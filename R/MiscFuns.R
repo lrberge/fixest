@@ -191,7 +191,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #'
 #' @method summary fixest
 #'
-#' @param se Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{White}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitely deduced from the argument \code{cluster}.
+#' @param se Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{White}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.
 #' @param cluster Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1, "var2")]}, \code{cluster = c("var1, "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster).
 #' @param object A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
 #' @param dof Logical, default is \code{TRUE}. Should there be a degree of freedom correction to the standard errors of the coefficients?
@@ -318,7 +318,7 @@ summary.fixest <- function(object, se, cluster, dof = TRUE, exact_dof = FALSE, f
 
 #' Facility to export the results of multiple \code{fixest} estimations in a Latex table.
 #'
-#' This function aggregates the results of multiple estimations and display them in the form of  one Latex table whose rownames are the variables and the columns contain the coefficients and standard-errors.
+#' This function aggregates the results of multiple estimations and display them in the form of  one Latex table whose row names are the variables and the columns contain the coefficients and standard-errors.
 #'
 #' @inheritParams summary.fixest
 #'
@@ -329,7 +329,7 @@ summary.fixest <- function(object, se, cluster, dof = TRUE, exact_dof = FALSE, f
 #' @param sdBelow Logical, default is \code{TRUE}. Should the standard-errors be displayed below the coefficients?
 #' @param drop Character vector. This element is used if some variables are not to be displayed. This should be a regular expression (see \code{\link[base]{regex}} help for more info). There can be more than one regular expression. Each variable satisfying the regular expression will be discarded.
 #' @param order Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a regular expression (see \code{\link[base]{regex}} help for more info). There can be more than one regular expression. The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions.
-#' @param dict A named character vector. It changes the original variable names to the ones contained in the \code{dict}. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default it is equal to \code{getFixest_dict()}, a default dictionnary can be set with \code{\link[fixest]{setFixest_dict}}.
+#' @param dict A named character vector. It changes the original variable names to the ones contained in the \code{dict}. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default it is equal to \code{getFixest_dict()}, a default dictionary can be set with \code{\link[fixest]{setFixest_dict}}.
 #' @param file A character scalar. If provided, the Latex table will be saved in a file whose path is \code{file}.
 #' @param replace Logical, default is \code{FALSE}. Only used if option \code{file} is used. Should the Latex table be written in a new file that replaces any existing file?
 #' @param convergence Logical, default is missing. Should the convergence state of the algorithm be displayed? By default, convergence information is displayed if at least one model did not converge.
@@ -337,12 +337,12 @@ summary.fixest <- function(object, se, cluster, dof = TRUE, exact_dof = FALSE, f
 #' @param label Character scalar. The label of the Latex table.
 #' @param aic Logical, default is \code{FALSE}. Should the AIC be displayed?
 #' @param sqCor Logical, default is \code{FALSE}. Should the squared correlation be displayed?
-#' @param subtitles Character vector of the same lenght as the number of models to be displayed. If provided, subtitles are added underneath the dependent variable name.
+#' @param subtitles Character vector of the same length as the number of models to be displayed. If provided, subtitles are added underneath the dependent variable name.
 #' @param fixef_sizes Logical, default is \code{FALSE}. If \code{TRUE} and fixed-effects were used in the models, then the number "individuals" per fixed-effect dimension is also displayed.
 #' @param keepFactors Logical, default is \code{TRUE}. If \code{FALSE}, then factor variables are displayed as fixed-effects and no coefficient is shown.
 #' @param bic Logical, default is \code{TRUE}.Should the BIC be reported?
 #' @param loglik Logical, default is \code{TRUE}. Should the log-likelihood be reported?
-#' @param yesNoFixef A character vector of lenght 2. Default is \code{c("Yes", "No")}. This is the message displayed when a given cluster is (or is not) included in a regression.
+#' @param yesNoFixef A character vector of length 2. Default is \code{c("Yes", "No")}. This is the message displayed when a given cluster is (or is not) included in a regression.
 #' @param family A logical, default is missing. Whether to display the families of the models. By default this line is displayed when at least two models are from different families.
 #' @param powerBelow Integer, default is -5. A coefficient whose value is below \code{10**(powerBelow+1)} is written with a power in Latex. For example \code{0.0000456} would be written \code{4.56$\\times 10^{-5}$} by default. Setting \code{powerBelow = -6} would lead to \code{0.00004} in Latex.
 #'
@@ -713,7 +713,7 @@ esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway
 
 #' Facility to display the results of multiple \code{fixest} estimations.
 #'
-#' This function aggregates the results of multiple estimations and display them in the form of only one table whose rownames are the variables and the columns contain the coefficients and standard-errors.
+#' This function aggregates the results of multiple estimations and display them in the form of only one table whose row names are the variables and the columns contain the coefficients and standard-errors.
 #'
 #' @inheritParams esttex
 #' @inheritParams summary.fixest
@@ -949,7 +949,7 @@ esttable <- function(..., se=c("standard", "white", "cluster", "twoway", "threew
 #'
 #' Reports different R2s for \code{fixest} estimations (e.g. \code{\link[fixest]{feglm}} or \code{\link[fixest]{feols}}).
 #'
-#' @param x A fixest object, e.g. obtained with function \code{\link[fixest]{feglm}} or \code{\link[fixest]{feols}}.
+#' @param x A \code{fixest} object, e.g. obtained with function \code{\link[fixest]{feglm}} or \code{\link[fixest]{feols}}.
 #' @param type A character vector representing the R2 to compute. The R2 codes are of the form: "wapr2" with letters "w" (within), "a" (adjusted) and "p" (pseudo) possibly missing. E.g. to get the regular R2: use \code{type = "r2"}, the within adjusted R2: use \code{type = "war2"}, the pseudo R2: use \code{type = "pr2"}, etc. By default, all R2s are computed.
 #'
 #' @return
@@ -1067,6 +1067,7 @@ r2 = function(x, type = "all"){
 
 #' Lags a variable using a formula
 #'
+#' Lags a variable using panel id+time identifiers in a formula.
 #'
 #'
 #' @param x A formula of the type \code{var ~ id + time} where \code{var} is the variable to be lagged, \code{id} is a variable representing the panel id, and \code{time} is the time variable of the panel.
@@ -1074,7 +1075,7 @@ r2 = function(x, type = "all"){
 #' @param data Optional, the data.frame in which to evaluate the formula.
 #' @param time.step The method to compute the lags. Can be equal to: \code{"unitary"} (default), \code{"consecutive"} or to a number. If \code{"unitary"}, then the largest common divisor between consecutive time periods is used (typically if the time variable represents years, it will be 1). This method can apply only to integer (or convertible to integer) variables. If \code{"consecutive"}, then the time variable can be of any type: two successive time periods represent a lag of 1. Finally, if the time variable is numeric, you can provide your own numeric time step.
 #' @param fill How to fill the observations without defined lead/lag values. Default is \code{NA}.
-#' @param duplicate.method If several observations have the same id and time values, then the notion of lag is not defined for them. If \code{duplicate.method = "none"} (default) and duplicate values are found, this leads to an error. You can use \code{duplicate.method = "first"} so that the first occurence of identical id/time observations will be used as lag.
+#' @param duplicate.method If several observations have the same id and time values, then the notion of lag is not defined for them. If \code{duplicate.method = "none"} (default) and duplicate values are found, this leads to an error. You can use \code{duplicate.method = "first"} so that the first occurrence of identical id/time observations will be used as lag.
 #' @param ... Not currently used.
 #'
 #' @return
@@ -1465,7 +1466,7 @@ summary.fixest.fixef = function(object, n=5, ...){
 
 #' Extract the Fixed-Effects from a \code{fixest} estimation.
 #'
-#' This function retrives the fixed effects from a \code{fixest} estimation. It is useful only when there are one or more clusters.
+#' This function retrieves the fixed effects from a \code{fixest} estimation. It is useful only when there are one or more clusters.
 #'
 #' @inheritParams feNmlm
 #'
@@ -1476,7 +1477,7 @@ summary.fixest.fixef = function(object, n=5, ...){
 #' If the cluster are coefficients not regular, then several reference points need to be set, leading to the coefficients to be NOT interpretable. If this is the case, then a warning is raised.
 #'
 #' @return
-#' A list containig the vectors of the fixed effects.
+#' A list containing the vectors of the fixed effects.
 #'
 #' If there is more than 1 cluster, then the attribute \dQuote{references} is created. This is a vector of length the number of clusters, each element contains the number of fixed-effects set as references. By construction, the elements of the first clusters are never set as references. In the presence of regular clusters, there should be Q-1 references (with Q the number of clusters).
 #'
@@ -1549,7 +1550,7 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 	    slope_vars = terms_full$slope_vars
 	    slope_terms = terms_full$slope_terms
 
-	    # dictionnary mapping fe var names to the ids of id_dummies_vect
+	    # dictionary mapping fe var names to the ids of id_dummies_vect
 	    dict_fe = 1:Q
 	    names(dict_fe) = object$fixef_vars
 
@@ -1863,13 +1864,13 @@ plot.fixest.fixef = function(x, n = 5, ...){
 #'
 #' For Poisson, Negative Binomial or Logit estimations with fixed-effects, when the dependent variable is only equal to 0 (or 1 for Logit) for one cluster value this leads to a perfect fit for that cluster value by setting its associated cluster coefficient to \code{-Inf}. Thus these observations need to be removed before estimation. This function gives the observations to be removed. Note that by default the function \code{\link[fixest]{femlm}} or \code{\link[fixest]{feglm}} drops them before performing the estimation.
 #'
-#' @param fml A formula contaning the dependent variable and the clusters. It can be of the type: \code{y ~ cluster_1 + cluster_2} or \code{y ~ x1 | cluster_1 + cluster_1} (in which case variables before the pipe are ignored).
+#' @param fml A formula containing the dependent variable and the clusters. It can be of the type: \code{y ~ cluster_1 + cluster_2} or \code{y ~ x1 | cluster_1 + cluster_1} (in which case variables before the pipe are ignored).
 #' @param data A data.frame containing the variables in the formula.
 #' @param family Character scalar: either \dQuote{poisson} (default), \dQuote{negbin} or \dQuote{logit}.
 #'
 #' @return
 #' It returns an integer vector of observations to be removed. If no observations are to be removed, an empty integer vector is returned. In both cases, it is of class \code{fixest.obs2remove}.
-#' The vector has an attribut \code{cluster} which is a list giving the IDs of the clusters that have been removed, for each cluster dimension.
+#' The vector has an attribute \code{cluster} which is a list giving the IDs of the clusters that have been removed, for each cluster dimension.
 #'
 #' @examples
 #'
@@ -2009,7 +2010,7 @@ obs2remove = function(fml, data, family = c("poisson", "negbin", "logit")){
 
 #' Summary method for fixest.obs2remove objects
 #'
-#' This function show synthetizes the information of function \code{\link[fixest]{obs2remove}}. It reports the number of observations to be removed as well as the number of clusters removed per cluster dimension.
+#' This function synthesizes the information of function \code{\link[fixest]{obs2remove}}. It reports the number of observations to be removed as well as the number of clusters removed per cluster dimension.
 #'
 #' @method summary fixest.obs2remove
 #'
@@ -2179,7 +2180,7 @@ collinearity = function(x, verbose){
 	    slope_vars = terms_full$slope_vars
 	    slope_terms = terms_full$slope_terms
 
-	    # dictionnary mapping fe var names to the ids of id_dummies_vect
+	    # dictionary mapping fe var names to the ids of id_dummies_vect
 	    dict_fe = 1:Q
 	    names(dict_fe) = x$fixef_vars
 	    slope_vars_unik = unique(slope_vars)
@@ -2861,7 +2862,7 @@ did_plot_yearly_effects = function(object, x.shift = 0, w = 0.1, ci_level = 0.95
 #' @param x.shift Shifts the confidence intervals bars to the left or right, depending on the value of \code{x.shift}. Default is 0.
 #' @param w The width of the confidence intervals.
 #' @param ci_level Scalar between 0 and 1: the level of the CI. By default it is equal to 0.95.
-#' @param style If \dQuote{interval}: it plots a confidence interval. If \dQuote{bar}, it plots simply error bars. If \dQuote{tube}: as interval, but with a greyed area.
+#' @param style If \dQuote{interval}: it plots a confidence interval. If \dQuote{bar}, it plots simply error bars. If \dQuote{tube}: as interval, but with a grayed area.
 #' @param add Default is \code{FALSE}, if the intervals are to be added to an existing graph. Note that if it is the case, then the argument \code{x} MUST be numeric.
 #' @param col Color of the point estimate and of the line joining them (if \code{style = "interval"}).
 #' @param bar.col Color of the bars of the confidence interval. Defaults to \code{col}.
@@ -2870,7 +2871,7 @@ did_plot_yearly_effects = function(object, x.shift = 0, w = 0.1, ci_level = 0.95
 #' @param grid Whether to add an horizontal grid. Default is \code{TRUE}.
 #' @param grid.par Graphical parameters used when plotting the grid in the background. Default is \code{list(lty=1)}.
 #' @param bar.join Logical, default is \code{FALSE}. Whether to join the dots when \code{style = "bar"}.
-#' @param only.params Logical, default is \code{FALSE}. If \code{TRUE}: no graph is plotted, only the ylim is returned. Useful to stack estimates from different estimations in the same graph.
+#' @param only.params Logical, default is \code{FALSE}. If \code{TRUE}: no graph is plotted, only the \code{ylim} is returned. Useful to stack estimates from different estimations in the same graph.
 #' @param ... Other arguments to be passed to the function \code{plot} or \code{lines} (if \code{add = TRUE}).
 #'
 #' @seealso
@@ -4527,9 +4528,9 @@ deparse_long = function(x){
 
 # Here we add common statistical functions
 
-#' Extract the number of observations form a \code{fixest} object
+#' Extracts the number of observations form a \code{fixest} object
 #'
-#' This function simply extracts the number of obsrvations form a \code{fixest} object, obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
+#' This function simply extracts the number of observations form a \code{fixest} object, obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
 #'
 #' @inheritParams summary.fixest
 #'
@@ -4572,7 +4573,7 @@ nobs.fixest = function(object, ...){
 #' \deqn{AIC = -2\times LogLikelihood + k\times nbParams}
 #' with k the penalty parameter.
 #'
-#' You can have more information on this crtierion on \code{\link[stats]{AIC}}.
+#' You can have more information on this criterion on \code{\link[stats]{AIC}}.
 #'
 #' @return
 #' It return a numeric vector, with length the same as the number of objects taken as arguments.
@@ -4629,7 +4630,7 @@ AIC.fixest = function(object, ..., k = 2){
 #' \deqn{BIC = -2\times LogLikelihood + \log(nobs)\times nbParams}
 #' with k the penalty parameter.
 #'
-#' You can have more information on this crtierion on \code{\link[stats]{AIC}}.
+#' You can have more information on this criterion on \code{\link[stats]{AIC}}.
 #'
 #' @return
 #' It return a numeric vector, with length the same as the number of objects taken as arguments.
@@ -5167,7 +5168,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 	res
 }
 
-#' Extract the variance/covariance of a \code{femlm} fit
+#' Extracts the variance/covariance of a \code{femlm} fit
 #'
 #' This function extracts the variance-covariance of estimated parameters from a model estimated with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
 #'
@@ -5180,7 +5181,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 #'
 #' @return
 #' It returns a \eqn{N\times N} square matrix where \eqn{N} is the number of variables of the fitted model.
-#' This matrix has an attribute \dQuote{type} specifying how this variance/covariance matrix has been commputed (i.e. was it created using White correction, or was it clustered along a specific factor, etc).
+#' This matrix has an attribute \dQuote{type} specifying how this variance/covariance matrix has been computed (i.e. was it created using White correction, or was it clustered along a specific factor, etc).
 #'
 #' @author
 #' Laurent Berge
@@ -6265,7 +6266,7 @@ getFixest_notes = function(){
 #'
 #'
 #'
-#' @param nthreads An integer stricly greater than one and lower than the maximum number of threads (if OpenMP is available). If missing, the default is the maximum number of threads minus two.
+#' @param nthreads An integer strictly greater than one and lower than the maximum number of threads (if OpenMP is available). If missing, the default is the maximum number of threads minus two.
 #'
 #' @author
 #' Laurent Berge
@@ -6322,9 +6323,9 @@ getFixest_nthreads = function(){
     x
 }
 
-#' Sets/gets the dictionnary used in \code{esttex}
+#' Sets/gets the dictionary used in \code{esttex}
 #'
-#' Sets/gets the default dictionnay used in the function \code{\link[fixest]{esttex}}. The dictionnaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table. By setting the dictionnary with \code{setFixest_dict}, you can avoid providing the argument \code{dict} in function \code{\link[fixest]{esttex}}.
+#' Sets/gets the default dictionnay used in the function \code{\link[fixest]{esttex}}. The dictionaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table. By setting the dictionary with \code{setFixest_dict}, you can avoid providing the argument \code{dict} in function \code{\link[fixest]{esttex}}.
 #'
 #'
 #' @param dict A named character vector. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use \code{dict = c(a="$log(a)$", b3="$bonus^3$")}.
@@ -6367,7 +6368,7 @@ setFixest_dict = function(dict){
 	# Formatting the names
 	dict_names = names(dict)
 	if(is.null(dict_names)){
-		stop("Argument 'dict', the dictionnary, must be a named vector. Currently it has no names.")
+		stop("Argument 'dict', the dictionary, must be a named vector. Currently it has no names.")
 	}
 
 	dict_names = gsub(" +", "", dict_names)
@@ -6527,7 +6528,7 @@ getFixest_print.type = function(){
 
 #' Sample data for difference in difference
 #'
-#' This data has been generated to illustrate the use of difference in difference functions in package \pkg{fixest}. This is a balanced panel of 104 individuals and 10 periods. About half the indivudals are treated, the treatment having a positive effect on the dependent variable \code{y} after the 5th period. The effect of the treament on \code{y} is gradual.
+#' This data has been generated to illustrate the use of difference in difference functions in package \pkg{fixest}. This is a balanced panel of 104 individuals and 10 periods. About half the individuals are treated, the treatment having a positive effect on the dependent variable \code{y} after the 5th period. The effect of the treatment on \code{y} is gradual.
 #'
 #' @usage
 #' data(base_did)
@@ -6546,7 +6547,7 @@ getFixest_print.type = function(){
 #' }
 #'
 #' @source
-#' This data has been extrated from Eurostat on October 2017.
+#' This data has been generated from \pkg{R}.
 #'
 #' @seealso
 #' The DiD functions of the package \pkg{fixest} are \code{\link[fixest]{did_estimate_yearly_effects}} and \code{\link[fixest]{did_plot_yearly_effects}}.
