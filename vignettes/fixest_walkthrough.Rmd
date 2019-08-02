@@ -165,14 +165,14 @@ for(i in 1:4){
 The previous code performs 4 estimations with an increasing number of fixed-effects and store their results into the list named `gravity_subcluster`. To show the results of all 4 estimations, it's easy:
 
 ```{r, eval=FALSE}
-esttable(gravity_subcluster, se = "twoway", cluster = trade[, c("Origin", "Destination")])
+esttable(gravity_subcluster, cluster = ~Origin+Destination)
 ```
 ```{r, echo=FALSE, results='asis'}
-tab = esttable(gravity_subcluster, se = "twoway", cluster = trade[, c("Origin", "Destination")])
+tab = esttable(gravity_subcluster, cluster = ~Origin+Destination)
 knitr::kable(tab)
 ```
 
-We have a view of the 4 estimations, all reporting two-way clustered standard-errors thanks to the use of the arguments `se` and `cluster`.
+We have a view of the 4 estimations, all reporting two-way clustered standard-errors thanks to the use of the argument `cluster`.
 
 
 ## Exporting the results to Latex
@@ -181,7 +181,8 @@ So far we have seen how to report the results of multiple estimations on the R c
 The function `esttex` works exactly as the function `esttable`, it takes any number of `fixest` estimations. By default, it reports Latex code on the R console:
 
 ```{r}
-esttex(gravity_subcluster, se = "twoway", cluster = trade[, c("Origin", "Destination")])
+# with two-way clustered SEs
+esttex(gravity_subcluster, cluster = ~Origin+Destination)
 ```
 
 This function has many optional arguments. The user can export the Latex table directly into a file (argument `file`), add a title (arg. `title`) and a label to the table (arg. `label`). 
@@ -200,7 +201,7 @@ myDict = c("log(dist_km)" = "$\\ln (Distance)$", "(Intercept)" = "Constant")
 # 1st export: we change the signif code and drop the intercept
 esttex(gravity_subcluster, signifCode = c("a" = 0.01, "b" = 0.05), drop = "Int", dict = myDict, file = "Estimation Table.tex", replace = TRUE, title = "First export -- normal Standard-errors")
 # 2nd export: clustered S-E + distance as the first coefficient
-esttex(gravity_subcluster, se = "cluster", cluster = trade$Product, order = "dist", dict = myDict, file = "Estimation Table.tex", title = "Second export -- clustered standard-errors (on Product variable)")
+esttex(gravity_subcluster, se = "cluster", cluster = ~Product, order = "dist", dict = myDict, file = "Estimation Table.tex", title = "Second export -- clustered standard-errors (on Product variable)")
 
 ```
 
