@@ -1,0 +1,9 @@
+
+bibentry(bibtype = "Article",
+title = "Efficient estimation of maximum likelihood models with multiple fixed-effects: the {R} package {FENmlm}",
+author = person("Laurent", "Berg\\'e"),
+year = 2018,
+journal = "CREA Discussion Papers",
+number = 13,
+textVersion = 'Berge L (2018). "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package
+FENmlm." CREA Discussion Papers.')

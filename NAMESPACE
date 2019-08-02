@@ -1,0 +1,74 @@
+useDynLib(fixest, .registration = TRUE)
+
+#
+# EXPORT
+#
+
+# main funs
+export(feNmlm, femlm, feols, feglm, fepois, fenegbin)
+export(feglm.fit)
+# misc funs
+export(esttex, esttable, collinearity, obs2remove, r2,
+       did_estimate_yearly_effects, did_plot_yearly_effects, errbar)
+# setters & getters
+exportPattern("^(s|g)etFes")
+
+# Base methods
+S3method(print, fixest)
+S3method(summary, fixest.fixef)
+S3method(summary, fixest.obs2remove)
+S3method(summary, fixest)
+S3method(plot, fixest.fixef)
+
+# Stats methods
+S3method(nobs, fixest)
+S3method(logLik, fixest)
+S3method(AIC, fixest)
+S3method(BIC, fixest)
+S3method(vcov, fixest)
+S3method(resid, fixest)
+S3method(residuals, fixest)
+S3method(coef, fixest)
+S3method(coefficients, fixest)
+S3method(fitted, fixest)
+S3method(fitted.values, fixest)
+S3method(update, fixest)
+S3method(predict, fixest)
+S3method(confint, fixest)
+S3method(formula, fixest)
+S3method(model.matrix, fixest)
+S3method(lag, formula)
+
+# nlme method
+S3method(fixef, fixest)
+
+#
+# IMPORT
+#
+
+importFrom(numDeriv, hessian, jacobian, genD)
+
+# needs re-export :-(, not the best solution but...
+importFrom(nlme, fixef)
+export(fixef)
+
+importFrom(stats, cor, dnorm, lm, model.matrix, nlminb, optim,
+			  pnorm, qnorm, as.formula, terms, var, sd, formula,
+			  nobs, AIC, BIC, update, predict, fitted, fitted.values,
+			  resid, residuals, logLik, coef, coefficients, lag,
+			  confint, vcov, na.omit, model.frame, "na.pass", poisson)
+
+importFrom(MASS, ginv)
+
+importFrom(utils, combn, head, tail)
+
+importFrom(Formula, Formula)
+
+importFrom(Rcpp, evalCpp)
+
+importFrom(graphics, par, plot, box, axis, abline, points, text, title,
+           lines, polygon, segments)
+
+
+
+
