@@ -7,7 +7,7 @@ Imports: stats, graphics, utils, Formula, MASS, numDeriv, nlme, Rcpp
 Suggests: knitr, data.table
 LinkingTo: Rcpp
 Depends: R(>= 3.1.0)
-Description: This package provides fast and user-friedly estimation of econometric models with multiple fixed-effects. Includes OLS and GLM models and also the negative binomial.
+Description: Fast and user-friedly estimation of econometric models with multiple fixed-effects. Includes OLS and GLM models and also the negative binomial.
     The core of the package is based on optimized parallel c++ code, scaling especially well for large data sets. 
     Furher provides tools to export and view the results of several estimations with very intuitive design to cluster the standard-errors.
 License: GPL-3
