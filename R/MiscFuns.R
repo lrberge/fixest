@@ -4515,7 +4515,7 @@ check_arg = function(x, type, message, mustBeThere = TRUE){
 deparse_long = function(x){
     dep_x = deparse(x)
     if(length(dep_x) == 1){
-        return(x)
+        return(dep_x)
     } else {
         return(paste(gsub("^ +", "", dep_x), collapse = ""))
     }
