@@ -150,6 +150,11 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         if("try-error" %in% class(family_name)){
             #  then we try with deparse
             family_dep = deparse(mc_origin$family)
+
+            if(length(family_dep) > 1){
+                stop("Argument family must be equal to 'poisson', 'logit', 'negbin' or 'gaussian'.")
+            }
+
             family_name = try(match.arg(family_dep, c("poisson", "negbin", "logit", "gaussian")), silent = TRUE)
             if("try-error" %in% class(family_name)){
                 stop("Argument family must be equal to 'poisson', 'logit', 'negbin' or 'gaussian'.")
@@ -350,14 +355,14 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         lhs = as.numeric(as.vector(y))
 
         # we reconstruct a formula
-        fml = as.formula(paste0(deparse(mc_origin[["y"]]), "~1"))
+        fml = as.formula(paste0(deparse_long(mc_origin[["y"]]), "~1"))
 
     } else {
 
         # The LHS must contain only values in the DF
         namesLHS = all.vars(fml[[2]])
         if(length(namesLHS) == 0){
-            stop("The right hand side of the formula (", deparse(fml[[2]]), ") contains no variable!")
+            stop("The right hand side of the formula (", deparse_long(fml[[2]]), ") contains no variable!")
         } else if(!all(namesLHS %in% dataNames)){
             not_there = namesLHS[!namesLHS %in% dataNames]
             stop(ifsingle(not_there, "The v", "V"), "ariable", enumerate_items(not_there, addS = TRUE), " in the LHS of the formula but not in the dataset.")
@@ -366,12 +371,12 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         lhs = try(eval(fml[[2]], data), silent = TRUE)
 
         if("try-error" %in% class(lhs)){
-            stop("Evaluation of the left-hand-side (equal to ", deparse(fml[[2]]), ") raises an error: \n", lhs)
+            stop("Evaluation of the left-hand-side (equal to ", deparse_long(fml[[2]]), ") raises an error: \n", lhs)
         } else if(is.logical(lhs) || is.integer(lhs)){
             lhs = as.numeric(as.vector(lhs))
         } else if(!is.numeric(lhs)){
             cls = class(lhs)
-            stop("The left hand side (", deparse(fml[[2]]), ") is not numeric. The class", ifsingle(cls, "", "e"), enumerate_items(cls, addS = TRUE), " not supported.")
+            stop("The left hand side (", deparse_long(fml[[2]]), ") is not numeric. The class", ifsingle(cls, "", "e"), enumerate_items(cls, addS = TRUE), " not supported.")
         } else {
             lhs = as.numeric(as.vector(lhs)) # complex
         }
@@ -446,7 +451,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                     X = matrix(X, ncol = 1)
                 }
 
-                colnames(X) = deparse(mc_origin[["X"]])
+                colnames(X) = deparse(mc_origin[["X"]])[1]
             }
 
             if(!is.matrix(X) || !is.numeric(X)){
@@ -500,7 +505,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             # we look at whether there are factor-like variables to be evaluated
             # if there is factors => model.matrix
             types = sapply(data[, dataNames %in% linear.varnames, FALSE], class)
-            if(length(types) == 0 || grepl("factor", deparse(linear.fml)) || any(types %in% c("character", "factor"))){
+            if(length(types) == 0 || grepl("factor", deparse_long(linear.fml)) || any(types %in% c("character", "factor"))){
                 useModel.matrix = TRUE
             } else {
                 useModel.matrix = FALSE
@@ -668,7 +673,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
                 offset.value = try(eval(offset.call, data), silent = TRUE)
                 if("try-error" %in% class(offset.value)){
-                    stop("Evaluation of the offset (equal to ", deparse(offset.call), ") raises and error: \n", offset.value)
+                    stop("Evaluation of the offset (equal to ", deparse_long(offset.call), ") raises and error: \n", offset.value)
                 }
 
             } else {
@@ -708,7 +713,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         } else if(is.null(offset)){
             # msg if it's not what the user wanted
             if(!is.null(mc_origin$offset)){
-                stop("Argument 'offset' (", deparse(mc_origin$offset), ") is evaluated to NULL. This is likely not what you want.")
+                stop("Argument 'offset' (", deparse_long(mc_origin$offset), ") is evaluated to NULL. This is likely not what you want.")
             }
         }
     }
@@ -747,7 +752,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
                 weights.value = try(eval(weights.call, data), silent = TRUE)
                 if("try-error" %in% class(weights.value)){
-                    stop("Evaluation of the weights (equal to ", deparse(weights.call), ") raises and error: \n", weights.value)
+                    stop("Evaluation of the weights (equal to ", deparse_long(weights.call), ") raises and error: \n", weights.value)
                 }
 
             } else {
@@ -810,7 +815,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
         } else if(!is.null(mc_origin$weights)){
             # we avoid this behavior
-            stop("Argument 'weights' (", deparse(mc_origin$weights), ") is evaluated to NULL. This is likely not what you want.")
+            stop("Argument 'weights' (", deparse_long(mc_origin$weights), ") is evaluated to NULL. This is likely not what you want.")
         }
     }
 
@@ -888,7 +893,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
             if(isVector(fixef_mat)){
                 fixef_mat = data.frame(x = fixef_mat, stringsAsFactors = FALSE)
-                names(fixef_mat) = deparse(mc_origin[["fixef_mat"]])
+                names(fixef_mat) = deparse(mc_origin[["fixef_mat"]])[1]
             } else if(is.list(fixef_mat)){
                 all_len = lengths(fixef_mat)
                 if(any(diff(all_len) != 0)){

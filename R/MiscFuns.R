@@ -114,7 +114,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 		if(is.null(names(fam_call))){
 			half_line = paste0("GLM estimation, family = ", x$family$family)
 		} else {
-			half_line = paste0("GLM estimation, family = ", deparse(fam_call))
+			half_line = paste0("GLM estimation, family = ", deparse_long(fam_call))
 		}
 	} else if(x$method == "fepois") {
 	    half_line = "Poisson estimation"
@@ -1182,11 +1182,11 @@ lag.formula = function(x, k, data, time.step = "unitary", fill = NA, duplicate.m
         }
 
         if(is.numeric(value) && !is.numeric(fill)){
-            stop("Argument 'fill' must be of the same type as ", deparse(fml[[2]]), ", which is numeric.")
+            stop("Argument 'fill' must be of the same type as ", deparse_long(fml[[2]]), ", which is numeric.")
         }
 
         if(!is.numeric(value) && is.numeric(fill)){
-            stop("Argument 'fill' must be of the same type as ", deparse(fml[[2]]), ", which is not numeric while 'fill' is.")
+            stop("Argument 'fill' must be of the same type as ", deparse_long(fml[[2]]), ", which is not numeric while 'fill' is.")
         }
         # I could go further in checking but it's enough
     }
@@ -1564,7 +1564,7 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 
 	    if(is.null(data)){
 	        # We try to provide an informative error message
-	        stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables (i.e. ", enumerate_items(slope_vars_unik, endVerb = FALSE), ") in the original dataset in the parent.frame -- but the data doesn't seem to be there anymore (btw it was ", deparse(dataName), ")")
+	        stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables (i.e. ", enumerate_items(slope_vars_unik, endVerb = FALSE), ") in the original dataset in the parent.frame -- but the data doesn't seem to be there anymore (btw it was ", deparse_long(dataName), ")")
 	    }
 
 	    data = as.data.frame(data)
@@ -1572,12 +1572,12 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 	    # we check the variables are there
 	    if(any(!slope_vars_unik %in% names(data))){
 	        var_pblm = setdiff(slope_vars_unik, names(data))
-	        stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables in the original dataset (", deparse(dataName), "). However, the variable", enumerate_items(var_pblm, addS = TRUE), " not present in the original dataset any more.")
+	        stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables in the original dataset (", deparse_long(dataName), "). However, the variable", enumerate_items(var_pblm, addS = TRUE), " not present in the original dataset any more.")
 	    }
 
 	    # we check length consistency
 	    if(NROW(data) != (object$nobs + length(object$obsRemoved))){
-	        stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables in the original dataset (", deparse(dataName), "), yet the dataset doesn't have the same number of observations as was used in the estimation (", NROW(data), " instead of ", object$nobs + length(object$obsRemoved), ").")
+	        stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables in the original dataset (", deparse_long(dataName), "), yet the dataset doesn't have the same number of observations as was used in the estimation (", NROW(data), " instead of ", object$nobs + length(object$obsRemoved), ").")
 	    }
 
 	    if(length(object$obsRemoved)){
@@ -2132,7 +2132,7 @@ collinearity = function(x, verbose){
 
 	if(is.null(data)){
 		dataName = x$call$data
-		stop("To apply 'diagnostic', we fetch the original database in the parent.frame -- but it doesn't seem to be there anymore (btw it was ", deparse(dataName), ").")
+		stop("To apply 'diagnostic', we fetch the original database in the parent.frame -- but it doesn't seem to be there anymore (btw it was ", deparse_long(dataName), ").")
 	}
 
 	if(!is.null(x$obsRemoved)){
@@ -2186,7 +2186,7 @@ collinearity = function(x, verbose){
 
 	    if(any(!slope_vars_unik %in% names(data))){
 	        var_pblm = setdiff(slope_vars_unik, names(data))
-	        stop("To check collinearity, we need to fetch some variables in the original dataset (", deparse(dataName), "). However, the variable", enumerate_items(var_pblm, addS = TRUE), " not present in the original dataset any more.")
+	        stop("To check collinearity, we need to fetch some variables in the original dataset (", deparse_long(dataName), "). However, the variable", enumerate_items(var_pblm, addS = TRUE), " not present in the original dataset any more.")
 	    }
 
 	    slope_var_list = list()
@@ -3099,7 +3099,7 @@ results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, pseudo
             if(dots_names[i] != ""){
                 dots_call[[i]] = dots_names[i]
             } else {
-                dots_call[[i]] = deparse(dots_call[[i]])
+                dots_call[[i]] = deparse_long(dots_call[[i]])
             }
         }
     }
@@ -3114,7 +3114,7 @@ results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, pseudo
         if(any(allowed_types %in% class(di))){
             all_models[[k]] = di
             if(any(class(dots_call[[i]]) %in% c("call", "name"))){
-                model_names[[k]] = deparse(dots_call[[i]])
+                model_names[[k]] = deparse_long(dots_call[[i]])
             } else {
                 model_names[[k]] = as.character(dots_call[[i]])
             }
@@ -3593,7 +3593,7 @@ terms_fixef = function(fml){
     # Internal function
     reformulate_varslope = function(dum, ..., add_dum = TRUE){
         mc = match.call()
-        dum = deparse(mc[["dum"]])
+        dum = deparse_long(mc[["dum"]])
 
         if(add_dum){
             res = dum
@@ -3602,7 +3602,7 @@ terms_fixef = function(fml){
         }
 
         for(i in 3:(length(mc) - !add_dum)){
-            value = deparse(mc[[i]])
+            value = deparse_long(mc[[i]])
             res = c(res, paste0(dum, "[[", value, "]]"))
         }
         res
@@ -4415,8 +4415,6 @@ check_arg = function(x, type, message, mustBeThere = TRUE){
 
     type = tolower(type)
 
-    # my_call = deparse(sys.call(1)[1])
-
     stop_now = function(...){
         # message is a global
 
@@ -4511,6 +4509,16 @@ check_arg = function(x, type, message, mustBeThere = TRUE){
         if( any(x > n) ) stop_now("But it is greater than ", n, ".")
     }
 
+}
+
+# Avoids the problem of multiple lines deparse
+deparse_long = function(x){
+    dep_x = deparse(x)
+    if(length(dep_x) == 1){
+        return(x)
+    } else {
+        return(paste(gsub("^ +", "", dep_x), collapse = ""))
+    }
 }
 
 #### ................. ####
@@ -5125,7 +5133,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 
 				value_offset = eval(offset_fml[[length(offset_fml)]], newdata)
 			} else {
-				stop("Predict can't be applied to this estimation because the offset (", deparse(offset), ") cannot be evaluated for the new data. Use a formula for the offset in the first estimation to avoid this.")
+				stop("Predict can't be applied to this estimation because the offset (", deparse_long(offset), ") cannot be evaluated for the new data. Use a formula for the offset in the first estimation to avoid this.")
 			}
 
 		}
@@ -5495,7 +5503,7 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 
 						if(is.null(data)){
 							# We try to provide an informative error message
-							stop("Cannot apply ", nway, "-way clustering with current 'cluster' argument. Variable", enumerate_items(var2fetch, past = TRUE, addS = TRUE), " not used as fixed-effects in the estimation. We tried to fetch ", ifelse(length(var2fetch) == 1, "this variable", "these variables"), " in the original database in the parent.frame -- but the data doesn't seem to be there anymore (btw it was ", deparse(dataName), "). Alternatively, use a list of vectors.", suffix)
+							stop("Cannot apply ", nway, "-way clustering with current 'cluster' argument. Variable", enumerate_items(var2fetch, past = TRUE, addS = TRUE), " not used as fixed-effects in the estimation. We tried to fetch ", ifelse(length(var2fetch) == 1, "this variable", "these variables"), " in the original database in the parent.frame -- but the data doesn't seem to be there anymore (btw it was ", deparse_long(dataName), "). Alternatively, use a list of vectors.", suffix)
 						}
 
 						data = as.data.frame(data)
@@ -5509,7 +5517,7 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 
 						# we check length consistency
 						if(NROW(data) != (object$nobs + length(object$obsRemoved))){
-							stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(var2fetch, addS = TRUE, endVerb = "no"), " in the original dataset (", deparse(dataName), "), yet the dataset doesn't have the same number of observations as was used in the estimation (", NROW(data), " instead of ", object$nobs + length(object$obsRemoved), ").", suffix)
+							stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(var2fetch, addS = TRUE, endVerb = "no"), " in the original dataset (", deparse_long(dataName), "), yet the dataset doesn't have the same number of observations as was used in the estimation (", NROW(data), " instead of ", object$nobs + length(object$obsRemoved), ").", suffix)
 						}
 
 						if(length(object$obsRemoved)){
@@ -5522,7 +5530,7 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 						if(anyNA(data)){
 							varsNA = sapply(data, anyNA)
 							varsNA = names(varsNA)[varsNA]
-							stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(varsNA, addS = TRUE, endVerb = "no"), " in the original dataset (", deparse(dataName), "). But ", ifsingle(varsNA, "this variable", "these variables"), " contain", ifsingle(varsNA, "s", ""), " NAs", msgRemoved, ". This is not allowed.", suffix)
+							stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(varsNA, addS = TRUE, endVerb = "no"), " in the original dataset (", deparse_long(dataName), "). But ", ifsingle(varsNA, "this variable", "these variables"), " contain", ifsingle(varsNA, "s", ""), " NAs", msgRemoved, ". This is not allowed.", suffix)
 						}
 
 						# We create the cluster list
@@ -5862,7 +5870,7 @@ update.fixest = function(object, fml.update, nframes = 1, ...){
 	if(any(dot_names == "")){
 		call_new_names = names(call_new)
 		problems = call_new[call_new_names == ""][-1]
-		stop("In 'update.fixest' the arguments of '...' are passed to the function ", object$method, ", and must be named. Currently there are un-named arguments (e.g. '", deparse(problems[[1]]), "').")
+		stop("In 'update.fixest' the arguments of '...' are passed to the function ", object$method, ", and must be named. Currently there are un-named arguments (e.g. '", deparse_long(problems[[1]]), "').")
 	}
 
 
@@ -5928,7 +5936,7 @@ update.fixest = function(object, fml.update, nframes = 1, ...){
 
 		if(is.null(data)){
 			dataName = object$call$data
-			stop("To apply 'update.fixest', we fetch the original database in the parent.frame -- but it doesn't seem to be there anymore (btw it was ", deparse(dataName), ").")
+			stop("To apply 'update.fixest', we fetch the original database in the parent.frame -- but it doesn't seem to be there anymore (btw it was ", deparse_long(dataName), ").")
 		}
 
 		# if same data => we apply init
@@ -6182,7 +6190,7 @@ model.matrix.fixest = function(object, data, ...){
 		try(data <- eval(object$call$data, parent.frame()), silent = TRUE)
 
 		if(is.null(data)){
-			dataName = deparse(object$call$data)
+			dataName = deparse_long(object$call$data)
 			stop("To apply 'model.matrix.fixest', we fetch the original database in the parent.frame -- but it doesn't seem to be there anymore (btw it was ", dataName, ").")
 		}
 
