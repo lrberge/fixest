@@ -1,3 +1,5 @@
 
 
-This nonsense will rule the world or word the rules
+Fastest method available to perform fixed-effects estimations. 
+
+An overview can be found on the project's [homepage](https://github.com/lrberge/fixest/wiki)
