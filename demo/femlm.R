@@ -13,7 +13,7 @@ summary(est_pois, se = "twoway")
 est_gaus = femlm(log(Euros) ~ log(dist_km) | Origin + Destination + Product, trade, family = "gaussian")
 
 # displaying the two sets of results
-res2table(est_pois, est_gaus, se = "twoway")
+esttable(est_pois, est_gaus, se = "twoway")
 
 # updating the first result (adding one variable and deleting one cluster)
 update(est_pois, . ~ . + log(Year) | . - Product)
