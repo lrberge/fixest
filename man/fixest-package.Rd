@@ -17,7 +17,7 @@ Note that the functions \code{\link[fixest]{feglm}} and \code{\link[fixest]{feml
 
 Several features are also included such as the possibility to easily compute different types of standard-errors (including multi-way clustering).
 
-It is possible to compare the results of severeal estimations by using the function \code{\link[fixest]{esttable}}, and to export them to Latex using \code{\link[fixest]{esttex}}.
+It is possible to compare the results of several estimations by using the function \code{\link[fixest]{esttable}}, and to export them to Latex using \code{\link[fixest]{esttex}}.
 }
 \references{
 Berg\\'e, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (\url{https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13}).

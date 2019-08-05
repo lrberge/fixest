@@ -16,7 +16,7 @@ esttex(..., se = c("standard", "white", "cluster", "twoway", "threeway",
 \arguments{
 \item{...}{Used to capture different \code{fixest} objects (obtained with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}). Note that any other type of element is discarded. Note that you can give a list of \code{fixest} objects.}
 
-\item{se}{Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{White}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitely deduced from the argument \code{cluster}.}
+\item{se}{Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{White}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.}
 
 \item{dof}{Logical, default is \code{TRUE}. Should there be a degree of freedom correction to the standard errors of the coefficients?}
 
@@ -34,7 +34,7 @@ esttex(..., se = c("standard", "white", "cluster", "twoway", "threeway",
 
 \item{order}{Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a regular expression (see \code{\link[base]{regex}} help for more info). There can be more than one regular expression. The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions.}
 
-\item{dict}{A named character vector. It changes the original variable names to the ones contained in the \code{dict}. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default it is equal to \code{getFixest_dict()}, a default dictionnary can be set with \code{\link[fixest]{setFixest_dict}}.}
+\item{dict}{A named character vector. It changes the original variable names to the ones contained in the \code{dict}. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default it is equal to \code{getFixest_dict()}, a default dictionary can be set with \code{\link[fixest]{setFixest_dict}}.}
 
 \item{file}{A character scalar. If provided, the Latex table will be saved in a file whose path is \code{file}.}
 
@@ -50,7 +50,7 @@ esttex(..., se = c("standard", "white", "cluster", "twoway", "threeway",
 
 \item{sqCor}{Logical, default is \code{FALSE}. Should the squared correlation be displayed?}
 
-\item{subtitles}{Character vector of the same lenght as the number of models to be displayed. If provided, subtitles are added underneath the dependent variable name.}
+\item{subtitles}{Character vector of the same length as the number of models to be displayed. If provided, subtitles are added underneath the dependent variable name.}
 
 \item{fixef_sizes}{Logical, default is \code{FALSE}. If \code{TRUE} and fixed-effects were used in the models, then the number "individuals" per fixed-effect dimension is also displayed.}
 
@@ -58,7 +58,7 @@ esttex(..., se = c("standard", "white", "cluster", "twoway", "threeway",
 
 \item{loglik}{Logical, default is \code{TRUE}. Should the log-likelihood be reported?}
 
-\item{yesNoFixef}{A character vector of lenght 2. Default is \code{c("Yes", "No")}. This is the message displayed when a given cluster is (or is not) included in a regression.}
+\item{yesNoFixef}{A character vector of length 2. Default is \code{c("Yes", "No")}. This is the message displayed when a given cluster is (or is not) included in a regression.}
 
 \item{keepFactors}{Logical, default is \code{TRUE}. If \code{FALSE}, then factor variables are displayed as fixed-effects and no coefficient is shown.}
 
@@ -70,7 +70,7 @@ esttex(..., se = c("standard", "white", "cluster", "twoway", "threeway",
 There is nothing returned, the result is only displayed on the console or saved in a file.
 }
 \description{
-This function aggregates the results of multiple estimations and display them in the form of  one Latex table whose rownames are the variables and the columns contain the coefficients and standard-errors.
+This function aggregates the results of multiple estimations and display them in the form of  one Latex table whose row names are the variables and the columns contain the coefficients and standard-errors.
 }
 \examples{
 

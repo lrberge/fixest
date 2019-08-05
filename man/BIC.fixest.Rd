@@ -22,7 +22,7 @@ The BIC is computed as follows:
 \deqn{BIC = -2\times LogLikelihood + \log(nobs)\times nbParams}
 with k the penalty parameter.
 
-You can have more information on this crtierion on \code{\link[stats]{AIC}}.
+You can have more information on this criterion on \code{\link[stats]{AIC}}.
 }
 \examples{
 

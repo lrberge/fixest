@@ -27,7 +27,7 @@ femlm(fml, data, family = c("poisson", "negbin", "logit", "gaussian"),
 
 \item{fixef}{Character vector. The name/s of a/some variable/s within the dataset to be used as fixed-effects. These variables should contain the identifier of each observation (e.g., think of it as a panel identifier).}
 
-\item{offset}{A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This offset is linearily added to the elements of the main formula 'fml'.}
+\item{offset}{A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This offset is linearly added to the elements of the main formula 'fml'.}
 
 \item{na_inf.rm}{Logical, default is \code{TRUE}. If the variables necessary for the estimation contain NA/Infs and \code{na_inf.rm = TRUE}, then all observations containing NA are removed prior to estimation and a note is displayed detailing the number of observations removed. Otherwise, an error is raised.}
 
@@ -37,7 +37,7 @@ femlm(fml, data, family = c("poisson", "negbin", "logit", "gaussian"),
 
 \item{nthreads}{Integer: Number of nthreads to be used (accelerates the algorithm via the use of openMP routines). The default is to use the total number of nthreads available minus two. You can set permanently the number of nthreads used within this package using the function \code{\link[fixest]{setFixest_nthreads}}.}
 
-\item{verbose}{Integer, default is 0. It represents the level of information that should be reported during the optimisation process. If \code{verbose=0}: nothing is reported. If \code{verbose=1}: the value of the coefficients and the likelihood are reported. If \code{verbose=2}: \code{1} + information on the computing tiime of the null model, the cluster coefficients and the hessian are reported.}
+\item{verbose}{Integer, default is 0. It represents the level of information that should be reported during the optimisation process. If \code{verbose=0}: nothing is reported. If \code{verbose=1}: the value of the coefficients and the likelihood are reported. If \code{verbose=2}: \code{1} + information on the computing time of the null model, the cluster coefficients and the hessian are reported.}
 
 \item{warn}{Logical, default is \code{TRUE}. Whether warnings should be displayed (concerns warnings relating to: convergence state, collinearity issues and observation removal due to only 0/1 outcomes or presence of NA values).}
 
@@ -79,7 +79,7 @@ An \code{femlm} object.
 \item{fixef_id}{The list (of length the number of clusters) of the cluster identifiers for each observation.}
 \item{fixef_sizes}{The size of each cluster.}
 \item{obsRemoved}{In the case there were clusters and some observations were removed because of only 0/1 outcome within a cluster, it gives the row numbers of the observations that were removed.}
-\item{fixef_removed}{In the case there were clusters and some observations were removed because of only 0/1 outcome within a cluster, it gives the list (for each cluster) of the clustr identifiers that were removed.}
+\item{fixef_removed}{In the case there were clusters and some observations were removed because of only 0/1 outcome within a cluster, it gives the list (for each cluster) of the cluster identifiers that were removed.}
 \item{theta}{In the case of a negative binomial estimation: the overdispersion parameter.}
 
  @seealso

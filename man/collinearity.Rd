@@ -22,7 +22,7 @@ This function tests: 1) collinearity with the cluster variables, 2) perfect mult
 }
 \examples{
 
-\dontrun{
+\donttest{
 # Creating an example data base:
 cluster_1 = sample(3, 100, TRUE)
 cluster_2 = sample(20, 100, TRUE)

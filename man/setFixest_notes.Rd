@@ -17,7 +17,7 @@ Sets/gets the default values of whether notes (informing for NA and observations
 }
 \examples{
 
-\dontrun{
+\donttest{
 # Default is TRUE
 getFixest_notes()
 # Change default with

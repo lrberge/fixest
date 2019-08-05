@@ -32,7 +32,7 @@ fepois(fml, data, offset, weights, start = NULL, etastart = NULL,
 
 \item{family}{Family to be used for the estimation. Defaults to \code{poisson()}. See \code{\link[stats]{family}} for details of family functions.}
 
-\item{offset}{A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This offset is linearily added to the elements of the main formula 'fml'.}
+\item{offset}{A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This offset is linearly added to the elements of the main formula 'fml'.}
 
 \item{weights}{A formula or a numeric vector. Each observation can be weighted, the weights must be greater than 0. If equal to a formula, it should be of one-sided: for example \code{~ var_weight}.}
 
@@ -60,7 +60,7 @@ fepois(fml, data, offset, weights, start = NULL, etastart = NULL,
 
 \item{notes}{Logical. By default, two notes are displayed: when NAs are removed (to show additional information) and when some observations are removed because of only 0 (or 0/1) outcomes in a fixed-effect (in Poisson/Neg. Bin./Logit models). To avoid displaying these messages, you can set \code{notes = FALSE}. You can remove these messages permanently by using \code{setFixest_notes(FALSE)}.}
 
-\item{verbose}{Integer, default is 0. It represents the level of information that should be reported during the optimisation process. If \code{verbose=0}: nothing is reported. If \code{verbose=1}: the value of the coefficients and the likelihood are reported. If \code{verbose=2}: \code{1} + information on the computing tiime of the null model, the cluster coefficients and the hessian are reported.}
+\item{verbose}{Integer, default is 0. It represents the level of information that should be reported during the optimisation process. If \code{verbose=0}: nothing is reported. If \code{verbose=1}: the value of the coefficients and the likelihood are reported. If \code{verbose=2}: \code{1} + information on the computing time of the null model, the cluster coefficients and the hessian are reported.}
 
 \item{combine.quick}{Logical. When you combine different variables to transform them into a single fixed-effects you can do e.g. \code{y ~ x | paste(var1, var2)}. The algorithm provides a shorthand to do the same operation: \code{y ~ x | var1^var2}. Because pasting variables is a costly operation, the internal algorithm may use a numerical trick to hasten the process. The cost of doing so is that you lose the labels. If you are interested in getting the value of the fixed-effects coefficients after the estimation, you should use \code{combine.quick = FALSE}. By default it is equal to \code{FALSE} if the number of observations is lower than 50,000, and to \code{TRUE} otherwise.}
 

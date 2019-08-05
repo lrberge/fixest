@@ -2,7 +2,7 @@
 % Please edit documentation in R/MiscFuns.R
 \name{vcov.fixest}
 \alias{vcov.fixest}
-\title{Extract the variance/covariance of a \code{femlm} fit}
+\title{Extracts the variance/covariance of a \code{femlm} fit}
 \usage{
 \method{vcov}{fixest}(object, se, cluster, dof = TRUE,
   exact_dof = FALSE, forceCovariance = FALSE, keepBounded = FALSE,
@@ -11,7 +11,7 @@
 \arguments{
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
 
-\item{se}{Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{White}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitely deduced from the argument \code{cluster}.}
+\item{se}{Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{White}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.}
 
 \item{cluster}{Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1, "var2")]}, \code{cluster = c("var1, "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster).}
 
@@ -29,7 +29,7 @@ The computation of the VCOV matrix is first done in \code{\link[fixest]{summary.
 }
 \value{
 It returns a \eqn{N\times N} square matrix where \eqn{N} is the number of variables of the fitted model.
-This matrix has an attribute \dQuote{type} specifying how this variance/covariance matrix has been commputed (i.e. was it created using White correction, or was it clustered along a specific factor, etc).
+This matrix has an attribute \dQuote{type} specifying how this variance/covariance matrix has been computed (i.e. was it created using White correction, or was it clustered along a specific factor, etc).
 }
 \description{
 This function extracts the variance-covariance of estimated parameters from a model estimated with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
@@ -43,26 +43,27 @@ data(trade)
 est_pois = femlm(Euros ~ log(dist_km) + log(Year) | Origin + Destination +
                  Product, trade)
 
-# "normal" VCOV
+# By default, in the presence of FEs
+# the VCOV is clustered along the first FE
 vcov(est_pois)
 
 # "white" VCOV
 vcov(est_pois, se = "white")
 
-# "clustered" VCOV (with respect to the Origin factor)
-vcov(est_pois, se = "cluster")
-
 # "clustered" VCOV (with respect to the Product factor)
 vcov(est_pois, se = "cluster", cluster = trade$Product)
 # another way to make the same request:
-vcov(est_pois, se = "cluster", cluster = "Product")
+# note that previously arg. se was optional since deduced from arg. cluster
+vcov(est_pois, cluster = "Product")
+# yet another way:
+vcov(est_pois, cluster = ~Product)
 
 # Another estimation without cluster:
 est_pois_simple = femlm(Euros ~ log(dist_km) + log(Year), trade)
 
 # We can still get the clustered VCOV,
-# but we need to give the cluster-vector:
-vcov(est_pois_simple, se = "cluster", cluster = trade$Product)
+# but we need to give the argument cluster:
+vcov(est_pois_simple, cluster = ~Product)
 
 
 }

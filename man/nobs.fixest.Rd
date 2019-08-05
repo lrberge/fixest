@@ -2,7 +2,7 @@
 % Please edit documentation in R/MiscFuns.R
 \name{nobs.fixest}
 \alias{nobs.fixest}
-\title{Extract the number of observations form a \code{fixest} object}
+\title{Extracts the number of observations form a \code{fixest} object}
 \usage{
 \method{nobs}{fixest}(object, ...)
 }
@@ -15,7 +15,7 @@
 It returns an interger.
 }
 \description{
-This function simply extracts the number of obsrvations form a \code{fixest} object, obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
+This function simply extracts the number of observations form a \code{fixest} object, obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
 }
 \examples{
 

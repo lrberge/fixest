@@ -14,12 +14,12 @@
 \item{...}{Not currently used.}
 }
 \value{
-A list containig the vectors of the fixed effects.
+A list containing the vectors of the fixed effects.
 
 If there is more than 1 cluster, then the attribute \dQuote{references} is created. This is a vector of length the number of clusters, each element contains the number of fixed-effects set as references. By construction, the elements of the first clusters are never set as references. In the presence of regular clusters, there should be Q-1 references (with Q the number of clusters).
 }
 \description{
-This function retrives the fixed effects from a \code{fixest} estimation. It is useful only when there are one or more clusters.
+This function retrieves the fixed effects from a \code{fixest} estimation. It is useful only when there are one or more clusters.
 }
 \details{
 If the cluster are coefficients not regular, then several reference points need to be set, leading to the coefficients to be NOT interpretable. If this is the case, then a warning is raised.

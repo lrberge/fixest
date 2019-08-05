@@ -14,13 +14,13 @@ feNmlm(fml, data, family = c("poisson", "negbin", "logit", "gaussian"),
   combine.quick, ...)
 }
 \arguments{
-\item{fml}{A formula. This formula gives the linear formula to be estimated (it is similar to a \code{lm} formula), for example: \code{fml = z~x+y}. To include cluster variables, you can 1) either insert them in this formula using a pipe (e.g. \code{fml = z~x+y|cluster1+cluster2}), or 2) either use the argment \code{cluster}. To include a non-linear in parameters element, you must use the argment \code{NL.fml}.}
+\item{fml}{A formula. This formula gives the linear formula to be estimated (it is similar to a \code{lm} formula), for example: \code{fml = z~x+y}. To include cluster variables, you can 1) either insert them in this formula using a pipe (e.g. \code{fml = z~x+y|cluster1+cluster2}), or 2) either use the argument \code{cluster}. To include a non-linear in parameters element, you must use the argment \code{NL.fml}.}
 
 \item{data}{A data.frame containing the necessary variables to run the model. The variables of the non-linear right hand side of the formula are identified with this \code{data.frame} names. Can also be a matrix.}
 
 \item{family}{Character scalar. It should provide the family. The possible values are "poisson" (Poisson model with log-link, the default), "negbin" (Negative Binomial model with log-link), "logit" (LOGIT model with log-link), "gaussian" (Gaussian model).}
 
-\item{NL.fml}{A formula. If provided, this formula represents the non-linear part of the right hand side (RHS). Note that contrary to the \code{fml} argument, the coefficients must explicitely appear in this formula. For instance, it can be \code{~a*log(b*x + c*x^3)}, where \code{a}, \code{b}, and \code{c} are the coefficients to be estimated. Note that only the RHS of the formula is to be provided, and NOT the left hand side.}
+\item{NL.fml}{A formula. If provided, this formula represents the non-linear part of the right hand side (RHS). Note that contrary to the \code{fml} argument, the coefficients must explicitly appear in this formula. For instance, it can be \code{~a*log(b*x + c*x^3)}, where \code{a}, \code{b}, and \code{c} are the coefficients to be estimated. Note that only the RHS of the formula is to be provided, and NOT the left hand side.}
 
 \item{fixef}{Character vector. The name/s of a/some variable/s within the dataset to be used as fixed-effects. These variables should contain the identifier of each observation (e.g., think of it as a panel identifier).}
 
@@ -34,11 +34,11 @@ feNmlm(fml, data, family = c("poisson", "negbin", "logit", "gaussian"),
 
 \item{NL.start.init}{(For NL models only) Numeric scalar. If the argument \code{NL.start} is not provided, or only partially filled (i.e. there remain non-linear parameters with no starting value), then the starting value of all remaining non-linear parameters is set to \code{NL.start.init}.}
 
-\item{offset}{A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This offset is linearily added to the elements of the main formula 'fml'.}
+\item{offset}{A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This offset is linearly added to the elements of the main formula 'fml'.}
 
 \item{start}{Starting values for the coefficients in the linear part (for the non-linear part, use NL.start). Can be: i) a numeric of length 1 (e.g. \code{start = 0}, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).}
 
-\item{jacobian.method}{(For NL models only) Character scalar. Provides the method used to numerically compute the jacobian of the non-linear part. Can be either \code{"simple"} or \code{"Richardson"}. Default is \code{"simple"}. See the help of \code{\link[numDeriv]{jacobian}} for more information.}
+\item{jacobian.method}{(For NL models only) Character scalar. Provides the method used to numerically compute the Jacobian of the non-linear part. Can be either \code{"simple"} or \code{"Richardson"}. Default is \code{"simple"}. See the help of \code{\link[numDeriv]{jacobian}} for more information.}
 
 \item{useHessian}{Logical. Should the Hessian be computed in the optimization stage? Default is \code{TRUE}.}
 
@@ -48,7 +48,7 @@ feNmlm(fml, data, family = c("poisson", "negbin", "logit", "gaussian"),
 
 \item{nthreads}{Integer: Number of nthreads to be used (accelerates the algorithm via the use of openMP routines). The default is to use the total number of nthreads available minus two. You can set permanently the number of nthreads used within this package using the function \code{\link[fixest]{setFixest_nthreads}}.}
 
-\item{verbose}{Integer, default is 0. It represents the level of information that should be reported during the optimisation process. If \code{verbose=0}: nothing is reported. If \code{verbose=1}: the value of the coefficients and the likelihood are reported. If \code{verbose=2}: \code{1} + information on the computing tiime of the null model, the cluster coefficients and the hessian are reported.}
+\item{verbose}{Integer, default is 0. It represents the level of information that should be reported during the optimisation process. If \code{verbose=0}: nothing is reported. If \code{verbose=1}: the value of the coefficients and the likelihood are reported. If \code{verbose=2}: \code{1} + information on the computing time of the null model, the cluster coefficients and the hessian are reported.}
 
 \item{theta.init}{Positive numeric scalar. The starting value of the dispersion parameter if \code{family="negbin"}. By default, the algorithm uses as a starting value the theta obtained from the model with only the intercept.}
 
@@ -98,7 +98,7 @@ An \code{femlm} object.
 \item{fixef_id}{The list (of length the number of clusters) of the cluster identifiers for each observation.}
 \item{fixef_sizes}{The size of each cluster.}
 \item{obsRemoved}{In the case there were clusters and some observations were removed because of only 0/1 outcome within a cluster, it gives the row numbers of the observations that were removed.}
-\item{fixef_removed}{In the case there were clusters and some observations were removed because of only 0/1 outcome within a cluster, it gives the list (for each cluster) of the clustr identifiers that were removed.}
+\item{fixef_removed}{In the case there were clusters and some observations were removed because of only 0/1 outcome within a cluster, it gives the list (for each cluster) of the cluster identifiers that were removed.}
 \item{theta}{In the case of a negative binomial estimation: the overdispersion parameter.}
 
  @seealso
@@ -107,7 +107,7 @@ See also \code{\link[fixest]{summary.fixest}} to see the results with the approp
 And other estimation methods: \code{\link[fixest]{feols}}, \code{\link[fixest]{femlm}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{fepois}}, \code{\link[fixest]{fenegbin}}.
 }
 \description{
-This function estimates maximum likelihood models (e.g., Poisson or Logit) with non-linear in parameters right-hand-sides and is efficient to handle any number of fixed effects. If you do not use non-linear in parameters right-hand-sied, use \code{\link[fixest]{femlm}} or \code{\link[fixest]{feglm}} instead (design is simpler).
+This function estimates maximum likelihood models (e.g., Poisson or Logit) with non-linear in parameters right-hand-sides and is efficient to handle any number of fixed effects. If you do not use non-linear in parameters right-hand-side, use \code{\link[fixest]{femlm}} or \code{\link[fixest]{feglm}} instead (design is simpler).
 }
 \details{
 This function estimates maximum likelihood models where the conditional expectations are as follows:

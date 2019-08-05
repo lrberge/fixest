@@ -7,7 +7,7 @@
 r2(x, type = "all")
 }
 \arguments{
-\item{x}{A fixest object, e.g. obtained with function \code{\link[fixest]{feglm}} or \code{\link[fixest]{feols}}.}
+\item{x}{A \code{fixest} object, e.g. obtained with function \code{\link[fixest]{feglm}} or \code{\link[fixest]{feols}}.}
 
 \item{type}{A character vector representing the R2 to compute. The R2 codes are of the form: "wapr2" with letters "w" (within), "a" (adjusted) and "p" (pseudo) possibly missing. E.g. to get the regular R2: use \code{type = "r2"}, the within adjusted R2: use \code{type = "war2"}, the pseudo R2: use \code{type = "pr2"}, etc. By default, all R2s are computed.}
 }

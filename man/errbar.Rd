@@ -27,7 +27,7 @@ errbar(estimate, sd, ci_low, ci_top, x, x.shift = 0, w = 0.1,
 
 \item{ci_level}{Scalar between 0 and 1: the level of the CI. By default it is equal to 0.95.}
 
-\item{style}{If \dQuote{interval}: it plots a confidence interval. If \dQuote{bar}, it plots simply error bars. If \dQuote{tube}: as interval, but with a greyed area.}
+\item{style}{If \dQuote{interval}: it plots a confidence interval. If \dQuote{bar}, it plots simply error bars. If \dQuote{tube}: as interval, but with a grayed area.}
 
 \item{add}{Default is \code{FALSE}, if the intervals are to be added to an existing graph. Note that if it is the case, then the argument \code{x} MUST be numeric.}
 
@@ -45,7 +45,7 @@ errbar(estimate, sd, ci_low, ci_top, x, x.shift = 0, w = 0.1,
 
 \item{bar.join}{Logical, default is \code{FALSE}. Whether to join the dots when \code{style = "bar"}.}
 
-\item{only.params}{Logical, default is \code{FALSE}. If \code{TRUE}: no graph is plotted, only the ylim is returned. Useful to stack estimates from different estimations in the same graph.}
+\item{only.params}{Logical, default is \code{FALSE}. If \code{TRUE}: no graph is plotted, only the \code{ylim} is returned. Useful to stack estimates from different estimations in the same graph.}
 
 \item{...}{Other arguments to be passed to the function \code{plot} or \code{lines} (if \code{add = TRUE}).}
 }

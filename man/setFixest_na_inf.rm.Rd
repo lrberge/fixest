@@ -17,7 +17,7 @@ Sets/gets the default policy of NA/Inf behavior in \code{fixest} estimations. By
 }
 \examples{
 
-\dontrun{
+\donttest{
 base = iris
 base[1, 1] = NA
 # default: NAs removed

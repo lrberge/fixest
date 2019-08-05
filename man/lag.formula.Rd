@@ -18,7 +18,7 @@
 
 \item{fill}{How to fill the observations without defined lead/lag values. Default is \code{NA}.}
 
-\item{duplicate.method}{If several observations have the same id and time values, then the notion of lag is not defined for them. If \code{duplicate.method = "none"} (default) and duplicate values are found, this leads to an error. You can use \code{duplicate.method = "first"} so that the first occurence of identical id/time observations will be used as lag.}
+\item{duplicate.method}{If several observations have the same id and time values, then the notion of lag is not defined for them. If \code{duplicate.method = "none"} (default) and duplicate values are found, this leads to an error. You can use \code{duplicate.method = "first"} so that the first occurrence of identical id/time observations will be used as lag.}
 
 \item{...}{Not currently used.}
 }
@@ -26,7 +26,7 @@
 It returns a vector of the same type and length as the variable to be lagged in the formula.
 }
 \description{
-Lags a variable using a formula
+Lags a variable using panel id+time identifiers in a formula.
 }
 \examples{
 # simple example with an unbalanced panel
@@ -49,13 +49,13 @@ base_dup = data.frame(id = rep(1:2, each = 4),
                       time = c(1, 1, 1, 2, 1, 2, 2, 3), x = 1:8)
 
 # by default: error
-\dontrun{
+\donttest{
 lag(x~id+time, 1, base_dup)
 }
 # with duplicate.method = "first"
 lag(x~id+time, 1, base_dup, duplicate.method = "first")
 
-\dontrun{
+\donttest{
 # You can create variables without specifying the data within data.table:
 library(data.table)
 base = data.table(id = rep(1:2, each = 3), year = 1990 + rep(1:3, 2), x = 1:6)

@@ -24,7 +24,7 @@ The AIC is computed as:
 \deqn{AIC = -2\times LogLikelihood + k\times nbParams}
 with k the penalty parameter.
 
-You can have more information on this crtierion on \code{\link[stats]{AIC}}.
+You can have more information on this criterion on \code{\link[stats]{AIC}}.
 }
 \examples{
 

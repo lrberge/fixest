@@ -13,7 +13,7 @@ esttable(..., se = c("standard", "white", "cluster", "twoway",
 \arguments{
 \item{...}{Used to capture different \code{fixest} objects (obtained with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}). Note that any other type of element is discarded. Note that you can give a list of \code{fixest} objects.}
 
-\item{se}{Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{White}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitely deduced from the argument \code{cluster}.}
+\item{se}{Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{White}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.}
 
 \item{dof}{Logical, default is \code{TRUE}. Should there be a degree of freedom correction to the standard errors of the coefficients?}
 
@@ -47,7 +47,7 @@ esttable(..., se = c("standard", "white", "cluster", "twoway",
 Returns a data.frame containing the formatted results.
 }
 \description{
-This function aggregates the results of multiple estimations and display them in the form of only one table whose rownames are the variables and the columns contain the coefficients and standard-errors.
+This function aggregates the results of multiple estimations and display them in the form of only one table whose row names are the variables and the columns contain the coefficients and standard-errors.
 }
 \examples{
 

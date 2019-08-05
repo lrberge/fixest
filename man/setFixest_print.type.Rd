@@ -17,7 +17,7 @@ Sets/gets the default behavior of the \code{print} method for non-summary \code{
 }
 \examples{
 
-\dontrun{
+\donttest{
 res = feols(Sepal.Length ~ Sepal.Width + Petal.Length, base)
 # default is coef. table:
 res

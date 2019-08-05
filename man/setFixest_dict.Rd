@@ -3,7 +3,7 @@
 \name{setFixest_dict}
 \alias{setFixest_dict}
 \alias{getFixest_dict}
-\title{Sets/gets the dictionnary used in \code{esttex}}
+\title{Sets/gets the dictionary used in \code{esttex}}
 \usage{
 setFixest_dict(dict)
 
@@ -13,11 +13,11 @@ getFixest_dict()
 \item{dict}{A named character vector. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use \code{dict = c(a="$log(a)$", b3="$bonus^3$")}.}
 }
 \description{
-Sets/gets the default dictionnay used in the function \code{\link[fixest]{esttex}}. The dictionnaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table. By setting the dictionnary with \code{setFixest_dict}, you can avoid providing the argument \code{dict} in function \code{\link[fixest]{esttex}}.
+Sets/gets the default dictionnay used in the function \code{\link[fixest]{esttex}}. The dictionaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table. By setting the dictionary with \code{setFixest_dict}, you can avoid providing the argument \code{dict} in function \code{\link[fixest]{esttex}}.
 }
 \examples{
 
-\dontrun{
+\donttest{
 data(trade)
 est = feols(log(Euros) ~ log(dist_km)|Origin+Destination+Product, trade)
 # we export the result & rename some variables

@@ -10,14 +10,14 @@ setFixest_nthreads(nthreads)
 getFixest_nthreads()
 }
 \arguments{
-\item{nthreads}{An integer stricly greater than one and lower than the maximum number of threads (if OpenMP is available). If missing, the default is the maximum number of threads minus two.}
+\item{nthreads}{An integer strictly greater than one and lower than the maximum number of threads (if OpenMP is available). If missing, the default is the maximum number of threads minus two.}
 }
 \description{
 Sets/gets the default number of threads to used in \code{fixest} estimation functions. The default is the maximum number of threads minus two.
 }
 \examples{
 
-\dontrun{
+\donttest{
 # Gets the current number of threads
 getFixest_nthreads()
 # To set multi-threading off:
