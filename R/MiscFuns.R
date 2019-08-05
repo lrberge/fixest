@@ -1848,14 +1848,17 @@ plot.fixest.fixef = function(x, n = 5, ...){
 		warning("The fixed-effects are not regular, they cannot be straightforwardly interpreted.", call. = FALSE)
 	}
 
-	op = par(mfrow = as.numeric(strsplit(mfrow[Q], "")[[1]]), mar = c(3, 3, 2.5, 3))
+	# modification par:
+	opar <- par(no.readonly =TRUE)
+	on.exit(par(opar))
+
+	par(mfrow = as.numeric(strsplit(mfrow[Q], "")[[1]]), mar = c(3, 3, 2.5, 3))
 
 	addExp = attr(x, "exponential")
 	for(i in 1:Q){
 		plot_single_cluster(x[[i]], n = n, addExp = addExp, fe_name = fixef_names[i])
 	}
 
-	par(op)
 }
 
 
