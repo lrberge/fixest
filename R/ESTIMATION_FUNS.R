@@ -367,7 +367,7 @@ ols_fit = function(y, X, w, correct_0w = FALSE, nthreads){
 #' The core of the GLM are the weighted OLS estimations. These estimations are performed with \code{\link[fixest]{feols}}. The method used to demean each variable along the fixed-effects is based on Berge (2018), since this is the same problem to solve as for the Gaussian case in a ML setup.
 #'
 #'
-#'  @seealso
+#' @seealso
 #' See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the functions \code{\link[fixest]{esttable}} and \code{\link[fixest]{esttex}} to visualize the results of multiple estimations.
 #' And other estimation methods: \code{\link[fixest]{feols}}, \code{\link[fixest]{femlm}}, \code{\link[fixest]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
 #'
@@ -897,42 +897,6 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
 }
 
 
-
-
-#' @describeIn  femlm Fixed-effects negative binomial estimation
-fenegbin = function(fml, data, theta.init, start = 0, fixef, offset, na_inf.rm = getFixest_na_inf.rm(),
-                    fixef.tol = 1e-5, fixef.iter = 1000, nthreads = getFixest_nthreads(),
-                    verbose = 0, warn = TRUE, notes = getFixest_notes(), combine.quick, ...){
-
-	# This is just an alias
-
-	res = try(feNmlm(fml = fml, data=data, family = "negbin", theta.init = theta.init, start = start, fixef = fixef, offset = offset, na_inf.rm = na_inf.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter, nthreads = nthreads, verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick, origin = "fenegbin", mc_origin_bis = match.call(), ...), silent = TRUE)
-
-	if("try-error" %in% class(res)){
-		stop(format_error_msg(res, "fenegbin"))
-	}
-
-	return(res)
-}
-
-#' @describeIn  feglm Fixed-effects poisson estimation
-fepois = function(fml, data, offset, weights, start = NULL, etastart = NULL, mustart = NULL,
-                  fixef, fixef.tol = 1e-6, fixef.iter = 1000, glm.iter = 25, glm.tol = 1e-8,
-                  na_inf.rm = getFixest_na_inf.rm(), nthreads = getFixest_nthreads(),
-                  warn = TRUE, notes = getFixest_notes(), verbose = 0, combine.quick, ...){
-
-	# This is just an alias
-
-	res = try(feglm(fml = fml, data = data, family = "poisson", offset = offset, weights = weights, start = start, etastart = etastart, mustart = mustart, fixef = fixef, fixef.tol = fixef.tol, fixef.iter = fixef.iter, glm.iter = glm.iter, glm.tol = glm.tol, na_inf.rm = na_inf.rm, nthreads = nthreads, warn = warn, notes = notes, verbose = verbose, combine.quick = combine.quick, origin_bis = "fepois", mc_origin_bis = match.call(), ...), silent = TRUE)
-
-	if("try-error" %in% class(res)){
-		stop(format_error_msg(res, "fepois"))
-	}
-
-	return(res)
-}
-
-
 #' Fixed-effects maximum likelihood model
 #'
 #' This function estimates maximum likelihood models with any number of fixed-effects.
@@ -1012,6 +976,39 @@ femlm <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	}
 
 	return(res)
+}
+
+#' @describeIn  femlm Fixed-effects negative binomial estimation
+fenegbin = function(fml, data, theta.init, start = 0, fixef, offset, na_inf.rm = getFixest_na_inf.rm(),
+                    fixef.tol = 1e-5, fixef.iter = 1000, nthreads = getFixest_nthreads(),
+                    verbose = 0, warn = TRUE, notes = getFixest_notes(), combine.quick, ...){
+
+    # This is just an alias
+
+    res = try(feNmlm(fml = fml, data=data, family = "negbin", theta.init = theta.init, start = start, fixef = fixef, offset = offset, na_inf.rm = na_inf.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter, nthreads = nthreads, verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick, origin = "fenegbin", mc_origin_bis = match.call(), ...), silent = TRUE)
+
+    if("try-error" %in% class(res)){
+        stop(format_error_msg(res, "fenegbin"))
+    }
+
+    return(res)
+}
+
+#' @describeIn  feglm Fixed-effects Poisson estimation
+fepois = function(fml, data, offset, weights, start = NULL, etastart = NULL, mustart = NULL,
+                  fixef, fixef.tol = 1e-6, fixef.iter = 1000, glm.iter = 25, glm.tol = 1e-8,
+                  na_inf.rm = getFixest_na_inf.rm(), nthreads = getFixest_nthreads(),
+                  warn = TRUE, notes = getFixest_notes(), verbose = 0, combine.quick, ...){
+
+    # This is just an alias
+
+    res = try(feglm(fml = fml, data = data, family = "poisson", offset = offset, weights = weights, start = start, etastart = etastart, mustart = mustart, fixef = fixef, fixef.tol = fixef.tol, fixef.iter = fixef.iter, glm.iter = glm.iter, glm.tol = glm.tol, na_inf.rm = na_inf.rm, nthreads = nthreads, warn = warn, notes = notes, verbose = verbose, combine.quick = combine.quick, origin_bis = "fepois", mc_origin_bis = match.call(), ...), silent = TRUE)
+
+    if("try-error" %in% class(res)){
+        stop(format_error_msg(res, "fepois"))
+    }
+
+    return(res)
 }
 
 
