@@ -32,7 +32,7 @@
 #' # By default the coefficient table is displayed.
 #' #  If the user wished to display only the coefficents, use option type:
 #' print(est_pois, type = "coef")
-#' \dontrun{
+#' \donttest{
 #' # To permanently display coef. only, use setFixest_print.type:
 #' setFixest_print.type("coef")
 #' est_pois
@@ -229,7 +229,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' esttable(sum_white, sum_oneway, sum_twoway, sum_threeway)
 #'
 #' # Alternative ways to cluster the SE:
-#' \dontrun{
+#' \donttest{
 #' # two-way clustering: Destination and Product
 #' # (Note that arg. se = "twoway" is implicitly deduced from the argument cluster)
 #' summary(est_pois, cluster = c("Destination", "Product"))
@@ -1105,13 +1105,13 @@ r2 = function(x, type = "all"){
 #'                       time = c(1, 1, 1, 2, 1, 2, 2, 3), x = 1:8)
 #'
 #' # by default: error
-#' \dontrun{
+#' \donttest{
 #' lag(x~id+time, 1, base_dup)
 #' }
 #' # with duplicate.method = "first"
 #' lag(x~id+time, 1, base_dup, duplicate.method = "first")
 #'
-#' \dontrun{
+#' \donttest{
 #' # You can create variables without specifying the data within data.table:
 #' library(data.table)
 #' base = data.table(id = rep(1:2, each = 3), year = 1990 + rep(1:3, 2), x = 1:6)
@@ -2062,7 +2062,7 @@ summary.fixest.obs2remove = function(object, ...){
 #'
 #' @examples
 #'
-#' \dontrun{
+#' \donttest{
 #' # Creating an example data base:
 #' cluster_1 = sample(3, 100, TRUE)
 #' cluster_2 = sample(20, 100, TRUE)
@@ -6234,7 +6234,7 @@ model.matrix.fixest = function(object, data, ...){
 #'
 #' @examples
 #'
-#' \dontrun{
+#' \donttest{
 #' # Default is TRUE
 #' getFixest_notes()
 #' # Change default with
@@ -6277,7 +6277,7 @@ getFixest_notes = function(){
 #'
 #' @examples
 #'
-#' \dontrun{
+#' \donttest{
 #' # Gets the current number of threads
 #' getFixest_nthreads()
 #' # To set multi-threading off:
@@ -6339,7 +6339,7 @@ getFixest_nthreads = function(){
 #'
 #' @examples
 #'
-#' \dontrun{
+#' \donttest{
 #' data(trade)
 #' est = feols(log(Euros) ~ log(dist_km)|Origin+Destination+Product, trade)
 #' # we export the result & rename some variables
@@ -6411,7 +6411,7 @@ getFixest_dict = function(){
 #'
 #' @examples
 #'
-#' \dontrun{
+#' \donttest{
 #' base = iris
 #' base[1, 1] = NA
 #' # default: NAs removed
@@ -6456,7 +6456,7 @@ getFixest_na_inf.rm = function(){
 #'
 #' @examples
 #'
-#' \dontrun{
+#' \donttest{
 #' res = feols(Sepal.Length ~ Sepal.Width + Petal.Length, base)
 #' # default is coef. table:
 #' res
