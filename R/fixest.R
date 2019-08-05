@@ -1,6 +1,6 @@
 #' Fast and User-Friendly Fixed-Effects Estimations
 #'
-#' The package \pkg{fixest} provides a family of functions to perform estimations with multiple fixed-effects. Standard-errors can be easily and intuitively clustered. It also includes tools to seamlessly export (to Latex) the results of various estimations.
+#' The package \pkg{fixest} provides a family of functions to perform estimations with multiple fixed-effects. Standard-errors can be easily and intuitively clustered. It also includes tools to seamlessly export the results of various estimations.
 #'
 #' @details
 #' This package efficiently estimates models with multiple fixed-effect (i.e. multiple large factor variables).
