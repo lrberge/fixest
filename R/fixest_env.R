@@ -1257,12 +1257,12 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             message_cluster = paste0(paste0(nb_missing, collapse = "/"), " fixed-effect", ifelse(sum(nb_missing) == 1, "", "s"), " (", numberFormatNormal(length(obs2remove)), " observations) removed because of only ", ifelse(family=="logit", "zero (or only one)", "zero"), " outcomes.\n")
 
             note = ifelse((anyNA_sample + any0W) > 0, "NOTES: ", "NOTE: ")
-            if(notes) cat(note, message_NA, ifelse(anyNA_sample, "       ", ""), message_0W, ifelse(any0W, "       ", ""), message_cluster, sep = "")
+            if(notes) message(note, message_NA, ifelse(anyNA_sample, "       ", ""), message_0W, ifelse(any0W, "       ", ""), message_cluster)
 
             names(fixef_removed) = fixef_vars
         } else if(anyNA_sample){
             note = ifelse((anyNA_sample + any0W) > 1, "NOTES: ", "NOTE: ")
-            if(notes) cat(note, message_NA, ifelse(anyNA_sample && any0W, "       ", ""), message_0W, sep = "")
+            if(notes) message(note, message_NA, ifelse(anyNA_sample && any0W, "       ", ""), message_0W)
         }
 
         if(length(obs2remove_NA) > 0){
@@ -1352,7 +1352,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             }
 
             note = ifelse((anyNA_sample + any0W) == 2, "NOTES: ", "NOTE: ")
-            if(notes) cat(note, message_NA, ifelse(anyNA_sample && any0W, "       ", ""), message_0W, sep = "")
+            if(notes) message(note, message_NA, ifelse(anyNA_sample && any0W, "       ", ""), message_0W)
 
             # we drop the NAs from the fixef matrix
             obs2remove = which(isNA_sample)
