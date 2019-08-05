@@ -11,7 +11,7 @@ export(feglm.fit)
 export(esttex, esttable, collinearity, obs2remove, r2,
        did_estimate_yearly_effects, did_plot_yearly_effects, errbar)
 # setters & getters
-exportPattern("^(s|g)etFes")
+exportPattern("^(s|g)etFixest")
 
 # Base methods
 S3method(print, fixest)
