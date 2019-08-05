@@ -1844,7 +1844,7 @@ plot.fixest.fixef = function(x, n = 5, ...){
 	fixef_names = names(x)
 	slope_flag = grepl("\\[", fixef_names)
 
-	if(Q > 1 && sum(attr(x, "references")[slope_flag]) > sum(slope_flag)-1){
+	if(Q > 1 && sum(attr(x, "references")[!slope_flag]) > sum(!slope_flag)-1){
 		warning("The fixed-effects are not regular, they cannot be straightforwardly interpreted.", call. = FALSE)
 	}
 
