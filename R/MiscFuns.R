@@ -6114,19 +6114,20 @@ formula.fixest = function(x, type = c("full", "linear", "NL"), ...){
 		return(NL.fml)
 	}
 
-	res = x$fml
-
-	NL.fml = x$NL.fml
-	if(!is.null(NL.fml)){
-		fml_char = as.character(res)
-		nl_char = as.character(NL.fml)
-		res = as.formula(paste(fml_char[2], "~", fml_char[3], "+ I(", nl_char[2], ")"))
-	}
-
-	fixef_vars = x$fixef_vars
-	if(length(fixef_vars) > 0){
-		fml_char = as.character(res)
-		res = as.formula(paste(fml_char[2], "~", fml_char[3], "|", paste0(fixef_vars, collapse = "+")))
+	if(is.null(x$NL.fml)){
+	    if(is.null(x$fml_full)){
+	        res = x$fml
+	    } else {
+	        res = x$fml_full
+	    }
+	} else if(is.null(x$fml_full)){
+	    fml_char = deparse_long(x$fml)
+	    nl_char = as.character(x$NL.fml)
+	    res = as.formula(paste(fml_char, "+ I(", nl_char[2], ")"))
+	} else {
+	    fml_split = strsplit(deparse_long(x$fml_full), "\\|")[[1]]
+	    nl_char = as.character(x$NL.fml)
+	    res = as.formula(paste(fml_split[1], "+ I(", nl_char[2], ") |", fml_split[2]))
 	}
 
 	res
