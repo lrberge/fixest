@@ -403,7 +403,9 @@ feglm = function(fml, data, family = "poisson", offset, weights, start = NULL, e
     env = try(fixest_env(fml=fml, data=data, family = family, offset = offset, weights = weights, linear.start = start, etastart=etastart, mustart=mustart, fixef = fixef, fixef.tol=fixef.tol, fixef.iter=fixef.iter, glm.iter = glm.iter, glm.tol = glm.tol, na_inf.rm = na_inf.rm, nthreads = nthreads, warn=warn, notes=notes, verbose = verbose, combine.quick = combine.quick, origin = "feglm", mc_origin = match.call(), ...), silent = TRUE)
 
     if("try-error" %in% class(env)){
-        stop(format_error_msg(env, "feglm"))
+        mc = match.call()
+        origin = ifelse(is.null(mc$origin), "feglm", mc$origin)
+        stop(format_error_msg(env, origin))
     }
 
     verbose = get("verbose", env)
@@ -1176,7 +1178,9 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 								 computeModel0=TRUE, ...), silent = TRUE)
 
 	if("try-error" %in% class(env)){
-		stop(format_error_msg(env, "feNmlm"))
+	    mc = match.call()
+	    origin = ifelse(is.null(mc$origin), "feNmlm", mc$origin)
+		stop(format_error_msg(env, origin))
 	}
 
 	verbose = get("verbose", env)
@@ -1558,10 +1562,12 @@ format_error_msg = function(x, origin){
 
     x = gsub("\n+$", "", x)
 
-    if(grepl("^Error in fe[^\n]+\n", x)){
-        res = gsub("^Error in fe[^\n]+\n *(.+)", "\\1", x)
+    if(grepl("^Error in (fe|fixest)[^\n]+\n", x)){
+        res = gsub("^Error in (fe|fixest)[^\n]+\n *(.+)", "\\2", x)
+    } else if(grepl("object '.+' not found", x)) {
+        res = x
     } else {
-       res = paste0(x, "\nThis error was unforeseen by the author of the function ", origin, ". It would be appreciated if you could report to laurent.berge@uni.lu.")
+       res = paste0(x, "\nThis error was unforeseen by the author of the function ", origin, ". If you think your call to the function is legitimate, could you report?")
     }
     res
 }
