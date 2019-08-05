@@ -3,8 +3,8 @@
 
 \title{News for \R Package \pkg{fixest}}
 
-\section{Changes in version 0.1.0 (2019-XX-XX)}{
-	\subsection{First version, youhou!}{
+\section{Changes in version 0.1.0 (August 2019)}{
+	\subsection{First version}{
 	    \itemize{
 	    \item This package is an effort to create a family of fast and user-friendly functions to perform estimations with multiple fixed-effects (F.E.).
 
