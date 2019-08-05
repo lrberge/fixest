@@ -6283,6 +6283,8 @@ getFixest_notes = function(){
 #' getFixest_nthreads()
 #' # To set multi-threading off:
 #' setFixest_nthreads(1)
+#' # To set it back to default:
+#' setFixest_nthreads()
 #' }
 #'
 #'
