@@ -1553,12 +1553,10 @@ warn_step_halving = function(env){
 
 format_error_msg = function(x, origin){
     # Simple formatting of the error msg
-    # I don't take the risk that the user can fool me => I use an origin argument
 
-    # The following code could have worked, but the user could do my_fun = femlm, my_fun(stuff)
-    # and then I would look stupid if I say I created the function my_fun
-    # s_all = sys.calls()
-    # origin = as.character(s_all[[length(s_all) - 2]][[1]])
+    # LATER:
+    # - for object not found: provide a better error msg by calling the name of the missing
+    #   argument => likely I'll need an match.call argument
 
     x = gsub("\n+$", "", x)
 
