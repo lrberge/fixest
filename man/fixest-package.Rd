@@ -6,7 +6,7 @@
 \alias{fixest-package}
 \title{Fast and User-Friendly Fixed-Effects Estimations}
 \description{
-The package \pkg{fixest} provides a family of functions to perform estimations with multiple fixed-effects. Standard-errors can be easily and intuitively clustered. It also includes tools to seamlessly export (to Latex) the results of various estimations.
+The package \pkg{fixest} provides a family of functions to perform estimations with multiple fixed-effects. Standard-errors can be easily and intuitively clustered. It also includes tools to seamlessly export the results of various estimations.
 }
 \details{
 This package efficiently estimates models with multiple fixed-effect (i.e. multiple large factor variables).
@@ -21,6 +21,13 @@ It is possible to compare the results of several estimations by using the functi
 }
 \references{
 Berg\\'e, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (\url{https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13}).
+}
+\seealso{
+Useful links:
+\itemize{
+  \item Report bugs at \url{https://github.com/lrberge/fixest/issues}
+}
+
 }
 \author{
 \strong{Maintainer}: Laurent Berge \email{laurent.berge@uni.lu}

@@ -22,6 +22,8 @@ Sets/gets the default number of threads to used in \code{fixest} estimation func
 getFixest_nthreads()
 # To set multi-threading off:
 setFixest_nthreads(1)
+# To set it back to default:
+setFixest_nthreads()
 }
 
 

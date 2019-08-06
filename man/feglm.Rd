@@ -77,17 +77,12 @@ Estimates GLM models with any number of fixed-effects.
 }
 \details{
 The core of the GLM are the weighted OLS estimations. These estimations are performed with \code{\link[fixest]{feols}}. The method used to demean each variable along the fixed-effects is based on Berge (2018), since this is the same problem to solve as for the Gaussian case in a ML setup.
-
-
- @seealso
-See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the functions \code{\link[fixest]{esttable}} and \code{\link[fixest]{esttex}} to visualize the results of multiple estimations.
-And other estimation methods: \code{\link[fixest]{feols}}, \code{\link[fixest]{femlm}}, \code{\link[fixest]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
 }
 \section{Functions}{
 \itemize{
 \item \code{feglm.fit}: Matrix method for fixed-effects GLM estimation
 
-\item \code{fepois}: Fixed-effects poisson estimation
+\item \code{fepois}: Fixed-effects Poisson estimation
 }}
 
 \section{Combining the fixed-effects}{
@@ -130,6 +125,10 @@ Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with mu
 For models with multiple fixed-effects:
 
 Gaure, Simen, 2013, "OLS with multiple high dimensional category variables", Computational Statistics & Data Analysis 66 pp. 8--18
+}
+\seealso{
+See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the functions \code{\link[fixest]{esttable}} and \code{\link[fixest]{esttex}} to visualize the results of multiple estimations.
+And other estimation methods: \code{\link[fixest]{feols}}, \code{\link[fixest]{femlm}}, \code{\link[fixest]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
 }
 \author{
 Laurent Berge
