@@ -236,7 +236,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' summary(est_pois, cluster = trade[, c("Destination", "Product")])
 #' summary(est_pois, cluster = list(trade$Destination, trade$Product))
 #' summary(est_pois, cluster = ~Destination+Product)
-#' # Since Destination and Product are used as clusters, you can also use:
+#' # Since Destination and Product are used as fixed-effects, you can also use:
 #' summary(est_pois, cluster = 2:3)
 #' }
 #'
@@ -359,7 +359,7 @@ summary.fixest <- function(object, se, cluster, dof = TRUE, exact_dof = FALSE, f
 #'
 #'# two fitted models with different expl. variables:
 #' res1 = femlm(Sepal.Length ~ Sepal.Width + Petal.Length +
-#'             Petal.Width | Species, iris)
+#'              Petal.Width | Species, iris)
 #' res2 = femlm(Sepal.Length ~ Petal.Width | Species, iris)
 #'
 #' # We export the three results in one Latex table,
@@ -913,7 +913,7 @@ esttable <- function(..., se=c("standard", "white", "cluster", "twoway", "threew
 		res <- rbind(res, c("Convergence", c(convergence_list, recursive = TRUE)))
 	}
 
-	res <- rbind(res, c("Squared-Correlation", c(sqCor_list, recursive = TRUE)))
+	res <- rbind(res, c("Squared-Corr.", c(sqCor_list, recursive = TRUE)))
 	res <- rbind(res, c("Adj-pseudo R2", c(r2_list, recursive = TRUE)))
 	# res <- rbind(res, c("AIC", c(aic_list, recursive = TRUE)))
 	if(loglik) res <- rbind(res, c("Log-Likelihood", numberFormatNormal(loglik_list)))
@@ -950,7 +950,7 @@ esttable <- function(..., se=c("standard", "white", "cluster", "twoway", "threew
 #' Reports different R2s for \code{fixest} estimations (e.g. \code{\link[fixest]{feglm}} or \code{\link[fixest]{feols}}).
 #'
 #' @param x A \code{fixest} object, e.g. obtained with function \code{\link[fixest]{feglm}} or \code{\link[fixest]{feols}}.
-#' @param type A character vector representing the R2 to compute. The R2 codes are of the form: "wapr2" with letters "w" (within), "a" (adjusted) and "p" (pseudo) possibly missing. E.g. to get the regular R2: use \code{type = "r2"}, the within adjusted R2: use \code{type = "war2"}, the pseudo R2: use \code{type = "pr2"}, etc. By default, all R2s are computed.
+#' @param type A character vector representing the R2 to compute. The R2 codes are of the form: "wapr2" with letters "w" (within), "a" (adjusted) and "p" (pseudo) possibly missing. E.g. to get the regular R2: use \code{type = "r2"}, the within adjusted R2: use \code{type = "war2"}, the pseudo R2: use \code{type = "pr2"}, etc. Use \code{"sq.cor"} for the squared correlation. By default, all R2s are computed.
 #'
 #' @return
 #' Returns a named vector.
@@ -963,8 +963,11 @@ esttable <- function(..., se=c("standard", "white", "cluster", "twoway", "threew
 #' # Load trade data
 #' data(trade)
 #'
-#' # We estimate the effect of distance on trade (with 3 cluster effects)
+#' # We estimate the effect of distance on trade (with 3 fixed-effects)
 #' est_pois = femlm(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
+#'
+#' # Squared correlation:
+#' r2(est_pois, "sq.cor")
 #'
 #' # "regular" r2:
 #' r2(est_pois, "r2")
@@ -975,8 +978,8 @@ esttable <- function(..., se=c("standard", "white", "cluster", "twoway", "threew
 #' # within adjusted r2
 #' r2(est_pois, "war2")
 #'
-#' # all three at once
-#' r2(est_pois, c("r2", "pr2", "war2"))
+#' # all four at once
+#' r2(est_pois, c("sq.cor", "r2", "pr2", "war2"))
 #'
 r2 = function(x, type = "all"){
 	# p: pseudo
@@ -1412,7 +1415,7 @@ summary.fixest.fixef = function(object, n=5, ...){
 		}
 		res = as.data.frame(rbind(nb_per_cluster, nb_ref, mean_per_cluster, var_per_cluster))
 
-		row_1 = paste0("Number of ", switch(info, "11" = "fixed-effects/slopes", "10"="fixed_effects", "1"="slopes"))
+		row_1 = paste0("Number of ", switch(info, "11" = "fixed-effects/slopes", "10"="fixed-effects", "1"="slopes"))
 
 		rownames(res) = c(row_1, "Number of references", "Mean", "Variance")
 
@@ -1474,12 +1477,12 @@ summary.fixest.fixef = function(object, n=5, ...){
 #' @param notes Logical. Whether to display a note when the fixed-effects coefficients are not regular.
 #'
 #' @details
-#' If the cluster are coefficients not regular, then several reference points need to be set, leading to the coefficients to be NOT interpretable. If this is the case, then a warning is raised.
+#' If the fixed-effect coefficients not regular, then several reference points need to be set, leading to the coefficients to be NOT interpretable. If this is the case, then a warning is raised.
 #'
 #' @return
 #' A list containing the vectors of the fixed effects.
 #'
-#' If there is more than 1 cluster, then the attribute \dQuote{references} is created. This is a vector of length the number of clusters, each element contains the number of fixed-effects set as references. By construction, the elements of the first clusters are never set as references. In the presence of regular clusters, there should be Q-1 references (with Q the number of clusters).
+#' If there is more than 1 fixed-effect, then the attribute \dQuote{references} is created. This is a vector of length the number of fixed-effects, each element contains the number of coefficients set as references. By construction, the elements of the first fixed-effect dimension are never set as references. In the presence of regular fixed-effects, there should be Q-1 references (with Q the number of fixed-effects).
 #'
 #' @seealso
 #' \code{\link[fixest]{plot.fixest.fixef}}. See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the functions \code{\link[fixest]{esttable}} and \code{\link[fixest]{esttex}} to visualize the results of multiple estimations.
@@ -1492,10 +1495,10 @@ summary.fixest.fixef = function(object, n=5, ...){
 #'
 #' data(trade)
 #'
-#' # We estimate the effect of distance on trade => we account for 3 cluster effects
+#' # We estimate the effect of distance on trade => we account for 3 fixed-effects
 #' est_pois = femlm(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
 #'
-#' # obtaining the cluster coefficients
+#' # Obtaining the fixed-effects coefficients:
 #' fe_trade = fixef(est_pois)
 #'
 #' # The fixed-effects of the first cluster:
@@ -1504,7 +1507,7 @@ summary.fixest.fixef = function(object, n=5, ...){
 #' # Summary information:
 #' summary(fe_trade)
 #'
-#' # plotting them
+#' # Plotting them:
 #' plot(fe_trade)
 #'
 fixef.fixest = function(object, notes = getFixest_notes(), ...){
@@ -1753,10 +1756,10 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 		names(nb_ref) = fixef_names
 		attr(all_clust, "references") = nb_ref
 
-		if(!isSlope) slope_flag = rep(TRUE, Q)
+		if(!isSlope) slope_flag = rep(FALSE, Q)
 
 		# warning if unbalanced
-		if(sum(nb_ref[slope_flag]) > Q-1){
+		if(notes && sum(nb_ref[!slope_flag]) > Q-1){
 			message("NOTE: The fixed-effects are not regular, they cannot be straightforwardly interpreted.")
 		}
 	}
@@ -4550,7 +4553,7 @@ deparse_long = function(x){
 #'
 #' @examples
 #'
-#' # simple estimation on iris data, clustering by "Species"
+#' # simple estimation on iris data with "Species" fixed-effects
 #' res = femlm(Sepal.Length ~ Sepal.Width + Petal.Length +
 #'             Petal.Width | Species, iris)
 #'
@@ -4591,7 +4594,7 @@ nobs.fixest = function(object, ...){
 #'
 #' # two fitted models with different expl. variables:
 #' res1 = femlm(Sepal.Length ~ Sepal.Width + Petal.Length +
-#'             Petal.Width | Species, iris)
+#'              Petal.Width | Species, iris)
 #' res2 = femlm(Sepal.Length ~ Petal.Width | Species, iris)
 #'
 #' AIC(res1, res2)
@@ -4697,7 +4700,7 @@ BIC.fixest = function(object, ...){
 #'
 #' @examples
 #'
-#' # simple estimation on iris data, clustering by "Species"
+#' # simple estimation on iris data with "Species" fixed-effects
 #' res = femlm(Sepal.Length ~ Sepal.Width + Petal.Length +
 #'             Petal.Width | Species, iris)
 #'
