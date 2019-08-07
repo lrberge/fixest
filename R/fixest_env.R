@@ -1081,7 +1081,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
             if(anyNA_sample){
                 msg = msg_na_inf(ANY_NA, ANY_INF)
-                message_NA = paste0(numberFormatNormal(nbNA), " observations removed because of ", msg, " (Breakup: ", msgNA_y, msgNA_L, msgNA_NL, msgNA_cluster, msgNA_slope, msgNA_offset, msgNA_weight, ").\n")
+                message_NA = paste0(numberFormatNormal(nbNA), " observations removed because of ", msg, " (Breakup: ", msgNA_y, msgNA_L, msgNA_NL, msgNA_cluster, msgNA_slope, msgNA_offset, msgNA_weight, ").")
             }
 
             if(nbNA == nobs){
