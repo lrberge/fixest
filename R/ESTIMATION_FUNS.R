@@ -937,13 +937,11 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
 #' # Load trade data
 #' data(trade)
 #'
-#' # We estimate the effect of distance on trade => we account for 3 cluster effects
+#' # We estimate the effect of distance on trade => we account for 3 fixed-effects
 #' # 1) Poisson estimation
 #' est_pois = femlm(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
-#' # alternative formulation giving the same results:
-#' # est_pois = femlm(Euros ~ log(dist_km), trade, cluster = c("Origin", "Destination", "Product"))
 #'
-#' # 2) Log-Log Gaussian estimation (with same clusters)
+#' # 2) Log-Log Gaussian estimation (with same FEs)
 #' est_gaus = update(est_pois, log(Euros+1) ~ ., family="gaussian")
 #'
 #' # Comparison of the results using the function esttable
