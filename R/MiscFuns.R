@@ -4051,7 +4051,7 @@ coefFormatLatex = function(x, digits = 4, power = 5){
 		if(abs(exponent) >= power){
 			left_value = round(x*10**-exponent, 3)
 			res = paste0("$", left_value, "\\times 10^{", exponent, "}$")
-		} else if(x > 10**(-digits)){
+		} else if(abs(x) > 10**(-digits)){
 			res = sprintf("%.*f", digits, x)
 		} else {
 			res = sprintf("%.*f", abs(exponent), x)
