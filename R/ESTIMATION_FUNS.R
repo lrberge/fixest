@@ -870,22 +870,6 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
             res$sumFE = res$sumFE - offset
         }
 
-        # if(TRUE && !onlyFixef){
-        #
-        #     # At the moment => it almost double computational time! I can't find intersting starting values
-        #     #   working in all cases
-        #
-        #     browser()
-        #
-        #     system.time(model_only_fe <- feglm_fe_only(y, env, eta = res$sumFE, offset = 0, weights, family_equiv, mu.eta, variance, linkfun, linkinv, dev.resids, family, glm.iter, glm.tol = 1e-2, fixef.tol = 1e-1, fixef.iter, nthreads, verbose)) # 6.5s
-        #
-        #     system.time(test_offset <- feglm_fe_only(y, env, eta = 0, offset = res$sumFE, weights, family_equiv, mu.eta, variance, linkfun, linkinv, dev.resids, family, glm.iter, glm.tol = 1e-2, fixef.tol = 1e-1, fixef.iter, nthreads, verbose)) # 3.36s
-        #
-        #     system.time(test <- feglm_fe_only(y, env, eta = eta, offset = 0, weights, family_equiv, mu.eta, variance, linkfun, linkinv, dev.resids, family, glm.iter, glm.tol = 1e-2, fixef.tol = 1e-1, fixef.iter, nthreads, verbose)) # 0.8s
-        #
-        #     system.time(test_none <- feglm_fe_only(y, env, eta = 0, offset = 0, weights, family_equiv, mu.eta, variance, linkfun, linkinv, dev.resids, family, glm.iter, glm.tol = 1e-2, fixef.tol = 1e-1, fixef.iter, nthreads, verbose)) # 1.99
-        # }
-
     }
 
     # other
@@ -981,6 +965,11 @@ fenegbin = function(fml, data, theta.init, start = 0, fixef, offset, na_inf.rm =
                     fixef.tol = 1e-5, fixef.iter = 1000, nthreads = getFixest_nthreads(),
                     verbose = 0, warn = TRUE, notes = getFixest_notes(), combine.quick, ...){
 
+    # We control for the problematic argument family
+    if("family" %in% names(match.call())){
+        stop("Function fenegbin does not accept the argument 'family'.")
+    }
+
     # This is just an alias
 
     res = try(feNmlm(fml = fml, data=data, family = "negbin", theta.init = theta.init, start = start, fixef = fixef, offset = offset, na_inf.rm = na_inf.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter, nthreads = nthreads, verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick, origin = "fenegbin", mc_origin_bis = match.call(), ...), silent = TRUE)
@@ -997,6 +986,11 @@ fepois = function(fml, data, offset, weights, start = NULL, etastart = NULL, mus
                   fixef, fixef.tol = 1e-6, fixef.iter = 1000, glm.iter = 25, glm.tol = 1e-8,
                   na_inf.rm = getFixest_na_inf.rm(), nthreads = getFixest_nthreads(),
                   warn = TRUE, notes = getFixest_notes(), verbose = 0, combine.quick, ...){
+
+    # We control for the problematic argument family
+    if("family" %in% names(match.call())){
+        stop("Function fepois does not accept the argument 'family'.")
+    }
 
     # This is just an alias
 
@@ -1123,7 +1117,6 @@ fepois = function(fml, data, offset, weights, start = NULL, etastart = NULL, mus
 #'
 #' # This section covers only non-linear in parameters examples
 #' # For linear relationships: use femlm instead
-#'
 #'
 #' # Generating data for a simple example
 #' n = 100
