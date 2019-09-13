@@ -2139,7 +2139,7 @@ collinearity = function(x, verbose){
 
 	if(is.null(data)){
 		dataName = x$call$data
-		stop("To apply 'diagnostic', we fetch the original database in the parent.frame -- but it doesn't seem to be there anymore (btw it was ", deparse_long(dataName), ").")
+		stop("To apply function 'collinearity', we fetch the original database in the parent.frame -- but it doesn't seem to be there anymore (btw it was ", deparse_long(dataName), ").")
 	}
 
 	if(!is.null(x$obsRemoved)){
@@ -5374,7 +5374,7 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 
 		if(!forceCovariance){
 			# warning("Standard errors are NA because of likely presence of collinearity. You can use option 'forceCovariance' to try to force the computation of the vcov matrix (to see what's wrong).", call. = FALSE)
-			warning("Standard errors are NA because of likely presence of collinearity. Use function diagnostic() to detect collinearity problems.", call. = FALSE)
+			warning("Standard errors are NA because of likely presence of collinearity. Use function collinearity() to detect collinearity problems.", call. = FALSE)
 			return(VCOV_raw)
 		} else {
 			VCOV_raw_forced = MASS::ginv(object$hessian)
