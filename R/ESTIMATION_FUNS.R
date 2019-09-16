@@ -598,7 +598,9 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
     assign("nb_sh", 0, env)
     on.exit(warn_step_halving(env))
 
-    if(init.type == "coef" && verbose >= 1) cat("Deviance at initializat.  = ", numberFormatNormal(devold), "\n", sep = "")
+    if((init.type == "coef" && verbose >= 1) || verbose >= 4) {
+        cat("Deviance at initializat.  = ", numberFormatNormal(devold), "\n", sep = "")
+    }
 
     #
     # The main loop
@@ -682,14 +684,25 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
                 assign("nb_sh", nb_sh + 1, env)
             }
 
-
             eta_new = wols$fitted.values
             eta_old = wols_old$fitted.values
 
             iter_sh = 0
             do_exit = FALSE
             while(!is.finite(dev) || dev_evol > 0 || !valideta(eta_new) || !validmu(mu)){
-                if(iter_sh == glm.iter){
+
+                if(iter == 1 && (is.finite(dev) && valideta(eta_new) && validmu(mu)) && iter_sh >= 2){
+                    # BEWARE FIRST ITERATION:
+                    # at first iteration, the deviance can be higher than the init, and SH may not help
+                    # we need to make sure we get out of SH before it's messed up
+                    break
+                } else if(iter_sh == glm.iter){
+
+                    # if first iteration => means algo did not find viable solution
+                    if(iter == 1){
+                        stop("Algorithm failed at first iteration. Step-halving could not find a valid set of parameters.")
+                    }
+
                     # message
                     msg = ifelse(!is.finite(dev), "non-finite deviance", ifelse(dev_evol > 0, "no reduction in deviance", "no valid eta/mu"))
 
@@ -707,7 +720,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
                 dev = dev.resids(y, mu, eta_new + offset, wt = weights)
                 dev_evol = dev - devold
 
-                if(verbose >= 3) cat("Step-halving: iter =", iter_sh, "--  dev:", numberFormatNormal(dev), "-- evol:", numberFormatNormal(dev_evol), "\n")
+                if(verbose >= 3) cat("Step-halving: iter =", iter_sh, "-- dev:", numberFormatNormal(dev), "-- evol:", numberFormatNormal(dev_evol), "\n")
             }
 
             if(do_exit) break
@@ -1550,7 +1563,7 @@ format_error_msg = function(x, origin){
 
     if(grepl("^Error in (fe|fixest)[^\n]+\n", x)){
         res = gsub("^Error in (fe|fixest)[^\n]+\n *(.+)", "\\2", x)
-    } else if(grepl("object '.+' not found", x)) {
+    } else if(grepl("[Oo]bject '.+' not found", x)) {
         res = x
     } else {
        res = paste0(x, "\nThis error was unforeseen by the author of the function ", origin, ". If you think your call to the function is legitimate, could you report?")
