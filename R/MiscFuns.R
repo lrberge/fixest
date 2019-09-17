@@ -2659,18 +2659,18 @@ did_estimate_yearly_effects = function(fml, data, treat_time, reference, returnD
 	if(missing(reference)) stop("You must provide argument 'reference' (currently it is missing).")
 	if(!length(reference) == 1 || !isVector(reference)) stop("Argument reference must be a numeric scalar.")
 	if(!reference %in% all_periods){
-		stop("The 'reference' must be a value of the time variable (currenlty ", reference, " does not belong to the time variable).")
+		stop("The 'reference' must be a value of the time variable (currenlty ", reference, " does not belong to the time variable [", time_var, "]).")
 	}
 
 	# creating the yearly treatment effects variables
 	select_periods = all_periods[all_periods != reference]
-	for(period in select_periods){
-		data_small[[paste0("treat_", period)]] = treat * (time == period)
+	treat_periods = gsub(" |-", "_", paste0("treat_", select_periods))
+	for(i in seq_along(select_periods)){
+		data_small[[treat_periods[i]]] = treat * (time == select_periods[i])
 	}
 
 	# creating the formula + estimation
 	FML = Formula::Formula(fml)
-	treat_periods = gsub(" ", "_", paste0("treat_", select_periods))
 	fml_fe = add2fml(FML, treat_periods)
 
 	res = estfun(fml_fe, data_small, ...)
