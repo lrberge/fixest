@@ -416,9 +416,9 @@ rbind(gamma, exp(fixef(result_NL_fe)$id))
 As we can see, we obtain the "right" estimates. 
 
 
-## Using multi-cores
+## Multi-threading
 
-The package fixest integrates multi-platform parallelism to hasten the estimation process. By default it makes use of all the available threads minus 2. To change the number of threads used, just use the argument `nthreads`:
+The package `fixest` integrates multi-platform parallelism to hasten the estimation process. By default it makes use of all the available threads minus 2. To change the number of threads used, just use the argument `nthreads`:
 
 ```{r, eval = FALSE}
 # Sample of results:
@@ -430,15 +430,15 @@ system.time(fenegbin(Euros ~ log(dist_km)|Origin+Destination+Product+Year, trade
 system.time(fenegbin(Euros ~ log(dist_km)|Origin+Destination+Product+Year, trade, nthreads = 4))
 ```
 
-As you can see, the efficiency of increasing the number of cores is not 1 to 1. Two cores do not divide the computing time by 2, nor four cores by 4. However it still reduces significantly the computing time, which might be valuable for large sample estimations.
+As you can see, the efficiency of increasing the number of threads is not 1 to 1. Two threads do not divide the computing time by 2, nor four threads by 4. However it still reduces significantly the computing time, which might be valuable for large sample estimations.
 
-You can permanently set the number of cores used by `fixest` using `setFixest_nthreads(nthreads)`.
+You can permanently set the number of threads used by `fixest` using `setFixest_nthreads(nthreads)`.
 
 ## Collineartiy
 
 The user ought to estimate the coefficient of variables that are **not** collinear: neither among each other, neither with the fixed-effects. Estimation with collinear variables leads to a non invertible Hessian (leading to the absence of Variance-Covariance matrix for the coefficients). In such cases, the estimating functions will raise a warning and suggest to use the function `collinearity` to spot the problem.
 
-Let's take an example in which we want to estimate the coefficient of a variable which is constant. Of course it makes no sense (this variable is perfectly collinear with the fixed-effects), so a warning will be raised suggesting to use the function `collinearity` to figure out what is wrong.
+Let's take an example in which we want to make a fixed-effects estimation with a variable which is constant. Of course it makes no sense (this variable is perfectly collinear with the fixed-effects), so a warning will be raised suggesting to use the function `collinearity` to figure out what is wrong.
 
 ```{r}
 base_coll = trade
