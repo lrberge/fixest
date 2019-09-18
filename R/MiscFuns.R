@@ -6025,7 +6025,7 @@ update.fixest = function(object, fml.update, nframes = 1, ...){
 
 	# new call: call_clear
 	call_clear = call_old
-	for(arg in setdiff(names(call_new)[-1], "fml.update")){
+	for(arg in setdiff(names(call_new)[-1], c("fml.update", "nframes"))){
 		call_clear[[arg]] = call_new[[arg]]
 	}
 
@@ -6033,7 +6033,7 @@ update.fixest = function(object, fml.update, nframes = 1, ...){
 
 	if(useInit){
 		# we can use the initialisation of parameters
-		if(object$method %in% c("femlm", "feNmlm", "fepois", "fenegbin")){
+		if(object$method %in% c("femlm", "feNmlm", "fenegbin")){
 			if(object$family == "negbin"){
 				if(is.null(dots$theta.init)){
 					theta.init = object$theta.init
