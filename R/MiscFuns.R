@@ -426,9 +426,9 @@ esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway
 	#
 
 	# Starting the table
-	myTitle = ifelse(!missing(title), title, "no title")
-	if(!missing(label)) myTitle = paste0("\\label{", label, "} ", myTitle)
-	start_table = paste0("\\begin{table}[htbp]\\centering\n\\caption{",  .escapeChars(myTitle), "}\n")
+	myTitle = ifelse(!missing(title), .escapeChars(title), "no title")
+	if(!missing(label)) myTitle = paste0("\\label{", .escapeChars(label, TRUE), "} ", myTitle)
+	start_table = paste0("\\begin{table}[htbp]\\centering\n\\caption{",  myTitle, "}\n")
 	end_table = "\\end{table}"
 
 	# intro and outro Latex tabular
@@ -441,7 +441,7 @@ esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway
 	outro_latex <- "\\end{tabular}\n"
 
 	# check the dictionnary
-    if(!is.character(dict)|| is.null(names(dict))){
+    if(!is.null(dict) && (!is.character(dict) || is.null(names(dict)))){
         stop("The argument 'dict' must be a named character vector.")
     }
 
@@ -451,6 +451,7 @@ esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway
 	qui = depvar_list %in% names(dict)
 	who = depvar_list[qui]
 	depvar_list[qui] = dict[who]
+	depvar_list = .escapeChars(depvar_list)
 
 	# We write the dependent variables properly, with multicolumn when necessary
 	# to do that, we count the number of occurences of each variable (& we respect the order provided by the user)
@@ -516,7 +517,8 @@ esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway
 
 	qui = all_vars %in% names(dict)
 	who = aliasVars[qui]
-	aliasVars[qui] = .escapeChars(dict[who])
+	aliasVars[qui] = dict[who]
+	aliasVars = .escapeChars(aliasVars)
 
 	coef_mat <- all_vars
 	for(m in 1:n_models) coef_mat <- cbind(coef_mat, coef_list[[m]][all_vars])
@@ -563,6 +565,7 @@ esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway
 		if(length(qui) > 0) {
 			factorNames[qui] = dict[factorNames[qui]]
 		}
+		factorNames = .escapeChars(factorNames)
 
 		allFactors = cbind(factorNames, allFactors)
 		factor_lines <- paste0(paste0(apply(allFactors, 1, paste0, collapse="&"), collapse="\\\\\n"), "\\\\\n")
@@ -589,6 +592,12 @@ esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway
 	        quoi[is.na(quoi)] = yesNoFixef[2]
 	        slope_flag_list[[m]] = quoi
 	    }
+
+	    # Changing the slope names
+	    qui = slope_names %in% names(dict)
+	    who = slope_names[qui]
+	    slope_names[qui] = dict[who]
+	    slope_names = .escapeChars(slope_names)
 
 	    # Matrix with yes/no information
 	    all_slopes = matrix(c(slope_flag_list, recursive = TRUE), nrow = length(slope_names))
@@ -648,6 +657,7 @@ esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway
 			se_cluster = strsplit(gsub("(^.+\\()|(\\))", "", my_se), " & ")[[1]]
 			qui = se_cluster %in% names(dict)
 			se_cluster[qui] = dict[se_cluster[qui]]
+			se_cluster = .escapeChars(se_cluster)
 			new_se = gsub("\\(.+", "", my_se)
 			my_se = paste0(new_se, "(", paste0(se_cluster, collapse = " & "), ")")
 		}
@@ -3910,7 +3920,7 @@ shade_area <- function(y1, y2, x, xmin, xmax, col="grey", ...){
 #### Small Utilities ####
 ####
 
-.escapeChars = function(x){
+.escapeChars = function(x, onlyPCT = FALSE){
     # Escapes the % and _ for latex
 
     if(all(!grepl("%|_", x))){
@@ -3920,9 +3930,17 @@ shade_area <- function(y1, y2, x, xmin, xmax, col="grey", ...){
 	# changes % into \% => to escape that character in Latex
 	res = gsub("%", "\\%", x, fixed = TRUE)
 	res = gsub("\\\\%", "\\%", res, fixed = TRUE) # if the user escaped: not done twice
-	# Escapes the underscore
-	res = gsub("_", "\\_", res, fixed = TRUE)
-	res = gsub("\\\\_", "\\_", res, fixed = TRUE) # if the user escaped: not done twice
+
+	if(onlyPCT){
+	    return(res)
+	}
+
+	# Escapes the underscore, but only NOT in equations
+	qui = !grepl("\\$", res)
+	if(any(qui)){
+	    res[qui] = gsub("_", "\\_", res[qui], fixed = TRUE)
+	    res[qui] = gsub("\\\\_", "\\_", res[qui], fixed = TRUE) # if the user escaped: not done twice
+	}
 
 	res
 }
@@ -6390,7 +6408,7 @@ setFixest_dict = function(dict){
 	td = table(dict_names)
 	if(any(td > 1)){
 		qui = which(dict_names %in% names(td)[td > 1])
-		name_dup = names(dict)[qui]
+		name_dup = unique(names(dict)[qui])
 		stop("Argument 'dict' contains duplicated names: ", enumerate_items(name_dup, endVerb = "no"))
 	}
 
