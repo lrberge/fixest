@@ -428,7 +428,7 @@ esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway
 	# Starting the table
 	myTitle = ifelse(!missing(title), title, "no title")
 	if(!missing(label)) myTitle = paste0("\\label{", label, "} ", myTitle)
-	start_table = paste0("\\begin{table}[htbp]\\centering\n\\caption{",  .cleanPCT(myTitle), "}\n")
+	start_table = paste0("\\begin{table}[htbp]\\centering\n\\caption{",  .escapeChars(myTitle), "}\n")
 	end_table = "\\end{table}"
 
 	# intro and outro Latex tabular
@@ -440,16 +440,17 @@ esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway
 
 	outro_latex <- "\\end{tabular}\n"
 
+	# check the dictionnary
+    if(!is.character(dict)|| is.null(names(dict))){
+        stop("The argument 'dict' must be a named character vector.")
+    }
+
 	# 1st lines => dep vars
-	# first_line <- paste0("Variables&", paste0(depvar_list, collapse="&"), "\\\\\n\\hline\n\\hline\n")
 	depvar_list = c(depvar_list, recursive = TRUE)
-	if(!missing(dict)){
-		if(!is.character(dict)|| is.null(names(dict))) stop("the arg. 'dict' must be a named character vector.")
-		depvar_list = c(depvar_list, recursive = TRUE)
-		qui = which(depvar_list%in%names(dict))
-		who = depvar_list[qui]
-		depvar_list[qui] = dict[who]
-	}
+
+	qui = depvar_list %in% names(dict)
+	who = depvar_list[qui]
+	depvar_list[qui] = dict[who]
 
 	# We write the dependent variables properly, with multicolumn when necessary
 	# to do that, we count the number of occurences of each variable (& we respect the order provided by the user)
@@ -513,15 +514,9 @@ esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway
 	aliasVars = all_vars
 	names(aliasVars) = all_vars
 
-	if(!missing(dict)){
-		if(!is.character(dict)|| is.null(names(dict))){
-			stop("the arg. 'dict' must be a named character vector.")
-		}
-	}
-
 	qui = all_vars %in% names(dict)
 	who = aliasVars[qui]
-	aliasVars[qui] = .cleanPCT(dict[who])
+	aliasVars[qui] = .escapeChars(dict[who])
 
 	coef_mat <- all_vars
 	for(m in 1:n_models) coef_mat <- cbind(coef_mat, coef_list[[m]][all_vars])
@@ -3915,10 +3910,21 @@ shade_area <- function(y1, y2, x, xmin, xmax, col="grey", ...){
 #### Small Utilities ####
 ####
 
-.cleanPCT = function(x){
+.escapeChars = function(x){
+    # Escapes the % and _ for latex
+
+    if(all(!grepl("%|_", x))){
+        return(x)
+    }
+
 	# changes % into \% => to escape that character in Latex
-	gsub("%", "\\%", x, fixed = TRUE)
-	gsub("\\\\%", "\\%", x, fixed = TRUE) # if the user escaped: not done twice
+	res = gsub("%", "\\%", x, fixed = TRUE)
+	res = gsub("\\\\%", "\\%", res, fixed = TRUE) # if the user escaped: not done twice
+	# Escapes the underscore
+	res = gsub("_", "\\_", res, fixed = TRUE)
+	res = gsub("\\\\_", "\\_", res, fixed = TRUE) # if the user escaped: not done twice
+
+	res
 }
 
 formatBicLL = function(bic, ll){
