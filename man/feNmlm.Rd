@@ -137,7 +137,6 @@ The over-dispersion parameter of the Negative Binomial family, theta, is capped 
 # This section covers only non-linear in parameters examples
 # For linear relationships: use femlm instead
 
-
 # Generating data for a simple example
 n = 100
 x = rnorm(n, 1, 5)**2

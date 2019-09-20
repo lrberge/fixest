@@ -58,7 +58,7 @@ summary(est_pois, cluster = c("Destination", "Product"))
 summary(est_pois, cluster = trade[, c("Destination", "Product")])
 summary(est_pois, cluster = list(trade$Destination, trade$Product))
 summary(est_pois, cluster = ~Destination+Product)
-# Since Destination and Product are used as clusters, you can also use:
+# Since Destination and Product are used as fixed-effects, you can also use:
 summary(est_pois, cluster = 2:3)
 }
 

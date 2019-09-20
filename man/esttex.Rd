@@ -76,7 +76,7 @@ This function aggregates the results of multiple estimations and display them in
 
 # two fitted models with different expl. variables:
 res1 = femlm(Sepal.Length ~ Sepal.Width + Petal.Length +
-            Petal.Width | Species, iris)
+             Petal.Width | Species, iris)
 res2 = femlm(Sepal.Length ~ Petal.Width | Species, iris)
 
 # We export the three results in one Latex table,

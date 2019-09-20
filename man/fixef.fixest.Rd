@@ -16,22 +16,22 @@
 \value{
 A list containing the vectors of the fixed effects.
 
-If there is more than 1 cluster, then the attribute \dQuote{references} is created. This is a vector of length the number of clusters, each element contains the number of fixed-effects set as references. By construction, the elements of the first clusters are never set as references. In the presence of regular clusters, there should be Q-1 references (with Q the number of clusters).
+If there is more than 1 fixed-effect, then the attribute \dQuote{references} is created. This is a vector of length the number of fixed-effects, each element contains the number of coefficients set as references. By construction, the elements of the first fixed-effect dimension are never set as references. In the presence of regular fixed-effects, there should be Q-1 references (with Q the number of fixed-effects).
 }
 \description{
 This function retrieves the fixed effects from a \code{fixest} estimation. It is useful only when there are one or more clusters.
 }
 \details{
-If the cluster are coefficients not regular, then several reference points need to be set, leading to the coefficients to be NOT interpretable. If this is the case, then a warning is raised.
+If the fixed-effect coefficients not regular, then several reference points need to be set, leading to the coefficients to be NOT interpretable. If this is the case, then a warning is raised.
 }
 \examples{
 
 data(trade)
 
-# We estimate the effect of distance on trade => we account for 3 cluster effects
+# We estimate the effect of distance on trade => we account for 3 fixed-effects
 est_pois = femlm(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
 
-# obtaining the cluster coefficients
+# Obtaining the fixed-effects coefficients:
 fe_trade = fixef(est_pois)
 
 # The fixed-effects of the first cluster:
@@ -40,7 +40,7 @@ head(fe_trade$Origin)
 # Summary information:
 summary(fe_trade)
 
-# plotting them
+# Plotting them:
 plot(fe_trade)
 
 }

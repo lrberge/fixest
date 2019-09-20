@@ -22,7 +22,7 @@ This function extracts the log-likelihood based on the model fit. You can have m
 }
 \examples{
 
-# simple estimation on iris data, clustering by "Species"
+# simple estimation on iris data with "Species" fixed-effects
 res = femlm(Sepal.Length ~ Sepal.Width + Petal.Length +
             Petal.Width | Species, iris)
 

@@ -9,7 +9,7 @@ r2(x, type = "all")
 \arguments{
 \item{x}{A \code{fixest} object, e.g. obtained with function \code{\link[fixest]{feglm}} or \code{\link[fixest]{feols}}.}
 
-\item{type}{A character vector representing the R2 to compute. The R2 codes are of the form: "wapr2" with letters "w" (within), "a" (adjusted) and "p" (pseudo) possibly missing. E.g. to get the regular R2: use \code{type = "r2"}, the within adjusted R2: use \code{type = "war2"}, the pseudo R2: use \code{type = "pr2"}, etc. By default, all R2s are computed.}
+\item{type}{A character vector representing the R2 to compute. The R2 codes are of the form: "wapr2" with letters "w" (within), "a" (adjusted) and "p" (pseudo) possibly missing. E.g. to get the regular R2: use \code{type = "r2"}, the within adjusted R2: use \code{type = "war2"}, the pseudo R2: use \code{type = "pr2"}, etc. Use \code{"sq.cor"} for the squared correlation. By default, all R2s are computed.}
 }
 \value{
 Returns a named vector.
@@ -22,8 +22,11 @@ Reports different R2s for \code{fixest} estimations (e.g. \code{\link[fixest]{fe
 # Load trade data
 data(trade)
 
-# We estimate the effect of distance on trade (with 3 cluster effects)
+# We estimate the effect of distance on trade (with 3 fixed-effects)
 est_pois = femlm(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
+
+# Squared correlation:
+r2(est_pois, "sq.cor")
 
 # "regular" r2:
 r2(est_pois, "r2")
@@ -34,8 +37,8 @@ r2(est_pois, "pr2")
 # within adjusted r2
 r2(est_pois, "war2")
 
-# all three at once
-r2(est_pois, c("r2", "pr2", "war2"))
+# all four at once
+r2(est_pois, c("sq.cor", "r2", "pr2", "war2"))
 
 }
 \author{
