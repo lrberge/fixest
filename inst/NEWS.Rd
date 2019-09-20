@@ -3,7 +3,33 @@
 
 \title{News for \R Package \pkg{fixest}}
 
-\section{Changes in version 0.1.0 (August 2019)}{
+\section{Changes in version 0.1.1 (20 September 2019)}{
+    \subsection{Major bug correction}{
+	    \itemize{
+    	    \item feglm: bug when a) the deviance at initialization was higher than the deviance of the first iteration of the IRWLS and b) the step-halving was unable to find a lower deviance. This led the estimation to fail with an error although it should have been performed properly.
+    	    \item did_estimate_yearly_effects: bug when the estimation involved periods with negative values
+	    }
+    }
+
+    \subsection{Minor bug correction}{
+        \itemize{
+            \item esttex: bug regarding the number of digits of negative coefficients to be displayed
+            \item esttex: now properly escaping the percentage and the underscore for exports in Latex
+            \item esttex: bug when changing the names of the dependent variables using a dictionnary
+            \item vcov: some warning messages were misleading
+            \item update: bug update when using the argument nframes
+            \item update: bug when updating the function fepois
+        }
+    }
+
+    \subsection{Error handling}{
+        \itemize{
+            \item Better error messages for: did_estimate_yearly_effects, main estimation functions, setFixest_dict, fepois and fenegbin.
+        }
+    }
+}
+
+\section{Version 0.1.0 (3 September 2019)}{
 	\subsection{First version}{
 	    \itemize{
 	    \item This package is an effort to create a family of fast and user-friendly functions to perform estimations with multiple fixed-effects (F.E.).
