@@ -1335,7 +1335,8 @@ lag.formula = function(x, k, data, time.step = "unitary", fill = NA, duplicate.m
     obs_lagged = cpp_lag_obs(id = id_sorted, time = time_sorted, nlag = k)
 
     # the lagged value
-    value_lagged = value[obs_lagged]
+    value_sorted = value[order_it]
+    value_lagged = value_sorted[obs_lagged]
     if(!is.na(fill)){
         qui_na = is.na(obs_lagged)
         value_lagged[qui_na] = fill
