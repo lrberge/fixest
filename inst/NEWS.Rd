@@ -3,7 +3,15 @@
 
 \title{News for \R Package \pkg{fixest}}
 
-\section{Changes in version 0.1.1 (20 September 2019)}{
+\section{Changes in version 0.1.2 (2019-10-04)}{
+    \subsection{Major bug correction}{
+        \itemize{
+            \item lag.formula: When the data was not in a particular format, the results could be wrong. Now corrected.
+        }
+    }
+}
+
+\section{Changes in version 0.1.1 (2019-09-20)}{
     \subsection{Major bug correction}{
 	    \itemize{
     	    \item feglm: bug when a) the deviance at initialization was higher than the deviance of the first iteration of the IRWLS and b) the step-halving was unable to find a lower deviance. This led the estimation to fail with an error although it should have been performed properly.
@@ -29,7 +37,7 @@
     }
 }
 
-\section{Version 0.1.0 (3 September 2019)}{
+\section{Version 0.1.0 (2019-09-03)}{
 	\subsection{First version}{
 	    \itemize{
 	    \item This package is an effort to create a family of fast and user-friendly functions to perform estimations with multiple fixed-effects (F.E.).
