@@ -663,7 +663,7 @@ esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway
 		}
 
 		nb_col = length(obs_list) + 1
-		info_SD = paste0("\\hline\n\\hline\n\\multicolumn{", nb_col, "}{l}{\\emph{", my_se, " standard-errors in parenthesis. Signif Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
+		info_SD = paste0("\\hline\n\\hline\n\\multicolumn{", nb_col, "}{l}{\\emph{", my_se, " standard-errors in parentheses. Signif Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
 		info_muli_se = ""
 	} else {
 		info_muli_se = paste0("Standard-Error type& ", paste(se_type_list, collapse="&"), "\\\\\n")
@@ -1335,7 +1335,8 @@ lag.formula = function(x, k, data, time.step = "unitary", fill = NA, duplicate.m
     obs_lagged = cpp_lag_obs(id = id_sorted, time = time_sorted, nlag = k)
 
     # the lagged value
-    value_lagged = value[obs_lagged]
+    value_sorted = value[order_it]
+    value_lagged = value_sorted[obs_lagged]
     if(!is.na(fill)){
         qui_na = is.na(obs_lagged)
         value_lagged[qui_na] = fill
@@ -4531,7 +4532,7 @@ check_arg = function(x, type, message, mustBeThere = TRUE){
 
     if(grepl(expr <- "le[[:digit:]]+", type)){
         n = myExtract(expr)
-        if( !any(x > n) ) stop_now("But it is greater than ", n, ".")
+        if( any(x > n) ) stop_now("But it is greater than ", n, ".")
     }
 
     if(grepl(expr <- "lt[[:digit:]]+", type)){
@@ -6358,7 +6359,7 @@ getFixest_nthreads = function(){
 
 #' Sets/gets the dictionary used in \code{esttex}
 #'
-#' Sets/gets the default dictionnay used in the function \code{\link[fixest]{esttex}}. The dictionaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table. By setting the dictionary with \code{setFixest_dict}, you can avoid providing the argument \code{dict} in function \code{\link[fixest]{esttex}}.
+#' Sets/gets the default dictionary used in the function \code{\link[fixest]{esttex}}. The dictionaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table. By setting the dictionary with \code{setFixest_dict}, you can avoid providing the argument \code{dict} in function \code{\link[fixest]{esttex}}.
 #'
 #'
 #' @param dict A named character vector. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use \code{dict = c(a="$log(a)$", b3="$bonus^3$")}.
