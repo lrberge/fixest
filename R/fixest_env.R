@@ -392,7 +392,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         if(!na_inf.rm){
             msg = msg_na_inf(info$any_na, info$any_inf)
             obs = head(which(info$is_na_inf), 3)
-            stop("The left hand side of the fomula contains ", msg, " (e.g. observation", enumerate_items(obs, addS = TRUE, endVerb = "no"), "). Please provide data without ", msg, " (or use na_inf.rm).")
+            stop("The left hand side of the fomula contains ", msg, " (e.g. observation", enumerate_items(obs, addS = TRUE, verb = "no"), "). Please provide data without ", msg, " (or use na_inf.rm).")
         } else {
             # If na_inf.rm => we keep track of the NAs
             if(info$any_na) ANY_NA = TRUE
@@ -547,7 +547,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 msg = msg_na_inf(info$any_na, info$any_inf)
                 obs = which(info$is_na_inf)
 
-                stop("The right hand side contains ", msg, " (e.g. observation", enumerate_items(obs, addS = TRUE, endVerb = "no"), "). Please provide data without ", msg, " (or use na_inf.rm). FYI the variable", enumerate_items(whoIsNA, addS = TRUE), " concerned.")
+                stop("The right hand side contains ", msg, " (e.g. observation", enumerate_items(obs, addS = TRUE, verb = "no"), "). Please provide data without ", msg, " (or use na_inf.rm). FYI the variable", enumerate_items(whoIsNA, addS = TRUE), " concerned.")
             } else {
                 # If na_inf.rm => we keep track of the NAs
                 if(info$any_na) ANY_NA = TRUE
@@ -609,7 +609,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 msg = msg_na_inf(info$any_na, info$any_inf)
                 obs = which(info$is_na_inf)
 
-                stop("The non-linear part (NL.fml) contains ", msg, " (e.g. observation", enumerate_items(obs, addS = TRUE, endVerb = "no"), "). Please provide data without ", msg, " (or use na_inf.rm). FYI the variable", enumerate_items(whoIsNA, addS = TRUE), " concerned.")
+                stop("The non-linear part (NL.fml) contains ", msg, " (e.g. observation", enumerate_items(obs, addS = TRUE, verb = "no"), "). Please provide data without ", msg, " (or use na_inf.rm). FYI the variable", enumerate_items(whoIsNA, addS = TRUE), " concerned.")
 
             } else {
                 # If na_inf.rm => we keep track of the NAs
@@ -697,7 +697,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 if(na_inf.rm == FALSE){
                     msg = msg_na_inf(info$any_na, info$any_inf)
                     obs = head(which(info$is_na_inf), 3)
-                    stop("The offset contains ", msg, " (e.g. observation", enumerate_items(obs, addS = TRUE, endVerb = "no"), "). Please provide data without ", msg, " (or use na_inf.rm).")
+                    stop("The offset contains ", msg, " (e.g. observation", enumerate_items(obs, addS = TRUE, verb = "no"), "). Please provide data without ", msg, " (or use na_inf.rm).")
                 } else {
                     if(info$any_na) ANY_NA = TRUE
                     if(info$any_inf) ANY_INF = TRUE
@@ -783,7 +783,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 if(na_inf.rm == FALSE){
                     msg = msg_na_inf(info$any_na, info$any_inf)
                     obs = head(which(info$is_na_inf), 3)
-                    stop("The weights contain ", msg, " (e.g. observation", enumerate_items(obs, addS = TRUE, endVerb = "no"), "). Please provide data without ", msg, " (or use na_inf.rm).")
+                    stop("The weights contain ", msg, " (e.g. observation", enumerate_items(obs, addS = TRUE, verb = "no"), "). Please provide data without ", msg, " (or use na_inf.rm).")
 
                 } else {
                     if(info$any_na) ANY_NA = TRUE
@@ -801,7 +801,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             # need to check NA if there are some (ie if NA in vector: any() gives TRUE if any TRUE, NA if no TRUE)
             anyNeg = any(weights.value < 0)
             if(!is.na(anyNeg) && anyNeg){
-                stop("The vector of weights contains negative values, this is not allowed (e.g. obs. ", enumerate_items(head(which(weights.value < 0), 3), endVerb = "no"), ").")
+                stop("The vector of weights contains negative values, this is not allowed (e.g. obs. ", enumerate_items(head(which(weights.value < 0), 3), verb = "no"), ").")
             }
 
             # we remove 0 weights
@@ -903,7 +903,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             }
 
             if(!is.matrix(fixef_mat) && !"data.frame" %in% class(fixef_mat)){
-                stop("Argument fixef_mat must be a vector, a matrix, a list or a data.frame (currently its class is ", enumerate_items(class(fixef_mat), endVerb = FALSE), ").")
+                stop("Argument fixef_mat must be a vector, a matrix, a list or a data.frame (currently its class is ", enumerate_items(class(fixef_mat), verb = FALSE), ").")
             }
 
             if(is.matrix(fixef_mat) && is.null(colnames(fixef_mat))){
@@ -1052,7 +1052,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                     msg = msg_na_inf(info$any_na, info$any_inf)
                     obs = which(info$is_na_inf)
 
-                    stop("In the fixed-effects part of the formula, variables with varying slopes contain ", msg, " (e.g. observation", enumerate_items(obs, addS = TRUE, endVerb = "no"), "). Please provide data without ", msg, " (or use na_inf.rm). FYI the variable", enumerate_items(whoIsNA, addS = TRUE), " concerned.")
+                    stop("In the fixed-effects part of the formula, variables with varying slopes contain ", msg, " (e.g. observation", enumerate_items(obs, addS = TRUE, verb = "no"), "). Please provide data without ", msg, " (or use na_inf.rm). FYI the variable", enumerate_items(whoIsNA, addS = TRUE), " concerned.")
                 } else {
                     # If na_inf.rm => we keep track of the NAs
                     if(info$any_na) ANY_NA = TRUE
@@ -1462,7 +1462,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         assign("starting_values", NULL, env)
 
         if(sum(start_provided) >= 2){
-            stop("You cannot provide more than one initialization method (currently there are ", enumerate_items(names(start_provided)[start_provided == 1], endVerb = FALSE), ").")
+            stop("You cannot provide more than one initialization method (currently there are ", enumerate_items(names(start_provided)[start_provided == 1], verb = FALSE), ").")
         }
 
         # controls for start performed already
@@ -1507,7 +1507,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
                 obs = head(obs_origin[which(info$is_na_inf)], 3)
 
-                stop("The argument '", arg_name, "' contains ", msg, " (e.g. observation", enumerate_items(obs, addS = TRUE, endVerb = "no"), "). Please provide starting values without ", msg, ".")
+                stop("The argument '", arg_name, "' contains ", msg, " (e.g. observation", enumerate_items(obs, addS = TRUE, verb = "no"), "). Please provide starting values without ", msg, ".")
                 # This is not exactly true, because if the NAs are the observations removed, it works
                 # but it's hard to clearly explain it concisely
             }
