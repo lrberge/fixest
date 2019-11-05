@@ -1247,7 +1247,7 @@ lag.formula = function(x, k, data, time.step = "unitary", fill = NA, duplicate.m
             time_new = tryCatch(as.numeric(time), warning = function(x) x)
 
             if(!is.numeric(time_new)){
-                stop("To use the 'unitary' time.step, the time variable must be numeric or at least convertible to numeric. So far the conversion has failed (time variable's class is currently ", enumerate_items(class(time), endVerb = FALSE), ").")
+                stop("To use the 'unitary' time.step, the time variable must be numeric or at least convertible to numeric. So far the conversion has failed (time variable's class is currently ", enumerate_items(class(time), verb = FALSE), ").")
             }
 
             time = time_new
@@ -1259,12 +1259,12 @@ lag.formula = function(x, k, data, time.step = "unitary", fill = NA, duplicate.m
 
     } else if(time.step != "consecutive"){
         if(!is.numeric(time)){
-            stop("If 'time.step' is a number, then the time variable must also be a number (this is not the cases: its class is currently ", enumerate_items(class(time), endVerb = FALSE), ").")
+            stop("If 'time.step' is a number, then the time variable must also be a number (this is not the cases: its class is currently ", enumerate_items(class(time), verb = FALSE), ").")
         }
 
         # if(any(time %% time.step != 0)){
         #     pblm = unique(head(time[time %% time.step != 0], 3))
-        #     stop("If 'time.step' is a number, then it must be an exact divisor of all the values in the time variable. This is currently not the case: ", time.step, " is not a divisor of ", enumerate_items(pblm, or = TRUE, endVerb = FALSE), ".")
+        #     stop("If 'time.step' is a number, then it must be an exact divisor of all the values in the time variable. This is currently not the case: ", time.step, " is not a divisor of ", enumerate_items(pblm, or = TRUE, verb = FALSE), ".")
         # }
     }
 
@@ -1574,14 +1574,16 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 
 	    if(is.null(data)){
 	        # We try to provide an informative error message
-	        stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables (i.e. ", enumerate_items(slope_vars_unik, endVerb = FALSE), ") in the original dataset in the parent.frame -- but the data doesn't seem to be there anymore (btw it was ", deparse_long(dataName), ")")
+	        stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables (i.e. ", enumerate_items(slope_vars_unik, verb = FALSE), ") in the original dataset in the parent.frame -- but the data doesn't seem to be there anymore (btw it was ", deparse_long(dataName), ")")
 	    }
 
 	    data = as.data.frame(data)
 
 	    # we check the variables are there
-	    if(any(!slope_vars_unik %in% names(data))){
-	        var_pblm = setdiff(slope_vars_unik, names(data))
+	    slope_vars_unik_raw = unique(sapply(slope_vars_unik, function(x) all.vars(parse(text = x))))
+
+	    if(any(!slope_vars_unik_raw %in% names(data))){
+	        var_pblm = setdiff(slope_vars_unik_raw, names(data))
 	        stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables in the original dataset (", deparse_long(dataName), "). However, the variable", enumerate_items(var_pblm, addS = TRUE), " not present in the original dataset any more.")
 	    }
 
@@ -1591,14 +1593,13 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 	    }
 
 	    if(length(object$obsRemoved)){
-	        data = data[-object$obsRemoved, slope_vars_unik, drop = FALSE]
+	        data = data[-object$obsRemoved, slope_vars_unik_raw, drop = FALSE]
 	    } else {
-	        data = data[, slope_vars_unik, drop = FALSE]
+	        data = data[, slope_vars_unik_raw, drop = FALSE]
 	    }
 
 	    slope_var_list = list()
 	    for(i in 1:length(slope_vars_unik)){
-	        variable = all.vars(parse(text = slope_vars_unik[i]))
 
 	        # as.numeric => we'll use cpp so required
 	        svar = as.numeric(as.vector(eval(parse(text = slope_vars_unik[i]), data)))
@@ -1656,10 +1657,10 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 
 	        nbCluster = sapply(my_dum, max)
 
-	        fixef_values <- cpp_get_fe_gnl(Q_fe, N, rep(1, N), dumMat, nbCluster, orderCluster)
+	        fixef_values_tmp <- cpp_get_fe_gnl(Q_fe, N, rep(1, N), dumMat, nbCluster, orderCluster)
 
 	        # the information on the references
-	        nb_ref_fe = fixef_values[[Q+1]]
+	        nb_ref_fe = fixef_values_tmp[[Q_fe+1]]
 	    } else {
 	        nb_ref_fe = integer(Q_fe)
 	    }
@@ -2657,7 +2658,7 @@ did_estimate_yearly_effects = function(fml, data, treat_time, reference, returnD
 
 	if(!is.numeric(treat) || any(!treat %in% c(0, 1))){
 	    obs = head(which(!treat %in% c(0, 1)), 3)
-		stop("The treatment variable must be 0/1, with 1 repersenting the treated. The variable that you gave, ", treat_var, ", is not (e.g. observation", enumerate_items(obs, addS = TRUE, endVerb = FALSE), ".")
+		stop("The treatment variable must be 0/1, with 1 repersenting the treated. The variable that you gave, ", treat_var, ", is not (e.g. observation", enumerate_items(obs, addS = TRUE, verb = FALSE), ".")
 	}
 
 	all_periods = sort(unique(time[!is.na(time)]))
@@ -2711,7 +2712,7 @@ did_estimate_yearly_effects = function(fml, data, treat_time, reference, returnD
 #'
 #' @param object An object returned by the function \code{\link[fixest]{did_estimate_yearly_effects}}.
 #' @param ... Any other argument to be passed to \code{summary} or to \code{plot}.
-#' @param style One of \code{"interval"} (default), \code{"bar"} or \code{"tube"}. The style of the plot.
+#' @param style One of \code{"bar"} (default), \code{"interval"} or \code{"tube"}. The style of the plot.
 #'
 #' @author
 #' Laurent Berge
@@ -2844,7 +2845,7 @@ did_plot_yearly_effects = function(object, x.shift = 0, w = 0.1, ci_level = 0.95
 	dots$sd = base2show$sd
 	dots$x = base2show$x
 	if(is.null(dots$xlab)) dots$xlab = time_variable
-	if(is.null(dots$ylab)) dots$ylab = "Estimate of Yearly Treatment"
+	if(is.null(dots$ylab)) dots$ylab = c("Estimate of Yearly Treatment on ", deparse(object$fml[[2]]))
 
 	# Now the plot
 	mc = match.call(expand.dots = FALSE)
@@ -3087,7 +3088,7 @@ errbar <- function(estimate, sd, ci_low, ci_top, x, x.shift = 0, w=0.1, ci_level
 
 
 #### ................. ####
-#### Internal Funs ####
+#### Internal Funs     ####
 ####
 
 results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, pseudo=TRUE, sdBelow=TRUE, dict = NULL, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, titles, yesNoFixef = c("Yes", "No"), keepFactors = FALSE, isTex = FALSE, useSummary, dots_call, powerBelow){
@@ -3203,6 +3204,29 @@ results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, pseudo
     } else {
         isTitles = FALSE
     }
+
+    # r2: which R2 to display?
+    if(missing(r2)){
+        # Default values:
+        #   - if all OLS: typical R2
+        #   - if any non-OLS: pseudo R2 + squared cor.
+        is_ols = sapply(all_models, function(x) deparse(x$call[[1]]) == "feols")
+        r2 = ifelse(all(is_ols), "r2", c("sq.cor", "pr2"))
+    } else if(isFALSE(r2)){
+        r2 = ""
+    } else {
+        check_arg(r2, "characterVector", "Argument r2 must be a character vector of valid r2 types (see function r2). REASON")
+        type_allowed = c("sq.cor", "r2", "ar2", "pr2", "apr2", "wr2", "war2", "wpr2", "wapr2")
+        r2 = unique(r2)
+        pblm = setdiff(r2, type_allowed)
+        if(length(pblm) > 0){
+            stop("In argument 'r2', the r2 type", enumerate_items(pblm, addS = TRUE), " not valid (see function r2).")
+        }
+    }
+
+    r2_dict_tex = c("sq.cor"="Squared Correlation", r2="R$^2$", ar2="Adjusted R$^2$", pr2="Pseudo R$^2$", apr2="Adjusted Pseudo R$^2$", wr2="Within R$^2$", war2="Within Adjusted R$^2$", wpr2="Within Pseudo R$^2$", wapr2="Whithin Adjusted Pseudo R$^2$")
+
+    r2_dict_R = c("sq.cor"="Squared Corr.", r2="R2", ar2="Adjusted R2", pr2="Pseudo R2", apr2="Adj. Pseudo R2", wr2="Within R2", war2="Within Adj. R2", wpr2="Within Pseudo R2", wapr2="Whithin Adj. Pseudo R2")
 
     for(m in 1:n_models){
 
@@ -3648,7 +3672,7 @@ terms_fixef = function(fml){
             qui = !grepl("\\]\\]$", var2check_double) | !grepl("\\[\\[", var2check_double) | lengths(strsplit(var2check_double, "\\[")) != 3
             if(any(qui)){
                 item_pblm = var2check_double[qui]
-                msg = paste0("Square bracket are special characters use **only** to designate varying slopes (see help). They are currenlty misused (it concerns ", enumerate_items(item_pblm, endVerb = FALSE), ").")
+                msg = paste0("Square bracket are special characters use **only** to designate varying slopes (see help). They are currenlty misused (it concerns ", enumerate_items(item_pblm, verb = FALSE), ").")
                 class(msg) = "try-error"
                 return(msg)
             }
@@ -3658,7 +3682,7 @@ terms_fixef = function(fml){
             qui = !grepl("\\]$", var2check_single) | lengths(strsplit(var2check_single, "\\[")) != 2
             if(any(qui)){
                 item_pblm = var2check_single[qui]
-                msg = paste0("Square bracket are special characters use **only** to designate varying slopes (see help). They are currenlty misused (it concerns ", enumerate_items(item_pblm, endVerb = FALSE), ").")
+                msg = paste0("Square bracket are special characters use **only** to designate varying slopes (see help). They are currenlty misused (it concerns ", enumerate_items(item_pblm, verb = FALSE), ").")
                 class(msg) = "try-error"
                 return(msg)
             }
@@ -4125,34 +4149,6 @@ numberFormatNormal = function(x){
 	sapply(x, numberFormat_single)
 }
 
-enumerate_items = function (x, endVerb = "is", addS = FALSE, past = FALSE, or = FALSE){
-	# function that enumerates items and add verbs
-	endVerb = match.arg(as.character(endVerb), c("is", "has", "no", "contain", "FALSE"))
-	if(endVerb == "FALSE") endVerb = "no"
-	n = length(x)
-
-	if(past){
-		endWord = switch(endVerb, is = ifelse(n == 1, " was", " were"), no = "", contain = "contained", has="had")
-	} else {
-		endWord = switch(endVerb, is = ifelse(n == 1, " is", " are"), no = "", contain = ifelse(n == 1, " contains", " contain"), has = ifelse(n == 1, " has", " have"))
-	}
-
-	if (addS) {
-		startWord = ifelse(n == 1, " ", "s ")
-	} else {
-		startWord = ""
-	}
-
-	if (n == 1) {
-		res = paste0(startWord, x, endWord)
-	} else {
-	    and_or = ifelse(or, " or ", " and ")
-		res = paste0(startWord, paste0(x[-n], collapse = ", "), and_or, x[n], endWord)
-	}
-
-	res
-}
-
 n_times = function(n){
 
     if(n <= 4){
@@ -4391,7 +4387,7 @@ check_dots_args = function(mc, dots_args = c(), suggest_args = c()){
                 suggest = paste0(" (fyi, another of its main arguments is ", suggest_info, ".)")
             }
         } else if(length(suggest_info) >= 2){
-            suggest = paste0(" (fyi, some of its main arguments are ", enumerate_items(suggest_info, endVerb = "no"), ".)")
+            suggest = paste0(" (fyi, some of its main arguments are ", enumerate_items(suggest_info, verb = "no"), ".)")
         }
 
         msg = paste0(enumerate_items(args_invalid), " not ", ifsingle(args_invalid, "a valid argument", "valid arguments"), " for function ", fun_name, ".", suggest)
@@ -4439,118 +4435,6 @@ extract_fe_slope = function(t){
     fe_all = gsub("\\[.+", "", t)
 
     list(fixef_vars=fixef_vars, slope_vars=slope_vars, slope_fe=slope_fe, slope_terms=slope_terms, fe_all=fe_all)
-}
-
-check_arg = function(x, type, message, mustBeThere = TRUE){
-    # function that makes it easy to check arguments:
-    #  provides precise and meaningful error messages
-
-    type = tolower(type)
-
-    stop_now = function(...){
-        # message is a global
-
-        reason = paste0(...)
-
-        print(reason)
-
-        # The original call
-        my_call = deparse(sys.calls()[[sys.nframe()-2]])[1] # call can have svl lines
-        nmax = 40
-        if(nchar(my_call) > nmax) my_call = paste0(substr(my_call, 1, nmax-1), "...")
-
-        # The formatted message
-        msg_split = strsplit(message, " ?REASON ?")[[1]]
-
-        msg_new = c(msg_split[1], reason, msg_split[-1])
-        msg_new = paste(msg_new, collapse = " ")
-
-        stop("error in ", my_call, ":\n", msg_new, call. = FALSE)
-    }
-
-    if(missing(x)){
-        if(mustBeThere){
-            stop_now("But it is missing.")
-        } else {
-            return(NULL)
-        }
-    }
-
-    isSingle = FALSE
-    if(grepl("single|scalar", type)){
-        isSingle = TRUE
-        if(length(x) == 0){
-            stop_now("But it is of length 0.")
-        } else if(length(x) != 1){
-            stop_now("But it is of length ", length(x), ".")
-        }
-    }
-
-    if(grepl("character", type) && !is.character(x)){
-        stop_now("But it is not of type character.")
-    }
-
-    if(grepl("logical", type) && !is.logical(x)){
-        stop_now("But it is not logical.")
-    }
-
-    if(grepl("numeric|integer", type) && !is.numeric(x)){
-        stop_now("But it is not numeric.")
-    }
-
-    if(!grepl("naok", type) && anyNA(x)){
-        if(isSingle){
-            stop_now("But it is equal to NA.")
-        } else {
-            stop_now("But it contains NAs.")
-        }
-    }
-
-    if(grepl("integer", type) && !all(x %% 1 == 0)){
-        stop_now("But it is not integer (although numeric).")
-    }
-
-    # Greater than, lower than
-    myExtract = function(expr, trim=2){
-        # type is global
-        start = gregexpr(expr, type)[[1]] + trim
-        length = attr(start, "match.length") - trim
-        res = substr(type, start, start + length - 1)
-        as.numeric(res)
-    }
-
-    if(grepl(expr <- "ge[[:digit:]]+", type)){
-        n = myExtract(expr)
-        if( any(x < n) ) stop_now("But it is lower than ", n, ".")
-    }
-
-    if(grepl(expr <- "gt[[:digit:]]+", type)){
-        n = myExtract(expr)
-        if( any(x == n) ) stop_now("But it is equal to ", n, " (while it should be *striclty* greater).")
-        if( any(x < n) ) stop_now("But it is lower than ", n, ".")
-    }
-
-    if(grepl(expr <- "le[[:digit:]]+", type)){
-        n = myExtract(expr)
-        if( any(x > n) ) stop_now("But it is greater than ", n, ".")
-    }
-
-    if(grepl(expr <- "lt[[:digit:]]+", type)){
-        n = myExtract(expr)
-        if( any(x == n) ) stop_now("But it is equal to ", n, " (while it should be *striclty* lower).")
-        if( any(x > n) ) stop_now("But it is greater than ", n, ".")
-    }
-
-}
-
-# Avoids the problem of multiple lines deparse
-deparse_long = function(x){
-    dep_x = deparse(x)
-    if(length(dep_x) == 1){
-        return(dep_x)
-    } else {
-        return(paste(gsub("^ +", "", dep_x), collapse = ""))
-    }
 }
 
 #### ................. ####
@@ -5472,7 +5356,7 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 				all_var_names = fml2varnames(cluster)
 
 				if(length(all_var_names) != nway){
-					stop("Asked for ", nway, "-way clustering but evaluating argument cluster leads to ", length(all_var_names), " clusters (", enumerate_items(all_var_names, endVerb = "no"), "). Please provide exactly ", nway, " clusters.")
+					stop("Asked for ", nway, "-way clustering but evaluating argument cluster leads to ", length(all_var_names), " clusters (", enumerate_items(all_var_names, verb = "no"), "). Please provide exactly ", nway, " clusters.")
 				}
 
 				cluster = all_var_names # Now a regular character vector
@@ -5549,7 +5433,7 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 
 						# we check length consistency
 						if(NROW(data) != (object$nobs + length(object$obsRemoved))){
-							stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(var2fetch, addS = TRUE, endVerb = "no"), " in the original dataset (", deparse_long(dataName), "), yet the dataset doesn't have the same number of observations as was used in the estimation (", NROW(data), " instead of ", object$nobs + length(object$obsRemoved), ").", suffix)
+							stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(var2fetch, addS = TRUE, verb = "no"), " in the original dataset (", deparse_long(dataName), "), yet the dataset doesn't have the same number of observations as was used in the estimation (", NROW(data), " instead of ", object$nobs + length(object$obsRemoved), ").", suffix)
 						}
 
 						if(length(object$obsRemoved)){
@@ -5562,7 +5446,7 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 						if(anyNA(data)){
 							varsNA = sapply(data, anyNA)
 							varsNA = names(varsNA)[varsNA]
-							stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(varsNA, addS = TRUE, endVerb = "no"), " in the original dataset (", deparse_long(dataName), "). But ", ifsingle(varsNA, "this variable", "these variables"), " contain", ifsingle(varsNA, "s", ""), " NAs", msgRemoved, ". This is not allowed.", suffix)
+							stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(varsNA, addS = TRUE, verb = "no"), " in the original dataset (", deparse_long(dataName), "). But ", ifsingle(varsNA, "this variable", "these variables"), " contain", ifsingle(varsNA, "s", ""), " NAs", msgRemoved, ". This is not allowed.", suffix)
 						}
 
 						# We create the cluster list
@@ -5629,7 +5513,7 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 					cluster = list(cluster)
 
 				} else if(! (is.list(cluster) && length(cluster) == 1)){
-					stop("For one way clustering, the argument 'cluster' must be either the name of a cluster variable (e.g. \"dum_1\"), a vector (e.g. data$dum_1), a list containing the vector of clusters (e.g. list(data$dum_1)), or a one-sided formula (e.g. ~dum_1). Currently the class of cluster is ", enumerate_items(class(cluster), endVerb = "no"), ".", suffix)
+					stop("For one way clustering, the argument 'cluster' must be either the name of a cluster variable (e.g. \"dum_1\"), a vector (e.g. data$dum_1), a list containing the vector of clusters (e.g. list(data$dum_1)), or a one-sided formula (e.g. ~dum_1). Currently the class of cluster is ", enumerate_items(class(cluster), verb = "no"), ".", suffix)
 
 				}
 			} else if(length(cluster) != nway){
@@ -5639,7 +5523,7 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 				stop(nway, "-way clustering is asked for, but the length of argument 'cluster' is ", length(cluster), " (it should be ", nway, "). Alternatively, you can use ", msgList, " or a one-sided formula.", suffix)
 
 			} else if(!is.list(cluster)){
-				stop("For ", nway, "-way clustering, the argument 'cluster' must be either a vector of cluster variables (e.g. c(\"", paste0("dum_", 1:nway, collapse = "\", \""), "\")), a list containing the vector of clusters (e.g. data[, c(\"", paste0("dum_", 1:nway, collapse = "\", \""), "\")]), or a one-sided formula (e.g. ~", paste0("dum_", 1:nway, collapse = "+"), "). Currently the class of cluster is: ", enumerate_items(class(cluster), endVerb = "no"), ".", suffix)
+				stop("For ", nway, "-way clustering, the argument 'cluster' must be either a vector of cluster variables (e.g. c(\"", paste0("dum_", 1:nway, collapse = "\", \""), "\")), a list containing the vector of clusters (e.g. data[, c(\"", paste0("dum_", 1:nway, collapse = "\", \""), "\")]), or a one-sided formula (e.g. ~", paste0("dum_", 1:nway, collapse = "+"), "). Currently the class of cluster is: ", enumerate_items(class(cluster), verb = "no"), ".", suffix)
 			}
 
 			cluster = as.list(cluster)
@@ -5648,7 +5532,7 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 		# now we check the lengths:
 		n_per_cluster = sapply(cluster, length)
 		if(!all(diff(n_per_cluster) == 0)){
-			stop("The vectors of the argument 'cluster' must be of the same length. Currently the lengths are: ", enumerate_items(n_per_cluster, endVerb = "no"), ".")
+			stop("The vectors of the argument 'cluster' must be of the same length. Currently the lengths are: ", enumerate_items(n_per_cluster, verb = "no"), ".")
 		}
 
 		# Either they are of the same length of the data
@@ -5668,7 +5552,7 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 		if(any(varsNA)){
 			varsNA = which(varsNA)
 			nb_name = c("1st", "2nd", "3rd", "4th")
-			stop("In argument cluster, the ", enumerate_items(nb_name[varsNA], endVerb = "no"), " cluster variable", ifsingle(varsNA, " contains", "s contain"), " NAs", msgRemoved, ". This is not allowed.")
+			stop("In argument cluster, the ", enumerate_items(nb_name[varsNA], verb = "no"), " cluster variable", ifsingle(varsNA, " contains", "s contain"), " NAs", msgRemoved, ". This is not allowed.")
 		}
 
 
@@ -6410,7 +6294,7 @@ setFixest_dict = function(dict){
 	if(any(td > 1)){
 		qui = which(dict_names %in% names(td)[td > 1])
 		name_dup = unique(names(dict)[qui])
-		stop("Argument 'dict' contains duplicated names: ", enumerate_items(name_dup, endVerb = "no"))
+		stop("Argument 'dict' contains duplicated names: ", enumerate_items(name_dup, verb = "no"))
 	}
 
 	options("fixest_dict" = dict)
