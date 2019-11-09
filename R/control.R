@@ -275,12 +275,14 @@ checkTheTypes = function(str, x){
 }
 
 
-check_arg = function(x, type, message){
+check_arg = function(x, type, message, call_depth = 0){
 	# function that makes it easy to check arguments:
 	#    provides precise and meaningful error messages
 	# only for scalars or vectors
 	# must be of single types
 	# possible types: logical/numeric/integer/character
+	# osf => one sided formula
+	# tsf: two sided formula
 
 	type = tolower(type)
 
@@ -296,59 +298,69 @@ check_arg = function(x, type, message){
 	# Creating the message with the most possible precision
 
 	if(missing(message)){
-		message = paste0("Argument '", deparse(substitute(x)),"' must be ")
+		while(TRUE){
+			# while: Trick to exist the condition at any time
+			message = paste0("Argument '", deparse(substitute(x)),"' must be ")
 
-		if(grepl("logical", type)){
-			my_type = "logical"
-		} else if(grepl("character", type)){
-			my_type = "character"
-		} else if(grepl("integer", type)){
-			my_type = "integer"
-		} else if(grepl("numeric", type)){
-			my_type = "numeric"
-		} else {
-			# no requirement
-			my_type = ""
+			if(grepl("osf", type)){
+				message = paste0(message, "a one sided formula.")
+				break
+			} else if(grepl("tsf", type)){
+				message = paste0(message, "a two sided formula.")
+				break
+			} else if(grepl("logical", type)){
+				my_type = "logical"
+			} else if(grepl("character", type)){
+				my_type = "character"
+			} else if(grepl("integer", type)){
+				my_type = "integer"
+			} else if(grepl("numeric", type)){
+				my_type = "numeric"
+			} else {
+				# no requirement
+				my_type = ""
+			}
+
+			if(grepl("single", type)){
+				message = paste0(message, "a single ", my_type)
+			} else {
+				# This is a vector
+				message = paste0(message, "a ", my_type, " vector")
+				message = gsub("a int", "an int", message)
+				message = gsub(" +", " ", message)
+			}
+
+			if(grepl("integer|numeric", type)){
+
+				first_msg = ifelse(grepl("vector", type), " of values", "")
+
+				if(grepl(expr <- "ge[[:digit:]]+", type)){
+					n = myExtract(expr)
+					message = paste0(message, first_msg, " greater than, or equal to, ", n)
+					first_msg = " and"
+				}
+
+				if(grepl(expr <- "gt[[:digit:]]+", type)){
+					add_and = TRUE
+					n = myExtract(expr)
+					message = paste0(message, first_msg, " strictly greater than ", n)
+					first_msg = " and"
+				}
+
+				if(grepl(expr <- "le[[:digit:]]+", type)){
+					n = myExtract(expr)
+					message = paste0(message, first_msg, " lower than, or equal to, ", n)
+				}
+
+				if(grepl(expr <- "lt[[:digit:]]+", type)){
+					n = myExtract(expr)
+					message = paste0(message, first_msg, " strictly lower than ", n)
+				}
+			}
+
+			message = paste0(message, ". REASON")
+			break
 		}
-
-		if(grepl("single", type)){
-			message = paste0(message, "a single ", my_type)
-		} else {
-			# This is a vector
-			message = paste0(message, "a ", my_type, " vector")
-			message = gsub("a int", "an int", message)
-			message = gsub(" +", " ", message)
-		}
-
-		if(grepl("integer|numeric", type)){
-
-			first_msg = ifelse(grepl("vector", type), " of values", "")
-
-			if(grepl(expr <- "ge[[:digit:]]+", type)){
-				n = myExtract(expr)
-				message = paste0(message, first_msg, " greater than, or equal to, ", n)
-				first_msg = " and"
-			}
-
-			if(grepl(expr <- "gt[[:digit:]]+", type)){
-				add_and = TRUE
-				n = myExtract(expr)
-				message = paste0(message, first_msg, " strictly greater than ", n)
-				first_msg = " and"
-			}
-
-			if(grepl(expr <- "le[[:digit:]]+", type)){
-				n = myExtract(expr)
-				message = paste0(message, first_msg, " lower than, or equal to, ", n)
-			}
-
-			if(grepl(expr <- "lt[[:digit:]]+", type)){
-				n = myExtract(expr)
-				message = paste0(message, first_msg, " strictly lower than ", n)
-			}
-		}
-
-		message = paste0(message, ". REASON")
 	}
 
 	stop_now = function(...){
@@ -357,7 +369,7 @@ check_arg = function(x, type, message){
 		reason = paste0(...)
 
 		# The original call
-		my_call = deparse(sys.calls()[[sys.nframe()-2]])[1] # call can have svl lines
+		my_call = deparse(sys.calls()[[sys.nframe()-(2 + call_depth)]])[1] # call can have svl lines
 		nmax = 40
 		if(nchar(my_call) > nmax) my_call = paste0(substr(my_call, 1, nmax-1), "...")
 
@@ -367,8 +379,12 @@ check_arg = function(x, type, message){
 		msg_new = c(msg_split[1], reason, msg_split[-1])
 		msg_new = paste(msg_new, collapse = " ")
 
-		stop("error in ", my_call, ":\n", msg_new, call. = FALSE)
+		stop("in ", my_call, ":\n", msg_new, call. = FALSE)
 	}
+
+	#
+	# SPECIAL ARGS
+	#
 
 	if(missing(x)){
 		if(grepl("mbt", type)){
@@ -383,6 +399,27 @@ check_arg = function(x, type, message){
 			return(NULL)
 		}
 	}
+
+	#
+	# FORMULAS
+	#
+
+	if(grepl("(o|t)sf", type)){
+		if(!"formula" %in% class(x)){
+			stop_now("But it is currently not a formula (instead it is of class '", class(x)[1], "').")
+		}
+
+		if(grepl("osf", type) && length(x) == 3){
+			stop_now("But it is currently two-sided.")
+		}
+
+		if(grepl("tsf", type) && length(x) == 2){
+			stop_now("But it is currently only one-sided.")
+		}
+
+		return(NULL)
+	}
+
 
 	isSingle = FALSE
 	if(grepl("single|scalar", type)){
@@ -461,7 +498,7 @@ deparse_long = function(x){
 #### Control Utilities ####
 ####
 
-enumerate_items = function (x, verb = "is", addS = FALSE, past = FALSE, or = FALSE, start_verb = FALSE){
+enumerate_items = function (x, verb = "is", addS = FALSE, past = FALSE, or = FALSE, start_verb = FALSE, quote = FALSE){
 	# function that enumerates items and add verbs
 	verb = match.arg(as.character(verb), c("is", "has", "no", "contain", "FALSE"))
 	if(verb == "FALSE") verb = "no"
@@ -477,6 +514,10 @@ enumerate_items = function (x, verb = "is", addS = FALSE, past = FALSE, or = FAL
 		startWord = ifelse(n == 1, " ", "s ")
 	} else {
 		startWord = ""
+	}
+
+	if(quote){
+		x = paste0("'", x, "'")
 	}
 
 	if (n == 1) {
