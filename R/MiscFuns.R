@@ -2845,7 +2845,7 @@ did_plot_yearly_effects = function(object, x.shift = 0, w = 0.1, ci_level = 0.95
 	dots$sd = base2show$sd
 	dots$x = base2show$x
 	if(is.null(dots$xlab)) dots$xlab = time_variable
-	if(is.null(dots$ylab)) dots$ylab = c("Estimate of Yearly Treatment on ", deparse(object$fml[[2]]))
+	if(is.null(dots$ylab)) dots$ylab = paste0("Estimate of Yearly Treatment on ", deparse(object$fml[[2]]))
 
 	# Now the plot
 	mc = match.call(expand.dots = FALSE)
@@ -3091,7 +3091,7 @@ errbar <- function(estimate, sd, ci_low, ci_top, x, x.shift = 0, w=0.1, ci_level
 #### Internal Funs     ####
 ####
 
-results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, pseudo=TRUE, sdBelow=TRUE, dict = NULL, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, titles, yesNoFixef = c("Yes", "No"), keepFactors = FALSE, isTex = FALSE, useSummary, dots_call, powerBelow){
+results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, r2, pseudo=TRUE, sdBelow=TRUE, dict = NULL, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, titles, yesNoFixef = c("Yes", "No"), keepFactors = FALSE, isTex = FALSE, useSummary, dots_call, powerBelow){
     # This function is the core of the functions esttable and esttex
 
     signifCode = sort(signifCode)
