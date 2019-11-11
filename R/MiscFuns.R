@@ -3101,39 +3101,55 @@ errbar <- function(estimate, sd, ci_low, ci_top, x, x.shift = 0, w=0.1, ci_level
 
 #' Treated and control sample descriptives
 #'
-#' This function shows the means and standard-deviations of several variables conditional on whether they are from the treated or the control group. Results can seamlessly be exported to Latex.
+#' This function shows the means and standard-deviations of several variables conditional on whether they are from the treated or the control group. The groups can further be split according to a pre/post variable. Results can be seamlessly be exported to Latex.
 #'
-#' @param x_or_fml Either a formula of the type \code{var1 + ... + var[N] ~ treat} or \code{var1 + ... + var[N] ~ treat | post}. Either a data.frame of containing all the variables for which the means are to be computed.
-#' @param base A data base containing all the variables in the formula \code{x_or_fml}.
-#' @param treat_var The vector identifying the treated and the control observations (the vector can be of any type but must contain only two possible values). Must be of the same length as the data.
-#' @param post_var The vector identifying the periods (pre/post) of the observations (the vector can be of any type but must contain only two possible values). The first value (in the sorted sense) of the vector is taken as the pre period. Must be of the same length as the data.
-#' @param rev_order Should the order between the treated and the control be reversed? Default is \code{FALSE}.
+#' @inheritParams esttex
+#'
+#' @param fml Either a formula of the type \code{var1 + ... + var[N] ~ treat} or \code{var1 + ... + var[N] ~ treat | post}. Either a data.frame/matrix containing all the variables for which the means are to be computed (they must be numeric of course). Both the treatment and the post variables must contain only exactly two values. You can use a point to select all the variables of the data set: \code{. ~ treat}.
+#' @param base A data base containing all the variables in the formula \code{fml}.
+#' @param treat_var Only if argument \code{fml} is *not* a formula. The vector identifying the treated and the control observations (the vector can be of any type but must contain only two possible values). Must be of the same length as the data.
+#' @param post_var Only if argument \code{fml} is *not* a formula. The vector identifying the periods (pre/post) of the observations (the vector can be of any type but must contain only two possible values). The first value (in the sorted sense) of the vector is taken as the pre period. Must be of the same length as the data.
+#' @param treat_first Which value of the 'treatment' vector should appear on the left? By default the max value appears first (e.g. if the treatment variable is a 0/1 vector, 1 appears first).
 #' @param tex Should the result be displayed in Latex? Default is \code{FALSE}. Automatically set to \code{TRUE} if the table is to be saved in a file using the argument \code{file}.
 #' @param treat_dict A character vector of length two. What are the names of the treated and the control? This should be a dictionnary: e.g. \code{c("1"="Treated", "0" = "Control")}.
 #' @param dict A named character vector. A dictionnary between the variables names and an alias. For instance \code{dict=c("x"="Inflation Rate")} would replace the variable name \code{x} by \dQuote{Inflation Rate}.
 #' @param file A file path. If given, the table is written in Latex into this file.
-#' @param append Default is \code{TRUE}, which means that when the table is exported, the existing file is not erased.
-#' @param title Character giving the Latex title of the table. (Only if exported.)
-#' @param label Character giving the Latex label of the table. (Only if exported.)
+#' @param replace Default is \code{TRUE}, which means that when the table is exported, the existing file is not erased.
+#' @param title Character string giving the Latex title of the table. (Only if exported.)
+#' @param label Character string giving the Latex label of the table. (Only if exported.)
 #' @param raw Logical, default is \code{FALSE}. If \code{TRUE}, it returns the information without formatting.
-#' @param indiv Either the variable name of individual identifiers, either a vector. A vector of individual IDs. If the data is that of a panel, this can be used to track the number of individuals per group.
-#' @param treat_first Which value of the treat vector should be on the left. By default the values are sorted (so if the treat_var is based of only 0s and 1s, then 0 will be on the left).
-#' @param prepostnames The names of the pre and post periods. Default is \code{c("Before", "After")}. (Only if there is a post_var.)
+#' @param indiv Either the variable name of individual identifiers, a one sided formula, or a vector. If the data is that of a panel, this can be used to track the number of individuals per group.
+#' @param prepostnames Only if there is a 'post' variable. The names of the pre and post periods to be displayed in Latex. Default is \code{c("Before", "After")}.
 #' @param diff.inv Logical, default to \code{FALSE}. Whether to inverse the difference.
+#'
+#' @details
+#' By default, when the user tries to apply this function to nun-numeric variables, an error is raised. The exception is when the all variables are selected with the dot (like in \code{. ~ treat}. In this case, non-numeric variables are automatically omitted (with a message).
+#'
+#' NAs are removed automatically: if the data contains NAs an information message will be prompted. First all observations containing NAs relating to the treatment or post variables are removed. Then if there are still NAs for the variables, they are excluded separately for each variable, and a new message detailing the NA breakup is prompted.
 #'
 #' @return
 #' It returns a data.frame or a Latex table with the conditional means and statistical differences between the groups.
 #'
 #' @examples
 #'
-#' myIris = data.frame(sl = iris$Sepal.Length, isVirginica = 1*(iris$Species == "virginica"))
+#' # Playing around with the DiD data
+#' data(base_did)
 #'
-#' did_means(myIris$sl, treat_var = myIris$isVirginica)
+#' did_means(y+x1+period~treat, base_did)
 #'
-#' did_means(sl ~ isVirginica, myIris)
+#' did_means(y+x1+period~treat, base_did, diff.inv = TRUE)
+#'
+#' did_means(y+x1+period~treat|post, base_did)
+#'
+#' did_means(y+x1+period~treat|post, base_did, indiv = "id")
+#'
+#' did_means(y+x1+period~treat|post, base_did, indiv = ~id, treat_first = 0)
+#'
+#' # Selecting all the variables
+#' did_means(.~treat|post, base_did, indiv = "id")
 #'
 #'
-did_means = function(x_or_fml, base, treat_var, post_var, tex = FALSE, treat_dict, dict = getOption("fest_dict"), file, append = TRUE, title, label, raw = FALSE, indiv, treat_first, prepostnames = c("Before", "After"), diff.inv = FALSE){
+did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, dict = getFixest_dict(), file, replace = FALSE, title, label, raw = FALSE, indiv, treat_first, prepostnames = c("Before", "After"), diff.inv = FALSE){
     # x is a data.frame
     # treat_vector is a list of IDs
     # treat_first: the treated-value to appear first
@@ -3141,87 +3157,49 @@ did_means = function(x_or_fml, base, treat_var, post_var, tex = FALSE, treat_dic
     # Ajouter protection quand un des groupes vaut 0!!!
     # ie un des treat-post n'a pas d'observation
 
+    fml_in = fml
+
     #
-    # Extracting the information
+    # Nber of units of observations (I do it before the main data)
     #
 
-    usePost = FALSE
-    if("formula" %in% class(x_or_fml)){
-        if(missing(base) || !is.data.frame(base)){
-            stop("If you provide a formula, a data.frame must be given in argument 'base'.")
-        }
-
-        # Creation of x and the condition
-        if(!length(x_or_fml) == 3){
-            stop("The formula must be of the type 'var1 + ... + var[N] ~ treat' or 'var1 + ... + var[N] ~ treat | post'.")
-        }
-
-        fml = extract_pipe(x_or_fml)$fml
-        pipe = extract_pipe(x_or_fml)$pipe
-
-        # we swap the formula to use model.frame
-        fml_x = as.formula(paste0("~", deparse(fml[[2]])))
-
-        base_dt = model.frame(fml_x, base) # may be slow
-        setDT(base_dt)
-        treat_var = eval(fml[[3]], base)
-        post_var = eval(pipe, base)
-
-        if(!is.null(post_var)){
-            usePost = TRUE
-        }
-
-        # other info
-        x_name = names(base_dt)
-    } else {
-        if(missing(treat_var)){
-            stop("You must provide the argument 'treat_var'.")
-        } else {
-            base_dt = data.table(x = x_or_fml)
-
-            if(NROW(base_dt) != length(treat_var)){
-                stop("The arguments 'x' and 'treat_var' must be of the same length.")
-            }
-
-            if(!missing(post_var) && !is.null(post_var)){
-                if(NROW(base_dt) != length(post_var)){
-                    stop("If provided, the argument 'post_var' must be of the same length of 'x'.")
-                }
-                usePost = TRUE
-            }
-
-            setDT(base_dt)
-
-            # other info
-            x_name = names(base_dt)
-        }
-    }
-
-    # Other controls
-    if(anyNA(base_dt)){
-        name_NA = x_name[sapply(base_dt, anyNA)]
-        stop("NAs are not allowed in 'x'! Please withraw them beforehand. FYI, ", enumerate_words(name_NA, endVerb = "contain"), " NAs.")
-    }
-    if(anyNA(treat_var)){
-        stop("NAs are not allowed in 'treat_var'! Please withraw them beforehand.")
-    }
-    if(usePost && anyNA(post_var)){
-        stop("NAs are not allowed in 'post_var'! Please withraw them beforehand.")
-    }
-
-    if(length(unique(treat_var))!=2){
-        stop("This function supports only 2 conditional values for 'treat_var'.")
-    }
-
+    IS_INDIV = FALSE
     if(!missing(indiv)){
-        if(length(indiv) == 1 && is.character(indiv)){
+        IS_INDIV = TRUE
+        if("formula" %in% class(indiv)){
+
+            check_arg(indiv, "osf")
+            indiv_varname = attr(terms(indiv), "term.labels")
+
+            if(missing(base)){
+                stop("To use 'indiv' as a formula, you must provide the argument 'base'.")
+            }
+
+            if(length(indiv_varname) > 1){
+                stop("The argument 'indiv' must refer to only one variable.")
+            }
+
+            if(!all(all.vars(indiv) %in% names(base))){
+                pblm = setdiff(all.vars(indiv), names(base))
+                stop("In argument 'indiv': the variable", enumerate_items(pblm, addS=TRUE)," not in the data set.")
+            }
+
+            indiv_var = try(eval(parse(text = indiv_varname), base), silent = TRUE)
+            if("try-error" %in% class(indiv_var)){
+                stop("Evaluation of 'indiv' raises and error:\n", indiv_var)
+            }
+        } else if(length(indiv) == 1 && is.character(indiv)){
+            indiv_varname = indiv
+
             if(missing(base) || !indiv %in% names(base)){
-                stop("'indiv' must be a variable name of 'base' or a vector.")
+                stop("To use 'indiv' as a 'character string' you must provide the argument 'base'.")
             } else {
                 indiv_var = base[[indiv]]
             }
         } else {
-            if(length(indiv) != NROW(base_dt)){
+            if(!missing(base) && length(indiv) != NROW(base)){
+                stop("The length of 'indiv' must be the same as the data.")
+            } else if(missing(base) && length(indiv) != NROW(fml)){
                 stop("The length of 'indiv' must be the same as the data.")
             }
             indiv_var = indiv
@@ -3230,57 +3208,271 @@ did_means = function(x_or_fml, base, treat_var, post_var, tex = FALSE, treat_dic
         indiv_var = NULL
     }
 
-    if(usePost){
-        control_variable(prepostnames, "characterVector")
-        if(length(prepostnames) != 2){
-            stop("Argument 'prepostnames' must be a character vector of length 2.")
+    #
+    # Extracting the information
+    #
+
+    usePost = FALSE
+    if("formula" %in% class(fml_in)){
+        if(missing(base) || !is.data.frame(base)){
+            stop("If you provide a formula, a data.frame must be given in argument 'base'.")
+        }
+
+        # Creation of x and the condition
+        if(!length(fml_in) == 3){
+            stop("The formula must be of the type 'var1 + ... + var[N] ~ treat' or 'var1 + ... + var[N] ~ treat | post'.")
+        }
+
+        fml = extract_pipe(fml_in)$fml
+        pipe = extract_pipe(fml_in)$pipe
+
+        #
+        # Treat & post
+        #
+
+        if(!(all(all.vars(fml[[3]]) %in% names(base)))){
+            pblm = setdiff(all.vars(fml[[3]]), names(base))
+            stop("In the evaluation of the treatment variable: ", enumerate_items(pblm), " not in the data set.")
+        }
+
+        treat_var = try(eval(fml[[3]], base), silent = TRUE)
+        if("try-error" %in% class(treat_var)){
+            stop("Evaluation of the 'treatment' variable raises and error: \n", treat_var)
+        }
+
+        if(!is.null(pipe)){
+            if(!(all(all.vars(pipe) %in% names(base)))){
+                pblm = setdiff(all.vars(pipe), names(base))
+                stop("In the evaluation of the 'post' variable: ", enumerate_items(pblm), " not in the data set.")
+            }
+
+            post_var = try(eval(pipe, base), silent = TRUE)
+            if("try-error" %in% class(post_var)){
+                stop("Evaluation of the 'post' variable raises and error: \n", treat_var)
+            }
+
+            usePost = TRUE
+        }
+
+        #
+        # The variables
+        #
+
+        # special case: the point
+        if(deparse(fml[[2]]) == "."){
+            all_vars = setdiff(names(base), deparse(fml[[3]]))
+            if(usePost) all_vars = setdiff(all_vars, as.character(pipe))
+            if(IS_INDIV) all_vars = setdiff(all_vars, indiv_varname)
+
+            if("data.table" %in% class(base)){
+                mat_vars = as.data.frame(base[, all_vars, with = FALSE])
+            } else {
+                mat_vars = base[, all_vars, FALSE]
+            }
+
+            # we drop non-numeric info + note
+            base_small = head(mat_vars, 10)
+            is_num = sapply(base_small, function(x) is.numeric(x) || is.logical(x))
+            pblm = all_vars[!is_num]
+
+            if(all(!is_num)){
+                stop("Function cannot be performed: not any numeric variable.")
+            } else if(length(pblm) > 0){
+                message("NOTE: The variable", enumerate_items(pblm, addS=TRUE), " removed because they are non-numeric.")
+            }
+
+            mat_vars = as.matrix(mat_vars[, is_num, FALSE])
+        } else {
+            # we swap the formula to use model.frame
+            fml_x = as.formula(paste0("1~", deparse(fml[[2]]), "-1"))
+
+            # Variables control:
+            all_vars = all.vars(fml_x)
+            pblm = setdiff(all_vars, names(base))
+            if(length(pblm) > 0){
+                stop("The variable", enumerate_items(pblm, addS = TRUE), " not in the data set (", deparse(substitute(base)), ").")
+            }
+
+            # Evaluation control
+            base_small = head(base, 10)
+            var2eval = attr(terms(fml_x), "term.labels")
+            var2eval = gsub(":", "*", var2eval)
+            for(i in seq_along(var2eval)){
+                var = var2eval[i]
+                x_small = try(eval(parse(text=var), base_small), silent = TRUE)
+                if("try-error" %in% class(x_small)){
+                    stop("Evaluation of the variable '", var, "' raises and error:\n", x_small)
+                }
+
+                if(!is.numeric(x_small) && !is.logical(x_small)){
+                    stop("The variable ", var, " is not numeric, please provide only numeric variables.")
+                }
+            }
+
+            mat_vars = prepare_matrix(fml_x, base)
+        }
+
+        if(is.logical(mat_vars)){
+            mat_vars = as.numeric(mat_vars)
+        }
+
+        # other info
+        x_name = colnames(mat_vars)
+    } else {
+        if(missing(treat_var)){
+            stop("If argument 'fml' is not a formula, you must provide the argument 'treat_var'.")
+        } else {
+            mat_vars = fml_in
+
+            if(NROW(mat_vars) != length(treat_var)){
+                stop("The arguments 'x' and 'treat_var' must be of the same length.")
+            }
+
+            if(!missing(post_var) && !is.null(post_var)){
+                if(NROW(mat_vars) != length(post_var)){
+                    stop("If provided, the argument 'post_var' must be of the same length of 'x'.")
+                }
+                usePost = TRUE
+            }
+
+            # We exclude non numeric variables
+            if("data.frame" %in% class(mat_vars)){
+                is_num = sapply(mat_vars, function(x) is.numeric(x) || is.logical(x))
+                if(any(!is_num)){
+                    pblm = names(mat_vars)[!is_num]
+                    stop("This function works only for numeric variables. Variable", enumerate_items(pblm, addS=TRUE), " not numeric.")
+                }
+                mat_vars = as.matrix(mat_vars)
+            } else if(!is.matrix(mat_vars)){
+                stop("If not a formula, argument 'fml' must be a data.frame or a matrix. Currently it is of class ", class(mat_vars)[1], ".")
+            } else if(!is.numeric(mat_vars) && !is.logical(mat_vars)){
+                stop("If not a formula, argument 'fml' must be a data.frame or a matrix with numeric variables. Currenlty its is not numeric.")
+            }
+
+            if(is.logical(mat_vars)) mat_vars = as.numeric(mat_vars)
+
+            # other info
+            x_name = colnames(mat_vars)
         }
     }
 
-    treat_values = as.character(sort(unique(treat_var)))
+    #
+    # NA control
+    #
+
+    # Treat & post
+    ANY_NA = FALSE
+    if(anyNA(treat_var) || (usePost && anyNA(post_var))){
+        ANY_NA = TRUE
+        qui_NA = is.na(treat_var)
+        if(usePost) qui_NA = qui_NA | is.na(post_var)
+
+        if(all(qui_NA)){
+            msg = "treatment variable."
+            if(usePost && anyNA(post_var)){
+                if(anyNA(treat_var)){
+                    msg = "'treatment' and 'post' variables."
+                } else {
+                    msg = "'post' variable."
+                }
+            }
+            stop("All observation contain NA values for the ", msg)
+        }
+
+        mat_vars = mat_vars[!qui_NA, ]
+        treat_var = treat_var[!qui_NA]
+        if(usePost) post_var = post_var[!qui_NA]
+
+        if(IS_INDIV) indiv_var = indiv_var[!qui_NA]
+
+        msg = ifelse(usePost, "/post variables.", " variable.")
+        message("NOTE: ", sum(qui_NA), " observations removed because of NA values in the treatment", msg)
+
+    }
+
+
+
+    # Treatment / post controls
+    if(length(unique(treat_var)) != 2){
+        n = length(unique(treat_var))
+        msg = ifelse(n == 1, "only one value.", paste0(n, " values."))
+        stop("This function supports only 2 conditional values for the treatment variable. Currently, it contains ", msg)
+    }
+
+    if(usePost && length(unique(post_var)) != 2){
+        n = length(unique(post_var))
+        msg = ifelse(n == 1, "only one value.", paste0(n, " values."))
+        stop("This function supports only 2 conditional values for the 'post' variable. Currently, it contains ", msg)
+    }
+
+    if(usePost){
+        check_arg(prepostnames, "characterVector", "Argument 'prepostnames' must be a character vector of length 2. REASON")
+        if(length(prepostnames) != 2){
+            stop("Argument 'prepostnames' must be a character vector of length 2. It is currenlty of length ", length(prepostnames), ".")
+        }
+    }
+
+    treat_cases = sort(unique(treat_var), decreasing = TRUE)
     if(!missing(treat_dict) && !is.null(treat_dict)){
 
         if(!checkVector(treat_dict) || is.null(names(treat_dict))){
             stop("The argument 'treat_dict' must be a named character vector.")
         }
 
-        pblm = setdiff(treat_values, names(treat_dict))
+        pblm = setdiff(treat_cases, names(treat_dict))
         if(length(pblm) > 0){
             stop("The value", enumerate_words(pblm, addS = TRUE), " not in 'treat_dict'.")
         }
     } else {
-        treat_dict = paste0("cond: ", treat_values)
-        names(treat_dict) = treat_values
+        treat_dict = paste0("cond: ", treat_cases)
+        names(treat_dict) = treat_cases
     }
 
     #
     # The main function
     #
 
-    rev_order = FALSE
     if(!missing(treat_first) && !is.null(treat_first)){
-        if(!treat_first %in% treat_values){
+        if(!treat_first %in% treat_cases){
             stop("Argument 'treat_first' must be an element of the treated variable.")
-        } else if(treat_first != treat_values[1]){
-            rev_order = TRUE
-            treat_values = rev(treat_values)
+        } else if(treat_first != treat_cases[1]){
+            treat_cases = rev(treat_cases)
         }
     }
 
     if(!usePost){
         # the simple case
-        res = .meanDiffTable(base_dt, treat_var, indiv_var, raw = raw, rev_order = rev_order, diff.inv = diff.inv)
+        res = .meanDiffTable(mat_vars, treat_var, treat_cases, indiv_var, raw = raw, diff.inv = diff.inv)
+
+        if(any(attr(res, "na"))){
+            nb_na = attr(res, "na")
+            var_with_na = x_name[nb_na > 0]
+            message("NA values were omitted for the variable", enumerate_items(paste0(var_with_na, " (", nb_na[nb_na > 0], ")"), addS=TRUE, verb=FALSE), ".")
+        }
+
+        attr(res, "na") = NULL
+
+
     } else {
         # the more complex case
         post_values = sort(unique(post_var))
 
         qui_pre = which(post_var == post_values[1])
-        res_pre = .meanDiffTable(base_dt[qui_pre], treat_var[qui_pre], indiv_var[qui_pre], raw = raw, rev_order = rev_order, diff.inv = diff.inv)
+        res_pre = .meanDiffTable(mat_vars[qui_pre, ], treat_var[qui_pre], treat_cases, indiv_var[qui_pre], raw = raw, diff.inv = diff.inv)
 
         qui_post = which(post_var == post_values[2])
-        res_post = .meanDiffTable(base_dt[qui_post], treat_var[qui_post], indiv_var[qui_post], raw = raw, rev_order = rev_order, diff.inv = diff.inv)
+        res_post = .meanDiffTable(mat_vars[qui_post, ], treat_var[qui_post], treat_cases, indiv_var[qui_post], raw = raw, diff.inv = diff.inv)
+
+        nb_na = attr(res_pre, "na") + attr(res_post, "na")
 
         res = cbind(res_pre, res_post[, -1])
+
+        if(any(nb_na)){
+            var_with_na = x_name[nb_na > 0]
+            message("NA values were omitted for the variable", enumerate_items(paste0(var_with_na, " (", nb_na[nb_na > 0], ")")), ".")
+        }
+
+        attr(res, "na") = NULL
     }
 
     #
@@ -3290,7 +3482,8 @@ did_means = function(x_or_fml, base, treat_var, post_var, tex = FALSE, treat_dic
     if(tex || !missing(file)){
         # we sink!
         if(!missing(file)){
-            sink(file = file, append = append)
+            sink(file = file, append = (replace == FALSE))
+            on.exit(sink())
         }
 
         if(!missing(title)){
@@ -3304,8 +3497,7 @@ did_means = function(x_or_fml, base, treat_var, post_var, tex = FALSE, treat_dic
         # we write the tex code
         #
 
-        # treat_text = paste0(treat_dict[treat_values], collapse = " & ")
-        treat_text = paste0(treat_dict[treat_values], collapse = " & ")
+        treat_text = paste0(treat_dict[as.character(treat_cases)], collapse = " & ")
 
         if(!usePost){
             # The simple case
@@ -3350,48 +3542,41 @@ did_means = function(x_or_fml, base, treat_var, post_var, tex = FALSE, treat_dic
 
         if(!missing(title)) cat("\\end{table}\n")
 
-        if(!missing(file)) sink()
-
         return(invisible(res))
     }
 
     res
 }
 
-.meanDiffTable = function(base_dt, treat_var, indiv_var, raw, rev_order, diff.inv = FALSE){
+.meanDiffTable = function(mat_vars, treat_var, treat_cases, indiv_var, raw, diff.inv = FALSE){
     # This function is the workhorse of did_means
 
-    x_name = names(base_dt)
-    n = length(x_name)
-    base_dt[, xxtreatxx := treat_var]
-    setorder(base_dt, xxtreatxx)
+    x_name = colnames(mat_vars)
 
-    means = base_dt[, lapply(.SD, mean), by = xxtreatxx, .SDcols = x_name[1:n]]
-    sds = base_dt[, lapply(.SD, sd), by = xxtreatxx, .SDcols = x_name[1:n]]
-    # means = base_dt[, lapply(.SD, mean), by = treat_var, .SDcols = x_name]
-    # sds = base_dt[, lapply(.SD, sd), by = treat_var, .SDcols = x_name]
+    treat_01 = 1 * (treat_var == treat_cases[2])
 
-    x_name = x_name[1:n]
+    nthreads = getFixest_nthreads()
+    info = cpppar_cond_means(mat_vars, treat_01, nthreads)
 
-    if(rev_order){
-        means = means[2:1, ]
-        sds = sds[2:1, ]
-    }
+    means = info$means
+    sds = info$sd
+    ns = info$n
+    n_01 = info$n_01
 
-    col_name = means[, 1]
-    name_1 = as.character(col_name[1])
-    name_2 = as.character(col_name[2])
+    name_1 = as.character(treat_cases[1])
+    name_2 = as.character(treat_cases[2])
 
-    means_1 = means[1, -1]
-    means_2 = means[2, -1]
+    means_1 = means[, 1]
+    means_2 = means[, 2]
 
-    sds_1 = sds[1, -1]
-    sds_2 = sds[2, -1]
+    sds_1 = sds[, 1]
+    sds_2 = sds[, 2]
+
+    n_1 = ns[, 1]
+    n_2 = ns[, 2]
 
     format_1 = paste0(mysignif(means_1, 2), " (", mysignif(sds_1, 2), ")")
     format_2 = paste0(mysignif(means_2, 2), " (", mysignif(sds_2, 2), ")")
-
-    n = ttable(treat_var)
 
     if(diff.inv){
         D = (means_2 - means_1)
@@ -3399,7 +3584,7 @@ did_means = function(x_or_fml, base, treat_var, post_var, tex = FALSE, treat_dic
         D = (means_1 - means_2)
     }
 
-    sd_D = sqrt(sds_1**2/n[name_1] + sds_2**2/n[name_2])
+    sd_D = sqrt(sds_1**2/n_1 + sds_2**2/n_2)
 
     t_stat = signif(D/sd_D, 3)
 
@@ -3409,26 +3594,28 @@ did_means = function(x_or_fml, base, treat_var, post_var, tex = FALSE, treat_dic
 
     if(raw){
         res = data.frame(vars = x_name, stringsAsFactors = FALSE)
-        res[[paste0("Mean: ", col_name[1])]] = c(means_1, recursive = TRUE)
-        res[[paste0("Mean: ", col_name[2])]] = c(means_2, recursive = TRUE)
-        res[[paste0("se: ", col_name[1])]] = c(sds_1, recursive = TRUE)
-        res[[paste0("se: ", col_name[2])]] = c(sds_2, recursive = TRUE)
+        res[[paste0("Mean: ", treat_cases[1])]] = c(means_1, recursive = TRUE)
+        res[[paste0("Mean: ", treat_cases[2])]] = c(means_2, recursive = TRUE)
+        res[[paste0("se: ", treat_cases[1])]] = c(sds_1, recursive = TRUE)
+        res[[paste0("se: ", treat_cases[2])]] = c(sds_2, recursive = TRUE)
         res[["Difference"]] = c(D, recursive=TRUE)
         res[["t-stat"]] = c(as.character(t_stat), recursive=TRUE)
     } else {
         res = data.frame(vars = x_name, stringsAsFactors = FALSE)
-        res[[paste0("cond: ", col_name[1])]] = format_1
-        res[[paste0("cond: ", col_name[2])]] = format_2
+        res[[paste0("cond: ", treat_cases[1])]] = format_1
+        res[[paste0("cond: ", treat_cases[2])]] = format_2
         res[["Difference"]] = c(mysignif(D, 3), recursive = TRUE)
         res[["t-stat"]] = c(as.character(t_stat), recursive = TRUE)
 
-        res[nrow(res) + 1, ] = c("Observations", addCommas(n[name_1]), addCommas(n[name_2]), "", "")
+        res[nrow(res) + 1, ] = c("Observations", addCommas(n_01[1]), addCommas(n_01[2]), "", "")
         # Le nombre d'individus
         if(!missing(indiv_var) && !is.null(indiv_var)){
             nb_indiv =  tapply(indiv_var, treat_var, function(x) length(unique(x)))
             res[nrow(res) + 1, ] = c("# Individuals", addCommas(nb_indiv[name_1]), addCommas(nb_indiv[name_2]), "", "")
         }
     }
+
+    attr(res, "na") = info$na
 
     res
 }
@@ -4562,6 +4749,22 @@ numberFormatNormal = function(x){
 	sapply(x, numberFormat_single)
 }
 
+mysignif = function (x, d = 2, r = 1){
+
+    mysignif_single = function(x, d, r) {
+        if (is.na(x)) {
+            return(NA)
+        }
+
+        if (abs(x) >= 10^(d - 1)){
+            return(round(x, r))
+        } else {
+            return(signif(x, d))
+        }
+    }
+    sapply(x, mysignif_single, d = d, r = r)
+}
+
 n_times = function(n){
 
     if(n <= 4){
@@ -4894,6 +5097,27 @@ tex_star = function(x){
     qui = nchar(x) > 0
     x[qui] = paste0("$^", x[qui], "$")
     x
+}
+
+
+extract_pipe = function(fml){
+    # We extract the elements after the pipe
+
+    FML = Formula::Formula(fml)
+    n_fml = length(FML)
+    n_rhs = n_fml[2]
+
+    if(n_rhs == 1){
+        fml_new = formula(FML, lhs = n_fml[1], rhs = 1)
+        pipe = NULL
+    } else if(n_rhs == 2){
+        fml_new = formula(FML, lhs = 1, rhs = 1)
+        pipe = as.expression(formula(FML, lhs = 0, rhs = 2)[[2]])
+    } else {
+        stop("fml must be at *most* a two part formula (currently it is ", n_rhs, " parts).")
+    }
+
+    list(fml=fml_new, pipe=pipe)
 }
 
 #### ................. ####
