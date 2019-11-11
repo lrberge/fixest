@@ -520,7 +520,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 }
             } else {
                 # just to check => will give error if not proper formula
-                linear.mat = try(stats::model.matrix(linear.fml, data[1:10, ]), silent = TRUE)
+                linear.mat = try(stats::model.matrix(linear.fml, head(data, 10)), silent = TRUE)
                 if("try-error" %in% class(linear.mat)){
                     stop("Evaluation of the right-hand-side of the formula raises and error: \n", linear.mat)
                 }
