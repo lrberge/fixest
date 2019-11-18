@@ -1,10 +1,34 @@
 #include <Rcpp.h>
 #include <math.h>
 #include <vector>
+#include <Rcpp/Benchmark/Timer.h>
 #include <stdio.h>
 
 using namespace Rcpp;
 using namespace std;
+
+// [[Rcpp::plugins(cpp11)]]
+
+
+// Small utility to time -- only for development
+double get_time(Timer &timer, bool us = false){
+    timer.step("stop");
+
+    int div = us ? 1000 : 1000000;
+
+    NumericVector res_v(timer);
+    int n = res_v.length();
+    if(n < 2) stop("Problem timer length");
+    double res = (res_v[n - 1] - res_v[n - 2]) / div;
+    return(res);
+}
+
+// [[Rcpp::export]]
+bool is_little_endian(){
+    int num = 1;
+    bool res = *(char *)&num == 1;
+    return res;
+}
 
 // [[Rcpp::export]]
 NumericVector cpp_lgamma(NumericVector x){
@@ -875,6 +899,352 @@ int cpp_pgcd(IntegerVector x){
     return pgcd;
 }
 
+
+
+
+
+inline unsigned long long float_to_ull(void *u, int i) {
+    unsigned long long *pu_ll = reinterpret_cast<unsigned long long*>(u);
+    unsigned long long u_ull = pu_ll[i];
+    unsigned long long mask = -(u_ull >> 63) | 0x8000000000000000;
+    return (u_ull ^ mask);
+}
+
+inline double ull_to_float(unsigned long long *u, int i) {
+    unsigned long long u_ull = u[i];
+    unsigned long long mask = ((u_ull >> 63) - 1) | 0x8000000000000000;
+    unsigned long long res_ull = u_ull ^ mask;
+    unsigned long long *pres_ull = &res_ull;
+    double *pres = reinterpret_cast<double*>(pres_ull);
+    double res = *pres;
+    return res;
+}
+
+void quf_double(vector<int> &x_uf, double *px, vector<double> &x_unik){
+
+    // x_uf: x unclassed factor
+    // px: pointer to x vector (R vector) -- READ ONLY!!!
+    // x_unik: empty vector
+
+    int n = x_uf.size();
+
+    if(n == 0) stop("x_unclass: size problem");
+
+    bool debug = false;
+
+    Timer timer;
+    if(debug) timer.step("start");
+
+    // variables
+    unsigned long long x_ull_current = 0;
+    // char: 2 octets: 0-255
+    // one double is made of 8 char
+    unsigned char x_char = 0;
+    vector<unsigned long long> x_ulong(n), x_tmp(n);
+
+    // radix array
+    int radix_table[8][256] = { {0} };
+
+    // 1) Counting
+    for(int i=0 ; i<n ; ++i){
+        x_ull_current = float_to_ull(px, i);
+        x_ulong[i] = x_ull_current;
+
+        for(int b=0 ; b<8 ; ++b){
+            x_char = ((unsigned char *)&x_ull_current)[b];
+            ++radix_table[b][x_char];
+        }
+    }
+
+    // 1') skipping
+    vector<bool> skip_flag(8);
+    for(int b = 0 ; b < 8 ; ++b){
+        x_char = ((unsigned char *)&x_ull_current)[b];
+        skip_flag[b] = radix_table[b][x_char] == n;
+    }
+
+    if(debug) Rprintf("Counting and skipping in %.3fms\n", get_time(timer));
+
+    // 2) Cumulating
+    for(int b = 0 ; b < 8 ; ++b){
+        for(int d = 1 ; d < 256 ; ++d){
+            radix_table[b][d] += radix_table[b][d - 1];
+        }
+    }
+
+    // 3) Sorting
+    unsigned long long *x_read = x_ulong.data();
+    unsigned long long *x_write = x_tmp.data();
+    unsigned long long *p_tmp; // used for swapping
+
+    vector<int> x_order(n), x_unclass(n);
+    int *o_read = x_unclass.data();
+    int *o_write = x_order.data();
+    int *o_tmp;
+
+    int k = 0;
+    for(auto &p : x_unclass) p = k++;
+
+    for(int b=0 ; b < 8 ; ++b){
+        if(skip_flag[b] == false){
+            int index;
+            for(int i = n - 1 ; i >= 0 ; --i){
+                x_ull_current = x_read[i];
+                x_char = ((unsigned char *)&x_ull_current)[b];
+                index = --radix_table[b][x_char];
+                x_write[index] = x_read[i];
+                o_write[index] = o_read[i];
+            }
+
+            p_tmp = x_read;
+            x_read = x_write;
+            x_write = p_tmp;
+
+            o_tmp = o_read;
+            o_read = o_write;
+            o_write = o_tmp;
+        }
+    }
+
+    if(debug) Rprintf("Cumulating and sorting in %.3fms\n", get_time(timer));
+
+
+    if(o_read != x_order.data()){
+        // we copy the result
+        memcpy(x_order.data(), o_read, sizeof(int) * n);
+    }
+
+    // We unclass, starting at 1
+    k=1;
+    x_unclass[0] = k;
+
+    double xi, xim1 = ull_to_float(x_read, 0);
+    x_unik.push_back(xim1);
+
+    for(int i=1 ; i<n ; ++i){
+        xi = ull_to_float(x_read, i);
+        if(xi != xim1){
+            ++k;
+            x_unik.push_back(xi);
+        }
+        x_unclass[i] = k;
+        xim1 = xi;
+    }
+
+    if(debug) Rprintf("Unclassing in %.3fms\n", get_time(timer));
+
+    // We put into the right order
+    for(int i=0 ; i<n ; ++i){
+        x_uf[x_order[i]] = x_unclass[i];
+    }
+
+    if(debug) Rprintf("Reordering in %.3fms\n", get_time(timer));
+
+
+}
+
+void quf_int_gnl(vector<int> &x_uf, int *px, vector<double> &x_unik, int x_min){
+    // we can sort a range up to 2**31 => ie not the full int range
+    // for ranges > 2**31 => as double
+    // px: pointer to the values of x
+
+    int n = x_uf.size();
+
+    if(static_cast<int>(x_uf.size()) != n) stop("x_unclass: size problem");
+
+    bool debug = false;
+
+    Timer timer;
+    if(debug) timer.step("start");
+
+    // variables
+    int x_uint_current = 0;
+    vector<int> x_uint(n), x_tmp(n);
+
+    // radix array
+    int radix_table[4][256] = { {0} };
+
+    // 1) Counting
+    for(int i=0 ; i<n ; ++i){
+        x_uint_current = px[i] - x_min;
+        x_uint[i] = x_uint_current;
+
+        for(int b=0 ; b<4 ; ++b){
+            ++radix_table[b][(x_uint_current >> 8*b) & 0xFF];
+        }
+    }
+
+    // 1') skipping
+    vector<bool> skip_flag(4);
+    for(int b = 0 ; b < 4 ; ++b){
+        skip_flag[b] = radix_table[b][(x_uint_current >> 8*b) & 0xFF] == n;
+    }
+
+    if(debug) Rprintf("Counting and skipping in %.3fms\n", get_time(timer));
+
+    // 2) Cumulating
+    for(int b = 0 ; b < 4 ; ++b){
+        for(int d = 1 ; d < 256 ; ++d){
+            radix_table[b][d] += radix_table[b][d - 1];
+        }
+    }
+
+    // 3) Sorting
+    int *x_read = x_uint.data();
+    int *x_write = x_tmp.data();
+    int *p_tmp; // used for swapping
+
+    vector<int> x_order(n), x_unclass(n);
+    int *o_read = x_unclass.data();
+    int *o_write = x_order.data();
+    int *o_tmp;
+
+    int k = 0;
+    for(auto &p : x_unclass) p = k++;
+
+    for(int b=0 ; b < 4 ; ++b){
+        if(skip_flag[b] == false){
+            // Rprintf("bin: %i\n", b);
+            int index;
+            for(int i = n - 1 ; i >= 0 ; --i){
+                index = --radix_table[b][(x_read[i] >> 8*b) & 0xFF];
+                x_write[index] = x_read[i];
+                o_write[index] = o_read[i];
+            }
+
+            p_tmp = x_read;
+            x_read = x_write;
+            x_write = p_tmp;
+
+            o_tmp = o_read;
+            o_read = o_write;
+            o_write = o_tmp;
+        }
+    }
+
+    if(debug) Rprintf("Cumulating and sorting in %.3fms\n", get_time(timer));
+
+    if(o_read != x_order.data()){
+        // we copy the result, if needed
+        memcpy(x_order.data(), o_read, sizeof(int) * n);
+    }
+
+    // We unclass
+    k=1;
+    x_unclass[0] = k;
+
+    double xi, xim1 = x_read[0] + x_min;
+    x_unik.push_back(xim1);
+
+    for(int i=1 ; i<n ; ++i){
+        xi = x_read[i] + x_min;
+        if(xi != xim1){
+            ++k;
+            x_unik.push_back(static_cast<double>(xi));
+        }
+        x_unclass[i] = k;
+        xim1 = xi;
+    }
+
+    if(debug) Rprintf("Unclassing in %.3fms\n", get_time(timer));
+
+    // We put into the right order
+    for(int i=0 ; i<n ; ++i){
+        x_uf[x_order[i]] = x_unclass[i];
+    }
+
+    if(debug) Rprintf("Reordering in %.3fms\n", get_time(timer));
+
+
+}
+
+void quf_int(vector<int> &x_uf, int *px, vector<double> &x_unik, int x_min, int max_value){
+    // Principle:
+    // we go through x only once
+    // we keep a table of all x values
+    // whenever we find a new value of x, we save it
+
+    if(max_value > 1000000) stop("max_value must be lower than 100000.");
+
+    int n = x_uf.size();
+    int n_unik = 0; // nber of uniques minus one
+
+    // radix array
+    vector<int> x_lookup(max_value + 1, 0);
+
+    int x_tmp, x_pos;
+    for(int i=0 ; i<n ; ++i){
+        x_tmp = px[i] - x_min;
+
+        if(x_lookup[x_tmp] == 0){
+            ++n_unik;
+            x_uf[i] = n_unik;
+            x_unik.push_back(static_cast<double>(px[i]));
+            x_lookup[x_tmp] = n_unik;
+        } else {
+            x_pos = x_lookup[x_tmp];
+            x_uf[i] = x_pos;
+        }
+    }
+
+}
+
+
+// [[Rcpp::export]]
+List cpp_quf_gnl(SEXP x){
+
+    int n = Rf_length(x);
+
+    vector<int> x_uf(n);
+    vector<double> x_unik;
+
+    if(TYPEOF(x) == INTSXP){
+        // integer
+
+        int *px = INTEGER(x);
+        int x_min = px[0], x_max = px[0], x_tmp;
+        for(int i=1 ; i<n ; ++i){
+            x_tmp = px[i];
+            if(x_tmp > x_max) x_max = x_tmp;
+            if(x_tmp < x_min) x_min = x_tmp;
+        }
+
+        int max_value = x_max - x_min;
+
+        // Rprintf("max_value = %i, n = %i\n", max_value, n);
+
+        if(max_value < n && max_value < 1000000){
+            quf_int(x_uf, px, x_unik, x_min, max_value);
+        } else if(max_value < 0x10000000){
+            // we don't cover ranges > 2**31
+            quf_int_gnl(x_uf, px, x_unik, x_min);
+        } else {
+            // ranges > 2**31 => as double
+            // we need to create a vector of double, otherwise: pointer issue
+            vector<double> x_dble(n);
+            for(int i=0 ; i<n ; ++i) x_dble[i] = static_cast<double>(px[i]);
+            quf_double(x_uf, x_dble.data(), x_unik);
+        }
+
+    } else {
+        // double
+        double *px = REAL(x);
+        quf_double(x_uf, px, x_unik);
+    }
+
+    List res;
+    res["x_uf"] = x_uf;
+    res["x_unik"] = x_unik;
+
+    return res;
+}
+
+
+
+
+
+
+
 // [[Rcpp::export]]
 IntegerVector cpp_lag_obs(IntegerVector id, IntegerVector time, int nlag){
     // in case of ties, we sum
@@ -922,9 +1292,9 @@ IntegerVector cpp_lag_obs(IntegerVector id, IntegerVector time, int nlag){
         }
     } else if(nlag < 0){
         /* NOTA:I could have tweaked the previous if() to get rid of the condition
-        //      but the code would have lost in clarity.
-        // For the lead: opposite to what is done before */
-        int nlead = -nlag;
+         //      but the code would have lost in clarity.
+         // For the lead: opposite to what is done before */
+         int nlead = -nlag;
         i = nobs;
         while(i >= 0){
             // R_CheckUserInterrupt(); // this is (too) costly
@@ -963,17 +1333,6 @@ IntegerVector cpp_lag_obs(IntegerVector id, IntegerVector time, int nlag){
 
     return(res);
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 
