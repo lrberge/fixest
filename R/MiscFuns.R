@@ -3259,8 +3259,8 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
         #
 
         # special case: the point
-        if(deparse(fml[[2]]) == "."){
-            all_vars = setdiff(names(base), deparse(fml[[3]]))
+        if(deparse(fml[[2]])[1] == "."){
+            all_vars = setdiff(names(base), deparse(fml[[3]])[1])
             if(usePost) all_vars = setdiff(all_vars, as.character(pipe))
             if(IS_INDIV) all_vars = setdiff(all_vars, indiv_varname)
 
@@ -3284,7 +3284,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
             mat_vars = as.matrix(mat_vars[, is_num, FALSE])
         } else {
             # we swap the formula to use model.frame
-            fml_x = as.formula(paste0("1~", deparse(fml[[2]]), "-1"))
+            fml_x = as.formula(paste0("1~", deparse_long(fml[[2]]), "-1"))
 
             # Variables control:
             all_vars = all.vars(fml_x)
@@ -3469,7 +3469,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 
         if(any(nb_na)){
             var_with_na = x_name[nb_na > 0]
-            message("NA values were omitted for the variable", enumerate_items(paste0(var_with_na, " (", nb_na[nb_na > 0], ")")), ".")
+            message("NA values were omitted for the variable", enumerate_items(paste0(var_with_na, " (", nb_na[nb_na > 0], ")"), addS=TRUE, verb=FALSE), ".")
         }
 
         attr(res, "na") = NULL
@@ -4861,13 +4861,22 @@ quickUnclassFactor = function(x, addItem = FALSE){
 		return(res)
 	}
 
-	myOrder = order(x)
-	x_sorted = x[myOrder]
-	x_quf_sorted = cpp_unclassFactor(x_sorted)
-	x_quf = x_quf_sorted[order(myOrder)]
+    if(is_little_endian()){
+        res = cpp_quf_gnl(x)
+        x_quf = res$x_uf
+        items = res$x_unik
+    } else {
+        myOrder = order(x)
+        x_sorted = x[myOrder]
+        x_quf_sorted = cpp_unclassFactor(x_sorted)
+        # x_quf = x_quf_sorted[order(myOrder)]
+        x_quf = integer(length(x_sorted))
+        x_quf[myOrder] = x_quf_sorted
+        if(addItem) items = cpp_unik(x_sorted, tail(x_quf_sorted, 1))
+    }
 
 	if(addItem){
-		res = list(x = x_quf, items = cpp_unik(x_sorted, tail(x_quf_sorted, 1)))
+		res = list(x = x_quf, items = items)
 		return(res)
 	} else {
 		return(x_quf)
@@ -5068,6 +5077,14 @@ format_se_type = function(x, width){
     n_fe = length(all_fe_split)
     n_char = nchar(all_fe_split)
 
+    if(n_fe == 1 && !grepl("\\^", all_fe_split[1])){
+        se_formatted = paste0("1-way: ", all_fe_split[1])
+        if(nchar(se_formatted) > width){
+            se_formatted = paste0(substr(se_formatted, 1, width - 2), "..")
+        }
+        return(se_formatted)
+    }
+
     if(width < 6 + sum(n_char) + (n_fe-1) * 3){
         qui = n_char > 5
         for(i in which(qui)){
@@ -5086,7 +5103,7 @@ format_se_type = function(x, width){
 
     # if still too large, we trim right
     if(nchar(se_formatted) > width){
-        se_formatted = gsub("-way: ", "way: ", se_formatted)
+        # se_formatted = gsub("-way: ", "way: ", se_formatted)
         se_formatted = paste0(substr(se_formatted, 1, width - 2), "..")
     }
 
@@ -5095,7 +5112,7 @@ format_se_type = function(x, width){
 
 tex_star = function(x){
     qui = nchar(x) > 0
-    x[qui] = paste0("$^", x[qui], "$")
+    x[qui] = paste0("$^{", x[qui], "}$")
     x
 }
 
