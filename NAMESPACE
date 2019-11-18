@@ -9,7 +9,7 @@ export(feNmlm, femlm, feols, feglm, fepois, fenegbin)
 export(feglm.fit)
 # misc funs
 export(esttex, esttable, collinearity, obs2remove, r2,
-       did_estimate_yearly_effects, did_plot_yearly_effects, errbar)
+       did_estimate_yearly_effects, did_plot_yearly_effects, errbar, did_means)
 # setters & getters
 exportPattern("^(s|g)etFixest")
 
