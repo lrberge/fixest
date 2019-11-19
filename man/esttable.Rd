@@ -6,9 +6,8 @@
 \usage{
 esttable(..., se = c("standard", "white", "cluster", "twoway",
   "threeway", "fourway"), dof = TRUE, cluster, depvar, drop, order,
-  digits = 4, pseudo = TRUE, convergence, signifCode = c(`***` =
-  0.001, `**` = 0.01, `*` = 0.05, . = 0.1), titles, keepFactors = FALSE,
-  family, bic = TRUE, loglik = FALSE)
+  digits = 4, fitstat, convergence, signifCode = c(`***` = 0.001, `**`
+  = 0.01, `*` = 0.05, . = 0.1), titles, keepFactors = FALSE, family)
 }
 \arguments{
 \item{...}{Used to capture different \code{fixest} objects (obtained with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}). Note that any other type of element is discarded. Note that you can give a list of \code{fixest} objects.}
@@ -27,7 +26,7 @@ esttable(..., se = c("standard", "white", "cluster", "twoway",
 
 \item{digits}{Integer, default is 4. The number of digits to be displayed.}
 
-\item{pseudo}{Logical, default is \code{TRUE}. Should the pseudo R2 be displayed?}
+\item{fitstat}{A character vector or a one sided formula. A vector listing which fit statistics to display. The valid types are 'll', 'aic', 'bic' and r2 types like 'r2', 'pr2', 'war2', etc (see all valid types in \code{\link[fixest]{r2}}). The default value depends on the models to display. Example of use: \code{fitstat=c('sq.cor', 'ar2', 'war2')}, or \code{fitstat=~sq.cor+ar2+war2} using a formula.}
 
 \item{convergence}{Logical, default is missing. Should the convergence state of the algorithm be displayed? By default, convergence information is displayed if at least one model did not converge.}
 
@@ -38,10 +37,6 @@ esttable(..., se = c("standard", "white", "cluster", "twoway",
 \item{keepFactors}{Logical, default is \code{TRUE}. If \code{FALSE}, then factor variables are displayed as fixed-effects and no coefficient is shown.}
 
 \item{family}{A logical, default is missing. Whether to display the families of the models. By default this line is displayed when at least two models are from different families.}
-
-\item{bic}{Logical, default is \code{TRUE}.Should the BIC be reported?}
-
-\item{loglik}{Logical, default is \code{TRUE}. Should the log-likelihood be reported?}
 }
 \value{
 Returns a data.frame containing the formatted results.

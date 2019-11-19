@@ -5,11 +5,10 @@
 \title{Facility to export the results of multiple \code{fixest} estimations in a Latex table.}
 \usage{
 esttex(..., se = c("standard", "white", "cluster", "twoway", "threeway",
-  "fourway"), dof = TRUE, cluster, digits = 4, pseudo = TRUE, title,
+  "fourway"), dof = TRUE, cluster, digits = 4, fitstat, title,
   sdBelow = TRUE, drop, order, dict = getFixest_dict(), file,
   replace = FALSE, convergence, signifCode = c(`***` = 0.01, `**` =
-  0.05, `*` = 0.1), label, aic = FALSE, sqCor = FALSE, subtitles,
-  fixef_sizes = FALSE, bic = TRUE, loglik = FALSE,
+  0.05, `*` = 0.1), label, subtitles, fixef_sizes = FALSE,
   yesNoFixef = c("Yes", "No"), keepFactors = TRUE, family,
   powerBelow = -5)
 }
@@ -24,7 +23,7 @@ esttex(..., se = c("standard", "white", "cluster", "twoway", "threeway",
 
 \item{digits}{Integer, default is 4. The number of digits to be displayed.}
 
-\item{pseudo}{Logical, default is \code{TRUE}. Should the pseudo R2 be displayed?}
+\item{fitstat}{A character vector or a one sided formula. A vector listing which fit statistics to display. The valid types are 'll', 'aic', 'bic' and r2 types like 'r2', 'pr2', 'war2', etc (see all valid types in \code{\link[fixest]{r2}}). The default value depends on the models to display. Example of use: \code{fitstat=c('sq.cor', 'ar2', 'war2')}, or \code{fitstat=~sq.cor+ar2+war2} using a formula.}
 
 \item{title}{Character scalar. The title of the Latex table.}
 
@@ -46,17 +45,9 @@ esttex(..., se = c("standard", "white", "cluster", "twoway", "threeway",
 
 \item{label}{Character scalar. The label of the Latex table.}
 
-\item{aic}{Logical, default is \code{FALSE}. Should the AIC be displayed?}
-
-\item{sqCor}{Logical, default is \code{FALSE}. Should the squared correlation be displayed?}
-
 \item{subtitles}{Character vector of the same length as the number of models to be displayed. If provided, subtitles are added underneath the dependent variable name.}
 
 \item{fixef_sizes}{Logical, default is \code{FALSE}. If \code{TRUE} and fixed-effects were used in the models, then the number "individuals" per fixed-effect dimension is also displayed.}
-
-\item{bic}{Logical, default is \code{TRUE}.Should the BIC be reported?}
-
-\item{loglik}{Logical, default is \code{TRUE}. Should the log-likelihood be reported?}
 
 \item{yesNoFixef}{A character vector of length 2. Default is \code{c("Yes", "No")}. This is the message displayed when a given cluster is (or is not) included in a regression.}
 

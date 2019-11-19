@@ -18,7 +18,7 @@ did_plot_yearly_effects(object, x.shift = 0, w = 0.1,
 
 \item{ci_level}{Scalar between 0 and 1: the level of the CI. By default it is equal to 0.95.}
 
-\item{style}{One of \code{"interval"} (default), \code{"bar"} or \code{"tube"}. The style of the plot.}
+\item{style}{One of \code{"bar"} (default), \code{"interval"} or \code{"tube"}. The style of the plot.}
 
 \item{add}{Default is \code{FALSE}, if the intervals are to be added to an existing graph. Note that if it is the case, then the argument \code{x} MUST be numeric.}
 
