@@ -811,6 +811,30 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpppar_cond_means
+List cpppar_cond_means(NumericMatrix mat_vars, IntegerVector treat, int nthreads);
+RcppExport SEXP _fixest_cpppar_cond_means(SEXP mat_varsSEXP, SEXP treatSEXP, SEXP nthreadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type mat_vars(mat_varsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type treat(treatSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpppar_cond_means(mat_vars, treat, nthreads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_quf_gnl
+List cpp_quf_gnl(SEXP x);
+RcppExport SEXP _fixest_cpp_quf_gnl(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_quf_gnl(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_fixest_compute_cluster_coef_r", (DL_FUNC) &_fixest_compute_cluster_coef_r, 12},
@@ -867,6 +891,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpppar_matprod", (DL_FUNC) &_fixest_cpppar_matprod, 3},
     {"_fixest_cpppar_which_na_inf_vec", (DL_FUNC) &_fixest_cpppar_which_na_inf_vec, 2},
     {"_fixest_cpppar_which_na_inf_mat", (DL_FUNC) &_fixest_cpppar_which_na_inf_mat, 2},
+    {"_fixest_cpppar_cond_means", (DL_FUNC) &_fixest_cpppar_cond_means, 3},
+    {"_fixest_cpp_quf_gnl", (DL_FUNC) &_fixest_cpp_quf_gnl, 1},
     {NULL, NULL, 0}
 };
 
