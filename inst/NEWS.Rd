@@ -3,6 +3,48 @@
 
 \title{News for \R Package \pkg{fixest}}
 
+\section{Changes in version 0.2.0 (2019-11-19)}{
+
+    \subsection{New function}{
+         \itemize{
+            \item[did_means] New function \code{did_means} to conveniently compare means of groups of observations (both treat/control and pre/post). Contains tools to easily export in Latex.
+        }
+    }
+
+    \subsection{Major user visible changes}{
+        \itemize{
+            \item[All estimation methods] Significant speed improvement when the fixed-effects variables (i.e. the identifiers) are of type integer or double.
+            \item[esttex, esttable] New argument 'fitstat' to select which fit statistic to display. The default adapts to the models. Old arguments (loglik, bic, aic, sq.cor) are dropped.
+            \item[esttable] Significantly better rendering of SE types.
+            \item[r2] Now NA is returned for R2s that have no theoretical justification (e.g. within R2 when no FEs, or 'regular' R2 for ML models).
+        }
+    }
+
+    \subsection{Minor user visible changes}{
+        \itemize{
+            \item[did_plot_yearly_effects] Now the name of the dependent variable appears on the y-axis.
+            \item[esttex] Usage of the \code{sym} macro in Latex is dropped.
+        }
+    }
+
+    \subsection{Bug correction}{
+        \itemize{
+            \item[fixef.fixest] bug could appear when using varying slopes coefficients in some specific circumstances (when the slope FEs were different from the regular FEs).
+            \item[fixef.fixest] bug when many regular FEs jointly with varying slopes.
+            \item[fixef.fixest] regarding slope coefficients: now the algorithm also evaluates functions of variables.
+            \item[esttable] Width of the "separating lines" now appropriately set for long dependent variable names.
+            \item[esttex] Spelling mistake corrected.
+            \item[estimations] Bug could occur for extremely small data sets (< 10 observations).
+        }
+    }
+
+    \subsection{Error handling}{
+        \itemize{
+            \item[esttex, esttable] More informative error messages in functions esttex and esttable.
+        }
+    }
+}
+
 \section{Changes in version 0.1.2 (2019-10-04)}{
     \subsection{Major bug correction}{
         \itemize{
