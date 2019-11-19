@@ -3135,17 +3135,22 @@ errbar <- function(estimate, sd, ci_low, ci_top, x, x.shift = 0, w=0.1, ci_level
 #' # Playing around with the DiD data
 #' data(base_did)
 #'
+#' # means of treat/control
 #' did_means(y+x1+period~treat, base_did)
 #'
+#' # same but inverting the difference
 #' did_means(y+x1+period~treat, base_did, diff.inv = TRUE)
 #'
+#' # now treat/control, before/after
 #' did_means(y+x1+period~treat|post, base_did)
 #'
+#' # same but with a new line giving the number of unique "indiv" for each case
 #' did_means(y+x1+period~treat|post, base_did, indiv = "id")
 #'
+#' # same but with the treat case "0" coming first
 #' did_means(y+x1+period~treat|post, base_did, indiv = ~id, treat_first = 0)
 #'
-#' # Selecting all the variables
+#' # Selecting all the variables with "."
 #' did_means(.~treat|post, base_did, indiv = "id")
 #'
 #'
@@ -3415,13 +3420,13 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
     treat_cases = sort(unique(treat_var), decreasing = TRUE)
     if(!missing(treat_dict) && !is.null(treat_dict)){
 
-        if(!checkVector(treat_dict) || is.null(names(treat_dict))){
+        if(!isVector(treat_dict) || is.null(names(treat_dict))){
             stop("The argument 'treat_dict' must be a named character vector.")
         }
 
         pblm = setdiff(treat_cases, names(treat_dict))
         if(length(pblm) > 0){
-            stop("The value", enumerate_words(pblm, addS = TRUE), " not in 'treat_dict'.")
+            stop("The value", enumerate_items(pblm, addS = TRUE), " not in 'treat_dict'.")
         }
     } else {
         treat_dict = paste0("cond: ", treat_cases)
@@ -3529,7 +3534,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
         # Changing the names of the variables
         if(!missnull(dict)){
             qui = which(res$vars %in% names(dict))
-            for(i in qui) res$vars[i] = .cleanPCT(dict[res$vars[i]])
+            for(i in qui) res$vars[i] = .escapeChars(dict[res$vars[i]])
         }
 
         # The data
@@ -4167,6 +4172,8 @@ vcovClust <- function (cluster, myBread, scores, dof=FALSE, K, do.unclass=TRUE){
     # - myBread: original vcov
     # - scores
     # Note: if length(unique(cluster)) == n (i.e. White correction), then the dof are such that vcovClust is equivalent to vcovHC(res, type="HC1")
+    # Source: http://cameron.econ.ucdavis.edu/research/Cameron_Miller_JHR_2015_February.pdf
+    #         Cameron & Miller -- A Practitioner’s Guide to Cluster-Robust Inference
 
     n <- NROW(scores)
     if(missing(K)) K <- NCOL(scores)
@@ -4861,26 +4868,37 @@ quickUnclassFactor = function(x, addItem = FALSE){
 		return(res)
 	}
 
-    if(is_little_endian()){
-        res = cpp_quf_gnl(x)
-        x_quf = res$x_uf
-        items = res$x_unik
+    res = cpp_quf_gnl(x)
+
+    if(addItem){
+        names(res) = c("x", "items")
+        return(res)
     } else {
-        myOrder = order(x)
-        x_sorted = x[myOrder]
-        x_quf_sorted = cpp_unclassFactor(x_sorted)
-        # x_quf = x_quf_sorted[order(myOrder)]
-        x_quf = integer(length(x_sorted))
-        x_quf[myOrder] = x_quf_sorted
-        if(addItem) items = cpp_unik(x_sorted, tail(x_quf_sorted, 1))
+        return(res$x_uf)
     }
 
-	if(addItem){
-		res = list(x = x_quf, items = items)
-		return(res)
-	} else {
-		return(x_quf)
-	}
+
+
+#     if(is_little_endian()){
+#         res = cpp_quf_gnl(x)
+#         x_quf = res$x_uf
+#         items = res$x_unik
+#     } else {
+#         myOrder = order(x)
+#         x_sorted = x[myOrder]
+#         x_quf_sorted = cpp_unclassFactor(x_sorted)
+#         # x_quf = x_quf_sorted[order(myOrder)]
+#         x_quf = integer(length(x_sorted))
+#         x_quf[myOrder] = x_quf_sorted
+#         if(addItem) items = cpp_unik(x_sorted, tail(x_quf_sorted, 1))
+#     }
+#
+# 	if(addItem){
+# 		res = list(x = x_quf, items = items)
+# 		return(res)
+# 	} else {
+# 		return(x_quf)
+# 	}
 }
 
 
@@ -4897,30 +4915,6 @@ getItems = function(x){
 	}
 
 	return(res)
-}
-
-isVector = function(x){
-	# it seems that when you subselect in data.table
-	# sometimes it does not yield a vector
-	# so i cannot use is.vecyor to check the consistency
-
-	if(is.vector(x)){
-		return(TRUE)
-	} else {
-		# if(class(x) %in% c("integer", "numeric", "character", "factor", "Date", "DateTime") && is.null(dim(x))){
-		if(is.null(dim(x)) && !is.list(x)){
-			return(TRUE)
-		}
-	}
-	return(FALSE)
-}
-
-ifsingle = function(x, yes, no){
-	if(length(x) == 1){
-		return(yes)
-	} else {
-		return(no)
-	}
 }
 
 missnull = function(x){
