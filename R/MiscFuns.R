@@ -4859,46 +4859,25 @@ quickUnclassFactor = function(x, addItem = FALSE){
 	# but waaaaay quicker
 
 	if(!is.numeric(x)){
-		# level and unclass are slower than applying char2num (about 2 times)
+		# level and unclass is much slower
 		x = as.character(x)
-	}
-
-	if(is.character(x)){
-		res = char2num(x, addItem)
-		return(res)
 	}
 
     res = cpp_quf_gnl(x)
 
     if(addItem){
-        names(res) = c("x", "items")
+
+        if(is.character(x)){
+            items = x[res$x_unik]
+            res = list(x = res$x_uf, items = items)
+        } else {
+            names(res) = c("x", "items")
+        }
+
         return(res)
     } else {
         return(res$x_uf)
     }
-
-
-
-#     if(is_little_endian()){
-#         res = cpp_quf_gnl(x)
-#         x_quf = res$x_uf
-#         items = res$x_unik
-#     } else {
-#         myOrder = order(x)
-#         x_sorted = x[myOrder]
-#         x_quf_sorted = cpp_unclassFactor(x_sorted)
-#         # x_quf = x_quf_sorted[order(myOrder)]
-#         x_quf = integer(length(x_sorted))
-#         x_quf[myOrder] = x_quf_sorted
-#         if(addItem) items = cpp_unik(x_sorted, tail(x_quf_sorted, 1))
-#     }
-#
-# 	if(addItem){
-# 		res = list(x = x_quf, items = items)
-# 		return(res)
-# 	} else {
-# 		return(x_quf)
-# 	}
 }
 
 
