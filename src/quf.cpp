@@ -12,9 +12,10 @@
  *   b)  ("a", "d", "a", "b") => (1, 3, 1, 2)                         *
  *  )                                                                 *
  *                                                                    *
- *  The code here is used to quf vectors of integers or floats.       *
- *  To quf character vectors, I use only R code which is fast thanks  *
- *  to the singular way R stores characters.                          *
+ *  The code here is used to quf vectors of integers, floats or       *
+ *  or strings. I convert any other type of identifier to             *
+ *  character if they're not numeric before getting into this         *
+ *  function.                                                         *
  *                                                                    *
  *  All we care in qufing is to get a vector from 1 to n the number   *
  *  of unique values. We don't care about the order (e.g., in         *
@@ -27,6 +28,10 @@
  *  first and then create the new values.                             *
  *  The process is similar for doubles: first sort, then get the      *
  *  new values.                                                       *
+ *  Finally for string vectors, I use R's feature of stocking         *
+ *  character strings in a unique location. They are therefore        *
+ *  uniquely identified by their pointer. I then tranform the         *
+ *  pointer to int, and sort accordingly.                             *
  *                                                                    *
  *  The sorting, when sorting is required, is radix-based. My code    *
  *  has greatly benefited from two sources which clarified a lot      *
@@ -69,28 +74,42 @@ inline double ull_to_float(unsigned long long u_ull) {
     return res;
 }
 
-void quf_double(vector<int> &x_uf, double *px, vector<double> &x_unik){
+void quf_double(vector<int> &x_uf, void *px, vector<double> &x_unik, bool is_string = false){
 
     // x_uf: x unclassed factor
     // px: pointer to x vector (R vector) -- READ ONLY!!!
     // x_unik: empty vector
+    // px: either double or ULL (in case of strings)
 
     int n = x_uf.size();
+
+    double *px_dble = (double *)px;
+    unsigned long long *px_ull = (unsigned long long *)px;
 
     // variables
     unsigned long long x_ull_current = 0;
     // char: 2 octets: 0-255
     // one double is made of 8 char
     unsigned char x_char = 0;
-    vector<unsigned long long> x_ulong(n), x_tmp(n);
+    vector<unsigned long long> x_ulong(is_string ? 1 : n), x_tmp(n);
+
+    // in case the data is string, we use px as the x_ulong
+    unsigned long long *px_ulong = is_string ? px_ull : x_ulong.data();
+
 
     // radix array
     int radix_table[8][256] = { {0} };
 
     // 1) Counting
     for(int i=0 ; i<n ; ++i){
-        x_ull_current = float_to_ull(px, i);
-        x_ulong[i] = x_ull_current;
+
+        if(is_string){
+            x_ull_current = px_ull[i];
+        } else {
+            // we change x double into ulong after flipping to keep order
+            x_ull_current = float_to_ull(px_dble, i);
+            x_ulong[i] = x_ull_current;
+        }
 
         for(int b=0 ; b<8 ; ++b){
             x_char = ((unsigned char *)&x_ull_current)[b];
@@ -113,7 +132,7 @@ void quf_double(vector<int> &x_uf, double *px, vector<double> &x_unik){
     }
 
     // 3) Sorting
-    unsigned long long *x_read = x_ulong.data();
+    unsigned long long *x_read = px_ulong;
     unsigned long long *x_write = x_tmp.data();
     unsigned long long *p_tmp; // used for swapping
 
@@ -157,13 +176,13 @@ void quf_double(vector<int> &x_uf, double *px, vector<double> &x_unik){
     x_unclass[0] = k;
 
     unsigned long long xi, xim1 = x_read[0];
-    x_unik.push_back(ull_to_float(xim1));
+    x_unik.push_back(is_string ? static_cast<double>(x_order[0]  + 1) : ull_to_float(xim1));
 
     for(int i=1 ; i<n ; ++i){
         xi = x_read[i];
         if(xi != xim1){
             ++k;
-            x_unik.push_back(ull_to_float(xi));
+            x_unik.push_back(is_string ? static_cast<double>(x_order[i]  + 1) : ull_to_float(xi));
         }
         x_unclass[i] = k;
         xim1 = xi;
@@ -319,26 +338,79 @@ void quf_int(vector<int> &x_uf, void *px, vector<double> &x_unik, int x_min, int
 
 }
 
-
 // [[Rcpp::export]]
-List cpp_quf_gnl(SEXP x){
-
-    // quf_int is the most efficient function.
-    // even if we have a vector of double, we check whether the underlying structure
-    // is in fact int, so that we can send it to quf_int
-    // if the vector is really double, then the checking cost is negligible
-    // if the vector is in fact int, the cost of checking is largely compensated by the
-    //   efficiency of the algorithm
+List cpp_quf_str(SEXP x){
 
     int n = Rf_length(x);
 
     vector<int> x_uf(n);
     vector<double> x_unik;
 
-    bool IS_INT = true;
+    // we change the string vector into a uint64 vector
+    // since we don't care about the sorting order, we can just
+    // recast into double (an not uint64)
+
+    vector<double> x_ull(n);
+    std::uintptr_t xi_uintptr;
+    unsigned long long xi_ull;
+
+
+    for(int i=0 ; i<n ; ++i){
+        const char *pxi = CHAR(STRING_ELT(x, i));
+        xi_uintptr = reinterpret_cast<std::uintptr_t>(pxi);
+        xi_ull = static_cast<unsigned long long>(xi_uintptr);
+
+        x_ull[i] = xi_ull;
+
+        // Rcout << xi_uintptr << "  ----  " << xi_ull << "\n";
+    }
+
+    quf_double(x_uf, x_ull.data(), x_unik, true);
+
+    List res;
+    res["x_uf"] = x_uf;
+    res["x_unik"] = x_unik;
+
+    return res;
+}
+
+
+
+
+// [[Rcpp::export]]
+List cpp_quf_gnl(SEXP x){
+
+    // INT: we try as possible to send the data to quf_int, the most efficient function
+    // for data of large range, we have a separate algorithms that avoids the creation
+    // of a possibly too large lookup table.
+    // for extreme ranges (> 2**31) we use the algorithm for double
+
+    // DOUBLE: quf_int is the most efficient function.
+    // even if we have a vector of double, we check whether the underlying structure
+    // is in fact int, so that we can send it to quf_int
+    // if the vector is really double, then the checking cost is negligible
+    // if the vector is in fact int, the cost of checking is largely compensated by the
+    //   efficiency of the algorithm
+
+    // STRING: for string vectors, we first transform them into ULL using their pointer
+    // before applying them the algorithm for doubles
+    // note that the x_unik returned is NOT of type string but is equal to
+    // the location of the unique elements
+
+    int n = Rf_length(x);
+
+    vector<int> x_uf(n);
+    vector<double> x_unik;
+
+    // preparation for strings
+    bool IS_STR = false;
+    vector<unsigned long long> x_ull;
+
+    bool IS_INT = false;
     bool is_int_in_double = false;
     if(TYPEOF(x) == REALSXP){
         // we check if underlying structure is int
+        IS_INT = true;
         double *px = REAL(x);
         for(int i=0 ; i<n ; ++i){
             if(!(px[i] == (int) px[i])){
@@ -348,6 +420,19 @@ List cpp_quf_gnl(SEXP x){
         }
 
         is_int_in_double = IS_INT; // true: only if x is REAL + INT test OK
+    } else if(TYPEOF(x) == STRSXP){
+
+        IS_STR = true;
+        std::uintptr_t xi_uintptr;
+
+        for(int i=0 ; i<n ; ++i){
+            const char *pxi = CHAR(STRING_ELT(x, i));
+            xi_uintptr = reinterpret_cast<std::uintptr_t>(pxi);
+
+            x_ull.push_back(static_cast<unsigned long long>(xi_uintptr));
+
+            // Rcout << xi_uintptr << "  ----  " << xi_ull << "\n";
+        }
     }
 
     if(IS_INT){
@@ -404,6 +489,9 @@ List cpp_quf_gnl(SEXP x){
             }
         }
 
+    } else if(IS_STR){
+        // string -- beforehand transformed as ULL
+        quf_double(x_uf, x_ull.data(), x_unik, true);
     } else {
         // double
         double *px = REAL(x);
@@ -416,6 +504,7 @@ List cpp_quf_gnl(SEXP x){
 
     return res;
 }
+
 
 
 
