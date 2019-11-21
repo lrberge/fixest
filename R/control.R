@@ -498,16 +498,47 @@ deparse_long = function(x){
 #### Control Utilities ####
 ####
 
-enumerate_items = function (x, verb = "is", addS = FALSE, past = FALSE, or = FALSE, start_verb = FALSE, quote = FALSE){
+enumerate_items = function (x, type, verb = FALSE, addS = FALSE, past = FALSE, or = FALSE, start_verb = FALSE, quote = FALSE){
 	# function that enumerates items and add verbs
-	verb = match.arg(as.character(verb), c("is", "has", "no", "contain", "FALSE"))
-	if(verb == "FALSE") verb = "no"
+	# in argument type, you can have a mix of the different arguments, all separated with a "."
+	# to add an additional, regular, verb, you can use the underscore: e.g. "s._look.or"
+	
+	if(!missing(type)){
+		args = strsplit(type, "\\.")[[1]]
+		verb = intersect(c("is", "has", "contain"), args)
+		if(length(verb) == 0){
+			qui = grepl("_", args)
+			if(any(qui)){
+				verb = gsub("^_|s$", "", args[qui])
+			} else {
+				verb = "no"
+			}
+		}
+		addS = "s" %in% args
+		past = "past" %in% args
+		or = "or" %in% args
+		start_verb = "start" %in% args
+		quote = "quote" %in% args
+	} else {
+		verb = match.arg(as.character(verb), c("is", "has", "no", "contain", "FALSE"))
+		if(verb == "FALSE") verb = "no"
+	}
+	
 	n = length(x)
 	
 	if(past){
-		verb_format = switch(verb, is = ifelse(n == 1, " was", " were"), no = "", contain = "contained", has="had")
+		if(verb %in% c("no", "is", "has")){
+			verb_format = switch(verb, is = ifelse(n == 1, " was", " were"), no = "", has=" had")
+		} else {
+			verb_format = paste0(" ", verb, "ed")
+		}
 	} else {
-		verb_format = switch(verb, is = ifelse(n == 1, " is", " are"), no = "", contain = ifelse(n == 1, " contains", " contain"), has = ifelse(n == 1, " has", " have"))
+		if(verb %in% c("no", "is", "has")){
+			verb_format = switch(verb, is = ifelse(n == 1, " is", " are"), no = "", has = ifelse(n == 1, " has", " have"))
+		} else {
+			verb_format = ifelse(n == 1, paste0(" ", verb, "s"), paste0(" ", verb))
+		}
+		
 	}
 	
 	if (addS) {

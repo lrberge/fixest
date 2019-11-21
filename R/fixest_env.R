@@ -88,12 +88,12 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     # stop if nonlinear args in linear funs (bc very likely it's a misunderstanding)
     if(origin != "feNmlm" && any(feNmlm_args %in% args)){
         qui_pblm = intersect(feNmlm_args, args)
-        stop("Argument", enumerate_items(qui_pblm, addS = TRUE), " not valid for function ", origin, ". These are arguments of function feNmlm only.")
+        stop("Argument", enumerate_items(qui_pblm, "s.is"), " not valid for function ", origin, ". These are arguments of function feNmlm only.")
     }
 
     args_invalid = setdiff(args, valid_args)
     if(length(args_invalid) > 0){
-        if(warn) warning(substr(deparse(mc_origin)[1], 1, 15), "...: ", enumerate_items(args_invalid), " not ", ifsingle(args_invalid, "a valid argument", "valid arguments"), " for function ", origin, ".", call. = FALSE, immediate. = TRUE)
+        if(warn) warning(substr(deparse(mc_origin)[1], 1, 15), "...: ", enumerate_items(args_invalid, "is"), " not ", ifsingle(args_invalid, "a valid argument", "valid arguments"), " for function ", origin, ".", call. = FALSE, immediate. = TRUE)
     }
 
     args_deprec = deprec_old_new[deprec_old_new %in% args]
@@ -320,7 +320,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
             if(any(!fixef %in% dataNames)){
                 var_problem = fixef[!fixef %in% dataNames]
-                stop("The argument 'fixef' must be variable names! Variable", enumerate_items(var_problem, addS = TRUE), " not in the data.")
+                stop("The argument 'fixef' must be variable names! Variable", enumerate_items(var_problem, "s.is"), " not in the data.")
 
             }
 
@@ -365,7 +365,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             stop("The right hand side of the formula (", deparse_long(fml[[2]]), ") contains no variable!")
         } else if(!all(namesLHS %in% dataNames)){
             not_there = namesLHS[!namesLHS %in% dataNames]
-            stop(ifsingle(not_there, "The v", "V"), "ariable", enumerate_items(not_there, addS = TRUE), " in the LHS of the formula but not in the dataset.")
+            stop(ifsingle(not_there, "The v", "V"), "ariable", enumerate_items(not_there, "s.is"), " in the LHS of the formula but not in the dataset.")
         }
 
         lhs = try(eval(fml[[2]], data), silent = TRUE)
@@ -376,7 +376,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             lhs = as.numeric(as.vector(lhs))
         } else if(!is.numeric(lhs)){
             cls = class(lhs)
-            stop("The left hand side (", deparse_long(fml[[2]]), ") is not numeric. The class", ifsingle(cls, "", "e"), enumerate_items(cls, addS = TRUE), " not supported.")
+            stop("The left hand side (", deparse_long(fml[[2]]), ") is not numeric. The class", ifsingle(cls, "", "e"), enumerate_items(cls, "s.is"), " not supported.")
         } else {
             lhs = as.numeric(as.vector(lhs)) # complex
         }
@@ -392,7 +392,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         if(!na_inf.rm){
             msg = msg_na_inf(info$any_na, info$any_inf)
             obs = head(which(info$is_na_inf), 3)
-            stop("The left hand side of the fomula contains ", msg, " (e.g. observation", enumerate_items(obs, addS = TRUE, verb = "no"), "). Please provide data without ", msg, " (or use na_inf.rm).")
+            stop("The left hand side of the fomula contains ", msg, " (e.g. observation", enumerate_items(obs, "s"), "). Please provide data without ", msg, " (or use na_inf.rm).")
         } else {
             # If na_inf.rm => we keep track of the NAs
             if(info$any_na) ANY_NA = TRUE
@@ -489,7 +489,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
             if(!all(linear.varnames %in% dataNames)){
                 not_there = setdiff(linear.varnames, dataNames)
-                stop(ifsingle(not_there, "The v", "V"), "ariable", enumerate_items(not_there, addS = TRUE), " in the RHS of the formula but not in the dataset.")
+                stop(ifsingle(not_there, "The v", "V"), "ariable", enumerate_items(not_there, "s.is"), " in the RHS of the formula but not in the dataset.")
             }
 
             if(isFixef){
@@ -547,7 +547,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 msg = msg_na_inf(info$any_na, info$any_inf)
                 obs = which(info$is_na_inf)
 
-                stop("The right hand side contains ", msg, " (e.g. observation", enumerate_items(obs, addS = TRUE, verb = "no"), "). Please provide data without ", msg, " (or use na_inf.rm). FYI the variable", enumerate_items(whoIsNA, addS = TRUE), " concerned.")
+                stop("The right hand side contains ", msg, " (e.g. observation", enumerate_items(obs, "s"), "). Please provide data without ", msg, " (or use na_inf.rm). FYI the variable", enumerate_items(whoIsNA, "s.is"), " concerned.")
             } else {
                 # If na_inf.rm => we keep track of the NAs
                 if(info$any_na) ANY_NA = TRUE
@@ -594,7 +594,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         qui_num = sapply(data_NL, is.numeric)
         if(any(!qui_num)){
             var_pblm = nonlinear.varnames[qui_num]
-            stop("In NL.fml, the variable", enumerate_items(var_pblm, addS = TRUE), " not numeric. This is not allowed.")
+            stop("In NL.fml, the variable", enumerate_items(var_pblm, "s.is"), " not numeric. This is not allowed.")
         }
         data_NL = as.numeric(as.matrix(data_NL))
 
@@ -609,7 +609,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 msg = msg_na_inf(info$any_na, info$any_inf)
                 obs = which(info$is_na_inf)
 
-                stop("The non-linear part (NL.fml) contains ", msg, " (e.g. observation", enumerate_items(obs, addS = TRUE, verb = "no"), "). Please provide data without ", msg, " (or use na_inf.rm). FYI the variable", enumerate_items(whoIsNA, addS = TRUE), " concerned.")
+                stop("The non-linear part (NL.fml) contains ", msg, " (e.g. observation", enumerate_items(obs, "s"), "). Please provide data without ", msg, " (or use na_inf.rm). FYI the variable", enumerate_items(whoIsNA, "s.is"), " concerned.")
 
             } else {
                 # If na_inf.rm => we keep track of the NAs
@@ -668,7 +668,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
                 if(any(!vars.offset %in% dataNames)){
                     var_missing = setdiff(vars.offset, dataNames)
-                    stop("In the argument 'offset': the variable", enumerate_items(var_missing, addS = TRUE), " not in the data.")
+                    stop("In the argument 'offset': the variable", enumerate_items(var_missing, "s.is"), " not in the data.")
                 }
 
                 offset.value = try(eval(offset.call, data), silent = TRUE)
@@ -697,7 +697,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 if(na_inf.rm == FALSE){
                     msg = msg_na_inf(info$any_na, info$any_inf)
                     obs = head(which(info$is_na_inf), 3)
-                    stop("The offset contains ", msg, " (e.g. observation", enumerate_items(obs, addS = TRUE, verb = "no"), "). Please provide data without ", msg, " (or use na_inf.rm).")
+                    stop("The offset contains ", msg, " (e.g. observation", enumerate_items(obs, "s"), "). Please provide data without ", msg, " (or use na_inf.rm).")
                 } else {
                     if(info$any_na) ANY_NA = TRUE
                     if(info$any_inf) ANY_INF = TRUE
@@ -747,7 +747,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
                 if(any(!vars.weights %in% dataNames)){
                     var_missing = vars.weights[!vars.weights %in% dataNames]
-                    stop("In the argument 'weights': the variable", enumerate_items(var_missing, addS = TRUE), " not in the data." )
+                    stop("In the argument 'weights': the variable", enumerate_items(var_missing, "s.is"), " not in the data." )
                 }
 
                 weights.value = try(eval(weights.call, data), silent = TRUE)
@@ -783,7 +783,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 if(na_inf.rm == FALSE){
                     msg = msg_na_inf(info$any_na, info$any_inf)
                     obs = head(which(info$is_na_inf), 3)
-                    stop("The weights contain ", msg, " (e.g. observation", enumerate_items(obs, addS = TRUE, verb = "no"), "). Please provide data without ", msg, " (or use na_inf.rm).")
+                    stop("The weights contain ", msg, " (e.g. observation", enumerate_items(obs, "s"), "). Please provide data without ", msg, " (or use na_inf.rm).")
 
                 } else {
                     if(info$any_na) ANY_NA = TRUE
@@ -801,7 +801,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             # need to check NA if there are some (ie if NA in vector: any() gives TRUE if any TRUE, NA if no TRUE)
             anyNeg = any(weights.value < 0)
             if(!is.na(anyNeg) && anyNeg){
-                stop("The vector of weights contains negative values, this is not allowed (e.g. obs. ", enumerate_items(head(which(weights.value < 0), 3), verb = "no"), ").")
+                stop("The vector of weights contains negative values, this is not allowed (e.g. obs. ", enumerate_items(head(which(weights.value < 0), 3)), ").")
             }
 
             # we remove 0 weights
@@ -903,7 +903,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             }
 
             if(!is.matrix(fixef_mat) && !"data.frame" %in% class(fixef_mat)){
-                stop("Argument fixef_mat must be a vector, a matrix, a list or a data.frame (currently its class is ", enumerate_items(class(fixef_mat), verb = FALSE), ").")
+                stop("Argument fixef_mat must be a vector, a matrix, a list or a data.frame (currently its class is ", enumerate_items(class(fixef_mat)), ").")
             }
 
             if(is.matrix(fixef_mat) && is.null(colnames(fixef_mat))){
@@ -941,7 +941,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 fixef_vars_all = all.vars(fixef_fml)
                 if(!all(fixef_vars_all %in% dataNames)){
                     var_problem = setdiff(fixef_vars_all, dataNames)
-                    stop("The fixed-effects variable", enumerate_items(var_problem, addS = TRUE), " not in the data.")
+                    stop("The fixed-effects variable", enumerate_items(var_problem, "s.is"), " not in the data.")
                 }
 
                 # Managing fast combine
@@ -990,7 +990,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                     # Further controls
                     not_numeric = !sapply(slope_mat, is.numeric)
                     if(any(not_numeric)){
-                        stop("In the fixed-effects part of the formula (i.e. in ", as.character(fixef_fml[2]), "), variables with varying slopes must be numeric. Currently variable", enumerate_items(names(slope_mat)[not_numeric], addS = TRUE), " not.")
+                        stop("In the fixed-effects part of the formula (i.e. in ", as.character(fixef_fml[2]), "), variables with varying slopes must be numeric. Currently variable", enumerate_items(names(slope_mat)[not_numeric], "s.is"), " not.")
                     }
 
                     onlySlope = all(slope_flag)
@@ -1026,7 +1026,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 # Default behavior, NA not allowed
                 var_problem = fixef_vars[sapply(fixef_mat, anyNA)]
                 obs = head(which(isNA_cluster), 3)
-                stop("The fixed-effects variables contain NA values. Please provide data without NA (or use na_inf.rm).", ifelse(ncol(fixef_mat) > 1, paste0(" FYI the clusters with NA are: ", paste0(var_problem, collapse = ", "), "."), ""), " (e.g. observation", enumerate_items(obs, addS = TRUE), ".)")
+                stop("The fixed-effects variables contain NA values. Please provide data without NA (or use na_inf.rm).", ifelse(ncol(fixef_mat) > 1, paste0(" FYI the clusters with NA are: ", paste0(var_problem, collapse = ", "), "."), ""), " (e.g. observation", enumerate_items(obs, "s"), ".)")
 
             } else {
                 # If na_inf.rm => we keep track of the NAs
@@ -1052,7 +1052,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                     msg = msg_na_inf(info$any_na, info$any_inf)
                     obs = which(info$is_na_inf)
 
-                    stop("In the fixed-effects part of the formula, variables with varying slopes contain ", msg, " (e.g. observation", enumerate_items(obs, addS = TRUE, verb = "no"), "). Please provide data without ", msg, " (or use na_inf.rm). FYI the variable", enumerate_items(whoIsNA, addS = TRUE), " concerned.")
+                    stop("In the fixed-effects part of the formula, variables with varying slopes contain ", msg, " (e.g. observation", enumerate_items(obs, "s"), "). Please provide data without ", msg, " (or use na_inf.rm). FYI the variable", enumerate_items(whoIsNA, "s.is"), " concerned.")
                 } else {
                     # If na_inf.rm => we keep track of the NAs
                     if(info$any_na) ANY_NA = TRUE
@@ -1462,7 +1462,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         assign("starting_values", NULL, env)
 
         if(sum(start_provided) >= 2){
-            stop("You cannot provide more than one initialization method (currently there are ", enumerate_items(names(start_provided)[start_provided == 1], verb = FALSE), ").")
+            stop("You cannot provide more than one initialization method (currently there are ", enumerate_items(names(start_provided)[start_provided == 1]), ").")
         }
 
         # controls for start performed already
@@ -1507,7 +1507,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
                 obs = head(obs_origin[which(info$is_na_inf)], 3)
 
-                stop("The argument '", arg_name, "' contains ", msg, " (e.g. observation", enumerate_items(obs, addS = TRUE, verb = "no"), "). Please provide starting values without ", msg, ".")
+                stop("The argument '", arg_name, "' contains ", msg, " (e.g. observation", enumerate_items(obs, "s"), "). Please provide starting values without ", msg, ".")
                 # This is not exactly true, because if the NAs are the observations removed, it works
                 # but it's hard to clearly explain it concisely
             }

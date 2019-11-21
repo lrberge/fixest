@@ -1011,7 +1011,7 @@ r2 = function(x, type = "all"){
 		type_all = tolower(unique(type))
 		pblm = setdiff(type_all, type_allowed)
 		if(length(pblm) > 0){
-			stop("The r2 type", enumerate_items(pblm, addS = TRUE), " not valid.")
+			stop("The r2 type", enumerate_items(pblm, "s.is"), " not valid.")
 		}
 	}
 
@@ -1183,7 +1183,7 @@ lag.formula = function(x, k, data, time.step = "unitary", fill = NA, duplicate.m
     vars = all.vars(x)
     qui_pblm = setdiff(vars, existing_vars)
     if(length(qui_pblm) > 0){
-        stop("In the formula the variable", enumerate_items(qui_pblm, addS=TRUE), " not in the ", ifelse(DATA_MISSING, "environment.", "data."))
+        stop("In the formula the variable", enumerate_items(qui_pblm, "s.is"), " not in the ", ifelse(DATA_MISSING, "environment.", "data."))
     }
 
     if(!isScalar(k, int = TRUE)) stop("Argument 'k' must be a single integer.")
@@ -1261,7 +1261,7 @@ lag.formula = function(x, k, data, time.step = "unitary", fill = NA, duplicate.m
             time_new = tryCatch(as.numeric(time), warning = function(x) x)
 
             if(!is.numeric(time_new)){
-                stop("To use the 'unitary' time.step, the time variable must be numeric or at least convertible to numeric. So far the conversion has failed (time variable's class is currently ", enumerate_items(class(time), verb = FALSE), ").")
+                stop("To use the 'unitary' time.step, the time variable must be numeric or at least convertible to numeric. So far the conversion has failed (time variable's class is currently ", enumerate_items(class(time)), ").")
             }
 
             time = time_new
@@ -1273,7 +1273,7 @@ lag.formula = function(x, k, data, time.step = "unitary", fill = NA, duplicate.m
 
     } else if(time.step != "consecutive"){
         if(!is.numeric(time)){
-            stop("If 'time.step' is a number, then the time variable must also be a number (this is not the cases: its class is currently ", enumerate_items(class(time), verb = FALSE), ").")
+            stop("If 'time.step' is a number, then the time variable must also be a number (this is not the case: its class is currently ", enumerate_items(class(time)), ").")
         }
 
         # if(any(time %% time.step != 0)){
@@ -1588,7 +1588,7 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 
 	    if(is.null(data)){
 	        # We try to provide an informative error message
-	        stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables (i.e. ", enumerate_items(slope_vars_unik, verb = FALSE), ") in the original dataset in the parent.frame -- but the data doesn't seem to be there anymore (btw it was ", deparse_long(dataName), ")")
+	        stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables (i.e. ", enumerate_items(slope_vars_unik), ") in the original dataset in the parent.frame -- but the data doesn't seem to be there anymore (btw it was ", deparse_long(dataName), ")")
 	    }
 
 	    data = as.data.frame(data)
@@ -1598,7 +1598,7 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 
 	    if(any(!slope_vars_unik_raw %in% names(data))){
 	        var_pblm = setdiff(slope_vars_unik_raw, names(data))
-	        stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables in the original dataset (", deparse_long(dataName), "). However, the variable", enumerate_items(var_pblm, addS = TRUE), " not present in the original dataset any more.")
+	        stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables in the original dataset (", deparse_long(dataName), "). However, the variable", enumerate_items(var_pblm, "s.is"), " not present in the original dataset any more.")
 	    }
 
 	    # we check length consistency
@@ -2214,7 +2214,7 @@ collinearity = function(x, verbose){
 
 	    if(any(!slope_vars_unik %in% names(data))){
 	        var_pblm = setdiff(slope_vars_unik, names(data))
-	        stop("To check collinearity, we need to fetch some variables in the original dataset (", deparse_long(dataName), "). However, the variable", enumerate_items(var_pblm, addS = TRUE), " not present in the original dataset any more.")
+	        stop("To check collinearity, we need to fetch some variables in the original dataset (", deparse_long(dataName), "). However, the variable", enumerate_items(var_pblm, "s.is"), " not present in the original dataset any more.")
 	    }
 
 	    slope_var_list = list()
@@ -2262,7 +2262,7 @@ collinearity = function(x, verbose){
 
 	        if(any(is_const)){
 	            var_problem = colnames(linear_mat_noIntercept)[is_const]
-	            message = paste0("Variable", enumerate_items(var_problem, addS = TRUE), " constant, thus collinear with the fixed-effects.")
+	            message = paste0("Variable", enumerate_items(var_problem, "s.is"), " constant, thus collinear with the fixed-effects.")
 	            print(message)
 	            return(invisible(message))
 	        }
@@ -2272,7 +2272,7 @@ collinearity = function(x, verbose){
 	        sum_all = colSums(abs(linear.matrix))
 	        if(any(sum_all == 0)){
 	            var_problem = colnames(linear.matrix)[sum_all == 0]
-	            message = paste0("Variable", enumerate_items(var_problem, addS = TRUE), " constant and equal to 0.")
+	            message = paste0("Variable", enumerate_items(var_problem, "s.is"), " constant and equal to 0.")
 
 	            print(message)
 	            return(invisible(message))
@@ -2339,7 +2339,7 @@ collinearity = function(x, verbose){
 	            varnames = colnames(linear_mat_noIntercept)
 	            collin_var = varnames[sum_residuals < 1e-4]
 
-	            message = paste0("Variable", enumerate_items(collin_var, addS = TRUE), " collinear with variable with varying slope ", slope_vars[q], " (on ", slope_fe[q], ").")
+	            message = paste0("Variable", enumerate_items(collin_var, "s.is"), " collinear with variable with varying slope ", slope_vars[q], " (on ", slope_fe[q], ").")
 
 	            print(message)
 	            return(invisible(message))
@@ -2634,7 +2634,7 @@ did_estimate_yearly_effects = function(fml, data, treat_time, reference, returnD
 
         qui_pblm = setdiff(treat_time, names(data))
         if(length(qui_pblm) != 0){
-            stop("In argument treat_time, the variable", enumerate_items(qui_pblm, addS = TRUE), " not in the data.")
+            stop("In argument treat_time, the variable", enumerate_items(qui_pblm, "s.is"), " not in the data.")
         }
 
         treat = data_small[[treat_time[1]]]
@@ -2652,7 +2652,7 @@ did_estimate_yearly_effects = function(fml, data, treat_time, reference, returnD
         all_vars = all.vars(treat_time)
         qui_pblm = setdiff(all_vars, names(data))
         if(length(qui_pblm) != 0){
-            stop("In argument treat_time, the variable", enumerate_items(qui_pblm, addS = TRUE), " not in the data.")
+            stop("In argument treat_time, the variable", enumerate_items(qui_pblm, "s.is"), " not in the data.")
         }
 
         t = terms(treat_time, data = data)
@@ -2672,7 +2672,7 @@ did_estimate_yearly_effects = function(fml, data, treat_time, reference, returnD
 
 	if(!is.numeric(treat) || any(!treat %in% c(0, 1))){
 	    obs = head(which(!treat %in% c(0, 1)), 3)
-		stop("The treatment variable must be 0/1, with 1 repersenting the treated. The variable that you gave, ", treat_var, ", is not (e.g. observation", enumerate_items(obs, addS = TRUE, verb = FALSE), ".")
+		stop("The treatment variable must be 0/1, with 1 repersenting the treated. The variable that you gave, ", treat_var, ", is not (e.g. observation", enumerate_items(obs, "s"), ".")
 	}
 
 	all_periods = sort(unique(time[!is.na(time)]))
@@ -3186,7 +3186,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 
             if(!all(all.vars(indiv) %in% names(base))){
                 pblm = setdiff(all.vars(indiv), names(base))
-                stop("In argument 'indiv': the variable", enumerate_items(pblm, addS=TRUE)," not in the data set.")
+                stop("In argument 'indiv': the variable", enumerate_items(pblm, "s.is")," not in the data set.")
             }
 
             indiv_var = try(eval(parse(text = indiv_varname), base), silent = TRUE)
@@ -3237,7 +3237,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 
         if(!(all(all.vars(fml[[3]]) %in% names(base)))){
             pblm = setdiff(all.vars(fml[[3]]), names(base))
-            stop("In the evaluation of the treatment variable: ", enumerate_items(pblm), " not in the data set.")
+            stop("In the evaluation of the treatment variable: ", enumerate_items(pblm, "is"), " not in the data set.")
         }
 
         treat_var = try(eval(fml[[3]], base), silent = TRUE)
@@ -3248,7 +3248,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
         if(!is.null(pipe)){
             if(!(all(all.vars(pipe) %in% names(base)))){
                 pblm = setdiff(all.vars(pipe), names(base))
-                stop("In the evaluation of the 'post' variable: ", enumerate_items(pblm), " not in the data set.")
+                stop("In the evaluation of the 'post' variable: ", enumerate_items(pblm, "is"), " not in the data set.")
             }
 
             post_var = try(eval(pipe, base), silent = TRUE)
@@ -3283,7 +3283,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
             if(all(!is_num)){
                 stop("Function cannot be performed: not any numeric variable.")
             } else if(length(pblm) > 0){
-                message("NOTE: The variable", enumerate_items(pblm, addS=TRUE), " removed because they are non-numeric.")
+                message("NOTE: The variable", enumerate_items(pblm, "s.is"), " removed because they are non-numeric.")
             }
 
             mat_vars = as.matrix(mat_vars[, is_num, FALSE])
@@ -3295,7 +3295,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
             all_vars = all.vars(fml_x)
             pblm = setdiff(all_vars, names(base))
             if(length(pblm) > 0){
-                stop("The variable", enumerate_items(pblm, addS = TRUE), " not in the data set (", deparse(substitute(base)), ").")
+                stop("The variable", enumerate_items(pblm, "s.is"), " not in the data set (", deparse(substitute(base)), ").")
             }
 
             # Evaluation control
@@ -3345,7 +3345,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
                 is_num = sapply(mat_vars, function(x) is.numeric(x) || is.logical(x))
                 if(any(!is_num)){
                     pblm = names(mat_vars)[!is_num]
-                    stop("This function works only for numeric variables. Variable", enumerate_items(pblm, addS=TRUE), " not numeric.")
+                    stop("This function works only for numeric variables. Variable", enumerate_items(pblm, "s.is"), " not numeric.")
                 }
                 mat_vars = as.matrix(mat_vars)
             } else if(!is.matrix(mat_vars)){
@@ -3426,7 +3426,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 
         pblm = setdiff(treat_cases, names(treat_dict))
         if(length(pblm) > 0){
-            stop("The value", enumerate_items(pblm, addS = TRUE), " not in 'treat_dict'.")
+            stop("The value", enumerate_items(pblm, "s.is"), " not in 'treat_dict'.")
         }
     } else {
         treat_dict = paste0("cond: ", treat_cases)
@@ -3452,7 +3452,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
         if(any(attr(res, "na"))){
             nb_na = attr(res, "na")
             var_with_na = x_name[nb_na > 0]
-            message("NA values were omitted for the variable", enumerate_items(paste0(var_with_na, " (", nb_na[nb_na > 0], ")"), addS=TRUE, verb=FALSE), ".")
+            message("NA values were omitted for the variable", enumerate_items(paste0(var_with_na, " (", nb_na[nb_na > 0], ")"), "s"), ".")
         }
 
         attr(res, "na") = NULL
@@ -3474,7 +3474,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 
         if(any(nb_na)){
             var_with_na = x_name[nb_na > 0]
-            message("NA values were omitted for the variable", enumerate_items(paste0(var_with_na, " (", nb_na[nb_na > 0], ")"), addS=TRUE, verb=FALSE), ".")
+            message("NA values were omitted for the variable", enumerate_items(paste0(var_with_na, " (", nb_na[nb_na > 0], ")"), "s"), ".")
         }
 
         attr(res, "na") = NULL
@@ -3794,7 +3794,7 @@ results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitsta
 
     pblm = setdiff(fitstat, fitstat_type_allowed)
     if(length(pblm) > 0){
-        stop(my_call, "Argument 'fitstat' must be a character vector (or a one sided formula) containing 'aic', 'bic', 'll', or valid r2 types names. ", enumerate_items(pblm, quote=TRUE), " not valid (see function r2).", call. = FALSE)
+        stop(my_call, "Argument 'fitstat' must be a character vector (or a one sided formula) containing 'aic', 'bic', 'll', or valid r2 types names. ", enumerate_items(pblm, "is.quote"), " not valid (see function r2).", call. = FALSE)
     }
 
     fitstat_dict_tex = c("sq.cor"="Squared Correlation", r2="R$^2$", ar2="Adjusted R$^2$", pr2="Pseudo R$^2$", apr2="Adjusted Pseudo R$^2$", wr2="Within R$^2$", war2="Within Adjusted R$^2$", wpr2="Within Pseudo R$^2$", wapr2="Whithin Adjusted Pseudo R$^2$", aic = "AIC", bic = "BIC", ll = "Log-Likelihood")
@@ -4279,7 +4279,7 @@ terms_fixef = function(fml){
             qui = !grepl("\\]\\]$", var2check_double) | !grepl("\\[\\[", var2check_double) | lengths(strsplit(var2check_double, "\\[")) != 3
             if(any(qui)){
                 item_pblm = var2check_double[qui]
-                msg = paste0("Square bracket are special characters use **only** to designate varying slopes (see help). They are currenlty misused (it concerns ", enumerate_items(item_pblm, verb = FALSE), ").")
+                msg = paste0("Square bracket are special characters use **only** to designate varying slopes (see help). They are currenlty misused (it concerns ", enumerate_items(item_pblm), ").")
                 class(msg) = "try-error"
                 return(msg)
             }
@@ -4289,7 +4289,7 @@ terms_fixef = function(fml){
             qui = !grepl("\\]$", var2check_single) | lengths(strsplit(var2check_single, "\\[")) != 2
             if(any(qui)){
                 item_pblm = var2check_single[qui]
-                msg = paste0("Square bracket are special characters use **only** to designate varying slopes (see help). They are currenlty misused (it concerns ", enumerate_items(item_pblm, verb = FALSE), ").")
+                msg = paste0("Square bracket are special characters use **only** to designate varying slopes (see help). They are currenlty misused (it concerns ", enumerate_items(item_pblm), ").")
                 class(msg) = "try-error"
                 return(msg)
             }
@@ -4985,10 +4985,10 @@ check_dots_args = function(mc, dots_args = c(), suggest_args = c()){
                 suggest = paste0(" (fyi, another of its main arguments is ", suggest_info, ".)")
             }
         } else if(length(suggest_info) >= 2){
-            suggest = paste0(" (fyi, some of its main arguments are ", enumerate_items(suggest_info, verb = "no"), ".)")
+            suggest = paste0(" (fyi, some of its main arguments are ", enumerate_items(suggest_info), ".)")
         }
 
-        msg = paste0(enumerate_items(args_invalid), " not ", ifsingle(args_invalid, "a valid argument", "valid arguments"), " for function ", fun_name, ".", suggest)
+        msg = paste0(enumerate_items(args_invalid, "is"), " not ", ifsingle(args_invalid, "a valid argument", "valid arguments"), " for function ", fun_name, ".", suggest)
         attr(res, "msg") = msg
     }
 
@@ -5717,7 +5717,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 				offset_fml = eval(offset)
 				varNotHere = setdiff(all.vars(offset_fml), names(newdata))
 				if(length(varNotHere) > 0){
-					stop("In the offset, the variable", enumerate_items(varNotHere, addS = TRUE), " not present in 'newdata'.")
+					stop("In the offset, the variable", enumerate_items(varNotHere, "s.is"), " not present in 'newdata'.")
 				}
 
 				value_offset = eval(offset_fml[[length(offset_fml)]], newdata)
@@ -6029,7 +6029,7 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 				all_var_names = fml2varnames(cluster)
 
 				if(length(all_var_names) != nway){
-					stop("Asked for ", nway, "-way clustering but evaluating argument cluster leads to ", length(all_var_names), " clusters (", enumerate_items(all_var_names, verb = "no"), "). Please provide exactly ", nway, " clusters.")
+					stop("Asked for ", nway, "-way clustering but evaluating argument cluster leads to ", length(all_var_names), " clusters (", enumerate_items(all_var_names), "). Please provide exactly ", nway, " clusters.")
 				}
 
 				cluster = all_var_names # Now a regular character vector
@@ -6049,7 +6049,7 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 					if(!doEval){
 						is_ok = grepl("^[\\.[:alpha:]][[:alnum:]_\\.]*(\\^[\\.[:alpha:]][[:alnum:]_\\.]*)*$", cluster)
 						if(any(!is_ok)){
-							stop("In argument cluster, only variable names and the '^' operator are accepted. The expression", enumerate_items(cluster[!is_ok], addS = TRUE), " not valid.\nAlternatively, you can use a list of vectors.", suffix)
+							stop("In argument cluster, only variable names and the '^' operator are accepted. The expression", enumerate_items(cluster[!is_ok], "s.is"), " not valid.\nAlternatively, you can use a list of vectors.", suffix)
 						}
 
 					}
@@ -6092,7 +6092,7 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 
 						if(is.null(data)){
 							# We try to provide an informative error message
-							stop("Cannot apply ", nway, "-way clustering with current 'cluster' argument. Variable", enumerate_items(var2fetch, past = TRUE, addS = TRUE), " not used as fixed-effects in the estimation. We tried to fetch ", ifelse(length(var2fetch) == 1, "this variable", "these variables"), " in the original database in the parent.frame -- but the data doesn't seem to be there anymore (btw it was ", deparse_long(dataName), "). Alternatively, use a list of vectors.", suffix)
+							stop("Cannot apply ", nway, "-way clustering with current 'cluster' argument. Variable", enumerate_items(var2fetch, "s.is.past"), " not used as fixed-effects in the estimation. We tried to fetch ", ifelse(length(var2fetch) == 1, "this variable", "these variables"), " in the original database in the parent.frame -- but the data doesn't seem to be there anymore (btw it was ", deparse_long(dataName), "). Alternatively, use a list of vectors.", suffix)
 						}
 
 						data = as.data.frame(data)
@@ -6101,12 +6101,12 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 						# we use all_vars and not var2fetch: safer to catch all variables (case clustvar^datavar)
 						if(any(!all_vars %in% names(data))){
 							var_pblm = setdiff(all_vars, names(data))
-							stop("In argument 'cluster', the variable", enumerate_items(var_pblm, addS = TRUE), " not present in the original dataset. Alternatively, use a list of vectors.", suffix)
+							stop("In argument 'cluster', the variable", enumerate_items(var_pblm, "s.is"), " not present in the original dataset. Alternatively, use a list of vectors.", suffix)
 						}
 
 						# we check length consistency
 						if(NROW(data) != (object$nobs + length(object$obsRemoved))){
-							stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(var2fetch, addS = TRUE, verb = "no"), " in the original dataset (", deparse_long(dataName), "), yet the dataset doesn't have the same number of observations as was used in the estimation (", NROW(data), " instead of ", object$nobs + length(object$obsRemoved), ").", suffix)
+							stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(var2fetch, "s"), " in the original dataset (", deparse_long(dataName), "), yet the dataset doesn't have the same number of observations as was used in the estimation (", NROW(data), " instead of ", object$nobs + length(object$obsRemoved), ").", suffix)
 						}
 
 						if(length(object$obsRemoved)){
@@ -6119,7 +6119,7 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 						if(anyNA(data)){
 							varsNA = sapply(data, anyNA)
 							varsNA = names(varsNA)[varsNA]
-							stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(varsNA, addS = TRUE, verb = "no"), " in the original dataset (", deparse_long(dataName), "). But ", ifsingle(varsNA, "this variable", "these variables"), " contain", ifsingle(varsNA, "s", ""), " NAs", msgRemoved, ". This is not allowed.", suffix)
+							stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(varsNA, "s"), " in the original dataset (", deparse_long(dataName), "). But ", ifsingle(varsNA, "this variable", "these variables"), " contain", ifsingle(varsNA, "s", ""), " NAs", msgRemoved, ". This is not allowed.", suffix)
 						}
 
 						# We create the cluster list
@@ -6186,7 +6186,7 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 					cluster = list(cluster)
 
 				} else if(! (is.list(cluster) && length(cluster) == 1)){
-					stop("For one way clustering, the argument 'cluster' must be either the name of a cluster variable (e.g. \"dum_1\"), a vector (e.g. data$dum_1), a list containing the vector of clusters (e.g. list(data$dum_1)), or a one-sided formula (e.g. ~dum_1). Currently the class of cluster is ", enumerate_items(class(cluster), verb = "no"), ".", suffix)
+					stop("For one way clustering, the argument 'cluster' must be either the name of a cluster variable (e.g. \"dum_1\"), a vector (e.g. data$dum_1), a list containing the vector of clusters (e.g. list(data$dum_1)), or a one-sided formula (e.g. ~dum_1). Currently the class of cluster is ", enumerate_items(class(cluster)), ".", suffix)
 
 				}
 			} else if(length(cluster) != nway){
@@ -6196,7 +6196,7 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 				stop(nway, "-way clustering is asked for, but the length of argument 'cluster' is ", length(cluster), " (it should be ", nway, "). Alternatively, you can use ", msgList, " or a one-sided formula.", suffix)
 
 			} else if(!is.list(cluster)){
-				stop("For ", nway, "-way clustering, the argument 'cluster' must be either a vector of cluster variables (e.g. c(\"", paste0("dum_", 1:nway, collapse = "\", \""), "\")), a list containing the vector of clusters (e.g. data[, c(\"", paste0("dum_", 1:nway, collapse = "\", \""), "\")]), or a one-sided formula (e.g. ~", paste0("dum_", 1:nway, collapse = "+"), "). Currently the class of cluster is: ", enumerate_items(class(cluster), verb = "no"), ".", suffix)
+				stop("For ", nway, "-way clustering, the argument 'cluster' must be either a vector of cluster variables (e.g. c(\"", paste0("dum_", 1:nway, collapse = "\", \""), "\")), a list containing the vector of clusters (e.g. data[, c(\"", paste0("dum_", 1:nway, collapse = "\", \""), "\")]), or a one-sided formula (e.g. ~", paste0("dum_", 1:nway, collapse = "+"), "). Currently the class of cluster is: ", enumerate_items(class(cluster)), ".", suffix)
 			}
 
 			cluster = as.list(cluster)
@@ -6205,7 +6205,7 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 		# now we check the lengths:
 		n_per_cluster = sapply(cluster, length)
 		if(!all(diff(n_per_cluster) == 0)){
-			stop("The vectors of the argument 'cluster' must be of the same length. Currently the lengths are: ", enumerate_items(n_per_cluster, verb = "no"), ".")
+			stop("The vectors of the argument 'cluster' must be of the same length. Currently the lengths are: ", enumerate_items(n_per_cluster), ".")
 		}
 
 		# Either they are of the same length of the data
@@ -6225,7 +6225,7 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 		if(any(varsNA)){
 			varsNA = which(varsNA)
 			nb_name = c("1st", "2nd", "3rd", "4th")
-			stop("In argument cluster, the ", enumerate_items(nb_name[varsNA], verb = "no"), " cluster variable", ifsingle(varsNA, " contains", "s contain"), " NAs", msgRemoved, ". This is not allowed.")
+			stop("In argument cluster, the ", enumerate_items(nb_name[varsNA]), " cluster variable", ifsingle(varsNA, " contains", "s contain"), " NAs", msgRemoved, ". This is not allowed.")
 		}
 
 
@@ -6967,7 +6967,7 @@ setFixest_dict = function(dict){
 	if(any(td > 1)){
 		qui = which(dict_names %in% names(td)[td > 1])
 		name_dup = unique(names(dict)[qui])
-		stop("Argument 'dict' contains duplicated names: ", enumerate_items(name_dup, verb = "no"))
+		stop("Argument 'dict' contains duplicated names: ", enumerate_items(name_dup))
 	}
 
 	options("fixest_dict" = dict)
