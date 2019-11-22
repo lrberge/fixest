@@ -1,3 +1,34 @@
+/*********************************************************************
+ * _______________                                                   *
+ * || Demeaning ||                                                   *
+ * ---------------                                                   *
+ *                                                                   *
+ * Author: Laurent R. Berge                                          *
+ *                                                                   *
+ * Workhorse for feols and feglm.                                    *
+ *                                                                   *
+ * It demeans any variable given in input, the algortihm is not      *
+ * a real demeaning algorithm.                                       *
+ * It is in fact identical as obtaining the optimal set of           *
+ * cluster coefficients (i.e. fixed-effects) in a ML context with    *
+ * a Gaussian likelihood (as described in Berge, 2018).              *
+ *                                                                   *
+ * This way we can leverage the powerful Irons and Tuck acceleration *
+ * algorithm. For simple cases, this doesn't matter so much.         *
+ * But for messy data (employee-company for instance), it matters    *
+ * quite a bit.                                                      *
+ *                                                                   *
+ * In terms of functionnality it accomodate weights and coefficients *
+ * with varying slopes.                                              *
+ *                                                                   *
+ * Of course any input is **strongly** checked before getting into   *
+ * this function.                                                    *
+ *                                                                   *
+ * I had to apply a trick to accomodate user interrupt in a parallel *
+ * setup. It costs a bit, but it's clearly worth it.                 *
+ *                                                                   *
+ ********************************************************************/
+
 #include <Rcpp.h>
 #include <math.h>
 #include <vector>
@@ -8,6 +39,8 @@
 #endif
 
 // [[Rcpp::plugins(openmp)]]
+
+
 
 using namespace Rcpp;
 using std::vector;
@@ -22,7 +55,7 @@ inline bool continue_crit(double a, double b, double diffMax){
 }
 
 inline bool stopping_crit(double a, double b, double diffMax){
-    // continuing criterion of the algorithm
+    // stopping criterion of the algorithm
     double diff = fabs(a - b);
     return ( (diff < diffMax) || (diff/(0.1 + fabs(a)) < diffMax) );
 }
@@ -37,9 +70,9 @@ int pending_interrupt() {
 	return !(R_ToplevelExec(Rcpp::checkInterruptFn, NULL));
 }
 // Works but only the master thread can call that function!
-// what happens if the master thread has finished its job but the lower thread is in an "infinite" loop?
-// this is tricky, as such we cannot stop it
-// solution: create a function keeping the threads idle waiting for the complete job to be done
+// What happens if the master thread has finished its job but the lower thread is in an "infinite" loop?
+// this is tricky, as such we cannot stop it.
+// Solution: create a function keeping the threads idle waiting for the complete job to be done
 // BUT I need to add static allocation of threads => performance cost
 
 
@@ -1371,6 +1404,7 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 
 	return(res);
 }
+
 
 
 

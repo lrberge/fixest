@@ -1,3 +1,36 @@
+/**************************************************************************
+ * _________________                                                      *
+ * || Convergence ||                                                      *
+ * -----------------                                                      *
+ *                                                                        *
+ * Author: Laurent R. Berge                                               *
+ *                                                                        *
+ * Compute the optimal set of cluster coefficients based on Berge (2018), *
+ * in a ML framework.                                                     *
+ *                                                                        *
+ * The code concerns both the cluster coefficients (i.e. fixed-effects)   *
+ * and the coefficients of the derivatives of the cluster coefficients.   *
+ *                                                                        *
+ * 2-FEs trick:                                                           *
+ * For both the Poisson and the Gaussian methods I use a trick to hasten  *
+ * computation. Instead of looping on the number of obsertvations, the    *
+ * loop is on the number of unique cases. For balanced panels, this is    *
+ * not useful, but for strongly unbalanced panels, this makes a big       *
+ * difference.                                                            *
+ *                                                                        *
+ * Logit/Negbin:                                                          *
+ * To obtain the cluster coefficients for these two likelihoods, I use    *
+ * a Newton-Raphson + dichotomy algorithm. This ensures convergence       *
+ * even when the NR algo would go astray (which may be the case in some   *
+ * situations).                                                           *
+ *                                                                        *
+ * Drawback:                                                              *
+ * The big drawback of the ML methods is that, as oppose to GLM metohods, *
+ * parallel computing cannot be leveraged.                                *
+ *                                                                        *
+ *                                                                        *
+ *************************************************************************/
+
 #include <Rcpp.h>
 #include <math.h>
 #include <vector>
@@ -10,7 +43,6 @@
 using namespace Rcpp;
 using std::vector;
 
-
 // Stopping / continuing criteria
 // Functions used inside all loops
 inline bool continue_criterion(double a, double b, double diffMax){
@@ -20,7 +52,7 @@ inline bool continue_criterion(double a, double b, double diffMax){
 }
 
 inline bool stopping_criterion(double a, double b, double diffMax){
-    // continuing criterion of the algorithm
+    // stopping criterion of the algorithm
     double diff = fabs(a - b);
     return ( (diff < diffMax) || (diff/(0.1 + fabs(a)) < diffMax) );
 }
@@ -213,7 +245,7 @@ void CCC_negbin(int nthreads, int nb_cluster, double theta, double diffMax_NR,
 			}
 		}
 
-		// computing the "bornes"
+		// computing the bounds
 		borne_inf[m] = log(sum_y[m]) - log(static_cast<double>(table[m])) - mu_max;
 		borne_sup[m] = borne_inf[m] + (mu_max - mu_min);
 	}
@@ -3154,4 +3186,7 @@ NumericMatrix update_deriv_single(int n_vars, int nb_coef,
 
 	return(res);
 }
+
+
+
 

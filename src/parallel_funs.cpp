@@ -1,3 +1,17 @@
+/*******************************************************************
+ * ________________________                                        *
+ * || Parallel functions ||                                        *
+ * ------------------------                                        *
+ *                                                                 *
+ * Author: Laurent R. Berge                                        *
+ *                                                                 *
+ * Group of functions doing simple things... but in parallel.      *
+ *                                                                 *
+ * The functions don't do much more than what their names suggest. *
+ *                                                                 *
+ ******************************************************************/
+
+
 #include <Rcpp.h>
 #include <math.h>
 #include <vector>
@@ -613,6 +627,7 @@ List cpppar_cond_means(NumericMatrix mat_vars, IntegerVector treat, int nthreads
 
     return res;
 }
+
 
 
 

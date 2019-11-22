@@ -1,3 +1,24 @@
+/***********************************************************************************
+ * ________________                                                                *
+ * || Misc. funs ||                                                                *
+ * ----------------                                                                *
+ *                                                                                 *
+ * Author: Laurent R. Berge                                                        *
+ *                                                                                 *
+ * Three groups of non-parallel functions:                                         *
+ *   1) simple functions that are faster than base R (because more specific)       *
+ *   2) function to obtain the FE coefficients after the estimation is done        *
+ *   3) functions to lag variables                                                 *
+ *                                                                                 *
+ * The algorithm to get the FE coefs is very fast and finds the number             *
+ * of references with proba 1. I may write an article in "stg letters" some day to *
+ * describe it (actually I should... God give me the time!).                       *
+ *                                                                                 *
+ * Otherwise, nothing much to say, everything is pretty explicit.                  *
+ *                                                                                 *
+ **********************************************************************************/
+
+
 #include <Rcpp.h>
 #include <math.h>
 #include <vector>
@@ -923,9 +944,11 @@ IntegerVector cpp_lag_obs(IntegerVector id, IntegerVector time, int nlag){
             ++i;
         }
     } else if(nlag < 0){
-        /* NOTA:I could have tweaked the previous if() to get rid of the condition
-         //      but the code would have lost in clarity.
-         // For the lead: opposite to what is done before */
+        /**************************************************************************
+        * NOTA: I could have tweaked the previous if() to get rid of the condition
+        *       but the code would have lost in clarity.
+        *       For the lead: opposite to what is done before
+        ***************************************************************************/
          int nlead = -nlag;
         i = nobs;
         while(i >= 0){
@@ -965,6 +988,7 @@ IntegerVector cpp_lag_obs(IntegerVector id, IntegerVector time, int nlag){
 
     return(res);
 }
+
 
 
 
