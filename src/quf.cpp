@@ -12,7 +12,7 @@
  *   b)  ("a", "d", "a", "b") => (1, 3, 1, 2)                         *
  *  )                                                                 *
  *                                                                    *
- *  The code here is used to quf vectors of integers, floats or       *
+ *  The code here is used to quf vectors of integers, floats          *
  *  or strings. I convert any other type of identifier to             *
  *  character if they're not numeric before getting into this         *
  *  function.                                                         *
@@ -433,6 +433,8 @@ List cpp_quf_gnl(SEXP x){
 
             // Rcout << xi_uintptr << "  ----  " << xi_ull << "\n";
         }
+    } else {
+        IS_INT = true;
     }
 
     if(IS_INT){
