@@ -1284,12 +1284,15 @@ lag.formula = function(x, k, data, time.step = "unitary", fill = NA, duplicate.m
 
     # Computation quf
     id = quickUnclassFactor(id)
-    time_full = quickUnclassFactor(time, addItem = TRUE)
+    time_full = quf_sorted(time, addItem = TRUE)
 
     #
     # WIP: define this unitary time step!!!! not straightforward at all!
-    # what to do with the ones thatdon't fit the unit???
+    # what to do with the ones that don't fit the unit???
     # example: time = c(1, 3, 6, 11) => smallest unit is 2, but it does not divide the others
+
+    # NOTA: "time" is not used as a CPP index: so we don't care that it goes from 1 to K
+    #       or from 0 to K-1. We only care that the numbers are consecutive
 
     # Releveling the time ID depending on the time.step
     if(time.step == "consecutive"){
@@ -1303,6 +1306,10 @@ lag.formula = function(x, k, data, time.step = "unitary", fill = NA, duplicate.m
         time_unik_new = (time_unik - min(time_unik)) / my_step
         time = time_unik_new[time_full$x]
 
+        if(my_step != 1){
+            message("NOTE: unitary time step taken: ", my_step, ".")
+        }
+
 
     } else {
         time_unik = time_full$items
@@ -1312,13 +1319,16 @@ lag.formula = function(x, k, data, time.step = "unitary", fill = NA, duplicate.m
         if(any(all_steps %% time.step != 0)){
             obs_pblm = which(all_steps %% time.step != 0)
 
-            stop("If 'time.step' is a number, then it must be an exact divisor of all the difference between two consecutive time periods. This is currently not the case: ", time.step, " is not a divisor of ", all_steps[obs_pblm], " (the difference btw ", time_unik[obs_pblm + 1], " and ", , ").")
+            stop("If 'time.step' is a number, then it must be an exact divisor of all the difference between two consecutive time periods. This is currently not the case: ", time.step, " is not a divisor of ", all_steps[obs_pblm][1], " (the difference btw the time periods ", time_unik[obs_pblm[1] + 1], " and ", time_unik[obs_pblm[1]], ").")
         }
 
         # we rescale time_unik // checks done beforehand
         time_unik_new = (time_unik - min(time_unik)) / time.step
         time = time_unik_new[time_full$x]
     }
+
+    # Here time is always integer: we convert it if necessary (hasten order calls)
+    time = as.integer(time)
 
     order_it = order(id, time)
     order_inv = order(order_it)
@@ -1994,8 +2004,11 @@ obs2remove = function(fml, data, family = c("poisson", "negbin", "logit")){
 
 		dum_raw = cluster_mat[, q]
 
-		thisNames = getItems(dum_raw)
-		dum = quickUnclassFactor(dum_raw)
+		# thisNames = getItems(dum_raw)
+		# dum = quickUnclassFactor(dum_raw)
+		dum_all = quickUnclassFactor(dum_raw)
+		dum = dum_all$x
+		thisNames = dum_all$items
 		k = length(thisNames)
 
 		# We delete "all zero" outcome
@@ -4854,6 +4867,22 @@ char2num = function(x, addItem = FALSE){
 
 }
 
+quf_sorted = function(x, addItem = FALSE){
+    # Same as QUF, but items are sorted
+
+    quoi = quickUnclassFactor(x, TRUE)
+
+    new_order = order(quoi$items)
+    x_uf = new_order[quoi$x]
+
+    if(addItem){
+        res = list(x = x_uf, items = quoi$items[new_order])
+        return(res)
+    } else {
+        return(x_uf)
+    }
+}
+
 quickUnclassFactor = function(x, addItem = FALSE){
 	# does as unclass(as.factor(x))
 	# but waaaaay quicker
@@ -4878,22 +4907,6 @@ quickUnclassFactor = function(x, addItem = FALSE){
     } else {
         return(res$x_uf)
     }
-}
-
-
-getItems = function(x){
-	# to get the unique elements of x before quickunclassfactor
-	# needs to be done because differs depending on the type of x
-
-	if(is.character(x)){
-		res = unique(x)
-	} else if(is.factor(x)){
-		res = levels(unique(x)[, drop=TRUE])
-	} else {
-		res = sort(unique(x))
-	}
-
-	return(res)
 }
 
 missnull = function(x){
