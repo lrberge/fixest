@@ -221,6 +221,10 @@ cpppar_cond_means <- function(mat_vars, treat, nthreads = 1L) {
     .Call(`_fixest_cpppar_cond_means`, mat_vars, treat, nthreads)
 }
 
+cpp_quf_str <- function(x) {
+    .Call(`_fixest_cpp_quf_str`, x)
+}
+
 cpp_quf_gnl <- function(x) {
     .Call(`_fixest_cpp_quf_gnl`, x)
 }
