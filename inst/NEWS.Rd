@@ -3,6 +3,25 @@
 
 \title{News for \R Package \pkg{fixest}}
 
+\section{Changes in version 0.2.1 (2019-11-22)}{
+
+    \subsection{Major bug correction}{
+        \itemize{
+            \item lag.formula: Bug introduced from previous update which could lead to wrong results. Now fixed.
+        }
+    }
+
+
+    \subsection{Major user visible changes}{
+         \itemize{
+            \item[All estimation methods] Significant speed improvement when the fixed-effects variables (i.e. the identifiers) are string vectors.
+        }
+    }
+
+
+
+}
+
 \section{Changes in version 0.2.0 (2019-11-19)}{
 
     \subsection{New function}{
