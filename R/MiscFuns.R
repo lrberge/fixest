@@ -2006,7 +2006,7 @@ obs2remove = function(fml, data, family = c("poisson", "negbin", "logit")){
 
 		# thisNames = getItems(dum_raw)
 		# dum = quickUnclassFactor(dum_raw)
-		dum_all = quickUnclassFactor(dum_raw)
+		dum_all = quickUnclassFactor(dum_raw, addItem = TRUE)
 		dum = dum_all$x
 		thisNames = dum_all$items
 		k = length(thisNames)
@@ -6564,7 +6564,28 @@ update.fixest = function(object, fml.update, nframes = 1, ...){
 	        fixef_old = as.formula(paste0("~", paste0(c(1, fixef_vars), collapse = "+")))
 	    }
 
-		fixef_new = update(fixef_old, formula(FML, lhs = 0, rhs = 2))
+	    # I use it as text to catch the var1^var2 FEs (update does not work)
+	    fixef_old_text = deparse_long(fixef_old)
+	    fixef_new_text = deparse_long(formula(FML, lhs = 0, rhs = 2))
+
+	    if(fixef_new_text == "~."){
+	        # nothing happens
+	        fixef_new = fixef_old
+	    } else if(fixef_new_text == "~1"){
+	        fixef_new = ~1
+	    } else if(grepl("\\^", fixef_old_text) || grepl("\\^", fixef_new_text)){
+	        # we update manually.... dammmit
+	        # Note that what follows does not work ONLY when you have number^var or number^number
+	        # and both cases don't make much sense -- I need not control for them
+	        fml_text_old = gsub("\\^", "__666__", fixef_old_text)
+	        fml_text_new = gsub("\\^", "__666__", fixef_new_text)
+
+	        fixef_new_wip = update(as.formula(fml_text_old), as.formula(fml_text_new))
+
+	        fixef_new = as.formula(gsub("__666__", "^", fixef_new_wip))
+	    } else {
+	        fixef_new = update(fixef_old, formula(FML, lhs = 0, rhs = 2))
+	    }
 
 		if(useInit){
 			# Only if we use the init => the starting cluster values
