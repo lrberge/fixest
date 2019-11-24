@@ -4585,7 +4585,8 @@ quf_sorted = function(x, addItem = FALSE){
     quoi = quickUnclassFactor(x, TRUE)
 
     new_order = order(quoi$items)
-    x_uf = new_order[quoi$x]
+    order_new_order = order(new_order)
+    x_uf = order_new_order[quoi$x]
 
     if(addItem){
         res = list(x = x_uf, items = quoi$items[new_order])
