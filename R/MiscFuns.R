@@ -272,7 +272,7 @@ summary.fixest <- function(object, se, cluster, dof = TRUE, exact_dof = FALSE, f
 	}
 
 	# The new VCOV
-	vcov = vcov(object, se=se, cluster=cluster, dof=dof, forceCovariance = forceCovariance, keepBounded = keepBounded, nframes_up = nframes_up)
+	vcov = vcov(object, se=se, cluster=cluster, dof=dof, exact_dof=exact_dof, forceCovariance = forceCovariance, keepBounded = keepBounded, nframes_up = nframes_up)
 
 	sd2 = diag(vcov)
 	sd2[sd2 < 0] = NA
@@ -5941,7 +5941,7 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 	if(exact_dof == TRUE){
 	    dof = TRUE
 		if(length(object$fixef_id) >= 2){
-			fe = fixef(object)
+			fe = fixef(object, notes = FALSE)
 			K = length(object$coefficients) + sum(object$fixef_sizes) - sum(attr(fe, "references"))
 		} else {
 		    exact_dof = FALSE
