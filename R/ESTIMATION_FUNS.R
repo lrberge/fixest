@@ -871,6 +871,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
         ll_null = env$model0$loglik
         fitted_null = linkinv(env$model0$constant)
     } else {
+        if(verbose >= 1) cat("Null model:\n")
         model_null = feglm.fit(X = matrix(1, nrow = n, ncol = 1), fixef_mat = NULL, env = env, lean = TRUE)
         ll_null = model_null$loglik
         fitted_null = model_null$fitted.values
