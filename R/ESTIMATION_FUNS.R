@@ -248,7 +248,10 @@ feols = function(fml, data, weights, offset, fixef, fixef.tol = 1e-7, fixef.iter
 		}
 
 		if(est$multicol == TRUE){
-			if(warn) warning("Presence of collinearity, covariance not defined. Use function collinearity() to pinpoint the problems.")
+			if(warn){
+			    warning("Presence of collinearity, covariance not defined. Use function collinearity() to pinpoint the problems.")
+			    options("fixest_last_warning" = proc.time())
+			}
 			res$cov.unscaled = est$xwx_inv * NA
 		} else {
 			res$cov.unscaled = est$xwx_inv * res$sigma2
@@ -826,7 +829,10 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
     }
 
     if(nchar(warning_msg) > 0){
-        if(warn) warning(warning_msg, call. = FALSE)
+        if(warn){
+            warning(warning_msg, call. = FALSE)
+            options("fixest_last_warning" = proc.time())
+        }
     }
 
     n = length(y)
@@ -1326,7 +1332,10 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 
 	# Warning message
 	if(nchar(warning_msg) > 0){
-		if(warn) warning("[femlm]:", warning_msg, call. = FALSE)
+		if(warn){
+		    warning("[femlm]:", warning_msg, call. = FALSE)
+		    options("fixest_last_warning" = proc.time())
+		}
 	}
 
 	# To handle the bounded coefficient, we set its SE to NA

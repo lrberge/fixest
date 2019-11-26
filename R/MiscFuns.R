@@ -97,7 +97,11 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 	}
 
 	if(isFALSE(x$convStatus)){
-		warning("The optimization algorithm did not converge, the results are not reliable. (", x$message, ")")
+	    last_warn = getOption("fixest_last_warning")
+	    if(is.null(last_warn) || (proc.time() - last_warn)[3] > 1){
+	        warning("The optimization algorithm did not converge, the results are not reliable. (", x$message, ")", call. = FALSE)
+	    }
+
 	}
 
 	coeftable = x$coeftable
@@ -5985,8 +5989,11 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 	if(anyNA(VCOV_raw)){
 
 		if(!forceCovariance){
-			# warning("Standard errors are NA because of likely presence of collinearity. You can use option 'forceCovariance' to try to force the computation of the vcov matrix (to see what's wrong).", call. = FALSE)
-			warning("Standard errors are NA because of likely presence of collinearity. Use function collinearity() to detect collinearity problems.", call. = FALSE)
+		    last_warn = getOption("fixest_last_warning")
+		    if(is.null(last_warn) || (proc.time() - last_warn)[3] > 1){
+		        warning("Standard errors are NA because of likely presence of collinearity. Use function collinearity() to detect collinearity problems.", call. = FALSE)
+		    }
+
 			return(VCOV_raw)
 		} else {
 			VCOV_raw_forced = MASS::ginv(object$hessian)
