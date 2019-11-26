@@ -85,7 +85,7 @@ feols = function(fml, data, weights, offset, fixef, fixef.tol = 1e-7, fixef.iter
 	} else {
 		time_start = proc.time()
 
-		# we use femlm for appropriate controls and data handling
+		# we use fixest_env for appropriate controls and data handling
 		env = try(fixest_env(fml = fml, data = data, weights = weights, offset = offset, fixef = fixef, fixef.tol = fixef.tol, fixef.iter = fixef.iter, na_inf.rm = na_inf.rm, nthreads = nthreads, verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick, origin = "feols", mc_origin = match.call(), ...), silent = TRUE)
 
 		if("try-error" %in% class(env)){
@@ -439,6 +439,9 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
         # main variables
         if(missing(y)) y = get("lhs", env)
         if(missing(X)) X = get("linear.mat", env)
+        if(!missing(fixef_mat) && is.null(fixef_mat)){
+            assign("isFixef", FALSE, env)
+        }
 
         if(missing(offset)) offset = get("offset.value", env)
         if(missing(weights)) weights = get("weights.value", env)
@@ -862,7 +865,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
         ll_null = env$model0$loglik
         fitted_null = linkinv(env$model0$constant)
     } else {
-        model_null = feglm.fit(X = matrix(1, nrow = n, ncol = 1), env = env, lean = TRUE)
+        model_null = feglm.fit(X = matrix(1, nrow = n, ncol = 1), fixef_mat = NULL, env = env, lean = TRUE)
         ll_null = model_null$loglik
         fitted_null = model_null$fitted.values
     }
