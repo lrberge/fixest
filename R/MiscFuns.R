@@ -5554,6 +5554,14 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 		} else {
 			res = object$family$linkfun(object$fitted.values)
 		}
+
+	    if(!is.null(object$obsRemoved)){
+	        # we add NA values
+	        tmp = rep(NA, object$nobs + length(object$obsRemoved))
+	        tmp[-object$obsRemoved] = res
+	        res = tmp
+	    }
+
 		return(res)
 	}
 
@@ -5571,6 +5579,9 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 	# 4) offset
 
 	n = nrow(newdata)
+
+	# NOTA 2019-11-26: I'm pondering whether to include NA-related messages
+	# (would it be useful???)
 
 	# 1) Cluster
 
@@ -5598,9 +5609,11 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 
 			fixef_values_possible = attr(object$fixef_id[[i]],"fixef_names")
 			valueNotHere = setdiff(cluster_current_unik, fixef_values_possible)
-			if(length(valueNotHere) > 0){
-				stop("The fixed-effect value ", valueNotHere[1], " (fixed-effect ", fixef_vars[i], ") was not used in the initial estimation, prediction cannot be done for observations with that value. Prediction can be done only for fixed-effect values present in the main estimation.")
-			}
+
+			# Now instead of stopping => regular NAs
+			# if(length(valueNotHere) > 0){
+			# 	stop("The fixed-effect value ", valueNotHere[1], " (fixed-effect '", fixef_vars[i], "') was not used in the initial estimation, prediction cannot be done for observations with that value. Prediction can be done only for fixed-effect values present in the main estimation.")
+			# }
 
 			cluster_current_num = unclass(factor(cluster_current, levels = fixef_values_possible))
 			id_cluster[[i]] = cluster_current_num
@@ -5662,6 +5675,8 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 		    }
 		}
 
+		# dropping names
+		value_cluster = as.vector(value_cluster)
 	}
 
 	# 2) Linear values
@@ -5674,11 +5689,11 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 		# Checking all variables are there
 		varNotHere = setdiff(all.vars(rhs_fml), names(newdata))
 		if(length(varNotHere) > 0){
-			stop("Some variables used to estimate the model (in fml) are missing from argument 'newdata': ", paste0(varNotHere, collapse = ", "), ".")
+			stop("Some variables used to estimate the model (in fml) are missing from argument 'newdata': ", enumerate_items(varNotHere), ".")
 		}
 
 		# we create the matrix
-		matrix_linear = model.matrix(rhs_fml, newdata)
+		matrix_linear = stats::model.matrix(rhs_fml, stats::model.frame(rhs_fml, newdata, na.action=na.pass))
 
 		keep = intersect(names(coef), colnames(matrix_linear))
 		value_linear = value_linear + as.vector(matrix_linear[, keep, drop = FALSE] %*% coef[keep])
@@ -5693,7 +5708,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 		NL_vars = all.vars(NL_fml)
 		varNotHere = setdiff(NL_vars, c(names(coef), names(newdata)))
 		if(length(varNotHere) > 0){
-			stop("Some variables used to estimate the model (in the non-linear formula) are missing from argument 'newdata': ", paste0(varNotHere, collapse = ", "), ".")
+			stop("Some variables used to estimate the model (in the non-linear formula) are missing from argument 'newdata': ", enumerate_items(varNotHere), ".")
 		}
 
 		var2send = intersect(NL_vars, names(newdata))
