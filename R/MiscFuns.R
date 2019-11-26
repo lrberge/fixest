@@ -1591,45 +1591,47 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 	    # We extract the slope variables
 	    slope_vars_unik = unique(slope_vars)
 
-	    # evaluation
-	    data = NULL
-	    try(data <- eval(object$call$data, parent.frame()), silent = TRUE)
-	    dataName = object$call$data
-
-	    if(is.null(data)){
-	        # We try to provide an informative error message
-	        stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables (i.e. ", enumerate_items(slope_vars_unik), ") in the original dataset in the parent.frame -- but the data doesn't seem to be there anymore (btw it was ", deparse_long(dataName), ")")
-	    }
-
-	    data = as.data.frame(data)
-
-	    # we check the variables are there
-	    slope_vars_unik_raw = unique(sapply(slope_vars_unik, function(x) all.vars(parse(text = x))))
-
-	    if(any(!slope_vars_unik_raw %in% names(data))){
-	        var_pblm = setdiff(slope_vars_unik_raw, names(data))
-	        stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables in the original dataset (", deparse_long(dataName), "). However, the variable", enumerate_items(var_pblm, "s.is"), " not present in the original dataset any more.")
-	    }
-
-	    # we check length consistency
-	    if(NROW(data) != (object$nobs + length(object$obsRemoved))){
-	        stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables in the original dataset (", deparse_long(dataName), "), yet the dataset doesn't have the same number of observations as was used in the estimation (", NROW(data), " instead of ", object$nobs + length(object$obsRemoved), ").")
-	    }
-
-	    if(length(object$obsRemoved)){
-	        data = data[-object$obsRemoved, slope_vars_unik_raw, drop = FALSE]
-	    } else {
-	        data = data[, slope_vars_unik_raw, drop = FALSE]
-	    }
+	    # 2019-11-26: now the slope variables are directly in the objects
+	    # # evaluation
+	    # data = NULL
+	    # try(data <- eval(object$call$data, parent.frame()), silent = TRUE)
+	    # dataName = object$call$data
+	    #
+	    # if(is.null(data)){
+	    #     # We try to provide an informative error message
+	    #     stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables (i.e. ", enumerate_items(slope_vars_unik), ") in the original dataset in the parent.frame -- but the data doesn't seem to be there anymore (btw it was ", deparse_long(dataName), ")")
+	    # }
+	    #
+	    # data = as.data.frame(data)
+	    #
+	    # # we check the variables are there
+	    # slope_vars_unik_raw = unique(sapply(slope_vars_unik, function(x) all.vars(parse(text = x))))
+	    #
+	    # if(any(!slope_vars_unik_raw %in% names(data))){
+	    #     var_pblm = setdiff(slope_vars_unik_raw, names(data))
+	    #     stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables in the original dataset (", deparse_long(dataName), "). However, the variable", enumerate_items(var_pblm, "s.is"), " not present in the original dataset any more.")
+	    # }
+	    #
+	    # # we check length consistency
+	    # if(NROW(data) != (object$nobs + length(object$obsRemoved))){
+	    #     stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables in the original dataset (", deparse_long(dataName), "), yet the dataset doesn't have the same number of observations as was used in the estimation (", NROW(data), " instead of ", object$nobs + length(object$obsRemoved), ").")
+	    # }
+	    #
+	    # if(length(object$obsRemoved)){
+	    #     data = data[-object$obsRemoved, slope_vars_unik_raw, drop = FALSE]
+	    # } else {
+	    #     data = data[, slope_vars_unik_raw, drop = FALSE]
+	    # }
 
 	    slope_var_list = list()
 	    for(i in 1:length(slope_vars_unik)){
 
-	        # as.numeric => we'll use cpp so required
-	        svar = as.numeric(as.vector(eval(parse(text = slope_vars_unik[i]), data)))
-	        if(length(svar) == 1) svar = rep(svar, N)
-
-	        slope_var_list[[slope_vars_unik[i]]] = svar
+	        # # as.numeric => we'll use cpp so required
+	        # svar = as.numeric(as.vector(eval(parse(text = slope_vars_unik[i]), data)))
+	        # if(length(svar) == 1) svar = rep(svar, N)
+	        #
+	        # slope_var_list[[slope_vars_unik[i]]] = svar
+	        slope_var_list[[slope_vars_unik[i]]] = object$slope_variables[[slope_vars_unik[i]]]
 	    }
 
 	    # STEP 2: demeaning
@@ -6551,9 +6553,11 @@ update.fixest = function(object, fml.update, nframes = 1, ...){
 		data = NULL
 		try(data <- eval(object$call$data, parent.frame(nframes)), silent = TRUE)
 
-		if(is.null(data)){
+		if(is.null(data) || is.function(data)){
 			dataName = object$call$data
-			stop("To apply 'update.fixest', we fetch the original database in the parent.frame -- but it doesn't seem to be there anymore (btw it was ", deparse_long(dataName), ").")
+			stop("To apply 'update.fixest', we fetch the original database in the parent.frame -- but it doesn't seem to be there anymore (btw it was '", deparse_long(dataName), "').")
+		} else if(!is.data.frame(data)){
+		    stop("To apply 'update.fixest', we fetch the original database in the parent.frame -- but currently the object '", deparse_long(object$call$data), "' is not a data.frame.")
 		}
 
 		# if same data => we apply init

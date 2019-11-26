@@ -2024,6 +2024,17 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
         if(isSlope){
             res$fixef_terms = fixef_terms
+
+            # We also add the variables => makes fixef self-contained
+            # It looks odd but the user may ask for the same var to have
+            # varying slopes in svl dimensions
+            sv = list()
+            slope_vars_unik = slope_vars[!is.na(slope_vars)]
+            for(var in slope_vars_unik){
+                sv[[var]] = slope_variables[[which.max(slope_vars == var)]]
+            }
+
+            res$slope_variables = sv
         }
 
         res$fixef_id = fixef_id_res
