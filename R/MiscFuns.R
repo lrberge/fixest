@@ -5921,13 +5921,13 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 	if(any(isBounded)){
 		if(keepBounded){
 			# we treat the bounded parameters as regular variables
-			myScore = object$score
+			myScore = object$scores
 			object$cov.unscaled = solve(object$hessian)
 		} else {
-			myScore = object$score[, -which(isBounded), drop = FALSE]
+			myScore = object$scores[, -which(isBounded), drop = FALSE]
 		}
 	} else {
-		myScore = object$score
+		myScore = object$scores
 	}
 
 
