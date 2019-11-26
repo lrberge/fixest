@@ -199,8 +199,10 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         # they concern only logit and poisson (so far)
         #
 
-        family$dev.resids = function(y, mu, eta, wt) sum(family$dev.resids(y, mu, wt))
-        family$mu.eta = function(mu, eta) family$mu.eta(eta)
+        fun_dev = family$dev.resids
+        family$dev.resids = function(y, mu, eta, wt) sum(fun_dev(y, mu, wt))
+        fun_mu.eta = family$mu.eta
+        family$mu.eta = function(mu, eta) fun_mu.eta(eta)
 
         if(is.null(family$valideta)) family$valideta = function(...) TRUE
         if(is.null(family$validmu)) family$validmu = function(...) TRUE
@@ -428,11 +430,11 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     if(isFit){
 
         isLinear = FALSE
-        if(is.null(X)){
+        if(missing(X) || is.null(X)){
             if(!isFixef){
                 stop("Argument X must be provided in the absence of fixed-effects.")
             } else {
-                isLinear = TRUE
+                isLinear = FALSE
             }
         } else {
             isLinear = TRUE
@@ -2056,6 +2058,11 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     }
     if(isWeight){
         res$weights = weights.value
+    }
+
+    # We save lhs in case of feglm, for later within-r2 evaluation
+    if(origin_type == "feglm" && isFixef){
+        res$y = lhs
     }
 
     assign("res", res, env)
