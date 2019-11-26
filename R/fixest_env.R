@@ -714,7 +714,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             }
         } else if(is.null(offset)){
             # msg if it's not what the user wanted
-            if(!is.null(mc_origin$offset)){
+            if(!is.null(mc_origin$offset) && deparse_long(mc_origin$offset) != "x$offset"){
                 stop("Argument 'offset' (", deparse_long(mc_origin$offset), ") is evaluated to NULL. This is likely not what you want.")
             }
         }
@@ -815,7 +815,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 message_0W = paste0(numberFormatNormal(sum(is0W)), " observations removed because of 0-weight.")
             }
 
-        } else if(!is.null(mc_origin$weights)){
+        } else if(!is.null(mc_origin$weights) && deparse_long(mc_origin$weights) != 'x[["weights"]]'){
             # we avoid this behavior
             stop("Argument 'weights' (", deparse_long(mc_origin$weights), ") is evaluated to NULL. This is likely not what you want.")
         }
@@ -1520,6 +1520,10 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         assign("init.type", "default", env)
         if(any(start_provided)){
             assign("init.type", c("coef", "eta", "mu")[start_provided], env)
+        }
+
+        if(!isLinear && get("init.type", env) == "coef"){
+            stop("You cannot initialize feglm with coefficients when there is no variable to be estimated (only the fixed-effects).")
         }
 
     }

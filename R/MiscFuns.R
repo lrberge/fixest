@@ -1052,7 +1052,21 @@ r2 = function(x, type = "all"){
 		        # This is the case of feglm where there were no fe_only model estimated
 		        # => we need to compute the FE model first
 
-		        res_fe = update(x, .~1|., glm.tol = 1e-2, fixef.tol = 1e-3, nframes = 2)
+		        # 2019-11-26: now self contained call (no need for outer frame evaluation)
+		        # res_fe = update(x, .~1|., glm.tol = 1e-2, fixef.tol = 1e-3, nframes = 2)
+
+		        # constructing the data
+		        newdata = cbind(data.frame(y = x$y), as.data.frame(x$fixef_id))
+		        if(!is.null(x$fixef_terms)){
+		            newdata = cbind(newdata, as.data.frame(x$slope_variables))
+		        }
+		        # Fe/slope only formula
+		        new_fml = as.formula(paste0("y~1|", gsub(".+\\|", "", as.character(x$fml_full)[3])))
+
+		        # The fact that weights = x[["weights"]] is on purpose -- don't touch it
+		        # same for offset = x$offset -- otherwise error is thrown in fixest_env
+		        res_fe = feglm(fml = new_fml, data = newdata, glm.tol = 1e-2, fixef.tol = 1e-3, family = x$family$family, weights = x[["weights"]], offset = x$offset)
+
 		        x$ssr_fe_only = cpp_ssq(resid(res_fe))
 		        x$ll_fe_only = logLik(res_fe)
 		    }
