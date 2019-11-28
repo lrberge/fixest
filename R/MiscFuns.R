@@ -4371,7 +4371,7 @@ terms_fixef = function(fml){
 prepare_df = function(vars, base, fastCombine = NA){
     # vars: vector of variables to evaluate
 
-    # we drop NAs an make it unique
+    # we drop NAs and make it unique
     vars = unique(vars[!is.na(vars)])
     all_var_names = vars
 
@@ -5611,6 +5611,17 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 
 	n = nrow(newdata)
 
+	# message for the user NOT to use newdata if its the same data set
+	# The user is not stupid: so just once
+	mc = match.call()
+	if(n == (object$nobs + length(object$obsRemoved)) && deparse_long(object$call$data) == deparse_long(mc$newdata) && getFixest_notes()){
+	    dont_warn = getOption("fixest_predict_dont_warn")
+	    if(!isTRUE(dont_warn)){
+	        message("NOTE: It looks like the data in 'newdata' is the same as the one used to run the regression. If so, to predict() on the existing data, you can leave the argument 'newdata' as missing, this is faster.")
+	        options("fixest_predict_dont_warn" = TRUE)
+	    }
+	}
+
 	# NOTA 2019-11-26: I'm pondering whether to include NA-related messages
 	# (would it be useful???)
 
@@ -5628,23 +5639,32 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 		id_cluster = list()
 		for(i in 1:n_cluster){
 			# checking if the variable is in the newdata
-			variable = all.vars(parse(text = fixef_vars[i]))
+		    fe_var = fixef_vars[i]
+			variable = all.vars(parse(text = fe_var))
 			isNotHere = !variable %in% names(newdata)
 			if(any(isNotHere)){
 				stop("The variable ", variable[isNotHere][1], " is absent from the 'newdata' but is needed for prediction (it is a cluster variable).")
 			}
 
+			# The values taken by the FE variable
+			fixef_values_possible = attr(object$fixef_id[[i]], "fixef_names")
+
+			# Checking if ^ is present
+			if(grepl("\\^", fe_var)){
+			    # If fastCombine was used => we're screwed, impossible to recover
+
+			    if(!is.character(fixef_values_possible)){
+			        stop("You cannot use predict() based on the initial regression since the fixed-effect '", variable, "' was combined using an algorithm dropping the FE values (but fast). Please re-run the regression using the argument 'combine.quick=FALSE'.")
+			    }
+
+			    fe_var_new = gsub("([[:alpha:]_\\.][[:alnum:]_\\.]*(\\^[[:alpha:]_\\.][[:alnum:]_\\.]*)+)",
+			                    "combine_clusters(\\1)", fe_var)
+
+			    fe_var = gsub("\\^", ", ", fe_var_new)
+			}
+
 			# Obtaining the unclassed vector of clusters
-			cluster_current = eval(parse(text = fixef_vars[i]), newdata)
-			cluster_current_unik = unique(cluster_current)
-
-			fixef_values_possible = attr(object$fixef_id[[i]],"fixef_names")
-			valueNotHere = setdiff(cluster_current_unik, fixef_values_possible)
-
-			# Now instead of stopping => regular NAs
-			# if(length(valueNotHere) > 0){
-			# 	stop("The fixed-effect value ", valueNotHere[1], " (fixed-effect '", fixef_vars[i], "') was not used in the initial estimation, prediction cannot be done for observations with that value. Prediction can be done only for fixed-effect values present in the main estimation.")
-			# }
+			cluster_current = eval(parse(text = fe_var), newdata)
 
 			cluster_current_num = unclass(factor(cluster_current, levels = fixef_values_possible))
 			id_cluster[[i]] = cluster_current_num
