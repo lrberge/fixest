@@ -5452,6 +5452,17 @@ fitted.fixest = fitted.values.fixest = function(object, type = c("response", "li
 		res = object$family$linkfun(object$fitted.values)
 	}
 
+	# Nota: obs can be removed: either because of NA, either because perfect fit
+	# Shall I put perfect fit as NA since they're out of the estimation???
+	# Still pondering...
+	# Actually adding them means a lot of work to ensure consitency (also in predict...)
+	if(!is.null(object$obsRemoved)){
+	    # we add NA values
+	    tmp = rep(NA, object$nobs + length(object$obsRemoved))
+	    tmp[-object$obsRemoved] = res
+	    res = tmp
+	}
+
 	res
 }
 
