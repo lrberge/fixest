@@ -67,7 +67,7 @@
 #' summary(res_comb)
 #' fixef(res_comb)[[1]]
 #'
-feols = function(fml, data, weights, offset, fixef, fixef.tol = 1e-7, fixef.iter = 2000,
+feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-7, fixef.iter = 2000,
                  na_inf.rm = getFixest_na_inf.rm(), nthreads = getFixest_nthreads(),
                  verbose = 0, warn = TRUE, notes = getFixest_notes(), combine.quick, ...){
 
@@ -86,7 +86,7 @@ feols = function(fml, data, weights, offset, fixef, fixef.tol = 1e-7, fixef.iter
 		time_start = proc.time()
 
 		# we use femlm for appropriate controls and data handling
-		env = try(fixest_env(fml = fml, data = data, weights = weights, offset = offset, fixef = fixef, fixef.tol = fixef.tol, fixef.iter = fixef.iter, na_inf.rm = na_inf.rm, nthreads = nthreads, verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick, origin = "feols", mc_origin = match.call(), ...), silent = TRUE)
+		env = try(fixest_env(fml = fml, data = data, weights = weights, offset = offset, panel.id = panel.id, fixef = fixef, fixef.tol = fixef.tol, fixef.iter = fixef.iter, na_inf.rm = na_inf.rm, nthreads = nthreads, verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick, origin = "feols", mc_origin = match.call(), ...), silent = TRUE)
 
 		if("try-error" %in% class(env)){
 			stop(format_error_msg(env, "feols"))
