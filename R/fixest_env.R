@@ -10,7 +10,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                        fixef, na_inf.rm = getFixest_na_inf.rm(), NL.start, lower, upper, NL.start.init,
                        offset, linear.start = 0, jacobian.method = "simple",
                        useHessian = TRUE, hessian.args = NULL, opt.control = list(),
-                      y, X, fixef_mat,
+                      y, X, fixef_mat, panel.id,
                        nthreads = getFixest_nthreads(),
                        verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000,
                        deriv.iter = 5000, deriv.tol = 1e-4, glm.iter = 25, glm.tol = 1e-8,
@@ -273,6 +273,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             }
             data = as.data.frame(data)
         }
+
         # The conversion of the data (due to data.table)
         if(!"data.frame" %in% class(data)){
             stop("The argument 'data' must be a data.frame or a matrix.")
@@ -291,11 +292,53 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         fml = formula(fml) # we regularize the formula to check it
         if(length(fml) != 3) stop("The formula must be two sided: e.g. y~x1+x2, or y~x1+x2|fe1+fe2.")
 
+        #
+        # Panel setup
+        #
+
+        isPanel = FALSE
+        if(check_lag(fml)){
+            isPanel = TRUE
+            if(!is.null(attr(data, "panel_info"))){
+                panel__meta__info = attr(data, "panel_info")
+            } else {
+                # Later: automatic deduction using the first two clusters
+                if(missing(panel.id)){
+                    stop("To use lag/leads (with l()/f()): either provide the argument 'panel.id' with the panel identifier OR set your data as a panel with function panel().")
+                }
+                panel__meta__info = panel_setup(data, panel.id, from_fixest = TRUE)
+            }
+            class(data) = "data.frame"
+        }
+
         FML = Formula::Formula(fml)
         n_rhs = length(FML)[2]
 
         if(n_rhs > 2){
             stop("The argument 'fml' cannot contain more than two parts separated by a pipe ('|').")
+        }
+
+        # We test there are no problems in the formula
+        info = try(terms(formula(FML, lhs = 1, rhs = 1)), silent = TRUE)
+        if("try-error" %in% class(info)){
+            dp = deparse(formula(FML, lhs = 1, rhs = 1))
+            stop("The formula: ", dp[1], ifsingle(dp, "", "..."), ", is not valid:\n", gsub("^[^\n]+\n", "", info))
+        }
+        # we check the cluster
+        if(n_rhs == 2){
+            info = try(terms(formula(FML, lhs = 0, rhs = 2)), silent = TRUE)
+            if("try-error" %in% class(info)){
+                dp = deparse(formula(FML, lhs = 0, rhs = 2))
+                stop("The fixed-effects part of the formula: ", dp[1], ifsingle(dp, "", "..."), ", is not valid:\n", gsub("^[^\n]+\n", "", info))
+            }
+        }
+
+        if(isPanel){
+            fml = try(rewrite_fml(fml), silent = TRUE)
+            if("try-error" %in% class(fml)){
+                stop("Problem in the formula:\n", gsub("_expand", "", fml))
+            }
+            FML = Formula::Formula(fml)
         }
 
         # for clarity, arg fixef is transformed into fixef_vars
@@ -519,12 +562,10 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                     stop("Evaluation of the right-hand-side of the formula raises and error: \n", linear.mat)
                 }
             } else {
-                # just to check => will give error if not proper formula
-                linear.mat = try(stats::model.matrix(linear.fml, head(data, 10)), silent = TRUE)
+                linear.mat = try(prepare_matrix(linear.fml, data), silent = TRUE)
                 if("try-error" %in% class(linear.mat)){
                     stop("Evaluation of the right-hand-side of the formula raises and error: \n", linear.mat)
                 }
-                linear.mat = prepare_matrix(linear.fml, data)
             }
         }
 
