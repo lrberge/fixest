@@ -419,8 +419,9 @@ void demean_acc_2(int v, int iterMax, PARAM_DEMEAN *args){
                 sum_weights_i, sum_weights_j, a_tilde, beta);
 
 	// For the stopping criterion on total addition
-	vector<double> mu_last(n_obs, 0);
-	double input_mean = 0;
+	// vector<double> mu_last(n_obs, 0);
+	// double input_mean = 0;
+	double ssr = 0;
 
 	bool numconv = false;
 	bool keepGoing = true;
@@ -459,7 +460,7 @@ void demean_acc_2(int v, int iterMax, PARAM_DEMEAN *args){
 			}
 		}
 
-		// Other stopping criterion: change to output very small
+		// Other stopping criterion: change to SSR very small
 		if(iter % 50 == 0){
 
 			// we need to compute beta
@@ -469,15 +470,15 @@ void demean_acc_2(int v, int iterMax, PARAM_DEMEAN *args){
 
 			if(isSlope_i){
 			    for(int obs=0 ; obs<n_obs ; ++obs){
-			        beta[dum_j[obs]] += obs_weights_j[obs] * slope_var_i[obs] * GX[dum_i[obs]];
+			        beta[dum_j[obs]] -= obs_weights_j[obs] * slope_var_i[obs] * GX[dum_i[obs]];
 			    }
 			} else if(isWeight){
 				for(int obs=0 ; obs<n_obs ; ++obs){
-					beta[dum_j[obs]] += obs_weights_j[obs] * GX[dum_i[obs]];
+					beta[dum_j[obs]] -= obs_weights_j[obs] * GX[dum_i[obs]];
 				}
 			} else {
 				for(int obs=0 ; obs<n_obs ; ++obs){
-					beta[dum_j[obs]] += GX[dum_i[obs]];
+					beta[dum_j[obs]] -= GX[dum_i[obs]];
 				}
 			}
 
@@ -498,36 +499,59 @@ void demean_acc_2(int v, int iterMax, PARAM_DEMEAN *args){
 			}
 
 
-			// init mu_last if iter == 50 / otherwise, comparison
+			// init ssr if iter == 50 / otherwise, comparison
 			if(iter == 50){
-				for(int i=0 ; i<n_obs ; ++i){
-					mu_last[i] = mu_current[i];
-				}
+				// for(int i=0 ; i<n_obs ; ++i){
+				// 	mu_last[i] = mu_current[i];
+				// }
+				//
+				// for(int i=0 ; i<n_obs ; ++i){
+				// 	input_mean += input[i];
+				// }
+				// input_mean /= n_obs;
+				// input_mean = fabs(input_mean);
 
-				for(int i=0 ; i<n_obs ; ++i){
-					input_mean += input[i];
-				}
-				input_mean /= n_obs;
-				input_mean = fabs(input_mean);
+				ssr = 0;
+			    double resid;
+			    for(int i=0 ; i<n_obs ; ++i){
+			        resid = input[i] - mu_current[i];
+			        ssr += resid*resid;
+			    }
 
 			} else {
-				double mu_diff = 0;
-				for(int i=0 ; i<n_obs ; ++i){
-					mu_diff += fabs(mu_last[i] - mu_current[i]);
-				}
-				mu_diff = mu_diff / n_obs; // we scale it to have a meaningful value
-				// Rprintf("iter %i -- mu_diff = %f (mean = %f)\n", iter, mu_diff, input_mean);
+				// double mu_diff = 0;
+				// for(int i=0 ; i<n_obs ; ++i){
+				// 	mu_diff += fabs(mu_last[i] - mu_current[i]);
+				// }
+				// mu_diff = mu_diff / n_obs; // we scale it to have a meaningful value
+				// // Rprintf("iter %i -- mu_diff = %f (mean = %f)\n", iter, mu_diff, input_mean);
+				//
+				// // if(mu_diff < diffMax || mu_diff / (0.1 + input_mean) < diffMax){
+				// if(stopping_crit(input_mean, mu_diff + input_mean, diffMax)){
+				// 	// Rprintf("mu_diff BREAK\n");
+				// 	break;
+				// }
+				//
+				// // we update mu_last
+				// for(int i=0 ; i<n_obs ; ++i){
+				// 	mu_last[i] = mu_current[i];
+				// }
 
-				// if(mu_diff < diffMax || mu_diff / (0.1 + input_mean) < diffMax){
-				if(stopping_crit(input_mean, mu_diff + input_mean, diffMax)){
-					// Rprintf("mu_diff BREAK\n");
-					break;
-				}
+				double ssr_old = ssr;
 
-				// we update mu_last
-				for(int i=0 ; i<n_obs ; ++i){
-					mu_last[i] = mu_current[i];
-				}
+			    // we compute the new SSR
+			    ssr = 0;
+			    double resid;
+			    for(int i=0 ; i<n_obs ; ++i){
+			        resid = input[i] - mu_current[i];
+			        ssr += resid*resid;
+			    }
+
+			    // if(isMaster) Rprintf("iter %i -- SSR = %.0f (diff = %.0f)\n", iter, ssr, ssr_old - ssr);
+
+			    if(stopping_crit(ssr_old, ssr, diffMax)){
+			        break;
+			    }
 
 			}
 		}
@@ -863,8 +887,9 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args){
 	}
 
 	// For the stopping criterion on total addition
-	vector<double> mu_last(n_obs, 0);
-	double input_mean = 0;
+	// vector<double> mu_last(n_obs, 0);
+	// double input_mean = 0;
+	double ssr = 0;
 
 	int iter = 0;
 	bool numconv = false;
@@ -899,9 +924,10 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args){
 			}
 		}
 
-		// Other stopping criterion: change to output very small
+		// Other stopping criterion: change to SSR very small
 		if(iter % 50 == 0){
 
+		    // mu_current is the vector of means
 			vector<double> mu_current(n_obs, 0);
 			for(int q=0 ; q<Q ; ++q){
 				int *my_dum = pdum[q];
@@ -920,36 +946,58 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args){
 
 			}
 
-			// init mu_last if iter == 50 / otherwise, comparison
+			// init ssr if iter == 50 / otherwise, comparison
 			if(iter == 50){
-				for(int i=0 ; i<n_obs ; ++i){
-					mu_last[i] = mu_current[i];
-				}
+				// for(int i=0 ; i<n_obs ; ++i){
+				// 	mu_last[i] = mu_current[i];
+				// }
 
-				for(int i=0 ; i<n_obs ; ++i){
-					input_mean += input[i];
-				}
-				input_mean /= n_obs;
-				input_mean = fabs(input_mean);
+				// for(int i=0 ; i<n_obs ; ++i){
+				// 	input_mean += input[i];
+				// }
+				// input_mean /= n_obs;
+				// input_mean = fabs(input_mean);
+
+				ssr = 0;
+			    double resid;
+			    for(int i=0 ; i<n_obs ; ++i){
+			        resid = input[i] - mu_current[i];
+			        ssr += resid*resid;
+    	        }
 
 			} else {
-				double mu_diff = 0;
-				for(int i=0 ; i<n_obs ; ++i){
-					mu_diff += fabs(mu_last[i] - mu_current[i]);
-				}
-				mu_diff = mu_diff / n_obs; // we scale it to have a meaningful value
-				// Rprintf("iter %i -- mu_diff = %f (mean = %f)\n", iter, mu_diff, input_mean);
+				// double mu_diff = 0;
+				// for(int i=0 ; i<n_obs ; ++i){
+				// 	mu_diff += fabs(mu_last[i] - mu_current[i]);
+				// }
+				// mu_diff = mu_diff / n_obs; // we scale it to have a meaningful value
+				// // Rprintf("iter %i -- mu_diff = %f (mean = %f)\n", iter, mu_diff, input_mean);
+				//
+				// // if(mu_diff / (0.1 + input_mean) < diffMax){
+				// if(stopping_crit(input_mean, mu_diff + input_mean, diffMax)){
+				// 	// Rprintf("mu_diff BREAK\n");
+				// 	break;
+				// }
+				//
+				// // we update mu_last
+				// for(int i=0 ; i<n_obs ; ++i){
+				// 	mu_last[i] = mu_current[i];
+				// }
+				double ssr_old = ssr;
 
-				// if(mu_diff / (0.1 + input_mean) < diffMax){
-				if(stopping_crit(input_mean, mu_diff + input_mean, diffMax)){
-					// Rprintf("mu_diff BREAK\n");
-					break;
-				}
+			    // we compute the new SSR
+			    ssr = 0;
+			    double resid;
+			    for(int i=0 ; i<n_obs ; ++i){
+			        resid = input[i] - mu_current[i];
+			        ssr += resid*resid;
+			    }
 
-				// we update mu_last
-				for(int i=0 ; i<n_obs ; ++i){
-					mu_last[i] = mu_current[i];
-				}
+			    // if(isMaster) Rprintf("iter %i -- SSR = %.0f (diff = %.0f)\n", iter, ssr, ssr_old - ssr);
+
+			    if(stopping_crit(ssr_old, ssr, diffMax)){
+			    	break;
+			    }
 
 			}
 		}
