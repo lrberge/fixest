@@ -67,7 +67,7 @@
 #' summary(res_comb)
 #' fixef(res_comb)[[1]]
 #'
-feols = function(fml, data, weights, offset, fixef, fixef.tol = 1e-7, fixef.iter = 2000,
+feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-7, fixef.iter = 2000,
                  na_inf.rm = getFixest_na_inf.rm(), nthreads = getFixest_nthreads(),
                  verbose = 0, warn = TRUE, notes = getFixest_notes(), combine.quick, ...){
 
