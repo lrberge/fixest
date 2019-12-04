@@ -4247,18 +4247,48 @@ prepare_matrix = function(fml, base){
     all_var_names = attr(t, "term.labels")
     all_vars = gsub(":", "*", all_var_names)
 
+    # Forming the call
     if(attr(t, "intercept") == 1){
         n = nrow(base)
         all_vars_call = parse(text = paste0("list('(Intercept)' = rep(1, ", n, "), ", paste0(all_vars, collapse = ", "), ")"))
-        data_list <- eval(all_vars_call, base)
-        names(data_list)[-1] = all_var_names
+        all_var_names = c("(Intercept)", all_var_names)
     } else {
         all_vars_call = parse(text = paste0("list(", paste0(all_vars, collapse = ", "), ")"))
-        data_list <- eval(all_vars_call, base)
-        names(data_list) = all_var_names
+    }
+
+    # evaluation
+    data_list <- eval(all_vars_call, base)
+
+    # Handling the multi columns case (ex: bs(x1), splines)
+    if(any(lengths(data_list) != nrow(base))){
+
+        all_n = as.vector(lengths(data_list) / nrow(base))
+
+        qui_pblm = which(all_n %% 1 != 0)
+        if(length(qui_pblm) > 0){
+            what = data_list[[qui_pblm]]
+            reason = ifelse(is.null(nrow(what)), paste0("of length ", length(what)), paste0("with ", nrow(what), " rows"))
+
+            stop("Evaluation of ", all_var_names[qui_pblm], " returns an object ", reason, " while the data set has ", nrow(base)," rows.", call. = FALSE)
+        }
+
+        all_n_vector = rep(all_n, all_n)
+
+        new_names = as.list(all_var_names)
+        for(i in which(all_n > 1)){
+            my_names = colnames(data_list[[i]])
+            if(is.null(my_names)){
+                my_names = 1:all_n[i]
+            }
+            new_names[[i]] = paste0(all_var_names[i], my_names)
+        }
+
+        all_var_names = unlist(new_names)
     }
 
     res = do.call("cbind", data_list)
+
+    colnames(res) = all_var_names
 
 
     res
