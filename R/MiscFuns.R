@@ -345,6 +345,7 @@ summary.fixest <- function(object, se, cluster, dof = TRUE, exact_dof = FALSE, f
 #' @param yesNoFixef A character vector of length 2. Default is \code{c("Yes", "No")}. This is the message displayed when a given cluster is (or is not) included in a regression.
 #' @param family A logical, default is missing. Whether to display the families of the models. By default this line is displayed when at least two models are from different families.
 #' @param powerBelow Integer, default is -5. A coefficient whose value is below \code{10**(powerBelow+1)} is written with a power in Latex. For example \code{0.0000456} would be written \code{4.56$\\times 10^{-5}$} by default. Setting \code{powerBelow = -6} would lead to \code{0.00004} in Latex.
+#' @param interaction.combine Character scalar, defaults to \code{" $\\times$ "}. When the estimation contains interactions and one of the variables has an alias, then the names of all interaction variables with an alias are changed and then combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind $\\times$ Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.
 #'
 #' @return
 #' There is nothing returned, the result is only displayed on the console or saved in a file.
@@ -370,7 +371,7 @@ summary.fixest <- function(object, se, cluster, dof = TRUE, exact_dof = FALSE, f
 #' esttex(res1, res2, dict = c(Sepal.Length = "The sepal length", Sepal.Width = "SW"),
 #'         signifCode = c("**" = 0.1, "*" = 0.2, "n.s."=1))
 #'
-esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = TRUE, cluster, digits=4, fitstat, title, sdBelow=TRUE, drop, order, dict = getFixest_dict(), file, replace=FALSE, convergence, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, fixef_sizes = FALSE, yesNoFixef = c("Yes", "No"), keepFactors = TRUE, family, powerBelow = -5){
+esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = TRUE, cluster, digits=4, fitstat, title, sdBelow=TRUE, drop, order, dict = getFixest_dict(), file, replace=FALSE, convergence, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, fixef_sizes = FALSE, yesNoFixef = c("Yes", "No"), keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ "){
 	# drop: a vector of regular expressions
 	# order: a vector of regular expressions
 	# dict: a 'named' vector
@@ -385,12 +386,19 @@ esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway
 		se = match.arg(se)
     } else {
 	    se = NULL
-	}
+    }
+
+    # check the dictionnary
+    if(!is.null(dict) && (!is.character(dict) || is.null(names(dict)))){
+        stop("The argument 'dict' must be a named character vector.")
+    }
+
+    check_arg(interaction.combine, "singleCharacter")
 
 	# to get the model names
 	dots_call = match.call(expand.dots = FALSE)[["..."]]
 
-	info = results2formattedList(..., se=se, dof=dof, fitstat=fitstat, cluster=cluster, digits=digits, sdBelow=sdBelow, signifCode=signifCode, subtitles=subtitles, yesNoFixef=yesNoFixef, keepFactors=keepFactors, isTex = TRUE, useSummary=useSummary, dots_call=dots_call, powerBelow=powerBelow, dict=dict)
+	info = results2formattedList(..., se=se, dof=dof, fitstat=fitstat, cluster=cluster, digits=digits, sdBelow=sdBelow, signifCode=signifCode, subtitles=subtitles, yesNoFixef=yesNoFixef, keepFactors=keepFactors, isTex = TRUE, useSummary=useSummary, dots_call=dots_call, powerBelow=powerBelow, dict=dict, interaction.combine=interaction.combine)
 
 	n_models = length(info$depvar_list)
 	# Getting the information
@@ -435,11 +443,6 @@ esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway
 								 "\\hline\n")
 
 	outro_latex <- "\\end{tabular}\n"
-
-	# check the dictionnary
-    if(!is.null(dict) && (!is.character(dict) || is.null(names(dict)))){
-        stop("The argument 'dict' must be a named character vector.")
-    }
 
 	# 1st lines => dep vars
 	depvar_list = c(depvar_list, recursive = TRUE)
@@ -648,7 +651,10 @@ esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway
 		}
 
 		nb_col = length(obs_list) + 1
-		info_SD = paste0("\\hline\n\\hline\n\\multicolumn{", nb_col, "}{l}{\\emph{", my_se, " standard-errors in parentheses. Signif Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
+		# info_SD = paste0("\\hline\n\\hline\n\\multicolumn{", nb_col, "}{l}{\\emph{", my_se, " standard-errors in parentheses. Signif Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
+		sd_intro = paste0("\\multicolumn{", nb_col, "}{l}{\\emph{")
+		info_SD = paste0("\\hline\n\\hline\n", sd_intro, my_se, " standard-errors in parentheses.}}\\\\\n")
+		info_SD = paste0(info_SD, sd_intro, "Signif Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
 		info_muli_se = ""
 	} else {
 		info_muli_se = paste0("Standard-Error type& ", paste(se_type_list, collapse="&"), "\\\\\n")
@@ -3375,7 +3381,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #### Internal Funs     ####
 ####
 
-results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitstat, sdBelow=TRUE, dict = NULL, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, titles, yesNoFixef = c("Yes", "No"), keepFactors = FALSE, isTex = FALSE, useSummary, dots_call, powerBelow){
+results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitstat, sdBelow=TRUE, dict = NULL, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, titles, yesNoFixef = c("Yes", "No"), keepFactors = FALSE, isTex = FALSE, useSummary, dots_call, powerBelow, interaction.combine){
     # This function is the core of the functions esttable and esttex
 
     # for error handling => refers to the right function
@@ -3467,7 +3473,8 @@ results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitsta
     # we keep track of the SEs
     se_type_list = list()
 
-    var_list <- coef_list <- coef_below <- sd_below <- list()
+    check_interaction_reorder = FALSE
+    var_list <- var_reorder_list <- coef_list <- coef_below <- sd_below <- list()
     depvar_list <- obs_list <- fitstat_list <- list()
     r2_list <- aic_list <- bic_list <- loglik_list <- convergence_list <- list()
     sqCor_list = family_list = theta_list = list()
@@ -3709,6 +3716,55 @@ results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitsta
 
         # on enleve les espaces dans les noms de variables
         var <- c(gsub(" ", "", row.names(a)))
+        # renaming => Tex only
+        if(isTex){
+            qui = var %in% names(dict)
+            var[qui] = dict[var[qui]]
+            tv = table(var)
+            if(any(tv > 1)){
+                value_pblm = names(tv)[tv > 1][1]
+                var_pblm = c(gsub(" ", "", row.names(a)))[var == value_pblm]
+                stop("Problematic value for argument 'dict': The variables ", enumerate_items(var_pblm, "quote"), " have all the same alias ('", value_pblm, "') in the same estimation. This makes no sense, please provide a separate alias for each.")
+            }
+
+            # if there are still interactions, we rename them
+            new_var = var
+            var_left = var[!qui]
+            if(length(var_left) > 0 && any(grepl(":", var_left))){
+                check_interaction_reorder = TRUE
+                qui_inter = grepl(":", var_left)
+                inter = strsplit(var_left[qui_inter], ":")
+
+                fun_rename = function(x){
+                    res = x
+                    who = res %in% names(dict)
+
+                    join = ifelse(any(who), interaction.combine, ":")
+
+                    res[who] = dict[res[who]]
+                    paste0(res, collapse = join)
+                }
+
+                inter_named = sapply(inter, fun_rename)
+                new_inter = sapply(inter, function(x) fun_rename(sort(x)))
+
+                var[!qui][qui_inter] = new_inter
+                new_var[!qui][qui_inter] = new_inter
+            }
+
+            var_reorder_list[[m]] <- new_var
+        } else if(interaction.sort){
+            # We reorder the interaction terms alphabetically
+            new_var = var
+            qui = grepl(":", new_var)
+            if(any(qui)){
+                check_interaction_reorder = TRUE
+                inter = strsplit(new_var[qui], ":")
+                new_inter = sapply(inter, function(x) paste0(sort(x), collapse = ":"))
+                new_var[qui] = new_inter
+            }
+            var_reorder_list[[m]] <- new_var
+        }
 
         if(isTex){
             coef = coefFormatLatex(a[, 1], digits = digits, power = abs(powerBelow))
@@ -3784,6 +3840,16 @@ results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitsta
         }
 
     }
+
+    if(check_interaction_reorder){
+        if(length(unique(unlist(var_reorder_list))) < length(unique(unlist(var_list)))){
+            var_list = var_reorder_list
+            for(m in 1:length(var_list)){
+                names(coef_list[[m]]) <- var_list[[m]]
+            }
+        }
+    }
+
 
     if(length(fitstat) > 0){
         attr(fitstat_list, "format_names") = fitstat_dict[fitstat]
