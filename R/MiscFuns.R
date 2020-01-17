@@ -294,7 +294,7 @@ summary.fixest <- function(object, se, cluster, dof = TRUE, exact_dof = FALSE, f
 
 	# th z & p values
 	zvalue <- object$coefficients/se
-	pvalue <- 2*pnorm(-abs(zvalue))
+	pvalue <- 2*pt(-abs(zvalue), object$nobs - object$nparams)
 
 	# update of se if bounded
 	se_format = se
