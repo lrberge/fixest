@@ -334,25 +334,25 @@ check_arg = function(x, type, message, call_depth = 0){
 				
 				first_msg = ifelse(grepl("vector", type), " of values", "")
 				
-				if(grepl(expr <- "ge[[:digit:]]+", type)){
+				if(grepl(expr <- "ge-?[[:digit:]]+", type)){
 					n = myExtract(expr)
 					message = paste0(message, first_msg, " greater than, or equal to, ", n)
 					first_msg = " and"
 				}
 				
-				if(grepl(expr <- "gt[[:digit:]]+", type)){
+				if(grepl(expr <- "gt-?[[:digit:]]+", type)){
 					add_and = TRUE
 					n = myExtract(expr)
 					message = paste0(message, first_msg, " strictly greater than ", n)
 					first_msg = " and"
 				}
 				
-				if(grepl(expr <- "le[[:digit:]]+", type)){
+				if(grepl(expr <- "le-?[[:digit:]]+", type)){
 					n = myExtract(expr)
 					message = paste0(message, first_msg, " lower than, or equal to, ", n)
 				}
 				
-				if(grepl(expr <- "lt[[:digit:]]+", type)){
+				if(grepl(expr <- "lt-?[[:digit:]]+", type)){
 					n = myExtract(expr)
 					message = paste0(message, first_msg, " strictly lower than ", n)
 				}
@@ -458,23 +458,23 @@ check_arg = function(x, type, message, call_depth = 0){
 	
 	# Greater than, lower than
 	
-	if(grepl(expr <- "ge[[:digit:]]+", type)){
+	if(grepl(expr <- "ge-?[[:digit:]]+", type)){
 		n = myExtract(expr)
 		if( any(x < n) ) stop_now("But it is lower than ", n, ".")
 	}
 	
-	if(grepl(expr <- "gt[[:digit:]]+", type)){
+	if(grepl(expr <- "gt-?[[:digit:]]+", type)){
 		n = myExtract(expr)
 		if( any(x == n) ) stop_now("But it is equal to ", n, " (while it should be *striclty* greater).")
 		if( any(x < n) ) stop_now("But it is lower than ", n, ".")
 	}
 	
-	if(grepl(expr <- "le[[:digit:]]+", type)){
+	if(grepl(expr <- "le-?[[:digit:]]+", type)){
 		n = myExtract(expr)
 		if( any(x > n) ) stop_now("But it is greater than ", n, ".")
 	}
 	
-	if(grepl(expr <- "lt[[:digit:]]+", type)){
+	if(grepl(expr <- "lt-?[[:digit:]]+", type)){
 		n = myExtract(expr)
 		if( any(x == n) ) stop_now("But it is equal to ", n, " (while it should be *striclty* lower).")
 		if( any(x > n) ) stop_now("But it is greater than ", n, ".")
