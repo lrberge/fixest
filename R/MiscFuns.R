@@ -11,7 +11,7 @@
 #' @param ... Other arguments to be passed to \code{\link[fixest]{vcov.fixest}}.
 #'
 #' @seealso
-#' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the functions \code{\link[fixest]{esttable}} and \code{\link[fixest]{esttex}} to visualize the results of multiple estimations.
+#' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
 #'
 #' @author
 #' Laurent Berge
@@ -211,7 +211,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' \item{coeftable}{The table of coefficients with the new standard errors.}
 #'
 #' @seealso
-#' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the functions \code{\link[fixest]{esttable}} and \code{\link[fixest]{esttex}} to visualize the results of multiple estimations.
+#' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
 #'
 #' @author
 #' Laurent Berge
@@ -245,7 +245,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' }
 #'
 #'
-summary.fixest <- function(object, se, cluster, dof = TRUE, exact_dof = FALSE, forceCovariance = FALSE, keepBounded = FALSE, ...){
+summ <- summary.fixest <- function(object, se, cluster, dof = TRUE, exact_dof = FALSE, forceCovariance = FALSE, keepBounded = FALSE, ...){
 	# computes the clustered SD and returns the modified vcov and coeftable
 
 	if(!is.null(object$onlyFixef)){
@@ -320,57 +320,186 @@ summary.fixest <- function(object, se, cluster, dof = TRUE, exact_dof = FALSE, f
 	return(object)
 }
 
-#' Facility to export the results of multiple \code{fixest} estimations in a Latex table.
+#' @rdname summ
+"summary.fixest"
+
+
+#' Estimations table (export the results of multiples estimations to a DF or to Latex)
 #'
-#' This function aggregates the results of multiple estimations and display them in the form of  one Latex table whose row names are the variables and the columns contain the coefficients and standard-errors.
+#' Aggregates the results of multiple estimations and displays them in the form of either a Latex table or a \code{data.frame}.
 #'
 #' @inheritParams summary.fixest
 #'
-#' @param ... Used to capture different \code{fixest} objects (obtained with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}). Note that any other type of element is discarded. Note that you can give a list of \code{fixest} objects.
+#' @param ... Used to capture different \code{fixest} estimation objects (obtained with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}). Note that any other type of element is discarded. Note that you can give a list of \code{fixest} objects.
 #' @param digits Integer, default is 4. The number of digits to be displayed.
+#' @param tex Logical: whether the results should be a data.frame or a Latex table. By default, this argument is \code{TRUE} if the argument \code{file} (used for exportation) is not missing; it is equal to \code{FALSE} otherwise.
 #' @param fitstat A character vector or a one sided formula. A vector listing which fit statistics to display. The valid types are 'll', 'aic', 'bic' and r2 types like 'r2', 'pr2', 'war2', etc (see all valid types in \code{\link[fixest]{r2}}). The default value depends on the models to display. Example of use: \code{fitstat=c('sq.cor', 'ar2', 'war2')}, or \code{fitstat=~sq.cor+ar2+war2} using a formula.
-#' @param title Character scalar. The title of the Latex table.
-#' @param sdBelow Logical, default is \code{TRUE}. Should the standard-errors be displayed below the coefficients?
-#' @param drop Character vector. This element is used if some variables are not to be displayed. This should be a regular expression (see \code{\link[base]{regex}} help for more info). There can be more than one regular expression. Each variable satisfying the regular expression will be discarded.
-#' @param order Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a regular expression (see \code{\link[base]{regex}} help for more info). There can be more than one regular expression. The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions.
-#' @param dict A named character vector. It changes the original variable names to the ones contained in the \code{dict}. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default it is equal to \code{getFixest_dict()}, a default dictionary can be set with \code{\link[fixest]{setFixest_dict}}.
-#' @param file A character scalar. If provided, the Latex table will be saved in a file whose path is \code{file}.
-#' @param replace Logical, default is \code{FALSE}. Only used if option \code{file} is used. Should the Latex table be written in a new file that replaces any existing file?
+#' @param title (Tex only.) Character scalar. The title of the Latex table.
+#' @param sdBelow (Tex only.) Logical, default is \code{TRUE}. Should the standard-errors be displayed below the coefficients?
+#' @param drop Character vector. This element is used if some variables are not to be displayed. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be discarded. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{drop = "x[[:digit:]]{2}"}.
+#' @param order Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument \code{dict}). Example: you have the following variables: \code{month1} to \code{month6}, then \code{x1} to \code{x5}, then \code{year1} to \code{year6}. If you want to display first the x's, then the years, then the months you could use: \code{order = c("x", "year")}.
+#' @param dict (Tex only.) A named character vector. It changes the original variable names to the ones contained in the \code{dict}. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default it is equal to \code{getFixest_dict()}, a default dictionary which can be set with \code{\link[fixest]{setFixest_dict}}.
+#' @param file A character scalar. If provided, the Latex (or data frame) table will be saved in a file whose path is \code{file}. If you provide this argument, then a Latex table will be exported, to export a regular \code{data.frame}, use argument \code{tex = FALSE}.
+#' @param replace Logical, default is \code{FALSE}. Only used if option \code{file} is used. Should the exported table be written in a new file that replaces any existing file?
 #' @param convergence Logical, default is missing. Should the convergence state of the algorithm be displayed? By default, convergence information is displayed if at least one model did not converge.
-#' @param signifCode Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is \code{c("***"=0.01, "**"=0.05, "*"=0.10)}.
-#' @param label Character scalar. The label of the Latex table.
+#' @param signifCode Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is \code{c("***"=0.01, "**"=0.05, "*"=0.10)} for a Latex table and \code{c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)} for a data.frame (to conform with R's default).
+#' @param label (Tex only.) Character scalar. The label of the Latex table.
 #' @param subtitles Character vector of the same length as the number of models to be displayed. If provided, subtitles are added underneath the dependent variable name.
-#' @param fixef_sizes Logical, default is \code{FALSE}. If \code{TRUE} and fixed-effects were used in the models, then the number "individuals" per fixed-effect dimension is also displayed.
+#' @param fixef_sizes (Tex only.) Logical, default is \code{FALSE}. If \code{TRUE} and fixed-effects were used in the models, then the number of "individuals" per fixed-effect dimension is also displayed.
+#' @param yesNoFixef (Tex only.) A character vector of length 1 or 2. Default is \code{c("Yes", "No")}. This is the message displayed when a given cluster is (or is not) included in a regression. If \code{yesNoFixef} is of length 1, then the second element is the empty string.
+#' @param family Logical, default is missing. Whether to display the families of the models. By default this line is displayed when at least two models are from different families.
 #' @param keepFactors Logical, default is \code{TRUE}. If \code{FALSE}, then factor variables are displayed as fixed-effects and no coefficient is shown.
-#' @param yesNoFixef A character vector of length 2. Default is \code{c("Yes", "No")}. This is the message displayed when a given cluster is (or is not) included in a regression.
-#' @param family A logical, default is missing. Whether to display the families of the models. By default this line is displayed when at least two models are from different families.
-#' @param powerBelow Integer, default is -5. A coefficient whose value is below \code{10**(powerBelow+1)} is written with a power in Latex. For example \code{0.0000456} would be written \code{4.56$\\times 10^{-5}$} by default. Setting \code{powerBelow = -6} would lead to \code{0.00004} in Latex.
-#' @param interaction.combine Character scalar, defaults to \code{" $\\times$ "}. When the estimation contains interactions and one of the variables has an alias, then the names of all interaction variables with an alias are changed and then combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind $\\times$ Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.
+#' @param powerBelow (Tex only.) Integer, default is -5. A coefficient whose value is below \code{10**(powerBelow+1)} is written with a power in Latex. For example \code{0.0000456} would be written \code{4.56$\\times 10^{-5}$} by default. Setting \code{powerBelow = -6} would lead to \code{0.00004} in Latex.
+#' @param interaction.combine (Tex only.) Character scalar, defaults to \code{" $\\times$ "}. When the estimation contains interactions and one of the variables has an alias, then the names of all interaction variables with an alias are changed and then combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind $\\times$ Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.
+#' @param depvar (Data frame only.) Logical, default is missing. Whether a first line containing the dependent variables should be shown. By default, the dependent variables are shown only if they differ across models or if the argumen \code{file} is not missing.
+#'
+#' @details
+#' The function \code{esttex} is equivalent to the function \code{etable} with argument \code{tex = TRUE}.
+#'
+#' The function \code{esttable} is equivalent to the function \code{etable} with argument \code{tex = FALSE}.
 #'
 #' @return
-#' There is nothing returned, the result is only displayed on the console or saved in a file.
+#' If \code{tex = TRUE}, the lines composing the Latex table are returned invisibly while the table is directly prompted on the console.
+#'
+#' If \code{tex = FALSE}, the data.frame is directly returned. If the argument \code{file} is not missing, the \code{data.frame} is returned invisibly.
 #'
 #' @seealso
-#' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the functions \code{\link[fixest]{esttable}} and \code{\link[fixest]{esttex}} to visualize the results of multiple estimations.
+#' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients.
 #'
 #' @author
 #' Laurent Berge
 #'
 #' @examples
 #'
-#'# two fitted models with different expl. variables:
-#' res1 = femlm(Sepal.Length ~ Sepal.Width + Petal.Length +
-#'              Petal.Width | Species, iris)
-#' res2 = femlm(Sepal.Length ~ Petal.Width | Species, iris)
+#' aq = airquality
+#' aq$Month = factor(aq$Month)
 #'
-#' # We export the three results in one Latex table,
-#' # with clustered standard-errors:
-#' esttex(res1, res2, se = "cluster")
+#' est1 = feols(Ozone ~ Month / Wind + Temp, data = aq)
+#' est2 = feols(Ozone ~ Wind + Temp | Month, data = aq)
 #'
-#' # Changing the names & significance codes
-#' esttex(res1, res2, dict = c(Sepal.Length = "The sepal length", Sepal.Width = "SW"),
-#'         signifCode = c("**" = 0.1, "*" = 0.2, "n.s."=1))
+#' # Displaying the two results in a single table
+#' etable(est1, est2)
 #'
+#' # drop: dropping the non interaction terms (see regexp help)
+#' etable(est1, est2, drop = "^[[:alnum:]]+$")
+#' # drop interactions
+#' etable(est1, est2, drop = ":")
+#'
+#' # order: Wind variable first, intercept last
+#' etable(est1, est2, order = c("Wind", "Month"))
+#' etable(est1, est2, order = c("^Wind", "Wind", "Month"))
+#'
+#' # signifCode
+#' etable(est1, est2, signifCode = c(" A"=0.01, " B"=0.05, " C"=0.1,
+#'                                   " D"=0.15, " F"=1))
+#'
+#' # fitstat
+#' etable(est1, est2, fitstat = ~r2+ar2+apr2+war2)
+#'
+#' # Adding a dictionnary (Tex only)
+#' dict = c(Month5="May", Month6="Jun", Month7="Jul", Month8="Aug", Month9="Sep")
+#' etable(est1, est2, dict = dict, tex = TRUE)
+#'
+etable = function(..., se=c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = TRUE, cluster, digits=4, tex, fitstat, title, sdBelow = TRUE, drop, order, dict = getFixest_dict(), file, replace=FALSE, convergence, signifCode, label, subtitles, fixef_sizes = FALSE, yesNoFixef = c("Yes", "No"), keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar){
+
+    #
+    # Checking the arguments
+    #
+
+    # Need to check for the presence of the se
+    useSummary = TRUE
+    if(missing(se) && missing(cluster)){
+        useSummary = FALSE
+    }
+
+    if(!missing(se)){
+        se = match.arg(se)
+    } else {
+        se = NULL
+    }
+
+    # check the dictionnary
+    if(!is.null(dict) && (!is.character(dict) || is.null(names(dict)))){
+        stop("The argument 'dict' must be a named character vector.")
+    }
+
+    # The depvar
+    if(missing(depvar) && !missing(file)){
+        depvar = TRUE
+    }
+
+    check_arg(dof, "singleLogical")
+    check_arg(digits, "singleIntegerGE1")
+    check_arg(title, "singleCharacter")
+    check_arg(sdBelow, "singleLogical")
+    check_arg(drop, "characterVector")
+    check_arg(order, "characterVector")
+    check_arg(file, "singleCharacter")
+    check_arg(replace, "singleLogical")
+    check_arg(convergence, "singleLogical")
+    check_arg(signifCode, "numericVectorGE0LE1")
+    check_arg(label, "singleCharacter")
+    check_arg(subtitles, "characterVector")
+    check_arg(fixef_sizes, "singleLogical")
+    check_arg(yesNoFixef, "characterVector")
+    check_arg(keepFactors, "singleLogical")
+    check_arg(family, "singleLogical")
+    check_arg(powerBelow, "singleIntegerLE-1")
+    check_arg(interaction.combine, "singleCharacter")
+    check_arg(tex, "singleLogical")
+    check_arg(depvar, "singleLogical")
+
+    if(missing(tex)){
+        if(!missing(file)) {
+            tex = TRUE
+        } else {
+            tex = FALSE
+        }
+    }
+
+    # The signif codes
+    if(missing(signifCode)){
+        if(tex){
+            signifCode = c("***"=0.01, "**"=0.05, "*"=0.10)
+        } else {
+            signifCode = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)
+        }
+    }
+
+    # to get the model names
+    dots_call = match.call(expand.dots = FALSE)[["..."]]
+
+    info = results2formattedList(..., se=se, dof=dof, fitstat=fitstat, cluster=cluster, digits=digits, sdBelow=sdBelow, signifCode=signifCode, title=title, subtitles=subtitles, yesNoFixef=yesNoFixef, keepFactors=keepFactors, isTex = tex, useSummary=useSummary, dots_call=dots_call, powerBelow=powerBelow, dict=dict, interaction.combine=interaction.combine, convergence=convergence, show_family=family, drop=drop, file=file, order=order, label=label, fixef_sizes=fixef_sizes, show_depvar=depvar)
+
+    if(tex){
+        res = etable_internal_latex(info)
+    } else {
+        res = etable_internal_df(info)
+    }
+
+    if(!missnull(file)){
+        sink(file = file, append = !replace)
+        on.exit(sink())
+
+        if(tex){
+            cat(res, sep = "")
+        } else {
+            print(res)
+        }
+
+        return(invisible(res))
+    } else {
+        if(tex){
+            cat(res, sep = "")
+            return(invisible(res))
+        } else {
+            return(res)
+        }
+    }
+}
+
+
+#' @describeIn etable Exports the results of multiple \code{fixest} estimations in a Latex table.
 esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = TRUE, cluster, digits=4, fitstat, title, sdBelow=TRUE, drop, order, dict = getFixest_dict(), file, replace=FALSE, convergence, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, fixef_sizes = FALSE, yesNoFixef = c("Yes", "No"), keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ "){
 	# drop: a vector of regular expressions
 	# order: a vector of regular expressions
@@ -400,364 +529,20 @@ esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway
 
 	info = results2formattedList(..., se=se, dof=dof, fitstat=fitstat, cluster=cluster, digits=digits, sdBelow=sdBelow, signifCode=signifCode, subtitles=subtitles, yesNoFixef=yesNoFixef, keepFactors=keepFactors, isTex = TRUE, useSummary=useSummary, dots_call=dots_call, powerBelow=powerBelow, dict=dict, interaction.combine=interaction.combine)
 
-	n_models = length(info$depvar_list)
-	# Getting the information
-	se_type_list = info$se_type_list
-	var_list = info$var_list
-	coef_list = info$coef_list
-	coef_below = info$coef_below
-	sd_below = info$sd_below
-	depvar_list = info$depvar_list
-	obs_list = info$obs_list
-	convergence_list = info$convergence_list
-	factorNames = info$factorNames
-	isFactor = info$isFactor
-	nbFactor = info$nbFactor
-	slope_names = info$slope_names
-	slope_flag_list = info$slope_flag_list
-	family_list = info$family_list
-	theta_list = info$theta_list
-	fitstat_list = info$fitstat_list
+    res = etable_internal_latex(info)
 
-	if(!missing(subtitles)){
-		isSubtitles = TRUE
-	} else {
-		isSubtitles = FALSE
-	}
-
-	#
-	# prompting the infos gathered
-	#
-
-	# Starting the table
-	myTitle = ifelse(!missing(title), .escapeChars(title), "no title")
-	if(!missing(label)) myTitle = paste0("\\label{", .escapeChars(label, TRUE), "} ", myTitle)
-	start_table = paste0("\\begin{table}[htbp]\\centering\n\\caption{",  myTitle, "}\n")
-	end_table = "\\end{table}"
-
-	# intro and outro Latex tabular
-	myAmpLine = paste0(paste0(rep(" ", length(depvar_list)+1), collapse="&"), "\\tabularnewline\n")
-	intro_latex <- paste0("\\begin{tabular}{l", paste0(rep("c", n_models), collapse=""), "}\n",
-								 myAmpLine,
-								 "\\hline\n",
-								 "\\hline\n")
-
-	outro_latex <- "\\end{tabular}\n"
-
-	# 1st lines => dep vars
-	depvar_list = c(depvar_list, recursive = TRUE)
-
-	qui = depvar_list %in% names(dict)
-	who = depvar_list[qui]
-	depvar_list[qui] = dict[who]
-	depvar_list = .escapeChars(depvar_list)
-
-	# We write the dependent variables properly, with multicolumn when necessary
-	# to do that, we count the number of occurences of each variable (& we respect the order provided by the user)
-	nb_multi = 1
-	names_multi = depvar_list[1]
-
-	if(n_models > 1){
-		k = 1
-		old_dep = depvar_list[1]
-		for(i in 2:length(depvar_list)){
-			if(depvar_list[i] == old_dep){
-				nb_multi[k] = nb_multi[k] + 1
-			} else {
-				k = k + 1
-				nb_multi[k] = 1
-				names_multi[k] = old_dep = depvar_list[i]
-			}
-		}
-	}
-
-	# now the proper format
-	first_line <- "Dependent Variables:"
-	if(length(nb_multi) == 1) first_line = "Dependent Variable:"
-	for(i in 1:length(nb_multi)){
-		if(nb_multi[i] == 1){
-			# no multi column
-			first_line = paste0(first_line, "&", names_multi[i])
-		} else {
-			first_line = paste0(first_line, "&\\multicolumn{", nb_multi[i], "}{c}{", names_multi[i], "}")
-		}
-	}
-	first_line = paste0(first_line, "\\\\\n")
-
-	# Model line
-	model_line = paste0("Model:&", paste0("(", 1:n_models, ")", collapse = "&"), "\\\\\n")
-
-	# a simple line with only "variables" written in the first cell
-	variable_line = "\\hline\n\\emph{Variables}\\tabularnewline\n"
-
-
-	# Coefficients,  the tricky part
-	coef_lines <- list()
-	all_vars <- unique(c(var_list, recursive=TRUE))
-
-	# dropping some coefs
-	if(!missing(drop)){
-		if(!is.character(drop)) stop("the arg. 'drop' must be a character vector of regular expression (see help regex).")
-		for(var2drop in drop) all_vars = all_vars[!grepl(var2drop, all_vars)]
-	}
-
-	# ordering the coefs
-	if(!missing(order)){
-		if(!is.character(order)) stop("the arg. 'order' must be a character vector of regular expression (see help regex).")
-		for(var2order in rev(order)){
-			who = grepl(var2order, all_vars)
-			all_vars = c(all_vars[who], all_vars[!who])
-		}
-	}
-
-	# changing the names of the coefs
-	aliasVars = all_vars
-	names(aliasVars) = all_vars
-
-	qui = all_vars %in% names(dict)
-	who = aliasVars[qui]
-	aliasVars[qui] = dict[who]
-	aliasVars = .escapeChars(aliasVars)
-
-	coef_mat <- all_vars
-	for(m in 1:n_models) coef_mat <- cbind(coef_mat, coef_list[[m]][all_vars])
-	coef_mat[is.na(coef_mat)] <- "  "
-	if(sdBelow){
-		coef_lines = c()
-		for(v in all_vars){
-			myCoef = mySd= myLine = c()
-			for(m in 1:n_models){
-				myCoef = c(myCoef, coef_below[[m]][v])
-				mySd = c(mySd, sd_below[[m]][v])
-			}
-
-			myCoef[is.na(myCoef)] = "  "
-			mySd[is.na(mySd)] = "  "
-			myCoef = paste0(aliasVars[v], "&", paste0(myCoef, collapse="&"))
-			mySd = paste0("  &", paste0(mySd, collapse="&"))
-			myLines = paste0(myCoef, "\\\\\n", mySd, "\\\\\n")
-			coef_lines = c(coef_lines, myLines)
-		}
-		coef_lines = paste0(coef_lines, collapse="")
-	} else {
-		coef_lines = paste0(paste0(apply(coef_mat, 1, paste0, collapse="&"), collapse="\\\\\n"), "\\\\\n")
-	}
-
-	# Factors (if needed)
-	if(length(factorNames) > 0){
-		dumIntro = paste0("\\hline\n\\emph{Fixed-Effects}& ", paste(rep(" ", n_models), collapse="&"), "\\\\\n")
-
-		for(m in 1:n_models) {
-			quoi = isFactor[[m]][factorNames]
-			quoi[is.na(quoi)] = yesNoFixef[2]
-			isFactor[[m]] = quoi
-
-			# We do the same for the number of items
-			quoi = nbFactor[[m]][factorNames]
-			quoi[is.na(quoi)] = "--"
-			nbFactor[[m]] = quoi
-		}
-
-		allFactors = matrix(c(isFactor, recursive=TRUE), nrow = length(factorNames))
-		# We change the names of the factors
-		qui = which(factorNames %in% names(dict))
-		if(length(qui) > 0) {
-			factorNames[qui] = dict[factorNames[qui]]
-		}
-		factorNames = .escapeChars(factorNames)
-
-		allFactors = cbind(factorNames, allFactors)
-		factor_lines <- paste0(paste0(apply(allFactors, 1, paste0, collapse="&"), collapse="\\\\\n"), "\\\\\n")
-
-		# For the number of items
-		all_nb_Factors = matrix(c(nbFactor, recursive=TRUE), nrow = length(factorNames))
-		factorNames_nbItems = paste0("# ", factorNames)
-		all_nb_Factors = cbind(factorNames_nbItems, all_nb_Factors)
-		nb_factor_lines <- paste0(paste0(apply(all_nb_Factors, 1, paste0, collapse="&"), collapse="\\\\\n"), "\\\\\n")
-
-
-	} else {
-		factor_lines = NULL
-		dumIntro = NULL
-	}
-
-	# Slopes (if needed)
-	if(length(slope_names) > 0){
-	    slope_intro = paste0("\\hline\n\\emph{Varying Slopes}& ", paste(rep(" ", n_models), collapse="&"), "\\\\\n")
-
-	    # reformat the yes/no slope
-	    for(m in 1:n_models) {
-	        quoi = slope_flag_list[[m]][slope_names]
-	        quoi[is.na(quoi)] = yesNoFixef[2]
-	        slope_flag_list[[m]] = quoi
-	    }
-
-	    # Changing the slope names
-	    qui = slope_names %in% names(dict)
-	    who = slope_names[qui]
-	    slope_names[qui] = dict[who]
-	    slope_names = .escapeChars(slope_names)
-
-	    # Matrix with yes/no information
-	    all_slopes = matrix(c(slope_flag_list, recursive = TRUE), nrow = length(slope_names))
-	    all_slopes = cbind(slope_names, all_slopes)
-	    slope_lines <- paste0(paste0(apply(all_slopes, 1, paste0, collapse="&"), collapse="\\\\\n"), "\\\\\n")
-
-	} else {
-	    slope_intro = NULL
-	    slope_lines = NULL
-	}
-
-	# Subtitles
-	if(isSubtitles){
-		info_subtitles = paste0("  & ", paste(subtitles, collapse="&"), "\\\\\n")
-	} else {
-		info_subtitles = ""
-	}
-
-	# Convergence information
-	info_convergence = ""
-	if((missing(convergence) && any(convergence_list == FALSE)) || (!missing(convergence) && convergence)){
-		info_convergence = paste0("Convergence &", paste(convergence_list, collapse="&"), "\\\\\n")
-	}
-
-	info_theta <- paste0("Overdispersion& ", paste(theta_list, collapse="&"), "\\\\\n")
-
-	# information on family
-	if((!missing(family) && family) || (missing(family) && length(unique(family_list)) > 1)){
-		info_family <- paste0("Family& ", paste(family_list, collapse="&"), "\\\\\n")
-	} else {
-		info_family = ""
-	}
-
-
-	# The standard errors
-	isUniqueSD = length(unique(unlist(se_type_list))) == 1
-	if(isUniqueSD){
-		my_se = unique(unlist(se_type_list)) # it comes from summary
-		# every model has the same type of SE
-		if(my_se == "Standard") my_se = "Normal"
-		if(my_se == "White") my_se = "White-corrected"
-
-		# Now we modify the names of the clusters if needed
-		if(grepl("\\(", my_se)){
-			# we extract the clusters
-			se_cluster = strsplit(gsub("(^.+\\()|(\\))", "", my_se), " & ")[[1]]
-			qui = se_cluster %in% names(dict)
-			se_cluster[qui] = dict[se_cluster[qui]]
-			se_cluster = .escapeChars(se_cluster)
-			new_se = gsub("\\(.+", "", my_se)
-			my_se = paste0(new_se, "(", paste0(se_cluster, collapse = " & "), ")")
-		}
-
-		nb_col = length(obs_list) + 1
-		# info_SD = paste0("\\hline\n\\hline\n\\multicolumn{", nb_col, "}{l}{\\emph{", my_se, " standard-errors in parentheses. Signif Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
-		sd_intro = paste0("\\multicolumn{", nb_col, "}{l}{\\emph{")
-		info_SD = paste0("\\hline\n\\hline\n", sd_intro, my_se, " standard-errors in parentheses.}}\\\\\n")
-		info_SD = paste0(info_SD, sd_intro, "Signif Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
-		info_muli_se = ""
-	} else {
-		info_muli_se = paste0("Standard-Error type& ", paste(se_type_list, collapse="&"), "\\\\\n")
-		info_SD = "\\hline\n\\hline\n\\\\\n"
-	}
-
-	# Information on number of items
-
-	# supplemental_info = "\\global\\long\\def\\sym#1{\\ifmmode^{#1}\\else\\ensuremath{^{#1}}\\fi}\n"
-	supplemental_info = ""
-
-	if(!fixef_sizes) nb_factor_lines = ""
-	if(all(theta_list == "")) info_theta = ""
-
-	#
-	# Fit statistics
-	#
-
-	fit_info = paste0("\\hline\n\\emph{Fit statistics}& ", paste(rep(" ", n_models), collapse="&"), "\\\\\n")
-	fit_info = paste0(fit_info, "Observations& ", paste(addCommas(obs_list), collapse="&"), "\\\\\n")
-	fit_info = paste0(fit_info, nb_factor_lines, info_convergence, info_muli_se)
-	if(!identical(fitstat_list, NA)){
-
-	    fit_names = attr(fitstat_list, "format_names")
-	    nb = length(fit_names)
-	    for(fit_id in 1:nb){
-	        fit = sapply(fitstat_list, function(x) x[[fit_id]])
-	        fit[is.na(fit)] = "--"
-	        fit_info = paste0(fit_info, fit_names[fit_id], " & ", paste0(fit, collapse = "&"), "\\\\\n")
-	    }
-	}
-
-
-	# # Fit statistics
-	# # fit_part <- paste0("\\hline\n\\emph{Fit statistics}& ", paste(rep(" ", n_models), collapse="&"), "\\\\\n")
-	# # Misc
-	# info_aic <- paste0("AIC & ", paste(numberFormatLatex(aic_list), collapse="&"), "\\\\\n")
-	# info_loglik <- paste0("Log-Likelihood & ", paste(numberFormatLatex(loglik_list), collapse="&"), "\\\\\n")
-	# info_bic <- paste0("BIC & ", paste(numberFormatLatex(bic_list), collapse="&"), "\\\\\n")
-	#
-	# info_obs <- paste0("Observations& ", paste(addCommas(obs_list), collapse="&"), "\\\\\n")
-	# info_r2 <- paste0("Adj-pseudo $R^2$ &", paste(r2_list, collapse="&"), "\\\\\n")
-	# info_sqCor <- paste0("$R^2$ &", paste(sqCor_list, collapse="&"), "\\\\\n")
-
-	if(!missing(file)){
+	if(!missnull(file)){
 	    sink(file = file, append = !replace)
 	    on.exit(sink())
 	}
 
-	# cat(paste0(supplemental_info, start_table, intro_latex, first_line, info_subtitles, model_line,
-	# 			  info_family, variable_line, coef_lines, info_theta, dumIntro, factor_lines,
-	# 			  slope_intro, slope_lines, fit_part, info_obs, nb_factor_lines, info_convergence,
-	# 			  info_muli_se, info_r2, info_sqCor, info_aic, info_loglik, info_bic, info_SD,
-	# 			  outro_latex, end_table))
-	cat(paste0(supplemental_info, start_table, intro_latex, first_line, info_subtitles, model_line,
-				  info_family, variable_line, coef_lines, info_theta, dumIntro, factor_lines,
-				  slope_intro, slope_lines, fit_info, info_SD, outro_latex, end_table))
+    cat(res, sep = "")
+    return(invisible(res))
 
 }
 
-#' Facility to display the results of multiple \code{fixest} estimations.
-#'
-#' This function aggregates the results of multiple estimations and display them in the form of only one table whose row names are the variables and the columns contain the coefficients and standard-errors.
-#'
-#' @inheritParams esttex
-#' @inheritParams summary.fixest
-#'
-#' @param depvar Logical, default is missing. Whether a first line containing the dependent variables should be shown. By default, the dependent variables are shown only if they differ across models.
-#' @param signifCode Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is \code{c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)}.
-#' @param titles A character vector. The length must match the number of models.
-#'
-#' @return
-#' Returns a data.frame containing the formatted results.
-#'
-#' @seealso
-#' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the functions \code{\link[fixest]{esttable}} and \code{\link[fixest]{esttex}} to visualize the results of multiple estimations.
-#'
-#' @author
-#' Laurent Berge
-#'
-#' @examples
-#'
-#' # two fitted models with different expl. variables:
-#' res1 = femlm(Sepal.Length ~ Sepal.Width + Petal.Length +
-#'             Petal.Width | Species, iris)
-#' # estimation without clusters
-#' res2 = update(res1, . ~ Sepal.Width | 0)
-#'
-#' # We export the two results in one Latex table:
-#' esttable(res1, res2)
-#'
-#' # With clustered standard-errors + showing the dependent variable
-#' esttable(res1, res2, se = "cluster", cluster = iris$Species, depvar = TRUE)
-#'
-#' # Changing the model names + the order of the variables
-#' # + dropping the intercept.
-#' esttable(model_1 = res1, res2,
-#'           order = c("Width", "Petal"), drop = "Int",
-#'           signifCode = c("**" = 0, "*" = 0.2, "n.s."=1))
-#'
-#'
-#'
-esttable <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = TRUE, cluster, depvar, drop, order, digits=4, fitstat, convergence, signifCode = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10), titles, keepFactors = FALSE, family){
+#' @describeIn etable Facility to display the results of multiple \code{fixest} estimations.
+esttable <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = TRUE, cluster, depvar, drop, order, digits=4, fitstat, convergence, signifCode = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10), subtitles, keepFactors = FALSE, family){
 
 	# Need to check for the presence of the se
     useSummary = TRUE
@@ -774,185 +559,9 @@ esttable <- function(..., se=c("standard", "white", "cluster", "twoway", "threew
 	# to get the model names
 	dots_call = match.call(expand.dots = FALSE)[["..."]]
 
-	info = results2formattedList(..., se=se, dof = dof, cluster=cluster, digits=digits, signifCode=signifCode, titles=titles, keepFactors=keepFactors, useSummary=useSummary, dots_call=dots_call, fitstat=fitstat)
+	info = results2formattedList(..., se=se, dof = dof, cluster=cluster, digits=digits, signifCode=signifCode, subtitles=subtitles, keepFactors=keepFactors, useSummary=useSummary, dots_call=dots_call, fitstat=fitstat, yesNoFixef = c("Yes", "No"))
 
-	n_models = length(info$depvar_list)
-	# Getting the information
-	se_type_list = info$se_type_list
-	var_list = info$var_list
-	coef_list = info$coef_list
-	coef_below = info$coef_below
-	sd_below = info$sd_below
-	depvar_list = info$depvar_list
-	obs_list = info$obs_list
-	convergence_list = info$convergence_list
-	factorNames = info$factorNames
-	isFactor = info$isFactor
-	nbFactor = info$nbFactor
-	slope_names = info$slope_names
-	slope_flag_list = info$slope_flag_list
-	useSummary = info$useSummary
-	depvar_list = info$depvar_list
-	model_names = info$model_names
-	family_list = info$family_list
-	theta_list = info$theta_list
-	fitstat_list = info$fitstat_list
-
-
-	if(!missing(titles)){
-		isTitles = TRUE
-	} else {
-	    isTitles = FALSE
-	}
-
-	# The coefficients
-
-	all_vars <- unique(c(var_list, recursive=TRUE))
-
-	# dropping some coefs
-	if(!missing(drop)){
-		if(!is.character(drop)) stop("the arg. 'drop' must be a character vector of regular expression (see help regex).")
-		for(var2drop in drop) all_vars = all_vars[!grepl(var2drop, all_vars)]
-	}
-
-	# ordering the coefs
-	if(!missing(order)){
-		if(!is.character(order)) stop("the arg. 'order' must be a character vector of regular expression (see help regex).")
-		for(var2order in rev(order)){
-			who = grepl(var2order, all_vars)
-			all_vars = c(all_vars[who], all_vars[!who])
-		}
-	}
-
-	coef_mat <- all_vars
-	for(m in 1:n_models) coef_mat <- cbind(coef_mat, coef_list[[m]][all_vars])
-	coef_mat[is.na(coef_mat)] <- "  "
-	res = coef_mat
-
-	if("Neg. Bin." %in% family_list){
-		theta_line = c("Overdispersion:", unlist(theta_list))
-		res = rbind(res, theta_line)
-	}
-
-	# The line with the dependent variable => defined here to get the width
-	preamble = c()
-	dep_width = 0
-	if((missing(depvar) && length(unique(unlist(depvar_list))) > 1) || (!missing(depvar) && depvar)){
-	    preamble = rbind(c("Dependent Var.:", unlist(depvar_list)), preamble)
-	    dep_width = nchar(as.vector(preamble))
-	}
-
-	# Used to draw a line
-	myLine = "______________________________________"
-	longueur = apply(res, 2, function(x) max(nchar(as.character(x))))
-	longueur = pmax(dep_width, longueur)
-	theLine = sapply(longueur, function(x) sprintf("%.*s", x, myLine))
-	theLine[1] = sprintf("%.*s", max(nchar(theLine[1]), 19), myLine)
-
-	# The FEs
-	if(length(factorNames)>0){
-
-		for(m in 1:n_models) {
-			quoi = isFactor[[m]][factorNames]
-			quoi[is.na(quoi)] = "No"
-			isFactor[[m]] = quoi
-		}
-		allFactors = matrix(c(isFactor, recursive=TRUE), nrow = length(factorNames))
-		allFactors = cbind(factorNames, allFactors)
-		factor_lines <- paste0(paste0(apply(allFactors, 1, paste0, collapse="&"), collapse="\\\\\n"), "\\\\\n")
-
-		myLine = "-------------------------------"
-
-		res = rbind(res, c("Fixed-Effects:", sprintf("%.*s", longueur[-1], myLine)))
-		factmat = matrix(c(strsplit(strsplit(factor_lines, "\n")[[1]], "&"), recursive = TRUE), ncol=n_models+1, byrow=TRUE)
-		factmat[, ncol(factmat)]=gsub("\\", "", factmat[, ncol(factmat)], fixed = TRUE)
-		res = rbind(res, factmat)
-	}
-
-	# The slopes
-	if(length(slope_names) > 0){
-	    # reformatting the yes/no
-	    for(m in 1:n_models) {
-	        quoi = slope_flag_list[[m]][slope_names]
-	        quoi[is.na(quoi)] = "No"
-	        slope_flag_list[[m]] = quoi
-	    }
-	    all_slopes = matrix(c(slope_flag_list, recursive=TRUE), nrow = length(slope_names))
-	    all_slopes = cbind(slope_names, all_slopes)
-	    slope_lines <- paste0(paste0(apply(all_slopes, 1, paste0, collapse="&"), collapse="\\\\\n"), "\\\\\n")
-
-	    myLine = "-------------------------------"
-
-	    res = rbind(res, c("Varying Slopes:", sprintf("%.*s", longueur[-1], myLine)))
-	    slope_mat = matrix(c(strsplit(strsplit(slope_lines, "\n")[[1]], "&"), recursive = TRUE), ncol=n_models+1, byrow = TRUE)
-	    slope_mat[, ncol(slope_mat)] = gsub("\\", "", slope_mat[, ncol(slope_mat)], fixed = TRUE)
-	    res = rbind(res, slope_mat)
-
-	}
-
-
-    # preamble created before because used to set the width
-	if(length(preamble) > 0){
-		# preamble = rbind(preamble, c("  ", theLine[-1]))
-		preamble = rbind(preamble, rep("   ", length(theLine)))
-		res <- rbind(preamble, res)
-	}
-
-	res <- rbind(res, theLine)
-
-	# the line with the families
-	if((missing(family) && length(unique(unlist(family_list))) > 1) || (!missing(family) && family)){
-		# preamble = rbind(c("Family:", unlist(family_list)), preamble)
-		res = rbind(res, c("Family:", unlist(family_list)))
-	}
-
-	res <- rbind(res, c("Observations", addCommas(obs_list)))
-	if(!useSummary){
-		se_type_format = c()
-		# for(m in 1:n_models) se_type_format[m] = charShorten(se_type_list[[m]], longueur[[1+m]])
-		for(m in 1:n_models) se_type_format[m] = format_se_type(se_type_list[[m]], longueur[[1+m]])
-		res <- rbind(res, c("S.E. type", c(se_type_format, recursive = TRUE)))
-	}
-
-	# convergence status
-	if((missing(convergence) && any(convergence_list == FALSE)) || (!missing(convergence) && convergence)){
-		res <- rbind(res, c("Convergence", c(convergence_list, recursive = TRUE)))
-	}
-
-	#
-	# Fit statistics
-	#
-
-	if(!identical(fitstat_list, NA)){
-
-	    fit_names = attr(fitstat_list, "format_names")
-	    nb = length(fit_names)
-	    for(fit_id in 1:nb){
-	        fit = sapply(fitstat_list, function(x) x[[fit_id]])
-	        fit[is.na(fit)] = "--"
-	        res <- rbind(res, c(fit_names[fit_id], fit))
-	    }
-	}
-
-	# if titles
-	if(isTitles){
-		modelNames = titles
-	} else {
-		# modelNames = paste0("model ", 1:n_models)
-		modelNames = model_names
-	}
-
-	# we shorten the model names to fit the width
-	for(m in 1:n_models) modelNames[m] = charShorten(modelNames[[m]], longueur[[1+m]])
-
-	res <- as.data.frame(res)
-	names(res) <- c("variables", modelNames)
-	row.names(res) = res$variables
-	res$variables = NULL
-
-	# We rename theta when NB is used
-	quiTheta = which(row.names(res) == ".theta")
-	row.names(res)[quiTheta] = "Dispersion Parameter"
+	res = etable_internal_df(info)
 
 	return(res)
 }
@@ -1251,7 +860,7 @@ summary.fixest.fixef = function(object, n=5, ...){
 #' If there is more than 1 fixed-effect, then the attribute \dQuote{references} is created. This is a vector of length the number of fixed-effects, each element contains the number of coefficients set as references. By construction, the elements of the first fixed-effect dimension are never set as references. In the presence of regular fixed-effects, there should be Q-1 references (with Q the number of fixed-effects).
 #'
 #' @seealso
-#' \code{\link[fixest]{plot.fixest.fixef}}. See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the functions \code{\link[fixest]{esttable}} and \code{\link[fixest]{esttex}} to visualize the results of multiple estimations.
+#' \code{\link[fixest]{plot.fixest.fixef}}. See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
 #'
 #' @author
 #' Laurent Berge
@@ -1581,7 +1190,7 @@ NULL
 #' If the data are not regular in the cluster coefficients, this means that several \sQuote{reference points} are set to obtain the fixed-effects, thereby impeding their interpretation. In this case a warning is raised.
 #'
 #' @seealso
-#' \code{\link[fixest]{fixef.fixest}} to extract clouster coefficients. See also the main estimation function \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, the functions \code{\link[fixest]{esttable}} and \code{\link[fixest]{esttex}} to visualize the results of multiple estimations.
+#' \code{\link[fixest]{fixef.fixest}} to extract clouster coefficients. See also the main estimation function \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
 #'
 #' @author
 #' Laurent Berge
@@ -3381,7 +2990,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #### Internal Funs     ####
 ####
 
-results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitstat, sdBelow=TRUE, dict = NULL, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, titles, yesNoFixef = c("Yes", "No"), keepFactors = FALSE, isTex = FALSE, useSummary, dots_call, powerBelow, interaction.combine){
+results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitstat, sdBelow=TRUE, dict = NULL, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, title, titles, yesNoFixef = c("Yes", "No"), keepFactors = FALSE, isTex = FALSE, useSummary, dots_call, powerBelow, interaction.combine, convergence, show_family, drop, order, file, fixef_sizes = FALSE, show_depvar=FALSE){
     # This function is the core of the functions esttable and esttex
 
     # for error handling => refers to the right function
@@ -3397,7 +3006,11 @@ results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitsta
     }
     signifCode = sort(signifCode)
 
-    check_arg(yesNoFixef, "characterVector", message = "The argument 'yesNoFixef' must be a character vector of length 2. REASON", call_depth = 1)
+    check_arg(yesNoFixef, "characterVector", message = "The argument 'yesNoFixef' must be a character vector of length 1 or 2. REASON", call_depth = 1)
+    if(length(yesNoFixef) == 1){
+        yesNoFixef = c(yesNoFixef, "")
+    }
+
     if(length(yesNoFixef) != 2){
         stop(my_call, "The argument 'yesNoFixef' must be of length 2.", call. = FALSE)
     }
@@ -3422,6 +3035,9 @@ results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitsta
     }
 
     n = length(dots)
+
+    if(n == 0) stop(my_call, "Not any estimation as argument.", call. = FALSE)
+
     all_models = list()
     model_names = list()
     k = 1
@@ -3490,11 +3106,12 @@ results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitsta
     # if there are subtitles
     if(!missing(subtitles)){
         if(length(subtitles) != n_models){
-            stop(my_call, "If argument 'subtitles' is provided, it must be of the same length as the number of models. Current lengths: ", length(subtitles), " vs ", n_models, " .", call. = FALSE)
+            stop(my_call, "If argument 'subtitles' is provided, it must be of the same length as the number of models. Current lengths: ", length(subtitles), " vs ", n_models, " models.", call. = FALSE)
         } else {
             isSubtitles = TRUE
         }
     } else {
+        subtitles = NULL
         isSubtitles = FALSE
     }
 
@@ -3753,7 +3370,7 @@ results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitsta
             }
 
             var_reorder_list[[m]] <- new_var
-        } else if(interaction.sort){
+        } else {
             # We reorder the interaction terms alphabetically
             new_var = var
             qui = grepl(":", new_var)
@@ -3855,10 +3472,545 @@ results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitsta
         attr(fitstat_list, "format_names") = fitstat_dict[fitstat]
     }
 
+    if(missing(title)){
+        title = NULL
+    }
 
-    res = list(se_type_list=se_type_list, var_list=var_list, coef_list=coef_list, coef_below=coef_below, sd_below=sd_below, depvar_list=depvar_list, obs_list=obs_list, convergence_list=convergence_list, factorNames=factorNames, isFactor=isFactor, nbFactor=nbFactor, slope_flag_list = slope_flag_list, slope_names=slope_names, useSummary=useSummary, model_names=model_names, family_list=family_list, theta_list=theta_list, fitstat_list=fitstat_list)
+    if((missing(convergence) && any(convergence_list == FALSE)) || (!missing(convergence) && convergence)){
+        convergence = TRUE
+    } else {
+        convergence = FALSE
+    }
+
+    if((!missing(show_family) && show_family) || (missing(show_family) && length(unique(family_list)) > 1)){
+        family = TRUE
+    } else {
+        family = FALSE
+    }
+
+    if((missing(show_depvar) && length(unique(unlist(depvar_list))) > 1) || (!missing(show_depvar) && show_depvar)){
+        depvar = TRUE
+    } else {
+        depvar = FALSE
+    }
+
+    if(missing(drop)) drop = NULL
+    if(missing(order)) order = NULL
+    if(missing(file)) file = NULL
+    if(missing(label)) label = NULL
+
+    res = list(se_type_list=se_type_list, var_list=var_list, coef_list=coef_list, coef_below=coef_below, sd_below=sd_below, depvar_list=depvar_list, obs_list=obs_list, convergence_list=convergence_list, factorNames=factorNames, isFactor=isFactor, nbFactor=nbFactor, slope_flag_list = slope_flag_list, slope_names=slope_names, useSummary=useSummary, model_names=model_names, family_list=family_list, theta_list=theta_list, fitstat_list=fitstat_list, subtitles=subtitles, isSubtitles=isSubtitles, title=title, convergence=convergence, family=family, drop=drop, order=order, file=file, label=label, sdBelow=sdBelow, signifCode=signifCode, fixef_sizes=fixef_sizes, depvar=depvar, useSummary=useSummary, dict=dict, yesNoFixef=yesNoFixef)
 
     return(res)
+}
+
+etable_internal_latex = function(info){
+    # Internal function to display the latex table
+
+    n_models = length(info$depvar_list)
+    # Getting the information
+    se_type_list = info$se_type_list
+    var_list = info$var_list
+    coef_list = info$coef_list
+    coef_below = info$coef_below
+    sd_below = info$sd_below
+    depvar_list = info$depvar_list
+    obs_list = info$obs_list
+    convergence_list = info$convergence_list
+    factorNames = info$factorNames
+    isFactor = info$isFactor
+    nbFactor = info$nbFactor
+    slope_names = info$slope_names
+    slope_flag_list = info$slope_flag_list
+    family_list = info$family_list
+    theta_list = info$theta_list
+    fitstat_list = info$fitstat_list
+    subtitles = info$subtitles
+    isSubtitles = info$isSubtitles
+    title = info$title
+    label = info$label
+    drop = info$drop
+    order = info$order
+    file = info$file
+    family = info$family
+    convergence = info$convergence
+    sdBelow = info$sdBelow
+    signifCode = info$signifCode
+    fixef_sizes = info$fixef_sizes
+    dict = info$dict
+    yesNoFixef = info$yesNoFixef
+
+    #
+    # prompting the infos gathered
+    #
+
+    # Starting the table
+    myTitle = ifelse(!is.null(title), .escapeChars(title), "no title")
+    if(!is.null(label)) myTitle = paste0("\\label{", .escapeChars(label, TRUE), "} ", myTitle)
+    start_table = paste0("\\begin{table}[htbp]\\centering\n\\caption{",  myTitle, "}\n")
+    end_table = "\\end{table}"
+
+    # intro and outro Latex tabular
+    myAmpLine = paste0(paste0(rep(" ", length(depvar_list)+1), collapse="&"), "\\tabularnewline\n")
+    intro_latex <- paste0("\\begin{tabular}{l", paste0(rep("c", n_models), collapse=""), "}\n",
+                          myAmpLine,
+                          "\\hline\n",
+                          "\\hline\n")
+
+    outro_latex <- "\\end{tabular}\n"
+
+    # 1st lines => dep vars
+    depvar_list = c(depvar_list, recursive = TRUE)
+
+    qui = depvar_list %in% names(dict)
+    who = depvar_list[qui]
+    depvar_list[qui] = dict[who]
+    depvar_list = .escapeChars(depvar_list)
+
+    # We write the dependent variables properly, with multicolumn when necessary
+    # to do that, we count the number of occurences of each variable (& we respect the order provided by the user)
+    nb_multi = 1
+    names_multi = depvar_list[1]
+
+    if(n_models > 1){
+        k = 1
+        old_dep = depvar_list[1]
+        for(i in 2:length(depvar_list)){
+            if(depvar_list[i] == old_dep){
+                nb_multi[k] = nb_multi[k] + 1
+            } else {
+                k = k + 1
+                nb_multi[k] = 1
+                names_multi[k] = old_dep = depvar_list[i]
+            }
+        }
+    }
+
+    # now the proper format
+    first_line <- "Dependent Variables:"
+    if(length(nb_multi) == 1) first_line = "Dependent Variable:"
+    for(i in 1:length(nb_multi)){
+        if(nb_multi[i] == 1){
+            # no multi column
+            first_line = paste0(first_line, "&", names_multi[i])
+        } else {
+            first_line = paste0(first_line, "&\\multicolumn{", nb_multi[i], "}{c}{", names_multi[i], "}")
+        }
+    }
+    first_line = paste0(first_line, "\\\\\n")
+
+    # Model line
+    model_line = paste0("Model:&", paste0("(", 1:n_models, ")", collapse = "&"), "\\\\\n")
+
+    # a simple line with only "variables" written in the first cell
+    variable_line = "\\hline\n\\emph{Variables}\\tabularnewline\n"
+
+
+    # Coefficients,  the tricky part
+    coef_lines <- list()
+    all_vars <- unique(c(var_list, recursive=TRUE))
+
+    # dropping some coefs
+    if(!is.null(drop)){
+        if(!is.character(drop)) stop("the arg. 'drop' must be a character vector of regular expression (see help regex).")
+        for(var2drop in drop) all_vars = all_vars[!grepl(var2drop, all_vars)]
+    }
+
+    # ordering the coefs
+    if(!is.null(order)){
+        if(!is.character(order)) stop("the arg. 'order' must be a character vector of regular expression (see help regex).")
+        for(var2order in rev(order)){
+            who = grepl(var2order, all_vars)
+            all_vars = c(all_vars[who], all_vars[!who])
+        }
+    }
+
+    # changing the names of the coefs
+    aliasVars = all_vars
+    names(aliasVars) = all_vars
+
+    qui = all_vars %in% names(dict)
+    who = aliasVars[qui]
+    aliasVars[qui] = dict[who]
+    aliasVars = .escapeChars(aliasVars)
+
+    coef_mat <- all_vars
+    for(m in 1:n_models) coef_mat <- cbind(coef_mat, coef_list[[m]][all_vars])
+    coef_mat[is.na(coef_mat)] <- "  "
+    if(sdBelow){
+        coef_lines = c()
+        for(v in all_vars){
+            myCoef = mySd= myLine = c()
+            for(m in 1:n_models){
+                myCoef = c(myCoef, coef_below[[m]][v])
+                mySd = c(mySd, sd_below[[m]][v])
+            }
+
+            myCoef[is.na(myCoef)] = "  "
+            mySd[is.na(mySd)] = "  "
+            myCoef = paste0(aliasVars[v], "&", paste0(myCoef, collapse="&"))
+            mySd = paste0("  &", paste0(mySd, collapse="&"))
+            myLines = paste0(myCoef, "\\\\\n", mySd, "\\\\\n")
+            coef_lines = c(coef_lines, myLines)
+        }
+        coef_lines = paste0(coef_lines, collapse="")
+    } else {
+        coef_lines = paste0(paste0(apply(coef_mat, 1, paste0, collapse="&"), collapse="\\\\\n"), "\\\\\n")
+    }
+
+    # Factors (if needed)
+    if(length(factorNames) > 0){
+        dumIntro = paste0("\\hline\n\\emph{Fixed-Effects}& ", paste(rep(" ", n_models), collapse="&"), "\\\\\n")
+
+        for(m in 1:n_models) {
+            quoi = isFactor[[m]][factorNames]
+            quoi[is.na(quoi)] = yesNoFixef[2]
+            isFactor[[m]] = quoi
+
+            # We do the same for the number of items
+            quoi = nbFactor[[m]][factorNames]
+            quoi[is.na(quoi)] = "--"
+            nbFactor[[m]] = quoi
+        }
+
+        allFactors = matrix(c(isFactor, recursive=TRUE), nrow = length(factorNames))
+        # We change the names of the factors
+        qui = which(factorNames %in% names(dict))
+        if(length(qui) > 0) {
+            factorNames[qui] = dict[factorNames[qui]]
+        }
+        factorNames = .escapeChars(factorNames)
+
+        allFactors = cbind(factorNames, allFactors)
+        factor_lines <- paste0(paste0(apply(allFactors, 1, paste0, collapse="&"), collapse="\\\\\n"), "\\\\\n")
+
+        # For the number of items
+        all_nb_Factors = matrix(c(nbFactor, recursive=TRUE), nrow = length(factorNames))
+        factorNames_nbItems = paste0("# ", factorNames)
+        all_nb_Factors = cbind(factorNames_nbItems, all_nb_Factors)
+        nb_factor_lines <- paste0(paste0(apply(all_nb_Factors, 1, paste0, collapse="&"), collapse="\\\\\n"), "\\\\\n")
+
+
+    } else {
+        factor_lines = NULL
+        dumIntro = NULL
+    }
+
+    # Slopes (if needed)
+    if(length(slope_names) > 0){
+        slope_intro = paste0("\\hline\n\\emph{Varying Slopes}& ", paste(rep(" ", n_models), collapse="&"), "\\\\\n")
+
+        # reformat the yes/no slope
+        for(m in 1:n_models) {
+            quoi = slope_flag_list[[m]][slope_names]
+            quoi[is.na(quoi)] = yesNoFixef[2]
+            slope_flag_list[[m]] = quoi
+        }
+
+        # Changing the slope names
+        qui = slope_names %in% names(dict)
+        who = slope_names[qui]
+        slope_names[qui] = dict[who]
+        slope_names = .escapeChars(slope_names)
+
+        # Matrix with yes/no information
+        all_slopes = matrix(c(slope_flag_list, recursive = TRUE), nrow = length(slope_names))
+        all_slopes = cbind(slope_names, all_slopes)
+        slope_lines <- paste0(paste0(apply(all_slopes, 1, paste0, collapse="&"), collapse="\\\\\n"), "\\\\\n")
+
+    } else {
+        slope_intro = NULL
+        slope_lines = NULL
+    }
+
+    # Subtitles
+    if(isSubtitles){
+        info_subtitles = paste0("  & ", paste(subtitles, collapse="&"), "\\\\\n")
+    } else {
+        info_subtitles = ""
+    }
+
+    # Convergence information
+    info_convergence = ""
+    if(convergence){
+        info_convergence = paste0("Convergence &", paste(convergence_list, collapse="&"), "\\\\\n")
+    }
+
+    info_theta <- paste0("Overdispersion& ", paste(theta_list, collapse="&"), "\\\\\n")
+
+    # information on family
+    if(family){
+        info_family <- paste0("Family& ", paste(family_list, collapse="&"), "\\\\\n")
+    } else {
+        info_family = ""
+    }
+
+
+    # The standard errors
+    isUniqueSD = length(unique(unlist(se_type_list))) == 1
+    if(isUniqueSD){
+        my_se = unique(unlist(se_type_list)) # it comes from summary
+        # every model has the same type of SE
+        if(my_se == "Standard") my_se = "Normal"
+        if(my_se == "White") my_se = "White-corrected"
+
+        # Now we modify the names of the clusters if needed
+        if(grepl("\\(", my_se)){
+            # we extract the clusters
+            se_cluster = strsplit(gsub("(^.+\\()|(\\))", "", my_se), " & ")[[1]]
+            qui = se_cluster %in% names(dict)
+            se_cluster[qui] = dict[se_cluster[qui]]
+            se_cluster = .escapeChars(se_cluster)
+            new_se = gsub("\\(.+", "", my_se)
+            my_se = paste0(new_se, "(", paste0(se_cluster, collapse = " & "), ")")
+        }
+
+        nb_col = length(obs_list) + 1
+        # info_SD = paste0("\\hline\n\\hline\n\\multicolumn{", nb_col, "}{l}{\\emph{", my_se, " standard-errors in parentheses. Signif Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
+        sd_intro = paste0("\\multicolumn{", nb_col, "}{l}{\\emph{")
+        info_SD = paste0("\\hline\n\\hline\n", sd_intro, my_se, " standard-errors in parentheses.}}\\\\\n")
+        info_SD = paste0(info_SD, sd_intro, "Signif Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
+        info_muli_se = ""
+    } else {
+        info_muli_se = paste0("Standard-Error type& ", paste(se_type_list, collapse="&"), "\\\\\n")
+        info_SD = "\\hline\n\\hline\n\\\\\n"
+    }
+
+    # Information on number of items
+    supplemental_info = ""
+
+    if(!fixef_sizes) nb_factor_lines = ""
+    if(all(theta_list == "")) info_theta = ""
+
+    #
+    # Fit statistics
+    #
+
+    fit_info = paste0("\\hline\n\\emph{Fit statistics}& ", paste(rep(" ", n_models), collapse="&"), "\\\\\n")
+    fit_info = paste0(fit_info, "Observations& ", paste(addCommas(obs_list), collapse="&"), "\\\\\n")
+    fit_info = paste0(fit_info, nb_factor_lines, info_convergence, info_muli_se)
+    if(!identical(fitstat_list, NA)){
+
+        fit_names = attr(fitstat_list, "format_names")
+        nb = length(fit_names)
+        for(fit_id in 1:nb){
+            fit = sapply(fitstat_list, function(x) x[[fit_id]])
+            fit[is.na(fit)] = "--"
+            fit_info = paste0(fit_info, fit_names[fit_id], " & ", paste0(fit, collapse = "&"), "\\\\\n")
+        }
+    }
+
+    res = c(supplemental_info, start_table, intro_latex, first_line, info_subtitles, model_line,
+    info_family, variable_line, coef_lines, info_theta, dumIntro, factor_lines,
+    slope_intro, slope_lines, fit_info, info_SD, outro_latex, end_table)
+
+    res = res[nchar(res) > 0]
+
+    return(res)
+}
+
+etable_internal_df = function(info){
+
+    n_models = length(info$depvar_list)
+    # Getting the information
+    se_type_list = info$se_type_list
+    var_list = info$var_list
+    coef_list = info$coef_list
+    coef_below = info$coef_below
+    sd_below = info$sd_below
+    depvar_list = info$depvar_list
+    obs_list = info$obs_list
+    convergence_list = info$convergence_list
+    factorNames = info$factorNames
+    isFactor = info$isFactor
+    nbFactor = info$nbFactor
+    slope_names = info$slope_names
+    slope_flag_list = info$slope_flag_list
+    family_list = info$family_list
+    theta_list = info$theta_list
+    fitstat_list = info$fitstat_list
+    title = info$title
+    label = info$label
+    drop = info$drop
+    order = info$order
+    file = info$file
+    family = info$family
+    convergence = info$convergence
+    sdBelow = info$sdBelow
+    signifCode = info$signifCode
+    fixef_sizes = info$fixef_sizes
+    depvar = info$depvar
+    useSummary = info$useSummary
+    model_names = info$model_names
+
+    # naming differences
+    titles = info$subtitles
+    isTitles = info$isSubtitles
+
+    # The coefficients
+
+    all_vars <- unique(c(var_list, recursive=TRUE))
+
+    # dropping some coefs
+    if(!is.null(drop)){
+        if(!is.character(drop)) stop("the arg. 'drop' must be a character vector of regular expression (see help regex).")
+        for(var2drop in drop) all_vars = all_vars[!grepl(var2drop, all_vars)]
+    }
+
+    # ordering the coefs
+    if(!is.null(order)){
+        if(!is.character(order)) stop("the arg. 'order' must be a character vector of regular expression (see help regex).")
+        for(var2order in rev(order)){
+            who = grepl(var2order, all_vars)
+            all_vars = c(all_vars[who], all_vars[!who])
+        }
+    }
+
+    coef_mat <- all_vars
+    for(m in 1:n_models) coef_mat <- cbind(coef_mat, coef_list[[m]][all_vars])
+    coef_mat[is.na(coef_mat)] <- "  "
+    res = coef_mat
+
+    if("Neg. Bin." %in% family_list){
+        theta_line = c("Overdispersion:", unlist(theta_list))
+        res = rbind(res, theta_line)
+    }
+
+    # The line with the dependent variable => defined here to get the width
+    preamble = c()
+    dep_width = 0
+    if(depvar){
+        preamble = rbind(c("Dependent Var.:", unlist(depvar_list)), preamble)
+        dep_width = nchar(as.vector(preamble))
+    }
+
+    # Used to draw a line
+    myLine = "______________________________________"
+    longueur = apply(res, 2, function(x) max(nchar(as.character(x))))
+    longueur = pmax(dep_width, longueur)
+    theLine = sapply(longueur, function(x) sprintf("%.*s", x, myLine))
+    theLine[1] = sprintf("%.*s", max(nchar(theLine[1]), 19), myLine)
+
+    # The FEs
+    if(length(factorNames)>0){
+
+        for(m in 1:n_models) {
+            quoi = isFactor[[m]][factorNames]
+            quoi[is.na(quoi)] = "No"
+            isFactor[[m]] = quoi
+        }
+        allFactors = matrix(c(isFactor, recursive=TRUE), nrow = length(factorNames))
+        allFactors = cbind(factorNames, allFactors)
+        factor_lines <- paste0(paste0(apply(allFactors, 1, paste0, collapse="&"), collapse="\\\\\n"), "\\\\\n")
+
+        myLine = "-------------------------------"
+
+        res = rbind(res, c("Fixed-Effects:", sprintf("%.*s", longueur[-1], myLine)))
+        factmat = matrix(c(strsplit(strsplit(factor_lines, "\n")[[1]], "&"), recursive = TRUE), ncol=n_models+1, byrow=TRUE)
+        factmat[, ncol(factmat)]=gsub("\\", "", factmat[, ncol(factmat)], fixed = TRUE)
+        res = rbind(res, factmat)
+    }
+
+    # The slopes
+    if(length(slope_names) > 0){
+        # reformatting the yes/no
+        for(m in 1:n_models) {
+            quoi = slope_flag_list[[m]][slope_names]
+            quoi[is.na(quoi)] = "No"
+            slope_flag_list[[m]] = quoi
+        }
+        all_slopes = matrix(c(slope_flag_list, recursive=TRUE), nrow = length(slope_names))
+        all_slopes = cbind(slope_names, all_slopes)
+        slope_lines <- paste0(paste0(apply(all_slopes, 1, paste0, collapse="&"), collapse="\\\\\n"), "\\\\\n")
+
+        myLine = "-------------------------------"
+
+        res = rbind(res, c("Varying Slopes:", sprintf("%.*s", longueur[-1], myLine)))
+        slope_mat = matrix(c(strsplit(strsplit(slope_lines, "\n")[[1]], "&"), recursive = TRUE), ncol=n_models+1, byrow = TRUE)
+        slope_mat[, ncol(slope_mat)] = gsub("\\", "", slope_mat[, ncol(slope_mat)], fixed = TRUE)
+        res = rbind(res, slope_mat)
+
+    }
+
+
+    # preamble created before because used to set the width
+    if(length(preamble) > 0){
+        # preamble = rbind(preamble, c("  ", theLine[-1]))
+        preamble = rbind(preamble, rep("   ", length(theLine)))
+        res <- rbind(preamble, res)
+    }
+
+    res <- rbind(res, theLine)
+
+    # the line with the families
+    if(family){
+        # preamble = rbind(c("Family:", unlist(family_list)), preamble)
+        res = rbind(res, c("Family", unlist(family_list)))
+    }
+
+    res <- rbind(res, c("Observations", addCommas(obs_list)))
+    if(!useSummary || !any(grepl("\\(", unlist(se_type_list)))){
+        se_type_format = c()
+        for(m in 1:n_models) se_type_format[m] = format_se_type(se_type_list[[m]], longueur[[1+m]])
+        res <- rbind(res, c("S.E. type", c(se_type_format, recursive = TRUE)))
+    } else {
+        main_type = gsub(" \\(.+", "", se_type_list[[1]])
+        se_type_format = c()
+        for(m in 1:n_models) se_type_format[m] = format_se_type(se_type_list[[m]], longueur[[1+m]], by = TRUE)
+        res <- rbind(res, c(paste0("SE type: ", main_type), c(se_type_format, recursive = TRUE)))
+    }
+
+    # convergence status
+    if(convergence){
+        res <- rbind(res, c("Convergence", c(convergence_list, recursive = TRUE)))
+    }
+
+    #
+    # Fit statistics
+    #
+
+    if(!identical(fitstat_list, NA)){
+
+        fit_names = attr(fitstat_list, "format_names")
+        nb = length(fit_names)
+        for(fit_id in 1:nb){
+            fit = sapply(fitstat_list, function(x) x[[fit_id]])
+            fit[is.na(fit)] = "--"
+            res <- rbind(res, c(fit_names[fit_id], fit))
+        }
+    }
+
+    # if titles
+    if(isTitles){
+        modelNames = titles
+    } else {
+        # modelNames = paste0("model ", 1:n_models)
+        modelNames = model_names
+    }
+
+    # we shorten the model names to fit the width
+    for(m in 1:n_models) modelNames[m] = charShorten(modelNames[[m]], longueur[[1+m]])
+
+    res <- as.data.frame(res)
+    names(res) <- c("variables", modelNames)
+    row.names(res) = res$variables
+    res$variables = NULL
+
+    # We rename theta when NB is used
+    quiTheta = which(row.names(res) == ".theta")
+    row.names(res)[quiTheta] = "Dispersion Parameter"
+
+    if(!is.null(file)){
+        sink(file = file, append = !replace)
+        on.exit(sink())
+
+        print(res)
+
+        return(invisible(res))
+    } else {
+        return(res)
+    }
+
 }
 
 myPrintCoefTable = function(coeftable, lastLine = ""){
@@ -4877,7 +5029,7 @@ extract_fe_slope = function(t){
     list(fixef_vars=fixef_vars, slope_vars=slope_vars, slope_fe=slope_fe, slope_terms=slope_terms, fe_all=fe_all)
 }
 
-format_se_type = function(x, width){
+format_se_type = function(x, width, by = FALSE){
     # we make 'nice' se types
 
     if(!grepl("\\(", x)){
@@ -4893,14 +5045,21 @@ format_se_type = function(x, width){
     n_char = nchar(all_fe_split)
 
     if(n_fe == 1 && !grepl("\\^", all_fe_split[1])){
-        se_formatted = paste0("1-way: ", all_fe_split[1])
+        if(by){
+            se_formatted = paste0("by: ", all_fe_split[1])
+        } else {
+            se_formatted = paste0("1-way: ", all_fe_split[1])
+        }
+
         if(nchar(se_formatted) > width){
             se_formatted = paste0(substr(se_formatted, 1, width - 2), "..")
         }
         return(se_formatted)
     }
 
-    if(width < 6 + sum(n_char) + (n_fe-1) * 3){
+    nb = ifelse(by, 3, 6)
+
+    if(width < nb + sum(n_char) + (n_fe-1) * 3){
         qui = n_char > 5
         for(i in which(qui)){
             if(grepl("\\^", all_fe_split[i])){
@@ -4914,7 +5073,12 @@ format_se_type = function(x, width){
         }
     }
 
-    se_formatted = paste0(n_fe, "-way: ", paste(all_fe_split, collapse = " & "))
+    if(by){
+        se_formatted = paste0("by: ", paste(all_fe_split, collapse = " & "))
+    } else {
+        se_formatted = paste0(n_fe, "-way: ", paste(all_fe_split, collapse = " & "))
+    }
+
 
     # if still too large, we trim right
     if(nchar(se_formatted) > width){
@@ -4967,7 +5131,7 @@ extract_pipe = function(fml){
 #' @param ... Not currently used.
 #'
 #' @seealso
-#' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the functions \code{\link[fixest]{esttable}} and \code{\link[fixest]{esttex}} to visualize the results of multiple estimations.
+#' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
 #'
 #' @author
 #' Laurent Berge
