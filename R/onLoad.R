@@ -8,6 +8,7 @@
 	options("fixest_notes" = TRUE)
 	options("fixest_na_inf.rm" = TRUE)
 	options("fixest_print.type" = "table")
+	options("fixest_fl_authorized" = FALSE)
 	setFixest_nthreads()
 
 	invisible()
