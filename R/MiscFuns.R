@@ -336,8 +336,8 @@ summ <- summary.fixest <- function(object, se, cluster, dof = TRUE, exact_dof = 
 #' @param fitstat A character vector or a one sided formula. A vector listing which fit statistics to display. The valid types are 'll', 'aic', 'bic' and r2 types like 'r2', 'pr2', 'war2', etc (see all valid types in \code{\link[fixest]{r2}}). The default value depends on the models to display. Example of use: \code{fitstat=c('sq.cor', 'ar2', 'war2')}, or \code{fitstat=~sq.cor+ar2+war2} using a formula.
 #' @param title (Tex only.) Character scalar. The title of the Latex table.
 #' @param sdBelow (Tex only.) Logical, default is \code{TRUE}. Should the standard-errors be displayed below the coefficients?
-#' @param drop Character vector. This element is used if some variables are not to be displayed. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be discarded. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{drop = "x[[:digit:]]{2}"}.
-#' @param order Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument \code{dict}). Example: you have the following variables: \code{month1} to \code{month6}, then \code{x1} to \code{x5}, then \code{year1} to \code{year6}. If you want to display first the x's, then the years, then the months you could use: \code{order = c("x", "year")}.
+#' @param drop Character vector. This element is used if some variables are not to be displayed. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be discarded. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{drop = "x[[:digit:]]{2}"}. If the first character is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is dropped). See details.
+#' @param order Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument \code{dict}). Example: you have the following variables: \code{month1} to \code{month6}, then \code{x1} to \code{x5}, then \code{year1} to \code{year6}. If you want to display first the x's, then the years, then the months you could use: \code{order = c("x", "year")}. If the first character is an exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that does not contain \dQuote{Intercept} goes first).  See details.
 #' @param dict (Tex only.) A named character vector. It changes the original variable names to the ones contained in the \code{dict}. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default it is equal to \code{getFixest_dict()}, a default dictionary which can be set with \code{\link[fixest]{setFixest_dict}}.
 #' @param file A character scalar. If provided, the Latex (or data frame) table will be saved in a file whose path is \code{file}. If you provide this argument, then a Latex table will be exported, to export a regular \code{data.frame}, use argument \code{tex = FALSE}.
 #' @param replace Logical, default is \code{FALSE}. Only used if option \code{file} is used. Should the exported table be written in a new file that replaces any existing file?
@@ -357,6 +357,17 @@ summ <- summary.fixest <- function(object, se, cluster, dof = TRUE, exact_dof = 
 #' The function \code{esttex} is equivalent to the function \code{etable} with argument \code{tex = TRUE}.
 #'
 #' The function \code{esttable} is equivalent to the function \code{etable} with argument \code{tex = FALSE}.
+#'
+#' @section Arguments drop and order
+#' The arguments \code{drop} and \code{order} use regular expressions. If you are aware of regular expressions, I urge you to learn it, since it is an extremely powerful way to manipulate character strings (and it exists across most programming languages).
+#'
+#' For example drop = "Wind" would drop any variable whose name contains "Wind". Note that variables such as "Temp:Wind" or "StrongWind" do contain "Wind", so would be dropped. To drop only the variable named "Wind", you need to use \code{drop = "^Wind$"} (with "^" meaning beginning, resp. "$" meaning end, of the string => this is the language of regular expressions).
+#'
+#' Although you can combine several regular expressions in a single character string using pipes, \code{drop} also accepts a vector of regular expressions.
+#'
+#' You can use the special character "!" (exclamation mark) to reverse the effect of the regular expression (this feature is specific to this fonction). For example \code{drop = "!Wind"} would drop any variable that does not contain "Wind".
+#'
+#' The argument \code{order} takes in a vector of regular expressions, the order will follow the elments of this vector. The vector gives a list of priorities, on the left the elements with highest priority. For example, order = c("Wind", "!Inter", "!Temp") would give highest priorities to the variables containing "Wind" (which would then appear first), second highest priority is the variables not containing "Inter", last, with lowest priority, the variables not containing "Temp". If you had the following variables: (Intercept), Temp:Wind, Wind, Temp you would end up with the following order: Wind, Temp:Wind, Temp, (Intercept).
 #'
 #' @return
 #' If \code{tex = TRUE}, the lines composing the Latex table are returned invisibly while the table is directly prompted on the console.
@@ -384,10 +395,14 @@ summ <- summary.fixest <- function(object, se, cluster, dof = TRUE, exact_dof = 
 #' etable(est1, est2, drop = "^[[:alnum:]]+$")
 #' # drop interactions
 #' etable(est1, est2, drop = ":")
+#' # keep only interactions ("!" reverses the effect)
+#' etable(est1, est2, drop = "!:")
 #'
 #' # order: Wind variable first, intercept last
 #' etable(est1, est2, order = c("Wind", "Month"))
 #' etable(est1, est2, order = c("^Wind", "Wind", "Month"))
+#' # Interactions, then Intercept, last ("!" reverses the effect)
+#' etable(est1, est2, order = c("!Int", "!:"))
 #'
 #' # signifCode
 #' etable(est1, est2, signifCode = c(" A"=0.01, " B"=0.05, " C"=0.1,
@@ -3356,10 +3371,8 @@ results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitsta
                     res = x
                     who = res %in% names(dict)
 
-                    join = ifelse(any(who), interaction.combine, ":")
-
                     res[who] = dict[res[who]]
-                    paste0(res, collapse = join)
+                    paste0(res, collapse = interaction.combine)
                 }
 
                 inter_named = sapply(inter, fun_rename)
@@ -3392,7 +3405,6 @@ results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitsta
         }
 
         if(isTex){
-            # pval = cut(a[, 4], breaks = c(-1, signifCode, 100), labels = c(paste0("\\sym{",names(signifCode),"}"), ""))
             pval = cut(a[, 4], breaks = c(-1, signifCode, 100), labels = c(tex_star(names(signifCode)), ""))
         } else {
             pval = cut(a[, 4], breaks = c(-1, signifCode, 100), labels = c(names(signifCode), ""))
@@ -3613,15 +3625,26 @@ etable_internal_latex = function(info){
     # dropping some coefs
     if(!is.null(drop)){
         if(!is.character(drop)) stop("the arg. 'drop' must be a character vector of regular expression (see help regex).")
-        for(var2drop in drop) all_vars = all_vars[!grepl(var2drop, all_vars)]
+        for(var2drop in drop){
+            if(grepl("^!", var2drop)){
+                all_vars = all_vars[grepl(substr(var2drop, 2, nchar(var2drop)), all_vars)]
+            } else {
+                all_vars = all_vars[!grepl(var2drop, all_vars)]
+            }
+        }
     }
 
     # ordering the coefs
     if(!is.null(order)){
         if(!is.character(order)) stop("the arg. 'order' must be a character vector of regular expression (see help regex).")
         for(var2order in rev(order)){
-            who = grepl(var2order, all_vars)
-            all_vars = c(all_vars[who], all_vars[!who])
+            if(grepl("^!", var2order)){
+                who = !grepl(substr(var2order, 2, nchar(var2order)), all_vars)
+                all_vars = c(all_vars[who], all_vars[!who])
+            } else {
+                who = grepl(var2order, all_vars)
+                all_vars = c(all_vars[who], all_vars[!who])
+            }
         }
     }
 
@@ -3854,15 +3877,26 @@ etable_internal_df = function(info){
     # dropping some coefs
     if(!is.null(drop)){
         if(!is.character(drop)) stop("the arg. 'drop' must be a character vector of regular expression (see help regex).")
-        for(var2drop in drop) all_vars = all_vars[!grepl(var2drop, all_vars)]
+        for(var2drop in drop){
+            if(grepl("^!", var2drop)){
+                all_vars = all_vars[grepl(substr(var2drop, 2, nchar(var2drop)), all_vars)]
+            } else {
+                all_vars = all_vars[!grepl(var2drop, all_vars)]
+            }
+        }
     }
 
     # ordering the coefs
     if(!is.null(order)){
         if(!is.character(order)) stop("the arg. 'order' must be a character vector of regular expression (see help regex).")
         for(var2order in rev(order)){
-            who = grepl(var2order, all_vars)
-            all_vars = c(all_vars[who], all_vars[!who])
+            if(grepl("^!", var2order)){
+                who = !grepl(substr(var2order, 2, nchar(var2order)), all_vars)
+                all_vars = c(all_vars[who], all_vars[!who])
+            } else {
+                who = grepl(var2order, all_vars)
+                all_vars = c(all_vars[who], all_vars[!who])
+            }
         }
     }
 
