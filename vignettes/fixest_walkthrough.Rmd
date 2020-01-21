@@ -35,7 +35,7 @@ This package is currently (Nov. 2019) the fastest software available to perform 
 
 The standard-errors of the estimates can be easily and intuitively clustered (up to four-way).
 
-Two specific functions are implemented to seamlessly export the results of multiple estimations into either a data.frame (function `esttable`), or a Latex table of "article-like" quality (function `esttex`).
+The function `etable` allows to seamlessly export the results of multiple estimations into either a data.frame, or into a Latex table of "article-like" quality.
 
 The main features of the package are illustrated in this vignette. The theory used to obtain the fixed-effects is based on Berge (2018), "*Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package fixest.*" CREA Discussion Papers, 13 (<https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13>).
 
@@ -57,7 +57,7 @@ knitr::kable(tab)
 ```
 
 
-The dependent variable of the estimation will be the level of trade between two countries while the independent variable is the geographic distance between the two countries. To obtain the elasticity of geographic distance net of the effects of the four clusters, we estimate the following:
+The dependent variable of the estimation will be the level of trade between two countries while the independent variable is the geographic distance between the two countries. To obtain the elasticity of geographic distance net of the effects of the four fixed-effects, we estimate the following:
 
 $E\left(Trade_{i,j,p,t}\right)=\gamma_{i}^{Exporter}\times\gamma_{j}^{Importer}\times\gamma_{p}^{Product}\times\gamma_{t}^{Year}\times Distance_{ij}^{\beta}$,
 
@@ -73,23 +73,23 @@ $E\left(Trade_{i,j,p,t}\right)=\exp\left(\gamma_{i}^{Exporter}+\gamma_{j}^{Impor
 The estimation of this model using a Poisson likelihood is as follows:
 
 ```{r}
-gravity_results <- feglm(Euros ~ log(dist_km)|Origin+Destination+Product+Year, trade)
+gravity_pois <- feglm(Euros ~ log(dist_km)|Origin+Destination+Product+Year, trade)
 ```
 
 Note that you need not provide the argument `family` since the Poisson model is the default.
 
 The results can be shown directly with the `print` method:
 ```{r}
-print(gravity_results)
+print(gravity_pois)
 ```
 
 The `print` reports the coefficient estimates and standard-errors as well as some other information. Among the quality of fit information, the squared-correlation corresponds to the correlation between the dependent variable and the expected predictor; it reflects somehow to the idea of R-square in OLS estimations.
 
 ## Clustering the standard-errors
 
-To cluster the standard-errors, we can simply use the argument `se` of the `summary` method. Let's say we want to cluster the standard-errors according to the first two clusters (i.e. the *Origin* and *Destination* variables). Then we just have to do:
+To cluster the standard-errors, we can simply use the argument `se` of the `summary` method. Let's say we want to cluster the standard-errors according to the first two fixed-effects (i.e. the *Origin* and *Destination* variables). Then we just have to do:
 ```{r}
-summary(gravity_results, se = "twoway")
+summary(gravity_pois, se = "twoway")
 ```
 The clustering can be done on one (`se="cluster"`), two (`se="twoway"`), three (`se="threeway"`) or up to four (`se="fourway"`) variables. If the estimation includes fixed-effects, then by default the clustering will be done using these fixed-effects, in the original order. This is why the *Origin* and *Destination* variables were used for the two-way clustering in the previous example. If, instead, you wanted to perform one-way clustering on the *Product* variable, you need to use the argument `cluster`: 
 
@@ -97,11 +97,11 @@ The clustering can be done on one (`se="cluster"`), two (`se="twoway"`), three (
 # Equivalent ways of clustering the SEs:
 # One-way clustering is deduced from the arguent 'cluster'
 # - using the vector:
-summary(gravity_results, cluster = trade$Product)
+summary(gravity_pois, cluster = trade$Product)
 # - by reference:
-summary(gravity_results, cluster = "Product")
+summary(gravity_pois, cluster = "Product")
 # - with a formula:
-summary(gravity_results, cluster = ~Product)
+summary(gravity_pois, cluster = ~Product)
 ```
 
 Note that you can always cluster the standard-errors, even when the estimation contained no fixed-effect. Buth then you must use the argument `cluster`:
@@ -122,7 +122,7 @@ summary(gravity_simple, cluster = ~Origin+Destination)
 Now we estimate the same relationship by OLS. We need to put the left hand side in logarithm (since the right-hand-side is not exponentialized):
 
 ```{r}
-gravity_results_ols <- feols(log(Euros) ~ log(dist_km)|Origin+Destination+Product+Year, trade)
+gravity_ols <- feols(log(Euros) ~ log(dist_km)|Origin+Destination+Product+Year, trade)
 ```
 
 Of course you can use different families in `feglm`, exactly as in `glm`. 
@@ -130,7 +130,7 @@ Of course you can use different families in `feglm`, exactly as in `glm`.
 To get the estimation for the fixed-effects Negative Binomial:
 
 ```{r}
-gravity_results_negbin <- fenegbin(Euros ~ log(dist_km)|Origin+Destination+Product+Year, trade)
+gravity_negbin <- fenegbin(Euros ~ log(dist_km)|Origin+Destination+Product+Year, trade)
 
 ```
 
@@ -138,38 +138,38 @@ gravity_results_negbin <- fenegbin(Euros ~ log(dist_km)|Origin+Destination+Produ
 
 ## Viewing the results in R
 
-Now let's say that we want a compact overview of the results of several estimations. The best way is to use the function `esttable`. This function summarizes the results of several `fixest` estimations into a data.frame. To see the fixed-effects results with the three different likelihoods, we just have to type:
+Now let's say that we want a compact overview of the results of several estimations. The best way is to use the function `etable`. This function summarizes the results of several `fixest` estimations into a data.frame. To see the fixed-effects results with the three different likelihoods, we just have to type:
 
 ```{r, eval=FALSE}
-esttable(gravity_results, gravity_results_negbin, gravity_results_ols,
-         se = "twoway", titles = c("Poisson", "Negative Binomial", "Gaussian"))
+etable(gravity_pois, gravity_negbin, gravity_ols,
+         se = "twoway", subtitles = c("Poisson", "Negative Binomial", "Gaussian"))
 ```
 ```{r, echo=FALSE, results='asis'}
-tab = esttable(gravity_results, gravity_results_negbin, gravity_results_ols, se = "twoway", titles = c("Poisson", "Negative Binomial", "Gaussian"))
+tab = etable(gravity_pois, gravity_negbin, gravity_ols, se = "twoway", subtitles = c("Poisson", "Negative Binomial", "Gaussian"))
 # problem to display the second empty line in markdown
 knitr::kable(tab[-2, ])
 ```
 
 We added the argument `se="twoway"` to cluster the standard-errors for all estimations. As can be seen this function gives an overview of the estimates and standard-errors, as well as some quality of fit measures. The argument `titles` is used to add information on each estimation column.
 
-In the previous example, we directly added the estimation results as arguments of the function `esttable`. But the function also accepts lists of estimations.
+In the previous example, we directly added the estimation results as arguments of the function `etable`. But the function also accepts lists of estimations.
 Let's give an example. Say you want to see the influence of the introduction of fixed-effects on the estimate of the elasticity of distance. You can do it with the following code where we use the argument `fixef` to include fixed-effects (instead of inserting them directly in the formula):
 
 ```{r}
-gravity_subcluster = list()
-all_clusters = c("Year", "Destination", "Origin", "Product")
-for(i in 1:4){
-	gravity_subcluster[[i]] = feglm(Euros ~ log(dist_km), trade, fixef = all_clusters[1:i])
+gravity_subfe = list()
+all_FEs = c("Year", "Destination", "Origin")
+for(i in 0:3){
+	gravity_subfe[[i+1]] = feglm(Euros ~ log(dist_km), trade, fixef = all_FEs[0:i])
 }
 ```
 
-The previous code performs 4 estimations with an increasing number of fixed-effects and store their results into the list named `gravity_subcluster`. To show the results of all 4 estimations, it's easy:
+The previous code performs 4 estimations with an increasing number of fixed-effects and store their results into the list named `gravity_subfe`. To show the results of all 4 estimations, it's easy:
 
 ```{r, eval=FALSE}
-esttable(gravity_subcluster, cluster = ~Origin+Destination)
+etable(gravity_subfe, cluster = ~Origin+Destination)
 ```
 ```{r, echo=FALSE, results='asis'}
-tab = esttable(gravity_subcluster, cluster = ~Origin+Destination)
+tab = etable(gravity_subfe, cluster = ~Origin+Destination)
 knitr::kable(tab)
 ```
 
@@ -178,19 +178,18 @@ We have a view of the 4 estimations, all reporting two-way clustered standard-er
 
 ## Exporting the results to Latex
 
-So far we have seen how to report the results of multiple estimations on the R console. Now, with the function `esttex`, we can export the results to high quality Latex tables.
-The function `esttex` works exactly as the function `esttable`, it takes any number of `fixest` estimations. By default, it reports Latex code on the R console:
+So far we have seen how to report the results of multiple estimations on the R console. Now, using the same function `etable`, we can also export the results to high quality Latex tables. We just need to provide the argument `tex = TRUE`:
 
 ```{r}
 # with two-way clustered SEs
-esttex(gravity_subcluster, cluster = ~Origin+Destination)
+etable(gravity_subfe, cluster = ~Origin+Destination, tex = TRUE)
 ```
 
-This function has many optional arguments. The user can export the Latex table directly into a file (argument `file`), add a title (arg. `title`) and a label to the table (arg. `label`). 
+The user can export the Latex table directly into a file (argument `file`), add a title (arg. `title`) and a label to the table (arg. `label`).  Note that when the argument `file` is present, the Latex format becomes the default (i.e. `tex = TRUE` by default).
 
 The coefficients can be renamed easily (arg. `dict`), some can be dropped (arg. `drop`) and they can be easily reordered with regular expressions (arg. `order`). 
 
-The significance codes can easily be changed (arg. `signifCode`) and all quality of fit information can be customized. Among others, the number of fixed-effect per cluster can also be displayed using the argument `showClusterSize`.
+The significance codes can easily be changed (arg. `signifCode`) and all quality of fit information can be customized. Among others, the number of fixed-effect per fixed-effect dimension can also be displayed using the argument `fixef_sizes`.
 
 ### An elaborate example
 
@@ -200,21 +199,21 @@ Consider the following example of the exportation of two tables:
 # we set the dictionary once and for all
 myDict = c("log(dist_km)" = "$\\ln (Distance)$", "(Intercept)" = "Constant")
 # 1st export: we change the signif code and drop the intercept
-esttex(gravity_subcluster, signifCode = c("a" = 0.01, "b" = 0.05),
-       drop = "Int", dict = myDict, file = "Estimation Table.tex", 
+etable(gravity_subfe, signifCode = c("a" = 0.01, "b" = 0.05),
+       drop = "Const", dict = myDict, file = "Estimation Tables.tex", 
        replace = TRUE, title = "First export -- normal Standard-errors")
 # 2nd export: clustered S-E + distance as the first coefficient
-esttex(gravity_subcluster, se = "cluster", cluster = ~Product, order = "dist", 
-       dict = myDict, file = "Estimation Table.tex", 
+etable(gravity_subfe, cluster = ~Product, order = "Dist", 
+       dict = myDict, file = "Estimation Tables.tex", 
        title = "Second export -- clustered standard-errors (on Product variable)")
 
 ```
 
-In this example, two tables containing the results of the 5 estimations are directly exported in the file "Estimation Table.tex". The file is re-created in the first exportation thanks to the argument `replace = TRUE`. 
+In this example, two tables containing the results of the 4 estimations are directly exported to a Latex table into the file "Estimation Tables.tex". First take notice (again) that **we do not need to use the argument** `tex=TRUE` since when the argument `file` is present, the Latex format becomes the default. The file is re-created in the first exportation thanks to the argument `replace = TRUE`. 
 
 To change the variable names in the Latex table, we use the argument `dict`. The variable `myDict` is the dictionary we use to rename the variables, it is simply a named vector. The original name of the variables correspond to the names of `myDict` while the new names of the variables are the values of this vector. Any variable that matches the names of `myDict` will be replaced by its value. Thus we do not care of the order of appearance of the variables in the estimation results. 
 
-In the first export, the coefficient of the intercept is dropped by using `drop = "Int"` (could be anything such that `grepl(drop[1], "(Intercept)")` is TRUE). In the second, the coefficient of the distance is put before the intercept (which is kept). Note that the actions performed by the arguments `drop` or `order` are performed **before** the renaming takes place with the argument `dict`.
+In the first export, the coefficient of the intercept is dropped by using `drop = "Const"` (could be anything such that `grepl(drop[1], "Constant")` is TRUE). In the second, the coefficient of the distance is put before the intercept (which is kept) thanks to the argument `order`. Note that the actions performed by the arguments `drop` or `order` are performed **after** the renaming takes place with the argument `dict`.
 
 
 ## Extracting the fixed-effects
@@ -222,11 +221,11 @@ In the first export, the coefficient of the intercept is dropped by using `drop 
 To obtain the fixed-effects of the estimation, the function `fixef` must be performed on the results. This function returns a list containing the fixed-effects coefficients for each dimension. The `summary` method helps to have a quick overview:
 
 ```{r}
-fixedEffects <- fixef(gravity_results)
+fixedEffects <- fixef(gravity_pois)
 summary(fixedEffects)
 ```
 
-We can see that the fixed-effects are balanced across the dimensions. Indeed, apart from the first dimension, only one coefficient per fixed-effect needs to be set as reference (i.e. fixed to 0) to avoid collinearity across the fixed-effects of the different clusters. This ensures that the fixed-effects coefficients can be compared within cluster. Had there be strictly more than one reference per cluster, their interpretation would have not been possible at all. If this was the case though, a warning message would have been prompted. Note that the mean values are meaningless per se, but give a reference points to which compare the fixed-effects within a cluster.
+We can see that the fixed-effects are balanced across the dimensions. Indeed, apart from the first dimension, only one coefficient per fixed-effect needs to be set as reference (i.e. fixed to 0) to avoid collinearity across the different fixed-effects dimensions. This ensures that the fixed-effects coefficients can be compared within a given fixed-effect dimension. Had there be strictly more than one reference per fixed-effect dimension, their interpretation would have not been possible at all. If this was the case though, a warning message would have been prompted. Note that the mean values are meaningless per se, but give a reference points to which compare the fixed-effects within a dimension.
 Let's look specifically at the `Year` fixed-effects: 
 
 ```{r}
@@ -239,7 +238,7 @@ Finally, the `plot` method helps to distinguish the most notable fixed-effects:
 plot(fixedEffects)
 ```
 
-For each cluster, the fixed-effects are first centered, then sorted, and finally the most notable (i.e. highest and lowest) are reported. The exponential of the coefficient is reported in the right hand side to simplify the interpretation for models with log-link (as the Poisson model). As we can see from the country of destination cluster, trade involving France (FR), Italy (IT) and Germany (DE) as destination countries is more than 2.7 times higher than the EU15 average. Further, the highest heterogeneity come from the product category, where trade in product 4 (dairy products) is roughly 2.7 times the average while product 14 (vegetable plaiting materials) represents a negligible fraction of the average. 
+For each dimension, the fixed-effects are first centered, then sorted, and finally the most notable (i.e. highest and lowest) are reported. The exponential of the coefficient is reported in the right hand side to simplify the interpretation for models with log-link (as the Poisson model). As we can see from the country of destination fixed-effects, trade involving France (FR), Italy (IT) and Germany (DE) as destination countries is more than 2.7 times higher than the EU15 average. Further, the highest heterogeneity come from the product category, where trade in product 4 (dairy products) is roughly 2.7 times the average while product 14 (vegetable plaiting materials) represents a negligible fraction of the average. 
 
 Note however that the interpretation of the fixed-effects must be taken with extra care. In particular, here the fixed-effects can be interpreted only because they are perfectly balanced. 
 
@@ -318,7 +317,57 @@ did_plot_yearly_effects(est_did)
 
 ## Lagging variables
 
-To lag variables in a panel setting, a simple and fast method has been implemented: `lag.formula`. Let's give an example with the previous data set:
+Some methods have been created to easily deal with leads and lags in a panel setting. First is shown the various ways of how to deal with it in a `fixest` estimation, then how to create a panel data set, last is described a general way to create lead and lag variables.
+
+### Lagging variables in an estimation
+
+There are two ways to provide leads and/or lags in a `fixest` estimation. Either "on-the-fly" by using the argument `panel.id`, either by setting up a panel data set with the function `panel` (useful if you run multiple models needing lags and/or leads), described in the next subsection.
+
+To set up the panel on-the-fly, you need to use the `panel.id` argument, which will give you access to the functions `f` and `l` to create leads and lags, respectively. Let's give an example, using the previous data set, where we use lags and leads of the explanatory and dependent variables.
+
+```{r}
+est1 = feols(y~l(x1, 0:1), base_did, panel.id = ~id+period)
+est2 = feols(f(y)~l(x1, -1:1), base_did, panel.id = ~id+period)
+est3 = feols(l(y)~l(x1, 0:3), base_did, panel.id = ~id+period)
+etable(est1, est2, est3, order = "f", drop="Int")
+```
+
+First of all, the value of `panel.id` corresponds to panel identifiers: first comes the variable identifying the panel-individuals, then comes the variables identifying the time. In the example, the `panel.id` came in the form of a one-sided formula, but it could equivalently be equal to `panel.id = c("id", "period")` or `panel.id = "id,period"`.
+
+As we can see, in the first estimation, a lag is created with the function `l`. The second argument of the function consists of a vector giving the lags we want. In this case, `l(x1, 0:1)` means we want `x1` and the first lag of `x1`. This argument accepts negative values which give leads, as shown in the second estimation where `l(x1, -1:1)` means that we want the first lead of `x1`, `x1`, then its first lag. In this example, we also use the first lead of `y` as a dependent variable with `f(y)`.
+
+### Setting up a panel data set
+
+You can set up a panel data set with the function `panel`. There are between two and three advantages of doing so. First, if you have to estimate many models with leads and/or lags, setting up a panel gives you access to the lagging functions, `f` and `l`, without having to provide the `panel.id` argument we've seen in the previous subsection. Second, even when you estimate models with a sub-selection of the panel data, the data set is still a proper panel, meaning you can still use the lagging functions. Finally, and only if you are a `data.table` user, you can use the lagging functions to create new variables.
+
+Let's repeat the previous example, now with a panel data set:
+```{r}
+# setting up the panel
+pdat = panel(base_did, ~id+period)
+# Now the panel.id argument is not required
+est1 = feols(y~l(x1, 0:1), pdat)
+est2 = feols(f(y)~l(x1, -1:1), pdat)
+# You can use sub selections of the panel data
+est_sub = feols(y~l(x1, 0:1), pdat[!pdat$period %in% c(2, 4)])
+etable(est1, est2, est_sub, order = "f", drop="Int")
+```
+
+Last, if you also use `data.table`, let's give an example of lead/lag creation:
+
+```{r}
+library(data.table)
+pdat_dt = panel(as.data.table(base_did), ~id+period)
+# we create a lagged value of the variable x1
+pdat_dt[, x1_l1 := l(x1)]
+# Now 
+pdat_dt[, c("x1_l1_fill0", "y_f2") := .(l(x1, fill = 0), f(y, 2))]
+head(pdat_dt)
+```
+
+
+### Creating lag/lead variables
+
+If you just want to create a single lag/lead variable, a simple and fast method has been implemented: `lag.formula`. Let's give an example:
 
 ```{r}
 base_lag = base_did
@@ -414,7 +463,7 @@ result_NL_fe = feNmlm(z_bis~0|id, base, NL.fml = ~ log(2*x + b*y), NL.start = li
 # The coef should be around 3
 coef(result_NL_fe)
 # the gamma and the exponential of the fixed-effects should be similar
-rbind(gamma, exp(fixef(result_NL_fe)$id))
+rbind(gamma, exp(fixef(result_NL_fe)$id[as.character(1:20)]))
 
 ```
 
