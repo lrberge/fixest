@@ -6,12 +6,12 @@
 \usage{
 feNmlm(fml, data, family = c("poisson", "negbin", "logit", "gaussian"),
   NL.fml, fixef, na_inf.rm = getFixest_na_inf.rm(), NL.start, lower,
-  upper, NL.start.init, offset, start = 0, jacobian.method = "simple",
-  useHessian = TRUE, hessian.args = NULL, opt.control = list(),
-  nthreads = getFixest_nthreads(), verbose = 0, theta.init,
-  fixef.tol = 1e-05, fixef.iter = 1000, deriv.tol = 1e-04,
-  deriv.iter = 1000, warn = TRUE, notes = getFixest_notes(),
-  combine.quick, ...)
+  upper, NL.start.init, offset, panel.id, start = 0,
+  jacobian.method = "simple", useHessian = TRUE, hessian.args = NULL,
+  opt.control = list(), nthreads = getFixest_nthreads(), verbose = 0,
+  theta.init, fixef.tol = 1e-05, fixef.iter = 1000,
+  deriv.tol = 1e-04, deriv.iter = 1000, warn = TRUE,
+  notes = getFixest_notes(), combine.quick, ...)
 }
 \arguments{
 \item{fml}{A formula. This formula gives the linear formula to be estimated (it is similar to a \code{lm} formula), for example: \code{fml = z~x+y}. To include cluster variables, you can 1) either insert them in this formula using a pipe (e.g. \code{fml = z~x+y|cluster1+cluster2}), or 2) either use the argument \code{cluster}. To include a non-linear in parameters element, you must use the argment \code{NL.fml}.}
@@ -35,6 +35,8 @@ feNmlm(fml, data, family = c("poisson", "negbin", "logit", "gaussian"),
 \item{NL.start.init}{(For NL models only) Numeric scalar. If the argument \code{NL.start} is not provided, or only partially filled (i.e. there remain non-linear parameters with no starting value), then the starting value of all remaining non-linear parameters is set to \code{NL.start.init}.}
 
 \item{offset}{A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This offset is linearly added to the elements of the main formula 'fml'.}
+
+\item{panel.id}{The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link[fixest]{feols}}).}
 
 \item{start}{Starting values for the coefficients in the linear part (for the non-linear part, use NL.start). Can be: i) a numeric of length 1 (e.g. \code{start = 0}, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).}
 
@@ -102,7 +104,7 @@ An \code{femlm} object.
 \item{theta}{In the case of a negative binomial estimation: the overdispersion parameter.}
 
  @seealso
-See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the functions \code{\link[fixest]{esttable}} and \code{\link[fixest]{esttex}} to visualize the results of multiple estimations.
+See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
 
 And other estimation methods: \code{\link[fixest]{feols}}, \code{\link[fixest]{femlm}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{fepois}}, \code{\link[fixest]{fenegbin}}.
 }
@@ -132,6 +134,20 @@ To estimate only a non-linear formula without even the intercept, you must exclu
 
 The over-dispersion parameter of the Negative Binomial family, theta, is capped at 10,000. If theta reaches this high value, it means that there is no overdispersion.
 }
+\section{Lagging variables}{
+
+
+To use leads/lags of variables in the estimation, you can: i) either provide the argument \code{panel.id}, ii) either set you data set as a panel with the function \code{\link[fixest]{panel}}. Doing either of the two will give you acceess to the lagging functions \code{\link[fixest]{l}} and \code{\link[fixest]{f}}.
+
+You can provide several leads/lags at once: e.g. if your formula is equal to \code{f(y) ~ l(x, -1:1)}, it means that the dependent variable is equal to the lead of \code{y}, and you will have as explanatory variables the lead of \code{x1}, \code{x1} and the lag of \code{x1}. See the examples in function \code{\link[fixest]{l}} for more details.
+
+
+ @seealso
+See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
+
+And other estimation methods: \code{\link[fixest]{femlm}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{fepois}}, \code{\link[fixest]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
+}
+
 \examples{
 
 # This section covers only non-linear in parameters examples

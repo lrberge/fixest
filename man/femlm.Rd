@@ -6,12 +6,13 @@
 \title{Fixed-effects maximum likelihood model}
 \usage{
 femlm(fml, data, family = c("poisson", "negbin", "logit", "gaussian"),
-  start = 0, fixef, offset, na_inf.rm = getFixest_na_inf.rm(),
-  fixef.tol = 1e-05, fixef.iter = 1000,
-  nthreads = getFixest_nthreads(), verbose = 0, warn = TRUE,
-  notes = getFixest_notes(), theta.init, combine.quick, ...)
+  start = 0, fixef, offset, panel.id,
+  na_inf.rm = getFixest_na_inf.rm(), fixef.tol = 1e-05,
+  fixef.iter = 1000, nthreads = getFixest_nthreads(), verbose = 0,
+  warn = TRUE, notes = getFixest_notes(), theta.init, combine.quick,
+  ...)
 
-fenegbin(fml, data, theta.init, start = 0, fixef, offset,
+fenegbin(fml, data, theta.init, start = 0, fixef, offset, panel.id,
   na_inf.rm = getFixest_na_inf.rm(), fixef.tol = 1e-05,
   fixef.iter = 1000, nthreads = getFixest_nthreads(), verbose = 0,
   warn = TRUE, notes = getFixest_notes(), combine.quick, ...)
@@ -28,6 +29,8 @@ fenegbin(fml, data, theta.init, start = 0, fixef, offset,
 \item{fixef}{Character vector. The name/s of a/some variable/s within the dataset to be used as fixed-effects. These variables should contain the identifier of each observation (e.g., think of it as a panel identifier).}
 
 \item{offset}{A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This offset is linearly added to the elements of the main formula 'fml'.}
+
+\item{panel.id}{The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link[fixest]{feols}}).}
 
 \item{na_inf.rm}{Logical, default is \code{TRUE}. If the variables necessary for the estimation contain NA/Infs and \code{na_inf.rm = TRUE}, then all observations containing NA are removed prior to estimation and a note is displayed detailing the number of observations removed. Otherwise, an error is raised.}
 
@@ -83,7 +86,7 @@ An \code{femlm} object.
 \item{theta}{In the case of a negative binomial estimation: the overdispersion parameter.}
 
  @seealso
-See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the functions \code{\link[fixest]{esttable}} and \code{\link[fixest]{esttex}} to visualize the results of multiple estimations.
+See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
 
 And other estimation methods: \code{\link[fixest]{feols}}, \code{\link[fixest]{femlm}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{fepois}}, \code{\link[fixest]{fenegbin}}.
 }
@@ -123,6 +126,20 @@ The over-dispersion parameter of the Negative Binomial family, theta, is capped 
 You can combine two variables to make it a new fixed-effect using \code{^}. The syntax is as follows: \code{fe_1^fe_2}. Here you created a new variable which is the combination of the two variables fe_1 and fe_2. This is identical to doing \code{paste0(fe_1, "_", fe_2)} but more convenient.
 
 Note that pasting is a costly operation, especially for large data sets. Thus, the internal algorithm uses a numerical trick which is fast, but the drawback is that the identity of each observation is lost (i.e. they are now equal to a meaningless number instead of being equal to \code{paste0(fe_1, "_", fe_2)}). These \dQuote{identities} are useful only if you're interested in the value of the fixed-effects (that you can extract with \code{\link[fixest]{fixef.fixest}}). If you're only interested in coefficients of the variables, it doesn't matter. Anyway, you can use \code{combine.quick = FALSE} to tell the internal algorithm to use \code{paste} instead of the numerical trick. By default, the numerical trick is performed only for large data sets.
+}
+
+\section{Lagging variables}{
+
+
+To use leads/lags of variables in the estimation, you can: i) either provide the argument \code{panel.id}, ii) either set you data set as a panel with the function \code{\link[fixest]{panel}}. Doing either of the two will give you acceess to the lagging functions \code{\link[fixest]{l}} and \code{\link[fixest]{f}}.
+
+You can provide several leads/lags at once: e.g. if your formula is equal to \code{f(y) ~ l(x, -1:1)}, it means that the dependent variable is equal to the lead of \code{y}, and you will have as explanatory variables the lead of \code{x1}, \code{x1} and the lag of \code{x1}. See the examples in function \code{\link[fixest]{l}} for more details.
+
+
+ @seealso
+See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
+
+And other estimation methods: \code{\link[fixest]{femlm}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{fepois}}, \code{\link[fixest]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
 }
 
 \examples{
@@ -170,7 +187,7 @@ On the unconditionnal Negative Binomial model:
 Allison, Paul D and Waterman, Richard P, 2002, "Fixed-Effects Negative Binomial Regression Models", Sociological Methodology 32(1) pp. 247--265
 }
 \seealso{
-See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the functions \code{\link[fixest]{esttable}} and \code{\link[fixest]{esttex}} to visualize the results of multiple estimations.
+See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
 And other estimation methods: \code{\link[fixest]{feols}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{fepois}}, \code{\link[fixest]{feNmlm}}.
 }
 \author{

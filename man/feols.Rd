@@ -4,7 +4,7 @@
 \alias{feols}
 \title{Fixed-effects OLS estimation}
 \usage{
-feols(fml, data, weights, offset, fixef, fixef.tol = 1e-07,
+feols(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-06,
   fixef.iter = 2000, na_inf.rm = getFixest_na_inf.rm(),
   nthreads = getFixest_nthreads(), verbose = 0, warn = TRUE,
   notes = getFixest_notes(), combine.quick, ...)
@@ -17,6 +17,8 @@ feols(fml, data, weights, offset, fixef, fixef.tol = 1e-07,
 \item{weights}{A formula or a numeric vector. Each observation can be weighted, the weights must be greater than 0. If equal to a formula, it should be of one-sided: for example \code{~ var_weight}.}
 
 \item{offset}{A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This offset is linearly added to the elements of the main formula 'fml'.}
+
+\item{panel.id}{The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link[fixest]{feols}}).}
 
 \item{fixef}{Character vector. The name/s of a/some variable/s within the dataset to be used as fixed-effects. These variables should contain the identifier of each observation (e.g., think of it as a panel identifier).}
 
@@ -62,29 +64,45 @@ In other words:
   \item cluster_var[var1, var2] is equivalent to cluster_var + cluster_var[[var1]] + cluster_var[[var2]]
   \item cluster_var[[var1, var2]] is equivalent to cluster_var[[var1]] + cluster_var[[var2]]
 }
+}
+
+\section{Lagging variables}{
+
+
+To use leads/lags of variables in the estimation, you can: i) either provide the argument \code{panel.id}, ii) either set you data set as a panel with the function \code{\link[fixest]{panel}}. Doing either of the two will give you acceess to the lagging functions \code{\link[fixest]{l}} and \code{\link[fixest]{f}}.
+
+You can provide several leads/lags at once: e.g. if your formula is equal to \code{f(y) ~ l(x, -1:1)}, it means that the dependent variable is equal to the lead of \code{y}, and you will have as explanatory variables the lead of \code{x1}, \code{x1} and the lag of \code{x1}. See the examples in function \code{\link[fixest]{l}} for more details.
 
 
  @seealso
-See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the functions \code{\link[fixest]{esttable}} and \code{\link[fixest]{esttex}} to visualize the results of multiple estimations.
+See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
+
 And other estimation methods: \code{\link[fixest]{femlm}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{fepois}}, \code{\link[fixest]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
 }
 
 \examples{
 
-# just one set of fixed-effects:
+# Just one set of fixed-effects:
 res = feols(Sepal.Length ~ Sepal.Width + Petal.Length | Species, iris)
 summary(res)
 
-# now with varying slopes:
+# Now with varying slopes:
 res = feols(Sepal.Length ~ Petal.Length | Species[Sepal.Width], iris)
 summary(res)
 
-# combining the FEs
+# Combining the FEs
 base = iris
 base$fe_2 = rep(1:10, 15)
 res_comb = feols(Sepal.Length ~ Petal.Length | Species^fe_2, base)
 summary(res_comb)
 fixef(res_comb)[[1]]
+
+# Using leads/lags
+data(base_did)
+# We need to set up the panel with the arg. panel.id
+est1 = feols(y~l(x1, 0:1), base_did, panel.id = ~id+period)
+est2 = feols(f(y)~l(x1, -1:1), base_did, panel.id = ~id+period)
+etable(est1, est2, order = "f", drop="Int")
 
 }
 \references{

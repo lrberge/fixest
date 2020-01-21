@@ -6,12 +6,12 @@
 \alias{fepois}
 \title{Fixed-effects GLM estimations}
 \usage{
-feglm(fml, data, family = "poisson", offset, weights, start = NULL,
-  etastart = NULL, mustart = NULL, fixef, fixef.tol = 1e-06,
-  fixef.iter = 1000, glm.iter = 25, glm.tol = 1e-08,
-  na_inf.rm = getFixest_na_inf.rm(), nthreads = getFixest_nthreads(),
-  warn = TRUE, notes = getFixest_notes(), verbose = 0, combine.quick,
-  ...)
+feglm(fml, data, family = "poisson", offset, weights, panel.id,
+  start = NULL, etastart = NULL, mustart = NULL, fixef,
+  fixef.tol = 1e-06, fixef.iter = 1000, glm.iter = 25,
+  glm.tol = 1e-08, na_inf.rm = getFixest_na_inf.rm(),
+  nthreads = getFixest_nthreads(), warn = TRUE,
+  notes = getFixest_notes(), verbose = 0, combine.quick, ...)
 
 feglm.fit(y, X, fixef_mat, family = "poisson", offset, weights,
   start = NULL, etastart = NULL, mustart = NULL, fixef.tol = 1e-06,
@@ -19,11 +19,12 @@ feglm.fit(y, X, fixef_mat, family = "poisson", offset, weights,
   na_inf.rm = getFixest_na_inf.rm(), nthreads = getFixest_nthreads(),
   warn = TRUE, notes = getFixest_notes(), verbose = 0, ...)
 
-fepois(fml, data, offset, weights, start = NULL, etastart = NULL,
-  mustart = NULL, fixef, fixef.tol = 1e-06, fixef.iter = 1000,
-  glm.iter = 25, glm.tol = 1e-08, na_inf.rm = getFixest_na_inf.rm(),
-  nthreads = getFixest_nthreads(), warn = TRUE,
-  notes = getFixest_notes(), verbose = 0, combine.quick, ...)
+fepois(fml, data, offset, weights, panel.id, start = NULL,
+  etastart = NULL, mustart = NULL, fixef, fixef.tol = 1e-06,
+  fixef.iter = 1000, glm.iter = 25, glm.tol = 1e-08,
+  na_inf.rm = getFixest_na_inf.rm(), nthreads = getFixest_nthreads(),
+  warn = TRUE, notes = getFixest_notes(), verbose = 0, combine.quick,
+  ...)
 }
 \arguments{
 \item{fml}{A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y | fe_1+fe_2}. You can combine two clusters with \code{^}: e.g. \code{fml = z~x+y|fe_1^fe_2}, see details. You can also use variables with varying slopes using square brackets: e.g. in \code{fml = z~y|fe_1[x] + fe_2} the variable \code{x} will have one coefficient for each value of \code{fe_1} -- if you use varying slopes, please have a look at the details section (can't describe it all here).}
@@ -35,6 +36,8 @@ fepois(fml, data, offset, weights, start = NULL, etastart = NULL,
 \item{offset}{A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This offset is linearly added to the elements of the main formula 'fml'.}
 
 \item{weights}{A formula or a numeric vector. Each observation can be weighted, the weights must be greater than 0. If equal to a formula, it should be of one-sided: for example \code{~ var_weight}.}
+
+\item{panel.id}{The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link[fixest]{feols}}).}
 
 \item{start}{Starting values for the coefficients. Can be: i) a numeric of length 1 (e.g. \code{start = 0}), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients). Default is missing.}
 
@@ -103,19 +106,35 @@ In other words:
   \item cluster_var[var1, var2] is equivalent to cluster_var + cluster_var[[var1]] + cluster_var[[var2]]
   \item cluster_var[[var1, var2]] is equivalent to cluster_var[[var1]] + cluster_var[[var2]]
 }
+}
+
+\section{Lagging variables}{
+
+
+To use leads/lags of variables in the estimation, you can: i) either provide the argument \code{panel.id}, ii) either set you data set as a panel with the function \code{\link[fixest]{panel}}. Doing either of the two will give you acceess to the lagging functions \code{\link[fixest]{l}} and \code{\link[fixest]{f}}.
+
+You can provide several leads/lags at once: e.g. if your formula is equal to \code{f(y) ~ l(x, -1:1)}, it means that the dependent variable is equal to the lead of \code{y}, and you will have as explanatory variables the lead of \code{x1}, \code{x1} and the lag of \code{x1}. See the examples in function \code{\link[fixest]{l}} for more details.
 
 
  @seealso
-See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the functions \code{\link[fixest]{esttable}} and \code{\link[fixest]{esttex}} to visualize the results of multiple estimations.
+See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
+
 And other estimation methods: \code{\link[fixest]{femlm}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{fepois}}, \code{\link[fixest]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
 }
 
 \examples{
-# default is a poisson model
+
+# Default is a poisson model
 res = feglm(Sepal.Length ~ Sepal.Width + Petal.Length | Species, iris)
 
-# with the fit method:
-res_bis = feglm.fit(iris$Sepal.Length, iris[, 2:3], iris$Species)
+# You could also use fepois
+res_pois = fepois(Sepal.Length ~ Sepal.Width + Petal.Length | Species, iris)
+
+# With the fit method:
+res_fit = feglm.fit(iris$Sepal.Length, iris[, 2:3], iris$Species)
+
+# All results are identical:
+etable(res, res_pois, res_fit)
 
 
 }
@@ -127,7 +146,7 @@ For models with multiple fixed-effects:
 Gaure, Simen, 2013, "OLS with multiple high dimensional category variables", Computational Statistics & Data Analysis 66 pp. 8--18
 }
 \seealso{
-See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the functions \code{\link[fixest]{esttable}} and \code{\link[fixest]{esttex}} to visualize the results of multiple estimations.
+See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
 And other estimation methods: \code{\link[fixest]{feols}}, \code{\link[fixest]{femlm}}, \code{\link[fixest]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
 }
 \author{
