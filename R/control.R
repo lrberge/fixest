@@ -431,6 +431,16 @@ check_arg = function(x, type, message, call_depth = 0){
 		}
 	}
 	
+	if(!grepl("naok", type) && anyNA(x)){
+		if(isSingle){
+			stop_now("But it is equal to NA.")
+		} else {
+			stop_now("But it contains NAs.")
+		}
+	} else if(grepl("naok", type)){
+		return(NULL)
+	}
+	
 	if(grepl("character", type) && !is.character(x)){
 		stop_now("But it is not of type character.")
 	}
@@ -442,14 +452,6 @@ check_arg = function(x, type, message, call_depth = 0){
 	if(grepl("numeric|integer", type) && !is.numeric(x) && !is.logical(x)){
 		# logicals are OK as numerics
 		stop_now("But it is not numeric.")
-	}
-	
-	if(!grepl("naok", type) && anyNA(x)){
-		if(isSingle){
-			stop_now("But it is equal to NA.")
-		} else {
-			stop_now("But it contains NAs.")
-		}
 	}
 	
 	if(grepl("integer", type) && !all(x %% 1 == 0)){
