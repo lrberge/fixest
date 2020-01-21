@@ -4,44 +4,63 @@
 # ~: Lagging
 #----------------------------------------------#
 
-# ------------------------------------------------------------- #
-# Contains all functions to ensure the easy lagging of variable
+# -------------------------------------------------------------- #
+# Contains all functions to ensure the easy lagging of variables
 # within fixest estimations.
 #
-# ------------------------------------------------------------- #
+# -------------------------------------------------------------- #
 
-
-# Work in progress:
-# - include the possibility to use var1^var2 -- OK
-# - include NA handling in bookeeping
-# - drop the methods of extraction ([[ and $)... not very useful, l/f should not be applied to vectors
 
 panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method = c("none", "first"), DATA_MISSING = FALSE, from_fixest = FALSE){
     # Function to setup the panel.
     # Used in lag.formula, panel, and fixest_env (with argument panel.id and panel.args)
     # DATA_MISSING: arg used in lag.formula
 
-    # The id/time -- Beware when using var1^var2
 
-    duplicate.method = match.arg(duplicate.method)
+    # for error handling => refers to the right function
+    my_call = deparse(sys.calls()[[sys.nframe()-1]])[1] # call can have svl lines
+    nmax = 40
+    if(nchar(my_call) > nmax) my_call = paste0(substr(my_call, 1, nmax-1), "...")
+    my_call = paste0(my_call, ":\n ")
 
-    tm = terms_hat(panel.id)
-    var_id_time = attr(tm, "term.labels")
-    if(length(var_id_time) != 2){
-        stop("The formula of the panel IDs must contain exactly two variables in the right hand side (currently there ", ifsingle(var_id_time, "is ", "are "), length(var_id_time), ").")
+
+    duplicate.method = try(match.arg(duplicate.method, choices = c("none", "first")), silent = TRUE)
+    if(class(duplicate.method) == "try-error"){
+        stop(my_call, "The argument 'duplicate.method' must be one of: 'none' or 'first'.", call. = FALSE)
     }
 
+    if("formula" %in% class(panel.id)){
+        tm = terms_hat(panel.id)
+        var_id_time = attr(tm, "term.labels")
+        if(length(var_id_time) != 2){
+            stop(my_call, "The formula of the argument 'panel.id' must contain exactly two variables in the right hand side (currently there ", ifsingle(var_id_time, "is ", "are "), length(var_id_time), ").", call. = FALSE)
+        }
+
+        all_vars = all.vars(tm)
+    } else if(is.character(panel.id) && length(panel.id) == 2){
+        all_vars = var_id_time = panel.id
+    } else if(is.character(panel.id) && length(panel.id) == 1){
+        var_id_time = gsub("(^ +| +$)", "", strsplit(panel.id, ",")[[1]])
+        all_vars = var_id_time = var_id_time[nchar(var_id_time) > 0]
+        if(length(var_id_time) != 2){
+            stop(my_call, "The argument 'panel.id' must be either: i) a one sided formula (e.g. ~id+time), ii) a character vector of length 2 (e.g. c('id', 'time'), or iii) a character scalar of two variables separated by a comma (e.g. 'id,time'). Currently it is neither of the three." , call. = FALSE)
+        }
+    } else {
+        stop(my_call, "The argument 'panel.id' must be either: i) a one sided formula (e.g. ~id+time), ii) a character vector of length 2 (e.g. c('id', 'time'), or iii) a character scalar of two variables separated by a comma (e.g. 'id,time'). Currently it is neither of the three." , call. = FALSE)
+    }
+
+
     if(DATA_MISSING){
-        if(!all(all.vars(tm) %in% ls(parent.frame(2)))){
-            pblm = setdiff(all.vars(tm), ls(parent.frame(2)))
-            stop("In the panel IDs, the variable", enumerate_items(pblm, "s.is.past.quote"), " not found in the environment.")
+        if(!all(all_vars %in% ls(parent.frame(2)))){
+            pblm = setdiff(all_vars, ls(parent.frame(2)))
+            stop(my_call, "In the argument 'panel.id', the variable", enumerate_items(pblm, "s.is.past.quote"), " not found in the environment.", call. = FALSE)
         }
         id = eval(parse(text = var_id_time[1]), parent.frame(2))
         time = eval(parse(text = var_id_time[2]), parent.frame(2))
     } else {
-        if(!all(all.vars(tm) %in% names(data))){
-            pblm = setdiff(all.vars(tm), ls(parent.frame(2)))
-            stop("In the panel IDs, the variable", enumerate_items(pblm, "s.is.quote"), " not in the data set.")
+        if(!all(all_vars %in% names(data))){
+            pblm = setdiff(all_vars, names(data))
+            stop(my_call, "In the argument 'panel.id', the variable", enumerate_items(pblm, "s.is.quote"), " not in the data set.", call. = FALSE)
         }
         id = eval(parse(text = var_id_time[1]), data)
         time = eval(parse(text = var_id_time[2]), data)
@@ -61,11 +80,11 @@ panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method =
 
     # time.step
     if(length(time.step) != 1 || (!is.numeric(time.step) && !is.character(time.step))){
-        stop("Argument time.step must be equal to 'unitary', 'consecutive' or to a number.")
+        stop(my_call, "The argument 'time.step' must be equal to 'unitary', 'consecutive' or to a number.", call. = FALSE)
     } else if(is.character(time.step)){
-        ts = try(match.arg(time.step, c("unitary", "consecutive")), silent = TRUE)
+        ts = try(match.arg(time.step, c("unitary", "consecutive", "within.consecutive")), silent = TRUE)
         if("try-error" %in% class(ts)){
-            stop("Argument time.step must be equal to 'unitary', 'consecutive' or to a number.")
+            stop(my_call, "The argument 'time.step' must be one of 'unitary', 'consecutive' or 'within.consecutive', or a number representing the time step.", call. = FALSE)
         }
         time.step = ts
     }
@@ -79,25 +98,28 @@ panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method =
             time_new = tryCatch(as.numeric(time), warning = function(x) x)
 
             if(!is.numeric(time_new)){
-                stop("To use the 'unitary' time.step, the time variable must be numeric or at least convertible to numeric. So far the conversion has failed (time variable's class is currently ", enumerate_items(class(time)), ").")
+                if(from_fixest){
+                    stop(my_call, "The time variable must be numeric or at least convertible to numeric. So far the conversion has failed (time variable's class is currently ", enumerate_items(class(time)), "). Alternatively, you can have more options to set up the panel using the function panel().", call. = FALSE)
+                } else {
+                    stop(my_call, "To use the 'unitary' time.step, the time variable must be numeric or at least convertible to numeric. So far the conversion has failed (time variable's class is currently ", enumerate_items(class(time)), ").", call. = FALSE)
+                }
             }
 
             time = time_new
         }
 
         if(any(time %% 1 != 0)){
-            stop("To use the 'unitary' time.step, the time variable", ifelse(time_conversion, " (which has been converted to numeric)", ""), " must be made of integers. So far this is not the case. Alternatively, you can give a number in time.step.")
+            if(from_fixest){
+                stop(my_call, "The time variable", ifelse(time_conversion, " (which has been converted to numeric)", ""), " must be made of integers. So far this is not the case. Alternatively, you can have more options to set up the panel using the function panel().", call. = FALSE)
+            } else {
+                stop(my_call, "To use the 'unitary' time.step, the time variable", ifelse(time_conversion, " (which has been converted to numeric)", ""), " must be made of integers. So far this is not the case. Alternatively, you can give a number in time.step.", call. = FALSE)
+            }
         }
 
-    } else if(time.step != "consecutive"){
+    } else if(!is.character(time.step)){
         if(!is.numeric(time)){
-            stop("If 'time.step' is a number, then the time variable must also be a number (this is not the case: its class is currently ", enumerate_items(class(time)), ").")
+            stop(my_call, "If 'time.step' is a number, then the time variable must also be a number (this is not the case: its class is currently ", enumerate_items(class(time)), ").", call. = FALSE)
         }
-
-        # if(any(time %% time.step != 0)){
-        #     pblm = unique(head(time[time %% time.step != 0], 3))
-        #     stop("If 'time.step' is a number, then it must be an exact divisor of all the values in the time variable. This is currently not the case: ", time.step, " is not a divisor of ", enumerate_items(pblm, or = TRUE, verb = FALSE), ".")
-        # }
     }
 
     # Computation quf
@@ -113,7 +135,8 @@ panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method =
     #       or from 0 to K-1. We only care that the numbers are consecutive
 
     # Releveling the time ID depending on the time.step
-    if(time.step == "consecutive"){
+    if(time.step %in% c("consecutive", "within.consecutive")){
+        # for within.consecutive, we deal with it after sorting
         time = time_full$x
     } else if(time.step == "unitary"){
         time_unik = time_full$items
@@ -137,7 +160,7 @@ panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method =
         if(any(all_steps %% time.step != 0)){
             obs_pblm = which(all_steps %% time.step != 0)
 
-            stop("If 'time.step' is a number, then it must be an exact divisor of all the difference between two consecutive time periods. This is currently not the case: ", time.step, " is not a divisor of ", all_steps[obs_pblm][1], " (the difference btw the time periods ", time_unik[obs_pblm[1] + 1], " and ", time_unik[obs_pblm[1]], ").")
+            stop(my_call, "If 'time.step' is a number, then it must be an exact divisor of all the difference between two consecutive time periods. This is currently not the case: ", time.step, " is not a divisor of ", all_steps[obs_pblm][1], " (the difference btw the time periods ", time_unik[obs_pblm[1] + 1], " and ", time_unik[obs_pblm[1]], ").", call. = FALSE)
         }
 
         # we rescale time_unik // checks done beforehand
@@ -154,6 +177,10 @@ panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method =
     id_sorted = id[order_it]
     time_sorted = time[order_it]
 
+    if(time.step == "within.consecutive"){
+        time_sorted = 1:length(time_sorted)
+    }
+
     # We check for duplicate rows => lag not defined for them
     if(duplicate.method == "none"){
         dup_info = cpp_find_duplicates(id_sorted, time_sorted)
@@ -169,7 +196,7 @@ panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method =
             id_dup = id_origin[obs_pblm]
             time_dup = time_origin[obs_pblm]
 
-            stop("The panel identifiers contain duplicate values: this is not allowed since lag/leads are not defined for them. For example (id, time) = (", id_dup, ", ", time_dup, ") appears ", n_times(dup_info$n_dup), ". Please provide data without duplicates -- or you can also use duplicate.method = 'first' (see Details).")
+            stop(my_call, "The panel identifiers contain duplicate values: this is not allowed since lag/leads are not defined for them. For example (id, time) = (", id_dup, ", ", time_dup, ") appears ", n_times(dup_info$n_dup), ". Please provide data without duplicates -- or you can also use duplicate.method = 'first' (see Details).", call. = FALSE)
         }
     }
 
@@ -178,12 +205,53 @@ panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method =
     res
 }
 
-# Add argument fill to f and l
+
+#' @describeIn l Forwards a variable (inverse of lagging) in a \code{fixest} estimation
 f = function(x, lead = 1, fill = NA){
     l(x, -lead, fill)
 }
 
 
+#' Lags a variable in a \code{fixest} estimation
+#'
+#' Produce lags or leads in the formulas of \code{fixest} estimations or when creating variables in a \code{\link[data.table]{data.table}}. The data must be set as a panel beforehand (either with the function \code{\link[fixest]{panel}} or with the argument \code{panel.id} in the estimation).
+#'
+#' @param x The variable.
+#' @param lag A vector of integers. In function \code{l} (resp. \code{f}), negative values lead to leads (resp. lags). This argument can be a vector when using it in fixest estimations. When creating variables in a \code{\link[data.table]{data.table}}, it **must** be of length one.
+#' @param fill A scalar, default is \code{NA}. How to fill the missing values due to the lag/lead? Note that in a \code{fixest} estimation, 'fill' must be numeric (not required when creating new variables).
+#'
+#' @return
+#' These functions can only be used i) in a formula of a \code{fixest} estimation, or ii) when creating variables within a \code{fixest_panel} object (obtained with function \code{\link[fixest]{panel}}) which is alaos a \code{\link[data.table]{data.table}}.
+#'
+#' @seealso
+#' The function \code{\link[fixest]{panel}} changes \code{data.frames} into a panel from which the functions \code{l} and \code{f} can be called. Otherwise you can set the panel 'live' during the estimation using the argument \code{panel.id} (see for example in the function \code{\link[fixest]{feols}}).
+#'
+#' @examples
+#'
+#' data(base_did)
+#'
+#' # Setting a data set as a panel...
+#' pdat = panel(base_did, ~id+period)
+#'
+#' # ...then using the functions l and f
+#' est1 = feols(y~l(x1, 0:1), pdat)
+#' est2 = feols(f(y)~l(x1, -1:1), pdat)
+#' est3 = feols(l(y)~l(x1, 0:3), pdat)
+#' etable(est1, est2, est3, order = c("f", "^x"), drop="Int")
+#'
+#' # or using the argument panel.id
+#' feols(f(y)~l(x1, -1:1), base_did, panel.id = ~id+period)
+#'
+#' \donttest{
+#' # l() and f() can also be used within a data.table:
+#' pdat_dt = panel(as.data.table(base_did), ~id+period)
+#' # Now since pdat_dt is also a data.table
+#' #   you can create lags/leads directly
+#' pdat_dt[, x1_l1 := l(x1)]
+#' pdat_dt[, c("x1_l1_fill0", "y_f2") := .(l(x1, fill = 0), f(y, 2))]
+#' }
+#'
+#'
 l = function(x, lag = 1, fill = NA){
 
     value = x
@@ -196,15 +264,46 @@ l = function(x, lag = 1, fill = NA){
         if(exists("panel__meta__info", parent.frame(where))){
             from_fixest = TRUE
             meta_info = get("panel__meta__info", parent.frame(where))
+            break
         }
     }
 
     if(from_fixest == FALSE){
-        if(any(grepl("^.\\[\\.data\\.table", sys_calls))){
-            # this is a call from within data table => OK
-            # Getting the meta info is a bit tricky
+        # Using l/f within data.table
 
+        fl_authorized = getOption("fixest_fl_authorized")
+
+        if(fl_authorized){
+            # Further control
+            check_arg(lag, "singleInteger", "When creating lags (or leads) within a data.table with l() (or f()), the argument 'lag' must be a single integer. REASON")
+
+            if(length(fill) != 1){
+                stop("The length of argument 'fill' must be exaclty 1. Its current length is ", length(fill), ".")
+            } else if(!is.na(fill)){
+                if(is.list(fill)){
+                    stop("Argument fill must be a 'scalar', currenlty it's a list!")
+                }
+
+                if(is.numeric(value) && !is.numeric(fill)){
+                    mc = match.call()
+                    stop("Argument 'fill' must be of the same type as ", deparse_long(mc$x), ", which is numeric.")
+                }
+
+                if(!is.numeric(value) && is.numeric(fill)){
+                    mc = match.call()
+                    stop("Argument 'fill' must be of the same type as ", deparse_long(mc$x), ", which is not numeric while 'fill' is.")
+                }
+                # I could go further in checking but it's enough
+            }
+
+            # we fetch the panel information
             qui  = which.max(grepl("^.\\[\\.data\\.table", sys_calls))
+
+            if(length(qui) == 0){
+                options(fixest_fl_authorized = FALSE)
+                stop("Unknown error when trying to create a lag (or lead) with function l() (or f()) within data.table. This is a 'fixest' error, may be worth reporting if needed.")
+            }
+
             var = gsub("^[^\\(]+\\(|,.+", "", sys_calls[qui])
             m = eval(parse(text = var), envir = sys.frames()[qui])
 
@@ -214,8 +313,25 @@ l = function(x, lag = 1, fill = NA){
 
             meta_info = attr(m, "panel_info")
         } else {
-            stop("Function l() is only callable within 'fixest' estimations or within a variable creation with data.table where the data set is a fixest_panel (obtained from panel()).")
+            stop("Function l() (or f()) is only callable within 'fixest' estimations or within a variable creation with data.table (i.e. using ':=') where the data set is a 'fixest_panel' (obtained from panel()). Alternatively, you can use lag.formula().")
         }
+
+        # if(any(grepl("^.\\[\\.data\\.table", sys_calls))){
+        #     # this is a call from within data table => OK
+        #     # Getting the meta info is a bit tricky
+        #
+        #     qui  = which.max(grepl("^.\\[\\.data\\.table", sys_calls))
+        #     var = gsub("^[^\\(]+\\(|,.+", "", sys_calls[qui])
+        #     m = eval(parse(text = var), envir = sys.frames()[qui])
+        #
+        #     if(!"fixest_panel" %in% class(m)){
+        #         stop("You can use l() or f() only when the data set is of class 'fixest_panel', you can use function panel() to set it.")
+        #     }
+        #
+        #     meta_info = attr(m, "panel_info")
+        # } else {
+        #     stop("Function l() is only callable within 'fixest' estimations or within a variable creation with data.table where the data set is a fixest_panel (obtained from panel()).")
+        # }
     }
 
     # we get the observation id!
@@ -313,15 +429,15 @@ f_expand = function(x, k=1, fill){
 
 #' Lags a variable using a formula
 #'
-#' Lags a variable using panel id+time identifiers in a formula.
+#' Lags a variable using panel id + time identifiers in a formula.
+#'
+#' @inheritParams panel
 #'
 #'
 #' @param x A formula of the type \code{var ~ id + time} where \code{var} is the variable to be lagged, \code{id} is a variable representing the panel id, and \code{time} is the time variable of the panel.
-#' @param k An integer giving the number of lags. For leads, just use a negative number.
-#' @param data Optional, the data.frame in which to evaluate the formula.
-#' @param time.step The method to compute the lags. Can be equal to: \code{"unitary"} (default), \code{"consecutive"} or to a number. If \code{"unitary"}, then the largest common divisor between consecutive time periods is used (typically if the time variable represents years, it will be 1). This method can apply only to integer (or convertible to integer) variables. If \code{"consecutive"}, then the time variable can be of any type: two successive time periods represent a lag of 1. Finally, if the time variable is numeric, you can provide your own numeric time step.
-#' @param fill How to fill the observations without defined lead/lag values. Default is \code{NA}.
-#' @param duplicate.method If several observations have the same id and time values, then the notion of lag is not defined for them. If \code{duplicate.method = "none"} (default) and duplicate values are found, this leads to an error. You can use \code{duplicate.method = "first"} so that the first occurrence of identical id/time observations will be used as lag.
+#' @param k An integer giving the number of lags. Default is 1. For leads, just use a negative number.
+#' @param data Optional, the data.frame in which to evaluate the formula. If not provided, variables will be fetched in the current environment.
+#' @param fill Scalar. How to fill the observations without defined lead/lag values. Default is \code{NA}.
 #' @param ... Not currently used.
 #'
 #' @return
@@ -330,19 +446,26 @@ f_expand = function(x, k=1, fill){
 #' @author
 #' Laurent Berge
 #'
+#' @seealso
+#' Alternatively, the function \code{\link[fixest]{panel}} changes a \code{data.frame} into a panel from which the functions \code{l} and \code{f} (creating leads and lags) can be called. Otherwise you can set the panel 'live' during the estimation using the argument \code{panel.id} (see for example in the function \code{\link[fixest]{feols}}).
+#'
 #' @examples
 #' # simple example with an unbalanced panel
 #' base = data.frame(id = rep(1:2, each = 4),
 #'                   time = c(1, 2, 3, 4, 1, 4, 6, 9), x = 1:8)
 #'
-#' lag(x~id+time,  1, base) # lag 1
-#' lag(x~id+time, -1, base) # lead 1
-#'
-#' lag(x~id+time, 2, base, fill = 0)
-#'
+#' base$lag1 = lag(x~id+time,  1, base) # lag 1
+#' base$lead1 = lag(x~id+time, -1, base) # lead 1
+#' base$lag2_fill0 = lag(x~id+time, 2, base, fill = 0)
 #' # with time.step = "consecutive"
-#' lag(x~id+time, 1, base, time.step = "cons")
-#' # => works for indiv. 2 because 9 (resp. 6) is consecutive to 6 (resp. 4)
+#' base$lag1_consecutive = lag(x~id+time, 1, base, time.step = "consecutive")
+#' #   => works for indiv. 2 because 9 (resp. 6) is consecutive to 6 (resp. 4)
+#' base$lag1_within.consecutive = lag(x~id+time, 1, base, time.step = "within")
+#' #   => now two consecutive years within each indiv is one lag
+#'
+#' print(base)
+#'
+#' # Argument time.step = "consecutive" is
 #' # mostly useful when the time variable is not a number:
 #' # e.g. c("1991q1", "1991q2", "1991q3") etc
 #'
@@ -350,12 +473,36 @@ f_expand = function(x, k=1, fill){
 #' base_dup = data.frame(id = rep(1:2, each = 4),
 #'                       time = c(1, 1, 1, 2, 1, 2, 2, 3), x = 1:8)
 #'
-#' # by default: error
+#' # Error because of duplicate values for (id, time)
 #' \donttest{
 #' lag(x~id+time, 1, base_dup)
 #' }
-#' # with duplicate.method = "first"
+#'
+#' # Error is bypassed, lag corresponds to first occurence of (id, time)
 #' lag(x~id+time, 1, base_dup, duplicate.method = "first")
+#'
+#'
+#' # Playing with time steps
+#' base = data.frame(id = rep(1:2, each = 4),
+#'                   time = c(1, 2, 3, 4, 1, 4, 6, 9), x = 1:8)
+#'
+#' # time step: 0.5 (here equivalent to lag of 1)
+#' lag(x~id+time, 2, base, time.step = 0.5)
+#'
+#' # Error: wrong time step
+#' \donttest{
+#' lag(x~id+time, 2, base, time.step = 7)
+#' }
+#'
+#' # Adding NAs + unsorted IDs
+#' base = data.frame(id = rep(1:2, each = 4),
+#'                   time = c(4, NA, 3, 1, 2, NA, 1, 3), x = 1:8)
+#'
+#' base$lag1 = lag(x~id+time, 1, base)
+#' base$lag1_within = lag(x~id+time, 1, base, time.step = "w")
+#' base_bis = base[order(base$id, base$time),]
+#'
+#' print(base_bis)
 #'
 #' \donttest{
 #' # You can create variables without specifying the data within data.table:
@@ -365,7 +512,7 @@ f_expand = function(x, k=1, fill){
 #' }
 #'
 #'
-lag.formula = function(x, k, data, time.step = "unitary", fill = NA, duplicate.method = c("none", "first"), ...){
+lag.formula = function(x, k = 1, data, time.step = "unitary", fill = NA, duplicate.method = c("none", "first"), ...){
     # Arguments:
     # time.step: default: "consecutive", other option: "unitary" (where you find the most common step and use it -- if the data is numeric), other option: a number, of course the time must be numeric
 
@@ -470,6 +617,66 @@ lag.formula = function(x, k, data, time.step = "unitary", fill = NA, duplicate.m
 
 
 
+#' Constructs a \code{fixest} panel data base
+#'
+#' Constructs a \code{fixest} panel data base out of a data.frame which allows to use leads and lags in \code{fixest} estimations and to create new variables from leads and lags if the data.frame was also a \code{\link[data.table]{data.table}}.
+#'
+#' @param data A data.frame.
+#' @param panel.id The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link[fixest]{feols}}).
+#' @param time.step The method to compute the lags. Can be equal to: \code{"unitary"} (default), \code{"consecutive"}, \code{"within.consecutive"}, or to a number. If \code{"unitary"}, then the largest common divisor between consecutive time periods is used (typically if the time variable represents years, it will be 1). This method can apply only to integer (or convertible to integer) variables. If \code{"consecutive"}, then the time variable can be of any type: two successive time periods represent a lag of 1. If \code{"witihn.consecutive"} then **within a given id**, two successive time periods represent a lag of 1. Finally, if the time variable is numeric, you can provide your own numeric time step.
+#' @param duplicate.method If several observations have the same id and time values, then the notion of lag is not defined for them. If \code{duplicate.method = "none"} (default) and duplicate values are found, this leads to an error. You can use \code{duplicate.method = "first"} so that the first occurrence of identical id/time observations will be used as lag.
+#'
+#' @details
+#' This function allows you to use leads and lags in a \code{fixest} estimation without having to provide the argument \code{panel.id}. It also offers more options on how to set the panel (with the additional arguments 'time.step' and 'duplicate.method').
+#'
+#' When the initial data set was also a \code{data.table}, not all operations are supported and some may dissolve the \code{fixest_panel}. This is the case when creating subselections of the initial data with additional attributes (e.g. pdt[x>0, .(x, y, z)] would dissolve the \code{fixest_panel}, meaning only a data.table would be the result of the call).
+#'
+#' If the initial data set was also a \code{data.table}, then you can create new variables from lags and leads using the functions \code{\link[fixest]{l}}() and \code{\link[fixest]{f}}(). See the example.
+#'
+#'
+#' @return
+#' It returns a data base identical to the one given in input, but with an additional attribute: \dQuote{panel_info}. This attribute contains vectors used to efficiently create lags/leads of the data. When the data is subselected, some bookeeping is performed on the attribute \dQuote{panel_info}.
+#'
+#' @author
+#' Laurent Berge
+#'
+#' @seealso
+#' The estimation methods \code{\link[fixest]{feols}}, \code{\link[fixest]{fepois}} and \code{\link[fixest]{feglm}}.
+#'
+#' The functions \code{\link[fixest]{l}} and \code{\link[fixest]{f}} to create lags and leads within \code{}fixest_panel objects.
+#'
+#' @examples
+#'
+#' data(base_did)
+#'
+#' # Setting a data set as a panel...
+#' pdat = panel(base_did, ~id+period)
+#'
+#' # ...then using the functions l and f
+#' est1 = feols(y~l(x1, 0:1), pdat)
+#' est2 = feols(f(y)~l(x1, -1:1), pdat)
+#' est3 = feols(l(y)~l(x1, 0:3), pdat)
+#' etable(est1, est2, est3, order = c("f", "^x"), drop="Int")
+#'
+#' # or using the argument panel.id
+#' feols(f(y)~l(x1, -1:1), base_did, panel.id = ~id+period)
+#'
+#' # You can use panel.id in various ways:
+#' pdat = panel(base_did, ~id+period)
+#' # is identical to:
+#' pdat = panel(base_did, c("id", "period"))
+#' # and also to:
+#' pdat = panel(base_did, "id,period")
+#'
+#' \donttest{
+#' # l() and f() can also be used within a data.table:
+#' pdat_dt = panel(as.data.table(base_did), ~id+period)
+#' # Now since pdat_dt is also a data.table
+#' #   you can create lags/leads directly
+#' pdat_dt[, x1_l1 := l(x1)]
+#' pdat_dt[, c("x1_l1_fill0", "y_f2") := .(l(x1, fill = 0), f(y, 2))]
+#' }
+#'
 panel = function(data, panel.id, time.step = "unitary", duplicate.method = c("none", "first")){
 
     if(missing(data)){
@@ -477,9 +684,6 @@ panel = function(data, panel.id, time.step = "unitary", duplicate.method = c("no
     } else if(!"data.frame" %in% class(data)){
         stop("Argument 'data' must be a data.frame.")
     }
-
-    duplicate.method = match.arg(duplicate.method)
-    check_arg(panel.id, "osf")
 
     meta_info = panel_setup(data, panel.id = panel.id, time.step = time.step, duplicate.method = duplicate.method)
 
@@ -498,11 +702,46 @@ panel = function(data, panel.id, time.step = "unitary", duplicate.method = c("no
     res
 }
 
+
+#' Dissolves a \code{fixest} panel
+#'
+#' Transforms a \code{fixest_panel} object into a regular data.frame.
+#'
+#' @param x A \code{fixest_panel} object (obtained from function \code{\link[fixest]{panel}}).
+#'
+#' @return
+#' Returns a data set of the exact same dimension. Only the attribute 'panel_info' is erased.
+#'
+#' @author
+#' Laurent Berge
+#'
+#' @seealso
+#' Alternatively, the function \code{\link[fixest]{panel}} changes a \code{data.frame} into a panel from which the functions \code{l} and \code{f} (creating leads and lags) can be called. Otherwise you can set the panel 'live' during the estimation using the argument \code{panel.id} (see for example in the function \code{\link[fixest]{feols}}).
+#'
+#' @examples
+#'
+#' data(base_did)
+#'
+#' # Setting a data set as a panel
+#' pdat = panel(base_did, ~id+period)
+#'
+#' # ... allows you to use leads and lags in estimations
+#' feols(y~l(x1, 0:1), pdat)
+#'
+#' # Now unpanel => returns the initial data set
+#' class(pdat) ; dim(pdat)
+#' new_base = unpanel(pdat)
+#' class(new_base) ; dim(new_base)
+#'
+#'
+#'
 unpanel = function(x){
 
     if("data.table" %in% class(x) && isNamespaceLoaded("data.table")){
         data.table::setattr(x, "panel_info", NULL)
         data.table::setattr(x, "class", setdiff(class(x), "fixest_panel"))
+
+        return(invisible(x))
     } else {
         attr(x, "panel_info") = NULL
         class(x) = setdiff(class(x), "fixest_panel")
@@ -527,6 +766,59 @@ unpanel = function(x){
 #     res
 # }
 
+
+
+#' Method to subselect from a \code{fixest_panel}
+#'
+#' Subselection from a \code{fixest_panel} which has been created with the function \code{\link[fixest]{panel}}. Also allows to create lag/lead variables with functions \code{\link[fixest]{l}}()/\code{\link[fixest]{f}}() if the \code{fixest_panel} is also a \code{\link[data.table]{data.table}}.
+#'
+#' @param x A \code{fixest_panel} object, created with the function \code{\link[fixest]{panel}}.
+#' @param i Row subselection. Allows \code{\link[data.table]{data.table}} style selection (provided the data is also a data.table).
+#' @param j Variable selection. Allows \code{\link[data.table]{data.table}} style selection/variable creation (provided the data is also a data.table).
+#' @param ... Other arguments to be passed to \code{[.data.frame} or \code{\link[data.table]{data.table}} (or whatever the class of the initial data).
+#'
+#' @details
+#' If the original data was also a data.table, some calls to \code{[.fixest_panel} may dissolve the \code{fixest_panel} object and return a regular data.table. This is the case for subselections with additional arguments. If so, a note is displayed on the console.
+#'
+#' @return
+#' It returns a \code{fixest_panel} data base, with the attributes allowing to create lags/leads properly bookkeeped.
+#'
+#' @author
+#' Laurent Berge
+#'
+#' @seealso
+#' Alternatively, the function \code{\link[fixest]{panel}} changes a \code{data.frame} into a panel from which the functions \code{l} and \code{f} (creating leads and lags) can be called. Otherwise you can set the panel 'live' during the estimation using the argument \code{panel.id} (see for example in the function \code{\link[fixest]{feols}}).
+#'
+#' @examples
+#'
+#' data(base_did)
+#'
+#' # Creating a fixest_panel object
+#' pdat = panel(base_did, ~id+period)
+#'
+#' # Subselections of fixest_panel objects bookkeeps the leads/lags engine
+#' pdat_small = pdat[!pdat$period %in% c(2, 4), ]
+#' a = feols(y~l(x1, 0:1), pdat_small)
+#'
+#' # we obtain the same results, had we created the lags "on the fly"
+#' base_small = base_did[!base_did$period %in% c(2, 4), ]
+#' b = feols(y~l(x1, 0:1), base_small, panel.id = ~id+period)
+#' etable(a, b)
+#'
+#'
+#' \donttest{
+#' # Using data.table to create new lead/lag variables
+#' pdat_dt = panel(as.data.table(base_did), ~id+period)
+#'
+#' # Variable creation
+#' pdat_dt[, x_l1 := l(x1)]
+#' pdat_dt[, c("x_l1", "x_f1_2") := .(l(x1), f(x1)**2)]
+#'
+#' # Estimation on a subset of the data
+#' #  (the lead/lags work appropriately)
+#' feols(y~l(x1, 0:1), pdat_dt[!period %in% c(2, 4)])
+#' }
+#'
 "[.fixest_panel" = function(x, i, j, ...){
     # we need to perform proper bookkeeping
 
@@ -537,37 +829,49 @@ unpanel = function(x){
         # data.table is really hard to handle....
         # Not very elegant... but that's life!
 
+        # When modifications are too risky, I dissolve the panel
+
         mc_new = mc
         mc_new[[1]] = as.name('[')
 
-        if(grepl(":=", deparse(mc))){
-            # Pfff data.table is REALLY a pain in the neck
-            # doesn't look 100% safe (say 95%)
+        if(grepl(":=", deparse(mc$j)[1])){
+            # Variable creation is OK
 
-            # Does NOT work:
-            # x_name = deparse(mc$x)
-            # eval(parse(text = paste0("setDT(", x_name, ")")), parent.frame())
-            # res <- eval(mc_new, parent.frame())
-            # eval(parse(text = paste0("setattr(", x_name, ", 'class', c('panel', class(", x_name, ")))")), parent.frame())
+            jvalue = mc$j
+            jtext = deparse_long(jvalue)
+            # we check if f() or l() is used
+            if(grepl("[^\\._[:alnum:]](l|f)\\(", jtext)){
+                # We authorize it but only in 'simple' variable creation
+                if(any(!names(mc) %in% c("", "x", "j"))){
+                    # We don't allow i either
+                    stop("When creating lags (resp. leads) with the function l() (resp. f()) within a data.table, only the argument 'j' is allowed.\nExample: 'data[, x_lag := l(x)]' is OK, while 'data[x>0, x_lag := l(x)]' is NOT ok.")
+                }
+                options(fixest_fl_authorized = TRUE)
+                on.exit(options(fixest_fl_authorized = FALSE))
+            }
 
-
-            # does not work:
-            # return(NextMethod())
-
+            # I have to do it that way... really not elegant...
             mc_new[[1]] = as.name('[.data.table')
-            # eval(mc_new, environment(data.table), parent.frame()) # Dont Work
-            # eval(mc_new, as.environment("package:data.table"), parent.frame()) # Dont Work
             eval(mc_new, asNamespace("data.table"), parent.frame())
-            # does not work:
-            # eval(data.table:::"[.data.table"(x, i, j, ...), parent.frame())
 
-            return(invisible(NULL))
-        } else {
-            x_dt = copy(x)
-            setattr(x_dt, "class", setdiff(class(x), "panel"))
+            return(invisible(TRUE))
+        } else if(any(!names(mc) %in% c("", "x", "i"))) {
+            # If any argument other than i is used => we dissolve the fixest panel
+
+            x_dt = data.table::copy(x)
+            data.table::setattr(x_dt, "class", setdiff(class(x), "fixest_panel"))
             mc_new$x = as.name('x_dt')
             res = eval(mc_new)
-            setattr(res, "class", c("fixest_panel", class(res)))
+            message("NOTE: The fixest panel is dissolved.")
+            return(res)
+        } else {
+            # Only i: OK
+
+            x_dt = data.table::copy(x)
+            data.table::setattr(x_dt, "class", setdiff(class(x), "fixest_panel"))
+            mc_new$x = as.name('x_dt')
+            res = eval(mc_new)
+            data.table::setattr(res, "class", c("fixest_panel", class(res)))
         }
 
     } else {
@@ -590,12 +894,32 @@ unpanel = function(x){
         id = info$id_sorted[info$order_inv]
         time = info$time_sorted[info$order_inv]
 
-        id = id[select]
-        time = time[select]
+        if(info$na_flag == FALSE){
+            id = id[select]
+            time = time[select]
+        } else{
+            # We don't forget to add the NAs!
+            id_tmp = time_tmp = rep(NA, info$is_na)
+            id_tmp[!info$is_na] = id
+            time_tmp[!info$is_na] = time
+            id = id_tmp[select]
+            time = time_tmp[select]
+        }
+
+        is_na = is.na(id) | is.na(time)
+        na_flag = FALSE
+        if(any(is_na)){
+            na_flag = TRUE
+            id = id[!is_na]
+            time = time[!is_na]
+        }
 
         order_it = order(id, time)
         order_inv = order(order_it)
-        attr(res, "panel_info") = list(order_it = order_it, order_inv=order_inv, id_sorted=id[order_it], time_sorted=time[order_it])
+
+        new_info = list(order_it = order_it, order_inv=order_inv, id_sorted=id[order_it], time_sorted=time[order_it], na_flag = na_flag)
+        if(na_flag) new_info$is_na = is_na
+        attr(res, "panel_info") = new_info
     }
 
     # if(is.null(dim(res))){

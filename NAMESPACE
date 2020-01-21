@@ -10,6 +10,8 @@ export(feglm.fit)
 # misc funs
 export(etable, esttex, esttable, collinearity, obs2remove, r2,
        did_estimate_yearly_effects, did_plot_yearly_effects, errbar, did_means)
+# Lag related
+export(panel, unpanel, f, l)
 # setters & getters
 exportPattern("^(s|g)etFixest")
 
@@ -20,6 +22,7 @@ S3method(summary, fixest.obs2remove)
 S3method(summary, fixest)
 export(summ) # alias for summary.fixest
 S3method(plot, fixest.fixef)
+S3method("[", fixest_panel) # Lag related
 
 # Stats methods
 S3method(nobs, fixest)
