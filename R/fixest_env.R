@@ -10,7 +10,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                        fixef, na_inf.rm = getFixest_na_inf.rm(), NL.start, lower, upper, NL.start.init,
                        offset, linear.start = 0, jacobian.method = "simple",
                        useHessian = TRUE, hessian.args = NULL, opt.control = list(),
-                      y, X, fixef_mat, panel.id,
+                       y, X, fixef_mat, panel.id,
                        nthreads = getFixest_nthreads(),
                        verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000,
                        deriv.iter = 5000, deriv.tol = 1e-4, glm.iter = 25, glm.tol = 1e-8,
@@ -58,7 +58,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
     #
     # Arguments control
-    main_args = c("fml", "data", "offset", "na_inf.rm", "fixef.tol", "fixef.iter", "fixef", "nthreads", "verbose", "warn", "notes", "combine.quick", "start")
+    main_args = c("fml", "data", "panel.id", "offset", "na_inf.rm", "fixef.tol", "fixef.iter", "fixef", "nthreads", "verbose", "warn", "notes", "combine.quick", "start")
     femlm_args = c("family", "theta.init", "linear.start", "opt.control", "deriv.tol", "deriv.iter")
     feNmlm_args = c("NL.fml", "NL.start", "lower", "upper", "NL.start.init", "jacobian.method", "useHessian", "hessian.args")
     feglm_args = c("family", "weights", "glm.iter", "glm.tol", "etastart", "mustart")
@@ -306,7 +306,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             } else {
                 # Later: automatic deduction using the first two clusters
                 if(missing(panel.id)){
-                    stop("To use lag/leads (with l()/f()): either provide the argument 'panel.id' with the panel identifier OR set your data as a panel with function panel().")
+                    stop("To use lag/leads (with l()/f()): either provide the argument 'panel.id' with the panel identifiers OR set your data as a panel with function panel().")
                 }
                 panel__meta__info = panel_setup(data, panel.id, from_fixest = TRUE)
             }
@@ -326,9 +326,11 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             dp = deparse(formula(FML, lhs = 1, rhs = 1))
             stop("The formula: ", dp[1], ifsingle(dp, "", "..."), ", is not valid:\n", gsub("^[^\n]+\n", "", info))
         }
-        # we check the cluster
+
+        # we check the FE part
         if(n_rhs == 2){
-            info = try(terms(formula(FML, lhs = 0, rhs = 2)), silent = TRUE)
+            # info = try(terms(formula(FML, lhs = 0, rhs = 2)), silent = TRUE)
+            info = terms_fixef(formula(FML, lhs = 0, rhs = 2))
             if("try-error" %in% class(info)){
                 dp = deparse(formula(FML, lhs = 0, rhs = 2))
                 stop("The fixed-effects part of the formula: ", dp[1], ifsingle(dp, "", "..."), ", is not valid:\n", gsub("^[^\n]+\n", "", info))
@@ -354,7 +356,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             } else {
                 stop("To add fixed-effects: either include them in argument 'fml' using a pipe ('|'), either use the argument 'fixef'. You cannot use both!")
             }
-        } else if(!missnull(fixef)){
+        } else if(!missing(fixef) && length(fixef) >= 1){
             isFixef = TRUE
 
             # We check the argument => character vector
@@ -1159,6 +1161,8 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             # we change the LHS variable
             lhs = lhs[-obs2remove_NA]
         }
+
+        # QUF setup ####
 
         Q = length(fixef_terms) # terms: contains FEs + slopes
         fixef_id = fixef_names = list()
