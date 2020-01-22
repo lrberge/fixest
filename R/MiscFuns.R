@@ -746,6 +746,139 @@ r2 = function(x, type = "all"){
 }
 
 
+#' Obtain various statistics from an estimation
+#'
+#' Set of functions to directly extract some commonly used statistics, like the p-value or the table of coefficients, from estimations. This was first implemented for \code{fixest} estimations, but has some support for other models.
+#'
+#' @param object An estimation. For example obtained from \code{\link[fixest]{feols}}.
+#' @param se [Fixest specific.] Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{White}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.
+#' @param cluster [Fixest specific.] Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1, "var2")]}, \code{cluster = c("var1, "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster).
+#' @param ... Other arguments to be passed to \code{summary}.
+#'
+#' @details
+#' This set of functions is primarily constructed for \code{fixest} estimations. Although it can work for non-\code{fixest} estimations, support for exotic estimation procedures that do not report standardized coefficient tables is highly limited.
+#'
+#' @return
+#' Returns a table of coefficients, with in rows the variables and four columns: the estimate, the standard-error, the t-statistic and the p-value.
+#'
+#' @examples
+#'
+#' # Some data and estimation
+#' data(trade)
+#' est = fepois(Euros ~ log(dist_km) | Origin^Product + Year, trade)
+#'
+#' #
+#' # Coeftable/se/tstat/pvalue
+#' #
+#'
+#' # Default is clustering along Origin^Product
+#' coeftable(est)
+#' se(est)
+#' tstat(est)
+#' pvalue(est)
+#'
+#' # Now with two-way clustered standard-errors
+#' #  and using ctable(), the alias to coeftable()
+#'
+#' ctable(est, cluster = ~Origin + Product)
+#' se(est, cluster = ~Origin + Product)
+#' pvalue(est, cluster = ~Origin + Product)
+#' tstat(est, cluster = ~Origin + Product)
+#'
+#' # Or you can cluster only once:
+#' est_sum = summary(est, cluster = ~Origin + Product)
+#' ctable(est_sum)
+#' se(est_sum)
+#' tstat(est_sum)
+#' pvalue(est_sum)
+#'
+#'
+#'
+coeftable = ctable = function(object, se, cluster, ...){
+    # We don't explicitely refer to the other arguments
+
+    # We make the same call to summary if necessary
+    mc = match.call()
+
+    IS_FIXEST = "fixest" %in% class(object)
+
+    if(!IS_FIXEST || any(!names(mc) %in% c("", "object")) || !"cov.scaled" %in% names(object)){
+        # We call summary
+        mc[[1]] = as.name("summary")
+        object = eval(mc, parent.frame())
+    }
+
+    # Let's find out the coefficients table
+    if(IS_FIXEST){
+        res = object$coeftable
+    } else {
+        list_mat = object[sapply(object, is.matrix)]
+
+        ok = FALSE
+        for(i in seq_along(list_mat)){
+            mat = list_mat[[i]]
+            if(!is.null(colnames(mat)) && any(grepl("(?i)(estimate|value|Pr\\()", colnames(mat)))){
+                ok = TRUE
+                res = mat
+            }
+        }
+
+        if(ok == FALSE){
+            stop("No coefficient table found. Was the 'object' really an estimation?")
+        }
+
+    }
+
+    res
+}
+
+#' @rdname coeftable
+"ctable"
+
+#' @describeIn coeftable Extracts the p-value of an estimation
+pvalue = function(object, se, cluster, ...){
+
+    mc = match.call()
+    mc[[1]] = as.name("coeftable")
+
+    mat = eval(mc, parent.frame())
+
+    if(ncol(mat) != 4){
+        stop("No appropriate coefficient table found (number of columns is ", ncol(mat), " instead of 4). You can investigate the problem using function ctable().")
+    }
+
+    mat[, 4]
+}
+
+#' @describeIn coeftable Extracts the t-statistics of an estimation
+tstat = function(object, se, cluster, ...){
+
+    mc = match.call()
+    mc[[1]] = as.name("coeftable")
+
+    mat = eval(mc, parent.frame())
+
+    if(ncol(mat) != 4){
+        stop("No appropriate coefficient table found (number of columns is ", ncol(mat), " instead of 4). You can investigate the problem using function ctable().")
+    }
+
+    mat[, 3]
+}
+
+#' @describeIn coeftable Extracts the standard-error of an estimation
+se = function(object, se, cluster, ...){
+
+    mc = match.call()
+    mc[[1]] = as.name("coeftable")
+
+    mat = eval(mc, parent.frame())
+
+    if(ncol(mat) != 4){
+        stop("No appropriate coefficient table found (number of columns is ", ncol(mat), " instead of 4). You can investigate the problem using function ctable().")
+    }
+
+    mat[, 2]
+}
 
 #' Summary method for cluster coefficients
 #'
@@ -2058,6 +2191,8 @@ did_estimate_yearly_effects = function(fml, data, treat_time, reference, returnD
 	if(!is.numeric(treat) || any(!treat %in% c(0, 1))){
 	    obs = head(which(!treat %in% c(0, 1)), 3)
 		stop("The treatment variable must be 0/1, with 1 repersenting the treated. The variable that you gave, ", treat_var, ", is not (e.g. observation", enumerate_items(obs, "s"), ".")
+	} else if(length(unique(treat)) == 1){
+	    stop("The treatment variable is equal to ", treat[1], " for all observations: there must be a problem!")
 	}
 
 	all_periods = sort(unique(time[!is.na(time)]))
@@ -2303,7 +2438,7 @@ did_plot_yearly_effects = function(object, x.shift = 0, w = 0.1, ci_level = 0.95
 #'
 #' errbar(est$coefficients, , x.shift = .2, add = TRUE, col = 2, bar.lty = 2, pch=15)
 #'
-errbar <- function(estimate, sd, ci_low, ci_top, x, x.shift = 0, w=0.1, ci_level = 0.95, style = c("bar", "interval", "tube"), add = FALSE, col = 1, bar.col = col, bar.lwd = par("lwd"), bar.lty, grid = TRUE, grid.par = list(lty=1), bar.join = FALSE, only.params = FALSE, ...){
+coefplot = errbar = function(estimate, sd, ci_low, ci_top, x, x.shift = 0, w=0.1, ci_level = 0.95, style = c("bar", "interval", "tube"), add = FALSE, col = 1, bar.col = col, bar.lwd = par("lwd"), bar.lty, grid = TRUE, grid.par = list(lty=1), bar.join = FALSE, only.params = FALSE, ...){
 	# creation de barres d'erreur
 	# 1 segment vertical de la taille de l'IC
 	# deux barres horizontales, a chaque bornes

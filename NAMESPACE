@@ -10,6 +10,7 @@ export(feglm.fit)
 # misc funs
 export(etable, esttex, esttable, collinearity, obs2remove, r2,
        did_estimate_yearly_effects, did_plot_yearly_effects, errbar, did_means)
+export(coeftable, ctable, se, tstat, pvalue)
 # Lag related
 export(panel, unpanel, f, l)
 # setters & getters
@@ -60,7 +61,7 @@ importFrom(stats, cor, dnorm, lm, model.matrix, nlminb, optim,
 			  pnorm, qnorm, as.formula, terms, var, sd, formula,
 			  nobs, AIC, BIC, update, predict, fitted, fitted.values,
 			  resid, residuals, logLik, coef, coefficients, lag,
-			  confint, vcov, na.omit, model.frame, "na.pass", poisson)
+			  confint, vcov, na.omit, model.frame, "na.pass", poisson, pt)
 
 importFrom(MASS, ginv)
 
