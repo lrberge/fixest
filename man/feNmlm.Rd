@@ -140,12 +140,6 @@ The over-dispersion parameter of the Negative Binomial family, theta, is capped 
 To use leads/lags of variables in the estimation, you can: i) either provide the argument \code{panel.id}, ii) either set you data set as a panel with the function \code{\link[fixest]{panel}}. Doing either of the two will give you acceess to the lagging functions \code{\link[fixest]{l}} and \code{\link[fixest]{f}}.
 
 You can provide several leads/lags at once: e.g. if your formula is equal to \code{f(y) ~ l(x, -1:1)}, it means that the dependent variable is equal to the lead of \code{y}, and you will have as explanatory variables the lead of \code{x1}, \code{x1} and the lag of \code{x1}. See the examples in function \code{\link[fixest]{l}} for more details.
-
-
- @seealso
-See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
-
-And other estimation methods: \code{\link[fixest]{femlm}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{fepois}}, \code{\link[fixest]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
 }
 
 \examples{
