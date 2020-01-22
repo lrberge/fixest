@@ -10,6 +10,9 @@
 #
 # -------------------------------------------------------------- #
 
+# Make sure data.table knows we know we're using it
+.datatable.aware = TRUE
+
 
 panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method = c("none", "first"), DATA_MISSING = FALSE, from_fixest = FALSE){
     # Function to setup the panel.
@@ -217,7 +220,8 @@ f = function(x, lead = 1, fill = NA){
 #' Produce lags or leads in the formulas of \code{fixest} estimations or when creating variables in a \code{\link[data.table]{data.table}}. The data must be set as a panel beforehand (either with the function \code{\link[fixest]{panel}} or with the argument \code{panel.id} in the estimation).
 #'
 #' @param x The variable.
-#' @param lag A vector of integers. In function \code{l} (resp. \code{f}), negative values lead to leads (resp. lags). This argument can be a vector when using it in fixest estimations. When creating variables in a \code{\link[data.table]{data.table}}, it **must** be of length one.
+#' @param lag A vector of integers giving the number of lags. Negative values lead to leads. This argument can be a vector when using it in fixest estimations. When creating variables in a \code{\link[data.table]{data.table}}, it **must** be of length one.
+#' @param lead A vector of integers giving the number of leads. Negative values lead to lags. This argument can be a vector when using it in fixest estimations. When creating variables in a \code{\link[data.table]{data.table}}, it **must** be of length one.
 #' @param fill A scalar, default is \code{NA}. How to fill the missing values due to the lag/lead? Note that in a \code{fixest} estimation, 'fill' must be numeric (not required when creating new variables).
 #'
 #' @return
@@ -315,23 +319,6 @@ l = function(x, lag = 1, fill = NA){
         } else {
             stop("Function l() (or f()) is only callable within 'fixest' estimations or within a variable creation with data.table (i.e. using ':=') where the data set is a 'fixest_panel' (obtained from panel()). Alternatively, you can use lag.formula().")
         }
-
-        # if(any(grepl("^.\\[\\.data\\.table", sys_calls))){
-        #     # this is a call from within data table => OK
-        #     # Getting the meta info is a bit tricky
-        #
-        #     qui  = which.max(grepl("^.\\[\\.data\\.table", sys_calls))
-        #     var = gsub("^[^\\(]+\\(|,.+", "", sys_calls[qui])
-        #     m = eval(parse(text = var), envir = sys.frames()[qui])
-        #
-        #     if(!"fixest_panel" %in% class(m)){
-        #         stop("You can use l() or f() only when the data set is of class 'fixest_panel', you can use function panel() to set it.")
-        #     }
-        #
-        #     meta_info = attr(m, "panel_info")
-        # } else {
-        #     stop("Function l() is only callable within 'fixest' estimations or within a variable creation with data.table where the data set is a fixest_panel (obtained from panel()).")
-        # }
     }
 
     # we get the observation id!
@@ -548,7 +535,7 @@ lag.formula = function(x, k = 1, data, time.step = "unitary", fill = NA, duplica
         existing_vars = names(data)
     } else {
         DATA_MISSING = TRUE
-        existing_vars = ls(parent.frame(2))
+        existing_vars = ls(parent.frame())
     }
 
     vars = all.vars(x)
@@ -689,7 +676,7 @@ panel = function(data, panel.id, time.step = "unitary", duplicate.method = c("no
 
     # R makes a shallow copy of data => need to do it differently with DT
 
-    if("data.table" %in% class(data) && isNamespaceLoaded("data.table")){
+    if("data.table" %in% class(data) && requireNamespace("data.table", quietly=TRUE)){
         res = data.table::copy(data)
         data.table::setattr(res, "panel_info", meta_info)
         data.table::setattr(res, "class", c("fixest_panel", "data.table", "data.frame"))
@@ -737,7 +724,7 @@ panel = function(data, panel.id, time.step = "unitary", duplicate.method = c("no
 #'
 unpanel = function(x){
 
-    if("data.table" %in% class(x) && isNamespaceLoaded("data.table")){
+    if("data.table" %in% class(x) && requireNamespace("data.table", quietly=TRUE)){
         data.table::setattr(x, "panel_info", NULL)
         data.table::setattr(x, "class", setdiff(class(x), "fixest_panel"))
 
@@ -749,23 +736,6 @@ unpanel = function(x){
 
     x
 }
-
-
-# "$.fixest_panel" = function(x, name){
-#     x[[name]]
-# }
-#
-# "[[.fixest_panel" = function(x, name){
-#     res = "[[.data.frame"(x, name)
-#     if(!is.null(res)){
-#         attr(res, "panel_info") = attr(x, "panel_info")
-#     }
-#
-#     class(res) = "fixest_panel_vector"
-#
-#     res
-# }
-
 
 
 #' Method to subselect from a \code{fixest_panel}
@@ -825,11 +795,13 @@ unpanel = function(x){
     info = attr(x, "panel_info")
     mc = match.call()
 
-    if("data.table" %in% class(x)){
+    IS_DT = FALSE
+    if("data.table" %in% class(x) && requireNamespace("data.table", quietly=TRUE)){
+        IS_DT = TRUE
         # data.table is really hard to handle....
         # Not very elegant... but that's life!
 
-        # When modifications are too risky, I dissolve the panel
+        # When modifications are too risky, I dissolve the
 
         mc_new = mc
         mc_new[[1]] = as.name('[')
@@ -855,36 +827,39 @@ unpanel = function(x){
             eval(mc_new, asNamespace("data.table"), parent.frame())
 
             return(invisible(TRUE))
-        } else if(any(!names(mc) %in% c("", "x", "i"))) {
-            # If any argument other than i is used => we dissolve the fixest panel
-
-            x_dt = data.table::copy(x)
-            data.table::setattr(x_dt, "class", setdiff(class(x), "fixest_panel"))
-            mc_new$x = as.name('x_dt')
-            res = eval(mc_new)
-            message("NOTE: The fixest panel is dissolved.")
-            return(res)
         } else {
-            # Only i: OK
 
             x_dt = data.table::copy(x)
             data.table::setattr(x_dt, "class", setdiff(class(x), "fixest_panel"))
             mc_new$x = as.name('x_dt')
-            res = eval(mc_new)
-            data.table::setattr(res, "class", c("fixest_panel", class(res)))
-        }
 
+            res = eval(mc_new)
+
+            if(any(!names(mc) %in% c("", "x", "i"))) {
+                # If any argument other than i is used => we dissolve the fixest panel
+                message("NOTE: The fixest panel is dissolved.")
+                return(res)
+            } else {
+                data.table::setattr(res, "class", c("fixest_panel", class(res)))
+            }
+
+        }
     } else {
         res = "[.data.frame"(x, i, j, ...)
     }
 
     if(!missing(i)){
-        if("data.table" %in% class(x)){
+        if(IS_DT){
             # data.table is quite a pain in the neck to handle...
 
-            x_dt[, xxxIDxxx := 1:.N]
-            mc_new$j = as.name("xxxIDxxx")
-            select = eval(mc_new)
+            data.table::set(x_dt, j = "x__ID__x", value = 1:nrow(x_dt))
+            # mc_new$j = as.name("xxxIDxxx")
+            # select = eval(mc_new)
+
+            # mc_new[[1]] = as.name('[.data.table')
+            # eval(mc_new, asNamespace("data.table"))
+
+            select = eval(parse(text = paste0("x_dt[", deparse_long(mc_new$i), "]")))$x__ID__x
 
         } else {
             select = i
