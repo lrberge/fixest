@@ -855,7 +855,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             if(any0W){
                 is0W = weights.value == 0
                 is0W = is0W & !is.na(is0W)
-                message_0W = paste0(numberFormatNormal(sum(is0W)), " observations removed because of 0-weight.")
+                message_0W = paste0(numberFormatNormal(sum(is0W)), " observation", plural(sum(is0W)), " removed because of 0-weight.")
             }
 
         } else if(!is.null(mc_origin$weights) && deparse_long(mc_origin$weights) != 'x[["weights"]]'){
@@ -1126,7 +1126,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
             if(anyNA_sample){
                 msg = msg_na_inf(ANY_NA, ANY_INF)
-                message_NA = paste0(numberFormatNormal(nbNA), " observations removed because of ", msg, " (Breakup: ", msgNA_y, msgNA_L, msgNA_NL, msgNA_cluster, msgNA_slope, msgNA_offset, msgNA_weight, ").")
+                message_NA = paste0(numberFormatNormal(nbNA), " observation", plural(nbNA), " removed because of ", msg, " (Breakup: ", msgNA_y, msgNA_L, msgNA_NL, msgNA_cluster, msgNA_slope, msgNA_offset, msgNA_weight, ").")
             }
 
             if(nbNA == nobs){
@@ -1301,7 +1301,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
             # Then the "Notes"
             nb_missing = sapply(fixef_removed, length)
-            message_cluster = paste0(paste0(nb_missing, collapse = "/"), " fixed-effect", ifelse(sum(nb_missing) == 1, "", "s"), " (", numberFormatNormal(length(obs2remove)), " observations) removed because of only ", ifelse(family=="logit", "zero (or only one)", "zero"), " outcomes.")
+            message_cluster = paste0(paste0(nb_missing, collapse = "/"), " fixed-effect", plural(sum(nb_missing)), " (", numberFormatNormal(length(obs2remove)), " observation", plural_len(obs2remove), ") removed because of only ", ifelse(family=="logit", "zero (or only one)", "zero"), " outcomes.")
 
             note = ifelse((anyNA_sample + any0W) > 0, "NOTES: ", "NOTE: ")
             if(notes) message(note, message_NA, ifelse(anyNA_sample, "\n       ", ""), message_0W, ifelse(any0W, "\n       ", ""), message_cluster)
@@ -1377,7 +1377,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             nbNA = sum(isNA_sample)
 
             if(anyNA_sample){
-                message_NA = paste0(numberFormatNormal(nbNA), " observations removed because of NA values (Breakup: ", msgNA_y, msgNA_L, msgNA_NL, msgNA_offset, msgNA_weight, ").")
+                message_NA = paste0(numberFormatNormal(nbNA), " observation", plural(nbNA), " removed because of NA values (Breakup: ", msgNA_y, msgNA_L, msgNA_NL, msgNA_offset, msgNA_weight, ").")
 
                 if(nbNA == nobs){
                     stop("All observations contain NAs. Estimation cannot be done. (Breakup: ", msgNA_y, msgNA_L, msgNA_NL, msgNA_cluster, msgNA_offset, msgNA_weight, ")")
