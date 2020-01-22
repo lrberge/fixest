@@ -245,7 +245,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' }
 #'
 #'
-summ <- summary.fixest <- function(object, se, cluster, dof = TRUE, exact_dof = FALSE, forceCovariance = FALSE, keepBounded = FALSE, ...){
+summary.fixest <- function(object, se, cluster, dof = TRUE, exact_dof = FALSE, forceCovariance = FALSE, keepBounded = FALSE, ...){
 	# computes the clustered SD and returns the modified vcov and coeftable
 
 	if(!is.null(object$onlyFixef)){
@@ -320,8 +320,17 @@ summ <- summary.fixest <- function(object, se, cluster, dof = TRUE, exact_dof = 
 	return(object)
 }
 
-#' @rdname summ
-"summary.fixest"
+#' @rdname summary.fixest
+"summ"
+
+summ = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, forceCovariance = FALSE, keepBounded = FALSE, ...){
+
+    # we reiterate the call
+    mc = match.call()
+    mc[[1]] = as.name("summary")
+
+    eval(mc, parent.frame())
+}
 
 
 #' Estimations table (export the results of multiples estimations to a DF or to Latex)
@@ -358,7 +367,7 @@ summ <- summary.fixest <- function(object, se, cluster, dof = TRUE, exact_dof = 
 #'
 #' The function \code{esttable} is equivalent to the function \code{etable} with argument \code{tex = FALSE}.
 #'
-#' @section Arguments drop and order
+#' @section Arguments drop and order:
 #' The arguments \code{drop} and \code{order} use regular expressions. If you are aware of regular expressions, I urge you to learn it, since it is an extremely powerful way to manipulate character strings (and it exists across most programming languages).
 #'
 #' For example drop = "Wind" would drop any variable whose name contains "Wind". Note that variables such as "Temp:Wind" or "StrongWind" do contain "Wind", so would be dropped. To drop only the variable named "Wind", you need to use \code{drop = "^Wind$"} (with "^" meaning beginning, resp. "$" meaning end, of the string => this is the language of regular expressions).
@@ -638,6 +647,7 @@ r2 = function(x, type = "all"){
 	}
 
 	# type_allowed next => ("count", "acount") ?
+    dict_names = c("sq.cor" = "Squared Correlation", "r2" = "R2", "ar2" = "Adjusted R2", "pr2" = "Pseudo R2", "apr2" = "Adjusted Pseudo R2", "wr2" = "Within R2", "war2" = "Within Adjusted R2", "wpr2" = "Within Pseudo R2", "wapr2" = "Within Adjusted Pseudo R2")
 	type_allowed = c("sq.cor", "r2", "ar2", "pr2", "apr2", "wr2", "war2", "wpr2", "wapr2")
 	if("all" %in% type){
 		type_all = type_allowed
@@ -649,7 +659,7 @@ r2 = function(x, type = "all"){
 		}
 	}
 
-	is_ols = deparse(x$call[[1]]) == "feols"
+	is_ols = x$method == "feols"
 	isCluster = "fixef_vars" %in% names(x)
 	n = nobs(x)
 
@@ -5148,6 +5158,16 @@ extract_pipe = function(fml){
     }
 
     list(fml=fml_new, pipe=pipe)
+}
+
+plural = function(x){
+    # adds s if x > 1
+    ifelse(x > 1, "s", "")
+}
+
+plural_len = function(x){
+    # adds s if length(x) > 1
+    ifelse(length(x) > 1, "s", "")
 }
 
 #### ................. ####
