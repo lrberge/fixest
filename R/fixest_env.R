@@ -262,6 +262,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     # Formatting data ####
     #
 
+    isPanel = FALSE
     if(isFit){
         isFixef = !missnull(fixef_mat)
     } else {
@@ -298,11 +299,17 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         # Panel setup
         #
 
-        isPanel = FALSE
         if(check_lag(fml)){
+            panel.info = NULL
             isPanel = TRUE
             if(!is.null(attr(data, "panel_info"))){
+                if(!missing(panel.id)){
+                    warning("The argument 'panel.id' is provided but argument 'data' is already a 'fixest_panel' object. Thus the argument 'panel.id' is ignored.", immediate. = TRUE)
+                }
+
                 panel__meta__info = attr(data, "panel_info")
+                panel.id = panel__meta__info$panel.id
+                panel.info = panel__meta__info$call
             } else {
                 # Later: automatic deduction using the first two clusters
                 if(missing(panel.id)){
@@ -329,7 +336,6 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
         # we check the FE part
         if(n_rhs == 2){
-            # info = try(terms(formula(FML, lhs = 0, rhs = 2)), silent = TRUE)
             info = terms_fixef(formula(FML, lhs = 0, rhs = 2))
             if("try-error" %in% class(info)){
                 dp = deparse(formula(FML, lhs = 0, rhs = 2))
@@ -340,7 +346,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         if(isPanel){
             fml = try(rewrite_fml(fml), silent = TRUE)
             if("try-error" %in% class(fml)){
-                stop("Problem in the formula:\n", gsub("_expand", "", fml))
+                stop("Problem in the formula: ", gsub("_expand", "", fml))
             }
             FML = Formula::Formula(fml)
         }
@@ -472,6 +478,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     # Controls and setting of the linear part:
     #
 
+    IS_INTER = FALSE
     if(isFit){
 
         isLinear = FALSE
@@ -525,7 +532,20 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
     } else {
         isLinear = FALSE
-        linear.varnames = all.vars(fml[[3]])
+
+        if(grepl("[^:]::[^:]", deparse_long(fml[[3]]))){
+            IS_INTER = TRUE
+
+            options("fixest_interaction_ref" = NULL)
+
+            new_fml = try(interact_fml(fml), silent = TRUE)
+            if("try-error" %in% class(new_fml)){
+                stop("Error in the right-hand-side of the formula: ", new_fml)
+            }
+            linear.varnames = all.vars(new_fml[[3]])
+        } else {
+            linear.varnames = all.vars(fml[[3]])
+        }
 
         if(length(linear.varnames) > 0 || attr(terms(fml), "intercept") == 1){
             isLinear = TRUE
@@ -549,28 +569,41 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             # We construct the linear matrix
             #
 
-            # we look at whether there are factor-like variables to be evaluated
-            # if there is factors => model.matrix
-            types = sapply(data[, dataNames %in% linear.varnames, FALSE], class)
-            if(length(types) == 0 || grepl("factor", deparse_long(linear.fml)) || any(types %in% c("character", "factor"))){
-                useModel.matrix = TRUE
-            } else {
-                useModel.matrix = FALSE
+            linear.mat = try(fixest_model_matrix(fml, data), silent = TRUE)
+            if("try-error" %in% class(linear.mat)){
+                stop("Evaluation of the right-hand-side of the formula raises an error: ", linear.mat)
             }
 
-            if(useModel.matrix){
-                # linear.mat = stats::model.matrix(linear.fml, data)
-                # to catch the NAs, model.frame needs to be used....
-                linear.mat = try(stats::model.matrix(linear.fml, stats::model.frame(linear.fml, data, na.action=na.pass)), silent = TRUE)
-                if("try-error" %in% class(linear.mat)){
-                    stop("Evaluation of the right-hand-side of the formula raises and error: \n", linear.mat)
-                }
-            } else {
-                linear.mat = try(prepare_matrix(linear.fml, data), silent = TRUE)
-                if("try-error" %in% class(linear.mat)){
-                    stop("Evaluation of the right-hand-side of the formula raises and error: \n", linear.mat)
-                }
+            useModel.matrix = attr(linear.mat, "useModel.matrix")
+
+            # Interaction information
+            if(IS_INTER){
+                interaction.info = getOption("fixest_interaction_ref")
             }
+
+            # # we look at whether there are factor-like variables to be evaluated
+            # # if there is factors => model.matrix
+            # types = sapply(data[, dataNames %in% linear.varnames, FALSE], class)
+            # if(length(types) == 0 || grepl("factor", deparse_long(linear.fml)) || any(types %in% c("character", "factor"))){
+            #     useModel.matrix = TRUE
+            # } else {
+            #     useModel.matrix = FALSE
+            # }
+            #
+            # if(useModel.matrix){
+            #     # linear.mat = stats::model.matrix(linear.fml, data)
+            #     # to catch the NAs, model.frame needs to be used....
+            #     linear.mat = try(stats::model.matrix(linear.fml, stats::model.frame(linear.fml, data, na.action=na.pass)), silent = TRUE)
+            #     if("try-error" %in% class(linear.mat)){
+            #         stop("Evaluation of the right-hand-side of the formula raises an error: \n", linear.mat)
+            #     }
+            # } else {
+            #     linear.mat = try(prepare_matrix(linear.fml, data), silent = TRUE)
+            #     if("try-error" %in% class(linear.mat)){
+            #         stop("Evaluation of the right-hand-side of the formula raises an error: \n", linear.mat)
+            #     }
+            # }
+
         }
 
     }
@@ -1170,6 +1203,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         obs2remove = fixef_sizes = c()
         fixef_removed = list()
         slope_variables = list()
+
         for(i in 1:Q){
 
             check_remove = TRUE
@@ -1238,7 +1272,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             # I don't do fixef_removed[[i]] = stg because of the slopes
             # if no slope, this is identical to fixef_removed[[i]] = stg
             # if slope: then length(fixef_removed) ends up being identical to length(fixef_vars)
-            #    (remember taht fixef_vars is the unique of slope_fe)
+            #    (remember that fixef_vars is the unique of slope_fe)
             if(length(qui) > 0){
                 # We first delete the data:
                 # fixef_removed[[i]] = thisNames[qui]
@@ -1337,11 +1371,16 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             index = 1:Q
         }
 
+
         fixef_id_res = list()
         for(i in index){
             dum = fixef_id[[i]]
             attr(dum, "fixef_names") = as.character(fixef_names[[i]])
-            fixef_id_res[[fixef_vars[i]]] = dum
+            if(isSlope){
+                fixef_id_res[[slope_fe[i]]] = dum
+            } else {
+                fixef_id_res[[fixef_vars[i]]] = dum
+            }
         }
 
         fixef_sizes_res = fixef_sizes[index]
@@ -1351,7 +1390,9 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         # We re-order the clusters
         #
 
+        IS_REORDER = FALSE
         if(any(fixef_sizes != sort(fixef_sizes, decreasing = TRUE))){
+            IS_REORDER = TRUE
             # FE with the most cases first (limits precision problems)
 
             new_order = order(fixef_sizes, decreasing = TRUE)
@@ -1420,7 +1461,8 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         if(isLinear) {
             if(useModel.matrix){
                 # means there are factors
-                linear.mat = stats::model.matrix(linear.fml, data)
+                # linear.mat = stats::model.matrix(linear.fml, data)
+                linear.mat = fixest_model_matrix(linear.fml, data)
             } else {
                 linear.mat = linear.mat[-obs2remove, , drop = FALSE]
             }
@@ -2081,6 +2123,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             # varying slopes in svl dimensions
             sv = list()
             slope_vars_unik = slope_vars[!is.na(slope_vars)]
+            if(IS_REORDER) slope_variables = slope_variables[order(new_order)]
             for(var in slope_vars_unik){
                 sv[[var]] = slope_variables[[which.max(slope_vars == var)]]
             }
@@ -2112,6 +2155,19 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     # We save lhs in case of feglm, for later within-r2 evaluation
     if(origin_type == "feglm" && isFixef){
         res$y = lhs
+    }
+
+    # Panel information
+    if(isPanel){
+        res$panel.id = panel.id
+        if(!is.null(panel.info)){
+            res$panel.info = panel.info
+        }
+    }
+
+    # Interaction information
+    if(IS_INTER){
+        res$interaction.info = interaction.info
     }
 
     assign("res", res, env)

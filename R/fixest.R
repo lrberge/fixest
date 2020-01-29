@@ -7,11 +7,13 @@
 #'
 #' The core functions are: \code{\link[fixest]{feols}}, \code{\link[fixest]{feglm}} and \code{\link[fixest]{femlm}} to estimate, respectively, linear models, generalized linear models and maximum likelihood models with multiple fixed-effects. The function \code{\link[fixest]{feNmlm}} allows the inclusion of non-linear in parameters right hand sides. Finally \code{\link[fixest]{fepois}} and \code{\link[fixest]{fenegbin}} are shorthands to estimate Poisson and Negative Binomial models.
 #'
-#' Note that the functions \code{\link[fixest]{feglm}} and \code{\link[fixest]{femlm}} provide the same results when using the same families but differ in that the latter is a direct maximum likelihood optimization (so the two can really have different convergence rate).
+#' Note that the functions \code{\link[fixest]{feglm}} and \code{\link[fixest]{femlm}} provide the same results when using the same families but differ in that the latter is a direct maximum likelihood optimization (so the two can really have different convergence rates).
 #'
 #' Several features are also included such as the possibility to easily compute different types of standard-errors (including multi-way clustering).
 #'
-#' It is possible to compare the results of several estimations by using the function \code{\link[fixest]{esttable}}, and to export them to Latex using \code{\link[fixest]{esttex}}.
+#' It is possible to compare the results of several estimations by using the function \code{\link[fixest]{etable}}, which also allows to export them to Latex.
+#'
+#' You can plot the coefficients and confidence intervals of estimations easily with the function \code{\link[fixest]{coefplot}}. This function also offers a specific layout for interactions.
 #'
 #' @references
 #' Berg\\'e, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (\url{https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13}).

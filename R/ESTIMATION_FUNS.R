@@ -40,9 +40,17 @@
 #'
 #' You can provide several leads/lags at once: e.g. if your formula is equal to \code{f(y) ~ l(x, -1:1)}, it means that the dependent variable is equal to the lead of \code{y}, and you will have as explanatory variables the lead of \code{x1}, \code{x1} and the lag of \code{x1}. See the examples in function \code{\link[fixest]{l}} for more details.
 #'
+#' @section Interactions:
+#'
+#' You can interact a variable with a "factor-like" variable by using the syntax \code{var::fe(ref)}, where \code{fe} is the variable to be interacted with and the argument \code{ref} is a value of \code{fe} taken as a reference.
+#'
+#' The full syntax is: \code{var::fe(ref, confirm)}. You have two arguments, \code{ref} and \code{confirm}, the two are optional. The argument \code{confirm} is there to avoid mistakenly estimating a model with (too) many variables. If the variable \code{fe} takes over 100 different values, then you have to add the argument \code{confirm = TRUE}. It is important to note that *if you do not care about the standard-errors of the interactions*, then you can add interactions in the fixed-effects part of the formula (using the syntax fe[[var]], as explained in the section \dQuote{Varying slopes}).
+#'
+#' Introducing interactions with this syntax leads to a different display of the interacted values in \code{\link[fixest]{etable}} and offers a special representation of the interacted coefficients in the function \code{\link[fixest]{coefplot}}. See examples.
+#'
 #'
 #' @seealso
-#' See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
+#' See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations. For plotting coefficients: see \code{\link[fixest]{coefplot}}.
 #'
 #' And other estimation methods: \code{\link[fixest]{femlm}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{fepois}}, \code{\link[fixest]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
 #'
@@ -59,27 +67,56 @@
 #'
 #' @examples
 #'
+#' #
 #' # Just one set of fixed-effects:
+#' #
+#'
 #' res = feols(Sepal.Length ~ Sepal.Width + Petal.Length | Species, iris)
 #' summary(res)
 #'
-#' # Now with varying slopes:
+#' #
+#' # Varying slopes:
+#' #
+#'
 #' res = feols(Sepal.Length ~ Petal.Length | Species[Sepal.Width], iris)
 #' summary(res)
 #'
-#' # Combining the FEs
+#' #
+#' # Combining the FEs:
+#' #
+#'
 #' base = iris
 #' base$fe_2 = rep(1:10, 15)
 #' res_comb = feols(Sepal.Length ~ Petal.Length | Species^fe_2, base)
 #' summary(res_comb)
 #' fixef(res_comb)[[1]]
 #'
-#' # Using leads/lags
+#' #
+#' # Using leads/lags:
+#' #
+#'
 #' data(base_did)
 #' # We need to set up the panel with the arg. panel.id
 #' est1 = feols(y~l(x1, 0:1), base_did, panel.id = ~id+period)
 #' est2 = feols(f(y)~l(x1, -1:1), base_did, panel.id = ~id+period)
 #' etable(est1, est2, order = "f", drop="Int")
+#'
+#' #
+#' # Using interactions:
+#' #
+#' \dontrun{
+#'
+#' "::" = function(a, b) NULL
+#'
+#' data(base_did)
+#' # We interact the variable 'period' with the variable 'treat'
+#' #  using the var::fe(ref) notation
+#' est_did = feols(y ~ x1 + treat::period(5) | id+period, base_did)
+#'
+#' # Now we can plot the result of the interaction with coefplot
+#' coefplot(est_did)
+#' # You have many more example in coefplot help
+#' }
 #'
 feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, fixef.iter = 2000,
                  na_inf.rm = getFixest_na_inf.rm(), nthreads = getFixest_nthreads(),
@@ -370,6 +407,7 @@ ols_fit = function(y, X, w, correct_0w = FALSE, nthreads){
 #' @inheritSection feols Combining the fixed-effects
 #' @inheritSection feols Varying slopes
 #' @inheritSection feols Lagging variables
+#' @inheritSection feols Interactions
 #'
 #' @param family Family to be used for the estimation. Defaults to \code{poisson()}. See \code{\link[stats]{family}} for details of family functions.
 #' @param start Starting values for the coefficients. Can be: i) a numeric of length 1 (e.g. \code{start = 0}), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients). Default is missing.
@@ -935,6 +973,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
 #' @inherit feNmlm return details
 #' @inheritSection feols Combining the fixed-effects
 #' @inheritSection feols Lagging variables
+#' @inheritSection feols Interactions
 #'
 #' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, you can 1) either insert them in this formula using a pipe (e.g. \code{fml = z~x+y|cluster1+cluster2}), or 2) either use the argument \code{fixef}.
 #' @param start Starting values for the coefficients. Can be: i) a numeric of length 1 (e.g. \code{start = 0}, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).
@@ -1060,6 +1099,7 @@ fepois = function(fml, data, offset, weights, panel.id, start = NULL, etastart =
 #'
 #' @inheritParams panel
 #' @inheritSection feols Lagging variables
+#' @inheritSection feols Interactions
 #'
 #' @param fml A formula. This formula gives the linear formula to be estimated (it is similar to a \code{lm} formula), for example: \code{fml = z~x+y}. To include cluster variables, you can 1) either insert them in this formula using a pipe (e.g. \code{fml = z~x+y|cluster1+cluster2}), or 2) either use the argument \code{cluster}. To include a non-linear in parameters element, you must use the argment \code{NL.fml}.
 #' @param start Starting values for the coefficients in the linear part (for the non-linear part, use NL.start). Can be: i) a numeric of length 1 (e.g. \code{start = 0}, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).

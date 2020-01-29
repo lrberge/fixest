@@ -291,29 +291,46 @@ The function `^` does the same as `paste0(species, "_", fe)` but is more conveni
 fixef(est_comb)[[1]]
 ```
 
-## Yearly treatment effect
+## Adding interactions: Yearly treatment effect
 
-In some difference-in-difference analyses, it is often useful not only to have the total treatment effect but to trace the evolution of the treatment. Package `fixest` offers a simple tool to do just that. 
-Let's take an example:
+The package `fixest` offers a special tool to add interactions in estimations. You can simply add `var::fe(ref)` in the formula, and the variable `var` will be interacted with the values taken by `fe`, with the argument `ref` specifying a reference value of `fe`. Using this syntax opens up a special treatment of the results when using the function `etable` and `coefplot`, as will be shown.
 
-```{r}
+In some difference-in-difference analyses, it is often useful not only to have the total treatment effect but to trace the evolution of the treatment. Let's take an example. In the following data base, some persons (identified with the variable `id`) receive a treatment and others not, represented by the variable `treat`. The treatment takes effect from `period` 6 onwards.
+
+```{r, echo = FALSE}
+# "::" = function(a, b) NULL
+```
+
+
+```{r, eval = FALSE}
 # Sample data illustrating the DiD
 data(base_did)
 head(base_did)
-# Estimation of yearly effect (they are automatically added)
+# Estimation of yearly effect
 # We also add individual/time fixed-effects:
-est_did = did_estimate_yearly_effects(y ~ x1 | id + period, base_did,
-                                      treat_time = ~treat+period, reference = 5)
+est_did = feols(y ~ x1 + treat::period(5) | id + period, base_did)
 est_did
 ```
 
-In the example above, we must provide the treatment and time identifiers in argument `treat_time`, we also must provide a reference period (in this case 5). A treatment variable is added for each period (but the reference), and then a regular OLS estimation is performed with `feols`. You can change the estimation method with the argument `estfun`.
+```{r, echo = FALSE}
+# Sample data illustrating the DiD
+data(base_did)
+head(base_did)
+# Estimation of yearly effect
+# We also add individual/time fixed-effects:
+est_did = eval(parse(text = "feols(y ~ x1 + treat::period(5) | id + period, base_did)"))
+est_did
+```
 
-Now to display the yearly treatment effects on a graph:
+In the example above, we create the interaction between the variable `treat` and the periods using the syntax `var::fe(ref)` (here `treat::period(5)`) with, in parenthesis, the reference. (Note that we need a reference otherwise, there is a collinearity problem because of the fixed-effect `id`.)
+
+Now to display the yearly treatment effects on a graph, we can use the function `coefplot`:
 
 ```{r, fig.width=7}
-did_plot_yearly_effects(est_did)
+coefplot(est_did)
 ```
+
+The function `coefplot` detects that the results contain interactions and plot the appropriate graph. In case you wanted to display al the coefficients, including \code{x1}, you can use the argument \code{only.inter = FALSE}. 
 
 ## Lagging variables
 

@@ -69,6 +69,8 @@ panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method =
         time = eval(parse(text = var_id_time[2]), data)
     }
 
+    panel.id = as.formula(paste0("~", var_id_time[1], "+", var_id_time[2]))
+
     # copy for later (in duplicates)
     id_origin = id
     time_origin = time
@@ -203,7 +205,7 @@ panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method =
         }
     }
 
-    res = list(order_it = order_it, order_inv = order_inv, id_sorted = id_sorted, time_sorted = time_sorted, na_flag = na_flag)
+    res = list(order_it = order_it, order_inv = order_inv, id_sorted = id_sorted, time_sorted = time_sorted, na_flag = na_flag, panel.id = panel.id)
     if(na_flag) res$is_na = is_na
     res
 }
@@ -264,7 +266,7 @@ l = function(x, lag = 1, fill = NA){
 
     # To improve => you don't wanna check all frames, only the relevant ones
     from_fixest = FALSE
-    for(where in 1:5){
+    for(where in 1:min(6, sys.nframe())){
         if(exists("panel__meta__info", parent.frame(where))){
             from_fixest = TRUE
             meta_info = get("panel__meta__info", parent.frame(where))
@@ -672,7 +674,10 @@ panel = function(data, panel.id, time.step = "unitary", duplicate.method = c("no
         stop("Argument 'data' must be a data.frame.")
     }
 
+    mc = match.call()
+
     meta_info = panel_setup(data, panel.id = panel.id, time.step = time.step, duplicate.method = duplicate.method)
+    meta_info$call = mc
 
     # R makes a shallow copy of data => need to do it differently with DT
 
@@ -853,12 +858,6 @@ unpanel = function(x){
             # data.table is quite a pain in the neck to handle...
 
             data.table::set(x_dt, j = "x__ID__x", value = 1:nrow(x_dt))
-            # mc_new$j = as.name("xxxIDxxx")
-            # select = eval(mc_new)
-
-            # mc_new[[1]] = as.name('[.data.table')
-            # eval(mc_new, asNamespace("data.table"))
-
             select = eval(parse(text = paste0("x_dt[", deparse_long(mc_new$i), "]")))$x__ID__x
 
         } else {
@@ -892,7 +891,7 @@ unpanel = function(x){
         order_it = order(id, time)
         order_inv = order(order_it)
 
-        new_info = list(order_it = order_it, order_inv=order_inv, id_sorted=id[order_it], time_sorted=time[order_it], na_flag = na_flag)
+        new_info = list(order_it = order_it, order_inv=order_inv, id_sorted=id[order_it], time_sorted=time[order_it], na_flag = na_flag, panel.id = info$panel.id, call = info$call)
         if(na_flag) new_info$is_na = is_na
         attr(res, "panel_info") = new_info
     }

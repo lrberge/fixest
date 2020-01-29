@@ -359,7 +359,7 @@ summ = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, forceCovaria
 #' @param family Logical, default is missing. Whether to display the families of the models. By default this line is displayed when at least two models are from different families.
 #' @param keepFactors Logical, default is \code{TRUE}. If \code{FALSE}, then factor variables are displayed as fixed-effects and no coefficient is shown.
 #' @param powerBelow (Tex only.) Integer, default is -5. A coefficient whose value is below \code{10**(powerBelow+1)} is written with a power in Latex. For example \code{0.0000456} would be written \code{4.56$\\times 10^{-5}$} by default. Setting \code{powerBelow = -6} would lead to \code{0.00004} in Latex.
-#' @param interaction.combine (Tex only.) Character scalar, defaults to \code{" $\\times$ "}. When the estimation contains interactions and one of the variables has an alias, then the names of all interaction variables with an alias are changed and then combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind $\\times$ Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.
+#' @param interaction.combine (Tex only.) Character scalar, defaults to \code{" $\\times$ "}. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind $\\times$ Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.
 #' @param depvar (Data frame only.) Logical, default is missing. Whether a first line containing the dependent variables should be shown. By default, the dependent variables are shown only if they differ across models or if the argumen \code{file} is not missing.
 #'
 #' @details
@@ -802,7 +802,7 @@ coeftable = ctable = function(object, se, cluster, ...){
 
     IS_FIXEST = "fixest" %in% class(object)
 
-    if(!IS_FIXEST || any(!names(mc) %in% c("", "object")) || !"cov.scaled" %in% names(object)){
+    if(!any(grepl("summary", class(object))) && (!IS_FIXEST || any(!names(mc) %in% c("", "object")) || !"cov.scaled" %in% names(object))){
         # We call summary
         mc[[1]] = as.name("summary")
         object = eval(mc, parent.frame())
@@ -847,7 +847,11 @@ pvalue = function(object, se, cluster, ...){
         stop("No appropriate coefficient table found (number of columns is ", ncol(mat), " instead of 4). You can investigate the problem using function ctable().")
     }
 
-    mat[, 4]
+    res = mat[, 4]
+    if(is.null(names(res))) {
+        names(res) = rownames(mat)
+    }
+    res
 }
 
 #' @describeIn coeftable Extracts the t-statistics of an estimation
@@ -862,7 +866,11 @@ tstat = function(object, se, cluster, ...){
         stop("No appropriate coefficient table found (number of columns is ", ncol(mat), " instead of 4). You can investigate the problem using function ctable().")
     }
 
-    mat[, 3]
+    res = mat[, 3]
+    if(is.null(names(res))) {
+        names(res) = rownames(mat)
+    }
+    res
 }
 
 #' @describeIn coeftable Extracts the standard-error of an estimation
@@ -877,7 +885,11 @@ se = function(object, se, cluster, ...){
         stop("No appropriate coefficient table found (number of columns is ", ncol(mat), " instead of 4). You can investigate the problem using function ctable().")
     }
 
-    mat[, 2]
+    res = mat[, 2]
+    if(is.null(names(res))) {
+        names(res) = rownames(mat)
+    }
+    res
 }
 
 #' Summary method for cluster coefficients
@@ -1667,33 +1679,79 @@ collinearity = function(x, verbose){
     }
 
 	linear_fml = formula(Formula(formula(x, "linear")), lhs=0, rhs=1)
-	isLinear = length(all.vars(linear_fml)) > 0
+
+	rhs_fml = formula(Formula(formula(x, "linear")), lhs = 1, rhs = 1)
+	if(grepl("[^:]::[^:]", deparse_long(rhs_fml[[3]]))){
+	    new_fml = interact_fml(rhs_fml)
+	    linear.varnames = all.vars(new_fml[[3]])
+	} else {
+	    linear.varnames = all.vars(rhs_fml[[3]])
+	}
+	isLinear = length(linear.varnames) > 0
+
 	NL_fml = x$NL.fml
 	isNL = !is.null(NL_fml)
 	coef = x$coefficients
 
 	# Getting the data
 	data = NULL
-	try(data <- eval(x$call$data, parent.frame()))
+	dataName = x$call$data
+	try(data <- eval(dataName, parent.frame()))
 
 	if(is.null(data)){
-		dataName = x$call$data
 		stop("To apply function 'collinearity', we fetch the original database in the parent.frame -- but it doesn't seem to be there anymore (btw it was ", deparse_long(dataName), ").")
 	}
 
-	if(!is.null(x$obsRemoved)){
-		data = data[-x$obsRemoved, ]
+	if(is.matrix(data)){
+	    data = as.data.frame(data)
+	} else {
+	    class(data) = "data.frame"
 	}
 
 	if(isFE){
 		linear_fml = update(linear_fml, ~ . + 1)
 	}
 
-	if(isLinear || isCluster || "(Intercept)" %in% names(coef)){
-		linear.matrix = model.matrix(linear_fml, data)
+	# Panel setup
+	if(check_lag(linear_fml)){
+	    if(!is.null(x$panel.info)){
+	        if(is.null(attr(data, "panel_info"))){
+	            # We try to recreate the panel
+	            if(any(!names(x$panel.info) %in% c("", "data", "panel.id"))){
+	                # This was NOT a standard panel creation
+	                stop("The original data set was a fixest_panel, now it isn't any more. Please restore the original data to a panel to perform the collinearity check. NOTA: the original call to panel was:\n", deparse_long(x$panel.info))
+	            } else {
+	                panel__meta__info = panel_setup(data, x$panel.id, from_fixest = TRUE)
+	            }
+	        } else {
+	            panel__meta__info = attr(data, "panel_info")
+	        }
+	    } else {
+	        panel__meta__info = panel_setup(data, x$panel.id, from_fixest = TRUE)
+	    }
 	}
 
-	if(isLinear && isCluster){
+	if(isLinear || isCluster || "(Intercept)" %in% names(coef)){
+		# linear.matrix = model.matrix(linear_fml, data)
+		linear.matrix = fixest_model_matrix(rhs_fml, data)
+	}
+
+	if(!is.null(x$obsRemoved)){
+	    linear.matrix = linear.matrix[-x$obsRemoved, ]
+	    # We do that to drop interaction variables that should not be there any more
+	    # if factors with only NA values
+	    varkeep = intersect(names(x$coefficients), colnames(linear.matrix))
+	    linear.matrix = linear.matrix[, varkeep]
+	}
+
+	if(isLinear){
+	    # We center and scale to have something comparable across data sets
+	    first_row = linear.matrix[1, ]
+	    linear.matrix = scale(linear.matrix, center = FALSE, scale = TRUE)
+	    # The constants => we set it to 1
+	    constant_id = apply(linear.matrix, 2, anyNA)
+	    constant_value = first_row[constant_id]
+	    linear.matrix[is.na(linear.matrix)] = 1
 	    linear_mat_noIntercept = linear.matrix[, -1, drop = FALSE]
 	}
 
@@ -1770,30 +1828,34 @@ collinearity = function(x, verbose){
 	#
 
 	if(isLinear){
-	    if(isFE){
-	        # Constant: not OK with FE
-	        K = ncol(linear_mat_noIntercept)
-	        is_const = logical(K)
-	        for(k in 1:K){
-	            is_const[k] = cpp_isConstant(linear_mat_noIntercept[, k])
-	        }
 
-	        if(any(is_const)){
-	            var_problem = colnames(linear_mat_noIntercept)[is_const]
-	            message = paste0("Variable", enumerate_items(var_problem, "s.is"), " constant, thus collinear with the fixed-effects.")
+	    if(isFE){
+	        if(any(constant_id[-1])){
+	            # var_problem = colnames(linear_mat_noIntercept)[is_const]
+	            var_problem = colnames(linear_mat_noIntercept)[constant_id[-1]]
+	            message = paste0("Variable", enumerate_items(var_problem, "s.is.quote"), " constant, thus collinear with the fixed-effects.")
 	            print(message)
 	            return(invisible(message))
 	        }
 
 	    } else {
-	        # constant and equal to 0
-	        sum_all = colSums(abs(linear.matrix))
-	        if(any(sum_all == 0)){
-	            var_problem = colnames(linear.matrix)[sum_all == 0]
-	            message = paste0("Variable", enumerate_items(var_problem, "s.is"), " constant and equal to 0.")
 
+	        isIntercept = attr(terms(x$fml),"intercept")
+
+	        if(isIntercept && any(constant_id[-1])){
+	            var_problem = colnames(linear_mat_noIntercept)[constant_id[-1]]
+	            message = paste0("Variable", enumerate_items(var_problem, "s.is.quote"), " constant, thus collinear with the intercept.")
 	            print(message)
 	            return(invisible(message))
+	        }
+
+	        if(any(constant_value == 0)){
+	            # constant and equal to 0
+    	        var_problem = colnames(linear.matrix)[first_row == 0 & constant_id]
+    	        message = paste0("Variable", enumerate_items(var_problem, "s.is.quote"), " constant and equal to 0.")
+
+    	        print(message)
+    	        return(invisible(message))
 	        }
 	    }
 	}
@@ -1808,23 +1870,20 @@ collinearity = function(x, verbose){
 			ccat(".")
 			dum = cluster[[q]]
 			k = max(dum)
+
 			value = cpp_tapply_sum(Q = k, x = linear_mat_noIntercept, dum = dum)
 			nb_per_cluster = cpp_table(Q = k, dum = dum)
 
 			# residuals of the linear projection on the cluster space
 			residuals = linear_mat_noIntercept - (value/nb_per_cluster)[dum, ]
 
-			sum_residuals = colSums(abs(residuals))
+			max_residuals = apply(abs(residuals), 2, max)
 
-			if(any(sum_residuals < 1e-4)){
+			if(any(max_residuals < 1e-6)){
 				ccat("\n")
 				varnames = colnames(linear_mat_noIntercept)
-				collin_var = varnames[sum_residuals < 1e-4]
-				if(length(collin_var) == 1){
-					message = paste0("Variable '", collin_var, "' is collinear with fixed-effects ", names(cluster)[q], ".")
-				} else {
-					message = paste0("Variables ", show_vars_limited_width(collin_var), " are collinear with fixed-effects '", names(cluster)[q], "'.")
-				}
+				collin_var = varnames[max_residuals < 1e-6]
+				message = paste0("Variable", enumerate_items(collin_var, "s.is.quote"), " collinear with fixed-effects '", names(cluster)[q], "'.")
 
 				print(message)
 				return(invisible(message))
@@ -1850,14 +1909,14 @@ collinearity = function(x, verbose){
 	        # residuals of the linear projection on the cluster space
 	        residuals = linear_mat_noIntercept - (value/denom)[dum, ]*my_var
 
-	        sum_residuals = colSums(abs(residuals))
+	        max_residuals = apply(abs(residuals), 2, max)
 
-	        if(any(sum_residuals < 1e-4)){
+	        if(any(max_residuals < 1e-6)){
 	            ccat("\n")
 	            varnames = colnames(linear_mat_noIntercept)
-	            collin_var = varnames[sum_residuals < 1e-4]
+	            collin_var = varnames[max_residuals < 1e-6]
 
-	            message = paste0("Variable", enumerate_items(collin_var, "s.is"), " collinear with variable with varying slope ", slope_vars[q], " (on ", slope_fe[q], ").")
+	            message = paste0("Variable", enumerate_items(collin_var, "s.is.quote"), " collinear with variable with varying slope '", slope_vars[q], "' (on '", slope_fe[q], "').")
 
 	            print(message)
 	            return(invisible(message))
@@ -1872,15 +1931,16 @@ collinearity = function(x, verbose){
 	# II) perfect multicollinearity
 	#
 
-	name2change = grepl("\\)[[:alnum:]]", colnames(linear.matrix))
+	name2change = grepl("[^[:alnum:]\\._]", colnames(linear.matrix))
+	dict_name = colnames(linear.matrix)[!grepl("(Intercept)", colnames(linear.matrix))]
 	if(any(name2change)){
 		linbase = as.data.frame(linear.matrix)
-		names(linbase)[name2change] = gsub("(\\(|\\))", "_", names(linbase)[name2change])
-		linearVars = setdiff(names(linbase), "(Intercept)")
+		names(linbase)[name2change] = gsub("[^[:alnum:]\\._]", "_", names(linbase)[name2change])
 	} else {
 		linbase = as.data.frame(linear.matrix)
-		linearVars = setdiff(colnames(linear.matrix), "(Intercept)")
 	}
+	linearVars = names(linbase)[!grepl("Intercept", names(linbase))]
+	names(dict_name) = linearVars
 
 	# for multicol without cluster
 	mat_base = as.matrix(linbase)
@@ -1899,13 +1959,14 @@ collinearity = function(x, verbose){
 
 			i = which(colnames(mat_base) == v)
 			res = ols_fit(y = mat_base[, i], X = mat_base[, -i, drop = FALSE], w = 1, nthreads = 1)
-			sum_resid = sum(abs(res$residuals))
 
-			if(sum_resid < 1e-4){
+			max_residuals = max(abs(res$residuals))
+
+			if(max_residuals < 1e-4){
 				ccat("\n")
 				coef_lm = res$coefficients
 				collin_var = names(coef_lm)[!is.na(coef_lm) & abs(coef_lm) > 1e-6]
-				message = paste0("Variable '", v, "' is collinear with variable", ifelse(length(collin_var)>=2, "s", ""), ": ", paste0(collin_var, collapse = ", "), ".")
+				message = paste0("Variable '", dict_name[v], "' is collinear with variable", enumerate_items(dict_name[collin_var], "s.quote"), ".")
 
 				print(message)
 				return(invisible(message))
@@ -1926,7 +1987,6 @@ collinearity = function(x, verbose){
 		n_clust = length(dum_names)
 		new_dum_names = paste0("__DUM_", 1:n_clust)
 		for(i in 1:n_clust){
-			# data[[paste0("__DUM_", i)]] = x$fixef_id[[i]]
 			linbase[[paste0("__DUM_", i)]] = x$fixef_id[[i]]
 		}
 
@@ -1936,14 +1996,15 @@ collinearity = function(x, verbose){
 
 			for(id_cluster in 1:n_clust){
 
-				res = feols(fml2estimate, linbase, cluster = new_dum_names[id_cluster], warn = FALSE)
+				res = feols(fml2estimate, linbase, fixef = new_dum_names[id_cluster], warn = FALSE)
 
-				sum_resid = sum(abs(resid(res)))
-				if(sum_resid < 1e-4){
+				max_residuals = max(abs(resid(res)))
+
+				if(max_residuals < 1e-4){
 					ccat("\n")
 					coef_lm = coef(res)
 					collin_var = names(coef_lm)[!is.na(coef_lm) & abs(coef_lm) > 1e-6]
-					message = paste0("Variable '", v, "' is collinear with variable", ifelse(length(collin_var)>=2, "s", ""), ": ", paste0(collin_var, collapse = ", "), " and the fixed-effects ", dum_names[id_cluster], ".")
+					message = paste0("Variable '", dict_name[v], "' is collinear with variable", enumerate_items(dict_name[collin_var], "s.quote"), ", together with the fixed-effects ", dum_names[id_cluster], ".")
 
 					print(message)
 					return(invisible(message))
@@ -2079,397 +2140,279 @@ collinearity = function(x, verbose){
 }
 
 
-#' Estimates yearly treatment effects
-#'
-#' This facility helps to estimate yearly treatment effects in a difference-in-difference setup without having to manually make the estimation. It is made as general as possible such that non-\code{fixest} estimation functions can also be used.
-#'
-#' @param fml A formula containing the variables WITHOUT the yearly treatment effects (which will be added by this function).
-#' @param data A \code{data.frame} containing all the variables.
-#' @param treat_time Either a character vector of length two containing the name of the treatment variable and the name of the time variable (e.g. \code{c("treat", "year")}). Either a one-sided formula containing the treatment and the time (e.g. \code{~treat~year}).
-#' @param reference The time period of reference. It should be a numeric scalar. The treatment will not be included for this time period so that it serves as reference.
-#' @param returnData Logical, default is \code{FALSE}. If \code{TRUE}, then the original database with the yearly treatment variables is returned.
-#' @param ... Other arguments to be passed to \code{estfun}, the estimation function.
-#' @param estfun The estimation function. Defaults to \code{\link[fixest]{feols}}.
-#'
-#' @return
-#' It returns an estimation object. In case of \code{fixest} estimations, it will return a \code{fixest} object.
-#'
-#' @author
-#' Laurent Berge
-#'
-#' @seealso
-#' \code{\link[fixest]{did_plot_yearly_effects}}, \code{\link[fixest]{errbar}}.
-#'
-#' @examples
-#'
-#' # Sample data illustrating the DiD
-#' data(base_did)
-#'
-#' # Estimation of yearly effect (they are automatically added)
-#' est = did_estimate_yearly_effects(y ~ x1 + treat + post, base_did,
-#'                                   treat_time = ~treat+period, reference = 5)
-#'
-#' # Now we plot the results
-#' did_plot_yearly_effects(est)
-#'
-#' # Now with fixed-effects:
-#' est_fe = did_estimate_yearly_effects(y ~ x1 | id + period, base_did,
-#'                                      treat_time = ~treat+period, reference = 5)
-#' did_plot_yearly_effects(est_fe)
-#'
-#' # you can change the type of SE to be plotted:
-#' did_plot_yearly_effects(est_fe, se = "cluster") # default
-#' did_plot_yearly_effects(est_fe, se = "standard")
-#'
-#'
-did_estimate_yearly_effects = function(fml, data, treat_time, reference, returnData = FALSE, ..., estfun = feols){
-	# fml formula to estimate, if no variable: include the constant
-	# data: a data frame
-	# treat_time: the names of the treatment and time variables
-	# reference: the time period to take as a reference
-	# ... other arguments to be passed to femlm
-	# estfun: the function to estimate the model
-
-	# Controls and creation of the estimation data
-	if("data.table" %in% class(data)){
-		data_small = as.data.frame(data)
-	} else if(is.data.frame(data)){
-		data_small = data
-	} else {
-		stop("Argument 'data' must be a data.frame!")
-	}
-
-    # Formula
-    if(missing(fml)) stop("You must provide argument 'fml' (currently it is missing).")
-	if(length(fml) != 3) stop("The argument 'fml' must be a two sided formula, e.g. y~x1+x2.")
-
-	# the treat and time variables
-    if(missing(treat_time)) stop("You must provide argument 'treat_time' (currently it is missing).")
-    if(is.character(treat_time)){
-        if(length(treat_time) != 2){
-            stop("Argument treat_time must be of length 2 (currently it is of length ", length(treat_time), ").")
-        }
-
-        qui_pblm = setdiff(treat_time, names(data))
-        if(length(qui_pblm) != 0){
-            stop("In argument treat_time, the variable", enumerate_items(qui_pblm, "s.is"), " not in the data.")
-        }
-
-        treat = data_small[[treat_time[1]]]
-        time = data_small[[treat_time[2]]]
-
-        treat_var = treat_time[1]
-        time_var = treat_time[2]
-
-    } else if("formula" %in% class(treat_time)){
-
-        treat_time = formula(treat_time)
-
-        if(length(treat_time) != 2) stop("In argument treat_time, the formula must be two sided, e.g. ~treat+year.")
-
-        all_vars = all.vars(treat_time)
-        qui_pblm = setdiff(all_vars, names(data))
-        if(length(qui_pblm) != 0){
-            stop("In argument treat_time, the variable", enumerate_items(qui_pblm, "s.is"), " not in the data.")
-        }
-
-        t = terms(treat_time, data = data)
-        all_var_full = attr(t, "term.labels")
-        if(length(all_var_full) != 2) stop("In argument treat_time, the formula must contain exactly two variables (currently it contains ", length(all_var_full), ").")
-
-        treat = eval(parse(text = all_var_full[1]), data_small)
-        time = eval(parse(text = all_var_full[2]), data_small)
-
-        treat_var = all_var_full[1]
-        time_var = all_var_full[2]
-
-    } else {
-        stop("Argument treat_time must be either a character vector, either a one-sided formula.")
-    }
-
-
-	if(!is.numeric(treat) || any(!treat %in% c(0, 1))){
-	    obs = head(which(!treat %in% c(0, 1)), 3)
-		stop("The treatment variable must be 0/1, with 1 repersenting the treated. The variable that you gave, ", treat_var, ", is not (e.g. observation", enumerate_items(obs, "s"), ".")
-	} else if(length(unique(treat)) == 1){
-	    stop("The treatment variable is equal to ", treat[1], " for all observations: there must be a problem!")
-	}
-
-	all_periods = sort(unique(time[!is.na(time)]))
-
-	if(missing(reference)) stop("You must provide argument 'reference' (currently it is missing).")
-	if(!length(reference) == 1 || !isVector(reference)) stop("Argument reference must be a numeric scalar.")
-	if(!reference %in% all_periods){
-		stop("The 'reference' must be a value of the time variable (currenlty ", reference, " does not belong to the time variable [", time_var, "]).")
-	}
-
-	# creating the yearly treatment effects variables
-	select_periods = all_periods[all_periods != reference]
-	treat_periods = gsub(" |-", "_", paste0("treat_", select_periods))
-	for(i in seq_along(select_periods)){
-		data_small[[treat_periods[i]]] = treat * (time == select_periods[i])
-	}
-
-	# creating the formula + estimation
-	FML = Formula::Formula(fml)
-	fml_fe = add2fml(FML, treat_periods)
-
-	res = estfun(fml_fe, data_small, ...)
-
-	res$reference = reference
-	res$all_periods = select_periods
-	res$time_variable = time_var
-	attr(res, "isYearlyTreatmentEstimate") = TRUE
-
-	# we tweak a bit the call
-	current_call = match.call()
-	est_call = res$call
-	if(is.null(est_call)){
-	    res$call = current_call
-	} else {
-	    est_call[["data"]] = current_call[["data"]]
-	    res$call = est_call
-	}
-
-	if(returnData){
-		res$data = data_small
-	}
-
-	res
-}
-
-#' Plots the results of yearly treatment effects estimation
-#'
-#' This function plots the results of a \code{\link[fixest]{did_estimate_yearly_effects}} estimation.
-#'
-#' @inheritParams errbar
-#'
-#' @param object An object returned by the function \code{\link[fixest]{did_estimate_yearly_effects}}.
-#' @param ... Any other argument to be passed to \code{summary} or to \code{plot}.
-#' @param style One of \code{"bar"} (default), \code{"interval"} or \code{"tube"}. The style of the plot.
-#'
-#' @author
-#' Laurent Berge
-#'
-#' @seealso
-#' \code{\link[fixest]{did_estimate_yearly_effects}}, \code{\link[fixest]{errbar}}.
-#'
-#' @examples
-#'
-#' # Sample data illustrating the DiD
-#' data(base_did)
-#'
-#' # Estimation of yearly effect (they are automatically added)
-#' est = did_estimate_yearly_effects(y ~ x1 + treat + post, base_did,
-#'                                   treat_time = ~treat+period, reference = 5)
-#'
-#' # Now we plot the results
-#' did_plot_yearly_effects(est)
-#'
-#' # Now with fixed-effects:
-#' est_fe = did_estimate_yearly_effects(y ~ x1 | id + period, base_did,
-#'                                      treat_time = ~treat+period, reference = 5)
-#' did_plot_yearly_effects(est_fe)
-#'
-#' # you can change the type of SE to be plotted:
-#' did_plot_yearly_effects(est_fe, se = "cluster") # default
-#' did_plot_yearly_effects(est_fe, se = "standard")
-#'
-#'
-did_plot_yearly_effects = function(object, x.shift = 0, w = 0.1, ci_level = 0.95, style = c("bar", "interval", "tube"), add = FALSE, col = 1, bar.col = col, bar.lwd = par("lwd"), bar.lty, grid = TRUE, grid.par = list(lty=1), bar.join = TRUE, ...){
-	# object: a result from the estimate_yearly_effects function
-	# ... anything to be passed to summary & to plot
-
-    #-------------------#
-    # Next in line:
-    # when add = TRUE:
-    #   * change the y-axis of the new value + add right axis
-    #-------------------#
-
-	# Controls
-	style = match.arg(style)
-	isYearlyTreatmentEstimate = attr(object, "isYearlyTreatmentEstimate")
-	if(!isTRUE(isYearlyTreatmentEstimate)){
-		stop("The argument 'object' must come from the function 'did_estimate_yearly_effects'.")
-	}
-
-	dots = list(...)
-
-	# the coefficients
-	if("fixest" %in% class(object)){
-	    # more robust to future updates of the package
-	    args_name_sum = names(formals("summary.fixest"))
-	    args_sum = intersect(names(dots), args_name_sum)
-	    if(length(args_sum) == 0){
-	        coef_yearly = summary(object, nframes_up = 1)$coeftable
-	    } else {
-	        dots_sum = dots[args_sum]
-	        dots_sum$object = object
-	        dots_sum$nframes_up = 1
-	        dots[args_sum] = NULL
-
-	        # Rstudio supa slow when error in the following code
-	        # (of course only when called from within did_plot_yearly_effects)
-	        # => I MUST use try
-	        coef_yearly = try(do.call("summary.fixest", dots_sum)$coeftable, silent = TRUE)
-	        if("try-error" %in% class(coef_yearly)) stop(coef_yearly)
-	        # I haven't found the cause yet
-	    }
-
-	} else {
-
-	    sum_exists = FALSE
-	    for(c_name in class(object)){
-	        if(exists(paste0("summary.", c_name), mode = "function")){
-	            sum_exists = TRUE
-	            break
-	        }
-	    }
-
-	    if(!sum_exists) stop("There is no summary method for objects of class ", c_name, ". did_plot_yearly_effects cannot be performed since it applies summary to the object (from which it extracts the coeftable).")
-
-	    fun_name = paste0("summary.", c_name)
-	    args_name_sum = names(formals(fun_name))
-	    args_sum = intersect(names(dots), args_name_sum)
-	    if(length(args_sum) == 0){
-	        coef_yearly_sum = summary(object)
-	    } else {
-	        dots_sum = dots[args_sum]
-	        dots_sum$object = object
-	        dots[args_sum] = NULL
-	        coef_yearly_sum = do.call(fun_name, dots_sum)
-	    }
-
-	    if("coeftable" %in% names(coef_yearly_sum)){
-	        coef_yearly = coef_yearly_sum$coeftable
-	        element = "coeftable"
-	    } else if("coefficients" %in% names(coef_yearly_sum)){
-	        coef_yearly = coef_yearly_sum$coefficients
-	        element = "coefficients"
-	    } else {
-	        stop("The summary method does not return a coeftable or coefficients object, needed to plot the results.")
-	    }
-
-	    if(is.matrix(coef_yearly)){
-	        ct_names = colnames(coef_yearly)
-	    } else if("data.frame" %in% class(coef_yearly)){
-	        ct_names = names(coef_yearly)
-	    } else {
-	        stop("The element ", element, " from the summary is not a matrix nor a data.frame => did_plot_yearly_effects cannot be performed.")
-	    }
-	}
-
-	var_names = rownames(coef_yearly)
-
-	var_select = which(grepl("treat_", var_names))
-	coef_yearly = coef_yearly[var_select, ]
-
-	# the periods used
-	select_periods = object$all_periods
-	# the variables name
-	time_variable = object$time_variable
-
-	# We add the reference point
-	base2show = data.frame(estimate = coef_yearly[, "Estimate"], sd = coef_yearly[, "Std. Error"], x = select_periods)
-	base2show = rbind(base2show, data.frame(estimate = 0, sd = 0, x = object$reference))
-	base2show = base2show[order(base2show$x), ]
-
-	# Arguments for the errbar and plot functions
-	dots$estimate = base2show$estimate
-	dots$sd = base2show$sd
-	dots$x = base2show$x
-	if(is.null(dots$xlab)) dots$xlab = time_variable
-	if(is.null(dots$ylab)) dots$ylab = paste0("Estimate of Yearly Treatment on ", deparse(object$fml[[2]]))
-
-	# Now the plot
-	mc = match.call(expand.dots = FALSE)
-	for(v in setdiff(names(mc), c("", "object", "...", "bar.join"))){
-	    dots[[v]] = mc[[v]]
-	}
-
-	dots$bar.join = bar.join # default different from the one of errbar
-
-	do.call("errbar", dots)
-
-	reference = object$reference
-	abline(v=reference, lty = 2, col = "gray")
-
-}
-
-
 #' Plots confidence intervals
 #'
-#' This function draws confidence intervals in a graph.
+#' This function plots the results of estimations (coefficients and confidence intervals). It is flexible and handle interactions in a special way.
 #'
-#' @param estimate Numeric vector. The point estimates.
+#' @inheritParams etable
+#'
+#' @param object Can be either: i) an estimation object (obtained for example from \code{\link[fixest]{feols}}, ii) a matrix of coefficients table, or iii) a numeric vector of the point estimates -- the latter requiring the extra arguments \code{sd} or \code{ci_low} and \code{ci_top}.
 #' @param sd The standard errors of the estimates. It may be missing.
 #' @param ci_low If \code{sd} is not provided, the lower bound of the confidence interval. For each estimate.
 #' @param ci_top If \code{sd} is not provided, the upper bound of the confidence interval. For each estimate.
-#' @param x The value of the x-axis. If missing, the names of the argument \code{estimate} is used.
+#' @param x The value of the x-axis. If missing, the names of the argument \code{estimate} are used.
 #' @param x.shift Shifts the confidence intervals bars to the left or right, depending on the value of \code{x.shift}. Default is 0.
-#' @param w The width of the confidence intervals.
+#' @param ci.width The width of the extremities of the confidence intervals. Default is \code{0.1}.
 #' @param ci_level Scalar between 0 and 1: the level of the CI. By default it is equal to 0.95.
-#' @param style If \dQuote{interval}: it plots a confidence interval. If \dQuote{bar}, it plots simply error bars. If \dQuote{tube}: as interval, but with a grayed area.
 #' @param add Default is \code{FALSE}, if the intervals are to be added to an existing graph. Note that if it is the case, then the argument \code{x} MUST be numeric.
-#' @param col Color of the point estimate and of the line joining them (if \code{style = "interval"}).
-#' @param bar.col Color of the bars of the confidence interval. Defaults to \code{col}.
-#' @param bar.lwd Line width of the confidence intervals, defaults to \code{1}.
-#' @param bar.lty Line type of the confidence intervals, defaults to \code{1} for \code{style = "bar"} and to \code{2} for \code{style = "interval"}.
-#' @param grid Whether to add an horizontal grid. Default is \code{TRUE}.
-#' @param grid.par Graphical parameters used when plotting the grid in the background. Default is \code{list(lty=1)}.
-#' @param bar.join Logical, default is \code{FALSE}. Whether to join the dots when \code{style = "bar"}.
-#' @param only.params Logical, default is \code{FALSE}. If \code{TRUE}: no graph is plotted, only the \code{ylim} is returned. Useful to stack estimates from different estimations in the same graph.
-#' @param ... Other arguments to be passed to the function \code{plot} or \code{lines} (if \code{add = TRUE}).
+#' @param pt.pch The patch of the coefficient estimates. Default is 20 (circle).
+#' @param cex Numeric, default is \code{par("cex")}. Expansion factor for the points
+#' @param pt.cex The size of the coefficient estimates. Default is the other argument \code{cex}.
+#' @param col The color of the points and the confidence intervals. Default is 1 ("black"). Note that you can set the colors separately for each of them with \code{pt.col} and \code{ci.col}.
+#' @param pt.col The color of the coefficient estimate. Default is equal to the other argument \code{col}.
+#' @param ci.col The color of the confidence intervals. Default is equal to the other argument \code{col}.
+#' @param lwd General liwe with. Default is par("lwd").
+#' @param ci.lwd The line width of the confidence intervals. Default is equal to the other argument \code{lwd}.
+#' @param ci.lty The line type of the confidence intervals. Default is 1.
+#' @param grid Logical, default is \code{TRUE}. Whether a grid should be displayed. You can set the display of the grid with the argument \code{grid.par}.
+#' @param grid.par List. Parameters of the grid. The default values are: \code{lty = 3} and \code{col = "gray"}. You can add any graphical parameter that will be passed to \code{\link[graphics]{abline}}. You also have two additional arguments: use \code{horiz = FALSE} to disable the horizontal lines, and use \code{vert = FALSE} to disable the vertical lines. Eg: \code{grid.par = list(vert = FALSE, col = "red", lwd = 2)}.
+#' @param zero Logical, default is \code{TRUE}. Whether the 0-line should be emphasized. You can set the parameters of that line with the argument \code{zero.par}.
+#' @param zero.par List. Parameters of the zero-line. The default values are \code{col = "black"} and \code{lwd = 1}. You can add any graphical parameter that will be passed to \code{\link[graphics]{abline}}. Example: \code{zero.par = list(col = "darkblue", lwd = 3)}.
+#' @param join Logical, default depends on the situation. If \code{TRUE}, then the coefficient estimates are joined with a line. By default, it is equal to \code{TRUE} only if: i) interactions are plotted, ii) the x values are numeric and iii) a reference is found.
+#' @param join.par List. Parameters of the line joining the cofficients. The default values are: \code{col = pt.col} and \code{lwd = lwd}. You can add any graphical parameter that will be passed to \code{\link[graphics]{lines}}. Eg: \code{join.par = list(lty = 2)}.
+#' @param ref.line Logical, default depends on the situation. It is \code{TRUE} only if: i) interactions are plotted, ii) the x values are numeric and iii) a reference is found. If \code{TRUE}, then a vertical line is drawn at the level of the reference value. You can set the parameters of this line with the argument \code{ref.line.par}.
+#' @param ref.line.par List. Parameters of the vertical line on the reference. The default values are: \code{col = "black"} and \code{lty = 2}. You can add any graphical parameter that will be passed to \code{\link[graphics]{abline}}. Eg: \code{ref.line.par = list(lty = 1, lwd = 3)}.
+#' @param xlim.add A numeric vector of length 1 or 2. It represents an extension factor of xlim, in percentage. Eg: \code{xlim.add = c(0, 0.5)} extends \code{xlim} of 50\% on the right. If of lentgh 1, positive values represent the right, and negative values the left (Eg: \code{xlim.add = -0.5} is equivalent to \code{xlim.add = c(0.5, 0)}).
+#' @param ylim.add A numeric vector of length 1 or 2. It represents an extension factor of ylim, in percentage. Eg: \code{ylim.add = c(0, 0.5)} extends \code{ylim} of 50\% on the top. If of lentgh 1, positive values represent the top, and negative values the bottom (Eg: \code{ylim.add = -0.5} is equivalent to \code{ylim.add = c(0.5, 0)}).
+#' @param only.params Logical, default is \code{FALSE}. If \code{TRUE} no graphic is displayed, only the values of \code{x} and \code{y} used in the plot are returned.
+#' @param only.inter Logical, default is \code{TRUE}. If an interaction of the type of \code{var::fe} (see \code{\link[fixest]{feols}} help for details) is found, then only these interactions are plotted. If \code{FALSE}, then interactions are treated as regular coefficients.
+#' @param ... Other arguments to be passed to \code{summary}, if \code{object} is an estimation, and/or to the function \code{plot} or \code{lines} (if \code{add = TRUE}).
 #'
 #' @seealso
-#' \code{\link[fixest]{did_estimate_yearly_effects}}, \code{\link[fixest]{did_plot_yearly_effects}}.
+#' See \code{\link[fixest]{setFixest_coefplot}} to set the default values of \code{coefplot}, and the estimation functions: e.g. \code{\link[fixest]{feols}}, \code{\link[fixest]{fepois}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{fenegbin}}.
+#'
+#' @section Setting custom default values:
+#' The function \code{coefplot} dispose of many arguments to parametrize the plots. Most of these arguments can be set once an for all using the function \code{\link[fixest]{setFixest_coefplot}}. See Example 3 below for a demonstration.
+#'
 #'
 #' @author
 #' Laurent Berge
 #'
 #' @examples
-#' a = rnorm(100)
-#' b = 0.5*a + rnorm(100)
-#' c = -0.5*b + rnorm(100)
 #'
-#' est = summary(lm(a ~ c + b))
+#' #
+#' # Example 1: Stacking two sets of results on the same graph
+#' #
 #'
-#' errbar(est$coefficients, x.shift = -.2)
+#' # Estimation on Iris data with one fixed-effect (Species)
+#' est = feols(Petal.Length ~ Petal.Width + Sepal.Length +
+#'             Sepal.Width | Species, iris)
 #'
-#' errbar(est$coefficients, , x.shift = .2, add = TRUE, col = 2, bar.lty = 2, pch=15)
 #'
-coefplot = errbar = function(estimate, sd, ci_low, ci_top, x, x.shift = 0, w=0.1, ci_level = 0.95, style = c("bar", "interval", "tube"), add = FALSE, col = 1, bar.col = col, bar.lwd = par("lwd"), bar.lty, grid = TRUE, grid.par = list(lty=1), bar.join = FALSE, only.params = FALSE, ...){
+#' # First graph with clustered standard-errors
+#' # (the default when fixed-effects are present)
+#' coefplot(est, x.shift = -.2)
+#'
+#' # 'x.shift' was used to shift the coefficients on the left.
+#'
+#'
+#' # Second set of results: this time with
+#' #  standard-errors that are not clustered.
+#' coefplot(est, se = "standard", x.shift = .2,
+#'          add = TRUE, col = 2, ci.lty = 2, pch=15)
+#'
+#'  # Note that we used 'se', an argument that will
+#'  #  be passed to summary.fixest
+#'
+#' legend("topright", col = 1:2, pch = 20, lwd = 1, lty = 1:2,
+#'        legend = c("Clustered", "Standard"), title = "Standard-Errors")
+#'
+#'
+#' #
+#' # Example 2: Interactions
+#' #
+#'
+#' \dontrun{
+#'
+#' "::" = function(a, b) NULL
+#'
+#' # Now we estimate and plot the "yearly" treatment effects
+#'
+#' data(base_did)
+#' base_inter = base_did
+#'
+#' # We interact the variable 'period' with the variable 'treat'
+#' #  using the var::fe(ref) notation
+#' est_did = feols(y ~ x1 + treat::period(5) | id+period, base_inter)
+#'
+#' # In the estimation, the variable treat is interacted
+#' #  with each value of period but 5, set as a reference
+#'
+#' # When estimations contain interactions, as before,
+#' #  the default behavior of coefplot changes,
+#' #  it now only plots interactions:
+#' coefplot(est_did)
+#'
+#' # We can see that the graph is different from before:
+#' #  - only interactions are shown,
+#' #  - the reference is present,
+#' #  - the estimates are joined.
+#' # => this is fully flexible
+#'
+#' coefplot(est_did, ref.line = FALSE, join = FALSE)
+#'
+#' # Now to display all coefficients, use 'only.inter'
+#' coefplot(est_did, only.inter = FALSE)
+#'
+#' #
+#' # What if the interacted variable is not numeric?
+#'
+#' # Let's create a "month" variable
+#' all_months = c("aug", "sept", "oct", "nov", "dec", "jan",
+#'                "feb", "mar", "apr", "may", "jun", "jul")
+#' base_inter$period_month = all_months[base_inter$period]
+#'
+#' # The new estimation
+#' est = feols(y ~ x1 + treat::period_month("oct") | id+period, base_inter)
+#' # Since 'period_month' of type character, coefplot sorts it
+#' coefplot(est)
+#'
+#' # To respect a plotting order, use a factor
+#' base_inter$month_factor = factor(base_inter$period_month, levels = all_months)
+#' est = feols(y ~ x1 + treat::month_factor("oct") | id+period, base_inter)
+#' coefplot(est)
+#'
+#' }
+#'
+#' #
+#' # Example 3: Setting defaults
+#' #
+#'
+#' # coefplot has many arguments, which makes it highly flexible.
+#' # If you don't like the default style of coefplot. No worries,
+#' # you can set *your* default by using the function
+#' # setFixest_coefplot()
+#'
+#' dict = c("Petal.Length"="Length (Petal)", "Petal.Width"="Width (Petal)",
+#'          "Sepal.Length"="Length (Sepal)", "Sepal.Width"="Width (Sepal)")
+#'
+#' setFixest_coefplot(ci.col = 2, pt.col = "darkblue", ci.lwd = 3,
+#'                    pt.cex = 2, pt.pch = 15, ci.width = 0, dict = dict)
+#'
+#' est = feols(Petal.Length ~ Petal.Width + Sepal.Length +
+#'                 Sepal.Width | Species, iris)
+#'
+#' # Tadaaa!
+#' coefplot(est)
+#'
+#' # To reset to the default settings:
+#' setFixest_coefplot()
+#' coefplot(est)
+#'
+#'
+coefplot = function(object, sd, ci_low, ci_top, x, x.shift = 0, dict, drop, order, ci.width=0.1, ci_level = 0.95, add = FALSE, pt.pch = 20, cex = par("cex"), pt.cex = cex, col = 1, pt.col = col, ci.col = col, lwd = par("lwd"), ci.lwd = lwd, ci.lty = 1, grid = TRUE, grid.par = list(lty=3, col = "gray"), zero = TRUE, zero.par = list(col="black", lwd=1), join = FALSE, join.par = list(col = pt.col, lwd=lwd), ref.line, ref.line.par = list(col = "black", lty = 2), xlim.add, ylim.add, only.params = FALSE, only.inter = TRUE, ...){
 	# creation de barres d'erreur
 	# 1 segment vertical de la taille de l'IC
 	# deux barres horizontales, a chaque bornes
 
-    # We extract the point estimate and the SEs if estimate is a matrix/data.frame
-    if(is.matrix(estimate)){
-        m_names = tolower(colnames(estimate))
-        if(m_names[1] == "estimate" & m_names[2] == "std. error"){
-            sd = estimate[, 2]
-            estimate = estimate[, 1]
+    # I don't allow the different styles any more (maybe I can change that in the future)
+    if(missing(dict)) dict = c()
+    # style = c("bar", "interval", "tube")
+    # style = match.arg(style)
+    style = "bar"
+
+    # We get the default values
+    opts = getOption("fixest_coefplot")
+
+    if(length(opts) >= 1){
+        if(!is.list(opts)){
+            warning("The default values of coefplot are ill-formed and therefore reset. Use only setFixest_coefplot for setting the default values.")
+            opts = list()
+            options("fixest_coefplot" = opts)
         } else {
-            stop("Argument estimate is a matrix but does not contain the columns 'Estimate' and 'Std. Error'. Either provide an appropriate matrix or give directly the vector of estimated coefficients in arg. estimate.")
+            mc = match.call()
+            arg2set = setdiff(names(opts), names(mc))
+            for(arg in arg2set){
+                assign(arg, opts[[arg]])
+            }
         }
+    }
+
+    #
+    # STEP 1 => getting the coefficient table + the CI
+    #
+
+    # This is NOT trivial because argument '...' refers to either summary (and we
+    # have to find out which), either to plot or lines
+    #
+
+    # Object can either be:
+    #  a) an estimation
+    #  b) a coefficient table (ie a matrix)
+    #  c) a vector of coefficients
+
+    dots = list(...)
+
+    if(is.list(object)){
+        sum_exists = FALSE
+        for(c_name in class(object)){
+            if(exists(paste0("summary.", c_name), mode = "function")){
+                sum_exists = TRUE
+                break
+            }
+        }
+
+        if(!sum_exists) stop("There is no summary method for objects of class ", c_name, ". 'coefplot' applies summary to the object to extract the coeftable. Maybe add directly the coeftable in object instead?")
+
+        fun_name = paste0("summary.", c_name)
+        args_name_sum = names(formals(fun_name))
+        args_sum = intersect(names(dots), args_name_sum)
+
+        # we kick out the summary arguments from dots
+        dots[args_sum] = NULL
+
+        # We reconstruct a call to coeftable
+        mc_coeftable = match.call(expand.dots = TRUE)
+        mc_coeftable[[1]] = as.name("coeftable")
+        mc_coeftable[setdiff(names(mc_coeftable), c(args_sum, "object", ""))] = NULL
+
+        mat = eval(mc_coeftable, parent.frame())
+
+        sd = mat[, 2]
+        estimate = mat[, 1]
+
+        names(estimate) = rownames(mat)
+
+        if("fml" %in% names(object)){
+            depvar = gsub(" ", "", as.character(object$fml)[[2]])
+            if(depvar %in% names(dict)) depvar = dict[depvar]
+            listDefault(dots, "main", paste0("Effect on ", depvar))
+        }
+
+    } else if(is.matrix(object)){
+        # object is a matrix containing the coefs and SEs
+
+        m_names = tolower(colnames(object))
+        if(ncol(object) == 4 || (grepl("estimate", m_names[1]) && grepl("std\\.? error", m_names[1]))){
+            sd = object[, 2]
+            estimate = object[, 1]
+
+            names(estimate) = rownames(object)
+
+        } else {
+            stop("Argument 'object' is a matrix but it should contain 4 columns (the two first ones should be reporting the estimate and the standard-error). Either provide an appropriate matrix or give directly the vector of estimated coefficients in arg. estimate.")
+        }
+    } else if(length(object[1]) > 1 || !is.null(dim(object)) || !is.numeric(object)){
+        stop("Argument 'object' must be either: i) an estimation object, ii) a matrix of coefficients table, or iii) a numeric vector of the point estimates. Currently it is neither of the three.")
+    } else {
+        # it's a numeric vector
+        estimate = object
     }
 
 	n <- length(estimate)
 
-	style = match.arg(style)
-
-	if(missing(bar.lty)){
-		bar.lty = ifelse(style == "bar", 1, 2)
+	if(missing(ci.lty)){
+		ci.lty = ifelse(style == "bar", 1, 2)
 	}
 
 	if(missing(sd)){
-		if(missing(ci_low) | missing(ci_top)) stop("If 'sd' is not provided, you must provide the arguments 'ci_low' and 'ci_top'.")
+		if(missing(ci_low) || missing(ci_top)) stop("If 'sd' is not provided, you must provide the arguments 'ci_low' and 'ci_top'.")
 
 		ci025 = ci_low
 		ci975 = ci_top
 
 	} else {
-		if(!missing(ci_low) | !missing(ci_top)) warning("Since 'sd' is provided, arguments 'ci_low' or 'ci_top' are ignored.")
+		if(!missing(ci_low) || !missing(ci_top)) warning("Since 'sd' is provided, arguments 'ci_low' or 'ci_top' are ignored.")
 
 		# We compue the CI
 		nb = abs(qnorm((1-ci_level)/2))
@@ -2477,56 +2420,267 @@ coefplot = errbar = function(estimate, sd, ci_low, ci_top, x, x.shift = 0, w=0.1
 		ci025 = estimate - nb*sd
 	}
 
-	# if(add){
-	# 	if(missing(x) || !is.numeric(x)){
-	# 		stop("When the argument 'add' is used, you MUST provide a numeric argument for 'x'.")
-	# 	}
-	# }
+	#
+	# STEP 2 => Plotting
+	#
+
+	# INTERACTIONS
+	ref_id = NA
+	if(only.inter && !is.null(names(estimate))){
+    	all_vars = names(estimate)
+    	if(any(grepl("::", all_vars))){
+
+    	    is_info = FALSE
+    	    if("fixest" %in% class(object)){
+    	        is_info = TRUE
+    	        interaction.info = object$interaction.info
+    	        is_ref = interaction.info$is_ref
+    	        items = interaction.info$items
+    	        is_num = interaction.info$fe_type %in% c("numeric", "integer")
+    	    }
+
+    	    # We retrict only to interactions
+    	    root_interaction = all_vars[grepl("::", all_vars)]
+    	    # We keep only the first one !
+    	    root_interaction = unique(gsub("::.+", "", root_interaction))[1]
+
+    	    inter_keep = grepl(root_interaction, all_vars, fixed = TRUE)
+    	    my_inter = all_vars[inter_keep]
+    	    estimate = estimate[inter_keep]
+    	    ci975 = ci975[inter_keep]
+    	    ci025 = ci025[inter_keep]
+
+    	    # We extract the name of the variables
+    	    fe_name = gsub(".+:", "", root_interaction)
+    	    if(fe_name %in% names(dict)) fe_name = dict[fe_name]
+    	    listDefault(dots, "xlab", fe_name)
+
+    	    var_name = gsub(":[[:alnum:]\\._]+", "", root_interaction)
+    	    if(var_name %in% names(dict)) var_name = dict[var_name]
+    	    listDefault(dots, "sub", paste0("(Interacted with ", var_name, ")"))
+
+    	    # We construct the x-axis
+    	    inter_values = gsub(".+::", "", my_inter)
+    	    names(estimate) = inter_values
+
+    	    inter_values_num = tryCatch(as.numeric(inter_values), warning = function(x) x)
+    	    if(is_info){
+
+    	        if(length(inter_values) != sum(!is_ref)){
+    	            stop("Internal error regarding the lengths of vectors of coefficients.")
+    	        }
+
+    	        if(any(is_ref)){
+    	            ref_id = which(is_ref)
+    	        }
+
+    	        my_values = my_ci_low = my_ci_high = rep(NA, length(is_ref))
+    	        names(my_values) = names(my_ci_low) = names(my_ci_high) = items
+
+    	        my_values[inter_values] = estimate
+    	        my_ci_high[inter_values] = ci975
+    	        my_ci_low[inter_values] = ci025
+
+    	        qui = which(is.na(my_values))
+    	        my_values[qui] = 0
+    	        my_ci_high[qui] = my_values[qui]
+    	        my_ci_low[qui] = my_values[qui]
+
+    	        estimate = my_values
+    	        ci975 = my_ci_high
+    	        ci025 = my_ci_low
+
+    	        if(is_num && missing(x)){
+    	            names(estimate) = NULL
+    	            x = items
+    	            if(missing(join)) join = TRUE
+    	            if(missing(ref.line)) ref.line = TRUE
+    	        }
+
+
+    	    } else if(is.numeric(inter_values_num)) {
+
+    	        # We check these are "real" numbers and not just "codes"
+    	        all_steps = diff(sort(inter_values_num))
+    	        ts = table(all_steps)
+    	        step_mode = as.numeric(names(ts)[which.max(ts)])
+    	        all_steps_rescaled = all_steps / step_mode
+
+    	        if(any(all_steps_rescaled < 10) && missing(x)){
+    	            names(estimate) = NULL
+    	            x = inter_values_num
+    	            if(missing(join)) join = TRUE
+    	        }
+    	    }
+
+	        n = length(estimate)
+    	}
+	}
+
+	# We set the default after the interactions (which is the decision variable)
+	if(missing(join)) join = FALSE
+	if(missing(ref.line)) ref.line = FALSE
+
+	# setting the names of the estimate
+	if(!missing(x)){
+	    if(length(x) != n) stop("Argument 'x' must have the same length as the number of coefficients (currently ", length(x), " vs ", n, ").")
+
+	    if(!is.numeric(x)){
+	        names(estimate) = x
+	    }
+	}
+
+	# order/drop/dict
+	if(!is.null(names(estimate))){
+
+	    if(missnull(dict)){
+	        dict = c()
+	    } else {
+	        check_arg(dict, "characterVector")
+	        if(is.null(names(dict))){
+                stop("Argument 'dict' must be a named character vector. Currently it has no names.")
+	        }
+	    }
+
+	    # dict
+	    all_vars = names(estimate)
+
+	    who = all_vars %in% names(dict)
+	    all_vars[who] = dict[all_vars[who]]
+	    names(estimate) = all_vars
+
+	    my_order = 1:n
+	    names(my_order) = all_vars
+
+	    # Drop
+	    if(!missing(drop)){
+	        check_arg(drop, "characterVector")
+
+	        for(var2drop in drop){
+	            if(grepl("^!", var2drop)){
+	                all_vars = all_vars[grepl(substr(var2drop, 2, nchar(var2drop)), all_vars)]
+	            } else {
+	                all_vars = all_vars[!grepl(var2drop, all_vars)]
+	            }
+	        }
+
+	        if(length(all_vars) == 0){
+	            stop("Argument 'drop' has removed all variables!")
+	        }
+	    }
+
+	    # order
+	    if(!missing(order)){
+	        check_arg(order, "characterVector")
+
+	        for(var2order in rev(order)){
+	            if(grepl("^!", var2order)){
+	                who = !grepl(substr(var2order, 2, nchar(var2order)), all_vars)
+	                all_vars = c(all_vars[who], all_vars[!who])
+	            } else {
+	                who = grepl(var2order, all_vars)
+	                all_vars = c(all_vars[who], all_vars[!who])
+	            }
+	        }
+	    }
+
+	    qui = my_order[all_vars]
+
+	    estimate = estimate[qui]
+	    ci975 = ci975[qui]
+	    ci025 = ci025[qui]
+	    if(!missing(x)) x = x[qui]
+	    n = length(qui)
+	}
 
 	# we create x_labels, x_value & x_at
-	if(missing(x)){
+	if(!missing(x) && is.numeric(x)){
+	    my_xlim = range(c(x + x.shift, x - x.shift))
+
+	    x_at = NULL
+	    x_value = x + x.shift
+
+	    if(is.null(names(estimate))){
+	        x_labels = NULL
+	    } else {
+	        x_labels = names(estimate)
+	    }
+
+	} else {
 	    x_at = 1:n
 	    x_value = 1:n + x.shift
 
 		if(is.null(names(estimate))){
-		    # x = factor(1:n + x.shift, labels = 1:n)
 		    x_labels = 1:n
 		} else {
-		    # x = factor(1:n + x.shift, labels = names(estimate))
 		    x_labels = names(estimate)
 		}
 
 		my_xlim = range(c(1:n + x.shift, 1:n - x.shift)) + c(-0.5, +0.5)
-	} else{
-		if(length(x) != n) stop("Argument 'x' must have the same length as 'estimate'.")
-
-	    if(is.numeric(x)){
-	        my_xlim = range(c(x + x.shift, x - x.shift))
-
-	        x_at = NULL
-	        x_value = x + x.shift
-	        x_labels = NULL
-
-	        # x = x + x.shift
-	    } else {
-	        # x = factor(1:n + x.shift, labels = x)
-	        x_at = 1:n
-	        x_value = 1:n + x.shift
-	        x_labels = x
-
-	        my_xlim = range(c(1:n + x.shift, 1:n - x.shift)) + c(-0.5, +0.5)
-	    }
 	}
 
-	dots <- list(...)
+	all_plot_args = unique(c(names(par()), names(formals(plot.default))))
+	pblm = setdiff(names(dots), all_plot_args)
+	if(length(pblm) > 0){
+	    warning("The following argument", ifsingle(pblm, " is not a", "s are not"), " plotting argument", ifsingle(pblm, " and is", "s and are"), " therefore ignored: ", enumerate_items(pblm), ".")
+	    dots[pblm] = NULL
+	}
 
 	# preparation of the do.call
 	dots$col = col
-	listDefault(dots, "pch", 20)
 	listDefault(dots, "xlab", "Variable")
-	listDefault(dots, "ylab", "Estimate")
+	ylab = paste0("Estimate and ", ifelse(missing(sd), "", paste0(floor(ci_level*100), "% ")), "Conf. Int.")
+	listDefault(dots, "ylab", ylab)
+
+	# The limits
+
+	# xlim
+	if(!missnull(xlim.add)){
+	    if("xlim" %in% names(dots)){
+	        message("Since argument 'xlim' is provided, argument 'xlim.add' is ignored.")
+	    } else {
+	        if((!is.numeric(xlim.add) || !length(xlim.add) %in% 1:2)){
+	            stop("Argument 'xlim.add' must be a numeric vector of length 1 or 2. It represents an extension factor of xlim, in percentage. (Eg: xlim.add = c(0, 0.5) extends xlim of 50% on the right.) If of lentgh 1, positive values represent the right, and negative values the left (Eg: xlim.add = -0.5 is equivalent to xlim.add = c(0.5, 0)).")
+	        }
+
+	        if(length(xlim.add) == 1){
+	            if(xlim.add > 0) {
+	                xlim.add = c(0, xlim.add)
+	            } else {
+	                xlim.add = c(xlim.add, 0)
+	            }
+	        }
+
+	        x_width = diff(my_xlim)
+	        my_xlim = my_xlim + xlim.add * x_width
+	    }
+	}
 	listDefault(dots, "xlim", my_xlim)
+
+	# ylim
 	my_ylim = range(c(ci025, ci975))
+
+	if(!missnull(ylim.add)){
+	    if("ylim" %in% names(dots)){
+	        message("Since argument 'ylim' is provided, argument 'ylim.add' is ignored.")
+	    } else {
+	        if((!length(ylim.add) %in% 1:2 || !is.numeric(ylim.add))){
+	            stop("Argument 'ylim.add' must be a numeric vector of length 1 or 2. It represents an extension factor of ylim, in percentage. (Eg: ylim.add = c(0, 0.5) extends ylim of 50% on the top.) If of lentgh 1, positive values represent the top, and negative values the bottom (Eg: ylim.add = -0.5 is equivalent to ylim.add = c(0.5, 0)).")
+	        }
+
+	        if(length(ylim.add) == 1){
+	            if(ylim.add > 0) {
+	                ylim.add = c(0, ylim.add)
+	            } else {
+	                ylim.add = c(ylim.add, 0)
+	            }
+	        }
+
+	        y_width = diff(my_ylim)
+	        my_ylim = my_ylim + ylim.add * y_width
+	    }
+	}
+
 	listDefault(dots, "ylim", my_ylim)
 
     dots$x = x_value
@@ -2544,80 +2698,149 @@ coefplot = errbar = function(estimate, sd, ci_low, ci_top, x, x.shift = 0, w=0.1
 	}
 
 	if(only.params){
-	    return(list(ylim = my_ylim))
+	    return(list(x = x_value, y = estimate, ylim = my_ylim))
 	}
 
 	if(!add){
 
 	    dots$axes = FALSE
+
+	    # Nude graph
+	    first.par = dots
+	    first.par$type = "n"
+	    do.call("plot", first.par)
+
 	    if(grid){
-	        first.par = dots
-	        first.par$type = "n"
-	        do.call("plot", first.par)
+	        listDefault(grid.par, "col", "gray")
+	        listDefault(grid.par, "lty", 3)
+	        listDefault(grid.par, "vert", TRUE)
+	        listDefault(grid.par, "horiz", TRUE)
 
-	        do.call("hgrid", grid.par)
-	        # we emphasize 0:
-	        grid.par$col = "black"
-	        grid.par$h = 0
-	        listDefault(grid.par, "lwd", 1.5)
-	        do.call("abline", grid.par)
+	        vert = grid.par$vert
+	        horiz = grid.par$horiz
+	        grid.par$vert = grid.par$horiz = NULL
 
-	        # now the points or lines
-	        if(dots$type != "n"){
-	            second.par = dots[c("x", "y", "type", "cex", "col", "pch", "lty", "lwd")]
-	            second.par = second.par[lengths(second.par) > 0]
-	            do.call("lines", second.par)
+	        if(horiz){
+	            do.call("hgrid", grid.par)
 	        }
-	    } else {
-	        do.call("plot", dots)
+
+	        if(vert){
+	            do.call("vgrid", grid.par)
+	        }
+	    }
+
+	    if(zero){
+	        listDefault(zero.par, "lwd", 1)
+	        listDefault(zero.par, "col", "black")
+	        zero.par$h = 0
+	        do.call("abline", zero.par)
+	    }
+
+	    if(ref.line){
+
+	        if(is.na(ref_id) && !"v" %in% names(ref.line.par)){
+	            stop("You can use the argument 'ref.line' only when interactions are provided and a reference is found. You can still draw vertical lines by using 'v' in argument 'ref.line.par'. Example: ref.line.par=list(v = ", round(x_value[floor(length(x_value)/2)]), ", col=2).")
+	        }
+
+	        listDefault(ref.line.par, "v", x_value[ref_id])
+	        listDefault(ref.line.par, "lty", 2)
+	        do.call("abline", ref.line.par)
 	    }
 
 	    box()
 	    axis(2)
 	    axis(1, at = x_at, labels = x_labels)
 
-	} else {
-		do.call("lines", dots)
 	}
 
-	if(style == "bar" && bar.join){
+	if(style == "bar" && join){
 		# We join the dots
-		third.par = dots[c("x", "y", "col", "lty", "lwd")]
-		third.par = third.par[lengths(third.par) > 0]
-		do.call("lines", third.par)
+
+	    listDefault(join.par, "lwd", lwd)
+	    listDefault(join.par, "col", pt.col)
+
+	    join.par$x = dots$x
+	    join.par$y = dots$y
+
+		do.call("lines", join.par)
 	}
 
 
 	if(style == "interval"){
 		# the "tube"
-		lines(x_value, ci025, lty = bar.lty, lwd = bar.lwd, col = bar.col)
-		lines(x_value, ci975, lty = bar.lty, lwd = bar.lwd, col = bar.col)
+		lines(x_value, ci025, lty = ci.lty, lwd = ci.lwd, col = ci.col)
+		lines(x_value, ci975, lty = ci.lty, lwd = ci.lwd, col = ci.col)
 	} else if(style == "tube"){
 		# Here we use shade area
 		shade_area(ci025, ci975, x_value, col = "lightgrey", lty=0)
 
-		dots$axes = NULL
-		dots$type = "o"
-		do.call("lines", dots)
+		# dots$axes = NULL
+		# dots$type = "o"
+		# do.call("lines", dots)
 	} else {
 		for(i in 1:n){
-			# if(is.factor(x)) x = unclass(x)
 		    x = x_value
 
 			# a) barre verticale
-			segments(x0=x[i], y0=ci025[i], x1=x[i], y1=ci975[i], lwd = bar.lwd, col = bar.col, lty = bar.lty)
+			segments(x0=x[i], y0=ci025[i], x1=x[i], y1=ci975[i], lwd = ci.lwd, col = ci.col, lty = ci.lty)
 
-			# b)toppings
-			#  i) ci975
-			segments(x0=x[i]-w, y0=ci975[i], x1=x[i]+w, y1=ci975[i], lwd = bar.lwd, col = bar.col, lty = bar.lty)
-			#  ii) ci025
-			segments(x0=x[i]-w, y0=ci025[i], x1=x[i]+w, y1=ci025[i], lwd = bar.lwd, col = bar.col, lty = bar.lty)
+			# Formatting the bar width
+
+			if(length(ci.width) > 1){
+			    stop("The argument 'ci.width' must be of length 1.")
+			}
+
+			if(is.character(ci.width)){
+
+			    width_nb = tryCatch(as.numeric(gsub("%", "", ci.width)), warning = function(x) x)
+			    if(!is.numeric(width_nb)){
+			        stop("The value of 'ci.width' is not valid. It should be equal either to a number, either to a percentage (e.g. ci.width=\"3%\").")
+			    }
+
+			    if(grepl("%", ci.width)){
+			        total_width = diff(par("usr")[1:2])
+			        ci.width = total_width * width_nb / 100
+			    } else {
+			        ci.width = width_nb
+			    }
+			}
+
+
+
+			# b) toppings
+			# Only if not reference
+			if(ci975[i] != ci025[i]){
+			    #  i) ci975
+			    segments(x0=x[i]-ci.width, y0=ci975[i], x1=x[i]+ci.width, y1=ci975[i], lwd = ci.lwd, col = ci.col, lty = ci.lty)
+			    #  ii) ci025
+			    segments(x0=x[i]-ci.width, y0=ci025[i], x1=x[i]+ci.width, y1=ci025[i], lwd = ci.lwd, col = ci.col, lty = ci.lty)
+			}
+
 		}
 	}
 
-	res = list(ylim = my_ylim)
+	# Last the points
+	if(!add){
+	    # now the points or lines
+	    if(dots$type != "n"){
+	        point.par = dots[c("x", "y", "type", "cex", "col", "pch", "lty", "lwd")]
+	        point.par$pch = pt.pch
+	        point.par$cex = pt.cex
+	        point.par$col = pt.col
+	        point.par = point.par[lengths(point.par) > 0]
+	        do.call("lines", point.par)
+	    }
+	} else {
+	    dots$pch = pt.pch
+	    dots$cex = pt.cex
+	    dots$col = pt.col
+	    do.call("lines", dots)
+	}
+
+	res = list(x = x_value, y = estimate, ylim = my_ylim)
 	return(invisible(res))
 }
+
 
 #' Treated and control sample descriptives
 #'
@@ -3509,11 +3732,21 @@ results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitsta
             var_left = var[!qui]
             if(length(var_left) > 0 && any(grepl(":", var_left))){
                 check_interaction_reorder = TRUE
+
+
                 qui_inter = grepl(":", var_left)
-                inter = strsplit(var_left[qui_inter], ":")
+                inter = strsplit(var_left[qui_inter], "(?<=[^:]):(?=[^:])", perl = TRUE)
 
                 fun_rename = function(x){
-                    res = x
+                    # We put the factors on the right
+                    qui_factor = grepl("::", x)
+                    if(any(qui_factor)){
+                        res = x[base::order(qui_factor)]
+                        res = gsub("::", " $=$ ", res)
+                    } else {
+                        res = x
+                    }
+
                     who = res %in% names(dict)
 
                     res[who] = dict[res[who]]
@@ -4403,6 +4636,62 @@ prepare_matrix = function(fml, base){
     res
 }
 
+
+fixest_model_matrix = function(fml, data){
+    # This functions takes in the formula of the linear part and the
+    # data
+    # It reformulates the formula (ie with lags and interactions)
+    # then either apply a model.matrix
+    # either applies an evaluation (which can be faster)
+
+    # Modify the formula to add interactions
+    is_interaction = FALSE
+    if(grepl("::", deparse_long(fml[[3]]))){
+        is_interaction = TRUE
+        fml = interact_fml(fml)
+    }
+
+    # Evaluation
+
+    # we look at whether there are factor-like variables to be evaluated
+    # if there is factors => model.matrix
+    dataNames = names(data)
+    linear.varnames = all.vars(fml[[3]])
+    types = sapply(data[, dataNames %in% linear.varnames, FALSE], class)
+    if(length(types) == 0 || grepl("factor", deparse_long(fml)) || any(types %in% c("character", "factor"))){
+        useModel.matrix = TRUE
+    } else {
+        useModel.matrix = FALSE
+    }
+
+    if(useModel.matrix){
+        # to catch the NAs, model.frame needs to be used....
+        linear.mat = stats::model.matrix(fml, stats::model.frame(fml, data, na.action=na.pass))
+    } else {
+        linear.mat = prepare_matrix(fml, data)
+    }
+
+    if(is_interaction){
+        # the following is needed (later in fixest_env => means there are factors)
+        useModel.matrix = TRUE
+
+        # we change the names
+        new_names = colnames(linear.mat)
+        all_terms = attr(terms(fml), "term.labels")
+        terms_inter = all_terms[grepl("^interact\\(", all_terms)]
+
+        for(pattern in terms_inter){
+            new_names = gsub(pattern, "", new_names, fixed = TRUE)
+        }
+
+        colnames(linear.mat) = new_names
+    }
+
+    attr(linear.mat, "useModel.matrix") = useModel.matrix
+
+    linear.mat
+}
+
 terms_fixef = function(fml){
     # separate all terms of fml into fixed effects ans varying slopes
 
@@ -4656,6 +4945,147 @@ combine_clusters = function(...){
     return(index)
 }
 
+interact = function(var, fe, ref, confirm = FALSE){
+    # Used to create interactions
+
+    mc = match.call()
+
+    var_name = deparse_long(mc$var)
+    fe_name = deparse_long(mc$fe)
+
+    # The NAs
+    is_na_fe = is.na(fe)
+
+    if(is.factor(fe)){
+        # we respect the fact that fe is a factor => we will keep its ordering
+        is_na_fe = is.na(fe)
+        fe_no_na = fe[!is_na_fe, drop = TRUE]
+        items = levels(fe_no_na)
+        fe_num = rep(NA, length(fe))
+        fe_num[!is_na_fe] = as.vector(unclass(fe_no_na))
+    } else {
+        if(any(is_na_fe)){
+            quf = quf_sorted(fe[!is_na_fe], addItem = TRUE)
+            fe_num = rep(NA, length(fe))
+            fe_num[!is_na_fe] = quf$x
+        } else {
+            quf = quf_sorted(fe, addItem = TRUE)
+            fe_num = quf$x
+        }
+
+        items = quf$items
+    }
+
+    noRef = FALSE
+    if(!missing(ref)){
+        # Controls
+
+        if(length(ref) > 1) stop("The argument 'ref' must be of length 1 (currenlty it is of length ", length(ref), ").")
+        if(is.na(ref)) stop("The argument 'ref' cannot be NA.")
+
+        if(!ref %in% items){
+            stop("Argument 'ref' is not an element of the variable ", fe_name, ".")
+        }
+
+        ref = which(items == ref)
+    } else {
+        noRef = TRUE
+        ref = 1
+    }
+
+    if(length(items) > 100 && !confirm){
+        stop("You are interacting ", var_name, " with a variable containing over 100 different values (exactly ", length(items), "). To proceed please add the argument 'confirm=TRUE'. Note that if you do not need the standard-errors, it is much faster to include the interactions in the fixed-effects part of the formula using ", fe_name, "[[", var_name, "]]. See details on how to add varying slopes.")
+    }
+
+    res = model.matrix(~ -1 + fe_num, model.frame(~ -1 + fe_num, data.frame(fe_num = factor(fe_num)), na.action = na.pass))
+
+    if(noRef){
+        res = res * var
+        colnames(res) = paste0(var_name, ":", fe_name, "::", items)
+    } else {
+        res = res[, -ref] * var
+        colnames(res) = paste0(var_name, ":", fe_name, "::", items[-ref])
+    }
+
+    # We send the information on the reference
+    opt = getOption("fixest_interaction_ref")
+    if(is.null(opt)){
+        is_ref = rep(FALSE, length(items))
+        if(noRef == FALSE){
+            is_ref[ref] = TRUE
+        }
+
+        opt = list(is_ref = is_ref, items = items, fe_type = class(fe))
+
+        options("fixest_interaction_ref" = opt)
+    }
+
+    res
+}
+
+interact_fml = function(fml){
+    # The formula is simple (should contain only the RHS)
+    # I use Formula for robustness
+
+    x_FML = Formula(fml)
+
+    x = attr(terms(formula(x_FML, lhs = 1, rhs = 1)), "term.labels")
+
+    if (!any(grepl("[^:]::[^:]", x))){
+        return(fml)
+    } else {
+
+        terms_all_list = as.list(x)
+        qui = which(grepl("[^:]::[^:]", x))
+        for(i in qui){
+            my_term = x[i]
+            terms_split = strsplit(x[i], "(?<=[^:])::(?=[^:])", perl = TRUE)[[1]]
+
+            if(grepl("\\(", terms_split[2])){
+                if(!grepl("^[\\.]?[[:alnum:]\\._]+\\(", terms_split[2])){
+                    stop("Problem in ", x[i], ": the format should be var::fe. See details.")
+                }
+
+                my_call = gsub("^[\\.]?[[:alnum:]\\._]+\\(", "interact_control(", terms_split[2])
+                args = try(eval(parse(text = my_call)), silent = TRUE)
+                fe_name = gsub("^([\\.]?[[:alnum:]\\._]+)\\(.+", "\\1", terms_split[2])
+                if("try-error" %in% class(args)){
+                    stop("Problem in the interaction of the formula: Error in ", terms_split[1], "::", fe_name, gsub(".+interact_control", "", args))
+                }
+
+                new_term = paste0("interact(", terms_split[1], ", ", fe_name, ", ", paste(args, collapse = ", "), ")")
+
+            } else {
+                new_term = paste0("interact(", terms_split[1], ", ", terms_split[2], ")")
+            }
+
+            terms_all_list[[i]] = new_term
+
+        }
+
+        x = unlist(terms_all_list)
+    }
+
+    lhs_fml = deparse_long(x_FML[[2]])
+    rhs_fml = paste(x, collapse = "+")
+
+    as.formula(paste0(lhs_fml, "~", rhs_fml))
+}
+
+interact_control = function(ref, confirm = FALSE){
+    # Internal call
+    # used to contral the call to interact is valid
+    check_arg(confirm, "singleLogical")
+    if(length(ref) > 1) stop("Argument 'ref' must be of length 1.")
+    mc = match.call()
+
+    res = c()
+    if("ref" %in% names(mc)) res = paste0("ref = ", deparse_long(mc$ref))
+    if("confirm" %in% names(mc)) res = c(res, paste0("confirm = ", confirm))
+
+    res
+}
+
 add2fml <- function(fml, x){
     #
     stopifnot(is.character(x))
@@ -4691,6 +5121,20 @@ hgrid = function(lty = 3, col = "darkgray", ymin = -Inf, ymax = Inf, ...){
     # now drawing the lines
     if(length(y) > 0){
         abline(h = y, col = col, lty = lty, ...)
+    }
+}
+
+vgrid = function(lty = 3, col = "darkgray", xmin = -Inf, xmax = Inf, ...){
+    # simple function that draws an horizontal grid
+
+    # Finding the coordinates
+    x = axis(1, lwd=0, labels = NA)
+
+    x = x[x > xmin & x < xmax]
+
+    # now drawing the lines
+    if(length(x) > 0){
+        abline(v = x, col = col, lty = lty, ...)
     }
 }
 
@@ -5771,6 +6215,8 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 	# 3) non-linear
 	# 4) offset
 
+	# + step 0: panel setup
+
 	n = nrow(newdata)
 
 	# message for the user NOT to use newdata if its the same data set
@@ -5786,6 +6232,28 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 
 	# NOTA 2019-11-26: I'm pondering whether to include NA-related messages
 	# (would it be useful???)
+
+
+	# STEP 0: panel setup
+
+	fml = object$fml
+	if(check_lag(fml)){
+	    if(!is.null(object$panel.info)){
+	        if(is.null(attr(newdata, "panel_info"))){
+                # We try to recreate the panel
+	            if(any(!names(object$panel.info) %in% c("", "data", "panel.id"))){
+	                # This was NOT a standard panel creation
+	                stop("The estimation contained lags/leads and the original data was a 'fixest_panel' while the new data is not. Please set the new data as a panel first with the function panel(). NOTA: the original call to panel was:\n", deparse_long(object$panel.info))
+	            } else {
+	                panel__meta__info = panel_setup(newdata, object$panel.id, from_fixest = TRUE)
+	            }
+	        } else {
+	            panel__meta__info = attr(newdata, "panel_info")
+	        }
+	    } else {
+	        panel__meta__info = panel_setup(newdata, object$panel.id, from_fixest = TRUE)
+	    }
+	}
 
 	# 1) Cluster
 
@@ -5897,16 +6365,29 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 	coef = object$coefficients
 
 	value_linear = 0
-	rhs_fml = formula(Formula(object$fml), lhs = 0, rhs = 1)
-	if(length(all.vars(rhs_fml)) > 0){
+	rhs_fml = formula(Formula(fml), lhs = 1, rhs = 1)
+	if(grepl("[^:]::[^:]", deparse_long(rhs_fml[[3]]))){
+	    new_fml = interact_fml(rhs_fml)
+	    linear.varnames = all.vars(new_fml[[3]])
+	} else {
+	    linear.varnames = all.vars(rhs_fml[[3]])
+	}
+
+	if(length(linear.varnames) > 0){
 		# Checking all variables are there
-		varNotHere = setdiff(all.vars(rhs_fml), names(newdata))
+		varNotHere = setdiff(linear.varnames, names(newdata))
 		if(length(varNotHere) > 0){
-			stop("Some variables used to estimate the model (in fml) are missing from argument 'newdata': ", enumerate_items(varNotHere), ".")
+			stop("The variable", enumerate_items(varNotHere, "s.quote"), " used to estimate the model (in fml) ", ifsingle(varNotHere, "is", "are"), " missing in the data.frame given by the argument 'newdata'.")
 		}
 
+		# We check if it's a panel or not (if so, we need to create it...)
+
 		# we create the matrix
-		matrix_linear = stats::model.matrix(rhs_fml, stats::model.frame(rhs_fml, newdata, na.action=na.pass))
+		# matrix_linear = stats::model.matrix(rhs_fml, stats::model.frame(rhs_fml, newdata, na.action=na.pass))
+		matrix_linear = try(fixest_model_matrix(rhs_fml, newdata), silent = TRUE)
+		if("try-error" %in% class(matrix_linear)){
+		    stop("Error when creating the linear matrix: ", matrix_linear)
+		}
 
 		keep = intersect(names(coef), colnames(matrix_linear))
 		value_linear = value_linear + as.vector(matrix_linear[, keep, drop = FALSE] %*% coef[keep])
@@ -7348,6 +7829,112 @@ getFixest_print.type = function(){
     x
 }
 
+
+#' Sets the defaults of coefplot
+#'
+#' You can set the default values of most arguments of \code{\link[fixest]{coefplot}} with this function.
+#'
+#' @inheritParams coefplot
+#'
+#' @param reset Logical, default is \code{TRUE}. If \code{TRUE}, then the arguments that *are not* set during the call are reset to their "factory"-default values. If \code{FALSE}, on the other hand, arguments that have already been modified are not changed.
+#'
+#' @return
+#' Doesn't return anything.
+#'
+#' @seealso
+#' \code{\link[fixest]{coefplot}}
+#'
+#' @examples
+#'
+#' # coefplot has many arguments, which makes it highly flexible.
+#' # If you don't like the default style of coefplot. No worries,
+#' # you can set *your* default by using the function
+#' # setFixest_coefplot()
+#'
+#' # Estimation
+#' est = feols(Petal.Length ~ Petal.Width + Sepal.Length +
+#'                 Sepal.Width | Species, iris)
+#'
+#' # Plot with default style
+#' coefplot(est)
+#'
+#' # Now we permanently change some arguments
+#' dict = c("Petal.Length"="Length (Petal)", "Petal.Width"="Width (Petal)",
+#'          "Sepal.Length"="Length (Sepal)", "Sepal.Width"="Width (Sepal)")
+#'
+#' setFixest_coefplot(ci.col = 2, pt.col = "darkblue", ci.lwd = 3,
+#'                    pt.cex = 2, pt.pch = 15, ci.width = 0, dict = dict)
+#'
+#' # Tadaaa!
+#' coefplot(est)
+#'
+#' # To reset to the default settings:
+#' setFixest_coefplot()
+#' coefplot(est)
+#'
+setFixest_coefplot = function(dict, ci.width=0.1, ci_level = 0.95, pt.pch = 20, cex = par("cex"), pt.cex = cex, col = 1, pt.col = col, ci.col = col, lwd = par("lwd"), ci.lwd = lwd, ci.lty, grid = TRUE, grid.par = list(lty=3, col = "gray"), zero = TRUE, zero.par = list(col="black", lwd=1), join = FALSE, join.par = list(lwd=lwd), ref.line, ref.line.par = list(col = "black", lty = 2), only.inter = TRUE, reset = TRUE){
+
+    #
+    # Controls
+    #
+
+    check_arg(ci.width, "singleNumericGE0")
+    check_arg(ci_level, "singleNumericGE0LT1")
+    check_arg(lwd, "singleNumericGE0")
+    check_arg(ci.lwd, "singleNumericGE0")
+    check_arg(grid, "singleLogical")
+    if(is.null(grid.par)){
+        grid.par = list()
+    } else if(!is.list(grid.par) ) {
+        stop("Argument grid.par must be a list (even empty).")
+    }
+    check_arg(zero, "singleLogical")
+    if(is.null(zero.par)){
+        zero.par = list()
+    } else if(!is.list(zero.par) ) {
+        stop("Argument zero.par must be a list (even empty).")
+    }
+    check_arg(join, "singleLogical")
+    if(is.null(join.par)){
+        join.par = list()
+    } else if(!is.list(join.par) ) {
+        stop("Argument join.par must be a list (even empty).")
+    }
+    check_arg(ref.line, "singleLogical")
+    if(is.null(ref.line.par)){
+        ref.line.par = list()
+    } else if(!is.list(ref.line.par) ) {
+        stop("Argument ref.line.par must be a list (even empty).")
+    }
+    check_arg(only.inter, "singleLogical")
+    check_arg(reset, "singleLogical")
+
+    #
+    # Code
+    #
+
+    if(reset){
+        opts = list()
+    } else {
+        opts = getOption("fixest_coefplot")
+        if(is.null(opts)){
+            opts = list()
+        } else if(!is.list(opts)){
+            warning("Wrong format of getOption('fixest_coefplot'), the options of coefplot are reset.")
+            opts = list()
+        }
+    }
+
+    mc = match.call()
+
+    all_args = setdiff(names(mc), c("", "reset"))
+
+    for(arg in all_args){
+        opts[[arg]] = eval(mc[[arg]])
+    }
+
+    options("fixest_coefplot" = opts)
+}
 
 
 #### .................. ####

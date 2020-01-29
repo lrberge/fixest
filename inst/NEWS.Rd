@@ -3,6 +3,71 @@
 
 \title{News for \R Package \pkg{fixest}}
 
+\section{Changes in version 0.3.0 (2020-01-21)}{
+
+    \subsection{New feature: Lagging}{
+         \itemize{
+            \item You can now add lags and leads in any \code{fixest} estimations. You only need to provide the panel identifiers with the new argument \code{panel.id}, then you're free to use the new functions \code{l()} for lags and \code{f()} for leads.
+            \item You can also set up a panel data set using the function \code{panel} which allows you to use the lagging functions without having to provide the argument \code{panel.id}, and which dispose of more options for setting the panel.
+        }
+    }
+
+    \subsection{New feature: Interactions}{
+         \itemize{
+            \item You can now add interactions in formulas with a new syntax: \code{var::fe(ref)}
+            \item The command \code{var::fe(ref)} interacts the variable \code{var} with each value of \code{fe} and sets \code{ref} as a reference. Note that if you don't use the argument \code{ref}, the command \code{var::fe} is identical to \code{var:factor(fe)}.
+            \item Using \code{var::fe(ref)} to write interactions opens up a special treatment of such variables in the exporting function \code{etable} and in the coefficient plotting function \code{coefplot}.
+        }
+    }
+
+    \subsection{New feature: \code{coefplot}}{
+         \itemize{
+            \item You can plot coefficients and their associated confidence intervals with the function \code{coefplot}.
+            \item \code{coefplot} dispose of many options, whose default values can be set with the function \code{setFixest_coefplot}.
+            \item As for the function \code{etable}, you can easily rename/drop/order the coefficients.
+            \item \code{coefplot} detects when interactions have been used and offers a special display for it.
+        }
+    }
+
+    \subsection{New functions}{
+         \itemize{
+            \item[etable] Estimations table: new function to export the results of multiple estimations. Replaces the two functions \code{esttex} and \code{esttable} (the two functions still exist but they will be deprecated in the future).
+            \item[Lagging] New functions related to lagging: \code{l}, \code{f}, \code{panel}, \code{unpanel} and \code{[.fixest_panel}.
+            \item[Utilities] A set of small utility functions has been added. They allow to extract part a coefficient table or parts of it (like the t-statistics of the standard-error) from an estimation. These functions are \code{coeftable}, \code{ctable} (an alias to \code{coeftable}), \code{se}, \code{tstat} and \code{pvalue}.
+            \item[coefplot] The functions \code{coefplot} and \code{setFixest_coefplot}.
+        }
+    }
+
+    \subsection{User visible changes}{
+         \itemize{
+            \item[predict & fitted] Predict and fitted now returns vectors of the length equal to the one of original data.
+            \item[r2] Computation of the within-R2 for feglm models is now self-contained.
+            \item[all estimations] New, more accurate, stopping criterion for 2+ fixed-effects.
+            \item[feols] Estimations are slightly faster.
+            \item[esttable] When there are interactions, R may change the order of the interactions, making two interactions in two different estimations look different while they are in fact the same (e.g. x3:x2 and x2:x3). Now esstable automatically reorders the interactions when needed for comparison across estimations.
+            \item[esttable] The type of standard errors is now always shown.
+            \item[esttex] The aliases provided by 'dict' are also applied within interactions. For example: \code{dict=c(x1="Wind", x2="Rain")}, with an estimation with the following variables 'x1', 'x2', 'x1:x2' will lead to the following aliases in Latex 'Wind', 'Rain' and 'Wind $\\times$ Rain'.
+            \item[esttex] Interactions of similar values but of different order (e.g. x1:x2 and x2:x1) are reorderd to appear in the same lines.
+            \item[esttex] The i) type of standard errors and ii) the significance codes, are now displayed in two separate lines (otherwise the line would be too wide).
+            \item[esttex] Argument \code{yesNoFixef} can be of length one, defaulting the second element to the empty string.
+        }
+    }
+
+    \subsection{Bug correction}{
+         \itemize{
+            \item[all estimations] Fixed: bug when functions in the formula returned matrices.
+            \item[update] Fixed: error message when the data is missing.
+            \item[feglm] Fixed: bug double estimation when family not equal to poisson or logit
+            \item[feglm] Fixed: severe bug occurring for families not equal to poisson or logit
+            \item[predict] Fixed: bug when the estimation contained combined FEs.
+            \item[summary] Regarding small sample only: now Student t distribution is used instead of the Normal to compute the pvalue.
+            \item[esttex] Different variables with the same aliases (given by the argument 'dict') now appear in the same row.
+            \item[esttex] Arguments 'drop' and 'order' are now applied post aliasing (alias given by the argument 'dict').
+            \item[r2] Small bug regarding objects obtained with \code{did_estimate_yearly_effects}.
+        }
+    }
+}
+
 \section{Changes in version 0.2.1 (2019-11-22)}{
 
     \subsection{Major bug correction}{
