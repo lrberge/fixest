@@ -8,13 +8,20 @@ useDynLib(fixest, .registration = TRUE)
 export(feNmlm, femlm, feols, feglm, fepois, fenegbin)
 export(feglm.fit)
 # misc funs
-export(etable, esttex, esttable, collinearity, obs2remove, r2,
-       did_estimate_yearly_effects, did_plot_yearly_effects, errbar, did_means)
+export(etable, esttex, esttable, collinearity, obs2remove, r2)
+# did
+export(did_means)
+# graph
+export(coefplot)
+# small funs
 export(coeftable, ctable, se, tstat, pvalue)
 # Lag related
 export(panel, unpanel, f, l)
 # setters & getters
 exportPattern("^(s|g)etFixest")
+
+# deprecated
+export(did_estimate_yearly_effects, did_plot_yearly_effects, errbar)
 
 # Base methods
 S3method(print, fixest)
@@ -72,7 +79,7 @@ importFrom(Formula, Formula)
 importFrom(Rcpp, evalCpp)
 
 importFrom(graphics, par, plot, box, axis, abline, points, text, title,
-           lines, polygon, segments)
+           lines, polygon, segments, plot.default)
 
 
 
