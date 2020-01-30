@@ -40,6 +40,7 @@
 
     \subsection{User visible changes}{
          \itemize{
+            \item[estimation] A key pre-processing step has been paralellized => algorithm faster in general and much faster for multi-FEs.
             \item[predict & fitted] Predict and fitted now returns vectors of the length equal to the one of original data.
             \item[r2] Computation of the within-R2 for feglm models is now self-contained.
             \item[all estimations] New, more accurate, stopping criterion for 2+ fixed-effects.
@@ -64,6 +65,7 @@
             \item[esttex] Different variables with the same aliases (given by the argument 'dict') now appear in the same row.
             \item[esttex] Arguments 'drop' and 'order' are now applied post aliasing (alias given by the argument 'dict').
             \item[r2] Small bug regarding objects obtained with \code{did_estimate_yearly_effects}.
+            \item[estimations] bug when using weights in \code{feglm}.
         }
     }
 }

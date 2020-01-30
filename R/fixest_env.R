@@ -218,6 +218,9 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         stop("Argument 'notes' must be a single logical.")
     }
 
+    show_notes = notes
+    notes = c()
+
     if(!isLogical(warn)){
         stop("Argument 'warn' must be a single logical.")
     }
@@ -889,6 +892,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 is0W = weights.value == 0
                 is0W = is0W & !is.na(is0W)
                 message_0W = paste0(numberFormatNormal(sum(is0W)), " observation", plural(sum(is0W)), " removed because of 0-weight.")
+                notes = c(notes, message_0W)
             }
 
         } else if(!is.null(mc_origin$weights) && deparse_long(mc_origin$weights) != 'x[["weights"]]'){
@@ -1089,10 +1093,18 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             }
         }
 
-        # We change factors to character
-        isFactor = sapply(fixef_mat, is.factor)
-        if(any(isFactor)){
-            for(i in which(isFactor)){
+        # # We change factors to character
+        # isFactor = sapply(fixef_mat, is.factor)
+        # if(any(isFactor)){
+        #     for(i in which(isFactor)){
+        #         fixef_mat[[i]] = as.character(fixef_mat[[i]])
+        #     }
+        # }
+
+        # We change non-numeric to character (impotant for parallel qufing)
+        is_not_num = sapply(fixef_mat, function(x) !is.numeric(x))
+        if(any(is_not_num)){
+            for(i in which(is_not_num)){
                 fixef_mat[[i]] = as.character(fixef_mat[[i]])
             }
         }
@@ -1160,6 +1172,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             if(anyNA_sample){
                 msg = msg_na_inf(ANY_NA, ANY_INF)
                 message_NA = paste0(numberFormatNormal(nbNA), " observation", plural(nbNA), " removed because of ", msg, " (Breakup: ", msgNA_y, msgNA_L, msgNA_NL, msgNA_cluster, msgNA_slope, msgNA_offset, msgNA_weight, ").")
+                notes = c(notes, message_NA)
             }
 
             if(nbNA == nobs){
@@ -1193,157 +1206,102 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
             # we change the LHS variable
             lhs = lhs[-obs2remove_NA]
+
+            if(cpp_isConstant(lhs)){
+                # We absolutely need to control for that, otherwise, the code breaks later on
+
+                message(ifsingle(notes, "NOTE: ", "NOTES: "), paste(notes, collapse = "\n       "))
+                msg = "NAs"
+                if(any0W && !anyNA_sample) msg = "0-weight"
+                if(any0W && anyNA_sample) msg = "NAs and 0-weight"
+                stop("The dependent variable (after cleaning for ", msg, ") is a constant. Estimation cannot be done.")
+            }
         }
 
         # QUF setup ####
 
         Q = length(fixef_terms) # terms: contains FEs + slopes
-        fixef_id = fixef_names = list()
-        sum_y_all = fixef_table = list()
-        obs2remove = fixef_sizes = c()
-        fixef_removed = list()
-        slope_variables = list()
 
-        for(i in 1:Q){
 
-            check_remove = TRUE
-            if(isSlope){
 
-                # the slope variable
-                if(slope_flag[i]){
-                    slope_variables[[i]] = slope_mat[[slope_vars[i]]]
-                    if(length(slope_variables[[i]]) == 1){
-                        # si l'utilisateur utilise une constante comme variable...
-                        # il faut aussi controler pour quand il fait n'importe quoi...
-                        slope_variables[[i]] = rep(slope_variables[[i]], length(lhs))
-                    }
-                }
+        fixef_removed = slope_variables = list()
+        obs2remove = c()
 
-                if(i > 1 && slope_fe[i] %in% slope_fe[1:(i-1)]){
-                    # fe done already!
-                    i_done = which.max(slope_fe[1:(i-1)] == slope_fe[i])
-                    fixef_names[[i]] = fixef_names[[i_done]]
-                    fixef_id[[i]] = fixef_id[[i_done]]
-                    sum_y_all[[i]] = sum_y_all[[i_done]]
-                    fixef_table[[i]] = fixef_table[[i_done]]
-                    fixef_sizes[i] = fixef_sizes[i_done]
+        type = switch(family, gaussian = 0, logit = 2, 1)
+        do_sum_y = !origin_type %in% c("feols", "feglm")
 
-                    next
-                } else {
-                    dum_raw = fixef_mat[[slope_fe[i]]]
-
-                    if(all(slope_flag)){
-                        # we check the removal of obs
-                        #    iff there is a "pure" fixef (ie no slope fixef)
-                        # condition means fixef id only associated to slopes
-                        check_remove = FALSE
-                    }
-
-                }
-            } else {
-                dum_raw = fixef_mat[[fixef_vars[i]]]
-            }
-
-            # FEs turned into integers
-            info = quickUnclassFactor(dum_raw, addItem = TRUE)
-            fixef_names[[i]] = thisNames = info$items
-            dum = info$x
-
-            fixef_id[[i]] = dum
-            k = length(thisNames)
-
-            # We delete "all zero" outcome
-            sum_y_all[[i]] = sum_y_clust = cpp_tapply_vsum(k, lhs, dum)
-            fixef_table[[i]] = n_perClust = cpp_table(k, dum)
-            fixef_sizes[i] = k
-
-            if(check_remove){
-                if(family %in% c("poisson", "negbin")){
-                    qui = which(sum_y_clust == 0)
-                } else if(family == "logit"){
-                    qui = which(sum_y_clust == 0 | sum_y_clust == n_perClust)
-                } else if(family == "gaussian"){
-                    qui = NULL
-                }
-            } else {
-                qui = NULL
-            }
-
-            # I don't do fixef_removed[[i]] = stg because of the slopes
-            # if no slope, this is identical to fixef_removed[[i]] = stg
-            # if slope: then length(fixef_removed) ends up being identical to length(fixef_vars)
-            #    (remember that fixef_vars is the unique of slope_fe)
-            if(length(qui) > 0){
-                # We first delete the data:
-                # fixef_removed[[i]] = thisNames[qui]
-                fixef_removed[[length(fixef_removed) + 1]] = thisNames[qui]
-                obs2remove = unique(c(obs2remove, which(dum %in% qui)))
-            } else {
-                # fixef_removed[[i]] = character(0)
-                fixef_removed[[length(fixef_removed) + 1]] = character(0)
-            }
+        only_slope = FALSE
+        if(isSlope){
+            # only slope: not any non-slope
+            only_slope = as.vector(tapply(!slope_flag, slope_fe, sum)[fixef_vars]) == 0
         }
 
-        # We remove the problems
-        if(length(obs2remove) > 0){
+        quf_info_all = cpppar_quf_table_sum(x = fixef_mat, y = lhs, do_sum_y = do_sum_y, type = type, only_slope = only_slope, nthreads = nthreads)
+
+        fixef_id = quf_info_all$quf
+        # names
+        fixef_names = list()
+        is_string = sapply(fixef_mat, is.character)
+        for(i in 1:length(fixef_id)){
+            if(is_string[i]){
+                fixef_names[[i]] = fixef_mat[[i]][quf_info_all$items[[i]]]
+            } else {
+                fixef_names[[i]] = quf_info_all$items[[i]]
+            }
+        }
+        # table/sum_y/sizes
+        fixef_table = quf_info_all$table
+        sum_y_all = quf_info_all$sum_y
+        fixef_sizes = lengths(fixef_table)
+
+        # If observations have been removed:
+        if(!is.null(quf_info_all$obs_removed)){
+
+            # which obs are removed
+            obs2remove = which(quf_info_all$obs_removed)
 
             # update of the lhs
             lhs = lhs[-obs2remove]
 
-            # Then we recreate the dummies
-            for(i in 1:Q){
-
-                if(isSlope){
-
-                    # update of the slope variable
-                    if(slope_flag[i]){
-                        slope_variables[[i]] = slope_variables[[i]][-obs2remove]
-                    }
-
-                    if(i > 1 && slope_fe[i] %in% slope_fe[1:(i-1)]){
-                        # fe done already!
-                        i_done = which.max(slope_fe[1:(i-1)] == slope_fe[i])
-                        fixef_names[[i]] = fixef_names[[i_done]]
-                        fixef_id[[i]] = fixef_id[[i_done]]
-                        sum_y_all[[i]] = sum_y_all[[i_done]]
-                        fixef_table[[i]] = fixef_table[[i_done]]
-                        fixef_sizes[i] = fixef_sizes[i_done]
-
-                        next
-                    } else {
-                        dum_new = fixef_id[[i]][-obs2remove]
-                    }
+            # Names of the FE removed
+            for(i in 1:length(fixef_id)){
+                if(is_string[i]){
+                    fixef_removed[[i]] = fixef_mat[[i]][quf_info_all$fe_removed[[i]]]
                 } else {
-                    dum_new = fixef_id[[i]][-obs2remove]
+                    fixef_removed[[i]] = quf_info_all$fe_removed[[i]]
                 }
-
-                # new way: faster using cpp_update_dum
-                k = length(fixef_names[[i]])
-                info = cpp_update_dum(dum_new, k)
-                dum = info$dum_new
-                fixef_names[[i]] = fixef_names[[i]][info$keep == 1]
-
-                fixef_id[[i]] = dum
-                k = length(fixef_names[[i]])
-
-                # We also recreate these values
-                sum_y_all[[i]] = cpp_tapply_vsum(k, lhs, dum)
-                fixef_table[[i]] = cpp_table(k, dum)
-                fixef_sizes[i] = k
-
             }
 
-            # Then the "Notes"
-            nb_missing = sapply(fixef_removed, length)
-            message_cluster = paste0(paste0(nb_missing, collapse = "/"), " fixed-effect", plural(sum(nb_missing)), " (", numberFormatNormal(length(obs2remove)), " observation", plural_len(obs2remove), ") removed because of only ", ifelse(family=="logit", "zero (or only one)", "zero"), " outcomes.")
-
-            note = ifelse((anyNA_sample + any0W) > 0, "NOTES: ", "NOTE: ")
-            if(notes) message(note, message_NA, ifelse(anyNA_sample, "\n       ", ""), message_0W, ifelse(any0W, "\n       ", ""), message_cluster)
-
             names(fixef_removed) = fixef_vars
-        } else if(anyNA_sample){
-            note = ifelse((anyNA_sample + any0W) > 1, "NOTES: ", "NOTE: ")
-            if(notes) message(note, message_NA, ifelse(anyNA_sample && any0W, "\n       ", ""), message_0W)
+
+            # Then the "Notes"
+            nb_missing = lengths(fixef_removed)
+            message_cluster = paste0(paste0(nb_missing, collapse = "/"), " fixed-effect", plural(sum(nb_missing)), " (", numberFormatNormal(length(obs2remove)), " observation", plural_len(obs2remove), ") removed because of only ", ifelse(family=="logit", "zero (or only one)", "zero"), " outcomes.")
+            notes = c(notes, message_cluster)
+        }
+
+        # If slopes: we need to recreate some values (quf/table/sum_y)
+        if(isSlope){
+
+            # The slope variables
+            for(i in which(slope_flag)){
+                slope_variables[[i]] = slope_mat[[slope_vars[i]]]
+                if(length(slope_variables[[i]]) == 1){
+                    # si l'utilisateur utilise une constante comme variable...
+                    # il faut aussi controler pour quand il fait n'importe quoi...
+                    slope_variables[[i]] = rep(slope_variables[[i]], length(lhs))
+                }
+            }
+
+            dict = 1:length(fixef_vars)
+            names(dict) = fixef_vars
+            new_id = dict[slope_fe]
+
+            fixef_id = fixef_id[new_id]
+            fixef_names = fixef_names[new_id]
+            sum_y_all = sum_y_all[new_id]
+            fixef_table = fixef_table[new_id]
+            fixef_sizes = lengths(fixef_table)
         }
 
         if(length(obs2remove_NA) > 0){
@@ -1419,6 +1377,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
             if(anyNA_sample){
                 message_NA = paste0(numberFormatNormal(nbNA), " observation", plural(nbNA), " removed because of NA values (Breakup: ", msgNA_y, msgNA_L, msgNA_NL, msgNA_offset, msgNA_weight, ").")
+                notes = c(notes, message_NA)
 
                 if(nbNA == nobs){
                     stop("All observations contain NAs. Estimation cannot be done. (Breakup: ", msgNA_y, msgNA_L, msgNA_NL, msgNA_cluster, msgNA_offset, msgNA_weight, ")")
@@ -1439,14 +1398,19 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 }
             }
 
-            note = ifelse((anyNA_sample + any0W) == 2, "NOTES: ", "NOTE: ")
-            if(notes) message(note, message_NA, ifelse(anyNA_sample && any0W, "\n       ", ""), message_0W)
+            # note = ifelse((anyNA_sample + any0W) == 2, "NOTES: ", "NOTE: ")
+            # if(notes) message(note, message_NA, ifelse(anyNA_sample && any0W, "\n       ", ""), message_0W)
 
             # we drop the NAs from the fixef matrix
             obs2remove = which(isNA_sample)
         } else {
             obs2remove = c()
         }
+    }
+
+    # Messages
+    if(show_notes && length(notes) > 0){
+        message(ifsingle(notes, "NOTE: ", "NOTES: "), paste(notes, collapse = "\n       "))
     }
 
     # NA & problem management
@@ -1626,7 +1590,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             y_pos = lhs[lhs > 0]
             qui_pos = lhs > 0
             if(isWeight){
-                constant = sum(weights[qui_pos] * y_pos * cpppar_log(y_pos, nthreads) - weights[qui_pos] * y_pos)
+                constant = sum(weights.value[qui_pos] * y_pos * cpppar_log(y_pos, nthreads) - weights.value[qui_pos] * y_pos)
                 dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(wt[qui_pos] * y_pos * eta[qui_pos]) + sum(wt * mu))
             } else {
                 constant = sum(y_pos * cpppar_log(y_pos, nthreads) - y_pos)
