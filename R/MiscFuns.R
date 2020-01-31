@@ -3347,6 +3347,98 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 }
 
 
+
+#' Interact variables with factors
+#'
+#' Interacts a variable with another treated as a factor, and
+#'
+#' @param var
+#' @param fe
+#' @param ref
+#' @param confirm
+#'
+#' @return
+#' @export
+#'
+#' @examples
+i = interact = function(var, fe, ref, confirm = FALSE){
+    # Used to create interactions
+
+    mc = match.call()
+
+    var_name = deparse_long(mc$var)
+    fe_name = deparse_long(mc$fe)
+
+    # The NAs
+    is_na_fe = is.na(fe)
+
+    if(is.factor(fe)){
+        # we respect the fact that fe is a factor => we will keep its ordering
+        is_na_fe = is.na(fe)
+        fe_no_na = fe[!is_na_fe, drop = TRUE]
+        items = levels(fe_no_na)
+        fe_num = rep(NA, length(fe))
+        fe_num[!is_na_fe] = as.vector(unclass(fe_no_na))
+    } else {
+        if(any(is_na_fe)){
+            quf = quf_sorted(fe[!is_na_fe], addItem = TRUE)
+            fe_num = rep(NA, length(fe))
+            fe_num[!is_na_fe] = quf$x
+        } else {
+            quf = quf_sorted(fe, addItem = TRUE)
+            fe_num = quf$x
+        }
+
+        items = quf$items
+    }
+
+    noRef = FALSE
+    if(!missing(ref)){
+        # Controls
+
+        if(length(ref) > 1) stop("The argument 'ref' must be of length 1 (currenlty it is of length ", length(ref), ").")
+        if(is.na(ref)) stop("The argument 'ref' cannot be NA.")
+
+        if(!ref %in% items){
+            stop("Argument 'ref' is not an element of the variable ", fe_name, ".")
+        }
+
+        ref = which(items == ref)
+    } else {
+        noRef = TRUE
+        ref = 1
+    }
+
+    if(length(items) > 100 && !confirm){
+        stop("You are interacting ", var_name, " with a variable containing over 100 different values (exactly ", length(items), "). To proceed please add the argument 'confirm=TRUE'. Note that if you do not need the standard-errors, it is much faster to include the interactions in the fixed-effects part of the formula using ", fe_name, "[[", var_name, "]]. See details on how to add varying slopes.")
+    }
+
+    res = model.matrix(~ -1 + fe_num, model.frame(~ -1 + fe_num, data.frame(fe_num = factor(fe_num)), na.action = na.pass))
+
+    if(noRef){
+        res = res * var
+        colnames(res) = paste0(var_name, ":", fe_name, "::", items)
+    } else {
+        res = res[, -ref] * var
+        colnames(res) = paste0(var_name, ":", fe_name, "::", items[-ref])
+    }
+
+    # We send the information on the reference
+    opt = getOption("fixest_interaction_ref")
+    if(is.null(opt)){
+        is_ref = rep(FALSE, length(items))
+        if(noRef == FALSE){
+            is_ref[ref] = TRUE
+        }
+
+        opt = list(is_ref = is_ref, items = items, fe_type = class(fe))
+
+        options("fixest_interaction_ref" = opt)
+    }
+
+    res
+}
+
 #### ................. ####
 #### Internal Funs     ####
 ####
@@ -4398,8 +4490,6 @@ myPrintCoefTable = function(coeftable, lastLine = ""){
         ct[, i] = decimalFormat(ct[, i])
     }
 
-    # browser()
-
     ct[whoIsLow, 4] = "< 2.2e-16"
     ct[is.na(ct[, 4]), 4] = "NA"
 
@@ -4894,83 +4984,7 @@ combine_clusters = function(...){
     return(index)
 }
 
-interact = function(var, fe, ref, confirm = FALSE){
-    # Used to create interactions
 
-    mc = match.call()
-
-    var_name = deparse_long(mc$var)
-    fe_name = deparse_long(mc$fe)
-
-    # The NAs
-    is_na_fe = is.na(fe)
-
-    if(is.factor(fe)){
-        # we respect the fact that fe is a factor => we will keep its ordering
-        is_na_fe = is.na(fe)
-        fe_no_na = fe[!is_na_fe, drop = TRUE]
-        items = levels(fe_no_na)
-        fe_num = rep(NA, length(fe))
-        fe_num[!is_na_fe] = as.vector(unclass(fe_no_na))
-    } else {
-        if(any(is_na_fe)){
-            quf = quf_sorted(fe[!is_na_fe], addItem = TRUE)
-            fe_num = rep(NA, length(fe))
-            fe_num[!is_na_fe] = quf$x
-        } else {
-            quf = quf_sorted(fe, addItem = TRUE)
-            fe_num = quf$x
-        }
-
-        items = quf$items
-    }
-
-    noRef = FALSE
-    if(!missing(ref)){
-        # Controls
-
-        if(length(ref) > 1) stop("The argument 'ref' must be of length 1 (currenlty it is of length ", length(ref), ").")
-        if(is.na(ref)) stop("The argument 'ref' cannot be NA.")
-
-        if(!ref %in% items){
-            stop("Argument 'ref' is not an element of the variable ", fe_name, ".")
-        }
-
-        ref = which(items == ref)
-    } else {
-        noRef = TRUE
-        ref = 1
-    }
-
-    if(length(items) > 100 && !confirm){
-        stop("You are interacting ", var_name, " with a variable containing over 100 different values (exactly ", length(items), "). To proceed please add the argument 'confirm=TRUE'. Note that if you do not need the standard-errors, it is much faster to include the interactions in the fixed-effects part of the formula using ", fe_name, "[[", var_name, "]]. See details on how to add varying slopes.")
-    }
-
-    res = model.matrix(~ -1 + fe_num, model.frame(~ -1 + fe_num, data.frame(fe_num = factor(fe_num)), na.action = na.pass))
-
-    if(noRef){
-        res = res * var
-        colnames(res) = paste0(var_name, ":", fe_name, "::", items)
-    } else {
-        res = res[, -ref] * var
-        colnames(res) = paste0(var_name, ":", fe_name, "::", items[-ref])
-    }
-
-    # We send the information on the reference
-    opt = getOption("fixest_interaction_ref")
-    if(is.null(opt)){
-        is_ref = rep(FALSE, length(items))
-        if(noRef == FALSE){
-            is_ref[ref] = TRUE
-        }
-
-        opt = list(is_ref = is_ref, items = items, fe_type = class(fe))
-
-        options("fixest_interaction_ref" = opt)
-    }
-
-    res
-}
 
 interact_fml = function(fml){
     # The formula is simple (should contain only the RHS)
@@ -7529,7 +7543,7 @@ formula.fixest = function(x, type = c("full", "linear", "NL"), ...){
 #'
 #'
 #'
-model.matrix.fixest = function(object, data, ...){
+model.matrix.fixest = function(object, data, na.rm = TRUE, ...){
 	# We evaluate the formula with the past call
 
     # Checking the arguments
@@ -7552,7 +7566,10 @@ model.matrix.fixest = function(object, data, ...){
 	}
 
 	# II) evaluation with the data
+	original_data = FALSE
 	if(missing(data)){
+	    original_data = TRUE
+
 		call_old = object$call
 
 		data = NULL
@@ -7579,9 +7596,48 @@ model.matrix.fixest = function(object, data, ...){
 
 	data = as.data.frame(data)
 
-	res = model.matrix(fml, data)
+	# Panel setup
+	if(check_lag(fml)){
+	    if(!is.null(object$panel.info)){
+	        if(is.null(attr(data, "panel_info"))){
+	            # We try to recreate the panel
+	            if(any(!names(object$panel.info) %in% c("", "data", "panel.id"))){
+	                # This was NOT a standard panel creation
+	                stop("The original data set was a fixest_panel, now it isn't any more. Please restore the original data to a panel to perform model.matrix. NOTA: the original call to panel was:\n", deparse_long(object$panel.info))
+	            } else {
+	                panel__meta__info = panel_setup(data, object$panel.id, from_fixest = TRUE)
+	            }
+	        } else {
+	            panel__meta__info = attr(data, "panel_info")
+	        }
+	    } else {
+	        panel__meta__info = panel_setup(data, object$panel.id, from_fixest = TRUE)
+	    }
+	}
 
-	res
+	linear.mat = fixest_model_matrix(fml, data)
+
+	check_0 = TRUE
+	if(original_data && !is.null(object$obsRemoved)){
+	    linear.mat = linear.mat[-object$obsRemoved, , drop = FALSE]
+	} else if(na.rm){
+	    info = cpppar_which_na_inf_mat(linear.mat, nthreads = 1)
+        isNA_L = info$is_na_inf
+        linear.mat = linear.mat[-which(isNA_L), , drop = FALSE]
+	} else {
+	    check_0 = FALSE
+	}
+
+	if(check_0){
+	    only_0 = cpppar_check_only_0(linear.mat, nrow(linear.mat), nthreads = 1)
+	    if(all(only_0 == 1)){
+	        stop("After removing NAs, not a single explanatory variable is different from 0.")
+	    } else if(any(only_0 == 1)){
+	        linear.mat = linear.mat[, only_0 == 0, drop = FALSE]
+	    }
+	}
+
+    linear.mat
 }
 
 #### ............... ####
