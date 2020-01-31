@@ -628,8 +628,35 @@ List cpppar_cond_means(NumericMatrix mat_vars, IntegerVector treat, int nthreads
     return res;
 }
 
+// [[Rcpp::export]]
+IntegerVector cpppar_check_only_0(SEXP x_mat, int n, int nthreads){
+    // returns a 0/1 vectors => 1 means only 0
 
+    int K = Rf_length(x_mat) / n;
 
+    // Rcout << "K = " << K << "\n";
+    // stop("stop");
+
+    IntegerVector res(K);
+
+    #pragma omp parallel for num_threads(nthreads)
+    for(int k=0 ; k<K ; ++k){
+
+        double *pxk = REAL(x_mat) + k*n;
+
+        bool is_zero = true;
+        for(int i=0 ; i<n ; ++i){
+            if(pxk[i] != 0){
+                is_zero = false;
+                break;
+            }
+        }
+
+        res[k] = is_zero;
+    }
+
+    return res;
+}
 
 
 
