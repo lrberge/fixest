@@ -4,12 +4,14 @@
 \alias{model.matrix.fixest}
 \title{Design matrix of a \code{femlm} model}
 \usage{
-\method{model.matrix}{fixest}(object, data, ...)
+\method{model.matrix}{fixest}(object, data, na.rm = TRUE, ...)
 }
 \arguments{
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
 
 \item{data}{If missing (default) then the original data is obtained by evaluating the \code{call}. Otherwise, it should be a \code{data.frame}.}
+
+\item{na.rm}{Default is \code{TRUE}. Should observations with NAs be removed from the matrix?}
 
 \item{...}{Not currently used.}
 }

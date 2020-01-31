@@ -481,7 +481,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     # Controls and setting of the linear part:
     #
 
-    IS_INTER = FALSE
+    interaction.info = NULL
     if(isFit){
 
         isLinear = FALSE
@@ -535,11 +535,9 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
     } else {
         isLinear = FALSE
+        options("fixest_interaction_ref" = NULL)
 
         if(grepl("[^:]::[^:]", deparse_long(fml[[3]]))){
-            IS_INTER = TRUE
-
-            options("fixest_interaction_ref" = NULL)
 
             new_fml = try(interact_fml(fml), silent = TRUE)
             if("try-error" %in% class(new_fml)){
@@ -579,10 +577,9 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
             useModel.matrix = attr(linear.mat, "useModel.matrix")
 
-            # Interaction information
-            if(IS_INTER){
-                interaction.info = getOption("fixest_interaction_ref")
-            }
+            # Interaction information => if no interaction: NULL
+            interaction.info = getOption("fixest_interaction_ref")
+
 
             # # we look at whether there are factor-like variables to be evaluated
             # # if there is factors => model.matrix
@@ -2144,7 +2141,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     }
 
     # Interaction information
-    if(IS_INTER){
+    if(!is.null(interaction.info)){
         res$interaction.info = interaction.info
     }
 

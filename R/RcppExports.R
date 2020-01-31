@@ -221,11 +221,19 @@ cpppar_cond_means <- function(mat_vars, treat, nthreads = 1L) {
     .Call(`_fixest_cpppar_cond_means`, mat_vars, treat, nthreads)
 }
 
+cpppar_check_only_0 <- function(x_mat, n, nthreads) {
+    .Call(`_fixest_cpppar_check_only_0`, x_mat, n, nthreads)
+}
+
 cpp_quf_str <- function(x) {
     .Call(`_fixest_cpp_quf_str`, x)
 }
 
 cpp_quf_gnl <- function(x) {
     .Call(`_fixest_cpp_quf_gnl`, x)
+}
+
+cpppar_quf_table_sum <- function(x, y, do_sum_y, type, only_slope, nthreads) {
+    .Call(`_fixest_cpppar_quf_table_sum`, x, y, do_sum_y, type, only_slope, nthreads)
 }
 

@@ -17,6 +17,8 @@ export(coefplot)
 export(coeftable, ctable, se, tstat, pvalue)
 # Lag related
 export(panel, unpanel, f, l)
+# interactions
+export(i, interact)
 # setters & getters
 exportPattern("^(s|g)etFixest")
 

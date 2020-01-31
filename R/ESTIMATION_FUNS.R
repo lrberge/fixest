@@ -48,6 +48,8 @@
 #'
 #' Introducing interactions with this syntax leads to a different display of the interacted values in \code{\link[fixest]{etable}} and offers a special representation of the interacted coefficients in the function \code{\link[fixest]{coefplot}}. See examples.
 #'
+#' The syntax \code{var::fe(ref)} is in fact a shorthand for \code{interact(var, fe, ref)}, you have more information in \code{\link[fixest]{interact}} help pages.
+#'
 #'
 #' @seealso
 #' See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations. For plotting coefficients: see \code{\link[fixest]{coefplot}}.
@@ -104,19 +106,20 @@
 #' #
 #' # Using interactions:
 #' #
-#' \dontrun{
 #'
-#' "::" = function(a, b) NULL
+#' # NOTA: in fixest estimations, i(var, fe, ref) is equivalent to var::fe(ref)
 #'
 #' data(base_did)
 #' # We interact the variable 'period' with the variable 'treat'
-#' #  using the var::fe(ref) notation
-#' est_did = feols(y ~ x1 + treat::period(5) | id+period, base_did)
+#' est_did = feols(y ~ x1 + i(treat, period, 5) | id+period, base_did)
+#'
+#' # You could have used the following formula instead:
+#' # y ~ x1 + treat::period(5) | id+period
 #'
 #' # Now we can plot the result of the interaction with coefplot
 #' coefplot(est_did)
 #' # You have many more example in coefplot help
-#' }
+#'
 #'
 feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, fixef.iter = 2000,
                  na_inf.rm = getFixest_na_inf.rm(), nthreads = getFixest_nthreads(),

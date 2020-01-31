@@ -82,6 +82,8 @@ You can interact a variable with a "factor-like" variable by using the syntax \c
 The full syntax is: \code{var::fe(ref, confirm)}. You have two arguments, \code{ref} and \code{confirm}, the two are optional. The argument \code{confirm} is there to avoid mistakenly estimating a model with (too) many variables. If the variable \code{fe} takes over 100 different values, then you have to add the argument \code{confirm = TRUE}. It is important to note that *if you do not care about the standard-errors of the interactions*, then you can add interactions in the fixed-effects part of the formula (using the syntax fe[[var]], as explained in the section \dQuote{Varying slopes}).
 
 Introducing interactions with this syntax leads to a different display of the interacted values in \code{\link[fixest]{etable}} and offers a special representation of the interacted coefficients in the function \code{\link[fixest]{coefplot}}. See examples.
+
+The syntax \code{var::fe(ref)} is in fact a shorthand for \code{interact(var, fe, ref)}, you have more information in \code{\link[fixest]{interact}} help pages.
 }
 
 \examples{
@@ -124,14 +126,19 @@ etable(est1, est2, order = "f", drop="Int")
 # Using interactions:
 #
 
+# NOTA: in fixest estimations, i(var, fe, ref) is equivalent to var::fe(ref)
+
 data(base_did)
 # We interact the variable 'period' with the variable 'treat'
-#  using the var::fe(ref) notation
-est_did = feols(y ~ x1 + treat::period(5) | id+period, base_did)
+est_did = feols(y ~ x1 + i(treat, period, 5) | id+period, base_did)
+
+# You could have used the following formula instead:
+# y ~ x1 + treat::period(5) | id+period
 
 # Now we can plot the result of the interaction with coefplot
 coefplot(est_did)
 # You have many more example in coefplot help
+
 
 }
 \references{

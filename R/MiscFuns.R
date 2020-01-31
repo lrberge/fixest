@@ -2222,9 +2222,6 @@ collinearity = function(x, verbose){
 #' # Example 2: Interactions
 #' #
 #'
-#' \dontrun{
-#'
-#' "::" = function(a, b) NULL
 #'
 #' # Now we estimate and plot the "yearly" treatment effects
 #'
@@ -2232,8 +2229,10 @@ collinearity = function(x, verbose){
 #' base_inter = base_did
 #'
 #' # We interact the variable 'period' with the variable 'treat'
-#' #  using the var::fe(ref) notation
-#' est_did = feols(y ~ x1 + treat::period(5) | id+period, base_inter)
+#' est_did = feols(y ~ x1 + i(treat, period, 5) | id+period, base_inter)
+#'
+#' # You could have written the following formula instead:
+#' # y ~ x1 + treat::period(5) | id+period
 #'
 #' # In the estimation, the variable treat is interacted
 #' #  with each value of period but 5, set as a reference
@@ -2263,16 +2262,15 @@ collinearity = function(x, verbose){
 #' base_inter$period_month = all_months[base_inter$period]
 #'
 #' # The new estimation
-#' est = feols(y ~ x1 + treat::period_month("oct") | id+period, base_inter)
+#' est = feols(y ~ x1 + i(treat, period_month, "oct") | id+period, base_inter)
 #' # Since 'period_month' of type character, coefplot sorts it
 #' coefplot(est)
 #'
 #' # To respect a plotting order, use a factor
 #' base_inter$month_factor = factor(base_inter$period_month, levels = all_months)
-#' est = feols(y ~ x1 + treat::month_factor("oct") | id+period, base_inter)
+#' est = feols(y ~ x1 + i(treat, month_factor, "oct") | id+period, base_inter)
 #' coefplot(est)
 #'
-#' }
 #'
 #' #
 #' # Example 3: Setting defaults
@@ -3350,17 +3348,49 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 
 #' Interact variables with factors
 #'
-#' Interacts a variable with another treated as a factor, and
+#' Interacts a variable with another treated as a factor, and sets a reference
 #'
-#' @param var
-#' @param fe
-#' @param ref
-#' @param confirm
+#' @param var A vector.
+#' @param fe A vector (of any type). Must be of the same length as \code{var}.
+#' @param ref A single value that belongs to the interacted variable (\code{fe}). Can be missing.
+#' @param confirm Logical, default is \code{FALSE}. If the factor variable has over 100 cases, you need to use \code{confirm = TRUE} to carry on.
 #'
 #' @return
-#' @export
+#' It returns a matrix with number of rows the length of \code{var}. The number of columns is equal to the number of cases contained in \code{fe} minus the reference.
+#'
+#' @section Shorthand in \code{fixest} estimations:
+#' In \code{fixest} estimations, instead of using \code{i(var, fe, ref)}, you can instead use the following writing \code{var::fe(ref)}.
+#'
+#' @author
+#' Laurent Berge
+#'
+#' @seealso
+#' \code{\link[fixest]{coefplot}} to plot interactions, \code{\link[fixest]{feols}} for OLS estimation with multiple fixed-effects.
 #'
 #' @examples
+#'
+#' #
+#' # Simple illustration
+#' #
+#'
+#' x = rnorm(10)
+#' y = rep(1:4, 3)[1:10]
+#'
+#' cbind(x, y, i(x, y, 1))
+#'
+#' #
+#' # In fixest estimations
+#' #
+#'
+#' # NOTA: in fixest estimations, i(var, fe, ref) is equivalent to var::fe(ref)
+#'
+#' data(base_did)
+#' # We interact the variable 'period' with the variable 'treat'
+#' est_did = feols(y ~ x1 + i(treat, period, 5) | id+period, base_did)
+#'
+#' # You could have used the following formula instead:
+#' # y ~ x1 + treat::period(5) | id+period
+#'
 i = interact = function(var, fe, ref, confirm = FALSE){
     # Used to create interactions
 
@@ -3368,6 +3398,10 @@ i = interact = function(var, fe, ref, confirm = FALSE){
 
     var_name = deparse_long(mc$var)
     fe_name = deparse_long(mc$fe)
+
+    if(length(var) != length(fe)){
+        stop("The arguments 'var' and 'fe' must be of the same length (currently ", length(var), " vs ", length(fe), ").")
+    }
 
     # The NAs
     is_na_fe = is.na(fe)
@@ -3438,6 +3472,9 @@ i = interact = function(var, fe, ref, confirm = FALSE){
 
     res
 }
+
+#' @rdname i
+"interact"
 
 #### ................. ####
 #### Internal Funs     ####
@@ -4684,9 +4721,7 @@ fixest_model_matrix = function(fml, data){
     # either applies an evaluation (which can be faster)
 
     # Modify the formula to add interactions
-    is_interaction = FALSE
     if(grepl("::", deparse_long(fml[[3]]))){
-        is_interaction = TRUE
         fml = interact_fml(fml)
     }
 
@@ -4710,14 +4745,14 @@ fixest_model_matrix = function(fml, data){
         linear.mat = prepare_matrix(fml, data)
     }
 
-    if(is_interaction){
+    if(any(grepl("^(i|interact)\\(", colnames(linear.mat)))){
         # the following is needed (later in fixest_env => means there are factors)
         useModel.matrix = TRUE
 
         # we change the names
         new_names = colnames(linear.mat)
         all_terms = attr(terms(fml), "term.labels")
-        terms_inter = all_terms[grepl("^interact\\(", all_terms)]
+        terms_inter = all_terms[grepl("^(i|interact)\\(", all_terms)]
 
         for(pattern in terms_inter){
             new_names = gsub(pattern, "", new_names, fixed = TRUE)
@@ -7521,6 +7556,7 @@ formula.fixest = function(x, type = c("full", "linear", "NL"), ...){
 #' @inheritParams nobs.fixest
 #'
 #' @param data If missing (default) then the original data is obtained by evaluating the \code{call}. Otherwise, it should be a \code{data.frame}.
+#' @param na.rm Default is \code{TRUE}. Should observations with NAs be removed from the matrix?
 #' @param ... Not currently used.
 #'
 #' @return
@@ -7617,15 +7653,18 @@ model.matrix.fixest = function(object, data, na.rm = TRUE, ...){
 
 	linear.mat = fixest_model_matrix(fml, data)
 
-	check_0 = TRUE
+	check_0 = FALSE
 	if(original_data && !is.null(object$obsRemoved)){
+	    check_0 = TRUE
 	    linear.mat = linear.mat[-object$obsRemoved, , drop = FALSE]
 	} else if(na.rm){
+	    check_0 = TRUE
 	    info = cpppar_which_na_inf_mat(linear.mat, nthreads = 1)
-        isNA_L = info$is_na_inf
-        linear.mat = linear.mat[-which(isNA_L), , drop = FALSE]
-	} else {
-	    check_0 = FALSE
+
+	    if(info$any_na_inf){
+	        isNA_L = info$is_na_inf
+	        linear.mat = linear.mat[-which(isNA_L), , drop = FALSE]
+	    }
 	}
 
 	if(check_0){

@@ -40,17 +40,18 @@
 
     \subsection{User visible changes}{
          \itemize{
-            \item[estimation] A key pre-processing step has been paralellized => algorithm faster in general and much faster for multi-FEs.
+            \item[all estimations] A key pre-processing step has been paralellized => algorithm faster in general and much faster for multi-FEs.
             \item[predict & fitted] Predict and fitted now returns vectors of the length equal to the one of original data.
             \item[r2] Computation of the within-R2 for feglm models is now self-contained.
             \item[all estimations] New, more accurate, stopping criterion for 2+ fixed-effects.
             \item[feols] Estimations are slightly faster.
-            \item[esttable] When there are interactions, R may change the order of the interactions, making two interactions in two different estimations look different while they are in fact the same (e.g. x3:x2 and x2:x3). Now esstable automatically reorders the interactions when needed for comparison across estimations.
-            \item[esttable] The type of standard errors is now always shown.
-            \item[esttex] The aliases provided by 'dict' are also applied within interactions. For example: \code{dict=c(x1="Wind", x2="Rain")}, with an estimation with the following variables 'x1', 'x2', 'x1:x2' will lead to the following aliases in Latex 'Wind', 'Rain' and 'Wind $\\times$ Rain'.
-            \item[esttex] Interactions of similar values but of different order (e.g. x1:x2 and x2:x1) are reorderd to appear in the same lines.
-            \item[esttex] The i) type of standard errors and ii) the significance codes, are now displayed in two separate lines (otherwise the line would be too wide).
-            \item[esttex] Argument \code{yesNoFixef} can be of length one, defaulting the second element to the empty string.
+            \item[etable/esttex] When there are interactions, R may change the order of the interactions, making two interactions in two different estimations look different while they are in fact the same (e.g. x3:x2 and x2:x3). Now esstable automatically reorders the interactions when needed for comparison across estimations.
+            \item[etable/esttable] The type of standard errors is now always shown.
+            \item[etable/esttex] The aliases provided by 'dict' are also applied within interactions. For example: \code{dict=c(x1="Wind", x2="Rain")}, with an estimation with the following variables 'x1', 'x2', 'x1:x2' will lead to the following aliases in Latex 'Wind', 'Rain' and 'Wind $\\times$ Rain'.
+            \item[etable/esttex] Interactions of similar values but of different order (e.g. x1:x2 and x2:x1) are reorderd to appear in the same lines.
+            \item[etable/esttex] The i) type of standard errors and ii) the significance codes, are now displayed in two separate lines (otherwise the line would be too wide).
+            \item[etable/esttex] Argument \code{yesNoFixef} can be of length one, defaulting the second element to the empty string.
+            \item[etable/esttex] Escaping of Latex special characters is now much more robust.
         }
     }
 
@@ -64,6 +65,7 @@
             \item[summary] Regarding small sample only: now Student t distribution is used instead of the Normal to compute the pvalue.
             \item[esttex] Different variables with the same aliases (given by the argument 'dict') now appear in the same row.
             \item[esttex] Arguments 'drop' and 'order' are now applied post aliasing (alias given by the argument 'dict').
+            \item[esttex] But when exporting multi-way standard errors.
             \item[r2] Small bug regarding objects obtained with \code{did_estimate_yearly_effects}.
             \item[estimations] bug when using weights in \code{feglm}.
         }
