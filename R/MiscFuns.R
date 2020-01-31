@@ -456,8 +456,8 @@ etable = function(..., se=c("standard", "white", "cluster", "twoway", "threeway"
     check_arg(digits, "singleIntegerGE1")
     check_arg(title, "singleCharacter")
     check_arg(sdBelow, "singleLogical")
-    check_arg(drop, "characterVector")
-    check_arg(order, "characterVector")
+    check_arg(drop, "characterVector", "The arg. 'drop' must be a vector of regular expressions (see help(regex)). REASON")
+    check_arg(order, "characterVector", "The arg. 'order' must be a vector of regular expressions (see help(regex)). REASON")
     check_arg(file, "singleCharacter")
     check_arg(replace, "singleLogical")
     check_arg(convergence, "singleLogical")
@@ -2552,37 +2552,15 @@ coefplot = function(object, sd, ci_low, ci_top, x, x.shift = 0, dict, drop, orde
 	    my_order = 1:n
 	    names(my_order) = all_vars
 
-	    # Drop
-	    if(!missing(drop)){
-	        check_arg(drop, "characterVector")
+	    # dropping some coefs
+	    all_vars = drop_apply(all_vars, drop)
 
-	        for(var2drop in drop){
-	            if(grepl("^!", var2drop)){
-	                all_vars = all_vars[grepl(substr(var2drop, 2, nchar(var2drop)), all_vars)]
-	            } else {
-	                all_vars = all_vars[!grepl(var2drop, all_vars)]
-	            }
-	        }
-
-	        if(length(all_vars) == 0){
-	            stop("Argument 'drop' has removed all variables!")
-	        }
+	    if(length(all_vars) == 0){
+	        stop("Argument 'drop' has removed all variables!")
 	    }
 
-	    # order
-	    if(!missing(order)){
-	        check_arg(order, "characterVector")
-
-	        for(var2order in rev(order)){
-	            if(grepl("^!", var2order)){
-	                who = !grepl(substr(var2order, 2, nchar(var2order)), all_vars)
-	                all_vars = c(all_vars[who], all_vars[!who])
-	            } else {
-	                who = grepl(var2order, all_vars)
-	                all_vars = c(all_vars[who], all_vars[!who])
-	            }
-	        }
-	    }
+	    # ordering the coefs
+	    all_vars = order_apply(all_vars, order)
 
 	    qui = my_order[all_vars]
 
@@ -3277,7 +3255,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
         # Changing the names of the variables
         if(!missnull(dict)){
             qui = which(res$vars %in% names(dict))
-            for(i in qui) res$vars[i] = .escapeChars(dict[res$vars[i]])
+            for(i in qui) res$vars[i] = escape_latex(dict[res$vars[i]], depth = 1)
         }
 
         # The data
@@ -3373,7 +3351,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #### Internal Funs     ####
 ####
 
-results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitstat, sdBelow=TRUE, dict = NULL, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, title, titles, yesNoFixef = c("Yes", "No"), keepFactors = FALSE, isTex = FALSE, useSummary, dots_call, powerBelow, interaction.combine, convergence, show_family, drop, order, file, fixef_sizes = FALSE, show_depvar=FALSE){
+results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitstat, sdBelow=TRUE, dict = NULL, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, title, yesNoFixef = c("Yes", "No"), keepFactors = FALSE, isTex = FALSE, useSummary, dots_call, powerBelow, interaction.combine, convergence, show_family, drop, order, file, fixef_sizes = FALSE, show_depvar=FALSE){
     # This function is the core of the functions esttable and esttex
 
     # for error handling => refers to the right function
@@ -3479,9 +3457,9 @@ results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitsta
     sqCor_list = family_list = theta_list = list()
 
     # To take care of factors
-    factorNames = c()
-    isFactor = vector(mode = "list", n_models)
-    nbFactor = vector(mode = "list", n_models) # the number of items per factor
+    fe_names = c()
+    is_fe = vector(mode = "list", n_models)
+    nb_fe = vector(mode = "list", n_models) # the number of items per factor
 
     slope_names = c()
     slope_flag_list = vector(mode = "list", n_models)
@@ -3493,20 +3471,18 @@ results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitsta
         } else {
             isSubtitles = TRUE
         }
+
+        if(isTex){
+            subtitles = escape_latex(subtitles, depth = 2)
+        }
+
     } else {
         subtitles = NULL
         isSubtitles = FALSE
     }
 
-    # if there are titles
-    if(!missing(titles)){
-        if(length(titles) != n_models){
-            stop(my_call, "If argument 'titles' is provided, it must be of the same length as the number of models. Current lengths: ", length(titles), " vs ", n_models, " .", call. = FALSE)
-        } else {
-            isTitles = TRUE
-        }
-    } else {
-        isTitles = FALSE
+    if(!is.null(dict) && isTex){
+        dict = escape_latex(dict, depth = 2)
     }
 
     #
@@ -3664,15 +3640,15 @@ results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitsta
             nbItems = c(nbItems, new_items)
         }
 
-        nbFactor[[m]] = nbItems
+        nb_fe[[m]] = nbItems
 
         # Formatting
 
         lFactor = rep(yesNoFixef[1], length(factor_var))
         names(lFactor) = factor_var
-        isFactor[[m]] = lFactor
+        is_fe[[m]] = lFactor
 
-        factorNames = unique(c(factorNames, factor_var, recursive=TRUE))
+        fe_names = unique(c(fe_names, factor_var, recursive=TRUE))
 
         #
         # SLOPES
@@ -3862,9 +3838,18 @@ results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitsta
         attr(fitstat_list, "format_names") = fitstat_dict[fitstat]
     }
 
-    if(missing(title)){
-        title = NULL
+    if(isTex){
+        if(missing(title)){
+            title = "no title"
+        } else {
+            title = escape_latex(title, 2)
+        }
+    } else {
+        if(missing(title)){
+            title = NULL
+        }
     }
+
 
     if((missing(convergence) && any(convergence_list == FALSE)) || (!missing(convergence) && convergence)){
         convergence = TRUE
@@ -3889,7 +3874,7 @@ results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitsta
     if(missing(file)) file = NULL
     if(missing(label)) label = NULL
 
-    res = list(se_type_list=se_type_list, var_list=var_list, coef_list=coef_list, coef_below=coef_below, sd_below=sd_below, depvar_list=depvar_list, obs_list=obs_list, convergence_list=convergence_list, factorNames=factorNames, isFactor=isFactor, nbFactor=nbFactor, slope_flag_list = slope_flag_list, slope_names=slope_names, useSummary=useSummary, model_names=model_names, family_list=family_list, theta_list=theta_list, fitstat_list=fitstat_list, subtitles=subtitles, isSubtitles=isSubtitles, title=title, convergence=convergence, family=family, drop=drop, order=order, file=file, label=label, sdBelow=sdBelow, signifCode=signifCode, fixef_sizes=fixef_sizes, depvar=depvar, useSummary=useSummary, dict=dict, yesNoFixef=yesNoFixef)
+    res = list(se_type_list=se_type_list, var_list=var_list, coef_list=coef_list, coef_below=coef_below, sd_below=sd_below, depvar_list=depvar_list, obs_list=obs_list, convergence_list=convergence_list, fe_names=fe_names, is_fe=is_fe, nb_fe=nb_fe, slope_flag_list = slope_flag_list, slope_names=slope_names, useSummary=useSummary, model_names=model_names, family_list=family_list, theta_list=theta_list, fitstat_list=fitstat_list, subtitles=subtitles, isSubtitles=isSubtitles, title=title, convergence=convergence, family=family, drop=drop, order=order, file=file, label=label, sdBelow=sdBelow, signifCode=signifCode, fixef_sizes=fixef_sizes, depvar=depvar, useSummary=useSummary, dict=dict, yesNoFixef=yesNoFixef)
 
     return(res)
 }
@@ -3907,9 +3892,9 @@ etable_internal_latex = function(info){
     depvar_list = info$depvar_list
     obs_list = info$obs_list
     convergence_list = info$convergence_list
-    factorNames = info$factorNames
-    isFactor = info$isFactor
-    nbFactor = info$nbFactor
+    fe_names = info$fe_names
+    is_fe = info$is_fe
+    nb_fe = info$nb_fe
     slope_names = info$slope_names
     slope_flag_list = info$slope_flag_list
     family_list = info$family_list
@@ -3935,8 +3920,8 @@ etable_internal_latex = function(info){
     #
 
     # Starting the table
-    myTitle = ifelse(!is.null(title), .escapeChars(title), "no title")
-    if(!is.null(label)) myTitle = paste0("\\label{", .escapeChars(label, TRUE), "} ", myTitle)
+    myTitle = title
+    if(!is.null(label)) myTitle = paste0("\\label{", label, "} ", myTitle)
     start_table = paste0("\\begin{table}[htbp]\\centering\n\\caption{",  myTitle, "}\n")
     end_table = "\\end{table}"
 
@@ -3955,7 +3940,7 @@ etable_internal_latex = function(info){
     qui = depvar_list %in% names(dict)
     who = depvar_list[qui]
     depvar_list[qui] = dict[who]
-    depvar_list = .escapeChars(depvar_list)
+    depvar_list = escape_latex(depvar_list, depth = 2)
 
     # We write the dependent variables properly, with multicolumn when necessary
     # to do that, we count the number of occurences of each variable (& we respect the order provided by the user)
@@ -4001,30 +3986,10 @@ etable_internal_latex = function(info){
     all_vars <- unique(c(var_list, recursive=TRUE))
 
     # dropping some coefs
-    if(!is.null(drop)){
-        if(!is.character(drop)) stop("the arg. 'drop' must be a character vector of regular expression (see help regex).")
-        for(var2drop in drop){
-            if(grepl("^!", var2drop)){
-                all_vars = all_vars[grepl(substr(var2drop, 2, nchar(var2drop)), all_vars)]
-            } else {
-                all_vars = all_vars[!grepl(var2drop, all_vars)]
-            }
-        }
-    }
+    all_vars = drop_apply(all_vars, drop, depth = 2)
 
     # ordering the coefs
-    if(!is.null(order)){
-        if(!is.character(order)) stop("the arg. 'order' must be a character vector of regular expression (see help regex).")
-        for(var2order in rev(order)){
-            if(grepl("^!", var2order)){
-                who = !grepl(substr(var2order, 2, nchar(var2order)), all_vars)
-                all_vars = c(all_vars[who], all_vars[!who])
-            } else {
-                who = grepl(var2order, all_vars)
-                all_vars = c(all_vars[who], all_vars[!who])
-            }
-        }
-    }
+    all_vars = order_apply(all_vars, order, depth = 2)
 
     # changing the names of the coefs
     aliasVars = all_vars
@@ -4033,7 +3998,7 @@ etable_internal_latex = function(info){
     qui = all_vars %in% names(dict)
     who = aliasVars[qui]
     aliasVars[qui] = dict[who]
-    aliasVars = .escapeChars(aliasVars)
+    aliasVars = escape_latex(aliasVars, depth = 2)
 
     coef_mat <- all_vars
     for(m in 1:n_models) coef_mat <- cbind(coef_mat, coef_list[[m]][all_vars])
@@ -4059,36 +4024,47 @@ etable_internal_latex = function(info){
         coef_lines = paste0(paste0(apply(coef_mat, 1, paste0, collapse="&"), collapse="\\\\\n"), "\\\\\n")
     }
 
-    # Factors (if needed)
-    if(length(factorNames) > 0){
+    # Fixed-effects (if needed)
+    if(length(fe_names) > 0){
         dumIntro = paste0("\\hline\n\\emph{Fixed-Effects}& ", paste(rep(" ", n_models), collapse="&"), "\\\\\n")
 
         for(m in 1:n_models) {
-            quoi = isFactor[[m]][factorNames]
+            quoi = is_fe[[m]][fe_names]
             quoi[is.na(quoi)] = yesNoFixef[2]
-            isFactor[[m]] = quoi
+            is_fe[[m]] = quoi
 
             # We do the same for the number of items
-            quoi = nbFactor[[m]][factorNames]
+            quoi = nb_fe[[m]][fe_names]
             quoi[is.na(quoi)] = "--"
-            nbFactor[[m]] = quoi
+            nb_fe[[m]] = quoi
         }
 
-        allFactors = matrix(c(isFactor, recursive=TRUE), nrow = length(factorNames))
-        # We change the names of the factors
-        qui = which(factorNames %in% names(dict))
-        if(length(qui) > 0) {
-            factorNames[qui] = dict[factorNames[qui]]
-        }
-        factorNames = .escapeChars(factorNames)
+        all_fe = matrix(c(is_fe, recursive = TRUE), nrow = length(fe_names))
 
-        allFactors = cbind(factorNames, allFactors)
-        factor_lines <- paste0(paste0(apply(allFactors, 1, paste0, collapse="&"), collapse="\\\\\n"), "\\\\\n")
+        # We change the names of the FEs
+        for(i in seq_along(fe_names)){
+            fe = fe_names[i]
+
+            if(fe %in% names(dict)){
+                fe_names[i] = dict[fe]
+            } else if(grepl("\\^", fe)){
+                fe_split = strsplit(fe, "\\^")[[1]]
+                who = fe_split %in% names(dict)
+                fe_split[who] = dict[fe_split[who]]
+                fe_names[i] = paste(fe_split, collapse = "$\\times$")
+            } else {
+                fe_names[i] = fe
+            }
+        }
+        fe_names = escape_latex(fe_names)
+
+        all_fe = cbind(fe_names, all_fe)
+        factor_lines <- paste0(paste0(apply(all_fe, 1, paste0, collapse="&"), collapse="\\\\\n"), "\\\\\n")
 
         # For the number of items
-        all_nb_Factors = matrix(c(nbFactor, recursive=TRUE), nrow = length(factorNames))
-        factorNames_nbItems = paste0("# ", factorNames)
-        all_nb_Factors = cbind(factorNames_nbItems, all_nb_Factors)
+        all_nb_Factors = matrix(c(nb_fe, recursive=TRUE), nrow = length(fe_names))
+        fe_names_nbItems = paste0("# ", fe_names)
+        all_nb_Factors = cbind(fe_names_nbItems, all_nb_Factors)
         nb_factor_lines <- paste0(paste0(apply(all_nb_Factors, 1, paste0, collapse="&"), collapse="\\\\\n"), "\\\\\n")
 
 
@@ -4112,7 +4088,7 @@ etable_internal_latex = function(info){
         qui = slope_names %in% names(dict)
         who = slope_names[qui]
         slope_names[qui] = dict[who]
-        slope_names = .escapeChars(slope_names)
+        slope_names = escape_latex(slope_names)
 
         # Matrix with yes/no information
         all_slopes = matrix(c(slope_flag_list, recursive = TRUE), nrow = length(slope_names))
@@ -4149,6 +4125,8 @@ etable_internal_latex = function(info){
 
     # The standard errors
     isUniqueSD = length(unique(unlist(se_type_list))) == 1
+    nb_col = length(obs_list) + 1
+    sd_intro = paste0("\\multicolumn{", nb_col, "}{l}{\\emph{")
     if(isUniqueSD){
         my_se = unique(unlist(se_type_list)) # it comes from summary
         # every model has the same type of SE
@@ -4156,25 +4134,16 @@ etable_internal_latex = function(info){
         if(my_se == "White") my_se = "White-corrected"
 
         # Now we modify the names of the clusters if needed
-        if(grepl("\\(", my_se)){
-            # we extract the clusters
-            se_cluster = strsplit(gsub("(^.+\\()|(\\))", "", my_se), " & ")[[1]]
-            qui = se_cluster %in% names(dict)
-            se_cluster[qui] = dict[se_cluster[qui]]
-            se_cluster = .escapeChars(se_cluster)
-            new_se = gsub("\\(.+", "", my_se)
-            my_se = paste0(new_se, "(", paste0(se_cluster, collapse = " & "), ")")
-        }
+        my_se = format_se_type_latex(my_se, dict)
 
-        nb_col = length(obs_list) + 1
-        # info_SD = paste0("\\hline\n\\hline\n\\multicolumn{", nb_col, "}{l}{\\emph{", my_se, " standard-errors in parentheses. Signif Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
-        sd_intro = paste0("\\multicolumn{", nb_col, "}{l}{\\emph{")
         info_SD = paste0("\\hline\n\\hline\n", sd_intro, my_se, " standard-errors in parentheses.}}\\\\\n")
         info_SD = paste0(info_SD, sd_intro, "Signif Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
         info_muli_se = ""
     } else {
-        info_muli_se = paste0("Standard-Error type& ", paste(se_type_list, collapse="&"), "\\\\\n")
-        info_SD = "\\hline\n\\hline\n\\\\\n"
+        all_se_type = sapply(se_type_list, format_se_type_latex, dict = dict, inline = TRUE)
+        info_muli_se = paste0("Standard-Error type& ", paste(all_se_type, collapse = "&"), "\\\\\n")
+
+        info_SD = paste0("\\hline\n\\hline\n", sd_intro, "Signif Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
     }
 
     # Information on number of items
@@ -4222,9 +4191,9 @@ etable_internal_df = function(info){
     depvar_list = info$depvar_list
     obs_list = info$obs_list
     convergence_list = info$convergence_list
-    factorNames = info$factorNames
-    isFactor = info$isFactor
-    nbFactor = info$nbFactor
+    fe_names = info$fe_names
+    is_fe = info$is_fe
+    nb_fe = info$nb_fe
     slope_names = info$slope_names
     slope_flag_list = info$slope_flag_list
     family_list = info$family_list
@@ -4253,30 +4222,10 @@ etable_internal_df = function(info){
     all_vars <- unique(c(var_list, recursive=TRUE))
 
     # dropping some coefs
-    if(!is.null(drop)){
-        if(!is.character(drop)) stop("the arg. 'drop' must be a character vector of regular expression (see help regex).")
-        for(var2drop in drop){
-            if(grepl("^!", var2drop)){
-                all_vars = all_vars[grepl(substr(var2drop, 2, nchar(var2drop)), all_vars)]
-            } else {
-                all_vars = all_vars[!grepl(var2drop, all_vars)]
-            }
-        }
-    }
+    all_vars = drop_apply(all_vars, drop, depth = 2)
 
     # ordering the coefs
-    if(!is.null(order)){
-        if(!is.character(order)) stop("the arg. 'order' must be a character vector of regular expression (see help regex).")
-        for(var2order in rev(order)){
-            if(grepl("^!", var2order)){
-                who = !grepl(substr(var2order, 2, nchar(var2order)), all_vars)
-                all_vars = c(all_vars[who], all_vars[!who])
-            } else {
-                who = grepl(var2order, all_vars)
-                all_vars = c(all_vars[who], all_vars[!who])
-            }
-        }
-    }
+    all_vars = order_apply(all_vars, order, depth = 2)
 
     coef_mat <- all_vars
     for(m in 1:n_models) coef_mat <- cbind(coef_mat, coef_list[[m]][all_vars])
@@ -4304,16 +4253,16 @@ etable_internal_df = function(info){
     theLine[1] = sprintf("%.*s", max(nchar(theLine[1]), 19), myLine)
 
     # The FEs
-    if(length(factorNames)>0){
+    if(length(fe_names)>0){
 
         for(m in 1:n_models) {
-            quoi = isFactor[[m]][factorNames]
+            quoi = is_fe[[m]][fe_names]
             quoi[is.na(quoi)] = "No"
-            isFactor[[m]] = quoi
+            is_fe[[m]] = quoi
         }
-        allFactors = matrix(c(isFactor, recursive=TRUE), nrow = length(factorNames))
-        allFactors = cbind(factorNames, allFactors)
-        factor_lines <- paste0(paste0(apply(allFactors, 1, paste0, collapse="&"), collapse="\\\\\n"), "\\\\\n")
+        all_fe = matrix(c(is_fe, recursive=TRUE), nrow = length(fe_names))
+        all_fe = cbind(fe_names, all_fe)
+        factor_lines <- paste0(paste0(apply(all_fe, 1, paste0, collapse="&"), collapse="\\\\\n"), "\\\\\n")
 
         myLine = "-------------------------------"
 
@@ -5168,29 +5117,59 @@ shade_area <- function(y1, y2, x, xmin, xmax, col="grey", ...){
 #### Small Utilities ####
 ####
 
-.escapeChars = function(x, onlyPCT = FALSE){
-    # Escapes the % and _ for latex
+escape_all = function(x){
+    # we escape all
+    res = gsub("((?<=[^\\\\])|(?<=^))(\\$|_|%|&|\\^)", "\\\\\\2", x, perl = TRUE)
+    res
+}
 
-    if(all(!grepl("%|_", x))){
-        return(x)
+escape_latex = function(x_all, depth = 0, noArg = FALSE){
+    # This is super tricky to escape properly!
+    # We do NOT escape within equations
+
+    x_name = deparse(substitute(x_all))
+
+    res = c()
+
+    for(index in seq_along(x_all)){
+        x = x_all[index]
+
+        # 1) finding out equations, ie non escaped dollar signs
+        dollars = gregexpr("((?<=[^\\\\])|(?<=^))\\$", x, perl = TRUE)[[1]]
+
+        is_eq = FALSE
+        if(length(dollars) > 1){
+            is_eq = TRUE
+            if(length(dollars) %% 2 != 0){
+                my_arg = "T"
+                if(!noArg){
+                    my_arg = paste0("In argument '", x_name, "', t")
+                }
+                stop_depth(depth = depth, my_arg, "here are ", length(dollars), " dollar signs in the following character string:\n", x, "\nIt will raise a Latex error (which '$' means equation? which means dollar-sign?): if you want to use a regular dollar sign, please escape it like that: \\\\$.")
+            }
+        }
+
+        # 2) Escaping but conditionnally on not being in an equation
+        if(is_eq){
+            # Finding out the equations
+            all_items = strsplit(paste0(x, " "), "((?<=[^\\\\])|(?<=^))\\$", perl = TRUE)[[1]]
+            for(i in seq_along(all_items)){
+                if(i %% 2 == 1){
+                    all_items[i] = escape_all(all_items[i])
+                }
+            }
+
+            res[index] = gsub(" $", "", paste(all_items, collapse = "$"))
+        } else {
+            res[index] = escape_all(x)
+        }
     }
 
-	# changes % into \% => to escape that character in Latex
-	res = gsub("%", "\\%", x, fixed = TRUE)
-	res = gsub("\\\\%", "\\%", res, fixed = TRUE) # if the user escaped: not done twice
+    if(!is.null(names(x_all))){
+        names(res) = names(x_all)
+    }
 
-	if(onlyPCT){
-	    return(res)
-	}
-
-	# Escapes the underscore, but only NOT in equations
-	qui = !grepl("\\$", res)
-	if(any(qui)){
-	    res[qui] = gsub("_", "\\_", res[qui], fixed = TRUE)
-	    res[qui] = gsub("\\\\_", "\\_", res[qui], fixed = TRUE) # if the user escaped: not done twice
-	}
-
-	res
+    res
 }
 
 formatBicLL = function(bic, ll){
@@ -5388,6 +5367,50 @@ mysignif = function (x, d = 2, r = 1){
     sapply(x, mysignif_single, d = d, r = r)
 }
 
+drop_apply = function(x, drop = NULL, depth = 1){
+
+    if(missing(drop) || length(drop) == 0){
+        return(x)
+    }
+
+    check_arg(drop, "characterVector", call_depth = depth, message = "The arg. 'drop' must be a vector of regular expressions (see help(regex)). REASON")
+
+    res = x
+
+    for(var2drop in drop){
+        if(grepl("^!", var2drop)){
+            res = res[grepl(substr(var2drop, 2, nchar(var2drop)), res)]
+        } else {
+            res = res[!grepl(var2drop, res)]
+        }
+    }
+
+    res
+}
+
+order_apply = function(x, order = NULL, depth = 1){
+
+    if(missing(order) || length(order) == 0){
+        return(x)
+    }
+
+    check_arg(order, "characterVector", call_depth = depth, message = "The arg. 'order' must be a vector of regular expressions (see help(regex)). REASON")
+
+    res = x
+
+    for(var2order in rev(order)){
+        if(grepl("^!", var2order)){
+            who = !grepl(substr(var2order, 2, nchar(var2order)), res)
+            res = c(res[who], res[!who])
+        } else {
+            who = grepl(var2order, res)
+            res = c(res[who], res[!who])
+        }
+    }
+
+    res
+}
+
 n_times = function(n){
 
     if(n <= 4){
@@ -5580,38 +5603,6 @@ msg_na_inf = function(any_na, any_inf){
     res
 }
 
-check_dots_args = function(mc, dots_args = c(), suggest_args = c()){
-    # Function to catch the arguments passing in ...
-    # we suggest some principal arguments
-
-    fun_name = as.character(mc[[1]])
-
-    args = names(mc$...)
-    args = args[nchar(args) > 0]
-
-    args_invalid = setdiff(args, dots_args)
-    res = FALSE
-    if(length(args_invalid) > 0){
-        res = TRUE
-        suggest_info = setdiff(suggest_args, names(mc))
-        suggest = ""
-        if(length(suggest_info) == 1){
-            if(length(suggest_args) == 1){
-                suggest = paste0(" (fyi, its main argument is ", suggest_info, ".)")
-            } else {
-                suggest = paste0(" (fyi, another of its main arguments is ", suggest_info, ".)")
-            }
-        } else if(length(suggest_info) >= 2){
-            suggest = paste0(" (fyi, some of its main arguments are ", enumerate_items(suggest_info), ".)")
-        }
-
-        msg = paste0(enumerate_items(args_invalid, "is"), " not ", ifsingle(args_invalid, "a valid argument", "valid arguments"), " for function ", fun_name, ".", suggest)
-        attr(res, "msg") = msg
-    }
-
-    res
-}
-
 
 which_na_inf = function(x, nthreads){
     # returns the same elements as cppar_which_na_inf_mat
@@ -5712,6 +5703,54 @@ format_se_type = function(x, width, by = FALSE){
     se_formatted
 }
 
+format_se_type_latex = function(x, dict = c(), inline = FALSE){
+    # we make 'nice' se types
+
+    if(!grepl("\\(", x)){
+        # means not clustered
+        # we escape all
+        return(escape_all(x))
+    }
+
+    # Now the FEs
+    all_fe = gsub(".+\\((.+)\\)", "\\1", x)
+
+    all_fe_split = gsub(" ", "", strsplit(all_fe, "&")[[1]])
+    n_fe = length(all_fe_split)
+
+    # Renaming the FEs
+
+    all_fe_format = c()
+    for(i in 1:length(all_fe_split)){
+        fe = all_fe_split[i]
+
+        if(fe %in% names(dict)){
+            all_fe_format[i] = dict[fe]
+        } else if(grepl("\\^", fe)){
+            fe_split = strsplit(fe, "\\^")[[1]]
+            who = fe_split %in% names(dict)
+            fe_split[who] = dict[fe_split[who]]
+            all_fe_format[i] = paste(fe_split, collapse = "$\\times$")
+        } else {
+            all_fe_format[i] = fe
+        }
+    }
+
+    fe_format = paste(all_fe_format, collapse = " \\& ")
+
+    # Full string
+    nb = c("One", "Two", "Three", "Four")
+    nway = paste0(nb[n_fe], "-way")
+
+    if(inline){
+        se_formatted = paste0(nway, ": ", fe_format)
+    } else {
+        se_formatted = paste0(nway, " (", fe_format, ")")
+    }
+
+    se_formatted
+}
+
 tex_star = function(x){
     qui = nchar(x) > 0
     x[qui] = paste0("$^{", x[qui], "}$")
@@ -5739,15 +5778,7 @@ extract_pipe = function(fml){
     list(fml=fml_new, pipe=pipe)
 }
 
-plural = function(x){
-    # adds s if x > 1
-    ifelse(x > 1, "s", "")
-}
 
-plural_len = function(x){
-    # adds s if length(x) > 1
-    ifelse(length(x) > 1, "s", "")
-}
 
 #### ................. ####
 #### Aditional Methods ####
