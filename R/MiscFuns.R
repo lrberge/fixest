@@ -198,8 +198,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' @param se Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{White}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.
 #' @param cluster Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1, "var2")]}, \code{cluster = c("var1, "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster).
 #' @param object A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
-#' @param dof Logical, default is \code{TRUE}. Should there be a degree of freedom correction to the standard errors of the coefficients?
-#' @param exact_dof Logical, default is \code{FALSE}. In case there were 2+ clusters in the estimation, it computes the exact number of degrees of freedom (this is not needed in case of balanced panels).
+#' @param dof An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}. Represent how the degree of freedom correction should be done. Defaults to \code{dof(fixef="nested", exact=FALSE, cluster = TRUE)}. See the help of the function \code{\link[fixest]{dof}} for details.
 #' @param forceCovariance (Advanced users.) Logical, default is \code{FALSE}. In the peculiar case where the obtained Hessian is not invertible (usually because of collinearity of some variables), use this option to force the covariance matrix, by using a generalized inverse of the Hessian. This can be useful to spot where possible problems come from.
 #' @param keepBounded (Advanced users -- feNmlm with non-linear part and bounded coefficients only.) Logical, default is \code{FALSE}. If \code{TRUE}, then the bounded coefficients (if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise it is not).
 #' @param ... Not currently used.
@@ -245,7 +244,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' }
 #'
 #'
-summary.fixest <- function(object, se, cluster, dof = TRUE, exact_dof = FALSE, forceCovariance = FALSE, keepBounded = FALSE, ...){
+summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), forceCovariance = FALSE, keepBounded = FALSE, ...){
 	# computes the clustered SD and returns the modified vcov and coeftable
 
 	if(!is.null(object$onlyFixef)){
@@ -276,7 +275,7 @@ summary.fixest <- function(object, se, cluster, dof = TRUE, exact_dof = FALSE, f
 	}
 
 	# The new VCOV
-	vcov = vcov(object, se=se, cluster=cluster, dof=dof, exact_dof=exact_dof, forceCovariance = forceCovariance, keepBounded = keepBounded, nframes_up = nframes_up)
+	vcov = vcov(object, se=se, cluster=cluster, dof=dof, forceCovariance = forceCovariance, keepBounded = keepBounded, nframes_up = nframes_up)
 
 	sd2 = diag(vcov)
 	sd2[sd2 < 0] = NA
@@ -323,7 +322,7 @@ summary.fixest <- function(object, se, cluster, dof = TRUE, exact_dof = FALSE, f
 #' @rdname summary.fixest
 "summ"
 
-summ = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, forceCovariance = FALSE, keepBounded = FALSE, ...){
+summ = function(object, se, cluster, dof = getFixest_dof(), forceCovariance = FALSE, keepBounded = FALSE, ...){
 
     # we reiterate the call
     mc = match.call()
@@ -4639,7 +4638,7 @@ vcovClust <- function (cluster, myBread, scores, dof=FALSE, K, do.unclass=TRUE){
 
     # Finite sample correction:
     if(dof){
-        dof_value  <- Q / (Q - 1) * (n - 1) / (n - K)
+        dof_value  <- Q / (Q - 1)
     } else {
         dof_value = 1
     }
@@ -4768,6 +4767,13 @@ fixest_model_matrix = function(fml, data){
 
 terms_fixef = function(fml){
     # separate all terms of fml into fixed effects ans varying slopes
+    # fml: one sided formula
+    # can also be a vector of terms
+
+    if(is.vector(fml)){
+        fml = as.formula(paste0("~", paste0(fml, collapse = "+")))
+    }
+
 
     # Internal function
     reformulate_varslope = function(dum, ..., add_dum = TRUE){
@@ -4867,6 +4873,16 @@ terms_fixef = function(fml){
     res$slope_vars = rep(NA, length(my_vars))
     res$slope_vars[res$slope_flag] = gsub(".+\\[|\\]", "", my_vars[res$slope_flag])
 
+    res
+}
+
+only_slope = function(fe_terms){
+    # returns a logical vector of whether a FE is only
+    # related to a slope
+
+    new_terms = terms_fixef(fe_terms)
+    fixef_vars = unique(new_terms$fe_vars)
+    res = tapply(!new_terms$slope_flag, new_terms$fe_vars, sum)[fixef_vars] == 0
     res
 }
 
@@ -6611,7 +6627,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 #' vcov(est_pois_simple, cluster = ~Product)
 #'
 #'
-vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, forceCovariance = FALSE, keepBounded = FALSE, ...){
+vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovariance = FALSE, keepBounded = FALSE, ...){
 	# computes the clustered vcov
 
     if(!"nframes_up" %in% names(match.call())){
@@ -6697,6 +6713,15 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 		nframes_up = dots$nframes_up + 1
 	}
 
+	# check the dof
+	if(!"dof.type" %in% class(dof)){
+	    stop("The argument 'dof.type' must be an object created by the function dof().")
+	} else {
+	    dof.fixef = dof$fixef
+	    is_exact = dof$exact
+	    is_cluster = dof$cluster
+	}
+
 	#
 	# non-linear: handling bounded parameters
 	#
@@ -6725,26 +6750,47 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 	#
 
 	n = object$nobs
-	K = object$nparams
+	n_fe = n_fe_ok = length(object$fixef_id)
 
-	if(exact_dof == TRUE){
-	    dof = TRUE
-		if(length(object$fixef_id) >= 2){
-			fe = fixef(object, notes = FALSE)
-			K = length(object$coefficients) + sum(object$fixef_sizes) - sum(attr(fe, "references"))
-		} else {
-		    exact_dof = FALSE
-		    warning("The argument 'exact_dof' is useful only for estimations with 2 or plus fixed-effects.", call. = TRUE, immediate. = TRUE)
-		}
+	# we adjust the fixef sizes to account for slopes
+	isSlope = FALSE
+	if(!is.null(object$fixef_terms)){
+	    isSlope = TRUE
+	    fixef_sizes_ok = object$fixef_sizes
+
+	    size_to_drop = only_slope(object$fixef_terms)[names(fixef_sizes_ok)]
+
+	    fixef_sizes_ok[size_to_drop] = 0
+	    n_fe_ok = sum(fixef_sizes_ok > 0)
+	} else {
+	    fixef_sizes_ok = object$fixef_sizes
 	}
 
-	correction.dof = n / (n - K*dof)
+	# How do we choose K? => argument dof
+
+	if(dof.fixef == "false"){
+	    # we do it with "minus" because of only slopes
+	    K = object$nparams
+	    if(n_fe_ok > 0){
+	        K = K - (sum(fixef_sizes_ok) - (n_fe_ok - 1))
+	    }
+	} else if(dof.fixef == "true" || se.val %in% c("standard", "white")){
+	    K = object$nparams
+	    if(is_exact && n_fe >= 2 && n_fe_ok >= 1){
+	        fe = fixef(object, notes = FALSE)
+	        K = K + (n_fe_ok - 1) - sum(attr(fe, "references"))
+	    }
+	} else {
+	    # nested
+	    # we delay the adjustment
+	    K = object$nparams
+	}
 
 	if(object$method == "feols"){
 		if(se.val != "standard"){
 			VCOV_raw = object$cov.unscaled / object$sigma2
 		} else {
-			VCOV_raw = object$cov.unscaled / (n / (n - K))
+			VCOV_raw = object$cov.unscaled / (n / (n - object$nparams))
 		}
 	} else {
 		VCOV_raw = object$cov.unscaled
@@ -6754,6 +6800,7 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 	# information on the variable used for the clustering
 	type_info = ""
 
+	is_nested = c()
 	if(anyNA(VCOV_raw)){
 
 		if(!forceCovariance){
@@ -6775,10 +6822,12 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 
 	} else if(se.val == "standard"){
 
+	    correction.dof = (n - 1) / (n - K)
 		vcov = VCOV_raw * correction.dof
 
 	} else if(se.val == "white"){
 
+	    correction.dof = (n - 1) / (n - K)
 		vcov = crossprod(myScore %*% VCOV_raw) * correction.dof
 
 	} else {
@@ -6811,6 +6860,8 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 				cluster = object$fixef_id[1:nway]
 
 				type_info = paste0(" (", paste0(object$fixef_vars[1:nway], collapse = " & "), ")")
+
+				is_nested = 1:nway
 
 				# in that specific case, there is no need of doing unclass.factor because already done
 				do.unclass = FALSE
@@ -6847,8 +6898,13 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 				if(all(cluster %in% object$fixef_vars)){
 					# cluster == names of clusters used in the estimation
 					type_info = paste0(" (", paste0(cluster, collapse = " & "), ")")
+
+					is_nested = which(names(object$fixef_id) %in% cluster)
+
 					cluster = object$fixef_id[cluster]
+
 					do.unclass = FALSE
+
 				} else {
 					cluster = gsub(" *", "", cluster)
 					if(!doEval){
@@ -7047,6 +7103,39 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 			}
 		}
 
+		# We recompute K
+		if(dof.fixef == "nested"){
+            if(do.unclass){
+                # we need to find out which is nested
+                is_nested = which(cpp_check_nested(object$fixef_id, cluster, object$fixef_sizes, n = n) == 1)
+            } else {
+                # no need to compute is_nested,
+                # we created it earlier
+            }
+
+		    if(length(is_nested) == n_fe){
+		        K = K - (sum(fixef_sizes_ok) - (n_fe_ok - 1))
+		    } else {
+		        if(is_exact && n_fe >= 2 && n_fe_ok >=1){
+		            fe = fixef(object, notes = FALSE)
+		            nb_ref = attr(fe, "references")
+
+		            # Slopes are a pain in the neck!!!
+		            if(length(is_nested) > 1){
+	                    id_nested = intersect(names(nb_ref), names(object$fixef_id)[is_nested])
+	                    nb_ref[id_nested] = object$fixef_sizes[id_nested]
+	                    total_refs = sum(nb_ref_fe) + sum(nb_ref_slope)
+		            } else {
+		                total_refs = sum(nb_ref)
+		            }
+
+		            K = K - total_refs
+		        } else {
+		            K = K - (sum(fixef_sizes_ok[is_nested]) - sum(fixef_sizes_ok[is_nested] > 0))
+		        }
+		    }
+		}
+
 		for(i in 1:nway){
 
 			myComb = combn(nway, i)
@@ -7077,8 +7166,8 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 
 				}
 
-				vcov = vcov + (-1)**(i+1) * vcovClust(index, VCOV_raw, myScore, dof, K, do.unclass=FALSE)
-
+				vcov = vcov + (-1)**(i+1) * vcovClust(index, VCOV_raw, myScore, dof = is_cluster, K, do.unclass=FALSE)
+				vcov = vcov * ((n - 1) / (n - K))
 			}
 		}
 	}
@@ -7088,10 +7177,10 @@ vcov.fixest = function(object, se, cluster, dof = TRUE, exact_dof = FALSE, force
 	}
 
 	sd.dict = c("standard" = "Standard", "white"="White", "cluster"="Clustered", "twoway"="Two-way", "threeway"="Three-way", "fourway"="Four-way")
-	dof_info = ""
-	if(exact_dof) dof_info = " [exact dof corr.]"
-	if(dof == FALSE) dof_info = " [no dof corr.]"
-	attr(vcov, "type") = paste0(as.vector(sd.dict[se.val]), type_info, dof_info)
+
+	attr(vcov, "type") = paste0(as.vector(sd.dict[se.val]), type_info)
+	attr(vcov, "dof.type") = paste0("dof(fixef = \"", dof.fixef, "\", exact = ", is_exact, ", cluster = ", is_cluster, ")")
+	attr(vcov, "dof.K") = K
 
 	vcov
 }
@@ -8060,6 +8149,142 @@ setFixest_coefplot = function(dict, ci.width=0.1, ci_level = 0.95, pt.pch = 20, 
     }
 
     options("fixest_coefplot" = opts)
+}
+
+
+#' Type of degree of freedom in fixest summary
+#'
+#' Provides how the degrees of freedom should be calculated in \code{\link[fixest]{vcov}}/\code{\link[fixest]{summary.fixest}}.
+#'
+#' @param fixef How to account for the fixed-effects parameters, defaults to \code{"nested"}. If \code{FALSE} or \code{"no"}, fixed-effects parameters are discarded, meaning the number of parameters is only equal to the number of variables. If \code{TRUE} or \code{yes}, then the number of parameters is equal to the number of variables plus the number of fixed-effects. Finally, if \code{nested}, then the number of parameters is equal to the number of variables an the number of fixed-effects that *are not* nested in the clusters used to cluster the standard-errors.
+#' @param exact Logical, default is \code{FALSE}. If there are 2 or more fixed-effects, these fixed-effects they can be irregular, meaning they can provide the same information. If so, the "real" number of parameters should be lower than the total number of fixed-effects. If \code{exact = TRUE}, then \code{\link[fixest]{fixef.fixest}} is first run to determine the exact number of parameters among the fixed-effects. Mostly, panels of the type individual-firm-year require \code{exact = TRUE} (but it adds computational costs).
+#' @param cluster Logical, default is \code{TRUE}. How to make the small sample correction when clustering the standard-errors? If \code{TRUE} a \code{G/(G-1)} correction is performed with \code{G} the number of cluster values.
+#'
+#' @return
+#' It returns a \code{dof.type} object.
+#'
+#' @author
+#' Laurent Berge
+#'
+#' @seealso
+#' \code{\link[fixest]{summary.fixest}}, \code{\link[fixest]{vcov.fixest}}, \code{\link[fixest]{setFixest_dof}}
+#'
+#' @examples
+#'
+#' # We create "irregular" FEs
+#' base = data.frame(x = rnorm(10))
+#' base$y = base$x + rnorm(10)
+#' base$fe1 = rep(1:3, c(4, 3, 3))
+#' base$fe2 = rep(1:5, each = 2)
+#'
+#' est = feols(y ~ x | fe1 + fe2, base)
+#'
+#' # fe1: 3 FEs
+#' # fe2: 5 FEs
+#'
+#' #
+#' # Clustered standard-errors: by fe1
+#' #
+#'
+#' # Default: fixef = "nested"
+#' #  => adjustment K = 1 + 5 (i.e. x + fe2)
+#' summary(est)
+#' attributes(vcov(est))[c("dof.type", "dof.K")]
+#'
+#'
+#' # fixef = FALSE
+#' #  => adjustment K = 1 (i.e. only x)
+#' summary(est, dof = dof(fixef=FALSE))
+#' attr(vcov(est, dof = dof(fixef=FALSE)), "dof.K")
+#'
+#'
+#' # fixef = TRUE
+#' #  => adjustment K = 1 + 3 + 5 - 1 (i.e. x + fe1 + fe2 - 1 restriction)
+#' summary(est, dof = dof(fixef=TRUE))
+#' attr(vcov(est, dof = dof(fixef=TRUE)), "dof.K")
+#'
+#'
+#' # fixef = TRUE & exact = TRUE
+#' #  => adjustment K = 1 + 3 + 5 - 2 (i.e. x + fe1 + fe2 - 2 restrictions)
+#' summary(est, dof = dof(fixef=TRUE, exact = TRUE))
+#' attr(vcov(est, dof = dof(fixef=TRUE, exact = TRUE)), "dof.K")
+#'
+#' # There are two restrictions:
+#' attr(fixef(est), "references")
+#'
+#'
+dof = function(fixef = "nested", exact = FALSE, cluster = TRUE){
+
+    if(isLogical(fixef)){
+        fixef = as.character(fixef)
+    }
+
+    check_arg(fixef, "singleCharacter", "Argument 'fixef' must be equal to TRUE, 'yes', FALSE, 'no', or 'nested' (default). REASON")
+
+    check_arg(exact, "singleLogical")
+    check_arg(cluster, "singleLogical")
+
+    fixef = try(match.arg(tolower(fixef), c("no", "false", "yes", "true", "nested")), silent = TRUE)
+    if("try-error" %in% class(fixef)){
+        stop("Argument 'fixef' must be equal to TRUE, 'yes', FALSE, 'no', or 'nested' (default)")
+    }
+
+    if(fixef == "TRUE") fixef = "yes"
+    if(fixef == "FALSE") fixef = "no"
+
+    res = list(fixef = fixef, exact = exact, cluster = cluster)
+    class(res) = "dof.type"
+    res
+}
+
+
+#' Sets the default type of DoF correction in summary/vcov.fixest
+#'
+#' Sets or gets the  default type of DOF correction in \code{\link[fixest]{summary.fixest}} and \code{\link[fixest]{vcov.fixest}}
+#'
+#' @param dof.type An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}.
+#'
+#' @author
+#' Laurent Berge
+#'
+#' @seealso
+#' \code{\link[fixest]{dof}}
+#'
+#' @return
+#' The function \code{getFixest_dof} returns a \code{dof.type} object.
+#'
+#' @examples
+#'
+#' \dontrun{
+#'
+#' # If you never want DoF correction when computing the vcov
+#' # of fixest object:
+#'
+#' setFixest_dof(dof(fixef = FALSE, cluster = FALSE))
+#'
+#' }
+#'
+#'
+setFixest_dof = function(dof.type = dof()){
+
+    if(!"dof.type" %in% class(dof.type)){
+        stop("The argument 'dof.type' must be an object created by the function dof().")
+    }
+
+    options("fixest_dof" = dof.type)
+}
+
+#' @rdname setFixest_dof
+"getFixest_dof"
+
+getFixest_dof = function(){
+
+    dof.type = getOption("fixest_dof")
+    if(!"dof.type" %in% class(dof.type)){
+        stop("The value of getOption(\"fixest_dof\") is currently not legal. Please use function setFixest_dict to set it to an appropriate value.")
+    }
+
+    dof.type
 }
 
 

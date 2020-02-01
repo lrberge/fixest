@@ -35,6 +35,7 @@
             \item[Lagging] New functions related to lagging: \code{l}, \code{f}, \code{panel}, \code{unpanel} and \code{[.fixest_panel}.
             \item[Utilities] A set of small utility functions has been added. They allow to extract part a coefficient table or parts of it (like the t-statistics of the standard-error) from an estimation. These functions are \code{coeftable}, \code{ctable} (an alias to \code{coeftable}), \code{se}, \code{tstat} and \code{pvalue}.
             \item[coefplot] The functions \code{coefplot} and \code{setFixest_coefplot}.
+            \item[dof] New function to set the type of degree of freedom adjustment when computing the variance-covariance matrix. You can permanently set the type of DoF adjustment with the new function setFixest_dof().
         }
     }
 
@@ -42,6 +43,7 @@
          \itemize{
             \item[all estimations] A key pre-processing step has been paralellized => algorithm faster in general and much faster for multi-FEs.
             \item[predict & fitted] Predict and fitted now returns vectors of the length equal to the one of original data.
+            \item[standard-errors] New ways to compute the standard-errors have been implemented. In particular, now it account for the "nestedness" of the fixed-effects in the clusters by default. You can freely change how to compute the degrees of freedom correction with the function dof().
             \item[r2] Computation of the within-R2 for feglm models is now self-contained.
             \item[all estimations] New, more accurate, stopping criterion for 2+ fixed-effects.
             \item[feols] Estimations are slightly faster.

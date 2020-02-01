@@ -990,5 +990,48 @@ IntegerVector cpp_lag_obs(IntegerVector id, IntegerVector time, int nlag){
 }
 
 
+// [[Rcpp::export]]
+IntegerVector cpp_check_nested(SEXP fe_list, SEXP cluster_list, IntegerVector fe_sizes, int n){
+    // Returns boolean vector of whether each FE is nested in the clusters
+
+    int Q = Rf_length(fe_list);
+    int G = Rf_length(cluster_list);
+
+    // SEXP x0 = VECTOR_ELT(x, 0);
+
+    IntegerVector res(Q);
+
+    for(int q=0 ; q<Q ; ++q){
+
+        int *pfe = INTEGER(VECTOR_ELT(fe_list, q));
+
+        for(int g=0 ; g<G ; ++g){
+            vector<int> fe_clust(fe_sizes[q]);
+
+            int *pclust =INTEGER(VECTOR_ELT(cluster_list, g));
+
+            bool nested = true;
+            int fe_value = 0;
+            int clust_value = 0;
+            for(int i=0 ; i<n ; ++i){
+                fe_value = pfe[i] - 1;
+                clust_value = fe_clust[fe_value];
+                if(clust_value == 0){
+                    fe_clust[fe_value] = pclust[i];
+                } else if(clust_value != pclust[i]){
+                    nested = false;
+                    break;
+                }
+            }
+
+            if(nested){
+                res[q] = 1;
+                break;
+            }
+        }
+    }
+
+    return res;
+}
 
 
