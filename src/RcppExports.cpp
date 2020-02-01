@@ -576,6 +576,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_check_nested
+IntegerVector cpp_check_nested(SEXP fe_list, SEXP cluster_list, IntegerVector fe_sizes, int n);
+RcppExport SEXP _fixest_cpp_check_nested(SEXP fe_listSEXP, SEXP cluster_listSEXP, SEXP fe_sizesSEXP, SEXP nSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type fe_list(fe_listSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type cluster_list(cluster_listSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type fe_sizes(fe_sizesSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_check_nested(fe_list, cluster_list, fe_sizes, n));
+    return rcpp_result_gen;
+END_RCPP
+}
 // get_nb_threads
 int get_nb_threads();
 RcppExport SEXP _fixest_get_nb_threads() {
@@ -912,6 +926,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_find_duplicates", (DL_FUNC) &_fixest_cpp_find_duplicates, 2},
     {"_fixest_cpp_pgcd", (DL_FUNC) &_fixest_cpp_pgcd, 1},
     {"_fixest_cpp_lag_obs", (DL_FUNC) &_fixest_cpp_lag_obs, 3},
+    {"_fixest_cpp_check_nested", (DL_FUNC) &_fixest_cpp_check_nested, 4},
     {"_fixest_get_nb_threads", (DL_FUNC) &_fixest_get_nb_threads, 0},
     {"_fixest_cpppar_exp", (DL_FUNC) &_fixest_cpppar_exp, 2},
     {"_fixest_cpppar_log", (DL_FUNC) &_fixest_cpppar_log, 2},

@@ -3,7 +3,7 @@
 
 \title{News for \R Package \pkg{fixest}}
 
-\section{Changes in version 0.3.0 (2020-01-21)}{
+\section{Changes in version 0.3.0 (2020-02-01)}{
 
     \subsection{New feature: Lagging}{
          \itemize{
