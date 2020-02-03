@@ -423,7 +423,7 @@ summ = function(object, se, cluster, dof = getFixest_dof(), forceCovariance = FA
 #' dict = c(Month5="May", Month6="Jun", Month7="Jul", Month8="Aug", Month9="Sep")
 #' etable(est1, est2, dict = dict, tex = TRUE)
 #'
-etable = function(..., se=c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = TRUE, cluster, digits=4, tex, fitstat, title, sdBelow = TRUE, drop, order, dict = getFixest_dict(), file, replace=FALSE, convergence, signifCode, label, subtitles, fixef_sizes = FALSE, yesNoFixef = c("Yes", "No"), keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar){
+etable = function(..., se=c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, digits=4, tex, fitstat, title, sdBelow = TRUE, drop, order, dict = getFixest_dict(), file, replace=FALSE, convergence, signifCode, label, subtitles, fixef_sizes = FALSE, yesNoFixef = c("Yes", "No"), keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar){
 
     #
     # Checking the arguments
@@ -451,7 +451,7 @@ etable = function(..., se=c("standard", "white", "cluster", "twoway", "threeway"
         depvar = TRUE
     }
 
-    check_arg(dof, "singleLogical")
+
     check_arg(digits, "singleIntegerGE1")
     check_arg(title, "singleCharacter")
     check_arg(sdBelow, "singleLogical")
@@ -523,11 +523,13 @@ etable = function(..., se=c("standard", "white", "cluster", "twoway", "threeway"
 
 
 #' @describeIn etable Exports the results of multiple \code{fixest} estimations in a Latex table.
-esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = TRUE, cluster, digits=4, fitstat, title, sdBelow=TRUE, drop, order, dict = getFixest_dict(), file, replace=FALSE, convergence, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, fixef_sizes = FALSE, yesNoFixef = c("Yes", "No"), keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ "){
+esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, digits=4, fitstat, title, sdBelow=TRUE, drop, order, dict = getFixest_dict(), file, replace=FALSE, convergence, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, fixef_sizes = FALSE, yesNoFixef = c("Yes", "No"), keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ "){
 	# drop: a vector of regular expressions
 	# order: a vector of regular expressions
 	# dict: a 'named' vector
 	# file: a character string
+
+
 
     useSummary = TRUE
 	if(missing(se) && missing(cluster)){
@@ -550,7 +552,7 @@ esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway
 	# to get the model names
 	dots_call = match.call(expand.dots = FALSE)[["..."]]
 
-	info = results2formattedList(..., se=se, dof=dof, fitstat=fitstat, cluster=cluster, digits=digits, sdBelow=sdBelow, signifCode=signifCode, subtitles=subtitles, yesNoFixef=yesNoFixef, keepFactors=keepFactors, isTex = TRUE, useSummary=useSummary, dots_call=dots_call, powerBelow=powerBelow, dict=dict, interaction.combine=interaction.combine)
+	info = results2formattedList(..., isTex = TRUE, useSummary=useSummary, se = se, dof = dof, cluster = cluster, digits = digits, fitstat = fitstat, title = title, sdBelow = sdBelow, drop = drop, order = order, dict = dict, file = file, replace = replace, convergence = convergence, signifCode = signifCode, label = label, subtitles = subtitles, fixef_sizes = fixef_sizes, yesNoFixef = yesNoFixef, keepFactors = keepFactors, show_family = family, powerBelow = powerBelow, interaction.combine = interaction.combine, dots_call = dots_call)
 
     res = etable_internal_latex(info)
 
@@ -565,7 +567,7 @@ esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway
 }
 
 #' @describeIn etable Facility to display the results of multiple \code{fixest} estimations.
-esttable <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = TRUE, cluster, depvar, drop, order, digits=4, fitstat, convergence, signifCode = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10), subtitles, keepFactors = FALSE, family){
+esttable <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, depvar, drop, order, digits=4, fitstat, convergence, signifCode = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10), subtitles, keepFactors = FALSE, family){
 
 	# Need to check for the presence of the se
     useSummary = TRUE
@@ -582,7 +584,7 @@ esttable <- function(..., se=c("standard", "white", "cluster", "twoway", "threew
 	# to get the model names
 	dots_call = match.call(expand.dots = FALSE)[["..."]]
 
-	info = results2formattedList(..., se=se, dof = dof, cluster=cluster, digits=digits, signifCode=signifCode, subtitles=subtitles, keepFactors=keepFactors, useSummary=useSummary, dots_call=dots_call, fitstat=fitstat, yesNoFixef = c("Yes", "No"))
+	info = results2formattedList(..., se=se, dof = dof, cluster=cluster, digits=digits, signifCode=signifCode, subtitles=subtitles, keepFactors=keepFactors, useSummary=useSummary, dots_call=dots_call, fitstat=fitstat, yesNoFixef = c("Yes", "No"), show_depvar = depvar, show_family = family)
 
 	res = etable_internal_df(info)
 
@@ -3479,7 +3481,7 @@ i = interact = function(var, fe, ref, confirm = FALSE){
 #### Internal Funs     ####
 ####
 
-results2formattedList = function(..., se, dof = FALSE, cluster, digits=4, fitstat, sdBelow=TRUE, dict = NULL, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, title, yesNoFixef = c("Yes", "No"), keepFactors = FALSE, isTex = FALSE, useSummary, dots_call, powerBelow, interaction.combine, convergence, show_family, drop, order, file, fixef_sizes = FALSE, show_depvar=FALSE){
+results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits=4, fitstat, sdBelow=TRUE, dict = NULL, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, title, yesNoFixef = c("Yes", "No"), keepFactors = FALSE, isTex = FALSE, useSummary, dots_call, powerBelow, interaction.combine, convergence, show_family, drop, order, file, fixef_sizes = FALSE, show_depvar=FALSE){
     # This function is the core of the functions esttable and esttex
 
     # for error handling => refers to the right function
@@ -4156,6 +4158,7 @@ etable_internal_latex = function(info){
     if(length(fe_names) > 0){
         dumIntro = paste0("\\hline\n\\emph{Fixed-Effects}& ", paste(rep(" ", n_models), collapse="&"), "\\\\\n")
 
+        # The number of FEs
         for(m in 1:n_models) {
             quoi = is_fe[[m]][fe_names]
             quoi[is.na(quoi)] = yesNoFixef[2]
@@ -5184,7 +5187,7 @@ shade_area <- function(y1, y2, x, xmin, xmax, col="grey", ...){
 
 escape_all = function(x){
     # we escape all
-    res = gsub("((?<=[^\\\\])|(?<=^))(\\$|_|%|&|\\^)", "\\\\\\2", x, perl = TRUE)
+    res = gsub("((?<=[^\\\\])|(?<=^))(\\$|_|%|&|\\^|#)", "\\\\\\2", x, perl = TRUE)
     res
 }
 
@@ -7104,7 +7107,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 		}
 
 		# We recompute K
-		if(dof.fixef == "nested"){
+		if(dof.fixef == "nested" && n_fe_ok >= 1){
             if(do.unclass){
                 # we need to find out which is nested
                 is_nested = which(cpp_check_nested(object$fixef_id, cluster, object$fixef_sizes, n = n) == 1)
@@ -7116,7 +7119,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 		    if(length(is_nested) == n_fe){
 		        K = K - (sum(fixef_sizes_ok) - (n_fe_ok - 1))
 		    } else {
-		        if(is_exact && n_fe >= 2 && n_fe_ok >=1){
+		        if(is_exact && n_fe >= 2){
 		            fe = fixef(object, notes = FALSE)
 		            nb_ref = attr(fe, "references")
 
@@ -7124,10 +7127,9 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 		            if(length(is_nested) > 1){
 	                    id_nested = intersect(names(nb_ref), names(object$fixef_id)[is_nested])
 	                    nb_ref[id_nested] = object$fixef_sizes[id_nested]
-	                    total_refs = sum(nb_ref_fe) + sum(nb_ref_slope)
-		            } else {
-		                total_refs = sum(nb_ref)
 		            }
+
+		            total_refs = sum(nb_ref)
 
 		            K = K - total_refs
 		        } else {
@@ -7218,7 +7220,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 #' confint(est_pois, se = "cluster")
 #'
 #'
-confint.fixest = function(object, parm, level = 0.95, se, cluster, dof = TRUE, ...){
+confint.fixest = function(object, parm, level = 0.95, se, cluster, dof = getFixest_dof(), ...){
 
     # Checking the arguments
     any_invalid = check_dots_args(match.call(expand.dots = FALSE),
@@ -7752,6 +7754,12 @@ model.matrix.fixest = function(object, data, na.rm = TRUE, ...){
 
 	    if(info$any_na_inf){
 	        isNA_L = info$is_na_inf
+
+	        if(sum(isNA_L) == nrow(linear.mat)){
+	            warning("All observations contain NA values.")
+	            return(linear.mat[-which(isNA_L), , drop = FALSE])
+	        }
+
 	        linear.mat = linear.mat[-which(isNA_L), , drop = FALSE]
 	    }
 	}
@@ -8154,7 +8162,7 @@ setFixest_coefplot = function(dict, ci.width=0.1, ci_level = 0.95, pt.pch = 20, 
 
 #' Type of degree of freedom in fixest summary
 #'
-#' Provides how the degrees of freedom should be calculated in \code{\link[fixest]{vcov}}/\code{\link[fixest]{summary.fixest}}.
+#' Provides how the degrees of freedom should be calculated in \code{\link[fixest]{vcov.fixest}}/\code{\link[fixest]{summary.fixest}}.
 #'
 #' @param fixef How to account for the fixed-effects parameters, defaults to \code{"nested"}. If \code{FALSE} or \code{"no"}, fixed-effects parameters are discarded, meaning the number of parameters is only equal to the number of variables. If \code{TRUE} or \code{yes}, then the number of parameters is equal to the number of variables plus the number of fixed-effects. Finally, if \code{nested}, then the number of parameters is equal to the number of variables an the number of fixed-effects that *are not* nested in the clusters used to cluster the standard-errors.
 #' @param exact Logical, default is \code{FALSE}. If there are 2 or more fixed-effects, these fixed-effects they can be irregular, meaning they can provide the same information. If so, the "real" number of parameters should be lower than the total number of fixed-effects. If \code{exact = TRUE}, then \code{\link[fixest]{fixef.fixest}} is first run to determine the exact number of parameters among the fixed-effects. Mostly, panels of the type individual-firm-year require \code{exact = TRUE} (but it adds computational costs).

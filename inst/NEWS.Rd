@@ -3,7 +3,17 @@
 
 \title{News for \R Package \pkg{fixest}}
 
-\section{Changes in version 0.3.0 (2020-01-21)}{
+\section{Changes in version 0.3.1 (2020-XX-XX)}{
+
+    \subsection{Bug fixes}{
+        \itemize{
+            \item[esttable/esttex] These two functions were replaced by the function \code{etable}. In the process, some of their arguments were "lost", this is now corrected.
+        }
+    }
+
+}
+
+\section{Changes in version 0.3.0 (2020-02-01)}{
 
     \subsection{New feature: Lagging}{
          \itemize{

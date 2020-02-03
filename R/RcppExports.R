@@ -141,6 +141,10 @@ cpp_lag_obs <- function(id, time, nlag) {
     .Call(`_fixest_cpp_lag_obs`, id, time, nlag)
 }
 
+cpp_check_nested <- function(fe_list, cluster_list, fe_sizes, n) {
+    .Call(`_fixest_cpp_check_nested`, fe_list, cluster_list, fe_sizes, n)
+}
+
 get_nb_threads <- function() {
     .Call(`_fixest_get_nb_threads`)
 }
