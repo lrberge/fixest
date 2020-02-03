@@ -4194,7 +4194,7 @@ etable_internal_latex = function(info){
 
         # For the number of items
         all_nb_Factors = matrix(c(nb_fe, recursive=TRUE), nrow = length(fe_names))
-        fe_names_nbItems = paste0("# ", fe_names)
+        fe_names_nbItems = paste0("\\# ", fe_names)
         all_nb_Factors = cbind(fe_names_nbItems, all_nb_Factors)
         nb_factor_lines <- paste0(paste0(apply(all_nb_Factors, 1, paste0, collapse="&"), collapse="\\\\\n"), "\\\\\n")
 
@@ -4733,8 +4733,8 @@ fixest_model_matrix = function(fml, data){
     # if there is factors => model.matrix
     dataNames = names(data)
     linear.varnames = all.vars(fml[[3]])
-    types = sapply(data[, dataNames %in% linear.varnames, FALSE], class)
-    if(length(types) == 0 || grepl("factor", deparse_long(fml)) || any(types %in% c("character", "factor"))){
+    is_num = sapply(data[, dataNames %in% linear.varnames, FALSE], is.numeric)
+    if(any(!is_num)){
         useModel.matrix = TRUE
     } else {
         useModel.matrix = FALSE

@@ -9,6 +9,7 @@
         \itemize{
             \item[esttable/esttex] These two functions were replaced by the function \code{etable}. In the process, some of their arguments were "lost", this is now corrected.
             \item[panel] Fixed faulty memory access when taking the lead of a variable.
+            \item[estimations] Bug when particular non-numeric vectors were used in explanatory variables.
         }
     }
 

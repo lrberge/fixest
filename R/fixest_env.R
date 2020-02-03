@@ -1377,7 +1377,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 notes = c(notes, message_NA)
 
                 if(nbNA == nobs){
-                    stop("All observations contain NAs. Estimation cannot be done. (Breakup: ", msgNA_y, msgNA_L, msgNA_NL, msgNA_cluster, msgNA_offset, msgNA_weight, ")")
+                    stop("All observations contain NAs. Estimation cannot be done. (Breakup: ", msgNA_y, msgNA_L, msgNA_NL, msgNA_offset, msgNA_weight, ")")
                 }
             }
 
