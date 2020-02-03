@@ -3,19 +3,17 @@
 
 \title{News for \R Package \pkg{fixest}}
 
-<<<<<<< HEAD
 \section{Changes in version 0.3.1 (2020-XX-XX)}{
 
     \subsection{Bug fixes}{
         \itemize{
             \item[esttable/esttex] These two functions were replaced by the function \code{etable}. In the process, some of their arguments were "lost", this is now corrected.
+            \item[panel] Fixed faulty memory access when taking the lead of a variable.
         }
     }
 
 }
 
-=======
->>>>>>> de080d3d1ee9598cf28eb02b63f23c7f5c1148b1
 \section{Changes in version 0.3.0 (2020-02-01)}{
 
     \subsection{New feature: Lagging}{

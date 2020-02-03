@@ -324,6 +324,11 @@ l = function(x, lag = 1, fill = NA){
     }
 
     # we get the observation id!
+
+    if(length(meta_info$id_sorted) != length(meta_info$time_sorted)){
+        stop("Internal error: lengths of the individuals and the time vectors are different.")
+    }
+
     obs_lagged = cpp_lag_obs(id = meta_info$id_sorted, time = meta_info$time_sorted, nlag = lag)
 
     # the lagged value => beware of NAs in IDs!

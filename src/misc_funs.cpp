@@ -949,8 +949,8 @@ IntegerVector cpp_lag_obs(IntegerVector id, IntegerVector time, int nlag){
         *       but the code would have lost in clarity.
         *       For the lead: opposite to what is done before
         ***************************************************************************/
-         int nlead = -nlag;
-        i = nobs;
+        int nlead = -nlag;
+        i = nobs - 1;
         while(i >= 0){
             // R_CheckUserInterrupt(); // this is (too) costly
             id_current = id[i];
