@@ -4734,7 +4734,7 @@ fixest_model_matrix = function(fml, data){
     dataNames = names(data)
     linear.varnames = all.vars(fml[[3]])
     is_num = sapply(data[, dataNames %in% linear.varnames, FALSE], is.numeric)
-    if(any(!is_num)){
+    if(length(is_num) == 0 || any(!is_num) || grepl("factor", deparse_long(fml))){
         useModel.matrix = TRUE
     } else {
         useModel.matrix = FALSE
