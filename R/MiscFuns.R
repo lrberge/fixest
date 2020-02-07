@@ -5816,7 +5816,7 @@ format_se_type_latex = function(x, dict = c(), inline = FALSE){
         se_formatted = paste0(nway, " (", fe_format, ")")
     }
 
-    se_formatted
+    escape_latex(se_formatted)
 }
 
 tex_star = function(x){
