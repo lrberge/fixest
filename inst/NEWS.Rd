@@ -3,13 +3,25 @@
 
 \title{News for \R Package \pkg{fixest}}
 
-\section{Changes in version 0.3.1 (2020-XX-XX)}{
+\section{Changes in version 0.3.1 (2020-02-09)}{
 
-    \subsection{Bug fixes}{
+    \subsection{Major bug fix}{
+        \itemize{
+            \item[panel] Fixed faulty memory access when taking the lead of a variable.
+        }
+    }
+
+    \subsection{Other bug fixes}{
         \itemize{
             \item[esttable/esttex] These two functions were replaced by the function \code{etable}. In the process, some of their arguments were "lost", this is now corrected.
-            \item[panel] Fixed faulty memory access when taking the lead of a variable.
+            \item[etable] Better escaping of special characters.
             \item[estimations] Bug when particular non-numeric vectors were used in explanatory variables.
+        }
+    }
+
+    \subsection{New features}{
+        \itemize{
+            \item[coefplot] The function \code{coefplot} now accepts lists of estimations.
         }
     }
 
