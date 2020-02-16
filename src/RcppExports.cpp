@@ -590,6 +590,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_diag_XUtX
+NumericVector cpp_diag_XUtX(NumericMatrix X, NumericMatrix U);
+RcppExport SEXP _fixest_cpp_diag_XUtX(SEXP XSEXP, SEXP USEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type X(XSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type U(USEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_diag_XUtX(X, U));
+    return rcpp_result_gen;
+END_RCPP
+}
 // get_nb_threads
 int get_nb_threads();
 RcppExport SEXP _fixest_get_nb_threads() {
@@ -927,6 +939,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_pgcd", (DL_FUNC) &_fixest_cpp_pgcd, 1},
     {"_fixest_cpp_lag_obs", (DL_FUNC) &_fixest_cpp_lag_obs, 3},
     {"_fixest_cpp_check_nested", (DL_FUNC) &_fixest_cpp_check_nested, 4},
+    {"_fixest_cpp_diag_XUtX", (DL_FUNC) &_fixest_cpp_diag_XUtX, 2},
     {"_fixest_get_nb_threads", (DL_FUNC) &_fixest_get_nb_threads, 0},
     {"_fixest_cpppar_exp", (DL_FUNC) &_fixest_cpppar_exp, 2},
     {"_fixest_cpppar_log", (DL_FUNC) &_fixest_cpppar_log, 2},
