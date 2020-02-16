@@ -2141,683 +2141,6 @@ collinearity = function(x, verbose){
 }
 
 
-#' Plots confidence intervals
-#'
-#' This function plots the results of estimations (coefficients and confidence intervals). It is flexible and handle interactions in a special way.
-#'
-#' @inheritParams etable
-#'
-#' @param object Can be either: i) an estimation object (obtained for example from \code{\link[fixest]{feols}}, ii) a matrix of coefficients table, or iii) a numeric vector of the point estimates -- the latter requiring the extra arguments \code{sd} or \code{ci_low} and \code{ci_top}.
-#' @param sd The standard errors of the estimates. It may be missing.
-#' @param ci_low If \code{sd} is not provided, the lower bound of the confidence interval. For each estimate.
-#' @param ci_top If \code{sd} is not provided, the upper bound of the confidence interval. For each estimate.
-#' @param x The value of the x-axis. If missing, the names of the argument \code{estimate} are used.
-#' @param x.shift Shifts the confidence intervals bars to the left or right, depending on the value of \code{x.shift}. Default is 0.
-#' @param ci.width The width of the extremities of the confidence intervals. Default is \code{0.1}.
-#' @param ci_level Scalar between 0 and 1: the level of the CI. By default it is equal to 0.95.
-#' @param add Default is \code{FALSE}, if the intervals are to be added to an existing graph. Note that if it is the case, then the argument \code{x} MUST be numeric.
-#' @param pt.pch The patch of the coefficient estimates. Default is 20 (circle).
-#' @param cex Numeric, default is \code{par("cex")}. Expansion factor for the points
-#' @param pt.cex The size of the coefficient estimates. Default is the other argument \code{cex}.
-#' @param col The color of the points and the confidence intervals. Default is 1 ("black"). Note that you can set the colors separately for each of them with \code{pt.col} and \code{ci.col}.
-#' @param pt.col The color of the coefficient estimate. Default is equal to the other argument \code{col}.
-#' @param ci.col The color of the confidence intervals. Default is equal to the other argument \code{col}.
-#' @param lwd General liwe with. Default is par("lwd").
-#' @param ci.lwd The line width of the confidence intervals. Default is equal to the other argument \code{lwd}.
-#' @param ci.lty The line type of the confidence intervals. Default is 1.
-#' @param grid Logical, default is \code{TRUE}. Whether a grid should be displayed. You can set the display of the grid with the argument \code{grid.par}.
-#' @param grid.par List. Parameters of the grid. The default values are: \code{lty = 3} and \code{col = "gray"}. You can add any graphical parameter that will be passed to \code{\link[graphics]{abline}}. You also have two additional arguments: use \code{horiz = FALSE} to disable the horizontal lines, and use \code{vert = FALSE} to disable the vertical lines. Eg: \code{grid.par = list(vert = FALSE, col = "red", lwd = 2)}.
-#' @param zero Logical, default is \code{TRUE}. Whether the 0-line should be emphasized. You can set the parameters of that line with the argument \code{zero.par}.
-#' @param zero.par List. Parameters of the zero-line. The default values are \code{col = "black"} and \code{lwd = 1}. You can add any graphical parameter that will be passed to \code{\link[graphics]{abline}}. Example: \code{zero.par = list(col = "darkblue", lwd = 3)}.
-#' @param join Logical, default depends on the situation. If \code{TRUE}, then the coefficient estimates are joined with a line. By default, it is equal to \code{TRUE} only if: i) interactions are plotted, ii) the x values are numeric and iii) a reference is found.
-#' @param join.par List. Parameters of the line joining the cofficients. The default values are: \code{col = pt.col} and \code{lwd = lwd}. You can add any graphical parameter that will be passed to \code{\link[graphics]{lines}}. Eg: \code{join.par = list(lty = 2)}.
-#' @param ref.line Logical, default depends on the situation. It is \code{TRUE} only if: i) interactions are plotted, ii) the x values are numeric and iii) a reference is found. If \code{TRUE}, then a vertical line is drawn at the level of the reference value. You can set the parameters of this line with the argument \code{ref.line.par}.
-#' @param ref.line.par List. Parameters of the vertical line on the reference. The default values are: \code{col = "black"} and \code{lty = 2}. You can add any graphical parameter that will be passed to \code{\link[graphics]{abline}}. Eg: \code{ref.line.par = list(lty = 1, lwd = 3)}.
-#' @param xlim.add A numeric vector of length 1 or 2. It represents an extension factor of xlim, in percentage. Eg: \code{xlim.add = c(0, 0.5)} extends \code{xlim} of 50\% on the right. If of lentgh 1, positive values represent the right, and negative values the left (Eg: \code{xlim.add = -0.5} is equivalent to \code{xlim.add = c(0.5, 0)}).
-#' @param ylim.add A numeric vector of length 1 or 2. It represents an extension factor of ylim, in percentage. Eg: \code{ylim.add = c(0, 0.5)} extends \code{ylim} of 50\% on the top. If of lentgh 1, positive values represent the top, and negative values the bottom (Eg: \code{ylim.add = -0.5} is equivalent to \code{ylim.add = c(0.5, 0)}).
-#' @param only.params Logical, default is \code{FALSE}. If \code{TRUE} no graphic is displayed, only the values of \code{x} and \code{y} used in the plot are returned.
-#' @param only.inter Logical, default is \code{TRUE}. If an interaction of the type of \code{var::fe} (see \code{\link[fixest]{feols}} help for details) is found, then only these interactions are plotted. If \code{FALSE}, then interactions are treated as regular coefficients.
-#' @param ... Other arguments to be passed to \code{summary}, if \code{object} is an estimation, and/or to the function \code{plot} or \code{lines} (if \code{add = TRUE}).
-#'
-#' @seealso
-#' See \code{\link[fixest]{setFixest_coefplot}} to set the default values of \code{coefplot}, and the estimation functions: e.g. \code{\link[fixest]{feols}}, \code{\link[fixest]{fepois}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{fenegbin}}.
-#'
-#' @section Setting custom default values:
-#' The function \code{coefplot} dispose of many arguments to parametrize the plots. Most of these arguments can be set once an for all using the function \code{\link[fixest]{setFixest_coefplot}}. See Example 3 below for a demonstration.
-#'
-#'
-#' @author
-#' Laurent Berge
-#'
-#' @examples
-#'
-#' #
-#' # Example 1: Stacking two sets of results on the same graph
-#' #
-#'
-#' # Estimation on Iris data with one fixed-effect (Species)
-#' est = feols(Petal.Length ~ Petal.Width + Sepal.Length +
-#'             Sepal.Width | Species, iris)
-#'
-#'
-#' # First graph with clustered standard-errors
-#' # (the default when fixed-effects are present)
-#' coefplot(est, x.shift = -.2)
-#'
-#' # 'x.shift' was used to shift the coefficients on the left.
-#'
-#'
-#' # Second set of results: this time with
-#' #  standard-errors that are not clustered.
-#' coefplot(est, se = "standard", x.shift = .2,
-#'          add = TRUE, col = 2, ci.lty = 2, pch=15)
-#'
-#'  # Note that we used 'se', an argument that will
-#'  #  be passed to summary.fixest
-#'
-#' legend("topright", col = 1:2, pch = 20, lwd = 1, lty = 1:2,
-#'        legend = c("Clustered", "Standard"), title = "Standard-Errors")
-#'
-#'
-#' #
-#' # Example 2: Interactions
-#' #
-#'
-#'
-#' # Now we estimate and plot the "yearly" treatment effects
-#'
-#' data(base_did)
-#' base_inter = base_did
-#'
-#' # We interact the variable 'period' with the variable 'treat'
-#' est_did = feols(y ~ x1 + i(treat, period, 5) | id+period, base_inter)
-#'
-#' # You could have written the following formula instead:
-#' # y ~ x1 + treat::period(5) | id+period
-#'
-#' # In the estimation, the variable treat is interacted
-#' #  with each value of period but 5, set as a reference
-#'
-#' # When estimations contain interactions, as before,
-#' #  the default behavior of coefplot changes,
-#' #  it now only plots interactions:
-#' coefplot(est_did)
-#'
-#' # We can see that the graph is different from before:
-#' #  - only interactions are shown,
-#' #  - the reference is present,
-#' #  - the estimates are joined.
-#' # => this is fully flexible
-#'
-#' coefplot(est_did, ref.line = FALSE, join = FALSE)
-#'
-#' # Now to display all coefficients, use 'only.inter'
-#' coefplot(est_did, only.inter = FALSE)
-#'
-#' #
-#' # What if the interacted variable is not numeric?
-#'
-#' # Let's create a "month" variable
-#' all_months = c("aug", "sept", "oct", "nov", "dec", "jan",
-#'                "feb", "mar", "apr", "may", "jun", "jul")
-#' base_inter$period_month = all_months[base_inter$period]
-#'
-#' # The new estimation
-#' est = feols(y ~ x1 + i(treat, period_month, "oct") | id+period, base_inter)
-#' # Since 'period_month' of type character, coefplot sorts it
-#' coefplot(est)
-#'
-#' # To respect a plotting order, use a factor
-#' base_inter$month_factor = factor(base_inter$period_month, levels = all_months)
-#' est = feols(y ~ x1 + i(treat, month_factor, "oct") | id+period, base_inter)
-#' coefplot(est)
-#'
-#'
-#' #
-#' # Example 3: Setting defaults
-#' #
-#'
-#' # coefplot has many arguments, which makes it highly flexible.
-#' # If you don't like the default style of coefplot. No worries,
-#' # you can set *your* default by using the function
-#' # setFixest_coefplot()
-#'
-#' dict = c("Petal.Length"="Length (Petal)", "Petal.Width"="Width (Petal)",
-#'          "Sepal.Length"="Length (Sepal)", "Sepal.Width"="Width (Sepal)")
-#'
-#' setFixest_coefplot(ci.col = 2, pt.col = "darkblue", ci.lwd = 3,
-#'                    pt.cex = 2, pt.pch = 15, ci.width = 0, dict = dict)
-#'
-#' est = feols(Petal.Length ~ Petal.Width + Sepal.Length +
-#'                 Sepal.Width | Species, iris)
-#'
-#' # Tadaaa!
-#' coefplot(est)
-#'
-#' # To reset to the default settings:
-#' setFixest_coefplot()
-#' coefplot(est)
-#'
-#'
-coefplot = function(object, sd, ci_low, ci_top, x, x.shift = 0, dict, drop, order, ci.width=0.1, ci_level = 0.95, add = FALSE, pt.pch = 20, cex = par("cex"), pt.cex = cex, col = 1, pt.col = col, ci.col = col, lwd = par("lwd"), ci.lwd = lwd, ci.lty = 1, grid = TRUE, grid.par = list(lty=3, col = "gray"), zero = TRUE, zero.par = list(col="black", lwd=1), join = FALSE, join.par = list(col = pt.col, lwd=lwd), ref.line, ref.line.par = list(col = "black", lty = 2), xlim.add, ylim.add, only.params = FALSE, only.inter = TRUE, ...){
-	# creation de barres d'erreur
-	# 1 segment vertical de la taille de l'IC
-	# deux barres horizontales, a chaque bornes
-
-    # I don't allow the different styles any more (maybe I can change that in the future)
-    if(missing(dict)) dict = c()
-    # style = c("bar", "interval", "tube")
-    # style = match.arg(style)
-    style = "bar"
-
-    # We get the default values
-    opts = getOption("fixest_coefplot")
-
-    if(length(opts) >= 1){
-        if(!is.list(opts)){
-            warning("The default values of coefplot are ill-formed and therefore reset. Use only setFixest_coefplot for setting the default values.")
-            opts = list()
-            options("fixest_coefplot" = opts)
-        } else {
-            mc = match.call()
-            arg2set = setdiff(names(opts), names(mc))
-            for(arg in arg2set){
-                assign(arg, opts[[arg]])
-            }
-        }
-    }
-
-    #
-    # STEP 1 => getting the coefficient table + the CI
-    #
-
-    # This is NOT trivial because argument '...' refers to either summary (and we
-    # have to find out which), either to plot or lines
-    #
-
-    # Object can either be:
-    #  a) an estimation
-    #  b) a coefficient table (ie a matrix)
-    #  c) a vector of coefficients
-
-    dots = list(...)
-
-    if(is.list(object)){
-        sum_exists = FALSE
-        for(c_name in class(object)){
-            if(exists(paste0("summary.", c_name), mode = "function")){
-                sum_exists = TRUE
-                break
-            }
-        }
-
-        if(!sum_exists) stop("There is no summary method for objects of class ", c_name, ". 'coefplot' applies summary to the object to extract the coeftable. Maybe add directly the coeftable in object instead?")
-
-        fun_name = paste0("summary.", c_name)
-        args_name_sum = names(formals(fun_name))
-        args_sum = intersect(names(dots), args_name_sum)
-
-        # we kick out the summary arguments from dots
-        dots[args_sum] = NULL
-
-        # We reconstruct a call to coeftable
-        mc_coeftable = match.call(expand.dots = TRUE)
-        mc_coeftable[[1]] = as.name("coeftable")
-        mc_coeftable[setdiff(names(mc_coeftable), c(args_sum, "object", ""))] = NULL
-
-        mat = eval(mc_coeftable, parent.frame())
-
-        sd = mat[, 2]
-        estimate = mat[, 1]
-
-        names(estimate) = rownames(mat)
-
-        if("fml" %in% names(object)){
-            depvar = gsub(" ", "", as.character(object$fml)[[2]])
-            if(depvar %in% names(dict)) depvar = dict[depvar]
-            listDefault(dots, "main", paste0("Effect on ", depvar))
-        }
-
-    } else if(is.matrix(object)){
-        # object is a matrix containing the coefs and SEs
-
-        m_names = tolower(colnames(object))
-        if(ncol(object) == 4 || (grepl("estimate", m_names[1]) && grepl("std\\.? error", m_names[1]))){
-            sd = object[, 2]
-            estimate = object[, 1]
-
-            names(estimate) = rownames(object)
-
-        } else {
-            stop("Argument 'object' is a matrix but it should contain 4 columns (the two first ones should be reporting the estimate and the standard-error). Either provide an appropriate matrix or give directly the vector of estimated coefficients in arg. estimate.")
-        }
-    } else if(length(object[1]) > 1 || !is.null(dim(object)) || !is.numeric(object)){
-        stop("Argument 'object' must be either: i) an estimation object, ii) a matrix of coefficients table, or iii) a numeric vector of the point estimates. Currently it is neither of the three.")
-    } else {
-        # it's a numeric vector
-        estimate = object
-    }
-
-	n <- length(estimate)
-
-	if(missing(ci.lty)){
-		ci.lty = ifelse(style == "bar", 1, 2)
-	}
-
-	if(missing(sd)){
-		if(missing(ci_low) || missing(ci_top)) stop("If 'sd' is not provided, you must provide the arguments 'ci_low' and 'ci_top'.")
-
-		ci025 = ci_low
-		ci975 = ci_top
-
-	} else {
-		if(!missing(ci_low) || !missing(ci_top)) warning("Since 'sd' is provided, arguments 'ci_low' or 'ci_top' are ignored.")
-
-		# We compue the CI
-		nb = abs(qnorm((1-ci_level)/2))
-		ci975 = estimate + nb*sd
-		ci025 = estimate - nb*sd
-	}
-
-	#
-	# STEP 2 => Plotting
-	#
-
-	# INTERACTIONS
-	ref_id = NA
-	if(only.inter && !is.null(names(estimate))){
-    	all_vars = names(estimate)
-    	if(any(grepl("::", all_vars))){
-
-    	    is_info = FALSE
-    	    if("fixest" %in% class(object)){
-    	        is_info = TRUE
-    	        interaction.info = object$interaction.info
-    	        is_ref = interaction.info$is_ref
-    	        items = interaction.info$items
-    	        is_num = interaction.info$fe_type %in% c("numeric", "integer")
-    	    }
-
-    	    # We retrict only to interactions
-    	    root_interaction = all_vars[grepl("::", all_vars)]
-    	    # We keep only the first one !
-    	    root_interaction = unique(gsub("::.+", "", root_interaction))[1]
-
-    	    inter_keep = grepl(root_interaction, all_vars, fixed = TRUE)
-    	    my_inter = all_vars[inter_keep]
-    	    estimate = estimate[inter_keep]
-    	    ci975 = ci975[inter_keep]
-    	    ci025 = ci025[inter_keep]
-
-    	    # We extract the name of the variables
-    	    fe_name = gsub(".+:", "", root_interaction)
-    	    if(fe_name %in% names(dict)) fe_name = dict[fe_name]
-    	    listDefault(dots, "xlab", fe_name)
-
-    	    var_name = gsub(":[[:alnum:]\\._]+", "", root_interaction)
-    	    if(var_name %in% names(dict)) var_name = dict[var_name]
-    	    listDefault(dots, "sub", paste0("(Interacted with ", var_name, ")"))
-
-    	    # We construct the x-axis
-    	    inter_values = gsub(".+::", "", my_inter)
-    	    names(estimate) = inter_values
-
-    	    inter_values_num = tryCatch(as.numeric(inter_values), warning = function(x) x)
-    	    if(is_info){
-
-    	        if(length(inter_values) != sum(!is_ref)){
-    	            stop("Internal error regarding the lengths of vectors of coefficients.")
-    	        }
-
-    	        if(any(is_ref)){
-    	            ref_id = which(is_ref)
-    	        }
-
-    	        my_values = my_ci_low = my_ci_high = rep(NA, length(is_ref))
-    	        names(my_values) = names(my_ci_low) = names(my_ci_high) = items
-
-    	        my_values[inter_values] = estimate
-    	        my_ci_high[inter_values] = ci975
-    	        my_ci_low[inter_values] = ci025
-
-    	        qui = which(is.na(my_values))
-    	        my_values[qui] = 0
-    	        my_ci_high[qui] = my_values[qui]
-    	        my_ci_low[qui] = my_values[qui]
-
-    	        estimate = my_values
-    	        ci975 = my_ci_high
-    	        ci025 = my_ci_low
-
-    	        if(is_num && missing(x)){
-    	            names(estimate) = NULL
-    	            x = items
-    	            if(missing(join)) join = TRUE
-    	            if(missing(ref.line)) ref.line = TRUE
-    	        }
-
-
-    	    } else if(is.numeric(inter_values_num)) {
-
-    	        # We check these are "real" numbers and not just "codes"
-    	        all_steps = diff(sort(inter_values_num))
-    	        ts = table(all_steps)
-    	        step_mode = as.numeric(names(ts)[which.max(ts)])
-    	        all_steps_rescaled = all_steps / step_mode
-
-    	        if(any(all_steps_rescaled < 10) && missing(x)){
-    	            names(estimate) = NULL
-    	            x = inter_values_num
-    	            if(missing(join)) join = TRUE
-    	        }
-    	    }
-
-	        n = length(estimate)
-    	}
-	}
-
-	# We set the default after the interactions (which is the decision variable)
-	if(missing(join)) join = FALSE
-	if(missing(ref.line)) ref.line = FALSE
-
-	# setting the names of the estimate
-	if(!missing(x)){
-	    if(length(x) != n) stop("Argument 'x' must have the same length as the number of coefficients (currently ", length(x), " vs ", n, ").")
-
-	    if(!is.numeric(x)){
-	        names(estimate) = x
-	    }
-	}
-
-	# order/drop/dict
-	if(!is.null(names(estimate))){
-
-	    if(missnull(dict)){
-	        dict = c()
-	    } else {
-	        check_arg(dict, "characterVector")
-	        if(is.null(names(dict))){
-                stop("Argument 'dict' must be a named character vector. Currently it has no names.")
-	        }
-	    }
-
-	    # dict
-	    all_vars = names(estimate)
-
-	    who = all_vars %in% names(dict)
-	    all_vars[who] = dict[all_vars[who]]
-	    names(estimate) = all_vars
-
-	    my_order = 1:n
-	    names(my_order) = all_vars
-
-	    # dropping some coefs
-	    all_vars = drop_apply(all_vars, drop)
-
-	    if(length(all_vars) == 0){
-	        stop("Argument 'drop' has removed all variables!")
-	    }
-
-	    # ordering the coefs
-	    all_vars = order_apply(all_vars, order)
-
-	    qui = my_order[all_vars]
-
-	    estimate = estimate[qui]
-	    ci975 = ci975[qui]
-	    ci025 = ci025[qui]
-	    if(!missing(x)) x = x[qui]
-	    n = length(qui)
-	}
-
-	# we create x_labels, x_value & x_at
-	if(!missing(x) && is.numeric(x)){
-	    my_xlim = range(c(x + x.shift, x - x.shift))
-
-	    x_at = NULL
-	    x_value = x + x.shift
-
-	    if(is.null(names(estimate))){
-	        x_labels = NULL
-	    } else {
-	        x_labels = names(estimate)
-	    }
-
-	} else {
-	    x_at = 1:n
-	    x_value = 1:n + x.shift
-
-		if(is.null(names(estimate))){
-		    x_labels = 1:n
-		} else {
-		    x_labels = names(estimate)
-		}
-
-		my_xlim = range(c(1:n + x.shift, 1:n - x.shift)) + c(-0.5, +0.5)
-	}
-
-	all_plot_args = unique(c(names(par()), names(formals(plot.default))))
-	pblm = setdiff(names(dots), all_plot_args)
-	if(length(pblm) > 0){
-	    warning("The following argument", ifsingle(pblm, " is not a", "s are not"), " plotting argument", ifsingle(pblm, " and is", "s and are"), " therefore ignored: ", enumerate_items(pblm), ".")
-	    dots[pblm] = NULL
-	}
-
-	# preparation of the do.call
-	dots$col = col
-	listDefault(dots, "xlab", "Variable")
-	ylab = paste0("Estimate and ", ifelse(missing(sd), "", paste0(floor(ci_level*100), "% ")), "Conf. Int.")
-	listDefault(dots, "ylab", ylab)
-
-	# The limits
-
-	# xlim
-	if(!missnull(xlim.add)){
-	    if("xlim" %in% names(dots)){
-	        message("Since argument 'xlim' is provided, argument 'xlim.add' is ignored.")
-	    } else {
-	        if((!is.numeric(xlim.add) || !length(xlim.add) %in% 1:2)){
-	            stop("Argument 'xlim.add' must be a numeric vector of length 1 or 2. It represents an extension factor of xlim, in percentage. (Eg: xlim.add = c(0, 0.5) extends xlim of 50% on the right.) If of lentgh 1, positive values represent the right, and negative values the left (Eg: xlim.add = -0.5 is equivalent to xlim.add = c(0.5, 0)).")
-	        }
-
-	        if(length(xlim.add) == 1){
-	            if(xlim.add > 0) {
-	                xlim.add = c(0, xlim.add)
-	            } else {
-	                xlim.add = c(xlim.add, 0)
-	            }
-	        }
-
-	        x_width = diff(my_xlim)
-	        my_xlim = my_xlim + xlim.add * x_width
-	    }
-	}
-	listDefault(dots, "xlim", my_xlim)
-
-	# ylim
-	my_ylim = range(c(ci025, ci975))
-
-	if(!missnull(ylim.add)){
-	    if("ylim" %in% names(dots)){
-	        message("Since argument 'ylim' is provided, argument 'ylim.add' is ignored.")
-	    } else {
-	        if((!length(ylim.add) %in% 1:2 || !is.numeric(ylim.add))){
-	            stop("Argument 'ylim.add' must be a numeric vector of length 1 or 2. It represents an extension factor of ylim, in percentage. (Eg: ylim.add = c(0, 0.5) extends ylim of 50% on the top.) If of lentgh 1, positive values represent the top, and negative values the bottom (Eg: ylim.add = -0.5 is equivalent to ylim.add = c(0.5, 0)).")
-	        }
-
-	        if(length(ylim.add) == 1){
-	            if(ylim.add > 0) {
-	                ylim.add = c(0, ylim.add)
-	            } else {
-	                ylim.add = c(ylim.add, 0)
-	            }
-	        }
-
-	        y_width = diff(my_ylim)
-	        my_ylim = my_ylim + ylim.add * y_width
-	    }
-	}
-
-	listDefault(dots, "ylim", my_ylim)
-
-    dots$x = x_value
-
-	dots$y = estimate
-
-	if(style == "interval"){
-		dots$type = "o"
-		listDefault(dots, "lwd", 2)
-	} else if(style == "tube"){
-		dots$type = "n"
-		listDefault(dots, "lwd", 2)
-	} else {
-		dots$type = "p"
-	}
-
-	if(only.params){
-	    return(list(x = x_value, y = estimate, ylim = my_ylim))
-	}
-
-	if(!add){
-
-	    dots$axes = FALSE
-
-	    # Nude graph
-	    first.par = dots
-	    first.par$type = "n"
-	    do.call("plot", first.par)
-
-	    if(grid){
-	        listDefault(grid.par, "col", "gray")
-	        listDefault(grid.par, "lty", 3)
-	        listDefault(grid.par, "vert", TRUE)
-	        listDefault(grid.par, "horiz", TRUE)
-
-	        vert = grid.par$vert
-	        horiz = grid.par$horiz
-	        grid.par$vert = grid.par$horiz = NULL
-
-	        if(horiz){
-	            do.call("hgrid", grid.par)
-	        }
-
-	        if(vert){
-	            do.call("vgrid", grid.par)
-	        }
-	    }
-
-	    if(zero){
-	        listDefault(zero.par, "lwd", 1)
-	        listDefault(zero.par, "col", "black")
-	        zero.par$h = 0
-	        do.call("abline", zero.par)
-	    }
-
-	    if(ref.line){
-
-	        if(is.na(ref_id) && !"v" %in% names(ref.line.par)){
-	            stop("You can use the argument 'ref.line' only when interactions are provided and a reference is found. You can still draw vertical lines by using 'v' in argument 'ref.line.par'. Example: ref.line.par=list(v = ", round(x_value[floor(length(x_value)/2)]), ", col=2).")
-	        }
-
-	        listDefault(ref.line.par, "v", x_value[ref_id])
-	        listDefault(ref.line.par, "lty", 2)
-	        do.call("abline", ref.line.par)
-	    }
-
-	    box()
-	    axis(2)
-	    axis(1, at = x_at, labels = x_labels)
-
-	}
-
-	if(style == "bar" && join){
-		# We join the dots
-
-	    listDefault(join.par, "lwd", lwd)
-	    listDefault(join.par, "col", pt.col)
-
-	    join.par$x = dots$x
-	    join.par$y = dots$y
-
-		do.call("lines", join.par)
-	}
-
-
-	if(style == "interval"){
-		# the "tube"
-		lines(x_value, ci025, lty = ci.lty, lwd = ci.lwd, col = ci.col)
-		lines(x_value, ci975, lty = ci.lty, lwd = ci.lwd, col = ci.col)
-	} else if(style == "tube"){
-		# Here we use shade area
-		shade_area(ci025, ci975, x_value, col = "lightgrey", lty=0)
-
-		# dots$axes = NULL
-		# dots$type = "o"
-		# do.call("lines", dots)
-	} else {
-		for(i in 1:n){
-		    x = x_value
-
-			# a) barre verticale
-			segments(x0=x[i], y0=ci025[i], x1=x[i], y1=ci975[i], lwd = ci.lwd, col = ci.col, lty = ci.lty)
-
-			# Formatting the bar width
-
-			if(length(ci.width) > 1){
-			    stop("The argument 'ci.width' must be of length 1.")
-			}
-
-			if(is.character(ci.width)){
-
-			    width_nb = tryCatch(as.numeric(gsub("%", "", ci.width)), warning = function(x) x)
-			    if(!is.numeric(width_nb)){
-			        stop("The value of 'ci.width' is not valid. It should be equal either to a number, either to a percentage (e.g. ci.width=\"3%\").")
-			    }
-
-			    if(grepl("%", ci.width)){
-			        total_width = diff(par("usr")[1:2])
-			        ci.width = total_width * width_nb / 100
-			    } else {
-			        ci.width = width_nb
-			    }
-			}
-
-
-
-			# b) toppings
-			# Only if not reference
-			if(ci975[i] != ci025[i]){
-			    #  i) ci975
-			    segments(x0=x[i]-ci.width, y0=ci975[i], x1=x[i]+ci.width, y1=ci975[i], lwd = ci.lwd, col = ci.col, lty = ci.lty)
-			    #  ii) ci025
-			    segments(x0=x[i]-ci.width, y0=ci025[i], x1=x[i]+ci.width, y1=ci025[i], lwd = ci.lwd, col = ci.col, lty = ci.lty)
-			}
-
-		}
-	}
-
-	# Last the points
-	if(!add){
-	    # now the points or lines
-	    if(dots$type != "n"){
-	        point.par = dots[c("x", "y", "type", "cex", "col", "pch", "lty", "lwd")]
-	        point.par$pch = pt.pch
-	        point.par$cex = pt.cex
-	        point.par$col = pt.col
-	        point.par = point.par[lengths(point.par) > 0]
-	        do.call("lines", point.par)
-	    }
-	} else {
-	    dots$pch = pt.pch
-	    dots$cex = pt.cex
-	    dots$col = pt.col
-	    do.call("lines", dots)
-	}
-
-	res = list(x = x_value, y = estimate, ylim = my_ylim)
-	return(invisible(res))
-}
-
 
 #' Treated and control sample descriptives
 #'
@@ -5240,6 +4563,13 @@ escape_latex = function(x_all, depth = 0, noArg = FALSE){
     res
 }
 
+escape_regex = function(x){
+    # escape special characters in regular expressions => to make it as "fixed"
+
+    res = gsub("((?<=[^\\\\])|(?<=^))(\\$|\\.|\\+|\\(|\\)|\\[|\\]|\\?|\\^)", "\\\\\\2", x, perl = TRUE)
+    res
+}
+
 formatBicLL = function(bic, ll){
 	# entry: bic and ll
 
@@ -5435,6 +4765,27 @@ mysignif = function (x, d = 2, r = 1){
     sapply(x, mysignif_single, d = d, r = r)
 }
 
+par_fit = function(my_par, id){
+    # simple function that extends the plot parameters
+    my_par = rep(my_par, ceiling(max(id) / length(my_par)))
+    my_par[id]
+}
+
+dict_apply = function(x, dict = NULL, depth = 1){
+
+    if(missing(dict) || length(dict) == 0){
+        return(x)
+    }
+
+    if(is.null(names(dict))){
+        stop_depth("The argument 'dict' must be a dictionnary, ie a named vector (eg dict=c(\"old_name\"=\"new_name\"). Currently it has no names.", depth = depth + 1)
+    }
+
+    who = x %in% names(dict)
+    x[who] = dict[as.character(x[who])]
+    x
+}
+
 drop_apply = function(x, drop = NULL, depth = 1){
 
     if(missing(drop) || length(drop) == 0){
@@ -5485,6 +4836,21 @@ n_times = function(n){
         res = switch(n, "1"="once", "2"="twice", "3"="three times", "4"="four times")
     } else {
         res = paste0(n, " times")
+    }
+
+    res
+}
+
+n_th = function(n){
+
+    if(n <= 13){
+        n_full = c("first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "nineth", "tenth", "eleventh", "twelfth", "thirteenth")
+        res = n_full[n]
+    } else {
+        rest = n %% 10
+        rest[rest == 0 | rest >= 4] = 4
+        postfix = c("st", "nd", "rd", "th")
+        res = paste0(n, postfix[rest])
     }
 
     res
@@ -7774,6 +7140,18 @@ model.matrix.fixest = function(object, data, na.rm = TRUE, ...){
 	}
 
     linear.mat
+}
+
+hatvalues.fixest = function(model, ...){
+    # Only works for feglm/feols objects
+    # to integrate
+
+
+
+}
+
+estfun.fixest = function(x, ...){
+
 }
 
 #### ............... ####
