@@ -1,3 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 Readme.md
+^docs$
+^BENCHMARK$
+
