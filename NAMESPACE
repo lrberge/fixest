@@ -53,6 +53,7 @@ S3method(predict, fixest)
 S3method(confint, fixest)
 S3method(formula, fixest)
 S3method(model.matrix, fixest)
+S3method(terms, fixest)
 S3method(lag, formula)
 
 # nlme method

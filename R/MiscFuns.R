@@ -291,7 +291,7 @@ summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), forceCova
 
 	# th z & p values
 	zvalue <- object$coefficients/se
-	pvalue <- 2*pt(-abs(zvalue), object$nobs - object$nparams)
+	pvalue <- 2*pt(-abs(zvalue), max(object$nobs - object$nparams, 1))
 
 	# update of se if bounded
 	se_format = se
@@ -7391,6 +7391,32 @@ model.matrix.fixest = function(object, data, na.rm = TRUE, ...){
 	}
 
     linear.mat
+}
+
+
+#' Extract the terms
+#'
+#' This function extracts the terms of a \code{fixest} estimation, excluding the fixed-effects part.
+#'
+#' @param x A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
+#' @param ... Not currently used.
+#'
+#' @return
+#' An object of class \code{c("terms", "formula")} which contains the terms representation of a symbolic model.
+#'
+#'
+#' @examples
+#'
+#' # simple estimation on iris data, clustering by "Species"
+#' res = feols(Sepal.Length ~ Sepal.Width*Petal.Length +
+#'             Petal.Width | Species, iris)
+#'
+#' # Terms of the linear part
+#' terms(res)
+#'
+#'
+terms.fixest = function(x, ...){
+    terms(formula(x, type = "linear"))
 }
 
 hatvalues.fixest = function(model, ...){
