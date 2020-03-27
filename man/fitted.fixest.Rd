@@ -7,7 +7,7 @@
 \usage{
 \method{fitted}{fixest}(object, type = c("response", "link"), ...)
 
-\method{fitted}{values.fixest}(object, type = c("response", "link"), ...)
+\method{fitted.values}{fixest}(object, type = c("response", "link"), ...)
 }
 \arguments{
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}

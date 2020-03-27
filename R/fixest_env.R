@@ -470,7 +470,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     }
 
     if(family %in% c("poisson", "negbin") && any(lhs_clean < 0)){
-        stop("Negative values of the dependant variable are not allowed for the \"", family, "\" family.")
+        stop("Negative values of the dependent variable are not allowed for the \"", family, "\" family.")
     }
 
     if(origin_type == "feNmlm" && family %in% "logit" && !all(lhs_clean==0 | lhs_clean==1)){

@@ -53,9 +53,8 @@ base_dup = data.frame(id = rep(1:2, each = 4),
                       time = c(1, 1, 1, 2, 1, 2, 2, 3), x = 1:8)
 
 # Error because of duplicate values for (id, time)
-\donttest{
-lag(x~id+time, 1, base_dup)
-}
+try(lag(x~id+time, 1, base_dup))
+
 
 # Error is bypassed, lag corresponds to first occurence of (id, time)
 lag(x~id+time, 1, base_dup, duplicate.method = "first")
@@ -69,9 +68,7 @@ base = data.frame(id = rep(1:2, each = 4),
 lag(x~id+time, 2, base, time.step = 0.5)
 
 # Error: wrong time step
-\donttest{
-lag(x~id+time, 2, base, time.step = 7)
-}
+try(lag(x~id+time, 2, base, time.step = 7))
 
 # Adding NAs + unsorted IDs
 base = data.frame(id = rep(1:2, each = 4),
@@ -83,12 +80,12 @@ base_bis = base[order(base$id, base$time),]
 
 print(base_bis)
 
-\donttest{
 # You can create variables without specifying the data within data.table:
-library(data.table)
-base = data.table(id = rep(1:2, each = 3), year = 1990 + rep(1:3, 2), x = 1:6)
-base[, x.l1 := lag(x~id+year, 1)]
+if(requireNamespace("data.table")){
+  base = data.table(id = rep(1:2, each = 3), year = 1990 + rep(1:3, 2), x = 1:6)
+  base[, x.l1 := lag(x~id+year, 1)]
 }
+
 
 
 }

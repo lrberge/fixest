@@ -248,14 +248,15 @@ f = function(x, lead = 1, fill = NA){
 #' # or using the argument panel.id
 #' feols(f(y)~l(x1, -1:1), base_did, panel.id = ~id+period)
 #'
-#' \donttest{
 #' # l() and f() can also be used within a data.table:
-#' pdat_dt = panel(as.data.table(base_did), ~id+period)
-#' # Now since pdat_dt is also a data.table
-#' #   you can create lags/leads directly
-#' pdat_dt[, x1_l1 := l(x1)]
-#' pdat_dt[, c("x1_l1_fill0", "y_f2") := .(l(x1, fill = 0), f(y, 2))]
+#' if(requireNamespace("data.table")){
+#'   pdat_dt = panel(as.data.table(base_did), ~id+period)
+#'   # Now since pdat_dt is also a data.table
+#'   #   you can create lags/leads directly
+#'   pdat_dt[, x1_l1 := l(x1)]
+#'   pdat_dt[, c("x1_l1_fill0", "y_f2") := .(l(x1, fill = 0), f(y, 2))]
 #' }
+#'
 #'
 #'
 l = function(x, lag = 1, fill = NA){
@@ -468,9 +469,8 @@ f_expand = function(x, k=1, fill){
 #'                       time = c(1, 1, 1, 2, 1, 2, 2, 3), x = 1:8)
 #'
 #' # Error because of duplicate values for (id, time)
-#' \donttest{
-#' lag(x~id+time, 1, base_dup)
-#' }
+#' try(lag(x~id+time, 1, base_dup))
+#'
 #'
 #' # Error is bypassed, lag corresponds to first occurence of (id, time)
 #' lag(x~id+time, 1, base_dup, duplicate.method = "first")
@@ -484,9 +484,7 @@ f_expand = function(x, k=1, fill){
 #' lag(x~id+time, 2, base, time.step = 0.5)
 #'
 #' # Error: wrong time step
-#' \donttest{
-#' lag(x~id+time, 2, base, time.step = 7)
-#' }
+#' try(lag(x~id+time, 2, base, time.step = 7))
 #'
 #' # Adding NAs + unsorted IDs
 #' base = data.frame(id = rep(1:2, each = 4),
@@ -498,12 +496,12 @@ f_expand = function(x, k=1, fill){
 #'
 #' print(base_bis)
 #'
-#' \donttest{
 #' # You can create variables without specifying the data within data.table:
-#' library(data.table)
-#' base = data.table(id = rep(1:2, each = 3), year = 1990 + rep(1:3, 2), x = 1:6)
-#' base[, x.l1 := lag(x~id+year, 1)]
+#' if(requireNamespace("data.table")){
+#'   base = data.table(id = rep(1:2, each = 3), year = 1990 + rep(1:3, 2), x = 1:6)
+#'   base[, x.l1 := lag(x~id+year, 1)]
 #' }
+#'
 #'
 #'
 lag.formula = function(x, k = 1, data, time.step = "unitary", fill = NA, duplicate.method = c("none", "first"), ...){
@@ -662,14 +660,15 @@ lag.formula = function(x, k = 1, data, time.step = "unitary", fill = NA, duplica
 #' # and also to:
 #' pdat = panel(base_did, "id,period")
 #'
-#' \donttest{
 #' # l() and f() can also be used within a data.table:
-#' pdat_dt = panel(as.data.table(base_did), ~id+period)
-#' # Now since pdat_dt is also a data.table
-#' #   you can create lags/leads directly
-#' pdat_dt[, x1_l1 := l(x1)]
-#' pdat_dt[, c("x1_l1_fill0", "y_f2") := .(l(x1, fill = 0), f(y, 2))]
+#' if(requireNamespace("data.table")){
+#'   pdat_dt = panel(as.data.table(base_did), ~id+period)
+#'   # Now since pdat_dt is also a data.table
+#'   #   you can create lags/leads directly
+#'   pdat_dt[, x1_l1 := l(x1)]
+#'   pdat_dt[, c("x1_l1_fill0", "y_f2") := .(l(x1, fill = 0), f(y, 2))]
 #' }
+#'
 #'
 panel = function(data, panel.id, time.step = "unitary", duplicate.method = c("none", "first")){
 
@@ -786,18 +785,19 @@ unpanel = function(x){
 #' etable(a, b)
 #'
 #'
-#' \donttest{
 #' # Using data.table to create new lead/lag variables
-#' pdat_dt = panel(as.data.table(base_did), ~id+period)
+#' if(requireNamespace("data.table")){
+#'   pdat_dt = panel(as.data.table(base_did), ~id+period)
 #'
-#' # Variable creation
-#' pdat_dt[, x_l1 := l(x1)]
-#' pdat_dt[, c("x_l1", "x_f1_2") := .(l(x1), f(x1)**2)]
+#'   # Variable creation
+#'   pdat_dt[, x_l1 := l(x1)]
+#'   pdat_dt[, c("x_l1", "x_f1_2") := .(l(x1), f(x1)**2)]
 #'
-#' # Estimation on a subset of the data
-#' #  (the lead/lags work appropriately)
-#' feols(y~l(x1, 0:1), pdat_dt[!period %in% c(2, 4)])
+#'   # Estimation on a subset of the data
+#'   #  (the lead/lags work appropriately)
+#'   feols(y~l(x1, 0:1), pdat_dt[!period %in% c(2, 4)])
 #' }
+#'
 #'
 "[.fixest_panel" = function(x, i, j, ...){
     # we need to perform proper bookkeeping

@@ -3,29 +3,28 @@
 \name{setFixest_dict}
 \alias{setFixest_dict}
 \alias{getFixest_dict}
-\title{Sets/gets the dictionary used in \code{esttex}}
+\title{Sets/gets the dictionary relabeling the variables}
 \usage{
 setFixest_dict(dict)
 
 getFixest_dict()
 }
 \arguments{
-\item{dict}{A named character vector. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use \code{dict = c(a="$log(a)$", b3="$bonus^3$")}.}
+\item{dict}{A named character vector. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use \code{dict = c(a="$log(a)$", b3="$bonus^3$")}. This dictionary is used in Latex tables or in graphs by the function \code{\link[fixest]{coefplot}}. If you want to separate Latex rendering from rendering in graphs, use an ampersand first to make the variable specific to \code{coefplot}.}
 }
 \description{
-Sets/gets the default dictionary used in the function \code{\link[fixest]{esttex}}. The dictionaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table. By setting the dictionary with \code{setFixest_dict}, you can avoid providing the argument \code{dict} in function \code{\link[fixest]{esttex}}.
+Sets/gets the default dictionary used in the function \code{\link[fixest]{esttex}}, \code{\link[fixest]{did_means}} and \code{\link[fixest]{coefplot}}. The dictionaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table or displaying in graphs. By setting the dictionary with \code{setFixest_dict}, you can avoid providing the argument \code{dict}.
 }
 \examples{
 
-\donttest{
 data(trade)
 est = feols(log(Euros) ~ log(dist_km)|Origin+Destination+Product, trade)
 # we export the result & rename some variables
 esttex(est, dict = c("log(Euros)"="Euros (ln)", Origin="Country of Origin"))
+
 # If you export many tables, it can be more convenient to use setFixest_dict:
 setFixest_dict(c("log(Euros)"="Euros (ln)", Origin="Country of Origin"))
 esttex(est) # variables are properly relabeled
-}
 
 }
 \author{

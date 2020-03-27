@@ -17,16 +17,15 @@ Sets/gets the default policy of NA/Inf behavior in \code{fixest} estimations. By
 }
 \examples{
 
-\donttest{
 base = iris
 base[1, 1] = NA
 # default: NAs removed
 res = feols(Sepal.Length ~ Sepal.Width, base)
 # no tolerance: estimation fails
-res = feols(Sepal.Length ~ Sepal.Width, base, na_inf.rm = FALSE)
+try(feols(Sepal.Length ~ Sepal.Width, base, na_inf.rm = FALSE))
+
 # to set no tolerance as default:
 setFixest_na_inf.rm(FALSE)
-}
 
 }
 \author{

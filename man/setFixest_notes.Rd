@@ -17,12 +17,11 @@ Sets/gets the default values of whether notes (informing for NA and observations
 }
 \examples{
 
-\donttest{
-# Default is TRUE
-getFixest_notes()
 # Change default with
 setFixest_notes(FALSE)
-}
+
+# Back to default which is TRUE
+getFixest_notes()
 
 }
 \author{

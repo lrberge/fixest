@@ -22,7 +22,6 @@ This function tests: 1) collinearity with the cluster variables, 2) perfect mult
 }
 \examples{
 
-\donttest{
 # Creating an example data base:
 cluster_1 = sample(3, 100, TRUE)
 cluster_2 = sample(20, 100, TRUE)
@@ -56,7 +55,7 @@ collinearity(res_2)
 res_3 = feNmlm(dep ~ log(z), base, NL.fml = ~log(a*x + b*y),
               NL.start = list(a=1, b=1), lower = list(a=0, b=0))
 collinearity(res_3)
-}
+
 
 }
 \author{

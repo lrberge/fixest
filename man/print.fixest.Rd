@@ -34,13 +34,12 @@ print(est_pois)
 # By default the coefficient table is displayed.
 #  If the user wished to display only the coefficents, use option type:
 print(est_pois, type = "coef")
-\donttest{
+
 # To permanently display coef. only, use setFixest_print.type:
 setFixest_print.type("coef")
 est_pois
 # back to default:
 setFixest_print.type("table")
-}
 
 
 }

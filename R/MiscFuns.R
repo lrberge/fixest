@@ -32,13 +32,12 @@
 #' # By default the coefficient table is displayed.
 #' #  If the user wished to display only the coefficents, use option type:
 #' print(est_pois, type = "coef")
-#' \donttest{
+#'
 #' # To permanently display coef. only, use setFixest_print.type:
 #' setFixest_print.type("coef")
 #' est_pois
 #' # back to default:
 #' setFixest_print.type("table")
-#' }
 #'
 #'
 print.fixest <- function(x, n, type = getFixest_print.type(), ...){
@@ -232,7 +231,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' esttable(sum_white, sum_oneway, sum_twoway, sum_threeway)
 #'
 #' # Alternative ways to cluster the SE:
-#' \donttest{
+#'
 #' # two-way clustering: Destination and Product
 #' # (Note that arg. se = "twoway" is implicitly deduced from the argument cluster)
 #' summary(est_pois, cluster = c("Destination", "Product"))
@@ -241,7 +240,6 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' summary(est_pois, cluster = ~Destination+Product)
 #' # Since Destination and Product are used as fixed-effects, you can also use:
 #' summary(est_pois, cluster = 2:3)
-#' }
 #'
 #'
 summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), forceCovariance = FALSE, keepBounded = FALSE, ...){
@@ -1668,7 +1666,6 @@ summary.fixest.obs2remove = function(object, ...){
 #'
 #' @examples
 #'
-#' \donttest{
 #' # Creating an example data base:
 #' cluster_1 = sample(3, 100, TRUE)
 #' cluster_2 = sample(20, 100, TRUE)
@@ -1702,7 +1699,7 @@ summary.fixest.obs2remove = function(object, ...){
 #' res_3 = feNmlm(dep ~ log(z), base, NL.fml = ~log(a*x + b*y),
 #'               NL.start = list(a=1, b=1), lower = list(a=0, b=0))
 #' collinearity(res_3)
-#' }
+#'
 #'
 collinearity = function(x, verbose){
 	# x: fixest estimation
@@ -5791,6 +5788,7 @@ fitted.fixest = fitted.values.fixest = function(object, type = c("response", "li
 }
 
 #' @rdname fitted.fixest
+#' @method fitted.values fixest
 "fitted.values.fixest"
 
 #' Extracts residuals from a \code{fixest} object
@@ -7422,12 +7420,11 @@ estfun.fixest = function(x, ...){
 #'
 #' @examples
 #'
-#' \donttest{
-#' # Default is TRUE
-#' getFixest_notes()
 #' # Change default with
 #' setFixest_notes(FALSE)
-#' }
+#'
+#' # Back to default which is TRUE
+#' getFixest_notes()
 #'
 setFixest_notes = function(x){
 
@@ -7465,14 +7462,14 @@ getFixest_notes = function(){
 #'
 #' @examples
 #'
-#' \donttest{
 #' # Gets the current number of threads
 #' getFixest_nthreads()
+#'
 #' # To set multi-threading off:
 #' setFixest_nthreads(1)
+#'
 #' # To set it back to default:
 #' setFixest_nthreads()
-#' }
 #'
 #'
 setFixest_nthreads = function(nthreads){
@@ -7516,12 +7513,12 @@ getFixest_nthreads = function(){
     x
 }
 
-#' Sets/gets the dictionary used in \code{esttex}
+#' Sets/gets the dictionary relabeling the variables
 #'
-#' Sets/gets the default dictionary used in the function \code{\link[fixest]{esttex}}. The dictionaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table. By setting the dictionary with \code{setFixest_dict}, you can avoid providing the argument \code{dict} in function \code{\link[fixest]{esttex}}.
+#' Sets/gets the default dictionary used in the function \code{\link[fixest]{esttex}}, \code{\link[fixest]{did_means}} and \code{\link[fixest]{coefplot}}. The dictionaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table or displaying in graphs. By setting the dictionary with \code{setFixest_dict}, you can avoid providing the argument \code{dict}.
 #'
 #'
-#' @param dict A named character vector. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use \code{dict = c(a="$log(a)$", b3="$bonus^3$")}.
+#' @param dict A named character vector. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use \code{dict = c(a="$log(a)$", b3="$bonus^3$")}. This dictionary is used in Latex tables or in graphs by the function \code{\link[fixest]{coefplot}}. If you want to separate Latex rendering from rendering in graphs, use an ampersand first to make the variable specific to \code{coefplot}.
 #'
 #' @author
 #' Laurent Berge
@@ -7529,15 +7526,14 @@ getFixest_nthreads = function(){
 #'
 #' @examples
 #'
-#' \donttest{
 #' data(trade)
 #' est = feols(log(Euros) ~ log(dist_km)|Origin+Destination+Product, trade)
 #' # we export the result & rename some variables
 #' esttex(est, dict = c("log(Euros)"="Euros (ln)", Origin="Country of Origin"))
+#'
 #' # If you export many tables, it can be more convenient to use setFixest_dict:
 #' setFixest_dict(c("log(Euros)"="Euros (ln)", Origin="Country of Origin"))
 #' esttex(est) # variables are properly relabeled
-#' }
 #'
 setFixest_dict = function(dict){
 
@@ -7601,16 +7597,15 @@ getFixest_dict = function(){
 #'
 #' @examples
 #'
-#' \donttest{
 #' base = iris
 #' base[1, 1] = NA
 #' # default: NAs removed
 #' res = feols(Sepal.Length ~ Sepal.Width, base)
 #' # no tolerance: estimation fails
-#' res = feols(Sepal.Length ~ Sepal.Width, base, na_inf.rm = FALSE)
+#' try(feols(Sepal.Length ~ Sepal.Width, base, na_inf.rm = FALSE))
+#'
 #' # to set no tolerance as default:
 #' setFixest_na_inf.rm(FALSE)
-#' }
 #'
 setFixest_na_inf.rm = function(x){
 
@@ -7646,7 +7641,6 @@ getFixest_na_inf.rm = function(){
 #'
 #' @examples
 #'
-#' \donttest{
 #' res = feols(Sepal.Length ~ Sepal.Width + Petal.Length, base)
 #' # default is coef. table:
 #' res
@@ -7654,7 +7648,9 @@ getFixest_na_inf.rm = function(){
 #' print(res, type = "coef")
 #' setFixest_print.type("coef")
 #' res # only the coefs
-#' }
+#'
+#' # back to default
+#' setFixest_print.type("table")
 #'
 setFixest_print.type = function(x){
 

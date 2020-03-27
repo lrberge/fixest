@@ -17,7 +17,6 @@ Sets/gets the default behavior of the \code{print} method for non-summary \code{
 }
 \examples{
 
-\donttest{
 res = feols(Sepal.Length ~ Sepal.Width + Petal.Length, base)
 # default is coef. table:
 res
@@ -25,7 +24,9 @@ res
 print(res, type = "coef")
 setFixest_print.type("coef")
 res # only the coefs
-}
+
+# back to default
+setFixest_print.type("table")
 
 }
 \author{
