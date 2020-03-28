@@ -343,6 +343,7 @@ summ = function(object, se, cluster, dof = getFixest_dof(), forceCovariance = FA
 #' @param title (Tex only.) Character scalar. The title of the Latex table.
 #' @param float (Tex only.) Logical. By default, if the argument \code{title} or \code{label} is provided, it is set to \code{TRUE}. Otherwise, it is set to \code{FALSE}.
 #' @param sdBelow (Tex only.) Logical, default is \code{TRUE}. Should the standard-errors be displayed below the coefficients?
+#' @param keep Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is kept). See details.
 #' @param drop Character vector. This element is used if some variables are not to be displayed. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be discarded. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{drop = "x[[:digit:]]{2}"}. If the first character is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is dropped). See details.
 #' @param order Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument \code{dict}). Example: you have the following variables: \code{month1} to \code{month6}, then \code{x1} to \code{x5}, then \code{year1} to \code{year6}. If you want to display first the x's, then the years, then the months you could use: \code{order = c("x", "year")}. If the first character is an exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that does not contain \dQuote{Intercept} goes first).  See details.
 #' @param dict (Tex only.) A named character vector. It changes the original variable names to the ones contained in the \code{dict}. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default it is equal to \code{getFixest_dict()}, a default dictionary which can be set with \code{\link[fixest]{setFixest_dict}}.
@@ -7705,112 +7706,6 @@ getFixest_print.type = function(){
     x
 }
 
-
-#' Sets the defaults of coefplot
-#'
-#' You can set the default values of most arguments of \code{\link[fixest]{coefplot}} with this function.
-#'
-#' @inheritParams coefplot
-#'
-#' @param reset Logical, default is \code{TRUE}. If \code{TRUE}, then the arguments that *are not* set during the call are reset to their "factory"-default values. If \code{FALSE}, on the other hand, arguments that have already been modified are not changed.
-#'
-#' @return
-#' Doesn't return anything.
-#'
-#' @seealso
-#' \code{\link[fixest]{coefplot}}
-#'
-#' @examples
-#'
-#' # coefplot has many arguments, which makes it highly flexible.
-#' # If you don't like the default style of coefplot. No worries,
-#' # you can set *your* default by using the function
-#' # setFixest_coefplot()
-#'
-#' # Estimation
-#' est = feols(Petal.Length ~ Petal.Width + Sepal.Length +
-#'                 Sepal.Width | Species, iris)
-#'
-#' # Plot with default style
-#' coefplot(est)
-#'
-#' # Now we permanently change some arguments
-#' dict = c("Petal.Length"="Length (Petal)", "Petal.Width"="Width (Petal)",
-#'          "Sepal.Length"="Length (Sepal)", "Sepal.Width"="Width (Sepal)")
-#'
-#' setFixest_coefplot(ci.col = 2, pt.col = "darkblue", ci.lwd = 3,
-#'                    pt.cex = 2, pt.pch = 15, ci.width = 0, dict = dict)
-#'
-#' # Tadaaa!
-#' coefplot(est)
-#'
-#' # To reset to the default settings:
-#' setFixest_coefplot()
-#' coefplot(est)
-#'
-setFixest_coefplot = function(dict, ci.width=0.1, ci_level = 0.95, pt.pch = 20, cex = par("cex"), pt.cex = cex, col = 1, pt.col = col, ci.col = col, lwd = par("lwd"), ci.lwd = lwd, ci.lty, grid = TRUE, grid.par = list(lty=3, col = "gray"), zero = TRUE, zero.par = list(col="black", lwd=1), join = FALSE, join.par = list(lwd=lwd), ref.line, ref.line.par = list(col = "black", lty = 2), only.inter = TRUE, reset = TRUE){
-
-    #
-    # Controls
-    #
-
-    check_arg(ci.width, "singleNumericGE0")
-    check_arg(ci_level, "singleNumericGE0LT1")
-    check_arg(lwd, "singleNumericGE0")
-    check_arg(ci.lwd, "singleNumericGE0")
-    check_arg(grid, "singleLogical")
-    if(is.null(grid.par)){
-        grid.par = list()
-    } else if(!is.list(grid.par) ) {
-        stop("Argument grid.par must be a list (even empty).")
-    }
-    check_arg(zero, "singleLogical")
-    if(is.null(zero.par)){
-        zero.par = list()
-    } else if(!is.list(zero.par) ) {
-        stop("Argument zero.par must be a list (even empty).")
-    }
-    check_arg(join, "singleLogical")
-    if(is.null(join.par)){
-        join.par = list()
-    } else if(!is.list(join.par) ) {
-        stop("Argument join.par must be a list (even empty).")
-    }
-    check_arg(ref.line, "singleLogical")
-    if(is.null(ref.line.par)){
-        ref.line.par = list()
-    } else if(!is.list(ref.line.par) ) {
-        stop("Argument ref.line.par must be a list (even empty).")
-    }
-    check_arg(only.inter, "singleLogical")
-    check_arg(reset, "singleLogical")
-
-    #
-    # Code
-    #
-
-    if(reset){
-        opts = list()
-        } else {
-        opts = getOption("fixest_coefplot")
-        if(is.null(opts)){
-            opts = list()
-        } else if(!is.list(opts)){
-            warning("Wrong format of getOption('fixest_coefplot'), the options of coefplot are reset.")
-            opts = list()
-        }
-    }
-
-    mc = match.call()
-
-    all_args = setdiff(names(mc), c("", "reset"))
-
-    for(arg in all_args){
-        opts[[arg]] = eval(mc[[arg]])
-            }
-
-    options("fixest_coefplot" = opts)
-}
 
 
 #' Type of degree of freedom in fixest summary
