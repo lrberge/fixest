@@ -602,8 +602,8 @@ List cpp_get_fe_gnl(int Q, int N, NumericVector sumFE, IntegerMatrix dumMat, Int
 					cluster_values(index_select) = sumFE(obs) - other_value;
 
 					// Update of the mat_done
-					for(int i=start_cluster[index_select] ; i<end_cluster[index_select] ; i++){
-						obs = obsCluster(i, q);
+					for(int j=start_cluster[index_select] ; j<end_cluster[index_select] ; j++){
+						obs = obsCluster(j, q);
 						mat_done(obs, q) = 1;
 						rowsums[obs]++;
 					}
