@@ -7,28 +7,31 @@
 
 
 
-#' Plots confidence intervals
+#' Plots confidence intervals and point estimates
 #'
 #' This function plots the results of estimations (coefficients and confidence intervals). It is flexible and handles interactions in a special way.
 #'
 #' @inheritParams etable
+#' @inheritSection etable Arguments keep, drop and order
 #'
 #' @param object Can be either: i) an estimation object (obtained for example from \code{\link[fixest]{feols}}, ii) a list of estimation objects (several results will be plotted at once), iii) a matrix of coefficients table, iv) a numeric vector of the point estimates -- the latter requiring the extra arguments \code{sd} or \code{ci_low} and \code{ci_high}.
 #' @param sd The standard errors of the estimates. It may be missing.
 #' @param ci_low If \code{sd} is not provided, the lower bound of the confidence interval. For each estimate.
 #' @param ci_high If \code{sd} is not provided, the upper bound of the confidence interval. For each estimate.
+#' @param horiz A logical scalar, default is \code{FALSE}. Whether to display the confidence intervals horizontally instead of vertically.
 #' @param x The value of the x-axis. If missing, the names of the argument \code{estimate} are used.
 #' @param x.shift Shifts the confidence intervals bars to the left or right, depending on the value of \code{x.shift}. Default is 0.
 #' @param ci.width The width of the extremities of the confidence intervals. Default is \code{0.1}.
 #' @param ci_level Scalar between 0 and 1: the level of the CI. By default it is equal to 0.95.
 #' @param add Default is \code{FALSE}, if the intervals are to be added to an existing graph. Note that if it is the case, then the argument \code{x} MUST be numeric.
-#' @param pt.pch The patch of the coefficient estimates. Default is 20 (circle).
+#' @param pt.pch The patch of the coefficient estimates. Default is 1 (circle).
 #' @param cex Numeric, default is \code{par("cex")}. Expansion factor for the points
 #' @param pt.cex The size of the coefficient estimates. Default is the other argument \code{cex}.
 #' @param col The color of the points and the confidence intervals. Default is 1 ("black"). Note that you can set the colors separately for each of them with \code{pt.col} and \code{ci.col}.
-#' @param pt.col The color of the coefficient estimate. Default is equal to the other argument \code{col}.
+#' @param pt.col The color of the coefficient estimates. Default is equal to the other argument \code{col}.
 #' @param ci.col The color of the confidence intervals. Default is equal to the other argument \code{col}.
 #' @param lwd General liwe with. Default is par("lwd").
+#' @param pt.lwd The line width of the coefficient estimates. Default is equal to the other argument \code{lwd}.
 #' @param ci.lwd The line width of the confidence intervals. Default is equal to the other argument \code{lwd}.
 #' @param ci.lty The line type of the confidence intervals. Default is 1.
 #' @param grid Logical, default is \code{TRUE}. Whether a grid should be displayed. You can set the display of the grid with the argument \code{grid.par}.
@@ -37,7 +40,8 @@
 #' @param zero.par List. Parameters of the zero-line. The default values are \code{col = "black"} and \code{lwd = 1}. You can add any graphical parameter that will be passed to \code{\link[graphics]{abline}}. Example: \code{zero.par = list(col = "darkblue", lwd = 3)}.
 #' @param pt.join Logical, default depends on the situation. If \code{TRUE}, then the coefficient estimates are joined with a line. By default, it is equal to \code{TRUE} only if: i) interactions are plotted, ii) the x values are numeric and iii) a reference is found.
 #' @param pt.join.par List. Parameters of the line joining the cofficients. The default values are: \code{col = pt.col} and \code{lwd = lwd}. You can add any graphical parameter that will be passed to \code{\link[graphics]{lines}}. Eg: \code{pt.join.par = list(lty = 2)}.
-#' @param ref.line Logical, default depends on the situation. It is \code{TRUE} only if: i) interactions are plotted, ii) the x values are numeric and iii) a reference is found. If \code{TRUE}, then a vertical line is drawn at the level of the reference value. You can set the parameters of this line with the argument \code{ref.line.par}.
+#' @param ref Only used in interactions. Either: i) "auto" (default), ii) a character vector of length 1, iii) a list of length 1, or iv) a named integer vector of length 1. It gives the value that has been set as a reference in the estimation of the interactions. By default, if the estimation has been done with \code{fixest}, the reference is automatically found. If ii), ie a character scalar, then that coefficient equal to zero is added as the first coefficient. If a list or a named integer vector of length 1, then the integer gives the position of the reference among the coefficients and the name gives the coefficient name.
+#' @param ref.line Logical, default is "auto", the behavior depending on the situation. It is \code{TRUE} only if: i) interactions are plotted, ii) the x values are numeric and iii) a reference is found. If \code{TRUE}, then a vertical line is drawn at the level of the reference value. You can set the parameters of this line with the argument \code{ref.line.par}.
 #' @param ref.line.par List. Parameters of the vertical line on the reference. The default values are: \code{col = "black"} and \code{lty = 2}. You can add any graphical parameter that will be passed to \code{\link[graphics]{abline}}. Eg: \code{ref.line.par = list(lty = 1, lwd = 3)}.
 #' @param xlim.add A numeric vector of length 1 or 2. It represents an extension factor of xlim, in percentage. Eg: \code{xlim.add = c(0, 0.5)} extends \code{xlim} of 50\% on the right. If of lentgh 1, positive values represent the right, and negative values the left (Eg: \code{xlim.add = -0.5} is equivalent to \code{xlim.add = c(0.5, 0)}).
 #' @param ylim.add A numeric vector of length 1 or 2. It represents an extension factor of ylim, in percentage. Eg: \code{ylim.add = c(0, 0.5)} extends \code{ylim} of 50\% on the top. If of lentgh 1, positive values represent the top, and negative values the bottom (Eg: \code{ylim.add = -0.5} is equivalent to \code{ylim.add = c(0.5, 0)}).
@@ -51,7 +55,19 @@
 #' @param ci.join.par A list of parameters to be passed to \code{\link[graphics]{lines}}. Only used if \code{ci.join=TRUE}. By default it is equal to \code{list(lwd = lwd, col = col, lty = 2)}.
 #' @param ci.fill Logical default to \code{FALSE}. Whether to fille the confidence intervals with a color. If \code{TRUE}, then you can set the graphical parameters with the argument \code{ci.fill.par}.
 #' @param ci.fill.par A list of parameters to be passed to \code{\link[graphics]{polygon}}. Only used if \code{ci.fill=TRUE}. By default it is equal to \code{list(col = "lightgray", alpha = 0.5)}. Note that \code{alpha} is a special parameter that adds transparency to the color (ranges from 0 to 1).
-#' @param group A list, default is missing. Each element of the list reports the coefficients to be grouped while the name of the element is the group name. Each element of the list can be either: i) a character vector of length 1, ii) of length 2, or ii) a numeric vector. If equal to: i) then it is interpreted as a pattern: all element fitting the regular expression will be grouped, if ii) it corrsponds to the first and last elements to be grouped, if iii) it corresponds to the coefficients numbers to be grouped. If equal to a character vector, you can use a percentage to tell the algorithm to look at the coefficients before aliasing (e.g. \code{"%varname"}). Example of valid uses: \code{group=list(group_name=\"pattern\")}, \code{group=list(group_name=c(\"var_start\", \"var_end\"))}, \code{group=list(group_name=1:2))}. See details.
+#' @param group A list, default is missing. Each element of the list reports the coefficients to be grouped while the name of the element is the group name. Each element of the list can be either: i) a character vector of length 1, ii) of length 2, or ii) a numeric vector. If equal to: i) then it is interpreted as a pattern: all element fitting the regular expression will be grouped, if ii) it corrsponds to the first and last elements to be grouped, if iii) it corresponds to the coefficients numbers to be grouped. If equal to a character vector, you can use a percentage to tell the algorithm to look at the coefficients before aliasing (e.g. \code{"\%varname"}). Example of valid uses: \code{group=list(group_name=\"pattern\")}, \code{group=list(group_name=c(\"var_start\", \"var_end\"))}, \code{group=list(group_name=1:2))}. See details.
+#' @param group.par A list of parameters controlling the display of the group. The parameters controlling the line are: \code{lwd}, \code{tcl} (length of the tick), \code{line.adj} (adjustment of the position, default is 0), \code{tick} (whether to add the ticks), \code{lwd.ticks}, \code{col.ticks}. Then the parameters controlling the text: \code{text.adj} (adjustment of the position, default is 0), \code{text.cex}, \code{text.font}, \code{text.col}.
+#' @param pt.bg The background color of the point estimate (when the \code{pt.pch} is in 21 to 25). Defaults to NULL.
+#' @param lab.cex The size of the labels of the coefficients. Default is missing. It is automatically set by an internal algorithm which can go as low as \code{lab.min.cex} (another argument).
+#' @param lab.min.cex The minimum size of the coefficients labels, as set by the internal algorithm. Default is 0.85.
+#' @param lab.max.mar The maximum size the left margin can take when trying to fit the coefficient labels into it (only when \code{horiz = TRUE}). This is used in the internal algorithm fitting the coefficient labels. Default is \code{0.25}.
+#' @param lab.fit The method to fit the coefficient labels into the plotting region (only when \code{horiz = FALSE}). Can be \code{"auto"} (the default), \code{"simple"}, \code{"multi"} or \code{"tilted"}. If \code{"simple"}, then the classic axis is drawn. If \code{"multi"}, then the coefficient labels are fit horizontally across several lines, such that they don't collide. If \code{"tilted"}, then the labels are tilted. If \code{"auto"}, an automatic choice between the three is made.
+#' @param main The title of the plot. Default is \code{"Effect on __depvar__"}. You can use the special variable \code{__depvar__} to set the title (useful when you set the plot default with \code{\link[fixest]{setFixest_coefplot}}).
+#' @param value.lab The label to appear on the side of the coefficient values. If \code{horiz = FALSE}, the label appears in the y-axis. If \code{horiz = TRUE}, then it appears on the x-axis. The default is equal to \code{"Estimate and __ci__ Conf. Int."}, with \code{__ci__} a special variable giving the value of the confidence interval.
+#' @param xlab The label of the x-axis, default is \code{NULL}. Note that if \code{horiz = TRUE}, it overrides the value of the argument \code{value.lab}.
+#' @param ylab The label of the y-axis, default is \code{NULL}. Note that if \code{horiz = FALSE}, it overrides the value of the argument \code{value.lab}.
+#' @param sub A subtitle, default is \code{NULL}.
+#' @param style A character scalar giving the style of the plot to be used. You can set styles with the function \code{\link[fixest]{setFixest_coefplot}}, setting all the default values of the function. If missing, then it switches to either "default", "interaction" or "multiple", depending on the data given in input.
 #'
 #' @seealso
 #' See \code{\link[fixest]{setFixest_coefplot}} to set the default values of \code{coefplot}, and the estimation functions: e.g. \code{\link[fixest]{feols}}, \code{\link[fixest]{fepois}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{fenegbin}}.
@@ -175,17 +191,28 @@
 #' est = feols(Petal.Length ~ Petal.Width + Sepal.Length +
 #'                 Sepal.Width | Species, iris)
 #'
-#' # Tadaaa!
+#' # Tadaaa! (Although the colors could be better)
 #' coefplot(est)
 #'
 #' # To reset to the default settings:
-#' setFixest_coefplot()
+#' setFixest_coefplot(reset = TRUE)
 #' coefplot(est)
 #'
 #'
-coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dict, drop, order, ci.width="1%", ci_level = 0.95, add = FALSE, pt.pch = 20, cex = par("cex"), pt.cex = cex, col = 1:8, pt.col = col, ci.col = col, lwd = par("lwd"), ci.lwd = lwd, ci.lty = 1, grid = TRUE, grid.par = list(lty=3, col = "gray"), zero = TRUE, zero.par = list(col="black", lwd=1), pt.join = FALSE, pt.join.par = list(col = pt.col, lwd=lwd), ci.join = FALSE, ci.join.par = list(lwd = lwd, col = col, lty = 2), ci.fill = FALSE, ci.fill.par = list(col = "lightgray", alpha = 0.5), ref = "&auto", ref.line = "auto", ref.line.par = list(col = "black", lty = 2), xlim.add, ylim.add, only.params = FALSE, only.inter = TRUE, sep, as.multiple = FALSE, bg, group = "auto", group.par = list(lwd=2, line=3, tcl=0.75, lab.line=2.5, lab.cex = 1), main = "Effect on __depvar__", ylab = "Estimate and __ci__ Conf. Int.", xlab = "", sub = ""){
+coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, horiz = FALSE, dict = getFixest_dict(), keep, drop, order, ci.width="1%", ci_level = 0.95, add = FALSE, pt.pch = 20, pt.bg = NULL, cex = par("cex"), pt.cex = cex, col = 1:8, pt.col = col, ci.col = col, lwd = par("lwd"), pt.lwd = lwd, ci.lwd = lwd, ci.lty = 1, grid = TRUE, grid.par = list(lty=3, col = "gray"), zero = TRUE, zero.par = list(col="black", lwd=1), pt.join = FALSE, pt.join.par = list(col = pt.col, lwd=lwd), ci.join = FALSE, ci.join.par = list(lwd = lwd, col = col, lty = 2), ci.fill = FALSE, ci.fill.par = list(col = "lightgray", alpha = 0.5), ref = "auto", ref.line = "auto", ref.line.par = list(col = "black", lty = 2), lab.cex, lab.min.cex = 0.85, lab.max.mar = 0.25, lab.fit = "auto", xlim.add, ylim.add, only.params = FALSE, only.inter = TRUE, sep, as.multiple = FALSE, bg, group = "auto", group.par = list(lwd=2, line=3, tcl=0.75), main = "Effect on __depvar__", value.lab = "Estimate and __ci__ Conf. Int.", ylab = NULL, xlab = NULL, sub = NULL){
 
-    if(missing(dict)) dict = c()
+
+    # Set up the dictionary
+    if(is.null(dict)){
+        dict = c()
+    } else if(any(grepl("^&", names(dict)))){
+        # Speficic markuo to identify coefplot aliases
+        dict_amp = dict[grepl("^&", names(dict))]
+        names(dict_amp) = gsub("^&", "", names(dict_amp))
+        dict[names(dict_amp)] = dict_amp
+    }
+
+    match.arg(lab.fit, choices = c("auto", "simple", "multi", "tilted"))
 
     dots = list(...)
 
@@ -195,27 +222,11 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
 
     ylab_add_ci = missing(ci_low)
 
-    opts = getOption("fixest_coefplot")
-
-    if(length(opts) >= 1){
-        if(!is.list(opts)){
-            warning("The default values of coefplot are ill-formed and therefore reset. Use only setFixest_coefplot for setting the default values.")
-            opts = list()
-            options("fixest_coefplot" = opts)
-        } else {
-            mc = match.call()
-            arg2set = setdiff(names(opts), names(mc))
-            for(arg in arg2set){
-                assign(arg, opts[[arg]])
-            }
-        }
-    }
-
     #
     # Getting the parameters => function coefplot_prms
     #
 
-    info = coefplot_prms(object = object, ..., sd = sd, ci_low = ci_low, ci_high = ci_high, x = x, x.shift = x.shift, dict = dict, drop = drop, order = order, ci_level = ci_level, ref = ref, only.inter = only.inter, sep = sep, as.multiple = as.multiple)
+    info = coefplot_prms(object = object, ..., sd = sd, ci_low = ci_low, ci_high = ci_high, x = x, x.shift = x.shift, dict = dict, keep = keep, drop = drop, order = order, ci_level = ci_level, ref = ref, only.inter = only.inter, sep = sep, as.multiple = as.multiple)
 
     prms = info$prms
     is_interaction = info$is_interaction
@@ -239,29 +250,108 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
     ci_high = prms$ci_high
     x_value = prms$x
 
+    if(horiz){
+        # We just reverse the x/y
+        tmp = prms$x
+        prms$x = prms$y
+        prms$y = tmp
+    }
+
+    #
+    # Setting the default values ####
+    #
+
+    opts = getOption("fixest_coefplot")
+    check_arg(style, "singleCharacter")
+    if(missing(style)){
+        if(is_interaction){
+            style = "interaction"
+        } else if(multiple_est){
+            style = "multiple"
+        } else {
+            style = "default"
+        }
+    }
+
+    old_style = style
+    style = try(match.arg(style, choices = names(opts)), silent = TRUE)
+    if("try-error" %in% class(style)){
+        warning("Unknow style '", old_style, "', using default style instead.")
+        style = "default"
+    }
+
+    my_opt = opts[[style]]
+
+    if(!is.list(my_opt)){
+        warning("The default values of coefplot for style '", style, "' are ill-formed and therefore reset. Use only setFixest_coefplot for setting the default values.")
+        setFixest_coefplot(style = style, reset = TRUE)
+    } else if(length(my_opt) > 0){
+
+        arg_2_add = setdiff(names(opts[["default"]]), names(my_opt))
+        if(length(arg_2_add) > 0){
+            my_opt[arg_2_add] = opts[["default"]][arg_2_add]
+            # we reorder
+            arg_list = names(formals(coefplot))
+            my_fact = factor(names(my_opt), levels = arg_list)
+            my_opt = my_opt[base::order(my_fact)]
+        }
+
+        mc = match.call()
+        arg2set = setdiff(names(my_opt), names(mc))
+        for(arg in arg2set){
+            my_arg = my_opt[[arg]]
+            if(is.name(my_arg)){
+                if(length(my_opt$extra_values) > 0){
+                    assign(arg, eval(my_arg, my_opt$extra_values))
+                } else {
+                    assign(arg, eval(my_arg))
+                }
+            } else {
+                assign(arg, my_arg)
+            }
+        }
+    }
+
+
     #
     # Title ####
     #
 
     # xlab / main / ylab / sub
 
-    check_arg(xlab, "singleCharacter")
+    check_arg(value.lab, "singleCharacter")
+    check_arg(xlab, "singleCharacter NULL")
     check_arg(main, "singleCharacter")
-    check_arg(ylab, "singleCharacter")
-    check_arg(sub, "singleCharacter")
+    check_arg(ylab, "singleCharacter NULL")
+    check_arg(sub, "singleCharacter NULL")
+
+    if(horiz){
+        if(is.null(xlab)) xlab = value.lab
+    } else {
+        if(is.null(ylab)) ylab = value.lab
+    }
+
+    if(is.null(xlab)) xlab = ""
+    if(is.null(ylab)) ylab = ""
+    if(is.null(sub)) sub = ""
 
     main = replace_and_make_callable(main, varlist)
     ylab = replace_and_make_callable(ylab, varlist)
     xlab = replace_and_make_callable(xlab, varlist)
     sub = replace_and_make_callable(sub, varlist)
 
-    dots$main = expr_builder(main)
-    dots$ylab = expr_builder(ylab)
-    dots$xlab = expr_builder(xlab)
-    dots$sub = expr_builder(sub)
+    main = expr_builder(main)
+    ylab = expr_builder(ylab)
+    xlab = expr_builder(xlab)
+    sub = expr_builder(sub)
+
+    dots$main = ""
+    dots$ylab = ""
+    dots$xlab = ""
+    dots$sub = ""
 
     #
-    # group = auto ####
+    # group = auto + Height ####
     #
 
     # The value of group = "auto" => renaming the labels
@@ -320,22 +410,48 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
         }
     }
 
-    #
-    # Plot (start) ####
-    #
+    IS_GROUP = !add && !missing(group) && !is.null(group) && length(group) > 0 && !is.null(x_labels)
 
+    line_height = par("mai")[1] / par("mar")[1]
 
-    all_plot_args = unique(c(names(par()), names(formals(plot.default))))
-    pblm = setdiff(names(dots), all_plot_args)
-    if(length(pblm) > 0){
-        warning("The following argument", ifsingle(pblm, " is not a", "s are not"), " plotting argument", ifsingle(pblm, " and is", "s and are"), " therefore ignored: ", enumerate_items(pblm), ".")
-        dots[pblm] = NULL
+    if(IS_GROUP){
+        # This means there are groups!
+        # We compute the height of the group based on the parameters
+        # passed in group.par
+        # => it will be used to adjust the margins
+
+        # we need: tcl + text.adj
+
+        tcl = 0.75
+        if(!is.null(group.par$tcl)){
+            tcl = max(group.par$tcl)
+        }
+
+        line.adj = 0
+        if(!is.null(group.par$line.adj)){
+            line.adj = max(group.par$line.adj)
+        }
+
+        text.adj = 0
+        if(!is.null(group.par$text.adj)){
+            text.adj = max(group.par$text.adj)
+        }
+
+        text.cex = 1
+        if(!is.null(group.par$text.cex)){
+            text.cex = max(group.par$text.cex)
+        }
+
+        group.height = (0.5 + tcl + text.cex + text.adj + line.adj)
+
+    } else {
+        group.height = 0
     }
 
-    # preparation of the do.call
-    dots$col = col
 
-    # The limits
+    #
+    # The limits ####
+    #
 
     # xlim
     if(!missnull(xlim.add)){
@@ -358,7 +474,6 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
             my_xlim = my_xlim + xlim.add * x_width
         }
     }
-    listDefault(dots, "xlim", my_xlim)
 
     # ylim
     my_ylim = range(c(ci_low, ci_high))
@@ -384,7 +499,196 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
         }
     }
 
-    listDefault(dots, "ylim", my_ylim)
+
+    #
+    # Margins and cex setting ####
+    #
+
+    if(!missing(lab.cex)){
+        lab.min.cex = lab.cex
+    } else {
+        lab.cex = 1
+    }
+
+    if(horiz){
+        # we make the labels fit into the margin
+
+        xlab.line = 3
+        sub.line = 4
+
+        # Algorithm:
+        # - if lab.cex is provided:
+        #  => we fit the labels into the margin // we extend the margin until it fits
+        # - if lab.cex is NOT provided:
+        #  => we extend the margin so that the label fit. If the margin exceeds lab.max.mar% of the plot space, we reduce the cex
+        #   etc, until it fits. If it still does not fit => we extend the margin until it fits.
+        #
+
+        nlines = group.height + 2
+        # The last 2 means 1 line on each side of the label
+
+        if(lab.cex > lab.min.cex){
+            # No algorithm
+            lab.width_in = max(strwidth(x_labels, units = "in", cex = lab.cex))
+        } else {
+            # Algorithm
+
+            max_mar_width_in = par("pin")[1] * lab.max.mar
+
+            while(nlines * line_height + lab.width_in > max_mar_width_in && lab.cex > lab.min.cex){
+                lab.cex = 0.95 * lab.cex
+                lab.width_in = max(strwidth(x_labels, units = "in", cex = lab.cex))
+            }
+
+            # Final step => if we go too far, we etend the margin, even beyond max_mar_width_in
+            if(lab.cex < lab.min.cex){
+                lab.cex = lab.min.cex
+                lab.width_in = max(strwidth(x_labels, units = "in", cex = lab.cex))
+            }
+
+        }
+
+        group.baseline = 2 + lab.width_in / line_height
+
+        nlines = nlines + lab.width_in / line_height
+
+        ylab.line = nlines
+
+        if(ylab != ""){
+            nlines = nlines + ceiling(strheight(ylab, units = "in") / line_height)
+        }
+
+        total_width = nlines * line_height
+
+        if(total_width > par("mai")[2]){
+            new_mai = par("mai")
+            new_mai[2] = total_width + 0.05
+            op = par(mai = new_mai)
+            on.exit(par(op))
+        }
+
+    } else {
+        # We adjust the margin only if there are groups and they
+        # don't fit in the original margin
+        # or if there is a xlab and groups at the same time
+
+        ylab.line = 3
+
+        LINE_MIN_TILTED = 0.25
+        LINE_MAX_TILTED = 3
+
+        if(lab.fit == "auto"){
+            # We want to display ALL labels
+            in_to_usr = diff(my_xlim) / par("pin")[1]
+
+            w_all = strwidth(x_labels, cex = lab.cex, units = "in") * in_to_usr
+            em = strwidth("M", units = "in") * in_to_usr
+            is_collided = ((w_all[-1] + w_all[-length(w_all)]) / 2 + em) > 1
+
+            while(any(is_collided) && lab.cex > lab.min.cex){
+                lab.cex = 0.95 * lab.cex
+                w_all = strwidth(x_labels, cex = lab.cex, units = "in") * in_to_usr
+                is_collided = ((w_all[-1] + w_all[-length(w_all)]) / 2 + em) > 1
+            }
+
+            # switch to multi lines
+            if(any(is_collided) || lab.cex < lab.min.cex){
+                lab.info = xaxis_labels(at = x_at, labels = x_labels, line.max = 1, minCex = lab.min.cex, trunc = Inf, only.params = TRUE)
+
+                if(lab.info$failed){
+                    # switch to tilted
+                    lab.fit = "tilted"
+                    lab.info = xaxis_biased(at = x_at, labels = x_labels, line.min = LINE_MIN_TILTED, line.max = LINE_MAX_TILTED, cex = seq(lab.cex, lab.min.cex, length.out = 4), trunc = Inf, only.params = TRUE)
+                    lab.cex = lab.info$cex
+                    nlines = lab.info$height_line + LINE_MIN_TILTED
+
+                } else {
+                    lab.fit = "multi"
+                    nlines = lab.info$height_line
+                    lab.cex = lab.info$cex
+                }
+
+            } else {
+                lab.fit = "simple"
+                nlines = 2 * lab.cex
+            }
+        } else if(lab.fit == "multi"){
+            lab.info = xaxis_labels(at = x_at, labels = x_labels, line.max = 1, minCex = lab.min.cex, trunc = Inf, only.params = TRUE)
+            lab.cex = lab.info$cex
+            nlines = lab.info$height_line
+
+            if(length(unique(lab.info$line)) == 1){
+                lab.fit = "simple"
+                nlines = 2 * lab.cex
+            }
+
+        } else if(lab.fit == "tilted"){
+            lab.info = xaxis_biased(at = x_at, labels = x_labels, line.min = LINE_MIN_TILTED, line.max = LINE_MAX_TILTED, cex = seq(lab.cex, lab.min.cex, length.out = 4), trunc = Inf, only.params = TRUE)
+            lab.cex = lab.info$cex
+            nlines = lab.info$height_line + LINE_MIN_TILTED
+
+        } else if(lab.fit == "simple"){
+            nlines = 2 * lab.cex
+        }
+
+        # browser()
+
+        if(IS_GROUP){
+            # tcl was set before
+            group.baseline = nlines + 1 - 0.75 + tcl
+
+            nlines = nlines + group.height
+
+            xlab.line = nlines
+        } else {
+            xlab.line = 3
+        }
+
+        if(xlab != ""){
+            xlab.line = xlab.line + ceiling(strheight(xlab, units = "in") / line_height) - 1
+        }
+
+        sub.line = xlab.line + 1
+
+        if(sub != ""){
+            nlines = sub.line + 1
+        } else if(xlab != ""){
+            nlines = sub.line
+        }
+
+        total_height = nlines * line_height
+
+        if(total_height > par("mai")[1]){
+            new_mai = par("mai")
+            new_mai[1] = total_height + 0.05
+            op = par(mai = new_mai)
+            on.exit(par(op))
+        }
+
+    }
+
+    #
+    # Plot (start) ####
+    #
+
+
+    all_plot_args = unique(c(names(par()), names(formals(plot.default))))
+    pblm = setdiff(names(dots), all_plot_args)
+    if(length(pblm) > 0){
+        warning("The following argument", ifsingle(pblm, " is not a", "s are not"), " plotting argument", ifsingle(pblm, " and is", "s and are"), " therefore ignored: ", enumerate_items(pblm), ".")
+        dots[pblm] = NULL
+    }
+
+    # preparation of the do.call
+    dots$col = col
+
+    if(horiz){
+        listDefault(dots, "xlim", my_ylim)
+        listDefault(dots, "ylim", my_xlim)
+    } else {
+        listDefault(dots, "xlim", my_xlim)
+        listDefault(dots, "ylim", my_ylim)
+    }
 
     dots$x = prms$x
     dots$y = prms$y
@@ -407,7 +711,12 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
         if(!missing(bg)){
             dx = diff(my_xlim)
             dy = diff(my_ylim)
-            rect(xleft = my_xlim[1] - dx, ybottom = my_ylim[1] - dy, xright = my_xlim[2] + dx, ytop = my_ylim[2] + dy, col = bg)
+            if(horiz){
+                rect(xleft = my_ylim[1] - dy, ybottom = my_xlim[1] - dx, xright = my_ylim[2] + dy, ytop = my_xlim[2] + dx, col = bg)
+            } else {
+                rect(xleft = my_xlim[1] - dx, ybottom = my_ylim[1] - dy, xright = my_xlim[2] + dx, ytop = my_ylim[2] + dy, col = bg)
+            }
+
         }
 
         # The grid
@@ -418,10 +727,10 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
             listDefault(grid.par, "horiz", TRUE)
 
             vert = grid.par$vert
-            horiz = grid.par$horiz
+            g.horiz = grid.par$horiz
             grid.par$vert = grid.par$horiz = NULL
 
-            if(horiz){
+            if(g.horiz){
                 do.call("hgrid", grid.par)
             }
 
@@ -433,8 +742,32 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
         if(zero){
             listDefault(zero.par, "lwd", 1)
             listDefault(zero.par, "col", "black")
-            zero.par$h = 0
+
+            if(horiz){
+                zero.par$v = 0
+            } else {
+                zero.par$h = 0
+            }
+
             do.call("abline", zero.par)
+        }
+
+        # Tha annotations
+
+        if(main != ""){
+            title(main = main)
+        }
+
+        if(xlab != ""){
+            title(xlab = xlab, line = xlab.line)
+        }
+
+        if(ylab != ""){
+            title(ylab = ylab, line = ylab.line)
+        }
+
+        if(sub != ""){
+            title(sub = sub, line = sub.line)
         }
 
         # Reference line
@@ -445,7 +778,7 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
 
         if(!isLogical(ref.line)){
             stop("Argument 'ref.line' must be either a logical, either equal to 'auto'. Currently it is none of these.")
-        } else if(ref.line){
+        } else if(ref.line) {
 
             ref_pblm = is.null(prms$is_ref) || !any(prms$is_ref)
 
@@ -464,35 +797,134 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
         }
 
         box()
-        axis(2)
 
-        if(AXIS_AS_NUM){
+        # if(horiz){
+        #     axis(1)
+        # } else {
+        #     axis(2)
+        # }
+        #
+        # side = 1 + horiz
+        #
+        # if(AXIS_AS_NUM){
+        #     axis(side, las = 1)
+        # } else {
+        #     if(any(grepl("^&", x_labels))){
+        #         # means we call expression()
+        #         # drawback => expressions can overlap
+        #         qui = grepl("^&", x_labels)
+        #         if(any(!qui)){
+        #             axis(side, at = x_at[!qui], labels = x_labels[!qui], las = 1)
+        #         }
+        #
+        #         for(i in which(qui)){
+        #             axis(side, at = x_at[i], labels = expr_builder(x_labels[i]), las = 1)
+        #         }
+        #
+        #     } else {
+        #         # easy case: only character
+        #         axis(side, at = x_at, labels = x_labels, las = 1)
+        #     }
+        # }
+
+
+        if(horiz){
             axis(1)
-        } else {
-            if(any(grepl("^&", x_labels))){
-                # means we call expression()
-                # drawback => expressions can overlap
-                qui = grepl("^&", x_labels)
-                if(any(!qui)){
-                    axis(1, at = x_at[!qui], labels = x_labels[!qui])
-                }
 
-                for(i in which(qui)){
-                    # my_expr = gsub("^&", "", x_labels[i])
-                    # if(grepl("^(expression|substitute)\\(", my_expr)){
-                    #     # direct evaluation
-                    #     my_lab = eval(parse(text = my_expr))
-                    # } else {
-                    #     my_lab = eval(parse(text = paste0("expression(", my_expr, ")")))
-                    # }
-                    axis(1, at = x_at[i], labels = expr_builder(x_labels[i]))
-                }
-
+            if(AXIS_AS_NUM){
+                axis(2, las = 1)
             } else {
-                # easy case: only character
-                axis(1, at = x_at, labels = x_labels)
+                if(any(grepl("^&", x_labels))){
+                    # means we call expression()
+                    # drawback => expressions can overlap
+                    qui = grepl("^&", x_labels)
+                    if(any(!qui)){
+                        axis(2, at = x_at[!qui], labels = x_labels[!qui], las = 1, cex = lab.cex)
+                    }
+
+                    for(i in which(qui)){
+                        axis(2, at = x_at[i], labels = expr_builder(x_labels[i]), las = 1, cex = lab.cex)
+                    }
+
+                } else {
+                    # easy case: only character
+                    axis(2, at = x_at, labels = x_labels, las = 1, cex = lab.cex)
+                }
             }
+        } else {
+            axis(2)
+
+            # browser()
+
+            if(AXIS_AS_NUM){
+                axis(1)
+            } else {
+                if(lab.fit == "simple"){
+                    if(any(grepl("^&", x_labels))){
+                        # means we call expression()
+                        # drawback => expressions can overlap
+                        qui = grepl("^&", x_labels)
+                        if(any(!qui)){
+                            axis(1, at = x_at[!qui], labels = x_labels[!qui], cex.axis = lab.cex)
+                        }
+
+                        for(i in which(qui)){
+                            axis(1, at = x_at[i], labels = expr_builder(x_labels[i]), cex.axis = lab.cex)
+                        }
+
+                    } else {
+                        # easy case: only character
+                        axis(1, at = x_at, labels = x_labels, cex.axis = lab.cex)
+                    }
+                } else if(lab.fit == "multi"){
+
+                    axis(1, at = x_at, labels = NA, tcl=-0.25)
+
+                    for(my_line in unique(lab.info$line)){
+                        qui_line = my_line == lab.info$line
+                        x_labels_current = x_labels[qui_line]
+                        x_at_current = x_at[qui_line]
+
+                        if(any(grepl("^&", x_labels_current))){
+                            qui = grepl("^&", x_labels_current)
+                            if(any(!qui)){
+                                axis(1, at = x_at_current[!qui], labels = x_labels_current[!qui], cex.axis = lab.cex, line = my_line, lwd = 0)
+                            }
+
+                            for(i in which(qui)){
+                                axis(1, at = x_at_current[i], labels = expr_builder(x_labels_current[i]), cex.axis = lab.cex, line = my_line, lwd = 0)
+                            }
+
+                        } else {
+                            # easy case: only character
+                            axis(1, at = x_at_current, labels = x_labels_current, cex.axis = lab.cex, line = my_line, lwd = 0)
+                        }
+                    }
+                } else if(lab.fit == "tilted"){
+
+                    axis(1, at = x_at, labels = NA, tcl = -0.25, lwd = 0, lwd.ticks = 1)
+
+                    if(any(grepl("^&", x_labels))){
+                        qui = grepl("^&", x_labels)
+                        if(any(!qui)){
+                            xaxis_biased(1, at = x_at[!qui], labels = x_labels[!qui], cex = lab.cex, angle = lab.info$angle, line.min = LINE_MIN_TILTED)
+                        }
+
+                        for(i in which(qui)){
+                            xaxis_biased(1, at = x_at[i], labels = expr_builder(x_labels[i]), cex = lab.cex, angle = lab.info$angle, line.min = LINE_MIN_TILTED)
+                        }
+
+                    } else {
+                        # easy case: only character
+                        xaxis_biased(1, at = x_at, labels = x_labels, cex = lab.cex, angle = lab.info$angle, line.min = LINE_MIN_TILTED)
+                    }
+                }
+            }
+
+
         }
+
+
 
     }
 
@@ -501,6 +933,14 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
     #
     # pt.join ####
     #
+
+    if(identical(pt.join, "auto")){
+        if(is_interaction && AXIS_AS_NUM){
+            pt.join = TRUE
+        } else {
+            pt.join = FALSE
+        }
+    }
 
     if(pt.join){
         # We join the dots
@@ -529,9 +969,6 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
 
             do.call("lines", pt.join.par)
         }
-
-
-
     }
 
 
@@ -542,8 +979,13 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
     x = x_value
 
     if(!is.na(ci.lwd) && ci.lwd > 0){
+
         # a) barre verticale
-        segments(x0=x, y0=ci_low, x1=x, y1=ci_high, lwd = par_fit(ci.lwd, prms$id), col = par_fit(ci.col, prms$id), lty = par_fit(ci.lty, prms$id))
+        if(horiz){
+            segments(x0=ci_low, y0=x, x1=ci_high, y1=x, lwd = par_fit(ci.lwd, prms$id), col = par_fit(ci.col, prms$id), lty = par_fit(ci.lty, prms$id))
+        } else {
+            segments(x0=x, y0=ci_low, x1=x, y1=ci_high, lwd = par_fit(ci.lwd, prms$id), col = par_fit(ci.col, prms$id), lty = par_fit(ci.lty, prms$id))
+        }
 
         # Formatting the bar width
 
@@ -559,20 +1001,36 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
             }
 
             if(grepl("%", ci.width)){
-                total_width = diff(par("usr")[1:2])
-                ci.width = total_width * width_nb / 100
+                if(horiz){
+                    total_width = diff(par("usr")[3:4])
+                } else {
+                    total_width = diff(par("usr")[1:2])
+                }
+
+                ci.width = total_width * width_nb / 100 / 2
             } else {
-                ci.width = width_nb
+                ci.width = width_nb / 2
             }
         }
 
         # b) toppings
         # Only if not a reference
         qui = ci_high != ci_low
-        #  i) ci_high
-        segments(x0=x[qui]-ci.width, y0=ci_high[qui], x1=x[qui]+ci.width, y1=ci_high[qui], lwd = par_fit(ci.lwd, prms$id[qui]), col = par_fit(ci.col, prms$id[qui]), lty = par_fit(ci.lty, prms$id[qui]))
-        #  ii) ci_low
-        segments(x0=x[qui]-ci.width, y0=ci_low[qui], x1=x[qui]+ci.width, y1=ci_low[qui], lwd = par_fit(ci.lwd, prms$id[qui]), col = par_fit(ci.col, prms$id[qui]), lty = par_fit(ci.lty, prms$id[qui]))
+
+        if(horiz){
+            #  i) ci_high
+            segments(x0=ci_high[qui], y0=x[qui]-ci.width, x1=ci_high[qui], y1=x[qui]+ci.width, lwd = par_fit(ci.lwd, prms$id[qui]), col = par_fit(ci.col, prms$id[qui]), lty = par_fit(ci.lty, prms$id[qui]))
+            #  ii) ci_low
+            segments(x0=ci_low[qui], y0=x[qui]-ci.width, x1=ci_low[qui], y1=x[qui]+ci.width, lwd = par_fit(ci.lwd, prms$id[qui]), col = par_fit(ci.col, prms$id[qui]), lty = par_fit(ci.lty, prms$id[qui]))
+
+        } else {
+            #  i) ci_high
+            segments(x0=x[qui]-ci.width, y0=ci_high[qui], x1=x[qui]+ci.width, y1=ci_high[qui], lwd = par_fit(ci.lwd, prms$id[qui]), col = par_fit(ci.col, prms$id[qui]), lty = par_fit(ci.lty, prms$id[qui]))
+            #  ii) ci_low
+            segments(x0=x[qui]-ci.width, y0=ci_low[qui], x1=x[qui]+ci.width, y1=ci_low[qui], lwd = par_fit(ci.lwd, prms$id[qui]), col = par_fit(ci.col, prms$id[qui]), lty = par_fit(ci.lty, prms$id[qui]))
+
+        }
+
     }
 
 
@@ -598,22 +1056,47 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
                     }
                 }
 
-                my_join.par$x = prms$x[prms$id == i]
+                if(horiz){
+                    my_join.par$y = prms$y[prms$id == i]
 
-                my_join.par$y = prms$ci_high[prms$id == i]
-                do.call("lines", my_join.par)
+                    my_join.par$x = prms$ci_high[prms$id == i]
+                    do.call("lines", my_join.par)
 
-                my_join.par$y = prms$ci_low[prms$id == i]
-                do.call("lines", my_join.par)
+                    my_join.par$x = prms$ci_low[prms$id == i]
+                    do.call("lines", my_join.par)
+
+                } else {
+                    my_join.par$x = prms$x[prms$id == i]
+
+                    my_join.par$y = prms$ci_high[prms$id == i]
+                    do.call("lines", my_join.par)
+
+                    my_join.par$y = prms$ci_low[prms$id == i]
+                    do.call("lines", my_join.par)
+                }
+
             }
         } else {
-            ci.join.par$x = prms$x
 
-            ci.join.par$y = prms$ci_high
-            do.call("lines", ci.join.par)
+            if(horiz){
+                ci.join.par$y = prms$y
 
-            ci.join.par$y = prms$ci_low
-            do.call("lines", ci.join.par)
+                ci.join.par$x = prms$ci_high
+                do.call("lines", ci.join.par)
+
+                ci.join.par$x = prms$ci_low
+                do.call("lines", ci.join.par)
+
+            } else {
+                ci.join.par$x = prms$x
+
+                ci.join.par$y = prms$ci_high
+                do.call("lines", ci.join.par)
+
+                ci.join.par$y = prms$ci_low
+                do.call("lines", ci.join.par)
+            }
+
         }
     }
 
@@ -624,8 +1107,9 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
     if(ci.fill){
         # We join the extremities of the conf. int.
 
-        listDefault(ci.fill.par, "col", rgb(0.5, 0.5, 0.5, 0.5))
+        listDefault(ci.fill.par, "col", rgb(0.5, 0.5, 0.5))
         listDefault(ci.fill.par, "alpha", 0.5)
+        listDefault(ci.fill.par, "border", NA)
 
         if(multiple_est){
             # We create the appropriate colors
@@ -650,10 +1134,19 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
                     }
                 }
 
-                my_join.par$x = c(prms$x[prms$id == i], rev(prms$x[prms$id == i]))
+                if(horiz){
+                    my_join.par$y = c(prms$y[prms$id == i], rev(prms$y[prms$id == i]))
 
-                my_join.par$y = c(prms$ci_high[prms$id == i], rev(prms$ci_low[prms$id == i]))
-                do.call("polygon", my_join.par)
+                    my_join.par$x = c(prms$ci_high[prms$id == i], rev(prms$ci_low[prms$id == i]))
+                    do.call("polygon", my_join.par)
+
+                } else {
+                    my_join.par$x = c(prms$x[prms$id == i], rev(prms$x[prms$id == i]))
+
+                    my_join.par$y = c(prms$ci_high[prms$id == i], rev(prms$ci_low[prms$id == i]))
+                    do.call("polygon", my_join.par)
+                }
+
             }
         } else {
             # colors => adding alpha if needed
@@ -664,9 +1157,16 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
                 ci.fill.par$col = rgb(my_col[1], my_col[2], my_col[3], my_alpha)
             }
 
-            ci.fill.par$x = c(prms$x, rev(prms$x))
-            ci.fill.par$y = c(prms$ci_high, rev(prms$ci_low))
-            do.call("polygon", ci.fill.par)
+            if(horiz){
+                ci.fill.par$y = c(prms$y, rev(prms$y))
+                ci.fill.par$x = c(prms$ci_high, rev(prms$ci_low))
+                do.call("polygon", ci.fill.par)
+            } else {
+                ci.fill.par$x = c(prms$x, rev(prms$x))
+                ci.fill.par$y = c(prms$ci_high, rev(prms$ci_low))
+                do.call("polygon", ci.fill.par)
+            }
+
         }
     }
 
@@ -681,41 +1181,57 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
             point.par$pch = par_fit(pt.pch, prms$id)
             point.par$cex = par_fit(pt.cex, prms$id)
             point.par$col = par_fit(pt.col, prms$id)
+            point.par$lwd = par_fit(pt.lwd, prms$id)
+            if(!is.null(pt.bg)) point.par$bg = par_fit(pt.bg, prms$id)
             point.par = point.par[lengths(point.par) > 0]
-            do.call("lines", point.par)
+            do.call("points", point.par)
         }
     } else {
         dots$pch = par_fit(pt.pch, prms$id)
         dots$cex = par_fit(pt.cex, prms$id)
         dots$col = par_fit(pt.col, prms$id)
-        do.call("lines", dots)
+        dots$lwd = par_fit(pt.lwd, prms$id)
+        if(!is.null(pt.bg)) point.par$bg = par_fit(pt.bg, prms$id)
+        do.call("points", dots)
     }
 
     #
     # Group ####
     #
 
-    if(!add && !missing(group) && !is.null(group) && !is.null(x_labels)){
+    if(IS_GROUP){
 
         if(!is.list(group)) stop("Argument 'group' must be a list.")
 
         axis_prms_fit = c("lwd", "tcl", "line", "tick", "lty", "col", "lwd.ticks", "col.ticks")
 
+        # The line and text adjustments
+        line.adj = group.par$line.adj
+        if(is.null(line.adj)){
+            line.adj = 0
+        }
+        group.par$line.adj = NULL
+
+        text.adj = group.par$text.adj
+        if(is.null(text.adj)){
+            text.adj = 0
+        }
+        group.par$text.adj = NULL
 
         # axis
         listDefault(group.par, "lwd", 2)
         listDefault(group.par, "tcl", 0.75)
-        listDefault(group.par, "line", 3)
+        group.par$line = group.baseline + line.adj
 
-        axis_par = group.par[!grepl("^lab", names(group.par))]
+        axis_par = group.par[!grepl("^text", names(group.par))]
         axis_par$side = 1
         axis_par$labels = NA
 
         # label
-        listDefault(group.par, "lab.line", 2.5)
-        listDefault(group.par, "lab.cex", 1)
-        listDefault(group.par, "lab.font", 1)
-        listDefault(group.par, "lab.col", 1)
+        listDefault(group.par, "text.line", group.par$line - 0.5 + text.adj)
+        listDefault(group.par, "text.cex", 1)
+        listDefault(group.par, "text.font", 1)
+        listDefault(group.par, "text.col", 1)
 
         for(i in seq_along(group)){
             group_name = names(group)[i]
@@ -797,6 +1313,9 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
                 my_axis[[p]] = par_fit(my_axis[[p]], i)
             }
 
+            side = 1 + horiz
+            my_axis$side = side
+
             info = do.call("axis", my_axis)
 
             if(!is.null(group_name)){
@@ -804,7 +1323,7 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
                     group_name = eval(parse(text = gsub("^&", "", group_name)))
                 }
 
-                axis(1, mean(info), labels = group_name, tick = FALSE, line = par_fit(group.par$lab.line, i), cex.axis = par_fit(group.par$lab.cex, i), font = par_fit(group.par$lab.font, i), col.axis = par_fit(group.par$lab.col, i))
+                axis(side, mean(info), labels = group_name, tick = FALSE, line = par_fit(group.par$text.line, i), cex.axis = par_fit(group.par$text.cex, i), font = par_fit(group.par$text.font, i), col.axis = par_fit(group.par$text.col, i))
             }
         }
     }
@@ -816,7 +1335,7 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, dic
 
 
 
-coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict, drop, order, ci_level = 0.95, ref = "&auto", only.inter = TRUE, sep, as.multiple = FALSE){
+coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict, keep, drop, order, ci_level = 0.95, ref = "auto", only.inter = TRUE, sep, as.multiple = FALSE){
 
     # get the default for:
     # dict, ci.level, ref, only.inter
@@ -1055,7 +1574,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
                     interaction.info = object$interaction.info
                     is_ref = interaction.info$is_ref
                     items = interaction.info$items
-                    is_num = is.numeric(interaction.info$fe_type)
+                    is_num = any(interaction.info$fe_type %in% c("integer", "numeric"))
                 }
 
                 # We retrict only to interactions
@@ -1091,7 +1610,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
                 inter_values_num = tryCatch(as.numeric(inter_values), warning = function(x) x)
                 if(is_info){
 
-                    if(identical(ref, "&auto")){
+                    if(identical(ref, "auto")){
                         # We add the reference used in the estimation
 
                         if(length(inter_values) != sum(!is_ref)){
@@ -1180,11 +1699,11 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
         }
 
         # We add the reference
-        if(!identical(ref, "&auto") && length(ref) > 0 && !isFALSE(ref)){
+        if(!identical(ref, "auto") && length(ref) > 0 && !isFALSE(ref)){
 
             if(is.null(names(ref))){
                 if(!is.character(ref) || length(ref) > 1){
-                    check_arg(ref, "singleCharacter", "Argument 'ref' must be either: a single character, either a list or a named integer vector. REASON")
+                    check_arg(ref, "singleCharacter", "Argument 'ref' must be either: a single character, either a list or a named integer vector of length 1 (The integer gives the position of the reference among the coefficients). REASON")
                 } else {
                     refname = ref
                     ref = list()
@@ -1195,7 +1714,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
             ref = unlist(ref)
             if(!isScalar(ref, int = TRUE)){
                 reason = ifelse(length(ref) == 1, " an integer", " of length 1")
-                stop("Argument 'ref' must be either: a single character, either a list or a named integer vector. The integer gives the position of the reference among the coefficients. Currently this is not ", reason, ".")
+                stop("Argument 'ref' must be either: a single character, either a list or a named integer vector of length 1. The integer gives the position of the reference among the coefficients. Currently this is not ", reason, ".")
             }
 
             # we recreate the parameters
@@ -1228,6 +1747,16 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
 
         # dropping some coefs
         all_vars = unique(prms$estimate_names)
+
+        if(!missing(keep) && length(keep) > 0){
+            all_vars = keep_apply(all_vars, keep)
+
+            if(length(all_vars) == 0){
+                stop("Argument 'keep' has removed all variables!")
+            }
+
+            prms = prms[prms$estimate_names %in% all_vars,]
+        }
 
         if(!missing(drop) && length(drop) > 0){
             all_vars = drop_apply(all_vars, drop)
@@ -1347,6 +1876,8 @@ replace_and_make_callable = function(text, varlist, text_as_expr = FALSE){
 
             warning(info, enumerate_items(paste0("__", setdiff(my_variables, names(varlist)), "__"), "is"), " not valid, thus ignored.", call. = FALSE)
 
+            return("")
+
             not_var = !my_variables %in% names(varlist)
             is_var[is_var][not_var] = FALSE
             my_variables = intersect(my_variables, names(varlist))
@@ -1458,6 +1989,199 @@ expr_builder = function(x){
     res
 }
 
+
+
+####
+#### Default setting ####
+####
+
+#' Sets the defaults of coefplot
+#'
+#' You can set the default values of most arguments of \code{\link[fixest]{coefplot}} with this function.
+#'
+#' @inheritParams coefplot
+#'
+#' @param reset Logical, default is \code{TRUE}. If \code{TRUE}, then the arguments that *are not* set during the call are reset to their "factory"-default values. If \code{FALSE}, on the other hand, arguments that have already been modified are not changed.
+#'
+#' @return
+#' Doesn't return anything.
+#'
+#' @seealso
+#' \code{\link[fixest]{coefplot}}
+#'
+#' @examples
+#'
+#' # coefplot has many arguments, which makes it highly flexible.
+#' # If you don't like the default style of coefplot. No worries,
+#' # you can set *your* default by using the function
+#' # setFixest_coefplot()
+#'
+#' # Estimation
+#' est = feols(Petal.Length ~ Petal.Width + Sepal.Length +
+#'                 Sepal.Width | Species, iris)
+#'
+#' # Plot with default style
+#' coefplot(est)
+#'
+#' # Now we permanently change some arguments
+#' dict = c("Petal.Length"="Length (Petal)", "Petal.Width"="Width (Petal)",
+#'          "Sepal.Length"="Length (Sepal)", "Sepal.Width"="Width (Sepal)")
+#'
+#' setFixest_coefplot(ci.col = 2, pt.col = "darkblue", ci.lwd = 3,
+#'                    pt.cex = 2, pt.pch = 15, ci.width = 0, dict = dict)
+#'
+#' # Tadaaa!
+#' coefplot(est)
+#'
+#' # To reset to the default settings:
+#' setFixest_coefplot()
+#' coefplot(est)
+#'
+setFixest_coefplot = function(style, horiz = FALSE, dict = getFixest_dict(), keep, ci.width = "1%", ci_level = 0.95, pt.pch = 20, pt.bg = NULL, cex = par("cex"), pt.cex = cex, col = 1:8, pt.col = col, ci.col = col, lwd = par("lwd"), pt.lwd = lwd, ci.lwd = lwd, ci.lty = 1, grid = TRUE, grid.par = list(lty = 3, col = "gray"), zero = TRUE, zero.par = list(col = "black", lwd = 1), pt.join = FALSE, pt.join.par = list(col = pt.col, lwd = lwd), ci.join = FALSE, ci.join.par = list(lwd = lwd, col = col, lty = 2), ci.fill = FALSE, ci.fill.par = list(col = "lightgray", alpha = 0.5), ref.line = "auto", ref.line.par = list(col = "black", lty = 2), lab.cex, lab.min.cex = 0.85, lab.max.mar = 0.25, lab.fit = "auto", xlim.add, ylim.add, sep, bg, group = "auto", group.par = list(lwd = 2, line = 3, tcl = 0.75), main = "Effect on __depvar__", value.lab = "Estimate and __ci__ Conf. Int.", ylab = NULL, xlab = NULL, sub = NULL, reset = FALSE){
+
+    fm_cp = formals(coefplot)
+    arg_list = names(fm_cp)
+    # arg_no_default = c("object", "sd", "ci_low", "ci_high", "drop", "order", "ref", "add", "only.params", "only.inter", "as.multiple", "...", "x", "x.shift")
+    # m = fm_cp[!names(fm_cp) %in% arg_no_default]
+    # cat(gsub(" = ,", ",", paste0(names(m), " = ", sapply(m, deparse), collapse = ", ")))
+
+    inter_default = list(xlab = "__fe__", sub = "Interacted with __var__", pt.join = "auto")
+    multiple_default = list()
+
+
+    #
+    # Controls
+    #
+
+    check_arg(style, "singleCharacter")
+    check_arg(ci.width, "single")
+    check_arg(ci_level, "singleNumericGT0LT1")
+    check_arg(lwd, "singleNumericGE0")
+    check_arg(ci.lwd, "singleNumericGE0")
+    check_arg(grid, "singleLogical")
+    if(is.null(grid.par)){
+        grid.par = list()
+    } else if(!is.list(grid.par) ) {
+        stop("Argument grid.par must be a list (even empty).")
+    }
+
+    check_arg(zero, "singleLogical")
+    if(is.null(zero.par)){
+        zero.par = list()
+    } else if(!is.list(zero.par) ) {
+        stop("Argument zero.par must be a list (even empty).")
+    }
+
+
+    if(is.null(pt.join.par)){
+        pt.join.par = list()
+    } else if(!is.list(pt.join.par) ) {
+        stop("Argument join.par must be a list (even empty).")
+    }
+
+    if(is.null(ref.line.par)){
+        ref.line.par = list()
+    } else if(!is.list(ref.line.par) ) {
+        stop("Argument ref.line.par must be a list (even empty).")
+    }
+
+    check_arg(reset, "singleLogical")
+
+    #
+    # Code
+    #
+
+    if(missing(style)){
+        style = "default"
+    }
+
+    if(style == "all" && reset){
+        opts = list(default = list(), interaction = inter_default, multiple = multiple_default)
+        options("fixest_coefplot" = opts)
+        return(invisible(NULL))
+    }
+
+    opts = getOption("fixest_coefplot")
+    if(!is.list(opts)){
+        warning("Wrong format of getOption('fixest_coefplot'), the options of coefplot are reset.")
+        opts = list(default = list(), interaction = inter_default, multiple = multiple_default)
+    }
+
+    if(reset){
+        if(style == "interaction"){
+            my_opt = inter_default
+        } else if(style == "multiple"){
+            my_opt = multiple_default
+        } else {
+            my_opt = list()
+        }
+
+    } else {
+        my_opt = opts[[style]]
+
+        if(is.null(my_opt)){
+            my_opt = list()
+        } else if(!is.list(opts)){
+            warning("Wrong format of getOption('fixest_coefplot') for style '", style, "', the options of coefplot for this style are reset.")
+            my_opt = list()
+        }
+    }
+
+    mc = match.call()
+
+    all_args = setdiff(names(mc), c("", "reset"))
+    mc = mc[all_args]
+
+    # now we find which args for which we delay evaluation
+    arg_var_default = lapply(fm_cp[!names(fm_cp) %in% all_args], all.vars)
+    arg_var_default = arg_var_default[lengths(arg_var_default) > 0]
+    default.eval = sapply(arg_var_default, function(x) any(x %in% all_args))
+    if(any(default.eval)){
+        default.arg = names(default.eval)[default.eval]
+        mc[default.arg] = fm_cp[default.arg]
+        # we re order
+        my_fact = factor(names(mc), levels = arg_list)
+        mc = mc[order(my_fact)]
+        all_args = names(mc)
+    }
+
+    extra_values = my_opt$extra_values
+    if(!is.list(extra_values)) extra_values = list()
+
+    for(arg in all_args){
+        my_arg = mc[[arg]]
+
+        my_arg_vars = all.vars(my_arg)
+        if(length(my_arg_vars) == 0 || !(any(my_arg_vars %in% arg_list))){
+            if("par" %in% all.names(my_arg)){
+                my_opt[[arg]] = my_arg
+            } else {
+                my_opt[[arg]] = eval(my_arg)
+            }
+
+        } else {
+            my_extra_args = setdiff(my_arg_vars, arg_list)
+            if(length(my_extra_args) > 0){
+                for(v in my_extra_args) extra_values[[v]] = eval(parse(text = v), parent.frame())
+            }
+            # control that the order is proper
+            arg2eval = intersect(my_arg_vars, arg_list)
+            order_arg = which(arg_list == arg)
+            order_arg2eval = sapply(arg2eval, function(x) which(arg_list == x))
+            if(any(order_arg2eval > order_arg)){
+                qui = which(order_arg2eval > order_arg)[1]
+                stop("In argument ", arg, ": its value (", deparse(my_arg), ") is set with the argument ", arg2eval[qui], " which occurs after. If you set an argument with the value of another argument: you must  use arguments appearing before.")
+            }
+            my_opt[[arg]] = my_arg
+        }
+    }
+
+    if(length(extra_values) > 0) my_opt$extra_values = extra_values
+
+    opts[[style]] = my_opt
+
+    options("fixest_coefplot" = opts)
+}
 
 
 
