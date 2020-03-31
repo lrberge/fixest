@@ -26,6 +26,10 @@ try(feols(Sepal.Length ~ Sepal.Width, base, na_inf.rm = FALSE))
 
 # to set no tolerance as default:
 setFixest_na_inf.rm(FALSE)
+try(feols(Sepal.Length ~ Sepal.Width, base))
+
+# Reset it on:
+setFixest_na_inf.rm(TRUE)
 
 }
 \author{

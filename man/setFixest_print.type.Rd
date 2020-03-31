@@ -17,7 +17,7 @@ Sets/gets the default behavior of the \code{print} method for non-summary \code{
 }
 \examples{
 
-res = feols(Sepal.Length ~ Sepal.Width + Petal.Length, base)
+res = feols(Sepal.Length ~ Sepal.Width + Petal.Length, iris)
 # default is coef. table:
 res
 # can be changed to only the coefficients:

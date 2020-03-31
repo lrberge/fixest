@@ -81,7 +81,7 @@ base_bis = base[order(base$id, base$time),]
 print(base_bis)
 
 # You can create variables without specifying the data within data.table:
-if(requireNamespace("data.table")){
+if(require("data.table")){
   base = data.table(id = rep(1:2, each = 3), year = 1990 + rep(1:3, 2), x = 1:6)
   base[, x.l1 := lag(x~id+year, 1)]
 }

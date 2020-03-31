@@ -6649,7 +6649,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 			        stop("You can use an integer in the argument 'cluster' only when there have been fixed-effects in the estimation. Currenlty this is not the case. Alternatively, arg. 'cluster' can be a formula, a vector of variables or a list of vectors.")
 			    }
 
-			    if(!all(cluster %% 1 == 0) || any(cluster < 1 || cluster > 4)){
+			    if(!all(cluster %% 1 == 0) || any(cluster < 1 | cluster > 4)){
 			        msg = ifelse(!all(cluster %% 1 == 0), "it is not made of integers", "it contains values different from 1 to 4")
 			        stop("Argument 'cluster' can be a numeric vector, if so it must have integer values between 1 and 4 (currently ", msg, ").")
 			    }
@@ -7633,6 +7633,10 @@ getFixest_dict = function(){
 #'
 #' # to set no tolerance as default:
 #' setFixest_na_inf.rm(FALSE)
+#' try(feols(Sepal.Length ~ Sepal.Width, base))
+#'
+#' # Reset it on:
+#' setFixest_na_inf.rm(TRUE)
 #'
 setFixest_na_inf.rm = function(x){
 
@@ -7668,7 +7672,7 @@ getFixest_na_inf.rm = function(){
 #'
 #' @examples
 #'
-#' res = feols(Sepal.Length ~ Sepal.Width + Petal.Length, base)
+#' res = feols(Sepal.Length ~ Sepal.Width + Petal.Length, iris)
 #' # default is coef. table:
 #' res
 #' # can be changed to only the coefficients:

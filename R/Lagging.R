@@ -249,7 +249,7 @@ f = function(x, lead = 1, fill = NA){
 #' feols(f(y)~l(x1, -1:1), base_did, panel.id = ~id+period)
 #'
 #' # l() and f() can also be used within a data.table:
-#' if(requireNamespace("data.table")){
+#' if(require("data.table")){
 #'   pdat_dt = panel(as.data.table(base_did), ~id+period)
 #'   # Now since pdat_dt is also a data.table
 #'   #   you can create lags/leads directly
@@ -497,7 +497,7 @@ f_expand = function(x, k=1, fill){
 #' print(base_bis)
 #'
 #' # You can create variables without specifying the data within data.table:
-#' if(requireNamespace("data.table")){
+#' if(require("data.table")){
 #'   base = data.table(id = rep(1:2, each = 3), year = 1990 + rep(1:3, 2), x = 1:6)
 #'   base[, x.l1 := lag(x~id+year, 1)]
 #' }
@@ -661,7 +661,7 @@ lag.formula = function(x, k = 1, data, time.step = "unitary", fill = NA, duplica
 #' pdat = panel(base_did, "id,period")
 #'
 #' # l() and f() can also be used within a data.table:
-#' if(requireNamespace("data.table")){
+#' if(require("data.table")){
 #'   pdat_dt = panel(as.data.table(base_did), ~id+period)
 #'   # Now since pdat_dt is also a data.table
 #'   #   you can create lags/leads directly
@@ -786,7 +786,7 @@ unpanel = function(x){
 #'
 #'
 #' # Using data.table to create new lead/lag variables
-#' if(requireNamespace("data.table")){
+#' if(require("data.table")){
 #'   pdat_dt = panel(as.data.table(base_did), ~id+period)
 #'
 #'   # Variable creation
