@@ -84,8 +84,9 @@ importFrom(Formula, Formula)
 importFrom(Rcpp, evalCpp)
 
 importFrom(graphics, par, plot, box, axis, abline, points, text, title,
-           lines, polygon, segments, plot.default)
+           lines, polygon, segments, plot.default, strwidth, strheight,
+           rect)
 
-
+importFrom(grDevices, rgb, col2rgb)
 
 

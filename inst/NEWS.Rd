@@ -3,6 +3,45 @@
 
 \title{News for \R Package \pkg{fixest}}
 
+\section{Changes in version 0.4.0 (2020-03-27)}{
+
+    \subsection{User visible changes: Latex export}{
+        \itemize{
+            \item Better Latex special character escaping.
+            \item New argument \code{fixef_sizes.simplify}, which provides the sizes of the fixed-effects in parentheses when there is no ambiguity.
+            \item You can suppress the line with the significance codes with \code{signifCode = NA}.
+            \item New argument \code{float} which decides whether to embed the table into a table environment. By default it is set to \code{TRUE} if a \code{title} or \code{label} is present.
+            \item New argument \code{keep} to select the variables to keep in the table.
+            \item New way to keep/drop/order variables with the special argument "\%". If you use "\%var", then it makes reference to the original variable name, not the aliased one (which is the default).
+            \item Better rendering of significant digits.
+        }
+    }
+
+    \subsection{User visible changes: coefplot}{
+        \itemize{
+            \item Argument \code{horiz}. The coefficients can now be displayed horizontally instead of vertically.
+            \item The coefficient labels, when in the x-axis, can now be displayed in three different ways thanks to the new argument \code{lab.fit}: "simple", the classic axis, "multi", the labels appear across multiple lines to avoid collision, and "tilted" for tilted labels.
+            \item The margins now automatically fit.
+            \item Argument \code{style} allows you to set styles with the function \code{setFixest_coefplot}, you can then summon the style in \code{coefplot} with this argument.
+            \item Use the ampersand to set dictionnary variables specific to \code{coefplot} (e.g. setFixest_dict(c(var1 = "a $\\times$ b", "&var1" = "&a\%*\%b")), the variable \code{var1} will be rendered differently in \code{etable} and in \code{coefplot}).
+            \item Better display of groups (with the arguments \code{group} and \code{group.par}).
+        }
+    }
+
+    \subsection{New methods}{
+        \itemize{
+            \item \code{terms.fixest} giving the terms of the estimation.
+        }
+    }
+
+    \subsection{Other}{
+        \itemize{
+            \item All \code{donttest} sections were removed from help pages.
+        }
+    }
+
+}
+
 \section{Changes in version 0.3.1 (2020-02-09)}{
 
     \subsection{Major bug fix}{
