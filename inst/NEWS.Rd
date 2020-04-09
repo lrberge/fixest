@@ -3,6 +3,14 @@
 
 \title{News for \R Package \pkg{fixest}}
 
+\section{Changes in version 0.4.1 (2020-XX-XX)}{
+  \subsection{Bug fixes}{
+    \item Major bug leading R to crash when using non-linear-in-parameters right-hand-sides in feNmlm. Only occured when some observations were removed from the data set (due to NAness or to perfect fit).
+    \item In the \code{collinearity} help pages: an example could lead to an error. It has been removed.
+    \item In \code{collinearity}, corrected the problem of display of the intercept.
+  }
+}
+
 \section{Changes in version 0.4.0 (2020-03-27)}{
 
     \subsection{User visible changes: Latex export}{

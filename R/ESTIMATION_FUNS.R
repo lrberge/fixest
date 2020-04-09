@@ -1214,6 +1214,7 @@ fepois = function(fml, data, offset, weights, panel.id, start = NULL, etastart =
 #' # For linear relationships: use femlm instead
 #'
 #' # Generating data for a simple example
+#' set.seed(1)
 #' n = 100
 #' x = rnorm(n, 1, 5)**2
 #' y = rnorm(n, -1, 5)**2
@@ -1289,7 +1290,7 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	# NO VARIABLE -- ONLY CLUSTERS
 	if(onlyFixef){
 		if(family == "negbin"){
-			stop("To estimate the negative binomial model, you need at least one variable. (The estimation of the model with only the clusters is not implemented.)")
+			stop("To estimate the negative binomial model, you need at least one variable. (The estimation of the model with only the fixed-effects is not implemented.)")
 		}
 
 		res = femlm_only_clusters(env)

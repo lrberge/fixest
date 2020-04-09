@@ -1668,38 +1668,34 @@ summary.fixest.obs2remove = function(object, ...){
 #' @examples
 #'
 #' # Creating an example data base:
-#' cluster_1 = sample(3, 100, TRUE)
-#' cluster_2 = sample(20, 100, TRUE)
-#' x = rnorm(100, cluster_1)**2
-#' y = rnorm(100, cluster_2)**2
+#' fe_1 = sample(3, 100, TRUE)
+#' fe_2 = sample(20, 100, TRUE)
+#' x = rnorm(100, fe_1)**2
+#' y = rnorm(100, fe_2)**2
 #' z = rnorm(100, 3)**2
 #' dep = rpois(100, x*y*z)
-#' base = data.frame(cluster_1, cluster_2, x, y, z, dep)
+#' base = data.frame(fe_1, fe_2, x, y, z, dep)
 #'
 #' # creating collinearity problems:
 #' base$v1 = base$v2 = base$v3 = base$v4 = 0
-#' base$v1[base$cluster_1 == 1] = 1
-#' base$v2[base$cluster_1 == 2] = 1
-#' base$v3[base$cluster_1 == 3] = 1
-#' base$v4[base$cluster_2 == 1] = 1
+#' base$v1[base$fe_1 == 1] = 1
+#' base$v2[base$fe_1 == 2] = 1
+#' base$v3[base$fe_1 == 3] = 1
+#' base$v4[base$fe_2 == 1] = 1
 #'
 #' # Estimations:
 #'
-#' # Collinearity with the cluster variables:
-#' res_1 = femlm(dep ~ log(x) + v1 + v2 + v4 | cluster_1 + cluster_2, base)
+#' # Collinearity with the fixed-effects:
+#' res_1 = femlm(dep ~ log(x) + v1 + v2 + v4 | fe_1 + fe_2, base)
 #' collinearity(res_1)
-#' # => collinearity with cluster identified, we drop v1 and v2
-#' res_1bis = femlm(dep ~ log(x) + v4 | cluster_1 + cluster_2, base)
+#'
+#' # => collinearity with the first fixed-effect identified, we drop v1 and v2
+#' res_1bis = femlm(dep ~ log(x) + v4 | fe_1 + fe_2, base)
 #' collinearity(res_1bis)
 #'
 #' # Multi-Collinearity:
 #' res_2 =  femlm(dep ~ log(x) + v1 + v2 + v3 + v4, base)
 #' collinearity(res_2)
-#'
-#' # In non-linear part:
-#' res_3 = feNmlm(dep ~ log(z), base, NL.fml = ~log(a*x + b*y),
-#'               NL.start = list(a=1, b=1), lower = list(a=0, b=0))
-#' collinearity(res_3)
 #'
 #'
 collinearity = function(x, verbose){
@@ -1991,6 +1987,7 @@ collinearity = function(x, verbose){
 	}
 	linearVars = names(linbase)[!grepl("Intercept", names(linbase))]
 	names(dict_name) = linearVars
+	dict_name["_Intercept_"] = "(Intercept)"
 
 	# for multicol without cluster
 	mat_base = as.matrix(linbase)

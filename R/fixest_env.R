@@ -674,7 +674,12 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             var_pblm = nonlinear.varnames[qui_num]
             stop("In NL.fml, the variable", enumerate_items(var_pblm, "s.is"), " not numeric. This is not allowed.")
         }
-        data_NL = as.numeric(as.matrix(data_NL))
+
+        data_NL = as.matrix(data_NL)
+
+        if(typeof(data_NL) != "double"){
+            data_NL = 1 * data_NL
+        }
 
         # Control for NAs
         anyNA_NL = FALSE
@@ -1215,11 +1220,11 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             }
         }
 
+        #
         # QUF setup ####
+        #
 
         Q = length(fixef_terms) # terms: contains FEs + slopes
-
-
 
         fixef_removed = slope_variables = list()
         obs2remove = c()
@@ -1454,6 +1459,10 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
         if(isWeight){
             weights.value = weights.value[-obs2remove]
+        }
+
+        if(isNonLinear){
+            data_NL = data_NL[-obs2remove, , drop = FALSE]
         }
 
     }
@@ -1927,7 +1936,8 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     envNL = new.env()
     assign("isNL", isNL, env)
     if(isNL){
-        for(var in nonlinear.varnames) assign(var, data[[var]], envNL)
+        data_NL = as.data.frame(data_NL)
+        for(var in nonlinear.varnames) assign(var, data_NL[[var]], envNL)
         for(var in nonlinear.params) assign(var, start[var], envNL)
     }
     assign("envNL", envNL, env)
@@ -2011,8 +2021,8 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         }
 
         # Handling NL.fml errors
-        if(length(mu) != nrow(data)){
-            stop("Evaluation of NL.fml leads to ", length(mu), " observations while there are ", nrow(data), " observations in the data base. They should be of the same lenght.")
+        if(length(mu) != nrow(data_NL)){
+            stop("Evaluation of NL.fml leads to ", length(mu), " observations while there are ", nrow(data_NL), " observations in the data base. They should be of the same lenght.")
         }
 
         if(anyNA(mu)){
@@ -2022,7 +2032,6 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     } else {
         mu = eval(nl.call, envir = envNL)
     }
-
 
     # On sauvegarde les valeurs de la partie non lineaire
     assign("nbMaxSave", 2, env) # nombre maximal de valeurs a sauvegarder

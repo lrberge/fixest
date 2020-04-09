@@ -7,3 +7,4 @@ src/*.so
 src/*.dll
 man/*.Rd
 src-i386/*
+Rplots.pdf
