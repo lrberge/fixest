@@ -25,12 +25,12 @@
 #' @param ci_level Scalar between 0 and 1: the level of the CI. By default it is equal to 0.95.
 #' @param add Default is \code{FALSE}, if the intervals are to be added to an existing graph. Note that if it is the case, then the argument \code{x} MUST be numeric.
 #' @param pt.pch The patch of the coefficient estimates. Default is 1 (circle).
-#' @param cex Numeric, default is \code{par("cex")}. Expansion factor for the points
+#' @param cex Numeric, default is 1. Expansion factor for the points
 #' @param pt.cex The size of the coefficient estimates. Default is the other argument \code{cex}.
 #' @param col The color of the points and the confidence intervals. Default is 1 ("black"). Note that you can set the colors separately for each of them with \code{pt.col} and \code{ci.col}.
 #' @param pt.col The color of the coefficient estimates. Default is equal to the other argument \code{col}.
 #' @param ci.col The color of the confidence intervals. Default is equal to the other argument \code{col}.
-#' @param lwd General liwe with. Default is par("lwd").
+#' @param lwd General liwe with. Default is 1.
 #' @param pt.lwd The line width of the coefficient estimates. Default is equal to the other argument \code{lwd}.
 #' @param ci.lwd The line width of the confidence intervals. Default is equal to the other argument \code{lwd}.
 #' @param ci.lty The line type of the confidence intervals. Default is 1.
@@ -199,7 +199,7 @@
 #' coefplot(est)
 #'
 #'
-coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, horiz = FALSE, dict = getFixest_dict(), keep, drop, order, ci.width="1%", ci_level = 0.95, add = FALSE, pt.pch = 20, pt.bg = NULL, cex = par("cex"), pt.cex = cex, col = 1:8, pt.col = col, ci.col = col, lwd = par("lwd"), pt.lwd = lwd, ci.lwd = lwd, ci.lty = 1, grid = TRUE, grid.par = list(lty=3, col = "gray"), zero = TRUE, zero.par = list(col="black", lwd=1), pt.join = FALSE, pt.join.par = list(col = pt.col, lwd=lwd), ci.join = FALSE, ci.join.par = list(lwd = lwd, col = col, lty = 2), ci.fill = FALSE, ci.fill.par = list(col = "lightgray", alpha = 0.5), ref = "auto", ref.line = "auto", ref.line.par = list(col = "black", lty = 2), lab.cex, lab.min.cex = 0.85, lab.max.mar = 0.25, lab.fit = "auto", xlim.add, ylim.add, only.params = FALSE, only.inter = TRUE, sep, as.multiple = FALSE, bg, group = "auto", group.par = list(lwd=2, line=3, tcl=0.75), main = "Effect on __depvar__", value.lab = "Estimate and __ci__ Conf. Int.", ylab = NULL, xlab = NULL, sub = NULL){
+coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, horiz = FALSE, dict = getFixest_dict(), keep, drop, order, ci.width="1%", ci_level = 0.95, add = FALSE, pt.pch = 20, pt.bg = NULL, cex = 1, pt.cex = cex, col = 1:8, pt.col = col, ci.col = col, lwd = 1, pt.lwd = lwd, ci.lwd = lwd, ci.lty = 1, grid = TRUE, grid.par = list(lty=3, col = "gray"), zero = TRUE, zero.par = list(col="black", lwd=1), pt.join = FALSE, pt.join.par = list(col = pt.col, lwd=lwd), ci.join = FALSE, ci.join.par = list(lwd = lwd, col = col, lty = 2), ci.fill = FALSE, ci.fill.par = list(col = "lightgray", alpha = 0.5), ref = "auto", ref.line = "auto", ref.line.par = list(col = "black", lty = 2), lab.cex, lab.min.cex = 0.85, lab.max.mar = 0.25, lab.fit = "auto", xlim.add, ylim.add, only.params = FALSE, only.inter = TRUE, sep, as.multiple = FALSE, bg, group = "auto", group.par = list(lwd=2, line=3, tcl=0.75), main = "Effect on __depvar__", value.lab = "Estimate and __ci__ Conf. Int.", ylab = NULL, xlab = NULL, sub = NULL){
 
 
     # Set up the dictionary
@@ -2037,7 +2037,7 @@ expr_builder = function(x){
 #' setFixest_coefplot()
 #' coefplot(est)
 #'
-setFixest_coefplot = function(style, horiz = FALSE, dict = getFixest_dict(), keep, ci.width = "1%", ci_level = 0.95, pt.pch = 20, pt.bg = NULL, cex = par("cex"), pt.cex = cex, col = 1:8, pt.col = col, ci.col = col, lwd = par("lwd"), pt.lwd = lwd, ci.lwd = lwd, ci.lty = 1, grid = TRUE, grid.par = list(lty = 3, col = "gray"), zero = TRUE, zero.par = list(col = "black", lwd = 1), pt.join = FALSE, pt.join.par = list(col = pt.col, lwd = lwd), ci.join = FALSE, ci.join.par = list(lwd = lwd, col = col, lty = 2), ci.fill = FALSE, ci.fill.par = list(col = "lightgray", alpha = 0.5), ref.line = "auto", ref.line.par = list(col = "black", lty = 2), lab.cex, lab.min.cex = 0.85, lab.max.mar = 0.25, lab.fit = "auto", xlim.add, ylim.add, sep, bg, group = "auto", group.par = list(lwd = 2, line = 3, tcl = 0.75), main = "Effect on __depvar__", value.lab = "Estimate and __ci__ Conf. Int.", ylab = NULL, xlab = NULL, sub = NULL, reset = FALSE){
+setFixest_coefplot = function(style, horiz = FALSE, dict = getFixest_dict(), keep, ci.width = "1%", ci_level = 0.95, pt.pch = 20, pt.bg = NULL, cex = 1, pt.cex = cex, col = 1:8, pt.col = col, ci.col = col, lwd = 1, pt.lwd = lwd, ci.lwd = lwd, ci.lty = 1, grid = TRUE, grid.par = list(lty = 3, col = "gray"), zero = TRUE, zero.par = list(col = "black", lwd = 1), pt.join = FALSE, pt.join.par = list(col = pt.col, lwd = lwd), ci.join = FALSE, ci.join.par = list(lwd = lwd, col = col, lty = 2), ci.fill = FALSE, ci.fill.par = list(col = "lightgray", alpha = 0.5), ref.line = "auto", ref.line.par = list(col = "black", lty = 2), lab.cex, lab.min.cex = 0.85, lab.max.mar = 0.25, lab.fit = "auto", xlim.add, ylim.add, sep, bg, group = "auto", group.par = list(lwd = 2, line = 3, tcl = 0.75), main = "Effect on __depvar__", value.lab = "Estimate and __ci__ Conf. Int.", ylab = NULL, xlab = NULL, sub = NULL, reset = FALSE){
 
     fm_cp = formals(coefplot)
     arg_list = names(fm_cp)
