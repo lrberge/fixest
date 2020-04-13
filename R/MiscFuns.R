@@ -11,7 +11,7 @@
 #' @param ... Other arguments to be passed to \code{\link[fixest]{vcov.fixest}}.
 #'
 #' @seealso
-#' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
+#' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the fixed-effects coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
 #'
 #' @author
 #' Laurent Berge
@@ -209,7 +209,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' \item{coeftable}{The table of coefficients with the new standard errors.}
 #'
 #' @seealso
-#' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
+#' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{fixef.fixest}} to extract the fixed-effects coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
 #'
 #' @author
 #' Laurent Berge
@@ -219,7 +219,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' # Load trade data
 #' data(trade)
 #'
-#' # We estimate the effect of distance on trade (with 3 cluster effects)
+#' # We estimate the effect of distance on trade (with 3 fixed-effects)
 #' est_pois = femlm(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
 #'
 #' # Comparing different types of standard errors
@@ -355,7 +355,7 @@ summ = function(object, se, cluster, dof = getFixest_dof(), forceCovariance = FA
 #' @param subtitles Character vector of the same length as the number of models to be displayed. If provided, subtitles are added underneath the dependent variable name.
 #' @param fixef_sizes (Tex only.) Logical, default is \code{FALSE}. If \code{TRUE} and fixed-effects were used in the models, then the number of "individuals" per fixed-effect dimension is also displayed.
 #' @param fixef_sizes.simplify Logical, default is \code{TRUE}. Only used if \code{fixef_sizes = TRUE}. If \code{TRUE}, the fixed-effects sizes will be displayed in parentheses instead of in a separate line if there is no ambiguity (i.e. if the size is constant across models).
-#' @param yesNoFixef (Tex only.) A character vector of length 1 or 2. Default is \code{c("Yes", "No")}. This is the message displayed when a given cluster is (or is not) included in a regression. If \code{yesNoFixef} is of length 1, then the second element is the empty string.
+#' @param yesNoFixef (Tex only.) A character vector of length 1 or 2. Default is \code{c("Yes", "No")}. This is the message displayed when a given fixed-effect is (or is not) included in a regression. If \code{yesNoFixef} is of length 1, then the second element is the empty string.
 #' @param family Logical, default is missing. Whether to display the families of the models. By default this line is displayed when at least two models are from different families.
 #' @param keepFactors Logical, default is \code{TRUE}. If \code{FALSE}, then factor variables are displayed as fixed-effects and no coefficient is shown.
 #' @param powerBelow (Tex only.) Integer, default is -5. A coefficient whose value is below \code{10**(powerBelow+1)} is written with a power in Latex. For example \code{0.0000456} would be written \code{4.56$\\times 10^{-5}$} by default. Setting \code{powerBelow = -6} would lead to \code{0.00004} in Latex.
@@ -388,7 +388,7 @@ summ = function(object, se, cluster, dof = getFixest_dof(), forceCovariance = FA
 #' If \code{tex = FALSE}, the data.frame is directly returned. If the argument \code{file} is not missing, the \code{data.frame} is returned invisibly.
 #'
 #' @seealso
-#' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients.
+#' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the fixed-effects coefficients.
 #'
 #' @author
 #' Laurent Berge
@@ -711,7 +711,7 @@ r2 = function(x, type = "all"){
 	}
 
 	is_ols = x$method == "feols"
-	isCluster = "fixef_vars" %in% names(x)
+	isFixef = "fixef_vars" %in% names(x)
 	n = nobs(x)
 
 	res = rep(NA, length(type_all))
@@ -728,16 +728,16 @@ r2 = function(x, type = "all"){
 		    next
 		}
 
-		if(grepl("w", myType) && !isCluster){
+		if(grepl("w", myType) && !isFixef){
 		    # within R2 not valid for models without FE
 		    next
 		}
 
 		adj = grepl("a", myType)
 		pseudo = grepl("p", myType)
-		within = grepl("w", myType) && isCluster
+		within = grepl("w", myType) && isFixef
 		ifNullNA = function(x) ifelse(is.null(x), NA, x)
-		if(within && isCluster){
+		if(within && isFixef){
 
 		    if(is.null(x$ssr_fe_only) && !is.null(x$fixef_vars)){
 		        # This is the case of feglm where there were no fe_only model estimated
@@ -943,18 +943,18 @@ se = function(object, se, cluster, ...){
     res
 }
 
-#' Summary method for cluster coefficients
+#' Summary method for fixed-effects coefficients
 #'
-#' This function summarizes the main characteristics of the cluster coefficients. It shows the number of fixed-effects that have been set as references and the first elements of the fixed-effects.
+#' This function summarizes the main characteristics of the fixed-effects coefficients. It shows the number of fixed-effects that have been set as references and the first elements of the fixed-effects.
 #'
 #' @method summary fixest.fixef
 #'
 #' @param object An object returned by the function \code{\link[fixest]{fixef.fixest}}.
-#' @param n Positive integer, defaults to 5. The \code{n} first fixed-effects for each cluster are reported.
+#' @param n Positive integer, defaults to 5. The \code{n} first fixed-effects for each fixed-effect dimension are reported.
 #' @param ... Not currently used.
 #'
 #' @return
-#' It prints the number of fixed-effect coefficients per cluster, as well as the number of fixed-effects used as references for each cluster, and the mean and variance of the cluster coefficients. Finally it reports the first 5 elements of each cluster.
+#' It prints the number of fixed-effect coefficients per fixed-effect dimension, as well as the number of fixed-effects used as references for each dimension, and the mean and variance of the fixed-effect coefficients. Finally, it reports the first 5 (arg. \code{n}) elements of each fixed-effect.
 #'
 #' @author
 #' Laurent Berge
@@ -973,12 +973,12 @@ se = function(object, se, cluster, ...){
 #' # obtaining the fixed-effects coefficients
 #' fe_trade = fixef(est_pois)
 #'
-#' # printing some summary information on the cluster coefficients:
+#' # printing some summary information on the fixed-effects coefficients:
 #' summary(fe_trade)
 #'
 #'
 summary.fixest.fixef = function(object, n=5, ...){
-	# This function shows some generic information on the clusters
+	# This function shows some generic information on the fixed-effect coefficients
 
     # checking arguments in dots
     any_invalid = check_dots_args(match.call(expand.dots = FALSE),
@@ -1042,7 +1042,7 @@ summary.fixest.fixef = function(object, n=5, ...){
 		}
 	}
 
-	# We print the first 5 elements of each cluster
+	# We print the first 5 elements of each fixed-effect
 	cat("\nCOEFFICIENTS:\n")
 	for(i in 1:Q){
 		m = head(object[[i]], n)
@@ -1065,7 +1065,7 @@ summary.fixest.fixef = function(object, n=5, ...){
 
 #' Extract the Fixed-Effects from a \code{fixest} estimation.
 #'
-#' This function retrieves the fixed effects from a \code{fixest} estimation. It is useful only when there are one or more clusters.
+#' This function retrieves the fixed effects from a \code{fixest} estimation. It is useful only when there are one or more fixed-effect dimensions.
 #'
 #' @inheritParams feNmlm
 #'
@@ -1081,7 +1081,7 @@ summary.fixest.fixef = function(object, n=5, ...){
 #' If there is more than 1 fixed-effect, then the attribute \dQuote{references} is created. This is a vector of length the number of fixed-effects, each element contains the number of coefficients set as references. By construction, the elements of the first fixed-effect dimension are never set as references. In the presence of regular fixed-effects, there should be Q-1 references (with Q the number of fixed-effects).
 #'
 #' @seealso
-#' \code{\link[fixest]{plot.fixest.fixef}}. See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
+#' \code{\link[fixest]{plot.fixest.fixef}}. See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the fixed-effect coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
 #'
 #' @author
 #' Laurent Berge
@@ -1097,7 +1097,7 @@ summary.fixest.fixef = function(object, n=5, ...){
 #' # Obtaining the fixed-effects coefficients:
 #' fe_trade = fixef(est_pois)
 #'
-#' # The fixed-effects of the first cluster:
+#' # The fixed-effects of the first fixed-effect dimension:
 #' head(fe_trade$Origin)
 #'
 #' # Summary information:
@@ -1398,7 +1398,7 @@ NULL
 
 #' Displaying the most notable fixed-effects
 #'
-#' This function plots the 5 fixed-effects with the highest and lowest values, for each of the clusters. It takes as an argument the fixed-effects obtained from the function \code{\link{fixef.fixest}} after an estimation using \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
+#' This function plots the 5 fixed-effects with the highest and lowest values, for each of the fixed-effect dimension. It takes as an argument the fixed-effects obtained from the function \code{\link{fixef.fixest}} after an estimation using \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
 #'
 #' @method plot fixest.fixef
 #'
@@ -1408,7 +1408,7 @@ NULL
 #'
 #' Note that the fixed-effect coefficients might NOT be interpretable. This function is useful only for fully regular panels.
 #'
-#' If the data are not regular in the cluster coefficients, this means that several \sQuote{reference points} are set to obtain the fixed-effects, thereby impeding their interpretation. In this case a warning is raised.
+#' If the data are not regular in the fixed-effect coefficients, this means that several \sQuote{reference points} are set to obtain the fixed-effects, thereby impeding their interpretation. In this case a warning is raised.
 #'
 #' @seealso
 #' \code{\link[fixest]{fixef.fixest}} to extract clouster coefficients. See also the main estimation function \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
@@ -1465,17 +1465,17 @@ plot.fixest.fixef = function(x, n = 5, ...){
 
 
 
-#' Finds observations to be removed from ML estimation with factors/clusters
+#' Finds observations to be removed from ML estimation with fixed-effects
 #'
-#' For Poisson, Negative Binomial or Logit estimations with fixed-effects, when the dependent variable is only equal to 0 (or 1 for Logit) for one cluster value this leads to a perfect fit for that cluster value by setting its associated cluster coefficient to \code{-Inf}. Thus these observations need to be removed before estimation. This function gives the observations to be removed. Note that by default the function \code{\link[fixest]{femlm}} or \code{\link[fixest]{feglm}} drops them before performing the estimation.
+#' For Poisson, Negative Binomial or Logit estimations with fixed-effects, when the dependent variable is only equal to 0 (or 1 for Logit) for one fixed-effect value this leads to a perfect fit for that fixed-effect value by setting its associated fixed-effect coefficient to \code{-Inf}. Thus these observations need to be removed before estimation. This function gives the observations to be removed. Note that by default the function \code{\link[fixest]{femlm}} or \code{\link[fixest]{feglm}} drops them before performing the estimation.
 #'
-#' @param fml A formula containing the dependent variable and the clusters. It can be of the type: \code{y ~ cluster_1 + cluster_2} or \code{y ~ x1 | cluster_1 + cluster_1} (in which case variables before the pipe are ignored).
+#' @param fml A formula containing the dependent variable and the fixed-effects. It can be of the type: \code{y ~ fixef_1 + fixef_2} or \code{y ~ x1 | fixef_1 + fixef_1} (in which case variables before the pipe are ignored).
 #' @param data A data.frame containing the variables in the formula.
 #' @param family Character scalar: either \dQuote{poisson} (default), \dQuote{negbin} or \dQuote{logit}.
 #'
 #' @return
 #' It returns an integer vector of observations to be removed. If no observations are to be removed, an empty integer vector is returned. In both cases, it is of class \code{fixest.obs2remove}.
-#' The vector has an attribute \code{cluster} which is a list giving the IDs of the clusters that have been removed, for each cluster dimension.
+#' The vector has an attribute \code{fixef} which is a list giving the IDs of the fixed-effects that have been removed, for each fixed-effect dimension.
 #'
 #' @examples
 #'
@@ -1485,7 +1485,7 @@ plot.fixest.fixef = function(x, n = 5, ...){
 #' base$v6[base$Species == "setosa"] = 0
 #'
 #' (x = obs2remove(v6 ~ Species, base))
-#' attr(x, "cluster")
+#' attr(x, "fixef")
 #'
 #' # The two results are identical:
 #' res_1 = femlm(v6 ~ Petal.Width | Species, base)
@@ -1499,9 +1499,9 @@ plot.fixest.fixef = function(x, n = 5, ...){
 #' all(res_1$obsRemoved == x)
 #'
 obs2remove = function(fml, data, family = c("poisson", "negbin", "logit")){
-	# in the formula, the clusters must be there:
-	# either y ~ cluster_1 + cluster_2
-	# either y ~ x1 + x2 | cluster_1 + cluster_2
+	# in the formula, the fixed-effects must be there:
+	# either y ~ fixef_1 + fixef_2
+	# either y ~ x1 + x2 | fixef_1 + fixef_2
 
 	#
 	# CONTROLS
@@ -1514,14 +1514,14 @@ obs2remove = function(fml, data, family = c("poisson", "negbin", "logit")){
 	# FML
 
 	if(!"formula" %in% class(fml) || length(fml) != 3){
-		stop("Argument 'fml' must be a formula of the type: 'y ~ x1 | cluster_1 + cluster_1' or of the type 'y ~ cluster_1 + cluster_2'.")
+		stop("Argument 'fml' must be a formula of the type: 'y ~ x1 | fixef_1 + fixef_2' or of the type 'y ~ fixef_1 + fixef_2'.")
 	}
 
 	FML = Formula::Formula(fml)
 	n_rhs = length(FML)[2]
 
 	if(n_rhs > 2){
-		stop("Argument 'fml' must be a formula of the type: 'y ~ x1 | cluster_1 + cluster_1' or of the type 'y ~ cluster_1 + cluster_2'.")
+		stop("Argument 'fml' must be a formula of the type: 'y ~ x1 | fixef_1 + fixef_2' or of the type 'y ~ fixef_1 + fixef_2'.")
 	}
 
 	# DATA
@@ -1609,7 +1609,7 @@ obs2remove = function(fml, data, family = c("poisson", "negbin", "logit")){
 
 	class(obs2remove) = "fixest.obs2remove"
 	attr(obs2remove, "family") = family
-	attr(obs2remove, "cluster") = dummyOmises
+	attr(obs2remove, "fixef") = dummyOmises
 
 	return(obs2remove)
 }
@@ -1618,7 +1618,7 @@ obs2remove = function(fml, data, family = c("poisson", "negbin", "logit")){
 
 #' Summary method for fixest.obs2remove objects
 #'
-#' This function synthesizes the information of function \code{\link[fixest]{obs2remove}}. It reports the number of observations to be removed as well as the number of clusters removed per cluster dimension.
+#' This function synthesizes the information of function \code{\link[fixest]{obs2remove}}. It reports the number of observations to be removed as well as the number of fixed-effects removed per fixed-effect dimension.
 #'
 #' @method summary fixest.obs2remove
 #'
@@ -1641,8 +1641,8 @@ summary.fixest.obs2remove = function(object, ...){
 		print("No observation to be removed.")
 	} else {
 		cat(length(object), " observations removed because of only zero", ifelse(attr(object, "family") == "logit", ", or only one,", ""), " outcomes.\n", sep = "")
-		cluster = attr(object, "cluster")
-		cat("# clusters removed: ", paste0(names(cluster), ": ", lengths(cluster), collapse = ", "), ".", sep = "")
+		cluster = attr(object, "fixef")
+		cat("# fixed-effects removed: ", paste0(names(cluster), ": ", lengths(cluster), collapse = ", "), ".", sep = "")
 	}
 
 }
@@ -1657,7 +1657,7 @@ summary.fixest.obs2remove = function(object, ...){
 #' @param verbose An integer. If higher than or equal to 1, then a note is prompted at each step of the algorithm. By default \code{verbose = 0} for small problems and to 1 for large problems.
 #'
 #' @details
-#' This function tests: 1) collinearity with the cluster variables, 2) perfect multi-collinearity between the variables, 4) perfect multi-collinearity between several variables and the clusters, and 4) identification issues when there are non-linear in parameters parts.
+#' This function tests: 1) collinearity with the fixed-effect variables, 2) perfect multi-collinearity between the variables, 4) perfect multi-collinearity between several variables and the fixed-effects, and 4) identification issues when there are non-linear in parameters parts.
 #'
 #' @return
 #' It returns a text message with the identified diagnostics.
@@ -1668,6 +1668,7 @@ summary.fixest.obs2remove = function(object, ...){
 #' @examples
 #'
 #' # Creating an example data base:
+#' set.seed(1)
 #' fe_1 = sample(3, 100, TRUE)
 #' fe_2 = sample(20, 100, TRUE)
 #' x = rnorm(100, fe_1)**2
@@ -1705,15 +1706,15 @@ collinearity = function(x, verbose){
 		stop("Argument 'x' must be a fixest object.")
 	}
 
-	# I) (linear) collinearity with clusters
+	# I) (linear) collinearity with fixed-effects
 	# II) (linear) multi collinearity
 	# III) (non-linear) overidentification
 
 	# flags
-    isCluster = !is.null(x$fixef_id)
+    isFixef = !is.null(x$fixef_id)
     isFE = FALSE
     isSlope = FALSE
-    if(isCluster){
+    if(isFixef){
         isSlope = !is.null(x$fixef_terms)
         if(isSlope){
             fixef_terms = x$fixef_terms
@@ -1777,7 +1778,7 @@ collinearity = function(x, verbose){
 	    }
 	}
 
-	if(isLinear || isCluster || "(Intercept)" %in% names(coef)){
+	if(isLinear || isFixef || "(Intercept)" %in% names(coef)){
 		# linear.matrix = model.matrix(linear_fml, data)
 		linear.matrix = fixest_model_matrix(rhs_fml, data)
 	}
@@ -2027,7 +2028,7 @@ collinearity = function(x, verbose){
 	#
 
 	# linearVars = setdiff(colnames(linear.matrix), "(Intercept)")
-	if(isLinear && length(linearVars) >= 2 && isCluster){
+	if(isLinear && length(linearVars) >= 2 && isFixef){
 		ccat(", multiple with cluster")
 
 		dum_names = names(x$fixef_id)
@@ -2079,9 +2080,9 @@ collinearity = function(x, verbose){
 		}
 	}
 
-	if(isNL && (length(coef) >= 2 || isCluster)){
+	if(isNL && (length(coef) >= 2 || isFixef)){
 		ccat(", in non-linear term:")
-		if(isCluster){
+		if(isFixef){
 			# we add the constant
 			coef["CONSTANT"] = 1
 			data$CONSTANT = 1
@@ -2145,7 +2146,7 @@ collinearity = function(x, verbose){
 				# NL case:
 				# we modify both fml and NL.fml
 
-				if(isCluster){
+				if(isFixef){
 					fml = update(x$fml, mu ~ . - 1 + CONSTANT)
 				} else {
 					fml = update(x$fml, mu ~ .)
@@ -5477,7 +5478,7 @@ extract_pipe = function(fml){
 #' @param ... Not currently used.
 #'
 #' @seealso
-#' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
+#' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the fixed-effects coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
 #'
 #' @author
 #' Laurent Berge
@@ -5667,7 +5668,7 @@ logLik.fixest = function(object, ...){
 #' @details
 #' The coefficients are the ones that have been found to maximize the log-likelihood of the specified model. More information can be found on the models from the estimations help pages: \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
 #'
-#' Note that if the model has been estimated with clusters, to obtain the cluster coefficients, you need to use the function \code{\link[fixest]{fixef.fixest}}.
+#' Note that if the model has been estimated with fixed-effects, to obtain the fixed-effect coefficients, you need to use the function \code{\link[fixest]{fixef.fixest}}.
 #'
 #' @return
 #' This function returns a named numeric vector.
@@ -5680,14 +5681,14 @@ logLik.fixest = function(object, ...){
 #'
 #' @examples
 #'
-#' # simple estimation on iris data, clustering by "Species"
+#' # simple estimation on iris data, using "Species" fixed-effects
 #' res = femlm(Sepal.Length ~ Sepal.Width + Petal.Length +
 #'             Petal.Width | Species, iris)
 #'
 #' # the coefficients of the variables:
 #' coef(res)
 #'
-#' # the cluster coefficients:
+#' # the fixed-effects coefficients:
 #' fixef(res)
 #'
 #'
@@ -5725,7 +5726,7 @@ coef.fixest = coefficients.fixest = function(object, ...){
 #'
 #' @examples
 #'
-#' # simple estimation on iris data, clustering by "Species"
+#' # simple estimation on iris data, using "Species" fixed-effects
 #' res_poisson = femlm(Sepal.Length ~ Sepal.Width + Petal.Length +
 #'                     Petal.Width | Species, iris)
 #'
@@ -5811,7 +5812,7 @@ fitted.fixest = fitted.values.fixest = function(object, type = c("response", "li
 #'
 #' @examples
 #'
-#' # simple estimation on iris data, clustering by "Species"
+#' # simple estimation on iris data, using "Species" fixed-effects
 #' res_poisson = femlm(Sepal.Length ~ Sepal.Width + Petal.Length +
 #'                     Petal.Width | Species, iris)
 #'
@@ -6237,7 +6238,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 #' # yet another way:
 #' vcov(est_pois, cluster = ~Product)
 #'
-#' # Another estimation without cluster:
+#' # Another estimation without fixed-effects:
 #' est_pois_simple = femlm(Euros ~ log(dist_km) + log(Year), trade)
 #'
 #' # We can still get the clustered VCOV,
@@ -6824,7 +6825,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 #' # Load trade data
 #' data(trade)
 #'
-#' # We estimate the effect of distance on trade (with 3 cluster effects)
+#' # We estimate the effect of distance on trade (with 3 fixed-effects)
 #' est_pois = femlm(Euros ~ log(dist_km) + log(Year) | Origin + Destination +
 #'                  Product, trade)
 #'
@@ -6903,7 +6904,7 @@ confint.fixest = function(object, parm, level = 0.95, se, cluster, dof = getFixe
 #'
 #' @inheritParams nobs.fixest
 #'
-#' @param fml.update Changes to be made to the original argument \code{fml}. See more information on \code{\link[stats]{update.formula}}. You can add/withdraw both variables and clusters. E.g. \code{. ~ . + x2 | . + z2} would add the variable \code{x2} and the cluster \code{z2} to the former estimation.
+#' @param fml.update Changes to be made to the original argument \code{fml}. See more information on \code{\link[stats]{update.formula}}. You can add/withdraw both variables and fixed-effects. E.g. \code{. ~ . + x2 | . + z2} would add the variable \code{x2} and the cluster \code{z2} to the former estimation.
 #' @param nframes (Advanced users.) Defaults to 1. Number of frames up the stack where to perform the evaluation of the updated call. By default, this is the parent frame.
 #' @param ... Other arguments to be passed to the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
 #'
@@ -6927,10 +6928,10 @@ confint.fixest = function(object, parm, level = 0.95, se, cluster, dof = getFixe
 #' # we add the variable log(Year)
 #' est_2 <- update(est_pois, . ~ . + log(Year))
 #'
-#' # we add another cluster: "Product"
+#' # we add another fixed-effect: "Product"
 #' est_3 <- update(est_2, . ~ . | . + Product)
 #'
-#' # we remove the cluster "Origin" and the variable log(dist_km)
+#' # we remove the fixed-effect "Origin" and the variable log(dist_km)
 #' est_4 <- update(est_3, . ~ . - log(dist_km) | . - Origin)
 #'
 #' # Quick look at the 4 estimations
@@ -7176,7 +7177,7 @@ update.fixest = function(object, fml.update, nframes = 1, ...){
 #' @inheritParams nobs.fixest
 #'
 #' @param x An object of class \code{fixest}. Typically the result of a \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}} estimation.
-#' @param type A character scalar. Default is \code{type = "full"} which gives back a formula containing the linear part of the model along with the clusters (if any) and the non-linear in parameters part (if any). If \code{type = "linear"} then only the linear formula is returned. If \code{type = "NL"} then only the non linear in parameters part is returned.
+#' @param type A character scalar. Default is \code{type = "full"} which gives back a formula containing the linear part of the model along with the fixed-effects (if any) and the non-linear in parameters part (if any). If \code{type = "linear"} then only the linear formula is returned. If \code{type = "NL"} then only the non linear in parameters part is returned.
 #' @param ... Not currently used.
 #'
 #' @return
@@ -7190,13 +7191,14 @@ update.fixest = function(object, fml.update, nframes = 1, ...){
 #'
 #' @examples
 #'
-#' # simple estimation on iris data, clustering by "Species"
+#' # simple estimation on iris data, using "Species" fixed-effects
 #' res = femlm(Sepal.Length ~ Sepal.Width + Petal.Length +
 #'             Petal.Width | Species, iris)
 #'
-#' # formula with the cluster variable
+#' # formula with the fixed-effect variable
 #' formula(res)
-#' # linear part without the cluster variable
+#'
+#' # linear part without the fixed-effects
 #' formula(res, "linear")
 #'
 #'
@@ -7255,7 +7257,7 @@ formula.fixest = function(x, type = c("full", "linear", "NL"), ...){
 
 #' Design matrix of a \code{femlm} model
 #'
-#' This function creates a design matrix of the linear part of a \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}} estimation. Note that it is only the linear part and the cluster variables (which can be considered as factors) are excluded from the matrix.
+#' This function creates a design matrix of the linear part of a \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}} estimation. Note that it is only the linear part. The fixed-effects variables (which can be considered as factors) are excluded from the matrix.
 #'
 #' @method model.matrix fixest
 #'
@@ -7277,7 +7279,7 @@ formula.fixest = function(x, type = c("full", "linear", "NL"), ...){
 #'
 #' @examples
 #'
-#' # simple estimation on iris data, clustering by "Species"
+#' # simple estimation on iris data, using "Species" fixed-effects
 #' res = femlm(Sepal.Length ~ Sepal.Width*Petal.Length +
 #'             Petal.Width | Species, iris)
 #'
@@ -7405,7 +7407,7 @@ model.matrix.fixest = function(object, data, na.rm = TRUE, ...){
 #'
 #' @examples
 #'
-#' # simple estimation on iris data, clustering by "Species"
+#' # simple estimation on iris data, using "Species" fixed-effects
 #' res = feols(Sepal.Length ~ Sepal.Width*Petal.Length +
 #'             Petal.Width | Species, iris)
 #'

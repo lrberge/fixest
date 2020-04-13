@@ -905,14 +905,14 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
 
     #
-    # Handling Clusters ####
+    # Handling Fixed-effects ####
     #
 
     isSlope = onlySlope = FALSE
     if(from_update){
         # Fixed-effects information coming from the update method
 
-        # means that there is no modification of past clusters
+        # means that there is no modification of past fixed-effects
 
         # we retrieve past information
         fixef_id = object$fixef_id
@@ -966,7 +966,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             fixef_table = fixef_table[new_order]
         }
 
-        # The formula with the clusters
+        # The formula with the fixed-effects
         fml_char = as.character(fml)
         fml_full = as.formula(paste0(fml_char[2], "~", fml_char[3], "|", paste0(fixef_vars, collapse = "+")))
 
@@ -1112,22 +1112,22 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         }
 
         if(anyNA(fixef_mat)){
-            isNA_cluster = rowSums(is.na(fixef_mat)) > 0
+            isNA_fixef = rowSums(is.na(fixef_mat)) > 0
 
             if(!na_inf.rm){
                 # Default behavior, NA not allowed
                 var_problem = fixef_vars[sapply(fixef_mat, anyNA)]
-                obs = head(which(isNA_cluster), 3)
-                stop("The fixed-effects variables contain NA values. Please provide data without NA (or use na_inf.rm).", ifelse(ncol(fixef_mat) > 1, paste0(" FYI the clusters with NA are: ", paste0(var_problem, collapse = ", "), "."), ""), " (e.g. observation", enumerate_items(obs, "s"), ".)")
+                obs = head(which(isNA_fixef), 3)
+                stop("The fixed-effects variables contain NA values. Please provide data without NA (or use na_inf.rm).", ifelse(ncol(fixef_mat) > 1, paste0(" FYI the fixed-effects with NA are: ", paste0(var_problem, collapse = ", "), "."), ""), " (e.g. observation", enumerate_items(obs, "s"), ".)")
 
             } else {
                 # If na_inf.rm => we keep track of the NAs
                 anyNA_sample = TRUE
-                isNA_sample = isNA_sample | isNA_cluster
-                msgNA_cluster = paste0(", Clusters: ", numberFormatNormal(sum(isNA_cluster)))
+                isNA_sample = isNA_sample | isNA_fixef
+                msgNA_fixef = paste0(", Fixed-effects: ", numberFormatNormal(sum(isNA_fixef)))
             }
         } else {
-            msgNA_cluster = ", Clusters: 0"
+            msgNA_fixef = ", Fixed-effects: 0"
         }
 
         # NAs in slopes
@@ -1173,13 +1173,13 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
             if(anyNA_sample){
                 msg = msg_na_inf(ANY_NA, ANY_INF)
-                message_NA = paste0(numberFormatNormal(nbNA), " observation", plural(nbNA), " removed because of ", msg, " (Breakup: ", msgNA_y, msgNA_L, msgNA_NL, msgNA_cluster, msgNA_slope, msgNA_offset, msgNA_weight, ").")
+                message_NA = paste0(numberFormatNormal(nbNA), " observation", plural(nbNA), " removed because of ", msg, " (Breakup: ", msgNA_y, msgNA_L, msgNA_NL, msgNA_fixef, msgNA_slope, msgNA_offset, msgNA_weight, ").")
                 notes = c(notes, message_NA)
             }
 
             if(nbNA == nobs){
                 msg = msg_na_inf(ANY_NA, ANY_INF)
-                stop("All observations contain ", msg, ". Estimation cannot be done. (Breakup: ", msgNA_y, msgNA_L, msgNA_NL, msgNA_cluster, msgNA_slope, msgNA_offset, msgNA_weight, ")")
+                stop("All observations contain ", msg, ". Estimation cannot be done. (Breakup: ", msgNA_y, msgNA_L, msgNA_NL, msgNA_fixef, msgNA_slope, msgNA_offset, msgNA_weight, ")")
             }
 
             if(any0W){
@@ -1190,7 +1190,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 if(nbNA == nobs){
                     if(anyNA_sample){
                         msg = msg_na_inf(ANY_NA, ANY_INF)
-                        stop("All observations contain ", msg, " or are 0-weight. Estimation cannot be done. (0-weight: ", sum(is0W), ", breakup ", msg, ": ", msgNA_y, msgNA_L, msgNA_NL, msgNA_cluster, msgNA_slope, msgNA_offset, msgNA_weight, ")")
+                        stop("All observations contain ", msg, " or are 0-weight. Estimation cannot be done. (0-weight: ", sum(is0W), ", breakup ", msg, ": ", msgNA_y, msgNA_L, msgNA_NL, msgNA_fixef, msgNA_slope, msgNA_offset, msgNA_weight, ")")
                     } else {
                         stop("All observations are 0-weight. Estimation cannot be done.")
                     }
@@ -1278,8 +1278,8 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
             # Then the "Notes"
             nb_missing = lengths(fixef_removed)
-            message_cluster = paste0(paste0(nb_missing, collapse = "/"), " fixed-effect", plural(sum(nb_missing)), " (", numberFormatNormal(length(obs2remove)), " observation", plural_len(obs2remove), ") removed because of only ", ifelse(family=="logit", "zero (or only one)", "zero"), " outcomes.")
-            notes = c(notes, message_cluster)
+            message_fixef = paste0(paste0(nb_missing, collapse = "/"), " fixed-effect", plural(sum(nb_missing)), " (", numberFormatNormal(length(obs2remove)), " observation", plural_len(obs2remove), ") removed because of only ", ifelse(family=="logit", "zero (or only one)", "zero"), " outcomes.")
+            notes = c(notes, message_fixef)
         }
 
         # If slopes: we need to recreate some values (quf/table/sum_y)
@@ -1309,16 +1309,16 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         if(length(obs2remove_NA) > 0){
             # we update the value of obs2remove (will contain both NA and removed bc of outcomes)
             if(length(obs2remove) > 0){
-                obs2remove_cluster = index_noNA[obs2remove]
+                obs2remove_fixef = index_noNA[obs2remove]
             } else {
-                obs2remove_cluster = c()
+                obs2remove_fixef = c()
             }
 
-            obs2remove = sort(c(obs2remove_NA, obs2remove_cluster))
+            obs2remove = sort(c(obs2remove_NA, obs2remove_fixef))
         }
 
         #
-        # we save the cluster IDs + sizes (to be returned in "res") [original order!]
+        # we save the fixed-effects IDs + sizes (to be returned in "res") [original order!]
         #
 
         if(isSlope){
@@ -1347,7 +1347,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         names(fixef_sizes_res) = fixef_vars
 
         #
-        # We re-order the clusters
+        # We re-order the fixed-effects
         #
 
         IS_REORDER = FALSE
@@ -1449,7 +1449,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         }
 
         if(Q == 0){
-            # if Q > 0: done already when managing the clusters
+            # if Q > 0: done already when managing the fixed-effects
             lhs = lhs[-obs2remove]
         }
 
@@ -1858,7 +1858,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     #### Sending to the env ####
     ####
 
-    useExp_clusterCoef = family %in% c("poisson")
+    useExp_fixefCoef = family %in% c("poisson")
 
     # The dummies
     assign("isFixef", isFixef, env)
@@ -1882,12 +1882,12 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         # the saved sumFE
         if(!missnull(sumFE_init)){
             # information on starting values coming from update method
-            doExp = ifelse(useExp_clusterCoef, exp, I)
+            doExp = ifelse(useExp_fixefCoef, exp, I)
 
             # Means it's the full fixef properly given
             assign("saved_sumFE", doExp(sumFE_init), env)
 
-        } else if(useExp_clusterCoef){
+        } else if(useExp_fixefCoef){
             assign("saved_sumFE", rep(1, length(lhs)), env)
         } else {
             assign("saved_sumFE", rep(0, length(lhs)), env)
@@ -1989,7 +1989,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
     # To monitor how the FEs are computed (if the problem is difficult or not)
     assign("firstIterCluster", 1e10, env) # the number of iterations in the first run
-    assign("firstRunCluster", TRUE, env) # flag for first enrty in get_dummies
+    assign("firstRunCluster", TRUE, env) # flag for first entry in get_dummies
     assign("iterCluster", 1e10, env) # the previous number of fixef iterations
     assign("evolutionLL", Inf, env) # diff b/w two successive LL
     assign("pastLL", 0, env)
@@ -2120,7 +2120,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
     }
 
-    # Observations removed (either NA or clusters)
+    # Observations removed (either NA or fixed-effects)
     if(length(obs2remove) > 0){
         res$obsRemoved = obs2remove
         if(isFixef && any(lengths(fixef_removed) > 0)){

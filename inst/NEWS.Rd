@@ -5,9 +5,15 @@
 
 \section{Changes in version 0.4.1 (2020-XX-XX)}{
   \subsection{Bug fixes}{
-    \item Major bug leading R to crash when using non-linear-in-parameters right-hand-sides in feNmlm. Only occured when some observations were removed from the data set (due to NAness or to perfect fit).
-    \item In the \code{collinearity} help pages: an example could lead to an error. It has been removed.
-    \item In \code{collinearity}, corrected the problem of display of the intercept.
+    \item Major bug leading R to crash when using non-linear-in-parameters right-hand-sides in feNmlm. Only occured when some observations were removed from the data set (due to NAness or to perfect fit). [Thanks to @marissachilds, GH issue #17.]
+    \item In the \code{collinearity} help pages: an example could lead to an error (due to random data generation). It has been removed.
+    \item In \code{collinearity}, corrected the problem of display of the intercept in some situations.
+    \item Defaults for the arguments \code{cex} and \code{lwd} in \code{coefplot} have been changed to 1 and 1 (instead of par("cex") and par("lwd")). Otherwise this led to the creation of Rplots.pdf in the working directory.
+    \item Corrected a typo in the article's title in the vignette.
+  }
+
+  \subsection{Help}{
+    \item Rewriting of sections, correction small mistakes (wrong argument names), dropping completely the 'cluster' terminology (meant for fixed-effects), addition of what is contained in fixest objects.
   }
 }
 

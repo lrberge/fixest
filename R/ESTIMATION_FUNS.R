@@ -12,7 +12,7 @@
 #'
 #' @inheritParams femlm
 #'
-#' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y | fe_1+fe_2}. You can combine two clusters with \code{^}: e.g. \code{fml = z~x+y|fe_1^fe_2}, see details. You can also use variables with varying slopes using square brackets: e.g. in \code{fml = z~y|fe_1[x] + fe_2} the variable \code{x} will have one coefficient for each value of \code{fe_1} -- if you use varying slopes, please have a look at the details section (can't describe it all here).
+#' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y | fe_1+fe_2}. You can combine two fixed-effects with \code{^}: e.g. \code{fml = z~x+y|fe_1^fe_2}, see details. You can also use variables with varying slopes using square brackets: e.g. in \code{fml = z~y|fe_1[x] + fe_2} the variable \code{x} will have one coefficient for each value of \code{fe_1} -- if you use varying slopes, please have a look at the details section (can't describe it all here).
 #' @param weights A formula or a numeric vector. Each observation can be weighted, the weights must be greater than 0. If equal to a formula, it should be of one-sided: for example \code{~ var_weight}.
 #'
 #' @details
@@ -24,14 +24,14 @@
 #' Note that pasting is a costly operation, especially for large data sets. Thus, the internal algorithm uses a numerical trick which is fast, but the drawback is that the identity of each observation is lost (i.e. they are now equal to a meaningless number instead of being equal to \code{paste0(fe_1, "_", fe_2)}). These \dQuote{identities} are useful only if you're interested in the value of the fixed-effects (that you can extract with \code{\link[fixest]{fixef.fixest}}). If you're only interested in coefficients of the variables, it doesn't matter. Anyway, you can use \code{combine.quick = FALSE} to tell the internal algorithm to use \code{paste} instead of the numerical trick. By default, the numerical trick is performed only for large data sets.
 #'
 #' @section Varying slopes:
-#' You can add variables with varying slopes in the fixed-effect part of the formula. The syntax is as follows: cluster_var[var1, var2]. Here the variables var1 and var2 will be with varying slopes (one slope per value in cluster_var) and the fixed-effect cluster_var will also be added.
+#' You can add variables with varying slopes in the fixed-effect part of the formula. The syntax is as follows: fixef_var[var1, var2]. Here the variables var1 and var2 will be with varying slopes (one slope per value in fixef_var) and the fixed-effect fixef_var will also be added.
 #'
-#' To add only the variables with varying slopes and not the fixed-effect, use double square brackets: cluster_var[[var1, var2]].
+#' To add only the variables with varying slopes and not the fixed-effect, use double square brackets: fixef_var[[var1, var2]].
 #'
 #' In other words:
 #' \itemize{
-#'   \item cluster_var[var1, var2] is equivalent to cluster_var + cluster_var[[var1]] + cluster_var[[var2]]
-#'   \item cluster_var[[var1, var2]] is equivalent to cluster_var[[var1]] + cluster_var[[var2]]
+#'   \item fixef_var[var1, var2] is equivalent to fixef_var + fixef_var[[var1]] + fixef_var[[var2]]
+#'   \item fixef_var[[var1, var2]] is equivalent to fixef_var[[var1]] + fixef_var[[var2]]
 #' }
 #'
 #' @section Lagging variables:
@@ -51,8 +51,43 @@
 #' The syntax \code{var::fe(ref)} is in fact a shorthand for \code{interact(var, fe, ref)}, you have more information in \code{\link[fixest]{interact}} help pages.
 #'
 #'
+#' @return
+#' A \code{fixest} object.
+#' \item{nobs}{The number of observations.}
+#' \item{fml}{The linear formula of the call.}
+#' \item{call}{The call of the function.}
+#' \item{method}{The method used to estimate the model.}
+#' \item{family}{The family used to estimate the model.}
+#' \item{fml_full}{[where relevant] The "full" formula containing the linear part and the fixed-effects.}
+#' \item{nparams}{The number of parameters of the model.}
+#' \item{fixef_vars}{The names of each fixed-effect dimension.}
+#' \item{fixef_id}{The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.}
+#' \item{fixef_sizes}{The size of each fixed-effect (i.e. the number of unique identifierfor each fixed-effect dimension).}
+#' \item{coefficients}{The named vector of estimated coefficients.}
+#' \item{multicol}{Logical, if multicollinearity was found.}
+#' \item{coeftable}{The table of the coefficients with their standard errors, z-values and p-values.}
+#' \item{loglik}{The loglikelihood.}
+#' \item{ssr_null}{Sum of the squared residuals of the null model (containing only with the intercept).}
+#' \item{ssr_fe_only}{Sum of the squared residuals of the model estimated with fixed-effects only.}
+#' \item{ll_null}{The log-likelihood of the null model (containing only with the intercept).}
+#' \item{ll_fe_only}{The log-likelihood of the model estimated with fixed-effects only.}
+#' \item{pseudo_r2}{The adjusted pseudo R2.}
+#' \item{fitted.values}{The fitted values.}
+#' \item{linear.predictors}{The linear predictors.}
+#' \item{residuals}{The residuals (y minus the fitted values).}
+#' \item{sq.cor}{Squared correlation between the dependent variable and the expected predictor (i.e. fitted.values) obtained by the estimation.}
+#' \item{hessian}{The Hessian of the parameters.}
+#' \item{cov.unscaled}{The variance-covariance matrix of the parameters.}
+#' \item{se}{The standard-error of the parameters.}
+#' \item{scores}{The matrix of the scores (first derivative for each observation).}
+#' \item{residuals}{The difference between the dependent variable and the expected predictor.}
+#' \item{sumFE}{The sum of the fixed-effects coefficients for each observation.}
+#' \item{offset}{[where relevant] The offset formula.}
+#' \item{weights}{[where relevant] The weights formula.}
+#'
+#'
 #' @seealso
-#' See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations. For plotting coefficients: see \code{\link[fixest]{coefplot}}.
+#' See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the fixed-effects coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations. For plotting coefficients: see \code{\link[fixest]{coefplot}}.
 #'
 #' And other estimation methods: \code{\link[fixest]{femlm}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{fepois}}, \code{\link[fixest]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
 #'
@@ -177,7 +212,7 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 
 	isFixef = get("isFixef", env)
 	if(!isFixef){
-		# No clusters
+		# No Fixed-effects
 		y_demean = y
 		X_demean = X
 		res$means = 0
@@ -191,13 +226,6 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 		fixef_sizes = get("fixef_sizes", env)
 		fixef_table_vector = get("fixef_table_vector", env)
 		fixef_id_vector = get("fixef_id_vector", env)
-
-		# demeaning
-		# vars_demean <- cpp_demean(y, X, weights, iterMax = fixef.iter,
-		# 								  diffMax = fixef.tol, nb_cluster_all = fixef_sizes,
-		# 								  dum_vector = fixef_id_vector, tableCluster_vector = fixef_table_vector,
-		# 								  r_init = init, checkWeight = fromGLM, nthreads = nthreads)
-
 
 		slope_flag = get("slope_flag", env)
 		slope_vars = get("slope_variables", env)
@@ -425,9 +453,49 @@ ols_fit = function(y, X, w, correct_0w = FALSE, nthreads){
 #' @details
 #' The core of the GLM are the weighted OLS estimations. These estimations are performed with \code{\link[fixest]{feols}}. The method used to demean each variable along the fixed-effects is based on Berge (2018), since this is the same problem to solve as for the Gaussian case in a ML setup.
 #'
+#' @return
+#' A \code{fixest} object.
+#' \item{nobs}{The number of observations.}
+#' \item{fml}{The linear formula of the call.}
+#' \item{call}{The call of the function.}
+#' \item{method}{The method used to estimate the model.}
+#' \item{family}{The family used to estimate the model.}
+#' \item{fml_full}{[where relevant] The "full" formula containing the linear part and the fixed-effects.}
+#' \item{nparams}{The number of parameters of the model.}
+#' \item{fixef_vars}{The names of each fixed-effect dimension.}
+#' \item{fixef_id}{The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.}
+#' \item{fixef_sizes}{The size of each fixed-effect (i.e. the number of unique identifierfor each fixed-effect dimension).}
+#' \item{y}{[where relevant] The dependent variable (used to compute the within-R2 when fixed-effects are present).}
+#' \item{convStatus}{Logical, convergence status of the IRWLS algorithm.}
+#' \item{weights_irls}{The weights of the last iteration of the IRWLS algorithm.}
+#' \item{obsRemoved}{[where relevant] In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the row numbers of the observations that were removed. Also reports the NA observations that were removed.}
+#' \item{fixef_removed}{[where relevant] In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.}
+#' \item{coefficients}{The named vector of estimated coefficients.}
+#' \item{coeftable}{The table of the coefficients with their standard errors, z-values and p-values.}
+#' \item{loglik}{The loglikelihood.}
+#' \item{deviance}{Deviance of the fitted model.}
+#' \item{iterations}{Number of iterations of the algorithm.}
+#' \item{ll_null}{Log-likelihood of the null model (i.e. with the intercept only).}
+#' \item{ssr_null}{Sum of the squared residuals of the null model (containing only with the intercept).}
+#' \item{pseudo_r2}{The adjusted pseudo R2.}
+#' \item{fitted.values}{The fitted values are the expected value of the dependent variable for the fitted model: that is \eqn{E(Y|X)}.}
+#' \item{linear.predictors}{The linear predictors.}
+#' \item{residuals}{The residuals (y minus the fitted values).}
+#' \item{sq.cor}{Squared correlation between the dependent variable and the expected predictor (i.e. fitted.values) obtained by the estimation.}
+#' \item{hessian}{The Hessian of the parameters.}
+#' \item{cov.unscaled}{The variance-covariance matrix of the parameters.}
+#' \item{se}{The standard-error of the parameters.}
+#' \item{scores}{The matrix of the scores (first derivative for each observation).}
+#' \item{residuals}{The difference between the dependent variable and the expected predictor.}
+#' \item{sumFE}{The sum of the fixed-effects coefficients for each observation.}
+#' \item{offset}{[where relevant] The offset formula.}
+#' \item{weights}{[where relevant] The weights formula.}
+#'
+#'
+#'
 #'
 #' @seealso
-#' See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
+#' See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the fixed-effects coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
 #' And other estimation methods: \code{\link[fixest]{feols}}, \code{\link[fixest]{femlm}}, \code{\link[fixest]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
 #'
 #' @author
@@ -978,12 +1046,48 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
 #' @inheritSection feols Lagging variables
 #' @inheritSection feols Interactions
 #'
-#' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, you can 1) either insert them in this formula using a pipe (e.g. \code{fml = z~x+y|cluster1+cluster2}), or 2) either use the argument \code{fixef}.
+#' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, you can 1) either insert them in this formula using a pipe (e.g. \code{fml = z~x+y|fixef_1+fixef_2}), or 2) either use the argument \code{fixef}.
 #' @param start Starting values for the coefficients. Can be: i) a numeric of length 1 (e.g. \code{start = 0}, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).
+#'
+#' @return
+#' A \code{fixest} object.
+#' \item{nobs}{The number of observations.}
+#' \item{fml}{The linear formula of the call.}
+#' \item{call}{The call of the function.}
+#' \item{method}{The method used to estimate the model.}
+#' \item{family}{The family used to estimate the model.}
+#' \item{fml_full}{[where relevant] The "full" formula containing the linear part and the fixed-effects.}
+#' \item{nparams}{The number of parameters of the model.}
+#' \item{fixef_vars}{The names of each fixed-effect dimension.}
+#' \item{fixef_id}{The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.}
+#' \item{fixef_sizes}{The size of each fixed-effect (i.e. the number of unique identifierfor each fixed-effect dimension).}
+#' \item{convStatus}{Logical, convergence status.}
+#' \item{message}{The convergence message from the optimization procedures.}
+#' \item{obsRemoved}{[where relevant] In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the row numbers of the observations that were removed. Also reports the NA observations that were removed.}
+#' \item{fixef_removed}{[where relevant] In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.}
+#' \item{coefficients}{The named vector of estimated coefficients.}
+#' \item{coeftable}{The table of the coefficients with their standard errors, z-values and p-values.}
+#' \item{loglik}{The log-likelihood.}
+#' \item{iterations}{Number of iterations of the algorithm.}
+#' \item{ll_null}{Log-likelihood of the null model (i.e. with the intercept only).}
+#' \item{ll_fe_only}{Log-likelihood of the model with only the fixed-effects.}
+#' \item{ssr_null}{Sum of the squared residuals of the null model (containing only with the intercept).}
+#' \item{pseudo_r2}{The adjusted pseudo R2.}
+#' \item{fitted.values}{The fitted values are the expected value of the dependent variable for the fitted model: that is \eqn{E(Y|X)}.}
+#' \item{residuals}{The residuals (y minus the fitted values).}
+#' \item{sq.cor}{Squared correlation between the dependent variable and the expected predictor (i.e. fitted.values) obtained by the estimation.}
+#' \item{hessian}{The Hessian of the parameters.}
+#' \item{cov.unscaled}{The variance-covariance matrix of the parameters.}
+#' \item{se}{The standard-error of the parameters.}
+#' \item{scores}{The matrix of the scores (first derivative for each observation).}
+#' \item{residuals}{The difference between the dependent variable and the expected predictor.}
+#' \item{sumFE}{The sum of the fixed-effects coefficients for each observation.}
+#' \item{offset}{[where relevant] The offset formula.}
+#' \item{weights}{[where relevant] The weights formula.}
 #'
 #'
 #' @seealso
-#' See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
+#' See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the fixed-effects coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
 #' And other estimation methods: \code{\link[fixest]{feols}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{fepois}}, \code{\link[fixest]{feNmlm}}.
 #'
 #' @author
@@ -1104,7 +1208,7 @@ fepois = function(fml, data, offset, weights, panel.id, start = NULL, etastart =
 #' @inheritSection feols Lagging variables
 #' @inheritSection feols Interactions
 #'
-#' @param fml A formula. This formula gives the linear formula to be estimated (it is similar to a \code{lm} formula), for example: \code{fml = z~x+y}. To include cluster variables, you can 1) either insert them in this formula using a pipe (e.g. \code{fml = z~x+y|cluster1+cluster2}), or 2) either use the argument \code{cluster}. To include a non-linear in parameters element, you must use the argment \code{NL.fml}.
+#' @param fml A formula. This formula gives the linear formula to be estimated (it is similar to a \code{lm} formula), for example: \code{fml = z~x+y}. To include fixed-effects variables, you can 1) either insert them in this formula using a pipe (e.g. \code{fml = z~x+y|fixef_1+fixef_2}), or 2) either use the argument \code{fixef}. To include a non-linear in parameters element, you must use the argment \code{NL.fml}.
 #' @param start Starting values for the coefficients in the linear part (for the non-linear part, use NL.start). Can be: i) a numeric of length 1 (e.g. \code{start = 0}, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).
 #' @param NL.fml A formula. If provided, this formula represents the non-linear part of the right hand side (RHS). Note that contrary to the \code{fml} argument, the coefficients must explicitly appear in this formula. For instance, it can be \code{~a*log(b*x + c*x^3)}, where \code{a}, \code{b}, and \code{c} are the coefficients to be estimated. Note that only the RHS of the formula is to be provided, and NOT the left hand side.
 #' @param data A data.frame containing the necessary variables to run the model. The variables of the non-linear right hand side of the formula are identified with this \code{data.frame} names. Can also be a matrix.
@@ -1121,11 +1225,11 @@ fepois = function(fml, data, offset, weights, panel.id, start = NULL, etastart =
 #' @param hessian.args List of arguments to be passed to function \code{\link[numDeriv]{genD}}. Defaults is missing. Only used with the presence of \code{NL.fml}.
 #' @param opt.control List of elements to be passed to the optimization method \code{\link[stats]{nlminb}}. See the help page of \code{\link[stats]{nlminb}} for more information.
 #' @param nthreads Integer: Number of nthreads to be used (accelerates the algorithm via the use of openMP routines). The default is to use the total number of nthreads available minus two. You can set permanently the number of nthreads used within this package using the function \code{\link[fixest]{setFixest_nthreads}}.
-#' @param verbose Integer, default is 0. It represents the level of information that should be reported during the optimisation process. If \code{verbose=0}: nothing is reported. If \code{verbose=1}: the value of the coefficients and the likelihood are reported. If \code{verbose=2}: \code{1} + information on the computing time of the null model, the cluster coefficients and the hessian are reported.
+#' @param verbose Integer, default is 0. It represents the level of information that should be reported during the optimisation process. If \code{verbose=0}: nothing is reported. If \code{verbose=1}: the value of the coefficients and the likelihood are reported. If \code{verbose=2}: \code{1} + information on the computing time of the null model, the fixed-effects coefficients and the hessian are reported.
 #' @param theta.init Positive numeric scalar. The starting value of the dispersion parameter if \code{family="negbin"}. By default, the algorithm uses as a starting value the theta obtained from the model with only the intercept.
-#' @param fixef.tol Precision used to obtain the fixed-effects (ie cluster coefficients). Defaults to \code{1e-5}. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument \code{fixef.tol} cannot be lower than \code{10000*.Machine$double.eps}. Note that this parameter is dynamically controlled by the algorithm.
-#' @param fixef.iter Maximum number of iterations in the step obtaining the fixed-effects (only in use for 2+ clusters). Default is 10000.
-#' @param deriv.iter Maximum number of iterations in the step obtaining the derivative of the fixed-effects (only in use for 2+ clusters). Default is 1000.
+#' @param fixef.tol Precision used to obtain the fixed-effects. Defaults to \code{1e-5}. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument \code{fixef.tol} cannot be lower than \code{10000*.Machine$double.eps}. Note that this parameter is dynamically controlled by the algorithm.
+#' @param fixef.iter Maximum number of iterations in the step obtaining the fixed-effects (only in use for 2+ fixed-effects). Default is 1000.
+#' @param deriv.iter Maximum number of iterations in the step obtaining the derivative of the fixed-effects (only in use for 2+ fixed-effects). Default is 1000.
 #' @param deriv.tol Precision used to obtain the fixed-effects derivatives. Defaults to \code{1e-4}. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument \code{deriv.tol} cannot be lower than \code{10000*.Machine$double.eps}.
 #' @param warn Logical, default is \code{TRUE}. Whether warnings should be displayed (concerns warnings relating to: convergence state, collinearity issues and observation removal due to only 0/1 outcomes or presence of NA values).
 #' @param notes Logical. By default, two notes are displayed: when NAs are removed (to show additional information) and when some observations are removed because of only 0 (or 0/1) outcomes in a fixed-effect (in Poisson/Neg. Bin./Logit models). To avoid displaying these messages, you can set \code{notes = FALSE}. You can remove these messages permanently by using \code{setFixest_notes(FALSE)}.
@@ -1143,25 +1247,25 @@ fepois = function(fml, data, offset, weights, panel.id, start = NULL, etastart =
 #' Logit likelihood:
 #' \deqn{E(Y|X)=\frac{\exp(X\beta)}{1+\exp(X\beta)}}{E(Y|X) = exp(X*beta) / (1 + exp(X*beta))}
 #'
-#' When there are one or more clusters, the conditional expectation can be written as:
+#' When there are one or more fixed-effects, the conditional expectation can be written as:
 #' \deqn{E(Y|X) = h(X\beta+\sum_{k}\sum_{m}\gamma_{m}^{k}\times C_{im}^{k}),}
-#' where \eqn{h(.)} is the function corresponding to the likelihood function as shown before. \eqn{C^k} is the matrix associated to cluster \eqn{k} such that \eqn{C^k_{im}} is equal to 1 if observation \eqn{i} is of category \eqn{m} in cluster \eqn{k} and 0 otherwise.
+#' where \eqn{h(.)} is the function corresponding to the likelihood function as shown before. \eqn{C^k} is the matrix associated to fixed-effect dimension \eqn{k} such that \eqn{C^k_{im}} is equal to 1 if observation \eqn{i} is of category \eqn{m} in the fixed-effect dimension \eqn{k} and 0 otherwise.
 #'
 #' When there are non linear in parameters functions, we can schematically split the set of regressors in two:
 #' \deqn{f(X,\beta)=X^1\beta^1 + g(X^2,\beta^2)}
-#' with first a linear term and then a non linear part expressed by the function g. That is, we add a non-linear term to the linear terms (which are \eqn{X*beta} and the cluster coefficients). It is always better (more efficient) to put into the argument \code{NL.fml} only the non-linear in parameter terms, and add all linear terms in the \code{fml} argument.
+#' with first a linear term and then a non linear part expressed by the function g. That is, we add a non-linear term to the linear terms (which are \eqn{X*beta} and the fixed-effects coefficients). It is always better (more efficient) to put into the argument \code{NL.fml} only the non-linear in parameter terms, and add all linear terms in the \code{fml} argument.
 #'
 #' To estimate only a non-linear formula without even the intercept, you must exclude the intercept from the linear formula by using, e.g., \code{fml = z~0}.
 #'
 #' The over-dispersion parameter of the Negative Binomial family, theta, is capped at 10,000. If theta reaches this high value, it means that there is no overdispersion.
 #'
 #' @return
-#' An \code{femlm} object.
+#' A \code{fixest} object.
 #' \item{coefficients}{The named vector of coefficients.}
 #' \item{coeftable}{The table of the coefficients with their standard errors, z-values and p-values.}
 #' \item{loglik}{The loglikelihood.}
 #' \item{iterations}{Number of iterations of the algorithm.}
-#' \item{n}{The number of observations.}
+#' \item{nobs}{The number of observations.}
 #' \item{nparams}{The number of parameters of the model.}
 #' \item{call}{The call.}
 #' \item{fml}{The linear formula of the call.}
@@ -1181,15 +1285,15 @@ fepois = function(fml, data, offset, weights, panel.id, start = NULL, etastart =
 #' \item{NL.fml}{The nonlinear formula of the call.}
 #' \item{bounds}{Whether the coefficients were upper or lower bounded. -- This can only be the case when a non-linear formula is included and the arguments 'lower' or 'upper' are provided.}
 #' \item{isBounded}{The logical vector that gives for each coefficient whether it was bounded or not. This can only be the case when a non-linear formula is included and the arguments 'lower' or 'upper' are provided.}
-#' \item{fixef_vars}{The names of each cluster.}
-#' \item{fixef_id}{The list (of length the number of clusters) of the cluster identifiers for each observation.}
-#' \item{fixef_sizes}{The size of each cluster.}
-#' \item{obsRemoved}{In the case there were clusters and some observations were removed because of only 0/1 outcome within a cluster, it gives the row numbers of the observations that were removed.}
-#' \item{fixef_removed}{In the case there were clusters and some observations were removed because of only 0/1 outcome within a cluster, it gives the list (for each cluster) of the cluster identifiers that were removed.}
+#' \item{fixef_vars}{The names of each fixed-effect dimension.}
+#' \item{fixef_id}{The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.}
+#' \item{fixef_sizes}{The size of each fixed-effect (i.e. the number of unique identifierfor each fixed-effect dimension).}
+#' \item{obsRemoved}{In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the row numbers of the observations that were removed. Also reports the NA observations that were removed.}
+#' \item{fixef_removed}{In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.}
 #' \item{theta}{In the case of a negative binomial estimation: the overdispersion parameter.}
 #'
 #'  @seealso
-#' See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
+#' See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the fixed-effects coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
 #'
 #' And other estimation methods: \code{\link[fixest]{feols}}, \code{\link[fixest]{femlm}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{fepois}}, \code{\link[fixest]{fenegbin}}.
 #'
@@ -1211,7 +1315,7 @@ fepois = function(fml, data, offset, weights, panel.id, start = NULL, etastart =
 #' @examples
 #'
 #' # This section covers only non-linear in parameters examples
-#' # For linear relationships: use femlm instead
+#' # For linear relationships: use femlm or feglm instead
 #'
 #' # Generating data for a simple example
 #' set.seed(1)
@@ -1287,7 +1391,7 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	# the result
 	res = get("res", env)
 
-	# NO VARIABLE -- ONLY CLUSTERS
+	# NO VARIABLE -- ONLY FIXED-EFFECTS
 	if(onlyFixef){
 		if(family == "negbin"){
 			stop("To estimate the negative binomial model, you need at least one variable. (The estimation of the model with only the fixed-effects is not implemented.)")
@@ -1502,10 +1606,10 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	# Fixed-effects
 	if(isFixef){
 
-		useExp_clusterCoef = family %in% c("poisson")
+		useExp_fixefCoef = family %in% c("poisson")
 
 		sumFE = attr(mu, "sumFE")
-		if(useExp_clusterCoef){
+		if(useExp_fixefCoef){
 			sumFE = rpar_log(sumFE, env)
 		}
 
@@ -1531,7 +1635,7 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 			if(length(mu_noDum) == 1) mu_noDum = rep(mu_noDum, n)
 
 			exp_mu_noDum = NULL
-			if(useExp_clusterCoef){
+			if(useExp_fixefCoef){
 				exp_mu_noDum = rpar_exp(mu_noDum, env)
 			}
 
@@ -1539,7 +1643,7 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 			dummies = getDummies(mu_noDum, exp_mu_noDum, env, coef)
 
 			exp_mu = NULL
-			if(useExp_clusterCoef){
+			if(useExp_fixefCoef){
 				# despite being called mu, it is in fact exp(mu)!!!
 				exp_mu = exp_mu_noDum*dummies
 				mu = rpar_log(exp_mu, env)
