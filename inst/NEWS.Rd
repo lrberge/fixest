@@ -3,7 +3,7 @@
 
 \title{News for \R Package \pkg{fixest}}
 
-\section{Changes in version 0.4.1 (2020-XX-XX)}{
+\section{Changes in version 0.4.1 (2020-04-13)}{
   \subsection{Bug fixes}{
     \item Major bug leading R to crash when using non-linear-in-parameters right-hand-sides in feNmlm. Only occured when some observations were removed from the data set (due to NAness or to perfect fit). [Thanks to @marissachilds, GH issue #17.]
     \item In the \code{collinearity} help pages: an example could lead to an error (due to random data generation). It has been removed.
@@ -14,6 +14,10 @@
 
   \subsection{Help}{
     \item Rewriting of sections, correction small mistakes (wrong argument names), dropping completely the 'cluster' terminology (meant for fixed-effects), addition of what is contained in fixest objects.
+  }
+
+  \subsection{Other}{
+    \item Adding a README.md.
   }
 }
 
