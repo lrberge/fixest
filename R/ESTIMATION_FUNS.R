@@ -229,6 +229,7 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 
 		slope_flag = get("slope_flag", env)
 		slope_vars = get("slope_variables", env)
+
 		vars_demean <- cpp_demean(y, X, weights, iterMax = fixef.iter,
 		                          diffMax = fixef.tol, nb_cluster_all = fixef_sizes,
 		                          dum_vector = fixef_id_vector, tableCluster_vector = fixef_table_vector,

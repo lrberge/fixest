@@ -262,7 +262,7 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, hor
     #
 
     opts = getOption("fixest_coefplot")
-    check_arg(style, "singleCharacter")
+    check_arg(style, "character scalar")
     if(missing(style)){
         if(is_interaction){
             style = "interaction"
@@ -319,11 +319,8 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, hor
 
     # xlab / main / ylab / sub
 
-    check_arg(value.lab, "singleCharacter")
-    check_arg(xlab, "singleCharacter NULL")
-    check_arg(main, "singleCharacter")
-    check_arg(ylab, "singleCharacter NULL")
-    check_arg(sub, "singleCharacter NULL")
+    check_arg(value.lab, main, "character scalar")
+    check_arg(xlab, ylab, sub, "character scalar NULL")
 
     if(horiz){
         if(is.null(xlab)) xlab = value.lab
@@ -1703,7 +1700,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
 
             if(is.null(names(ref))){
                 if(!is.character(ref) || length(ref) > 1){
-                    check_arg(ref, "singleCharacter", "Argument 'ref' must be either: a single character, either a list or a named integer vector of length 1 (The integer gives the position of the reference among the coefficients). REASON")
+                    check_arg(ref, "character scalar", .message = "Argument 'ref' must be either: a single character, either a list or a named integer vector of length 1 (The integer gives the position of the reference among the coefficients).")
                 } else {
                     refname = ref
                     ref = list()
@@ -2053,39 +2050,15 @@ setFixest_coefplot = function(style, horiz = FALSE, dict = getFixest_dict(), kee
     # Controls
     #
 
-    check_arg(style, "singleCharacter")
-    check_arg(ci.width, "single")
-    check_arg(ci_level, "singleNumericGT0LT1")
-    check_arg(lwd, "singleNumericGE0")
-    check_arg(ci.lwd, "singleNumericGE0")
-    check_arg(grid, "singleLogical")
-    if(is.null(grid.par)){
-        grid.par = list()
-    } else if(!is.list(grid.par) ) {
-        stop("Argument grid.par must be a list (even empty).")
-    }
+    check_arg(style, "character scalar")
+    check_arg(ci.width, "scalar(numeric, character) GE{0}")
+    check_arg(ci_level, "numeric scalar GT{0} LT{1}")
+    check_arg(lwd, ci.lwd, "numeric scalar GE{0}")
+    check_arg(grid, zero, "logical scalar")
 
-    check_arg(zero, "singleLogical")
-    if(is.null(zero.par)){
-        zero.par = list()
-    } else if(!is.list(zero.par) ) {
-        stop("Argument zero.par must be a list (even empty).")
-    }
+    check_arg_plus("L0 list NULL{list()}", grid.par, zero.par, pt.join.par, ref.line.par)
 
-
-    if(is.null(pt.join.par)){
-        pt.join.par = list()
-    } else if(!is.list(pt.join.par) ) {
-        stop("Argument join.par must be a list (even empty).")
-    }
-
-    if(is.null(ref.line.par)){
-        ref.line.par = list()
-    } else if(!is.list(ref.line.par) ) {
-        stop("Argument ref.line.par must be a list (even empty).")
-    }
-
-    check_arg(reset, "singleLogical")
+    check_arg(reset, "logical scalar")
 
     #
     # Code

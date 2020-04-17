@@ -10,7 +10,7 @@
 #
 # -------------------------------------------------------------- #
 
-# Make sure data.table knows we know we're using it
+# Make sure data.table knows we're using it
 .datatable.aware = TRUE
 
 
@@ -19,51 +19,41 @@ panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method =
     # Used in lag.formula, panel, and fixest_env (with argument panel.id and panel.args)
     # DATA_MISSING: arg used in lag.formula
 
+    check_arg_plus(duplicate.method, "match", .call_up = 1)
 
-    # for error handling => refers to the right function
-    my_call = deparse(sys.calls()[[sys.nframe()-1]])[1] # call can have svl lines
-    nmax = 40
-    if(nchar(my_call) > nmax) my_call = paste0(substr(my_call, 1, nmax-1), "...")
-    my_call = paste0(my_call, ":\n ")
-
-
-    duplicate.method = try(match.arg(duplicate.method, choices = c("none", "first")), silent = TRUE)
-    if(class(duplicate.method) == "try-error"){
-        stop(my_call, "The argument 'duplicate.method' must be one of: 'none' or 'first'.", call. = FALSE)
-    }
+    check_arg(panel.id, "character vector len(,2) | formula", .message = "The argument 'panel.id' must be either: i) a one sided formula (e.g. ~id+time), ii) a character vector of length 2 (e.g. c('id', 'time'), or iii) a character scalar of two variables separated by a comma (e.g. 'id,time').", .call_up = 1)
 
     if("formula" %in% class(panel.id)){
         tm = terms_hat(panel.id)
         var_id_time = attr(tm, "term.labels")
         if(length(var_id_time) != 2){
-            stop(my_call, "The formula of the argument 'panel.id' must contain exactly two variables in the right hand side (currently there ", ifsingle(var_id_time, "is ", "are "), length(var_id_time), ").", call. = FALSE)
+            stop_up("The formula of the argument 'panel.id' must contain exactly two variables in the right hand side (currently there ", plural(var_id_time, "is"), " ", length(var_id_time), ").")
         }
 
         all_vars = all.vars(tm)
-    } else if(is.character(panel.id) && length(panel.id) == 2){
+    } else if(length(panel.id) == 2){
         all_vars = var_id_time = panel.id
-    } else if(is.character(panel.id) && length(panel.id) == 1){
+
+    } else if(length(panel.id) == 1){
         var_id_time = gsub("(^ +| +$)", "", strsplit(panel.id, ",")[[1]])
         all_vars = var_id_time = var_id_time[nchar(var_id_time) > 0]
         if(length(var_id_time) != 2){
-            stop(my_call, "The argument 'panel.id' must be either: i) a one sided formula (e.g. ~id+time), ii) a character vector of length 2 (e.g. c('id', 'time'), or iii) a character scalar of two variables separated by a comma (e.g. 'id,time'). Currently it is neither of the three." , call. = FALSE)
+            stop_up("The argument 'panel.id' must be either: i) a one sided formula (e.g. ~id+time), ii) a character vector of length 2 (e.g. c('id', 'time'), or iii) a character scalar of two variables separated by a comma (e.g. 'id,time'). Currently it is neither of the three.")
         }
-    } else {
-        stop(my_call, "The argument 'panel.id' must be either: i) a one sided formula (e.g. ~id+time), ii) a character vector of length 2 (e.g. c('id', 'time'), or iii) a character scalar of two variables separated by a comma (e.g. 'id,time'). Currently it is neither of the three." , call. = FALSE)
     }
 
 
     if(DATA_MISSING){
         if(!all(all_vars %in% ls(parent.frame(2)))){
             pblm = setdiff(all_vars, ls(parent.frame(2)))
-            stop(my_call, "In the argument 'panel.id', the variable", enumerate_items(pblm, "s.is.past.quote"), " not found in the environment.", call. = FALSE)
+            stop_up("In the argument 'panel.id', the variable", enumerate_items(pblm, "s.is.past.quote"), " not found in the environment.")
         }
         id = eval(parse(text = var_id_time[1]), parent.frame(2))
         time = eval(parse(text = var_id_time[2]), parent.frame(2))
     } else {
         if(!all(all_vars %in% names(data))){
             pblm = setdiff(all_vars, names(data))
-            stop(my_call, "In the argument 'panel.id', the variable", enumerate_items(pblm, "s.is.quote"), " not in the data set.", call. = FALSE)
+            stop_up("In the argument 'panel.id', the variable", enumerate_items(pblm, "s.is.quote"), " not in the data set.")
         }
         id = eval(parse(text = var_id_time[1]), data)
         time = eval(parse(text = var_id_time[2]), data)
@@ -84,15 +74,7 @@ panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method =
     }
 
     # time.step
-    if(length(time.step) != 1 || (!is.numeric(time.step) && !is.character(time.step))){
-        stop(my_call, "The argument 'time.step' must be equal to 'unitary', 'consecutive' or to a number.", call. = FALSE)
-    } else if(is.character(time.step)){
-        ts = try(match.arg(time.step, c("unitary", "consecutive", "within.consecutive")), silent = TRUE)
-        if("try-error" %in% class(ts)){
-            stop(my_call, "The argument 'time.step' must be one of 'unitary', 'consecutive' or 'within.consecutive', or a number representing the time step.", call. = FALSE)
-        }
-        time.step = ts
-    }
+    check_arg_plus(time.step, "numeric scalar GT{0} | match(unitary, consecutive, within.consecutive)", .call_up = 1)
 
     # unitary time.step: conversion to numeric before quf
     if(time.step == "unitary") {
@@ -104,9 +86,9 @@ panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method =
 
             if(!is.numeric(time_new)){
                 if(from_fixest){
-                    stop(my_call, "The time variable must be numeric or at least convertible to numeric. So far the conversion has failed (time variable's class is currently ", enumerate_items(class(time)), "). Alternatively, you can have more options to set up the panel using the function panel().", call. = FALSE)
+                    stop_up("The time variable must be numeric or at least convertible to numeric. So far the conversion has failed (time variable's class is currently ", enumerate_items(class(time)), "). Alternatively, you can have more options to set up the panel using the function panel().")
                 } else {
-                    stop(my_call, "To use the 'unitary' time.step, the time variable must be numeric or at least convertible to numeric. So far the conversion has failed (time variable's class is currently ", enumerate_items(class(time)), ").", call. = FALSE)
+                    stop_up("To use the 'unitary' time.step, the time variable must be numeric or at least convertible to numeric. So far the conversion has failed (time variable's class is currently ", enumerate_items(class(time)), ").")
                 }
             }
 
@@ -115,15 +97,15 @@ panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method =
 
         if(any(time %% 1 != 0)){
             if(from_fixest){
-                stop(my_call, "The time variable", ifelse(time_conversion, " (which has been converted to numeric)", ""), " must be made of integers. So far this is not the case. Alternatively, you can have more options to set up the panel using the function panel().", call. = FALSE)
+                stop_up("The time variable", ifelse(time_conversion, " (which has been converted to numeric)", ""), " must be made of integers. So far this is not the case. Alternatively, you can have more options to set up the panel using the function panel().")
             } else {
-                stop(my_call, "To use the 'unitary' time.step, the time variable", ifelse(time_conversion, " (which has been converted to numeric)", ""), " must be made of integers. So far this is not the case. Alternatively, you can give a number in time.step.", call. = FALSE)
+                stop_up("To use the 'unitary' time.step, the time variable", ifelse(time_conversion, " (which has been converted to numeric)", ""), " must be made of integers. So far this is not the case. Alternatively, you can give a number in time.step.")
             }
         }
 
     } else if(!is.character(time.step)){
         if(!is.numeric(time)){
-            stop(my_call, "If 'time.step' is a number, then the time variable must also be a number (this is not the case: its class is currently ", enumerate_items(class(time)), ").", call. = FALSE)
+            stop_up("If 'time.step' is a number, then the time variable must also be numeric (this is not the case: its class is currently ", enumerate_items(class(time)), ").")
         }
     }
 
@@ -165,7 +147,7 @@ panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method =
         if(any(all_steps %% time.step != 0)){
             obs_pblm = which(all_steps %% time.step != 0)
 
-            stop(my_call, "If 'time.step' is a number, then it must be an exact divisor of all the difference between two consecutive time periods. This is currently not the case: ", time.step, " is not a divisor of ", all_steps[obs_pblm][1], " (the difference btw the time periods ", time_unik[obs_pblm[1] + 1], " and ", time_unik[obs_pblm[1]], ").", call. = FALSE)
+            stop_up("If 'time.step' is a number, then it must be an exact divisor of all the difference between two consecutive time periods. This is currently not the case: ", time.step, " is not a divisor of ", all_steps[obs_pblm][1], " (the difference btw the time periods ", time_unik[obs_pblm[1] + 1], " and ", time_unik[obs_pblm[1]], ").")
         }
 
         # we rescale time_unik // checks done beforehand
@@ -201,7 +183,7 @@ panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method =
             id_dup = id_origin[obs_pblm]
             time_dup = time_origin[obs_pblm]
 
-            stop(my_call, "The panel identifiers contain duplicate values: this is not allowed since lag/leads are not defined for them. For example (id, time) = (", id_dup, ", ", time_dup, ") appears ", n_times(dup_info$n_dup), ". Please provide data without duplicates -- or you can also use duplicate.method = 'first' (see Details).", call. = FALSE)
+            stop_up("The panel identifiers contain duplicate values: this is not allowed since lag/leads are not defined for them. For example (id, time) = (", id_dup, ", ", time_dup, ") appears ", n_times(dup_info$n_dup), ". Please provide data without duplicates -- or you can also use duplicate.method = 'first' (see Details).")
         }
     }
 
@@ -282,14 +264,11 @@ l = function(x, lag = 1, fill = NA){
 
         if(fl_authorized){
             # Further control
-            check_arg(lag, "singleInteger", "When creating lags (or leads) within a data.table with l() (or f()), the argument 'lag' must be a single integer. REASON")
+            check_arg(lag, "integer scalar", .message = "When creating lags (or leads) within a data.table with l() (or f()), the argument 'lag' must be a single integer.")
 
-            if(length(fill) != 1){
-                stop("The length of argument 'fill' must be exaclty 1. Its current length is ", length(fill), ".")
-            } else if(!is.na(fill)){
-                if(is.list(fill)){
-                    stop("Argument fill must be a 'scalar', currenlty it's a list!")
-                }
+            check_arg(fill, "NA | scalar")
+
+            if(!is.na(fill)){
 
                 if(is.numeric(value) && !is.numeric(fill)){
                     mc = match.call()
@@ -362,8 +341,8 @@ l_expand = function(x, k=1, fill){
     mc = match.call()
 
     if(missing(x)) stop("Argument 'x' cannot be missing.")
-    check_arg(k, "integerVector")
-    check_arg(fill, "numericScalarNaok")
+    check_arg(k, "integer vector")
+    check_arg(fill, "NA | numeric scalar")
 
     mc_new = mc
 
@@ -394,8 +373,8 @@ f_expand = function(x, k=1, fill){
     mc = match.call()
 
     if(missing(x)) stop("Argument 'x' cannot be missing.")
-    check_arg(k, "integerVector")
-    check_arg(fill, "numericScalarNaok")
+    check_arg(k, "integer vector")
+    check_arg(fill, "NA | numeric scalar")
 
     mc_new = mc
 
@@ -515,15 +494,12 @@ lag.formula = function(x, k = 1, data, time.step = "unitary", fill = NA, duplica
     # IMPORTANT TO BE DONE:
     # - check argument 'fill' in here (not in panel_setup)
 
-    # Checking arguments in ...
-    any_invalid = check_dots_args(match.call(expand.dots = FALSE),
-                                  suggest_args = c("k", "data", "time.step", "fill"))
-    if(any_invalid){
-        warning(attr(any_invalid, "msg"))
-    }
+    validate_dots(suggest_args = c("k", "data", "time.step", "fill"))
 
     # Controls
-    duplicate.method = match.arg(duplicate.method)
+    check_arg_plus(duplicate.method, "match")
+    check_arg(data, "data.frame | matrix")
+    check_arg(k, "integer scalar")
 
     if(!missing(data)){
         DATA_MISSING = FALSE
@@ -532,8 +508,6 @@ lag.formula = function(x, k = 1, data, time.step = "unitary", fill = NA, duplica
                 stop("The variables of 'data' have no name (data is a matrix without column names).")
             }
             data = as.data.frame(data)
-        } else if(!"data.frame" %in%class(data)){
-            stop("Argument 'data' must be a data.frame.")
         } else if("data.table" %in% class(data)){
             data = as.data.frame(data)
         }
@@ -549,8 +523,6 @@ lag.formula = function(x, k = 1, data, time.step = "unitary", fill = NA, duplica
         stop("In the formula the variable", enumerate_items(qui_pblm, "s.is.quote"), " not in the ", ifelse(DATA_MISSING, "environment. Add argument data?", "data."))
     }
 
-    # checking k
-    check_arg(k, "integerScalar", "Argument 'k' must be a single integer.")
 
     # LHS
     fml = x
@@ -561,13 +533,8 @@ lag.formula = function(x, k = 1, data, time.step = "unitary", fill = NA, duplica
     }
 
     # checking argument fill
-    if(length(fill) != 1){
-        stop("The length of argument 'fill' must be exaclty 1. Its current length is ", length(fill), ".")
-    } else if(!is.na(fill)){
-        if(is.list(fill)){
-            stop("Argument fill must be a 'scalar', currenlty it's a list!")
-        }
-
+    check_arg(fill, "NA | scalar")
+    if(!is.na(fill)){
         if(is.numeric(value) && !is.numeric(fill)){
             stop("Argument 'fill' must be of the same type as ", deparse_long(fml[[2]]), ", which is numeric.")
         }
@@ -614,7 +581,7 @@ lag.formula = function(x, k = 1, data, time.step = "unitary", fill = NA, duplica
 #' Constructs a \code{fixest} panel data base out of a data.frame which allows to use leads and lags in \code{fixest} estimations and to create new variables from leads and lags if the data.frame was also a \code{\link[data.table]{data.table}}.
 #'
 #' @param data A data.frame.
-#' @param panel.id The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link[fixest]{feols}}).
+#' @param panel.id The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id = ~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link[fixest]{feols}}).
 #' @param time.step The method to compute the lags. Can be equal to: \code{"unitary"} (default), \code{"consecutive"}, \code{"within.consecutive"}, or to a number. If \code{"unitary"}, then the largest common divisor between consecutive time periods is used (typically if the time variable represents years, it will be 1). This method can apply only to integer (or convertible to integer) variables. If \code{"consecutive"}, then the time variable can be of any type: two successive time periods represent a lag of 1. If \code{"witihn.consecutive"} then **within a given id**, two successive time periods represent a lag of 1. Finally, if the time variable is numeric, you can provide your own numeric time step.
 #' @param duplicate.method If several observations have the same id and time values, then the notion of lag is not defined for them. If \code{duplicate.method = "none"} (default) and duplicate values are found, this leads to an error. You can use \code{duplicate.method = "first"} so that the first occurrence of identical id/time observations will be used as lag.
 #'

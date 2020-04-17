@@ -42,14 +42,9 @@
 #'
 print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 
-
     # checking the arguments
-    any_invalid = check_dots_args(match.call(expand.dots = FALSE),
-                                  dots_args = c("se", "cluster", "dof", "exact_dof", "forceCovariance", "keepBounded"),
-                                  suggest_args = c("n", "type", "se", "cluster"))
-    if(any_invalid){
-        warning(attr(any_invalid, "msg"))
-    }
+    validate_dots(suggest_args = c("n", "type", "se", "cluster"),
+                  valid_args = c("se", "cluster", "dof", "exact_dof", "forceCovariance", "keepBounded"))
 
     # The objects from the estimation and the summary are identical, except regarding the vcov
 	fromSummary = "cov.scaled" %in% names(x)
@@ -258,11 +253,7 @@ summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), forceCova
 	# Checking arguments in ...
 	if(!any(c("fromPrint", "nframes_up") %in% names(match.call()))){
 	    # condition means NOT internal call => thus client call
-	    any_invalid = check_dots_args(match.call(expand.dots = FALSE),
-	                                  suggest_args = c("se", "cluster", "dof"))
-	    if(any_invalid){
-	        warning(attr(any_invalid, "msg"))
-	    }
+	    validate_dots(suggest_args = c("se", "cluster", "dof"))
 	}
 
 
@@ -440,7 +431,7 @@ summ = function(object, se, cluster, dof = getFixest_dof(), forceCovariance = FA
 #' dict = c(Month5="May", Month6="Jun", Month7="Jul", Month8="Aug", Month9="Sep")
 #' etable(est1, est2, dict = dict, tex = TRUE)
 #'
-etable = function(..., se=c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, digits=4, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict = getFixest_dict(), file, replace=FALSE, convergence, signifCode, label, float, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNoFixef = c("Yes", "No"), keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar){
+etable = function(..., se = c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, digits=4, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict = getFixest_dict(), file, replace=FALSE, convergence, signifCode, label, float, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNoFixef = c("Yes", "No"), keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar){
 
     #
     # Checking the arguments
@@ -453,48 +444,17 @@ etable = function(..., se=c("standard", "white", "cluster", "twoway", "threeway"
     }
 
     if(!missing(se)){
-        se = match.arg(se)
+        check_arg_plus(se, "match")
     } else {
         se = NULL
     }
 
-    coefstat = match.arg(coefstat)
-
-    # check the dictionnary
-    if(!is.null(dict) && (!is.character(dict) || is.null(names(dict)))){
-        stop("The argument 'dict' must be a named character vector.")
-    }
+    check_arg_plus(coefstat, "match")
 
     # The depvar
     if(missing(depvar) && !missing(file)){
         depvar = TRUE
     }
-
-
-    check_arg(digits, "singleIntegerGE1")
-    check_arg(title, "singleCharacter")
-    check_arg(sdBelow, "singleLogical")
-    check_arg(keep, "characterVectorNULL", "The arg. 'keep' must be a vector of regular expressions (see help(regex)). REASON")
-    check_arg(drop, "characterVectorNULL", "The arg. 'drop' must be a vector of regular expressions (see help(regex)). REASON")
-    check_arg(order, "characterVectorNULL", "The arg. 'order' must be a vector of regular expressions (see help(regex)). REASON")
-    check_arg(file, "singleCharacter")
-    check_arg(replace, "singleLogical")
-    check_arg(convergence, "singleLogical")
-    check_arg(signifCode, "numericVectorGE0LE1")
-    check_arg(label, "singleCharacter")
-    check_arg(subtitles, "characterVector")
-    check_arg(fixef_sizes, "singleLogical")
-    check_arg(fixef_sizes.simplify, "singleLogical")
-    check_arg(yesNoFixef, "characterVector")
-    check_arg(keepFactors, "singleLogical")
-    check_arg(family, "singleLogical")
-    check_arg(powerBelow, "singleIntegerLE-1")
-    check_arg(interaction.combine, "singleCharacter")
-    check_arg(tex, "singleLogical")
-    check_arg(depvar, "singleLogical")
-
-    check_arg(ci, "singleNumericGT0.5LT1")
-
 
     if(missing(tex)){
         if(!missing(file)) {
@@ -514,7 +474,7 @@ etable = function(..., se=c("standard", "white", "cluster", "twoway", "threeway"
     }
 
     # Float or not
-    check_arg(float, "singleLogical")
+    check_arg(float, "logical scalar")
     if(missing(float)){
         if(!missing(title) || !missing(label)){
             float = TRUE
@@ -561,7 +521,7 @@ etable = function(..., se=c("standard", "white", "cluster", "twoway", "threeway"
 
 
 #' @describeIn etable Exports the results of multiple \code{fixest} estimations in a Latex table.
-esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, digits=4, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, title, float = float, sdBelow=TRUE, keep, drop, order, dict = getFixest_dict(), file, replace=FALSE, convergence, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNoFixef = c("Yes", "No"), keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ "){
+esttex <- function(..., se = c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, digits=4, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, title, float = float, sdBelow=TRUE, keep, drop, order, dict = getFixest_dict(), file, replace=FALSE, convergence, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNoFixef = c("Yes", "No"), keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ "){
 	# drop: a vector of regular expressions
 	# order: a vector of regular expressions
 	# dict: a 'named' vector
@@ -573,22 +533,15 @@ esttex <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway
 	}
 
     if(!missing(se)){
-		se = match.arg(se)
+        check_arg_plus(se, "match")
     } else {
 	    se = NULL
     }
 
-    coefstat = match.arg(coefstat)
-
-    # check the dictionnary
-    if(!is.null(dict) && (!is.character(dict) || is.null(names(dict)))){
-        stop("The argument 'dict' must be a named character vector.")
-    }
-
-    check_arg(interaction.combine, "singleCharacter")
+    check_arg_plus(coefstat, "match")
 
     # Float or not
-    check_arg(float, "singleLogical")
+    check_arg(float, "logical scalar")
     if(missing(float)){
         if(!missing(title) || !missing(label)){
             float = TRUE
@@ -981,11 +934,7 @@ summary.fixest.fixef = function(object, n=5, ...){
 	# This function shows some generic information on the fixed-effect coefficients
 
     # checking arguments in dots
-    any_invalid = check_dots_args(match.call(expand.dots = FALSE),
-                                  suggest_args = "n")
-    if(any_invalid){
-        warning(attr(any_invalid, "msg"))
-    }
+    validate_dots(suggest_args = "n")
 
 	Q = length(object)
 	fixef_names = names(object)
@@ -1111,10 +1060,7 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 	# This function retrieves the dummies
 
     # Checking the arguments
-    any_invalid = check_dots_args(match.call(expand.dots = FALSE))
-    if(any_invalid){
-        warning(attr(any_invalid, "msg"))
-    }
+    validate_dots()
 
 	# Preliminary stuff
 	S = object$sumFE
@@ -1434,10 +1380,7 @@ NULL
 plot.fixest.fixef = function(x, n = 5, ...){
 
     # Checking the arguments
-    any_invalid = check_dots_args(match.call(expand.dots = FALSE), suggest_args = "n")
-    if(any_invalid){
-        warning(attr(any_invalid, "msg"))
-    }
+    validate_dots(suggest_args = "n")
 
 	Q = length(x)
 
@@ -2263,7 +2206,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
         IS_INDIV = TRUE
         if("formula" %in% class(indiv)){
 
-            check_arg(indiv, "osf")
+            check_arg(indiv, "os formula")
             indiv_varname = attr(terms(indiv), "term.labels")
 
             if(missing(base)){
@@ -2501,10 +2444,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
     }
 
     if(usePost){
-        check_arg(prepostnames, "characterVector", "Argument 'prepostnames' must be a character vector of length 2. REASON")
-        if(length(prepostnames) != 2){
-            stop("Argument 'prepostnames' must be a character vector of length 2. It is currenlty of length ", length(prepostnames), ".")
-        }
+        check_arg(prepostnames, "character vector len(2)")
     }
 
     treat_cases = sort(unique(treat_var), decreasing = TRUE)
@@ -2624,7 +2564,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
         # Changing the names of the variables
         if(!missnull(dict)){
             qui = which(res$vars %in% names(dict))
-            for(i in qui) res$vars[i] = escape_latex(dict[res$vars[i]], depth = 1)
+            for(i in qui) res$vars[i] = escape_latex(dict[res$vars[i]], up = 1)
         }
 
         # The data
@@ -2854,33 +2794,41 @@ i = interact = function(var, fe, ref, confirm = FALSE){
 results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits=4, fitstat, sdBelow=TRUE, dict = NULL, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), coefstat = "se", ci = 0.95, label, subtitles, title, float = FALSE, yesNoFixef = c("Yes", "No"), keepFactors = FALSE, isTex = FALSE, useSummary, dots_call, powerBelow, interaction.combine, convergence, show_family, drop, order, keep, file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, show_depvar=FALSE){
     # This function is the core of the functions esttable and esttex
 
-    # for error handling => refers to the right function
-    my_call = deparse(sys.calls()[[sys.nframe()-1]])[1] # call can have svl lines
-    nmax = 40
-    if(nchar(my_call) > nmax) my_call = paste0(substr(my_call, 1, nmax-1), "...")
-    my_call = paste0("error in ", my_call, ":\n")
+    # Full control
+    set_up(1)
+    # => we also allow lists (of fixest objects)
+    check_arg(..., "class(fixest) | list mbt")
+
+    check_arg(digits, "integer scalar GE{1}")
+    check_arg(title, "character scalar")
+
+    check_arg("logical scalar", sdBelow, replace, convergence, fixef_sizes, fixef_sizes.simplify, keepFactors, family, tex, depvar)
+
+    regex_msg = function(arg) paste0("The arg. '", arg, "' must be a vector of regular expressions (see help(regex)).")
+    check_arg(keep, "character vector NULL", .message = regex_msg("keep"))
+    check_arg(drop, "character vector NULL", .message = regex_msg("drop"))
+    check_arg(order, "character vector NULL", .message = regex_msg("order"))
+
+    check_arg(file, label, interaction.combine, "character scalar")
+    check_arg(signifCode, "NULL NA | named numeric vector GE{0} LE{1}")
+    check_arg(subtitles, "character vector")
+    check_arg(yesNoFixef, "character vector len(,2)")
+    check_arg(powerBelow, "integer scalar LE{-1}")
+
+    check_arg(ci, "numeric scalar GT{0.5} LT{1}")
+
+    check_arg(dict, "NULL named character vector")
 
 
     add_signif = TRUE
     if(length(signifCode) == 0 || (length(signifCode) == 1 && is.na(signifCode))){
         add_signif = FALSE
     } else {
-        check_arg(signifCode, "numericVectorGE0LE1", call_depth = 1)
-        if(is.null(names(signifCode))){
-            stop(my_call, "The argument 'signifCode' must be a NAMED vector. It currently has no names.", call. = FALSE)
-        }
         signifCode = sort(signifCode)
     }
 
-
-
-    check_arg(yesNoFixef, "characterVector", message = "The argument 'yesNoFixef' must be a character vector of length 1 or 2. REASON", call_depth = 1)
     if(length(yesNoFixef) == 1){
         yesNoFixef = c(yesNoFixef, "")
-    }
-
-    if(length(yesNoFixef) != 2){
-        stop(my_call, "The argument 'yesNoFixef' must be of length 2.", call. = FALSE)
     }
 
     # at the moment: only fixest allowed
@@ -2904,7 +2852,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits
 
     n = length(dots)
 
-    if(n == 0) stop(my_call, "Not any estimation as argument.", call. = FALSE)
+    if(n == 0) stop_up("Not any estimation as argument.")
 
     all_models = list()
     model_names = list()
@@ -2945,7 +2893,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits
 
     }
 
-    if(length(all_models)==0) stop(my_call, "Not any proper model (fixest) as argument!", call. = FALSE)
+    if(length(all_models)==0) stop_up("Not any proper model (fixest) as argument!")
 
     n_models <- length(all_models)
 
@@ -2974,13 +2922,13 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits
     # if there are subtitles
     if(!missing(subtitles)){
         if(length(subtitles) != n_models){
-            stop(my_call, "If argument 'subtitles' is provided, it must be of the same length as the number of models. Current lengths: ", length(subtitles), " vs ", n_models, " models.", call. = FALSE)
+            stop_up("If argument 'subtitles' is provided, it must be of the same length as the number of models. Current lengths: ", length(subtitles), " vs ", n_models, " models.")
         } else {
             isSubtitles = TRUE
         }
 
         if(isTex){
-            subtitles = escape_latex(subtitles, depth = 2)
+            subtitles = escape_latex(subtitles, up = 2)
         }
 
     } else {
@@ -2989,7 +2937,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits
     }
 
     if(!is.null(dict) && isTex){
-        dict = escape_latex(dict, depth = 2)
+        dict = escape_latex(dict, up = 2)
     }
 
     #
@@ -3017,10 +2965,10 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits
     } else if(isFALSE(fitstat) || (length(fitstat) == 1 && fitstat == "")){
         fitstat = NULL
     } else if("formula" %in% class(fitstat)){
-        check_arg(fitstat, "osf", "Argument 'fitstat' must be a one sided formula (or a character vector) containing 'aic', 'bic', 'll', or valid r2 types names (see function r2). REASON", call_depth = 1)
+        check_arg(fitstat, "os formula", .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing 'aic', 'bic', 'll', or valid r2 types names (see function r2). ")
         fitstat = attr(terms(fitstat), "term.labels")
     } else {
-        check_arg(fitstat, "characterVector", "Argument 'fitstat' must be a character vector (or a one sided formula) containing 'aic', 'bic', 'll', or valid r2 types names (see function r2). REASON", call_depth = 1)
+        check_arg(fitstat, "character vector", .message = "Argument 'fitstat' must be a character vector (or a one sided formula) containing 'aic', 'bic', 'll', or valid r2 types names (see function r2). ")
     }
 
     # checking the types
@@ -3029,7 +2977,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits
 
     pblm = setdiff(fitstat, fitstat_type_allowed)
     if(length(pblm) > 0){
-        stop(my_call, "Argument 'fitstat' must be a character vector (or a one sided formula) containing 'aic', 'bic', 'll', or valid r2 types names. ", enumerate_items(pblm, "is.quote"), " not valid (see function r2).", call. = FALSE)
+        stop_up("Argument 'fitstat' must be a character vector (or a one sided formula) containing 'aic', 'bic', 'll', or valid r2 types names. ", enumerate_items(pblm, "is.quote"), " not valid (see function r2).")
     }
 
     fitstat_dict_tex = c("sq.cor"="Squared Correlation", r2="R$^2$", ar2="Adjusted R$^2$", pr2="Pseudo R$^2$", apr2="Adjusted Pseudo R$^2$", wr2="Within R$^2$", war2="Within Adjusted R$^2$", wpr2="Within Pseudo R$^2$", wapr2="Whithin Adjusted Pseudo R$^2$", aic = "AIC", bic = "BIC", ll = "Log-Likelihood")
@@ -3496,7 +3444,7 @@ etable_internal_latex = function(info){
     qui = depvar_list %in% names(dict)
     who = depvar_list[qui]
     depvar_list[qui] = dict[who]
-    depvar_list = escape_latex(depvar_list, depth = 2)
+    depvar_list = escape_latex(depvar_list, up = 2)
 
     # We write the dependent variables properly, with multicolumn when necessary
     # to do that, we count the number of occurences of each variable (& we respect the order provided by the user)
@@ -3548,13 +3496,13 @@ etable_internal_latex = function(info){
     # all_vars <- unique(unlist(var_list))
 
     # keeping some coefs
-    all_vars = keep_apply(all_vars, keep, depth = 2)
+    all_vars = keep_apply(all_vars, keep, up = 2)
 
     # dropping some coefs
-    all_vars = drop_apply(all_vars, drop, depth = 2)
+    all_vars = drop_apply(all_vars, drop, up = 2)
 
     # ordering the coefs
-    all_vars = order_apply(all_vars, order, depth = 2)
+    all_vars = order_apply(all_vars, order, up = 2)
 
     # changing the names of the coefs
     aliasVars = all_vars
@@ -3563,7 +3511,7 @@ etable_internal_latex = function(info){
     qui = all_vars %in% names(dict)
     who = aliasVars[qui]
     aliasVars[qui] = dict[who]
-    aliasVars = escape_latex(aliasVars, depth = 2)
+    aliasVars = escape_latex(aliasVars, up = 2)
 
     coef_mat <- all_vars
     for(m in 1:n_models) coef_mat <- cbind(coef_mat, coef_list[[m]][all_vars])
@@ -3840,13 +3788,13 @@ etable_internal_df = function(info){
     }
 
     # keeping some coefs
-    all_vars = keep_apply(all_vars, keep, depth = 2)
+    all_vars = keep_apply(all_vars, keep, up = 2)
 
     # dropping some coefs
-    all_vars = drop_apply(all_vars, drop, depth = 2)
+    all_vars = drop_apply(all_vars, drop, up = 2)
 
     # ordering the coefs
-    all_vars = order_apply(all_vars, order, depth = 2)
+    all_vars = order_apply(all_vars, order, up = 2)
 
     coef_mat <- all_vars
     for(m in 1:n_models) coef_mat <- cbind(coef_mat, coef_list[[m]][all_vars])
@@ -4605,7 +4553,7 @@ interact_fml = function(fml){
 interact_control = function(ref, confirm = FALSE){
     # Internal call
     # used to contral the call to interact is valid
-    check_arg(confirm, "singleLogical")
+    check_arg(confirm, "logical scalar")
     if(length(ref) > 1) stop("Argument 'ref' must be of length 1.")
     mc = match.call()
 
@@ -4704,7 +4652,7 @@ escape_all = function(x){
     res
 }
 
-escape_latex = function(x_all, depth = 0, noArg = FALSE){
+escape_latex = function(x_all, up = 0, noArg = FALSE){
     # This is super tricky to escape properly!
     # We do NOT escape within equations
 
@@ -4726,7 +4674,7 @@ escape_latex = function(x_all, depth = 0, noArg = FALSE){
                 if(!noArg){
                     my_arg = paste0("In argument '", x_name, "', t")
                 }
-                stop_depth(depth = depth, my_arg, "here are ", length(dollars), " dollar signs in the following character string:\n", x, "\nIt will raise a Latex error (which '$' means equation? which means dollar-sign?): if you want to use a regular dollar sign, please escape it like that: \\\\$.")
+                stop_up(up = up, my_arg, "here are ", length(dollars), " dollar signs in the following character string:\n", x, "\nIt will raise a Latex error (which '$' means equation? which means dollar-sign?): if you want to use a regular dollar sign, please escape it like that: \\\\$.")
             }
         }
 
@@ -4962,14 +4910,12 @@ par_fit = function(my_par, id){
     my_par[id]
 }
 
-dict_apply = function(x, dict = NULL, depth = 1){
+dict_apply = function(x, dict = NULL, up = 1){
+
+    check_arg(dict, "NULL named character vector", .message = "The argument 'dict' must be a dictionnary, ie a named vector (eg dict=c(\"old_name\"=\"new_name\")", .up = up)
 
     if(missing(dict) || length(dict) == 0){
         return(x)
-    }
-
-    if(is.null(names(dict))){
-        stop_depth("The argument 'dict' must be a dictionnary, ie a named vector (eg dict=c(\"old_name\"=\"new_name\"). Currently it has no names.", depth = depth + 1)
     }
 
     who = x %in% names(dict)
@@ -4977,13 +4923,13 @@ dict_apply = function(x, dict = NULL, depth = 1){
     x
 }
 
-keep_apply = function(x, keep = NULL, depth = 1){
+keep_apply = function(x, keep = NULL, up = 1){
 
     if(missing(keep) || length(keep) == 0){
         return(x)
     }
 
-    check_arg(keep, "characterVector", call_depth = depth, message = "The arg. 'keep' must be a vector of regular expressions (see help(regex)). REASON")
+    check_arg(keep, "character vector", .up = up, .message = "The arg. 'keep' must be a vector of regular expressions (see help(regex)).")
 
     res = x
 
@@ -5011,13 +4957,13 @@ keep_apply = function(x, keep = NULL, depth = 1){
     res[qui_keep]
 }
 
-drop_apply = function(x, drop = NULL, depth = 1){
+drop_apply = function(x, drop = NULL, up = 1){
 
     if(missing(drop) || length(drop) == 0){
         return(x)
     }
 
-    check_arg(drop, "characterVector", call_depth = depth, message = "The arg. 'drop' must be a vector of regular expressions (see help(regex)). REASON")
+    check_arg(drop, "character vector", .up = up, .message = "The arg. 'drop' must be a vector of regular expressions (see help(regex)). ")
 
     res = x
 
@@ -5044,13 +4990,13 @@ drop_apply = function(x, drop = NULL, depth = 1){
     res
 }
 
-order_apply = function(x, order = NULL, depth = 1){
+order_apply = function(x, order = NULL, up = 1){
 
     if(missing(order) || length(order) == 0){
         return(x)
     }
 
-    check_arg(order, "characterVector", call_depth = depth, message = "The arg. 'order' must be a vector of regular expressions (see help(regex)). REASON")
+    check_arg(order, "character vector", .up = up, .message = "The arg. 'order' must be a vector of regular expressions (see help(regex)). ")
 
     res = x
 
@@ -5074,32 +5020,6 @@ order_apply = function(x, order = NULL, depth = 1){
             who = grepl(var2order, vect2check)
             res = c(res[who], res[!who])
         }
-    }
-
-    res
-}
-
-n_times = function(n){
-
-    if(n <= 4){
-        res = switch(n, "1"="once", "2"="twice", "3"="three times", "4"="four times")
-    } else {
-        res = paste0(n, " times")
-    }
-
-    res
-}
-
-n_th = function(n){
-
-    if(n <= 13){
-        n_full = c("first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "nineth", "tenth", "eleventh", "twelfth", "thirteenth")
-        res = n_full[n]
-    } else {
-        rest = n %% 10
-        rest[rest == 0 | rest >= 4] = 4
-        postfix = c("st", "nd", "rd", "th")
-        res = paste0(n, postfix[rest])
     }
 
     res
@@ -5461,6 +5381,29 @@ extract_pipe = function(fml){
     list(fml=fml_new, pipe=pipe)
 }
 
+deparse_long = function(x){
+    dep_x = deparse(x)
+    if(length(dep_x) == 1){
+        return(dep_x)
+    } else {
+        return(paste(gsub("^ +", "", dep_x), collapse = ""))
+    }
+}
+
+isVector = function(x){
+    # it seems that when you subselect in data.table
+    # sometimes it does not yield a vector
+    # so i cannot use is.vector to check the consistency
+
+    if(is.vector(x)){
+        return(TRUE)
+    } else {
+        if(is.null(dim(x)) && !is.list(x)){
+            return(TRUE)
+        }
+    }
+    return(FALSE)
+}
 
 
 #### ................. ####
@@ -5747,11 +5690,7 @@ coef.fixest = coefficients.fixest = function(object, ...){
 fitted.fixest = fitted.values.fixest = function(object, type = c("response", "link"), ...){
 
     # Checking the arguments
-    any_invalid = check_dots_args(match.call(expand.dots = FALSE),
-                                  suggest_args = "type")
-    if(any_invalid){
-        warning(attr(any_invalid, "msg"))
-    }
+    validate_dots(suggest_args = "type")
 
 	type = match.arg(type)
 
@@ -5877,11 +5816,7 @@ resid.fixest = residuals.fixest = function(object, ...){
 predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 
     # Checking the arguments
-    any_invalid = check_dots_args(match.call(expand.dots = FALSE),
-                                  suggest_args = "type")
-    if(any_invalid){
-        warning(attr(any_invalid, "msg"))
-    }
+    validate_dots(suggest_args = "type")
 
 	# Controls
 	type = match.arg(type)
@@ -6251,11 +6186,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 
     if(!"nframes_up" %in% names(match.call())){
         # condition means client call
-        any_invalid = check_dots_args(match.call(expand.dots = FALSE),
-                                      suggest_args = c("se", "cluster", "dof"))
-        if(any_invalid){
-            warning(attr(any_invalid, "msg"))
-        }
+        validate_dots(suggest_args = c("se", "cluster", "dof"))
     }
 
 	if(!is.null(object$onlyFixef)){
@@ -6839,12 +6770,8 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 confint.fixest = function(object, parm, level = 0.95, se, cluster, dof = getFixest_dof(), ...){
 
     # Checking the arguments
-    any_invalid = check_dots_args(match.call(expand.dots = FALSE),
-                                  dots_args = c("exact_dof", "forceCovariance", "keepBounded"),
-                                  suggest_args = c("parm", "level", "se", "cluster"))
-    if(any_invalid){
-        warning(attr(any_invalid, "msg"))
-    }
+    validate_dots(suggest_args = c("parm", "level", "se", "cluster"),
+                  valid_args = c("exact_dof", "forceCovariance", "keepBounded"))
 
 	# Control
 	if(!is.numeric(level) || !length(level) == 1 || level >= 1 || level <= .50){
@@ -7207,11 +7134,7 @@ formula.fixest = function(x, type = c("full", "linear", "NL"), ...){
 	# we add the clusters in the formula if needed
 
     # Checking the arguments
-    any_invalid = check_dots_args(match.call(expand.dots = FALSE),
-                                  suggest_args = "type")
-    if(any_invalid){
-        warning(attr(any_invalid, "msg"))
-    }
+    validate_dots(suggest_args = "type")
 
     if(isTRUE(x$fromFit)){
         stop("formula method not available for fixest estimations obtained from fit methods.")
@@ -7291,11 +7214,7 @@ model.matrix.fixest = function(object, data, na.rm = TRUE, ...){
 	# We evaluate the formula with the past call
 
     # Checking the arguments
-    any_invalid = check_dots_args(match.call(expand.dots = FALSE),
-                                  suggest_args = "data")
-    if(any_invalid){
-        warning(attr(any_invalid, "msg"))
-    }
+    validate_dots(suggest_args = "data")
 
     if(isTRUE(object$fromFit)){
         stop("model.matrix method not available for fixest estimations obtained from fit methods.")
@@ -7774,19 +7693,10 @@ getFixest_print.type = function(){
 #'
 dof = function(fixef = "nested", exact = FALSE, cluster = TRUE){
 
-    if(isLogical(fixef)){
-        fixef = as.character(fixef)
-    }
+    check_arg_plus(fixef, "logical scalar | match(no, yes, nested)")
+    fixef = as.character(fixef)
 
-    check_arg(fixef, "singleCharacter", "Argument 'fixef' must be equal to TRUE, 'yes', FALSE, 'no', or 'nested' (default). REASON")
-
-    check_arg(exact, "singleLogical")
-    check_arg(cluster, "singleLogical")
-
-    fixef = try(match.arg(tolower(fixef), c("no", "false", "yes", "true", "nested")), silent = TRUE)
-    if("try-error" %in% class(fixef)){
-        stop("Argument 'fixef' must be equal to TRUE, 'yes', FALSE, 'no', or 'nested' (default)")
-    }
+    check_arg(exact, cluster, "logical scalar")
 
     if(fixef == "TRUE") fixef = "yes"
     if(fixef == "FALSE") fixef = "no"
