@@ -31,7 +31,7 @@ The package `fixest` provides a family of functions to perform estimations with 
 The two main functions are `feols` for linear models and `feglm` for generalized linear models. In addition, the function `femlm` performs direct maximum likelihood estimation, and `feNmlm` extends the latter to allow the inclusion of non-linear in parameters right-hand-sides. 
 Each of these functions supports *any number* of fixed-effects and is implemented with full fledged multi-threading in c++. Functions `feols` and `feglm` further support variables with varying slopes.
 
-This package is currently (Nov. 2019) the fastest software available to perform fixed-effects estimations (see the project's [homepage](https://github.com/lrberge/fixest/wiki) for a benchmarking).
+This package is currently (Feb. 2020) the fastest software available to perform fixed-effects estimations (see the project's [homepage](https://github.com/lrberge/fixest/) for a benchmarking).
 
 The standard-errors of the estimates can be easily and intuitively clustered (up to four-way).
 
@@ -39,7 +39,7 @@ The function `etable` allows to seamlessly export the results of multiple estima
 
 The main features of the package are illustrated in this vignette. The theory used to obtain the fixed-effects is based on Berge (2018), "*Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm.*" CREA Discussion Papers, 13 (<https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13>).
 
-# Simple example using Trade data
+# Simple example using trade data
 
 This example deals with international trade, which is a setup that usually requires performing estimations with many fixed-effects. We estimate a very simple gravity model in which we are interested in finding out the negative effect of geographic distance on trade. The sample data consists of European trade extracted from Eurostat. Let's load the data contained in the package:
 
@@ -216,7 +216,7 @@ To change the variable names in the Latex table, we use the argument `dict`. The
 In the first export, the coefficient of the intercept is dropped by using `drop = "Const"` (could be anything such that `grepl(drop[1], "Constant")` is TRUE). In the second, the coefficient of the distance is put before the intercept (which is kept) thanks to the argument `order`. Note that the actions performed by the arguments `drop` or `order` are performed **after** the renaming takes place with the argument `dict`.
 
 
-## Extracting the fixed-effects
+## Extracting the fixed-effects coefficients
 
 To obtain the fixed-effects of the estimation, the function `fixef` must be performed on the results. This function returns a list containing the fixed-effects coefficients for each dimension. The `summary` method helps to have a quick overview:
 
@@ -302,22 +302,22 @@ In some difference-in-difference analyses, it is often useful not only to have t
 ```
 
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 # Sample data illustrating the DiD
 data(base_did)
 head(base_did)
+```
+
+```{r, eval = FALSE}
 # Estimation of yearly effect
 # We also add individual/time fixed-effects:
 est_did = feols(y ~ x1 + treat::period(5) | id + period, base_did)
 est_did
 ```
 
+
 ```{r, echo = FALSE}
-# Sample data illustrating the DiD
-data(base_did)
-head(base_did)
-# Estimation of yearly effect
-# We also add individual/time fixed-effects:
+# I need to use a trick to be allowed to use "::"
 est_did = eval(parse(text = "feols(y ~ x1 + treat::period(5) | id + period, base_did)"))
 est_did
 ```
@@ -343,10 +343,10 @@ There are two ways to provide leads and/or lags in a `fixest` estimation. Either
 To set up the panel on-the-fly, you need to use the `panel.id` argument, which will give you access to the functions `f` and `l` to create leads and lags, respectively. Let's give an example, using the previous data set, where we use lags and leads of the explanatory and dependent variables.
 
 ```{r}
-est1 = feols(y~l(x1, 0:1), base_did, panel.id = ~id+period)
-est2 = feols(f(y)~l(x1, -1:1), base_did, panel.id = ~id+period)
-est3 = feols(l(y)~l(x1, 0:3), base_did, panel.id = ~id+period)
-etable(est1, est2, est3, order = "f", drop="Int")
+est1 = feols(y ~ l(x1, 0:1), base_did, panel.id = ~id+period)
+est2 = feols(f(y) ~ l(x1, -1:1), base_did, panel.id = ~id+period)
+est3 = feols(l(y) ~ l(x1, 0:3), base_did, panel.id = ~id+period)
+etable(est1, est2, est3, order = "f", drop = "Int")
 ```
 
 First of all, the value of `panel.id` corresponds to panel identifiers: first comes the variable identifying the panel-individuals, then comes the variables identifying the time. In the example, the `panel.id` came in the form of a one-sided formula, but it could equivalently be equal to `panel.id = c("id", "period")` or `panel.id = "id,period"`.
@@ -362,11 +362,11 @@ Let's repeat the previous example, now with a panel data set:
 # setting up the panel
 pdat = panel(base_did, ~id+period)
 # Now the panel.id argument is not required
-est1 = feols(y~l(x1, 0:1), pdat)
-est2 = feols(f(y)~l(x1, -1:1), pdat)
+est1 = feols(y ~ l(x1, 0:1), pdat)
+est2 = feols(f(y) ~ l(x1, -1:1), pdat)
 # You can use sub selections of the panel data
-est_sub = feols(y~l(x1, 0:1), pdat[!pdat$period %in% c(2, 4)])
-etable(est1, est2, est_sub, order = "f", drop="Int")
+est_sub = feols(y ~ l(x1, 0:1), pdat[!pdat$period %in% c(2, 4)])
+etable(est1, est2, est_sub, order = "f", drop = "Int")
 ```
 
 Last, if you also use `data.table`, let's give an example of lead/lag creation:
@@ -389,7 +389,7 @@ If you just want to create a single lag/lead variable, a simple and fast method 
 ```{r}
 base_lag = base_did
 # we create a lagged value of the variable x1
-base_lag$x1.l1 = lag(x1~id+period, 1, base_lag)
+base_lag$x1.l1 = lag(x1 ~ id+period, 1, base_lag)
 head(base_lag)
 ```
 
@@ -401,7 +401,7 @@ In case you use the popular package `data.table`, you can create lagged variable
 library(data.table)
 base_lag_dt = as.data.table(base_did)
 # we create a lagged value of the variable x1
-base_lag_dt[, x1.l1 := lag(x1~id+period, 1)]
+base_lag_dt[, x1.l1 := lag(x1 ~ id+period, 1)]
 ```
 
 ## Non-linear in parameters example
