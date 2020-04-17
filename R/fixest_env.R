@@ -912,6 +912,10 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     if(from_update){
         # Fixed-effects information coming from the update method
 
+        #
+        # ... From update ####
+        #
+
         # means that there is no modification of past fixed-effects
 
         # we retrieve past information
@@ -973,7 +977,15 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     } else if(isFixef){
         # The main fixed-effects construction
 
+        #
+        # ... General ####
+        #
+
         if(isFit){
+
+            #
+            # ... From fit ####
+            #
 
             if(isVector(fixef_mat)){
                 fixef_mat = data.frame(x = fixef_mat, stringsAsFactors = FALSE)
@@ -1007,6 +1019,10 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             fml_full = as.formula(paste0(fml_char[2], "~", fml_char[3], "|", paste0(fixef_vars, collapse = "+")))
 
         } else {
+            #
+            # ... Reguar ####
+            #
+
             # Regular way
             if(is.character(fixef_vars) && any(grepl("^", fixef_vars, fixed = TRUE))){
                 # we make it a formula
@@ -1095,13 +1111,9 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             }
         }
 
-        # # We change factors to character
-        # isFactor = sapply(fixef_mat, is.factor)
-        # if(any(isFactor)){
-        #     for(i in which(isFactor)){
-        #         fixef_mat[[i]] = as.character(fixef_mat[[i]])
-        #     }
-        # }
+        #
+        # ... NA handling ####
+        #
 
         # We change non-numeric to character (impotant for parallel qufing)
         is_not_num = sapply(fixef_mat, function(x) !is.numeric(x))
@@ -1221,7 +1233,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         }
 
         #
-        # QUF setup ####
+        # ... QUF setup ####
         #
 
         Q = length(fixef_terms) # terms: contains FEs + slopes
@@ -1364,6 +1376,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
             if(isSlope){
                 slope_variables = slope_variables[new_order]
+                slope_flag = slope_flag[new_order]
             }
 
         }
