@@ -10,7 +10,7 @@ feols(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-06,
   notes = getFixest_notes(), combine.quick, ...)
 }
 \arguments{
-\item{fml}{A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y | fe_1+fe_2}. You can combine two clusters with \code{^}: e.g. \code{fml = z~x+y|fe_1^fe_2}, see details. You can also use variables with varying slopes using square brackets: e.g. in \code{fml = z~y|fe_1[x] + fe_2} the variable \code{x} will have one coefficient for each value of \code{fe_1} -- if you use varying slopes, please have a look at the details section (can't describe it all here).}
+\item{fml}{A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y | fe_1+fe_2}. You can combine two fixed-effects with \code{^}: e.g. \code{fml = z~x+y|fe_1^fe_2}, see details. You can also use variables with varying slopes using square brackets: e.g. in \code{fml = z~y|fe_1[x] + fe_2} the variable \code{x} will have one coefficient for each value of \code{fe_1} -- if you use varying slopes, please have a look at the details section (can't describe it all here).}
 
 \item{data}{A data.frame containing the necessary variables to run the model. The variables of the non-linear right hand side of the formula are identified with this \code{data.frame} names. Can also be a matrix.}
 
@@ -18,19 +18,19 @@ feols(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-06,
 
 \item{offset}{A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This offset is linearly added to the elements of the main formula 'fml'.}
 
-\item{panel.id}{The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link[fixest]{feols}}).}
+\item{panel.id}{The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id = ~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link[fixest]{feols}}).}
 
 \item{fixef}{Character vector. The name/s of a/some variable/s within the dataset to be used as fixed-effects. These variables should contain the identifier of each observation (e.g., think of it as a panel identifier).}
 
-\item{fixef.tol}{Precision used to obtain the fixed-effects (ie cluster coefficients). Defaults to \code{1e-5}. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument \code{fixef.tol} cannot be lower than \code{10000*.Machine$double.eps}. Note that this parameter is dynamically controlled by the algorithm.}
+\item{fixef.tol}{Precision used to obtain the fixed-effects. Defaults to \code{1e-5}. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument \code{fixef.tol} cannot be lower than \code{10000*.Machine$double.eps}. Note that this parameter is dynamically controlled by the algorithm.}
 
-\item{fixef.iter}{Maximum number of iterations in the step obtaining the fixed-effects (only in use for 2+ clusters). Default is 10000.}
+\item{fixef.iter}{Maximum number of iterations in the step obtaining the fixed-effects (only in use for 2+ fixed-effects). Default is 1000.}
 
 \item{na_inf.rm}{Logical, default is \code{TRUE}. If the variables necessary for the estimation contain NA/Infs and \code{na_inf.rm = TRUE}, then all observations containing NA are removed prior to estimation and a note is displayed detailing the number of observations removed. Otherwise, an error is raised.}
 
 \item{nthreads}{Integer: Number of nthreads to be used (accelerates the algorithm via the use of openMP routines). The default is to use the total number of nthreads available minus two. You can set permanently the number of nthreads used within this package using the function \code{\link[fixest]{setFixest_nthreads}}.}
 
-\item{verbose}{Integer, default is 0. It represents the level of information that should be reported during the optimisation process. If \code{verbose=0}: nothing is reported. If \code{verbose=1}: the value of the coefficients and the likelihood are reported. If \code{verbose=2}: \code{1} + information on the computing time of the null model, the cluster coefficients and the hessian are reported.}
+\item{verbose}{Integer, default is 0. It represents the level of information that should be reported during the optimisation process. If \code{verbose=0}: nothing is reported. If \code{verbose=1}: the value of the coefficients and the likelihood are reported. If \code{verbose=2}: \code{1} + information on the computing time of the null model, the fixed-effects coefficients and the hessian are reported.}
 
 \item{warn}{Logical, default is \code{TRUE}. Whether warnings should be displayed (concerns warnings relating to: convergence state, collinearity issues and observation removal due to only 0/1 outcomes or presence of NA values).}
 
@@ -39,6 +39,40 @@ feols(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-06,
 \item{combine.quick}{Logical. When you combine different variables to transform them into a single fixed-effects you can do e.g. \code{y ~ x | paste(var1, var2)}. The algorithm provides a shorthand to do the same operation: \code{y ~ x | var1^var2}. Because pasting variables is a costly operation, the internal algorithm may use a numerical trick to hasten the process. The cost of doing so is that you lose the labels. If you are interested in getting the value of the fixed-effects coefficients after the estimation, you should use \code{combine.quick = FALSE}. By default it is equal to \code{FALSE} if the number of observations is lower than 50,000, and to \code{TRUE} otherwise.}
 
 \item{...}{Not currently used.}
+}
+\value{
+A \code{fixest} object.
+\item{nobs}{The number of observations.}
+\item{fml}{The linear formula of the call.}
+\item{call}{The call of the function.}
+\item{method}{The method used to estimate the model.}
+\item{family}{The family used to estimate the model.}
+\item{fml_full}{[where relevant] The "full" formula containing the linear part and the fixed-effects.}
+\item{nparams}{The number of parameters of the model.}
+\item{fixef_vars}{The names of each fixed-effect dimension.}
+\item{fixef_id}{The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.}
+\item{fixef_sizes}{The size of each fixed-effect (i.e. the number of unique identifierfor each fixed-effect dimension).}
+\item{coefficients}{The named vector of estimated coefficients.}
+\item{multicol}{Logical, if multicollinearity was found.}
+\item{coeftable}{The table of the coefficients with their standard errors, z-values and p-values.}
+\item{loglik}{The loglikelihood.}
+\item{ssr_null}{Sum of the squared residuals of the null model (containing only with the intercept).}
+\item{ssr_fe_only}{Sum of the squared residuals of the model estimated with fixed-effects only.}
+\item{ll_null}{The log-likelihood of the null model (containing only with the intercept).}
+\item{ll_fe_only}{The log-likelihood of the model estimated with fixed-effects only.}
+\item{pseudo_r2}{The adjusted pseudo R2.}
+\item{fitted.values}{The fitted values.}
+\item{linear.predictors}{The linear predictors.}
+\item{residuals}{The residuals (y minus the fitted values).}
+\item{sq.cor}{Squared correlation between the dependent variable and the expected predictor (i.e. fitted.values) obtained by the estimation.}
+\item{hessian}{The Hessian of the parameters.}
+\item{cov.unscaled}{The variance-covariance matrix of the parameters.}
+\item{se}{The standard-error of the parameters.}
+\item{scores}{The matrix of the scores (first derivative for each observation).}
+\item{residuals}{The difference between the dependent variable and the expected predictor.}
+\item{sumFE}{The sum of the fixed-effects coefficients for each observation.}
+\item{offset}{[where relevant] The offset formula.}
+\item{weights}{[where relevant] The weights formula.}
 }
 \description{
 Estimates OLS with any number of fixed-effects.
@@ -55,14 +89,14 @@ Note that pasting is a costly operation, especially for large data sets. Thus, t
 
 \section{Varying slopes}{
 
-You can add variables with varying slopes in the fixed-effect part of the formula. The syntax is as follows: cluster_var[var1, var2]. Here the variables var1 and var2 will be with varying slopes (one slope per value in cluster_var) and the fixed-effect cluster_var will also be added.
+You can add variables with varying slopes in the fixed-effect part of the formula. The syntax is as follows: fixef_var[var1, var2]. Here the variables var1 and var2 will be with varying slopes (one slope per value in fixef_var) and the fixed-effect fixef_var will also be added.
 
-To add only the variables with varying slopes and not the fixed-effect, use double square brackets: cluster_var[[var1, var2]].
+To add only the variables with varying slopes and not the fixed-effect, use double square brackets: fixef_var[[var1, var2]].
 
 In other words:
 \itemize{
-  \item cluster_var[var1, var2] is equivalent to cluster_var + cluster_var[[var1]] + cluster_var[[var2]]
-  \item cluster_var[[var1, var2]] is equivalent to cluster_var[[var1]] + cluster_var[[var2]]
+  \item fixef_var[var1, var2] is equivalent to fixef_var + fixef_var[[var1]] + fixef_var[[var2]]
+  \item fixef_var[[var1, var2]] is equivalent to fixef_var[[var1]] + fixef_var[[var2]]
 }
 }
 
@@ -149,7 +183,7 @@ For models with multiple fixed-effects:
 Gaure, Simen, 2013, "OLS with multiple high dimensional category variables", Computational Statistics & Data Analysis 66 pp. 8--18
 }
 \seealso{
-See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations. For plotting coefficients: see \code{\link[fixest]{coefplot}}.
+See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the fixed-effects coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations. For plotting coefficients: see \code{\link[fixest]{coefplot}}.
 
 And other estimation methods: \code{\link[fixest]{femlm}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{fepois}}, \code{\link[fixest]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
 }

@@ -2,12 +2,12 @@
 % Please edit documentation in R/MiscFuns.R
 \name{obs2remove}
 \alias{obs2remove}
-\title{Finds observations to be removed from ML estimation with factors/clusters}
+\title{Finds observations to be removed from ML estimation with fixed-effects}
 \usage{
 obs2remove(fml, data, family = c("poisson", "negbin", "logit"))
 }
 \arguments{
-\item{fml}{A formula containing the dependent variable and the clusters. It can be of the type: \code{y ~ cluster_1 + cluster_2} or \code{y ~ x1 | cluster_1 + cluster_1} (in which case variables before the pipe are ignored).}
+\item{fml}{A formula containing the dependent variable and the fixed-effects. It can be of the type: \code{y ~ fixef_1 + fixef_2} or \code{y ~ x1 | fixef_1 + fixef_1} (in which case variables before the pipe are ignored).}
 
 \item{data}{A data.frame containing the variables in the formula.}
 
@@ -15,10 +15,10 @@ obs2remove(fml, data, family = c("poisson", "negbin", "logit"))
 }
 \value{
 It returns an integer vector of observations to be removed. If no observations are to be removed, an empty integer vector is returned. In both cases, it is of class \code{fixest.obs2remove}.
-The vector has an attribute \code{cluster} which is a list giving the IDs of the clusters that have been removed, for each cluster dimension.
+The vector has an attribute \code{fixef} which is a list giving the IDs of the fixed-effects that have been removed, for each fixed-effect dimension.
 }
 \description{
-For Poisson, Negative Binomial or Logit estimations with fixed-effects, when the dependent variable is only equal to 0 (or 1 for Logit) for one cluster value this leads to a perfect fit for that cluster value by setting its associated cluster coefficient to \code{-Inf}. Thus these observations need to be removed before estimation. This function gives the observations to be removed. Note that by default the function \code{\link[fixest]{femlm}} or \code{\link[fixest]{feglm}} drops them before performing the estimation.
+For Poisson, Negative Binomial or Logit estimations with fixed-effects, when the dependent variable is only equal to 0 (or 1 for Logit) for one fixed-effect value this leads to a perfect fit for that fixed-effect value by setting its associated fixed-effect coefficient to \code{-Inf}. Thus these observations need to be removed before estimation. This function gives the observations to be removed. Note that by default the function \code{\link[fixest]{femlm}} or \code{\link[fixest]{feglm}} drops them before performing the estimation.
 }
 \examples{
 
@@ -28,7 +28,7 @@ base$v6 = base$Petal.Length
 base$v6[base$Species == "setosa"] = 0
 
 (x = obs2remove(v6 ~ Species, base))
-attr(x, "cluster")
+attr(x, "fixef")
 
 # The two results are identical:
 res_1 = femlm(v6 ~ Petal.Width | Species, base)

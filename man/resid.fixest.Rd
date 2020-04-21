@@ -25,7 +25,7 @@ The residuals returned are the difference between the dependent variable and the
 }
 \examples{
 
-# simple estimation on iris data, clustering by "Species"
+# simple estimation on iris data, using "Species" fixed-effects
 res_poisson = femlm(Sepal.Length ~ Sepal.Width + Petal.Length +
                     Petal.Width | Species, iris)
 

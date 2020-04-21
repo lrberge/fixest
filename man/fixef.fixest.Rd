@@ -19,7 +19,7 @@ A list containing the vectors of the fixed effects.
 If there is more than 1 fixed-effect, then the attribute \dQuote{references} is created. This is a vector of length the number of fixed-effects, each element contains the number of coefficients set as references. By construction, the elements of the first fixed-effect dimension are never set as references. In the presence of regular fixed-effects, there should be Q-1 references (with Q the number of fixed-effects).
 }
 \description{
-This function retrieves the fixed effects from a \code{fixest} estimation. It is useful only when there are one or more clusters.
+This function retrieves the fixed effects from a \code{fixest} estimation. It is useful only when there are one or more fixed-effect dimensions.
 }
 \details{
 If the fixed-effect coefficients not regular, then several reference points need to be set, leading to the coefficients to be NOT interpretable. If this is the case, then a warning is raised.
@@ -34,7 +34,7 @@ est_pois = femlm(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
 # Obtaining the fixed-effects coefficients:
 fe_trade = fixef(est_pois)
 
-# The fixed-effects of the first cluster:
+# The fixed-effects of the first fixed-effect dimension:
 head(fe_trade$Origin)
 
 # Summary information:
@@ -45,7 +45,7 @@ plot(fe_trade)
 
 }
 \seealso{
-\code{\link[fixest]{plot.fixest.fixef}}. See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the cluster coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
+\code{\link[fixest]{plot.fixest.fixef}}. See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the fixed-effect coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
 }
 \author{
 Laurent Berge

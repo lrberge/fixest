@@ -337,7 +337,7 @@ summ = function(object, se, cluster, dof = getFixest_dof(), forceCovariance = FA
 #' @param keep Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is kept). See details.
 #' @param drop Character vector. This element is used if some variables are not to be displayed. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be discarded. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{drop = "x[[:digit:]]{2}"}. If the first character is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is dropped). See details.
 #' @param order Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument \code{dict}). Example: you have the following variables: \code{month1} to \code{month6}, then \code{x1} to \code{x5}, then \code{year1} to \code{year6}. If you want to display first the x's, then the years, then the months you could use: \code{order = c("x", "year")}. If the first character is an exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that does not contain \dQuote{Intercept} goes first).  See details.
-#' @param dict (Tex only.) A named character vector. It changes the original variable names to the ones contained in the \code{dict}. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default it is equal to \code{getFixest_dict()}, a default dictionary which can be set with \code{\link[fixest]{setFixest_dict}}.
+#' @param dict A named character vector or a logical scalar. It changes the original variable names to the ones contained in the \code{dict}ionary. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default, if Tex output is requested or if argument \code{file} is not missing, it is equal to \code{getFixest_dict()}, a default dictionary which can be set with \code{\link[fixest]{setFixest_dict}}. The default is not to change names if a \code{data.frame} is requested (i.e. \code{tex = FALSE}); if so, you can use \code{dict = TRUE} to use the dictionary you've set globally with \code{setFixest_dict()}.
 #' @param file A character scalar. If provided, the Latex (or data frame) table will be saved in a file whose path is \code{file}. If you provide this argument, then a Latex table will be exported, to export a regular \code{data.frame}, use argument \code{tex = FALSE}.
 #' @param replace Logical, default is \code{FALSE}. Only used if option \code{file} is used. Should the exported table be written in a new file that replaces any existing file?
 #' @param convergence Logical, default is missing. Should the convergence state of the algorithm be displayed? By default, convergence information is displayed if at least one model did not converge.
@@ -431,7 +431,7 @@ summ = function(object, se, cluster, dof = getFixest_dof(), forceCovariance = FA
 #' dict = c(Month5="May", Month6="Jun", Month7="Jul", Month8="Aug", Month9="Sep")
 #' etable(est1, est2, dict = dict, tex = TRUE)
 #'
-etable = function(..., se = c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, digits=4, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict = getFixest_dict(), file, replace=FALSE, convergence, signifCode, label, float, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNoFixef = c("Yes", "No"), keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar){
+etable = function(..., se = c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, digits=4, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode, label, float, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNoFixef = c("Yes", "No"), keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar){
 
     #
     # Checking the arguments
@@ -456,6 +456,7 @@ etable = function(..., se = c("standard", "white", "cluster", "twoway", "threewa
         depvar = TRUE
     }
 
+    check_arg(tex, "logical scalar")
     if(missing(tex)){
         if(!missing(file)) {
             tex = TRUE
@@ -490,7 +491,7 @@ etable = function(..., se = c("standard", "white", "cluster", "twoway", "threewa
     # to get the model names
     dots_call = match.call(expand.dots = FALSE)[["..."]]
 
-    info = results2formattedList(..., se=se, dof=dof, fitstat=fitstat, cluster=cluster, digits=digits, sdBelow=sdBelow, signifCode=signifCode, coefstat = coefstat, ci = ci, title=title, float=float, subtitles=subtitles, yesNoFixef=yesNoFixef, keepFactors=keepFactors, isTex = tex, useSummary=useSummary, dots_call=dots_call, powerBelow=powerBelow, dict=dict, interaction.combine=interaction.combine, convergence=convergence, show_family=family, keep=keep, drop=drop, file=file, order=order, label=label, fixef_sizes=fixef_sizes, show_depvar=depvar)
+    info = results2formattedList(..., se=se, dof=dof, fitstat=fitstat, cluster=cluster, digits=digits, sdBelow=sdBelow, signifCode=signifCode, coefstat = coefstat, ci = ci, title=title, float=float, subtitles=subtitles, yesNoFixef=yesNoFixef, keepFactors=keepFactors, tex = tex, useSummary=useSummary, dots_call=dots_call, powerBelow=powerBelow, dict=dict, interaction.combine=interaction.combine, convergence=convergence, family=family, keep=keep, drop=drop, file=file, order=order, label=label, fixef_sizes=fixef_sizes, depvar=depvar)
 
     if(tex){
         res = etable_internal_latex(info)
@@ -521,7 +522,7 @@ etable = function(..., se = c("standard", "white", "cluster", "twoway", "threewa
 
 
 #' @describeIn etable Exports the results of multiple \code{fixest} estimations in a Latex table.
-esttex <- function(..., se = c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, digits=4, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, title, float = float, sdBelow=TRUE, keep, drop, order, dict = getFixest_dict(), file, replace=FALSE, convergence, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNoFixef = c("Yes", "No"), keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ "){
+esttex <- function(..., se = c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, digits=4, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, title, float = float, sdBelow=TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNoFixef = c("Yes", "No"), keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ "){
 	# drop: a vector of regular expressions
 	# order: a vector of regular expressions
 	# dict: a 'named' vector
@@ -553,7 +554,7 @@ esttex <- function(..., se = c("standard", "white", "cluster", "twoway", "threew
 	# to get the model names
 	dots_call = match.call(expand.dots = FALSE)[["..."]]
 
-	info = results2formattedList(..., isTex = TRUE, useSummary=useSummary, se = se, dof = dof, cluster = cluster, digits = digits, fitstat = fitstat, title = title, float = float, sdBelow = sdBelow, keep=keep, drop = drop, order = order, dict = dict, file = file, replace = replace, convergence = convergence, signifCode = signifCode, coefstat = coefstat, ci = ci, label = label, subtitles = subtitles, fixef_sizes = fixef_sizes, fixef_sizes.simplify = fixef_sizes.simplify, yesNoFixef = yesNoFixef, keepFactors = keepFactors, show_family = family, powerBelow = powerBelow, interaction.combine = interaction.combine, dots_call = dots_call)
+	info = results2formattedList(..., tex = TRUE, useSummary=useSummary, se = se, dof = dof, cluster = cluster, digits = digits, fitstat = fitstat, title = title, float = float, sdBelow = sdBelow, keep=keep, drop = drop, order = order, dict = dict, file = file, replace = replace, convergence = convergence, signifCode = signifCode, coefstat = coefstat, ci = ci, label = label, subtitles = subtitles, fixef_sizes = fixef_sizes, fixef_sizes.simplify = fixef_sizes.simplify, yesNoFixef = yesNoFixef, keepFactors = keepFactors, family = family, powerBelow = powerBelow, interaction.combine = interaction.combine, dots_call = dots_call, depvar = TRUE)
 
     res = etable_internal_latex(info)
 
@@ -568,7 +569,7 @@ esttex <- function(..., se = c("standard", "white", "cluster", "twoway", "threew
 }
 
 #' @describeIn etable Facility to display the results of multiple \code{fixest} estimations.
-esttable <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, coefstat = c("se", "tstat", "confint"), ci = 0.95, depvar, keep, drop, order, digits=4, fitstat, convergence, signifCode = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10), subtitles, keepFactors = FALSE, family){
+esttable <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, coefstat = c("se", "tstat", "confint"), ci = 0.95, depvar, keep, drop, dict, order, digits=4, fitstat, convergence, signifCode = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10), subtitles, keepFactors = FALSE, family){
 
 	# Need to check for the presence of the se
     useSummary = TRUE
@@ -587,7 +588,7 @@ esttable <- function(..., se=c("standard", "white", "cluster", "twoway", "threew
 	# to get the model names
 	dots_call = match.call(expand.dots = FALSE)[["..."]]
 
-	info = results2formattedList(..., se=se, dof = dof, cluster=cluster, digits=digits, signifCode=signifCode, coefstat = coefstat, ci = ci, subtitles=subtitles, keepFactors=keepFactors, useSummary=useSummary, dots_call=dots_call, fitstat=fitstat, yesNoFixef = c("Yes", "No"), show_depvar = depvar, show_family = family, keep = keep, drop = drop, order = order)
+	info = results2formattedList(..., se=se, dof = dof, cluster=cluster, digits=digits, signifCode=signifCode, coefstat = coefstat, ci = ci, subtitles=subtitles, keepFactors=keepFactors, useSummary=useSummary, dots_call=dots_call, fitstat=fitstat, yesNoFixef = c("Yes", "No"), depvar = depvar, family = family, keep = keep, drop = drop, order = order, dict = dict, interaction.combine = ":")
 
 	res = etable_internal_df(info)
 
@@ -1060,7 +1061,11 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 	# This function retrieves the dummies
 
     # Checking the arguments
-    validate_dots()
+    validate_dots(valid_args = "fixef.tol")
+
+    dots = list(...)
+    fixef.tol = dots$fixef.tol
+    check_value_plus(fixef.tol, "NULL{1e-5} numeric scalar GT{0} LT{1}")
 
 	# Preliminary stuff
 	S = object$sumFE
@@ -1166,7 +1171,7 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 	    fixef_table_vector = as.integer(unlist(fixef_table_list[dict_fe[fe_all]]))
 
 	    S_demean <- cpp_demean(y = S, X_raw = 0, r_weights = 0, iterMax = 1000L,
-	                              diffMax = 1e-4, nb_cluster_all = nb_cluster_all,
+	                              diffMax = fixef.tol, nb_cluster_all = nb_cluster_all,
 	                              dum_vector = dum_vector, tableCluster_vector = fixef_table_vector,
 	                              slope_flag = slope_flag, slope_vars = slope_vars_vector,
 	                              r_init = 0, checkWeight = 1L, nthreads = 1L, save_fixef = TRUE)
@@ -2741,14 +2746,18 @@ i = interact = function(var, fe, ref, confirm = FALSE){
     if(!missing(ref)){
         # Controls
 
-        if(length(ref) > 1) stop("The argument 'ref' must be of length 1 (currenlty it is of length ", length(ref), ").")
-        if(is.na(ref)) stop("The argument 'ref' cannot be NA.")
+        # if(length(ref) > 1) stop("The argument 'ref' must be of length 1 (currenlty it is of length ", length(ref), ").")
+        # if(is.na(ref)) stop("The argument 'ref' cannot be NA.")
+        # if(!any(ref %in% items)){
+        #     stop("Argument 'ref' is not an element of the variable ", fe_name, ".")
+        # }
+        #
+        # ref = which(items == ref)
 
-        if(!ref %in% items){
-            stop("Argument 'ref' is not an element of the variable ", fe_name, ".")
-        }
+        check_arg(ref, "multi charin", .choices = items, .message = paste0("Argument 'ref' must consist of elements of the variable '", fe_name, "'."))
 
-        ref = which(items == ref)
+        ref = which(items %in% ref)
+
     } else {
         noRef = TRUE
         ref = 1
@@ -2791,7 +2800,7 @@ i = interact = function(var, fe, ref, confirm = FALSE){
 #### Internal Funs     ####
 ####
 
-results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits=4, fitstat, sdBelow=TRUE, dict = NULL, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), coefstat = "se", ci = 0.95, label, subtitles, title, float = FALSE, yesNoFixef = c("Yes", "No"), keepFactors = FALSE, isTex = FALSE, useSummary, dots_call, powerBelow, interaction.combine, convergence, show_family, drop, order, keep, file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, show_depvar=FALSE){
+results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits = 4, fitstat, sdBelow=TRUE, dict, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), coefstat = "se", ci = 0.95, label, subtitles, title, float = FALSE, yesNoFixef = c("Yes", "No"), keepFactors = FALSE, tex = FALSE, useSummary, dots_call, powerBelow, interaction.combine, convergence, family, drop, order, keep, file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, depvar = FALSE){
     # This function is the core of the functions esttable and esttex
 
     # Full control
@@ -2803,11 +2812,22 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits
     check_arg(title, "character scalar")
 
     check_arg("logical scalar", sdBelow, replace, convergence, fixef_sizes, fixef_sizes.simplify, keepFactors, family, tex, depvar)
+    isTex = tex
+    if(missing(family)){
+        show_family = NULL
+    } else {
+        show_family = family
+    }
 
-    regex_msg = function(arg) paste0("The arg. '", arg, "' must be a vector of regular expressions (see help(regex)).")
-    check_arg(keep, "character vector NULL", .message = regex_msg("keep"))
-    check_arg(drop, "character vector NULL", .message = regex_msg("drop"))
-    check_arg(order, "character vector NULL", .message = regex_msg("order"))
+    # we rename the argument
+    if(missing(depvar)){
+        # Default is set in the end
+        show_depvar = NULL
+    } else {
+        show_depvar = depvar
+    }
+
+    check_arg(keep, drop, order, "character vector NULL", .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
 
     check_arg(file, label, interaction.combine, "character scalar")
     check_arg(signifCode, "NULL NA | named numeric vector GE{0} LE{1}")
@@ -2817,8 +2837,20 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits
 
     check_arg(ci, "numeric scalar GT{0.5} LT{1}")
 
-    check_arg(dict, "NULL named character vector")
+    check_arg(dict, "NULL logical scalar | named character vector")
 
+    # default values for dict
+    if(missing(dict)){
+        if(isTex || !missing(file)){
+            dict = getFixest_dict()
+        } else {
+            dict = NULL
+        }
+    } else if(isTRUE(dict)) {
+        dict = getFixest_dict()
+    } else if(isFALSE(dict)) {
+        dict = NULL
+    }
 
     add_signif = TRUE
     if(length(signifCode) == 0 || (length(signifCode) == 1 && is.na(signifCode))){
@@ -3148,7 +3180,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits
         # on enleve les espaces dans les noms de variables
         var <- var_origin <- c(gsub(" ", "", row.names(a)))
         # renaming => Tex only
-        if(isTex){
+        if(isTex || !is.null(dict)){
             qui = var %in% names(dict)
             var[qui] = dict[var[qui]]
             tv = table(var)
@@ -3241,6 +3273,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits
             } else {
                 pval = cut(a[, 4], breaks = c(-1, signifCode, 100), labels = c(names(signifCode), ""))
             }
+            pval[is.na(pval)] = ""
         } else {
             pval = rep("", nrow(a))
         }
@@ -3348,13 +3381,13 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits
         convergence = FALSE
     }
 
-    if((!missing(show_family) && show_family) || (missing(show_family) && length(unique(family_list)) > 1)){
+    if(isTRUE(show_family) || (is.null(show_family) && length(unique(family_list)) > 1)){
         family = TRUE
     } else {
         family = FALSE
     }
 
-    if((missing(show_depvar) && length(unique(unlist(depvar_list))) > 1) || (!missing(show_depvar) && show_depvar)){
+    if((is.null(show_depvar) && length(unique(unlist(depvar_list))) > 1) || isTRUE(show_depvar)){
         depvar = TRUE
     } else {
         depvar = FALSE
@@ -3439,11 +3472,7 @@ etable_internal_latex = function(info){
     outro_latex <- "\\end{tabular}\n"
 
     # 1st lines => dep vars
-    depvar_list = c(depvar_list, recursive = TRUE)
-
-    qui = depvar_list %in% names(dict)
-    who = depvar_list[qui]
-    depvar_list[qui] = dict[who]
+    depvar_list = dict_apply(c(depvar_list, recursive = TRUE), dict)
     depvar_list = escape_latex(depvar_list, up = 2)
 
     # We write the dependent variables properly, with multicolumn when necessary
@@ -3773,12 +3802,15 @@ etable_internal_df = function(info){
     useSummary = info$useSummary
     model_names = info$model_names
     coefstat = info$coefstat
+    dict = info$dict
 
     # naming differences
     titles = info$subtitles
     isTitles = info$isSubtitles
 
     # The coefficients
+
+    depvar_list = dict_apply(unlist(depvar_list), dict, 2)
 
     # all_vars <- unique(c(var_list, recursive=TRUE))
     # we need to loop not to lose names
@@ -3810,7 +3842,7 @@ etable_internal_df = function(info){
     preamble = c()
     dep_width = 0
     if(depvar){
-        preamble = rbind(c("Dependent Var.:", unlist(depvar_list)), preamble)
+        preamble = rbind(c("Dependent Var.:", depvar_list), preamble)
         dep_width = nchar(as.vector(preamble))
     }
 
@@ -4126,7 +4158,19 @@ prepare_matrix = function(fml, base){
     t = terms(rhs, data = base)
 
     all_var_names = attr(t, "term.labels")
+
+
+    # We take care of interactions: references can be multiple, then ':' is legal
     all_vars = gsub(":", "*", all_var_names)
+
+    if(any(qui_inter <- grepl("interact(", all_var_names, fixed = TRUE)) &&
+       any(qui_ref <- grepl("ref =.+:", all_var_names[qui_inter]))){
+        var_inter_ref = all_var_names[qui_inter][qui_ref]
+        var_inter_ref_split = strsplit(var_inter_ref, "ref = ")
+        fun2apply = function(x) paste(gsub(":", "*", x[1]), x[2], sep = "ref = ")
+        new_var_inter_ref = sapply(var_inter_ref_split, fun2apply)
+        all_vars[qui_inter][qui_ref] = new_var_inter_ref
+    }
 
     # Forming the call
     if(attr(t, "intercept") == 1){
@@ -4554,11 +4598,15 @@ interact_control = function(ref, confirm = FALSE){
     # Internal call
     # used to contral the call to interact is valid
     check_arg(confirm, "logical scalar")
-    if(length(ref) > 1) stop("Argument 'ref' must be of length 1.")
+
     mc = match.call()
 
     res = c()
-    if("ref" %in% names(mc)) res = paste0("ref = ", deparse_long(mc$ref))
+    if("ref" %in% names(mc)){
+        # if(length(ref) > 1) stop("Argument 'ref' must be of length 1.")
+        res = paste0("ref = ", deparse_long(mc$ref))
+    }
+
     if("confirm" %in% names(mc)) res = c(res, paste0("confirm = ", confirm))
 
     res
@@ -5252,6 +5300,8 @@ format_se_type = function(x, width, by = FALSE){
     if(!grepl("\\(", x)){
         # means not clustered
         return(x)
+    } else if(x == "NA (not-available)"){
+        return("not available")
     }
 
     # Now the FEs
@@ -6358,6 +6408,8 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 		    if(is.null(last_warn) || (proc.time() - last_warn)[3] > 1){
 		        warning("Standard errors are NA because of likely presence of collinearity. Use function collinearity() to detect collinearity problems.", call. = FALSE)
 		    }
+
+		    attr(VCOV_raw, "type") = "NA (not-available)"
 
 			return(VCOV_raw)
 		} else {

@@ -55,7 +55,7 @@ vcov(est_pois, cluster = "Product")
 # yet another way:
 vcov(est_pois, cluster = ~Product)
 
-# Another estimation without cluster:
+# Another estimation without fixed-effects:
 est_pois_simple = femlm(Euros ~ log(dist_km) + log(Year), trade)
 
 # We can still get the clustered VCOV,

@@ -30,7 +30,7 @@ This function returns the \emph{expected predictor} of a \code{fixest} fit. The 
 }
 \examples{
 
-# simple estimation on iris data, clustering by "Species"
+# simple estimation on iris data, using "Species" fixed-effects
 res_poisson = femlm(Sepal.Length ~ Sepal.Width + Petal.Length +
                     Petal.Width | Species, iris)
 

@@ -19,11 +19,11 @@
 It returns a design matrix.
 }
 \description{
-This function creates a design matrix of the linear part of a \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}} estimation. Note that it is only the linear part and the cluster variables (which can be considered as factors) are excluded from the matrix.
+This function creates a design matrix of the linear part of a \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}} estimation. Note that it is only the linear part. The fixed-effects variables (which can be considered as factors) are excluded from the matrix.
 }
 \examples{
 
-# simple estimation on iris data, clustering by "Species"
+# simple estimation on iris data, using "Species" fixed-effects
 res = femlm(Sepal.Length ~ Sepal.Width*Petal.Length +
             Petal.Width | Species, iris)
 

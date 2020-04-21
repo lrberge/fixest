@@ -12,7 +12,7 @@
 \item{...}{Not currently used.}
 }
 \description{
-This function synthesizes the information of function \code{\link[fixest]{obs2remove}}. It reports the number of observations to be removed as well as the number of clusters removed per cluster dimension.
+This function synthesizes the information of function \code{\link[fixest]{obs2remove}}. It reports the number of observations to be removed as well as the number of fixed-effects removed per fixed-effect dimension.
 }
 \examples{
 base = iris

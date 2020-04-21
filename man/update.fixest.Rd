@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
 
-\item{fml.update}{Changes to be made to the original argument \code{fml}. See more information on \code{\link[stats]{update.formula}}. You can add/withdraw both variables and clusters. E.g. \code{. ~ . + x2 | . + z2} would add the variable \code{x2} and the cluster \code{z2} to the former estimation.}
+\item{fml.update}{Changes to be made to the original argument \code{fml}. See more information on \code{\link[stats]{update.formula}}. You can add/withdraw both variables and fixed-effects. E.g. \code{. ~ . + x2 | . + z2} would add the variable \code{x2} and the cluster \code{z2} to the former estimation.}
 
 \item{nframes}{(Advanced users.) Defaults to 1. Number of frames up the stack where to perform the evaluation of the updated call. By default, this is the parent frame.}
 
@@ -32,10 +32,10 @@ est_pois <- femlm(Euros ~ log(dist_km) | Origin + Destination, trade)
 # we add the variable log(Year)
 est_2 <- update(est_pois, . ~ . + log(Year))
 
-# we add another cluster: "Product"
+# we add another fixed-effect: "Product"
 est_3 <- update(est_2, . ~ . | . + Product)
 
-# we remove the cluster "Origin" and the variable log(dist_km)
+# we remove the fixed-effect "Origin" and the variable log(dist_km)
 est_4 <- update(est_3, . ~ . - log(dist_km) | . - Origin)
 
 # Quick look at the 4 estimations

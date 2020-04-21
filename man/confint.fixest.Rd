@@ -33,7 +33,7 @@ This function computes the confidence interval of parameter estimates obtained f
 # Load trade data
 data(trade)
 
-# We estimate the effect of distance on trade (with 3 cluster effects)
+# We estimate the effect of distance on trade (with 3 fixed-effects)
 est_pois = femlm(Euros ~ log(dist_km) + log(Year) | Origin + Destination +
                  Product, trade)
 

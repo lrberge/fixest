@@ -23,18 +23,18 @@ This function extracts the coefficients obtained from a model estimated with \co
 \details{
 The coefficients are the ones that have been found to maximize the log-likelihood of the specified model. More information can be found on the models from the estimations help pages: \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
 
-Note that if the model has been estimated with clusters, to obtain the cluster coefficients, you need to use the function \code{\link[fixest]{fixef.fixest}}.
+Note that if the model has been estimated with fixed-effects, to obtain the fixed-effect coefficients, you need to use the function \code{\link[fixest]{fixef.fixest}}.
 }
 \examples{
 
-# simple estimation on iris data, clustering by "Species"
+# simple estimation on iris data, using "Species" fixed-effects
 res = femlm(Sepal.Length ~ Sepal.Width + Petal.Length +
             Petal.Width | Species, iris)
 
 # the coefficients of the variables:
 coef(res)
 
-# the cluster coefficients:
+# the fixed-effects coefficients:
 fixef(res)
 
 

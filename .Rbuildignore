@@ -1,7 +1,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-README.md
 ^docs$
 ^BENCHMARK$
-Rplots.pdf
 

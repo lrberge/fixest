@@ -1,10 +1,10 @@
 <a href="https://cran.r-project.org/web/checks/check_results_fixest.html"><img src="https://cranchecks.info/badges/flavor/release/fixest" alt="CRAN status"></a>
-<a href="https://cran.r-project.org/web/packages/fixest/index.html"><img src="http://www.r-pkg.org/badges/version/fixest" alt="Version"> </a>
+<a href="https://CRAN.R-project.org/package=fixest"><img src="http://www.r-pkg.org/badges/version/fixest" alt="Version"> </a>
 <a href="https://ipub.com/dev-corner/apps/r-package-downloads/"> <img src="https://cranlogs.r-pkg.org/badges/fixest" alt = "Downloads"> </a>
 
-The `fixest` package offers a family of functions to perform estimations with multiple fixed-effects in both an OLS and a GLM context. Please refer to the [introduction](https://cran.r-project.org/web/packages/fixest/vignettes/fixest_walkthrough.html) for a walk-through.
+The `fixest` package offers a family of functions to perform estimations with multiple fixed-effects in both an OLS and a GLM context. Please refer to the [introduction](https://CRAN.R-project.org/package=fixest/vignettes/fixest_walkthrough.html) for a walk-through.
 
-At the time of writing of this page (February 2020), `fixest` is the fastest method to perform fixed-effects estimations, often by orders of magnitude. See below for a benchmarking with the fastest alternative software. 
+At the time of writing of this page (February 2020), `fixest` is the fastest existing method to perform fixed-effects estimations, often by orders of magnitude. See below for a benchmarking with the fastest alternative software. 
 
 ## Benchmarking
 

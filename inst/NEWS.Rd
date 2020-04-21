@@ -3,21 +3,52 @@
 
 \title{News for \R Package \pkg{fixest}}
 
+\section{Changes in version 0.xx.xx (2020-xx-xx)}{
+
+    \subsection{Bug fixes}{
+        \itemize{
+            \item Bug with estimations with varying slopes if the fixed-effect relative to the slope is not in its decreasing order (thanks to Davide Proserpio).
+            \item Bug when interacting two variables with the \code{var::fe} syntax with \code{confirm = TRUE} and no reference.
+            \item Bug in \code{etable} when the standard-errors where \code{NA}.
+        }
+    }
+
+    \subsection{User-visible changes}{
+        \itemize{
+            \item Interactions in \code{var::fe(ref)} now accept multiple references (i.e. \code{ref} can be a vector).
+            \item In \code{etable}, the variable names of non-Latex output can now be changed.
+        }
+    }
+
+    \subsection{Error-handling}{
+        \itemize{
+            \item Improved error-handling with dreamerr's functions.
+        }
+    }
+}
+
 \section{Changes in version 0.4.1 (2020-04-13)}{
   \subsection{Bug fixes}{
+  \itemize{
     \item Major bug leading R to crash when using non-linear-in-parameters right-hand-sides in feNmlm. Only occured when some observations were removed from the data set (due to NAness or to perfect fit). [Thanks to @marissachilds, GH issue #17.]
     \item In the \code{collinearity} help pages: an example could lead to an error (due to random data generation). It has been removed.
     \item In \code{collinearity}, corrected the problem of display of the intercept in some situations.
-    \item Defaults for the arguments \code{cex} and \code{lwd} in \code{coefplot} have been changed to 1 and 1 (instead of par("cex") and par("lwd")). Otherwise this led to the creation of Rplots.pdf in the working directory.
+    \item Defaults for the arguments \code{cex} and \code{lwd} in \code{coefplot} have been changed to 1 and 1 (instead of par("cex") and par("lwd")). Otherwise this led to the creation of \code{Rplots.pdf} in the working directory (thanks to Kurt Hornik).
     \item Corrected a typo in the article's title in the vignette.
+    }
   }
 
   \subsection{Help}{
-    \item Rewriting of sections, correction small mistakes (wrong argument names), dropping completely the 'cluster' terminology (meant for fixed-effects), addition of what is contained in fixest objects.
+  \itemize{
+    \item Rewriting of sections, correction of small mistakes (wrong argument names), dropping completely the 'cluster' terminology (meant for fixed-effects), addition of what is contained in fixest objects.
+    }
   }
 
   \subsection{Other}{
+  \itemize{
     \item Adding a README.md.
+    \item Small corrections in the vignette.
+    }
   }
 }
 
