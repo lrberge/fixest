@@ -6483,12 +6483,12 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 
 	} else if(se.val == "standard"){
 
-	    correction.dof = (n - 1) / (n - K)
+	    correction.dof = n / (n - K)
 		vcov = VCOV_raw * correction.dof
 
 	} else if(se.val == "white"){
 
-	    correction.dof = (n - 1) / (n - K)
+	    correction.dof = n / (n - K)
 		vcov = crossprod(myScore %*% VCOV_raw) * correction.dof
 
 	} else {
@@ -6827,7 +6827,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 				}
 
 				vcov = vcov + (-1)**(i+1) * vcovClust(index, VCOV_raw, myScore, dof = is_cluster, K, do.unclass=FALSE)
-				vcov = vcov * ((n - 1) / (n - K))
+				vcov = vcov * (n / (n - K))
 			}
 		}
 	}
