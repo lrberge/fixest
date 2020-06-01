@@ -265,6 +265,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     # Formatting data ####
     #
 
+    fml_no_xpd = NULL # will be returned if expansion is performed
     isPanel = FALSE
     if(isFit){
         isFixef = !missnull(fixef_mat)
@@ -297,6 +298,12 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         if(!"formula" %in% class(fml)) stop("The argument 'fml' must be a formula.")
         fml = formula(fml) # we regularize the formula to check it
         if(length(fml) != 3) stop("The formula must be two sided: e.g. y~x1+x2, or y~x1+x2|fe1+fe2.")
+
+        # We apply expand for macros => we return fml_no_xpd
+        if(length(getFixest_fml()) > 0){
+            fml_no_xpd = fml
+            fml = xpd(fml)
+        }
 
         #
         # Panel setup
@@ -2088,6 +2095,8 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     res = list(nobs=length(lhs), fml=fml, call = mc_origin, method = origin)
 
     if(isFixef) res$fml_full = fml_full
+
+    if(!is.null(fml_no_xpd)) res$fml_no_xpd = fml_no_xpd
 
     if(isFit) res$fromFit = TRUE
 

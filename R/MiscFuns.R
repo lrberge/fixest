@@ -1164,7 +1164,7 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 
 	    what = slope_var_list[slope_vars]
 	    names(what) = NULL
-	    slope_vars_vector = unlist(what)
+	    slope_vars_vector = as.numeric(unlist(what))
 
 	    fixef_table_list = list()
 	    for(i in 1:Q) fixef_table_list[[i]] = cpp_table(fixef_sizes[i], id_dummies_vect[[i]])
@@ -2796,6 +2796,28 @@ i = interact = function(var, fe, ref, confirm = FALSE){
 #' @rdname i
 "interact"
 
+
+#' @rdname setFixest_fml
+xpd = function(fml, ...){
+    check_arg(fml, .type = "formula mbt")
+
+    macros = parse_macros(..., from_xpd = TRUE)
+
+    if(length(macros) == 0) return(fml)
+
+    qui = which(names(macros) %in% all.vars(fml))
+    if(length(qui) > 0){
+        fml_dp = deparse_long(fml)
+        # We need to add a lookafter assertion: otherwise if we have ..ctrl + .. ctrl_long, there will be a replacement in ..ctrl_long
+        for(i in qui){
+            fml_dp = gsub(paste0(names(macros)[i], "(?=$|[^[:alpha:]_\\.])"), macros[[i]], fml_dp, perl = TRUE)
+        }
+        fml = as.formula(fml_dp)
+    }
+
+    fml
+}
+
 #### ................. ####
 #### Internal Funs     ####
 ####
@@ -3996,6 +4018,43 @@ etable_internal_df = function(info){
         return(res)
     }
 
+}
+
+parse_macros = function(..., reset = FALSE, from_xpd = FALSE){
+    set_up(1)
+
+    check_arg(..., "os formula dotnames", .message = paste0("Each element of '...' must be a one-sided formula, and the name of each argument must start with two dots (ex: ", ifelse(from_xpd, "xpd(fml, ..ctrl = ~ x5 + x6)", "setFixest_fml(..ctrl = ~ x5 + x6)"), ")."))
+
+    # We require os formulas instead of character strings because:
+    # 1) I find it more handy
+    # 2) there is a parsing check from R
+
+    # Original macros
+    fml_macro = getOption("fixest_fml_macro")
+    if(is.null(fml_macro)){
+        fml_macro = list()
+    } else if(!is.list(fml_macro)){
+        warning("The value of getOption(\"fixest_fml_macro\") wasn't legal, it has been reset.")
+        fml_macro = list()
+        options(fixest_fml_macro = list())
+    }
+
+    # We check the names
+    if(...length() == 0) return(fml_macro)
+
+    dots = list(...)
+
+    # Setting the new macros
+    qui_pblm = !grepl("^\\.\\.", names(dots))
+    if(any(qui_pblm)){
+        arg_name = names(dots)[qui_pblm][1]
+        correct_name = gsub("^\\.*", "\\.\\.", arg_name)
+        stop_up("Each argument name must start with two dots. Use '", correct_name, "' instead of '", arg_name, "'.")
+    }
+
+    for(v in names(dots)) fml_macro[[v]] = deparse_long(dots[[v]][[2]])
+
+    fml_macro
 }
 
 myPrintCoefTable = function(coeftable, lastLine = ""){
@@ -5432,7 +5491,7 @@ extract_pipe = function(fml){
 }
 
 deparse_long = function(x){
-    dep_x = deparse(x)
+    dep_x = deparse(x, width.cutoff = 500)
     if(length(dep_x) == 1){
         return(dep_x)
     } else {
@@ -7390,18 +7449,6 @@ terms.fixest = function(x, ...){
     terms(formula(x, type = "linear"))
 }
 
-hatvalues.fixest = function(model, ...){
-    # Only works for feglm/feols objects
-    # to integrate
-
-
-
-}
-
-estfun.fixest = function(x, ...){
-
-}
-
 #### ............... ####
 #### Setters/Getters ####
 ####
@@ -7806,6 +7853,68 @@ getFixest_dof = function(){
     }
 
     dof.type
+}
+
+
+
+#' Sets/gets and expands formula macros
+#'
+#' You can set formula macros globally with \code{setFixest_fml}. These macros can then be used in \code{fixest} estimations or when using the function \code{\link[fixest]{xpd}}.
+#'
+#' @param fml A formula containing macros variables. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}.
+#' @param ... Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. \code{..ctrl}). The value of each argument must be a one-sided formula, it is the definition of the macro variable. Example of a valid call: \code{setFixest_fml(..ctrl = ~ var1 + var2)}. In the function \code{xpd}, the default macro variables are taken from \code{getFixest_fml}, any variable in \code{...} will replace these values.
+#' @param reset A logical scalar, defaults to \code{FALSE}. If \code{TRUE}, all macro variables are first reset (i.e. deleted).
+#'
+#' @details
+#' In \code{xpd}, the default macro variables are taken from \code{getFixest_fml}. Any value in the \code{...} argument of \code{xpd} will replace these default values.
+#'
+#' The definitions of the macro variables will replace in verbatim the macro variables. Therefore, you can include multipart formulas if you wish but then beware of the order the the macros variable in the formula. For example, using the airquality data, say you want to set as controls the variable \code{Temp} and \code{Day} fixed-effects, you can do \code{setFixest_fml(..ctrl = ~Temp | Day)}, but then \code{feols(Ozone ~ Wind + ..ctrl, airquality)} will be quite different from \code{feols(Ozone ~ ..ctrl + Wind, airquality)}, so beware!
+#'
+#' @return
+#' The function \code{getFixest_fml()} returns a list of character strings, the names corresponding to the macro variable names, the character strings corresponding to their definition.
+#'
+#' @examples
+#'
+#' # Small examples with airquality data
+#' data(airquality)
+#' # we set two macro variables
+#' setFixest_fml(..ctrl = ~ Temp + Day,
+#'               ..ctrl_long = ~ poly(Temp, 2) + poly(Day, 2))
+#'
+#' # Using the macro in lm with xpd:
+#' lm(xpd(Ozone ~ Wind + ..ctrl), airquality)
+#' lm(xpd(Ozone ~ Wind + ..ctrl_long), airquality)
+#'
+#' # You can use the macros without xpd() in fixest estimations
+#' a <- feols(Ozone ~ Wind + ..ctrl, airquality)
+#' b <- feols(Ozone ~ Wind + ..ctrl_long, airquality)
+#' etable(a, b, keep = "Int|Win")
+#'
+#'
+#'
+setFixest_fml = function(..., reset = FALSE){
+
+    check_arg(reset, "logical scalar")
+
+    fml_macro = parse_macros(..., reset = reset)
+
+    options("fixest_fml_macro" = fml_macro)
+
+}
+
+#' @rdname setFixest_fml
+getFixest_fml = function(){
+    fml_macro = getOption("fixest_fml_macro")
+    if(is.null(fml_macro)){
+        options("fixest_fml_macro" = list())
+        fml_macro = list()
+    } else if(!is.list(fml_macro)){
+        options("fixest_fml_macro" = list())
+        warning("The value of getOption(\"fixest_fml_macro\") is not legal, it has been reset. Please use only 'setFixest_fml' to set formula macro variables.")
+        fml_macro = list()
+    }
+
+    fml_macro
 }
 
 
