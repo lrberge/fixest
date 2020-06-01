@@ -14,14 +14,15 @@
 .datatable.aware = TRUE
 
 
-panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method = c("none", "first"), DATA_MISSING = FALSE, from_fixest = FALSE){
+panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method = "none", DATA_MISSING = FALSE, from_fixest = FALSE){
     # Function to setup the panel.
     # Used in lag.formula, panel, and fixest_env (with argument panel.id and panel.args)
     # DATA_MISSING: arg used in lag.formula
 
-    check_arg_plus(duplicate.method, "match", .call_up = 1)
+    set_up(1)
+    check_arg_plus(duplicate.method, "match(none, first)")
 
-    check_arg(panel.id, "character vector len(,2) | formula", .message = "The argument 'panel.id' must be either: i) a one sided formula (e.g. ~id+time), ii) a character vector of length 2 (e.g. c('id', 'time'), or iii) a character scalar of two variables separated by a comma (e.g. 'id,time').", .call_up = 1)
+    check_arg(panel.id, "character vector len(,2) | formula", .message = "The argument 'panel.id' must be either: i) a one sided formula (e.g. ~id+time), ii) a character vector of length 2 (e.g. c('id', 'time'), or iii) a character scalar of two variables separated by a comma (e.g. 'id,time').")
 
     if("formula" %in% class(panel.id)){
         tm = terms_hat(panel.id)
@@ -74,7 +75,7 @@ panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method =
     }
 
     # time.step
-    check_arg_plus(time.step, "numeric scalar GT{0} | match(unitary, consecutive, within.consecutive)", .call_up = 1)
+    check_arg_plus(time.step, "numeric scalar GT{0} | match(unitary, consecutive, within.consecutive)")
 
     # unitary time.step: conversion to numeric before quf
     if(time.step == "unitary") {
@@ -644,6 +645,8 @@ panel = function(data, panel.id, time.step = "unitary", duplicate.method = c("no
     } else if(!"data.frame" %in% class(data)){
         stop("Argument 'data' must be a data.frame.")
     }
+
+    check_arg_plus(duplicate.method, "match")
 
     mc = match.call()
 

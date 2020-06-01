@@ -116,7 +116,7 @@ did_estimate_yearly_effects = function(fml, data, treat_time, reference, returnD
 
         qui_pblm = setdiff(treat_time, names(data))
         if(length(qui_pblm) != 0){
-            stop("In argument treat_time, the variable", enumerate_items(qui_pblm, addS = TRUE), " not in the data.")
+            stop("In argument treat_time, the variable", enumerate_items(qui_pblm, "s"), " not in the data.")
         }
 
         treat = data_small[[treat_time[1]]]
@@ -134,7 +134,7 @@ did_estimate_yearly_effects = function(fml, data, treat_time, reference, returnD
         all_vars = all.vars(treat_time)
         qui_pblm = setdiff(all_vars, names(data))
         if(length(qui_pblm) != 0){
-            stop("In argument treat_time, the variable", enumerate_items(qui_pblm, addS = TRUE), " not in the data.")
+            stop("In argument treat_time, the variable", enumerate_items(qui_pblm, "s"), " not in the data.")
         }
 
         t = terms(treat_time, data = data)
@@ -154,7 +154,7 @@ did_estimate_yearly_effects = function(fml, data, treat_time, reference, returnD
 
     if(!is.numeric(treat) || any(!treat %in% c(0, 1))){
         obs = head(which(!treat %in% c(0, 1)), 3)
-        stop("The treatment variable must be 0/1, with 1 repersenting the treated. The variable that you gave, ", treat_var, ", is not (e.g. observation", enumerate_items(obs, addS = TRUE, verb = FALSE), ".")
+        stop("The treatment variable must be 0/1, with 1 repersenting the treated. The variable that you gave, ", treat_var, ", is not (e.g. observation", enumerate_items(obs, "s"), ".")
     } else if(length(unique(treat)) == 1){
         stop("The treatment variable is equal to ", treat[1], " for all observations: there must be a problem!")
     }
