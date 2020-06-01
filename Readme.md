@@ -1,3 +1,6 @@
+
+# fixest: Fast and user-friendly fixed-effects estimation
+
 <a href="https://cran.r-project.org/web/checks/check_results_fixest.html"><img src="https://cranchecks.info/badges/flavor/release/fixest" alt="CRAN status"></a>
 <a href="https://CRAN.R-project.org/package=fixest"><img src="http://www.r-pkg.org/badges/version/fixest" alt="Version"> </a>
 <a href="https://ipub.com/dev-corner/apps/r-package-downloads/"> <img src="https://cranlogs.r-pkg.org/badges/fixest" alt = "Downloads"> </a>
@@ -10,22 +13,22 @@ At the time of writing of this page (February 2020), `fixest` is the fastest exi
 
 Here is a comparison of the performance of `fixest` functions to other state of the art methods to perform estimations with multiple fixed-effects. The results are reported in the five figures below. Package `fixest` (black lines) is consistently faster in all situations.
 
-<img alt="Figure 1: Benchmarking for OLS." src="vignettes/benchmark_gaussian.png">
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/benchmark_gaussian.png?raw=true)
 
-<img alt="Figure 1 bis: Benchmarking for OLS, difficult case." src="vignettes/benchmark_difficult.png">
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/benchmark_difficult.png?raw=true)
 
-<img alt="Figure 2: Benchmarking for Poisson." src="vignettes/benchmark_poisson.png">
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/benchmark_poisson.png?raw=true)
 
-<img alt="Figure 3: Benchmarking for Negative Binomial." src="vignettes/benchmark_negbin.png">
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/benchmark_negbin.png?raw=true)
 
-<img alt="Figure 4: Benchmarking for Logit." src="vignettes/benchmark_logit.png">
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/benchmark_logit.png?raw=true)
 
 ### Setup
 
 The benchmarking was performed as follows: In the OLS context, we estimate the following equation:
 
 <!-- $$y_{ijk} = \alpha_i + \beta_j + \gamma_k + \delta x_{ijk} + \epsilon_{ijk}$$ -->
-![](vignettes/equation.PNG)
+![](vignettes/images/equation.PNG)
  
 The same functional form (one variable, three fixed-effects) is estimated for the Poisson, the Negative Binomial and the Logit cases (with ad hoc modifications to fit each model). See Berge (2018) for more details on the setup.
 
