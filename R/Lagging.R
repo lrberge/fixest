@@ -112,7 +112,7 @@ panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method =
 
     # Computation quf
     id = quickUnclassFactor(id)
-    time_full = quf_sorted(time, addItem = TRUE)
+    time_full = quickUnclassFactor(time, addItem = TRUE, sorted = TRUE)
 
     #
     # WIP: define this unitary time step!!!! not straightforward at all!

@@ -2730,11 +2730,11 @@ i = interact = function(var, fe, ref){
         fe_num[!is_na_fe] = as.vector(unclass(fe_no_na))
     } else {
         if(any(is_na_fe)){
-            quf = quf_sorted(fe[!is_na_fe], addItem = TRUE)
+            quf = quickUnclassFactor(fe[!is_na_fe], addItem = TRUE, sorted = TRUE)
             fe_num = rep(NA, length(fe))
             fe_num[!is_na_fe] = quf$x
         } else {
-            quf = quf_sorted(fe, addItem = TRUE)
+            quf = quickUnclassFactor(fe, addItem = TRUE, sorted = TRUE)
             fe_num = quf$x
         }
 
@@ -2745,14 +2745,6 @@ i = interact = function(var, fe, ref){
     if(!missing(ref)){
         # Controls
 
-        # if(length(ref) > 1) stop("The argument 'ref' must be of length 1 (currenlty it is of length ", length(ref), ").")
-        # if(is.na(ref)) stop("The argument 'ref' cannot be NA.")
-        # if(!any(ref %in% items)){
-        #     stop("Argument 'ref' is not an element of the variable ", fe_name, ".")
-        # }
-        #
-        # ref = which(items == ref)
-
         check_arg(ref, "multi charin", .choices = items, .message = paste0("Argument 'ref' must consist of elements of the variable '", fe_name, "'."))
 
         ref = which(items %in% ref)
@@ -2760,10 +2752,6 @@ i = interact = function(var, fe, ref){
     } else {
         noRef = TRUE
         ref = 1
-    }
-
-    if(length(items) > 100 && !confirm){
-        stop("You are interacting ", var_name, " with a variable containing over 100 different values (exactly ", length(items), "). To proceed please add the argument 'confirm=TRUE'. Note that if you do not need the standard-errors, it is much faster to include the interactions in the fixed-effects part of the formula using ", fe_name, "[[", var_name, "]]. See details on how to add varying slopes.")
     }
 
     res = model.matrix(~ -1 + fe_num, model.frame(~ -1 + fe_num, data.frame(fe_num = factor(fe_num)), na.action = na.pass))
