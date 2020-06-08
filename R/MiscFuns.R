@@ -70,9 +70,11 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 
 	x = summary(x, fromPrint = TRUE, ...)
 
+	check_arg(n, "integer scalar GE{1}")
+
 	msgRemaining = ""
 	nb_coef = length(coef(x)) - isNegbin
-	if(missing(n)){
+	if(missing(n) && is.null(x$n_print)){
 		if(fromSummary){
 			n = Inf
 		} else {
@@ -84,10 +86,19 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 			}
 		}
 
-	} else if(!length(n) == 1 || !is.numeric(n) || n<=0){
-		stop("Argument 'n' must be a single positive integer.")
-	} else if(n < nb_coef){
-		msgRemaining = paste0("... ", nb_coef - n, " coefficients remaining\n")
+	} else {
+	    if(!is.null(x$n_print)) n = x$n_print
+
+	    if(n < nb_coef){
+	        msgRemaining = paste0("... ", nb_coef - n, " coefficients remaining\n")
+	    }
+	}
+
+	# We also add the collinearity message
+	collinearity_msg = ""
+	if(!is.null(x$collin.var)){
+	    n_collin = length(x$collin.var)
+	    collinearity_msg = paste0("... ", n_collin, " variable", plural(n_collin, "s.was"), " removed because of collinearity (", enumerate_items(x$collin.var, nmax = 3), ifelse(n_collin > 3, " [full set in $collin.var]", ""), ")\n")
 	}
 
 	if(isFALSE(x$convStatus)){
@@ -144,6 +155,8 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 
 		cat("Standard-errors:", se.type, "\n")
 
+	    last_line = paste0(msgRemaining, collinearity_msg)
+
 		# The matrix of coefficients
 		if(isNegbin){
 			if(nrow(coeftable) == 2){
@@ -152,13 +165,13 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 				new_table = coeftable[-nrow(coeftable), ]
 			}
 
-			myPrintCoefTable(head(new_table, n), lastLine = msgRemaining)
+			myPrintCoefTable(head(new_table, n), lastLine = last_line)
 
 			theta = coeftable[".theta", 1]
 			noDispInfo = ifelse(theta > 1000, "(theta >> 0, no sign of overdispersion, you may consider a Poisson model)", "")
 			cat("Over-dispersion parameter: theta =", theta, noDispInfo, "\n")
 		} else {
-			myPrintCoefTable(head(coeftable, n), lastLine = msgRemaining)
+			myPrintCoefTable(head(coeftable, n), lastLine = last_line)
 		}
 	}
 
@@ -195,6 +208,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' @param dof An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}. Represent how the degree of freedom correction should be done. Defaults to \code{dof(fixef="nested", exact=FALSE, cluster = TRUE)}. See the help of the function \code{\link[fixest]{dof}} for details.
 #' @param forceCovariance (Advanced users.) Logical, default is \code{FALSE}. In the peculiar case where the obtained Hessian is not invertible (usually because of collinearity of some variables), use this option to force the covariance matrix, by using a generalized inverse of the Hessian. This can be useful to spot where possible problems come from.
 #' @param keepBounded (Advanced users -- feNmlm with non-linear part and bounded coefficients only.) Logical, default is \code{FALSE}. If \code{TRUE}, then the bounded coefficients (if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise it is not).
+#' @param n Integer, default is missing (means Inf). Number of coefficients to display when the print method is used.
 #' @param ... Not currently used.
 #'
 #' @return
@@ -237,7 +251,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' summary(est_pois, cluster = 2:3)
 #'
 #'
-summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), forceCovariance = FALSE, keepBounded = FALSE, ...){
+summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), forceCovariance = FALSE, keepBounded = FALSE, n,  ...){
 	# computes the clustered SD and returns the modified vcov and coeftable
 
 	if(!is.null(object$onlyFixef)){
@@ -254,6 +268,11 @@ summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), forceCova
 	if(!any(c("fromPrint", "nframes_up") %in% names(match.call()))){
 	    # condition means NOT internal call => thus client call
 	    validate_dots(suggest_args = c("se", "cluster", "dof"))
+	}
+
+	check_arg(n, "integer scalar GE{1}")
+	if(!missing(n)){
+	    object$n_print = n
 	}
 
 
@@ -709,8 +728,9 @@ r2 = function(x, type = "all"){
 		        new_fml = as.formula(paste0("y~1|", gsub(".+\\|", "", as.character(x$fml_full)[3])))
 
 		        # The fact that weights = x[["weights"]] is on purpose -- don't touch it
-		        # same for offset = x$offset -- otherwise error is thrown in fixest_env
-		        res_fe = feglm(fml = new_fml, data = newdata, glm.tol = 1e-2, fixef.tol = 1e-3, family = x$family$family, weights = x[["weights"]], offset = x$offset)
+		        # same for offset = x[["offset"]] -- otherwise error is thrown in fixest_env
+		        # x$family$family is also normal
+		        res_fe = feglm(fml = new_fml, data = newdata, glm.tol = 1e-2, fixef.tol = 1e-3, family = x$family$family, weights = x[["weights"]], offset = x[["offset"]])
 
 		        x$ssr_fe_only = cpp_ssq(resid(res_fe))
 		        x$ll_fe_only = logLik(res_fe)
