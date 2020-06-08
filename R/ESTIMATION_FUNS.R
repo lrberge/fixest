@@ -651,7 +651,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
     variance = family$variance
     linkfun = family$linkfun
     linkinv = family$linkinv
-    dev.resids = family$dev.resids
+    sum_dev.resids = family$sum_dev.resids
     valideta = family$valideta
     validmu = family$validmu
     mu.eta = family$mu.eta
@@ -709,7 +709,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
         } else {
             eta = offset_fe
             mu = linkinv(eta)
-            devold = dev.resids(y, mu, eta, wt = weights)
+            devold = sum_dev.resids(y, mu, eta, wt = weights)
         }
 
         wols_old = list(fitted.values = eta - offset)
@@ -726,7 +726,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
     if(init.type != "coef"){
         # starting deviance with constant equal to 1e-5
         # this is important for getting in step halving early (when deviance goes awry right from the start)
-        devold = dev.resids(y, rep(linkinv(1e-5), nobs), rep(1e-5, nobs), wt = weights)
+        devold = sum_dev.resids(y, rep(linkinv(1e-5), nobs), rep(1e-5, nobs), wt = weights)
         wols_old = list(fitted.values = rep(1e-5, nobs))
     }
 
@@ -805,7 +805,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
 
         mu = linkinv(eta)
 
-        dev = dev.resids(y, mu, eta, wt = weights)
+        dev = sum_dev.resids(y, mu, eta, wt = weights)
         dev_evol = dev - devold
 
         if(verbose >= 1) cat("Iteration: ", sprintf("%02i", iter), " -- Deviance = ", numberFormatNormal(dev), "\n", sep = "")
@@ -856,7 +856,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
                 eta_new = (eta_old + eta_new) / 2
 
                 mu = linkinv(eta_new + offset)
-                dev = dev.resids(y, mu, eta_new + offset, wt = weights)
+                dev = sum_dev.resids(y, mu, eta_new + offset, wt = weights)
                 dev_evol = dev - devold
 
                 if(verbose >= 3) cat("Step-halving: iter =", iter_sh, "-- dev:", numberFormatNormal(dev), "-- evol:", numberFormatNormal(dev_evol), "\n")

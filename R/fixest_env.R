@@ -199,8 +199,12 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         # they concern only logit and poisson (so far)
         #
 
-        fun_dev = family$dev.resids
-        family$dev.resids = function(y, mu, eta, wt) sum(fun_dev(y, mu, wt))
+        # fun_dev = family$dev.resids
+        # family$dev.resids = function(y, mu, eta, wt) sum(fun_dev(y, mu, wt))
+
+        dev.resids = family$dev.resids
+        family$sum_dev.resids = function(y, mu, eta, wt) sum(dev.resids(y, mu, wt))
+
         fun_mu.eta = family$mu.eta
         family$mu.eta = function(mu, eta) fun_mu.eta(eta)
 
@@ -1610,13 +1614,15 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             qui_pos = lhs > 0
             if(isWeight){
                 constant = sum(weights.value[qui_pos] * y_pos * cpppar_log(y_pos, nthreads) - weights.value[qui_pos] * y_pos)
-                dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(wt[qui_pos] * y_pos * eta[qui_pos]) + sum(wt * mu))
+                # dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(wt[qui_pos] * y_pos * eta[qui_pos]) + sum(wt * mu))
+                sum_dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(wt[qui_pos] * y_pos * eta[qui_pos]) + sum(wt * mu))
             } else {
                 constant = sum(y_pos * cpppar_log(y_pos, nthreads) - y_pos)
-                dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(y_pos * eta[qui_pos]) + sum(mu))
+                # dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(y_pos * eta[qui_pos]) + sum(mu))
+                sum_dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(y_pos * eta[qui_pos]) + sum(mu))
             }
 
-            family_funs$dev.resids = dev.resids
+            family_funs$sum_dev.resids = sum_dev.resids
 
             family_funs$mu.eta = function(mu, eta) mu
             family_funs$validmu = function(mu) cpppar_poisson_validmu(mu, nthreads)
@@ -1625,11 +1631,13 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             family_funs$linkfun = function(mu) cpppar_logit_linkfun(mu, nthreads)
             family_funs$linkinv = function(eta) cpppar_logit_linkinv(eta, nthreads)
             if(isWeight){
-                dev.resids = function(y, mu, eta, wt) sum(cpppar_logit_devresids(y, mu, wt, nthreads))
+                # dev.resids = function(y, mu, eta, wt) sum(cpppar_logit_devresids(y, mu, wt, nthreads))
+                sum_dev.resids = function(y, mu, eta, wt) sum(cpppar_logit_devresids(y, mu, wt, nthreads))
             } else {
-                dev.resids = function(y, mu, eta, wt) sum(cpppar_logit_devresids(y, mu, 1, nthreads))
+                # dev.resids = function(y, mu, eta, wt) sum(cpppar_logit_devresids(y, mu, 1, nthreads))
+                sum_dev.resids = function(y, mu, eta, wt) sum(cpppar_logit_devresids(y, mu, 1, nthreads))
             }
-            family_funs$dev.resids = dev.resids
+            family_funs$sum_dev.resids = sum_dev.resids
 
             family_funs$mu.eta = function(mu, eta) cpppar_logit_mueta(eta, nthreads)
         }
