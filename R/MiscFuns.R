@@ -2669,7 +2669,6 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' @param var A vector.
 #' @param fe A vector (of any type). Must be of the same length as \code{var}.
 #' @param ref A single value that belongs to the interacted variable (\code{fe}). Can be missing.
-#' @param confirm Logical, default is \code{FALSE}. If the factor variable has over 100 cases, you need to use \code{confirm = TRUE} to carry on.
 #'
 #' @return
 #' It returns a matrix with number of rows the length of \code{var}. The number of columns is equal to the number of cases contained in \code{fe} minus the reference.
@@ -2707,7 +2706,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' # You could have used the following formula instead:
 #' # y ~ x1 + treat::period(5) | id+period
 #'
-i = interact = function(var, fe, ref, confirm = FALSE){
+i = interact = function(var, fe, ref){
     # Used to create interactions
 
     mc = match.call()
@@ -4653,20 +4652,16 @@ interact_fml = function(fml){
     as.formula(paste0(lhs_fml, "~", rhs_fml))
 }
 
-interact_control = function(ref, confirm = FALSE){
+interact_control = function(ref){
     # Internal call
-    # used to contral the call to interact is valid
-    check_arg(confirm, "logical scalar")
+    # used to control the call to interact is valid
 
     mc = match.call()
 
     res = c()
     if("ref" %in% names(mc)){
-        # if(length(ref) > 1) stop("Argument 'ref' must be of length 1.")
         res = paste0("ref = ", deparse_long(mc$ref))
     }
-
-    if("confirm" %in% names(mc)) res = c(res, paste0("confirm = ", confirm))
 
     res
 }

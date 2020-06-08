@@ -42,9 +42,9 @@
 #'
 #' @section Interactions:
 #'
-#' You can interact a variable with a "factor-like" variable by using the syntax \code{var::fe(ref)}, where \code{fe} is the variable to be interacted with and the argument \code{ref} is a value of \code{fe} taken as a reference.
+#' You can interact a variable with a "factor-like" variable by using the syntax \code{var::fe(ref)}, where \code{fe} is the variable to be interacted with and the argument \code{ref} is a value (or several) of \code{fe} taken as a reference.
 #'
-#' The full syntax is: \code{var::fe(ref, confirm)}. You have two arguments, \code{ref} and \code{confirm}, the two are optional. The argument \code{confirm} is there to avoid mistakenly estimating a model with (too) many variables. If the variable \code{fe} takes over 100 different values, then you have to add the argument \code{confirm = TRUE}. It is important to note that *if you do not care about the standard-errors of the interactions*, then you can add interactions in the fixed-effects part of the formula (using the syntax fe[[var]], as explained in the section \dQuote{Varying slopes}).
+#' It is important to note that *if you do not care about the standard-errors of the interactions*, then you can add interactions in the fixed-effects part of the formula (using the syntax fe[[var]], as explained in the section \dQuote{Varying slopes}).
 #'
 #' Introducing interactions with this syntax leads to a different display of the interacted values in \code{\link[fixest]{etable}} and offers a special representation of the interacted coefficients in the function \code{\link[fixest]{coefplot}}. See examples.
 #'
