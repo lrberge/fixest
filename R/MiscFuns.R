@@ -5574,24 +5574,7 @@ char2num = function(x, addItem = FALSE){
 
 }
 
-quf_sorted = function(x, addItem = FALSE){
-    # Same as QUF, but items are sorted
-
-    quoi = quickUnclassFactor(x, TRUE)
-
-    new_order = order(quoi$items)
-    order_new_order = order(new_order)
-    x_uf = order_new_order[quoi$x]
-
-    if(addItem){
-        res = list(x = x_uf, items = quoi$items[new_order])
-        return(res)
-    } else {
-        return(x_uf)
-    }
-}
-
-quickUnclassFactor = function(x, addItem = FALSE){
+quickUnclassFactor = function(x, addItem = FALSE, sorted = FALSE){
 	# does as unclass(as.factor(x))
 	# but waaaaay quicker
 
@@ -5601,6 +5584,28 @@ quickUnclassFactor = function(x, addItem = FALSE){
 	}
 
     res = cpp_quf_gnl(x)
+
+    if(sorted){
+
+        if(is.character(x)){
+            items = x[res$x_unik]
+        } else {
+            items = res$x_unik
+        }
+
+        x = res$x_uf
+
+        new_order = order(items)
+        order_new_order = order(new_order)
+        x_uf = order_new_order[x]
+
+        if(addItem){
+            res = list(x = x_uf, items = items[new_order])
+            return(res)
+        } else {
+            return(x_uf)
+        }
+    }
 
     if(addItem){
 
