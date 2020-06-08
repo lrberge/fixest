@@ -238,9 +238,10 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
     #
     # nthreads argument
-    if(!isScalar(nthreads) || (nthreads %% 1) != 0 || nthreads <= 0){
-        stop("The argument 'nthreads' must be an integer greater or equal to 1 and lower than the number of threads available (", max(get_nb_threads(), 1), ").")
-    }
+    # if(!isScalar(nthreads) || (nthreads %% 1) != 0 || nthreads <= 0){
+    #     stop("The argument 'nthreads' must be an integer greater or equal to 1 and lower than the number of threads available (", max(get_nb_threads(), 1), ").")
+    # }
+    check_value(nthreads, "integer scalar GT{0}", .message = paste0("The argument 'nthreads' must be an integer greater or equal to 1 and lower than the number of threads available (", max(get_nb_threads(), 1), ")."))
 
     if(nthreads > 1){
         max_threads = get_nb_threads()
@@ -583,6 +584,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             }
 
             useModel.matrix = attr(linear.mat, "useModel.matrix")
+            attr(linear.mat, "useModel.matrix") = NULL
 
             # Interaction information => if no interaction: NULL
             interaction.info = getOption("fixest_interaction_ref")
@@ -747,29 +749,13 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                     stop("In ", origin, " the offset cannot be a formula. You must provide a numeric vector.")
                 }
 
-                offset = formula(offset) # regularization
-
-                if(length(offset) != 2){
-                    stop("Argument 'offset' must be a one-sided formula (e.g.): ~ 1+x^2 ; or a numeric vector.")
-                }
-
-                offset.call = offset[[length(offset)]]
-                vars.offset = all.vars(offset.call)
-
-                if(any(!vars.offset %in% dataNames)){
-                    var_missing = setdiff(vars.offset, dataNames)
-                    stop("In the argument 'offset': the variable", enumerate_items(var_missing, "s.is"), " not in the data.")
-                }
-
-                offset.value = try(eval(offset.call, data), silent = TRUE)
-                if("try-error" %in% class(offset.value)){
-                    stop("Evaluation of the offset (equal to ", deparse_long(offset.call), ") raises and error: \n", offset.value)
-                }
+                check_value(offset, "os formula var(data)", .data = data)
+                offset.value = offset[[2]]
+                check_value_plus(offset.value, "evalset numeric vector conv NA OK", .data = data, .prefix = "In argument 'offset', the expression")
 
             } else {
-                if(!is.numeric(offset) || !isVector(offset)){
-                    stop("The argument 'offset' must be either a one-sided formula (e.g. ~x1), either a numeric vector.")
-                }
+
+                check_value_plus(offset, "numeric vector conv NA OK", .prefix = "If not a formula, argument 'offset'")
 
                 if(length(offset) == 1){
                     offset.value = rep(offset, nobs)
@@ -802,8 +788,13 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             }
         } else if(is.null(offset)){
             # msg if it's not what the user wanted
-            if(!is.null(mc_origin$offset) && deparse_long(mc_origin$offset) != "x$offset"){
-                stop("Argument 'offset' (", deparse_long(mc_origin$offset), ") is evaluated to NULL. This is likely not what you want.")
+            if(!is.null(mc_origin$offset)){
+                dp = deparse_long(mc_origin$offset)
+
+                if((grepl("[[", dp, fixed = TRUE) || grepl("$", dp, fixed = TRUE)) && dp != 'x$offset'){
+                    # we avoid this behavior
+                    stop("Argument 'offset' (", dp, ") is evaluated to NULL. This is likely not what you want.")
+                }
             }
         }
     }
@@ -826,29 +817,14 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                     stop("In ", origin, " the weights cannot be a formula. You must provide a numeric vector.")
                 }
 
-                weights = formula(weights) # regularization
+                check_value(weights, "os formula var(data)", .data = data)
+                weights.value = weights[[2]]
+                check_value_plus(weights.value, "evalset numeric vector conv NA OK", .data = data, .prefix = "In argument 'weights', the expression")
 
-                if(length(weights) != 2){
-                    stop("The argument weights must be either a one-sided formula (e.g. ~x1), either a numeric vector.")
-                }
-
-                weights.call = weights[[length(weights)]]
-                vars.weights = all.vars(weights.call)
-
-                if(any(!vars.weights %in% dataNames)){
-                    var_missing = vars.weights[!vars.weights %in% dataNames]
-                    stop("In the argument 'weights': the variable", enumerate_items(var_missing, "s.is"), " not in the data." )
-                }
-
-                weights.value = try(eval(weights.call, data), silent = TRUE)
-                if("try-error" %in% class(weights.value)){
-                    stop("Evaluation of the weights (equal to ", deparse_long(weights.call), ") raises and error: \n", weights.value)
-                }
 
             } else {
-                if(!is.numeric(weights) || !isVector(weights)){
-                    stop("The argument weights must be either a one-sided formula (e.g. ~x1), either a numeric vector. Currently it is not ", ifelse(!is.numeric(weights), "even numeric", "a vector despite being numeric"), ".")
-                }
+
+                check_value_plus(weights, "numeric vector conv NA OK", .prefix = "If not a formula, argument 'weights'")
 
                 if(length(weights) == 1){
                     if(weights == 1){
@@ -904,9 +880,12 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 notes = c(notes, message_0W)
             }
 
-        } else if(!is.null(mc_origin$weights) && deparse_long(mc_origin$weights) != 'x[["weights"]]'){
-            # we avoid this behavior
-            stop("Argument 'weights' (", deparse_long(mc_origin$weights), ") is evaluated to NULL. This is likely not what you want.")
+        } else if(!is.null(mc_origin$weights)){
+            dp = deparse_long(mc_origin$weights)
+            if((grepl("[[", dp, fixed = TRUE) || grepl("$", dp, fixed = TRUE)) && dp != 'x[["weights"]]'){
+                # we avoid this behavior
+                stop("Argument 'weights' (", dp, ") is evaluated to NULL. This is likely not what you want.")
+            }
         }
     }
 
