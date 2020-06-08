@@ -4,11 +4,27 @@
 \alias{errbar}
 \title{Plots confidence intervals}
 \usage{
-errbar(estimate, sd, ci_low, ci_top, x, x.shift = 0, w = 0.1,
-  ci_level = 0.95, style = c("bar", "interval", "tube"), add = FALSE,
-  col = 1, bar.col = col, bar.lwd = par("lwd"), bar.lty,
-  grid = TRUE, grid.par = list(lty = 1), bar.join = FALSE,
-  only.params = FALSE, ...)
+errbar(
+  estimate,
+  sd,
+  ci_low,
+  ci_top,
+  x,
+  x.shift = 0,
+  w = 0.1,
+  ci_level = 0.95,
+  style = c("bar", "interval", "tube"),
+  add = FALSE,
+  col = 1,
+  bar.col = col,
+  bar.lwd = par("lwd"),
+  bar.lty,
+  grid = TRUE,
+  grid.par = list(lty = 1),
+  bar.join = FALSE,
+  only.params = FALSE,
+  ...
+)
 }
 \arguments{
 \item{estimate}{Numeric vector. The point estimates.}

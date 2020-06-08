@@ -4,8 +4,7 @@
 \alias{predict.fixest}
 \title{Predict method for \code{fixest} fits}
 \usage{
-\method{predict}{fixest}(object, newdata, type = c("response", "link"),
-  ...)
+\method{predict}{fixest}(object, newdata, type = c("response", "link"), ...)
 }
 \arguments{
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}

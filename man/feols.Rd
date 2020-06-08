@@ -4,10 +4,23 @@
 \alias{feols}
 \title{Fixed-effects OLS estimation}
 \usage{
-feols(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-06,
-  fixef.iter = 2000, na_inf.rm = getFixest_na_inf.rm(),
-  nthreads = getFixest_nthreads(), verbose = 0, warn = TRUE,
-  notes = getFixest_notes(), combine.quick, ...)
+feols(
+  fml,
+  data,
+  weights,
+  offset,
+  panel.id,
+  fixef,
+  fixef.tol = 1e-06,
+  fixef.iter = 2000,
+  na_inf.rm = getFixest_na_inf.rm(),
+  nthreads = getFixest_nthreads(),
+  verbose = 0,
+  warn = TRUE,
+  notes = getFixest_notes(),
+  combine.quick,
+  ...
+)
 }
 \arguments{
 \item{fml}{A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y | fe_1+fe_2}. You can combine two fixed-effects with \code{^}: e.g. \code{fml = z~x+y|fe_1^fe_2}, see details. You can also use variables with varying slopes using square brackets: e.g. in \code{fml = z~y|fe_1[x] + fe_2} the variable \code{x} will have one coefficient for each value of \code{fe_1} -- if you use varying slopes, please have a look at the details section (can't describe it all here).}
@@ -111,9 +124,9 @@ You can provide several leads/lags at once: e.g. if your formula is equal to \co
 \section{Interactions}{
 
 
-You can interact a variable with a "factor-like" variable by using the syntax \code{var::fe(ref)}, where \code{fe} is the variable to be interacted with and the argument \code{ref} is a value of \code{fe} taken as a reference.
+You can interact a variable with a "factor-like" variable by using the syntax \code{var::fe(ref)}, where \code{fe} is the variable to be interacted with and the argument \code{ref} is a value (or several) of \code{fe} taken as a reference.
 
-The full syntax is: \code{var::fe(ref, confirm)}. You have two arguments, \code{ref} and \code{confirm}, the two are optional. The argument \code{confirm} is there to avoid mistakenly estimating a model with (too) many variables. If the variable \code{fe} takes over 100 different values, then you have to add the argument \code{confirm = TRUE}. It is important to note that *if you do not care about the standard-errors of the interactions*, then you can add interactions in the fixed-effects part of the formula (using the syntax fe[[var]], as explained in the section \dQuote{Varying slopes}).
+It is important to note that *if you do not care about the standard-errors of the interactions*, then you can add interactions in the fixed-effects part of the formula (using the syntax fe[[var]], as explained in the section \dQuote{Varying slopes}).
 
 Introducing interactions with this syntax leads to a different display of the interacted values in \code{\link[fixest]{etable}} and offers a special representation of the interacted coefficients in the function \code{\link[fixest]{coefplot}}. See examples.
 

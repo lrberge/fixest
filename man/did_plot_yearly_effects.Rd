@@ -4,10 +4,22 @@
 \alias{did_plot_yearly_effects}
 \title{Plots the results of yearly treatment effects estimation}
 \usage{
-did_plot_yearly_effects(object, x.shift = 0, w = 0.1,
-  ci_level = 0.95, style = c("bar", "interval", "tube"), add = FALSE,
-  col = 1, bar.col = col, bar.lwd = par("lwd"), bar.lty,
-  grid = TRUE, grid.par = list(lty = 1), bar.join = TRUE, ...)
+did_plot_yearly_effects(
+  object,
+  x.shift = 0,
+  w = 0.1,
+  ci_level = 0.95,
+  style = c("bar", "interval", "tube"),
+  add = FALSE,
+  col = 1,
+  bar.col = col,
+  bar.lwd = par("lwd"),
+  bar.lty,
+  grid = TRUE,
+  grid.par = list(lty = 1),
+  bar.join = TRUE,
+  ...
+)
 }
 \arguments{
 \item{object}{An object returned by the function \code{\link[fixest]{did_estimate_yearly_effects}}.}

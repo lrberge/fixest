@@ -4,7 +4,8 @@
 \name{base_did}
 \alias{base_did}
 \title{Sample data for difference in difference}
-\format{\code{base_did} is a data frame with 1,040 observations and 6 variables named \code{y}, \code{x1}, \code{id}, \code{period}, \code{post} and \code{treat}.
+\format{
+\code{base_did} is a data frame with 1,040 observations and 6 variables named \code{y}, \code{x1}, \code{id}, \code{period}, \code{post} and \code{treat}.
 
 \itemize{
 \item{y: The dependent variable affected by the treatment.}
@@ -14,7 +15,8 @@
 \item{post: Indicator taking value 1 if the period is strictly greater than 5, 0 otherwise.}
 \item{treat: Indicator taking value 1 if the individual is treated, 0 otherwise.}
 
-}}
+}
+}
 \source{
 This data has been generated from \pkg{R}.
 }

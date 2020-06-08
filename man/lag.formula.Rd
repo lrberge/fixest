@@ -4,8 +4,15 @@
 \alias{lag.formula}
 \title{Lags a variable using a formula}
 \usage{
-\method{lag}{formula}(x, k = 1, data, time.step = "unitary",
-  fill = NA, duplicate.method = c("none", "first"), ...)
+\method{lag}{formula}(
+  x,
+  k = 1,
+  data,
+  time.step = "unitary",
+  fill = NA,
+  duplicate.method = c("none", "first"),
+  ...
+)
 }
 \arguments{
 \item{x}{A formula of the type \code{var ~ id + time} where \code{var} is the variable to be lagged, \code{id} is a variable representing the panel id, and \code{time} is the time variable of the panel.}

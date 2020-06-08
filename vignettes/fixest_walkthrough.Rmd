@@ -1,19 +1,22 @@
 ---
-title: "Fast Fixed-Effects Estimation: Short introduction"
+title: 'Fast Fixed-Effects Estimation: Short introduction'
 author: "Laurent Berge"
 date: "`r Sys.Date()`"
 output:
   html_document:
-    toc: true
+    number_sections: yes
+    toc: yes
     toc_depth: 3
-    number_sections: true
     toc_float:
-      collapsed: false
-      smooth_scroll: false
-vignette: >
-  %\VignetteIndexEntry{fixest introduction}
-  %\VignetteEngine{knitr::rmarkdown}
+      collapsed: no
+      smooth_scroll: no
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+vignette: > 
+  %\VignetteIndexEntry{fixest introduction} 
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown} 
 ---
 
 ```{r setup, include = FALSE}
@@ -84,6 +87,7 @@ print(gravity_pois)
 ```
 
 The `print` reports the coefficient estimates and standard-errors as well as some other information. Among the quality of fit information, the squared-correlation corresponds to the correlation between the dependent variable and the expected predictor; it reflects somehow to the idea of R-square in OLS estimations.
+Note taht the estimation is performed using parallel computing which you can control using the argument `nthreads` (see the "multi-threading" section for more details).
 
 ## Clustering the standard-errors
 
@@ -330,7 +334,7 @@ Now to display the yearly treatment effects on a graph, we can use the function 
 coefplot(est_did)
 ```
 
-The function `coefplot` detects that the results contain interactions and plot the appropriate graph. In case you wanted to display al the coefficients, including \code{x1}, you can use the argument \code{only.inter = FALSE}. 
+The function `coefplot` detects that the results contain interactions and plot the appropriate graph. In case you wanted to display al the coefficients, including `x1`, you can use the argument `only.inter = FALSE`. 
 
 ## Lagging variables
 
@@ -505,7 +509,7 @@ As you can see, the efficiency of increasing the number of threads is not 1 to 1
 
 You can permanently set the number of threads used by `fixest` using `setFixest_nthreads(nthreads)`.
 
-## Collineartiy
+## Collinearity
 
 The user ought to estimate the coefficient of variables that are **not** collinear: neither among each other, neither with the fixed-effects. Estimation with collinear variables leads to a non invertible Hessian (leading to the absence of Variance-Covariance matrix for the coefficients). In such cases, the estimating functions will raise a warning and suggest to use the function `collinearity` to spot the problem.
 

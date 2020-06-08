@@ -6,25 +6,74 @@
 \alias{fepois}
 \title{Fixed-effects GLM estimations}
 \usage{
-feglm(fml, data, family = "poisson", offset, weights, panel.id,
-  start = NULL, etastart = NULL, mustart = NULL, fixef,
-  fixef.tol = 1e-06, fixef.iter = 1000, glm.iter = 25,
-  glm.tol = 1e-08, na_inf.rm = getFixest_na_inf.rm(),
-  nthreads = getFixest_nthreads(), warn = TRUE,
-  notes = getFixest_notes(), verbose = 0, combine.quick, ...)
+feglm(
+  fml,
+  data,
+  family = "poisson",
+  offset,
+  weights,
+  panel.id,
+  start = NULL,
+  etastart = NULL,
+  mustart = NULL,
+  fixef,
+  fixef.tol = 1e-06,
+  fixef.iter = 1000,
+  glm.iter = 25,
+  glm.tol = 1e-08,
+  na_inf.rm = getFixest_na_inf.rm(),
+  nthreads = getFixest_nthreads(),
+  warn = TRUE,
+  notes = getFixest_notes(),
+  verbose = 0,
+  combine.quick,
+  ...
+)
 
-feglm.fit(y, X, fixef_mat, family = "poisson", offset, weights,
-  start = NULL, etastart = NULL, mustart = NULL, fixef.tol = 1e-06,
-  fixef.iter = 1000, glm.iter = 25, glm.tol = 1e-08,
-  na_inf.rm = getFixest_na_inf.rm(), nthreads = getFixest_nthreads(),
-  warn = TRUE, notes = getFixest_notes(), verbose = 0, ...)
+feglm.fit(
+  y,
+  X,
+  fixef_mat,
+  family = "poisson",
+  offset,
+  weights,
+  start = NULL,
+  etastart = NULL,
+  mustart = NULL,
+  fixef.tol = 1e-06,
+  fixef.iter = 1000,
+  glm.iter = 25,
+  glm.tol = 1e-08,
+  na_inf.rm = getFixest_na_inf.rm(),
+  nthreads = getFixest_nthreads(),
+  warn = TRUE,
+  notes = getFixest_notes(),
+  verbose = 0,
+  ...
+)
 
-fepois(fml, data, offset, weights, panel.id, start = NULL,
-  etastart = NULL, mustart = NULL, fixef, fixef.tol = 1e-06,
-  fixef.iter = 1000, glm.iter = 25, glm.tol = 1e-08,
-  na_inf.rm = getFixest_na_inf.rm(), nthreads = getFixest_nthreads(),
-  warn = TRUE, notes = getFixest_notes(), verbose = 0, combine.quick,
-  ...)
+fepois(
+  fml,
+  data,
+  offset,
+  weights,
+  panel.id,
+  start = NULL,
+  etastart = NULL,
+  mustart = NULL,
+  fixef,
+  fixef.tol = 1e-06,
+  fixef.iter = 1000,
+  glm.iter = 25,
+  glm.tol = 1e-08,
+  na_inf.rm = getFixest_na_inf.rm(),
+  nthreads = getFixest_nthreads(),
+  warn = TRUE,
+  notes = getFixest_notes(),
+  verbose = 0,
+  combine.quick,
+  ...
+)
 }
 \arguments{
 \item{fml}{A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y | fe_1+fe_2}. You can combine two fixed-effects with \code{^}: e.g. \code{fml = z~x+y|fe_1^fe_2}, see details. You can also use variables with varying slopes using square brackets: e.g. in \code{fml = z~y|fe_1[x] + fe_2} the variable \code{x} will have one coefficient for each value of \code{fe_1} -- if you use varying slopes, please have a look at the details section (can't describe it all here).}
@@ -89,7 +138,7 @@ A \code{fixest} object.
 \item{fixef_sizes}{The size of each fixed-effect (i.e. the number of unique identifierfor each fixed-effect dimension).}
 \item{y}{[where relevant] The dependent variable (used to compute the within-R2 when fixed-effects are present).}
 \item{convStatus}{Logical, convergence status of the IRWLS algorithm.}
-\item{weights_irls}{The weights of the last iteration of the IRWLS algorithm.}
+\item{irls_weights}{The weights of the last iteration of the IRWLS algorithm.}
 \item{obsRemoved}{[where relevant] In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the row numbers of the observations that were removed. Also reports the NA observations that were removed.}
 \item{fixef_removed}{[where relevant] In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.}
 \item{coefficients}{The named vector of estimated coefficients.}
@@ -157,9 +206,9 @@ You can provide several leads/lags at once: e.g. if your formula is equal to \co
 \section{Interactions}{
 
 
-You can interact a variable with a "factor-like" variable by using the syntax \code{var::fe(ref)}, where \code{fe} is the variable to be interacted with and the argument \code{ref} is a value of \code{fe} taken as a reference.
+You can interact a variable with a "factor-like" variable by using the syntax \code{var::fe(ref)}, where \code{fe} is the variable to be interacted with and the argument \code{ref} is a value (or several) of \code{fe} taken as a reference.
 
-The full syntax is: \code{var::fe(ref, confirm)}. You have two arguments, \code{ref} and \code{confirm}, the two are optional. The argument \code{confirm} is there to avoid mistakenly estimating a model with (too) many variables. If the variable \code{fe} takes over 100 different values, then you have to add the argument \code{confirm = TRUE}. It is important to note that *if you do not care about the standard-errors of the interactions*, then you can add interactions in the fixed-effects part of the formula (using the syntax fe[[var]], as explained in the section \dQuote{Varying slopes}).
+It is important to note that *if you do not care about the standard-errors of the interactions*, then you can add interactions in the fixed-effects part of the formula (using the syntax fe[[var]], as explained in the section \dQuote{Varying slopes}).
 
 Introducing interactions with this syntax leads to a different display of the interacted values in \code{\link[fixest]{etable}} and offers a special representation of the interacted coefficients in the function \code{\link[fixest]{coefplot}}. See examples.
 

@@ -4,7 +4,8 @@
 \name{trade}
 \alias{trade}
 \title{Trade data sample}
-\format{\code{trade} is a data frame with 38,325 observations and 6 variables named \code{Destination}, \code{Origin}, \code{Product}, \code{Year}, \code{dist_km} and \code{Euros}.
+\format{
+\code{trade} is a data frame with 38,325 observations and 6 variables named \code{Destination}, \code{Origin}, \code{Product}, \code{Year}, \code{dist_km} and \code{Euros}.
 
 \itemize{
 \item{Origin: 2-digits codes of the countries of origin of the trade flow.}
@@ -14,7 +15,8 @@
 \item{dist_km: Geographic distance in km between the centers of the countries of origin and destination.}
 \item{Euros: The total amount in euros of the trade flow for the specific year/product category/origin-destination country pair.}
 
-}}
+}
+}
 \source{
 This data has been extrated from Eurostat on October 2017.
 }

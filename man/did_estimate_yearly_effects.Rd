@@ -4,8 +4,15 @@
 \alias{did_estimate_yearly_effects}
 \title{Estimates yearly treatment effects}
 \usage{
-did_estimate_yearly_effects(fml, data, treat_time, reference,
-  returnData = FALSE, ..., estfun = feols)
+did_estimate_yearly_effects(
+  fml,
+  data,
+  treat_time,
+  reference,
+  returnData = FALSE,
+  ...,
+  estfun = feols
+)
 }
 \arguments{
 \item{fml}{A formula containing the variables WITHOUT the yearly treatment effects (which will be added by this function).}

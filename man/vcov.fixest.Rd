@@ -4,8 +4,15 @@
 \alias{vcov.fixest}
 \title{Extracts the variance/covariance of a \code{femlm} fit}
 \usage{
-\method{vcov}{fixest}(object, se, cluster, dof = getFixest_dof(),
-  forceCovariance = FALSE, keepBounded = FALSE, ...)
+\method{vcov}{fixest}(
+  object,
+  se,
+  cluster,
+  dof = getFixest_dof(),
+  forceCovariance = FALSE,
+  keepBounded = FALSE,
+  ...
+)
 }
 \arguments{
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
