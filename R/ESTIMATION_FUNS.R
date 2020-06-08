@@ -243,6 +243,22 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 			res$means = vars_demean$means
 		}
 
+		if(any(slope_flag > 0) && any(res$iterations > 300)){
+		    # Maybe we have a convergence problem
+		    # This is poorly coded, but it's a temporary fix
+		    opt_fe = check_conv(y_demean, X_demean, fixef_id_vector, slope_flag, slope_vars, weights)
+
+		    # This is a bit too rough a check but it should catch the most problematic cases
+		    if(any(opt_fe > 1e-4)){
+		        msg = "There seems to be a convergence problem as regards the variables with varying slopes (in the RHS of your formula). The precision of the estimates may not be great. This is a known issue and there is work underway to solve it.\n As a workaround, you can use the variables with varying slopes as regular variables using the function interact (see ?interact)."
+		        if(fromGLM){
+		            res$warn_varying_slope = msg
+		        } else {
+		            warning(msg)
+		        }
+		    }
+		}
+
 		if(verbose >= 1){
 			if(length(fixef_sizes) > 1){
 				cat(" Demeaning in ", (proc.time() - time_demean)[3], "s (iter: ", paste0(c(tail(res$iterations, 1), res$iterations[-length(res$iterations)]), collapse = ", "), ")\n", sep="")
@@ -257,15 +273,27 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 	# Estimation
 	if(!onlyFixef){
 
-		est = ols_fit(y_demean, X_demean, weights, correct_0w, nthreads)
+	    est = ols_fit(y_demean, X_demean, weights, correct_0w, nthreads)
+
+	    # Corner case: all variables not relevant
+	    if(!is.null(est$all_removed)){
+	        all_vars = colnames(X)
+
+	        if(isFixef){
+	            stop_up(ifsingle(all_vars, "The only variable ", "All variables"), enumerate_items(all_vars, "quote.is", nmax = 3), " collinear with the fixed effects. In such circumstances, the estimation is void.", up = fromGLM)
+	        } else {
+	            stop_up(ifsingle(all_vars, "The only variable ", "All variables"), enumerate_items(all_vars, "quote.is", nmax = 3), " virtually constant and equal to 0. In such circumstances, the estimation is void.", up = fromGLM)
+	        }
+	    }
 
 		# Formatting the result
-		coef = est$coefficients
-		names(coef) = colnames(X)
+	    coef = est$coefficients
+	    names(coef) = colnames(X)[!est$is_excluded]
 		res$coefficients = coef
 		# Additional stuff
 		res$residuals = est$residuals
 		res$multicol = est$multicol
+		if(fromGLM) res$is_excluded = est$is_excluded
 	} else {
 		res$residuals = y_demean
 		res$coefficients = coef = NULL
@@ -291,7 +319,31 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 	# Post processing
 	#
 
+	# Collinearity message
+	collin.adj = 0
+	if(res$multicol){
+	    var_collinear = colnames(X)[est$is_excluded]
+	    if(notes){
+	        message(ifsingle(var_collinear, "The variable ", "Variables "), enumerate_items(var_collinear, "quote.has", nmax = 3), " been removed because of collinearity (see $collin.var).")
+	    }
+
+	    res$collin.var = var_collinear
+
+	    # full set of coeffficients with NAs
+	    collin.coef = setNames(rep(NA, ncol(X)), colnames(X))
+	    collin.coef[!est$is_excluded] = res$coefficients
+	    res$collin.coef = collin.coef
+
+	    if(isFixef){
+	        X = X[, !est$is_excluded, drop = FALSE]
+	    }
+	    X_demean = X_demean[, !est$is_excluded, drop = FALSE]
+
+	    collin.adj = sum(est$is_excluded)
+	}
+
 	n = length(y)
+	res$nparams = res$nparams - collin.adj
 	df_k = res$nparams
 	res$nobs = n
 
@@ -330,15 +382,16 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 			res$sigma2 = cpp_ssq(res$residuals) / (length(y) - df_k)
 		}
 
-		if(est$multicol == TRUE){
-			if(warn){
-			    warning("Presence of collinearity, covariance not defined. Use function collinearity() to pinpoint the problems.")
-			    options("fixest_last_warning" = proc.time())
-			}
-			res$cov.unscaled = est$xwx_inv * NA
-		} else {
-			res$cov.unscaled = est$xwx_inv * res$sigma2
-		}
+		# if(est$multicol == TRUE){
+		# 	if(warn){
+		# 	    warning("Presence of collinearity, covariance not defined. Use function collinearity() to pinpoint the problems.")
+		# 	    options("fixest_last_warning" = proc.time())
+		# 	}
+		# 	res$cov.unscaled = est$xwx_inv * NA
+		# } else {
+		# 	res$cov.unscaled = est$xwx_inv * res$sigma2
+		# }
+		res$cov.unscaled = est$xwx_inv * res$sigma2
 
 		rownames(res$cov.unscaled) = colnames(res$cov.unscaled) = names(coef)
 
@@ -349,7 +402,7 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 
 		# coeftable
 		zvalue <- coef/se
-		pvalue <- 2*pnorm(-abs(zvalue))
+		pvalue <- 2*pt(-abs(zvalue), max(n - df_k, 1))
 
 		coeftable <- data.frame("Estimate"=coef, "Std. Error"=se, "z value"=zvalue, "Pr(>|z|)"=pvalue)
 		names(coeftable) <- c("Estimate", "Std. Error", "z value",  "Pr(>|z|)")
@@ -393,7 +446,7 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 }
 
 
-ols_fit = function(y, X, w, correct_0w = FALSE, nthreads){
+ols_fit_old = function(y, X, w, correct_0w = FALSE, nthreads){
 	# No control here -- done before
 
     if(correct_0w == FALSE){
@@ -427,6 +480,87 @@ ols_fit = function(y, X, w, correct_0w = FALSE, nthreads){
 	res = list(xwx = xwx, coefficients = beta, fitted.values = fitted.values, xwx_inv = xwx_inv, multicol = multicol, residuals = residuals)
 
 	res
+}
+
+ols_fit = function(y, X, w, correct_0w = FALSE, nthreads){
+    # No control here -- done before
+
+    info_products = cpp_sparse_products(X, w, y, correct_0w, nthreads)
+    xwx = info_products$XtX
+    xwy = info_products$Xty
+
+    multicol = FALSE
+    info_inv = cpp_cholesky(xwx)
+
+    if(!is.null(info_inv$all_removed)){
+        # Means all variables are collinear! => can happen when using FEs
+        return(list(all_removed = TRUE))
+    }
+
+    xwx_inv = info_inv$XtX_inv
+    is_excluded = info_inv$id_excl
+
+    multicol = any(is_excluded)
+
+    beta = as.vector(xwx_inv %*% xwy[!is_excluded])
+
+    fitted.values = cpppar_xbeta(X[, !is_excluded, drop = FALSE], beta, nthreads)
+
+    residuals = y - fitted.values
+
+    res = list(xwx = xwx, coefficients = beta, fitted.values = fitted.values, xwx_inv = xwx_inv, multicol = multicol, residuals = residuals, is_excluded = is_excluded)
+
+    res
+}
+
+
+
+check_conv = function(y, X, fixef_id_vector, slope_flag, slope_vars, weights){
+    # VERY SLOW!!!!
+    # IF THIS FUNCTION LASTS => TO BE PORTED TO C++
+
+    # y, X => variables that were demeaned
+
+    # For each variable: we compute the optimal FE coefficient
+    # it should be 0 if the algorithm converged
+
+    Q = length(slope_flag)
+
+    nobs = length(y)
+    if(length(X) == 1){
+        K = 1
+    } else {
+        K = NCOL(X) + 1
+    }
+
+    res = matrix(NA, K, Q)
+
+    for(k in 1:K){
+        if(k == 1){
+            x = y
+        } else {
+            x = X[, k - 1]
+        }
+
+        for(q in 1:Q){
+            index_id = 1:nobs + (q - 1) * nobs
+            fixef_id = fixef_id_vector[index_id]
+
+            if(slope_flag[q]){
+                index_var = 1:nobs + (cumsum(slope_flag)[q] - 1) * nobs
+                var = slope_vars[index_var]
+
+                num = tapply(weights * x * var, fixef_id, sum)
+                denom = tapply(weights * var^2, fixef_id, sum)
+                res[k, q] = max(abs(num/denom))
+
+            } else {
+                res[k, q] = max(abs(tapply(weights * x, fixef_id, mean)))
+            }
+        }
+    }
+
+    res
 }
 
 
@@ -468,7 +602,7 @@ ols_fit = function(y, X, w, correct_0w = FALSE, nthreads){
 #' \item{fixef_sizes}{The size of each fixed-effect (i.e. the number of unique identifierfor each fixed-effect dimension).}
 #' \item{y}{[where relevant] The dependent variable (used to compute the within-R2 when fixed-effects are present).}
 #' \item{convStatus}{Logical, convergence status of the IRWLS algorithm.}
-#' \item{weights_irls}{The weights of the last iteration of the IRWLS algorithm.}
+#' \item{irls_weights}{The weights of the last iteration of the IRWLS algorithm.}
 #' \item{obsRemoved}{[where relevant] In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the row numbers of the observations that were removed. Also reports the NA observations that were removed.}
 #' \item{fixef_removed}{[where relevant] In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.}
 #' \item{coefficients}{The named vector of estimated coefficients.}
@@ -908,9 +1042,33 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
     #     warning_msg = paste(warning_msg, "Presence of collinearity. Use function collinearity() to pinpoint the problems.")
     # }
 
-    res$weights_irls = w # weights from the iteratively reweighted least square
+    # Collinearity message
+    collin.adj = 0
+    if(wols$multicol){
+        var_collinear = colnames(X)[wols$is_excluded]
+        if(notes) message(ifsingle(var_collinear, "The variable ", "Variables "), enumerate_items(var_collinear, "quote.has"), " been removed because of collinearity (see $collin.var).")
+
+        res$collin.var = var_collinear
+
+        # full set of coeffficients with NAs
+        collin.coef = setNames(rep(NA, ncol(X)), colnames(X))
+        collin.coef[!wols$is_excluded] = wols$coefficients
+        res$collin.coef = collin.coef
+
+        wols$X_demean = wols$X_demean[, !wols$is_excluded, drop = FALSE]
+        X = X[, !wols$is_excluded, drop = FALSE]
+
+        collin.adj = sum(wols$is_excluded)
+    }
+
+
+    res$irls_weights = w # weights from the iteratively reweighted least square
 
     res$coefficients = coef = wols$coefficients
+
+    if(!is.null(wols$warn_varying_slope)){
+        warning(wols$warn_varying_slope)
+    }
 
     res$linear.predictors = wols$fitted.values
     if(isOffset){
@@ -923,24 +1081,40 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
 
     if(!onlyFixef && !lean){
         # score + hessian + vcov
-        res$scores = (wols$residuals * res$weights_irls) * wols$X_demean
-        # res$hessian = crossprod(res$X_demean * sqrt(res$weights_irls))
-        res$hessian = cpppar_crossprod(wols$X_demean, res$weights_irls, nthreads)
+        res$scores = (wols$residuals * res$irls_weights) * wols$X_demean
+
+        res$hessian = cpppar_crossprod(wols$X_demean, res$irls_weights, nthreads)
 
         # cov:
-        var <- NULL
-        try(var <- solve(res$hessian), silent = TRUE)
-        if(is.null(var) || wols$multicol){
-            if(is.null(var)){
-                warning_msg = paste(warning_msg, "Covariance not defined, presence of collinearity. Use function collinearity() to pinpoint the problems.")
-                res$cov.unscaled = res$hessian * NA
-            } else {
-                warning_msg = paste(warning_msg, "Presence of collinearity in the IRLS stage. Use function collinearity() to pinpoint the problems.")
-                res$cov.unscaled = var
-            }
-        } else {
-            res$cov.unscaled = var
+        # var <- NULL
+        # try(var <- solve(res$hessian), silent = TRUE)
+        # if(is.null(var) || wols$multicol){
+        #     if(is.null(var)){
+        #         warning_msg = paste(warning_msg, "Covariance not defined, presence of collinearity. Use function collinearity() to pinpoint the problems.")
+        #         res$cov.unscaled = res$hessian * NA
+        #     } else {
+        #         warning_msg = paste(warning_msg, "Presence of collinearity in the IRLS stage. Use function collinearity() to pinpoint the problems.")
+        #         res$cov.unscaled = var
+        #     }
+        # } else {
+        #     res$cov.unscaled = var
+        # }
+        info_inv = cpp_cholesky(res$hessian, nthreads)
+        if(!is.null(info_inv$all_removed)){
+            # This should not occur, but I prefer to be safe
+            stop("Not any single variable with a positive variance was found after the weighted-OLS stage. (If possible, could you send a replicable example to fixest's author? He's curious about when that actually happens, since in theory it should never happen.)")
         }
+
+        var = info_inv$XtX_inv
+        is_excluded = info_inv$id_excl
+
+        if(any(is_excluded)){
+            # There should be no remaining collinearity
+            warning_msg = paste(warning_msg, "Residual collinearity was found after the weighted-OLS stage. The covariance is not defined. (This should not happen. If possible, could you send a replicable example to fixest's author? He's curious about when that actually happen.)")
+            var = matrix(NA, length(is_excluded), length(is_excluded))
+        }
+        res$cov.unscaled = var
+
         rownames(res$cov.unscaled) = colnames(res$cov.unscaled) = names(coef)
 
         # se
@@ -971,6 +1145,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
     n = length(y)
     res$nobs = n
 
+    res$nparams = res$nparams - collin.adj
     df_k = res$nparams
 
     # r2s
@@ -1666,7 +1841,7 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 		theta = coef[".theta"]
 		res$theta = theta
 
-		if(theta > 1000){
+		if(notes && theta > 1000){
 			message("Very high value of theta (", theta, "). There is no sign of overdisperion, you may consider a Poisson model.")
 		}
 
@@ -1745,8 +1920,8 @@ format_error_msg = function(x, origin){
 
     x = gsub("\n+$", "", x)
 
-    if(grepl("^Error (in|:) (fe|fixest)[^\n]+\n", x)){
-        res = gsub("^Error (in|:) (fe|fixest)[^\n]+\n *(.+)", "\\3", x)
+    if(grepl("^Error (in|:|: in) (fe|fixest)[^\n]+\n", x)){
+        res = gsub("^Error (in|:|: in) (fe|fixest)[^\n]+\n *(.+)", "\\3", x)
     } else if(grepl("[Oo]bject '.+' not found", x)) {
         res = x
     } else {
