@@ -266,62 +266,62 @@ NumericVector cpppar_logit_devresids(NumericVector y, NumericVector mu, NumericV
 }
 
 
-// [[Rcpp::export]]
-NumericMatrix cpppar_crossprod(NumericMatrix X, NumericVector w, int nthreads){
-
-	int N = X.nrow();
-	int K = X.ncol();
-
-	bool isWeight = false;
-	if(w.length() > 1){
-		isWeight = true;
-	}
-
-	NumericMatrix res(K, K);
-
-	int nValues = K * K;
-	NumericVector values(nValues);
-
-	// computation
-#pragma omp parallel for num_threads(nthreads)
-	for(int index=0 ; index<nValues ; index++){
-		int k_row = index % K;
-		int k_col = index / K;
-
-		if(k_row <= k_col){
-			double val = 0;
-
-			if(isWeight){
-				for(int i=0 ; i<N ; ++i){
-					val += X(i, k_row) * w[i] * X(i, k_col);
-				}
-			} else {
-				for(int i=0 ; i<N ; ++i){
-					val += X(i, k_row) * X(i, k_col);
-				}
-			}
-
-			values(index) = val;
-		}
-
-	}
-
-	// save
-	for(int index=0 ; index<nValues ; index++){
-		int k_row = index % K;
-		int k_col = index / K;
-
-		if(k_row <= k_col){
-			res(k_row, k_col) = values(index);
-			if(k_row != k_col){
-				res(k_col, k_row) = values(index);
-			}
-		}
-
-	}
-
-	return(res);
-}
+// // [[Rcpp::export]]
+// NumericMatrix cpppar_crossprod(NumericMatrix X, NumericVector w, int nthreads){
+//
+// 	int N = X.nrow();
+// 	int K = X.ncol();
+//
+// 	bool isWeight = false;
+// 	if(w.length() > 1){
+// 		isWeight = true;
+// 	}
+//
+// 	NumericMatrix res(K, K);
+//
+// 	int nValues = K * K;
+// 	NumericVector values(nValues);
+//
+// 	// computation
+// #pragma omp parallel for num_threads(nthreads)
+// 	for(int index=0 ; index<nValues ; index++){
+// 		int k_row = index % K;
+// 		int k_col = index / K;
+//
+// 		if(k_row <= k_col){
+// 			double val = 0;
+//
+// 			if(isWeight){
+// 				for(int i=0 ; i<N ; ++i){
+// 					val += X(i, k_row) * w[i] * X(i, k_col);
+// 				}
+// 			} else {
+// 				for(int i=0 ; i<N ; ++i){
+// 					val += X(i, k_row) * X(i, k_col);
+// 				}
+// 			}
+//
+// 			values(index) = val;
+// 		}
+//
+// 	}
+//
+// 	// save
+// 	for(int index=0 ; index<nValues ; index++){
+// 		int k_row = index % K;
+// 		int k_col = index / K;
+//
+// 		if(k_row <= k_col){
+// 			res(k_row, k_col) = values(index);
+// 			if(k_row != k_col){
+// 				res(k_col, k_row) = values(index);
+// 			}
+// 		}
+//
+// 	}
+//
+// 	return(res);
+// }
 
 
 
@@ -659,7 +659,63 @@ IntegerVector cpppar_check_only_0(SEXP x_mat, int n, int nthreads){
 }
 
 
-
+// // [[Rcpp::export]]
+// List cpppar_scale(SEXP x, int nthreads){
+//     // x: List of numeric vectors
+//
+//     int Q = Rf_length(x);
+//     SEXP x0 = VECTOR_ELT(x, 0);
+//     int n = Rf_length(x0);
+//
+//     List res;
+//
+//     // We only have numerics: so either integer, either double
+// #pragma omp parallel for num_threads(nthreads)
+//     for(int q=0 ; q<Q ; ++q){
+//
+//         SEXP xq = VECTOR_ELT(x, q);
+//         double sum_x = 0;
+//         double sum_x2 = 0;
+//
+//         if(TYPEOF(xq) == REALSXP){
+//             double *px = REAL(xq);
+//             double v;
+//             for(int i=0 ; i<n ; ++i){
+//                 v = px[i];
+//                 sum_x += v;
+//                 sum_x2 += v * v;
+//             }
+//         } else {
+//             int *px = INTEGER(xq);
+//             double v;
+//             for(int i=0 ; i<n ; ++i){
+//                 v = static_cast<double>(px[i]);
+//                 sum_x += v;
+//                 sum_x2 += v * v;
+//             }
+//         }
+//
+//         double mean_x = sum_x / n;
+//         double sd_x = sqrt(sum_x2 / n - mean_x * mean_x);
+//         // ATTENTION AUX 0sd
+//
+//         NumericVector x_out(n);
+//         if(TYPEOF(xq) == REALSXP){
+//             double *px = REAL(xq);
+//             for(int i=0 ; i<n ; ++i){
+//                 x_out[i] = (px - mean_x) / sd_x
+//             }
+//         }
+//
+//
+//
+//     }
+//
+//
+//
+//
+//     return res;
+// }
 
 
 
