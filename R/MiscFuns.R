@@ -5890,6 +5890,14 @@ isVector = function(x){
     return(FALSE)
 }
 
+fill_with_na = function(x, obsRemoved){
+    if(is.null(obsRemoved)) return(x)
+
+    res = rep(NA, length(x) + length(obsRemoved))
+    res[-obsRemoved] = x
+    res
+}
+
 
 #### ................. ####
 #### Aditional Methods ####
@@ -6220,6 +6228,7 @@ fitted.fixest = fitted.values.fixest = function(object, type = c("response", "li
 #'
 #' @inheritParams nobs.fixest
 #'
+#' @param type A character scalar, either \code{"response"} (default), \code{"deviance"} or \code{"pearson"}.
 #' @param ... Not currently used.
 #'
 #' @details
@@ -6243,8 +6252,103 @@ fitted.fixest = fitted.values.fixest = function(object, type = c("response", "li
 #' # we plot the residuals
 #' plot(resid(res_poisson))
 #'
-resid.fixest = residuals.fixest = function(object, ...){
-	object$residuals
+resid.fixest = residuals.fixest = function(object, type = c("response", "deviance", "pearson"), ...){
+
+    check_arg_plus(type, "match")
+
+    method = object$method
+    family = object$family
+
+    r = object$residuals
+    w = object[["weights"]]
+
+    if(method == "feols" || (method %in% c("feNmlm", "femlm") && family == "gaussian")){
+        if(type %in% c("deviance", "pearson") && !is.null(w)){
+            res = r * sqrt(w)
+        } else {
+            res = r
+        }
+
+    } else if(method %in% c("fepois", "feglm")){
+
+        if(type == "response"){
+            res = r
+
+        } else {
+            mu = object$fitted.values
+            if(is.null(w)) w = rep(1, length(r))
+
+            if(type == "deviance"){
+                y = r + mu
+
+                res = sqrt(pmax((object$family$dev.resids)(y, mu, w), 0))
+                qui = y < mu
+                res[qui] = -res[qui]
+
+            } else if(type == "pearson"){
+                res = r * sqrt(w)/sqrt(object$family$variance(object$fitted.values))
+
+            }
+        }
+
+
+    } else {
+
+        if(type == "response"){
+            res = r
+
+        } else {
+            # deviance or pearson
+            mu = object$fitted.values
+            if(is.null(w)) w = rep(1, length(r))
+
+            theta = ifelse(family == "negbin", object$theta, 1)
+
+            if(type == "deviance"){
+
+                # dev.resids function
+                if(family == "poisson"){
+                    dev.resids = poisson()$dev.resids
+
+                } else if(family == "logit"){
+                    dev.resids = binomial()$dev.resids
+
+                } else if(family == "negbin"){
+                    dev.resids = function(y, mu, wt) 2 * wt * (y * log(pmax(1, y)/mu) - (y + theta) * log((y + theta)/(mu + theta)))
+
+                }
+
+                y = object$residuals + mu
+
+                res = sqrt(pmax(dev.resids(y, mu, w), 0))
+                qui = y < mu
+                res[qui] = -res[qui]
+
+            } else if(type == "pearson"){
+
+                # variance function
+                if(family == "poisson"){
+                    variance = poisson()$variance
+
+                } else if(family == "logit"){
+                    variance = binomial()$variance
+
+                } else if(family == "negbin"){
+                    variance = function(mu) mu + mu^2/theta
+
+                }
+
+                res = r * sqrt(w)/sqrt(variance(mu))
+
+            }
+        }
+
+
+    }
+
+    res = fill_with_na(res, object$obsRemoved)
+
+    res
 }
 
 #' @rdname resid.fixest
@@ -7206,6 +7310,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 				vcov = vcov * (n / (n - K))
 			}
 		}
+
 	}
 
 	if(any(diag(vcov)<0)){
