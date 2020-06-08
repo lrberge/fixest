@@ -2825,6 +2825,374 @@ xpd = function(fml, ...){
     fml
 }
 
+
+#' Fast transform of any type of vector(s) into an integer vector
+#'
+#' Tool to transform any type of vector, or even combination of vectors, into an integer vector ranging from 1 to the number of unique values. This actually creates an unique identifier vector.
+#'
+#' @param ... Vectors of any type, to be transformed in integer.
+#' @param sorted Logical, default is \code{FALSE}. Whether the integer vector should make reference to sorted values?
+#' @param add_items Logical, default is \code{FALSE}. Whether to add the unique values of the original vector(s). If requested, an attribute \code{items} is created containing the values (alternatively, they can appear in a list if \code{items.list=TRUE}).
+#' @param items.list Logical, default is \code{FALSE}. Only used if \code{add_items=TRUE}. If \code{TRUE}, then a list of length 2 is returned with \code{x} the integer vector and \code{items} the vector of items.
+#' @param multi.join Logical, or character, scalar, defaults to \code{FALSE}. Only used if multiple vectors are to be transformed into integers. If \code{multi.join} is not \code{FALSE}, the the values of the different vectors will be collated using \code{\link[base]{paste}} with \code{collapse=multi.join}.
+#'
+#' @details
+#' If multiple vectors have to be combined and \code{add_items=TRUE}, to have user readable values in the items, you should add the argument \code{multi.join} so that the values of the vectors are combined in a "user-readable" way. Note that in the latter case, the algorithm is much much slower.
+#'
+#' @return
+#' Reruns a vector of the same length as the input vectors.
+#' If \code{add_items=TRUE} and \code{items.list=TRUE}, a list of two elements is returned: \code{x} being the integer vector and \code{items} being the unique values to which the values in \code{x} make reference.
+#'
+#' @examples
+#'
+#' x1 = iris$Species
+#' x2 = as.integer(iris$Sepal.Length)
+#'
+#' # transforms the species vector into integers
+#' to_integer(x1)
+#'
+#' # To obtain the "items":
+#' to_integer(x1, add_items = TRUE)
+#' # same but in list form
+#' to_integer(x1, add_items = TRUE, items.list = TRUE)
+#'
+#' # transforms x2 into an integer vector from 1 to 4
+#' to_integer(x2, add_items = TRUE)
+#'
+#' # To have the sorted items:
+#' to_integer(x2, add_items = TRUE, sorted = TRUE)
+#'
+#' # The result can safely be used as an index
+#' res = to_integer(x2, add_items = TRUE, sorted = TRUE, items.list = TRUE)
+#' all(res$items[res$x] == x2)
+#'
+#'
+#' #
+#' # Multiple vectors
+#' #
+#'
+#' # by default, the two vector are fast combined, and items are meaningless
+#' to_integer(x1, x2, add_items = TRUE)
+#'
+#' # You can use multi.join to have human-readable values for the items:
+#' to_integer(x1, x2, add_items = TRUE, multi.join = TRUE)
+#'
+#' to_integer(x1, x2, add_items = TRUE, multi.join = "; ")
+#'
+to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE, multi.join = FALSE){
+
+    check_arg(..., "vector NA OK mbt")
+    check_arg(sorted, add_items, items.list, "logical scalar")
+    check_arg(multi.join, "scalar(logical, character)")
+
+    dots = list(...)
+
+    # Removing NAs
+    Q = length(dots)
+    n_all = lengths(dots)
+    n = n_all[1]
+
+    if(length(unique(n_all)) != 1) stop("All elements in '...' should be of the same length (current lenghts are ", enumerate_items(n_all), ").")
+
+    is_na = is.na(dots[[1]])
+    for(q in seq(from = 2, length.out = Q - 1)){
+        is_na = is_na | is.na(dots[[q]])
+    }
+
+    ANY_NA = FALSE
+    if(any(is_na)){
+        ANY_NA = TRUE
+
+        if(all(is_na)){
+            message("NOTE: All values are NA.")
+            res = rep(NA, n)
+            if(add_items){
+                if(items.attr){
+                    attr(res, "items") = NA
+                } else {
+                    res = list(x = res, items = NA)
+                }
+            }
+
+            return(res)
+        }
+
+        for(q in 1:Q) dots[[q]] = dots[[q]][!is_na]
+    }
+
+    #
+    # Creating the ID
+    #
+
+    do_join = FALSE
+    if(!isFALSE(multi.join) && Q > 1){
+        do_join = TRUE
+        if(isTRUE(multi.join)) multi.join = "_"
+    }
+
+    if(Q == 1){
+        res = quickUnclassFactor(dots[[1]], addItem = add_items, sorted = sorted)
+
+    } else {
+
+        if(do_join){
+            myDots = dots
+            myDots$sep = multi.join
+            index = do.call("paste", myDots)
+
+        } else {
+
+            for(q in 1:Q){
+                dots[[q]] = quickUnclassFactor(dots[[q]], sorted = sorted)
+            }
+
+            # Then we combine
+            power = floor(1 + log10(sapply(dots, max)))
+
+            if(sum(power) > 14){
+                myDots = dots
+                myDots$sep = multi.join
+                index = do.call("paste", myDots)
+            } else {
+                # quicker, but limited by the precision of doubles
+                index = dots[[1]]
+                for(q in 2:Q){
+                    index = index + dots[[q]]*10**sum(power[1:(q-1)])
+                }
+            }
+        }
+
+        res = quickUnclassFactor(index, addItem = add_items, sorted = sorted)
+    }
+
+    if(ANY_NA){
+        if(is.list(res)){
+            x = res$x
+        } else {
+            x = res
+        }
+
+        x_na = rep(NA, n)
+        x_na[!is_na] = x
+
+        if(is.list(res)){
+            res$x = x_na
+        } else {
+            res = x_na
+        }
+
+    }
+
+    if(add_items && isFALSE(items.list)){
+        res_tmp = res$x
+        attr(res_tmp, "items") = res$items
+        res = res_tmp
+    }
+
+
+
+    res
+}
+
+
+
+#' Centers a set of variables around a set of factors
+#'
+#'
+#'
+#' @param X A matrix, vector or a list. The vectors to be centered. There must be the same number of observations as in the factors used for centering (argument \code{fe}).
+#' @param fe A matrix, vector or list. The factors used to center the variables in argument \code{X}. (Note: fe stands for fixed-effects.)
+#' @param weights Vector, can be missing or NULL. If present, it must contain the same number of observations as in \code{X}.
+#' @param nthreads Number of threads to be used. By default it is equal to \code{getFixest_nthreads()}.
+#' @param notes Logical, whether to display a message when NA values are removed. By default it is equal to \code{getFixest_notes()}.
+#' @param iter Number of iterations, default is 2000.
+#' @param tol Stopping criterion of the algorithm. Default is \code{1e-6}. The algorithm stops when the maximum absolute increase in the coefficients values is lower than \code{tol}.
+#' @param im_confident Logical, default is \code{FALSE}. FOR EXPERT USERS ONLY! This argument allows to skip some of the preprocessing of the arguments given in input. If \code{TRUE}, then \code{X} MUST be a numeric matrix (not integer, numeric), \code{fe} MUST be a list and \code{weights}, if given, MUST be numeric (not integer!). Further the three MUST NOT contain any NA values and MUST have the same number of observations. Non compliance to these rules may simply lead your R session to break.
+#'
+#' @return
+#' It returns a matrix of the same number of columns as \code{X} in input. The number of rows is equal to the number of rows of \code{X} minus the number of NA values (contained in \code{X}, \code{fe} or \code{weights}).
+#'
+#' @examples
+#'
+#' # Illustration of the FWL theorem
+#' data(trade)
+#'
+#' base = trade
+#' base$ln_dist = log(base$dist_km)
+#' base$ln_euros = log(base$Euros)
+#'
+#' # We center the two variables ln_dist and ln_euros
+#' #  on the factors Origin and Destination
+#' X_demean = demean(X = base[, c("ln_dist", "ln_euros")],
+#'                   fe = base[, c("Origin", "Destination")])
+#' base[, c("ln_dist_dm", "ln_euros_dm")] = X_demean
+#'
+#' est = feols(ln_euros_dm ~ ln_dist_dm, base)
+#' est_fe = feols(ln_euros ~ ln_dist | Origin + Destination, base)
+#'
+#' # The results are the same as if we used the two factors
+#' # as fixed-effects
+#' etable(est, est_fe, se = "st")
+#'
+#'
+#'
+#'
+demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFixest_notes(), iter = 2000, tol = 1e-6, im_confident = FALSE){
+    # LATER: add slopes
+
+    # Step 1: formatting of the input
+    if(!im_confident){
+        check_arg(X, fe, "numeric vmatrix | list mbt")
+        check_arg(iter, "integer scalar GE{1}")
+        check_arg(tol, "numeric scalar GT{0}")
+        check_arg(notes, "logical scalar")
+
+        ## X
+        if(is.list(X)){
+            var_names = names(X)
+
+            if(!is.data.frame(X)){
+                n_all = lengths(X)
+                if(any(diff(n_all) != 0)){
+                    n_unik = unique(n_all)
+                    stop("In argument 'X' all elements of the list must be of the same length. This is currently not the case (ex: one is of length ", n_unik[1], " while another is of length ", n_unik[2], ").")
+                }
+                X = as.data.frame(X)
+            }
+            is_numeric = sapply(X, is.numeric)
+            if(any(!is_numeric)){
+                n_non_num = sum(is_numeric)
+                stop("All values in 'X' must be numeric. This is not the case for ", n_non_num, " variable", plural(n_non_num), ".")
+            }
+            X = as.matrix(X)
+        } else {
+            if(!is.matrix(X)) X = as.matrix(X)
+            var_names = colnames(X)
+        }
+
+        if(is.null(var_names)) var_names = paste0("V", 1:ncol(X))
+        X = X * 1
+
+        ## fe
+        if(is.list(fe)){
+            fe_names = names(fe)
+
+            if(!is.data.frame(fe)){
+                n_all = lengths(fe)
+                if(any(diff(n_all) != 0)){
+                    n_unik = unique(n_all)
+                    stop("In argument 'fe' all elements of the list must be of the same length. This is currently not the case (ex: one is of length ", n_unik[1], " while another is of length ", n_unik[2], ").")
+                }
+                fe = as.data.frame(fe)
+            }
+        } else {
+            fe_names = colnames(fe)
+            fe = as.data.frame(fe)
+        }
+
+        if(is.null(fe_names)) fe_names = paste0("Factor_", 1:length(fe))
+
+        if(nrow(fe) != nrow(X)) stop("The number of observations in 'X' and in 'fe' don't match (", nrow(X), " vs ", nrow(fe), ").")
+
+
+        ## weights
+        check_arg_plus(weights, "NULL numeric conv vector len(X) GE{0}", .data = X)
+        is_weight = !missing(weights) && !is.null(weights)
+
+        ## nthreads
+        check_arg(nthreads, "integer scalar GE{1}")
+        if(nthreads > 1){
+            max_threads = get_nb_threads()
+            if(max_threads == 0){
+                warning("OpenMP not detected: cannot use ", nthreads, " threads, single-threaded mode instead.")
+                nthreads = 1
+            } else if(nthreads > max_threads){
+                warning("Asked for ", nthreads, " threads while the maximum is ", max_threads, ". Set to ", max_threads, " threads instead.")
+                nthreads = max_threads
+            }
+        }
+
+
+        #
+        # FORMATTING
+        #
+
+        # NAs
+        is_NA = FALSE
+        info_X = cpppar_which_na_inf_mat(X, nthreads)
+        n_na_x = 0
+        if(info_X$any_na_inf){
+            is_NA = is_NA | info_X$is_na_inf
+            n_na_x = sum(info_X$is_na_inf)
+        }
+
+        n_na_fe = 0
+        if(anyNA(fe)){
+            is_na_fe = rowSums(is.na(fe)) > 0
+            n_na_fe = sum(is_na_fe)
+            is_NA = is_NA | is_na_fe
+        }
+
+        weight_msg = ""
+        if(is_weight){
+            is_na_weights = is.na(weights)
+            weight_msg = paste0(", weights: ", sum(n_na_w))
+            is_NA = is_NA | is_na_weights
+        }
+
+        n_na = sum(is_NA)
+        if(n_na > 0 && notes){
+            if(all(is_NA)) stop("All observations contain NA values (Breakup: X: ", n_na_x, ", fe: ", n_na_fe, weight_msg, ").")
+
+            message("NOTE: ", signif_plus(n_na), " observation", plural(n_na), " removed because of NA values (Breakup: X: ", n_na_x, ", fe: ", n_na_fe, weight_msg, ").")
+        }
+
+        if(n_na > 0){
+            X = X[!is_NA, , drop = FALSE]
+            fe = fe[!is_NA, , drop = FALSE]
+            if(is_weight) weights = weights[!is_NA]
+        }
+
+        if(!is_weight) weights = 1
+
+    } else {
+        if(missing(weights) || is.null(weights)) weights = 1
+    }
+
+    #
+    # Unclassing fes
+    #
+
+    Q = length(fe)
+    n = length(fe[[1]])
+    quf_info_all = cpppar_quf_table_sum(x = fe, y = rep(1, n), do_sum_y = FALSE, type = 0, only_slope = rep(FALSE, Q), nthreads = nthreads)
+
+    # table/sum_y/sizes
+    fixef_table = quf_info_all$table
+    fixef_sizes = lengths(fixef_table)
+
+    fixef_id_vector = as.integer(unlist(quf_info_all$quf) - 1)
+    fixef_table_vector = as.integer(unlist(fixef_table))
+
+
+    # LATER => rework cpp_demean so that y can be void
+    y = rep(0, n)
+
+    #
+    # The algorithm
+    #
+
+    vars_demean <- cpp_demean(y, X, weights, iterMax = iter,
+                              diffMax = tol, nb_cluster_all = fixef_sizes,
+                              dum_vector = fixef_id_vector, tableCluster_vector = fixef_table_vector,
+                              slope_flag = rep(FALSE, Q), slope_vars = 0,
+                              r_init = 0, checkWeight = FALSE, nthreads = nthreads)
+
+    X_demean = vars_demean$X_demean
+    colnames(X_demean) = var_names
+    X_demean
+}
+
 #### ................. ####
 #### Internal Funs     ####
 ####
