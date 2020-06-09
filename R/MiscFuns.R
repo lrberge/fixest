@@ -623,9 +623,14 @@ esttable <- function(..., se=c("standard", "white", "cluster", "twoway", "threew
 #'
 #' @param x A \code{fixest} object, e.g. obtained with function \code{\link[fixest]{feglm}} or \code{\link[fixest]{feols}}.
 #' @param type A character vector representing the R2 to compute. The R2 codes are of the form: "wapr2" with letters "w" (within), "a" (adjusted) and "p" (pseudo) possibly missing. E.g. to get the regular R2: use \code{type = "r2"}, the within adjusted R2: use \code{type = "war2"}, the pseudo R2: use \code{type = "pr2"}, etc. Use \code{"sq.cor"} for the squared correlation. By default, all R2s are computed.
+#' @param full_names Logical scalar, default is \code{FALSE}. If \code{TRUE} then names of the vector in output will have full names instead of keywords (e.g. \code{Squared Correlation} instead of \code{sq.cor}, etc).
 #'
 #' @details
 #' For R2s with no theoretical justification, like e.g. regular R2s for maximum likelihood models -- or within R2s for models without fixed-effects, NA is returned. The single measure to possibly compare all kinds of models is the squared correlation between the dependent variable and the expected predictor.
+#'
+#' The pseudo-R2 is also returned in the OLS case, it corresponds to the pseudo-R2 of the equivalent GLM model with a Gaussian family.
+#'
+#' For the adjusted within-R2s, the adjustment factor is \code{(n - nb_fe) / (n - nb_fe - K)} with \code{n} the number of observations, \code{nb_fe} the number of fixed-effects and \code{K} the number of variables.
 #'
 #' @return
 #' Returns a named vector.
@@ -639,49 +644,54 @@ esttable <- function(..., se=c("standard", "white", "cluster", "twoway", "threew
 #' data(trade)
 #'
 #' # We estimate the effect of distance on trade (with 3 fixed-effects)
-#' est_pois = femlm(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
+#' est = feols(log(Euros) ~ log(dist_km)|Origin+Destination+Product, trade)
 #'
 #' # Squared correlation:
-#' r2(est_pois, "sq.cor")
+#' r2(est, "sq.cor")
 #'
 #' # "regular" r2:
-#' r2(est_pois, "r2")
+#' r2(est, "r2")
 #'
-#' # pseudo r2
-#' r2(est_pois, "pr2")
+#' # pseudo r2 (equivalent to GLM with Gaussian family)
+#' r2(est, "pr2")
 #'
-#' # within adjusted r2
-#' r2(est_pois, "war2")
+#' # adjusted within r2
+#' r2(est, "war2")
 #'
 #' # all four at once
-#' r2(est_pois, c("sq.cor", "r2", "pr2", "war2"))
+#' r2(est, c("sq.cor", "r2", "pr2", "war2"))
 #'
-r2 = function(x, type = "all"){
+#' # same with full names instead of codes
+#' r2(est, c("sq.cor", "r2", "pr2", "war2"), full_names = TRUE)
+#'
+r2 = function(x, type = "all", full_names = FALSE){
 	# p: pseudo
 	# w: within
 	# a: adjusted
-    # NOTA: wr2 not supported for feglm because fe_model incurs too much computational cost
+
+    check_arg(full_names, "logical scalar")
 
 	if(!"fixest" %in% class(x)){
 		stop("Only 'fixest' objects are supported.")
 	}
 
-	if(!is.character(type) || !isVector(type)){
-		stop("Argument 'type' must be a character vector (e.g. type = c(\"sq.cor\", \"r2\", \"pr2\")). (a: adjused, p: pseudo, w: within.)")
-	}
+	check_arg(type, "character vector no na", .message = "Argument 'type' must be a character vector (e.g. type = c(\"sq.cor\", \"r2\", \"pr2\")). (a: adjused, p: pseudo, w: within.)")
 
 	# type_allowed next => ("count", "acount") ?
-    dict_names = c("sq.cor" = "Squared Correlation", "r2" = "R2", "ar2" = "Adjusted R2", "pr2" = "Pseudo R2", "apr2" = "Adjusted Pseudo R2", "wr2" = "Within R2", "war2" = "Within Adjusted R2", "wpr2" = "Within Pseudo R2", "wapr2" = "Within Adjusted Pseudo R2")
+    dict_names = c("sq.cor" = "Squared Correlation", "r2" = "R2", "ar2" = "Adjusted R2", "pr2" = "Pseudo R2", "apr2" = "Adjusted Pseudo R2", "wr2" = "Within R2", "war2" = "Adjusted Within R2", "wpr2" = "Within Pseudo R2", "wapr2" = "Adjusted Within Pseudo R2")
 	type_allowed = c("sq.cor", "r2", "ar2", "pr2", "apr2", "wr2", "war2", "wpr2", "wapr2")
+	types_alias = c(par2 = "apr2", awr2 = "war2", pwr2 = "wpr2", wpar2 = "wapr2", pwar2 = "wapr2", pawr2 = "wapr2", apwr2 = "wapr2", awpr2 = "wapr2")
 	if("all" %in% type){
 		type_all = type_allowed
 	} else {
-		type_all = tolower(unique(type))
-		pblm = setdiff(type_all, type_allowed)
+		type_all = tolower(type)
+		pblm = setdiff(type_all, c(type_allowed, names(types_alias)))
 		if(length(pblm) > 0){
-			stop("The r2 type", enumerate_items(pblm, "s.is"), " not valid.")
+			stop("The r2 type", enumerate_items(pblm, "quote.s.is"), " not valid.")
 		}
 	}
+
+	type_all = dict_apply(type_all, types_alias)
 
 	is_ols = x$method == "feols"
 	isFixef = "fixef_vars" %in% names(x)
@@ -759,13 +769,19 @@ r2 = function(x, type = "all"){
 				}
 			} else {
 				ssr_null = x$ssr_null
-				res[i] = 1 - drop(crossprod(resid(x))) / ssr_null * (n - 1) / (n - df_k)
+				df.intercept = 1 * (isFixef || grepl("(Intercept)", names(x$coefficients), fixed = TRUE))
+				res[i] = 1 - drop(crossprod(resid(x))) / ssr_null * (n - df.intercept) / (n - df_k)
 			}
 
 		}
 	}
 
-	names(res) = type_all
+	if(full_names){
+	    names(res) = dict_apply(type_all, dict_names)
+	} else {
+	    names(res) = type_all
+	}
+
 
 	res
 }
