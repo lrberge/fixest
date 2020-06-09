@@ -2161,7 +2161,6 @@ collinearity = function(x, verbose){
 #'
 #' This function shows the means and standard-deviations of several variables conditional on whether they are from the treated or the control group. The groups can further be split according to a pre/post variable. Results can be seamlessly be exported to Latex.
 #'
-#' @inheritParams esttex
 #'
 #' @param fml Either a formula of the type \code{var1 + ... + var[N] ~ treat} or \code{var1 + ... + var[N] ~ treat | post}. Either a data.frame/matrix containing all the variables for which the means are to be computed (they must be numeric of course). Both the treatment and the post variables must contain only exactly two values. You can use a point to select all the variables of the data set: \code{. ~ treat}.
 #' @param base A data base containing all the variables in the formula \code{fml}.
@@ -2469,7 +2468,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
     }
 
     if(usePost){
-        check_arg(prepostnames, "character vector len(2)")
+        check_arg(prepostnames, "character vector len(2) no na")
     }
 
     treat_cases = sort(unique(treat_var), decreasing = TRUE)
@@ -2881,7 +2880,7 @@ xpd = function(fml, ...){
 #'
 to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE, multi.join = FALSE){
 
-    check_arg(..., "vector NA OK mbt")
+    check_arg(..., "vector mbt")
     check_arg(sorted, add_items, items.list, "logical scalar")
     check_arg(multi.join, "scalar(logical, character)")
 
@@ -2907,10 +2906,10 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
             message("NOTE: All values are NA.")
             res = rep(NA, n)
             if(add_items){
-                if(items.attr){
-                    attr(res, "items") = NA
-                } else {
+                if(items.list){
                     res = list(x = res, items = NA)
+                } else {
+                    attr(res, "items") = NA
                 }
             }
 
@@ -3136,7 +3135,7 @@ demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFi
         weight_msg = ""
         if(is_weight){
             is_na_weights = is.na(weights)
-            weight_msg = paste0(", weights: ", sum(n_na_w))
+            weight_msg = paste0(", weights: ", sum(is_na_weights))
             is_NA = is_NA | is_na_weights
         }
 
@@ -3224,17 +3223,17 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits
         show_depvar = depvar
     }
 
-    check_arg(keep, drop, order, "character vector NULL", .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
+    check_arg(keep, drop, order, "character vector no na NULL", .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
 
     check_arg(file, label, interaction.combine, "character scalar")
-    check_arg(signifCode, "NULL NA | named numeric vector GE{0} LE{1}")
-    check_arg(subtitles, "character vector")
-    check_arg(yesNoFixef, "character vector len(,2)")
+    check_arg(signifCode, "NULL NA | named numeric vector no na GE{0} LE{1}")
+    check_arg(subtitles, "character vector no na")
+    check_arg(yesNoFixef, "character vector no na len(,2)")
     check_arg(powerBelow, "integer scalar LE{-1}")
 
     check_arg(ci, "numeric scalar GT{0.5} LT{1}")
 
-    check_arg(dict, "NULL logical scalar | named character vector")
+    check_arg(dict, "NULL logical scalar | named character vector no na")
 
     # default values for dict
     if(missing(dict)){
@@ -3397,7 +3396,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits
         check_arg(fitstat, "os formula", .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing 'aic', 'bic', 'll', or valid r2 types names (see function r2). ")
         fitstat = attr(terms(fitstat), "term.labels")
     } else {
-        check_arg(fitstat, "character vector", .message = "Argument 'fitstat' must be a character vector (or a one sided formula) containing 'aic', 'bic', 'll', or valid r2 types names (see function r2). ")
+        check_arg(fitstat, "character vector no na", .message = "Argument 'fitstat' must be a character vector (or a one sided formula) containing 'aic', 'bic', 'll', or valid r2 types names (see function r2). ")
     }
 
     # checking the types
@@ -5390,7 +5389,7 @@ par_fit = function(my_par, id){
 
 dict_apply = function(x, dict = NULL, up = 1){
 
-    check_arg(dict, "NULL named character vector", .message = "The argument 'dict' must be a dictionnary, ie a named vector (eg dict=c(\"old_name\"=\"new_name\")", .up = up)
+    check_arg(dict, "NULL named character vector no na", .message = "The argument 'dict' must be a dictionnary, ie a named vector (eg dict=c(\"old_name\"=\"new_name\")", .up = up)
 
     if(missing(dict) || length(dict) == 0){
         return(x)
@@ -5407,7 +5406,7 @@ keep_apply = function(x, keep = NULL, up = 1){
         return(x)
     }
 
-    check_arg(keep, "character vector", .up = up, .message = "The arg. 'keep' must be a vector of regular expressions (see help(regex)).")
+    check_arg(keep, "character vector no na", .up = up, .message = "The arg. 'keep' must be a vector of regular expressions (see help(regex)).")
 
     res = x
 
@@ -5441,7 +5440,7 @@ drop_apply = function(x, drop = NULL, up = 1){
         return(x)
     }
 
-    check_arg(drop, "character vector", .up = up, .message = "The arg. 'drop' must be a vector of regular expressions (see help(regex)). ")
+    check_arg(drop, "character vector no na", .up = up, .message = "The arg. 'drop' must be a vector of regular expressions (see help(regex)). ")
 
     res = x
 
@@ -5474,7 +5473,7 @@ order_apply = function(x, order = NULL, up = 1){
         return(x)
     }
 
-    check_arg(order, "character vector", .up = up, .message = "The arg. 'order' must be a vector of regular expressions (see help(regex)). ")
+    check_arg(order, "character vector no na", .up = up, .message = "The arg. 'order' must be a vector of regular expressions (see help(regex)). ")
 
     res = x
 
@@ -6952,10 +6951,25 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 
 			return(VCOV_raw)
 		} else {
-			VCOV_raw_forced = MASS::ginv(object$hessian)
-			if(anyNA(VCOV_raw_forced)) {
-				stop("The covariance matrix could not be 'forced'.")
-			}
+			# VCOV_raw_forced = MASS::ginv(object$hessian)
+			# if(anyNA(VCOV_raw_forced)) {
+			# 	stop("The covariance matrix could not be 'forced'.")
+			# }
+		    info_inv = cpp_cholesky(object$hessian)
+		    if(!is.null(info_inv$all_removed)){
+		        # Means all variables are collinear! => can happen when using FEs
+		        stop("All variables have virtually no effect on the dependent variable. Covariance is not defined.")
+		    }
+
+		    VCOV_raw_forced = info_inv$XtX_inv
+		    if(any(info_inv$id_excl)){
+		        n_collin = sum(info_inv$all_removed)
+		        message("NOTE: ", n_letter(n_collin), " variable", plural(n_collin, "s.has"), " been found to be singular.")
+
+		        VCOV_raw_forced = cpp_mat_reconstruct(VCOV_raw_forced, info_inv$id_excl)
+		        VCOV_raw_forced[, info_inv$id_excl] = NA
+		        VCOV_raw_forced[info_inv$id_excl, ] = NA
+		    }
 
 			object$cov.unscaled = VCOV_raw_forced
 			return(vcov(object, se=se.val, cluster=cluster, dof=dof))
@@ -7693,7 +7707,6 @@ update.fixest = function(object, fml.update, nframes = 1, ...){
 #'
 #' This function extracts the formula from a \code{fixest} estimation (obtained with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}). If the estimation was done with fixed-effects, they are added in the formula after a pipe (\dQuote{|}). If the estimation was done with a non linear in parameters part, then this will be added in the formula in between \code{I()}.
 #'
-#' @inheritParams nobs.fixest
 #'
 #' @param x An object of class \code{fixest}. Typically the result of a \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}} estimation.
 #' @param type A character scalar. Default is \code{type = "full"} which gives back a formula containing the linear part of the model along with the fixed-effects (if any) and the non-linear in parameters part (if any). If \code{type = "linear"} then only the linear formula is returned. If \code{type = "NL"} then only the non linear in parameters part is returned.

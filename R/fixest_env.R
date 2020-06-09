@@ -755,11 +755,11 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
                 check_value(offset, "os formula var(data)", .data = data)
                 offset.value = offset[[2]]
-                check_value_plus(offset.value, "evalset numeric vector conv NA OK", .data = data, .prefix = "In argument 'offset', the expression")
+                check_value_plus(offset.value, "evalset numeric vector conv", .data = data, .prefix = "In argument 'offset', the expression")
 
             } else {
 
-                check_value_plus(offset, "numeric vector conv NA OK", .prefix = "If not a formula, argument 'offset'")
+                check_value_plus(offset, "numeric vector conv", .prefix = "If not a formula, argument 'offset'")
 
                 if(length(offset) == 1){
                     offset.value = rep(offset, nobs)
@@ -823,12 +823,12 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
                 check_value(weights, "os formula var(data)", .data = data)
                 weights.value = weights[[2]]
-                check_value_plus(weights.value, "evalset numeric vector conv NA OK", .data = data, .prefix = "In argument 'weights', the expression")
+                check_value_plus(weights.value, "evalset numeric vector conv", .data = data, .prefix = "In argument 'weights', the expression")
 
 
             } else {
 
-                check_value_plus(weights, "numeric vector conv NA OK", .prefix = "If not a formula, argument 'weights'")
+                check_value_plus(weights, "numeric vector conv", .prefix = "If not a formula, argument 'weights'")
 
                 if(length(weights) == 1){
                     if(weights == 1){

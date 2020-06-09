@@ -129,25 +129,25 @@ hatvalues.fixest = function(model, ...){
 
 }
 
-#' Extracts the scores from a fixest estimation
-#'
-#' Extracts the scores from a fixest estimation.
-#'
-#' @param x A \code{fixest} object, obtained for instance from \code{\link[fixest]{feols}}.
-#' @param ... Not currently used.
-#'
-#' @return
-#' Returns a matrix of the same number of rows as the number of observations used for the estimation, and the same number of columns as there were variables.
-#'
-#' @examples
-#'
-#' est = feols(Petal.Length ~ Petal.Width + Sepal.Width, iris)
-#' head(estfun(est))
-#'
-estfun.fixest = function(x, ...){
-    # The scores are an object always contained in fixest estimations
-    x$scores
-}
+# #' Extracts the scores from a fixest estimation
+# #'
+# #' Extracts the scores from a fixest estimation.
+# #'
+# #' @param x A \code{fixest} object, obtained for instance from \code{\link[fixest]{feols}}.
+# #' @param ... Not currently used.
+# #'
+# #' @return
+# #' Returns a matrix of the same number of rows as the number of observations used for the estimation, and the same number of columns as there were variables.
+# #'
+# #' @examples
+# #'
+# #' est = feols(Petal.Length ~ Petal.Width + Sepal.Width, iris)
+# #' head(estfun(est))
+# #'
+# estfun.fixest = function(x, ...){
+#     # The scores are an object always contained in fixest estimations
+#     x$scores
+# }
 
 
 

@@ -22,7 +22,7 @@ panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method =
     set_up(1)
     check_arg_plus(duplicate.method, "match(none, first)")
 
-    check_arg(panel.id, "character vector len(,2) | formula", .message = "The argument 'panel.id' must be either: i) a one sided formula (e.g. ~id+time), ii) a character vector of length 2 (e.g. c('id', 'time'), or iii) a character scalar of two variables separated by a comma (e.g. 'id,time').")
+    check_arg(panel.id, "character vector len(,2) no na | formula", .message = "The argument 'panel.id' must be either: i) a one sided formula (e.g. ~id+time), ii) a character vector of length 2 (e.g. c('id', 'time'), or iii) a character scalar of two variables separated by a comma (e.g. 'id,time').")
 
     if("formula" %in% class(panel.id)){
         tm = terms_hat(panel.id)
@@ -342,7 +342,7 @@ l_expand = function(x, k=1, fill){
     mc = match.call()
 
     if(missing(x)) stop("Argument 'x' cannot be missing.")
-    check_arg(k, "integer vector")
+    check_arg(k, "integer vector no na")
     check_arg(fill, "NA | numeric scalar")
 
     mc_new = mc
@@ -374,7 +374,7 @@ f_expand = function(x, k=1, fill){
     mc = match.call()
 
     if(missing(x)) stop("Argument 'x' cannot be missing.")
-    check_arg(k, "integer vector")
+    check_arg(k, "integer vector no na")
     check_arg(fill, "NA | numeric scalar")
 
     mc_new = mc

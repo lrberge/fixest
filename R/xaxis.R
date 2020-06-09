@@ -189,8 +189,8 @@ xaxis_labels = function(at, labels, line.min = 0, line.max = 2, minCex = 0.8, ad
 # line: goes from 0 to 4 in a standard plot
 xaxis_biased = function(at, labels, angle, cex, line.min = 0, line.max = 2, yadj = 0.5, trunc = 20, trunc.method = "auto", only.params = FALSE, ...){
 
-    check_arg(angle, "null numeric vector")
-    check_arg(cex, "null numeric vector")
+    check_arg(angle, "null numeric vector no na")
+    check_arg(cex, "null numeric vector no na")
 
     if(line.max < line.min){
         message("xaxis_biased: line.max < line.min (i.e. ", line.max, " < ", line.min, ") line.max set to ", line.min, ".")

@@ -65,6 +65,30 @@ cpp_demean <- function(y, X_raw, r_weights, iterMax, diffMax, nb_cluster_all, du
     .Call(`_fixest_cpp_demean`, y, X_raw, r_weights, iterMax, diffMax, nb_cluster_all, dum_vector, tableCluster_vector, slope_flag, slope_vars, r_init, checkWeight, nthreads, save_fixef)
 }
 
+cpp_invert_tri <- function(R_mat, nthreads = 1L) {
+    .Call(`_fixest_cpp_invert_tri`, R_mat, nthreads)
+}
+
+cpp_tri_tprod <- function(R_mat, nthreads = 1L) {
+    .Call(`_fixest_cpp_tri_tprod`, R_mat, nthreads)
+}
+
+cpp_cholesky <- function(X, nthreads = 1L) {
+    .Call(`_fixest_cpp_cholesky`, X, nthreads)
+}
+
+cpp_sparse_products <- function(X, w, y, correct_0w = FALSE, nthreads = 1L) {
+    .Call(`_fixest_cpp_sparse_products`, X, w, y, correct_0w, nthreads)
+}
+
+cpppar_crossprod <- function(X, w, nthreads) {
+    .Call(`_fixest_cpppar_crossprod`, X, w, nthreads)
+}
+
+cpp_mat_reconstruct <- function(X, id_excl) {
+    .Call(`_fixest_cpp_mat_reconstruct`, X, id_excl)
+}
+
 cpp_lgamma <- function(x) {
     .Call(`_fixest_cpp_lgamma`, x)
 }
@@ -199,10 +223,6 @@ cpppar_logit_mueta <- function(x, nthreads) {
 
 cpppar_logit_devresids <- function(y, mu, wt, nthreads) {
     .Call(`_fixest_cpppar_logit_devresids`, y, mu, wt, nthreads)
-}
-
-cpppar_crossprod <- function(X, w, nthreads) {
-    .Call(`_fixest_cpppar_crossprod`, X, w, nthreads)
 }
 
 cpppar_xwy <- function(X, y, w, nthreads) {
