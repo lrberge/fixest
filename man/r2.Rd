@@ -4,12 +4,14 @@
 \alias{r2}
 \title{R2s of \code{fixest} models}
 \usage{
-r2(x, type = "all")
+r2(x, type = "all", full_names = FALSE)
 }
 \arguments{
 \item{x}{A \code{fixest} object, e.g. obtained with function \code{\link[fixest]{feglm}} or \code{\link[fixest]{feols}}.}
 
 \item{type}{A character vector representing the R2 to compute. The R2 codes are of the form: "wapr2" with letters "w" (within), "a" (adjusted) and "p" (pseudo) possibly missing. E.g. to get the regular R2: use \code{type = "r2"}, the within adjusted R2: use \code{type = "war2"}, the pseudo R2: use \code{type = "pr2"}, etc. Use \code{"sq.cor"} for the squared correlation. By default, all R2s are computed.}
+
+\item{full_names}{Logical scalar, default is \code{FALSE}. If \code{TRUE} then names of the vector in output will have full names instead of keywords (e.g. \code{Squared Correlation} instead of \code{sq.cor}, etc).}
 }
 \value{
 Returns a named vector.
@@ -19,6 +21,10 @@ Reports different R2s for \code{fixest} estimations (e.g. \code{\link[fixest]{fe
 }
 \details{
 For R2s with no theoretical justification, like e.g. regular R2s for maximum likelihood models -- or within R2s for models without fixed-effects, NA is returned. The single measure to possibly compare all kinds of models is the squared correlation between the dependent variable and the expected predictor.
+
+The pseudo-R2 is also returned in the OLS case, it corresponds to the pseudo-R2 of the equivalent GLM model with a Gaussian family.
+
+For the adjusted within-R2s, the adjustment factor is \code{(n - nb_fe) / (n - nb_fe - K)} with \code{n} the number of observations, \code{nb_fe} the number of fixed-effects and \code{K} the number of variables.
 }
 \examples{
 
@@ -26,22 +32,25 @@ For R2s with no theoretical justification, like e.g. regular R2s for maximum lik
 data(trade)
 
 # We estimate the effect of distance on trade (with 3 fixed-effects)
-est_pois = femlm(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
+est = feols(log(Euros) ~ log(dist_km)|Origin+Destination+Product, trade)
 
 # Squared correlation:
-r2(est_pois, "sq.cor")
+r2(est, "sq.cor")
 
 # "regular" r2:
-r2(est_pois, "r2")
+r2(est, "r2")
 
-# pseudo r2
-r2(est_pois, "pr2")
+# pseudo r2 (equivalent to GLM with Gaussian family)
+r2(est, "pr2")
 
-# within adjusted r2
-r2(est_pois, "war2")
+# adjusted within r2
+r2(est, "war2")
 
 # all four at once
-r2(est_pois, c("sq.cor", "r2", "pr2", "war2"))
+r2(est, c("sq.cor", "r2", "pr2", "war2"))
+
+# same with full names instead of codes
+r2(est, c("sq.cor", "r2", "pr2", "war2"), full_names = TRUE)
 
 }
 \author{

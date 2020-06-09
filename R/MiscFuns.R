@@ -769,7 +769,7 @@ r2 = function(x, type = "all", full_names = FALSE){
 				}
 			} else {
 				ssr_null = x$ssr_null
-				df.intercept = 1 * (isFixef || grepl("(Intercept)", names(x$coefficients), fixed = TRUE))
+				df.intercept = 1 * (isFixef || any(grepl("(Intercept)", names(x$coefficients), fixed = TRUE)))
 				res[i] = 1 - drop(crossprod(resid(x))) / ssr_null * (n - df.intercept) / (n - df_k)
 			}
 
