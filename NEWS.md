@@ -54,7 +54,11 @@
 
 #### Error-handling
         
- - Improved error-handling with dreamerr's functions.
+ - Improved error-handling with [dreamerr](https://cran.r-project.org/package=dreamerr)'s functions.
+ 
+#### Other
+
+ -  Dependency to MASS has been removed.
 
 ## Changes in version 0.4.1 (2020-04-13)
 

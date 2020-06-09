@@ -6,7 +6,9 @@
 \section{Changes in version 0.5.0}{
 
     \subsection{Move}{
-        This is the last version for which this NEWS.Rd is maintained. From now on, the content will be in NEWS.md.
+        \itemize{
+            \item This is the last version for which this NEWS.Rd is maintained. From now on, the content will be in NEWS.md.
+        }
     }
 
     \subsection{Bug fixes}{
@@ -76,6 +78,12 @@
     \subsection{Error-handling}{
         \itemize{
             \item Improved error-handling with dreamerr's functions.
+        }
+    }
+
+    \subsection{Other}{
+        \itemize{
+            \item MASS dependenvy is removed.
         }
     }
 }

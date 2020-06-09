@@ -21,6 +21,10 @@ export(dof)
 export(panel, unpanel, f, l)
 # interactions
 export(i, interact)
+# macro
+export(xpd)
+# utilities
+export(to_integer, demean)
 # setters & getters
 exportPattern("^(s|g)etFixest")
 
@@ -55,6 +59,9 @@ S3method(formula, fixest)
 S3method(model.matrix, fixest)
 S3method(terms, fixest)
 S3method(lag, formula)
+S3method(deviance, fixest)
+S3method(sigma, fixest)
+S3method(weights, fixest)
 
 # nlme method
 S3method(fixef, fixest)
@@ -71,13 +78,15 @@ importFrom(numDeriv, hessian, jacobian, genD)
 importFrom(nlme, fixef)
 export(fixef)
 
-importFrom(stats, cor, dnorm, lm, model.matrix, nlminb, optim,
-			  pnorm, qnorm, as.formula, terms, var, sd, formula,
-			  nobs, AIC, BIC, update, predict, fitted, fitted.values,
-			  resid, residuals, logLik, coef, coefficients, lag,
-			  confint, vcov, na.omit, model.frame, "na.pass", poisson, pt)
+importFrom(stats, cor, dnorm, lm, nlminb, optim,
+			  pnorm, qnorm, as.formula, var, sd, formula,
+			  na.omit, model.frame, "na.pass", poisson, pt)
 
-importFrom(MASS, ginv)
+# stats methods
+importFrom(stats, model.matrix, sigma, deviance, weights, terms,
+             nobs, AIC, BIC, update, predict, fitted, fitted.values,
+			  resid, residuals, logLik, coef, coefficients, lag,
+			  confint, vcov, binomial, setNames)
 
 importFrom(utils, combn, head, tail)
 
