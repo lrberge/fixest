@@ -2,4 +2,5 @@
 ^\.Rproj\.user$
 ^docs$
 ^BENCHMARK$
+^vignettes/images$
 
