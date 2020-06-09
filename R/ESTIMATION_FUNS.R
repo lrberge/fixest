@@ -1042,11 +1042,29 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
 
     if(onlyFixef) res$onlyFixef = onlyFixef
 
+    # dispersion + scores
+    if(family$family %in% c("poisson", "binomial")){
+        res$dispersion = 1
+    } else {
+        weighted_resids = wols$residuals * res$irls_weights
+        # res$dispersion = sum(weighted_resids ** 2) / sum(res$irls_weights)
+        # I use the second line to fit GLM's
+        res$dispersion = sum(weighted_resids * wols$residuals) / (res$nobs - res$nparams)
+    }
+
+    res$working_residuals = wols$residuals
+
     if(!onlyFixef && !lean){
         # score + hessian + vcov
-        res$scores = (wols$residuals * res$irls_weights) * wols$X_demean
 
-        res$hessian = cpppar_crossprod(wols$X_demean, res$irls_weights, nthreads)
+        # dispersion + scores
+        if(family$family %in% c("poisson", "binomial")){
+            res$scores = (wols$residuals * res$irls_weights) * wols$X_demean
+            res$hessian = cpppar_crossprod(wols$X_demean, res$irls_weights, nthreads)
+        } else {
+            res$scores = (weighted_resids / res$dispersion) * wols$X_demean
+            res$hessian = cpppar_crossprod(wols$X_demean, res$irls_weights, nthreads) / res$dispersion
+        }
 
         # cov:
         # var <- NULL
