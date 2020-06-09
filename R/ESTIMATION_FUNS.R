@@ -445,43 +445,6 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 	res
 }
 
-
-ols_fit_old = function(y, X, w, correct_0w = FALSE, nthreads){
-	# No control here -- done before
-
-    if(correct_0w == FALSE){
-        # DEFAULT
-        xwx = cpppar_crossprod(X, w, nthreads)
-        xwy = cpppar_xwy(X, y, w, nthreads)
-    } else if(correct_0w == TRUE){
-        # to ignore 0w obs
-        is_0w = w == 0
-        xwx = cpppar_crossprod(X[!is_0w, , drop = FALSE], w[!is_0w], nthreads)
-        xwy = cpppar_xwy(X[!is_0w, , drop = FALSE], y[!is_0w], w[!is_0w], nthreads)
-    }
-
-	multicol = FALSE
-	xwx_inv = NULL
-	try(xwx_inv <- solve(xwx), silent = TRUE)
-	if(is.null(xwx_inv)){
-		multicol = TRUE
-		# if multicollinearity, we provide a solution anyway
-		# multicol is dealt with separately by the user
-		xwx_inv = MASS::ginv(xwx)
-	}
-
-	beta = drop(xwx_inv %*% xwy)
-
-    fitted.values = cpppar_xbeta(X, beta, nthreads)
-    residuals = y - fitted.values
-
-	names(beta) = colnames(X)
-
-	res = list(xwx = xwx, coefficients = beta, fitted.values = fitted.values, xwx_inv = xwx_inv, multicol = multicol, residuals = residuals)
-
-	res
-}
-
 ols_fit = function(y, X, w, correct_0w = FALSE, nthreads){
     # No control here -- done before
 
