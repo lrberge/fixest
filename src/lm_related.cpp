@@ -12,7 +12,12 @@
 
 #include <Rcpp.h>
 #include <cmath>
-#include <omp.h>
+#ifdef _OPENMP
+    #include <omp.h>
+#else
+    #define omp_get_thread_num() 0
+    #define omp_get_num_threads() 1
+#endif
 using namespace Rcpp;
 
 // [[Rcpp::plugins(openmp)]]
@@ -76,23 +81,11 @@ NumericMatrix cpp_tri_tprod(const NumericMatrix &R_mat, int nthreads = 1){
 
             double value = 0;
 
-            if(i == j){
-                double v;
-                for(int k=i ; k<K ; ++k){
-                    v = R_prime(k, i);
-                    value += v * v;
-                }
-                RRt(i, i) = value;
-
-            } else {
-                for(int k=i ; k<K ; ++k){
-                    value += R_prime(k, j) * R_prime(k, i);
-                }
-                RRt(i, j) = value;
-                RRt(j, i) = value;
+            for(int k=i ; k<K ; ++k){
+                value += R_prime(k, j) * R_prime(k, i);
             }
-
-
+            RRt(i, j) = value;
+            RRt(j, i) = value;
         }
     }
 
@@ -114,16 +107,13 @@ List cpp_cholesky(NumericMatrix X, int nthreads = 1){
     for(int j=0 ; j<K ; ++j){
 
         // implicit pivoting (it's like 0-rank variables are stacked in the end)
-        // int j_select = j - n_excl;
-        int j_select = j;
 
-        double L_jj = X(j_select, j);
-        double tmp;
+        double L_jj = X(j, j);
         for(int k=0 ; k<j ; ++k){
+
             if(id_excl[k]) continue;
 
-            tmp = L(j, k);
-            L_jj -= tmp * tmp;
+            L_jj -= L(j, k) * L(j, k);
         }
 
         if(L_jj < tol){
@@ -143,16 +133,16 @@ List cpp_cholesky(NumericMatrix X, int nthreads = 1){
 
         L_jj = sqrt(L_jj);
 
-        L(j_select, j) = L_jj;
+        L(j, j) = L_jj;
 
         #pragma omp parallel for num_threads(nthreads) schedule(static, 1)
-        for(int i=j_select+1 ; i<K ; ++i){
+        for(int i=j+1 ; i<K ; ++i){
 
             double value = X(i, j);
             for(int k=0 ; k<j ; ++k){
                 if(id_excl[k]) continue;
 
-                value -= L(i, k) * L(j_select, k);
+                value -= L(i, k) * L(j, k);
             }
             L(i, j) = value/L_jj;
         }
@@ -301,7 +291,7 @@ List cpp_sparse_products(NumericMatrix X, NumericVector w, NumericVector y, bool
                             val += wX(i, k_row) * wX(i, k_col);
                         }
 
-                        all_values(index) = val;
+                        all_values[index] = val;
                     }
 
                 }
@@ -312,8 +302,8 @@ List cpp_sparse_products(NumericMatrix X, NumericVector w, NumericVector y, bool
                     int k_col = index / K;
 
                     if(k_row <= k_col){
-                        XtX(k_row, k_col) = all_values(index);
-                        XtX(k_col, k_row) = all_values(index);
+                        XtX(k_row, k_col) = all_values[index];
+                        XtX(k_col, k_row) = all_values[index];
                     }
 
                 }
@@ -397,7 +387,7 @@ List cpp_sparse_products(NumericMatrix X, NumericVector w, NumericVector y, bool
                             val += X(i, k_row) * X(i, k_col);
                         }
 
-                        all_values(index) = val;
+                        all_values[index] = val;
                     }
 
                 }
@@ -408,8 +398,8 @@ List cpp_sparse_products(NumericMatrix X, NumericVector w, NumericVector y, bool
                     int k_col = index / K;
 
                     if(k_row <= k_col){
-                        XtX(k_row, k_col) = all_values(index);
-                        XtX(k_col, k_row) = all_values(index);
+                        XtX(k_row, k_col) = all_values[index];
+                        XtX(k_col, k_row) = all_values[index];
                     }
 
                 }
@@ -638,7 +628,7 @@ NumericMatrix cpppar_crossprod(NumericMatrix X, NumericVector w, int nthreads){
                             val += X(i, k_row) * wX(i, k_col);
                         }
 
-                        all_values(index) = val;
+                        all_values[index] = val;
                     }
 
                 }
@@ -649,8 +639,8 @@ NumericMatrix cpppar_crossprod(NumericMatrix X, NumericVector w, int nthreads){
                     int k_col = index / K;
 
                     if(k_row <= k_col){
-                        XtX(k_row, k_col) = all_values(index);
-                        XtX(k_col, k_row) = all_values(index);
+                        XtX(k_row, k_col) = all_values[index];
+                        XtX(k_col, k_row) = all_values[index];
                     }
 
                 }
@@ -699,7 +689,7 @@ NumericMatrix cpppar_crossprod(NumericMatrix X, NumericVector w, int nthreads){
                             val += X(i, k_row) * X(i, k_col);
                         }
 
-                        all_values(index) = val;
+                        all_values[index] = val;
                     }
 
                 }
@@ -710,8 +700,8 @@ NumericMatrix cpppar_crossprod(NumericMatrix X, NumericVector w, int nthreads){
                     int k_col = index / K;
 
                     if(k_row <= k_col){
-                        XtX(k_row, k_col) = all_values(index);
-                        XtX(k_col, k_row) = all_values(index);
+                        XtX(k_row, k_col) = all_values[index];
+                        XtX(k_col, k_row) = all_values[index];
                     }
 
                 }
