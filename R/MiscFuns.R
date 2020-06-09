@@ -3057,7 +3057,8 @@ demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFi
 
     # Step 1: formatting of the input
     if(!im_confident){
-        check_arg(X, fe, "numeric vmatrix | list mbt")
+        check_arg(X, "numeric vmatrix | list mbt")
+        check_arg(fe, "vmatrix | list mbt")
         check_arg(iter, "integer scalar GE{1}")
         check_arg(tol, "numeric scalar GT{0}")
         check_arg(notes, "logical scalar")
@@ -3106,6 +3107,11 @@ demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFi
         }
 
         if(is.null(fe_names)) fe_names = paste0("Factor_", 1:length(fe))
+
+        is_pblm = sapply(fe, function(x) !is.numeric(x) || !is.character(x))
+        for(i in which(is_pblm)){
+            fe[[i]] = as.character(fe[[i]])
+        }
 
         if(nrow(fe) != nrow(X)) stop("The number of observations in 'X' and in 'fe' don't match (", nrow(X), " vs ", nrow(fe), ").")
 
