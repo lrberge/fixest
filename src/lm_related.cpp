@@ -806,4 +806,26 @@ NumericMatrix cpppar_crossprod(NumericMatrix X, NumericVector w, int nthreads){
 
 
 
+// [[Rcpp::export]]
+NumericMatrix cpp_mat_reconstruct(NumericMatrix X, Rcpp::LogicalVector id_excl){
 
+    int K = id_excl.length();
+    int K_small = X.ncol();
+
+    NumericMatrix res(K, K);
+
+    int n_col_excl = 0;
+    for(int j=0 ; j<K_small ; ++j){
+
+        while(id_excl[j + n_col_excl]) ++n_col_excl;
+
+        int col = j + n_col_excl;
+        int n_row_excl = 0;
+        for(int i=0 ; i<K_small ; ++i){
+            while(id_excl[i + n_row_excl]) ++n_row_excl;
+            res(i+n_row_excl, col) = X(i, j);
+        }
+    }
+
+    return res;
+}
