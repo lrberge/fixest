@@ -6249,7 +6249,7 @@ fitted.fixest = fitted.values.fixest = function(object, type = c("response", "li
 #'
 #' @inheritParams nobs.fixest
 #'
-#' @param type A character scalar, either \code{"response"} (default), \code{"deviance"} or \code{"pearson"}.
+#' @param type A character scalar, either \code{"response"} (default), \code{"deviance"}, \code{"pearson"}, or \code{"working"}. Note that the \code{"working"} corresponds to the residuals from the weighted least square and only applies to \code{\link[fixest]{feglm}} models.
 #' @param ... Not currently used.
 #'
 #' @details
@@ -6273,7 +6273,7 @@ fitted.fixest = fitted.values.fixest = function(object, type = c("response", "li
 #' # we plot the residuals
 #' plot(resid(res_poisson))
 #'
-resid.fixest = residuals.fixest = function(object, type = c("response", "deviance", "pearson"), ...){
+resid.fixest = residuals.fixest = function(object, type = c("response", "deviance", "pearson", "working"), ...){
 
     check_arg_plus(type, "match")
 
@@ -6284,6 +6284,9 @@ resid.fixest = residuals.fixest = function(object, type = c("response", "devianc
     w = object[["weights"]]
 
     if(method == "feols" || (method %in% c("feNmlm", "femlm") && family == "gaussian")){
+
+        if(type == "working") stop("Type 'working' only applies to models fitted via feglm (thus is not valid for feols).")
+
         if(type %in% c("deviance", "pearson") && !is.null(w)){
             res = r * sqrt(w)
         } else {
@@ -6294,6 +6297,9 @@ resid.fixest = residuals.fixest = function(object, type = c("response", "devianc
 
         if(type == "response"){
             res = r
+
+        } else if(type == "working"){
+            res = object$working_residuals
 
         } else {
             mu = object$fitted.values
@@ -6314,6 +6320,8 @@ resid.fixest = residuals.fixest = function(object, type = c("response", "devianc
 
 
     } else {
+
+        if(type == "working") stop("Type 'working' only applies to models fitted via feglm (thus is not valid for ", method, ").")
 
         if(type == "response"){
             res = r
