@@ -9,14 +9,14 @@
 An object of class \code{function} of length 1.
 }
 \usage{
-\method{resid}{fixest}(object, type = c("response", "deviance", "pearson"), ...)
+\method{resid}{fixest}(object, type = c("response", "deviance", "pearson", "working"), ...)
 
 residuals.fixest
 }
 \arguments{
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
 
-\item{type}{A character scalar, either \code{"response"} (default), \code{"deviance"} or \code{"pearson"}.}
+\item{type}{A character scalar, either \code{"response"} (default), \code{"deviance"}, \code{"pearson"}, or \code{"working"}. Note that the \code{"working"} corresponds to the residuals from the weighted least square and only applies to \code{\link[fixest]{feglm}} models.}
 
 \item{...}{Not currently used.}
 }

@@ -10,11 +10,7 @@
  - Bug when interacting two variables with the `var::fe` syntax with `confirm = TRUE` and no reference.
  - Bug in `etable` when the standard-errors where `NA`.
  - Fixed very minor bug when computing the SEs (1e-6 difference).
-
-#### Issue found: convergence problems with multiples variables with varying slopes
-        
- - Convergence problems may arise in the presence of **multiple** variables with varying slopes. Theoretical work helped find a solution to this problem, but the implementation in R is proving not instantaneous.
- - In the meantime, now a warning is prompted when the algorithm suspects a convergence problem leading to poor precision of the estimated coefficients.
+ - Standard-errors in `feglm` for non-poisson, non-binomial families, are now correct.
 
 #### New functionality: formula macros
         
@@ -30,10 +26,10 @@
 
 #### Major user-visible changes
         
- - New internal algorithm to estimate OLS:
- - 1) It is numerically more stable.
- - 2) Incomparably faster when factors are to be estimated (and not explicitly used as fixed-effects).
- - 3) Collinear variables are removed on the fly.
+ - New internal algorithm to estimate OLS (applies to both `feols` and `feglm`):
+    1. It is numerically more stable.
+    2. Incomparably faster when factors are to be estimated (and not explicitly used as fixed-effects).
+    3. Collinear variables are removed on the fly.
 
 #### User-visible changes
         
@@ -41,6 +37,8 @@
  - In `etable`, the variable names of non-Latex output can now be changed.
  - You can use the argument `n` when applying summary to choose the number of coefficients to display.
  - Argument `confirm` has been removed from the function `interact`.
+ - `r2` allows more flexibility in the keywords it accepts.
+ - Function `dof` gains a new argument `adj` which allows to make different types of common small sample corrections. Its other arguments have been renamed for clarity (`fixef` => `fixef.K`, `exact` => `fixef.exact`, `cluster` => `cluster.adj`).
 
 #### New Methods
         
@@ -51,6 +49,11 @@
         
  - Typos corrected.
  - Images in the Readme set to 1200px.
+ 
+#### Issue found: convergence problems with multiples variables with varying slopes
+        
+ - Convergence problems may arise in the presence of **multiple** variables with varying slopes. Theoretical work helped find a solution to this problem, but the implementation in R is proving not instantaneous.
+ - In the meantime, now a warning is prompted when the algorithm suspects a convergence problem leading to poor precision of the estimated coefficients.
 
 #### Error-handling
         
