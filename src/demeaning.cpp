@@ -697,6 +697,7 @@ void computeMeans(vector<double*> &pcluster_origin, vector<double*> &pcluster_de
 
 		if(slope_flag[q]){
 		    double *my_slope_var = all_slope_vars[q];
+		    // after the weight is the "output": z*coef_slope
 		    for(int obs=0 ; obs<n_obs ; ++obs){
 		        sum_other_means[obs] += obs_weights_current[obs] * my_slope_var[obs] * my_cluster_coef[my_dum[obs]];
 		    }
@@ -775,6 +776,8 @@ void computeMeans(vector<double*> &pcluster_origin, vector<double*> &pcluster_de
 
 }
 
+
+
 bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args){
 
 	//
@@ -821,6 +824,7 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args){
 		double *my_sum_input_output = psum_input_output[q];
 		int *my_dum = pdum[q];
 
+		// Dans all_obs_weights, il y a la valeur de la variable si slope: w * z. Si pas de slope, seulement w.
 		if(isWeight){
 		    double *obs_weights_current = all_obs_weights[q];
 			for(int obs=0 ; obs<n_obs ; ++obs){
@@ -1072,6 +1076,8 @@ void demean_single_gnl(int v, PARAM_DEMEAN* args){
 		}
 	}
 
+	// if(args->piterations_all[v] > 50) balance_FEs(v, args);
+
 	int *jobdone = args->jobdone;
 	jobdone[v] = 1;
 
@@ -1232,6 +1238,9 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 	                    my_SW[my_dum[obs]] += var * var;
 	                }
 	            }
+
+	            // Rcout << "weight q = " << q << " : " << my_SW[0] << ", " << my_SW[1] << ", " << my_SW[2] << "\n";
+
 	        } else {
 	            // if NOT a slope var: my_slope_weights eq to weights or 1
 	            if(isWeight){
@@ -1245,6 +1254,10 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 	                    my_SW[my_dum[obs]]++;
 	                }
 	            }
+
+	            // Rcout << "weight q = " << q << " : " << my_SW[0];
+	            // for(int oo=1 ; oo<pcluster[q] ; oo++) Rcout << ", " << my_SW[oo];
+	            // Rcout << "\n";
 	        }
 	    }
 
