@@ -60,6 +60,7 @@
             \item Argument \code{confirm} has been removed from the function \code{interact}.
             \item \code{r2} allows more flexibility in the keywords it accepts. Full names can be displayed with the new argument \code{full_names}. The adjusted R2 now matches the one of \code{lm} when there is no intercept.
             \item Function \code{dof} gains a new argument \code{adj} which allows to make different types of common small sample corrections. Its other arguments have been renamed for clarity (\code{fixef} => \code{fixef.K}, \code{exact} => \code{fixef.exact}, \code{cluster} => \code{cluster.adj}).
+            \item Now t-statistics are used for \code{feols} and non-poisson, non-binomial models in \code{feglm}. For all other models, z-statistics are used. This complies with the default's R-stats behavior.
         }
     }
 

@@ -39,6 +39,7 @@
  - Argument `confirm` has been removed from the function `interact`.
  - `r2` allows more flexibility in the keywords it accepts.
  - Function `dof` gains a new argument `adj` which allows to make different types of common small sample corrections. Its other arguments have been renamed for clarity (`fixef` => `fixef.K`, `exact` => `fixef.exact`, `cluster` => `cluster.adj`).
+ - Now t-statistics are used for `feols` and non-poisson, non-binomial models in `feglm`. For all other models, z-statistics are used. This complies with the default's R-stats behavior.
 
 #### New Methods
         

@@ -404,8 +404,8 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 		zvalue <- coef/se
 		pvalue <- 2*pt(-abs(zvalue), max(n - df_k, 1))
 
-		coeftable <- data.frame("Estimate"=coef, "Std. Error"=se, "z value"=zvalue, "Pr(>|z|)"=pvalue)
-		names(coeftable) <- c("Estimate", "Std. Error", "z value",  "Pr(>|z|)")
+		coeftable <- data.frame("Estimate"=coef, "Std. Error"=se, "t value"=zvalue, "Pr(>|t|)"=pvalue)
+		names(coeftable) <- c("Estimate", "Std. Error", "t value",  "Pr(>|t|)")
 		row.names(coeftable) <- names(coef)
 
 		attr(se, "type") = attr(coeftable, "type") = "Standard"
@@ -1105,10 +1105,17 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
 
         # coeftable
         zvalue <- coef/se
-        pvalue <- 2*pnorm(-abs(zvalue))
+        use_t = !family$family %in% c("poisson", "binomial")
+        if(use_t){
+            pvalue <- 2*pt(-abs(zvalue), max(res$nobs - res$nparams, 1))
+            ctable_names = c("Estimate", "Std. Error", "t value",  "Pr(>|t|)")
+        } else {
+            pvalue <- 2*pnorm(-abs(zvalue))
+            ctable_names = c("Estimate", "Std. Error", "z value",  "Pr(>|z|)")
+        }
 
         coeftable <- data.frame("Estimate"=coef, "Std. Error"=se, "z value"=zvalue, "Pr(>|z|)"=pvalue)
-        names(coeftable) <- c("Estimate", "Std. Error", "z value",  "Pr(>|z|)")
+        names(coeftable) <- ctable_names
         row.names(coeftable) <- names(coef)
 
         attr(se, "type") = attr(coeftable, "type") = "Standard"

@@ -301,7 +301,12 @@ summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), forceCova
 
 	# th z & p values
 	zvalue <- object$coefficients/se
-	pvalue <- 2*pt(-abs(zvalue), max(object$nobs - object$nparams, 1))
+	if(object$method %in% "feols" || (object$method %in% "feglm" && !object$family$family %in% c("poisson", "binomial"))){
+	    pvalue <- 2*pt(-abs(zvalue), max(object$nobs - object$nparams, 1))
+	} else {
+	    pvalue <- 2*pnorm(-abs(zvalue))
+	}
+
 
 	# update of se if bounded
 	se_format = se
@@ -7373,7 +7378,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 	sd.dict = c("standard" = "Standard", "white"="White", "cluster"="Clustered", "twoway"="Two-way", "threeway"="Three-way", "fourway"="Four-way")
 
 	attr(vcov, "type") = paste0(as.vector(sd.dict[se.val]), type_info)
-	attr(vcov, "dof.type") = paste0("dof(adj = ", dof.adj, ", fixef.K = '", dof.fixef.K, "', fixef.exact = ", is_exact, ", cluster = ", is_cluster, ")")
+	attr(vcov, "dof.type") = paste0("dof(adj = ", dof.adj, ", fixef.K = '", dof.fixef.K, "', fixef.exact = ", is_exact, ", cluster.adj = ", is_cluster, ")")
 	attr(vcov, "dof.K") = K
 
 	vcov
