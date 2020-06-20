@@ -1304,35 +1304,6 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 		fixef_values = list(S[select])
 
 		# There are no references => no need to set nb_ref
-	} else if(FALSE && Q == 2) {
-		# specific method that is faster but specific to the case of 2 FE
-	    # NOTA:
-	    # - the next method is even faster
-	    # - but this current method has the benefit to provide the components
-		dum_i = id_dummies_vect[[1]] - 1L
-		dum_j = id_dummies_vect[[2]] - 1L
-
-		order_ij = order(dum_i, dum_j)
-		i_sorted_index_j = dum_j[order_ij]
-
-		order_ji = order(dum_j, dum_i)
-		j_sorted_index_i = dum_i[order_ji]
-
-		i_sorted_sumFE = S[order_ij]
-		j_sorted_sumFE = S[order_ji]
-
-		fe <- cpp_get_fe_2(clusterSize = object$fixef_sizes, i_sorted_index_j = i_sorted_index_j, i_sorted_sumFE = i_sorted_sumFE, j_sorted_index_i = j_sorted_index_i, j_sorted_sumFE = j_sorted_sumFE, r_cumtable_i = cumsum(table(dum_i)), r_cumtable_j = cumsum(table(dum_j)))
-
-		# cpp_get_fe_2 returns a matrix (we will update cpp_get_fe_gnl to return a matrix later)
-		# so we put it into a list (for now)
-
-		fixef_values = list()
-		fixef_values[[1]] = fe[fe[, 1] == 1, 3]
-		fixef_values[[2]] = fe[fe[, 1] == 2, 3]
-
-		# the number of references needed
-		nb_ref = c(0, sum(fe[, 4]))
-
 	} else {
 		# We apply a Rcpp script to handle complicated cases (and we don't know beforehand if the input is one)
 
@@ -2007,9 +1978,6 @@ collinearity = function(x, verbose){
 		ccat(ifelse(Q >= 1, ", ", " "), "multiple:")
 		for(v in linearVars){
 			ccat(".")
-			# fml2estimate = as.formula(paste0(v, "~", paste0(setdiff(linearVars, v), collapse = "+")))
-			# res = lm(fml2estimate, linbase)
-			# sum_resid = sum(abs(resid(res)))
 
 			i = which(colnames(mat_base) == v)
 			res = ols_fit(y = mat_base[, i], X = mat_base[, -i, drop = FALSE], w = 1, nthreads = 1)

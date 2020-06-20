@@ -20,6 +20,7 @@
 #else
     #define omp_get_thread_num() 0
     #define omp_get_num_threads() 1
+    #define omp_get_max_threads() 0
 #endif
 #include <cmath>
 #include <stdio.h>
@@ -30,6 +31,12 @@ using namespace Rcpp;
 // [[Rcpp::plugins(openmp)]]
 
 // This file contains misc femlm functions parallelized with the omp library
+
+// [[Rcpp::export]]
+int get_nb_threads(){
+    int res = omp_get_max_threads();
+    return(res);
+}
 
 // [[Rcpp::export]]
 NumericVector cpppar_exp(NumericVector x, int nthreads){

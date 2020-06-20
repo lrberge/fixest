@@ -333,30 +333,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cpp_invert_tri
-NumericMatrix cpp_invert_tri(const NumericMatrix& R_mat, int nthreads);
-RcppExport SEXP _fixest_cpp_invert_tri(SEXP R_matSEXP, SEXP nthreadsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type R_mat(R_matSEXP);
-    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_invert_tri(R_mat, nthreads));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_tri_tprod
-NumericMatrix cpp_tri_tprod(const NumericMatrix& R_mat, int nthreads);
-RcppExport SEXP _fixest_cpp_tri_tprod(SEXP R_matSEXP, SEXP nthreadsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type R_mat(R_matSEXP);
-    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_tri_tprod(R_mat, nthreads));
-    return rcpp_result_gen;
-END_RCPP
-}
 // cpp_cholesky
 List cpp_cholesky(NumericMatrix X, int nthreads);
 RcppExport SEXP _fixest_cpp_cholesky(SEXP XSEXP, SEXP nthreadsSEXP) {
@@ -490,46 +466,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cpp_unclassFactor
-IntegerVector cpp_unclassFactor(NumericVector x);
-RcppExport SEXP _fixest_cpp_unclassFactor(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_unclassFactor(x));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_unik
-IntegerVector cpp_unik(NumericVector x_sorted, int k_max);
-RcppExport SEXP _fixest_cpp_unik(SEXP x_sortedSEXP, SEXP k_maxSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type x_sorted(x_sortedSEXP);
-    Rcpp::traits::input_parameter< int >::type k_max(k_maxSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_unik(x_sorted, k_max));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_get_fe_2
-NumericMatrix cpp_get_fe_2(SEXP clusterSize, SEXP i_sorted_index_j, SEXP i_sorted_sumFE, SEXP j_sorted_index_i, SEXP j_sorted_sumFE, SEXP r_cumtable_i, SEXP r_cumtable_j);
-RcppExport SEXP _fixest_cpp_get_fe_2(SEXP clusterSizeSEXP, SEXP i_sorted_index_jSEXP, SEXP i_sorted_sumFESEXP, SEXP j_sorted_index_iSEXP, SEXP j_sorted_sumFESEXP, SEXP r_cumtable_iSEXP, SEXP r_cumtable_jSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type clusterSize(clusterSizeSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type i_sorted_index_j(i_sorted_index_jSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type i_sorted_sumFE(i_sorted_sumFESEXP);
-    Rcpp::traits::input_parameter< SEXP >::type j_sorted_index_i(j_sorted_index_iSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type j_sorted_sumFE(j_sorted_sumFESEXP);
-    Rcpp::traits::input_parameter< SEXP >::type r_cumtable_i(r_cumtable_iSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type r_cumtable_j(r_cumtable_jSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_get_fe_2(clusterSize, i_sorted_index_j, i_sorted_sumFE, j_sorted_index_i, j_sorted_sumFE, r_cumtable_i, r_cumtable_j));
-    return rcpp_result_gen;
-END_RCPP
-}
 // cpp_get_fe_gnl
 List cpp_get_fe_gnl(int Q, int N, NumericVector sumFE, IntegerMatrix dumMat, IntegerVector cluster_sizes, IntegerVector obsCluster);
 RcppExport SEXP _fixest_cpp_get_fe_gnl(SEXP QSEXP, SEXP NSEXP, SEXP sumFESEXP, SEXP dumMatSEXP, SEXP cluster_sizesSEXP, SEXP obsClusterSEXP) {
@@ -565,18 +501,6 @@ BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_ssq(x));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_update_dum
-List cpp_update_dum(IntegerVector dum, int k_max);
-RcppExport SEXP _fixest_cpp_update_dum(SEXP dumSEXP, SEXP k_maxSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< IntegerVector >::type dum(dumSEXP);
-    Rcpp::traits::input_parameter< int >::type k_max(k_maxSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_update_dum(dum, k_max));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -663,18 +587,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< IntegerVector >::type fe_sizes(fe_sizesSEXP);
     Rcpp::traits::input_parameter< int >::type n(nSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_check_nested(fe_list, cluster_list, fe_sizes, n));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_diag_XUtX
-NumericVector cpp_diag_XUtX(NumericMatrix X, NumericMatrix U);
-RcppExport SEXP _fixest_cpp_diag_XUtX(SEXP XSEXP, SEXP USEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type X(XSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type U(USEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_diag_XUtX(X, U));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -982,8 +894,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_derivconv_seq_2", (DL_FUNC) &_fixest_cpp_derivconv_seq_2, 12},
     {"_fixest_update_deriv_single", (DL_FUNC) &_fixest_update_deriv_single, 5},
     {"_fixest_cpp_demean", (DL_FUNC) &_fixest_cpp_demean, 14},
-    {"_fixest_cpp_invert_tri", (DL_FUNC) &_fixest_cpp_invert_tri, 2},
-    {"_fixest_cpp_tri_tprod", (DL_FUNC) &_fixest_cpp_tri_tprod, 2},
     {"_fixest_cpp_cholesky", (DL_FUNC) &_fixest_cpp_cholesky, 2},
     {"_fixest_cpp_sparse_products", (DL_FUNC) &_fixest_cpp_sparse_products, 5},
     {"_fixest_cpppar_crossprod", (DL_FUNC) &_fixest_cpppar_crossprod, 3},
@@ -994,13 +904,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_tapply_sum", (DL_FUNC) &_fixest_cpp_tapply_sum, 3},
     {"_fixest_cpp_tapply_vsum", (DL_FUNC) &_fixest_cpp_tapply_vsum, 3},
     {"_fixest_cpp_table", (DL_FUNC) &_fixest_cpp_table, 2},
-    {"_fixest_cpp_unclassFactor", (DL_FUNC) &_fixest_cpp_unclassFactor, 1},
-    {"_fixest_cpp_unik", (DL_FUNC) &_fixest_cpp_unik, 2},
-    {"_fixest_cpp_get_fe_2", (DL_FUNC) &_fixest_cpp_get_fe_2, 7},
     {"_fixest_cpp_get_fe_gnl", (DL_FUNC) &_fixest_cpp_get_fe_gnl, 6},
     {"_fixest_cpp_ssr_null", (DL_FUNC) &_fixest_cpp_ssr_null, 1},
     {"_fixest_cpp_ssq", (DL_FUNC) &_fixest_cpp_ssq, 1},
-    {"_fixest_cpp_update_dum", (DL_FUNC) &_fixest_cpp_update_dum, 2},
     {"_fixest_cpp_isConstant", (DL_FUNC) &_fixest_cpp_isConstant, 1},
     {"_fixest_cpp_any_na_null", (DL_FUNC) &_fixest_cpp_any_na_null, 1},
     {"_fixest_cpp_constant_dum", (DL_FUNC) &_fixest_cpp_constant_dum, 4},
@@ -1008,7 +914,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_pgcd", (DL_FUNC) &_fixest_cpp_pgcd, 1},
     {"_fixest_cpp_lag_obs", (DL_FUNC) &_fixest_cpp_lag_obs, 3},
     {"_fixest_cpp_check_nested", (DL_FUNC) &_fixest_cpp_check_nested, 4},
-    {"_fixest_cpp_diag_XUtX", (DL_FUNC) &_fixest_cpp_diag_XUtX, 2},
     {"_fixest_get_nb_threads", (DL_FUNC) &_fixest_get_nb_threads, 0},
     {"_fixest_cpppar_exp", (DL_FUNC) &_fixest_cpppar_exp, 2},
     {"_fixest_cpppar_log", (DL_FUNC) &_fixest_cpppar_log, 2},
