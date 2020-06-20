@@ -8058,7 +8058,10 @@ getFixest_notes = function(){
 setFixest_nthreads = function(nthreads){
 	# By default, we leave 2 nthreads (never use all)
 
-	max_threads = min(get_nb_threads(), 1000) # we cap at 1k nthreads
+    max_CRAN = as.numeric(Sys.getenv("OMP_THREAD_LIMIT"))
+    max_CRAN[is.na(max_CRAN)] = 1000
+
+	max_threads = min(get_nb_threads(), 1000, max_CRAN) # we cap at 1k nthreads
 
 	if(missing(nthreads) || is.null(nthreads)){
 		nthreads = max(1, max_threads - 2)
