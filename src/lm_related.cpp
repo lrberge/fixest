@@ -3,6 +3,8 @@
 * || OLS Functions ||                                         *
 * -------------------                                         *
 *                                                             *
+* Author: Laurent R. Berge                                    *
+*                                                             *
 * Set of functions to perform OLS estimations.                *
 *                                                             *
 * In general, the functions are slower than BLAS ones         *
@@ -22,27 +24,21 @@ using namespace Rcpp;
 
 // [[Rcpp::plugins(openmp)]]
 
-// [[Rcpp::export]]
-NumericMatrix cpp_invert_tri(const NumericMatrix &R_mat, int nthreads = 1){
-    // Parallel is not super efficient but it's better than nothing: 2 threads: 40%; 4 threads: 60%; speedup
-    //
+void invert_tri(NumericMatrix &R, int K, int nthreads = 1){
 
-    // Startegy: we invert by bands (b)
-    int K = R_mat.ncol();
-    NumericMatrix res(K, K);
-    NumericMatrix R_prime(K, K);
+    // Startegy: we invert by bands (b) => better for parallelization
 
     // initialization of R prime
     for(int i=0 ; i<K ; ++i){
         for(int j=i+1 ; j<K ; ++j){
-            R_prime(j, i) = R_mat(i, j);
+            R(j, i) = R(i, j);
         }
     }
 
+    // b0
     for(int i=0 ; i<K ; ++i){
-        res(i, i) = 1/R_mat(i, i);
+        R(i, i) = 1/R(i, i);
     }
-
 
     for(int b=1 ; b<K ; ++b){
 
@@ -50,56 +46,53 @@ NumericMatrix cpp_invert_tri(const NumericMatrix &R_mat, int nthreads = 1){
         for(int i=0 ; i<K-b ; ++i){
             double numerator = 0;
             int col = i+b;
-            for(int k=i+1 ; k<=i+b ; ++k){
-                numerator -= R_prime(k, i) * res(k, col);
+            for(int k=i+1 ; k<=col ; ++k){
+                numerator -= R(k, i) * R(k, col);
             }
-            res(i, col) = numerator * res(i, i);
+            R(i, col) = numerator * R(i, i);
         }
     }
 
-    return res;
 }
 
-// [[Rcpp::export]]
-NumericMatrix cpp_tri_tprod(const NumericMatrix &R_mat, int nthreads = 1){
+void tproduct_tri(NumericMatrix &RRt, NumericMatrix &R, int nthreads = 1){
 
-    int K = R_mat.ncol();
+    int K = RRt.ncol();
 
-    NumericMatrix R_prime(K, K);
     // initialization of R prime
     for(int i=0 ; i<K ; ++i){
-        for(int j=i ; j<K ; ++j){
-            R_prime(j, i) = R_mat(i, j);
+        for(int j=i+1 ; j<K ; ++j){
+            R(j, i) = R(i, j);
         }
     }
-
-    NumericMatrix RRt(K, K);
 
     #pragma omp parallel for num_threads(nthreads) schedule(static, 1)
     for(int i=0 ; i<K ; ++i){
         for(int j=i ; j<K ; ++j){
 
             double value = 0;
-
-            for(int k=i ; k<K ; ++k){
-                value += R_prime(k, j) * R_prime(k, i);
+            int k_start = i < j ? j : i;
+            for(int k=k_start ; k<K ; ++k){
+                value += R(k, j) * R(k, i);
             }
             RRt(i, j) = value;
             RRt(j, i) = value;
         }
     }
 
-    return RRt;
 }
+
 
 // [[Rcpp::export]]
 List cpp_cholesky(NumericMatrix X, int nthreads = 1){
     // X est symetrique, semi definie positive
     // rank-revealing on-the-fly
 
+    List res;
+
     int K = X.ncol();
 
-    NumericMatrix L(K, K);
+    NumericMatrix R(K, K);
     LogicalVector id_excl(K);
     int n_excl = 0;
     double tol = 1.0/100000.0/100000.0;
@@ -108,17 +101,18 @@ List cpp_cholesky(NumericMatrix X, int nthreads = 1){
 
         // implicit pivoting (it's like 0-rank variables are stacked in the end)
 
-        double L_jj = X(j, j);
+        double R_jj = X(j, j);
         for(int k=0 ; k<j ; ++k){
 
             if(id_excl[k]) continue;
 
-            L_jj -= L(j, k) * L(j, k);
+            R_jj -= R(k, j) * R(k, j);
         }
 
-        if(L_jj < tol){
+        if(R_jj < tol){
             n_excl++;
             id_excl[j] = true;
+
             // Rcout << "excluded: " << j << ", L_jj: " << L_jj << "\n";
 
             // Corner case, may happen:
@@ -131,9 +125,9 @@ List cpp_cholesky(NumericMatrix X, int nthreads = 1){
             continue;
         }
 
-        L_jj = sqrt(L_jj);
+        R_jj = sqrt(R_jj);
 
-        L(j, j) = L_jj;
+        R(j, j) = R_jj;
 
         #pragma omp parallel for num_threads(nthreads) schedule(static, 1)
         for(int i=j+1 ; i<K ; ++i){
@@ -142,46 +136,51 @@ List cpp_cholesky(NumericMatrix X, int nthreads = 1){
             for(int k=0 ; k<j ; ++k){
                 if(id_excl[k]) continue;
 
-                value -= L(i, k) * L(j, k);
+                value -= R(k, i) * R(k, j);
             }
-            L(i, j) = value/L_jj;
+            R(j, i) = value/R_jj;
         }
     }
-
-    // We recontruct a R matrix and compute (RtR)-1
 
     // we reconstruct the R matrix, otherwise it's just a mess to handle excluded variables on the fly
-    int K_excl = K - n_excl;
-    NumericMatrix R_mat(K_excl, K_excl);
-    // column fill scheme
-    int n_j_excl = 0;
-    for(int j=0 ; j<K ; ++j){
+    // changes are in place
 
-        if(id_excl[j]){
-            ++n_j_excl;
-            continue;
-        }
+    if(n_excl > 0){
+        int n_j_excl = 0;
 
-        int n_i_excl = n_j_excl;
-        for(int i=j ; i<K ; ++i){
-            if(id_excl[i]){
-                ++n_i_excl;
+        // The first chunk of the matrix is identical
+        // we find when it starts being different
+        int j_start = 0;
+        for( ; !id_excl[j_start] ; ++j_start);
+
+        for(int j=j_start ; j<K ; ++j){
+
+            if(id_excl[j]){
+                ++n_j_excl;
                 continue;
             }
-            R_mat(j - n_j_excl, i - n_i_excl) = L(i, j);
+
+            int n_i_excl = 0;
+            for(int i=0 ; i<=j ; ++i){
+                if(id_excl[i]){
+                    ++n_i_excl;
+                    continue;
+                }
+                R(i - n_i_excl, j - n_j_excl) = R(i, j);
+            }
         }
+
+        K -= n_excl;
     }
 
+    // Inversion of R, in place
+    invert_tri(R, K, nthreads);
 
-    NumericMatrix R_inv = cpp_invert_tri(R_mat, nthreads);
-    NumericMatrix XtX_inv = cpp_tri_tprod(R_inv, nthreads);
+    NumericMatrix XtX_inv(K, K);
+    tproduct_tri(XtX_inv, R, nthreads);
 
-    List res;
-    // res["R"] = R_mat;
-    // res["L"] = L;
     res["XtX_inv"] = XtX_inv;
     res["id_excl"] = id_excl;
-
 
     return res;
 }
@@ -207,10 +206,12 @@ static bool sparse_check(const NumericMatrix &X){
     int n0_middle_row = 0;
     int n0_last_row = 0;
 
+    int mid = N/2;
+
     for(int k=0 ; k<K ; ++k){
-        if(X(0, k) == 0) ++n0_first_row;
-        if(X(N/2, k) == 0) ++n0_middle_row;
-        if(X(N, k) == 0) ++n0_last_row;
+        n0_first_row += X(0, k) == 0;
+        n0_middle_row += X(mid, k) == 0;
+        n0_last_row += X(N - 1, k) == 0;
     }
 
     // Rcout << "1st: " << n0_first_row << ", mid: " << n0_middle_row << ", last: " << n0_last_row << "\n";
@@ -220,290 +221,45 @@ static bool sparse_check(const NumericMatrix &X){
     return false;
 }
 
-// [[Rcpp::export]]
-List cpp_sparse_products(NumericMatrix X, NumericVector w, NumericVector y, bool correct_0w = false, int nthreads = 1){
+void set_sparse(std::vector<int> &n_j, std::vector<int> &start_j, std::vector<int> &all_i, std::vector<double> &x, const NumericMatrix &X, const NumericVector &w){
 
     int N = X.nrow();
     int K = X.ncol();
 
-    bool isWeight = false;
-    if(w.length() > 1){
-        isWeight = true;
-    }
+    bool isWeight = w.length() > 1;
 
-    NumericMatrix XtX(K, K);
-    NumericVector Xty(K);
-
-    if(sparse_check(X) == false){
-        // NOT SPARSE
-
-        if(isWeight){
-            NumericMatrix wX(Rcpp::clone(X));
-            for(int k=0 ; k<K ; ++k){
-                for(int i=0 ; i<N ; ++i){
-                    wX(i, k) *= sqrt(w[i]);
-                }
-            }
-
-            NumericVector wy(Rcpp::clone(y));
-            for(int i=0 ; i<N ; ++i){
-                wy(i) *= sqrt(w[i]);
-            }
-
-            //
-            // XtX
-            //
-
-            // specific scheme for large N and K == 1
-            if(K == 1){
-                std::vector<double> all_values(nthreads, 0);
-                #pragma omp parallel num_threads(nthreads)
-                {
-                    int i = omp_get_thread_num()*N/omp_get_num_threads();
-                    int stop = (omp_get_thread_num()+1)*N/omp_get_num_threads();
-                    double val = 0;
-                    for(; i<stop ; ++i){
-                        val += wX(i, 0) * wX(i, 0);
-                    }
-                    all_values[omp_get_thread_num()] = val;
-                }
-
-                double value = 0;
-                for(int m=0 ; m<nthreads ; ++m){
-                    value += all_values[m];
-                }
-
-                XtX(0, 0) = value;
-
-            } else {
-                // We use this trick to even out the load on the threads
-                int nValues = K * K;
-                NumericVector all_values(nValues);
-
-                #pragma omp parallel for num_threads(nthreads) schedule(static, 1)
-                for(int index=0 ; index<nValues ; index++){
-                    int k_row = index % K;
-                    int k_col = index / K;
-
-                    if(k_row <= k_col){
-                        double val = 0;
-                        for(int i=0 ; i<N ; ++i){
-                            val += wX(i, k_row) * wX(i, k_col);
-                        }
-
-                        all_values[index] = val;
-                    }
-
-                }
-
-                // save
-                for(int index=0 ; index<nValues ; index++){
-                    int k_row = index % K;
-                    int k_col = index / K;
-
-                    if(k_row <= k_col){
-                        XtX(k_row, k_col) = all_values[index];
-                        XtX(k_col, k_row) = all_values[index];
-                    }
-
-                }
-            }
-
-
-            //
-            // Xty
-            //
-
-            if(K == 1){
-                std::vector<double> all_values(nthreads, 0);
-                #pragma omp parallel num_threads(nthreads)
-                {
-                    int i = omp_get_thread_num()*N/omp_get_num_threads();
-                    int stop = (omp_get_thread_num()+1)*N/omp_get_num_threads();
-                    double val = 0;
-                    for(; i<stop ; ++i){
-                        val += wX(i, 0) * wy[i];
-                    }
-                    all_values[omp_get_thread_num()] = val;
-                }
-
-                double value = 0;
-                for(int m=0 ; m<nthreads ; ++m){
-                    value += all_values[m];
-                }
-
-                Xty[0] = value;
-            } else  {
-                #pragma omp parallel for num_threads(nthreads)
-                for(int j=0 ; j<K ; ++j){
-                    double val = 0;
-                    for(int i=0 ; i<N ; ++i){
-                        val += wX(i, j) * wy[i];
-                    }
-
-                    Xty[j] = val;
-                }
-            }
-
-        } else {
-            // Identique, mais pas besoin de faire une copie de X ni de y qui peuvent etre couteuses
-            //
-            // XtX
-            //
-
-            if(K == 1){
-                std::vector<double> all_values(nthreads, 0);
-                #pragma omp parallel num_threads(nthreads)
-                {
-                    int i = omp_get_thread_num()*N/omp_get_num_threads();
-                    int stop = (omp_get_thread_num()+1)*N/omp_get_num_threads();
-                    double val = 0;
-                    for(; i<stop ; ++i){
-                        val += X(i, 0) * X(i, 0);
-                    }
-                    all_values[omp_get_thread_num()] = val;
-                }
-
-                double value = 0;
-                for(int m=0 ; m<nthreads ; ++m){
-                    value += all_values[m];
-                }
-
-                XtX(0, 0) = value;
-
-            } else {
-                // We use this trick to even out the load on the threads
-                int nValues = K * K;
-                NumericVector all_values(nValues);
-
-                #pragma omp parallel for num_threads(nthreads) schedule(static, 1)
-                for(int index=0 ; index<nValues ; index++){
-                    int k_row = index % K;
-                    int k_col = index / K;
-
-                    if(k_row <= k_col){
-                        double val = 0;
-                        for(int i=0 ; i<N ; ++i){
-                            val += X(i, k_row) * X(i, k_col);
-                        }
-
-                        all_values[index] = val;
-                    }
-
-                }
-
-                // save
-                for(int index=0 ; index<nValues ; index++){
-                    int k_row = index % K;
-                    int k_col = index / K;
-
-                    if(k_row <= k_col){
-                        XtX(k_row, k_col) = all_values[index];
-                        XtX(k_col, k_row) = all_values[index];
-                    }
-
-                }
-            }
-
-
-            //
-            // Xty
-            //
-
-            if(K == 1){
-                std::vector<double> all_values(nthreads, 0);
-                #pragma omp parallel num_threads(nthreads)
-                {
-                    int i = omp_get_thread_num()*N/omp_get_num_threads();
-                    int stop = (omp_get_thread_num()+1)*N/omp_get_num_threads();
-                    double val = 0;
-                    for(; i<stop ; ++i){
-                        val += X(i, 0) * y[i];
-                    }
-                    all_values[omp_get_thread_num()] = val;
-                }
-
-                double value = 0;
-                for(int m=0 ; m<nthreads ; ++m){
-                    value += all_values[m];
-                }
-
-                Xty[0] = value;
-
-            } else  {
-                #pragma omp parallel for num_threads(nthreads)
-                for(int j=0 ; j<K ; ++j){
-                    double val = 0;
-                    for(int i=0 ; i<N ; ++i){
-                        val += X(i, j) * y[i];
-                    }
-
-                    Xty[j] = val;
-                }
-            }
-        }
-
-        List res;
-        res["XtX"] = XtX;
-        res["Xty"] = Xty;
-
-        return res;
-    }
-
-    //
-    // SPARSE case
-    //
-
-
-    std::vector<int> n_j(K, 0);
-    std::vector<int> all_i;
-    std::vector<double> x;
-
-    // CAN'T BE PARALLELIZED
+    int n_obs = 0;
     for(int k=0 ; k<K ; ++k){
         for(int i=0 ; i<N ; ++i){
 
             if(X(i, k) != 0){
-                if(isWeight){
-                    if(correct_0w && w[i] == 0){
-                        continue;
-                    }
-                    ++n_j[k];
-                    all_i.push_back(i);
+                ++n_j[k];
+                all_i.push_back(i);
 
+                if(isWeight){
                     // BEWARE: here there is no square root for w!
                     // (as opposed to the non-sparse case)
                     x.push_back(X(i, k) * w[i]);
                 } else {
-                    // No weights
-                    ++n_j[k];
-                    all_i.push_back(i);
                     x.push_back(X(i, k));
                 }
             }
         }
+
+        n_obs += n_j[k];
+        start_j[k + 1] = n_obs;
     }
 
+}
 
-    //
-    // The cross-product
-    //
+void mp_sparse_XtX(NumericMatrix XtX, const std::vector<int> &n_j, const std::vector<int> &start_j, const std::vector<int> &all_i, const std::vector<double> &x, const NumericMatrix &X, int nthreads){
 
-
-    // starting values of j's
-    std::vector<int> start_j(K, 0);
-    for(int k=1 ; k<K ; ++k){
-        start_j[k] = start_j[k-1] + n_j[k-1];
-    }
-    start_j.push_back(start_j[K-1] + n_j[K-1]);
-
-
+    int K = X.ncol();
 
     #pragma omp parallel for num_threads(nthreads) schedule(static, 1)
     for(int j1=0 ; j1<K ; ++j1){
 
         int k = 0, start = 0, end = 0;
-        double tmp = 0;
 
         // Upper triangle
         for(int j2=j1 ; j2<K ; ++j2){
@@ -520,8 +276,7 @@ List cpp_sparse_products(NumericMatrix X, NumericVector w, NumericVector y, bool
 
             double value = 0;
             for(int index=start ; index<end ; ++index){
-                tmp = X(all_i[index], k);
-                if(tmp != 0) value += tmp * x[index];
+                value += X(all_i[index], k) * x[index];
             }
 
             if(value == 0) continue;
@@ -531,11 +286,11 @@ List cpp_sparse_products(NumericMatrix X, NumericVector w, NumericVector y, bool
 
         }
     }
+}
 
+void mp_sparse_Xty(NumericVector Xty, const std::vector<int> &start_j, const std::vector<int> &all_i, const std::vector<double> &x, NumericVector &y, int nthreads){
 
-    //
-    // now Xty
-    //
+    int K = Xty.length();
 
     #pragma omp parallel for num_threads(nthreads)
     for(int j=0 ; j<K ; ++j){
@@ -552,6 +307,168 @@ List cpp_sparse_products(NumericMatrix X, NumericVector w, NumericVector y, bool
 
         Xty[j] = value;
     }
+
+}
+
+
+// mp: mat prod
+void mp_XtX(NumericMatrix &XtX, const NumericMatrix &X, const NumericMatrix &wX, int nthreads){
+
+    int N = X.nrow();
+    int K = X.ncol();
+
+    // specific scheme for large N and K == 1
+    if(K == 1){
+        std::vector<double> all_values(nthreads, 0);
+        #pragma omp parallel num_threads(nthreads)
+        {
+            int i = omp_get_thread_num()*N/omp_get_num_threads();
+            int stop = (omp_get_thread_num()+1)*N/omp_get_num_threads();
+            double val = 0;
+            for(; i<stop ; ++i){
+                val += X(i, 0) * wX(i, 0);
+            }
+            all_values[omp_get_thread_num()] = val;
+        }
+
+        double value = 0;
+        for(int m=0 ; m<nthreads ; ++m){
+            value += all_values[m];
+        }
+
+        XtX(0, 0) = value;
+
+    } else {
+        // We use this trick to even out the load on the threads
+        int nValues = K * (K + 1) / 2;
+        std::vector<int> all_i, all_j;
+        for(int i=0 ; i<K ; ++i){
+            for(int j=i ; j<K ; ++j){
+                all_i.push_back(i);
+                all_j.push_back(j);
+            }
+        }
+
+        #pragma omp parallel for num_threads(nthreads)
+        for(int index=0 ; index<nValues ; ++index){
+            int k_row = all_i[index];
+            int k_col = all_j[index];
+
+            double val = 0;
+            for(int i=0 ; i<N ; ++i){
+                val += X(i, k_row) * wX(i, k_col);
+            }
+
+            XtX(k_row, k_col) = val;
+            XtX(k_col, k_row) = val;
+        }
+    }
+
+}
+
+// mp: mat prod
+void mp_Xty(NumericVector &Xty, const NumericMatrix &X, const NumericVector y, int nthreads){
+
+    int N = X.nrow();
+    int K = X.ncol();
+
+    if(K == 1){
+        std::vector<double> all_values(nthreads, 0);
+        #pragma omp parallel num_threads(nthreads)
+        {
+            int i = omp_get_thread_num()*N/omp_get_num_threads();
+            int stop = (omp_get_thread_num()+1)*N/omp_get_num_threads();
+            double val = 0;
+            for(; i<stop ; ++i){
+                val += X(i, 0) * y[i];
+            }
+            all_values[omp_get_thread_num()] = val;
+        }
+
+        double value = 0;
+        for(int m=0 ; m<nthreads ; ++m){
+            value += all_values[m];
+        }
+
+        Xty[0] = value;
+    } else  {
+        #pragma omp parallel for num_threads(nthreads)
+        for(int j=0 ; j<K ; ++j){
+            double val = 0;
+            for(int i=0 ; i<N ; ++i){
+                val += X(i, j) * y[i];
+            }
+
+            Xty[j] = val;
+        }
+    }
+
+}
+
+// [[Rcpp::export]]
+List cpp_sparse_products(NumericMatrix X, NumericVector w, NumericVector y, bool correct_0w = false, int nthreads = 1){
+
+    int N = X.nrow();
+    int K = X.ncol();
+
+    bool isWeight = w.length() > 1;
+
+    NumericMatrix XtX(K, K);
+    NumericVector Xty(K);
+
+    if(sparse_check(X) == false){
+        // NOT SPARSE
+
+        if(isWeight){
+
+            NumericMatrix wX(Rcpp::clone(X));
+            for(int k=0 ; k<K ; ++k){
+                for(int i=0 ; i<N ; ++i){
+                    wX(i, k) *= w[i];
+                }
+            }
+
+            // XtX
+            mp_XtX(XtX, X, wX, nthreads);
+
+            // Xty
+            mp_Xty(Xty, wX, y, nthreads);
+
+
+        } else {
+            // Identique, mais pas besoin de faire une copie de X ni de y qui peuvent etre couteuses
+
+            // XtX
+            mp_XtX(XtX, X, X, nthreads);
+
+            // Xty
+            mp_Xty(Xty, X, y, nthreads);
+
+        }
+
+        List res;
+        res["XtX"] = XtX;
+        res["Xty"] = Xty;
+
+        return res;
+    }
+
+    //
+    // SPARSE case
+    //
+
+    std::vector<int> n_j(K, 0);
+    std::vector<int> start_j(K + 1, 0);
+    std::vector<int> all_i;
+    std::vector<double> x;
+
+    set_sparse(n_j, start_j, all_i, x, X, w);
+
+    // XtX
+    mp_sparse_XtX(XtX, n_j, start_j, all_i, x, X, nthreads);
+
+    // Xty
+    mp_sparse_Xty(Xty, start_j, all_i, x, y, nthreads);
 
     List res;
     res["XtX"] = XtX;
@@ -587,125 +504,14 @@ NumericMatrix cpppar_crossprod(NumericMatrix X, NumericVector w, int nthreads){
                 }
             }
 
-            //
             // XtX
-            //
-
-            // specific scheme for large N and K == 1
-            if(K == 1){
-                std::vector<double> all_values(nthreads, 0);
-                #pragma omp parallel num_threads(nthreads)
-                {
-                    int i = omp_get_thread_num()*N/omp_get_num_threads();
-                    int stop = (omp_get_thread_num()+1)*N/omp_get_num_threads();
-                    double val = 0;
-                    for(; i<stop ; ++i){
-                        val += X(i, 0) * wX(i, 0);
-                    }
-                    all_values[omp_get_thread_num()] = val;
-                }
-
-                double value = 0;
-                for(int m=0 ; m<nthreads ; ++m){
-                    value += all_values[m];
-                }
-
-                XtX(0, 0) = value;
-
-            } else {
-                // We use this trick to even out the load on the threads
-                int nValues = K * K;
-                NumericVector all_values(nValues);
-
-                #pragma omp parallel for num_threads(nthreads) schedule(static, 1)
-                for(int index=0 ; index<nValues ; index++){
-                    int k_row = index % K;
-                    int k_col = index / K;
-
-                    if(k_row <= k_col){
-                        double val = 0;
-                        for(int i=0 ; i<N ; ++i){
-                            val += X(i, k_row) * wX(i, k_col);
-                        }
-
-                        all_values[index] = val;
-                    }
-
-                }
-
-                // save
-                for(int index=0 ; index<nValues ; index++){
-                    int k_row = index % K;
-                    int k_col = index / K;
-
-                    if(k_row <= k_col){
-                        XtX(k_row, k_col) = all_values[index];
-                        XtX(k_col, k_row) = all_values[index];
-                    }
-
-                }
-            }
+            mp_XtX(XtX, X, wX, nthreads);
 
         } else {
             // Identique, mais pas besoin de faire une copie de X ni de y qui peuvent etre couteuses
-            //
+
             // XtX
-            //
-
-            if(K == 1){
-                std::vector<double> all_values(nthreads, 0);
-                #pragma omp parallel num_threads(nthreads)
-                {
-                    int i = omp_get_thread_num()*N/omp_get_num_threads();
-                    int stop = (omp_get_thread_num()+1)*N/omp_get_num_threads();
-                    double val = 0;
-                    for(; i<stop ; ++i){
-                        val += X(i, 0) * X(i, 0);
-                    }
-
-                    all_values[omp_get_thread_num()] = val;
-                }
-
-                double value = 0;
-                for(int m=0 ; m<nthreads ; ++m){
-                    value += all_values[m];
-                }
-
-                XtX(0, 0) = value;
-
-            } else {
-                // We use this trick to even out the load on the threads
-                int nValues = K * K;
-                NumericVector all_values(nValues);
-
-                #pragma omp parallel for num_threads(nthreads) schedule(static, 1)
-                for(int index=0 ; index<nValues ; index++){
-                    int k_row = index % K;
-                    int k_col = index / K;
-
-                    if(k_row <= k_col){
-                        double val = 0;
-                        for(int i=0 ; i<N ; ++i){
-                            val += X(i, k_row) * X(i, k_col);
-                        }
-
-                        all_values[index] = val;
-                    }
-
-                }
-
-                // save
-                for(int index=0 ; index<nValues ; index++){
-                    int k_row = index % K;
-                    int k_col = index / K;
-
-                    if(k_row <= k_col){
-                        XtX(k_row, k_col) = all_values[index];
-                        XtX(k_col, k_row) = all_values[index];
-                    }
-
-                }
-            }
+            mp_XtX(XtX, X, X, nthreads);
         }
 
         return XtX;
@@ -715,86 +521,18 @@ NumericMatrix cpppar_crossprod(NumericMatrix X, NumericVector w, int nthreads){
     // SPARSE case
     //
 
-
     std::vector<int> n_j(K, 0);
+    std::vector<int> start_j(K + 1, 0);
     std::vector<int> all_i;
     std::vector<double> x;
 
-    // CAN'T BE PARALLELIZED
-    for(int k=0 ; k<K ; ++k){
-        for(int i=0 ; i<N ; ++i){
+    set_sparse(n_j, start_j, all_i, x, X, w);
 
-            if(X(i, k) != 0){
-                if(isWeight){
-                    ++n_j[k];
-                    all_i.push_back(i);
-
-                    // BEWARE: here there is no square root for w!
-                    // (as opposed to the non-sparse case)
-                    x.push_back(X(i, k) * w[i]);
-                } else {
-                    // No weights
-                    ++n_j[k];
-                    all_i.push_back(i);
-                    x.push_back(X(i, k));
-                }
-            }
-        }
-    }
-
-
-    //
-    // The cross-product
-    //
-
-
-    // starting values of j's
-    std::vector<int> start_j(K, 0);
-    for(int k=1 ; k<K ; ++k){
-        start_j[k] = start_j[k-1] + n_j[k-1];
-    }
-    start_j.push_back(start_j[K-1] + n_j[K-1]);
-
-
-
-    #pragma omp parallel for num_threads(nthreads) schedule(static, 1)
-    for(int j1=0 ; j1<K ; ++j1){
-
-        int k = 0, start = 0, end = 0;
-        double tmp = 0;
-
-        // Upper triangle
-        for(int j2=j1 ; j2<K ; ++j2){
-
-            if(n_j[j1] < n_j[j2]){
-                start = start_j[j1];
-                end = start_j[j1 + 1];
-                k = j2;
-            } else {
-                start = start_j[j2];
-                end = start_j[j2 + 1];
-                k = j1;
-            }
-
-            double value = 0;
-            for(int index=start ; index<end ; ++index){
-                tmp = X(all_i[index], k);
-                if(tmp != 0) value += tmp * x[index];
-            }
-
-            if(value == 0) continue;
-
-            XtX(j1, j2) = value;
-            XtX(j2, j1) = value;
-
-        }
-    }
+    // XtX
+    mp_sparse_XtX(XtX, n_j, start_j, all_i, x, X, nthreads);
 
     return XtX;
 }
-
-
-
 
 // [[Rcpp::export]]
 NumericMatrix cpp_mat_reconstruct(NumericMatrix X, Rcpp::LogicalVector id_excl){
@@ -819,3 +557,14 @@ NumericMatrix cpp_mat_reconstruct(NumericMatrix X, Rcpp::LogicalVector id_excl){
 
     return res;
 }
+
+
+
+
+
+
+
+
+
+
+
