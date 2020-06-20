@@ -465,9 +465,15 @@ ols_fit = function(y, X, w, correct_0w = FALSE, nthreads){
 
     multicol = any(is_excluded)
 
-    beta = as.vector(xwx_inv %*% xwy[!is_excluded])
+    if(multicol){
+        beta = as.vector(xwx_inv %*% xwy[!is_excluded])
+        fitted.values = cpppar_xbeta(X[, !is_excluded, drop = FALSE], beta, nthreads)
+    } else {
+        # avoids copies
+        beta = as.vector(xwx_inv %*% xwy)
+        fitted.values = cpppar_xbeta(X, beta, nthreads)
+    }
 
-    fitted.values = cpppar_xbeta(X[, !is_excluded, drop = FALSE], beta, nthreads)
 
     residuals = y - fitted.values
 
