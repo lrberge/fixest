@@ -1,8 +1,33 @@
 
 # News for the R Package `fixest`
 
+## Changes in version 0.5.1
 
-## Changes in version 0.5.0
+#### Hotfix
+ 
+ - Fixed bug introduced in the previous update (memory access error). Does not affect any of the results but could lead R to crash unexpectedly (odds were low though since access was adjacent).
+ 
+#### Bugs
+
+ - Fix image link to the equation in the README.md.
+ - Fix bug R2 and logLik when observations were removed because of NA values. Due to the update in `residuals.fixest`.
+ 
+#### User visible change
+
+ - Rewriting of the internal algorithm computing the VCOV. 1) About 30% performance gain for estimations with many variables. 2) The code is much less memory hungry. 
+
+#### Major update of `etable`
+
+ - New argument `style` which allows to set many elements of the output table. 
+ - (minor) `signifCode` can be equal to `"letters"` to display letters instead of stars.
+ 
+#### Other
+
+ - `setFixest_nthreads` now respects the `OMP_THREAD_LIMIT` environment variable.
+ - Rd links are now made to the proper htlm files.
+
+
+## Changes in version 0.5.0 (10-06-2020)
 
 #### Bug fixes
         

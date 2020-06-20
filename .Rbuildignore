@@ -3,4 +3,5 @@
 ^docs$
 ^BENCHMARK$
 ^vignettes/images$
+^inst/NEWS\.Rd$
 

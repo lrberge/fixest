@@ -16,7 +16,7 @@
 #' Returns a vector of the same length as the number of observations in the original data set. Ignored observations due to NA or perfect fit are re-introduced and their weights set to NA.
 #'
 #' @seealso
-#' \code{\link[fixest]{feols}}, \code{\link[fixest]{fepois}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
+#' \code{\link[fixest]{feols}}, \code{\link[fixest:feglm]{fepois}}, \code{\link[fixest]{feglm}}, \code{\link[fixest:femlm]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
 #'
 #' @examples
 #'
@@ -46,7 +46,7 @@ weights.fixest = function(object, ...){
 #' Returns a numeric scalar.
 #'
 #' @seealso
-#' \code{\link[fixest]{feols}}, \code{\link[fixest]{fepois}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
+#' \code{\link[fixest]{feols}}, \code{\link[fixest:feglm]{fepois}}, \code{\link[fixest]{feglm}}, \code{\link[fixest:femlm]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
 #'
 #'
 #' @examples
@@ -71,7 +71,7 @@ sigma.fixest = function(object, ...){
 #' Returns a numeric scalar equal to the deviance.
 #'
 #' @seealso
-#' \code{\link[fixest]{feols}}, \code{\link[fixest]{fepois}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
+#' \code{\link[fixest]{feols}}, \code{\link[fixest:feglm]{fepois}}, \code{\link[fixest]{feglm}}, \code{\link[fixest:femlm]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
 #'
 #' @examples
 #'

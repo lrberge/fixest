@@ -378,6 +378,7 @@ summ = function(object, se, cluster, dof = getFixest_dof(), forceCovariance = FA
 #' @param depvar (Data frame only.) Logical, default is missing. Whether a first line containing the dependent variables should be shown. By default, the dependent variables are shown only if they differ across models or if the argumen \code{file} is not missing.
 #' @param coefstat One of \code{"se"} (default), \code{"tstat"} or \code{"confint"}. The statistic to report for each coefficient: the standard-error, the t-statistics or the confidence interval. You can adjust the confidence interval with the argument \code{ci}.
 #' @param ci Level of the confidence interval, defaults to \code{0.95}. Only used if \code{coefstat = confint}.
+#' @param style A list. You can change the general style of the table with this argument. It should be of the form \code{style = list(keyword="key1:value1;key2:value2")} etc. The available keywords are \code{lines} (to manage the type of lines appearing in the table), and \code{depvar}, \code{model}, \code{var}, \code{fixef}, \code{slopes}, \code{fixef.sizes}, and \code{stats}. Most of these keywords accept the key \code{title:} which affects the title appearing just before the section. Eg to drop the \emph{Variables} header, just use \code{style=list("title:")}. Note that if you use \code{style=list("title: ")} (note the space after ":"), then an empty line will still be there. The keywords fixef, slopes and fixef.sizes also accept the keys \code{prefix} and \code{suffix}. E.g. if \code{style=list(fixef="suffix: FE")}, then there will be no header showing but the text " FE" will be appended to the ficed-effects variable names. The keys accepted in \code{lines} are \code{top}, \code{bottom}, \code{foot} and \code{sep}.
 #'
 #' @details
 #' The function \code{esttex} is equivalent to the function \code{etable} with argument \code{tex = TRUE}.
@@ -1371,7 +1372,7 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 #' The package \pkg{fixest} uses the \code{fixef} method from \pkg{nlme}. Unfortunately, re-exporting this method is required in order not to attach package \pkg{nlme}.
 #'
 #' \itemize{
-#' \item Here is the help from package \pkg{nlme}: \code{\link[nlme]{fixef}}. The help from package \pkg{fixest} is here: \code{\link[fixest]{fixef.fixest}}.
+#' \item Here is the help from package \pkg{nlme}: \code{\link[nlme:fixed.effects]{fixef}}. The help from package \pkg{fixest} is here: \code{\link[fixest]{fixef.fixest}}.
 #' }
 #'
 #' @note
@@ -6138,7 +6139,7 @@ logLik.fixest = function(object, ...){
 #' Laurent Berge
 #'
 #' @seealso
-#' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. \code{\link[fixest]{summary.fixest}}, \code{\link[fixest]{confint.fixest}}, \code{\link[fixest]{vcov.fixest}}, \code{\link[fixest]{esttable}}, \code{\link[fixest]{esttex}}, \code{\link[fixest]{fixef.fixest}}.
+#' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. \code{\link[fixest]{summary.fixest}}, \code{\link[fixest]{confint.fixest}}, \code{\link[fixest]{vcov.fixest}}, \code{\link[fixest]{etable}}, \code{\link[fixest]{fixef.fixest}}.
 #'
 #' @examples
 #'
@@ -8097,7 +8098,7 @@ getFixest_nthreads = function(){
 
 #' Sets/gets the dictionary relabeling the variables
 #'
-#' Sets/gets the default dictionary used in the function \code{\link[fixest]{esttex}}, \code{\link[fixest]{did_means}} and \code{\link[fixest]{coefplot}}. The dictionaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table or displaying in graphs. By setting the dictionary with \code{setFixest_dict}, you can avoid providing the argument \code{dict}.
+#' Sets/gets the default dictionary used in the function \code{\link[fixest]{etable}}, \code{\link[fixest]{did_means}} and \code{\link[fixest]{coefplot}}. The dictionaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table or displaying in graphs. By setting the dictionary with \code{setFixest_dict}, you can avoid providing the argument \code{dict}.
 #'
 #'
 #' @param dict A named character vector. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use \code{dict = c(a="$log(a)$", b3="$bonus^3$")}. This dictionary is used in Latex tables or in graphs by the function \code{\link[fixest]{coefplot}}. If you want to separate Latex rendering from rendering in graphs, use an ampersand first to make the variable specific to \code{coefplot}.
@@ -8426,7 +8427,7 @@ getFixest_dof = function(){
 
 #' Sets/gets and expands formula macros
 #'
-#' You can set formula macros globally with \code{setFixest_fml}. These macros can then be used in \code{fixest} estimations or when using the function \code{\link[fixest]{xpd}}.
+#' You can set formula macros globally with \code{setFixest_fml}. These macros can then be used in \code{fixest} estimations or when using the function \code{\link[fixest:setFixest_fml]{xpd}}.
 #'
 #' @param fml A formula containing macros variables. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}.
 #' @param ... Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. \code{..ctrl}). The value of each argument must be a one-sided formula, it is the definition of the macro variable. Example of a valid call: \code{setFixest_fml(..ctrl = ~ var1 + var2)}. In the function \code{xpd}, the default macro variables are taken from \code{getFixest_fml}, any variable in \code{...} will replace these values.

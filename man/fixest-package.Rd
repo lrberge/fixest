@@ -11,7 +11,7 @@ The package \pkg{fixest} provides a family of functions to perform estimations w
 \details{
 This package efficiently estimates models with multiple fixed-effect (i.e. multiple large factor variables).
 
-The core functions are: \code{\link[fixest]{feols}}, \code{\link[fixest]{feglm}} and \code{\link[fixest]{femlm}} to estimate, respectively, linear models, generalized linear models and maximum likelihood models with multiple fixed-effects. The function \code{\link[fixest]{feNmlm}} allows the inclusion of non-linear in parameters right hand sides. Finally \code{\link[fixest]{fepois}} and \code{\link[fixest]{fenegbin}} are shorthands to estimate Poisson and Negative Binomial models.
+The core functions are: \code{\link[fixest]{feols}}, \code{\link[fixest]{feglm}} and \code{\link[fixest]{femlm}} to estimate, respectively, linear models, generalized linear models and maximum likelihood models with multiple fixed-effects. The function \code{\link[fixest]{feNmlm}} allows the inclusion of non-linear in parameters right hand sides. Finally \code{\link[fixest:feglm]{fepois}} and \code{\link[fixest:femlm]{fenegbin}} are shorthands to estimate Poisson and Negative Binomial models.
 
 Note that the functions \code{\link[fixest]{feglm}} and \code{\link[fixest]{femlm}} provide the same results when using the same families but differ in that the latter is a direct maximum likelihood optimization (so the two can really have different convergence rates).
 

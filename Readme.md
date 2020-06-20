@@ -28,7 +28,7 @@ Here is a comparison of the performance of `fixest` functions to other state of 
 The benchmarking was performed as follows: In the OLS context, we estimate the following equation:
 
 <!-- $$y_{ijk} = \alpha_i + \beta_j + \gamma_k + \delta x_{ijk} + \epsilon_{ijk}$$ -->
-![](vignettes/images/equation.PNG)
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/equation.PNG?raw=true)
  
 The same functional form (one variable, three fixed-effects) is estimated for the Poisson, the Negative Binomial and the Logit cases (with ad hoc modifications to fit each model). See Berge (2018) for more details on the setup.
 

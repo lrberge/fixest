@@ -116,7 +116,7 @@ In other words:
 \section{Lagging variables}{
 
 
-To use leads/lags of variables in the estimation, you can: i) either provide the argument \code{panel.id}, ii) either set you data set as a panel with the function \code{\link[fixest]{panel}}. Doing either of the two will give you acceess to the lagging functions \code{\link[fixest]{l}} and \code{\link[fixest]{f}}.
+To use leads/lags of variables in the estimation, you can: i) either provide the argument \code{panel.id}, ii) either set you data set as a panel with the function \code{\link[fixest]{panel}}. Doing either of the two will give you acceess to the lagging functions \code{\link[fixest]{l}} and \code{\link[fixest:l]{f}}.
 
 You can provide several leads/lags at once: e.g. if your formula is equal to \code{f(y) ~ l(x, -1:1)}, it means that the dependent variable is equal to the lead of \code{y}, and you will have as explanatory variables the lead of \code{x1}, \code{x1} and the lag of \code{x1}. See the examples in function \code{\link[fixest]{l}} for more details.
 }
@@ -130,7 +130,7 @@ It is important to note that *if you do not care about the standard-errors of th
 
 Introducing interactions with this syntax leads to a different display of the interacted values in \code{\link[fixest]{etable}} and offers a special representation of the interacted coefficients in the function \code{\link[fixest]{coefplot}}. See examples.
 
-The syntax \code{var::fe(ref)} is in fact a shorthand for \code{interact(var, fe, ref)}, you have more information in \code{\link[fixest]{interact}} help pages.
+The syntax \code{var::fe(ref)} is in fact a shorthand for \code{interact(var, fe, ref)}, you have more information in \code{\link[fixest:i]{interact}} help pages.
 }
 
 \examples{
@@ -198,7 +198,7 @@ Gaure, Simen, 2013, "OLS with multiple high dimensional category variables", Com
 \seealso{
 See also \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the fixed-effects coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations. For plotting coefficients: see \code{\link[fixest]{coefplot}}.
 
-And other estimation methods: \code{\link[fixest]{femlm}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{fepois}}, \code{\link[fixest]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
+And other estimation methods: \code{\link[fixest]{femlm}}, \code{\link[fixest]{feglm}}, \code{\link[fixest:feglm]{fepois}}, \code{\link[fixest:femlm]{fenegbin}}, \code{\link[fixest]{feNmlm}}.
 }
 \author{
 Laurent Berge

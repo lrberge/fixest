@@ -65,14 +65,6 @@ cpp_demean <- function(y, X_raw, r_weights, iterMax, diffMax, nb_cluster_all, du
     .Call(`_fixest_cpp_demean`, y, X_raw, r_weights, iterMax, diffMax, nb_cluster_all, dum_vector, tableCluster_vector, slope_flag, slope_vars, r_init, checkWeight, nthreads, save_fixef)
 }
 
-cpp_invert_tri <- function(R_mat, nthreads = 1L) {
-    .Call(`_fixest_cpp_invert_tri`, R_mat, nthreads)
-}
-
-cpp_tri_tprod <- function(R_mat, nthreads = 1L) {
-    .Call(`_fixest_cpp_tri_tprod`, R_mat, nthreads)
-}
-
 cpp_cholesky <- function(X, nthreads = 1L) {
     .Call(`_fixest_cpp_cholesky`, X, nthreads)
 }
@@ -113,18 +105,6 @@ cpp_table <- function(Q, dum) {
     .Call(`_fixest_cpp_table`, Q, dum)
 }
 
-cpp_unclassFactor <- function(x) {
-    .Call(`_fixest_cpp_unclassFactor`, x)
-}
-
-cpp_unik <- function(x_sorted, k_max) {
-    .Call(`_fixest_cpp_unik`, x_sorted, k_max)
-}
-
-cpp_get_fe_2 <- function(clusterSize, i_sorted_index_j, i_sorted_sumFE, j_sorted_index_i, j_sorted_sumFE, r_cumtable_i, r_cumtable_j) {
-    .Call(`_fixest_cpp_get_fe_2`, clusterSize, i_sorted_index_j, i_sorted_sumFE, j_sorted_index_i, j_sorted_sumFE, r_cumtable_i, r_cumtable_j)
-}
-
 cpp_get_fe_gnl <- function(Q, N, sumFE, dumMat, cluster_sizes, obsCluster) {
     .Call(`_fixest_cpp_get_fe_gnl`, Q, N, sumFE, dumMat, cluster_sizes, obsCluster)
 }
@@ -135,10 +115,6 @@ cpp_ssr_null <- function(y) {
 
 cpp_ssq <- function(x) {
     .Call(`_fixest_cpp_ssq`, x)
-}
-
-cpp_update_dum <- function(dum, k_max) {
-    .Call(`_fixest_cpp_update_dum`, dum, k_max)
 }
 
 cpp_isConstant <- function(x) {
@@ -167,10 +143,6 @@ cpp_lag_obs <- function(id, time, nlag) {
 
 cpp_check_nested <- function(fe_list, cluster_list, fe_sizes, n) {
     .Call(`_fixest_cpp_check_nested`, fe_list, cluster_list, fe_sizes, n)
-}
-
-cpp_diag_XUtX <- function(X, U) {
-    .Call(`_fixest_cpp_diag_XUtX`, X, U)
 }
 
 get_nb_threads <- function() {

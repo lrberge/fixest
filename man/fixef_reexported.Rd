@@ -9,7 +9,7 @@ The package \pkg{fixest} uses the \code{fixef} method from \pkg{nlme}. Unfortuna
 }
 \details{
 \itemize{
-\item Here is the help from package \pkg{nlme}: \code{\link[nlme]{fixef}}. The help from package \pkg{fixest} is here: \code{\link[fixest]{fixef.fixest}}.
+\item Here is the help from package \pkg{nlme}: \code{\link[nlme:fixed.effects]{fixef}}. The help from package \pkg{fixest} is here: \code{\link[fixest]{fixef.fixest}}.
 }
 }
 \note{
