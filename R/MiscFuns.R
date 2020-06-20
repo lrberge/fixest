@@ -748,7 +748,7 @@ r2 = function(x, type = "all", full_names = FALSE){
 		        # x$family$family is also normal
 		        res_fe = feglm(fml = new_fml, data = newdata, glm.tol = 1e-2, fixef.tol = 1e-3, family = x$family$family, weights = x[["weights"]], offset = x[["offset"]])
 
-		        x$ssr_fe_only = cpp_ssq(resid(res_fe))
+		        x$ssr_fe_only = cpp_ssq(res_fe$residuals)
 		        x$ll_fe_only = logLik(res_fe)
 		    }
 
@@ -761,7 +761,7 @@ r2 = function(x, type = "all", full_names = FALSE){
 			} else {
 				ssr_fe_only = ifNullNA(x$ssr_fe_only)
 				nb_fe = x$nparams - length(coef(x))
-				res[i] = 1 - cpp_ssq(resid(x)) / ssr_fe_only * (n - nb_fe) / (n - nb_fe - df_k)
+				res[i] = 1 - cpp_ssq(x$residuals) / ssr_fe_only * (n - nb_fe) / (n - nb_fe - df_k)
 			}
 		} else {
 			df_k = ifelse(adj, x$nparams, 1 - pseudo)
@@ -776,7 +776,7 @@ r2 = function(x, type = "all", full_names = FALSE){
 			} else {
 				ssr_null = x$ssr_null
 				df.intercept = 1 * (isFixef || any(grepl("(Intercept)", names(x$coefficients), fixed = TRUE)))
-				res[i] = 1 - drop(crossprod(resid(x))) / ssr_null * (n - df.intercept) / (n - df_k)
+				res[i] = 1 - drop(crossprod(x$residuals)) / ssr_null * (n - df.intercept) / (n - df_k)
 			}
 
 		}
@@ -2036,7 +2036,7 @@ collinearity = function(x, verbose){
 
 				res = feols(fml2estimate, linbase, fixef = new_dum_names[id_cluster], warn = FALSE)
 
-				max_residuals = max(abs(resid(res)))
+				max_residuals = max(abs(res$residuals))
 
 				if(max_residuals < 1e-4){
 					ccat("\n")
@@ -2155,7 +2155,7 @@ collinearity = function(x, verbose){
 
 			}
 
-			sum_resids = sum(abs(resid(res)))
+			sum_resids = sum(abs(res$residuals))
 			if(sum_resids < 1e-4){
 				coef_esti = coef(res)
 				coef_diff = abs(coef_esti - coef[names(coef_esti)])
@@ -6108,7 +6108,7 @@ BIC.fixest = function(object, ...){
 logLik.fixest = function(object, ...){
 
 	if(object$method == "feols"){
-		resid = residuals(object)
+		resid = object$residuals
 		sigma = sqrt(mean(resid^2))
 		n = length(resid)
 		ll = -1/2/sigma^2 * sum(resid^2) - n * log(sigma) - n * log(2*pi)/2
