@@ -1,7 +1,13 @@
 
 # News for the R Package `fixest`
 
-## Changes in version 0.5.1
+## Changes in version 0.5.2
+
+#### Bugs
+
+ - In `vcov`, the degree-of-freedom in the small sample correction correction was fixed to "nested" and couldn't be modified, now corrected. Further, "nested" was not properly accounted for, now corrected.
+
+## Changes in version 0.5.1 (18-06-2018)
 
 #### Hotfix
  

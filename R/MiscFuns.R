@@ -205,7 +205,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' @param se Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{White}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.
 #' @param cluster Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1, "var2")]}, \code{cluster = c("var1, "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster).
 #' @param object A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
-#' @param dof An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}. Represent how the degree of freedom correction should be done. Defaults to \code{dof(adj = 1, fixef.K="nested", fixef.exact=FALSE, cluster.adj = TRUE)}. See the help of the function \code{\link[fixest]{dof}} for details.
+#' @param dof An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}. Represents how the degree of freedom correction should be done. Defaults to \code{dof(adj = 1, fixef.K="nested", fixef.exact=FALSE, cluster.adj = TRUE)}. See the help of the function \code{\link[fixest]{dof}} for details.
 #' @param forceCovariance (Advanced users.) Logical, default is \code{FALSE}. In the peculiar case where the obtained Hessian is not invertible (usually because of collinearity of some variables), use this option to force the covariance matrix, by using a generalized inverse of the Hessian. This can be useful to spot where possible problems come from.
 #' @param keepBounded (Advanced users -- feNmlm with non-linear part and bounded coefficients only.) Logical, default is \code{FALSE}. If \code{TRUE}, then the bounded coefficients (if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise it is not).
 #' @param n Integer, default is missing (means Inf). Number of coefficients to display when the print method is used.
@@ -7027,13 +7027,13 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 
 	# How do we choose K? => argument dof
 
-	if(dof.fixef.K == "false"){
+	if(dof.fixef.K == "none"){
 	    # we do it with "minus" because of only slopes
 	    K = object$nparams
 	    if(n_fe_ok > 0){
 	        K = K - (sum(fixef_sizes_ok) - (n_fe_ok - 1))
 	    }
-	} else if(dof.fixef.K == "true" || se.val %in% c("standard", "white")){
+	} else if(dof.fixef.K == "full" || se.val %in% c("standard", "white")){
 	    K = object$nparams
 	    if(is_exact && n_fe >= 2 && n_fe_ok >= 1){
 	        fe = fixef(object, notes = FALSE)
@@ -7417,6 +7417,15 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 		        } else {
 		            K = K - (sum(fixef_sizes_ok[is_nested]) - sum(fixef_sizes_ok[is_nested] > 0))
 		        }
+		    }
+
+		    if(dof.adj == 0){
+		        # No adjustment
+		        correction.dof = 1
+		    } else if(dof.adj == 1){
+		        correction.dof = n / (n - K)
+		    } else if(dof.adj == 2){
+		        correction.dof = (n - 1) / (n - K)
 		    }
 		}
 
@@ -8361,8 +8370,8 @@ getFixest_print.type = function(){
 #' Provides how the degrees of freedom should be calculated in \code{\link[fixest]{vcov.fixest}}/\code{\link[fixest]{summary.fixest}}.
 #'
 #' @param adj Can be equal to 0, 1 or 2. Type of small sample correction. If 0: no small sample correction. If 1: a correction of the form \code{n / (n - K)} with n the number of observation and K the number of estiamted parameters. If 2: the correction is \code{(n - 1) / (n - K)}.
-#' @param fixef.K How to account for the fixed-effects parameters, defaults to \code{"nested"}. If \code{FALSE} or \code{"no"}, fixed-effects parameters are discarded, meaning the number of parameters is only equal to the number of variables. If \code{TRUE} or \code{yes}, then the number of parameters is equal to the number of variables plus the number of fixed-effects. Finally, if \code{nested}, then the number of parameters is equal to the number of variables an the number of fixed-effects that *are not* nested in the clusters used to cluster the standard-errors.
-#' @param fixef.exact Logical, default is \code{FALSE}. If there are 2 or more fixed-effects, these fixed-effects they can be irregular, meaning they can provide the same information. If so, the "real" number of parameters should be lower than the total number of fixed-effects. If \code{fixef.exact = TRUE}, then \code{\link[fixest]{fixef.fixest}} is first run to determine the exact number of parameters among the fixed-effects. Mostly, panels of the type individual-firm-year require \code{fixef.exact = TRUE} (but it adds computational costs).
+#' @param fixef.K How to account for the fixed-effects parameters, defaults to \code{"nested"}. If \code{FALSE} or \code{"none"}, fixed-effects parameters are discarded, meaning the number of parameters is only equal to the number of variables. If \code{TRUE} or \code{"full"}, then the number of parameters is equal to the number of variables plus the number of fixed-effects. Finally, if \code{nested}, then the number of parameters is equal to the number of variables an the number of fixed-effects that *are not* nested in the clusters used to cluster the standard-errors.
+#' @param fixef.exact Logical, default is \code{FALSE}. If there are 2 or more fixed-effects, these fixed-effects they can be irregular, meaning they can provide the same information. If so, the "real" number of parameters should be lower than the total number of fixed-effects. If \code{fixef.exact = TRUE}, then \code{\link[fixest]{fixef.fixest}} is first run to determine the exact number of parameters among the fixed-effects. Mostly, panels of the type individual-firm require \code{fixef.exact = TRUE} (but it adds computational costs).
 #' @param cluster.adj Logical, default is \code{TRUE}. How to make the small sample correction when clustering the standard-errors? If \code{TRUE} a \code{G/(G-1)} correction is performed with \code{G} the number of cluster values.
 #'
 #' @return
@@ -8426,20 +8435,20 @@ getFixest_print.type = function(){
 #'
 #' # fixef.K = FALSE
 #' #  => adjustment K = 1 (i.e. only x)
-#' summary(est, dof = dof(fixef.K=FALSE))
-#' attr(vcov(est, dof = dof(fixef.K=FALSE)), "dof.K")
+#' summary(est, dof = dof(fixef.K = "none"))
+#' attr(vcov(est, dof = dof(fixef.K = "none")), "dof.K")
 #'
 #'
 #' # fixef.K = TRUE
 #' #  => adjustment K = 1 + 3 + 5 - 1 (i.e. x + fe1 + fe2 - 1 restriction)
-#' summary(est, dof = dof(fixef.K=TRUE))
-#' attr(vcov(est, dof = dof(fixef.K=TRUE)), "dof.K")
+#' summary(est, dof = dof(fixef.K = "full"))
+#' attr(vcov(est, dof = dof(fixef.K = "full")), "dof.K")
 #'
 #'
 #' # fixef.K = TRUE & fixef.exact = TRUE
 #' #  => adjustment K = 1 + 3 + 5 - 2 (i.e. x + fe1 + fe2 - 2 restrictions)
-#' summary(est, dof = dof(fixef.K=TRUE, fixef.exact = TRUE))
-#' attr(vcov(est, dof = dof(fixef.K=TRUE, fixef.exact = TRUE)), "dof.K")
+#' summary(est, dof = dof(fixef.K = "full", fixef.exact = TRUE))
+#' attr(vcov(est, dof = dof(fixef.K = "full", fixef.exact = TRUE)), "dof.K")
 #'
 #' # There are two restrictions:
 #' attr(fixef(est), "references")
@@ -8448,13 +8457,13 @@ getFixest_print.type = function(){
 dof = function(adj = 1, fixef.K = "nested", fixef.exact = FALSE, cluster.adj = TRUE){
 
     check_arg_plus(adj, "integer scalar conv GE{0} LE{2}")
-    check_arg_plus(fixef.K, "logical scalar | match(no, yes, nested)")
+    check_arg_plus(fixef.K, "logical scalar | match(none, full, nested)")
     fixef.K = as.character(fixef.K)
 
     check_arg(fixef.exact, cluster.adj, "logical scalar")
 
-    if(fixef.K == "TRUE") fixef.K = "yes"
-    if(fixef.K == "FALSE") fixef.K = "no"
+    if(fixef.K == "TRUE") fixef.K = "full"
+    if(fixef.K == "FALSE") fixef.K = "none"
 
     res = list(adj = adj, fixef.K = fixef.K, fixef.exact = fixef.exact, cluster.adj = cluster.adj)
     class(res) = "dof.type"
