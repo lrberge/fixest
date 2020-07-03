@@ -205,9 +205,9 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' @param se Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{White}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.
 #' @param cluster Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1, "var2")]}, \code{cluster = c("var1, "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster).
 #' @param object A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
-#' @param dof An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}. Represents how the degree of freedom correction should be done. Defaults to \code{dof(adj = 1, fixef.K="nested", fixef.exact=FALSE, cluster.adj = TRUE)}. See the help of the function \code{\link[fixest]{dof}} for details.
+#' @param dof An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}. Represents how the degree of freedom correction should be done. Defaults to \code{dof(adj = TRUE, fixef.K="nested", cluster.adj = TRUE, fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{dof}} for details.
 #' @param forceCovariance (Advanced users.) Logical, default is \code{FALSE}. In the peculiar case where the obtained Hessian is not invertible (usually because of collinearity of some variables), use this option to force the covariance matrix, by using a generalized inverse of the Hessian. This can be useful to spot where possible problems come from.
-#' @param keepBounded (Advanced users -- feNmlm with non-linear part and bounded coefficients only.) Logical, default is \code{FALSE}. If \code{TRUE}, then the bounded coefficients (if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise it is not).
+#' @param keepBounded (Advanced users -- \code{feNmlm} with non-linear part and bounded coefficients only.) Logical, default is \code{FALSE}. If \code{TRUE}, then the bounded coefficients (if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise it is not).
 #' @param n Integer, default is missing (means Inf). Number of coefficients to display when the print method is used.
 #' @param ... Not currently used.
 #'
@@ -232,12 +232,13 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' est_pois = femlm(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
 #'
 #' # Comparing different types of standard errors
+#' sum_standard = summary(est_pois, se = "standard")
 #' sum_white    = summary(est_pois, se = "white")
 #' sum_oneway   = summary(est_pois, se = "cluster")
 #' sum_twoway   = summary(est_pois, se = "twoway")
 #' sum_threeway = summary(est_pois, se = "threeway")
 #'
-#' esttable(sum_white, sum_oneway, sum_twoway, sum_threeway)
+#' etable(sum_standard, sum_white, sum_oneway, sum_twoway, sum_threeway)
 #'
 #' # Alternative ways to cluster the SE:
 #'
@@ -6977,7 +6978,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 	} else {
 	    dof.fixef.K = dof$fixef.K
 	    dof.adj = dof$adj
-	    is_exact = dof$fixef.exact
+	    is_exact = dof$fixef.force_exact
 	    is_cluster = dof$cluster.adj
 	}
 
@@ -7049,7 +7050,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 		if(se.val != "standard"){
 			VCOV_raw = object$cov.unscaled / object$sigma2
 		} else {
-			VCOV_raw = object$cov.unscaled / (n / (n - object$nparams))
+			VCOV_raw = object$cov.unscaled / ((n - 1) / (n - object$nparams))
 		}
 	} else {
 		VCOV_raw = object$cov.unscaled
@@ -7057,14 +7058,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 
 
 	# Small sample adjustment
-	if(dof.adj == 0){
-	    # No adjustment
-	    correction.dof = 1
-	} else if(dof.adj == 1){
-	    correction.dof = n / (n - K)
-	} else if(dof.adj == 2){
-	    correction.dof = (n - 1) / (n - K)
-	}
+	correction.dof = ifelse(dof.adj, (n - 1) / (n - K), 1)
 
 
 	# information on the variable used for the clustering
@@ -7113,7 +7107,8 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 
 	} else if(se.val == "white"){
 
-		vcov = crossprod(myScore %*% VCOV_raw) * correction.dof
+	    # we make a n/(n-1) adjustment to match vcovHC(type = "HC1")
+		vcov = crossprod(myScore %*% VCOV_raw) * correction.dof * ifelse(dof.adj, n/(n-1), 1)
 
 	} else {
 		# Clustered SD!
@@ -7389,7 +7384,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 		}
 
 		# We recompute K
-		if(dof.fixef.K == "nested" && n_fe_ok >= 1){
+		if(dof.adj && dof.fixef.K == "nested" && n_fe_ok >= 1){
             if(do.unclass){
                 # we need to find out which is nested
                 is_nested = which(cpp_check_nested(object$fixef_id, cluster, object$fixef_sizes, n = n) == 1)
@@ -7419,14 +7414,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 		        }
 		    }
 
-		    if(dof.adj == 0){
-		        # No adjustment
-		        correction.dof = 1
-		    } else if(dof.adj == 1){
-		        correction.dof = n / (n - K)
-		    } else if(dof.adj == 2){
-		        correction.dof = (n - 1) / (n - K)
-		    }
+		    correction.dof = (n - 1) / (n - K)
 		}
 
 		for(i in 1:nway){
@@ -7460,9 +7448,10 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 				}
 
 				vcov = vcov + (-1)**(i+1) * vcovClust(index, VCOV_raw, myScore, dof = is_cluster, do.unclass=FALSE)
-				vcov = vcov * correction.dof
 			}
 		}
+
+		vcov = vcov * correction.dof
 
 	}
 
@@ -7473,7 +7462,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 	sd.dict = c("standard" = "Standard", "white"="White", "cluster"="Clustered", "twoway"="Two-way", "threeway"="Three-way", "fourway"="Four-way")
 
 	attr(vcov, "type") = paste0(as.vector(sd.dict[se.val]), type_info)
-	attr(vcov, "dof.type") = paste0("dof(adj = ", dof.adj, ", fixef.K = '", dof.fixef.K, "', fixef.exact = ", is_exact, ", cluster.adj = ", is_cluster, ")")
+	attr(vcov, "dof.type") = paste0("dof(adj = ", dof.adj, ", fixef.K = '", dof.fixef.K, "', cluster.adj = ", is_cluster, ", fixef.force_exact = ", is_exact, ")")
 	attr(vcov, "dof.K") = K
 
 	vcov
@@ -8369,10 +8358,10 @@ getFixest_print.type = function(){
 #'
 #' Provides how the degrees of freedom should be calculated in \code{\link[fixest]{vcov.fixest}}/\code{\link[fixest]{summary.fixest}}.
 #'
-#' @param adj Can be equal to 0, 1 or 2. Type of small sample correction. If 0: no small sample correction. If 1: a correction of the form \code{n / (n - K)} with n the number of observation and K the number of estiamted parameters. If 2: the correction is \code{(n - 1) / (n - K)}.
-#' @param fixef.K How to account for the fixed-effects parameters, defaults to \code{"nested"}. If \code{FALSE} or \code{"none"}, fixed-effects parameters are discarded, meaning the number of parameters is only equal to the number of variables. If \code{TRUE} or \code{"full"}, then the number of parameters is equal to the number of variables plus the number of fixed-effects. Finally, if \code{nested}, then the number of parameters is equal to the number of variables an the number of fixed-effects that *are not* nested in the clusters used to cluster the standard-errors.
-#' @param fixef.exact Logical, default is \code{FALSE}. If there are 2 or more fixed-effects, these fixed-effects they can be irregular, meaning they can provide the same information. If so, the "real" number of parameters should be lower than the total number of fixed-effects. If \code{fixef.exact = TRUE}, then \code{\link[fixest]{fixef.fixest}} is first run to determine the exact number of parameters among the fixed-effects. Mostly, panels of the type individual-firm require \code{fixef.exact = TRUE} (but it adds computational costs).
-#' @param cluster.adj Logical, default is \code{TRUE}. How to make the small sample correction when clustering the standard-errors? If \code{TRUE} a \code{G/(G-1)} correction is performed with \code{G} the number of cluster values.
+#' @param adj Logical scalar, defaults to \code{TRUE}. Whether to apply a small sample adjustment of the form \code{(n - 1) / (n - K)}, with \code{K} the number of estimated parameters. If \code{FALSE}, then no adjustment is made.
+#' @param fixef.K Character scalar equal to \code{"nested"} (default), \code{"none"} or \code{"full"}. In the small sample adjustment, how to account for the fixed-effects parameters. If \code{"none"}, the fixed-effects parameters are discarded, meaning the number of parameters (\code{K}) is only equal to the number of variables. If \code{"full"}, then the number of parameters is equal to the number of variables plus the number of fixed-effects. Finally, if \code{"nested"}, then the number of parameters is equal to the number of variables plus the number of fixed-effects that *are not* nested in the clusters used to cluster the standard-errors.
+#' @param fixef.force_exact Logical, default is \code{FALSE}. If there are 2 or more fixed-effects, these fixed-effects they can be irregular, meaning they can provide the same information. If so, the "real" number of parameters should be lower than the total number of fixed-effects. If \code{fixef.force_exact = TRUE}, then \code{\link[fixest]{fixef.fixest}} is first run to determine the exact number of parameters among the fixed-effects. Mostly, panels of the type individual-firm require \code{fixef.force_exact = TRUE} (but it adds computational costs).
+#' @param cluster.adj Logical scalar, default is \code{TRUE}. How to make the small sample correction when clustering the standard-errors? If \code{TRUE} a \code{G/(G-1)} correction is performed with \code{G} the number of cluster values.
 #'
 #' @return
 #' It returns a \code{dof.type} object.
@@ -8389,24 +8378,26 @@ getFixest_print.type = function(){
 #' # Equivalence with lm/glm standard-errors
 #' #
 #'
+#' # LM
+#' # In the absence of fixed-effects,
+#' # by default, the standard-errors are computed in the same way
+#'
 #' res = feols(Petal.Length ~ Petal.Width + Species, iris)
 #' res_lm = lm(Petal.Length ~ Petal.Width + Species, iris)
-#'
-#' # lm applies a correction of the type adj = 1 (fixest's default)
 #' vcov(res) / vcov(res_lm)
 #'
-#' # Glm
+#' # GLM
+#' # By default, there is no small sample adjustment in glm, as opposed to feglm.
+#' # To get the same SEs, we need to use dof(adj = FALSE)
+#'
 #' res_pois = fepois(round(Petal.Length) ~ Petal.Width + Species, iris)
 #' res_glm = glm(round(Petal.Length) ~ Petal.Width + Species, iris, family = poisson())
-#'
-#' # glm applies a correction of the type adj = 0 (this time not fixest's default)
-#' vcov(res_pois, dof = dof(adj = 0)) / vcov(res_glm)
+#' vcov(res_pois, dof = dof(adj = FALSE)) / vcov(res_glm)
 #'
 #' # Same example with the Gamma
 #' res_gamma = feglm(round(Petal.Length) ~ Petal.Width + Species, iris, family = Gamma())
 #' res_glm_gamma = glm(round(Petal.Length) ~ Petal.Width + Species, iris, family = Gamma())
-#'
-#' vcov(res_gamma, dof = dof(adj = 0)) / vcov(res_glm_gamma)
+#' vcov(res_gamma, dof = dof(adj = FALSE)) / vcov(res_glm_gamma)
 #'
 #' #
 #' # Fixed-effects corrections
@@ -8445,27 +8436,22 @@ getFixest_print.type = function(){
 #' attr(vcov(est, dof = dof(fixef.K = "full")), "dof.K")
 #'
 #'
-#' # fixef.K = TRUE & fixef.exact = TRUE
+#' # fixef.K = TRUE & fixef.force_exact = TRUE
 #' #  => adjustment K = 1 + 3 + 5 - 2 (i.e. x + fe1 + fe2 - 2 restrictions)
-#' summary(est, dof = dof(fixef.K = "full", fixef.exact = TRUE))
-#' attr(vcov(est, dof = dof(fixef.K = "full", fixef.exact = TRUE)), "dof.K")
+#' summary(est, dof = dof(fixef.K = "full", fixef.force_exact = TRUE))
+#' attr(vcov(est, dof = dof(fixef.K = "full", fixef.force_exact = TRUE)), "dof.K")
 #'
 #' # There are two restrictions:
 #' attr(fixef(est), "references")
 #'
 #'
-dof = function(adj = 1, fixef.K = "nested", fixef.exact = FALSE, cluster.adj = TRUE){
+dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, fixef.force_exact = FALSE){
 
-    check_arg_plus(adj, "integer scalar conv GE{0} LE{2}")
-    check_arg_plus(fixef.K, "logical scalar | match(none, full, nested)")
-    fixef.K = as.character(fixef.K)
+    check_arg_plus(adj, "loose logical scalar conv")
+    check_arg_plus(fixef.K, "match(none, full, nested)")
+    check_arg(fixef.force_exact, cluster.adj, "logical scalar")
 
-    check_arg(fixef.exact, cluster.adj, "logical scalar")
-
-    if(fixef.K == "TRUE") fixef.K = "full"
-    if(fixef.K == "FALSE") fixef.K = "none"
-
-    res = list(adj = adj, fixef.K = fixef.K, fixef.exact = fixef.exact, cluster.adj = cluster.adj)
+    res = list(adj = adj, fixef.K = fixef.K, cluster.adj = cluster.adj, fixef.force_exact = fixef.force_exact)
     class(res) = "dof.type"
     res
 }
