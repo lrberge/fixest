@@ -7108,7 +7108,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 	} else if(se.val == "white"){
 
 	    # we make a n/(n-1) adjustment to match vcovHC(type = "HC1")
-		vcov = crossprod(myScore %*% VCOV_raw) * correction.dof * ifelse(dof.adj, n/(n-1), 1)
+		vcov = crossprod(myScore %*% VCOV_raw) * correction.dof * ifelse(is_cluster, n/(n-1), 1)
 
 	} else {
 		# Clustered SD!
