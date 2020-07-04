@@ -1,0 +1,208 @@
+---
+title: "On standard-errors"
+author: "Laurent Berge"
+date: "01/07/2020"
+output: rmarkdown::html_vignette
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+```
+
+It is an euphemism to say that standard-errors are a critical element of your estimations: literally your paper's results depend on them. It is therefore unfortunate that no conventional "best" way exists to compute them. Multiple definitions can create confusion and the purpose of this document is to lay bare the fiddly details of standard-error computation.
+
+The first part describes how standard-errors are computed in `fixest`'s estimations. The second part illustrates how to replicate some standard-errors obtained from other estimation methods with `fixest`. 
+
+This document applies to `fixest` version 0.6.0 or higher.
+
+
+## How standard-errors are computed in `fixest`
+
+There are two components defining the standard-errors in `fixest`. The main type of standard-error is given by the argument `se`, the small sample correction is defined by the argument `dof`.
+
+### The argument `se`
+
+The argument `se` can be equal to either `"standard"`, `"white"`, `"cluster"`, `"twoway"`, or `"threeway"`.
+
+If `se = "standard"`, then the standard-errors are based on the assumption that the errors are all independent and generated with the same law (in particular, same variance). If `se = "white"`, this corresponds to the classic hereoskedasticity-robust standard-errors (White correction), where it is assumed that the errors are independent but the variance of their generative law may vary. If `se = "cluster"`, then arbitrary correlation of the errors within clusters is accounted for. Same for `se = "twoway"` (resp. `"threeway"`): arbitrary correlation within each of the two (resp. three) clusters is accounted for. 
+
+### The argument `dof`
+
+The type of small sample correction applied is defined by the argument `dof` which accepts only objects produced by the function `dof`. The main arguments of this function are `adj`, `fixef.K` and `cluster.adj`. I detail each of them below.
+
+
+Say you have $\tilde{V}$ the variance-covariance matrix (henceforth VCOV) before any small sample adjustment. Argument `adj` can be equal to `TRUE` or `FALSE`, leading to the following adjustment:
+
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/SE/adj.png?raw=true)
+
+When the estimation contains fixed-effects, the value of $K$ in the previous adjustment can be determined in different ways, governed by the argument `fixef.K`. To illustrate how $K$ is computed, let's use an example with individual (variable `id`) and time fixed-effect and with clustered standard-errors. The structure of the 10 observations data is:
+
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/SE/sample_data.png?raw=true)
+
+The standard-errors are clustered with respect to the `cluster` variable, further we can see that the variable `id` is nested within the `cluster` variable (i.e. each value of `id` "belongs" to only one value of `cluster`; e.g. `id` could represent US counties and `cluster` US states).
+
+The argument `fixef.K` can be equal to either `"none"`, `"nested"` or `"full"`. Then $K$ will be computed as follows:
+
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/SE/K_computation.png?raw=true)
+
+Where $K_{vars}$ is the number of estimated coefficients associated to the variables. `fixef.K="none"` discards all fixed-effects coefficients. `fixef.K="nested"` discards all coefficients that are nested (here the 5 coefficients from `id`). Finally `fixef.K="full"` accounts for all fixed-effects coefficients (here 6: equal to 5 from `id`, plus 2 from `time`, minus one used as a reference [otherwise collinearity arise]). Note that if `fixef.K="nested"` and the standard-errors are *not* clustered, this is equivalent to using `fixef.K="full".`
+
+The last argument of `dof` is `cluster.adj`. This argument is only relevant when the standard-errors are clustered. Let $M$ be the sandwich estimator of the VCOV without adjustment. Then for one-way clustered standard errors:
+ 
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/SE/cluster_adj_one_way.png?raw=true)
+
+With $G$ the number of unique elements of the cluster variable (in the previous example $G=2$ for `cluster`). 
+
+The effect of the adjusment for two-way clustered standard-errors is as follows: 
+
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/SE/cluster_adj_two_way.png?raw=true)
+
+Using the data from the previous example, here the standard-errors are clustered by `id` and `time`, leading to $G_{id}=5$, $G_{time}=2$, and $G_{id,time}=10$.
+
+#### Yet more details
+
+You're already fed up about about these details? I'm sorry but there's more, so far you've only seen the main arguments! I now come to detail three more elements: `fixef.force_exact`, `cluster.df` and `t.df`.
+
+Argument `fixef.force_exact` is only relevant when there are two or more fixed-effects. By default all the fixed-effects coefficients are accounted for when computing the degrees of freedom. In general this is fine, but in some situations it may overestimate the number of estimated coefficients. Why? Because some of the fixed-effects may be collinear, the effective number of coefficients being lower. Let's illustrate that with an example. Consider the following set of fixed-effects:
+
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/SE/exact_collinearity.png?raw=true)
+
+There are 6 different values of `id` and 4 different values of `time`. By default, 9 coefficients are used to compute the degrees of freedom (6 plus 4 minus one reference). But we can see here that the "effective" number of coefficients is equal to 8: two coefficients should be removed to avoid collinearity issues (any one from each color set). If you use `fixef.force_exact=TRUE`, then the function `fixef` is first run to determine the number of free coefficients in the fixed-effects, this number is then used to compute the degree of freedom.
+
+Argument `cluster.df` is only relevant when you apply two-way clustering (or higher). It can have two values: either `"conventional"` (the default), or `"min"`. This affects the adjustments for each clustered matrix. For two-way clustered standard errors, if `cluster.df="min"`, the adjusment becomes:
+
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/SE/cluster_df_min.png?raw=true)
+
+Now instead of having a specific adjustment for each matrix, there is only one adjustment of $G_{min}/(G_{min}-1)$ where $G_{min}$ is the minimum cluster size (here $G_{min}=\min(G_i,G_t)$).
+
+Argument `t.df` is only relevant when standard-errors are clustered. It affects the way the *p-value* is computed. It can be equal to: either `"conventional"` (the default), or `"min"`. By default, the degrees of freedom used to find the p-value from the Student t distribution is equal to the number of observations minus the number of estimated coefficients. When the standard-errors are clustered and `t.df="min"`, the degrees of freedom used in the Student t distribution is equal to the minimum cluster size (among all clusters used to cluster the VCOV).
+
+
+## Replicating standard-errors from other methods
+
+This section illustrates how the results from `fixest` compares with the ones from other methods. It also shows how to replicate the latter from `fixest` using the argument `dof`.
+
+First, let's generate some data:
+
+```{r}
+library(fixest) ; library(plm) ; library(lfe, warn.conflicts = FALSE)
+library(lmtest) ; library(sandwich)
+
+# Data generation
+set.seed(0)
+N = 20 ; n_id = N/5; n_time = N/n_id
+base = data.frame(y = rnorm(N), x = rnorm(N), id = rep(1:n_id, n_time), 
+                  time = rep(1:n_time, each = n_id))
+
+```
+
+Here are some comparisons when the estimation doesn't contain fixed-effects.
+
+```{r}
+# Estimations
+res_lm    = lm(y ~ x, base)
+res_feols = feols(y ~ x, base)
+
+# Same standard-errors
+rbind(se(res_lm), se(res_feols))
+
+# Heteroskedasticity-robust covariance
+se_lm_white    = sqrt(diag(vcovHC(res_lm, type = "HC1")))
+se_feols_white = se(res_feols, se = "white")
+rbind(se_lm_white, se_feols_white)
+# Note that Stata's <reg y x, robust> leads to similar results (same SEs, same p-values)
+```
+
+The most important differences arise in the presence of fixed-effects. Let's first compare "standard" and clustered standard-errors between `lm`, `plm` and Stata's `xtreg`.
+
+
+```{r}
+# Estimations
+est_lm    = lm(y ~ x + as.factor(id) + as.factor(time), base)
+est_plm   = plm(y ~ x + as.factor(time), base, index = c("id", "time"), model = "within")
+est_feols = feols(y ~ x | id + time, base)
+
+#
+# "Standard" standard-errors
+#
+
+# By default fixest clusters the SEs when FEs are present,
+#  so we need to ask for standard SEs explicitly.
+rbind(se(est_lm)["x"], se(est_plm)["x"], se(est_feols, se = "standard"))
+
+# p-values:
+rbind(pvalue(est_lm)["x"], pvalue(est_plm)["x"], pvalue(est_feols, se = "standard"))
+
+```
+
+The standard-errors and p-values are identical. Now for clustered SEs:
+
+```{r}
+# Clustered by id
+se_CL_id_lm    = sqrt(vcovCL(est_lm, cluster = base$id, type = "HC1")["x", "x"])
+se_CL_id_plm   = sqrt(vcovHC(est_plm, cluster = "group")["x", "x"])
+se_CL_id_stata = 0.165385      # vce(cluster grp)
+se_CL_id_feols = se(est_feols) # By default: clustered according to id
+
+# 3 different clustered versions (feols and stata are the same)
+rbind(se_CL_grp_lm, se_CL_grp_plm, se_CL_grp_stata, se_CL_grp_feols)
+```
+
+As we can see, there are three different versions of the standard-errors. Let's see how to replicate the `lm` and the `plm`:
+
+```{r}
+# How to get the lm
+se_CL_id_feols_lm = se(est_feols, dof = dof(fixef.K = "full"))
+rbind(se_CL_id_lm, se_CL_id_feols_full)
+
+# How to get the plm
+se_CL_id_feols_plm = se(est_feols, dof = dof(fixef.K = "none", cluster.adj = FALSE))
+rbind(se_CL_id_plm, se_CL_id_feols_plm)
+```
+
+The p-value (of the clustered standard-errors) from Stata is different from `feols` however. You can replicate it using `t.df`:
+
+```{r}
+rbind(r = coeftable(est_feols), stata = coeftable(est_feols, dof = dof(t.df="min")))
+```
+
+#### Other multiple fixed-effects methods
+
+Now a specific comparison with `lfe` (version 2.8-5) and Stata's `reghdfe` which are popular tools to estimate econometric models with multiple fixed-effects. 
+
+For clustered standard-errors, `reghdfe` reports similar statistics as `xtreg` which have already been illustrated before.
+
+`lfe` however reports different statistics:
+
+```{r}
+# lfe: clustered by id
+est_lfe = felm(y ~ x | id + time | 0 | id, base)
+se_CL_id_lfe = se(est_lfe)
+
+# The two are different, and it cannot be directly replicated by feols
+rbind(se_CL_id_lfe, se_CL_id_feols)
+
+# You have to provide a custom VCOV to replicate lfe's VCOV
+my_vcov = vcov(est_feols, dof = dof(adj = FALSE))
+se(est_feols, .vcov = my_vcov * 19/18) # Note that there are 20 observations
+
+# Differently from feols, the SEs are different if time is not a FE:
+# => now they are identical
+rbind(se(felm(y ~ x + factor(time) | id | 0 | id, base))["x"],
+      se(feols(y ~ x + factor(time) | id, base))["x"])
+```
+
+`feols` and `reghdfe` differ for multi-way clustering. To replicate the results from `reghdfe` you need to provide the argument `dof = dof(cluster.df = "min", t.df = "min")`.
+
+
+#### Setting the way to compute the standard-errors once and for all
+
+Once you've found the preferred way to compute the standard-errors for your current project, you can permanently set the way the standard-errors are computed using the function `setFixest_dof()`.
+
+For example, if you want to permanently compute them *a la* `reghdfe`, just use:
+
+```{r}
+setFixest_dof(dof(cluster.df = "min", t.df = "min"))
+```
+
+
