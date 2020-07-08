@@ -14,6 +14,7 @@
 #'
 #' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y | fe_1+fe_2}. You can combine two fixed-effects with \code{^}: e.g. \code{fml = z~x+y|fe_1^fe_2}, see details. You can also use variables with varying slopes using square brackets: e.g. in \code{fml = z~y|fe_1[x] + fe_2} the variable \code{x} will have one coefficient for each value of \code{fe_1} -- if you use varying slopes, please have a look at the details section (can't describe it all here).
 #' @param weights A formula or a numeric vector. Each observation can be weighted, the weights must be greater than 0. If equal to a formula, it should be of one-sided: for example \code{~ var_weight}.
+#' @param verbose Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algoritmh (the first number is the left-hand-side, the other numbers are the right-hand-side variables).
 #'
 #' @details
 #' The method used to demean each variable along the fixed-effects is based on Berge (2018), since this is the same problem to solve as for the Gaussian case in a ML setup.
@@ -156,7 +157,7 @@
 #' # You have many more example in coefplot help
 #'
 #'
-feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, fixef.iter = 2000,
+feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, fixef.iter = 10000,
                  na_inf.rm = getFixest_na_inf.rm(), nthreads = getFixest_nthreads(),
                  verbose = 0, warn = TRUE, notes = getFixest_notes(), combine.quick, ...){
 
@@ -251,19 +252,35 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 		    # This is a bit too rough a check but it should catch the most problematic cases
 		    if(any(opt_fe > 1e-4)){
 		        msg = "There seems to be a convergence problem as regards the variables with varying slopes (in the RHS of your formula). The precision of the estimates may not be great. This is a known issue and there is work underway to solve it.\n As a workaround, you can use the variables with varying slopes as regular variables using the function interact (see ?interact)."
+
+		        res$convStatus = FALSE
+
+		        res$message = paste0("tol: ", signif_plus(fixef.tol), " iter: ", max(res$iterations))
+
 		        if(fromGLM){
 		            res$warn_varying_slope = msg
 		        } else {
 		            warning(msg)
 		        }
 		    }
+		} else if(any(res$iterations >= fixef.iter)){
+		    msg = paste0("Demeaning algorithm: Absence of convergence after reaching the maximum number of iterations (", fixef.iter, ").")
+
+		    res$convStatus = FALSE
+		    res$message = paste0("Maximum of ", fixef.iter, " iterations reached.")
+
+		    if(fromGLM){
+		        res$warn_varying_slope = msg
+		    } else {
+		        warning(msg)
+		    }
 		}
 
 		if(verbose >= 1){
 			if(length(fixef_sizes) > 1){
-				cat(" Demeaning in ", (proc.time() - time_demean)[3], "s (iter: ", paste0(c(tail(res$iterations, 1), res$iterations[-length(res$iterations)]), collapse = ", "), ")\n", sep="")
+				cat("Demeaning in ", (proc.time() - time_demean)[3], "s (iter: ", paste0(c(tail(res$iterations, 1), res$iterations[-length(res$iterations)]), collapse = ", "), ")\n", sep="")
 			} else {
-				cat(" Demeaning in ", (proc.time() - time_demean)[3], "s\n", sep="")
+				cat("Demeaning in ", (proc.time() - time_demean)[3], "s\n", sep="")
 			}
 		}
 	}
@@ -553,6 +570,7 @@ check_conv = function(y, X, fixef_id_vector, slope_flag, slope_vars, weights){
 #' @param y Numeric vector of the dependent variable.
 #' @param X Numeric matrix of the regressors.
 #' @param fixef_mat Matrix/data.frame of the fixed-effects.
+#' @param verbose Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algoritmh (the first number is the left-hand-side, the other numbers are the right-hand-side variables). It can also detail the step-halving algorithm.
 #'
 #' @details
 #' The core of the GLM are the weighted OLS estimations. These estimations are performed with \code{\link[fixest]{feols}}. The method used to demean each variable along the fixed-effects is based on Berge (2018), since this is the same problem to solve as for the Gaussian case in a ML setup.
@@ -631,7 +649,7 @@ check_conv = function(y, X, fixef_id_vector, slope_flag, slope_vars, weights){
 #'
 feglm = function(fml, data, family = "poisson", offset, weights, panel.id, start = NULL,
                  etastart = NULL, mustart = NULL, fixef,
-                 fixef.tol = 1e-6, fixef.iter = 1000, glm.iter = 25, glm.tol = 1e-8,
+                 fixef.tol = 1e-6, fixef.iter = 10000, glm.iter = 25, glm.tol = 1e-8,
                  na_inf.rm = getFixest_na_inf.rm(), nthreads = getFixest_nthreads(),
                  warn = TRUE, notes = getFixest_notes(), verbose = 0, combine.quick, ...){
 
@@ -660,7 +678,7 @@ feglm = function(fml, data, family = "poisson", offset, weights, panel.id, start
 
 #' @rdname feglm
 feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start = NULL,
-                     etastart = NULL, mustart = NULL, fixef.tol = 1e-6, fixef.iter = 1000,
+                     etastart = NULL, mustart = NULL, fixef.tol = 1e-6, fixef.iter = 10000,
                      glm.iter = 25, glm.tol = 1e-8, na_inf.rm = getFixest_na_inf.rm(),
                      nthreads = getFixest_nthreads(), warn = TRUE, notes = getFixest_notes(), verbose = 0, ...){
 
@@ -1309,7 +1327,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
 #'
 femlm <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), start = 0, fixef,
 						offset, panel.id, na_inf.rm = getFixest_na_inf.rm(),
-						fixef.tol = 1e-5, fixef.iter = 1000,
+						fixef.tol = 1e-5, fixef.iter = 10000,
 						nthreads = getFixest_nthreads(), verbose = 0, warn = TRUE,
 						notes = getFixest_notes(), theta.init, combine.quick, ...){
 
@@ -1327,7 +1345,7 @@ femlm <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 #' @rdname femlm
 fenegbin = function(fml, data, theta.init, start = 0, fixef, offset, panel.id,
                     na_inf.rm = getFixest_na_inf.rm(), fixef.tol = 1e-5,
-                    fixef.iter = 1000, nthreads = getFixest_nthreads(),
+                    fixef.iter = 10000, nthreads = getFixest_nthreads(),
                     verbose = 0, warn = TRUE, notes = getFixest_notes(), combine.quick, ...){
 
     # We control for the problematic argument family
@@ -1348,7 +1366,7 @@ fenegbin = function(fml, data, theta.init, start = 0, fixef, offset, panel.id,
 
 #' @rdname feglm
 fepois = function(fml, data, offset, weights, panel.id, start = NULL, etastart = NULL, mustart = NULL,
-                  fixef, fixef.tol = 1e-6, fixef.iter = 1000, glm.iter = 25, glm.tol = 1e-8,
+                  fixef, fixef.tol = 1e-6, fixef.iter = 10000, glm.iter = 25, glm.tol = 1e-8,
                   na_inf.rm = getFixest_na_inf.rm(), nthreads = getFixest_nthreads(),
                   warn = TRUE, notes = getFixest_notes(), verbose = 0, combine.quick, ...){
 
@@ -1398,7 +1416,7 @@ fepois = function(fml, data, offset, weights, panel.id, start = NULL, etastart =
 #' @param verbose Integer, default is 0. It represents the level of information that should be reported during the optimisation process. If \code{verbose=0}: nothing is reported. If \code{verbose=1}: the value of the coefficients and the likelihood are reported. If \code{verbose=2}: \code{1} + information on the computing time of the null model, the fixed-effects coefficients and the hessian are reported.
 #' @param theta.init Positive numeric scalar. The starting value of the dispersion parameter if \code{family="negbin"}. By default, the algorithm uses as a starting value the theta obtained from the model with only the intercept.
 #' @param fixef.tol Precision used to obtain the fixed-effects. Defaults to \code{1e-5}. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument \code{fixef.tol} cannot be lower than \code{10000*.Machine$double.eps}. Note that this parameter is dynamically controlled by the algorithm.
-#' @param fixef.iter Maximum number of iterations in the step obtaining the fixed-effects (only in use for 2+ fixed-effects). Default is 1000.
+#' @param fixef.iter Maximum number of iterations in the step obtaining the fixed-effects (only in use for 2+ fixed-effects). Default is 10000.
 #' @param deriv.iter Maximum number of iterations in the step obtaining the derivative of the fixed-effects (only in use for 2+ fixed-effects). Default is 1000.
 #' @param deriv.tol Precision used to obtain the fixed-effects derivatives. Defaults to \code{1e-4}. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument \code{deriv.tol} cannot be lower than \code{10000*.Machine$double.eps}.
 #' @param warn Logical, default is \code{TRUE}. Whether warnings should be displayed (concerns warnings relating to: convergence state, collinearity issues and observation removal due to only 0/1 outcomes or presence of NA values).
@@ -1522,7 +1540,7 @@ fepois = function(fml, data, offset, weights, panel.id, start = NULL, etastart =
 #' points(x, fitted(est2_NL), col = 4, pch = 2)
 #'
 #'
-feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), NL.fml, fixef, na_inf.rm = getFixest_na_inf.rm(), NL.start, lower, upper, NL.start.init, offset, panel.id, start = 0, jacobian.method="simple", useHessian = TRUE, hessian.args = NULL, opt.control = list(), nthreads = getFixest_nthreads(), verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 1000, deriv.tol = 1e-4, deriv.iter = 1000, warn = TRUE, notes = getFixest_notes(), combine.quick, ...){
+feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), NL.fml, fixef, na_inf.rm = getFixest_na_inf.rm(), NL.start, lower, upper, NL.start.init, offset, panel.id, start = 0, jacobian.method="simple", useHessian = TRUE, hessian.args = NULL, opt.control = list(), nthreads = getFixest_nthreads(), verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000, deriv.tol = 1e-4, deriv.iter = 1000, warn = TRUE, notes = getFixest_notes(), combine.quick, ...){
 
 	time_start = proc.time()
 

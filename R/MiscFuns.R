@@ -104,7 +104,11 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 	if(isFALSE(x$convStatus)){
 	    last_warn = getOption("fixest_last_warning")
 	    if(is.null(last_warn) || (proc.time() - last_warn)[3] > 1){
-	        warning("The optimization algorithm did not converge, the results are not reliable. (", x$message, ")", call. = FALSE)
+	        if(x$method %in% c("femlm", "feNmlm", "fenegbin")){
+	            warning("The optimization algorithm did not converge, the results are not reliable. (", x$message, ")", call. = FALSE)
+	        } else {
+	            warning("The demeaning algorithm did not converge, the results are not reliable. (", x$message, ")", call. = FALSE)
+	        }
 	    }
 
 	}
