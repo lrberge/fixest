@@ -7,6 +7,7 @@ output: rmarkdown::html_vignette
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+Sys.setenv(lang = "en")
 ```
 
 It is an euphemism to say that standard-errors are a critical element of your estimations: literally your paper's results depend on them. It is therefore unfortunate that no conventional "best" way exists to compute them. Multiple definitions can create confusion and the purpose of this document is to lay bare the fiddly details of standard-error computation.
@@ -22,7 +23,7 @@ There are two components defining the standard-errors in `fixest`. The main type
 
 ### The argument `se`
 
-The argument `se` can be equal to either `"standard"`, `"white"`, `"cluster"`, `"twoway"`, or `"threeway"`.
+The argument `se` can be equal to either: `"standard"`, `"white"`, `"cluster"`, `"twoway"`, or `"threeway"`.
 
 If `se = "standard"`, then the standard-errors are based on the assumption that the errors are all independent and generated with the same law (in particular, same variance). If `se = "white"`, this corresponds to the classic hereoskedasticity-robust standard-errors (White correction), where it is assumed that the errors are independent but the variance of their generative law may vary. If `se = "cluster"`, then arbitrary correlation of the errors within clusters is accounted for. Same for `se = "twoway"` (resp. `"threeway"`): arbitrary correlation within each of the two (resp. three) clusters is accounted for. 
 
@@ -73,20 +74,19 @@ Argument `cluster.df` is only relevant when you apply two-way clustering (or hig
 
 ![](https://github.com/lrberge/fixest/blob/master/vignettes/images/SE/cluster_df_min.png?raw=true)
 
-Now instead of having a specific adjustment for each matrix, there is only one adjustment of $G_{min}/(G_{min}-1)$ where $G_{min}$ is the minimum cluster size (here $G_{min}=\min(G_i,G_t)$).
+Now instead of having a specific adjustment for each matrix, there is only one adjustment of $G_{min}/(G_{min}-1)$ where $G_{min}$ is the minimum cluster size (here $G_{min}=\min(G_{id},G_{time})$).
 
 Argument `t.df` is only relevant when standard-errors are clustered. It affects the way the *p-value* is computed. It can be equal to: either `"conventional"` (the default), or `"min"`. By default, the degrees of freedom used to find the p-value from the Student t distribution is equal to the number of observations minus the number of estimated coefficients. When the standard-errors are clustered and `t.df="min"`, the degrees of freedom used in the Student t distribution is equal to the minimum cluster size (among all clusters used to cluster the VCOV).
 
 
 ## Replicating standard-errors from other methods
 
-This section illustrates how the results from `fixest` compares with the ones from other methods. It also shows how to replicate the latter from `fixest` using the argument `dof`.
+This section illustrates how the results from `fixest` compares with the ones from other methods. It also shows how to replicate the latter from `fixest`.
 
 First, let's generate some data:
 
 ```{r}
-library(fixest) ; library(plm) ; library(lfe, warn.conflicts = FALSE)
-library(lmtest) ; library(sandwich)
+library(fixest) ; library(plm) ; library(sandwich)
 
 # Data generation
 set.seed(0)
@@ -110,8 +110,9 @@ rbind(se(res_lm), se(res_feols))
 se_lm_white    = sqrt(diag(vcovHC(res_lm, type = "HC1")))
 se_feols_white = se(res_feols, se = "white")
 rbind(se_lm_white, se_feols_white)
-# Note that Stata's <reg y x, robust> leads to similar results (same SEs, same p-values)
 ```
+
+Note that Stata's `reg y x, robust` also leads to similar results (same SEs, same p-values). 
 
 The most important differences arise in the presence of fixed-effects. Let's first compare "standard" and clustered standard-errors between `lm`, `plm` and Stata's `xtreg`.
 
@@ -139,28 +140,28 @@ The standard-errors and p-values are identical. Now for clustered SEs:
 
 ```{r}
 # Clustered by id
-se_CL_id_lm    = sqrt(vcovCL(est_lm, cluster = base$id, type = "HC1")["x", "x"])
-se_CL_id_plm   = sqrt(vcovHC(est_plm, cluster = "group")["x", "x"])
-se_CL_id_stata = 0.165385      # vce(cluster grp)
-se_CL_id_feols = se(est_feols) # By default: clustered according to id
+se_lm_id    = sqrt(vcovCL(est_lm, cluster = base$id, type = "HC1")["x", "x"])
+se_plm_id   = sqrt(vcovHC(est_plm, cluster = "group")["x", "x"])
+se_stata_id = 0.165385      # vce(cluster id)
+se_feols_id = se(est_feols) # By default: clustered according to id
 
 # 3 different clustered versions (feols and stata are the same)
-rbind(se_CL_grp_lm, se_CL_grp_plm, se_CL_grp_stata, se_CL_grp_feols)
+rbind(se_lm_id, se_plm_id, se_stata_id, se_feols_id)
 ```
 
 As we can see, there are three different versions of the standard-errors. Let's see how to replicate the `lm` and the `plm`:
 
 ```{r}
 # How to get the lm
-se_CL_id_feols_lm = se(est_feols, dof = dof(fixef.K = "full"))
-rbind(se_CL_id_lm, se_CL_id_feols_full)
+se_feols_id_lm = se(est_feols, dof = dof(fixef.K = "full"))
+rbind(se_lm_id, se_feols_id_lm)
 
 # How to get the plm
-se_CL_id_feols_plm = se(est_feols, dof = dof(fixef.K = "none", cluster.adj = FALSE))
-rbind(se_CL_id_plm, se_CL_id_feols_plm)
+se_feols_id_plm = se(est_feols, dof = dof(fixef.K = "none", cluster.adj = FALSE))
+rbind(se_plm_id, se_feols_id_plm)
 ```
 
-The p-value (of the clustered standard-errors) from Stata is different from `feols` however. You can replicate it using `t.df`:
+The *p-value* (of the clustered standard-errors) from Stata is different from `feols` however. You can replicate it using `t.df`:
 
 ```{r}
 rbind(r = coeftable(est_feols), stata = coeftable(est_feols, dof = dof(t.df="min")))
@@ -170,34 +171,43 @@ rbind(r = coeftable(est_feols), stata = coeftable(est_feols, dof = dof(t.df="min
 
 Now a specific comparison with `lfe` (version 2.8-5) and Stata's `reghdfe` which are popular tools to estimate econometric models with multiple fixed-effects. 
 
-For clustered standard-errors, `reghdfe` reports similar statistics as `xtreg` which have already been illustrated before.
-
-`lfe` however reports different statistics:
+Here are the differences and similarities with `lfe`:
 
 ```{r}
+library(Matrix) ; library(lfe, warn.conflicts = FALSE)
+
 # lfe: clustered by id
 est_lfe = felm(y ~ x | id + time | 0 | id, base)
-se_CL_id_lfe = se(est_lfe)
+se_lfe_id = se(est_lfe)
 
 # The two are different, and it cannot be directly replicated by feols
-rbind(se_CL_id_lfe, se_CL_id_feols)
+rbind(se_lfe_id, se_feols_id)
 
 # You have to provide a custom VCOV to replicate lfe's VCOV
 my_vcov = vcov(est_feols, dof = dof(adj = FALSE))
 se(est_feols, .vcov = my_vcov * 19/18) # Note that there are 20 observations
 
 # Differently from feols, the SEs are different if time is not a FE:
-# => now they are identical
+# => now SEs are identical. (The warning is from lfe.)
 rbind(se(felm(y ~ x + factor(time) | id | 0 | id, base))["x"],
       se(feols(y ~ x + factor(time) | id, base))["x"])
+
+# Now with two-way clustered standard-errors
+est_lfe_2way = felm(y ~ x | id + time | 0 | id + time, base)
+se_lfe_2way = se(est_lfe_2way)
+se_feols_2way = se(est_feols, se = "twoway")
+rbind(se_lfe_2way, se_feols_2way)
+
+# To have the same pvalues, you need to use t.df="min"
+rbind(pvalue(est_lfe_2way), pvalue(est_feols, se = "twoway", dof = dof(t.df = "min")))
 ```
 
-`feols` and `reghdfe` differ for multi-way clustering. To replicate the results from `reghdfe` you need to provide the argument `dof = dof(cluster.df = "min", t.df = "min")`.
+For clustered standard-errors, `reghdfe` reports similar statistics as `xtreg` which have already been illustrated before. The standard-errors of `feols` and `reghdfe` differ only for multi-way clustering, where the latter uses `cluster.df="min"`. To obtain the same p-values, you need to use `t.df="min"`. To replicate the results from `reghdfe` you need to provide the argument `dof = dof(cluster.df = "min", t.df = "min")`.
 
 
-#### Setting the way to compute the standard-errors once and for all
+#### Defining how to compute the standard-errors once and for all
 
-Once you've found the preferred way to compute the standard-errors for your current project, you can permanently set the way the standard-errors are computed using the function `setFixest_dof()`.
+Once you've found the preferred way to compute the standard-errors for your current project, you can permanently set it permanently using the function `setFixest_dof()`.
 
 For example, if you want to permanently compute them *a la* `reghdfe`, just use:
 
@@ -205,4 +215,14 @@ For example, if you want to permanently compute them *a la* `reghdfe`, just use:
 setFixest_dof(dof(cluster.df = "min", t.df = "min"))
 ```
 
+
+## References
+
+MacKinnon, JG, White, H (1985). “[Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties](http://qed.econ.queensu.ca/working_papers/papers/qed_wp_537.pdf)” Journal of Econometrics, 29(3), 305–325.
+
+Kauermann G, Carroll RJ (2001). “[A Note on the Efficiency of Sandwich Covariance Matrix Estimation](https://www.tandfonline.com/doi/abs/10.1198/016214501753382309)”, Journal of the American Statistical Association, 96(456), 1387–1396.
+
+Zeileis A (2004). “[Econometric Computing with HC and HAC Covariance Matrix Estimator](https://www.jstatsoft.org/article/view/v011i10)”, Journal of Statistical Software, 11(10), 1–17.
+
+Cameron AC, Gelbach JB, Miller DL (2011). “[Robust Inference with Multiway Clustering](https://www.nber.org/papers/t0327)”, Journal of Business & Ecomomic Statistics, 29(2), 238–249.
 
