@@ -6961,12 +6961,21 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 	# Default behavior se:
 	suffix = ""
 	if(missnull(se)){
+
 		if(missing(cluster)){
-			if("fixef_vars" %in% names(object)){
-				se = "cluster"
-			} else {
-				se = "standard"
-			}
+
+		    se_default = getFixest_se()
+
+		    n_fe = length(object$fixef_id)
+
+		    if(n_fe == 0){
+		        se = se_default$no_FE
+		    } else if(n_fe == 1){
+		        se = se_default$one_FE
+		    } else {
+		        se = se_default$two_FE
+		    }
+
 		} else {
 			if("formula" %in% class(cluster)){
 				# we just find the nway clustering and do only minor control
@@ -8578,6 +8587,68 @@ getFixest_dof = function(){
     }
 
     dof.type
+}
+
+
+#' Sets the default type of standard errors to be used
+#'
+#' This functions defines or extracts the default type of standard-errors to computed in \code{fixest} \code{\link[fixest:summary.fixest]{summary}}, and \code{\link[fixest:vcov.fixest]{vcov}}.
+#'
+#' @param no_FE Character scalar equal to either: \code{"standard"} (default), or \code{"white"}. The type of standard-errors to use by default for estimations without fixed-effects.
+#' @param one_FE Character scalar equal to either: \code{"standard"}, \code{"white"}, or \code{"cluster"} (default). The type of standard-errors to use by default for estimations with \emph{one} fixed-effect.
+#' @param two_FE Character scalar equal to either: \code{"standard"}, \code{"white"}, \code{"cluster"}, or \code{"twoway"} (default). The type of standard-errors to use by default for estimations with \emph{two or more} fixed-effects.
+#'
+#' @return
+#' The function \code{getFixest_se()} returns a list with three elements containing the default for estimations i) wihtout, ii) with one, or iii) with two or more fixed-effects.
+#'
+#' @examples
+#'
+#' # By default:
+#' # - no fixed-effect (FE): standard
+#' # - one or more FEs: cluster
+#'
+#' data(base_did)
+#' est_no_FE  = feols(y ~ x1, base_did)
+#' est_one_FE = feols(y ~ x1 | id, base_did)
+#' est_two_FE = feols(y ~ x1 | id + period, base_did)
+#'
+#' etable(est_no_FE, est_one_FE, est_two_FE)
+#'
+#' # Changing the default standard-errors
+#' setFixest_se(no_FE = "white", one_FE = "standard", two_FE = "twoway")
+#' etable(est_no_FE, est_one_FE, est_two_FE)
+#'
+#' # Reseting the defaults
+#' setFixest_se()
+#'
+#'
+setFixest_se = function(no_FE = "standard", one_FE = "cluster", two_FE = "cluster"){
+
+    check_arg_plus(no_FE,  "match(standard, white)")
+    check_arg_plus(one_FE, "match(standard, white, cluster)")
+    check_arg_plus(two_FE, "match(standard, white, cluster, twoway)")
+
+    options(fixest_se = list(no_FE = no_FE, one_FE = one_FE, two_FE = two_FE))
+
+
+}
+
+#' @rdname setFixest_se
+getFixest_se = function(){
+
+    se_default = getOption("fixest_se")
+
+    if(is.null(se_default)){
+        se_default = list(no_FE = "standard", one_FE = "cluster", two_FE = "cluster")
+        options(fixest_se = se_default)
+        return(se_default)
+    }
+
+    if(!is.list(se_default) || !all(unlist(se_default) %in% c("standard", "white", "cluster", "twoway"))){
+        stop("The value of getOption(\"se_default\") is currently not legal. Please use function setFixest_se to set it to an appropriate value.")
+    }
+
+    se_default
 }
 
 
