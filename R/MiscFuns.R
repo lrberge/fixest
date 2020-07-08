@@ -773,6 +773,8 @@ r2 = function(x, type = "all", full_names = FALSE){
 		ifNullNA = function(x) ifelse(is.null(x), NA, x)
 		if(within && isFixef){
 
+		    if(isTRUE(x$onlyFixef)) next
+
 		    if(is.null(x$ssr_fe_only) && !is.null(x$fixef_vars)){
 		        # This is the case of feglm where there were no fe_only model estimated
 		        # => we need to compute the FE model first
