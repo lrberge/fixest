@@ -2762,7 +2762,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' # You could have used the following formula instead:
 #' # y ~ x1 + treat::period(5) | id+period
 #'
-i = interact = function(var, fe, ref){
+i = interact = function(var, fe, ref, drop, keep){
     # Used to create interactions
 
     mc = match.call()
@@ -2797,17 +2797,27 @@ i = interact = function(var, fe, ref){
         items = quf$items
     }
 
-    noRef = FALSE
+
+    check_arg(ref, drop, keep, "multi charin", .choices = items, .message = paste0("Argument '__ARG__' must consist of elements of the variable '", fe_name, "'."))
+
+    noRef = TRUE
+    id_drop = c()
     if(!missing(ref)){
-        # Controls
+        id_drop = ref = which(items %in% ref)
+    }
 
-        check_arg(ref, "multi charin", .choices = items, .message = paste0("Argument 'ref' must consist of elements of the variable '", fe_name, "'."))
+    if(!missing(drop)){
+        id_drop = c(id_drop, which(items %in% drop))
+    }
 
-        ref = which(items %in% ref)
+    if(!missing(keep)){
+        id_drop = c(id_drop, which(!items %in% keep))
+    }
 
-    } else {
-        noRef = TRUE
-        ref = 1
+    if(length(id_drop) > 0){
+        id_drop = unique(sort(id_drop))
+        if(length(id_drop) == length(items)) stop("All items from the interaction have been removed.")
+        noRef = FALSE
     }
 
     res = model.matrix(~ -1 + fe_num, model.frame(~ -1 + fe_num, data.frame(fe_num = factor(fe_num)), na.action = na.pass))
@@ -2816,14 +2826,15 @@ i = interact = function(var, fe, ref){
         res = res * var
         colnames(res) = paste0(var_name, ":", fe_name, "::", items)
     } else {
-        res = res[, -ref] * var
-        colnames(res) = paste0(var_name, ":", fe_name, "::", items[-ref])
+        res = res[, -id_drop, drop = FALSE] * var
+        colnames(res) = paste0(var_name, ":", fe_name, "::", items[-id_drop])
     }
 
     # We send the information on the reference
     opt = getOption("fixest_interaction_ref")
     if(is.null(opt)){
         is_ref = rep(FALSE, length(items))
+
         if(noRef == FALSE){
             is_ref[ref] = TRUE
         }
@@ -4739,14 +4750,20 @@ prepare_matrix = function(fml, base){
     # We take care of interactions: references can be multiple, then ':' is legal
     all_vars = gsub(":", "*", all_var_names)
 
-    if(any(qui_inter <- grepl("interact(", all_var_names, fixed = TRUE)) &&
-       any(qui_ref <- grepl("ref =.+:", all_var_names[qui_inter]))){
-        var_inter_ref = all_var_names[qui_inter][qui_ref]
-        var_inter_ref_split = strsplit(var_inter_ref, "ref = ")
-        fun2apply = function(x) paste(gsub(":", "*", x[1]), x[2], sep = "ref = ")
-        new_var_inter_ref = sapply(var_inter_ref_split, fun2apply)
-        all_vars[qui_inter][qui_ref] = new_var_inter_ref
+    if(any(qui_inter <- (grepl("^i(nteract)?\\(", all_var_names) & grepl(":", all_var_names, fixed = TRUE)))){
+
+        for(arg in c("ref", "drop", "keep")){
+            if(any(qui_ref <- grepl(paste0(arg, " =.+:"), all_var_names[qui_inter]))){
+                var_inter_ref = all_var_names[qui_inter][qui_ref]
+                var_inter_ref_split = strsplit(var_inter_ref, paste0(arg, " = "))
+                fun2apply = function(x) paste(gsub(":", "*", x[1]), x[2], sep = paste0(arg, " = "))
+                new_var_inter_ref = sapply(var_inter_ref_split, fun2apply)
+                all_vars[qui_inter][qui_ref] = new_var_inter_ref
+            }
+        }
+
     }
+
 
     # Forming the call
     if(attr(t, "intercept") == 1){
@@ -5170,7 +5187,7 @@ interact_fml = function(fml){
     as.formula(paste0(lhs_fml, "~", rhs_fml))
 }
 
-interact_control = function(ref){
+interact_control = function(ref, drop, keep){
     # Internal call
     # used to control the call to interact is valid
 
@@ -5179,6 +5196,14 @@ interact_control = function(ref){
     res = c()
     if("ref" %in% names(mc)){
         res = paste0("ref = ", deparse_long(mc$ref))
+    }
+
+    if("drop" %in% names(mc)){
+        res = paste0("drop = ", deparse_long(mc$drop))
+    }
+
+    if("keep" %in% names(mc)){
+        res = paste0("keep = ", deparse_long(mc$keep))
     }
 
     res
