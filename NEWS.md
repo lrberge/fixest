@@ -1,11 +1,48 @@
 
 # News for the R Package `fixest`
 
-## Changes in version 0.5.2
+## Changes in version 0.6.0
 
 #### Bugs
 
  - In `vcov`, the degree-of-freedom in the small sample correction correction was fixed to "nested" and couldn't be modified, now corrected. Further, "nested" was not properly accounted for, now corrected.
+ 
+ - In `etable`, `fitsat = FALSE` or `fitsat = NA` led to a bug.
+ 
+ - `r2`: bug when the estimation contained only fixed effects (thanks to Luis Fonseca [#27](https://github.com/lrberge/fixest/issues/27)).
+ 
+#### New vignettes
+
+ - On standard-errors: how are the SEs computed in fixest and how to replicate the SEs from other software.
+ - Exporting estimation tables: how to use efficiently `etable`, in particular how to customize the tables.
+ 
+#### Major changes: etable
+
+  - New arguments: `group`, `extraline`, `notes`, `tablefoot`. 
+  
+    - `group` allows to eliminate variables (like `drop`) and adds an extra line with TRUE/FALSE if the model contained those variables.
+    
+    - `extraline` allows to add extra lines with any content.
+    
+    - `notes` allows to add notes after the table.
+    
+    - `tablefoot` controls whether the table footer, containing the type of standard-errors and the significance codes, should be displayed.
+    
+  - Renaming: `yesNoFixef` => `yesNo`.
+  
+  - Most default values can be set globally with the new function `setFixest_etable`.
+ 
+#### Major changes: dof
+
+ - Function `dof`, used to adjust the small sample corrections, is now much more complete and allows to replicate a large set of estimation results from alternative software.
+
+#### User visible changes
+
+ - You can now provide custom VCOVs to summary by using the argument `.vcov`.
+ 
+ - A warning is now prompted when the maximum number of iterations of the algorithm is reached (suggestion by @clukewatson  [#24](https://github.com/lrberge/fixest/issues/24)]). 
+ 
+ - The types of standard-errors can now be set globally with the function setFixest_se (suggestion by @dlindzee [#28](https://github.com/lrberge/fixest/issues/28))
 
 ## Changes in version 0.5.1 (18-06-2018)
 
@@ -41,7 +78,8 @@
  - Bug when interacting two variables with the `var::fe` syntax with `confirm = TRUE` and no reference.
  - Bug in `etable` when the standard-errors where `NA`.
  - Fixed very minor bug when computing the SEs (1e-6 difference).
- - Standard-errors in `feglm` for non-poisson, non-binomial families, are now correct.
+ - Standard-errors in `feglm` for non-poisson, non-binomial families, are now correct (minor differences).
+ - `fixef` did not work when the slope was an integer, now corrected (thanks to @clerousset [#20](https://github.com/lrberge/fixest/issues/20)).
 
 #### New functionality: formula macros
         
@@ -58,8 +96,11 @@
 #### Major user-visible changes
         
  - New internal algorithm to estimate OLS (applies to both `feols` and `feglm`):
+ 
     1. It is numerically more stable.
+    
     2. Incomparably faster when factors are to be estimated (and not explicitly used as fixed-effects).
+    
     3. Collinear variables are removed on the fly.
 
 #### User-visible changes
@@ -99,7 +140,7 @@
 
 #### Bug fixes
   
- - Major bug leading R to crash when using non-linear-in-parameters right-hand-sides in feNmlm. Only occured when some observations were removed from the data set (due to NAness or to perfect fit). [Thanks to @marissachilds, GH issue #17.]
+ - Major bug leading R to crash when using non-linear-in-parameters right-hand-sides in feNmlm. Only occured when some observations were removed from the data set (due to NAness or to perfect fit). [Thanks to @marissachilds, GH issue [#17]](https://github.com/lrberge/fixest/issues/17).]
  - In the `collinearity` help pages: an example could lead to an error (due to random data generation). It has been removed.
  - In `collinearity`, corrected the problem of display of the intercept in some situations.
  - Defaults for the arguments `cex` and `lwd` in `coefplot` have been changed to 1 and 1 (instead of par("cex") and par("lwd")). Otherwise this led to the creation of `Rplots.pdf` in the working directory (thanks to Kurt Hornik).
@@ -118,12 +159,13 @@
 
 #### User visible changes: Latex export
         
- - Better Latex special character escaping.
+ - Better Latex special character escaping (errors reported by @dlindzee [#15](https://github.com/lrberge/fixest/issues/15)).
  - New argument `fixef_sizes.simplify`, which provides the sizes of the fixed-effects in parentheses when there is no ambiguity.
  - You can suppress the line with the significance codes with `signifCode = NA`.
  - New argument `float` which decides whether to embed the table into a table environment. By default it is set to `TRUE` if a `title` or `label` is present.
  - New argument `keep` to select the variables to keep in the table.
  - New way to keep/drop/order variables with the special argument "\%". If you use "\%var", then it makes reference to the original variable name, not the aliased one (which is the default).
+ - New argument `coefstat` defining what should be shown below the coefficients (standard-errors, t-stats or confidence intervals). Suggestion by @d712 [#16](https://github.com/lrberge/fixest/issues/16).
  - Better rendering of significant digits.
 
 #### User visible changes: coefplot
