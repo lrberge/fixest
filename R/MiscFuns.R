@@ -106,8 +106,10 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 	    if(is.null(last_warn) || (proc.time() - last_warn)[3] > 1){
 	        if(x$method %in% c("femlm", "feNmlm", "fenegbin")){
 	            warning("The optimization algorithm did not converge, the results are not reliable. (", x$message, ")", call. = FALSE)
-	        } else {
+	        } else if(x$method == "feols"){
 	            warning("The demeaning algorithm did not converge, the results are not reliable. (", x$message, ")", call. = FALSE)
+	        } else {
+	            warning("The GLM algorithm did not converge, the results are not reliable. (", x$message, ")", call. = FALSE)
 	        }
 	    }
 
@@ -6486,7 +6488,7 @@ BIC.fixest = function(object, ...){
 		otherBIC = c()
 	}
 
-	all_BIC = c(-2*logLik(object) + 2*object$nparams*log(nobs(object)), otherBIC)
+	all_BIC = c(-2*logLik(object) + object$nparams*log(nobs(object)), otherBIC)
 
 	all_BIC
 }
