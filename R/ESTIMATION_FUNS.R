@@ -943,7 +943,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
         dev = sum_dev.resids(y, mu, eta, wt = weights)
         dev_evol = dev - devold
 
-        if(verbose >= 1) cat("Iteration: ", sprintf("%02i", iter), " -- Deviance = ", numberFormatNormal(dev), "\n", sep = "")
+        if(verbose >= 1) cat("Iteration: ", sprintf("%02i", iter), " -- Deviance = ", numberFormatNormal(dev), " -- Evol. = ", dev_evol, "\n", sep = "")
 
         #
         # STEP HALVING
@@ -977,13 +977,19 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
                         stop("Algorithm failed at first iteration. Step-halving could not find a valid set of parameters.")
                     }
 
-                    # message
-                    msg = ifelse(!is.finite(dev), "non-finite deviance", ifelse(dev_evol > 0, "no reduction in deviance", "no valid eta/mu"))
+                    # Problem only if the deviance is non-finite or eta/mu not valid
+                    # Otherwise, it means that we're at a maximum
 
-                    warning_msg = paste0("Divergence at iteration ", iter, ": ", msg, ". Step halving: no valid correction found. Last evaluated coefficients with finite deviance are returned for information purposes.")
-                    div_message = paste0(msg, " despite step-halving")
-                    wols = wols_old
-                    do_exit = TRUE
+                    if(!is.finite(dev) || !valideta(eta_new) || !validmu(mu)){
+                        # message
+                        msg = ifelse(!is.finite(dev), "non-finite deviance", "no valid eta/mu")
+
+                        warning_msg = paste0("Divergence at iteration ", iter, ": ", msg, ". Step halving: no valid correction found. Last evaluated coefficients with finite deviance are returned for information purposes.")
+                        div_message = paste0(msg, " despite step-halving")
+                        wols = wols_old
+                        do_exit = TRUE
+                    }
+
                     break
                 }
 
@@ -1193,7 +1199,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
             res$loglik = sum(y * eta - mu) - lfact
         }
     } else {
-        res$loglik = family$aic(y = y, n = n, mu = res$fitted.values, wt = weights, dev = dev) / -2
+        res$loglik = family$aic(y = y, n = rep.int(1, n), mu = res$fitted.values, wt = weights, dev = dev) / -2
     }
 
     if(lean){
