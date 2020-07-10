@@ -19,7 +19,7 @@ This document does not describe `etable`'s arguments in details (since it's in t
 
 ## First example
 
-Using data from the airquality data base, let's estimate 5 models:
+Using data from the *airquality* data base, let's estimate 5 models:
 
 ```{r}
 library(fixest)
@@ -75,7 +75,7 @@ Missing keywords are considered to be equal to the empty string.
 
 Now the `style` argument is illustrated along with the modification of default values.
 
-#### Changing the defaults 
+#### Changing the default values
 
 To permanently change the default values for function `etable`, just use the function `setFixest_etable`:
 

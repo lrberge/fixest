@@ -274,7 +274,7 @@ esttex <- function(..., se = c("standard", "white", "cluster", "twoway", "threew
 }
 
 #' @describeIn etable Facility to display the results of multiple \code{fixest} estimations.
-esttable <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, coefstat = c("se", "tstat", "confint"), ci = 0.95, depvar, keep, drop, dict, order, digits=4, fitstat, convergence, signifCode = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10), subtitles, keepFactors = FALSE, family){
+esttable <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, coefstat = c("se", "tstat", "confint"), ci = 0.95, depvar, keep, drop, dict, order, digits=4, fitstat, convergence, signifCode = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10), subtitles, keepFactors = FALSE, family, group = NULL, extraline = NULL){
 
     # Need to check for the presence of the se
     useSummary = TRUE
@@ -293,7 +293,7 @@ esttable <- function(..., se=c("standard", "white", "cluster", "twoway", "threew
     # to get the model names
     dots_call = match.call(expand.dots = FALSE)[["..."]]
 
-    info = results2formattedList(..., se=se, dof = dof, cluster=cluster, digits=digits, signifCode=signifCode, coefstat = coefstat, ci = ci, subtitles=subtitles, keepFactors=keepFactors, useSummary=useSummary, dots_call=dots_call, fitstat=fitstat, yesNo = c("Yes", "No"), depvar = depvar, family = family, keep = keep, drop = drop, order = order, dict = dict, interaction.combine = ":")
+    info = results2formattedList(..., se=se, dof = dof, cluster=cluster, digits=digits, signifCode=signifCode, coefstat = coefstat, ci = ci, subtitles=subtitles, keepFactors=keepFactors, useSummary=useSummary, dots_call=dots_call, fitstat=fitstat, yesNo = c("Yes", "No"), depvar = depvar, family = family, keep = keep, drop = drop, order = order, dict = dict, interaction.combine = ":", group = group, extraline = extraline)
 
     res = etable_internal_df(info)
 
@@ -371,6 +371,9 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits
     check_arg_plus(signifCode, "NULL NA | match(letters) | named numeric vector no na GE{0} LE{1}")
     check_arg(subtitles, "character vector no na")
     check_arg(yesNo, "character vector no na len(,2)")
+
+    if(isTex == FALSE) yesNo = c("Yes", "No")
+
     check_arg(powerBelow, "integer scalar LE{-1}")
 
     check_arg(ci, "numeric scalar GT{0.5} LT{1}")
@@ -1628,6 +1631,8 @@ etable_internal_df = function(info){
     model_names = info$model_names
     coefstat = info$coefstat
     dict = info$dict
+    group = info$group
+    extraline = info$extraline
 
     # naming differences
     titles = info$subtitles
@@ -1644,6 +1649,22 @@ etable_internal_df = function(info){
         all_vars = c(all_vars, vars[!vars %in% all_vars])
     }
 
+    for(i in seq_along(group)){
+        gi = group[[i]]
+        present = rep(FALSE, n_models)
+        for(v in gi){
+            if(grepl("^%", v)){
+                # original names
+                v = substr(v, 2, nchar(v))
+                present = present | sapply(var_list, function(x) any(grepl(v, names(x))))
+            } else {
+                present = present | sapply(var_list, function(x) any(grepl(v, x)))
+            }
+        }
+
+        group[[i]] = present
+    }
+
     # keeping some coefs
     all_vars = keep_apply(all_vars, keep)
 
@@ -1657,6 +1678,43 @@ etable_internal_df = function(info){
     for(m in 1:n_models) coef_mat <- cbind(coef_mat, coef_list[[m]][all_vars])
     coef_mat[is.na(coef_mat)] <- "  "
     res = coef_mat
+
+    # Group
+    for(i in seq_along(group)){
+        gi = group[[i]]
+        gi_format = c("Yes", "No")[2 - gi]
+
+        gi_name = gsub("^[^\\}]+\\}", "", names(group)[i])
+
+        my_line = c(gi_name, gi_format)
+
+        res = rbind(res, my_line)
+    }
+
+    # Extra lines
+    for(i in seq_along(extraline)){
+        el = extraline[[i]]
+        yesNo = c("Yes", "No")
+
+        # The format depends on the type
+        if(is.logical(el)){
+            if(length(el) == 1){
+                el_format = rep(yesNo[2 - el], n_models)
+            } else {
+                el_format = yesNo[2 - el]
+            }
+        } else if(is.numeric(el)){
+            el_format = numberFormatLatex(el)
+        } else {
+            el_format = el
+        }
+
+        el_name = gsub("^[^\\}]+\\}", "", names(extraline)[i])
+
+        my_line = c(el_name, el_format)
+
+        res = rbind(res, my_line)
+    }
 
     if("Neg. Bin." %in% family_list){
         theta_line = c("Overdispersion:", unlist(theta_list))
