@@ -832,5 +832,31 @@ IntegerVector cpp_check_nested(SEXP fe_list, SEXP cluster_list, IntegerVector fe
 }
 
 
+// [[Rcpp::export]]
+NumericVector cpp_diag_XUtX(NumericMatrix X, NumericMatrix U){
+    // computes the diagonal of X %*% U %*% t(X)
 
+    int n = X.nrow();
+    int K = X.ncol();
+
+    NumericVector res(n);
+
+    for(int i=0 ; i<n ; ++i){
+
+        double res_i = 0;
+        for(int k=0 ; k<K ; ++k){
+
+            double xk = 0;
+            for(int k2=0 ; k2<K ; ++k2){
+                xk += X(i, k2) * U(k, k2);
+            }
+
+            res_i += xk * X(i,k);
+        }
+
+        res[i] = res_i;
+    }
+
+    return res;
+}
 
