@@ -1,0 +1,39 @@
+---
+title: "Exporting estimation tables"
+author: "Laurent Berge"
+date: "07/07/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+`fixest` offers a simple tool, the function `etable`, to export estimation tables to Latex. The main advantage of this function is its simplicity, many adjustments being made automatically behind the scene. 
+
+Its main limitations are that *i*) only `fixest` objects can be exported, and *ii*) only Latex is supported. Thus by no means it competes with other excellent tools to export tables in various format (like for instance [modelsummary](https://cran.r-project.org/package=modelsummary) or [texreg](https://cran.r-project.org/package=texreg)). 
+
+It offers however a fair deal of customization, and since you can seamlessly change its default values, you can completely transform the style of your tables without modifying a single line of code. 
+
+This document first describes its main arguments, then focuses on the argument `style` and ends with a set of examples.
+
+## Main arguments
+
+```{r}
+library(fixest)
+data(airquality)
+
+setFixest_notes(FALSE)
+setFixest_dict(c(Ozone = "Ozone (ppb)", Solar.R = "Solar Radiation (in Langleys)",
+                 Wind = "Wind Speed (mph)", Temp = "Temperature (Fahrenheit)"))
+
+est = feols(Ozone ~ Solar.R + Wind + Temp | Month + Day, airquality)
+est_poly = feols(Ozone ~ Solar.R + Wind + poly(Temp, 3) | Month + Day, airquality)
+```
+
+
+## Setting the style 
+
+The argument `style` defines how the table looks. It allows an in-depth customization of the table. 
+
+## Some defaults
