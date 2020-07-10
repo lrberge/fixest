@@ -11,9 +11,16 @@
  
  - `r2`: bug when the estimation contained only fixed effects (thanks to Luis Fonseca [#27](https://github.com/lrberge/fixest/issues/27)).
  
+ - Now the `BIC` of `feglm` is similar to the one of `glm`.
+ 
+ - Bug in the log-likelihood in the presence of weights, now corrected.
+ 
+ - Bug in `coefplot` when some interacted variables were removed because of collinearity. Now corrected.
+ 
 #### New vignettes
 
  - On standard-errors: how are the SEs computed in fixest and how to replicate the SEs from other software.
+ 
  - Exporting estimation tables: how to use efficiently `etable`, in particular how to customize the tables.
  
 #### Major changes: etable
@@ -24,7 +31,7 @@
     
     - `extraline` allows to add extra lines with any content.
     
-    - `notes` allows to add notes after the table.
+    - `notes` allows to add notes after the table (suggestion by @bgchamps [#25](https://github.com/lrberge/fixest/issues/25)).
     
     - `tablefoot` controls whether the table footer, containing the type of standard-errors and the significance codes, should be displayed.
     
@@ -42,7 +49,17 @@
  
  - A warning is now prompted when the maximum number of iterations of the algorithm is reached (suggestion by @clukewatson  [#24](https://github.com/lrberge/fixest/issues/24)]). 
  
- - The types of standard-errors can now be set globally with the function setFixest_se (suggestion by @dlindzee [#28](https://github.com/lrberge/fixest/issues/28))
+ - The types of standard-errors can now be set globally with the function `setFixest_se` (suggestion by @dlindzee [#28](https://github.com/lrberge/fixest/issues/28))
+ 
+ - New `feols` argument `demeaned`. If `TRUE`, then the centered variables are returned (`y_demeaned` and `X_demeaned`). (Suggestion by Linus Holtermann.)
+ 
+ - `interact` gains two new arguments: `drop` and `keep` (suggestion by @SuperMayo [#23](https://github.com/lrberge/fixest/issues/23)).
+ 
+#### New methods
+
+ - `hatvalues` has been implemented for feols and feglm estimations.
+ 
+ - the `estfun` from `sandwich` has been implemented.
 
 ## Changes in version 0.5.1 (18-06-2018)
 
@@ -279,7 +296,7 @@
 
 #### Major user visible changes
          
- -[All estimation methods] Significant speed improvement when the fixed-effects variables (i.e. the identifiers) are string vectors.
+ - [All estimation methods] Significant speed improvement when the fixed-effects variables (i.e. the identifiers) are string vectors.
 
 
 ## Changes in version 0.2.0 (2019-11-19)
