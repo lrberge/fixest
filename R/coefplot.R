@@ -1572,12 +1572,15 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
                     is_ref = interaction.info$is_ref
                     items = interaction.info$items
                     is_num = any(interaction.info$fe_type %in% c("integer", "numeric"))
-                }
 
-                # We retrict only to interactions
-                root_interaction = all_vars[grepl("::", all_vars)]
-                # We keep only the first one !
-                root_interaction = unique(gsub("::.+", "", root_interaction))[1]
+                    root_interaction = interaction.info$prefix
+
+                } else {
+                    # We retrict only to interactions
+                    root_interaction = all_vars[grepl("::", all_vars)]
+                    # We keep only the first one !
+                    root_interaction = unique(gsub("::.+", "", root_interaction))[1]
+                }
 
                 names(IS_INTER) = root_interaction
 
@@ -1609,6 +1612,13 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
 
                     if(identical(ref, "auto")){
                         # We add the reference used in the estimation
+
+                        if(!is.null(object$collin.var)){
+                            all_inter_names = paste0(root_interaction, "::", items)
+                            qui_keep = !all_inter_names %in% object$collin.var
+                            is_ref = is_ref[qui_keep]
+                            items = items[qui_keep]
+                        }
 
                         if(length(inter_values) != sum(!is_ref)){
                             stop("Internal error regarding the lengths of vectors of coefficients. Could you report to the author of the fixest package?")

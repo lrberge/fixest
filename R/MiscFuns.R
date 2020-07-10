@@ -2802,11 +2802,14 @@ i = interact = function(var, fe, ref, drop, keep){
     }
 
 
-    check_arg(ref, drop, keep, "multi charin", .choices = items, .message = paste0("Argument '__ARG__' must consist of elements of the variable '", fe_name, "'."))
+    check_arg(ref, "charin", .choices = items, .message = paste0("Argument 'ref' must be a single element of the variable '", fe_name, "'."))
+    check_arg(drop, keep, "multi charin", .choices = items, .message = paste0("Argument '__ARG__' must consist of elements of the variable '", fe_name, "'."))
 
-    noRef = TRUE
+    no_rm = TRUE
+    any_ref = FALSE
     id_drop = c()
     if(!missing(ref)){
+        any_ref = TRUE
         id_drop = ref = which(items %in% ref)
     }
 
@@ -2821,12 +2824,12 @@ i = interact = function(var, fe, ref, drop, keep){
     if(length(id_drop) > 0){
         id_drop = unique(sort(id_drop))
         if(length(id_drop) == length(items)) stop("All items from the interaction have been removed.")
-        noRef = FALSE
+        no_rm = FALSE
     }
 
     res = model.matrix(~ -1 + fe_num, model.frame(~ -1 + fe_num, data.frame(fe_num = factor(fe_num)), na.action = na.pass))
 
-    if(noRef){
+    if(no_rm){
         res = res * var
         colnames(res) = paste0(var_name, ":", fe_name, "::", items)
     } else {
@@ -2837,13 +2840,25 @@ i = interact = function(var, fe, ref, drop, keep){
     # We send the information on the reference
     opt = getOption("fixest_interaction_ref")
     if(is.null(opt)){
-        is_ref = rep(FALSE, length(items))
 
-        if(noRef == FALSE){
-            is_ref[ref] = TRUE
+        opt = list(fe_type = class(fe))
+
+        qui_drop = (1:length(items)) %in% id_drop
+
+        if(any_ref){
+            qui_drop[ref] = FALSE
+            opt$items = items[!qui_drop]
+
+            is_ref = rep(FALSE, length(opt$items))
+            is_ref[sum(!qui_drop[1:ref])] = TRUE
+
+            opt$is_ref = is_ref
+        } else {
+            opt$items = items[!qui_drop]
+            opt$is_ref = rep(FALSE, length(opt$items))
         }
 
-        opt = list(is_ref = is_ref, items = items, fe_type = class(fe))
+        opt$prefix = paste0(var_name, ":", fe_name)
 
         options("fixest_interaction_ref" = opt)
     }
