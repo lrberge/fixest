@@ -43,6 +43,7 @@
 #' @param group A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument \code{drop}) and \code{TRUE} or \code{FALSE} will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: \code{group=list("Controls: personal traits"=c("gender", "height", "weight"))} will create an new line with \code{"Controls: personal traits"} in the leftmost cell, all three variables gender, height and weight are discared, TRUE appearing in each model containing at least one of the three variables (the style of TRUE/FALSE is governed by the argument \code{yesNo}). You can control the style with the \code{title} and \code{where} keywords in curly brackets. For example \code{group=list("{title:Controls; where:stats}Personal traits"=c("gender", "height", "weight"))} will add an extra line right before with "Control" written in it, and the group information will appear after the statistics. The keyword where can be equal to either \code{var} (default), \code{fixef} or \code{stats}.
 #' @param extraline A list. The list elements should be either a single logical or a vector of the same length as the number of models. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extraline=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the style with the \code{title} and \code{where} keywords in curly brackets. For example \code{group=list("{title:Sub-sample; where:stats}By age"=c("<20 yo", "all", ">50 yo"))} will add an extra line right before with "Sub-sample" written in it, and the extraline information will appear after the statistics section. The keyword where can be equal to either \code{var} (default), \code{fixef} or \code{stats}.
 #' @param tablefoot Logical, default is \code{TRUE}. Whether to display the table footer containing the information on the way the standard-errors where computed and the meaning of the significance codes.
+#' @param reset (\code{setFixest_etable} only.) Logical, default is \code{FALSE}. If \code{TRUE}, this will reset all the default values that were already set by the user in previous calls.
 #'
 #' @details
 #' The function \code{esttex} is equivalent to the function \code{etable} with argument \code{tex = TRUE}.
@@ -1883,8 +1884,6 @@ etable_internal_df = function(info){
 
 
 #' @rdname etable
-#'
-#' @param reset Logical, default is \code{FALSE}. If \code{TRUE}, this will reset all the default values that were already set by the user in previous calls.
 setFixest_etable = function(digits=4, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, signifCode, float, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNo = c("Yes", "No"), family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style = list(), notes = NULL, group = NULL, extraline = NULL, tablefoot = TRUE, reset = FALSE){
 
     # cat(names(formals(setFixest_etable)), sep = '", "')
@@ -2022,7 +2021,7 @@ setFixest_etable = function(digits=4, fitstat, coefstat = c("se", "tstat", "conf
 
 }
 
-#' @rdname setFixest_etable
+#' @rdname etable
 getFixest_etable = function(){
     opts = getOption("fixest_etable")
     if(!is.list(opts)){
