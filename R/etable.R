@@ -40,8 +40,8 @@
 #' @param ci Level of the confidence interval, defaults to \code{0.95}. Only used if \code{coefstat = confint}.
 #' @param style A list. You can change the general style of the table with this argument. It should be of the form \code{style = list(keyword="key1:value1;key2:value2")} etc. The available keywords are \code{lines} (to manage the type of lines appearing in the table), and \code{depvar}, \code{model}, \code{var}, \code{fixef}, \code{slopes}, \code{fixef.sizes}, \code{stats} and \code{notes}. Most of these keywords accept the key \code{title:} which affects the title appearing just before the section. Eg to drop the \emph{Variables} header, just use \code{style=list("title:")}. Note that if you use \code{style=list("title: ")} (note the space after ":"), then an empty line will still be there. The keywords fixef, slopes and fixef.sizes also accept the keys \code{prefix} and \code{suffix}. E.g. if \code{style=list(fixef="suffix: FE")}, then there will be no header showing but the text " FE" will be appended to the ficed-effects variable names. The keys accepted in \code{lines} are \code{top}, \code{bottom}, \code{foot} and \code{sep}.
 #' @param notes Character vector. If provided, a \code{"notes"} section will be added at the end right after the end of the table, containing the text of this argument. Note that if it is a vector, it will be collapsed with new lines.
-#' @param group A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument \code{drop}) and \code{TRUE} or \code{FALSE} will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: \code{group=list("Controls: personal traits"=c("gender", "height", "weight"))} will create an new line with \code{"Controls: personal traits"} in the leftmost cell, all three variables gender, height and weight are discared, TRUE appearing in each model containing at least one of the three variables (the style of TRUE/FALSE is governed by the argument \code{yesNo}). You can control the style with the \code{title} and \code{where} keywords in curly brackets. For example \code{group=list("{title:Controls; where:stat}Personal traits"=c("gender", "height", "weight"))} will add an extra line right before with "Control" written in it, and the group information will appear after the statistics. The keyword where can be equal to either \code{var} (default), \code{fixef} or \code{stat}.
-#' @param extraline A list. The list elements should be either a single logical or a vector of the same length as the number of models. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extraline=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the style with the \code{title} and \code{where} keywords in curly brackets. For example \code{group=list("{title:Sub-sample; where:stat}By age"=c("<20 yo", "all", ">50 yo"))} will add an extra line right before with "Sub-sample" written in it, and the extraline information will appear after the statistics section. The keyword where can be equal to either \code{var} (default), \code{fixef} or \code{stat}.
+#' @param group A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument \code{drop}) and \code{TRUE} or \code{FALSE} will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: \code{group=list("Controls: personal traits"=c("gender", "height", "weight"))} will create an new line with \code{"Controls: personal traits"} in the leftmost cell, all three variables gender, height and weight are discared, TRUE appearing in each model containing at least one of the three variables (the style of TRUE/FALSE is governed by the argument \code{yesNo}). You can control the style with the \code{title} and \code{where} keywords in curly brackets. For example \code{group=list("{title:Controls; where:stats}Personal traits"=c("gender", "height", "weight"))} will add an extra line right before with "Control" written in it, and the group information will appear after the statistics. The keyword where can be equal to either \code{var} (default), \code{fixef} or \code{stats}.
+#' @param extraline A list. The list elements should be either a single logical or a vector of the same length as the number of models. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extraline=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the style with the \code{title} and \code{where} keywords in curly brackets. For example \code{group=list("{title:Sub-sample; where:stats}By age"=c("<20 yo", "all", ">50 yo"))} will add an extra line right before with "Sub-sample" written in it, and the extraline information will appear after the statistics section. The keyword where can be equal to either \code{var} (default), \code{fixef} or \code{stats}.
 #' @param tablefoot Logical, default is \code{TRUE}. Whether to display the table footer containing the information on the way the standard-errors where computed and the meaning of the significance codes.
 #'
 #' @details
@@ -136,7 +136,7 @@
 #' etable(est1, est2, dict = dict, tex = TRUE, style = style_lines)
 #'
 #'
-etable = function(..., se = c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, digits=4, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode, label, float, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNo = c("Yes", "No"), keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style = list(), notes = NULL, group = NULL, extraline = NULL, tablefoot = TRUE){
+etable = function(..., se = c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, digits=4, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode, label, float, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNo = "Yes", keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style = list(), notes = NULL, group = NULL, extraline = NULL, tablefoot = TRUE){
 
     #
     # Checking the arguments
@@ -227,7 +227,7 @@ etable = function(..., se = c("standard", "white", "cluster", "twoway", "threewa
 
 
 #' @describeIn etable Exports the results of multiple \code{fixest} estimations in a Latex table.
-esttex <- function(..., se = c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, digits=4, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, title, float = float, sdBelow=TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNo = c("Yes", "No"), keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", style = list(), notes = NULL, group = NULL, tablefoot = TRUE, extraline = NULL){
+esttex <- function(..., se = c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, digits=4, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, title, float = float, sdBelow=TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNo = "Yes", keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", style = list(), notes = NULL, group = NULL, tablefoot = TRUE, extraline = NULL){
     # drop: a vector of regular expressions
     # order: a vector of regular expressions
     # dict: a 'named' vector
@@ -421,7 +421,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits
         check_value_plus(style$stats, "NULL{default} character scalar")
         style$stats = parse_style(style$stats, "title")
 
-        default = "title:\\emph{Notes:} "
+        default = "title:\\emph{\\medskip Notes:} "
         check_value_plus(style$notes, "NULL{default} character scalar")
         style$notes = parse_style(style$notes, "title")
     }
@@ -1468,7 +1468,7 @@ etable_internal_latex = function(info){
     # Notes
     info_notes = ""
     if(nchar(notes) > 0){
-        info_notes = paste0("\n", style$notes$title, notes)
+        info_notes = paste0("\n", style$notes$title, notes, "\n")
     }
 
     # Stacking var and stat
@@ -1495,7 +1495,7 @@ etable_internal_latex = function(info){
             if(nchar(gi_style_parsed$where) == 0){
                 gi_where = "var"
             } else {
-                gi_where = check_value_plus(gi_style_parsed$where, "match(var, stat, fixef)", .message = "In 'group', the keyword 'where' accepts only three values: either 'var', 'fixef' or 'stat'.")
+                gi_where = check_value_plus(gi_style_parsed$where, "match(var, stats, fixef)", .message = "In 'group', the keyword 'where' accepts only three values: either 'var', 'fixef' or 'stats'.")
             }
 
 
@@ -1552,7 +1552,7 @@ etable_internal_latex = function(info){
             if(nchar(el_style_parsed$where) == 0){
                 el_where = "var"
             } else {
-                el_where = check_value_plus(el_style_parsed$where, "match(var, stat, fixef)", .message = "In 'extraline', the keyword 'where' accepts only three values: either 'var', 'fixef' or 'stat'.")
+                el_where = check_value_plus(el_style_parsed$where, "match(var, stats, fixef)", .message = "In 'extraline', the keyword 'where' accepts only three values: either 'var', 'fixef' or 'stats'.")
             }
 
             if(nchar(el_style_parsed$title) > 0){

@@ -17,23 +17,89 @@ It offers however a fair deal of customization, and since you can seamlessly cha
 
 This document first describes its main arguments, then focuses on the argument `style` and ends with a set of examples.
 
-## Main arguments
+## First example
+
+Using data from the airquality data base, let's estimate 4 models:
 
 ```{r}
 library(fixest)
 data(airquality)
 
-setFixest_notes(FALSE)
+setFixest_notes(FALSE) # Avoid messages when NAs are removed
+
+est_noFE = feols(Ozone ~ Solar.R + Wind + Temp, airquality)
+est_1FE  = feols(Ozone ~ Solar.R + Wind + Temp | Day, airquality)
+est_2FE  = feols(Ozone ~ Solar.R + Wind + Temp | Day + Month , airquality)
+est_poly = feols(Ozone ~ Solar.R + Wind + poly(Temp, 3) | Day + Month, airquality)
+```
+
+To export the results to Latex, we use `etable`. We first set the dictionnary renaming the variables, then we export the results with clustered standard-errors at the Day level:
+
+```{r, eval = FALSE}
+# Dictionnay => set only once per session
 setFixest_dict(c(Ozone = "Ozone (ppb)", Solar.R = "Solar Radiation (in Langleys)",
                  Wind = "Wind Speed (mph)", Temp = "Temperature (Fahrenheit)"))
 
-est = feols(Ozone ~ Solar.R + Wind + Temp | Month + Day, airquality)
-est_poly = feols(Ozone ~ Solar.R + Wind + poly(Temp, 3) | Month + Day, airquality)
+etable(est_noFE, est_1FE, est_2FE, est_poly, est_slopes, cluster = "Day", file = file,
+       group = list("Temperature (cubic)" = "poly"), notes = "Estimation of 5 models.")
+
 ```
 
+The previous code produces the following table:
 
-## Setting the style 
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/etable/first_table.PNG?raw=true)
 
-The argument `style` defines how the table looks. It allows an in-depth customization of the table. 
+What can we notice? First, all variables are appropriately labeled. Second, all standard-errors of the four models are clustered by Day, and this is mentioned in the table footer. This is achieved with the argument `cluster`. Third, there's a fixed-effects section telling which model has which fixed-effect. Fourth, the polynomial of the Temperature is not shown, instead there's a line telling which model includes a cubic polynomial. This is achieved with the argument `group`. 
 
-## Some defaults
+The style of the table is rather sober, but no worries most of it can be customized.
+
+
+## Setting the style, once and for all
+
+The argument `style` defines how the table looks. It allows an in-depth customization of the table. The tables is split into several components, each allowing some customization. The components of a table are described by the following figure:
+
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/etable/style_explanation.png?raw=true)
+
+The argument `style` must be a list, the names of which correspond to the different components. Each elements of this list must be a single character string of the form `"keyword1:value1; keyword2:value; etc"`. The missing components fall back to their default values. The components, with the keywords they accept and their defaults are:
+
+ - **depvar**: *title*. Default `"title:Dependent Variable(s):"`.
+ - **model**: *title, format*. Default `"title:Model:; format:(1)"`. In `format`, you can use the special values 1, i, I, a or A; the corresponding values will be increased across the model columns.
+ - **var**: *title*. Default `"title:\\emph{Variables}"`.
+ - **fixef**: *title, prefix, suffix, where*. Default `"title:\\emph{Fixed-effects}; where:var"`. Valid values of `where` are "var" or "stats".
+ - **slopes**: *title, format*.  Default `"title:\\emph{Varying Slopes}; format:__var__ (__slope__)"`. In `format`, the special values \_\_var\_\_ and \_\_slope\_\_ are replaced with the corresponding labels of the variables and of the slope.
+ - **stats**: *title*.  Default `"title:\\emph{Fit statistics}"`.
+ - **notes**: *title*.  Default `"title:\\emph{\\medskip Notes:} "`.
+ - **lines**: *top, foot, bottom, sep*.  Default `"top:\\tabularnewline\\toprule\\toprule;bottom:;foot:\\bottomrule\\bottomrule;sep:\\midrule"`.
+
+Missing keywords are considered to be equal to the empty string.
+
+Before illustrating how to use the `style` argument, first is shown how to change the defaults.
+
+#### Changing the defaults 
+
+To permanenetly change the defaults, just use the function `setFixest_etable`:
+
+```{r}
+new_style = list(lines = "top:\\toprule; bottom:\\bottomrule",
+                 var = "title:\\midrule", # cleans the title but keeps line
+                 depvar = "", # cleans the title
+                 model = "format:$Model_{I}$",  # cleans the titles + changes model format
+                 fixef = "title: ; suffix: fixed effects; where:stats",
+                 # fixef: cleans the titles + adds a suffix + places after the stats
+                 slopes = "format:__var__ $\\times $ __slope__",
+                 stats = "title: ") # cleans the title but adds an empty line
+
+setFixest_etable(fitstat = ~r2, signifCode = NA, yesNo = "$\\checkmark$",
+                 tablefoot = FALSE, style = new_style)
+```
+
+And now, using the exact same line of code as in the example, we obtain table with a different style:
+
+
+```{r, eval = FALSE}
+etable(est_noFE, est_1FE, est_2FE, est_poly, est_slopes, cluster = "Day", file = file,
+       group = list("Temperature (cubic)" = "poly"), notes = "Estimation of 5 models.")
+```
+
+![](https://github.com/lrberge/fixest/blob/master/vignettes/images/etable/table_new_style.PNG?raw=true)
+
