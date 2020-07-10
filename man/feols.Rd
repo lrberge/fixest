@@ -12,13 +12,14 @@ feols(
   panel.id,
   fixef,
   fixef.tol = 1e-06,
-  fixef.iter = 2000,
+  fixef.iter = 10000,
   na_inf.rm = getFixest_na_inf.rm(),
   nthreads = getFixest_nthreads(),
   verbose = 0,
   warn = TRUE,
   notes = getFixest_notes(),
   combine.quick,
+  demeaned = FALSE,
   ...
 )
 }
@@ -37,19 +38,21 @@ feols(
 
 \item{fixef.tol}{Precision used to obtain the fixed-effects. Defaults to \code{1e-5}. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument \code{fixef.tol} cannot be lower than \code{10000*.Machine$double.eps}. Note that this parameter is dynamically controlled by the algorithm.}
 
-\item{fixef.iter}{Maximum number of iterations in the step obtaining the fixed-effects (only in use for 2+ fixed-effects). Default is 1000.}
+\item{fixef.iter}{Maximum number of iterations in the step obtaining the fixed-effects (only in use for 2+ fixed-effects). Default is 10000.}
 
 \item{na_inf.rm}{Logical, default is \code{TRUE}. If the variables necessary for the estimation contain NA/Infs and \code{na_inf.rm = TRUE}, then all observations containing NA are removed prior to estimation and a note is displayed detailing the number of observations removed. Otherwise, an error is raised.}
 
 \item{nthreads}{Integer: Number of nthreads to be used (accelerates the algorithm via the use of openMP routines). The default is to use the total number of nthreads available minus two. You can set permanently the number of nthreads used within this package using the function \code{\link[fixest]{setFixest_nthreads}}.}
 
-\item{verbose}{Integer, default is 0. It represents the level of information that should be reported during the optimisation process. If \code{verbose=0}: nothing is reported. If \code{verbose=1}: the value of the coefficients and the likelihood are reported. If \code{verbose=2}: \code{1} + information on the computing time of the null model, the fixed-effects coefficients and the hessian are reported.}
+\item{verbose}{Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algoritmh (the first number is the left-hand-side, the other numbers are the right-hand-side variables).}
 
 \item{warn}{Logical, default is \code{TRUE}. Whether warnings should be displayed (concerns warnings relating to: convergence state, collinearity issues and observation removal due to only 0/1 outcomes or presence of NA values).}
 
 \item{notes}{Logical. By default, two notes are displayed: when NAs are removed (to show additional information) and when some observations are removed because of only 0 (or 0/1) outcomes in a fixed-effect (in Poisson/Neg. Bin./Logit models). To avoid displaying these messages, you can set \code{notes = FALSE}. You can remove these messages permanently by using \code{setFixest_notes(FALSE)}.}
 
 \item{combine.quick}{Logical. When you combine different variables to transform them into a single fixed-effects you can do e.g. \code{y ~ x | paste(var1, var2)}. The algorithm provides a shorthand to do the same operation: \code{y ~ x | var1^var2}. Because pasting variables is a costly operation, the internal algorithm may use a numerical trick to hasten the process. The cost of doing so is that you lose the labels. If you are interested in getting the value of the fixed-effects coefficients after the estimation, you should use \code{combine.quick = FALSE}. By default it is equal to \code{FALSE} if the number of observations is lower than 50,000, and to \code{TRUE} otherwise.}
+
+\item{demeaned}{Logical, default is \code{FALSE}. Only used in the presence of fixed-effects: should the centered variables be returned? If \code{TRUE},  it creates the items \code{y_demeaned} and \code{X_demeaned}.}
 
 \item{...}{Not currently used.}
 }

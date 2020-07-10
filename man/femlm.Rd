@@ -15,7 +15,7 @@ femlm(
   panel.id,
   na_inf.rm = getFixest_na_inf.rm(),
   fixef.tol = 1e-05,
-  fixef.iter = 1000,
+  fixef.iter = 10000,
   nthreads = getFixest_nthreads(),
   verbose = 0,
   warn = TRUE,
@@ -35,7 +35,7 @@ fenegbin(
   panel.id,
   na_inf.rm = getFixest_na_inf.rm(),
   fixef.tol = 1e-05,
-  fixef.iter = 1000,
+  fixef.iter = 10000,
   nthreads = getFixest_nthreads(),
   verbose = 0,
   warn = TRUE,
@@ -63,7 +63,7 @@ fenegbin(
 
 \item{fixef.tol}{Precision used to obtain the fixed-effects. Defaults to \code{1e-5}. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument \code{fixef.tol} cannot be lower than \code{10000*.Machine$double.eps}. Note that this parameter is dynamically controlled by the algorithm.}
 
-\item{fixef.iter}{Maximum number of iterations in the step obtaining the fixed-effects (only in use for 2+ fixed-effects). Default is 1000.}
+\item{fixef.iter}{Maximum number of iterations in the step obtaining the fixed-effects (only in use for 2+ fixed-effects). Default is 10000.}
 
 \item{nthreads}{Integer: Number of nthreads to be used (accelerates the algorithm via the use of openMP routines). The default is to use the total number of nthreads available minus two. You can set permanently the number of nthreads used within this package using the function \code{\link[fixest]{setFixest_nthreads}}.}
 
