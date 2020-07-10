@@ -15,6 +15,7 @@
 #' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y | fe_1+fe_2}. You can combine two fixed-effects with \code{^}: e.g. \code{fml = z~x+y|fe_1^fe_2}, see details. You can also use variables with varying slopes using square brackets: e.g. in \code{fml = z~y|fe_1[x] + fe_2} the variable \code{x} will have one coefficient for each value of \code{fe_1} -- if you use varying slopes, please have a look at the details section (can't describe it all here).
 #' @param weights A formula or a numeric vector. Each observation can be weighted, the weights must be greater than 0. If equal to a formula, it should be of one-sided: for example \code{~ var_weight}.
 #' @param verbose Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algoritmh (the first number is the left-hand-side, the other numbers are the right-hand-side variables).
+#' @param demeaned Logical, default is \code{FALSE}. Only used in the presence of fixed-effects: should the centered variables be returned? If \code{TRUE},  it creates the items \code{y_demeaned} and \code{X_demeaned}.
 #'
 #' @details
 #' The method used to demean each variable along the fixed-effects is based on Berge (2018), since this is the same problem to solve as for the Gaussian case in a ML setup.
@@ -159,7 +160,7 @@
 #'
 feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, fixef.iter = 10000,
                  na_inf.rm = getFixest_na_inf.rm(), nthreads = getFixest_nthreads(),
-                 verbose = 0, warn = TRUE, notes = getFixest_notes(), combine.quick, ...){
+                 verbose = 0, warn = TRUE, notes = getFixest_notes(), combine.quick, demeaned = FALSE, ...){
 
 	dots = list(...)
 
@@ -176,7 +177,7 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 		time_start = proc.time()
 
 		# we use fixest_env for appropriate controls and data handling
-		env = try(fixest_env(fml = fml, data = data, weights = weights, offset = offset, panel.id = panel.id, fixef = fixef, fixef.tol = fixef.tol, fixef.iter = fixef.iter, na_inf.rm = na_inf.rm, nthreads = nthreads, verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick, origin = "feols", mc_origin = match.call(), ...), silent = TRUE)
+		env = try(fixest_env(fml = fml, data = data, weights = weights, offset = offset, panel.id = panel.id, fixef = fixef, fixef.tol = fixef.tol, fixef.iter = fixef.iter, na_inf.rm = na_inf.rm, nthreads = nthreads, verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick, demeaned = demeaned, origin = "feols", mc_origin = match.call(), ...), silent = TRUE)
 
 		if("try-error" %in% class(env)){
 			stop(format_error_msg(env, "feols"))
@@ -287,7 +288,10 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 
 	time_esti = proc.time()
 
+	#
 	# Estimation
+	#
+
 	if(!onlyFixef){
 
 	    est = ols_fit(y_demean, X_demean, weights, correct_0w, nthreads)
@@ -311,11 +315,21 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 		res$residuals = est$residuals
 		res$multicol = est$multicol
 		if(fromGLM) res$is_excluded = est$is_excluded
+
+		if(demeaned){
+		    res$y_demeaned = y_demean
+		    res$X_demeaned = X_demean
+		}
+
 	} else {
 		res$residuals = y_demean
 		res$coefficients = coef = NULL
 		res$onlyFixef = TRUE
 		res$multicol = FALSE
+
+		if(demeaned){
+		    res$y_demeaned = y_demean
+		}
 	}
 
 	time_post = proc.time()

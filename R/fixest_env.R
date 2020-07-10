@@ -15,7 +15,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                        verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000,
                        deriv.iter = 5000, deriv.tol = 1e-4, glm.iter = 25, glm.tol = 1e-8,
                        etastart, mustart,
-                       warn = TRUE, notes = getFixest_notes(), combine.quick,
+                       warn = TRUE, notes = getFixest_notes(), combine.quick, demeaned = FALSE,
                        origin_bis, origin = "feNmlm", mc_origin, mc_origin_bis, mc_origin_ter,
                        computeModel0 = FALSE, weights,
                        from_update = FALSE, object, sumFE_init, debug = FALSE, ...){
@@ -62,7 +62,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     femlm_args = c("family", "theta.init", "linear.start", "opt.control", "deriv.tol", "deriv.iter")
     feNmlm_args = c("NL.fml", "NL.start", "lower", "upper", "NL.start.init", "jacobian.method", "useHessian", "hessian.args")
     feglm_args = c("family", "weights", "glm.iter", "glm.tol", "etastart", "mustart")
-    feols_args = c("weights")
+    feols_args = c("weights", "demeaned")
     internal_args = c("debug", "object", "from_update", "sumFE_init")
 
     deprec_old_new = c()
@@ -218,20 +218,10 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         computeModel0 = family_equiv %in% c("poisson", "logit")
     }
 
-    if(!isLogical(notes)){
-        stop("Argument 'notes' must be a single logical.")
-    }
+    check_arg(demeaned, notes, warn, na_inf.rm, "logical scalar")
 
     show_notes = notes
     notes = c()
-
-    if(!isLogical(warn)){
-        stop("Argument 'warn' must be a single logical.")
-    }
-
-    if(!isLogical(na_inf.rm)){
-        stop("Argument 'na_inf.rm' must be a single logical.")
-    }
 
     # flags for NA infinite vales => will be used in the message (good to discrimintae b/w NA and inf)
     ANY_INF = FALSE
