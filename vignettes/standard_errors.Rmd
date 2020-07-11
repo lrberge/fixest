@@ -15,7 +15,7 @@ Sys.setenv(lang = "en")
 
 It is an euphemism to say that standard-errors are a critical element of your estimations: literally your paper's results depend on them. It is therefore unfortunate that no conventional "best" way exists to compute them. Multiple definitions can create confusion and the purpose of this document is to lay bare the fiddly details of standard-error computation.
 
-The first part describes how standard-errors are computed in `fixest`'s estimations. The second part illustrates how to replicate some standard-errors obtained from other estimation methods with `fixest`. 
+The first part describes how standard-errors are computed in `fixest`'s estimations. Please note that here I don't discuss the *why*, but only the *how*. The second part illustrates how to replicate some standard-errors obtained from other estimation methods with `fixest`. 
 
 This document applies to `fixest` version 0.6.0 or higher.
 
