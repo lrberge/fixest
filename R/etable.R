@@ -50,6 +50,8 @@
 #'
 #' The function \code{esttable} is equivalent to the function \code{etable} with argument \code{tex = FALSE}.
 #'
+#' You can permanently change the way your table looks in Latex by using \code{setFixest_etable}. The following vignette gives and example as well as illustrates how to use the argument \code{style}: \url{https://cran.r-project.org/web/packages/fixest/vignettes/exporting_tables.html}.
+#'
 #' @section Arguments keep, drop and order:
 #' The arguments \code{keep}, \code{drop} and \code{order} use regular expressions. If you are not aware of regular expressions, I urge you to learn it, since it is an extremely powerful way to manipulate character strings (and it exists across most programming languages).
 #'
@@ -62,6 +64,8 @@
 #' You can use the special character "%" (percentage) to make reference to the original variable name instead of the aliased name. For example, you have a variable named \code{"Month6"}, and use a dictionary \code{dict = c(Month6="June")}. Thus the variable will be displayed as \code{"June"}. If you want to delete that variable, you can use either \code{drop="June"}, or \code{drop="%Month6"} (which makes reference to its original name).
 #'
 #' The argument \code{order} takes in a vector of regular expressions, the order will follow the elments of this vector. The vector gives a list of priorities, on the left the elements with highest priority. For example, order = c("Wind", "!Inter", "!Temp") would give highest priorities to the variables containing "Wind" (which would then appear first), second highest priority is the variables not containing "Inter", last, with lowest priority, the variables not containing "Temp". If you had the following variables: (Intercept), Temp:Wind, Wind, Temp you would end up with the following order: Wind, Temp:Wind, Temp, (Intercept).
+#'
+#'
 #'
 #' @return
 #' If \code{tex = TRUE}, the lines composing the Latex table are returned invisibly while the table is directly prompted on the console.
@@ -136,6 +140,44 @@
 #' style_lines = list(lines = "top:\\toprule;bottom:\\bottomrule;sep:\\midrule;foot:\\midrule")
 #' etable(est1, est2, dict = dict, tex = TRUE, style = style_lines)
 #'
+#' #
+#' # Group and extraline
+#' #
+#'
+#' # Sometimes it's useful to group control variables into a single line
+#' # You can achieve that with the group argument
+#'
+#' setFixest_fml(..ctrl = ~ poly(Wind, 2) + poly(Temp, 2))
+#' est_c0 = feols(Ozone ~ Solar.R, data = aq)
+#' est_c1 = feols(Ozone ~ Solar.R + ..ctrl, data = aq)
+#' est_c2 = feols(Ozone ~ Solar.R + I(Solar.R**2) + ..ctrl, data = aq)
+#'
+#' etable(est_c0, est_c1, est_c2, group = list(Controls = "poly"))
+#'
+#' # 'group' here does the same as drop = "poly", but adds an extra line
+#' # with TRUE/FALSE where the variables were found
+#'
+#' # 'extraline' adds an extra line, where you can add the value for each model
+#' est_all  = feols(Ozone ~ Solar.R + Temp + Wind, data = aq)
+#' est_sub1 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month %in% 5:6, ])
+#' est_sub2 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month %in% 7:8, ])
+#' est_sub3 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month == 9, ])
+#'
+#' etable(est_all, est_sub1, est_sub2, est_sub3,
+#'        extraline = list("Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
+#'
+#' # When exporting to Latex, you can add meta arguments to 'group' and 'extraline'
+#' # Two keywords are allowed: 'title' and 'where'
+#' # 'title' adds a line just before with the content of 'title' in the leftmost cell
+#' # 'where' governs the location of the line. It can be equal to 'var', 'stats' or 'fixef'.
+#' # The syntax is: {title:Controls; where:stats}Group name.
+#' # Note that starting with curly braces is mandatory.
+#'
+#' # Examples
+#' etable(est_c0, est_c1, est_c2, tex = TRUE, group = list("{where:stats}Controls" = "poly"))
+#' etable(est_all, est_sub1, est_sub2, est_sub3, tex = TRUE,
+#'        extraline = list("{title:\\midrule}Sub-sample" =
+#'                           c("All", "May-June", "Jul.-Aug.", "Sept.")))
 #'
 etable = function(..., se = c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, digits=4, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode, label, float, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNo = "Yes", keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style = list(), notes = NULL, group = NULL, extraline = NULL, tablefoot = TRUE){
 
@@ -324,6 +366,9 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits
         sysOrigin = sys.parent()
         mc = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin), expand.dots = FALSE)
         args_in = setdiff(names(mc), "style")
+
+        # Arguments for which the defaults should not be changed in etable, tex = FALSE
+        if(!tex) args_in = c(args_in, "signifCode")
 
         # We modify only non-user provided arguments
         for(v in names(opts)){
@@ -1494,7 +1539,8 @@ etable_internal_latex = function(info){
             # style component
             gi_style = gsub("\\{|\\}.+", "", gi_name)
             gi_style_parsed = parse_style(gi_style, c("title", "where"))
-            gi_name = gsub("^[^\\}]+\\}", "", gi_name)
+            from = nchar(strsplit(gi_name, "}", fixed = TRUE)[[1]][1])
+            gi_name = substr(gi_name, from + 2, nchar(gi_name))
 
             if(nchar(gi_style_parsed$where) == 0){
                 gi_where = "var"
@@ -1551,7 +1597,8 @@ etable_internal_latex = function(info){
             # style component
             el_style = gsub("\\{|\\}.+", "", el_name)
             el_style_parsed = parse_style(el_style, c("title", "where"))
-            el_name = gsub("^[^\\}]+\\}", "", el_name)
+            from = nchar(strsplit(el_name, "}", fixed = TRUE)[[1]][1])
+            el_name = substr(el_name, from + 2, nchar(el_name))
 
             if(nchar(el_style_parsed$where) == 0){
                 el_where = "var"
@@ -1685,7 +1732,9 @@ etable_internal_df = function(info){
         gi = group[[i]]
         gi_format = c("Yes", "No")[2 - gi]
 
-        gi_name = gsub("^[^\\}]+\\}", "", names(group)[i])
+        gi_name = names(group)[i]
+        from = nchar(strsplit(gi_name, "}", fixed = TRUE)[[1]][1])
+        gi_name = substr(gi_name, from + 2, nchar(gi_name))
 
         my_line = c(gi_name, gi_format)
 
@@ -1710,7 +1759,9 @@ etable_internal_df = function(info){
             el_format = el
         }
 
-        el_name = gsub("^[^\\}]+\\}", "", names(extraline)[i])
+        el_name = names(extraline)[i]
+        from = nchar(strsplit(el_name, "}", fixed = TRUE)[[1]][1])
+        el_name = substr(el_name, from + 2, nchar(el_name))
 
         my_line = c(el_name, el_format)
 

@@ -219,6 +219,8 @@ Aggregates the results of multiple estimations and displays them in the form of 
 The function \code{esttex} is equivalent to the function \code{etable} with argument \code{tex = TRUE}.
 
 The function \code{esttable} is equivalent to the function \code{etable} with argument \code{tex = FALSE}.
+
+You can permanently change the way your table looks in Latex by using \code{setFixest_etable}. The following vignette gives and example as well as illustrates how to use the argument \code{style}: \url{https://cran.r-project.org/web/packages/fixest/vignettes/exporting_tables.html}.
 }
 \section{Functions}{
 \itemize{
@@ -304,6 +306,44 @@ etable(est1, est2, dict = dict, tex = TRUE, style = style_noHeaders)
 style_lines = list(lines = "top:\\\\toprule;bottom:\\\\bottomrule;sep:\\\\midrule;foot:\\\\midrule")
 etable(est1, est2, dict = dict, tex = TRUE, style = style_lines)
 
+#
+# Group and extraline
+#
+
+# Sometimes it's useful to group control variables into a single line
+# You can achieve that with the group argument
+
+setFixest_fml(..ctrl = ~ poly(Wind, 2) + poly(Temp, 2))
+est_c0 = feols(Ozone ~ Solar.R, data = aq)
+est_c1 = feols(Ozone ~ Solar.R + ..ctrl, data = aq)
+est_c2 = feols(Ozone ~ Solar.R + I(Solar.R**2) + ..ctrl, data = aq)
+
+etable(est_c0, est_c1, est_c2, group = list(Controls = "poly"))
+
+# 'group' here does the same as drop = "poly", but adds an extra line
+# with TRUE/FALSE where the variables were found
+
+# 'extraline' adds an extra line, where you can add the value for each model
+est_all  = feols(Ozone ~ Solar.R + Temp + Wind, data = aq)
+est_sub1 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month \%in\% 5:6, ])
+est_sub2 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month \%in\% 7:8, ])
+est_sub3 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month == 9, ])
+
+etable(est_all, est_sub1, est_sub2, est_sub3,
+       extraline = list("Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
+
+# When exporting to Latex, you can add meta arguments to 'group' and 'extraline'
+# Two keywords are allowed: 'title' and 'where'
+# 'title' adds a line just before with the content of 'title' in the leftmost cell
+# 'where' governs the location of the line. It can be equal to 'var', 'stats' or 'fixef'.
+# The syntax is: {title:Controls; where:stats}Group name.
+# Note that starting with curly braces is mandatory.
+
+# Examples
+etable(est_c0, est_c1, est_c2, tex = TRUE, group = list("{where:stats}Controls" = "poly"))
+etable(est_all, est_sub1, est_sub2, est_sub3, tex = TRUE,
+       extraline = list("{title:\\\\midrule}Sub-sample" =
+                          c("All", "May-June", "Jul.-Aug.", "Sept.")))
 
 }
 \seealso{
