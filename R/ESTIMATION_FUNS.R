@@ -52,6 +52,14 @@
 #'
 #' The syntax \code{var::fe(ref)} is in fact a shorthand for \code{interact(var, fe, ref)}, you have more information in \code{\link[fixest:i]{interact}} help pages.
 #'
+#' @section On standard-errors:
+#'
+#' Standard-errors can be computed in different ways, you can use the arguments \code{se} and \code{dof} in \code{\link[fixest]{summary.fixest}} to define how to compute them. By default, in the presence of fixed-effects, standard-errors are automatically clustered.
+#'
+#' The following vignette: \url{https://cran.r-project.org/web/packages/fixest/vignettes/standard_errors.html} describes in details how the standard-errors are computed in \code{fixest} and how you can replicate standard-errors from other software.
+#'
+#' You can use the functions \code{\link[fixest]{setFixest_se}} and \code{\link[fixest:dof]{setFixest_dof}} to permanently set the way the standard-errors are computed.
+#'
 #'
 #' @return
 #' A \code{fixest} object.
@@ -86,6 +94,8 @@
 #' \item{sumFE}{The sum of the fixed-effects coefficients for each observation.}
 #' \item{offset}{[where relevant] The offset formula.}
 #' \item{weights}{[where relevant] The weights formula.}
+#' \item{y_demeaned}{Only when \code{demeaned = TRUE}: the centered dependent variable.}
+#' \item{X_demeaned}{Only when \code{demeaned = TRUE}: the centered explanatory variable.}
 #'
 #'
 #' @seealso
@@ -574,6 +584,7 @@ check_conv = function(y, X, fixef_id_vector, slope_flag, slope_vars, weights){
 #' @inheritSection feols Varying slopes
 #' @inheritSection feols Lagging variables
 #' @inheritSection feols Interactions
+#' @inheritSection feols On standard-errors
 #'
 #' @param family Family to be used for the estimation. Defaults to \code{poisson()}. See \code{\link[stats]{family}} for details of family functions.
 #' @param start Starting values for the coefficients. Can be: i) a numeric of length 1 (e.g. \code{start = 0}), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients). Default is missing.
@@ -1253,6 +1264,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
 #' @inheritSection feols Combining the fixed-effects
 #' @inheritSection feols Lagging variables
 #' @inheritSection feols Interactions
+#' @inheritSection feols On standard-errors
 #'
 #' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, you can 1) either insert them in this formula using a pipe (e.g. \code{fml = z~x+y|fixef_1+fixef_2}), or 2) either use the argument \code{fixef}.
 #' @param start Starting values for the coefficients. Can be: i) a numeric of length 1 (e.g. \code{start = 0}, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).
@@ -1415,6 +1427,7 @@ fepois = function(fml, data, offset, weights, panel.id, start = NULL, etastart =
 #' @inheritParams panel
 #' @inheritSection feols Lagging variables
 #' @inheritSection feols Interactions
+#' @inheritSection feols On standard-errors
 #'
 #' @param fml A formula. This formula gives the linear formula to be estimated (it is similar to a \code{lm} formula), for example: \code{fml = z~x+y}. To include fixed-effects variables, you can 1) either insert them in this formula using a pipe (e.g. \code{fml = z~x+y|fixef_1+fixef_2}), or 2) either use the argument \code{fixef}. To include a non-linear in parameters element, you must use the argment \code{NL.fml}.
 #' @param start Starting values for the coefficients in the linear part (for the non-linear part, use NL.start). Can be: i) a numeric of length 1 (e.g. \code{start = 0}, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).

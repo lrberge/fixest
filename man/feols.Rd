@@ -89,6 +89,8 @@ A \code{fixest} object.
 \item{sumFE}{The sum of the fixed-effects coefficients for each observation.}
 \item{offset}{[where relevant] The offset formula.}
 \item{weights}{[where relevant] The weights formula.}
+\item{y_demeaned}{Only when \code{demeaned = TRUE}: the centered dependent variable.}
+\item{X_demeaned}{Only when \code{demeaned = TRUE}: the centered explanatory variable.}
 }
 \description{
 Estimates OLS with any number of fixed-effects.
@@ -134,6 +136,16 @@ It is important to note that *if you do not care about the standard-errors of th
 Introducing interactions with this syntax leads to a different display of the interacted values in \code{\link[fixest]{etable}} and offers a special representation of the interacted coefficients in the function \code{\link[fixest]{coefplot}}. See examples.
 
 The syntax \code{var::fe(ref)} is in fact a shorthand for \code{interact(var, fe, ref)}, you have more information in \code{\link[fixest:i]{interact}} help pages.
+}
+
+\section{On standard-errors}{
+
+
+Standard-errors can be computed in different ways, you can use the arguments \code{se} and \code{dof} in \code{\link[fixest]{summary.fixest}} to define how to compute them. By default, in the presence of fixed-effects, standard-errors are automatically clustered.
+
+The following vignette: \url{https://cran.r-project.org/web/packages/fixest/vignettes/standard_errors.html} describes in details how the standard-errors are computed in \code{fixest} and how you can replicate standard-errors from other software.
+
+You can use the functions \code{\link[fixest]{setFixest_se}} and \code{\link[fixest:dof]{setFixest_dof}} to permanently set the way the standard-errors are computed.
 }
 
 \examples{
