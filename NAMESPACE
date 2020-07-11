@@ -69,6 +69,7 @@ S3method(fixef, fixest)
 
 # sandwich method
 S3method(estfun, fixest)
+S3method(bread, fixest)
 
 #
 # IMPORT
@@ -81,8 +82,8 @@ importFrom(numDeriv, hessian, jacobian, genD)
 # needs re-export :-(, not the best solution but...
 importFrom(nlme, fixef)
 export(fixef)
-importFrom(sandwich, estfun)
-export(estfun)
+importFrom(sandwich, estfun, bread)
+export(estfun, bread)
 
 importFrom(stats, cor, dnorm, lm, nlminb, optim,
 			  pnorm, qnorm, as.formula, var, sd, formula,

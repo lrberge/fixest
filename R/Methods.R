@@ -203,22 +203,41 @@ estfun.fixest = function(x, ...){
 
 #' Functions exported from \pkg{sandwich} to implement \pkg{fixest} methods
 #'
-#' The package \pkg{fixest} does not use \code{estfun} from \pkg{sandwich}, but this method has been implemented to allow users to leverage the variances from \pkg{sandwich}.
+#' The package \pkg{fixest} does not use \code{estfun} or \code{bread} from \pkg{sandwich}, but these methods have been implemented to allow users to leverage the variances from \pkg{sandwich}.
 #'
 #' \itemize{
-#' \item Here is the help from package \pkg{sandwich}: \code{\link[sandwich:estfun]{estfun}}. The help from package \pkg{fixest} is here: \code{\link[fixest]{estfun.fixest}}.
+#' \item Here is the help from package \pkg{sandwich}: \code{\link[sandwich:estfun]{estfun}} and \code{\link[sandwich:bread]{bread}}. The help from package \pkg{fixest} is here: \code{\link[fixest]{estfun.fixest}} and \code{\link[fixest]{bread.fixest}}.
 #' }
 #'
 #'
-#' @name estfun_reexported
+#' @name sandwich_reexported
 #' @keywords internal
 NULL
 
-#' @rdname estfun_reexported
+#' @rdname sandwich_reexported
 #' @name estfun
 NULL
 
+#' @rdname sandwich_reexported
+#' @name bread
+NULL
 
+
+#' Extracts the bread matrix from fixest objects
+#'
+#' Extracts the bread matrix from fixest objects to be used to compute sanwich variance-covariance matrices.
+#'
+#' @param x A \code{fixest} object, obtained for instance from \code{\link[fixest]{feols}}.
+#' @param ... Not currently used.
+#'
+#' @return
+#' Returns a matrix of the same dimension as the number of variables used in the estimation.
+#'
+#' @examples
+#'
+#' est = feols(Petal.Length ~ Petal.Width + Sepal.Width, iris)
+#' bread(est)
+#'
 bread.fixest = function(x, ...){
     validate_dots()
 
@@ -239,8 +258,6 @@ bread.fixest = function(x, ...){
 
     res
 }
-
-
 
 
 
