@@ -6901,6 +6901,10 @@ getFixest_print.type = function(){
 #' @param cluster.df Either "conventional" (default) or "min". Only relevant when the variance-covariance matrix is two-way clustered (or higher). It governs how the small sample adjustment for the clusters is to be performed. [Sorry for the jargon that follows.] By default the i-th "sandwich" matrix is adjusted with G_i/(G_i-1) with G_i the number of unique clusters. If \code{cluster.df="min"}, a unique adjustment is made, of the form G_min/(G_min-1) with G_min the smallest G_i.
 #' @param t.df Either "conventional" (default) or "min". Only relevant when the variance-covariance matrix is clustered. It governs how the p-values should be computed. By default, the degrees of freedom of the Student t distribution is equal to the number of observations minus the number of estimated variables. If \code{t.df="min"}, then the degrees of freedom of the Student t distribution is equal to the minimum size of the clusters with which the VCOV has been clustered.
 #'
+#' @details
+#'
+#' The following vignette: \url{https://cran.r-project.org/web/packages/fixest/vignettes/standard_errors.html} describes in details how the standard-errors are computed in \code{fixest} and how you can replicate standard-errors from other software.
+#'
 #' @return
 #' It returns a \code{dof.type} object.
 #'
@@ -6908,7 +6912,7 @@ getFixest_print.type = function(){
 #' Laurent Berge
 #'
 #' @seealso
-#' \code{\link[fixest]{summary.fixest}}, \code{\link[fixest]{vcov.fixest}}, \code{\link[fixest]{setFixest_dof}}
+#' \code{\link[fixest]{summary.fixest}}, \code{\link[fixest]{vcov.fixest}}
 #'
 #' @examples
 #'
@@ -6982,6 +6986,15 @@ getFixest_print.type = function(){
 #' # There are two restrictions:
 #' attr(fixef(est), "references")
 #'
+#' #
+#' # To permanently set the default dof:
+#' #
+#'
+#' # eg to set it a la Stata's reghdfe:
+#' setFixest_dof(dof(cluster.df = "min", t.df = "min"))
+#'
+#' # To reset it
+#' setFixest_dof()
 #'
 dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = "conventional", t.df = "conventional", fixef.force_exact = FALSE){
 
@@ -6997,33 +7010,9 @@ dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = 
 }
 
 
-#' Sets the default type of DoF correction in summary/vcov.fixest
-#'
-#' Sets or gets the  default type of DOF correction in \code{\link[fixest]{summary.fixest}} and \code{\link[fixest]{vcov.fixest}}
+#' @rdname dof
 #'
 #' @param dof.type An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}.
-#'
-#' @author
-#' Laurent Berge
-#'
-#' @seealso
-#' \code{\link[fixest]{dof}}
-#'
-#' @return
-#' The function \code{getFixest_dof} returns a \code{dof.type} object.
-#'
-#' @examples
-#'
-#' \dontrun{
-#'
-#' # If you never want DoF correction when computing the vcov
-#' # of fixest object:
-#'
-#' setFixest_dof(dof(adj = 0, cluster.adj = FALSE))
-#'
-#' }
-#'
-#'
 setFixest_dof = function(dof.type = dof()){
 
     if(!"dof.type" %in% class(dof.type)){
@@ -7033,7 +7022,7 @@ setFixest_dof = function(dof.type = dof()){
     options("fixest_dof" = dof.type)
 }
 
-#' @rdname setFixest_dof
+#' @rdname dof
 "getFixest_dof"
 
 getFixest_dof = function(){
