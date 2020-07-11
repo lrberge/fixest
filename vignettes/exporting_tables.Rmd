@@ -1,8 +1,11 @@
 ---
 title: "Exporting estimation tables"
 author: "Laurent Berge"
-date: "07/07/2020"
 output: html_document
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Exporting estimation tables}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
@@ -16,6 +19,8 @@ Its main limitations are that *i)* only `fixest` objects can be exported, and *i
 It offers however a fair deal of customization, and since you can seamlessly change its default values, you can completely transform the style of your tables without modifying a single line of code. 
 
 This document does not describe `etable`'s arguments in details (since it's in the help pages). Rather, it illustrates how to change the style of the table, once and for all.
+
+This document applies to `fixest` version 0.6.0 or higher.
 
 ## First example
 
@@ -38,7 +43,7 @@ To export the results to Latex, we use `etable`. We first set the dictionnary re
 ```{r, eval = FALSE}
 # Dictionary => set only once per session
 setFixest_dict(c(Ozone = "Ozone (ppb)", Solar.R = "Solar Radiation (Langleys)",
-                 Wind = "Wind Speed (mph)", Temp = "Temperature (Fahrenheit)"))
+                 Wind = "Wind Speed (mph)", Temp = "Temperature"))
 
 etable(est_noFE, est_1FE, est_2FE, est_poly, est_slopes, cluster = "Day", file = file,
        group = list("Temperature (cubic)" = "poly"), notes = "Estimation of 5 models.")
@@ -56,7 +61,7 @@ The style of the table is rather sober, but no worries most of it can be customi
 
 ## Setting the style, once and for all
 
-The argument `style` defines how the table looks. It allows an in-depth customization of the table. The tables is split into several components, each allowing some customization. The components of a table and some of its associated keywords are described by the following figure:
+The argument `style` defines how the table looks. It allows an in-depth customization of the table. The table is split into several components, each allowing some customization. The components of a table and some of its associated keywords are described by the following figure:
 
 ![](https://github.com/lrberge/fixest/blob/master/vignettes/images/etable/style_explanation.png?raw=true)
 

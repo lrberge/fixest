@@ -1,8 +1,11 @@
 ---
 title: "On standard-errors"
 author: "Laurent Berge"
-date: "01/07/2020"
-output: rmarkdown::html_vignette
+output: rmarkdown::html_document
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{On standard-errors}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
@@ -19,7 +22,7 @@ This document applies to `fixest` version 0.6.0 or higher.
 
 ## How standard-errors are computed in `fixest`
 
-There are two components defining the standard-errors in `fixest`. The main type of standard-error is given by the argument `se`, the small sample correction is defined by the argument `dof`.
+There are two components defining the standard-errors in `fixest`. The main type of standard-error is given by the argument `se`, the small sample correction is defined by the argument `dof` (*degree of freedom*).
 
 ### The argument `se`
 
@@ -86,8 +89,6 @@ This section illustrates how the results from `fixest` compares with the ones fr
 First, let's generate some data:
 
 ```{r}
-library(fixest) ; library(plm) ; library(sandwich)
-
 # Data generation
 set.seed(0)
 N = 20 ; n_id = N/5; n_time = N/n_id
@@ -99,6 +100,8 @@ base = data.frame(y = rnorm(N), x = rnorm(N), id = rep(1:n_id, n_time),
 Here are some comparisons when the estimation doesn't contain fixed-effects.
 
 ```{r}
+library(fixest) ; library(sandwich)
+
 # Estimations
 res_lm    = lm(y ~ x, base)
 res_feols = feols(y ~ x, base)
@@ -114,10 +117,18 @@ rbind(se_lm_white, se_feols_white)
 
 Note that Stata's `reg y x, robust` also leads to similar results (same SEs, same p-values). 
 
-The most important differences arise in the presence of fixed-effects. Let's first compare "standard" and clustered standard-errors between `lm`, `plm` and Stata's `xtreg`.
+The most important differences arise in the presence of fixed-effects. Let's first compare "standard" standard-errors between `lm` and `plm`.
 
+
+```{r, echo = FALSE}
+if(!requireNamespace(plm)){
+    knitr::opts_chunk$set(eval = FALSE)
+}
+```
 
 ```{r}
+library(plm)
+
 # Estimations
 est_lm    = lm(y ~ x + as.factor(id) + as.factor(time), base)
 est_plm   = plm(y ~ x + as.factor(time), base, index = c("id", "time"), model = "within")
@@ -136,7 +147,7 @@ rbind(pvalue(est_lm)["x"], pvalue(est_plm)["x"], pvalue(est_feols, se = "standar
 
 ```
 
-The standard-errors and p-values are identical. Now for clustered SEs:
+The standard-errors and p-values are identical, note that this is also the case for Stata's `xtreg`. Now for clustered SEs:
 
 ```{r}
 # Clustered by id
@@ -145,27 +156,27 @@ se_plm_id   = sqrt(vcovHC(est_plm, cluster = "group")["x", "x"])
 se_stata_id = 0.165385      # vce(cluster id)
 se_feols_id = se(est_feols) # By default: clustered according to id
 
-# 3 different clustered versions (feols and stata are the same)
 rbind(se_lm_id, se_plm_id, se_stata_id, se_feols_id)
 ```
 
-As we can see, there are three different versions of the standard-errors. Let's see how to replicate the `lm` and the `plm`:
+As we can see, there are three different versions of the standard-errors, `feols` being identical to Stata's `xtreg` clustered SEs. The *p-value* from Stata is different from `feols` however. You can replicate it using `t.df`:
 
 ```{r}
-# How to get the lm
+rbind(r = coeftable(est_feols), stata = coeftable(est_feols, dof = dof(t.df = "min")))
+```
+
+Now let's see how to replicate the `lm` and the `plm`:
+
+```{r}
+# How to get the lm version
 se_feols_id_lm = se(est_feols, dof = dof(fixef.K = "full"))
 rbind(se_lm_id, se_feols_id_lm)
 
-# How to get the plm
+# How to get the plm version
 se_feols_id_plm = se(est_feols, dof = dof(fixef.K = "none", cluster.adj = FALSE))
 rbind(se_plm_id, se_feols_id_plm)
 ```
 
-The *p-value* (of the clustered standard-errors) from Stata is different from `feols` however. You can replicate it using `t.df`:
-
-```{r}
-rbind(r = coeftable(est_feols), stata = coeftable(est_feols, dof = dof(t.df="min")))
-```
 
 #### Other multiple fixed-effects methods
 
@@ -173,8 +184,16 @@ Now a specific comparison with `lfe` (version 2.8-5) and Stata's `reghdfe` which
 
 Here are the differences and similarities with `lfe`:
 
+```{r, echo = FALSE}
+if(!requireNamespace(lfe)){
+    knitr::opts_chunk$set(eval = FALSE)
+} else {
+    knitr::opts_chunk$set(eval = TRUE)
+}
+```
+
 ```{r}
-library(Matrix) ; library(lfe, warn.conflicts = FALSE)
+library(lfe, quietly = TRUE)
 
 # lfe: clustered by id
 est_lfe = felm(y ~ x | id + time | 0 | id, base)
@@ -202,12 +221,12 @@ rbind(se_lfe_2way, se_feols_2way)
 rbind(pvalue(est_lfe_2way), pvalue(est_feols, se = "twoway", dof = dof(t.df = "min")))
 ```
 
-For clustered standard-errors, `reghdfe` reports similar statistics as `xtreg` which have already been illustrated before. The standard-errors of `feols` and `reghdfe` differ only for multi-way clustering, where the latter uses `cluster.df="min"`. To obtain the same p-values, you need to use `t.df="min"`. To replicate the results from `reghdfe` you need to provide the argument `dof = dof(cluster.df = "min", t.df = "min")`.
+For clustered standard-errors, `reghdfe` reports similar statistics as `xtreg` which have already been illustrated before. The standard-errors of `feols` and `reghdfe` differ only for multi-way clustering, where the latter uses `cluster.df="min"`. To obtain the same p-values, you need to use `t.df="min"`. Thus to replicate the results from `reghdfe` you need to provide the argument `dof = dof(cluster.df = "min", t.df = "min")`.
 
 
 #### Defining how to compute the standard-errors once and for all
 
-Once you've found the preferred way to compute the standard-errors for your current project, you can permanently set it permanently using the function `setFixest_dof()`.
+Once you've found the preferred way to compute the standard-errors for your current project, you can permanently set it permanently using the functions `setFixest_dof()` and `setFixest_se()`.
 
 For example, if you want to permanently compute them *a la* `reghdfe`, just use:
 
@@ -215,6 +234,13 @@ For example, if you want to permanently compute them *a la* `reghdfe`, just use:
 setFixest_dof(dof(cluster.df = "min", t.df = "min"))
 ```
 
+By default, the standard-errors are clustered in the presence of fixed-effects. You can change this behavior with, e.g.:
+
+```{r}
+setFixest_se(no_FE = "standard", one_FE = "standard", two_FE = "standard")
+```
+
+which changes the way the default standard-errors are computed when the estimation contains no fixed-effects, one fixed-effect, or two or more fixed-effects.
 
 ## References
 
