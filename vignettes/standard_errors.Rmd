@@ -121,8 +121,9 @@ The most important differences arise in the presence of fixed-effects. Let's fir
 
 
 ```{r, echo = FALSE}
-if(!requireNamespace(plm)){
+if(!requireNamespace("plm", quietly = TRUE)){
     knitr::opts_chunk$set(eval = FALSE)
+    cat("Evaluation of the next chunks requires 'plm', which is not present.")
 }
 ```
 
@@ -185,15 +186,16 @@ Now a specific comparison with `lfe` (version 2.8-5) and Stata's `reghdfe` which
 Here are the differences and similarities with `lfe`:
 
 ```{r, echo = FALSE}
-if(!requireNamespace(lfe)){
+if(!requireNamespace("lfe", quietly = TRUE)){
     knitr::opts_chunk$set(eval = FALSE)
+    cat("Evaluation of the next chunk requires 'lfe', which is not present.")
 } else {
     knitr::opts_chunk$set(eval = TRUE)
 }
 ```
 
 ```{r}
-library(lfe, quietly = TRUE)
+library(lfe, quietly = TRUE, warn.conflicts = FALSE)
 
 # lfe: clustered by id
 est_lfe = felm(y ~ x | id + time | 0 | id, base)
