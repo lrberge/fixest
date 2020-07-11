@@ -244,7 +244,9 @@ setFixest_se(no_FE = "standard", one_FE = "standard", two_FE = "standard")
 
 which changes the way the default standard-errors are computed when the estimation contains no fixed-effects, one fixed-effect, or two or more fixed-effects.
 
-## References
+## References & acknowledgments
+
+I wish to thank Karl Dunkle Werner, Grant McDermott and Ivo Welch for raising the issue and for helpful discussions. Any error is of course my own.
 
 MacKinnon, JG, White, H (1985). “[Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties](http://qed.econ.queensu.ca/working_papers/papers/qed_wp_537.pdf)” Journal of Econometrics, 29(3), 305–325.
 
