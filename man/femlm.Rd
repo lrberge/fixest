@@ -53,7 +53,7 @@ fenegbin(
 
 \item{start}{Starting values for the coefficients. Can be: i) a numeric of length 1 (e.g. \code{start = 0}, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).}
 
-\item{fixef}{Character vector. The name/s of a/some variable/s within the dataset to be used as fixed-effects. These variables should contain the identifier of each observation (e.g., think of it as a panel identifier).}
+\item{fixef}{Character vector. The names of variables to be used as fixed-effects. These variables should contain the identifier of each observation (e.g., think of it as a panel identifier). Note that the recommended way to include fixed-effects is to insert them directly in the formula.}
 
 \item{offset}{A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This offset is linearly added to the elements of the main formula 'fml'.}
 
@@ -63,15 +63,15 @@ fenegbin(
 
 \item{fixef.tol}{Precision used to obtain the fixed-effects. Defaults to \code{1e-5}. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument \code{fixef.tol} cannot be lower than \code{10000*.Machine$double.eps}. Note that this parameter is dynamically controlled by the algorithm.}
 
-\item{fixef.iter}{Maximum number of iterations in the step obtaining the fixed-effects (only in use for 2+ fixed-effects). Default is 10000.}
+\item{fixef.iter}{Maximum number of iterations in fixed-effects algorithm (only in use for 2+ fixed-effects). Default is 10000.}
 
-\item{nthreads}{Integer: Number of nthreads to be used (accelerates the algorithm via the use of openMP routines). The default is to use the total number of nthreads available minus two. You can set permanently the number of nthreads used within this package using the function \code{\link[fixest]{setFixest_nthreads}}.}
+\item{nthreads}{Integer: Number of nthreads to be used (accelerates the algorithm via the use of openMP routines). The default is to use the total number of nthreads available minus two. You can set permanently the number of threads used within this package using the function \code{\link[fixest]{setFixest_nthreads}}.}
 
 \item{verbose}{Integer, default is 0. It represents the level of information that should be reported during the optimisation process. If \code{verbose=0}: nothing is reported. If \code{verbose=1}: the value of the coefficients and the likelihood are reported. If \code{verbose=2}: \code{1} + information on the computing time of the null model, the fixed-effects coefficients and the hessian are reported.}
 
-\item{warn}{Logical, default is \code{TRUE}. Whether warnings should be displayed (concerns warnings relating to: convergence state, collinearity issues and observation removal due to only 0/1 outcomes or presence of NA values).}
+\item{warn}{Logical, default is \code{TRUE}. Whether warnings should be displayed (concerns warnings relating to convergence state).}
 
-\item{notes}{Logical. By default, two notes are displayed: when NAs are removed (to show additional information) and when some observations are removed because of only 0 (or 0/1) outcomes in a fixed-effect (in Poisson/Neg. Bin./Logit models). To avoid displaying these messages, you can set \code{notes = FALSE}. You can remove these messages permanently by using \code{setFixest_notes(FALSE)}.}
+\item{notes}{Logical. By default, two notes are displayed: when NAs are removed (to show additional information) and when some observations are removed because of only 0 (or 0/1) outcomes in a fixed-effect setup (in Poisson/Neg. Bin./Logit models). To avoid displaying these messages, you can set \code{notes = FALSE}. You can remove these messages permanently by using \code{setFixest_notes(FALSE)}.}
 
 \item{theta.init}{Positive numeric scalar. The starting value of the dispersion parameter if \code{family="negbin"}. By default, the algorithm uses as a starting value the theta obtained from the model with only the intercept.}
 
@@ -119,27 +119,7 @@ A \code{fixest} object.
 This function estimates maximum likelihood models with any number of fixed-effects.
 }
 \details{
-This function estimates maximum likelihood models where the conditional expectations are as follows:
-
-Gaussian likelihood:
-\deqn{E(Y|X)=X\beta}{E(Y|X) = X*beta}
-Poisson and Negative Binomial likelihoods:
-\deqn{E(Y|X)=\exp(X\beta)}{E(Y|X) = exp(X*beta)}
-where in the Negative Binomial there is the parameter \eqn{\theta}{theta} used to model the variance as \eqn{\mu+\mu^2/\theta}{mu+mu^2/theta}, with \eqn{\mu}{mu} the conditional expectation.
-Logit likelihood:
-\deqn{E(Y|X)=\frac{\exp(X\beta)}{1+\exp(X\beta)}}{E(Y|X) = exp(X*beta) / (1 + exp(X*beta))}
-
-When there are one or more fixed-effects, the conditional expectation can be written as:
-\deqn{E(Y|X) = h(X\beta+\sum_{k}\sum_{m}\gamma_{m}^{k}\times C_{im}^{k}),}
-where \eqn{h(.)} is the function corresponding to the likelihood function as shown before. \eqn{C^k} is the matrix associated to fixed-effect dimension \eqn{k} such that \eqn{C^k_{im}} is equal to 1 if observation \eqn{i} is of category \eqn{m} in the fixed-effect dimension \eqn{k} and 0 otherwise.
-
-When there are non linear in parameters functions, we can schematically split the set of regressors in two:
-\deqn{f(X,\beta)=X^1\beta^1 + g(X^2,\beta^2)}
-with first a linear term and then a non linear part expressed by the function g. That is, we add a non-linear term to the linear terms (which are \eqn{X*beta} and the fixed-effects coefficients). It is always better (more efficient) to put into the argument \code{NL.fml} only the non-linear in parameter terms, and add all linear terms in the \code{fml} argument.
-
-To estimate only a non-linear formula without even the intercept, you must exclude the intercept from the linear formula by using, e.g., \code{fml = z~0}.
-
-The over-dispersion parameter of the Negative Binomial family, theta, is capped at 10,000. If theta reaches this high value, it means that there is no overdispersion.
+Note that the functions \code{\link[fixest]{feglm}} and \code{\link[fixest]{femlm}} provide the same results when using the same families but differ in that the latter is a direct maximum likelihood optimization (so the two can really have different convergence rates).
 }
 \section{Combining the fixed-effects}{
 
@@ -151,7 +131,7 @@ Note that pasting is a costly operation, especially for large data sets. Thus, t
 \section{Lagging variables}{
 
 
-To use leads/lags of variables in the estimation, you can: i) either provide the argument \code{panel.id}, ii) either set you data set as a panel with the function \code{\link[fixest]{panel}}. Doing either of the two will give you acceess to the lagging functions \code{\link[fixest]{l}} and \code{\link[fixest:l]{f}}.
+To use leads/lags of variables in the estimation, you can: i) either provide the argument \code{panel.id}, ii) either set your data set as a panel with the function \code{\link[fixest]{panel}}. Doing either of the two will give you acceess to the lagging functions \code{\link[fixest]{l}} and \code{\link[fixest:l]{f}}.
 
 You can provide several leads/lags at once: e.g. if your formula is equal to \code{f(y) ~ l(x, -1:1)}, it means that the dependent variable is equal to the lead of \code{y}, and you will have as explanatory variables the lead of \code{x1}, \code{x1} and the lag of \code{x1}. See the examples in function \code{\link[fixest]{l}} for more details.
 }
@@ -159,13 +139,13 @@ You can provide several leads/lags at once: e.g. if your formula is equal to \co
 \section{Interactions}{
 
 
-You can interact a variable with a "factor-like" variable by using the syntax \code{var::fe(ref)}, where \code{fe} is the variable to be interacted with and the argument \code{ref} is a value (or several) of \code{fe} taken as a reference.
+You can interact a numeric variable with a "factor-like" variable by using \code{interact(var, fe, ref)}, where \code{fe} is the variable to be interacted with and the argument \code{ref} is a value of \code{fe} taken as a reference (optional). Instead of using the function \code{\link[fixest:i]{interact}}, you can use the alias \code{i(var, fe, ref)} or even the highly specific syntax \code{var::fe(ref)}.
 
 It is important to note that *if you do not care about the standard-errors of the interactions*, then you can add interactions in the fixed-effects part of the formula (using the syntax fe[[var]], as explained in the section \dQuote{Varying slopes}).
 
-Introducing interactions with this syntax leads to a different display of the interacted values in \code{\link[fixest]{etable}} and offers a special representation of the interacted coefficients in the function \code{\link[fixest]{coefplot}}. See examples.
+Using this specific way to create interactions leads to a different display of the interacted values in \code{\link[fixest]{etable}} and offers a special representation of the interacted coefficients in the function \code{\link[fixest]{coefplot}}. See examples.
 
-The syntax \code{var::fe(ref)} is in fact a shorthand for \code{interact(var, fe, ref)}, you have more information in \code{\link[fixest:i]{interact}} help pages.
+The function \code{\link[fixest:i]{interact}} has in fact more arguments, please see details in its associated help page.
 }
 
 \section{On standard-errors}{
@@ -173,7 +153,7 @@ The syntax \code{var::fe(ref)} is in fact a shorthand for \code{interact(var, fe
 
 Standard-errors can be computed in different ways, you can use the arguments \code{se} and \code{dof} in \code{\link[fixest]{summary.fixest}} to define how to compute them. By default, in the presence of fixed-effects, standard-errors are automatically clustered.
 
-The following vignette: \url{https://cran.r-project.org/web/packages/fixest/vignettes/standard_errors.html} describes in details how the standard-errors are computed in \code{fixest} and how you can replicate standard-errors from other software.
+The following vignette: \href{https://cran.r-project.org/package=fixest/vignettes/standard_errors.html}{On standard-errors} describes in details how the standard-errors are computed in \code{fixest} and how you can replicate standard-errors from other software.
 
 You can use the functions \code{\link[fixest]{setFixest_se}} and \code{\link[fixest:dof]{setFixest_dof}} to permanently set the way the standard-errors are computed.
 }

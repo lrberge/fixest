@@ -19,6 +19,10 @@ interact
 \item{fe}{A vector (of any type). Must be of the same length as \code{var}.}
 
 \item{ref}{A single value that belongs to the interacted variable (\code{fe}). Can be missing.}
+
+\item{drop}{A vector of values that belongs to the interacted variable (\code{fe}). If provided, all values from \code{fe} that match \code{drop} will be removed.}
+
+\item{keep}{A vector of values that belongs to the interacted variable (\code{fe}). If provided, only the values from \code{fe} that match \code{keep} will be kept.}
 }
 \value{
 It returns a matrix with number of rows the length of \code{var}. The number of columns is equal to the number of cases contained in \code{fe} minus the reference.

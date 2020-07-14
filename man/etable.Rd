@@ -220,7 +220,7 @@ The function \code{esttex} is equivalent to the function \code{etable} with argu
 
 The function \code{esttable} is equivalent to the function \code{etable} with argument \code{tex = FALSE}.
 
-You can permanently change the way your table looks in Latex by using \code{setFixest_etable}. The following vignette gives and example as well as illustrates how to use the argument \code{style}: \url{https://cran.r-project.org/web/packages/fixest/vignettes/exporting_tables.html}.
+You can permanently change the way your table looks in Latex by using \code{setFixest_etable}. The following vignette gives and example as well as illustrates how to use the argument \code{style}: \href{https://cran.r-project.org/package=fixest/vignettes/exporting_tables.html}{Exporting estimation tables}.
 }
 \section{Functions}{
 \itemize{

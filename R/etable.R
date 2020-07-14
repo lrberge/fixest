@@ -50,7 +50,7 @@
 #'
 #' The function \code{esttable} is equivalent to the function \code{etable} with argument \code{tex = FALSE}.
 #'
-#' You can permanently change the way your table looks in Latex by using \code{setFixest_etable}. The following vignette gives and example as well as illustrates how to use the argument \code{style}: \url{https://cran.r-project.org/web/packages/fixest/vignettes/exporting_tables.html}.
+#' You can permanently change the way your table looks in Latex by using \code{setFixest_etable}. The following vignette gives and example as well as illustrates how to use the argument \code{style}: \href{https://cran.r-project.org/package=fixest/vignettes/exporting_tables.html}{Exporting estimation tables}.
 #'
 #' @section Arguments keep, drop and order:
 #' The arguments \code{keep}, \code{drop} and \code{order} use regular expressions. If you are not aware of regular expressions, I urge you to learn it, since it is an extremely powerful way to manipulate character strings (and it exists across most programming languages).

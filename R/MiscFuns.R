@@ -2433,7 +2433,8 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' @param var A vector.
 #' @param fe A vector (of any type). Must be of the same length as \code{var}.
 #' @param ref A single value that belongs to the interacted variable (\code{fe}). Can be missing.
-#'
+#' @param drop A vector of values that belongs to the interacted variable (\code{fe}). If provided, all values from \code{fe} that match \code{drop} will be removed.
+#' @param keep A vector of values that belongs to the interacted variable (\code{fe}). If provided, only the values from \code{fe} that match \code{keep} will be kept.
 #' @return
 #' It returns a matrix with number of rows the length of \code{var}. The number of columns is equal to the number of cases contained in \code{fe} minus the reference.
 #'
@@ -6903,7 +6904,7 @@ getFixest_print.type = function(){
 #'
 #' @details
 #'
-#' The following vignette: \url{https://cran.r-project.org/web/packages/fixest/vignettes/standard_errors.html} describes in details how the standard-errors are computed in \code{fixest} and how you can replicate standard-errors from other software.
+#' The following vignette: \href{https://cran.r-project.org/package=fixest/vignettes/standard_errors.html}{On standard-errors}, describes in details how the standard-errors are computed in \code{fixest} and how you can replicate standard-errors from other software.
 #'
 #' @return
 #' It returns a \code{dof.type} object.

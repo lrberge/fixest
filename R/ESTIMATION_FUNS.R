@@ -16,6 +16,7 @@
 #' @param weights A formula or a numeric vector. Each observation can be weighted, the weights must be greater than 0. If equal to a formula, it should be of one-sided: for example \code{~ var_weight}.
 #' @param verbose Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algoritmh (the first number is the left-hand-side, the other numbers are the right-hand-side variables).
 #' @param demeaned Logical, default is \code{FALSE}. Only used in the presence of fixed-effects: should the centered variables be returned? If \code{TRUE},  it creates the items \code{y_demeaned} and \code{X_demeaned}.
+#' @param notes Logical. By default, two notes are displayed: when NAs are removed (to show additional information) and when some observations are removed because of collinearity. To avoid displaying these messages, you can set \code{notes = FALSE}. You can remove these messages permanently by using \code{setFixest_notes(FALSE)}.
 #'
 #' @details
 #' The method used to demean each variable along the fixed-effects is based on Berge (2018), since this is the same problem to solve as for the Gaussian case in a ML setup.
@@ -38,25 +39,25 @@
 #'
 #' @section Lagging variables:
 #'
-#' To use leads/lags of variables in the estimation, you can: i) either provide the argument \code{panel.id}, ii) either set you data set as a panel with the function \code{\link[fixest]{panel}}. Doing either of the two will give you acceess to the lagging functions \code{\link[fixest]{l}} and \code{\link[fixest:l]{f}}.
+#' To use leads/lags of variables in the estimation, you can: i) either provide the argument \code{panel.id}, ii) either set your data set as a panel with the function \code{\link[fixest]{panel}}. Doing either of the two will give you acceess to the lagging functions \code{\link[fixest]{l}} and \code{\link[fixest:l]{f}}.
 #'
 #' You can provide several leads/lags at once: e.g. if your formula is equal to \code{f(y) ~ l(x, -1:1)}, it means that the dependent variable is equal to the lead of \code{y}, and you will have as explanatory variables the lead of \code{x1}, \code{x1} and the lag of \code{x1}. See the examples in function \code{\link[fixest]{l}} for more details.
 #'
 #' @section Interactions:
 #'
-#' You can interact a variable with a "factor-like" variable by using the syntax \code{var::fe(ref)}, where \code{fe} is the variable to be interacted with and the argument \code{ref} is a value (or several) of \code{fe} taken as a reference.
+#' You can interact a numeric variable with a "factor-like" variable by using \code{interact(var, fe, ref)}, where \code{fe} is the variable to be interacted with and the argument \code{ref} is a value of \code{fe} taken as a reference (optional). Instead of using the function \code{\link[fixest:i]{interact}}, you can use the alias \code{i(var, fe, ref)} or even the highly specific syntax \code{var::fe(ref)}.
 #'
 #' It is important to note that *if you do not care about the standard-errors of the interactions*, then you can add interactions in the fixed-effects part of the formula (using the syntax fe[[var]], as explained in the section \dQuote{Varying slopes}).
 #'
-#' Introducing interactions with this syntax leads to a different display of the interacted values in \code{\link[fixest]{etable}} and offers a special representation of the interacted coefficients in the function \code{\link[fixest]{coefplot}}. See examples.
+#' Using this specific way to create interactions leads to a different display of the interacted values in \code{\link[fixest]{etable}} and offers a special representation of the interacted coefficients in the function \code{\link[fixest]{coefplot}}. See examples.
 #'
-#' The syntax \code{var::fe(ref)} is in fact a shorthand for \code{interact(var, fe, ref)}, you have more information in \code{\link[fixest:i]{interact}} help pages.
+#' The function \code{\link[fixest:i]{interact}} has in fact more arguments, please see details in its associated help page.
 #'
 #' @section On standard-errors:
 #'
 #' Standard-errors can be computed in different ways, you can use the arguments \code{se} and \code{dof} in \code{\link[fixest]{summary.fixest}} to define how to compute them. By default, in the presence of fixed-effects, standard-errors are automatically clustered.
 #'
-#' The following vignette: \url{https://cran.r-project.org/web/packages/fixest/vignettes/standard_errors.html} describes in details how the standard-errors are computed in \code{fixest} and how you can replicate standard-errors from other software.
+#' The following vignette: \href{https://cran.r-project.org/package=fixest/vignettes/standard_errors.html}{On standard-errors} describes in details how the standard-errors are computed in \code{fixest} and how you can replicate standard-errors from other software.
 #'
 #' You can use the functions \code{\link[fixest]{setFixest_se}} and \code{\link[fixest:dof]{setFixest_dof}} to permanently set the way the standard-errors are computed.
 #'
@@ -94,6 +95,8 @@
 #' \item{sumFE}{The sum of the fixed-effects coefficients for each observation.}
 #' \item{offset}{[where relevant] The offset formula.}
 #' \item{weights}{[where relevant] The weights formula.}
+#' \item{collin.var}{[where relevant] Vector containing the variables removed because of collinearity.}
+#' \item{collin.coef}{[where relevant] Vector of coefficients, where the values of the variables removed because of collinearity are NA.}
 #' \item{y_demeaned}{Only when \code{demeaned = TRUE}: the centered dependent variable.}
 #' \item{X_demeaned}{Only when \code{demeaned = TRUE}: the centered explanatory variable.}
 #'
@@ -306,7 +309,7 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 
 	    est = ols_fit(y_demean, X_demean, weights, correct_0w, nthreads)
 
-	    # Corner case: all variables not relevant
+	    # Corner case: not any relevant variable
 	    if(!is.null(est$all_removed)){
 	        all_vars = colnames(X)
 
@@ -423,15 +426,6 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 			res$sigma2 = cpp_ssq(res$residuals) / (length(y) - df_k)
 		}
 
-		# if(est$multicol == TRUE){
-		# 	if(warn){
-		# 	    warning("Presence of collinearity, covariance not defined. Use function collinearity() to pinpoint the problems.")
-		# 	    options("fixest_last_warning" = proc.time())
-		# 	}
-		# 	res$cov.unscaled = est$xwx_inv * NA
-		# } else {
-		# 	res$cov.unscaled = est$xwx_inv * res$sigma2
-		# }
 		res$cov.unscaled = est$xwx_inv * res$sigma2
 
 		rownames(res$cov.unscaled) = colnames(res$cov.unscaled) = names(coef)
@@ -590,12 +584,14 @@ check_conv = function(y, X, fixef_id_vector, slope_flag, slope_vars, weights){
 #' @param start Starting values for the coefficients. Can be: i) a numeric of length 1 (e.g. \code{start = 0}), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients). Default is missing.
 #' @param etastart Numeric vector of the same length as the data. Starting values for the linear predictor. Default is missing.
 #' @param mustart Numeric vector of the same length as the data. Starting values for the vector of means. Default is missing.
+#' @param fixef.tol Precision used to obtain the fixed-effects. Defaults to \code{1e-6}. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations.
 #' @param glm.iter Number of iterations of the glm algorithm. Default is 25.
 #' @param glm.tol Tolerance level for the glm algorithm. Default is \code{1e-8}.
 #' @param y Numeric vector of the dependent variable.
 #' @param X Numeric matrix of the regressors.
 #' @param fixef_mat Matrix/data.frame of the fixed-effects.
 #' @param verbose Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algoritmh (the first number is the left-hand-side, the other numbers are the right-hand-side variables). It can also detail the step-halving algorithm.
+#' @param notes Logical. By default, three notes are displayed: when NAs are removed, when some fixed-effects are removed because of only 0 (or 0/1) outcomes, or when a variable is dropped because of collinearity. To avoid displaying these messages, you can set \code{notes = FALSE}. You can remove these messages permanently by using \code{setFixest_notes(FALSE)}.
 #'
 #' @details
 #' The core of the GLM are the weighted OLS estimations. These estimations are performed with \code{\link[fixest]{feols}}. The method used to demean each variable along the fixed-effects is based on Berge (2018), since this is the same problem to solve as for the Gaussian case in a ML setup.
@@ -637,6 +633,8 @@ check_conv = function(y, X, fixef_id_vector, slope_flag, slope_vars, weights){
 #' \item{sumFE}{The sum of the fixed-effects coefficients for each observation.}
 #' \item{offset}{[where relevant] The offset formula.}
 #' \item{weights}{[where relevant] The weights formula.}
+#' \item{collin.var}{[where relevant] Vector containing the variables removed because of collinearity.}
+#' \item{collin.coef}{[where relevant] Vector of coefficients, where the values of the variables removed because of collinearity are NA.}
 #'
 #'
 #'
@@ -1269,6 +1267,9 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
 #' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, you can 1) either insert them in this formula using a pipe (e.g. \code{fml = z~x+y|fixef_1+fixef_2}), or 2) either use the argument \code{fixef}.
 #' @param start Starting values for the coefficients. Can be: i) a numeric of length 1 (e.g. \code{start = 0}, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).
 #'
+#' @details
+#' Note that the functions \code{\link[fixest]{feglm}} and \code{\link[fixest]{femlm}} provide the same results when using the same families but differ in that the latter is a direct maximum likelihood optimization (so the two can really have different convergence rates).
+#'
 #' @return
 #' A \code{fixest} object.
 #' \item{nobs}{The number of observations.}
@@ -1434,7 +1435,7 @@ fepois = function(fml, data, offset, weights, panel.id, start = NULL, etastart =
 #' @param NL.fml A formula. If provided, this formula represents the non-linear part of the right hand side (RHS). Note that contrary to the \code{fml} argument, the coefficients must explicitly appear in this formula. For instance, it can be \code{~a*log(b*x + c*x^3)}, where \code{a}, \code{b}, and \code{c} are the coefficients to be estimated. Note that only the RHS of the formula is to be provided, and NOT the left hand side.
 #' @param data A data.frame containing the necessary variables to run the model. The variables of the non-linear right hand side of the formula are identified with this \code{data.frame} names. Can also be a matrix.
 #' @param family Character scalar. It should provide the family. The possible values are "poisson" (Poisson model with log-link, the default), "negbin" (Negative Binomial model with log-link), "logit" (LOGIT model with log-link), "gaussian" (Gaussian model).
-#' @param fixef Character vector. The name/s of a/some variable/s within the dataset to be used as fixed-effects. These variables should contain the identifier of each observation (e.g., think of it as a panel identifier).
+#' @param fixef Character vector. The names of variables to be used as fixed-effects. These variables should contain the identifier of each observation (e.g., think of it as a panel identifier). Note that the recommended way to include fixed-effects is to insert them directly in the formula.
 #' @param na_inf.rm Logical, default is \code{TRUE}. If the variables necessary for the estimation contain NA/Infs and \code{na_inf.rm = TRUE}, then all observations containing NA are removed prior to estimation and a note is displayed detailing the number of observations removed. Otherwise, an error is raised.
 #' @param NL.start (For NL models only) A list of starting values for the non-linear parameters. ALL the parameters are to be named and given a staring value. Example: \code{NL.start=list(a=1,b=5,c=0)}. Though, there is an exception: if all parameters are to be given the same starting value, you can use the argument \code{NL.start.init}.
 #' @param lower (For NL models only) A list. The lower bound for each of the non-linear parameters that requires one. Example: \code{lower=list(b=0,c=0)}. Beware, if the estimated parameter is at his lower bound, then asymptotic theory cannot be applied and the standard-error of the parameter cannot be estimated because the gradient will not be null. In other words, when at its upper/lower bound, the parameter is considered as 'fixed'.
@@ -1445,15 +1446,15 @@ fepois = function(fml, data, offset, weights, panel.id, start = NULL, etastart =
 #' @param useHessian Logical. Should the Hessian be computed in the optimization stage? Default is \code{TRUE}.
 #' @param hessian.args List of arguments to be passed to function \code{\link[numDeriv]{genD}}. Defaults is missing. Only used with the presence of \code{NL.fml}.
 #' @param opt.control List of elements to be passed to the optimization method \code{\link[stats]{nlminb}}. See the help page of \code{\link[stats]{nlminb}} for more information.
-#' @param nthreads Integer: Number of nthreads to be used (accelerates the algorithm via the use of openMP routines). The default is to use the total number of nthreads available minus two. You can set permanently the number of nthreads used within this package using the function \code{\link[fixest]{setFixest_nthreads}}.
+#' @param nthreads Integer: Number of nthreads to be used (accelerates the algorithm via the use of openMP routines). The default is to use the total number of nthreads available minus two. You can set permanently the number of threads used within this package using the function \code{\link[fixest]{setFixest_nthreads}}.
 #' @param verbose Integer, default is 0. It represents the level of information that should be reported during the optimisation process. If \code{verbose=0}: nothing is reported. If \code{verbose=1}: the value of the coefficients and the likelihood are reported. If \code{verbose=2}: \code{1} + information on the computing time of the null model, the fixed-effects coefficients and the hessian are reported.
 #' @param theta.init Positive numeric scalar. The starting value of the dispersion parameter if \code{family="negbin"}. By default, the algorithm uses as a starting value the theta obtained from the model with only the intercept.
 #' @param fixef.tol Precision used to obtain the fixed-effects. Defaults to \code{1e-5}. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument \code{fixef.tol} cannot be lower than \code{10000*.Machine$double.eps}. Note that this parameter is dynamically controlled by the algorithm.
-#' @param fixef.iter Maximum number of iterations in the step obtaining the fixed-effects (only in use for 2+ fixed-effects). Default is 10000.
-#' @param deriv.iter Maximum number of iterations in the step obtaining the derivative of the fixed-effects (only in use for 2+ fixed-effects). Default is 1000.
+#' @param fixef.iter Maximum number of iterations in fixed-effects algorithm (only in use for 2+ fixed-effects). Default is 10000.
+#' @param deriv.iter Maximum number of iterations in the algorithm to obtain the derivative of the fixed-effects (only in use for 2+ fixed-effects). Default is 1000.
 #' @param deriv.tol Precision used to obtain the fixed-effects derivatives. Defaults to \code{1e-4}. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument \code{deriv.tol} cannot be lower than \code{10000*.Machine$double.eps}.
-#' @param warn Logical, default is \code{TRUE}. Whether warnings should be displayed (concerns warnings relating to: convergence state, collinearity issues and observation removal due to only 0/1 outcomes or presence of NA values).
-#' @param notes Logical. By default, two notes are displayed: when NAs are removed (to show additional information) and when some observations are removed because of only 0 (or 0/1) outcomes in a fixed-effect (in Poisson/Neg. Bin./Logit models). To avoid displaying these messages, you can set \code{notes = FALSE}. You can remove these messages permanently by using \code{setFixest_notes(FALSE)}.
+#' @param warn Logical, default is \code{TRUE}. Whether warnings should be displayed (concerns warnings relating to convergence state).
+#' @param notes Logical. By default, two notes are displayed: when NAs are removed (to show additional information) and when some observations are removed because of only 0 (or 0/1) outcomes in a fixed-effect setup (in Poisson/Neg. Bin./Logit models). To avoid displaying these messages, you can set \code{notes = FALSE}. You can remove these messages permanently by using \code{setFixest_notes(FALSE)}.
 #' @param combine.quick Logical. When you combine different variables to transform them into a single fixed-effects you can do e.g. \code{y ~ x | paste(var1, var2)}. The algorithm provides a shorthand to do the same operation: \code{y ~ x | var1^var2}. Because pasting variables is a costly operation, the internal algorithm may use a numerical trick to hasten the process. The cost of doing so is that you lose the labels. If you are interested in getting the value of the fixed-effects coefficients after the estimation, you should use \code{combine.quick = FALSE}. By default it is equal to \code{FALSE} if the number of observations is lower than 50,000, and to \code{TRUE} otherwise.
 #' @param ... Not currently used.
 #'

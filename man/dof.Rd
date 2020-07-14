@@ -45,7 +45,7 @@ It returns a \code{dof.type} object.
 Provides how the degrees of freedom should be calculated in \code{\link[fixest]{vcov.fixest}}/\code{\link[fixest]{summary.fixest}}.
 }
 \details{
-The following vignette: \url{https://cran.r-project.org/web/packages/fixest/vignettes/standard_errors.html} describes in details how the standard-errors are computed in \code{fixest} and how you can replicate standard-errors from other software.
+The following vignette: \href{https://cran.r-project.org/package=fixest/vignettes/standard_errors.html}{On standard-errors}, describes in details how the standard-errors are computed in \code{fixest} and how you can replicate standard-errors from other software.
 }
 \examples{
 
