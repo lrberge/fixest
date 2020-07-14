@@ -9,24 +9,32 @@
 
 # Some functions are not trivial to test properly though
 
+library(dreamerr) ; library(Formula) ; library(fixest)
+
+test = fixest:::test
+vcovClust = fixest:::vcovClust
+
 ####
 #### Estimations ####
 ####
 
 cat("ESTIMATION\n\n")
 
-
 base = iris
 names(base) = c("y", "x1", "x2", "x3", "species")
-base$fe_2 = sample(5, nrow(base), TRUE)
+base$fe_2 = rep(1:5, 30)
 base$constant = 5
 base$y_int = as.integer(base$y)
 base$w = as.vector(unclass(base$species) - 0.95)
 base$offset = unclass(base$species) - 0.95
-base$y_01 = as.vector(1 * ((scale(base$x1)+rnorm(150)) > 0))
+set.seed(0)
+base$y_01 = 1 * ((scale(base$x1) + rnorm(150)) > 0)
+# what follows to avoid removal of fixed-effects (logit is pain in the neck)
+base$y_01[1:5 + rep(c(0, 50, 100), each = 5)] = 1
+base$y_01[6:10 + rep(c(0, 50, 100), each = 5)] = 0
 
 for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
-    cat("Model: ", sfill(model, 6), sep = "")
+    cat("Model: ", dreamerr::sfill(model, 6), sep = "")
     for(use_weights in c(FALSE, TRUE)){
         my_weight = NULL
         if(use_weights) my_weight = base$w
@@ -39,7 +47,7 @@ for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
 
                 cat(".")
 
-                tol  = ifelse(model == "negbin", 1e-2, 1e-5)
+                tol  = switch(model, "negbin" = 1e-2, "logit" = 3e-5, 1e-5)
 
                 # Setting up the formula to accomodate FEs
                 if(nb_fe == 0){
@@ -415,7 +423,7 @@ base$y_int = as.integer(base$y) + 1
 # OLS + GLM + FENMLM
 
 for(method in c("ols", "feglm", "femlm", "fenegbin")){
-    cat("Method: ", sfill(method, 8))
+    cat("Method: ", dreamerr::sfill(method, 8))
     for(do_weight in c(FALSE, TRUE)){
         cat(".")
 
@@ -498,8 +506,6 @@ base$constant = 5
 base$y_int = as.integer(base$y)
 base$w = as.vector(unclass(base$species) - 0.95)
 
-setFixest_notes(FALSE)
-
 for(useWeights in c(FALSE, TRUE)){
     for(model in c("ols", "pois")){
         for(use_fe in c(FALSE, TRUE)){
@@ -580,7 +586,7 @@ X_demean = demean(X_NA, fe_NA)
 
 cat("HATVALUES\n\n")
 
-
+set.seed(0)
 x = sin(1:10)
 y = rnorm(10)
 y_int = rpois(10, 2)
