@@ -15,8 +15,8 @@ output:
     toc_depth: '3'
 vignette: > 
   %\VignetteIndexEntry{fixest introduction} 
+  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-  %\VignetteEngine{knitr::rmarkdown} 
 ---
 
 ```{r setup, include = FALSE}

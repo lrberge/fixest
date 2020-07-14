@@ -1,15 +1,18 @@
 ---
 title: "On standard-errors"
 author: "Laurent Berge"
+date: "`r Sys.Date()`"
 output: rmarkdown::html_document
 vignette: >
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteIndexEntry{On standard-errors}
+  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+knitr::opts_chunk$set(echo = TRUE, 
+                      eval = TRUE,
+                      comment = "#>")
 Sys.setenv(lang = "en")
 ```
 
@@ -36,6 +39,7 @@ The type of small sample correction applied is defined by the argument `dof` whi
 
 
 Say you have $\tilde{V}$ the variance-covariance matrix (henceforth VCOV) before any small sample adjustment. Argument `adj` can be equal to `TRUE` or `FALSE`, leading to the following adjustment:
+
 
 ![](https://github.com/lrberge/fixest/blob/master/vignettes/images/SE/adj.png?raw=true)
 
