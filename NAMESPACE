@@ -87,7 +87,7 @@ export(estfun, bread)
 
 importFrom(stats, cor, dnorm, lm, nlminb, optim,
 			  pnorm, qnorm, as.formula, var, sd, formula,
-			  na.omit, model.frame, "na.pass", poisson, pt)
+			  na.omit, model.frame, "na.pass", poisson, pt, hatvalues)
 
 # stats methods
 importFrom(stats, model.matrix, sigma, deviance, weights, terms,
