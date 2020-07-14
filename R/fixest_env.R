@@ -268,7 +268,10 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
         #
         # The data
+
         if(missing(data)) stop("You must provide the argument 'data' (currently it is missing).")
+        check_value(data, "matrix | data.frame", .arg_name = "data")
+
         if(is.matrix(data)){
             if(is.null(colnames(data))){
                 stop("If argument data is to be a matrix, its columns must be named.")
@@ -290,9 +293,11 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         #
         # The fml => controls + setup
         if(missing(fml)) stop("You must provide the argument 'fml' (currently it is missing).")
+        check_value(fml, "ts formula", .arg_name = "fml")
+
         if(!"formula" %in% class(fml)) stop("The argument 'fml' must be a formula.")
         fml = formula(fml) # we regularize the formula to check it
-        if(length(fml) != 3) stop("The formula must be two sided: e.g. y~x1+x2, or y~x1+x2|fe1+fe2.")
+        # if(length(fml) != 3) stop("The formula must be two sided: e.g. y~x1+x2, or y~x1+x2|fe1+fe2.")
 
         # We apply expand for macros => we return fml_no_xpd
         if(length(getFixest_fml()) > 0){
@@ -1114,6 +1119,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
             } else {
                 # If na_inf.rm => we keep track of the NAs
+                ANY_NA = TRUE
                 anyNA_sample = TRUE
                 isNA_sample = isNA_sample | isNA_fixef
                 msgNA_fixef = paste0(", Fixed-effects: ", numberFormatNormal(sum(isNA_fixef)))
