@@ -132,7 +132,7 @@ if(!requireNamespace("plm", quietly = TRUE)){
 ```
 
 ```{r}
-library(plm)
+library(plm, warn.conflicts = FALSE)
 
 # Estimations
 est_lm    = lm(y ~ x + as.factor(id) + as.factor(time), base)
@@ -232,7 +232,7 @@ For clustered standard-errors, `reghdfe` reports similar statistics as `xtreg` w
 
 #### Defining how to compute the standard-errors once and for all
 
-Once you've found the preferred way to compute the standard-errors for your current project, you can permanently set it permanently using the functions `setFixest_dof()` and `setFixest_se()`.
+Once you've found the preferred way to compute the standard-errors for your current project, you can set it permanently using the functions `setFixest_dof()` and `setFixest_se()`.
 
 For example, if you want to permanently compute them *a la* `reghdfe`, just use:
 

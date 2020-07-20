@@ -147,13 +147,13 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 	    fixef_vars = terms_full$fixef_vars
 
 	    if(length(fixef_vars) > 0){
-	        cat("Fixed-effects: ", paste0(fixef_vars, ": ", x$fixef_sizes[fixef_vars], collapse=",  "), "\n", sep="")
+	        cat("Fixed-effects: ", paste0(fixef_vars, ": ", addCommas(x$fixef_sizes[fixef_vars]), collapse=",  "), "\n", sep="")
 	    }
 
-	    cat("Varying slopes: ", paste0(terms_full$slope_vars, " (", terms_full$slope_fe, ": ", x$fixef_sizes[terms_full$slope_fe], ")", collapse=",  "), "\n", sep="")
+	    cat("Varying slopes: ", paste0(terms_full$slope_vars, " (", terms_full$slope_fe, ": ", addCommas(x$fixef_sizes[terms_full$slope_fe]), ")", collapse=",  "), "\n", sep="")
 
 	} else {
-	    if(!is.null(x$fixef_sizes)) cat("Fixed-effects: ", paste0(x$fixef_vars, ": ", x$fixef_sizes, collapse=",  "), "\n", sep="")
+	    if(!is.null(x$fixef_sizes)) cat("Fixed-effects: ", paste0(x$fixef_vars, ": ", addCommas(x$fixef_sizes), collapse=",  "), "\n", sep="")
 	}
 
 

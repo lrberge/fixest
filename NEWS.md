@@ -1,7 +1,14 @@
 
 # News for the R Package `fixest`
 
-## Changes in version 0.6.0
+## Changes in version 0.6.1
+
+#### User visible changes
+
+ - Improved display of numbers in `print` method.
+ - Added variables names to `X_demeaned` from `feols`.
+
+## Changes in version 0.6.0 (13-07-2020)
 
 #### Bugs
 

@@ -156,7 +156,7 @@ femlm_hessian <- function(coef, env){
 	# on ajoute la partie manquante
 	if(isNL) hessVar[1:k, 1:k] = hessVar[1:k, 1:k] + H
 
-	if(family=="negbin"){
+	if(family == "negbin"){
 		theta = coef[".theta"]
 		ll_dx_dother = famFuns$ll_dx_dother(y, mu, exp_mu, coef, env)
 

@@ -4,4 +4,5 @@
 ^BENCHMARK$
 ^vignettes/images$
 ^inst/NEWS\.Rd$
+^ONGOING_ISSUES\.md$
 

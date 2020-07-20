@@ -1,35 +1,35 @@
-/**************************************************************************
- * _________________                                                      *
- * || Convergence ||                                                      *
- * -----------------                                                      *
- *                                                                        *
- * Author: Laurent R. Berge                                               *
- *                                                                        *
- * Compute the optimal set of cluster coefficients based on Berge (2018), *
- * in a ML framework.                                                     *
- *                                                                        *
- * The code concerns both the cluster coefficients (i.e. fixed-effects)   *
- * and the coefficients of the derivatives of the cluster coefficients.   *
- *                                                                        *
- * 2-FEs trick:                                                           *
- * For both the Poisson and the Gaussian methods I use a trick to hasten  *
- * computation. Instead of looping on the number of obsertvations, the    *
- * loop is on the number of unique cases. For balanced panels, this is    *
- * not useful, but for strongly unbalanced panels, this makes a big       *
- * difference.                                                            *
- *                                                                        *
- * Logit/Negbin:                                                          *
- * To obtain the cluster coefficients for these two likelihoods, I use    *
- * a Newton-Raphson + dichotomy algorithm. This ensures convergence       *
- * even when the NR algo would go astray (which may be the case in some   *
- * situations).                                                           *
- *                                                                        *
- * Drawback:                                                              *
- * The big drawback of the ML methods is that, as oppose to GLM metohods, *
- * parallel computing cannot be leveraged.                                *
- *                                                                        *
- *                                                                        *
- *************************************************************************/
+/***************************************************************************
+ * _________________                                                       *
+ * || Convergence ||                                                       *
+ * -----------------                                                       *
+ *                                                                         *
+ * Author: Laurent R. Berge                                                *
+ *                                                                         *
+ * Compute the optimal set of cluster coefficients based on Berge (2018),  *
+ * in a ML framework.                                                      *
+ *                                                                         *
+ * The code concerns both the cluster coefficients (i.e. fixed-effects)    *
+ * and the coefficients of the derivatives of the cluster coefficients.    *
+ *                                                                         *
+ * 2-FEs trick:                                                            *
+ * For both the Poisson and the Gaussian methods I use a trick to hasten   *
+ * computation. Instead of looping on the number of obsertvations, the     *
+ * loop is on the number of unique cases. For balanced panels, this is     *
+ * not useful, but for strongly unbalanced panels, this makes a big        *
+ * difference.                                                             *
+ *                                                                         *
+ * Logit/Negbin:                                                           *
+ * To obtain the cluster coefficients for these two likelihoods, I use     *
+ * a Newton-Raphson + dichotomy algorithm. This ensures convergence        *
+ * even when the NR algo would go astray (which may be the case in some    *
+ * situations).                                                            *
+ *                                                                         *
+ * Drawback:                                                               *
+ * The big drawback of the ML methods is that, as opposed to GLM metohods, *
+ * parallel computing cannot be leveraged.                                 *
+ *                                                                         *
+ *                                                                         *
+ **************************************************************************/
 
 #include <Rcpp.h>
 #include <math.h>
@@ -321,8 +321,10 @@ void CCC_negbin(int nthreads, int nb_cluster, double theta, double diffMax_NR,
 			// the stopping criterion
 			if(iter == iterMax){
 				keepGoing = false;
-				Rprintf("[Getting cluster coefficients nber %i] max iterations reached (%i).\n", m, iterMax);
-				Rprintf("Value Sum Deriv (NR) = %f. Difference = %f.\n", value, fabs(x0-x1));
+			    if(omp_get_thread_num() == 0){
+			        Rprintf("[Getting cluster coefficients nber %i] max iterations reached (%i).\n", m, iterMax);
+			        Rprintf("Value Sum Deriv (NR) = %f. Difference = %f.\n", value, fabs(x0-x1));
+			    }
 			}
 
 			// if(fabs(x0-x1) / (0.1 + fabs(x1)) < diffMax_NR){

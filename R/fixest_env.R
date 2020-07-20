@@ -679,7 +679,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         data_NL = data[, nonlinear.varnames, drop = FALSE]
         qui_num = sapply(data_NL, is.numeric)
         if(any(!qui_num)){
-            var_pblm = nonlinear.varnames[qui_num]
+            var_pblm = nonlinear.varnames[!qui_num]
             stop("In NL.fml, the variable", enumerate_items(var_pblm, "s.is"), " not numeric. This is not allowed.")
         }
 
@@ -1005,7 +1005,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
         } else {
             #
-            # ... Reguar ####
+            # ... Regular ####
             #
 
             # Regular way
@@ -2066,6 +2066,9 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     }
 
     assign("start", start, env)
+
+    # fixest tag
+    assign("fixest_env", TRUE, env)
 
     #
     # Res ####
