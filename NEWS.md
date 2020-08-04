@@ -3,6 +3,10 @@
 
 ## Changes in version 0.6.1
 
+#### Bugs
+
+ - Major bug when fixed-effects were combined with `^` and they contained NAs. Could lead R to crash (thanks to @poliquin [#35](https://github.com/lrberge/fixest/issues/35)).
+
 #### User visible changes
 
  - Improved display of numbers in `print` method.

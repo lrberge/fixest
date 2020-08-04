@@ -3556,6 +3556,28 @@ combine_clusters_fast = function(...){
     cluster = list(...)
     Q = length(cluster)
 
+    # The problem is that the clusters can be of ANY type...
+    # So too much of a pain to take care of them in c++
+    # => when I have time I'll do it, but pfff...
+
+    # Not super efficient, but that's life
+    ANY_NA = FALSE
+    if(any(who_NA <- sapply(cluster, anyNA))){
+        ANY_NA = TRUE
+        who_NA = which(who_NA)
+        IS_NA = is.na(cluster[[who_NA[1]]])
+        for(i in who_NA[-1]){
+            IS_NA = IS_NA | is.na(cluster[[i]])
+        }
+
+        if(all(IS_NA)) stop("When combining the fixed-effects with ^: all FEs are NAs. Estimation cannot be done. ")
+
+        # we recreate the clusters
+        for(i in 1:Q){
+            cluster[[i]] = cluster[[i]][!IS_NA]
+        }
+    }
+
     # First we unclass
     for(i in 1:Q){
         cluster[[i]] = quickUnclassFactor(cluster[[i]])
@@ -3576,7 +3598,15 @@ combine_clusters_fast = function(...){
         }
     }
 
-    return(index)
+    if(ANY_NA){
+        # we recreate the return vector with appropriate NAs
+        res = rep(NA_real_, length(IS_NA))
+        res[!IS_NA] = index
+    } else {
+        res = index
+    }
+
+    return(res)
 }
 
 combine_clusters = function(...){
@@ -3586,12 +3616,38 @@ combine_clusters = function(...){
     cluster = list(...)
     Q = length(cluster)
 
+    # See comments in combine_cluster_fast
+    ANY_NA = FALSE
+    if(any(who_NA <- sapply(cluster, anyNA))){
+        ANY_NA = TRUE
+        who_NA = which(who_NA)
+        IS_NA = is.na(cluster[[who_NA[1]]])
+        for(i in who_NA[-1]){
+            IS_NA = IS_NA | is.na(cluster[[i]])
+        }
+
+        if(all(IS_NA)) stop("When combining the fixed-effects with ^: all FEs are NAs. Estimation cannot be done. ")
+
+        # we recreate the clusters
+        for(i in 1:Q){
+            cluster[[i]] = cluster[[i]][!IS_NA]
+        }
+    }
+
     # We just paste
     myDots = cluster
     myDots$sep = "_"
     index = do.call("paste", myDots)
 
-    return(index)
+    if(ANY_NA){
+        # we recreate the return vector with appropriate NAs
+        res = rep(NA_character_, length(IS_NA))
+        res[!IS_NA] = index
+    } else {
+        res = index
+    }
+
+    return(res)
 }
 
 
