@@ -677,37 +677,28 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         }
 
         data_NL = data[, nonlinear.varnames, drop = FALSE]
-        qui_num = sapply(data_NL, is.numeric)
-        if(any(!qui_num)){
-            var_pblm = nonlinear.varnames[!qui_num]
-            stop("In NL.fml, the variable", enumerate_items(var_pblm, "s.is"), " not numeric. This is not allowed.")
-        }
 
-        data_NL = as.matrix(data_NL)
-
-        if(typeof(data_NL) != "double"){
-            data_NL = 1 * data_NL
-        }
-
-        # Control for NAs
+        # Update 08-2020 => We now allow non-numeric variables in the NL part (they can be used as identifiers)
         anyNA_NL = FALSE
-        info = which_na_inf(data_NL, nthreads)
-        if(info$any_na_inf){
+        if(any(quiNA <- sapply(data_NL, anyNA))){
             anyNA_NL = TRUE
+            quiNA = which(quiNA)
+
+            isNA_NL = is.na(data_NL[[quiNA[1]]])
+            for(i in quiNA[-1]){
+                isNA_NL = isNA_NL | is.na(data_NL[[quiNA[i]]])
+            }
+
             if(!na_inf.rm){
-                quiNA = colSums(data_NL[info$is_na_inf, , drop=FALSE]) > 0
                 whoIsNA = nonlinear.varnames[quiNA]
-                msg = msg_na_inf(info$any_na, info$any_inf)
-                obs = which(info$is_na_inf)
+                msg = "NAs"
+                obs = which(isNA_NL)
 
                 stop("The non-linear part (NL.fml) contains ", msg, " (e.g. observation", enumerate_items(obs, "s"), "). Please provide data without ", msg, " (or use na_inf.rm). FYI the variable", enumerate_items(whoIsNA, "s.is"), " concerned.")
 
             } else {
                 # If na_inf.rm => we keep track of the NAs
-                if(info$any_na) ANY_NA = TRUE
-                if(info$any_inf) ANY_INF = TRUE
-
-                isNA_NL = info$is_na_inf
+                ANY_NA = TRUE
                 anyNA_sample = TRUE
                 isNA_sample = isNA_sample | isNA_NL
                 msgNA_NL = paste0(", NL: ", numberFormatNormal(sum(isNA_NL)))
@@ -716,6 +707,47 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         } else {
             msgNA_NL = ", NL: 0"
         }
+
+
+        # qui_num = sapply(data_NL, is.numeric)
+        # if(any(!qui_num)){
+        #     var_pblm = nonlinear.varnames[!qui_num]
+        #     stop("In NL.fml, the variable", enumerate_items(var_pblm, "s.is"), " not numeric. This is not allowed.")
+        # }
+        #
+        # data_NL = as.matrix(data_NL)
+        #
+        # if(typeof(data_NL) != "double"){
+        #     data_NL = 1 * data_NL
+        # }
+        #
+        # # Control for NAs
+        # anyNA_NL = FALSE
+        # info = which_na_inf(data_NL, nthreads)
+        # if(info$any_na_inf){
+        #     anyNA_NL = TRUE
+        #     if(!na_inf.rm){
+        #         quiNA = colSums(data_NL[info$is_na_inf, , drop=FALSE]) > 0
+        #         whoIsNA = nonlinear.varnames[quiNA]
+        #         msg = msg_na_inf(info$any_na, info$any_inf)
+        #         obs = which(info$is_na_inf)
+        #
+        #         stop("The non-linear part (NL.fml) contains ", msg, " (e.g. observation", enumerate_items(obs, "s"), "). Please provide data without ", msg, " (or use na_inf.rm). FYI the variable", enumerate_items(whoIsNA, "s.is"), " concerned.")
+        #
+        #     } else {
+        #         # If na_inf.rm => we keep track of the NAs
+        #         if(info$any_na) ANY_NA = TRUE
+        #         if(info$any_inf) ANY_INF = TRUE
+        #
+        #         isNA_NL = info$is_na_inf
+        #         anyNA_sample = TRUE
+        #         isNA_sample = isNA_sample | isNA_NL
+        #         msgNA_NL = paste0(", NL: ", numberFormatNormal(sum(isNA_NL)))
+        #     }
+        #
+        # } else {
+        #     msgNA_NL = ", NL: 0"
+        # }
 
     } else {
         isNonLinear = FALSE
@@ -1671,11 +1703,22 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     if(isNL){
         if(missing(NL.start.init)){
             if(missing(NL.start)) stop("There must be starting values for NL parameters. Please use argument NL.start (or NL.start.init).")
-            if(typeof(NL.start) != "list") stop("NL.start must be a list.")
-            if(any(!nonlinear.params %in% names(NL.start))) stop(paste("Some NL parameters have no starting values:\n", paste(nonlinear.params[!nonlinear.params %in% names(NL.start)], collapse=", "), ".", sep=""))
+            if(length(NL.start) == 1 && is.numeric(NL.start)){
+                # NL.start is used for NL.start.init
+                if(is.na(NL.start)) stop("Argument 'NL.start' is currently equal to NA. Please provide a valid starting value.")
+                NL.start.init = NL.start
+                NL.start <- list()
+                NL.start[nonlinear.params] <- NL.start.init
 
-            # we restrict NL.start to the nonlinear.params
-            NL.start = NL.start[nonlinear.params]
+            } else if(typeof(NL.start) != "list"){
+                stop("NL.start must be a list.")
+            } else if(any(!nonlinear.params %in% names(NL.start))){
+                stop(paste("Some NL parameters have no starting values:\n", paste(nonlinear.params[!nonlinear.params %in% names(NL.start)], collapse=", "), ".", sep=""))
+            } else {
+                # we restrict NL.start to the nonlinear.params
+                NL.start = NL.start[nonlinear.params]
+            }
+
         } else {
             if(length(NL.start.init)>1) stop("NL.start.init must be a scalar.")
             if(!is.numeric(NL.start.init)) stop("NL.start.init must be numeric!")
