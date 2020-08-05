@@ -27,6 +27,8 @@ feglm(
   notes = getFixest_notes(),
   verbose = 0,
   combine.quick,
+  only.env = FALSE,
+  env,
   ...
 )
 
@@ -49,6 +51,8 @@ feglm.fit(
   warn = TRUE,
   notes = getFixest_notes(),
   verbose = 0,
+  only.env = FALSE,
+  env,
   ...
 )
 
@@ -72,6 +76,8 @@ fepois(
   notes = getFixest_notes(),
   verbose = 0,
   combine.quick,
+  only.env = FALSE,
+  env,
   ...
 )
 }
@@ -116,6 +122,10 @@ fepois(
 
 \item{combine.quick}{Logical. When you combine different variables to transform them into a single fixed-effects you can do e.g. \code{y ~ x | paste(var1, var2)}. The algorithm provides a shorthand to do the same operation: \code{y ~ x | var1^var2}. Because pasting variables is a costly operation, the internal algorithm may use a numerical trick to hasten the process. The cost of doing so is that you lose the labels. If you are interested in getting the value of the fixed-effects coefficients after the estimation, you should use \code{combine.quick = FALSE}. By default it is equal to \code{FALSE} if the number of observations is lower than 50,000, and to \code{TRUE} otherwise.}
 
+\item{only.env}{[Advanced users.] Logical, default is \code{FALSE}. If \code{TRUE}, then only the environment used to make the estimation is returned.}
+
+\item{env}{[Advanced users.] A \code{fixest} environment created by a \code{fixest} estimation with \code{only.env = TRUE}. Default is missing. If provided, the data from this environment will be used to perform the estimation.}
+
 \item{...}{Not currently used.}
 
 \item{y}{Numeric vector of the dependent variable.}
@@ -139,7 +149,7 @@ A \code{fixest} object.
 \item{y}{[where relevant] The dependent variable (used to compute the within-R2 when fixed-effects are present).}
 \item{convStatus}{Logical, convergence status of the IRWLS algorithm.}
 \item{irls_weights}{The weights of the last iteration of the IRWLS algorithm.}
-\item{obsRemoved}{[where relevant] In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the row numbers of the observations that were removed. Also reports the NA observations that were removed.}
+\item{obsRemoved}{[where relevant] Vector of observations that were removed because of NA values or because of only 0/1 outcome within a fixed-effect (depends on the family though).}
 \item{fixef_removed}{[where relevant] In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.}
 \item{coefficients}{The named vector of estimated coefficients.}
 \item{coeftable}{The table of the coefficients with their standard errors, z-values and p-values.}

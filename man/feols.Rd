@@ -20,6 +20,8 @@ feols(
   notes = getFixest_notes(),
   combine.quick,
   demeaned = FALSE,
+  only.env = FALSE,
+  env,
   ...
 )
 }
@@ -53,6 +55,10 @@ feols(
 \item{combine.quick}{Logical. When you combine different variables to transform them into a single fixed-effects you can do e.g. \code{y ~ x | paste(var1, var2)}. The algorithm provides a shorthand to do the same operation: \code{y ~ x | var1^var2}. Because pasting variables is a costly operation, the internal algorithm may use a numerical trick to hasten the process. The cost of doing so is that you lose the labels. If you are interested in getting the value of the fixed-effects coefficients after the estimation, you should use \code{combine.quick = FALSE}. By default it is equal to \code{FALSE} if the number of observations is lower than 50,000, and to \code{TRUE} otherwise.}
 
 \item{demeaned}{Logical, default is \code{FALSE}. Only used in the presence of fixed-effects: should the centered variables be returned? If \code{TRUE},  it creates the items \code{y_demeaned} and \code{X_demeaned}.}
+
+\item{only.env}{[Advanced users.] Logical, default is \code{FALSE}. If \code{TRUE}, then only the environment used to make the estimation is returned.}
+
+\item{env}{[Advanced users.] A \code{fixest} environment created by a \code{fixest} estimation with \code{only.env = TRUE}. Default is missing. If provided, the data from this environment will be used to perform the estimation.}
 
 \item{...}{Not currently used.}
 }
@@ -89,6 +95,7 @@ A \code{fixest} object.
 \item{sumFE}{The sum of the fixed-effects coefficients for each observation.}
 \item{offset}{[where relevant] The offset formula.}
 \item{weights}{[where relevant] The weights formula.}
+\item{obsRemoved}{[where relevant] Vector of observations that were removed because of NA values.}
 \item{collin.var}{[where relevant] Vector containing the variables removed because of collinearity.}
 \item{collin.coef}{[where relevant] Vector of coefficients, where the values of the variables removed because of collinearity are NA.}
 \item{y_demeaned}{Only when \code{demeaned = TRUE}: the centered dependent variable.}

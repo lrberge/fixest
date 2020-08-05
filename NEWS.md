@@ -9,8 +9,23 @@
 
 #### User visible changes
 
+ - `etable`: new argument `placement` to define the position of the float in Latex.
+ 
  - Improved display of numbers in `print` method.
+ 
  - Added variables names to `X_demeaned` from `feols`.
+ 
+ - In all estimations: 
+ 
+    * new arguments `only.env` and `env`. 
+    * The first, `only.env`, allows to recover only the environment used to perform the estimation (i.e. all the preprocessing done before the estimation).
+    * The second, `env`, accepts a fixest environment created by `only.env`, and performs the estimation using this environment--all other arguments are ignored. 
+    * These changes are a prerequisite to the efficient implementation of bootstraping (since, by applying modifications directly in `env`, we cut all preprocessing).
+
+ - In non-linear estimations: 
+ 
+    * non-numeric variables can now be used. 
+    * argument `NL.start` now accepts numeric scalars, initializing all coefficients to the same value (avoids the use of the other argument `NL.start.init`).
 
 ## Changes in version 0.6.0 (13-07-2020)
 

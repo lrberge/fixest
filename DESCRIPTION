@@ -15,5 +15,5 @@ BugReports: https://github.com/lrberge/fixest/issues
 SystemRequirements: C++11
 VignetteBuilder: knitr
 LazyData: true
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Encoding: UTF-8
