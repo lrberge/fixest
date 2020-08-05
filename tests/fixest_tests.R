@@ -632,6 +632,60 @@ test(vcov(est_pois, cluster = ~id, dof = dof(adj = FALSE)), vcovCL(est_pois, clu
 
 
 
+####
+#### only.env ####
+####
+
+# We check that there's no problem when using the environment
+
+cat("ONLY ENV\n\n")
+
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
+
+env = feols(y ~ x1 + x2 | species, base, only.env = TRUE)
+feols(env = env)
+
+env = feglm(y ~ x1 + x2 | species, base, only.env = TRUE)
+feglm(env = env)
+
+env = fepois(y ~ x1 + x2 | species, base, only.env = TRUE)
+fepois(env = env)
+
+env = fenegbin(y ~ x1 + x2 | species, base, only.env = TRUE)
+fenegbin(env = env)
+
+env = femlm(y ~ x1 + x2 | species, base, only.env = TRUE)
+femlm(env = env)
+
+env = feNmlm(y ~ x1 + x2 | species, base, only.env = TRUE)
+feNmlm(env = env)
+
+
+
+####
+#### Non linear tests ####
+####
+
+cat("NON LINEAR\n\n")
+
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
+
+tab = c("versicolor" = 5, "setosa" = 0, "virginica" = -5)
+
+fun_nl = function(a, b, spec){
+    res = as.numeric(tab[spec])
+    a*res + b*res^2
+}
+
+est_nl = feNmlm(y ~ x1, base, NL.fml = ~fun_nl(a, b, species), NL.start = 1, family = "gaussian")
+
+base$var_spec = as.numeric(tab[base$species])
+
+est_lin = feols(y ~ x1 + var_spec + I(var_spec^2), base)
+
+test(coef(est_nl), coef(est_lin)[c(3, 4, 1, 2)], "~")
 
 
 
