@@ -3570,7 +3570,8 @@ combine_clusters_fast = function(...){
             IS_NA = IS_NA | is.na(cluster[[i]])
         }
 
-        if(all(IS_NA)) stop("When combining the fixed-effects with ^: all FEs are NAs. Estimation cannot be done. ")
+        # Nice error message comes later
+        if(all(IS_NA)) return(rep(NA, length(IS_NA)))
 
         # we recreate the clusters
         for(i in 1:Q){
@@ -3626,7 +3627,7 @@ combine_clusters = function(...){
             IS_NA = IS_NA | is.na(cluster[[i]])
         }
 
-        if(all(IS_NA)) stop("When combining the fixed-effects with ^: all FEs are NAs. Estimation cannot be done. ")
+        if(all(IS_NA)) return(rep(NA, length(IS_NA)))
 
         # we recreate the clusters
         for(i in 1:Q){
