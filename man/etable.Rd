@@ -43,7 +43,8 @@ etable(
   notes = NULL,
   group = NULL,
   extraline = NULL,
-  tablefoot = TRUE
+  tablefoot = TRUE,
+  placement = "htbp"
 )
 
 esttex(
@@ -79,7 +80,8 @@ esttex(
   notes = NULL,
   group = NULL,
   tablefoot = TRUE,
-  extraline = NULL
+  extraline = NULL,
+  placement = "htbp"
 )
 
 esttable(
@@ -129,6 +131,7 @@ setFixest_etable(
   group = NULL,
   extraline = NULL,
   tablefoot = TRUE,
+  placement = "htbp",
   reset = FALSE
 )
 
@@ -204,6 +207,8 @@ getFixest_etable()
 \item{extraline}{A list. The list elements should be either a single logical or a vector of the same length as the number of models. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extraline=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the style with the \code{title} and \code{where} keywords in curly brackets. For example \code{group=list("{title:Sub-sample; where:stats}By age"=c("<20 yo", "all", ">50 yo"))} will add an extra line right before with "Sub-sample" written in it, and the extraline information will appear after the statistics section. The keyword where can be equal to either \code{var} (default), \code{fixef} or \code{stats}.}
 
 \item{tablefoot}{Logical, default is \code{TRUE}. Whether to display the table footer containing the information on the way the standard-errors where computed and the meaning of the significance codes.}
+
+\item{placement}{(Tex only.) Character string giving the position of the float in Latex. Default is "htbp". It must consist of only the characters 'h', 't', 'b', 'p', 'H' and '!'. Reminder: h: here; t: top; b: bottom; p: float page; H: definitely here; !: prevents Latex to look for other positions.}
 
 \item{reset}{(\code{setFixest_etable} only.) Logical, default is \code{FALSE}. If \code{TRUE}, this will reset all the default values that were already set by the user in previous calls.}
 }
