@@ -216,7 +216,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' @param forceCovariance (Advanced users.) Logical, default is \code{FALSE}. In the peculiar case where the obtained Hessian is not invertible (usually because of collinearity of some variables), use this option to force the covariance matrix, by using a generalized inverse of the Hessian. This can be useful to spot where possible problems come from.
 #' @param keepBounded (Advanced users -- \code{feNmlm} with non-linear part and bounded coefficients only.) Logical, default is \code{FALSE}. If \code{TRUE}, then the bounded coefficients (if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise it is not).
 #' @param n Integer, default is missing (means Inf). Number of coefficients to display when the print method is used.
-#' @param ... Not currently used.
+#' @param ... Only used if the argument \code{.vocv} is provided and is a function: extra arguments to be passed to that function.
 #'
 #' @section Compatibility with \pkg{sandwich} package:
 #' The VCOVs from \code{sandwich} can be used with \code{feols}, \code{feglm} and \code{fepois} estimations. If you want to have a \code{sandwich} VCOV when using \code{summary.fixest}, you can use the argument \code{.vcov} to specify the VCOV function to use (see examples).

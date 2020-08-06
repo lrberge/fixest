@@ -40,7 +40,7 @@ summ
 
 \item{n}{Integer, default is missing (means Inf). Number of coefficients to display when the print method is used.}
 
-\item{...}{Not currently used.}
+\item{...}{Only used if the argument \code{.vocv} is provided and is a function: extra arguments to be passed to that function.}
 }
 \value{
 It returns a \code{fixest} object with:
