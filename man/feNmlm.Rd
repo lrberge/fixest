@@ -50,7 +50,7 @@ feNmlm(
 
 \item{na_inf.rm}{Logical, default is \code{TRUE}. If the variables necessary for the estimation contain NA/Infs and \code{na_inf.rm = TRUE}, then all observations containing NA are removed prior to estimation and a note is displayed detailing the number of observations removed. Otherwise, an error is raised.}
 
-\item{NL.start}{(For NL models only) A list of starting values for the non-linear parameters. ALL the parameters are to be named and given a staring value. Example: \code{NL.start=list(a=1,b=5,c=0)}. Though, there is an exception: if all parameters are to be given the same starting value, you can use the argument \code{NL.start.init}.}
+\item{NL.start}{(For NL models only) A list of starting values for the non-linear parameters. ALL the parameters are to be named and given a staring value. Example: \code{NL.start=list(a=1,b=5,c=0)}. Though, there is an exception: if all parameters are to be given the same starting value, you can use a numeric scalar.}
 
 \item{lower}{(For NL models only) A list. The lower bound for each of the non-linear parameters that requires one. Example: \code{lower=list(b=0,c=0)}. Beware, if the estimated parameter is at his lower bound, then asymptotic theory cannot be applied and the standard-error of the parameter cannot be estimated because the gradient will not be null. In other words, when at its upper/lower bound, the parameter is considered as 'fixed'.}
 
@@ -92,9 +92,9 @@ feNmlm(
 
 \item{combine.quick}{Logical. When you combine different variables to transform them into a single fixed-effects you can do e.g. \code{y ~ x | paste(var1, var2)}. The algorithm provides a shorthand to do the same operation: \code{y ~ x | var1^var2}. Because pasting variables is a costly operation, the internal algorithm may use a numerical trick to hasten the process. The cost of doing so is that you lose the labels. If you are interested in getting the value of the fixed-effects coefficients after the estimation, you should use \code{combine.quick = FALSE}. By default it is equal to \code{FALSE} if the number of observations is lower than 50,000, and to \code{TRUE} otherwise.}
 
-\item{only.env}{[Advanced users.] Logical, default is \code{FALSE}. If \code{TRUE}, then only the environment used to make the estimation is returned.}
+\item{only.env}{(Advanced users.) Logical, default is \code{FALSE}. If \code{TRUE}, then only the environment used to make the estimation is returned.}
 
-\item{env}{[Advanced users.] A \code{fixest} environment created by a \code{fixest} estimation with \code{only.env = TRUE}. Default is missing. If provided, the data from this environment will be used to perform the estimation.}
+\item{env}{(Advanced users.) A \code{fixest} environment created by a \code{fixest} estimation with \code{only.env = TRUE}. Default is missing. If provided, the data from this environment will be used to perform the estimation.}
 
 \item{...}{Not currently used.}
 }

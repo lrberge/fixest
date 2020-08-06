@@ -81,9 +81,9 @@ fenegbin(
 
 \item{combine.quick}{Logical. When you combine different variables to transform them into a single fixed-effects you can do e.g. \code{y ~ x | paste(var1, var2)}. The algorithm provides a shorthand to do the same operation: \code{y ~ x | var1^var2}. Because pasting variables is a costly operation, the internal algorithm may use a numerical trick to hasten the process. The cost of doing so is that you lose the labels. If you are interested in getting the value of the fixed-effects coefficients after the estimation, you should use \code{combine.quick = FALSE}. By default it is equal to \code{FALSE} if the number of observations is lower than 50,000, and to \code{TRUE} otherwise.}
 
-\item{only.env}{[Advanced users.] Logical, default is \code{FALSE}. If \code{TRUE}, then only the environment used to make the estimation is returned.}
+\item{only.env}{(Advanced users.) Logical, default is \code{FALSE}. If \code{TRUE}, then only the environment used to make the estimation is returned.}
 
-\item{env}{[Advanced users.] A \code{fixest} environment created by a \code{fixest} estimation with \code{only.env = TRUE}. Default is missing. If provided, the data from this environment will be used to perform the estimation.}
+\item{env}{(Advanced users.) A \code{fixest} environment created by a \code{fixest} estimation with \code{only.env = TRUE}. Default is missing. If provided, the data from this environment will be used to perform the estimation.}
 
 \item{...}{Not currently used.}
 }
@@ -94,15 +94,15 @@ A \code{fixest} object.
 \item{call}{The call of the function.}
 \item{method}{The method used to estimate the model.}
 \item{family}{The family used to estimate the model.}
-\item{fml_full}{[where relevant] The "full" formula containing the linear part and the fixed-effects.}
+\item{fml_full}{(When relevant.) The "full" formula containing the linear part and the fixed-effects.}
 \item{nparams}{The number of parameters of the model.}
 \item{fixef_vars}{The names of each fixed-effect dimension.}
 \item{fixef_id}{The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.}
 \item{fixef_sizes}{The size of each fixed-effect (i.e. the number of unique identifierfor each fixed-effect dimension).}
 \item{convStatus}{Logical, convergence status.}
 \item{message}{The convergence message from the optimization procedures.}
-\item{obsRemoved}{[where relevant] In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the row numbers of the observations that were removed. Also reports the NA observations that were removed.}
-\item{fixef_removed}{[where relevant] In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.}
+\item{obsRemoved}{(When relevant.) In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the row numbers of the observations that were removed. Also reports the NA observations that were removed.}
+\item{fixef_removed}{(When relevant.) In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.}
 \item{coefficients}{The named vector of estimated coefficients.}
 \item{coeftable}{The table of the coefficients with their standard errors, z-values and p-values.}
 \item{loglik}{The log-likelihood.}
@@ -120,8 +120,8 @@ A \code{fixest} object.
 \item{scores}{The matrix of the scores (first derivative for each observation).}
 \item{residuals}{The difference between the dependent variable and the expected predictor.}
 \item{sumFE}{The sum of the fixed-effects coefficients for each observation.}
-\item{offset}{[where relevant] The offset formula.}
-\item{weights}{[where relevant] The weights formula.}
+\item{offset}{(When relevant.) The offset formula.}
+\item{weights}{(When relevant.) The weights formula.}
 }
 \description{
 This function estimates maximum likelihood models with any number of fixed-effects.

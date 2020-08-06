@@ -56,9 +56,9 @@ feols(
 
 \item{demeaned}{Logical, default is \code{FALSE}. Only used in the presence of fixed-effects: should the centered variables be returned? If \code{TRUE},  it creates the items \code{y_demeaned} and \code{X_demeaned}.}
 
-\item{only.env}{[Advanced users.] Logical, default is \code{FALSE}. If \code{TRUE}, then only the environment used to make the estimation is returned.}
+\item{only.env}{(Advanced users.) Logical, default is \code{FALSE}. If \code{TRUE}, then only the environment used to make the estimation is returned.}
 
-\item{env}{[Advanced users.] A \code{fixest} environment created by a \code{fixest} estimation with \code{only.env = TRUE}. Default is missing. If provided, the data from this environment will be used to perform the estimation.}
+\item{env}{(Advanced users.) A \code{fixest} environment created by a \code{fixest} estimation with \code{only.env = TRUE}. Default is missing. If provided, the data from this environment will be used to perform the estimation.}
 
 \item{...}{Not currently used.}
 }
@@ -69,7 +69,7 @@ A \code{fixest} object.
 \item{call}{The call of the function.}
 \item{method}{The method used to estimate the model.}
 \item{family}{The family used to estimate the model.}
-\item{fml_full}{[where relevant] The "full" formula containing the linear part and the fixed-effects.}
+\item{fml_full}{(When relevant.) The "full" formula containing the linear part and the fixed-effects.}
 \item{nparams}{The number of parameters of the model.}
 \item{fixef_vars}{The names of each fixed-effect dimension.}
 \item{fixef_id}{The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.}
@@ -93,11 +93,11 @@ A \code{fixest} object.
 \item{scores}{The matrix of the scores (first derivative for each observation).}
 \item{residuals}{The difference between the dependent variable and the expected predictor.}
 \item{sumFE}{The sum of the fixed-effects coefficients for each observation.}
-\item{offset}{[where relevant] The offset formula.}
-\item{weights}{[where relevant] The weights formula.}
-\item{obsRemoved}{[where relevant] Vector of observations that were removed because of NA values.}
-\item{collin.var}{[where relevant] Vector containing the variables removed because of collinearity.}
-\item{collin.coef}{[where relevant] Vector of coefficients, where the values of the variables removed because of collinearity are NA.}
+\item{offset}{(When relevant.) The offset formula.}
+\item{weights}{(When relevant.) The weights formula.}
+\item{obsRemoved}{(When relevant.) Vector of observations that were removed because of NA values.}
+\item{collin.var}{(When relevant.) Vector containing the variables removed because of collinearity.}
+\item{collin.coef}{(When relevant.) Vector of coefficients, where the values of the variables removed because of collinearity are NA.}
 \item{y_demeaned}{Only when \code{demeaned = TRUE}: the centered dependent variable.}
 \item{X_demeaned}{Only when \code{demeaned = TRUE}: the centered explanatory variable.}
 }
