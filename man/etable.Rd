@@ -44,7 +44,8 @@ etable(
   group = NULL,
   extraline = NULL,
   tablefoot = TRUE,
-  placement = "htbp"
+  placement = "htbp",
+  drop.section = NULL
 )
 
 esttex(
@@ -81,7 +82,8 @@ esttex(
   group = NULL,
   tablefoot = TRUE,
   extraline = NULL,
-  placement = "htbp"
+  placement = "htbp",
+  drop.section = NULL
 )
 
 esttable(
@@ -132,6 +134,7 @@ setFixest_etable(
   extraline = NULL,
   tablefoot = TRUE,
   placement = "htbp",
+  drop.section = NULL,
   reset = FALSE
 )
 
@@ -208,7 +211,9 @@ getFixest_etable()
 
 \item{tablefoot}{Logical, default is \code{TRUE}. Whether to display the table footer containing the information on the way the standard-errors where computed and the meaning of the significance codes.}
 
-\item{placement}{(Tex only.) Character string giving the position of the float in Latex. Default is "htbp". It must consist of only the characters 'h', 't', 'b', 'p', 'H' and '!'. Reminder: h: here; t: top; b: bottom; p: float page; H: definitely here; !: prevents Latex to look for other positions.}
+\item{placement}{(Tex only.) Character string giving the position of the float in Latex. Default is "htbp". It must consist of only the characters 'h', 't', 'b', 'p', 'H' and '!'. Reminder: h: here; t: top; b: bottom; p: float page; H: definitely here; !: prevents Latex to look for other positions. Note that it can be equal to the empty string (and you'll get the default placement).}
+
+\item{drop.section}{(Tex only.) Character vector which can be of length 0 (i.e. equal to \code{NULL}). Can contain the values "fixef", "slopes" or "stats". It would drop, respectively, the fixed-effects section, the variables with varying slopes section or the fit statistics section.}
 
 \item{reset}{(\code{setFixest_etable} only.) Logical, default is \code{FALSE}. If \code{TRUE}, this will reset all the default values that were already set by the user in previous calls.}
 }

@@ -9,7 +9,10 @@
 
 #### User visible changes
 
- - `etable`: new argument `placement` to define the position of the float in Latex.
+ - `etable` (suggestions by Caleb Kwon): 
+ 
+    * new argument `placement` to define the position of the float in Latex.
+    * new argument `drop.section`, with which you can drop a) the fixed-effects, b) the variables with varying slopes, or c) the statistics, sections.
  
  - Improved display of numbers in `print` method.
  
