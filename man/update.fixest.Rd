@@ -4,7 +4,7 @@
 \alias{update.fixest}
 \title{Updates a \code{fixest} estimation}
 \usage{
-\method{update}{fixest}(object, fml.update, nframes = 1, ...)
+\method{update}{fixest}(object, fml.update, nframes = 1, evaluate = TRUE, ...)
 }
 \arguments{
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
@@ -12,6 +12,8 @@
 \item{fml.update}{Changes to be made to the original argument \code{fml}. See more information on \code{\link[stats]{update.formula}}. You can add/withdraw both variables and fixed-effects. E.g. \code{. ~ . + x2 | . + z2} would add the variable \code{x2} and the cluster \code{z2} to the former estimation.}
 
 \item{nframes}{(Advanced users.) Defaults to 1. Number of frames up the stack where to perform the evaluation of the updated call. By default, this is the parent frame.}
+
+\item{evaluate}{Logical, default is \code{TRUE}. If \code{FALSE}, only the updated call is returned.}
 
 \item{...}{Other arguments to be passed to the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
 }

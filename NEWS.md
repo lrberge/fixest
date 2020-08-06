@@ -29,6 +29,14 @@
  
     * non-numeric variables can now be used. 
     * argument `NL.start` now accepts numeric scalars, initializing all coefficients to the same value (avoids the use of the other argument `NL.start.init`).
+    
+  - `summary.fixest`:
+  
+    * argument `.vcov` now accepts functions that compute the vcov. This ensures convenient compatibility with the `sandwich` package (compatibility is still not full though: bootstraped SEs don't work yet).
+    
+  - `update.fixest`:
+  
+    * new argument `evaluate` to ensure consistency with the `update` method from stats.
 
 ## Changes in version 0.6.0 (13-07-2020)
 

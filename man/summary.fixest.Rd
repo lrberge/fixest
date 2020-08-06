@@ -32,7 +32,7 @@ summ
 
 \item{dof}{An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{dof}} for this argument. The arguments and defaults of the function \code{\link[fixest]{dof}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "conventional"}, \code{t.df = "conventional"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{dof}} for details.}
 
-\item{.vcov}{A user provided covariance matrix. Must be a square matrix of the same number of rows as the number of variables estimated.}
+\item{.vcov}{A user provided covariance matrix or a function coomputing this matrix. If a matrix, it must be a square matrix of the same number of rows as the number of variables estimated. If a function, it must return the previsouly mentioned matrix.}
 
 \item{forceCovariance}{(Advanced users.) Logical, default is \code{FALSE}. In the peculiar case where the obtained Hessian is not invertible (usually because of collinearity of some variables), use this option to force the covariance matrix, by using a generalized inverse of the Hessian. This can be useful to spot where possible problems come from.}
 
@@ -51,13 +51,19 @@ It returns a \code{fixest} object with:
 \description{
 This function is similar to \code{print.fixest}. It provides the table of coefficients along with other information on the fit of the estimation. It can compute different types of standard errors. The new variance covariance matrix is an object returned.
 }
+\section{Compatibility with \pkg{sandwich} package}{
+
+The VCOVs from \code{sandwich} can be used with \code{feols}, \code{feglm} and \code{fepois} estimations. If you want to have a \code{sandwich} VCOV when using \code{summary.fixest}, you can use the argument \code{.vcov} to specify the VCOV function to use (see examples).
+Note that if you do so and you use a formula in the \code{cluster} argument, an innocuous warning can pop up if you used several non-numeric fixed-effects in the estimation (this is due to the function \code{\link[stats]{expand.model.frame}} used in \code{sandwich}).
+}
+
 \examples{
 
 # Load trade data
 data(trade)
 
 # We estimate the effect of distance on trade (with 3 fixed-effects)
-est_pois = femlm(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
+est_pois = fepois(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
 
 # Comparing different types of standard errors
 sum_standard = summary(est_pois, se = "standard")
@@ -78,6 +84,15 @@ summary(est_pois, cluster = list(trade$Destination, trade$Product))
 summary(est_pois, cluster = ~Destination+Product)
 # Since Destination and Product are used as fixed-effects, you can also use:
 summary(est_pois, cluster = 2:3)
+
+
+#
+# Compatibility with sandwich
+#
+
+# You can use the VOCVs from sandwich by using the argument .vcov:
+library(sandwich)
+summary(est_pois, .vcov = vcovCL, cluster = trade[, c("Destination", "Product")])
 
 
 }

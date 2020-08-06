@@ -212,11 +212,15 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' @param cluster Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1, "var2")]}, \code{cluster = c("var1, "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster).
 #' @param object A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
 #' @param dof An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{dof}} for this argument. The arguments and defaults of the function \code{\link[fixest]{dof}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "conventional"}, \code{t.df = "conventional"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{dof}} for details.
-#' @param .vcov A user provided covariance matrix. Must be a square matrix of the same number of rows as the number of variables estimated.
+#' @param .vcov A user provided covariance matrix or a function coomputing this matrix. If a matrix, it must be a square matrix of the same number of rows as the number of variables estimated. If a function, it must return the previsouly mentioned matrix.
 #' @param forceCovariance (Advanced users.) Logical, default is \code{FALSE}. In the peculiar case where the obtained Hessian is not invertible (usually because of collinearity of some variables), use this option to force the covariance matrix, by using a generalized inverse of the Hessian. This can be useful to spot where possible problems come from.
 #' @param keepBounded (Advanced users -- \code{feNmlm} with non-linear part and bounded coefficients only.) Logical, default is \code{FALSE}. If \code{TRUE}, then the bounded coefficients (if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise it is not).
 #' @param n Integer, default is missing (means Inf). Number of coefficients to display when the print method is used.
 #' @param ... Not currently used.
+#'
+#' @section Compatibility with \pkg{sandwich} package:
+#' The VCOVs from \code{sandwich} can be used with \code{feols}, \code{feglm} and \code{fepois} estimations. If you want to have a \code{sandwich} VCOV when using \code{summary.fixest}, you can use the argument \code{.vcov} to specify the VCOV function to use (see examples).
+#' Note that if you do so and you use a formula in the \code{cluster} argument, an innocuous warning can pop up if you used several non-numeric fixed-effects in the estimation (this is due to the function \code{\link[stats]{expand.model.frame}} used in \code{sandwich}).
 #'
 #' @return
 #' It returns a \code{fixest} object with:
@@ -236,7 +240,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' data(trade)
 #'
 #' # We estimate the effect of distance on trade (with 3 fixed-effects)
-#' est_pois = femlm(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
+#' est_pois = fepois(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
 #'
 #' # Comparing different types of standard errors
 #' sum_standard = summary(est_pois, se = "standard")
@@ -259,6 +263,15 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' summary(est_pois, cluster = 2:3)
 #'
 #'
+#' #
+#' # Compatibility with sandwich
+#' #
+#'
+#' # You can use the VOCVs from sandwich by using the argument .vcov:
+#' library(sandwich)
+#' summary(est_pois, .vcov = vcovCL, cluster = trade[, c("Destination", "Product")])
+#'
+#'
 summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), .vcov, forceCovariance = FALSE, keepBounded = FALSE, n,  ...){
 	# computes the clustered SD and returns the modified vcov and coeftable
 
@@ -275,7 +288,9 @@ summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), .vcov, fo
 	# Checking arguments in ...
 	if(!any(c("fromPrint", "nframes_up") %in% names(match.call()))){
 	    # condition means NOT internal call => thus client call
-	    validate_dots(suggest_args = c("se", "cluster", "dof"))
+	    if(missing(.vcov) || !is.function(.vcov)){
+	        validate_dots(suggest_args = c("se", "cluster", "dof"))
+	    }
 	}
 
 	check_arg(n, "integer scalar GE{1}")
@@ -293,8 +308,26 @@ summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), .vcov, fo
 	# The new VCOV
 	if(!missnull(.vcov)){
 	    n_coef = length(object$coefficients)
-	    check_arg(.vcov, "square numeric matrix nrow(value)", .value = n_coef)
-	    vcov = .vcov
+	    check_arg(.vcov, "square numeric matrix nrow(value) | function", .value = n_coef)
+
+	    if(is.function(.vcov)){
+	        arg_names = formalArgs(.vcov)
+	        # we contruct the call
+	        dots = list(...)
+	        # We shouldn't have a prior on the name of the first argument
+	        dots[[arg_names[1]]] = object
+	        if("cluster" %in% arg_names && !missing(cluster)){
+	            dots[["cluster"]] = cluster
+	        }
+	        vcov = do.call(.vcov, dots)
+
+	        check_value(vcov, "square numeric matrix nrow(value)", .value = n_coef,
+	                    .message = paste0("If argument '.vcov' is to be a function, it should return a square numeric matrix of the same dimension as the number of coefficients (here ", n_coef, ")."))
+
+	    } else {
+	        # square matrix
+	        vcov = .vcov
+	    }
 
 	    warn_ignore = c()
 	    if(!missnull(se)) warn_ignore = "se"
@@ -6161,6 +6194,7 @@ confint.fixest = function(object, parm, level = 0.95, se, cluster, dof = getFixe
 #'
 #' @param fml.update Changes to be made to the original argument \code{fml}. See more information on \code{\link[stats]{update.formula}}. You can add/withdraw both variables and fixed-effects. E.g. \code{. ~ . + x2 | . + z2} would add the variable \code{x2} and the cluster \code{z2} to the former estimation.
 #' @param nframes (Advanced users.) Defaults to 1. Number of frames up the stack where to perform the evaluation of the updated call. By default, this is the parent frame.
+#' @param evaluate Logical, default is \code{TRUE}. If \code{FALSE}, only the updated call is returned.
 #' @param ... Other arguments to be passed to the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
 #'
 #' @return
@@ -6192,7 +6226,7 @@ confint.fixest = function(object, parm, level = 0.95, se, cluster, dof = getFixe
 #' # Quick look at the 4 estimations
 #' esttable(est_pois, est_2, est_3, est_4)
 #'
-update.fixest = function(object, fml.update, nframes = 1, ...){
+update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 	# Update method
 	# fml.update: update the formula
 	# If 1) SAME DATA and 2) SAME dep.var, then we make initialisation
@@ -6201,10 +6235,10 @@ update.fixest = function(object, fml.update, nframes = 1, ...){
 	if(missing(fml.update)){
 		fml.update = . ~ .
 	} else {
-		if(!"formula" %in% class(fml.update)){
-			stop("The argument 'fml.update' is required.")
-		}
+	    check_arg(fml.update, "formula")
 	}
+
+    check_arg(evaluate, "logical scalar")
 
     if(isTRUE(object$fromFit)){
         stop("update method not available for fixest estimations obtained from fit methods.")
@@ -6397,11 +6431,13 @@ update.fixest = function(object, fml.update, nframes = 1, ...){
 
 	# new call: call_clear
 	call_clear = call_old
-	for(arg in setdiff(names(call_new)[-1], c("fml.update", "nframes"))){
+	for(arg in setdiff(names(call_new)[-1], c("fml.update", "nframes", "evaluate"))){
 		call_clear[[arg]] = call_new[[arg]]
 	}
 
 	call_clear$fml = as.call(fml_new)
+
+	if(!evaluate) return(call_clear)
 
 	if(useInit){
 		# we can use the initialisation of parameters
