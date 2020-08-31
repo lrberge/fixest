@@ -6,6 +6,8 @@
 #### Bugs
 
  - Major bug when fixed-effects were combined with `^` and they contained NAs. Could lead R to crash (thanks to @poliquin [#35](https://github.com/lrberge/fixest/issues/35)).
+ 
+ - Bug when using lead/lags in estimations. The bug was due to a bug in a dependency ([dreamerr](https://cran.r-project.org/package=dreamerr)) and was fixed. Now fixest requires **dreamerr** version >= 1.2.1. Bug spotted by @seunghoon001 ([#44](https://github.com/lrberge/fixest/issues/44)).
 
 #### User visible changes
 
