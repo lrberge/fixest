@@ -689,6 +689,127 @@ test(coef(est_nl), coef(est_lin)[c(3, 4, 1, 2)], "~")
 
 
 
+####
+#### Lagging ####
+####
+
+# Different types of lag
+# 1) check no error in wide variety of situations
+# 2) check consistency
+
+cat("LAGGING\n\n")
+
+data(base_did)
+base = base_did
+
+n = nrow(base)
+
+set.seed(0)
+base$y_na = base$y ; base$y_na[sample(n, 50)] = NA
+base$period_txt = letters[base$period]
+base$y_0 = base$y**2 ; base$y_0[base$id == 1] = 0
+
+# We compute the lags "by hand"
+base = base[order(base$id, base$period), ]
+base$x1_lag = c(NA, base$x1[-n]) ; base$x1_lag[base$period == 1] = NA
+base$x1_lead = c(base$x1[-1], NA) ; base$x1_lead[base$period == 10] = NA
+
+# we create holes
+base$period_bis = base$period ; base$period_bis[base$period_bis == 5] = 50
+base$x1_lag_hole = base$x1_lag ; base$x1_lag_hole[base$period %in% c(5, 6)] = NA
+base$x1_lead_hole = base$x1_lead ; base$x1_lead_hole[base$period %in% c(4, 5)] = NA
+
+# we reshuffle the base
+base = base[sample(n), ]
+
+#
+# Checks consistency
+#
+
+cat("consistentcy...")
+
+test(lag(x1 ~ id + period, data = base), base$x1_lag)
+test(lag(x1 ~ id + period, -1, data = base), base$x1_lead)
+
+test(lag(x1 ~ id + period_bis, data = base), base$x1_lag_hole)
+test(lag(x1 ~ id + period_bis, -1, data = base), base$x1_lead_hole)
+
+test(lag(x1 ~ id + period_txt, data = base, time.step = "consecutive"), base$x1_lag)
+test(lag(x1 ~ id + period_txt, -1, data = base, time.step = "consecutive"), base$x1_lead)
+
+cat("done.\nEstimations...")
+
+#
+# Estimations
+#
+
+# Poisson
+
+for(depvar in c("y", "y_na", "y_0")){
+
+    cat(".")
+
+    base$y_dep = base[[depvar]]
+    pdat = panel(base, ~ id + period)
+
+    if(depvar == "y_0"){
+        estfun = fepois
+    } else {
+        estfun = feols
+    }
+
+    est_raw  = estfun(y_dep ~ x1 + x1_lag + x1_lead, base)
+    est      = estfun(y_dep ~ x1 + l(x1) + f(x1), base, panel.id = "id,period")
+    est_pdat = estfun(y_dep ~ x1 + l(x1, 1) + f(x1, 1), pdat)
+    test(coef(est_raw), coef(est))
+    test(coef(est_raw), coef(est_pdat))
+
+    # Now we just check that calls to l/f works without checking coefs
+
+    est = estfun(y_dep ~ x1 + l(x1) + f(x1), base, panel.id = "id,period")
+    est = estfun(y_dep ~ l(x1, -1:1) + f(x1, 2), base, panel.id = c("id", "period"))
+    est = estfun(y_dep ~ l(x1, -1:1, fill = 1), base, panel.id = ~ id + period)
+    if(depvar == "y") test(est$nobs, n)
+    est = estfun(f(y_dep) ~ f(x1, -1:1), base, panel.id = ~ id + period)
+
+}
+
+cat("done.\n")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
