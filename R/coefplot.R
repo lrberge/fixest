@@ -1621,7 +1621,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
                         }
 
                         if(length(inter_values) != sum(!is_ref)){
-                            stop("Internal error regarding the lengths of vectors of coefficients. Could you report to the author of the fixest package?")
+                            stop("Internal error regarding the lengths of vectors of coefficients.")
                         }
 
                         if(any(is_ref)){
