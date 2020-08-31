@@ -356,7 +356,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         if(isPanel){
             fml = try(rewrite_fml(fml), silent = TRUE)
             if("try-error" %in% class(fml)){
-                stop("Problem in the formula: ", gsub("_expand", "", fml))
+                stop("Problem in the formula regarding lag/leads: ", gsub("_expand", "", fml))
             }
             FML = Formula::Formula(fml)
         }
