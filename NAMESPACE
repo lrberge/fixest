@@ -107,4 +107,6 @@ importFrom(graphics, par, plot, box, axis, abline, points, text, title,
 
 importFrom(grDevices, rgb, col2rgb)
 
+importFrom(methods, formalArgs)
+
 
