@@ -2012,7 +2012,7 @@ format_error_msg = function(x, origin){
 
     if(grepl("^Error (in|:|: in) (fe|fixest)[^\n]+\n", x)){
         res = gsub("^Error (in|:|: in) (fe|fixest)[^\n]+\n *(.+)", "\\3", x)
-    } else if(grepl("[Oo]bject '.+' not found", x)) {
+    } else if(grepl("[Oo]bject '.+' not found", x) || grepl("memory", x)) {
         res = x
     } else {
        res = paste0(x, "\nThis error was unforeseen by the author of the function ", origin, ". If you think your call to the function is legitimate, could you report?")
