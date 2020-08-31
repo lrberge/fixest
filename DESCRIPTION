@@ -1,9 +1,9 @@
 Package: fixest
 Type: Package
 Title: Fast Fixed-Effects Estimations
-Version: 0.6.0
+Version: 0.6.1
 Authors@R: person("Laurent", "Berge", email = "laurent.berge@uni.lu", role = c("aut", "cre"))
-Imports: stats, graphics, grDevices, utils, Formula, numDeriv, nlme, sandwich, Rcpp, dreamerr(>= 1.2.0)
+Imports: stats, graphics, grDevices, utils, methods, Formula, numDeriv, nlme, sandwich, Rcpp, dreamerr(>= 1.2.1)
 Suggests: knitr, rmarkdown, data.table, plm, lfe, MASS
 LinkingTo: Rcpp
 Depends: R(>= 3.1.0)
