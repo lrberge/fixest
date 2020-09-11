@@ -32,6 +32,7 @@
 #include <Rcpp.h>
 #include <math.h>
 #include <vector>
+#include <stdint.h>
 #ifdef _OPENMP
     #include <omp.h>
 #else
@@ -1138,7 +1139,16 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 	bool isWeight = Rf_length(r_weights) != 1;
 
 	// whether we use X_raw
-	int n_X = Rf_length(X_raw);
+
+    // We need to take care of length(x) > 2B, we don't know ex ante
+    #ifdef LONG_VECTOR_SUPPORT
+    	int64_t n_X = Rf_xlength(X_raw);
+    #else
+    	int64_t n_X = Rf_length(X_raw);
+    #endif
+
+	// int n_X = Rf_length(X_raw);
+
 	int n_vars;
 	bool useX;
 	if(n_X == 1){
@@ -1205,7 +1215,7 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 
 	// slope_weights_vector will contain obs_weight[obs]*vars[obs] for slopes, and obs_weight[obs]
 	//    for non slopes [thus we initialize at 1 -- default if no weights no slope]
-	vector<double> slope_weights_vector(isSlope ? Q * n_obs : 1, 1);
+	vector<double> slope_weights_vector(isSlope ? Q * static_cast<int64_t>(n_obs) : 1, 1);
 
 	if(isSlope){
 
@@ -1297,40 +1307,82 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 		}
 	}
 
-	// we put all input variables into a single vector
-	// the dep var is the last one
-	vector<double> input_values(n_obs*n_vars);
-
-	if(useX){
-		double* pX_raw = REAL(X_raw);
-		for(int i = 0 ; i < (n_obs*(n_vars - 1)) ; ++i){
-			input_values[i] = pX_raw[i];
-		}
-	}
-
-	double* py = REAL(y);
-	int y_start = n_obs*(n_vars - 1);
-	for(int i = 0 ; i < n_obs ; ++i){
-		input_values[y_start + i] = py[i];
-	}
+	// DEPREC: now we don't make a hard copy any more
+	//         we just make pinput point to the right stuff
+    // 	// we put all input variables into a single vector
+    // 	// the dep var is the last one
+    // 	vector<double> input_values(static_cast<int64_t>(n_obs) * n_vars);
+    //
+    // 	double *pinput_tmp = input_values.data();
+    // 	if(useX){
+    // 		double* pX_raw = REAL(X_raw);
+    // 		// for(int i = 0 ; i < (n_obs*(n_vars - 1)) ; ++i){
+    // 		// 	input_values[i] = pX_raw[i];
+    // 		// }
+    // 		for(int k=0 ; k<(n_vars - 1) ; ++k){
+    // 		    for(int i = 0 ; i < n_obs ; ++i){
+    // 		        pinput_tmp[i] = pX_raw[i];
+    // 	        }
+    // 		    pinput_tmp += n_obs;
+    // 		    pX_raw += n_obs;
+    // 		}
+    // 	}
+    //
+    // 	double* py = REAL(y);
+    // 	// int y_start = n_obs*(n_vars - 1);
+    // 	// for(int i = 0 ; i < n_obs ; ++i){
+    // 	// 	input_values[y_start + i] = py[i];
+    // 	// }
+    // 	for(int i = 0 ; i < n_obs ; ++i){
+    // 	    pinput_tmp[i] = py[i];
+    //     }
+    // END: DEPREC
 
 	// output vector:
-	vector<double> output_values(n_obs*n_vars, 0);
+	vector<double> output_values(static_cast<int64_t>(n_obs) * n_vars, 0);
+	int64_t n_total = static_cast<int64_t>(n_obs) * n_vars;
+	bool large_n = n_total > 2147483647;
 
 	if(isInit){
-		for(int i=0 ; i<(n_obs*n_vars) ; ++i){
-			output_values[i] = init[i];
-		}
+	    if(large_n){
+	        for(int64_t i=0 ; i<n_total ; ++i){
+	            output_values[i] = init[i];
+	        }
+	    } else {
+	        for(int i=0 ; i<(n_obs*n_vars) ; ++i){
+	            output_values[i] = init[i];
+	        }
+	    }
 	}
 
+	//
 	// vector of pointers: input/output
-	vector<double*> pinput(n_vars);
+	//
+
+	// vector<double*> pinput(n_vars);
+	// vector<double*> poutput(n_vars);
+	// pinput[0] = input_values.data();
+	// poutput[0] = output_values.data();
+	// for(int v=1 ; v<n_vars ; v++){
+	// 	pinput[v] = pinput[v - 1] + n_obs;
+	// 	poutput[v] = poutput[v - 1] + n_obs;
+	// }
+
 	vector<double*> poutput(n_vars);
-	pinput[0] = input_values.data();
 	poutput[0] = output_values.data();
 	for(int v=1 ; v<n_vars ; v++){
-		pinput[v] = pinput[v - 1] + n_obs;
-		poutput[v] = poutput[v - 1] + n_obs;
+	    poutput[v] = poutput[v - 1] + n_obs;
+	}
+
+	vector<double*> pinput(n_vars);
+	if(useX){
+	    pinput[0] = REAL(X_raw);
+	    for(int k=1 ; k<(n_vars - 1) ; ++k){
+	        pinput[k] = pinput[k - 1] + n_obs;
+	    }
+	    pinput[n_vars - 1] = REAL(y);
+	} else {
+	    pinput[0] = REAL(y);
 	}
 
 	// keeping track of iterations
@@ -1423,16 +1475,33 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 	int nrow = useX ? n_obs : 1;
 	int ncol = useX ? n_vars - 1 : 1;
 	NumericMatrix X_demean(nrow, ncol);
+	// for(int k=0 ; k<(n_vars - 1) ; ++k){
+	//     int start = k*n_obs;
+	//     for(int i=0 ; i < n_obs ; ++i){
+	//         X_demean(i, k) = input_values[start + i] - output_values[start + i];
+	//     }
+	// }
+
+	double *pinput_tmp;
+	double *poutput_tmp;
 	for(int k=0 ; k<(n_vars - 1) ; ++k){
-		int start = k*n_obs;
+	    pinput_tmp = pinput[k];
+	    poutput_tmp = poutput[k];
+
 		for(int i=0 ; i < n_obs ; ++i){
-			X_demean(i, k) = input_values[start + i] - output_values[start + i];
+			X_demean(i, k) = pinput_tmp[i] - poutput_tmp[i];
 		}
 	}
 
 	NumericVector y_demean(n_obs);
+	// for(int i=0 ; i < n_obs ; ++i){
+	// 	y_demean[i] = input_values[y_start + i] - output_values[y_start + i];
+	// }
+
+	pinput_tmp = pinput[n_vars - 1];
+	poutput_tmp = poutput[n_vars - 1];
 	for(int i=0 ; i < n_obs ; ++i){
-		y_demean[i] = input_values[y_start + i] - output_values[y_start + i];
+	    y_demean[i] = pinput_tmp[i] - poutput_tmp[i];
 	}
 
 	// iterations
@@ -1442,16 +1511,23 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 	}
 
 	// if save is requested
-	int n = saveInit ? n_obs*n_vars : 1;
+	int64_t n = saveInit ? n_total : 1;
 	NumericVector saved_output(n);
-	for(int i=0 ; i < n ; ++i){
-		saved_output[i] = output_values[i];
+	if(n > 2147483647){
+	    for(int64_t i=0 ; i < n ; ++i){
+	        saved_output[i] = output_values[i];
+	    }
+	} else {
+	    for(int i=0 ; i < n ; ++i){
+	        saved_output[i] = output_values[i];
+	    }
 	}
 
+
 	// save fixef coef
-	n = save_fixef ? nb_coef : 1;
-	NumericVector saved_fixef_coef(n);
-	for(int i=0 ; i < n ; ++i){
+	int n_c = save_fixef ? nb_coef : 1;
+	NumericVector saved_fixef_coef(n_c);
+	for(int i=0 ; i < n_c ; ++i){
 	    saved_fixef_coef[i] = fixef_values[i];
 	}
 

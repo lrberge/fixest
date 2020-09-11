@@ -443,8 +443,8 @@ List cpppar_which_na_inf_vec(SEXP x, int nthreads){
     // "trick" to make a break in a multi-threaded section
     #pragma omp parallel num_threads(nthreads)
     {
-        int i = omp_get_thread_num()*nobs/omp_get_num_threads();
-        int stop = (omp_get_thread_num()+1)*nobs/omp_get_num_threads();
+        int i = omp_get_thread_num()*(nobs/omp_get_num_threads());
+        int stop = (omp_get_thread_num()+1)*(nobs/omp_get_num_threads());
         double x_tmp = 0;
         for(; i<stop && !anyNAInf ; ++i){
             x_tmp = px[i];
@@ -511,8 +511,8 @@ List cpppar_which_na_inf_mat(NumericMatrix mat, int nthreads){
     // "trick" to make a break in a multi-threaded section
     #pragma omp parallel num_threads(nthreads)
     {
-        int i = omp_get_thread_num()*nobs/omp_get_num_threads();
-        int stop = (omp_get_thread_num()+1)*nobs/omp_get_num_threads();
+        int i = omp_get_thread_num()*(nobs/omp_get_num_threads());
+        int stop = (omp_get_thread_num()+1)*(nobs/omp_get_num_threads());
         double x_tmp = 0;
         for(; i<stop && !anyNAInf ; ++i){
             for(int k=0 ; k<K ; ++k){

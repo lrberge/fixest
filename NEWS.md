@@ -8,6 +8,8 @@
  - Major bug when fixed-effects were combined with `^` and they contained NAs. Could lead R to crash (thanks to @poliquin [#35](https://github.com/lrberge/fixest/issues/35)).
  
  - Bug when using lead/lags in estimations. The bug was due to a bug in a dependency ([dreamerr](https://cran.r-project.org/package=dreamerr)) and was fixed. Now fixest requires **dreamerr** version >= 1.2.1. Bug spotted by @seunghoon001 ([#44](https://github.com/lrberge/fixest/issues/44)).
+ 
+ - Major bug when n_obs x n_vars > 2B or n_obs x n_fixed-effects > 2B. In such cases estimations could just not be done, even leading R to crash when using nthreads > 1. The algorithm was fixed to allow datasets with up to 2B observations to be estimated in all circumstances.
 
 #### User visible changes
 

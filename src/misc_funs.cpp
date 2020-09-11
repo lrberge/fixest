@@ -565,6 +565,7 @@ bool cpp_isConstant(NumericVector x){
 // [[Rcpp::export]]
 bool cpp_any_na_null(SEXP x){
     // > twice faster than testing the two separately
+    // x is a vector
 
     int n = Rf_length(x);
     double *px = REAL(x);
