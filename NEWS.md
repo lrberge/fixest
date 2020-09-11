@@ -29,6 +29,7 @@
     * The first, `only.env`, allows to recover only the environment used to perform the estimation (i.e. all the preprocessing done before the estimation).
     * The second, `env`, accepts a fixest environment created by `only.env`, and performs the estimation using this environment--all other arguments are ignored. 
     * These changes are a prerequisite to the efficient implementation of bootstraping (since, by applying modifications directly in `env`, we cut all preprocessing).
+    * new argument `mem.clean`: internally, intermediary objects are removed as much as possible and `gc()` is called before each memory intensive C++ section.
 
  - In non-linear estimations: 
  
