@@ -1509,7 +1509,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         if(useModel.matrix){
             # There are factors => possibly some vars are only 0 now that NAs are removed
 
-            only_0 = cpppar_check_only_0(linear.mat, nrow(linear.mat), nthreads)
+            only_0 = cpppar_check_only_0(linear.mat, nthreads)
             if(all(only_0 == 1)){
                 stop("After removing NAs, not a single explanatory variable is different from 0.")
             } else if(any(only_0 == 1)){

@@ -6664,7 +6664,7 @@ model.matrix.fixest = function(object, data, na.rm = TRUE, ...){
 	}
 
 	if(check_0){
-	    only_0 = cpppar_check_only_0(linear.mat, nrow(linear.mat), nthreads = 1)
+	    only_0 = cpppar_check_only_0(linear.mat, nthreads = 1)
 	    if(all(only_0 == 1)){
 	        stop("After removing NAs, not a single explanatory variable is different from 0.")
 	    } else if(any(only_0 == 1)){
