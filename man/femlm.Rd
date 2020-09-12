@@ -22,6 +22,7 @@ femlm(
   notes = getFixest_notes(),
   theta.init,
   combine.quick,
+  mem.clean = FALSE,
   only.env = FALSE,
   env,
   ...
@@ -43,6 +44,7 @@ fenegbin(
   warn = TRUE,
   notes = getFixest_notes(),
   combine.quick,
+  mem.clean = FALSE,
   only.env = FALSE,
   env,
   ...
@@ -80,6 +82,8 @@ fenegbin(
 \item{theta.init}{Positive numeric scalar. The starting value of the dispersion parameter if \code{family="negbin"}. By default, the algorithm uses as a starting value the theta obtained from the model with only the intercept.}
 
 \item{combine.quick}{Logical. When you combine different variables to transform them into a single fixed-effects you can do e.g. \code{y ~ x | paste(var1, var2)}. The algorithm provides a shorthand to do the same operation: \code{y ~ x | var1^var2}. Because pasting variables is a costly operation, the internal algorithm may use a numerical trick to hasten the process. The cost of doing so is that you lose the labels. If you are interested in getting the value of the fixed-effects coefficients after the estimation, you should use \code{combine.quick = FALSE}. By default it is equal to \code{FALSE} if the number of observations is lower than 50,000, and to \code{TRUE} otherwise.}
+
+\item{mem.clean}{Logical, default is \code{FALSE}. Only to be used if the data set is large compared to the available RAM. If \code{TRUE} then intermediary objects are removed as much as possible and \code{\link[base]{gc}} is run before each substantial C++ section in the internal code to avoid memory issues.}
 
 \item{only.env}{(Advanced users.) Logical, default is \code{FALSE}. If \code{TRUE}, then only the environment used to make the estimation is returned.}
 

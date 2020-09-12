@@ -27,6 +27,7 @@ feglm(
   notes = getFixest_notes(),
   verbose = 0,
   combine.quick,
+  mem.clean = FALSE,
   only.env = FALSE,
   env,
   ...
@@ -50,6 +51,7 @@ feglm.fit(
   nthreads = getFixest_nthreads(),
   warn = TRUE,
   notes = getFixest_notes(),
+  mem.clean = FALSE,
   verbose = 0,
   only.env = FALSE,
   env,
@@ -76,6 +78,7 @@ fepois(
   notes = getFixest_notes(),
   verbose = 0,
   combine.quick,
+  mem.clean = FALSE,
   only.env = FALSE,
   env,
   ...
@@ -121,6 +124,8 @@ fepois(
 \item{verbose}{Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algoritmh (the first number is the left-hand-side, the other numbers are the right-hand-side variables). It can also detail the step-halving algorithm.}
 
 \item{combine.quick}{Logical. When you combine different variables to transform them into a single fixed-effects you can do e.g. \code{y ~ x | paste(var1, var2)}. The algorithm provides a shorthand to do the same operation: \code{y ~ x | var1^var2}. Because pasting variables is a costly operation, the internal algorithm may use a numerical trick to hasten the process. The cost of doing so is that you lose the labels. If you are interested in getting the value of the fixed-effects coefficients after the estimation, you should use \code{combine.quick = FALSE}. By default it is equal to \code{FALSE} if the number of observations is lower than 50,000, and to \code{TRUE} otherwise.}
+
+\item{mem.clean}{Logical, default is \code{FALSE}. Only to be used if the data set is large compared to the available RAM. If \code{TRUE} then intermediary objects are removed as much as possible and \code{\link[base]{gc}} is run before each substantial C++ section in the internal code to avoid memory issues.}
 
 \item{only.env}{(Advanced users.) Logical, default is \code{FALSE}. If \code{TRUE}, then only the environment used to make the estimation is returned.}
 
