@@ -61,8 +61,8 @@ update_deriv_single <- function(n_vars, nb_coef, r_ll_d2, r_jacob_vector, r_dum_
     .Call(`_fixest_update_deriv_single`, n_vars, nb_coef, r_ll_d2, r_jacob_vector, r_dum_vector)
 }
 
-cpp_demean <- function(y, X_raw, r_weights, iterMax, diffMax, nb_cluster_all, dum_vector, tableCluster_vector, slope_flag, slope_vars, r_init, checkWeight, nthreads, save_fixef = FALSE) {
-    .Call(`_fixest_cpp_demean`, y, X_raw, r_weights, iterMax, diffMax, nb_cluster_all, dum_vector, tableCluster_vector, slope_flag, slope_vars, r_init, checkWeight, nthreads, save_fixef)
+cpp_demean <- function(y, X_raw, r_weights, iterMax, diffMax, nb_cluster_all, dum_list, tableCluster_vector, slope_flag, slope_vars, r_init, checkWeight, nthreads, save_fixef = FALSE) {
+    .Call(`_fixest_cpp_demean`, y, X_raw, r_weights, iterMax, diffMax, nb_cluster_all, dum_list, tableCluster_vector, slope_flag, slope_vars, r_init, checkWeight, nthreads, save_fixef)
 }
 
 cpp_cholesky <- function(X, nthreads = 1L) {
@@ -225,8 +225,8 @@ cpppar_cond_means <- function(mat_vars, treat, nthreads = 1L) {
     .Call(`_fixest_cpppar_cond_means`, mat_vars, treat, nthreads)
 }
 
-cpppar_check_only_0 <- function(x_mat, n, nthreads) {
-    .Call(`_fixest_cpppar_check_only_0`, x_mat, n, nthreads)
+cpppar_check_only_0 <- function(x_mat, nthreads) {
+    .Call(`_fixest_cpppar_check_only_0`, x_mat, nthreads)
 }
 
 cpp_quf_str <- function(x) {

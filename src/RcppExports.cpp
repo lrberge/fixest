@@ -310,8 +310,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_demean
-List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax, SEXP nb_cluster_all, SEXP dum_vector, SEXP tableCluster_vector, SEXP slope_flag, SEXP slope_vars, SEXP r_init, int checkWeight, int nthreads, bool save_fixef);
-RcppExport SEXP _fixest_cpp_demean(SEXP ySEXP, SEXP X_rawSEXP, SEXP r_weightsSEXP, SEXP iterMaxSEXP, SEXP diffMaxSEXP, SEXP nb_cluster_allSEXP, SEXP dum_vectorSEXP, SEXP tableCluster_vectorSEXP, SEXP slope_flagSEXP, SEXP slope_varsSEXP, SEXP r_initSEXP, SEXP checkWeightSEXP, SEXP nthreadsSEXP, SEXP save_fixefSEXP) {
+List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax, SEXP nb_cluster_all, SEXP dum_list, SEXP tableCluster_vector, SEXP slope_flag, SEXP slope_vars, SEXP r_init, int checkWeight, int nthreads, bool save_fixef);
+RcppExport SEXP _fixest_cpp_demean(SEXP ySEXP, SEXP X_rawSEXP, SEXP r_weightsSEXP, SEXP iterMaxSEXP, SEXP diffMaxSEXP, SEXP nb_cluster_allSEXP, SEXP dum_listSEXP, SEXP tableCluster_vectorSEXP, SEXP slope_flagSEXP, SEXP slope_varsSEXP, SEXP r_initSEXP, SEXP checkWeightSEXP, SEXP nthreadsSEXP, SEXP save_fixefSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -321,7 +321,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type iterMax(iterMaxSEXP);
     Rcpp::traits::input_parameter< double >::type diffMax(diffMaxSEXP);
     Rcpp::traits::input_parameter< SEXP >::type nb_cluster_all(nb_cluster_allSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type dum_vector(dum_vectorSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type dum_list(dum_listSEXP);
     Rcpp::traits::input_parameter< SEXP >::type tableCluster_vector(tableCluster_vectorSEXP);
     Rcpp::traits::input_parameter< SEXP >::type slope_flag(slope_flagSEXP);
     Rcpp::traits::input_parameter< SEXP >::type slope_vars(slope_varsSEXP);
@@ -329,7 +329,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type checkWeight(checkWeightSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
     Rcpp::traits::input_parameter< bool >::type save_fixef(save_fixefSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_demean(y, X_raw, r_weights, iterMax, diffMax, nb_cluster_all, dum_vector, tableCluster_vector, slope_flag, slope_vars, r_init, checkWeight, nthreads, save_fixef));
+    rcpp_result_gen = Rcpp::wrap(cpp_demean(y, X_raw, r_weights, iterMax, diffMax, nb_cluster_all, dum_list, tableCluster_vector, slope_flag, slope_vars, r_init, checkWeight, nthreads, save_fixef));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -838,15 +838,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpppar_check_only_0
-IntegerVector cpppar_check_only_0(SEXP x_mat, int n, int nthreads);
-RcppExport SEXP _fixest_cpppar_check_only_0(SEXP x_matSEXP, SEXP nSEXP, SEXP nthreadsSEXP) {
+IntegerVector cpppar_check_only_0(NumericMatrix x_mat, int nthreads);
+RcppExport SEXP _fixest_cpppar_check_only_0(SEXP x_matSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type x_mat(x_matSEXP);
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type x_mat(x_matSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_check_only_0(x_mat, n, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpppar_check_only_0(x_mat, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -946,7 +945,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpppar_which_na_inf_vec", (DL_FUNC) &_fixest_cpppar_which_na_inf_vec, 2},
     {"_fixest_cpppar_which_na_inf_mat", (DL_FUNC) &_fixest_cpppar_which_na_inf_mat, 2},
     {"_fixest_cpppar_cond_means", (DL_FUNC) &_fixest_cpppar_cond_means, 3},
-    {"_fixest_cpppar_check_only_0", (DL_FUNC) &_fixest_cpppar_check_only_0, 3},
+    {"_fixest_cpppar_check_only_0", (DL_FUNC) &_fixest_cpppar_check_only_0, 2},
     {"_fixest_cpp_quf_str", (DL_FUNC) &_fixest_cpp_quf_str, 1},
     {"_fixest_cpp_quf_gnl", (DL_FUNC) &_fixest_cpp_quf_gnl, 1},
     {"_fixest_cpppar_quf_table_sum", (DL_FUNC) &_fixest_cpppar_quf_table_sum, 6},
