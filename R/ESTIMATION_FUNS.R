@@ -253,7 +253,7 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 		# fixef information
 		fixef_sizes = get("fixef_sizes", env)
 		fixef_table_vector = get("fixef_table_vector", env)
-		fixef_id_vector = get("fixef_id_vector", env)
+		fixef_id_list = get("fixef_id_list", env)
 
 		slope_flag = get("slope_flag", env)
 		slope_vars = get("slope_variables", env)
@@ -266,7 +266,7 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 
 		vars_demean <- cpp_demean(y, X, weights, iterMax = fixef.iter,
 		                          diffMax = fixef.tol, nb_cluster_all = fixef_sizes,
-		                          dum_vector = fixef_id_vector, tableCluster_vector = fixef_table_vector,
+		                          dum_list = fixef_id_list, tableCluster_vector = fixef_table_vector,
 		                          slope_flag = slope_flag, slope_vars = slope_vars,
 		                          r_init = init, checkWeight = fromGLM, nthreads = nthreads)
 
@@ -284,7 +284,7 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 		if(any(slope_flag > 0) && any(res$iterations > 300)){
 		    # Maybe we have a convergence problem
 		    # This is poorly coded, but it's a temporary fix
-		    opt_fe = check_conv(y_demean, X_demean, fixef_id_vector, slope_flag, slope_vars, weights)
+		    opt_fe = check_conv(y_demean, X_demean, fixef_id_list, slope_flag, slope_vars, weights)
 
 		    # This is a bit too rough a check but it should catch the most problematic cases
 		    if(any(opt_fe > 1e-4)){
@@ -551,7 +551,7 @@ ols_fit = function(y, X, w, correct_0w = FALSE, nthreads){
 
 
 
-check_conv = function(y, X, fixef_id_vector, slope_flag, slope_vars, weights){
+check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights){
     # VERY SLOW!!!!
     # IF THIS FUNCTION LASTS => TO BE PORTED TO C++
 
@@ -579,8 +579,7 @@ check_conv = function(y, X, fixef_id_vector, slope_flag, slope_vars, weights){
         }
 
         for(q in 1:Q){
-            index_id = 1:nobs + (q - 1) * nobs
-            fixef_id = fixef_id_vector[index_id]
+            fixef_id = fixef_id_list[[q]]
 
             if(slope_flag[q]){
                 index_var = 1:nobs + (cumsum(slope_flag)[q] - 1) * nobs

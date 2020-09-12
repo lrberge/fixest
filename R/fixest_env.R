@@ -1979,7 +1979,12 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
         # New cpp functions
         # This is where we send the elements needed for convergence in cpp
-        assign("fixef_id_vector", as.integer(unlist(fixef_id) - 1), env)
+        if(origin_type == "feNmlm"){
+            assign("fixef_id_vector", as.integer(unlist(fixef_id) - 1), env)
+        } else {
+            assign("fixef_id_list", fixef_id, env)
+        }
+
         assign("fixef_table_vector", as.integer(unlist(fixef_table)), env)
         assign("sum_y_vector", unlist(sum_y_all), env)
 

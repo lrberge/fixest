@@ -988,7 +988,7 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 
 	    nb_cluster_all = as.integer(unlist(fixef_sizes[dict_fe[fe_all]]))
 
-	    dum_vector = as.integer(unlist(id_dummies_vect[dict_fe[fe_all]])) - 1L
+	    dum_list = id_dummies_vect[dict_fe[fe_all]]
 
 	    slope_flag = as.integer(grepl("\\[", fixef_terms))
 
@@ -1002,7 +1002,7 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 
 	    S_demean <- cpp_demean(y = S, X_raw = 0, r_weights = 0, iterMax = 1000L,
 	                              diffMax = fixef.tol, nb_cluster_all = nb_cluster_all,
-	                              dum_vector = dum_vector, tableCluster_vector = fixef_table_vector,
+	                              dum_list = dum_list, tableCluster_vector = fixef_table_vector,
 	                              slope_flag = slope_flag, slope_vars = slope_vars_vector,
 	                              r_init = 0, checkWeight = 1L, nthreads = 1L, save_fixef = TRUE)
 
@@ -2981,7 +2981,7 @@ demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFi
     fixef_table = quf_info_all$table
     fixef_sizes = lengths(fixef_table)
 
-    fixef_id_vector = as.integer(unlist(quf_info_all$quf) - 1)
+    # fixef_id_vector = as.integer(unlist(quf_info_all$quf) - 1)
     fixef_table_vector = as.integer(unlist(fixef_table))
 
 
@@ -2994,7 +2994,7 @@ demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFi
 
     vars_demean <- cpp_demean(y, X, weights, iterMax = iter,
                               diffMax = tol, nb_cluster_all = fixef_sizes,
-                              dum_vector = fixef_id_vector, tableCluster_vector = fixef_table_vector,
+                              dum_list = quf_info_all$quf, tableCluster_vector = fixef_table_vector,
                               slope_flag = rep(FALSE, Q), slope_vars = 0,
                               r_init = 0, checkWeight = FALSE, nthreads = nthreads)
 

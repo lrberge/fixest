@@ -42,6 +42,11 @@
 // [[Rcpp::plugins(openmp)]]
 
 
+/* CHANGELOG:
+ *  - 12/09/2020: the vector of fixed-effects id becomes a list, the same that is returned in R (it avoids a deep copy).
+ *  So I had to change the R-style indexes into C-style indexes by substratcting 1.
+ */
+
 
 using namespace Rcpp;
 using std::vector;
@@ -176,7 +181,7 @@ void demean_single_1(int v, PARAM_DEMEAN* args){
 	}
 
 	// dum and table
-	int *dum = pdum[0];
+	int *my_dum = pdum[0];
 	double *sum_weights = psum_weights[0];
 
 	// weights
@@ -194,11 +199,11 @@ void demean_single_1(int v, PARAM_DEMEAN* args){
 	// The sum
 	if(isWeight){
 		for(int obs=0 ; obs<n_obs ; ++obs){
-			cluster_coef[dum[obs]] += obs_weights[obs] * input[obs];
+			cluster_coef[my_dum[obs] - 1] += obs_weights[obs] * input[obs];
 		}
 	} else {
 		for(int obs=0 ; obs<n_obs ; ++obs){
-			cluster_coef[dum[obs]] += input[obs];
+			cluster_coef[my_dum[obs] - 1] += input[obs];
 		}
 	}
 
@@ -211,11 +216,11 @@ void demean_single_1(int v, PARAM_DEMEAN* args){
 	if(isSlope){
 	    double *my_slope_var = args->all_slope_vars[0];
 	    for(int obs=0 ; obs<n_obs ; ++obs){
-	        output[obs] = my_slope_var[obs] * cluster_coef[dum[obs]];
+	        output[obs] = my_slope_var[obs] * cluster_coef[my_dum[obs] - 1];
 	    }
 	} else {
 	    for(int obs=0 ; obs<n_obs ; ++obs){
-	        output[obs] = cluster_coef[dum[obs]];
+	        output[obs] = cluster_coef[my_dum[obs] - 1];
 	    }
 	}
 
@@ -249,15 +254,15 @@ void CCC_gaussian_2(const vector<double> &pcluster_origin, vector<double> &pclus
 
 	if(isSlope_i){
 	    for(int obs=0 ; obs<n_obs ; ++obs){
-	        beta[dum_j[obs]] += obs_weights_j[obs] * slope_var_i[obs] * pcluster_origin[dum_i[obs]];
+	        beta[dum_j[obs] - 1] += obs_weights_j[obs] * slope_var_i[obs] * pcluster_origin[dum_i[obs] - 1];
 	    }
 	} else if(isWeight){
 		for(int obs=0 ; obs<n_obs ; ++obs){
-			beta[dum_j[obs]] += obs_weights_j[obs] * pcluster_origin[dum_i[obs]];
+			beta[dum_j[obs] - 1] += obs_weights_j[obs] * pcluster_origin[dum_i[obs] - 1];
 		}
 	} else {
 		for(int obs=0 ; obs<n_obs ; ++obs){
-			beta[dum_j[obs]] += pcluster_origin[dum_i[obs]];
+			beta[dum_j[obs] - 1] += pcluster_origin[dum_i[obs] - 1];
 		}
 	}
 
@@ -268,15 +273,15 @@ void CCC_gaussian_2(const vector<double> &pcluster_origin, vector<double> &pclus
 
 	if(isSlope_j){
 	    for(int obs=0 ; obs<n_obs ; ++obs){
-	        pcluster_destination[dum_i[obs]] += obs_weights_i[obs] * slope_var_j[obs] * beta[dum_j[obs]];
+	        pcluster_destination[dum_i[obs] - 1] += obs_weights_i[obs] * slope_var_j[obs] * beta[dum_j[obs] - 1];
 	    }
 	} else if(isWeight){
 		for(int obs=0 ; obs<n_obs ; ++obs){
-			pcluster_destination[dum_i[obs]] += obs_weights_i[obs] * beta[dum_j[obs]];
+			pcluster_destination[dum_i[obs] - 1] += obs_weights_i[obs] * beta[dum_j[obs] - 1];
 		}
 	} else {
 		for(int obs=0 ; obs<n_obs ; ++obs){
-			pcluster_destination[dum_i[obs]] += beta[dum_j[obs]];
+			pcluster_destination[dum_i[obs] - 1] += beta[dum_j[obs] - 1];
 		}
 	}
 
@@ -335,21 +340,21 @@ void demean_acc_2(int v, int iterMax, PARAM_DEMEAN *args){
 	if(isSlope){
 	    for(int obs=0 ; obs<n_obs ; ++obs){
 	        double resid_tmp = input[obs] - output[obs];
-	        const_a[dum_i[obs]] += obs_weights_i[obs]*resid_tmp;
-	        const_b[dum_j[obs]] += obs_weights_j[obs]*resid_tmp;
+	        const_a[dum_i[obs] - 1] += obs_weights_i[obs]*resid_tmp;
+	        const_b[dum_j[obs] - 1] += obs_weights_j[obs]*resid_tmp;
 	    }
 	} else if(isWeight){
 	    // weights are identical if there is no slope
         for(int obs=0 ; obs<n_obs ; ++obs){
             double resid_tmp = obs_weights_i[obs]*(input[obs] - output[obs]);
-            const_a[dum_i[obs]] += resid_tmp;
-            const_b[dum_j[obs]] += resid_tmp;
+            const_a[dum_i[obs] - 1] += resid_tmp;
+            const_b[dum_j[obs] - 1] += resid_tmp;
         }
     } else {
         for(int obs=0 ; obs<n_obs ; ++obs){
             double resid_tmp = input[obs] - output[obs];
-	        const_a[dum_i[obs]] += resid_tmp;
-	        const_b[dum_j[obs]] += resid_tmp;
+	        const_a[dum_i[obs] - 1] += resid_tmp;
+	        const_b[dum_j[obs] - 1] += resid_tmp;
         }
     }
 
@@ -374,15 +379,15 @@ void demean_acc_2(int v, int iterMax, PARAM_DEMEAN *args){
 
 	if(isSlope_j){
 	    for(int obs=0 ; obs<n_obs ; ++obs){
-	        a_tilde[dum_i[obs]] -= obs_weights_i[obs] * slope_var_j[obs] * const_b[dum_j[obs]];
+	        a_tilde[dum_i[obs] - 1] -= obs_weights_i[obs] * slope_var_j[obs] * const_b[dum_j[obs] - 1];
 	    }
 	} else if(isWeight){
 		for(int obs=0 ; obs<n_obs ; ++obs){
-			a_tilde[dum_i[obs]] -= obs_weights_i[obs] * const_b[dum_j[obs]];
+			a_tilde[dum_i[obs] - 1] -= obs_weights_i[obs] * const_b[dum_j[obs] - 1];
 		}
 	} else {
 		for(int obs=0 ; obs<n_obs ; ++obs){
-			a_tilde[dum_i[obs]] -= const_b[dum_j[obs]];
+			a_tilde[dum_i[obs] - 1] -= const_b[dum_j[obs] - 1];
 		}
 	}
 
@@ -471,15 +476,15 @@ void demean_acc_2(int v, int iterMax, PARAM_DEMEAN *args){
 
 			if(isSlope_i){
 			    for(int obs=0 ; obs<n_obs ; ++obs){
-			        beta[dum_j[obs]] -= obs_weights_j[obs] * slope_var_i[obs] * GX[dum_i[obs]];
+			        beta[dum_j[obs] - 1] -= obs_weights_j[obs] * slope_var_i[obs] * GX[dum_i[obs] - 1];
 			    }
 			} else if(isWeight){
 				for(int obs=0 ; obs<n_obs ; ++obs){
-					beta[dum_j[obs]] -= obs_weights_j[obs] * GX[dum_i[obs]];
+					beta[dum_j[obs] - 1] -= obs_weights_j[obs] * GX[dum_i[obs] - 1];
 				}
 			} else {
 				for(int obs=0 ; obs<n_obs ; ++obs){
-					beta[dum_j[obs]] -= GX[dum_i[obs]];
+					beta[dum_j[obs] - 1] -= GX[dum_i[obs] - 1];
 				}
 			}
 
@@ -491,27 +496,17 @@ void demean_acc_2(int v, int iterMax, PARAM_DEMEAN *args){
 			vector<double> mu_current(n_obs);
 			if(isSlope){
 			    for(int obs=0 ; obs<n_obs ; ++obs){
-			        mu_current[obs] = slope_var_i[obs] * GX[dum_i[obs]] + slope_var_j[obs] * beta[dum_j[obs]];
+			        mu_current[obs] = slope_var_i[obs] * GX[dum_i[obs] - 1] + slope_var_j[obs] * beta[dum_j[obs] - 1];
 			    }
 			} else {
 			    for(int obs=0 ; obs<n_obs ; ++obs){
-			        mu_current[obs] = GX[dum_i[obs]] + beta[dum_j[obs]];
+			        mu_current[obs] = GX[dum_i[obs] - 1] + beta[dum_j[obs] - 1];
 			    }
 			}
 
 
 			// init ssr if iter == 50 / otherwise, comparison
 			if(iter == 50){
-				// for(int i=0 ; i<n_obs ; ++i){
-				// 	mu_last[i] = mu_current[i];
-				// }
-				//
-				// for(int i=0 ; i<n_obs ; ++i){
-				// 	input_mean += input[i];
-				// }
-				// input_mean /= n_obs;
-				// input_mean = fabs(input_mean);
-
 				ssr = 0;
 			    double resid;
 			    for(int i=0 ; i<n_obs ; ++i){
@@ -520,24 +515,6 @@ void demean_acc_2(int v, int iterMax, PARAM_DEMEAN *args){
 			    }
 
 			} else {
-				// double mu_diff = 0;
-				// for(int i=0 ; i<n_obs ; ++i){
-				// 	mu_diff += fabs(mu_last[i] - mu_current[i]);
-				// }
-				// mu_diff = mu_diff / n_obs; // we scale it to have a meaningful value
-				// // Rprintf("iter %i -- mu_diff = %f (mean = %f)\n", iter, mu_diff, input_mean);
-				//
-				// // if(mu_diff < diffMax || mu_diff / (0.1 + input_mean) < diffMax){
-				// if(stopping_crit(input_mean, mu_diff + input_mean, diffMax)){
-				// 	// Rprintf("mu_diff BREAK\n");
-				// 	break;
-				// }
-				//
-				// // we update mu_last
-				// for(int i=0 ; i<n_obs ; ++i){
-				// 	mu_last[i] = mu_current[i];
-				// }
-
 				double ssr_old = ssr;
 
 			    // we compute the new SSR
@@ -568,15 +545,15 @@ void demean_acc_2(int v, int iterMax, PARAM_DEMEAN *args){
 
 	if(isSlope_i){
 	    for(int obs=0 ; obs<n_obs ; ++obs){
-	        beta_final[dum_j[obs]] -= obs_weights_j[obs] * slope_var_i[obs] * GX[dum_i[obs]];
+	        beta_final[dum_j[obs] - 1] -= obs_weights_j[obs] * slope_var_i[obs] * GX[dum_i[obs] - 1];
 	    }
 	} else if(isWeight){
 		for(int obs=0 ; obs<n_obs ; ++obs){
-			beta_final[dum_j[obs]] -= obs_weights_j[obs]*GX[dum_i[obs]];
+			beta_final[dum_j[obs] - 1] -= obs_weights_j[obs]*GX[dum_i[obs] - 1];
 		}
 	} else {
 		for(int obs=0 ; obs<n_obs ; ++obs){
-			beta_final[dum_j[obs]] -= GX[dum_i[obs]];
+			beta_final[dum_j[obs] - 1] -= GX[dum_i[obs] - 1];
 		}
 	}
 
@@ -590,15 +567,15 @@ void demean_acc_2(int v, int iterMax, PARAM_DEMEAN *args){
 
 	if(isSlope_j){
 	    for(int obs=0 ; obs<n_obs ; ++obs){
-	        alpha_final[dum_i[obs]] -= obs_weights_i[obs] * slope_var_j[obs] * beta_final[dum_j[obs]];
+	        alpha_final[dum_i[obs] - 1] -= obs_weights_i[obs] * slope_var_j[obs] * beta_final[dum_j[obs] - 1];
 	    }
 	} else if(isWeight){
 		for(int obs=0 ; obs<n_obs ; ++obs){
-			alpha_final[dum_i[obs]] -= obs_weights_i[obs]*beta_final[dum_j[obs]];
+			alpha_final[dum_i[obs] - 1] -= obs_weights_i[obs]*beta_final[dum_j[obs] - 1];
 		}
 	} else {
 		for(int obs=0 ; obs<n_obs ; ++obs){
-			alpha_final[dum_i[obs]] -= beta_final[dum_j[obs]];
+			alpha_final[dum_i[obs] - 1] -= beta_final[dum_j[obs] - 1];
 		}
 	}
 
@@ -610,11 +587,11 @@ void demean_acc_2(int v, int iterMax, PARAM_DEMEAN *args){
 	// mu final
 	if(isSlope){
 	    for(int obs=0 ; obs<n_obs ; ++obs){
-	        output[obs] += slope_var_i[obs] * alpha_final[dum_i[obs]] + slope_var_j[obs] * beta_final[dum_j[obs]];
+	        output[obs] += slope_var_i[obs] * alpha_final[dum_i[obs] - 1] + slope_var_j[obs] * beta_final[dum_j[obs] - 1];
 	    }
 	} else {
 	    for(int obs=0 ; obs<n_obs ; ++obs){
-	        output[obs] += alpha_final[dum_i[obs]] + beta_final[dum_j[obs]];
+	        output[obs] += alpha_final[dum_i[obs] - 1] + beta_final[dum_j[obs] - 1];
 	    }
 	}
 
@@ -637,7 +614,7 @@ void demean_acc_2(int v, int iterMax, PARAM_DEMEAN *args){
 }
 
 void compute_mean(int n_obs, int nb_cluster, double *cluster_coef, const vector<double> &sum_other_means,
-                  double *sum_in_out, int *dum, double *sum_weights){
+                  double *sum_in_out, int *my_dum, double *sum_weights){
 
     // NOTA: sum_in_out and sum_other_means are already "weighted" (see in computeMeans and in demean_acc_gnl)
 
@@ -648,7 +625,7 @@ void compute_mean(int n_obs, int nb_cluster, double *cluster_coef, const vector<
 
 	// looping sequentially over the sum of other coefficients
 	for(int i=0 ; i<n_obs ; ++i){
-		cluster_coef[dum[i]] += sum_other_means[i];
+		cluster_coef[my_dum[i] - 1] += sum_other_means[i];
 	}
 
 	// calculating cluster coef
@@ -700,15 +677,15 @@ void computeMeans(vector<double*> &pcluster_origin, vector<double*> &pcluster_de
 		    double *my_slope_var = all_slope_vars[q];
 		    // after the weight is the "output": z*coef_slope
 		    for(int obs=0 ; obs<n_obs ; ++obs){
-		        sum_other_means[obs] += obs_weights_current[obs] * my_slope_var[obs] * my_cluster_coef[my_dum[obs]];
+		        sum_other_means[obs] += obs_weights_current[obs] * my_slope_var[obs] * my_cluster_coef[my_dum[obs] - 1];
 		    }
 		} else if(isWeight){
 			for(int obs=0 ; obs<n_obs ; ++obs){
-				sum_other_means[obs] += obs_weights_current[obs] * my_cluster_coef[my_dum[obs]];
+				sum_other_means[obs] += obs_weights_current[obs] * my_cluster_coef[my_dum[obs] - 1];
 			}
 		} else {
 			for(int obs=0 ; obs<n_obs ; ++obs){
-				sum_other_means[obs] += my_cluster_coef[my_dum[obs]];
+				sum_other_means[obs] += my_cluster_coef[my_dum[obs] - 1];
 			}
 		}
 	}
@@ -757,15 +734,15 @@ void computeMeans(vector<double*> &pcluster_origin, vector<double*> &pcluster_de
 				if(slope_flag[h]){
 				    double *my_slope_var = all_slope_vars[h];
 				    for(int obs=0 ; obs<n_obs ; ++obs){
-				        sum_other_means[obs] += obs_weights_current[obs] * my_slope_var[obs] * my_cluster_coef[my_dum[obs]];
+				        sum_other_means[obs] += obs_weights_current[obs] * my_slope_var[obs] * my_cluster_coef[my_dum[obs] - 1];
 				    }
 				} else if(isWeight){
 					for(int obs=0 ; obs<n_obs ; ++obs){
-						sum_other_means[obs] += obs_weights_current[obs] * my_cluster_coef[my_dum[obs]];
+						sum_other_means[obs] += obs_weights_current[obs] * my_cluster_coef[my_dum[obs] - 1];
 					}
 				} else {
 					for(int obs=0 ; obs<n_obs ; ++obs){
-						sum_other_means[obs] += my_cluster_coef[my_dum[obs]];
+						sum_other_means[obs] += my_cluster_coef[my_dum[obs] - 1];
 					}
 				}
 			}
@@ -829,11 +806,11 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args){
 		if(isWeight){
 		    double *obs_weights_current = all_obs_weights[q];
 			for(int obs=0 ; obs<n_obs ; ++obs){
-				my_sum_input_output[my_dum[obs]] += obs_weights_current[obs] * (input[obs] - output[obs]);
+				my_sum_input_output[my_dum[obs] - 1] += obs_weights_current[obs] * (input[obs] - output[obs]);
 			}
 		} else {
 			for(int obs=0 ; obs<n_obs ; ++obs){
-				my_sum_input_output[my_dum[obs]] += input[obs] - output[obs];
+				my_sum_input_output[my_dum[obs] - 1] += input[obs] - output[obs];
 			}
 		}
 	}
@@ -941,11 +918,11 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args){
 				if(slope_flag[q]){
 				    double *my_slope_var = all_slope_vars[q];
 				    for(int obs=0 ; obs<n_obs ; ++obs){
-				        mu_current[obs] += my_slope_var[obs] * my_cluster_coef[my_dum[obs]];
+				        mu_current[obs] += my_slope_var[obs] * my_cluster_coef[my_dum[obs] - 1];
 				    }
 				} else {
 				    for(int obs=0 ; obs<n_obs ; ++obs){
-				        mu_current[obs] += my_cluster_coef[my_dum[obs]];
+				        mu_current[obs] += my_cluster_coef[my_dum[obs] - 1];
 				    }
 				}
 
@@ -1021,11 +998,11 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args){
 		if(slope_flag[q]){
 		    double *my_slope_var = all_slope_vars[q];
 		    for(int obs=0 ; obs<n_obs ; ++obs){
-		        output[obs] += my_slope_var[obs] * my_cluster_coef[my_dum[obs]];
+		        output[obs] += my_slope_var[obs] * my_cluster_coef[my_dum[obs] - 1];
 		    }
 		} else {
 		    for(int obs=0 ; obs<n_obs ; ++obs){
-		        output[obs] += my_cluster_coef[my_dum[obs]];
+		        output[obs] += my_cluster_coef[my_dum[obs] - 1];
 		    }
 		}
 	}
@@ -1119,7 +1096,7 @@ void stayIdleCheckingInterrupt(bool *stopnow, vector<int> &jobdone, int n_vars, 
 // Loop over demean_single
 // [[Rcpp::export]]
 List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax, SEXP nb_cluster_all,
-                SEXP dum_vector, SEXP tableCluster_vector, SEXP slope_flag, SEXP slope_vars,
+                SEXP dum_list, SEXP tableCluster_vector, SEXP slope_flag, SEXP slope_vars,
                 SEXP r_init, int checkWeight, int nthreads, bool save_fixef = false){
 	// main fun that calls demean_single
 	// preformat all the information needed on the clusters
@@ -1172,10 +1149,15 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 
 	// cluster id for each observation
 	vector<int*> pdum(Q);
-	pdum[0] = INTEGER(dum_vector);
-	for(int q=1 ; q<Q ; ++q){
-		pdum[q] = pdum[q - 1] + n_obs;
+	// New version => dum_vector (a vector) is replaced by dum_list (a list)
+	for(int q=0 ; q<Q ; ++q){
+		pdum[q] = INTEGER(VECTOR_ELT(dum_list, q));
 	}
+
+	// pdum[0] = INTEGER(dum_vector);
+	// for(int q=1 ; q<Q ; ++q){
+	// 	pdum[q] = pdum[q - 1] + n_obs;
+	// }
 
 	// Handling slopes
 	int nb_slopes = 0;
@@ -1239,13 +1221,13 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 	                    double var = my_slope_var[obs];
 	                    double weight_var = obs_weights[obs] * var;
 	                    my_slope_weights[obs] = weight_var;
-	                    my_SW[my_dum[obs]] += weight_var * var;
+	                    my_SW[my_dum[obs] - 1] += weight_var * var;
 	                }
 	            } else {
 	                for(int obs=0 ; obs<n_obs ; ++obs){
 	                    double var = my_slope_var[obs];
 	                    my_slope_weights[obs] = var;
-	                    my_SW[my_dum[obs]] += var * var;
+	                    my_SW[my_dum[obs] - 1] += var * var;
 	                }
 	            }
 
@@ -1257,11 +1239,11 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 	                for(int obs=0 ; obs<n_obs ; ++obs){
 	                    double weight = obs_weights[obs];
 	                    my_slope_weights[obs] = weight;
-	                    my_SW[my_dum[obs]] += weight;
+	                    my_SW[my_dum[obs] - 1] += weight;
 	                }
 	            } else {
 	                for(int obs=0 ; obs<n_obs ; ++obs){
-	                    my_SW[my_dum[obs]]++;
+	                    my_SW[my_dum[obs] - 1]++;
 	                }
 	            }
 
@@ -1284,7 +1266,7 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 	            int *my_dum = pdum[q];
 	            double *my_SW = psum_weights[q];
 	            for(int obs=0 ; obs<n_obs ; ++obs){
-	                my_SW[my_dum[obs]] += obs_weights[obs];
+	                my_SW[my_dum[obs] - 1] += obs_weights[obs];
 	            }
 	        }
 	    } else {
