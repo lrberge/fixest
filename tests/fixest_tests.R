@@ -580,6 +580,59 @@ X_demean = demean(X_NA, fe_NA)
 
 
 ####
+#### fixef ####
+####
+
+cat("FIXEF\n\n")
+
+data(trade)
+
+base = trade
+base$ln_euros = log(base$Euros)
+base$ln_dist = log(base$dist_km)
+
+# 1 FE
+
+res_lm    = lm(ln_euros ~ ln_dist + factor(Origin) - 1, base)
+res_feols = feols(ln_euros ~ ln_dist | Origin, base)
+
+fe_fixest = fixef(res_feols)$Origin
+coef_lm = coef(res_lm)
+fe_lm = coef_lm[grepl("factor", names(coef_lm))]
+names(fe_lm) = gsub("factor(Origin)", "", names(fe_lm), fixed = TRUE)
+
+test(fe_fixest, fe_lm[names(fe_fixest)], "~")
+
+# 2 FE
+
+res_lm    = lm(ln_euros ~ ln_dist + factor(Origin) + factor(Destination), base)
+res_feols = feols(ln_euros ~ ln_dist | Origin + Destination, base)
+
+fe_fixest_origin = fixef(res_feols)$Origin
+
+coef_lm = coef(res_lm)
+fe_lm_origin = coef_lm[grepl("factor(Origin)", names(coef_lm), fixed = TRUE)]
+names(fe_lm_origin) = gsub("factor(Origin)", "", names(fe_lm_origin), fixed = TRUE)
+
+# The difference should be equal across all FEs
+test(sd(fe_fixest_origin[names(fe_lm_origin)] - fe_lm_origin), 0, "~")
+
+# 3 FE
+
+res_lm    = lm(ln_euros ~ ln_dist + factor(Origin) + factor(Destination) + factor(Year), base)
+res_feols = feols(ln_euros ~ ln_dist | Origin + Destination + Year, base)
+
+fe_fixest_origin = fixef(res_feols)$Origin
+
+coef_lm = coef(res_lm)
+fe_lm_origin = coef_lm[grepl("factor(Origin)", names(coef_lm), fixed = TRUE)]
+names(fe_lm_origin) = gsub("factor(Origin)", "", names(fe_lm_origin), fixed = TRUE)
+
+# The difference should be equal across all FEs
+test(sd(fe_fixest_origin[names(fe_lm_origin)] - fe_lm_origin), 0, "~")
+
+
+####
 #### hatvalues ####
 ####
 
