@@ -61,8 +61,8 @@ update_deriv_single <- function(n_vars, nb_coef, r_ll_d2, r_jacob_vector, r_dum_
     .Call(`_fixest_update_deriv_single`, n_vars, nb_coef, r_ll_d2, r_jacob_vector, r_dum_vector)
 }
 
-cpp_demean <- function(y, X_raw, r_weights, iterMax, diffMax, nb_cluster_all, dum_list, tableCluster_vector, slope_flag, slope_vars, r_init, checkWeight, nthreads, save_fixef = FALSE) {
-    .Call(`_fixest_cpp_demean`, y, X_raw, r_weights, iterMax, diffMax, nb_cluster_all, dum_list, tableCluster_vector, slope_flag, slope_vars, r_init, checkWeight, nthreads, save_fixef)
+cpp_demean <- function(y, X_raw, n_vars_X, r_weights, iterMax, diffMax, nb_cluster_all, dum_list, tableCluster_vector, slope_flag, slope_vars, r_init, checkWeight, nthreads, save_fixef = FALSE) {
+    .Call(`_fixest_cpp_demean`, y, X_raw, n_vars_X, r_weights, iterMax, diffMax, nb_cluster_all, dum_list, tableCluster_vector, slope_flag, slope_vars, r_init, checkWeight, nthreads, save_fixef)
 }
 
 cpp_cholesky <- function(X, nthreads = 1L) {

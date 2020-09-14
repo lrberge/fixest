@@ -1095,7 +1095,7 @@ void stayIdleCheckingInterrupt(bool *stopnow, vector<int> &jobdone, int n_vars, 
 
 // Loop over demean_single
 // [[Rcpp::export]]
-List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax, SEXP nb_cluster_all,
+List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, double diffMax, SEXP nb_cluster_all,
                 SEXP dum_list, SEXP tableCluster_vector, SEXP slope_flag, SEXP slope_vars,
                 SEXP r_init, int checkWeight, int nthreads, bool save_fixef = false){
 	// main fun that calls demean_single
@@ -1116,26 +1116,8 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 	bool isWeight = Rf_length(r_weights) != 1;
 
 	// whether we use X_raw
-
-    // We need to take care of length(x) > 2B, we don't know ex ante
-    #ifdef LONG_VECTOR_SUPPORT
-    	int64_t n_X = Rf_xlength(X_raw);
-    #else
-    	int64_t n_X = Rf_length(X_raw);
-    #endif
-
-	// int n_X = Rf_length(X_raw);
-
-	int n_vars;
-	bool useX;
-	if(n_X == 1){
-		// means X_raw not needed
-		n_vars = 1; // only y
-		useX = false;
-	} else {
-		n_vars = n_X / n_obs + 1;
-		useX = true;
-	}
+	int n_vars = 1 + n_vars_X;
+	bool useX = n_vars_X > 0;
 
 	// initialisation if needed
 	bool isInit = Rf_length(r_init) != 1;
@@ -1153,11 +1135,6 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 	for(int q=0 ; q<Q ; ++q){
 		pdum[q] = INTEGER(VECTOR_ELT(dum_list, q));
 	}
-
-	// pdum[0] = INTEGER(dum_vector);
-	// for(int q=1 ; q<Q ; ++q){
-	// 	pdum[q] = pdum[q - 1] + n_obs;
-	// }
 
 	// Handling slopes
 	int nb_slopes = 0;
@@ -1289,37 +1266,6 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 		}
 	}
 
-	// DEPREC: now we don't make a hard copy any more
-	//         we just make pinput point to the right stuff
-    // 	// we put all input variables into a single vector
-    // 	// the dep var is the last one
-    // 	vector<double> input_values(static_cast<int64_t>(n_obs) * n_vars);
-    //
-    // 	double *pinput_tmp = input_values.data();
-    // 	if(useX){
-    // 		double* pX_raw = REAL(X_raw);
-    // 		// for(int i = 0 ; i < (n_obs*(n_vars - 1)) ; ++i){
-    // 		// 	input_values[i] = pX_raw[i];
-    // 		// }
-    // 		for(int k=0 ; k<(n_vars - 1) ; ++k){
-    // 		    for(int i = 0 ; i < n_obs ; ++i){
-    // 		        pinput_tmp[i] = pX_raw[i];
-    // 	        }
-    // 		    pinput_tmp += n_obs;
-    // 		    pX_raw += n_obs;
-    // 		}
-    // 	}
-    //
-    // 	double* py = REAL(y);
-    // 	// int y_start = n_obs*(n_vars - 1);
-    // 	// for(int i = 0 ; i < n_obs ; ++i){
-    // 	// 	input_values[y_start + i] = py[i];
-    // 	// }
-    // 	for(int i = 0 ; i < n_obs ; ++i){
-    // 	    pinput_tmp[i] = py[i];
-    //     }
-    // END: DEPREC
-
 	// output vector:
 	vector<double> output_values(static_cast<int64_t>(n_obs) * n_vars, 0);
 	int64_t n_total = static_cast<int64_t>(n_obs) * n_vars;
@@ -1340,15 +1286,6 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 	//
 	// vector of pointers: input/output
 	//
-
-	// vector<double*> pinput(n_vars);
-	// vector<double*> poutput(n_vars);
-	// pinput[0] = input_values.data();
-	// poutput[0] = output_values.data();
-	// for(int v=1 ; v<n_vars ; v++){
-	// 	pinput[v] = pinput[v - 1] + n_obs;
-	// 	poutput[v] = poutput[v - 1] + n_obs;
-	// }
 
 	vector<double*> poutput(n_vars);
 	poutput[0] = output_values.data();
@@ -1423,9 +1360,11 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
 	// the main loop
 	//
 
+	int nthreads_current = nthreads > n_vars ? n_vars : nthreads;
+
 	// enlever les rprintf dans les nthreads jobs
-#pragma omp parallel for num_threads(nthreads) schedule(static, 1)
-	for(int v = 0 ; v<(n_vars+nthreads) ; ++v){
+#pragma omp parallel for num_threads(nthreads_current) schedule(static, 1)
+	for(int v = 0 ; v<(n_vars+nthreads_current) ; ++v){
 		// demean_single is the workhorse
 		// you get the "mean"
 

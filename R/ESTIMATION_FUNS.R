@@ -248,7 +248,8 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 		time_demean = proc.time()
 
 		# Number of nthreads
-		nthreads = min(nthreads, ncol(X) + 1 - onlyFixef)
+		n_vars_X = ifelse(is.null(ncol(X)), 0, ncol(X))
+		# nthreads = min(nthreads, ncol(X) + 1 - onlyFixef)
 
 		# fixef information
 		fixef_sizes = get("fixef_sizes", env)
@@ -264,7 +265,7 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 		    gc()
 		}
 
-		vars_demean <- cpp_demean(y, X, weights, iterMax = fixef.iter,
+		vars_demean <- cpp_demean(y, X, n_vars_X, weights, iterMax = fixef.iter,
 		                          diffMax = fixef.tol, nb_cluster_all = fixef_sizes,
 		                          dum_list = fixef_id_list, tableCluster_vector = fixef_table_vector,
 		                          slope_flag = slope_flag, slope_vars = slope_vars,

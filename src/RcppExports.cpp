@@ -310,13 +310,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_demean
-List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax, SEXP nb_cluster_all, SEXP dum_list, SEXP tableCluster_vector, SEXP slope_flag, SEXP slope_vars, SEXP r_init, int checkWeight, int nthreads, bool save_fixef);
-RcppExport SEXP _fixest_cpp_demean(SEXP ySEXP, SEXP X_rawSEXP, SEXP r_weightsSEXP, SEXP iterMaxSEXP, SEXP diffMaxSEXP, SEXP nb_cluster_allSEXP, SEXP dum_listSEXP, SEXP tableCluster_vectorSEXP, SEXP slope_flagSEXP, SEXP slope_varsSEXP, SEXP r_initSEXP, SEXP checkWeightSEXP, SEXP nthreadsSEXP, SEXP save_fixefSEXP) {
+List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, double diffMax, SEXP nb_cluster_all, SEXP dum_list, SEXP tableCluster_vector, SEXP slope_flag, SEXP slope_vars, SEXP r_init, int checkWeight, int nthreads, bool save_fixef);
+RcppExport SEXP _fixest_cpp_demean(SEXP ySEXP, SEXP X_rawSEXP, SEXP n_vars_XSEXP, SEXP r_weightsSEXP, SEXP iterMaxSEXP, SEXP diffMaxSEXP, SEXP nb_cluster_allSEXP, SEXP dum_listSEXP, SEXP tableCluster_vectorSEXP, SEXP slope_flagSEXP, SEXP slope_varsSEXP, SEXP r_initSEXP, SEXP checkWeightSEXP, SEXP nthreadsSEXP, SEXP save_fixefSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type y(ySEXP);
     Rcpp::traits::input_parameter< SEXP >::type X_raw(X_rawSEXP);
+    Rcpp::traits::input_parameter< int >::type n_vars_X(n_vars_XSEXP);
     Rcpp::traits::input_parameter< SEXP >::type r_weights(r_weightsSEXP);
     Rcpp::traits::input_parameter< int >::type iterMax(iterMaxSEXP);
     Rcpp::traits::input_parameter< double >::type diffMax(diffMaxSEXP);
@@ -329,7 +330,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type checkWeight(checkWeightSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
     Rcpp::traits::input_parameter< bool >::type save_fixef(save_fixefSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_demean(y, X_raw, r_weights, iterMax, diffMax, nb_cluster_all, dum_list, tableCluster_vector, slope_flag, slope_vars, r_init, checkWeight, nthreads, save_fixef));
+    rcpp_result_gen = Rcpp::wrap(cpp_demean(y, X_raw, n_vars_X, r_weights, iterMax, diffMax, nb_cluster_all, dum_list, tableCluster_vector, slope_flag, slope_vars, r_init, checkWeight, nthreads, save_fixef));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -904,7 +905,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_derivconv_acc_2", (DL_FUNC) &_fixest_cpp_derivconv_acc_2, 12},
     {"_fixest_cpp_derivconv_seq_2", (DL_FUNC) &_fixest_cpp_derivconv_seq_2, 12},
     {"_fixest_update_deriv_single", (DL_FUNC) &_fixest_update_deriv_single, 5},
-    {"_fixest_cpp_demean", (DL_FUNC) &_fixest_cpp_demean, 14},
+    {"_fixest_cpp_demean", (DL_FUNC) &_fixest_cpp_demean, 15},
     {"_fixest_cpp_cholesky", (DL_FUNC) &_fixest_cpp_cholesky, 2},
     {"_fixest_cpp_sparse_products", (DL_FUNC) &_fixest_cpp_sparse_products, 5},
     {"_fixest_cpppar_crossprod", (DL_FUNC) &_fixest_cpppar_crossprod, 3},

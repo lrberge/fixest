@@ -1000,7 +1000,7 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 	    for(i in 1:Q) fixef_table_list[[i]] = cpp_table(fixef_sizes[i], id_dummies_vect[[i]])
 	    fixef_table_vector = as.integer(unlist(fixef_table_list[dict_fe[fe_all]]))
 
-	    S_demean <- cpp_demean(y = S, X_raw = 0, r_weights = 0, iterMax = 1000L,
+	    S_demean <- cpp_demean(y = S, X_raw = 0, n_vars_X = 0, r_weights = 0, iterMax = 1000L,
 	                              diffMax = fixef.tol, nb_cluster_all = nb_cluster_all,
 	                              dum_list = dum_list, tableCluster_vector = fixef_table_vector,
 	                              slope_flag = slope_flag, slope_vars = slope_vars_vector,
@@ -2992,7 +2992,7 @@ demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFi
     # The algorithm
     #
 
-    vars_demean <- cpp_demean(y, X, weights, iterMax = iter,
+    vars_demean <- cpp_demean(y, X, ncol(X), weights, iterMax = iter,
                               diffMax = tol, nb_cluster_all = fixef_sizes,
                               dum_list = quf_info_all$quf, tableCluster_vector = fixef_table_vector,
                               slope_flag = rep(FALSE, Q), slope_vars = 0,
