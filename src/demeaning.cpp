@@ -1269,17 +1269,10 @@ List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, d
 	// output vector:
 	vector<double> output_values(static_cast<int64_t>(n_obs) * n_vars, 0);
 	int64_t n_total = static_cast<int64_t>(n_obs) * n_vars;
-	bool large_n = n_total > 2147483647;
 
 	if(isInit){
-	    if(large_n){
-	        for(int64_t i=0 ; i<n_total ; ++i){
-	            output_values[i] = init[i];
-	        }
-	    } else {
-	        for(int i=0 ; i<(n_obs*n_vars) ; ++i){
-	            output_values[i] = init[i];
-	        }
+	    for(int64_t i=0 ; i<n_total ; ++i){
+	        output_values[i] = init[i];
 	    }
 	}
 
@@ -1396,12 +1389,6 @@ List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, d
 	int nrow = useX ? n_obs : 1;
 	int ncol = useX ? n_vars - 1 : 1;
 	NumericMatrix X_demean(nrow, ncol);
-	// for(int k=0 ; k<(n_vars - 1) ; ++k){
-	//     int start = k*n_obs;
-	//     for(int i=0 ; i < n_obs ; ++i){
-	//         X_demean(i, k) = input_values[start + i] - output_values[start + i];
-	//     }
-	// }
 
 	double *pinput_tmp;
 	double *poutput_tmp;
@@ -1415,10 +1402,6 @@ List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, d
 	}
 
 	NumericVector y_demean(n_obs);
-	// for(int i=0 ; i < n_obs ; ++i){
-	// 	y_demean[i] = input_values[y_start + i] - output_values[y_start + i];
-	// }
-
 	pinput_tmp = pinput[n_vars - 1];
 	poutput_tmp = poutput[n_vars - 1];
 	for(int i=0 ; i < n_obs ; ++i){
@@ -1434,14 +1417,8 @@ List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, d
 	// if save is requested
 	int64_t n = saveInit ? n_total : 1;
 	NumericVector saved_output(n);
-	if(n > 2147483647){
-	    for(int64_t i=0 ; i < n ; ++i){
-	        saved_output[i] = output_values[i];
-	    }
-	} else {
-	    for(int i=0 ; i < n ; ++i){
-	        saved_output[i] = output_values[i];
-	    }
+	for(int64_t i=0 ; i < n ; ++i){
+	    saved_output[i] = output_values[i];
 	}
 
 
