@@ -47,6 +47,10 @@
   - `update.fixest`:
   
     * new argument `evaluate` to ensure consistency with the `update` method from stats.
+    
+  - `feols` & `feglm`:
+  
+    * the Cholesky decomposition now checks for user interrupts (matters for models with MANY variables to estimate).
 
 ## Changes in version 0.6.0 (13-07-2020)
 
