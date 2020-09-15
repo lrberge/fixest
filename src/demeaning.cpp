@@ -1120,7 +1120,7 @@ List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, d
 	bool useX = n_vars_X > 0;
 
 	// initialisation if needed
-	bool isInit = Rf_length(r_init) != 1;
+	bool isInit = Rf_xlength(r_init) != 1;
 	double *init = REAL(r_init);
 	bool saveInit = isInit || init[0] != 0;
 
