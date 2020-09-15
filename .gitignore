@@ -7,3 +7,4 @@ src/*.so
 src/*.dll
 src-i386/*
 Rplots.pdf
+.Rhistor*
