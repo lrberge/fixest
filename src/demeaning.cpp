@@ -402,8 +402,8 @@ void demean_acc_2(int v, int iterMax, PARAM_DEMEAN *args){
 	// interruption handling
 	bool isMaster = omp_get_thread_num() == 0;
 	bool *pStopNow = args->stopnow;
-	double flop = 20 * n_obs; // rough estimate nber operation per iter
-	int iterSecond = ceil(2000000000 / flop / 5); // nber iter per 1/5 second
+	double flop = 20.0 * static_cast<double>(n_obs); // rough estimate nber operation per iter
+	int iterSecond = ceil(2000000000.0 / flop / 5); // nber iter per 1/5 second
 
 	//
 	// IT iteration (preparation)
@@ -818,8 +818,9 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args){
 	// interruption handling
 	bool isMaster = omp_get_thread_num() == 0;
 	bool *pStopNow = args->stopnow;
-	double flop = 4*(5 + 12*(Q-1) + 4*(Q-1)*(Q-1))*n_obs; // rough estimate nber operation per iter
-	int iterSecond = ceil(2000000000 / flop / 5); // nber iter per 1/5 second
+	double flop = 4.0*(5 + 12*(Q-1) + 4*(Q-1)*(Q-1))*static_cast<double>(n_obs); // rough estimate nber operation per iter
+	// I know I "over cast" but it's to remember the lesson
+	int iterSecond = ceil(2000000000.0 / flop / 5); // nber iter per 1/5 second
 
 	//
 	// IT iteration (preparation)
@@ -861,7 +862,6 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args){
 	// check whether we should go into the loop
 	bool keepGoing = false;
 	for(int i=0 ; i<nb_coef ; ++i){
-		// if(fabs(X[i] - GX[i]) / (0.1 + fabs(GX[i])) > diffMax){
 		if(continue_crit(X[i], GX[i], diffMax)){
 			keepGoing = true;
 			break;
@@ -869,8 +869,6 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args){
 	}
 
 	// For the stopping criterion on total addition
-	// vector<double> mu_last(n_obs, 0);
-	// double input_mean = 0;
 	double ssr = 0;
 
 	int iter = 0;
@@ -930,15 +928,6 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args){
 
 			// init ssr if iter == 50 / otherwise, comparison
 			if(iter == 50){
-				// for(int i=0 ; i<n_obs ; ++i){
-				// 	mu_last[i] = mu_current[i];
-				// }
-
-				// for(int i=0 ; i<n_obs ; ++i){
-				// 	input_mean += input[i];
-				// }
-				// input_mean /= n_obs;
-				// input_mean = fabs(input_mean);
 
 				ssr = 0;
 			    double resid;
@@ -948,23 +937,6 @@ bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args){
     	        }
 
 			} else {
-				// double mu_diff = 0;
-				// for(int i=0 ; i<n_obs ; ++i){
-				// 	mu_diff += fabs(mu_last[i] - mu_current[i]);
-				// }
-				// mu_diff = mu_diff / n_obs; // we scale it to have a meaningful value
-				// // Rprintf("iter %i -- mu_diff = %f (mean = %f)\n", iter, mu_diff, input_mean);
-				//
-				// // if(mu_diff / (0.1 + input_mean) < diffMax){
-				// if(stopping_crit(input_mean, mu_diff + input_mean, diffMax)){
-				// 	// Rprintf("mu_diff BREAK\n");
-				// 	break;
-				// }
-				//
-				// // we update mu_last
-				// for(int i=0 ; i<n_obs ; ++i){
-				// 	mu_last[i] = mu_current[i];
-				// }
 				double ssr_old = ssr;
 
 			    // we compute the new SSR
