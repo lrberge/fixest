@@ -97,7 +97,9 @@ all.equal(w, summary(res_wfe)$W$W.it)
 #    wfe: 320ms
 # fixest:  10ms
 
-
+# Coefficients and SEs:
+rbind(fixest = coef(res_feols), wfe = coef(res_wfe))
+rbind(fixest = se(res_feols), wfe = se(res_wfe))
 
 
 
