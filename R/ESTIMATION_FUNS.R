@@ -337,6 +337,10 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 
 	    est = ols_fit(y_demean, X_demean, weights, correct_0w, nthreads)
 
+	    if(mem.clean){
+	        gc()
+	    }
+
 	    # Corner case: not any relevant variable
 	    if(!is.null(est$all_removed)){
 	        all_vars = colnames(X)
@@ -430,6 +434,10 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 		res$fitted.values = res$sumFE = y - res$residuals
 	} else {
 
+	    if(mem.clean){
+	        gc()
+	    }
+
 		# X_beta / fitted / sumFE
 		if(isFixef){
 			x_beta = cpppar_xbeta(X, coef, nthreads)
@@ -452,6 +460,10 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 		}
 
 		res$hessian = est$xwx
+
+		if(mem.clean){
+		    gc()
+		}
 
 		if(isWeight){
 			res$sigma2 = cpp_ssq(res$residuals * sqrt(weights)) / (length(y) - df_k)
@@ -486,6 +498,10 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 	    res$sq.cor =  stats::cor(y, res$fitted.values)**2
 	} else {
 	    res$sq.cor = NA
+	}
+
+	if(mem.clean){
+	    gc()
 	}
 
 	res$ssr_null = cpp_ssr_null(y)
@@ -856,6 +872,10 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
     # Init
     #
 
+    if(mem.clean){
+        gc()
+    }
+
     if(init.type == "mu"){
 
         mu = starting_values
@@ -918,6 +938,10 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
         # NOTA: FE only => ADDS LOTS OF COMPUTATIONAL COSTS without convergence benefit
     }
 
+    if(mem.clean){
+        gc()
+    }
+
     if(init.type != "coef"){
         # starting deviance with constant equal to 1e-5
         # this is important for getting in step halving early (when deviance goes awry right from the start)
@@ -944,6 +968,10 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
     conv = FALSE
     warning_msg = div_message = ""
     for (iter in 1:glm.iter) {
+
+        if(mem.clean){
+            gc()
+        }
 
         mu.eta.val = mu.eta(mu, eta)
         var_mu = variance(mu)
@@ -978,6 +1006,10 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
             break
         }
 
+        if(mem.clean){
+            gc()
+        }
+
         wols = feols(y = z, X = X, weights = w, means = wols$means, correct_0w = any_0w, env = env, fixef.tol = fixef.tol * 10**(iter==1), fixef.iter = fixef.iter, nthreads = nthreads, mem.clean = mem.clean, verbose = verbose - 1)
 
         # In theory OLS estimation is guaranteed to exist
@@ -996,6 +1028,10 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
         eta = wols$fitted.values
         if(isOffset){
             eta = eta + offset
+        }
+
+        if(mem.clean){
+            gc()
         }
 
         mu = linkinv(eta)
@@ -1055,6 +1091,10 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
 
                 iter_sh = iter_sh + 1
                 eta_new = (eta_old + eta_new) / 2
+
+                if(mem.clean){
+                    gc()
+                }
 
                 mu = linkinv(eta_new + offset)
                 dev = sum_dev.resids(y, mu, eta_new + offset, wt = weights)
@@ -1161,6 +1201,10 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
     if(!onlyFixef && !lean){
         # score + hessian + vcov
 
+        if(mem.clean){
+            gc()
+        }
+
         # dispersion + scores
         if(family$family %in% c("poisson", "binomial")){
             res$scores = (wols$residuals * res$irls_weights) * wols$X_demean
@@ -1170,20 +1214,6 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
             res$hessian = cpppar_crossprod(wols$X_demean, res$irls_weights, nthreads) / res$dispersion
         }
 
-        # cov:
-        # var <- NULL
-        # try(var <- solve(res$hessian), silent = TRUE)
-        # if(is.null(var) || wols$multicol){
-        #     if(is.null(var)){
-        #         warning_msg = paste(warning_msg, "Covariance not defined, presence of collinearity. Use function collinearity() to pinpoint the problems.")
-        #         res$cov.unscaled = res$hessian * NA
-        #     } else {
-        #         warning_msg = paste(warning_msg, "Presence of collinearity in the IRLS stage. Use function collinearity() to pinpoint the problems.")
-        #         res$cov.unscaled = var
-        #     }
-        # } else {
-        #     res$cov.unscaled = var
-        # }
         info_inv = cpp_cholesky(res$hessian, nthreads)
         if(!is.null(info_inv$all_removed)){
             # This should not occur, but I prefer to be safe
@@ -1253,6 +1283,11 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
     # simpler form for poisson
     if(family_equiv == "poisson"){
         if(isWeight){
+
+            if(mem.clean){
+                gc()
+            }
+
             res$loglik = sum( (y * eta - mu - cpppar_lgamma(y + 1, nthreads)) * weights)
         } else {
             lfact = get("lfactorial", env)
@@ -1272,6 +1307,11 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
         fitted_null = linkinv(env$model0$constant)
     } else {
         if(verbose >= 1) cat("Null model:\n")
+
+        if(mem.clean){
+            gc()
+        }
+
         model_null = feglm.fit(X = matrix(1, nrow = n, ncol = 1), fixef_mat = NULL, env = env, lean = TRUE)
         ll_null = model_null$loglik
         fitted_null = model_null$fitted.values
