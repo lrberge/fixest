@@ -11,10 +11,13 @@
 #### Imai & Song ####
 ####
 
-# Equivalence between the "unit" wfe estimation and fixest
+# Equivalence between the "unit" wfe estimation and the same estimation in fixest
 # A) function to compute the unit weights
 # B) comparaison of the estimations
 #
+# other:
+#  - AJPS 2019 paper: https://imai.fas.harvard.edu/research/files/FEmatch.pdf
+#  - original code for unit weights (function GenWeightsUnit, line 1043): https://github.com/insongkim/wfe/blob/master/src/wfe.c
 
 #
 # A) weights
