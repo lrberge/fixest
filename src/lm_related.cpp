@@ -356,8 +356,8 @@ void mp_XtX(NumericMatrix &XtX, const NumericMatrix &X, const NumericMatrix &wX,
         std::vector<double> all_values(nthreads, 0);
         #pragma omp parallel num_threads(nthreads)
         {
-            int i = omp_get_thread_num()*N/omp_get_num_threads();
-            int stop = (omp_get_thread_num()+1)*N/omp_get_num_threads();
+            int i = omp_get_thread_num()*(N/omp_get_num_threads());
+            int stop = (omp_get_thread_num()+1)*(N/omp_get_num_threads());
             double val = 0;
             for(; i<stop ; ++i){
                 val += X(i, 0) * wX(i, 0);
@@ -383,7 +383,7 @@ void mp_XtX(NumericMatrix &XtX, const NumericMatrix &X, const NumericMatrix &wX,
             }
         }
 
-        #pragma omp parallel for num_threads(nthreads)
+        #pragma omp parallel for num_threads(nthreads) schedule(static, 1)
         for(int index=0 ; index<nValues ; ++index){
             int k_row = all_i[index];
             int k_col = all_j[index];
@@ -410,8 +410,8 @@ void mp_Xty(NumericVector &Xty, const NumericMatrix &X, const NumericVector y, i
         std::vector<double> all_values(nthreads, 0);
         #pragma omp parallel num_threads(nthreads)
         {
-            int i = omp_get_thread_num()*N/omp_get_num_threads();
-            int stop = (omp_get_thread_num()+1)*N/omp_get_num_threads();
+            int i = omp_get_thread_num()*(N/omp_get_num_threads());
+            int stop = (omp_get_thread_num()+1)*(N/omp_get_num_threads());
             double val = 0;
             for(; i<stop ; ++i){
                 val += X(i, 0) * y[i];
