@@ -1120,7 +1120,7 @@ List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, d
 
     // we initialize all_slope_vars to the values of slope_vars
     // to neutral_var if not slope
-    int index = 0;
+    int64_t index = 0;
     for(int q=0 ; q<Q ; ++q){
         if(pslope_flag[q]){
             all_slope_vars[q] = REAL(slope_vars) + index;
