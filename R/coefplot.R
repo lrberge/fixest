@@ -1613,16 +1613,23 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
                     if(identical(ref, "auto")){
                         # We add the reference used in the estimation
 
-                        if(!is.null(object$collin.var)){
-                            all_inter_names = paste0(root_interaction, "::", items)
-                            qui_keep = !all_inter_names %in% object$collin.var
-                            is_ref = is_ref[qui_keep]
-                            items = items[qui_keep]
-                        }
+                        # if(!is.null(object$collin.var)){
+                        #     all_inter_names = paste0(root_interaction, "::", items)
+                        #     qui_keep = !all_inter_names %in% object$collin.var
+                        #     is_ref = is_ref[qui_keep]
+                        #     items = items[qui_keep]
+                        # }
+                        #
+                        # if(length(inter_values) != sum(!is_ref)){
+                        #     warning("Internal error regarding the lengths of vectors of coefficients.")
+                        # }
 
-                        if(length(inter_values) != sum(!is_ref)){
-                            stop("Internal error regarding the lengths of vectors of coefficients.")
-                        }
+                        # We take care of removed variables
+                        all_inter_names = paste0(root_interaction, "::", items)
+                        all_inter_current = paste0(root_interaction, "::", c(inter_values, items[is_ref]))
+                        qui_keep = all_inter_names %in% all_inter_current
+                        is_ref = is_ref[qui_keep]
+                        items = items[qui_keep]
 
                         if(any(is_ref)){
                             ref_id = which(is_ref)
