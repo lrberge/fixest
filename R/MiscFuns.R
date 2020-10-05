@@ -2844,7 +2844,7 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
 demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFixest_notes(), iter = 2000, tol = 1e-6, im_confident = FALSE){
     # LATER: add slopes
 
-    # Step 1: formatting of the input
+    # Step 1: formatting the input
     if(!im_confident){
         check_arg(X, "numeric vmatrix | list mbt")
         check_arg(fe, "vmatrix | list mbt")
@@ -2876,7 +2876,7 @@ demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFi
         }
 
         if(is.null(var_names)) var_names = paste0("V", 1:ncol(X))
-        X = X * 1
+        if(is.integer(X)) X = X * 1
 
         ## fe
         if(is.list(fe)){
@@ -2906,7 +2906,7 @@ demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFi
 
 
         ## weights
-        check_arg_plus(weights, "NULL numeric conv vector len(X) GE{0}", .data = X)
+        check_arg_plus(weights, "NULL numeric conv vector len(data) GE{0}", .data = X)
         is_weight = !missing(weights) && !is.null(weights)
 
         ## nthreads
