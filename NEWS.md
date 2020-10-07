@@ -1,7 +1,7 @@
 
 # News for the R Package `fixest`
 
-## Changes in version 0.6.1
+## Changes in version 0.7.0
 
 #### Bugs
 
@@ -18,6 +18,12 @@
  - Two deep copies of some data are now avoided in the demeaning function. This improves the performance in terms of memory footprint, and also makes the algorithm faster. 
 
 #### User visible changes
+
+ - Name change in `summary`/`vcov`/`etable`: To get heteroskedasticity-robust standard-errors, `se = "hetero"` now replaces `se = "white"` to enhance clarity. Note that `se = "white"` still works.
+ 
+ - Argument `na_inf.rm` has been removed. It was present for historical reasons, and is removed to increase code clarity.
+ 
+ - Standard-errors: new default values for standard-errors. They become similar to `reghdfe` to increase cross-software comparability. Computing the standard-errors the old way is still possible using the argument `dof`. See the dedicated vignette: [On standard errors](https://cran.r-project.org/package=fixest/vignettes/standard_errors.html).
 
  - `etable` (suggestions by Caleb Kwon): 
  
