@@ -14,7 +14,7 @@
 #' @param ... Used to capture different \code{fixest} estimation objects (obtained with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}). Note that any other type of element is discarded. Note that you can give a list of \code{fixest} objects.
 #' @param digits Integer, default is 4. The number of digits to be displayed.
 #' @param tex Logical: whether the results should be a data.frame or a Latex table. By default, this argument is \code{TRUE} if the argument \code{file} (used for exportation) is not missing; it is equal to \code{FALSE} otherwise.
-#' @param fitstat A character vector or a one sided formula. A vector listing which fit statistics to display. The valid types are 'll', 'aic', 'bic' and r2 types like 'r2', 'pr2', 'war2', etc (see all valid types in \code{\link[fixest]{r2}}). The default value depends on the models to display. Example of use: \code{fitstat=c('sq.cor', 'ar2', 'war2')}, or \code{fitstat=~sq.cor+ar2+war2} using a formula.
+#' @param fitstat A character vector or a one sided formula. A vector listing which fit statistics to display. The valid types are 'll', 'aic', 'bic' and r2 types like 'r2', 'pr2', 'war2', etc (see all valid types in \code{\link[fixest]{r2}}). Also accepts valid types from the function \code{\link[fixest]{fistat}}. The default value depends on the models to display. Example of use: \code{fitstat=c('sq.cor', 'ar2', 'war2')}, or \code{fitstat=~sq.cor+ar2+war2} using a formula.
 #' @param title (Tex only.) Character scalar. The title of the Latex table.
 #' @param float (Tex only.) Logical. By default, if the argument \code{title} or \code{label} is provided, it is set to \code{TRUE}. Otherwise, it is set to \code{FALSE}.
 #' @param sdBelow (Tex only.) Logical, default is \code{TRUE}. Should the standard-errors be displayed below the coefficients?
@@ -241,7 +241,7 @@ etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threew
     # to get the model names
     dots_call = match.call(expand.dots = FALSE)[["..."]]
 
-    info = results2formattedList(..., se=se, dof=dof, fitstat=fitstat, cluster=cluster, digits=digits, sdBelow=sdBelow, signifCode=signifCode, coefstat = coefstat, ci = ci, title=title, float=float, subtitles=subtitles, yesNo=yesNo, keepFactors=keepFactors, tex = tex, useSummary=useSummary, dots_call=dots_call, powerBelow=powerBelow, dict=dict, interaction.combine=interaction.combine, convergence=convergence, family=family, keep=keep, drop=drop, file=file, order=order, label=label, fixef_sizes=fixef_sizes, fixef_sizes.simplify=fixef_sizes.simplify, depvar=depvar, style=style, replace=replace, notes = notes, group = group, tablefoot = tablefoot, extraline=extraline, placement = placement, drop.section = drop.section)
+    info = results2formattedList(..., se=se, dof=dof, fitstat_all=fitstat, cluster=cluster, digits=digits, sdBelow=sdBelow, signifCode=signifCode, coefstat = coefstat, ci = ci, title=title, float=float, subtitles=subtitles, yesNo=yesNo, keepFactors=keepFactors, tex = tex, useSummary=useSummary, dots_call=dots_call, powerBelow=powerBelow, dict=dict, interaction.combine=interaction.combine, convergence=convergence, family=family, keep=keep, drop=drop, file=file, order=order, label=label, fixef_sizes=fixef_sizes, fixef_sizes.simplify=fixef_sizes.simplify, depvar=depvar, style=style, replace=replace, notes = notes, group = group, tablefoot = tablefoot, extraline=extraline, placement = placement, drop.section = drop.section)
 
     if(tex){
         res = etable_internal_latex(info)
@@ -306,7 +306,7 @@ esttex <- function(..., se = c("standard", "hetero", "cluster", "twoway", "three
     # to get the model names
     dots_call = match.call(expand.dots = FALSE)[["..."]]
 
-    info = results2formattedList(..., tex = TRUE, useSummary=useSummary, se = se, dof = dof, cluster = cluster, digits = digits, fitstat = fitstat, title = title, float = float, sdBelow = sdBelow, keep=keep, drop = drop, order = order, dict = dict, file = file, replace = replace, convergence = convergence, signifCode = signifCode, coefstat = coefstat, ci = ci, label = label, subtitles = subtitles, fixef_sizes = fixef_sizes, fixef_sizes.simplify = fixef_sizes.simplify, yesNo = yesNo, keepFactors = keepFactors, family = family, powerBelow = powerBelow, interaction.combine = interaction.combine, dots_call = dots_call, depvar = TRUE, style = style, notes = notes, group = group, tablefoot = tablefoot, extraline = extraline, placement = placement, drop.section = drop.section)
+    info = results2formattedList(..., tex = TRUE, useSummary=useSummary, se = se, dof = dof, cluster = cluster, digits = digits, fitstat_all = fitstat, title = title, float = float, sdBelow = sdBelow, keep=keep, drop = drop, order = order, dict = dict, file = file, replace = replace, convergence = convergence, signifCode = signifCode, coefstat = coefstat, ci = ci, label = label, subtitles = subtitles, fixef_sizes = fixef_sizes, fixef_sizes.simplify = fixef_sizes.simplify, yesNo = yesNo, keepFactors = keepFactors, family = family, powerBelow = powerBelow, interaction.combine = interaction.combine, dots_call = dots_call, depvar = TRUE, style = style, notes = notes, group = group, tablefoot = tablefoot, extraline = extraline, placement = placement, drop.section = drop.section)
 
     res = etable_internal_latex(info)
 
@@ -342,14 +342,14 @@ esttable <- function(..., se=c("standard", "hetero", "cluster", "twoway", "three
     # to get the model names
     dots_call = match.call(expand.dots = FALSE)[["..."]]
 
-    info = results2formattedList(..., se=se, dof = dof, cluster=cluster, digits=digits, signifCode=signifCode, coefstat = coefstat, ci = ci, subtitles=subtitles, keepFactors=keepFactors, useSummary=useSummary, dots_call=dots_call, fitstat=fitstat, yesNo = c("Yes", "No"), depvar = depvar, family = family, keep = keep, drop = drop, order = order, dict = dict, interaction.combine = ":", group = group, extraline = extraline)
+    info = results2formattedList(..., se=se, dof = dof, cluster=cluster, digits=digits, signifCode=signifCode, coefstat = coefstat, ci = ci, subtitles=subtitles, keepFactors=keepFactors, useSummary=useSummary, dots_call=dots_call, fitstat_all=fitstat, yesNo = c("Yes", "No"), depvar = depvar, family = family, keep = keep, drop = drop, order = order, dict = dict, interaction.combine = ":", group = group, extraline = extraline)
 
     res = etable_internal_df(info)
 
     return(res)
 }
 
-results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits = 4, fitstat, sdBelow=TRUE, dict, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), coefstat = "se", ci = 0.95, label, subtitles, title, float = FALSE, replace = FALSE, yesNo = c("Yes", "No"), keepFactors = FALSE, tex = FALSE, useSummary, dots_call, powerBelow, interaction.combine, convergence, family, drop, order, keep, file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, depvar = FALSE, style = list(), notes = NULL, group = NULL, tablefoot = TRUE, extraline=NULL, placement = "htbp", drop.section = NULL){
+results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits = 4, fitstat_all, sdBelow=TRUE, dict, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), coefstat = "se", ci = 0.95, label, subtitles, title, float = FALSE, replace = FALSE, yesNo = c("Yes", "No"), keepFactors = FALSE, tex = FALSE, useSummary, dots_call, powerBelow, interaction.combine, convergence, family, drop, order, keep, file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, depvar = FALSE, style = list(), notes = NULL, group = NULL, tablefoot = TRUE, extraline=NULL, placement = "htbp", drop.section = NULL){
     # This function is the core of the functions esttable and esttex
 
 
@@ -644,7 +644,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits
     # fitstat: which R2 to display?
     #
 
-    if(missing(fitstat)){
+    if(missing(fitstat_all)){
         # Default values:
         #   - if all OLS: typical R2
         #   - if any non-OLS: pseudo R2 + squared cor.
@@ -653,39 +653,38 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits
         if(all(is_ols)){
             if(any(sapply(all_models, function(x) "fixef_vars" %in% names(x)))){
                 # means any FE model
-                fitstat = c("r2", "wr2")
+                fitstat_all = c("r2", "wr2")
             } else {
-                fitstat = c("r2", "ar2")
+                fitstat_all = c("r2", "ar2")
             }
         } else {
-            fitstat = c("sq.cor", "pr2", "bic")
+            fitstat_all = c("sq.cor", "pr2", "bic")
         }
 
 
-    } else if(isFALSE(fitstat) || (length(fitstat) == 1 && (is.na(fitstat) || fitstat == ""))){
-        fitstat = NULL
-    } else if("formula" %in% class(fitstat)){
-        check_arg(fitstat, "os formula", .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing 'aic', 'bic', 'll', or valid r2 types names (see function r2). ")
-        fitstat = attr(terms(fitstat), "term.labels")
+    } else if(isFALSE(fitstat_all) || (length(fitstat_all) == 1 && (is.na(fitstat_all) || fitstat_all == ""))){
+        fitstat_all = NULL
+    } else if("formula" %in% class(fitstat_all)){
+        check_arg(fitstat_all, "os formula", .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing 'aic', 'bic', 'll', or valid r2 types names (see function r2). ")
+        fitstat_all = attr(terms(fitstat_all), "term.labels")
     } else {
-        check_arg(fitstat, "character vector no na", .message = "Argument 'fitstat' must be a character vector (or a one sided formula) containing 'aic', 'bic', 'll', or valid r2 types names (see function r2). ")
+        check_arg(fitstat_all, "character vector no na", .message = "Argument 'fitstat' must be a character vector (or a one sided formula) containing 'aic', 'bic', 'll', or valid r2 types names (see function r2). ")
     }
 
     # checking the types
-    fitstat_type_allowed = c("sq.cor", "r2", "ar2", "pr2", "apr2", "par2", "wr2", "war2", "awr2", "wpr2", "pwr2", "wapr2", "wpar2", "awpr2", "apwr2", "pawr2", "pwar2", "ll", "aic", "bic")
-    fitstat = unique(fitstat)
+    fitstat_type_allowed = c("sq.cor", "ll", "aic", "bic", fitstat(give_types = TRUE), "r2", "ar2", "pr2", "apr2", "par2", "wr2", "war2", "awr2", "wpr2", "pwr2", "wapr2", "wpar2", "awpr2", "apwr2", "pawr2", "pwar2")
+    fitstat_all = unique(fitstat_all)
 
-    pblm = setdiff(fitstat, fitstat_type_allowed)
+    pblm = setdiff(fitstat_all, fitstat_type_allowed)
     if(length(pblm) > 0){
-        stop_up("Argument 'fitstat' must be a character vector (or a one sided formula) containing 'aic', 'bic', 'll', or valid r2 types names. ", enumerate_items(pblm, "is.quote"), " not valid (see function r2).")
+        stop_up("Argument 'fitstat' must be a character vector (or a one sided formula) containing '", paste0(fitstat_type_allowed[1:(which(fitstat_type_allowed == "r2") - 1)], collapse = "', '"), "', or valid r2 types names (see function r2). ", enumerate_items(pblm, "is.quote"), " not valid.")
     }
 
-    fitstat_dict_tex = c("sq.cor"="Squared Correlation", r2="R$^2$", ar2="Adjusted R$^2$", pr2="Pseudo R$^2$", apr2="Adjusted Pseudo R$^2$", wr2="Within R$^2$", war2="Within Adjusted R$^2$", wpr2="Within Pseudo R$^2$", wapr2="Whithin Adjusted Pseudo R$^2$", aic = "AIC", bic = "BIC", ll = "Log-Likelihood")
-
-    fitstat_dict_R = c("sq.cor"="Squared Corr.", r2="R2", ar2="Adjusted R2", pr2="Pseudo R2", apr2="Adj. Pseudo R2", wr2="Within R2", war2="Within Adj. R2", wpr2="Within Pseudo R2", wapr2="Whithin Adj. Pseudo R2", aic = "AIC", bic = "BIC", ll = "Log-Likelihood")
-
-    fitstat_dict = fitstat_dict_R
-    if(isTex) fitstat_dict = fitstat_dict_tex
+    if(isTex){
+        fitstat_dict = c("sq.cor"="Squared Correlation", r2="R$^2$", ar2="Adjusted R$^2$", pr2="Pseudo R$^2$", apr2="Adjusted Pseudo R$^2$", wr2="Within R$^2$", war2="Within Adjusted R$^2$", wpr2="Within Pseudo R$^2$", wapr2="Whithin Adjusted Pseudo R$^2$", aic = "AIC", bic = "BIC", ll = "Log-Likelihood", "G" = "# of working obs.")
+    } else {
+        fitstat_dict = c("sq.cor"="Squared Corr.", r2="R2", ar2="Adjusted R2", pr2="Pseudo R2", apr2="Adj. Pseudo R2", wr2="Within R2", war2="Within Adj. R2", wpr2="Within Pseudo R2", wapr2="Whithin Adj. Pseudo R2", aic = "AIC", bic = "BIC", ll = "Log-Likelihood", "G" = "G")
+    }
 
     # end: fitstat
 
@@ -1000,28 +999,34 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits
 
         K <- x$nparams
 
-        if(length(fitstat) == 0){
+        if(length(fitstat_all) == 0){
             fitstat_list[[m]] = NA
         } else {
             fistat_format = list()
 
             fun_format = ifelse(isTex, numberFormatLatex, numberFormatNormal)
 
-            if("aic" %in% fitstat) fistat_format[["aic"]] = fun_format(round(AIC(x), 3))
-            if("bic" %in% fitstat) fistat_format[["bic"]] = fun_format(round(BIC(x), 3))
-            if("ll" %in% fitstat) fistat_format[["ll"]] = fun_format(logLik(x))
+            if("aic" %in% fitstat_all) fistat_format[["aic"]] = fun_format(round(AIC(x), 3))
+            if("bic" %in% fitstat_all) fistat_format[["bic"]] = fun_format(round(BIC(x), 3))
+            if("ll" %in% fitstat_all) fistat_format[["ll"]] = fun_format(logLik(x))
 
             # regular r2s
             r2_type_allowed = c("sq.cor", "r2", "ar2", "pr2", "apr2", "wr2", "war2", "wpr2", "wapr2")
-            if(any(fitstat %in% r2_type_allowed)){
-                all_r2 = r2(x, intersect(fitstat, r2_type_allowed))
+            if(any(fitstat_all %in% r2_type_allowed)){
+                all_r2 = r2(x, intersect(fitstat_all, r2_type_allowed))
                 for(r2_val in names(all_r2)){
                     nb = 5 - (r2_val == "sq.cor") * 2
                     fistat_format[[r2_val]] = round(as.vector(all_r2[r2_val]), nb)
                 }
             }
 
-            fitstat_list[[m]] = fistat_format[fitstat]
+            # Other fit statistics
+            fs_remaining = intersect(fitstat_all, fitstat(give_types = TRUE))
+            for(fs in fs_remaining){
+                fistat_format[[fs]] = fitstat(x, type = fs)
+            }
+
+            fitstat_list[[m]] = fistat_format[fitstat_all]
         }
 
     }
@@ -1036,8 +1041,8 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits
     }
 
 
-    if(length(fitstat) > 0){
-        attr(fitstat_list, "format_names") = fitstat_dict[fitstat]
+    if(length(fitstat_all) > 0){
+        attr(fitstat_list, "format_names") = fitstat_dict[fitstat_all]
     }
 
     if(isTex){

@@ -3038,8 +3038,12 @@ demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFi
 #'
 fitstat = function(x, type, as.list = FALSE, ...){
 
-    check_arg(x, "class(fixest)")
-    check_arg_plus(type, "multi match(G)")
+    dots = list(...)
+    valid_types = c("G")
+    if(isTRUE(dots$give_types)) return(valid_types)
+
+    check_arg(x, "class(fixest) mbt")
+    check_arg_plus(type, "mbt multi match", .choices = valid_types)
     check_arg(as.list, "logical scalar")
 
     res_all = list()
