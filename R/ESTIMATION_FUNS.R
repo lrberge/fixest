@@ -1439,12 +1439,12 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
 #' esttable(est_pois, est_gaus, se = "twoway")
 #'
 #' # Comparing different types of standard errors
-#' sum_white    = summary(est_pois, se = "white")
+#' sum_hetero    = summary(est_pois, se = "hetero")
 #' sum_oneway   = summary(est_pois, se = "cluster")
 #' sum_twoway   = summary(est_pois, se = "twoway")
 #' sum_threeway = summary(est_pois, se = "threeway")
 #'
-#' esttable(sum_white, sum_oneway, sum_twoway, sum_threeway)
+#' esttable(sum_hetero, sum_oneway, sum_twoway, sum_threeway)
 #'
 #'
 #'

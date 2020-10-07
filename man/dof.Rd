@@ -14,8 +14,8 @@ dof(
   adj = TRUE,
   fixef.K = "nested",
   cluster.adj = TRUE,
-  cluster.df = "conventional",
-  t.df = "conventional",
+  cluster.df = "min",
+  t.df = "min",
   fixef.force_exact = FALSE
 )
 
@@ -30,9 +30,9 @@ getFixest_dof
 
 \item{cluster.adj}{Logical scalar, default is \code{TRUE}. How to make the small sample correction when clustering the standard-errors? If \code{TRUE} a \code{G/(G-1)} correction is performed with \code{G} the number of cluster values.}
 
-\item{cluster.df}{Either "conventional" (default) or "min". Only relevant when the variance-covariance matrix is two-way clustered (or higher). It governs how the small sample adjustment for the clusters is to be performed. [Sorry for the jargon that follows.] By default the i-th "sandwich" matrix is adjusted with G_i/(G_i-1) with G_i the number of unique clusters. If \code{cluster.df="min"}, a unique adjustment is made, of the form G_min/(G_min-1) with G_min the smallest G_i.}
+\item{cluster.df}{Either "conventional" or "min" (default). Only relevant when the variance-covariance matrix is two-way clustered (or higher). It governs how the small sample adjustment for the clusters is to be performed. [Sorry for the jargon that follows.] By default a unique adjustment is made, of the form G_min/(G_min-1) with G_min the smallest G_i. If \code{cluster.df="conventional"} then the i-th "sandwich" matrix is adjusted with G_i/(G_i-1) with G_i the number of unique clusters.}
 
-\item{t.df}{Either "conventional" (default) or "min". Only relevant when the variance-covariance matrix is clustered. It governs how the p-values should be computed. By default, the degrees of freedom of the Student t distribution is equal to the number of observations minus the number of estimated variables. If \code{t.df="min"}, then the degrees of freedom of the Student t distribution is equal to the minimum size of the clusters with which the VCOV has been clustered.}
+\item{t.df}{Either "conventional" or "min" (default). Only relevant when the variance-covariance matrix is clustered. It governs how the p-values should be computed. By default, the degrees of freedom of the Student t distribution is equal to the minimum size of the clusters with which the VCOV has been clustered. If \code{t.df="conventional"}, then the degrees of freedom of the Student t distribution is equal to the number of observations minus the number of estimated variables.}
 
 \item{fixef.force_exact}{Logical, default is \code{FALSE}. If there are 2 or more fixed-effects, these fixed-effects they can be irregular, meaning they can provide the same information. If so, the "real" number of parameters should be lower than the total number of fixed-effects. If \code{fixef.force_exact = TRUE}, then \code{\link[fixest]{fixef.fixest}} is first run to determine the exact number of parameters among the fixed-effects. Mostly, panels of the type individual-firm require \code{fixef.force_exact = TRUE} (but it adds computational costs).}
 
@@ -123,8 +123,8 @@ attr(fixef(est), "references")
 # To permanently set the default dof:
 #
 
-# eg to set it a la Stata's reghdfe:
-setFixest_dof(dof(cluster.df = "min", t.df = "min"))
+# eg no small sample adjustment:
+setFixest_dof(dof(adj = FALSE))
 
 # To reset it
 setFixest_dof()

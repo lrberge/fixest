@@ -10,7 +10,7 @@
 \usage{
 etable(
   ...,
-  se = c("standard", "white", "cluster", "twoway", "threeway", "fourway"),
+  se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"),
   dof = getFixest_dof(),
   cluster,
   digits = 4,
@@ -50,7 +50,7 @@ etable(
 
 esttex(
   ...,
-  se = c("standard", "white", "cluster", "twoway", "threeway", "fourway"),
+  se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"),
   dof = getFixest_dof(),
   cluster,
   digits = 4,
@@ -88,7 +88,7 @@ esttex(
 
 esttable(
   ...,
-  se = c("standard", "white", "cluster", "twoway", "threeway", "fourway"),
+  se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"),
   dof = getFixest_dof(),
   cluster,
   coefstat = c("se", "tstat", "confint"),
@@ -143,7 +143,7 @@ getFixest_etable()
 \arguments{
 \item{...}{Used to capture different \code{fixest} estimation objects (obtained with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}). Note that any other type of element is discarded. Note that you can give a list of \code{fixest} objects.}
 
-\item{se}{Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{White}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.}
+\item{se}{Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.}
 
 \item{dof}{An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{dof}} for this argument. The arguments and defaults of the function \code{\link[fixest]{dof}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "conventional"}, \code{t.df = "conventional"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{dof}} for details.}
 

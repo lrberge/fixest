@@ -303,14 +303,14 @@ test(se(est_feols, dof = dof(adj = FALSE, fixef.K = "full")), se_CL_grp_lm_HC0)
 test(se(est_feols), se_CL_grp_stata, "~")
 
 #
-# White
+# Heteroskedasticity-robust
 #
 
 se_white_lm_HC1 = sqrt(vcovHC(est_lm, type = "HC1")["x", "x"])
 se_white_lm_HC0 = sqrt(vcovHC(est_lm, type = "HC0")["x", "x"])
 
-test(se(est_feols, se = "white"), se_white_lm_HC1)
-test(se(est_feols, se = "white", dof = dof(adj = FALSE, cluster.adj = FALSE)), se_white_lm_HC0)
+test(se(est_feols, se = "hetero"), se_white_lm_HC1)
+test(se(est_feols, se = "hetero", dof = dof(adj = FALSE, cluster.adj = FALSE)), se_white_lm_HC0)
 
 #
 # Two way

@@ -208,7 +208,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #'
 #' @method summary fixest
 #'
-#' @param se Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{White}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.
+#' @param se Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.
 #' @param cluster Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1, "var2")]}, \code{cluster = c("var1, "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster).
 #' @param object A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
 #' @param dof An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{dof}} for this argument. The arguments and defaults of the function \code{\link[fixest]{dof}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "conventional"}, \code{t.df = "conventional"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{dof}} for details.
@@ -244,12 +244,12 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #'
 #' # Comparing different types of standard errors
 #' sum_standard = summary(est_pois, se = "standard")
-#' sum_white    = summary(est_pois, se = "white")
+#' sum_hetero    = summary(est_pois, se = "hetero")
 #' sum_oneway   = summary(est_pois, se = "cluster")
 #' sum_twoway   = summary(est_pois, se = "twoway")
 #' sum_threeway = summary(est_pois, se = "threeway")
 #'
-#' etable(sum_standard, sum_white, sum_oneway, sum_twoway, sum_threeway)
+#' etable(sum_standard, sum_hetero, sum_oneway, sum_twoway, sum_threeway)
 #'
 #' # Alternative ways to cluster the SE:
 #'
@@ -586,7 +586,7 @@ r2 = function(x, type = "all", full_names = FALSE){
 #' Set of functions to directly extract some commonly used statistics, like the p-value or the table of coefficients, from estimations. This was first implemented for \code{fixest} estimations, but has some support for other models.
 #'
 #' @param object An estimation. For example obtained from \code{\link[fixest]{feols}}.
-#' @param se [Fixest specific.] Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{White}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.
+#' @param se [Fixest specific.] Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.
 #' @param cluster [Fixest specific.] Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1, "var2")]}, \code{cluster = c("var1, "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster).
 #' @param ... Other arguments to be passed to \code{summary}.
 #'
@@ -5447,13 +5447,17 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 #' @inheritParams summary.fixest
 #' @inheritParams nobs.fixest
 #'
+#' @param attr Logical, defaults to \code{FALSE}. Whether to include the attributes describing how the VCOV was computed.
 #' @param ... Other arguments to be passed to \code{\link[fixest]{summary.fixest}}.
 #'
 #' The computation of the VCOV matrix is first done in \code{\link[fixest]{summary.fixest}}.
 #'
+#' @details
+#' For an explanation on how the standard-errors are computed and what is the exact meaning of the arguments, please have a look at the dedicated vignette: \href{https://cran.r-project.org/package=fixest/vignettes/standard_errors.html}{On standard-errors}.
+#'
 #' @return
 #' It returns a \eqn{N\times N} square matrix where \eqn{N} is the number of variables of the fitted model.
-#' This matrix has an attribute \dQuote{type} specifying how this variance/covariance matrix has been computed (i.e. was it created using White correction, or was it clustered along a specific factor, etc).
+#' This matrix has an attribute \dQuote{type} specifying how this variance/covariance matrix has been computed (i.e. if it was created using a heteroskedascity-robust correction, or if it was clustered along a specific factor, etc).
 #'
 #' @author
 #' Laurent Berge
@@ -5474,8 +5478,8 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 #' # the VCOV is clustered along the first FE
 #' vcov(est_pois)
 #'
-#' # "white" VCOV
-#' vcov(est_pois, se = "white")
+#' # Heteroskedasticity-robust VCOV
+#' vcov(est_pois, se = "hetero")
 #'
 #' # "clustered" VCOV (with respect to the Product factor)
 #' vcov(est_pois, se = "cluster", cluster = trade$Product)
@@ -5568,14 +5572,16 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 	    # we allow for integer values
 	    se = c("cluster", "twoway", "threeway", "fourway")[se]
 	} else if(!is.character(se)){
-		stop("Argument 'se' must be a character scalar equal to: 'standard', 'white', 'cluster', 'twoway', 'threeway' or 'fourway'.")
+		stop("Argument 'se' must be a character scalar equal to: 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
     }
 
 	se.val = NULL
-	try(se.val <- match.arg(se, c("standard", "white", "cluster", "twoway", "threeway", "fourway", "1", "2", "3", "4")), silent = TRUE)
+	try(se.val <- match.arg(se, c("standard", "white", "hetero", "cluster", "twoway", "threeway", "fourway", "1", "2", "3", "4")), silent = TRUE)
 	if(is.null(se.val)){
-		stop("Invalid argument 'se'. It should be equal to one of 'standard', 'white', 'cluster', 'twoway', 'threeway' or 'fourway'.")
+		stop("Invalid argument 'se'. It should be equal to one of 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
 	}
+
+	if(se.val == "white") se.val = "hetero"
 
 	dots = list()
 	if(is.null(dots$nframes_up)){
@@ -5646,7 +5652,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 	    if(n_fe_ok > 0){
 	        K = K - (sum(fixef_sizes_ok) - (n_fe_ok - 1))
 	    }
-	} else if(dof.fixef.K == "full" || se.val %in% c("standard", "white")){
+	} else if(dof.fixef.K == "full" || se.val %in% c("standard", "hetero")){
 	    K = object$nparams
 	    if(is_exact && n_fe >= 2 && n_fe_ok >= 1){
 	        fe = fixef(object, notes = FALSE)
@@ -5717,7 +5723,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 
 		vcov = VCOV_raw * correction.dof
 
-	} else if(se.val == "white"){
+	} else if(se.val == "hetero"){
 
 	    # we make a n/(n-1) adjustment to match vcovHC(type = "HC1")
 		vcov = crossprod(myScore %*% VCOV_raw) * correction.dof * ifelse(is_cluster, n/(n-1), 1)
@@ -6086,7 +6092,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 		warning("Some variances are negative (likely problem of collinearity).")
 	}
 
-	sd.dict = c("standard" = "Standard", "white"="White", "cluster"="Clustered", "twoway"="Two-way", "threeway"="Three-way", "fourway"="Four-way")
+	sd.dict = c("standard" = "Standard", "hetero"="HC", "cluster"="Clustered", "twoway"="Two-way", "threeway"="Three-way", "fourway"="Four-way")
 
 	attr(vcov, "type") = paste0(as.vector(sd.dict[se.val]), type_info)
 	attr(vcov, "dof.type") = paste0("dof(adj = ", dof.adj, ", fixef.K = '", dof.fixef.K, "', cluster.adj = ", is_cluster, ", cluster.df = '", dof$cluster.df, "', t.df = '", dof$t.df, "', fixef.force_exact = ", is_exact, ")")
@@ -6992,8 +6998,8 @@ getFixest_print.type = function(){
 #' @param fixef.K Character scalar equal to \code{"nested"} (default), \code{"none"} or \code{"full"}. In the small sample adjustment, how to account for the fixed-effects parameters. If \code{"none"}, the fixed-effects parameters are discarded, meaning the number of parameters (\code{K}) is only equal to the number of variables. If \code{"full"}, then the number of parameters is equal to the number of variables plus the number of fixed-effects. Finally, if \code{"nested"}, then the number of parameters is equal to the number of variables plus the number of fixed-effects that *are not* nested in the clusters used to cluster the standard-errors.
 #' @param fixef.force_exact Logical, default is \code{FALSE}. If there are 2 or more fixed-effects, these fixed-effects they can be irregular, meaning they can provide the same information. If so, the "real" number of parameters should be lower than the total number of fixed-effects. If \code{fixef.force_exact = TRUE}, then \code{\link[fixest]{fixef.fixest}} is first run to determine the exact number of parameters among the fixed-effects. Mostly, panels of the type individual-firm require \code{fixef.force_exact = TRUE} (but it adds computational costs).
 #' @param cluster.adj Logical scalar, default is \code{TRUE}. How to make the small sample correction when clustering the standard-errors? If \code{TRUE} a \code{G/(G-1)} correction is performed with \code{G} the number of cluster values.
-#' @param cluster.df Either "conventional" (default) or "min". Only relevant when the variance-covariance matrix is two-way clustered (or higher). It governs how the small sample adjustment for the clusters is to be performed. [Sorry for the jargon that follows.] By default the i-th "sandwich" matrix is adjusted with G_i/(G_i-1) with G_i the number of unique clusters. If \code{cluster.df="min"}, a unique adjustment is made, of the form G_min/(G_min-1) with G_min the smallest G_i.
-#' @param t.df Either "conventional" (default) or "min". Only relevant when the variance-covariance matrix is clustered. It governs how the p-values should be computed. By default, the degrees of freedom of the Student t distribution is equal to the number of observations minus the number of estimated variables. If \code{t.df="min"}, then the degrees of freedom of the Student t distribution is equal to the minimum size of the clusters with which the VCOV has been clustered.
+#' @param cluster.df Either "conventional" or "min" (default). Only relevant when the variance-covariance matrix is two-way clustered (or higher). It governs how the small sample adjustment for the clusters is to be performed. [Sorry for the jargon that follows.] By default a unique adjustment is made, of the form G_min/(G_min-1) with G_min the smallest G_i. If \code{cluster.df="conventional"} then the i-th "sandwich" matrix is adjusted with G_i/(G_i-1) with G_i the number of unique clusters.
+#' @param t.df Either "conventional" or "min" (default). Only relevant when the variance-covariance matrix is clustered. It governs how the p-values should be computed. By default, the degrees of freedom of the Student t distribution is equal to the minimum size of the clusters with which the VCOV has been clustered. If \code{t.df="conventional"}, then the degrees of freedom of the Student t distribution is equal to the number of observations minus the number of estimated variables.
 #'
 #' @details
 #'
@@ -7084,13 +7090,13 @@ getFixest_print.type = function(){
 #' # To permanently set the default dof:
 #' #
 #'
-#' # eg to set it a la Stata's reghdfe:
-#' setFixest_dof(dof(cluster.df = "min", t.df = "min"))
+#' # eg no small sample adjustment:
+#' setFixest_dof(dof(adj = FALSE))
 #'
 #' # To reset it
 #' setFixest_dof()
 #'
-dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = "conventional", t.df = "conventional", fixef.force_exact = FALSE){
+dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = "min", t.df = "min", fixef.force_exact = FALSE){
 
     check_arg_plus(adj, "loose logical scalar conv")
     check_arg_plus(fixef.K, "match(none, full, nested)")
@@ -7134,9 +7140,9 @@ getFixest_dof = function(){
 #'
 #' This functions defines or extracts the default type of standard-errors to computed in \code{fixest} \code{\link[fixest:summary.fixest]{summary}}, and \code{\link[fixest:vcov.fixest]{vcov}}.
 #'
-#' @param no_FE Character scalar equal to either: \code{"standard"} (default), or \code{"white"}. The type of standard-errors to use by default for estimations without fixed-effects.
-#' @param one_FE Character scalar equal to either: \code{"standard"}, \code{"white"}, or \code{"cluster"} (default). The type of standard-errors to use by default for estimations with \emph{one} fixed-effect.
-#' @param two_FE Character scalar equal to either: \code{"standard"}, \code{"white"}, \code{"cluster"}, or \code{"twoway"} (default). The type of standard-errors to use by default for estimations with \emph{two or more} fixed-effects.
+#' @param no_FE Character scalar equal to either: \code{"standard"} (default), or \code{"hetero"}. The type of standard-errors to use by default for estimations without fixed-effects.
+#' @param one_FE Character scalar equal to either: \code{"standard"}, \code{"hetero"}, or \code{"cluster"} (default). The type of standard-errors to use by default for estimations with \emph{one} fixed-effect.
+#' @param two_FE Character scalar equal to either: \code{"standard"}, \code{"hetero"}, \code{"cluster"}, or \code{"twoway"} (default). The type of standard-errors to use by default for estimations with \emph{two or more} fixed-effects.
 #'
 #' @return
 #' The function \code{getFixest_se()} returns a list with three elements containing the default for estimations i) wihtout, ii) with one, or iii) with two or more fixed-effects.
@@ -7155,7 +7161,7 @@ getFixest_dof = function(){
 #' etable(est_no_FE, est_one_FE, est_two_FE)
 #'
 #' # Changing the default standard-errors
-#' setFixest_se(no_FE = "white", one_FE = "standard", two_FE = "twoway")
+#' setFixest_se(no_FE = "hetero", one_FE = "standard", two_FE = "twoway")
 #' etable(est_no_FE, est_one_FE, est_two_FE)
 #'
 #' # Reseting the defaults
@@ -7164,9 +7170,9 @@ getFixest_dof = function(){
 #'
 setFixest_se = function(no_FE = "standard", one_FE = "cluster", two_FE = "cluster"){
 
-    check_arg_plus(no_FE,  "match(standard, white)")
-    check_arg_plus(one_FE, "match(standard, white, cluster)")
-    check_arg_plus(two_FE, "match(standard, white, cluster, twoway)")
+    check_arg_plus(no_FE,  "match(standard, hetero)")
+    check_arg_plus(one_FE, "match(standard, hetero, cluster)")
+    check_arg_plus(two_FE, "match(standard, hetero, cluster, twoway)")
 
     options(fixest_se = list(no_FE = no_FE, one_FE = one_FE, two_FE = two_FE))
 
@@ -7184,7 +7190,7 @@ getFixest_se = function(){
         return(se_default)
     }
 
-    if(!is.list(se_default) || !all(unlist(se_default) %in% c("standard", "white", "cluster", "twoway"))){
+    if(!is.list(se_default) || !all(unlist(se_default) %in% c("standard", "hetero", "cluster", "twoway"))){
         stop("The value of getOption(\"se_default\") is currently not legal. Please use function setFixest_se to set it to an appropriate value.")
     }
 

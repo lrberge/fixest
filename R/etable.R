@@ -181,7 +181,7 @@
 #'        extraline = list("{title:\\midrule}Sub-sample" =
 #'                           c("All", "May-June", "Jul.-Aug.", "Sept.")))
 #'
-etable = function(..., se = c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, digits=4, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode, label, float, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNo = "Yes", keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style = list(), notes = NULL, group = NULL, extraline = NULL, tablefoot = TRUE, placement = "htbp", drop.section = NULL){
+etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, digits=4, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode, label, float, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNo = "Yes", keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style = list(), notes = NULL, group = NULL, extraline = NULL, tablefoot = TRUE, placement = "htbp", drop.section = NULL){
 
     #
     # Checking the arguments
@@ -274,7 +274,7 @@ etable = function(..., se = c("standard", "white", "cluster", "twoway", "threewa
 
 
 #' @describeIn etable Exports the results of multiple \code{fixest} estimations in a Latex table.
-esttex <- function(..., se = c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, digits=4, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, title, float = float, sdBelow=TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNo = "Yes", keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", style = list(), notes = NULL, group = NULL, tablefoot = TRUE, extraline = NULL, placement = "htbp", drop.section = NULL){
+esttex <- function(..., se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, digits=4, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, title, float = float, sdBelow=TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNo = "Yes", keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", style = list(), notes = NULL, group = NULL, tablefoot = TRUE, extraline = NULL, placement = "htbp", drop.section = NULL){
     # drop: a vector of regular expressions
     # order: a vector of regular expressions
     # dict: a 'named' vector
@@ -323,7 +323,7 @@ esttex <- function(..., se = c("standard", "white", "cluster", "twoway", "threew
 }
 
 #' @describeIn etable Facility to display the results of multiple \code{fixest} estimations.
-esttable <- function(..., se=c("standard", "white", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, coefstat = c("se", "tstat", "confint"), ci = 0.95, depvar, keep, drop, dict, order, digits=4, fitstat, convergence, signifCode = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10), subtitles, keepFactors = FALSE, family, group = NULL, extraline = NULL){
+esttable <- function(..., se=c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, coefstat = c("se", "tstat", "confint"), ci = 0.95, depvar, keep, drop, dict, order, digits=4, fitstat, convergence, signifCode = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10), subtitles, keepFactors = FALSE, family, group = NULL, extraline = NULL){
 
     # Need to check for the presence of the se
     useSummary = TRUE
@@ -1463,7 +1463,7 @@ etable_internal_latex = function(info){
             my_se = unique(unlist(se_type_list)) # it comes from summary
             # every model has the same type of SE
             if(my_se == "Standard") my_se = "Normal"
-            if(my_se == "White") my_se = "White-corrected"
+            if(my_se == "HC") my_se = "Heteroskedasticity-robust"
 
             # Now we modify the names of the clusters if needed
             my_se = format_se_type_latex(my_se, dict)
