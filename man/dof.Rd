@@ -96,25 +96,25 @@ est = feols(y ~ x | fe1 + fe2, base)
 # Default: fixef.K = "nested"
 #  => adjustment K = 1 + 5 (i.e. x + fe2)
 summary(est)
-attributes(vcov(est))[c("dof.type", "dof.K")]
+attributes(vcov(est, attr = TRUE))[c("dof.type", "dof.K")]
 
 
 # fixef.K = FALSE
 #  => adjustment K = 1 (i.e. only x)
 summary(est, dof = dof(fixef.K = "none"))
-attr(vcov(est, dof = dof(fixef.K = "none")), "dof.K")
+attr(vcov(est, dof = dof(fixef.K = "none"), attr = TRUE), "dof.K")
 
 
 # fixef.K = TRUE
 #  => adjustment K = 1 + 3 + 5 - 1 (i.e. x + fe1 + fe2 - 1 restriction)
 summary(est, dof = dof(fixef.K = "full"))
-attr(vcov(est, dof = dof(fixef.K = "full")), "dof.K")
+attr(vcov(est, dof = dof(fixef.K = "full"), attr = TRUE), "dof.K")
 
 
 # fixef.K = TRUE & fixef.force_exact = TRUE
 #  => adjustment K = 1 + 3 + 5 - 2 (i.e. x + fe1 + fe2 - 2 restrictions)
 summary(est, dof = dof(fixef.K = "full", fixef.force_exact = TRUE))
-attr(vcov(est, dof = dof(fixef.K = "full", fixef.force_exact = TRUE)), "dof.K")
+attr(vcov(est, dof = dof(fixef.K = "full", fixef.force_exact = TRUE), attr = TRUE), "dof.K")
 
 # There are two restrictions:
 attr(fixef(est), "references")
@@ -126,7 +126,7 @@ attr(fixef(est), "references")
 # eg no small sample adjustment:
 setFixest_dof(dof(adj = FALSE))
 
-# To reset it
+# Factory default
 setFixest_dof()
 
 }

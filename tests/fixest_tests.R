@@ -155,19 +155,19 @@ est = feols(y ~ x | fe1 + fe2, base)
 
 # Default: fixef.K = "nested"
 #  => adjustment K = 1 + 5 (i.e. x + fe2)
-test(attr(vcov(est, dof = dof(fixef.K = "nested")), "dof.K"), 6)
+test(attr(vcov(est, dof = dof(fixef.K = "nested"), attr = TRUE), "dof.K"), 6)
 
 # fixef.K = FALSE
 #  => adjustment K = 1 (i.e. only x)
-test(attr(vcov(est, dof = dof(fixef.K = "none")), "dof.K"), 1)
+test(attr(vcov(est, dof = dof(fixef.K = "none"), attr = TRUE), "dof.K"), 1)
 
 # fixef.K = TRUE
 #  => adjustment K = 1 + 3 + 5 - 1 (i.e. x + fe1 + fe2 - 1 restriction)
-test(attr(vcov(est, dof = dof(fixef.K = "full")), "dof.K"), 8)
+test(attr(vcov(est, dof = dof(fixef.K = "full"), attr = TRUE), "dof.K"), 8)
 
 # fixef.K = TRUE & fixef.exact = TRUE
 #  => adjustment K = 1 + 3 + 5 - 2 (i.e. x + fe1 + fe2 - 2 restrictions)
-test(attr(vcov(est, dof = dof(fixef.K = "full", fixef.force_exact = TRUE)), "dof.K"), 7)
+test(attr(vcov(est, dof = dof(fixef.K = "full", fixef.force_exact = TRUE), attr = TRUE), "dof.K"), 7)
 
 #
 # Manual checks of the SEs
