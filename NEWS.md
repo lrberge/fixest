@@ -19,6 +19,8 @@
 
 #### User visible changes
 
+ - New function `fitsat` that computes various fit statistics. It is integrated with `etable` and can be invoked with the argument `fitstat`. So far only one fit statistic is included, but more will come.
+
  - Name change in `summary`/`vcov`/`etable`: To get heteroskedasticity-robust standard-errors, `se = "hetero"` now replaces `se = "white"` to enhance clarity. Note that `se = "white"` still works.
  
  - Argument `na_inf.rm` has been removed. It was present for historical reasons, and is removed to increase code clarity.

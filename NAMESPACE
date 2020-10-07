@@ -8,7 +8,7 @@ useDynLib(fixest, .registration = TRUE)
 export(feNmlm, femlm, feols, feglm, fepois, fenegbin)
 export(feglm.fit)
 # misc funs
-export(etable, esttex, esttable, collinearity, obs2remove, r2)
+export(etable, esttex, esttable, collinearity, obs2remove, r2, fitstat)
 # did
 export(did_means)
 # graph
