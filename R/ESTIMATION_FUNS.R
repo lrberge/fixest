@@ -173,8 +173,7 @@
 #'
 #'
 feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, fixef.iter = 10000,
-                 na_inf.rm = getFixest_na_inf.rm(), nthreads = getFixest_nthreads(),
-                 verbose = 0, warn = TRUE, notes = getFixest_notes(), combine.quick,
+                 nthreads = getFixest_nthreads(), verbose = 0, warn = TRUE, notes = getFixest_notes(), combine.quick,
                  demeaned = FALSE, mem.clean = FALSE, only.env = FALSE, env, ...){
 
 	dots = list(...)
@@ -193,7 +192,7 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 
 		# we use fixest_env for appropriate controls and data handling
 		if(missing(env)){
-		    env = try(fixest_env(fml = fml, data = data, weights = weights, offset = offset, panel.id = panel.id, fixef = fixef, fixef.tol = fixef.tol, fixef.iter = fixef.iter, na_inf.rm = na_inf.rm, nthreads = nthreads, verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick, demeaned = demeaned, mem.clean = mem.clean, origin = "feols", mc_origin = match.call(), ...), silent = TRUE)
+		    env = try(fixest_env(fml = fml, data = data, weights = weights, offset = offset, panel.id = panel.id, fixef = fixef, fixef.tol = fixef.tol, fixef.iter = fixef.iter, nthreads = nthreads, verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick, demeaned = demeaned, mem.clean = mem.clean, origin = "feols", mc_origin = match.call(), ...), silent = TRUE)
 		} else if(r <- !is.environment(env) || !isTRUE(env$fixest_env)) {
 		    stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(r, "an", "a 'fixest'"), " environment.")
 		}
@@ -720,9 +719,8 @@ check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights){
 #'
 #'
 feglm = function(fml, data, family = "poisson", offset, weights, panel.id, start = NULL,
-                 etastart = NULL, mustart = NULL, fixef,
-                 fixef.tol = 1e-6, fixef.iter = 10000, glm.iter = 25, glm.tol = 1e-8,
-                 na_inf.rm = getFixest_na_inf.rm(), nthreads = getFixest_nthreads(),
+                 etastart = NULL, mustart = NULL, fixef, fixef.tol = 1e-6, fixef.iter = 10000,
+                 glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
                  warn = TRUE, notes = getFixest_notes(), verbose = 0, combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
 
     if(missing(weights)) weights = NULL
@@ -730,7 +728,7 @@ feglm = function(fml, data, family = "poisson", offset, weights, panel.id, start
     time_start = proc.time()
 
     if(missing(env)){
-        env = try(fixest_env(fml=fml, data=data, family = family, offset = offset, weights = weights, panel.id = panel.id, linear.start = start, etastart=etastart, mustart=mustart, fixef = fixef, fixef.tol=fixef.tol, fixef.iter=fixef.iter, glm.iter = glm.iter, glm.tol = glm.tol, na_inf.rm = na_inf.rm, nthreads = nthreads, warn=warn, notes=notes, verbose = verbose, combine.quick = combine.quick, mem.clean = mem.clean, origin = "feglm", mc_origin = match.call(), ...), silent = TRUE)
+        env = try(fixest_env(fml=fml, data=data, family = family, offset = offset, weights = weights, panel.id = panel.id, linear.start = start, etastart=etastart, mustart=mustart, fixef = fixef, fixef.tol=fixef.tol, fixef.iter=fixef.iter, glm.iter = glm.iter, glm.tol = glm.tol, nthreads = nthreads, warn=warn, notes=notes, verbose = verbose, combine.quick = combine.quick, mem.clean = mem.clean, origin = "feglm", mc_origin = match.call(), ...), silent = TRUE)
 
     } else {
         if(!is.environment(env)) stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not an environment.")
@@ -761,8 +759,7 @@ feglm = function(fml, data, family = "poisson", offset, weights, panel.id, start
 
 #' @rdname feglm
 feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start = NULL,
-                     etastart = NULL, mustart = NULL, fixef.tol = 1e-6, fixef.iter = 10000,
-                     glm.iter = 25, glm.tol = 1e-8, na_inf.rm = getFixest_na_inf.rm(),
+                     etastart = NULL, mustart = NULL, fixef.tol = 1e-6, fixef.iter = 10000, glm.iter = 25, glm.tol = 1e-8,
                      nthreads = getFixest_nthreads(), warn = TRUE, notes = getFixest_notes(), mem.clean = FALSE,
                      verbose = 0, only.env = FALSE, env, ...){
 
@@ -818,7 +815,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
 
         time_start = proc.time()
 
-        env = try(fixest_env(y = y, X = X, fixef_mat = fixef_mat, family = family, na_inf.rm = na_inf.rm, nthreads = nthreads, offset = offset, weights = weights, linear.start = start, etastart=etastart, mustart=mustart, fixef.tol = fixef.tol, fixef.iter = fixef.iter, glm.iter = glm.iter, glm.tol = glm.tol, notes=notes, mem.clean = mem.clean, warn=warn, verbose = verbose, origin = "feglm.fit", mc_origin = match.call(), ...), silent = TRUE)
+        env = try(fixest_env(y = y, X = X, fixef_mat = fixef_mat, family = family, nthreads = nthreads, offset = offset, weights = weights, linear.start = start, etastart=etastart, mustart=mustart, fixef.tol = fixef.tol, fixef.iter = fixef.iter, glm.iter = glm.iter, glm.tol = glm.tol, notes=notes, mem.clean = mem.clean, warn=warn, verbose = verbose, origin = "feglm.fit", mc_origin = match.call(), ...), silent = TRUE)
 
         if("try-error" %in% class(env)){
             stop(format_error_msg(env, "feglm.fit"))
@@ -1451,14 +1448,13 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
 #'
 #'
 femlm <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), start = 0, fixef,
-						offset, panel.id, na_inf.rm = getFixest_na_inf.rm(),
-						fixef.tol = 1e-5, fixef.iter = 10000,
+						offset, panel.id, fixef.tol = 1e-5, fixef.iter = 10000,
 						nthreads = getFixest_nthreads(), verbose = 0, warn = TRUE,
 						notes = getFixest_notes(), theta.init, combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
 
 	# This is just an alias
 
-	res = try(feNmlm(fml=fml, data=data, family=family, fixef=fixef, offset=offset, panel.id = panel.id, start = start, na_inf.rm=na_inf.rm, fixef.tol=fixef.tol, fixef.iter=fixef.iter, nthreads=nthreads, verbose=verbose, warn=warn, notes=notes, theta.init = theta.init, combine.quick = combine.quick, mem.clean = mem.clean, origin="femlm", mc_origin_bis=match.call(), only.env=only.env, env=env, ...), silent = TRUE)
+	res = try(feNmlm(fml=fml, data=data, family=family, fixef=fixef, offset=offset, panel.id = panel.id, start = start, fixef.tol=fixef.tol, fixef.iter=fixef.iter, nthreads=nthreads, verbose=verbose, warn=warn, notes=notes, theta.init = theta.init, combine.quick = combine.quick, mem.clean = mem.clean, origin="femlm", mc_origin_bis=match.call(), only.env=only.env, env=env, ...), silent = TRUE)
 
 	if("try-error" %in% class(res)){
 		stop(format_error_msg(res, "femlm"))
@@ -1469,8 +1465,7 @@ femlm <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 
 #' @rdname femlm
 fenegbin = function(fml, data, theta.init, start = 0, fixef, offset, panel.id,
-                    na_inf.rm = getFixest_na_inf.rm(), fixef.tol = 1e-5,
-                    fixef.iter = 10000, nthreads = getFixest_nthreads(),
+                    fixef.tol = 1e-5, fixef.iter = 10000, nthreads = getFixest_nthreads(),
                     verbose = 0, warn = TRUE, notes = getFixest_notes(), combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
 
     # We control for the problematic argument family
@@ -1480,7 +1475,7 @@ fenegbin = function(fml, data, theta.init, start = 0, fixef, offset, panel.id,
 
     # This is just an alias
 
-    res = try(feNmlm(fml = fml, data=data, family = "negbin", theta.init = theta.init, start = start, fixef = fixef, offset = offset, panel.id = panel.id, na_inf.rm = na_inf.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter, nthreads = nthreads, verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick, mem.clean = mem.clean, origin = "fenegbin", mc_origin_bis = match.call(), only.env=only.env, env=env, ...), silent = TRUE)
+    res = try(feNmlm(fml = fml, data=data, family = "negbin", theta.init = theta.init, start = start, fixef = fixef, offset = offset, panel.id = panel.id, fixef.tol = fixef.tol, fixef.iter = fixef.iter, nthreads = nthreads, verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick, mem.clean = mem.clean, origin = "fenegbin", mc_origin_bis = match.call(), only.env=only.env, env=env, ...), silent = TRUE)
 
     if("try-error" %in% class(res)){
         stop(format_error_msg(res, "fenegbin"))
@@ -1491,8 +1486,7 @@ fenegbin = function(fml, data, theta.init, start = 0, fixef, offset, panel.id,
 
 #' @rdname feglm
 fepois = function(fml, data, offset, weights, panel.id, start = NULL, etastart = NULL, mustart = NULL,
-                  fixef, fixef.tol = 1e-6, fixef.iter = 10000, glm.iter = 25, glm.tol = 1e-8,
-                  na_inf.rm = getFixest_na_inf.rm(), nthreads = getFixest_nthreads(),
+                  fixef, fixef.tol = 1e-6, fixef.iter = 10000, glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
                   warn = TRUE, notes = getFixest_notes(), verbose = 0, combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
 
     # We control for the problematic argument family
@@ -1502,7 +1496,7 @@ fepois = function(fml, data, offset, weights, panel.id, start = NULL, etastart =
 
     # This is just an alias
 
-    res = try(feglm(fml = fml, data = data, family = "poisson", offset = offset, weights = weights, panel.id = panel.id, start = start, etastart = etastart, mustart = mustart, fixef = fixef, fixef.tol = fixef.tol, fixef.iter = fixef.iter, glm.iter = glm.iter, glm.tol = glm.tol, na_inf.rm = na_inf.rm, nthreads = nthreads, warn = warn, notes = notes, verbose = verbose, combine.quick = combine.quick, mem.clean = mem.clean, origin_bis = "fepois", mc_origin_bis = match.call(), only.env=only.env, env=env, ...), silent = TRUE)
+    res = try(feglm(fml = fml, data = data, family = "poisson", offset = offset, weights = weights, panel.id = panel.id, start = start, etastart = etastart, mustart = mustart, fixef = fixef, fixef.tol = fixef.tol, fixef.iter = fixef.iter, glm.iter = glm.iter, glm.tol = glm.tol, nthreads = nthreads, warn = warn, notes = notes, verbose = verbose, combine.quick = combine.quick, mem.clean = mem.clean, origin_bis = "fepois", mc_origin_bis = match.call(), only.env=only.env, env=env, ...), silent = TRUE)
 
     if("try-error" %in% class(res)){
         stop(format_error_msg(res, "fepois"))
@@ -1528,7 +1522,6 @@ fepois = function(fml, data, offset, weights, panel.id, start = NULL, etastart =
 #' @param data A data.frame containing the necessary variables to run the model. The variables of the non-linear right hand side of the formula are identified with this \code{data.frame} names. Can also be a matrix.
 #' @param family Character scalar. It should provide the family. The possible values are "poisson" (Poisson model with log-link, the default), "negbin" (Negative Binomial model with log-link), "logit" (LOGIT model with log-link), "gaussian" (Gaussian model).
 #' @param fixef Character vector. The names of variables to be used as fixed-effects. These variables should contain the identifier of each observation (e.g., think of it as a panel identifier). Note that the recommended way to include fixed-effects is to insert them directly in the formula.
-#' @param na_inf.rm Logical, default is \code{TRUE}. If the variables necessary for the estimation contain NA/Infs and \code{na_inf.rm = TRUE}, then all observations containing NA are removed prior to estimation and a note is displayed detailing the number of observations removed. Otherwise, an error is raised.
 #' @param NL.start (For NL models only) A list of starting values for the non-linear parameters. ALL the parameters are to be named and given a staring value. Example: \code{NL.start=list(a=1,b=5,c=0)}. Though, there is an exception: if all parameters are to be given the same starting value, you can use a numeric scalar.
 #' @param lower (For NL models only) A list. The lower bound for each of the non-linear parameters that requires one. Example: \code{lower=list(b=0,c=0)}. Beware, if the estimated parameter is at his lower bound, then asymptotic theory cannot be applied and the standard-error of the parameter cannot be estimated because the gradient will not be null. In other words, when at its upper/lower bound, the parameter is considered as 'fixed'.
 #' @param upper (For NL models only) A list. The upper bound for each of the non-linear parameters that requires one. Example: \code{upper=list(a=10,c=50)}. Beware, if the estimated parameter is at his upper bound, then asymptotic theory cannot be applied and the standard-error of the parameter cannot be estimated because the gradient will not be null. In other words, when at its upper/lower bound, the parameter is considered as 'fixed'.
@@ -1669,12 +1662,12 @@ fepois = function(fml, data, offset, weights, panel.id, start = NULL, etastart =
 #' points(x, fitted(est2_NL), col = 4, pch = 2)
 #'
 #'
-feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), NL.fml, fixef, na_inf.rm = getFixest_na_inf.rm(), NL.start, lower, upper, NL.start.init, offset, panel.id, start = 0, jacobian.method="simple", useHessian = TRUE, hessian.args = NULL, opt.control = list(), nthreads = getFixest_nthreads(), verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000, deriv.tol = 1e-4, deriv.iter = 1000, warn = TRUE, notes = getFixest_notes(), combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
+feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), NL.fml, fixef, NL.start, lower, upper, NL.start.init, offset, panel.id, start = 0, jacobian.method="simple", useHessian = TRUE, hessian.args = NULL, opt.control = list(), nthreads = getFixest_nthreads(), verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000, deriv.tol = 1e-4, deriv.iter = 1000, warn = TRUE, notes = getFixest_notes(), combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
 
 	time_start = proc.time()
 
 	if(missing(env)){
-	    env = try(fixest_env(fml=fml, data=data, family=family, NL.fml=NL.fml, fixef=fixef, na_inf.rm=na_inf.rm, NL.start=NL.start, lower=lower, upper=upper, NL.start.init=NL.start.init, offset=offset, panel.id=panel.id, linear.start=start, jacobian.method=jacobian.method, useHessian=useHessian, opt.control=opt.control, nthreads=nthreads, verbose=verbose, theta.init=theta.init, fixef.tol=fixef.tol, fixef.iter=fixef.iter, deriv.iter=deriv.iter, warn=warn, notes=notes, combine.quick=combine.quick, mem.clean = mem.clean, mc_origin=match.call(), computeModel0=TRUE, ...), silent = TRUE)
+	    env = try(fixest_env(fml=fml, data=data, family=family, NL.fml=NL.fml, fixef=fixef, NL.start=NL.start, lower=lower, upper=upper, NL.start.init=NL.start.init, offset=offset, panel.id=panel.id, linear.start=start, jacobian.method=jacobian.method, useHessian=useHessian, opt.control=opt.control, nthreads=nthreads, verbose=verbose, theta.init=theta.init, fixef.tol=fixef.tol, fixef.iter=fixef.iter, deriv.iter=deriv.iter, warn=warn, notes=notes, combine.quick=combine.quick, mem.clean = mem.clean, mc_origin=match.call(), computeModel0=TRUE, ...), silent = TRUE)
 
 	} else if(r <- !is.environment(env) || !isTRUE(env$fixest_env)) {
 	    stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(r, "an", "a 'fixest'"), " environment.")

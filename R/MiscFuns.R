@@ -6972,53 +6972,6 @@ getFixest_dict = function(){
     x
 }
 
-#' Sets/gets whether to remove NA/Inf values from \code{fixest} estimations
-#'
-#' Sets/gets the default policy of NA/Inf behavior in \code{fixest} estimations. By default, NA/Inf values are removed (and a note is displayed). If you prefer a no NA policy, just set \code{setFixest_na_inf.rm(FALSE)}.
-#'
-#' @param x A Logical.
-#'
-#' @author
-#' Laurent Berge
-#'
-#' @examples
-#'
-#' base = iris
-#' base[1, 1] = NA
-#' # default: NAs removed
-#' res = feols(Sepal.Length ~ Sepal.Width, base)
-#' # no tolerance: estimation fails
-#' try(feols(Sepal.Length ~ Sepal.Width, base, na_inf.rm = FALSE))
-#'
-#' # to set no tolerance as default:
-#' setFixest_na_inf.rm(FALSE)
-#' try(feols(Sepal.Length ~ Sepal.Width, base))
-#'
-#' # Reset it on:
-#' setFixest_na_inf.rm(TRUE)
-#'
-setFixest_na_inf.rm = function(x){
-
-    if(length(x) != 1 || !is.logical(x) || is.na(x)){
-        stop("Argument 'x' must be either TRUE or FALSE.")
-    }
-
-    options("fixest_na_inf.rm" = x)
-}
-
-#' @rdname setFixest_na_inf.rm
-"getFixest_na_inf.rm"
-
-getFixest_na_inf.rm = function(){
-
-    x = getOption("fixest_na_inf.rm")
-    if(length(x) != 1 || !is.logical(x) || is.na(x)){
-        stop("The value of getOption(\"fixest_na_inf.rm\") is currently not legal. Please use function setFixest_na_inf.rm to set it to an appropriate value. ")
-    }
-
-    x
-}
-
 #' Sets/gets what \code{print} does to \code{fixest} estimations
 #'
 #' Sets/gets the default behavior of the \code{print} method for non-summary \code{fixest} estimations. Default is to display the coefficients table but it can be changed to displaying only the coefficients.

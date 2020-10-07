@@ -13,7 +13,6 @@ femlm(
   fixef,
   offset,
   panel.id,
-  na_inf.rm = getFixest_na_inf.rm(),
   fixef.tol = 1e-05,
   fixef.iter = 10000,
   nthreads = getFixest_nthreads(),
@@ -36,7 +35,6 @@ fenegbin(
   fixef,
   offset,
   panel.id,
-  na_inf.rm = getFixest_na_inf.rm(),
   fixef.tol = 1e-05,
   fixef.iter = 10000,
   nthreads = getFixest_nthreads(),
@@ -64,8 +62,6 @@ fenegbin(
 \item{offset}{A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This offset is linearly added to the elements of the main formula 'fml'.}
 
 \item{panel.id}{The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id = ~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link[fixest]{feols}}).}
-
-\item{na_inf.rm}{Logical, default is \code{TRUE}. If the variables necessary for the estimation contain NA/Infs and \code{na_inf.rm = TRUE}, then all observations containing NA are removed prior to estimation and a note is displayed detailing the number of observations removed. Otherwise, an error is raised.}
 
 \item{fixef.tol}{Precision used to obtain the fixed-effects. Defaults to \code{1e-5}. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument \code{fixef.tol} cannot be lower than \code{10000*.Machine$double.eps}. Note that this parameter is dynamically controlled by the algorithm.}
 

@@ -21,7 +21,6 @@ feglm(
   fixef.iter = 10000,
   glm.iter = 25,
   glm.tol = 1e-08,
-  na_inf.rm = getFixest_na_inf.rm(),
   nthreads = getFixest_nthreads(),
   warn = TRUE,
   notes = getFixest_notes(),
@@ -47,7 +46,6 @@ feglm.fit(
   fixef.iter = 10000,
   glm.iter = 25,
   glm.tol = 1e-08,
-  na_inf.rm = getFixest_na_inf.rm(),
   nthreads = getFixest_nthreads(),
   warn = TRUE,
   notes = getFixest_notes(),
@@ -72,7 +70,6 @@ fepois(
   fixef.iter = 10000,
   glm.iter = 25,
   glm.tol = 1e-08,
-  na_inf.rm = getFixest_na_inf.rm(),
   nthreads = getFixest_nthreads(),
   warn = TRUE,
   notes = getFixest_notes(),
@@ -112,8 +109,6 @@ fepois(
 \item{glm.iter}{Number of iterations of the glm algorithm. Default is 25.}
 
 \item{glm.tol}{Tolerance level for the glm algorithm. Default is \code{1e-8}.}
-
-\item{na_inf.rm}{Logical, default is \code{TRUE}. If the variables necessary for the estimation contain NA/Infs and \code{na_inf.rm = TRUE}, then all observations containing NA are removed prior to estimation and a note is displayed detailing the number of observations removed. Otherwise, an error is raised.}
 
 \item{nthreads}{Integer: Number of nthreads to be used (accelerates the algorithm via the use of openMP routines). The default is to use the total number of nthreads available minus two. You can set permanently the number of threads used within this package using the function \code{\link[fixest]{setFixest_nthreads}}.}
 

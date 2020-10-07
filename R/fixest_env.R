@@ -7,7 +7,7 @@
 
 
 fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), NL.fml,
-                       fixef, na_inf.rm = getFixest_na_inf.rm(), NL.start, lower, upper, NL.start.init,
+                       fixef, NL.start, lower, upper, NL.start.init,
                        offset, linear.start = 0, jacobian.method = "simple",
                        useHessian = TRUE, hessian.args = NULL, opt.control = list(),
                        y, X, fixef_mat, panel.id,
@@ -58,7 +58,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
     #
     # Arguments control
-    main_args = c("fml", "data", "panel.id", "offset", "na_inf.rm", "fixef.tol", "fixef.iter", "fixef", "nthreads", "verbose", "warn", "notes", "combine.quick", "start", "only.env", "mem.clean")
+    main_args = c("fml", "data", "panel.id", "offset", "fixef.tol", "fixef.iter", "fixef", "nthreads", "verbose", "warn", "notes", "combine.quick", "start", "only.env", "mem.clean")
     femlm_args = c("family", "theta.init", "linear.start", "opt.control", "deriv.tol", "deriv.iter")
     feNmlm_args = c("NL.fml", "NL.start", "lower", "upper", "NL.start.init", "jacobian.method", "useHessian", "hessian.args")
     feglm_args = c("family", "weights", "glm.iter", "glm.tol", "etastart", "mustart")
@@ -218,7 +218,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         computeModel0 = family_equiv %in% c("poisson", "logit")
     }
 
-    check_arg(demeaned, notes, warn, na_inf.rm, mem.clean, "logical scalar")
+    check_arg(demeaned, notes, warn, mem.clean, "logical scalar")
 
     show_notes = notes
     notes = c()
@@ -458,22 +458,15 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     msgNA_y = "LHS: 0"
     info = cpppar_which_na_inf_vec(lhs, nthreads)
     if(info$any_na_inf){
-        if(!na_inf.rm){
-            msg = msg_na_inf(info$any_na, info$any_inf)
-            obs = head(which(info$is_na_inf), 3)
-            stop("The left hand side of the fomula contains ", msg, " (e.g. observation", enumerate_items(obs, "s"), "). Please provide data without ", msg, " (or use na_inf.rm).")
-        } else {
-            # If na_inf.rm => we keep track of the NAs
-            if(info$any_na) ANY_NA = TRUE
-            if(info$any_inf) ANY_INF = TRUE
 
-            anyNA_y = TRUE
-            isNA_y = info$is_na_inf
-            anyNA_sample = TRUE
-            isNA_sample = isNA_sample | isNA_y
-            msgNA_y = paste0("LHS: ", numberFormatNormal(sum(isNA_y)))
+        if(info$any_na) ANY_NA = TRUE
+        if(info$any_inf) ANY_INF = TRUE
 
-        }
+        anyNA_y = TRUE
+        isNA_y = info$is_na_inf
+        anyNA_sample = TRUE
+        isNA_sample = isNA_sample | isNA_y
+        msgNA_y = paste0("LHS: ", numberFormatNormal(sum(isNA_y)))
 
         lhs_clean = lhs[!isNA_y]
 
@@ -641,28 +634,17 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         info = cpppar_which_na_inf_mat(linear.mat, nthreads)
         if(info$any_na_inf){
             anyNA_L = TRUE
-            if(!na_inf.rm){
-                # Default behavior: no NA tolerance
-                quiNA = colSums(linear.mat[info$is_na_inf, , drop=FALSE]) > 0
-                whoIsNA = linear.params[quiNA]
-                msg = msg_na_inf(info$any_na, info$any_inf)
-                obs = which(info$is_na_inf)
 
-                stop("The right hand side contains ", msg, " (e.g. observation", enumerate_items(obs, "s"), "). Please provide data without ", msg, " (or use na_inf.rm). FYI the variable", enumerate_items(whoIsNA, "s.is"), " concerned.")
-            } else {
-                # If na_inf.rm => we keep track of the NAs
-                if(info$any_na) ANY_NA = TRUE
-                if(info$any_inf) ANY_INF = TRUE
+            if(info$any_na) ANY_NA = TRUE
+            if(info$any_inf) ANY_INF = TRUE
 
-                isNA_L = info$is_na_inf
-                anyNA_sample = TRUE
-                isNA_sample = isNA_sample | isNA_L
-                msgNA_L = paste0(", RHS: ", numberFormatNormal(sum(isNA_L)))
+            isNA_L = info$is_na_inf
+            anyNA_sample = TRUE
+            isNA_sample = isNA_sample | isNA_L
+            msgNA_L = paste0(", RHS: ", numberFormatNormal(sum(isNA_L)))
 
-                if(mem.clean){
-                    rm(isNA_L)
-                }
-
+            if(mem.clean){
+                rm(isNA_L)
             }
 
         } else {
@@ -715,20 +697,10 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 isNA_NL = isNA_NL | is.na(data_NL[[quiNA[i]]])
             }
 
-            if(!na_inf.rm){
-                whoIsNA = nonlinear.varnames[quiNA]
-                msg = "NAs"
-                obs = which(isNA_NL)
-
-                stop("The non-linear part (NL.fml) contains ", msg, " (e.g. observation", enumerate_items(obs, "s"), "). Please provide data without ", msg, " (or use na_inf.rm). FYI the variable", enumerate_items(whoIsNA, "s.is"), " concerned.")
-
-            } else {
-                # If na_inf.rm => we keep track of the NAs
-                ANY_NA = TRUE
-                anyNA_sample = TRUE
-                isNA_sample = isNA_sample | isNA_NL
-                msgNA_NL = paste0(", NL: ", numberFormatNormal(sum(isNA_NL)))
-            }
+            ANY_NA = TRUE
+            anyNA_sample = TRUE
+            isNA_sample = isNA_sample | isNA_NL
+            msgNA_NL = paste0(", NL: ", numberFormatNormal(sum(isNA_NL)))
 
             if(mem.clean){
                 rm(isNA_NL)
@@ -791,22 +763,17 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             info = cpppar_which_na_inf_vec(offset.value, nthreads)
             if(info$any_na_inf){
                 anyNA_offset = TRUE
-                if(na_inf.rm == FALSE){
-                    msg = msg_na_inf(info$any_na, info$any_inf)
-                    obs = head(which(info$is_na_inf), 3)
-                    stop("The offset contains ", msg, " (e.g. observation", enumerate_items(obs, "s"), "). Please provide data without ", msg, " (or use na_inf.rm).")
-                } else {
-                    if(info$any_na) ANY_NA = TRUE
-                    if(info$any_inf) ANY_INF = TRUE
 
-                    isNA_offset = info$is_na_inf
-                    anyNA_sample = TRUE
-                    isNA_sample = isNA_sample | isNA_offset
-                    msgNA_offset = paste0(", Offset: ", numberFormatNormal(sum(isNA_offset)))
+                if(info$any_na) ANY_NA = TRUE
+                if(info$any_inf) ANY_INF = TRUE
 
-                    if(mem.clean){
-                        rm(isNA_offset)
-                    }
+                isNA_offset = info$is_na_inf
+                anyNA_sample = TRUE
+                isNA_sample = isNA_sample | isNA_offset
+                msgNA_offset = paste0(", Offset: ", numberFormatNormal(sum(isNA_offset)))
+
+                if(mem.clean){
+                    rm(isNA_offset)
                 }
             } else {
                 msgNA_offset = ", Offset: 0"
@@ -877,23 +844,16 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             if(info$any_na_inf){
                 anyNA_weights = TRUE
 
-                if(na_inf.rm == FALSE){
-                    msg = msg_na_inf(info$any_na, info$any_inf)
-                    obs = head(which(info$is_na_inf), 3)
-                    stop("The weights contain ", msg, " (e.g. observation", enumerate_items(obs, "s"), "). Please provide data without ", msg, " (or use na_inf.rm).")
+                if(info$any_na) ANY_NA = TRUE
+                if(info$any_inf) ANY_INF = TRUE
 
-                } else {
-                    if(info$any_na) ANY_NA = TRUE
-                    if(info$any_inf) ANY_INF = TRUE
+                isNA_W = info$is_na_inf
+                anyNA_sample = TRUE
+                isNA_sample = isNA_sample | isNA_W
+                msgNA_weight = paste0(", Weights: ", numberFormatNormal(sum(isNA_W)))
 
-                    isNA_W = info$is_na_inf
-                    anyNA_sample = TRUE
-                    isNA_sample = isNA_sample | isNA_W
-                    msgNA_weight = paste0(", Weights: ", numberFormatNormal(sum(isNA_W)))
-
-                    if(mem.clean){
-                        rm(isNA_W)
-                    }
+                if(mem.clean){
+                    rm(isNA_W)
                 }
             } else {
                 msgNA_weight = ", Weights: 0"
@@ -1158,19 +1118,10 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         if(anyNA(fixef_mat)){
             isNA_fixef = rowSums(is.na(fixef_mat)) > 0
 
-            if(!na_inf.rm){
-                # Default behavior, NA not allowed
-                var_problem = fixef_vars[sapply(fixef_mat, anyNA)]
-                obs = head(which(isNA_fixef), 3)
-                stop("The fixed-effects variables contain NA values. Please provide data without NA (or use na_inf.rm).", ifelse(ncol(fixef_mat) > 1, paste0(" FYI the fixed-effects with NA are: ", paste0(var_problem, collapse = ", "), "."), ""), " (e.g. observation", enumerate_items(obs, "s"), ".)")
-
-            } else {
-                # If na_inf.rm => we keep track of the NAs
-                ANY_NA = TRUE
-                anyNA_sample = TRUE
-                isNA_sample = isNA_sample | isNA_fixef
-                msgNA_fixef = paste0(", Fixed-effects: ", numberFormatNormal(sum(isNA_fixef)))
-            }
+            ANY_NA = TRUE
+            anyNA_sample = TRUE
+            isNA_sample = isNA_sample | isNA_fixef
+            msgNA_fixef = paste0(", Fixed-effects: ", numberFormatNormal(sum(isNA_fixef)))
 
             if(mem.clean){
                 rm(isNA_fixef)
@@ -1193,24 +1144,13 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             info = cpppar_which_na_inf_mat(mat_tmp, nthreads)
             if(info$any_na_inf){
 
-                if(!na_inf.rm){
-                    # Default behavior: no NA tolerance
-                    quiNA = colSums(slope_mat[info$is_na_inf, , drop=FALSE]) > 0
-                    whoIsNA = names(slope_mat)[quiNA]
-                    msg = msg_na_inf(info$any_na, info$any_inf)
-                    obs = which(info$is_na_inf)
+                if(info$any_na) ANY_NA = TRUE
+                if(info$any_inf) ANY_INF = TRUE
 
-                    stop("In the fixed-effects part of the formula, variables with varying slopes contain ", msg, " (e.g. observation", enumerate_items(obs, "s"), "). Please provide data without ", msg, " (or use na_inf.rm). FYI the variable", enumerate_items(whoIsNA, "s.is"), " concerned.")
-                } else {
-                    # If na_inf.rm => we keep track of the NAs
-                    if(info$any_na) ANY_NA = TRUE
-                    if(info$any_inf) ANY_INF = TRUE
-
-                    isNA_slope = info$is_na_inf
-                    anyNA_sample = TRUE
-                    isNA_sample = isNA_sample | isNA_slope
-                    msgNA_slope = paste0(", Var. Slopes: ", numberFormatNormal(sum(isNA_slope)))
-                }
+                isNA_slope = info$is_na_inf
+                anyNA_sample = TRUE
+                isNA_sample = isNA_sample | isNA_slope
+                msgNA_slope = paste0(", Var. Slopes: ", numberFormatNormal(sum(isNA_slope)))
 
             } else {
                 msgNA_slope = ", Var. Slopes: 0"
