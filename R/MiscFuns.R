@@ -337,7 +337,7 @@ summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), .vcov, fo
 	    }
 
 	} else {
-	    vcov = vcov(object, se=se, cluster=cluster, dof=dof, forceCovariance = forceCovariance, keepBounded = keepBounded, nframes_up = nframes_up)
+	    vcov = vcov(object, se=se, cluster=cluster, dof=dof, forceCovariance = forceCovariance, keepBounded = keepBounded, nframes_up = nframes_up, attr = TRUE)
 	}
 
 
@@ -359,7 +359,8 @@ summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), .vcov, fo
 	zvalue <- object$coefficients/se
 	if(object$method %in% "feols" || (object$method %in% "feglm" && !object$family$family %in% c("poisson", "binomial"))){
 
-	    t.df = attr(vcov, "t.df")
+	    # I have renamed t.df into G
+	    t.df = attr(vcov, "G")
 
 	    if(!is.null(t.df)){
 	        pvalue <- 2*pt(-abs(zvalue), max(t.df - 1, 1))
@@ -3003,6 +3004,67 @@ demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFi
     X_demean
 }
 
+
+
+#' Computes fit statistics of fixest objects
+#'
+#' Computes various fit statistics for \code{fixest} estimations.
+#'
+#' @param x A \code{fixest} estimation.
+#' @param type Character vector. The type of fit statistic to be computed. So far, only \code{"G"}, the 'working' number of observations, is available.
+#' @param as.list Logical, default is \code{FALSE}. Only used when one statistic is to be computed (i.e. arg. \code{type} is of length 1). If \code{TRUE}, then a list whose name is the \code{type} is returned containing the statistic.
+#' @param ... Other elements to bepassed to other methods and may be used to compute the statistics (for example you can pass on arguments to compute the VCOV when using \code{type = "G"}).
+#'
+#' @return
+#' If two or more types are to be computed, then a list is returned whose names correstpond to the argument \code{type}. If only one type is to be computed, then by default the result is simplified to a vector (or list, it depends on the type) containing the statistics; to return a list instead, \code{as.list=TRUE} needs to be used.
+#'
+#' @examples
+#'
+#' data(trade)
+#' gravity = feols(log(Euros) ~ log(dist_km) | Destination + Origin, trade)
+#'
+#' # Extracting the 'working' number of observations used to compute the pvalues
+#' fitstat(gravity, "G")
+#'
+#' # Idem, but when coimputing two-way SEs
+#' fitstat(gravity, "G", se = "standard")
+#'
+#'
+fitstat = function(x, type, as.list = FALSE, ...){
+
+    check_arg(x, "class(fixest)")
+    check_arg_plus(type, "multi match(G)")
+    check_arg(as.list, "logical scalar")
+
+    res_all = list()
+    type_all = type
+
+    for(i in seq_along(type_all)){
+        type = type_all[i]
+
+        if(type == "G"){
+            fromSummary = "cov.scaled" %in% names(x)
+            if(!fromSummary){
+                my_vcov = vcov(x, attr = TRUE, ...)
+            } else {
+                my_vcov = x$cov.scaled
+            }
+
+            G = attr(my_vcov, "G")
+            if(is.null(G)) G = x$nobs
+
+            res_all[[type]] = G
+        }
+
+    }
+
+    if(!as.list){
+        res_all = res_all[[1]]
+    }
+
+    res_all
+}
+
 #### ................. ####
 #### Internal Funs     ####
 ####
@@ -5497,8 +5559,10 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 #' vcov(est_pois_simple, cluster = ~Product)
 #'
 #'
-vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovariance = FALSE, keepBounded = FALSE, ...){
+vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE, forceCovariance = FALSE, keepBounded = FALSE, ...){
 	# computes the clustered vcov
+
+    check_arg(attr, "logical scalar")
 
     if(!"nframes_up" %in% names(match.call())){
         # condition means client call
@@ -6083,7 +6147,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 		if(is_t_min){
 		    if(is.null(G_min)) G_min = min(sapply(cluster, max))
 
-		    attr(vcov, "t.df") = G_min
+		    if(attr) base::attr(vcov, "G") = G_min
 		}
 
 	}
@@ -6094,9 +6158,13 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), forceCovarian
 
 	sd.dict = c("standard" = "Standard", "hetero"="HC", "cluster"="Clustered", "twoway"="Two-way", "threeway"="Three-way", "fourway"="Four-way")
 
-	attr(vcov, "type") = paste0(as.vector(sd.dict[se.val]), type_info)
-	attr(vcov, "dof.type") = paste0("dof(adj = ", dof.adj, ", fixef.K = '", dof.fixef.K, "', cluster.adj = ", is_cluster, ", cluster.df = '", dof$cluster.df, "', t.df = '", dof$t.df, "', fixef.force_exact = ", is_exact, ")")
-	attr(vcov, "dof.K") = K
+	if(attr){
+	    base::attr(vcov, "type") = paste0(as.vector(sd.dict[se.val]), type_info)
+	    base::attr(vcov, "dof.type") = paste0("dof(adj = ", dof.adj, ", fixef.K = '", dof.fixef.K, "', cluster.adj = ", is_cluster, ", cluster.df = '", dof$cluster.df, "', t.df = '", dof$t.df, "', fixef.force_exact = ", is_exact, ")")
+	    base::attr(vcov, "dof.K") = K
+	}
+
+
 
 	vcov
 }
