@@ -505,6 +505,7 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 	}
 
 	res$ssr_null = cpp_ssr_null(y)
+	res$ssr = cpp_ssq(res$residuals)
 	sigma_null = sqrt(res$ssr_null/n)
 	res$ll_null = -1/2/sigma_null^2*res$ssr_null - n*log(sigma_null) - n*log(2*pi)/2
 

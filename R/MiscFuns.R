@@ -213,6 +213,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' @param object A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
 #' @param dof An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{dof}} for this argument. The arguments and defaults of the function \code{\link[fixest]{dof}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "conventional"}, \code{t.df = "conventional"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{dof}} for details.
 #' @param .vcov A user provided covariance matrix or a function coomputing this matrix. If a matrix, it must be a square matrix of the same number of rows as the number of variables estimated. If a function, it must return the previsouly mentioned matrix.
+#' @param lean Logical, default is \code{FALSE}. Used to reduce the (memory) size of the summary object. If \code{TRUE}, then all objects of length N (the number of observations) are removed from the result. Note that some \code{fixest} methods may consequently not work when applied to the summary.
 #' @param forceCovariance (Advanced users.) Logical, default is \code{FALSE}. In the peculiar case where the obtained Hessian is not invertible (usually because of collinearity of some variables), use this option to force the covariance matrix, by using a generalized inverse of the Hessian. This can be useful to spot where possible problems come from.
 #' @param keepBounded (Advanced users -- \code{feNmlm} with non-linear part and bounded coefficients only.) Logical, default is \code{FALSE}. If \code{TRUE}, then the bounded coefficients (if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise it is not).
 #' @param n Integer, default is missing (means Inf). Number of coefficients to display when the print method is used.
@@ -272,7 +273,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' summary(est_pois, .vcov = vcovCL, cluster = trade[, c("Destination", "Product")])
 #'
 #'
-summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), .vcov, forceCovariance = FALSE, keepBounded = FALSE, n,  ...){
+summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), .vcov, lean = FALSE, forceCovariance = FALSE, keepBounded = FALSE, n,  ...){
 	# computes the clustered SD and returns the modified vcov and coeftable
 
 	if(!is.null(object$onlyFixef)){
@@ -293,6 +294,7 @@ summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), .vcov, fo
 	    }
 	}
 
+	check_arg(lean, "logical scalar")
 	check_arg(n, "integer scalar GE{1}")
 	if(!missing(n)){
 	    object$n_print = n
@@ -393,6 +395,10 @@ summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), .vcov, fo
 	object$cov.scaled = vcov
 	object$coeftable = coeftable
 	object$se = se
+
+	if(lean){
+	    object[c("fixef_id", "residuals", "fitted.values", "scores", "sumFE")] = NULL
+	}
 
 	return(object)
 }
@@ -550,7 +556,7 @@ r2 = function(x, type = "all", full_names = FALSE){
 			} else {
 				ssr_fe_only = ifNullNA(x$ssr_fe_only)
 				nb_fe = x$nparams - length(coef(x))
-				res[i] = 1 - cpp_ssq(x$residuals) / ssr_fe_only * (n - nb_fe) / (n - nb_fe - df_k)
+				res[i] = 1 - x$ssr / ssr_fe_only * (n - nb_fe) / (n - nb_fe - df_k)
 			}
 		} else {
 			df_k = ifelse(adj, x$nparams, 1 - pseudo)
@@ -565,7 +571,7 @@ r2 = function(x, type = "all", full_names = FALSE){
 			} else {
 				ssr_null = x$ssr_null
 				df.intercept = 1 * (isFixef || any(grepl("(Intercept)", names(x$coefficients), fixed = TRUE)))
-				res[i] = 1 - drop(crossprod(x$residuals)) / ssr_null * (n - df.intercept) / (n - df_k)
+				res[i] = 1 - x$ssr / ssr_null * (n - df.intercept) / (n - df_k)
 			}
 
 		}
@@ -4859,7 +4865,10 @@ BIC.fixest = function(object, ...){
 logLik.fixest = function(object, ...){
 
 	if(object$method == "feols"){
-		resid = object$residuals
+	    # if the summary is 'lean', then no way we can compute that
+	    resid = object$residuals
+	    if(is.null(resid)) resid = NA
+
 		sigma = sqrt(mean(resid^2))
 		n = length(resid)
 		ll = -1/2/sigma^2 * sum(resid^2) - n * log(sigma) - n * log(2*pi)/2
@@ -5038,6 +5047,10 @@ resid.fixest = residuals.fixest = function(object, type = c("response", "devianc
 
     r = object$residuals
     w = object[["weights"]]
+
+    if(is.null(r)){
+        stop("The method 'resid.fixest' cannot be applied to a 'lean' summary. Please apply it to the estimation object directly.")
+    }
 
     if(method == "feols" || (method %in% c("feNmlm", "femlm") && family == "gaussian")){
 

@@ -89,6 +89,10 @@ deviance.fixest = function(object, ...){
     w = object[["weights"]]
     if(is.null(w)) w = rep(1, length(r))
 
+    if(is.null(r) && !method %in% c("fepois", "feglm")){
+        stop("The method 'deviance.fixest' cannot be applied to a 'lean' summary. Please apply it to the estimation object directly.")
+    }
+
     if(method == "feols" || (method %in% c("femlm", "feNmlm") && family == "gaussian")){
         res = sum(w * r**2)
 
