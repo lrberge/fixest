@@ -3072,7 +3072,7 @@ fitstat = function(x, type, as.list = FALSE, ...){
 parse_macros = function(..., reset = FALSE, from_xpd = FALSE){
     set_up(1)
 
-    check_arg(..., "os formula dotnames", .message = paste0("Each element of '...' must be a one-sided formula, and the name of each argument must start with two dots (ex: ", ifelse(from_xpd, "xpd(fml, ..ctrl = ~ x5 + x6)", "setFixest_fml(..ctrl = ~ x5 + x6)"), ")."))
+    check_arg(..., "dotnames os formula | character vector no na", .message = paste0("Each element of '...' must be a one-sided formula, and the name of each argument must start with two dots (ex: ", ifelse(from_xpd, "xpd(fml, ..ctrl = ~ x5 + x6)", "setFixest_fml(..ctrl = ~ x5 + x6)"), ").\nAlternatively it can be a character vector of variable names."))
 
     # We require os formulas instead of character strings because:
     # 1) I find it more handy
@@ -3083,7 +3083,7 @@ parse_macros = function(..., reset = FALSE, from_xpd = FALSE){
     if(is.null(fml_macro)){
         fml_macro = list()
     } else if(!is.list(fml_macro)){
-        warning("The value of getOption(\"fixest_fml_macro\") wasn't legal, it has been reset.")
+        warn_up("The value of getOption(\"fixest_fml_macro\") wasn't legal, it has been reset.")
         fml_macro = list()
         options(fixest_fml_macro = list())
     }
@@ -3101,7 +3101,28 @@ parse_macros = function(..., reset = FALSE, from_xpd = FALSE){
         stop_up("Each argument name must start with two dots. Use '", correct_name, "' instead of '", arg_name, "'.")
     }
 
-    for(v in names(dots)) fml_macro[[v]] = deparse_long(dots[[v]][[2]])
+    for(v in names(dots)){
+        fml_raw = dots[[v]]
+
+        if(is.character(fml_raw)){
+            fml_raw = fml_raw[grepl("[[:alnum:]]", fml_raw)]
+
+            if(length(fml_raw) > 0){
+                fml_str = paste("~", paste(fml_raw, collapse = " + "))
+                fml = try(as.formula(fml_str))
+                if("try-error" %in% class(fml)){
+                    stop("The variable '", v, "' does not lead to a valid formula (i.e. ", fml_str, " is not valid).")
+                }
+            } else {
+                fml = ~1
+            }
+
+        } else {
+            fml = fml_raw
+        }
+
+        fml_macro[[v]] = deparse_long(fml[[2]])
+    }
 
     fml_macro
 }
@@ -7252,7 +7273,7 @@ getFixest_se = function(){
 #' You can set formula macros globally with \code{setFixest_fml}. These macros can then be used in \code{fixest} estimations or when using the function \code{\link[fixest:setFixest_fml]{xpd}}.
 #'
 #' @param fml A formula containing macros variables. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}.
-#' @param ... Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. \code{..ctrl}). The value of each argument must be a one-sided formula, it is the definition of the macro variable. Example of a valid call: \code{setFixest_fml(..ctrl = ~ var1 + var2)}. In the function \code{xpd}, the default macro variables are taken from \code{getFixest_fml}, any variable in \code{...} will replace these values.
+#' @param ... Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. \code{..ctrl}). The value of each argument must be a one-sided formula or a character vector, it is the definition of the macro variable. Example of a valid call: \code{setFixest_fml(..ctrl = ~ var1 + var2)}. In the function \code{xpd}, the default macro variables are taken from \code{getFixest_fml}, any variable in \code{...} will replace these values.
 #' @param reset A logical scalar, defaults to \code{FALSE}. If \code{TRUE}, all macro variables are first reset (i.e. deleted).
 #'
 #' @details
