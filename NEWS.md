@@ -13,6 +13,8 @@
  
  - `coefplot`: Problem regarding interactions when observations, and hence coefficients, were removed from the estimation. Now the coefficients are removed from the plot. Bug reported by @phisherblack [#45](https://github.com/lrberge/fixest/issues/45).
  
+ - `coefplot`: Corrected various bugs when asked for the plotting of several estimations. 
+ 
 #### Internal improvements
 
  - Two deep copies of some data are now avoided in the demeaning function. This improves the performance in terms of memory footprint, and also makes the algorithm faster. 
@@ -46,6 +48,10 @@
   * The new default of argument `nthreads` is 50% of all available threads. 
   * Accepts new values: a) 0 means all available threads, b) a number strictly between 0 and 1 will represent the fraction of all threads to use.
   * Multi-threading is now off when forking is detected.
+  
+  - `coefplot`:
+  
+    * The argument `group` now accepts a special character `"^^"`, when used, it cleans the beginning of the coefficient name. Very useful for factors.
 
  - Improved display of numbers in `print` method.
  

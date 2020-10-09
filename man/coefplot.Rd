@@ -168,7 +168,7 @@ coefplot(
 
 \item{bg}{Background color for the plot. By default it is white.}
 
-\item{group}{A list, default is missing. Each element of the list reports the coefficients to be grouped while the name of the element is the group name. Each element of the list can be either: i) a character vector of length 1, ii) of length 2, or ii) a numeric vector. If equal to: i) then it is interpreted as a pattern: all element fitting the regular expression will be grouped, if ii) it corrsponds to the first and last elements to be grouped, if iii) it corresponds to the coefficients numbers to be grouped. If equal to a character vector, you can use a percentage to tell the algorithm to look at the coefficients before aliasing (e.g. \code{"\%varname"}). Example of valid uses: \code{group=list(group_name=\"pattern\")}, \code{group=list(group_name=c(\"var_start\", \"var_end\"))}, \code{group=list(group_name=1:2))}. See details.}
+\item{group}{A list, default is missing. Each element of the list reports the coefficients to be grouped while the name of the element is the group name. Each element of the list can be either: i) a character vector of length 1, ii) of length 2, or ii) a numeric vector. If equal to: i) then it is interpreted as a pattern: all element fitting the regular expression will be grouped (note that you can use the special character "^^" to clean the beginning of the names, see example), if ii) it corrsponds to the first and last elements to be grouped, if iii) it corresponds to the coefficients numbers to be grouped. If equal to a character vector, you can use a percentage to tell the algorithm to look at the coefficients before aliasing (e.g. \code{"\%varname"}). Example of valid uses: \code{group=list(group_name=\"pattern\")}, \code{group=list(group_name=c(\"var_start\", \"var_end\"))}, \code{group=list(group_name=1:2))}. See details.}
 
 \item{group.par}{A list of parameters controlling the display of the group. The parameters controlling the line are: \code{lwd}, \code{tcl} (length of the tick), \code{line.adj} (adjustment of the position, default is 0), \code{tick} (whether to add the ticks), \code{lwd.ticks}, \code{col.ticks}. Then the parameters controlling the text: \code{text.adj} (adjustment of the position, default is 0), \code{text.cex}, \code{text.font}, \code{text.col}.}
 
@@ -323,6 +323,26 @@ coefplot(est)
 # To reset to the default settings:
 setFixest_coefplot(reset = TRUE)
 coefplot(est)
+
+#
+# Example 4: group + cleaning
+#
+
+# You can use the argument group to group variables
+# You can further use the special character "^^" to clean
+#  the beginning of the coef. name: particularly useful for factors
+
+est = feols(Petal.Length ~ Petal.Width + Sepal.Length +
+                Sepal.Width + Species, iris)
+
+# No grouping:
+coefplot(est)
+
+# now we group by Sepal and Species
+coefplot(est, group = list(Sepal = "Sepal", Species = "Species"))
+
+# now we group + clean the beginning of the names using the special character ^^
+coefplot(est, group = list(Sepal = "^^Sepal.", Species = "^^Species"))
 
 
 }
