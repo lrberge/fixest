@@ -47,6 +47,27 @@ a <- feols(Ozone ~ Wind + ..ctrl, airquality)
 b <- feols(Ozone ~ Wind + ..ctrl_long, airquality)
 etable(a, b, keep = "Int|Win")
 
+#
+# You can use xpd for stepwise estimations
+#
+
+# we want to look at the effect of x1 on y
+# controlling for different variables
+
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
+
+# We first create a matrix with all possible combinations of variables
+my_args = lapply(names(base)[-(1:2)], function(x) c("", x))
+(all_combs = as.matrix(do.call("expand.grid", my_args)))
+
+res_all = list()
+for(i in 1:nrow(all_combs)){
+  res_all[[i]] = feols(xpd(y ~ x1 + ..v, ..v = all_combs[i, ]), base)
+}
+
+etable(res_all)
+coefplot(res_all)
 
 
 }
