@@ -4567,7 +4567,34 @@ format_se_type = function(x, width, by = FALSE){
 
     if(!grepl("\\(", x)){
         # means not clustered
-        return(x)
+        if(nchar(x) <= width) return(x)
+
+        # We reduce each word to 3 letters (if needed)
+        x_split = c("$", strsplit(x, "")[[1]]) # we add a non-letter flag, marking the beginning
+        x_split_new = x_split
+        end_word = length(x_split)
+        non_letter_flag = grepl("[^[:alpha:]]", x_split) * (1:end_word)
+        letter_flag = grepl("[[:alpha:]]", x_split) * (1:end_word)
+        while(TRUE){
+            start_word = which.max(non_letter_flag[1:end_word]) + 1
+            # we truncate
+            word_length = end_word - start_word + 1
+            slack = length(x_split_new) - (width + 1)
+            letters_to_rm = min(word_length - 4, slack)
+            if(letters_to_rm > 0){
+                i_max = end_word - letters_to_rm
+                x_split_new = x_split_new[-((i_max+1):end_word)]
+                x_split_new[i_max] = "."
+            }
+
+            lf = letter_flag[1:(start_word - 1)]
+            if(all(lf == 0)) break
+
+            # new end_word
+            end_word = which.max(lf)
+        }
+
+        return(paste(x_split_new[-1], collapse = ""))
     } else if(x == "NA (not-available)"){
         return("not available")
     }
