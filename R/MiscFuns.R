@@ -3012,7 +3012,7 @@ demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFi
 #' @param x A \code{fixest} estimation.
 #' @param type Character vector. The type of fit statistic to be computed. So far, only \code{"G"}, the 'working' number of observations, is available.
 #' @param as.list Logical, default is \code{FALSE}. Only used when one statistic is to be computed (i.e. arg. \code{type} is of length 1). If \code{TRUE}, then a list whose name is the \code{type} is returned containing the statistic.
-#' @param ... Other elements to bepassed to other methods and may be used to compute the statistics (for example you can pass on arguments to compute the VCOV when using \code{type = "G"}).
+#' @param ... Other elements to be passed to other methods and may be used to compute the statistics (for example you can pass on arguments to compute the VCOV when using \code{type = "G"}).
 #'
 #' @return
 #' If two or more types are to be computed, then a list is returned whose names correstpond to the argument \code{type}. If only one type is to be computed, then by default the result is simplified to a vector (or list, it depends on the type) containing the statistics; to return a list instead, \code{as.list=TRUE} needs to be used.
@@ -3031,9 +3031,22 @@ demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFi
 #'
 fitstat = function(x, type, as.list = FALSE, ...){
 
+    # Later:
+    # f => f stat
+    #   * f.df / f.pval / f.stat
+    # wf => within f stat
+    #   * wf.df / wf.pval / wf.stat
+
     dots = list(...)
     valid_types = c("G")
-    if(isTRUE(dots$give_types)) return(valid_types)
+    if(isTRUE(dots$give_types)){
+
+        tex_alias = c("G" = "Size of 'working' sample")
+        R_alias   = c("G" = "G")
+
+        res = list(types = valid_types, tex_alias = tex_alias, R_alias = R_alias)
+        return(res)
+    }
 
     check_arg(x, "class(fixest) mbt")
     check_arg_plus(type, "mbt multi match", .choices = valid_types)

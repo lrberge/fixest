@@ -677,18 +677,23 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
             fitstat_all = c("sq.cor", "pr2", "bic")
         }
 
-
     } else if(isFALSE(fitstat_all) || (length(fitstat_all) == 1 && (is.na(fitstat_all) || fitstat_all == ""))){
         fitstat_all = NULL
+
     } else if("formula" %in% class(fitstat_all)){
-        check_arg(fitstat_all, "os formula", .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing 'aic', 'bic', 'll', or valid r2 types names (see function r2). ")
+        check_arg(fitstat_all, "os formula", .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing 'aic', 'bic', 'll', types from function fitstat (?fitstat), or valid r2 types names (?r2). ")
         fitstat_all = attr(terms(fitstat_all), "term.labels")
+
     } else {
         check_arg(fitstat_all, "character vector no na", .message = "Argument 'fitstat' must be a character vector (or a one sided formula) containing 'aic', 'bic', 'll', or valid r2 types names (see function r2). ")
+
     }
 
+    fitstat_all = tolower(fitstat_all)
+
     # checking the types
-    fitstat_type_allowed = c("sq.cor", "ll", "aic", "bic", fitstat(give_types = TRUE), "r2", "ar2", "pr2", "apr2", "par2", "wr2", "war2", "awr2", "wpr2", "pwr2", "wapr2", "wpar2", "awpr2", "apwr2", "pawr2", "pwar2")
+    fitstat_fun_types = fitstat(give_types = TRUE)
+    fitstat_type_allowed = c("sq.cor", "ll", "aic", "bic", fitstat_fun_types$types, "r2", "ar2", "pr2", "apr2", "par2", "wr2", "war2", "awr2", "wpr2", "pwr2", "wapr2", "wpar2", "awpr2", "apwr2", "pawr2", "pwar2")
     fitstat_all = unique(fitstat_all)
 
     pblm = setdiff(fitstat_all, fitstat_type_allowed)
@@ -697,9 +702,17 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
     }
 
     if(isTex){
-        fitstat_dict = c("sq.cor"="Squared Correlation", r2="R$^2$", ar2="Adjusted R$^2$", pr2="Pseudo R$^2$", apr2="Adjusted Pseudo R$^2$", wr2="Within R$^2$", war2="Within Adjusted R$^2$", wpr2="Within Pseudo R$^2$", wapr2="Whithin Adjusted Pseudo R$^2$", aic = "AIC", bic = "BIC", ll = "Log-Likelihood", "G" = "# of working obs.")
+        fitstat_dict = c("sq.cor"="Squared Correlation", r2="R$^2$", ar2="Adjusted R$^2$", pr2="Pseudo R$^2$", apr2="Adjusted Pseudo R$^2$", wr2="Within R$^2$", war2="Within Adjusted R$^2$", wpr2="Within Pseudo R$^2$", wapr2="Whithin Adjusted Pseudo R$^2$", aic = "AIC", bic = "BIC", ll = "Log-Likelihood", fitstat_fun_types$tex_alias)
     } else {
-        fitstat_dict = c("sq.cor"="Squared Corr.", r2="R2", ar2="Adjusted R2", pr2="Pseudo R2", apr2="Adj. Pseudo R2", wr2="Within R2", war2="Within Adj. R2", wpr2="Within Pseudo R2", wapr2="Whithin Adj. Pseudo R2", aic = "AIC", bic = "BIC", ll = "Log-Likelihood", "G" = "G")
+        fitstat_dict = c("sq.cor"="Squared Corr.", r2="R2", ar2="Adjusted R2", pr2="Pseudo R2", apr2="Adj. Pseudo R2", wr2="Within R2", war2="Within Adj. R2", wpr2="Within Pseudo R2", wapr2="Whithin Adj. Pseudo R2", aic = "AIC", bic = "BIC", ll = "Log-Likelihood", fitstat_fun_types$R_alias)
+    }
+
+    # Renaming the stats with user-provided aliases
+    if(length(dict) > 0){
+        user_stat_name = intersect(names(fitstat_dict), names(dict))
+        if(length(user_stat_name) > 0){
+            fitstat_dict[user_stat_name] = dict[user_stat_name]
+        }
     }
 
     # end: fitstat
@@ -1504,7 +1517,6 @@ etable_internal_latex = function(info){
             my_se = unique(unlist(se_type_list)) # it comes from summary
             # every model has the same type of SE
             if(my_se == "Standard") my_se = "Normal"
-            if(my_se == "HC") my_se = "Heteroskedasticity-robust"
 
             # Now we modify the names of the clusters if needed
             my_se = format_se_type_latex(my_se, dict)

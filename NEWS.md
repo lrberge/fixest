@@ -36,6 +36,8 @@
   - Fix glitch in help pages regarding the use of the '%' (percentage) character in regular expressions.
   
   - Two new arguments `.vcov` and `.vcov_args` to compute the standard-errors with custom functions.
+  
+  - The statistics can now have custom aliases using the argument `dict`.
 
 #### User visible changes
 
