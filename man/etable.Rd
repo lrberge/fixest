@@ -13,6 +13,8 @@ etable(
   se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"),
   dof = getFixest_dof(),
   cluster,
+  .vcov,
+  .vcov_args = NULL,
   digits = 4,
   tex,
   fitstat,
@@ -53,6 +55,8 @@ esttex(
   se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"),
   dof = getFixest_dof(),
   cluster,
+  .vcov,
+  .vcov_args = NULL,
   digits = 4,
   fitstat,
   coefstat = c("se", "tstat", "confint"),
@@ -91,6 +95,8 @@ esttable(
   se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"),
   dof = getFixest_dof(),
   cluster,
+  .vcov,
+  .vcov_args = NULL,
   coefstat = c("se", "tstat", "confint"),
   ci = 0.95,
   depvar,
@@ -148,6 +154,10 @@ getFixest_etable()
 \item{dof}{An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{dof}} for this argument. The arguments and defaults of the function \code{\link[fixest]{dof}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "conventional"}, \code{t.df = "conventional"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{dof}} for details.}
 
 \item{cluster}{Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1, "var2")]}, \code{cluster = c("var1, "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster).}
+
+\item{.vcov}{A function to be used to compute the standard-errors of each fixest object. You can pass extra arguments to this function using the argument \code{.vcov_args}. See the example.}
+
+\item{.vcov_args}{A list containing arguments to be passed to the function \code{.vcov}.}
 
 \item{digits}{Integer, default is 4. The number of digits to be displayed.}
 
@@ -354,6 +364,20 @@ etable(est_c0, est_c1, est_c2, tex = TRUE, group = list("{where:stats}Controls" 
 etable(est_all, est_sub1, est_sub2, est_sub3, tex = TRUE,
        extraline = list("{title:\\\\midrule}Sub-sample" =
                           c("All", "May-June", "Jul.-Aug.", "Sept.")))
+
+
+#
+# Using custom functions to cumpute the standard errors
+#
+
+# You can customize the way you compute the SEs with the argument .vcov
+# Let's use some covariances from the sandwich package
+
+etable(est_c0, est_c1, est_c2, .vcov = sandwich::vcovHC)
+
+# To add extra arguments to vcovHC, you need to use .vcov_args
+etable(est_c0, est_c1, est_c2, .vcov = sandwich::vcovHC, .vcov_args = list(type = "HC0"))
+
 
 }
 \seealso{

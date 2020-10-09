@@ -46,6 +46,8 @@
 #' @param placement (Tex only.) Character string giving the position of the float in Latex. Default is "htbp". It must consist of only the characters 'h', 't', 'b', 'p', 'H' and '!'. Reminder: h: here; t: top; b: bottom; p: float page; H: definitely here; !: prevents Latex to look for other positions. Note that it can be equal to the empty string (and you'll get the default placement).
 #' @param drop.section (Tex only.) Character vector which can be of length 0 (i.e. equal to \code{NULL}). Can contain the values "fixef", "slopes" or "stats". It would drop, respectively, the fixed-effects section, the variables with varying slopes section or the fit statistics section.
 #' @param reset (\code{setFixest_etable} only.) Logical, default is \code{FALSE}. If \code{TRUE}, this will reset all the default values that were already set by the user in previous calls.
+#' @param .vcov A function to be used to compute the standard-errors of each fixest object. You can pass extra arguments to this function using the argument \code{.vcov_args}. See the example.
+#' @param .vcov_args A list containing arguments to be passed to the function \code{.vcov}.
 #'
 #' @details
 #' The function \code{esttex} is equivalent to the function \code{etable} with argument \code{tex = TRUE}.
@@ -181,7 +183,21 @@
 #'        extraline = list("{title:\\midrule}Sub-sample" =
 #'                           c("All", "May-June", "Jul.-Aug.", "Sept.")))
 #'
-etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, digits=4, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode, label, float, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNo = "Yes", keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style = list(), notes = NULL, group = NULL, extraline = NULL, tablefoot = TRUE, placement = "htbp", drop.section = NULL){
+#'
+#' #
+#' # Using custom functions to cumpute the standard errors
+#' #
+#'
+#' # You can customize the way you compute the SEs with the argument .vcov
+#' # Let's use some covariances from the sandwich package
+#'
+#' etable(est_c0, est_c1, est_c2, .vcov = sandwich::vcovHC)
+#'
+#' # To add extra arguments to vcovHC, you need to use .vcov_args
+#' etable(est_c0, est_c1, est_c2, .vcov = sandwich::vcovHC, .vcov_args = list(type = "HC0"))
+#'
+#'
+etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, .vcov, .vcov_args = NULL, digits=4, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode, label, float, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNo = "Yes", keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style = list(), notes = NULL, group = NULL, extraline = NULL, tablefoot = TRUE, placement = "htbp", drop.section = NULL){
 
     #
     # Checking the arguments
@@ -189,7 +205,7 @@ etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threew
 
     # Need to check for the presence of the se
     useSummary = TRUE
-    if(missing(se) && missing(cluster)){
+    if(missing(se) && missing(cluster) && missing(.vcov)){
         useSummary = FALSE
     }
 
@@ -241,7 +257,7 @@ etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threew
     # to get the model names
     dots_call = match.call(expand.dots = FALSE)[["..."]]
 
-    info = results2formattedList(..., se=se, dof=dof, fitstat_all=fitstat, cluster=cluster, digits=digits, sdBelow=sdBelow, signifCode=signifCode, coefstat = coefstat, ci = ci, title=title, float=float, subtitles=subtitles, yesNo=yesNo, keepFactors=keepFactors, tex = tex, useSummary=useSummary, dots_call=dots_call, powerBelow=powerBelow, dict=dict, interaction.combine=interaction.combine, convergence=convergence, family=family, keep=keep, drop=drop, file=file, order=order, label=label, fixef_sizes=fixef_sizes, fixef_sizes.simplify=fixef_sizes.simplify, depvar=depvar, style=style, replace=replace, notes = notes, group = group, tablefoot = tablefoot, extraline=extraline, placement = placement, drop.section = drop.section)
+    info = results2formattedList(..., se=se, dof=dof, fitstat_all=fitstat, cluster=cluster, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, sdBelow=sdBelow, signifCode=signifCode, coefstat = coefstat, ci = ci, title=title, float=float, subtitles=subtitles, yesNo=yesNo, keepFactors=keepFactors, tex = tex, useSummary=useSummary, dots_call=dots_call, powerBelow=powerBelow, dict=dict, interaction.combine=interaction.combine, convergence=convergence, family=family, keep=keep, drop=drop, file=file, order=order, label=label, fixef_sizes=fixef_sizes, fixef_sizes.simplify=fixef_sizes.simplify, depvar=depvar, style=style, replace=replace, notes = notes, group = group, tablefoot = tablefoot, extraline=extraline, placement = placement, drop.section = drop.section)
 
     if(tex){
         res = etable_internal_latex(info)
@@ -274,14 +290,14 @@ etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threew
 
 
 #' @describeIn etable Exports the results of multiple \code{fixest} estimations in a Latex table.
-esttex <- function(..., se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, digits=4, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, title, float = float, sdBelow=TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNo = "Yes", keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", style = list(), notes = NULL, group = NULL, tablefoot = TRUE, extraline = NULL, placement = "htbp", drop.section = NULL){
+esttex <- function(..., se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, .vcov, .vcov_args = NULL, digits=4, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, title, float = float, sdBelow=TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNo = "Yes", keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", style = list(), notes = NULL, group = NULL, tablefoot = TRUE, extraline = NULL, placement = "htbp", drop.section = NULL){
     # drop: a vector of regular expressions
     # order: a vector of regular expressions
     # dict: a 'named' vector
     # file: a character string
 
     useSummary = TRUE
-    if(missing(se) && missing(cluster)){
+    if(missing(se) && missing(cluster) && missing(.vcov)){
         useSummary = FALSE
     }
 
@@ -306,7 +322,7 @@ esttex <- function(..., se = c("standard", "hetero", "cluster", "twoway", "three
     # to get the model names
     dots_call = match.call(expand.dots = FALSE)[["..."]]
 
-    info = results2formattedList(..., tex = TRUE, useSummary=useSummary, se = se, dof = dof, cluster = cluster, digits = digits, fitstat_all = fitstat, title = title, float = float, sdBelow = sdBelow, keep=keep, drop = drop, order = order, dict = dict, file = file, replace = replace, convergence = convergence, signifCode = signifCode, coefstat = coefstat, ci = ci, label = label, subtitles = subtitles, fixef_sizes = fixef_sizes, fixef_sizes.simplify = fixef_sizes.simplify, yesNo = yesNo, keepFactors = keepFactors, family = family, powerBelow = powerBelow, interaction.combine = interaction.combine, dots_call = dots_call, depvar = TRUE, style = style, notes = notes, group = group, tablefoot = tablefoot, extraline = extraline, placement = placement, drop.section = drop.section)
+    info = results2formattedList(..., tex = TRUE, useSummary=useSummary, se=se, dof=dof, cluster=cluster, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, fitstat_all=fitstat, title=title, float=float, sdBelow=sdBelow, keep=keep, drop=drop, order=order, dict=dict, file=file, replace=replace, convergence=convergence, signifCode=signifCode, coefstat=coefstat, ci=ci, label=label, subtitles=subtitles, fixef_sizes=fixef_sizes, fixef_sizes.simplify=fixef_sizes.simplify, yesNo=yesNo, keepFactors=keepFactors, family=family, powerBelow=powerBelow, interaction.combine=interaction.combine, dots_call=dots_call, depvar=TRUE, style=style, notes=notes, group=group, tablefoot=tablefoot, extraline=extraline, placement=placement, drop.section=drop.section)
 
     res = etable_internal_latex(info)
 
@@ -323,11 +339,11 @@ esttex <- function(..., se = c("standard", "hetero", "cluster", "twoway", "three
 }
 
 #' @describeIn etable Facility to display the results of multiple \code{fixest} estimations.
-esttable <- function(..., se=c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, coefstat = c("se", "tstat", "confint"), ci = 0.95, depvar, keep, drop, dict, order, digits=4, fitstat, convergence, signifCode = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10), subtitles, keepFactors = FALSE, family, group = NULL, extraline = NULL){
+esttable <- function(..., se=c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, .vcov, .vcov_args = NULL, coefstat = c("se", "tstat", "confint"), ci = 0.95, depvar, keep, drop, dict, order, digits=4, fitstat, convergence, signifCode = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10), subtitles, keepFactors = FALSE, family, group = NULL, extraline = NULL){
 
     # Need to check for the presence of the se
     useSummary = TRUE
-    if(missing(se) && missing(cluster)){
+    if(missing(se) && missing(cluster) && missing(.vcov)){
         useSummary = FALSE
     }
 
@@ -342,14 +358,14 @@ esttable <- function(..., se=c("standard", "hetero", "cluster", "twoway", "three
     # to get the model names
     dots_call = match.call(expand.dots = FALSE)[["..."]]
 
-    info = results2formattedList(..., se=se, dof = dof, cluster=cluster, digits=digits, signifCode=signifCode, coefstat = coefstat, ci = ci, subtitles=subtitles, keepFactors=keepFactors, useSummary=useSummary, dots_call=dots_call, fitstat_all=fitstat, yesNo = c("Yes", "No"), depvar = depvar, family = family, keep = keep, drop = drop, order = order, dict = dict, interaction.combine = ":", group = group, extraline = extraline)
+    info = results2formattedList(..., se=se, dof = dof, cluster=cluster, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, signifCode=signifCode, coefstat = coefstat, ci = ci, subtitles=subtitles, keepFactors=keepFactors, useSummary=useSummary, dots_call=dots_call, fitstat_all=fitstat, yesNo = c("Yes", "No"), depvar = depvar, family = family, keep = keep, drop = drop, order = order, dict = dict, interaction.combine = ":", group = group, extraline = extraline)
 
     res = etable_internal_df(info)
 
     return(res)
 }
 
-results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits = 4, fitstat_all, sdBelow=TRUE, dict, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), coefstat = "se", ci = 0.95, label, subtitles, title, float = FALSE, replace = FALSE, yesNo = c("Yes", "No"), keepFactors = FALSE, tex = FALSE, useSummary, dots_call, powerBelow, interaction.combine, convergence, family, drop, order, keep, file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, depvar = FALSE, style = list(), notes = NULL, group = NULL, tablefoot = TRUE, extraline=NULL, placement = "htbp", drop.section = NULL){
+results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov, .vcov_args = NULL, digits = 4, fitstat_all, sdBelow=TRUE, dict, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), coefstat = "se", ci = 0.95, label, subtitles, title, float = FALSE, replace = FALSE, yesNo = c("Yes", "No"), keepFactors = FALSE, tex = FALSE, useSummary, dots_call, powerBelow, interaction.combine, convergence, family, drop, order, keep, file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, depvar = FALSE, style = list(), notes = NULL, group = NULL, tablefoot = TRUE, extraline=NULL, placement = "htbp", drop.section = NULL){
     # This function is the core of the functions esttable and esttex
 
 
@@ -692,7 +708,27 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, digits
 
         # If se or cluster is provided, we use summary
         if(useSummary){
-            x = summary(all_models[[m]], se=se, cluster, dof = dof, nframes_up = 2)
+
+            if(missing(.vcov)){
+                x = summary(all_models[[m]], se=se, cluster, dof = dof, nframes_up = 2)
+
+            } else {
+                # We check the arguments
+                check_arg(.vcov, "function", .message = "The argument '.vcov' must be a function to compute the variance-covariance matrix.")
+                check_arg_plus(.vcov_args, "NULL{list()} list", .message = "The argument '.vcov_args' must be a list of arguments to be passed to the function in '.vcov'.")
+
+                # we contruct the call to summary.fixest
+                summ_call_args = .vcov_args
+                summ_call_args$object = all_models[[m]]
+                summ_call_args$.vcov = .vcov
+                if(!missing(se)) summ_call_args[["se"]] = se
+                if(!missing(cluster)) summ_call_args[["cluster"]] = cluster
+
+                x = do.call("summary", summ_call_args)
+
+            }
+
+
         } else {
             # What do we do if se not provided?
             # we apply summary only to the ones that are not summaries
@@ -1897,21 +1933,32 @@ etable_internal_df = function(info){
     if(!useSummary || !any(grepl("\\(", unlist(se_type_list)))){
         se_type_format = c()
 
+        type = ""
         if(length(unique(gsub(" \\(.+", "", se_type_list))) == 1){
             # All identical
-            type = paste0(": ", gsub(" \\(.+", "", se_type_list[1]))
+
+            if(grepl("(", se_type_list[[1]], fixed = TRUE)){
+                # Only if clustered
+                type = paste0(": ", gsub(" \\(.+", "", se_type_list[[1]]))
+            }
+
             for(m in 1:n_models) se_type_format[m] = format_se_type(se_type_list[[m]], longueur[[1+m]], by = TRUE)
         } else {
-            type = ""
             for(m in 1:n_models) se_type_format[m] = format_se_type(se_type_list[[m]], longueur[[1+m]])
         }
 
         res <- rbind(res, c(paste0(coefstat_sentence, type), c(se_type_format, recursive = TRUE)))
     } else {
-        main_type = gsub(" \\(.+", "", se_type_list[[1]])
+
         se_type_format = c()
         for(m in 1:n_models) se_type_format[m] = format_se_type(se_type_list[[m]], longueur[[1+m]], by = TRUE)
-        res <- rbind(res, c(paste0(coefstat_sentence, ": ", main_type), c(se_type_format, recursive = TRUE)))
+
+        main_type = ""
+        if(grepl("(", se_type_list[[1]], fixed = TRUE)){
+            main_type = paste0(": ", gsub(" \\(.+", "", se_type_list[[1]]))
+        }
+
+        res <- rbind(res, c(paste0(coefstat_sentence, main_type), c(se_type_format, recursive = TRUE)))
     }
 
     # convergence status
