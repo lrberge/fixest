@@ -42,7 +42,7 @@ feols(
 
 \item{fixef.iter}{Maximum number of iterations in fixed-effects algorithm (only in use for 2+ fixed-effects). Default is 10000.}
 
-\item{nthreads}{Integer: Number of nthreads to be used (accelerates the algorithm via the use of openMP routines). The default is to use the total number of nthreads available minus two. You can set permanently the number of threads used within this package using the function \code{\link[fixest]{setFixest_nthreads}}.}
+\item{nthreads}{The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. The default is to use 50% of all threads. You can set permanently the number of threads used within this package using the function \code{\link[fixest]{setFixest_nthreads}}.}
 
 \item{verbose}{Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algoritmh (the first number is the left-hand-side, the other numbers are the right-hand-side variables).}
 

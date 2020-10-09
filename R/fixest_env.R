@@ -238,21 +238,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
     #
     # nthreads argument
-    # if(!isScalar(nthreads) || (nthreads %% 1) != 0 || nthreads <= 0){
-    #     stop("The argument 'nthreads' must be an integer greater or equal to 1 and lower than the number of threads available (", max(get_nb_threads(), 1), ").")
-    # }
-    check_value(nthreads, "integer scalar GT{0}", .message = paste0("The argument 'nthreads' must be an integer greater or equal to 1 and lower than the number of threads available (", max(get_nb_threads(), 1), ")."))
-
-    if(nthreads > 1){
-        max_threads = get_nb_threads()
-        if(max_threads == 0){
-            warning("OpenMP not detected: cannot use ", nthreads, " threads, single-threaded mode instead.")
-            nthreads = 1
-        } else if(nthreads > max_threads){
-            warning("Asked for ", nthreads, " threads while the maximum is ", max_threads, ". Set to ", max_threads, " threads instead.")
-            nthreads = max_threads
-        }
-    }
+    nthreads = check_set_nthreads(nthreads)
 
     # The family functions (for femlm only)
     famFuns = switch(family,

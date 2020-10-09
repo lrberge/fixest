@@ -2917,18 +2917,7 @@ demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFi
         is_weight = !missing(weights) && !is.null(weights)
 
         ## nthreads
-        check_arg(nthreads, "integer scalar GE{1}")
-        if(nthreads > 1){
-            max_threads = get_nb_threads()
-            if(max_threads == 0){
-                warning("OpenMP not detected: cannot use ", nthreads, " threads, single-threaded mode instead.")
-                nthreads = 1
-            } else if(nthreads > max_threads){
-                warning("Asked for ", nthreads, " threads while the maximum is ", max_threads, ". Set to ", max_threads, " threads instead.")
-                nthreads = max_threads
-            }
-        }
-
+        nthreads = check_set_nthreads(nthreads)
 
         #
         # FORMATTING
@@ -3906,6 +3895,38 @@ shade_area <- function(y1, y2, x, xmin, xmax, col="grey", ...){
     x1 <- x[ind] ; x2 <- x[rev(ind)]
     polygon(c(x1,x2), c(y1[ind], y2[rev(ind)]), col=col, ...)
 }
+
+
+check_set_nthreads = function(nthreads){
+    # Simple function that checks that the nber of threads is valid
+    set_up(1)
+
+    check_value(nthreads, "integer scalar GE{0} | numeric scalar GT{0} LT{1}", .message = paste0("The argument 'nthreads' must be an integer lower or equal to the number of threads available (", max(get_nb_threads(), 1), "). It can be equal to 0 which means all threads. Alternatively, if equal to a number strictly between 0 and 1, it represents the fraction of all threads to be used."))
+
+    max_threads = get_nb_threads()
+
+    if(is_in_fork()) return(1)
+
+    if(nthreads == 0){
+        nthreads = max(max_threads, 1)
+
+    } else if(nthreads < 1){
+        nthreads = max(ceiling(max_threads * nthreads), 1)
+
+    } else if(nthreads > 1){
+        if(max_threads == 0){
+            warn_up("OpenMP not detected: cannot use ", nthreads, " threads, single-threaded mode instead.")
+            nthreads = 1
+        } else if(nthreads > max_threads){
+            warn_up("Asked for ", nthreads, " threads while the maximum is ", max_threads, ". Set to ", max_threads, " threads instead.")
+            nthreads = max_threads
+        }
+
+    }
+
+    nthreads
+}
+
 
 #### ................. ####
 #### Small Utilities ####
@@ -6841,7 +6862,7 @@ getFixest_notes = function(){
 #'
 #'
 #'
-#' @param nthreads An integer strictly greater than one and lower than the maximum number of threads (if OpenMP is available). If missing, the default is the maximum number of threads minus two.
+#' @param nthreads The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. If missing, the default is to use 50% of all threads.
 #'
 #' @author
 #' Laurent Berge
@@ -6868,22 +6889,11 @@ setFixest_nthreads = function(nthreads){
 	max_threads = min(get_nb_threads(), 1000, max_CRAN) # we cap at 1k nthreads
 
 	if(missing(nthreads) || is.null(nthreads)){
-		nthreads = max(1, max_threads - 2)
+		# New default => 50% of all threads
+		nthreads = check_set_nthreads(0.5)
 	}
 
-	if(length(nthreads) != 1 || !is.numeric(nthreads) || is.na(nthreads) || nthreads %% 1 != 0 || nthreads < 0){
-		stop("Argument 'nthreads' must be equal to a positive integer.")
-	}
-
-	if(nthreads > 1){
-		if(max_threads == 0){
-			warning("OpenMP not detected: cannot use ", nthreads, " threads, single-threaded mode instead.")
-			nthreads = 1
-		} else if(nthreads > max_threads){
-			warning("Asked for ", nthreads, " threads while the maximum is ", max_threads, ". Set to ", max_threads, " threads instead.")
-			nthreads = max_threads
-		}
-	}
+	nthreads = check_set_nthreads(nthreads)
 
 	options("fixest_nthreads" = nthreads)
 

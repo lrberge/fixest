@@ -14,7 +14,7 @@ setFixest_nthreads(nthreads)
 getFixest_nthreads
 }
 \arguments{
-\item{nthreads}{An integer strictly greater than one and lower than the maximum number of threads (if OpenMP is available). If missing, the default is the maximum number of threads minus two.}
+\item{nthreads}{The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. If missing, the default is to use 50% of all threads.}
 }
 \description{
 Sets/gets the default number of threads to used in \code{fixest} estimation functions. The default is the maximum number of threads minus two.

@@ -17,6 +17,7 @@
 #include <vector>
 #ifdef _OPENMP
     #include <omp.h>
+    #include <pthread.h>
 #else
     #define omp_get_thread_num() 0
     #define omp_get_num_threads() 1
@@ -32,10 +33,34 @@ using namespace Rcpp;
 
 // This file contains misc femlm functions parallelized with the omp library
 
+static bool fixest_in_fork = false;
+
 // [[Rcpp::export]]
 int get_nb_threads(){
     int res = omp_get_max_threads();
     return(res);
+}
+
+// Trick taken from data.table to detect forking
+void when_fork() {
+  fixest_in_fork = true;
+}
+
+void after_fork() {
+  fixest_in_fork = false;
+}
+
+// [[Rcpp::export]]
+void setup_fork_presence() {
+ // Called once on loading data.table from init.c
+ #ifdef _OPENMP
+    pthread_atfork(&when_fork, &after_fork, NULL);
+ #endif
+}
+
+// [[Rcpp::export]]
+bool is_in_fork(){
+    return fixest_in_fork;
 }
 
 // [[Rcpp::export]]
