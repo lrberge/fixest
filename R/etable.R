@@ -1825,7 +1825,9 @@ etable_internal_df = function(info){
 
         gi_name = names(group)[i]
         from = nchar(strsplit(gi_name, "}", fixed = TRUE)[[1]][1])
-        gi_name = substr(gi_name, from + 2, nchar(gi_name))
+        if(from < nchar(gi_name)){
+            gi_name = substr(gi_name, from + 2, nchar(gi_name))
+        }
 
         my_line = c(gi_name, gi_format)
 
