@@ -15,6 +15,8 @@
  
  - `coefplot`: Corrected various bugs when asked for the plotting of several estimations. 
  
+ - Fix the stack imbalance warning (report by @shoonlee, [#46](https://github.com/lrberge/fixest/issues/46))
+ 
 #### Internal improvements
 
  - Two deep copies of some data are now avoided in the demeaning function. This improves the performance in terms of memory footprint, and also makes the algorithm faster. 
