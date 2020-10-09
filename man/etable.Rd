@@ -367,7 +367,7 @@ etable(est_all, est_sub1, est_sub2, est_sub3, tex = TRUE,
 
 
 #
-# Using custom functions to cumpute the standard errors
+# Using custom functions to compute the standard errors
 #
 
 # You can customize the way you compute the SEs with the argument .vcov

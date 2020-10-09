@@ -185,7 +185,7 @@
 #'
 #'
 #' #
-#' # Using custom functions to cumpute the standard errors
+#' # Using custom functions to compute the standard errors
 #' #
 #'
 #' # You can customize the way you compute the SEs with the argument .vcov
