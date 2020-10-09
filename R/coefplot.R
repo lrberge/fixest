@@ -1458,24 +1458,32 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
         all_estimates = all_estimates[base::order(all_estimates$id_order, all_estimates$est_nb), ]
 
         # we rescale
-        if(missing(sep)){
-            all_sep = c(0.2, 0.2, 0.18, 0.16)
-            if(length(all_sep) < nb_est - 1){
-                sep = 1 / (n-1) * 0.7
-            }
-            sep = all_sep[nb_est - 1]
-        } else {
-            n_sep = length(sep)
-            if(n_sep > 1){
-                if(n_sep < nb_est - 1){
-                    sep = sep[n_sep]
+
+        if(nb_est > 1){
+            if(missing(sep)){
+                all_sep = c(0.2, 0.2, 0.18, 0.16)
+                if(length(all_sep) < nb_est - 1){
+                    sep = 1 / (nb_est-1) * 0.7
                 } else {
-                    sep = sep[nb_est - 1]
+                    sep = all_sep[nb_est - 1]
+                }
+
+            } else {
+                n_sep = length(sep)
+                if(n_sep > 1){
+                    if(n_sep < nb_est - 1){
+                        sep = sep[n_sep]
+                    } else {
+                        sep = sep[nb_est - 1]
+                    }
                 }
             }
-        }
 
-        all_estimates$x_new = all_estimates$id_order + ((all_estimates$est_nb - 1) / (nb_est - 1) - 0.5) * ((nb_est - 1) * sep)
+            all_estimates$x_new = all_estimates$id_order + ((all_estimates$est_nb - 1) / (nb_est - 1) - 0.5) * ((nb_est - 1) * sep)
+        } else {
+            sep = 0
+            all_estimates$x_new = all_estimates$id_order
+        }
 
         # The coefficients
 
