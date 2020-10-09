@@ -1854,7 +1854,9 @@ etable_internal_df = function(info){
 
         el_name = names(extraline)[i]
         from = nchar(strsplit(el_name, "}", fixed = TRUE)[[1]][1])
-        el_name = substr(el_name, from + 2, nchar(el_name))
+        if(from < nchar(el_name)){
+            el_name = substr(el_name, from + 2, nchar(el_name))
+        }
 
         my_line = c(el_name, el_format)
 
