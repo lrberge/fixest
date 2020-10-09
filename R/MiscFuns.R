@@ -7365,7 +7365,7 @@ getFixest_se = function(){
 #' }
 #'
 #' etable(res_all)
-#' coefplot(res_all)
+#' coefplot(res_all, group = list(Species = "^^species"))
 #'
 #'
 setFixest_fml = function(..., reset = FALSE){

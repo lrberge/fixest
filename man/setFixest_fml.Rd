@@ -67,7 +67,7 @@ for(i in 1:nrow(all_combs)){
 }
 
 etable(res_all)
-coefplot(res_all)
+coefplot(res_all, group = list(Species = "^^species"))
 
 
 }
