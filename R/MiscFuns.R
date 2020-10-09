@@ -119,6 +119,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 
 	# The type of SE
 	se.type = attr(coeftable, "type")
+	if(is.null(se.type)) se.type = "Custom"
 
 	if(x$method %in% c("femlm", "feNmlm")){
 		family_format = c(poisson="Poisson", negbin="Negative Binomial", logit="Logit", gaussian="Gaussian")
@@ -212,7 +213,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' @param cluster Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1, "var2")]}, \code{cluster = c("var1, "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster).
 #' @param object A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
 #' @param dof An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{dof}} for this argument. The arguments and defaults of the function \code{\link[fixest]{dof}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "conventional"}, \code{t.df = "conventional"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{dof}} for details.
-#' @param .vcov A user provided covariance matrix or a function coomputing this matrix. If a matrix, it must be a square matrix of the same number of rows as the number of variables estimated. If a function, it must return the previsouly mentioned matrix.
+#' @param .vcov A user provided covariance matrix or a function computing this matrix. If a matrix, it must be a square matrix of the same number of rows as the number of variables estimated. If a function, it must return the previsouly mentioned matrix.
 #' @param lean Logical, default is \code{FALSE}. Used to reduce the (memory) size of the summary object. If \code{TRUE}, then all objects of length N (the number of observations) are removed from the result. Note that some \code{fixest} methods may consequently not work when applied to the summary.
 #' @param forceCovariance (Advanced users.) Logical, default is \code{FALSE}. In the peculiar case where the obtained Hessian is not invertible (usually because of collinearity of some variables), use this option to force the covariance matrix, by using a generalized inverse of the Hessian. This can be useful to spot where possible problems come from.
 #' @param keepBounded (Advanced users -- \code{feNmlm} with non-linear part and bounded coefficients only.) Logical, default is \code{FALSE}. If \code{TRUE}, then the bounded coefficients (if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise it is not).
@@ -330,6 +331,9 @@ summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), .vcov, le
 	        # square matrix
 	        vcov = .vcov
 	    }
+
+	    # We add the type of the matrix
+	    attr(vcov, "type") = "Custom"
 
 	    warn_ignore = c()
 	    if(!missnull(se)) warn_ignore = "se"
@@ -6215,7 +6219,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 		warning("Some variances are negative (likely problem of collinearity).")
 	}
 
-	sd.dict = c("standard" = "Standard", "hetero"="HC", "cluster"="Clustered", "twoway"="Two-way", "threeway"="Three-way", "fourway"="Four-way")
+	sd.dict = c("standard" = "Standard", "hetero"="Heteroskedasticity-robust", "cluster"="Clustered", "twoway"="Two-way", "threeway"="Three-way", "fourway"="Four-way")
 
 	if(attr){
 	    base::attr(vcov, "type") = paste0(as.vector(sd.dict[se.val]), type_info)
