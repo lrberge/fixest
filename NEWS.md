@@ -16,34 +16,47 @@
 #### Internal improvements
 
  - Two deep copies of some data are now avoided in the demeaning function. This improves the performance in terms of memory footprint, and also makes the algorithm faster. 
+ 
+#### New function: `fitstat` 
+
+  - New function `fitsat` that computes various fit statistics. It is integrated with `etable` and can be invoked with the argument `fitstat`. So far only one fit statistic is included, but more will come.
+  
+#### Standard-errors
+  
+ - New default values for standard-errors (only concerns multiway clustering). They become similar to `reghdfe` to increase cross-software comparability. Computing the standard-errors the old way is still possible using the argument `dof`. See the dedicated vignette: [On standard errors](https://cran.r-project.org/package=fixest/vignettes/standard_errors.html).
+ 
+ - Name change in `summary`/`vcov`/`etable`: To get heteroskedasticity-robust standard-errors, `se = "hetero"` now replaces `se = "white"` to enhance clarity. Note that `se = "white"` still works.
+ 
+#### New features in `etable`
+
+  - New argument `placement` to define the position of the float in Latex (suggestion by Caleb Kwon).
+  
+  - New argument `drop.section`, with which you can drop a) the fixed-effects, b) the variables with varying slopes, or c) the statistics, sections (suggestion by Caleb Kwon).
+  
+  - Fix glitch in help pages regarding the use of the '%' (percentage) character in regular expressions.
+  
+  - Two new arguments `.vcov` and `.vcov_args` to compute the standard-errors with custom functions.
 
 #### User visible changes
 
- - New function `fitsat` that computes various fit statistics. It is integrated with `etable` and can be invoked with the argument `fitstat`. So far only one fit statistic is included, but more will come.
+ - Argument `nthreads`:
+ 
+  * The new default of argument `nthreads` is 50% of all available threads. 
+  * Accepts new values: a) 0 means all available threads, b) a number strictly between 0 and 1 will represent the fraction of all threads to use.
+  * Multi-threading is now off when forking is detected.
 
- - Name change in `summary`/`vcov`/`etable`: To get heteroskedasticity-robust standard-errors, `se = "hetero"` now replaces `se = "white"` to enhance clarity. Note that `se = "white"` still works.
- 
- - Argument `na_inf.rm` has been removed. It was present for historical reasons, and is removed to increase code clarity.
- 
- - Standard-errors: new default values for standard-errors. They become similar to `reghdfe` to increase cross-software comparability. Computing the standard-errors the old way is still possible using the argument `dof`. See the dedicated vignette: [On standard errors](https://cran.r-project.org/package=fixest/vignettes/standard_errors.html).
-
- - `etable` (suggestions by Caleb Kwon): 
- 
-    * new argument `placement` to define the position of the float in Latex.
-    * new argument `drop.section`, with which you can drop a) the fixed-effects, b) the variables with varying slopes, or c) the statistics, sections.
-    * fix glitch in help pages regarding the use of the '%' (percentage) character in regular expressions.
- 
  - Improved display of numbers in `print` method.
  
  - Added variables names to `X_demeaned` from `feols`.
  
  - In all estimations: 
  
+    * new argument `mem.clean`: internally, intermediary objects are removed as much as possible and `gc()` is called before each memory intensive C++ section.
     * new arguments `only.env` and `env`. 
     * The first, `only.env`, allows to recover only the environment used to perform the estimation (i.e. all the preprocessing done before the estimation).
     * The second, `env`, accepts a fixest environment created by `only.env`, and performs the estimation using this environment--all other arguments are ignored. 
     * These changes are a prerequisite to the efficient implementation of bootstraping (since, by applying modifications directly in `env`, we cut all preprocessing).
-    * new argument `mem.clean`: internally, intermediary objects are removed as much as possible and `gc()` is called before each memory intensive C++ section.
+    
 
  - In non-linear estimations: 
  
@@ -61,6 +74,10 @@
   - `feols` & `feglm`:
   
     * the Cholesky decomposition now checks for user interrupts (matters for models with MANY variables to estimate).
+  
+#### Deprecation
+
+ - Argument `na_inf.rm` has been removed. It was present for historical reasons, and is removed to increase code clarity.
 
 ## Changes in version 0.6.0 (13-07-2020)
 
@@ -122,7 +139,7 @@
  
  - the `estfun` from `sandwich` has been implemented.
 
-## Changes in version 0.5.1 (18-06-2018)
+## Changes in version 0.5.1 (18-06-2020)
 
 #### Hotfix
  
