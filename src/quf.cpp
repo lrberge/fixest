@@ -54,6 +54,7 @@ using namespace Rcpp;
 using std::vector;
 
 // [[Rcpp::plugins(cpp11)]]
+// [[Rcpp::plugins(openmp)]]
 
 
 
@@ -508,20 +509,18 @@ List cpp_quf_gnl(SEXP x){
 }
 
 
-void quf_single(SEXP x, vector<int> &x_uf, vector<double> &x_unik){
-
-    int n = Rf_length(x);
+void quf_single(void *px_in, std::string &x_type, int n, vector<int> &x_uf, vector<double> &x_unik){
 
     // preparation for strings
-    bool IS_STR = false;
+    bool IS_STR = x_type == "string";
     vector<unsigned long long> x_ull;
 
     bool IS_INT = false;
     bool is_int_in_double = false;
-    if(TYPEOF(x) == REALSXP){
+    if(x_type == "double"){
         // we check if underlying structure is int
         IS_INT = true;
-        double *px = REAL(x);
+        double *px = (double *) px_in;
         for(int i=0 ; i<n ; ++i){
             if(!(px[i] == (int) px[i])){
                 IS_INT = false;
@@ -530,21 +529,10 @@ void quf_single(SEXP x, vector<int> &x_uf, vector<double> &x_unik){
         }
 
         is_int_in_double = IS_INT; // true: only if x is REAL + INT test OK
-    } else if(TYPEOF(x) == STRSXP){
 
-        IS_STR = true;
-        std::uintptr_t xi_uintptr;
-
-        for(int i=0 ; i<n ; ++i){
-            const char *pxi = CHAR(STRING_ELT(x, i));
-            xi_uintptr = reinterpret_cast<std::uintptr_t>(pxi);
-
-            x_ull.push_back(static_cast<unsigned long long>(xi_uintptr));
-
-            // Rcout << xi_uintptr << "  ----  " << xi_ull << "\n";
-        }
-    } else {
+    } else if(x_type == "int"){
         IS_INT = true;
+
     }
 
     if(IS_INT){
@@ -554,8 +542,8 @@ void quf_single(SEXP x, vector<int> &x_uf, vector<double> &x_unik){
         void *px_generic;
         int X_MIN;
         if(is_int_in_double){
-            double *px = REAL(x);
-            px_generic = REAL(x);
+            double *px = (double *) px_in;
+            px_generic = (double *) px_in;
             double x_min = px[0], x_max = px[0], x_tmp;
             for(int i=1 ; i<n ; ++i){
                 x_tmp = px[i];
@@ -565,8 +553,8 @@ void quf_single(SEXP x, vector<int> &x_uf, vector<double> &x_unik){
             X_MIN = static_cast<int>(x_min);
             max_value = x_max - x_min;
         } else {
-            int *px = INTEGER(x);
-            px_generic = INTEGER(x);
+            int *px = (int *) px_in;
+            px_generic = (int *) px_in;
             int x_min = px[0], x_max = px[0], x_tmp;
             for(int i=1 ; i<n ; ++i){
                 x_tmp = px[i];
@@ -595,7 +583,7 @@ void quf_single(SEXP x, vector<int> &x_uf, vector<double> &x_unik){
             } else {
                 // we need to create a vector of double, otherwise: pointer issue
                 vector<double> x_dble(n);
-                int *px = INTEGER(x);
+                int *px = (int *) px_in;
                 for(int i=0 ; i<n ; ++i) x_dble[i] = static_cast<double>(px[i]);
                 quf_double(x_uf, x_dble.data(), x_unik);
             }
@@ -603,16 +591,15 @@ void quf_single(SEXP x, vector<int> &x_uf, vector<double> &x_unik){
 
     } else if(IS_STR){
         // string -- beforehand transformed as ULL
-        quf_double(x_uf, x_ull.data(), x_unik, true);
+        quf_double(x_uf, px_in, x_unik, true);
     } else {
         // double
-        double *px = REAL(x);
-        quf_double(x_uf, px, x_unik);
+        quf_double(x_uf, px_in, x_unik);
     }
 
 }
 
-void quf_table_sum_single(SEXP x_all, int q, vector<int> &x_quf,
+void quf_table_sum_single(void *px_in, std::string &x_type, int n, int q, vector<int> &x_quf,
                           vector<double> &x_unik, vector<int> &x_table,
                           double *py, vector<double> &sum_y, bool do_sum_y,
                           int type, vector<bool> &any_pblm, vector<bool> &id_pblm,
@@ -625,15 +612,12 @@ void quf_table_sum_single(SEXP x_all, int q, vector<int> &x_quf,
     // 1: pblm if sum y = 0
     // 2: pblm if sum y = 0 or sum_y == table
 
-
-    SEXP x = VECTOR_ELT(x_all, q);
-    int n = Rf_length(x);
     x_quf.resize(n);
 
     // Rcout << "q = " << q << ", n = " << n;
 
     // UFing
-    quf_single(x, x_quf, x_unik);
+    quf_single(px_in, x_type, n, x_quf, x_unik);
 
     // table + sum_y
 
@@ -838,8 +822,8 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, int type, IntegerVector
     if(type < 0 || type > 2) stop("Argument type must be equal to 0, 1, or 2.");
 
     int Q = Rf_length(x);
-    SEXP x0 = VECTOR_ELT(x, 0);
-    int n = Rf_length(x0);
+    SEXP xq = VECTOR_ELT(x, 0);
+    int n = Rf_length(xq);
 
     vector<bool> check_pblm(Q, true);
     if(only_slope.length() == Q){
@@ -864,9 +848,54 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, int type, IntegerVector
     vector<bool> obs_removed;
     vector< vector<double> > x_removed_all(Q);
 
+    // New code => we avoid passing SEXP within the parallel loop
+    // We get the types of the R vectors
+    // For strings => we convert into numeric without parallel (sigh)
+
+    vector<void *> px_all(Q);
+    vector<std::string> x_type_all(Q);
+    // vector to store modified strings
+    vector< vector<unsigned long long> > x_ull_all(Q);
+
+    for(int q=0 ; q<Q ; ++q){
+
+        xq = VECTOR_ELT(x, q);
+
+        if(TYPEOF(xq) == INTSXP){
+            x_type_all[q] = "int";
+            px_all[q] = INTEGER(xq);
+
+        } else if(TYPEOF(xq) == REALSXP){
+            x_type_all[q] = "double";
+            px_all[q] = REAL(xq);
+
+        } else if(TYPEOF(xq) == STRSXP){
+            // We make the conversion to unsigned long long
+            x_type_all[q] = "string";
+
+            std::uintptr_t xi_uintptr;
+
+            for(int i=0 ; i<n ; ++i){
+                const char *pxi = CHAR(STRING_ELT(xq, i));
+                xi_uintptr = reinterpret_cast<std::uintptr_t>(pxi);
+
+                x_ull_all[q].push_back(static_cast<unsigned long long>(xi_uintptr));
+
+                // Rcout << xi_uintptr << "  ----  " << xi_ull << "\n";
+            }
+
+            px_all[q] = x_ull_all[q].data();
+        } else {
+            // We NEVER end here
+            stop("Error: wrong type.");
+        }
+    }
+
+
+
 #pragma omp parallel for num_threads(nthreads)
     for(int q=0 ; q<Q ; ++q){
-        quf_table_sum_single(x, q, x_quf_all[q], x_unik_all[q], x_table_all[q],
+        quf_table_sum_single(px_all[q], x_type_all[q], n, q, x_quf_all[q], x_unik_all[q], x_table_all[q],
                              py, sum_y_all[q], do_sum_y, type, any_pblm, id_pblm_all[q], check_pblm[q]);
     }
 
