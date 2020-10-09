@@ -1570,6 +1570,7 @@ etable_internal_latex = function(info){
 
         fit_info = paste0(fit_info, "Observations& ", paste(addCommas(obs_list), collapse = "&"), "\\\\\n")
         fit_info = paste0(fit_info, nb_FE_lines, info_convergence, info_muli_se)
+
         if(!all(sapply(fitstat_list, function(x) all(is.na(x))))){
 
             fit_names = attr(fitstat_list, "format_names")
@@ -1970,12 +1971,13 @@ etable_internal_df = function(info){
     # Fit statistics
     #
 
-    if(!identical(fitstat_list, NA)){
+    if(!all(sapply(fitstat_list, function(x) all(is.na(x))))){
 
         fit_names = attr(fitstat_list, "format_names")
         nb = length(fit_names)
         for(fit_id in 1:nb){
             fit = sapply(fitstat_list, function(x) x[[fit_id]])
+            if(all(is.na(fit))) next
             fit[is.na(fit)] = "--"
             res <- rbind(res, c(fit_names[fit_id], fit))
         }
