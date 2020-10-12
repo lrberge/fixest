@@ -11,6 +11,9 @@
 
 library(dreamerr) ; library(Formula) ; library(fixest)
 
+
+setFixest_notes(FALSE)
+
 test = fixest:::test
 vcovClust = fixest:::vcovClust
 
@@ -320,7 +323,7 @@ test(se(est_feols, se = "hetero", dof = dof(adj = FALSE, cluster.adj = FALSE)), 
 se_CL_2w_lm    = sqrt(vcovCL(est_lm, cluster = ~ grp + tm, type = "HC1")["x", "x"])
 se_CL_2w_feols = se(est_feols, se = "twoway")
 
-test(se(est_feols, se = "twoway", dof = dof(fixef.K = "full")), se_CL_2w_lm)
+test(se(est_feols, se = "twoway", dof = dof(fixef.K = "full", cluster.df = "conv")), se_CL_2w_lm)
 
 #
 # Checking the calls work properly
