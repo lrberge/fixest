@@ -48,7 +48,7 @@ void after_fork() {
 }
 
 // [[Rcpp::export]]
-void setup_fork_presence() {
+void cpp_setup_fork_presence() {
  // Called once on loading data.table from init.c
  #ifdef _OPENMP
     pthread_atfork(&when_fork, &after_fork, NULL);
@@ -56,9 +56,29 @@ void setup_fork_presence() {
 }
 
 // [[Rcpp::export]]
-bool is_in_fork(){
+bool cpp_is_in_fork(){
     return fixest_in_fork;
 }
+
+
+// The following function is already defined in lm_related (I know...)
+std::vector<int> set_parallel_scheme_bis(int N, int nthreads){
+    // => this concerns only the parallel application on a 1-Dimensional matrix
+    // takes in the nber of observations of the vector and the nber of threads
+    // gives back a vector of the length the nber of threads + 1 giving the start/stop of each threads
+
+    std::vector<int> res(nthreads + 1, 0);
+    double N_rest = N;
+
+    for(int i=0 ; i<nthreads ; ++i){
+        res[i + 1] = ceil(N_rest / (nthreads - i));
+        N_rest -= res[i + 1];
+        res[i + 1] += res[i];
+    }
+
+    return res;
+}
+
 
 // [[Rcpp::export]]
 NumericVector cpppar_exp(NumericVector x, int nthreads){
@@ -463,18 +483,17 @@ List cpppar_which_na_inf_vec(SEXP x, int nthreads){
 
     // no need to care about the race condition
     // "trick" to make a break in a multi-threaded section
-    #pragma omp parallel num_threads(nthreads)
-    {
-        int i = omp_get_thread_num()*(nobs/omp_get_num_threads());
-        int stop = (omp_get_thread_num()+1)*(nobs/omp_get_num_threads());
-        double x_tmp = 0;
-        for(; i<stop && !anyNAInf ; ++i){
-            x_tmp = px[i];
-            if(std::isnan(x_tmp) || std::isinf(x_tmp)){
+
+    std::vector<int> bounds = set_parallel_scheme_bis(nobs, nthreads);
+    #pragma omp parallel for num_threads(nthreads)
+    for(int t=0 ; t<nthreads ; ++t){
+        for(int i=bounds[t]; i<bounds[t + 1] && !anyNAInf ; ++i){
+            if(std::isnan(px[i]) || std::isinf(px[i])){
                 anyNAInf = true;
             }
         }
     }
+
 
     // object to return: is_na_inf
     LogicalVector is_na_inf(anyNAInf ? nobs : 1);
@@ -531,15 +550,14 @@ List cpppar_which_na_inf_mat(NumericMatrix mat, int nthreads){
 
     // no need to care about the race condition
     // "trick" to make a break in a multi-threaded section
-    #pragma omp parallel num_threads(nthreads)
-    {
-        int i = omp_get_thread_num()*(nobs/omp_get_num_threads());
-        int stop = (omp_get_thread_num()+1)*(nobs/omp_get_num_threads());
-        double x_tmp = 0;
-        for(; i<stop && !anyNAInf ; ++i){
-            for(int k=0 ; k<K ; ++k){
-                x_tmp = mat(i, k);
-                if(std::isnan(x_tmp) || std::isinf(x_tmp)){
+
+    std::vector<int> bounds = set_parallel_scheme_bis(nobs, nthreads);
+
+    #pragma omp parallel for num_threads(nthreads)
+    for(int t=0 ; t<nthreads ; ++t){
+        for(int k=0 ; k<K ; ++k){
+            for(int i=bounds[t]; i<bounds[t + 1] && !anyNAInf ; ++i){
+                if(std::isnan(mat(i, k)) || std::isinf(mat(i, k))){
                     anyNAInf = true;
                 }
             }

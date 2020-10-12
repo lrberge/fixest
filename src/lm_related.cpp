@@ -14,15 +14,33 @@
 
 #include <Rcpp.h>
 #include <cmath>
+#include <math.h>
 #ifdef _OPENMP
     #include <omp.h>
-#else
-    #define omp_get_thread_num() 0
-    #define omp_get_num_threads() 1
 #endif
 using namespace Rcpp;
 
 // [[Rcpp::plugins(openmp)]]
+
+
+std::vector<int> set_parallel_scheme(int N, int nthreads){
+    // => this concerns only the parallel application on a 1-Dimensional matrix
+    // takes in the nber of observations of the vector and the nber of threads
+    // gives back a vector of the length the nber of threads + 1 giving the start/stop of each threads
+
+    std::vector<int> res(nthreads + 1, 0);
+    double N_rest = N;
+
+    for(int i=0 ; i<nthreads ; ++i){
+        res[i + 1] = ceil(N_rest / (nthreads - i));
+        N_rest -= res[i + 1];
+        res[i + 1] += res[i];
+    }
+
+    return res;
+}
+
+
 
 void invert_tri(NumericMatrix &R, int K, int nthreads = 1){
 
@@ -353,21 +371,22 @@ void mp_XtX(NumericMatrix &XtX, const NumericMatrix &X, const NumericMatrix &wX,
 
     // specific scheme for large N and K == 1
     if(K == 1){
+
         std::vector<double> all_values(nthreads, 0);
-        #pragma omp parallel num_threads(nthreads)
-        {
-            int i = omp_get_thread_num()*(N/omp_get_num_threads());
-            int stop = (omp_get_thread_num()+1)*(N/omp_get_num_threads());
+        std::vector<int> bounds = set_parallel_scheme(N, nthreads);
+
+        #pragma omp parallel for num_threads(nthreads)
+        for(int t=0 ; t<nthreads ; ++t){
             double val = 0;
-            for(; i<stop ; ++i){
+            for(int i=bounds[t]; i<bounds[t + 1] ; ++i){
                 val += X(i, 0) * wX(i, 0);
             }
-            all_values[omp_get_thread_num()] = val;
+            all_values[t] = val;
         }
 
         double value = 0;
-        for(int m=0 ; m<nthreads ; ++m){
-            value += all_values[m];
+        for(int t=0 ; t<nthreads ; ++t){
+            value += all_values[t];
         }
 
         XtX(0, 0) = value;
@@ -407,21 +426,22 @@ void mp_Xty(NumericVector &Xty, const NumericMatrix &X, const NumericVector y, i
     int K = X.ncol();
 
     if(K == 1){
+
         std::vector<double> all_values(nthreads, 0);
-        #pragma omp parallel num_threads(nthreads)
-        {
-            int i = omp_get_thread_num()*(N/omp_get_num_threads());
-            int stop = (omp_get_thread_num()+1)*(N/omp_get_num_threads());
+        std::vector<int> bounds = set_parallel_scheme(N, nthreads);
+
+        #pragma omp parallel for num_threads(nthreads)
+        for(int t=0 ; t<nthreads ; ++t){
             double val = 0;
-            for(; i<stop ; ++i){
-                val += X(i, 0) * y[i];
+            for(int i=bounds[t]; i<bounds[t + 1] ; ++i){
+                val += X(i, 0) * y(i);
             }
-            all_values[omp_get_thread_num()] = val;
+            all_values[t] = val;
         }
 
         double value = 0;
-        for(int m=0 ; m<nthreads ; ++m){
-            value += all_values[m];
+        for(int t=0 ; t<nthreads ; ++t){
+            value += all_values[t];
         }
 
         Xty[0] = value;
