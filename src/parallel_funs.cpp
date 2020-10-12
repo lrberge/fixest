@@ -19,8 +19,6 @@
     #include <omp.h>
     #include <pthread.h>
 #else
-    #define omp_get_thread_num() 0
-    #define omp_get_num_threads() 1
     #define omp_get_max_threads() 0
 #endif
 #include <cmath>
@@ -31,14 +29,13 @@ using namespace Rcpp;
 
 // [[Rcpp::plugins(openmp)]]
 
-// This file contains misc femlm functions parallelized with the omp library
+// This file contains misc fixest functions parallelized with the omp library
 
 static bool fixest_in_fork = false;
 
 // [[Rcpp::export]]
-int get_nb_threads(){
-    int res = omp_get_max_threads();
-    return(res);
+int cpp_get_nb_threads(){
+    return omp_get_max_threads();
 }
 
 // Trick taken from data.table to detect forking

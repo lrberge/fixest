@@ -3939,11 +3939,11 @@ check_set_nthreads = function(nthreads){
     # Simple function that checks that the nber of threads is valid
     set_up(1)
 
-    check_value(nthreads, "integer scalar GE{0} | numeric scalar GT{0} LT{1}", .message = paste0("The argument 'nthreads' must be an integer lower or equal to the number of threads available (", max(get_nb_threads(), 1), "). It can be equal to 0 which means all threads. Alternatively, if equal to a number strictly between 0 and 1, it represents the fraction of all threads to be used."))
+    check_value(nthreads, "integer scalar GE{0} | numeric scalar GT{0} LT{1}", .message = paste0("The argument 'nthreads' must be an integer lower or equal to the number of threads available (", max(cpp_get_nb_threads(), 1), "). It can be equal to 0 which means all threads. Alternatively, if equal to a number strictly between 0 and 1, it represents the fraction of all threads to be used."))
 
-    max_threads = get_nb_threads()
+    max_threads = cpp_get_nb_threads()
 
-    if(is_in_fork()) return(1)
+    if(cpp_is_in_fork()) return(1)
 
     if(nthreads == 0){
         nthreads = max(max_threads, 1)
@@ -6951,10 +6951,10 @@ setFixest_nthreads = function(nthreads){
     max_CRAN = as.numeric(Sys.getenv("OMP_THREAD_LIMIT"))
     max_CRAN[is.na(max_CRAN)] = 1000
 
-	max_threads = min(get_nb_threads(), 1000, max_CRAN) # we cap at 1k nthreads
+	max_threads = min(cpp_get_nb_threads(), 1000, max_CRAN) # we cap at 1k nthreads
 
 	if(missing(nthreads) || is.null(nthreads)){
-		# New default => 50% of all threads
+		# New default => 50% of all available threads (usually equiv to the nber of procs)
 		nthreads = check_set_nthreads(0.5)
 	}
 
