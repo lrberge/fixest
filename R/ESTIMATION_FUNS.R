@@ -270,6 +270,7 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 		                          slope_flag = slope_flag, slope_vars = slope_vars,
 		                          r_init = init, checkWeight = fromGLM, nthreads = nthreads)
 
+
 		y_demean = vars_demean$y_demean
 		X_demean = vars_demean$X_demean
 		res$iterations = vars_demean$iterations
@@ -962,7 +963,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
     # The main loop
     #
 
-    wols = list(means = 1)
+    wols_means = 1
     conv = FALSE
     warning_msg = div_message = ""
     for (iter in 1:glm.iter) {
@@ -1005,10 +1006,11 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
         }
 
         if(mem.clean){
+            rm(wols)
             gc()
         }
 
-        wols = feols(y = z, X = X, weights = w, means = wols$means, correct_0w = any_0w, env = env, fixef.tol = fixef.tol * 10**(iter==1), fixef.iter = fixef.iter, nthreads = nthreads, mem.clean = mem.clean, verbose = verbose - 1)
+        wols = feols(y = z, X = X, weights = w, means = wols_means, correct_0w = any_0w, env = env, fixef.tol = fixef.tol * 10**(iter==1), fixef.iter = fixef.iter, nthreads = nthreads, mem.clean = mem.clean, verbose = verbose - 1)
 
         # In theory OLS estimation is guaranteed to exist
         # yet, NA coef may happen with non-infinite very large values of z/w (e.g. values > 1e100)
@@ -1021,6 +1023,8 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
             div_message = "Weighted-OLS returned NA coefficients."
             wols = wols_old
             break
+        } else {
+            wols_means = wols$means
         }
 
         eta = wols$fitted.values
