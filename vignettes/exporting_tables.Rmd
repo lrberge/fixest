@@ -13,13 +13,15 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE, comment = "#>")
 ```
 
-`fixest` offers a simple tool, the function `etable`, to export estimation tables to Latex. The main advantage of this function is its simplicity, many adjustments being made automatically behind the scene. 
+`fixest` offers a tool, the function `etable`, to view estimation tables in `R` or export them to Latex. 
 
-Its main limitations are that *i)* only `fixest` objects can be exported, and *ii)* only Latex is supported. Thus by no means it competes with other excellent tools to export tables in various format (like for instance [modelsummary](https://cran.r-project.org/package=modelsummary) or [texreg](https://cran.r-project.org/package=texreg)). 
+The main advantage of this function is its simplicity: it is completely integrated with other `fixest` functions, making it exceedingly easy to export multiple estimation results with, say, different types of standard-errors. On the other hand, its main limitations are that *i)* only `fixest` objects can be exported, and *ii)* only Latex is supported. 
 
-It offers however a fair deal of customization, and since you can seamlessly change its default values, you can completely transform the style of your tables without modifying a single line of code. 
+It also offers a fair deal of customization, and since you can seamlessly change its default values, you can completely transform the style of your tables without modifying a single line of code. 
 
-This document does not describe `etable`'s arguments in details (since it's in the help pages). Rather, it illustrates how to change the style of the table, once and for all.
+Note that there exists excellent alternatives to export tables, like for instance [modelsummary](https://cran.r-project.org/package=modelsummary) or [texreg](https://cran.r-project.org/package=texreg); but they are, necessarily, less integrated with `fixest` objects, often necessiting more lines of code to export the same results. 
+
+This document does not describe `etable`'s arguments in details (the help page provides many examples). Rather, it illustrates how to change the style of the table, once and for all.
 
 This document applies to `fixest` version 0.6.0 or higher.
 
@@ -37,16 +39,17 @@ est_noFE = feols(Ozone ~ Solar.R + Wind + Temp, airquality)
 est_1FE  = feols(Ozone ~ Solar.R + Wind + Temp | Day, airquality)
 est_2FE  = feols(Ozone ~ Solar.R + Wind + Temp | Day + Month , airquality)
 est_poly = feols(Ozone ~ Solar.R + Wind + poly(Temp, 3) | Day + Month, airquality)
+est_slopes = feols(Ozone ~ Solar.R + Wind | Day + Month[Temp], airquality)
 ```
 
 To export the results to Latex, we use `etable`. We first set the dictionnary renaming the variables, then we export the results with clustered standard-errors at the Day level:
 
-```{r, eval = FALSE}
+```{r, eval = TRUE, results = "hide"}
 # Dictionary => set only once per session
 setFixest_dict(c(Ozone = "Ozone (ppb)", Solar.R = "Solar Radiation (Langleys)",
                  Wind = "Wind Speed (mph)", Temp = "Temperature"))
 
-etable(est_noFE, est_1FE, est_2FE, est_poly, est_slopes, cluster = "Day", file = file,
+etable(est_noFE, est_1FE, est_2FE, est_poly, est_slopes, cluster = "Day", tex = TRUE,
        group = list("Temperature (cubic)" = "poly"), notes = "Estimation of 5 models.")
 
 ```
@@ -55,9 +58,9 @@ The previous code produces the following table:
 
 ![](https://github.com/lrberge/fixest/blob/master/vignettes/images/etable/first_table.PNG?raw=true)
 
-What can we notice? First, all variables are appropriately labeled. Second, all standard-errors of the four models are clustered by Day, and this is mentioned in the table footer. This is achieved with the argument `cluster`. Third, there's a fixed-effects section telling which model has which fixed-effect. Fourth, the polynomial of the Temperature is not shown, instead there's a line telling which model includes a cubic polynomial. This is achieved with the argument `group`. 
+What can we notice? First, all variables are appropriately labeled. Second, all standard-errors are clustered by Day, and this is mentioned in the table footer. This is achieved with the argument `cluster`. Third, there's a fixed-effects section telling which model has which fixed-effect. Fourth, the polynomial of the Temperature is not shown, instead there's a line telling which model includes a cubic polynomial. This is achieved with the argument `group`. 
 
-The style of the table is rather sober, but no worries most of it can be customized.
+The style of the table is rather sober, but no worries: most of it can be customized.
 
 
 ## Setting the style, once and for all
@@ -102,8 +105,8 @@ setFixest_etable(fitstat = ~r2, signifCode = NA, yesNo = "$\\checkmark$",
 And now, using the exact same line of code as in the first example, we obtain a table with a different style:
 
 
-```{r, eval = FALSE}
-etable(est_noFE, est_1FE, est_2FE, est_poly, est_slopes, cluster = "Day", file = file,
+```{r, results = 'hide'}
+etable(est_noFE, est_1FE, est_2FE, est_poly, est_slopes, cluster = "Day", tex = TRUE,
        group = list("Temperature (cubic)" = "poly"), notes = "Estimation of 5 models.")
 ```
 
