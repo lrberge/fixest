@@ -19,6 +19,7 @@ feglm(
   fixef,
   fixef.tol = 1e-06,
   fixef.iter = 10000,
+  collin.tol = 1e-14,
   glm.iter = 25,
   glm.tol = 1e-08,
   nthreads = getFixest_nthreads(),
@@ -44,6 +45,7 @@ feglm.fit(
   mustart = NULL,
   fixef.tol = 1e-06,
   fixef.iter = 10000,
+  collin.tol = 1e-14,
   glm.iter = 25,
   glm.tol = 1e-08,
   nthreads = getFixest_nthreads(),
@@ -68,6 +70,7 @@ fepois(
   fixef,
   fixef.tol = 1e-06,
   fixef.iter = 10000,
+  collin.tol = 1e-14,
   glm.iter = 25,
   glm.tol = 1e-08,
   nthreads = getFixest_nthreads(),
@@ -105,6 +108,8 @@ fepois(
 \item{fixef.tol}{Precision used to obtain the fixed-effects. Defaults to \code{1e-6}. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations.}
 
 \item{fixef.iter}{Maximum number of iterations in fixed-effects algorithm (only in use for 2+ fixed-effects). Default is 10000.}
+
+\item{collin.tol}{Numeric scalar, default is \code{1e-14}. Threshold decising when variables should be considered collinear and subsequently removed from the estimation. Higher values means more variables will be removed (if there is presence of collinearity). One signal of presence of collinearity is t-stats that are extremely low (for instance when t-stats < 1e-3).}
 
 \item{glm.iter}{Number of iterations of the glm algorithm. Default is 25.}
 

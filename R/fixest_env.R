@@ -12,7 +12,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                        useHessian = TRUE, hessian.args = NULL, opt.control = list(),
                        y, X, fixef_mat, panel.id,
                        nthreads = getFixest_nthreads(),
-                       verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000,
+                       verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000, collin.tol = 1e-14,
                        deriv.iter = 5000, deriv.tol = 1e-4, glm.iter = 25, glm.tol = 1e-8,
                        etastart, mustart,
                        warn = TRUE, notes = getFixest_notes(), combine.quick, demeaned = FALSE,
@@ -61,8 +61,8 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     main_args = c("fml", "data", "panel.id", "offset", "fixef.tol", "fixef.iter", "fixef", "nthreads", "verbose", "warn", "notes", "combine.quick", "start", "only.env", "mem.clean")
     femlm_args = c("family", "theta.init", "linear.start", "opt.control", "deriv.tol", "deriv.iter")
     feNmlm_args = c("NL.fml", "NL.start", "lower", "upper", "NL.start.init", "jacobian.method", "useHessian", "hessian.args")
-    feglm_args = c("family", "weights", "glm.iter", "glm.tol", "etastart", "mustart")
-    feols_args = c("weights", "demeaned")
+    feglm_args = c("family", "weights", "glm.iter", "glm.tol", "etastart", "mustart", "collin.tol")
+    feols_args = c("weights", "demeaned", "collin.tol")
     internal_args = c("debug", "object", "from_update", "sumFE_init")
 
     deprec_old_new = c()
@@ -219,6 +219,8 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     }
 
     check_arg(demeaned, notes, warn, mem.clean, "logical scalar")
+
+    check_arg(collin.tol, "numeric scalar GT{0}")
 
     show_notes = notes
     notes = c()

@@ -65,8 +65,8 @@ cpp_demean <- function(y, X_raw, n_vars_X, r_weights, iterMax, diffMax, nb_clust
     .Call(`_fixest_cpp_demean`, y, X_raw, n_vars_X, r_weights, iterMax, diffMax, nb_cluster_all, dum_list, tableCluster_vector, slope_flag, slope_vars, r_init, checkWeight, nthreads, save_fixef)
 }
 
-cpp_cholesky <- function(X, nthreads = 1L) {
-    .Call(`_fixest_cpp_cholesky`, X, nthreads)
+cpp_cholesky <- function(X, tol = 1.0/100000.0/100000.0, nthreads = 1L) {
+    .Call(`_fixest_cpp_cholesky`, X, tol, nthreads)
 }
 
 cpp_sparse_products <- function(X, w, y, correct_0w = FALSE, nthreads = 1L) {
@@ -149,16 +149,16 @@ cpp_diag_XUtX <- function(X, U) {
     .Call(`_fixest_cpp_diag_XUtX`, X, U)
 }
 
-get_nb_threads <- function() {
-    .Call(`_fixest_get_nb_threads`)
+cpp_get_nb_threads <- function() {
+    .Call(`_fixest_cpp_get_nb_threads`)
 }
 
-setup_fork_presence <- function() {
-    invisible(.Call(`_fixest_setup_fork_presence`))
+cpp_setup_fork_presence <- function() {
+    invisible(.Call(`_fixest_cpp_setup_fork_presence`))
 }
 
-is_in_fork <- function() {
-    .Call(`_fixest_is_in_fork`)
+cpp_is_in_fork <- function() {
+    .Call(`_fixest_cpp_is_in_fork`)
 }
 
 cpppar_exp <- function(x, nthreads) {

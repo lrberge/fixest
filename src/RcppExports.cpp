@@ -335,14 +335,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_cholesky
-List cpp_cholesky(NumericMatrix X, int nthreads);
-RcppExport SEXP _fixest_cpp_cholesky(SEXP XSEXP, SEXP nthreadsSEXP) {
+List cpp_cholesky(NumericMatrix X, double tol, int nthreads);
+RcppExport SEXP _fixest_cpp_cholesky(SEXP XSEXP, SEXP tolSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type X(XSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_cholesky(X, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_cholesky(X, tol, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -603,32 +604,32 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// get_nb_threads
-int get_nb_threads();
-RcppExport SEXP _fixest_get_nb_threads() {
+// cpp_get_nb_threads
+int cpp_get_nb_threads();
+RcppExport SEXP _fixest_cpp_get_nb_threads() {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(get_nb_threads());
+    rcpp_result_gen = Rcpp::wrap(cpp_get_nb_threads());
     return rcpp_result_gen;
 END_RCPP
 }
-// setup_fork_presence
-void setup_fork_presence();
-RcppExport SEXP _fixest_setup_fork_presence() {
+// cpp_setup_fork_presence
+void cpp_setup_fork_presence();
+RcppExport SEXP _fixest_cpp_setup_fork_presence() {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
-    setup_fork_presence();
+    cpp_setup_fork_presence();
     return R_NilValue;
 END_RCPP
 }
-// is_in_fork
-bool is_in_fork();
-RcppExport SEXP _fixest_is_in_fork() {
+// cpp_is_in_fork
+bool cpp_is_in_fork();
+RcppExport SEXP _fixest_cpp_is_in_fork() {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(is_in_fork());
+    rcpp_result_gen = Rcpp::wrap(cpp_is_in_fork());
     return rcpp_result_gen;
 END_RCPP
 }
@@ -925,7 +926,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_derivconv_seq_2", (DL_FUNC) &_fixest_cpp_derivconv_seq_2, 12},
     {"_fixest_update_deriv_single", (DL_FUNC) &_fixest_update_deriv_single, 5},
     {"_fixest_cpp_demean", (DL_FUNC) &_fixest_cpp_demean, 15},
-    {"_fixest_cpp_cholesky", (DL_FUNC) &_fixest_cpp_cholesky, 2},
+    {"_fixest_cpp_cholesky", (DL_FUNC) &_fixest_cpp_cholesky, 3},
     {"_fixest_cpp_sparse_products", (DL_FUNC) &_fixest_cpp_sparse_products, 5},
     {"_fixest_cpppar_crossprod", (DL_FUNC) &_fixest_cpppar_crossprod, 3},
     {"_fixest_cpp_mat_reconstruct", (DL_FUNC) &_fixest_cpp_mat_reconstruct, 2},
@@ -946,9 +947,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_lag_obs", (DL_FUNC) &_fixest_cpp_lag_obs, 3},
     {"_fixest_cpp_check_nested", (DL_FUNC) &_fixest_cpp_check_nested, 4},
     {"_fixest_cpp_diag_XUtX", (DL_FUNC) &_fixest_cpp_diag_XUtX, 2},
-    {"_fixest_get_nb_threads", (DL_FUNC) &_fixest_get_nb_threads, 0},
-    {"_fixest_setup_fork_presence", (DL_FUNC) &_fixest_setup_fork_presence, 0},
-    {"_fixest_is_in_fork", (DL_FUNC) &_fixest_is_in_fork, 0},
+    {"_fixest_cpp_get_nb_threads", (DL_FUNC) &_fixest_cpp_get_nb_threads, 0},
+    {"_fixest_cpp_setup_fork_presence", (DL_FUNC) &_fixest_cpp_setup_fork_presence, 0},
+    {"_fixest_cpp_is_in_fork", (DL_FUNC) &_fixest_cpp_is_in_fork, 0},
     {"_fixest_cpppar_exp", (DL_FUNC) &_fixest_cpppar_exp, 2},
     {"_fixest_cpppar_log", (DL_FUNC) &_fixest_cpppar_log, 2},
     {"_fixest_cpppar_log_a_exp", (DL_FUNC) &_fixest_cpppar_log_a_exp, 4},

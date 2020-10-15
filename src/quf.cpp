@@ -513,7 +513,6 @@ void quf_single(void *px_in, std::string &x_type, int n, vector<int> &x_uf, vect
 
     // preparation for strings
     bool IS_STR = x_type == "string";
-    vector<unsigned long long> x_ull;
 
     bool IS_INT = false;
     bool is_int_in_double = false;

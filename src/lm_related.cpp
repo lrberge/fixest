@@ -127,7 +127,7 @@ void tproduct_tri(NumericMatrix &RRt, NumericMatrix &R, int nthreads = 1){
 
 
 // [[Rcpp::export]]
-List cpp_cholesky(NumericMatrix X, int nthreads = 1){
+List cpp_cholesky(NumericMatrix X, double tol = 1.0/100000.0/100000.0, int nthreads = 1){
     // X est symetrique, semi definie positive
     // rank-revealing on-the-fly
 
@@ -138,7 +138,6 @@ List cpp_cholesky(NumericMatrix X, int nthreads = 1){
     NumericMatrix R(K, K);
     LogicalVector id_excl(K);
     int n_excl = 0;
-    double tol = 1.0/100000.0/100000.0;
 
     // we check for interrupt every 1s when it's the most computationnaly intensive
     // at each iteration we have K * (j+1) - j**2 - 2*j - 1 multiplications
