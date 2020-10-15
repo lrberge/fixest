@@ -2524,7 +2524,12 @@ i = interact = function(var, fe, ref, drop, keep){
     fe_name = deparse_long(mc$fe)
 
     if(length(var) != length(fe)){
-        stop("The arguments 'var' and 'fe' must be of the same length (currently ", length(var), " vs ", length(fe), ").")
+        if(grepl("^[[:alpha:]\\.][[:alnum:]\\._]*:[[:alpha:]\\.][[:alnum:]\\._]*$", var_name)){
+            info = strsplit(var_name, ":")[[1]]
+            stop("In interact(): When 'var' is equal to a product, please use I(", info[1], "*", info[2], ") instead of ", var_name, ".")
+        } else {
+            stop("The arguments 'var' and 'fe' must be of the same length (currently ", length(var), " vs ", length(fe), ").")
+        }
     }
 
     # The NAs
