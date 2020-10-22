@@ -933,8 +933,8 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 	    # This is an estimation with slopes
 	    # we apply another method => we use the demeaning function
 
-	    slope_variables = object$slope_variables
-	    slope_flag = object$slope_flag
+	    slope_variables = object$slope_variables_reordered
+	    slope_flag = object$slope_flag_reordered
 
 	    new_order = object$fe.reorder
 	    fixef_vars = object$fixef_vars[new_order]
