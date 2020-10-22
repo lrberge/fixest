@@ -144,6 +144,7 @@ List cpp_cholesky(NumericMatrix X, double tol = 1.0/100000.0/100000.0, int nthre
     // max => K**2/4
     double flop = K * K / 4.0;
     int iterSecond = ceil(2000000000 / flop / 2); // nber iter per 1/2 second
+    double min_norm = X(0, 0);
 
     for(int j=0 ; j<K ; ++j){
 
@@ -161,6 +162,8 @@ List cpp_cholesky(NumericMatrix X, double tol = 1.0/100000.0/100000.0, int nthre
 
             R_jj -= R(k, j) * R(k, j);
         }
+
+        if(min_norm > R_jj) min_norm = R_jj;
 
         if(R_jj < tol){
             n_excl++;
@@ -234,6 +237,7 @@ List cpp_cholesky(NumericMatrix X, double tol = 1.0/100000.0/100000.0, int nthre
 
     res["XtX_inv"] = XtX_inv;
     res["id_excl"] = id_excl;
+    res["min_norm"] = min_norm;
 
     return res;
 }

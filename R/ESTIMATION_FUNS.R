@@ -99,6 +99,7 @@
 #' \item{obsRemoved}{(When relevant.) Vector of observations that were removed because of NA values.}
 #' \item{collin.var}{(When relevant.) Vector containing the variables removed because of collinearity.}
 #' \item{collin.coef}{(When relevant.) Vector of coefficients, where the values of the variables removed because of collinearity are NA.}
+#' \item{collin.min_norm}{The minimal diagonal value of the Cholesky decomposition. Small values indicate possible presence collinearity.}
 #' \item{y_demeaned}{Only when \code{demeaned = TRUE}: the centered dependent variable.}
 #' \item{X_demeaned}{Only when \code{demeaned = TRUE}: the centered explanatory variable.}
 #'
@@ -360,6 +361,7 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 		# Additional stuff
 		res$residuals = est$residuals
 		res$multicol = est$multicol
+		res$min_norm = est$min_norm
 		if(fromGLM) res$is_excluded = est$is_excluded
 
 		if(demeaned){
@@ -563,7 +565,7 @@ ols_fit = function(y, X, w, correct_0w = FALSE, collin.tol, nthreads){
 
     residuals = y - fitted.values
 
-    res = list(xwx = xwx, coefficients = beta, fitted.values = fitted.values, xwx_inv = xwx_inv, multicol = multicol, residuals = residuals, is_excluded = is_excluded)
+    res = list(xwx = xwx, coefficients = beta, fitted.values = fitted.values, xwx_inv = xwx_inv, multicol = multicol, residuals = residuals, is_excluded = is_excluded, collin.min_norm = info_inv$min_norm)
 
     res
 }
@@ -761,7 +763,7 @@ feglm = function(fml, data, family = "poisson", offset, weights, panel.id, start
 
 #' @rdname feglm
 feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start = NULL,
-                     etastart = NULL, mustart = NULL, fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-14, glm.iter = 25, glm.tol = 1e-8,
+                     etastart = NULL, mustart = NULL, fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10, glm.iter = 25, glm.tol = 1e-8,
                      nthreads = getFixest_nthreads(), warn = TRUE, notes = getFixest_notes(), mem.clean = FALSE,
                      verbose = 0, only.env = FALSE, env, ...){
 
@@ -1492,7 +1494,7 @@ fenegbin = function(fml, data, theta.init, start = 0, fixef, offset, panel.id,
 
 #' @rdname feglm
 fepois = function(fml, data, offset, weights, panel.id, start = NULL, etastart = NULL, mustart = NULL,
-                  fixef, fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-14, glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
+                  fixef, fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10, glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
                   warn = TRUE, notes = getFixest_notes(), verbose = 0, combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
 
     # We control for the problematic argument family

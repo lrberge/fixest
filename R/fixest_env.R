@@ -1962,6 +1962,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     assign("fixef.tol", fixef.tol, env)
     assign("NR.tol", NR.tol, env)
     assign("deriv.tol", deriv.tol, env)
+    assign("collin.tol", collin.tol, env)
     # ITERATIONS
     assign("fixef.iter", fixef.iter, env)
     assign("deriv.iter", deriv.iter, env)
