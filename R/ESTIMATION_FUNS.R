@@ -173,7 +173,7 @@
 #' # You have many more example in coefplot help
 #'
 #'
-feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-14,
+feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
                  nthreads = getFixest_nthreads(), verbose = 0, warn = TRUE, notes = getFixest_notes(), combine.quick,
                  demeaned = FALSE, mem.clean = FALSE, only.env = FALSE, env, ...){
 
@@ -265,11 +265,11 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 		    gc()
 		}
 
-		vars_demean <- cpp_demean(y, X, n_vars_X, weights, iterMax = fixef.iter,
-		                          diffMax = fixef.tol, nb_cluster_all = fixef_sizes,
-		                          dum_list = fixef_id_list, tableCluster_vector = fixef_table_vector,
-		                          slope_flag = slope_flag, slope_vars = slope_vars,
-		                          r_init = init, checkWeight = fromGLM, nthreads = nthreads)
+		vars_demean = cpp_demean(y, X, n_vars_X, weights, iterMax = fixef.iter,
+		                            diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
+		                            fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
+		                            slope_flag_Q = slope_flag, slope_vars_list = slope_vars,
+		                            r_init = init, nthreads = nthreads)
 
 
 		y_demean = vars_demean$y_demean
