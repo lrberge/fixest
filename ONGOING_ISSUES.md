@@ -1,17 +1,14 @@
 
 ## Ongoing issues
 
-#### Varying slopes convergence problem
+#### Compatibility with the sandwich package
 
-There is a convergence problem that happens only when there are several variables with varying slopes (hereafter VVS). Having only one VVS is fine (note that I consider the slope fixed-effect as a variable too).
+So far `fixest` objects are compatible with variances computed with the package `sandwich` with the following exceptions:
 
-The issue is that I consider coefficients from variables with varying slopes as independent while they're in fact completely linked, and this *may* lead to convergence problems (note that convergence is usually fine though).
+ - `vcovHC` with `type = "HC4"`: The compatibility is only partial, i.e. it works for models without fixed-effects but breaks with fixed-effects estimations. This is because the hatvalues, needed for this kind of VCOV correction, are not defined when fixed-effects are used (actually I could make it compatible but the model would need to be reestimated with dummy variables, and this hardly squares with the idea of efficient fixed-effects estimation).
+ 
+ - `vcovBS`, i.e. bootstraped standard-errors: Absolutely not compatible so far, but it will become compatible later (hopefully).
 
-Now there's a warning popping when the convergence is not deemed good enough. 
-
-The good news is that I realized there's a closed form solution to get all coefficients of VVS at once. But since it entails massive rewriting of the C++ code, I need to take at least 2/3 days of full time work to solve it and ensure everything is fine, and I don't know when that's going to happen. 
-
-## Ongoing bugs
 
 
 
