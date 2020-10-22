@@ -808,6 +808,8 @@ n = nrow(base)
 set.seed(0)
 base$y_na = base$y ; base$y_na[sample(n, 50)] = NA
 base$period_txt = letters[base$period]
+ten_dates = c("1jan1960", "2jan1960", "31mar1960", "5apr1960", "12may1960", "25may1960", "20jun1960", "30jul1960", "2jan1965", "5dec2002")
+base$period_date = as.Date(ten_dates, "%d%b%Y")[base$period]
 base$y_0 = base$y**2 ; base$y_0[base$id == 1] = 0
 
 # We compute the lags "by hand"
@@ -835,8 +837,11 @@ test(lag(x1 ~ id + period, -1, data = base), base$x1_lead)
 test(lag(x1 ~ id + period_bis, data = base), base$x1_lag_hole)
 test(lag(x1 ~ id + period_bis, -1, data = base), base$x1_lead_hole)
 
-test(lag(x1 ~ id + period_txt, data = base, time.step = "consecutive"), base$x1_lag)
-test(lag(x1 ~ id + period_txt, -1, data = base, time.step = "consecutive"), base$x1_lead)
+test(lag(x1 ~ id + period_txt, data = base), base$x1_lag)
+test(lag(x1 ~ id + period_txt, -1, data = base), base$x1_lead)
+
+test(lag(x1 ~ id + period_date, data = base), base$x1_lag)
+test(lag(x1 ~ id + period_date, -1, data = base), base$x1_lead)
 
 cat("done.\nEstimations...")
 
@@ -847,32 +852,35 @@ cat("done.\nEstimations...")
 # Poisson
 
 for(depvar in c("y", "y_na", "y_0")){
+    for(p in c("period", "period_txt", "period_date")){
 
-    cat(".")
+        base$per = base[[p]]
 
-    base$y_dep = base[[depvar]]
-    pdat = panel(base, ~ id + period)
+        cat(".")
 
-    if(depvar == "y_0"){
-        estfun = fepois
-    } else {
-        estfun = feols
+        base$y_dep = base[[depvar]]
+        pdat = panel(base, ~ id + period)
+
+        if(depvar == "y_0"){
+            estfun = fepois
+        } else {
+            estfun = feols
+        }
+
+        est_raw  = estfun(y_dep ~ x1 + x1_lag + x1_lead, base)
+        est      = estfun(y_dep ~ x1 + l(x1) + f(x1), base, panel.id = "id,per")
+        est_pdat = estfun(y_dep ~ x1 + l(x1, 1) + f(x1, 1), pdat)
+        test(coef(est_raw), coef(est))
+        test(coef(est_raw), coef(est_pdat))
+
+        # Now we just check that calls to l/f works without checking coefs
+
+        est = estfun(y_dep ~ x1 + l(x1) + f(x1), base, panel.id = "id,per")
+        est = estfun(y_dep ~ l(x1, -1:1) + f(x1, 2), base, panel.id = c("id", "per"))
+        est = estfun(y_dep ~ l(x1, -1:1, fill = 1), base, panel.id = ~ id + per)
+        if(depvar == "y") test(est$nobs, n)
+        est = estfun(f(y_dep) ~ f(x1, -1:1), base, panel.id = ~ id + per)
     }
-
-    est_raw  = estfun(y_dep ~ x1 + x1_lag + x1_lead, base)
-    est      = estfun(y_dep ~ x1 + l(x1) + f(x1), base, panel.id = "id,period")
-    est_pdat = estfun(y_dep ~ x1 + l(x1, 1) + f(x1, 1), pdat)
-    test(coef(est_raw), coef(est))
-    test(coef(est_raw), coef(est_pdat))
-
-    # Now we just check that calls to l/f works without checking coefs
-
-    est = estfun(y_dep ~ x1 + l(x1) + f(x1), base, panel.id = "id,period")
-    est = estfun(y_dep ~ l(x1, -1:1) + f(x1, 2), base, panel.id = c("id", "period"))
-    est = estfun(y_dep ~ l(x1, -1:1, fill = 1), base, panel.id = ~ id + period)
-    if(depvar == "y") test(est$nobs, n)
-    est = estfun(f(y_dep) ~ f(x1, -1:1), base, panel.id = ~ id + period)
-
 }
 
 cat("done.\n")
