@@ -4,19 +4,14 @@
 \alias{panel}
 \title{Constructs a \code{fixest} panel data base}
 \usage{
-panel(
-  data,
-  panel.id,
-  time.step = "unitary",
-  duplicate.method = c("none", "first")
-)
+panel(data, panel.id, time.step = NULL, duplicate.method = c("none", "first"))
 }
 \arguments{
 \item{data}{A data.frame.}
 
 \item{panel.id}{The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id = ~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link[fixest]{feols}}).}
 
-\item{time.step}{The method to compute the lags. Can be equal to: \code{"unitary"} (default), \code{"consecutive"}, \code{"within.consecutive"}, or to a number. If \code{"unitary"}, then the largest common divisor between consecutive time periods is used (typically if the time variable represents years, it will be 1). This method can apply only to integer (or convertible to integer) variables. If \code{"consecutive"}, then the time variable can be of any type: two successive time periods represent a lag of 1. If \code{"witihn.consecutive"} then **within a given id**, two successive time periods represent a lag of 1. Finally, if the time variable is numeric, you can provide your own numeric time step.}
+\item{time.step}{The method to compute the lags, default is \code{NULL} (which means automatically set). Can be equal to: \code{"unitary"}, \code{"consecutive"}, \code{"within.consecutive"}, or to a number. If \code{"unitary"}, then the largest common divisor between consecutive time periods is used (typically if the time variable represents years, it will be 1). This method can apply only to integer (or convertible to integer) variables. If \code{"consecutive"}, then the time variable can be of any type: two successive time periods represent a lag of 1. If \code{"witihn.consecutive"} then **within a given id**, two successive time periods represent a lag of 1. Finally, if the time variable is numeric, you can provide your own numeric time step.}
 
 \item{duplicate.method}{If several observations have the same id and time values, then the notion of lag is not defined for them. If \code{duplicate.method = "none"} (default) and duplicate values are found, this leads to an error. You can use \code{duplicate.method = "first"} so that the first occurrence of identical id/time observations will be used as lag.}
 }

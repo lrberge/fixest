@@ -8,7 +8,7 @@
   x,
   k = 1,
   data,
-  time.step = "unitary",
+  time.step = NULL,
   fill = NA,
   duplicate.method = c("none", "first"),
   ...
@@ -21,7 +21,7 @@
 
 \item{data}{Optional, the data.frame in which to evaluate the formula. If not provided, variables will be fetched in the current environment.}
 
-\item{time.step}{The method to compute the lags. Can be equal to: \code{"unitary"} (default), \code{"consecutive"}, \code{"within.consecutive"}, or to a number. If \code{"unitary"}, then the largest common divisor between consecutive time periods is used (typically if the time variable represents years, it will be 1). This method can apply only to integer (or convertible to integer) variables. If \code{"consecutive"}, then the time variable can be of any type: two successive time periods represent a lag of 1. If \code{"witihn.consecutive"} then **within a given id**, two successive time periods represent a lag of 1. Finally, if the time variable is numeric, you can provide your own numeric time step.}
+\item{time.step}{The method to compute the lags, default is \code{NULL} (which means automatically set). Can be equal to: \code{"unitary"}, \code{"consecutive"}, \code{"within.consecutive"}, or to a number. If \code{"unitary"}, then the largest common divisor between consecutive time periods is used (typically if the time variable represents years, it will be 1). This method can apply only to integer (or convertible to integer) variables. If \code{"consecutive"}, then the time variable can be of any type: two successive time periods represent a lag of 1. If \code{"witihn.consecutive"} then **within a given id**, two successive time periods represent a lag of 1. Finally, if the time variable is numeric, you can provide your own numeric time step.}
 
 \item{fill}{Scalar. How to fill the observations without defined lead/lag values. Default is \code{NA}.}
 
