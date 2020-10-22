@@ -23,14 +23,16 @@ vcovClust = fixest:::vcovClust
 
 cat("ESTIMATION\n\n")
 
+set.seed(0)
+
 base = iris
 names(base) = c("y", "x1", "x2", "x3", "species")
 base$fe_2 = rep(1:5, 30)
+base$fe_3 = sample(15, 150, TRUE)
 base$constant = 5
 base$y_int = as.integer(base$y)
 base$w = as.vector(unclass(base$species) - 0.95)
 base$offset = unclass(base$species) - 0.95
-set.seed(0)
 base$y_01 = 1 * ((scale(base$x1) + rnorm(150)) > 0)
 # what follows to avoid removal of fixed-effects (logit is pain in the neck)
 base$y_01[1:5 + rep(c(0, 50, 100), each = 5)] = 1
@@ -46,7 +48,7 @@ for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
             my_offset = NULL
             if(use_offset) my_offset = base$offset
 
-            for(nb_fe in 0:7){
+            for(nb_fe in 0:9){
 
                 cat(".")
 
@@ -81,10 +83,12 @@ for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
                     # Combnined clusters
                     fml_fixest = y ~ x1 + x2 | species^fe_2
                     fml_stats = y ~ x1 + x2 + paste(species, fe_2)
-                } else if(nb_fe == Inf){
-                    # Lots of FEs => I'll check that when the VS problem is fixed
-                    fml_fixest = y ~ x1 | species[x2] + fe_2[x3]
-                    fml_stats = y ~ x1 + x2:species + x3:factor(fe_2) + species + factor(fe_2)
+                } else if(nb_fe == 8){
+                    fml_fixest = y ~ x1 | species[x2] + fe_2[x3] + fe_3
+                    fml_stats = y ~ x1 + i(x2, species) + i(x3, fe_2) + species + factor(fe_2) + factor(fe_3)
+                } else if(nb_fe == 9){
+                    fml_fixest = y ~ x1 | species + fe_2[x2,x3] + fe_3
+                    fml_stats = y ~ x1 + species + factor(fe_2) + i(x2, fe_2) + i(x3, fe_2) + factor(fe_3)
                 }
 
                 # ad hoc modifications of the formula
@@ -467,6 +471,47 @@ for(method in c("ols", "feglm", "femlm", "fenegbin")){
 }
 cat("\n")
 
+
+####
+#### fixef ####
+####
+
+set.seed(0)
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
+base$x4 = rnorm(150) + 0.25*base$y
+base$fe_bis = sample(10, 150, TRUE)
+base$fe_ter = sample(15, 150, TRUE)
+
+get_coef = function(all_coef, x){
+    res = all_coef[grepl(x, names(all_coef))]
+    names(res) = gsub(x, "", names(res))
+    res
+}
+
+m = feols(y ~ x1 + x2 | species + fe_bis, base)
+all_coef = coef(feols(y ~ -1 + x1 + x2 + species + factor(fe_bis), base))
+
+m_fe = fixef(m)
+c1  = get_coef(all_coef, "species")
+test(var(c1 - m_fe$species[names(c1)]), 0)
+
+c2  = get_coef(all_coef, "factor\\(fe_bis\\)")
+test(var(c2 - m_fe$fe_bis[names(c2)]), 0)
+
+
+m = feols(y ~ x1 + x2 | species + fe_bis[x3], base)
+all_coef = coef(feols(y ~ -1 + x1 + x2 + species + factor(fe_bis) + x3::fe_bis, base))
+
+m_fe = fixef(m)
+c1  = get_coef(all_coef, "species")
+test(var(c1 - m_fe$species[names(c1)]), 0, "~")
+
+c2  = get_coef(all_coef, "factor\\(fe_bis\\)")
+test(var(c2 - m_fe$fe_bis[names(c2)]), 0, "~")
+
+c3  = get_coef(all_coef, "x3:fe_bis::")
+test(c3, m_fe[["fe_bis[[x3]]"]][names(c3)], "~", tol = 1e-5)
 
 
 ####
