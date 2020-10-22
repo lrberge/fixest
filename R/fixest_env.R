@@ -1143,7 +1143,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             }
 
             if(mem.clean){
-                rm(mat_tmp, info)
+                rm(info)
                 gc()
             }
 
@@ -2079,7 +2079,11 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     K = length(params)
     if(isFixef){
         if(isSlope){
-            K = K + sum(fixef_sizes) - sum(slope_flag == FALSE) + any(slope_flag == FALSE)
+            K = K + sum(fixef_sizes * (1 + abs(slope_flag) - (slope_flag < 0)))
+            # now the references
+            if(any(slope_flag >= 0)){
+                K = K + 1 - sum(slope_flag >= 0)
+            }
         } else {
             K = K + sum(fixef_sizes - 1) + 1
         }
@@ -2099,6 +2103,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         if(isSlope){
             res$fixef_terms = fixef_terms
             original_order = order(new_order)
+            res$slope_flag = slope_flag[order(new_order)]
             res$slope_flag_reordered = slope_flag
             res$slope_variables_reordered = slope_variables
             res$fe.reorder = new_order
