@@ -9,7 +9,7 @@ fitstat(x, type, as.list = FALSE, ...)
 \arguments{
 \item{x}{A \code{fixest} estimation.}
 
-\item{type}{Character vector. The type of fit statistic to be computed. So far, only \code{"G"}, the 'working' number of observations, is available.}
+\item{type}{Character vector. The type of fit statistic to be computed. So far, \code{"G"}, the 'working' number of observations, and \code{'theta'}, the over-dispersion parameter in negative binomial estimation, are available.}
 
 \item{as.list}{Logical, default is \code{FALSE}. Only used when one statistic is to be computed (i.e. arg. \code{type} is of length 1). If \code{TRUE}, then a list whose name is the \code{type} is returned containing the statistic.}
 

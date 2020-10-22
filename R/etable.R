@@ -625,7 +625,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
     var_list <- var_reorder_list <- coef_list <- coef_below <- sd_below <- list()
     depvar_list <- obs_list <- fitstat_list <- list()
     r2_list <- aic_list <- bic_list <- loglik_list <- convergence_list <- list()
-    sqCor_list = family_list = theta_list = list()
+    sqCor_list = family_list = list()
 
     # To take care of factors
     fe_names = c()
@@ -664,7 +664,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
         # Default values:
         #   - if all OLS: typical R2
         #   - if any non-OLS: pseudo R2 + squared cor.
-        is_ols = sapply(all_models, function(x) deparse(x$call[[1]]) == "feols")
+        is_ols = sapply(all_models, function(x) x$method == "feols")
 
         if(all(is_ols)){
             if(any(sapply(all_models, function(x) "fixef_vars" %in% names(x)))){
@@ -678,6 +678,10 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
         }
 
         fitstat_all = c("n", fitstat_all)
+
+        if(any(sapply(all_models, function(x) !is.null(x$theta)))){
+            fitstat_all = c(fitstat_all, "theta")
+        }
 
     } else if(isFALSE(fitstat_all) || (length(fitstat_all) == 1 && (is.na(fitstat_all) || fitstat_all == ""))){
         fitstat_all = NULL
@@ -780,11 +784,6 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
             fam = "Neg. Bin."
         }
         family_list[[m]] = fam
-
-
-        # Negbin parameter
-        theta = all_models[[m]]$theta
-        theta_list[[m]] = ifelse(is.null(theta), "", numberFormatNormal(theta))
 
         # variable dependante:
         depvar <- gsub(" ", "", as.character(x$fml)[[2]])
@@ -1069,9 +1068,9 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
             }
 
             # Other fit statistics
-            fs_remaining = intersect(fitstat_all, fitstat(give_types = TRUE))
+            fs_remaining = intersect(fitstat_all, fitstat(give_types = TRUE)$types)
             for(fs in fs_remaining){
-                fistat_format[[fs]] = fitstat(x, type = fs)
+                fistat_format[[fs]] = fun_format(round(fitstat(x, type = fs), 3))
             }
 
             fitstat_list[[m]] = fistat_format[fitstat_all]
@@ -1129,7 +1128,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
     if(missing(file)) file = NULL
     if(missing(label)) label = NULL
 
-    res = list(se_type_list=se_type_list, var_list=var_list, coef_list=coef_list, coef_below=coef_below, sd_below=sd_below, depvar_list=depvar_list, obs_list=obs_list, convergence_list=convergence_list, fe_names=fe_names, is_fe=is_fe, nb_fe=nb_fe, slope_flag_list = slope_flag_list, slope_names=slope_names, useSummary=useSummary, model_names=model_names, family_list=family_list, theta_list=theta_list, fitstat_list=fitstat_list, subtitles=subtitles, isSubtitles=isSubtitles, title=title, convergence=convergence, family=family, keep=keep, drop=drop, order=order, file=file, label=label, sdBelow=sdBelow, signifCode=signifCode, fixef_sizes=fixef_sizes, fixef_sizes.simplify = fixef_sizes.simplify, depvar=depvar, useSummary=useSummary, dict=dict, yesNo=yesNo, add_signif=add_signif, float=float, coefstat=coefstat, ci=ci, style=style, notes=notes, group=group, tablefoot=tablefoot, extraline=extraline, placement=placement, drop.section=drop.section)
+    res = list(se_type_list=se_type_list, var_list=var_list, coef_list=coef_list, coef_below=coef_below, sd_below=sd_below, depvar_list=depvar_list, obs_list=obs_list, convergence_list=convergence_list, fe_names=fe_names, is_fe=is_fe, nb_fe=nb_fe, slope_flag_list = slope_flag_list, slope_names=slope_names, useSummary=useSummary, model_names=model_names, family_list=family_list, fitstat_list=fitstat_list, subtitles=subtitles, isSubtitles=isSubtitles, title=title, convergence=convergence, family=family, keep=keep, drop=drop, order=order, file=file, label=label, sdBelow=sdBelow, signifCode=signifCode, fixef_sizes=fixef_sizes, fixef_sizes.simplify = fixef_sizes.simplify, depvar=depvar, useSummary=useSummary, dict=dict, yesNo=yesNo, add_signif=add_signif, float=float, coefstat=coefstat, ci=ci, style=style, notes=notes, group=group, tablefoot=tablefoot, extraline=extraline, placement=placement, drop.section=drop.section)
 
     return(res)
 }
@@ -1153,7 +1152,6 @@ etable_internal_latex = function(info){
     slope_names = info$slope_names
     slope_flag_list = info$slope_flag_list
     family_list = info$family_list
-    theta_list = info$theta_list
     fitstat_list = info$fitstat_list
     subtitles = info$subtitles
     isSubtitles = info$isSubtitles
@@ -1497,8 +1495,6 @@ etable_internal_latex = function(info){
         info_convergence = paste0("Convergence &", paste(convergence_list, collapse = " & "), "\\\\\n")
     }
 
-    info_theta <- paste0("Overdispersion & ", paste(theta_list, collapse = " & "), "\\\\\n")
-
     # information on family
     if(family){
         info_family <- paste0(" &  ", paste(family_list, collapse = " & "), "\\\\\n")
@@ -1564,8 +1560,6 @@ etable_internal_latex = function(info){
     # Information on number of items
     supplemental_info = ""
 
-    if(all(theta_list == "")) info_theta = ""
-
     #
     # Fit statistics
     #
@@ -1589,7 +1583,7 @@ etable_internal_latex = function(info){
             for(fit_id in 1:nb){
                 fit = sapply(fitstat_list, function(x) x[[fit_id]])
                 if(all(is.na(fit))) next
-                fit[is.na(fit)] = "--"
+                fit[is.na(fit)] = ""
                 fit_info = paste0(fit_info, fit_names[fit_id], " & ", paste0(fit, collapse = "&"), "\\\\\n")
             }
         }
@@ -1605,7 +1599,7 @@ etable_internal_latex = function(info){
     }
 
     # Stacking var and stat
-    var_stack = c(variable_line, coef_lines, info_theta)
+    var_stack = c(variable_line, coef_lines)
     stat_stack = c(fit_info)
     dum_stack = c(dumIntro, FE_lines, slope_intro, slope_lines)
 
@@ -1726,8 +1720,6 @@ etable_internal_latex = function(info){
 
     res = c(supplemental_info, start_table, intro_latex, first_line, info_subtitles, model_line, info_family, var_stack, stat_stack, info_SD, style$lines$bottom, outro_latex, info_notes, end_table)
 
-    # res = c(supplemental_info, start_table, intro_latex, first_line, info_subtitles, model_line, info_family, variable_line, coef_lines, info_theta, dumIntro, FE_lines, slope_intro, slope_lines, fit_info, info_SD, style$lines$bottom, outro_latex, info_notes, end_table)
-
     res = res[nchar(res) > 0]
 
     return(res)
@@ -1751,7 +1743,6 @@ etable_internal_df = function(info){
     slope_names = info$slope_names
     slope_flag_list = info$slope_flag_list
     family_list = info$family_list
-    theta_list = info$theta_list
     fitstat_list = info$fitstat_list
     title = info$title
     label = info$label
@@ -1860,11 +1851,6 @@ etable_internal_df = function(info){
         my_line = c(el_name, el_format)
 
         res = rbind(res, my_line)
-    }
-
-    if("Neg. Bin." %in% family_list){
-        theta_line = c("Overdispersion:", unlist(theta_list))
-        res = rbind(res, theta_line)
     }
 
     # The line with the dependent variable => defined here to get the width

@@ -3008,7 +3008,7 @@ demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFi
 #' Computes various fit statistics for \code{fixest} estimations.
 #'
 #' @param x A \code{fixest} estimation.
-#' @param type Character vector. The type of fit statistic to be computed. So far, only \code{"G"}, the 'working' number of observations, is available.
+#' @param type Character vector. The type of fit statistic to be computed. So far, \code{"G"}, the 'working' number of observations, and \code{'theta'}, the over-dispersion parameter in negative binomial estimation, are available.
 #' @param as.list Logical, default is \code{FALSE}. Only used when one statistic is to be computed (i.e. arg. \code{type} is of length 1). If \code{TRUE}, then a list whose name is the \code{type} is returned containing the statistic.
 #' @param ... Other elements to be passed to other methods and may be used to compute the statistics (for example you can pass on arguments to compute the VCOV when using \code{type = "G"}).
 #'
@@ -3036,13 +3036,15 @@ fitstat = function(x, type, as.list = FALSE, ...){
     #   * wf.df / wf.pval / wf.stat
 
     dots = list(...)
-    valid_types = c("G")
+    valid_types = c("G", "theta")
     if(isTRUE(dots$give_types)){
 
-        tex_alias = c("G" = "Size of 'working' sample")
-        R_alias   = c("G" = "G")
+        tex_alias = c("g" = "Size of 'working' sample", "theta" = "Over-dispersion")
+        R_alias   = c("g" = "G", "theta" = "Over-dispersion")
 
-        res = list(types = valid_types, tex_alias = tex_alias, R_alias = R_alias)
+        # type_alias = c("f" = "f.stat")
+
+        res = list(types = tolower(valid_types), tex_alias = tex_alias, R_alias = R_alias)
         return(res)
     }
 
@@ -3068,11 +3070,22 @@ fitstat = function(x, type, as.list = FALSE, ...){
             if(is.null(G)) G = x$nobs
 
             res_all[[type]] = G
+
+        } else if(type == "theta"){
+            isNegbin = x$method == "fenegbin" || (x$method %in% c("femlm", "feNmlm") && x$family=="negbin")
+            if(isNegbin){
+                theta = coef(x)[".theta"]
+                names(theta) = "Overdispersion"
+            } else {
+                theta = NA
+            }
+
+            res_all[[type]] = theta
         }
 
     }
 
-    if(!as.list){
+    if(length(type_all) == 1 && !as.list){
         res_all = res_all[[1]]
     }
 
@@ -4195,7 +4208,11 @@ numberFormat_single = function(x, type = "normal"){
 	# For numbers higher than 1e9 => we apply a specific formatting
 	# idem for numbers lower than 1e-4
 
-    if(is.na(x)) return("NA")
+    if(is.na(x)){
+        return(NA)
+        # return(ifelse(type == "normal", "--", ""))
+    }
+
 	if(x == 0) return("0")
 
 	exponent = floor(log10(abs(x)))
