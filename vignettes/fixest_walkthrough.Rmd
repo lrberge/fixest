@@ -509,21 +509,7 @@ As you can see, the efficiency of increasing the number of threads is not 1 to 1
 
 You can permanently set the number of threads used by `fixest` using `setFixest_nthreads(nthreads)`.
 
-## Collinearity
 
-The user ought to estimate the coefficient of variables that are **not** collinear: neither among each other, neither with the fixed-effects. Estimation with collinear variables leads to a non invertible Hessian (leading to the absence of Variance-Covariance matrix for the coefficients). In such cases, the estimating functions will raise a warning and suggest to use the function `collinearity` to spot the problem.
-
-Let's take an example in which we want to make a fixed-effects estimation with a variable which is constant. Of course it makes no sense (this variable is perfectly collinear with the fixed-effects), so a warning will be raised suggesting to use the function `collinearity` to figure out what is wrong.
-
-```{r}
-base_coll = trade
-base_coll$constant_variable = 1
-res <- femlm(Euros ~ log(dist_km) + constant_variable|Origin+Destination+Product+Year, base_coll)
-collinearity(res)
-
-```
-
-As we can see, the function `collinearity` spots the collinear variables and name them. Even in elaborate cases of collinearity, the algorithm tries to find out the culprit and informs the user accordingly. 
 
 
 
