@@ -361,7 +361,7 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 		# Additional stuff
 		res$residuals = est$residuals
 		res$multicol = est$multicol
-		res$min_norm = est$min_norm
+		res$collin.min_norm = est$collin.min_norm
 		if(fromGLM) res$is_excluded = est$is_excluded
 
 		if(demeaned){
