@@ -228,6 +228,11 @@ f = function(x, lead = 1, fill = NA){
     l(x, -lead, fill)
 }
 
+#' @describeIn d Creates differences (i.e. x - lag(x)) in a \code{fixest} estimation
+d = function(x, lag = 1, fill = NA){
+    x - l(x, lag, fill)
+}
+
 
 #' Lags a variable in a \code{fixest} estimation
 #'
@@ -249,16 +254,17 @@ f = function(x, lead = 1, fill = NA){
 #' data(base_did)
 #'
 #' # Setting a data set as a panel...
-#' pdat = panel(base_did, ~id+period)
+#' pdat = panel(base_did, ~ id + period)
 #'
 #' # ...then using the functions l and f
-#' est1 = feols(y~l(x1, 0:1), pdat)
-#' est2 = feols(f(y)~l(x1, -1:1), pdat)
-#' est3 = feols(l(y)~l(x1, 0:3), pdat)
-#' etable(est1, est2, est3, order = c("f", "^x"), drop="Int")
+#' est1 = feols(y ~ l(x1, 0:1), pdat)
+#' est2 = feols(f(y) ~ l(x1, -1:1), pdat)
+#' est3 = feols(l(y) ~ l(x1, 0:3), pdat)
+#' etable(est1, est2, est3, order = c("f", "^x"), drop = "Int")
 #'
 #' # or using the argument panel.id
-#' feols(f(y)~l(x1, -1:1), base_did, panel.id = ~id+period)
+#' feols(f(y) ~ l(x1, -1:1), base_did, panel.id = ~id + period)
+#' feols(d(y) ~ d(x1), base_did, panel.id = ~id + period)
 #'
 #' # l() and f() can also be used within a data.table:
 #' if(require("data.table")){
@@ -266,6 +272,7 @@ f = function(x, lead = 1, fill = NA){
 #'   # Now since pdat_dt is also a data.table
 #'   #   you can create lags/leads directly
 #'   pdat_dt[, x1_l1 := l(x1)]
+#'   pdat_dt[, x1_d1 := d(x1)]
 #'   pdat_dt[, c("x1_l1_fill0", "y_f2") := .(l(x1, fill = 0), f(y, 2))]
 #' }
 #'
@@ -366,7 +373,7 @@ l = function(x, lag = 1, fill = NA){
 }
 
 
-l_expand = function(x, k=1, fill){
+l__expand = function(x, k = 1, fill){
 
     mc = match.call()
 
@@ -398,7 +405,7 @@ l_expand = function(x, k=1, fill){
 }
 
 # same as l_expand, but opposite sign
-f_expand = function(x, k=1, fill){
+f__expand = function(x, k = 1, fill){
 
     mc = match.call()
 
@@ -421,6 +428,34 @@ f_expand = function(x, k=1, fill){
                 mc_new[[1]] = as.name("f")
                 mc_new$k = as.numeric(k[i])
             }
+
+            res[i] = gsub("x = |k = ", "", deparse_long(mc_new))
+        }
+    }
+
+
+    res
+}
+
+# The diff operator
+d__expand = function(x, k = 1, fill){
+
+    mc = match.call()
+
+    if(missing(x)) stop("Argument 'x' cannot be missing.")
+    check_arg(k, "integer vector no na")
+    check_arg(fill, "NA | numeric scalar")
+
+    mc_new = mc
+
+    res = c()
+    for(i in 1:length(k)){
+
+        if(k[i] == 0){
+            res[i] = deparse_long(mc_new$x)
+        } else {
+            mc_new[[1]] = as.name("d")
+            mc_new$k = as.numeric(k[i])
 
             res[i] = gsub("x = |k = ", "", deparse_long(mc_new))
         }
@@ -810,7 +845,7 @@ unpanel = function(x){
         # data.table is really hard to handle....
         # Not very elegant... but that's life!
 
-        # When modifications are too risky, I dissolve the
+        # When modifications are too risky, I dissolve the panel
 
         mc_new = mc
         mc_new[[1]] = as.name('[')
@@ -821,11 +856,11 @@ unpanel = function(x){
             jvalue = mc$j
             jtext = deparse_long(jvalue)
             # we check if f() or l() is used
-            if(grepl("[^\\._[:alnum:]](l|f)\\(", jtext)){
+            if(grepl("[^\\._[:alnum:]](l|f|d)\\(", jtext)){
                 # We authorize it but only in 'simple' variable creation
                 if(any(!names(mc) %in% c("", "x", "j"))){
                     # We don't allow i either
-                    stop("When creating lags (resp. leads) with the function l() (resp. f()) within a data.table, only the argument 'j' is allowed.\nExample: 'data[, x_lag := l(x)]' is OK, while 'data[x>0, x_lag := l(x)]' is NOT ok.")
+                    stop("When creating lags (resp. leads or diffs) with the function l() (resp. f() or d()) within a data.table, only the argument 'j' is allowed.\nExample: 'data[, x_lag := l(x)]' is OK, while 'data[x>0, x_lag := l(x)]' is NOT ok.")
                 }
                 options(fixest_fl_authorized = TRUE)
                 on.exit(options(fixest_fl_authorized = FALSE))
@@ -932,7 +967,7 @@ terms_hat = function(fml, fastCombine = TRUE){
 
 check_lag = function(fml){
     fml_txt = deparse_long(fml)
-    grepl("((^)|[^\\._[:alnum:]])(l|f)\\(", fml_txt)
+    grepl("((^)|[^\\._[:alnum:]])(l|f|d)\\(", fml_txt)
 }
 
 
@@ -941,22 +976,19 @@ reformulate_terms = function(x){
 
     res = x
 
-    if(any(grepl("\\b(l|f)\\(", x))){
+    if(any(grepl("\\b(l|f|d)\\(", x))){
         # Means lagging required
 
-        term_all_expand = gsub("^l\\(", "l_expand(", x)
-        term_all_expand = gsub("([^\\._[:alnum:]])l\\(", "\\1l_expand(", term_all_expand)
+        term_all_expand = gsub("^(l|f|d)\\(", "\\1__expand(", x)
+        term_all_expand = gsub("([^\\._[:alnum:]])(l|f|d)\\(", "\\1\\2__expand(", term_all_expand)
 
-        term_all_expand = gsub("^f\\(", "f_expand(", term_all_expand)
-        term_all_expand = gsub("([^\\._[:alnum:]])f\\(", "\\1f_expand(", term_all_expand)
-
-        qui_expand = which(grepl("(l|f)_expand", term_all_expand))
+        qui_expand = which(grepl("__expand", term_all_expand))
 
         if(length(qui_expand) > 0){
             terms_all_list = as.list(x)
 
             # we select only the first function
-            end_l_expand = function(x){
+            find_closing = function(x){
                 x_split = strsplit(x, "")[[1]]
                 open = x_split == "("
                 close = x_split == ")"
@@ -965,20 +997,21 @@ reformulate_terms = function(x){
 
             for(k in qui_expand){
 
-                terms_split = strsplit(term_all_expand[k], "(f|l)_expand")[[1]]
-                is_l = strsplit(term_all_expand[k], "_expand")[[1]]
-                is_l = grepl("l$", is_l[-length(is_l)])
+                terms_split = strsplit(term_all_expand[k], "(l|f|d)__expand")[[1]]
+                terms_split_bis = strsplit(term_all_expand[k], "__expand")[[1]]
+                key = substr(terms_split_bis, nchar(terms_split_bis), nchar(terms_split_bis))
 
                 slice = terms_split[1]
                 for(i in 1:(length(terms_split) - 1)){
 
                     val = terms_split[i + 1]
 
-                    end = end_l_expand(val)
+                    end = find_closing(val)
                     if(end == nchar(val)){
-                        quoi = eval(parse(text = paste0(ifelse(is_l[i], "l", "f"), "_expand", val)))
+                        quoi = eval(parse(text = paste0(key[i], "__expand", val)))
+
                     } else {
-                        what = paste0(ifelse(is_l[i], "l", "f"), "_expand", substr(val, 1, end))
+                        what = paste0(key[i], "__expand", substr(val, 1, end))
                         end_text = substr(val, end + 1, nchar(val))
                         quoi = paste0(eval(parse(text = what)), end_text)
                     }
