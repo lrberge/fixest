@@ -153,14 +153,6 @@ cpp_get_nb_threads <- function() {
     .Call(`_fixest_cpp_get_nb_threads`)
 }
 
-cpp_setup_fork_presence <- function() {
-    invisible(.Call(`_fixest_cpp_setup_fork_presence`))
-}
-
-cpp_is_in_fork <- function() {
-    .Call(`_fixest_cpp_is_in_fork`)
-}
-
 cpppar_exp <- function(x, nthreads) {
     .Call(`_fixest_cpppar_exp`, x, nthreads)
 }

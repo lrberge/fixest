@@ -12,7 +12,8 @@
 	setFixest_coefplot("all", reset = TRUE)
 	setFixest_dof()
 
-	cpp_setup_fork_presence()
+	# # To include later
+	# cpp_setup_fork_presence()
 	setFixest_nthreads()
 
 	invisible()

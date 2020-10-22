@@ -613,25 +613,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cpp_setup_fork_presence
-void cpp_setup_fork_presence();
-RcppExport SEXP _fixest_cpp_setup_fork_presence() {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    cpp_setup_fork_presence();
-    return R_NilValue;
-END_RCPP
-}
-// cpp_is_in_fork
-bool cpp_is_in_fork();
-RcppExport SEXP _fixest_cpp_is_in_fork() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(cpp_is_in_fork());
-    return rcpp_result_gen;
-END_RCPP
-}
 // cpppar_exp
 NumericVector cpppar_exp(NumericVector x, int nthreads);
 RcppExport SEXP _fixest_cpppar_exp(SEXP xSEXP, SEXP nthreadsSEXP) {
@@ -959,8 +940,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_check_nested", (DL_FUNC) &_fixest_cpp_check_nested, 4},
     {"_fixest_cpp_diag_XUtX", (DL_FUNC) &_fixest_cpp_diag_XUtX, 2},
     {"_fixest_cpp_get_nb_threads", (DL_FUNC) &_fixest_cpp_get_nb_threads, 0},
-    {"_fixest_cpp_setup_fork_presence", (DL_FUNC) &_fixest_cpp_setup_fork_presence, 0},
-    {"_fixest_cpp_is_in_fork", (DL_FUNC) &_fixest_cpp_is_in_fork, 0},
     {"_fixest_cpppar_exp", (DL_FUNC) &_fixest_cpppar_exp, 2},
     {"_fixest_cpppar_log", (DL_FUNC) &_fixest_cpppar_log, 2},
     {"_fixest_cpppar_log_a_exp", (DL_FUNC) &_fixest_cpppar_log_a_exp, 4},

@@ -31,33 +31,40 @@ using namespace Rcpp;
 
 // This file contains misc fixest functions parallelized with the omp library
 
-static bool fixest_in_fork = false;
+
+// Regarding fork detection => I don't know enough yet
+// The code below doesn't seem to work. And I can't check since I'm on Windows....
+// Safer not to include it for now.
+
+// static bool fixest_in_fork = false;
+//
+// // Trick taken from data.table to detect forking
+// // Actually I don't know if it works, and I can't check...
+// void when_fork() {
+//   fixest_in_fork = true;
+// }
+//
+// void after_fork() {
+//   fixest_in_fork = false;
+// }
+//
+// // [[Rcpp::export]]
+// void cpp_setup_fork_presence() {
+//  // Called only once at startup
+//  #ifdef _OPENMP
+//     pthread_atfork(&when_fork, &after_fork, NULL);
+//  #endif
+// }
+//
+// // [[Rcpp::export]]
+// bool cpp_is_in_fork(){
+//     return fixest_in_fork;
+// }
+
 
 // [[Rcpp::export]]
 int cpp_get_nb_threads(){
     return omp_get_max_threads();
-}
-
-// Trick taken from data.table to detect forking
-void when_fork() {
-  fixest_in_fork = true;
-}
-
-void after_fork() {
-  fixest_in_fork = false;
-}
-
-// [[Rcpp::export]]
-void cpp_setup_fork_presence() {
- // Called only once at startup
- #ifdef _OPENMP
-    pthread_atfork(&when_fork, &after_fork, NULL);
- #endif
-}
-
-// [[Rcpp::export]]
-bool cpp_is_in_fork(){
-    return fixest_in_fork;
 }
 
 

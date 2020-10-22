@@ -3958,7 +3958,8 @@ check_set_nthreads = function(nthreads){
 
     max_threads = cpp_get_nb_threads()
 
-    if(cpp_is_in_fork()) return(1)
+    # # To add later
+    # if(cpp_is_in_fork()) return(1)
 
     if(nthreads == 0){
         nthreads = max(max_threads, 1)
