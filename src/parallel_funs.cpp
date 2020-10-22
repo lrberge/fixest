@@ -49,7 +49,7 @@ void after_fork() {
 
 // [[Rcpp::export]]
 void cpp_setup_fork_presence() {
- // Called once on loading data.table from init.c
+ // Called only once at startup
  #ifdef _OPENMP
     pthread_atfork(&when_fork, &after_fork, NULL);
  #endif
@@ -573,6 +573,85 @@ List cpppar_which_na_inf_mat(NumericMatrix mat, int nthreads){
             double x_tmp = 0;
             for(int k=0 ; k<K ; ++k){
                 x_tmp = mat(i, k);
+                if(std::isnan(x_tmp)){
+                    is_na_inf[i] = true;
+                    any_na = true;
+                    break;
+                } else if(std::isinf(x_tmp)){
+                    is_na_inf[i] = true;
+                    any_inf = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    // Return
+    List res;
+    res["any_na"] = any_na;
+    res["any_inf"] = any_inf;
+    res["any_na_inf"] = any_na || any_inf;
+    res["is_na_inf"] = is_na_inf;
+
+    return res;
+}
+
+// [[Rcpp::export]]
+List cpppar_which_na_inf_df(SEXP df, int nthreads){
+    // almost identical to cpppar_which_na_inf_vec but for R **numeric** data frames. Changes:
+    // - main argument becomes SEXP
+    // - k-for loop within the i-for loop
+    /*
+     This function takes a df and looks at whether it contains NA or infinite values
+     return: flag for na/inf + logical vector of obs that are Na/inf
+     std::isnan, std::isinf are OK since cpp11 required
+     in the "best" case (default expected), we need not construct is_na_inf
+     */
+
+
+    int K = Rf_length(df);
+    int nobs = Rf_length(VECTOR_ELT(df, 0));
+    bool anyNAInf = false;
+    bool any_na = false;    // return value
+    bool any_inf = false;   // return value
+
+    // The Mapping of the data
+    std::vector<double*> df_data(K);
+    for(int k=0 ; k<K ; ++k){
+        df_data[k] = REAL(VECTOR_ELT(df, k));
+    }
+
+    /*
+     we make parallel the anyNAInf loop
+     why? because we want that when there's no NA (default) it works as fast as possible
+     if there are NAs, single threaded mode is faster, but then we circumvent with the do_any_na_inf flag
+     */
+
+    // no need to care about the race condition
+    // "trick" to make a break in a multi-threaded section
+
+    std::vector<int> bounds = set_parallel_scheme_bis(nobs, nthreads);
+
+    #pragma omp parallel for num_threads(nthreads)
+    for(int t=0 ; t<nthreads ; ++t){
+        for(int k=0 ; k<K ; ++k){
+            for(int i=bounds[t]; i<bounds[t + 1] && !anyNAInf ; ++i){
+                if(std::isnan(df_data[k][i]) || std::isinf(df_data[k][i])){
+                    anyNAInf = true;
+                }
+            }
+        }
+    }
+
+    // object to return: is_na_inf
+    LogicalVector is_na_inf(anyNAInf ? nobs : 1);
+
+    if(anyNAInf){
+        #pragma omp parallel for num_threads(nthreads)
+        for(int i=0 ; i<nobs ; ++i){
+            double x_tmp = 0;
+            for(int k=0 ; k<K ; ++k){
+                x_tmp = df_data[k][i];
                 if(std::isnan(x_tmp)){
                     is_na_inf[i] = true;
                     any_na = true;
