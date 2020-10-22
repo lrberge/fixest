@@ -933,111 +933,94 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 	    # This is an estimation with slopes
 	    # we apply another method => we use the demeaning function
 
-	    fixef_terms = object$fixef_terms
-	    terms_full = extract_fe_slope(fixef_terms)
-	    fixef_vars = terms_full$fixef_vars
-	    slope_fe = terms_full$slope_fe
-	    fe_all = terms_full$fe_all
-	    slope_vars = terms_full$slope_vars
-	    slope_terms = terms_full$slope_terms
+	    slope_variables = object$slope_variables
+	    slope_flag = object$slope_flag
 
-	    # dictionary mapping fe var names to the ids of id_dummies_vect
-	    dict_fe = 1:Q
-	    names(dict_fe) = object$fixef_vars
+	    new_order = object$fe.reorder
+	    fixef_vars = object$fixef_vars[new_order]
+	    fixef_sizes = as.integer(object$fixef_sizes[new_order])
 
-	    # STEP 1: getting the variables with varying slopes (not saved in object to save space)
-	    # We extract the slope variables
-	    slope_vars_unik = unique(slope_vars)
+	    # We reconstruct the terms
+	    fixef_terms = c()
+	    start = c(0, cumsum(abs(slope_flag)))
+	    for(i in seq_along(slope_flag)){
+	        sf = slope_flag[i]
+	        if(sf >= 0){
+	            fixef_terms = c(fixef_terms, fixef_vars[i])
+	        }
 
-	    # 2019-11-26: now the slope variables are directly in the objects
-	    # # evaluation
-	    # data = NULL
-	    # try(data <- eval(object$call$data, parent.frame()), silent = TRUE)
-	    # dataName = object$call$data
-	    #
-	    # if(is.null(data)){
-	    #     # We try to provide an informative error message
-	    #     stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables (i.e. ", enumerate_items(slope_vars_unik), ") in the original dataset in the parent.frame -- but the data doesn't seem to be there anymore (btw it was ", deparse_long(dataName), ")")
-	    # }
-	    #
-	    # data = as.data.frame(data)
-	    #
-	    # # we check the variables are there
-	    # slope_vars_unik_raw = unique(sapply(slope_vars_unik, function(x) all.vars(parse(text = x))))
-	    #
-	    # if(any(!slope_vars_unik_raw %in% names(data))){
-	    #     var_pblm = setdiff(slope_vars_unik_raw, names(data))
-	    #     stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables in the original dataset (", deparse_long(dataName), "). However, the variable", enumerate_items(var_pblm, "s.is"), " not present in the original dataset any more.")
-	    # }
-	    #
-	    # # we check length consistency
-	    # if(NROW(data) != (object$nobs + length(object$obsRemoved))){
-	    #     stop("To get the coefficients for the variables with varying slopes, we need to fetch these variables in the original dataset (", deparse_long(dataName), "), yet the dataset doesn't have the same number of observations as was used in the estimation (", NROW(data), " instead of ", object$nobs + length(object$obsRemoved), ").")
-	    # }
-	    #
-	    # if(length(object$obsRemoved)){
-	    #     data = data[-object$obsRemoved, slope_vars_unik_raw, drop = FALSE]
-	    # } else {
-	    #     data = data[, slope_vars_unik_raw, drop = FALSE]
-	    # }
-
-	    slope_var_list = list()
-	    for(i in 1:length(slope_vars_unik)){
-
-	        # # as.numeric => we'll use cpp so required
-	        # svar = as.numeric(as.vector(eval(parse(text = slope_vars_unik[i]), data)))
-	        # if(length(svar) == 1) svar = rep(svar, N)
-	        #
-	        # slope_var_list[[slope_vars_unik[i]]] = svar
-	        slope_var_list[[slope_vars_unik[i]]] = object$slope_variables[[slope_vars_unik[i]]]
+	        if(abs(sf) > 0){
+	            fixef_terms = c(fixef_terms, paste0(fixef_vars[i], "[[", names(slope_variables)[start[i] + 1:abs(sf)], "]]"))
+            }
 	    }
 
+	    fe_id_list = object$fixef_id[new_order]
+
+	    #
 	    # STEP 2: demeaning
+	    #
 
-	    # This way to proceed is "dirty", I shall do some cleanup when I have more time
-	    fixef_sizes = object$fixef_sizes
 
-	    nb_cluster_all = as.integer(unlist(fixef_sizes[dict_fe[fe_all]]))
-
-	    dum_list = id_dummies_vect[dict_fe[fe_all]]
-
-	    slope_flag = as.integer(grepl("\\[", fixef_terms))
-
-	    what = slope_var_list[slope_vars]
-	    names(what) = NULL
-	    slope_vars_vector = as.numeric(unlist(what))
-
-	    fixef_table_list = list()
-	    for(i in 1:Q) fixef_table_list[[i]] = cpp_table(fixef_sizes[i], id_dummies_vect[[i]])
-	    fixef_table_vector = as.integer(unlist(fixef_table_list[dict_fe[fe_all]]))
+	    table_id_I = as.integer(unlist(lapply(fe_id_list, table), use.names = FALSE))
 
 	    S_demean <- cpp_demean(y = S, X_raw = 0, n_vars_X = 0, r_weights = 0, iterMax = 1000L,
-	                              diffMax = fixef.tol, nb_cluster_all = nb_cluster_all,
-	                              dum_list = dum_list, tableCluster_vector = fixef_table_vector,
-	                              slope_flag = slope_flag, slope_vars = slope_vars_vector,
-	                              r_init = 0, checkWeight = 1L, nthreads = 1L, save_fixef = TRUE)
+	                           diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
+	                           fe_id_list = fe_id_list, table_id_I = table_id_I,
+	                           slope_flag = slope_flag, slope_vars = slope_variables,
+	                           r_init = 0, nthreads = 1L, save_fixef = TRUE)
 
 	    fixef_coef = S_demean$fixef_coef
 
-	    fixef_values = list()
-	    cum_sizes = cumsum(fixef_sizes[fe_all])
-	    start = 1 + c(0, cum_sizes)
-	    for(i in seq_along(fixef_terms)){
-	        fixef_values[[i]] = fixef_coef[start[i]:cum_sizes[i]]
+	    names(fixef_sizes) = fixef_vars
+
+	    fe_all = c()
+	    for(i in seq_along(slope_flag)){
+	        fe_all = c(fe_all, rep(fixef_vars[i], 1 + abs(slope_flag[i]) - (slope_flag[i] < 0)))
+	    }
+
+	    start = 1
+	    i = 1
+	    for(q in seq_along(slope_flag)){
+	        sf = slope_flag[q]
+	        if(sf == 0){
+	            fixef_values[[i]] = fixef_coef[seq(start, length.out = fixef_sizes[q])]
+	            i = i + 1
+	            start = start + fixef_sizes[q]
+	        } else {
+	            nb = abs(sf) + (sf > 0)
+
+	            adj = 0
+	            if(sf > 0){
+	                # The fixed-effects is in the last position
+	                j_fe = nb - 1
+	                fixef_values[[i]] = fixef_coef[seq(start + j_fe, by = nb, length.out = fixef_sizes[q])]
+	                adj = 1
+	            }
+
+	            for(j in 0:(nb - 1 - adj)){
+	                fixef_values[[i + j + adj]] = fixef_coef[seq(start + j, by = nb, length.out = fixef_sizes[q])]
+	            }
+	            i = i + nb
+	            start = start + fixef_sizes[q] * nb
+	        }
+
 	    }
 
 	    #
 	    # Now the referenes
 	    #
 
+	    nb_ref = integer(length(fixef_terms))
+
 	    # FE references
-	    Q_fe = length(fixef_vars)
+	    who_fe = slope_flag >= 0
+	    Q_fe = sum(who_fe)
 	    if(Q_fe >= 2){
 
-	        my_dum = id_dummies_vect[dict_fe[fixef_vars]]
+	        my_dum = fe_id_list[who_fe]
 
-	        dumMat <- matrix(unlist(my_dum), N, Q_fe) - 1
-	        orderCluster <- matrix(unlist(lapply(my_dum, order)), N, Q_fe) - 1
+	        dumMat <- matrix(unlist(my_dum, use.names = FALSE), N, Q_fe) - 1
+	        orderCluster <- matrix(unlist(lapply(my_dum, order), use.names = FALSE), N, Q_fe) - 1
 
 	        nbCluster = sapply(my_dum, max)
 
@@ -1051,28 +1034,39 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 
 	    # Slope references (if associated FE + constant)
 
-        Q_slope = length(slope_fe)
+	    names(slope_flag) = fixef_vars
+
+        Q_slope = sum(abs(slope_flag))
         nb_ref_slope = integer(Q_slope)
-        for(i in 1:Q_slope){
+        i_noVS = 1
+        for(i in seq_along(fixef_terms)){
 
-            my_dum = id_dummies_vect[[dict_fe[slope_fe[i]]]]
-            my_order = order(my_dum)
-            var_sorted = slope_var_list[[slope_vars[i]]][my_order]
+            ft = fixef_terms[i]
 
-            # if no associated FE => we check only 0 values
-            if(!slope_fe[i] %in% fixef_vars){
-                nb_ref_slope[i] = cpp_constant_dum(fixef_sizes[slope_fe[i]], var_sorted, my_dum[my_order], only_0 = TRUE)
+            if(!grepl("[[", ft, fixed = TRUE)){
+                # No slope => already computed
+                nb_ref[i] = nb_ref_fe[i_noVS]
+                i_noVS = i_noVS + 1
+
             } else {
-                nb_ref_slope[i] = cpp_constant_dum(fixef_sizes[slope_fe[i]], var_sorted, my_dum[my_order])
+                # Slope
+                fe_name = gsub("\\[.+", "", ft)
+                my_dum = fe_id_list[[fe_name]]
+
+                my_order = order(my_dum)
+                var_sorted = slope_variables[[gsub(".+\\[|\\]+", "", ft)]][my_order]
+
+                # if no associated FE => we check only 0 values
+                if(slope_flag[fe_name] < 0){
+                    nb_ref[i] = cpp_constant_dum(fixef_sizes[fe_name], var_sorted, my_dum[my_order], only_0 = TRUE)
+                } else {
+                    nb_ref[i] = cpp_constant_dum(fixef_sizes[fe_name], var_sorted, my_dum[my_order])
+                }
             }
         }
 
-        nb_ref = integer(length(fixef_terms))
-        nb_ref[slope_flag] = nb_ref_slope
-        nb_ref[!slope_flag] = nb_ref_fe
-
         # we recreate that to avoid conditioning on isSlope later
-        fixef_id = fixef_id[dict_fe[fe_all]]
+        fixef_id = fixef_id[fe_all]
         fixef_names = fixef_terms
 
     } else if(Q == 1){
@@ -1106,8 +1100,13 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 	all_clust = list()
 	Q_all = ifelse(isSlope, length(fixef_terms), Q)
 	for(i in 1:Q_all){
-		cv = fixef_values[[i]]
-		names(cv) = attr(fixef_id[[i]], "fixef_names")
+	    # We put it inthe right order
+	    fn = attr(fixef_id[[i]], "fixef_names")
+	    if(all(!grepl("[^[:digit:]]", fn))) fn = as.numeric(fn)
+	    my_order = order(fn)
+
+	    cv = fixef_values[[i]][my_order]
+	    names(cv) = fn[my_order]
 		all_clust[[fixef_names[i]]] = cv
 	}
 
@@ -2980,28 +2979,22 @@ demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFi
 
     Q = length(fe)
     n = length(fe[[1]])
-    quf_info_all = cpppar_quf_table_sum(x = fe, y = rep(1, n), do_sum_y = FALSE, type = 0, only_slope = rep(FALSE, Q), nthreads = nthreads)
+    quf_info_all = cpppar_quf_table_sum(x = fe, y = 0, do_sum_y = FALSE, type = 0, only_slope = rep(FALSE, Q), nthreads = nthreads)
 
     # table/sum_y/sizes
     fixef_table = quf_info_all$table
     fixef_sizes = lengths(fixef_table)
-
-    # fixef_id_vector = as.integer(unlist(quf_info_all$quf) - 1)
     fixef_table_vector = as.integer(unlist(fixef_table))
-
-
-    # LATER => rework cpp_demean so that y can be void
-    y = rep(0, n)
 
     #
     # The algorithm
     #
 
-    vars_demean <- cpp_demean(y, X, ncol(X), weights, iterMax = iter,
-                              diffMax = tol, nb_cluster_all = fixef_sizes,
-                              dum_list = quf_info_all$quf, tableCluster_vector = fixef_table_vector,
-                              slope_flag = rep(FALSE, Q), slope_vars = 0,
-                              r_init = 0, checkWeight = FALSE, nthreads = nthreads)
+    vars_demean <- cpp_demean(y = 0, X, ncol(X), weights, iterMax = iter,
+                              diffMax = tol, r_nb_id_Q = fixef_sizes,
+                              fe_id_list = quf_info_all$quf, table_id_I = fixef_table_vector,
+                              slope_flag_Q = rep(FALSE, Q), slope_vars_list = list(0),
+                              r_init = 0, nthreads = nthreads)
 
     X_demean = vars_demean$X_demean
     colnames(X_demean) = var_names
@@ -3466,6 +3459,9 @@ terms_fixef = function(fml){
     # fml: one sided formula
     # can also be a vector of terms
 
+    # terms_fixef(~dum_1[[x1]] + dum_2[x2])
+    # terms_fixef(~dum_1[[x1]] + dum_2 + dum_3[x2, x3])
+
     if(is.vector(fml)){
         fml = as.formula(paste0("~", paste0(fml, collapse = "+")))
     }
@@ -3491,8 +3487,8 @@ terms_fixef = function(fml){
 
     # we need to take care of the ^ used to combine variables
     fml_char = as.character(fml[2])
-    if(grepl("\\^", fml_char)){
-        fml_char_new = gsub("\\^", "_impossible_var_name_", fml_char)
+    if(grepl("^", fml_char, fixed = TRUE)){
+        fml_char_new = gsub("^", "_impossible_var_name_", fml_char, fixed = TRUE)
         fml = as.formula(paste0("~", fml_char_new))
     }
 
@@ -3501,22 +3497,22 @@ terms_fixef = function(fml){
 
     # if error, we send it back
     if("try-error" %in% class(t)){
-        t = gsub("_impossible_var_name_", "^", t)
+        t = gsub("_impossible_var_name_", "^", t, fixed = TRUE)
         return(t)
     }
 
     my_vars = attr(t, "term.labels")
 
     # Further error checking (misuse of varying slopes)
-    if(any(grepl("\\]", my_vars))){
-        var2check = my_vars[grepl("\\]", my_vars)]
-        var2check_double = var2check[grepl("\\]\\]", var2check)]
-        var2check_single = var2check[!grepl("\\]\\]", var2check)]
+    if(any(grepl("]", my_vars, fixed = TRUE))){
+        var2check = my_vars[grepl("]", my_vars, fixed = TRUE)]
+        var2check_double = var2check[grepl("]]", var2check, fixed = TRUE)]
+        var2check_single = var2check[!grepl("]]", var2check, fixed = TRUE)]
         if(length(var2check_double) > 0){
             qui = !grepl("\\]\\]$", var2check_double) | !grepl("\\[\\[", var2check_double) | lengths(strsplit(var2check_double, "\\[")) != 3
             if(any(qui)){
                 item_pblm = var2check_double[qui]
-                msg = paste0("Square bracket are special characters use **only** to designate varying slopes (see help). They are currenlty misused (it concerns ", enumerate_items(item_pblm), ").")
+                msg = paste0("Square bracket are special characters used **only** to designate varying slopes (see help). They are currenlty misused (it concerns ", enumerate_items(item_pblm), ").")
                 class(msg) = "try-error"
                 return(msg)
             }
@@ -3526,7 +3522,7 @@ terms_fixef = function(fml){
             qui = !grepl("\\]$", var2check_single) | lengths(strsplit(var2check_single, "\\[")) != 2
             if(any(qui)){
                 item_pblm = var2check_single[qui]
-                msg = paste0("Square bracket are special characters use **only** to designate varying slopes (see help). They are currenlty misused (it concerns ", enumerate_items(item_pblm), ").")
+                msg = paste0("Square bracket are special characters used **only** to designate varying slopes (see help). They are currenlty misused (it concerns ", enumerate_items(item_pblm), ").")
                 class(msg) = "try-error"
                 return(msg)
             }
@@ -3534,7 +3530,7 @@ terms_fixef = function(fml){
 
     }
 
-    qui_slope = grepl("\\[", my_vars)
+    qui_slope = grepl("[", my_vars, fixed = TRUE)
     if(any(qui_slope)){
         new_terms = c()
 
@@ -3562,23 +3558,37 @@ terms_fixef = function(fml){
     my_vars = unique(my_vars)
 
     # we put the ^ back
-    my_vars = gsub("_impossible_var_name_", "^", my_vars)
+    my_vars = gsub("_impossible_var_name_", "^", my_vars, fixed = TRUE)
 
-    res = list(fml_terms = my_vars, fe_vars = gsub("\\[.+", "", my_vars))
-    res$slope_flag = grepl("\\[", my_vars)
-    res$slope_vars = rep(NA, length(my_vars))
-    res$slope_vars[res$slope_flag] = gsub(".+\\[|\\]", "", my_vars[res$slope_flag])
+    res = list(fml_terms = my_vars)
+    # OLD version
+    fe_vars_all = gsub("\\[.+", "", my_vars)
+    is_slope_all = grepl("\\[", my_vars)
+    slope_vars_all = rep(NA_character_, length(my_vars))
+    slope_vars_all[is_slope_all] = gsub(".+\\[|\\]", "", my_vars[is_slope_all])
 
-    res
-}
+    # New version following the reworking of demeaning
+    fe_vars = unique(fe_vars_all)
+    #fe_vars: unique of the fixed-effects variables
+    slope_flag = rep(0, length(fe_vars))
+    # slope_flag: 0: no Varying slope // > 0: varying slope AND fixed-effect // < 0: varying slope WITHOUT fixed-effect
 
-only_slope = function(fe_terms){
-    # returns a logical vector of whether a FE is only
-    # related to a slope
+    slope_vars_list = vector("list", length(fe_vars))
+    names(slope_vars_list) = fe_vars
+    for(i in seq_along(fe_vars)){
+        qui = which(fe_vars_all == fe_vars[i])
+        if(any(is_slope_all[qui])){
+            nb = sum(is_slope_all[qui])
+            slope_flag[i] = nb * (1 - 2*(length(qui) == nb))
+            slope_vars_list[[i]] = slope_vars_all[qui][is_slope_all[qui]]
+        }
+    }
 
-    new_terms = terms_fixef(fe_terms)
-    fixef_vars = unique(new_terms$fe_vars)
-    res = tapply(!new_terms$slope_flag, new_terms$fe_vars, sum)[fixef_vars] == 0
+    res$fe_vars = fe_vars
+    res$slope_flag = as.integer(slope_flag)
+    res$slope_vars_list = slope_vars_list
+    res$slope_vars = unlist(slope_vars_list, use.names = FALSE)
+
     res
 }
 
@@ -3626,7 +3636,7 @@ prepare_df = function(vars, base, fastCombine = NA){
         res = do.call("data.frame", data_list)
 
         if(changeNames){
-            qui = grepl("combine_clusters", all_var_names)
+            qui = grepl("combine_clusters", all_var_names, fixed = TRUE)
             new_names = gsub("combine_clusters(_fast)?\\(|\\)", "", all_var_names[qui])
             new_names = gsub(", ?", "^", new_names)
             all_var_names[qui] = new_names
@@ -5803,17 +5813,13 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 	n_fe = n_fe_ok = length(object$fixef_id)
 
 	# we adjust the fixef sizes to account for slopes
+	fixef_sizes_ok = object$fixef_sizes
 	isSlope = FALSE
 	if(!is.null(object$fixef_terms)){
 	    isSlope = TRUE
-	    fixef_sizes_ok = object$fixef_sizes
-
-	    size_to_drop = only_slope(object$fixef_terms)[names(fixef_sizes_ok)]
-
-	    fixef_sizes_ok[size_to_drop] = 0
+	    # The drop the fixef_sizes for only slopes
+	    fixef_sizes_ok[object$slope_flag < 0] = 0
 	    n_fe_ok = sum(fixef_sizes_ok > 0)
-	} else {
-	    fixef_sizes_ok = object$fixef_sizes
 	}
 
 	# How do we choose K? => argument dof

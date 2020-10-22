@@ -19,13 +19,15 @@
  
 #### Internal improvements
 
+ - Brand new internal algorithm which now uses closed form solutions when dealing with varying slopes. This that when variables with varying slopes are present, the algorithm is incomparably faster and more accurate.
+
  - Two deep copies of some data are now avoided in the demeaning function. This improves the performance in terms of memory footprint, and also makes the algorithm faster. 
  
 #### New function: `fitstat` 
 
   - New function `fitsat` that computes various fit statistics. It is integrated with `etable` and can be invoked with the argument `fitstat`. So far only one fit statistic is included, but more will come.
   
-#### Standard-errors
+#### Standard-errors, important changes
   
  - New default values for standard-errors (only concerns multiway clustering). They become similar to `reghdfe` to increase cross-software comparability. Computing the standard-errors the old way is still possible using the argument `dof`. See the dedicated vignette: [On standard errors](https://cran.r-project.org/package=fixest/vignettes/standard_errors.html).
  
@@ -50,6 +52,9 @@
   * The new default of argument `nthreads` is 50% of all available threads. 
   * Accepts new values: a) 0 means all available threads, b) a number strictly between 0 and 1 will represent the fraction of all threads to use.
   * Multi-threading is now off when forking is detected.
+  
+  - `demean`:
+    * speed improvement.
   
   - `coefplot`:
   

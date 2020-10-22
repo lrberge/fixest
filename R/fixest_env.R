@@ -1035,8 +1035,6 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                     stop("Argument 'combine.quick' must be a single logical.")
                 }
 
-                # start: NEW
-
                 fixef_terms_full = terms_fixef(fixef_fml)
                 if("try-error" %in% class(fixef_terms_full)){
                     stop("Problem extracting the terms of the fixed-effects part of the formula:\n", fixef_terms_full)
@@ -1052,11 +1050,11 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 fixef_vars = names(fixef_mat)
 
                 # Slopes
-                isSlope = any(fixef_terms_full$slope_flag)
+                isSlope = any(fixef_terms_full$slope_flag != 0)
                 if(isSlope){
 
                     if(!origin_type %in% c("feols", "feglm")){
-                        stop("The use of varying slopes is available only for functions feols, feglm or fepois.")
+                        stop("The use of varying slopes is available only for the functions feols, feglm or fepois.")
                     }
 
                     slope_mat = prepare_df(fixef_terms_full$slope_vars, data)
@@ -1064,8 +1062,8 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                         stop("Problem evaluating the variables with varying slopes in the fixed-effects part of the formula:\n", slope_mat)
                     }
                     slope_flag = fixef_terms_full$slope_flag
-                    slope_fe = fixef_terms_full$fe_vars
                     slope_vars = fixef_terms_full$slope_vars
+                    slope_vars_list = fixef_terms_full$slope_vars_list
 
                     # Further controls
                     not_numeric = !sapply(slope_mat, is.numeric)
@@ -1073,21 +1071,14 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                         stop("In the fixed-effects part of the formula (i.e. in ", as.character(fixef_fml[2]), "), variables with varying slopes must be numeric. Currently variable", enumerate_items(names(slope_mat)[not_numeric], "s.is"), " not.")
                     }
 
-                    onlySlope = all(slope_flag)
+                    # slope_flag: 0: no Varying slope // > 0: varying slope AND fixed-effect // < 0: varying slope WITHOUT fixed-effect
+                    onlySlope = all(slope_flag < 0)
 
                 }
 
                 # fml update
-                # fml = update(fml, as.formula(paste0(".~.|", paste0(fixef_terms, collapse = "+"))))
                 fml_char = as.character(fml)
                 fml_full = as.formula(paste0(fml_char[2], "~", fml_char[3], "|", paste0(fixef_terms, collapse = "+")))
-
-                #   end: NEW
-
-                # OLD -- deprec:
-                # fixef_mat = prepare_cluster_mat(fixef_fml, data, combine.quick)
-                # we change fixef_vars to become a vector of characters
-                # fixef_vars = names(fixef_mat)
             }
         }
 
@@ -1099,7 +1090,9 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         is_not_num = sapply(fixef_mat, function(x) !is.numeric(x))
         if(any(is_not_num)){
             for(i in which(is_not_num)){
-                fixef_mat[[i]] = as.character(fixef_mat[[i]])
+                if(!is.character(fixef_mat[[i]])){
+                    fixef_mat[[i]] = as.character(fixef_mat[[i]])
+                }
             }
         }
 
@@ -1128,8 +1121,13 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 gc2trig = FALSE
             }
 
-            mat_tmp = matrix(as.numeric(unlist(slope_mat)), nrow(slope_mat))
-            info = cpppar_which_na_inf_mat(mat_tmp, nthreads)
+            # Convert to double
+            who_not_double = which(sapply(slope_mat, is.integer))
+            for(i in who_not_double){
+                slope_mat[[i]] = as.numeric(slope_mat[[i]])
+            }
+
+            info = cpppar_which_na_inf_df(slope_mat, nthreads)
             if(info$any_na_inf){
 
                 if(info$any_na) ANY_NA = TRUE
@@ -1215,9 +1213,9 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         # ... QUF setup ####
         #
 
-        Q = length(fixef_terms) # terms: contains FEs + slopes
+        Q = length(fixef_vars) # terms: contains FEs + slopes
 
-        fixef_removed = slope_variables = list()
+        fixef_removed = list()
         obs2remove = c()
 
         type = switch(family, gaussian = 0, logit = 2, 1)
@@ -1226,7 +1224,11 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         only_slope = FALSE
         if(isSlope){
             # only slope: not any non-slope
-            only_slope = as.vector(tapply(!slope_flag, slope_fe, sum)[fixef_vars]) == 0
+            # only_slope = as.vector(tapply(!slope_flag, slope_fe, sum)[fixef_vars]) == 0
+            only_slope = slope_flag < 0
+
+            # shallow copy
+            slope_variables = as.list(slope_mat)
         }
 
         if(mem.clean && gc2trig){
@@ -1278,30 +1280,6 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             notes = c(notes, message_fixef)
         }
 
-        # If slopes: we need to recreate some values (quf/table/sum_y)
-        if(isSlope){
-
-            # The slope variables
-            for(i in which(slope_flag)){
-                slope_variables[[i]] = slope_mat[[slope_vars[i]]]
-                if(length(slope_variables[[i]]) == 1){
-                    # si l'utilisateur utilise une constante comme variable...
-                    # il faut aussi controler pour quand il fait n'importe quoi...
-                    slope_variables[[i]] = rep(slope_variables[[i]], length(lhs))
-                }
-            }
-
-            dict = 1:length(fixef_vars)
-            names(dict) = fixef_vars
-            new_id = dict[slope_fe]
-
-            fixef_id = fixef_id[new_id]
-            fixef_names = fixef_names[new_id]
-            sum_y_all = sum_y_all[new_id]
-            fixef_table = fixef_table[new_id]
-            fixef_sizes = lengths(fixef_table)
-        }
-
         if(length(obs2remove_NA) > 0){
             # we update the value of obs2remove (will contain both NA and removed bc of outcomes)
             if(length(obs2remove) > 0){
@@ -1317,29 +1295,22 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         # we save the fixed-effects IDs + sizes (to be returned in "res") [original order!]
         #
 
-        if(isSlope){
-            # we only have one ID per FE used (not 1 per slope)
-            index = c()
-            for(var in fixef_vars){
-                index = c(index, which.max(slope_fe == var))
-            }
-        } else {
-            index = 1:Q
-        }
-
-
         fixef_id_res = list()
-        for(i in index){
+        for(i in 1:Q){
             dum = fixef_id[[i]]
             attr(dum, "fixef_names") = as.character(fixef_names[[i]])
-            if(isSlope){
-                fixef_id_res[[slope_fe[i]]] = dum
-            } else {
-                fixef_id_res[[fixef_vars[i]]] = dum
-            }
+            fixef_id_res[[fixef_vars[i]]] = dum
         }
 
-        fixef_sizes_res = fixef_sizes[index]
+
+        # The real size is equal to nb_coef * nb_slopes
+        if(isSlope){
+            fixef_sizes_real = fixef_sizes * (1 + abs(slope_flag) - (slope_flag < 0))
+        } else {
+            fixef_sizes_real = fixef_sizes
+        }
+
+        fixef_sizes_res = fixef_sizes
         names(fixef_sizes_res) = fixef_vars
 
         #
@@ -1347,11 +1318,11 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         #
 
         IS_REORDER = FALSE
-        if(any(fixef_sizes != sort(fixef_sizes, decreasing = TRUE))){
+        if(any(fixef_sizes_real != sort(fixef_sizes_real, decreasing = TRUE))){
             IS_REORDER = TRUE
             # FE with the most cases first (limits precision problems)
 
-            new_order = order(fixef_sizes, decreasing = TRUE)
+            new_order = order(fixef_sizes_real, decreasing = TRUE)
 
             fixef_sizes = fixef_sizes[new_order]
             fixef_id = fixef_id[new_order]
@@ -1359,10 +1330,12 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             fixef_table = fixef_table[new_order]
 
             if(isSlope){
-                slope_variables = slope_variables[new_order]
+                slope_variables = slope_variables[unlist(slope_vars_list[new_order], use.names = FALSE)]
                 slope_flag = slope_flag[new_order]
             }
 
+        } else {
+            new_order = 1:Q
         }
 
     } else {
@@ -1940,11 +1913,11 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         # Slopes
 
         if(isSlope){
-            assign("slope_flag", as.integer(slope_flag), env)
-            assign("slope_variables", as.numeric(unlist(slope_variables)), env)
+            assign("slope_flag", slope_flag, env)
+            assign("slope_variables", slope_variables, env)
         } else {
             assign("slope_flag", rep(0L, length(fixef_vars)), env)
-            assign("slope_variables", 0, env)
+            assign("slope_variables", list(0), env)
         }
 
     }
@@ -2124,18 +2097,10 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
         if(isSlope){
             res$fixef_terms = fixef_terms
-
-            # We also add the variables => makes fixef self-contained
-            # It looks odd but the user may ask for the same var to have
-            # varying slopes in svl dimensions
-            sv = list()
-            slope_vars_unik = slope_vars[!is.na(slope_vars)]
-            if(IS_REORDER) slope_variables = slope_variables[order(new_order)]
-            for(var in slope_vars_unik){
-                sv[[var]] = slope_variables[[which.max(slope_vars == var)]]
-            }
-
-            res$slope_variables = sv
+            original_order = order(new_order)
+            res$slope_flag_reordered = slope_flag
+            res$slope_variables_reordered = slope_variables
+            res$fe.reorder = new_order
         }
 
         res$fixef_id = fixef_id_res
