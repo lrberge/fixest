@@ -795,16 +795,16 @@ summary.fixest.fixef = function(object, n=5, ...){
 	if(Q > 1){
 		nb_ref = attr(object, "references")
 		nb_per_cluster = sapply(object, length)
-		mean_per_cluster = var_per_cluster = c()
+		mean_per_cluster = sd_per_cluster = c()
 		for(i in 1:Q){
 			mean_per_cluster[i] = as.character(signif(mean(object[[i]]), 3))
-			var_per_cluster[i] = as.character(signif(var(object[[i]]), 3))
+			sd_per_cluster[i] = as.character(signif(sd(object[[i]]), 3))
 		}
-		res = as.data.frame(rbind(nb_per_cluster, nb_ref, mean_per_cluster, var_per_cluster))
+		res = as.data.frame(rbind(nb_per_cluster, nb_ref, mean_per_cluster, sd_per_cluster))
 
 		row_1 = paste0("Number of ", switch(info, "11" = "fixed-effects/slopes", "10"="fixed-effects", "1"="slopes"))
 
-		rownames(res) = c(row_1, "Number of references", "Mean", "Variance")
+		rownames(res) = c(row_1, "Number of references", "Mean", "Standard-deviation")
 
 		colnames(res) = fixef_names
 
