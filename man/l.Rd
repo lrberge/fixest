@@ -2,10 +2,13 @@
 % Please edit documentation in R/Lagging.R
 \name{f}
 \alias{f}
+\alias{d}
 \alias{l}
 \title{Lags a variable in a \code{fixest} estimation}
 \usage{
 f(x, lead = 1, fill = NA)
+
+d(x, lag = 1, fill = NA)
 
 l(x, lag = 1, fill = NA)
 }
@@ -27,6 +30,8 @@ Produce lags or leads in the formulas of \code{fixest} estimations or when creat
 \section{Functions}{
 \itemize{
 \item \code{f}: Forwards a variable (inverse of lagging) in a \code{fixest} estimation
+
+\item \code{d}: Creates differences (i.e. x - lag(x)) in a \code{fixest} estimation
 }}
 
 \examples{

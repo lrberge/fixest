@@ -228,7 +228,7 @@ f = function(x, lead = 1, fill = NA){
     l(x, -lead, fill)
 }
 
-#' @describeIn d Creates differences (i.e. x - lag(x)) in a \code{fixest} estimation
+#' @describeIn l Creates differences (i.e. x - lag(x)) in a \code{fixest} estimation
 d = function(x, lag = 1, fill = NA){
     x - l(x, lag, fill)
 }

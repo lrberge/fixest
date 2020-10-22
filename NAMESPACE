@@ -18,7 +18,7 @@ export(coeftable, ctable, se, tstat, pvalue)
 # dof
 export(dof)
 # Lag related
-export(panel, unpanel, f, l)
+export(panel, unpanel, f, l, d)
 # interactions
 export(i, interact)
 # macro
