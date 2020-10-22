@@ -364,7 +364,7 @@ You can set up a panel data set with the function `panel`. There are between two
 Let's repeat the previous example, now with a panel data set:
 ```{r}
 # setting up the panel
-pdat = panel(base_did, ~id+period)
+pdat = panel(base_did, ~id + period)
 # Now the panel.id argument is not required
 est1 = feols(y ~ l(x1, 0:1), pdat)
 est2 = feols(f(y) ~ l(x1, -1:1), pdat)
@@ -393,7 +393,7 @@ If you just want to create a single lag/lead variable, a simple and fast method 
 ```{r}
 base_lag = base_did
 # we create a lagged value of the variable x1
-base_lag$x1.l1 = lag(x1 ~ id+period, 1, base_lag)
+base_lag$x1.l1 = lag(x1 ~ id + period, 1, base_lag)
 head(base_lag)
 ```
 
@@ -405,7 +405,7 @@ In case you use the popular package `data.table`, you can create lagged variable
 library(data.table)
 base_lag_dt = as.data.table(base_did)
 # we create a lagged value of the variable x1
-base_lag_dt[, x1.l1 := lag(x1 ~ id+period, 1)]
+base_lag_dt[, x1.l1 := lag(x1 ~ id + period, 1)]
 ```
 
 ## Non-linear in parameters example
