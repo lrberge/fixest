@@ -612,6 +612,8 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, hor
             on.exit(par(op))
         }
 
+        my_xlim = rev(my_xlim)
+
     } else {
         # We adjust the margin only if there are groups and they
         # don't fit in the original margin
