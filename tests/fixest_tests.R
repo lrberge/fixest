@@ -816,6 +816,7 @@ base$y_0 = base$y**2 ; base$y_0[base$id == 1] = 0
 base = base[order(base$id, base$period), ]
 base$x1_lag = c(NA, base$x1[-n]) ; base$x1_lag[base$period == 1] = NA
 base$x1_lead = c(base$x1[-1], NA) ; base$x1_lead[base$period == 10] = NA
+base$x1_diff = base$x1 - base$x1_lag
 
 # we create holes
 base$period_bis = base$period ; base$period_bis[base$period_bis == 5] = 50
@@ -870,6 +871,13 @@ for(depvar in c("y", "y_na", "y_0")){
         est_raw  = estfun(y_dep ~ x1 + x1_lag + x1_lead, base)
         est      = estfun(y_dep ~ x1 + l(x1) + f(x1), base, panel.id = "id,per")
         est_pdat = estfun(y_dep ~ x1 + l(x1, 1) + f(x1, 1), pdat)
+        test(coef(est_raw), coef(est))
+        test(coef(est_raw), coef(est_pdat))
+
+        # Now diff
+        est_raw  = estfun(y_dep ~ x1 + x1_diff, base)
+        est      = estfun(y_dep ~ x1 + d(x1), base, panel.id = "id,per")
+        est_pdat = estfun(y_dep ~ x1 + d(x1, 1), pdat)
         test(coef(est_raw), coef(est))
         test(coef(est_raw), coef(est_pdat))
 
