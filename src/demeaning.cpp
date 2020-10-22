@@ -33,23 +33,43 @@
 #include <math.h>
 #include <vector>
 #include <stdint.h>
-#ifdef _OPENMP
-    #include <omp.h>
+    #ifdef _OPENMP
+#include <omp.h>
 #else
     #define omp_get_thread_num() 0
 #endif
 
 // [[Rcpp::plugins(openmp)]]
 
+using namespace Rcpp;
+using std::vector;
+
 
 /* CHANGELOG:
  *  - 12/09/2020: the vector of fixed-effects id becomes a list, the same that is returned in R (it avoids a deep copy).
  *  So I had to change the R-style indexes into C-style indexes by substratcting 1.
+ *  - October 2020:
+ *  Complete rewriting of the function. Now there is a class, FEClass, that takes care of computing the FE related stuff.
+ *  I included the handling of varying slopes with closed-form.
+ *  => this leads to much clearer code.
+ */
+
+/* CONVENTION:
+ * - suffix _Q means the vector is of length Q
+ * - suffix _I (for Identifier) means the vector is of length the total number of FE identifiers
+ * - suffix _T means a scalar representing the Total of something, usually the sum of a _Q object
+ * - suffix _C means the vector is of length the number of coefficients
+ * - suffix VS_C means the vector is of length the number of coefficients for the varying slopes
+ * - suffix noVS_C means the vector is of length the number of coefficients for regular fixed-effects (no VS!)
+ * - suffix _N means the vector is of length n_obs
+ * - prefix p_ means a pointer
+ * - nb_id: refers to the fixed-effects IDs
+ * - nb_coef: refers to the fixed-effects coefficients. Coef and id are identical in **absence** of varying slopes.
+ * - vs: means varying slopes
  */
 
 
-using namespace Rcpp;
-using std::vector;
+
 
 
 // Stopping / continuing criteria:
@@ -73,7 +93,7 @@ inline bool stopping_crit(double a, double b, double diffMax){
 
 // for interruption
 int pending_interrupt() {
-	return !(R_ToplevelExec(Rcpp::checkInterruptFn, NULL));
+    return !(R_ToplevelExec(Rcpp::checkInterruptFn, NULL));
 }
 // Works but only the master thread can call that function!
 // What happens if the master thread has finished its job but the lower thread is in an "infinite" loop?
@@ -82,675 +102,1228 @@ int pending_interrupt() {
 // BUT I need to add static allocation of threads => performance cost
 
 
+//
+// Now we start a big chunk => computing the varying slopes coefficients
+// That's a big job. To simplify it, I created the class FEClass that takes care of it.
+//
+
+
+class simple_mat_with_id{
+    // => Access to one of the n_coef matrices of size n_vs x n_vs; all stacked in a single vector
+    //
+    // px0: origin of the vector (which is of length n_coef * n_vs * n_vs)
+    // px_current: working location of the n_vs x n_vs matrix
+    // n: n_vs
+    // n2: explicit
+    // id_current: current identifier. The identifiers range from 0 to (n_coef - 1)
+
+    simple_mat_with_id() = delete;
+
+    double *px0;
+    double *px_current;
+    int nrow, ncol, n_total, id_current = 0;
+
+public:
+    simple_mat_with_id(double* px_in, int nrow_in):
+    px0(px_in), px_current(px_in), nrow(nrow_in), ncol(nrow_in), n_total(nrow * ncol) {};
+    simple_mat_with_id(double* px_in, int nrow_in, int ncol_in):
+        px0(px_in), px_current(px_in), nrow(nrow_in), ncol(ncol_in), n_total(nrow * ncol) {};
+    double& operator()(int id, int i, int j);
+    double& operator()(int id, int i);
+};
+
+inline double& simple_mat_with_id::operator()(int id, int i, int j){
+    if(id != id_current){
+        id_current = id;
+        px_current = px0 + n_total * id;
+    }
+
+    return px_current[i + nrow * j];
+}
+
+inline double& simple_mat_with_id::operator()(int id, int i){
+    if(id != id_current){
+        id_current = id;
+        px_current = px0 + n_total * id;
+    }
+
+    return px_current[i];
+}
+
+class FEClass{
+
+    int Q;
+    int n_obs;
+    int slope_index;
+    bool is_weight;
+    bool is_slope;
+
+    // Dense vectors that we populate in the class, and their associated pointers
+    vector<double> eq_systems_VS_C;
+    vector<double*> p_eq_systems_VS_C;
+
+    vector<double> sum_weights_noVS_C;
+    vector<double*> p_sum_weights_noVS_C;
+
+    // p_fe_id: pointers to the fe_id vectors
+    // p_vs_vars: pointers to the VS variables
+    // p_weights: pointer to the weight vector
+    // eq_systems_VS_C: vector stacking all the systems of equations (each system is of size n_coef * n_vs * n_vs)
+    // p_eq_systems_VS_C: pointer to the right equation system. Of length Q.
+    vector<int*> p_fe_id;
+    vector<double*> p_vs_vars;
+    double *p_weights = nullptr;
+
+    vector<bool> is_slope_Q;
+    vector<bool> is_slope_fe_Q;
+
+    vector<int> nb_vs_Q;
+    vector<int> nb_vs_noFE_Q;
+
+    int *nb_id_Q;
+
+    vector<int> coef_start_Q;
+
+    // internal functions
+    void compute_fe_coef_internal(int, double *, bool, double *, double *, double *);
+    void compute_fe_coef_2_internal(double *, double *, double *, bool);
+    void add_wfe_coef_to_mu_internal(int, double *, double *, bool);
+
+public:
+
+    // Utility class: Facilitates the access to the VS variables
+    class simple_mat_of_vs_vars{
+        int K_fe;
+        vector<double*> pvars;
+
+    public:
+        simple_mat_of_vs_vars(const FEClass*, int);
+        double operator()(int, int);
+    };
+
+    int nb_coef_T;
+    vector<int> nb_coef_Q;
+
+    // constructor:
+    FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id_Q, SEXP table_id_I, SEXP slope_flag_Q, SEXP slope_vars_list);
+
+    // functions
+    void compute_fe_coef(double *fe_coef, double *mu_in_N);
+    void compute_fe_coef(int q, double *fe_coef, double *sum_other_coef_N, double *in_out_C);
+
+    void add_wfe_coef_to_mu(int q, double *fe_coef_C, double *out_N);
+    void add_fe_coef_to_mu(int q, double *fe_coef_C, double *out_N);
+
+    void compute_fe_coef_2(double *fe_coef_in_C, double *fe_coef_out_C, double *fe_coef_tmp, double *in_out_C);
+
+    void add_2_fe_coef_to_mu(double *fe_coef_a, double *fe_coef_b, double *in_out_C, double *out_N, bool update_beta);
+
+    void compute_in_out(int q, double *in_out_C, double *in_N, double *out_N);
+};
+
+FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id_Q, SEXP table_id_I, SEXP slope_flag_Q, SEXP slope_vars_list){
+    // The constructor does the job of creating the pre-solved system of equations
+
+    // Information on p_slope_flag_Q:
+    // - vector of length Q
+    // - say sf = p_slope_flag_Q[q]
+    //  * abs(sf) number of VARIABLES with varying slope
+    //  * sf > 0: we add the fixed-effect
+    //  * sf < 0: the FE should NOT be included
+
+    this->n_obs = n_obs;
+    this->Q = Q;
+
+    //
+    // Step 0: General information
+    //
+
+    // fixed-effect id for each observation
+    p_fe_id.resize(Q);
+    // New version => dum_vector (a vector) is replaced by fe_id_list (a list)
+    for(int q=0 ; q<Q ; ++q){
+        p_fe_id[q] = INTEGER(VECTOR_ELT(fe_id_list, q));
+    }
+
+    nb_id_Q = INTEGER(r_nb_id_Q);
+
+
+    //
+    // Step 1: we check if slopes are needed
+    //
+
+    // nb_slopes: number of variables with varying slopes (the FE does not count!)
+
+    int nb_slopes = 0;
+    int sf = 0; // slope flag
+    int *p_slope_flag_Q = INTEGER(slope_flag_Q);
+    vector<bool> is_slope_Q(Q, false);
+    vector<bool> is_slope_fe_Q(Q, false);
+    vector<int> nb_vs_Q(Q, 0);
+    vector<int> nb_vs_noFE_Q(Q, 0);
+    vector<int> nb_coef_Q(Q);
+    int nb_coef_T = 0;
+
+    // Rcout << Q << " Fixed-effects:\n";
+
+    for(int q=0 ; q<Q ; ++q){
+        //   0: no slope
+        // < 0: slope but not fixed-effect
+        // > 0: slope WITH not fixed-effect
+        // here we count the number of slopes only, we exclude the FEs (that's why there's the substraction)
+
+        sf = p_slope_flag_Q[q];
+        if(sf != 0){
+            nb_slopes += abs(sf);
+            is_slope_Q[q] = true;
+            nb_vs_Q[q] = abs(sf);
+            nb_vs_noFE_Q[q] = abs(sf);
+
+            if(sf > 0){
+                ++nb_vs_Q[q];
+                is_slope_fe_Q[q] = true;
+            }
+
+            // There is n_vs coefficients (and not n_vs squared => this is only in the systems of eq)
+            nb_coef_Q[q] = nb_vs_Q[q] * nb_id_Q[q];
+        } else {
+            nb_coef_Q[q] = nb_id_Q[q];
+        }
+
+        // Rcout << " - FE: " << (is_slope_Q[q] == false || sf > 0)  << ", slopes: " << nb_vs_noFE_Q[q] << "\n";
+
+        nb_coef_T += nb_coef_Q[q];
+    }
+
+    // where to start the coefficients
+    vector<int> coef_start_Q(Q, 0);
+    for(int q=1 ; q<Q ; ++q) coef_start_Q[q] = coef_start_Q[q - 1] + nb_coef_Q[q - 1];
+
+    // Copying (tiny objects)
+    this->is_slope_Q = is_slope_Q;
+    this->is_slope_fe_Q = is_slope_fe_Q;
+    this->nb_vs_Q = nb_vs_Q;
+    this->nb_vs_noFE_Q = nb_vs_noFE_Q;
+    this->nb_coef_Q = nb_coef_Q;
+    this->nb_coef_T = nb_coef_T;
+    this->coef_start_Q = coef_start_Q;
+
+    //
+    // Step 2: precomputed stuff for non slopes and slopes
+    //
+
+    // Weights
+    bool is_weight = Rf_length(r_weights) != 1;
+    p_weights = REAL(r_weights);
+
+    is_slope = nb_slopes > 0;
+
+    // First the non slope coefficients
+    // We create the sum of weights
+
+    int nb_coef_noVS_T = 0;
+    for(int q=0; q<Q ; ++q){
+        if(is_slope_Q[q] == false){
+            nb_coef_noVS_T += nb_id_Q[q];
+        }
+    }
+
+    sum_weights_noVS_C.resize(nb_coef_noVS_T > 0 ? nb_coef_noVS_T : 1);
+    std::fill(sum_weights_noVS_C.begin(), sum_weights_noVS_C.end(), 0);
+
+    p_sum_weights_noVS_C.resize(Q);
+    p_sum_weights_noVS_C[0] = sum_weights_noVS_C.data();
+    for(int q=1 ; q<Q ; ++q){
+        p_sum_weights_noVS_C[q] = p_sum_weights_noVS_C[q - 1] + (is_slope_Q[q - 1] == true ? 0 : nb_id_Q[q - 1]);
+    }
+
+    // table is already computed
+    vector<int*> p_table_id_I(Q);
+    p_table_id_I[0] = INTEGER(table_id_I);
+    for(int q=1 ; q<Q ; ++q){
+        p_table_id_I[q] = p_table_id_I[q - 1] + nb_id_Q[q - 1];
+    }
+
+
+    for(int q=0 ; q<Q ; ++q){
+        if(is_slope_Q[q] == true){
+            continue;
+        }
+
+        double *my_SW = p_sum_weights_noVS_C[q];
+
+        if(is_weight){
+            int *my_fe = p_fe_id[q];
+            for(int obs=0 ; obs<n_obs ; ++obs){
+                my_SW[my_fe[obs] - 1] += p_weights[obs];
+            }
+        } else {
+            int nb_coef = nb_id_Q[q];
+            int *my_table = p_table_id_I[q];
+            for(int i=0 ; i<nb_coef ; ++i){
+                my_SW[i] = my_table[i];
+            }
+        }
+
+    }
+
+    // Rcout << "setup of FE without slope: OK\n";
+
+
+    if(is_weight && nb_coef_noVS_T > 0){
+        // Checking the 0-weights => we set them to 1 to wavoid division by 0
+        for(int c=0 ; c<nb_coef_noVS_T ; ++c){
+            if(sum_weights_noVS_C[c] == 0){
+                sum_weights_noVS_C[c] = 1;
+            }
+        }
+    }
+
+
+    // Then the slopes
+    if(nb_slopes > 0){
+
+        // A) Meta variables => the ones containing the main information
+
+        // slope_vars_list: R list
+        p_vs_vars.resize(nb_slopes);
+        for(int v=0 ; v<nb_slopes ; ++v){
+            p_vs_vars[v] = REAL(VECTOR_ELT(slope_vars_list, v));
+        }
+
+        // Rcout << "Varying Slopes:\n - saving p_vs_vars: OK\n";
+
+        // B) Computing the coefficients of the systems of equations
+
+        int nb_vs_coef_T = 0;
+        for(int q=0 ; q<Q ; ++q){
+            nb_vs_coef_T += nb_vs_Q[q] * nb_vs_Q[q] * nb_id_Q[q];
+        }
+
+        // Rcout << "There are " << nb_vs_coef_T << " coefficients in the system of Eqs.\n";
+
+        // The sys of eqs, all coefs to 0
+        eq_systems_VS_C.resize(nb_vs_coef_T);
+        std::fill(eq_systems_VS_C.begin(), eq_systems_VS_C.end(), 0);
+
+        p_eq_systems_VS_C.resize(Q);
+        p_eq_systems_VS_C[0] = eq_systems_VS_C.data();
+        for(int q=1 ; q<Q ; ++q){
+            p_eq_systems_VS_C[q] = p_eq_systems_VS_C[q - 1] + nb_vs_Q[q - 1] * nb_vs_Q[q - 1] * nb_id_Q[q - 1];
+        }
+
+        // Rcout << " - initializing the system of equations: OK\n";
+
+        for(int q=0 ; q<Q ; ++q){
+            if(is_slope_Q[q] == false) continue;
+
+            // Rcout << "   * q = " << q << ", ";
+
+            simple_mat_of_vs_vars VS_mat(this, q);
+            simple_mat_with_id my_system(p_eq_systems_VS_C[q], nb_vs_Q[q]);
+
+            int V = nb_vs_Q[q];
+            int *my_fe = p_fe_id[q];
+            int nb_coef = nb_id_Q[q];
+
+            for(int i=0 ; i<n_obs ; ++i){
+                for(int v1=0 ; v1<V ; ++v1){
+                    for(int v2=0 ; v2<=v1 ; ++v2){
+                        if(is_weight){
+                            my_system(my_fe[i] - 1, v1, v2) += VS_mat(i, v1) * VS_mat(i, v2) * p_weights[i];
+                        } else {
+                            my_system(my_fe[i] - 1, v1, v2) += VS_mat(i, v1) * VS_mat(i, v2);
+                        }
+                    }
+                }
+            }
+
+            // Rcout << "a";
+
+            // Finishing the computation of the system (symmetry)
+            for(int c=0 ; c<nb_coef ; ++c){
+                for(int v1=0 ; v1<V ; ++v1){
+                    for(int v2=0 ; v2<v1 ; ++v2){
+                        if(my_system(c, v1, v2) == 0){
+                            // We avoid corner cases (otherwise leads to division by 0)
+                            my_system(c, v1, v2) = 1;
+                            my_system(c, v2, v1) = 1;
+                        } else {
+                            my_system(c, v2, v1) = my_system(c, v1, v2);
+                        }
+                    }
+                }
+            }
+
+            // Rcout << "b";
+
+
+            // Precomputing the solver coefficients
+            double my_row_coef = 0;
+            for(int c=0 ; c<nb_coef ; ++c){
+                for(int v=0 ; v<V ; ++v){
+                    for(int i=v + 1 ; i<V ; ++i){
+                        my_row_coef = my_system(c, i, v) / my_system(c, v, v);
+                        my_system(c, i, v) = my_row_coef;
+                        for(int j=v + 1 ; j<V ; ++j){
+                            my_system(c, i, j) -= my_row_coef * my_system(c, v, j);
+                        }
+                    }
+                }
+            }
+
+            // Rcout << " OK\n";
+
+            // We end up with all the (pre-solved) systems of equations
+        }
+
+    }
+}
+
+
+// Overloaded versions
+void FEClass::compute_fe_coef(double *fe_coef_C, double *mu_in_N){
+    // mu: length n_obs, vector giving sum_in_out
+    // fe_coef: vector receiving the cluster coefficients
+
+    // single FE version
+    compute_fe_coef_internal(0, fe_coef_C, true, mu_in_N, nullptr, nullptr);
+}
+
+void FEClass::compute_fe_coef(int q, double *fe_coef_C, double *sum_other_coef_N, double *in_out_C){
+    // mu: length n_obs, vector giving sum_in_out
+    // fe_coef: vector receiving the cluster coefficients
+
+    // multiple FE version
+    compute_fe_coef_internal(q, fe_coef_C, false, nullptr, sum_other_coef_N, in_out_C);
+
+}
+
+void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single, double *mu_in_N, double *sum_other_coef_N, double *in_out_C){
+    // mu: length n_obs, vector giving sum_in_out
+    // fe_coef: vector receiving the cluster coefficients
+
+    int V = nb_vs_Q[q];
+    int *my_fe = p_fe_id[q];
+    int nb_coef = nb_coef_Q[q];
+    int nb_id = nb_id_Q[q];
+
+    double *my_fe_coef = fe_coef_C + coef_start_Q[q];
+
+    if(is_slope_Q[q] == false){
+
+        double *my_SW = p_sum_weights_noVS_C[q];
+
+        if(is_single){
+
+            for(int obs=0 ; obs<n_obs ; ++obs){
+                if(is_weight){
+                    my_fe_coef[my_fe[obs] - 1] += p_weights[obs] * mu_in_N[obs];
+                } else {
+                    my_fe_coef[my_fe[obs] - 1] += mu_in_N[obs];
+                }
+            }
+
+        } else {
+
+            double *sum_in_out = in_out_C + coef_start_Q[q];
+
+            // initialize cluster coef
+            for(int m=0 ; m<nb_coef ; ++m){
+                my_fe_coef[m] = sum_in_out[m];
+            }
+
+            // looping sequentially over the sum of other coefficients
+            for(int i=0 ; i<n_obs ; ++i){
+                my_fe_coef[my_fe[i] - 1] -= sum_other_coef_N[i];
+            }
+
+        }
+
+        for(int m=0 ; m<nb_coef ; ++m){
+            my_fe_coef[m] /= my_SW[m];
+        }
+
+    } else {
+        // Setting up => computing the raw coefficient of the last column
+        simple_mat_of_vs_vars VS_mat(this, q);
+        simple_mat_with_id my_system(p_eq_systems_VS_C[q], nb_vs_Q[q]);
+
+        // We use the vector of FE coefficients
+        simple_mat_with_id rhs(my_fe_coef, nb_vs_Q[q], 1);
+
+        if(is_single){
+
+            for(int i=0 ; i<n_obs ; ++i){
+                for(int v1=0 ; v1<V ; ++v1){
+                    if(is_weight){
+                        rhs(my_fe[i] - 1, v1) += VS_mat(i, v1) * mu_in_N[i] * p_weights[i];
+                    } else {
+                        rhs(my_fe[i] - 1, v1) += VS_mat(i, v1) * mu_in_N[i];
+                    }
+                }
+            }
+
+        } else {
+
+            // initialization
+            double *sum_in_out = in_out_C + coef_start_Q[q];
+            for(int m=0 ; m<nb_coef ; ++m){
+                my_fe_coef[m] = sum_in_out[m];
+            }
+
+            for(int i=0 ; i<n_obs ; ++i){
+                for(int v=0 ; v<V ; ++v){
+                    if(is_weight){
+                        rhs(my_fe[i] - 1, v) -= VS_mat(i, v) * sum_other_coef_N[i] * p_weights[i];
+                    } else {
+                        rhs(my_fe[i] - 1, v) -= VS_mat(i, v) * sum_other_coef_N[i];
+                    }
+                }
+            }
+
+        }
+
+
+        // "Correcting" the last column
+        for(int c=0 ; c<nb_id ; ++c){
+            for(int v=0 ; v<V ; ++v){
+                for(int v1=v + 1 ; v1<V ; ++v1){
+                    // -= row_coef * value from the v row
+                    rhs(c, v1) -= my_system(c, v1, v) * rhs(c, v);
+                }
+            }
+        }
+
+        // Solving => we store the solution in rhs
+        double val = 0;
+        for(int c=0 ; c<nb_id ; ++c){
+            // We backward solve
+            for(int v=V - 1 ; v>=0 ; --v){
+                val = rhs(c, v);
+                for(int v_done=v + 1 ; v_done<V ; ++v_done){
+                    val -= rhs(c, v_done) * my_system(c, v, v_done);
+                }
+                rhs(c, v) = val / my_system(c, v, v);
+            }
+        }
+
+    }
+
+}
+
+
+void FEClass::compute_fe_coef_2_internal(double *fe_coef_in_out_C, double *fe_coef_tmp, double *in_out_C, bool step_2 = false){
+    // The aim here is to update the value of b given the value of a
+    // fe_coef_tmp is always of size the 2nd FE
+    // fe_in/out are always the size the 1st FE
+    // a: origin
+    // b: destination
+
+    int index_a = 0;
+    int index_b = 1;
+
+    double *my_fe_coef_a;
+    double *my_fe_coef_b;
+
+    if(step_2){
+        index_a = 1;
+        index_b = 0;
+
+        my_fe_coef_a = fe_coef_tmp;
+        my_fe_coef_b = fe_coef_in_out_C;
+    } else {
+
+        my_fe_coef_a = fe_coef_in_out_C;
+        my_fe_coef_b = fe_coef_tmp;
+    }
+
+    int V_a = nb_vs_Q[index_a];
+    int V_b = nb_vs_Q[index_b];
+
+    int *my_fe_a = p_fe_id[index_a];
+    int *my_fe_b = p_fe_id[index_b];
+
+    // int nb_coef_a = nb_coef_Q[index_a];
+    int nb_coef_b = nb_coef_Q[index_b];
+
+    // int nb_id_a = nb_id_Q[index_a];
+    int nb_id_b = nb_id_Q[index_b];
+
+    // double *my_in_out_a = in_out_C + coef_start_Q[index_a];
+    double *my_in_out_b = in_out_C + coef_start_Q[index_b];
+
+    bool is_slope_a = is_slope_Q[index_a];
+    bool is_slope_b = is_slope_Q[index_b];
+
+    // VSlope utilities
+    simple_mat_of_vs_vars VS_mat_a(this, index_a);
+    simple_mat_with_id my_vs_coef_a(my_fe_coef_a, V_a, 1);
+
+    simple_mat_of_vs_vars VS_mat_b(this, index_b);
+    simple_mat_with_id my_vs_coef_b(my_fe_coef_b, V_b, 1);
+
+
+    // initialize cluster coef
+    for(int m=0 ; m<nb_coef_b ; ++m){
+        my_fe_coef_b[m] = my_in_out_b[m];
+    }
+
+    if(is_slope_b == false){
+
+        // Adding the values of the first FE
+        for(int i=0 ; i<n_obs ; ++i){
+            if(is_slope_a){
+                for(int v=0 ; v<V_a ; ++v){
+                    if(is_weight){
+                        my_fe_coef_b[my_fe_b[i] - 1] -= my_vs_coef_a(my_fe_a[i] - 1, v) * VS_mat_a(i, v) * p_weights[i];
+                    } else {
+                        my_fe_coef_b[my_fe_b[i] - 1] -= my_vs_coef_a(my_fe_a[i] - 1, v) * VS_mat_a(i, v);
+                    }
+                }
+            } else if(is_weight){
+                my_fe_coef_b[my_fe_b[i] - 1] -= my_fe_coef_a[my_fe_a[i] - 1] * p_weights[i];
+            } else {
+                my_fe_coef_b[my_fe_b[i] - 1] -= my_fe_coef_a[my_fe_a[i] - 1];
+            }
+        }
+
+        double *my_SW = p_sum_weights_noVS_C[index_b];
+        for(int m=0 ; m<nb_coef_b ; ++m){
+            my_fe_coef_b[m] /= my_SW[m];
+        }
+
+    } else {
+        simple_mat_with_id my_system_b(p_eq_systems_VS_C[index_b], V_b);
+        simple_mat_with_id rhs_b(my_fe_coef_b, V_b, 1);
+
+        double tmp = 0;
+
+        for(int i=0 ; i<n_obs ; ++i){
+
+            if(is_slope_a){
+                tmp = 0;
+                for(int v=0 ; v<V_a ; ++v){
+                    if(is_weight){
+                        tmp += my_vs_coef_a(my_fe_a[i] - 1, v) * VS_mat_a(i, v) * p_weights[i];
+                    } else {
+                        tmp += my_vs_coef_a(my_fe_a[i] - 1, v) * VS_mat_a(i, v);
+                    }
+                }
+
+            } else if(is_weight){
+                tmp = my_fe_coef_a[my_fe_a[i] - 1] * p_weights[i];
+            } else {
+                tmp = my_fe_coef_a[my_fe_a[i] - 1];
+            }
+
+            for(int v=0 ; v<V_b ; ++v){
+                if(is_weight){
+                    rhs_b(my_fe_b[i] - 1, v) -= VS_mat_b(i, v) * tmp * p_weights[i];
+                } else {
+                    rhs_b(my_fe_b[i] - 1, v) -= VS_mat_b(i, v) * tmp;
+                }
+            }
+        }
+
+        // "Correcting" the last column
+        for(int c=0 ; c<nb_id_b ; ++c){
+            for(int v=0 ; v<V_b ; ++v){
+                for(int v1=v + 1 ; v1<V_b ; ++v1){
+                    // -= row_coef * value from the v row
+                    rhs_b(c, v1) -= my_system_b(c, v1, v) * rhs_b(c, v);
+                }
+            }
+        }
+
+        // Solving => we store the solution in rhs
+        double val = 0;
+        for(int c=0 ; c<nb_id_b ; ++c){
+            // We backward solve
+            for(int v=V_b - 1 ; v>=0 ; --v){
+                val = rhs_b(c, v);
+                for(int v_done=v + 1 ; v_done<V_b ; ++v_done){
+                    val -= rhs_b(c, v_done) * my_system_b(c, v, v_done);
+                }
+                rhs_b(c, v) = val / my_system_b(c, v, v);
+            }
+        }
+    }
+
+}
+
+void FEClass::compute_fe_coef_2(double *fe_coef_in_C, double *fe_coef_out_C, double *fe_coef_tmp, double *in_out_C){
+    // Specific to the 2-FEs case
+    // This way we avoid creating and using a temp object of length N
+
+
+
+    //
+    // Step 1: Updating b
+    //
+
+    compute_fe_coef_2_internal(fe_coef_in_C, fe_coef_tmp, in_out_C);
+
+    //
+    // Step 2: Updating a
+    //
+
+    compute_fe_coef_2_internal(fe_coef_out_C, fe_coef_tmp, in_out_C, true);
+
+}
+
+void FEClass::add_wfe_coef_to_mu(int q, double *fe_coef_C, double *out_N){
+    // We add the weighted FE coefficient to each observation
+
+    add_wfe_coef_to_mu_internal(q, fe_coef_C, out_N, true);
+
+}
+
+void FEClass::add_fe_coef_to_mu(int q, double *fe_coef_C, double *out_N){
+    // We add the FE coefficient to each observation -- NO WEIGHTS!!!
+
+    // Single FE version
+    add_wfe_coef_to_mu_internal(q, fe_coef_C, out_N, false);
+
+}
+
+void FEClass::add_wfe_coef_to_mu_internal(int q, double *fe_coef_C, double *out_N, bool add_weights){
+    // We just add the weighted (or not) FE coefficient to each observation
+    // We need to be careful for VS
+
+    int V = nb_vs_Q[q];
+    int *my_fe = p_fe_id[q];
+
+    double *my_fe_coef = fe_coef_C + coef_start_Q[q];
+
+    bool use_weights = add_weights && is_weight;
+
+    if(is_slope_Q[q] == false){
+
+        for(int i=0 ; i<n_obs ; ++i){
+            if(use_weights){
+                out_N[i] += my_fe_coef[my_fe[i] - 1] * p_weights[i];
+            } else {
+                out_N[i] += my_fe_coef[my_fe[i] - 1];
+            }
+        }
+
+    } else {
+        simple_mat_of_vs_vars VS_mat(this, q);
+        simple_mat_with_id my_vs_coef(my_fe_coef, nb_vs_Q[q], 1);
+
+        for(int i=0 ; i<n_obs ; ++i){
+            for(int v=0 ; v<V ; ++v){
+                if(use_weights){
+                    out_N[i] += my_vs_coef(my_fe[i] - 1, v) * VS_mat(i, v) * p_weights[i];
+                } else {
+                    out_N[i] += my_vs_coef(my_fe[i] - 1, v) * VS_mat(i, v);
+                }
+            }
+        }
+
+    }
+
+}
+
+void FEClass::add_2_fe_coef_to_mu(double *fe_coef_a, double *fe_coef_b, double *in_out_C, double *out_N, bool update_beta = true){
+    // We add the value of the FE coefficients to each observation
+
+
+    //
+    // Step 1: we update the coefficients of b
+    //
+
+    if(update_beta){
+        compute_fe_coef_2_internal(fe_coef_a, fe_coef_b, in_out_C, out_N);
+    }
+
+    //
+    // Step 2: we add the value of each coef
+    //
+
+    for(int q=0 ; q<2 ; ++q){
+
+        double *my_fe_coef = q == 0 ? fe_coef_a : fe_coef_b;
+        int *my_fe = p_fe_id[q];
+        bool is_slope = is_slope_Q[q];
+        int V = nb_vs_Q[q];
+
+        simple_mat_of_vs_vars VS_mat(this, q);
+        simple_mat_with_id my_vs_coef(my_fe_coef, nb_vs_Q[q], 1);
+
+        for(int i=0 ; i<n_obs ; ++i){
+            if(is_slope){
+                for(int v=0 ; v<V ; ++v){
+                    out_N[i] += my_vs_coef(my_fe[i] - 1, v) * VS_mat(i, v);
+                }
+            } else {
+                out_N[i] += my_fe_coef[my_fe[i] - 1];
+            }
+        }
+
+    }
+
+}
+
+
+void FEClass::compute_in_out(int q, double *in_out_C, double *in_N, double *out_N){
+    // output: vector of length the number of coefficients
+
+    int V = nb_vs_Q[q];
+    int *my_fe = p_fe_id[q];
+
+    double *sum_in_out = in_out_C + coef_start_Q[q];
+
+    if(is_slope_Q[q] == false){
+
+        for(int i=0 ; i<n_obs ; ++i){
+            if(is_weight){
+                sum_in_out[my_fe[i] - 1] += (in_N[i] - out_N[i]) * p_weights[i];
+            } else {
+                sum_in_out[my_fe[i] - 1] += (in_N[i] - out_N[i]);
+            }
+        }
+
+    } else {
+        simple_mat_of_vs_vars VS_mat(this, q);
+        simple_mat_with_id my_vs_sum_in_out(sum_in_out, nb_vs_Q[q], 1);
+
+        for(int i=0 ; i<n_obs ; ++i){
+            for(int v=0 ; v<V ; ++v){
+                if(is_weight){
+                    my_vs_sum_in_out(my_fe[i] - 1, v) += (in_N[i] - out_N[i]) * VS_mat(i, v) * p_weights[i];
+                } else {
+                    my_vs_sum_in_out(my_fe[i] - 1, v) += (in_N[i] - out_N[i]) * VS_mat(i, v);
+                }
+            }
+        }
+
+    }
+
+}
+
+FEClass::simple_mat_of_vs_vars::simple_mat_of_vs_vars(const FEClass *FE_info, int q){
+    // We set up the matrix
+    int start = 0;
+    for(int l=0 ; l<q ; ++l) start += FE_info->nb_vs_noFE_Q[l];
+
+    int K = FE_info->nb_vs_noFE_Q[q];
+    pvars.resize(K);
+    for(int k=0 ; k<K ; ++k){
+        pvars[k] = FE_info->p_vs_vars[start + k];
+    }
+
+    if(FE_info->is_slope_fe_Q[q]){
+        K_fe = K;
+    } else {
+        K_fe = -1;
+    }
+}
+
+inline double FEClass::simple_mat_of_vs_vars::operator()(int i, int k){
+    if(k == K_fe){
+        return 1;
+    }
+
+    return pvars[k][i];
+}
+
+
+
+//
+// END OF FE Class
+//
+
+
 // List of objects, used to
 // lighten the writting of the functions
 struct PARAM_DEMEAN{
-	int n_obs;
-	int Q;
-	int nb_coef;
-	int iterMax;
-	double diffMax;
+    int n_obs;
+    int Q;
+    int nb_coef_T;
+    int iterMax;
+    double diffMax;
 
-	// number of clusters & iterations
-	int *pcluster;
-	int *piterations_all;
+    // iterations
+    int *p_iterations_all;
 
-	// weights + slopes:
-	bool isWeight;
-	// double *obs_weights;
-	vector<double*> psum_weights;
-	vector<double*> all_obs_weights;
+    // vectors of pointers
+    vector<double*> p_input;
+    vector<double*> p_output;
 
-	bool isSlope;
-	int *slope_flag;
-	vector<double*> all_slope_vars;
+    // saving the fixed effects
+    bool save_fixef;
+    double *fixef_values;
 
-	// vectors of pointers
-	vector<int*> pdum;
-	vector<int*> ptable; // to remove
-	vector<double*> pinput;
-	vector<double*> poutput;
+    // FE information
+    FEClass *p_FE_info;
 
-	// saving the fixed effects
-	bool save_fixef;
-	double *fixef_values;
-
-	// soptflag
-	bool *stopnow;
-	int *jobdone;
+    // stopflag
+    bool *stopnow;
+    int *jobdone;
 };
 
+
+
 bool dm_update_X_IronsTuck(int nb_coef_no_Q, vector<double> &X,
-                        const vector<double> &GX, const vector<double> &GGX,
-                        vector<double> &delta_GX, vector<double> &delta2_X){
+                           const vector<double> &GX, const vector<double> &GGX,
+                           vector<double> &delta_GX, vector<double> &delta2_X){
 
-	for(int i=0 ; i<nb_coef_no_Q ; ++i){
-	    double GX_tmp = GX[i];
-		delta_GX[i] = GGX[i] - GX_tmp;
-		delta2_X[i] = delta_GX[i] - GX_tmp + X[i];
-	}
+    for(int i=0 ; i<nb_coef_no_Q ; ++i){
+        double GX_tmp = GX[i];
+        delta_GX[i] = GGX[i] - GX_tmp;
+        delta2_X[i] = delta_GX[i] - GX_tmp + X[i];
+    }
 
-	double vprod = 0, ssq = 0;
-	for(int i=0 ; i<nb_coef_no_Q ; ++i){
-	    double delta2_X_tmp = delta2_X[i];
-		vprod += delta_GX[i] * delta2_X_tmp;
-		ssq += delta2_X_tmp * delta2_X_tmp;
-	}
+    double vprod = 0, ssq = 0;
+    for(int i=0 ; i<nb_coef_no_Q ; ++i){
+        double delta2_X_tmp = delta2_X[i];
+        vprod += delta_GX[i] * delta2_X_tmp;
+        ssq += delta2_X_tmp * delta2_X_tmp;
+    }
 
-	bool res = false;
+    bool res = false;
 
-	if(ssq == 0){
-		res = true;
-	} else {
-		double coef = vprod/ssq;
+    if(ssq == 0){
+        res = true;
+    } else {
+        double coef = vprod/ssq;
 
-		// update of X:
-		for(int i=0 ; i<nb_coef_no_Q ; ++i){
-			X[i] = GGX[i] - coef * delta_GX[i];
-		}
-	}
+        // update of X:
+        for(int i=0 ; i<nb_coef_no_Q ; ++i){
+            X[i] = GGX[i] - coef * delta_GX[i];
+        }
+    }
 
-	return(res);
+    return(res);
 }
 
 
 
 void demean_single_1(int v, PARAM_DEMEAN* args){
-	// v: variable identifier to demean
+    // v: variable identifier to demean
 
-	// Q == 1: nothing to say, just compute the closed form
+    // Q == 1: nothing to say, just compute the closed form
 
-	// loading the data
-	int n_obs = args->n_obs;
-	int nb_coef = args->nb_coef;
-	vector<int*> &pdum = args->pdum;
-	vector<double*> &psum_weights = args->psum_weights;
-	vector<double*> &pinput = args->pinput;
-	vector<double*> &poutput = args->poutput;
+    // loading the data
+    int nb_coef_T = args->nb_coef_T;
 
-	// vector of cluster coefficients initialized at 0
-	vector<double> cluster_coef(nb_coef, 0);
+    vector<double*> &p_input = args->p_input;
+    vector<double*> &p_output = args->p_output;
 
-	// interruption handling
-	bool isMaster = omp_get_thread_num() == 0;
-	bool *pStopNow = args->stopnow;
-	if(isMaster){
-		if(pending_interrupt()){
-			*pStopNow = true;
-		}
-	}
+    // fe_info
+    FEClass &FE_info = *(args->p_FE_info);
 
-	// dum and table
-	int *my_dum = pdum[0];
-	double *sum_weights = psum_weights[0];
+    // vector of fixed-effects coefficients initialized at 0
+    vector<double> fe_coef(nb_coef_T, 0);
+    double *p_fe_coef = fe_coef.data();
 
-	// weights
-	bool isWeight = args->isWeight;
-	// double *obs_weights = args->obs_weights;
-	double *obs_weights = args->all_obs_weights[0];
+    // interruption handling
+    bool isMaster = omp_get_thread_num() == 0;
+    bool *pStopNow = args->stopnow;
+    if(isMaster){
+        if(pending_interrupt()){
+            *pStopNow = true;
+        }
+    }
 
-	// slopes
-	bool isSlope = args->isSlope;
+    // the input & output
+    double *input = p_input[v];
+    double *output = p_output[v];
 
-	// the input & output
-	double *input = pinput[v];
-	double *output = poutput[v];
+    // We compute the FEs
+    FE_info.compute_fe_coef(p_fe_coef, input);
 
-	// The sum
-	if(isWeight){
-		for(int obs=0 ; obs<n_obs ; ++obs){
-			cluster_coef[my_dum[obs] - 1] += obs_weights[obs] * input[obs];
-		}
-	} else {
-		for(int obs=0 ; obs<n_obs ; ++obs){
-			cluster_coef[my_dum[obs] - 1] += input[obs];
-		}
-	}
+    // Output:
+    FE_info.add_fe_coef_to_mu(0, p_fe_coef, output);
 
-	// calculating cluster coef
-	for(int m=0 ; m<nb_coef ; ++m){
-		cluster_coef[m] /= sum_weights[m];
-	}
+    // saving the fixef coefs
+    double *fixef_values = args->fixef_values;
+    if(args->save_fixef){
+        for(int m=0 ; m<nb_coef_T ; ++m){
+            fixef_values[m] = fe_coef[m];
+        }
+    }
 
-	// Output:
-	if(isSlope){
-	    double *my_slope_var = args->all_slope_vars[0];
-	    for(int obs=0 ; obs<n_obs ; ++obs){
-	        output[obs] = my_slope_var[obs] * cluster_coef[my_dum[obs] - 1];
-	    }
-	} else {
-	    for(int obs=0 ; obs<n_obs ; ++obs){
-	        output[obs] = cluster_coef[my_dum[obs] - 1];
-	    }
-	}
-
-	// saving the fixef coefs
-	double *fixef_values = args->fixef_values;
-	if(args->save_fixef){
-	    for(int m=0 ; m<nb_coef ; ++m){
-	        fixef_values[m] = cluster_coef[m];
-	    }
-	}
-
-
-}
-
-void CCC_gaussian_2(const vector<double> &pcluster_origin, vector<double> &pcluster_destination,
-                    int n_i, int n_j,
-                    int n_obs, int *dum_i, int *dum_j,
-                    bool isWeight, double *obs_weights_i, double *obs_weights_j,
-                    bool isSlope_i, double *slope_var_i, bool isSlope_j, double *slope_var_j,
-                    double *sum_weights_i, double *sum_weights_j,
-                    const vector<double> &a_tilde, vector<double> &beta){
-
-	// alpha = a_tilde + (Ab %m% (Ba %m% alpha))
-	for(int i=0 ; i<n_i ; ++i){
-		pcluster_destination[i] = 0;
-	}
-
-	for(int j=0 ; j<n_j ; ++j){
-		beta[j] = 0;
-	}
-
-	if(isSlope_i){
-	    for(int obs=0 ; obs<n_obs ; ++obs){
-	        beta[dum_j[obs] - 1] += obs_weights_j[obs] * slope_var_i[obs] * pcluster_origin[dum_i[obs] - 1];
-	    }
-	} else if(isWeight){
-		for(int obs=0 ; obs<n_obs ; ++obs){
-			beta[dum_j[obs] - 1] += obs_weights_j[obs] * pcluster_origin[dum_i[obs] - 1];
-		}
-	} else {
-		for(int obs=0 ; obs<n_obs ; ++obs){
-			beta[dum_j[obs] - 1] += pcluster_origin[dum_i[obs] - 1];
-		}
-	}
-
-	for(int j=0 ; j<n_j ; ++j){
-		beta[j] /= sum_weights_j[j];
-	}
-
-
-	if(isSlope_j){
-	    for(int obs=0 ; obs<n_obs ; ++obs){
-	        pcluster_destination[dum_i[obs] - 1] += obs_weights_i[obs] * slope_var_j[obs] * beta[dum_j[obs] - 1];
-	    }
-	} else if(isWeight){
-		for(int obs=0 ; obs<n_obs ; ++obs){
-			pcluster_destination[dum_i[obs] - 1] += obs_weights_i[obs] * beta[dum_j[obs] - 1];
-		}
-	} else {
-		for(int obs=0 ; obs<n_obs ; ++obs){
-			pcluster_destination[dum_i[obs] - 1] += beta[dum_j[obs] - 1];
-		}
-	}
-
-	for(int i=0 ; i<n_i ; ++i){
-		pcluster_destination[i] /= sum_weights_i[i];
-		pcluster_destination[i] += a_tilde[i];
-	}
-
-	// Rprintf("pcluster_destination: %.3f, %.3f, %.3f, %.3f\n", pcluster_destination[0], pcluster_destination[1], pcluster_destination[2], pcluster_destination[3]);
 
 }
 
 void demean_acc_2(int v, int iterMax, PARAM_DEMEAN *args){
 
-	//
-	// Setting up
-	//
+    //
+    // Setting up
+    //
 
-	// loading data
-	int n_obs = args->n_obs;
-	int *nb_cluster = args->pcluster;
-	int n_i = nb_cluster[0], n_j = nb_cluster[1];
-	double diffMax = args->diffMax;
+    // loading data
+    int n_obs = args->n_obs;
+    double diffMax = args->diffMax;
 
-	// input output
-	vector<double*> &pinput = args->pinput;
-	vector<double*> &poutput = args->poutput;
-	double *input = pinput[v];
-	double *output = poutput[v];
+    // input output
+    vector<double*> &p_input = args->p_input;
+    vector<double*> &p_output = args->p_output;
+    double *input = p_input[v];
+    double *output = p_output[v];
 
-	vector<double*> &psum_weights = args->psum_weights;
-	double *sum_weights_i = psum_weights[0];
-	double *sum_weights_j = psum_weights[1];
+    int *iterations_all = args->p_iterations_all;
 
-	bool isWeight = args->isWeight;
-	double *obs_weights_i = args->all_obs_weights[0];
-	double *obs_weights_j = args->all_obs_weights[1];
+    // FE info
+    FEClass &FE_info = *(args->p_FE_info);
 
-	bool isSlope = args->isSlope;
-	bool isSlope_i = args->slope_flag[0];
-	bool isSlope_j = args->slope_flag[1];
+    // vector of FE coefs => needs not be equal to nb_coef_T (because Q can be higher than 2)
+    int n_a = FE_info.nb_coef_Q[0];
+    int n_b = FE_info.nb_coef_Q[1];
+    int nb_coef_2 = n_a + n_b;
 
-	double *slope_var_i = args->all_slope_vars[0];
-	double *slope_var_j = args->all_slope_vars[1];
+    // conditional sum of input minus output
+    vector<double> sum_input_output(nb_coef_2, 0);
+    double *p_sum_in_out = sum_input_output.data();
 
-	int *dum_i = args->pdum[0];
-	int *dum_j = args->pdum[1];
+    for(int q=0 ; q<2 ; ++q){
+        FE_info.compute_in_out(q, p_sum_in_out, input, output);
+    }
 
-	int *iterations_all = args->piterations_all;
+    // Rcout << "Value of in_out:\n";
+    // for(int c=0 ; c<nb_coef_2 ; ++c){
+    //     if(c == n_a) Rcout << "\n";
+    //     Rcout << p_sum_in_out[c] << ", ";
+    //
+    // }
+    // Rcout << "\n";
 
-	//
-	// const_a and const_b
-	vector<double> const_a(n_i, 0);
-	vector<double> const_b(n_j, 0);
+    // Rprintf("a_tilde: %.3f, %.3f, %.3f, %.3f\n", a_tilde[0], a_tilde[1], a_tilde[2], a_tilde[3]);
 
-	if(isSlope){
-	    for(int obs=0 ; obs<n_obs ; ++obs){
-	        double resid_tmp = input[obs] - output[obs];
-	        const_a[dum_i[obs] - 1] += obs_weights_i[obs]*resid_tmp;
-	        const_b[dum_j[obs] - 1] += obs_weights_j[obs]*resid_tmp;
-	    }
-	} else if(isWeight){
-	    // weights are identical if there is no slope
-        for(int obs=0 ; obs<n_obs ; ++obs){
-            double resid_tmp = obs_weights_i[obs]*(input[obs] - output[obs]);
-            const_a[dum_i[obs] - 1] += resid_tmp;
-            const_b[dum_j[obs] - 1] += resid_tmp;
+    // interruption handling
+    bool isMaster = omp_get_thread_num() == 0;
+    bool *pStopNow = args->stopnow;
+    double flop = 20 * n_obs; // rough estimate nber operation per iter
+    int iterSecond = ceil(2000000000 / flop / 5); // nber iter per 1/5 second
+
+    //
+    // IT iteration (preparation)
+    //
+
+    vector<double> X(n_a, 0);
+    vector<double> GX(n_a);
+    vector<double> GGX(n_a);
+
+    double *p_X   = X.data();
+    double *p_GX  = GX.data();
+    double *p_GGX = GGX.data();
+
+    vector<double> delta_GX(n_a);
+    vector<double> delta2_X(n_a);
+
+    vector<double> coef_beta(n_b);
+    double *p_coef_beta = coef_beta.data();
+
+    //
+    // the main loop
+    //
+
+    // first iteration => update GX
+    FE_info.compute_fe_coef_2(p_X, p_GX, p_coef_beta, p_sum_in_out);
+
+    // Rcout << "Coefs at first iteration:\na: ";
+    // for(int i=0 ; i<n_a ; ++i){
+    //     Rcout << p_GX[i] << ", ";
+    // }
+    // Rcout << "\nb: ";
+    // for(int i=0 ; i<n_b ; ++i){
+    //     Rcout << p_coef_beta[i] << ", ";
+    // }
+    // Rcout << "\n";
+
+    // For the stopping criterion on total addition
+    // vector<double> mu_last(n_obs, 0);
+    // double input_mean = 0;
+    double ssr = 0;
+
+    bool numconv = false;
+    bool keepGoing = true;
+    int iter = 1;
+    while(!*pStopNow && keepGoing && iter<=iterMax){
+
+        if(isMaster && iter % iterSecond == 0){
+            if(pending_interrupt()){
+                *pStopNow = true;
+                break;
+            }
         }
-    } else {
-        for(int obs=0 ; obs<n_obs ; ++obs){
-            double resid_tmp = input[obs] - output[obs];
-	        const_a[dum_i[obs] - 1] += resid_tmp;
-	        const_b[dum_j[obs] - 1] += resid_tmp;
+
+        ++iter;
+
+        // GGX -- origin: GX, destination: GGX
+        FE_info.compute_fe_coef_2(p_GX, p_GGX, p_coef_beta, p_sum_in_out);
+
+        // X ; update of the fixed-effects coefficients
+        numconv = dm_update_X_IronsTuck(n_a, X, GX, GGX, delta_GX, delta2_X);
+        if(numconv) break;
+
+        // GX -- origin: X, destination: GX
+        FE_info.compute_fe_coef_2(p_X, p_GX, p_coef_beta, p_sum_in_out);
+
+        keepGoing = false;
+        for(int i=0 ; i<n_a ; ++i){
+            if(continue_crit(X[i], GX[i], diffMax)){
+                keepGoing = true;
+                break;
+            }
+        }
+
+        // Other stopping criterion: change to SSR very small
+        if(iter % 50 == 0){
+
+            vector<double> mu_current(n_obs, 0);
+            double *p_mu = mu_current.data();
+
+            FE_info.add_2_fe_coef_to_mu(p_GX, p_coef_beta, p_sum_in_out, p_mu);
+
+            // init ssr if iter == 50 / otherwise, comparison
+            if(iter == 50){
+                ssr = 0;
+                double resid;
+                for(int i=0 ; i<n_obs ; ++i){
+                    resid = input[i] - mu_current[i];
+                    ssr += resid*resid;
+                }
+
+            } else {
+                double ssr_old = ssr;
+
+                // we compute the new SSR
+                ssr = 0;
+                double resid;
+                for(int i=0 ; i<n_obs ; ++i){
+                    resid = input[i] - mu_current[i];
+                    ssr += resid*resid;
+                }
+
+                // if(isMaster) Rprintf("iter %i -- SSR = %.0f (diff = %.0f)\n", iter, ssr, ssr_old - ssr);
+
+                if(stopping_crit(ssr_old, ssr, diffMax)){
+                    break;
+                }
+
+            }
+        }
+
+    }
+
+    //
+    // we update the result (output)
+    //
+
+    // we end with a last iteration
+    double *p_alpha_final = p_GX;
+    double *p_beta_final = p_coef_beta;
+
+    FE_info.compute_fe_coef_2(p_alpha_final, p_alpha_final, p_beta_final, p_sum_in_out);
+
+    // Rcout << "Output before:\n";
+    // for(int i=0 ; i<6 ; ++i){
+    //     Rcout << output[i] << ",";
+    // }
+
+    // we update the output
+    FE_info.add_2_fe_coef_to_mu(p_alpha_final, p_beta_final, p_sum_in_out, output, false);
+
+    // Rcout << "\nOutput after:\n";
+    // for(int i=0 ; i<6 ; ++i){
+    //     Rcout << output[i] << ",";
+    // }
+    // Rcout << "\n";
+    //
+    // Rcout << "Final coefs:\na: ";
+    // for(int i=0 ; i<n_a ; ++i){
+    //     Rcout << p_alpha_final[i] << ", ";
+    // }
+    // Rcout << "\nb: ";
+    // for(int i=0 ; i<n_b ; ++i){
+    //     Rcout << p_beta_final[i] << ", ";
+    // }
+    // Rcout << "\n\n";
+
+    // keeping track of iterations
+    iterations_all[v] += iter;
+
+    // saving the fixef coefs
+    double *fixef_values = args->fixef_values;
+    if(args->save_fixef){
+
+        for(int i=0 ; i<n_a ; ++i){
+            fixef_values[i] += p_alpha_final[i];
+        }
+
+        for(int j=0 ; j<n_b ; ++j){
+            fixef_values[n_a + j] += p_beta_final[j];
         }
     }
 
-
-	for(int i=0 ; i<n_i ; ++i){
-		const_a[i] /= sum_weights_i[i];
-	}
-
-	for(int j=0 ; j<n_j ; ++j){
-		const_b[j] /= sum_weights_j[j];
-	}
-
-	// Rprintf("const_a: %.3f, %.3f, %.3f, %.3f\n", const_a[0], const_a[1], const_a[2], const_a[3]);
-	// Rprintf("const_b: %.3f, %.3f, %.3f, %.3f\n", const_b[0], const_b[1], const_b[2], const_b[3]);
-
-
-	// values that will be used later
-	vector<double> beta(n_j);
-
-	// alpha_tilde
-	vector<double> a_tilde(n_i, 0);
-
-	if(isSlope_j){
-	    for(int obs=0 ; obs<n_obs ; ++obs){
-	        a_tilde[dum_i[obs] - 1] -= obs_weights_i[obs] * slope_var_j[obs] * const_b[dum_j[obs] - 1];
-	    }
-	} else if(isWeight){
-		for(int obs=0 ; obs<n_obs ; ++obs){
-			a_tilde[dum_i[obs] - 1] -= obs_weights_i[obs] * const_b[dum_j[obs] - 1];
-		}
-	} else {
-		for(int obs=0 ; obs<n_obs ; ++obs){
-			a_tilde[dum_i[obs] - 1] -= const_b[dum_j[obs] - 1];
-		}
-	}
-
-
-	for(int i=0 ; i<n_i ; ++i){
-		a_tilde[i] /= sum_weights_i[i];
-		a_tilde[i] += const_a[i];
-	}
-
-	// Rprintf("a_tilde: %.3f, %.3f, %.3f, %.3f\n", a_tilde[0], a_tilde[1], a_tilde[2], a_tilde[3]);
-
-	// interruption handling
-	bool isMaster = omp_get_thread_num() == 0;
-	bool *pStopNow = args->stopnow;
-	double flop = 20.0 * static_cast<double>(n_obs); // rough estimate nber operation per iter
-	int iterSecond = ceil(2000000000.0 / flop / 5); // nber iter per 1/5 second
-
-	//
-	// IT iteration (preparation)
-	//
-
-	vector<double> X(n_i, 0);
-	vector<double> GX(n_i);
-	vector<double> GGX(n_i);
-	vector<double> delta_GX(n_i);
-	vector<double> delta2_X(n_i);
-
-	//
-	// the main loop
-	//
-
-	// first iteration => update GX
-	CCC_gaussian_2(X, GX, n_i, n_j, n_obs, dum_i, dum_j, isWeight, obs_weights_i, obs_weights_j,
-                isSlope_i, slope_var_i, isSlope_j, slope_var_j,
-                sum_weights_i, sum_weights_j, a_tilde, beta);
-
-	// For the stopping criterion on total addition
-	// vector<double> mu_last(n_obs, 0);
-	// double input_mean = 0;
-	double ssr = 0;
-
-	bool numconv = false;
-	bool keepGoing = true;
-	int iter = 1;
-	while(!*pStopNow && keepGoing && iter<=iterMax){
-
-		if(isMaster && iter % iterSecond == 0){
-			if(pending_interrupt()){
-				*pStopNow = true;
-				break;
-			}
-		}
-
-		++iter;
-
-		// GGX -- origin: GX, destination: GGX
-		CCC_gaussian_2(GX, GGX, n_i, n_j, n_obs, dum_i, dum_j, isWeight, obs_weights_i, obs_weights_j,
-                 isSlope_i, slope_var_i, isSlope_j, slope_var_j,
-                 sum_weights_i, sum_weights_j, a_tilde, beta);
-
-		// X ; update of the cluster coefficient
-		numconv = dm_update_X_IronsTuck(n_i, X, GX, GGX, delta_GX, delta2_X);
-		if(numconv) break;
-
-		// GX -- origin: X, destination: GX
-		CCC_gaussian_2(X, GX, n_i, n_j, n_obs, dum_i, dum_j, isWeight, obs_weights_i, obs_weights_j,
-                 isSlope_i, slope_var_i, isSlope_j, slope_var_j,
-                 sum_weights_i, sum_weights_j, a_tilde, beta);
-
-		keepGoing = false;
-		for(int i=0 ; i<n_i ; ++i){
-			// if(fabs(X[i] - GX[i]) / (0.1 + fabs(GX[i])) > diffMax){
-			if(continue_crit(X[i], GX[i], diffMax)){
-				keepGoing = true;
-				break;
-			}
-		}
-
-		// Other stopping criterion: change to SSR very small
-		if(iter % 50 == 0){
-
-			// we need to compute beta
-			for(int j=0 ; j<n_j ; ++j){
-				beta[j] = 0;
-			}
-
-			if(isSlope_i){
-			    for(int obs=0 ; obs<n_obs ; ++obs){
-			        beta[dum_j[obs] - 1] -= obs_weights_j[obs] * slope_var_i[obs] * GX[dum_i[obs] - 1];
-			    }
-			} else if(isWeight){
-				for(int obs=0 ; obs<n_obs ; ++obs){
-					beta[dum_j[obs] - 1] -= obs_weights_j[obs] * GX[dum_i[obs] - 1];
-				}
-			} else {
-				for(int obs=0 ; obs<n_obs ; ++obs){
-					beta[dum_j[obs] - 1] -= GX[dum_i[obs] - 1];
-				}
-			}
-
-			for(int j=0 ; j<n_j ; ++j){
-				beta[j] /= sum_weights_j[j];
-				beta[j] += const_b[j];
-			}
-
-			vector<double> mu_current(n_obs);
-			if(isSlope){
-			    for(int obs=0 ; obs<n_obs ; ++obs){
-			        mu_current[obs] = slope_var_i[obs] * GX[dum_i[obs] - 1] + slope_var_j[obs] * beta[dum_j[obs] - 1];
-			    }
-			} else {
-			    for(int obs=0 ; obs<n_obs ; ++obs){
-			        mu_current[obs] = GX[dum_i[obs] - 1] + beta[dum_j[obs] - 1];
-			    }
-			}
-
-
-			// init ssr if iter == 50 / otherwise, comparison
-			if(iter == 50){
-				ssr = 0;
-			    double resid;
-			    for(int i=0 ; i<n_obs ; ++i){
-			        resid = input[i] - mu_current[i];
-			        ssr += resid*resid;
-			    }
-
-			} else {
-				double ssr_old = ssr;
-
-			    // we compute the new SSR
-			    ssr = 0;
-			    double resid;
-			    for(int i=0 ; i<n_obs ; ++i){
-			        resid = input[i] - mu_current[i];
-			        ssr += resid*resid;
-			    }
-
-			    // if(isMaster) Rprintf("iter %i -- SSR = %.0f (diff = %.0f)\n", iter, ssr, ssr_old - ssr);
-
-			    if(stopping_crit(ssr_old, ssr, diffMax)){
-			        break;
-			    }
-
-			}
-		}
-
-	}
-
-	//
-	// we update the result (output)
-	//
-
-	// we need to compute beta, and then alpha
-	vector<double> beta_final(n_j, 0);
-
-	if(isSlope_i){
-	    for(int obs=0 ; obs<n_obs ; ++obs){
-	        beta_final[dum_j[obs] - 1] -= obs_weights_j[obs] * slope_var_i[obs] * GX[dum_i[obs] - 1];
-	    }
-	} else if(isWeight){
-		for(int obs=0 ; obs<n_obs ; ++obs){
-			beta_final[dum_j[obs] - 1] -= obs_weights_j[obs]*GX[dum_i[obs] - 1];
-		}
-	} else {
-		for(int obs=0 ; obs<n_obs ; ++obs){
-			beta_final[dum_j[obs] - 1] -= GX[dum_i[obs] - 1];
-		}
-	}
-
-	for(int j=0 ; j<n_j ; ++j){
-		beta_final[j] /= sum_weights_j[j];
-		beta_final[j] += const_b[j];
-	}
-
-	// alpha = const_a - (Ab %m% beta)
-	vector<double> alpha_final(n_i, 0);
-
-	if(isSlope_j){
-	    for(int obs=0 ; obs<n_obs ; ++obs){
-	        alpha_final[dum_i[obs] - 1] -= obs_weights_i[obs] * slope_var_j[obs] * beta_final[dum_j[obs] - 1];
-	    }
-	} else if(isWeight){
-		for(int obs=0 ; obs<n_obs ; ++obs){
-			alpha_final[dum_i[obs] - 1] -= obs_weights_i[obs]*beta_final[dum_j[obs] - 1];
-		}
-	} else {
-		for(int obs=0 ; obs<n_obs ; ++obs){
-			alpha_final[dum_i[obs] - 1] -= beta_final[dum_j[obs] - 1];
-		}
-	}
-
-	for(int i=0 ; i<n_i ; ++i){
-		alpha_final[i] /= sum_weights_i[i];
-		alpha_final[i] += const_a[i];
-	}
-
-	// mu final
-	if(isSlope){
-	    for(int obs=0 ; obs<n_obs ; ++obs){
-	        output[obs] += slope_var_i[obs] * alpha_final[dum_i[obs] - 1] + slope_var_j[obs] * beta_final[dum_j[obs] - 1];
-	    }
-	} else {
-	    for(int obs=0 ; obs<n_obs ; ++obs){
-	        output[obs] += alpha_final[dum_i[obs] - 1] + beta_final[dum_j[obs] - 1];
-	    }
-	}
-
-	// keeping track of iterations
-	iterations_all[v] += iter;
-
-	// saving the fixef coefs
-	double *fixef_values = args->fixef_values;
-	if(args->save_fixef){
-
-	    for(int i=0 ; i<n_i ; ++i){
-	        fixef_values[i] += alpha_final[i];
-	    }
-
-	    for(int j=0 ; j<+n_j ; ++j){
-	        fixef_values[n_i + j] += beta_final[j];
-	    }
-	}
-
 }
 
-void compute_mean(int n_obs, int nb_cluster, double *cluster_coef, const vector<double> &sum_other_means,
-                  double *sum_in_out, int *my_dum, double *sum_weights){
+void compute_fe_gnl(double *p_fe_coef_origin, double *p_fe_coef_destination,
+                    double *p_sum_other_means, double *p_sum_in_out, PARAM_DEMEAN *args){
+    // update of the cluster coefficients
+    // first we update mu, then we update the cluster coefficicents
 
-    // NOTA: sum_in_out and sum_other_means are already "weighted" (see in computeMeans and in demean_acc_gnl)
+    //
+    // Loading the variables
+    //
 
-	// initialize cluster coef
-	for(int m=0 ; m<nb_cluster ; ++m){
-		cluster_coef[m] = 0;
-	}
+    int n_obs = args->n_obs;
+    int Q = args->Q;
 
-	// looping sequentially over the sum of other coefficients
-	for(int i=0 ; i<n_obs ; ++i){
-		cluster_coef[my_dum[i] - 1] += sum_other_means[i];
-	}
+    // fe_info
+    FEClass &FE_info = *(args->p_FE_info);
 
-	// calculating cluster coef
-	for(int m=0 ; m<nb_cluster ; ++m){
-		cluster_coef[m] = (sum_in_out[m] - cluster_coef[m]) / sum_weights[m];
-	}
+    // We update each cluster coefficient, starting from Q (the smallest one)
 
-	// "output" is the update of cluster_coef
-}
-
-void computeMeans(vector<double*> &pcluster_origin, vector<double*> &pcluster_destination,
-                  vector<double> &sum_other_means, vector<double*> &psum_input_output, PARAM_DEMEAN *args){
-	// update of the cluster coefficients
-	// first we update mu, then we update the cluster coefficicents
-
-	//
-	// Loading the variables
-	//
-
-	int n_obs = args->n_obs;
-	int Q = args->Q;
-
-	int *pcluster = args->pcluster;
-
-	vector<int*> &pdum = args->pdum;
-
-	// weights:
-	vector<double*> &psum_weights = args->psum_weights;
-	bool isWeight = args->isWeight;
-	vector<double*> &all_obs_weights = args->all_obs_weights;
-
-	// slopes:
-	int *slope_flag = args->slope_flag;
-	vector<double*> &all_slope_vars = args->all_slope_vars;
-
-	// We update each cluster coefficient, starting from Q (the smallest one)
-
-	for(int i=0 ; i<n_obs ; ++i){
-		sum_other_means[i] = 0;
-	}
+    std::fill_n(p_sum_other_means, n_obs, 0);
 
     // we start with Q-1
-	double *obs_weights_current = all_obs_weights[Q-1];
-	for(int q=0 ; q<(Q-1) ; ++q){
-		int *my_dum = pdum[q];
-		double *my_cluster_coef = pcluster_origin[q];
+    for(int q=0 ; q<(Q-1) ; ++q){
+        FE_info.add_wfe_coef_to_mu(q, p_fe_coef_origin, p_sum_other_means);
+    }
 
-		if(slope_flag[q]){
-		    double *my_slope_var = all_slope_vars[q];
-		    // after the weight is the "output": z*coef_slope
-		    for(int obs=0 ; obs<n_obs ; ++obs){
-		        sum_other_means[obs] += obs_weights_current[obs] * my_slope_var[obs] * my_cluster_coef[my_dum[obs] - 1];
-		    }
-		} else if(isWeight){
-			for(int obs=0 ; obs<n_obs ; ++obs){
-				sum_other_means[obs] += obs_weights_current[obs] * my_cluster_coef[my_dum[obs] - 1];
-			}
-		} else {
-			for(int obs=0 ; obs<n_obs ; ++obs){
-				sum_other_means[obs] += my_cluster_coef[my_dum[obs] - 1];
-			}
-		}
-	}
+    // Rcout << "Head of sum_other_means: ";
+    // for(int i=0 ; i<10 ; ++i) Rcout << p_sum_other_means[i] << ", ";
+    // Rcout << "\n";
+
+    for(int q=Q-1 ; q>=0 ; q--){
 
 
-	for(int q=Q-1 ; q>=0 ; q--){
+        FE_info.compute_fe_coef(q, p_fe_coef_destination, p_sum_other_means, p_sum_in_out);
 
-		// computing the optimal cluster coef -- given mu_with_coef
-		double *my_cluster_coef = pcluster_destination[q];
-		double *my_sum_weights = psum_weights[q];
-		double *my_sum_in_out = psum_input_output[q];
-		int *my_dum = pdum[q];
-		int nb_cluster = pcluster[q];
-
-		// update of the cluster coefficients
-		compute_mean(n_obs, nb_cluster, my_cluster_coef, sum_other_means, my_sum_in_out, my_dum, my_sum_weights);
-
-		// if(int q == 0){
-		// 	Rprintf("pcluster_destination: %.3f, %.3f, %.3f, %.3f\n", my_cluster_coef[0], my_cluster_coef[1], my_cluster_coef[2], my_cluster_coef[3]);
-		// }
+        // if(int q == 0){
+        // 	Rprintf("p_fe_coef_destination: %.3f, %.3f, %.3f, %.3f\n", my_fe_coef[0], my_fe_coef[1], my_fe_coef[2], my_fe_coef[3]);
+        // }
 
 
-		// updating the value of sum_other_means (only if necessary)
-		if(q != 0){
+        // updating the value of p_sum_other_means (only if necessary)
+        if(q != 0){
 
-			// We recompute it from scratch (only way -- otherwise precision problems arise)
+            // We recompute it from scratch (only way -- otherwise precision problems arise)
 
-			for(int i=0 ; i<n_obs ; ++i){
-				sum_other_means[i] = 0;
-			}
+            std::fill_n(p_sum_other_means, n_obs, 0);
 
-			int *my_dum;
-			double *my_cluster_coef;
-			double *obs_weights_current = all_obs_weights[q-1];
-			for(int h=0 ; h<Q ; h++){
-				if(h == q-1) continue;
+            double *my_fe_coef;
+            for(int h=0 ; h<Q ; h++){
+                if(h == q-1) continue;
 
-				my_dum = pdum[h];
+                if(h < q-1){
+                    my_fe_coef = p_fe_coef_origin;
+                } else {
+                    my_fe_coef = p_fe_coef_destination;
+                }
 
-				if(h < q-1){
-					my_cluster_coef = pcluster_origin[h];
-				} else {
-					my_cluster_coef = pcluster_destination[h];
-				}
+                FE_info.add_wfe_coef_to_mu(h, my_fe_coef, p_sum_other_means);
+            }
 
-				if(slope_flag[h]){
-				    double *my_slope_var = all_slope_vars[h];
-				    for(int obs=0 ; obs<n_obs ; ++obs){
-				        sum_other_means[obs] += obs_weights_current[obs] * my_slope_var[obs] * my_cluster_coef[my_dum[obs] - 1];
-				    }
-				} else if(isWeight){
-					for(int obs=0 ; obs<n_obs ; ++obs){
-						sum_other_means[obs] += obs_weights_current[obs] * my_cluster_coef[my_dum[obs] - 1];
-					}
-				} else {
-					for(int obs=0 ; obs<n_obs ; ++obs){
-						sum_other_means[obs] += my_cluster_coef[my_dum[obs] - 1];
-					}
-				}
-			}
+        }
+    }
 
-		}
-	}
-
-	// In the end, the array pcluster_destination is fully updated, starting from Q to 1
+    // In the end, the array p_fe_coef_destination is fully updated, starting from Q to 1
 
 }
 
@@ -758,658 +1331,501 @@ void computeMeans(vector<double*> &pcluster_origin, vector<double*> &pcluster_de
 
 bool demean_acc_gnl(int v, int iterMax, PARAM_DEMEAN *args){
 
-	//
-	// data
-	//
+    //
+    // data
+    //
 
-	int n_obs = args->n_obs;
-	int nb_coef = args->nb_coef;
-	int Q = args->Q;
-	double diffMax = args->diffMax;
+    int n_obs = args->n_obs;
+    int nb_coef_T = args->nb_coef_T;
+    int Q = args->Q;
+    double diffMax = args->diffMax;
 
-	int *pcluster = args->pcluster;
+    // fe_info
+    FEClass &FE_info = *(args->p_FE_info);
 
-	vector<int*> pdum = args->pdum;
+    // input output
+    vector<double*> &p_input = args->p_input;
+    vector<double*> &p_output = args->p_output;
+    double *input = p_input[v];
+    double *output = p_output[v];
 
-	// weights
-	bool isWeight = args->isWeight;
-	// double *obs_weights = args->obs_weights;
-	vector<double*> &all_obs_weights = args->all_obs_weights;
+    // temp var:
+    vector<double> sum_other_means(n_obs);
+    double *p_sum_other_means = sum_other_means.data();
 
-	// slopes
-	int *slope_flag = args->slope_flag;
-	vector<double*> &all_slope_vars = args->all_slope_vars;
+    // conditional sum of input minus output
+    vector<double> sum_input_output(nb_coef_T, 0);
+    double *p_sum_in_out = sum_input_output.data();
 
-	// input output
-	vector<double*> &pinput = args->pinput;
-	vector<double*> &poutput = args->poutput;
-	double *input = pinput[v];
-	double *output = poutput[v];
+    for(int q=0 ; q<Q ; ++q){
+        FE_info.compute_in_out(q, p_sum_in_out, input, output);
+    }
 
-	// temp var:
-	vector<double> sum_other_means(n_obs);
-
-	// conditional sum of input minus output
-	vector<double> sum_input_output(nb_coef, 0);
-	vector<double*> psum_input_output(Q);
-	psum_input_output[0] = sum_input_output.data();
-	for(int q=1 ; q<Q ; ++q){
-		psum_input_output[q] = psum_input_output[q - 1] + pcluster[q - 1];
-	}
-
-
-	for(int q=0 ; q<Q ; ++q){
-		double *my_sum_input_output = psum_input_output[q];
-		int *my_dum = pdum[q];
-
-		// Dans all_obs_weights, il y a la valeur de la variable si slope: w * z. Si pas de slope, seulement w.
-		if(isWeight){
-		    double *obs_weights_current = all_obs_weights[q];
-			for(int obs=0 ; obs<n_obs ; ++obs){
-				my_sum_input_output[my_dum[obs] - 1] += obs_weights_current[obs] * (input[obs] - output[obs]);
-			}
-		} else {
-			for(int obs=0 ; obs<n_obs ; ++obs){
-				my_sum_input_output[my_dum[obs] - 1] += input[obs] - output[obs];
-			}
-		}
-	}
-
-	// interruption handling
-	bool isMaster = omp_get_thread_num() == 0;
-	bool *pStopNow = args->stopnow;
-	double flop = 4.0*(5 + 12*(Q-1) + 4*(Q-1)*(Q-1))*static_cast<double>(n_obs); // rough estimate nber operation per iter
-	// I know I "over cast" but it's to remember the lesson
-	int iterSecond = ceil(2000000000.0 / flop / 5); // nber iter per 1/5 second
-
-	//
-	// IT iteration (preparation)
-	//
-
-	// variables on 1:K
-	vector<double> X(nb_coef, 0);
-	vector<double> GX(nb_coef);
-	vector<double> GGX(nb_coef);
-	// pointers:
-	vector<double*> pX(Q);
-	vector<double*> pGX(Q);
-	vector<double*> pGGX(Q);
-	pX[0] = X.data();
-	pGX[0] = GX.data();
-	pGGX[0] = GGX.data();
-
-	for(int q=1 ; q<Q ; ++q){
-		pX[q] = pX[q - 1] + pcluster[q - 1];
-		pGX[q] = pGX[q - 1] + pcluster[q - 1];
-		pGGX[q] = pGGX[q - 1] + pcluster[q - 1];
-	}
-
-	// variables on 1:(Q-1)
-	int nb_coef_no_Q = 0;
-	for(int q = 0 ; q<(Q-1) ; ++q){
-		nb_coef_no_Q += pcluster[q];
-	}
-	vector<double> delta_GX(nb_coef_no_Q);
-	vector<double> delta2_X(nb_coef_no_Q);
-
-	//
-	// the main loop
-	//
-
-	// first iteration
-	computeMeans(pX, pGX, sum_other_means, psum_input_output, args);
-
-	// check whether we should go into the loop
-	bool keepGoing = false;
-	for(int i=0 ; i<nb_coef ; ++i){
-		if(continue_crit(X[i], GX[i], diffMax)){
-			keepGoing = true;
-			break;
-		}
-	}
-
-	// For the stopping criterion on total addition
-	double ssr = 0;
-
-	int iter = 0;
-	bool numconv = false;
-	while(!*pStopNow && keepGoing && iter<iterMax){
-
-		if(isMaster && iter % iterSecond == 0){
-			if(pending_interrupt()){
-				*pStopNow = true;
-				break;
-			}
-		}
-
-		iter++;
-
-		// GGX -- origin: GX, destination: GGX
-		computeMeans(pGX, pGGX, sum_other_means, psum_input_output, args);
-
-		// X ; update of the cluster coefficient
-		numconv = dm_update_X_IronsTuck(nb_coef_no_Q, X, GX, GGX, delta_GX, delta2_X);
-		if(numconv) break;
-
-		// GX -- origin: X, destination: GX
-		computeMeans(pX, pGX, sum_other_means, psum_input_output, args);
-
-		keepGoing = false;
-		for(int i=0 ; i<nb_coef_no_Q ; ++i){
-			// diffmax: nber of significant digits
-			// if(fabs(X[i] - GX[i]) / (0.1 + fabs(GX[i])) > diffMax){
-			if(continue_crit(X[i], GX[i], diffMax)){
-				keepGoing = true;
-				break;
-			}
-		}
-
-		// Other stopping criterion: change to SSR very small
-		if(iter % 50 == 0){
-
-		    // mu_current is the vector of means
-			vector<double> mu_current(n_obs, 0);
-			for(int q=0 ; q<Q ; ++q){
-				int *my_dum = pdum[q];
-				double *my_cluster_coef = pGX[q];
-
-				if(slope_flag[q]){
-				    double *my_slope_var = all_slope_vars[q];
-				    for(int obs=0 ; obs<n_obs ; ++obs){
-				        mu_current[obs] += my_slope_var[obs] * my_cluster_coef[my_dum[obs] - 1];
-				    }
-				} else {
-				    for(int obs=0 ; obs<n_obs ; ++obs){
-				        mu_current[obs] += my_cluster_coef[my_dum[obs] - 1];
-				    }
-				}
-
-			}
-
-			// init ssr if iter == 50 / otherwise, comparison
-			if(iter == 50){
-
-				ssr = 0;
-			    double resid;
-			    for(int i=0 ; i<n_obs ; ++i){
-			        resid = input[i] - mu_current[i];
-			        ssr += resid*resid;
-    	        }
-
-			} else {
-				double ssr_old = ssr;
-
-			    // we compute the new SSR
-			    ssr = 0;
-			    double resid;
-			    for(int i=0 ; i<n_obs ; ++i){
-			        resid = input[i] - mu_current[i];
-			        ssr += resid*resid;
-			    }
-
-			    // if(isMaster) Rprintf("iter %i -- SSR = %.0f (diff = %.0f)\n", iter, ssr, ssr_old - ssr);
-
-			    if(stopping_crit(ssr_old, ssr, diffMax)){
-			    	break;
-			    }
-
-			}
-		}
+    // Rcout << "Sum in out:\n";
+    // int c_next = 0;
+    // int q_current = 0;
+    // for(int c=0 ; c<nb_coef_T ; ++c){
+    //     if(c == c_next){
+    //         if(c != 0) Rcout << "\n";
+    //
+    //         Rcout << "q = " << q_current << ": ";
+    //         c_next += FE_info.nb_coef_Q[q_current];
+    //         q_current++;
+    //     }
+    //
+    //     Rcout << p_sum_in_out[c] << ", ";
+    // }
+    // Rcout << "\n";
 
 
-	}
 
-	//
-	// Updating the output
-	//
+    // interruption handling
+    bool isMaster = omp_get_thread_num() == 0;
+    bool *pStopNow = args->stopnow;
+    double flop = 4*(5 + 12*(Q-1) + 4*(Q-1)*(Q-1))*n_obs; // rough estimate nber operation per iter
+    int iterSecond = ceil(2000000000 / flop / 5); // nber iter per 1/5 second
 
-	for(int q=0 ; q<Q ; ++q){
-		int *my_dum = pdum[q];
-		double *my_cluster_coef = pGX[q];
+    //
+    // IT iteration (preparation)
+    //
 
-		if(slope_flag[q]){
-		    double *my_slope_var = all_slope_vars[q];
-		    for(int obs=0 ; obs<n_obs ; ++obs){
-		        output[obs] += my_slope_var[obs] * my_cluster_coef[my_dum[obs] - 1];
-		    }
-		} else {
-		    for(int obs=0 ; obs<n_obs ; ++obs){
-		        output[obs] += my_cluster_coef[my_dum[obs] - 1];
-		    }
-		}
-	}
+    // variables on 1:K
+    vector<double> X(nb_coef_T, 0);
+    vector<double> GX(nb_coef_T);
+    vector<double> GGX(nb_coef_T);
+    // pointers:
+    double *p_X   = X.data();
+    double *p_GX  = GX.data();
+    double *p_GGX = GGX.data();
 
-	// keeping track of iterations
-	int *iterations_all = args->piterations_all;
-	iterations_all[v] += iter;
+    // variables on 1:(Q-1)
+    int nb_coef_no_Q = 0;
+    for(int q = 0 ; q<(Q-1) ; ++q){
+        nb_coef_no_Q += FE_info.nb_coef_Q[q];
+    }
+    vector<double> delta_GX(nb_coef_no_Q);
+    vector<double> delta2_X(nb_coef_no_Q);
 
-	// saving the fixef coefs
-	double *fixef_values = args->fixef_values;
-	if(args->save_fixef){
-	    for(int m=0 ; m<nb_coef ; ++m){
-	        fixef_values[m] += GX[m];
-	    }
-	}
+    //
+    // the main loop
+    //
 
-	bool conv = iter == iterMax ? false : true;
+    // first iteration
+    compute_fe_gnl(p_X, p_GX, p_sum_other_means, p_sum_in_out, args);
 
-	return(conv);
+    // Rcout << "Coef first iter:\n";
+    // c_next = 0;
+    // q_current = 0;
+    // for(int c=0 ; c<nb_coef_T ; ++c){
+    //     if(c == c_next){
+    //         if(c != 0) Rcout << "\n";
+    //
+    //         Rcout << "q = " << q_current << ": ";
+    //         c_next += FE_info.nb_coef_Q[q_current];
+    //         q_current++;
+    //     }
+    //
+    //     Rcout << p_GX[c] << ", ";
+    // }
+    // Rcout << "\n\n\n";
+
+    // check whether we should go into the loop
+    bool keepGoing = false;
+    for(int i=0 ; i<nb_coef_T ; ++i){
+        if(continue_crit(X[i], GX[i], diffMax)){
+            keepGoing = true;
+            break;
+        }
+    }
+
+    // For the stopping criterion on total addition
+    // vector<double> mu_last(n_obs, 0);
+    // double input_mean = 0;
+    double ssr = 0;
+
+    int iter = 0;
+    bool numconv = false;
+    while(!*pStopNow && keepGoing && iter<iterMax){
+
+        if(isMaster && iter % iterSecond == 0){
+            if(pending_interrupt()){
+                *pStopNow = true;
+                break;
+            }
+        }
+
+        iter++;
+
+        // GGX -- origin: GX, destination: GGX
+        compute_fe_gnl(p_GX, p_GGX, p_sum_other_means, p_sum_in_out, args);
+
+        // X ; update of the cluster coefficient
+        numconv = dm_update_X_IronsTuck(nb_coef_no_Q, X, GX, GGX, delta_GX, delta2_X);
+        if(numconv) break;
+
+        // GX -- origin: X, destination: GX
+        compute_fe_gnl(p_X, p_GX, p_sum_other_means, p_sum_in_out, args);
+
+        keepGoing = false;
+        for(int i=0 ; i<nb_coef_no_Q ; ++i){
+            if(continue_crit(X[i], GX[i], diffMax)){
+                keepGoing = true;
+                break;
+            }
+        }
+
+        // Other stopping criterion: change to SSR very small
+        if(iter % 50 == 0){
+
+            // mu_current is the vector of means
+            vector<double> mu_current(n_obs, 0);
+            double *p_mu = mu_current.data();
+            for(int q=0 ; q<Q ; ++q){
+
+                FE_info.add_fe_coef_to_mu(q, p_GX, p_mu);
+
+            }
+
+            // init ssr if iter == 50 / otherwise, comparison
+            if(iter == 50){
+
+                ssr = 0;
+                double resid;
+                for(int i=0 ; i<n_obs ; ++i){
+                    resid = input[i] - mu_current[i];
+                    ssr += resid*resid;
+                }
+
+            } else {
+                double ssr_old = ssr;
+
+                // we compute the new SSR
+                ssr = 0;
+                double resid;
+                for(int i=0 ; i<n_obs ; ++i){
+                    resid = input[i] - mu_current[i];
+                    ssr += resid*resid;
+                }
+
+                // if(isMaster) Rprintf("iter %i -- SSR = %.0f (diff = %.0f)\n", iter, ssr, ssr_old - ssr);
+
+                if(stopping_crit(ssr_old, ssr, diffMax)){
+                    break;
+                }
+
+            }
+        }
+
+
+    }
+
+    //
+    // Updating the output
+    //
+
+    for(int q=0 ; q<Q ; ++q){
+        FE_info.add_fe_coef_to_mu(q, p_GX, output);
+    }
+
+    // keeping track of iterations
+    int *iterations_all = args->p_iterations_all;
+    iterations_all[v] += iter;
+
+    // saving the fixef coefs
+    double *fixef_values = args->fixef_values;
+    if(args->save_fixef){
+        for(int m=0 ; m<nb_coef_T ; ++m){
+            fixef_values[m] += GX[m];
+        }
+    }
+
+    bool conv = iter == iterMax ? false : true;
+
+    return(conv);
 }
 
 void demean_single_gnl(int v, PARAM_DEMEAN* args){
-	// v: variable identifier to demean
+    // v: variable identifier to demean
 
-	// Algorithm to quickly get the means
-	// Q >= 3 => acceleration for 15 iter
-	// if no convergence: conv 2 clusters
-	// then acceleration again
+    // Algorithm to quickly get the means
+    // Q >= 3 => acceleration for 15 iter
+    // if no convergence: conv 2 clusters
+    // then acceleration again
 
-	// data
-	int iterMax = args->iterMax;
-	int Q = args->Q;
+    // data
+    int iterMax = args->iterMax;
+    int Q = args->Q;
 
-	if(Q == 2){
-		demean_acc_2(v, iterMax, args);
-		// demean_acc_gnl(v, iterMax, args);
-	} else {
-		// 15 iterations
-		bool conv = demean_acc_gnl(v, 15, args);
+    if(Q == 2){
+        demean_acc_2(v, iterMax, args);
+        // demean_acc_gnl(v, iterMax, args);
+    } else {
+        // 15 iterations
+        bool conv = demean_acc_gnl(v, 15, args);
 
-		if(conv == false){
-			// 2 convergence
-			demean_acc_2(v, iterMax / 2 - 15, args);
+        if(conv == false && iterMax > 15){
+            // 2 convergence
+            demean_acc_2(v, iterMax / 2 - 15, args);
 
-			if(Q > 2){
-				// re-acceleration
-				demean_acc_gnl(v, iterMax / 2, args);
-			}
-		}
-	}
+            if(Q > 2){
+                // re-acceleration
+                demean_acc_gnl(v, iterMax / 2, args);
+            }
+        }
+    }
 
-	// if(args->piterations_all[v] > 50) balance_FEs(v, args);
+    // if(args->p_iterations_all[v] > 50) balance_FEs(v, args);
 
-	int *jobdone = args->jobdone;
-	jobdone[v] = 1;
+    int *jobdone = args->jobdone;
+    jobdone[v] = 1;
 
 }
 
 void stayIdleCheckingInterrupt(bool *stopnow, vector<int> &jobdone, int n_vars, int *counterInside){
-	// function that keeps the master thread busy until everything is done
+    // function that keeps the master thread busy until everything is done
 
-	int nbDone = 0, iter = 1;
-	bool isMaster = omp_get_thread_num() == 0;
+    int nbDone = 0, iter = 1;
+    bool isMaster = omp_get_thread_num() == 0;
 
 
-	while(isMaster && nbDone < n_vars && !(*stopnow)){
-		++iter;
+    while(isMaster && nbDone < n_vars && !(*stopnow)){
+        ++iter;
 
-		if(iter % 500000000 == 0){
-			if(pending_interrupt()){
-				(*counterInside)++;
-				*stopnow = true;
-				break;
-			} else {
-				// to avoid int overflow:
-				iter = 0;
-			}
-		}
+        if(iter % 500000000 == 0){
+            if(pending_interrupt()){
+                (*counterInside)++;
+                *stopnow = true;
+                break;
+            } else {
+                // to avoid int overflow:
+                iter = 0;
+            }
+        }
 
-		if(iter % 1000000 == 0){
-			nbDone = 0;
-			for(int v=0 ; v<n_vars ; v++){
-				nbDone += jobdone[v];
-			}
-		}
+        if(iter % 1000000 == 0){
+            nbDone = 0;
+            for(int v=0 ; v<n_vars ; v++){
+                nbDone += jobdone[v];
+            }
+        }
 
-	}
+    }
 
 }
 
 // Loop over demean_single
 // [[Rcpp::export]]
-List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, double diffMax, SEXP nb_cluster_all,
-                SEXP dum_list, SEXP tableCluster_vector, SEXP slope_flag, SEXP slope_vars,
-                SEXP r_init, int checkWeight, int nthreads, bool save_fixef = false){
-	// main fun that calls demean_single
-	// preformat all the information needed on the clusters
-	// y: the dependent variable
-	// X_raw: the matrix of the explanatory variables -- can be "empty"
+List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, double diffMax, SEXP r_nb_id_Q,
+                   SEXP fe_id_list, SEXP table_id_I, SEXP slope_flag_Q, SEXP slope_vars_list,
+                   SEXP r_init, int nthreads, bool save_fixef = false){
+    // main fun that calls demean_single
+    // preformat all the information needed on the clusters
+    // y: the dependent variable
+    // X_raw: the matrix of the explanatory variables -- can be "empty"
 
-	// when including weights: recreate table values
-	// export weights and isWeight bool
+    // when including weights: recreate table values
+    // export weights and is_weight bool
 
-	// slope_flag: whether a FE is a varying slope
-	// slope_var: the associated variables with varying slopes
+    // slope_flag: whether a FE is a varying slope
+    // slope_var: the associated variables with varying slopes
 
-	//initial variables
-	int Q = Rf_length(nb_cluster_all);
-	int *pcluster = INTEGER(nb_cluster_all);
-	int n_obs = Rf_length(y);
-	bool isWeight = Rf_length(r_weights) != 1;
+    //initial variables
+    int Q = Rf_length(r_nb_id_Q);
 
-	// whether we use X_raw
-	int n_vars = 1 + n_vars_X;
-	bool useX = n_vars_X > 0;
+    // whether we use y
+    double *p_y = REAL(y);
+    int n_obs = Rf_length(y);
+    bool useY = n_obs > 1 || p_y[0] != 0;
 
-	// initialisation if needed
-	bool isInit = Rf_xlength(r_init) != 1;
-	double *init = REAL(r_init);
-	bool saveInit = isInit || init[0] != 0;
+    // whether we use X_raw
+    bool useX = n_vars_X > 0;
+    if(useY == false){
+        n_obs = Rf_xlength(X_raw) / n_vars_X;
+    }
+    int n_vars = useY + n_vars_X;
 
-	int nb_coef = 0;
-	for(int q=0 ; q<Q ; ++q){
-		nb_coef += pcluster[q];
-	}
+    // initialisation if needed (we never initialize when only one FE)
+    bool isInit = Rf_xlength(r_init) != 1 && Q > 1;
+    double *init = REAL(r_init);
+    bool saveInit = (isInit || init[0] != 0) && Q > 1;
 
-	// cluster id for each observation
-	vector<int*> pdum(Q);
-	// New version => dum_vector (a vector) is replaced by dum_list (a list)
-	for(int q=0 ; q<Q ; ++q){
-		pdum[q] = INTEGER(VECTOR_ELT(dum_list, q));
-	}
+    // Creating the object containing all information on the FEs
+    FEClass FE_info(n_obs, Q, r_weights, fe_id_list, r_nb_id_Q, table_id_I, slope_flag_Q, slope_vars_list);
+    int nb_coef_T = FE_info.nb_coef_T;
 
-	// Handling slopes
-	int nb_slopes = 0;
-	int *pslope_flag = INTEGER(slope_flag);
-	for(int q=0 ; q<Q ; ++q){
-        nb_slopes += pslope_flag[q];
-	}
-	bool isSlope = nb_slopes > 0;
-	vector<double*> all_slope_vars(Q);
-	vector<double> neutral_var(isSlope ? n_obs : 1, 1);
+    // output vector:
+    vector<double> output_values(static_cast<int64_t>(n_obs) * n_vars, 0);
+    int64_t n_total = static_cast<int64_t>(n_obs) * n_vars;
 
-    // we initialize all_slope_vars to the values of slope_vars
-    // to neutral_var if not slope
-    int64_t index = 0;
-    for(int q=0 ; q<Q ; ++q){
-        if(pslope_flag[q]){
-            all_slope_vars[q] = REAL(slope_vars) + index;
-            index += n_obs;
-        } else {
-            all_slope_vars[q] = neutral_var.data();
+    if(isInit){
+        for(int64_t i=0 ; i<n_total ; ++i){
+            output_values[i] = init[i];
         }
     }
 
-	// Handling weights
-	// if there are weights: sum_weights
-	vector<double> sum_weights(nb_coef, 0);
-	vector<double*> psum_weights(Q);
-	psum_weights[0] = sum_weights.data();
-	for(int q=1 ; q<Q ; ++q){
-		psum_weights[q] = psum_weights[q - 1] + pcluster[q - 1];
-	}
+    //
+    // vector of pointers: input/output
+    //
 
-	double *obs_weights = REAL(r_weights);
-	// all_obs_weights: weights for each FE (I created it to take care of slopes)
-	vector<double*> all_obs_weights(Q);
-	int *table_vector = INTEGER(tableCluster_vector);
+    vector<double*> p_output(n_vars);
+    p_output[0] = output_values.data();
+    for(int v=1 ; v<n_vars ; v++){
+        p_output[v] = p_output[v - 1] + n_obs;
+    }
 
-	// slope_weights_vector will contain obs_weight[obs]*vars[obs] for slopes, and obs_weight[obs]
-	//    for non slopes [thus we initialize at 1 -- default if no weights no slope]
-	vector<double> slope_weights_vector(isSlope ? Q * static_cast<int64_t>(n_obs) : 1, 1);
+    vector<double*> p_input(n_vars);
+    if(useX){
+        p_input[0] = REAL(X_raw);
+        for(int k=1 ; k<n_vars_X ; ++k){
+            p_input[k] = p_input[k - 1] + n_obs;
+        }
 
-	if(isSlope){
+        if(useY){
+            p_input[n_vars_X] = p_y;
+        }
 
-	    // all_obs_weights refer to the values in slope_weights_vector
-	    all_obs_weights[0] = slope_weights_vector.data();
-	    for(int q=1 ; q<Q ; ++q){
-	        all_obs_weights[q] = all_obs_weights[q - 1] + n_obs;
-	    }
+    } else {
+        p_input[0] = REAL(y);
+    }
 
-	    // we compute the values of slope_weights_vector and sum of weights
+    // keeping track of iterations
+    vector<int> iterations_all(n_vars, 0);
+    int *p_iterations_all = iterations_all.data();
 
-	    for(int q=0 ; q<Q ; ++q){
-	        int *my_dum = pdum[q];
-	        double *my_SW = psum_weights[q];
-	        double *my_slope_weights = all_obs_weights[q];
+    // save fixef option
+    if(useX && save_fixef){
+        stop("save_fixef can be used only when there is no Xs.");
+    }
 
-	        if(pslope_flag[q]){
-	            double *my_slope_var = all_slope_vars[q];
-	            if(isWeight){
-	                for(int obs=0 ; obs<n_obs ; ++obs){
-	                    double var = my_slope_var[obs];
-	                    double weight_var = obs_weights[obs] * var;
-	                    my_slope_weights[obs] = weight_var;
-	                    my_SW[my_dum[obs] - 1] += weight_var * var;
-	                }
-	            } else {
-	                for(int obs=0 ; obs<n_obs ; ++obs){
-	                    double var = my_slope_var[obs];
-	                    my_slope_weights[obs] = var;
-	                    my_SW[my_dum[obs] - 1] += var * var;
-	                }
-	            }
+    vector<double> fixef_values(save_fixef ? nb_coef_T : 1, 0);
+    double *p_fixef_values = fixef_values.data();
 
-	            // Rcout << "weight q = " << q << " : " << my_SW[0] << ", " << my_SW[1] << ", " << my_SW[2] << "\n";
+    //
+    // Sending variables to envir
+    //
 
-	        } else {
-	            // if NOT a slope var: my_slope_weights eq to weights or 1
-	            if(isWeight){
-	                for(int obs=0 ; obs<n_obs ; ++obs){
-	                    double weight = obs_weights[obs];
-	                    my_slope_weights[obs] = weight;
-	                    my_SW[my_dum[obs] - 1] += weight;
-	                }
-	            } else {
-	                for(int obs=0 ; obs<n_obs ; ++obs){
-	                    my_SW[my_dum[obs] - 1]++;
-	                }
-	            }
+    PARAM_DEMEAN args;
 
-	            // Rcout << "weight q = " << q << " : " << my_SW[0];
-	            // for(int oo=1 ; oo<pcluster[q] ; oo++) Rcout << ", " << my_SW[oo];
-	            // Rcout << "\n";
-	        }
-	    }
+    args.n_obs = n_obs;
+    args.iterMax = iterMax;
+    args.diffMax = diffMax;
+    args.Q = Q;
+    args.nb_coef_T = nb_coef_T;
+    args.p_input = p_input;
+    args.p_output = p_output;
+    args.p_iterations_all = p_iterations_all;
 
-	} else {
-	    // NO SLOPE
+    // save FE_info
+    args.p_FE_info = &FE_info;
 
-	    // this is always the same weights
-	    for(int q=0 ; q<Q ; ++q){
-	        all_obs_weights[q] = REAL(r_weights);
-	    }
+    // save fixef:
+    args.save_fixef = save_fixef;
+    args.fixef_values = p_fixef_values;
 
-	    if(isWeight){
-	        for(int q=0 ; q<Q ; ++q){
-	            int *my_dum = pdum[q];
-	            double *my_SW = psum_weights[q];
-	            for(int obs=0 ; obs<n_obs ; ++obs){
-	                my_SW[my_dum[obs] - 1] += obs_weights[obs];
-	            }
-	        }
-	    } else {
-	        // we pass the value of table_vector to sum_weights
-	        for(int i=0 ; i<nb_coef ; ++i){
-	            sum_weights[i] = table_vector[i];
-	        }
-	    }
-	}
+    // stopping flag + indicator that job is finished
+    bool stopnow = false;
+    args.stopnow = &stopnow;
+    vector<int> jobdone(n_vars, 0);
+    int *pjobdone = jobdone.data();
+    args.jobdone = pjobdone;
 
-	// We update the weight information => slope is (almost) like using weights
-	isWeight = isWeight || isSlope;
-
-	// We avoid 0 weight clusters => (otherwise division by 0 leads to NA)
-	if(checkWeight || isSlope){
-		for(int coef=0 ; coef<nb_coef ; ++coef){
-			if(sum_weights[coef] == 0){
-				sum_weights[coef] = 1;
-			}
-		}
-	}
-
-	// output vector:
-	vector<double> output_values(static_cast<int64_t>(n_obs) * n_vars, 0);
-	int64_t n_total = static_cast<int64_t>(n_obs) * n_vars;
-
-	if(isInit){
-	    for(int64_t i=0 ; i<n_total ; ++i){
-	        output_values[i] = init[i];
-	    }
-	}
-
-	//
-	// vector of pointers: input/output
-	//
-
-	vector<double*> poutput(n_vars);
-	poutput[0] = output_values.data();
-	for(int v=1 ; v<n_vars ; v++){
-	    poutput[v] = poutput[v - 1] + n_obs;
-	}
-
-	vector<double*> pinput(n_vars);
-	if(useX){
-	    pinput[0] = REAL(X_raw);
-	    for(int k=1 ; k<(n_vars - 1) ; ++k){
-	        pinput[k] = pinput[k - 1] + n_obs;
-	    }
-	    pinput[n_vars - 1] = REAL(y);
-	} else {
-	    pinput[0] = REAL(y);
-	}
-
-	// keeping track of iterations
-	vector<int> iterations_all(n_vars, 0);
-	int *piterations_all = iterations_all.data();
-
-	// save fixef option
-	if(useX && save_fixef){
-	    stop("save_fixef can be used only when there is no Xs.");
-	}
-
-	vector<double> fixef_values(save_fixef ? nb_coef : 1, 0);
-	double *pfixef_values = fixef_values.data();
-
-	//
-	// Sending variables to envir
-	//
-
-	PARAM_DEMEAN args;
-
-	args.n_obs = n_obs;
-	args.iterMax = iterMax;
-	args.diffMax = diffMax;
-	args.Q = Q;
-	args.nb_coef = nb_coef;
-	args.pdum = pdum;
-	args.pcluster = pcluster;
-	args.pinput = pinput;
-	args.poutput = poutput;
-	args.piterations_all = piterations_all;
-
-	// weights + slope:
-	args.isWeight = isWeight;
-	args.psum_weights = psum_weights;
-	args.all_obs_weights = all_obs_weights;
-	args.all_slope_vars = all_slope_vars;
-	args.slope_flag = pslope_flag;
-	args.isSlope = isSlope;
-
-	// save fixef:
-	args.save_fixef = save_fixef;
-	args.fixef_values = pfixef_values;
-
-	// stopping flag + indicator that job is finished
-	bool stopnow = false;
-	args.stopnow = &stopnow;
-	vector<int> jobdone(n_vars, 0);
-	int *pjobdone = jobdone.data();
-	args.jobdone = pjobdone;
-
-	int counter = 0;
-	int *pcounter = &counter;
+    int counter = 0;
+    int *pcounter = &counter;
 
 
-	//
-	// the main loop
-	//
+    //
+    // the main loop
+    //
 
-	int nthreads_current = nthreads > n_vars ? n_vars : nthreads;
+    int nthreads_current = nthreads > n_vars ? n_vars : nthreads;
 
-	// enlever les rprintf dans les nthreads jobs
+    // enlever les rprintf dans les nthreads jobs
 #pragma omp parallel for num_threads(nthreads_current) schedule(static, 1)
-	for(int v = 0 ; v<(n_vars+nthreads_current) ; ++v){
-		// demean_single is the workhorse
-		// you get the "mean"
+    for(int v = 0 ; v<(n_vars+nthreads_current) ; ++v){
+        // demean_single is the workhorse
+        // you get the "mean"
 
-		if(!*(args.stopnow)){
-			if(v < n_vars){
-				if(Q == 1){
-					demean_single_1(v, &args);
-				} else {
-					demean_single_gnl(v, &args);
-				}
-			} else if(true && Q != 1){
-				stayIdleCheckingInterrupt(&stopnow, jobdone, n_vars, pcounter);
-			}
-		}
+        if(!*(args.stopnow)){
+            if(v < n_vars){
+                if(Q == 1){
+                    demean_single_1(v, &args);
+                } else {
+                    demean_single_gnl(v, &args);
+                }
+            } else if(true && Q != 1){
+                stayIdleCheckingInterrupt(&stopnow, jobdone, n_vars, pcounter);
+            }
+        }
 
-	}
-
-
-	if(*(args.stopnow)){
-		stop("cpp_demean: User interrupt.");
-	}
-
-	// Rprintf("Master checking: %i\n", *pcounter);
-
-	//
-	// save
-	//
-
-	int nrow = useX ? n_obs : 1;
-	int ncol = useX ? n_vars - 1 : 1;
-	NumericMatrix X_demean(nrow, ncol);
-
-	double *pinput_tmp;
-	double *poutput_tmp;
-	for(int k=0 ; k<(n_vars - 1) ; ++k){
-	    pinput_tmp = pinput[k];
-	    poutput_tmp = poutput[k];
-
-		for(int i=0 ; i < n_obs ; ++i){
-			X_demean(i, k) = pinput_tmp[i] - poutput_tmp[i];
-		}
-	}
-
-	NumericVector y_demean(n_obs);
-	pinput_tmp = pinput[n_vars - 1];
-	poutput_tmp = poutput[n_vars - 1];
-	for(int i=0 ; i < n_obs ; ++i){
-	    y_demean[i] = pinput_tmp[i] - poutput_tmp[i];
-	}
-
-	// iterations
-	IntegerVector iter_final(n_vars);
-	for(int v=0 ; v<n_vars ; ++v){
-		iter_final[v] = piterations_all[v];
-	}
-
-	// if save is requested
-	int64_t n = saveInit ? n_total : 1;
-	NumericVector saved_output(n);
-	for(int64_t i=0 ; i < n ; ++i){
-	    saved_output[i] = output_values[i];
-	}
+    }
 
 
-	// save fixef coef
-	int n_c = save_fixef ? nb_coef : 1;
-	NumericVector saved_fixef_coef(n_c);
-	for(int i=0 ; i < n_c ; ++i){
-	    saved_fixef_coef[i] = fixef_values[i];
-	}
+    if(*(args.stopnow)){
+        stop("cpp_demean: User interrupt.");
+    }
+
+    // Rprintf("Master checking: %i\n", *pcounter);
+
+    //
+    // save
+    //
+
+    int nrow = useX ? n_obs : 1;
+    int ncol = useX ? n_vars - useY : 1;
+    NumericMatrix X_demean(nrow, ncol);
+
+    double *p_input_tmp;
+    double *p_output_tmp;
+    for(int k=0 ; k<n_vars_X ; ++k){
+        p_input_tmp = p_input[k];
+        p_output_tmp = p_output[k];
+
+        for(int i=0 ; i < n_obs ; ++i){
+            X_demean(i, k) = p_input_tmp[i] - p_output_tmp[i];
+        }
+    }
+
+    NumericVector y_demean(useY ? n_obs : 1);
+    if(useY){
+        // y is always the last variable
+        p_input_tmp = p_input[n_vars - 1];
+        p_output_tmp = p_output[n_vars - 1];
+        for(int i=0 ; i < n_obs ; ++i){
+            y_demean[i] = p_input_tmp[i] - p_output_tmp[i];
+        }
+    }
 
 
-	List res; // a vector and a matrix
-	res["X_demean"] = X_demean;
-	res["y_demean"] = y_demean;
-	res["iterations"] = iter_final;
-	res["means"] = saved_output;
-	res["fixef_coef"] = saved_fixef_coef;
+    // iterations
+    IntegerVector iter_final(n_vars);
+    for(int v=0 ; v<n_vars ; ++v){
+        iter_final[v] = p_iterations_all[v];
+    }
 
-	return(res);
+    // if save is requested
+    int64_t n = saveInit ? n_total : 1;
+    NumericVector saved_output(n);
+    for(int64_t i=0 ; i < n ; ++i){
+        saved_output[i] = output_values[i];
+    }
+
+
+    // save fixef coef
+    int n_c = save_fixef ? nb_coef_T : 1;
+    NumericVector saved_fixef_coef(n_c);
+    for(int i=0 ; i < n_c ; ++i){
+        saved_fixef_coef[i] = fixef_values[i];
+    }
+
+
+    List res; // a vector and a matrix
+    res["X_demean"] = X_demean;
+    res["y_demean"] = y_demean;
+    res["iterations"] = iter_final;
+    res["means"] = saved_output;
+    res["fixef_coef"] = saved_fixef_coef;
+
+    return(res);
 }
 
 
