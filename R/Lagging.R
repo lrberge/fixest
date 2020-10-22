@@ -14,7 +14,7 @@
 .datatable.aware = TRUE
 
 
-panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method = "none", DATA_MISSING = FALSE, from_fixest = FALSE){
+panel_setup = function(data, panel.id, time.step = NULL, duplicate.method = "none", DATA_MISSING = FALSE, from_fixest = FALSE){
     # Function to setup the panel.
     # Used in lag.formula, panel, and fixest_env (with argument panel.id and panel.args)
     # DATA_MISSING: arg used in lag.formula
@@ -75,7 +75,29 @@ panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method =
     }
 
     # time.step
-    check_arg_plus(time.step, "numeric scalar GT{0} | match(unitary, consecutive, within.consecutive)")
+    if(is.null(time.step)){
+
+        if(is.numeric(time)){
+            time.step = "unitary"
+        } else {
+            time.step = "consecutive"
+
+            if(any(grepl("(?i)date", class(time)))){
+                time_new = tryCatch(as.numeric(time), warning = function(x) x)
+                if(!is.numeric(time_new)){
+                    warning("When setting the panel: the time variable is a 'date' but could not be converted to numeric. Its character counterpart is used => please check it makes sense.")
+                    time = as.character(time)
+                } else {
+                    time = time_new
+                }
+            }
+
+        }
+
+    } else {
+        check_arg_plus(time.step, "numeric scalar GT{0} | match(unitary, consecutive, within.consecutive)")
+    }
+
 
     # unitary time.step: conversion to numeric before quf
     if(time.step == "unitary") {
@@ -126,19 +148,26 @@ panel_setup = function(data, panel.id, time.step = "unitary", duplicate.method =
     if(time.step %in% c("consecutive", "within.consecutive")){
         # for within.consecutive, we deal with it after sorting
         time = time_full$x
+
     } else if(time.step == "unitary"){
         time_unik = time_full$items
-        all_steps = unique(diff(time_unik))
-        my_step = cpp_pgcd(unique(all_steps))
 
-        # we rescale time_unik
-        time_unik_new = (time_unik - min(time_unik)) / my_step
-        time = time_unik_new[time_full$x]
+        if(length(time_unik) == 1){
+            my_step = 1
+            time = rep(0, length(time_full$x))
 
-        if(my_step != 1){
-            message("NOTE: unitary time step taken: ", my_step, ".")
+        } else {
+            all_steps = unique(diff(time_unik))
+            my_step = cpp_pgcd(unique(all_steps))
+
+            # we rescale time_unik
+            time_unik_new = (time_unik - min(time_unik)) / my_step
+            time = time_unik_new[time_full$x]
+
+            if(my_step != 1){
+                message("NOTE: unitary time step taken: ", my_step, ".")
+            }
         }
-
 
     } else {
         time_unik = time_full$items
@@ -484,7 +513,7 @@ f_expand = function(x, k=1, fill){
 #'
 #'
 #'
-lag.formula = function(x, k = 1, data, time.step = "unitary", fill = NA, duplicate.method = c("none", "first"), ...){
+lag.formula = function(x, k = 1, data, time.step = NULL, fill = NA, duplicate.method = c("none", "first"), ...){
     # Arguments:
     # time.step: default: "consecutive", other option: "unitary" (where you find the most common step and use it -- if the data is numeric), other option: a number, of course the time must be numeric
 
@@ -583,7 +612,7 @@ lag.formula = function(x, k = 1, data, time.step = "unitary", fill = NA, duplica
 #'
 #' @param data A data.frame.
 #' @param panel.id The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id = ~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link[fixest]{feols}}).
-#' @param time.step The method to compute the lags. Can be equal to: \code{"unitary"} (default), \code{"consecutive"}, \code{"within.consecutive"}, or to a number. If \code{"unitary"}, then the largest common divisor between consecutive time periods is used (typically if the time variable represents years, it will be 1). This method can apply only to integer (or convertible to integer) variables. If \code{"consecutive"}, then the time variable can be of any type: two successive time periods represent a lag of 1. If \code{"witihn.consecutive"} then **within a given id**, two successive time periods represent a lag of 1. Finally, if the time variable is numeric, you can provide your own numeric time step.
+#' @param time.step The method to compute the lags, default is \code{NULL} (which means automatically set). Can be equal to: \code{"unitary"}, \code{"consecutive"}, \code{"within.consecutive"}, or to a number. If \code{"unitary"}, then the largest common divisor between consecutive time periods is used (typically if the time variable represents years, it will be 1). This method can apply only to integer (or convertible to integer) variables. If \code{"consecutive"}, then the time variable can be of any type: two successive time periods represent a lag of 1. If \code{"witihn.consecutive"} then **within a given id**, two successive time periods represent a lag of 1. Finally, if the time variable is numeric, you can provide your own numeric time step.
 #' @param duplicate.method If several observations have the same id and time values, then the notion of lag is not defined for them. If \code{duplicate.method = "none"} (default) and duplicate values are found, this leads to an error. You can use \code{duplicate.method = "first"} so that the first occurrence of identical id/time observations will be used as lag.
 #'
 #' @details
@@ -638,7 +667,7 @@ lag.formula = function(x, k = 1, data, time.step = "unitary", fill = NA, duplica
 #' }
 #'
 #'
-panel = function(data, panel.id, time.step = "unitary", duplicate.method = c("none", "first")){
+panel = function(data, panel.id, time.step = NULL, duplicate.method = c("none", "first")){
 
     if(missing(data)){
         stop("You must provide the argument 'data'.")
