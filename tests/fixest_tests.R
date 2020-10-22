@@ -501,7 +501,7 @@ test(var(c2 - m_fe$fe_bis[names(c2)]), 0)
 
 
 m = feols(y ~ x1 + x2 | species + fe_bis[x3], base)
-all_coef = coef(feols(y ~ -1 + x1 + x2 + species + factor(fe_bis) + x3::fe_bis, base))
+all_coef = coef(feols(y ~ -1 + x1 + x2 + species + factor(fe_bis) + i(x3, fe_bis), base))
 
 m_fe = fixef(m)
 c1  = get_coef(all_coef, "species")
