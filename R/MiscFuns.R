@@ -3087,7 +3087,7 @@ fitstat = function(x, type, as.list = FALSE, ...){
 parse_macros = function(..., reset = FALSE, from_xpd = FALSE){
     set_up(1)
 
-    check_arg(..., "dotnames os formula | character vector no na", .message = paste0("Each element of '...' must be a one-sided formula, and the name of each argument must start with two dots (ex: ", ifelse(from_xpd, "xpd(fml, ..ctrl = ~ x5 + x6)", "setFixest_fml(..ctrl = ~ x5 + x6)"), ").\nAlternatively it can be a character vector of variable names."))
+    check_arg(..., "dotnames os formula | character vector no na | numeric scalar", .message = paste0("Each element of '...' must be a one-sided formula, and the name of each argument must start with two dots (ex: ", ifelse(from_xpd, "xpd(fml, ..ctrl = ~ x5 + x6)", "setFixest_fml(..ctrl = ~ x5 + x6)"), ").\nAlternatively it can be a character vector of variable names, or a numeric scalar."))
 
     # We require os formulas instead of character strings because:
     # 1) I find it more handy
@@ -3119,7 +3119,7 @@ parse_macros = function(..., reset = FALSE, from_xpd = FALSE){
     for(v in names(dots)){
         fml_raw = dots[[v]]
 
-        if(is.character(fml_raw)){
+        if(!"formula" %in% class(fml_raw)){
             fml_raw = fml_raw[grepl("[[:alnum:]]", fml_raw)]
 
             if(length(fml_raw) > 0){
