@@ -966,7 +966,7 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 	    S_demean <- cpp_demean(y = S, X_raw = 0, n_vars_X = 0, r_weights = 0, iterMax = 1000L,
 	                           diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
 	                           fe_id_list = fe_id_list, table_id_I = table_id_I,
-	                           slope_flag = slope_flag, slope_vars = slope_variables,
+	                           slope_flag_Q = slope_flag, slope_vars_list = slope_variables,
 	                           r_init = 0, nthreads = 1L, save_fixef = TRUE)
 
 	    fixef_coef = S_demean$fixef_coef
@@ -980,6 +980,7 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 
 	    start = 1
 	    i = 1
+	    fixef_values = list()
 	    for(q in seq_along(slope_flag)){
 	        sf = slope_flag[q]
 	        if(sf == 0){
@@ -1762,7 +1763,7 @@ collinearity = function(x, verbose){
 			ccat(".")
 
 			i = which(colnames(mat_base) == v)
-			res = ols_fit(y = mat_base[, i], X = mat_base[, -i, drop = FALSE], w = 1, nthreads = 1)
+			res = ols_fit(y = mat_base[, i], X = mat_base[, -i, drop = FALSE], w = 1, collin.tol = 1e-10,  nthreads = 1)
 
 			max_residuals = max(abs(res$residuals))
 
