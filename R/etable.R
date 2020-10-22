@@ -14,7 +14,7 @@
 #' @param ... Used to capture different \code{fixest} estimation objects (obtained with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}). Note that any other type of element is discarded. Note that you can give a list of \code{fixest} objects.
 #' @param digits Integer, default is 4. The number of digits to be displayed.
 #' @param tex Logical: whether the results should be a data.frame or a Latex table. By default, this argument is \code{TRUE} if the argument \code{file} (used for exportation) is not missing; it is equal to \code{FALSE} otherwise.
-#' @param fitstat A character vector or a one sided formula. A vector listing which fit statistics to display. The valid types are 'll', 'aic', 'bic' and r2 types like 'r2', 'pr2', 'war2', etc (see all valid types in \code{\link[fixest]{r2}}). Also accepts valid types from the function \code{\link[fixest]{fitstat}}. The default value depends on the models to display. Example of use: \code{fitstat=c('sq.cor', 'ar2', 'war2')}, or \code{fitstat=~sq.cor+ar2+war2} using a formula.
+#' @param fitstat A character vector or a one sided formula. A vector listing which fit statistics to display. The valid types are 'n', 'll', 'aic', 'bic' and r2 types like 'r2', 'pr2', 'war2', etc (see all valid types in \code{\link[fixest]{r2}}). Also accepts valid types from the function \code{\link[fixest]{fitstat}}. The default value depends on the models to display. Example of use: \code{fitstat=c('n', 'sq.cor', 'ar2', 'war2')}, or \code{fitstat=~n+sq.cor+ar2+war2} using a formula.
 #' @param title (Tex only.) Character scalar. The title of the Latex table.
 #' @param float (Tex only.) Logical. By default, if the argument \code{title} or \code{label} is provided, it is set to \code{TRUE}. Otherwise, it is set to \code{FALSE}.
 #' @param sdBelow (Tex only.) Logical, default is \code{TRUE}. Should the standard-errors be displayed below the coefficients?
@@ -677,8 +677,11 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
             fitstat_all = c("sq.cor", "pr2", "bic")
         }
 
+        fitstat_all = c("n", fitstat_all)
+
     } else if(isFALSE(fitstat_all) || (length(fitstat_all) == 1 && (is.na(fitstat_all) || fitstat_all == ""))){
         fitstat_all = NULL
+        drop.section = c(drop.section, "stats")
 
     } else if("formula" %in% class(fitstat_all)){
         check_arg(fitstat_all, "os formula", .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing 'aic', 'bic', 'll', types from function fitstat (?fitstat), or valid r2 types names (?r2). ")
@@ -693,7 +696,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
 
     # checking the types
     fitstat_fun_types = fitstat(give_types = TRUE)
-    fitstat_type_allowed = c("sq.cor", "ll", "aic", "bic", fitstat_fun_types$types, "r2", "ar2", "pr2", "apr2", "par2", "wr2", "war2", "awr2", "wpr2", "pwr2", "wapr2", "wpar2", "awpr2", "apwr2", "pawr2", "pwar2")
+    fitstat_type_allowed = c("n", "sq.cor", "ll", "aic", "bic", fitstat_fun_types$types, "r2", "ar2", "pr2", "apr2", "par2", "wr2", "war2", "awr2", "wpr2", "pwr2", "wapr2", "wpar2", "awpr2", "apwr2", "pawr2", "pwar2")
     fitstat_all = unique(fitstat_all)
 
     pblm = setdiff(fitstat_all, fitstat_type_allowed)
@@ -702,9 +705,9 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
     }
 
     if(isTex){
-        fitstat_dict = c("sq.cor"="Squared Correlation", r2="R$^2$", ar2="Adjusted R$^2$", pr2="Pseudo R$^2$", apr2="Adjusted Pseudo R$^2$", wr2="Within R$^2$", war2="Within Adjusted R$^2$", wpr2="Within Pseudo R$^2$", wapr2="Whithin Adjusted Pseudo R$^2$", aic = "AIC", bic = "BIC", ll = "Log-Likelihood", fitstat_fun_types$tex_alias)
+        fitstat_dict = c("n" = "Observations", "sq.cor"="Squared Correlation", r2="R$^2$", ar2="Adjusted R$^2$", pr2="Pseudo R$^2$", apr2="Adjusted Pseudo R$^2$", wr2="Within R$^2$", war2="Within Adjusted R$^2$", wpr2="Within Pseudo R$^2$", wapr2="Whithin Adjusted Pseudo R$^2$", aic = "AIC", bic = "BIC", ll = "Log-Likelihood", fitstat_fun_types$tex_alias)
     } else {
-        fitstat_dict = c("sq.cor"="Squared Corr.", r2="R2", ar2="Adjusted R2", pr2="Pseudo R2", apr2="Adj. Pseudo R2", wr2="Within R2", war2="Within Adj. R2", wpr2="Within Pseudo R2", wapr2="Whithin Adj. Pseudo R2", aic = "AIC", bic = "BIC", ll = "Log-Likelihood", fitstat_fun_types$R_alias)
+        fitstat_dict = c("n" = "Observations", "sq.cor"="Squared Corr.", r2="R2", ar2="Adjusted R2", pr2="Pseudo R2", apr2="Adj. Pseudo R2", wr2="Within R2", war2="Within Adj. R2", wpr2="Within Pseudo R2", wapr2="Whithin Adj. Pseudo R2", aic = "AIC", bic = "BIC", ll = "Log-Likelihood", fitstat_fun_types$R_alias)
     }
 
     # Renaming the stats with user-provided aliases
@@ -977,21 +980,16 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
 
         if(coefstat == "se"){
             se_value = fun_format(a[, 2])
+
         } else if(coefstat == "tstat"){
             se_value = fun_format(a[, 3])
+
         } else if(coefstat == "confint"){
             se_value = apply(confint(x, level = ci), 1, function(z) paste0("[", fun_format(z[1]), "; ", fun_format(z[2]), "]"))
+
         } else {
             stop("Wrong value for the argument 'coefstat': ", coefstat, " is not supported.")
         }
-
-        # if(isTex){
-        #     coef = coefFormatLatex(a[, 1], digits = digits, power = abs(powerBelow))
-        #     se_value = coefFormatLatex(a[, 2], digits = digits, power = abs(powerBelow))
-        # } else {
-        #     coef = as.character(round(a[, 1], digits))
-        #     se_value = as.character(myRound(a[, 2], digits))
-        # }
 
         if(add_signif){
             if(isTex){
@@ -1055,6 +1053,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
 
             fun_format = ifelse(isTex, numberFormatLatex, numberFormatNormal)
 
+            if("n" %in% fitstat_all) fistat_format[["n"]] = fun_format(n)
             if("aic" %in% fitstat_all) fistat_format[["aic"]] = fun_format(round(AIC(x), 3))
             if("bic" %in% fitstat_all) fistat_format[["bic"]] = fun_format(round(BIC(x), 3))
             if("ll" %in% fitstat_all) fistat_format[["ll"]] = fun_format(logLik(x))
@@ -1580,7 +1579,7 @@ etable_internal_latex = function(info){
             fit_info = paste0(style$lines$sep, style$stats$title, "& ", paste(rep(" ", n_models), collapse = "&"), "\\\\\n")
         }
 
-        fit_info = paste0(fit_info, "Observations& ", paste(addCommas(obs_list), collapse = "&"), "\\\\\n")
+        # fit_info = paste0(fit_info, "Observations& ", paste(addCommas(obs_list), collapse = "&"), "\\\\\n")
         fit_info = paste0(fit_info, nb_FE_lines, info_convergence, info_muli_se)
 
         if(!all(sapply(fitstat_list, function(x) all(is.na(x))))){
@@ -1946,7 +1945,7 @@ etable_internal_df = function(info){
         coefstat_sentence = "VCOV type"
     }
 
-    res <- rbind(res, c("Observations", addCommas(obs_list)))
+    # res <- rbind(res, c("Observations", addCommas(obs_list)))
     if(!useSummary || !any(grepl("\\(", unlist(se_type_list)))){
         se_type_format = c()
 
