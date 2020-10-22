@@ -297,13 +297,9 @@ fixef(est_comb)[[1]]
 
 ## Adding interactions: Yearly treatment effect
 
-The package `fixest` offers a special tool to add interactions in estimations. You can simply add `var::fe(ref)` in the formula, and the variable `var` will be interacted with the values taken by `fe`, with the argument `ref` specifying a reference value of `fe`. Using this syntax opens up a special treatment of the results when using the function `etable` and `coefplot`, as will be shown.
+The package `fixest` offers a special tool to add interactions in estimations. You can simply add `i(var, fe, ref)` in the formula, and the variable `var` will be interacted with the values taken by `fe`, with the argument `ref` specifying a reference value of `fe`. Using `i()` opens up a special treatment of the results when using the function `etable` and `coefplot`, as will be shown.
 
 In some difference-in-difference analyses, it is often useful not only to have the total treatment effect but to trace the evolution of the treatment. Let's take an example. In the following data base, some persons (identified with the variable `id`) receive a treatment and others not, represented by the variable `treat`. The treatment takes effect from `period` 6 onwards.
-
-```{r, echo = FALSE}
-# "::" = function(a, b) NULL
-```
 
 
 ```{r, eval = TRUE}
@@ -312,21 +308,14 @@ data(base_did)
 head(base_did)
 ```
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 # Estimation of yearly effect
 # We also add individual/time fixed-effects:
-est_did = feols(y ~ x1 + treat::period(5) | id + period, base_did)
+est_did = feols(y ~ x1 + i(treat, period, 5) | id + period, base_did)
 est_did
 ```
 
-
-```{r, echo = FALSE}
-# I need to use a trick to be allowed to use "::"
-est_did = eval(parse(text = "feols(y ~ x1 + treat::period(5) | id + period, base_did)"))
-est_did
-```
-
-In the example above, we create the interaction between the variable `treat` and the periods using the syntax `var::fe(ref)` (here `treat::period(5)`) with, in parenthesis, the reference. (Note that we need a reference otherwise, there is a collinearity problem because of the fixed-effect `id`.)
+In the example above, we create the interaction between the variable `treat` and the periods using the syntax `i(var, fe, ref)`. Note that, although the reference is optional, we need it otherwise there is a collinearity problem because of the fixed-effect `id`.
 
 Now to display the yearly treatment effects on a graph, we can use the function `coefplot`:
 
