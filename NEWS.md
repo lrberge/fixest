@@ -25,7 +25,7 @@
  
 #### New function: `fitstat` 
 
-  - New function `fitsat` that computes various fit statistics. It is integrated with `etable` and can be invoked with the argument `fitstat`. So far only one fit statistic is included, but more will come.
+  - New function `fitsat` that computes various fit statistics. It is integrated with `etable` and can be invoked with the argument `fitstat`. So far only two fit statistics are included, but more will come.
   
 #### Standard-errors, important changes
   
@@ -43,7 +43,11 @@
   
   - Two new arguments `.vcov` and `.vcov_args` to compute the standard-errors with custom functions.
   
+  - The number of observations (`n`) is now treated as a regular statistic and can be place where one wants.
+  
   - The statistics can now have custom aliases using the argument `dict`.
+  
+  - The overdispersion becomes a regular fit statistic that can be included (or not) using `fitstat`.
 
 #### User visible changes
 
@@ -51,7 +55,9 @@
  
   * The new default of argument `nthreads` is 50% of all available threads. 
   * Accepts new values: a) 0 means all available threads, b) a number strictly between 0 and 1 will represent the fraction of all threads to use.
-  * Multi-threading is now off when forking is detected.
+  
+  - When setting formula macros:
+    * The functions `xpd` and `setFixest_fml` now accept character vectors and numeric scalars on top of formulas.
   
   - `demean`:
     * speed improvement.
@@ -59,14 +65,22 @@
   - `coefplot`:
   
     * The argument `group` now accepts a special character `"^^"`, when used, it cleans the beginning of the coefficient name. Very useful for factors.
+    
+     * When `horiz = TRUE`, the order of the coefficients is not reversed any more.
 
  - Improved display of numbers in `print` method.
  
  - Added variables names to `X_demeaned` from `feols`.
  
+ - Lagging functions:
+  * Now `time.step = NULL` by default, which means that the choice of how to lag is automatically set. This means that the default behavior for time variables equal to Dates or character values should be appropriate.
+  
+  * New operator `d` which is the difference operator.
+ 
  - In all estimations: 
  
     * new argument `mem.clean`: internally, intermediary objects are removed as much as possible and `gc()` is called before each memory intensive C++ section.
+    * new output: `collin.min_norm`, this value informs on the possible presence of collinearity in the system.
     * new arguments `only.env` and `env`. 
     * The first, `only.env`, allows to recover only the environment used to perform the estimation (i.e. all the preprocessing done before the estimation).
     * The second, `env`, accepts a fixest environment created by `only.env`, and performs the estimation using this environment--all other arguments are ignored. 
