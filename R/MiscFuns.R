@@ -401,7 +401,7 @@ summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), .vcov, le
 	object$se = se
 
 	if(lean){
-	    object[c("fixef_id", "residuals", "fitted.values", "scores", "sumFE")] = NULL
+	    object[c("fixef_id", "residuals", "fitted.values", "scores", "sumFE", "slope_variables_reordered")] = NULL
 	}
 
 	return(object)
