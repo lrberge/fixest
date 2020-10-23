@@ -861,3 +861,53 @@ NumericVector cpp_diag_XUtX(NumericMatrix X, NumericMatrix U){
     return res;
 }
 
+
+// [[Rcpp::export]]
+NumericVector cpp_factor_matrix(IntegerVector fact, bool any_na){
+    // fact: integer vector from 1 (!) to K, can contain NAs
+    // Checking Na is cheap as opposed to populating the matrix, but having an argument avoids creating a new object
+
+    int n = fact.length();
+    int K = 0;
+    LogicalVector is_na(any_na ? n : 1, false);
+
+    // Finding out the NAs and the nber of cols
+    if(any_na){
+        for(int i=0 ; i<n ; ++i){
+            if(IntegerVector::is_na(fact[i])){
+                is_na[i] = true;
+            } else if(K < fact[i]){
+                K = fact[i];
+            }
+        }
+    } else {
+        for(int i=0 ; i<n ; ++i){
+            if(K < fact[i]){
+                K = fact[i];
+            }
+        }
+    }
+
+    NumericMatrix res(n, K);
+
+    // Filling the matrix
+    if(any_na){
+        for(int i=0 ; i<n ; ++i){
+            if(IntegerVector::is_na(fact[i])){
+                // we fill the row
+                for(int k=0 ; k<K ; ++k){
+                    res(i, k) = NA_REAL;
+                }
+            } else {
+                res(i, fact[i] - 1) = 1;
+            }
+        }
+    } else {
+        for(int i=0 ; i<n ; ++i){
+            res(i, fact[i] - 1) = 1;
+        }
+    }
+
+    return res;
+}
+
