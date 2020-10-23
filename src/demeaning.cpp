@@ -314,6 +314,7 @@ FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id
 
     // Weights
     bool is_weight = Rf_length(r_weights) != 1;
+    this->is_weight = is_weight;
     p_weights = REAL(r_weights);
 
     is_slope = nb_slopes > 0;
@@ -377,6 +378,13 @@ FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id
                 sum_weights_noVS_C[c] = 1;
             }
         }
+
+        // Rcout << "Sum weights:\n";
+        // for(int c=0 ; c<nb_coef_noVS_T ; ++c){
+        //     Rcout << sum_weights_noVS_C[c] << ", ";
+        // }
+        // Rcout << "\n";
+
     }
 
 
@@ -540,9 +548,15 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
 
         }
 
+        // Rcout << "is_weight:" << is_weight << ", is_single: " << is_single << "\n";
+
+        // Rcout << "Coefs:\n ";
         for(int m=0 ; m<nb_coef ; ++m){
+            // Rcout << my_fe_coef[m] << " ("  << my_SW[m] << "), ";
+
             my_fe_coef[m] /= my_SW[m];
         }
+        // Rcout << "\n\n";
 
     } else {
         // Setting up => computing the raw coefficient of the last column
@@ -574,11 +588,13 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
 
             for(int i=0 ; i<n_obs ; ++i){
                 for(int v=0 ; v<V ; ++v){
-                    if(is_weight){
-                        rhs(my_fe[i] - 1, v) -= VS_mat(i, v) * sum_other_coef_N[i] * p_weights[i];
-                    } else {
-                        rhs(my_fe[i] - 1, v) -= VS_mat(i, v) * sum_other_coef_N[i];
-                    }
+                    // if(is_weight){
+                    //     rhs(my_fe[i] - 1, v) -= VS_mat(i, v) * sum_other_coef_N[i] * p_weights[i];
+                    // } else {
+                    //     rhs(my_fe[i] - 1, v) -= VS_mat(i, v) * sum_other_coef_N[i];
+                    // }
+                    rhs(my_fe[i] - 1, v) -= VS_mat(i, v) * sum_other_coef_N[i];
+                    // rhs(my_fe[i] - 1, v) -= sum_other_coef_N[i];
                 }
             }
 
@@ -701,18 +717,27 @@ void FEClass::compute_fe_coef_2_internal(double *fe_coef_in_out_C, double *fe_co
 
         for(int i=0 ; i<n_obs ; ++i){
 
+            // if(is_slope_a){
+            //     tmp = 0;
+            //     for(int v=0 ; v<V_a ; ++v){
+            //         if(is_weight){
+            //             tmp += my_vs_coef_a(my_fe_a[i] - 1, v) * VS_mat_a(i, v) * p_weights[i];
+            //         } else {
+            //             tmp += my_vs_coef_a(my_fe_a[i] - 1, v) * VS_mat_a(i, v);
+            //         }
+            //     }
+            //
+            // } else if(is_weight){
+            //     tmp = my_fe_coef_a[my_fe_a[i] - 1] * p_weights[i];
+            // } else {
+            //     tmp = my_fe_coef_a[my_fe_a[i] - 1];
+            // }
             if(is_slope_a){
                 tmp = 0;
                 for(int v=0 ; v<V_a ; ++v){
-                    if(is_weight){
-                        tmp += my_vs_coef_a(my_fe_a[i] - 1, v) * VS_mat_a(i, v) * p_weights[i];
-                    } else {
-                        tmp += my_vs_coef_a(my_fe_a[i] - 1, v) * VS_mat_a(i, v);
-                    }
+                    tmp += my_vs_coef_a(my_fe_a[i] - 1, v) * VS_mat_a(i, v);
                 }
 
-            } else if(is_weight){
-                tmp = my_fe_coef_a[my_fe_a[i] - 1] * p_weights[i];
             } else {
                 tmp = my_fe_coef_a[my_fe_a[i] - 1];
             }
@@ -1644,10 +1669,10 @@ List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, d
     }
     int n_vars = useY + n_vars_X;
 
-    // initialisation if needed (we never initialize when only one FE)
+    // initialisation if needed (we never initialize when only one FE, except if asked explicitly)
     bool isInit = Rf_xlength(r_init) != 1 && Q > 1;
     double *init = REAL(r_init);
-    bool saveInit = (isInit || init[0] != 0) && Q > 1;
+    bool saveInit = ((isInit || init[0] != 0) && Q > 1) || init[0] == 666;
 
     // Creating the object containing all information on the FEs
     FEClass FE_info(n_obs, Q, r_weights, fe_id_list, r_nb_id_Q, table_id_I, slope_flag_Q, slope_vars_list);
