@@ -2875,19 +2875,19 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
 
 #' Centers a set of variables around a set of factors
 #'
+#' User-level access to internal demeaning algorithm of \code{fixest}.
 #'
-#'
-#' @param X A matrix, vector or a list. The vectors to be centered. There must be the same number of observations as in the factors used for centering (argument \code{fe}).
-#' @param fe A matrix, vector or list. The factors used to center the variables in argument \code{X}. (Note: fe stands for fixed-effects.)
+#' @param X A matrix, vector or a list. The vectors to be centered. There must be the same number of observations as in the factors used for centering (argument \code{f}).
+#' @param f A matrix, vector or list. The factors used to center the variables in argument \code{X}.
 #' @param weights Vector, can be missing or NULL. If present, it must contain the same number of observations as in \code{X}.
 #' @param nthreads Number of threads to be used. By default it is equal to \code{getFixest_nthreads()}.
 #' @param notes Logical, whether to display a message when NA values are removed. By default it is equal to \code{getFixest_notes()}.
 #' @param iter Number of iterations, default is 2000.
 #' @param tol Stopping criterion of the algorithm. Default is \code{1e-6}. The algorithm stops when the maximum absolute increase in the coefficients values is lower than \code{tol}.
-#' @param im_confident Logical, default is \code{FALSE}. FOR EXPERT USERS ONLY! This argument allows to skip some of the preprocessing of the arguments given in input. If \code{TRUE}, then \code{X} MUST be a numeric matrix (not integer, numeric), \code{fe} MUST be a list and \code{weights}, if given, MUST be numeric (not integer!). Further the three MUST NOT contain any NA values and MUST have the same number of observations. Non compliance to these rules may simply lead your R session to break.
+#' @param im_confident Logical, default is \code{FALSE}. FOR EXPERT USERS ONLY! This argument allows to skip some of the preprocessing of the arguments given in input. If \code{TRUE}, then \code{X} MUST be a numeric matrix (not integer, numeric), \code{f} MUST be a list and \code{weights}, if given, MUST be numeric (not integer!). Further the three MUST NOT contain any NA values and MUST have the same number of observations. Non compliance to these rules may simply lead your R session to break.
 #'
 #' @return
-#' It returns a matrix of the same number of columns as \code{X} in input. The number of rows is equal to the number of rows of \code{X} minus the number of NA values (contained in \code{X}, \code{fe} or \code{weights}).
+#' It returns a matrix of the same number of columns as \code{X} in input. The number of rows is equal to the number of rows of \code{X} minus the number of NA values (contained in \code{X}, \code{f} or \code{weights}).
 #'
 #' @examples
 #'
@@ -2901,7 +2901,7 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
 #' # We center the two variables ln_dist and ln_euros
 #' #  on the factors Origin and Destination
 #' X_demean = demean(X = base[, c("ln_dist", "ln_euros")],
-#'                   fe = base[, c("Origin", "Destination")])
+#'                   f = base[, c("Origin", "Destination")])
 #' base[, c("ln_dist_dm", "ln_euros_dm")] = X_demean
 #'
 #' est = feols(ln_euros_dm ~ ln_dist_dm, base)
@@ -2914,13 +2914,13 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
 #'
 #'
 #'
-demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFixest_notes(), iter = 2000, tol = 1e-6, im_confident = FALSE){
+demean = function(X, f, weights, nthreads = getFixest_nthreads(), notes = getFixest_notes(), iter = 2000, tol = 1e-6, im_confident = FALSE){
     # LATER: add slopes
 
     # Step 1: formatting the input
     if(!im_confident){
         check_arg(X, "numeric vmatrix | list mbt")
-        check_arg(fe, "vmatrix | list mbt")
+        check_arg(f, "vmatrix | list mbt")
         check_arg(iter, "integer scalar GE{1}")
         check_arg(tol, "numeric scalar GT{0}")
         check_arg(notes, "logical scalar")
@@ -2951,31 +2951,31 @@ demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFi
         if(is.null(var_names)) var_names = paste0("V", 1:ncol(X))
         if(is.integer(X)) X = X * 1
 
-        ## fe
-        if(is.list(fe)){
-            fe_names = names(fe)
+        ## f
+        if(is.list(f)){
+            fe_names = names(f)
 
-            if(!is.data.frame(fe)){
-                n_all = lengths(fe)
+            if(!is.data.frame(f)){
+                n_all = lengths(f)
                 if(any(diff(n_all) != 0)){
                     n_unik = unique(n_all)
-                    stop("In argument 'fe' all elements of the list must be of the same length. This is currently not the case (ex: one is of length ", n_unik[1], " while another is of length ", n_unik[2], ").")
+                    stop("In argument 'f' all elements of the list must be of the same length. This is currently not the case (ex: one is of length ", n_unik[1], " while another is of length ", n_unik[2], ").")
                 }
-                fe = as.data.frame(fe)
+                f = as.data.frame(f)
             }
         } else {
-            fe_names = colnames(fe)
-            fe = as.data.frame(fe)
+            fe_names = colnames(f)
+            f = as.data.frame(f)
         }
 
-        if(is.null(fe_names)) fe_names = paste0("Factor_", 1:length(fe))
+        if(is.null(fe_names)) fe_names = paste0("Factor_", 1:length(f))
 
-        is_pblm = sapply(fe, function(x) !is.numeric(x) || !is.character(x))
+        is_pblm = sapply(f, function(x) !is.numeric(x) || !is.character(x))
         for(i in which(is_pblm)){
-            fe[[i]] = as.character(fe[[i]])
+            f[[i]] = as.character(f[[i]])
         }
 
-        if(nrow(fe) != nrow(X)) stop("The number of observations in 'X' and in 'fe' don't match (", nrow(X), " vs ", nrow(fe), ").")
+        if(nrow(f) != nrow(X)) stop("The number of observations in 'X' and in 'f' don't match (", nrow(X), " vs ", nrow(f), ").")
 
 
         ## weights
@@ -2999,8 +2999,8 @@ demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFi
         }
 
         n_na_fe = 0
-        if(anyNA(fe)){
-            is_na_fe = rowSums(is.na(fe)) > 0
+        if(anyNA(f)){
+            is_na_fe = rowSums(is.na(f)) > 0
             n_na_fe = sum(is_na_fe)
             is_NA = is_NA | is_na_fe
         }
@@ -3014,14 +3014,14 @@ demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFi
 
         n_na = sum(is_NA)
         if(n_na > 0 && notes){
-            if(all(is_NA)) stop("All observations contain NA values (Breakup: X: ", n_na_x, ", fe: ", n_na_fe, weight_msg, ").")
+            if(all(is_NA)) stop("All observations contain NA values (Breakup: X: ", n_na_x, ", f: ", n_na_fe, weight_msg, ").")
 
-            message("NOTE: ", signif_plus(n_na), " observation", plural(n_na), " removed because of NA values (Breakup: X: ", n_na_x, ", fe: ", n_na_fe, weight_msg, ").")
+            message("NOTE: ", signif_plus(n_na), " observation", plural(n_na), " removed because of NA values (Breakup: X: ", n_na_x, ", f: ", n_na_fe, weight_msg, ").")
         }
 
         if(n_na > 0){
             X = X[!is_NA, , drop = FALSE]
-            fe = fe[!is_NA, , drop = FALSE]
+            f = f[!is_NA, , drop = FALSE]
             if(is_weight) weights = weights[!is_NA]
         }
 
@@ -3035,9 +3035,9 @@ demean = function(X, fe, weights, nthreads = getFixest_nthreads(), notes = getFi
     # Unclassing fes
     #
 
-    Q = length(fe)
-    n = length(fe[[1]])
-    quf_info_all = cpppar_quf_table_sum(x = fe, y = 0, do_sum_y = FALSE, type = 0, only_slope = rep(FALSE, Q), nthreads = nthreads)
+    Q = length(f)
+    n = length(f[[1]])
+    quf_info_all = cpppar_quf_table_sum(x = f, y = 0, do_sum_y = FALSE, type = 0, only_slope = rep(FALSE, Q), nthreads = nthreads)
 
     # table/sum_y/sizes
     fixef_table = quf_info_all$table

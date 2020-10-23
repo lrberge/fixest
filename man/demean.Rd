@@ -6,7 +6,7 @@
 \usage{
 demean(
   X,
-  fe,
+  f,
   weights,
   nthreads = getFixest_nthreads(),
   notes = getFixest_notes(),
@@ -16,9 +16,9 @@ demean(
 )
 }
 \arguments{
-\item{X}{A matrix, vector or a list. The vectors to be centered. There must be the same number of observations as in the factors used for centering (argument \code{fe}).}
+\item{X}{A matrix, vector or a list. The vectors to be centered. There must be the same number of observations as in the factors used for centering (argument \code{f}).}
 
-\item{fe}{A matrix, vector or list. The factors used to center the variables in argument \code{X}. (Note: fe stands for fixed-effects.)}
+\item{f}{A matrix, vector or list. The factors used to center the variables in argument \code{X}.}
 
 \item{weights}{Vector, can be missing or NULL. If present, it must contain the same number of observations as in \code{X}.}
 
@@ -30,13 +30,13 @@ demean(
 
 \item{tol}{Stopping criterion of the algorithm. Default is \code{1e-6}. The algorithm stops when the maximum absolute increase in the coefficients values is lower than \code{tol}.}
 
-\item{im_confident}{Logical, default is \code{FALSE}. FOR EXPERT USERS ONLY! This argument allows to skip some of the preprocessing of the arguments given in input. If \code{TRUE}, then \code{X} MUST be a numeric matrix (not integer, numeric), \code{fe} MUST be a list and \code{weights}, if given, MUST be numeric (not integer!). Further the three MUST NOT contain any NA values and MUST have the same number of observations. Non compliance to these rules may simply lead your R session to break.}
+\item{im_confident}{Logical, default is \code{FALSE}. FOR EXPERT USERS ONLY! This argument allows to skip some of the preprocessing of the arguments given in input. If \code{TRUE}, then \code{X} MUST be a numeric matrix (not integer, numeric), \code{f} MUST be a list and \code{weights}, if given, MUST be numeric (not integer!). Further the three MUST NOT contain any NA values and MUST have the same number of observations. Non compliance to these rules may simply lead your R session to break.}
 }
 \value{
-It returns a matrix of the same number of columns as \code{X} in input. The number of rows is equal to the number of rows of \code{X} minus the number of NA values (contained in \code{X}, \code{fe} or \code{weights}).
+It returns a matrix of the same number of columns as \code{X} in input. The number of rows is equal to the number of rows of \code{X} minus the number of NA values (contained in \code{X}, \code{f} or \code{weights}).
 }
 \description{
-Centers a set of variables around a set of factors
+User-level access to internal demeaning algorithm of \code{fixest}.
 }
 \examples{
 
@@ -50,7 +50,7 @@ base$ln_euros = log(base$Euros)
 # We center the two variables ln_dist and ln_euros
 #  on the factors Origin and Destination
 X_demean = demean(X = base[, c("ln_dist", "ln_euros")],
-                  fe = base[, c("Origin", "Destination")])
+                  f = base[, c("Origin", "Destination")])
 base[, c("ln_dist_dm", "ln_euros_dm")] = X_demean
 
 est = feols(ln_euros_dm ~ ln_dist_dm, base)
