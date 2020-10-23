@@ -933,7 +933,17 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
                     qui_factor = grepl("::", x)
                     if(any(qui_factor)){
                         res = x[base::order(qui_factor)]
-                        res = gsub("::", " $=$ ", res)
+
+                        n_last = length(res)
+                        last_value_split = strsplit(res[n_last], "::")[[1]]
+                        last_value_split = dict_apply(last_value_split, dict)
+
+                        if(isTex){
+                            res[n_last] = paste(last_value_split, collapse = " $=$ ")
+                        } else {
+                            res[n_last] = paste(last_value_split, collapse = " = ")
+                        }
+
                     } else {
                         res = x
                     }
@@ -941,7 +951,13 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
                     who = res %in% names(dict)
 
                     res[who] = dict[res[who]]
-                    paste0(res, collapse = interaction.combine)
+                    if(isTex){
+                        res = paste0(res, collapse = interaction.combine)
+                    } else {
+                        res = paste0(res, collapse = " x ")
+                    }
+
+                    return(res)
                 }
 
                 inter_named = sapply(inter, fun_rename)
