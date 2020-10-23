@@ -97,7 +97,7 @@ summary(gravity_pois, se = "twoway")
 ```
 The clustering can be done on one (`se="cluster"`), two (`se="twoway"`), three (`se="threeway"`) or up to four (`se="fourway"`) variables. If the estimation includes fixed-effects, then by default the clustering will be done using these fixed-effects, in the original order. This is why the *Origin* and *Destination* variables were used for the two-way clustering in the previous example. If, instead, you wanted to perform one-way clustering on the *Product* variable, you need to use the argument `cluster`: 
 
-```{r}
+```{r, eval = FALSE}
 # Equivalent ways of clustering the SEs:
 # One-way clustering is deduced from the arguent 'cluster'
 # - using the vector:
@@ -107,6 +107,12 @@ summary(gravity_pois, cluster = "Product")
 # - with a formula:
 summary(gravity_pois, cluster = ~Product)
 ```
+
+All produce the same results:
+```{r, eval = TRUE}
+summary(gravity_pois, cluster = ~Product)
+```
+
 
 Note that you can always cluster the standard-errors, even when the estimation contained no fixed-effect. Buth then you must use the argument `cluster`:
 
@@ -219,6 +225,8 @@ To change the variable names in the Latex table, we use the argument `dict`. The
 
 In the first export, the coefficient of the intercept is dropped by using `drop = "Const"` (could be anything such that `grepl(drop[1], "Constant")` is TRUE). In the second, the coefficient of the distance is put before the intercept (which is kept) thanks to the argument `order`. Note that the actions performed by the arguments `drop` or `order` are performed **after** the renaming takes place with the argument `dict`.
 
+Note that you can completely customize the style of the table by using the argument `style`, please have a look at the dedicated vignette: [Exporting estimation tables](https://cran.r-project.org/package=fixest/vignettes/exporting_tables.html). 
+
 
 ## Extracting the fixed-effects coefficients
 
@@ -324,6 +332,21 @@ coefplot(est_did)
 ```
 
 The function `coefplot` detects that the results contain interactions and plot the appropriate graph. In case you wanted to display al the coefficients, including `x1`, you can use the argument `only.inter = FALSE`. 
+
+Note that (since version 0.7.0) the function `i()` is versatile and can be used to create factors. When you do so, contrary to regular factors, there are synergies with the functions `coefplot` and `etable`. Let's have an example where instead of using the variable `period` as a fixed-effect we just want to include its values from 3 to 6:
+
+```{r, eval = TRUE}
+# Estimation of yearly effect
+# We also add individual/time fixed-effects:
+est_f_did = feols(y ~ x1 + i(period, keep = 3:6) + i(treat, period, 5) | id, base_did)
+# The display in etable is now 'nicer' than when using regular factors
+etable(est_f_did, dict = c("period" = "Period", "6" = "six"))
+```
+
+And coefplot automatically "groups" the values of factors created with `i()`:
+```{r, fig.width=7}
+coefplot(est_f_did, only.inter = FALSE)
+```
 
 ## Lagging variables
 
@@ -482,7 +505,7 @@ As we can see, we obtain the "right" estimates.
 
 ## Multi-threading
 
-The package `fixest` integrates multi-platform parallelism to hasten the estimation process. By default it makes use of all the available threads minus 2. To change the number of threads used, just use the argument `nthreads`:
+The package `fixest` integrates multi-platform parallelism to hasten the estimation process. By default it makes use of 50% of all available threads. To change the number of threads used, just use the argument `nthreads`:
 
 ```{r, eval = FALSE}
 # Sample of results:
