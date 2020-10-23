@@ -288,33 +288,17 @@ NumericVector cpppar_logit_devresids(NumericVector y, NumericVector mu, NumericV
 	NumericVector res(n);
 	bool isWeight = wt.length() != 1;
 
-	if(isWeight){
-		#pragma omp parallel for num_threads(nthreads)
-		for(int i = 0 ; i < n ; ++i) {
-			if(y[i] == 1){
-				res[i] = - 2 * log(mu[i]) * wt[i];
-			} else if(y[i] == 0){
-				res[i] = - 2 * log(1 - mu[i]) * wt[i];
-			} else {
-			    double y_tmp = y[i];
-			    double mu_tmp = mu[i];
-				res[i] = 2 * wt[i] * (y_tmp*log(y_tmp/mu_tmp) + (1 - y_tmp)*log((1 - y_tmp)/(1 - mu_tmp)));
-			}
+	#pragma omp parallel for num_threads(nthreads)
+	for(int i = 0 ; i < n ; ++i) {
+		if(y[i] == 1){
+			res[i] = - 2 * log(mu[i]);
+		} else if(y[i] == 0){
+			res[i] = - 2 * log(1 - mu[i]);
+		} else {
+			res[i] = 2 * (y[i]*log(y[i]/mu[i]) + (1 - y[i])*log((1 - y[i])/(1 - mu[i])));
 		}
-	} else {
-		#pragma omp parallel for num_threads(nthreads)
-		for(int i = 0 ; i < n ; ++i) {
-			if(y[i] == 1){
-				res[i] = - 2 * log(mu[i]);
-			} else if(y[i] == 0){
-				res[i] = - 2 * log(1 - mu[i]);
-			} else {
-			    double y_tmp = y[i];
-			    double mu_tmp = mu[i];
-				// res[i] = 2 * (y[i]*log(y[i]/mu[i]) + (1 - y[i])*log((1 - y[i])/(1 - mu[i])));
-				res[i] = 2 * (y_tmp*log(y_tmp/mu_tmp) + (1 - y_tmp)*log((1 - y_tmp)/(1 - mu_tmp)));
-			}
-		}
+
+		if(isWeight) res[i] *= wt[i];
 	}
 
 
