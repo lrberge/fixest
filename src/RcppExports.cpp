@@ -603,6 +603,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_factor_matrix
+NumericVector cpp_factor_matrix(IntegerVector fact, bool any_na);
+RcppExport SEXP _fixest_cpp_factor_matrix(SEXP factSEXP, SEXP any_naSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type fact(factSEXP);
+    Rcpp::traits::input_parameter< bool >::type any_na(any_naSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_factor_matrix(fact, any_na));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_get_nb_threads
 int cpp_get_nb_threads();
 RcppExport SEXP _fixest_cpp_get_nb_threads() {
@@ -939,6 +951,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_lag_obs", (DL_FUNC) &_fixest_cpp_lag_obs, 3},
     {"_fixest_cpp_check_nested", (DL_FUNC) &_fixest_cpp_check_nested, 4},
     {"_fixest_cpp_diag_XUtX", (DL_FUNC) &_fixest_cpp_diag_XUtX, 2},
+    {"_fixest_cpp_factor_matrix", (DL_FUNC) &_fixest_cpp_factor_matrix, 2},
     {"_fixest_cpp_get_nb_threads", (DL_FUNC) &_fixest_cpp_get_nb_threads, 0},
     {"_fixest_cpppar_exp", (DL_FUNC) &_fixest_cpppar_exp, 2},
     {"_fixest_cpppar_log", (DL_FUNC) &_fixest_cpppar_log, 2},
