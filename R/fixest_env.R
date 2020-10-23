@@ -1263,6 +1263,11 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             # update of the lhs
             lhs = lhs[-obs2remove]
 
+            # update of the slope variables
+            if(isSlope){
+                for(i in seq_along(slope_variables)) slope_variables[[i]] = slope_variables[[i]][-obs2remove]
+            }
+
             # Names of the FE removed
             for(i in 1:length(fixef_id)){
                 if(is_string[i]){
