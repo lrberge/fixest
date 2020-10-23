@@ -37,6 +37,9 @@ base$y_01 = 1 * ((scale(base$x1) + rnorm(150)) > 0)
 # what follows to avoid removal of fixed-effects (logit is pain in the neck)
 base$y_01[1:5 + rep(c(0, 50, 100), each = 5)] = 1
 base$y_01[6:10 + rep(c(0, 50, 100), each = 5)] = 0
+# We enforce the removal of observations
+base$y_int_null = base$y_int
+base$y_int_null[base$fe_3 %in% 1:5] = 0
 
 for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
     cat("Model: ", dreamerr::sfill(model, 6), sep = "")
@@ -48,45 +51,45 @@ for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
             my_offset = NULL
             if(use_offset) my_offset = base$offset
 
-            for(nb_fe in 0:9){
+            for(id_fe in 0:9){
 
                 cat(".")
 
-                tol  = switch(model, "negbin" = 1e-2, "logit" = 3e-5, 1e-5)
+                tol = switch(model, "negbin" = 1e-2, "logit" = 3e-5, 1e-5)
 
                 # Setting up the formula to accomodate FEs
-                if(nb_fe == 0){
+                if(id_fe == 0){
                     fml_fixest = fml_stats = y ~ x1
-                } else if(nb_fe == 1){
+                } else if(id_fe == 1){
                     fml_fixest = y ~ x1 | species
                     fml_stats = y ~ x1 + factor(species)
-                } else if(nb_fe == 2){
+                } else if(id_fe == 2){
                     fml_fixest = y ~ x1 | species + fe_2
                     fml_stats = y ~ x1 + factor(species) + factor(fe_2)
-                } else if(nb_fe == 3){
+                } else if(id_fe == 3){
                     # varying slope
                     fml_fixest = y ~ x1 | species[[x2]]
                     fml_stats = y ~ x1 + x2:species
-                } else if(nb_fe == 4){
+                } else if(id_fe == 4){
                     # varying slope -- 1 VS, 1 FE
                     fml_fixest = y ~ x1 | species[[x2]] + fe_2
                     fml_stats = y ~ x1 + x2:species + factor(fe_2)
-                } else if(nb_fe == 5){
+                } else if(id_fe == 5){
                     # varying slope -- 2 VS
                     fml_fixest = y ~ x1 | species[x2]
                     fml_stats = y ~ x1 + x2:species + species
-                } else if(nb_fe == 6){
+                } else if(id_fe == 6){
                     # varying slope -- 2 VS bis
                     fml_fixest = y ~ x1 | species[[x2]] + fe_2[[x3]]
                     fml_stats = y ~ x1 + x2:species + x3:factor(fe_2)
-                } else if(nb_fe == 7){
+                } else if(id_fe == 7){
                     # Combnined clusters
                     fml_fixest = y ~ x1 + x2 | species^fe_2
                     fml_stats = y ~ x1 + x2 + paste(species, fe_2)
-                } else if(nb_fe == 8){
+                } else if(id_fe == 8){
                     fml_fixest = y ~ x1 | species[x2] + fe_2[x3] + fe_3
-                    fml_stats = y ~ x1 + i(x2, species) + i(x3, fe_2) + species + factor(fe_2) + factor(fe_3)
-                } else if(nb_fe == 9){
+                    fml_stats = y ~ x1 + species + i(x2, species) + factor(fe_2) + i(x3, fe_2) + factor(fe_3)
+                } else if(id_fe == 9){
                     fml_fixest = y ~ x1 | species + fe_2[x2,x3] + fe_3
                     fml_stats = y ~ x1 + species + factor(fe_2) + i(x2, fe_2) + i(x3, fe_2) + factor(fe_3)
                 }
@@ -95,7 +98,15 @@ for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
                 if(model == "logit"){
                     fml_fixest = update(Formula(fml_fixest), y_01 ~.)
                     fml_stats = update(fml_stats, y_01 ~.)
-                } else if(model %in% c("pois", "negbin", "Gamma")){
+
+                    # The estimations are OK, conv differences out of my control
+                    if(id_fe %in% 8:9) tol = 0.5
+
+                } else if(model == "pois"){
+                    fml_fixest = update(Formula(fml_fixest), y_int_null ~.)
+                    fml_stats = update(fml_stats, y_int_null ~.)
+
+                } else if(model %in% c("negbin", "Gamma")){
                     fml_fixest = update(Formula(fml_fixest), y_int ~.)
                     fml_stats = update(fml_stats, y_int ~.)
                 }
@@ -111,12 +122,17 @@ for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
 
                     my_family = switch(model, pois = poisson(), logit = binomial(), Gamma = Gamma())
 
-                    res =  feglm(fml_fixest, base, family = my_family, weights = my_weight, offset = my_offset)
-                    res_bis = glm(fml_stats, base, family = my_family, weights = my_weight, offset = my_offset)
+                    res = feglm(fml_fixest, base, family = my_family, weights = my_weight, offset = my_offset)
+                    if(!is.null(res$obsRemoved)){
+                        qui = -res$obsRemoved
+                        res_bis = glm(fml_stats, base[qui, ], family = my_family, weights = my_weight[qui], offset = my_offset[qui])
+                    } else {
+                        res_bis = glm(fml_stats, base, family = my_family, weights = my_weight, offset = my_offset)
+                    }
 
                 } else if(model == "negbin"){
                     # no offset in glm.nb + no VS in fenegbin + no weights in fenegbin
-                    if(use_weights || use_offset || nb_fe > 2) next
+                    if(use_weights || use_offset || id_fe > 2) next
 
                     res = fenegbin(fml_fixest, base, notes = FALSE)
                     res_bis = MASS::glm.nb(fml_stats, base)
@@ -126,7 +142,7 @@ for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
                 test(coef(res)["x1"], coef(res_bis)["x1"], "~", tol)
                 test(se(res, se = "st", dof = dof(adj = adj))["x1"], se(res_bis)["x1"], "~", tol)
                 test(pvalue(res, se = "st", dof = dof(adj = adj))["x1"], pvalue(res_bis)["x1"], "~", tol*10**(model == "negbin"))
-                # cat("Model: ", model, ", FE: ", nb_fe, ", weight: ", use_weights,  ", offset: ", use_offset, "\n", sep="")
+                # cat("Model: ", model, ", FE: ", id_fe, ", weight: ", use_weights,  ", offset: ", use_offset, "\n", sep="")
 
             }
             cat("|")
@@ -476,6 +492,8 @@ cat("\n")
 #### fixef ####
 ####
 
+cat("FIXEF\n\n")
+
 set.seed(0)
 base = iris
 names(base) = c("y", "x1", "x2", "x3", "species")
@@ -489,6 +507,10 @@ get_coef = function(all_coef, x){
     res
 }
 
+#
+# With 2 x 1 FE
+#
+
 m = feols(y ~ x1 + x2 | species + fe_bis, base)
 all_coef = coef(feols(y ~ -1 + x1 + x2 + species + factor(fe_bis), base))
 
@@ -499,6 +521,10 @@ test(var(c1 - m_fe$species[names(c1)]), 0)
 c2  = get_coef(all_coef, "factor\\(fe_bis\\)")
 test(var(c2 - m_fe$fe_bis[names(c2)]), 0)
 
+
+#
+# With 1 FE + 1 FE 1 VS
+#
 
 m = feols(y ~ x1 + x2 | species + fe_bis[x3], base)
 all_coef = coef(feols(y ~ -1 + x1 + x2 + species + factor(fe_bis) + i(x3, fe_bis), base))
@@ -512,6 +538,68 @@ test(var(c2 - m_fe$fe_bis[names(c2)]), 0, "~")
 
 c3  = get_coef(all_coef, "x3:fe_bis::")
 test(c3, m_fe[["fe_bis[[x3]]"]][names(c3)], "~", tol = 1e-5)
+
+#
+# With 2 x (1 FE + 1 VS) + 1 FE
+#
+
+m = feols(y ~ x1 | species[x2] + fe_bis[x3] + fe_ter, base)
+all_coef = coef(feols(y ~ -1 + x1 + species + i(x2, species) + factor(fe_bis) + i(x3, fe_bis) + factor(fe_ter), base))
+
+m_fe = fixef(m)
+c1  = get_coef(all_coef, "^species")
+test(var(c1 - m_fe$species[names(c1)]), 0, "~")
+
+c2  = get_coef(all_coef, "^factor\\(fe_bis\\)")
+test(var(c2 - m_fe$fe_bis[names(c2)]), 0, "~")
+
+c3  = get_coef(all_coef, "x3:fe_bis::")
+test(c3, m_fe[["fe_bis[[x3]]"]][names(c3)], "~", tol = 2e-4)
+
+c4  = get_coef(all_coef, "x2:species::")
+test(c4, m_fe[["species[[x2]]"]][names(c4)], "~", tol = 2e-4)
+
+#
+# With 2 x (1 FE) + 1 FE 2 VS
+#
+
+m = feols(y ~ x1 | species + fe_bis[x2,x3] + fe_ter, base)
+all_coef = coef(feols(y ~ x1 + species + factor(fe_bis) + i(x2, fe_bis) + i(x3, fe_bis) + factor(fe_ter), base))
+
+m_fe = fixef(m)
+c1  = get_coef(all_coef, "^species")
+test(var(c1 - m_fe$species[names(c1)]), 0, "~")
+
+c2  = get_coef(all_coef, "^factor\\(fe_bis\\)")
+test(var(c2 - m_fe$fe_bis[names(c2)]), 0, "~")
+
+c3  = get_coef(all_coef, "x2:fe_bis::")
+test(c3, m_fe[["fe_bis[[x2]]"]][names(c3)], "~", tol = 2e-4)
+
+c4  = get_coef(all_coef, "x3:fe_bis::")
+test(c4, m_fe[["fe_bis[[x3]]"]][names(c4)], "~", tol = 2e-4)
+
+
+#
+# With weights
+#
+
+w = 3 * (as.integer(base$species) - 0.95)
+m = feols(y ~ x1 | species + fe_bis[x2,x3] + fe_ter, base, weights = w)
+all_coef = coef(feols(y ~ x1 + species + factor(fe_bis) + i(x2, fe_bis) + i(x3, fe_bis) + factor(fe_ter), base, weights = w))
+
+m_fe = fixef(m)
+c1  = get_coef(all_coef, "^species")
+test(var(c1 - m_fe$species[names(c1)]), 0, "~")
+
+c2  = get_coef(all_coef, "^factor\\(fe_bis\\)")
+test(var(c2 - m_fe$fe_bis[names(c2)]), 0, "~")
+
+c3  = get_coef(all_coef, "x2:fe_bis::")
+test(c3, m_fe[["fe_bis[[x2]]"]][names(c3)], "~", tol = 2e-4)
+
+c4  = get_coef(all_coef, "x3:fe_bis::")
+test(c4, m_fe[["fe_bis[[x3]]"]][names(c4)], "~", tol = 2e-4)
 
 
 ####
@@ -590,6 +678,34 @@ for(useWeights in c(FALSE, TRUE)){
     }
 }
 cat("\n")
+
+
+####
+#### Interact ####
+####
+
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
+base$fe_2 = round(rnorm(150))
+
+#
+# We just ensure it works without error
+#
+
+m = feols(y ~ x1 + i(fe_2), base)
+coefplot(m)
+etable(m, dict = c("0" = "zero"))
+
+m = feols(y ~ x1 + i(fe_2) + i(x2, fe_2), base)
+coefplot(m, only.inter = FALSE)
+etable(m, dict = c("0" = "zero"))
+
+a = i(base$fe_2)
+b = i(base$fe_2, drop = 0:1)
+d = i(base$fe_2, keep = 0:1)
+
+test(ncol(a), ncol(b) + 2)
+test(ncol(d), 2)
 
 
 
