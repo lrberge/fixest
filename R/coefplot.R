@@ -380,22 +380,31 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, hor
             tx_inter = table(x_inter)
             qui_auto = names(tx_inter)[tx_inter >= 2]
 
+            # browser()
+
             group = list()
 
             for(i in seq_along(qui_auto)){
                 var_left = qui_auto[i]
-                qui_select = grepl(paste0(var_left, ":"), x_labels_raw, fixed = TRUE)
+                qui_select = substr(x_labels_raw, 1, nchar(var_left)) == var_left
 
                 # we require to be next to each other
                 if(!all(diff(which(qui_select)) == 1)) next
 
                 x_select = x_labels_raw[qui_select]
 
+                is_inter = TRUE
                 if(all(grepl(":.+::", x_select))){
                     # This is a fixest call
                     first_part = strsplit(x_select[1], "::")[[1]][1]
                     var_right = gsub(".+:", "", first_part)
                     n_max = nchar(first_part) + 2
+
+                } else if(all(grepl("::", x_select))) {
+                    is_inter = FALSE
+                    # This is a fixest factor
+                    n_max = nchar(var_left) + 2
+
                 } else {
                     # we need to find out by ourselves...
                     n = min(nchar(x_select[1:2]))
@@ -415,11 +424,20 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, hor
                     var_right = gsub(".+:", "", substr(x_select[1], 1, n_max))
                 }
 
-                v_name = dict_apply(c(var_left, var_right), dict)
-                # group_name = paste0("&substitute(x %*% (y == ldots), list(x = \"", v_name[1], "\", y = \"", v_name[2], "\"))")
-                group_name = replace_and_make_callable("__x__ %*% (__y__ == ldots)", list(x = v_name[1], y = v_name[2]), text_as_expr = TRUE)
+                if(is_inter){
+                    v_name = dict_apply(c(var_left, var_right), dict)
+                    group_name = replace_and_make_callable("__x__ %*% (__y__ == ldots)", list(x = v_name[1], y = v_name[2]), text_as_expr = TRUE)
 
-                group[[group_name]] = escape_regex(paste0("%", var_left, ":", var_right))
+                    group[[group_name]] = escape_regex(paste0("%", var_left, ":", var_right))
+
+                } else {
+                    v_name = dict_apply(var_left, dict)
+                    group_name = replace_and_make_callable("__x__", list(x = v_name), text_as_expr = TRUE)
+
+                    group[[group_name]] = paste0("%^", escape_regex(var_left))
+
+                }
+
 
                 # We update the labels
                 x_labels[qui_select] = substr(x_select, n_max + 1, nchar(x_select))
@@ -1591,7 +1609,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
         ref_id = NA
         if(only.inter && !is.null(names(estimate))){
             all_vars = names(estimate)
-            if(any(grepl("::", all_vars))){
+            if(any(grepl(":.+::", all_vars))){
 
                 IS_INTER = TRUE
 
