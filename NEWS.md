@@ -5,7 +5,7 @@
 
 #### Bugs
 
- - Major bug when fixed-effects were combined with `^` and they contained NAs. Could lead R to crash (thanks to @poliquin [#35](https://github.com/lrberge/fixest/issues/35)).
+ - Major bug when fixed-effects were combined with `^` and they contained NAs (thanks to @poliquin [#35](https://github.com/lrberge/fixest/issues/35)).
  
  - Bug when using lead/lags in estimations. The bug was due to a bug in a dependency ([dreamerr](https://cran.r-project.org/package=dreamerr)) and was fixed. Now fixest requires **dreamerr** version >= 1.2.1. Bug spotted by @seunghoon001 ([#44](https://github.com/lrberge/fixest/issues/44)).
  
@@ -15,23 +15,29 @@
  
  - `coefplot`: Corrected various bugs when asked for the plotting of several estimations. 
  
- - Fix the stack imbalance warning (report by @shoonlee, [#46](https://github.com/lrberge/fixest/issues/46))
+ - Fix the stack imbalance warning (report by @shoonlee, [#46](https://github.com/lrberge/fixest/issues/46)).
  
 #### Internal improvements
 
- - Brand new internal algorithm which now uses closed form solutions when dealing with varying slopes. This that when variables with varying slopes are present, the algorithm is incomparably faster and more accurate.
+ - Brand new internal algorithm which now uses closed form solutions when dealing with variables with varying slopes. This means that when variables with varying slopes are present, the algorithm is incomparably faster and more accurate.
 
  - Two deep copies of some data are now avoided in the demeaning function. This improves the performance in terms of memory footprint, and also makes the algorithm faster. 
  
-#### New function: `fitstat` 
-
-  - New function `fitsat` that computes various fit statistics. It is integrated with `etable` and can be invoked with the argument `fitstat`. So far only two fit statistics are included, but more will come.
-  
 #### Standard-errors, important changes
   
  - New default values for standard-errors (only concerns multiway clustering). They become similar to `reghdfe` to increase cross-software comparability. Computing the standard-errors the old way is still possible using the argument `dof`. See the dedicated vignette: [On standard errors](https://cran.r-project.org/package=fixest/vignettes/standard_errors.html).
  
  - Name change in `summary`/`vcov`/`etable`: To get heteroskedasticity-robust standard-errors, `se = "hetero"` now replaces `se = "white"` to enhance clarity. Note that `se = "white"` still works.
+ 
+#### New function: `fitstat` 
+
+  - New function `fitsat` that computes various fit statistics. It is integrated with `etable` and can be invoked with the argument `fitstat`. So far only two fit statistics are included, but more will come.
+ 
+#### New features in `interact()`
+
+  - You can now use `i(var)` to treat the variable `var` as a factor. You can select which values to drop/keep with the respective arguments. 
+  
+  - Using `i(var)` leads to a special treatment of these variables in the functions `coefplot` and `etable`.
  
 #### New features in `etable`
 
@@ -43,11 +49,13 @@
   
   - Two new arguments `.vcov` and `.vcov_args` to compute the standard-errors with custom functions.
   
-  - The number of observations (`n`) is now treated as a regular statistic and can be place where one wants.
+  - The number of observations (`n`) is now treated as a regular statistic and can be placed where one wants.
   
   - The statistics can now have custom aliases using the argument `dict`.
   
   - The overdispersion becomes a regular fit statistic that can be included (or not) using `fitstat`.
+  
+  - The dictionnary now applies to the factors of interactions, and the values of factors.
 
 #### User visible changes
 
@@ -57,14 +65,16 @@
   * Accepts new values: a) 0 means all available threads, b) a number strictly between 0 and 1 will represent the fraction of all threads to use.
   
   - When setting formula macros:
+  
     * The functions `xpd` and `setFixest_fml` now accept character vectors and numeric scalars on top of formulas.
   
   - `demean`:
+  
     * speed improvement.
   
   - `coefplot`:
   
-    * The argument `group` now accepts a special character `"^^"`, when used, it cleans the beginning of the coefficient name. Very useful for factors.
+    * The argument `group` now accepts a special character `"^^"`, when used, it cleans the beginning of the coefficient name. Very useful for, e.g., factors although factors created with `i()` need not that.
     
      * When `horiz = TRUE`, the order of the coefficients is not reversed any more.
 
@@ -73,18 +83,19 @@
  - Added variables names to `X_demeaned` from `feols`.
  
  - Lagging functions:
+ 
   * Now `time.step = NULL` by default, which means that the choice of how to lag is automatically set. This means that the default behavior for time variables equal to Dates or character values should be appropriate.
   
   * New operator `d` which is the difference operator.
  
  - In all estimations: 
  
-    * new argument `mem.clean`: internally, intermediary objects are removed as much as possible and `gc()` is called before each memory intensive C++ section.
-    * new output: `collin.min_norm`, this value informs on the possible presence of collinearity in the system.
-    * new arguments `only.env` and `env`. 
-    * The first, `only.env`, allows to recover only the environment used to perform the estimation (i.e. all the preprocessing done before the estimation).
-    * The second, `env`, accepts a fixest environment created by `only.env`, and performs the estimation using this environment--all other arguments are ignored. 
-    * These changes are a prerequisite to the efficient implementation of bootstraping (since, by applying modifications directly in `env`, we cut all preprocessing).
+    * new argument `mem.clean`: internally, intermediary objects are removed as much as possible and `gc()` is called before each memory intensive C++ section. Only useful when you're at the edge of reaching the memory limit.
+    * new output: `collin.min_norm`, this value informs on the possible presence of collinearity in the system of variables.
+    * new arguments `only.env` and `env`:
+      * The first, `only.env`, allows to recover only the environment used to perform the estimation (i.e. all the preprocessing done before the estimation).
+      * The second, `env`, accepts a fixest environment created by `only.env`, and performs the estimation using this environment--all other arguments are ignored. 
+      * These changes are a prerequisite to the efficient implementation of bootstraping (since, by applying modifications directly in `env`, we cut all preprocessing).
     
 
  - In non-linear estimations: 
