@@ -1178,6 +1178,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
     res$irls_weights = w # weights from the iteratively reweighted least square
 
     res$coefficients = coef = wols$coefficients
+    res$collin.min_norm = wols$collin.min_norm
 
     if(!is.null(wols$warn_varying_slope)){
         warning(wols$warn_varying_slope)
