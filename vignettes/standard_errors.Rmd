@@ -204,10 +204,12 @@ se_feols_id_plm = se(est_feols, dof = dof(fixef.K = "none", cluster.adj = FALSE)
 rbind(se_plm_id, se_feols_id_plm)
 ```
 
+As we can see, the type of small sample correction we choose can have a non-negligible impact on the standard-error.
+
 
 #### Other multiple fixed-effects methods
 
-Now a specific comparison with `lfe` (version 2.8-5) and Stata's `reghdfe` which are popular tools to estimate econometric models with multiple fixed-effects. 
+Now a specific comparison with `lfe` (version 2.8-5.1) and Stata's `reghdfe` which are popular tools to estimate econometric models with multiple fixed-effects. 
 
 From `fixest` version 0.7.0 onwards, the standard-errors and p-values are computed similarly to `reghdfe`, for both clustered and multiway clustered standard errors. So the comparison here focuses on `lfe`.
 
