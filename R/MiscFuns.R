@@ -2470,20 +2470,20 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 
 
 
-#' Interact variables with factors
+#' Create, or interact variables with, factors
 #'
-#' Interacts a variable with another treated as a factor, and sets a reference
+#' Treat a variable as a factor, or interacts a variable with another treated as a factor. Values to be dropped/kept from the factor can be easily set.
 #'
-#' @param var A vector.
-#' @param fe A vector (of any type). Must be of the same length as \code{var}.
-#' @param ref A single value that belongs to the interacted variable (\code{fe}). Can be missing.
-#' @param drop A vector of values that belongs to the interacted variable (\code{fe}). If provided, all values from \code{fe} that match \code{drop} will be removed.
-#' @param keep A vector of values that belongs to the interacted variable (\code{fe}). If provided, only the values from \code{fe} that match \code{keep} will be kept.
+#' @param var A vector. If the other argument \code{f} is missing, then this vector will be treated as a factor.
+#' @param f A vector (of any type) that will be treated as a factor. Must be of the same length as \code{var}.
+#' @param ref A single value that belongs to the interacted variable (\code{f}). Can be missing.
+#' @param drop A vector of values that belongs to the factor variable (\code{f}). If provided, all values from \code{f} that match \code{drop} will be removed.
+#' @param keep A vector of values that belongs to the factor variable (\code{f}). If provided, only the values from \code{f} that match \code{keep} will be kept.
 #' @return
-#' It returns a matrix with number of rows the length of \code{var}. The number of columns is equal to the number of cases contained in \code{fe} minus the reference.
+#' It returns a matrix with number of rows the length of \code{var}. The number of columns is equal to the number of cases contained in \code{f} minus the reference.
 #'
 #' @section Shorthand in \code{fixest} estimations:
-#' In \code{fixest} estimations, instead of using \code{i(var, fe, ref)}, you can instead use the following writing \code{var::fe(ref)}.
+#' In \code{fixest} estimations, instead of using \code{i(var, f, ref)}, you can instead use the following writing \code{var::f(ref)}.
 #'
 #' @author
 #' Laurent Berge
@@ -2500,61 +2500,95 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' x = rnorm(10)
 #' y = rep(1:4, 3)[1:10]
 #'
+#' # interaction
 #' cbind(x, y, i(x, y, 1))
+#' # without interaction
+#' cbind(x, y, i(y, ref = 1))
 #'
 #' #
 #' # In fixest estimations
 #' #
 #'
-#' # NOTA: in fixest estimations, i(var, fe, ref) is equivalent to var::fe(ref)
-#'
 #' data(base_did)
 #' # We interact the variable 'period' with the variable 'treat'
-#' est_did = feols(y ~ x1 + i(treat, period, 5) | id+period, base_did)
+#' est_did = feols(y ~ x1 + i(treat, period, 5) | id + period, base_did)
 #'
-#' # You could have used the following formula instead:
-#' # y ~ x1 + treat::period(5) | id+period
+#' # => special treatment in coefplot
+#' coefplot(est_did)
 #'
-i = interact = function(var, fe, ref, drop, keep){
+#' # Using i() for factors
+#' est_bis = feols(y ~ x1 + i(period, keep = 3:6) + i(treat, period, 5) | id, base_did)
+#'
+#' coefplot(est_bis, only.inter = FALSE)
+#'
+#' # => special treatment in etable
+#' etable(est_bis, dict = c("6" = "six"))
+#'
+#'
+i = interact = function(var, f, ref, drop, keep){
     # Used to create interactions
 
     mc = match.call()
 
-    var_name = deparse_long(mc$var)
-    fe_name = deparse_long(mc$fe)
+    if(missing(var) && missing(f)){
+        stop("You must provide at least one of the two arguments: 'var' or 'f'.")
+    }
 
-    if(length(var) != length(fe)){
-        if(grepl("^[[:alpha:]\\.][[:alnum:]\\._]*:[[:alpha:]\\.][[:alnum:]\\._]*$", var_name)){
-            info = strsplit(var_name, ":")[[1]]
-            stop("In interact(): When 'var' is equal to a product, please use I(", info[1], "*", info[2], ") instead of ", var_name, ".")
+    # Finding if it's a call from fixest
+    FROM_FIXEST = sys.nframe() > 5 && any(sapply(sys.calls(), function(x) any(grepl("fixest", x[[1]], fixed = TRUE))))
+
+    # General checks
+    check_arg(var, "vector")
+    check_arg(f, "vector")
+
+    IS_INTER = TRUE
+    if(missing(f) || missing(var)){
+        # => i() is used to create a factor
+        IS_INTER = FALSE
+
+        if(missing(f)){
+            f = var
+            fe_name = deparse_long(mc$var)
         } else {
-            stop("The arguments 'var' and 'fe' must be of the same length (currently ", length(var), " vs ", length(fe), ").")
+            fe_name = deparse_long(mc$f)
+        }
+
+    } else {
+        var_name = deparse_long(mc$var)
+        fe_name = deparse_long(mc$f)
+
+        if(length(var) != length(f)){
+            if(grepl("^[[:alpha:]\\.][[:alnum:]\\._]*:[[:alpha:]\\.][[:alnum:]\\._]*$", var_name)){
+                info = strsplit(var_name, ":")[[1]]
+                stop("In interact(): When 'var' is equal to a product, please use I(", info[1], "*", info[2], ") instead of ", var_name, ".")
+            } else {
+                stop("The arguments 'var' and 'f' must be of the same length (currently ", length(var), " vs ", length(f), ").")
+            }
         }
     }
 
     # The NAs
-    is_na_fe = is.na(fe)
+    is_na_fe = is.na(f)
 
-    if(is.factor(fe)){
-        # we respect the fact that fe is a factor => we will keep its ordering
-        is_na_fe = is.na(fe)
-        fe_no_na = fe[!is_na_fe, drop = TRUE]
+    if(is.factor(f)){
+        # we respect the fact that f is a factor => we will keep its ordering
+        is_na_fe = is.na(f)
+        fe_no_na = f[!is_na_fe, drop = TRUE]
         items = levels(fe_no_na)
-        fe_num = rep(NA, length(fe))
+        fe_num = rep(NA, length(f))
         fe_num[!is_na_fe] = as.vector(unclass(fe_no_na))
     } else {
         if(any(is_na_fe)){
-            quf = quickUnclassFactor(fe[!is_na_fe], addItem = TRUE, sorted = TRUE)
-            fe_num = rep(NA, length(fe))
+            quf = quickUnclassFactor(f[!is_na_fe], addItem = TRUE, sorted = TRUE)
+            fe_num = rep(NA, length(f))
             fe_num[!is_na_fe] = quf$x
         } else {
-            quf = quickUnclassFactor(fe, addItem = TRUE, sorted = TRUE)
+            quf = quickUnclassFactor(f, addItem = TRUE, sorted = TRUE)
             fe_num = quf$x
         }
 
         items = quf$items
     }
-
 
     check_arg(ref, "charin", .choices = items, .message = paste0("Argument 'ref' must be a single element of the variable '", fe_name, "'."))
     check_arg(drop, keep, "multi charin", .choices = items, .message = paste0("Argument '__ARG__' must consist of elements of the variable '", fe_name, "'."))
@@ -2581,40 +2615,63 @@ i = interact = function(var, fe, ref, drop, keep){
         no_rm = FALSE
     }
 
-    res = model.matrix(~ -1 + fe_num, model.frame(~ -1 + fe_num, data.frame(fe_num = factor(fe_num)), na.action = na.pass))
+    res = cpp_factor_matrix(fe_num, any(is_na_fe))
 
     if(no_rm){
-        res = res * var
-        colnames(res) = paste0(var_name, ":", fe_name, "::", items)
+        if(IS_INTER){
+            res = res * var
+        }
     } else {
-        res = res[, -id_drop, drop = FALSE] * var
-        colnames(res) = paste0(var_name, ":", fe_name, "::", items[-id_drop])
+        if(IS_INTER){
+            res = res[, -id_drop, drop = FALSE] * var
+        } else {
+            res = res[, -id_drop, drop = FALSE]
+        }
+    }
+
+
+    if(length(id_drop) > 0){
+        items_name = items[-id_drop]
+    } else {
+        items_name = items
+    }
+
+    if(FROM_FIXEST){
+        if(IS_INTER){
+            colnames(res) = paste0("__CLEAN__", var_name, ":", fe_name, "::", items_name)
+        } else {
+            colnames(res) = paste0("__CLEAN__", fe_name, "::", items_name)
+        }
+    } else {
+        colnames(res) = items_name
     }
 
     # We send the information on the reference
-    opt = getOption("fixest_interaction_ref")
-    if(is.null(opt)){
+    if(IS_INTER){
+        opt = getOption("fixest_interaction_ref")
+        if(is.null(opt)){
 
-        opt = list(fe_type = class(fe))
+            opt = list(fe_type = class(f))
 
-        qui_drop = (1:length(items)) %in% id_drop
+            qui_drop = (1:length(items)) %in% id_drop
 
-        if(any_ref){
-            qui_drop[ref] = FALSE
-            opt$items = items[!qui_drop]
+            if(any_ref){
+                qui_drop[ref] = FALSE
+                opt$items = items[!qui_drop]
 
-            is_ref = rep(FALSE, length(opt$items))
-            is_ref[sum(!qui_drop[1:ref])] = TRUE
+                is_ref = rep(FALSE, length(opt$items))
+                is_ref[sum(!qui_drop[1:ref])] = TRUE
 
-            opt$is_ref = is_ref
-        } else {
-            opt$items = items[!qui_drop]
-            opt$is_ref = rep(FALSE, length(opt$items))
+                opt$is_ref = is_ref
+            } else {
+                opt$items = items[!qui_drop]
+                opt$is_ref = rep(FALSE, length(opt$items))
+            }
+
+            opt$prefix = paste0(var_name, ":", fe_name)
+
+            options("fixest_interaction_ref" = opt)
         }
-
-        opt$prefix = paste0(var_name, ":", fe_name)
-
-        options("fixest_interaction_ref" = opt)
     }
 
     res
@@ -3353,6 +3410,7 @@ prepare_matrix = function(fml, base){
     all_vars = gsub(":", "*", all_var_names)
 
     if(any(qui_inter <- (grepl("^i(nteract)?\\(", all_var_names) & grepl(":", all_var_names, fixed = TRUE)))){
+        # beware of in drop/keep":"!!!
 
         for(arg in c("ref", "drop", "keep")){
             if(any(qui_ref <- grepl(paste0(arg, " =.+:"), all_var_names[qui_inter]))){
@@ -3365,7 +3423,6 @@ prepare_matrix = function(fml, base){
         }
 
     }
-
 
     # Forming the call
     if(attr(t, "intercept") == 1){
@@ -3452,13 +3509,15 @@ fixest_model_matrix = function(fml, data){
         useModel.matrix = TRUE
 
         # we change the names
-        new_names = colnames(linear.mat)
-        all_terms = attr(terms(fml), "term.labels")
-        terms_inter = all_terms[grepl("^(i|interact)\\(", all_terms)]
+        # new_names = colnames(linear.mat)
+        # all_terms = attr(terms(fml), "term.labels")
+        # terms_inter = all_terms[grepl("^(i|interact)\\(", all_terms)]
+        #
+        # for(pattern in terms_inter){
+        #     new_names = gsub(pattern, "", new_names, fixed = TRUE)
+        # }
 
-        for(pattern in terms_inter){
-            new_names = gsub(pattern, "", new_names, fixed = TRUE)
-        }
+        new_names = gsub(".*__CLEAN__", "", colnames(linear.mat))
 
         colnames(linear.mat) = new_names
     }

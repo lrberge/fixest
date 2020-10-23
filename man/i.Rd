@@ -4,35 +4,35 @@
 \name{i}
 \alias{i}
 \alias{interact}
-\title{Interact variables with factors}
+\title{Create, or interact variables with, factors}
 \format{
 An object of class \code{function} of length 1.
 }
 \usage{
-i(var, fe, ref, drop, keep)
+i(var, f, ref, drop, keep)
 
 interact
 }
 \arguments{
-\item{var}{A vector.}
+\item{var}{A vector. If the other argument \code{f} is missing, then this vector will be treated as a factor.}
 
-\item{fe}{A vector (of any type). Must be of the same length as \code{var}.}
+\item{f}{A vector (of any type) that will be treated as a factor. Must be of the same length as \code{var}.}
 
-\item{ref}{A single value that belongs to the interacted variable (\code{fe}). Can be missing.}
+\item{ref}{A single value that belongs to the interacted variable (\code{f}). Can be missing.}
 
-\item{drop}{A vector of values that belongs to the interacted variable (\code{fe}). If provided, all values from \code{fe} that match \code{drop} will be removed.}
+\item{drop}{A vector of values that belongs to the factor variable (\code{f}). If provided, all values from \code{f} that match \code{drop} will be removed.}
 
-\item{keep}{A vector of values that belongs to the interacted variable (\code{fe}). If provided, only the values from \code{fe} that match \code{keep} will be kept.}
+\item{keep}{A vector of values that belongs to the factor variable (\code{f}). If provided, only the values from \code{f} that match \code{keep} will be kept.}
 }
 \value{
-It returns a matrix with number of rows the length of \code{var}. The number of columns is equal to the number of cases contained in \code{fe} minus the reference.
+It returns a matrix with number of rows the length of \code{var}. The number of columns is equal to the number of cases contained in \code{f} minus the reference.
 }
 \description{
-Interacts a variable with another treated as a factor, and sets a reference
+Treat a variable as a factor, or interacts a variable with another treated as a factor. Values to be dropped/kept from the factor can be easily set.
 }
 \section{Shorthand in \code{fixest} estimations}{
 
-In \code{fixest} estimations, instead of using \code{i(var, fe, ref)}, you can instead use the following writing \code{var::fe(ref)}.
+In \code{fixest} estimations, instead of using \code{i(var, f, ref)}, you can instead use the following writing \code{var::f(ref)}.
 }
 
 \examples{
@@ -44,20 +44,30 @@ In \code{fixest} estimations, instead of using \code{i(var, fe, ref)}, you can i
 x = rnorm(10)
 y = rep(1:4, 3)[1:10]
 
+# interaction
 cbind(x, y, i(x, y, 1))
+# without interaction
+cbind(x, y, i(y, ref = 1))
 
 #
 # In fixest estimations
 #
 
-# NOTA: in fixest estimations, i(var, fe, ref) is equivalent to var::fe(ref)
-
 data(base_did)
 # We interact the variable 'period' with the variable 'treat'
-est_did = feols(y ~ x1 + i(treat, period, 5) | id+period, base_did)
+est_did = feols(y ~ x1 + i(treat, period, 5) | id + period, base_did)
 
-# You could have used the following formula instead:
-# y ~ x1 + treat::period(5) | id+period
+# => special treatment in coefplot
+coefplot(est_did)
+
+# Using i() for factors
+est_bis = feols(y ~ x1 + i(period, keep = 3:6) + i(treat, period, 5) | id, base_did)
+
+coefplot(est_bis, only.inter = FALSE)
+
+# => special treatment in etable
+etable(est_bis, dict = c("6" = "six"))
+
 
 }
 \seealso{
