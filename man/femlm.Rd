@@ -177,15 +177,15 @@ data(trade)
 
 # We estimate the effect of distance on trade => we account for 3 fixed-effects
 # 1) Poisson estimation
-est_pois = femlm(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
+est_pois = femlm(Euros ~ log(dist_km) | Origin + Destination + Product, trade)
 
 # 2) Log-Log Gaussian estimation (with same FEs)
-est_gaus = update(est_pois, log(Euros+1) ~ ., family="gaussian")
+est_gaus = update(est_pois, log(Euros+1) ~ ., family = "gaussian")
 
 # Comparison of the results using the function esttable
-esttable(est_pois, est_gaus)
+etable(est_pois, est_gaus)
 # Now using two way clustered standard-errors
-esttable(est_pois, est_gaus, se = "twoway")
+etable(est_pois, est_gaus, se = "twoway")
 
 # Comparing different types of standard errors
 sum_hetero    = summary(est_pois, se = "hetero")
@@ -193,7 +193,7 @@ sum_oneway   = summary(est_pois, se = "cluster")
 sum_twoway   = summary(est_pois, se = "twoway")
 sum_threeway = summary(est_pois, se = "threeway")
 
-esttable(sum_hetero, sum_oneway, sum_twoway, sum_threeway)
+etable(sum_hetero, sum_oneway, sum_twoway, sum_threeway)
 
 
 

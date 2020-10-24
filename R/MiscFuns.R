@@ -7506,6 +7506,25 @@ getFixest_se = function(){
 #' etable(res_all)
 #' coefplot(res_all, group = list(Species = "^^species"))
 #'
+#' #
+#' # You can use macros to grep variables in your data set
+#' #
+#'
+#' data(longley)
+#' setFixest_fml(..many_vars = grep("GNP|ployed", names(longley), value = TRUE))
+#' feols(Armed.Forces ~Population + ..many_vars, longley)
+#'
+#' #
+#' # You can also put numbers in macros
+#' #
+#'
+#' res_all = list()
+#' for(p in 1:3){
+#'   res_all[[p]] = feols(xpd(Ozone ~ Wind + poly(Temp, ..p), ..p = p), airquality)
+#' }
+#'
+#' etable(res_all)
+#'
 #'
 setFixest_fml = function(..., reset = FALSE){
 

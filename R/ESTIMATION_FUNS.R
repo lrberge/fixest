@@ -1435,15 +1435,15 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
 #'
 #' # We estimate the effect of distance on trade => we account for 3 fixed-effects
 #' # 1) Poisson estimation
-#' est_pois = femlm(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
+#' est_pois = femlm(Euros ~ log(dist_km) | Origin + Destination + Product, trade)
 #'
 #' # 2) Log-Log Gaussian estimation (with same FEs)
-#' est_gaus = update(est_pois, log(Euros+1) ~ ., family="gaussian")
+#' est_gaus = update(est_pois, log(Euros+1) ~ ., family = "gaussian")
 #'
 #' # Comparison of the results using the function esttable
-#' esttable(est_pois, est_gaus)
+#' etable(est_pois, est_gaus)
 #' # Now using two way clustered standard-errors
-#' esttable(est_pois, est_gaus, se = "twoway")
+#' etable(est_pois, est_gaus, se = "twoway")
 #'
 #' # Comparing different types of standard errors
 #' sum_hetero    = summary(est_pois, se = "hetero")
@@ -1451,7 +1451,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
 #' sum_twoway   = summary(est_pois, se = "twoway")
 #' sum_threeway = summary(est_pois, se = "threeway")
 #'
-#' esttable(sum_hetero, sum_oneway, sum_twoway, sum_threeway)
+#' etable(sum_hetero, sum_oneway, sum_twoway, sum_threeway)
 #'
 #'
 #'
@@ -1649,21 +1649,21 @@ fepois = function(fml, data, offset, weights, panel.id, start = NULL, etastart =
 #' # Estimating the same 'linear' relation using a 'non-linear' call
 #' est1_NL = feNmlm(z1 ~ 1, base, NL.fml = ~a*log(x)+b*log(y), NL.start = list(a=0, b=0))
 #' # we compare the estimates with the function esttable (they are identical)
-#' esttable(est1_L, est1_NL)
+#' etable(est1_L, est1_NL)
 #'
 #' # Now generating a non-linear relation (E(z2) = x + y + 1):
 #' z2 = rpois(n, x + y) + rpois(n, 1)
 #' base$z2 = z2
 #'
 #' # Estimation using this non-linear form
-#' est2_NL = feNmlm(z2~0, base, NL.fml = ~log(a*x + b*y),
-#'                NL.start = list(a=1, b=2), lower = list(a=0, b=0))
+#' est2_NL = feNmlm(z2 ~ 0, base, NL.fml = ~log(a*x + b*y),
+#'                NL.start = 2, lower = list(a=0, b=0))
 #' # we can't estimate this relation linearily
 #' # => closest we can do:
-#' est2_L = femlm(z2~log(x)+log(y), base)
+#' est2_L = femlm(z2 ~ log(x) + log(y), base)
 #'
 #' # Difference between the two models:
-#' esttable(est2_L, est2_NL)
+#' etable(est2_L, est2_NL)
 #'
 #' # Plotting the fits:
 #' plot(x, z2, pch = 18)
