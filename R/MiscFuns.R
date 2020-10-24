@@ -301,7 +301,6 @@ summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), .vcov, le
 	    object$n_print = n
 	}
 
-
 	if(is.null(dots$nframes_up)){
 		nframes_up = 1 + !is.null(dots$fromPrint)
 	} else {
@@ -313,15 +312,29 @@ summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), .vcov, le
 	    n_coef = length(object$coefficients)
 	    check_arg(.vcov, "square numeric matrix nrow(value) | function", .value = n_coef)
 
+	    vcov_name = "Custom"
 	    if(is.function(.vcov)){
 	        arg_names = formalArgs(.vcov)
 	        # we contruct the call
 	        dots = list(...)
-	        # We shouldn't have a prior on the name of the first argument
-	        dots[[arg_names[1]]] = object
-	        if("cluster" %in% arg_names && !missing(cluster)){
-	            dots[["cluster"]] = cluster
+
+	        if(".vcov_args" %in% names(dots)){
+	            # internal call
+	            vcov_name = dots$vcov_name
+	            dots = dots$.vcov_args
+	        } else {
+	            mc = match.call()
+	            vcov_name = deparse_long(mc$.vcov)
 	        }
+
+	        vcov_name = gsub("sandwich::", "", vcov_name, fixed = TRUE)
+
+	        # We shouldn't have a prior on the name of the first argument
+	        dots[[arg_names[1]]] = as.name("object")
+	        if("cluster" %in% arg_names && !missing(cluster)){
+	            dots[["cluster"]] = as.name("cluster")
+	        }
+
 	        vcov = do.call(.vcov, dots)
 
 	        check_value(vcov, "square numeric matrix nrow(value)", .value = n_coef,
@@ -333,11 +346,10 @@ summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), .vcov, le
 	    }
 
 	    # We add the type of the matrix
-	    attr(vcov, "type") = "Custom"
+	    attr(vcov, "type") = vcov_name
 
 	    warn_ignore = c()
 	    if(!missnull(se)) warn_ignore = "se"
-	    if(!missnull(cluster)) warn_ignore[length(warn_ignore)] = "cluster"
 	    if(length(warn_ignore) > 0){
 	        warning("Since argument '.vcov' is provided, the argument", enumerate_items(warn_ignore, "s.quote.is"), " ignored.")
 	    }

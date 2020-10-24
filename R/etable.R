@@ -724,6 +724,19 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
 
     # end: fitstat
 
+    #
+    # Loop ####
+    #
+
+    if(!missing(.vcov)){
+        if(!missing(cluster)) .vcov_args[["cluster"]] = as.name("cluster")
+        if(!missing(se)) .vcov_args[["se"]] = as.name("se")
+
+        sysOrigin = sys.parent()
+        mc = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin), expand.dots = FALSE)
+        vcov_name = deparse_long(mc$.vcov)
+    }
+
     for(m in 1:n_models){
 
         # If se or cluster is provided, we use summary
@@ -737,14 +750,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
                 check_arg(.vcov, "function", .message = "The argument '.vcov' must be a function to compute the variance-covariance matrix.")
                 check_arg_plus(.vcov_args, "NULL{list()} list", .message = "The argument '.vcov_args' must be a list of arguments to be passed to the function in '.vcov'.")
 
-                # we contruct the call to summary.fixest
-                summ_call_args = .vcov_args
-                summ_call_args$object = all_models[[m]]
-                summ_call_args$.vcov = .vcov
-                if(!missing(se)) summ_call_args[["se"]] = se
-                if(!missing(cluster)) summ_call_args[["cluster"]] = cluster
-
-                x = do.call("summary", summ_call_args)
+                x = summary(all_models[[m]], .vcov = .vcov, .vcov_args = .vcov_args, vcov_name = vcov_name)
 
             }
 
