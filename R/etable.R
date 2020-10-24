@@ -253,6 +253,10 @@ etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threew
         warning("Since float = TRUE, the argument", enumerate_items(what, "s.is"), " ignored", immediate. = TRUE, call. = FALSE)
     }
 
+    if(missing(dict) && !tex){
+        dict = TRUE
+    }
+
 
     # to get the model names
     dots_call = match.call(expand.dots = FALSE)[["..."]]
@@ -518,6 +522,9 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
         }
     } else if(isTRUE(dict)) {
         dict = getFixest_dict()
+        if(is.null(dict)){
+            dict = c("____" = "OH OH OH")
+        }
     } else if(isFALSE(dict)) {
         dict = NULL
     }
@@ -927,27 +934,33 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
             # if there are still interactions, we rename them
             new_var = var
             var_left = var[!qui]
-            if(length(var_left) > 0 && any(grepl(":", var_left))){
+            if(length(var_left) > 0 && any(grepl(":|\\*", var_left))){
                 check_interaction_reorder = TRUE
 
 
-                qui_inter = grepl(":", var_left)
-                inter = strsplit(var_left[qui_inter], "(?<=[^:]):(?=[^:])", perl = TRUE)
+                qui_inter = grepl("(?<=[^:\\*])(::|:|\\*)(?=[^:\\*])", var_left, perl = TRUE)
+                inter = strsplit(var_left[qui_inter], "(?<=[^:\\*])(:|\\*)(?=[^:\\*])", perl = TRUE)
 
                 fun_rename = function(x){
                     # We put the factors on the right
+
                     qui_factor = grepl("::", x)
                     if(any(qui_factor)){
                         res = x[base::order(qui_factor)]
 
                         n_last = length(res)
-                        last_value_split = strsplit(res[n_last], "::")[[1]]
-                        last_value_split = dict_apply(last_value_split, dict)
 
-                        if(isTex){
-                            res[n_last] = paste(last_value_split, collapse = " $=$ ")
+                        if(res[n_last] %in% names(dict)){
+                            res[n_last] = dict[res[n_last]]
                         } else {
-                            res[n_last] = paste(last_value_split, collapse = " = ")
+                            last_value_split = strsplit(res[n_last], "::")[[1]]
+                            last_value_split = dict_apply(last_value_split, dict)
+
+                            if(isTex){
+                                res[n_last] = paste(last_value_split, collapse = " $=$ ")
+                            } else {
+                                res[n_last] = paste(last_value_split, collapse = " = ")
+                            }
                         }
 
                     } else {
