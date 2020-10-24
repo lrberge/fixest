@@ -1352,6 +1352,8 @@ etable_internal_latex = function(info){
     # ordering the coefs
     all_vars = order_apply(all_vars, order)
 
+    if(length(all_vars) == 0) stop_up("Not any variable was selected, please reframe your keep/drop arguments.")
+
     # changing the names of the coefs
     aliasVars = all_vars
     names(aliasVars) = all_vars
@@ -1824,6 +1826,8 @@ etable_internal_df = function(info){
 
     # ordering the coefs
     all_vars = order_apply(all_vars, order)
+
+    if(length(all_vars) == 0) stop_up("Not any variable was selected, please reframe your keep/drop arguments.")
 
     coef_mat <- all_vars
     for(m in 1:n_models) coef_mat <- cbind(coef_mat, coef_list[[m]][all_vars])
