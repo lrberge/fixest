@@ -978,10 +978,10 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
         } else {
             # We reorder the interaction terms alphabetically
             new_var = var
-            qui = grepl(":", new_var)
+            qui = grepl("(?<=[^:]):(?=[^:])", new_var, perl = TRUE)
             if(any(qui)){
                 check_interaction_reorder = TRUE
-                inter = strsplit(new_var[qui], ":")
+                inter = strsplit(new_var[qui], "(?<=[^:]):(?=[^:])", perl = TRUE)
                 new_inter = sapply(inter, function(x) paste0(sort(x), collapse = ":"))
                 new_var[qui] = new_inter
             }
