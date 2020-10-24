@@ -3504,20 +3504,11 @@ fixest_model_matrix = function(fml, data){
         linear.mat = prepare_matrix(fml, data)
     }
 
-    if(any(grepl("^(i|interact)\\(", colnames(linear.mat)))){
+    if(any(grepl("__CLEAN__", colnames(linear.mat), fixed = TRUE))){
         # the following is needed (later in fixest_env => means there are factors)
         useModel.matrix = TRUE
 
-        # we change the names
-        # new_names = colnames(linear.mat)
-        # all_terms = attr(terms(fml), "term.labels")
-        # terms_inter = all_terms[grepl("^(i|interact)\\(", all_terms)]
-        #
-        # for(pattern in terms_inter){
-        #     new_names = gsub(pattern, "", new_names, fixed = TRUE)
-        # }
-
-        new_names = gsub(".*__CLEAN__", "", colnames(linear.mat))
+        new_names = clean_interact_names(colnames(linear.mat))
 
         colnames(linear.mat) = new_names
     }
@@ -4052,6 +4043,53 @@ check_set_nthreads = function(nthreads){
     }
 
     nthreads
+}
+
+clean_interact_names = function(x){
+    # GOD, why is it so complicated? Why?
+    # Why do I have to spend so much time on that crap?
+    #
+    # x = c("i(Month, keep = 4:7)__CLEAN__Month::5", "i(Month):Wind__CLEAN__Month::5", "Temp:i(bonjour(test), drop = 5:12):Wind__CLEAN__bonjour::5", "i(a, pi(b))__CLEAN__a::o")
+    #
+    # Speed consideration:
+    # for 2000 names: 10ms simple case
+    #                 28ms complex case
+    # price to pay is OK
+    #
+
+    res = x
+
+    who2clean = grepl("__CLEAN__", x, fixed = TRUE)
+
+    x2clean = x[who2clean]
+
+    x_split = strsplit(x2clean, "(^|(?<=[^[:alnum:]\\._]))i(nteract)?\\(|__CLEAN__", perl = TRUE)
+
+    x_left = sapply(x_split, function(v) v[1])
+    x_right = sapply(x_split, function(v) v[2])
+    x_alias = sapply(x_split, function(v) v[3])
+
+    x_right = gsub("^[^\\(\\)]+(\\(|\\))", "\\1", x_right)
+
+    qui_ok = substr(x_right, 1, 1) == ")"
+
+    x_right[qui_ok] = substr(x_right[qui_ok], 2, 500)
+
+    if(any(!qui_ok)){
+
+        clean_x_right_hard = function(letter_vec){
+            open = 1 + cumsum(letter_vec == "(")
+            close = cumsum(letter_vec == ")")
+            letter_vec = letter_vec[-(1:which.max(close - open == 0))]
+            paste(letter_vec, collapse = "")
+        }
+
+        x_right[!qui_ok] = sapply(strsplit(x_right[!qui_ok], ""), clean_x_right_hard)
+    }
+
+    res[who2clean] = paste0(x_left, x_alias, x_right)
+
+    return(res)
 }
 
 
