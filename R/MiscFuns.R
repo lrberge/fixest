@@ -2706,7 +2706,7 @@ xpd = function(fml, ...){
         fml_dp = deparse_long(fml)
         # We need to add a lookafter assertion: otherwise if we have ..ctrl + .. ctrl_long, there will be a replacement in ..ctrl_long
         for(i in qui){
-            fml_dp = gsub(paste0(names(macros)[i], "(?=$|[^[:alpha:]_\\.])"), macros[[i]], fml_dp, perl = TRUE)
+            fml_dp = gsub(paste0(escape_regex(names(macros)[i]), "(?=$|[^[:alnum:]_\\.])"), macros[[i]], fml_dp, perl = TRUE)
         }
         fml = as.formula(fml_dp)
     }
