@@ -664,10 +664,28 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
     }
 
     #
-    # fitstat: which R2 to display?
+    # fitstat ####
     #
 
     if(missing(fitstat_all)){
+        # => do default
+        fitstat_all = "."
+
+    } else if(isFALSE(fitstat_all) || (length(fitstat_all) == 1 && (is.na(fitstat_all) || fitstat_all == ""))){
+        fitstat_all = NULL
+        drop.section = c(drop.section, "stats")
+
+    } else if("formula" %in% class(fitstat_all)){
+        check_arg(fitstat_all, "os formula", .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing 'n', 'aic', 'bic', 'll', types from function fitstat (?fitstat), or valid r2 types names (?r2). ")
+
+        fitstat_all = gsub(" ", "", strsplit(deparse_long(fitstat_all[[2]]), "+", fixed = TRUE)[[1]])
+
+    } else {
+        check_arg(fitstat_all, "character vector no na", .message = "Argument 'fitstat' must be a character vector (or a one sided formula) containing 'aic', 'bic', 'll', or valid r2 types names (see function r2). ")
+
+    }
+
+    if("." %in% fitstat_all){
         # Default values:
         #   - if all OLS: typical R2
         #   - if any non-OLS: pseudo R2 + squared cor.
@@ -676,30 +694,30 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
         if(all(is_ols)){
             if(any(sapply(all_models, function(x) "fixef_vars" %in% names(x)))){
                 # means any FE model
-                fitstat_all = c("r2", "wr2")
+                fitstat_default = c("r2", "wr2")
             } else {
-                fitstat_all = c("r2", "ar2")
+                fitstat_default = c("r2", "ar2")
             }
         } else {
-            fitstat_all = c("sq.cor", "pr2", "bic")
+            fitstat_default = c("sq.cor", "pr2", "bic")
         }
 
-        fitstat_all = c("n", fitstat_all)
+        fitstat_default = c("n", fitstat_default)
 
         if(any(sapply(all_models, function(x) !is.null(x$theta)))){
-            fitstat_all = c(fitstat_all, "theta")
+            fitstat_default = c(fitstat_default, "theta")
         }
 
-    } else if(isFALSE(fitstat_all) || (length(fitstat_all) == 1 && (is.na(fitstat_all) || fitstat_all == ""))){
-        fitstat_all = NULL
-        drop.section = c(drop.section, "stats")
+        fitstat_default = setdiff(fitstat_default, fitstat_all)
 
-    } else if("formula" %in% class(fitstat_all)){
-        check_arg(fitstat_all, "os formula", .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing 'aic', 'bic', 'll', types from function fitstat (?fitstat), or valid r2 types names (?r2). ")
-        fitstat_all = attr(terms(fitstat_all), "term.labels")
-
-    } else {
-        check_arg(fitstat_all, "character vector no na", .message = "Argument 'fitstat' must be a character vector (or a one sided formula) containing 'aic', 'bic', 'll', or valid r2 types names (see function r2). ")
+        if(length(fitstat_default) > 0){
+            i = which(fitstat_all == ".")[1]
+            if(i == length(fitstat_all)){
+                fitstat_all = c(fitstat_all[0:(i-1)], fitstat_default)
+            } else {
+                fitstat_all = c(fitstat_all[0:(i-1)], fitstat_default, fitstat_all[(i+1):length(fitstat_all)])
+            }
+        }
 
     }
 
