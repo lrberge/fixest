@@ -163,8 +163,6 @@ List cpp_cholesky(NumericMatrix X, double tol = 1.0/100000.0/100000.0, int nthre
             R_jj -= R(k, j) * R(k, j);
         }
 
-        if(min_norm > R_jj) min_norm = R_jj;
-
         if(R_jj < tol){
             n_excl++;
             id_excl[j] = true;
@@ -180,6 +178,8 @@ List cpp_cholesky(NumericMatrix X, double tol = 1.0/100000.0/100000.0, int nthre
 
             continue;
         }
+
+        if(min_norm > R_jj) min_norm = R_jj;
 
         R_jj = sqrt(R_jj);
 
