@@ -3475,15 +3475,14 @@ prepare_matrix = function(fml, base){
 
     all_var_names = attr(t, "term.labels")
 
-
     # We take care of interactions: references can be multiple, then ':' is legal
     all_vars = gsub(":", "*", all_var_names)
 
     if(any(qui_inter <- (grepl("^i(nteract)?\\(", all_var_names) & grepl(":", all_var_names, fixed = TRUE)))){
-        # beware of in drop/keep":"!!!
+        # beware of ":" in drop/keep!!!
 
-        for(arg in c("ref", "drop", "keep")){
-            if(any(qui_ref <- grepl(paste0(arg, " =.+:"), all_var_names[qui_inter]))){
+        for(arg in c("drop", "keep")){
+            if(any(qui_ref <- grepl(paste0(arg, " =[^\\)]+:"), all_var_names[qui_inter]))){
                 var_inter_ref = all_var_names[qui_inter][qui_ref]
                 var_inter_ref_split = strsplit(var_inter_ref, paste0(arg, " = "))
                 fun2apply = function(x) paste(gsub(":", "*", x[1]), x[2], sep = paste0(arg, " = "))
@@ -3549,23 +3548,62 @@ fixest_model_matrix = function(fml, data){
     # then either apply a model.matrix
     # either applies an evaluation (which can be faster)
 
+    # fml = ~a*b+c+i(x1)+Temp:i(x2)+i(x3)/Wind
+
     # Modify the formula to add interactions
-    if(grepl("::", deparse_long(fml[[3]]))){
+    if(grepl("::", deparse_long(fml[[3]]), fixed = TRUE)){
         fml = interact_fml(fml)
     }
 
+    #
     # Evaluation
+    #
 
-    # we look at whether there are factor-like variables to be evaluated
-    # if there is factors => model.matrix
-    dataNames = names(data)
-    linear.varnames = all.vars(fml[[3]])
-    is_num = sapply(data[, dataNames %in% linear.varnames, FALSE], is.numeric)
-    if(length(is_num) == 0 || any(!is_num) || grepl("factor", deparse_long(fml))){
-        useModel.matrix = TRUE
-    } else {
-        useModel.matrix = FALSE
+    t_fml = terms(fml)
+    tl = attr(t_fml, "term.labels")
+
+    # We check for calls to i()
+    qui_inter <- grepl("(^|[^[:alnum:]_\\.])i(nteract)?\\(", tl)
+    IS_INTER = any(qui_inter)
+    if(IS_INTER){
+        # OMG... why do I always have to reinvent the wheel???
+        is_intercept = attr(t_fml,"intercept") == 1
+        i_naked = which(is_naked_inter(tl[qui_inter]))
+
+        for(i in seq_along(i_naked)){
+            if(!is_intercept && i == 1) next
+
+            j = i_naked[i]
+            txt = gsub("(^|(?<=[^[:alnum:]\\._]))i(nteract)?\\(", "i_ref(", tl[qui_inter][j], perl = TRUE)
+            tl[qui_inter][j] = eval(parse(text = txt))
+        }
+
+        fml_no_inter = as.formula(paste0("y ~ ", paste(c(1, tl[!qui_inter]), collapse = "+")))
+        fml = as.formula(paste0("y ~ ", paste(tl, collapse = "+")))
+
     }
+
+    # Are there factors NOT in i()? If so => model.matrix is used
+    dataNames = names(data)
+
+    if(IS_INTER){
+        linear.varnames = all.vars(fml_no_inter[[3]])
+        is_num = sapply(data[, dataNames %in% linear.varnames, FALSE], is.numeric)
+        if(length(is_num) > 0 && (any(!is_num) || grepl("factor", deparse_long(fml_no_inter)))){
+            useModel.matrix = TRUE
+        } else {
+            useModel.matrix = FALSE
+        }
+    } else {
+        linear.varnames = all.vars(fml[[3]])
+        is_num = sapply(data[, dataNames %in% linear.varnames, FALSE], is.numeric)
+        if(length(is_num) == 0 || any(!is_num) || grepl("factor", deparse_long(fml))){
+            useModel.matrix = TRUE
+        } else {
+            useModel.matrix = FALSE
+        }
+    }
+
 
     if(useModel.matrix){
         # to catch the NAs, model.frame needs to be used....
@@ -4161,6 +4199,37 @@ clean_interact_names = function(x){
 
     return(res)
 }
+
+is_naked_inter = function(x){
+    # Why is it always so complicated... There must be an easier way
+    # x = c("i(x1)", "i(I(x3))", "interact(x3, x4, TRUE, drop = c(1, 3:5))", "Temp:i(x2)", "i(x3):Wind")
+
+    x_split = strsplit(x, "(^|(?<=[^[:alnum:]\\._]))i(nteract)?\\(", perl = TRUE)
+
+    left = sapply(x_split, function(x) x[1])
+    right = sapply(x_split, function(x) x[2])
+
+    right_naked = function(r){
+
+        if(!grepl("(", r, fixed = TRUE) && grepl("\\)$", r)){
+            return(TRUE)
+        }
+
+        letter_vec = strsplit(r, "")[[1]]
+        open = 1 + cumsum(letter_vec == "(")
+        close = cumsum(letter_vec == ")")
+        which.max(close - open == 0) == length(letter_vec)
+    }
+
+    left_ok  = nchar(left) == 0
+    right_ok = rep(FALSE, length(right))
+    if(any(left_ok)){
+        right_ok[left_ok] = sapply(right[left_ok], right_naked)
+    }
+
+    left_ok & right_ok
+}
+
 
 
 #### ................. ####
