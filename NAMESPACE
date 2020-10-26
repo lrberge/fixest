@@ -40,6 +40,11 @@ export(summ) # alias for summary.fixest
 S3method(plot, fixest.fixef)
 S3method("[", fixest_panel) # Lag related
 
+# rep
+S3method(rep, fixest) # rep fixest objects
+S3method(rep, fixest_list) # idem: rep a list of fixest objects
+export(.l)
+
 # Stats methods
 S3method(nobs, fixest)
 S3method(logLik, fixest)
