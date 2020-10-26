@@ -24,6 +24,9 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+
+library(fixest)
+setFixest_nthreads(1)
 ```
 
 <!-- Help on vignette writing here: http://r-pkgs.had.co.nz/vignettes.html. -->

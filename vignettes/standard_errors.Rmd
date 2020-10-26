@@ -19,6 +19,8 @@ library(fixest)
 library(sandwich)
 library(plm)
 library(lfe)
+
+setFixest_nthreads(1)
 ```
 
 
