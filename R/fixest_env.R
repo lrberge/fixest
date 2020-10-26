@@ -1394,21 +1394,6 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     if(length(obs2remove) > 0){
         # we kick out the problems (both NA related and fixef related)
 
-        # if(isNL || (isLinear && useModel.matrix)){
-        #     data = data[-obs2remove, , drop = FALSE]
-        # }
-        #
-        # # We recreate the linear matrix and the LHS
-        # if(isLinear) {
-        #     if(useModel.matrix){
-        #         # means there are factors
-        #         # linear.mat = stats::model.matrix(linear.fml, data)
-        #         linear.mat = fixest_model_matrix(linear.fml, data)
-        #     } else {
-        #         linear.mat = linear.mat[-obs2remove, , drop = FALSE]
-        #     }
-        # }
-
         # We drop only 0 variables (may happen for factors)
         linear.mat = linear.mat[-obs2remove, , drop = FALSE]
 

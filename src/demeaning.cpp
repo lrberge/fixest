@@ -1834,7 +1834,6 @@ List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, d
         saved_output[i] = output_values[i];
     }
 
-
     // save fixef coef
     int n_c = save_fixef ? nb_coef_T : 1;
     NumericVector saved_fixef_coef(n_c);
