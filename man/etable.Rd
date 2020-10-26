@@ -397,12 +397,14 @@ etable(est1, est2, fitstat = ~ ll + .)
 
 
 #
-# To have specific SEs for each model
+# Computing a different SE for each model
 #
 
 est = feols(Ozone ~ Solar.R + Wind + Temp, data = aq)
 
+#
 # Method 1: use summary
+
 s1 = summary(est, "standard")
 s2 = summary(est, cluster = ~ Month)
 s3 = summary(est, cluster = ~ Day)
@@ -410,13 +412,18 @@ s4 = summary(est, cluster = ~ Day + Month)
 
 etable(list(s1, s2, s3, s4))
 
-# Method 2: using rep
-etable(rep(est, cluster = list("standard", ~ Month, ~ Day, ~ Day + Month)))
+#
+# Method 2: using a list in the argument 'cluster'
 
-# Method 2: another example
 est_bis = feols(Ozone ~ Solar.R + Wind + Temp | Month, data = aq)
+etable(list(est, est_bis), cluster = list("standard", ~ Month))
 
-# When using rep on 2 or more objects, you need to embedd them in .l()
+#
+# Method 3: Using rep()
+
+etable(rep(est, cluster = list("standard", ~ Month))
+
+# When using rep on 2 or more objects, you need to embed them in .l()
 etable(rep(.l(est, est_bis), cluster = list("standard", ~ Month, ~ Day)))
 
 # Using each to order differently
