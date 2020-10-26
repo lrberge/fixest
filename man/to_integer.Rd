@@ -21,7 +21,7 @@ to_integer(
 
 \item{items.list}{Logical, default is \code{FALSE}. Only used if \code{add_items=TRUE}. If \code{TRUE}, then a list of length 2 is returned with \code{x} the integer vector and \code{items} the vector of items.}
 
-\item{multi.join}{Logical, or character, scalar, defaults to \code{FALSE}. Only used if multiple vectors are to be transformed into integers. If \code{multi.join} is not \code{FALSE}, the the values of the different vectors will be collated using \code{\link[base]{paste}} with \code{collapse=multi.join}.}
+\item{multi.join}{Logical, or character, scalar, defaults to \code{FALSE}. Only used if multiple vectors are to be transformed into integers. If \code{multi.join} is not \code{FALSE}, then the values of the different vectors will be collated using \code{\link[base]{paste}} with \code{collapse=multi.join}.}
 }
 \value{
 Reruns a vector of the same length as the input vectors.

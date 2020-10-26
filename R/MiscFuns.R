@@ -2773,7 +2773,7 @@ xpd = function(fml, ...){
 #' @param sorted Logical, default is \code{FALSE}. Whether the integer vector should make reference to sorted values?
 #' @param add_items Logical, default is \code{FALSE}. Whether to add the unique values of the original vector(s). If requested, an attribute \code{items} is created containing the values (alternatively, they can appear in a list if \code{items.list=TRUE}).
 #' @param items.list Logical, default is \code{FALSE}. Only used if \code{add_items=TRUE}. If \code{TRUE}, then a list of length 2 is returned with \code{x} the integer vector and \code{items} the vector of items.
-#' @param multi.join Logical, or character, scalar, defaults to \code{FALSE}. Only used if multiple vectors are to be transformed into integers. If \code{multi.join} is not \code{FALSE}, the the values of the different vectors will be collated using \code{\link[base]{paste}} with \code{collapse=multi.join}.
+#' @param multi.join Logical, or character, scalar, defaults to \code{FALSE}. Only used if multiple vectors are to be transformed into integers. If \code{multi.join} is not \code{FALSE}, then the values of the different vectors will be collated using \code{\link[base]{paste}} with \code{collapse=multi.join}.
 #'
 #' @details
 #' If multiple vectors have to be combined and \code{add_items=TRUE}, to have user readable values in the items, you should add the argument \code{multi.join} so that the values of the vectors are combined in a "user-readable" way. Note that in the latter case, the algorithm is much much slower.
@@ -2870,7 +2870,17 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
     }
 
     if(Q == 1){
-        res = quickUnclassFactor(dots[[1]], addItem = add_items, sorted = sorted)
+        if(sorted && is.factor(dots[[1]])){
+            # Special treatment for factors => we keep their order
+            f = dots[[1]][drop = TRUE]
+            res = quickUnclassFactor(unclass(f), addItem = add_items, sorted = sorted)
+            if(add_items){
+                res$items = levels(f)[res$items]
+            }
+
+        } else {
+            res = quickUnclassFactor(dots[[1]], addItem = add_items, sorted = sorted)
+        }
 
     } else {
 
@@ -2927,8 +2937,6 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
         attr(res_tmp, "items") = res$items
         res = res_tmp
     }
-
-
 
     res
 }
