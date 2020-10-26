@@ -2545,6 +2545,9 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 i = interact = function(var, f, ref, drop, keep){
     # Used to create interactions
 
+    # gt = function(x) cat(sfill(x, 20), ": ", -(t0 - (t0<<-proc.time()))[3], "s\n", sep = "")
+    # t0 = proc.time()
+
     mc = match.call()
 
     if(missing(var) && missing(f)){
@@ -2584,38 +2587,53 @@ i = interact = function(var, f, ref, drop, keep){
         }
     }
 
-    # The NAs
-    is_na_fe = is.na(f)
+    # The NAs + recreation of f if necessary
+    IS_FACTOR_INTER = FALSE
+    if(IS_INTER){
 
-    if(is.factor(f)){
-        # we respect the fact that f is a factor => we will keep its ordering
-        is_na_fe = is.na(f)
-        fe_no_na = f[!is_na_fe, drop = TRUE]
-        items = levels(fe_no_na)
-        fe_num = rep(NA, length(f))
-        fe_num[!is_na_fe] = as.vector(unclass(fe_no_na))
-    } else {
-        if(any(is_na_fe)){
-            quf = quickUnclassFactor(f[!is_na_fe], addItem = TRUE, sorted = TRUE)
-            fe_num = rep(NA, length(f))
-            fe_num[!is_na_fe] = quf$x
-        } else {
-            quf = quickUnclassFactor(f, addItem = TRUE, sorted = TRUE)
-            fe_num = quf$x
+        is_na_all = is.na(var) | is.na(f)
+
+        if(!is.numeric(var)){
+            IS_FACTOR_INTER = TRUE
+            # It's an interaction between factors
+            f_new = rep(NA_character_, length(f))
+            f_new[!is_na_all] = paste0(var[!is_na_all], "__%%__", f[!is_na_all])
+            f = f_new
+            IS_INTER = FALSE
         }
 
-        items = quf$items
+    } else {
+        is_na_all = is.na(f)
     }
 
-    check_arg(ref, "charin", .choices = items, .message = paste0("Argument 'ref' must be a single element of the variable '", fe_name, "'."))
+    if(!IS_INTER){
+        # neutral var in C code
+        var = 1
+    }
+
+    # QUFing
+
+    info = to_integer(f, add_items = TRUE, items.list = TRUE, sorted = TRUE)
+    fe_num = info$x
+    items = info$items
+
+    check_arg(ref, "logical scalar | charin", .choices = items, .message = paste0("Argument 'ref' must be a single element of the variable '", fe_name, "'."))
     check_arg(drop, keep, "multi charin", .choices = items, .message = paste0("Argument '__ARG__' must consist of elements of the variable '", fe_name, "'."))
 
     no_rm = TRUE
     any_ref = FALSE
     id_drop = c()
     if(!missing(ref)){
-        any_ref = TRUE
-        id_drop = ref = which(items %in% ref)
+        if(is.logical(ref)){
+            if(ref == TRUE){
+                # We always delete the first value
+                any_ref = TRUE
+                id_drop = ref = which(items == items[1])
+            }
+        } else {
+            any_ref = TRUE
+            id_drop = ref = which(items %in% ref)
+        }
     }
 
     if(!missing(drop)){
@@ -2629,23 +2647,14 @@ i = interact = function(var, f, ref, drop, keep){
     if(length(id_drop) > 0){
         id_drop = unique(sort(id_drop))
         if(length(id_drop) == length(items)) stop("All items from the interaction have been removed.")
+        who_is_dropped = id_drop
         no_rm = FALSE
-    }
-
-    res = cpp_factor_matrix(fe_num, any(is_na_fe))
-
-    if(no_rm){
-        if(IS_INTER){
-            res = res * var
-        }
     } else {
-        if(IS_INTER){
-            res = res[, -id_drop, drop = FALSE] * var
-        } else {
-            res = res[, -id_drop, drop = FALSE]
-        }
+        # -1 is neutral
+        who_is_dropped = -1
     }
 
+    # The column names
 
     if(length(id_drop) > 0){
         items_name = items[-id_drop]
@@ -2654,17 +2663,40 @@ i = interact = function(var, f, ref, drop, keep){
     }
 
     if(FROM_FIXEST){
-        if(IS_INTER){
-            colnames(res) = paste0("__CLEAN__", var_name, ":", fe_name, "::", items_name)
+        # Pour avoir des jolis noms c'est un vrai gloubiboulga,
+        # mais j'ai pas trouve plus simple...
+        if(IS_FACTOR_INTER){
+            name_split = strsplit(items_name, "__%%__", fixed = TRUE)
+            var_items = sapply(name_split, function(x) x[1])
+            f_items = sapply(name_split, function(x) x[2])
+            col_names = paste0("__CLEAN__", var_name, "::", var_items, ":", fe_name, "::", f_items)
+
+        } else if(IS_INTER){
+            col_names = paste0("__CLEAN__", var_name, ":", fe_name, "::", items_name)
+
         } else {
-            colnames(res) = paste0("__CLEAN__", fe_name, "::", items_name)
+            col_names = paste0("__CLEAN__", fe_name, "::", items_name)
         }
     } else {
-        colnames(res) = items_name
+
+        if(IS_FACTOR_INTER){
+            name_split = strsplit(items_name, "__%%__", fixed = TRUE)
+            items_name = sapply(name_split, paste, collapse = ":")
+        }
+
+        col_names = items_name
     }
 
+    res = cpp_factor_matrix(fe_num, is_na_all, who_is_dropped, var, col_names)
+    # res => matrix with...
+    #  - NAs where appropriate
+    #  - appropriate number of columns
+    #  - interacted if needed
+    #
+
+
     # We send the information on the reference
-    if(IS_INTER){
+    if(FROM_FIXEST && IS_INTER){
         opt = getOption("fixest_interaction_ref")
         if(is.null(opt)){
 
@@ -2696,6 +2728,19 @@ i = interact = function(var, f, ref, drop, keep){
 
 #' @rdname i
 "interact"
+
+i_ref = function(var, f, ref, drop, keep){
+
+    mc = match.call()
+
+    mc[[1]] = as.name("i")
+
+    if(!all(c("var", "f") %in% names(mc)) && !any(c("ref", "drop", "keep") %in% names(mc))){
+        mc$ref = TRUE
+    }
+
+    return(deparse_long(mc))
+}
 
 
 #' @rdname setFixest_fml
