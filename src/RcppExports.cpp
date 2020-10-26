@@ -604,14 +604,17 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_factor_matrix
-NumericVector cpp_factor_matrix(IntegerVector fact, bool any_na);
-RcppExport SEXP _fixest_cpp_factor_matrix(SEXP factSEXP, SEXP any_naSEXP) {
+NumericVector cpp_factor_matrix(IntegerVector fact, LogicalVector is_na_all, IntegerVector who_is_dropped, SEXP var, CharacterVector col_names);
+RcppExport SEXP _fixest_cpp_factor_matrix(SEXP factSEXP, SEXP is_na_allSEXP, SEXP who_is_droppedSEXP, SEXP varSEXP, SEXP col_namesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< IntegerVector >::type fact(factSEXP);
-    Rcpp::traits::input_parameter< bool >::type any_na(any_naSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_factor_matrix(fact, any_na));
+    Rcpp::traits::input_parameter< LogicalVector >::type is_na_all(is_na_allSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type who_is_dropped(who_is_droppedSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type var(varSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type col_names(col_namesSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_factor_matrix(fact, is_na_all, who_is_dropped, var, col_names));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -951,7 +954,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_lag_obs", (DL_FUNC) &_fixest_cpp_lag_obs, 3},
     {"_fixest_cpp_check_nested", (DL_FUNC) &_fixest_cpp_check_nested, 4},
     {"_fixest_cpp_diag_XUtX", (DL_FUNC) &_fixest_cpp_diag_XUtX, 2},
-    {"_fixest_cpp_factor_matrix", (DL_FUNC) &_fixest_cpp_factor_matrix, 2},
+    {"_fixest_cpp_factor_matrix", (DL_FUNC) &_fixest_cpp_factor_matrix, 5},
     {"_fixest_cpp_get_nb_threads", (DL_FUNC) &_fixest_cpp_get_nb_threads, 0},
     {"_fixest_cpppar_exp", (DL_FUNC) &_fixest_cpppar_exp, 2},
     {"_fixest_cpppar_log", (DL_FUNC) &_fixest_cpppar_log, 2},

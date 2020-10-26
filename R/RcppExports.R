@@ -149,8 +149,8 @@ cpp_diag_XUtX <- function(X, U) {
     .Call(`_fixest_cpp_diag_XUtX`, X, U)
 }
 
-cpp_factor_matrix <- function(fact, any_na) {
-    .Call(`_fixest_cpp_factor_matrix`, fact, any_na)
+cpp_factor_matrix <- function(fact, is_na_all, who_is_dropped, var, col_names) {
+    .Call(`_fixest_cpp_factor_matrix`, fact, is_na_all, who_is_dropped, var, col_names)
 }
 
 cpp_get_nb_threads <- function() {
