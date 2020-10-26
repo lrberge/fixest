@@ -1,7 +1,32 @@
 
 # News for the R Package `fixest`
 
-## Changes in version 0.7.0
+## Changes in version 0.7.1
+
+#### Hotfixes
+
+ - Fix bug int overflow in estimations with only one variable.
+ 
+ - Fix bug in tests occurring in R old release.
+ 
+ - Fix bug in examples occurring in R old release.
+
+#### Improvements
+
+ - Function `i()` now behaves as `factor()`, setting automatically a reference when appropriate.
+ 
+ - Internal algorithm of `i()` is much faster.
+ 
+#### New features
+
+ - In `etable`, the user can now provide a type of clustering for each model.
+ 
+ - New method `rep.fixest` to replicate fixest objects, mostly useful in `etable` when several SEs for the same models are to be reported.
+ 
+ - Automatic fix when the variance is not positive definite.
+
+
+## Changes in version 0.7.0 (24-10-2020)
 
 #### Bugs
 
