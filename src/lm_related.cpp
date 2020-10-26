@@ -63,7 +63,7 @@ void invert_tri(NumericMatrix &R, int K, int nthreads = 1){
     // Check for interrupts
     // number of computations is (K - b) * (b + 1) => max is (K + 1)**2 / 2
     double flop = (K + 1) * (K + 1) / 2.0;
-    int iterSecond = ceil(2000000000 / flop / 2); // nber iter per 1/2 second
+    int iterSecond = ceil(2000000000 / flop / 5); // nber iter per 1/5 second
 
     for(int b=1 ; b<K ; ++b){
 
@@ -99,7 +99,7 @@ void tproduct_tri(NumericMatrix &RRt, NumericMatrix &R, int nthreads = 1){
     // Check for interrupts
     // we do the same as for the invert_tri
     double flop = (K + 1) * (K + 1) / 2.0;
-    int iterSecond = ceil(2000000000 / flop / 2); // nber iter per 1/2 second
+    int iterSecond = ceil(2000000000 / flop / 5); // nber iter per 1/5 second
     int n_iter_main = 0;
 
     #pragma omp parallel for num_threads(nthreads) schedule(static, 1)
@@ -143,7 +143,7 @@ List cpp_cholesky(NumericMatrix X, double tol = 1.0/100000.0/100000.0, int nthre
     // at each iteration we have K * (j+1) - j**2 - 2*j - 1 multiplications
     // max => K**2/4
     double flop = K * K / 4.0;
-    int iterSecond = ceil(2000000000 / flop / 2); // nber iter per 1/2 second
+    int iterSecond = ceil(2000000000 / flop / 5); // nber iter per 1/5 second
     double min_norm = X(0, 0);
 
     for(int j=0 ; j<K ; ++j){
