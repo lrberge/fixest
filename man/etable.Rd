@@ -383,6 +383,7 @@ etable(est_c0, est_c1, est_c2, .vcov = sandwich::vcovHC)
 # To add extra arguments to vcovHC, you need to use .vcov_args
 etable(est_c0, est_c1, est_c2, .vcov = sandwich::vcovHC, .vcov_args = list(type = "HC0"))
 
+
 #
 # Customize which fit statistic to display
 #
@@ -393,6 +394,33 @@ etable(est1, est2, fitstat = ~ r2 + n + G)
 
 # If you use a formula, '.' means the default:
 etable(est1, est2, fitstat = ~ ll + .)
+
+
+#
+# To have specific SEs for each model
+#
+
+est = feols(Ozone ~ Solar.R + Wind + Temp, data = aq)
+
+# Method 1: use summary
+s1 = summary(est, "standard")
+s2 = summary(est, cluster = ~ Month)
+s3 = summary(est, cluster = ~ Day)
+s4 = summary(est, cluster = ~ Day + Month)
+
+etable(list(s1, s2, s3, s4))
+
+# Method 2: using rep
+etable(rep(est, cluster = list("standard", ~ Month, ~ Day, ~ Day + Month)))
+
+# Method 2: another example
+est_bis = feols(Ozone ~ Solar.R + Wind + Temp | Month, data = aq)
+
+# When using rep on 2 or more objects, you need to embedd them in .l()
+etable(rep(.l(est, est_bis), cluster = list("standard", ~ Month, ~ Day)))
+
+# Using each to order differently
+etable(rep(.l(est, est_bis), each = 3, cluster = list("standard", ~ Month, ~ Day)))
 
 
 }

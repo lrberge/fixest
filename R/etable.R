@@ -214,6 +214,33 @@
 #' etable(est1, est2, fitstat = ~ ll + .)
 #'
 #'
+#' #
+#' # To have specific SEs for each model
+#' #
+#'
+#' est = feols(Ozone ~ Solar.R + Wind + Temp, data = aq)
+#'
+#' # Method 1: use summary
+#' s1 = summary(est, "standard")
+#' s2 = summary(est, cluster = ~ Month)
+#' s3 = summary(est, cluster = ~ Day)
+#' s4 = summary(est, cluster = ~ Day + Month)
+#'
+#' etable(list(s1, s2, s3, s4))
+#'
+#' # Method 2: using rep
+#' etable(rep(est, cluster = list("standard", ~ Month, ~ Day, ~ Day + Month)))
+#'
+#' # Method 2: another example
+#' est_bis = feols(Ozone ~ Solar.R + Wind + Temp | Month, data = aq)
+#'
+#' # When using rep on 2 or more objects, you need to embedd them in .l()
+#' etable(rep(.l(est, est_bis), cluster = list("standard", ~ Month, ~ Day)))
+#'
+#' # Using each to order differently
+#' etable(rep(.l(est, est_bis), each = 3, cluster = list("standard", ~ Month, ~ Day)))
+#'
+#'
 etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, .vcov, .vcov_args = NULL, digits=4, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode, label, float, subtitles, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNo = "Yes", keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style = list(), notes = NULL, group = NULL, extraline = NULL, tablefoot = TRUE, placement = "htbp", drop.section = NULL){
 
     #
@@ -766,18 +793,41 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
 
     # end: fitstat
 
-    #
-    # Loop ####
-    #
-
     if(!missing(.vcov)){
-        if(!missing(cluster)) .vcov_args[["cluster"]] = as.name("cluster")
-        if(!missing(se)) .vcov_args[["se"]] = as.name("se")
-
         sysOrigin = sys.parent()
         mc = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin), expand.dots = FALSE)
         vcov_name = deparse_long(mc$.vcov)
     }
+
+    IS_MULTI_CLUST = FALSE
+    if(!missing(cluster) && identical(class(cluster), "list")){
+        IS_MULTI_CLUST = TRUE
+
+        check_value(cluster, "list len(value)", .value = n_models, .message = "If 'cluster' is a list, it must be of the same length as the number of models.")
+
+        if(!missnull(se)){
+            message("Argument 'se' is ignored, to use 'standard' or 'hetero' standard-errors please place these keywords in the argument 'cluster'.")
+        }
+
+        se = vector("list", n_models)
+        for(m in 1:n_models){
+            if(identical(cluster[[m]], "standard")){
+                se[[m]] = "standard"
+            } else if(identical(cluster[[m]], "hetero")){
+                se[[m]] = "hetero"
+            }
+        }
+    } else if(!missnull(se) && length(se) > 1){
+        IS_MULTI_CLUST = TRUE
+        check_value(se, "character vector len(value)", .value = n_models, .message = "If 'se' is a vector, it must be of the same length as the number of models.")
+
+        cluster = vector("list", n_models)
+
+    }
+
+    #
+    # Loop ####
+    #
 
     for(m in 1:n_models){
 
@@ -785,7 +835,13 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
         if(useSummary){
 
             if(missing(.vcov)){
-                x = summary(all_models[[m]], se=se, cluster, dof = dof, nframes_up = 2)
+
+                if(IS_MULTI_CLUST){
+                    x = summary(all_models[[m]], se = se[[m]], cluster = cluster[[m]], dof = dof, nframes_up = 2)
+                } else {
+                    x = summary(all_models[[m]], se = se, cluster = cluster, dof = dof, nframes_up = 2)
+                }
+
 
             } else {
                 # We check the arguments
