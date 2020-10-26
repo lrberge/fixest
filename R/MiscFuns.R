@@ -6522,8 +6522,11 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 
 	}
 
-	if(any(diag(vcov)<0)){
-		warning("Some variances are negative (likely problem of collinearity).")
+	if(any(diag(vcov) < 0)){
+	    # We 'fix' it
+	    e = eigen(vcov)
+	    vcov = tcrossprod(e$vectors %*% diag(pmax(e$values, 1e-8)), e$vectors)
+	    message("Variance is not positive definite and was 'fixed'.")
 	}
 
 	sd.dict = c("standard" = "Standard", "hetero"="Heteroskedasticity-robust", "cluster"="Clustered", "twoway"="Two-way", "threeway"="Three-way", "fourway"="Four-way")
