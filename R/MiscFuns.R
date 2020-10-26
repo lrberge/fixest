@@ -7148,6 +7148,157 @@ terms.fixest = function(x, ...){
     terms(formula(x, type = "linear"))
 }
 
+
+
+#' Replicates fixest objects
+#'
+#' Simple function that replicates fixest objects while (optionally) computing different standard-errors. Useful mostly in combination with \code{\link[fixest]{etable}} or \code{\link[fixest]{coefplot}}.
+#'
+#' @param x Either a fixest object, either a list of fixest objects created with \code{.l()}.
+#' @param times Integer vector giving the number of repetitions of the vector of elements. By default \code{times = 1}. It must be either of length 1, either of the same length as the argument \code{x}.
+#' @param each Integer scalar indicating the repetition of each element. Default is 1.
+#' @param cluster A list containing the types of standard-error to be computed, default is missing. If not missing, it must be of the same length as \code{times}, \code{each}, or the final vector. Note that if the arguments \code{times} and \code{each} are missing, then \code{times} becomes equal to the length of \code{cluster}. (Note that \code{cluster} accepts the character values \code{"standard"} or \code{"hetero"} to compute non-clustered SEs.)
+#' @param ... In \code{.l()}: \code{fixest} objects. In \code{rep()}: not currently used.
+#'
+#' @details
+#' To apply \code{rep.fixest} on a list of fixest objects, it is absolutely necessary to use \code{.l()} and not \code{list()}.
+#'
+#' @return
+#' Returns a list of the appropriate length. Each element of the list is a fixest object.
+#'
+#' @examples
+#'
+#' # Let's show results with different standard-errors
+#'
+#' est = feols(Ozone ~ Solar.R + Wind + Temp, data = airquality)
+#'
+#' my_cluster = list("Month", "Day", ~ Day + Month)
+#'
+#' etable(rep(est, cluster = my_cluster))
+#'
+#' coefplot(rep(est, cluster = my_cluster), drop = "Int")
+#'
+#' #
+#' # To rep multiple objects, you need to use .l()
+#' #
+#'
+#' est_bis = feols(Ozone ~ Solar.R + Wind + Temp | Month, airquality)
+#'
+#' etable(rep(.l(est, est_bis), cluster = my_cluster))
+#'
+#' # using each
+#' etable(rep(.l(est, est_bis), each = 3, cluster = my_cluster))
+#'
+#'
+rep.fixest = function(x, times = 1, each = 1, cluster, ...){
+    # each is applied first, then times
+    # x can be either a list of fixest objects, either a fixest object
+
+    check_arg(x, "class(fixest, fixest_list) mbt")
+    check_arg(times, "integer scalar GE{1} | integer vector no na GE{0}")
+    check_arg(each, "integer scalar GE{1}")
+    check_arg(cluster, "class(list)")
+
+    validate_dots(suggest_args = c("times", "each"), stop = TRUE)
+
+    # Checking the arguments
+    IS_LIST = FALSE
+    if("fixest_list" %in% class(x)){
+        IS_LIST = TRUE
+        class(x) = "list"
+
+        n = length(x)
+
+    } else {
+        n = 1
+    }
+
+    IS_MULTI_CLUST = !missing(cluster)
+    if(IS_MULTI_CLUST){
+        n_clu = length(cluster)
+
+        if(times == 1 && each == 1){
+            times = n_clu
+        }
+    }
+
+    res_int = rep(1:n, times = times, each = each)
+    n_res = length(res_int)
+
+    if(IS_MULTI_CLUST){
+        # Checking and expanding
+
+        cluster_mapping = 1:n_res
+        if(times == 1){
+            if(n_clu != each && n_clu != n_res){
+                stop("In rep, the argument 'cluster' (currently of length ", n_clu, ") must be a list either of length ", each, " or of length ", n_res, ".")
+            }
+
+            if(n_clu == each) cluster_mapping = rep(1:each, times = n)
+
+        } else if(each == 1){
+            if(n_clu != times && n_clu != n_res){
+                stop("In rep, the argument 'cluster' (currently of length ", n_clu, ") must be a list either of length ", times, " or of length ", n_res, ".")
+            }
+
+            if(n_clu == times) cluster_mapping = rep(1:n_clu, each = n)
+
+        } else {
+            if(n_clu != n_res){
+                stop("In rep, the argument 'cluster' (currently of length ", n_clu, ") must be a list either of length ", n_res, ".")
+            }
+        }
+
+        se_all = vector("list", n_clu)
+        for(m in 1:n_clu){
+            if(identical(cluster[[m]], "standard")){
+                se_all[[m]] = "standard"
+            } else if(identical(cluster[[m]], "hetero")){
+                se_all[[m]] = "hetero"
+            }
+        }
+
+    }
+
+    res = vector("list", length(res_int))
+
+    if(IS_MULTI_CLUST){
+        for(i in 1:n_res){
+            if(IS_LIST){
+                res[[i]] = summary(x[[res_int[i]]], se = se_all[[cluster_mapping[i]]], cluster = cluster[[cluster_mapping[i]]])
+            } else {
+                res[[i]] = summary(x, se = se_all[[cluster_mapping[i]]], cluster = cluster[[cluster_mapping[i]]])
+            }
+        }
+
+    } else {
+        for(i in unique(res_int)){
+            if(IS_LIST){
+                res[res_int == i] = x[[i]]
+            } else {
+                res[res_int == i] = list(x)
+            }
+        }
+    }
+
+    res
+}
+
+#' @rdname rep.fixest
+rep.fixest_list = function(x, times = 1, each = 1, cluster, ...){
+    rep.fixest(x, times = times, each = each, cluster = cluster, ...)
+}
+
+#' @rdname rep.fixest
+.l = function(...){
+
+    check_arg(..., "mbt class(fixest)")
+
+    res = list(...)
+    class(res) = "fixest_list"
+    res
+}
+
 #### ............... ####
 #### Setters/Getters ####
 ####
