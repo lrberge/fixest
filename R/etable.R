@@ -201,6 +201,7 @@
 #' # To add extra arguments to vcovHC, you need to use .vcov_args
 #' etable(est_c0, est_c1, est_c2, .vcov = sandwich::vcovHC, .vcov_args = list(type = "HC0"))
 #'
+#'
 #' #
 #' # Customize which fit statistic to display
 #' #
@@ -2004,37 +2005,15 @@ etable_internal_df = function(info){
         coefstat_sentence = "VCOV type"
     }
 
-    # res <- rbind(res, c("Observations", addCommas(obs_list)))
-    if(!useSummary || !any(grepl("\\(", unlist(se_type_list)))){
-        se_type_format = c()
+    se_type_format = c()
+    for(m in 1:n_models) se_type_format[m] = format_se_type(se_type_list[[m]], longueur[[1+m]], by = TRUE)
 
-        type = ""
-        if(length(unique(gsub(" \\(.+", "", se_type_list))) == 1){
-            # All identical
-
-            if(grepl("(", se_type_list[[1]], fixed = TRUE)){
-                # Only if clustered
-                type = paste0(": ", gsub(" \\(.+", "", se_type_list[[1]]))
-            }
-
-            for(m in 1:n_models) se_type_format[m] = format_se_type(se_type_list[[m]], longueur[[1+m]], by = TRUE)
-        } else {
-            for(m in 1:n_models) se_type_format[m] = format_se_type(se_type_list[[m]], longueur[[1+m]])
-        }
-
-        res <- rbind(res, c(paste0(coefstat_sentence, type), c(se_type_format, recursive = TRUE)))
-    } else {
-
-        se_type_format = c()
-        for(m in 1:n_models) se_type_format[m] = format_se_type(se_type_list[[m]], longueur[[1+m]], by = TRUE)
-
-        main_type = ""
-        if(grepl("(", se_type_list[[1]], fixed = TRUE)){
-            main_type = paste0(": ", gsub(" \\(.+", "", se_type_list[[1]]))
-        }
-
-        res <- rbind(res, c(paste0(coefstat_sentence, main_type), c(se_type_format, recursive = TRUE)))
+    main_type = ""
+    if(all(grepl("(", unlist(se_type_list), fixed = TRUE))){
+        main_type = ": Clustered"
     }
+
+    res <- rbind(res, c(paste0(coefstat_sentence, main_type), c(se_type_format, recursive = TRUE)))
 
     # convergence status
     if(convergence){
