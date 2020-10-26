@@ -20,7 +20,7 @@ test = function(x, y, type = "=", tol = 1e-6){
 
     if(type == "=" && is.numeric(x)){
         type = "~"
-        tol = 1e-15
+        tol = 1e-12
     }
 
     if(type == "err"){
