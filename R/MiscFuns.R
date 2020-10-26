@@ -6526,7 +6526,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 	    # We 'fix' it
 	    e = eigen(vcov)
 	    vcov = tcrossprod(e$vectors %*% diag(pmax(e$values, 1e-8)), e$vectors)
-	    message("Variance is not positive definite and was 'fixed'.")
+	    message("Variance contained negative values in the diagonal and was 'fixed' (a la Cameron, Gelbach & Miller 2011).")
 	}
 
 	sd.dict = c("standard" = "Standard", "hetero"="Heteroskedasticity-robust", "cluster"="Clustered", "twoway"="Two-way", "threeway"="Three-way", "fourway"="Four-way")
