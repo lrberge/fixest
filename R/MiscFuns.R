@@ -2486,8 +2486,8 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #'
 #' Treat a variable as a factor, or interacts a variable with another treated as a factor. Values to be dropped/kept from the factor can be easily set.
 #'
-#' @param var A vector. If the other argument \code{f} is missing, then this vector will be treated as a factor.
-#' @param f A vector (of any type) that will be treated as a factor. Must be of the same length as \code{var}.
+#' @param var A vector to be interacted with \code{f}. If the other argument \code{f} is missing, then this vector will be treated as the argument \code{f}.
+#' @param f A vector (of any type) that will be treated as a factor. Must be of the same length as \code{var} if \code{var} is not missing.
 #' @param ref A single value that belongs to the interacted variable (\code{f}). Can be missing.
 #' @param drop A vector of values that belongs to the factor variable (\code{f}). If provided, all values from \code{f} that match \code{drop} will be removed.
 #' @param keep A vector of values that belongs to the factor variable (\code{f}). If provided, only the values from \code{f} that match \code{keep} will be kept.
@@ -2509,13 +2509,18 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' # Simple illustration
 #' #
 #'
-#' x = rnorm(10)
+#' x = 1:10
 #' y = rep(1:4, 3)[1:10]
 #'
 #' # interaction
 #' cbind(x, y, i(x, y, 1))
+#'
 #' # without interaction
 #' cbind(x, y, i(y, ref = 1))
+#'
+#' # You can interact factors too
+#' z = rep(c("a", "b", "c"), c(5, 3, 2))
+#' data.frame(z, y, i(z, y))
 #'
 #' #
 #' # In fixest estimations

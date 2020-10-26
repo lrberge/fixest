@@ -14,9 +14,9 @@ i(var, f, ref, drop, keep)
 interact
 }
 \arguments{
-\item{var}{A vector. If the other argument \code{f} is missing, then this vector will be treated as a factor.}
+\item{var}{A vector to be interacted with \code{f}. If the other argument \code{f} is missing, then this vector will be treated as the argument \code{f}.}
 
-\item{f}{A vector (of any type) that will be treated as a factor. Must be of the same length as \code{var}.}
+\item{f}{A vector (of any type) that will be treated as a factor. Must be of the same length as \code{var} if \code{var} is not missing.}
 
 \item{ref}{A single value that belongs to the interacted variable (\code{f}). Can be missing.}
 
@@ -41,13 +41,18 @@ In \code{fixest} estimations, instead of using \code{i(var, f, ref)}, you can in
 # Simple illustration
 #
 
-x = rnorm(10)
+x = 1:10
 y = rep(1:4, 3)[1:10]
 
 # interaction
 cbind(x, y, i(x, y, 1))
+
 # without interaction
 cbind(x, y, i(y, ref = 1))
+
+# You can interact factors too
+z = rep(c("a", "b", "c"), c(5, 3, 2))
+data.frame(z, y, i(z, y))
 
 #
 # In fixest estimations
