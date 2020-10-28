@@ -266,8 +266,8 @@ FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id
 
     for(int q=0 ; q<Q ; ++q){
         //   0: no slope
-        // < 0: slope but not fixed-effect
-        // > 0: slope WITH not fixed-effect
+        // < 0: slope but no fixed-effect
+        // > 0: slope WITH fixed-effect
         // here we count the number of slopes only, we exclude the FEs (that's why there's the substraction)
 
         sf = p_slope_flag_Q[q];
@@ -1813,6 +1813,8 @@ List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, d
         } else {
             res["means"] = output_values;
         }
+    } else {
+        res["means"] = 0.0;
     }
 
     // save fixef coef
