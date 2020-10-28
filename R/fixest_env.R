@@ -1534,7 +1534,10 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
     }
 
+    #
     # families of feglm
+    #
+
     if(origin_type == "feglm"){
 
         family_equiv = family_funs$family_equiv
@@ -1563,10 +1566,8 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             family_funs$linkfun = function(mu) cpppar_logit_linkfun(mu, nthreads)
             family_funs$linkinv = function(eta) cpppar_logit_linkinv(eta, nthreads)
             if(isWeight){
-                # dev.resids = function(y, mu, eta, wt) sum(cpppar_logit_devresids(y, mu, wt, nthreads))
                 sum_dev.resids = function(y, mu, eta, wt) sum(cpppar_logit_devresids(y, mu, wt, nthreads))
             } else {
-                # dev.resids = function(y, mu, eta, wt) sum(cpppar_logit_devresids(y, mu, 1, nthreads))
                 sum_dev.resids = function(y, mu, eta, wt) sum(cpppar_logit_devresids(y, mu, 1, nthreads))
             }
             family_funs$sum_dev.resids = sum_dev.resids
@@ -1577,7 +1578,6 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         assign("family_funs", family_funs, env)
 
     }
-
 
     if(lparams == 0 && Q == 0) stop("No parameter to be estimated.")
 
@@ -1688,45 +1688,21 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
     # The main precision
 
-    if(!isScalar(fixef.tol) || fixef.tol <= 0 || fixef.tol >1){
-        stop("If provided, argument 'fixef.tol' must be a strictly positive scalar lower than 1.")
-    } else if(fixef.tol < 10000*.Machine$double.eps){
-        stop("Argument 'fixef.tol' cannot be lower than ", signif(10000*.Machine$double.eps))
-    }
-
-    if(!isScalar(fixef.iter) || fixef.iter < 1){
-        stop("Argument fixef.iter must be an integer greater than 0.")
-    }
+    check_value(fixef.tol, "numeric scalar GT{(10000*.Machine$double.eps)}")
+    check_arg(fixef.iter, "integer scalar GE{1}")
 
     if(origin_type == "feNmlm"){
-        if(!isScalar(deriv.iter) || deriv.iter < 1){
-            stop("Argument deriv.iter must be an integer greater than 0.")
-        }
-
-        if(!isScalar(deriv.tol) || deriv.tol <= 0 || deriv.tol >1){
-            stop("If provided, argument 'deriv.tol' must be a strictly positive scalar lower than 1.")
-        } else if(deriv.tol < 10000*.Machine$double.eps){
-            stop("Argument 'deriv.tol' cannot be lower than ", signif(10000*.Machine$double.eps))
-        }
+        check_arg(deriv.tol, "numeric scalar GT{(10000*.Machine$double.eps)}")
+        check_arg(deriv.iter, "integer scalar GE{1}")
 
         # Other: opt.control
-        if(!is.list(opt.control)){
-            stop("Argument opt.control must be a list of controls for the function nlminb (see help for details).")
-        }
+        check_arg(opt.control, "list l0", .message = "Argument opt.control must be a list of controls for the function nlminb (see help for details).")
 
     }
 
     if(origin_type == "feglm"){
-
-        if(!isScalar(glm.iter) || glm.iter < 1){
-            stop("Argument glm.iter must be an integer greater than, or equal to, 1.")
-        }
-
-        if(!isScalar(glm.tol) || glm.tol <= 0 || glm.tol > 1){
-            stop("Argument 'glm.tol' must be a strictly positive scalar lower than 1.")
-        } else if(glm.tol < 1000*.Machine$double.eps){
-            stop("Argument 'glm.tol' cannot be lower than ", signif(1000*.Machine$double.eps))
-        }
+        check_arg(glm.tol, "numeric scalar gt{(1000*.Machine$double.eps)}")
+        check_arg(glm.iter, "integer scalar GE{1}")
 
         assign("glm.iter", glm.iter, env)
         assign("glm.tol", glm.tol, env)
@@ -1760,34 +1736,6 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     upper = upper[params]
     lower = lower[params]
 
-    #
-    # The MODEL0 => to get the init of the theta for the negbin
-    #
-
-    if(missing(theta.init)){
-        theta.init = NULL
-    } else {
-        if(!isScalar(theta.init) || theta.init <= 0){
-            stop("the argument 'theta.init' must be a strictly positive scalar.")
-        }
-    }
-
-    if(origin_type == "feNmlm" || computeModel0){
-        model0 <- get_model_null(env, theta.init)
-        theta.init = model0$theta
-    } else {
-        model0 = NULL
-    }
-
-    # For the negative binomial:
-    if(family == "negbin"){
-        params = c(params, ".theta")
-        start = c(start, theta.init)
-        names(start) = params
-        upper = c(upper, 10000)
-        lower = c(lower, 1e-3)
-    }
-
     ####
     #### Sending to the env ####
     ####
@@ -1817,13 +1765,47 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
     # Other
     assign("family", family, env)
+    assign("famFuns", famFuns, env)
     assign("fml", fml, env)
     assign("origin", origin, env)
     assign("warn", warn, env)
     assign("mem.clean", mem.clean, env)
     assign("nthreads", nthreads, env)
 
+    #
+    # The MODEL0 => to get the init of the theta for the negbin
+    #
+
+    check_arg(theta.init, "numeric scalar gt{0}")
+    if(missing(theta.init)){
+        theta.init = NULL
+    }
+
+    if(origin_type == "feNmlm" || computeModel0){
+        model0 = get_model_null(env, theta.init)
+        theta.init = model0$theta
+    } else {
+        model0 = NULL
+    }
+
+    # For the negative binomial:
+    if(family == "negbin"){
+        params = c(params, ".theta")
+        start = c(start, theta.init)
+        names(start) = params
+        upper = c(upper, 10000)
+        lower = c(lower, 1e-3)
+    }
+
+    assign("model0", model0, env)
+    onlyFixef = !isLinear && !isNonLinear && Q > 0
+    assign("onlyFixef", onlyFixef, env)
+    assign("start", start, env)
+
+    #
     # The Fixed-effects
+    #
+
     assign("isFixef", isFixef, env)
     if(isFixef){
         assign("fixef_id", fixef_id, env)
@@ -1930,7 +1912,6 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         assign("nonlinear.params", nonlinear.params, env)
         assign("params", params, env)
         assign("jacobian.method", jacobian.method, env)
-        assign("famFuns", famFuns, env)
         # Pour gerer les valeurs de mu:
         assign("coefMu", list(), env)
         assign("valueMu", list(), env)
@@ -2015,16 +1996,6 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         if(useHessian) hessian <- femlm_hessian
         assign("gradient", gradient, env)
         assign("hessian", hessian, env)
-
-        assign("model0", model0, env)
-
-        onlyFixef = !isLinear && !isNonLinear && Q > 0
-        assign("onlyFixef", onlyFixef, env)
-        if(onlyFixef){
-            assign("linear.mat", 0, env)
-        }
-
-        assign("start", start, env)
     }
 
     # fixest tag
