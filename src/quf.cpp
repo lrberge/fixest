@@ -75,14 +75,12 @@ inline double ull_to_float(unsigned long long u_ull) {
     return res;
 }
 
-void quf_double(vector<int> &x_uf, void *px, vector<double> &x_unik, bool is_string = false){
+void quf_double(int n, int *x_uf, void *px, vector<double> &x_unik, bool is_string = false){
 
     // x_uf: x unclassed factor
     // px: pointer to x vector (R vector) -- READ ONLY!!!
     // x_unik: empty vector
     // px: either double or ULL (in case of strings)
-
-    int n = x_uf.size();
 
     double *px_dble = (double *)px;
     unsigned long long *px_ull = (unsigned long long *)px;
@@ -196,7 +194,7 @@ void quf_double(vector<int> &x_uf, void *px, vector<double> &x_unik, bool is_str
 
 }
 
-void quf_int_gnl(vector<int> &x_uf, void *px, vector<double> &x_unik, int x_min, bool is_double){
+void quf_int_gnl(int n, int *x_uf, void *px, vector<double> &x_unik, int x_min, bool is_double){
     // we can sort a range up to 2**31 => ie not the full int range
     // for ranges > 2**31 => as double
     // px: pointer to the values of x -- R vector READ ONLY!!!
@@ -205,8 +203,6 @@ void quf_int_gnl(vector<int> &x_uf, void *px, vector<double> &x_unik, int x_min,
 
     int *px_int = (int *)px;
     double *px_dble = (double *)px;
-
-    int n = x_uf.size();
 
     // variables
     int x_uint_current = 0;
@@ -302,7 +298,7 @@ void quf_int_gnl(vector<int> &x_uf, void *px, vector<double> &x_unik, int x_min,
 
 }
 
-void quf_int(vector<int> &x_uf, void *px, vector<double> &x_unik, int x_min, int max_value, bool is_double = false){
+void quf_int(int n, int *x_uf, void *px, vector<double> &x_unik, int x_min, int max_value, bool is_double = false){
     // Principle:
     // we go through x only once
     // we keep a table of all x values
@@ -314,7 +310,6 @@ void quf_int(vector<int> &x_uf, void *px, vector<double> &x_unik, int x_min, int
     int *px_int = (int *)px;
     double *px_dble = (double *)px;
 
-    int n = x_uf.size();
     int n_unik = 0; // nber of uniques minus one
 
     // radix array
@@ -323,12 +318,10 @@ void quf_int(vector<int> &x_uf, void *px, vector<double> &x_unik, int x_min, int
     int x_tmp, x_pos;
     for(int i=0 ; i<n ; ++i){
         x_tmp = is_double ? static_cast<int>(px_dble[i]) - x_min : px_int[i] - x_min;
-        // x_tmp = x[i] - x_min;
 
         if(x_lookup[x_tmp] == 0){
             ++n_unik;
             x_uf[i] = n_unik;
-            // x_unik.push_back(static_cast<double>(px_int[i]));
             x_unik.push_back(is_double ? px_dble[i] : static_cast<double>(px_int[i]));
             x_lookup[x_tmp] = n_unik;
         } else {
@@ -338,44 +331,6 @@ void quf_int(vector<int> &x_uf, void *px, vector<double> &x_unik, int x_min, int
     }
 
 }
-
-// [[Rcpp::export]]
-List cpp_quf_str(SEXP x){
-
-    int n = Rf_length(x);
-
-    vector<int> x_uf(n);
-    vector<double> x_unik;
-
-    // we change the string vector into a uint64 vector
-    // since we don't care about the sorting order, we can just
-    // recast into double (an not uint64)
-
-    vector<double> x_ull(n);
-    std::uintptr_t xi_uintptr;
-    unsigned long long xi_ull;
-
-
-    for(int i=0 ; i<n ; ++i){
-        const char *pxi = CHAR(STRING_ELT(x, i));
-        xi_uintptr = reinterpret_cast<std::uintptr_t>(pxi);
-        xi_ull = static_cast<unsigned long long>(xi_uintptr);
-
-        x_ull[i] = xi_ull;
-
-        // Rcout << xi_uintptr << "  ----  " << xi_ull << "\n";
-    }
-
-    quf_double(x_uf, x_ull.data(), x_unik, true);
-
-    List res;
-    res["x_uf"] = x_uf;
-    res["x_unik"] = x_unik;
-
-    return res;
-}
-
-
 
 
 // [[Rcpp::export]]
@@ -400,7 +355,9 @@ List cpp_quf_gnl(SEXP x){
 
     int n = Rf_length(x);
 
-    vector<int> x_uf(n);
+    // vector<int> x_uf(n);
+    SEXP r_x_uf = PROTECT(Rf_allocVector(INTSXP, n));
+    int *x_uf = INTEGER(r_x_uf);
     vector<double> x_unik;
 
     // preparation for strings
@@ -474,42 +431,44 @@ List cpp_quf_gnl(SEXP x){
         // so we go into quf_int whenever max_value <= 2.5*n
 
         if(max_value < 100000 || max_value <= 2.5*n){
-            quf_int(x_uf, px_generic, x_unik, X_MIN, static_cast<int>(max_value), is_int_in_double);
+            quf_int(n, x_uf, px_generic, x_unik, X_MIN, static_cast<int>(max_value), is_int_in_double);
         } else if(max_value < 0x10000000){
             // we don't cover ranges > 2**31 (uints are pain in the neck)
-            quf_int_gnl(x_uf, px_generic, x_unik, X_MIN, is_int_in_double);
+            quf_int_gnl(n, x_uf, px_generic, x_unik, X_MIN, is_int_in_double);
         } else {
             // ranges > 2**31 => as double
 
             if(is_int_in_double){
-                quf_double(x_uf, (double *)px_generic, x_unik);
+                quf_double(n, x_uf, (double *)px_generic, x_unik);
             } else {
                 // we need to create a vector of double, otherwise: pointer issue
                 vector<double> x_dble(n);
                 int *px = INTEGER(x);
                 for(int i=0 ; i<n ; ++i) x_dble[i] = static_cast<double>(px[i]);
-                quf_double(x_uf, x_dble.data(), x_unik);
+                quf_double(n, x_uf, x_dble.data(), x_unik);
             }
         }
 
     } else if(IS_STR){
         // string -- beforehand transformed as ULL
-        quf_double(x_uf, x_ull.data(), x_unik, true);
+        quf_double(n, x_uf, x_ull.data(), x_unik, true);
     } else {
         // double
         double *px = REAL(x);
-        quf_double(x_uf, px, x_unik);
+        quf_double(n, x_uf, px, x_unik);
     }
 
+    UNPROTECT(1);
+
     List res;
-    res["x_uf"] = x_uf;
+    res["x_uf"] = r_x_uf;
     res["x_unik"] = x_unik;
 
     return res;
 }
 
 
-void quf_single(void *px_in, std::string &x_type, int n, vector<int> &x_uf, vector<double> &x_unik){
+void quf_single(void *px_in, std::string &x_type, int n, int *x_uf, vector<double> &x_unik){
 
     // preparation for strings
     bool IS_STR = x_type == "string";
@@ -570,35 +529,35 @@ void quf_single(void *px_in, std::string &x_type, int n, vector<int> &x_uf, vect
         // so we go into quf_int whenever max_value <= 2.5*n
 
         if(max_value < 100000 || max_value <= 2.5*n){
-            quf_int(x_uf, px_generic, x_unik, X_MIN, static_cast<int>(max_value), is_int_in_double);
+            quf_int(n, x_uf, px_generic, x_unik, X_MIN, static_cast<int>(max_value), is_int_in_double);
         } else if(max_value < 0x10000000){
             // we don't cover ranges > 2**31 (uints are pain in the neck)
-            quf_int_gnl(x_uf, px_generic, x_unik, X_MIN, is_int_in_double);
+            quf_int_gnl(n, x_uf, px_generic, x_unik, X_MIN, is_int_in_double);
         } else {
             // ranges > 2**31 => as double
 
             if(is_int_in_double){
-                quf_double(x_uf, (double *)px_generic, x_unik);
+                quf_double(n, x_uf, (double *)px_generic, x_unik);
             } else {
                 // we need to create a vector of double, otherwise: pointer issue
                 vector<double> x_dble(n);
                 int *px = (int *) px_in;
                 for(int i=0 ; i<n ; ++i) x_dble[i] = static_cast<double>(px[i]);
-                quf_double(x_uf, x_dble.data(), x_unik);
+                quf_double(n, x_uf, x_dble.data(), x_unik);
             }
         }
 
     } else if(IS_STR){
         // string -- beforehand transformed as ULL
-        quf_double(x_uf, px_in, x_unik, true);
+        quf_double(n, x_uf, px_in, x_unik, true);
     } else {
         // double
-        quf_double(x_uf, px_in, x_unik);
+        quf_double(n, x_uf, px_in, x_unik);
     }
 
 }
 
-void quf_table_sum_single(void *px_in, std::string &x_type, int n, int q, vector<int> &x_quf,
+void quf_table_sum_single(void *px_in, std::string &x_type, int n, int q, int *x_quf,
                           vector<double> &x_unik, vector<int> &x_table,
                           double *py, vector<double> &sum_y, bool do_sum_y,
                           int type, vector<bool> &any_pblm, vector<bool> &id_pblm,
@@ -610,8 +569,6 @@ void quf_table_sum_single(void *px_in, std::string &x_type, int n, int q, vector
     // 0: no problem
     // 1: pblm if sum y = 0
     // 2: pblm if sum y = 0 or sum_y == table
-
-    x_quf.resize(n);
 
     // Rcout << "q = " << q << ", n = " << n;
 
@@ -671,7 +628,7 @@ void quf_table_sum_single(void *px_in, std::string &x_type, int n, int q, vector
 
 }
 
-void quf_refactor_table_sum_single(vector<int> &quf_old, vector<int> &quf_new, vector<bool> &obs_removed,
+void quf_refactor_table_sum_single(int n, int *quf_old, int *quf_new, vector<bool> &obs_removed,
                                    vector<double> &x_unik, vector<double> &x_unik_new, vector<double> &x_removed,
                                    vector<int> &x_table, double *py, vector<double> &sum_y, bool do_sum_y,
                                    int type, vector<bool> &id_pblm, bool check_pblm, bool *pstop_now){
@@ -684,7 +641,6 @@ void quf_refactor_table_sum_single(vector<int> &quf_old, vector<int> &quf_new, v
     // Type: 0: no restriction -- 1: only 0s -- 2: 0s and 1s
 
     int D = x_unik.size();
-    int n = quf_old.size();
 
     // Only if type == 2 (0s and 1s removed) that we recreate the pblmatic IDs
     // because if only 0s, only the ones in the original id_pblm are removed
@@ -779,12 +735,13 @@ void quf_refactor_table_sum_single(vector<int> &quf_old, vector<int> &quf_new, v
         }
 
         int id;
+        int i_new = 0;
         for(int i=0 ; i<n ; ++i){
             if(!obs_removed[i]){
                 id = any_pblm ? id_new[quf_old[i] - 1] : quf_old[i];
                 ++x_table[id - 1];
                 if(do_sum_y) sum_y[id - 1] += py[i];
-                quf_new.push_back(id);
+                quf_new[i_new++] = id;
             }
         }
 
@@ -837,7 +794,13 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, int type, IntegerVector
     double *py = REAL(y);
 
     // the vectors of qufed
-    vector< vector<int> > x_quf_all(Q);
+    List res_x_quf_all(Q);
+    vector<int*> p_x_quf_all(Q);
+    for(int q=0 ; q<Q ; ++q){
+        res_x_quf_all[q] = PROTECT(Rf_allocVector(INTSXP, n));
+        p_x_quf_all[q] = INTEGER(res_x_quf_all[q]);
+    }
+
     vector< vector<int> > x_table_all(Q);
     vector< vector<double> > x_unik_all(Q);
     vector<bool> any_pblm(Q, false);
@@ -890,11 +853,9 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, int type, IntegerVector
         }
     }
 
-
-
-#pragma omp parallel for num_threads(nthreads)
+    #pragma omp parallel for num_threads(nthreads)
     for(int q=0 ; q<Q ; ++q){
-        quf_table_sum_single(px_all[q], x_type_all[q], n, q, x_quf_all[q], x_unik_all[q], x_table_all[q],
+        quf_table_sum_single(px_all[q], x_type_all[q], n, q, p_x_quf_all[q], x_unik_all[q], x_table_all[q],
                              py, sum_y_all[q], do_sum_y, type, any_pblm, id_pblm_all[q], check_pblm[q]);
     }
 
@@ -914,12 +875,12 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, int type, IntegerVector
         std::fill(obs_removed.begin(), obs_removed.end(), false);
 
         // No need to take care of race conditions
-#pragma omp parallel for num_threads(nthreads)
+        #pragma omp parallel for num_threads(nthreads)
         for(int q=0 ; q<Q ; ++q){
             // skipping loop if no problem
             if(any_pblm[q]){
-                vector<bool> id_pblm = id_pblm_all[q];
-                int *pquf = x_quf_all[q].data();
+                vector<bool> &id_pblm = id_pblm_all[q];
+                int *pquf = p_x_quf_all[q];
                 for(int i=0 ; i<n ; ++i){
                     if(id_pblm[pquf[i] - 1]){
                         obs_removed[i] = true;
@@ -945,58 +906,60 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, int type, IntegerVector
         // I create the addition new_quf and new_unik because we need the
         // them old items for the construction of the new.
 
-        vector< vector<int> > x_new_quf_all(Q);
+        int n_removed = std::accumulate(obs_removed.begin(), obs_removed.end(), 0);
+        int n_new = n - n_removed;
+
+        Rcout << "n removed: " << n_removed << ", n left: " << n_new << "\n";
+
+        List res_x_new_quf_all(Q);
+        vector<int*> p_x_new_quf_all(Q);
+        for(int q=0 ; q<Q ; ++q){
+            res_x_new_quf_all[q] = PROTECT(Rf_allocVector(INTSXP, n_new));
+            p_x_new_quf_all[q] = INTEGER(res_x_new_quf_all[q]);
+        }
+
         vector< vector<double> > x_new_unik_all(Q);
         bool stop_now = false;
         bool *pstop_now = &stop_now;
 
-#pragma omp parallel for num_threads(nthreads)
+        #pragma omp parallel for num_threads(nthreads)
         for(int q=0 ; q<Q ; ++q){
-            quf_refactor_table_sum_single(x_quf_all[q], x_new_quf_all[q], obs_removed,
+            quf_refactor_table_sum_single(n, p_x_quf_all[q], p_x_new_quf_all[q], obs_removed,
                                           x_unik_all[q], x_new_unik_all[q], x_removed_all[q],
-                                                                                         x_table_all[q], py, sum_y_all[q], do_sum_y,
-                                                                                         type, id_pblm_all[q], check_pblm[q], pstop_now);
+                                        x_table_all[q], py, sum_y_all[q], do_sum_y,
+                                        type, id_pblm_all[q], check_pblm[q], pstop_now);
         }
 
         if(*pstop_now){
+            UNPROTECT(Q + Q);
             stop("The dependent variable is fully explained by the fixed-effects.");
         }
 
         // Saving the values in the appropriate locations
-        x_quf_all = x_new_quf_all;
+        res_x_quf_all = res_x_new_quf_all;
         x_unik_all = x_new_unik_all;
 
     }
 
     // The object to be returned
+
     List res;
 
-    // Rcout << "start res -- ";
-
-    // x: UF
-    List res_tmp;
-    for(int q=0 ; q<Q ; ++q){
-        res_tmp.push_back(x_quf_all[q]);
-    }
-    res["quf"] = clone(res_tmp);
-
-    // Rcout << "quf: ok";
+    // x: UF (the largest object => no copy)
+    res["quf"] = res_x_quf_all;
 
     // x: Unik
+    List res_tmp(Q);
     for(int q=0 ; q<Q ; ++q){
         res_tmp[q] = x_unik_all[q];
     }
     res["items"] = clone(res_tmp);
-
-    // Rcout << ", items: ok";
 
     // table
     for(int q=0 ; q<Q ; ++q){
         res_tmp[q] = x_table_all[q];
     }
     res["table"] = clone(res_tmp);
-
-    // Rcout << ", table: ok";
 
     // sum y
     for(int q=0 ; q<Q ; ++q){
@@ -1008,8 +971,6 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, int type, IntegerVector
     }
     res["sum_y"] = clone(res_tmp);
 
-    // Rcout << ", sum_y: ok";
-
     //
     // IF PROBLEM ONLY
     //
@@ -1018,19 +979,15 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, int type, IntegerVector
         // The removed observations
         res["obs_removed"] = obs_removed;
 
-        // Rcout << ", obs_removed: ok";
-
         // The removed clusters
         for(int q=0 ; q<Q ; ++q){
             res_tmp[q] = x_removed_all[q];
         }
         res["fe_removed"] = clone(res_tmp);
 
-        // Rcout << ", fe_removed: ok";
-
     }
 
-    // Rcout << "\n";
+    UNPROTECT(Q + (Q * is_pblm));
 
     return res;
 }
