@@ -947,8 +947,8 @@ n = nrow(base)
 set.seed(0)
 base$y_na = base$y ; base$y_na[sample(n, 50)] = NA
 base$period_txt = letters[base$period]
-ten_dates = c("1jan1960", "2jan1960", "31mar1960", "5apr1960", "12may1960", "25may1960", "20jun1960", "30jul1960", "2jan1965", "5dec2002")
-base$period_date = as.Date(ten_dates, "%d%b%Y")[base$period]
+ten_dates = c("1960-01-15", "1960-01-16", "1960-03-31", "1960-04-05", "1960-05-12", "1960-05-25", "1960-06-20", "1960-07-30", "1965-01-02", "2002-12-05")
+base$period_date = as.Date(ten_dates, "%Y-%m-%d")[base$period]
 base$y_0 = base$y**2 ; base$y_0[base$id == 1] = 0
 
 # We compute the lags "by hand"
