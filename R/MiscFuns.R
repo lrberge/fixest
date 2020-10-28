@@ -195,8 +195,15 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 	}
 
 
-	if(!is.null(x$convStatus) && !x$convStatus && is.null(x$onlyFixef)){
-		cat("# Evaluations:", x$iterations, "--", x$message, "\n")
+	if(isFALSE(x$convStatus)){
+	    iter_format = x$iterations
+	    if(length(iter_format)== 1){
+	        iter_format = paste0("lhs: ", iter_format)
+	    } else {
+	        n_iter = length(iter_format)
+	        iter_format = paste0("lhs: ", iter_format[n_iter], ", rhs: ", paste0(head(iter_format, min(n_iter - 1, n)), collapse = ", "))
+	    }
+		cat("# Evaluations:", iter_format, "--", x$message, "\n")
 	}
 
 }
