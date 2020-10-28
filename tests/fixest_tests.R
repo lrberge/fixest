@@ -151,6 +151,29 @@ for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
     cat("\n")
 }
 
+
+####
+#### Fit methods ####
+####
+
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
+base$y_int = as.integer(base$y)
+base$y_log = sample(c(TRUE, FALSE), 150, TRUE)
+
+res = feglm.fit(base$y, base[, 2:4])
+res_bis = feglm(y ~ -1 + x1 + x2 + x3, base)
+test(coef(res), coef(res_bis))
+
+res = feglm.fit(base$y_int, base[, 2:4])
+res_bis = feglm(y_int ~ -1 + x1 + x2 + x3, base)
+test(coef(res), coef(res_bis))
+
+res = feglm.fit(base$y_log, base[, 2:4])
+res_bis = feglm(y_log ~ -1 + x1 + x2 + x3, base)
+test(coef(res), coef(res_bis))
+
+
 ####
 #### Standard-errors ####
 ####
