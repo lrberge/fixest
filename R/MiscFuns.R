@@ -6035,7 +6035,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 
 	if(se.val == "white") se.val = "hetero"
 
-	dots = list()
+	dots = list(...)
 	if(is.null(dots$nframes_up)){
 		nframes_up = 1
 	} else {
