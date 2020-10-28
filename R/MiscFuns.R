@@ -3548,12 +3548,15 @@ prepare_matrix = function(fml, base){
 }
 
 
-fixest_model_matrix = function(fml, data){
+fixest_model_matrix = function(fml, data, fake_intercept = FALSE){
     # This functions takes in the formula of the linear part and the
     # data
     # It reformulates the formula (ie with lags and interactions)
     # then either apply a model.matrix
     # either applies an evaluation (which can be faster)
+    #
+    # fake_intercept => whether to add the intercept, only to make sure
+    #  the factors are well created
 
     # fml = ~a*b+c+i(x1)+Temp:i(x2)+i(x3)/Wind
 
@@ -3574,7 +3577,7 @@ fixest_model_matrix = function(fml, data){
     IS_INTER = any(qui_inter)
     if(IS_INTER){
         # OMG... why do I always have to reinvent the wheel???
-        is_intercept = attr(t_fml,"intercept") == 1
+        is_intercept = fake_intercept || (attr(t_fml,"intercept") == 1)
         i_naked = which(is_naked_inter(tl[qui_inter]))
 
         for(i in seq_along(i_naked)){
@@ -3611,6 +3614,10 @@ fixest_model_matrix = function(fml, data){
         }
     }
 
+    if(fake_intercept && useModel.matrix == FALSE){
+        # We ensure the intercept is NOT here
+        fml = update(fml, . ~ -1 + .)
+    }
 
     if(useModel.matrix){
         # to catch the NAs, model.frame needs to be used....
