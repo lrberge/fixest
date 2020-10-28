@@ -421,7 +421,7 @@ etable(list(est, est_bis), cluster = list("standard", ~ Month))
 #
 # Method 3: Using rep()
 
-etable(rep(est, cluster = list("standard", ~ Month))
+etable(rep(est, cluster = list("standard", ~ Month)))
 
 # When using rep on 2 or more objects, you need to embed them in .l()
 etable(rep(.l(est, est_bis), cluster = list("standard", ~ Month, ~ Day)))
