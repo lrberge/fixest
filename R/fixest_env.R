@@ -481,9 +481,10 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     }
 
     #
-    # Controls and setting of the linear part:
+    # ... linear part ####
     #
 
+    fixef_terms_full = NULL
     interaction.info = NULL
     if(isFit){
 
@@ -563,17 +564,32 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 stop(ifsingle(not_there, "The v", "V"), "ariable", enumerate_items(not_there, "s.is"), " in the RHS of the formula but not in the dataset.")
             }
 
+            fake_intercept = FALSE
             if(isFixef){
                 # if dummies are provided, we make sure there is an
                 # intercept so that factors can be handled properly
-                linear.fml = update(linear.fml, ~.+1)
+                #
+                # Beware: only slope: we don't add it
+
+                if(is.character(fixef_vars)){
+                    # There is no varying slope allowed
+                    fake_intercept = TRUE
+                } else {
+                    # On en profite pour extraire les termes
+                    fixef_terms_full = terms_fixef(fixef_vars)
+                    if("try-error" %in% class(fixef_terms_full)){
+                        stop("Problem extracting the terms of the fixed-effects part of the formula:\n", fixef_terms_full)
+                    }
+                    fake_intercept = any(fixef_terms_full$slope_flag >= 0)
+
+                }
             }
 
             #
             # We construct the linear matrix
             #
 
-            linear.mat = try(fixest_model_matrix(fml, data), silent = TRUE)
+            linear.mat = try(fixest_model_matrix(fml, data, fake_intercept), silent = TRUE)
             if("try-error" %in% class(linear.mat)){
                 stop("Evaluation of the right-hand-side of the formula raises an error: ", linear.mat)
             }
@@ -583,31 +599,6 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
             # Interaction information => if no interaction: NULL
             interaction.info = getOption("fixest_interaction_ref")
-
-
-            # # we look at whether there are factor-like variables to be evaluated
-            # # if there is factors => model.matrix
-            # types = sapply(data[, dataNames %in% linear.varnames, FALSE], class)
-            # if(length(types) == 0 || grepl("factor", deparse_long(linear.fml)) || any(types %in% c("character", "factor"))){
-            #     useModel.matrix = TRUE
-            # } else {
-            #     useModel.matrix = FALSE
-            # }
-            #
-            # if(useModel.matrix){
-            #     # linear.mat = stats::model.matrix(linear.fml, data)
-            #     # to catch the NAs, model.frame needs to be used....
-            #     linear.mat = try(stats::model.matrix(linear.fml, stats::model.frame(linear.fml, data, na.action=na.pass)), silent = TRUE)
-            #     if("try-error" %in% class(linear.mat)){
-            #         stop("Evaluation of the right-hand-side of the formula raises an error: \n", linear.mat)
-            #     }
-            # } else {
-            #     linear.mat = try(prepare_matrix(linear.fml, data), silent = TRUE)
-            #     if("try-error" %in% class(linear.mat)){
-            #         stop("Evaluation of the right-hand-side of the formula raises an error: \n", linear.mat)
-            #     }
-            # }
-
         }
 
     }
@@ -1031,14 +1022,15 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                     } else {
                         combine.quick = FALSE
                     }
-                } else if(!isLogical(combine.quick)){
-                    stop("Argument 'combine.quick' must be a single logical.")
                 }
 
-                fixef_terms_full = terms_fixef(fixef_fml)
-                if("try-error" %in% class(fixef_terms_full)){
-                    stop("Problem extracting the terms of the fixed-effects part of the formula:\n", fixef_terms_full)
+                if(!is.null(fixef_terms_full)){
+                    fixef_terms_full = terms_fixef(fixef_fml)
+                    if("try-error" %in% class(fixef_terms_full)){
+                        stop("Problem extracting the terms of the fixed-effects part of the formula:\n", fixef_terms_full)
+                    }
                 }
+
 
                 fixef_terms = fixef_terms_full$fml_terms
 
