@@ -264,8 +264,6 @@ FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id
     vector<int> nb_coef_Q(Q);
     int nb_coef_T = 0;
 
-    // Rcout << Q << " Fixed-effects:\n";
-
     for(int q=0 ; q<Q ; ++q){
         //   0: no slope
         // < 0: slope but not fixed-effect
@@ -289,8 +287,6 @@ FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id
         } else {
             nb_coef_Q[q] = nb_id_Q[q];
         }
-
-        // Rcout << " - FE: " << (is_slope_Q[q] == false || sf > 0)  << ", slopes: " << nb_vs_noFE_Q[q] << "\n";
 
         nb_coef_T += nb_coef_Q[q];
     }
@@ -368,8 +364,6 @@ FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id
 
     }
 
-    // Rcout << "setup of FE without slope: OK\n";
-
 
     if(is_weight && nb_coef_noVS_T > 0){
         // Checking the 0-weights => we set them to 1 to wavoid division by 0
@@ -378,12 +372,6 @@ FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id
                 sum_weights_noVS_C[c] = 1;
             }
         }
-
-        // Rcout << "Sum weights:\n";
-        // for(int c=0 ; c<nb_coef_noVS_T ; ++c){
-        //     Rcout << sum_weights_noVS_C[c] << ", ";
-        // }
-        // Rcout << "\n";
 
     }
 
@@ -399,16 +387,12 @@ FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id
             p_vs_vars[v] = REAL(VECTOR_ELT(slope_vars_list, v));
         }
 
-        // Rcout << "Varying Slopes:\n - saving p_vs_vars: OK\n";
-
         // B) Computing the coefficients of the systems of equations
 
         int nb_vs_coef_T = 0;
         for(int q=0 ; q<Q ; ++q){
             nb_vs_coef_T += nb_vs_Q[q] * nb_vs_Q[q] * nb_id_Q[q];
         }
-
-        // Rcout << "There are " << nb_vs_coef_T << " coefficients in the system of Eqs.\n";
 
         // The sys of eqs, all coefs to 0
         eq_systems_VS_C.resize(nb_vs_coef_T);
@@ -420,12 +404,8 @@ FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id
             p_eq_systems_VS_C[q] = p_eq_systems_VS_C[q - 1] + nb_vs_Q[q - 1] * nb_vs_Q[q - 1] * nb_id_Q[q - 1];
         }
 
-        // Rcout << " - initializing the system of equations: OK\n";
-
         for(int q=0 ; q<Q ; ++q){
             if(is_slope_Q[q] == false) continue;
-
-            // Rcout << "   * q = " << q << ", ";
 
             simple_mat_of_vs_vars VS_mat(this, q);
             simple_mat_with_id my_system(p_eq_systems_VS_C[q], nb_vs_Q[q]);
@@ -446,41 +426,36 @@ FEClass::FEClass(int n_obs, int Q, SEXP r_weights, SEXP fe_id_list, SEXP r_nb_id
                 }
             }
 
-            // Rcout << "a";
-
             // Finishing the computation of the system (symmetry)
             for(int c=0 ; c<nb_coef ; ++c){
                 for(int v1=0 ; v1<V ; ++v1){
                     for(int v2=0 ; v2<v1 ; ++v2){
-                        if(my_system(c, v1, v2) == 0){
-                            // We avoid corner cases (otherwise leads to division by 0)
-                            my_system(c, v1, v2) = 1;
-                            my_system(c, v2, v1) = 1;
-                        } else {
-                            my_system(c, v2, v1) = my_system(c, v1, v2);
-                        }
+                        my_system(c, v2, v1) = my_system(c, v1, v2);
                     }
                 }
             }
-
-            // Rcout << "b";
 
 
             // Precomputing the solver coefficients
             double my_row_coef = 0;
             for(int c=0 ; c<nb_coef ; ++c){
                 for(int v=0 ; v<V ; ++v){
-                    for(int i=v + 1 ; i<V ; ++i){
-                        my_row_coef = my_system(c, i, v) / my_system(c, v, v);
-                        my_system(c, i, v) = my_row_coef;
-                        for(int j=v + 1 ; j<V ; ++j){
-                            my_system(c, i, j) -= my_row_coef * my_system(c, v, j);
+                    if(my_system(c, v, v) == 0){
+                        // The pivot is equal to 0 => overidentified system
+                        for(int i=v + 1 ; i<V ; ++i){
+                            my_system(c, i, v) = 0;
+                        }
+                    } else {
+                        for(int i=v + 1 ; i<V ; ++i){
+                            my_row_coef = my_system(c, i, v) / my_system(c, v, v);
+                            my_system(c, i, v) = my_row_coef;
+                            for(int j=v + 1 ; j<V ; ++j){
+                                my_system(c, i, j) -= my_row_coef * my_system(c, v, j);
+                            }
                         }
                     }
                 }
             }
-
-            // Rcout << " OK\n";
 
             // We end up with all the (pre-solved) systems of equations
         }
@@ -588,13 +563,7 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
 
             for(int i=0 ; i<n_obs ; ++i){
                 for(int v=0 ; v<V ; ++v){
-                    // if(is_weight){
-                    //     rhs(my_fe[i] - 1, v) -= VS_mat(i, v) * sum_other_coef_N[i] * p_weights[i];
-                    // } else {
-                    //     rhs(my_fe[i] - 1, v) -= VS_mat(i, v) * sum_other_coef_N[i];
-                    // }
                     rhs(my_fe[i] - 1, v) -= VS_mat(i, v) * sum_other_coef_N[i];
-                    // rhs(my_fe[i] - 1, v) -= sum_other_coef_N[i];
                 }
             }
 
@@ -616,11 +585,15 @@ void FEClass::compute_fe_coef_internal(int q, double *fe_coef_C, bool is_single,
         for(int c=0 ; c<nb_id ; ++c){
             // We backward solve
             for(int v=V - 1 ; v>=0 ; --v){
-                val = rhs(c, v);
-                for(int v_done=v + 1 ; v_done<V ; ++v_done){
-                    val -= rhs(c, v_done) * my_system(c, v, v_done);
+                if(my_system(c, v, v) == 0){
+                    rhs(c, v) = 0;
+                } else {
+                    val = rhs(c, v);
+                    for(int v_done=v + 1 ; v_done<V ; ++v_done){
+                        val -= rhs(c, v_done) * my_system(c, v, v_done);
+                    }
+                    rhs(c, v) = val / my_system(c, v, v);
                 }
-                rhs(c, v) = val / my_system(c, v, v);
             }
         }
 
@@ -1678,14 +1651,13 @@ List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, d
     FEClass FE_info(n_obs, Q, r_weights, fe_id_list, r_nb_id_Q, table_id_I, slope_flag_Q, slope_vars_list);
     int nb_coef_T = FE_info.nb_coef_T;
 
-    // output vector:
-    vector<double> output_values(static_cast<int64_t>(n_obs) * n_vars, 0);
+    // output vector: (Note that if the means are provided, we use that vector and will modify it in place)
     int64_t n_total = static_cast<int64_t>(n_obs) * n_vars;
+    SEXP output_values = PROTECT(Rf_allocVector(REALSXP, isInit ? 1 : n_total));
 
-    if(isInit){
-        for(int64_t i=0 ; i<n_total ; ++i){
-            output_values[i] = init[i];
-        }
+    double *p_output_origin = isInit ? init : REAL(output_values);
+    if(isInit == false){
+        std::fill_n(p_output_origin, n_total, 0);
     }
 
     //
@@ -1693,7 +1665,7 @@ List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, d
     //
 
     vector<double*> p_output(n_vars);
-    p_output[0] = output_values.data();
+    p_output[0] = p_output_origin;
     for(int v=1 ; v<n_vars ; v++){
         p_output[v] = p_output[v - 1] + n_obs;
     }
@@ -1765,7 +1737,7 @@ List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, d
     int nthreads_current = nthreads > n_vars ? n_vars : nthreads;
 
     // enlever les rprintf dans les nthreads jobs
-#pragma omp parallel for num_threads(nthreads_current) schedule(static, 1)
+    #pragma omp parallel for num_threads(nthreads_current) schedule(static, 1)
     for(int v = 0 ; v<(n_vars+nthreads_current) ; ++v){
         // demean_single is the workhorse
         // you get the "mean"
@@ -1786,6 +1758,7 @@ List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, d
 
 
     if(*(args.stopnow)){
+        UNPROTECT(1);
         stop("cpp_demean: User interrupt.");
     }
 
@@ -1794,6 +1767,8 @@ List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, d
     //
     // save
     //
+
+    List res; // a vector and a matrix
 
     int nrow = useX ? n_obs : 1;
     int ncol = useX ? n_vars - useY : 1;
@@ -1820,6 +1795,8 @@ List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, d
         }
     }
 
+    res["X_demean"] = X_demean;
+    res["y_demean"] = y_demean;
 
     // iterations
     IntegerVector iter_final(n_vars);
@@ -1827,27 +1804,23 @@ List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, d
         iter_final[v] = p_iterations_all[v];
     }
 
+    res["iterations"] = iter_final;
+
     // if save is requested
-    int64_t n = saveInit ? n_total : 1;
-    NumericVector saved_output(n);
-    for(int64_t i=0 ; i < n ; ++i){
-        saved_output[i] = output_values[i];
+    if(saveInit){
+        if(isInit){
+            res["means"] = r_init;
+        } else {
+            res["means"] = output_values;
+        }
     }
 
     // save fixef coef
-    int n_c = save_fixef ? nb_coef_T : 1;
-    NumericVector saved_fixef_coef(n_c);
-    for(int i=0 ; i < n_c ; ++i){
-        saved_fixef_coef[i] = fixef_values[i];
+    if(save_fixef){
+        res["fixef_coef"] = fixef_values;
     }
 
-
-    List res; // a vector and a matrix
-    res["X_demean"] = X_demean;
-    res["y_demean"] = y_demean;
-    res["iterations"] = iter_final;
-    res["means"] = saved_output;
-    res["fixef_coef"] = saved_fixef_coef;
+    UNPROTECT(1);
 
     return(res);
 }
