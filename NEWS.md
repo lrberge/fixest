@@ -1,7 +1,29 @@
 
 # News for the R Package `fixest`
 
-## Changes in version 0.7.1
+## Changes in version 0.8.0
+
+#### Bugs
+
+  - When using variable names to cluster the standard-errors inside functions, summary may not fetch the data in the right frame (thanks to @chenwang, [#52](https://github.com/lrberge/fixest/issues/52)).
+  
+  - When using variables with varying slopes and the number of iterations is greater than 300, a bug occured in the function checking the convergence was right (thanks to @kendonB, [#53](https://github.com/lrberge/fixest/issues/53)). 
+  
+  - Fix bug occurring for estimations with FEs but without any variable.
+  
+  - Fix bug in the demeaning algorithm when two variables with varying slopes were identical.
+
+  
+
+#### Improvements of the internal algorithm
+
+ - Internal demeaning algorithm: some copies of the data are avoided when using `feglm`.
+ 
+ - Internal algorithm of `to_integer` (used in all estimations): one copy of the input data is now avoided.
+ 
+ - All estimations: smarter handling of the intercept, thus avoiding the reconstruction of the design matrix.
+
+## Changes in version 0.7.1 (27-10-2020)
 
 #### Hotfixes
 
@@ -86,8 +108,9 @@
 
  - Argument `nthreads`:
  
-  * The new default of argument `nthreads` is 50% of all available threads. 
-  * Accepts new values: a) 0 means all available threads, b) a number strictly between 0 and 1 will represent the fraction of all threads to use.
+    * The new default of argument `nthreads` is 50% of all available threads. 
+  
+    * Accepts new values: a) 0 means all available threads, b) a number strictly between 0 and 1 will represent the fraction of all threads to use.
   
   - When setting formula macros:
   
@@ -109,9 +132,9 @@
  
  - Lagging functions:
  
-  * Now `time.step = NULL` by default, which means that the choice of how to lag is automatically set. This means that the default behavior for time variables equal to Dates or character values should be appropriate.
+    * Now `time.step = NULL` by default, which means that the choice of how to lag is automatically set. This means that the default behavior for time variables equal to Dates or character values should be appropriate.
   
-  * New operator `d` which is the difference operator.
+    * New operator `d` which is the difference operator.
  
  - In all estimations: 
  
