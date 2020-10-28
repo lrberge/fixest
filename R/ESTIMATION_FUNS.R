@@ -250,7 +250,6 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 
 		# Number of nthreads
 		n_vars_X = ifelse(is.null(ncol(X)), 0, ncol(X))
-		# nthreads = min(nthreads, ncol(X) + 1 - onlyFixef)
 
 		# fixef information
 		fixef_sizes = get("fixef_sizes", env)
@@ -272,9 +271,13 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 		                            slope_flag_Q = slope_flag, slope_vars_list = slope_vars,
 		                            r_init = init, nthreads = nthreads)
 
-
 		y_demean = vars_demean$y_demean
-		X_demean = vars_demean$X_demean
+		if(onlyFixef){
+		    X_demean = matrix(1, nrow = length(y_demean))
+		} else {
+		    X_demean = vars_demean$X_demean
+		}
+
 		res$iterations = vars_demean$iterations
 		if(fromGLM){
 			res$means = vars_demean$means
@@ -284,18 +287,24 @@ feols = function(fml, data, weights, offset, panel.id, fixef, fixef.tol = 1e-6, 
 		    rm(vars_demean)
 		}
 
-		if(any(slope_flag > 0) && any(res$iterations > 300)){
+		if(any(abs(slope_flag) > 0) && any(res$iterations > 300)){
 		    # Maybe we have a convergence problem
 		    # This is poorly coded, but it's a temporary fix
-		    opt_fe = check_conv(y_demean, X_demean, fixef_id_list, slope_flag, slope_vars, weights)
+		    opt_fe <- check_conv(y_demean, X_demean, fixef_id_list, slope_flag, slope_vars, weights)
 
 		    # This is a bit too rough a check but it should catch the most problematic cases
 		    if(any(opt_fe > 1e-4)){
-		        msg = "There seems to be a convergence problem as regards the variables with varying slopes (in the RHS of your formula). The precision of the estimates may not be great. This is a known issue and there is work underway to solve it.\n As a workaround, you can use the variables with varying slopes as regular variables using the function interact (see ?interact)."
+		        msg = "There seems to be a convergence problem due to the presence of variables with varying slopes. The precision of the estimates may not be great."
+		        if(any(slope_flag < 0)){
+		            sugg = "This convergence problem mostly arises when there are varying slopes without their associated fixed-effect, as is the case in your estimation. Why not try to include the fixed-effect (i.e. use '[' instead of '[[')?"
+		        } else {
+		            sugg = "As a workaround, and if there are not too many slopes, you can use the variables with varying slopes as regular variables using the function interact (see ?interact)."
+		        }
+		        msg = paste(msg, sugg)
 
 		        res$convStatus = FALSE
 
-		        res$message = paste0("tol: ", signif_plus(fixef.tol), " iter: ", max(res$iterations))
+		        res$message = paste0("tol: ", signif_plus(fixef.tol), ", iter: ", max(res$iterations))
 
 		        if(fromGLM){
 		            res$warn_varying_slope = msg
@@ -590,7 +599,7 @@ check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights){
         K = NCOL(X) + 1
     }
 
-    res = matrix(NA, K, Q)
+    res = list()
 
     for(k in 1:K){
         if(k == 1){
@@ -599,22 +608,33 @@ check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights){
             x = X[, k - 1]
         }
 
+        res_tmp = c()
+        index_slope = 1
         for(q in 1:Q){
             fixef_id = fixef_id_list[[q]]
 
-            if(slope_flag[q]){
-                index_var = 1:nobs + (cumsum(slope_flag)[q] - 1) * nobs
-                var = slope_vars[index_var]
+            if(slope_flag[q] >= 0){
+                res_tmp = c(res_tmp, max(abs(tapply(weights * x, fixef_id, mean))))
+            }
 
-                num = tapply(weights * x * var, fixef_id, sum)
-                denom = tapply(weights * var^2, fixef_id, sum)
-                res[k, q] = max(abs(num/denom))
+            n_slopes = abs(slope_flag[q])
+            if(n_slopes > 0){
+                for(i in 1:n_slopes){
+                    var = slope_vars[[index_slope]]
 
-            } else {
-                res[k, q] = max(abs(tapply(weights * x, fixef_id, mean)))
+                    num = tapply(weights * x * var, fixef_id, sum)
+                    denom = tapply(weights * var^2, fixef_id, sum)
+                    res_tmp = c(res_tmp, max(abs(num/denom)))
+
+                    index_slope = index_slope + 1
+                }
             }
         }
+
+        res[[k]] = res_tmp
     }
+
+    res = do.call("rbind", res)
 
     res
 }
