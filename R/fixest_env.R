@@ -300,7 +300,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         }
 
         #
-        # Panel setup
+        # ... Panel setup ####
         #
 
         if(check_lag(fml)){
@@ -371,26 +371,18 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
             # We check the argument => character vector
 
-            if(!isVector(fixef) || !is.character(fixef)){
-                stop("Argument 'fixef', when provided, must be a character vector of variable names.")
-            }
-
-            if(any(!fixef %in% dataNames)){
-                var_problem = fixef[!fixef %in% dataNames]
-                stop("The argument 'fixef' must be variable names! Variable", enumerate_items(var_problem, "s.is"), " not in the data.")
-
-            }
+            check_arg_plus(fixef, "multi match", .choices = dataNames, .message = "Argument 'fixef', when provided, must be a character vector of variable names.")
 
             fixef_vars = fixef
         }
 
-        # fml_full now does not contain the clusters, but will later contain them
+        # fml_full now does not contain the FEs, but will later contain them
         fml_full = fml
     }
 
 
     #
-    # The left hand side
+    # ... The left hand side ####
     #
 
     # evaluation
@@ -400,16 +392,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             stop("You must provide argument 'y' when using ", origin_type, ".fit.")
         }
 
-        if(!is.numeric(y)){
-            stop("Argument 'y' must be numeric.")
-        }
-
-        if(!is.null(dim(y)) || is.list(y)){
-            stop("Argument y must be a vector.")
-        }
-
-        # for cpp (as double):
-        lhs = as.numeric(as.vector(y))
+        lhs = check_value_plus(y, "numeric vector conv")
 
         # we reconstruct a formula
         fml = as.formula(paste0(deparse_long(mc_origin[["y"]]), "~1"))
@@ -643,7 +626,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
 
     #
-    # The nonlinear part:
+    # ... nonlinear part ####
     #
 
     msgNA_NL = ""
@@ -705,7 +688,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     else isNL = TRUE
 
     #
-    # Offset
+    # ... Offset ####
     #
 
     isOffset = FALSE
@@ -777,7 +760,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     }
 
     #
-    # Weights
+    # ... Weights ####
     #
 
     any0W = anyNA_W = FALSE
@@ -1699,12 +1682,6 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     # Controls: user defined gradient
     #
 
-    # OFFSET
-    assign("offset.value", offset.value, env)
-
-    # WEIGHTS
-    assign("weights.value", weights.value, env)
-
     #
     # PRECISION + controls ####
     #
@@ -1787,13 +1764,6 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     # The MODEL0 => to get the init of the theta for the negbin
     #
 
-    # Bad location => rethink the design of the code
-    assign("famFuns", famFuns, env)
-    assign("family", family, env)
-    assign("nobs", length(lhs), env)
-    assign("lhs", lhs, env)
-    assign("nthreads", nthreads, env)
-
     if(missing(theta.init)){
         theta.init = NULL
     } else {
@@ -1818,16 +1788,42 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         lower = c(lower, 1e-3)
     }
 
-    # On balance les donnees a utiliser dans un nouvel environnement
-    if(isLinear) assign("linear.mat", linear.mat, env)
-
     ####
     #### Sending to the env ####
     ####
 
     useExp_fixefCoef = family %in% c("poisson")
 
-    # The dummies
+    #
+    # General elements
+    #
+
+    # Control
+    assign("fixef.iter", fixef.iter, env)
+    assign("fixef.iter.limit_reached", 0, env) # for warnings if max iter is reached
+    assign("fixef.tol", fixef.tol, env)
+    assign("collin.tol", collin.tol, env)
+
+    # Data
+    if(isLinear){
+        assign("linear.mat", linear.mat, env)
+    } else {
+        assign("linear.mat", 1, env)
+    }
+    assign("offset.value", offset.value, env)
+    assign("weights.value", weights.value, env)
+    assign("lhs", lhs, env)
+    assign("nobs", length(lhs), env)
+
+    # Other
+    assign("family", family, env)
+    assign("fml", fml, env)
+    assign("origin", origin, env)
+    assign("warn", warn, env)
+    assign("mem.clean", mem.clean, env)
+    assign("nthreads", nthreads, env)
+
+    # The Fixed-effects
     assign("isFixef", isFixef, env)
     if(isFixef){
         assign("fixef_id", fixef_id, env)
@@ -1846,20 +1842,6 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             assign("fixef_id.matrix_cpp", fixef_id.matrix_cpp, env)
         }
 
-        # the saved sumFE
-        if(!missnull(sumFE_init)){
-            # information on starting values coming from update method
-            doExp = ifelse(useExp_fixefCoef, exp, I)
-
-            # Means it's the full fixef properly given
-            assign("saved_sumFE", doExp(sumFE_init), env)
-
-        } else if(useExp_fixefCoef){
-            assign("saved_sumFE", rep(1, length(lhs)), env)
-        } else {
-            assign("saved_sumFE", rep(0, length(lhs)), env)
-        }
-
         # New cpp functions
         # This is where we send the elements needed for convergence in cpp
         if(origin_type == "feNmlm"){
@@ -1872,6 +1854,21 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         assign("sum_y_vector", unlist(sum_y_all), env)
 
         if(origin_type == "feNmlm"){
+
+            # the saved sumFE
+            if(!missnull(sumFE_init)){
+                # information on starting values coming from update method
+                doExp = ifelse(useExp_fixefCoef, exp, I)
+
+                # Means it's the full fixef properly given
+                assign("saved_sumFE", doExp(sumFE_init), env)
+
+            } else if(useExp_fixefCoef){
+                assign("saved_sumFE", rep(1, length(lhs)), env)
+            } else {
+                assign("saved_sumFE", rep(0, length(lhs)), env)
+            }
+
             if(family == "gaussian" && Q >= 2){
                 assign("fixef_invTable", 1/unlist(fixef_table), env)
             } else {
@@ -1904,139 +1901,131 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
     }
 
-    # basic NL
-    envNL = new.env()
-    assign("isNL", isNL, env)
-    if(isNL){
-        data_NL = as.data.frame(data_NL)
-        for(var in nonlinear.varnames) assign(var, data_NL[[var]], envNL)
-        for(var in nonlinear.params) assign(var, start[var], envNL)
-    }
-    assign("envNL", envNL, env)
-    assign("nl.call", nl.call, env)
-    # NO user defined gradient: too complicated, not really efficient
-    assign("isGradient", FALSE, env)
-    assign("lower", lower, env)
-    assign("upper", upper, env)
 
-    # other
-    assign("lhs", lhs, env)
-    assign("isLinear", isLinear, env)
-    assign("linear.params", linear.params, env)
-    assign("nonlinear.params", nonlinear.params, env)
-    assign("params", params, env)
-    assign("nobs", length(lhs), env)
-    assign("jacobian.method", jacobian.method, env)
-    assign("famFuns", famFuns, env)
-    assign("family", family, env)
-    assign("iter", 0, env)
-    # Pour gerer les valeurs de mu:
-    assign("coefMu", list(), env)
-    assign("valueMu", list(), env)
-    assign("valueExpMu", list(), env)
-    assign("wasUsed", TRUE, env)
-    # Pour les valeurs de la Jacobienne non lineaire
-    assign("JC_nbSave", 0, env)
-    assign("JC_nbMaxSave", 1, env)
-    assign("JC_savedCoef", list(), env)
-    assign("JC_savedValue", list(), env)
-    # PRECISION
-    assign("fixef.tol", fixef.tol, env)
-    assign("NR.tol", NR.tol, env)
-    assign("deriv.tol", deriv.tol, env)
-    assign("collin.tol", collin.tol, env)
-    # ITERATIONS
-    assign("fixef.iter", fixef.iter, env)
-    assign("deriv.iter", deriv.iter, env)
-    assign("fixef.iter.limit_reached", 0, env) # for warnings if max iter is reached
-    assign("deriv.iter.limit_reached", 0, env) # for warnings if max iter is reached
-    # OTHER
-    assign("useAcc", TRUE, env)
-    assign("warn_0_Hessian", FALSE, env)
-    assign("warn_overfit_logit", FALSE, env)
-    # Misc
-    assign("origin", origin, env)
-    assign("warn", warn, env)
-    assign("opt.control", opt.control, env)
-    assign("mem.clean", mem.clean, env)
+    #
+    # Specific to femlm/feNmlm
+    #
 
-
-    # To monitor how the FEs are computed (if the problem is difficult or not)
-    assign("firstIterCluster", 1e10, env) # the number of iterations in the first run
-    assign("firstRunCluster", TRUE, env) # flag for first entry in get_dummies
-    assign("iterCluster", 1e10, env) # the previous number of fixef iterations
-    assign("evolutionLL", Inf, env) # diff b/w two successive LL
-    assign("pastLL", 0, env)
-    assign("iterLastPrecisionIncrease", 0, env) # the last iteration when precision was increased
-    assign("nbLowIncrease", 0, env) # number of successive evaluations with very low LL increments
-    assign("nbIterOne", 0, env) # nber of successive evaluations with only 1 iter to get the clusters
-    assign("difficultConvergence", FALSE, env)
-
-    # Same for derivatives
-    assign("derivDifficultConvergence", FALSE, env)
-    assign("firstRunDeriv", TRUE, env) # flag for first entry in derivative
-    assign("accDeriv", TRUE, env) # Logical: flag for accelerating deriv
-    assign("iterDeriv", 1e10, env) # number of iterations in the derivatives step
-
-
-    # NL: On teste les valeurs initiales pour informer l'utilisateur
-
-    if(isNL){
-        mu = NULL
-        try(mu <- eval(nl.call, envir = envNL), silent = FALSE)
-        if(is.null(mu)){
-            # the non linear part could not be evaluated - ad hoc message
-            stop("The non-linear part (NL.fml) could not be evaluated. There may be a problem in 'NL.fml'.")
-        }
-
-        # No numeric vectors
-        if(!isVector(mu) || !is.numeric(mu)){
-            stop("Evaluation of NL.fml should return a numeric vector. (This is currently not the case.)")
-        }
-
-        # Handling NL.fml errors
-        if(length(mu) != nrow(data_NL)){
-            stop("Evaluation of NL.fml leads to ", length(mu), " observations while there are ", nrow(data_NL), " observations in the data base. They should be of the same lenght.")
-        }
-
-        if(anyNA(mu)){
-            stop("Evaluating NL.fml leads to NA values: this is not supported. Maybe it's a problem with the starting values, maybe it's another problem.")
-        }
-
-    } else {
-        mu = eval(nl.call, envir = envNL)
-    }
-
-    # On sauvegarde les valeurs de la partie non lineaire
-    assign("nbMaxSave", 2, env) # nombre maximal de valeurs a sauvegarder
-    assign("nbSave", 1, env)  # nombre de valeurs totales sauvegardees
-    assign("savedCoef", list(start[nonlinear.params]), env)
-    assign("savedValue", list(mu), env)
-    if(isLinear) {
-        # mu <- mu + c(linear.mat%*%unlist(start[linear.params]))
-        start_coef_linear = unlist(start[linear.params])
-        mu <- mu + cpppar_xbeta(linear.mat, start_coef_linear, nthreads)
-    }
-
-    # Mise en place du calcul du gradient
     if(origin_type == "feNmlm"){
+
+        # basic NL
+        envNL = new.env()
+        assign("isNL", isNL, env)
+        if(isNL){
+            data_NL = as.data.frame(data_NL)
+            for(var in nonlinear.varnames) assign(var, data_NL[[var]], envNL)
+            for(var in nonlinear.params) assign(var, start[var], envNL)
+        }
+        assign("envNL", envNL, env)
+        assign("nl.call", nl.call, env)
+        # NO user defined gradient: too complicated, not really efficient
+        assign("isGradient", FALSE, env)
+        assign("lower", lower, env)
+        assign("upper", upper, env)
+
+        # other
+        assign("iter", 0, env)
+        assign("isLinear", isLinear, env)
+        assign("linear.params", linear.params, env)
+        assign("nonlinear.params", nonlinear.params, env)
+        assign("params", params, env)
+        assign("jacobian.method", jacobian.method, env)
+        assign("famFuns", famFuns, env)
+        # Pour gerer les valeurs de mu:
+        assign("coefMu", list(), env)
+        assign("valueMu", list(), env)
+        assign("valueExpMu", list(), env)
+        assign("wasUsed", TRUE, env)
+        # Pour les valeurs de la Jacobienne non lineaire
+        assign("JC_nbSave", 0, env)
+        assign("JC_nbMaxSave", 1, env)
+        assign("JC_savedCoef", list(), env)
+        assign("JC_savedValue", list(), env)
+        # PRECISION
+        assign("NR.tol", NR.tol, env)
+        assign("deriv.tol", deriv.tol, env)
+        # ITERATIONS
+        assign("deriv.iter", deriv.iter, env)
+        assign("deriv.iter.limit_reached", 0, env) # for warnings if max iter is reached
+        # OTHER
+        assign("useAcc", TRUE, env)
+        assign("warn_0_Hessian", FALSE, env)
+        assign("warn_overfit_logit", FALSE, env)
+        # Misc
+        assign("opt.control", opt.control, env)
+
+        # To monitor how the FEs are computed (if the problem is difficult or not)
+        assign("firstIterCluster", 1e10, env) # the number of iterations in the first run
+        assign("firstRunCluster", TRUE, env) # flag for first entry in get_dummies
+        assign("iterCluster", 1e10, env) # the previous number of fixef iterations
+        assign("evolutionLL", Inf, env) # diff b/w two successive LL
+        assign("pastLL", 0, env)
+        assign("iterLastPrecisionIncrease", 0, env) # the last iteration when precision was increased
+        assign("nbLowIncrease", 0, env) # number of successive evaluations with very low LL increments
+        assign("nbIterOne", 0, env) # nber of successive evaluations with only 1 iter to get the clusters
+        assign("difficultConvergence", FALSE, env)
+
+        # Same for derivatives
+        assign("derivDifficultConvergence", FALSE, env)
+        assign("firstRunDeriv", TRUE, env) # flag for first entry in derivative
+        assign("accDeriv", TRUE, env) # Logical: flag for accelerating deriv
+        assign("iterDeriv", 1e10, env) # number of iterations in the derivatives step
+
+        # NL: On teste les valeurs initiales pour informer l'utilisateur
+
+        if(isNL){
+            mu = NULL
+            try(mu <- eval(nl.call, envir = envNL), silent = FALSE)
+            if(is.null(mu)){
+                # the non linear part could not be evaluated - ad hoc message
+                stop("The non-linear part (NL.fml) could not be evaluated. There may be a problem in 'NL.fml'.")
+            }
+
+            # No numeric vectors
+            if(!isVector(mu) || !is.numeric(mu)){
+                stop("Evaluation of NL.fml should return a numeric vector. (This is currently not the case.)")
+            }
+
+            # Handling NL.fml errors
+            if(length(mu) != nrow(data_NL)){
+                stop("Evaluation of NL.fml leads to ", length(mu), " observations while there are ", nrow(data_NL), " observations in the data base. They should be of the same lenght.")
+            }
+
+            if(anyNA(mu)){
+                stop("Evaluating NL.fml leads to NA values: this is not supported. Maybe it's a problem with the starting values, maybe it's another problem.")
+            }
+
+        } else {
+            mu = eval(nl.call, envir = envNL)
+        }
+
+        # On sauvegarde les valeurs de la partie non lineaire
+        assign("nbMaxSave", 2, env) # nombre maximal de valeurs a sauvegarder
+        assign("nbSave", 1, env)  # nombre de valeurs totales sauvegardees
+        assign("savedCoef", list(start[nonlinear.params]), env)
+        assign("savedValue", list(mu), env)
+        if(isLinear){
+            start_coef_linear = unlist(start[linear.params])
+            mu <- mu + cpppar_xbeta(linear.mat, start_coef_linear, nthreads)
+        }
+
+        # Mise en place du calcul du gradient
         gradient = femlm_gradient
         hessian <- NULL
         if(useHessian) hessian <- femlm_hessian
         assign("gradient", gradient, env)
         assign("hessian", hessian, env)
+
+        assign("model0", model0, env)
+
+        onlyFixef = !isLinear && !isNonLinear && Q > 0
+        assign("onlyFixef", onlyFixef, env)
+        if(onlyFixef){
+            assign("linear.mat", 0, env)
+        }
+
+        assign("start", start, env)
     }
-
-    assign("fml", fml, env)
-    assign("model0", model0, env)
-
-    onlyFixef = !isLinear && !isNonLinear && Q > 0
-    assign("onlyFixef", onlyFixef, env)
-    if(onlyFixef){
-        assign("linear.mat", 0, env)
-    }
-
-    assign("start", start, env)
 
     # fixest tag
     assign("fixest_env", TRUE, env)
