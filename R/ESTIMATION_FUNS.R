@@ -1165,15 +1165,9 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
     } else {
         res$convStatus = TRUE
     }
-
     #
     # post processing
     #
-
-    # repeated warning message later on
-    # if(wols$multicol){
-    #     warning_msg = paste(warning_msg, "Presence of collinearity. Use function collinearity() to pinpoint the problems.")
-    # }
 
     # Collinearity message
     collin.adj = 0
@@ -1208,6 +1202,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, start
     if(isOffset){
         res$linear.predictors = res$linear.predictors + offset
     }
+
     res$fitted.values = linkinv(res$linear.predictors)
     res$residuals = y - res$fitted.values
 
