@@ -909,8 +909,6 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, int type, IntegerVector
         int n_removed = std::accumulate(obs_removed.begin(), obs_removed.end(), 0);
         int n_new = n - n_removed;
 
-        Rcout << "n removed: " << n_removed << ", n left: " << n_new << "\n";
-
         List res_x_new_quf_all(Q);
         vector<int*> p_x_new_quf_all(Q);
         for(int q=0 ; q<Q ; ++q){
