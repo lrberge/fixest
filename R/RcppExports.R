@@ -237,10 +237,6 @@ cpppar_check_only_0 <- function(x_mat, nthreads) {
     .Call(`_fixest_cpppar_check_only_0`, x_mat, nthreads)
 }
 
-cpp_quf_str <- function(x) {
-    .Call(`_fixest_cpp_quf_str`, x)
-}
-
 cpp_quf_gnl <- function(x) {
     .Call(`_fixest_cpp_quf_gnl`, x)
 }

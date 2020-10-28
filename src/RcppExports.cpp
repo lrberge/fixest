@@ -877,17 +877,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cpp_quf_str
-List cpp_quf_str(SEXP x);
-RcppExport SEXP _fixest_cpp_quf_str(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_quf_str(x));
-    return rcpp_result_gen;
-END_RCPP
-}
 // cpp_quf_gnl
 List cpp_quf_gnl(SEXP x);
 RcppExport SEXP _fixest_cpp_quf_gnl(SEXP xSEXP) {
@@ -976,7 +965,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpppar_which_na_inf_df", (DL_FUNC) &_fixest_cpppar_which_na_inf_df, 2},
     {"_fixest_cpppar_cond_means", (DL_FUNC) &_fixest_cpppar_cond_means, 3},
     {"_fixest_cpppar_check_only_0", (DL_FUNC) &_fixest_cpppar_check_only_0, 2},
-    {"_fixest_cpp_quf_str", (DL_FUNC) &_fixest_cpp_quf_str, 1},
     {"_fixest_cpp_quf_gnl", (DL_FUNC) &_fixest_cpp_quf_gnl, 1},
     {"_fixest_cpppar_quf_table_sum", (DL_FUNC) &_fixest_cpppar_quf_table_sum, 6},
     {NULL, NULL, 0}
