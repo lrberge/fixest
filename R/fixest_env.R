@@ -2077,7 +2077,12 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
             # Handling NL.fml errors
             if(length(mu) != nrow(data_NL)){
-                stop("Evaluation of NL.fml leads to ", length(mu), " observations while there are ", nrow(data_NL), " observations in the data base. They should be of the same lenght.")
+                if(length(mu) == 1 && length(nonlinear.varnames) == 0){
+                    stop("No variable from the data is in the 'NL.fml', there must be a problem.")
+                } else {
+                    stop("Evaluation of NL.fml leads to ", length(mu), " observations while there are ", nrow(data_NL), " observations in the data base. They should be of the same lenght.")
+                }
+
             }
 
             if(anyNA(mu)){
