@@ -1380,6 +1380,12 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 stop("After removing NAs, not a single explanatory variable is different from 0.")
             } else if(any(only_0 == 1)){
                 linear.mat = linear.mat[, only_0 == 0, drop = FALSE]
+
+                # useful when feNmlm
+                linear.params <- colnames(linear.mat)
+                params <- c(nonlinear.params, linear.params)
+                lparams <- length(params)
+                varnames <- c(nonlinear.varnames, linear.varnames)
             }
         }
 
