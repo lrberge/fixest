@@ -2509,11 +2509,12 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' @param ref A single value that belongs to the interacted variable (\code{f}). Can be missing.
 #' @param drop A vector of values that belongs to the factor variable (\code{f}). If provided, all values from \code{f} that match \code{drop} will be removed.
 #' @param keep A vector of values that belongs to the factor variable (\code{f}). If provided, only the values from \code{f} that match \code{keep} will be kept.
+#'
 #' @return
 #' It returns a matrix with number of rows the length of \code{var}. The number of columns is equal to the number of cases contained in \code{f} minus the reference.
 #'
 #' @section Shorthand in \code{fixest} estimations:
-#' In \code{fixest} estimations, instead of using \code{i(var, f, ref)}, you can instead use the following writing \code{var::f(ref)}.
+#' In \code{fixest} estimations, instead of using \code{i(var, f, ref)}, you can instead use the following writing \code{var::f(ref)}. Note that this way of doing interactions is not endorsed any more and will likely be deprecated in the future.
 #'
 #' @author
 #' Laurent Berge

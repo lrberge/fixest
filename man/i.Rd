@@ -32,7 +32,7 @@ Treat a variable as a factor, or interacts a variable with another treated as a 
 }
 \section{Shorthand in \code{fixest} estimations}{
 
-In \code{fixest} estimations, instead of using \code{i(var, f, ref)}, you can instead use the following writing \code{var::f(ref)}.
+In \code{fixest} estimations, instead of using \code{i(var, f, ref)}, you can instead use the following writing \code{var::f(ref)}. Note that this way of doing interactions is not endorsed any more and will likely be deprecated in the future.
 }
 
 \examples{
