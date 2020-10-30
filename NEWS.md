@@ -5,15 +5,13 @@
 
 #### Bugs
 
+ - Major bug when predict was used in the presence of fixed-effects (thanks to @jurojas5, [#54](https://github.com/lrberge/fixest/issues/54)). Introduced in version 0.7.
+
   - When using variable names to cluster the standard-errors inside functions, summary may not fetch the data in the right frame (thanks to @chenwang, [#52](https://github.com/lrberge/fixest/issues/52)).
   
   - When using variables with varying slopes and the number of iterations is greater than 300, a bug occured in the function checking the convergence was right (thanks to @kendonB, [#53](https://github.com/lrberge/fixest/issues/53)). 
   
-  - Fix bug occurring for estimations with FEs but without any variable.
-  
   - Fix bug in the demeaning algorithm when two variables with varying slopes were identical.
-
-  
 
 #### Improvements of the internal algorithm
 

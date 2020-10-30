@@ -881,6 +881,7 @@ summary.fixest.fixef = function(object, n=5, ...){
 #'
 #' @param object A \code{fixest} estimation (e.g. obtained using \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}).
 #' @param notes Logical. Whether to display a note when the fixed-effects coefficients are not regular.
+#' @param sorted Logical, default is \code{TRUE}. Whether to order the fixed-effects by their names. If \code{FALSE}, then the order used in the demeaning algorithm is used.
 #'
 #' @details
 #' If the fixed-effect coefficients not regular, then several reference points need to be set, leading to the coefficients to be NOT interpretable. If this is the case, then a warning is raised.
@@ -916,9 +917,11 @@ summary.fixest.fixef = function(object, n=5, ...){
 #' # Plotting them:
 #' plot(fe_trade)
 #'
-fixef.fixest = function(object, notes = getFixest_notes(), ...){
+fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, ...){
 	# object is a fixest object
 	# This function retrieves the dummies
+
+    check_arg(notes, sorted, "logical scalar")
 
     # Checking the arguments
     validate_dots(valid_args = "fixef.tol")
@@ -1120,14 +1123,22 @@ fixef.fixest = function(object, notes = getFixest_notes(), ...){
 	all_clust = list()
 	Q_all = ifelse(isSlope, length(fixef_terms), Q)
 	for(i in 1:Q_all){
-	    # We put it inthe right order
+	    # We put it inthe right order, if requested
 	    fn = attr(fixef_id[[i]], "fixef_names")
-	    if(all(!grepl("[^[:digit:]]", fn))) fn = as.numeric(fn)
-	    my_order = order(fn)
 
-	    cv = fixef_values[[i]][my_order]
-	    names(cv) = fn[my_order]
-		all_clust[[fixef_names[i]]] = cv
+	    if(sorted){
+	        if(all(!grepl("[^[:digit:]]", fn))) fn = as.numeric(fn)
+	        my_order = order(fn)
+
+	        cv = fixef_values[[i]][my_order]
+	        names(cv) = fn[my_order]
+	        all_clust[[fixef_names[i]]] = cv
+	    } else {
+	        cv = fixef_values[[i]]
+	        names(cv) = fn
+	        all_clust[[fixef_names[i]]] = cv
+	    }
+
 	}
 
 	class(all_clust) = c("fixest.fixef", "list")
@@ -2749,6 +2760,17 @@ i_ref = function(var, f, ref, drop, keep){
     return(deparse_long(mc))
 }
 
+i_noref = function(var, f, ref, drop, keep){
+
+    mc = match.call()
+
+    mc[[1]] = as.name("i")
+
+    mc$ref = mc$drop = mc$keep = NULL
+
+    return(deparse_long(mc))
+}
+
 
 #' @rdname setFixest_fml
 xpd = function(fml, ...){
@@ -3548,7 +3570,7 @@ prepare_matrix = function(fml, base){
 }
 
 
-fixest_model_matrix = function(fml, data, fake_intercept = FALSE){
+fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALSE){
     # This functions takes in the formula of the linear part and the
     # data
     # It reformulates the formula (ie with lags and interactions)
@@ -3580,13 +3602,22 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE){
         is_intercept = fake_intercept || (attr(t_fml,"intercept") == 1)
         i_naked = which(is_naked_inter(tl[qui_inter]))
 
-        for(i in seq_along(i_naked)){
-            if(!is_intercept && i == 1) next
+        if(i_noref){
+            for(i in seq_along(i_naked)){
+                j = i_naked[i]
+                txt = gsub("(^|(?<=[^[:alnum:]\\._]))i(nteract)?\\(", "i_noref(", tl[qui_inter][j], perl = TRUE)
+                tl[qui_inter][j] = eval(parse(text = txt))
+            }
+        } else {
+            for(i in seq_along(i_naked)){
+                if(!is_intercept && i == 1) next
 
-            j = i_naked[i]
-            txt = gsub("(^|(?<=[^[:alnum:]\\._]))i(nteract)?\\(", "i_ref(", tl[qui_inter][j], perl = TRUE)
-            tl[qui_inter][j] = eval(parse(text = txt))
+                j = i_naked[i]
+                txt = gsub("(^|(?<=[^[:alnum:]\\._]))i(nteract)?\\(", "i_ref(", tl[qui_inter][j], perl = TRUE)
+                tl[qui_inter][j] = eval(parse(text = txt))
+            }
         }
+
 
         fml_no_inter = as.formula(paste0("y ~ ", paste(c(1, tl[!qui_inter]), collapse = "+")))
         fml = as.formula(paste0("y ~ ", paste(tl, collapse = "+")))
@@ -5677,7 +5708,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 
 		n_cluster = length(fixef_vars)
 
-		# Extraction of the clusters
+		# Extraction of the FEs
 		id_cluster = list()
 		for(i in 1:n_cluster){
 			# checking if the variable is in the newdata
@@ -5685,7 +5716,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 			variable = all.vars(parse(text = fe_var))
 			isNotHere = !variable %in% names(newdata)
 			if(any(isNotHere)){
-				stop("The variable ", variable[isNotHere][1], " is absent from the 'newdata' but is needed for prediction (it is a cluster variable).")
+				stop("The variable ", variable[isNotHere][1], " is absent from the 'newdata' but is needed for prediction (it is a fixed-effect variable).")
 			}
 
 			# The values taken by the FE variable
@@ -5705,7 +5736,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 			    fe_var = gsub("\\^", ", ", fe_var_new)
 			}
 
-			# Obtaining the unclassed vector of clusters
+			# Obtaining the vector of clusters
 			cluster_current = eval(parse(text = fe_var), newdata)
 
 			cluster_current_num = unclass(factor(cluster_current, levels = fixef_values_possible))
@@ -5715,7 +5746,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 		names(id_cluster) = fixef_vars
 
 		# Value of the cluster coefficients
-		cluster_coef = fixef(object)
+		cluster_coef = fixef(object, sorted = FALSE)
 
 		# Adding the FEs and Slopes
 		if(!is.null(object$fixef_terms)){
@@ -5795,8 +5826,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 		# We check if it's a panel or not (if so, we need to create it...)
 
 		# we create the matrix
-		# matrix_linear = stats::model.matrix(rhs_fml, stats::model.frame(rhs_fml, newdata, na.action=na.pass))
-		matrix_linear = try(fixest_model_matrix(rhs_fml, newdata), silent = TRUE)
+		matrix_linear = try(fixest_model_matrix(rhs_fml, newdata, i_noref = TRUE), silent = TRUE)
 		if("try-error" %in% class(matrix_linear)){
 		    stop("Error when creating the linear matrix: ", matrix_linear)
 		}
