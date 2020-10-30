@@ -8,7 +8,7 @@
 
 fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), NL.fml,
                        fixef, NL.start, lower, upper, NL.start.init,
-                       offset, linear.start = 0, jacobian.method = "simple",
+                       offset, subset, split, split.full = FALSE, linear.start = 0, jacobian.method = "simple",
                        useHessian = TRUE, hessian.args = NULL, opt.control = list(),
                        y, X, fixef_mat, panel.id,
                        nthreads = getFixest_nthreads(),
@@ -58,7 +58,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
     #
     # Arguments control
-    main_args = c("fml", "data", "panel.id", "offset", "fixef.tol", "fixef.iter", "fixef", "nthreads", "verbose", "warn", "notes", "combine.quick", "start", "only.env", "mem.clean")
+    main_args = c("fml", "data", "panel.id", "offset", "subset", "split", "split.full", "fixef.tol", "fixef.iter", "fixef", "nthreads", "verbose", "warn", "notes", "combine.quick", "start", "only.env", "mem.clean")
     femlm_args = c("family", "theta.init", "linear.start", "opt.control", "deriv.tol", "deriv.iter")
     feNmlm_args = c("NL.fml", "NL.start", "lower", "upper", "NL.start.init", "jacobian.method", "useHessian", "hessian.args")
     feglm_args = c("family", "weights", "glm.iter", "glm.tol", "etastart", "mustart", "collin.tol")
@@ -380,14 +380,12 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         fml_full = fml
     }
 
-
     #
-    # ... The left hand side ####
+    # ... subset ####
     #
 
-    # evaluation
     if(isFit){
-
+        # We have to first eval y if isFit in order to check subset properly
         if(missing(y)){
             stop("You must provide argument 'y' when using ", origin_type, ".fit.")
         }
@@ -397,7 +395,92 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         # we reconstruct a formula
         fml = as.formula(paste0(deparse_long(mc_origin[["y"]]), "~1"))
 
-    } else {
+        nobs = length(lhs)
+    }
+
+    # delayed.subset only concerns isFit // subsetting must always occur before NA checking
+    isSubset = FALSE
+    delayed.subset = FALSE
+    if(!missing(subset)){
+        if(!is.null(subset)){
+
+            isSubset = TRUE
+
+            if("formula" %in% class(subset)){
+
+                if(isFit){
+                    stop("In ", origin, " the subset cannot be a formula. You must provide either an integer vector or a logical vector.")
+                }
+
+                check_value(subset, "os formula var(data)", .data = data)
+                subset.value = subset[[2]]
+                subset = check_value_plus(subset.value, "evalset integer vector gt{0} | logical vector len(data)", .data = data, .prefix = "In argument 'subset', the expression")
+
+            } else {
+
+                if(isFit){
+                    check_value(subset, "integer vector gt{0} | logical vector len(data)", .data = lhs)
+                } else {
+                    check_value(subset, "integer vector gt{0} | logical vector len(data)",
+                                .prefix = "If not a formula, argument 'subset'", .data = data)
+                }
+            }
+
+            isNA_subset = is.na(subset)
+            if(all(isNA_subset)){
+                stop("In argument 'subset', all values are NA, estimation cannot be done.")
+            }
+
+            if(is.logical(subset)){
+                subset[isNA_subset] = FALSE
+            } else {
+                subset = subset[!isNA_subset]
+            }
+
+            if(isFit){
+                delayed.subset = TRUE
+                nobs_before_subset = length(lhs)
+                lhs = lhs[subset]
+            } else {
+                nobs_before_subset = NROW(data)
+
+                # subsetting creates a deep copy. We avoid copying the entire data set.
+                var2keep = all.vars(fml)
+                if(isFixef){
+                    if(is.character(fixef_vars)){
+                        var2keep = c(var2keep, fixef_vars)
+                    } else {
+                        var2keep = c(var2keep, all.vars(fixef_vars))
+                    }
+                }
+                if(!missnull(NL.fml)){
+                    check_value(NL.fml, "os formula")
+                    var2keep = c(var2keep, all.vars(NL.fml))
+                }
+                var2keep = intersect(unique(var2keep), names(data))
+
+                data = data[subset, var2keep, drop = FALSE]
+            }
+
+
+        } else if(!is.null(mc_origin$subset)){
+            dp = deparse_long(mc_origin$subset)
+            if((grepl("[[", dp, fixed = TRUE) || grepl("$", dp, fixed = TRUE)) && dp != 'x[["subset"]]'){
+                # we avoid this behavior
+                stop("Argument 'subset' (", dp, ") is evaluated to NULL. This is likely not what you want.")
+            }
+        }
+    }
+
+
+    #
+    # ... The left hand side ####
+    #
+
+    # the LHS for isFit has been done just before subset
+
+    # evaluation
+    if(isFit == FALSE){
 
         # The LHS must contain only values in the DF
         namesLHS = all.vars(fml[[2]])
@@ -420,10 +503,12 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         } else {
             lhs = as.numeric(as.vector(lhs)) # complex
         }
+
+        nobs = length(lhs)
     }
 
     lhs_clean = lhs # copy used for NA case
-    nobs = length(lhs)
+
 
     anyNA_y = FALSE
     msgNA_y = "LHS: 0"
@@ -518,6 +603,11 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             fml_full = fml
 
             linear.varnames = NULL
+
+            if(delayed.subset){
+                linear.mat = linear.mat[subset, , drop = FALSE]
+            }
+
         }
 
     } else {
@@ -721,6 +811,10 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 }
             }
 
+            if(delayed.subset){
+                offset.value = offset.value[subset]
+            }
+
             anyNA_offset = FALSE
             info = cpppar_which_na_inf_vec(offset.value, nthreads)
             if(info$any_na_inf){
@@ -799,6 +893,10 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 } else {
                     weights.value = weights
                 }
+            }
+
+            if(delayed.subset){
+                weights.value = weights.value[subset]
             }
 
             anyNA_weights = FALSE
@@ -972,6 +1070,10 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             fml_char = as.character(fml)
             fml_full = as.formula(paste0(fml_char[2], "~", fml_char[3], "|", paste0(fixef_vars, collapse = "+")))
 
+            if(delayed.subset){
+                fixef_mat = fixef_mat[subset, , drop = FALSE]
+            }
+
         } else {
             #
             # ... Regular ####
@@ -1061,7 +1163,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         # ... NA handling ####
         #
 
-        # We change non-numeric to character (impotant for parallel qufing)
+        # We change non-numeric to character (important for parallel qufing)
         is_not_num = sapply(fixef_mat, function(x) !is.numeric(x))
         if(any(is_not_num)){
             for(i in which(is_not_num)){
@@ -2063,6 +2165,14 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     }
 
     # Observations removed (either NA or fixed-effects)
+    if(isSubset){
+        # subset does not accept duplicate values eg c(1, 1, 1, 2)
+        all_obs = 1:nobs_before_subset
+        obs2keep = all_obs[subset]
+        obs2remove_subset = all_obs[-obs2keep]
+        obs2remove = sort(c(obs2remove_subset, obs2keep[obs2remove]))
+    }
+
     if(length(obs2remove) > 0){
         res$obsRemoved = obs2remove
         if(isFixef && any(lengths(fixef_removed) > 0)){
