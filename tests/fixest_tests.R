@@ -1035,30 +1035,61 @@ cat("done.\n")
 
 
 
+####
+#### predict ####
+####
+
+cat("PREDICT\n\n")
+
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
+base$fe_bis = sample(letters, 150, TRUE)
+
+#
+# Same generative data
+#
+
+# Predict with fixed-effects
+res = feols(y ~ x1 | species + fe_bis, base)
+test(predict(res), predict(res, base))
+
+res = fepois(y ~ x1 | species + fe_bis, base)
+test(predict(res), predict(res, base))
+
+res = femlm(y ~ x1 | species + fe_bis, base)
+test(predict(res), predict(res, base))
 
 
+# Predict with varying slopes -- That's normal that precision is high (because FEs are computed with low precision)
+res = feols(y ~ x1 | species + fe_bis[x3], base)
+test(predict(res), predict(res, base), "~", tol = 1e-5)
+
+res = fepois(y ~ x1 | species + fe_bis[x3], base)
+test(predict(res), predict(res, base), "~", tol = 1e-3)
 
 
+# Prediction with factors
+res = feols(y ~ x1 + i(species), base)
+test(predict(res), predict(res, base))
 
+res = feols(y ~ x1 + i(species) + i(fe_bis), base)
+test(predict(res), predict(res, base))
 
+quoi = head(base[, c("y", "x1", "species", "fe_bis")])
+test(head(predict(res)), predict(res, quoi))
 
+quoi$species = as.character(quoi$species)
+quoi$species[1:3] = "zz"
+test(head(predict(res)), predict(res, quoi))
 
+# prediction with lags
+data(base_did)
+res = feols(y ~ x1 + l(x1), base_did, panel.id = ~ id + period)
+test(predict(res), predict(res, base_did))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+qui = sample(which(base_did$id %in% 1:5))
+base_bis = base_did[qui, ]
+test(predict(res)[qui], predict(res, base_bis))
 
 
 
