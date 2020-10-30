@@ -1094,6 +1094,72 @@ test(predict(res)[qui], predict(res, base_bis))
 
 
 
+####
+#### subset ####
+####
+
+
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
+base$fe_bis = sample(letters, 150, TRUE)
+base$x4 = rnorm(150)
+base$x1[sample(150, 5)] = NA
+
+# Errors
+test(feols(fml, base, subset = ~species), "err")
+test(feols(fml, base, subset = -1:15), "err")
+test(feols(fml, base, subset = integer(0)), "err")
+test(feols(fml, base, subset = c(TRUE, TRUE, FALSE)), "err")
+
+# Valid use
+for(id_fun in 1:6){
+    estfun = switch(as.character(id_fun),
+                    "1" = feols,
+                    "2" = feglm,
+                    "3" = fepois,
+                    "4" = femlm,
+                    "5" = fenegbin,
+                    "6" = feNmlm)
+
+    for(id_fe in 1:5){
+
+        cat(".")
+
+        fml = switch(as.character(id_fe),
+                     "1" = y ~ x1 + x2,
+                     "2" = y ~ x1 + x2 | species,
+                     "3" = y ~ x1 + x2 | fe_bis,
+                     "4" = y ~ x1 + x2 + i(fe_bis),
+                     "5" = y ~ x1 + x2 | fe_bis[x3])
+
+        if(id_fe == 5 && id_fun %in% 4:6) next
+
+        if(id_fun == 6){
+            res_sub_a = estfun(fml, base, subset = ~species == "setosa", NL.fml = ~ a*x4, NL.start = 0)
+            res_sub_b = estfun(fml, base, subset = base$species == "setosa", NL.fml = ~ a*x4, NL.start = 0)
+            res_sub_c = estfun(fml, base, subset = which(base$species == "setosa"), NL.fml = ~ a*x4, NL.start = 0)
+            res       = estfun(fml, base[base$species == "setosa", ], NL.fml = ~ a*x4, NL.start = 0)
+        } else {
+            res_sub_a = estfun(fml, base, subset = ~species == "setosa")
+            res_sub_b = estfun(fml, base, subset = base$species == "setosa")
+            res_sub_c = estfun(fml, base, subset = which(base$species == "setosa"))
+            res       = estfun(fml, base[base$species == "setosa", ])
+        }
+
+        test(coef(res_sub_a), coef(res))
+        test(coef(res_sub_b), coef(res))
+        test(coef(res_sub_c), coef(res))
+        test(se(res_sub_c, cluster = "fe_bis"), se(res, cluster = "fe_bis"))
+    }
+    cat("|")
+}
+cat("\n")
+
+
+
+
+
+
 
 
 
