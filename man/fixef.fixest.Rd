@@ -4,12 +4,14 @@
 \alias{fixef.fixest}
 \title{Extract the Fixed-Effects from a \code{fixest} estimation.}
 \usage{
-\method{fixef}{fixest}(object, notes = getFixest_notes(), ...)
+\method{fixef}{fixest}(object, notes = getFixest_notes(), sorted = TRUE, ...)
 }
 \arguments{
 \item{object}{A \code{fixest} estimation (e.g. obtained using \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}).}
 
 \item{notes}{Logical. Whether to display a note when the fixed-effects coefficients are not regular.}
+
+\item{sorted}{Logical, default is \code{TRUE}. Whether to order the fixed-effects by their names. If \code{FALSE}, then the order used in the demeaning algorithm is used.}
 
 \item{...}{Not currently used.}
 }
