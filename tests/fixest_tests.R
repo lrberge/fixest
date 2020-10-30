@@ -1062,7 +1062,7 @@ test(predict(res), predict(res, base))
 
 # Predict with varying slopes -- That's normal that precision is high (because FEs are computed with low precision)
 res = feols(y ~ x1 | species + fe_bis[x3], base)
-test(predict(res), predict(res, base), "~", tol = 1e-5)
+test(predict(res), predict(res, base), "~", tol = 1e-4)
 
 res = fepois(y ~ x1 | species + fe_bis[x3], base)
 test(predict(res), predict(res, base), "~", tol = 1e-3)
