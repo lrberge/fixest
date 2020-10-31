@@ -10,7 +10,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                        fixef, NL.start, lower, upper, NL.start.init,
                        offset, subset, split, split.full = FALSE, linear.start = 0, jacobian.method = "simple",
                        useHessian = TRUE, hessian.args = NULL, opt.control = list(),
-                       y, X, fixef_mat, panel.id,
+                       y, X, fixef_mat, panel.id, fixef.rm = "perfect",
                        nthreads = getFixest_nthreads(),
                        verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000, collin.tol = 1e-14,
                        deriv.iter = 5000, deriv.tol = 1e-4, glm.iter = 25, glm.tol = 1e-8,
@@ -58,7 +58,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
     #
     # Arguments control
-    main_args = c("fml", "data", "panel.id", "offset", "subset", "split", "split.full", "fixef.tol", "fixef.iter", "fixef", "nthreads", "verbose", "warn", "notes", "combine.quick", "start", "only.env", "mem.clean")
+    main_args = c("fml", "data", "panel.id", "offset", "subset", "split", "split.full", "fixef.rm", "fixef.tol", "fixef.iter", "fixef", "nthreads", "verbose", "warn", "notes", "combine.quick", "start", "only.env", "mem.clean")
     femlm_args = c("family", "theta.init", "linear.start", "opt.control", "deriv.tol", "deriv.iter")
     feNmlm_args = c("NL.fml", "NL.start", "lower", "upper", "NL.start.init", "jacobian.method", "useHessian", "hessian.args")
     feglm_args = c("family", "weights", "glm.iter", "glm.tol", "etastart", "mustart", "collin.tol")
@@ -218,7 +218,9 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         computeModel0 = family_equiv %in% c("poisson", "logit")
     }
 
-    check_arg(demeaned, notes, warn, mem.clean, "logical scalar")
+    check_arg(demeaned, notes, warn, mem.clean, split.full, "logical scalar")
+
+    check_arg_plus(fixef.rm, "match(singleton, perfect, both, none)")
 
     check_arg(collin.tol, "numeric scalar GT{0}")
 
@@ -1295,13 +1297,19 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         fixef_removed = list()
         obs2remove = c()
 
-        type = switch(family, gaussian = 0, logit = 2, 1)
+        rm_0 = !family == "gaussian"
+        rm_1 = family == "logit"
+        rm_single = fixef.rm %in% c("singleton", "both")
         do_sum_y = !origin_type %in% c("feols", "feglm")
+
+        if(isSplit){
+            # we delay the removal of FEs
+            rm_0 = rm_1 = FALSE
+        }
 
         only_slope = FALSE
         if(isSlope){
             # only slope: not any non-slope
-            # only_slope = as.vector(tapply(!slope_flag, slope_fe, sum)[fixef_vars]) == 0
             only_slope = slope_flag < 0
 
             # shallow copy
@@ -1313,7 +1321,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             gc2trig = FALSE
         }
 
-        quf_info_all = cpppar_quf_table_sum(x = fixef_mat, y = lhs, do_sum_y = do_sum_y, type = type, only_slope = only_slope, nthreads = nthreads)
+        quf_info_all = cpppar_quf_table_sum(x = fixef_mat, y = lhs, do_sum_y = do_sum_y, rm_0 = rm_0, rm_1 = rm_1, rm_single = rm_single, only_slope = only_slope, nthreads = nthreads)
 
         fixef_id = quf_info_all$quf
         # names
