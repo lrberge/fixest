@@ -560,15 +560,10 @@ void quf_single(void *px_in, std::string &x_type, int n, int *x_uf, vector<doubl
 void quf_table_sum_single(void *px_in, std::string &x_type, int n, int q, int *x_quf,
                           vector<double> &x_unik, vector<int> &x_table,
                           double *py, vector<double> &sum_y, bool do_sum_y,
-                          int type, vector<bool> &any_pblm, vector<bool> &id_pblm,
-                          bool check_pblm){
+                          bool rm_0, bool rm_1, bool rm_single, vector<bool> &any_pblm,
+                          vector<bool> &id_pblm, bool check_pblm){
 
-    //
-
-    // Problems depending on the types:
-    // 0: no problem
-    // 1: pblm if sum y = 0
-    // 2: pblm if sum y = 0 or sum_y == table
+    // check_pblm => FALSE only if only_slope = TRUE
 
     // Rcout << "q = " << q << ", n = " << n;
 
@@ -577,8 +572,8 @@ void quf_table_sum_single(void *px_in, std::string &x_type, int n, int q, int *x
 
     // table + sum_y
 
-    // You need sum_y to remove clusters (even if you don't need sum_y in the end)
-    bool compute_sum_y = do_sum_y || type > 0;
+    // You need sum_y to remove FEs (even if you don't need sum_y in the end)
+    bool compute_sum_y = do_sum_y || rm_0;
 
     int D = x_unik.size();
 
@@ -594,13 +589,12 @@ void quf_table_sum_single(void *px_in, std::string &x_type, int n, int q, int *x
         if(compute_sum_y) sum_y[obs] += py[i];
     }
 
-    if(type > 0 && check_pblm){
+    if((rm_0 || rm_single) && check_pblm){
 
         // 1) We check whether there is any problem
-        bool is_logit = type == 2;
         int d_end = 0;
         for(int d=0 ; d<D ; ++d){
-            if(sum_y[d] == 0 || (is_logit && sum_y[d] == x_table[d])){
+            if((rm_0 && sum_y[d] == 0) || (rm_1 && sum_y[d] == x_table[d]) || (rm_single && x_table[d] == 1)){
                 any_pblm[q] = true;
                 d_end = d;
                 break;
@@ -613,7 +607,7 @@ void quf_table_sum_single(void *px_in, std::string &x_type, int n, int q, int *x
             std::fill(id_pblm.begin(), id_pblm.end(), false);
 
             for(int d=d_end ; d<D ; ++d){
-                if(sum_y[d] == 0 || (is_logit && sum_y[d] == x_table[d])){
+                if((rm_0 && sum_y[d] == 0) || (rm_1 && sum_y[d] == x_table[d]) || (rm_single && x_table[d] == 1)){
                     id_pblm[d] = true;
                 }
             }
@@ -631,27 +625,25 @@ void quf_table_sum_single(void *px_in, std::string &x_type, int n, int q, int *x
 void quf_refactor_table_sum_single(int n, int *quf_old, int *quf_new, vector<bool> &obs_removed,
                                    vector<double> &x_unik, vector<double> &x_unik_new, vector<double> &x_removed,
                                    vector<int> &x_table, double *py, vector<double> &sum_y, bool do_sum_y,
-                                   int type, vector<bool> &id_pblm, bool check_pblm, bool *pstop_now){
+                                   bool rm_1, vector<bool> &id_pblm, bool check_pblm, bool *pstop_now){
     // takes in the old quf, the observations removed,
     // then recreates the vectors of:
     // quf, table, sum_y, x_unik_new
 
     // IDs range from 1 to n_values
 
-    // Type: 0: no restriction -- 1: only 0s -- 2: 0s and 1s
-
     int D = x_unik.size();
 
-    // Only if type == 2 (0s and 1s removed) that we recreate the pblmatic IDs
+    // Only if rm_1 (0s and 1s removed) that we recreate the pblmatic IDs
     // because if only 0s, only the ones in the original id_pblm are removed
     // we find out which ones are only 0s or only 1s
     // NOTA: I don't reiterate the observation removal => just one round
     //  (otherwise it could go several rounds => too time consuming, no big value added)
 
-    if((type == 2 || !check_pblm) && !*pstop_now){
+    if((rm_1 || !check_pblm) && !*pstop_now){
         // If we haven't excluded observations because of 0 only values (ie check_pblm == false)
         // then we here need to update id_pblm, because some IDs could have been taken
-        // out due to other clusters being removed
+        // out due to other FEs being removed
 
         // the new ID problem => what are the IDs that still exists?
         vector<bool> id_still_exists(D, false);
@@ -694,7 +686,7 @@ void quf_refactor_table_sum_single(int n, int *quf_old, int *quf_new, vector<boo
 
         // is there a problem?
         bool any_pblm = false;
-        // we check only if needed (if type<2 && length(id_pblm) == 0 => means no problem)
+        // we check only if needed (if !rm_1 && length(id_pblm) == 0 => means no problem)
         if(id_pblm.size() > 0){
             for(int d=0 ; d<D ; ++d){
                 if(id_pblm[d]){
@@ -766,16 +758,13 @@ void quf_refactor_table_sum_single(int n, int *quf_old, int *quf_new, vector<boo
 
 
 // [[Rcpp::export]]
-List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, int type, IntegerVector only_slope, int nthreads){
+List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1, bool rm_single, IntegerVector only_slope, int nthreads){
     // x: List of vectors of IDs (type int/num or char only)
     // y: dependent variable
-    // Type:
-    //  0: no removal of obs
-    //  1: removal of 0 only clusters
-    //  2: removal of 0 only and 1 only clusters
+    // rm_0: remove FEs where dep var is only 0
+    // rm_1: remove FEs where dep var is only 0 or 1
+    // rm_single: remove FEs with only one observation
     // do_sum_y: should we compute the sum_y?
-
-    if(type < 0 || type > 2) stop("Argument type must be equal to 0, 1, or 2.");
 
     int Q = Rf_length(x);
     SEXP xq = VECTOR_ELT(x, 0);
@@ -856,7 +845,7 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, int type, IntegerVector
     #pragma omp parallel for num_threads(nthreads)
     for(int q=0 ; q<Q ; ++q){
         quf_table_sum_single(px_all[q], x_type_all[q], n, q, p_x_quf_all[q], x_unik_all[q], x_table_all[q],
-                             py, sum_y_all[q], do_sum_y, type, any_pblm, id_pblm_all[q], check_pblm[q]);
+                             py, sum_y_all[q], do_sum_y, rm_0, rm_1, rm_single, any_pblm, id_pblm_all[q], check_pblm[q]);
     }
 
 
@@ -925,7 +914,7 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, int type, IntegerVector
             quf_refactor_table_sum_single(n, p_x_quf_all[q], p_x_new_quf_all[q], obs_removed,
                                           x_unik_all[q], x_new_unik_all[q], x_removed_all[q],
                                         x_table_all[q], py, sum_y_all[q], do_sum_y,
-                                        type, id_pblm_all[q], check_pblm[q], pstop_now);
+                                        rm_1, id_pblm_all[q], check_pblm[q], pstop_now);
         }
 
         if(*pstop_now){
