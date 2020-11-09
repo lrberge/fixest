@@ -963,7 +963,7 @@ deriv_xi_other = function(ll_dx_dother, ll_d2, env, coef){
 	# derivative of the dummies wrt an other parameter
 	fixef_id.matrix_cpp = get("fixef_id.matrix_cpp", env)
 	fixef_sizes = get("fixef_sizes", env)
-	fixef_id = get("fixef_id", env)
+	fixef_id = get("fixef_id_list", env)
 	deriv.tol = get("deriv.tol", env)
 	Q = length(fixef_id)
 	iterMax = get("deriv.iter", env)
@@ -1331,7 +1331,7 @@ setup_poisson_fixedcost = function(env){
 
 	ptm = proc.time()
 
-	fixef_id = get("fixef_id",env)
+	fixef_id = get("fixef_id_list",env)
 
 	dum_A = as.integer(fixef_id[[1]])
 	dum_B = as.integer(fixef_id[[2]])
@@ -1361,7 +1361,7 @@ setup_gaussian_fixedcost = function(env){
 
 	invTableCluster_vector = get("fixef_invTable", env)
 	dum_vector = get("fixef_id_vector", env) # already minus 1
-	fixef_id = get("fixef_id", env)
+	fixef_id = get("fixef_id_list", env)
 
 	dum_i = as.integer(fixef_id[[1]])
 	dum_j = as.integer(fixef_id[[2]])
