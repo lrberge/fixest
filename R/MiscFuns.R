@@ -6806,8 +6806,6 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 		stop("In 'update.fixest' the arguments of '...' are passed to the function ", object$method, ", and must be named. Currently there are un-named arguments (e.g. '", deparse_long(problems[[1]]), "').")
 	}
 
-
-
 	#
 	# I) Linear formula update
 	#
@@ -6816,79 +6814,26 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 	fml = update(fml_old, formula(FML, lhs = 1, rhs = 1))
 	fml_char = as.character(fml)
 
-	useInit = TRUE
-	if(fml[[2]] != fml_old[[2]]){
-		# means different dependent variables
-		# 	=> initialisation with past parameters is useless
-		useInit = FALSE
-	}
-
 	# Family information
 	if(!is.null(dots$family)){
-		if(object$method %in% c("femlm", "feNmlm", "fepois", "fenegbin")){
+	    if(object$method == "feols"){
+	        stop("'family' is not an argument of function feols().")
+	    } else if(object$method %in% c("femlm", "feNmlm", "fepois", "fenegbin")){
 			family_new = match.arg(dots$family, c("poisson", "negbin", "gaussian", "logit"))
-			if(family_new != object$family){
-				# if different families: initialisation is useless
-				useInit = FALSE
-			}
-		} else if(object$method == "feglm"){
-			useInit = FALSE # if the user uses argument family it means it's a different one
-		} else {
-			stop("'family' is not an argument of function feols().")
 		}
-	}
-
-	if(!is.null(dots$na.rm) && dots$na.rm && !(!is.null(object$call$na.rm) && object$call$na.rm)){
-		# Too complicated to initialize with na.rm
-		# I would have to make tons of controls, and it would work
-		# only in some cases...
-		useInit = FALSE
-	}
-
-	if(!is.null(object$fixef_terms)){
-	    # In case of slopes => no init
-	    useInit = FALSE
 	}
 
 	#
 	# II) evaluation data
 	#
 
-	# We find out if it is the same data
-	#	=> only to find out if init is useful
-	if(!is.null(dots$data)){
-		useInit = FALSE
-	}
-
-	if(useInit){
-		# we test if we can use the initialisation of the parameters
-
-		# We are here ONLY if the data needs to be evaluated
-		data = NULL
-		try(data <- eval(object$call$data, parent.frame(nframes)), silent = TRUE)
-
-		if(is.null(data) || is.function(data)){
-			dataName = object$call$data
-			stop("To apply 'update.fixest', we fetch the original database in the parent.frame -- but it doesn't seem to be there anymore (btw it was '", deparse_long(dataName), "').")
-		} else if(!is.data.frame(data)){
-		    stop("To apply 'update.fixest', we fetch the original database in the parent.frame -- but currently the object '", deparse_long(object$call$data), "' is not a data.frame.")
-		}
-
-		# if same data => we apply init
-		n_old = object$nobs + length(object$obsRemoved)
-		n_new = nrow(data)
-		if(n_old != n_new){
-			useInit = FALSE
-		}
-	}
+	# Removed => since I removed the init mechanism (wasn't really efficient nor safe)
 
 	#
 	# III) cluster updates
 	#
 
 	fixef_vars = object$fixef_vars
-	sumFE_init = NULL
-	from_update = FALSE
 	if(length(FML)[2] > 1){
 		# modification of the clusters
 	    if(!is.null(object$fixef_terms)){
@@ -6920,25 +6865,6 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 	        fixef_new = update(fixef_old, formula(FML, lhs = 0, rhs = 2))
 	    }
 
-		if(useInit){
-			# Only if we use the init => the starting cluster values
-			isThere = sapply(fixef_vars, function(x) grepl(x, as.character(fixef_new)[2]))
-			if(is.null(object$obsRemoved)){
-				# ONLY when there is no cluster removed (otherwise computationaly too complex to be worth)
-				if(all(isThere)){
-					# we just have to put the old
-					sumFE_init = object$sumFE
-				} else if(any(isThere)){
-					# we use the dummies only for the ones that are there
-					my_fe = fixef(object)
-					sumFE_init = 0
-					for(i in which(isThere)){
-						sumFE_init = sumFE_init + my_fe[[i]][object$fixef_id[[i]]]
-					}
-				}
-			}
-		}
-
 		if(length(all.vars(fixef_new)) > 0){
 			# means there is a cluster
 			fml_new = as.formula(paste0(fml_char[2], "~", fml_char[3], "|", as.character(fixef_new)[2]))
@@ -6948,12 +6874,6 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 		}
 
 	} else if(!is.null(fixef_vars)){
-		# Means we keep the same clusters
-		from_update = TRUE
-
-		# the starting value:
-		sumFE_init = object$sumFE
-
 		# the formula updated:
 		fml_new = as.formula(paste0(fml_char[2], "~", fml_char[3], "|", paste0(fixef_vars, collapse = "+")))
 
@@ -6982,23 +6902,7 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 
 	if(!evaluate) return(call_clear)
 
-	if(useInit){
-		# we can use the initialisation of parameters
-		if(object$method %in% c("femlm", "feNmlm", "fenegbin")){
-			if(object$family == "negbin"){
-				if(is.null(dots$theta.init)){
-					theta.init = object$theta.init
-					call_clear$theta.init = theta.init
-				}
-			}
-		}
-
-		call_clear$from_update = from_update
-		call_clear$sumFE_init = as.name("sumFE_init")
-	}
-
-	# The variable "sumFE_init" must be evaluated here!
-	res = eval(call_clear, list(sumFE_init=sumFE_init), parent.frame(nframes))
+	res = eval(call_clear, parent.frame(nframes))
 
 	res
 }
