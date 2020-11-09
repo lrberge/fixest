@@ -347,14 +347,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_sparse_products
-List cpp_sparse_products(NumericMatrix X, NumericVector w, NumericVector y, bool correct_0w, int nthreads);
+List cpp_sparse_products(NumericMatrix X, NumericVector w, SEXP y, bool correct_0w, int nthreads);
 RcppExport SEXP _fixest_cpp_sparse_products(SEXP XSEXP, SEXP wSEXP, SEXP ySEXP, SEXP correct_0wSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type X(XSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< SEXP >::type y(ySEXP);
     Rcpp::traits::input_parameter< bool >::type correct_0w(correct_0wSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_sparse_products(X, w, y, correct_0w, nthreads));
@@ -889,18 +889,23 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpppar_quf_table_sum
-List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, int type, IntegerVector only_slope, int nthreads);
-RcppExport SEXP _fixest_cpppar_quf_table_sum(SEXP xSEXP, SEXP ySEXP, SEXP do_sum_ySEXP, SEXP typeSEXP, SEXP only_slopeSEXP, SEXP nthreadsSEXP) {
+List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1, bool rm_single, IntegerVector only_slope, int nthreads, bool do_refactor, SEXP r_x_sizes, IntegerVector obs2keep);
+RcppExport SEXP _fixest_cpppar_quf_table_sum(SEXP xSEXP, SEXP ySEXP, SEXP do_sum_ySEXP, SEXP rm_0SEXP, SEXP rm_1SEXP, SEXP rm_singleSEXP, SEXP only_slopeSEXP, SEXP nthreadsSEXP, SEXP do_refactorSEXP, SEXP r_x_sizesSEXP, SEXP obs2keepSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
     Rcpp::traits::input_parameter< SEXP >::type y(ySEXP);
     Rcpp::traits::input_parameter< bool >::type do_sum_y(do_sum_ySEXP);
-    Rcpp::traits::input_parameter< int >::type type(typeSEXP);
+    Rcpp::traits::input_parameter< bool >::type rm_0(rm_0SEXP);
+    Rcpp::traits::input_parameter< bool >::type rm_1(rm_1SEXP);
+    Rcpp::traits::input_parameter< bool >::type rm_single(rm_singleSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type only_slope(only_slopeSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpppar_quf_table_sum(x, y, do_sum_y, type, only_slope, nthreads));
+    Rcpp::traits::input_parameter< bool >::type do_refactor(do_refactorSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type r_x_sizes(r_x_sizesSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type obs2keep(obs2keepSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpppar_quf_table_sum(x, y, do_sum_y, rm_0, rm_1, rm_single, only_slope, nthreads, do_refactor, r_x_sizes, obs2keep));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -966,7 +971,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpppar_cond_means", (DL_FUNC) &_fixest_cpppar_cond_means, 3},
     {"_fixest_cpppar_check_only_0", (DL_FUNC) &_fixest_cpppar_check_only_0, 2},
     {"_fixest_cpp_quf_gnl", (DL_FUNC) &_fixest_cpp_quf_gnl, 1},
-    {"_fixest_cpppar_quf_table_sum", (DL_FUNC) &_fixest_cpppar_quf_table_sum, 6},
+    {"_fixest_cpppar_quf_table_sum", (DL_FUNC) &_fixest_cpppar_quf_table_sum, 11},
     {NULL, NULL, 0}
 };
 
