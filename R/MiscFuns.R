@@ -1575,12 +1575,26 @@ collinearity = function(x, verbose){
 	}
 
 	if(!is.null(x$obsRemoved)){
-	    linear.matrix = linear.matrix[-x$obsRemoved, ]
+	    linear.matrix = linear.matrix[-x$obsRemoved, , drop = FALSE]
+	}
+
+	if(!is.null(x$obsKept)){
+	    linear.matrix = linear.matrix[x$obsKept, , drop = FALSE]
+	}
+
+	if(!is.null(x$obsKept_bis)){
+	    linear.matrix = linear.matrix[x$obsKept_bis, , drop = FALSE]
+	}
+
+	if(isLinear){
 	    # We do that to drop interaction variables that should not be there any more
 	    # if factors with only NA values
 	    varkeep = intersect(names(x$coefficients), colnames(linear.matrix))
-	    linear.matrix = linear.matrix[, varkeep]
+	    if(length(varkeep) < ncol(linear.matrix)){
+	        linear.matrix = linear.matrix[, varkeep, drop = FALSE]
+	    }
 	}
+
 
 	if(isLinear){
 	    # We center and scale to have something comparable across data sets
@@ -3346,7 +3360,7 @@ parse_style = function(x, keywords){
     res
 }
 
-myPrintCoefTable = function(coeftable, lastLine = ""){
+myPrintCoefTable = function(coeftable, lastLine = "", show_signif = TRUE){
     # Simple function that does as the function coeftable but handles special cases
     # => to take care of the case when the coefficient is bounded
 
@@ -3380,8 +3394,9 @@ myPrintCoefTable = function(coeftable, lastLine = ""){
 
     cat(lastLine)
 
-    cat("---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n")
-
+    if(show_signif){
+        cat("---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n")
+    }
 }
 
 plot_single_cluster = function(x, n=5, addExp = FALSE, fe_name, ...){
@@ -4545,6 +4560,8 @@ mysignif = function (x, d = 2, r = 1){
     sapply(x, mysignif_single, d = d, r = r)
 }
 
+index_2D_to_1D = function(i, j, n_j) 1 + (i - 1) * n_j + j - 1
+
 par_fit = function(my_par, id){
     # simple function that extends the plot parameters
     my_par = rep(my_par, ceiling(max(id) / length(my_par)))
@@ -5081,12 +5098,36 @@ isVector = function(x){
     return(FALSE)
 }
 
-fill_with_na = function(x, obsRemoved){
-    if(is.null(obsRemoved)) return(x)
+# fill_with_na = function(x, obsRemoved){
+#     if(is.null(obsRemoved)) return(x)
+#
+#     res = rep(NA, length(x) + length(obsRemoved))
+#     res[-obsRemoved] = x
+#     res
+# }
 
-    res = rep(NA, length(x) + length(obsRemoved))
-    res[-obsRemoved] = x
-    res
+fill_with_na = function(x, object){
+    if(is.null(object$obsRemoved) && is.null(object$obsKept)){
+        return(x)
+    }
+
+    res = rep(NA, object$nobs_origin)
+    if(!is.null(object$obsRemoved)){
+        if(!is.null(object$obsKept)){
+            if(!is.null(object$obsKept_bis)){
+                res[-object$obsRemoved][object$obsKept][object$obsKept_bis] = x
+            } else {
+                res[-object$obsRemoved][object$obsKept] = x
+            }
+        } else {
+            res[-object$obsRemoved] = x
+        }
+    } else if(!is.null(object$obsKept_bis)){
+        res[object$obsKept][object$obsKept_bis] = x
+    } else {
+        res[object$obsKept] = x
+    }
+
 }
 
 
@@ -5402,12 +5443,7 @@ fitted.fixest = fitted.values.fixest = function(object, type = c("response", "li
 	# Shall I put perfect fit as NA since they're out of the estimation???
 	# Still pondering...
 	# Actually adding them means a lot of work to ensure consitency (also in predict...)
-	if(!is.null(object$obsRemoved)){
-	    # we add NA values
-	    tmp = rep(NA, object$nobs + length(object$obsRemoved))
-	    tmp[-object$obsRemoved] = res
-	    res = tmp
-	}
+	res = fill_with_na(res, object)
 
 	res
 }
@@ -5552,7 +5588,7 @@ resid.fixest = residuals.fixest = function(object, type = c("response", "devianc
 
     }
 
-    res = fill_with_na(res, object$obsRemoved)
+    res = fill_with_na(res, object)
 
     res
 }
@@ -5637,12 +5673,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 			res = object$family$linkfun(object$fitted.values)
 		}
 
-	    if(!is.null(object$obsRemoved)){
-	        # we add NA values
-	        tmp = rep(NA, object$nobs + length(object$obsRemoved))
-	        tmp[-object$obsRemoved] = res
-	        res = tmp
-	    }
+	    res = fill_with_na(res, object)
 
 		return(res)
 	}
@@ -5667,7 +5698,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 	# message for the user NOT to use newdata if its the same data set
 	# The user is not stupid: so just once
 	mc = match.call()
-	if(n == (object$nobs + length(object$obsRemoved)) && deparse_long(object$call$data) == deparse_long(mc$newdata) && getFixest_notes()){
+	if(n == object$nobs_origin && deparse_long(object$call$data) == deparse_long(mc$newdata) && getFixest_notes()){
 	    dont_warn = getOption("fixest_predict_dont_warn")
 	    if(!isTRUE(dont_warn)){
 	        message("NOTE: It looks like the data in 'newdata' is the same as the one used to run the regression. If so, to predict() on the existing data, you can leave the argument 'newdata' as missing, this is faster.")
@@ -6033,7 +6064,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 			} else if(length(cluster) <= 4){
 				nway = length(cluster)
 
-			} else if(length(cluster) %in% (nobs(object) + 0:length(object$obsRemoved))){
+			} else if(length(cluster) %in% c(object$nobs, object$nobs_origin)){
 				nway = 1
 
 			} else {
@@ -6344,14 +6375,22 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 						}
 
 						# we check length consistency
-						if(NROW(data) != (object$nobs + length(object$obsRemoved))){
-							stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(var2fetch, "s"), " in the original dataset (", deparse_long(dataName), "), yet the dataset doesn't have the same number of observations as was used in the estimation (", NROW(data), " instead of ", object$nobs + length(object$obsRemoved), ").", suffix)
+						if(NROW(data) != object$nobs_origin){
+							stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(var2fetch, "s"), " in the original dataset (", deparse_long(dataName), "), yet the dataset doesn't have the same number of observations as was used in the estimation (", NROW(data), " instead of ", object$nobs_origin, ").", suffix)
 						}
 
-						if(length(object$obsRemoved)){
+						if(length(object$obsRemoved) > 0){
 							data = data[-object$obsRemoved, all_vars, drop = FALSE]
 						} else {
 							data = data[, all_vars, drop = FALSE]
+						}
+
+						if(length(object$obsKept) > 0){
+						    data = data[object$obsKept, , drop = FALSE]
+						}
+
+						if(length(object$obsKept_bis) > 0){
+						    data = data[object$obsKept_bis, , drop = FALSE]
 						}
 
 						# Final check: NAs
@@ -6370,29 +6409,22 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 							cname = cluster_names[i]
 							if(cname %in% object$fixef_vars){
 								cluster[[i]] = object$fixef_id[[cname]]
+
 							} else if(cname %in% names(data)){
-								value = data[[cname]]
+							    # data is already of the right size
+								cluster[[i]] = data[[cname]]
 
-								if(length(object$obsRemoved) > 0){
-									value = value
-								}
-
-								cluster[[i]] = value
 							} else {
 								# combination
 								if(grepl("^", cname, fixed = TRUE)){
 									value_text = gsub("\\^", ", ", cname)
 									value_text = paste0("combine_clusters_fast(", value_text, ")")
+								} else {
+								    value_text = cname
 								}
 
 								value_call = parse(text = value_text)
-								value = eval(value_call, data)
-
-								if(length(object$obsRemoved) > 0){
-									value = value
-								}
-
-								cluster[[i]] = value
+								cluster[[i]] = eval(value_call, data)
 							}
 						}
 
@@ -6450,9 +6482,27 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 		# Either they are of the same length of the data
 		if(n_per_cluster[1] != object$nobs){
 			# Then two cases: either the user introduces the original data and it is OK
-			if(n_per_cluster[1] == (object$nobs + length(object$obsRemoved))){
+			if(n_per_cluster[1] == object$nobs_origin){
 				# We modify the clusters
-				for(i in 1:nway) cluster[[i]] = cluster[[i]][-object$obsRemoved]
+				for(i in 1:nway){
+				    # 3 cases: either obsRemoved and/or obsKept and possibly obsKept_bis
+				    if(!is.null(object$obsRemoved)){
+				        if(!is.null(object$obsKept)){
+				            if(!is.null(object$obsKept_bis)){
+				                cluster[[i]] = cluster[[i]][-object$obsRemoved][object$obsKept][object$obsKept_bis]
+				            } else {
+				                cluster[[i]] = cluster[[i]][-object$obsRemoved][object$obsKept]
+				            }
+				        } else {
+				            cluster[[i]] = cluster[[i]][-object$obsRemoved]
+				        }
+				    } else if(!is.null(object$obsKept_bis)){
+				        cluster[[i]] = cluster[[i]][object$obsKept][object$obsKept_bis]
+				    } else {
+				        cluster[[i]] = cluster[[i]][object$obsKept]
+				    }
+
+				}
 			} else {
 				# If this is not the case: there is a problem
 				stop("The length of the clusters (", n_per_cluster[1], ") does not match the number of observations in the estimation (", object$nobs, ").")
@@ -7137,9 +7187,21 @@ model.matrix.fixest = function(object, data, na.rm = TRUE, ...){
 	linear.mat = fixest_model_matrix(fml, data)
 
 	check_0 = FALSE
-	if(original_data && !is.null(object$obsRemoved)){
-	    check_0 = TRUE
-	    linear.mat = linear.mat[-object$obsRemoved, , drop = FALSE]
+	if(original_data){
+	    if(!is.null(object$obsRemoved)){
+	        check_0 = TRUE
+	        linear.mat = linear.mat[-object$obsRemoved, , drop = FALSE]
+	    }
+
+        if(!is.null(object$obsKept)){
+            check_0 = TRUE
+            linear.mat = linear.mat[object$obsKept, , drop = FALSE]
+        }
+
+	    if(!is.null(object$obsKept_bis)){
+	        linear.mat = linear.mat[object$obsKept_bis, , drop = FALSE]
+	    }
+
 	} else if(na.rm){
 	    check_0 = TRUE
 	    info = cpppar_which_na_inf_mat(linear.mat, nthreads = 1)
@@ -7160,6 +7222,7 @@ model.matrix.fixest = function(object, data, na.rm = TRUE, ...){
 	    only_0 = cpppar_check_only_0(linear.mat, nthreads = 1)
 	    if(all(only_0 == 1)){
 	        stop("After removing NAs, not a single explanatory variable is different from 0.")
+
 	    } else if(any(only_0 == 1)){
 	        linear.mat = linear.mat[, only_0 == 0, drop = FALSE]
 	    }
