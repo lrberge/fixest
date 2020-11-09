@@ -29,7 +29,7 @@ weights.fixest = function(object, ...){
     # To comply with stats default
     if(is.null(w)) return(NULL)
 
-    w = fill_with_na(w, object$obsRemoved)
+    w = fill_with_na(w, object)
 
     w
 }
