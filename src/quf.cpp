@@ -557,18 +557,67 @@ void quf_single(void *px_in, std::string &x_type, int n, int *x_uf, vector<doubl
 
 }
 
+void quf_refactor(int *px_in, int x_size, IntegerVector &obs2keep, int n, int *x_uf, vector<double> &x_unik, vector<int> &x_table){
+    // pxin: data that has been qufed already => so integer ranging from 1 to nber of unique elements
+    // obs2keep => optional, observations to keep
+
+    int n_keep = obs2keep.size();
+    bool keep_obs = n_keep > 1;
+
+    if(keep_obs){
+        vector<int> id_new(x_size, 0);
+        int val = 0;
+        int val_new = 1;
+        for(int i=0 ; i<n_keep ; ++i){
+            val = px_in[obs2keep[i] - 1] - 1;
+            if(id_new[val] == 0){
+                x_table.push_back(1);
+                x_unik.push_back(val + 1);
+                id_new[val] = val_new++;
+            } else {
+                ++x_table[id_new[val] - 1];
+            }
+            x_uf[i] = id_new[val];
+        }
+
+    } else {
+        // We just create the table and the unique
+        x_table.resize(x_size);
+        std::fill(x_table.begin(), x_table.end(), 0);
+
+        for(int i=0 ; i<n ; ++i){
+            ++x_table[px_in[i] - 1];
+        }
+
+        x_unik.resize(x_size);
+        for(int i=0 ; i<x_size ; ++i){
+            x_unik[i] = i + 1;
+        }
+    }
+
+}
+
+
+
 void quf_table_sum_single(void *px_in, std::string &x_type, int n, int q, int *x_quf,
-                          vector<double> &x_unik, vector<int> &x_table,
-                          double *py, vector<double> &sum_y, bool do_sum_y,
-                          bool rm_0, bool rm_1, bool rm_single, vector<bool> &any_pblm,
-                          vector<bool> &id_pblm, bool check_pblm){
+                          vector<double> &x_unik, vector<int> &x_table, double *py,
+                          vector<double> &sum_y, bool do_sum_y, bool rm_0, bool rm_1,
+                          bool rm_single, vector<bool> &any_pblm, vector<bool> &id_pblm,
+                          bool check_pblm, bool do_refactor, int x_size, IntegerVector &obs2keep){
 
     // check_pblm => FALSE only if only_slope = TRUE
 
     // Rcout << "q = " << q << ", n = " << n;
 
     // UFing
-    quf_single(px_in, x_type, n, x_quf, x_unik);
+    if(do_refactor){
+        // refactoring of previous qufing => in one pass, we create table on the way
+        int * px_in_int = (int *) px_in;
+        quf_refactor(px_in_int, x_size, obs2keep, n, x_quf, x_unik, x_table);
+
+    } else {
+        quf_single(px_in, x_type, n, x_quf, x_unik);
+    }
 
     // table + sum_y
 
@@ -577,17 +626,22 @@ void quf_table_sum_single(void *px_in, std::string &x_type, int n, int q, int *x
 
     int D = x_unik.size();
 
-    x_table.resize(D);
+    if(!do_refactor){
+        x_table.resize(D);
+    }
 
     sum_y.resize(compute_sum_y > 0 ? D : 1);
     std::fill(sum_y.begin(), sum_y.end(), 0);
 
     int obs;
-    for(int i=0 ; i<n ; ++i){
-        obs = x_quf[i] - 1;
-        ++x_table[obs];
-        if(compute_sum_y) sum_y[obs] += py[i];
+    if(compute_sum_y || !do_refactor){
+        for(int i=0 ; i<n ; ++i){
+            obs = x_quf[i] - 1;
+            if(!do_refactor) ++x_table[obs];
+            if(compute_sum_y) sum_y[obs] += py[i];
+        }
     }
+
 
     if((rm_0 || rm_single) && check_pblm){
 
@@ -758,13 +812,21 @@ void quf_refactor_table_sum_single(int n, int *quf_old, int *quf_new, vector<boo
 
 
 // [[Rcpp::export]]
-List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1, bool rm_single, IntegerVector only_slope, int nthreads){
+List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
+                          bool rm_single, IntegerVector only_slope, int nthreads,
+                          bool do_refactor, SEXP r_x_sizes, IntegerVector obs2keep){
+
     // x: List of vectors of IDs (type int/num or char only)
     // y: dependent variable
     // rm_0: remove FEs where dep var is only 0
     // rm_1: remove FEs where dep var is only 0 or 1
     // rm_single: remove FEs with only one observation
     // do_sum_y: should we compute the sum_y?
+
+    // When the data is refactored (ie x is a fixef_id_list, each element ranging from 1 to n_items):
+    // - do_refactor
+    // - r_x_sizes => a vector of length Q, the number of items for each FE
+    // - obs2keep => vector of observations to keep. The neutral is stg of length 1.
 
     int Q = Rf_length(x);
     SEXP xq = VECTOR_ELT(x, 0);
@@ -780,14 +842,34 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1, b
 
     // Rcout << "Q = " << Q << "\n";
 
-    double *py = REAL(y);
+    double *py = nullptr;
+    if(TYPEOF(y) == REALSXP){
+        py = REAL(y);
+    } else {
+        // => there will be no use of y, so nullptr is OK
+        // but I must ensure that beforehand: do_sum_y = rm_0 = rm_1 = false
+    }
+
+
+    // I create a fake vector to avoid conditional calls later on
+    vector<int> x_sizes_fake(Q, 0);
+    int *px_sizes = do_refactor ? INTEGER(r_x_sizes) : x_sizes_fake.data();
+
+    int n_keep = obs2keep.length();
+    bool identical_x = do_refactor && n_keep == 1;
 
     // the vectors of qufed
     List res_x_quf_all(Q);
     vector<int*> p_x_quf_all(Q);
     for(int q=0 ; q<Q ; ++q){
-        res_x_quf_all[q] = PROTECT(Rf_allocVector(INTSXP, n));
-        p_x_quf_all[q] = INTEGER(res_x_quf_all[q]);
+        if(identical_x){
+            SEXP x_val = VECTOR_ELT(x, q);
+            res_x_quf_all[q] = x_val;
+            p_x_quf_all[q]   = INTEGER(x_val);
+        } else {
+            res_x_quf_all[q] = PROTECT(Rf_allocVector(INTSXP, do_refactor ? n_keep : n));
+            p_x_quf_all[q]   = INTEGER(res_x_quf_all[q]);
+        }
     }
 
     vector< vector<int> > x_table_all(Q);
@@ -845,7 +927,8 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1, b
     #pragma omp parallel for num_threads(nthreads)
     for(int q=0 ; q<Q ; ++q){
         quf_table_sum_single(px_all[q], x_type_all[q], n, q, p_x_quf_all[q], x_unik_all[q], x_table_all[q],
-                             py, sum_y_all[q], do_sum_y, rm_0, rm_1, rm_single, any_pblm, id_pblm_all[q], check_pblm[q]);
+                             py, sum_y_all[q], do_sum_y, rm_0, rm_1, rm_single, any_pblm, id_pblm_all[q], check_pblm[q],
+                             do_refactor, px_sizes[q], obs2keep);
     }
 
 
@@ -978,7 +1061,3 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1, b
 
     return res;
 }
-
-
-
-
