@@ -1632,16 +1632,26 @@ List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, d
     int Q = Rf_length(r_nb_id_Q);
 
     // whether we use y
-    double *p_y = REAL(y);
-    int n_obs = Rf_length(y);
-    bool useY = n_obs > 1 || p_y[0] != 0;
+    bool is_y_list = TYPEOF(y) == VECSXP;
+    int n_vars_y = 0;
+    int n_obs;
+    if(is_y_list){
+        n_vars_y = Rf_length(y);
+        n_obs = Rf_length(VECTOR_ELT(y, 0));
+    } else {
+        n_vars_y = 1;
+        n_obs = Rf_length(y);
+    }
+
+    bool useY = n_obs > 1;
+    if(!useY) n_vars_y = 0;
 
     // whether we use X_raw
     bool useX = n_vars_X > 0;
     if(useY == false){
         n_obs = Rf_xlength(X_raw) / n_vars_X;
     }
-    int n_vars = useY + n_vars_X;
+    int n_vars = n_vars_y + n_vars_X;
 
     // initialisation if needed (we never initialize when only one FE, except if asked explicitly)
     bool isInit = Rf_xlength(r_init) != 1 && Q > 1;
@@ -1677,13 +1687,16 @@ List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, d
         for(int k=1 ; k<n_vars_X ; ++k){
             p_input[k] = p_input[k - 1] + n_obs;
         }
+    }
 
-        if(useY){
-            p_input[n_vars_X] = p_y;
+    if(useY){
+        if(is_y_list){
+            for(int v=0 ; v<n_vars_y ; ++v){
+                p_input[n_vars_X + v] = REAL(VECTOR_ELT(y, v));
+            }
+        } else {
+            p_input[n_vars_X] = REAL(y);
         }
-
-    } else {
-        p_input[0] = REAL(y);
     }
 
     // keeping track of iterations
@@ -1786,18 +1799,41 @@ List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, d
         }
     }
 
-    NumericVector y_demean(useY ? n_obs : 1);
-    if(useY){
-        // y is always the last variable
-        p_input_tmp = p_input[n_vars - 1];
-        p_output_tmp = p_output[n_vars - 1];
-        for(int i=0 ; i < n_obs ; ++i){
-            y_demean[i] = p_input_tmp[i] - p_output_tmp[i];
+    res["X_demean"] = X_demean;
+
+
+
+    if(is_y_list && useY){
+        List y_demean(n_vars_y);
+
+        for(int v=0 ; v<n_vars_y ; ++v){
+            p_input_tmp  = p_input[n_vars_X + v];
+            p_output_tmp = p_output[n_vars_X + v];
+
+            NumericVector y_demean_tmp(n_obs);
+            for(int i=0 ; i < n_obs ; ++i){
+                y_demean_tmp[i] = p_input_tmp[i] - p_output_tmp[i];
+            }
+
+            y_demean[v] = y_demean_tmp;
         }
+
+        res["y_demean"] = y_demean;
+
+    } else {
+        NumericVector y_demean(useY ? n_obs : 1);
+        if(useY){
+            // y is always the last variable
+            p_input_tmp = p_input[n_vars - 1];
+            p_output_tmp = p_output[n_vars - 1];
+            for(int i=0 ; i < n_obs ; ++i){
+                y_demean[i] = p_input_tmp[i] - p_output_tmp[i];
+            }
+        }
+        res["y_demean"] = y_demean;
     }
 
-    res["X_demean"] = X_demean;
-    res["y_demean"] = y_demean;
+
 
     // iterations
     IntegerVector iter_final(n_vars);
