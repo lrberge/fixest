@@ -13,11 +13,11 @@
 #' @inheritParams femlm
 #'
 #' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y | fe_1+fe_2}. You can combine two fixed-effects with \code{^}: e.g. \code{fml = z~x+y|fe_1^fe_2}, see details. You can also use variables with varying slopes using square brackets: e.g. in \code{fml = z~y|fe_1[x] + fe_2} the variable \code{x} will have one coefficient for each value of \code{fe_1} -- if you use varying slopes, please have a look at the details section (can't describe it all here).
-#' @param weights A formula or a numeric vector. Each observation can be weighted, the weights must be greater than 0. If equal to a formula, it should be of one-sided: for example \code{~ var_weight}.
+#' @param weights A formula or a numeric vector. Each observation can be weighted, the weights must be greater than 0. If equal to a formula, it should be one-sided: for example \code{~ var_weight}.
 #' @param verbose Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algoritmh (the first number is the left-hand-side, the other numbers are the right-hand-side variables).
-#' @param demeaned Logical, default is \code{FALSE}. Only used in the presence of fixed-effects: should the centered variables be returned? If \code{TRUE},  it creates the items \code{y_demeaned} and \code{X_demeaned}.
+#' @param demeaned Logical, default is \code{FALSE}. Only used in the presence of fixed-effects: should the centered variables be returned? If \code{TRUE}, it creates the items \code{y_demeaned} and \code{X_demeaned}.
 #' @param notes Logical. By default, two notes are displayed: when NAs are removed (to show additional information) and when some observations are removed because of collinearity. To avoid displaying these messages, you can set \code{notes = FALSE}. You can remove these messages permanently by using \code{setFixest_notes(FALSE)}.
-#' @param collin.tol Numeric scalar, default is \code{1e-14}. Threshold decising when variables should be considered collinear and subsequently removed from the estimation. Higher values means more variables will be removed (if there is presence of collinearity). One signal of presence of collinearity is t-stats that are extremely low (for instance when t-stats < 1e-3).
+#' @param collin.tol Numeric scalar, default is \code{1e-10}. Threshold decising when variables should be considered collinear and subsequently removed from the estimation. Higher values means more variables will be removed (if there is presence of collinearity). One signal of presence of collinearity is t-stats that are extremely low (for instance when t-stats < 1e-3).
 #'
 #' @details
 #' The method used to demean each variable along the fixed-effects is based on Berge (2018), since this is the same problem to solve as for the Gaussian case in a ML setup.
@@ -38,7 +38,7 @@
 #'   \item fixef_var[[var1, var2]] is equivalent to fixef_var[[var1]] + fixef_var[[var2]]
 #' }
 #'
-#' In general, for convergence reasons, it is recommended to always add the fixed-effect and avoid using only the variable with varying slope.
+#' In general, for convergence reasons, it is recommended to always add the fixed-effect and avoid using only the variable with varying slope (i.e. use single square brackets).
 #'
 #' @section Lagging variables:
 #'
@@ -171,7 +171,7 @@
 #' # You have many more example in coefplot help
 #'
 #'
-feols = function(fml, data, weights, offset, subset, split, split.full = FALSE, panel.id, fixef, fixef.rm = "none", fixef.tol = 1e-6,
+feols = function(fml, data, weights, offset, subset, split, fsplit, panel.id, fixef, fixef.rm = "none", fixef.tol = 1e-6,
                  fixef.iter = 10000, collin.tol = 1e-10, nthreads = getFixest_nthreads(), verbose = 0, warn = TRUE,
                  notes = getFixest_notes(), combine.quick, demeaned = FALSE, mem.clean = FALSE, only.env = FALSE, env, ...){
 
@@ -179,6 +179,7 @@ feols = function(fml, data, weights, offset, subset, split, split.full = FALSE, 
 
 	# 1st: is the call coming from feglm?
 	fromGLM = FALSE
+	skip_fixef = FALSE
 	if("X" %in% names(dots)){
 		fromGLM = TRUE
 		# env is provided by feglm
@@ -188,12 +189,15 @@ feols = function(fml, data, weights, offset, subset, split, split.full = FALSE, 
 		correct_0w = dots$correct_0w
 	} else {
 		time_start = proc.time()
+		# gt = function(x) cat(sfill(x, 20), ": ", -(t0 - (t0<<-proc.time()))[3], "s\n", sep = "")
+		# t0 = proc.time()
 
 		# we use fixest_env for appropriate controls and data handling
+
 		if(missing(env)){
-		    env = try(fixest_env(fml = fml, data = data, weights = weights, offset = offset, subset = subset, split = split, split.full = split.full, panel.id = panel.id, fixef = fixef, fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter, collin.tol = collin.tol, nthreads = nthreads, verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick, demeaned = demeaned, mem.clean = mem.clean, origin = "feols", mc_origin = match.call(), ...), silent = TRUE)
-		} else if(r <- !is.environment(env) || !isTRUE(env$fixest_env)) {
-		    stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(r, "an", "a 'fixest'"), " environment.")
+		    env = try(fixest_env(fml = fml, data = data, weights = weights, offset = offset, subset = subset, split = split, fsplit = fsplit, panel.id = panel.id, fixef = fixef, fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter, collin.tol = collin.tol, nthreads = nthreads, verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick, demeaned = demeaned, mem.clean = mem.clean, origin = "feols", mc_origin = match.call(), ...), silent = TRUE)
+		} else if(!is.environment(env) || !isTRUE(env$fixest_env)) {
+		    stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(!is.environment(env), "an", "a 'fixest'"), " environment.")
 		}
 
 		if("try-error" %in% class(env)){
@@ -209,6 +213,13 @@ feols = function(fml, data, weights, offset, subset, split, split.full = FALSE, 
 		X = get("linear.mat", env)
 		nthreads = get("nthreads", env)
 		init = 0
+
+		# demeaned variables
+		if(!is.null(dots$X_demean)){
+		    skip_fixef = TRUE
+		    X_demean = dots$X_demean
+		    y_demean = dots$y_demean
+		}
 
 		# offset
 		offset = get("offset.value", env)
@@ -228,8 +239,16 @@ feols = function(fml, data, weights, offset, subset, split, split.full = FALSE, 
 		if(verbose >= 2) cat("Setup in ", (proc.time() - time_start)[3], "s\n", sep="")
 	}
 
+	isFixef = get("isFixef", env)
+
+	# Used to solve with the reduced model
+	xwx = dots$xwx
+	xwy = dots$xwy
+
+	# gt("setup")
+
 	#
-	# Split
+	# Split ####
 	#
 
 	do_split = get("do_split", env)
@@ -239,15 +258,434 @@ feols = function(fml, data, weights, offset, subset, split, split.full = FALSE, 
 	    split.items = get("split.items", env)
 
 	    assign("do_split", FALSE, env)
+
 	    res_all = list()
-	    if(split.full){
-	        res_all[["__FULL_fixest__"]] = feols(env = env)
+	    n_split = length(split.items)
+	    index = NULL
+	    all_names = NULL
+	    is_multi = FALSE
+	    for(i in 0:n_split){
+	        if(i == 0){
+	            if(split.full){
+	                my_env = reshape_env(env)
+	                my_res = feols(env = my_env)
+	            } else {
+	                next
+	            }
+	        } else {
+	            my_res = feols(env = reshape_env(env, obs2keep = which(split == i)))
+	        }
+
+	        if("fixest_multi" %in% class(my_res)){
+
+	            if(is_multi == FALSE){
+	                # setup in the first iteration
+	                is_multi = TRUE
+	                meta = attr(my_res, "meta")
+	                index = meta$index
+	                all_names = meta$all_names
+	            }
+
+	            my_res = attr(my_res, "data")
+	        }
+
+	        if(is_multi){
+	            for(m in 1:length(my_res)){
+	                res_all[[length(res_all) + 1]] = my_res[[m]]
+	            }
+	        } else {
+	            res_all[[length(res_all) + 1]] = my_res
+	        }
+
 	    }
 
-	    for(i in seq_along(split.items)){
-	        res_all[[split.items[i]]] = feols(env = reshape_env(env, keep = split == i))
+	    if(split.full){
+	        split_names = c("full_sample", split.items)
+	    } else {
+	        split_names = split.items
 	    }
+
+	    if(is.null(index)){
+	        index = list(sample = length(res_all))
+	        all_names = list(sample = split_names)
+
+	    } else {
+	        index_tmp = list(sample = length(split_names))
+	        for(i in seq_along(index)){
+	            index_tmp[[names(index)[i]]] = index[[i]]
+	        }
+	        index = index_tmp
+
+	        all_names_tmp = list(sample = split_names)
+	        for(i in seq_along(all_names)){
+	            all_names_tmp[[names(all_names)[i]]] = all_names[[i]]
+	        }
+	        all_names = all_names_tmp
+	    }
+
+	    # result
+	    res_multi = setup_multi(index, all_names, res_all)
+
+	    return(res_multi)
 	}
+
+	#
+	# Multi LHS and RHS ####
+	#
+
+	do_multi_lhs = get("do_multi_lhs", env)
+	do_multi_rhs = get("do_multi_rhs", env)
+	if(do_multi_lhs || do_multi_rhs){
+	    assign("do_multi_lhs", FALSE, env)
+	    assign("do_multi_rhs", FALSE, env)
+
+	    fml = get("fml", env)
+	    lhs_names = get("lhs_names", env)
+	    lhs = y
+
+	    if(do_multi_lhs){
+	        # We find out which LHS have the same NA patterns => saves a lot of computation
+
+	        n_lhs = length(lhs)
+	        lhs_group_is_na = list()
+	        lhs_group_id = c()
+	        lhs_group_n_na = c()
+	        for(i in 1:n_lhs){
+	            is_na_current = !is.finite(lhs[[i]])
+	            n_na_current = sum(is_na_current)
+
+	            if(i == 1){
+	                lhs_group_id = 1
+	                lhs_group_is_na[[1]] = is_na_current
+	                lhs_group_n_na[1] = n_na_current
+
+	            } else {
+	                qui = which(lhs_group_n_na == n_na_current)
+
+	                if(length(qui) > 0){
+
+	                    if(n_na_current == 0){
+	                        # no need to check the pattern
+	                        lhs_group_id[i] = lhs_group_id[qui[1]]
+	                        next
+	                    }
+
+	                    for(j in qui){
+	                        if(all(is_na_current == lhs_group_is_na[[j]])){
+	                            lhs_group_id[i] = lhs_group_id[j]
+	                            next
+	                        }
+	                    }
+	                }
+
+	                # if here => new group because couldn't be matched
+                    id = max(lhs_group_id) + 1
+                    lhs_group_id[i] = id
+                    lhs_group_is_na[[id]] = is_na_current
+                    lhs_group_n_na[id] = n_na_current
+	            }
+	        }
+
+	        # we make groups
+	        lhs_group = list()
+	        for(i in 1:max(lhs_group_id)){
+	            lhs_group[[i]] = which(lhs_group_id == i)
+	        }
+
+	    } else if(do_multi_lhs == FALSE){
+	        lhs_group_is_na = list(FALSE)
+	        lhs_group_n_na = 0
+	        lhs_group = list(1)
+	        lhs = list(lhs) # I really abuse R shallow copy system...
+	        names(lhs) = deparse_long(fml[[2]])
+	    }
+
+	    if(do_multi_rhs){
+	        fml_rhs_all = get("fml_rhs_all", env)
+	        fml_all_sw = get("fml_all_sw", env)
+	        is_cumul = get("is_cumul", env)
+	        fake_intercept = get("fake_intercept", env)
+	        data = get("data", env)
+
+	        # Two schemes:
+	        #  - if cumulative: we take advantage of it => both in demeaning and in estimation
+	        #  - if regular stepwise => only in demeaning
+	        # => of course this is dependent on the pattern of NAs
+	        #
+
+	        # rnc: running number of columns
+	        rnc = ifelse(length(X) == 1, 0, ncol(X))
+	        if(rnc == 0){
+	            col_start = integer(0)
+	        } else {
+	            col_start = 1:rnc
+	        }
+
+	        rhs = list()
+	        rhs_group_is_na = list()
+	        rhs_group_id = c()
+	        rhs_group_n_na = c()
+	        rhs_n_vars = c()
+	        rhs_col_id = list()
+	        for(i in seq_along(fml_all_sw)){
+	            # We evaluate the extra data and check the NA pattern
+
+	            my_fml = fml_all_sw[[i]]
+
+	            if(i == 1 && (is_cumul || identical(my_fml[[3]], 1))){
+	                # That case is already in the main linear.mat => no NA
+	                rhs_group_id = 1
+	                rhs_group_is_na[[1]] = FALSE
+	                rhs_group_n_na[1] = 0
+	                rhs_n_vars[1] = 0
+	                rhs[[1]] = 0
+	                if(rnc == 0){
+	                    rhs_col_id[[1]] = integer(0)
+	                } else {
+	                    rhs_col_id[[1]] = 1:rnc
+	                }
+
+	                next
+	            }
+
+	            rhs_current = try(fixest_model_matrix(my_fml, data, fake_intercept = TRUE), silent = TRUE)
+                if("try-error" %in% class(rhs_current)){
+                    stop("Evaluation of the RHS raises an error (concerns ", deparse_long(my_fml[[3]]), "):\n", rhs_current)
+                }
+
+
+	            rhs[[i]] = rhs_current
+	            rhs_n_vars[i] = ncol(rhs_current)
+	            info = cpppar_which_na_inf_mat(rhs_current, nthreads)
+
+	            if(is_cumul){
+	                rnc = rnc + rhs_n_vars[i]
+	                rhs_col_id[[i]] = 1:rnc
+
+	            } else {
+	                rhs_col_id[[i]] = c(col_start, seq(rnc + 1, length.out = rhs_n_vars[i]))
+	                rnc = rnc + rhs_n_vars[i]
+
+	            }
+
+	            is_na_current = info$is_na_inf
+	            n_na_current = 0
+	            if(info$any_na_inf){
+	                n_na_current = sum(is_na_current)
+	            } else {
+	                # NULL would lead to problems down the road
+	                is_na_current = FALSE
+	            }
+
+	            if(i == 1){
+	                rhs_group_id = 1
+	                rhs_group_is_na[[1]] = is_na_current
+	                rhs_group_n_na[1] = n_na_current
+
+	            } else {
+	                qui = which(rhs_group_n_na == n_na_current)
+
+	                if(length(qui) > 0){
+
+	                    if(n_na_current == 0){
+	                        # no need to check the pattern
+	                        rhs_group_id[i] = rhs_group_id[qui[1]]
+	                        next
+	                    }
+
+	                    for(j in qui){
+	                        if(all(is_na_current == rhs_group_is_na[[j]])){
+	                            rhs_group_id[i] = rhs_group_id[j]
+	                            next
+	                        }
+	                    }
+	                }
+
+	                # if here => new group because couldn't be matched
+	                id = max(rhs_group_id) + 1
+	                rhs_group_id[i] = id
+	                rhs_group_is_na[[id]] = is_na_current
+	                rhs_group_n_na[id] = n_na_current
+	            }
+	        }
+
+	        # we make groups
+	        rhs_group = list()
+	        for(i in 1:max(rhs_group_id)){
+	            rhs_group[[i]] = which(rhs_group_id == i)
+	        }
+
+	    } else if(do_multi_rhs == FALSE){
+
+	        fml_rhs_all = list(xpd(~ ..rhs, ..rhs = deparse_long(fml[[3]])))
+	        is_cumul = FALSE
+	        rhs_group_is_na = list(FALSE)
+	        rhs_group_n_na = 0
+	        rhs_n_vars = 0
+	        rhs_group = list(1)
+	        rhs = list(0)
+	        rhs_col_id = list(1:NCOL(X))
+	    }
+
+	    isLinear = length(X) > 1
+
+	    n_lhs = length(lhs)
+	    n_rhs = length(rhs)
+	    res = vector("list", n_lhs * n_rhs)
+
+	    rhs_names = sapply(fml_rhs_all, deparse_long)
+
+	    for(i in seq_along(lhs_group)){
+	        for(j in seq_along(rhs_group)){
+
+	            # NA removal
+	            no_na = FALSE
+	            if(lhs_group_n_na[i] > 0){
+	                if(rhs_group_n_na[j] > 0){
+	                    is_na_current = lhs_group_is_na[[i]] | rhs_group_is_na[[j]]
+	                } else {
+	                    is_na_current = lhs_group_is_na[[i]]
+	                }
+	            } else if(rhs_group_n_na[j] > 0){
+	                is_na_current = rhs_group_is_na[[j]]
+	            } else {
+	                no_na = TRUE
+	            }
+
+	            # Here it depends on whether there are FEs or not, whether it's cumul or not
+	            my_lhs = lhs[lhs_group[[i]]]
+	            if(isLinear){
+	                my_rhs = list(X)
+	                for(u in rhs_group[[j]]){
+	                    if(length(rhs[[u]]) > 1) my_rhs[[length(my_rhs) + 1]] = rhs[[u]]
+	                }
+	            } else{
+	                rhs_len = lengths(rhs)
+	                my_rhs = rhs[rhs_len > 1 & seq_along(rhs) %in% rhs_group[[j]]]
+
+	            }
+
+	            if(!no_na){
+	                # NA removal
+	                for(u in seq_along(my_lhs)){
+	                    my_lhs[[u]] = my_lhs[[u]][!is_na_current]
+	                }
+
+	                for(u in seq_along(my_rhs)){
+	                    if(length(my_rhs[[u]]) > 1) my_rhs[[u]] = my_rhs[[u]][!is_na_current, , drop = FALSE]
+	                }
+
+	                my_env = reshape_env(env, obs2keep = which(!is_na_current), assign_lhs = FALSE, assign_rhs = FALSE)
+
+	            } else {
+	                my_env = reshape_env(env)
+	            }
+
+	            isLinear_current = TRUE
+	            if(length(my_rhs) == 0){
+	                X_all = 0
+	                isLinear_current = FALSE
+	            } else {
+	                X_all = do.call("cbind", my_rhs)
+	            }
+
+
+	            if(isFixef){
+	                # We batch demean
+
+	                n_vars_X = ifelse(is.null(ncol(X_all)), 0, ncol(X_all))
+
+	                # fixef information
+	                fixef_sizes = get("fixef_sizes", my_env)
+	                fixef_table_vector = get("fixef_table_vector", my_env)
+	                fixef_id_list = get("fixef_id_list", my_env)
+
+	                slope_flag = get("slope_flag", my_env)
+	                slope_vars = get("slope_variables", my_env)
+
+	                if(mem.clean) gc()
+
+	                vars_demean = cpp_demean(my_lhs, X_all, n_vars_X, weights, iterMax = fixef.iter,
+	                                         diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
+	                                         fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
+	                                         slope_flag_Q = slope_flag, slope_vars_list = slope_vars,
+	                                         r_init = init, nthreads = nthreads)
+	            }
+
+	            if(is_cumul){
+	                # we precompute the solution
+	                w = get("weights.value", my_env)
+
+	                # Changer cpp_sparse_products pour qu'il renvoie une liste quand y est une liste
+
+	                if(isFixef){
+	                    my_products = cpp_sparse_products(vars_demean$X_demean, w, vars_demean$y_demean, nthreads = nthreads)
+	                } else {
+	                    my_products = cpp_sparse_products(X_all, w, my_lhs, nthreads = nthreads)
+	                }
+
+	                xwx = my_products$XtX
+	                xwy = my_products$Xty
+	            }
+
+	            for(ii in seq_along(my_lhs)){
+	                i_lhs = lhs_group[[i]][ii]
+
+	                for(jj in rhs_group[[j]]){
+
+	                    qui = rhs_col_id[[jj]]
+	                    if(isLinear_current){
+	                        my_X = X_all[, qui, drop = FALSE]
+	                    } else {
+	                        my_X = 0
+	                    }
+
+	                    my_fml = xpd(..lhs ~ ..rhs, ..lhs = lhs_names[i_lhs], ..rhs = fml_rhs_all[[jj]])
+	                    current_env = reshape_env(my_env, lhs = my_lhs[[ii]], rhs = my_X, fml = my_fml)
+
+	                    if(is_cumul){
+
+	                        if(isFixef){
+	                            my_res = feols(env = current_env, xwx = xwx[qui, qui, drop = FALSE], xwy = xwy[[ii]][qui],
+	                                           X_demean = vars_demean$X_demean[ , qui, drop = FALSE],
+	                                           y_demean = vars_demean$y_demean[[ii]])
+	                        } else {
+	                            my_res = feols(env = current_env, xwx = xwx[qui, qui, drop = FALSE], xwy = xwy[[ii]][qui])
+	                        }
+
+
+	                    } else {
+
+	                        if(isFixef){
+	                            my_res = feols(env = current_env, X_demean = vars_demean$X_demean[ , qui, drop = FALSE],
+	                                           y_demean = vars_demean$y_demean[[ii]])
+	                        } else {
+	                            my_res = feols(env = current_env)
+	                        }
+
+	                    }
+
+	                    res[[index_2D_to_1D(i_lhs, jj, n_rhs)]] = my_res
+	                }
+	            }
+
+	        }
+	    }
+
+	    # Meta information for fixest_multi
+
+	    index = list(lhs = n_lhs, rhs = n_rhs)
+	    all_names = list(lhs = lhs_names, rhs = rhs_names)
+
+	    # result
+	    res_multi = setup_multi(index, all_names, res)
+
+	    return(res_multi)
+	}
+
+	#
+	# Regular estimation ####
+	#
 
 
 	onlyFixef = length(X) == 1
@@ -258,8 +696,10 @@ feols = function(fml, data, weights, offset, subset, split, split.full = FALSE, 
 		res = get("res", env)
 	}
 
-	isFixef = get("isFixef", env)
-	if(!isFixef){
+	if(skip_fixef){
+	    # Variables were already demeaned
+
+	} else if(!isFixef){
 		# No Fixed-effects
 		y_demean = y
 		X_demean = X
@@ -284,6 +724,7 @@ feols = function(fml, data, weights, offset, subset, split, split.full = FALSE, 
 		    gc()
 		}
 
+		# browser()
 		vars_demean = cpp_demean(y, X, n_vars_X, weights, iterMax = fixef.iter,
 		                            diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
 		                            fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
@@ -353,6 +794,7 @@ feols = function(fml, data, weights, offset, subset, split, split.full = FALSE, 
 		}
 	}
 
+	# gt("demean")
 	time_esti = proc.time()
 
 	#
@@ -365,7 +807,7 @@ feols = function(fml, data, weights, offset, subset, split, split.full = FALSE, 
 
 	if(!onlyFixef){
 
-	    est = ols_fit(y_demean, X_demean, weights, correct_0w, collin.tol, nthreads)
+	    est = ols_fit(y_demean, X_demean, weights, correct_0w, collin.tol, nthreads, xwx, xwy)
 
 	    if(mem.clean){
 	        gc()
@@ -426,7 +868,7 @@ feols = function(fml, data, weights, offset, subset, split, split.full = FALSE, 
 
 		return(res)
 	}
-
+	# gt("fit")
 	#
 	# Post processing
 	#
@@ -551,22 +993,25 @@ feols = function(fml, data, weights, offset, subset, split, split.full = FALSE, 
 	}
 
 	# other
-	res$fml = get("fml", env)
 	res$call = match.call()
 
 	if(verbose >= 3) cat("Post-processing in ", (time_post - time_post)[3], "s\n", sep="")
+
+	# gt("post")
 
 	class(res) = "fixest"
 
 	res
 }
 
-ols_fit = function(y, X, w, correct_0w = FALSE, collin.tol, nthreads){
+ols_fit = function(y, X, w, correct_0w = FALSE, collin.tol, nthreads, xwx = NULL, xwy = NULL){
     # No control here -- done before
 
-    info_products = cpp_sparse_products(X, w, y, correct_0w, nthreads)
-    xwx = info_products$XtX
-    xwy = info_products$Xty
+    if(is.null(xwx)){
+        info_products = cpp_sparse_products(X, w, y, correct_0w, nthreads)
+        xwx = info_products$XtX
+        xwy = info_products$Xty
+    }
 
     multicol = FALSE
     info_inv = cpp_cholesky(xwx, collin.tol, nthreads)
