@@ -44,7 +44,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 
     # checking the arguments
     validate_dots(suggest_args = c("n", "type", "se", "cluster"),
-                  valid_args = c("se", "cluster", "dof", "exact_dof", "forceCovariance", "keepBounded"))
+                  valid_args = c("se", "cluster", "dof", "forceCovariance", "keepBounded"))
 
     # The objects from the estimation and the summary are identical, except regarding the vcov
 	fromSummary = "cov.scaled" %in% names(x)
@@ -52,13 +52,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 	# if NOT from summary, we consider the argument 'type'
 	if(!fromSummary){
 	    # checking argument type
-	    if(length(type) != 1 || !is.character(type) || is.na(type)){
-	        stop("Argument 'type' must be equal to 'table' or 'coef'.")
-	    }
-	    type = try(match.arg(type, c("coef", "table")), silent = TRUE)
-	    if("try-error" %in% class(type)){
-	        stop("Argument 'type' must be equal to 'table' or 'coef'.")
-	    }
+	    check_arg_plus(type, "match(coef, table)")
 
 	    if(type == "coef"){
 	        print(coef(x))
@@ -217,7 +211,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' @method summary fixest
 #'
 #' @param se Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.
-#' @param cluster Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1", "var2")]}, \code{cluster = c("var1", "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster).
+#' @param cluster Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1", "var2")]}, \code{cluster = c("var1", "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster). You can interact two variables using \code{^} with the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.
 #' @param object A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
 #' @param dof An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{dof}} for this argument. The arguments and defaults of the function \code{\link[fixest]{dof}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "conventional"}, \code{t.df = "conventional"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{dof}} for details.
 #' @param .vcov A user provided covariance matrix or a function computing this matrix. If a matrix, it must be a square matrix of the same number of rows as the number of variables estimated. If a function, it must return the previsouly mentioned matrix.
@@ -253,7 +247,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #'
 #' # Comparing different types of standard errors
 #' sum_standard = summary(est_pois, se = "standard")
-#' sum_hetero    = summary(est_pois, se = "hetero")
+#' sum_hetero   = summary(est_pois, se = "hetero")
 #' sum_oneway   = summary(est_pois, se = "cluster")
 #' sum_twoway   = summary(est_pois, se = "twoway")
 #' sum_threeway = summary(est_pois, se = "threeway")
@@ -271,6 +265,13 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' # Since Destination and Product are used as fixed-effects, you can also use:
 #' summary(est_pois, cluster = 2:3)
 #'
+#' # You can interact the clustering variables "live" using the var1 ^ var2 syntax.
+#'
+#' summary(est_pois, cluster = "Destination^Product")
+#' summary(est_pois, cluster = ~Destination^Product)
+#' # Equivalent to
+#' summary(est_pois, cluster = paste(trade$Destination, trade$Product))
+#'
 #'
 #' #
 #' # Compatibility with sandwich
@@ -281,7 +282,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' summary(est_pois, .vcov = vcovCL, cluster = trade[, c("Destination", "Product")])
 #'
 #'
-summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), .vcov, lean = FALSE, forceCovariance = FALSE, keepBounded = FALSE, n,  ...){
+summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), .vcov, lean = FALSE, forceCovariance = FALSE, keepBounded = FALSE, n, ...){
 	# computes the clustered SD and returns the modified vcov and coeftable
 
 	if(!is.null(object$onlyFixef)){

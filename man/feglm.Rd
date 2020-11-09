@@ -12,11 +12,13 @@ feglm(
   family = "poisson",
   offset,
   weights,
+  subset,
   panel.id,
   start = NULL,
   etastart = NULL,
   mustart = NULL,
   fixef,
+  fixef.rm = "perfect",
   fixef.tol = 1e-06,
   fixef.iter = 10000,
   collin.tol = 1e-14,
@@ -40,9 +42,11 @@ feglm.fit(
   family = "poisson",
   offset,
   weights,
+  subset,
   start = NULL,
   etastart = NULL,
   mustart = NULL,
+  fixef.rm = "perfect",
   fixef.tol = 1e-06,
   fixef.iter = 10000,
   collin.tol = 1e-10,
@@ -63,11 +67,13 @@ fepois(
   data,
   offset,
   weights,
+  subset,
   panel.id,
   start = NULL,
   etastart = NULL,
   mustart = NULL,
   fixef,
+  fixef.rm = "perfect",
   fixef.tol = 1e-06,
   fixef.iter = 10000,
   collin.tol = 1e-10,
@@ -93,7 +99,7 @@ fepois(
 
 \item{offset}{A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This offset is linearly added to the elements of the main formula 'fml'.}
 
-\item{weights}{A formula or a numeric vector. Each observation can be weighted, the weights must be greater than 0. If equal to a formula, it should be of one-sided: for example \code{~ var_weight}.}
+\item{weights}{A formula or a numeric vector. Each observation can be weighted, the weights must be greater than 0. If equal to a formula, it should be one-sided: for example \code{~ var_weight}.}
 
 \item{panel.id}{The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id = ~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link[fixest]{feols}}).}
 
@@ -109,7 +115,7 @@ fepois(
 
 \item{fixef.iter}{Maximum number of iterations in fixed-effects algorithm (only in use for 2+ fixed-effects). Default is 10000.}
 
-\item{collin.tol}{Numeric scalar, default is \code{1e-14}. Threshold decising when variables should be considered collinear and subsequently removed from the estimation. Higher values means more variables will be removed (if there is presence of collinearity). One signal of presence of collinearity is t-stats that are extremely low (for instance when t-stats < 1e-3).}
+\item{collin.tol}{Numeric scalar, default is \code{1e-10}. Threshold decising when variables should be considered collinear and subsequently removed from the estimation. Higher values means more variables will be removed (if there is presence of collinearity). One signal of presence of collinearity is t-stats that are extremely low (for instance when t-stats < 1e-3).}
 
 \item{glm.iter}{Number of iterations of the glm algorithm. Default is 25.}
 
@@ -204,7 +210,7 @@ In other words:
   \item fixef_var[[var1, var2]] is equivalent to fixef_var[[var1]] + fixef_var[[var2]]
 }
 
-In general, for convergence reasons, it is recommended to always add the fixed-effect and avoid using only the variable with varying slope.
+In general, for convergence reasons, it is recommended to always add the fixed-effect and avoid using only the variable with varying slope (i.e. use single square brackets).
 }
 
 \section{Lagging variables}{
