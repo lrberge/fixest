@@ -3611,13 +3611,18 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
     t_fml = terms(fml)
     tl = attr(t_fml, "term.labels")
 
+    if(length(tl) == 0){
+        res = matrix(1, nrow = nrow(data), ncol = 1, dimnames = list(NULL,"(Intercept)"))
+        return(res)
+    }
+
     # We check for calls to i()
     qui_inter <- grepl("(^|[^[:alnum:]_\\.])i(nteract)?\\(", tl)
     IS_INTER = any(qui_inter)
     if(IS_INTER){
         # OMG... why do I always have to reinvent the wheel???
         is_intercept = fake_intercept || (attr(t_fml,"intercept") == 1)
-        i_naked = which(is_naked_inter(tl[qui_inter]))
+        i_naked = which(is_naked_fun(tl[qui_inter], "i(nteract)?"))
 
         if(i_noref){
             for(i in seq_along(i_naked)){
@@ -4262,11 +4267,11 @@ clean_interact_names = function(x){
     return(res)
 }
 
-is_naked_inter = function(x){
+is_naked_fun = function(x, fun_pattern){
     # Why is it always so complicated... There must be an easier way
     # x = c("i(x1)", "i(I(x3))", "interact(x3, x4, TRUE, drop = c(1, 3:5))", "Temp:i(x2)", "i(x3):Wind")
 
-    x_split = strsplit(x, "(^|(?<=[^[:alnum:]\\._]))i(nteract)?\\(", perl = TRUE)
+    x_split = strsplit(x, paste0("(^|(?<=[^[:alnum:]\\._]))", fun_pattern, "\\("), perl = TRUE)
 
     left = sapply(x_split, function(x) x[1])
     right = sapply(x_split, function(x) x[2])
