@@ -12,6 +12,10 @@
   - When using variables with varying slopes and the number of iterations is greater than 300, a bug occured in the function checking the convergence was right (thanks to @kendonB, [#53](https://github.com/lrberge/fixest/issues/53)). 
   
   - Fix bug in the demeaning algorithm when two variables with varying slopes were identical.
+  
+  - Fix bug in femlm/feNmlm when factor variables are removed after observations were removed.
+  
+  - In `summary`, fix bug when the argument `cluster` was equal to a formula with expressions and not a variable names (thanks to @edrubin [#55](https://github.com/lrberge/fixest/issues/55)).
 
 #### Improvements of the internal algorithm
 
@@ -20,6 +24,24 @@
  - Internal algorithm of `to_integer` (used in all estimations): one copy of the input data is now avoided.
  
  - All estimations: smarter handling of the intercept, thus avoiding the reconstruction of the design matrix.
+ 
+#### Major user visible changes
+
+  - Multiple estimations:
+  
+    * New arguments `split` and `fsplit`: you can now perform split sample estimations.
+    
+    * Estimations for multiple left-hand-sides can be done at once.
+    
+    * Stepwise estimation can be performed with the new stepwise functions.
+    
+    * The object returned is of class `fixest_multi`. You can easily navigate through the results.
+ 
+#### New features
+
+ - In all estimations:
+    
+    * New argument `subset`.
 
 ## Changes in version 0.7.1 (27-10-2020)
 
