@@ -390,10 +390,12 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             stop("You must provide argument 'y' when using ", origin_type, ".fit.")
         }
 
-        lhs = check_value_plus(y, "numeric vector conv")
+        lhs = check_value_plus(y, "numeric vmatrix ncol(1) conv")
+        if(is.matrix(lhs)) lhs = as.vector(lhs)
 
         # we reconstruct a formula
         fml = as.formula(paste0(deparse_long(mc_origin[["y"]]), "~1"))
+        lhs_names = as.character(fml[[2]])
 
         nobs_origin = nobs = length(lhs)
     }
@@ -523,7 +525,8 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             }
 
         } else {
-            lhs = check_value_plus(lhs, "numeric vector conv", .prefix = "The left hand side")
+            lhs = check_value_plus(lhs, "numeric vmatrix ncol(1) conv", .prefix = "The left hand side")
+            if(is.matrix(lhs)) lhs = as.vector(lhs)
             lhs_names = lhs_text
         }
 
@@ -2318,7 +2321,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     # Observations removed (either NA or fixed-effects)
     if(isSubset){
         # subset does not accept duplicate values eg c(1, 1, 1, 2)
-        all_obs = 1:nobs_before_subset
+        all_obs = 1:nobs_origin
         obs2keep = all_obs[subset]
         obs2remove_subset = all_obs[-obs2keep]
         obs2remove = sort(c(obs2remove_subset, obs2keep[obs2remove]))
