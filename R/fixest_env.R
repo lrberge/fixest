@@ -774,7 +774,11 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                         }
                     }
 
-                    sw_all_vars = all.vars(xpd(~ ..sw, ..sw = sw_terms))
+                    if(origin_type == "feols"){
+                        sw_all_vars = all.vars(xpd(~ ..sw, ..sw = sw_terms))
+                    } else {
+                        sw_all_vars = all.vars(fml[[3]])
+                    }
 
                     # Creating the current formula
                     if(is_cumul){
@@ -790,7 +794,6 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
                     # Plus tard quand j'aurais develope mes donnes en fixest_semi_sparse => evaluer tous les termes
                     fml = xpd(lhs ~ ..rhs, ..rhs = tl_new)
-                    # fml = as.formula(paste0(lhs_txt, "~", paste(tl_new, collapse = " + ")))
 
                 }
 
@@ -811,7 +814,6 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         }
 
     }
-
 
     # further controls (includes na checking)
     msgNA_L = ""
@@ -2091,27 +2093,12 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     if(missing(theta.init)){
         theta.init = NULL
     }
+    assign("theta.init", theta.init, env)
 
-    if(origin_type == "feNmlm" || computeModel0){
-        model0 = get_model_null(env, theta.init)
-        theta.init = model0$theta
-    } else {
-        model0 = NULL
-    }
-
-    # For the negative binomial:
-    if(family == "negbin"){
-        params = c(params, ".theta")
-        start = c(start, theta.init)
-        names(start) = params
-        upper = c(upper, 10000)
-        lower = c(lower, 1e-3)
-    }
-
-    assign("model0", model0, env)
     onlyFixef = !isLinear && !isNonLinear && Q > 0
     assign("onlyFixef", onlyFixef, env)
     assign("start", start, env)
+    assign("isNL", isNL, env)
     assign("linear.params", linear.params, env)
     assign("isLinear", isLinear, env)
     assign("nonlinear.params", nonlinear.params, env)
@@ -2147,7 +2134,6 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
         # basic NL
         envNL = new.env()
-        assign("isNL", isNL, env)
         if(isNL){
             data_NL = as.data.frame(data_NL)
             for(var in nonlinear.varnames) assign(var, data_NL[[var]], envNL)
@@ -2239,10 +2225,6 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         assign("nbSave", 1, env)  # nombre de valeurs totales sauvegardees
         assign("savedCoef", list(start[nonlinear.params]), env)
         assign("savedValue", list(mu), env)
-        # if(isLinear){
-        #     start_coef_linear = unlist(start[linear.params])
-        #     mu <- mu + cpppar_xbeta(linear.mat, start_coef_linear, nthreads)
-        # }
 
         # Mise en place du calcul du gradient
         gradient = femlm_gradient
@@ -2629,7 +2611,7 @@ assign_fixef_env = function(env, nobs, family, origin_type, fixef_id, fixef_size
 
 
 
-reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs = TRUE, assign_rhs = TRUE, fml = NULL){
+reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs = TRUE, assign_rhs = TRUE, fml = NULL, check_lhs = FALSE){
     # env: environment from an estimation
     # This functions reshapes the environment to perform the neww estimation
     # either by selecting some observation (in split)
@@ -2663,11 +2645,15 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 
     lhs_done = FALSE
 
-    if(isFixef && length(obs2keep) > 0){
+    #
+    # fixef ####
+    #
+
+    if(isFixef && (length(obs2keep) > 0 || check_lhs)){
 
         # gt("nothing")
 
-        if(assign_lhs){
+        if(assign_lhs && length(obs2keep) > 0){
             if(is.list(lhs)){
                 # list means multiple LHS
                 for(i in seq_along(lhs)){
@@ -2720,6 +2706,10 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 
         if(length(obs2remove) > 0){
 
+            if(is.null(obs2keep)){
+                obs2keep = 1:length(fixef_mat[[1]])
+            }
+
             if(assign_lhs && is.list(lhs)){
                 if(is.list(lhs)){
                     # list means multiple LHS
@@ -2746,6 +2736,10 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
     # This is very tedious
     if(!is.null(obs2keep)){
         # Recreating the values
+
+        #
+        # RM obs = TRUE ####
+        #
 
         #
         # The left hand side
@@ -2786,30 +2780,33 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 
                 } else if(any(only_0 == 1)){
                     rhs = rhs[, only_0 == 0, drop = FALSE]
+                }
 
-                    linear.params = colnames(rhs)
-                    nonlinear.params = get("nonlinear.params", env)
-                    params = c(nonlinear.params, linear.params)
-                    assign("linear.params", linear.params, new_env)
-                    assign("params", params, new_env)
+                linear.params = colnames(rhs)
+                nonlinear.params = get("nonlinear.params", env)
+                params = c(nonlinear.params, linear.params)
+                assign("linear.params", linear.params, new_env)
+                assign("params", params, new_env)
 
-                    # useful when feNmlm or feglm
-                    if(origin_type %in% c("feNmlm", "feglm")){
+                # useful when feNmlm or feglm
+                if(origin_type %in% c("feNmlm", "feglm")){
 
-                        start = get("start", env)
-                        qui = names(start) %in% params
-                        assign("start", start[qui], new_env)
+                    start = get("start", env)
+                    new_start = setNames(start[params], params)
+                    new_start[is.na(new_start)] = 0
+                    assign("start", new_start, new_env)
 
-                        if(origin_type == "feNmlm"){
-                            upper = get("upper", env)
-                            lower = get("lower", env)
+                    if(origin_type == "feNmlm"){
+                        upper = get("upper", env)
+                        new_upper = setNames(upper[params], params)
+                        new_upper[is.na(new_upper)] = Inf
+                        assign("upper", new_upper, new_env)
 
-                            qui = names(upper) %in% params
-                            assign("upper", upper[qui], new_env)
-                            assign("lower", lower[qui], new_env)
-                        }
+                        lower = get("lower", env)
+                        new_lower = setNames(lower[params], params)
+                        new_lower[is.na(new_lower)] = -Inf
+                        assign("lower", new_lower, new_env)
                     }
-
                 }
 
                 assign("linear.mat", rhs, new_env)
@@ -2830,19 +2827,22 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
         # The non-linear part, the weight and the offset
         #
 
-        isOffset = length(env$offset.value) > 1
+        offset.value = get("offset.value", env)
+        isOffset = length(offset.value) > 1
         if(isOffset){
-            offset.value = get("offset.value", env)
             assign("offset.value", offset.value[obs2keep], new_env)
         }
 
-        isWeight = length(env$weights.value) > 1
+        weights.value = get("weights.value", env)
+        isWeight = length(weights.value) > 1
         if(isWeight){
-            weights.value = get("weights.value", env)
-            assign("weights.value", weights.value[obs2keep], new_env)
+            # used in family$family_equiv
+            weights.value = weights.value[obs2keep]
+            assign("weights.value", weights.value, new_env)
         }
 
-        if(isTRUE(env$isNL)){
+        isNL = get("isNL", env)
+        if(isNL){
             envNL = get("envNL", env)
             envNL_new = new.env()
             for(var in names(envNL)){
@@ -2860,12 +2860,12 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
         # GLM specific stuff
         if(origin_type == "feglm"){
 
-            if(!is.list(lhs) && family$family_equiv == "poisson"){
-
-                family_funs = get("family_funs", env)
+            family_funs = get("family_funs", env)
+            if(!is.list(lhs) && family_funs$family_equiv == "poisson"){
 
                 y_pos = lhs[lhs > 0]
                 qui_pos = lhs > 0
+
                 if(isWeight){
                     constant = sum(weights.value[qui_pos] * y_pos * cpppar_log(y_pos, nthreads) - weights.value[qui_pos] * y_pos)
                     sum_dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(wt[qui_pos] * y_pos * eta[qui_pos]) + sum(wt * mu))
@@ -2943,6 +2943,7 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
         }
 
         # obs2keep
+        res$nobs = length(obs2keep)
         if(is.null(res$obsKept)){
             res$obsKept = obs2keep
         } else {
@@ -2955,27 +2956,37 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 
     } else {
 
+        #
+        # Save LHS/RHS ####
+        #
+
         if(save_lhs){
             # Here lhs is ALWAYS a vector
             assign("lhs", lhs, new_env)
 
-            if(origin_type == "feglm" && family$family_equiv == "poisson"){
-
+            if(origin_type == "feglm"){
                 family_funs = get("family_funs", env)
 
-                y_pos = lhs[lhs > 0]
-                qui_pos = lhs > 0
-                if(isWeight){
-                    constant = sum(weights.value[qui_pos] * y_pos * cpppar_log(y_pos, nthreads) - weights.value[qui_pos] * y_pos)
-                    sum_dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(wt[qui_pos] * y_pos * eta[qui_pos]) + sum(wt * mu))
-                } else {
-                    constant = sum(y_pos * cpppar_log(y_pos, nthreads) - y_pos)
-                    sum_dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(y_pos * eta[qui_pos]) + sum(mu))
+                if(family_funs$family_equiv == "poisson"){
+
+                    y_pos = lhs[lhs > 0]
+                    qui_pos = lhs > 0
+
+                    weights.value = get("weights.value", env)
+                    isWeight = length(weights.value) > 1
+
+                    if(isWeight){
+                        constant = sum(weights.value[qui_pos] * y_pos * cpppar_log(y_pos, nthreads) - weights.value[qui_pos] * y_pos)
+                        sum_dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(wt[qui_pos] * y_pos * eta[qui_pos]) + sum(wt * mu))
+                    } else {
+                        constant = sum(y_pos * cpppar_log(y_pos, nthreads) - y_pos)
+                        sum_dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(y_pos * eta[qui_pos]) + sum(mu))
+                    }
+
+                    family_funs$sum_dev.resids = sum_dev.resids
+
+                    assign("family_funs", family_funs, new_env)
                 }
-
-                family_funs$sum_dev.resids = sum_dev.resids
-
-                assign("family_funs", family_funs, new_env)
             }
 
             if(origin_type == "feglm" && isFixef){
@@ -3000,16 +3011,20 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
                 if(origin_type %in% c("feNmlm", "feglm")){
 
                     start = get("start", env)
-                    qui = names(start) %in% params
-                    assign("start", start[qui], new_env)
+                    new_start = setNames(start[params], params)
+                    new_start[is.na(new_start)] = 0
+                    assign("start", new_start, new_env)
 
                     if(origin_type == "feNmlm"){
                         upper = get("upper", env)
-                        lower = get("lower", env)
+                        new_upper = setNames(upper[params], params)
+                        new_upper[is.na(new_upper)] = Inf
+                        assign("upper", new_upper, new_env)
 
-                        qui = names(upper) %in% params
-                        assign("upper", upper[qui], new_env)
-                        assign("lower", lower[qui], new_env)
+                        lower = get("lower", env)
+                        new_lower = setNames(lower[params], params)
+                        new_lower[is.na(new_lower)] = -Inf
+                        assign("lower", new_lower, new_env)
                     }
                 }
             }
