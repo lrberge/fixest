@@ -287,7 +287,8 @@ femlm_ll <- function(coef, env){
 	}
 
 	# We save the ll and ssr with FEs of the first iteration
-	if(iter == 1 && env$isFixef && all(head(coef, length(coef) - (family == "negbin")) == 0)){
+	isFixef = get("isFixef", env)
+	if(iter == 1 && isFixef && all(head(coef, length(coef) - (family == "negbin")) == 0)){
 		assign("ll_fe_only", ll, env)
 		ep = famFuns$expected.predictor(mu, exp_mu)
 		# assign("ssr_fe_only", drop(crossprod(y - ep)), env)
