@@ -3688,6 +3688,11 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
         colnames(linear.mat) = new_names
     }
 
+
+    if(is.integer(linear.mat)){
+        linear.mat = 1 * linear.mat
+    }
+
     attr(linear.mat, "useModel.matrix") = useModel.matrix
 
     linear.mat
