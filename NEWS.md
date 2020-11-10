@@ -16,6 +16,10 @@
   - Fix bug in femlm/feNmlm when factor variables are removed after observations were removed.
   
   - In `summary`, fix bug when the argument `cluster` was equal to a formula with expressions and not a variable names (thanks to @edrubin [#55](https://github.com/lrberge/fixest/issues/55)).
+  
+  - Fix bug when integers are present in the RHS (thanks to @zozotintin [#56](https://github.com/lrberge/fixest/issues/56)).
+  
+  - Fix bug when nb_FE >= 2 and the data was large (thanks to @zozotintin [#56](https://github.com/lrberge/fixest/issues/56)). 
 
 #### Improvements of the internal algorithm
 
