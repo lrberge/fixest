@@ -39,6 +39,12 @@ S3method(summary, fixest)
 export(summ) # alias for summary.fixest
 S3method(plot, fixest.fixef)
 S3method("[", fixest_panel) # Lag related
+# fixest_multi
+S3method("[", fixest_multi)
+S3method("[[", fixest_multi)
+S3method("$", fixest_multi)
+S3method(print, fixest_multi)
+S3method(summary, fixest_multi)
 
 # rep
 S3method(rep, fixest) # rep fixest objects
