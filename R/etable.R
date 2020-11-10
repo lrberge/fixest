@@ -462,7 +462,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
 
     set_up(1)
     # => we also allow lists (of fixest objects)
-    check_arg(..., "class(fixest) | list mbt")
+    check_arg(..., "class(fixest, fixest_multi) | list mbt")
 
     check_arg(digits, "integer scalar GE{1}")
     check_arg(title, "character scalar")
@@ -593,9 +593,6 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
         yesNo = c(yesNo, "")
     }
 
-    # at the moment: only fixest allowed
-    allowed_types = "fixest"
-
     # We get all the models
     dots <- list(...)
 
@@ -622,7 +619,11 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
     for(i in 1:n){
         di = dots[[i]]
 
-        if(any(allowed_types %in% class(di))){
+        if("fixest_multi" %in% class(di)){
+            di = attr(di, "data")
+        }
+
+        if("fixest" %in% class(di)){
             all_models[[k]] = di
             if(any(class(dots_call[[i]]) %in% c("call", "name"))){
                 model_names[[k]] = deparse_long(dots_call[[i]])
@@ -634,7 +635,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
         } else if(length(class(di))==1 && class(di)=="list"){
             # we get into this list to get the fixest objects
             types = sapply(di, class)
-            qui = which(types %in% allowed_types)
+            qui = which(types == "fixest")
             for(m in qui){
                 all_models[[k]] = di[[m]]
 
