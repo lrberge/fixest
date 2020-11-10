@@ -250,8 +250,8 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, panel.id, fi
 
 		if(missing(env)){
 		    env = try(fixest_env(fml = fml, data = data, weights = weights, offset = offset, subset = subset, split = split, fsplit = fsplit, panel.id = panel.id, fixef = fixef, fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter, collin.tol = collin.tol, nthreads = nthreads, verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick, demeaned = demeaned, mem.clean = mem.clean, origin = "feols", mc_origin = match.call(), ...), silent = TRUE)
-		} else if(!is.environment(env) || !isTRUE(env$fixest_env)) {
-		    stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(!is.environment(env), "an", "a 'fixest'"), " environment.")
+		} else if((r <- !is.environment(env)) || !isTRUE(env$fixest_env)) {
+		    stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(r, "an", "a 'fixest'"), " environment.")
 		}
 
 		if("try-error" %in% class(env)){
@@ -481,6 +481,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, panel.id, fi
 	        rhs_group_n_na = c()
 	        rhs_n_vars = c()
 	        rhs_col_id = list()
+	        any_na_rhs = FALSE
 	        for(i in seq_along(fml_all_sw)){
 	            # We evaluate the extra data and check the NA pattern
 
@@ -507,24 +508,20 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, panel.id, fi
                     stop("Evaluation of the RHS raises an error (concerns ", deparse_long(my_fml[[3]]), "):\n", rhs_current)
                 }
 
-
 	            rhs[[i]] = rhs_current
 	            rhs_n_vars[i] = ncol(rhs_current)
 	            info = cpppar_which_na_inf_mat(rhs_current, nthreads)
 
-	            if(is_cumul){
-	                rnc = rnc + rhs_n_vars[i]
-	                rhs_col_id[[i]] = 1:rnc
-
-	            } else {
-	                rhs_col_id[[i]] = c(col_start, seq(rnc + 1, length.out = rhs_n_vars[i]))
-	                rnc = rnc + rhs_n_vars[i]
-
+	            is_na_current = info$is_na_inf
+	            if(is_cumul && any_na_rhs){
+	                # we cumulate the NAs
+	                is_na_current = is_na_current | rhs_group_is_na[[rhs_group_id[i - 1]]]
+	                info$any_na_inf = any(is_na_current)
 	            }
 
-	            is_na_current = info$is_na_inf
 	            n_na_current = 0
 	            if(info$any_na_inf){
+	                any_na_rhs = TRUE
 	                n_na_current = sum(is_na_current)
 	            } else {
 	                # NULL would lead to problems down the road
@@ -547,12 +544,16 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, panel.id, fi
 	                        next
 	                    }
 
+	                    go_next = FALSE
 	                    for(j in qui){
 	                        if(all(is_na_current == rhs_group_is_na[[j]])){
 	                            rhs_group_id[i] = rhs_group_id[j]
-	                            next
+	                            go_next = TRUE
+	                            break
 	                        }
 	                    }
+
+	                    if(go_next) next
 	                }
 
 	                # if here => new group because couldn't be matched
@@ -560,6 +561,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, panel.id, fi
 	                rhs_group_id[i] = id
 	                rhs_group_is_na[[id]] = is_na_current
 	                rhs_group_n_na[id] = n_na_current
+
 	            }
 	        }
 
@@ -567,6 +569,19 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, panel.id, fi
 	        rhs_group = list()
 	        for(i in 1:max(rhs_group_id)){
 	            rhs_group[[i]] = which(rhs_group_id == i)
+	        }
+
+	        rhs_group_n_vars = rep(0, length(rhs_group))
+
+	        for(i in seq_along(fml_all_sw)){
+    	        if(is_cumul){
+    	            rnc = rnc + rhs_n_vars[i]
+    	            rhs_col_id[[i]] = 1:rnc
+    	        } else {
+    	            id = rhs_group_id[i]
+    	            rhs_col_id[[i]] = c(col_start, seq(rnc + rhs_group_n_vars[id] + 1, length.out = rhs_n_vars[i]))
+    	            rhs_group_n_vars[id] = rhs_group_n_vars[id] + rhs_n_vars[i]
+    	        }
 	        }
 
 	    } else if(do_multi_rhs == FALSE){
@@ -610,13 +625,30 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, panel.id, fi
 	            my_lhs = lhs[lhs_group[[i]]]
 	            if(isLinear){
 	                my_rhs = list(X)
-	                for(u in rhs_group[[j]]){
-	                    if(length(rhs[[u]]) > 1) my_rhs[[length(my_rhs) + 1]] = rhs[[u]]
+	                if(is_cumul){
+	                    gmax = max(rhs_group[[j]])
+	                    my_rhs[1 + (1:gmax)] = rhs[1:gmax]
+	                } else {
+	                    for(u in rhs_group[[j]]){
+	                        if(length(rhs[[u]]) > 1){
+	                            my_rhs[[length(my_rhs) + 1]] = rhs[[u]]
+	                        }
+	                    }
 	                }
+
 	            } else{
 	                rhs_len = lengths(rhs)
-	                my_rhs = rhs[rhs_len > 1 & seq_along(rhs) %in% rhs_group[[j]]]
+	                if(is_cumul){
+	                    gmax = max(rhs_group[[j]])
+	                    my_rhs = rhs[rhs_len > 1 & seq_along(rhs) <= gmax]
+	                } else {
+	                    my_rhs = rhs[rhs_len > 1 & seq_along(rhs) %in% rhs_group[[j]]]
+	                }
+	            }
 
+	            len_all = lengths(my_rhs)
+	            if(any(len_all == 1)){
+	                my_rhs = my_rhs[len_all > 1]
 	            }
 
 	            if(!no_na){
@@ -778,7 +810,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, panel.id, fi
 		    gc()
 		}
 
-		# browser()
+
 		vars_demean = cpp_demean(y, X, n_vars_X, weights, iterMax = fixef.iter,
 		                            diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
 		                            fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
@@ -1046,9 +1078,6 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, panel.id, fi
 		}
 	}
 
-	# other
-	res$call = match.call()
-
 	if(verbose >= 3) cat("Post-processing in ", (time_post - time_post)[3], "s\n", sep="")
 
 	# gt("post")
@@ -1169,6 +1198,7 @@ check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights){
 #' @inheritSection feols Lagging variables
 #' @inheritSection feols Interactions
 #' @inheritSection feols On standard-errors
+#' @inheritSection feols Multiple estimations
 #'
 #' @param family Family to be used for the estimation. Defaults to \code{poisson()}. See \code{\link[stats]{family}} for details of family functions.
 #' @param start Starting values for the coefficients. Can be: i) a numeric of length 1 (e.g. \code{start = 0}), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients). Default is missing.
@@ -1331,7 +1361,7 @@ feglm = function(fml, data, family = "poisson", offset, weights, subset, split, 
 
 
 #' @rdname feglm
-feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, subset, start = NULL,
+feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, split, fsplit, weights, subset, start = NULL,
                      etastart = NULL, mustart = NULL, fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000,
                      collin.tol = 1e-10, glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(), warn = TRUE,
                      notes = getFixest_notes(), mem.clean = FALSE, verbose = 0, only.env = FALSE, env, ...){
@@ -1345,7 +1375,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, subse
         # no need to further check the arguments
         # we extract them from the env
 
-        if(r <- !is.environment(env) || !isTRUE(env$fixest_env)) {
+        if((r <- !is.environment(env)) || !isTRUE(env$fixest_env)) {
             stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(r, "an", "a 'fixest'"), " environment.")
         }
 
@@ -1389,7 +1419,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, subse
 
         time_start = proc.time()
 
-        env = try(fixest_env(y = y, X = X, fixef_mat = fixef_mat, family = family, nthreads = nthreads, offset = offset, weights = weights, subset = subset, linear.start = start, etastart=etastart, mustart=mustart, fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter, collin.tol = collin.tol, glm.iter = glm.iter, glm.tol = glm.tol, notes=notes, mem.clean = mem.clean, warn=warn, verbose = verbose, origin = "feglm.fit", mc_origin = match.call(), ...), silent = TRUE)
+        env = try(fixest_env(y = y, X = X, fixef_mat = fixef_mat, family = family, nthreads = nthreads, offset = offset, weights = weights, subset = subset, split = split, fsplit = fsplit, linear.start = start, etastart=etastart, mustart=mustart, fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter, collin.tol = collin.tol, glm.iter = glm.iter, glm.tol = glm.tol, notes=notes, mem.clean = mem.clean, warn=warn, verbose = verbose, origin = "feglm.fit", mc_origin = match.call(), ...), silent = TRUE)
 
         if("try-error" %in% class(env)){
             stop(format_error_msg(env, "feglm.fit"))
@@ -1417,6 +1447,186 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, subse
         init.type = get("init.type", env)
         starting_values = get("starting_values", env)
     }
+
+
+    #
+    # Split ####
+    #
+
+    do_split = get("do_split", env)
+    if(do_split){
+        split = get("split", env)
+        split.full = get("split.full", env)
+        split.items = get("split.items", env)
+
+        assign("do_split", FALSE, env)
+
+        res_all = list()
+        n_split = length(split.items)
+        index = NULL
+        all_names = NULL
+        is_multi = FALSE
+        for(i in 0:n_split){
+            if(i == 0){
+                if(split.full){
+                    my_env = reshape_env(env)
+                    my_res = feglm.fit(env = my_env)
+                } else {
+                    next
+                }
+            } else {
+                my_res = feglm.fit(env = reshape_env(env, obs2keep = which(split == i)))
+            }
+
+            if("fixest_multi" %in% class(my_res)){
+
+                if(is_multi == FALSE){
+                    # setup in the first iteration
+                    is_multi = TRUE
+                    meta = attr(my_res, "meta")
+                    index = meta$index
+                    all_names = meta$all_names
+                }
+
+                my_res = attr(my_res, "data")
+            }
+
+            if(is_multi){
+                for(m in 1:length(my_res)){
+                    res_all[[length(res_all) + 1]] = my_res[[m]]
+                }
+            } else {
+                res_all[[length(res_all) + 1]] = my_res
+            }
+
+        }
+
+        if(split.full){
+            split_names = c("full_sample", split.items)
+        } else {
+            split_names = split.items
+        }
+
+        if(is.null(index)){
+            index = list(sample = length(res_all))
+            all_names = list(sample = split_names)
+
+        } else {
+            index_tmp = list(sample = length(split_names))
+            for(i in seq_along(index)){
+                index_tmp[[names(index)[i]]] = index[[i]]
+            }
+            index = index_tmp
+
+            all_names_tmp = list(sample = split_names)
+            for(i in seq_along(all_names)){
+                all_names_tmp[[names(all_names)[i]]] = all_names[[i]]
+            }
+            all_names = all_names_tmp
+        }
+
+        # result
+        res_multi = setup_multi(index, all_names, res_all)
+
+        return(res_multi)
+    }
+
+    #
+    # Multi LHS and RHS ####
+    #
+
+    do_multi_lhs = get("do_multi_lhs", env)
+    do_multi_rhs = get("do_multi_rhs", env)
+    if(do_multi_lhs || do_multi_rhs){
+        assign("do_multi_lhs", FALSE, env)
+        assign("do_multi_rhs", FALSE, env)
+
+        nthreads = get("nthreads", env)
+
+        # IMPORTANT NOTE:
+        # contrary to feols, the preprocessing is only a small fraction of the
+        # computing time in ML models
+        # Therefore we don't need to optimize processing as hard as in FEOLS
+        # because the gains are only marginal
+
+        fml = get("fml", env)
+
+        # LHS
+        lhs_names = get("lhs_names", env)
+        lhs = get("lhs", env)
+
+        if(do_multi_lhs == FALSE){
+            lhs = list(lhs)
+        }
+
+        # RHS
+        if(do_multi_rhs){
+            fml_rhs_all = get("fml_rhs_all", env)
+            is_cumul = get("is_cumul", env)
+            fake_intercept = get("fake_intercept", env)
+            data = get("data", env)
+
+            rhs = list()
+            for(i in seq_along(fml_rhs_all)){
+                # We evaluate the extra data and check the NA pattern
+
+                my_fml = xpd(lhs ~ ..rhs, ..rhs = fml_rhs_all[[i]])
+                rhs_current = try(fixest_model_matrix(my_fml, data, fake_intercept = fake_intercept), silent = TRUE)
+                if("try-error" %in% class(rhs_current)){
+                    stop("Evaluation of the RHS raises an error (concerns ", deparse_long(my_fml[[3]]), "):\n", rhs_current)
+                }
+
+                rhs[[i]] = rhs_current
+            }
+        } else {
+            fml_rhs_all = list(xpd(~ ..rhs, ..rhs = deparse_long(fml[[3]])))
+            is_cumul = FALSE
+            linear.mat = get("linear.mat", env)
+            rhs = list(linear.mat)
+        }
+
+        n_lhs = length(lhs)
+        n_rhs = length(rhs)
+        res = vector("list", n_lhs * n_rhs)
+
+        rhs_names = sapply(fml_rhs_all, deparse_long)
+
+        for(i in seq_along(lhs)){
+            for(j in seq_along(rhs)){
+                # reshaping the env => taking care of the NAs
+
+                is_na_current = !is.finite(lhs[[i]]) | cpppar_which_na_inf_mat(rhs[[j]], nthreads)$is_na_inf
+
+                my_fml = xpd(..lhs ~ ..rhs, ..lhs = lhs_names[i], ..rhs = fml_rhs_all[[j]])
+
+                if(any(is_na_current)){
+                    my_env = reshape_env(env, which(!is_na_current), lhs = lhs[[i]], rhs = rhs[[j]], fml = my_fml)
+                } else {
+                    # We still need to check the RHS (only 0/1)
+                    my_env = reshape_env(env, lhs = lhs[[i]], rhs = rhs[[j]], fml = my_fml, check_lhs = TRUE)
+                }
+
+                my_res = feglm.fit(env = my_env)
+
+                res[[index_2D_to_1D(i, j, n_rhs)]] = my_res
+            }
+        }
+
+        # Meta information for fixest_multi
+
+        index = list(lhs = n_lhs, rhs = n_rhs)
+        all_names = list(lhs = lhs_names, rhs = rhs_names)
+
+        # result
+        res_multi = setup_multi(index, all_names, res)
+
+        return(res_multi)
+
+    }
+
+    #
+    # Regular estimation ####
+    #
 
     # Setup:
     family = get("family_funs", env)
@@ -1861,7 +2071,9 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, subse
 
             res$loglik = sum( (y * eta - mu - cpppar_lgamma(y + 1, nthreads)) * weights)
         } else {
-            lfact = get("lfactorial", env)
+            # lfact is later used in model0 and is costly to compute
+            lfact = sum(rpar_lgamma(y + 1, env))
+            assign("lfactorial", lfact, env)
             res$loglik = sum(y * eta - mu) - lfact
         }
     } else {
@@ -1874,8 +2086,10 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, subse
 
     # The pseudo_r2
     if(family_equiv %in% c("poisson", "logit")){
-        ll_null = env$model0$loglik
-        fitted_null = linkinv(env$model0$constant)
+        model0 = get_model_null(env, theta.init = NULL)
+        ll_null = model0$loglik
+        fitted_null = linkinv(model0$constant)
+
     } else {
         if(verbose >= 1) cat("Null model:\n")
 
@@ -2098,7 +2312,7 @@ fepois = function(fml, data, offset, weights, subset, split, fsplit, panel.id, s
 
     # This is just an alias
 
-    res = try(feglm(fml = fml, data = data, family = "poisson", offset = offset, weights = weights, subset = subset, panel.id = panel.id, start = start, etastart = etastart, mustart = mustart, fixef = fixef, fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter, collin.tol = collin.tol, glm.iter = glm.iter, glm.tol = glm.tol, nthreads = nthreads, warn = warn, notes = notes, verbose = verbose, combine.quick = combine.quick, mem.clean = mem.clean, origin_bis = "fepois", mc_origin_bis = match.call(), only.env=only.env, env=env, ...), silent = TRUE)
+    res = try(feglm(fml = fml, data = data, family = "poisson", offset = offset, weights = weights, subset = subset, split = split, fsplit = fsplit, panel.id = panel.id, start = start, etastart = etastart, mustart = mustart, fixef = fixef, fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter, collin.tol = collin.tol, glm.iter = glm.iter, glm.tol = glm.tol, nthreads = nthreads, warn = warn, notes = notes, verbose = verbose, combine.quick = combine.quick, mem.clean = mem.clean, origin_bis = "fepois", mc_origin_bis = match.call(), only.env=only.env, env=env, ...), silent = TRUE)
 
     if("try-error" %in% class(res)){
         stop(format_error_msg(res, "fepois"))
@@ -2267,14 +2481,14 @@ fepois = function(fml, data, offset, weights, subset, split, fsplit, panel.id, s
 #' points(x, fitted(est2_NL), col = 4, pch = 2)
 #'
 #'
-feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), NL.fml, fixef, fixef.rm = "perfect", NL.start, lower, upper, NL.start.init, offset, subset, panel.id, start = 0, jacobian.method="simple", useHessian = TRUE, hessian.args = NULL, opt.control = list(), nthreads = getFixest_nthreads(), verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000, deriv.tol = 1e-4, deriv.iter = 1000, warn = TRUE, notes = getFixest_notes(), combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
+feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), NL.fml, fixef, fixef.rm = "perfect", NL.start, lower, upper, NL.start.init, offset, subset, split, fsplit, panel.id, start = 0, jacobian.method="simple", useHessian = TRUE, hessian.args = NULL, opt.control = list(), nthreads = getFixest_nthreads(), verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000, deriv.tol = 1e-4, deriv.iter = 1000, warn = TRUE, notes = getFixest_notes(), combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
 
 	time_start = proc.time()
 
 	if(missing(env)){
-	    env = try(fixest_env(fml=fml, data=data, family=family, NL.fml=NL.fml, fixef=fixef, fixef.rm=fixef.rm, NL.start=NL.start, lower=lower, upper=upper, NL.start.init=NL.start.init, offset=offset, subset=subset, panel.id=panel.id, linear.start=start, jacobian.method=jacobian.method, useHessian=useHessian, opt.control=opt.control, nthreads=nthreads, verbose=verbose, theta.init=theta.init, fixef.tol=fixef.tol, fixef.iter=fixef.iter, deriv.iter=deriv.iter, warn=warn, notes=notes, combine.quick=combine.quick, mem.clean = mem.clean, mc_origin=match.call(), computeModel0=TRUE, ...), silent = TRUE)
+	    env = try(fixest_env(fml=fml, data=data, family=family, NL.fml=NL.fml, fixef=fixef, fixef.rm=fixef.rm, NL.start=NL.start, lower=lower, upper=upper, NL.start.init=NL.start.init, offset=offset, subset=subset, split=split, fsplit=fsplit, panel.id=panel.id, linear.start=start, jacobian.method=jacobian.method, useHessian=useHessian, opt.control=opt.control, nthreads=nthreads, verbose=verbose, theta.init=theta.init, fixef.tol=fixef.tol, fixef.iter=fixef.iter, deriv.iter=deriv.iter, warn=warn, notes=notes, combine.quick=combine.quick, mem.clean = mem.clean, mc_origin=match.call(), computeModel0=TRUE, ...), silent = TRUE)
 
-	} else if(r <- !is.environment(env) || !isTRUE(env$fixest_env)) {
+	} else if((r <- !is.environment(env)) || !isTRUE(env$fixest_env)) {
 	    stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(r, "an", "a 'fixest'"), " environment.")
 	}
 
@@ -2282,7 +2496,6 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	if(only.env){
 	    return(env)
 	}
-
 
 	if("try-error" %in% class(env)){
 	    mc = match.call()
@@ -2292,6 +2505,187 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 
 	verbose = get("verbose", env)
 	if(verbose >= 2) cat("Setup in ", (proc.time() - time_start)[3], "s\n", sep="")
+
+
+	#
+	# Split ####
+	#
+
+	do_split = get("do_split", env)
+	if(do_split){
+	    split = get("split", env)
+	    split.full = get("split.full", env)
+	    split.items = get("split.items", env)
+
+	    assign("do_split", FALSE, env)
+
+	    res_all = list()
+	    n_split = length(split.items)
+	    index = NULL
+	    all_names = NULL
+	    is_multi = FALSE
+	    for(i in 0:n_split){
+	        if(i == 0){
+	            if(split.full){
+	                my_env = reshape_env(env)
+	                my_res = feNmlm(env = my_env)
+	            } else {
+	                next
+	            }
+	        } else {
+	            my_res = feNmlm(env = reshape_env(env, obs2keep = which(split == i)))
+	        }
+
+	        if("fixest_multi" %in% class(my_res)){
+
+	            if(is_multi == FALSE){
+	                # setup in the first iteration
+	                is_multi = TRUE
+	                meta = attr(my_res, "meta")
+	                index = meta$index
+	                all_names = meta$all_names
+	            }
+
+	            my_res = attr(my_res, "data")
+	        }
+
+	        if(is_multi){
+	            for(m in 1:length(my_res)){
+	                res_all[[length(res_all) + 1]] = my_res[[m]]
+	            }
+	        } else {
+	            res_all[[length(res_all) + 1]] = my_res
+	        }
+
+	    }
+
+	    if(split.full){
+	        split_names = c("full_sample", split.items)
+	    } else {
+	        split_names = split.items
+	    }
+
+	    if(is.null(index)){
+	        index = list(sample = length(res_all))
+	        all_names = list(sample = split_names)
+
+	    } else {
+	        index_tmp = list(sample = length(split_names))
+	        for(i in seq_along(index)){
+	            index_tmp[[names(index)[i]]] = index[[i]]
+	        }
+	        index = index_tmp
+
+	        all_names_tmp = list(sample = split_names)
+	        for(i in seq_along(all_names)){
+	            all_names_tmp[[names(all_names)[i]]] = all_names[[i]]
+	        }
+	        all_names = all_names_tmp
+	    }
+
+	    # result
+	    res_multi = setup_multi(index, all_names, res_all)
+
+	    return(res_multi)
+	}
+
+	#
+	# Multi LHS and RHS ####
+	#
+
+	do_multi_lhs = get("do_multi_lhs", env)
+	do_multi_rhs = get("do_multi_rhs", env)
+	if(do_multi_lhs || do_multi_rhs){
+	    assign("do_multi_lhs", FALSE, env)
+	    assign("do_multi_rhs", FALSE, env)
+
+	    nthreads = get("nthreads", env)
+
+	    # IMPORTANT NOTE:
+	    # contrary to feols, the preprocessing is only a small fraction of the
+	    # computing time in ML models
+	    # Therefore we don't need to optimize processing as hard as in FEOLS
+	    # because the gains are only marginal
+
+	    fml = get("fml", env)
+
+	    # LHS
+	    lhs_names = get("lhs_names", env)
+	    lhs = get("lhs", env)
+
+	    if(do_multi_lhs == FALSE){
+	        lhs = list(lhs)
+	    }
+
+	    # RHS
+	    if(do_multi_rhs){
+	        fml_rhs_all = get("fml_rhs_all", env)
+	        is_cumul = get("is_cumul", env)
+	        fake_intercept = get("fake_intercept", env)
+	        data = get("data", env)
+
+	        rhs = list()
+	        for(i in seq_along(fml_rhs_all)){
+	            # We evaluate the extra data and check the NA pattern
+
+	            my_fml = xpd(lhs ~ ..rhs, ..rhs = fml_rhs_all[[i]])
+	            rhs_current = try(fixest_model_matrix(my_fml, data, fake_intercept = fake_intercept), silent = TRUE)
+	            if("try-error" %in% class(rhs_current)){
+	                stop("Evaluation of the RHS raises an error (concerns ", deparse_long(my_fml[[3]]), "):\n", rhs_current)
+	            }
+
+	            rhs[[i]] = rhs_current
+	        }
+	    } else {
+	        fml_rhs_all = list(xpd(~ ..rhs, ..rhs = deparse_long(fml[[3]])))
+	        is_cumul = FALSE
+	        linear.mat = get("linear.mat", env)
+	        rhs = list(linear.mat)
+	    }
+
+	    n_lhs = length(lhs)
+	    n_rhs = length(rhs)
+	    res = vector("list", n_lhs * n_rhs)
+
+	    rhs_names = sapply(fml_rhs_all, deparse_long)
+
+	    for(i in seq_along(lhs)){
+	        for(j in seq_along(rhs)){
+	            # reshaping the env => taking care of the NAs
+
+	            is_na_current = !is.finite(lhs[[i]]) | cpppar_which_na_inf_mat(rhs[[j]], nthreads)$is_na_inf
+
+	            my_fml = xpd(..lhs ~ ..rhs, ..lhs = lhs_names[i], ..rhs = fml_rhs_all[[j]])
+
+	            if(any(is_na_current)){
+	                my_env = reshape_env(env, which(!is_na_current), lhs = lhs[[i]], rhs = rhs[[j]], fml = my_fml)
+	            } else {
+	                # We still need to check the RHS (only 0/1)
+	                my_env = reshape_env(env, lhs = lhs[[i]], rhs = rhs[[j]], fml = my_fml, check_lhs = TRUE)
+	            }
+
+	            my_res = feNmlm(env = my_env)
+
+	            res[[index_2D_to_1D(i, j, n_rhs)]] = my_res
+	        }
+	    }
+
+	    # Meta information for fixest_multi
+
+	    index = list(lhs = n_lhs, rhs = n_rhs)
+	    all_names = list(lhs = lhs_names, rhs = rhs_names)
+
+	    # result
+	    res_multi = setup_multi(index, all_names, res)
+
+	    return(res_multi)
+
+	}
+
+	#
+	# Regular estimation ####
+	#
+
 
 	# Objects needed for optimization + misc
 	start = get("start", env)
@@ -2308,11 +2702,35 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 
 	family = get("family", env)
 	famFuns = get("famFuns", env)
-	model0 = get("model0", env)
 	params = get("params", env)
 
 	isFixef = get("isFixef", env)
 	onlyFixef = get("onlyFixef", env)
+
+	#
+	# Model 0 + theta init
+	#
+
+	theta.init = get("theta.init", env)
+	model0 = get_model_null(env, theta.init)
+
+	# For the negative binomial:
+	if(family == "negbin"){
+	    theta.init = get("theta.init", env)
+	    if(is.null(theta.init)){
+	        theta.init = model0$theta
+	    }
+
+	    params = c(params, ".theta")
+	    start = c(start, theta.init)
+	    names(start) = params
+	    upper = c(upper, 10000)
+	    lower = c(lower, 1e-3)
+
+	    assign("params", params, env)
+	}
+
+	assign("model0", model0, env)
 
 	# the result
 	res = get("res", env)
@@ -2324,7 +2742,6 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 		}
 
 		res = femlm_only_clusters(env)
-		res$call = match.call()
 		res$onlyFixef = TRUE
 
 		return(res)
