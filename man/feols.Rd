@@ -31,13 +31,17 @@ feols(
 )
 }
 \arguments{
-\item{fml}{A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y | fe_1+fe_2}. You can combine two fixed-effects with \code{^}: e.g. \code{fml = z~x+y|fe_1^fe_2}, see details. You can also use variables with varying slopes using square brackets: e.g. in \code{fml = z~y|fe_1[x] + fe_2} the variable \code{x} will have one coefficient for each value of \code{fe_1} -- if you use varying slopes, please have a look at the details section (can't describe it all here).}
+\item{fml}{A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y | fe_1+fe_2}. You can combine two fixed-effects with \code{^}: e.g. \code{fml = z~x+y|fe_1^fe_2}, see details. You can also use variables with varying slopes using square brackets: e.g. in \code{fml = z~y|fe_1[x] + fe_2}, see details. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. The formula \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)} leads to 6 estimation, see details.}
 
 \item{data}{A data.frame containing the necessary variables to run the model. The variables of the non-linear right hand side of the formula are identified with this \code{data.frame} names. Can also be a matrix.}
 
 \item{weights}{A formula or a numeric vector. Each observation can be weighted, the weights must be greater than 0. If equal to a formula, it should be one-sided: for example \code{~ var_weight}.}
 
 \item{offset}{A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This offset is linearly added to the elements of the main formula 'fml'.}
+
+\item{split}{A one sided formula representing a variable (eg \code{split = ~var}) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. If you also want to include the estimation for the full sample, use the argument \code{fsplit} instead.}
+
+\item{fsplit}{A one sided formula representing a variable (eg \code{split = ~var}) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. This argument is the same as split but also includes the full sample as the first estimation.}
 
 \item{panel.id}{The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id = ~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link[fixest]{feols}}).}
 
@@ -167,13 +171,40 @@ The following vignette: \href{https://cran.r-project.org/package=fixest/vignette
 You can use the functions \code{\link[fixest]{setFixest_se}} and \code{\link[fixest:dof]{setFixest_dof}} to permanently set the way the standard-errors are computed.
 }
 
+\section{Multiple estimations}{
+
+
+Multiple estimations can be performed at once, they just have to be specified in the formula. Multiple estimations yield a \code{fixest_multi} object which is \sQuote{kind of} a list of all the results but includes specific methods to access the results in a handy way.
+
+To include mutliple dependent variables, wrap them in \code{c()} (\code{list()} also works). For instance \code{fml = c(y1, y2) ~ x1} would estimate the model \code{fml = y1 ~ x1} and then the model \code{fml = y2 ~ x1}.
+
+To include multiple independent variables, you need to use the stepwise functions. There are 4 stepwise functions associated to 4 short aliases. These are a) stepwise, stepwise0, cstepwise, cstepwise0, and b) sw, sw0, csw, csw0. Let's explain that.
+Assume you have the following formula: \code{fml = y ~ x1 + sw(x2, x3)}. The stepwise function \code{sw} will estimate the following two models: \code{y ~ x1 + x2} and \code{y ~ x1 + x3}. That is, each element in \code{sw()} is sequentially, and separately, added to the formula. Would have you used \code{sw0} in lieu of \code{sw}, then the model \code{y ~ x1} would also have been estimated. The \code{0} in the name means that the model wihtout any stepwise element also needs to be estimated.
+Finally, the prefix \code{c} means cumulative: each stepwise element is added to the next. That is, \code{fml = y ~ x1 + csw(x2, x3)} would lead to the following models \code{y ~ x1 + x2} and \code{y ~ x1 + x2 + x3}. The \code{0} has the same meaning and would also lead to the model without the stepwise elements to be estimated: in other words, \code{fml = y ~ x1 + csw0(x2, x3)} leads to the following three models: \code{y ~ x1}, \code{y ~ x1 + x2} and \code{y ~ x1 + x2 + x3}.
+
+Multiple independent variables can be combined with multiple dependent variables, as in \code{fml = c(y1, y2) ~ cw(x1, x2, x3)} which would lead to 6 estimations. Multiple estimations can also be combined to split samples (with the arguments \code{split}, \code{fsplit}).
+
+Fixed-effects cannot be included in a stepwise fashion: they are there or not and stay the same for all estimations.
+
+A note on performance. The feature of multiple estimations has been highly optimized for \code{feols}, in particular in the presence of fixed-effects. It is faster to estimate multiple models using the formula rather than with a loop. For non-\code{feols} models using the formula is roughly similar to using a loop performance-wise.
+}
+
 \examples{
+
+#
+# Basic estimation
+#
+
+res = feols(Sepal.Length ~ Sepal.Width + Petal.Length, iris)
+# You can specify clustered standard-errors in summary:
+summary(res, cluster = ~species)
 
 #
 # Just one set of fixed-effects:
 #
 
 res = feols(Sepal.Length ~ Sepal.Width + Petal.Length | Species, iris)
+# By default, the SEs are clustered according to the first fixed-effect
 summary(res)
 
 #
@@ -199,8 +230,8 @@ fixef(res_comb)[[1]]
 
 data(base_did)
 # We need to set up the panel with the arg. panel.id
-est1 = feols(y~l(x1, 0:1), base_did, panel.id = ~id+period)
-est2 = feols(f(y)~l(x1, -1:1), base_did, panel.id = ~id+period)
+est1 = feols(y ~ l(x1, 0:1), base_did, panel.id = ~id+period)
+est2 = feols(f(y) ~ l(x1, -1:1), base_did, panel.id = ~id+period)
 etable(est1, est2, order = "f", drop="Int")
 
 #
@@ -215,6 +246,35 @@ est_did = feols(y ~ x1 + i(treat, period, 5) | id+period, base_did)
 coefplot(est_did)
 # You have many more example in coefplot help
 
+#
+# Multiple estimations:
+#
+
+# 6 estimations
+est_mult = feols(c(Ozone, Solar.R) ~ Wind + Temp + csw0(Wind:Temp, Day), airquality)
+
+# We can display the results for the first lhs:
+etable(est_mult[lhs = 1])
+
+# And now the second (access can be made by name)
+etable(est_mult[lhs = "Solar.R"])
+
+# Now we focus on the two last right hand sides
+# (note that .N can be used to specify the last item)
+etable(est_mult[rhs = 2:.N])
+
+# Combining with split
+est_split = feols(c(Ozone, Solar.R) ~ sw(poly(Wind, 2), poly(Temp, 2)),
+                  airquality, split = ~ Month)
+
+# You can display everything at once with the print method
+est_split
+
+# Different way of displaying the results with "compact"
+summary(est_split, "compact")
+
+# You can still select which sample/LHS/RHS to display
+est_split[sample = 1:2, lhs = 1, rhs = 1]
 
 }
 \references{

@@ -12,7 +12,7 @@
 #'
 #' @inheritParams femlm
 #'
-#' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y | fe_1+fe_2}. You can combine two fixed-effects with \code{^}: e.g. \code{fml = z~x+y|fe_1^fe_2}, see details. You can also use variables with varying slopes using square brackets: e.g. in \code{fml = z~y|fe_1[x] + fe_2} the variable \code{x} will have one coefficient for each value of \code{fe_1} -- if you use varying slopes, please have a look at the details section (can't describe it all here).
+#' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y | fe_1+fe_2}. You can combine two fixed-effects with \code{^}: e.g. \code{fml = z~x+y|fe_1^fe_2}, see details. You can also use variables with varying slopes using square brackets: e.g. in \code{fml = z~y|fe_1[x] + fe_2}, see details. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. The formula \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)} leads to 6 estimation, see details.
 #' @param weights A formula or a numeric vector. Each observation can be weighted, the weights must be greater than 0. If equal to a formula, it should be one-sided: for example \code{~ var_weight}.
 #' @param verbose Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algoritmh (the first number is the left-hand-side, the other numbers are the right-hand-side variables).
 #' @param demeaned Logical, default is \code{FALSE}. Only used in the presence of fixed-effects: should the centered variables be returned? If \code{TRUE}, it creates the items \code{y_demeaned} and \code{X_demeaned}.
@@ -63,6 +63,22 @@
 #' The following vignette: \href{https://cran.r-project.org/package=fixest/vignettes/standard_errors.html}{On standard-errors} describes in details how the standard-errors are computed in \code{fixest} and how you can replicate standard-errors from other software.
 #'
 #' You can use the functions \code{\link[fixest]{setFixest_se}} and \code{\link[fixest:dof]{setFixest_dof}} to permanently set the way the standard-errors are computed.
+#'
+#' @section Multiple estimations:
+#'
+#' Multiple estimations can be performed at once, they just have to be specified in the formula. Multiple estimations yield a \code{fixest_multi} object which is \sQuote{kind of} a list of all the results but includes specific methods to access the results in a handy way.
+#'
+#' To include mutliple dependent variables, wrap them in \code{c()} (\code{list()} also works). For instance \code{fml = c(y1, y2) ~ x1} would estimate the model \code{fml = y1 ~ x1} and then the model \code{fml = y2 ~ x1}.
+#'
+#' To include multiple independent variables, you need to use the stepwise functions. There are 4 stepwise functions associated to 4 short aliases. These are a) stepwise, stepwise0, cstepwise, cstepwise0, and b) sw, sw0, csw, csw0. Let's explain that.
+#' Assume you have the following formula: \code{fml = y ~ x1 + sw(x2, x3)}. The stepwise function \code{sw} will estimate the following two models: \code{y ~ x1 + x2} and \code{y ~ x1 + x3}. That is, each element in \code{sw()} is sequentially, and separately, added to the formula. Would have you used \code{sw0} in lieu of \code{sw}, then the model \code{y ~ x1} would also have been estimated. The \code{0} in the name means that the model wihtout any stepwise element also needs to be estimated.
+#' Finally, the prefix \code{c} means cumulative: each stepwise element is added to the next. That is, \code{fml = y ~ x1 + csw(x2, x3)} would lead to the following models \code{y ~ x1 + x2} and \code{y ~ x1 + x2 + x3}. The \code{0} has the same meaning and would also lead to the model without the stepwise elements to be estimated: in other words, \code{fml = y ~ x1 + csw0(x2, x3)} leads to the following three models: \code{y ~ x1}, \code{y ~ x1 + x2} and \code{y ~ x1 + x2 + x3}.
+#'
+#' Multiple independent variables can be combined with multiple dependent variables, as in \code{fml = c(y1, y2) ~ cw(x1, x2, x3)} which would lead to 6 estimations. Multiple estimations can also be combined to split samples (with the arguments \code{split}, \code{fsplit}).
+#'
+#' Fixed-effects cannot be included in a stepwise fashion: they are there or not and stay the same for all estimations.
+#'
+#' A note on performance. The feature of multiple estimations has been highly optimized for \code{feols}, in particular in the presence of fixed-effects. It is faster to estimate multiple models using the formula rather than with a loop. For non-\code{feols} models using the formula is roughly similar to using a loop performance-wise.
 #'
 #'
 #' @return
@@ -125,10 +141,19 @@
 #' @examples
 #'
 #' #
+#' # Basic estimation
+#' #
+#'
+#' res = feols(Sepal.Length ~ Sepal.Width + Petal.Length, iris)
+#' # You can specify clustered standard-errors in summary:
+#' summary(res, cluster = ~species)
+#'
+#' #
 #' # Just one set of fixed-effects:
 #' #
 #'
 #' res = feols(Sepal.Length ~ Sepal.Width + Petal.Length | Species, iris)
+#' # By default, the SEs are clustered according to the first fixed-effect
 #' summary(res)
 #'
 #' #
@@ -154,8 +179,8 @@
 #'
 #' data(base_did)
 #' # We need to set up the panel with the arg. panel.id
-#' est1 = feols(y~l(x1, 0:1), base_did, panel.id = ~id+period)
-#' est2 = feols(f(y)~l(x1, -1:1), base_did, panel.id = ~id+period)
+#' est1 = feols(y ~ l(x1, 0:1), base_did, panel.id = ~id+period)
+#' est2 = feols(f(y) ~ l(x1, -1:1), base_did, panel.id = ~id+period)
 #' etable(est1, est2, order = "f", drop="Int")
 #'
 #' #
@@ -170,6 +195,35 @@
 #' coefplot(est_did)
 #' # You have many more example in coefplot help
 #'
+#' #
+#' # Multiple estimations:
+#' #
+#'
+#' # 6 estimations
+#' est_mult = feols(c(Ozone, Solar.R) ~ Wind + Temp + csw0(Wind:Temp, Day), airquality)
+#'
+#' # We can display the results for the first lhs:
+#' etable(est_mult[lhs = 1])
+#'
+#' # And now the second (access can be made by name)
+#' etable(est_mult[lhs = "Solar.R"])
+#'
+#' # Now we focus on the two last right hand sides
+#' # (note that .N can be used to specify the last item)
+#' etable(est_mult[rhs = 2:.N])
+#'
+#' # Combining with split
+#' est_split = feols(c(Ozone, Solar.R) ~ sw(poly(Wind, 2), poly(Temp, 2)),
+#'                   airquality, split = ~ Month)
+#'
+#' # You can display everything at once with the print method
+#' est_split
+#'
+#' # Different way of displaying the results with "compact"
+#' summary(est_split, "compact")
+#'
+#' # You can still select which sample/LHS/RHS to display
+#' est_split[sample = 1:2, lhs = 1, rhs = 1]
 #'
 feols = function(fml, data, weights, offset, subset, split, fsplit, panel.id, fixef, fixef.rm = "none", fixef.tol = 1e-6,
                  fixef.iter = 10000, collin.tol = 1e-10, nthreads = getFixest_nthreads(), verbose = 0, warn = TRUE,
@@ -1205,8 +1259,40 @@ check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights){
 #' # All results are identical:
 #' etable(res, res_pois, res_fit)
 #'
+#' # Note that you have more examples in feols
 #'
-feglm = function(fml, data, family = "poisson", offset, weights, subset, panel.id, start = NULL,
+#' #
+#' # Multiple estimations:
+#' #
+#'
+#' # 6 estimations
+#' est_mult = fepois(c(Ozone, Solar.R) ~ Wind + Temp + csw0(Wind:Temp, Day), airquality)
+#'
+#' # We can display the results for the first lhs:
+#' etable(est_mult[lhs = 1])
+#'
+#' # And now the second (access can be made by name)
+#' etable(est_mult[lhs = "Solar.R"])
+#'
+#' # Now we focus on the two last right hand sides
+#' # (note that .N can be used to specify the last item)
+#' etable(est_mult[rhs = 2:.N])
+#'
+#' # Combining with split
+#' est_split = fepois(c(Ozone, Solar.R) ~ sw(poly(Wind, 2), poly(Temp, 2)),
+#'                   airquality, split = ~ Month)
+#'
+#' # You can display everything at once with the print method
+#' est_split
+#'
+#' # Different way of displaying the results with "compact"
+#' summary(est_split, "compact")
+#'
+#' # You can still select which sample/LHS/RHS to display
+#' est_split[sample = 1:2, lhs = 1, rhs = 1]
+#'
+#'
+feglm = function(fml, data, family = "poisson", offset, weights, subset, split, fsplit, panel.id, start = NULL,
                  etastart = NULL, mustart = NULL, fixef, fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-14,
                  glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
                  warn = TRUE, notes = getFixest_notes(), verbose = 0, combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
@@ -1216,11 +1302,10 @@ feglm = function(fml, data, family = "poisson", offset, weights, subset, panel.i
     time_start = proc.time()
 
     if(missing(env)){
-        env = try(fixest_env(fml=fml, data=data, family = family, offset = offset, weights = weights, subset = subset, panel.id = panel.id, linear.start = start, etastart=etastart, mustart=mustart, fixef = fixef, fixef.rm = fixef.rm, fixef.tol=fixef.tol, fixef.iter=fixef.iter, collin.tol = collin.tol, glm.iter = glm.iter, glm.tol = glm.tol, nthreads = nthreads, warn=warn, notes=notes, verbose = verbose, combine.quick = combine.quick, mem.clean = mem.clean, origin = "feglm", mc_origin = match.call(), ...), silent = TRUE)
+        env = try(fixest_env(fml=fml, data=data, family = family, offset = offset, weights = weights, subset = subset, split = split, fsplit = fsplit, panel.id = panel.id, linear.start = start, etastart=etastart, mustart=mustart, fixef = fixef, fixef.rm = fixef.rm, fixef.tol=fixef.tol, fixef.iter=fixef.iter, collin.tol = collin.tol, glm.iter = glm.iter, glm.tol = glm.tol, nthreads = nthreads, warn=warn, notes=notes, verbose = verbose, combine.quick = combine.quick, mem.clean = mem.clean, origin = "feglm", mc_origin = match.call(), ...), silent = TRUE)
 
-    } else {
-        if(!is.environment(env)) stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not an environment.")
-        if(is.null(env$fixest_env)) stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not a 'fixest' environment.")
+    } else if((r <- !is.environment(env)) || !isTRUE(env$fixest_env)){
+        stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(r, "an", "a 'fixest'"), " environment.")
     }
 
     if("try-error" %in% class(env)){
@@ -1840,8 +1925,9 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, subse
 #' @inheritSection feols Lagging variables
 #' @inheritSection feols Interactions
 #' @inheritSection feols On standard-errors
+#' @inheritSection feols Multiple estimations
 #'
-#' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, you can 1) either insert them in this formula using a pipe (e.g. \code{fml = z~x+y|fixef_1+fixef_2}), or 2) either use the argument \code{fixef}.
+#' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y|fixef_1+fixef_2}. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. The formula \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)} leads to 6 estimation, see details.
 #' @param start Starting values for the coefficients. Can be: i) a numeric of length 1 (e.g. \code{start = 0}, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).
 #'
 #' @details
@@ -1905,10 +1991,6 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, subse
 #'
 #' @examples
 #'
-#' #
-#' # Linear examples
-#' #
-#'
 #' # Load trade data
 #' data(trade)
 #'
@@ -1925,7 +2007,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, subse
 #' etable(est_pois, est_gaus, se = "twoway")
 #'
 #' # Comparing different types of standard errors
-#' sum_hetero    = summary(est_pois, se = "hetero")
+#' sum_hetero   = summary(est_pois, se = "hetero")
 #' sum_oneway   = summary(est_pois, se = "cluster")
 #' sum_twoway   = summary(est_pois, se = "twoway")
 #' sum_threeway = summary(est_pois, se = "threeway")
@@ -1933,16 +2015,47 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, weights, subse
 #' etable(sum_hetero, sum_oneway, sum_twoway, sum_threeway)
 #'
 #'
+#' #
+#' # Multiple estimations:
+#' #
+#'
+#' # 6 estimations
+#' est_mult = fepois(c(Ozone, Solar.R) ~ Wind + Temp + csw0(Wind:Temp, Day), airquality)
+#'
+#' # We can display the results for the first lhs:
+#' etable(est_mult[lhs = 1])
+#'
+#' # And now the second (access can be made by name)
+#' etable(est_mult[lhs = "Solar.R"])
+#'
+#' # Now we focus on the two last right hand sides
+#' # (note that .N can be used to specify the last item)
+#' etable(est_mult[rhs = 2:.N])
+#'
+#' # Combining with split
+#' est_split = fepois(c(Ozone, Solar.R) ~ sw(poly(Wind, 2), poly(Temp, 2)),
+#'                   airquality, split = ~ Month)
+#'
+#' # You can display everything at once with the print method
+#' est_split
+#'
+#' # Different way of displaying the results with "compact"
+#' summary(est_split, "compact")
+#'
+#' # You can still select which sample/LHS/RHS to display
+#' est_split[sample = 1:2, lhs = 1, rhs = 1]
+#'
+#'
 #'
 #'
 femlm <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), start = 0, fixef, fixef.rm = "perfect",
-						offset, subset, panel.id, fixef.tol = 1e-5, fixef.iter = 10000,
+						offset, subset, split, fsplit, panel.id, fixef.tol = 1e-5, fixef.iter = 10000,
 						nthreads = getFixest_nthreads(), verbose = 0, warn = TRUE,
 						notes = getFixest_notes(), theta.init, combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
 
 	# This is just an alias
 
-	res = try(feNmlm(fml = fml, data = data, family = family, fixef = fixef, fixef.rm = fixef.rm, offset = offset, subset = subset, panel.id = panel.id, start = start, fixef.tol=fixef.tol, fixef.iter=fixef.iter, nthreads=nthreads, verbose=verbose, warn=warn, notes=notes, theta.init = theta.init, combine.quick = combine.quick, mem.clean = mem.clean, origin="femlm", mc_origin_bis=match.call(), only.env=only.env, env=env, ...), silent = TRUE)
+	res = try(feNmlm(fml = fml, data = data, family = family, fixef = fixef, fixef.rm = fixef.rm, offset = offset, subset = subset, split = split, fsplit = fsplit, panel.id = panel.id, start = start, fixef.tol=fixef.tol, fixef.iter=fixef.iter, nthreads=nthreads, verbose=verbose, warn=warn, notes=notes, theta.init = theta.init, combine.quick = combine.quick, mem.clean = mem.clean, origin="femlm", mc_origin_bis=match.call(), only.env=only.env, env=env, ...), silent = TRUE)
 
 	if("try-error" %in% class(res)){
 		stop(format_error_msg(res, "femlm"))
@@ -1952,7 +2065,7 @@ femlm <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 }
 
 #' @rdname femlm
-fenegbin = function(fml, data, theta.init, start = 0, fixef, fixef.rm = "perfect", offset, subset, panel.id,
+fenegbin = function(fml, data, theta.init, start = 0, fixef, fixef.rm = "perfect", offset, subset, split, fsplit, panel.id,
                     fixef.tol = 1e-5, fixef.iter = 10000, nthreads = getFixest_nthreads(),
                     verbose = 0, warn = TRUE, notes = getFixest_notes(), combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
 
@@ -1963,7 +2076,7 @@ fenegbin = function(fml, data, theta.init, start = 0, fixef, fixef.rm = "perfect
 
     # This is just an alias
 
-    res = try(feNmlm(fml = fml, data=data, family = "negbin", theta.init = theta.init, start = start, fixef = fixef, fixef.rm = fixef.rm, offset = offset, subset = subset, panel.id = panel.id, fixef.tol = fixef.tol, fixef.iter = fixef.iter, nthreads = nthreads, verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick, mem.clean = mem.clean, origin = "fenegbin", mc_origin_bis = match.call(), only.env=only.env, env=env, ...), silent = TRUE)
+    res = try(feNmlm(fml = fml, data=data, family = "negbin", theta.init = theta.init, start = start, fixef = fixef, fixef.rm = fixef.rm, offset = offset, subset = subset, split = split, fsplit = fsplit, panel.id = panel.id, fixef.tol = fixef.tol, fixef.iter = fixef.iter, nthreads = nthreads, verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick, mem.clean = mem.clean, origin = "fenegbin", mc_origin_bis = match.call(), only.env=only.env, env=env, ...), silent = TRUE)
 
     if("try-error" %in% class(res)){
         stop(format_error_msg(res, "fenegbin"))
@@ -1973,7 +2086,7 @@ fenegbin = function(fml, data, theta.init, start = 0, fixef, fixef.rm = "perfect
 }
 
 #' @rdname feglm
-fepois = function(fml, data, offset, weights, subset, panel.id, start = NULL, etastart = NULL, mustart = NULL,
+fepois = function(fml, data, offset, weights, subset, split, fsplit, panel.id, start = NULL, etastart = NULL, mustart = NULL,
                   fixef, fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
                   glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(), warn = TRUE, notes = getFixest_notes(),
                   verbose = 0, combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
@@ -1998,16 +2111,19 @@ fepois = function(fml, data, offset, weights, subset, panel.id, start = NULL, et
 
 #' Fixed effects nonlinear maximum likelihood models
 #'
-#' This function estimates maximum likelihood models (e.g., Poisson or Logit) with non-linear in parameters right-hand-sides and is efficient to handle any number of fixed effects. If you do not use non-linear in parameters right-hand-side, use \code{\link[fixest]{femlm}} or \code{\link[fixest]{feglm}} instead (design is simpler).
+#' This function estimates maximum likelihood models (e.g., Poisson or Logit) with non-linear in parameters right-hand-sides and is efficient to handle any number of fixed effects. If you do not use non-linear in parameters right-hand-side, use \code{\link[fixest]{femlm}} or \code{\link[fixest]{feglm}} instead (their design is simpler).
 #'
 #' @inheritParams panel
 #' @inheritSection feols Lagging variables
 #' @inheritSection feols Interactions
 #' @inheritSection feols On standard-errors
+#' @inheritSection feols Multiple estimations
 #'
-#' @param fml A formula. This formula gives the linear formula to be estimated (it is similar to a \code{lm} formula), for example: \code{fml = z~x+y}. To include fixed-effects variables, you can 1) either insert them in this formula using a pipe (e.g. \code{fml = z~x+y|fixef_1+fixef_2}), or 2) either use the argument \code{fixef}. To include a non-linear in parameters element, you must use the argment \code{NL.fml}.
+#' @param fml A formula. This formula gives the linear formula to be estimated (it is similar to a \code{lm} formula), for example: \code{fml = z~x+y}. To include fixed-effects variables, insert them in this formula using a pipe (e.g. \code{fml = z~x+y|fixef_1+fixef_2}). To include a non-linear in parameters element, you must use the argment \code{NL.fml}. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. This leads to 6 estimation \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)}. See details.
 #' @param start Starting values for the coefficients in the linear part (for the non-linear part, use NL.start). Can be: i) a numeric of length 1 (e.g. \code{start = 0}, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).
 #' @param NL.fml A formula. If provided, this formula represents the non-linear part of the right hand side (RHS). Note that contrary to the \code{fml} argument, the coefficients must explicitly appear in this formula. For instance, it can be \code{~a*log(b*x + c*x^3)}, where \code{a}, \code{b}, and \code{c} are the coefficients to be estimated. Note that only the RHS of the formula is to be provided, and NOT the left hand side.
+#' @param split A one sided formula representing a variable (eg \code{split = ~var}) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. If you also want to include the estimation for the full sample, use the argument \code{fsplit} instead.
+#' @param fsplit A one sided formula representing a variable (eg \code{split = ~var}) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. This argument is the same as split but also includes the full sample as the first estimation.
 #' @param data A data.frame containing the necessary variables to run the model. The variables of the non-linear right hand side of the formula are identified with this \code{data.frame} names. Can also be a matrix.
 #' @param family Character scalar. It should provide the family. The possible values are "poisson" (Poisson model with log-link, the default), "negbin" (Negative Binomial model with log-link), "logit" (LOGIT model with log-link), "gaussian" (Gaussian model).
 #' @param fixef Character vector. The names of variables to be used as fixed-effects. These variables should contain the identifier of each observation (e.g., think of it as a panel identifier). Note that the recommended way to include fixed-effects is to insert them directly in the formula.
