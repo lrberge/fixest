@@ -3065,7 +3065,36 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 }
 
 
-cstepwise = csw = stepwise = sw = function(...){
+#' Stepwise estimation tools
+#'
+#' Functions to perform stepwise estimations.
+#'
+#' @param ... Represents formula variables to be added in a stepwise fashion to an estimation.
+#'
+#' @details
+#'
+#' To include multiple independent variables, you need to use the stepwise functions. There are 4 stepwise functions associated to 4 short aliases. These are a) stepwise, stepwise0, cstepwise, cstepwise0, and b) sw, sw0, csw, csw0. Let's explain that.
+#'
+#' Assume you have the following formula: \code{fml = y ~ x1 + sw(x2, x3)}. The stepwise function \code{sw} will estimate the following two models: \code{y ~ x1 + x2} and \code{y ~ x1 + x3}. That is, each element in \code{sw()} is sequentially, and separately, added to the formula. Would have you used \code{sw0} in lieu of \code{sw}, then the model \code{y ~ x1} would also have been estimated. The \code{0} in the name means that the model wihtout any stepwise element also needs to be estimated.
+#'
+#' Finally, the prefix \code{c} means cumulative: each stepwise element is added to the next. That is, \code{fml = y ~ x1 + csw(x2, x3)} would lead to the following models \code{y ~ x1 + x2} and \code{y ~ x1 + x2 + x3}. The \code{0} has the same meaning and would also lead to the model without the stepwise elements to be estimated: in other words, \code{fml = y ~ x1 + csw0(x2, x3)} leads to the following three models: \code{y ~ x1}, \code{y ~ x1 + x2} and \code{y ~ x1 + x2 + x3}.
+#'
+#'
+#' @examples
+#'
+#' base = iris
+#' names(base) = c("y1", "x1", "x2", "x3", "species")
+#'
+#' # Regular stepwise
+#' feols(y ~ sw(x1, x2, x3))
+#'
+#' # Cumulative stepwise
+#' feols(y ~ csw(x1, x2, x3))
+#'
+#' # Using the 0
+#' feols(y ~ x1 + x2 + sw0(x3))
+#'
+stepwise = sw = cstepwise = csw = function(...){
     mc = match.call(expand.dots = TRUE)
 
     n = length(mc) - 1
@@ -3109,63 +3138,26 @@ cstepwise0 = csw0 = stepwise0 = sw0 = function(...){
     res
 }
 
-# cstepwise = csw = function(...){
-#     mc = match.call(expand.dots = TRUE)
-#
-#     n = length(mc) - 1
-#
-#     if(n == 0){
-#         return("")
-#     }
-#
-#     res = vector("character", n)
-#     res[[1]] = deparse_long(mc[[2]])
-#
-#     res_add = vector("character", n - 1)
-#
-#     if(n >= 2){
-#         for(i in 2:n){
-#             value = deparse_long(mc[[i + 1]])
-#             res_add[[i - 1]] = value
-#             res[[i]] = paste0(res[[i - 1]], " + ", value)
-#         }
-#     }
-#
-#     attr(res, "additional_vars") = res_add
-#
-#     res
-# }
-#
-# cstepwise0 = csw0 = function(...){
-#     mc = match.call(expand.dots = TRUE)
-#
-#     n = length(mc) - 1
-#
-#     if(n == 0){
-#         return("")
-#     }
-#
-#     res = vector("character", n + 1)
-#     res[[2]] = deparse_long(mc[[2]])
-#
-#     res_add = vector("character", n)
-#
-#     for(i in 2:n){
-#         value = deparse_long(mc[[i + 1]])
-#         res_add[[i - 1]] = value
-#         res[[i + 1]] = paste0(res[[i]], " + ", value)
-#     }
-#
-#     attr(res, "additional_vars") = res_add
-#
-#     res
-# }
+#' @rdname stepwise
+"sw"
 
+#' @rdname stepwise
+"cstepwise"
 
+#' @rdname stepwise
+"csw"
 
+#' @rdname stepwise
+"stepwise0"
 
+#' @rdname stepwise
+"sw0"
 
+#' @rdname stepwise
+"cstepwise0"
 
+#' @rdname stepwise
+"csw0"
 
 
 
