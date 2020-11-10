@@ -35,44 +35,70 @@ setup_multi = function(index, all_names, data){
     return(res_multi)
 }
 
-summary.fixest_multi = function(object, ...){
+#' Summary for fixest_multi objects
+#'
+#' Summary information for fixest_multi objects. In particular, this is used to specify the type of standard-errors to be computed.
+#'
+#' @inherit print.fixest_multi seealso
+#'
+#' @param object A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to multiple results.
+#' @param type A character either equal to \code{"short"}, \code{"long"}, \code{"compact"}, or \code{"se_compact"}. If \code{short}, only the table of coefficients is displayed for each estimation. If \code{long}, then the full results are displayed for each estimation. If \code{compact}, a \code{data.frame} is returned with one line per model and the formatted coefficients + standard-errors in the columns. If \code{se_compact}, a \code{data.frame} is returned with one line per model, one numeric column for each coefficient and one numeric column for each standard-error.
+#' @param ... Other arguments to be passed to \code{\link[fixest]{summary.fixest}}.
+#'
+#' @return
+#' It returns either an object of class \code{fixest_multi} (if \code{type} equals \code{short} or \code{long}), either a \code{data.frame} (if type equals \code{compact} or \code{se_compact}).
+#'
+#' @examples
+#'
+#' base = iris
+#' names(base) = c("y", "x1", "x2", "x3", "species")
+#'
+#' # Multiple estimation
+#' res = feols(y ~ csw(x1, x2, x3), base, split = ~species)
+#'
+#' # By default, the type is "short"
+#' # You can stil use the arguments from summary.fixest
+#' summary(res, cluster = ~ species)
+#'
+#' summary(res, type = "long")
+#'
+#' summary(res, type = "compact")
+#'
+#' summary(res, type = "se_compact")
+#'
+#'
+summary.fixest_multi = function(object, type = "short", ...){
     dots = list(...)
     data = attr(object, "data")
 
-    est_1 = data[[1]]
-    if(!is.null(est_1$cov.scaled) && isTRUE(dots$fromPrint)) return(object)
+    check_arg_plus(type, "match(short, long, compact, se_compact)")
 
-    for(i in 1:length(data)){
-        data[[i]] = summary(data[[i]], nframes_up = 2, ...)
+    if(!missing(type) || is.null(attr(object, "print_request"))){
+        attr(object, "print_request") = type
     }
 
-    attr(object, "data") = data
-
-    return(object)
-}
-
-
-print.fixest_multi = function(x, n, type = getFixest_print.type(), ...){
-
-    x = summary(x, fromPrint = TRUE, ...)
-
-    meta = attr(x, "meta")
-    data = attr(x, "data")
-
-    index = meta$index
-    all_names = meta$all_names
-    tree = meta$tree
-
-    cat(signif_plus(do.call(prod, index)), " fixest estimations\n", sep = "")
-
-    # Finding out the type of SEs
     est_1 = data[[1]]
-    coeftable = est_1$coeftable
-    se.type = attr(coeftable, "type")
-    cat("Standard-errors:", se.type, "\n")
+    if(is.null(est_1$cov.scaled) || !isTRUE(dots$fromPrint)){
 
-    if(type == "compact"){
+        for(i in 1:length(data)){
+            data[[i]] = summary(data[[i]], nframes_up = 2, ...)
+        }
+
+        attr(object, "data") = data
+    }
+
+    if(type %in% c("compact", "se_compact")){
+        meta = attr(object, "meta")
+        data = attr(object, "data")
+
+        index = meta$index
+        all_names = meta$all_names
+        tree = meta$tree
+
         res = data.frame(i = tree$obs)
+        if(!"lhs" %in% names(index)){
+            res$lhs = sapply(data, function(x) as.character(x$fml[[2]]))
+        }
         for(my_dim in names(index)){
             res[[my_dim]] = sfill(as.character(factor(tree[[my_dim]], labels = all_names[[my_dim]])), right = TRUE)
         }
@@ -85,11 +111,27 @@ print.fixest_multi = function(x, n, type = getFixest_print.type(), ...){
             ct = data[[i]]$coeftable
             vname = row.names(ct)
 
-            stars = cut(ct[, 4], breaks = c(-1, signifCode, 100), labels = c(names(signifCode), ""))
-            stars[is.na(stars)] = ""
+            if(type == "compact"){
+                stars = cut(ct[, 4], breaks = c(-1, signifCode, 100), labels = c(names(signifCode), ""))
+                stars[is.na(stars)] = ""
 
-            value = paste0(signif_plus(ct[, 1], 3), " (", signif_plus(ct[, 2], 3), ")", stars)
-            names(value) = vname
+                value = paste0(signif_plus(ct[, 1], 3), " (", signif_plus(ct[, 2], 3), ")", stars)
+                names(value) = vname
+
+            } else if(type == "se_compact"){
+                n = length(vname)
+                vname_tmp = character(2 * n)
+                qui_coef = seq(1, by = 2, length.out = n)
+                qui_se   = seq(2, by = 2, length.out = n)
+                vname_tmp[qui_coef] = vname
+                vname_tmp[qui_se]   = paste0(vname, "__se")
+                vname = vname_tmp
+
+                value = numeric(2 * n)
+                value[qui_coef] = ct[, 1]
+                value[qui_se]   = ct[, 2]
+                names(value) = vname
+            }
 
             ct_all[[i]] = value
         }
@@ -99,13 +141,72 @@ print.fixest_multi = function(x, n, type = getFixest_print.type(), ...){
         tmp = lapply(ct_all, function(x) x[vname_all])
         my_ct = do.call("rbind", tmp)
         colnames(my_ct) = vname_all
-        my_ct[is.na(my_ct)] = ""
+        if(type == "compact"){
+            my_ct[is.na(my_ct)] = ""
+        }
 
         for(i in seq_along(vname_all)){
-            res[[vname_all[i]]] = sfill(my_ct[, i], anchor = "(", right = TRUE)
+            if(type == "compact"){
+                res[[vname_all[i]]] = sfill(my_ct[, i], anchor = "(", right = TRUE)
+            } else {
+                res[[vname_all[i]]] = my_ct[, i]
+            }
         }
 
         return(res)
+    }
+
+    return(object)
+}
+
+
+#' Print method for fixest_multi objects
+#'
+#' Displays summary information on fixest_multi objects in the R console.
+#'
+#' @param x A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to multiple results.
+#' @param ... Other arguments to be passed to \code{\link[fixest]{summary.fixest_multi}}.
+#'
+#' @seealso
+#' The main fixest estimation functions: \code{\link[fixest]{feols}}, \code{\link[fixest:feglm]{fepois}}, \code{\link[fixest:femlm]{fenegbin}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{feNmlm}}. Tools for mutliple fixest estimations: \code{\link[fixest]{summary.fixest_mutli}}, \code{\link[fixest]{print.fixest_mutli}}, \code{\link[fixest]{as.list.fixest_multi}}, \code{\link[fixest]{sub-sub-.fixest_multi}}, \code{\link[fixest]{sub-.fixest_multi}}, \code{\link[fixest]{cash-.fixest_multi}}.
+#'
+#' @examples
+#'
+#' base = iris
+#' names(base) = c("y", "x1", "x2", "x3", "species")
+#'
+#' # Multiple estimation
+#' res = feols(y ~ csw(x1, x2, x3), base, split = ~species)
+#'
+#' # Let's print all that
+#' res
+#'
+print.fixest_multi = function(x, ...){
+
+    x = summary(x, fromPrint = TRUE, ...)
+
+    # Type = compact
+    if(is.data.frame(x)){
+        return(x)
+    }
+
+    is_short = identical(attr(x, "print_request"), "short")
+
+    meta = attr(x, "meta")
+    data = attr(x, "data")
+
+    index = meta$index
+    all_names = meta$all_names
+    tree = meta$tree
+
+    cat(signif_plus(do.call(prod, index)), " fixest estimations\n", sep = "")
+
+    # Finding out the type of SEs
+    if(is_short){
+        est_1 = data[[1]]
+        coeftable = est_1$coeftable
+        se.type = attr(coeftable, "type")
+        cat("Standard-errors:", se.type, "\n")
     }
 
     depth = length(index)
@@ -124,8 +225,14 @@ print.fixest_multi = function(x, n, type = getFixest_print.type(), ...){
                     cat(dict_title[names(index)[3]], ": ", all_names[[3]][k], "\n", sep = "")
 
                     obs = tree$obs[tree[, 1] == i & tree[, 2] == j & tree[, 3] == k]
-                    myPrintCoefTable(coeftable = coeftable(data[[obs]], ...), show_signif = FALSE)
-                    if(k != index[[3]]) cat("---\n")
+
+                    if(is_short){
+                        myPrintCoefTable(coeftable = coeftable(data[[obs]], ...), show_signif = FALSE)
+                        if(k != index[[3]]) cat("---\n")
+                    } else {
+                        print(data[[obs]])
+                        if(k != index[[3]]) cat("\n")
+                    }
                 }
             }
         }
@@ -138,8 +245,13 @@ print.fixest_multi = function(x, n, type = getFixest_print.type(), ...){
                 cat(dict_title[names(index)[2]], ": ", all_names[[2]][j], "\n", sep = "")
 
                 obs = tree$obs[tree[, 1] == i & tree[, 2] == j]
-                myPrintCoefTable(coeftable = coeftable(data[[obs]], ...), show_signif = FALSE)
-                if(j != index[[2]]) cat("---\n")
+                if(is_short){
+                    myPrintCoefTable(coeftable = coeftable(data[[obs]], ...), show_signif = FALSE)
+                    if(j != index[[2]]) cat("---\n")
+                } else {
+                    print(data[[obs]])
+                    if(j != index[[2]]) cat("\n")
+                }
             }
         }
     } else {
@@ -147,13 +259,45 @@ print.fixest_multi = function(x, n, type = getFixest_print.type(), ...){
             cat(dict_title[names(index)[1]], ": ", all_names[[1]][i], "\n", sep = "")
 
             obs = tree$obs[tree[, 1] == i]
-            myPrintCoefTable(coeftable = coeftable(data[[obs]], ...), show_signif = FALSE)
-            if(i != index[[1]]) cat("---\n")
+
+            if(is_short){
+                myPrintCoefTable(coeftable = coeftable(data[[obs]], ...), show_signif = FALSE)
+                if(i != index[[1]]) cat("---\n")
+            } else {
+                print(data[[obs]])
+                if(i != index[[1]]) cat("\n")
+            }
         }
     }
 
 }
 
+#' Extracts one element from a \code{fixest_multi} object
+#'
+#' Extracts single elements from multiple \code{fixest} estimations.
+#'
+#' @inherit print.fixest_multi seealso
+#' @inheritParams print.fixest_multi
+#'
+#' @param i An integer scalar. The identifier of the estimation to extract.
+#'
+#' @return
+#' A \code{fixest} object is returned.
+#'
+#' @examples
+#'
+#' base = iris
+#' names(base) = c("y", "x1", "x2", "x3", "species")
+#'
+#' # Multiple estimation
+#' res = feols(y ~ csw(x1, x2, x3), base, split = ~species)
+#'
+#' # The first estimation
+#' res[[1]]
+#'
+#' # The second one, etc
+#' res[[2]]
+#'
 "[[.fixest_multi" = function(x, i){
 
     data = attr(x, "data")
@@ -164,6 +308,47 @@ print.fixest_multi = function(x, n, type = getFixest_print.type(), ...){
 }
 
 
+#' Subset a fixest_multi object
+#'
+#' Subset a fixest_multi object using different keys.
+#'
+#' @inherit print.fixest_multi seealso
+#' @inheritParams print.fixest_multi
+#'
+#' @param sample An integer vector of a character vector. It represents the \code{sample} identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation was a split sample. You can use \code{.N} to refer to the last element.
+#' @param lhs An integer vector of a character vector. It represents the left-hand-sides identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation contained multiple left-hand-sides. You can use \code{.N} to refer to the last element.
+#' @param rhs An integer vector. It represents the right-hand-sides identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation contained multiple right-hand-sides. You can use \code{.N} to refer to the last element.
+#' @param i An integer vector. Represents the estimations to extract.
+#' @param I An integer vector. Represents the root element to extract.
+#'
+#' @details
+#' The order with we we use the keys matter. Every time a key sample, lhs or rhs is used, a reordering is performed to consider the leftmost-side key to be the new root.
+#'
+#' @return
+#' It returns a \code{fixest_multi} object. If there is only one estimation left in the object, then the result is simplified into a \code{fixest} object.
+#'
+#' @examples
+#'
+#' # Estimation with multiple samples/LHS/RHS
+#' aq = airquality[airquality$Month %in% 5:6, ]
+#' est_split = feols(c(Ozone, Solar.R) ~ sw(poly(Wind, 2), poly(Temp, 2)),
+#'                   aq, split = ~ Month)
+#'
+#' # By default: sample is the root
+#' etable(est_split)
+#'
+#' # Let's reorder, by considering lhs the root
+#' etable(est_split[lhs = 1:.N])
+#'
+#' # Selecting only one LHS and RHS
+#' etable(est_split[lhs = "Ozone", rhs = 1])
+#'
+#' # Taking the first root (here sample = 5)
+#' etable(est_split[I = 1])
+#'
+#' # The first and last estimations
+#' etable(est_split[i = c(1, .N)])
+#'
 "[.fixest_multi" = function(x, sample, lhs, rhs, i, I){
 
     mc = match.call()
@@ -356,6 +541,32 @@ print.fixest_multi = function(x, n, type = getFixest_print.type(), ...){
 }
 
 
+#' Extracts the root of a fixest_multi object
+#'
+#' Extracts an element at the root of a fixest_multi object.
+#'
+#' @inherit print.fixest_multi seealso
+#' @inheritParams print.fixest_multi
+#'
+#' @param name The name of the root element to select.
+#'
+#' @return
+#' It either returns a \code{fixest_multi} object or a \code{fixest} object it there is only one estimation associated to the root element.
+#'
+#' @examples
+#'
+#' base = iris
+#' names(base) = c("y", "x1", "x2", "x3", "species")
+#'
+#' # Multiple estimation
+#' res = feols(y ~ csw(x1, x2, x3), base, split = ~species)
+#'
+#' # Let's the results for the setosa species
+#' res$setosa
+#'
+#' # now for versicolor
+#' etable(res$versicolor)
+#'
 "$.fixest_multi" = function(x, name){
 
     # real variables
@@ -370,7 +581,35 @@ print.fixest_multi = function(x, n, type = getFixest_print.type(), ...){
 }
 
 
-
+#' Transforms a fixest_multi object into a list
+#'
+#' Extracts the results from a \code{fixest_multi} object and place them into a list.
+#'
+#' @inheritParams print.fixest_multi
+#' @inherit print.fixest_multi seealso
+#'
+#' @method as.list fixest_multi
+#'
+#' @param ... Not currently used.
+#'
+#' @return
+#' Returns a list containing all the results of the multiple estimations.
+#'
+#' @examples
+#'
+#' base = iris
+#' names(base) = c("y", "x1", "x2", "x3", "species")
+#'
+#' # Multiple estimation
+#' res = feols(y ~ csw(x1, x2, x3), base, split = ~species)
+#'
+#' # All the results at once
+#' as.list(res)
+#'
+#'
+as.list.fixest_multi = function(x, ...){
+    attr(x, "data")
+}
 
 
 
