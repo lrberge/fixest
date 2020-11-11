@@ -310,6 +310,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, panel.id, fi
 	    split = get("split", env)
 	    split.full = get("split.full", env)
 	    split.items = get("split.items", env)
+	    split.name = get("split.name", env)
 
 	    assign("do_split", FALSE, env)
 
@@ -354,28 +355,28 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, panel.id, fi
 	    }
 
 	    if(split.full){
-	        split_names = c("full_sample", split.items)
-	    } else {
-	        split_names = split.items
+	        split.items = c("full_sample", split.items)
 	    }
 
 	    if(is.null(index)){
 	        index = list(sample = length(res_all))
-	        all_names = list(sample = split_names)
+	        all_names = list(sample = split.items)
 
 	    } else {
-	        index_tmp = list(sample = length(split_names))
+	        index_tmp = list(sample = length(split.items))
 	        for(i in seq_along(index)){
 	            index_tmp[[names(index)[i]]] = index[[i]]
 	        }
 	        index = index_tmp
 
-	        all_names_tmp = list(sample = split_names)
+	        all_names_tmp = list(sample = split.items)
 	        for(i in seq_along(all_names)){
 	            all_names_tmp[[names(all_names)[i]]] = all_names[[i]]
 	        }
 	        all_names = all_names_tmp
 	    }
+
+	    all_names$split.name = split.name
 
 	    # result
 	    res_multi = setup_multi(index, all_names, res_all)
@@ -1458,6 +1459,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, split, fsplit,
         split = get("split", env)
         split.full = get("split.full", env)
         split.items = get("split.items", env)
+        split.name = get("split.name", env)
 
         assign("do_split", FALSE, env)
 
@@ -1502,28 +1504,28 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, split, fsplit,
         }
 
         if(split.full){
-            split_names = c("full_sample", split.items)
-        } else {
-            split_names = split.items
+            split.items = c("full_sample", split.items)
         }
 
         if(is.null(index)){
             index = list(sample = length(res_all))
-            all_names = list(sample = split_names)
+            all_names = list(sample = split.items)
 
         } else {
-            index_tmp = list(sample = length(split_names))
+            index_tmp = list(sample = length(split.items))
             for(i in seq_along(index)){
                 index_tmp[[names(index)[i]]] = index[[i]]
             }
             index = index_tmp
 
-            all_names_tmp = list(sample = split_names)
+            all_names_tmp = list(sample = split.items)
             for(i in seq_along(all_names)){
                 all_names_tmp[[names(all_names)[i]]] = all_names[[i]]
             }
             all_names = all_names_tmp
         }
+
+        all_names$split.name = split.name
 
         # result
         res_multi = setup_multi(index, all_names, res_all)
@@ -2516,6 +2518,7 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	    split = get("split", env)
 	    split.full = get("split.full", env)
 	    split.items = get("split.items", env)
+	    split.name = get("split.name", env)
 
 	    assign("do_split", FALSE, env)
 
@@ -2560,28 +2563,28 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	    }
 
 	    if(split.full){
-	        split_names = c("full_sample", split.items)
-	    } else {
-	        split_names = split.items
+	        split.items = c("full_sample", split.items)
 	    }
 
 	    if(is.null(index)){
 	        index = list(sample = length(res_all))
-	        all_names = list(sample = split_names)
+	        all_names = list(sample = split.items)
 
 	    } else {
-	        index_tmp = list(sample = length(split_names))
+	        index_tmp = list(sample = length(split.items))
 	        for(i in seq_along(index)){
 	            index_tmp[[names(index)[i]]] = index[[i]]
 	        }
 	        index = index_tmp
 
-	        all_names_tmp = list(sample = split_names)
+	        all_names_tmp = list(sample = split.items)
 	        for(i in seq_along(all_names)){
 	            all_names_tmp[[names(all_names)[i]]] = all_names[[i]]
 	        }
 	        all_names = all_names_tmp
 	    }
+
+	    all_names$split.name = split.name
 
 	    # result
 	    res_multi = setup_multi(index, all_names, res_all)

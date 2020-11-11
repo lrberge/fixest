@@ -13,7 +13,8 @@ setup_multi = function(index, all_names, data){
     qui = n_all == 1
     if(any(qui)){
         index = index[!qui]
-        all_names = all_names[!qui]
+        # all_names = all_names[!qui]
+        # We don't drop the names dimension => we always keep it as an imprint
     }
 
     meta = list(index = index, all_names = all_names)
@@ -96,6 +97,11 @@ summary.fixest_multi = function(object, type = "short", ...){
         tree = meta$tree
 
         res = data.frame(i = tree$obs)
+
+        if(!"sample" %in% names(index) && !is.null(all_names$sample)){
+            res$sample = all_names$sample
+        }
+
         if(!"lhs" %in% names(index)){
             res$lhs = sapply(data, function(x) as.character(x$fml[[2]]))
         }
@@ -115,7 +121,7 @@ summary.fixest_multi = function(object, type = "short", ...){
                 stars = cut(ct[, 4], breaks = c(-1, signifCode, 100), labels = c(names(signifCode), ""))
                 stars[is.na(stars)] = ""
 
-                value = paste0(signif_plus(ct[, 1], 3), " (", signif_plus(ct[, 2], 3), ")", stars)
+                value = paste0(signif_plus(ct[, 1], 3), stars, " (", signif_plus(ct[, 2], 3), ")")
                 names(value) = vname
 
             } else if(type == "se_compact"){
@@ -403,7 +409,7 @@ print.fixest_multi = function(x, ...){
         check_arg_plus(I, "evalset integer vector no na", .data = list(.N = I_max))
 
         if(any(abs(I) > I_max)){
-            stop("The index 'I' refers to root elements, and thus cannot be greater than ", I_max, ". Currently ", I[which.max(abs(I))], " is not valid.")
+            stop("The index 'I' refers to root elements (here ", names(index)[1], "), and thus cannot be greater than ", I_max, ". Currently ", I[which.max(abs(I))], " is not valid.")
         }
 
         obs = (1:I_max)[I]
@@ -412,20 +418,19 @@ print.fixest_multi = function(x, ...){
         if(length(index) == 1 && length(obs) == 1){
             res = data[[obs]]
 
-        } else if(length(obs) == 1){
-            # The first dimension is dissolved
-            obs_keep = tree[tree[, 1] == obs, "obs"]
-            res = setup_multi(index[-1], all_names[-1], data[obs_keep])
-
         } else {
-            new_index = index
-            new_index[[1]] = length(obs)
-
             new_all_names = all_names
             new_all_names[[1]] = all_names[[1]][obs]
-
             obs_keep = tree[tree[, 1] %in% obs, "obs"]
-            res = setup_multi(new_index, new_all_names, data[obs_keep])
+
+            if(length(obs) == 1){
+                # The first dimension is dissolved
+                res = setup_multi(index[-1], new_all_names, data[obs_keep])
+            } else {
+                new_index = index
+                new_index[[1]] = length(obs)
+                res = setup_multi(new_index, new_all_names, data[obs_keep])
+            }
         }
 
         return(res)
@@ -517,6 +522,7 @@ print.fixest_multi = function(x, ...){
         new_index[[d]] = length(selection[[d]])
         new_all_names[[d]] = all_names[[d]][selection[[d]]]
     }
+    new_all_names$split.name = all_names$split.name
 
     for(my_dim in rev(user_order)){
         # 1) we prune the tree
