@@ -1118,6 +1118,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
             check_value(split, "os formula var(data)", .data = data)
             split.value = split[[2]]
+            split.name = as.character(split.value)
             split = check_value_plus(split.value, "evalset vector", .data = data, .prefix = "In argument 'split', the expression")
 
         } else {
@@ -1127,6 +1128,8 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             } else {
                 check_value(split, "vector len(data)", .data = data, .prefix = "If not a formula, argument 'split'")
             }
+
+            split.name = gsub("^[[:alpha:]][[:alnum:]\\._]*\\$", "", deparse_long(mc_origin$split))
         }
 
         if(delayed.subset){
@@ -2239,6 +2242,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     if(isSplit){
         assign("split", split, env)
         assign("split.items", split.items, env)
+        assign("split.name", split.name, env)
         assign("split.full", split.full, env)
     }
 
