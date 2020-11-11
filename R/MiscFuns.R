@@ -7220,7 +7220,7 @@ rep.fixest = function(x, times = 1, each = 1, cluster, ...){
 
     check_arg(x, "class(fixest, fixest_list) mbt")
     check_arg(times, "integer scalar GE{1} | integer vector no na GE{0}")
-    check_arg(each, "integer scalar GE{1}")
+    check_arg(each, "integer scalar GE{1} | logical scalar")
     check_arg(cluster, "class(list)")
 
     validate_dots(suggest_args = c("times", "each"), stop = TRUE)
@@ -7237,12 +7237,21 @@ rep.fixest = function(x, times = 1, each = 1, cluster, ...){
         n = 1
     }
 
+    if(is.logical(each) && each == FALSE){
+        stop("Argument 'each' cannot be equal to FALSE.")
+    }
+
     IS_MULTI_CLUST = !missing(cluster)
     if(IS_MULTI_CLUST){
         n_clu = length(cluster)
 
         if(times == 1 && each == 1){
-            times = n_clu
+            if(isTRUE(each)){
+                each = n_clu
+            } else {
+                times = n_clu
+            }
+
         }
     }
 
@@ -7303,6 +7312,10 @@ rep.fixest = function(x, times = 1, each = 1, cluster, ...){
                 res[res_int == i] = list(x)
             }
         }
+    }
+
+    for(i in 1:n_res){
+        res[[i]]$model_id = res_int[i]
     }
 
     res
