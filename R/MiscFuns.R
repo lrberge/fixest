@@ -5044,15 +5044,16 @@ format_se_type_latex = function(x, dict = c(), inline = FALSE){
     fe_format = paste(all_fe_format, collapse = " \\& ")
 
     # Full string
-    # nb = c("One", "Two", "Three", "Four")
-    # nway = paste0(nb[n_fe], "-way")
-    #
-    # if(inline){
-    #     se_formatted = paste0(nway, ": ", fe_format)
-    # } else {
-    #     se_formatted = paste0(nway, " (", fe_format, ")")
-    # }
-    se_formatted = fe_format
+    nb = c("One", "Two", "Three", "Four")
+    nway = paste0(nb[n_fe], "-way")
+
+    if(inline){
+        # se_formatted = paste0(nway, ": ", fe_format)
+        se_formatted = fe_format
+    } else {
+        se_formatted = paste0(nway, " (", fe_format, ")")
+    }
+    # se_formatted = fe_format
 
     escape_latex(se_formatted)
 }
