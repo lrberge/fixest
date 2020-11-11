@@ -1197,13 +1197,17 @@ for(id_fun in 1:5){
 
     cat("__")
 
-    est_multi = estfun(c(y1, y2) ~ x1 + csw0(x2, x3) + x4, base, split = ~species)
+    est_multi = estfun(c(y1, y2) ~ x1 + csw0(x2, x3) + x4, base, fsplit = ~species)
     k = 1
     all_rhs = c("", "x2", "x3")
-    for(s in c("setosa", "versicolor", "virginica")){
+    for(s in c("all", "setosa", "versicolor", "virginica")){
         for(lhs in c("y1", "y2")){
             for(n_rhs in 1:3){
-                res = estfun(xpd(..lhs ~ x1 + ..rhs + x4, ..lhs = lhs, ..rhs = all_rhs[1:n_rhs]), base[base$species == s, ], notes = FALSE)
+                if(s == "all"){
+                    res = estfun(xpd(..lhs ~ x1 + ..rhs + x4, ..lhs = lhs, ..rhs = all_rhs[1:n_rhs]), base, notes = FALSE)
+                } else {
+                    res = estfun(xpd(..lhs ~ x1 + ..rhs + x4, ..lhs = lhs, ..rhs = all_rhs[1:n_rhs]), base[base$species == s, ], notes = FALSE)
+                }
 
                 vname = names(coef(res))
                 test(coef(est_multi[[k]])[vname], coef(res))
