@@ -8,6 +8,52 @@
 setup_multi = function(index, all_names, data){
     # Basic setup function
 
+
+    if("fixest_multi" %in% class(data[[1]])){
+        # We need to "grow" the results
+
+        new_data = list()
+        for(i in seq_along(data)){
+            my_res = data[[i]]
+
+            if(i == 1){
+                # setup in the first iteration
+                meta = attr(my_res, "meta")
+                old_index = meta$index
+                old_all_names = meta$all_names
+            }
+
+            my_data = attr(my_res, "data")
+
+            for(j in seq_along(my_data)){
+                new_data[[length(new_data) + 1]] = my_data[[j]]
+            }
+
+        }
+
+        #
+        # we create the new information
+        #
+
+        # the length of all_names need not be the same as index
+        new_all_names = all_names
+        for(i in seq_along(old_all_names)){
+            new_all_names[[names(old_all_names)[i]]] = old_all_names[[i]]
+        }
+
+        new_index = index
+        for(i in seq_along(old_index)){
+            new_index[[names(old_index)[i]]] = old_index[[i]]
+        }
+
+        # now we're ready to go
+        index = new_index
+        all_names = new_all_names
+        data = new_data
+
+    }
+
+
     # We drop non-used dimensions
     n_all = sapply(index, max)
     qui = n_all == 1
