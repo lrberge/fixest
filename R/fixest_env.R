@@ -2290,7 +2290,6 @@ setup_fixef = function(fixef_mat, lhs, fixef_vars, fixef.rm, family, isSplit, sp
 
     quf_info_all = cpppar_quf_table_sum(x = fixef_mat, y = lhs, do_sum_y = do_sum_y, rm_0 = rm_0, rm_1 = rm_1, rm_single = rm_single, only_slope = only_slope, nthreads = nthreads, do_refactor = isRefactor, r_x_sizes = fixef_sizes, obs2keep = obs2keep)
 
-
     fixef_id = quf_info_all$quf
     # names
 
@@ -2559,7 +2558,6 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 
         # gt("fixef, dropping")
 
-        # browser()
         # We refactor the fixed effects => we may remove even more obs
         info_fe = setup_fixef(fixef_mat = fixef_mat, lhs = lhs, fixef_vars = fixef_vars, fixef.rm = fixef.rm, family = family, isSplit = FALSE, origin_type = origin_type, isSlope = isSlope, slope_flag = slope_flag, slope_mat = slope_mat, slope_vars_list = slope_vars_list, fixef_names_old = fixef_names_old, fixef_sizes = fixef_sizes, obs2keep = obs2keep, nthreads = nthreads)
 
@@ -2603,6 +2601,7 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
         }
 
         lhs_done = TRUE
+        nobs = length(fixef_id[[1]])
 
         assign_fixef_env(new_env, nobs, family, origin_type, fixef_id, fixef_sizes, fixef_table, sum_y_all, slope_flag, slope_variables, slope_vars_list)
 
@@ -2824,10 +2823,10 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 
         # obs2keep
         res$nobs = length(obs2keep)
-        if(is.null(res$obsKept)){
-            res$obsKept = obs2keep
+        if(is.null(res$obs_selection)){
+            res$obs_selection = list(obs2keep)
         } else {
-            res$obsKept_bis = obs2keep
+            res$obs_selection[[length(res$obs_selection) + 1]] = obs2keep
         }
 
         assign("res", res, new_env)
@@ -2870,7 +2869,9 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
             }
 
             if(origin_type == "feglm" && isFixef){
+                res = get("res", env)
                 res$y = lhs
+                assign("res", res, new_env)
             }
         }
 
@@ -2912,7 +2913,7 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
             assign("isLinear", isLinear, new_env)
 
             # Finally the DoF
-            res = get("res", env)
+            res = get("res", new_env)
             params = get("params", new_env)
             K = length(params)
             if(isFixef){
