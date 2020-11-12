@@ -848,6 +848,9 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
     } else {
         // => there will be no use of y, so nullptr is OK
         // but I must ensure that beforehand: do_sum_y = rm_0 = rm_1 = false
+        if(do_sum_y || rm_0){
+            stop("y should not be a list when its values are assessed.");
+        }
     }
 
 
@@ -1001,7 +1004,7 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
         }
 
         if(*pstop_now){
-            UNPROTECT(Q + Q);
+            UNPROTECT((Q * (!identical_x)) + Q);
             stop("The dependent variable is fully explained by the fixed-effects.");
         }
 
@@ -1057,7 +1060,7 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
 
     }
 
-    UNPROTECT(Q + (Q * is_pblm));
+    UNPROTECT((Q * (!identical_x)) + (Q * is_pblm));
 
     return res;
 }
