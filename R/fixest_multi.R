@@ -40,6 +40,8 @@ setup_multi = function(index, all_names, data){
 #'
 #' Summary information for fixest_multi objects. In particular, this is used to specify the type of standard-errors to be computed.
 #'
+#' @method summary fixest_multi
+#'
 #' @inherit print.fixest_multi seealso
 #'
 #' @param object A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to multiple results.
@@ -170,11 +172,13 @@ summary.fixest_multi = function(object, type = "short", ...){
 #'
 #' Displays summary information on fixest_multi objects in the R console.
 #'
+#' @method print fixest_multi
+#'
 #' @param x A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to multiple results.
 #' @param ... Other arguments to be passed to \code{\link[fixest]{summary.fixest_multi}}.
 #'
 #' @seealso
-#' The main fixest estimation functions: \code{\link[fixest]{feols}}, \code{\link[fixest:feglm]{fepois}}, \code{\link[fixest:femlm]{fenegbin}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{feNmlm}}. Tools for mutliple fixest estimations: \code{\link[fixest]{summary.fixest_mutli}}, \code{\link[fixest]{print.fixest_mutli}}, \code{\link[fixest]{as.list.fixest_multi}}, \code{\link[fixest]{sub-sub-.fixest_multi}}, \code{\link[fixest]{sub-.fixest_multi}}, \code{\link[fixest]{cash-.fixest_multi}}.
+#' The main fixest estimation functions: \code{\link[fixest]{feols}}, \code{\link[fixest:feglm]{fepois}}, \code{\link[fixest:femlm]{fenegbin}}, \code{\link[fixest]{feglm}}, \code{\link[fixest]{feNmlm}}. Tools for mutliple fixest estimations: \code{\link[fixest]{summary.fixest_multi}}, \code{\link[fixest]{print.fixest_multi}}, \code{\link[fixest]{as.list.fixest_multi}}, \code{\link[fixest]{sub-sub-.fixest_multi}}, \code{\link[fixest]{sub-.fixest_multi}}, \code{\link[fixest]{cash-.fixest_multi}}.
 #'
 #' @examples
 #'
@@ -282,6 +286,8 @@ print.fixest_multi = function(x, ...){
 #'
 #' Extracts single elements from multiple \code{fixest} estimations.
 #'
+#' @method sub-sub- fixest_multi
+#'
 #' @inherit print.fixest_multi seealso
 #' @inheritParams print.fixest_multi
 #'
@@ -317,6 +323,8 @@ print.fixest_multi = function(x, ...){
 #' Subset a fixest_multi object
 #'
 #' Subset a fixest_multi object using different keys.
+#'
+#' @method sub- fixest_multi
 #'
 #' @inherit print.fixest_multi seealso
 #' @inheritParams print.fixest_multi
@@ -550,6 +558,8 @@ print.fixest_multi = function(x, ...){
 #' Extracts the root of a fixest_multi object
 #'
 #' Extracts an element at the root of a fixest_multi object.
+#'
+#' @method cash- fixest_multi
 #'
 #' @inherit print.fixest_multi seealso
 #' @inheritParams print.fixest_multi
