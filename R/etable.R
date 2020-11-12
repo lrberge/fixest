@@ -46,7 +46,7 @@
 #' @param reset (\code{setFixest_etable} only.) Logical, default is \code{FALSE}. If \code{TRUE}, this will reset all the default values that were already set by the user in previous calls.
 #' @param .vcov A function to be used to compute the standard-errors of each fixest object. You can pass extra arguments to this function using the argument \code{.vcov_args}. See the example.
 #' @param .vcov_args A list containing arguments to be passed to the function \code{.vcov}.
-#' @param poly_dict Character vector, default is \code{c("", " square", " cube")}. When polynomials are used with the function \code{\link[base]{poly}}, the variables are automatically renamed and \code{poly_dict} rules the display of the power. For powers greater than the number of elements of the vector, the value displayed is \code{$^{pow}$} in Latex and \code{^ pow} in the R console.
+#' @param poly_dict Character vector, default is \code{c("", " square", " cube")}. When polynomials are used with the function \code{\link[stats]{poly}}, the variables are automatically renamed and \code{poly_dict} rules the display of the power. For powers greater than the number of elements of the vector, the value displayed is \code{$^{pow}$} in Latex and \code{^ pow} in the R console.
 #'
 #' @details
 #' The function \code{esttex} is equivalent to the function \code{etable} with argument \code{tex = TRUE}.
