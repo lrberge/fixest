@@ -307,81 +307,10 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, panel.id, fi
 
 	do_split = get("do_split", env)
 	if(do_split){
-	    split = get("split", env)
-	    split.full = get("split.full", env)
-	    split.items = get("split.items", env)
-	    split.name = get("split.name", env)
 
-	    assign("do_split", FALSE, env)
+	    res = multi_split(env, feols)
 
-	    res_all = list()
-	    n_split = length(split.items)
-	    index = NULL
-	    all_names = NULL
-	    is_multi = FALSE
-	    for(i in 0:n_split){
-	        if(i == 0){
-	            if(split.full){
-	                my_env = reshape_env(env)
-	                my_res = feols(env = my_env)
-	            } else {
-	                next
-	            }
-	        } else {
-	            my_res = feols(env = reshape_env(env, obs2keep = which(split == i)))
-	        }
-
-	        if("fixest_multi" %in% class(my_res)){
-
-	            if(is_multi == FALSE){
-	                # setup in the first iteration
-	                is_multi = TRUE
-	                meta = attr(my_res, "meta")
-	                index = meta$index
-	                all_names = meta$all_names
-	            }
-
-	            my_res = attr(my_res, "data")
-	        }
-
-	        if(is_multi){
-	            for(m in 1:length(my_res)){
-	                res_all[[length(res_all) + 1]] = my_res[[m]]
-	            }
-	        } else {
-	            res_all[[length(res_all) + 1]] = my_res
-	        }
-
-	    }
-
-	    if(split.full){
-	        split.items = c("full_sample", split.items)
-	    }
-
-	    if(is.null(index)){
-	        index = list(sample = length(res_all))
-	        all_names = list(sample = split.items)
-
-	    } else {
-	        index_tmp = list(sample = length(split.items))
-	        for(i in seq_along(index)){
-	            index_tmp[[names(index)[i]]] = index[[i]]
-	        }
-	        index = index_tmp
-
-	        all_names_tmp = list(sample = split.items)
-	        for(i in seq_along(all_names)){
-	            all_names_tmp[[names(all_names)[i]]] = all_names[[i]]
-	        }
-	        all_names = all_names_tmp
-	    }
-
-	    all_names$split.name = split.name
-
-	    # result
-	    res_multi = setup_multi(index, all_names, res_all)
-
-	    return(res_multi)
+	    return(res)
 	}
 
 	#
@@ -1456,81 +1385,10 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, split, fsplit,
 
     do_split = get("do_split", env)
     if(do_split){
-        split = get("split", env)
-        split.full = get("split.full", env)
-        split.items = get("split.items", env)
-        split.name = get("split.name", env)
 
-        assign("do_split", FALSE, env)
+        res = multi_split(env, feglm.fit)
 
-        res_all = list()
-        n_split = length(split.items)
-        index = NULL
-        all_names = NULL
-        is_multi = FALSE
-        for(i in 0:n_split){
-            if(i == 0){
-                if(split.full){
-                    my_env = reshape_env(env)
-                    my_res = feglm.fit(env = my_env)
-                } else {
-                    next
-                }
-            } else {
-                my_res = feglm.fit(env = reshape_env(env, obs2keep = which(split == i)))
-            }
-
-            if("fixest_multi" %in% class(my_res)){
-
-                if(is_multi == FALSE){
-                    # setup in the first iteration
-                    is_multi = TRUE
-                    meta = attr(my_res, "meta")
-                    index = meta$index
-                    all_names = meta$all_names
-                }
-
-                my_res = attr(my_res, "data")
-            }
-
-            if(is_multi){
-                for(m in 1:length(my_res)){
-                    res_all[[length(res_all) + 1]] = my_res[[m]]
-                }
-            } else {
-                res_all[[length(res_all) + 1]] = my_res
-            }
-
-        }
-
-        if(split.full){
-            split.items = c("full_sample", split.items)
-        }
-
-        if(is.null(index)){
-            index = list(sample = length(res_all))
-            all_names = list(sample = split.items)
-
-        } else {
-            index_tmp = list(sample = length(split.items))
-            for(i in seq_along(index)){
-                index_tmp[[names(index)[i]]] = index[[i]]
-            }
-            index = index_tmp
-
-            all_names_tmp = list(sample = split.items)
-            for(i in seq_along(all_names)){
-                all_names_tmp[[names(all_names)[i]]] = all_names[[i]]
-            }
-            all_names = all_names_tmp
-        }
-
-        all_names$split.name = split.name
-
-        # result
-        res_multi = setup_multi(index, all_names, res_all)
-
-        return(res_multi)
+        return(res)
     }
 
     #
@@ -1540,90 +1398,10 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, split, fsplit,
     do_multi_lhs = get("do_multi_lhs", env)
     do_multi_rhs = get("do_multi_rhs", env)
     if(do_multi_lhs || do_multi_rhs){
-        assign("do_multi_lhs", FALSE, env)
-        assign("do_multi_rhs", FALSE, env)
 
-        nthreads = get("nthreads", env)
+        res = multi_LHS_RHS(env, feglm.fit)
 
-        # IMPORTANT NOTE:
-        # contrary to feols, the preprocessing is only a small fraction of the
-        # computing time in ML models
-        # Therefore we don't need to optimize processing as hard as in FEOLS
-        # because the gains are only marginal
-
-        fml = get("fml", env)
-
-        # LHS
-        lhs_names = get("lhs_names", env)
-        lhs = get("lhs", env)
-
-        if(do_multi_lhs == FALSE){
-            lhs = list(lhs)
-        }
-
-        # RHS
-        if(do_multi_rhs){
-            fml_rhs_all = get("fml_rhs_all", env)
-            is_cumul = get("is_cumul", env)
-            fake_intercept = get("fake_intercept", env)
-            data = get("data", env)
-
-            rhs = list()
-            for(i in seq_along(fml_rhs_all)){
-                # We evaluate the extra data and check the NA pattern
-
-                my_fml = xpd(lhs ~ ..rhs, ..rhs = fml_rhs_all[[i]])
-                rhs_current = try(fixest_model_matrix(my_fml, data, fake_intercept = fake_intercept), silent = TRUE)
-                if("try-error" %in% class(rhs_current)){
-                    stop("Evaluation of the RHS raises an error (concerns ", deparse_long(my_fml[[3]]), "):\n", rhs_current)
-                }
-
-                rhs[[i]] = rhs_current
-            }
-        } else {
-            fml_rhs_all = list(xpd(~ ..rhs, ..rhs = deparse_long(fml[[3]])))
-            is_cumul = FALSE
-            linear.mat = get("linear.mat", env)
-            rhs = list(linear.mat)
-        }
-
-        n_lhs = length(lhs)
-        n_rhs = length(rhs)
-        res = vector("list", n_lhs * n_rhs)
-
-        rhs_names = sapply(fml_rhs_all, deparse_long)
-
-        for(i in seq_along(lhs)){
-            for(j in seq_along(rhs)){
-                # reshaping the env => taking care of the NAs
-
-                is_na_current = !is.finite(lhs[[i]]) | cpppar_which_na_inf_mat(rhs[[j]], nthreads)$is_na_inf
-
-                my_fml = xpd(..lhs ~ ..rhs, ..lhs = lhs_names[i], ..rhs = fml_rhs_all[[j]])
-
-                if(any(is_na_current)){
-                    my_env = reshape_env(env, which(!is_na_current), lhs = lhs[[i]], rhs = rhs[[j]], fml = my_fml)
-                } else {
-                    # We still need to check the RHS (only 0/1)
-                    my_env = reshape_env(env, lhs = lhs[[i]], rhs = rhs[[j]], fml = my_fml, check_lhs = TRUE)
-                }
-
-                my_res = feglm.fit(env = my_env)
-
-                res[[index_2D_to_1D(i, j, n_rhs)]] = my_res
-            }
-        }
-
-        # Meta information for fixest_multi
-
-        index = list(lhs = n_lhs, rhs = n_rhs)
-        all_names = list(lhs = lhs_names, rhs = rhs_names)
-
-        # result
-        res_multi = setup_multi(index, all_names, res)
-
-        return(res_multi)
-
+        return(res)
     }
 
     #
@@ -2516,81 +2294,10 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 
 	do_split = get("do_split", env)
 	if(do_split){
-	    split = get("split", env)
-	    split.full = get("split.full", env)
-	    split.items = get("split.items", env)
-	    split.name = get("split.name", env)
 
-	    assign("do_split", FALSE, env)
+	    res = multi_split(env, feNmlm)
 
-	    res_all = list()
-	    n_split = length(split.items)
-	    index = NULL
-	    all_names = NULL
-	    is_multi = FALSE
-	    for(i in 0:n_split){
-	        if(i == 0){
-	            if(split.full){
-	                my_env = reshape_env(env)
-	                my_res = feNmlm(env = my_env)
-	            } else {
-	                next
-	            }
-	        } else {
-	            my_res = feNmlm(env = reshape_env(env, obs2keep = which(split == i)))
-	        }
-
-	        if("fixest_multi" %in% class(my_res)){
-
-	            if(is_multi == FALSE){
-	                # setup in the first iteration
-	                is_multi = TRUE
-	                meta = attr(my_res, "meta")
-	                index = meta$index
-	                all_names = meta$all_names
-	            }
-
-	            my_res = attr(my_res, "data")
-	        }
-
-	        if(is_multi){
-	            for(m in 1:length(my_res)){
-	                res_all[[length(res_all) + 1]] = my_res[[m]]
-	            }
-	        } else {
-	            res_all[[length(res_all) + 1]] = my_res
-	        }
-
-	    }
-
-	    if(split.full){
-	        split.items = c("full_sample", split.items)
-	    }
-
-	    if(is.null(index)){
-	        index = list(sample = length(res_all))
-	        all_names = list(sample = split.items)
-
-	    } else {
-	        index_tmp = list(sample = length(split.items))
-	        for(i in seq_along(index)){
-	            index_tmp[[names(index)[i]]] = index[[i]]
-	        }
-	        index = index_tmp
-
-	        all_names_tmp = list(sample = split.items)
-	        for(i in seq_along(all_names)){
-	            all_names_tmp[[names(all_names)[i]]] = all_names[[i]]
-	        }
-	        all_names = all_names_tmp
-	    }
-
-	    all_names$split.name = split.name
-
-	    # result
-	    res_multi = setup_multi(index, all_names, res_all)
-
-	    return(res_multi)
+	    return(res)
 	}
 
 	#
@@ -2600,89 +2307,10 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	do_multi_lhs = get("do_multi_lhs", env)
 	do_multi_rhs = get("do_multi_rhs", env)
 	if(do_multi_lhs || do_multi_rhs){
-	    assign("do_multi_lhs", FALSE, env)
-	    assign("do_multi_rhs", FALSE, env)
 
-	    nthreads = get("nthreads", env)
+	    res = multi_LHS_RHS(env, feNmlm)
 
-	    # IMPORTANT NOTE:
-	    # contrary to feols, the preprocessing is only a small fraction of the
-	    # computing time in ML models
-	    # Therefore we don't need to optimize processing as hard as in FEOLS
-	    # because the gains are only marginal
-
-	    fml = get("fml", env)
-
-	    # LHS
-	    lhs_names = get("lhs_names", env)
-	    lhs = get("lhs", env)
-
-	    if(do_multi_lhs == FALSE){
-	        lhs = list(lhs)
-	    }
-
-	    # RHS
-	    if(do_multi_rhs){
-	        fml_rhs_all = get("fml_rhs_all", env)
-	        is_cumul = get("is_cumul", env)
-	        fake_intercept = get("fake_intercept", env)
-	        data = get("data", env)
-
-	        rhs = list()
-	        for(i in seq_along(fml_rhs_all)){
-	            # We evaluate the extra data and check the NA pattern
-
-	            my_fml = xpd(lhs ~ ..rhs, ..rhs = fml_rhs_all[[i]])
-	            rhs_current = try(fixest_model_matrix(my_fml, data, fake_intercept = fake_intercept), silent = TRUE)
-	            if("try-error" %in% class(rhs_current)){
-	                stop("Evaluation of the RHS raises an error (concerns ", deparse_long(my_fml[[3]]), "):\n", rhs_current)
-	            }
-
-	            rhs[[i]] = rhs_current
-	        }
-	    } else {
-	        fml_rhs_all = list(xpd(~ ..rhs, ..rhs = deparse_long(fml[[3]])))
-	        is_cumul = FALSE
-	        linear.mat = get("linear.mat", env)
-	        rhs = list(linear.mat)
-	    }
-
-	    n_lhs = length(lhs)
-	    n_rhs = length(rhs)
-	    res = vector("list", n_lhs * n_rhs)
-
-	    rhs_names = sapply(fml_rhs_all, deparse_long)
-
-	    for(i in seq_along(lhs)){
-	        for(j in seq_along(rhs)){
-	            # reshaping the env => taking care of the NAs
-
-	            is_na_current = !is.finite(lhs[[i]]) | cpppar_which_na_inf_mat(rhs[[j]], nthreads)$is_na_inf
-
-	            my_fml = xpd(..lhs ~ ..rhs, ..lhs = lhs_names[i], ..rhs = fml_rhs_all[[j]])
-
-	            if(any(is_na_current)){
-	                my_env = reshape_env(env, which(!is_na_current), lhs = lhs[[i]], rhs = rhs[[j]], fml = my_fml)
-	            } else {
-	                # We still need to check the RHS (only 0/1)
-	                my_env = reshape_env(env, lhs = lhs[[i]], rhs = rhs[[j]], fml = my_fml, check_lhs = TRUE)
-	            }
-
-	            my_res = feNmlm(env = my_env)
-
-	            res[[index_2D_to_1D(i, j, n_rhs)]] = my_res
-	        }
-	    }
-
-	    # Meta information for fixest_multi
-
-	    index = list(lhs = n_lhs, rhs = n_rhs)
-	    all_names = list(lhs = lhs_names, rhs = rhs_names)
-
-	    # result
-	    res_multi = setup_multi(index, all_names, res)
-
-	    return(res_multi)
+	    return(res)
 
 	}
 
@@ -3102,8 +2730,143 @@ format_error_msg = function(x, origin){
 }
 
 
+####
+#### Multiple estimation tools ####
+####
 
 
+
+multi_split = function(env, fun){
+    split = get("split", env)
+    split.full = get("split.full", env)
+    split.items = get("split.items", env)
+    split.name = get("split.name", env)
+
+    assign("do_split", FALSE, env)
+
+    res_all = list()
+    n_split = length(split.items)
+    index = NULL
+    all_names = NULL
+    is_multi = FALSE
+    for(i in 0:n_split){
+        if(i == 0){
+            if(split.full){
+                my_env = reshape_env(env)
+                my_res = fun(env = my_env)
+            } else {
+                next
+            }
+        } else {
+            my_res = fun(env = reshape_env(env, obs2keep = which(split == i)))
+        }
+
+        res_all[[length(res_all) + 1]] = my_res
+    }
+
+    if(split.full){
+        split.items = c("full_sample", split.items)
+    }
+
+    index = list(sample = length(res_all))
+    all_names = list(sample = split.items, split.name = split.name)
+
+    # result
+    res_multi = setup_multi(index, all_names, res_all)
+
+    return(res_multi)
+}
+
+
+
+multi_LHS_RHS = function(env, fun){
+    do_multi_lhs = get("do_multi_lhs", env)
+    do_multi_rhs = get("do_multi_rhs", env)
+
+    assign("do_multi_lhs", FALSE, env)
+    assign("do_multi_rhs", FALSE, env)
+
+    nthreads = get("nthreads", env)
+
+    # IMPORTANT NOTE:
+    # contrary to feols, the preprocessing is only a small fraction of the
+    # computing time in ML models
+    # Therefore we don't need to optimize processing as hard as in FEOLS
+    # because the gains are only marginal
+
+    fml = get("fml", env)
+
+    # LHS
+    lhs_names = get("lhs_names", env)
+    lhs = get("lhs", env)
+
+    if(do_multi_lhs == FALSE){
+        lhs = list(lhs)
+    }
+
+    # RHS
+    if(do_multi_rhs){
+        fml_rhs_all = get("fml_rhs_all", env)
+        is_cumul = get("is_cumul", env)
+        fake_intercept = get("fake_intercept", env)
+        data = get("data", env)
+
+        rhs = list()
+        for(i in seq_along(fml_rhs_all)){
+            # We evaluate the extra data and check the NA pattern
+
+            my_fml = xpd(lhs ~ ..rhs, ..rhs = fml_rhs_all[[i]])
+            rhs_current = try(fixest_model_matrix(my_fml, data, fake_intercept = fake_intercept), silent = TRUE)
+            if("try-error" %in% class(rhs_current)){
+                stop_up("Evaluation of the RHS raises an error (concerns ", deparse_long(my_fml[[3]]), "):\n", rhs_current)
+            }
+
+            rhs[[i]] = rhs_current
+        }
+    } else {
+        fml_rhs_all = list(xpd(~ ..rhs, ..rhs = deparse_long(fml[[3]])))
+        is_cumul = FALSE
+        linear.mat = get("linear.mat", env)
+        rhs = list(linear.mat)
+    }
+
+    n_lhs = length(lhs)
+    n_rhs = length(rhs)
+    res = vector("list", n_lhs * n_rhs)
+
+    rhs_names = sapply(fml_rhs_all, deparse_long)
+
+    for(i in seq_along(lhs)){
+        for(j in seq_along(rhs)){
+            # reshaping the env => taking care of the NAs
+
+            is_na_current = !is.finite(lhs[[i]]) | cpppar_which_na_inf_mat(rhs[[j]], nthreads)$is_na_inf
+
+            my_fml = xpd(..lhs ~ ..rhs, ..lhs = lhs_names[i], ..rhs = fml_rhs_all[[j]])
+
+            if(any(is_na_current)){
+                my_env = reshape_env(env, which(!is_na_current), lhs = lhs[[i]], rhs = rhs[[j]], fml = my_fml)
+            } else {
+                # We still need to check the RHS (only 0/1)
+                my_env = reshape_env(env, lhs = lhs[[i]], rhs = rhs[[j]], fml = my_fml, check_lhs = TRUE)
+            }
+
+            my_res = fun(env = my_env)
+
+            res[[index_2D_to_1D(i, j, n_rhs)]] = my_res
+        }
+    }
+
+    # Meta information for fixest_multi
+
+    index = list(lhs = n_lhs, rhs = n_rhs)
+    all_names = list(lhs = lhs_names, rhs = rhs_names)
+
+    # result
+    res_multi = setup_multi(index, all_names, res)
+
+    return(res_multi)
+}
 
 
 
