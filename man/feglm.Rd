@@ -121,6 +121,8 @@ fepois(
 
 \item{fixef}{Character vector. The names of variables to be used as fixed-effects. These variables should contain the identifier of each observation (e.g., think of it as a panel identifier). Note that the recommended way to include fixed-effects is to insert them directly in the formula.}
 
+\item{fixef.rm}{Can be equal to "perfect" (default), "singleton", "both" or "none". Controls which observations are to be removed. If "perfect", then observations having a fixed-effect with perfect fit (e.g. only 0 outcomes in Poisson estimations) will be removed. If "singleton", all observations for which a fixed-effect appears only once will be removed. The meaning of "both" and "none" is direct.}
+
 \item{fixef.tol}{Precision used to obtain the fixed-effects. Defaults to \code{1e-6}. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations.}
 
 \item{fixef.iter}{Maximum number of iterations in fixed-effects algorithm (only in use for 2+ fixed-effects). Default is 10000.}

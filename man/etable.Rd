@@ -32,22 +32,21 @@ etable(
   signifCode,
   label,
   float,
-  subtitles,
+  subtitles = list("auto"),
   fixef_sizes = FALSE,
   fixef_sizes.simplify = TRUE,
-  yesNo = "Yes",
   keepFactors = TRUE,
   family,
   powerBelow = -5,
   interaction.combine = " $\\\\times $ ",
   depvar,
-  style = list(),
+  style = NULL,
   notes = NULL,
   group = NULL,
   extraline = NULL,
-  tablefoot = TRUE,
   placement = "htbp",
-  drop.section = NULL
+  drop.section = NULL,
+  poly_dict = c("", " square", " cube")
 )
 
 esttex(
@@ -73,21 +72,20 @@ esttex(
   convergence,
   signifCode = c(`***` = 0.01, `**` = 0.05, `*` = 0.1),
   label,
-  subtitles,
+  subtitles = list("auto"),
   fixef_sizes = FALSE,
   fixef_sizes.simplify = TRUE,
-  yesNo = "Yes",
   keepFactors = TRUE,
   family,
   powerBelow = -5,
   interaction.combine = " $\\\\times $ ",
-  style = list(),
+  style = NULL,
   notes = NULL,
   group = NULL,
-  tablefoot = TRUE,
   extraline = NULL,
   placement = "htbp",
-  drop.section = NULL
+  drop.section = NULL,
+  poly_dict = c("", " square", " cube")
 )
 
 esttable(
@@ -108,11 +106,12 @@ esttable(
   fitstat,
   convergence,
   signifCode = c(`***` = 0.001, `**` = 0.01, `*` = 0.05, . = 0.1),
-  subtitles,
+  subtitles = list("auto"),
   keepFactors = FALSE,
   family,
   group = NULL,
-  extraline = NULL
+  extraline = NULL,
+  poly_dict = c("", " square", " cube")
 )
 
 setFixest_etable(
@@ -134,11 +133,10 @@ setFixest_etable(
   powerBelow = -5,
   interaction.combine = " $\\\\times $ ",
   depvar,
-  style = list(),
+  style = NULL,
   notes = NULL,
   group = NULL,
   extraline = NULL,
-  tablefoot = TRUE,
   placement = "htbp",
   drop.section = NULL,
   reset = FALSE
@@ -193,13 +191,11 @@ getFixest_etable()
 
 \item{float}{(Tex only.) Logical. By default, if the argument \code{title} or \code{label} is provided, it is set to \code{TRUE}. Otherwise, it is set to \code{FALSE}.}
 
-\item{subtitles}{Character vector of the same length as the number of models to be displayed. If provided, subtitles are added underneath the dependent variable name.}
+\item{subtitles}{Character vector or list. The elements should be of length 1 or of the same length as the number of models. If a list, the names of the list will be displayed on the leftmost column. By default it is equal to \code{list("auto")} which means that if the object is a split sample estimation, the sample will be automatically added as a sub-title.}
 
 \item{fixef_sizes}{(Tex only.) Logical, default is \code{FALSE}. If \code{TRUE} and fixed-effects were used in the models, then the number of "individuals" per fixed-effect dimension is also displayed.}
 
 \item{fixef_sizes.simplify}{Logical, default is \code{TRUE}. Only used if \code{fixef_sizes = TRUE}. If \code{TRUE}, the fixed-effects sizes will be displayed in parentheses instead of in a separate line if there is no ambiguity (i.e. if the size is constant across models).}
-
-\item{yesNo}{(Tex only.) A character vector of length 1 or 2. Default is \code{c("Yes", "No")}. This is the message displayed when a given fixed-effect is (or is not) included in a regression. If \code{yesNo} is of length 1, then the second element is the empty string.}
 
 \item{keepFactors}{Logical, default is \code{TRUE}. If \code{FALSE}, then factor variables are displayed as fixed-effects and no coefficient is shown.}
 
@@ -211,7 +207,7 @@ getFixest_etable()
 
 \item{depvar}{(Data frame only.) Logical, default is missing. Whether a first line containing the dependent variables should be shown. By default, the dependent variables are shown only if they differ across models or if the argumen \code{file} is not missing.}
 
-\item{style}{A list. You can change the general style of the table with this argument. It should be of the form \code{style = list(keyword="key1:value1;key2:value2")} etc. The available keywords are \code{lines} (to manage the type of lines appearing in the table), and \code{depvar}, \code{model}, \code{var}, \code{fixef}, \code{slopes}, \code{fixef.sizes}, \code{stats} and \code{notes}. Most of these keywords accept the key \code{title:} which affects the title appearing just before the section. Eg to drop the \emph{Variables} header, just use \code{style=list("title:")}. Note that if you use \code{style=list("title: ")} (note the space after ":"), then an empty line will still be there. The keywords fixef, slopes and fixef.sizes also accept the keys \code{prefix} and \code{suffix}. E.g. if \code{style=list(fixef="suffix: FE")}, then there will be no header showing but the text " FE" will be appended to the ficed-effects variable names. The keys accepted in \code{lines} are \code{top}, \code{bottom}, \code{foot} and \code{sep}.}
+\item{style}{An object created by the function \code{\link[fixest]{style}}. It represents the style of the Latex table, see the documentation of \code{\link[fixest]{style}}.}
 
 \item{notes}{Character vector. If provided, a \code{"notes"} section will be added at the end right after the end of the table, containing the text of this argument. Note that if it is a vector, it will be collapsed with new lines.}
 
@@ -219,11 +215,11 @@ getFixest_etable()
 
 \item{extraline}{A list. The list elements should be either a single logical or a vector of the same length as the number of models. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extraline=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the style with the \code{title} and \code{where} keywords in curly brackets. For example \code{group=list("{title:Sub-sample; where:stats}By age"=c("<20 yo", "all", ">50 yo"))} will add an extra line right before with "Sub-sample" written in it, and the extraline information will appear after the statistics section. The keyword where can be equal to either \code{var} (default), \code{fixef} or \code{stats}.}
 
-\item{tablefoot}{Logical, default is \code{TRUE}. Whether to display the table footer containing the information on the way the standard-errors where computed and the meaning of the significance codes.}
-
 \item{placement}{(Tex only.) Character string giving the position of the float in Latex. Default is "htbp". It must consist of only the characters 'h', 't', 'b', 'p', 'H' and '!'. Reminder: h: here; t: top; b: bottom; p: float page; H: definitely here; !: prevents Latex to look for other positions. Note that it can be equal to the empty string (and you'll get the default placement).}
 
 \item{drop.section}{(Tex only.) Character vector which can be of length 0 (i.e. equal to \code{NULL}). Can contain the values "fixef", "slopes" or "stats". It would drop, respectively, the fixed-effects section, the variables with varying slopes section or the fit statistics section.}
+
+\item{poly_dict}{Character vector, default is \code{c("", " square", " cube")}. When polynomials are used with the function \code{\link[stats]{poly}}, the variables are automatically renamed and \code{poly_dict} rules the display of the power. For powers greater than the number of elements of the vector, the value displayed is \code{$^{pow}$} in Latex and \code{^ pow} in the R console.}
 
 \item{reset}{(\code{setFixest_etable} only.) Logical, default is \code{FALSE}. If \code{TRUE}, this will reset all the default values that were already set by the user in previous calls.}
 }
