@@ -69,7 +69,7 @@ setup_multi = function(index, all_names, data){
     meta$tree$obs = 1:nrow(tree)
 
     res_multi = list()
-    first_dim = all_names[[1]]
+    first_dim = all_names[[names(index)[1]]]
     for(i in seq_along(first_dim)){
         res_multi[[first_dim[i]]] = 1
     }
@@ -158,7 +158,7 @@ summary.fixest_multi = function(object, type = "short", ...){
         }
         res$i = NULL
 
-        signifCode = c(" ***"=0.001, " **"=0.01, " *"=0.05, " ."=0.1)
+        signifCode = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.1)
 
         ct_all = list()
         for(i in seq_along(data)){
@@ -269,61 +269,28 @@ print.fixest_multi = function(x, ...){
 
     dict_title = c("sample" = "Sample", "lhs" = "Dep. var.", "rhs" = "Expl. vars.")
 
-    if(depth == 3){
+    headers = list()
+    headers[[1]] = function(d, i) cat(dict_title[d], ": ", all_names[[d]][i], "\n", sep = "")
+    headers[[2]] = function(d, i) cat("\n### ", dict_title[d], ": ", all_names[[d]][i], "\n\n", sep = "")
+    headers[[3]] = function(d, i) cat("\n\n# ", toupper(dict_title[d]), ": ", all_names[[d]][i], "\n\n", sep = "")
+    headers[[4]] = function(d, i) cat("\n\n#\n# ", toupper(dict_title[d]), ": ", all_names[[d]][i], "\n#\n\n", sep = "")
 
-        for(i in 1:index[[1]]){
-            cat("\n\n# ", toupper(dict_title[names(index)[1]]), ": ", all_names[[1]][i], "\n\n", sep = "")
-
-            for(j in 1:index[[2]]){
-                cat("\n### ", dict_title[names(index)[2]], ": ", all_names[[2]][j], "\n\n", sep = "")
-
-                for(k in 1:index[[3]]){
-                    cat(dict_title[names(index)[3]], ": ", all_names[[3]][k], "\n", sep = "")
-
-                    obs = tree$obs[tree[, 1] == i & tree[, 2] == j & tree[, 3] == k]
-
-                    if(is_short){
-                        myPrintCoefTable(coeftable = coeftable(data[[obs]], ...), show_signif = FALSE)
-                        if(k != index[[3]]) cat("---\n")
-                    } else {
-                        print(data[[obs]])
-                        if(k != index[[3]]) cat("\n")
-                    }
-                }
+    for(i in 1:nrow(tree)){
+        for(j in 1:depth){
+            d = names(index)[j]
+            if(i == 1 || tree[i - 1, j] != tree[i, j]){
+                headers[[depth - j + 1]](d, tree[i, j])
             }
         }
 
-    } else if(depth == 2){
-        for(i in 1:index[[1]]){
-            cat("\n### ", dict_title[names(index)[1]], ": ", all_names[[1]][i], "\n\n", sep = "")
-
-            for(j in 1:index[[2]]){
-                cat(dict_title[names(index)[2]], ": ", all_names[[2]][j], "\n", sep = "")
-
-                obs = tree$obs[tree[, 1] == i & tree[, 2] == j]
-                if(is_short){
-                    myPrintCoefTable(coeftable = coeftable(data[[obs]], ...), show_signif = FALSE)
-                    if(j != index[[2]]) cat("---\n")
-                } else {
-                    print(data[[obs]])
-                    if(j != index[[2]]) cat("\n")
-                }
-            }
+        if(is_short){
+            myPrintCoefTable(coeftable = coeftable(data[[i]], ...), show_signif = FALSE)
+            if(tree[i, depth] != index[[depth]]) cat("---\n")
+        } else {
+            print(data[[i]])
+            if(tree[i, depth] != index[[depth]]) cat("\n")
         }
-    } else {
-        for(i in 1:index[[1]]){
-            cat(dict_title[names(index)[1]], ": ", all_names[[1]][i], "\n", sep = "")
 
-            obs = tree$obs[tree[, 1] == i]
-
-            if(is_short){
-                myPrintCoefTable(coeftable = coeftable(data[[obs]], ...), show_signif = FALSE)
-                if(i != index[[1]]) cat("---\n")
-            } else {
-                print(data[[obs]])
-                if(i != index[[1]]) cat("\n")
-            }
-        }
     }
 
 }
