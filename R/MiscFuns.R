@@ -1255,190 +1255,6 @@ plot.fixest.fixef = function(x, n = 5, ...){
 }
 
 
-
-#' Finds observations to be removed from ML estimation with fixed-effects
-#'
-#' For Poisson, Negative Binomial or Logit estimations with fixed-effects, when the dependent variable is only equal to 0 (or 1 for Logit) for one fixed-effect value this leads to a perfect fit for that fixed-effect value by setting its associated fixed-effect coefficient to \code{-Inf}. Thus these observations need to be removed before estimation. This function gives the observations to be removed. Note that by default the function \code{\link[fixest]{femlm}} or \code{\link[fixest]{feglm}} drops them before performing the estimation.
-#'
-#' @param fml A formula containing the dependent variable and the fixed-effects. It can be of the type: \code{y ~ fixef_1 + fixef_2} or \code{y ~ x1 | fixef_1 + fixef_1} (in which case variables before the pipe are ignored).
-#' @param data A data.frame containing the variables in the formula.
-#' @param family Character scalar: either \dQuote{poisson} (default), \dQuote{negbin} or \dQuote{logit}.
-#'
-#' @return
-#' It returns an integer vector of observations to be removed. If no observations are to be removed, an empty integer vector is returned. In both cases, it is of class \code{fixest.obs2remove}.
-#' The vector has an attribute \code{fixef} which is a list giving the IDs of the fixed-effects that have been removed, for each fixed-effect dimension.
-#'
-#' @examples
-#'
-#' base = iris
-#' # v6: Petal.Length with only 0 values for 'setosa'
-#' base$v6 = base$Petal.Length
-#' base$v6[base$Species == "setosa"] = 0
-#'
-#' (x = obs2remove(v6 ~ Species, base))
-#' attr(x, "fixef")
-#'
-#' # The two results are identical:
-#' res_1 = femlm(v6 ~ Petal.Width | Species, base)
-#' # => note + obsRemoved is created
-#'
-#' res_2 = femlm(v6 ~ Petal.Width | Species, base[-x, ])
-#' # => no note because observations are removed before
-#'
-#' esttable(res_1, res_2)
-#'
-#' all(res_1$obsRemoved == x)
-#'
-obs2remove = function(fml, data, family = c("poisson", "negbin", "logit")){
-	# in the formula, the fixed-effects must be there:
-	# either y ~ fixef_1 + fixef_2
-	# either y ~ x1 + x2 | fixef_1 + fixef_2
-
-	#
-	# CONTROLS
-	#
-
-	# FAMILY
-
-	family = match.arg(family)
-
-	# FML
-
-	if(!"formula" %in% class(fml) || length(fml) != 3){
-		stop("Argument 'fml' must be a formula of the type: 'y ~ x1 | fixef_1 + fixef_2' or of the type 'y ~ fixef_1 + fixef_2'.")
-	}
-
-	FML = Formula::Formula(fml)
-	n_rhs = length(FML)[2]
-
-	if(n_rhs > 2){
-		stop("Argument 'fml' must be a formula of the type: 'y ~ x1 | fixef_1 + fixef_2' or of the type 'y ~ fixef_1 + fixef_2'.")
-	}
-
-	# DATA
-
-	if(is.matrix(data)){
-		if(is.null(colnames(data))){
-			stop("If argument data is to be a matrix, its columns must be named.")
-		}
-		data = as.data.frame(data)
-	}
-	# The conversion of the data (due to data.table)
-	if(!"data.frame" %in% class(data)){
-		stop("The argument 'data' must be a data.frame or a matrix.")
-	}
-	if("data.table" %in% class(data)){
-		# this is a local change only
-		class(data) = "data.frame"
-	}
-
-	dataNames = names(data)
-
-	# Extracting the variables
-	vars_left = all.vars(formula(FML, lhs=1, rhs=0))
-	cluster_fml = formula(FML, lhs=0, rhs=n_rhs)
-	vars_clusters = all.vars(cluster_fml)
-
-	if(length(left_missing <- setdiff(vars_left, dataNames)) > 0){
-		stop("Left hand side could not be evaluated, following variables are missing from the data: ", paste0(left_missing, collapse = ", "), ".")
-	}
-
-	if(length(right_missing <- setdiff(vars_clusters, dataNames)) > 0){
-		stop("The clsuters could not be evaluated, following variables are missing from the data: ", paste0(right_missing, collapse = ", "), ".")
-	}
-
-	# Evaluation variables
-	lhs = as.vector(eval(fml[[2]], data))
-	cluster_mat = model.frame(cluster_fml, data)
-	cluster_name = names(cluster_mat)
-
-	#
-	# -- CORE --
-	#
-
-	Q = length(cluster_name)
-	dummyOmises = list()
-	obs2remove = c()
-	for(q in 1:Q){
-
-		dum_raw = cluster_mat[, q]
-
-		# thisNames = getItems(dum_raw)
-		# dum = quickUnclassFactor(dum_raw)
-		dum_all = quickUnclassFactor(dum_raw, addItem = TRUE)
-		dum = dum_all$x
-		thisNames = dum_all$items
-		k = length(thisNames)
-
-		# We delete "all zero" outcome
-		sum_y_clust = cpp_tapply_vsum(k, lhs, dum)
-		n_perClust = cpp_table(k, dum)
-
-		if(family %in% c("poisson", "negbin")){
-			qui = which(sum_y_clust == 0)
-		} else if(family == "logit"){
-			qui = which(sum_y_clust == 0 | sum_y_clust == n_perClust)
-		}
-
-		if(length(qui > 0)){
-			# We first delete the data:
-			dummyOmises[[q]] = thisNames[qui]
-			obs2remove = unique(c(obs2remove, which(dum %in% qui)))
-		} else {
-			dummyOmises[[q]] = character(0)
-		}
-	}
-
-	names(dummyOmises) = cluster_name
-
-	if(length(obs2remove) == 0){
-		print("No observation to be removed.")
-		obs2remove = integer(0)
-		class(obs2remove) = "fixest.obs2remove"
-		return(invisible(obs2remove))
-	}
-
-	class(obs2remove) = "fixest.obs2remove"
-	attr(obs2remove, "family") = family
-	attr(obs2remove, "fixef") = dummyOmises
-
-	return(obs2remove)
-}
-
-
-
-#' Summary method for fixest.obs2remove objects
-#'
-#' This function synthesizes the information of function \code{\link[fixest]{obs2remove}}. It reports the number of observations to be removed as well as the number of fixed-effects removed per fixed-effect dimension.
-#'
-#' @method summary fixest.obs2remove
-#'
-#' @param object A \code{fixest.obs2remove} object obtained from function \code{\link[fixest]{obs2remove}}.
-#' @param ... Not currently used.
-#'
-#'
-#' @examples
-#' base = iris
-#' # v6: Petal.Length with only 0 values for 'setosa'
-#' base$v6 = base$Petal.Length
-#' base$v6[base$Species == "setosa"] = 0
-#'
-#' x = obs2remove(v6 ~ Species, base)
-#' summary(x)
-#'
-summary.fixest.obs2remove = function(object, ...){
-
-	if(length(object) == 0){
-		print("No observation to be removed.")
-	} else {
-		cat(length(object), " observations removed because of only zero", ifelse(attr(object, "family") == "logit", ", or only one,", ""), " outcomes.\n", sep = "")
-		cluster = attr(object, "fixef")
-		cat("# fixed-effects removed: ", paste0(names(cluster), ": ", lengths(cluster), collapse = ", "), ".", sep = "")
-	}
-
-}
-
-
 #' Collinearity diagnostics for \code{fixest} objects
 #'
 #' In some occasions, the optimization algorithm of \code{\link[fixest]{femlm}} may fail to converge, or the variance-covariance matrix may not be available. The most common reason of why this happens is colllinearity among variables. This function helps to find out which set of variables is problematic.
@@ -1578,12 +1394,8 @@ collinearity = function(x, verbose){
 	    linear.matrix = linear.matrix[-x$obsRemoved, , drop = FALSE]
 	}
 
-	if(!is.null(x$obsKept)){
-	    linear.matrix = linear.matrix[x$obsKept, , drop = FALSE]
-	}
-
-	if(!is.null(x$obsKept_bis)){
-	    linear.matrix = linear.matrix[x$obsKept_bis, , drop = FALSE]
+	for(i in seq_along(x$obs_selection)){
+	    linear.matrix = linear.matrix[x$obs_selection[[i]], , drop = FALSE]
 	}
 
 	if(isLinear){
@@ -5109,36 +4921,26 @@ isVector = function(x){
     return(FALSE)
 }
 
-# fill_with_na = function(x, obsRemoved){
-#     if(is.null(obsRemoved)) return(x)
-#
-#     res = rep(NA, length(x) + length(obsRemoved))
-#     res[-obsRemoved] = x
-#     res
-# }
 
 fill_with_na = function(x, object){
-    if(is.null(object$obsRemoved) && is.null(object$obsKept)){
+    if(is.null(object$obsRemoved) && is.null(object$obs_selection)){
         return(x)
     }
 
     res = rep(NA, object$nobs_origin)
+    qui = 1:object$nobs_origin
+
     if(!is.null(object$obsRemoved)){
-        if(!is.null(object$obsKept)){
-            if(!is.null(object$obsKept_bis)){
-                res[-object$obsRemoved][object$obsKept][object$obsKept_bis] = x
-            } else {
-                res[-object$obsRemoved][object$obsKept] = x
-            }
-        } else {
-            res[-object$obsRemoved] = x
-        }
-    } else if(!is.null(object$obsKept_bis)){
-        res[object$obsKept][object$obsKept_bis] = x
-    } else {
-        res[object$obsKept] = x
+        qui = qui[-object$obsRemoved]
     }
 
+    for(i in seq_along(object$obs_selection)){
+        qui = qui[object$obs_selection[[i]]]
+    }
+
+    res[qui] = x
+
+    return(res)
 }
 
 
@@ -6396,12 +6198,8 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 							data = data[, all_vars, drop = FALSE]
 						}
 
-						if(length(object$obsKept) > 0){
-						    data = data[object$obsKept, , drop = FALSE]
-						}
-
-						if(length(object$obsKept_bis) > 0){
-						    data = data[object$obsKept_bis, , drop = FALSE]
+						for(i in seq_along(object$obs_selection)){
+						    data = data[object$obs_selection[[i]], , drop = FALSE]
 						}
 
 						# Final check: NAs
@@ -6496,21 +6294,13 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 			if(n_per_cluster[1] == object$nobs_origin){
 				# We modify the clusters
 				for(i in 1:nway){
-				    # 3 cases: either obsRemoved and/or obsKept and possibly obsKept_bis
+				    # first we take care of obsRemoved
 				    if(!is.null(object$obsRemoved)){
-				        if(!is.null(object$obsKept)){
-				            if(!is.null(object$obsKept_bis)){
-				                cluster[[i]] = cluster[[i]][-object$obsRemoved][object$obsKept][object$obsKept_bis]
-				            } else {
-				                cluster[[i]] = cluster[[i]][-object$obsRemoved][object$obsKept]
-				            }
-				        } else {
-				            cluster[[i]] = cluster[[i]][-object$obsRemoved]
-				        }
-				    } else if(!is.null(object$obsKept_bis)){
-				        cluster[[i]] = cluster[[i]][object$obsKept][object$obsKept_bis]
-				    } else {
-				        cluster[[i]] = cluster[[i]][object$obsKept]
+				        cluster[[i]] = cluster[[i]][-object$obsRemoved]
+				    }
+
+				    for(j in seq_along(object$obs_selection)){
+				        cluster[[i]] = cluster[[i]][object$obs_selection[[j]]]
 				    }
 
 				}
@@ -7108,13 +6898,9 @@ model.matrix.fixest = function(object, data, na.rm = TRUE, ...){
 	        linear.mat = linear.mat[-object$obsRemoved, , drop = FALSE]
 	    }
 
-        if(!is.null(object$obsKept)){
-            check_0 = TRUE
-            linear.mat = linear.mat[object$obsKept, , drop = FALSE]
-        }
-
-	    if(!is.null(object$obsKept_bis)){
-	        linear.mat = linear.mat[object$obsKept_bis, , drop = FALSE]
+	    for(i in seq_along(object$obs_selection)){
+	        check_0 = TRUE
+	        linear.mat = linear.mat[object$obs_selection[[i]], , drop = FALSE]
 	    }
 
 	} else if(na.rm){
