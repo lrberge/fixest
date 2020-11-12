@@ -13,13 +13,15 @@
   
   - Fix bug in the demeaning algorithm when two variables with varying slopes were identical.
   
-  - Fix bug in femlm/feNmlm when factor variables are removed after observations were removed.
+  - Fix bug in femlm/feNmlm when factor variables are removed due to the removal of some observations.
   
-  - In `summary`, fix bug when the argument `cluster` was equal to a formula with expressions and not a variable names (thanks to @edrubin [#55](https://github.com/lrberge/fixest/issues/55)).
+  - In `summary`, fix bug when the argument `cluster` was equal to a formula with expressions and not a variable name (thanks to @edrubin [#55](https://github.com/lrberge/fixest/issues/55)).
   
   - Fix bug when integers are present in the RHS (thanks to @zozotintin [#56](https://github.com/lrberge/fixest/issues/56)).
   
   - Fix bug when nb_FE >= 2 and the data was large (thanks to @zozotintin [#56](https://github.com/lrberge/fixest/issues/56)). 
+  
+  - Fix bug display of how the standard-errors were clustered in `etable`.
 
 #### Improvements of the internal algorithm
 
@@ -35,17 +37,33 @@
   
     * New arguments `split` and `fsplit`: you can now perform split sample estimations.
     
-    * Estimations for multiple left-hand-sides can be done at once.
+    * Estimations for multiple left-hand-sides can be done at once by wrapping the variables in `c()`.
     
-    * Stepwise estimation can be performed with the new stepwise functions.
+    * Stepwise estimations can be performed with the new stepwise functions (`sw`, `sw0`, `csw` and `csw0`).
     
-    * The object returned is of class `fixest_multi`. You can easily navigate through the results.
+    * The object returned is of class `fixest_multi`. You can easily navigate through the results with its subset methods.
+    
+#### New features in etable
+
+  - Major overhaul of the style argument. 
+  
+    * it can be set with the new function `style` that contains its own documentation. 
+    
+    * some `etable` arguments have been ported to the `style` function (`yesNo`, `tablefoot`).
+    
+    * new `tabular` arguments which allows to create `tabular*` tables (suggestion by @fostermeijer [#51](https://github.com/lrberge/fixest/issues/51)).
+
+  - polynomials are automatically renamed to facilitate comparison across models.
+  
+  - the labelling of models is enhanced when `rep.fixest` is used with different standard-errors (the model names are now "model INDEX.SUB-INDEX").
+  
+  - the argument `subtitles` has been improved, and now automatically displays the samples when split sample estimations are performed.
  
 #### New features
 
  - In all estimations:
     
-    * New argument `subset`.
+    * New arguments `subset`, `split`, `fsplit`.
 
 ## Changes in version 0.7.1 (27-10-2020)
 
