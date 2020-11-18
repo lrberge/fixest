@@ -5202,12 +5202,33 @@ fixest_fml_rewriter = function(fml){
                     fml_fixef = NULL
 
                 } else if(isPanel){
-                    fml_fixef = fml_maker(fml_parts[[2]])
 
-                    fixef_terms = attr(terms(fml_fixef), "term.labels")
-                    fixef_text = error_sender(expand_lags_internal(fixef_terms),
-                                              "Problem in the formula regarding lag/leads: ", clean = "__expand")
-                    fml_fixef = as.formula(paste("~", paste(fixef_text, collapse = "+")))
+                    fml_fixef = fml_maker(fml_parts[[2]])
+                    fml_fixef_text = deparse_long(fml_fixef)
+
+                    if(grepl("(l|d|f)\\(", fml_fixef_text)){
+                        # We need to make changes
+                        # 1st: for terms to work => we change ^ if present (sigh)
+
+                        do_sub = grepl("^", fml_fixef_text, fixed = TRUE)
+
+                        if(do_sub){
+                            fml_fixef = as.formula(gsub("^", "__impossible_var__", fml_fixef_text, fixed = TRUE))
+                        }
+
+                        fixef_terms = attr(terms(fml_fixef), "term.labels")
+                        fixef_text = error_sender(expand_lags_internal(fixef_terms),
+                                                  "Problem in the formula regarding lag/leads: ", clean = "__expand")
+
+                        if(do_sub){
+                            fixef_text = gsub("__impossible_var__", "^", fixef_text, fixed = TRUE)
+                        }
+
+                        fml_fixef = as.formula(paste("~", paste(fixef_text, collapse = "+")))
+
+                    }
+                } else {
+                    fml_fixef = fml_maker(fml_parts[[2]])
                 }
             }
 
