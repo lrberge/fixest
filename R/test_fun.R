@@ -124,3 +124,17 @@ test = function(x, y, type = "=", tol = 1e-6){
 
 }
 
+
+
+run_test = function(){
+    test_code = readLines("tests/fixest_tests.R")[-(1:20)]
+
+    parsed_code = parse(text = test_code)
+
+    eval(parsed_code)
+}
+
+
+
+
+
