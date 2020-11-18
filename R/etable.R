@@ -1160,6 +1160,28 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
                 }
             }
 
+            # We take care of raw powers
+            if(any(grepl("^I\\([^\\^]+\\^[[:digit:]]+\\)", var_left))){
+
+                # We clean only I(var^d)
+                qui_pow = grepl("^I\\([^\\^]+\\^[[:digit:]]+\\)$", var_left)
+                if(any(qui_pow)){
+                    pow_var = gsub("^I\\(|\\^.+$", "", var_left[qui_pow])
+                    pow_digit = as.numeric(gsub(".+\\^|\\)", "", var_left[qui_pow]))
+
+                    pow_digit_clean = poly_dict[pow_digit]
+                    if(isTex){
+                        pow_digit_clean[is.na(pow_digit_clean)] = paste0("$ ^{", pow_digit[is.na(pow_digit_clean)], "}")
+                    } else {
+                        pow_digit_clean[is.na(pow_digit_clean)] = paste0(" ^ ", pow_digit[is.na(pow_digit_clean)])
+                    }
+
+                    pow_named = paste0(dict_apply(pow_var, dict), pow_digit_clean)
+
+                    var[!qui][qui_pow] = new_var[!qui][qui_pow] = pow_named
+                }
+            }
+
             names(new_var) = names(var) = var_origin
             var_reorder_list[[m]] <- new_var
 
