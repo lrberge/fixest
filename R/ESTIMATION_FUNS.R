@@ -88,8 +88,7 @@
 #' \item{call}{The call of the function.}
 #' \item{method}{The method used to estimate the model.}
 #' \item{family}{The family used to estimate the model.}
-#' \item{fml_full}{(When relevant.) The "full" formula containing the linear part and the fixed-effects.}
-#' \item{nparams}{The number of parameters of the model.}
+#' \item{fml_all}{A list containing different parts of the formula. Always contain the linear formula. Then depending on the cases: \code{fixef}: the fixed-effects, \code{iv}: the IV part of the formula.
 #' \item{fixef_vars}{The names of each fixed-effect dimension.}
 #' \item{fixef_id}{The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.}
 #' \item{fixef_sizes}{The size of each fixed-effect (i.e. the number of unique identifierfor each fixed-effect dimension).}
@@ -605,7 +604,6 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, panel.id, fi
 	                X_all = do.call("cbind", my_rhs)
 	            }
 
-
 	            if(isFixef){
 	                # We batch demean
 
@@ -630,14 +628,11 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, panel.id, fi
 
 	            if(is_cumul){
 	                # we precompute the solution
-	                w = get("weights.value", my_env)
-
-	                # Changer cpp_sparse_products pour qu'il renvoie une liste quand y est une liste
 
 	                if(isFixef){
-	                    my_products = cpp_sparse_products(vars_demean$X_demean, w, vars_demean$y_demean, nthreads = nthreads)
+	                    my_products = cpp_sparse_products(vars_demean$X_demean, weights, vars_demean$y_demean, nthreads = nthreads)
 	                } else {
-	                    my_products = cpp_sparse_products(X_all, w, my_lhs, nthreads = nthreads)
+	                    my_products = cpp_sparse_products(X_all, weights, my_lhs, nthreads = nthreads)
 	                }
 
 	                xwx = my_products$XtX
@@ -657,7 +652,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, panel.id, fi
 	                    }
 
 	                    my_fml = xpd(..lhs ~ ..rhs, ..lhs = lhs_names[i_lhs], ..rhs = fml_rhs_all[[jj]])
-	                    current_env = reshape_env(my_env, lhs = my_lhs[[ii]], rhs = my_X, fml = my_fml)
+	                    current_env = reshape_env(my_env, lhs = my_lhs[[ii]], rhs = my_X, fml_linear = my_fml)
 
 	                    if(is_cumul){
 
@@ -1153,7 +1148,7 @@ check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights){
 #' \item{call}{The call of the function.}
 #' \item{method}{The method used to estimate the model.}
 #' \item{family}{The family used to estimate the model.}
-#' \item{fml_full}{(When relevant.) The "full" formula containing the linear part and the fixed-effects.}
+#' \item{fml_all}{A list containing different parts of the formula. Always contain the linear formula. Then, if relevant: \code{fixef}: the fixed-effects.
 #' \item{nparams}{The number of parameters of the model.}
 #' \item{fixef_vars}{The names of each fixed-effect dimension.}
 #' \item{fixef_id}{The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.}
@@ -1934,7 +1929,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, split, fsplit,
 #' \item{call}{The call of the function.}
 #' \item{method}{The method used to estimate the model.}
 #' \item{family}{The family used to estimate the model.}
-#' \item{fml_full}{(When relevant.) The "full" formula containing the linear part and the fixed-effects.}
+#' \item{fml_all}{A list containing different parts of the formula. Always contain the linear formula. Then, if relevant: \code{fixef}: the fixed-effects; \code{NL}: the non linear part of the formula.
 #' \item{nparams}{The number of parameters of the model.}
 #' \item{fixef_vars}{The names of each fixed-effect dimension.}
 #' \item{fixef_id}{The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.}
@@ -2337,7 +2332,7 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	params = get("params", env)
 
 	isFixef = get("isFixef", env)
-	onlyFixef = get("onlyFixef", env)
+	onlyFixef = !isLinear && !isNonLinear && isFixef
 
 	#
 	# Model 0 + theta init
@@ -2845,10 +2840,10 @@ multi_LHS_RHS = function(env, fun){
             my_fml = xpd(..lhs ~ ..rhs, ..lhs = lhs_names[i], ..rhs = fml_rhs_all[[j]])
 
             if(any(is_na_current)){
-                my_env = reshape_env(env, which(!is_na_current), lhs = lhs[[i]], rhs = rhs[[j]], fml = my_fml)
+                my_env = reshape_env(env, which(!is_na_current), lhs = lhs[[i]], rhs = rhs[[j]], fml_linear = my_fml)
             } else {
                 # We still need to check the RHS (only 0/1)
-                my_env = reshape_env(env, lhs = lhs[[i]], rhs = rhs[[j]], fml = my_fml, check_lhs = TRUE)
+                my_env = reshape_env(env, lhs = lhs[[i]], rhs = rhs[[j]], fml_linear = my_fml, check_lhs = TRUE)
             }
 
             my_res = fun(env = my_env)
