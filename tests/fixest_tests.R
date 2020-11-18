@@ -9,7 +9,7 @@
 
 # Some functions are not trivial to test properly though
 
-library(dreamerr) ; library(Formula) ; library(fixest)
+library(dreamerr) ; library(fixest)
 
 
 setFixest_notes(FALSE)
@@ -96,19 +96,19 @@ for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
 
                 # ad hoc modifications of the formula
                 if(model == "logit"){
-                    fml_fixest = update(Formula(fml_fixest), y_01 ~.)
-                    fml_stats = update(fml_stats, y_01 ~.)
+                    fml_fixest = xpd(y_01 ~ ..rhs, ..rhs = fml_fixest[[3]])
+                    fml_stats = xpd(y_01 ~ ..rhs, ..rhs = fml_stats[[3]])
 
                     # The estimations are OK, conv differences out of my control
                     if(id_fe %in% 8:9) tol = 0.5
 
                 } else if(model == "pois"){
-                    fml_fixest = update(Formula(fml_fixest), y_int_null ~.)
-                    fml_stats = update(fml_stats, y_int_null ~.)
+                    fml_fixest = xpd(y_int_null ~ ..rhs, ..rhs = fml_fixest[[3]])
+                    fml_stats = xpd(y_int_null ~ ..rhs, ..rhs = fml_stats[[3]])
 
                 } else if(model %in% c("negbin", "Gamma")){
-                    fml_fixest = update(Formula(fml_fixest), y_int ~.)
-                    fml_stats = update(fml_stats, y_int ~.)
+                    fml_fixest = xpd(y_int ~ ..rhs, ..rhs = fml_fixest[[3]])
+                    fml_stats = xpd(y_int ~ ..rhs, ..rhs = fml_stats[[3]])
                 }
 
                 adj = 1
