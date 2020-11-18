@@ -560,7 +560,7 @@ r2 = function(x, type = "all", full_names = FALSE){
 		            newdata = cbind(newdata, as.data.frame(x$slope_variables))
 		        }
 		        # Fe/slope only formula
-		        new_fml = as.formula(paste0("y~1|", gsub(".+\\|", "", as.character(x$fml_full)[3])))
+		        new_fml = merge_fml(y ~ 1, x$fml_all$fixef)
 
 		        # The fact that weights = x[["weights"]] is on purpose -- don't touch it
 		        # same for offset = x[["offset"]] -- otherwise error is thrown in fixest_env
@@ -1332,11 +1332,11 @@ collinearity = function(x, verbose){
         }
     }
 
-	linear_fml = formula(Formula(formula(x, "linear")), lhs=0, rhs=1)
+	linear_fml = fml_split(formula(x, "linear"), 2, split.lhs = TRUE)
 
-	rhs_fml = formula(Formula(formula(x, "linear")), lhs = 1, rhs = 1)
+	rhs_fml = fml_split(formula(x, "linear"), 1)
 	if(grepl("[^:]::[^:]", deparse_long(rhs_fml[[3]]))){
-	    new_fml = interact_fml(rhs_fml)
+	    new_fml = expand_interactions(rhs_fml)
 	    linear.varnames = all.vars(new_fml[[3]])
 	} else {
 	    linear.varnames = all.vars(rhs_fml[[3]])
@@ -1931,8 +1931,13 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
             stop("The formula must be of the type 'var1 + ... + var[N] ~ treat' or 'var1 + ... + var[N] ~ treat | post'.")
         }
 
-        fml = extract_pipe(fml_in)$fml
-        pipe = extract_pipe(fml_in)$pipe
+        fml_parts = fml_split(fml_in)
+
+        fml = fml_parts[[1]]
+        pipe = NULL
+        if(length(fml_parts) > 1){
+            pipe = fml_parts[[2]]
+        }
 
         #
         # Treat & post
@@ -3085,7 +3090,7 @@ fitstat = function(x, type, as.list = FALSE, ...){
 parse_macros = function(..., reset = FALSE, from_xpd = FALSE){
     set_up(1)
 
-    check_arg(..., "dotnames os formula | character vector no na | numeric scalar", .message = paste0("Each element of '...' must be a one-sided formula, and the name of each argument must start with two dots (ex: ", ifelse(from_xpd, "xpd(fml, ..ctrl = ~ x5 + x6)", "setFixest_fml(..ctrl = ~ x5 + x6)"), ").\nAlternatively it can be a character vector of variable names, or a numeric scalar."))
+    check_arg(..., "dotnames os formula | character vector no na | numeric scalar | class(call, name)", .message = paste0("Each element of '...' must be a one-sided formula, and the name of each argument must start with two dots (ex: ", ifelse(from_xpd, "xpd(fml, ..ctrl = ~ x5 + x6)", "setFixest_fml(..ctrl = ~ x5 + x6)"), ").\nAlternatively it can be a character vector of variable names, or a numeric scalar."))
 
     # We require os formulas instead of character strings because:
     # 1) I find it more handy
@@ -3116,6 +3121,10 @@ parse_macros = function(..., reset = FALSE, from_xpd = FALSE){
 
     for(v in names(dots)){
         fml_raw = dots[[v]]
+
+        if(any(c("call", "name") %in% class(fml_raw))){
+            fml_raw = deparse_long(fml_raw)
+        }
 
         if(!"formula" %in% class(fml_raw)){
             fml_raw = fml_raw[grepl("[[:alnum:]]", fml_raw)]
@@ -3413,7 +3422,7 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
 
     # Modify the formula to add interactions
     if(grepl("::", deparse_long(fml[[3]]), fixed = TRUE)){
-        fml = interact_fml(fml)
+        fml = expand_interactions(fml)
     }
 
     #
@@ -3424,7 +3433,12 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
     tl = attr(t_fml, "term.labels")
 
     if(length(tl) == 0){
-        res = matrix(1, nrow = nrow(data), ncol = 1, dimnames = list(NULL,"(Intercept)"))
+
+        if(fake_intercept){
+            return("NOT_LINEAR")
+        }
+
+        res = matrix(1, nrow = nrow(data), ncol = 1, dimnames = list(NULL, "(Intercept)"))
         return(res)
     }
 
@@ -3479,44 +3493,33 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
         }
     }
 
-    if(fake_intercept && useModel.matrix == FALSE){
-        # We ensure the intercept is NOT here
-        fml = update(fml, . ~ -1 + .)
-    }
-
     if(useModel.matrix){
         # to catch the NAs, model.frame needs to be used....
         linear.mat = stats::model.matrix(fml, stats::model.frame(fml, data, na.action=na.pass))
     } else {
-        linear.mat = prepare_matrix(fml, data)
+        linear.mat = prepare_matrix(fml, data, fake_intercept)
     }
 
     if(any(grepl("__CLEAN__", colnames(linear.mat), fixed = TRUE))){
-        # the following is needed (later in fixest_env => means there are factors)
-        useModel.matrix = TRUE
-
         new_names = clean_interact_names(colnames(linear.mat))
 
         colnames(linear.mat) = new_names
     }
 
-
     if(is.integer(linear.mat)){
         linear.mat = 1 * linear.mat
     }
 
-    attr(linear.mat, "useModel.matrix") = useModel.matrix
-
     linear.mat
 }
 
-terms_fixef = function(fml){
-    # separate all terms of fml into fixed effects ans varying slopes
+fixef_terms = function(fml){
+    # separate all terms of fml into fixed effects and varying slopes
     # fml: one sided formula
     # can also be a vector of terms
 
-    # terms_fixef(~dum_1[[x1]] + dum_2[x2])
-    # terms_fixef(~dum_1[[x1]] + dum_2 + dum_3[x2, x3])
+    # fixef_terms(~dum_1[[x1]] + dum_2[x2])
+    # fixef_terms(~dum_1[[x1]] + dum_2 + dum_3[x2, x3])
 
     if(is.vector(fml)){
         fml = as.formula(paste0("~", paste0(fml, collapse = "+")))
@@ -3658,13 +3661,13 @@ prepare_df = function(vars, base, fastCombine = NA){
     do_combine = !is.na(fastCombine)
 
     changeNames = FALSE
-    if(do_combine && any(grepl("\\^", vars))){
+    if(do_combine && any(grepl("^", vars, fixed = TRUE))){
         # special indicator to combine factors
         # ^ is a special character: only used to combine variables!!!
 
         fun2combine = ifelse(fastCombine, "combine_clusters_fast", "combine_clusters")
 
-        vars_new = gsub("([[:alpha:]_\\.][[:alnum:]_\\.]*(\\^[[:alpha:]_\\.][[:alnum:]_\\.]*)+)",
+        vars_new = gsub("([[:alpha:]\\.][[:alnum:]_\\.]*(\\^[[:alpha:]\\.][[:alnum:]_\\.]*)+)",
                         paste0(fun2combine, "(\\1)"), vars)
 
         vars_new = gsub("\\^", ", ", vars_new)
@@ -3854,52 +3857,57 @@ combine_clusters = function(...){
     return(res)
 }
 
+expand_interactions_internal = function(x){
+    # x == terms
 
+    terms_all_list = as.list(x)
+    qui = which(grepl("[^:]::[^:]", x))
+    for(i in qui){
+        my_term = x[i]
+        terms_split = strsplit(x[i], "(?<=[^:])::(?=[^:])", perl = TRUE)[[1]]
 
-interact_fml = function(fml){
+        if(grepl("\\(", terms_split[2])){
+            if(!grepl("^[\\.]?[[:alnum:]\\._]+\\(", terms_split[2])){
+                stop("Problem in ", x[i], ": the format should be var::fe. See details.")
+            }
+
+            my_call = gsub("^[\\.]?[[:alnum:]\\._]+\\(", "interact_control(", terms_split[2])
+            args = try(eval(parse(text = my_call)), silent = TRUE)
+            fe_name = gsub("^([\\.]?[[:alnum:]\\._]+)\\(.+", "\\1", terms_split[2])
+            if("try-error" %in% class(args)){
+                stop("Problem in the interaction of the formula: Error in ", terms_split[1], "::", fe_name, gsub(".+interact_control", "", args))
+            }
+
+            new_term = paste0("interact(", terms_split[1], ", ", fe_name, ", ", paste(args, collapse = ", "), ")")
+
+        } else {
+            new_term = paste0("interact(", terms_split[1], ", ", terms_split[2], ")")
+        }
+
+        terms_all_list[[i]] = new_term
+
+    }
+
+    x = unlist(terms_all_list)
+
+    return(x)
+}
+
+expand_interactions = function(fml){
     # The formula is simple (should contain only the RHS)
-    # I use Formula for robustness
 
-    x_FML = Formula(fml)
+    fml_linear = fml_split(fml, 1)
 
-    x = attr(terms(formula(x_FML, lhs = 1, rhs = 1)), "term.labels")
+    x = attr(terms(fml_linear), "term.labels")
 
     if (!any(grepl("[^:]::[^:]", x))){
         return(fml)
+
     } else {
-
-        terms_all_list = as.list(x)
-        qui = which(grepl("[^:]::[^:]", x))
-        for(i in qui){
-            my_term = x[i]
-            terms_split = strsplit(x[i], "(?<=[^:])::(?=[^:])", perl = TRUE)[[1]]
-
-            if(grepl("\\(", terms_split[2])){
-                if(!grepl("^[\\.]?[[:alnum:]\\._]+\\(", terms_split[2])){
-                    stop("Problem in ", x[i], ": the format should be var::fe. See details.")
-                }
-
-                my_call = gsub("^[\\.]?[[:alnum:]\\._]+\\(", "interact_control(", terms_split[2])
-                args = try(eval(parse(text = my_call)), silent = TRUE)
-                fe_name = gsub("^([\\.]?[[:alnum:]\\._]+)\\(.+", "\\1", terms_split[2])
-                if("try-error" %in% class(args)){
-                    stop("Problem in the interaction of the formula: Error in ", terms_split[1], "::", fe_name, gsub(".+interact_control", "", args))
-                }
-
-                new_term = paste0("interact(", terms_split[1], ", ", fe_name, ", ", paste(args, collapse = ", "), ")")
-
-            } else {
-                new_term = paste0("interact(", terms_split[1], ", ", terms_split[2], ")")
-            }
-
-            terms_all_list[[i]] = new_term
-
-        }
-
-        x = unlist(terms_all_list)
+        x = expand_interactions_internal(x)
     }
 
-    lhs_fml = deparse_long(x_FML[[2]])
+    lhs_fml = deparse_long(fml_linear[[2]])
     rhs_fml = paste(x, collapse = "+")
 
     as.formula(paste0(lhs_fml, "~", rhs_fml))
@@ -3908,6 +3916,12 @@ interact_fml = function(fml){
 interact_control = function(ref, drop, keep){
     # Internal call
     # used to control the call to interact is valid
+
+    counter = getOption("fixest_deprec_interact")
+    if(is.null(counter)){
+        options("fixest_deprec_interact" = TRUE)
+        .Deprecated(msg = "Interactions with the syntax var::fe is deprecated and will disappear in 1 year from 12/11/2020. Please use the function i() instead.")
+    }
 
     mc = match.call()
 
@@ -3925,16 +3939,6 @@ interact_control = function(ref, drop, keep){
     }
 
     res
-}
-
-add2fml <- function(fml, x){
-    #
-    stopifnot(is.character(x))
-
-    my_call = parse(text = paste0("update(fml, .~.+", paste(x, collapse="+"), ")"))
-    res  = eval(my_call)
-
-    return(res)
 }
 
 listDefault = function(x, variable, value){
@@ -4876,27 +4880,6 @@ tex_star = function(x){
     x
 }
 
-
-extract_pipe = function(fml){
-    # We extract the elements after the pipe
-
-    FML = Formula::Formula(fml)
-    n_fml = length(FML)
-    n_rhs = n_fml[2]
-
-    if(n_rhs == 1){
-        fml_new = formula(FML, lhs = n_fml[1], rhs = 1)
-        pipe = NULL
-    } else if(n_rhs == 2){
-        fml_new = formula(FML, lhs = 1, rhs = 1)
-        pipe = as.expression(formula(FML, lhs = 0, rhs = 2)[[2]])
-    } else {
-        stop("fml must be at *most* a two part formula (currently it is ", n_rhs, " parts).")
-    }
-
-    list(fml=fml_new, pipe=pipe)
-}
-
 deparse_long = function(x){
     dep_x = deparse(x, width.cutoff = 500)
     if(length(dep_x) == 1){
@@ -4943,6 +4926,318 @@ fill_with_na = function(x, object){
     return(res)
 }
 
+is_operator = function(x, op) if(length(x) <= 1) FALSE else x[[1]] == op
+
+fml_breaker = function(fml, op){
+    res = list()
+    k = 1
+    while(is_operator(fml, op)){
+        res[[k]] = fml[[3]]
+        k = k + 1
+        fml = fml[[2]]
+    }
+    res[[k]] = fml
+
+    res
+}
+
+fml_maker = function(lhs, rhs){
+
+    while(is_operator(lhs, "(")){
+        lhs = lhs[[2]]
+    }
+
+    if(missing(rhs)){
+        if(is_operator(lhs, "~")){
+            return(lhs)
+        }
+        res = ~ .
+        res[[2]] = lhs
+    } else {
+
+        while(is_operator(rhs, "(")){
+            rhs = rhs[[2]]
+        }
+
+        res = . ~ .
+        res[[2]] = lhs
+        res[[3]] = rhs
+    }
+
+    res
+}
+
+fml_split_internal = function(fml, split.lhs = FALSE){
+
+    fml_split_tilde = fml_breaker(fml, "~")
+    k = length(fml_split_tilde)
+
+    # NOTA in fml_breaker: to avoid copies, the order of elements returned is reversed
+
+    # currently res is the LHS
+    res = list(fml_split_tilde[[k]])
+
+    if(k == 2){
+        rhs = fml_breaker(fml_split_tilde[[1]], "|")
+        l = length(rhs)
+
+    } else if(k == 3){
+        rhs  = fml_breaker(fml_split_tilde[[2]], "|")
+        l = length(rhs)
+        rhs_right = fml_breaker(fml_split_tilde[[1]], "|")
+
+        if(length(rhs_right) > 1){
+            stop_up("Problem in the formula: the formula in the RHS (expressing the IVs) cannot be multipart.")
+        }
+
+        # The rightmost element of the RHS is in position 1!!!!
+        iv_fml = fml_maker(rhs[[1]], rhs_right[[1]])
+
+        rhs[[1]] = iv_fml
+
+    } else {
+        # This is an error
+        stop_up("Problem in the formula: you cannot have more than one RHS part containing a formula.")
+    }
+
+    if(!split.lhs){
+        new_fml = fml_maker(res[[1]], rhs[[l]])
+
+        res[[1]] = new_fml
+        if(l == 1) return(res)
+        res[2:l] = rhs[(l - 1):1]
+
+    } else {
+        res[1 + (1:l)] = rhs[l:1]
+    }
+
+    res
+}
+
+
+fml_split = function(fml, i, split.lhs = FALSE, text = FALSE, raw = FALSE){
+    # I had to create that fonction to cope with the following formula:
+    #
+    #                       y ~ x1 | fe1 | u ~ z
+    #
+    # For Formula to work well, one would need to write insstead: y | x1 | fe1 | (u ~ z)
+    # that set of parentheses are superfluous
+
+    my_split = fml_split_internal(fml, split.lhs)
+
+    if(raw){
+        return(my_split)
+    } else if(text){
+
+        if(!missing(i)){
+            return(deparse_long(my_split[[i]]))
+        } else {
+            return(sapply(my_split, deparse_long))
+        }
+
+    } else if(!missing(i)) {
+        return(fml_maker(my_split[[i]]))
+
+    } else {
+        res = lapply(my_split, fml_maker)
+
+        return(res)
+    }
+
+}
+
+error_sender = function(expr, ..., clean, up = 0){
+    res = tryCatch(expr, error = function(e) structure(conditionMessage(e), class = "try-error"))
+
+    if("try-error" %in% class(res)){
+        set_up(1 + up)
+        msg = paste(..., collapse = "")
+        if(!missing(clean)){
+            stop_up(msg, gsub(clean, "", res))
+        } else {
+            stop_up(msg, res)
+        }
+    }
+
+    res
+}
+
+is_fml_inside = function(fml){
+    # we remove parentheses first
+
+    while(is_operator(fml, "(")){
+        fml = fml[[2]]
+    }
+
+    is_operator(fml, "~")
+}
+
+
+merge_fml = function(fml_linear, fml_fixef = NULL, fml_iv = NULL){
+
+    is_fe = length(fml_fixef) > 0
+    is_iv = length(fml_iv) > 0
+
+    if(!is_fe && !is_iv){
+        res = fml_linear
+    } else {
+        fml_all = deparse_long(fml_linear)
+
+        if(is_fe){
+            # we add parentheses if necessary
+            if(is_operator(fml_fixef[[2]], "|")){
+                fml_all[[2]] = paste0("(", as.character(fml_fixef)[2], ")")
+            } else {
+                fml_all[[2]] = as.character(fml_fixef)[2]
+            }
+        }
+
+        if(is_iv) fml_all[[length(fml_all) + 1]] = deparse_long(fml_iv)
+
+       res = as.formula(paste(fml_all, collapse = "|"))
+    }
+
+    res
+}
+
+
+fixest_fml_rewriter = function(fml){
+    # Currently performs the following
+    # - expands lags
+    # - expands interactions with :: (note that this will be deprecated)
+    # - protects powers: x^3 => I(x^3)
+    #
+    # fml = sw(f(y, 1:2)) ~ x1 + l(x2, 1:2) + x2^2 | fe1 | y ~ z::e + g^3
+
+    fml_text = deparse_long(fml)
+
+    isPanel = grepl("(^|[^\\._[:alnum:]])(f|d|l)\\(", fml_text)
+    isPower = grepl("^", fml_text, fixed = TRUE)
+    isInteract = grepl("[^:]::[^:]", fml_text)
+
+    if(isPanel || isInteract){
+        # We rewrite term-wise
+
+        fml_parts = fml_split(fml, raw = TRUE)
+        n_parts = length(fml_parts)
+
+        #
+        # LHS
+        #
+
+        # only panel: no power (bc no need), no interact
+
+        # We tolerate multiple LHS and expansion
+        lhs_text = fml_split(fml, 1, text = TRUE, split.lhs = TRUE)
+        if(isPanel){
+
+            if(grepl("^(c|(c?(stepwise|sw)0?)|list)\\(", lhs_text)){
+                lhs_text2eval = gsub("^(c|(c?(stepwise|sw)0?|list))\\(", "stepwise(", lhs_text)
+                lhs_names = eval(parse(text = lhs_text2eval))
+            } else {
+                lhs_names = lhs_text
+            }
+
+            lhs_all = error_sender(expand_lags_internal(lhs_names),
+                                   "Problem in the formula regarding lag/leads: ", clean = "__expand")
+
+            if(length(lhs_all) > 1){
+                lhs_fml = paste("c(", paste(lhs_all, collapse = "+"), ")")
+            } else {
+                lhs_fml = lhs_all
+            }
+
+            lhs_text = lhs_fml
+        }
+
+        #
+        # RHS
+        #
+
+        # power + panel + interact
+
+        if(isPower){
+            # rhs actually also contains the LHS
+            rhs_text = deparse_long(fml_parts[[1]])
+            rhs_text = gsub("([\\.[:alpha:]][[:alnum:]\\._]*\\^[[:digit:]]+)", "I(\\1)", rhs_text)
+            fml_rhs = as.formula(rhs_text)
+        } else {
+            fml_rhs = fml_maker(fml_parts[[1]])
+        }
+
+        rhs_terms = attr(terms(fml_rhs), "term.labels")
+
+        if(isPanel){
+            rhs_terms = error_sender(expand_lags_internal(rhs_terms),
+                                     "Problem in the formula regarding lag/leads: ", clean = "__expand")
+        }
+
+        if(isInteract){
+            rhs_terms = error_sender(expand_interactions_internal(rhs_terms),
+                                     "Error in the interaction in the RHS of the formula: ")
+        }
+
+        rhs_text = paste(rhs_terms, collapse = "+")
+
+        fml_linear = as.formula(paste0(lhs_text, "~", rhs_text))
+
+        #
+        # FE + IV
+        #
+
+        fml_fixef = fml_iv = NULL
+
+        if(n_parts > 1){
+
+            #
+            # FE
+            #
+
+            # Only isPanel (although odd....)
+
+            is_fe = !is_fml_inside(fml_parts[[2]])
+            if(is_fe){
+
+                if(identical(fml_parts[[2]], 0)){
+                    fml_fixef = NULL
+
+                } else if(isPanel){
+                    fml_fixef = fml_maker(fml_parts[[2]])
+
+                    fixef_terms = attr(terms(fml_fixef), "term.labels")
+                    fixef_text = error_sender(expand_lags_internal(fixef_terms),
+                                              "Problem in the formula regarding lag/leads: ", clean = "__expand")
+                    fml_fixef = as.formula(paste("~", paste(fixef_text, collapse = "+")))
+                }
+            }
+
+            #
+            # IV
+            #
+
+            if(n_parts == 3 || !is_fe){
+                fml_iv = fml_maker(fml_parts[[n_parts]])
+
+                fml_iv = fixest_fml_rewriter(fml_iv)$fml
+            }
+        }
+
+        fml_new = merge_fml(fml_linear, fml_fixef, fml_iv)
+
+    } else if(isPower){
+        # It's faster not to call terms
+        fml_text = gsub("([\\.[:alpha:]][[:alnum:]\\._]*\\^[[:digit:]]+)", "I(\\1)", fml_text)
+        fml_new = as.formula(fml_text)
+
+    } else {
+        res = list(fml = fml, isPanel = FALSE)
+        return(res)
+    }
+
+    res = list(fml = fml_new, isPanel = isPanel)
+
+    return(res)
+}
 
 #### ................. ####
 #### Aditional Methods ####
@@ -5654,9 +5949,9 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 	coef = object$coefficients
 
 	value_linear = 0
-	rhs_fml = formula(Formula(fml), lhs = 1, rhs = 1)
+	rhs_fml = fml_split(fml, 1)
 	if(grepl("[^:]::[^:]", deparse_long(rhs_fml[[3]]))){
-	    new_fml = interact_fml(rhs_fml)
+	    new_fml = expand_interactions(rhs_fml)
 	    linear.varnames = all.vars(new_fml[[3]])
 	} else {
 	    linear.varnames = all.vars(rhs_fml[[3]])
@@ -6592,7 +6887,6 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
         stop("Argument 'nframes' must be a single integer greater than, or equal to, 1.")
     }
 
-	FML = Formula(fml.update)
 	call_new = match.call()
 	dots = list(...)
 
@@ -6612,8 +6906,7 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 	#
 
 	fml_old = object$fml
-	fml = update(fml_old, formula(FML, lhs = 1, rhs = 1))
-	fml_char = as.character(fml)
+	fml_linear = update(fml_old, fml_split(fml.update, 1))
 
 	# Family information
 	if(!is.null(dots$family)){
@@ -6625,33 +6918,43 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 	}
 
 	#
-	# II) evaluation data
+	# II) fixed-effects updates
 	#
 
-	# Removed => since I removed the init mechanism (wasn't really efficient nor safe)
+	fml_fixef = NULL
 
-	#
-	# III) cluster updates
-	#
+	updt_fml_parts = fml_split(fml.update, raw = TRUE)
+	n_parts = length(updt_fml_parts)
+
+	if(n_parts > 2 + (object$method == "feols")){
+	    stop("The update formula cannot have more than ", 2 + (object$method == "feols"), " parts for the method ", object$method, ".")
+	}
+
+	is_fe = n_parts > 1 && !is_fml_inside(updt_fml_parts[[2]])
 
 	fixef_vars = object$fixef_vars
-	if(length(FML)[2] > 1){
-		# modification of the clusters
-	    if(!is.null(object$fixef_terms)){
-	        fixef_old = as.formula(paste0("~", paste0(c(1, object$fixef_terms), collapse = "+")))
-	    } else {
-	        fixef_old = as.formula(paste0("~", paste0(c(1, fixef_vars), collapse = "+")))
-	    }
+
+	if(is_fe){
+
+	    fixef_old = object$fml_all$fixef
 
 	    # I use it as text to catch the var1^var2 FEs (update does not work)
-	    fixef_old_text = deparse_long(fixef_old)
-	    fixef_new_text = deparse_long(formula(FML, lhs = 0, rhs = 2))
+	    if(is.null(fixef_old)){
+	        fixef_old_text = "~ 1"
+	    } else {
+	        fixef_old_text = deparse_long(fixef_old)
+	    }
+
+	    fixef_new_fml = fml_maker(updt_fml_parts[[2]])
+	    fixef_new_text = deparse_long(fixef_new_fml)
 
 	    if(fixef_new_text == "~."){
 	        # nothing happens
 	        fixef_new = fixef_old
-	    } else if(fixef_new_text == "~1"){
+
+	    } else if(fixef_new_text %in% c("~0", "~1")){
 	        fixef_new = ~1
+
 	    } else if(grepl("\\^", fixef_old_text) || grepl("\\^", fixef_new_text)){
 	        # we update manually.... dammmit
 	        # Note that what follows does not work ONLY when you have number^var or number^number
@@ -6663,25 +6966,47 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 
 	        fixef_new = as.formula(gsub("__666__", "^", fixef_new_wip))
 	    } else {
-	        fixef_new = update(fixef_old, formula(FML, lhs = 0, rhs = 2))
+	        fixef_new = update(fixef_old, fixef_new_fml)
 	    }
 
 		if(length(all.vars(fixef_new)) > 0){
-			# means there is a cluster
-			fml_new = as.formula(paste0(fml_char[2], "~", fml_char[3], "|", as.character(fixef_new)[2]))
-		} else {
-			# there is no cluster
-			fml_new = fml
+			# means there is a fixed-effect
+		    fml_fixef = fixef_new
 		}
 
 	} else if(!is.null(fixef_vars)){
 		# the formula updated:
-		fml_new = as.formula(paste0(fml_char[2], "~", fml_char[3], "|", paste0(fixef_vars, collapse = "+")))
+		fml_fixef = object$fml_all$fixef
+
+	}
+
+	#
+	# III) IV updates
+	#
+
+	if(n_parts > 2 || (n_parts == 2 && !is_fe)){
+
+	    iv_new_fml = fml_maker(updt_fml_parts[[n_parts]])
+
+	    if(!is_fml_inside(iv_new_fml)){
+	        stop("The third part of the update formula in 'feols' must be a formula.")
+	    }
+
+	    iv_old = object$fml_all$iv
+
+	    if(is.null(iv_old)){
+	        fml_iv = iv_new_fml
+
+	    } else {
+	        fml_iv = update(iv_old, iv_new_fml)
+	    }
 
 	} else {
-		# there is no cluster in the initial model
-		fml_new = fml
+	    fml_iv = object$fml_all$iv
 	}
+
+
+	fml_new = merge_fml(fml_linear, fml_fixef, fml_iv)
 
 
 	#
@@ -6693,9 +7018,12 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 	# we drop the argument fixef from old call (now it's in the fml_new)
 	call_old$fixef = NULL
 
+	# We also drop the arguments for multiple estimations:
+	call_old$split = call_old$fsplit = NULL
+
 	# new call: call_clear
 	call_clear = call_old
-	for(arg in setdiff(names(call_new)[-1], c("fml.update", "nframes", "evaluate"))){
+	for(arg in setdiff(names(call_new)[-1], c("fml.update", "nframes", "evaluate", "object"))){
 		call_clear[[arg]] = call_new[[arg]]
 	}
 
@@ -6740,7 +7068,7 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 #' formula(res, "linear")
 #'
 #'
-formula.fixest = function(x, type = c("full", "linear", "NL"), ...){
+formula.fixest = function(x, type = c("full", "linear", "iv", "NL"), ...){
 	# Extract the formula from the object
 	# we add the clusters in the formula if needed
 
@@ -6751,13 +7079,14 @@ formula.fixest = function(x, type = c("full", "linear", "NL"), ...){
         stop("formula method not available for fixest estimations obtained from fit methods.")
     }
 
-	type = match.arg(type)
+	check_arg_plus(type, "match")
 
 	if(type == "linear"){
 		return(x$fml)
+
 	} else if(type == "NL"){
 
-		if(x$method != "femlm"){
+		if(!x$method == "feNmlm"){
 			stop("type = 'NL' is not valid for a ", x$method, " estimation.")
 		}
 
@@ -6767,23 +7096,15 @@ formula.fixest = function(x, type = c("full", "linear", "NL"), ...){
 		}
 
 		return(NL.fml)
+
+	} else if(type == "iv"){
+	    if(is.null(x$fml_all$iv)){
+	        stop("type = 'iv' is only available for feols estimations with IV.")
+	    }
 	}
 
-	if(is.null(x$NL.fml)){
-	    if(is.null(x$fml_full)){
-	        res = x$fml
-	    } else {
-	        res = x$fml_full
-	    }
-	} else if(is.null(x$fml_full)){
-	    fml_char = deparse_long(x$fml)
-	    nl_char = as.character(x$NL.fml)
-	    res = as.formula(paste(fml_char, "+ I(", nl_char[2], ")"))
-	} else {
-	    fml_split = strsplit(deparse_long(x$fml_full), "\\|")[[1]]
-	    nl_char = as.character(x$NL.fml)
-	    res = as.formula(paste(fml_split[1], "+ I(", nl_char[2], ") |", fml_split[2]))
-	}
+	# Shall I add LHS ~ RHS + NL(NL fml) | fe | iv ???
+    res = merge_fml(x$fml_all$linear, x$fml_all$fixef, x$fml_all$iv)
 
 	res
 }
