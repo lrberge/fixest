@@ -10,7 +10,7 @@ export(feglm.fit)
 # etable
 export(etable, esttex, esttable, style)
 # misc funs
-export(collinearity, obs2remove, r2, fitstat)
+export(collinearity, r2, fitstat)
 # did
 export(did_means)
 # graph
@@ -31,12 +31,12 @@ export(to_integer, demean)
 exportPattern("^(s|g)etFixest")
 
 # deprecated
-export(did_estimate_yearly_effects, did_plot_yearly_effects, errbar)
+export(obs2remove)
+S3method(summary, fixest.obs2remove)
 
 # Base methods
 S3method(print, fixest)
 S3method(summary, fixest.fixef)
-S3method(summary, fixest.obs2remove)
 S3method(summary, fixest)
 export(summ) # alias for summary.fixest
 S3method(plot, fixest.fixef)
