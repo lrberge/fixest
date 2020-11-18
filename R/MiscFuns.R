@@ -2969,7 +2969,7 @@ demean = function(X, f, weights, nthreads = getFixest_nthreads(), notes = getFix
 
     Q = length(f)
     n = length(f[[1]])
-    quf_info_all = cpppar_quf_table_sum(x = f, y = 0, do_sum_y = FALSE, rm_0 = FALSE, rm_1 = FALSE, rm_single = FALSE, only_slope = rep(FALSE, Q), nthreads = nthreads)
+    quf_info_all = cpppar_quf_table_sum(x = f, y = 0, do_sum_y = FALSE, rm_0 = FALSE, rm_1 = FALSE, rm_single = FALSE, do_refactor = FALSE, r_x_sizes = 0, obs2keep = 0, only_slope = rep(FALSE, Q), nthreads = nthreads)
 
     # table/sum_y/sizes
     fixef_table = quf_info_all$table
