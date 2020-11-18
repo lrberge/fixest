@@ -694,6 +694,189 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, panel.id, fi
 	    return(res_multi)
 	}
 
+
+	#
+	# IV ####
+	#
+
+	do_iv = get("do_iv", env)
+	if(do_iv){
+        assign("do_iv", FALSE, env)
+
+	    # Loaded already
+	    # y: lhs
+	    # X: linear.mat
+
+	    iv_lhs = get("iv_lhs", env)
+	    iv_lhs_names = get("iv_lhs_names", env)
+	    iv.mat = get("iv.mat", env) # we enforce (before) at least one variable in iv.mat
+	    n_endo = length(iv_lhs)
+
+	    if(isFixef){
+	        # we batch demean first
+
+	        n_vars_X = ifelse(is.null(ncol(X)), 0, ncol(X))
+
+	        # fixef information
+	        fixef_sizes = get("fixef_sizes", env)
+	        fixef_table_vector = get("fixef_table_vector", env)
+	        fixef_id_list = get("fixef_id_list", env)
+
+	        slope_flag = get("slope_flag", env)
+	        slope_vars = get("slope_variables", env)
+
+	        if(mem.clean) gc()
+
+	        vars_demean = cpp_demean(y, X, n_vars_X, weights, iterMax = fixef.iter,
+	                                 diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
+	                                 fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
+	                                 slope_flag_Q = slope_flag, slope_vars_list = slope_vars,
+	                                 r_init = init, nthreads = nthreads)
+
+	        iv_vars_demean = cpp_demean(iv_lhs, iv.mat, ncol(iv.mat), weights, iterMax = fixef.iter,
+	                                    diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
+	                                    fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
+	                                    slope_flag_Q = slope_flag, slope_vars_list = slope_vars,
+	                                    r_init = init, nthreads = nthreads)
+
+	        X_demean = vars_demean$X_demean
+	        y_demean = vars_demean$y_demean
+
+	        iv.mat_demean = iv_vars_demean$X_demean
+	        iv_lhs_demean = iv_vars_demean$y_demean
+
+	        # We precompute the solution
+	        iv_products = cpp_iv_products(X = X_demean, y = y_demean, Z = iv.mat_demean,
+	                                      u = iv_lhs_demean, w = weights, nthreads = nthreads)
+
+	        if(n_vars_X == 0){
+	            XZ_demean = iv.mat_demean
+	            XZ = iv.mat
+	        } else {
+	            XZ_demean = cbind(X_demean, iv.mat_demean)
+	            XZ = cbind(X, iv.mat)
+	        }
+
+
+	        # First stage(s)
+
+	        XZtXZ = iv_products$XZtXZ
+	        XZtu  = iv_products$XZtu
+
+	        res_first_stage = list()
+
+	        for(i in 1:n_endo){
+	            current_env = reshape_env(env, lhs = iv_lhs[[i]], rhs = XZ, fml_iv_endo = iv_lhs_names[i])
+
+	            res_first_stage[[i]] = feols(env = current_env, xwx = XZtXZ, xwy = XZtu[[i]],
+	                                         X_demean = XZ_demean, y_demean = iv_lhs_demean[[i]], add_fitted_demean = TRUE)
+	        }
+
+	        # Second stage
+
+	        if(n_endo == 1){
+	            res_FS = res_first_stage[[1]]
+	            U = as.matrix(res_FS$fitted.values)
+	            U_demean = as.matrix(res_FS$fitted.values_demean)
+	        } else {
+	            U_list = list()
+	            U_dm_list = list()
+	            for(i in 1:n_endo){
+	                res_FS = res_first_stage[[i]]
+	                U_list[[i]] = res_FS$fitted.values
+	                U_dm_list[[i]] = res_FS$fitted.values_demean
+	            }
+
+	            U = do.call("cbind", U_list)
+	            U_demean = do.call("cbind", U_dm_list)
+	        }
+
+	        colnames(U) = colnames(U_demean) = paste0("fit_", iv_lhs_names)
+
+            if(n_vars_X == 0){
+                XU = as.matrix(U)
+                XU_demean = as.matrix(U_demean)
+            } else {
+                XU = cbind(X, U)
+                XU_demean = cbind(X_demean, U_demean)
+            }
+
+	        XtX = iv_products$XtX
+	        Xty = iv_products$Xty
+	        iv_prod_second = cpp_iv_product_completion(XtX = XtX, Xty = Xty, X = X_demean,
+	                                                   y = y_demean, U = U_demean, w = weights, nthreads = nthreads)
+
+	        XUtXU = iv_prod_second$XUtXU
+	        XUty  = iv_prod_second$XUty
+
+	        current_env = reshape_env(env, rhs = XU)
+	        res_second_stage = feols(env = current_env, xwx = XUtXU, xwy = XUty,
+	                                 X_demean = XU_demean, y_demean = y_demean)
+
+
+	    } else {
+
+	        # We precompute the solution
+	        iv_products = cpp_iv_products(X = X, y = y, Z = iv.mat,
+	                                      u = iv_lhs, w = weights, nthreads = nthreads)
+
+	        XZ = cbind(X, iv.mat)
+
+	        # First stage(s)
+
+	        XZtXZ = iv_products$XZtXZ
+	        XZtu  = iv_products$XZtu
+
+	        res_first_stage = list()
+
+	        for(i in 1:n_endo){
+	            current_env = reshape_env(env, lhs = iv_lhs[[i]], rhs = XZ, fml_iv_endo = iv_lhs_names[i])
+	            res_first_stage[[i]] = feols(env = current_env, xwx = XZtXZ, xwy = XZtu[[i]])
+	        }
+
+	        # Second stage
+
+	        if(n_endo == 1){
+	            res_FS = res_first_stage[[1]]
+	            U = as.matrix(res_FS$fitted.values)
+	        } else {
+	            U_list = list()
+	            U_dm_list = list()
+	            for(i in 1:n_endo){
+	                res_FS = res_first_stage[[i]]
+	                U_list[[i]] = res_FS$fitted.values
+	            }
+
+	            U = do.call("cbind", U_list)
+	        }
+
+	        colnames(U) = paste0("fit_", iv_lhs_names)
+
+            XU = cbind(X, U)
+
+	        XtX = iv_products$XtX
+	        Xty = iv_products$Xty
+	        iv_prod_second = cpp_iv_product_completion(XtX = XtX, Xty = Xty, X = X,
+	                                                   y = y, U = U, w = weights, nthreads = nthreads)
+
+	        XUtXU = iv_prod_second$XUtXU
+	        XUty  = iv_prod_second$XUty
+
+	        current_env = reshape_env(env, rhs = XU)
+	        res_second_stage = feols(env = current_env, xwx = XUtXU, xwy = XUty)
+	    }
+
+	    if(n_endo == 1){
+	        res_second_stage$first_stage = res_first_stage[[1]]
+	    } else {
+	        res_second_stage$first_stage = res_first_stage
+	    }
+
+	    return(res_second_stage)
+
+	}
+
+
 	#
 	# Regular estimation ####
 	#
@@ -927,6 +1110,9 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, panel.id, fi
 			x_beta = cpppar_xbeta(X, coef, nthreads)
 			res$sumFE = y - x_beta - res$residuals
 			res$fitted.values = x_beta + res$sumFE
+			if(isTRUE(dots$add_fitted_demean)){
+			    res$fitted.values_demean = est$fitted.values
+			}
 		} else {
 			res$fitted.values = est$fitted.values
 		}
