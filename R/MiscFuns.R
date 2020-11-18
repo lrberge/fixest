@@ -3333,7 +3333,7 @@ vcovClust <- function (cluster, myBread, scores, dof=FALSE, do.unclass=TRUE){
     res
 }
 
-prepare_matrix = function(fml, base){
+prepare_matrix = function(fml, base, fake_intercept = FALSE){
     # This function is way faster than model.matrix but does not accept factors
     # The argument fml **MUST** not have factors!
 
@@ -3361,7 +3361,7 @@ prepare_matrix = function(fml, base){
     }
 
     # Forming the call
-    if(attr(t, "intercept") == 1){
+    if(attr(t, "intercept") == 1 && !fake_intercept){
         n = nrow(base)
         all_vars_call = parse(text = paste0("list('(Intercept)' = rep(1, ", n, "), ", paste0(all_vars, collapse = ", "), ")"))
         all_var_names = c("(Intercept)", all_var_names)
