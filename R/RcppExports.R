@@ -81,6 +81,18 @@ cpp_mat_reconstruct <- function(X, id_excl) {
     .Call(`_fixest_cpp_mat_reconstruct`, X, id_excl)
 }
 
+cpp_iv_products <- function(X, y, Z, u, w, nthreads) {
+    .Call(`_fixest_cpp_iv_products`, X, y, Z, u, w, nthreads)
+}
+
+cpp_iv_product_completion <- function(XtX, Xty, X, y, U, w, nthreads) {
+    .Call(`_fixest_cpp_iv_product_completion`, XtX, Xty, X, y, U, w, nthreads)
+}
+
+cpp_iv_resid <- function(resid_2nd, coef, resid_1st, nthreads) {
+    .Call(`_fixest_cpp_iv_resid`, resid_2nd, coef, resid_1st, nthreads)
+}
+
 cpp_lgamma <- function(x) {
     .Call(`_fixest_cpp_lgamma`, x)
 }
