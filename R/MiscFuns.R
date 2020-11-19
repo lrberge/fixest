@@ -6305,9 +6305,8 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 		stop("Argument 'se' must be a character scalar equal to: 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
     }
 
-	se.val = NULL
-
-	se.val = check_arg_plus(se, "match", .choices = c("standard", "white", "hetero", "cluster", "twoway", "threeway", "fourway", "1", "2", "3", "4"), .message = "Argument argument 'se' should be equal to one of 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
+	check_arg_plus(se, "match", .choices = c("standard", "white", "hetero", "cluster", "twoway", "threeway", "fourway", "1", "2", "3", "4"), .message = "Argument argument 'se' should be equal to one of 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
+	se.val = se
 
 	if(se.val == "white") se.val = "hetero"
 
