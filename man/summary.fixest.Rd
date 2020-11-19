@@ -4,6 +4,7 @@
 \name{summary.fixest}
 \alias{summary.fixest}
 \alias{summ}
+\alias{summary.fixest_list}
 \title{Summary of a \code{fixest} object. Computes different types of standard errors.}
 \format{
 An object of class \code{function} of length 1.
@@ -15,6 +16,7 @@ An object of class \code{function} of length 1.
   cluster,
   dof = getFixest_dof(),
   .vcov,
+  stage = 2,
   lean = FALSE,
   forceCovariance = FALSE,
   keepBounded = FALSE,
@@ -23,6 +25,18 @@ An object of class \code{function} of length 1.
 )
 
 summ
+
+\method{summary}{fixest_list}(
+  object,
+  se,
+  cluster,
+  dof = getFixest_dof(),
+  .vcov,
+  stage = 2,
+  lean = FALSE,
+  n,
+  ...
+)
 }
 \arguments{
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
@@ -34,6 +48,8 @@ summ
 \item{dof}{An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{dof}} for this argument. The arguments and defaults of the function \code{\link[fixest]{dof}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "conventional"}, \code{t.df = "conventional"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{dof}} for details.}
 
 \item{.vcov}{A user provided covariance matrix or a function computing this matrix. If a matrix, it must be a square matrix of the same number of rows as the number of variables estimated. If a function, it must return the previsouly mentioned matrix.}
+
+\item{stage}{Can be equal to \code{2} (default), \code{1}, \code{1:2} or \code{2:1}. Only used if the object is an IV estimation: defines the stage to which \code{summary} should be applied. If \code{stage = 1} and there are multiple endogenous regressors or if \code{stage} is of length 2, then an object of class \code{fixest_multi} is returned.}
 
 \item{lean}{Logical, default is \code{FALSE}. Used to reduce the (memory) size of the summary object. If \code{TRUE}, then all objects of length N (the number of observations) are removed from the result. Note that some \code{fixest} methods may consequently not work when applied to the summary.}
 
