@@ -1785,7 +1785,7 @@ List cpp_demean(SEXP y, SEXP X_raw, int n_vars_X, SEXP r_weights, int iterMax, d
     List res; // a vector and a matrix
 
     int nrow = useX ? n_obs : 1;
-    int ncol = useX ? n_vars - useY : 1;
+    int ncol = useX ? n_vars_X : 1;
     NumericMatrix X_demean(nrow, ncol);
 
     double *p_input_tmp;
