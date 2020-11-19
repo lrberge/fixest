@@ -3581,7 +3581,7 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
 
     if(useModel.matrix){
         # to catch the NAs, model.frame needs to be used....
-        linear.mat = stats::model.matrix(fml, stats::model.frame(fml, data, na.action=na.pass))
+        linear.mat = stats::model.matrix(fml[c(1, 3)], stats::model.frame(fml[c(1, 3)], data, na.action=na.pass))
     } else {
         linear.mat = prepare_matrix(fml, data, fake_intercept)
     }
