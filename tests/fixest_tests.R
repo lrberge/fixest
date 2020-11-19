@@ -32,7 +32,7 @@ base$fe_3 = sample(15, 150, TRUE)
 base$constant = 5
 base$y_int = as.integer(base$y)
 base$w = as.vector(unclass(base$species) - 0.95)
-base$offset = unclass(base$species) - 0.95
+base$offset_value = unclass(base$species) - 0.95
 base$y_01 = 1 * ((scale(base$x1) + rnorm(150)) > 0)
 # what follows to avoid removal of fixed-effects (logit is pain in the neck)
 base$y_01[1:5 + rep(c(0, 50, 100), each = 5)] = 1
@@ -49,7 +49,7 @@ for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
 
         for(use_offset in c(FALSE, TRUE)){
             my_offset = NULL
-            if(use_offset) my_offset = base$offset
+            if(use_offset) my_offset = base$offset_value
 
             for(id_fe in 0:9){
 
@@ -125,7 +125,11 @@ for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
                     res = feglm(fml_fixest, base, family = my_family, weights = my_weight, offset = my_offset)
                     if(!is.null(res$obsRemoved)){
                         qui = -res$obsRemoved
-                        res_bis = glm(fml_stats, base[qui, ], family = my_family, weights = my_weight[qui], offset = my_offset[qui])
+                        base_tmp = base[qui, ]
+                        base_tmp$my_weight = my_weight[qui]
+                        base_tmp$my_offset = my_offset[qui]
+
+                        res_bis = glm(fml_stats, base_tmp, family = my_family, weights = my_weight, offset = my_offset)
                     } else {
                         res_bis = glm(fml_stats, base, family = my_family, weights = my_weight, offset = my_offset)
                     }
