@@ -247,7 +247,7 @@
 #' etable(rep(.l(est, est_bis), each = 3, cluster = list("standard", ~ Month, ~ Day)))
 #'
 #'
-etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, .vcov, .vcov_args = NULL, digits=4, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode, label, float, subtitles = list("auto"), fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube")){
+etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, stage = 2, .vcov, .vcov_args = NULL, digits=4, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode, label, float, subtitles = list("auto"), fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube")){
 
     #
     # Checking the arguments
@@ -255,7 +255,7 @@ etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threew
 
     # Need to check for the presence of the se
     useSummary = TRUE
-    if(missing(se) && missing(cluster) && missing(.vcov)){
+    if(missing(se) && missing(cluster) && missing(.vcov) && missing(stage)){
         useSummary = FALSE
     }
 
@@ -311,7 +311,7 @@ etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threew
     # to get the model names
     dots_call = match.call(expand.dots = FALSE)[["..."]]
 
-    info = results2formattedList(..., se=se, dof=dof, fitstat_all=fitstat, cluster=cluster, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, sdBelow=sdBelow, signifCode=signifCode, coefstat = coefstat, ci = ci, title=title, float=float, subtitles=subtitles, keepFactors=keepFactors, tex = tex, useSummary=useSummary, dots_call=dots_call, powerBelow=powerBelow, dict=dict, interaction.combine=interaction.combine, convergence=convergence, family=family, keep=keep, drop=drop, file=file, order=order, label=label, fixef_sizes=fixef_sizes, fixef_sizes.simplify=fixef_sizes.simplify, depvar=depvar, style=style, replace=replace, notes = notes, group = group, extraline=extraline, placement = placement, drop.section = drop.section, poly_dict = poly_dict)
+    info = results2formattedList(..., se=se, dof=dof, fitstat_all=fitstat, cluster=cluster, stage=stage, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, sdBelow=sdBelow, signifCode=signifCode, coefstat = coefstat, ci = ci, title=title, float=float, subtitles=subtitles, keepFactors=keepFactors, tex = tex, useSummary=useSummary, dots_call=dots_call, powerBelow=powerBelow, dict=dict, interaction.combine=interaction.combine, convergence=convergence, family=family, keep=keep, drop=drop, file=file, order=order, label=label, fixef_sizes=fixef_sizes, fixef_sizes.simplify=fixef_sizes.simplify, depvar=depvar, style=style, replace=replace, notes = notes, group = group, extraline=extraline, placement = placement, drop.section = drop.section, poly_dict = poly_dict)
 
     if(tex){
         res = etable_internal_latex(info)
@@ -344,14 +344,14 @@ etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threew
 
 
 #' @describeIn etable Exports the results of multiple \code{fixest} estimations in a Latex table.
-esttex <- function(..., se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, .vcov, .vcov_args = NULL, digits=4, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, title, float = float, sdBelow=TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles = list("auto"), fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", style = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube")){
+esttex = function(..., se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, stage = 2, .vcov, .vcov_args = NULL, digits=4, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, title, float = float, sdBelow=TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles = list("auto"), fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", style = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube")){
     # drop: a vector of regular expressions
     # order: a vector of regular expressions
     # dict: a 'named' vector
     # file: a character string
 
     useSummary = TRUE
-    if(missing(se) && missing(cluster) && missing(.vcov)){
+    if(missing(se) && missing(cluster) && missing(.vcov) && missing(stage)){
         useSummary = FALSE
     }
 
@@ -376,7 +376,7 @@ esttex <- function(..., se = c("standard", "hetero", "cluster", "twoway", "three
     # to get the model names
     dots_call = match.call(expand.dots = FALSE)[["..."]]
 
-    info = results2formattedList(..., tex = TRUE, useSummary=useSummary, se=se, dof=dof, cluster=cluster, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, fitstat_all=fitstat, title=title, float=float, sdBelow=sdBelow, keep=keep, drop=drop, order=order, dict=dict, file=file, replace=replace, convergence=convergence, signifCode=signifCode, coefstat=coefstat, ci=ci, label=label, subtitles=subtitles, fixef_sizes=fixef_sizes, fixef_sizes.simplify=fixef_sizes.simplify, keepFactors=keepFactors, family=family, powerBelow=powerBelow, interaction.combine=interaction.combine, dots_call=dots_call, depvar=TRUE, style=style, notes=notes, group=group, extraline=extraline, placement=placement, drop.section=drop.section, poly_dict = poly_dict)
+    info = results2formattedList(..., tex = TRUE, useSummary=useSummary, se=se, dof=dof, cluster=cluster, stage=stage, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, fitstat_all=fitstat, title=title, float=float, sdBelow=sdBelow, keep=keep, drop=drop, order=order, dict=dict, file=file, replace=replace, convergence=convergence, signifCode=signifCode, coefstat=coefstat, ci=ci, label=label, subtitles=subtitles, fixef_sizes=fixef_sizes, fixef_sizes.simplify=fixef_sizes.simplify, keepFactors=keepFactors, family=family, powerBelow=powerBelow, interaction.combine=interaction.combine, dots_call=dots_call, depvar=TRUE, style=style, notes=notes, group=group, extraline=extraline, placement=placement, drop.section=drop.section, poly_dict = poly_dict)
 
     res = etable_internal_latex(info)
 
@@ -393,11 +393,11 @@ esttex <- function(..., se = c("standard", "hetero", "cluster", "twoway", "three
 }
 
 #' @describeIn etable Facility to display the results of multiple \code{fixest} estimations.
-esttable <- function(..., se=c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, .vcov, .vcov_args = NULL, coefstat = c("se", "tstat", "confint"), ci = 0.95, depvar, keep, drop, dict, order, digits=4, fitstat, convergence, signifCode = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10), subtitles = list("auto"), keepFactors = FALSE, family, group = NULL, extraline = NULL, poly_dict = c("", " square", " cube")){
+esttable = function(..., se=c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, stage = 2, .vcov, .vcov_args = NULL, coefstat = c("se", "tstat", "confint"), ci = 0.95, depvar, keep, drop, dict, order, digits=4, fitstat, convergence, signifCode = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10), subtitles = list("auto"), keepFactors = FALSE, family, group = NULL, extraline = NULL, poly_dict = c("", " square", " cube")){
 
     # Need to check for the presence of the se
     useSummary = TRUE
-    if(missing(se) && missing(cluster) && missing(.vcov)){
+    if(missing(se) && missing(cluster) && missing(.vcov) && missing(stage)){
         useSummary = FALSE
     }
 
@@ -412,14 +412,14 @@ esttable <- function(..., se=c("standard", "hetero", "cluster", "twoway", "three
     # to get the model names
     dots_call = match.call(expand.dots = FALSE)[["..."]]
 
-    info = results2formattedList(..., se=se, dof = dof, cluster=cluster, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, signifCode=signifCode, coefstat = coefstat, ci = ci, subtitles=subtitles, keepFactors=keepFactors, useSummary=useSummary, dots_call=dots_call, fitstat_all=fitstat, depvar = depvar, family = family, keep = keep, drop = drop, order = order, dict = dict, interaction.combine = ":", group = group, extraline = extraline, poly_dict = poly_dict)
+    info = results2formattedList(..., se=se, dof = dof, cluster=cluster, stage=stage, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, signifCode=signifCode, coefstat = coefstat, ci = ci, subtitles=subtitles, keepFactors=keepFactors, useSummary=useSummary, dots_call=dots_call, fitstat_all=fitstat, depvar = depvar, family = family, keep = keep, drop = drop, order = order, dict = dict, interaction.combine = ":", group = group, extraline = extraline, poly_dict = poly_dict)
 
     res = etable_internal_df(info)
 
     return(res)
 }
 
-results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov, .vcov_args = NULL, digits = 4, fitstat_all, sdBelow=TRUE, dict, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), coefstat = "se", ci = 0.95, label, subtitles, title, float = FALSE, replace = FALSE, keepFactors = FALSE, tex = FALSE, useSummary, dots_call, powerBelow, interaction.combine, convergence, family, drop, order, keep, file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, depvar = FALSE, style = NULL, notes = NULL, group = NULL, extraline=NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube")){
+results2formattedList = function(..., se, dof = getFixest_dof(), cluster, stage = 2, .vcov, .vcov_args = NULL, digits = 4, fitstat_all, sdBelow=TRUE, dict, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), coefstat = "se", ci = 0.95, label, subtitles, title, float = FALSE, replace = FALSE, keepFactors = FALSE, tex = FALSE, useSummary, dots_call, powerBelow, interaction.combine, convergence, family, drop, order, keep, file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, depvar = FALSE, style = NULL, notes = NULL, group = NULL, extraline=NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube")){
     # This function is the core of the functions esttable and esttex
 
 
@@ -638,9 +638,9 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
             }
 
             k = k+1
-        } else if(length(class(di))==1 && class(di)=="list"){
+        } else if(any(c("list", "fixest_list") %in% class(di))){
             # we get into this list to get the fixest objects
-            types = sapply(di, class)
+            types = sapply(di, function(x) class(x)[1])
             qui = which(types == "fixest")
             for(m in qui){
                 all_models[[k]] = di[[m]]
@@ -670,10 +670,9 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
 
     n_models = length(all_models)
 
-
+    auto_subtitles_clean = list()
     if(length(auto_subtitles) > 0){
         # We reconstruct the subtitles properly
-        auto_subtitles_clean = list()
 
         for(i in seq_along(auto_subtitles)){
             my_sub = auto_subtitles[[i]]
@@ -686,12 +685,162 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
             value[my_sub$index] = my_sub$value
             auto_subtitles_clean[[my_sub$title]] = value
         }
+    }
 
+
+    # Formatting the names (if needed)
+    alternative_names = paste0("model ", 1:n_models)
+    who2replace = sapply(model_names, function(x) length(x) == 0 || x == "")
+    model_names[who2replace] = alternative_names[who2replace]
+    if(length(model_id) == n_models){
+        index = rep(0, max(model_id))
+        sub_index = rep(1, n_models)
+
+        for(i in 1:n_models){
+            id = model_id[i]
+            index[id] = index[id] + 1
+            sub_index[i] = index[id]
+        }
+
+        model_names = paste0("model ", model_id, ".", sub_index)
+    }
+
+    #
+    # ... summary ####
+    #
+
+    check_arg(stage, "integer vector no na len(,2) GE{1} LE{2}")
+
+    if(!missing(.vcov)){
+        sysOrigin = sys.parent()
+        mc = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin), expand.dots = FALSE)
+        vcov_name = deparse_long(mc$.vcov)
+
+        # We check the arguments
+        check_arg(.vcov, "function", .message = "The argument '.vcov' must be a function to compute the variance-covariance matrix.")
+        check_arg_plus(.vcov_args, "NULL{list()} list", .message = "The argument '.vcov_args' must be a list of arguments to be passed to the function in '.vcov'.")
+    }
+
+    IS_MULTI_CLUST = FALSE
+    if(!missing(cluster) && identical(class(cluster), "list")){
+        IS_MULTI_CLUST = TRUE
+
+        check_value(cluster, "list len(value)", .value = n_models, .message = "If 'cluster' is a list, it must be of the same length as the number of models.")
+
+        if(!missnull(se)){
+            message("Argument 'se' is ignored, to use 'standard' or 'hetero' standard-errors please place these keywords in the argument 'cluster'.")
+        }
+
+        se = vector("list", n_models)
+        for(m in 1:n_models){
+            if(identical(cluster[[m]], "standard")){
+                se[[m]] = "standard"
+            } else if(identical(cluster[[m]], "hetero")){
+                se[[m]] = "hetero"
+            }
+        }
+    } else if(!missnull(se) && length(se) > 1){
+        IS_MULTI_CLUST = TRUE
+        check_value(se, "character vector len(value)", .value = n_models, .message = "If 'se' is a vector, it must be of the same length as the number of models.")
+
+        cluster = vector("list", n_models)
+    }
+
+    # If se or cluster is provided, we use summary
+    # if is_mult, we'll have to unroll the results
+    check_mult = any(qui_iv <- sapply(all_models, function(x) isTRUE(x$iv)))
+    is_mult = FALSE
+    if(check_mult){
+        stage = unique(stage)
+        # we check if we'll have multiple results
+        if(length(stage) > 1){
+            # Multiple for sure
+            is_mult = TRUE
+        } else if(1 %in% stage && any(sapply(all_models[qui_iv], function(x) length(x$iv_endo_names) > 1))){
+            # Means we have multiple end, so svl first stages
+            is_mult = TRUE
+        }
+    }
+
+    # The following two objects are only used if is_mult
+    all_models_bis = list()
+    iv_times = c()
+    # we'll use iv subtitles only if length(stage) > 1
+    iv_sub = c()
+    for(m in 1:n_models){
+        if(useSummary){
+            if(missing(.vcov)){
+                if(IS_MULTI_CLUST){
+                    x = summary(all_models[[m]], se = se[[m]], cluster = cluster[[m]], dof = dof, stage = stage, nframes_up = 2)
+                } else {
+                    x = summary(all_models[[m]], se = se, cluster = cluster, dof = dof, stage = stage, nframes_up = 2)
+                }
+            } else {
+                x = summary(all_models[[m]], stage = stage, .vcov = .vcov, .vcov_args = .vcov_args, vcov_name = vcov_name)
+            }
+
+        } else {
+            # What do we do if se not provided?
+            # we apply summary only to the ones that are not summaries
+            x = all_models[[m]]
+            if(!"cov.scaled" %in% names(x)){
+                # not a summary => we apply summary to trigger default behavior
+                x = summary(x, dof = dof)
+            }
+        }
+
+        if(is_mult){
+
+            if("fixest_multi" %in% class(x)){
+                data = attr(x, "data")
+                for(i in seq_along(data)){
+                    all_models_bis[[length(all_models_bis) + 1]] = data[[i]]
+                }
+
+                iv_times[m] = length(data)
+            } else {
+                all_models_bis[[length(all_models_bis) + 1]] = x
+                iv_times[m] = 1
+            }
+
+        } else {
+            all_models[[m]] = x
+        }
+    }
+
+    if(is_mult){
+        # We've got mutliple estimations from summary => we expand the subtitles
+        all_models = all_models_bis
+
+        model_names = rep(model_names, iv_times)
+        i_max = rep(iv_times, iv_times)
+        suffix = paste0(".", unlist(lapply(iv_times, seq)))
+        suffix[i_max == 1] = ""
+        model_names = paste0(model_names, suffix)
+
+        if(length(auto_subtitles) > 0){
+            # We expand the subtitles
+            for(i in seq_along(auto_subtitles_clean)){
+                auto_subtitles_clean[[i]] = rep(auto_subtitles_clean[[i]], iv_times)
+            }
+        }
+
+        if(AUTO_SUBTITLES){
+            my_stages = sapply(all_models, function(x) ifelse(is.null(x$iv_stage), 3, x$iv_stage))
+            if(length(unique(my_stages)) > 1){
+                dict_stage = c("First", "Second", " ")
+                auto_subtitles_clean[["IV stages"]] = dict_stage[my_stages]
+            }
+        }
+
+        n_models = length(all_models)
+    }
+
+    if(length(auto_subtitles_clean) > 0){
         for(i in seq_along(auto_subtitles_clean)){
             title = names(auto_subtitles_clean)[i]
             subtitles[[dict_apply(title, dict)]] = dict_apply(auto_subtitles_clean[[i]], dict)
         }
-
     }
 
     # if there are subtitles
@@ -729,23 +878,6 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
         check_value(extraline[[i]], "logical scalar | vector(character, numeric, logical) len(value)", .message = paste0("The elements of argument 'extraline' must be vectors of length ", n_models, " or logical scalars."), .value = n_models)
     }
 
-    # formatting the names (if needed)
-    alternative_names = paste0("model ", 1:n_models)
-    who2replace = sapply(model_names, function(x) length(x) == 0 || x == "")
-    model_names[who2replace] = alternative_names[who2replace]
-    if(length(model_id) == n_models){
-        index = rep(0, max(model_id))
-        sub_index = rep(1, n_models)
-
-        for(i in 1:n_models){
-            id = model_id[i]
-            index[id] = index[id] + 1
-            sub_index[i] = index[id]
-        }
-
-        model_names = paste0("model ", model_id, ".", sub_index)
-    }
-
     # we keep track of the SEs
     se_type_list = list()
 
@@ -768,7 +900,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
     }
 
     #
-    # fitstat ####
+    # ... fitstat ####
     #
 
     if(missing(fitstat_all)){
@@ -853,76 +985,12 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, .vcov,
 
     # end: fitstat
 
-    if(!missing(.vcov)){
-        sysOrigin = sys.parent()
-        mc = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin), expand.dots = FALSE)
-        vcov_name = deparse_long(mc$.vcov)
-    }
-
-    IS_MULTI_CLUST = FALSE
-    if(!missing(cluster) && identical(class(cluster), "list")){
-        IS_MULTI_CLUST = TRUE
-
-        check_value(cluster, "list len(value)", .value = n_models, .message = "If 'cluster' is a list, it must be of the same length as the number of models.")
-
-        if(!missnull(se)){
-            message("Argument 'se' is ignored, to use 'standard' or 'hetero' standard-errors please place these keywords in the argument 'cluster'.")
-        }
-
-        se = vector("list", n_models)
-        for(m in 1:n_models){
-            if(identical(cluster[[m]], "standard")){
-                se[[m]] = "standard"
-            } else if(identical(cluster[[m]], "hetero")){
-                se[[m]] = "hetero"
-            }
-        }
-    } else if(!missnull(se) && length(se) > 1){
-        IS_MULTI_CLUST = TRUE
-        check_value(se, "character vector len(value)", .value = n_models, .message = "If 'se' is a vector, it must be of the same length as the number of models.")
-
-        cluster = vector("list", n_models)
-
-    }
-
     #
-    # Loop ####
+    # ... Loop ####
     #
 
     for(m in 1:n_models){
-
-        # If se or cluster is provided, we use summary
-        if(useSummary){
-
-            if(missing(.vcov)){
-
-                if(IS_MULTI_CLUST){
-                    x = summary(all_models[[m]], se = se[[m]], cluster = cluster[[m]], dof = dof, nframes_up = 2)
-                } else {
-                    x = summary(all_models[[m]], se = se, cluster = cluster, dof = dof, nframes_up = 2)
-                }
-
-
-            } else {
-                # We check the arguments
-                check_arg(.vcov, "function", .message = "The argument '.vcov' must be a function to compute the variance-covariance matrix.")
-                check_arg_plus(.vcov_args, "NULL{list()} list", .message = "The argument '.vcov_args' must be a list of arguments to be passed to the function in '.vcov'.")
-
-                x = summary(all_models[[m]], .vcov = .vcov, .vcov_args = .vcov_args, vcov_name = vcov_name)
-
-            }
-
-
-        } else {
-            # What do we do if se not provided?
-            # we apply summary only to the ones that are not summaries
-            x = all_models[[m]]
-            if(!"cov.scaled" %in% names(x)){
-                # not a summary => we apply summary to trigger default behavior
-                x = summary(x, dof = dof)
-            }
-
-        }
+        x = all_models[[m]]
         se_type_list[[m]] = attr(x$se, "type")
 
         # family
