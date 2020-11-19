@@ -2035,7 +2035,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
                 stop("In the evaluation of the 'post' variable: ", enumerate_items(pblm, "is"), " not in the data set.")
             }
 
-            post_var = try(eval(pipe, base), silent = TRUE)
+            post_var = try(eval(pipe[[2]], base), silent = TRUE)
             if("try-error" %in% class(post_var)){
                 stop("Evaluation of the 'post' variable raises and error: \n", treat_var)
             }
