@@ -290,7 +290,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' summary(est_pois, .vcov = vcovCL, cluster = trade[, c("Destination", "Product")])
 #'
 #'
-summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), .vcov, lean = FALSE, forceCovariance = FALSE, keepBounded = FALSE, n, ...){
+summary.fixest = function(object, se, cluster, dof = getFixest_dof(), .vcov, stage = 2, lean = FALSE, forceCovariance = FALSE, keepBounded = FALSE, n, ...){
 	# computes the clustered SD and returns the modified vcov and coeftable
 
 	if(!is.null(object$onlyFixef)){
@@ -311,8 +311,11 @@ summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), .vcov, le
 	    }
 	}
 
+	check_arg(stage, "integer vector no na len(,2) GE{1} LE{2}")
+
 	check_arg(lean, "logical scalar")
-	check_arg(n, "integer scalar GE{1}")
+
+	check_value(n, "integer scalar GE{1}", .arg_name = "n")
 	if(!missing(n)){
 	    object$n_print = n
 	}
@@ -322,6 +325,57 @@ summary.fixest <- function(object, se, cluster, dof = getFixest_dof(), .vcov, le
 	} else {
 		nframes_up = dots$nframes_up + 1
 	}
+
+	if(!missing(stage)){
+	    if(isTRUE(object$iv)){
+	        if(object$iv_stage == 1){
+                warning("Argument 'stage' is valid only for the second stage of IV estimations.")
+	        }
+	    } else {
+	        warning("Argument 'stage' is valid only for IV estimations.")
+        }
+	}
+
+
+	# IV
+	if(isTRUE(object$iv) && !isTRUE(dots$iv)){
+	    stage = unique(stage)
+	    res = list()
+
+	    stage_names = c()
+
+	    for(s in seq_along(stage)){
+	        if(stage[s] == 1){
+	            if("fixest" %in% class(object$iv_first_stage)){
+	                res[[length(res) + 1]] = summary(object$iv_first_stage, se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nframes_up = nframes_up + 1, iv = TRUE)
+
+	                stage_names[length(stage_names) + 1] = paste0("First stage: ", deparse_long(object$iv_first_stage$fml[[2]]))
+
+	            } else {
+	                for(i in seq_along(object$iv_first_stage)){
+	                    res[[length(res) + 1]] = summary(object$iv_first_stage[[i]], se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nframes_up = nframes_up + 1, iv = TRUE)
+
+	                    stage_names[length(stage_names) + 1] = paste0("First stage: ", names(object$iv_first_stage)[i])
+	                }
+	            }
+	        } else {
+	            res[[length(res) + 1]] = summary(object, se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nframes_up = nframes_up + 1, iv = TRUE)
+	            stage_names[length(stage_names) + 1] = "Second stage"
+	        }
+	    }
+
+	    if(length(res) == 1){
+	        return(res[[1]])
+	    }
+
+	    index = list("iv" = length(res))
+	    all_names = list("iv" = stage_names)
+	    res_multi = setup_multi(index, all_names, res)
+	    attr(res_multi, "print_request") = "long"
+
+	    return(res_multi)
+	}
+
 
 	# The new VCOV
 	if(!missnull(.vcov)){
