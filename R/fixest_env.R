@@ -679,6 +679,8 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 stop("The number of rows of X (", nrow(X), ") must be of the same dimension as y (", nobs, ").")
             }
 
+            linear.mat = X
+
             # we coerce to matrix (avoids sparse matrix) + transform into double
             if(!is.matrix(linear.mat) || is.integer(linear.mat[1])){
                 linear.mat = as.matrix(X) * 1
@@ -2111,7 +2113,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     # Other
     assign("family", family, env)
     assign("famFuns", famFuns, env)
-    assign("fml", fml, env)
+    assign("fml", fml_linear, env)
     assign("origin", origin, env)
     assign("origin_type", origin_type, env)
     assign("warn", warn, env)
@@ -2894,7 +2896,7 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
         if(do_iv){
             # LHS
             iv_lhs = get("iv_lhs", env)
-            for(i in seq_along(iv.lhs)){
+            for(i in seq_along(iv_lhs)){
                 iv_lhs[[i]] = iv_lhs[[i]][obs2keep]
             }
             assign("iv_lhs", iv_lhs, new_env)

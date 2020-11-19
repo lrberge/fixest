@@ -322,9 +322,6 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	    assign("do_multi_lhs", FALSE, env)
 	    assign("do_multi_rhs", FALSE, env)
 	    do_iv = get("do_iv", env)
-	    if(do_iv){
-	        n_inst = get("n_inst", env)
-	    }
 
 	    fml = get("fml", env)
 	    lhs_names = get("lhs_names", env)
@@ -612,6 +609,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	                # We need to GET them => they have been modified in my_env
 	                iv_lhs = get("iv_lhs", my_env)
 	                iv.mat = get("iv.mat", my_env)
+	                n_inst = ncol(iv.mat)
 	            }
 
 	            if(isFixef){
