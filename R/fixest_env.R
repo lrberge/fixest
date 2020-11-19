@@ -1201,7 +1201,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
         if(is.list(iv_lhs)){
             # we check the consistency
-            iv_lhs_names = eval(parse(text = gsub("^list\\(", "stepwise(", lhs_text2eval)))
+            iv_lhs_names = eval(parse(text = gsub("^list\\(", "stepwise(", iv_lhs_text2eval)))
 
             n_all = lengths(iv_lhs)
             if(!all(n_all == n_all[1])){
@@ -1241,12 +1241,14 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
         # RHS
         #
 
-        if(all.vars(iv_fml_parts[[2]]) == 0){
+        if(length(all.vars(iv_fml_parts[[2]])) == 0){
             stop("In the IV part, the RHS must contain at least one variable.")
         }
 
         iv.mat = error_sender(fixest_model_matrix(fml_iv, data, fake_intercept = TRUE),
                               "Problem in the IV part. Evaluation of the right-hand-side raises an error: ")
+
+        inst_names = attr(terms(fml_iv), "term.labels")
 
         # NAs
         info = cpppar_which_na_inf_mat(iv.mat, nthreads)
@@ -1762,6 +1764,12 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                 varnames = c(nonlinear.varnames, linear.varnames)
             }
         }
+
+    }
+
+    if(do_iv && "(Intercept)" %in% colnames(iv.mat)){
+        var2remove = which(colnames(iv.mat) == "(Intercept)")
+        iv.mat = iv.mat[, -var2remove, drop = FALSE]
     }
 
 
@@ -2319,6 +2327,13 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     if(!is.null(fml_no_xpd)) res$fml_no_xpd = fml_no_xpd
 
     if(isFit) res$fromFit = TRUE
+
+    if(do_iv){
+        res$iv = TRUE
+        res$iv_inst_names = inst_names
+        res$iv_n_inst = ncol(iv.mat)
+        res$iv_endo_names = iv_lhs_names
+    }
 
     # nber of params
     K = length(params)
