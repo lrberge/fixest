@@ -50,7 +50,7 @@ setFixest_dict(c(Ozone = "Ozone (ppb)", Solar.R = "Solar Radiation (Langleys)",
                  Wind = "Wind Speed (mph)", Temp = "Temperature"))
 
 etable(est_noFE, est_1FE, est_2FE, est_poly, est_slopes, cluster = "Day", tex = TRUE,
-       group = list("Temperature (cubic)" = "poly"), notes = "Estimation of 5 models.")
+       group = list("Temperature (cubic)" = "%poly"), notes = "Estimation of 5 models.")
 
 ```
 
@@ -69,37 +69,16 @@ The argument `style` defines how the table looks. It allows an in-depth customiz
 
 ![](https://github.com/lrberge/fixest/blob/master/vignettes/images/etable/style_explanation.png?raw=true)
 
-The argument `style` must be a list, the names of which correspond to the different components. Each element of this list must be a single character string of the form `"keyword1:value1; keyword2:value; etc"`. The missing components fall back to their default values. The components, with the keywords they accept and their defaults are:
+The argument `style` only accepts outputs from the function of the same name. That function is documented and describes the different components that can be found in the previous illustration. 
 
- - **depvar**: *title*. Default `"title:Dependent Variable(s):"`.
- - **model**: *title, format*. Default `"title:Model:; format:(1)"`. In `format`, you can use the special values 1, i, I, a or A; the corresponding values will be increased across the model columns.
- - **var**: *title*. Default `"title:\\emph{Variables}"`.
- - **fixef**: *title, prefix, suffix, where*. Default `"title:\\emph{Fixed-effects}; where:var"`. Valid values of `where` are "var" or "stats".
- - **slopes**: *title, format*.  Default `"title:\\emph{Varying Slopes}; format:__var__ (__slope__)"`. In `format`, the special values \_\_var\_\_ and \_\_slope\_\_ are replaced with the corresponding labels of the variables and of the slope.
- - **stats**: *title*.  Default `"title:\\emph{Fit statistics}"`.
- - **notes**: *title*.  Default `"title:\\emph{\\medskip Notes:} "`.
- - **lines**: *top, foot, bottom, sep*.  Default `"top:\\tabularnewline\\toprule\\toprule;bottom:;foot:\\bottomrule\\bottomrule;sep:\\midrule"`.
-
-Missing keywords are considered to be equal to the empty string.
-
-Now the `style` argument is illustrated along with the modification of default values.
+The function style has two starting points (in the argument `main`), either the style of the first table displayed, either a much more compact style named "aer". The "aer" is illustrated by changing the default style.
 
 #### Changing the default values
 
 To permanently change the default values for function `etable`, just use the function `setFixest_etable`:
 
 ```{r}
-new_style = list(lines = "top:\\toprule; bottom:\\bottomrule",
-                 var = "title:\\midrule", # cleans the title but keeps line
-                 depvar = "", # cleans the title
-                 model = "format:$Model_{I}$",  # cleans the titles + changes model format
-                 fixef = "title: ; suffix: fixed effects; where:stats",
-                 # fixef: cleans the titles + adds a suffix + places after the stats
-                 slopes = "format:__var__ $\\times $ __slope__",
-                 stats = "title: ") # cleans the title but adds an empty line
-
-setFixest_etable(fitstat = ~r2, signifCode = NA, yesNo = "$\\checkmark$",
-                 tablefoot = FALSE, style = new_style)
+setFixest_etable(style = style(main = "aer"), fitstat = ~r2, signifCode = NA)
 ```
 
 And now, using the exact same line of code as in the first example, we obtain a table with a different style:
@@ -107,7 +86,7 @@ And now, using the exact same line of code as in the first example, we obtain a 
 
 ```{r, results = 'hide'}
 etable(est_noFE, est_1FE, est_2FE, est_poly, est_slopes, cluster = "Day", tex = TRUE,
-       group = list("Temperature (cubic)" = "poly"), notes = "Estimation of 5 models.")
+       group = list("Temperature (cubic)" = "%poly"), notes = "Estimation of 5 models.")
 ```
 
 ![](https://github.com/lrberge/fixest/blob/master/vignettes/images/etable/table_new_style.PNG?raw=true)
