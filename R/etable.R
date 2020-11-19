@@ -141,11 +141,13 @@
 #' # You can modify many parameters with the argument style
 #'
 #' # To drop the headers before each section, use:
-#' style_noHeaders = list(var="", fixef="suffix: FE", stats = "")
+#' # Note that a space adds an extra line
+#' style_noHeaders = style(var.title = "", fixef.title = "", stats.title = " ")
 #' etable(est1, est2, dict = dict, tex = TRUE, style = style_noHeaders)
 #'
-#' # To change the lines of the table
-#' style_lines = list(lines = "top:\\toprule;bottom:\\bottomrule;sep:\\midrule;foot:\\midrule")
+#' # To change the lines of the table + dropping the table footer
+#' style_lines = style(line.top = "\\toprule", line.bottom = "\\bottomrule",
+#'                     tablefoot = FALSE)
 #' etable(est1, est2, dict = dict, tex = TRUE, style = style_lines)
 #'
 #' #
@@ -420,8 +422,9 @@ esttable = function(..., se=c("standard", "hetero", "cluster", "twoway", "threew
 }
 
 results2formattedList = function(..., se, dof = getFixest_dof(), cluster, stage = 2, .vcov, .vcov_args = NULL, digits = 4, fitstat_all, sdBelow=TRUE, dict, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), coefstat = "se", ci = 0.95, label, subtitles, title, float = FALSE, replace = FALSE, keepFactors = FALSE, tex = FALSE, useSummary, dots_call, powerBelow, interaction.combine, convergence, family, drop, order, keep, file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, depvar = FALSE, style = NULL, notes = NULL, group = NULL, extraline=NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube")){
-    # This function is the core of the functions esttable and esttex
+    # This function is the core of the function etable
 
+    set_up(1)
 
     # Setting the default values (we take extra care for "style")
     if(tex){
@@ -460,9 +463,8 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, stage 
     # Full control
     #
 
-    set_up(1)
     # => we also allow lists (of fixest objects)
-    check_arg(..., "class(fixest, fixest_multi) | list mbt")
+    check_arg(..., "class(fixest, fixest_multi, fixest_list) | list mbt")
 
     check_arg(digits, "integer scalar GE{1}")
     check_arg(title, "character scalar")
@@ -1115,7 +1117,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, stage 
                 slope_format = style$slopes.format
                 slope_var_full = c()
                 for(i in seq_along(slope_vars_name)){
-                    slope_var_full[i] = gsub("\\_\\_slope\\_\\_", slope_fe_name[i], gsub("\\_\\_var\\_\\_", slope_vars_name[i], slope_format, fixed = TRUE), fixed = TRUE)
+                    slope_var_full[i] = gsub("__slope__", slope_fe_name[i], gsub("__var__", slope_vars_name[i], slope_format, fixed = TRUE), fixed = TRUE)
                 }
 
             } else {
@@ -1611,16 +1613,7 @@ etable_internal_latex = function(info){
 
     for(i in seq_along(group)){
         gi = group[[i]]
-        present = rep(FALSE, n_models)
-        for(v in gi){
-            if(grepl("^%", v)){
-                # original names
-                v = substr(v, 2, nchar(v))
-                present = present | sapply(var_list, function(x) any(grepl(v, names(x))))
-            } else {
-                present = present | sapply(var_list, function(x) any(grepl(v, x)))
-            }
-        }
+        present = sapply(var_list, function(x) any(keep_apply(x, gi, TRUE)))
 
         group[[i]] = present
     }
@@ -2110,16 +2103,8 @@ etable_internal_df = function(info){
 
     for(i in seq_along(group)){
         gi = group[[i]]
-        present = rep(FALSE, n_models)
-        for(v in gi){
-            if(grepl("^%", v)){
-                # original names
-                v = substr(v, 2, nchar(v))
-                present = present | sapply(var_list, function(x) any(grepl(v, names(x))))
-            } else {
-                present = present | sapply(var_list, function(x) any(grepl(v, x)))
-            }
-        }
+
+        present = sapply(var_list, function(x) any(keep_apply(x, gi, TRUE)))
 
         group[[i]] = present
     }
@@ -2346,10 +2331,10 @@ etable_internal_df = function(info){
 
 
 #' @rdname etable
-setFixest_etable = function(digits = 4, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, signifCode, float, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, yesNo = c("Yes", "No"), family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, reset = FALSE){
+setFixest_etable = function(digits = 4, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, signifCode, float, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, reset = FALSE){
 
     # cat(names(formals(setFixest_etable)), sep = '", "')
-    arg_list = c("digits", "fitstat", "coefstat", "ci", "sdBelow", "keep", "drop", "order", "dict", "signifCode", "float", "fixef_sizes", "fixef_sizes.simplify", "yesNo", "family", "powerBelow", "interaction.combine", "depvar", "style", "notes", "group", "extraline", "placement", "drop.section", "reset")
+    arg_list = c("digits", "fitstat", "coefstat", "ci", "sdBelow", "keep", "drop", "order", "dict", "signifCode", "float", "fixef_sizes", "fixef_sizes.simplify", "family", "powerBelow", "interaction.combine", "depvar", "style", "notes", "group", "extraline", "placement", "drop.section", "reset")
 
     #
     # Argument checking => strong since these will become default values
@@ -2391,8 +2376,6 @@ setFixest_etable = function(digits = 4, fitstat, coefstat = c("se", "tstat", "co
     check_arg(interaction.combine, "character scalar")
 
     check_arg(notes, "character vector no na")
-
-    check_arg(yesNo, "character vector no na len(,2)")
 
     check_arg(powerBelow, "integer scalar LE{-1}")
 
@@ -2494,7 +2477,7 @@ tex_multicol = function(x){
 #'
 #' This function describes the style of Latex tables to be exported with the function \code{\link[fixest]{etable}}.
 #'
-#' @param main Either "base", "aer" or "qje". Defines the basic style to start from. The styles "aer" and "qje" are almost identical and only differ on the top/bottom lines.
+#' @param main Either "base", "aer" or "qje". Defines the basic style to start from. The styles "aer" and "qje" are almost identical and only differ on the top/bottom lines. (Note that checkmarks, used in "aer", are in the \code{amssymb} package.)
 #' @param depvar.title A character scalar. The title of the line of the dependent variables (defaults to \code{"Dependent variable(s):"} if \code{main = "base"} (the 's' appears only if just one variable) and to \code{""} if \code{main = "aer"}).
 #' @param model.title A character scalar. The title of the line of the models (defaults to \code{"Model:"} if \code{main = "base"} and to \code{""} if \code{main = "aer"}).
 #' @param model.format A character scalar. The value to appear on top of each column. It defaults to \code{"(1)"}. Note that 1, i, I, a and A are special characters: if found, their values will be automatically incremented across columns.
@@ -2514,7 +2497,7 @@ tex_multicol = function(x){
 #' @param tablefoot A logical scalar. Whether or not to display a footer within the table. Defaults to \code{TRUE} if \code{main = "aer"}) and \code{FALSE} if \code{main = "aer"}).
 #' @param tablefoot.title A character scalar. Only if \code{tablefoot = TRUE}, value to appear before the table footer. Defaults to \code{"\\bottomrule\\bottomrule"} if \code{main = "base"}.
 #' @param tablefoot.value A character scalar. The notes to be displayed in the footer. Defaults to \code{"default"} if \code{main = "base"}, which leads to custom footers informing on the type of standard-error and significance codes, depending on the estimations.
-#' @param yesNo A character vector of length 1 or 2. Defaults to \code{"Yes"} if \code{main = "base"} and to \code{"$\\checkmark$"} if \code{main = "aer"}. This is the message displayed when a given fixed-effect is (or is not) included in a regression. If \code{yesNo} is of length 1, then the second element is the empty string.
+#' @param yesNo A character vector of length 1 or 2. Defaults to \code{"Yes"} if \code{main = "base"} and to \code{"$\\checkmark$"} if \code{main = "aer"} (from package \code{amssymb}). This is the message displayed when a given fixed-effect is (or is not) included in a regression. If \code{yesNo} is of length 1, then the second element is the empty string.
 #' @param tabular Character scalar equal to "normal" (default), "*" or "X". Represents the type of tabular to export.
 #'
 #' @return
@@ -2553,7 +2536,7 @@ style = function(main = "base", depvar.title, model.title, model.format, line.to
     # Checking
     check_arg_plus(main, "match(base, aer, qje)")
 
-    check_arg("character scalar", depvar.title, model.title, line.top, lines.sep, line.bottom, var.title)
+    check_arg("character scalar", depvar.title, model.title, line.top, line.bottom, var.title)
     check_arg("character scalar", fixef.title, fixef.prefix, fixef.suffix, slopes.title, slopes.format)
     check_arg("character scalar", fixef_sizes.prefix, fixef_sizes.suffix, stats.title)
     check_arg("character scalar", notes.title, tablefoot.title)

@@ -4483,7 +4483,7 @@ dict_apply = function(x, dict = NULL){
     x
 }
 
-keep_apply = function(x, keep = NULL){
+keep_apply = function(x, keep = NULL, logical = FALSE){
 
     if(missing(keep) || length(keep) == 0){
         return(x)
@@ -4513,6 +4513,8 @@ keep_apply = function(x, keep = NULL){
             qui_keep = qui_keep | grepl(var2keep, vect2check)
         }
     }
+
+    if(logical) return(qui_keep)
 
     res[qui_keep]
 }
