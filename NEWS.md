@@ -22,6 +22,8 @@
   - Fix bug when nb_FE >= 2 and the data was large (thanks to @zozotintin [#56](https://github.com/lrberge/fixest/issues/56)). 
   
   - Fix bug display of how the standard-errors were clustered in `etable`.
+  
+  - Fix bug occurring when lags were used in combination with combined fixed-effects (i.e. fe1 ^ fe2) (thanks to @SuperMayo [#59](https://github.com/lrberge/fixest/issues/59)).
 
 #### Improvements of the internal algorithm
 
@@ -31,17 +33,56 @@
  
  - All estimations: smarter handling of the intercept, thus avoiding the reconstruction of the design matrix.
  
-#### Major user visible changes
+#### IV
 
-  - Multiple estimations:
-  
-    * New arguments `split` and `fsplit`: you can now perform split sample estimations.
+ - IV estimations are now supported. It is summoned by adding a formula defining the endogenous regressors and the instruments after a pipe.
+```R
+base = iris
+names(base) = c("y", "x1", "x_endo", "x_inst", "species")
+base$endo_bis = 0.5 * base$y + 0.3 * base$x_inst + rnorm(150)
+base$inst_bis = 0.2 * base$x_endo + 0.3 * base$endo_bis + rnorm(150)
+
+# The endo/instrument is defined in a formula past a pipe
+res_iv1 = feols(y ~ x1 | x_endo ~ x_inst, base)
+
+# Same with the species fixed-effect
+res_iv2 = feols(y ~ x1 | species | x_endo ~ x_inst, base)
+
+# To add multiple endogenous regressors: embed them in c()
+res_iv3 = feols(y ~ x1 | c(x_endo, x_endo_bis) ~ x_inst + x_inst_bis, base)
+
+```
+ 
+#### Multiple estimations
+
+  - New arguments `split` and `fsplit`: you can now perform split sample estimations (`fsplit` adds the full sample).
     
-    * Estimations for multiple left-hand-sides can be done at once by wrapping the variables in `c()`.
+  - Estimations for multiple left-hand-sides can be done at once by wrapping the variables in `c()`.
     
-    * Stepwise estimations can be performed with the new stepwise functions (`sw`, `sw0`, `csw` and `csw0`).
+  - In the right-hand-side, stepwise estimations can be performed with the new stepwise functions (`sw`, `sw0`, `csw` and `csw0`).
     
-    * The object returned is of class `fixest_multi`. You can easily navigate through the results with its subset methods.
+  - The object returned is of class `fixest_multi`. You can easily navigate through the results with its subset methods.
+
+```R
+aq = airquality[airquality$Month %in% 5:6, ]
+est_split = feols(c(Ozone, Solar.R) ~ sw(poly(Wind, 2), poly(Temp, 2)),
+                 aq, split = ~ Month)
+                 
+# By default: sample is the root
+etable(est_split)
+
+# Let's reorder, by considering lhs the root
+etable(est_split[lhs = 1:.N])
+
+# Selecting only one LHS and RHS
+etable(est_split[lhs = "Ozone", rhs = 1])
+
+# Taking the first root (here sample = 5)
+etable(est_split[I = 1])
+
+# The first and last estimations
+etable(est_split[i = c(1, .N)])
+```
     
 #### New features in etable
 
@@ -63,7 +104,11 @@
 
  - In all estimations:
     
-    * New arguments `subset`, `split`, `fsplit`.
+    * `subset`: regular subset (long overdue).
+    
+    * `split`, `fsplit`: to perform split sample estimations.
+    
+    * `se`, `cluster`: to cluster the standard-errors during the call.
 
 ## Changes in version 0.7.1 (27-10-2020)
 
