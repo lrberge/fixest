@@ -6571,6 +6571,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 
 						# we check the variables are there
 						# we use all_vars and not var2fetch: safer to catch all variables (case clustvar^datavar)
+
 						if(any(!all_vars %in% names(data))){
 							var_pblm = setdiff(all_vars, names(data))
 							stop("In argument 'cluster', the variable", enumerate_items(var_pblm, "s.is"), " not present in the original dataset. Alternatively, use a list of vectors.", suffix)
@@ -7545,11 +7546,18 @@ rep.fixest_list = function(x, times = 1, each = 1, cluster, ...){
         return(dots)
     }
 
-    if(length(dots) == 1 && all(sapply(dots[[1]], function(x) "fixest" %in% class(x)))){
-        res = dots[[1]]
-        class(res) = "fixest_list"
+    if(length(dots) == 1){
+        if(all(sapply(dots[[1]], function(x) "fixest" %in% class(x)))){
+            res = dots[[1]]
+            class(res) = "fixest_list"
+            return(res)
+        }
 
-        return(res)
+        if("fixest_multi" %in% class(dots[[1]])){
+            res = attr(dots[[1]], "data")
+            class(res) = "fixest_list"
+            return(res)
+        }
     }
 
     res = list()
@@ -8166,8 +8174,6 @@ getFixest_fml = function(){
 #' @source
 #' This data has been generated from \pkg{R}.
 #'
-#' @seealso
-#' The DiD functions of the package \pkg{fixest} are \code{\link[fixest]{did_estimate_yearly_effects}} and \code{\link[fixest]{did_plot_yearly_effects}}.
 #'
 #'
 #'
