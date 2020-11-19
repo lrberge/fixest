@@ -10,6 +10,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
                        fixef, NL.start, lower, upper, NL.start.init,
                        offset, subset, split = NULL, fsplit = NULL, linear.start = 0, jacobian.method = "simple",
                        useHessian = TRUE, hessian.args = NULL, opt.control = list(),
+                       cluster, se,
                        y, X, fixef_mat, panel.id, fixef.rm = "perfect",
                        nthreads = getFixest_nthreads(),
                        verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000, collin.tol = 1e-14,
@@ -58,7 +59,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
     #
     # Arguments control
-    main_args = c("fml", "data", "panel.id", "offset", "subset", "split", "fsplit", "fixef.rm", "fixef.tol", "fixef.iter", "fixef", "nthreads", "verbose", "warn", "notes", "combine.quick", "start", "only.env", "mem.clean")
+    main_args = c("fml", "data", "panel.id", "offset", "subset", "split", "fsplit", "cluster", "se", "fixef.rm", "fixef.tol", "fixef.iter", "fixef", "nthreads", "verbose", "warn", "notes", "combine.quick", "start", "only.env", "mem.clean")
     femlm_args = c("family", "theta.init", "linear.start", "opt.control", "deriv.tol", "deriv.iter")
     feNmlm_args = c("NL.fml", "NL.start", "lower", "upper", "NL.start.init", "jacobian.method", "useHessian", "hessian.args")
     feglm_args = c("family", "weights", "glm.iter", "glm.tol", "etastart", "mustart", "collin.tol")
@@ -399,6 +400,19 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
         # fml_full => contains everything // useful in subset only
         fml_full = merge_fml(fml_linear, fml_fixef, fml_iv)
+    }
+
+    # We need to get the variables from the argument cluster and add them to fml_full
+    # so that subset works properly
+    if(!missnull(cluster)){
+
+        check_arg(cluster, "os formula | character vector")
+
+        if(is.character(cluster)){
+            cluster = xpd(~..clu, ..clu = cluster)
+        }
+
+        fml_full = xpd(..left ~ ..right | ..clu, ..left = fml_full[[2]], ..right = fml_full[[3]], ..clu = cluster)
     }
 
     #
@@ -1256,6 +1270,71 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
 
     #
+    # ... Cluster ####
+    #
+
+    msgNA_cluster = ""
+    do_summary = FALSE
+    if(!missnull(cluster)){
+        # cluster was checked already before subset => to get the right variables
+        # Here cluster is a formula
+
+        do_summary = TRUE
+
+        cluster_terms = fixef_terms(cluster)
+        if(any(cluster_terms$slope_flag != 0)){
+            stop("You cannot use variables with varying slopes in the argument 'cluster'.")
+        }
+
+        cluster_terms = cluster_terms$fe_vars
+        if(isFixef && all(cluster_terms %in% fixef_terms_full$fe_vars)){
+                # we do nothing => the algo will use the FE ids
+        } else {
+            cluster = error_sender(prepare_df(cluster_terms, data, TRUE),
+                                   "Problem evaluating the argument 'cluster':\n")
+
+            if(anyNA(cluster)){
+                isNA_cluster = rowSums(is.na(cluster)) > 0
+
+                ANY_NA = TRUE
+                anyNA_sample = TRUE
+                isNA_sample = isNA_sample | isNA_cluster
+                msgNA_cluster = paste0("cluster: ", numberFormatNormal(sum(isNA_cluster)))
+
+                if(mem.clean){
+                    rm(isNA_cluster)
+                    gc2trig = TRUE
+                }
+
+            }
+        }
+    } else {
+        cluster = NULL
+    }
+
+    if(!missnull(se)){
+        do_summary = TRUE
+
+        check_arg(se, "match", .choices = c("standard", "white", "hetero", "cluster", "twoway", "threeway", "fourway", "1", "2", "3", "4"), .message = "Argument argument 'se' should be equal to one of 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
+
+        # we check consistency
+        if(isFixef){
+            n_fe = length(fixef_terms_full$fe_vars)
+        } else {
+            n_fe = 0
+        }
+
+        n_clu = c(cluster = 1, twoway = 2, threeway = 3, fourway = 4)[se]
+        if(missnull(cluster) && !is.na(n_clu) && n_clu > n_fe){
+            stop("In argument 'se': ", n_letter(n_clu), "-way clustering cannot be done with the current estimation which has ", ifelse(n_fe == 0, "no fixed-effect.", paste0("only ", n_letter(n_fe), " fixed-effects.")), " Please provide the argument cluster.")
+        }
+
+    } else {
+        se = NULL
+    }
+
+
+    #
     # Fixed-effects ####
     #
 
@@ -1441,7 +1520,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             # we remove all NAs obs + 0 weight obs
             gc2trig = TRUE
 
-            details = c(msgNA_y, msgNA_L, msgNA_iv, msgNA_NL, msgNA_fixef, msgNA_slope, msgNA_offset, msgNA_weight, msgNA_split)
+            details = c(msgNA_y, msgNA_L, msgNA_iv, msgNA_NL, msgNA_fixef, msgNA_slope, msgNA_offset, msgNA_weight, msgNA_split, msgNA_cluster)
             msg_details = paste(details[nchar(details) > 0], collapse = ", ")
 
             nbNA = sum(isNA_sample)
@@ -1548,7 +1627,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
             nbNA = sum(isNA_sample)
 
-            details = c(msgNA_y, msgNA_L, msgNA_iv, msgNA_NL, msgNA_offset, msgNA_weight, msgNA_split)
+            details = c(msgNA_y, msgNA_L, msgNA_iv, msgNA_NL, msgNA_offset, msgNA_weight, msgNA_split, msgNA_cluster)
             msg_details = paste(details[nchar(details) > 0], collapse = ", ")
 
             if(anyNA_sample){
@@ -1585,6 +1664,10 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     if(show_notes && length(notes) > 0){
         message(ifsingle(notes, "NOTE: ", "NOTES: "), paste(notes, collapse = "\n       "))
     }
+
+    #
+    # NA removal ####
+    #
 
     # NA & problem management
     if(length(obs2remove) > 0){
@@ -1662,6 +1745,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     if(Q > 0 && onlySlope == FALSE){
         # If there is a linear intercept, we withdraw it
         # We drop the intercept:
+
         if(isLinear && "(Intercept)" %in% colnames(linear.mat)){
             var2remove = which(colnames(linear.mat) == "(Intercept)")
             if(ncol(linear.mat) == length(var2remove)){
@@ -2025,6 +2109,13 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     assign("warn", warn, env)
     assign("mem.clean", mem.clean, env)
     assign("nthreads", nthreads, env)
+
+    # summary
+    assign("do_summary", do_summary, env)
+    if(do_summary){
+        assign("cluster", cluster, env)
+        assign("se", se, env)
+    }
 
     # Multi
     assign("do_multi_rhs", multi_rhs, env)
@@ -2778,6 +2869,49 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
                 assign("linear.mat", rhs, new_env)
             }
             assign("isLinear", isLinear, new_env)
+        }
+
+        #
+        # The IV
+        #
+
+        do_iv = get("do_iv", env)
+        if(do_iv){
+            # LHS
+            iv_lhs = get("iv_lhs", env)
+            for(i in seq_along(iv.lhs)){
+                iv_lhs[[i]] = iv_lhs[[i]][obs2keep]
+            }
+            assign("iv_lhs", iv_lhs, new_env)
+
+            # RHS
+            iv.mat = get("iv.mat", env)
+            iv.mat = iv.mat[obs2keep, , drop = FALSE]
+
+            only_0 = cpppar_check_only_0(iv.mat, nthreads)
+            if(all(only_0 == 1)){
+                # Can happen if instrument is a factor in split sample
+                stop("After removing NAs, not a single instrument is different from 0.")
+
+            } else if(any(only_0 == 1)){
+                iv.mat = iv.mat[, only_0 == 0, drop = FALSE]
+            }
+
+            assign("iv.mat", iv.mat, new_env)
+
+        }
+
+        #
+        # The cluster
+        #
+
+        do_summary = get("do_summary", env)
+        if(do_summary){
+            cluster = get("cluster", env)
+            if(is.data.frame(cluster)){
+                cluster = cluster[obs2keep, , drop = FALSE]
+                assign("cluster", cluster, new_env)
+            }
         }
 
         #
