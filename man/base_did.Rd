@@ -26,7 +26,4 @@ data(base_did)
 \description{
 This data has been generated to illustrate the use of difference in difference functions in package \pkg{fixest}. This is a balanced panel of 104 individuals and 10 periods. About half the individuals are treated, the treatment having a positive effect on the dependent variable \code{y} after the 5th period. The effect of the treatment on \code{y} is gradual.
 }
-\seealso{
-The DiD functions of the package \pkg{fixest} are \code{\link[fixest]{did_estimate_yearly_effects}} and \code{\link[fixest]{did_plot_yearly_effects}}.
-}
 \keyword{datasets}

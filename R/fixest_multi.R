@@ -312,8 +312,6 @@ print.fixest_multi = function(x, ...){
 #'
 #' Extracts single elements from multiple \code{fixest} estimations.
 #'
-#' @method sub-sub- fixest_multi
-#'
 #' @inherit print.fixest_multi seealso
 #' @inheritParams print.fixest_multi
 #'
@@ -350,7 +348,6 @@ print.fixest_multi = function(x, ...){
 #'
 #' Subset a fixest_multi object using different keys.
 #'
-#' @method sub- fixest_multi
 #'
 #' @inherit print.fixest_multi seealso
 #' @inheritParams print.fixest_multi
@@ -358,6 +355,7 @@ print.fixest_multi = function(x, ...){
 #' @param sample An integer vector of a character vector. It represents the \code{sample} identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation was a split sample. You can use \code{.N} to refer to the last element.
 #' @param lhs An integer vector of a character vector. It represents the left-hand-sides identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation contained multiple left-hand-sides. You can use \code{.N} to refer to the last element.
 #' @param rhs An integer vector. It represents the right-hand-sides identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation contained multiple right-hand-sides. You can use \code{.N} to refer to the last element.
+#' @param iv An integer vector. It represent the stages of the IV. Note that the length can be greater than 2 when there are multiple endogenous regressors (the first stage corresponding to multiple estimations). Note that the order of the stages depends on the \code{stage} argument from \code{\link[fixest]{summary.fixest}}.
 #' @param i An integer vector. Represents the estimations to extract.
 #' @param I An integer vector. Represents the root element to extract.
 #'
@@ -607,7 +605,6 @@ print.fixest_multi = function(x, ...){
 #'
 #' Extracts an element at the root of a fixest_multi object.
 #'
-#' @method cash- fixest_multi
 #'
 #' @inherit print.fixest_multi seealso
 #' @inheritParams print.fixest_multi

@@ -4,7 +4,7 @@
 \alias{$.fixest_multi}
 \title{Extracts the root of a fixest_multi object}
 \usage{
-\method{cash-}{fixest_multi}(x, name)
+\method{$}{fixest_multi}(x, name)
 }
 \arguments{
 \item{x}{A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to multiple results.}

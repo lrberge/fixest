@@ -4,7 +4,7 @@
 \alias{formula.fixest}
 \title{Extract the formula of a \code{fixest} fit}
 \usage{
-\method{formula}{fixest}(x, type = c("full", "linear", "NL"), ...)
+\method{formula}{fixest}(x, type = c("full", "linear", "iv", "NL"), ...)
 }
 \arguments{
 \item{x}{An object of class \code{fixest}. Typically the result of a \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}} estimation.}

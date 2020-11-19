@@ -13,6 +13,7 @@ etable(
   se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"),
   dof = getFixest_dof(),
   cluster,
+  stage = 2,
   .vcov,
   .vcov_args = NULL,
   digits = 4,
@@ -54,6 +55,7 @@ esttex(
   se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"),
   dof = getFixest_dof(),
   cluster,
+  stage = 2,
   .vcov,
   .vcov_args = NULL,
   digits = 4,
@@ -93,6 +95,7 @@ esttable(
   se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"),
   dof = getFixest_dof(),
   cluster,
+  stage = 2,
   .vcov,
   .vcov_args = NULL,
   coefstat = c("se", "tstat", "confint"),
@@ -128,7 +131,6 @@ setFixest_etable(
   float,
   fixef_sizes = FALSE,
   fixef_sizes.simplify = TRUE,
-  yesNo = c("Yes", "No"),
   family,
   powerBelow = -5,
   interaction.combine = " $\\\\times $ ",
@@ -152,6 +154,8 @@ getFixest_etable()
 \item{dof}{An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{dof}} for this argument. The arguments and defaults of the function \code{\link[fixest]{dof}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "conventional"}, \code{t.df = "conventional"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{dof}} for details.}
 
 \item{cluster}{Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1", "var2")]}, \code{cluster = c("var1", "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster). You can interact two variables using \code{^} with the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.}
+
+\item{stage}{Can be equal to \code{2} (default), \code{1}, \code{1:2} or \code{2:1}. Only used if the object is an IV estimation: defines the stage to which \code{summary} should be applied. If \code{stage = 1} and there are multiple endogenous regressors or if \code{stage} is of length 2, then an object of class \code{fixest_multi} is returned.}
 
 \item{.vcov}{A function to be used to compute the standard-errors of each fixest object. You can pass extra arguments to this function using the argument \code{.vcov_args}. See the example.}
 
@@ -320,11 +324,13 @@ etable(est1, est2, signifCode = c(" A"=0.01, " B"=0.05, " C"=0.1, " D"=0.15, " F
 # You can modify many parameters with the argument style
 
 # To drop the headers before each section, use:
-style_noHeaders = list(var="", fixef="suffix: FE", stats = "")
+# Note that a space adds an extra line
+style_noHeaders = style(var.title = "", fixef.title = "", stats.title = " ")
 etable(est1, est2, dict = dict, tex = TRUE, style = style_noHeaders)
 
-# To change the lines of the table
-style_lines = list(lines = "top:\\\\toprule;bottom:\\\\bottomrule;sep:\\\\midrule;foot:\\\\midrule")
+# To change the lines of the table + dropping the table footer
+style_lines = style(line.top = "\\\\toprule", line.bottom = "\\\\bottomrule",
+                    tablefoot = FALSE)
 etable(est1, est2, dict = dict, tex = TRUE, style = style_lines)
 
 #

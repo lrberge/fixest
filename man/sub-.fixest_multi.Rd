@@ -4,7 +4,7 @@
 \alias{[.fixest_multi}
 \title{Subset a fixest_multi object}
 \usage{
-\method{sub-}{fixest_multi}(x, sample, lhs, rhs, i, I)
+\method{[}{fixest_multi}(x, sample, lhs, rhs, iv, i, I)
 }
 \arguments{
 \item{x}{A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to multiple results.}
@@ -14,6 +14,8 @@
 \item{lhs}{An integer vector of a character vector. It represents the left-hand-sides identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation contained multiple left-hand-sides. You can use \code{.N} to refer to the last element.}
 
 \item{rhs}{An integer vector. It represents the right-hand-sides identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation contained multiple right-hand-sides. You can use \code{.N} to refer to the last element.}
+
+\item{iv}{An integer vector. It represent the stages of the IV. Note that the length can be greater than 2 when there are multiple endogenous regressors (the first stage corresponding to multiple estimations). Note that the order of the stages depends on the \code{stage} argument from \code{\link[fixest]{summary.fixest}}.}
 
 \item{i}{An integer vector. Represents the estimations to extract.}
 
