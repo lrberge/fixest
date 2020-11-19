@@ -6244,7 +6244,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 	suffix = ""
 	if(missnull(se)){
 
-		if(missing(cluster)){
+		if(missnull(cluster)){
 
 		    se_default = getFixest_se()
 
@@ -6306,10 +6306,8 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
     }
 
 	se.val = NULL
-	try(se.val <- match.arg(se, c("standard", "white", "hetero", "cluster", "twoway", "threeway", "fourway", "1", "2", "3", "4")), silent = TRUE)
-	if(is.null(se.val)){
-		stop("Invalid argument 'se'. It should be equal to one of 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
-	}
+
+	se.val = check_arg_plus(se, "match", .choices = c("standard", "white", "hetero", "cluster", "twoway", "threeway", "fourway", "1", "2", "3", "4"), .message = "Argument argument 'se' should be equal to one of 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
 
 	if(se.val == "white") se.val = "hetero"
 
@@ -6670,7 +6668,10 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 				} else if(! (is.list(cluster) && length(cluster) == 1)){
 					stop("For one way clustering, the argument 'cluster' must be either the name of a cluster variable (e.g. \"dum_1\"), a vector (e.g. data$dum_1), a list containing the vector of clusters (e.g. list(data$dum_1)), or a one-sided formula (e.g. ~dum_1). Currently the class of cluster is ", enumerate_items(class(cluster)), ".", suffix)
 
+				} else if(!is.null(names(cluster))){
+				    type_info = paste0(" (", names(cluster), ")")
 				}
+
 			} else if(length(cluster) != nway){
 
 				msgList = "a list of vectors"
@@ -6679,6 +6680,9 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 
 			} else if(!is.list(cluster)){
 				stop("For ", nway, "-way clustering, the argument 'cluster' must be either a vector of cluster variables (e.g. c(\"", paste0("dum_", 1:nway, collapse = "\", \""), "\")), a list containing the vector of clusters (e.g. data[, c(\"", paste0("dum_", 1:nway, collapse = "\", \""), "\")]), or a one-sided formula (e.g. ~", paste0("dum_", 1:nway, collapse = "+"), "). Currently the class of cluster is: ", enumerate_items(class(cluster)), ".", suffix)
+
+			} else if(!is.null(names(cluster))){
+			    type_info = paste0(" (", paste0(names(cluster), collapse = " & "), ")")
 			}
 
 			cluster = as.list(cluster)
