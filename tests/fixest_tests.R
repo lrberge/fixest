@@ -1170,9 +1170,11 @@ names(base) = c("y1", "x1", "x2", "x3", "species")
 base$y2 = 10 + rnorm(150) + 0.5 * base$x1
 base$x4 = rnorm(150) + 0.5 * base$y1
 base$fe2 = rep(letters[1:15], 10)
-base$y2[base$fe2 == "a"] = 0
+base$fe2[50:51] = NA
+base$y2[base$fe2 == "a" & !is.na(base$fe2)] = 0
 base$x2[1:5] = NA
 base$x3[6] = NA
+base$fe3 = rep(letters[1:10], 15)
 
 
 for(id_fun in 1:5){
@@ -1201,21 +1203,21 @@ for(id_fun in 1:5){
 
     cat("__")
 
-    est_multi = estfun(c(y1, y2) ~ x1 + csw0(x2, x3) + x4, base, fsplit = ~species)
+    est_multi = estfun(c(y1, y2) ~ x1 + csw0(x2, x3) + x4 | species + fe2, base, fsplit = ~species)
     k = 1
     all_rhs = c("", "x2", "x3")
     for(s in c("all", "setosa", "versicolor", "virginica")){
         for(lhs in c("y1", "y2")){
             for(n_rhs in 1:3){
                 if(s == "all"){
-                    res = estfun(xpd(..lhs ~ x1 + ..rhs + x4, ..lhs = lhs, ..rhs = all_rhs[1:n_rhs]), base, notes = FALSE)
+                    res = estfun(xpd(..lhs ~ x1 + ..rhs + x4 | species + fe2, ..lhs = lhs, ..rhs = all_rhs[1:n_rhs]), base, notes = FALSE)
                 } else {
-                    res = estfun(xpd(..lhs ~ x1 + ..rhs + x4, ..lhs = lhs, ..rhs = all_rhs[1:n_rhs]), base[base$species == s, ], notes = FALSE)
+                    res = estfun(xpd(..lhs ~ x1 + ..rhs + x4 | species + fe2, ..lhs = lhs, ..rhs = all_rhs[1:n_rhs]), base[base$species == s, ], notes = FALSE)
                 }
 
                 vname = names(coef(res))
                 test(coef(est_multi[[k]])[vname], coef(res))
-                test(se(est_multi[[k]], cluster = "fe2")[vname], se(res, cluster = "fe2"))
+                test(se(est_multi[[k]], cluster = "fe3")[vname], se(res, cluster = "fe3"))
                 k = k + 1
             }
         }

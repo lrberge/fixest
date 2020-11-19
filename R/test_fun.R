@@ -131,7 +131,7 @@ run_test = function(){
 
     parsed_code = parse(text = test_code)
 
-    eval(parsed_code, parent.frame())
+    eval(parsed_code)
 }
 
 
