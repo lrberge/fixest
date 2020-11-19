@@ -501,6 +501,30 @@ summ = function(object, se, cluster, dof = getFixest_dof(), forceCovariance = FA
     eval(mc, parent.frame())
 }
 
+#' @rdname summary.fixest
+summary.fixest_list = function(object, se, cluster, dof = getFixest_dof(), .vcov, stage = 2, lean = FALSE, n, ...){
+
+    dots = list(...)
+    nframes_up = ifelse(is.null(dots$nframes_up), 1, dots$nframes_up + 1)
+
+    res = list()
+    for(i in seq_along(object)){
+        my_res = summary(object[[i]], se = se, cluster = cluster, dof = dof, .vcov = .vcov, stage = stage, lean = lean, n = n, nframes_up = nframes_up, ...)
+
+        # we unroll
+        if("fixest_multi" %in% class(my_res)){
+            data = attr(my_res, "data")
+            for(j in seq_along(data)){
+                res[[length(res) + 1]] = data[[j]]
+            }
+        } else {
+            res[[length(res) + 1]] = my_res
+        }
+    }
+
+    res
+}
+
 
 #' R2s of \code{fixest} models
 #'
@@ -7519,9 +7543,38 @@ rep.fixest_list = function(x, times = 1, each = 1, cluster, ...){
 #' @rdname rep.fixest
 .l = function(...){
 
-    check_arg(..., "mbt class(fixest)")
+    check_arg(..., "mbt class(fixest) | list")
 
-    res = list(...)
+    dots = list(...)
+    if(all(sapply(dots, function(x) "fixest" %in% class(x)))){
+        class(dots) = "fixest_list"
+
+        return(dots)
+    }
+
+    if(length(dots) == 1 && all(sapply(dots[[1]], function(x) "fixest" %in% class(x)))){
+        res = dots[[1]]
+        class(res) = "fixest_list"
+
+        return(res)
+    }
+
+    res = list()
+    for(i in seq_along(dots)){
+        if("fixest" %in% class(dots[[i]])){
+            res[[length(res) + 1]] = dots[[i]]
+        } else {
+            obj = dots[[i]]
+            for(j in seq_along(obj)){
+                if(!"fixest" %in% class(obj[[j]])){
+                    stop("In .l(...), each argument must be either a fixest object, or a list of fixest objects. Problem: The ", n_th(j), " element of the ", n_th(i), " argument (the latter being a list) is not a fixest object.")
+                }
+
+                res[[length(res) + 1]] = obj[[j]]
+            }
+        }
+    }
+
     class(res) = "fixest_list"
     res
 }
