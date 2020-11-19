@@ -12,6 +12,8 @@ feols(
   subset,
   split,
   fsplit,
+  cluster,
+  se,
   panel.id,
   fixef,
   fixef.rm = "none",
@@ -31,7 +33,7 @@ feols(
 )
 }
 \arguments{
-\item{fml}{A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y | fe_1+fe_2}. You can combine two fixed-effects with \code{^}: e.g. \code{fml = z~x+y|fe_1^fe_2}, see details. You can also use variables with varying slopes using square brackets: e.g. in \code{fml = z~y|fe_1[x] + fe_2}, see details. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. The formula \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)} leads to 6 estimation, see details.}
+\item{fml}{A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y | fe_1+fe_2}. You can combine two fixed-effects with \code{^}: e.g. \code{fml = z~x+y|fe_1^fe_2}, see details. You can also use variables with varying slopes using square brackets: e.g. in \code{fml = z~y|fe_1[x] + fe_2}, see details. To add IVs, insert the endogenous vars./instruments after a pipe, like in \code{y ~ x | c(x_endo1, x_endo2) ~ x_inst1 + x_inst2}. Note that it should always be the last element, see details. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. The formula \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)} leads to 6 estimation, see details.}
 
 \item{data}{A data.frame containing the necessary variables to run the model. The variables of the non-linear right hand side of the formula are identified with this \code{data.frame} names. Can also be a matrix.}
 
@@ -39,9 +41,15 @@ feols(
 
 \item{offset}{A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) \code{~0.5*x**2}. This offset is linearly added to the elements of the main formula 'fml'.}
 
+\item{subset}{A vector (logical or numeric) or a one-sided formula. If provided, then the estimation will be performed only on the observations defined by this argument.}
+
 \item{split}{A one sided formula representing a variable (eg \code{split = ~var}) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. If you also want to include the estimation for the full sample, use the argument \code{fsplit} instead.}
 
 \item{fsplit}{A one sided formula representing a variable (eg \code{split = ~var}) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. This argument is the same as split but also includes the full sample as the first estimation.}
+
+\item{cluster}{Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1", "var2")]}, \code{cluster = c("var1", "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster). You can interact two variables using \code{^} with the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.}
+
+\item{se}{Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.}
 
 \item{panel.id}{The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id = ~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link[fixest]{feols}}).}
 
@@ -82,8 +90,7 @@ A \code{fixest} object.
 \item{call}{The call of the function.}
 \item{method}{The method used to estimate the model.}
 \item{family}{The family used to estimate the model.}
-\item{fml_full}{(When relevant.) The "full" formula containing the linear part and the fixed-effects.}
-\item{nparams}{The number of parameters of the model.}
+\item{fml_all}{A list containing different parts of the formula. Always contain the linear formula. Then depending on the cases: \code{fixef}: the fixed-effects, \code{iv}: the IV part of the formula.}
 \item{fixef_vars}{The names of each fixed-effect dimension.}
 \item{fixef_id}{The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.}
 \item{fixef_sizes}{The size of each fixed-effect (i.e. the number of unique identifierfor each fixed-effect dimension).}
@@ -173,6 +180,19 @@ The following vignette: \href{https://cran.r-project.org/package=fixest/vignette
 You can use the functions \code{\link[fixest]{setFixest_se}} and \code{\link[fixest:dof]{setFixest_dof}} to permanently set the way the standard-errors are computed.
 }
 
+\section{Instrumental variables}{
+
+
+To estimate two stage least square regressions, insert the relationship between the endogenous regressor(s) and the instruments in a formula, after a pipe.
+
+For example, \code{fml = y ~ x1 | x_endo ~ x_inst} will use the variables \code{x1} and \code{x_inst} in the first stage to explain \code{x_endo}. Then will use the fitted value of \code{x_endo} (which will be named \code{fit_x_endo}) and \code{x1} to explain \code{y}.
+To include several endogenous regressors, you need to embed them in \code{c()}, like in: \code{fml = y ~ x1 | c(x_endo1, x_end2) ~ x_inst1 + x_inst2}.
+
+Of course you can still add the fixed-effects, but the IV formula must always come last, like in \code{fml = y ~ x1 | fe1 + fe2 | x_endo ~ x_inst}.
+
+By default, the second stage regression is returned. You can access the first stage(s) regressions either directly in the slot \code{iv_first_stage} (not recommended), or using the argument \code{stage = 1} from the function \code{\link[fixest]{summary.fixest}}. For example \code{summary(iv_est, stage = 1)} will give the first stage(s). Note that using summary you can display both the second and first stages at the same time using, e.g., \code{stage = 1:2} (using \code{2:1} would reverse the order).
+}
+
 \section{Multiple estimations}{
 
 
@@ -199,7 +219,7 @@ A note on performance. The feature of multiple estimations has been highly optim
 
 res = feols(Sepal.Length ~ Sepal.Width + Petal.Length, iris)
 # You can specify clustered standard-errors in summary:
-summary(res, cluster = ~species)
+summary(res, cluster = ~Species)
 
 #
 # Just one set of fixed-effects:
@@ -247,6 +267,50 @@ est_did = feols(y ~ x1 + i(treat, period, 5) | id+period, base_did)
 # Now we can plot the result of the interaction with coefplot
 coefplot(est_did)
 # You have many more example in coefplot help
+
+#
+# Instrumental variables
+#
+
+# To estimate Two stage least squares,
+# insert a formula describing the endo. vars./instr. relation after a pipe:
+
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "fe1")
+base$x_inst1 = 0.2 * base$x1 + 0.7 * base$x2 + rpois(150, 2)
+base$x_inst2 = 0.2 * base$x2 + 0.7 * base$x3 + rpois(150, 3)
+base$x_endo1 = 0.5 * base$y + 0.5 * base$x3 + rnorm(150, sd = 2)
+base$x_endo2 = 1.5 * base$y + 0.5 * base$x3 + 3 * base$x_inst1 + rnorm(150, sd = 5)
+
+# Using 2 controls, 1 endogenous var. and 1 instrument
+res_iv = feols(y ~ x1 + x2 | x_endo1 ~ x_inst1, base)
+
+# The second stage is the default
+summary(res_iv)
+
+# To show the first stage:
+summary(res_iv, stage = 1)
+
+# To show both the first and second stages:
+summary(res_iv, stage = 1:2)
+
+# Adding a fixed-effect => IV formula always last!
+res_iv_fe = feols(y ~ x1 + x2 | fe1 | x_endo1 ~ x_inst1, base)
+
+# With two endogenous regressors => we use c()
+res_iv2 = feols(y ~ x1 + x2 | c(x_endo1, x_endo2) ~ x_inst1 + x_inst2, base)
+
+# Now there's two first stages => a fixest_multi object is returned
+sum_res_iv2 = summary(res_iv2, stage = 1)
+
+# You can navigate through it by subsetting:
+sum_res_iv2[iv = 1]
+
+# The stage argument also works in etable:
+etable(res_iv, res_iv_fe, res_iv2, order = "fit_")
+
+etable(res_iv, res_iv_fe, res_iv2, stage = 1:2, order = c("fit", "inst"),
+       group = list(control = "!fit_|inst"))
 
 #
 # Multiple estimations:

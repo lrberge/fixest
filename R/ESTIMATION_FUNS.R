@@ -12,7 +12,7 @@
 #'
 #' @inheritParams femlm
 #'
-#' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y | fe_1+fe_2}. You can combine two fixed-effects with \code{^}: e.g. \code{fml = z~x+y|fe_1^fe_2}, see details. You can also use variables with varying slopes using square brackets: e.g. in \code{fml = z~y|fe_1[x] + fe_2}, see details. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. The formula \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)} leads to 6 estimation, see details.
+#' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y | fe_1+fe_2}. You can combine two fixed-effects with \code{^}: e.g. \code{fml = z~x+y|fe_1^fe_2}, see details. You can also use variables with varying slopes using square brackets: e.g. in \code{fml = z~y|fe_1[x] + fe_2}, see details. To add IVs, insert the endogenous vars./instruments after a pipe, like in \code{y ~ x | c(x_endo1, x_endo2) ~ x_inst1 + x_inst2}. Note that it should always be the last element, see details. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. The formula \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)} leads to 6 estimation, see details.
 #' @param weights A formula or a numeric vector. Each observation can be weighted, the weights must be greater than 0. If equal to a formula, it should be one-sided: for example \code{~ var_weight}.
 #' @param verbose Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algoritmh (the first number is the left-hand-side, the other numbers are the right-hand-side variables).
 #' @param demeaned Logical, default is \code{FALSE}. Only used in the presence of fixed-effects: should the centered variables be returned? If \code{TRUE}, it creates the items \code{y_demeaned} and \code{X_demeaned}.
@@ -64,6 +64,18 @@
 #'
 #' You can use the functions \code{\link[fixest]{setFixest_se}} and \code{\link[fixest:dof]{setFixest_dof}} to permanently set the way the standard-errors are computed.
 #'
+#' @section Instrumental variables:
+#'
+#' To estimate two stage least square regressions, insert the relationship between the endogenous regressor(s) and the instruments in a formula, after a pipe.
+#'
+#' For example, \code{fml = y ~ x1 | x_endo ~ x_inst} will use the variables \code{x1} and \code{x_inst} in the first stage to explain \code{x_endo}. Then will use the fitted value of \code{x_endo} (which will be named \code{fit_x_endo}) and \code{x1} to explain \code{y}.
+#' To include several endogenous regressors, you need to embed them in \code{c()}, like in: \code{fml = y ~ x1 | c(x_endo1, x_end2) ~ x_inst1 + x_inst2}.
+#'
+#' Of course you can still add the fixed-effects, but the IV formula must always come last, like in \code{fml = y ~ x1 | fe1 + fe2 | x_endo ~ x_inst}.
+#'
+#' By default, the second stage regression is returned. You can access the first stage(s) regressions either directly in the slot \code{iv_first_stage} (not recommended), or using the argument \code{stage = 1} from the function \code{\link[fixest]{summary.fixest}}. For example \code{summary(iv_est, stage = 1)} will give the first stage(s). Note that using summary you can display both the second and first stages at the same time using, e.g., \code{stage = 1:2} (using \code{2:1} would reverse the order).
+#'
+#'
 #' @section Multiple estimations:
 #'
 #' Multiple estimations can be performed at once, they just have to be specified in the formula. Multiple estimations yield a \code{fixest_multi} object which is \sQuote{kind of} a list of all the results but includes specific methods to access the results in a handy way.
@@ -88,7 +100,7 @@
 #' \item{call}{The call of the function.}
 #' \item{method}{The method used to estimate the model.}
 #' \item{family}{The family used to estimate the model.}
-#' \item{fml_all}{A list containing different parts of the formula. Always contain the linear formula. Then depending on the cases: \code{fixef}: the fixed-effects, \code{iv}: the IV part of the formula.
+#' \item{fml_all}{A list containing different parts of the formula. Always contain the linear formula. Then depending on the cases: \code{fixef}: the fixed-effects, \code{iv}: the IV part of the formula.}
 #' \item{fixef_vars}{The names of each fixed-effect dimension.}
 #' \item{fixef_id}{The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.}
 #' \item{fixef_sizes}{The size of each fixed-effect (i.e. the number of unique identifierfor each fixed-effect dimension).}
@@ -145,7 +157,7 @@
 #'
 #' res = feols(Sepal.Length ~ Sepal.Width + Petal.Length, iris)
 #' # You can specify clustered standard-errors in summary:
-#' summary(res, cluster = ~species)
+#' summary(res, cluster = ~Species)
 #'
 #' #
 #' # Just one set of fixed-effects:
@@ -193,6 +205,50 @@
 #' # Now we can plot the result of the interaction with coefplot
 #' coefplot(est_did)
 #' # You have many more example in coefplot help
+#'
+#' #
+#' # Instrumental variables
+#' #
+#'
+#' # To estimate Two stage least squares,
+#' # insert a formula describing the endo. vars./instr. relation after a pipe:
+#'
+#' base = iris
+#' names(base) = c("y", "x1", "x2", "x3", "fe1")
+#' base$x_inst1 = 0.2 * base$x1 + 0.7 * base$x2 + rpois(150, 2)
+#' base$x_inst2 = 0.2 * base$x2 + 0.7 * base$x3 + rpois(150, 3)
+#' base$x_endo1 = 0.5 * base$y + 0.5 * base$x3 + rnorm(150, sd = 2)
+#' base$x_endo2 = 1.5 * base$y + 0.5 * base$x3 + 3 * base$x_inst1 + rnorm(150, sd = 5)
+#'
+#' # Using 2 controls, 1 endogenous var. and 1 instrument
+#' res_iv = feols(y ~ x1 + x2 | x_endo1 ~ x_inst1, base)
+#'
+#' # The second stage is the default
+#' summary(res_iv)
+#'
+#' # To show the first stage:
+#' summary(res_iv, stage = 1)
+#'
+#' # To show both the first and second stages:
+#' summary(res_iv, stage = 1:2)
+#'
+#' # Adding a fixed-effect => IV formula always last!
+#' res_iv_fe = feols(y ~ x1 + x2 | fe1 | x_endo1 ~ x_inst1, base)
+#'
+#' # With two endogenous regressors => we use c()
+#' res_iv2 = feols(y ~ x1 + x2 | c(x_endo1, x_endo2) ~ x_inst1 + x_inst2, base)
+#'
+#' # Now there's two first stages => a fixest_multi object is returned
+#' sum_res_iv2 = summary(res_iv2, stage = 1)
+#'
+#' # You can navigate through it by subsetting:
+#' sum_res_iv2[iv = 1]
+#'
+#' # The stage argument also works in etable:
+#' etable(res_iv, res_iv_fe, res_iv2, order = "fit_")
+#'
+#' etable(res_iv, res_iv_fe, res_iv2, stage = 1:2, order = c("fit", "inst"),
+#'        group = list(control = "!fit_|inst"))
 #'
 #' #
 #' # Multiple estimations:
@@ -834,7 +890,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	            if(n_vars_X == 0){
 	                my_res$ssr_noInst = cpp_ssq(y_demean)
 	            } else {
-	                fit_no_inst = ols_fit(iv_lhs_demean[[i]], X_demean, w, correct_0w = FALSE, collin.tol = collin.tol, nthreads = nthreads,
+	                fit_no_inst = ols_fit(iv_lhs_demean[[i]], X_demean, w = weights, correct_0w = FALSE, collin.tol = collin.tol, nthreads = nthreads,
 	                                      xwx = ZXtZX[-(1:K), -(1:K), drop = FALSE], xwy = ZXtu[[i]][-(1:K)])
 	                my_res$ssr_noInst = cpp_ssq(fit_no_inst$residuals)
 	            }
@@ -917,7 +973,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	            my_res = feols(env = current_env, xwx = ZXtZX, xwy = ZXtu[[i]])
 
 	            # For the F-stats
-	            fit_no_inst = ols_fit(iv_lhs[[i]], X, w, correct_0w = FALSE, collin.tol = collin.tol, nthreads = nthreads,
+	            fit_no_inst = ols_fit(iv_lhs[[i]], X, w = weights, correct_0w = FALSE, collin.tol = collin.tol, nthreads = nthreads,
 	                                  xwx = ZXtZX[-(1:K), -(1:K), drop = FALSE], xwy = ZXtu[[i]][-(1:K)])
 	            my_res$ssr_noInst = cpp_ssq(fit_no_inst$residuals)
 
@@ -1453,7 +1509,7 @@ check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights){
 #' \item{call}{The call of the function.}
 #' \item{method}{The method used to estimate the model.}
 #' \item{family}{The family used to estimate the model.}
-#' \item{fml_all}{A list containing different parts of the formula. Always contain the linear formula. Then, if relevant: \code{fixef}: the fixed-effects.
+#' \item{fml_all}{A list containing different parts of the formula. Always contain the linear formula. Then, if relevant: \code{fixef}: the fixed-effects.}
 #' \item{nparams}{The number of parameters of the model.}
 #' \item{fixef_vars}{The names of each fixed-effect dimension.}
 #' \item{fixef_id}{The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.}
@@ -2241,7 +2297,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, split, fsplit,
 #' \item{call}{The call of the function.}
 #' \item{method}{The method used to estimate the model.}
 #' \item{family}{The family used to estimate the model.}
-#' \item{fml_all}{A list containing different parts of the formula. Always contain the linear formula. Then, if relevant: \code{fixef}: the fixed-effects; \code{NL}: the non linear part of the formula.
+#' \item{fml_all}{A list containing different parts of the formula. Always contain the linear formula. Then, if relevant: \code{fixef}: the fixed-effects; \code{NL}: the non linear part of the formula.}
 #' \item{nparams}{The number of parameters of the model.}
 #' \item{fixef_vars}{The names of each fixed-effect dimension.}
 #' \item{fixef_id}{The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.}
@@ -2415,6 +2471,7 @@ fepois = function(fml, data, offset, weights, subset, split, fsplit, cluster, se
 #'
 #' This function estimates maximum likelihood models (e.g., Poisson or Logit) with non-linear in parameters right-hand-sides and is efficient to handle any number of fixed effects. If you do not use non-linear in parameters right-hand-side, use \code{\link[fixest]{femlm}} or \code{\link[fixest]{feglm}} instead (their design is simpler).
 #'
+#' @inheritParams summary.fixest
 #' @inheritParams panel
 #' @inheritSection feols Lagging variables
 #' @inheritSection feols Interactions
@@ -2429,6 +2486,7 @@ fepois = function(fml, data, offset, weights, subset, split, fsplit, cluster, se
 #' @param data A data.frame containing the necessary variables to run the model. The variables of the non-linear right hand side of the formula are identified with this \code{data.frame} names. Can also be a matrix.
 #' @param family Character scalar. It should provide the family. The possible values are "poisson" (Poisson model with log-link, the default), "negbin" (Negative Binomial model with log-link), "logit" (LOGIT model with log-link), "gaussian" (Gaussian model).
 #' @param fixef Character vector. The names of variables to be used as fixed-effects. These variables should contain the identifier of each observation (e.g., think of it as a panel identifier). Note that the recommended way to include fixed-effects is to insert them directly in the formula.
+#' @param subset A vector (logical or numeric) or a one-sided formula. If provided, then the estimation will be performed only on the observations defined by this argument.
 #' @param NL.start (For NL models only) A list of starting values for the non-linear parameters. ALL the parameters are to be named and given a staring value. Example: \code{NL.start=list(a=1,b=5,c=0)}. Though, there is an exception: if all parameters are to be given the same starting value, you can use a numeric scalar.
 #' @param lower (For NL models only) A list. The lower bound for each of the non-linear parameters that requires one. Example: \code{lower=list(b=0,c=0)}. Beware, if the estimated parameter is at his lower bound, then asymptotic theory cannot be applied and the standard-error of the parameter cannot be estimated because the gradient will not be null. In other words, when at its upper/lower bound, the parameter is considered as 'fixed'.
 #' @param upper (For NL models only) A list. The upper bound for each of the non-linear parameters that requires one. Example: \code{upper=list(a=10,c=50)}. Beware, if the estimated parameter is at his upper bound, then asymptotic theory cannot be applied and the standard-error of the parameter cannot be estimated because the gradient will not be null. In other words, when at its upper/lower bound, the parameter is considered as 'fixed'.
@@ -2487,6 +2545,7 @@ fepois = function(fml, data, offset, weights, subset, split, fsplit, cluster, se
 #' \item{nparams}{The number of parameters of the model.}
 #' \item{call}{The call.}
 #' \item{fml}{The linear formula of the call.}
+#' \item{fml_all}{A list containing different parts of the formula. Always contain the linear formula. Then, if relevant: \code{fixef}: the fixed-effects; \code{NL}: the non linear part of the formula.}
 #' \item{ll_null}{Log-likelihood of the null model (i.e. with the intercept only).}
 #' \item{pseudo_r2}{The adjusted pseudo R2.}
 #' \item{message}{The convergence message from the optimization procedures.}
