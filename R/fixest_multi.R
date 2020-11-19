@@ -5,7 +5,7 @@
 #----------------------------------------------#
 
 
-setup_multi = function(index, all_names, data){
+setup_multi = function(index, all_names, data, simplify = TRUE){
     # Basic setup function
 
 
@@ -55,12 +55,14 @@ setup_multi = function(index, all_names, data){
 
 
     # We drop non-used dimensions
-    n_all = sapply(index, max)
-    qui = n_all == 1
-    if(any(qui)){
-        index = index[!qui]
-        # all_names = all_names[!qui]
-        # We don't drop the names dimension => we always keep it as an imprint
+    if(simplify){
+        n_all = sapply(index, max)
+        qui = n_all == 1
+        if(any(qui)){
+            index = index[!qui]
+            # all_names = all_names[!qui]
+            # We don't drop the names dimension => we always keep it as an imprint
+        }
     }
 
     meta = list(index = index, all_names = all_names)
@@ -88,11 +90,13 @@ setup_multi = function(index, all_names, data){
 #'
 #' @method summary fixest_multi
 #'
+#' @inheritParams summary.fixest
+#'
 #' @inherit print.fixest_multi seealso
 #'
 #' @param object A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to multiple results.
 #' @param type A character either equal to \code{"short"}, \code{"long"}, \code{"compact"}, or \code{"se_compact"}. If \code{short}, only the table of coefficients is displayed for each estimation. If \code{long}, then the full results are displayed for each estimation. If \code{compact}, a \code{data.frame} is returned with one line per model and the formatted coefficients + standard-errors in the columns. If \code{se_compact}, a \code{data.frame} is returned with one line per model, one numeric column for each coefficient and one numeric column for each standard-error.
-#' @param ... Other arguments to be passed to \code{\link[fixest]{summary.fixest}}.
+#' @param ... Not currently used.
 #'
 #' @return
 #' It returns either an object of class \code{fixest_multi} (if \code{type} equals \code{short} or \code{long}), either a \code{data.frame} (if type equals \code{compact} or \code{se_compact}).
@@ -116,7 +120,7 @@ setup_multi = function(index, all_names, data){
 #' summary(res, type = "se_compact")
 #'
 #'
-summary.fixest_multi = function(object, type = "short", ...){
+summary.fixest_multi = function(object, type = "short", se, cluster, dof = getFixest_dof(), .vcov, stage = 2, lean = FALSE, n, ...){
     dots = list(...)
     data = attr(object, "data")
 
@@ -126,14 +130,25 @@ summary.fixest_multi = function(object, type = "short", ...){
         attr(object, "print_request") = type
     }
 
+    nframes_up = ifelse(is.null(dots$nframes_up), 1, dots$nframes_up + 1)
+
     est_1 = data[[1]]
     if(is.null(est_1$cov.scaled) || !isTRUE(dots$fromPrint)){
 
         for(i in 1:length(data)){
-            data[[i]] = summary(data[[i]], nframes_up = 2, ...)
+            data[[i]] = summary(data[[i]], nframes_up = nframes_up, se = se, cluster = cluster, dof = dof, .vcov = .vcov, stage = stage, lean = lean, n = n, ...)
         }
 
-        attr(object, "data") = data
+        # In IV: multiple estimations can be returned
+
+        if("fixest_multi" %in% class(data[[1]])){
+            meta = attr(object, "meta")
+
+            object = setup_multi(meta$index, meta$all_names, data)
+        } else {
+            attr(object, "data") = data
+        }
+
     }
 
     if(type %in% c("compact", "se_compact")){
@@ -255,8 +270,6 @@ print.fixest_multi = function(x, ...){
     all_names = meta$all_names
     tree = meta$tree
 
-    cat(signif_plus(do.call(prod, index)), " fixest estimations\n", sep = "")
-
     # Finding out the type of SEs
     if(is_short){
         est_1 = data[[1]]
@@ -267,7 +280,7 @@ print.fixest_multi = function(x, ...){
 
     depth = length(index)
 
-    dict_title = c("sample" = "Sample", "lhs" = "Dep. var.", "rhs" = "Expl. vars.")
+    dict_title = c("sample" = "Sample", "lhs" = "Dep. var.", "rhs" = "Expl. vars.", "iv" = "IV")
 
     headers = list()
     headers[[1]] = function(d, i) cat(dict_title[d], ": ", all_names[[d]][i], "\n", sep = "")
@@ -284,7 +297,7 @@ print.fixest_multi = function(x, ...){
         }
 
         if(is_short){
-            myPrintCoefTable(coeftable = coeftable(data[[i]], ...), show_signif = FALSE)
+            myPrintCoefTable(coeftable = coeftable(data[[i]]), show_signif = FALSE)
             if(tree[i, depth] != index[[depth]]) cat("---\n")
         } else {
             print(data[[i]])
@@ -376,21 +389,23 @@ print.fixest_multi = function(x, ...){
 #' # The first and last estimations
 #' etable(est_split[i = c(1, .N)])
 #'
-"[.fixest_multi" = function(x, sample, lhs, rhs, i, I){
+"[.fixest_multi" = function(x, sample, lhs, rhs, iv, i, I){
+
+    core_args = c("sample", "lhs", "rhs", "iv")
 
     mc = match.call()
-    if(!any(c("sample", "lhs", "rhs", "i", "I") %in% names(mc))){
+    if(!any(c(core_args, "i", "I") %in% names(mc))){
         return(x)
     }
 
     use_i = "i" %in% names(mc)
-    if(use_i && any(c("sample", "lhs", "rhs", "I") %in% names(mc))){
-        stop("The index 'i' cannot be used with any other index ('sample', 'lhs', 'rhs', or 'I').")
+    if(use_i && any(c(core_args, "I") %in% names(mc))){
+        stop("The index 'i' cannot be used with any other index (", enumerate_items(c(core_args, "I"), "quote.or"), ").")
     }
 
     use_I = "I" %in% names(mc)
-    if(use_I && any(c("sample", "lhs", "rhs") %in% names(mc))){
-        stop("The index 'I' cannot be used with any other index ('i', 'sample', 'lhs', or 'rhs').")
+    if(use_I && any(core_args %in% names(mc))){
+        stop("The index 'I' cannot be used with any other index (", enumerate_items(c("i", core_args), "quote.or"), ").")
     }
 
     # We get the meta information
@@ -463,12 +478,13 @@ print.fixest_multi = function(x, ...){
     is_sample = !missing(sample)
     is_lhs    = !missing(lhs)
     is_rhs    = !missing(rhs)
+    is_iv    = !missing(iv)
 
     selection = list()
 
     s_max = index[["sample"]]
     if(is_sample){
-        check_arg_plus(sample, "evalset multi charin | integer vector no na", .choices = all_names[["sample"]], .data = list(.N = s_max))
+        check_arg_plus(sample, "evalset multi match | integer vector no na", .choices = all_names[["sample"]], .data = list(.N = s_max))
 
 
         if(is.character(sample)){
@@ -488,7 +504,7 @@ print.fixest_multi = function(x, ...){
 
     lhs_max = index[["lhs"]]
     if(is_lhs){
-        check_arg_plus(lhs, "evalset multi charin | integer vector no na", .choices = all_names[["lhs"]], .data = list(.N = lhs_max))
+        check_arg_plus(lhs, "evalset multi match | integer vector no na", .choices = all_names[["lhs"]], .data = list(.N = lhs_max))
 
         if(is.character(lhs)){
             dict = 1:lhs_max
@@ -507,7 +523,7 @@ print.fixest_multi = function(x, ...){
 
     rhs_max = index[["rhs"]]
     if(is_rhs){
-        check_arg_plus(rhs, "evalset multi charin | integer vector no na", .choices = all_names[["rhs"]], .data = list(.N = rhs_max))
+        check_arg_plus(rhs, "evalset multi match | integer vector no na", .choices = all_names[["rhs"]], .data = list(.N = rhs_max))
 
         if(is.character(rhs)){
             dict = 1:rhs_max
@@ -522,6 +538,25 @@ print.fixest_multi = function(x, ...){
         selection$rhs = (1:rhs_max)[rhs]
     } else if("rhs" %in% names(index)){
         selection$rhs = 1:rhs_max
+    }
+
+    iv_max = index[["iv"]]
+    if(is_iv){
+        check_arg_plus(iv, "evalset multi match | integer vector no na", .choices = all_names[["iv"]], .data = list(.N = iv_max))
+
+        if(is.character(iv)){
+            dict = 1:iv_max
+            names(dict) = all_names[["iv"]]
+            iv = as.integer(dict[iv])
+        }
+
+        if(any(abs(iv) > iv_max)){
+            stop("The index 'iv' cannot be greater than ", iv_max, ". Currently ", I[which.max(abs(iv))], " is not valid.")
+        }
+
+        selection$iv = (1:iv_max)[iv]
+    } else if("iv" %in% names(index)){
+        selection$iv = 1:iv_max
     }
 
     # We keep the order of the user!!!!!
@@ -562,7 +597,7 @@ print.fixest_multi = function(x, ...){
         return(new_data[[1]])
     }
 
-    res_multi = setup_multi(new_index, new_all_names, new_data)
+    res_multi = setup_multi(new_index, new_all_names, new_data, simplify = FALSE)
 
     return(res_multi)
 }
