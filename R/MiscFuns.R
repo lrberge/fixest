@@ -134,7 +134,15 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 		half_line = "OLS estimation"
 	}
 
-	cat(half_line, ", Dep. Var.: ", as.character(x$fml)[[2]], "\n", sep="")
+	if(isTRUE(x$iv)){
+	    glue = function(...) paste(..., collapse = ", ")
+	    first_line = paste0("TSLS estimation, Engo.: ", glue(x$iv_endo_names), ", Instr.: ", glue(x$iv_inst_names), "\n")
+	    second_line = paste0(ifunit(x$iv_stage, "First", "Second"), " stage: Dep. Var.: ", as.character(x$fml)[[2]], "\n")
+	    cat(first_line, second_line, sep = "")
+	} else {
+	    cat(half_line, ", Dep. Var.: ", as.character(x$fml)[[2]], "\n", sep="")
+	}
+
 	# cat(msg, "ML estimation, family = ", family_format[x$family], ", Dep. Var.: ", as.character(x$fml)[[2]], "\n", sep="")
 	cat("Observations:", addCommas(x$nobs), "\n")
 	if(!is.null(x$fixef_terms)){
