@@ -59,16 +59,16 @@ Finally, the prefix \code{c} means cumulative: each stepwise element is added to
 \examples{
 
 base = iris
-names(base) = c("y1", "x1", "x2", "x3", "species")
+names(base) = c("y", "x1", "x2", "x3", "species")
 
 # Regular stepwise
-feols(y ~ sw(x1, x2, x3))
+feols(y ~ sw(x1, x2, x3), base)
 
 # Cumulative stepwise
-feols(y ~ csw(x1, x2, x3))
+feols(y ~ csw(x1, x2, x3), base)
 
 # Using the 0
-feols(y ~ x1 + x2 + sw0(x3))
+feols(y ~ x1 + x2 + sw0(x3), base)
 
 }
 \keyword{datasets}

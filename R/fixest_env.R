@@ -3207,16 +3207,16 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 #' @examples
 #'
 #' base = iris
-#' names(base) = c("y1", "x1", "x2", "x3", "species")
+#' names(base) = c("y", "x1", "x2", "x3", "species")
 #'
 #' # Regular stepwise
-#' feols(y ~ sw(x1, x2, x3))
+#' feols(y ~ sw(x1, x2, x3), base)
 #'
 #' # Cumulative stepwise
-#' feols(y ~ csw(x1, x2, x3))
+#' feols(y ~ csw(x1, x2, x3), base)
 #'
 #' # Using the 0
-#' feols(y ~ x1 + x2 + sw0(x3))
+#' feols(y ~ x1 + x2 + sw0(x3), base)
 #'
 stepwise = sw = cstepwise = csw = function(...){
     mc = match.call(expand.dots = TRUE)
@@ -3284,121 +3284,121 @@ cstepwise0 = csw0 = stepwise0 = sw0 = function(...){
 "csw0"
 
 
-extract_stepwise = function(fml, origin_type){
-    # fml = y ~ sw(x1, x2)
-    # fml = ~ fe1 + csw(fe2, fe3)
-
-    n_parts = length(fml)
-    osf = n_parts == 2
-
-    fml_txt = deparse_long(fml[[n_parts]])
-    if(grepl("(^|[^[:alnum:]_\\.])c?(stepwise|sw)0?\\(", fml_txt)){
-        # We will partially create the linear matrix
-
-        tl = attr(fml_terms, "term.labels")
-
-        qui = grepl("(^|[^[:alnum:]_\\.])c?(stepwise|sw)0?\\(", tl)
-        if(sum(qui) >= 2){
-            stop("In the formula: You cannot use more than one stepwise function.")
-        }
-
-        if(!is_naked_fun(tl[qui], "c?(stepwise|sw)0?")){
-            stop("In the formula: You cannot combine stepwise functions with any other element.")
-        }
-
-        tl_new = tl
-
-        sw_text = tl[qui]
-        sw_terms = eval(parse(text = sw_text))
-        is_cumul = isTRUE(attr(sw_terms, "is_cumul"))
-
-        if(length(sw_terms) == 1){
-
-            if(nchar(sw_terms) == 0){
-                tl_new = tl[!qui]
-                if(length(tl_new) == 0){
-                    tl_new = 1
-                }
-
-            } else {
-                tl_new[qui] = sw_terms
-            }
-
-            # lhs_text: created in the LHS section
-            if(osf){
-                fml_new = xpd(~ ..rhs, ..rhs = tl_new)
-            } else {
-                fml_new = xpd(..lhs ~ ..rhs, ..lhs = fml[[2]], ..rhs = tl_new)
-            }
-
-            res = list(do_multi = FALSE, fml = fml_new)
-
-            return(res)
-
-        } else {
-            multi_rhs = TRUE
-            tl_new[qui] = "..STEPWISE_VARIABLES"
-            fml_raw = xpd(~..rhs, ..rhs = tl_new)
-
-            fml_all_full = list()
-            fml_all_sw = list()
-            for(i in seq_along(sw_terms)){
-                if(nchar(sw_terms[i]) == 0 && length(tl_new) > 1){
-                    # adding 1 when empty is "ugly"
-                    fml_all_full[[i]] = xpd(~..rhs, ..rhs = tl_new[!qui])
-                    fml_all_sw[[i]] = lhs ~ 1
-                } else {
-                    if(is_cumul){
-                        fml_all_full[[i]] = xpd(fml_raw, ..STEPWISE_VARIABLES = sw_terms[1:i])
-                    } else {
-                        fml_all_full[[i]] = xpd(fml_raw, ..STEPWISE_VARIABLES = sw_terms[i])
-                    }
-
-                    if(osf){
-                        fml_all_sw[[i]] = xpd(~ ..STEPWISE_VARIABLES, ..STEPWISE_VARIABLES = sw_terms[i])
-                    } else {
-                        fml_all_sw[[i]] = xpd(lhs ~ ..STEPWISE_VARIABLES, ..STEPWISE_VARIABLES = sw_terms[i])
-                    }
-
-                }
-            }
-
-            # In non OLS: we need all the variables bc we create the full design matrix
-            # in FEOLS we do it stepwise (so we only need the SW terms)
-            if(origin_type == "feols"){
-                sw_all_vars = all.vars(xpd(~ ..sw, ..sw = sw_terms))
-            } else {
-                sw_all_vars = all.vars(fml_linear[[3]])
-            }
-
-            # Creating the current formula
-            if(is_cumul){
-                # Cumulative => first item in main linear matrix
-                tl_new[qui] = sw_terms[1]
-                sw_terms = sw_terms[-1]
-            } else {
-                tl_new = tl[!qui]
-                if(length(tl_new) == 0){
-                    tl_new = 1
-                }
-            }
-
-            # Plus tard quand j'aurais develope mes donnes en fixest_semi_sparse => evaluer tous les termes
-            if(osf){
-                fml_new = xpd(~ ..rhs, ..rhs = tl_new)
-            } else {
-                fml_new = xpd(lhs ~ ..rhs, ..rhs = tl_new)
-            }
-        }
-    } else {
-        res = list(do_multi = FALSE, fml = fml)
-    }
-
-
-    res = list(do_multi = TRUE, fml = fml_new, sw_all_vars = sw_all_vars, fml_all_full = fml_all_full, fml_all_sw = fml_all_sw)
-
-    return(res)
-}
+# extract_stepwise = function(fml, origin_type){
+#     # fml = y ~ sw(x1, x2)
+#     # fml = ~ fe1 + csw(fe2, fe3)
+#
+#     n_parts = length(fml)
+#     osf = n_parts == 2
+#
+#     fml_txt = deparse_long(fml[[n_parts]])
+#     if(grepl("(^|[^[:alnum:]_\\.])c?(stepwise|sw)0?\\(", fml_txt)){
+#         # We will partially create the linear matrix
+#
+#         tl = attr(fml_terms, "term.labels")
+#
+#         qui = grepl("(^|[^[:alnum:]_\\.])c?(stepwise|sw)0?\\(", tl)
+#         if(sum(qui) >= 2){
+#             stop("In the formula: You cannot use more than one stepwise function.")
+#         }
+#
+#         if(!is_naked_fun(tl[qui], "c?(stepwise|sw)0?")){
+#             stop("In the formula: You cannot combine stepwise functions with any other element.")
+#         }
+#
+#         tl_new = tl
+#
+#         sw_text = tl[qui]
+#         sw_terms = eval(parse(text = sw_text))
+#         is_cumul = isTRUE(attr(sw_terms, "is_cumul"))
+#
+#         if(length(sw_terms) == 1){
+#
+#             if(nchar(sw_terms) == 0){
+#                 tl_new = tl[!qui]
+#                 if(length(tl_new) == 0){
+#                     tl_new = 1
+#                 }
+#
+#             } else {
+#                 tl_new[qui] = sw_terms
+#             }
+#
+#             # lhs_text: created in the LHS section
+#             if(osf){
+#                 fml_new = xpd(~ ..rhs, ..rhs = tl_new)
+#             } else {
+#                 fml_new = xpd(..lhs ~ ..rhs, ..lhs = fml[[2]], ..rhs = tl_new)
+#             }
+#
+#             res = list(do_multi = FALSE, fml = fml_new)
+#
+#             return(res)
+#
+#         } else {
+#             multi_rhs = TRUE
+#             tl_new[qui] = "..STEPWISE_VARIABLES"
+#             fml_raw = xpd(~..rhs, ..rhs = tl_new)
+#
+#             fml_all_full = list()
+#             fml_all_sw = list()
+#             for(i in seq_along(sw_terms)){
+#                 if(nchar(sw_terms[i]) == 0 && length(tl_new) > 1){
+#                     # adding 1 when empty is "ugly"
+#                     fml_all_full[[i]] = xpd(~..rhs, ..rhs = tl_new[!qui])
+#                     fml_all_sw[[i]] = lhs ~ 1
+#                 } else {
+#                     if(is_cumul){
+#                         fml_all_full[[i]] = xpd(fml_raw, ..STEPWISE_VARIABLES = sw_terms[1:i])
+#                     } else {
+#                         fml_all_full[[i]] = xpd(fml_raw, ..STEPWISE_VARIABLES = sw_terms[i])
+#                     }
+#
+#                     if(osf){
+#                         fml_all_sw[[i]] = xpd(~ ..STEPWISE_VARIABLES, ..STEPWISE_VARIABLES = sw_terms[i])
+#                     } else {
+#                         fml_all_sw[[i]] = xpd(lhs ~ ..STEPWISE_VARIABLES, ..STEPWISE_VARIABLES = sw_terms[i])
+#                     }
+#
+#                 }
+#             }
+#
+#             # In non OLS: we need all the variables bc we create the full design matrix
+#             # in FEOLS we do it stepwise (so we only need the SW terms)
+#             if(origin_type == "feols"){
+#                 sw_all_vars = all.vars(xpd(~ ..sw, ..sw = sw_terms))
+#             } else {
+#                 sw_all_vars = all.vars(fml_linear[[3]])
+#             }
+#
+#             # Creating the current formula
+#             if(is_cumul){
+#                 # Cumulative => first item in main linear matrix
+#                 tl_new[qui] = sw_terms[1]
+#                 sw_terms = sw_terms[-1]
+#             } else {
+#                 tl_new = tl[!qui]
+#                 if(length(tl_new) == 0){
+#                     tl_new = 1
+#                 }
+#             }
+#
+#             # Plus tard quand j'aurais develope mes donnes en fixest_semi_sparse => evaluer tous les termes
+#             if(osf){
+#                 fml_new = xpd(~ ..rhs, ..rhs = tl_new)
+#             } else {
+#                 fml_new = xpd(lhs ~ ..rhs, ..rhs = tl_new)
+#             }
+#         }
+#     } else {
+#         res = list(do_multi = FALSE, fml = fml)
+#     }
+#
+#
+#     res = list(do_multi = TRUE, fml = fml_new, sw_all_vars = sw_all_vars, fml_all_full = fml_all_full, fml_all_sw = fml_all_sw)
+#
+#     return(res)
+# }
 
 
 
