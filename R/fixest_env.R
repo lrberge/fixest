@@ -6,7 +6,7 @@
 #----------------------------------------------#
 
 
-fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), NL.fml = NULL,
+fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), NL.fml = NULL,
                        fixef, NL.start, lower, upper, NL.start.init,
                        offset, subset, split = NULL, fsplit = NULL, linear.start = 0, jacobian.method = "simple",
                        useHessian = TRUE, hessian.args = NULL, opt.control = list(),
@@ -24,12 +24,12 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     # INTERNAL function:
     # the estimation functions need input data in the exact format without any mistake possible (bc of c++)
     # this function takes care of implementing all the checks needed and providing the proper formatting
-    # it also prepare the list returned in the est. funs
+    # it also prepares the list returned in the est. funs
 
     # Only an environment is returned
-    env <- new.env(parent = emptyenv())
+    env = new.env(parent = emptyenv())
 
-    # the function of origin
+    # The function of origin
     if(!missnull(origin_bis)){
         origin = origin_bis
     }
@@ -1297,8 +1297,15 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
             cluster = error_sender(prepare_df(cluster_terms, data, TRUE),
                                    "Problem evaluating the argument 'cluster':\n")
 
+            # Type conversion
+            for(i in seq_along(cluster)){
+                if(!is.numeric(cluster[[i]]) && !is.character(cluster[[i]])){
+                    cluster[[i]] = as.character(cluster[[i]])
+                }
+            }
+
             if(anyNA(cluster)){
-                isNA_cluster = rowSums(is.na(cluster)) > 0
+                isNA_cluster = !complete.cases(cluster)
 
                 ANY_NA = TRUE
                 anyNA_sample = TRUE
@@ -1465,7 +1472,7 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
 
         msgNA_fixef = ""
         if(anyNA(fixef_mat)){
-            isNA_fixef = rowSums(is.na(fixef_mat)) > 0
+            isNA_fixef = !complete.cases(fixef_mat)
 
             ANY_NA = TRUE
             anyNA_sample = TRUE
