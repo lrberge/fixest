@@ -1677,22 +1677,24 @@ fixest_env <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussi
     if(length(obs2remove) > 0){
         # we kick out the problems (both NA related and fixef related)
 
-        # We drop only 0 variables (may happen for factors)
-        linear.mat = linear.mat[-obs2remove, , drop = FALSE]
+        if(isLinear){
+            # We drop only 0 variables (may happen for factors)
+            linear.mat = linear.mat[-obs2remove, , drop = FALSE]
 
-        # If there are factors => possibly some vars are only 0 now that NAs are removed
-        only_0 = cpppar_check_only_0(linear.mat, nthreads)
-        if(all(only_0 == 1)){
-            stop("After removing NAs, not a single explanatory variable is different from 0.")
+            # If there are factors => possibly some vars are only 0 now that NAs are removed
+            only_0 = cpppar_check_only_0(linear.mat, nthreads)
+            if(all(only_0 == 1)){
+                stop("After removing NAs, not a single explanatory variable is different from 0.")
 
-        } else if(any(only_0 == 1)){
-            linear.mat = linear.mat[, only_0 == 0, drop = FALSE]
+            } else if(any(only_0 == 1)){
+                linear.mat = linear.mat[, only_0 == 0, drop = FALSE]
 
-            # useful for feNmlm
-            linear.params = colnames(linear.mat)
-            params = c(nonlinear.params, linear.params)
-            lparams = length(params)
-            varnames = c(nonlinear.varnames, linear.varnames)
+                # useful for feNmlm
+                linear.params = colnames(linear.mat)
+                params = c(nonlinear.params, linear.params)
+                lparams = length(params)
+                varnames = c(nonlinear.varnames, linear.varnames)
+            }
         }
 
         if(Q == 0){
