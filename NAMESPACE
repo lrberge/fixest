@@ -8,7 +8,7 @@ useDynLib(fixest, .registration = TRUE)
 export(feNmlm, femlm, feols, feglm, fepois, fenegbin)
 export(feglm.fit)
 # etable
-export(etable, esttex, esttable, style)
+export(etable, estyle, estyle.df)
 # misc funs
 export(collinearity, r2, fitstat)
 # did
@@ -31,7 +31,7 @@ export(to_integer, demean)
 exportPattern("^(s|g)etFixest")
 
 # deprecated
-export(obs2remove)
+export(obs2remove, esttex, esttable)
 S3method(summary, fixest.obs2remove)
 
 # Base methods

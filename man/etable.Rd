@@ -42,12 +42,15 @@ etable(
   interaction.combine = " $\\\\times $ ",
   depvar,
   style = NULL,
+  style.df = NULL,
   notes = NULL,
   group = NULL,
   extraline = NULL,
   placement = "htbp",
   drop.section = NULL,
-  poly_dict = c("", " square", " cube")
+  poly_dict = c("", " square", " cube"),
+  postprocess = NULL,
+  postprocess.df = NULL
 )
 
 esttex(
@@ -101,6 +104,7 @@ esttable(
   coefstat = c("se", "tstat", "confint"),
   ci = 0.95,
   depvar,
+  style.df = NULL,
   keep,
   drop,
   dict,
@@ -136,11 +140,14 @@ setFixest_etable(
   interaction.combine = " $\\\\times $ ",
   depvar,
   style = NULL,
+  style.df = NULL,
   notes = NULL,
   group = NULL,
   extraline = NULL,
   placement = "htbp",
   drop.section = NULL,
+  postprocess = NULL,
+  postprocess.df = NULL,
   reset = FALSE
 )
 
@@ -211,7 +218,9 @@ getFixest_etable()
 
 \item{depvar}{(Data frame only.) Logical, default is missing. Whether a first line containing the dependent variables should be shown. By default, the dependent variables are shown only if they differ across models or if the argumen \code{file} is not missing.}
 
-\item{style}{An object created by the function \code{\link[fixest]{style}}. It represents the style of the Latex table, see the documentation of \code{\link[fixest]{style}}.}
+\item{style}{An object created by the function \code{\link[fixest]{estyle}}. It represents the style of the Latex table, see the documentation of \code{\link[fixest]{estyle}}.}
+
+\item{style.df}{An object created by the function \code{\link[fixest]{estyle.df}. }It represents the style of the data frame returned (if \code{tex = FALSE}), see the documentation of \code{\link[fixest]{estyle.df}}.}
 
 \item{notes}{Character vector. If provided, a \code{"notes"} section will be added at the end right after the end of the table, containing the text of this argument. Note that if it is a vector, it will be collapsed with new lines.}
 
@@ -224,6 +233,10 @@ getFixest_etable()
 \item{drop.section}{(Tex only.) Character vector which can be of length 0 (i.e. equal to \code{NULL}). Can contain the values "fixef", "slopes" or "stats". It would drop, respectively, the fixed-effects section, the variables with varying slopes section or the fit statistics section.}
 
 \item{poly_dict}{Character vector, default is \code{c("", " square", " cube")}. When polynomials are used with the function \code{\link[stats]{poly}}, the variables are automatically renamed and \code{poly_dict} rules the display of the power. For powers greater than the number of elements of the vector, the value displayed is \code{$^{pow}$} in Latex and \code{^ pow} in the R console.}
+
+\item{postprocess}{A function that will postprocess the character vector defining the latex table. Only when \code{tex = TRUE}. By default it is equal to \code{NULL}, meaning that there is no postprocessing. When \code{tex = FALSE}, see the argument \code{postprocess.df}.}
+
+\item{postprocess.df}{A function that will postprocess the resulting data.frame. Only when \code{tex = FALSE}. By default it is equal to \code{NULL}, meaning that there is no postprocessing. When \code{tex = TRUE}, see the argument \code{postprocess}.}
 
 \item{reset}{(\code{setFixest_etable} only.) Logical, default is \code{FALSE}. If \code{TRUE}, this will reset all the default values that were already set by the user in previous calls.}
 }
@@ -325,11 +338,11 @@ etable(est1, est2, signifCode = c(" A"=0.01, " B"=0.05, " C"=0.1, " D"=0.15, " F
 
 # To drop the headers before each section, use:
 # Note that a space adds an extra line
-style_noHeaders = style(var.title = "", fixef.title = "", stats.title = " ")
+style_noHeaders = estyle(var.title = "", fixef.title = "", stats.title = " ")
 etable(est1, est2, dict = dict, tex = TRUE, style = style_noHeaders)
 
 # To change the lines of the table + dropping the table footer
-style_lines = style(line.top = "\\\\toprule", line.bottom = "\\\\bottomrule",
+style_lines = estyle(line.top = "\\\\toprule", line.bottom = "\\\\bottomrule",
                     tablefoot = FALSE)
 etable(est1, est2, dict = dict, tex = TRUE, style = style_lines)
 
