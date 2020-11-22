@@ -47,7 +47,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
                   valid_args = c("se", "cluster", "dof", "forceCovariance", "keepBounded"))
 
     # The objects from the estimation and the summary are identical, except regarding the vcov
-	fromSummary = "cov.scaled" %in% names(x)
+	fromSummary = isTRUE(x$summary)
 
 	# if NOT from summary, we consider the argument 'type'
 	if(!fromSummary){
@@ -475,6 +475,8 @@ summary.fixest = function(object, se, cluster, dof = getFixest_dof(), .vcov, sta
 	if(lean){
 	    object[c("fixef_id", "residuals", "fitted.values", "scores", "sumFE", "slope_variables_reordered")] = NULL
 	}
+
+	object$summary = TRUE
 
 	return(object)
 }
