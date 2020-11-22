@@ -369,6 +369,18 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	}
 
 	#
+	# Multi fixef ####
+	#
+
+	do_multi_fixef = get("do_multi_fixef", env)
+	if(do_multi_fixef){
+
+	    res = multi_fixef(env, feols)
+
+	    return(res)
+	}
+
+	#
 	# Multi LHS and RHS ####
 	#
 
@@ -441,9 +453,9 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	    }
 
 	    if(do_multi_rhs){
-	        fml_rhs_all = get("fml_rhs_all", env)
-	        fml_all_sw = get("fml_all_sw", env)
-	        is_cumul = get("is_cumul", env)
+	        multi_rhs_fml_full = get("multi_rhs_fml_full", env)
+	        multi_rhs_fml_sw = get("multi_rhs_fml_sw", env)
+	        multi_rhs_cumul = get("multi_rhs_cumul", env)
 	        fake_intercept = get("fake_intercept", env)
 	        data = get("data", env)
 
@@ -468,12 +480,12 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	        rhs_n_vars = c()
 	        rhs_col_id = list()
 	        any_na_rhs = FALSE
-	        for(i in seq_along(fml_all_sw)){
+	        for(i in seq_along(multi_rhs_fml_sw)){
 	            # We evaluate the extra data and check the NA pattern
 
-	            my_fml = fml_all_sw[[i]]
+	            my_fml = multi_rhs_fml_sw[[i]]
 
-	            if(i == 1 && (is_cumul || identical(my_fml[[3]], 1))){
+	            if(i == 1 && (multi_rhs_cumul || identical(my_fml[[3]], 1))){
 	                # That case is already in the main linear.mat => no NA
 	                rhs_group_id = 1
 	                rhs_group_is_na[[1]] = FALSE
@@ -489,17 +501,15 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	                next
 	            }
 
-	            rhs_current = try(fixest_model_matrix(my_fml, data, fake_intercept = TRUE), silent = TRUE)
-                if("try-error" %in% class(rhs_current)){
-                    stop("Evaluation of the RHS raises an error (concerns ", deparse_long(my_fml[[3]]), "):\n", rhs_current)
-                }
+	            rhs_current = error_sender(fixest_model_matrix(my_fml, data, fake_intercept = TRUE),
+	                                       "Evaluation of the RHS raises an error (concerns ", deparse_long(my_fml[[3]]), "):\n")
 
 	            rhs[[i]] = rhs_current
 	            rhs_n_vars[i] = ncol(rhs_current)
 	            info = cpppar_which_na_inf_mat(rhs_current, nthreads)
 
 	            is_na_current = info$is_na_inf
-	            if(is_cumul && any_na_rhs){
+	            if(multi_rhs_cumul && any_na_rhs){
 	                # we cumulate the NAs
 	                is_na_current = is_na_current | rhs_group_is_na[[rhs_group_id[i - 1]]]
 	                info$any_na_inf = any(is_na_current)
@@ -559,10 +569,14 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 	        rhs_group_n_vars = rep(0, length(rhs_group))
 
-	        for(i in seq_along(fml_all_sw)){
-    	        if(is_cumul){
+	        for(i in seq_along(multi_rhs_fml_sw)){
+    	        if(multi_rhs_cumul){
     	            rnc = rnc + rhs_n_vars[i]
-    	            rhs_col_id[[i]] = 1:rnc
+    	            if(rnc == 0){
+    	                rhs_col_id[[i]] = integer(0)
+    	            } else {
+    	                rhs_col_id[[i]] = 1:rnc
+    	            }
     	        } else {
     	            id = rhs_group_id[i]
     	            rhs_col_id[[i]] = c(col_start, seq(rnc + rhs_group_n_vars[id] + 1, length.out = rhs_n_vars[i]))
@@ -572,8 +586,8 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 	    } else if(do_multi_rhs == FALSE){
 
-	        fml_rhs_all = list(xpd(~ ..rhs, ..rhs = deparse_long(fml[[3]])))
-	        is_cumul = FALSE
+	        multi_rhs_fml_full = list(xpd(~ ..rhs, ..rhs = deparse_long(fml[[3]])))
+	        multi_rhs_cumul = FALSE
 	        rhs_group_is_na = list(FALSE)
 	        rhs_group_n_na = 0
 	        rhs_n_vars = 0
@@ -588,7 +602,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	    n_rhs = length(rhs)
 	    res = vector("list", n_lhs * n_rhs)
 
-	    rhs_names = sapply(fml_rhs_all, deparse_long)
+	    rhs_names = sapply(multi_rhs_fml_full, deparse_long)
 
 	    for(i in seq_along(lhs_group)){
 	        for(j in seq_along(rhs_group)){
@@ -611,7 +625,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	            my_lhs = lhs[lhs_group[[i]]]
 	            if(isLinear){
 	                my_rhs = list(X)
-	                if(is_cumul){
+	                if(multi_rhs_cumul){
 	                    gmax = max(rhs_group[[j]])
 	                    my_rhs[1 + (1:gmax)] = rhs[1:gmax]
 	                } else {
@@ -624,7 +638,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 	            } else{
 	                rhs_len = lengths(rhs)
-	                if(is_cumul){
+	                if(multi_rhs_cumul){
 	                    gmax = max(rhs_group[[j]])
 	                    my_rhs = rhs[rhs_len > 1 & seq_along(rhs) <= gmax]
 	                } else {
@@ -741,7 +755,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	                        my_X = 0
 	                    }
 
-	                    my_fml = xpd(..lhs ~ ..rhs, ..lhs = lhs_names[i_lhs], ..rhs = fml_rhs_all[[jj]])
+	                    my_fml = xpd(..lhs ~ ..rhs, ..lhs = lhs_names[i_lhs], ..rhs = multi_rhs_fml_full[[jj]])
 	                    current_env = reshape_env(my_env, lhs = my_lhs[[ii]], rhs = my_X, fml_linear = my_fml)
 
 	                    if(do_iv){
@@ -1748,6 +1762,18 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, split, fsplit,
     }
 
     #
+    # Multi fixef ####
+    #
+
+    do_multi_fixef = get("do_multi_fixef", env)
+    if(do_multi_fixef){
+
+        res = multi_fixef(env, feglm.fit)
+
+        return(res)
+    }
+
+    #
     # Multi LHS and RHS ####
     #
 
@@ -2668,6 +2694,18 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	}
 
 	#
+	# Multi fixef ####
+	#
+
+	do_multi_fixef = get("do_multi_fixef", env)
+	if(do_multi_fixef){
+
+	    res = multi_fixef(env, feNmlm)
+
+	    return(res)
+	}
+
+	#
 	# Multi LHS and RHS ####
 	#
 
@@ -3180,26 +3218,28 @@ multi_LHS_RHS = function(env, fun){
 
     # RHS
     if(do_multi_rhs){
-        fml_rhs_all = get("fml_rhs_all", env)
-        is_cumul = get("is_cumul", env)
+        multi_rhs_fml_full = get("multi_rhs_fml_full", env)
+        multi_rhs_cumul = get("multi_rhs_cumul", env)
         fake_intercept = get("fake_intercept", env)
         data = get("data", env)
 
         rhs = list()
-        for(i in seq_along(fml_rhs_all)){
+        for(i in seq_along(multi_rhs_fml_full)){
             # We evaluate the extra data and check the NA pattern
 
-            my_fml = xpd(lhs ~ ..rhs, ..rhs = fml_rhs_all[[i]])
-            rhs_current = try(fixest_model_matrix(my_fml, data, fake_intercept = fake_intercept), silent = TRUE)
-            if("try-error" %in% class(rhs_current)){
-                stop_up("Evaluation of the RHS raises an error (concerns ", deparse_long(my_fml[[3]]), "):\n", rhs_current)
+            my_fml = xpd(lhs ~ ..rhs, ..rhs = multi_rhs_fml_full[[i]])
+            rhs_current = error_sender(fixest_model_matrix(my_fml, data, fake_intercept = fake_intercept),
+                                       "Evaluation of the RHS raises an error (concerns ", deparse_long(my_fml[[3]]), "):\n", up = 1)
+
+            if(identical(rhs_current, "NOT_LINEAR")){
+                rhs_current = 0
             }
 
             rhs[[i]] = rhs_current
         }
     } else {
-        fml_rhs_all = list(xpd(~ ..rhs, ..rhs = deparse_long(fml[[3]])))
-        is_cumul = FALSE
+        multi_rhs_fml_full = list(xpd(~ ..rhs, ..rhs = deparse_long(fml[[3]])))
+        multi_rhs_cumul = FALSE
         linear.mat = get("linear.mat", env)
         rhs = list(linear.mat)
     }
@@ -3208,15 +3248,19 @@ multi_LHS_RHS = function(env, fun){
     n_rhs = length(rhs)
     res = vector("list", n_lhs * n_rhs)
 
-    rhs_names = sapply(fml_rhs_all, deparse_long)
+    rhs_names = sapply(multi_rhs_fml_full, deparse_long)
 
     for(i in seq_along(lhs)){
         for(j in seq_along(rhs)){
             # reshaping the env => taking care of the NAs
+cat("i = ", i, " j = ", j, "\n", sep ="")
+            if(length(rhs[[j]]) == 1){
+                is_na_current = !is.finite(lhs[[i]])
+            } else {
+                is_na_current = !is.finite(lhs[[i]]) | cpppar_which_na_inf_mat(rhs[[j]], nthreads)$is_na_inf
+            }
 
-            is_na_current = !is.finite(lhs[[i]]) | cpppar_which_na_inf_mat(rhs[[j]], nthreads)$is_na_inf
-
-            my_fml = xpd(..lhs ~ ..rhs, ..lhs = lhs_names[i], ..rhs = fml_rhs_all[[j]])
+            my_fml = xpd(..lhs ~ ..rhs, ..lhs = lhs_names[i], ..rhs = multi_rhs_fml_full[[j]])
 
             if(any(is_na_current)){
                 my_env = reshape_env(env, which(!is_na_current), lhs = lhs[[i]], rhs = rhs[[j]], fml_linear = my_fml)
@@ -3243,7 +3287,189 @@ multi_LHS_RHS = function(env, fun){
 }
 
 
+multi_fixef = function(env, estfun){
+    # Honestly had I known it was so painful, I wouldn't have done it...
+    assign("do_multi_fixef", FALSE, env)
 
+    multi_fixef_fml_full = get("multi_fixef_fml_full", env)
+    multi_fixef_fml_sw = get("multi_fixef_fml_sw", env)
+    multi_fixef_cumul = get("multi_fixef_cumul", env)
+    combine.quick = get("combine.quick", env)
+    fixef.rm = get("fixef.rm", env)
+    family = get("family", env)
+    origin_type = get("origin_type", env)
+
+    data = get("data", env)
+
+    n_fixef = length(multi_fixef_fml_full)
+
+    data_results = list()
+    for(i in 1:n_fixef){
+
+        fml_fixef = multi_fixef_fml_full[[i]]
+
+        if(length(all.vars(fml_fixef)) > 0){
+
+            #
+            # Evaluation of the fixed-effects
+            #
+
+            fixef_terms_full = fixef_terms(fml_fixef)
+
+            # fixef_terms_full computed in the formula section
+            fixef_terms = fixef_terms_full$fml_terms
+
+            # FEs
+            fixef_mat = error_sender(prepare_df(fixef_terms_full$fe_vars, data, combine.quick),
+                                     "Problem evaluating the fixed-effects part of the formula:\n")
+
+            fixef_vars = names(fixef_mat)
+
+            # Slopes
+            isSlope = any(fixef_terms_full$slope_flag != 0)
+            slope_vars_list = list(0)
+            if(isSlope){
+
+                slope_mat = error_sender(prepare_df(fixef_terms_full$slope_vars, data),
+                                         "Problem evaluating the variables with varying slopes in the fixed-effects part of the formula:\n")
+
+                slope_flag = fixef_terms_full$slope_flag
+                slope_vars = fixef_terms_full$slope_vars
+                slope_vars_list = fixef_terms_full$slope_vars_list
+
+                # Further controls
+                not_numeric = !sapply(slope_mat, is.numeric)
+                if(any(not_numeric)){
+                    stop("In the fixed-effects part of the formula (i.e. in ", as.character(fml_fixef[2]), "), variables with varying slopes must be numeric. Currently variable", enumerate_items(names(slope_mat)[not_numeric], "s.is.quote"), " not.")
+                }
+
+                # slope_flag: 0: no Varying slope // > 0: varying slope AND fixed-effect // < 0: varying slope WITHOUT fixed-effect
+                onlySlope = all(slope_flag < 0)
+
+            }
+
+            # fml update
+            fml_fixef = xpd(~ ..fe, ..fe = fixef_terms)
+
+            #
+            # NA
+            #
+
+            for(j in seq_along(fixef_mat)){
+                if(!is.numeric(fixef_mat[[j]]) && !is.character(fixef_mat[[j]])){
+                    fixef_mat[[j]] = as.character(fixef_mat[[j]])
+                }
+            }
+
+            is_NA = !complete.cases(fixef_mat)
+
+            if(isSlope){
+                # Convert to double
+                who_not_double = which(sapply(slope_mat, is.integer))
+                for(i in who_not_double){
+                    slope_mat[[i]] = as.numeric(slope_mat[[i]])
+                }
+
+                info = cpppar_which_na_inf_df(slope_mat, nthreads)
+                if(info$any_na_inf){
+                    is_NA = is_NA | info$is_na_inf
+                }
+            }
+
+            if(any(is_NA)){
+                # Remember that isFixef is FALSE so far => so we only change the reg vars
+                my_env = reshape_env(env = env, obs2keep = which(!is_NA))
+
+                # NA removal in fixef
+                fixef_mat = fixef_mat[!is_NA, , drop = FALSE]
+
+                if(isSlope){
+                    slope_mat = slope_mat[!is_NA, , drop = FALSE]
+                }
+            } else {
+                my_env = new.env(parent = env)
+            }
+
+            # We remove the linear part if needed
+            linear.mat = get("linear.mat", my_env)
+            if("(Intercept)" %in% colnames(linear.mat)){
+                int_col = which("(Intercept)" %in% colnames(linear.mat))
+                if(ncol(linear.mat) == 1){
+                    assign("linear.mat", 0, my_env)
+                } else {
+                    assign("linear.mat", linear.mat[, -int_col, drop = FALSE], my_env)
+                }
+            }
+
+            # We assign the fixed-effects
+            lhs = get("lhs", my_env)
+
+            # We delay the computation by using isSplit = TRUE and split.full = FALSE
+            # Real QUF will be done in the last reshape env
+            info_fe = setup_fixef(fixef_mat = fixef_mat, lhs = lhs, fixef_vars = fixef_vars, fixef.rm = fixef.rm, family = family, isSplit = TRUE, split.full = FALSE, origin_type = origin_type, isSlope = isSlope, slope_flag = slope_flag, slope_mat = slope_mat, slope_vars_list = slope_vars_list, nthreads = nthreads)
+
+            fixef_id        = info_fe$fixef_id
+            fixef_names     = info_fe$fixef_names
+            fixef_sizes     = info_fe$fixef_sizes
+            fixef_table     = info_fe$fixef_table
+            sum_y_all       = info_fe$sum_y_all
+            lhs             = info_fe$lhs
+
+            obs2remove      = info_fe$obs2remove
+            fixef_removed   = info_fe$fixef_removed
+            message_fixef   = info_fe$message_fixef
+
+            slope_variables = info_fe$slope_variables
+            slope_flag      = info_fe$slope_flag
+
+            fixef_id_res    = info_fe$fixef_id_res
+            fixef_sizes_res = info_fe$fixef_sizes_res
+            new_order       = info_fe$new_order
+
+            assign("isFixef", TRUE, my_env)
+            assign("new_order_original", new_order, my_env)
+            assign("fixef_names", fixef_names, my_env)
+            assign("fixef_vars", fixef_vars, my_env)
+
+            assign_fixef_env(env, family, origin_type, fixef_id, fixef_sizes, fixef_table, sum_y_all, slope_flag, slope_variables, slope_vars_list)
+
+            #
+            # Formatting the fixef stuff from res
+            #
+
+            # fml & fixef_vars => other stuff will be taken care of in reshape
+            res = get("res", my_env)
+            res$fml_all$fixef = fml_fixef
+            res$fixef_vars = fixef_vars
+            assign("res", res, my_env)
+
+            #
+            # Last reshape
+            #
+
+            my_env_est = reshape_env(my_env, assign_fixef = TRUE)
+
+        } else {
+            # No fixed-effect // new.env is indispensible => otherwise multi RHS/LHS not possible
+            my_env_est = reshape_env(env)
+        }
+
+        data_results[[i]] = estfun(env = my_env_est)
+    }
+
+    index = list(fixef = n_fixef)
+    fixef_names = sapply(multi_fixef_fml_full, deparse_long)
+    all_names = list(fixef = fixef_names)
+
+    res_multi = setup_multi(index, all_names, data_results)
+
+    if("lhs" %in% names(attr(res_multi, "meta")$index)){
+        res_multi = res_multi[lhs = TRUE]
+    }
+
+    return(res_multi)
+
+}
 
 
 
