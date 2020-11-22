@@ -280,13 +280,14 @@ print.fixest_multi = function(x, ...){
 
     depth = length(index)
 
-    dict_title = c("sample" = "Sample", "lhs" = "Dep. var.", "rhs" = "Expl. vars.", "iv" = "IV")
+    dict_title = c("sample" = "Sample", "lhs" = "Dep. var.", "rhs" = "Expl. vars.", "iv" = "IV", "fixef" = "Fixed-effects")
 
     headers = list()
     headers[[1]] = function(d, i) cat(dict_title[d], ": ", all_names[[d]][i], "\n", sep = "")
     headers[[2]] = function(d, i) cat("\n### ", dict_title[d], ": ", all_names[[d]][i], "\n\n", sep = "")
     headers[[3]] = function(d, i) cat("\n\n# ", toupper(dict_title[d]), ": ", all_names[[d]][i], "\n\n", sep = "")
     headers[[4]] = function(d, i) cat("\n\n#\n# ", toupper(dict_title[d]), ": ", all_names[[d]][i], "\n#\n\n", sep = "")
+    headers[[5]] = function(d, i) cat("\n\n#===\n# ", toupper(dict_title[d]), ": ", all_names[[d]][i], "\n#===\n\n", sep = "")
 
     for(i in 1:nrow(tree)){
         for(j in 1:depth){
@@ -297,7 +298,11 @@ print.fixest_multi = function(x, ...){
         }
 
         if(is_short){
-            myPrintCoefTable(coeftable = coeftable(data[[i]]), show_signif = FALSE)
+            if(isTRUE(data[[i]]$onlyFixef)){
+                cat("No variable (only the fixed-effects).\n")
+            } else {
+                myPrintCoefTable(coeftable = coeftable(data[[i]]), show_signif = FALSE)
+            }
             if(tree[i, depth] != index[[depth]]) cat("---\n")
         } else {
             print(data[[i]])
@@ -352,15 +357,20 @@ print.fixest_multi = function(x, ...){
 #' @inherit print.fixest_multi seealso
 #' @inheritParams print.fixest_multi
 #'
-#' @param sample An integer vector of a character vector. It represents the \code{sample} identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation was a split sample. You can use \code{.N} to refer to the last element.
-#' @param lhs An integer vector of a character vector. It represents the left-hand-sides identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation contained multiple left-hand-sides. You can use \code{.N} to refer to the last element.
-#' @param rhs An integer vector. It represents the right-hand-sides identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation contained multiple right-hand-sides. You can use \code{.N} to refer to the last element.
-#' @param iv An integer vector. It represent the stages of the IV. Note that the length can be greater than 2 when there are multiple endogenous regressors (the first stage corresponding to multiple estimations). Note that the order of the stages depends on the \code{stage} argument from \code{\link[fixest]{summary.fixest}}.
+#' @param sample An integer vector, a logical scalar, or a character vector. It represents the \code{sample} identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation was a split sample. You can use \code{.N} to refer to the last element. If logical, all elements are selected in both cases, but \code{FALSE} leads \code{sample} to become the rightmost key (just try it out).
+#' @param lhs An integer vector, a logical scalar, or a character vector. It represents the left-hand-sides identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation contained multiple left-hand-sides. You can use \code{.N} to refer to the last element. If logical, all elements are selected in both cases, but \code{FALSE} leads \code{lhs} to become the rightmost key (just try it out).
+#' @param rhs An integer vector or a logical scalar. It represents the right-hand-sides identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation contained multiple right-hand-sides. You can use \code{.N} to refer to the last element. If logical, all elements are selected in both cases, but \code{FALSE} leads \code{rhs} to become the rightmost key (just try it out).
+#' @param fixef An integer vector or a logical scalar. It represents the fixed-effects identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation contained fixed-effects in a stepwise fashion. You can use \code{.N} to refer to the last element. If logical, all elements are selected in both cases, but \code{FALSE} leads \code{fixef} to become the rightmost key (just try it out).
+#' @param iv An integer vector or a logical scalar. It represent the stages of the IV. Note that the length can be greater than 2 when there are multiple endogenous regressors (the first stage corresponding to multiple estimations). Note that the order of the stages depends on the \code{stage} argument from \code{\link[fixest]{summary.fixest}}. If logical, all elements are selected in both cases, but \code{FALSE} leads \code{iv} to become the rightmost key (just try it out).
 #' @param i An integer vector. Represents the estimations to extract.
 #' @param I An integer vector. Represents the root element to extract.
+#' @param reorder Logical, default is \code{TRUE}. Indicates whether reordering of the results should be performed depending on the user input.
+#' @param drop Logical, default is \code{TRUE}. If the result contains only one estimation, then if \code{drop = TRUE} it will be transformed into a \code{fixest} object (instead of \code{fixest_multi}).
 #'
 #' @details
-#' The order with we we use the keys matter. Every time a key sample, lhs or rhs is used, a reordering is performed to consider the leftmost-side key to be the new root.
+#' The order with we we use the keys matter. Every time a key \code{sample}, \code{lhs}, \code{rhs}, \code{fixef} or \code{iv} is used, a reordering is performed to consider the leftmost-side key to be the new root.
+#'
+#' Use logical keys to easily reorder. For example, say the object \code{res} contains a multiple estimation with multiple left-hand-sides, right-hand-sides and fixed-effects. By default the results are ordered as follows: \code{lhs}, \code{fixef}, \code{rhs}. If you use \code{res[lhs = FALSE]}, then the new order is: \code{fixef}, \code{rhs}, \code{lhs}. With \code{res[rhs = TRUE, lhs = FALSE]} it becomes: \code{rhs}, \code{fixef}, \code{lhs}. In both cases you keep all estimations.
 #'
 #' @return
 #' It returns a \code{fixest_multi} object. If there is only one estimation left in the object, then the result is simplified into a \code{fixest} object.
@@ -387,9 +397,10 @@ print.fixest_multi = function(x, ...){
 #' # The first and last estimations
 #' etable(est_split[i = c(1, .N)])
 #'
-"[.fixest_multi" = function(x, sample, lhs, rhs, iv, i, I){
+"[.fixest_multi" = function(x, sample, lhs, rhs, fixef, iv, i, I, reorder = TRUE, drop = TRUE){
 
     core_args = c("sample", "lhs", "rhs", "iv")
+    check_arg(reorder, drop, "logical scalar")
 
     mc = match.call()
     if(!any(c(core_args, "i", "I") %in% names(mc))){
@@ -476,16 +487,23 @@ print.fixest_multi = function(x, ...){
     is_sample = !missing(sample)
     is_lhs    = !missing(lhs)
     is_rhs    = !missing(rhs)
-    is_iv    = !missing(iv)
+    is_fixef  = !missing(fixef)
+    is_iv     = !missing(iv)
 
     selection = list()
 
+    last = c()
+
     s_max = index[["sample"]]
     if(is_sample){
-        check_arg_plus(sample, "evalset multi match | integer vector no na", .choices = all_names[["sample"]], .data = list(.N = s_max))
+        check_arg_plus(sample, "evalset logical scalar | multi match | integer vector no na", .choices = all_names[["sample"]], .data = list(.N = s_max))
 
-
-        if(is.character(sample)){
+        if(is.logical(sample)){
+            if(isFALSE(sample)){
+                last[length(last) + 1] = "sample"
+            }
+            sample = 1:s_max
+        } else if(is.character(sample)){
             dict = 1:s_max
             names(dict) = all_names[["sample"]]
             sample = as.integer(dict[sample])
@@ -502,9 +520,14 @@ print.fixest_multi = function(x, ...){
 
     lhs_max = index[["lhs"]]
     if(is_lhs){
-        check_arg_plus(lhs, "evalset multi match | integer vector no na", .choices = all_names[["lhs"]], .data = list(.N = lhs_max))
+        check_arg_plus(lhs, "evalset logical scalar | multi match | integer vector no na", .choices = all_names[["lhs"]], .data = list(.N = lhs_max))
 
-        if(is.character(lhs)){
+        if(is.logical(lhs)){
+            if(isFALSE(lhs)){
+                last[length(last) + 1] = "lhs"
+            }
+            lhs = 1:lhs_max
+        } else if(is.character(lhs)){
             dict = 1:lhs_max
             names(dict) = all_names[["lhs"]]
             lhs = as.integer(dict[lhs])
@@ -521,9 +544,14 @@ print.fixest_multi = function(x, ...){
 
     rhs_max = index[["rhs"]]
     if(is_rhs){
-        check_arg_plus(rhs, "evalset multi match | integer vector no na", .choices = all_names[["rhs"]], .data = list(.N = rhs_max))
+        check_arg_plus(rhs, "evalset logical scalar | multi match | integer vector no na", .choices = all_names[["rhs"]], .data = list(.N = rhs_max))
 
-        if(is.character(rhs)){
+        if(is.logical(rhs)){
+            if(isFALSE(rhs)){
+                last[length(last) + 1] = "rhs"
+            }
+            rhs = 1:rhs_max
+        } else if(is.character(rhs)){
             dict = 1:rhs_max
             names(dict) = all_names[["rhs"]]
             rhs = as.integer(dict[rhs])
@@ -538,11 +566,40 @@ print.fixest_multi = function(x, ...){
         selection$rhs = 1:rhs_max
     }
 
+    fixef_max = index[["fixef"]]
+    if(is_fixef){
+        check_arg_plus(fixef, "evalset logical scalar | multi match | integer vector no na", .choices = all_names[["fixef"]], .data = list(.N = fixef_max))
+
+        if(is.logical(fixef)){
+            if(isFALSE(fixef)){
+                last[length(last) + 1] = "fixef"
+            }
+            fixef = 1:fixef_max
+        } else if(is.character(fixef)){
+            dict = 1:fixef_max
+            names(dict) = all_names[["fixef"]]
+            fixef = as.integer(dict[fixef])
+        }
+
+        if(any(abs(fixef) > fixef_max)){
+            stop("The index 'fixef' cannot be greater than ", fixef_max, ". Currently ", I[which.max(abs(fixef))], " is not valid.")
+        }
+
+        selection$fixef = (1:fixef_max)[fixef]
+    } else if("fixef" %in% names(index)){
+        selection$fixef = 1:fixef_max
+    }
+
     iv_max = index[["iv"]]
     if(is_iv){
-        check_arg_plus(iv, "evalset multi match | integer vector no na", .choices = all_names[["iv"]], .data = list(.N = iv_max))
+        check_arg_plus(iv, "evalset logical scalar | multi match | integer vector no na", .choices = all_names[["iv"]], .data = list(.N = iv_max))
 
-        if(is.character(iv)){
+        if(is.logical(iv)){
+            if(isFALSE(iv)){
+                last[length(last) + 1] = "iv"
+            }
+            iv = 1:iv_max
+        } else if(is.character(iv)){
             dict = 1:iv_max
             names(dict) = all_names[["iv"]]
             iv = as.integer(dict[iv])
@@ -560,10 +617,13 @@ print.fixest_multi = function(x, ...){
     # We keep the order of the user!!!!!
     sc = sys.call()
     user_order = names(sc)[-(1:2)]
-    if(any(!user_order %in% names(index))){
+    if(reorder == FALSE){
         user_order = names(index)
     } else {
         user_order = c(user_order, setdiff(names(index), user_order))
+        if(length(last) > 0){
+            user_order = c(setdiff(user_order, last), last)
+        }
     }
 
     new_index = list()
@@ -591,7 +651,7 @@ print.fixest_multi = function(x, ...){
         new_data[[i]] = data[[tree$obs[i]]]
     }
 
-    if(length(new_data) == 1){
+    if(length(new_data) == 1 && drop){
         return(new_data[[1]])
     }
 
