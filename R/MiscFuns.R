@@ -5133,7 +5133,17 @@ error_sender = function(expr, ..., clean, up = 0){
         set_up(1 + up)
         msg = paste(..., collapse = "")
         if(!missing(clean)){
-            stop_up(msg, gsub(clean, "", res))
+
+            if(grepl(" => ", clean)){
+                clean_split = strstplit(clean, " => ")[[1]]
+                from = clean_split[1]
+                to = clean_split[2]
+            } else {
+                from = clean
+                to = ""
+            }
+
+            stop_up(msg, gsub(from, to, res))
         } else {
             stop_up(msg, res)
         }
@@ -5339,6 +5349,7 @@ fixest_fml_rewriter = function(fml){
 
     return(res)
 }
+
 
 #### ................. ####
 #### Aditional Methods ####
@@ -7148,7 +7159,7 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 #'
 #'
 #' @param x An object of class \code{fixest}. Typically the result of a \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}} estimation.
-#' @param type A character scalar. Default is \code{type = "full"} which gives back a formula containing the linear part of the model along with the fixed-effects (if any) and the non-linear in parameters part (if any). If \code{type = "linear"} then only the linear formula is returned. If \code{type = "NL"} then only the non linear in parameters part is returned.
+#' @param type A character scalar. Default is \code{type = "full"} which gives back a formula containing the linear part of the model along with the fixed-effects (if any) and the IV part (if any). If \code{type = "linear"} then only the linear formula is returned. If \code{type = "NL"} then only the non linear in parameters part is returned.
 #' @param ... Not currently used.
 #'
 #' @return
@@ -7551,14 +7562,15 @@ rep.fixest_list = function(x, times = 1, each = 1, cluster, ...){
     }
 
     if(length(dots) == 1){
-        if(all(sapply(dots[[1]], function(x) "fixest" %in% class(x)))){
-            res = dots[[1]]
+
+        if("fixest_multi" %in% class(dots[[1]])){
+            res = attr(dots[[1]], "data")
             class(res) = "fixest_list"
             return(res)
         }
 
-        if("fixest_multi" %in% class(dots[[1]])){
-            res = attr(dots[[1]], "data")
+        if(all(sapply(dots[[1]], function(x) "fixest" %in% class(x)))){
+            res = dots[[1]]
             class(res) = "fixest_list"
             return(res)
         }
