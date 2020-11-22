@@ -3591,54 +3591,39 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
     linear.mat
 }
 
-fixef_terms = function(fml){
+fixef_terms = function(fml, stepwise = FALSE, origin_type = "feols"){
     # separate all terms of fml into fixed effects and varying slopes
     # fml: one sided formula
     # can also be a vector of terms
+    # Je fais tout ce tralala a cause de ce putain de terms() qui ne marche pas avec a^b!!!! fait chier!
 
     # fixef_terms(~dum_1[[x1]] + dum_2[x2])
     # fixef_terms(~dum_1[[x1]] + dum_2 + dum_3[x2, x3])
 
-    if(is.vector(fml)){
-        fml = as.formula(paste0("~", paste0(fml, collapse = "+")))
-    }
-
-
-    # Internal function
-    reformulate_varslope = function(dum, ..., add_dum = TRUE){
-        mc = match.call()
-        dum = deparse_long(mc[["dum"]])
-
-        if(add_dum){
-            res = dum
-        } else {
-            res = c()
+    if(!is.vector(fml)){
+        # we need to take care of the ^ used to combine variables
+        fml_char = as.character(fml[2])
+        if(grepl("^", fml_char, fixed = TRUE)){
+            fml_char_new = gsub("^", "_impossible_var_name_", fml_char, fixed = TRUE)
+            fml = as.formula(paste0("~", fml_char_new))
         }
 
-        for(i in 3:(length(mc) - !add_dum)){
-            value = deparse_long(mc[[i]])
-            res = c(res, paste0(dum, "[[", value, "]]"))
+        if(!origin_type %in% c("feols", "feglm") && grepl("[", fml_char, fixed = TRUE)){
+            stop("The use of varying slopes is available only for the functions feols, feglm or fepois.")
         }
-        res
+
+        t = terms(fml)
+
+        if(stepwise){
+            sw_info = extract_stepwise(tms = t)
+            return(sw_info)
+        }
+
+        my_vars = attr(t, "term.labels")
+
+    } else {
+        my_vars = fml
     }
-
-    # we need to take care of the ^ used to combine variables
-    fml_char = as.character(fml[2])
-    if(grepl("^", fml_char, fixed = TRUE)){
-        fml_char_new = gsub("^", "_impossible_var_name_", fml_char, fixed = TRUE)
-        fml = as.formula(paste0("~", fml_char_new))
-    }
-
-
-    t = try(terms(fml))
-
-    # if error, we send it back
-    if("try-error" %in% class(t)){
-        t = gsub("_impossible_var_name_", "^", t, fixed = TRUE)
-        return(t)
-    }
-
-    my_vars = attr(t, "term.labels")
 
     # Further error checking (misuse of varying slopes)
     if(any(grepl("]", my_vars, fixed = TRUE))){
@@ -3665,6 +3650,24 @@ fixef_terms = function(fml){
             }
         }
 
+    }
+
+    # Internal function
+    reformulate_varslope = function(dum, ..., add_dum = TRUE){
+        mc = match.call()
+        dum = deparse_long(mc[["dum"]])
+
+        if(add_dum){
+            res = dum
+        } else {
+            res = c()
+        }
+
+        for(i in 3:(length(mc) - !add_dum)){
+            value = deparse_long(mc[[i]])
+            res = c(res, paste0(dum, "[[", value, "]]"))
+        }
+        res
     }
 
     qui_slope = grepl("[", my_vars, fixed = TRUE)
