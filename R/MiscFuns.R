@@ -523,8 +523,8 @@ summary.fixest_list = function(object, se, cluster, dof = getFixest_dof(), .vcov
 #' Reports different R2s for \code{fixest} estimations (e.g. \code{\link[fixest]{feglm}} or \code{\link[fixest]{feols}}).
 #'
 #' @param x A \code{fixest} object, e.g. obtained with function \code{\link[fixest]{feglm}} or \code{\link[fixest]{feols}}.
-#' @param type A character vector representing the R2 to compute. The R2 codes are of the form: "wapr2" with letters "w" (within), "a" (adjusted) and "p" (pseudo) possibly missing. E.g. to get the regular R2: use \code{type = "r2"}, the within adjusted R2: use \code{type = "war2"}, the pseudo R2: use \code{type = "pr2"}, etc. Use \code{"sq.cor"} for the squared correlation. By default, all R2s are computed.
-#' @param full_names Logical scalar, default is \code{FALSE}. If \code{TRUE} then names of the vector in output will have full names instead of keywords (e.g. \code{Squared Correlation} instead of \code{sq.cor}, etc).
+#' @param type A character vector representing the R2 to compute. The R2 codes are of the form: "wapr2" with letters "w" (within), "a" (adjusted) and "p" (pseudo) possibly missing. E.g. to get the regular R2: use \code{type = "r2"}, the within adjusted R2: use \code{type = "war2"}, the pseudo R2: use \code{type = "pr2"}, etc. Use \code{"cor2"} for the squared correlation. By default, all R2s are computed.
+#' @param full_names Logical scalar, default is \code{FALSE}. If \code{TRUE} then names of the vector in output will have full names instead of keywords (e.g. \code{Squared Correlation} instead of \code{cor2}, etc).
 #'
 #' @details
 #' For R2s with no theoretical justification, like e.g. regular R2s for maximum likelihood models -- or within R2s for models without fixed-effects, NA is returned. The single measure to possibly compare all kinds of models is the squared correlation between the dependent variable and the expected predictor.
@@ -548,7 +548,7 @@ summary.fixest_list = function(object, se, cluster, dof = getFixest_dof(), .vcov
 #' est = feols(log(Euros) ~ log(dist_km)|Origin+Destination+Product, trade)
 #'
 #' # Squared correlation:
-#' r2(est, "sq.cor")
+#' r2(est, "cor2")
 #'
 #' # "regular" r2:
 #' r2(est, "r2")
@@ -560,10 +560,10 @@ summary.fixest_list = function(object, se, cluster, dof = getFixest_dof(), .vcov
 #' r2(est, "war2")
 #'
 #' # all four at once
-#' r2(est, c("sq.cor", "r2", "pr2", "war2"))
+#' r2(est, c("cor2", "r2", "pr2", "war2"))
 #'
 #' # same with full names instead of codes
-#' r2(est, c("sq.cor", "r2", "pr2", "war2"), full_names = TRUE)
+#' r2(est, c("cor2", "r2", "pr2", "war2"), full_names = TRUE)
 #'
 r2 = function(x, type = "all", full_names = FALSE){
 	# p: pseudo
@@ -576,12 +576,12 @@ r2 = function(x, type = "all", full_names = FALSE){
 		stop("Only 'fixest' objects are supported.")
 	}
 
-	check_arg(type, "character vector no na", .message = "Argument 'type' must be a character vector (e.g. type = c(\"sq.cor\", \"r2\", \"pr2\")). (a: adjused, p: pseudo, w: within.)")
+	check_arg(type, "character vector no na", .message = "Argument 'type' must be a character vector (e.g. type = c(\"cor2\", \"r2\", \"pr2\")). (a: adjused, p: pseudo, w: within.)")
 
 	# type_allowed next => ("count", "acount") ?
-    dict_names = c("sq.cor" = "Squared Correlation", "r2" = "R2", "ar2" = "Adjusted R2", "pr2" = "Pseudo R2", "apr2" = "Adjusted Pseudo R2", "wr2" = "Within R2", "war2" = "Adjusted Within R2", "wpr2" = "Within Pseudo R2", "wapr2" = "Adjusted Within Pseudo R2")
-	type_allowed = c("sq.cor", "r2", "ar2", "pr2", "apr2", "wr2", "war2", "wpr2", "wapr2")
-	types_alias = c(par2 = "apr2", awr2 = "war2", pwr2 = "wpr2", wpar2 = "wapr2", pwar2 = "wapr2", pawr2 = "wapr2", apwr2 = "wapr2", awpr2 = "wapr2")
+    dict_names = c("cor2" = "Squared Correlation", "r2" = "R2", "ar2" = "Adjusted R2", "pr2" = "Pseudo R2", "apr2" = "Adjusted Pseudo R2", "wr2" = "Within R2", "war2" = "Adjusted Within R2", "wpr2" = "Within Pseudo R2", "wapr2" = "Adjusted Within Pseudo R2")
+	type_allowed = c("cor2", "r2", "ar2", "pr2", "apr2", "wr2", "war2", "wpr2", "wapr2")
+	types_alias = c(par2 = "apr2", awr2 = "war2", pwr2 = "wpr2", wpar2 = "wapr2", pwar2 = "wapr2", pawr2 = "wapr2", apwr2 = "wapr2", awpr2 = "wapr2", sq.cor = "cor2")
 	if("all" %in% type){
 		type_all = type_allowed
 	} else {
