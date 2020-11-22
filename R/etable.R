@@ -14,7 +14,7 @@
 #' @param ... Used to capture different \code{fixest} estimation objects (obtained with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}). Note that any other type of element is discarded. Note that you can give a list of \code{fixest} objects.
 #' @param digits Integer, default is 4. The number of digits to be displayed.
 #' @param tex Logical: whether the results should be a data.frame or a Latex table. By default, this argument is \code{TRUE} if the argument \code{file} (used for exportation) is not missing; it is equal to \code{FALSE} otherwise.
-#' @param fitstat A character vector or a one sided formula (both with only lowercase letters). A vector listing which fit statistics to display. The valid types are 'n', 'll', 'aic', 'bic' and r2 types like 'r2', 'pr2', 'war2', etc (see all valid types in \code{\link[fixest]{r2}}). Also accepts valid types from the function \code{\link[fixest]{fitstat}}. The default value depends on the models to display. Example of use: \code{fitstat=c('n', 'sq.cor', 'ar2', 'war2')}, or \code{fitstat=~n+sq.cor+ar2+war2} using a formula. You can use the dot to refer to default values:\code{ ~ . + ll} would add the log-likelihood to the default fit statistics.
+#' @param fitstat A character vector or a one sided formula (both with only lowercase letters). A vector listing which fit statistics to display. The valid types are 'n', 'll', 'aic', 'bic' and r2 types like 'r2', 'pr2', 'war2', etc (see all valid types in \code{\link[fixest]{r2}}). Also accepts valid types from the function \code{\link[fixest]{fitstat}}. The default value depends on the models to display. Example of use: \code{fitstat=c('n', 'cor2', 'ar2', 'war2')}, or \code{fitstat=~n+cor2+ar2+war2} using a formula. You can use the dot to refer to default values:\code{ ~ . + ll} would add the log-likelihood to the default fit statistics.
 #' @param title (Tex only.) Character scalar. The title of the Latex table.
 #' @param float (Tex only.) Logical. By default, if the argument \code{title} or \code{label} is provided, it is set to \code{TRUE}. Otherwise, it is set to \code{FALSE}.
 #' @param sdBelow (Tex only.) Logical, default is \code{TRUE}. Should the standard-errors be displayed below the coefficients?
@@ -34,7 +34,7 @@
 #' @param keepFactors Logical, default is \code{TRUE}. If \code{FALSE}, then factor variables are displayed as fixed-effects and no coefficient is shown.
 #' @param powerBelow (Tex only.) Integer, default is -5. A coefficient whose value is below \code{10**(powerBelow+1)} is written with a power in Latex. For example \code{0.0000456} would be written \code{4.56$\\times 10^{-5}$} by default. Setting \code{powerBelow = -6} would lead to \code{0.00004} in Latex.
 #' @param interaction.combine (Tex only.) Character scalar, defaults to \code{" $\\times$ "}. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind $\\times$ Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.
-#' @param depvar (Data frame only.) Logical, default is missing. Whether a first line containing the dependent variables should be shown. By default, the dependent variables are shown only if they differ across models or if the argumen \code{file} is not missing.
+#' @param depvar (Data frame only.) Logical, default is \code{TRUE}. Whether a first line containing the dependent variables should be shown.
 #' @param coefstat One of \code{"se"} (default), \code{"tstat"} or \code{"confint"}. The statistic to report for each coefficient: the standard-error, the t-statistics or the confidence interval. You can adjust the confidence interval with the argument \code{ci}.
 #' @param ci Level of the confidence interval, defaults to \code{0.95}. Only used if \code{coefstat = confint}.
 #' @param style An object created by the function \code{\link[fixest]{estyle}}. It represents the style of the Latex table, see the documentation of \code{\link[fixest]{estyle}}.
@@ -252,7 +252,7 @@
 #' etable(rep(.l(est, est_bis), each = 3, cluster = list("standard", ~ Month, ~ Day)))
 #'
 #'
-etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, stage = 2, .vcov, .vcov_args = NULL, digits=4, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode, label, float, subtitles = list("auto"), fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style = NULL, style.df = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube"), postprocess = NULL, postprocess.df = NULL){
+etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, stage = 2, .vcov, .vcov_args = NULL, digits=4, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode, label, float, subtitles = list("auto"), fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar = TRUE, style = NULL, style.df = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube"), postprocess = NULL, postprocess.df = NULL){
 
     #
     # Checking the arguments
@@ -1013,7 +1013,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, stage 
                 fitstat_default = c("r2", "ar2")
             }
         } else {
-            fitstat_default = c("sq.cor", "pr2", "bic")
+            fitstat_default = c("cor2", "pr2", "bic")
         }
 
         fitstat_default = c("n", fitstat_default)
@@ -1039,7 +1039,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, stage 
 
     # checking the types
     fitstat_fun_types = fitstat(give_types = TRUE)
-    fitstat_type_allowed = c("n", "sq.cor", "ll", "aic", "bic", fitstat_fun_types$types, "r2", "ar2", "pr2", "apr2", "par2", "wr2", "war2", "awr2", "wpr2", "pwr2", "wapr2", "wpar2", "awpr2", "apwr2", "pawr2", "pwar2")
+    fitstat_type_allowed = c("n", "ll", "aic", "bic", fitstat_fun_types$types, "sq.cor", "cor2", "r2", "ar2", "pr2", "apr2", "par2", "wr2", "war2", "awr2", "wpr2", "pwr2", "wapr2", "wpar2", "awpr2", "apwr2", "pawr2", "pwar2")
     fitstat_all = unique(fitstat_all)
 
     pblm = setdiff(fitstat_all, fitstat_type_allowed)
@@ -1048,9 +1048,9 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, stage 
     }
 
     if(isTex){
-        fitstat_dict = c("n" = "Observations", "sq.cor"="Squared Correlation", r2="R$^2$", ar2="Adjusted R$^2$", pr2="Pseudo R$^2$", apr2="Adjusted Pseudo R$^2$", wr2="Within R$^2$", war2="Within Adjusted R$^2$", wpr2="Within Pseudo R$^2$", wapr2="Whithin Adjusted Pseudo R$^2$", aic = "AIC", bic = "BIC", ll = "Log-Likelihood", fitstat_fun_types$tex_alias)
+        fitstat_dict = c(n = "Observations", cor2="Squared Correlation", r2="R$^2$", ar2="Adjusted R$^2$", pr2="Pseudo R$^2$", apr2="Adjusted Pseudo R$^2$", wr2="Within R$^2$", war2="Within Adjusted R$^2$", wpr2="Within Pseudo R$^2$", wapr2="Whithin Adjusted Pseudo R$^2$", aic = "AIC", bic = "BIC", ll = "Log-Likelihood", fitstat_fun_types$tex_alias)
     } else {
-        fitstat_dict = c("n" = "Observations", "sq.cor"="Squared Corr.", r2="R2", ar2="Adjusted R2", pr2="Pseudo R2", apr2="Adj. Pseudo R2", wr2="Within R2", war2="Within Adj. R2", wpr2="Within Pseudo R2", wapr2="Whithin Adj. Pseudo R2", aic = "AIC", bic = "BIC", ll = "Log-Likelihood", fitstat_fun_types$R_alias)
+        fitstat_dict = c(n = "Observations", cor2="Squared Corr.", r2="R2", ar2="Adjusted R2", pr2="Pseudo R2", apr2="Adj. Pseudo R2", wr2="Within R2", war2="Within Adj. R2", wpr2="Within Pseudo R2", wapr2="Whithin Adj. Pseudo R2", aic = "AIC", bic = "BIC", ll = "Log-Likelihood", fitstat_fun_types$R_alias)
     }
 
     # Renaming the stats with user-provided aliases
@@ -1436,11 +1436,11 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, stage 
             if("ll" %in% fitstat_all) fistat_format[["ll"]] = fun_format(logLik(x))
 
             # regular r2s
-            r2_type_allowed = c("sq.cor", "r2", "ar2", "pr2", "apr2", "wr2", "war2", "wpr2", "wapr2")
+            r2_type_allowed = c("cor2", "r2", "ar2", "pr2", "apr2", "wr2", "war2", "wpr2", "wapr2")
             if(any(fitstat_all %in% r2_type_allowed)){
                 all_r2 = r2(x, intersect(fitstat_all, r2_type_allowed))
                 for(r2_val in names(all_r2)){
-                    nb = 5 - (r2_val == "sq.cor") * 2
+                    nb = 5 - (r2_val == "cor2") * 2
                     fistat_format[[r2_val]] = round(as.vector(all_r2[r2_val]), nb)
                 }
             }
@@ -2466,7 +2466,8 @@ setFixest_etable = function(digits = 4, fitstat, coefstat = c("se", "tstat", "co
         }
 
         # checking the types
-        fitstat_type_allowed = c("sq.cor", "r2", "ar2", "pr2", "apr2", "par2", "wr2", "war2", "awr2", "wpr2", "pwr2", "wapr2", "wpar2", "awpr2", "apwr2", "pawr2", "pwar2", "ll", "aic", "bic")
+        stop("Fix the fitstat types allowed")
+        fitstat_type_allowed = c("sq.cor", "cor2", "r2", "ar2", "pr2", "apr2", "par2", "wr2", "war2", "awr2", "wpr2", "pwr2", "wapr2", "wpar2", "awpr2", "apwr2", "pawr2", "pwar2", "ll", "aic", "bic")
         fitstat = unique(fitstat)
 
         pblm = setdiff(fitstat, fitstat_type_allowed)
@@ -2621,7 +2622,7 @@ tex_multicol = function(x){
 #' @details
 #' The \code{\\checkmark} command, used in the "aer" style (in argument \code{yesNo}), is in the \code{amssymb} package.
 #'
-#' The commands \code{\\toprule}, \code{\\midrule} and \code{\\bottomrule} are in the \code{booktabs} package.
+#' The commands \code{\\toprule}, \code{\\midrule} and \code{\\bottomrule} are in the \code{booktabs} package. You can set the width of the top/bottom rules with \\setlength\\heavyrulewidth\{wd\}, and of the midrule with \\setlength\\lightrulewidth\{wd\}.
 #'
 #' @return
 #' Returns a list containing the style parameters.
