@@ -9,9 +9,9 @@ r2(x, type = "all", full_names = FALSE)
 \arguments{
 \item{x}{A \code{fixest} object, e.g. obtained with function \code{\link[fixest]{feglm}} or \code{\link[fixest]{feols}}.}
 
-\item{type}{A character vector representing the R2 to compute. The R2 codes are of the form: "wapr2" with letters "w" (within), "a" (adjusted) and "p" (pseudo) possibly missing. E.g. to get the regular R2: use \code{type = "r2"}, the within adjusted R2: use \code{type = "war2"}, the pseudo R2: use \code{type = "pr2"}, etc. Use \code{"sq.cor"} for the squared correlation. By default, all R2s are computed.}
+\item{type}{A character vector representing the R2 to compute. The R2 codes are of the form: "wapr2" with letters "w" (within), "a" (adjusted) and "p" (pseudo) possibly missing. E.g. to get the regular R2: use \code{type = "r2"}, the within adjusted R2: use \code{type = "war2"}, the pseudo R2: use \code{type = "pr2"}, etc. Use \code{"cor2"} for the squared correlation. By default, all R2s are computed.}
 
-\item{full_names}{Logical scalar, default is \code{FALSE}. If \code{TRUE} then names of the vector in output will have full names instead of keywords (e.g. \code{Squared Correlation} instead of \code{sq.cor}, etc).}
+\item{full_names}{Logical scalar, default is \code{FALSE}. If \code{TRUE} then names of the vector in output will have full names instead of keywords (e.g. \code{Squared Correlation} instead of \code{cor2}, etc).}
 }
 \value{
 Returns a named vector.
@@ -35,7 +35,7 @@ data(trade)
 est = feols(log(Euros) ~ log(dist_km)|Origin+Destination+Product, trade)
 
 # Squared correlation:
-r2(est, "sq.cor")
+r2(est, "cor2")
 
 # "regular" r2:
 r2(est, "r2")
@@ -47,10 +47,10 @@ r2(est, "pr2")
 r2(est, "war2")
 
 # all four at once
-r2(est, c("sq.cor", "r2", "pr2", "war2"))
+r2(est, c("cor2", "r2", "pr2", "war2"))
 
 # same with full names instead of codes
-r2(est, c("sq.cor", "r2", "pr2", "war2"), full_names = TRUE)
+r2(est, c("cor2", "r2", "pr2", "war2"), full_names = TRUE)
 
 }
 \author{
