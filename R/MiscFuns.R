@@ -208,6 +208,10 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 		cat("# Evaluations:", iter_format, "--", x$message, "\n")
 	}
 
+	if(isTRUE(x$iv)){
+	    print(fitstat(x, ~ ivf))
+	}
+
 }
 
 ##
@@ -349,7 +353,17 @@ summary.fixest = function(object, se, cluster, dof = getFixest_dof(), .vcov, sta
 	                }
 	            }
 	        } else {
-	            res[[length(res) + 1]] = summary(object, se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nframes_up = nframes_up + 1, iv = TRUE)
+	            # We keep the information on clustering => matters for wald tests of 1st stage
+	            keep_se_info = length(stage) == 1
+	            my_res = summary(object, se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nframes_up = nframes_up + 1, iv = TRUE, keep_se_info = keep_se_info)
+
+	            if(keep_se_info){
+	                se_info = attr(my_res$cov.scaled, "se_info")
+	                attr(my_res$cov.scaled, "se_info") = NULL
+	                my_res$se_info = se_info
+	            }
+
+	            res[[length(res) + 1]] = my_res
 	            stage_names[length(stage_names) + 1] = "Second stage"
 	        }
 	    }
@@ -415,7 +429,7 @@ summary.fixest = function(object, se, cluster, dof = getFixest_dof(), .vcov, sta
 	    }
 
 	} else {
-	    vcov = vcov(object, se=se, cluster=cluster, dof=dof, forceCovariance = forceCovariance, keepBounded = keepBounded, nframes_up = nframes_up, attr = TRUE)
+	    vcov = vcov(object, se=se, cluster=cluster, dof=dof, forceCovariance = forceCovariance, keepBounded = keepBounded, nframes_up = nframes_up, attr = TRUE, keep_se_info = isTRUE(dots$keep_se_info))
 	}
 
 
@@ -926,9 +940,6 @@ summary.fixest.fixef = function(object, n=5, ...){
 		cat("\tMean = ", signif(mean(x1), 3), "\tVariance = ", signif(var(x1), 3), "\n", sep = "")
 	} else {
 		print(res)
-		if(!isRegular){
-			cat("NOTE: The fixed-effects are NOT regular, so cannot be straighforwardly interpreted.\n")
-		}
 	}
 
 	# We print the first 5 elements of each fixed-effect
@@ -3070,18 +3081,134 @@ demean = function(X, f, weights, nthreads = getFixest_nthreads(), notes = getFix
 }
 
 
+#' Print method for fit statistics of fixest estimations
+#'
+#' Displays a brief summary of selected fit statistics from the function \code{\link[fixest]{fitstat}}.
+#'
+#' @inherit fitstat examples
+#'
+#' @param x An object resulting from the \code{\link[fixest]{fitstat}} function.
+#' @param ... Not currently used.
+#'
+#'
+print.fixest_fitstat = function(x, ...){
+
+    glue = function(x) paste(x[nchar(x) > 0], collapse = ", ")
+
+    all_types = fitstat(give_types = TRUE)
+    dict_type = all_types$R_alias
+
+    res = c()
+
+    for(i in seq_along(x)){
+        type = names(x)[i]
+
+        v = x[[i]]
+
+        if(grepl("::", type, fixed = TRUE)){
+            dict = getFixest_dict()
+            rename_fun = function(x) paste0(dict_type[x[1]], ", ", dict_apply(x[2], dict))
+            test_name = rename_fun(strsplit(type, "::")[[1]])
+        } else {
+            test_name = dict_type[type]
+        }
+
+        if(length(v) == 1){
+            # Basic display
+            res[i] = paste0(test_name, ": ", numberFormatNormal(v))
+        } else {
+
+            stat_line = p_line = dof_line = vcov_line = ""
+            if(!is.null(v$stat)) stat_line = paste0("stat = ", numberFormatNormal(v$stat))
+            if(!is.null(v$p)) p_line = paste0("p ", ifelse(v$p < 2.2e-16, "< 2.2e-16", paste0("= ", numberFormatNormal(v$p))))
+            if(!is.null(v$df)) dof_line = paste0("on ", numberFormatNormal(v$df), " degrees of freedom")
+            if(!is.null(v$df1)) dof_line = paste0("on ", numberFormatNormal(v$df1), " and ", numberFormatNormal(v$df2), " degrees of freedom")
+            if(!is.null(v$vcov)) vcov_line = paste0("VCOV matrix: ", v$vcov)
+
+            res[i] = paste0(test_name, ": ", glue(c(stat_line, p_line, dof_line, vcov_line)), ".")
+        }
+    }
+
+    cat(sfill(res, anchor = ":"), sep = "\n")
+
+}
+
+
+
+#' Register custom fit statistics
+#'
+#' Enables the registration of custom fi statistics that can be easily summoned with the function \code{\link[fixest]{fitstat}}.
+#'
+#' @inherit fitstat examples
+#' @inherit fitstat seealso
+#'
+#' @param type A character scalar giving the type-name.
+#' @param fun A function to be applied to a \code{fixest} estimation. It must return either a scalar, either a list. Note that for the print method to work correctly, the names of the items of the list must be one of: \code{stat}, \code{p}, \code{df}, \code{df1}, \code{df2}, \code{vcov}. Only the print method is affected by this.
+#' @param alias An alias to be used in lieu of the type name in the display methods (ie when used in the function \code{\link[fixest]{print.fixest_fitstat}} or \code{\link[fixest]{etable}}).
+#'
+#'
+fitstat_register = function(type, fun, alias){
+
+    check_arg(type, "character scalar mbt")
+    check_arg(fun, "function mbt")
+    check_arg(alias, "NULL character scalar")
+
+    # We check the type is not conflicting
+    existing_types = fitstat(give_types = TRUE)$types
+
+    opts = getOption("fixest_fitstat_user")
+
+    if(type %in% setdiff(existing_types, names(opts))){
+        stop("The type name '", type, "' is the same as one built-in type. Please chose another one.")
+    }
+
+    if(missnull(alias)){
+        alias = type
+    }
+
+    res = list(fun = fun, alias = alias)
+
+    opts[[type]] = res
+
+    options(fixest_fitstat_user = opts)
+
+    invisible(NULL)
+}
 
 #' Computes fit statistics of fixest objects
 #'
 #' Computes various fit statistics for \code{fixest} estimations.
 #'
 #' @param x A \code{fixest} estimation.
-#' @param type Character vector. The type of fit statistic to be computed. So far, \code{"G"}, the 'working' number of observations, and \code{'theta'}, the over-dispersion parameter in negative binomial estimation, are available.
-#' @param as.list Logical, default is \code{FALSE}. Only used when one statistic is to be computed (i.e. arg. \code{type} is of length 1). If \code{TRUE}, then a list whose name is the \code{type} is returned containing the statistic.
-#' @param ... Other elements to be passed to other methods and may be used to compute the statistics (for example you can pass on arguments to compute the VCOV when using \code{type = "G"}).
+#' @param type Character vector. The type of fit statistic to be computed. The classic ones are: n, rmse, r2, pr2, f, wald, ivf, ivwald. You have the full list in the details section. Further, you can register your own types with \code{\link[fixest]{fitstat_register}}.
+#' @param simplify Logical, default is \code{FALSE}. By default a list is returned whose names are the selected types. If \code{simplify = TRUE} and only one type is selected, then the element is directly returned (ie will not be nested in a list).
+#' @param verbose Logical, default is \code{TRUE}. If \code{TRUE}, an object of class \code{fixest_fitstat} is returned (so its associated print method will be triggerrd). If \code{FALSE} a simple list is returned instead.
+#' @param show_types Logical, default is \code{FALSE}. If \code{TRUE}, only prompts all available types.
+#' @param ... Other elements to be passed to other methods and may be used to compute the statistics (for example you can pass on arguments to compute the VCOV when using \code{type = "g"} or \code{type = "wald"}.).
+#'
+#' @section Registering your own types:
+#'
+#' You can register custom fit statistics with the function \code{fitstat_register}.
+#'
+#' @section Available types:
+#'
+#' The types are case sensitive, please use lower case only. The types available are:
+#'
+#' \itemize{
+#' \item{n, ll, aic, bic, rmse}{The number of observations, the log-likelihood, the AIC, the BIC and the root mean squared error, respectively.}
+#' \item{g}{The effective sample size. This is used only when the standard-errors are clustered and is used when computing the p-values of the coefficients.}
+#' \item{r2, ar2, wr2, awr2, pr2, apr2, wpr2, awpr2}{All r2 that can be obtained with the function \code{\link[fixest]{r2}}. The \code{a} stands for 'adjusted', the \code{w} for 'within' and the \code{p} for 'pseudo'. Note that the order of the letters \code{a}, \code{w} and \code{p} does not matter.}
+#' \item{f, wf}{The F-tests of nullity of the coefficients. The \code{w} stands for 'within'. These types return the following values: stat, p, df1 and df2. If you want to display only one of these, use their name after a dot: e.g. \code{f.stat} will give the statistic of the F-test, or \code{wf.p} will give the p-values of the F-test on the projected model (i.e. projected onto the fixed-effects).}
+#' \item{wald}{Wald test of joint nullity of the coefficients. This test always excludes the intercept and the fixed-effects. These type returns the following values: stat, p, df1, df2 and vcov. The element \code{vcov} reports the way the VCOV matrix was computed since it directly influences this statistic.}
+#' \item{ivf, ivf1, ivf2, ivfall}{These statistics are specific to IV estimations. They report either the IV F-test of the first stage (\code{ivf} or \code{ivf1}), of the second stage (\code{ivf2}) or of both (\code{ivfall}). The F-test of the first stage is commonly named weak instrument test. The value of \code{ivfall} is only useful in \code{\link[fixest]{etable}} when both the 1st and 2nd stages are displayed (it leads to the 1st stage F-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, \code{ivf1} would also be displayed on the 2nd stage estimation). These types return the following values: stat, p, df1 and df2.}
+#' \item{ivwald, ivwald1, ivwald2, ivwaldall}{These statistics are specific to IV estimations. They report either the IV Wald-test of the first stage (\code{ivwald} or \code{ivwald1}), of the second stage (\code{ivwald2}) or of both (\code{ivwaldall}). The Wald-test of the first stage is commonly named weak instrument test. The value of \code{ivwaldall} is only useful in \code{\link[fixest]{etable}} when both the 1st and 2nd stages are displayed (it leads to the 1st stage Wald-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, \code{ivwald1} would also be displayed on the 2nd stage estimation). These types return the following values: stat, p, df1, df2, and vcov.}
+#' }
+#'
+#'
+#'
 #'
 #' @return
-#' If two or more types are to be computed, then a list is returned whose names correstpond to the argument \code{type}. If only one type is to be computed, then by default the result is simplified to a vector (or list, it depends on the type) containing the statistics; to return a list instead, \code{as.list=TRUE} needs to be used.
+#' By default an object of class \code{fixest_fitstat} is returned. Using \code{verbose = FALSE} returns a simple a list. Finally, if only one type is selected, \code{simplify = TRUE} leads to the selected type to be returned.
 #'
 #' @examples
 #'
@@ -3089,36 +3216,109 @@ demean = function(X, f, weights, nthreads = getFixest_nthreads(), notes = getFix
 #' gravity = feols(log(Euros) ~ log(dist_km) | Destination + Origin, trade)
 #'
 #' # Extracting the 'working' number of observations used to compute the pvalues
-#' fitstat(gravity, "G")
+#' fitstat(gravity, "g", simplify = TRUE)
 #'
-#' # Idem, but when coimputing two-way SEs
-#' fitstat(gravity, "G", se = "standard")
+#' # Some fit statistics
+#' fitstat(gravity, ~ rmse + r2 + wald + wf)
+#'
+#' # You can use them in etable
+#' etable(gravity, fitstat = ~ rmse + r2 + wald + wf)
+#'
+#' # For wald and wf, you could show the pvalue instead:
+#' etable(gravity, fitstat = ~ rmse + r2 + wald.p + wf.p)
+#'
+#' # Now let's display some statistics that are not built-in
+#' # => we use fitstat_register to create them
+#'
+#' # We need: a) type name, b) the function to be applied
+#' #          c) (optional) an alias
+#'
+#' fitstat_register("tstand", function(x) tstat(x, se = "stand")[1], "t-stat (regular)")
+#' fitstat_register("thc", function(x) tstat(x, se = "heter")[1], "t-stat (HC1)")
+#' fitstat_register("t1w", function(x) tstat(x, se = "clus")[1], "t-stat (clustered)")
+#' fitstat_register("t2w", function(x) tstat(x, se = "twow")[1], "t-stat (2-way)")
+#'
+#' # Now we can use these keywords in fitstat:
+#' etable(gravity, fitstat = ~ . + tstand + thc + t1w + t2w)
+#'
+#' # Note that the custom stats we created are can easily lead
+#' # to errors, but that's another story!
 #'
 #'
-fitstat = function(x, type, as.list = FALSE, ...){
+fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE, ...){
 
-    # Later:
-    # f => f stat
-    #   * f.df / f.pval / f.stat
-    # wf => within f stat
-    #   * wf.df / wf.pval / wf.stat
+    r2_types = c("sq.cor", "cor2", "r2", "ar2", "pr2", "apr2", "par2", "wr2", "war2", "awr2", "wpr2", "pwr2", "wapr2", "wpar2", "awpr2", "apwr2", "pawr2", "pwar2")
+
+    opts = getOption("fixest_fitstat_user")
+    user_types = names(opts)
 
     dots = list(...)
-    valid_types = c("G", "theta")
-    if(isTRUE(dots$give_types)){
 
-        tex_alias = c("g" = "Size of 'working' sample", "theta" = "Over-dispersion")
-        R_alias   = c("g" = "G", "theta" = "Over-dispersion")
+    if(isTRUE(dots$give_types) || isTRUE(show_types)){
 
-        # type_alias = c("f" = "f.stat")
+        # Compound types => types yielding several values
 
-        res = list(types = tolower(valid_types), tex_alias = tex_alias, R_alias = R_alias)
+        # F-test etc
+        comp_types = c("f", "wf", "ivf", "ivf1", "ivf2", "ivfall", "wald", "ivwald", "ivwald1", "ivwald2", "ivwaldall")
+        full_comp_types = paste(comp_types, rep(c("stat", "p"), each = length(comp_types)), sep = ".")
+
+        comp_alias = c(f = "F-test", wf = "F-test (projected)", ivfall = "F-test (IV)", ivf1 = "F-test (1st stage)", ivf2 = "F-test (2nd stage)", wald = "Wald (joint nullity)", ivwaldall = "Wald (joint nullity of IV only)", ivwald1 = "Wald (1st stage)", ivwald2 = "Wald (2nd stage)")
+        my_names = paste(names(comp_alias), rep(c("stat", "p"), each = length(comp_alias)), sep = ".")
+        full_comp_alias = setNames(paste0(comp_alias, ", ", rep(c("stat.", "p-value"), each = length(comp_alias))), my_names)
+
+        # "Regular" types
+        valid_types = c("n", "ll", "aic", "bic", "rmse", "g", "theta", r2_types, comp_types, full_comp_types, user_types)
+
+        user_alias = sapply(opts, function(x) x$alias)
+
+        tex_alias = c(n = "Observations", ll = "Log-Likelihood", aic = "AIC", bic = "BIC", g = "Size of the 'effective' sample", rmse = "RMSE", theta = "Over-dispersion", "cor2"="Squared Correlation", r2="R$^2$", ar2="Adjusted R$^2$", pr2="Pseudo R$^2$", apr2="Adjusted Pseudo R$^2$", wr2="Within R$^2$", war2="Within Adjusted R$^2$", wpr2="Within Pseudo R$^2$", wapr2="Whithin Adjusted Pseudo R$^2$", comp_alias, full_comp_alias, user_alias)
+
+        R_alias = c(n = "Observations", ll = "Log-Likelihood", aic = "AIC", bic = "BIC", g = "G", rmse = "RMSE", theta = "Over-dispersion", cor2="Squared Corr.", r2="R2", ar2="Adjusted R2", pr2="Pseudo R2", apr2="Adj. Pseudo R2", wr2="Within R2", war2="Within Adj. R2", wpr2="Within Pseudo R2", wapr2="Whithin Adj. Pseudo R2", comp_alias, full_comp_alias, user_alias)
+
+        # add r2 type alias
+        type_alias = c(ivf = "ivf1", ivf.stat = "ivf1.stat", ivf.p = "ivf1.p", ivwald = "ivwald1", ivwald.stat = "ivwald1", ivwald.p = "ivwald1.p", par2 = "apr2", awr2 = "war2", pwr2 = "wpr2", wpar2 = "wapr2", pwar2 = "wapr2", pawr2 = "wapr2", apwr2 = "wapr2", awpr2 = "wapr2", sq.cor = "cor2")
+
+        if(show_types){
+            cat("Available types:\n", paste(valid_types, collapse = ", "), "\n")
+            return(invisible(NULL))
+        }
+
+        res = list(types = valid_types, tex_alias = tex_alias, R_alias = R_alias, type_alias = type_alias)
         return(res)
     }
 
     check_arg(x, "class(fixest) mbt")
-    check_arg_plus(type, "mbt multi match", .choices = valid_types)
-    check_arg(as.list, "logical scalar")
+    check_arg_plus(type, "character vector no na | os formula")
+    check_arg(simplify, verbose, "logical scalar")
+
+    if("formula" %in% class(type)){
+        type = gsub(" ", "", strsplit(deparse_long(type[[2]]), "+", fixed = TRUE)[[1]])
+    }
+    type = tolower(type)
+
+    # To update
+    type_with_summary = any(grepl("^(g|(iv)?wald)", type))
+    if(type_with_summary && (!isTRUE(x$summary) || !is.null(dots$se) || !is.null(dots$cluster))){
+        x = summary(x, ...)
+    }
+
+    IS_ETABLE = isTRUE(dots$etable)
+    set_value = function(vec, value){
+        if(length(vec) == 1) return(vec)
+
+        if(value != ""){
+            return(vec[[value]])
+        } else if(IS_ETABLE){
+            return(vec[1])
+        } else {
+            return(vec)
+        }
+    }
+
+    if(any(type %in% c("ivwald", "ivf"))){
+        type[type == "ivwald"] = "ivwald1"
+        type[type == "ivf"] = "ivf1"
+    }
 
     res_all = list()
     type_all = type
@@ -3126,15 +3326,26 @@ fitstat = function(x, type, as.list = FALSE, ...){
     for(i in seq_along(type_all)){
         type = type_all[i]
 
-        if(type == "G"){
-            fromSummary = "cov.scaled" %in% names(x)
-            if(!fromSummary){
-                my_vcov = vcov(x, attr = TRUE, ...)
-            } else {
-                my_vcov = x$cov.scaled
-            }
+        # Big if
+        if(type == "n"){
+            res_all[[type]] = x$nobs
 
-            G = attr(my_vcov, "G")
+        } else if(type == "ll"){
+            res_all[[type]] = logLik(x)
+
+        } else if(type == "aic"){
+            res_all[[type]] = AIC(x)
+
+        } else if(type == "bic"){
+            res_all[[type]] = BIC(x)
+
+        } else if(type == "rmse"){
+            res_all[[type]] = sqrt(cpp_ssq(x$residuals) / x$nobs)
+
+        } else if(type == "g"){
+            my_vcov = x$cov.scaled
+
+            G = attr(my_vcov, "g")
             if(is.null(G)) G = x$nobs
 
             res_all[[type]] = G
@@ -3149,12 +3360,286 @@ fitstat = function(x, type, as.list = FALSE, ...){
             }
 
             res_all[[type]] = theta
+
+        } else if(type %in% r2_types){
+            res_all[[type]] = r2(x, type)
+
+        } else {
+
+            #
+            # Types for which root.value is allowed
+            #
+
+            if(grepl(".", type, fixed = TRUE)){
+                root = gsub("\\..+", "", type)
+                value = gsub(".+\\.", "", type)
+            } else {
+                root = type
+                value = ""
+            }
+
+            if(root == "f"){
+                if(!is.null(x$ssr)){
+                    df1 = x$nparams - 1
+                    df2 = x$nobs - x$nparams
+                    stat = ((x$ssr_null - x$ssr) / df1) / (x$ssr / df2)
+                    p = pf(stat, df1, df2, lower.tail = FALSE)
+                    vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
+                    res_all[[type]] = set_value(vec, value)
+
+                } else {
+                    res_all[[type]] = NA
+                }
+            } else if(root == "wf"){
+                df1 = length(x$coefficients)
+
+                if(!is.null(x$ssr_fe_only) && df1 > 0){
+                    df2 = x$nobs - x$nparams
+                    stat = ((x$ssr_fe_only - x$ssr) / df1) / (x$ssr / df2)
+                    p = pf(stat, df1, df2, lower.tail = FALSE)
+                    vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
+                    res_all[[type]] = set_value(vec, value)
+
+                } else {
+                    res_all[[type]] = NA
+                }
+
+
+            } else if(root == "ivfall"){
+                if(isTRUE(x$iv)){
+                    if(x$iv_stage == 1){
+                        df1 = x$iv_n_inst
+                        df2 = x$nobs - x$nparams
+                        stat = ((x$ssr_no_inst - x$ssr) / df1) / (x$ssr / df2)
+                        p = pf(stat, df1, df2, lower.tail = FALSE)
+                        vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
+                        res_all[[type]] = set_value(vec, value)
+
+                    } else {
+                        # f stat for the second stage
+                        stop("add ssr_no_endo in the second stage")
+                        df1 = length(res$iv_endo_names)
+                        df2 = x$nobs - x$nparams
+                        stat = ((x$ssr_no_endo - x$ssr) / df1) / (x$ssr / df2)
+                        p = pf(stat, df1, df2, lower.tail = FALSE)
+                        vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
+                        res_all[[type]] = set_value(vec, value)
+                    }
+
+                } else {
+                    res_all[[type]] = NA
+                }
+
+            } else if(root == "ivf1"){
+                if(isTRUE(x$iv)){
+                    df1 = x$iv_n_inst
+                    df2 = x$nobs - x$nparams
+
+                    if(x$iv_stage == 1){
+                        stat = ((x$ssr_no_inst - x$ssr) / df1) / (x$ssr / df2)
+                        p = pf(stat, df1, df2, lower.tail = FALSE)
+                        vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
+                        res_all[[type]] = set_value(vec, value)
+
+                    } else {
+                        x_first = x$iv_first_stage
+
+                        if("fixest" %in% class(x_first)){
+                            stat = ((x_first$ssr_no_inst - x_first$ssr) / df1) / (x_first$ssr / df2)
+                            p = pf(stat, df1, df2, lower.tail = FALSE)
+                            vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
+                            res_all[[type]] = set_value(vec, value)
+
+                        } else {
+                            for(endo in names(x_first)){
+                                stat = ((x_first[[endo]]$ssr_no_inst - x_first[[endo]]$ssr) / df1) / (x_first[[endo]]$ssr / df2)
+                                p = pf(stat, df1, df2, lower.tail = FALSE)
+                                vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
+                                res_all[[paste0(type, "::", endo)]] = set_value(vec, value)
+                            }
+                        }
+                    }
+
+                } else {
+                    res_all[[type]] = NA
+                }
+
+            } else if(root == "ivf2"){
+                if(isTRUE(x$iv) && x$iv_stage == 2){
+                    # f stat for the second stage
+                    stop("add ssr_no_endo in the second stage")
+                    df1 = length(x$iv_endo_names)
+                    df2 = x$nobs - x$nparams
+                    stat = ((x$ssr_no_endo - x$ssr) / df1) / (x$ssr / df2)
+                    p = pf(stat, df1, df2, lower.tail = FALSE)
+                    vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
+                    res_all[[type]] = set_value(vec, value)
+
+                } else {
+                    res_all[[type]] = NA
+                }
+
+            } else if(root == "wald"){
+                # Joint nullity of the coefficients
+                # if FE => on the projected model only
+
+                qui = !names(x$coefficients) %in% "(Intercept)"
+                my_coef = x$coefficients[qui]
+                df1 = length(my_coef)
+
+                if(df1 > 0){
+                    df2 = x$nobs - x$nparams
+
+                    # The VCOV is always full rank in here
+                    # => maybe opitmize later?
+                    stat = drop(my_coef %*% solve(x$cov.scaled[qui, qui]) %*% my_coef) / df1
+                    p = pf(stat, df1, df2, lower.tail = FALSE)
+                    vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+                    res_all[[type]] = set_value(vec, value)
+
+                } else {
+                    # Only fixef
+                    res_all[[type]] = NA
+                }
+
+            } else if(root == "ivwaldall"){
+
+                if(isTRUE(x$iv)){
+                    if(x$iv_stage == 1){
+                        inst = x$iv_inst_names
+
+                        my_coef = x$coefficients[inst]
+
+                        df1 = length(my_coef)
+                        df2 = x$nobs - x$nparams
+
+                        stat = drop(my_coef %*% solve(x$cov.scaled[inst, inst]) %*% my_coef) / df1
+                        p = pf(stat, df1, df2, lower.tail = FALSE)
+                        vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+                        res_all[[type]] = set_value(vec, value)
+
+                    } else {
+                        # wald stat for the second stage
+                        endo = paste0("fit_", x$iv_endo_names)
+
+                        my_coef = x$coefficients[endo]
+
+                        df1 = length(my_coef)
+                        df2 = x$nobs - x$nparams
+
+                        stat = drop(my_coef %*% solve(x$cov.scaled[endo, endo]) %*% my_coef) / df1
+                        p = pf(stat, df1, df2, lower.tail = FALSE)
+                        vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+                        res_all[[type]] = set_value(vec, value)
+                    }
+
+                } else {
+                    res_all[[type]] = NA
+                }
+
+            } else if(root %in% "ivwald1"){
+                if(isTRUE(x$iv)){
+                    df1 = x$iv_n_inst
+                    df2 = x$nobs - x$nparams
+                    inst = x$iv_inst_names
+
+                    if(x$iv_stage == 1){
+                        my_coef = x$coefficients[inst]
+
+                        stat = drop(my_coef %*% solve(x$cov.scaled[inst, inst]) %*% my_coef) / df1
+                        p = pf(stat, df1, df2, lower.tail = FALSE)
+                        vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+                        res_all[[type]] = set_value(vec, value)
+
+                    } else {
+                        x_first = x$iv_first_stage
+
+                        if("fixest" %in% class(x_first)){
+
+                            if(is.null(x_first$cov.scaled)){
+                                # We compute the VCOV like for the second stage
+                                if(!is.null(x$se_info)){
+                                    x_first = summary(x_first)
+                                } else {
+                                    x_first = summary(x_first, se = x$se_info$se, cluster = x$se_info$cluster, dof = x$se_info$dof)
+                                }
+                            }
+
+                            my_coef = x_first$coefficients[inst]
+
+                            stat = drop(my_coef %*% solve(x_first$cov.scaled[inst, inst]) %*% my_coef) / df1
+                            p = pf(stat, df1, df2, lower.tail = FALSE)
+                            vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+                            res_all[[type]] = set_value(vec, value)
+
+                        } else {
+                            for(endo in names(x_first)){
+
+                                my_x_first = x_first[[endo]]
+
+                                if(is.null(my_x_first$cov.scaled)){
+                                    # We compute the VCOV like for the second stage
+                                    if(!is.null(x$se_info)){
+                                        my_x_first = summary(my_x_first)
+                                    } else {
+                                        my_x_first = summary(my_x_first, se = x$se_info$se, cluster = x$se_info$cluster, dof = x$se_info$dof)
+                                    }
+                                }
+
+                                my_coef = my_x_first$coefficients[inst]
+
+                                stat = drop(my_coef %*% solve(my_x_first$cov.scaled[inst, inst]) %*% my_coef) / df1
+                                p = pf(stat, df1, df2, lower.tail = FALSE)
+                                vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+                                res_all[[paste0(type, "::", endo)]] = set_value(vec, value)
+                            }
+                        }
+                    }
+
+                } else {
+                    res_all[[type]] = NA
+                }
+
+            } else if(root == "ivwald2"){
+                if(isTRUE(x$iv) && x$iv_stage == 2){
+                    # wald stat for the second stage
+                    endo = paste0("fit_", x$iv_endo_names)
+
+                    my_coef = x$coefficients[endo]
+
+                    df1 = length(my_coef)
+                    df2 = x$nobs - x$nparams
+
+                    stat = drop(my_coef %*% solve(x$cov.scaled[endo, endo]) %*% my_coef) / df1
+                    p = pf(stat, df1, df2, lower.tail = FALSE)
+                    vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+                    res_all[[type]] = set_value(vec, value)
+
+                } else {
+                    res_all[[type]] = NA
+                }
+
+            } else if(root %in% user_types){
+
+                res_all[[type]] = set_value(opts[[root]]$fun(x), value)
+
+            } else {
+                stop("The type ", type, " is not supported, see details of ?fitstat, or use fitstat(show_types = TRUE) to get the names of all supported tests.")
+            }
         }
 
     }
 
-    if(length(type_all) == 1 && !as.list){
-        res_all = res_all[[1]]
+    if(simplify){
+        verbose = FALSE
+    }
+
+    if(verbose){
+        class(res_all) = "fixest_fitstat"
+    }
+
+    if(length(type_all) == 1 && simplify){
+        return(res_all[[1]])
     }
 
     res_all
@@ -5705,9 +6190,10 @@ fitted.fixest = fitted.values.fixest = function(object, type = c("response", "li
 #' # we plot the residuals
 #' plot(resid(res_poisson))
 #'
-resid.fixest = residuals.fixest = function(object, type = c("response", "deviance", "pearson", "working"), ...){
+resid.fixest = residuals.fixest = function(object, type = c("response", "deviance", "pearson", "working"), na.rm = TRUE, ...){
 
     check_arg_plus(type, "match")
+    check_arg_plus(na.rm, "logical scalar")
 
     method = object$method
     family = object$family
@@ -5811,7 +6297,9 @@ resid.fixest = residuals.fixest = function(object, type = c("response", "devianc
 
     }
 
-    res = fill_with_na(res, object)
+    if(!na.rm){
+        res = fill_with_na(res, object)
+    }
 
     res
 }
@@ -6848,7 +7336,10 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 	    base::attr(vcov, "dof.K") = K
 	}
 
-
+	if(isTRUE(dots$keep_se_info)){
+	    if(missing(cluster)) cluster = NULL
+	    attr(vcov, "se_info") = list(se = se.val, dof = dof, cluster = cluster)
+	}
 
 	vcov
 }
