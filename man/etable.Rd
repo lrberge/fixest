@@ -40,7 +40,7 @@ etable(
   family,
   powerBelow = -5,
   interaction.combine = " $\\\\times $ ",
-  depvar,
+  depvar = TRUE,
   style = NULL,
   style.df = NULL,
   notes = NULL,
@@ -172,7 +172,7 @@ getFixest_etable()
 
 \item{tex}{Logical: whether the results should be a data.frame or a Latex table. By default, this argument is \code{TRUE} if the argument \code{file} (used for exportation) is not missing; it is equal to \code{FALSE} otherwise.}
 
-\item{fitstat}{A character vector or a one sided formula (both with only lowercase letters). A vector listing which fit statistics to display. The valid types are 'n', 'll', 'aic', 'bic' and r2 types like 'r2', 'pr2', 'war2', etc (see all valid types in \code{\link[fixest]{r2}}). Also accepts valid types from the function \code{\link[fixest]{fitstat}}. The default value depends on the models to display. Example of use: \code{fitstat=c('n', 'sq.cor', 'ar2', 'war2')}, or \code{fitstat=~n+sq.cor+ar2+war2} using a formula. You can use the dot to refer to default values:\code{ ~ . + ll} would add the log-likelihood to the default fit statistics.}
+\item{fitstat}{A character vector or a one sided formula (both with only lowercase letters). A vector listing which fit statistics to display. The valid types are 'n', 'll', 'aic', 'bic' and r2 types like 'r2', 'pr2', 'war2', etc (see all valid types in \code{\link[fixest]{r2}}). Also accepts valid types from the function \code{\link[fixest]{fitstat}}. The default value depends on the models to display. Example of use: \code{fitstat=c('n', 'cor2', 'ar2', 'war2')}, or \code{fitstat=~n+cor2+ar2+war2} using a formula. You can use the dot to refer to default values:\code{ ~ . + ll} would add the log-likelihood to the default fit statistics.}
 
 \item{title}{(Tex only.) Character scalar. The title of the Latex table.}
 
@@ -216,7 +216,7 @@ getFixest_etable()
 
 \item{interaction.combine}{(Tex only.) Character scalar, defaults to \code{" $\\times$ "}. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind $\\times$ Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.}
 
-\item{depvar}{(Data frame only.) Logical, default is missing. Whether a first line containing the dependent variables should be shown. By default, the dependent variables are shown only if they differ across models or if the argumen \code{file} is not missing.}
+\item{depvar}{(Data frame only.) Logical, default is \code{TRUE}. Whether a first line containing the dependent variables should be shown.}
 
 \item{style}{An object created by the function \code{\link[fixest]{estyle}}. It represents the style of the Latex table, see the documentation of \code{\link[fixest]{estyle}}.}
 

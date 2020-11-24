@@ -4,22 +4,28 @@
 \alias{[.fixest_multi}
 \title{Subset a fixest_multi object}
 \usage{
-\method{[}{fixest_multi}(x, sample, lhs, rhs, iv, i, I)
+\method{[}{fixest_multi}(x, sample, lhs, rhs, fixef, iv, i, I, reorder = TRUE, drop = TRUE)
 }
 \arguments{
 \item{x}{A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to multiple results.}
 
-\item{sample}{An integer vector of a character vector. It represents the \code{sample} identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation was a split sample. You can use \code{.N} to refer to the last element.}
+\item{sample}{An integer vector, a logical scalar, or a character vector. It represents the \code{sample} identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation was a split sample. You can use \code{.N} to refer to the last element. If logical, all elements are selected in both cases, but \code{FALSE} leads \code{sample} to become the rightmost key (just try it out).}
 
-\item{lhs}{An integer vector of a character vector. It represents the left-hand-sides identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation contained multiple left-hand-sides. You can use \code{.N} to refer to the last element.}
+\item{lhs}{An integer vector, a logical scalar, or a character vector. It represents the left-hand-sides identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation contained multiple left-hand-sides. You can use \code{.N} to refer to the last element. If logical, all elements are selected in both cases, but \code{FALSE} leads \code{lhs} to become the rightmost key (just try it out).}
 
-\item{rhs}{An integer vector. It represents the right-hand-sides identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation contained multiple right-hand-sides. You can use \code{.N} to refer to the last element.}
+\item{rhs}{An integer vector or a logical scalar. It represents the right-hand-sides identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation contained multiple right-hand-sides. You can use \code{.N} to refer to the last element. If logical, all elements are selected in both cases, but \code{FALSE} leads \code{rhs} to become the rightmost key (just try it out).}
 
-\item{iv}{An integer vector. It represent the stages of the IV. Note that the length can be greater than 2 when there are multiple endogenous regressors (the first stage corresponding to multiple estimations). Note that the order of the stages depends on the \code{stage} argument from \code{\link[fixest]{summary.fixest}}.}
+\item{fixef}{An integer vector or a logical scalar. It represents the fixed-effects identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation contained fixed-effects in a stepwise fashion. You can use \code{.N} to refer to the last element. If logical, all elements are selected in both cases, but \code{FALSE} leads \code{fixef} to become the rightmost key (just try it out).}
+
+\item{iv}{An integer vector or a logical scalar. It represent the stages of the IV. Note that the length can be greater than 2 when there are multiple endogenous regressors (the first stage corresponding to multiple estimations). Note that the order of the stages depends on the \code{stage} argument from \code{\link[fixest]{summary.fixest}}. If logical, all elements are selected in both cases, but \code{FALSE} leads \code{iv} to become the rightmost key (just try it out).}
 
 \item{i}{An integer vector. Represents the estimations to extract.}
 
 \item{I}{An integer vector. Represents the root element to extract.}
+
+\item{reorder}{Logical, default is \code{TRUE}. Indicates whether reordering of the results should be performed depending on the user input.}
+
+\item{drop}{Logical, default is \code{TRUE}. If the result contains only one estimation, then if \code{drop = TRUE} it will be transformed into a \code{fixest} object (instead of \code{fixest_multi}).}
 }
 \value{
 It returns a \code{fixest_multi} object. If there is only one estimation left in the object, then the result is simplified into a \code{fixest} object.
@@ -28,7 +34,9 @@ It returns a \code{fixest_multi} object. If there is only one estimation left in
 Subset a fixest_multi object using different keys.
 }
 \details{
-The order with we we use the keys matter. Every time a key sample, lhs or rhs is used, a reordering is performed to consider the leftmost-side key to be the new root.
+The order with we we use the keys matter. Every time a key \code{sample}, \code{lhs}, \code{rhs}, \code{fixef} or \code{iv} is used, a reordering is performed to consider the leftmost-side key to be the new root.
+
+Use logical keys to easily reorder. For example, say the object \code{res} contains a multiple estimation with multiple left-hand-sides, right-hand-sides and fixed-effects. By default the results are ordered as follows: \code{lhs}, \code{fixef}, \code{rhs}. If you use \code{res[lhs = FALSE]}, then the new order is: \code{fixef}, \code{rhs}, \code{lhs}. With \code{res[rhs = TRUE, lhs = FALSE]} it becomes: \code{rhs}, \code{fixef}, \code{lhs}. In both cases you keep all estimations.
 }
 \examples{
 

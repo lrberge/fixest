@@ -9,7 +9,12 @@
 An object of class \code{function} of length 1.
 }
 \usage{
-\method{resid}{fixest}(object, type = c("response", "deviance", "pearson", "working"), ...)
+\method{resid}{fixest}(
+  object,
+  type = c("response", "deviance", "pearson", "working"),
+  na.rm = TRUE,
+  ...
+)
 
 residuals.fixest
 }

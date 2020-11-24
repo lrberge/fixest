@@ -4,33 +4,82 @@
 \alias{fitstat}
 \title{Computes fit statistics of fixest objects}
 \usage{
-fitstat(x, type, as.list = FALSE, ...)
+fitstat(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE, ...)
 }
 \arguments{
 \item{x}{A \code{fixest} estimation.}
 
-\item{type}{Character vector. The type of fit statistic to be computed. So far, \code{"G"}, the 'working' number of observations, and \code{'theta'}, the over-dispersion parameter in negative binomial estimation, are available.}
+\item{type}{Character vector. The type of fit statistic to be computed. The classic ones are: n, rmse, r2, pr2, f, wald, ivf, ivwald. You have the full list in the details section. Further, you can register your own types with \code{\link[fixest]{fitstat_register}}.}
 
-\item{as.list}{Logical, default is \code{FALSE}. Only used when one statistic is to be computed (i.e. arg. \code{type} is of length 1). If \code{TRUE}, then a list whose name is the \code{type} is returned containing the statistic.}
+\item{simplify}{Logical, default is \code{FALSE}. By default a list is returned whose names are the selected types. If \code{simplify = TRUE} and only one type is selected, then the element is directly returned (ie will not be nested in a list).}
 
-\item{...}{Other elements to be passed to other methods and may be used to compute the statistics (for example you can pass on arguments to compute the VCOV when using \code{type = "G"}).}
+\item{verbose}{Logical, default is \code{TRUE}. If \code{TRUE}, an object of class \code{fixest_fitstat} is returned (so its associated print method will be triggerrd). If \code{FALSE} a simple list is returned instead.}
+
+\item{show_types}{Logical, default is \code{FALSE}. If \code{TRUE}, only prompts all available types.}
+
+\item{...}{Other elements to be passed to other methods and may be used to compute the statistics (for example you can pass on arguments to compute the VCOV when using \code{type = "g"} or \code{type = "wald"}.).}
 }
 \value{
-If two or more types are to be computed, then a list is returned whose names correstpond to the argument \code{type}. If only one type is to be computed, then by default the result is simplified to a vector (or list, it depends on the type) containing the statistics; to return a list instead, \code{as.list=TRUE} needs to be used.
+By default an object of class \code{fixest_fitstat} is returned. Using \code{verbose = FALSE} returns a simple a list. Finally, if only one type is selected, \code{simplify = TRUE} leads to the selected type to be returned.
 }
 \description{
 Computes various fit statistics for \code{fixest} estimations.
 }
+\section{Registering your own types}{
+
+
+You can register custom fit statistics with the function \code{fitstat_register}.
+}
+
+\section{Available types}{
+
+
+The types are case sensitive, please use lower case only. The types available are:
+
+\itemize{
+\item{n, ll, aic, bic, rmse}{The number of observations, the log-likelihood, the AIC, the BIC and the root mean squared error, respectively.}
+\item{g}{The effective sample size. This is used only when the standard-errors are clustered and is used when computing the p-values of the coefficients.}
+\item{r2, ar2, wr2, awr2, pr2, apr2, wpr2, awpr2}{All r2 that can be obtained with the function \code{\link[fixest]{r2}}. The \code{a} stands for 'adjusted', the \code{w} for 'within' and the \code{p} for 'pseudo'. Note that the order of the letters \code{a}, \code{w} and \code{p} does not matter.}
+\item{f, wf}{The F-tests of nullity of the coefficients. The \code{w} stands for 'within'. These types return the following values: stat, p, df1 and df2. If you want to display only one of these, use their name after a dot: e.g. \code{f.stat} will give the statistic of the F-test, or \code{wf.p} will give the p-values of the F-test on the projected model (i.e. projected onto the fixed-effects).}
+\item{wald}{Wald test of joint nullity of the coefficients. This test always excludes the intercept and the fixed-effects. These type returns the following values: stat, p, df1, df2 and vcov. The element \code{vcov} reports the way the VCOV matrix was computed since it directly influences this statistic.}
+\item{ivf, ivf1, ivf2, ivfall}{These statistics are specific to IV estimations. They report either the IV F-test of the first stage (\code{ivf} or \code{ivf1}), of the second stage (\code{ivf2}) or of both (\code{ivfall}). The F-test of the first stage is commonly named weak instrument test. The value of \code{ivfall} is only useful in \code{\link[fixest]{etable}} when both the 1st and 2nd stages are displayed (it leads to the 1st stage F-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, \code{ivf1} would also be displayed on the 2nd stage estimation). These types return the following values: stat, p, df1 and df2.}
+\item{ivwald, ivwald1, ivwald2, ivwaldall}{These statistics are specific to IV estimations. They report either the IV Wald-test of the first stage (\code{ivwald} or \code{ivwald1}), of the second stage (\code{ivwald2}) or of both (\code{ivwaldall}). The Wald-test of the first stage is commonly named weak instrument test. The value of \code{ivwaldall} is only useful in \code{\link[fixest]{etable}} when both the 1st and 2nd stages are displayed (it leads to the 1st stage Wald-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, \code{ivwald1} would also be displayed on the 2nd stage estimation). These types return the following values: stat, p, df1, df2, and vcov.}
+}
+}
+
 \examples{
 
 data(trade)
 gravity = feols(log(Euros) ~ log(dist_km) | Destination + Origin, trade)
 
 # Extracting the 'working' number of observations used to compute the pvalues
-fitstat(gravity, "G")
+fitstat(gravity, "g", simplify = TRUE)
 
-# Idem, but when coimputing two-way SEs
-fitstat(gravity, "G", se = "standard")
+# Some fit statistics
+fitstat(gravity, ~ rmse + r2 + wald + wf)
+
+# You can use them in etable
+etable(gravity, fitstat = ~ rmse + r2 + wald + wf)
+
+# For wald and wf, you could show the pvalue instead:
+etable(gravity, fitstat = ~ rmse + r2 + wald.p + wf.p)
+
+# Now let's display some statistics that are not built-in
+# => we use fitstat_register to create them
+
+# We need: a) type name, b) the function to be applied
+#          c) (optional) an alias
+
+fitstat_register("tstand", function(x) tstat(x, se = "stand")[1], "t-stat (regular)")
+fitstat_register("thc", function(x) tstat(x, se = "heter")[1], "t-stat (HC1)")
+fitstat_register("t1w", function(x) tstat(x, se = "clus")[1], "t-stat (clustered)")
+fitstat_register("t2w", function(x) tstat(x, se = "twow")[1], "t-stat (2-way)")
+
+# Now we can use these keywords in fitstat:
+etable(gravity, fitstat = ~ . + tstand + thc + t1w + t2w)
+
+# Note that the custom stats we created are can easily lead
+# to errors, but that's another story!
 
 
 }
