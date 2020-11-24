@@ -902,11 +902,11 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 	            # For the F-stats
 	            if(n_vars_X == 0){
-	                my_res$ssr_noInst = cpp_ssq(y_demean)
+	                my_res$ssr_no_inst = cpp_ssq(y_demean)
 	            } else {
 	                fit_no_inst = ols_fit(iv_lhs_demean[[i]], X_demean, w = weights, correct_0w = FALSE, collin.tol = collin.tol, nthreads = nthreads,
 	                                      xwx = ZXtZX[-(1:K), -(1:K), drop = FALSE], xwy = ZXtu[[i]][-(1:K)])
-	                my_res$ssr_noInst = cpp_ssq(fit_no_inst$residuals)
+	                my_res$ssr_no_inst = cpp_ssq(fit_no_inst$residuals)
 	            }
 
 	            my_res$iv_stage = 1
@@ -989,7 +989,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	            # For the F-stats
 	            fit_no_inst = ols_fit(iv_lhs[[i]], X, w = weights, correct_0w = FALSE, collin.tol = collin.tol, nthreads = nthreads,
 	                                  xwx = ZXtZX[-(1:K), -(1:K), drop = FALSE], xwy = ZXtu[[i]][-(1:K)])
-	            my_res$ssr_noInst = cpp_ssq(fit_no_inst$residuals)
+	            my_res$ssr_no_inst = cpp_ssq(fit_no_inst$residuals)
 
 	            my_res$iv_stage = 1
 
