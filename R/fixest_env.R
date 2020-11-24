@@ -562,7 +562,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
                 complete_vars = intersect(unique(complete_vars), names(data))
 
-                data = data[subset, var2keep, drop = FALSE]
+                data = data[subset, complete_vars, drop = FALSE]
             }
 
 
@@ -1114,9 +1114,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         }
 
         isSplit = TRUE
-        split = to_integer(split, add_items = TRUE, sorted = TRUE, items.list = TRUE)
-        split.items = split$items
-        split = split$x
+        # We will unclass split after NA removal
 
         anyNA_split = FALSE
         isNA_S = is.na(split)
@@ -1692,6 +1690,10 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
         if(isNonLinear){
             data_NL = data_NL[-obs2remove, , drop = FALSE]
+        }
+
+        if(isSplit){
+            split = split[-obs2remove]
         }
 
     }
@@ -2280,6 +2282,10 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     # split
     assign("do_split", isSplit, env)
     if(isSplit){
+        split = to_integer(split, add_items = TRUE, sorted = TRUE, items.list = TRUE)
+        split.items = split$items
+        split = split$x
+
         assign("split", split, env)
         assign("split.items", split.items, env)
         assign("split.name", split.name, env)
