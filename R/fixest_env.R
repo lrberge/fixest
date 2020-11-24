@@ -3376,9 +3376,9 @@ extract_stepwise = function(fml, tms, all_vars = TRUE){
             # In non OLS: we need all the variables bc we create the full design matrix
             # in FEOLS we do it stepwise (so we only need the SW terms)
             if(all_vars){
-                sw_all_vars = all.vars(xpd(~ ..sw, ..sw = sw_terms))
+                sw_all_vars = all.vars(fml[[3]])
             } else {
-                sw_all_vars = all.vars(fml_linear[[3]])
+                sw_all_vars = all.vars(xpd(~ ..sw, ..sw = sw_terms))
             }
 
             # Creating the current formula
