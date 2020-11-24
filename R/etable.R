@@ -990,12 +990,12 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, stage 
         drop.section = c(drop.section, "stats")
 
     } else if("formula" %in% class(fitstat_all)){
-        check_arg(fitstat_all, "os formula", .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing 'n', 'aic', 'bic', 'll', types from function fitstat (?fitstat), or valid r2 types names (?r2). ")
+        check_arg(fitstat_all, "os formula", .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing valid types from the function fitstat (see details in ?fitstat).")
 
         fitstat_all = gsub(" ", "", strsplit(deparse_long(fitstat_all[[2]]), "+", fixed = TRUE)[[1]])
 
     } else {
-        check_arg(fitstat_all, "character vector no na", .message = "Argument 'fitstat' must be a character vector (or a one sided formula) containing 'aic', 'bic', 'll', or valid r2 types names (see function r2). ")
+        check_arg(fitstat_all, "character vector no na", .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing valid types from the function fitstat (see details in ?fitstat).")
 
     }
 
@@ -1039,18 +1039,25 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, stage 
 
     # checking the types
     fitstat_fun_types = fitstat(give_types = TRUE)
-    fitstat_type_allowed = c("n", "ll", "aic", "bic", fitstat_fun_types$types, "sq.cor", "cor2", "r2", "ar2", "pr2", "apr2", "par2", "wr2", "war2", "awr2", "wpr2", "pwr2", "wapr2", "wpar2", "awpr2", "apwr2", "pawr2", "pwar2")
+    fitstat_type_allowed = fitstat_fun_types$types
     fitstat_all = unique(fitstat_all)
+    type_alias = fitstat_fun_types$type_alias
+
+    if(any(fitstat_all %in% names(type_alias))){
+
+        i = intersect(fitstat_all, names(type_alias))
+        fitstat_all[fitstat_all %in% i] = type_alias[fitstat_all[fitstat_all %in% i]]
+    }
 
     pblm = setdiff(fitstat_all, fitstat_type_allowed)
     if(length(pblm) > 0){
-        stop_up("Argument 'fitstat' must be a character vector (or a one sided formula) containing '", paste0(fitstat_type_allowed[1:(which(fitstat_type_allowed == "r2") - 1)], collapse = "', '"), "', or valid r2 types names (see function r2). ", enumerate_items(pblm, "is.quote"), " not valid.")
+        stop_up("Argument 'fitstat' must be a one sided formula (or a character vector) containing valid types from the function fitstat (see details in ?fitstat or use fitstat(show_types = TRUE)). The type", enumerate_items(pblm, "s.is.quote"), " not valid.")
     }
 
     if(isTex){
-        fitstat_dict = c(n = "Observations", cor2="Squared Correlation", r2="R$^2$", ar2="Adjusted R$^2$", pr2="Pseudo R$^2$", apr2="Adjusted Pseudo R$^2$", wr2="Within R$^2$", war2="Within Adjusted R$^2$", wpr2="Within Pseudo R$^2$", wapr2="Whithin Adjusted Pseudo R$^2$", aic = "AIC", bic = "BIC", ll = "Log-Likelihood", fitstat_fun_types$tex_alias)
+        fitstat_dict = fitstat_fun_types$tex_alias
     } else {
-        fitstat_dict = c(n = "Observations", cor2="Squared Corr.", r2="R2", ar2="Adjusted R2", pr2="Pseudo R2", apr2="Adj. Pseudo R2", wr2="Within R2", war2="Within Adj. R2", wpr2="Within Pseudo R2", wapr2="Whithin Adj. Pseudo R2", aic = "AIC", bic = "BIC", ll = "Log-Likelihood", fitstat_fun_types$R_alias)
+        fitstat_dict = fitstat_fun_types$R_alias
     }
 
     # Renaming the stats with user-provided aliases
@@ -1058,6 +1065,12 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, stage 
         user_stat_name = intersect(names(fitstat_dict), names(dict))
         if(length(user_stat_name) > 0){
             fitstat_dict[user_stat_name] = dict[user_stat_name]
+        }
+
+        # Now with the aliases
+        user_stat_name = intersect(names(type_alias), names(dict))
+        if(length(user_stat_name) > 0){
+            fitstat_dict[type_alias[user_stat_name]] = dict[user_stat_name]
         }
     }
 
@@ -1067,6 +1080,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, stage 
     # ... Loop ####
     #
 
+    reformat_fitstat = FALSE
     for(m in 1:n_models){
         x = all_models[[m]]
         se_type_list[[m]] = attr(x$se, "type")
@@ -1426,32 +1440,16 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, stage 
         if(length(fitstat_all) == 0){
             fitstat_list[[m]] = NA
         } else {
-            fistat_format = list()
 
             fun_format = ifelse(isTex, numberFormatLatex, numberFormatNormal)
 
-            if("n" %in% fitstat_all) fistat_format[["n"]] = fun_format(n)
-            if("aic" %in% fitstat_all) fistat_format[["aic"]] = fun_format(round(AIC(x), 3))
-            if("bic" %in% fitstat_all) fistat_format[["bic"]] = fun_format(round(BIC(x), 3))
-            if("ll" %in% fitstat_all) fistat_format[["ll"]] = fun_format(logLik(x))
+            my_stats = lapply(fitstat(x, fitstat_all, etable = TRUE, verbose = FALSE), fun_format)
 
-            # regular r2s
-            r2_type_allowed = c("cor2", "r2", "ar2", "pr2", "apr2", "wr2", "war2", "wpr2", "wapr2")
-            if(any(fitstat_all %in% r2_type_allowed)){
-                all_r2 = r2(x, intersect(fitstat_all, r2_type_allowed))
-                for(r2_val in names(all_r2)){
-                    nb = 5 - (r2_val == "cor2") * 2
-                    fistat_format[[r2_val]] = round(as.vector(all_r2[r2_val]), nb)
-                }
+            if(any(grepl("::", names(my_stats), fixed = TRUE))){
+                reformat_fitstat = TRUE
             }
 
-            # Other fit statistics
-            fs_remaining = intersect(fitstat_all, fitstat(give_types = TRUE)$types)
-            for(fs in fs_remaining){
-                fistat_format[[fs]] = fun_format(round(fitstat(x, type = fs), 3))
-            }
-
-            fitstat_list[[m]] = fistat_format[fitstat_all]
+            fitstat_list[[m]] = my_stats
         }
 
     }
@@ -1466,8 +1464,43 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, stage 
     }
 
 
+
     if(length(fitstat_all) > 0){
-        attr(fitstat_list, "format_names") = fitstat_dict[fitstat_all]
+
+        if(reformat_fitstat){
+            # PAIN IN THE NECK!
+
+            all_names = unique(unlist(lapply(fitstat_list, names)))
+            all_names_new = c()
+            for(v in fitstat_all){
+                all_names_new = c(all_names_new, all_names[gsub("::.+", "", all_names) == v])
+            }
+
+            fitstat_list_new = list()
+            for(i in seq_along(fitstat_list)){
+                my_list = fitstat_list[[i]]
+                fitstat_list_new[[i]] = lapply(all_names_new, function(x) ifelse(is.null(my_list[[x]]), NA, my_list[[x]]))
+            }
+
+            # Now the aliases
+            fitstat_dict_new = c()
+            fun_rename = function(x) {
+                if(!grepl("::", x, fixed = TRUE)) return(fitstat_dict[x])
+
+                xx = strsplit(x, "::")[[1]]
+                paste0(fitstat_dict[xx[1]], ", ", dict_apply(xx[2], dict))
+            }
+
+            for(v in all_names_new){
+                fitstat_dict_new[v] = fun_rename(v)
+            }
+
+            fitstat_list = fitstat_list_new
+            attr(fitstat_list, "format_names") = fitstat_dict_new
+
+        } else {
+            attr(fitstat_list, "format_names") = fitstat_dict[fitstat_all]
+        }
     }
 
     if(isTex){
@@ -1972,7 +2005,6 @@ etable_internal_latex = function(info){
             fit_info = paste0(escape_latex(style$stats.title), "& ", paste(rep(" ", n_models), collapse = "&"), "\\\\\n")
         }
 
-        # fit_info = paste0(fit_info, "Observations& ", paste(addCommas(obs_list), collapse = "&"), "\\\\\n")
         fit_info = paste0(fit_info, nb_FE_lines, info_convergence, info_muli_se)
 
         if(!all(sapply(fitstat_list, function(x) all(is.na(x))))){
@@ -2134,7 +2166,6 @@ etable_internal_df = function(info){
     coef_below = info$coef_below
     sd_below = info$sd_below
     depvar_list = info$depvar_list
-    obs_list = info$obs_list
     convergence_list = info$convergence_list
     fe_names = info$fe_names
     is_fe = info$is_fe
@@ -2352,6 +2383,11 @@ etable_internal_df = function(info){
             n = max(nchar(res[, 1]), 12)
             if(all(grepl("(", unlist(se_type_list), fixed = TRUE))){
                 n = max(n, 20)
+            }
+
+            fit_names = attr(fitstat_list, "format_names")
+            if(length(fit_names) > 0){
+                n = max(n, max(nchar(fit_names)))
             }
 
             myLine = paste(rep(style$stats.title, 40), collapse = "")
