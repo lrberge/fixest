@@ -353,7 +353,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
             part_2 = all.vars(fml_parts[[2]])
             if(any(!part_2 %in% dataNames)){
-                mgs = ifelse(is_fml_inside(fml_parts[[2]]), "IV", "fixed-effects")
+                msg = ifelse(is_fml_inside(fml_parts[[2]]), "IV", "fixed-effects")
                 stop("The variable", enumerate_items(setdiff(part_2, dataNames), "s.is.quote"), " in the ", msg, " part of the formula but not in the data set.")
             }
 
