@@ -8625,9 +8625,9 @@ getFixest_dof = function(){
 #'
 #' This functions defines or extracts the default type of standard-errors to computed in \code{fixest} \code{\link[fixest:summary.fixest]{summary}}, and \code{\link[fixest:vcov.fixest]{vcov}}.
 #'
-#' @param no_FE Character scalar equal to either: \code{"standard"} (default), or \code{"hetero"}. The type of standard-errors to use by default for estimations without fixed-effects.
+#' @param no_FE Character scalar equal to either: \code{"standard"}, or \code{"hetero"} (default). The type of standard-errors to use by default for estimations without fixed-effects.
 #' @param one_FE Character scalar equal to either: \code{"standard"}, \code{"hetero"}, or \code{"cluster"} (default). The type of standard-errors to use by default for estimations with \emph{one} fixed-effect.
-#' @param two_FE Character scalar equal to either: \code{"standard"}, \code{"hetero"}, \code{"cluster"}, or \code{"twoway"} (default). The type of standard-errors to use by default for estimations with \emph{two or more} fixed-effects.
+#' @param two_FE Character scalar equal to either: \code{"standard"}, \code{"hetero"}, \code{"cluster"} (default), or \code{"twoway"}. The type of standard-errors to use by default for estimations with \emph{two or more} fixed-effects.
 #'
 #' @return
 #' The function \code{getFixest_se()} returns a list with three elements containing the default for estimations i) wihtout, ii) with one, or iii) with two or more fixed-effects.
@@ -8635,7 +8635,7 @@ getFixest_dof = function(){
 #' @examples
 #'
 #' # By default:
-#' # - no fixed-effect (FE): standard
+#' # - no fixed-effect (FE): hetero(skedicticity robust)
 #' # - one or more FEs: cluster
 #'
 #' data(base_did)
@@ -8646,14 +8646,14 @@ getFixest_dof = function(){
 #' etable(est_no_FE, est_one_FE, est_two_FE)
 #'
 #' # Changing the default standard-errors
-#' setFixest_se(no_FE = "hetero", one_FE = "standard", two_FE = "twoway")
+#' setFixest_se(no_FE = "standard", one_FE = "standard", two_FE = "twoway")
 #' etable(est_no_FE, est_one_FE, est_two_FE)
 #'
 #' # Reseting the defaults
 #' setFixest_se()
 #'
 #'
-setFixest_se = function(no_FE = "standard", one_FE = "cluster", two_FE = "cluster"){
+setFixest_se = function(no_FE = "hetero", one_FE = "cluster", two_FE = "cluster"){
 
     check_arg_plus(no_FE,  "match(standard, hetero)")
     check_arg_plus(one_FE, "match(standard, hetero, cluster)")
@@ -8670,7 +8670,7 @@ getFixest_se = function(){
     se_default = getOption("fixest_se")
 
     if(is.null(se_default)){
-        se_default = list(no_FE = "standard", one_FE = "cluster", two_FE = "cluster")
+        se_default = list(no_FE = "hetero", one_FE = "cluster", two_FE = "cluster")
         options(fixest_se = se_default)
         return(se_default)
     }
