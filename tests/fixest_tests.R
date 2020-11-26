@@ -12,10 +12,10 @@
 library(dreamerr) ; library(fixest)
 
 
-setFixest_notes(FALSE)
-
 test = fixest:::test
 vcovClust = fixest:::vcovClust
+
+setFixest_notes(FALSE)
 
 ####
 #### Estimations ####
@@ -123,15 +123,17 @@ for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
                     my_family = switch(model, pois = poisson(), logit = binomial(), Gamma = Gamma())
 
                     res = feglm(fml_fixest, base, family = my_family, weights = my_weight, offset = my_offset)
+
                     if(!is.null(res$obsRemoved)){
                         qui = -res$obsRemoved
-                        base_tmp = base[qui, ]
-                        base_tmp$my_weight = my_weight[qui]
-                        base_tmp$my_offset = my_offset[qui]
 
+                        # I MUST do that.... => subset does not work...
+                        base_tmp = base[qui, ]
+                        base_tmp$my_offset = my_offset[qui]
+                        base_tmp$my_weight = my_weight[qui]
                         res_bis = glm(fml_stats, base_tmp, family = my_family, weights = my_weight, offset = my_offset)
                     } else {
-                        res_bis = glm(fml_stats, base, family = my_family, weights = my_weight, offset = my_offset)
+                        res_bis = glm(fml_stats, data = base, family = my_family, weights = my_weight, offset = my_offset)
                     }
 
                 } else if(model == "negbin"){
@@ -1102,6 +1104,8 @@ test(predict(res)[qui], predict(res, base_bis))
 #### subset ####
 ####
 
+cat("SUBSET\n\n")
+
 
 base = iris
 names(base) = c("y", "x1", "x2", "x3", "species")
@@ -1195,7 +1199,7 @@ for(id_fun in 1:5){
                 res = estfun(xpd(..lhs ~ x1 + ..rhs, ..lhs = lhs, ..rhs = rhs), base[base$species == s, ], notes = FALSE)
 
                 test(coef(est_multi[[k]]), coef(res))
-                test(se(est_multi[[k]], cluster = "fe2"), se(res, cluster = "fe2"))
+                test(se(est_multi[[k]], cluster = "fe3"), se(res, cluster = "fe3"))
                 k = k + 1
             }
         }
