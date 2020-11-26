@@ -2694,22 +2694,80 @@ i_noref = function(var, f, ref, drop, keep){
 }
 
 
-#' @rdname setFixest_fml
-xpd = function(fml, ...){
+
+#' Expands formula macros
+#'
+#' Create macros within formulas and expand them with character vectors or other formulas.
+#'
+#' @inherit setFixest_fml examples
+#' @inheritParams setFixest_fml
+#'
+#' @param fml A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}. Special macros of the form \code{..("regex")} can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument \code{data}. See examples.
+#' @param data Either a character vector or a data.frame. This argument will only be used if a macro of the type \code{..("regex")} is used in the formula of the argument \code{fml}. If so, any variable name from \code{data} that matches the regular expression will be added to the formula.
+#'
+#' @details
+#' In \code{xpd}, the default macro variables are taken from \code{getFixest_fml}. Any value in the \code{...} argument of \code{xpd} will replace these default values.
+#'
+#' The definitions of the macro variables will replace in verbatim the macro variables. Therefore, you can include multipart formulas if you wish but then beware of the order of the macros variable in the formula. For example, using the airquality data, say you want to set as controls the variable \code{Temp} and \code{Day} fixed-effects, you can do \code{setFixest_fml(..ctrl = ~Temp | Day)}, but then \code{feols(Ozone ~ Wind + ..ctrl, airquality)} will be quite different from \code{feols(Ozone ~ ..ctrl + Wind, airquality)}, so beware!
+#'
+#' @return
+#' It returns a formula where all macros have been expanded.
+#'
+#'
+#'
+xpd = function(fml, ..., data = NULL){
     check_arg(fml, .type = "formula mbt")
 
     macros = parse_macros(..., from_xpd = TRUE)
 
-    if(length(macros) == 0) return(fml)
+    if(length(macros) == 0 && missing(data)) return(fml)
 
-    qui = which(names(macros) %in% all.vars(fml))
-    if(length(qui) > 0){
-        fml_dp = deparse_long(fml)
-        # We need to add a lookafter assertion: otherwise if we have ..ctrl + .. ctrl_long, there will be a replacement in ..ctrl_long
-        for(i in qui){
-            fml_dp = gsub(paste0(escape_regex(names(macros)[i]), "(?=$|[^[:alnum:]_\\.])"), macros[[i]], fml_dp, perl = TRUE)
+    fml_dp = NULL
+
+    if(length(macros) > 0){
+        qui = which(names(macros) %in% all.vars(fml))
+        if(length(qui) > 0){
+            fml_dp = deparse_long(fml)
+            # We need to add a lookafter assertion: otherwise if we have ..ctrl + .. ctrl_long, there will be a replacement in ..ctrl_long
+            for(i in qui){
+                fml_dp = gsub(paste0(escape_regex(names(macros)[i]), "(?=$|[^[:alnum:]_\\.])"), macros[[i]], fml_dp, perl = TRUE)
+            }
+            fml = as.formula(fml_dp)
         }
-        fml = as.formula(fml_dp)
+    }
+
+    if(!missnull(data)){
+        # We expand only if data is provided (it means the user wants us to check)
+        if(is.null(fml_dp)) fml_dp = deparse_long(fml)
+
+        if(grepl('..("', fml_dp, fixed = TRUE)){
+
+            check_arg(data, "character vector no na | matrix | data.frame")
+
+            if(is.matrix(data)){
+                data = colnames(data)
+                if(is.null(data)){
+                    stop("The argument 'data' must contain variable names. It is currently a matrix without column names.")
+                }
+            } else if(is.data.frame(data)){
+                data = names(data)
+            }
+
+            fml_dp_split = strsplit(fml_dp, '..("', fixed = TRUE)[[1]]
+
+            res = fml_dp_split
+            for(i in 2:length(res)){
+                re = gsub('"\\).*', "", res[i])
+                vars = grep(re, data, value = TRUE)
+                if(length(vars) == 0){
+                    vars = "1"
+                }
+
+                res[i] = paste0(paste(vars, collapse = "+"), substr(res[i], nchar(re) + 3, nchar(res[i])))
+            }
+
+            fml = as.formula(paste(res, collapse = ""))
+        }
     }
 
     fml
@@ -8524,7 +8582,7 @@ getFixest_se = function(){
 
 
 
-#' Sets/gets and expands formula macros
+#' Sets/gets formula macros
 #'
 #' You can set formula macros globally with \code{setFixest_fml}. These macros can then be used in \code{fixest} estimations or when using the function \code{\link[fixest:setFixest_fml]{xpd}}.
 #'
@@ -8583,9 +8641,20 @@ getFixest_se = function(){
 #' # You can use macros to grep variables in your data set
 #' #
 #'
+#' # Example 1: setting a macro variable globally
+#'
 #' data(longley)
 #' setFixest_fml(..many_vars = grep("GNP|ployed", names(longley), value = TRUE))
-#' feols(Armed.Forces ~Population + ..many_vars, longley)
+#' feols(Armed.Forces ~ Population + ..many_vars, longley)
+#'
+#' # Example 2: using ..("regex") to grep the variables "live"
+#'
+#' feols(Armed.Forces ~ Population + ..("GNP|ployed"), longley)
+#'
+#' # Example 3: same as Ex.2 but without using a fixest estimation
+#'
+#' # Here we need to use xpd():
+#' lm(xpd(Armed.Forces ~ Population + ..("GNP|ployed"), data = longley), longley)
 #'
 #' #
 #' # You can also put numbers in macros
