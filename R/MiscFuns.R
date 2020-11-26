@@ -3703,6 +3703,108 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
     res_all
 }
 
+
+#' Wald test of nullity of coefficients
+#'
+#' Wald test used to test the joint nullity of a set of coefficients.
+#'
+#' @inheritParams print.fixest
+#' @inheritParams summary.fixest
+#' @inheritParams etable
+#'
+#' @param print Logical, default is \code{TRUE}. If \code{TRUE}, then a verbose description of the test is prompted on the R console. Otherwise only a named vector containing the test statistics is returned.
+#' @param ... Any other element to be passed to \code{\link[fixest]{summary.fixest}}.
+#'
+#' @details
+#' The type of VCOV matrix plays a crucial role in this test. Use the arguments \code{se} and \code{cluster} to change the type of VCOV for the test.
+#'
+#' @return
+#' A named vector containing the following elements is returned: \code{stat}, \code{p}, \code{df1}, and \code{df2}. They correspond to the test statistic, the p-value, the first and second degrees of freedoms.
+#'
+#' If no valud coefficient is found, the value \code{NA} is returned.
+#'
+#' @examples
+#'
+#' data(airquality)
+#'
+#' est = feols(Ozone ~ Solar.R + Wind + poly(Temp, 3), airquality)
+#'
+#' # Testing the joint nullity of the Temp polynomial
+#' wald(est, "poly")
+#'
+#' # Same but with clustered SEs
+#' wald(est, "poly", cluster = "Month")
+#'
+#' # Now: all vars but the polynomial and the intercept
+#' wald(est, drop = "Inte|poly")
+#'
+#' #
+#' # Toy example: testing pre-trends
+#' #
+#'
+#' data(base_did)
+#'
+#' est_did = feols(y ~ x1 + i(treat, period, 5) | id + period, base_did)
+#'
+#' # The graph of the coefficients
+#' coefplot(est_did)
+#'
+#' # The pre-trend test
+#' wald(est_did, "period::[1234]$")
+#'
+#' # If "period::[1234]$" looks weird to you, check out
+#' # regular expressions: e.g. see ?regex.
+#' # Learn it, you won't regret it!
+#'
+#'
+wald = function(x, keep = NULL, drop = NULL, print = TRUE, se, cluster, ...){
+    #
+
+    check_arg(x, "class(fixest)")
+    check_arg(keep, drop, "NULL character vector no na")
+
+    if(isTRUE(x$onlyFixef)) return(NA)
+
+    dots = list(...)
+    if(!isTRUE(x$summary) || !missing(se) || !missing(cluster) || ...length() > 0){
+        x = summary(x, se = se, cluster = cluster, nframes_up = 1, ...)
+    }
+
+    if(missing(keep) && missing(drop)){
+        drop = "\\(Intercept\\)"
+    }
+
+    coef_name = names(x$coefficients)
+    coef_name = keep_apply(coef_name, keep)
+    coef_name = drop_apply(coef_name, drop)
+
+    if(length(coef_name) == 0) return(NA)
+
+    qui = names(x$coefficients) %in% coef_name
+    my_coef = x$coefficients[qui]
+    df1 = length(my_coef)
+
+    df2 = x$nobs - x$nparams
+
+    # The VCOV is always full rank in here
+    stat = drop(my_coef %*% solve(x$cov.scaled[qui, qui]) %*% my_coef) / df1
+    p = pf(stat, df1, df2, lower.tail = FALSE)
+    vcov = attr(x$cov.scaled, "type")
+    vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = vcov)
+
+    if(print){
+        cat("Wald test, H0: joint nullity of ", enumerate_items(coef_name), "\n", sep  ="")
+        cat(" stat = ", numberFormatNormal(stat),
+            ", p-value ", ifelse(p < 2.2e-16, "< 2.2e-16", paste0("= ", numberFormatNormal(p))),
+            ", on ", numberFormatNormal(df1), " and ", numberFormatNormal(df2), " degrees of freedom.",
+            " Using a ", vcov, " VCOV matrix.", sep = "")
+
+        return(invisible(vec))
+    } else {
+        return(vec)
+    }
+}
+
 #### ................. ####
 #### Internal Funs     ####
 ####
