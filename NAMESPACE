@@ -11,7 +11,7 @@ export(feglm.fit)
 export(etable, estyle, estyle.df)
 # misc funs
 export(collinearity)
-export(r2, fitstat, fitstat_register)
+export(r2, fitstat, fitstat_register, wald)
 # did
 export(did_means)
 # graph
