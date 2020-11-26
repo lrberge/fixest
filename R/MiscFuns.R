@@ -185,10 +185,10 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 	}
 
 	if(x$method == "feols"){
-	    ll_format = numberFormatNormal(logLik(x))
-	    cat("Log-likelihood:", ll_format,                    "  Adj. R2:", round(r2(x, "ar2"), 5), "\n")
+	    rmse = numberFormatNormal(fitstat(x, "rmse", simplify = TRUE))
+	    cat("RMSE:", rmse, "  Adj. R2:", round(r2(x, "ar2"), 5), "\n")
 	    if(!is.null(x$fixef_sizes) && is.null(x$onlyFixef)){
-	        cat(sprintf("% *s", 16 + nchar(ll_format), " "), "R2-Within:", round(r2(x, "wr2"), 5), "\n")
+	        cat(sprintf("% *s", 6 + nchar(rmse), " "), "R2-Within:", round(r2(x, "wr2"), 5), "\n")
 	    }
 	} else {
 		bic_ll = formatBicLL(BIC(x), x$loglik)
