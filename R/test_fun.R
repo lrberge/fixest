@@ -131,10 +131,12 @@ run_test = function(){
 
     parsed_code = parse(text = test_code)
 
-    eval(parsed_code)
+    eval(parsed_code, .GlobalEnv)
 }
 
 
+setflag = function(x) assign("FLAG", x, .GlobalEnv)
 
+flag = function() get("FLAG", .GlobalEnv)
 
 
