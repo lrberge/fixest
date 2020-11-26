@@ -2469,6 +2469,11 @@ setup_fixef = function(fixef_mat, lhs, fixef_vars, fixef.rm, family, isSplit, sp
         fixef_sizes = 0
     }
 
+    # quoi = list(fixef_mat=fixef_mat, lhs=lhs, do_sum_y=do_sum_y, rm_0=rm_0, rm_1=rm_1, rm_single=rm_single, only_slope=only_slope, nthreads=nthreads, isRefactor=isRefactor, fixef_sizes=fixef_sizes, obs2keep=obs2keep)
+    # save(quoi, file = "../_DATA/problem.Rdata")
+
+    # browser()
+
     quf_info_all = cpppar_quf_table_sum(x = fixef_mat, y = lhs, do_sum_y = do_sum_y, rm_0 = rm_0, rm_1 = rm_1, rm_single = rm_single, only_slope = only_slope, nthreads = nthreads, do_refactor = isRefactor, r_x_sizes = fixef_sizes, obs2keep = obs2keep)
 
     fixef_id = quf_info_all$quf
@@ -2517,7 +2522,7 @@ setup_fixef = function(fixef_mat, lhs, fixef_vars, fixef.rm, family, isSplit, sp
 
         # Names of the FE removed
         for(i in 1:length(fixef_id)){
-            if(is_string[i]){
+            if(is.character(fixef_mat[[i]])){
                 fixef_removed[[i]] = fixef_mat[[i]][quf_info_all$fe_removed[[i]]]
             } else {
                 fixef_removed[[i]] = quf_info_all$fe_removed[[i]]
