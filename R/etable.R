@@ -312,19 +312,20 @@ etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threew
         dict = TRUE
     }
 
-
     # to get the model names
     dots_call = match.call(expand.dots = FALSE)[["..."]]
 
-    info = results2formattedList(..., se=se, dof=dof, fitstat_all=fitstat, cluster=cluster, stage=stage, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, sdBelow=sdBelow, signifCode=signifCode, coefstat = coefstat, ci = ci, title=title, float=float, subtitles=subtitles, keepFactors=keepFactors, tex = tex, useSummary=useSummary, dots_call=dots_call, powerBelow=powerBelow, dict=dict, interaction.combine=interaction.combine, convergence=convergence, family=family, keep=keep, drop=drop, file=file, order=order, label=label, fixef_sizes=fixef_sizes, fixef_sizes.simplify=fixef_sizes.simplify, depvar=depvar, style=style, style.df=style.df, replace=replace, notes = notes, group = group, extraline=extraline, placement = placement, drop.section = drop.section, poly_dict = poly_dict)
+    dots = error_sender(list(...), "Some elements in '...' could not be evaluated: ")
 
-    # We delay post processing because some only 'cat' the result
+    if(length(dots) == 0){
+        stop("You must provide at least one element in '...'.")
+    }
+
+    # Postprocess => we catch the arguments
     DO_POSTPROCESS = TRUE
+    opts = getOption("fixest_etable")
 
     if(tex){
-        res = etable_internal_latex(info)
-
-        opts = getOption("fixest_etable")
         check_arg(postprocess, "NULL function arg(1,)")
 
         if(!is.null(postprocess)){
@@ -336,9 +337,6 @@ etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threew
         }
 
     } else {
-        res = etable_internal_df(info)
-
-        opts = getOption("fixest_etable")
         check_arg(postprocess.df, "NULL function arg(1,)")
         if(!is.null(postprocess.df)){
             my_postprocess = postprocess.df
@@ -349,12 +347,47 @@ etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threew
         }
     }
 
+    if(DO_POSTPROCESS){
+        # Catching the arguments
+        pp_args = list()
+        if(!is.null(names(dots))){
+            fm = formalArgs(my_postprocess)
+            qui = names(dots) %in% fm
+            pp_args = dots[qui]
+            dots = dots[!qui]
+        }
+    }
+
+    if(length(dots) == 0){
+        stop("After cleaning the arguments to the postprocessing functions, there is no element left in '...'. Please provide at least one.")
+    }
+
+    for(i in seq_along(dots)){
+        if(!any(c("fixest", "fixest_list", "fixest_multi") %in% class(dots[[i]])) && !is.list(dots[[i]])){
+            stop("The ", n_th(i), " element of '...' is not valid: it should be a fixest object or a list, it is neither.")
+        }
+    }
+
+    info = results2formattedList(dots = dots, se=se, dof=dof, fitstat_all=fitstat, cluster=cluster, stage=stage, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, sdBelow=sdBelow, signifCode=signifCode, coefstat = coefstat, ci = ci, title=title, float=float, subtitles=subtitles, keepFactors=keepFactors, tex = tex, useSummary=useSummary, dots_call=dots_call, powerBelow=powerBelow, dict=dict, interaction.combine=interaction.combine, convergence=convergence, family=family, keep=keep, drop=drop, file=file, order=order, label=label, fixef_sizes=fixef_sizes, fixef_sizes.simplify=fixef_sizes.simplify, depvar=depvar, style=style, style.df=style.df, replace=replace, notes = notes, group = group, extraline=extraline, placement = placement, drop.section = drop.section, poly_dict = poly_dict, tex_tag = DO_POSTPROCESS)
+
+    if(tex){
+        res = etable_internal_latex(info)
+    } else {
+        res = etable_internal_df(info)
+    }
+
     if(!missnull(file)){
         sink(file = file, append = !replace)
         on.exit(sink())
 
         if(DO_POSTPROCESS){
-            res = my_postprocess(res)
+            # res = my_postprocess(res)
+            pp_args_all = list(res)
+            if(length(pp_args) > 0){
+                pp_args_all[names(pp_args)] = pp_args
+            }
+            res = do.call(my_postprocess, pp_args_all)
+
             if(is.null(res)){
                 return(invisible(NULL))
             }
@@ -372,7 +405,13 @@ etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threew
     } else {
 
         if(DO_POSTPROCESS){
-            res = my_postprocess(res)
+            # res = my_postprocess(res)
+            pp_args_all = list(res)
+            if(length(pp_args) > 0){
+                pp_args_all[names(pp_args)] = pp_args
+            }
+            res = do.call(my_postprocess, pp_args_all)
+
             if(is.null(res)){
                 return(invisible(NULL))
             }
@@ -433,7 +472,9 @@ esttex = function(..., se = c("standard", "hetero", "cluster", "twoway", "threew
     # to get the model names
     dots_call = match.call(expand.dots = FALSE)[["..."]]
 
-    info = results2formattedList(..., tex = TRUE, useSummary=useSummary, se=se, dof=dof, cluster=cluster, stage=stage, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, fitstat_all=fitstat, title=title, float=float, sdBelow=sdBelow, keep=keep, drop=drop, order=order, dict=dict, file=file, replace=replace, convergence=convergence, signifCode=signifCode, coefstat=coefstat, ci=ci, label=label, subtitles=subtitles, fixef_sizes=fixef_sizes, fixef_sizes.simplify=fixef_sizes.simplify, keepFactors=keepFactors, family=family, powerBelow=powerBelow, interaction.combine=interaction.combine, dots_call=dots_call, depvar=TRUE, style=style, notes=notes, group=group, extraline=extraline, placement=placement, drop.section=drop.section, poly_dict = poly_dict)
+    dots = list(...)
+
+    info = results2formattedList(dots = dots, tex = TRUE, useSummary=useSummary, se=se, dof=dof, cluster=cluster, stage=stage, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, fitstat_all=fitstat, title=title, float=float, sdBelow=sdBelow, keep=keep, drop=drop, order=order, dict=dict, file=file, replace=replace, convergence=convergence, signifCode=signifCode, coefstat=coefstat, ci=ci, label=label, subtitles=subtitles, fixef_sizes=fixef_sizes, fixef_sizes.simplify=fixef_sizes.simplify, keepFactors=keepFactors, family=family, powerBelow=powerBelow, interaction.combine=interaction.combine, dots_call=dots_call, depvar=TRUE, style=style, notes=notes, group=group, extraline=extraline, placement=placement, drop.section=drop.section, poly_dict = poly_dict)
 
     res = etable_internal_latex(info)
 
@@ -481,14 +522,16 @@ esttable = function(..., se=c("standard", "hetero", "cluster", "twoway", "threew
     # to get the model names
     dots_call = match.call(expand.dots = FALSE)[["..."]]
 
-    info = results2formattedList(..., se=se, dof = dof, cluster=cluster, stage=stage, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, signifCode=signifCode, coefstat = coefstat, ci = ci, subtitles=subtitles, style.df=style.df, keepFactors=keepFactors, useSummary=useSummary, dots_call=dots_call, fitstat_all=fitstat, depvar = depvar, family = family, keep = keep, drop = drop, order = order, dict = dict, interaction.combine = ":", group = group, extraline = extraline, poly_dict = poly_dict)
+    dots = list(...)
+
+    info = results2formattedList(dots = dots, se=se, dof = dof, cluster=cluster, stage=stage, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, signifCode=signifCode, coefstat = coefstat, ci = ci, subtitles=subtitles, style.df=style.df, keepFactors=keepFactors, useSummary=useSummary, dots_call=dots_call, fitstat_all=fitstat, depvar = depvar, family = family, keep = keep, drop = drop, order = order, dict = dict, interaction.combine = ":", group = group, extraline = extraline, poly_dict = poly_dict)
 
     res = etable_internal_df(info)
 
     return(res)
 }
 
-results2formattedList = function(..., se, dof = getFixest_dof(), cluster, stage = 2, .vcov, .vcov_args = NULL, digits = 4, fitstat_all, sdBelow=TRUE, dict, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), coefstat = "se", ci = 0.95, label, subtitles, title, float = FALSE, replace = FALSE, keepFactors = FALSE, tex = FALSE, useSummary, dots_call, powerBelow, interaction.combine, convergence, family, drop, order, keep, file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, depvar = FALSE, style = NULL, style.df=NULL, notes = NULL, group = NULL, extraline=NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube")){
+results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage = 2, .vcov, .vcov_args = NULL, digits = 4, fitstat_all, sdBelow=TRUE, dict, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), coefstat = "se", ci = 0.95, label, subtitles, title, float = FALSE, replace = FALSE, keepFactors = FALSE, tex = FALSE, useSummary, dots_call, powerBelow, interaction.combine, convergence, family, drop, order, keep, file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, depvar = FALSE, style = NULL, style.df=NULL, notes = NULL, group = NULL, extraline=NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube"), tex_tag = FALSE){
     # This function is the core of the function etable
 
     set_up(1)
@@ -547,9 +590,6 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, stage 
     #
     # Full control
     #
-
-    # => we also allow lists (of fixest objects)
-    check_arg(..., "class(fixest, fixest_multi, fixest_list) | list mbt")
 
     check_arg(digits, "integer scalar GE{1}")
     check_arg(title, "character scalar")
@@ -653,9 +693,6 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, stage 
             subtitles = list(subtitles)
         }
     }
-
-    # We get all the models
-    dots <- list(...)
 
     # formatting the names of the models
     dots_names = names(dots_call)
@@ -1539,7 +1576,7 @@ results2formattedList = function(..., se, dof = getFixest_dof(), cluster, stage 
     if(missing(file)) file = NULL
     if(missing(label)) label = NULL
 
-    res = list(se_type_list=se_type_list, var_list=var_list, coef_list=coef_list, coef_below=coef_below, sd_below=sd_below, depvar_list=depvar_list, obs_list=obs_list, convergence_list=convergence_list, fe_names=fe_names, is_fe=is_fe, nb_fe=nb_fe, slope_flag_list = slope_flag_list, slope_names=slope_names, useSummary=useSummary, model_names=model_names, family_list=family_list, fitstat_list=fitstat_list, subtitles=subtitles, isSubtitles=isSubtitles, title=title, convergence=convergence, family=family, keep=keep, drop=drop, order=order, file=file, label=label, sdBelow=sdBelow, signifCode=signifCode, fixef_sizes=fixef_sizes, fixef_sizes.simplify = fixef_sizes.simplify, depvar=depvar, useSummary=useSummary, dict=dict, yesNo=yesNo, add_signif=add_signif, float=float, coefstat=coefstat, ci=ci, style=style, notes=notes, group=group, extraline=extraline, placement=placement, drop.section=drop.section)
+    res = list(se_type_list=se_type_list, var_list=var_list, coef_list=coef_list, coef_below=coef_below, sd_below=sd_below, depvar_list=depvar_list, obs_list=obs_list, convergence_list=convergence_list, fe_names=fe_names, is_fe=is_fe, nb_fe=nb_fe, slope_flag_list = slope_flag_list, slope_names=slope_names, useSummary=useSummary, model_names=model_names, family_list=family_list, fitstat_list=fitstat_list, subtitles=subtitles, isSubtitles=isSubtitles, title=title, convergence=convergence, family=family, keep=keep, drop=drop, order=order, file=file, label=label, sdBelow=sdBelow, signifCode=signifCode, fixef_sizes=fixef_sizes, fixef_sizes.simplify = fixef_sizes.simplify, depvar=depvar, useSummary=useSummary, dict=dict, yesNo=yesNo, add_signif=add_signif, float=float, coefstat=coefstat, ci=ci, style=style, notes=notes, group=group, extraline=extraline, placement=placement, drop.section=drop.section, tex_tag=tex_tag)
 
     return(res)
 }
@@ -1590,6 +1627,7 @@ etable_internal_latex = function(info){
     extraline = info$extraline
     placement = info$placement
     drop.section = info$drop.section
+    tex_tag = info$tex_tag
 
     # Formatting the searating lines
     if(nchar(style$line.top) > 1) style$line.top = paste0(style$line.top, "\n")
@@ -2149,7 +2187,14 @@ etable_internal_latex = function(info){
         stat_stack = c(stat_stack, dum_stack)
     }
 
-    res = c(supplemental_info, start_table, intro_latex, first_line, info_subtitles, model_line, info_family, var_stack, stat_stack, info_SD, style$line.bottom, outro_latex, info_notes, end_table)
+    if(tex_tag){
+        start_tag = "%start:tab\n"
+        end_tag = "%end:tab\n"
+    } else {
+        start_tag = end_tag = ""
+    }
+
+    res = c(supplemental_info, start_table, start_tag, intro_latex, first_line, info_subtitles, model_line, info_family, var_stack, stat_stack, info_SD, style$line.bottom, outro_latex, end_tag, info_notes, end_table)
 
     res = res[nchar(res) > 0]
 
