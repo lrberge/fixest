@@ -272,10 +272,14 @@ print.fixest_multi = function(x, ...){
 
     # Finding out the type of SEs
     if(is_short){
-        est_1 = data[[1]]
-        coeftable = est_1$coeftable
-        se.type = attr(coeftable, "type")
-        cat("Standard-errors:", se.type, "\n")
+
+        all_se = unique(sapply(data, function(x) attr(x$cov.scaled, "type")))
+
+        if(length(all_se) > 1){
+            cat("Standard-errors: mixed (use summary() with arg. 'se' or 'cluster' to harmonize them) \n")
+        } else {
+            cat("Standard-errors:", all_se, "\n")
+        }
     }
 
     depth = length(index)
