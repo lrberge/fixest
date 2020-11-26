@@ -562,7 +562,7 @@ void quf_refactor(int *px_in, int x_size, IntegerVector &obs2keep, int n, int *x
     // obs2keep => optional, observations to keep
 
     int n_keep = obs2keep.size();
-    bool keep_obs = n_keep > 1;
+    bool keep_obs = obs2keep[0] != 0;
 
     if(keep_obs){
         vector<int> id_new(x_size, 0);
@@ -613,7 +613,16 @@ void quf_table_sum_single(void *px_in, std::string &x_type, int n, int q, int *x
     if(do_refactor){
         // refactoring of previous qufing => in one pass, we create table on the way
         int * px_in_int = (int *) px_in;
+
+        // return;
+
         quf_refactor(px_in_int, x_size, obs2keep, n, x_quf, x_unik, x_table);
+
+        if(obs2keep[0] != 0){
+            n = obs2keep.length();
+        }
+        // Rcout << "new n = " << n << "\n";
+        // return;
 
     } else {
         quf_single(px_in, x_type, n, x_quf, x_unik);
@@ -630,8 +639,15 @@ void quf_table_sum_single(void *px_in, std::string &x_type, int n, int q, int *x
         x_table.resize(D);
     }
 
+    // Rcout << "D = " << D << "\n";
+    // Rcout << "length(x_table) = " << x_table.size() << "\n";
+    // Rcout << "compute_sum_y = " << compute_sum_y << "\n";
+    // return;
+
     sum_y.resize(compute_sum_y > 0 ? D : 1);
     std::fill(sum_y.begin(), sum_y.end(), 0);
+
+    // Rcout << "size sum_y = " << sum_y.size() << "\n";
 
     int obs;
     if(compute_sum_y || !do_refactor){
@@ -655,12 +671,16 @@ void quf_table_sum_single(void *px_in, std::string &x_type, int n, int q, int *x
             }
         }
 
+        // Rcout << "problem = " << any_pblm[q] << "\n";
+        // return;
+
         // 2) If so: we find them
         if(any_pblm[q]){
             id_pblm.resize(D);
             std::fill(id_pblm.begin(), id_pblm.end(), false);
 
             for(int d=d_end ; d<D ; ++d){
+                // Rcout << "d = " << d << "\n";
                 if((rm_0 && sum_y[d] == 0) || (rm_1 && sum_y[d] == x_table[d]) || (rm_single && x_table[d] == 1)){
                     id_pblm[d] = true;
                 }
@@ -826,7 +846,7 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
     // When the data is refactored (ie x is a fixef_id_list, each element ranging from 1 to n_items):
     // - do_refactor
     // - r_x_sizes => a vector of length Q, the number of items for each FE
-    // - obs2keep => vector of observations to keep. The neutral is stg of length 1.
+    // - obs2keep => vector of observations to keep. The neutral is 0.
 
     int Q = Rf_length(x);
     SEXP xq = VECTOR_ELT(x, 0);
@@ -859,7 +879,7 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
     int *px_sizes = do_refactor ? INTEGER(r_x_sizes) : x_sizes_fake.data();
 
     int n_keep = obs2keep.length();
-    bool identical_x = do_refactor && n_keep == 1;
+    bool identical_x = do_refactor && obs2keep[0] == 0;
 
     // the vectors of qufed
     List res_x_quf_all(Q);
@@ -941,6 +961,12 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
             is_pblm = true;
             break;
         }
+    }
+
+    // Rcout << "Any problem: " << is_pblm << "\n";
+
+    if(obs2keep[0] != 0){
+        n = n_keep;
     }
 
     if(is_pblm){
