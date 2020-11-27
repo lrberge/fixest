@@ -345,7 +345,6 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 		mem.clean = get("mem.clean", env)
 
 		verbose = get("verbose", env)
-		# if(verbose >= 2) cat("Setup in ", (proc.time() - time_start)[3], "s\n", sep="")
 		if(verbose >= 2) gt("Setup")
 	}
 
@@ -354,8 +353,6 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	# Used to solve with the reduced model
 	xwx = dots$xwx
 	xwy = dots$xwy
-
-	# gt("setup")
 
 	#
 	# Split ####
@@ -1184,18 +1181,13 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 		if(verbose >= 1){
 			if(length(fixef_sizes) > 1){
-				# cat("Demeaning in ", (proc.time() - time_demean)[3], "s (iter: ", paste0(c(tail(res$iterations, 1), res$iterations[-length(res$iterations)]), collapse = ", "), ")\n", sep="")
 				gt("Demeaning", FALSE)
 			    cat(" (iter: ", paste0(c(tail(res$iterations, 1), res$iterations[-length(res$iterations)]), collapse = ", "), ")\n", sep="")
 			} else {
-				# cat("Demeaning in ", (proc.time() - time_demean)[3], "s\n", sep="")
 				gt("Demeaning")
 			}
 		}
 	}
-
-	# gt("demean")
-	time_esti = proc.time()
 
 	#
 	# Estimation
@@ -1252,8 +1244,8 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	}
 
 	time_post = proc.time()
-	if(verbose >= 1 && (time_post - time_esti)[3] > 0.05){
-		cat("Estimation in ", (time_post - time_esti)[3], "s\n", sep="")
+	if(verbose >= 1){
+		gt("Estimation")
 	}
 
 	if(mem.clean){
@@ -1411,10 +1403,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 		}
 	}
 
-	# if(verbose >= 3) cat("Post-processing in ", (time_post - time_post)[3], "s\n", sep="")
-	if(verbose >= 3) cat("Post-processing")
-
-	# gt("post")
+	if(verbose >= 3) gt("Post-processing")
 
 	class(res) = "fixest"
 
