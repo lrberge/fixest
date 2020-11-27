@@ -411,6 +411,10 @@ etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threew
             if(is.null(res)){
                 return(invisible(NULL))
             }
+
+            if(tex){
+                res = res[!res %in% c("%start:tab\n", "%end:tab\n")]
+            }
         }
 
         if(tex){
@@ -434,6 +438,10 @@ etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threew
 
             if(is.null(res)){
                 return(invisible(NULL))
+            }
+
+            if(tex){
+                res = res[!res %in% c("%start:tab\n", "%end:tab\n")]
             }
         }
 
