@@ -3797,7 +3797,7 @@ wald = function(x, keep = NULL, drop = NULL, print = TRUE, se, cluster, ...){
     vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = vcov)
 
     if(print){
-        cat("Wald test, H0: joint nullity of ", enumerate_items(coef_name), "\n", sep  ="")
+        cat("Wald test, H0: ", ifsingle(coef_name, "", "joint "), "nullity of ", enumerate_items(coef_name), "\n", sep  ="")
         cat(" stat = ", numberFormatNormal(stat),
             ", p-value ", ifelse(p < 2.2e-16, "< 2.2e-16", paste0("= ", numberFormatNormal(p))),
             ", on ", numberFormatNormal(df1), " and ", numberFormatNormal(df2), " degrees of freedom.",
