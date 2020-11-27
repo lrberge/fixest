@@ -157,6 +157,25 @@ for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
     cat("\n")
 }
 
+####
+#### Corner cases ####
+####
+
+
+# We test the absence of bugs
+
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "fe1")
+base$fe2 = rep(1:5, 30)
+base$y[1:5] = NA
+base$x1[4:8] = NA
+base$x2[4:21] = NA
+base$x3[110:111] = NA
+base$fe1[110:118] = NA
+base$fe2[base$fe2 == 1] = 0
+
+res = feols(y ~ 1 | csw(fe1, fe1^fe2), base)
+
 
 ####
 #### Fit methods ####
@@ -1220,8 +1239,8 @@ for(id_fun in 1:5){
                 }
 
                 vname = names(coef(res))
-                test(coef(est_multi[[k]])[vname], coef(res))
-                test(se(est_multi[[k]], cluster = "fe3")[vname], se(res, cluster = "fe3"))
+                test(coef(est_multi[[k]])[vname], coef(res), "~" , 1e-6)
+                test(se(est_multi[[k]], cluster = "fe3")[vname], se(res, cluster = "fe3"), "~" , 1e-6)
                 k = k + 1
             }
         }
