@@ -1284,7 +1284,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     if(!missnull(se)){
         do_summary = TRUE
 
-        check_arg(se, "match", .choices = c("standard", "white", "hetero", "cluster", "twoway", "threeway", "fourway", "1", "2", "3", "4"), .message = "Argument argument 'se' should be equal to one of 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
+        check_arg_plus(se, "match", .choices = c("standard", "white", "hetero", "cluster", "twoway", "threeway", "fourway", "1", "2", "3", "4"), .message = "Argument argument 'se' should be equal to one of 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
 
         # we check consistency
         if(isFixef){
