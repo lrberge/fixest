@@ -220,6 +220,8 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #'
 #' This function is similar to \code{print.fixest}. It provides the table of coefficients along with other information on the fit of the estimation. It can compute different types of standard errors. The new variance covariance matrix is an object returned.
 #'
+#' @inheritParams feNmlm
+#'
 #' @method summary fixest
 #'
 #' @param se Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.
@@ -295,7 +297,7 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 #' summary(est_pois, .vcov = vcovCL, cluster = trade[, c("Destination", "Product")])
 #'
 #'
-summary.fixest = function(object, se, cluster, dof = getFixest_dof(), .vcov, stage = 2, lean = FALSE, forceCovariance = FALSE, keepBounded = FALSE, n, ...){
+summary.fixest = function(object, se, cluster, dof = getFixest_dof(), .vcov, stage = 2, lean = FALSE, forceCovariance = FALSE, keepBounded = FALSE, n, nthreads = getFixest_nthreads(), ...){
 	# computes the clustered SD and returns the modified vcov and coeftable
 
 	if(!is.null(object$onlyFixef)){
@@ -341,13 +343,13 @@ summary.fixest = function(object, se, cluster, dof = getFixest_dof(), .vcov, sta
 	    for(s in seq_along(stage)){
 	        if(stage[s] == 1){
 	            if("fixest" %in% class(object$iv_first_stage)){
-	                res[[length(res) + 1]] = summary(object$iv_first_stage, se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nframes_up = nframes_up + 1, iv = TRUE)
+	                res[[length(res) + 1]] = summary(object$iv_first_stage, se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nframes_up = nframes_up + 1, nthreads = nthreads, iv = TRUE)
 
 	                stage_names[length(stage_names) + 1] = paste0("First stage: ", deparse_long(object$iv_first_stage$fml[[2]]))
 
 	            } else {
 	                for(i in seq_along(object$iv_first_stage)){
-	                    res[[length(res) + 1]] = summary(object$iv_first_stage[[i]], se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nframes_up = nframes_up + 1, iv = TRUE)
+	                    res[[length(res) + 1]] = summary(object$iv_first_stage[[i]], se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nframes_up = nframes_up + 1, nthreads = nthreads, iv = TRUE)
 
 	                    stage_names[length(stage_names) + 1] = paste0("First stage: ", names(object$iv_first_stage)[i])
 	                }
@@ -355,7 +357,7 @@ summary.fixest = function(object, se, cluster, dof = getFixest_dof(), .vcov, sta
 	        } else {
 	            # We keep the information on clustering => matters for wald tests of 1st stage
 	            keep_se_info = length(stage) == 1
-	            my_res = summary(object, se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nframes_up = nframes_up + 1, iv = TRUE, keep_se_info = keep_se_info)
+	            my_res = summary(object, se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nframes_up = nframes_up + 1, nthreads = nthreads, iv = TRUE, keep_se_info = keep_se_info)
 
 	            if(keep_se_info){
 	                se_info = attr(my_res$cov.scaled, "se_info")
@@ -429,7 +431,7 @@ summary.fixest = function(object, se, cluster, dof = getFixest_dof(), .vcov, sta
 	    }
 
 	} else {
-	    vcov = vcov(object, se=se, cluster=cluster, dof=dof, forceCovariance = forceCovariance, keepBounded = keepBounded, nframes_up = nframes_up, attr = TRUE, keep_se_info = isTRUE(dots$keep_se_info))
+	    vcov = vcov(object, se=se, cluster=cluster, dof=dof, forceCovariance = forceCovariance, keepBounded = keepBounded, nframes_up = nframes_up, nthreads = nthreads, attr = TRUE, keep_se_info = isTRUE(dots$keep_se_info))
 	}
 
 
@@ -3357,7 +3359,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
     # To update
     type_with_summary = any(grepl("^(g|(iv)?wald)", type))
     if(type_with_summary && (!isTRUE(x$summary) || !is.null(dots$se) || !is.null(dots$cluster))){
-        x = summary(x, ...)
+        x = summary(x, nframes_up = 1, ...)
     }
 
     IS_ETABLE = isTRUE(dots$etable)
@@ -3549,7 +3551,6 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                     df2 = x$nobs - x$nparams
 
                     # The VCOV is always full rank in here
-                    # => maybe opitmize later?
                     stat = drop(my_coef %*% solve(x$cov.scaled[qui, qui]) %*% my_coef) / df1
                     p = pf(stat, df1, df2, lower.tail = FALSE)
                     vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
@@ -3599,9 +3600,10 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                 if(isTRUE(x$iv)){
                     df1 = x$iv_n_inst
                     df2 = x$nobs - x$nparams
-                    inst = x$iv_inst_names
+
 
                     if(x$iv_stage == 1){
+                        inst = x$iv_inst_names_xpd
                         my_coef = x$coefficients[inst]
 
                         stat = drop(my_coef %*% solve(x$cov.scaled[inst, inst]) %*% my_coef) / df1
@@ -3611,15 +3613,16 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
 
                     } else {
                         x_first = x$iv_first_stage
+                        inst = x_first$iv_inst_names_xpd
 
                         if("fixest" %in% class(x_first)){
 
                             if(is.null(x_first$cov.scaled)){
                                 # We compute the VCOV like for the second stage
-                                if(!is.null(x$se_info)){
-                                    x_first = summary(x_first)
+                                if(is.null(x$se_info) || !is.null(dots$se) || !is.null(dots$cluster)){
+                                    x_first = summary(x_first, nframes_up = 1, ...)
                                 } else {
-                                    x_first = summary(x_first, se = x$se_info$se, cluster = x$se_info$cluster, dof = x$se_info$dof)
+                                    x_first = summary(x_first, se = x$se_info$se, cluster = x$se_info$cluster, dof = x$se_info$dof, nframes_up = 1, ...)
                                 }
                             }
 
@@ -3634,13 +3637,14 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                             for(endo in names(x_first)){
 
                                 my_x_first = x_first[[endo]]
+                                inst = my_x_first$iv_inst_names_xpd
 
                                 if(is.null(my_x_first$cov.scaled)){
                                     # We compute the VCOV like for the second stage
-                                    if(!is.null(x$se_info)){
-                                        my_x_first = summary(my_x_first)
+                                    if(is.null(x$se_info) || !is.null(dots$se) || !is.null(dots$cluster)){
+                                        my_x_first = summary(my_x_first, nframes_up = 1, ...)
                                     } else {
-                                        my_x_first = summary(my_x_first, se = x$se_info$se, cluster = x$se_info$cluster, dof = x$se_info$dof)
+                                        my_x_first = summary(my_x_first, se = x$se_info$se, cluster = x$se_info$cluster, dof = x$se_info$dof, nframes_up = 1, ...)
                                     }
                                 }
 
@@ -4019,7 +4023,7 @@ plot_single_cluster = function(x, n=5, addExp = FALSE, fe_name, ...){
 }
 
 
-vcovClust <- function (cluster, myBread, scores, dof=FALSE, do.unclass=TRUE){
+vcovClust <- function (cluster, myBread, scores, dof=FALSE, do.unclass=TRUE, nthreads = 1){
     # Internal function: no need for controls, they come beforehand
     # - cluster: the vector of dummies
     # - myBread: original vcov
@@ -4045,14 +4049,8 @@ vcovClust <- function (cluster, myBread, scores, dof=FALSE, do.unclass=TRUE){
         dof_value = 1
     }
 
-    # return(crossprod(RightScores%*%myBread) * dof_value)
-
-    # Maybe I'll later add parallelism, but I don't want to add other arguments to the functions
-    # calling vcov... and there are many
-    # I don't want either to apply "hidden" parallelism, even using getOption
-    # We'll see....
-    xy = cpppar_matprod(RightScores, myBread, 1)
-    res = cpppar_crossprod(xy, 1, 1) * dof_value
+    xy = cpppar_matprod(RightScores, myBread, nthreads)
+    res = cpppar_crossprod(xy, 1, nthreads) * dof_value
     res
 }
 
@@ -6881,7 +6879,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 #' vcov(est_pois_simple, cluster = ~Product)
 #'
 #'
-vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE, forceCovariance = FALSE, keepBounded = FALSE, ...){
+vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE, forceCovariance = FALSE, keepBounded = FALSE, nthreads = getFixest_nthreads(), ...){
 	# computes the clustered vcov
 
     check_arg(attr, "logical scalar")
@@ -7105,7 +7103,9 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 	} else if(se.val == "hetero"){
 
 	    # we make a n/(n-1) adjustment to match vcovHC(type = "HC1")
-		vcov = crossprod(myScore %*% VCOV_raw) * correction.dof * ifelse(is_cluster, n/(n-1), 1)
+		# vcov = crossprod(myScore %*% VCOV_raw) * correction.dof * ifelse(is_cluster, n/(n-1), 1)
+		vcov = cpppar_crossprod(cpppar_matprod(myScore, VCOV_raw, nthreads), 1, nthreads) * correction.dof * ifelse(is_cluster, n/(n-1), 1)
+		dimnames(vcov) = dimnames(VCOV_raw)
 
 	} else {
 		# Clustered SD!
@@ -7461,7 +7461,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 				}
 
 			    # When cluster.df == "min" => no dof here but later
-				vcov = vcov + (-1)**(i+1) * vcovClust(index, VCOV_raw, myScore, dof = is_cluster && !is_cluster_min, do.unclass=FALSE)
+				vcov = vcov + (-1)**(i+1) * vcovClust(index, VCOV_raw, myScore, dof = is_cluster && !is_cluster_min, do.unclass=FALSE, nthreads = nthreads)
 			}
 		}
 
