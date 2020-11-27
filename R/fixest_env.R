@@ -1897,7 +1897,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     }
 
-    if(lparams == 0 && Q == 0) stop("No parameter to be estimated.")
+    if(lparams == 0 && Q == 0 && !multi_fixef) stop("No parameter to be estimated.")
 
     check_arg(useHessian, "logical scalar")
     assign("hessian.args", hessian.args, env)
@@ -3381,7 +3381,12 @@ extract_stepwise = function(fml, tms, all_vars = TRUE){
             # In non OLS: we need all the variables bc we create the full design matrix
             # in FEOLS we do it stepwise (so we only need the SW terms)
             if(all_vars){
-                sw_all_vars = all.vars(fml[[3]])
+                if(is_fml){
+                    sw_all_vars = all.vars(fml[[3]])
+                } else {
+                    # we need to recreate the formula because of impossible_var_name in tms
+                    sw_all_vars = all.vars(xpd(~..rhs, ..rhs = tl))
+                }
             } else {
                 sw_all_vars = all.vars(xpd(~ ..sw, ..sw = sw_terms))
             }

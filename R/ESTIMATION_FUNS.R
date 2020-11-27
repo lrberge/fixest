@@ -3283,7 +3283,7 @@ multi_LHS_RHS = function(env, fun){
     for(i in seq_along(lhs)){
         for(j in seq_along(rhs)){
             # reshaping the env => taking care of the NAs
-cat("i = ", i, " j = ", j, "\n", sep ="")
+
             if(length(rhs[[j]]) == 1){
                 is_na_current = !is.finite(lhs[[i]])
             } else {

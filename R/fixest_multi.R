@@ -273,11 +273,11 @@ print.fixest_multi = function(x, ...){
     # Finding out the type of SEs
     if(is_short){
 
-        all_se = unique(sapply(data, function(x) attr(x$cov.scaled, "type")))
+        all_se = unique(unlist(sapply(data, function(x) attr(x$cov.scaled, "type"))))
 
         if(length(all_se) > 1){
             cat("Standard-errors: mixed (use summary() with arg. 'se' or 'cluster' to harmonize them) \n")
-        } else {
+        } else if(length(all_se) == 1){
             cat("Standard-errors:", all_se, "\n")
         }
     }

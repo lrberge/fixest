@@ -5781,7 +5781,7 @@ error_sender = function(expr, ..., clean, up = 0){
         if(!missing(clean)){
 
             if(grepl(" => ", clean)){
-                clean_split = strstplit(clean, " => ")[[1]]
+                clean_split = strsplit(clean, " => ")[[1]]
                 from = clean_split[1]
                 to = clean_split[2]
             } else {
