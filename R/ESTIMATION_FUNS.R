@@ -298,8 +298,8 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 		correct_0w = dots$correct_0w
 	} else {
 		time_start = proc.time()
-		# gt = function(x) cat(sfill(x, 20), ": ", -(t0 - (t0<<-proc.time()))[3], "s\n", sep = "")
-		# t0 = proc.time()
+		gt = function(x, nl = TRUE) cat(sfill(x, 20), ": ", -(t0 - (t0<<-proc.time()))[3], "s", ifelse(nl, "\n", ""), sep = "")
+		t0 = proc.time()
 
 		# we use fixest_env for appropriate controls and data handling
 
@@ -345,7 +345,8 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 		mem.clean = get("mem.clean", env)
 
 		verbose = get("verbose", env)
-		if(verbose >= 2) cat("Setup in ", (proc.time() - time_start)[3], "s\n", sep="")
+		# if(verbose >= 2) cat("Setup in ", (proc.time() - time_start)[3], "s\n", sep="")
+		if(verbose >= 2) gt("Setup")
 	}
 
 	isFixef = get("isFixef", env)
@@ -816,6 +817,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	do_iv = get("do_iv", env)
 	if(do_iv){
         assign("do_iv", FALSE, env)
+	    assign("verbose", 0, env)
 
 	    # Loaded already
 	    # y: lhs
@@ -910,6 +912,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	            }
 
 	            my_res$iv_stage = 1
+	            my_res$iv_inst_names_xpd = colnames(iv.mat)
 
 	            res_first_stage[[iv_lhs_names[i]]] = my_res
 	        }
@@ -973,12 +976,30 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 	        }
 
+	        if(verbose >= 2) gt("IV products")
+
 	        ZX = cbind(iv.mat, X)
 
 	        # First stage(s)
 
 	        ZXtZX = iv_products$ZXtZX
 	        ZXtu  = iv_products$ZXtu
+
+	        # Let's put the intercept first => I know it's not really elegant, but that's life
+	        is_int = "(Intercept)" %in% colnames(X)
+	        if(is_int){
+	            nz = ncol(iv.mat)
+	            nzx = ncol(ZX)
+	            qui = c(nz + 1, (1:nzx)[-(nz + 1)])
+
+	            ZX = ZX[, qui, drop = FALSE]
+	            ZXtZX = ZXtZX[qui, qui, drop = FALSE]
+	            for(i in seq_along(ZXtu)){
+	                ZXtu[[i]] = ZXtu[[i]][qui]
+	            }
+
+	        }
+
 
 	        res_first_stage = list()
 
@@ -988,13 +1009,16 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 	            # For the F-stats
 	            fit_no_inst = ols_fit(iv_lhs[[i]], X, w = weights, correct_0w = FALSE, collin.tol = collin.tol, nthreads = nthreads,
-	                                  xwx = ZXtZX[-(1:K), -(1:K), drop = FALSE], xwy = ZXtu[[i]][-(1:K)])
+	                                  xwx = ZXtZX[-(1:K + is_int), -(1:K + is_int), drop = FALSE], xwy = ZXtu[[i]][-(1:K + is_int)])
 	            my_res$ssr_no_inst = cpp_ssq(fit_no_inst$residuals)
 
 	            my_res$iv_stage = 1
+	            my_res$iv_inst_names_xpd = colnames(iv.mat)
 
 	            res_first_stage[[iv_lhs_names[i]]] = my_res
 	        }
+
+	        if(verbose >= 2) gt("1st stage(s)")
 
 	        # Second stage
 
@@ -1024,10 +1048,22 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	        UXtUX = iv_prod_second$UXtUX
 	        UXty  = iv_prod_second$UXty
 
+	        if(is_int){
+	            nu = ncol(U)
+	            nux = ncol(UX)
+	            qui = c(nu + 1, (1:nux)[-(nu + 1)])
+
+	            UX = UX[, qui, drop = FALSE]
+	            UXtUX = UXtUX[qui, qui, drop = FALSE]
+	            UXty = UXty[qui]
+	        }
+
 	        resid_s1 = lapply(res_first_stage, function(x) x$residuals)
 
 	        current_env = reshape_env(env, rhs = UX)
 	        res_second_stage = feols(env = current_env, xwx = UXtUX, xwy = UXty, resid_1st_stage = resid_s1)
+
+	        if(verbose >= 2) gt("2nd stage")
 	    }
 
 	    if(n_endo == 1){
@@ -1148,9 +1184,12 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 		if(verbose >= 1){
 			if(length(fixef_sizes) > 1){
-				cat("Demeaning in ", (proc.time() - time_demean)[3], "s (iter: ", paste0(c(tail(res$iterations, 1), res$iterations[-length(res$iterations)]), collapse = ", "), ")\n", sep="")
+				# cat("Demeaning in ", (proc.time() - time_demean)[3], "s (iter: ", paste0(c(tail(res$iterations, 1), res$iterations[-length(res$iterations)]), collapse = ", "), ")\n", sep="")
+				gt("Demeaning", FALSE)
+			    cat(" (iter: ", paste0(c(tail(res$iterations, 1), res$iterations[-length(res$iterations)]), collapse = ", "), ")\n", sep="")
 			} else {
-				cat("Demeaning in ", (proc.time() - time_demean)[3], "s\n", sep="")
+				# cat("Demeaning in ", (proc.time() - time_demean)[3], "s\n", sep="")
+				gt("Demeaning")
 			}
 		}
 	}
@@ -1270,7 +1309,8 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 	if(!is.null(dots$resid_1st_stage)){
 	    # We correct the residual
-	    resid_new = cpp_iv_resid(res$residuals, res$coefficients, dots$resid_1st_stage, nthreads)
+	    is_int = "(Intercept)" %in% names(res$coefficients)
+	    resid_new = cpp_iv_resid(res$residuals, res$coefficients, dots$resid_1st_stage, is_int, nthreads)
 	    res$iv_residuals = res$residuals
 	    res$residuals = resid_new
 	}
@@ -1371,7 +1411,8 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 		}
 	}
 
-	if(verbose >= 3) cat("Post-processing in ", (time_post - time_post)[3], "s\n", sep="")
+	# if(verbose >= 3) cat("Post-processing in ", (time_post - time_post)[3], "s\n", sep="")
+	if(verbose >= 3) cat("Post-processing")
 
 	# gt("post")
 

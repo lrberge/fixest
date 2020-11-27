@@ -420,16 +420,17 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_iv_resid
-NumericVector cpp_iv_resid(NumericVector resid_2nd, NumericVector coef, SEXP resid_1st, int nthreads);
-RcppExport SEXP _fixest_cpp_iv_resid(SEXP resid_2ndSEXP, SEXP coefSEXP, SEXP resid_1stSEXP, SEXP nthreadsSEXP) {
+NumericVector cpp_iv_resid(NumericVector resid_2nd, NumericVector coef, SEXP resid_1st, bool is_int, int nthreads);
+RcppExport SEXP _fixest_cpp_iv_resid(SEXP resid_2ndSEXP, SEXP coefSEXP, SEXP resid_1stSEXP, SEXP is_intSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type resid_2nd(resid_2ndSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type coef(coefSEXP);
     Rcpp::traits::input_parameter< SEXP >::type resid_1st(resid_1stSEXP);
+    Rcpp::traits::input_parameter< bool >::type is_int(is_intSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_iv_resid(resid_2nd, coef, resid_1st, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_iv_resid(resid_2nd, coef, resid_1st, is_int, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -980,7 +981,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_mat_reconstruct", (DL_FUNC) &_fixest_cpp_mat_reconstruct, 2},
     {"_fixest_cpp_iv_products", (DL_FUNC) &_fixest_cpp_iv_products, 6},
     {"_fixest_cpp_iv_product_completion", (DL_FUNC) &_fixest_cpp_iv_product_completion, 7},
-    {"_fixest_cpp_iv_resid", (DL_FUNC) &_fixest_cpp_iv_resid, 4},
+    {"_fixest_cpp_iv_resid", (DL_FUNC) &_fixest_cpp_iv_resid, 5},
     {"_fixest_cpp_lgamma", (DL_FUNC) &_fixest_cpp_lgamma, 1},
     {"_fixest_cpp_log_a_exp", (DL_FUNC) &_fixest_cpp_log_a_exp, 3},
     {"_fixest_cpp_partialDerivative_other", (DL_FUNC) &_fixest_cpp_partialDerivative_other, 9},

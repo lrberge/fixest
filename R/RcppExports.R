@@ -89,8 +89,8 @@ cpp_iv_product_completion <- function(XtX, Xty, X, y, U, w, nthreads) {
     .Call(`_fixest_cpp_iv_product_completion`, XtX, Xty, X, y, U, w, nthreads)
 }
 
-cpp_iv_resid <- function(resid_2nd, coef, resid_1st, nthreads) {
-    .Call(`_fixest_cpp_iv_resid`, resid_2nd, coef, resid_1st, nthreads)
+cpp_iv_resid <- function(resid_2nd, coef, resid_1st, is_int, nthreads) {
+    .Call(`_fixest_cpp_iv_resid`, resid_2nd, coef, resid_1st, is_int, nthreads)
 }
 
 cpp_lgamma <- function(x) {

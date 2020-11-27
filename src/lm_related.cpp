@@ -1098,7 +1098,7 @@ List cpp_iv_product_completion(NumericMatrix XtX, NumericVector Xty, NumericMatr
 }
 
 // [[Rcpp::export]]
-NumericVector cpp_iv_resid(NumericVector resid_2nd, NumericVector coef, SEXP resid_1st, int nthreads){
+NumericVector cpp_iv_resid(NumericVector resid_2nd, NumericVector coef, SEXP resid_1st, bool is_int, int nthreads){
 
     int N = resid_2nd.length();
     int K = Rf_length(resid_1st);
@@ -1114,7 +1114,7 @@ NumericVector cpp_iv_resid(NumericVector resid_2nd, NumericVector coef, SEXP res
         #pragma omp parallel for num_threads(nthreads)
         for(int t=0 ; t<nthreads ; ++t){
             for(int i=bounds[t]; i<bounds[t + 1] ; ++i){
-                iv_resid[i] -= coef[0] * p_r[i];
+                iv_resid[i] -= coef[0 + is_int] * p_r[i];
             }
         }
 
@@ -1130,7 +1130,7 @@ NumericVector cpp_iv_resid(NumericVector resid_2nd, NumericVector coef, SEXP res
 
             double *p_r = p_p_r[k];
             for(int i=0 ; i<N ; ++i){
-                iv_resid[i] -= coef[k] * p_r[i];
+                iv_resid[i] -= coef[k + is_int] * p_r[i];
             }
         }
     }
