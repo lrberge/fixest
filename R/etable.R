@@ -321,41 +321,60 @@ etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threew
         stop("You must provide at least one element in '...'.")
     }
 
-    # Postprocess => we catch the arguments
-    DO_POSTPROCESS = TRUE
+    #
+    # Postprocess
+    #
+
+    # Note that I need to catch the arguments from the two pp functions
+    # => so that the same call lead to valid evaluations
+
     opts = getOption("fixest_etable")
+    pp_tex = pp_df = NULL
 
-    if(tex){
-        check_arg(postprocess, "NULL function arg(1,)")
+    check_arg(postprocess, "NULL function arg(1,)")
 
-        if(!is.null(postprocess)){
-            my_postprocess = postprocess
-        } else if(!is.null(opts$postprocess)){
-            my_postprocess = opts$postprocess
-        } else {
-            DO_POSTPROCESS = FALSE
-        }
-
-    } else {
-        check_arg(postprocess.df, "NULL function arg(1,)")
-        if(!is.null(postprocess.df)){
-            my_postprocess = postprocess.df
-        } else if(!is.null(opts$postprocess.df)){
-            my_postprocess = opts$postprocess.df
-        } else {
-            DO_POSTPROCESS = FALSE
-        }
+    if(!is.null(postprocess)){
+        pp_tex = postprocess
+    } else if(!is.null(opts$postprocess)){
+        pp_tex = opts$postprocess
     }
 
-    if(DO_POSTPROCESS){
+    check_arg(postprocess.df, "NULL function arg(1,)")
+    if(!is.null(postprocess.df)){
+        pp_df = postprocess.df
+    } else if(!is.null(opts$postprocess.df)){
+        pp_df = opts$postprocess.df
+    }
+
+    my_postprocess = pp_other = NULL
+    if(tex){
+        my_postprocess = pp_tex
+        pp_other = pp_df
+    } else {
+        my_postprocess = pp_df
+        pp_other = pp_tex
+    }
+
+    DO_POSTPROCESS = !is.null(my_postprocess)
+
+    # Catching the arguments
+    pp_args = list()
+    if(!is.null(names(dots))){
         # Catching the arguments
-        pp_args = list()
-        if(!is.null(names(dots))){
+        if(!is.null(my_postprocess)){
             fm = formalArgs(my_postprocess)
             qui = names(dots) %in% fm
             pp_args = dots[qui]
             dots = dots[!qui]
         }
+
+        if(!is.null(pp_other)){
+            fm = formalArgs(pp_other)
+            qui = names(dots) %in% fm
+            pp_args = dots[qui]
+            dots = dots[!qui]
+        }
+
     }
 
     if(length(dots) == 0){
@@ -405,7 +424,7 @@ etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threew
     } else {
 
         if(DO_POSTPROCESS){
-            # res = my_postprocess(res)
+
             pp_args_all = list(res)
             if(length(pp_args) > 0){
                 pp_args_all[names(pp_args)] = pp_args
