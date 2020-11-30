@@ -451,11 +451,13 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	    }
 
 	    if(do_multi_rhs){
-	        multi_rhs_fml_full = get("multi_rhs_fml_full", env)
-	        multi_rhs_fml_sw = get("multi_rhs_fml_sw", env)
-	        multi_rhs_cumul = get("multi_rhs_cumul", env)
-	        fake_intercept = get("fake_intercept", env)
-	        data = get("data", env)
+	        rhs_info_stepwise = get("rhs_info_stepwise", env)
+	        multi_rhs_fml_full = rhs_info_stepwise$fml_all_full
+	        multi_rhs_fml_sw = rhs_info_stepwise$fml_all_sw
+	        multi_rhs_cumul = rhs_info_stepwise$is_cumul
+
+	        linear_core = get("linear_core", env)
+	        rhs = get("rhs_sw", env)
 
 	        # Two schemes:
 	        #  - if cumulative: we take advantage of it => both in demeaning and in estimation
@@ -463,15 +465,17 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	        # => of course this is dependent on the pattern of NAs
 	        #
 
+	        n_core_left = ifelse(length(linear_core$left) == 1, 0, ncol(linear_core$left))
+	        n_core_right = ifelse(length(linear_core$right) == 1, 0, ncol(linear_core$right))
+
 	        # rnc: running number of columns
-	        rnc = ifelse(length(X) == 1, 0, ncol(X))
+	        rnc = n_core_left
 	        if(rnc == 0){
 	            col_start = integer(0)
 	        } else {
 	            col_start = 1:rnc
 	        }
 
-	        rhs = list()
 	        rhs_group_is_na = list()
 	        rhs_group_id = c()
 	        rhs_group_n_na = c()
@@ -499,10 +503,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	                next
 	            }
 
-	            rhs_current = error_sender(fixest_model_matrix(my_fml, data, fake_intercept = TRUE),
-	                                       "Evaluation of the RHS raises an error (concerns ", deparse_long(my_fml[[3]]), "):\n")
-
-	            rhs[[i]] = rhs_current
+	            rhs_current = rhs[[i]]
 	            rhs_n_vars[i] = ncol(rhs_current)
 	            info = cpppar_which_na_inf_mat(rhs_current, nthreads)
 
@@ -565,9 +566,14 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	            rhs_group[[i]] = which(rhs_group_id == i)
 	        }
 
-	        rhs_group_n_vars = rep(0, length(rhs_group))
+
+
+	        # Finding the right column IDs to select
+
+	        rhs_group_n_vars = rep(0, length(rhs_group)) # To get the total nber of cols per group
 
 	        for(i in seq_along(multi_rhs_fml_sw)){
+
     	        if(multi_rhs_cumul){
     	            rnc = rnc + rhs_n_vars[i]
     	            if(rnc == 0){
@@ -582,6 +588,22 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
     	        }
 	        }
 
+	        if(n_core_right > 0){
+	            # We adjust
+	            if(multi_rhs_cumul){
+	                for(i in seq_along(multi_rhs_fml_sw)){
+	                    id = rhs_group_id[i]
+	                    gmax = max(rhs_group[[id]])
+	                    rhs_col_id[[i]] = c(rhs_col_id[[i]], n_core_left + sum(rhs_n_vars[1:gmax]) + 1:n_core_right)
+	                }
+	            } else {
+	                for(i in seq_along(multi_rhs_fml_sw)){
+	                    id = rhs_group_id[i]
+	                    rhs_col_id[[i]] = c(rhs_col_id[[i]], n_core_left + rhs_group_n_vars[id] + 1:n_core_right)
+	                }
+	            }
+	        }
+
 	    } else if(do_multi_rhs == FALSE){
 
 	        multi_rhs_fml_full = list(xpd(~ ..rhs, ..rhs = deparse_long(fml[[3]])))
@@ -592,9 +614,12 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	        rhs_group = list(1)
 	        rhs = list(0)
 	        rhs_col_id = list(1:NCOL(X))
+	        linear_core = list(left = X, right = 1)
 	    }
 
-	    isLinear = length(X) > 1
+	    isLinear_right = length(linear_core$right) > 1
+
+	    isLinear = length(linear_core$left) > 1 || isLinear_right
 
 	    n_lhs = length(lhs)
 	    n_rhs = length(rhs)
@@ -622,7 +647,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	            # Here it depends on whether there are FEs or not, whether it's cumul or not
 	            my_lhs = lhs[lhs_group[[i]]]
 	            if(isLinear){
-	                my_rhs = list(X)
+	                my_rhs = linear_core[1]
 	                if(multi_rhs_cumul){
 	                    gmax = max(rhs_group[[j]])
 	                    my_rhs[1 + (1:gmax)] = rhs[1:gmax]
@@ -634,6 +659,10 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	                    }
 	                }
 
+	                if(isLinear_right){
+	                    my_rhs[[length(my_rhs) + 1]] = linear_core$right
+	                }
+
 	            } else{
 	                rhs_len = lengths(rhs)
 	                if(multi_rhs_cumul){
@@ -641,6 +670,10 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	                    my_rhs = rhs[rhs_len > 1 & seq_along(rhs) <= gmax]
 	                } else {
 	                    my_rhs = rhs[rhs_len > 1 & seq_along(rhs) %in% rhs_group[[j]]]
+	                }
+
+	                if(isLinear_right){
+	                    my_rhs[[length(my_rhs) + 1]] = linear_core$right
 	                }
 	            }
 
@@ -3248,55 +3281,72 @@ multi_LHS_RHS = function(env, fun){
 
     # RHS
     if(do_multi_rhs){
-        multi_rhs_fml_full = get("multi_rhs_fml_full", env)
-        multi_rhs_cumul = get("multi_rhs_cumul", env)
-        fake_intercept = get("fake_intercept", env)
-        data = get("data", env)
+        rhs_info_stepwise = get("rhs_info_stepwise", env)
+        multi_rhs_fml_full = rhs_info_stepwise$fml_all_full
+        multi_rhs_fml_sw = rhs_info_stepwise$fml_all_sw
+        multi_rhs_cumul = rhs_info_stepwise$is_cumul
 
-        rhs = list()
-        for(i in seq_along(multi_rhs_fml_full)){
-            # We evaluate the extra data and check the NA pattern
+        linear_core = get("linear_core", env)
+        rhs_sw = get("rhs_sw", env)
 
-            my_fml = xpd(lhs ~ ..rhs, ..rhs = multi_rhs_fml_full[[i]])
-            rhs_current = error_sender(fixest_model_matrix(my_fml, data, fake_intercept = fake_intercept),
-                                       "Evaluation of the RHS raises an error (concerns ", deparse_long(my_fml[[3]]), "):\n", up = 1)
-
-            if(identical(rhs_current, "NOT_LINEAR")){
-                rhs_current = 0
-            }
-
-            rhs[[i]] = rhs_current
-        }
     } else {
         multi_rhs_fml_full = list(xpd(~ ..rhs, ..rhs = deparse_long(fml[[3]])))
         multi_rhs_cumul = FALSE
         linear.mat = get("linear.mat", env)
-        rhs = list(linear.mat)
+        linear_core = list(left = linear.mat, right = 1)
+        rhs_sw = list(1)
     }
 
+    isLinear_left = length(linear_core$left) > 1
+    isLinear_right = length(linear_core$right) > 1
+
     n_lhs = length(lhs)
-    n_rhs = length(rhs)
+    n_rhs = length(rhs_sw)
     res = vector("list", n_lhs * n_rhs)
 
     rhs_names = sapply(multi_rhs_fml_full, deparse_long)
 
     for(i in seq_along(lhs)){
-        for(j in seq_along(rhs)){
+        for(j in seq_along(rhs_sw)){
             # reshaping the env => taking care of the NAs
 
-            if(length(rhs[[j]]) == 1){
+            # Forming the RHS
+            my_rhs = linear_core[1]
+
+            if(multi_rhs_cumul){
+                my_rhs[1 + 1:j] = rhs_sw[1:j]
+            } else {
+                my_rhs[2] = rhs_sw[j]
+            }
+
+            if(isLinear_right){
+                my_rhs[[length(my_rhs) + 1]] = linear_core$right
+            }
+
+            n_all = lengths(my_rhs)
+            if(any(n_all == 1)){
+                my_rhs = my_rhs[n_all > 1]
+            }
+
+            if(length(my_rhs) == 0){
+                my_rhs = 1
+            } else {
+                my_rhs = do.call("cbind", my_rhs)
+            }
+
+            if(length(my_rhs) == 1){
                 is_na_current = !is.finite(lhs[[i]])
             } else {
-                is_na_current = !is.finite(lhs[[i]]) | cpppar_which_na_inf_mat(rhs[[j]], nthreads)$is_na_inf
+                is_na_current = !is.finite(lhs[[i]]) | cpppar_which_na_inf_mat(my_rhs, nthreads)$is_na_inf
             }
 
             my_fml = xpd(..lhs ~ ..rhs, ..lhs = lhs_names[i], ..rhs = multi_rhs_fml_full[[j]])
 
             if(any(is_na_current)){
-                my_env = reshape_env(env, which(!is_na_current), lhs = lhs[[i]], rhs = rhs[[j]], fml_linear = my_fml)
+                my_env = reshape_env(env, which(!is_na_current), lhs = lhs[[i]], rhs = my_rhs, fml_linear = my_fml)
             } else {
                 # We still need to check the RHS (only 0/1)
-                my_env = reshape_env(env, lhs = lhs[[i]], rhs = rhs[[j]], fml_linear = my_fml, check_lhs = TRUE)
+                my_env = reshape_env(env, lhs = lhs[[i]], rhs = my_rhs, fml_linear = my_fml, check_lhs = TRUE)
             }
 
             my_res = fun(env = my_env)
@@ -3322,8 +3372,6 @@ multi_fixef = function(env, estfun){
     assign("do_multi_fixef", FALSE, env)
 
     multi_fixef_fml_full = get("multi_fixef_fml_full", env)
-    multi_fixef_fml_sw = get("multi_fixef_fml_sw", env)
-    multi_fixef_cumul = get("multi_fixef_cumul", env)
     combine.quick = get("combine.quick", env)
     fixef.rm = get("fixef.rm", env)
     family = get("family", env)
@@ -3421,13 +3469,28 @@ multi_fixef = function(env, estfun){
             }
 
             # We remove the linear part if needed
-            linear.mat = get("linear.mat", my_env)
-            if("(Intercept)" %in% colnames(linear.mat)){
-                int_col = which("(Intercept)" %in% colnames(linear.mat))
-                if(ncol(linear.mat) == 1){
-                    assign("linear.mat", 0, my_env)
-                } else {
-                    assign("linear.mat", linear.mat[, -int_col, drop = FALSE], my_env)
+
+
+            if(get("do_multi_rhs", env)){
+                linear_core = get("linear_core", my_env)
+                if("(Intercept)" %in% colnames(linear_core$left)){
+                    int_col = which("(Intercept)" %in% colnames(linear_core$left))
+                    if(ncol(linear_core$left) == 1){
+                        linear_core$left = 1
+                    } else {
+                        linear_core$left = linear_core$left[, -int_col, drop = FALSE]
+                    }
+                    assign("linear_core", linear_core, my_env)
+                }
+            } else {
+                linear.mat = get("linear.mat", my_env)
+                if("(Intercept)" %in% colnames(linear.mat)){
+                    int_col = which("(Intercept)" %in% colnames(linear.mat))
+                    if(ncol(linear.mat) == 1){
+                        assign("linear.mat", 1, my_env)
+                    } else {
+                        assign("linear.mat", linear.mat[, -int_col, drop = FALSE], my_env)
+                    }
                 }
             }
 

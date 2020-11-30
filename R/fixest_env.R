@@ -779,33 +779,92 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             #
 
             rhs_info_stepwise = error_sender(extract_stepwise(fml_linear), "Problem in the RHS of the formula: ")
+
             multi_rhs = rhs_info_stepwise$do_multi
-            if(multi_rhs){
-                fml_linear = rhs_info_stepwise$fml
-            }
+
 
             #
             # We construct the linear matrix
             #
 
-            linear.mat = error_sender(fixest_model_matrix(fml_linear, data, fake_intercept),
-                                      "Evaluation of the right-hand-side of the formula raises an error: ")
+            if(multi_rhs){
+                # We construct:
+                # - left and right cores (vars that are always there)
+                # - center
 
-            if(identical(linear.mat, "NOT_LINEAR")){
-                isLinear = FALSE
+                isLinear = FALSE # => superseded by the multi_rhs mechanism
+
+                fml_core_left = rhs_info_stepwise$fml_core_left
+                fml_core_right = rhs_info_stepwise$fml_core_right
+                fml_all_sw = rhs_info_stepwise$fml_all_sw
+
+                linear_core = list()
+                linear_core$left = error_sender(fixest_model_matrix(fml_core_left, data, fake_intercept),
+                                                "Evaluation of the right-hand-side of the formula raises an error: ")
+
+                linear_core$right = error_sender(fixest_model_matrix(fml_core_right, data, TRUE),
+                                                "Evaluation of the right-hand-side of the formula raises an error: ")
+
+                rhs_sw = list()
+                for(i in seq_along(fml_all_sw)){
+                    rhs_sw[[i]] = error_sender(fixest_model_matrix(fml_all_sw[[i]], data, TRUE),
+                                               "Evaluation of the right-hand-side of the formula raises an error: ")
+                }
+
+            } else {
+                # Regular, single RHS
+
+                linear.mat = error_sender(fixest_model_matrix(fml_linear, data, fake_intercept),
+                                          "Evaluation of the right-hand-side of the formula raises an error: ")
+
+                if(identical(linear.mat, 1)){
+                    isLinear = FALSE
+                }
+
+                # Interaction information => if no interaction: NULL, only the first is there
+                interaction.info = getOption("fixest_interaction_ref")
             }
-
-            # Interaction information => if no interaction: NULL, only the first is there
-            interaction.info = getOption("fixest_interaction_ref")
         }
-
     }
 
-    # further controls (includes na checking)
+    # Further controls (includes na checking)
     msgNA_L = ""
+    if(multi_rhs){
+
+        anyNA_L = FALSE
+        isNA_L = FALSE
+        if(length(linear_core$left) > 1){
+            info = cpppar_which_na_inf_mat(linear_core$left, nthreads)
+            if(info$any_na_inf){
+                anyNA_L = TRUE
+                if(info$any_na) ANY_NA = TRUE
+                if(info$any_inf) ANY_INF = TRUE
+                isNA_L = isNA_L | info$is_na_inf
+                anyNA_sample = TRUE
+                isNA_sample = isNA_sample | isNA_L
+            }
+        }
+
+        if(length(linear_core$right) > 1){
+            info = cpppar_which_na_inf_mat(linear_core$right, nthreads)
+            if(info$any_na_inf){
+                anyNA_L = TRUE
+                if(info$any_na) ANY_NA = TRUE
+                if(info$any_inf) ANY_INF = TRUE
+                isNA_L = isNA_L | info$is_na_inf
+                anyNA_sample = TRUE
+                isNA_sample = isNA_sample | isNA_L
+            }
+        }
+
+        if(anyNA_L){
+            msgNA_L = paste0("RHS: ", numberFormatNormal(sum(isNA_L)))
+        }
+    }
+
     if(isLinear){
 
-        linear.params <- colnames(linear.mat)
+        linear.params = colnames(linear.mat)
         anyNA_L = FALSE
         info = cpppar_which_na_inf_mat(linear.mat, nthreads)
         if(info$any_na_inf){
@@ -831,8 +890,14 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             gc2trig = FALSE
         }
 
-    } 	else {
-        linear.params <- linear.start <- linear.varnames <- NULL
+    } else if(multi_rhs && origin_type %in% "feNmlm"){
+        # We need to assign linear.params
+        v_core = unlist(lapply(linear_core, colnames))
+        v_sw = unlist(lapply(rhs_sw, colnames))
+        linear.varnames = linear.params = unique(c(v_core, v_sw))
+
+    } else {
+        linear.params = linear.start = linear.varnames = NULL
     }
 
 
@@ -1307,6 +1372,11 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     # Fixed-effects ####
     #
 
+    # NOTA on stepwise FEs:
+    # I wanted to evaluate all the FEs first, then send the evaluated stuff for later. Like in stepwise linear.
+    # This is actually a bad idea because FEs are too complex to manipulate (damn SLOPES!!!).
+    # This means that lags in the FEs + stepwise FEs will never be supported.
+
     isSlope = onlySlope = FALSE
     if(isFixef){
         # The main fixed-effects construction
@@ -1633,51 +1703,23 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
         if(isLinear){
             # We drop only 0 variables (may happen for factors)
-            linear.mat = linear.mat[-obs2remove, , drop = FALSE]
+            linear.mat = select_obs(linear.mat, -obs2remove, nthreads)
 
-            # If there are factors => possibly some vars are only 0 now that NAs are removed
-            only_0 = cpppar_check_only_0(linear.mat, nthreads)
-            if(all(only_0 == 1)){
-                stop("After removing NAs, not a single explanatory variable is different from 0.")
-
-            } else if(any(only_0 == 1)){
-                linear.mat = linear.mat[, only_0 == 0, drop = FALSE]
-
-                # useful for feNmlm
-                linear.params = colnames(linear.mat)
-                params = c(nonlinear.params, linear.params)
-                lparams = length(params)
-                varnames = c(nonlinear.varnames, linear.varnames)
-            }
+            # useful for feNmlm
+            linear.params = colnames(linear.mat)
+            params = c(nonlinear.params, linear.params)
+            lparams = length(params)
         }
 
         if(Q == 0){
             # if Q > 0: done already when managing the fixed-effects
-            if(is.list(lhs)){
-                for(i in seq_along(lhs)){
-                    lhs[[i]] = lhs[[i]][-obs2remove]
-                }
-            } else {
-                lhs = lhs[-obs2remove]
-            }
+            lhs = select_obs(lhs, -obs2remove)
 
         }
 
         if(do_iv){
-            for(i in seq_along(iv_lhs)){
-                iv_lhs[[i]] = iv_lhs[[i]][-obs2remove]
-            }
-
-            iv.mat = iv.mat[-obs2remove, , drop = FALSE]
-
-            # Sanity check
-            only_0 = cpppar_check_only_0(iv.mat, nthreads)
-            if(all(only_0 == 1)){
-                stop("After removing NAs, in the IV part: not a single explanatory variable is different from 0.")
-
-            } else if(any(only_0 == 1)){
-                iv.mat = iv.mat[, only_0 == 0, drop = FALSE]
-            }
+            iv_lhs = select_obs(iv_lhs, -obs2remove)
+            iv.mat = select_obs(iv.mat, -obs2remove, nthreads, "instrument")
         }
 
         if(isOffset){
@@ -1694,6 +1736,11 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
         if(isSplit){
             split = split[-obs2remove]
+        }
+
+        if(multi_rhs){
+            linear_core = select_obs(linear_core, -obs2remove, nthreads)
+            rhs_sw = select_obs(rhs_sw, -obs2remove, nthreads)
         }
 
     }
@@ -1897,7 +1944,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     }
 
-    if(lparams == 0 && Q == 0 && !multi_fixef) stop("No parameter to be estimated.")
+    if(lparams == 0 && Q == 0 && !multi_fixef && !multi_rhs) stop("No parameter to be estimated.")
 
     check_arg(useHessian, "logical scalar")
     assign("hessian.args", hessian.args, env)
@@ -2093,32 +2140,22 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     assign("do_multi_rhs", multi_rhs, env)
     if(multi_rhs){
-        assign("multi_rhs_fml_full", rhs_info_stepwise$fml_all_full, env)
-        assign("multi_rhs_fml_sw", rhs_info_stepwise$fml_all_sw, env)
-        assign("multi_rhs_cumul", rhs_info_stepwise$is_cumul, env)
-        assign("fake_intercept", fake_intercept, env)
+        assign("rhs_info_stepwise", rhs_info_stepwise, env)
+        assign("linear_core", linear_core, env)
+        assign("rhs_sw", rhs_sw, env)
 
     }
 
     assign("do_multi_fixef", multi_fixef, env)
     if(multi_fixef){
         assign("multi_fixef_fml_full", fixef_info_stepwise$fml_all_full, env)
-        assign("multi_fixef_fml_sw", fixef_info_stepwise$fml_all_sw, env)
-        assign("multi_fixef_cumul", fixef_info_stepwise$is_cumul, env)
 
         if(missnull(combine.quick)){
             combine.quick = TRUE
         }
         assign("combine.quick", combine.quick, env)
 
-    }
-
-    if(multi_rhs || multi_fixef){
-        # We keep an imprint of the variables used in the SW estimations
-
-        var_sw = c()
-        if(multi_rhs) var_sw = rhs_info_stepwise$sw_all_vars
-        if(multi_fixef) var_sw = unique(c(var_sw, fixef_info_stepwise$sw_all_vars))
+        var_sw = unique(fixef_info_stepwise$sw_all_vars)
 
         if(length(var_sw) > 0){
             if(length(obs2remove) > 0){
@@ -2458,7 +2495,7 @@ setup_fixef = function(fixef_mat, lhs, fixef_vars, fixef.rm, family, isSplit, sp
 
     if(isSplitNoFull && do_keep){
         # Here fixef_mat is a DF
-        fixef_mat = fixef_mat[obs2keep, , drop = FALSE]
+        fixef_mat = select_obs(fixef_mat, obs2keep)
     }
 
     if(is.null(obs2keep)){
@@ -2719,14 +2756,7 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
         # gt("nothing")
 
         if(assign_lhs && length(obs2keep) > 0){
-            if(is.list(lhs)){
-                # list means multiple LHS
-                for(i in seq_along(lhs)){
-                    lhs[[i]] = lhs[[i]][obs2keep]
-                }
-            } else {
-                lhs = lhs[obs2keep]
-            }
+            lhs = select_obs(lhs, obs2keep)
         }
 
         # gt("fixef, dropping lhs")
@@ -2775,12 +2805,8 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
             }
 
             if(assign_lhs && is.list(lhs)){
-                if(is.list(lhs)){
-                    # list means multiple LHS
-                    for(i in seq_along(lhs)){
-                        lhs[[i]] = lhs[[i]][-obs2remove]
-                    }
-                }
+                # list means multiple LHS
+                lhs = select_obs(lhs, -obs2remove)
             }
 
             obs2keep = obs2keep[-obs2remove]
@@ -2812,14 +2838,8 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 
             if(assign_lhs){
                 if(lhs_done == FALSE){
-                    if(is.list(lhs)){
-                        # list means multiple LHS
-                        for(i in seq_along(lhs)){
-                            lhs[[i]] = lhs[[i]][obs2keep]
-                        }
-                    } else {
-                        lhs = lhs[obs2keep]
-                    }
+                    # lhs: can be vector or list
+                    lhs = select_obs(lhs, obs2keep)
                 }
                 assign("lhs", lhs, new_env)
             }
@@ -2837,15 +2857,7 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
                 isLinear = FALSE
                 if(length(rhs) > 1){
                     isLinear = TRUE
-                    rhs = rhs[obs2keep, , drop = FALSE]
-
-                    only_0 = cpppar_check_only_0(rhs, nthreads)
-                    if(all(only_0 == 1)){
-                        stop("After removing NAs, not a single explanatory variable is different from 0.")
-
-                    } else if(any(only_0 == 1)){
-                        rhs = rhs[, only_0 == 0, drop = FALSE]
-                    }
+                    rhs = select_obs(rhs, obs2keep, nthreads)
 
                     linear.params = colnames(rhs)
                     nonlinear.params = get("nonlinear.params", env)
@@ -2896,17 +2908,7 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 
                 # RHS
                 iv.mat = get("iv.mat", env)
-                iv.mat = iv.mat[obs2keep, , drop = FALSE]
-
-                only_0 = cpppar_check_only_0(iv.mat, nthreads)
-                if(all(only_0 == 1)){
-                    # Can happen if instrument is a factor in split sample
-                    stop("After removing NAs, not a single instrument is different from 0.")
-
-                } else if(any(only_0 == 1)){
-                    iv.mat = iv.mat[, only_0 == 0, drop = FALSE]
-                }
-
+                iv.mat = select_obs(iv.mat, obs2keep, nthreads, msg = "instrument")
                 assign("iv.mat", iv.mat, new_env)
 
             }
@@ -2925,10 +2927,23 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
             }
 
             #
+            # Stepwise RHS
+            #
+
+            if(get("do_multi_rhs", env)){
+                linear_core = get("linear_core", env)
+                rhs_sw = get("rhs_sw", env)
+
+                assign("linear_core", select_obs(linear_core, obs2keep, nthreads), new_env)
+                assign("rhs_sw", select_obs(rhs_sw, obs2keep, nthreads), new_env)
+            }
+
+            #
             # New data if stepwise estimation
             #
 
-            if(exists("data", new_env) && isTRUE(env$do_multi_rhs)){
+            # So far this is used only in stepwise FE
+            if(get("do_multi_fixef", env)){
                 data = get("data", env)
                 assign("data", data[obs2keep, , drop = FALSE], new_env)
             }
@@ -3378,8 +3393,32 @@ extract_stepwise = function(fml, tms, all_vars = TRUE){
                 }
             }
 
-            # In non OLS: we need all the variables bc we create the full design matrix
-            # in FEOLS we do it stepwise (so we only need the SW terms)
+            # New mechanism => we will evaluate everything at the first call for linear stepwise
+            # we respect the order of the user. So we need the core left and right
+
+            qui = which(qui)
+            if(is_cumul){
+                # We add the first terms to the main formula
+                tl_left = tl[seq(1, length.out = qui)]
+                tl_left[qui] = sw_terms[1]
+            } else {
+                tl_left = tl[seq(1, length.out = qui - 1)]
+            }
+
+            tl_right = tl[seq(qui + 1, length.out = length(tl) - qui)]
+
+            if(length(tl_left) == 0) tl_left = ""
+            if(length(tl_right) == 0) tl_right = ""
+
+            if(osf){
+                fml_core_left = xpd(~ ..rhs, ..rhs = tl_left)
+                fml_core_right = xpd(~ ..rhs, ..rhs = tl_right)
+            } else {
+                fml_core_left = xpd(lhs ~ ..rhs, ..rhs = tl_left)
+                fml_core_right = xpd(lhs ~ ..rhs, ..rhs = tl_right)
+            }
+
+
             if(all_vars){
                 if(is_fml){
                     sw_all_vars = all.vars(fml[[3]])
@@ -3395,7 +3434,6 @@ extract_stepwise = function(fml, tms, all_vars = TRUE){
             if(is_cumul){
                 # Cumulative => first item in main linear matrix
                 tl_new[qui] = sw_terms[1]
-                sw_terms = sw_terms[-1]
             } else {
                 tl_new = tl[!qui]
                 if(length(tl_new) == 0){
@@ -3403,12 +3441,13 @@ extract_stepwise = function(fml, tms, all_vars = TRUE){
                 }
             }
 
-            # Plus tard quand j'aurais develope mes donnes en fixest_semi_sparse => evaluer tous les termes
+            # => this is only useful to deduce fake_intercept
             if(osf){
                 fml_new = xpd(~ ..rhs, ..rhs = tl_new)
             } else {
                 fml_new = xpd(lhs ~ ..rhs, ..rhs = tl_new)
             }
+
         }
     } else if(is_fml) {
         res = list(do_multi = FALSE, fml = fml)
@@ -3418,13 +3457,63 @@ extract_stepwise = function(fml, tms, all_vars = TRUE){
         return(res)
     }
 
-    res = list(do_multi = TRUE, fml = fml_new, sw_all_vars = sw_all_vars, fml_all_full = fml_all_full, fml_all_sw = fml_all_sw, is_cumul = is_cumul)
+    res = list(do_multi = TRUE, fml = fml_new, fml_all_full = fml_all_full, fml_all_sw = fml_all_sw, is_cumul = is_cumul, fml_core_left = fml_core_left, fml_core_right = fml_core_right, sw_all_vars = sw_all_vars)
 
     return(res)
 }
 
 
 
+# a = list(1:5, 6:10)
+# b = 1:5
+# d = list(matrix(1:10, 5, 2), 1, matrix(1:5, 5, 1))
+# select_obs(a, 1:2) ; select_obs(b, 1:2) ; select_obs(d, 1:2)
+select_obs = function(x, index, nthreads = 1, msg = "explanatory variable"){
+    # => selection of observations.
+    # Since some objects can be of multiple types, this avoids code repetition and increases clarity.
+
+    if(!is.list(x)){
+
+        if(is.matrix(x)){
+            x = x[index, , drop = FALSE]
+
+            only_0 = cpppar_check_only_0(x, nthreads)
+            if(all(only_0 == 1)){
+                stop("After removing NAs (or perfect fit fixed-effects), not a single explanatory variable is different from 0.")
+
+            } else if(any(only_0 == 1)){
+                x = x[, only_0 == 0, drop = FALSE]
+            }
+
+        } else if(length(x) > 0){
+            # We check the length because RHS = 1 means not linear (we don't want to subset on that)
+            x = x[index]
+        }
+
+    } else if(is.matrix(x[[1]]) || length(x[[1]]) == 1){
+        # Means RHS
+        for(i in seq_along(x)){
+            if(length(x[[i]]) > 1){
+                x[[i]] = x[[i]][index, , drop = FALSE]
+
+                only_0 = cpppar_check_only_0(x[[i]], nthreads)
+                if(all(only_0 == 1)){
+                    stop("After removing NAs (or perfect fit fixed-effects), not a single ", msg, " is different from 0.")
+
+                } else if(any(only_0 == 1)){
+                    x[[i]] = x[[i]][, only_0 == 0, drop = FALSE]
+                }
+            }
+        }
+
+    } else {
+        for(i in seq_along(x)){
+            x[[i]] = x[[i]][index]
+        }
+    }
+
+    x
+}
 
 
 

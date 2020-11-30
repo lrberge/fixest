@@ -4156,7 +4156,7 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
     if(length(tl) == 0){
 
         if(fake_intercept){
-            return("NOT_LINEAR")
+            return(1)
         }
 
         res = matrix(1, nrow = nrow(data), ncol = 1, dimnames = list(NULL, "(Intercept)"))
