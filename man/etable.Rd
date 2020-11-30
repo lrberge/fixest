@@ -50,7 +50,8 @@ etable(
   drop.section = NULL,
   poly_dict = c("", " square", " cube"),
   postprocess = NULL,
-  postprocess.df = NULL
+  postprocess.df = NULL,
+  fit_format = "__var__"
 )
 
 esttex(
@@ -148,6 +149,7 @@ setFixest_etable(
   drop.section = NULL,
   postprocess = NULL,
   postprocess.df = NULL,
+  fit_format = "__var__",
   reset = FALSE
 )
 
@@ -224,9 +226,9 @@ getFixest_etable()
 
 \item{notes}{Character vector. If provided, a \code{"notes"} section will be added at the end right after the end of the table, containing the text of this argument. Note that if it is a vector, it will be collapsed with new lines.}
 
-\item{group}{A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument \code{drop}) and \code{TRUE} or \code{FALSE} will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: \code{group=list("Controls: personal traits"=c("gender", "height", "weight"))} will create an new line with \code{"Controls: personal traits"} in the leftmost cell, all three variables gender, height and weight are discared, TRUE appearing in each model containing at least one of the three variables (the style of TRUE/FALSE is governed by the argument \code{yesNo}). You can control the style with the \code{title} and \code{where} keywords in curly brackets. For example \code{group=list("{title:Controls; where:stats}Personal traits"=c("gender", "height", "weight"))} will add an extra line right before with "Control" written in it, and the group information will appear after the statistics. The keyword where can be equal to either \code{var} (default), \code{fixef} or \code{stats}.}
+\item{group}{A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument \code{drop}) and \code{TRUE} or \code{FALSE} will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: \code{group=list("Controls: personal traits"=c("gender", "height", "weight"))} will create an new line with \code{"Controls: personal traits"} in the leftmost cell, all three variables gender, height and weight are discared, TRUE appearing in each model containing at least one of the three variables (the style of TRUE/FALSE is governed by the argument \code{yesNo}). You can control the style with the \code{title} and \code{where} keywords in curly brackets. For example \code{group=list("{title:Controls; where:stats}Personal traits"=c("gender", "height", "weight"))} will add an extra line right before with "Control" written in it, and the group information will appear after the statistics. The keyword where can be equal to either \code{var} (default), \code{fixef} or \code{stats}. Starting the list name with an underscore is equivalent to adding \code{"{where:stats}"}: eg \code{list("_Controls"="x")} is equivalent to \code{list("{where:stats}Controls"="x")}.}
 
-\item{extraline}{A list. The list elements should be either a single logical or a vector of the same length as the number of models. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extraline=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the style with the \code{title} and \code{where} keywords in curly brackets. For example \code{group=list("{title:Sub-sample; where:stats}By age"=c("<20 yo", "all", ">50 yo"))} will add an extra line right before with "Sub-sample" written in it, and the extraline information will appear after the statistics section. The keyword where can be equal to either \code{var} (default), \code{fixef} or \code{stats}.}
+\item{extraline}{A list. The list elements should be either a single logical or a vector of the same length as the number of models. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extraline=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the style with the \code{title} and \code{where} keywords in curly brackets. For example \code{extraline=list("{title:Sub-sample; where:stats}By age"=c("<20 yo", "all", ">50 yo"))} will add an extra line right before with "Sub-sample" written in it, and the extraline information will appear after the statistics section. The keyword where can be equal to either \code{var} (default), \code{fixef} or \code{stats}. Starting the list name with an underscore is equivalent to adding \code{"{where:stats}"}: eg \code{list("_Controls"=TRUE)} is equivalent to \code{list("{where:stats}Controls"=TRUE)}.}
 
 \item{placement}{(Tex only.) Character string giving the position of the float in Latex. Default is "htbp". It must consist of only the characters 'h', 't', 'b', 'p', 'H' and '!'. Reminder: h: here; t: top; b: bottom; p: float page; H: definitely here; !: prevents Latex to look for other positions. Note that it can be equal to the empty string (and you'll get the default placement).}
 
@@ -238,22 +240,24 @@ getFixest_etable()
 
 \item{postprocess.df}{A function that will postprocess the resulting data.frame. Only when \code{tex = FALSE}. By default it is equal to \code{NULL}, meaning that there is no postprocessing. When \code{tex = TRUE}, see the argument \code{postprocess}.}
 
+\item{fit_format}{Character scalar, default is \code{"__var__"}. Only used in the presence of IVs. By default the endogenous regressors are named \code{fit_varname} in the second stage. The format of the endogenous regressor to appear in the table is governed by \code{fit_format}. For instance, by default, the prefix fit is removed, leading to only \code{varname} to appear. If \code{fit_format = "$\\hat{__var__}$"}, then "$\\hat{varname}$" will appear in the table.}
+
 \item{reset}{(\code{setFixest_etable} only.) Logical, default is \code{FALSE}. If \code{TRUE}, this will reset all the default values that were already set by the user in previous calls.}
 }
 \value{
 If \code{tex = TRUE}, the lines composing the Latex table are returned invisibly while the table is directly prompted on the console.
 
-If \code{tex = FALSE}, the data.frame is directly returned. If the argument \code{file} is not missing, the \code{data.frame} is returned invisibly.
+If \code{tex = FALSE}, the data.frame is directly returned. If the argument \code{file} is not missing, the \code{data.frame} is printed and returned invisibly.
 }
 \description{
 Aggregates the results of multiple estimations and displays them in the form of either a Latex table or a \code{data.frame}.
 }
 \details{
-The function \code{esttex} is equivalent to the function \code{etable} with argument \code{tex = TRUE}.
+The function \code{esttex} is equivalent to the function \code{etable} with argument \code{tex = TRUE}. This function is deprecated.
 
-The function \code{esttable} is equivalent to the function \code{etable} with argument \code{tex = FALSE}.
+The function \code{esttable} is equivalent to the function \code{etable} with argument \code{tex = FALSE}. This function is deprecated.
 
-You can permanently change the way your table looks in Latex by using \code{setFixest_etable}. The following vignette gives and example as well as illustrates how to use the argument \code{style}: \href{https://cran.r-project.org/package=fixest/vignettes/exporting_tables.html}{Exporting estimation tables}.
+You can permanently change the way your table looks in Latex by using \code{setFixest_etable}. The following vignette gives an example as well as illustrates how to use the \code{estyle} and postprocessing functions: \href{https://cran.r-project.org/package=fixest/vignettes/exporting_tables.html}{Exporting estimation tables}.
 }
 \section{Functions}{
 \itemize{

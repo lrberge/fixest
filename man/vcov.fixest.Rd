@@ -12,6 +12,7 @@
   attr = FALSE,
   forceCovariance = FALSE,
   keepBounded = FALSE,
+  nthreads = getFixest_nthreads(),
   ...
 )
 }
@@ -29,6 +30,8 @@
 \item{forceCovariance}{(Advanced users.) Logical, default is \code{FALSE}. In the peculiar case where the obtained Hessian is not invertible (usually because of collinearity of some variables), use this option to force the covariance matrix, by using a generalized inverse of the Hessian. This can be useful to spot where possible problems come from.}
 
 \item{keepBounded}{(Advanced users -- \code{feNmlm} with non-linear part and bounded coefficients only.) Logical, default is \code{FALSE}. If \code{TRUE}, then the bounded coefficients (if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise it is not).}
+
+\item{nthreads}{The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. The default is to use 50\% of all threads. You can set permanently the number of threads used within this package using the function \code{\link[fixest]{setFixest_nthreads}}.}
 
 \item{...}{Other arguments to be passed to \code{\link[fixest]{summary.fixest}}.
 
