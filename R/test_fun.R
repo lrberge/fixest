@@ -125,9 +125,37 @@ test = function(x, y, type = "=", tol = 1e-6){
 }
 
 
+chunk = function(x) cat(toupper(x), "\n\n")
 
-run_test = function(){
-    test_code = readLines("tests/fixest_tests.R")[-(1:20)]
+
+run_test = function(chunk){
+    test_code = readLines("tests/fixest_tests.R")[-(1:17)]
+
+    if(!missing(chunk)){
+        qui = which(grepl("^chunk\\(", test_code))
+        all_chunks = test_code[qui]
+        chunk_names = tolower(gsub(".+\\(\"|\".*", "", all_chunks))
+        check_value_plus(chunk, "multi match | integer vector no na", .choices = chunk_names)
+        if(is.numeric(chunk)){
+            if(any(chunk > length(qui))){
+                stop("There are maximum ", length(qui), " chunks.")
+            }
+            chunk_select = sort(unique(chunk))
+        } else {
+            chunk_select = which(chunk_names %in% chunk)
+        }
+
+        qui = c(qui, length(test_code))
+
+        new_test_code = c()
+        for(i in chunk_select){
+            new_test_code = c(new_test_code, test_code[qui[i] : (qui[i + 1] - 1)])
+        }
+
+        test_code = new_test_code
+    }
+
+    setFixest_notes(FALSE)
 
     parsed_code = parse(text = test_code)
 
@@ -137,6 +165,6 @@ run_test = function(){
 
 setflag = function(x) assign("FLAG", x, .GlobalEnv)
 
-flag = function() get("FLAG", .GlobalEnv)
+flag = function() mget("FLAG", .GlobalEnv, ifnotfound = FALSE)
 
 

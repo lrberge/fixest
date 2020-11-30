@@ -21,7 +21,7 @@ setFixest_notes(FALSE)
 #### Estimations ####
 ####
 
-cat("ESTIMATION\n\n")
+chunk("ESTIMATION")
 
 set.seed(0)
 
@@ -161,6 +161,8 @@ for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
 #### Corner cases ####
 ####
 
+chunk("Corner cases")
+
 
 # We test the absence of bugs
 
@@ -173,13 +175,21 @@ base$x2[4:21] = NA
 base$x3[110:111] = NA
 base$fe1[110:118] = NA
 base$fe2[base$fe2 == 1] = 0
+base$fe3 = sample(letters[1:5], 150, TRUE)
+base$period = rep(1:50, 3)
 
 res = feols(y ~ 1 | csw(fe1, fe1^fe2), base)
+
+res = feols(y ~ 1 + csw(x1, i(fe1)) | fe2, base)
+
+res = feols(y ~ csw(f(x1, 1:2), x2) | sw0(fe2, fe2^fe3), base, panel.id = ~ fe1 + period)
 
 
 ####
 #### Fit methods ####
 ####
+
+chunk("Fit methods")
 
 base = iris
 names(base) = c("y", "x1", "x2", "x3", "species")
@@ -203,7 +213,7 @@ test(coef(res), coef(res_bis))
 #### Standard-errors ####
 ####
 
-cat("STANDARD ERRORS\n\n")
+chunk("STANDARD ERRORS")
 
 #
 # Fixed-effects corrections
@@ -485,7 +495,7 @@ test(se(est_pois, se = "fourway", cluster = ~Origin+Destination+Product), "err")
 #### Residuals ####
 ####
 
-cat("RESIDUALS\n\n")
+chunk("RESIDUALS")
 
 base = iris
 names(base) = c("y", "x1", "x2", "x3", "species")
@@ -540,7 +550,7 @@ cat("\n")
 #### fixef ####
 ####
 
-cat("FIXEF\n\n")
+chunk("FIXEF")
 
 set.seed(0)
 base = iris
@@ -654,7 +664,7 @@ test(c4, m_fe[["fe_bis[[x3]]"]][names(c4)], "~", tol = 2e-4)
 #### To Integer ####
 ####
 
-cat("TO_INTEGER\n\n")
+chunk("TO_INTEGER")
 
 base = iris
 names(base) = c("y", "x1", "x2", "x3", "species")
@@ -732,6 +742,9 @@ cat("\n")
 #### Interact ####
 ####
 
+
+chunk("Interact")
+
 base = iris
 names(base) = c("y", "x1", "x2", "x3", "species")
 base$fe_2 = round(rnorm(150))
@@ -761,7 +774,7 @@ test(ncol(d), 2)
 #### demean ####
 ####
 
-cat("DEMEAN\n\n")
+chunk("DEMEAN")
 
 data(trade)
 
@@ -795,7 +808,7 @@ X_demean = demean(X_NA, fe_NA)
 #### fixef ####
 ####
 
-cat("FIXEF\n\n")
+chunk("FIXEF")
 
 data(trade)
 
@@ -849,7 +862,7 @@ test(sd(fe_fixest_origin[names(fe_lm_origin)] - fe_lm_origin), 0, "~")
 ####
 
 
-cat("HATVALUES\n\n")
+chunk("HATVALUES")
 
 set.seed(0)
 x = sin(1:10)
@@ -870,7 +883,7 @@ test(hatvalues(fgm), hatvalues(gm))
 #### sandwich ####
 ####
 
-cat("SANDWICH\n\n")
+chunk("SANDWICH")
 
 # Compatibility with sandwich
 
@@ -903,7 +916,7 @@ test(vcov(est_pois, cluster = ~id, dof = dof(adj = FALSE)), vcovCL(est_pois, clu
 
 # We check that there's no problem when using the environment
 
-cat("ONLY ENV\n\n")
+chunk("ONLY ENV")
 
 base = iris
 names(base) = c("y", "x1", "x2", "x3", "species")
@@ -932,7 +945,7 @@ feNmlm(env = env)
 #### Non linear tests ####
 ####
 
-cat("NON LINEAR\n\n")
+chunk("NON LINEAR")
 
 base = iris
 names(base) = c("y", "x1", "x2", "x3", "species")
@@ -962,7 +975,7 @@ test(coef(est_nl), coef(est_lin)[c(3, 4, 1, 2)], "~")
 # 1) check no error in wide variety of situations
 # 2) check consistency
 
-cat("LAGGING\n\n")
+chunk("LAGGING")
 
 data(base_did)
 base = base_did
@@ -1055,7 +1068,7 @@ for(depvar in c("y", "y_na", "y_0")){
     }
 }
 
-cat("done.\n")
+cat("done.\n\n")
 
 
 
@@ -1064,7 +1077,7 @@ cat("done.\n")
 #### predict ####
 ####
 
-cat("PREDICT\n\n")
+chunk("PREDICT")
 
 base = iris
 names(base) = c("y", "x1", "x2", "x3", "species")
@@ -1123,7 +1136,7 @@ test(predict(res)[qui], predict(res, base_bis))
 #### subset ####
 ####
 
-cat("SUBSET\n\n")
+chunk("SUBSET")
 
 
 base = iris
@@ -1187,6 +1200,8 @@ cat("\n")
 ####
 #### Multiple estimations ####
 ####
+
+chunk("Multiple")
 
 base = iris
 names(base) = c("y1", "x1", "x2", "x3", "species")
