@@ -8,7 +8,7 @@ useDynLib(fixest, .registration = TRUE)
 export(feNmlm, femlm, feols, feglm, fepois, fenegbin)
 export(feglm.fit)
 # etable
-export(etable, estyle, estyle.df)
+export(etable, style.tex, style.df)
 # misc funs
 export(collinearity)
 export(r2, fitstat, fitstat_register, wald)
@@ -40,6 +40,7 @@ S3method(print, fixest)
 S3method(print, fixest_fitstat)
 S3method(summary, fixest.fixef)
 S3method(summary, fixest)
+S3method(summary, fixest_list)
 export(summ) # alias for summary.fixest
 S3method(plot, fixest.fixef)
 S3method("[", fixest_panel) # Lag related
@@ -49,6 +50,7 @@ S3method("[[", fixest_multi)
 S3method("$", fixest_multi)
 S3method(print, fixest_multi)
 S3method(summary, fixest_multi)
+S3method(as.list, fixest_multi)
 
 # rep
 S3method(rep, fixest) # rep fixest objects
