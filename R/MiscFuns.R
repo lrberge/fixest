@@ -517,9 +517,9 @@ summary.fixest_list = function(object, se, cluster, dof = getFixest_dof(), .vcov
 
     res = list()
     for(i in seq_along(object)){
-        my_res = summary(object[[i]], se = se, cluster = cluster, dof = dof, .vcov = .vcov, stage = stage, lean = lean, n = n, nframes_up = nframes_up, ...)
+        my_res = summary(object[[i]], se = se, cluster = cluster, dof = dof, .vcov = .vcov, stage = stage, lean = lean, n = n, nframes_up = nframes_up)
 
-        # we unroll
+        # we unroll in case of IV
         if("fixest_multi" %in% class(my_res)){
             data = attr(my_res, "data")
             for(j in seq_along(data)){
@@ -529,6 +529,9 @@ summary.fixest_list = function(object, se, cluster, dof = getFixest_dof(), .vcov
             res[[length(res) + 1]] = my_res
         }
     }
+
+    # We return a simple list
+    class(res) = NULL
 
     res
 }
@@ -5057,6 +5060,8 @@ numberFormat_single = function(x, type = "normal"){
 	# For numbers higher than 1e9 => we apply a specific formatting
 	# idem for numbers lower than 1e-4
 
+    if(is.character(x)) return(x)
+
     if(is.na(x)){
         return(NA)
         # return(ifelse(type == "normal", "--", ""))
@@ -8236,12 +8241,21 @@ rep.fixest_list = function(x, times = 1, each = 1, cluster, ...){
             res[[length(res) + 1]] = dots[[i]]
         } else {
             obj = dots[[i]]
-            for(j in seq_along(obj)){
-                if(!"fixest" %in% class(obj[[j]])){
-                    stop("In .l(...), each argument must be either a fixest object, or a list of fixest objects. Problem: The ", n_th(j), " element of the ", n_th(i), " argument (the latter being a list) is not a fixest object.")
+
+            if(class(obj) %in% "fixest_multi"){
+                data = attr(obj, "data")
+                for(j in seq_along(data)){
+                    res[[length(res) + 1]] = data[[j]]
                 }
 
-                res[[length(res) + 1]] = obj[[j]]
+            } else {
+                for(j in seq_along(obj)){
+                    if(!"fixest" %in% class(obj[[j]])){
+                        stop("In .l(...), each argument must be either a fixest object, or a list of fixest objects. Problem: The ", n_th(j), " element of the ", n_th(i), " argument (the latter being a list) is not a fixest object.")
+                    }
+
+                    res[[length(res) + 1]] = obj[[j]]
+                }
             }
         }
     }
