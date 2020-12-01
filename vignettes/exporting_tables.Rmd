@@ -38,7 +38,7 @@ library(fixest)
 data(airquality)
 
 # Setting a dictionary 
-setFixest_dict(c(Ozone = "Ozone (ppb)", Solar.R = "Solar Radiation",
+setFixest_dict(c(Ozone = "Ozone (ppb)", Solar.R = "Solar Radiation (Langleys)",
                  Wind = "Wind Speed (mph)", Temp = "Temperature"))
 ```
 
