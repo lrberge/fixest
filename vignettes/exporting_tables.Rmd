@@ -11,6 +11,10 @@ vignette: >
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, comment = "#>")
+library(pander)
+library(fixest)
+setFixest_notes(FALSE)
+setFixest_etable(digits = 3)
 ```
 
 `fixest` offers a tool, the function `etable`, to view estimation tables in `R` or export them to Latex. 
@@ -21,73 +25,228 @@ It also offers a fair deal of customization, and since you can seamlessly change
 
 Note that there exists excellent alternatives to export tables, like for instance [modelsummary](https://cran.r-project.org/package=modelsummary) or [texreg](https://cran.r-project.org/package=texreg); but they are, necessarily, less integrated with `fixest` objects, often necessiting more lines of code to export the same results. 
 
-This document does not describe `etable`'s arguments in details (the help page provides many examples). Rather, it illustrates how to change the style of the table, once and for all.
+This document does not describe `etable`'s arguments in details (the help page provides many examples). Rather, it illustrates some powerful features that may be hidden at first sight.
 
-This document applies to `fixest` version 0.6.0 or higher.
+This document applies to `fixest` version 0.8.0 or higher.
 
-## First example
+## Preliminaries
 
-Using data from the *airquality* data base, let's estimate 5 models:
+Throughout this document, we will use data from the *airquality* data base. We also set a dictionary that will be used to rename the variables used in `etable`. This dictionary is set once and for all.
 
-```{r}
+```{r, eval = TRUE, results = "hide"}
 library(fixest)
 data(airquality)
 
-setFixest_notes(FALSE) # To avoid messages when NAs are removed
+# Setting a dictionary 
+setFixest_dict(c(Ozone = "Ozone (ppb)", Solar.R = "Solar Radiation",
+                 Wind = "Wind Speed (mph)", Temp = "Temperature"))
+```
 
-est_noFE = feols(Ozone ~ Solar.R + Wind + Temp, airquality)
-est_1FE  = feols(Ozone ~ Solar.R + Wind + Temp | Day, airquality)
-est_2FE  = feols(Ozone ~ Solar.R + Wind + Temp | Day + Month , airquality)
-est_poly = feols(Ozone ~ Solar.R + Wind + poly(Temp, 3) | Day + Month, airquality)
+
+## Exporting multiple estimations to data.frames
+
+Let's estimate the following four models and cluster the standard-errors by `Day`:
+```{r}
+# On multiple estimations: see the dedicated vignette
+est = feols(Ozone ~ Solar.R + sw0(Wind + Temp) | csw(Month, Day), 
+            airquality, cluster = ~Day)
+```
+
+By default, when the argument `file` is missing, the function `etable` returns a `data.frame`. Let's see the ouput of the previous estimations:
+
+```{r}
+etable(est)
+```
+
+What can we notice? First, the variables are properly labeled. Second, the fixed-effects section details which fixed-effects is included in which model. Third, the type of standard-error is reminded in a dedicated row. 
+
+Starting from this table, two elements are detailed: a) how to change the look of the table with the `style.df` argument, b) how to leverage tools from other packages with the `postprocess.df` argument.
+
+### Changing the look of the data.frame with `style.df`
+
+You can change many elements of the `data.frame` with the argument `style.df` whose input must come from the function `style.df`. The style monitors many elements of the table, in particular the titles of the sections. Let's have an example:
+
+```{r}
+etable(est, style.df = style.df(depvar.title = "", fixef.title = "", 
+                                 fixef.suffix = " fixed effect", yesNo = "yes"))
+```
+
+In the previous example, the dependent variable and fixed-effects (FE) headers have been removed, and this is achieved with the (explicit) arguments `depvar.title` and `fixef.title`. Furthermore the suffix `"fixed effect"` is added to each fixed-effect variable, and the indicator of which FE is included in which model is slightly changed. There are more options that are described in the `style.df` documentation.
+
+#### Postprocessing with external functions
+
+Since the output of `etable` is a `data.frame`, any formatting function handling `data.frame`s can be leveraged. It is then very easy to integrate it into `etable`. Let's have an example with the package `pander`:
+
+```{r}
+library(pander)
+
+etable(est, postprocess.df = pandoc.table.return, style = "rmarkdown")
+```
+
+What did it do? First, it called the function `pandoc.table.return` from within `etable`. Second, the argument `style` is not from `etable` but is from `pander`'s function. Indeed, all the arguments to the postprocessing function are caught and passed to it. So far so good. But you could say: why bother using the posprocessing function when we could just use piping? You're right, but wait a second for the next section. 
+
+
+#### Setting `etable` default values
+
+One important feature of `etable` is that you can set the default values of almost all its arguments. This includes the postprocessing function. Let's change the default values of `style.df` and `postprocess.df`:
+
+```{r}
+my_style = style.df(depvar.title = "", fixef.title = "", 
+                    fixef.suffix = " fixed effect", yesNo = "yes")
+setFixest_etable(style.df = my_style, postprocess.df = pandoc.table.return)
+```
+
+Since now `pandoc.table.return` is the default postprocessing, *all its arguments are added to `etable`*. So calls like that are valid even though `style` or `caption` are *not* arguments from `etable`:
+
+```{r}
+etable(est[rhs = 2], style = "rmarkdown", caption = "New default values")
+```
+
+## Exporting multiple estimations to Latex
+
+We now illustrate the exports to Latex. First, to include all the sections of a table, let's add a fifth estimation to the previous example; this new estimation includes variables with varying slopes:
+
+```{r}
 est_slopes = feols(Ozone ~ Solar.R + Wind | Day + Month[Temp], airquality)
 ```
 
-To export the results to Latex, we use `etable`. We first set the dictionnary renaming the variables, then we export the results with clustered standard-errors at the Day level:
+To export to Latex, use the argument `tex = TRUE` (note that this argument is on when the argument `file` is not missing):
 
-```{r, eval = TRUE, results = "hide"}
-# Dictionary => set only once per session
-setFixest_dict(c(Ozone = "Ozone (ppb)", Solar.R = "Solar Radiation (Langleys)",
-                 Wind = "Wind Speed (mph)", Temp = "Temperature"))
+```{r, results = 'hide'}
+etable(est, est_slopes, tex = TRUE)
+```
 
-etable(est_noFE, est_1FE, est_2FE, est_poly, est_slopes, cluster = "Day", tex = TRUE,
-       group = list("Temperature (cubic)" = "%poly"), notes = "Estimation of 5 models.")
-
+```{r, include = FALSE}
+# etable(est, est_slopes, file = "../_VIGNETTES/vignette_etable.tex", replace = TRUE)
+# etable(est, est_slopes, file = "../_VIGNETTES/vignette_etable.tex", style.tex = style.tex("aer"), fitstat = ~ r2 + n, signifCode = NA)
 ```
 
 The previous code produces the following table:
 
 ![](https://github.com/lrberge/fixest/blob/master/vignettes/images/etable/first_table.PNG?raw=true)
 
-What can we notice? First, all variables are appropriately labeled. Second, all standard-errors are clustered by Day, and this is mentioned in the table footer. This is achieved with the argument `cluster`. Third, there's a fixed-effects section telling which model has which fixed-effect. Fourth, the polynomial of the Temperature is not shown, instead there's a line telling which model includes a cubic polynomial. This is achieved with the argument `group`. 
+The style of the table is rather sober, but no worries: most of it can be customized. We now illustrate: a) how to change the look of the table with the argument `style.tex`, and how to include custom features with the argument `postproces.tex`.
 
-The style of the table is rather sober, but no worries: most of it can be customized.
+### Changing the look of the Latex table with `style.tex`
 
-
-## Setting the style, once and for all
-
-The argument `style` defines how the table looks. It allows an in-depth customization of the table. The table is split into several components, each allowing some customization. The components of a table and some of its associated keywords are described by the following figure:
+The argument `style.tex` defines how the table looks. It allows an in-depth customization of the table. The table is split into several components, each allowing some customization. The components of a table and some of its associated keywords are described by the following figure:
 
 ![](https://github.com/lrberge/fixest/blob/master/vignettes/images/etable/style_explanation.png?raw=true)
 
-The argument `style` only accepts outputs from the function of the same name. That function is documented and describes the different components that can be found in the previous illustration. 
+The argument `style.tex` only accepts outputs from the function `style.tex`. That function is documented and describes the different components that can be found in the previous illustration. 
 
-The function style has two starting points (in the argument `main`), either the style of the first table displayed, either a much more compact style named "aer". The "aer" is illustrated by changing the default style.
-
-#### Changing the default values
-
-To permanently change the default values for function `etable`, just use the function `setFixest_etable`:
-
-```{r}
-setFixest_etable(style = style(main = "aer"), fitstat = ~r2, signifCode = NA)
-```
-
-And now, using the exact same line of code as in the first example, we obtain a table with a different style:
-
+The function `style.tex` has two starting points (in the argument `main`), either the style of the first table displayed, either a much more compact style named "aer". Let's show the same table with the aer style, without stars beside the coefficients, and different fit statistics:
 
 ```{r, results = 'hide'}
-etable(est_noFE, est_1FE, est_2FE, est_poly, est_slopes, cluster = "Day", tex = TRUE,
-       group = list("Temperature (cubic)" = "%poly"), notes = "Estimation of 5 models.")
+etable(est, est_slopes, style.tex = style.tex("aer"), 
+       signifCode = NA, fitstat = ~ r2 + n, tex = TRUE)
 ```
 
+Which yields the following table:
+
 ![](https://github.com/lrberge/fixest/blob/master/vignettes/images/etable/table_new_style.PNG?raw=true)
+
+
+### Adding custom features with `postprocess.tex`
+
+When `tex = TRUE` `etable` returns a character vector. It is possible to modify it at will with the argument `postprocess.tex`. When a postprocessing function is detected, two additional tags are added to the character vector identifying the start and end of the table (`"%start:tab\\n"` and `"%end:tab\\n"`). 
+
+Assume we want to set the rule widths of the table, we could write the following function:
+
+```{r}
+set_rules = function(x, heavy, light){
+  # x: the character vector returned by etable
+  
+  tex2add = ""
+  if(!missing(heavy)){
+    tex2add = paste0("\\setlength\\heavyrulewidth{", heavy, "}\n")
+  }
+  if(!missing(light)){
+    tex2add = paste0(tex2add, "\\setlength\\lightrulewidth{", light, "}\n")
+  }
+  
+  if(nchar(tex2add) > 0){
+    x[x == "%start:tab\n"] = tex2add
+  }
+  
+  x
+}
+```
+
+Now we can summon that function from `etable`:
+
+```{r, results = 'hide'}
+etable(est, est_slopes, postprocess.tex = set_rules, heavy = "0.14em", tex = TRUE)
+```
+
+Of course it is even more convenient to set `set_rules` as the default postprocessing function.
+
+#### Setting `etable` default values: Latex edition
+
+To set the default values, like for the data.frame output, use `setFixest_etable`:
+
+```{r}
+setFixest_etable(style.tex = style.tex("aer"), postprocess.tex = set_rules, 
+                 fitstat = ~ r2 + n, signifCode = NA)
+```
+
+Now we can access directly the arguments of the postprocessing function and the default style is the one of the second table:
+
+```{r}
+etable(est, est_slopes, heavy = "0.14em", tex = TRUE)
+```
+
+## Setting custom fit statistics
+
+It is often useful to include in a table some fit statistics that are not standard, or simply that may not be included in `fixest` built-in fit statistics. While it is possible to include any extra line in the table with the argument `extraline`, this is rather cumbersome and possibly error-prone if this task has to be repeated.
+
+To avoid that kind of issue, `fixest` allows the user to register custom fit statistics. Once they are registered, they can be seamlessly called via the `fitstat` argument in `etable`.
+
+Let's continue with the previous example using the `airquality` data set, and now let's display different p-values of statistical significance for the variable `Solar.R`. These p-values will vary depending on how we compute the VCOV matrix.
+
+Here is an example that will shortly be explained:
+
+```{r}
+fitstat_register(type = "p_s", alias = "pvalue (standard)",
+                 fun = function(x) pvalue(x, se = "s")["Solar.R"])
+
+fitstat_register(type = "p_h", alias = "pvalue (Heterosk.)",
+                 fun = function(x) pvalue(x, se = "h")["Solar.R"])
+
+fitstat_register(type = "p_day", alias = "pvalue (Day)",
+                 fun = function(x) pvalue(x, cluster = "Day")["Solar.R"])
+
+fitstat_register(type = "p_month", alias = "pvalue (Month)",
+                 fun = function(x) pvalue(x, cluster = "Month")["Solar.R"])
+
+# We first reset the default values set in the previous sections
+setFixest_etable(reset = TRUE)
+# Now we display the results with the new fit statistics
+etable(est, fitstat = ~ . + p_s + p_h + p_day + p_month)
+```
+
+The function `fitstat_register` is a tool to add fit statistics in the `fitstat` engine. The first argument, `type`, is the code name by which the statistic is to be summoned. The argument `alias` provides the row name of the statistics: how it should look in the table. Finally in the `fun` argument is the function computing the statistic. That function must apply to a `fixest` estimation and must also return a single value.
+
+Once these statistics are registered, they can seamlessly be summoned with the argument `fitstat` and will appear in the order the user provide. Note that the dot in `fitstat = ~ . + p_s + etc` represents the default statistics to be displayed and need not be there.
+
+
+## Using external functions to export multiple results
+
+Thanks to contributors (namely Karl Dunkle Werner), `fixest` objects are compatible with [broom](https://broom.tidymodels.org/index.html) methods. This means that export functions building on `broom` can be leveraged, like for instance [modelsummary](https://github.com/vincentarelbundock/modelsummary).
+
+In case you use external export tools, here are some tips.
+
+Multiple estimations, like the object `est` in the previous examples, are a bit special and `broom` methods can't apply directly. To export them, you first need to coerce the results into a list: by simply using `as.list(est)`.
+
+By default in `fixest` the estimations are separated from the calculation of the VCOV matrices. That's not a problem when using `etable` since, after providing the argument `se` or `cluster`, all VCOVs are calculated at once. Using other tools for exportation requires a call to `summary` for each model to compute the appropriate standard-errors. But this process can also be automatised. The function `.l()` can be used to coerce several `fixest` objects to which `summary` can then be applied, for example: 
+
+```{r, eval = FALSE}
+summary(.l(est, est_slopes), cluster = ~ Month)
+```
+
+The previous code returns a list of the five estimations for which the standard-errors are all clustered at the Month level.
+
+
+
+
 
