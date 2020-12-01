@@ -401,7 +401,7 @@ print.fixest_multi = function(x, ...){
 #' # The first and last estimations
 #' etable(est_split[i = c(1, .N)])
 #'
-"[.fixest_multi" = function(x, sample, lhs, rhs, fixef, iv, i, I, reorder = TRUE, drop = TRUE){
+"[.fixest_multi" = function(x, i, sample, lhs, rhs, fixef, iv, I, reorder = TRUE, drop = TRUE){
 
     core_args = c("sample", "lhs", "rhs", "iv")
     check_arg(reorder, drop, "logical scalar")
