@@ -1481,7 +1481,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
         my_names_order = unique(all_estimates$estimate_names)
         my_order = 1:length(my_names_order)
         names(my_order) = my_names_order
-        all_estimates$id_order = my_order[all_estimates$estimate_names]
+        all_estimates$id_order = my_order[as.character(all_estimates$estimate_names)]
         all_estimates = all_estimates[base::order(all_estimates$id_order, all_estimates$est_nb), ]
 
         # we rescale
