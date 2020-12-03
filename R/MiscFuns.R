@@ -2961,17 +2961,28 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
 #'
 #' User-level access to internal demeaning algorithm of \code{fixest}.
 #'
-#' @param X A matrix, vector or a list. The vectors to be centered. There must be the same number of observations as in the factors used for centering (argument \code{f}).
+#' @inheritSection feols Varying slopes
+#'
+#' @param X A matrix, vector or a list OR a formula. If equal to a formula, then the argument \code{data} is required, and it must be of the type: \code{x1 + x2 ~ f1 + fe2} with on the LHS the variables to be centered, and on the RHS the factors used for centering. Note that you can use variables with varying slopes with the syntax \code{fe[v1, v2]} (see details in \code{\link[fixest]{feols}}). If not a formula, it must represent the data to be centered. Of course the dimension of that data must be the same as the factors used for centering (argument \code{f}).
 #' @param f A matrix, vector or list. The factors used to center the variables in argument \code{X}.
+#' @param slope.vars A vector, matrix or list representing the variables with varying slopes. Note that if this argument is used it MUST be in conjunction with the argument \code{slope.flag} that maps the factors to which the varying slopes are attached. See examples.
+#' @param slope.flag An integer vector of the same length as the number of variables in \code{f} (the factors used for centering). It indicates for each factor the number of variables with varying slopes to which it is associated. Positive values mean that the raw factor should also be included in the centering, negative values that it should be excluded. Sorry it's complicated... but see the examples it may get clearer.
+#' @param data A data.frame containing all variables in the argument \code{X}. Only used if \code{X} is a formula, in which case \code{data} is mandatory.
 #' @param weights Vector, can be missing or NULL. If present, it must contain the same number of observations as in \code{X}.
 #' @param nthreads Number of threads to be used. By default it is equal to \code{getFixest_nthreads()}.
 #' @param notes Logical, whether to display a message when NA values are removed. By default it is equal to \code{getFixest_notes()}.
 #' @param iter Number of iterations, default is 2000.
 #' @param tol Stopping criterion of the algorithm. Default is \code{1e-6}. The algorithm stops when the maximum absolute increase in the coefficients values is lower than \code{tol}.
-#' @param im_confident Logical, default is \code{FALSE}. FOR EXPERT USERS ONLY! This argument allows to skip some of the preprocessing of the arguments given in input. If \code{TRUE}, then \code{X} MUST be a numeric matrix (not integer, numeric), \code{f} MUST be a list and \code{weights}, if given, MUST be numeric (not integer!). Further the three MUST NOT contain any NA values and MUST have the same number of observations. Non compliance to these rules may simply lead your R session to break.
+#' @param na.rm Logical, default is \code{FALSE}. If \code{TRUE} and the input data contains any NA value, then any observation with NA will be discarded leading to an output with less observations than the input. By default, if NAs are present the output will also be filled with NAs for each NA observation in input.
+#' @param as.matrix Logical, default is \code{FALSE}. By default a \code{data.frame} is returned. If \code{TRUE}, then a matrix will be returned.
+#' @param im_confident Logical, default is \code{FALSE}. FOR EXPERT USERS ONLY! This argument allows to skip some of the preprocessing of the arguments given in input. If \code{TRUE}, then \code{X} MUST be a numeric vector/matrix/list (not a formula!), \code{f} MUST be a list, \code{slope.vars} and \code{slope.flag} MUST be consistent and \code{weights}, if given, MUST be numeric (not integer!). Further there MUST be not any NA value, and the number of observations of each element MUST be consistent. Non compliance to these rules may simply lead your R session to break.
 #'
 #' @return
-#' It returns a matrix of the same number of columns as \code{X} in input. The number of rows is equal to the number of rows of \code{X} minus the number of NA values (contained in \code{X}, \code{f} or \code{weights}).
+#' It returns a data.frame of the same number of columns as the number of variables to be centered.
+#'
+#' If \code{na.rm = TRUE}, then the number of rows is equal to the number of rows in input minus the number of NA values (contained in \code{X}, \code{f}, \code{slope.vars} or \code{weights}). The default is to have an output of the same number of observations as the input (filled with NAs where appropriate).
+#'
+#' A matrix can be returned if \code{as.matrix = TRUE}.
 #'
 #' @examples
 #'
@@ -2995,22 +3006,109 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
 #' # as fixed-effects
 #' etable(est, est_fe, se = "st")
 #'
+#' #
+#' # Variables with varying slopes
+#' #
+#'
+#' # You can center on factors but also on variables with varying slopes
+#'
+#' # Let's have an illustration
+#' base = iris
+#' names(base) = c("y", "x1", "x2", "x3", "species")
+#'
+#' #
+#' # We center y and x1 on species and x2 * species
+#'
+#' # using a formula
+#' base_dm = demean(y + x1 ~ species[x2], data = base)
+#'
+#' # using vectors
+#' base_dm_bis = demean(X = base[, c("y", "x1")], f = base$species,
+#'                      slope.vars = base$x2, slope.flag = 1)
+#'
+#' # Let's look at the equivalences
+#' res_vs_1 = feols(y ~ x1 + species + x2:species, base)
+#' res_vs_2 = feols(y ~ x1, base_dm)
+#' res_vs_3 = feols(y ~ x1, base_dm_bis)
+#'
+#' # only the small sample adj. differ in the SEs
+#' etable(res_vs_1, res_vs_2, res_vs_3, keep = "x1")
+#'
+#' #
+#' # center on x2 * species and on another FE
+#'
+#' base$fe = rep(1:5, 10)
+#'
+#' # using a formula => double square brackets!
+#' base_dm = demean(y + x1 ~ fe + species[[x2]], data = base)
+#'
+#' # using vectors => note slope.flag!
+#' base_dm_bis = demean(X = base[, c("y", "x1")], f = base[, c("fe", "species")],
+#'                      slope.vars = base$x2, slope.flag = c(0, -1))
+#'
+#' # Explanations slope.flag = c(0, -1):
+#' # - the first 0: the first factor (fe) is associated to no variable
+#' # - the "-1":
+#' #    * |-1| = 1: the second factor (species) is associated to ONE variable
+#' #    *   -1 < 0: the second factor should not be included as such
+#'
+#' # Let's look at the equivalences
+#' res_vs_1 = feols(y ~ x1 + i(fe) + x2:species, base)
+#' res_vs_2 = feols(y ~ x1, base_dm)
+#' res_vs_3 = feols(y ~ x1, base_dm_bis)
+#'
+#' # only the small sample adj. differ in the SEs
+#' etable(res_vs_1, res_vs_2, res_vs_3, keep = "x1")
 #'
 #'
 #'
-demean = function(X, f, weights, nthreads = getFixest_nthreads(), notes = getFixest_notes(), iter = 2000, tol = 1e-6, im_confident = FALSE){
-    # LATER: add slopes
+#'
+demean = function(X, f, slope.vars, slope.flag, data, weights, nthreads = getFixest_nthreads(), notes = getFixest_notes(), iter = 2000, tol = 1e-6, na.rm = FALSE, as.matrix = FALSE, im_confident = FALSE){
 
+    ANY_NA = FALSE
     # Step 1: formatting the input
     if(!im_confident){
-        check_arg(X, "numeric vmatrix | list mbt")
-        check_arg(f, "vmatrix | list mbt")
+        check_arg(X, "numeric vmatrix | list | formula mbt")
         check_arg(iter, "integer scalar GE{1}")
         check_arg(tol, "numeric scalar GT{0}")
         check_arg(notes, "logical scalar")
 
-        ## X
-        if(is.list(X)){
+        #
+        # X
+        #
+
+        fe_done = FALSE
+        if("formula" %in% class(X)){
+            check_arg(data, "data.frame mbt")
+            check_arg(X, "ts formula var(data)", .data = data)
+
+            # Extracting the information
+            terms_fixef = fixef_terms(xpd(~ ..fixef, ..fixef = X[[3]]))
+            X = model.matrix(xpd(~ -1 + ..rhs, ..rhs = X[[2]]), data)
+            var_names = colnames(X)
+
+            # FE
+            fe_done = TRUE
+
+            f = error_sender(prepare_df(terms_fixef$fe_vars, data), "Error when evaluating the fixed-effects variables: ")
+
+            isSlope = any(terms_fixef$slope_flag != 0)
+
+            if(isSlope){
+                slope.vars = error_sender(prepare_df(terms_fixef$slope_vars, data), "Error when evaluating the variable with varying slopes: ")
+                slope.flag = terms_fixef$slope_flag
+
+                not_numeric = !sapply(slope.vars, is.numeric)
+                if(any(not_numeric)){
+                    stop("In the fixed-effects part of the formula, variables with varying slopes must be numeric. Currently variable", enumerate_items(names(slope.vars)[not_numeric], "s.is.quote"), " not.")
+                }
+
+            } else {
+                slope.vars = list(0)
+                slope.flag = rep(0L, length(f))
+            }
+
+        } else if(is.list(X)){
             var_names = names(X)
 
             if(!is.data.frame(X)){
@@ -3019,47 +3117,93 @@ demean = function(X, f, weights, nthreads = getFixest_nthreads(), notes = getFix
                     n_unik = unique(n_all)
                     stop("In argument 'X' all elements of the list must be of the same length. This is currently not the case (ex: one is of length ", n_unik[1], " while another is of length ", n_unik[2], ").")
                 }
-                X = as.data.frame(X)
             }
+
             is_numeric = sapply(X, is.numeric)
             if(any(!is_numeric)){
                 n_non_num = sum(is_numeric)
                 stop("All values in 'X' must be numeric. This is not the case for ", n_non_num, " variable", plural(n_non_num), ".")
             }
-            X = as.matrix(X)
+
         } else {
-            if(!is.matrix(X)) X = as.matrix(X)
             var_names = colnames(X)
         }
 
-        if(is.null(var_names)) var_names = paste0("V", 1:ncol(X))
-        if(is.integer(X)) X = X * 1
+        if(is.null(var_names)) var_names = paste0("V", 1:NCOL(X))
 
-        ## f
-        if(is.list(f)){
-            fe_names = names(f)
+        #
+        # f + slope.vars
+        #
 
-            if(!is.data.frame(f)){
-                n_all = lengths(f)
-                if(any(diff(n_all) != 0)){
-                    n_unik = unique(n_all)
-                    stop("In argument 'f' all elements of the list must be of the same length. This is currently not the case (ex: one is of length ", n_unik[1], " while another is of length ", n_unik[2], ").")
+        if(!fe_done){
+            check_arg(f, "vmatrix | list mbt")
+            check_arg(slope.vars, "numeric vmatrix | list")
+            check_arg(slope.flag, "integer vector no na")
+
+            if(is.list(f)){
+
+                if(!is.data.frame(f)){
+                    n_all = lengths(f)
+                    if(any(diff(n_all) != 0)){
+                        n_unik = unique(n_all)
+                        stop("In argument 'f' all elements of the list must be of the same length. This is currently not the case (ex: one is of length ", n_unik[1], " while another is of length ", n_unik[2], ").")
+                    }
+                    f = as.data.frame(f)
                 }
+            } else {
                 f = as.data.frame(f)
             }
-        } else {
-            fe_names = colnames(f)
-            f = as.data.frame(f)
+
+            is_pblm = sapply(f, function(x) !is.numeric(x) || !is.character(x))
+            for(i in which(is_pblm)){
+                f[[i]] = as.character(f[[i]])
+            }
+
+            if(NROW(f) != NROW(X)) stop("The number of observations in 'X' and in 'f' don't match (", NROW(X), " vs ", NROW(f), ").")
+
+
+            # Now the slopes
+            isSlope = FALSE
+            if(!missnull(slope.vars) || !missnull(slope.flag)){
+
+                isSlope = TRUE
+
+                if(missnull(slope.vars)) stop("If argument 'slope.flag' is provided, you must also provide the argument 'slope.vars'.")
+                if(missnull(slope.flag)) stop("If argument 'slope.vars' is provided, you must also provide the argument 'slope.flag'.")
+
+                if(is.list(slope.vars)){
+                    if(!is.data.frame(slope.vars)){
+                        n_all = lengths(slope.vars)
+                        if(any(diff(n_all) != 0)){
+                            n_unik = unique(n_all)
+                            stop("In argument 'slope.vars' all elements of the list must be of the same length. This is currently not the case (ex: one is of length ", n_unik[1], " while another is of length ", n_unik[2], ").")
+                        }
+                        slope.vars = as.data.frame(slope.vars)
+                    }
+
+                    not_numeric = !sapply(slope.vars, is.numeric)
+                    if(any(not_numeric)){
+                        stop("In the argument 'slope.vars', the variables with varying slopes must be numeric. Currently variable", enumerate_items(names(slope.vars)[not_numeric], "s.is.quote"), " not.")
+                    }
+
+                } else {
+                    slope.vars = as.data.frame(slope.vars)
+                }
+
+                if(length(slope.flag) != length(f)){
+                    stop("The argument 'slope.flag' must be a vector representing, for each fixed-effect, the number of variables with varying slopes associated to it. Problem: the lengths of slope.flag and the fixed-effect differ: ", length(slope.flag), " vs ", length(f), ".")
+                }
+
+                if(sum(abs(slope.flag)) != NCOL(slope.vars)){
+                    stop("The argument 'slope.flag' must be a vector representing, for each fixed-effect, the number of variables with varying slopes associated to it. Problem: currently the number of variables in 'slope.flag' differ from the nyumber of variables in 'slope.vars': ", sum(abs(slope.flag)), " vs ", NCOL(slope.vars), ".")
+                }
+
+
+            } else {
+                slope.vars = list(0)
+                slope.flag = rep(0L, length(f))
+            }
         }
-
-        if(is.null(fe_names)) fe_names = paste0("Factor_", 1:length(f))
-
-        is_pblm = sapply(f, function(x) !is.numeric(x) || !is.character(x))
-        for(i in which(is_pblm)){
-            f[[i]] = as.character(f[[i]])
-        }
-
-        if(nrow(f) != nrow(X)) stop("The number of observations in 'X' and in 'f' don't match (", nrow(X), " vs ", nrow(f), ").")
 
 
         ## weights
@@ -3075,7 +3219,8 @@ demean = function(X, f, weights, nthreads = getFixest_nthreads(), notes = getFix
 
         # NAs
         is_NA = FALSE
-        info_X = cpppar_which_na_inf_mat(X, nthreads)
+
+        info_X = cpp_which_na_inf(X, nthreads)
         n_na_x = 0
         if(info_X$any_na_inf){
             is_NA = is_NA | info_X$is_na_inf
@@ -3084,9 +3229,16 @@ demean = function(X, f, weights, nthreads = getFixest_nthreads(), notes = getFix
 
         n_na_fe = 0
         if(anyNA(f)){
-            is_na_fe = rowSums(is.na(f)) > 0
+            is_na_fe = !complete.cases(f)
             n_na_fe = sum(is_na_fe)
             is_NA = is_NA | is_na_fe
+        }
+
+        slopes_msg = ""
+        if(isSlope){
+            is_na_slope = !complete.cases(f)
+            slopes_msg = paste0(", slope vars: ", sum(is_na_slope))
+            is_NA = is_NA | is_na_slope
         }
 
         weight_msg = ""
@@ -3098,14 +3250,20 @@ demean = function(X, f, weights, nthreads = getFixest_nthreads(), notes = getFix
 
         n_na = sum(is_NA)
         if(n_na > 0 && notes){
-            if(all(is_NA)) stop("All observations contain NA values (Breakup: X: ", n_na_x, ", f: ", n_na_fe, weight_msg, ").")
+            if(all(is_NA)) stop("All observations contain NA values (Breakup: X: ", n_na_x, ", f: ", n_na_fe, slopes_msg, weight_msg, ").")
 
-            message("NOTE: ", signif_plus(n_na), " observation", plural(n_na), " removed because of NA values (Breakup: X: ", n_na_x, ", f: ", n_na_fe, weight_msg, ").")
+            message("NOTE: ", signif_plus(n_na), " observation", plural(n_na), " removed because of NA values (Breakup: X: ", n_na_x, ", f: ", n_na_fe, slopes_msg, weight_msg, ").")
         }
 
         if(n_na > 0){
+            ANY_NA = TRUE
             X = X[!is_NA, , drop = FALSE]
             f = f[!is_NA, , drop = FALSE]
+
+            if(isSlope){
+                slope.vars = slope.vars[!is_NA, , drop = FALSE]
+            }
+
             if(is_weight) weights = weights[!is_NA]
         }
 
@@ -3113,6 +3271,10 @@ demean = function(X, f, weights, nthreads = getFixest_nthreads(), notes = getFix
 
     } else {
         if(missing(weights) || is.null(weights)) weights = 1
+        if(missnull(slope.vars) || missnull(slope.flag)){
+            slope.vars = list(0)
+            slope.flag = rep(0L, length(f))
+        }
     }
 
     #
@@ -3121,26 +3283,70 @@ demean = function(X, f, weights, nthreads = getFixest_nthreads(), notes = getFix
 
     Q = length(f)
     n = length(f[[1]])
-    quf_info_all = cpppar_quf_table_sum(x = f, y = 0, do_sum_y = FALSE, rm_0 = FALSE, rm_1 = FALSE, rm_single = FALSE, do_refactor = FALSE, r_x_sizes = 0, obs2keep = 0, only_slope = rep(FALSE, Q), nthreads = nthreads)
+    quf_info_all = cpppar_quf_table_sum(x = f, y = 0, do_sum_y = FALSE, rm_0 = FALSE, rm_1 = FALSE, rm_single = FALSE, do_refactor = FALSE, r_x_sizes = 0, obs2keep = 0, only_slope = slope.flag < 0, nthreads = nthreads)
 
     # table/sum_y/sizes
     fixef_table = quf_info_all$table
     fixef_sizes = lengths(fixef_table)
     fixef_table_vector = as.integer(unlist(fixef_table))
+    if(!is.integer(slope.flag)) slope.flag = as.integer(slope.flag)
 
     #
     # The algorithm
     #
 
-    vars_demean <- cpp_demean(y = 0, X, ncol(X), weights, iterMax = iter,
+    # y => list, X => matrix
+    if(as.matrix){
+        y = 0
+    } else {
+        # Quirk => y returns a list only if NCOL(y) > 1 or is.list(y)
+        if(!is.list(X)){
+            y = list(X)
+        } else {
+            y = X
+        }
+
+        X = 0
+    }
+
+    vars_demean <- cpp_demean(y, X, weights, iterMax = iter,
                               diffMax = tol, r_nb_id_Q = fixef_sizes,
                               fe_id_list = quf_info_all$quf, table_id_I = fixef_table_vector,
-                              slope_flag_Q = rep(FALSE, Q), slope_vars_list = list(0),
+                              slope_flag_Q = slope.flag, slope_vars_list = slope.vars,
                               r_init = 0, nthreads = nthreads)
 
-    X_demean = vars_demean$X_demean
-    colnames(X_demean) = var_names
-    X_demean
+    if(na.rm == FALSE && ANY_NA){
+
+        if(as.matrix){
+            K = NCOL(vars_demean$X_demean)
+            res = matrix(NA, n, K)
+            res[!is_NA, ] = vars_demean$X_demean
+            colnames(res) = var_names
+        } else {
+            K = length(vars_demean$y_demean)
+            res = list()
+            n = length(is_NA)
+            for(k in 1:K){
+                tmp = rep(NA, n)
+                tmp[!is_NA] = vars_demean$y_demean[[k]]
+                res[[k]] = tmp
+            }
+
+            res = as.data.frame(res)
+            names(res) = var_names
+        }
+    } else {
+        if(as.matrix){
+            res = vars_demean$X_demean
+            colnames(res) = var_names
+        } else {
+            # convert list to DF is 0 cost
+            res = as.data.frame(vars_demean$y_demean)
+            names(res) = var_names
+        }
+    }
+
+    res
 }
 
 

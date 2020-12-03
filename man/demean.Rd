@@ -7,18 +7,29 @@
 demean(
   X,
   f,
+  slope.vars,
+  slope.flag,
+  data,
   weights,
   nthreads = getFixest_nthreads(),
   notes = getFixest_notes(),
   iter = 2000,
   tol = 1e-06,
+  na.rm = FALSE,
+  as.matrix = FALSE,
   im_confident = FALSE
 )
 }
 \arguments{
-\item{X}{A matrix, vector or a list. The vectors to be centered. There must be the same number of observations as in the factors used for centering (argument \code{f}).}
+\item{X}{A matrix, vector or a list OR a formula. If equal to a formula, then the argument \code{data} is required, and it must be of the type: \code{x1 + x2 ~ f1 + fe2} with on the LHS the variables to be centered, and on the RHS the factors used for centering. Note that you can use variables with varying slopes with the syntax \code{fe[v1, v2]} (see details in \code{\link[fixest]{feols}}). If not a formula, it must represent the data to be centered. Of course the dimension of that data must be the same as the factors used for centering (argument \code{f}).}
 
 \item{f}{A matrix, vector or list. The factors used to center the variables in argument \code{X}.}
+
+\item{slope.vars}{A vector, matrix or list representing the variables with varying slopes. Note that if this argument is used it MUST be in conjunction with the argument \code{slope.flag} that maps the factors to which the varying slopes are attached. See examples.}
+
+\item{slope.flag}{An integer vector of the same length as the number of variables in \code{f} (the factors used for centering). It indicates for each factor the number of variables with varying slopes to which it is associated. Positive values mean that the raw factor should also be included in the centering, negative values that it should be excluded. Sorry it's complicated... but see the examples it may get clearer.}
+
+\item{data}{A data.frame containing all variables in the argument \code{X}. Only used if \code{X} is a formula, in which case \code{data} is mandatory.}
 
 \item{weights}{Vector, can be missing or NULL. If present, it must contain the same number of observations as in \code{X}.}
 
@@ -30,14 +41,37 @@ demean(
 
 \item{tol}{Stopping criterion of the algorithm. Default is \code{1e-6}. The algorithm stops when the maximum absolute increase in the coefficients values is lower than \code{tol}.}
 
-\item{im_confident}{Logical, default is \code{FALSE}. FOR EXPERT USERS ONLY! This argument allows to skip some of the preprocessing of the arguments given in input. If \code{TRUE}, then \code{X} MUST be a numeric matrix (not integer, numeric), \code{f} MUST be a list and \code{weights}, if given, MUST be numeric (not integer!). Further the three MUST NOT contain any NA values and MUST have the same number of observations. Non compliance to these rules may simply lead your R session to break.}
+\item{na.rm}{Logical, default is \code{FALSE}. If \code{TRUE} and the input data contains any NA value, then any observation with NA will be discarded leading to an output with less observations than the input. By default, if NAs are present the output will also be filled with NAs for each NA observation in input.}
+
+\item{as.matrix}{Logical, default is \code{FALSE}. By default a \code{data.frame} is returned. If \code{TRUE}, then a matrix will be returned.}
+
+\item{im_confident}{Logical, default is \code{FALSE}. FOR EXPERT USERS ONLY! This argument allows to skip some of the preprocessing of the arguments given in input. If \code{TRUE}, then \code{X} MUST be a numeric vector/matrix/list (not a formula!), \code{f} MUST be a list, \code{slope.vars} and \code{slope.flag} MUST be consistent and \code{weights}, if given, MUST be numeric (not integer!). Further there MUST be not any NA value, and the number of observations of each element MUST be consistent. Non compliance to these rules may simply lead your R session to break.}
 }
 \value{
-It returns a matrix of the same number of columns as \code{X} in input. The number of rows is equal to the number of rows of \code{X} minus the number of NA values (contained in \code{X}, \code{f} or \code{weights}).
+It returns a data.frame of the same number of columns as the number of variables to be centered.
+
+If \code{na.rm = TRUE}, then the number of rows is equal to the number of rows in input minus the number of NA values (contained in \code{X}, \code{f}, \code{slope.vars} or \code{weights}). The default is to have an output of the same number of observations as the input (filled with NAs where appropriate).
+
+A matrix can be returned if \code{as.matrix = TRUE}.
 }
 \description{
 User-level access to internal demeaning algorithm of \code{fixest}.
 }
+\section{Varying slopes}{
+
+You can add variables with varying slopes in the fixed-effect part of the formula. The syntax is as follows: fixef_var[var1, var2]. Here the variables var1 and var2 will be with varying slopes (one slope per value in fixef_var) and the fixed-effect fixef_var will also be added.
+
+To add only the variables with varying slopes and not the fixed-effect, use double square brackets: fixef_var[[var1, var2]].
+
+In other words:
+\itemize{
+  \item fixef_var[var1, var2] is equivalent to fixef_var + fixef_var[[var1]] + fixef_var[[var2]]
+  \item fixef_var[[var1, var2]] is equivalent to fixef_var[[var1]] + fixef_var[[var2]]
+}
+
+In general, for convergence reasons, it is recommended to always add the fixed-effect and avoid using only the variable with varying slope (i.e. use single square brackets).
+}
+
 \examples{
 
 # Illustration of the FWL theorem
@@ -59,6 +93,60 @@ est_fe = feols(ln_euros ~ ln_dist | Origin + Destination, base)
 # The results are the same as if we used the two factors
 # as fixed-effects
 etable(est, est_fe, se = "st")
+
+#
+# Variables with varying slopes
+#
+
+# You can center on factors but also on variables with varying slopes
+
+# Let's have an illustration
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
+
+#
+# We center y and x1 on species and x2 * species
+
+# using a formula
+base_dm = demean(y + x1 ~ species[x2], data = base)
+
+# using vectors
+base_dm_bis = demean(X = base[, c("y", "x1")], f = base$species,
+                     slope.vars = base$x2, slope.flag = 1)
+
+# Let's look at the equivalences
+res_vs_1 = feols(y ~ x1 + species + x2:species, base)
+res_vs_2 = feols(y ~ x1, base_dm)
+res_vs_3 = feols(y ~ x1, base_dm_bis)
+
+# only the small sample adj. differ in the SEs
+etable(res_vs_1, res_vs_2, res_vs_3, keep = "x1")
+
+#
+# center on x2 * species and on another FE
+
+base$fe = rep(1:5, 10)
+
+# using a formula => double square brackets!
+base_dm = demean(y + x1 ~ fe + species[[x2]], data = base)
+
+# using vectors => note slope.flag!
+base_dm_bis = demean(X = base[, c("y", "x1")], f = base[, c("fe", "species")],
+                     slope.vars = base$x2, slope.flag = c(0, -1))
+
+# Explanations slope.flag = c(0, -1):
+# - the first 0: the first factor (fe) is associated to no variable
+# - the "-1":
+#    * |-1| = 1: the second factor (species) is associated to ONE variable
+#    *   -1 < 0: the second factor should not be included as such
+
+# Let's look at the equivalences
+res_vs_1 = feols(y ~ x1 + i(fe) + x2:species, base)
+res_vs_2 = feols(y ~ x1, base_dm)
+res_vs_3 = feols(y ~ x1, base_dm_bis)
+
+# only the small sample adj. differ in the SEs
+etable(res_vs_1, res_vs_2, res_vs_3, keep = "x1")
 
 
 
