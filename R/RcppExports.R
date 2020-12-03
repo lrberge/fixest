@@ -61,8 +61,12 @@ update_deriv_single <- function(n_vars, nb_coef, r_ll_d2, r_jacob_vector, r_dum_
     .Call(`_fixest_update_deriv_single`, n_vars, nb_coef, r_ll_d2, r_jacob_vector, r_dum_vector)
 }
 
-cpp_demean <- function(y, X_raw, n_vars_X, r_weights, iterMax, diffMax, r_nb_id_Q, fe_id_list, table_id_I, slope_flag_Q, slope_vars_list, r_init, nthreads, save_fixef = FALSE) {
-    .Call(`_fixest_cpp_demean`, y, X_raw, n_vars_X, r_weights, iterMax, diffMax, r_nb_id_Q, fe_id_list, table_id_I, slope_flag_Q, slope_vars_list, r_init, nthreads, save_fixef)
+cpp_demean <- function(y, X_raw, r_weights, iterMax, diffMax, r_nb_id_Q, fe_id_list, table_id_I, slope_flag_Q, slope_vars_list, r_init, nthreads, save_fixef = FALSE) {
+    .Call(`_fixest_cpp_demean`, y, X_raw, r_weights, iterMax, diffMax, r_nb_id_Q, fe_id_list, table_id_I, slope_flag_Q, slope_vars_list, r_init, nthreads, save_fixef)
+}
+
+cpp_which_na_inf <- function(x, nthreads) {
+    .Call(`_fixest_cpp_which_na_inf`, x, nthreads)
 }
 
 cpp_cholesky <- function(X, tol = 1.0/100000.0/100000.0, nthreads = 1L) {
