@@ -2522,7 +2522,7 @@ etable_internal_df = function(info){
         if(nchar(style$stats.title) == 1){
             n = max(nchar(res[, 1]), 12)
             if(all(grepl("(", unlist(se_type_list), fixed = TRUE))){
-                n = max(n, 20)
+                n = max(n, 15)
             }
 
             fit_names = attr(fitstat_list, "format_names")
@@ -2558,6 +2558,7 @@ etable_internal_df = function(info){
     main_type = ""
     if(all(grepl("(", unlist(se_type_list), fixed = TRUE))){
         main_type = ": Clustered"
+        coefstat_sentence = gsub(" type", "", coefstat_sentence)
     }
 
     res = rbind(res, c(paste0(coefstat_sentence, main_type), c(se_type_format, recursive = TRUE)))
