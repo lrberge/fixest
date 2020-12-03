@@ -4,10 +4,12 @@
 \alias{[.fixest_multi}
 \title{Subset a fixest_multi object}
 \usage{
-\method{[}{fixest_multi}(x, sample, lhs, rhs, fixef, iv, i, I, reorder = TRUE, drop = TRUE)
+\method{[}{fixest_multi}(x, i, sample, lhs, rhs, fixef, iv, I, reorder = TRUE, drop = TRUE)
 }
 \arguments{
 \item{x}{A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to multiple results.}
+
+\item{i}{An integer vector. Represents the estimations to extract.}
 
 \item{sample}{An integer vector, a logical scalar, or a character vector. It represents the \code{sample} identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation was a split sample. You can use \code{.N} to refer to the last element. If logical, all elements are selected in both cases, but \code{FALSE} leads \code{sample} to become the rightmost key (just try it out).}
 
@@ -18,8 +20,6 @@
 \item{fixef}{An integer vector or a logical scalar. It represents the fixed-effects identifiers for which the results should be extracted. Only valid when the \code{fixest} estimation contained fixed-effects in a stepwise fashion. You can use \code{.N} to refer to the last element. If logical, all elements are selected in both cases, but \code{FALSE} leads \code{fixef} to become the rightmost key (just try it out).}
 
 \item{iv}{An integer vector or a logical scalar. It represent the stages of the IV. Note that the length can be greater than 2 when there are multiple endogenous regressors (the first stage corresponding to multiple estimations). Note that the order of the stages depends on the \code{stage} argument from \code{\link[fixest]{summary.fixest}}. If logical, all elements are selected in both cases, but \code{FALSE} leads \code{iv} to become the rightmost key (just try it out).}
-
-\item{i}{An integer vector. Represents the estimations to extract.}
 
 \item{I}{An integer vector. Represents the root element to extract.}
 
