@@ -41,7 +41,7 @@ etable(
   powerBelow = -5,
   interaction.combine = " $\\\\times $ ",
   depvar = TRUE,
-  style = NULL,
+  style.tex = NULL,
   style.df = NULL,
   notes = NULL,
   group = NULL,
@@ -49,7 +49,7 @@ etable(
   placement = "htbp",
   drop.section = NULL,
   poly_dict = c("", " square", " cube"),
-  postprocess = NULL,
+  postprocess.tex = NULL,
   postprocess.df = NULL,
   fit_format = "__var__"
 )
@@ -85,7 +85,7 @@ esttex(
   family,
   powerBelow = -5,
   interaction.combine = " $\\\\times $ ",
-  style = NULL,
+  style.tex = NULL,
   notes = NULL,
   group = NULL,
   extraline = NULL,
@@ -140,14 +140,14 @@ setFixest_etable(
   powerBelow = -5,
   interaction.combine = " $\\\\times $ ",
   depvar,
-  style = NULL,
+  style.tex = NULL,
   style.df = NULL,
   notes = NULL,
   group = NULL,
   extraline = NULL,
   placement = "htbp",
   drop.section = NULL,
-  postprocess = NULL,
+  postprocess.tex = NULL,
   postprocess.df = NULL,
   fit_format = "__var__",
   reset = FALSE
@@ -220,9 +220,9 @@ getFixest_etable()
 
 \item{depvar}{(Data frame only.) Logical, default is \code{TRUE}. Whether a first line containing the dependent variables should be shown.}
 
-\item{style}{An object created by the function \code{\link[fixest]{estyle}}. It represents the style of the Latex table, see the documentation of \code{\link[fixest]{estyle}}.}
+\item{style.tex}{An object created by the function \code{\link[fixest]{style.tex}}. It represents the style of the Latex table, see the documentation of \code{\link[fixest]{style.tex}}.}
 
-\item{style.df}{An object created by the function \code{\link[fixest]{estyle.df}. }It represents the style of the data frame returned (if \code{tex = FALSE}), see the documentation of \code{\link[fixest]{estyle.df}}.}
+\item{style.df}{An object created by the function \code{\link[fixest]{style.df}. }It represents the style of the data frame returned (if \code{tex = FALSE}), see the documentation of \code{\link[fixest]{style.df}}.}
 
 \item{notes}{Character vector. If provided, a \code{"notes"} section will be added at the end right after the end of the table, containing the text of this argument. Note that if it is a vector, it will be collapsed with new lines.}
 
@@ -236,11 +236,11 @@ getFixest_etable()
 
 \item{poly_dict}{Character vector, default is \code{c("", " square", " cube")}. When polynomials are used with the function \code{\link[stats]{poly}}, the variables are automatically renamed and \code{poly_dict} rules the display of the power. For powers greater than the number of elements of the vector, the value displayed is \code{$^{pow}$} in Latex and \code{^ pow} in the R console.}
 
-\item{postprocess}{A function that will postprocess the character vector defining the latex table. Only when \code{tex = TRUE}. By default it is equal to \code{NULL}, meaning that there is no postprocessing. When \code{tex = FALSE}, see the argument \code{postprocess.df}.}
+\item{postprocess.tex}{A function that will postprocess the character vector defining the latex table. Only when \code{tex = TRUE}. By default it is equal to \code{NULL}, meaning that there is no postprocessing. When \code{tex = FALSE}, see the argument \code{postprocess.df}. See details.}
 
-\item{postprocess.df}{A function that will postprocess the resulting data.frame. Only when \code{tex = FALSE}. By default it is equal to \code{NULL}, meaning that there is no postprocessing. When \code{tex = TRUE}, see the argument \code{postprocess}.}
+\item{postprocess.df}{A function that will postprocess.tex the resulting data.frame. Only when \code{tex = FALSE}. By default it is equal to \code{NULL}, meaning that there is no postprocessing. When \code{tex = TRUE}, see the argument \code{postprocess.tex}.}
 
-\item{fit_format}{Character scalar, default is \code{"__var__"}. Only used in the presence of IVs. By default the endogenous regressors are named \code{fit_varname} in the second stage. The format of the endogenous regressor to appear in the table is governed by \code{fit_format}. For instance, by default, the prefix fit is removed, leading to only \code{varname} to appear. If \code{fit_format = "$\\hat{__var__}$"}, then "$\\hat{varname}$" will appear in the table.}
+\item{fit_format}{Character scalar, default is \code{"__var__"}. Only used in the presence of IVs. By default the endogenous regressors are named \code{fit_varname} in the second stage. The format of the endogenous regressor to appear in the table is governed by \code{fit_format}. For instance, by default, the prefix \code{"fit_"} is removed, leading to only \code{varname} to appear. If \code{fit_format = "$\\\\hat{__var__}$"}, then \code{"$\\hat{varname}$"} will appear in the table.}
 
 \item{reset}{(\code{setFixest_etable} only.) Logical, default is \code{FALSE}. If \code{TRUE}, this will reset all the default values that were already set by the user in previous calls.}
 }
@@ -257,7 +257,9 @@ The function \code{esttex} is equivalent to the function \code{etable} with argu
 
 The function \code{esttable} is equivalent to the function \code{etable} with argument \code{tex = FALSE}. This function is deprecated.
 
-You can permanently change the way your table looks in Latex by using \code{setFixest_etable}. The following vignette gives an example as well as illustrates how to use the \code{estyle} and postprocessing functions: \href{https://cran.r-project.org/package=fixest/vignettes/exporting_tables.html}{Exporting estimation tables}.
+You can permanently change the way your table looks in Latex by using \code{setFixest_etable}. The following vignette gives an example as well as illustrates how to use the \code{style} and postprocessing functions: \href{https://cran.r-project.org/package=fixest/vignettes/exporting_tables.html}{Exporting estimation tables}.
+
+When the argument \code{postprocessing.tex} is not missing, two additional tags will be included in the character vector returned by \code{etable}: \code{"\%start:tab\\n"} and \code{"\%end:tab\\n"}. These can be used to identify the start and end of the tabular and are useful to insert code within the \code{table} environment.
 }
 \section{Functions}{
 \itemize{
@@ -342,13 +344,16 @@ etable(est1, est2, signifCode = c(" A"=0.01, " B"=0.05, " C"=0.1, " D"=0.15, " F
 
 # To drop the headers before each section, use:
 # Note that a space adds an extra line
-style_noHeaders = estyle(var.title = "", fixef.title = "", stats.title = " ")
-etable(est1, est2, dict = dict, tex = TRUE, style = style_noHeaders)
+style_noHeaders = style.tex(var.title = "", fixef.title = "", stats.title = " ")
+etable(est1, est2, dict = dict, tex = TRUE, style.tex = style_noHeaders)
 
 # To change the lines of the table + dropping the table footer
-style_lines = estyle(line.top = "\\\\toprule", line.bottom = "\\\\bottomrule",
+style_lines = style.tex(line.top = "\\\\toprule", line.bottom = "\\\\bottomrule",
                     tablefoot = FALSE)
-etable(est1, est2, dict = dict, tex = TRUE, style = style_lines)
+etable(est1, est2, dict = dict, tex = TRUE, style.tex = style_lines)
+
+# Or you have the predefined type "aer"
+etable(est1, est2, dict = dict, tex = TRUE, style.tex = style.tex("aer"))
 
 #
 # Group and extraline
@@ -360,12 +365,14 @@ etable(est1, est2, dict = dict, tex = TRUE, style = style_lines)
 setFixest_fml(..ctrl = ~ poly(Wind, 2) + poly(Temp, 2))
 est_c0 = feols(Ozone ~ Solar.R, data = aq)
 est_c1 = feols(Ozone ~ Solar.R + ..ctrl, data = aq)
-est_c2 = feols(Ozone ~ Solar.R + I(Solar.R**2) + ..ctrl, data = aq)
+est_c2 = feols(Ozone ~ Solar.R + Solar.R^2 + ..ctrl, data = aq)
 
-etable(est_c0, est_c1, est_c2, group = list(Controls = "poly"))
+etable(est_c0, est_c1, est_c2, group = list(Controls = "\%poly"))
 
-# 'group' here does the same as drop = "poly", but adds an extra line
+# 'group' here does the same as drop = "\%poly", but adds an extra line
 # with TRUE/FALSE where the variables were found
+# Note that the "\%" is needed because polnomials are automatically renamed
+#  so we need to make reference to the original name.
 
 # 'extraline' adds an extra line, where you can add the value for each model
 est_all  = feols(Ozone ~ Solar.R + Temp + Wind, data = aq)
@@ -380,8 +387,9 @@ etable(est_all, est_sub1, est_sub2, est_sub3,
 # Two keywords are allowed: 'title' and 'where'
 # 'title' adds a line just before with the content of 'title' in the leftmost cell
 # 'where' governs the location of the line. It can be equal to 'var', 'stats' or 'fixef'.
-# The syntax is: {title:Controls; where:stats}Group name.
-# Note that starting with curly braces is mandatory.
+# The syntax is: {"{title:Controls; where:stats}Group name"}
+# (the enclosing curly braces are only here to make Rd work, please ignore them)
+# You can use the shortcut "_Group name" which is equivalent to {"{where:stats}Group name"}
 
 # Examples
 etable(est_c0, est_c1, est_c2, tex = TRUE, group = list("{where:stats}Controls" = "poly"))
