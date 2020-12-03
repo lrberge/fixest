@@ -1080,7 +1080,7 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, ...){
 
 	    table_id_I = as.integer(unlist(lapply(fe_id_list, table), use.names = FALSE))
 
-	    S_demean <- cpp_demean(y = S, X_raw = 0, n_vars_X = 0, r_weights = 0, iterMax = 1000L,
+	    S_demean <- cpp_demean(y = S, X_raw = 0, r_weights = 0, iterMax = 1000L,
 	                           diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
 	                           fe_id_list = fe_id_list, table_id_I = table_id_I,
 	                           slope_flag_Q = slope_flag, slope_vars_list = slope_variables,
@@ -6968,6 +6968,10 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 	se.val = se
 
 	if(se.val == "white") se.val = "hetero"
+
+
+	# Checking the nber of threads
+	nthreads = check_set_nthreads(nthreads)
 
 	dots = list(...)
 	if(is.null(dots$nframes_up)){
