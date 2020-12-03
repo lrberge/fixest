@@ -48,9 +48,9 @@
 #' @param .vcov A function to be used to compute the standard-errors of each fixest object. You can pass extra arguments to this function using the argument \code{.vcov_args}. See the example.
 #' @param .vcov_args A list containing arguments to be passed to the function \code{.vcov}.
 #' @param poly_dict Character vector, default is \code{c("", " square", " cube")}. When polynomials are used with the function \code{\link[stats]{poly}}, the variables are automatically renamed and \code{poly_dict} rules the display of the power. For powers greater than the number of elements of the vector, the value displayed is \code{$^{pow}$} in Latex and \code{^ pow} in the R console.
-#' @param postprocess.tex A function that will postprocess.tex the character vector defining the latex table. Only when \code{tex = TRUE}. By default it is equal to \code{NULL}, meaning that there is no postprocessing. When \code{tex = FALSE}, see the argument \code{postprocess.df}.
+#' @param postprocess.tex A function that will postprocess the character vector defining the latex table. Only when \code{tex = TRUE}. By default it is equal to \code{NULL}, meaning that there is no postprocessing. When \code{tex = FALSE}, see the argument \code{postprocess.df}. See details.
 #' @param postprocess.df A function that will postprocess.tex the resulting data.frame. Only when \code{tex = FALSE}. By default it is equal to \code{NULL}, meaning that there is no postprocessing. When \code{tex = TRUE}, see the argument \code{postprocess.tex}.
-#' @param fit_format Character scalar, default is \code{"__var__"}. Only used in the presence of IVs. By default the endogenous regressors are named \code{fit_varname} in the second stage. The format of the endogenous regressor to appear in the table is governed by \code{fit_format}. For instance, by default, the prefix \code{"fit_"} is removed, leading to only \code{varname} to appear. If \code{fit_format = "$\\hat{__var__}$"}, then "$\\hat{varname}$" will appear in the table.
+#' @param fit_format Character scalar, default is \code{"__var__"}. Only used in the presence of IVs. By default the endogenous regressors are named \code{fit_varname} in the second stage. The format of the endogenous regressor to appear in the table is governed by \code{fit_format}. For instance, by default, the prefix \code{"fit_"} is removed, leading to only \code{varname} to appear. If \code{fit_format = "$\\\\hat{__var__}$"}, then \code{"$\\hat{varname}$"} will appear in the table.
 #'
 #' @details
 #' The function \code{esttex} is equivalent to the function \code{etable} with argument \code{tex = TRUE}. This function is deprecated.
@@ -59,7 +59,7 @@
 #'
 #' You can permanently change the way your table looks in Latex by using \code{setFixest_etable}. The following vignette gives an example as well as illustrates how to use the \code{style} and postprocessing functions: \href{https://cran.r-project.org/package=fixest/vignettes/exporting_tables.html}{Exporting estimation tables}.
 #'
-#' When the argument \code{postprocessing.tex} is not missing, two additional tags will be included in the character vector returned by \code{etable}: \code{"%start:tab\n"} and \code{"%end:tab\n"}. These can be used to identify the start and end of the tabular and are useful to insert code within the \code{table} environment.
+#' When the argument \code{postprocessing.tex} is not missing, two additional tags will be included in the character vector returned by \code{etable}: \code{"\%start:tab\\n"} and \code{"\%end:tab\\n"}. These can be used to identify the start and end of the tabular and are useful to insert code within the \code{table} environment.
 #'
 #' @section Arguments keep, drop and order:
 #' The arguments \code{keep}, \code{drop} and \code{order} use regular expressions. If you are not aware of regular expressions, I urge you to learn it, since it is an extremely powerful way to manipulate character strings (and it exists across most programming languages).
@@ -191,9 +191,9 @@
 #' # Two keywords are allowed: 'title' and 'where'
 #' # 'title' adds a line just before with the content of 'title' in the leftmost cell
 #' # 'where' governs the location of the line. It can be equal to 'var', 'stats' or 'fixef'.
-#' # The syntax is: "{title:Controls; where:stats}Group name".
-#' #
-#' # You can use the shortcut "_Group name" which is equivalent to "{where:stats}Group name"
+#' # The syntax is: {"{title:Controls; where:stats}Group name"}
+#' # (the enclosing curly braces are only here to make Rd work, please ignore them)
+#' # You can use the shortcut "_Group name" which is equivalent to {"{where:stats}Group name"}
 #'
 #' # Examples
 #' etable(est_c0, est_c1, est_c2, tex = TRUE, group = list("{where:stats}Controls" = "poly"))
@@ -2876,13 +2876,13 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
     if("main" %in% names(mc)){
         if(main == "base"){
             res = list(depvar.title = "Dependent Variable(s):", model.title = "Model:", model.format = "(1)",
-                       line.top = "\\tabularnewline\\toprule\\toprule", line.bottom = "",
+                       line.top = "\\tabularnewline\\midrule\\midrule", line.bottom = "",
                        var.title = "\\midrule \\emph{Variables}",
                        fixef.title = "\\midrule \\emph{Fixed-effects}", fixef.prefix = "", fixef.suffix = "", fixef.where = "var",
                        slopes.title = "\\midrule \\emph{Varying Slopes}", slopes.format = "__var__ (__slope__)",
                        fixef_sizes.prefix = "# ", fixef_sizes.suffix = "",
                        stats.title = "\\midrule \\emph{Fit statistics}", notes.title = "\\medskip \\emph{Notes:} ",
-                       tablefoot = TRUE, tablefoot.title = "\\bottomrule\\bottomrule", tablefoot.value = "default", yesNo = c("Yes", ""))
+                       tablefoot = TRUE, tablefoot.title = "\\midrule\\midrule", tablefoot.value = "default", yesNo = c("Yes", ""))
 
         } else {
             res = list(depvar.title = "", model.title = "", model.format = "(1)",
