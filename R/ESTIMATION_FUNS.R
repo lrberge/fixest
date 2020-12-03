@@ -728,7 +728,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 	                if(mem.clean) gc()
 
-	                vars_demean = cpp_demean(my_lhs, X_all, n_vars_X, weights, iterMax = fixef.iter,
+	                vars_demean = cpp_demean(my_lhs, X_all, weights, iterMax = fixef.iter,
 	                                         diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
 	                                         fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
 	                                         slope_flag_Q = slope_flag, slope_vars_list = slope_vars,
@@ -739,7 +739,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 	                if(do_iv){
 
-	                    iv_vars_demean = cpp_demean(iv_lhs, iv.mat, ncol(iv.mat), weights, iterMax = fixef.iter,
+	                    iv_vars_demean = cpp_demean(iv_lhs, iv.mat, weights, iterMax = fixef.iter,
 	                                                diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
 	                                                fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
 	                                                slope_flag_Q = slope_flag, slope_vars_list = slope_vars,
@@ -886,13 +886,13 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	            slope_flag = get("slope_flag", env)
 	            slope_vars = get("slope_variables", env)
 
-	            vars_demean = cpp_demean(y, X, n_vars_X, weights, iterMax = fixef.iter,
+	            vars_demean = cpp_demean(y, X, weights, iterMax = fixef.iter,
 	                                     diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
 	                                     fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
 	                                     slope_flag_Q = slope_flag, slope_vars_list = slope_vars,
 	                                     r_init = init, nthreads = nthreads)
 
-	            iv_vars_demean = cpp_demean(iv_lhs, iv.mat, ncol(iv.mat), weights, iterMax = fixef.iter,
+	            iv_vars_demean = cpp_demean(iv_lhs, iv.mat, weights, iterMax = fixef.iter,
 	                                        diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
 	                                        fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
 	                                        slope_flag_Q = slope_flag, slope_vars_list = slope_vars,
@@ -1152,7 +1152,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 		}
 
 
-		vars_demean = cpp_demean(y, X, n_vars_X, weights, iterMax = fixef.iter,
+		vars_demean = cpp_demean(y, X, weights, iterMax = fixef.iter,
 		                            diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
 		                            fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
 		                            slope_flag_Q = slope_flag, slope_vars_list = slope_vars,
