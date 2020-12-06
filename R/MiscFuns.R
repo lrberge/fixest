@@ -1,14 +1,18 @@
 
 #' A print facility for \code{fixest} objects.
 #'
-#' This function is very similar to usual \code{summary} functions as it provides the table of coefficients along with other information on the fit of the estimation. The type of output is customizable by the user (using function \code{\link[fixest]{setFixest_print.type}}).
+#' This function is very similar to usual \code{summary} functions as it provides the table of coefficients along with other information on the fit of the estimation. The type of output is customizable by the user (using function \code{\link[fixest]{setFixest_print}}).
 #'
 #' @method print fixest
 #'
 #' @param x A \code{fixest} object. Obtained using the methods \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
 #' @param n Integer, number of coefficients to display. By default, only the first 8 coefficients are displayed if \code{x} does not come from \code{\link[fixest]{summary.fixest}}.
-#' @param type Either \code{"table"} (default) to display the coefficients table or \code{"coef"} to display only the coefficients. By default the value is \code{getFixest_print.type()} which can be permanently set with \code{\link[fixest]{setFixest_print.type}}).
+#' @param type Either \code{"table"} (default) to display the coefficients table or \code{"coef"} to display only the coefficients.
+#' @param fitstat A formula or a character vector representing which fit statistic to display. The types must be valid types of the function \code{\link[fixest]{fitstat}}. The default fit statistics depend on the type of estimation (OLS, GLM, IV, with/without fixed-effect). Providing the argument \code{fitstat} overrides the default fit statistics, you can however use the point "." to summon them back. Ex 1: \code{fitstat = ~ . + ll} adds the log-likelihood to the default values. Ex 2: \code{fitstat = ~ ll + pr2} only displays the log-likelihood and the pseudo-R2.
 #' @param ... Other arguments to be passed to \code{\link[fixest]{vcov.fixest}}.
+#'
+#' @details
+#'  It is possible to set the default values for the arguments \code{type} and \code{fitstat} by using the function \code{\link[fixest]{setFixest_print}}.
 #'
 #' @seealso
 #' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the fixed-effects coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
@@ -23,7 +27,7 @@
 #'
 #' # We estimate the effect of distance on trade
 #' #   => we account for 3 fixed-effects (FEs)
-#' est_pois = femlm(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
+#' est_pois = fepois(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
 #'
 #' # displaying the results
 #' #  (by default SEs are clustered if FEs are used)
@@ -33,14 +37,33 @@
 #' #  If the user wished to display only the coefficents, use option type:
 #' print(est_pois, type = "coef")
 #'
-#' # To permanently display coef. only, use setFixest_print.type:
-#' setFixest_print.type("coef")
+#' # To permanently display coef. only, use setFixest_print:
+#' setFixest_print(type = "coef")
 #' est_pois
 #' # back to default:
-#' setFixest_print.type("table")
+#' setFixest_print(type = "table")
+#'
+#' #
+#' # fitstat
+#' #
+#'
+#' # We modify which fit statistic to display
+#' print(est_pois, fitstat = ~ . + lr)
+#'
+#' # We add the LR test to the default (represented by the ".")
+#'
+#' # to show only the LR stat:
+#' print(est_pois, fitstat = ~ . + lr.stat)
+#'
+#' # To modify the defaults:
+#' setFixest_print(fitstat = ~ . + lr.stat + rmse)
+#' est_pois
+#'
+#' # Back to default (NULL == default)
+#' setFixest_print(fitstat = NULL)
 #'
 #'
-print.fixest <- function(x, n, type = getFixest_print.type(), ...){
+print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 
     # checking the arguments
     validate_dots(suggest_args = c("n", "type", "se", "cluster"),
@@ -48,6 +71,13 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 
     # The objects from the estimation and the summary are identical, except regarding the vcov
 	fromSummary = isTRUE(x$summary)
+
+	if(!missnull(fitstat)){
+	    fitstat = fitstat_validate(fitstat, TRUE)
+	}
+
+	# User options
+	set_defaults("fixest_print")
 
 	# if NOT from summary, we consider the argument 'type'
 	if(!fromSummary){
@@ -184,18 +214,36 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 		}
 	}
 
-	if(x$method == "feols"){
-	    rmse = numberFormatNormal(fitstat(x, "rmse", simplify = TRUE))
-	    cat("RMSE:", rmse, "  Adj. R2:", round(r2(x, "ar2"), 5), "\n")
-	    if(!is.null(x$fixef_sizes) && is.null(x$onlyFixef)){
-	        cat(sprintf("% *s", 6 + nchar(rmse), " "), "R2-Within:", round(r2(x, "wr2"), 5), "\n")
-	    }
-	} else {
-		bic_ll = formatBicLL(BIC(x), x$loglik)
-		cat("Log-likelihood:", bic_ll$ll,  "Adj. Pseudo-R2:", round(x$pseudo_r2, 5), "\n")
-		cat("           BIC:", bic_ll$bic, "  Squared Cor.:", round(x$sq.cor, 5), "\n")
-	}
+	if(!is.null(fitstat) && identical(fitstat, NA)){
+	    # No fitstat
 
+	} else {
+
+	    if(is.null(fitstat) || "." %in% fitstat){
+	        if(x$method == "feols"){
+	            default_fit = c("rmse", "ar2")
+
+	            if(!is.null(x$fixef_sizes) && is.null(x$onlyFixef)){
+	                default_fit = c(default_fit, "wr2")
+	            }
+
+	            if(isTRUE(x$iv)){
+	                default_fit = c(default_fit, "ivf1", "wh", "sargan")
+	            }
+
+	        } else {
+	            default_fit = c("ll", "apr2", "bic", "cor2")
+	        }
+
+	        if("." %in% fitstat){
+	            fitstat = setdiff(c(default_fit, fitstat), ".")
+	        } else {
+	            fitstat = default_fit
+	        }
+	    }
+
+	    print(fixest::fitstat(x, fitstat), na.rm = TRUE, group.solo = TRUE)
+	}
 
 	if(isFALSE(x$convStatus)){
 	    iter_format = x$iterations
@@ -206,10 +254,6 @@ print.fixest <- function(x, n, type = getFixest_print.type(), ...){
 	        iter_format = paste0("lhs: ", iter_format[n_iter], ", rhs: ", paste0(head(iter_format, min(n_iter - 1, n)), collapse = ", "))
 	    }
 		cat("# Evaluations:", iter_format, "--", x$message, "\n")
-	}
-
-	if(isTRUE(x$iv)){
-	    print(fitstat(x, ~ ivf))
 	}
 
 }
@@ -621,7 +665,7 @@ r2 = function(x, type = "all", full_names = FALSE){
 	for(i in seq_along(type_all)){
 		myType = type_all[i]
 
-		if(myType == "sq.cor"){
+		if(myType == "cor2"){
 		    res[i] = x$sq.cor
 		    next
 		}
@@ -659,10 +703,8 @@ r2 = function(x, type = "all", full_names = FALSE){
 		        # Fe/slope only formula
 		        new_fml = merge_fml(y ~ 1, x$fml_all$fixef)
 
-		        # The fact that weights = x[["weights"]] is on purpose -- don't touch it
-		        # same for offset = x[["offset"]] -- otherwise error is thrown in fixest_env
 		        # x$family$family is also normal
-		        res_fe = feglm(fml = new_fml, data = newdata, glm.tol = 1e-2, fixef.tol = 1e-3, family = x$family$family, weights = x[["weights"]], offset = x[["offset"]])
+		        res_fe = feglm(fml = new_fml, data = newdata, glm.tol = 1e-2, fixef.tol = 1e-3, family = x$family$family, weights = x$weights, offset = x$offset)
 
 		        x$ssr_fe_only = cpp_ssq(res_fe$residuals)
 		        x$ll_fe_only = logLik(res_fe)
@@ -3357,17 +3399,100 @@ demean = function(X, f, slope.vars, slope.flag, data, weights, nthreads = getFix
 #' @inherit fitstat examples
 #'
 #' @param x An object resulting from the \code{\link[fixest]{fitstat}} function.
+#' @param na.rm Logical, default is \code{FALSE}. If \code{TRUE}, the statistics that are missing are not displayed.
 #' @param ... Not currently used.
 #'
 #'
-print.fixest_fitstat = function(x, ...){
+print.fixest_fitstat = function(x, na.rm = FALSE, ...){
 
+    dots = list(...)
+
+    # glue = function(x) gsub("( +)(,)", "\\2\\1", paste(x[nchar(x) > 0], collapse = ", "))
     glue = function(x) paste(x[nchar(x) > 0], collapse = ", ")
 
     all_types = fitstat(give_types = TRUE)
     dict_type = all_types$R_alias
 
+    if(na.rm){
+        IS_NA = sapply(x, function(z) identical(z, NA))
+        x = x[!IS_NA]
+        if(length(x) == 0) return(invisible(NULL))
+    }
+
+    if(isTRUE(dots$group.solo)){
+        # Later integration in print
+        solo = lengths(x) == 1
+        x_solo = unlist(x[solo])
+        n_solo = length(x_solo)
+
+        if(n_solo > 1){
+            x_solo_names = names(x[solo])
+            x_solo = unlist(x[solo])
+
+            x = x[!solo]
+
+            nr = ceiling(n_solo / 2)
+            m = matrix(c(x_solo, NA)[1:(2*nr)], nr, 2, byrow = TRUE)
+            m_alias = matrix(c(unlist(dict_type[x_solo_names]), "")[1:(2*nr)], nr, 2, byrow = TRUE)
+
+            if(nr > 1 && anyNA(m[nr, ])){
+                m[nr, ] = m[nr, 2:1]
+                m_alias[nr, ] = m_alias[nr, 2:1]
+            }
+
+            cols_new = list()
+            for(i in 1:2){
+                col = m[,i]
+                gt1 = abs(col) > 1 & !is.na(col)
+                col_char = numberFormatNormal(col)
+                col_char[gt1] = sfill(col_char[gt1], anchor = ".", na = "")
+                col_char[!gt1] = sfill(col_char[!gt1], anchor = ".", na = "")
+                col_char = sfill(col_char, right = TRUE)
+
+                # The aliases
+                col_char = paste0(sfill(m_alias[, i]), ": ", col_char)
+                if(anyNA(col)){
+                    col_char[is.na(col)] = sfill("", nchar(col_char[1]))
+                }
+
+                cols_new[[i]] = col_char
+            }
+            mm = do.call(cbind, cols_new)
+
+            cat(apply(mm, 1, paste, collapse = "   "), sep = "\n")
+        }
+
+        if(length(x) == 0) return(invisible(NULL))
+    }
+
     res = c()
+
+    # Formatting the stats and pvalues
+    is_stat = sapply(x, function(z) "stat" %in% names(z))
+    is_pval = sapply(x, function(z) "p" %in% names(z))
+
+    if(any(is_stat)){
+        stat_all = sapply(x[is_stat], function(z) z$stat)
+        stat_all = paste0("stat = ", sfill(sfill(numberFormatNormal(stat_all), anchor = "."), right = TRUE))
+        for(i in seq_along(stat_all)){
+            j = which(is_stat)[i]
+            x[[j]]$stat = stat_all[i]
+        }
+    }
+
+    if(any(is_pval)){
+        pval_all = sapply(x[is_pval], function(z) z$p)
+        low = pval_all < 2.2e-16
+        pval_all[low] = 2.2e-16
+        pval_all = paste0("p ", ifelse(low, "< ", "= "), sfill(numberFormatNormal(pval_all), right = TRUE))
+        for(i in seq_along(pval_all)){
+            j = which(is_pval)[i]
+            x[[j]]$p = pval_all[i]
+        }
+    }
+
+    # formatting for multiple endo regs
+    qui_right = rep(FALSE, length(x))
 
     for(i in seq_along(x)){
         type = names(x)[i]
@@ -3378,6 +3503,7 @@ print.fixest_fitstat = function(x, ...){
             dict = getFixest_dict()
             rename_fun = function(x) paste0(dict_type[x[1]], ", ", dict_apply(x[2], dict))
             test_name = rename_fun(strsplit(type, "::")[[1]])
+            qui_right[i] = TRUE
         } else {
             test_name = dict_type[type]
         }
@@ -3388,17 +3514,25 @@ print.fixest_fitstat = function(x, ...){
         } else {
 
             stat_line = p_line = dof_line = vcov_line = ""
-            if(!is.null(v$stat)) stat_line = paste0("stat = ", numberFormatNormal(v$stat))
-            if(!is.null(v$p)) p_line = paste0("p ", ifelse(v$p < 2.2e-16, "< 2.2e-16", paste0("= ", numberFormatNormal(v$p))))
-            if(!is.null(v$df)) dof_line = paste0("on ", numberFormatNormal(v$df), " degrees of freedom")
-            if(!is.null(v$df1)) dof_line = paste0("on ", numberFormatNormal(v$df1), " and ", numberFormatNormal(v$df2), " degrees of freedom")
+            if(!is.null(v$stat)) stat_line = v$stat
+            if(!is.null(v$p)) p_line = v$p
+            if(!is.null(v$df)) dof_line = paste0("on ", numberFormatNormal(v$df), " DoF")
+            if(!is.null(v$df1)) dof_line = paste0("on ", numberFormatNormal(v$df1), " and ", numberFormatNormal(v$df2), " DoF")
             if(!is.null(v$vcov)) vcov_line = paste0("VCOV matrix: ", v$vcov)
 
-            res[i] = paste0(test_name, ": ", glue(c(stat_line, p_line, dof_line, vcov_line)), ".")
+            res[i] = paste0(test_name, "! ", glue(c(stat_line, p_line, dof_line, vcov_line)), ".")
         }
     }
 
-    cat(sfill(res, anchor = ":"), sep = "\n")
+    if(any(qui_right)){
+        res2fix = strsplit(res[qui_right], "!", fixed = TRUE)
+        left = sapply(res2fix, function(x) x[1])
+        right = sapply(res2fix, function(x) x[2])
+        res_fixed = paste0(sfill(left, right = TRUE), "!", right)
+        res[qui_right] = res_fixed
+    }
+
+    cat(gsub("!", ":", sfill(res, anchor = "!"), fixed = TRUE), sep = "\n")
 
 }
 
@@ -3971,7 +4105,10 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
 #'
 #'
 wald = function(x, keep = NULL, drop = NULL, print = TRUE, se, cluster, ...){
-    #
+    # LATER:
+    # - keep can be a list
+    #   * list("fit_" = 1, "x5$")
+    #   * regex = restriction. No "=" => 0
 
     check_arg(x, "class(fixest)")
     check_arg(keep, drop, "NULL character vector no na")
@@ -4009,13 +4146,49 @@ wald = function(x, keep = NULL, drop = NULL, print = TRUE, se, cluster, ...){
         cat("Wald test, H0: ", ifsingle(coef_name, "", "joint "), "nullity of ", enumerate_items(coef_name), "\n", sep  ="")
         cat(" stat = ", numberFormatNormal(stat),
             ", p-value ", ifelse(p < 2.2e-16, "< 2.2e-16", paste0("= ", numberFormatNormal(p))),
-            ", on ", numberFormatNormal(df1), " and ", numberFormatNormal(df2), " degrees of freedom.",
+            ", on ", numberFormatNormal(df1), " and ", numberFormatNormal(df2), " DoF.",
             " Using a ", vcov, " VCOV matrix.", sep = "")
 
         return(invisible(vec))
     } else {
         return(vec)
     }
+}
+
+fitstat_validate = function(x, vector = FALSE){
+    check_value(x, "NA | os formula | charin(FALSE) | character vector no na", .arg_name = "fitstat", .up = 1)
+
+    if("formula" %in% class(x)){
+        x = attr(terms(update(~ DEFAULT, x)), "term.labels")
+    } else if (length(x) == 1 && (isFALSE(x) || is.na(x))){
+        x = c()
+    }
+
+    # checking the types
+    fitstat_fun_types = fitstat(give_types = TRUE)
+    fitstat_type_allowed = fitstat_fun_types$types
+    x = unique(x)
+    type_alias = fitstat_fun_types$type_alias
+
+    if(any(x %in% names(type_alias))){
+        i = intersect(x, names(type_alias))
+        x[x %in% i] = type_alias[x[x %in% i]]
+    }
+
+    pblm = setdiff(x, c(fitstat_type_allowed, "DEFAULT"))
+    if(length(pblm) > 0){
+        stop_up("Argument 'x' must be a one sided formula (or a character vector) containing valid types from the function x (see details in ?x or use x(show_types = TRUE)). The type", enumerate_items(pblm, "s.is.quote"), " not valid.")
+    }
+
+    if(length(x) == 0){
+        x = NA
+    } else if(vector){
+        x = gsub("DEFAULT", ".", x, fixed = TRUE)
+    } else {
+        x = as.formula(paste("~", paste(gsub("DEFAULT", ".", x), collapse = "+")))
+    }
+
+    x
 }
 
 #### ................. ####
@@ -5052,6 +5225,84 @@ is_naked_fun = function(x, fun_pattern){
 }
 
 
+set_defaults = function(opts_name){
+
+    opts = getOption(opts_name)
+    if(is.null(opts) || length(opts) == 0){
+        return(NULL)
+    }
+
+    sysOrigin = sys.parent()
+    mc = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin), expand.dots = FALSE)
+    args_in = names(mc)
+
+    args2set = setdiff(names(opts), args_in)
+
+    for(v in args2set){
+        assign(v, opts[[v]], parent.frame())
+    }
+
+}
+
+fetch_data = function(x){
+    # x: fixest estimation
+    # We try different strategies:
+    # 1) using the environment where the estimation was done
+    # 2) the "parent.frame()" defined as the frame on top of ALL fixest functions
+    # 3) the global environment, if it wasn't in 1)
+
+    # Maybe I should keep only 1) => is there a reason to add the others?
+
+    # 1) safest
+    # 2) less safe but OK => no note
+    # 3) kind of dangerous => warning()
+
+    # 1) Environment of the call
+
+    data = NULL
+    try(data <- eval(x$call$data, x$call_env))
+
+    if(!is.null(data)){
+        return(data)
+    }
+
+    # 2) First non fixest frame
+
+    fixest_funs = ls(getNamespace("fixest"))
+
+    i = 2
+    sysOrigin = sys.parent(i)
+    while(sysOrigin != 0 && as.character(sys.call(sysOrigin)[[1]]) %in% fixest_funs){
+        i = i + 1
+        sysOrigin = sys.parent(i)
+    }
+
+    if(sysOrigin != 0){
+        # We try again...
+        try(data <- eval(x$call$data, parent.frame(sysOrigin)))
+
+        if(!is.null(data)){
+            return(data)
+        }
+    }
+
+    # 3) Global environment
+
+    if(!identical(parent.env(x$call_env))){
+        # ...and again
+        try(data <- eval(x$call$data, .GlobalEnv))
+
+        if(!is.null(data)){
+            return(data)
+        }
+    }
+
+    # => Error message
+
+    stop_up("We tried to fetch the data in the enviroment where the estimation was made, but the data (btw it was ", charShorten(deparse(x$call$data)[1], 15), ") does not seem to be there any more.")
+
+
+}
 
 #### ................. ####
 #### Small Utilities ####
@@ -8647,51 +8898,46 @@ getFixest_dict = function(){
     x
 }
 
-#' Sets/gets what \code{print} does to \code{fixest} estimations
-#'
-#' Sets/gets the default behavior of the \code{print} method for non-summary \code{fixest} estimations. Default is to display the coefficients table but it can be changed to displaying only the coefficients.
-#'
-#' @param x Either \code{"table"} or \code{"coef"}.
-#'
-#' @author
-#' Laurent Berge
-#'
-#'
-#' @examples
-#'
-#' res = feols(Sepal.Length ~ Sepal.Width + Petal.Length, iris)
-#' # default is coef. table:
-#' res
-#' # can be changed to only the coefficients:
-#' print(res, type = "coef")
-#' setFixest_print.type("coef")
-#' res # only the coefs
-#'
-#' # back to default
-#' setFixest_print.type("table")
-#'
-setFixest_print.type = function(x){
 
-    if(length(x) != 1 || !is.character(x) || is.na(x)){
-        stop("Argument 'x' must be equal to 'table' or 'coef'.")
+#' @rdname print.fixest
+#' @title Sets/gets what \code{print} does to \code{fixest} estimations
+setFixest_print = function(type = "table", fitstat = NULL){
+
+    check_arg_plus(type, "match(coef, table)")
+
+    if(!missnull(fitstat)){
+        fitstat = fitstat_validate(fitstat, TRUE)
     }
 
-    type = try(match.arg(x, c("coef", "table")), silent = TRUE)
-    if("try-error" %in% class(type)){
-        stop("Argument 'x' must be equal to 'table' or 'coef'.")
+    # Getting the existing defaults
+    opts = getOption("fixest_print")
+
+    if(is.null(opts)){
+        opts = list()
+    } else if(!is.list(opts)){
+        warning("Wrong formatting of option 'fixest_print', all options are reset.")
+        opts = list()
     }
 
-    options("fixest_print.type" = type)
+    # Saving the default values
+    mc = match.call()
+    args_default = names(mc)[-1]
+
+    # NOTA: we don't allow delayed evaluation => all arguments must have hard values
+    for(v in args_default){
+        opts[[v]] = eval(as.name(v))
+    }
+
+    options(fixest_print = opts)
 }
 
-#' @rdname setFixest_print.type
-"getFixest_print.type"
 
-getFixest_print.type = function(){
+#' @rdname print.fixest
+getFixest_print = function(){
 
-    x = getOption("fixest_print.type")
-    if(length(x) != 1 || !is.character(x) || is.na(x) || !x %in% c("coef", "table")){
-        stop("The value of getOption(\"fixest_print.type\") is currently not legal. Please use function setFixest_print.type to set it to an appropriate value. ")
+    x = getOption("fixest_print")
+    if(!(is.null(x) || is.list(x))){
+        stop("The value of getOption(\"fixest_print\") is currently not legal. Please use function setFixest_print to set it to an appropriate value. ")
     }
 
     x
@@ -8912,7 +9158,6 @@ getFixest_se = function(){
 #'
 #' You can set formula macros globally with \code{setFixest_fml}. These macros can then be used in \code{fixest} estimations or when using the function \code{\link[fixest:setFixest_fml]{xpd}}.
 #'
-#' @param fml A formula containing macros variables. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}.
 #' @param ... Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. \code{..ctrl}). The value of each argument must be a one-sided formula or a character vector, it is the definition of the macro variable. Example of a valid call: \code{setFixest_fml(..ctrl = ~ var1 + var2)}. In the function \code{xpd}, the default macro variables are taken from \code{getFixest_fml}, any variable in \code{...} will replace these values.
 #' @param reset A logical scalar, defaults to \code{FALSE}. If \code{TRUE}, all macro variables are first reset (i.e. deleted).
 #'
