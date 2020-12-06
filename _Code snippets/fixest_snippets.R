@@ -12,7 +12,7 @@
 # Quick and Dirty implementation of marginal effects
 # Very limited but does the job. Easy to expand.
 
-
+require(dreamerr) ; require(fixest)
 meffect = function(x, at_means = TRUE, se, cluster, ...){
     # x: fixest object
 
