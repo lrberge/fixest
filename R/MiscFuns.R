@@ -3605,6 +3605,9 @@ fitstat_register = function(type, fun, alias){
 #' \item{wald}{Wald test of joint nullity of the coefficients. This test always excludes the intercept and the fixed-effects. These type returns the following values: stat, p, df1, df2 and vcov. The element \code{vcov} reports the way the VCOV matrix was computed since it directly influences this statistic.}
 #' \item{ivf, ivf1, ivf2, ivfall}{These statistics are specific to IV estimations. They report either the IV F-test of the first stage (\code{ivf} or \code{ivf1}), of the second stage (\code{ivf2}) or of both (\code{ivfall}). The F-test of the first stage is commonly named weak instrument test. The value of \code{ivfall} is only useful in \code{\link[fixest]{etable}} when both the 1st and 2nd stages are displayed (it leads to the 1st stage F-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, \code{ivf1} would also be displayed on the 2nd stage estimation). These types return the following values: stat, p, df1 and df2.}
 #' \item{ivwald, ivwald1, ivwald2, ivwaldall}{These statistics are specific to IV estimations. They report either the IV Wald-test of the first stage (\code{ivwald} or \code{ivwald1}), of the second stage (\code{ivwald2}) or of both (\code{ivwaldall}). The Wald-test of the first stage is commonly named weak instrument test. The value of \code{ivwaldall} is only useful in \code{\link[fixest]{etable}} when both the 1st and 2nd stages are displayed (it leads to the 1st stage Wald-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, \code{ivwald1} would also be displayed on the 2nd stage estimation). These types return the following values: stat, p, df1, df2, and vcov.}
+#' \item{wh}{This statistic is specific to IV estimations. Wu-Hausman endogeneity test. H0 is the absence of endogeneity of the instrumented variables. It returns the following values: stat, p, df1, df2.}
+#' \item{sargan}{Sargan test of overidentifying restrictions. H0: the instruments are not correlated with the second stage residuals. It returns the following values: stat, p, df.}
+#' \item{lr, wlr}{Likelihood ratio and within likelihood ratio tests. It returns the following elements: stat, p, df. Concerning the within-LR test, note that, coutrary to estimations with \code{femlm} or \code{feNmlm}, estimations with \code{feglm}/\code{fepois} need to estimate the model with fixed-effects only which may prove time-consuming (depending on your model). Bottom line, if you really need the within-LR and estimate a Poisson model, use \code{femlm} instead of \code{fepois} (the former uses direct ML maximisation for which the only FEs model is a by product).}
 #' }
 #'
 #'
@@ -3662,10 +3665,10 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
         # Compound types => types yielding several values
 
         # F-test etc
-        comp_types = c("f", "wf", "ivf", "ivf1", "ivf2", "ivfall", "wald", "ivwald", "ivwald1", "ivwald2", "ivwaldall")
+        comp_types = c("f", "wf", "ivf", "ivf1", "ivf2", "ivfall", "wald", "ivwald", "ivwald1", "ivwald2", "ivwaldall", "wh", "sargan", "lr", "wlr")
         full_comp_types = paste(comp_types, rep(c("stat", "p"), each = length(comp_types)), sep = ".")
 
-        comp_alias = c(f = "F-test", wf = "F-test (projected)", ivfall = "F-test (IV)", ivf1 = "F-test (1st stage)", ivf2 = "F-test (2nd stage)", wald = "Wald (joint nullity)", ivwaldall = "Wald (joint nullity of IV only)", ivwald1 = "Wald (1st stage)", ivwald2 = "Wald (2nd stage)")
+        comp_alias = c(f = "F-test", wf = "F-test (projected)", ivfall = "F-test (IV only)", ivf1 = "F-test (1st stage)", ivf2 = "F-test (2nd stage)", wald = "Wald (joint nullity)", ivwaldall = "Wald (IV only)", ivwald1 = "Wald (1st stage)", ivwald2 = "Wald (2nd stage)", wh = "Wu-Hausman", sargan = "Sargan", lr = "LR", wlr = "LR (within)")
         my_names = paste(names(comp_alias), rep(c("stat", "p"), each = length(comp_alias)), sep = ".")
         full_comp_alias = setNames(paste0(comp_alias, ", ", rep(c("stat.", "p-value"), each = length(comp_alias))), my_names)
 
@@ -3676,7 +3679,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
 
         tex_alias = c(n = "Observations", ll = "Log-Likelihood", aic = "AIC", bic = "BIC", g = "Size of the 'effective' sample", rmse = "RMSE", theta = "Over-dispersion", "cor2"="Squared Correlation", r2="R$^2$", ar2="Adjusted R$^2$", pr2="Pseudo R$^2$", apr2="Adjusted Pseudo R$^2$", wr2="Within R$^2$", war2="Within Adjusted R$^2$", wpr2="Within Pseudo R$^2$", wapr2="Whithin Adjusted Pseudo R$^2$", comp_alias, full_comp_alias, user_alias)
 
-        R_alias = c(n = "Observations", ll = "Log-Likelihood", aic = "AIC", bic = "BIC", g = "G", rmse = "RMSE", theta = "Over-dispersion", cor2="Squared Corr.", r2="R2", ar2="Adjusted R2", pr2="Pseudo R2", apr2="Adj. Pseudo R2", wr2="Within R2", war2="Within Adj. R2", wpr2="Within Pseudo R2", wapr2="Whithin Adj. Pseudo R2", comp_alias, full_comp_alias, user_alias)
+        R_alias = c(n = "Observations", ll = "Log-Likelihood", aic = "AIC", bic = "BIC", g = "G", rmse = "RMSE", theta = "Over-dispersion", cor2="Squared Cor.", r2="R2", ar2="Adj. R2", pr2="Pseudo R2", apr2="Adj. Pseudo R2", wr2="Within R2", war2="Within Adj. R2", wpr2="Within Pseudo R2", wapr2="Whithin Adj. Pseudo R2", comp_alias, full_comp_alias, user_alias)
 
         # add r2 type alias
         type_alias = c(ivf = "ivf1", ivf.stat = "ivf1.stat", ivf.p = "ivf1.p", ivwald = "ivwald1", ivwald.stat = "ivwald1", ivwald.p = "ivwald1.p", par2 = "apr2", awr2 = "war2", pwr2 = "wpr2", wpar2 = "wapr2", pwar2 = "wapr2", pawr2 = "wapr2", apwr2 = "wapr2", awpr2 = "wapr2", sq.cor = "cor2")
@@ -3754,7 +3757,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
             res_all[[type]] = G
 
         } else if(type == "theta"){
-            isNegbin = x$method == "fenegbin" || (x$method %in% c("femlm", "feNmlm") && x$family=="negbin")
+            isNegbin = x$method == "fenegbin" || (x$method %in% c("femlm", "feNmlm") && x$family == "negbin")
             if(isNegbin){
                 theta = coef(x)[".theta"]
                 names(theta) = "Overdispersion"
@@ -3785,7 +3788,17 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                 if(!is.null(x$ssr)){
                     df1 = x$nparams - 1
                     df2 = x$nobs - x$nparams
-                    stat = ((x$ssr_null - x$ssr) / df1) / (x$ssr / df2)
+
+                    if(isTRUE(x$iv) && x$iv_stage == 2){
+                        # We need to compute the SSR
+                        w = 1
+                        if(!is.null(x$weights)) w = x$weights
+                        ssr = cpp_ssq(x$iv_residuals, w)
+                    } else {
+                        ssr = x$ssr
+                    }
+
+                    stat = ((x$ssr_null - ssr) / df1) / (ssr / df2)
                     p = pf(stat, df1, df2, lower.tail = FALSE)
                     vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
                     res_all[[type]] = set_value(vec, value)
@@ -3820,10 +3833,15 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
 
                     } else {
                         # f stat for the second stage
-                        stop("add ssr_no_endo in the second stage")
-                        df1 = length(res$iv_endo_names)
+
+                        df1 = length(x$iv_endo_names)
                         df2 = x$nobs - x$nparams
-                        stat = ((x$ssr_no_endo - x$ssr) / df1) / (x$ssr / df2)
+
+                        w = 1
+                        if(!is.null(x$weights)) w = x$weights
+                        ssr = cpp_ssq(x$iv_residuals, w)
+
+                        stat = ((x$ssr_no_endo - ssr) / df1) / (ssr / df2)
                         p = pf(stat, df1, df2, lower.tail = FALSE)
                         vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
                         res_all[[type]] = set_value(vec, value)
@@ -3836,9 +3854,9 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
             } else if(root == "ivf1"){
                 if(isTRUE(x$iv)){
                     df1 = x$iv_n_inst
-                    df2 = x$nobs - x$nparams
 
                     if(x$iv_stage == 1){
+                        df2 = x$nobs - x$nparams
                         stat = ((x$ssr_no_inst - x$ssr) / df1) / (x$ssr / df2)
                         p = pf(stat, df1, df2, lower.tail = FALSE)
                         vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
@@ -3848,12 +3866,14 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                         x_first = x$iv_first_stage
 
                         if("fixest" %in% class(x_first)){
+                            df2 = x$nobs - x_first$nparams
                             stat = ((x_first$ssr_no_inst - x_first$ssr) / df1) / (x_first$ssr / df2)
                             p = pf(stat, df1, df2, lower.tail = FALSE)
                             vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
                             res_all[[type]] = set_value(vec, value)
 
                         } else {
+                            df2 = x$nobs - x_first[[1]]$nparams
                             for(endo in names(x_first)){
                                 stat = ((x_first[[endo]]$ssr_no_inst - x_first[[endo]]$ssr) / df1) / (x_first[[endo]]$ssr / df2)
                                 p = pf(stat, df1, df2, lower.tail = FALSE)
@@ -3870,10 +3890,14 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
             } else if(root == "ivf2"){
                 if(isTRUE(x$iv) && x$iv_stage == 2){
                     # f stat for the second stage
-                    stop("add ssr_no_endo in the second stage")
+
                     df1 = length(x$iv_endo_names)
                     df2 = x$nobs - x$nparams
-                    stat = ((x$ssr_no_endo - x$ssr) / df1) / (x$ssr / df2)
+                    w = 1
+                    if(!is.null(x$weights)) w = x$weights
+                    ssr = cpp_ssq(x$iv_residuals, w)
+
+                    stat = ((x$ssr_no_endo - ssr) / df1) / (ssr / df2)
                     p = pf(stat, df1, df2, lower.tail = FALSE)
                     vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
                     res_all[[type]] = set_value(vec, value)
@@ -3942,10 +3966,10 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
             } else if(root %in% "ivwald1"){
                 if(isTRUE(x$iv)){
                     df1 = x$iv_n_inst
-                    df2 = x$nobs - x$nparams
 
 
                     if(x$iv_stage == 1){
+                        df2 = x$nobs - x$nparams
                         inst = x$iv_inst_names_xpd
                         my_coef = x$coefficients[inst]
 
@@ -3959,6 +3983,8 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                         inst = x_first$iv_inst_names_xpd
 
                         if("fixest" %in% class(x_first)){
+
+                            df2 = x$nobs - x_first$nparams
 
                             if(is.null(x_first$cov.scaled)){
                                 # We compute the VCOV like for the second stage
@@ -3977,6 +4003,8 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                             res_all[[type]] = set_value(vec, value)
 
                         } else {
+                            df2 = x$nobs - x_first[[1]]$nparams
+
                             for(endo in names(x_first)){
 
                                 my_x_first = x_first[[endo]]
@@ -4018,6 +4046,69 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                     stat = drop(my_coef %*% solve(x$cov.scaled[endo, endo]) %*% my_coef) / df1
                     p = pf(stat, df1, df2, lower.tail = FALSE)
                     vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+                    res_all[[type]] = set_value(vec, value)
+
+                } else {
+                    res_all[[type]] = NA
+                }
+
+            } else if(root == "wh"){
+                if(isTRUE(x$iv) && x$iv_stage == 2){
+                    # Wu Hausman stat for the second stage
+                    vec = x$iv_wh
+                    res_all[[type]] = set_value(vec, value)
+
+                } else {
+                    res_all[[type]] = NA
+                }
+
+            } else if(root == "sargan"){
+                if(!is.null(x$iv_sargan)){
+                    # Wu Hausman stat for the second stage
+                    vec = x$iv_sargan
+                    res_all[[type]] = set_value(vec, value)
+
+                } else {
+                    res_all[[type]] = NA
+                }
+
+            } else if(root == "lr"){
+                if(!is.null(x$ll_null)){
+
+                    stat = 2 * (x$loglik - x$ll_null)
+                    df = x$nparams
+                    p = pchisq(stat, df, lower.tail = FALSE)
+
+                    vec = list(stat = stat, p = p, df = df)
+                    res_all[[type]] = set_value(vec, value)
+
+                } else {
+                    res_all[[type]] = NA
+                }
+
+            } else if(root == "wlr"){
+                if(!is.null(x$ll_fe_only) || (x$method_type == "feglm" && !is.null(x$fixef_id))){
+
+                    if(x$method_type == "feglm"){
+                        # estimation of the FE only model
+
+                        newdata = cbind(data.frame(y = x$y), as.data.frame(x$fixef_id))
+                        if(!is.null(x$fixef_terms)){
+                            newdata = cbind(newdata, as.data.frame(x$slope_variables))
+                        }
+                        new_fml = merge_fml(y ~ 1, x$fml_all$fixef)
+                        res_fe = feglm(fml = new_fml, data = newdata, glm.tol = 1e-2, fixef.tol = 1e-3, family = x$family$family, weights = x$weights, offset = x$offset)
+
+                        ll_fe_only = logLik(res_fe)
+                    } else {
+                        ll_fe_only = x$ll_fe_only
+                    }
+
+                    stat = 2 * (x$loglik - ll_fe_only)
+                    df = length(x$coefficients)
+                    p = pchisq(stat, df, lower.tail = FALSE)
+
+                    vec = list(stat = stat, p = p, df = df)
                     res_all[[type]] = set_value(vec, value)
 
                 } else {
@@ -6787,13 +6878,12 @@ fitted.fixest = fitted.values.fixest = function(object, type = c("response", "li
 #' @inheritParams nobs.fixest
 #'
 #' @param type A character scalar, either \code{"response"} (default), \code{"deviance"}, \code{"pearson"}, or \code{"working"}. Note that the \code{"working"} corresponds to the residuals from the weighted least square and only applies to \code{\link[fixest]{feglm}} models.
+#' @param na.rm Logical, default is \code{TRUE}. Whether to remove the observations with NAs from the original data set. If \code{FALSE}, then the vector returned is always of the same length as the original data set.
 #' @param ... Not currently used.
 #'
-#' @details
-#' The residuals returned are the difference between the dependent variable and the expected predictor.
 #'
 #' @return
-#' It returns a numeric vector of the length the number of observations used for the estimation.
+#' It returns a numeric vector of the length the number of observations used for the estimation (if \code{na.rm = TRUE}) or of the length of the original data set (if \code{na.rm = FALSE}).
 #'
 #' @author
 #' Laurent Berge
