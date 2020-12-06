@@ -355,7 +355,7 @@ summary.fixest = function(object, se, cluster, dof = getFixest_dof(), .vcov, sta
 	if(!is.null(object$cov.scaled) && "fromPrint" %in% names(dots)) return(object)
 
 	# Checking arguments in ...
-	if(!any(c("fromPrint") %in% names(match.call()))){
+	if(!any(c("fromPrint", "iv", "keep_se_info") %in% names(match.call()))){
 	    # condition means NOT internal call => thus client call
 	    if(missing(.vcov) || !is.function(.vcov)){
 	        validate_dots(suggest_args = c("se", "cluster", "dof"))
