@@ -1122,7 +1122,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
         } else if(!is.null(mc_origin$weights)){
             dp = deparse_long(mc_origin$weights)
-            if((grepl("[[", dp, fixed = TRUE) || grepl("$", dp, fixed = TRUE)) && dp != 'x[["weights"]]'){
+            if((grepl("[[", dp, fixed = TRUE) || grepl("$", dp, fixed = TRUE)) && dp != 'x$weights'){
                 # we avoid this behavior
                 stop("Argument 'weights' (", dp, ") is evaluated to NULL. This is likely not what you want.")
             }
@@ -1218,33 +1218,15 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         # LHS
         #
 
-        iv_lhs_text = deparse_long(iv_fml_parts[[1]])
-        iv_lhs_text2eval = gsub("^(c|(c?(stepwise|sw)0?))\\(", "list(", iv_lhs_text)
+        # Now LHS evaluated as a regular formula
+        iv_lhs_mat = error_sender(fixest_model_matrix(xpd(y ~ ..rhs, ..rhs = iv_fml_parts[[1]]), data, TRUE),
+                                  "Evaluation of the left-hand-side of the IV part (equal to ", deparse_long(iv_fml_parts[[1]]), ") raises an error: \n")
 
-        iv_lhs = error_sender(eval(parse(text = iv_lhs_text2eval), data),
-                              "Evaluation of the left-hand-side (equal to ", iv_lhs_text, ") raises an error: \n")
-
-        if(is.list(iv_lhs)){
-            # we check the consistency
-            iv_lhs_names = eval(parse(text = gsub("^list\\(", "stepwise(", iv_lhs_text2eval)))
-
-            n_all = lengths(iv_lhs)
-            if(!all(n_all == n_all[1])){
-                i = which(n_all != n_all[1])[1]
-                stop("In the IV part, the evaluation of the multiple left hand sides raises an error: the first lhs is of length ", n_all[1], " while the ", n_th(i), " is of length ", n_all[i], ". They should all be of the same length")
-            }
-
-            # individual check + conversions
-            for(i in seq_along(iv_lhs)){
-                iv_lhs[[i]] = check_value_plus(iv_lhs[[i]], "numeric vector conv", .prefix = paste0("Problem in the ", n_th(i), " left hand side of the IV part. It"))
-            }
-
-        } else {
-            iv_lhs = check_value_plus(iv_lhs, "numeric vmatrix ncol(1) conv", .prefix = "The left hand side")
-            if(is.matrix(iv_lhs)) iv_lhs = as.vector(iv_lhs)
-
-            iv_lhs = list(iv_lhs)
-            iv_lhs_names = iv_lhs_text
+        # Not great => to improve later
+        iv_lhs = list()
+        iv_lhs_names = colnames(iv_lhs_mat)
+        for(i in 1:ncol(iv_lhs_mat)){
+            iv_lhs[[iv_lhs_names[i]]] = iv_lhs_mat[, i]
         }
 
         # NAs
@@ -1511,7 +1493,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                 gc2trig = FALSE
             }
 
-            # Convert to double
+            # Convert to double => to remove in the future
             who_not_double = which(sapply(slope_mat, is.integer))
             for(i in who_not_double){
                 slope_mat[[i]] = as.numeric(slope_mat[[i]])
