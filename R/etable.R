@@ -1388,6 +1388,23 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
 
             }
 
+            # IV: fit_
+            if(any(qui_iv <- grepl("^fit_", var_left))){
+                # IVs
+                iv_vars = gsub("^fit_", "", var_left[qui_iv])
+
+                if(fit_format == "__var__"){
+                    iv_vars = dict_apply(iv_vars, dict)
+
+                } else {
+                    for(i in seq_along(iv_vars)){
+                        iv_vars = gsub("__var__", dict_apply(iv_vars[i], dict), fit_format)
+                    }
+                }
+
+                var[!qui][qui_iv] = new_var[!qui][qui_iv] = iv_vars
+            }
+
             # We take care of poly
             if(any(grepl("^poly\\(", var_left))){
 
@@ -1430,22 +1447,6 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
 
                     var[!qui][qui_pow] = new_var[!qui][qui_pow] = pow_named
                 }
-            }
-
-            if(any(qui_iv <- grepl("^fit_", var_left))){
-                # IVs
-                iv_vars = gsub("^fit_", "", var_left[qui_iv])
-
-                if(fit_format == "__var__"){
-                    iv_vars = dict_apply(iv_vars, dict)
-
-                } else {
-                    for(i in seq_along(iv_vars)){
-                        iv_vars = gsub("__var__", dict_apply(iv_vars[i], dict), fit_format)
-                    }
-                }
-
-                var[!qui][qui_iv] = new_var[!qui][qui_iv] = iv_vars
             }
 
             names(new_var) = names(var) = var_origin
@@ -2637,36 +2638,9 @@ setFixest_etable = function(digits = 4, fitstat, coefstat = c("se", "tstat", "co
 
     check_arg(digits, "integer scalar GE{1}")
 
-    # fitstat (chiant)
+    # fitstat (chiant) => controle reporte a fitstat_validate
     if(!missing(fitstat)){
-        check_arg(fitstat, "NA | os formula | charin(FALSE) | character vector no na")
-        if("formula" %in% class(fitstat)){
-            fitstat = attr(terms(fitstat, data = data.frame(DEFAULT = 1)), "term.labels")
-        } else if (length(fitstat) == 1 && (isFALSE(fitstat) || is.na(fitstat))){
-            fitstat = c()
-        }
-
-        # checking the types
-        fitstat_fun_types = fixest::fitstat(give_types = TRUE)
-        fitstat_type_allowed = fitstat_fun_types$types
-        fitstat = unique(fitstat)
-        type_alias = fitstat_fun_types$type_alias
-
-        if(any(fitstat %in% names(type_alias))){
-            i = intersect(fitstat, names(type_alias))
-            fitstat[fitstat %in% i] = type_alias[fitstat[fitstat %in% i]]
-        }
-
-        pblm = setdiff(fitstat, c(fitstat_type_allowed, "DEFAULT"))
-        if(length(pblm) > 0){
-            stop_up("Argument 'fitstat' must be a one sided formula (or a character vector) containing valid types from the function fitstat (see details in ?fitstat or use fitstat(show_types = TRUE)). The type", enumerate_items(pblm, "s.is.quote"), " not valid.")
-        }
-
-        if(length(fitstat) == 0){
-            fitstat = NA
-        } else {
-            fitstat = as.formula(paste("~", paste(gsub("DEFAULT", ".", fitstat), collapse = "+")))
-        }
+        fitstat = fitstat_validate(fitstat)
     }
 
 
