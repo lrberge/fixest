@@ -162,9 +162,3 @@ run_test = function(chunk){
     eval(parsed_code, .GlobalEnv)
 }
 
-
-setflag = function(x) assign("FLAG", x, .GlobalEnv)
-
-flag = function() mget("FLAG", .GlobalEnv, ifnotfound = FALSE)
-
-

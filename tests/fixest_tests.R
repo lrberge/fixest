@@ -12,7 +12,7 @@
 library(dreamerr) ; library(fixest)
 
 
-test = fixest:::test
+test = fixest:::test ; chunk = fixest:::chunk
 vcovClust = fixest:::vcovClust
 
 setFixest_notes(FALSE)
@@ -785,24 +785,42 @@ base$ln_dist = log(base$dist_km)
 X = base[, c("ln_euros", "ln_dist")]
 fe = base[, c("Origin", "Destination")]
 
-X_demean = demean(X, fe)
-base_new = as.data.frame(X_demean)
+base_new = demean(X, fe)
 
 a = feols(ln_euros ~ ln_dist, base_new)
 b = feols(ln_euros ~ ln_dist | Origin + Destination, base, demeaned = TRUE)
 
 test(coef(a)[-1], coef(b), "~", 1e-12)
 
-test(X_demean[, 1], b$y_demeaned)
-test(X_demean[, -1], b$X_demeaned)
+test(base_new$ln_euros, b$y_demeaned)
+test(base_new$ln_dist, b$X_demeaned)
+
+# Now we just check there's no error
 
 # NAs
 X_NA = X
-fe_NA =fe
-X_NA[sample(nrow(X_NA), 50), 1] = NA
-fe_NA[sample(nrow(fe_NA), 50), 1] = NA
+fe_NA = fe
+X_NA[1:5, 1] = NA
+fe_NA[6:10, 1] = NA
 X_demean = demean(X_NA, fe_NA)
+test(nrow(X_demean), nrow(X))
 
+# integer
+X_int = X
+X_int[[1]] = as.integer(X_int[[1]])
+X_demean = demean(X_int, fe)
+
+# matrix
+X_demean = demean(X_int, fe, as.matrix = TRUE)
+
+# fml
+X_demean = demean(ln_dist ~ Origin + Destination, data = base)
+
+# slopes
+X_dm_slopes = demean(ln_dist ~ Origin + Destination[ln_euros], data = base)
+X_dm_slopes_bis = demean(base$ln_dist, fe, slope.vars = base$ln_euros, slope.flag = c(0, 1))
+
+test(X_dm_slopes, X_dm_slopes_bis)
 
 ####
 #### fixef ####
