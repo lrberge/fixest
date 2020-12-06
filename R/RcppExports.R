@@ -125,12 +125,12 @@ cpp_get_fe_gnl <- function(Q, N, sumFE, dumMat, cluster_sizes, obsCluster) {
     .Call(`_fixest_cpp_get_fe_gnl`, Q, N, sumFE, dumMat, cluster_sizes, obsCluster)
 }
 
-cpp_ssr_null <- function(y) {
-    .Call(`_fixest_cpp_ssr_null`, y)
+cpp_ssr_null <- function(y, w = numeric(0)) {
+    .Call(`_fixest_cpp_ssr_null`, y, w)
 }
 
-cpp_ssq <- function(x) {
-    .Call(`_fixest_cpp_ssq`, x)
+cpp_ssq <- function(x, w = numeric(0)) {
+    .Call(`_fixest_cpp_ssq`, x, w)
 }
 
 cpp_isConstant <- function(x) {

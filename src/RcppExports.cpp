@@ -543,24 +543,26 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_ssr_null
-double cpp_ssr_null(NumericVector y);
-RcppExport SEXP _fixest_cpp_ssr_null(SEXP ySEXP) {
+double cpp_ssr_null(NumericVector y, NumericVector w);
+RcppExport SEXP _fixest_cpp_ssr_null(SEXP ySEXP, SEXP wSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_ssr_null(y));
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_ssr_null(y, w));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_ssq
-double cpp_ssq(NumericVector x);
-RcppExport SEXP _fixest_cpp_ssq(SEXP xSEXP) {
+double cpp_ssq(NumericVector x, NumericVector w);
+RcppExport SEXP _fixest_cpp_ssq(SEXP xSEXP, SEXP wSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_ssq(x));
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_ssq(x, w));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1001,8 +1003,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_tapply_vsum", (DL_FUNC) &_fixest_cpp_tapply_vsum, 3},
     {"_fixest_cpp_table", (DL_FUNC) &_fixest_cpp_table, 2},
     {"_fixest_cpp_get_fe_gnl", (DL_FUNC) &_fixest_cpp_get_fe_gnl, 6},
-    {"_fixest_cpp_ssr_null", (DL_FUNC) &_fixest_cpp_ssr_null, 1},
-    {"_fixest_cpp_ssq", (DL_FUNC) &_fixest_cpp_ssq, 1},
+    {"_fixest_cpp_ssr_null", (DL_FUNC) &_fixest_cpp_ssr_null, 2},
+    {"_fixest_cpp_ssq", (DL_FUNC) &_fixest_cpp_ssq, 2},
     {"_fixest_cpp_isConstant", (DL_FUNC) &_fixest_cpp_isConstant, 1},
     {"_fixest_cpp_any_na_null", (DL_FUNC) &_fixest_cpp_any_na_null, 1},
     {"_fixest_cpp_constant_dum", (DL_FUNC) &_fixest_cpp_constant_dum, 4},

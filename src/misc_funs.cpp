@@ -504,43 +504,65 @@ List cpp_get_fe_gnl(int Q, int N, NumericVector sumFE, IntegerMatrix dumMat, Int
 
 
 // [[Rcpp::export]]
-double cpp_ssr_null(NumericVector y){
+double cpp_ssr_null(NumericVector y, NumericVector w = NumericVector(0)){
 	// simple fun to compute the ssr of the null ols model
 	// 2/3 times faster than pure r
 
-	int n = y.length();
+	bool is_weight = w.length() > 1;
 
-	// the mean
+	int n = y.length();
+	double denom = 0;
+
+	// the "mean"
 	double y_mean = 0;
-	for(int i=0 ; i<n ; i++){
-		y_mean += y[i];
+	for(int i=0 ; i<n ; ++i){
+	    if(is_weight){
+	        y_mean += y[i] * w[i];
+	        denom += w[i];
+	    } else {
+	        y_mean += y[i];
+	    }
 	}
 
-	y_mean = y_mean/n;
+	if(is_weight){
+	    y_mean = y_mean/denom;
+	} else {
+	    y_mean = y_mean/n;
+	}
 
-	double res = 0, value;
-	for(int i=0 ; i<n ; i++){
+	double res = 0, value = 0;
+	for(int i=0 ; i<n ; ++i){
 		value = y[i] - y_mean;
-		res += value * value;
+	    if(is_weight){
+	        res += value * value * w[i];
+	    } else {
+	        res += value * value;
+	    }
 	}
 
 	return(res);
 }
 
 // [[Rcpp::export]]
-double cpp_ssq(NumericVector x){
+double cpp_ssq(NumericVector x, NumericVector w = NumericVector(0)){
 	// simple fun to compute the sum of the square of the elt of a vector
-	// 30% fatser than pure r
+	// 30% faster than pure r (twice faster with weights)
+
+	bool is_weight = w.length() > 1;
 
 	int n = x.length();
 
 	// the mean
 	double res = 0;
 	for(int i=0 ; i<n ; i++){
-		res += x[i] * x[i];
+	    if(is_weight){
+	        res += x[i] * x[i] * w[i];
+	    } else {
+	        res += x[i] * x[i];
+	    }
 	}
 
-	return(res);
+	return res;
 }
 
 // [[Rcpp::export]]
