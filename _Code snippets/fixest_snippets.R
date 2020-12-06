@@ -5,6 +5,85 @@
 #----------------------------------------------#
 
 
+####
+#### Marginal effects ####
+####
+
+# Quick and Dirty implementation of marginal effects
+# Very limited but does the job. Easy to expand.
+
+
+meffect = function(x, at_means = TRUE, se, cluster, ...){
+    # x: fixest object
+
+    check_arg(x, "class(fixest) mbt")
+    check_arg(at_means, "logical scalar")
+    if(isFALSE(at_means)) stop("Sorry, so far, only the marginal effects at means is available.")
+
+    if(!isTRUE(x$summary) || !missing(se) || !missing(cluster)){
+        x = summary(x, se = se, cluster = cluster, ...)
+    }
+
+    coef = x$coefficients
+    vars = names(coef)
+
+    vcov = x$cov.scaled
+
+    m = model.matrix(x)
+    m_mean = colMeans(m[, vars])
+    mu_mean = as.vector(m_mean %*% coef)
+
+    # 1) the SE
+    # 2) the ME with formatting
+
+    # 1) The standard errors via the delta method (at means)
+    if(x$method_type == "feols" || (x$method_type == "feNmlm" && x$family == "gaussian")){
+        d_f = function(x) 1
+        dd_f = function(x) 0
+    } else if((x$method_type == "feNmlm" && x$family == "gaussian") || (x$method_type == "feglm" && x$family$family == "poisson")){
+        d_f = function(x) exp(x)
+        dd_f = function(x) exp(x)
+    } else if(x$method_type == "feglm" && x$family$family == "binomial" && x$family$link == "probit"){
+        d_f = dnorm
+        dd_f = function(x) 1/(sqrt(2*pi)) * -x * exp(-x**2/2)
+    } else {
+        stop("Current family is not supported.")
+    }
+
+    # jacobian from the formula
+    jac = tcrossprod(coef, m_mean) * dd_f(mu_mean)
+    diag(jac) = diag(jac) + d_f(mu_mean)
+    vcov_new = jac %*% vcov %*% t(jac)
+
+    sd = sqrt(diag(vcov_new))
+    value = coef * d_f(mu_mean)
+    z = value/sd
+
+    res = data.frame(var = vars, dydx = value, se = sd, z = z, pvalue = 2 * pnorm(-abs(z)), CI_95_low = value - 1.96*sd, CI_95_high = value + 1.96*sd, row.names = seq_along(vars))
+
+    res
+}
+
+#
+# Example
+#
+
+# Note:
+# - check with Stata's: margins, dydx(x1 x2) atmeans
+
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
+
+# I set the default SE to "standard" for comparability with Stata
+setFixest_se(no_FE = "standard")
+
+res = fepois(y ~ x1 + x2, base)
+meffect(res)
+
+res = feglm(1*(y > 5) ~ x1 + x2, base, family = binomial("probit"))
+meffect(res)
+
+
 
 
 ####
