@@ -355,7 +355,7 @@ summary.fixest = function(object, se, cluster, dof = getFixest_dof(), .vcov, sta
 	if(!is.null(object$cov.scaled) && "fromPrint" %in% names(dots)) return(object)
 
 	# Checking arguments in ...
-	if(!any(c("fromPrint", "nframes_up") %in% names(match.call()))){
+	if(!any(c("fromPrint") %in% names(match.call()))){
 	    # condition means NOT internal call => thus client call
 	    if(missing(.vcov) || !is.function(.vcov)){
 	        validate_dots(suggest_args = c("se", "cluster", "dof"))
@@ -371,12 +371,6 @@ summary.fixest = function(object, se, cluster, dof = getFixest_dof(), .vcov, sta
 	    object$n_print = n
 	}
 
-	if(is.null(dots$nframes_up)){
-		nframes_up = 1 + !is.null(dots$fromPrint)
-	} else {
-		nframes_up = dots$nframes_up + 1
-	}
-
 	# IV
 	if(isTRUE(object$iv) && !isTRUE(dots$iv)){
 	    stage = unique(stage)
@@ -387,13 +381,13 @@ summary.fixest = function(object, se, cluster, dof = getFixest_dof(), .vcov, sta
 	    for(s in seq_along(stage)){
 	        if(stage[s] == 1){
 	            if("fixest" %in% class(object$iv_first_stage)){
-	                res[[length(res) + 1]] = summary(object$iv_first_stage, se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nframes_up = nframes_up + 1, nthreads = nthreads, iv = TRUE)
+	                res[[length(res) + 1]] = summary(object$iv_first_stage, se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nthreads = nthreads, iv = TRUE)
 
 	                stage_names[length(stage_names) + 1] = paste0("First stage: ", deparse_long(object$iv_first_stage$fml[[2]]))
 
 	            } else {
 	                for(i in seq_along(object$iv_first_stage)){
-	                    res[[length(res) + 1]] = summary(object$iv_first_stage[[i]], se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nframes_up = nframes_up + 1, nthreads = nthreads, iv = TRUE)
+	                    res[[length(res) + 1]] = summary(object$iv_first_stage[[i]], se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nthreads = nthreads, iv = TRUE)
 
 	                    stage_names[length(stage_names) + 1] = paste0("First stage: ", names(object$iv_first_stage)[i])
 	                }
@@ -401,7 +395,7 @@ summary.fixest = function(object, se, cluster, dof = getFixest_dof(), .vcov, sta
 	        } else {
 	            # We keep the information on clustering => matters for wald tests of 1st stage
 	            keep_se_info = length(stage) == 1
-	            my_res = summary(object, se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nframes_up = nframes_up + 1, nthreads = nthreads, iv = TRUE, keep_se_info = keep_se_info)
+	            my_res = summary(object, se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nthreads = nthreads, iv = TRUE, keep_se_info = keep_se_info)
 
 	            if(keep_se_info){
 	                se_info = attr(my_res$cov.scaled, "se_info")
@@ -475,7 +469,7 @@ summary.fixest = function(object, se, cluster, dof = getFixest_dof(), .vcov, sta
 	    }
 
 	} else {
-	    vcov = vcov(object, se=se, cluster=cluster, dof=dof, forceCovariance = forceCovariance, keepBounded = keepBounded, nframes_up = nframes_up, nthreads = nthreads, attr = TRUE, keep_se_info = isTRUE(dots$keep_se_info))
+	    vcov = vcov(object, se=se, cluster=cluster, dof=dof, forceCovariance = forceCovariance, keepBounded = keepBounded, nthreads = nthreads, attr = TRUE, keep_se_info = isTRUE(dots$keep_se_info))
 	}
 
 
@@ -557,11 +551,10 @@ summ = function(object, se, cluster, dof = getFixest_dof(), forceCovariance = FA
 summary.fixest_list = function(object, se, cluster, dof = getFixest_dof(), .vcov, stage = 2, lean = FALSE, n, ...){
 
     dots = list(...)
-    nframes_up = ifelse(is.null(dots$nframes_up), 1, dots$nframes_up + 1)
 
     res = list()
     for(i in seq_along(object)){
-        my_res = summary(object[[i]], se = se, cluster = cluster, dof = dof, .vcov = .vcov, stage = stage, lean = lean, n = n, nframes_up = nframes_up)
+        my_res = summary(object[[i]], se = se, cluster = cluster, dof = dof, .vcov = .vcov, stage = stage, lean = lean, n = n)
 
         # we unroll in case of IV
         if("fixest_multi" %in% class(my_res)){
@@ -693,7 +686,6 @@ r2 = function(x, type = "all", full_names = FALSE){
 		        # => we need to compute the FE model first
 
 		        # 2019-11-26: now self contained call (no need for outer frame evaluation)
-		        # res_fe = update(x, .~1|., glm.tol = 1e-2, fixef.tol = 1e-3, nframes = 2)
 
 		        # constructing the data
 		        newdata = cbind(data.frame(y = x$y), as.data.frame(x$fixef_id))
@@ -1484,13 +1476,7 @@ collinearity = function(x, verbose){
 	coef = x$coefficients
 
 	# Getting the data
-	data = NULL
-	dataName = x$call$data
-	try(data <- eval(dataName, parent.frame()))
-
-	if(is.null(data)){
-		stop("To apply function 'collinearity', we fetch the original database in the parent.frame -- but it doesn't seem to be there anymore (btw it was ", deparse_long(dataName), ").")
-	}
+	data = fetch_data(x, "To apply function 'collinearity', ")
 
 	if(is.matrix(data)){
 	    data = as.data.frame(data)
@@ -3705,7 +3691,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
     # To update
     type_with_summary = any(grepl("^(g|(iv)?wald)", type))
     if(type_with_summary && (!isTRUE(x$summary) || !is.null(dots$se) || !is.null(dots$cluster))){
-        x = summary(x, nframes_up = 1, ...)
+        x = summary(x, ...)
     }
 
     IS_ETABLE = isTRUE(dots$etable)
@@ -3989,9 +3975,9 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                             if(is.null(x_first$cov.scaled)){
                                 # We compute the VCOV like for the second stage
                                 if(is.null(x$se_info) || !is.null(dots$se) || !is.null(dots$cluster)){
-                                    x_first = summary(x_first, nframes_up = 1, ...)
+                                    x_first = summary(x_first, ...)
                                 } else {
-                                    x_first = summary(x_first, se = x$se_info$se, cluster = x$se_info$cluster, dof = x$se_info$dof, nframes_up = 1, ...)
+                                    x_first = summary(x_first, se = x$se_info$se, cluster = x$se_info$cluster, dof = x$se_info$dof, ...)
                                 }
                             }
 
@@ -4013,9 +3999,9 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                                 if(is.null(my_x_first$cov.scaled)){
                                     # We compute the VCOV like for the second stage
                                     if(is.null(x$se_info) || !is.null(dots$se) || !is.null(dots$cluster)){
-                                        my_x_first = summary(my_x_first, nframes_up = 1, ...)
+                                        my_x_first = summary(my_x_first, ...)
                                     } else {
-                                        my_x_first = summary(my_x_first, se = x$se_info$se, cluster = x$se_info$cluster, dof = x$se_info$dof, nframes_up = 1, ...)
+                                        my_x_first = summary(my_x_first, se = x$se_info$se, cluster = x$se_info$cluster, dof = x$se_info$dof, ...)
                                     }
                                 }
 
@@ -4208,7 +4194,7 @@ wald = function(x, keep = NULL, drop = NULL, print = TRUE, se, cluster, ...){
 
     dots = list(...)
     if(!isTRUE(x$summary) || !missing(se) || !missing(cluster) || ...length() > 0){
-        x = summary(x, se = se, cluster = cluster, nframes_up = 1, ...)
+        x = summary(x, se = se, cluster = cluster, ...)
     }
 
     if(missing(keep) && missing(drop)){
@@ -5335,7 +5321,7 @@ set_defaults = function(opts_name){
 
 }
 
-fetch_data = function(x){
+fetch_data = function(x, prefix = "", suffix = ""){
     # x: fixest estimation
     # We try different strategies:
     # 1) using the environment where the estimation was done
@@ -5345,13 +5331,13 @@ fetch_data = function(x){
     # Maybe I should keep only 1) => is there a reason to add the others?
 
     # 1) safest
-    # 2) less safe but OK => no note
-    # 3) kind of dangerous => warning()
+    # 2) less safe but OK => note ???
+    # 3) kind of dangerous => warning() ???
 
     # 1) Environment of the call
 
     data = NULL
-    try(data <- eval(x$call$data, x$call_env))
+    try(data <- eval(x$call$data, x$call_env), silent = TRUE)
 
     if(!is.null(data)){
         return(data)
@@ -5370,7 +5356,7 @@ fetch_data = function(x){
 
     if(sysOrigin != 0){
         # We try again...
-        try(data <- eval(x$call$data, parent.frame(sysOrigin)))
+        try(data <- eval(x$call$data, parent.frame(sysOrigin)), silent = TRUE)
 
         if(!is.null(data)){
             return(data)
@@ -5381,7 +5367,7 @@ fetch_data = function(x){
 
     if(!identical(parent.env(x$call_env))){
         # ...and again
-        try(data <- eval(x$call$data, .GlobalEnv))
+        try(data <- eval(x$call$data, .GlobalEnv), silent = TRUE)
 
         if(!is.null(data)){
             return(data)
@@ -5390,7 +5376,20 @@ fetch_data = function(x){
 
     # => Error message
 
-    stop_up("We tried to fetch the data in the enviroment where the estimation was made, but the data (btw it was ", charShorten(deparse(x$call$data)[1], 15), ") does not seem to be there any more.")
+    if(nchar(prefix) == 0){
+        msg = "W"
+    } else {
+        s = ifelse(grepl(" $", prefix), "", " ")
+        if(grepl("\\. *$", prefix)){
+            msg = paste0(prefix, s, "W")
+        } else {
+            msg = paste0(prefix, s, "w")
+        }
+    }
+
+    msg = ifelse(nchar(prefix) > 0, gsub(" +", " ", paste0(prefix, ", w")), "W")
+
+    stop_up(msg, "e fetch the data in the enviroment where the estimation was made, but the data does not seem to be there any more (btw it was ", charShorten(deparse(x$call$data)[1], 15), "). ", suffix)
 
 
 }
@@ -7436,10 +7435,11 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 
     check_arg(attr, "logical scalar")
 
-    if(!"nframes_up" %in% names(match.call())){
-        # condition means client call
+    if(!any("keep_se_info" %in% names(match.call(expand.dots = TRUE)))){
+        # means NOT a client call
         validate_dots(suggest_args = c("se", "cluster", "dof"))
     }
+
 
 	if(!is.null(object$onlyFixef)){
 		# means that the estimation is done without variables
@@ -7493,8 +7493,6 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 			}
 
 			se = switch(nway, "1"="cluster", "2"="twoway", "3"="threeway", "4"="fourway")
-
-			suffix = paste0(" [note: ", nway, "-way clustering deduced by cluster length.]")
 		}
 
 	}
@@ -7521,11 +7519,6 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 	nthreads = check_set_nthreads(nthreads)
 
 	dots = list(...)
-	if(is.null(dots$nframes_up)){
-		nframes_up = 1
-	} else {
-		nframes_up = dots$nframes_up + 1
-	}
 
 	# DoF related
 	check_arg(dof, "class(dof.type)", .message = "The argument 'dof.type' must be an object created by the function dof().")
@@ -7743,7 +7736,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 					if(!doEval){
 						is_ok = grepl("^[\\.[:alpha:]][[:alnum:]_\\.]*(\\^[\\.[:alpha:]][[:alnum:]_\\.]*)*$", cluster)
 						if(any(!is_ok)){
-							stop("In argument cluster, only variable names and the '^' operator are accepted. The expression", enumerate_items(cluster[!is_ok], "s.is"), " not valid.\nAlternatively, you can use a list of vectors.", suffix)
+							stop("In argument cluster, only variable names and the '^' operator are accepted. The expression", enumerate_items(cluster[!is_ok], "s.is"), " not valid.\nAlternatively, you can use a list of vectors.")
 						}
 
 					}
@@ -7780,14 +7773,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 						var2fetch = setdiff(all_vars, object$fixef_vars)
 
 						# evaluation
-						data = NULL
-						try(data <- eval(object$call$data, parent.frame(nframes_up)), silent = TRUE)
-						dataName = object$call$data
-
-						if(is.null(data)){
-							# We try to provide an informative error message
-							stop("Cannot apply ", nway, "-way clustering with current 'cluster' argument. Variable", enumerate_items(var2fetch, "s.is.past"), " not used as fixed-effects in the estimation. We tried to fetch ", ifelse(length(var2fetch) == 1, "this variable", "these variables"), " in the original database in the parent.frame -- but the data doesn't seem to be there anymore (btw it was ", deparse_long(dataName), "). Alternatively, use a list of vectors.", suffix)
-						}
+						data = fetch_data(object, paste0("Cannot apply ", nway, "-way clustering with current 'cluster' argument. Variable", enumerate_items(var2fetch, "s.is.past"), " not used as fixed-effects in the estimation so ", plural_len(var2fetch, "need"), " to be taken from the data. "), " Alternatively, use a list of vectors.")
 
 						data = as.data.frame(data)
 
@@ -7796,12 +7782,12 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 
 						if(any(!all_vars %in% names(data))){
 							var_pblm = setdiff(all_vars, names(data))
-							stop("In argument 'cluster', the variable", enumerate_items(var_pblm, "s.is"), " not present in the original dataset. Alternatively, use a list of vectors.", suffix)
+							stop("In argument 'cluster', the variable", enumerate_items(var_pblm, "s.is"), " not present in the original dataset. Alternatively, use a list of vectors.")
 						}
 
 						# we check length consistency
 						if(NROW(data) != object$nobs_origin){
-							stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(var2fetch, "s"), " in the original dataset (", deparse_long(dataName), "), yet the dataset doesn't have the same number of observations as was used in the estimation (", NROW(data), " instead of ", object$nobs_origin, ").", suffix)
+							stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(var2fetch, "s"), " in the original dataset (", deparse_long(dataName), "), yet the dataset doesn't have the same number of observations as was used in the estimation (", NROW(data), " instead of ", object$nobs_origin, ").")
 						}
 
 						if(length(object$obsRemoved) > 0){
@@ -7818,7 +7804,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 						if(anyNA(data)){
 							varsNA = sapply(data, anyNA)
 							varsNA = names(varsNA)[varsNA]
-							stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(varsNA, "s"), " in the original dataset (", deparse_long(dataName), "). But ", ifsingle(varsNA, "this variable", "these variables"), " contain", ifsingle(varsNA, "s", ""), " NAs", msgRemoved, ". This is not allowed.", suffix)
+							stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(varsNA, "s"), " in the original dataset (", deparse_long(dataName), "). But ", ifsingle(varsNA, "this variable", "these variables"), " contain", ifsingle(varsNA, "s", ""), " NAs", msgRemoved, ". This is not allowed.")
 						}
 
 						# We create the cluster list
@@ -7878,7 +7864,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 					cluster = list(cluster)
 
 				} else if(! (is.list(cluster) && length(cluster) == 1)){
-					stop("For one way clustering, the argument 'cluster' must be either the name of a cluster variable (e.g. \"dum_1\"), a vector (e.g. data$dum_1), a list containing the vector of clusters (e.g. list(data$dum_1)), or a one-sided formula (e.g. ~dum_1). Currently the class of cluster is ", enumerate_items(class(cluster)), ".", suffix)
+					stop("For one way clustering, the argument 'cluster' must be either the name of a cluster variable (e.g. \"dum_1\"), a vector (e.g. data$dum_1), a list containing the vector of clusters (e.g. list(data$dum_1)), or a one-sided formula (e.g. ~dum_1). Currently the class of cluster is ", enumerate_items(class(cluster)), ".")
 
 				} else if(!is.null(names(cluster))){
 				    type_info = paste0(" (", names(cluster), ")")
@@ -7888,10 +7874,10 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 
 				msgList = "a list of vectors"
 				if(is.list(cluster)) msgList = "a vector of variables names"
-				stop(nway, "-way clustering is asked for, but the length of argument 'cluster' is ", length(cluster), " (it should be ", nway, "). Alternatively, you can use ", msgList, " or a one-sided formula.", suffix)
+				stop(nway, "-way clustering is asked for, but the length of argument 'cluster' is ", length(cluster), " (it should be ", nway, "). Alternatively, you can use ", msgList, " or a one-sided formula.")
 
 			} else if(!is.list(cluster)){
-				stop("For ", nway, "-way clustering, the argument 'cluster' must be either a vector of cluster variables (e.g. c(\"", paste0("dum_", 1:nway, collapse = "\", \""), "\")), a list containing the vector of clusters (e.g. data[, c(\"", paste0("dum_", 1:nway, collapse = "\", \""), "\")]), or a one-sided formula (e.g. ~", paste0("dum_", 1:nway, collapse = "+"), "). Currently the class of cluster is: ", enumerate_items(class(cluster)), ".", suffix)
+				stop("For ", nway, "-way clustering, the argument 'cluster' must be either a vector of cluster variables (e.g. c(\"", paste0("dum_", 1:nway, collapse = "\", \""), "\")), a list containing the vector of clusters (e.g. data[, c(\"", paste0("dum_", 1:nway, collapse = "\", \""), "\")]), or a one-sided formula (e.g. ~", paste0("dum_", 1:nway, collapse = "+"), "). Currently the class of cluster is: ", enumerate_items(class(cluster)), ".")
 
 			} else if(!is.null(names(cluster))){
 			    type_info = paste0(" (", paste0(names(cluster), collapse = " & "), ")")
@@ -8128,7 +8114,7 @@ confint.fixest = function(object, parm, level = 0.95, se, cluster, dof = getFixe
 	}
 
 	# The proper SE
-	sum_object = summary(object, se = se, cluster = cluster, dof = dof, nframes_up = 1, ...)
+	sum_object = summary(object, se = se, cluster = cluster, dof = dof, ...)
 
 	se_all = sum_object$se
 	coef_all = object$coefficients
@@ -8472,7 +8458,7 @@ model.matrix.fixest = function(object, data, na.rm = TRUE, ...){
 	# We evaluate the formula with the past call
 
     # Checking the arguments
-    validate_dots(suggest_args = "data")
+    validate_dots(suggest_args = c("data", "type"))
 
     if(isTRUE(object$fromFit)){
         stop("model.matrix method not available for fixest estimations obtained from fit methods.")
@@ -8481,7 +8467,7 @@ model.matrix.fixest = function(object, data, na.rm = TRUE, ...){
 	# I) we obtain the right formula
 	fml = object$fml
 
-	# we kick out the intercept if there is presence of clusters
+	# we kick out the intercept if there is presence of fixed-effects
 	if(attr(terms(fml), "intercept") == 1 && !is.null(object$fixef_vars)){
 		fml = update(fml, . ~ . - 1)
 	}
@@ -8491,15 +8477,7 @@ model.matrix.fixest = function(object, data, na.rm = TRUE, ...){
 	if(missing(data)){
 	    original_data = TRUE
 
-		call_old = object$call
-
-		data = NULL
-		try(data <- eval(object$call$data, parent.frame()), silent = TRUE)
-
-		if(is.null(data)){
-			dataName = deparse_long(object$call$data)
-			stop("To apply 'model.matrix.fixest', we fetch the original database in the parent.frame -- but it doesn't seem to be there anymore (btw it was ", dataName, ").")
-		}
+	    data = fetch_data(object, "To apply 'model.matrix.fixest', ")
 
 	}
 

@@ -19,7 +19,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                        warn = TRUE, notes = getFixest_notes(), combine.quick, demeaned = FALSE,
                        origin_bis, origin = "feNmlm", mc_origin, mc_origin_bis, mc_origin_ter,
                        computeModel0 = FALSE, weights,
-                       debug = FALSE, mem.clean = FALSE, ...){
+                       debug = FALSE, mem.clean = FALSE, call_env = NULL, call_env_bis, ...){
 
     # INTERNAL function:
     # the estimation functions need input data in the exact format without any mistake possible (bc of c++)
@@ -37,6 +37,10 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     # The match.call of origin
     if(!missnull(mc_origin_bis)){
         mc_origin = mc_origin_bis
+    }
+
+    if(!missnull(call_env_bis)){
+        call_env = call_env_bis
     }
 
     # NOTE on argument "origin":
@@ -2322,7 +2326,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     # Preparation of the results list (avoid code repetition in estimation funs)
     #
 
-    res = list(nobs=nobs, nobs_origin=nobs_origin, fml=fml_linear, call = mc_origin, method = origin)
+    res = list(nobs=nobs, nobs_origin=nobs_origin, fml=fml_linear, call = mc_origin, call_env = call_env, method = origin, method_type = origin_type)
 
     fml_all = list()
     fml_all$linear = fml_linear
