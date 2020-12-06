@@ -186,7 +186,7 @@ You can use the functions \code{\link[fixest]{setFixest_se}} and \code{\link[fix
 To estimate two stage least square regressions, insert the relationship between the endogenous regressor(s) and the instruments in a formula, after a pipe.
 
 For example, \code{fml = y ~ x1 | x_endo ~ x_inst} will use the variables \code{x1} and \code{x_inst} in the first stage to explain \code{x_endo}. Then will use the fitted value of \code{x_endo} (which will be named \code{fit_x_endo}) and \code{x1} to explain \code{y}.
-To include several endogenous regressors, you need to embed them in \code{c()}, like in: \code{fml = y ~ x1 | c(x_endo1, x_end2) ~ x_inst1 + x_inst2}.
+To include several endogenous regressors, just use "+", like in: \code{fml = y ~ x1 | x_endo1 + x_end2 ~ x_inst1 + x_inst2}.
 
 Of course you can still add the fixed-effects, but the IV formula must always come last, like in \code{fml = y ~ x1 | fe1 + fe2 | x_endo ~ x_inst}.
 
@@ -297,8 +297,8 @@ summary(res_iv, stage = 1:2)
 # Adding a fixed-effect => IV formula always last!
 res_iv_fe = feols(y ~ x1 + x2 | fe1 | x_endo1 ~ x_inst1, base)
 
-# With two endogenous regressors => we use c()
-res_iv2 = feols(y ~ x1 + x2 | c(x_endo1, x_endo2) ~ x_inst1 + x_inst2, base)
+# With two endogenous regressors
+res_iv2 = feols(y ~ x1 + x2 | x_endo1 + x_endo2 ~ x_inst1 + x_inst2, base)
 
 # Now there's two first stages => a fixest_multi object is returned
 sum_res_iv2 = summary(res_iv2, stage = 1)
@@ -307,10 +307,10 @@ sum_res_iv2 = summary(res_iv2, stage = 1)
 sum_res_iv2[iv = 1]
 
 # The stage argument also works in etable:
-etable(res_iv, res_iv_fe, res_iv2, order = "fit_")
+etable(res_iv, res_iv_fe, res_iv2, order = "endo")
 
-etable(res_iv, res_iv_fe, res_iv2, stage = 1:2, order = c("fit", "inst"),
-       group = list(control = "!fit_|inst"))
+etable(res_iv, res_iv_fe, res_iv2, stage = 1:2, order = c("endo", "inst"),
+       group = list(control = "!endo|inst"))
 
 #
 # Multiple estimations:

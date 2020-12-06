@@ -4,10 +4,12 @@
 \alias{print.fixest_fitstat}
 \title{Print method for fit statistics of fixest estimations}
 \usage{
-\method{print}{fixest_fitstat}(x, ...)
+\method{print}{fixest_fitstat}(x, na.rm = FALSE, ...)
 }
 \arguments{
 \item{x}{An object resulting from the \code{\link[fixest]{fitstat}} function.}
+
+\item{na.rm}{Logical, default is \code{FALSE}. If \code{TRUE}, the statistics that are missing are not displayed.}
 
 \item{...}{Not currently used.}
 }

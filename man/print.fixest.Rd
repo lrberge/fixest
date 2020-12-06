@@ -2,21 +2,32 @@
 % Please edit documentation in R/MiscFuns.R
 \name{print.fixest}
 \alias{print.fixest}
+\alias{setFixest_print}
+\alias{getFixest_print}
 \title{A print facility for \code{fixest} objects.}
 \usage{
-\method{print}{fixest}(x, n, type = getFixest_print.type(), ...)
+\method{print}{fixest}(x, n, type = "table", fitstat = NULL, ...)
+
+setFixest_print(type = "table", fitstat = NULL)
+
+getFixest_print()
 }
 \arguments{
 \item{x}{A \code{fixest} object. Obtained using the methods \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
 
 \item{n}{Integer, number of coefficients to display. By default, only the first 8 coefficients are displayed if \code{x} does not come from \code{\link[fixest]{summary.fixest}}.}
 
-\item{type}{Either \code{"table"} (default) to display the coefficients table or \code{"coef"} to display only the coefficients. By default the value is \code{getFixest_print.type()} which can be permanently set with \code{\link[fixest]{setFixest_print.type}}).}
+\item{type}{Either \code{"table"} (default) to display the coefficients table or \code{"coef"} to display only the coefficients.}
+
+\item{fitstat}{A formula or a character vector representing which fit statistic to display. The types must be valid types of the function \code{\link[fixest]{fitstat}}. The default fit statistics depend on the type of estimation (OLS, GLM, IV, with/without fixed-effect). Providing the argument \code{fitstat} overrides the default fit statistics, you can however use the point "." to summon them back. Ex 1: \code{fitstat = ~ . + ll} adds the log-likelihood to the default values. Ex 2: \code{fitstat = ~ ll + pr2} only displays the log-likelihood and the pseudo-R2.}
 
 \item{...}{Other arguments to be passed to \code{\link[fixest]{vcov.fixest}}.}
 }
 \description{
-This function is very similar to usual \code{summary} functions as it provides the table of coefficients along with other information on the fit of the estimation. The type of output is customizable by the user (using function \code{\link[fixest]{setFixest_print.type}}).
+This function is very similar to usual \code{summary} functions as it provides the table of coefficients along with other information on the fit of the estimation. The type of output is customizable by the user (using function \code{\link[fixest]{setFixest_print}}).
+}
+\details{
+It is possible to set the default values for the arguments \code{type} and \code{fitstat} by using the function \code{\link[fixest]{setFixest_print}}.
 }
 \examples{
 
@@ -25,7 +36,7 @@ data(trade)
 
 # We estimate the effect of distance on trade
 #   => we account for 3 fixed-effects (FEs)
-est_pois = femlm(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
+est_pois = fepois(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
 
 # displaying the results
 #  (by default SEs are clustered if FEs are used)
@@ -35,11 +46,30 @@ print(est_pois)
 #  If the user wished to display only the coefficents, use option type:
 print(est_pois, type = "coef")
 
-# To permanently display coef. only, use setFixest_print.type:
-setFixest_print.type("coef")
+# To permanently display coef. only, use setFixest_print:
+setFixest_print(type = "coef")
 est_pois
 # back to default:
-setFixest_print.type("table")
+setFixest_print(type = "table")
+
+#
+# fitstat
+#
+
+# We modify which fit statistic to display
+print(est_pois, fitstat = ~ . + lr)
+
+# We add the LR test to the default (represented by the ".")
+
+# to show only the LR stat:
+print(est_pois, fitstat = ~ . + lr.stat)
+
+# To modify the defaults:
+setFixest_print(fitstat = ~ . + lr.stat + rmse)
+est_pois
+
+# Back to default (NULL == default)
+setFixest_print(fitstat = NULL)
 
 
 }

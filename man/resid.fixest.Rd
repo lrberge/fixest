@@ -23,16 +23,15 @@ residuals.fixest
 
 \item{type}{A character scalar, either \code{"response"} (default), \code{"deviance"}, \code{"pearson"}, or \code{"working"}. Note that the \code{"working"} corresponds to the residuals from the weighted least square and only applies to \code{\link[fixest]{feglm}} models.}
 
+\item{na.rm}{Logical, default is \code{TRUE}. Whether to remove the observations with NAs from the original data set. If \code{FALSE}, then the vector returned is always of the same length as the original data set.}
+
 \item{...}{Not currently used.}
 }
 \value{
-It returns a numeric vector of the length the number of observations used for the estimation.
+It returns a numeric vector of the length the number of observations used for the estimation (if \code{na.rm = TRUE}) or of the length of the original data set (if \code{na.rm = FALSE}).
 }
 \description{
 This function extracts residuals from a fitted model estimated with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
-}
-\details{
-The residuals returned are the difference between the dependent variable and the expected predictor.
 }
 \examples{
 
