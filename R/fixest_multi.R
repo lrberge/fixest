@@ -130,13 +130,11 @@ summary.fixest_multi = function(object, type = "short", se, cluster, dof = getFi
         attr(object, "print_request") = type
     }
 
-    nframes_up = ifelse(is.null(dots$nframes_up), 1, dots$nframes_up + 1)
-
     est_1 = data[[1]]
     if(is.null(est_1$cov.scaled) || !isTRUE(dots$fromPrint)){
 
         for(i in 1:length(data)){
-            data[[i]] = summary(data[[i]], nframes_up = nframes_up, se = se, cluster = cluster, dof = dof, .vcov = .vcov, stage = stage, lean = lean, n = n, ...)
+            data[[i]] = summary(data[[i]], se = se, cluster = cluster, dof = dof, .vcov = .vcov, stage = stage, lean = lean, n = n, ...)
         }
 
         # In IV: multiple estimations can be returned

@@ -939,9 +939,9 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
         if(useSummary){
             if(missing(.vcov)){
                 if(IS_MULTI_CLUST){
-                    x = summary(all_models[[m]], se = se[[m]], cluster = cluster[[m]], dof = dof, stage = stage, nframes_up = 2)
+                    x = summary(all_models[[m]], se = se[[m]], cluster = cluster[[m]], dof = dof, stage = stage)
                 } else {
-                    x = summary(all_models[[m]], se = se, cluster = cluster, dof = dof, stage = stage, nframes_up = 2)
+                    x = summary(all_models[[m]], se = se, cluster = cluster, dof = dof, stage = stage)
                 }
             } else {
                 x = summary(all_models[[m]], stage = stage, .vcov = .vcov, .vcov_args = .vcov_args, vcov_name = vcov_name)
