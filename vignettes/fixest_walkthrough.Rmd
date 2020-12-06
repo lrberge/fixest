@@ -25,6 +25,21 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
+set.seed(0)
+
+if(requireNamespace("data.table", quietly = TRUE)) library(data.table)
+
+require_DT_ON = function(){
+  if(!requireNamespace("data.table", quietly = TRUE)){
+    knitr::opts_chunk$set(eval = FALSE)
+    cat("Evaluation of the next chunks requires 'data.table', which is not present.")
+  }
+}
+
+require_DT_OFF = function(){
+  knitr::opts_chunk$set(eval = TRUE)
+}
+
 library(fixest)
 setFixest_nthreads(1)
 ```
@@ -35,7 +50,7 @@ setFixest_nthreads(1)
 
 The package `fixest` provides a family of functions to perform estimations with multiple fixed-effects.
 The two main functions are `feols` for linear models and `feglm` for generalized linear models. In addition, the function `femlm` performs direct maximum likelihood estimation, and `feNmlm` extends the latter to allow the inclusion of non-linear in parameters right-hand-sides. 
-Each of these functions supports *any number* of fixed-effects and is implemented with full fledged multi-threading in c++. Functions `feols` and `feglm` further support variables with varying slopes.
+Each of these functions supports any number of fixed-effects and is implemented with full fledged multi-threading in c++. Functions `feols` and `feglm` further support variables with varying slopes.
 
 This package is currently (Feb. 2020) the fastest software available to perform fixed-effects estimations (see the project's [homepage](https://github.com/lrberge/fixest/) for a benchmarking).
 
@@ -390,6 +405,11 @@ etable(est1, est2, est_sub, order = "f", drop = "Int")
 
 Last, if you also use `data.table`, let's give an example of lead/lag creation:
 
+```{r, include = FALSE}
+require_DT_ON()
+```
+
+
 ```{r}
 library(data.table)
 pdat_dt = panel(as.data.table(base_did), ~id+period)
@@ -398,6 +418,10 @@ pdat_dt[, x1_l1 := l(x1)]
 # Now 
 pdat_dt[, c("x1_l1_fill0", "y_f2") := .(l(x1, fill = 0), f(y, 2))]
 head(pdat_dt)
+```
+
+```{r, include = FALSE}
+require_DT_OFF()
 ```
 
 
@@ -416,11 +440,19 @@ The first two arguments are mandatory. The formula informs on the variable to be
 
 In case you use the popular package `data.table`, you can create lagged variables very simply:
 
+```{r, include = FALSE}
+require_DT_ON()
+```
+
 ```{r}
 library(data.table)
 base_lag_dt = as.data.table(base_did)
 # we create a lagged value of the variable x1
 base_lag_dt[, x1.l1 := lag(x1 ~ id + period, 1)]
+```
+
+```{r, include = FALSE}
+require_DT_OFF()
 ```
 
 ## Non-linear in parameters example

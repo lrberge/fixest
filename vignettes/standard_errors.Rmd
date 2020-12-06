@@ -16,24 +16,24 @@ knitr::opts_chunk$set(echo = TRUE,
 Sys.setenv(lang = "en")
 
 library(fixest)
-library(sandwich)
-library(plm)
-library(lfe)
+
+if(requireNamespace("plm", quietly = TRUE)) library(plm)
+
+if(requireNamespace("sandwich", quietly = TRUE)) library(sandwich)
+
+if(requireNamespace("lfe", quietly = TRUE)){
+  library(lfe)
+  options(lfe.threads = 1)
+}
 
 setFixest_nthreads(1)
 ```
-
-
-<!-- A faire:
- - check lfe + check reghdfe nouvelles version 2-way
- - pvalues!
--->
 
 It is an euphemism to say that standard-errors are a critical element of your estimations: literally your paper's results depend on them. It is therefore unfortunate that no conventional "best" way exists to compute them. Multiple definitions can create confusion and the purpose of this document is to lay bare the fiddly details of standard-error computation in this package.
 
 The first part describes how standard-errors are computed in `fixest`'s estimations. Please note that here I don't discuss the *why*, but only the *how*. For a thorough introduction to the topic, see the excellent paper by [Zeileis, Koll and Graham (2020)](https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf). The second part illustrates how to replicate some standard-errors obtained from other estimation methods with `fixest`. 
 
-This document applies to `fixest` version 0.7.0 or higher.
+This document applies to `fixest` version 0.8.0 or higher.
 
 
 ## How standard-errors are computed in `fixest`
@@ -129,6 +129,15 @@ base = data.frame(y = rnorm(N), x = rnorm(N), id = rep(1:n_id, n_time),
 
 Here are some comparisons when the estimation doesn't contain fixed-effects.
 
+```{r, echo = FALSE}
+if(!requireNamespace("sandwich", quietly = TRUE)){
+    knitr::opts_chunk$set(eval = FALSE)
+    cat("Evaluation of the next chunks requires 'sandwich', which is not present.")
+} else {
+    knitr::opts_chunk$set(eval = TRUE)
+}
+```
+
 ```{r}
 library(sandwich)
 
@@ -154,6 +163,8 @@ The most important differences arise in the presence of fixed-effects. Let's fir
 if(!requireNamespace("plm", quietly = TRUE)){
     knitr::opts_chunk$set(eval = FALSE)
     cat("Evaluation of the next chunks requires 'plm', which is not present.")
+} else {
+    knitr::opts_chunk$set(eval = TRUE)
 }
 ```
 

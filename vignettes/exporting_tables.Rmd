@@ -11,7 +11,20 @@ vignette: >
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, comment = "#>")
-library(pander)
+
+if(requireNamespace("pander", quietly = TRUE)) library(pander)
+
+require_pander_ON = function(){
+  if(!requireNamespace("pander", quietly = TRUE)){
+    knitr::opts_chunk$set(eval = FALSE)
+    cat("Evaluation of the next chunks requires 'pander', which is not present.")
+  }
+}
+
+require_pander_OFF = function(){
+  knitr::opts_chunk$set(eval = TRUE)
+}
+
 library(fixest)
 setFixest_notes(FALSE)
 setFixest_etable(digits = 3)
@@ -25,7 +38,7 @@ It also offers a fair deal of customization, and since you can seamlessly change
 
 Note that there exists excellent alternatives to export tables, like for instance [modelsummary](https://cran.r-project.org/package=modelsummary) or [texreg](https://cran.r-project.org/package=texreg); but they are, necessarily, less integrated with `fixest` objects, often necessiting more lines of code to export the same results. 
 
-This document does not describe `etable`'s arguments in details (the help page provides many examples). Rather, it illustrates some powerful features that may be hidden at first sight.
+This document does not describe `etable`'s arguments in details (the help page provides many examples). Rather, it illustrates some features that may be hidden at first sight.
 
 This document applies to `fixest` version 0.8.0 or higher.
 
@@ -77,6 +90,11 @@ In the previous example, the dependent variable and fixed-effects (FE) headers h
 
 Since the output of `etable` is a `data.frame`, any formatting function handling `data.frame`s can be leveraged. It is then very easy to integrate it into `etable`. Let's have an example with the package `pander`:
 
+```{r, echo = FALSE}
+require_pander_ON()
+```
+
+
 ```{r}
 library(pander)
 
@@ -101,6 +119,11 @@ Since now `pandoc.table.return` is the default postprocessing, *all its argument
 ```{r}
 etable(est[rhs = 2], style = "rmarkdown", caption = "New default values")
 ```
+
+```{r, echo = FALSE}
+require_pander_OFF()
+```
+
 
 ## Exporting multiple estimations to Latex
 
