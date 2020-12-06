@@ -69,7 +69,7 @@
 #' To estimate two stage least square regressions, insert the relationship between the endogenous regressor(s) and the instruments in a formula, after a pipe.
 #'
 #' For example, \code{fml = y ~ x1 | x_endo ~ x_inst} will use the variables \code{x1} and \code{x_inst} in the first stage to explain \code{x_endo}. Then will use the fitted value of \code{x_endo} (which will be named \code{fit_x_endo}) and \code{x1} to explain \code{y}.
-#' To include several endogenous regressors, you need to embed them in \code{c()}, like in: \code{fml = y ~ x1 | c(x_endo1, x_end2) ~ x_inst1 + x_inst2}.
+#' To include several endogenous regressors, just use "+", like in: \code{fml = y ~ x1 | x_endo1 + x_end2 ~ x_inst1 + x_inst2}.
 #'
 #' Of course you can still add the fixed-effects, but the IV formula must always come last, like in \code{fml = y ~ x1 | fe1 + fe2 | x_endo ~ x_inst}.
 #'
@@ -235,8 +235,8 @@
 #' # Adding a fixed-effect => IV formula always last!
 #' res_iv_fe = feols(y ~ x1 + x2 | fe1 | x_endo1 ~ x_inst1, base)
 #'
-#' # With two endogenous regressors => we use c()
-#' res_iv2 = feols(y ~ x1 + x2 | c(x_endo1, x_endo2) ~ x_inst1 + x_inst2, base)
+#' # With two endogenous regressors
+#' res_iv2 = feols(y ~ x1 + x2 | x_endo1 + x_endo2 ~ x_inst1 + x_inst2, base)
 #'
 #' # Now there's two first stages => a fixest_multi object is returned
 #' sum_res_iv2 = summary(res_iv2, stage = 1)
@@ -245,10 +245,10 @@
 #' sum_res_iv2[iv = 1]
 #'
 #' # The stage argument also works in etable:
-#' etable(res_iv, res_iv_fe, res_iv2, order = "fit_")
+#' etable(res_iv, res_iv_fe, res_iv2, order = "endo")
 #'
-#' etable(res_iv, res_iv_fe, res_iv2, stage = 1:2, order = c("fit", "inst"),
-#'        group = list(control = "!fit_|inst"))
+#' etable(res_iv, res_iv_fe, res_iv2, stage = 1:2, order = c("endo", "inst"),
+#'        group = list(control = "!endo|inst"))
 #'
 #' #
 #' # Multiple estimations:
@@ -304,7 +304,10 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 		# we use fixest_env for appropriate controls and data handling
 
 		if(missing(env)){
-		    env = try(fixest_env(fml = fml, data = data, weights = weights, offset = offset, subset = subset, split = split, fsplit = fsplit, cluster = cluster, se = se, panel.id = panel.id, fixef = fixef, fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter, collin.tol = collin.tol, nthreads = nthreads, verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick, demeaned = demeaned, mem.clean = mem.clean, origin = "feols", mc_origin = match.call(), ...), silent = TRUE)
+		    set_defaults("fixest_estimation")
+		    call_env = new.env(parent = parent.frame())
+
+		    env = try(fixest_env(fml = fml, data = data, weights = weights, offset = offset, subset = subset, split = split, fsplit = fsplit, cluster = cluster, se = se, panel.id = panel.id, fixef = fixef, fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter, collin.tol = collin.tol, nthreads = nthreads, verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick, demeaned = demeaned, mem.clean = mem.clean, origin = "feols", mc_origin = match.call(), call_env = call_env, ...), silent = TRUE)
 		} else if((r <- !is.environment(env)) || !isTRUE(env$fixest_env)) {
 		    stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(r, "an", "a 'fixest'"), " environment.")
 		}
@@ -625,7 +628,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	    n_rhs = length(rhs)
 	    res = vector("list", n_lhs * n_rhs)
 
-	    rhs_names = sapply(multi_rhs_fml_full, deparse_long)
+	    rhs_names = sapply(multi_rhs_fml_full, function(x) as.character(x)[[2]])
 
 	    for(i in seq_along(lhs_group)){
 	        for(j in seq_along(rhs_group)){
@@ -934,11 +937,12 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 	            # For the F-stats
 	            if(n_vars_X == 0){
-	                my_res$ssr_no_inst = cpp_ssq(y_demean)
+	                my_res$ssr_no_inst = cpp_ssq(iv_lhs_demean[[i]], weights)
 	            } else {
-	                fit_no_inst = ols_fit(iv_lhs_demean[[i]], X_demean, w = weights, correct_0w = FALSE, collin.tol = collin.tol, nthreads = nthreads,
-	                                      xwx = ZXtZX[-(1:K), -(1:K), drop = FALSE], xwy = ZXtu[[i]][-(1:K)])
-	                my_res$ssr_no_inst = cpp_ssq(fit_no_inst$residuals)
+	                fit_no_inst = ols_fit(iv_lhs_demean[[i]], X_demean, w = weights, correct_0w = FALSE,
+	                                      collin.tol = collin.tol, nthreads = nthreads,
+	                                      xwx = iv_products$XtX, xwy = ZXtu[[i]][-(1:K)])
+	                my_res$ssr_no_inst = cpp_ssq(fit_no_inst$residuals, weights)
 	            }
 
 	            my_res$iv_stage = 1
@@ -946,6 +950,8 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 	            res_first_stage[[iv_lhs_names[i]]] = my_res
 	        }
+
+	        if(verbose >= 2) gt("1st stage(s)")
 
 	        # Second stage
 
@@ -991,6 +997,15 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	                                 X_demean = UX_demean, y_demean = y_demean,
 	                                 resid_1st_stage = resid_s1)
 
+	        # For the F-stats
+	        if(n_vars_X == 0){
+	            res_second_stage$ssr_no_endo = cpp_ssq(y_demean, weights)
+	        } else {
+	            fit_no_endo = ols_fit(y_demean, X_demean, w = weights, correct_0w = FALSE,
+	                                  collin.tol = collin.tol, nthreads = nthreads,
+	                                  xwx = XtX, xwy = Xty)
+	            res_second_stage$ssr_no_endo = cpp_ssq(fit_no_endo$residuals, weights)
+	        }
 
 	    } else {
 	        # fixef == FALSE
@@ -1030,7 +1045,6 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 	        }
 
-
 	        res_first_stage = list()
 
 	        for(i in 1:n_endo){
@@ -1040,7 +1054,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	            # For the F-stats
 	            fit_no_inst = ols_fit(iv_lhs[[i]], X, w = weights, correct_0w = FALSE, collin.tol = collin.tol, nthreads = nthreads,
 	                                  xwx = ZXtZX[-(1:K + is_int), -(1:K + is_int), drop = FALSE], xwy = ZXtu[[i]][-(1:K + is_int)])
-	            my_res$ssr_no_inst = cpp_ssq(fit_no_inst$residuals)
+	            my_res$ssr_no_inst = cpp_ssq(fit_no_inst$residuals, weights)
 
 	            my_res$iv_stage = 1
 	            my_res$iv_inst_names_xpd = colnames(iv.mat)
@@ -1093,7 +1107,73 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	        current_env = reshape_env(env, rhs = UX)
 	        res_second_stage = feols(env = current_env, xwx = UXtUX, xwy = UXty, resid_1st_stage = resid_s1)
 
-	        if(verbose >= 2) gt("2nd stage")
+	        # For the F-stats
+	        fit_no_endo = ols_fit(y, X, w = weights, correct_0w = FALSE,
+	                              collin.tol = collin.tol, nthreads = nthreads,
+	                              xwx = XtX, xwy = Xty)
+	        res_second_stage$ssr_no_endo = cpp_ssq(fit_no_endo$residuals, weights)
+	    }
+
+	    if(verbose >= 2) gt("2nd stage")
+
+	    #
+	    # Wu-Hausman endogeneity test
+	    #
+
+	    # Current limitation => only standard vcov => later add argument (which would yield the full est.)?
+	    # The problem of the full est. is that it takes memory very likely needlessly
+
+	    if(isFixef){
+	        ENDO_demean = do.call(cbind, iv_lhs_demean)
+	        iv_prod_wh = cpp_iv_product_completion(XtX = UXtUX, Xty = UXty,
+	                                               X = UX_demean, y = y_demean, U = ENDO_demean,
+	                                               w = weights, nthreads = nthreads)
+
+	        RHS_wh = cbind(ENDO_demean, UX_demean)
+	        fit_wh = ols_fit(y_demean, RHS_wh, w = weights, correct_0w = FALSE, collin.tol = collin.tol,
+	                         nthreads = nthreads, xwx = iv_prod_wh$UXtUX, xwy = iv_prod_wh$UXty)
+	    } else {
+	        ENDO = do.call(cbind, iv_lhs)
+	        iv_prod_wh = cpp_iv_product_completion(XtX = UXtUX, Xty = UXty,
+	                                               X = UX, y = y, U = ENDO,
+	                                               w = weights, nthreads = nthreads)
+
+	        RHS_wh = cbind(ENDO, UX)
+	        fit_wh = ols_fit(y, RHS_wh, w = weights, correct_0w = FALSE, collin.tol = collin.tol,
+	                         nthreads = nthreads, xwx = iv_prod_wh$UXtUX, xwy = iv_prod_wh$UXty)
+	    }
+
+	    df1 = n_endo
+	    df2 = length(y) - (res_second_stage$nparams + df1)
+	    qui = df1 + 1:df1 + ("(Intercept)" %in% names(res_second_stage$coefficients))
+	    my_coef = fit_wh$coefficients[qui]
+	    vcov_wh = fit_wh$xwx_inv[qui, qui] * cpp_ssq(fit_wh$residuals, weights) / df2
+	    stat = drop(my_coef %*% solve(vcov_wh) %*% my_coef) / df1
+	    p = pf(stat, df1, df2, lower.tail = FALSE)
+	    res_second_stage$iv_wh = list(stat = stat, p = p, df1 = df1, df2 = df2)
+
+	    #
+	    # Sargan
+	    #
+
+	    if(n_endo < ncol(iv.mat)){
+	        df = ncol(iv.mat) - n_endo
+	        resid_2nd = res_second_stage$residuals
+
+	        if(isFixef){
+	            xwy = cpppar_xwy(ZX_demean, resid_2nd, weights, nthreads)
+	            fit_sargan = ols_fit(resid_2nd, ZX_demean, w = weights, correct_0w = FALSE, collin.tol = collin.tol,
+	                                 nthreads = nthreads, xwx = ZXtZX, xwy = xwy)
+	        } else {
+	            xwy = cpppar_xwy(ZX, resid_2nd, weights, nthreads)
+	            fit_sargan = ols_fit(resid_2nd, ZX, w = weights, correct_0w = FALSE, collin.tol = collin.tol,
+	                                 nthreads = nthreads, xwx = ZXtZX, xwy = xwy)
+	        }
+
+	        r = fit_sargan$residuals
+	        stat = length(r) * (1 - cpp_ssq(r, weights) / cpp_ssr_null(resid_2nd))
+	        p = pchisq(stat, df, lower.tail = FALSE)
+	        res_second_stage$iv_sargan = list(stat = stat, p = p, df = df)
 	    }
 
 	    if(n_endo == 1){
@@ -1382,11 +1462,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 		    gc()
 		}
 
-		if(isWeight){
-			res$sigma2 = cpp_ssq(res$residuals * sqrt(weights)) / (length(y) - df_k)
-		} else {
-			res$sigma2 = cpp_ssq(res$residuals) / (length(y) - df_k)
-		}
+		res$sigma2 = cpp_ssq(res$residuals, weights) / (length(y) - df_k)
 
 		res$cov.unscaled = est$xwx_inv * res$sigma2
 
@@ -1421,18 +1497,20 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	    gc()
 	}
 
-	res$ssr_null = cpp_ssr_null(y)
-	res$ssr = cpp_ssq(res$residuals)
-	sigma_null = sqrt(res$ssr_null/n)
-	res$ll_null = -1/2/sigma_null^2*res$ssr_null - n*log(sigma_null) - n*log(2*pi)/2
+	res$ssr_null = cpp_ssr_null(y, weights)
+	res$ssr = cpp_ssq(res$residuals, weights)
+	sigma_null = sqrt(res$ssr_null / ifelse(isWeight, sum(weights), n))
+	# res$ll_null = -1/2/sigma_null^2*res$ssr_null - n*log(sigma_null) - n*log(2*pi)/2
+	res$ll_null = -1/2/sigma_null^2*res$ssr_null - (log(sigma_null) + log(2*pi)/2) * ifelse(isWeight, sum(weights), n)
 
 	# fixef info
 	if(isFixef){
 		# For the within R2
 		if(!onlyFixef){
-			res$ssr_fe_only = cpp_ssq(y_demean)
-			sigma = sqrt(res$ssr_fe_only/n)
-			res$ll_fe_only = -1/2/sigma^2*res$ssr_fe_only - n*log(sigma) - n*log(2*pi)/2
+			res$ssr_fe_only = cpp_ssq(y_demean, weights)
+			sigma = sqrt(res$ssr_fe_only / ifelse(isWeight, sum(weights), n))
+			# res$ll_fe_only = -1/2/sigma^2*res$ssr_fe_only - n*log(sigma) - n*log(2*pi)/2
+			res$ll_fe_only = -1/2/sigma^2*res$ssr_fe_only - (log(sigma) + log(2*pi)/2) * ifelse(isWeight, sum(weights), n)
 		}
 	}
 
@@ -2328,7 +2406,6 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, split, fsplit,
     }
     res$ll_null = ll_null
     res$pseudo_r2 = 1 - (res$loglik - df_k)/(ll_null - 1)
-    res$ssr_null = cpp_ssq(y - fitted_null)
 
 
     # fixef info
@@ -3304,7 +3381,7 @@ multi_LHS_RHS = function(env, fun){
     n_rhs = length(rhs_sw)
     res = vector("list", n_lhs * n_rhs)
 
-    rhs_names = sapply(multi_rhs_fml_full, deparse_long)
+    rhs_names = sapply(multi_rhs_fml_full, function(x) as.character(x)[[2]])
 
     for(i in seq_along(lhs)){
         for(j in seq_along(rhs_sw)){
@@ -3376,6 +3453,7 @@ multi_fixef = function(env, estfun){
     fixef.rm = get("fixef.rm", env)
     family = get("family", env)
     origin_type = get("origin_type", env)
+    nthreads = get("nthreads", env)
 
     data = get("data", env)
 
@@ -3551,7 +3629,7 @@ multi_fixef = function(env, estfun){
     }
 
     index = list(fixef = n_fixef)
-    fixef_names = sapply(multi_fixef_fml_full, deparse_long)
+    fixef_names = sapply(multi_fixef_fml_full, function(x) as.character(x)[[2]])
     all_names = list(fixef = fixef_names)
 
     res_multi = setup_multi(index, all_names, data_results)
