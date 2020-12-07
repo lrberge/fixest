@@ -3092,7 +3092,9 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
 
         fe_done = FALSE
         # Note: I have optimized this code, but not the internal functions called by it
-        if(inherits(X, "formula")) {
+        if(is.call(X)) { # is.call is the fastest way to ckeck for formula in this setting, otherwise use: inherits(X, "formula")
+
+            matxl = as.matrix # for reasons I don't fully comprehend, it seems like the argument default as.matrix = is.atomic(X) is re-evaluated, so it becomes true because X is coerced to model matrix below?!
             check_arg(data, "data.frame mbt")
             check_arg(X, "ts formula var(data)", .data = data)
 
@@ -3116,6 +3118,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
                 slope.vars = list(0)
                 slope.flag = rep(0L, length(f))
             }
+            as.matrix = matxl # Reassigning what was before.
 
         } else if(lX) {
             var_names = names(X)
