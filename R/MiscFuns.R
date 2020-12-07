@@ -3130,7 +3130,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
             # but anyway, using vapply on an object with all attributes removed is the fastest way to do this
             is_numeric = vapply(`attributes<-`(X, NULL), is.numeric, TRUE) # Much faster than sapply(X, is.numeric)
             if(!all(is_numeric)){ # Faster than any(!is_numeric)
-                n_non_num = sum(is_numeric)
+                n_non_num = sum(!is_numeric)
                 stop("All values in 'X' must be numeric. This is not the case for ", n_non_num, " variable", plural(n_non_num), ".")
             }
 
