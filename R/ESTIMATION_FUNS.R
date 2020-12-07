@@ -795,12 +795,18 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	                    if(do_iv){
 	                        if(isLinear_current){
 	                            qui_iv = c(1:n_inst, n_inst + qui)
+
+	                            XtX = iv_products$XtX[qui, qui, drop = FALSE]
+	                            Xty = iv_products$Xty[[ii]][qui]
 	                        } else {
 	                            qui_iv = 1:n_inst
+
+	                            XtX = matrix(0, 1, 1)
+	                            Xty = matrix(0, 1, 1)
 	                        }
 
-	                        my_iv_products = list(XtX = iv_products$XtX[qui, qui, drop = FALSE],
-	                                              Xty = iv_products$Xty[[ii]][qui],
+	                        my_iv_products = list(XtX = XtX,
+	                                              Xty = Xty,
 	                                              ZXtZX = iv_products$ZXtZX[qui_iv, qui_iv, drop = FALSE],
 	                                              ZXtu = lapply(iv_products$ZXtu, function(x) x[qui_iv]))
 

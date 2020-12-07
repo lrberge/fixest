@@ -3154,7 +3154,7 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
             }
             res$nparams = K
 
-            if(!isLinear){
+            if(!isLinear && !isTRUE(res$iv)){
                 res$onlyFixef = TRUE
             }
         }
