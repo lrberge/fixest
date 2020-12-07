@@ -2964,8 +2964,8 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
 #' @inheritSection feols Varying slopes
 #'
 #' @param X A matrix, vector or a list OR a formula. If equal to a formula, then the argument \code{data} is required, and it must be of the type: \code{x1 + x2 ~ f1 + fe2} with on the LHS the variables to be centered, and on the RHS the factors used for centering. Note that you can use variables with varying slopes with the syntax \code{fe[v1, v2]} (see details in \code{\link[fixest]{feols}}). If not a formula, it must represent the data to be centered. Of course the dimension of that data must be the same as the factors used for centering (argument \code{f}).
-#' @param f A matrix, vector or list. The factors used to center the variables in argument \code{X}.
-#' @param slope.vars A vector, matrix or list representing the variables with varying slopes. Note that if this argument is used it MUST be in conjunction with the argument \code{slope.flag} that maps the factors to which the varying slopes are attached. See examples.
+#' @param f A matrix, vector or list. The factors used to center the variables in argument \code{X}. Matrices will be coerced using \code{as.data.frame}.
+#' @param slope.vars A vector, matrix or list representing the variables with varying slopes. Matrices will be coerced using \code{as.data.frame}. Note that if this argument is used it MUST be in conjunction with the argument \code{slope.flag} that maps the factors to which the varying slopes are attached. See examples.
 #' @param slope.flag An integer vector of the same length as the number of variables in \code{f} (the factors used for centering). It indicates for each factor the number of variables with varying slopes to which it is associated. Positive values mean that the raw factor should also be included in the centering, negative values that it should be excluded. Sorry it's complicated... but see the examples it may get clearer.
 #' @param data A data.frame containing all variables in the argument \code{X}. Only used if \code{X} is a formula, in which case \code{data} is mandatory.
 #' @param weights Vector, can be missing or NULL. If present, it must contain the same number of observations as in \code{X}.
@@ -2975,7 +2975,7 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
 #' @param tol Stopping criterion of the algorithm. Default is \code{1e-6}. The algorithm stops when the maximum absolute increase in the coefficients values is lower than \code{tol}.
 #' @param na.rm Logical, default is \code{FALSE}. If \code{TRUE} and the input data contains any NA value, then any observation with NA will be discarded leading to an output with less observations than the input. By default, if NAs are present the output will also be filled with NAs for each NA observation in input.
 #' @param as.matrix Logical, default is \code{FALSE}. By default a \code{data.frame} is returned. If \code{TRUE}, then a matrix will be returned.
-#' @param im_confident Logical, default is \code{FALSE}. FOR EXPERT USERS ONLY! This argument allows to skip some of the preprocessing of the arguments given in input. If \code{TRUE}, then \code{X} MUST be a numeric vector/matrix/list (not a formula!), \code{f} MUST be a list, \code{slope.vars} and \code{slope.flag} MUST be consistent and \code{weights}, if given, MUST be numeric (not integer!). Further there MUST be not any NA value, and the number of observations of each element MUST be consistent. Non compliance to these rules may simply lead your R session to break.
+#' @param im_confident Logical, default is \code{FALSE}. FOR EXPERT USERS ONLY! This argument allows to skip some of the preprocessing of the arguments given in input. If \code{TRUE}, then \code{X} MUST be a numeric vector/matrix/list (not a formula!), \code{f} MUST be a list, \code{slope.vars} MUST be a list and \code{slope.vars} and \code{slope.flag} MUST be consistent and \code{weights}, if given, MUST be numeric (not integer!). Further there MUST be not any NA value, and the number of observations of each element MUST be consistent. Non compliance to these rules may simply lead your R session to break.
 #'
 #' @return
 #' It returns a data.frame of the same number of columns as the number of variables to be centered.
@@ -3063,11 +3063,24 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
 #'
 #'
 #'
-demean = function(X, f, slope.vars, slope.flag, data, weights, nthreads = getFixest_nthreads(), notes = getFixest_notes(), iter = 2000, tol = 1e-6, na.rm = FALSE, as.matrix = FALSE, im_confident = FALSE){
+demean = function(X, f, slope.vars, slope.flag, data, weights,
+                  nthreads = getFixest_nthreads(), notes = getFixest_notes(),
+                  iter = 2000, tol = 1e-6, na.rm = TRUE,
+                  as.matrix = is.atomic(X), # I strongly prefer input type = output type, let people decide what kind of objects they pass and have them coerce their objects as needed.
+                  im_confident = FALSE) {
 
     ANY_NA = FALSE
+    # to reassign class if X is data.frame, data.table or tibble. Optimally you would preserve all attributes,
+    # but using attributes<- is slow on data.frames. What I did in collapse is export the SET_ATTRIB and DUPLICATE_ATTRIB
+    # functions from the C-API to use them internally in R -> copy attributes without checks at 0 cost, even for large data.frames.
+    if(lX <- is.list(X)) {
+        clx <- oldClass(X) # oldClass is faster and returns NULL when the list is plain. class returns the implicit class "list".
+        # This is the key to fast R code -> all data.frame methods are super slow and should duly be avoided in internal code.
+        oldClass(X) <- NULL
+    }
     # Step 1: formatting the input
     if(!im_confident){
+        # It seems these checks, though convenient, are also rather slow, but this will not matter much for large data
         check_arg(X, "numeric vmatrix | list | formula mbt")
         check_arg(iter, "integer scalar GE{1}")
         check_arg(tol, "numeric scalar GT{0}")
@@ -3078,58 +3091,55 @@ demean = function(X, f, slope.vars, slope.flag, data, weights, nthreads = getFix
         #
 
         fe_done = FALSE
+        # Note: I have optimized this code, but not the internal functions called by it
         if("formula" %in% class(X)){
             check_arg(data, "data.frame mbt")
             check_arg(X, "ts formula var(data)", .data = data)
 
             # Extracting the information
-            terms_fixef = fixef_terms(xpd(~ ..fixef, ..fixef = X[[3]]))
-            X = model.matrix(xpd(~ -1 + ..rhs, ..rhs = X[[2]]), data)
-            var_names = colnames(X)
+            terms_fixef = fixef_terms(xpd(~ ..fixef, ..fixef = X[[3L]]))
+            X = model.matrix(xpd(~ -1 + ..rhs, ..rhs = X[[2L]]), data)
+            var_names = dimnames(X)[[2L]] # faster than colnames(X)
 
             # FE
             fe_done = TRUE
-
-            f = error_sender(prepare_df(terms_fixef$fe_vars, data), "Error when evaluating the fixed-effects variables: ")
-
+            f = unclass(error_sender(prepare_df(terms_fixef$fe_vars, data), "Error when evaluating the fixed-effects variables: "))
             isSlope = any(terms_fixef$slope_flag != 0)
 
-            if(isSlope){
-                slope.vars = error_sender(prepare_df(terms_fixef$slope_vars, data), "Error when evaluating the variable with varying slopes: ")
+            if(isSlope) {
+                slope.vars = unclass(error_sender(prepare_df(terms_fixef$slope_vars, data), "Error when evaluating the variable with varying slopes: "))
                 slope.flag = terms_fixef$slope_flag
-
-                not_numeric = !sapply(slope.vars, is.numeric)
-                if(any(not_numeric)){
-                    stop("In the fixed-effects part of the formula, variables with varying slopes must be numeric. Currently variable", enumerate_items(names(slope.vars)[not_numeric], "s.is.quote"), " not.")
-                }
-
+                # See commentary below.
+                is_numeric = vapply(`attributes<-`(slope.vars, NULL), is.numeric, TRUE) # !sapply(slope.vars, is.numeric)
+                if(!all(is_numeric)) stop("In the fixed-effects part of the formula, variables with varying slopes must be numeric. Currently variable", enumerate_items(names(slope.vars)[!is_numeric], "s.is.quote"), " not.")
             } else {
                 slope.vars = list(0)
                 slope.flag = rep(0L, length(f))
             }
 
-        } else if(is.list(X)){
+        } else if(lX) {
             var_names = names(X)
-
-            if(!is.data.frame(X)){
+            if(!any(clx == "data.frame")) { # this works, even if clx is NULL
                 n_all = lengths(X)
-                if(any(diff(n_all) != 0)){
+                if(!all(n_all == n_all[1L])) { # Much faster than any(diff(n_all) != 0)
                     n_unik = unique(n_all)
                     stop("In argument 'X' all elements of the list must be of the same length. This is currently not the case (ex: one is of length ", n_unik[1], " while another is of length ", n_unik[2], ").")
                 }
             }
-
-            is_numeric = sapply(X, is.numeric)
-            if(any(!is_numeric)){
+            # If your using Rcpp and the input is NumericVector or NumericMatrix, you should get a C++ error for wrongly typed data, so I don't see the need for this
+            # but anyway, using vapply on an object with all attributes removed is the fastest way to do this
+            is_numeric = vapply(`attributes<-`(X, NULL), is.numeric, TRUE) # Much faster than sapply(X, is.numeric)
+            if(!all(is_numeric)){ # Faster than any(!is_numeric)
                 n_non_num = sum(is_numeric)
                 stop("All values in 'X' must be numeric. This is not the case for ", n_non_num, " variable", plural(n_non_num), ".")
             }
 
         } else {
-            var_names = colnames(X)
+            var_names = dimnames(X)[[2L]] # Faster than colnames(X)
         }
 
-        if(is.null(var_names)) var_names = paste0("V", 1:NCOL(X))
+        # Actually this is totally redundant, you can just assign NULL var names again.. bet people decide ybout their in and outputs
+        # if(is.null(var_names)) var_names = paste0("V", if(lX) seq_along(X) else 1:NCOL(X))
 
         #
         # f + slope.vars
@@ -3140,31 +3150,30 @@ demean = function(X, f, slope.vars, slope.flag, data, weights, nthreads = getFix
             check_arg(slope.vars, "numeric vmatrix | list")
             check_arg(slope.flag, "integer vector no na")
 
-            if(is.list(f)){
-
-                if(!is.data.frame(f)){
+            if(is.list(f)) {
+                if(!is.data.frame(f)) {
                     n_all = lengths(f)
-                    if(any(diff(n_all) != 0)){
+                    if(!all(n_all == n_all[1L])) { # Much faster than any(diff(n_all) != 0)
                         n_unik = unique(n_all)
                         stop("In argument 'f' all elements of the list must be of the same length. This is currently not the case (ex: one is of length ", n_unik[1], " while another is of length ", n_unik[2], ").")
                     }
-                    f = as.data.frame(f)
-                }
-            } else {
-                f = as.data.frame(f)
+                    # f = as.data.frame(f)  # as.data.frame is super slow, especially on large data. You already checked the lengths, so it's ok
+                } else oldClass(f) <- NULL
+            } else { # as.data.frame on matrix is also very slow, you could do in C++ as in at collapse::mctl.. but I suppose most will pass lists of factors anyway..
+                f = if(!is.array(f)) list(f) else unclass(as.data.frame(f))
             }
 
-            is_pblm = sapply(f, function(x) !is.numeric(x) || !is.character(x))
-            for(i in which(is_pblm)){
-                f[[i]] = as.character(f[[i]])
+            is_pblm = vapply(`attributes<-`(f, NULL), function(x) !(is.numeric(x) || is.character(x)), TRUE) # Much faster than sapply(f, function(x) !is.numeric(x) || !is.character(x))
+            if(any(is_pblm)) { # Because f is unclassed, this runs much faster
+                for(i in which(is_pblm)) f[[i]] = as.character(f[[i]])
             }
-
-            if(NROW(f) != NROW(X)) stop("The number of observations in 'X' and in 'f' don't match (", NROW(X), " vs ", NROW(f), ").")
-
+            # Why call NROW here when f is already a list? -> calling dim on a data.frame is costly
+            if(length(f[[1L]]) != (if(lX) length(X[[1L]]) else NROW(X)))
+                stop("The number of observations in 'X' and in 'f' don't match (", if(lX) length(X[[1L]]) else NROW(X), " vs ", length(f[[1L]]), ").")
 
             # Now the slopes
             isSlope = FALSE
-            if(!missnull(slope.vars) || !missnull(slope.flag)){
+            if(!missnull(slope.vars) || !missnull(slope.flag)) {
 
                 isSlope = TRUE
 
@@ -3174,30 +3183,25 @@ demean = function(X, f, slope.vars, slope.flag, data, weights, nthreads = getFix
                 if(is.list(slope.vars)){
                     if(!is.data.frame(slope.vars)){
                         n_all = lengths(slope.vars)
-                        if(any(diff(n_all) != 0)){
+                        if(!all(n_all == n_all[1L])) { # Much faster than any(diff(n_all) != 0)
                             n_unik = unique(n_all)
                             stop("In argument 'slope.vars' all elements of the list must be of the same length. This is currently not the case (ex: one is of length ", n_unik[1], " while another is of length ", n_unik[2], ").")
                         }
-                        slope.vars = as.data.frame(slope.vars)
-                    }
+                        # See commentary above.
+                        # slope.vars = as.data.frame(slope.vars)
+                    } else oldClass(slope.vars) <- NULL
 
-                    not_numeric = !sapply(slope.vars, is.numeric)
-                    if(any(not_numeric)){
-                        stop("In the argument 'slope.vars', the variables with varying slopes must be numeric. Currently variable", enumerate_items(names(slope.vars)[not_numeric], "s.is.quote"), " not.")
-                    }
+                    is_numeric = vapply(`attributes<-`(slope.vars, NULL), is.numeric, TRUE) # Much faster than !sapply(slope.vars, is.numeric)
+                    # Note: you can still reverse in the error message, !all(vec) is faster than any(!vec)
+                    if(!all(is_numeric)) stop("In the argument 'slope.vars', the variables with varying slopes must be numeric. Currently variable", enumerate_items(names(slope.vars)[!is_numeric], "s.is.quote"), " not.")
 
-                } else {
-                    slope.vars = as.data.frame(slope.vars)
+                } else { # Same as above.. Necessary to convert ??
+                    slope.vars = if(!is.array(slope.vars)) list(slope.vars) else unclass(as.data.frame(slope.vars))
                 }
 
-                if(length(slope.flag) != length(f)){
-                    stop("The argument 'slope.flag' must be a vector representing, for each fixed-effect, the number of variables with varying slopes associated to it. Problem: the lengths of slope.flag and the fixed-effect differ: ", length(slope.flag), " vs ", length(f), ".")
-                }
-
-                if(sum(abs(slope.flag)) != NCOL(slope.vars)){
-                    stop("The argument 'slope.flag' must be a vector representing, for each fixed-effect, the number of variables with varying slopes associated to it. Problem: currently the number of variables in 'slope.flag' differ from the nyumber of variables in 'slope.vars': ", sum(abs(slope.flag)), " vs ", NCOL(slope.vars), ".")
-                }
-
+                if(length(slope.flag) != length(f)) stop("The argument 'slope.flag' must be a vector representing, for each fixed-effect, the number of variables with varying slopes associated to it. Problem: the lengths of slope.flag and the fixed-effect differ: ", length(slope.flag), " vs ", length(f), ".")
+                # if(sum(abs(slope.flag)) != length(slope.vars))  : This means that slope flag can only be 0, 1 or -1. In the documentation you only talk about positive and negative values. The change I made reflects this.
+                if(sum(slope.flag != 0L) != length(slope.vars)) stop("The argument 'slope.flag' must be a vector representing, for each fixed-effect, the number of variables with varying slopes associated to it. Problem: currently the number of variables in 'slope.flag' differ from the nyumber of variables in 'slope.vars': ", sum(slope.flag != 0L), " vs ", length(slope.vars), ".")
 
             } else {
                 slope.vars = list(0)
@@ -3210,7 +3214,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights, nthreads = getFix
         check_arg_plus(weights, "NULL numeric conv vector len(data) GE{0}", .data = X)
         is_weight = !missing(weights) && !is.null(weights)
 
-        ## nthreads
+        ## nthreads (Also seems unnecessarily costly: 250 microseconds)
         nthreads = check_set_nthreads(nthreads)
 
         #
@@ -3219,61 +3223,61 @@ demean = function(X, f, slope.vars, slope.flag, data, weights, nthreads = getFix
 
         # NAs
         is_NA = FALSE
-
         info_X = cpp_which_na_inf(X, nthreads)
-        n_na_x = 0
+
         if(info_X$any_na_inf){
-            is_NA = is_NA | info_X$is_na_inf
-            n_na_x = sum(info_X$is_na_inf)
-        }
+            is_NA = info_X$is_na_inf # Since you initiated it als FALSE, I see no reason to add. : is_NA | info_X$is_na_inf
+            n_na_x = 1L # I put this later. Only needed if notes = TRUE: n_na_x = sum(info_X$is_na_inf)
+        } else n_na_x = 0L
 
-        n_na_fe = 0
-        if(anyNA(f)){
-            is_na_fe = !complete.cases(f)
-            n_na_fe = sum(is_na_fe)
+
+        if(anyNA.data.frame(f)){ # anyNA(f): Need to call method here because class of f was removed to enhance code speed
+            is_na_fe = !complete.cases(f) # complete cases also works on unclassed objects
+            n_na_fe = 1L # Same thing here, moved below: n_na_fe = sum(is_na_fe)
             is_NA = is_NA | is_na_fe
-        }
+        } else n_na_fe = 0L
 
-        slopes_msg = ""
-        if(isSlope){
-            is_na_slope = !complete.cases(f)
-            slopes_msg = paste0(", slope vars: ", sum(is_na_slope))
+        # Here following the same principle (error message stuff added below) + added intelligence: if missing X, go ahead, otherwise run anyNA first to check. (note that the anyNA statement is only executed if n_na_x > 0L))
+        if(isSlope && (n_na_x || anyNA.data.frame(slope.vars))) {
+            is_na_slope = !complete.cases(slope.vars)
             is_NA = is_NA | is_na_slope
-        }
+        } else is_na_slope = 0L
 
-        weight_msg = ""
-        if(is_weight){
+        # It seems that missing weights are more rare, so I think it always makes sense to call anyNA first.
+        if(is_weight && anyNA(weights)){
             is_na_weights = is.na(weights)
-            weight_msg = paste0(", weights: ", sum(is_na_weights))
             is_NA = is_NA | is_na_weights
-        }
+        } else is_na_weights = 0L
 
         n_na = sum(is_NA)
-        if(n_na > 0 && notes){
-            if(all(is_NA)) stop("All observations contain NA values (Breakup: X: ", n_na_x, ", f: ", n_na_fe, slopes_msg, weight_msg, ").")
-
+        if(n_na && notes) { # positive integer values always evaluate as TRUE, 0L evaluates as FALSE
+            # Here is all the error message stuff now: Only evaluated if needed
+            if(n_na_x) n_na_x = sum(info_X$is_na_inf)
+            if(n_na_fe) n_na_fe = sum(is_na_fe)
+            slopes_msg = if(isSlope) paste0(", slope vars: ", sum(is_na_slope)) else ""
+            weight_msg = if(is_weight) paste0(", weights: ", sum(is_na_weights)) else ""
+            # You already calculated the number of missing values: all(is_NA)
+            if(n_na == length(is_NA)) stop("All observations contain NA values (Breakup: X: ", n_na_x, ", f: ", n_na_fe, slopes_msg, weight_msg, ").")
             message("NOTE: ", signif_plus(n_na), " observation", plural(n_na), " removed because of NA values (Breakup: X: ", n_na_x, ", f: ", n_na_fe, slopes_msg, weight_msg, ").")
         }
 
-        if(n_na > 0){
+        if(n_na) { # better subsetting -> Yup
             ANY_NA = TRUE
-            X = X[!is_NA, , drop = FALSE]
-            f = f[!is_NA, , drop = FALSE]
-
-            if(isSlope){
-                slope.vars = slope.vars[!is_NA, , drop = FALSE]
-            }
-
-            if(is_weight) weights = weights[!is_NA]
+            cc <- !is_NA
+            X = if(lX) lapply(X, `[`, cc) else if(is.matrix(X)) X[cc, , drop = FALSE] else X[cc] # X[!is_NA, , drop = FALSE]
+            f = lapply(f, `[`, cc) # f[!is_NA, , drop = FALSE]
+            if(isSlope) slope.vars = lapply(slope.vars, `[`, cc) # slope.vars[!is_NA, , drop = FALSE]
+            if(is_weight) weights = weights[cc]
         }
-
         if(!is_weight) weights = 1
 
     } else {
+        # Need this here, otherwise error:
+        var_names = if(lX) names(X) else dimnames(X)[[2L]]
         if(missing(weights) || is.null(weights)) weights = 1
         if(missnull(slope.vars) || missnull(slope.flag)){
             slope.vars = list(0)
-            slope.flag = rep(0L, length(f))
+            slope.flag = rep(0L, length(unclass(f))) # unclass gives extra speed if f is data.frame, and no cost if f is list.
         }
     }
 
@@ -3281,14 +3285,18 @@ demean = function(X, f, slope.vars, slope.flag, data, weights, nthreads = getFix
     # Unclassing fes
     #
 
-    Q = length(f)
-    n = length(f[[1]])
-    quf_info_all = cpppar_quf_table_sum(x = f, y = 0, do_sum_y = FALSE, rm_0 = FALSE, rm_1 = FALSE, rm_single = FALSE, do_refactor = FALSE, r_x_sizes = 0, obs2keep = 0, only_slope = slope.flag < 0, nthreads = nthreads)
+    # Just giving you extra speed if f is a data.frame and im_confident = TRUE
+    Q = length(unclass(f))
+    n = length(.subset2(f, 1L))
+    quf_info_all = cpppar_quf_table_sum(x = f, y = 0, do_sum_y = FALSE, rm_0 = FALSE,
+                                        rm_1 = FALSE, rm_single = FALSE, do_refactor = FALSE,
+                                        r_x_sizes = 0, obs2keep = 0, only_slope = slope.flag < 0L,
+                                        nthreads = nthreads)
 
     # table/sum_y/sizes
     fixef_table = quf_info_all$table
     fixef_sizes = lengths(fixef_table)
-    fixef_table_vector = as.integer(unlist(fixef_table))
+    fixef_table_vector = unlist(fixef_table) # The C++ function returns a list of integer vectors, and unlist will create an integer vector, so I don't see the need to coerce again:  as.integer(unlist(fixef_table))
     if(!is.integer(slope.flag)) slope.flag = as.integer(slope.flag)
 
     #
@@ -3296,16 +3304,9 @@ demean = function(X, f, slope.vars, slope.flag, data, weights, nthreads = getFix
     #
 
     # y => list, X => matrix
-    if(as.matrix){
-        y = 0
-    } else {
+    if(as.matrix) y = 0 else {
         # Quirk => y returns a list only if NCOL(y) > 1 or is.list(y)
-        if(!is.list(X)){
-            y = list(X)
-        } else {
-            y = X
-        }
-
+        y = if(lX) X else list(X) # This does the same, a bit more frugal
         X = 0
     }
 
@@ -3315,37 +3316,26 @@ demean = function(X, f, slope.vars, slope.flag, data, weights, nthreads = getFix
                               slope_flag_Q = slope.flag, slope_vars_list = slope.vars,
                               r_init = 0, nthreads = nthreads)
 
-    if(na.rm == FALSE && ANY_NA){
+    # I restructured this code (changed the nesting) and made it more efficient:
 
-        if(as.matrix){
+    if(as.matrix) {
+        if(ANY_NA && na.rm == FALSE) {
             K = NCOL(vars_demean$X_demean)
             res = matrix(NA, n, K)
-            res[!is_NA, ] = vars_demean$X_demean
-            colnames(res) = var_names
-        } else {
-            K = length(vars_demean$y_demean)
-            res = list()
-            n = length(is_NA)
-            for(k in 1:K){
-                tmp = rep(NA, n)
-                tmp[!is_NA] = vars_demean$y_demean[[k]]
-                res[[k]] = tmp
-            }
-
-            res = as.data.frame(res)
-            names(res) = var_names
-        }
+            res[cc, ] = vars_demean$X_demean
+        } else res = vars_demean$X_demean
+        dimnames(res)[[2L]] = var_names # This works and is faster than colnames(res) = var_names
     } else {
-        if(as.matrix){
-            res = vars_demean$X_demean
-            colnames(res) = var_names
-        } else {
-            # convert list to DF is 0 cost
-            res = as.data.frame(vars_demean$y_demean)
-            names(res) = var_names
-        }
+        if(ANY_NA && na.rm == FALSE) {
+            n = length(is_NA) # One-line efficient solution to the task:
+            res = lapply(vars_demean$y_demean, function(x) `[<-`(rep(NA_real_, n), cc, value = x))
+        } else res = vars_demean$y_demean
+        # res = as.data.frame(res) # convert list to DF is 0 cost -> That's not true, there is a cost increasing in the size of the data that can easily be avoided
+        names(res) = var_names
+        # This makes your function class-agnostic to lists, data.frame's, data.table's and tibbles (with the exception for any custom data.frame row.names which are not preserved, but the as.data.frame solution also did not do that)
+        if(!lX || length(clx)) attr(res, "row.names") <- .set_row_names(length(res[[1L]])) # Here !lX || length(clx) means add row.names if either X was a matrix or is classed that is a data.frame
+        oldClass(res) <- if(lX) clx else "data.frame" # If X is a plain list, and since oldClass returns NULL, this will assign a null class again.
     }
-
     res
 }
 
@@ -5565,38 +5555,17 @@ quickUnclassFactor = function(x, addItem = FALSE, sorted = FALSE){
     }
 }
 
-missnull = function(x){
-	if(missing(x) || is.null(x)){
-		return(TRUE)
-	} else {
-		return(FALSE)
-	}
+missnull = function(x) missing(x) || is.null(x)
+
+isScalar = function(x, int = FALSE) {
+    if(length(x) == 1L && is.numeric(x) && is.finite(x))
+        return(!(int && !(x %% 1 == 0))) else return(FALSE)
 }
 
-isScalar = function(x, int = FALSE){
-	if(length(x) == 1 && is.numeric(x) && is.finite(x)){
-	    if(int && !(x %% 1 == 0)) return(FALSE)
-		return(TRUE)
-	} else {
-		return(FALSE)
-	}
-}
+isLogical = function(x) length(x) == 1L && is.logical(x) && !is.na(x)
 
-isLogical = function(x){
-	if(length(x) == 1 && is.logical(x) && !is.na(x)){
-		return(TRUE)
-	} else {
-		return(FALSE)
-	}
-}
 
-isSingleChar = function(x){
-	if(length(x) == 1 && is.character(x) && !is.na(x)){
-		return(TRUE)
-	} else {
-		return(FALSE)
-	}
-}
+isSingleChar = function(x) length(x) == 1L && is.character(x) && !is.na(x)
 
 fml2varnames = function(fml){
 	# This function trandforms a one sided formula into a
