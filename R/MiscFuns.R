@@ -3284,10 +3284,6 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
     #
     # Unclassing fes
     #
-
-    # Just giving you extra speed if f is a data.frame and im_confident = TRUE
-    Q = length(unclass(f))
-    n = length(.subset2(f, 1L))
     quf_info_all = cpppar_quf_table_sum(x = f, y = 0, do_sum_y = FALSE, rm_0 = FALSE,
                                         rm_1 = FALSE, rm_single = FALSE, do_refactor = FALSE,
                                         r_x_sizes = 0, obs2keep = 0, only_slope = slope.flag < 0L,
