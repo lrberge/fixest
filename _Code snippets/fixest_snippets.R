@@ -20,6 +20,10 @@ meffect = function(x, at_means = TRUE, se, cluster, ...){
     check_arg(at_means, "logical scalar")
     if(isFALSE(at_means)) stop("Sorry, so far only the marginal effects at means is available.")
 
+    if(!is.null(x$fixef_id)){
+        stop("Models with fixed-effects are not supported, use factors instead (if possible).")
+    }
+
     if(!isTRUE(x$summary) || !missing(se) || !missing(cluster)){
         x = summary(x, se = se, cluster = cluster, ...)
     }
@@ -50,7 +54,7 @@ meffect = function(x, at_means = TRUE, se, cluster, ...){
         stop("Current family is not supported.")
     }
 
-    # jacobian 
+    # jacobian
     jac = tcrossprod(coef, m_mean) * dd_f(mu_mean)
     diag(jac) = diag(jac) + d_f(mu_mean)
     vcov_new = jac %*% vcov %*% t(jac)
