@@ -3321,7 +3321,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
     if(as.matrix) {
         if(ANY_NA && na.rm == FALSE) {
             K = NCOL(vars_demean$X_demean)
-            res = matrix(NA, n, K)
+            res = matrix(NA_real_, length(is_NA), K)
             res[cc, ] = vars_demean$X_demean
         } else res = vars_demean$X_demean
         dimnames(res)[[2L]] = var_names # This works and is faster than colnames(res) = var_names
