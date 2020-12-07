@@ -18,7 +18,7 @@ meffect = function(x, at_means = TRUE, se, cluster, ...){
 
     check_arg(x, "class(fixest) mbt")
     check_arg(at_means, "logical scalar")
-    if(isFALSE(at_means)) stop("Sorry, so far, only the marginal effects at means is available.")
+    if(isFALSE(at_means)) stop("Sorry, so far only the marginal effects at means is available.")
 
     if(!isTRUE(x$summary) || !missing(se) || !missing(cluster)){
         x = summary(x, se = se, cluster = cluster, ...)
@@ -40,7 +40,7 @@ meffect = function(x, at_means = TRUE, se, cluster, ...){
     if(x$method_type == "feols" || (x$method_type == "feNmlm" && x$family == "gaussian")){
         d_f = function(x) 1
         dd_f = function(x) 0
-    } else if((x$method_type == "feNmlm" && x$family == "gaussian") || (x$method_type == "feglm" && x$family$family == "poisson")){
+    } else if((x$method_type == "feNmlm" && x$family == "poisson") || (x$method_type == "feglm" && x$family$family == "poisson")){
         d_f = function(x) exp(x)
         dd_f = function(x) exp(x)
     } else if(x$method_type == "feglm" && x$family$family == "binomial" && x$family$link == "probit"){
@@ -50,7 +50,7 @@ meffect = function(x, at_means = TRUE, se, cluster, ...){
         stop("Current family is not supported.")
     }
 
-    # jacobian from the formula
+    # jacobian 
     jac = tcrossprod(coef, m_mean) * dd_f(mu_mean)
     diag(jac) = diag(jac) + d_f(mu_mean)
     vcov_new = jac %*% vcov %*% t(jac)
