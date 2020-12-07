@@ -3092,7 +3092,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
 
         fe_done = FALSE
         # Note: I have optimized this code, but not the internal functions called by it
-        if("formula" %in% class(X)){
+        if(inherits(X, "formula")) {
             check_arg(data, "data.frame mbt")
             check_arg(X, "ts formula var(data)", .data = data)
 
