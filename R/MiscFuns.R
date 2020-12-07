@@ -3263,7 +3263,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
 
         if(n_na) { # better subsetting -> Yup
             ANY_NA = TRUE
-            cc <- !is_NA
+            cc <- which(!is_NA) # subsetting integer is faster than logical !!
             X = if(lX) lapply(X, `[`, cc) else if(is.matrix(X)) X[cc, , drop = FALSE] else X[cc] # X[!is_NA, , drop = FALSE]
             f = lapply(f, `[`, cc) # f[!is_NA, , drop = FALSE]
             if(isSlope) slope.vars = lapply(slope.vars, `[`, cc) # slope.vars[!is_NA, , drop = FALSE]
