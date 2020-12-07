@@ -2963,7 +2963,7 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
 #'
 #' @inheritSection feols Varying slopes
 #'
-#' @param X A matrix, vector or a list OR a formula. If equal to a formula, then the argument \code{data} is required, and it must be of the type: \code{x1 + x2 ~ f1 + fe2} with on the LHS the variables to be centered, and on the RHS the factors used for centering. Note that you can use variables with varying slopes with the syntax \code{fe[v1, v2]} (see details in \code{\link[fixest]{feols}}). If not a formula, it must represent the data to be centered. Of course the dimension of that data must be the same as the factors used for centering (argument \code{f}).
+#' @param X A matrix, vector or a list OR a formula. If equal to a formula, then the argument \code{data} is required, and it must be of the type: \code{x1 + x2 ~ f1 + fe2} with on the LHS the variables to be centered, and on the RHS the factors used for centering. Note that you can use variables with varying slopes with the syntax \code{fe[v1, v2]} (see details in \code{\link[fixest]{feols}}). Note also that transformations to LHS variables such as \code{log(x1) + log(x2) ~ f1 + fe2} are disabled (i.e. you will get x1 and x2 centered, not their logs). If not a formula, it must represent the data to be centered. Of course the dimension of that data must be the same as the factors used for centering (argument \code{f}).
 #' @param f A matrix, vector or list. The factors used to center the variables in argument \code{X}. Matrices will be coerced using \code{as.data.frame}.
 #' @param slope.vars A vector, matrix or list representing the variables with varying slopes. Matrices will be coerced using \code{as.data.frame}. Note that if this argument is used it MUST be in conjunction with the argument \code{slope.flag} that maps the factors to which the varying slopes are attached. See examples.
 #' @param slope.flag An integer vector of the same length as the number of variables in \code{f} (the factors used for centering). It indicates for each factor the number of variables with varying slopes to which it is associated. Positive values mean that the raw factor should also be included in the centering, negative values that it should be excluded. Sorry it's complicated... but see the examples it may get clearer.
@@ -3094,14 +3094,25 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
         # Note: I have optimized this code, but not the internal functions called by it
         if(is.call(X)) { # is.call is the fastest way to ckeck for formula in this setting, otherwise use: inherits(X, "formula")
 
-            matxl = as.matrix # for reasons I don't fully comprehend, it seems like the argument default as.matrix = is.atomic(X) is re-evaluated, so it becomes true because X is coerced to model matrix below?!
+            # matxl = as.matrix # for reasons I don't fully comprehend, it seems like the argument default as.matrix = is.atomic(X) is re-evaluated, so it becomes true because X is coerced to model matrix below?!
+            # The above line is not needed anymore since model.matrix is no longer used.
             check_arg(data, "data.frame mbt")
             check_arg(X, "ts formula var(data)", .data = data)
 
             # Extracting the information
             terms_fixef = fixef_terms(xpd(~ ..fixef, ..fixef = X[[3L]]))
-            X = model.matrix(xpd(~ -1 + ..rhs, ..rhs = X[[2L]]), data)
-            var_names = dimnames(X)[[2L]] # faster than colnames(X)
+            # This is problematic, it calls model.matrix.default, which removes missing values, but does not keep track of them, so you get issues later in the code
+            # X = model.matrix(xpd(~ -1 + ..rhs, ..rhs = X[[2L]]), data)
+            # var_names = dimnames(X)[[2L]] # faster than colnames(X)
+
+            # This is a simple solution, does not allow you to transform LHS variables in the formula, but 99% of people wouldn't do that anyway
+            # It's also better to keep X a data.frame since as.matrix = FALSE by default, yielding efficiency gains, otherwise converting to matrix and back
+            # So if you implement a proper formula processing again, I'd do it with model.frame (but here again same problem, it removes missing values)
+            var_names = all.vars(X[[2L]])
+            if(!all(var_names %in% names(data))) stop(paste("LHS variables", paste(setdiff(var_names, names(data)), collapse = ", "), "not found."))
+            X = .subset(data, var_names) # Efficient subset and unclassing in one
+            lX = TRUE # Needed for the rest of the code to work
+            clx = oldClass(data)
 
             # FE
             fe_done = TRUE
@@ -3118,7 +3129,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
                 slope.vars = list(0)
                 slope.flag = rep(0L, length(f))
             }
-            as.matrix = matxl # Reassigning what was before.
+            # as.matrix = matxl # Reassigning what was before. (not needed if model.matrix is not used)
 
         } else if(lX) {
             var_names = names(X)
