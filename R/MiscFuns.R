@@ -9166,6 +9166,7 @@ getFixest_dof = function(){
 #' @param no_FE Character scalar equal to either: \code{"standard"}, or \code{"hetero"} (default). The type of standard-errors to use by default for estimations without fixed-effects.
 #' @param one_FE Character scalar equal to either: \code{"standard"}, \code{"hetero"}, or \code{"cluster"} (default). The type of standard-errors to use by default for estimations with \emph{one} fixed-effect.
 #' @param two_FE Character scalar equal to either: \code{"standard"}, \code{"hetero"}, \code{"cluster"} (default), or \code{"twoway"}. The type of standard-errors to use by default for estimations with \emph{two or more} fixed-effects.
+#' @param all Character scalar equal to either: \code{"standard"}, or \code{"hetero"}. By default is is NULL. If provided, it sets all the SEs to that value.
 #'
 #' @return
 #' The function \code{getFixest_se()} returns a list with three elements containing the default for estimations i) wihtout, ii) with one, or iii) with two or more fixed-effects.
@@ -9191,11 +9192,17 @@ getFixest_dof = function(){
 #' setFixest_se()
 #'
 #'
-setFixest_se = function(no_FE = "hetero", one_FE = "cluster", two_FE = "cluster"){
+setFixest_se = function(no_FE = "hetero", one_FE = "cluster", two_FE = "cluster", all = NULL){
 
-    check_arg_plus(no_FE,  "match(standard, hetero)")
-    check_arg_plus(one_FE, "match(standard, hetero, cluster)")
-    check_arg_plus(two_FE, "match(standard, hetero, cluster, twoway)")
+    check_arg_plus(all,  "NULL match(standard, hetero)")
+    if(is.null(all)){
+        check_arg_plus(no_FE,  "match(standard, hetero)")
+        check_arg_plus(one_FE, "match(standard, hetero, cluster)")
+        check_arg_plus(two_FE, "match(standard, hetero, cluster, twoway)")
+    } else {
+        no_FE = one_FE = two_FE = all
+    }
+
 
     options(fixest_se = list(no_FE = no_FE, one_FE = one_FE, two_FE = two_FE))
 

@@ -5,7 +5,12 @@
 \alias{getFixest_se}
 \title{Sets the default type of standard errors to be used}
 \usage{
-setFixest_se(no_FE = "hetero", one_FE = "cluster", two_FE = "cluster")
+setFixest_se(
+  no_FE = "hetero",
+  one_FE = "cluster",
+  two_FE = "cluster",
+  all = NULL
+)
 
 getFixest_se()
 }
@@ -15,6 +20,8 @@ getFixest_se()
 \item{one_FE}{Character scalar equal to either: \code{"standard"}, \code{"hetero"}, or \code{"cluster"} (default). The type of standard-errors to use by default for estimations with \emph{one} fixed-effect.}
 
 \item{two_FE}{Character scalar equal to either: \code{"standard"}, \code{"hetero"}, \code{"cluster"} (default), or \code{"twoway"}. The type of standard-errors to use by default for estimations with \emph{two or more} fixed-effects.}
+
+\item{all}{Character scalar equal to either: \code{"standard"}, or \code{"hetero"}. By default is is NULL. If provided, it sets all the SEs to that value.}
 }
 \value{
 The function \code{getFixest_se()} returns a list with three elements containing the default for estimations i) wihtout, ii) with one, or iii) with two or more fixed-effects.
