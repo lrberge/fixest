@@ -20,8 +20,12 @@ meffect = function(x, at_means = TRUE, se, cluster, ...){
     check_arg(at_means, "logical scalar")
     if(isFALSE(at_means)) stop("Sorry, so far only the marginal effects at means is available.")
 
-    if(!is.null(x$fixef_id)){
-        stop("Models with fixed-effects are not supported, use factors instead (if possible).")
+    is_FE = FALSE
+    if(!is.null(x$fixef_vars)){
+        if(!x$method_type == "feglm"){
+            stop("Models with fixed-effects are not yet supported for method ", x$method, ", use factors instead (if possible).")
+        }
+        is_FE = TRUE
     }
 
     if(!isTRUE(x$summary) || !missing(se) || !missing(cluster)){
@@ -33,9 +37,22 @@ meffect = function(x, at_means = TRUE, se, cluster, ...){
 
     vcov = x$cov.scaled
 
-    m = model.matrix(x)
-    m_mean = colMeans(m[, vars])
-    mu_mean = as.vector(m_mean %*% coef)
+    if(!is_FE){
+        m = model.matrix(x)
+        m_mean = colMeans(m[, vars])
+
+    } else {
+        # x => feglm
+        if(x$family$family %in% c("poisson", "binomial")){
+            m = x$scores / (x$working_residuals * x$irls_weights)
+        } else {
+            m = x$scores / (x$working_residuals * x$irls_weights / x$dispersion)
+        }
+
+        m_mean = colMeans(m)
+    }
+
+    mu_mean = mean(predict(x, type = "link"))
 
     # 1) the SE
     # 2) the ME with formatting
@@ -79,13 +96,24 @@ base = iris
 names(base) = c("y", "x1", "x2", "x3", "species")
 
 # I set the default SE to "standard" for comparability with Stata
-setFixest_se(no_FE = "standard")
+setFixest_se(all = "standard")
 
 res = fepois(y ~ x1 + x2, base)
 meffect(res)
 
 res = feglm(1*(y > 5) ~ x1 + x2, base, family = binomial("probit"))
 meffect(res)
+
+#
+# FE example
+
+# With fixed-effects as factor
+res_lin = fepois(y ~ x1 + x2 + species, base)
+meffect(res_lin)
+
+# With fixed-effects absorbed
+res_fe = fepois(y ~ x1 + x2 | species, base)
+meffect(res_fe)
 
 
 
