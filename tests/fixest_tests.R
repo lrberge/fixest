@@ -1286,6 +1286,46 @@ for(id_fun in 1:5){
 cat("\n")
 
 
+####
+#### IV ####
+####
+
+base = iris
+names(base) = c("y", "x1", "x_endo_1", "x_inst_1", "fe")
+set.seed(2)
+base$x_inst_2 = 0.2 * base$y + 0.2 * base$x_endo_1 + rnorm(150, sd = 0.5)
+base$x_endo_2 = 0.2 * base$y - 0.2 * base$x_inst_1 + rnorm(150, sd = 0.5)
+
+# Checking a basic estimation
+
+setFixest_se(all = "standard")
+
+est_iv = feols(y ~ x1 | x_endo_1 + x_endo_2 ~ x_inst_1 + x_inst_2, base)
+
+res_f1 = feols(x_endo_1 ~ x1 + x_inst_1 + x_inst_2, base)
+res_f2 = feols(x_endo_2 ~ x1 + x_inst_1 + x_inst_2, base)
+
+base$fit_x_endo_1 = predict(res_f1)
+base$fit_x_endo_2 = predict(res_f2)
+
+res_2nd = feols(y ~ fit_x_endo_1 + fit_x_endo_2 + x1, base)
+
+# the coef
+test(coef(est_iv), coef(res_2nd))
+
+# the SE
+resid_iv = base$y - predict(res_2nd, data.frame(x1 = base$x1, fit_x_endo_1 = base$x_endo_1, fit_x_endo_2 = base$x_endo_2))
+sigma2_iv = cpp_ssq(resid_iv) / (res_2nd$nobs - res_2nd$nparams)
+
+sum_2nd = summary(res_2nd, .vcov = res_2nd$cov.unscaled / res_2nd$sigma2 * sigma2_iv)
+
+test(se(sum_2nd), se(est_iv))
+
+
+etable(summary(est_iv, stage = 1:2))
+
+
+
 
 
 
