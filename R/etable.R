@@ -779,7 +779,14 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
             if(AUTO_SUBTITLES){
                 if(!is.null(meta$all_names[["sample"]])){
                     my_subtitles = list()
-                    my_subtitles$title = meta$all_names$split.name
+
+                    if(tex == FALSE){
+                        # We need to rename to avoid FE problem duplicate row names
+                        my_subtitles$title = paste0("Sample (", dict_apply(meta$all_names$split.name, dict), ")")
+                    } else {
+                        my_subtitles$title = dict_apply(meta$all_names$split.name, dict)
+                    }
+
                     n_mod = length(di)
 
                     if(!"sample" %in% names(meta$index)){
@@ -834,7 +841,7 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
 
     }
 
-    if(length(all_models)==0) stop_up("Not any proper model (fixest) as argument!")
+    if(length(all_models)==0) stop_up("Not any 'fixest' model as argument!")
 
     n_models = length(all_models)
 
@@ -2468,6 +2475,8 @@ etable_internal_df = function(info){
             is_fe[[m]] = quoi
         }
 
+        fe_names = dict_apply(fe_names, dict)
+
         if(nchar(style$fixef.prefix) > 0){
             fe_names = paste0(style$fixef.prefix, fe_names)
         }
@@ -2605,7 +2614,8 @@ etable_internal_df = function(info){
         res$variables = as.character(res$variables)
         res$variables[qui] = paste0(res$variables[qui], add_space)
     }
-    row.names(res) = res$variables
+
+    row.names(res) = unlist(res$variables)
     res$variables = NULL
 
     # We rename theta when NB is used
