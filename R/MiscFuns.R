@@ -1,7 +1,7 @@
 
 #' A print facility for \code{fixest} objects.
 #'
-#' This function is very similar to usual \code{summary} functions as it provides the table of coefficients along with other information on the fit of the estimation. The type of output is customizable by the user (using function \code{\link[fixest]{setFixest_print}}).
+#' This function is very similar to usual \code{summary} functions as it provides the table of coefficients along with other information on the fit of the estimation. The type of output can be customized by the user (using function \code{setFixest_print}).
 #'
 #' @method print fixest
 #'
@@ -12,7 +12,7 @@
 #' @param ... Other arguments to be passed to \code{\link[fixest]{vcov.fixest}}.
 #'
 #' @details
-#'  It is possible to set the default values for the arguments \code{type} and \code{fitstat} by using the function \code{\link[fixest]{setFixest_print}}.
+#'  It is possible to set the default values for the arguments \code{type} and \code{fitstat} by using the function \code{setFixest_print}.
 #'
 #' @seealso
 #' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. Use \code{\link[fixest]{summary.fixest}} to see the results with the appropriate standard-errors, \code{\link[fixest]{fixef.fixest}} to extract the fixed-effects coefficients, and the function \code{\link[fixest]{etable}} to visualize the results of multiple estimations.
@@ -166,7 +166,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 
 	if(isTRUE(x$iv)){
 	    glue = function(...) paste(..., collapse = ", ")
-	    first_line = paste0("TSLS estimation, Endo.: ", glue(x$iv_endo_names), ", Instr.: ", glue(x$iv_inst_names), "\n")
+	    first_line = paste0("TSLS estimation, Dep. Var.: ", as.character(x$fml)[[2]], ", Endo.: ", glue(x$iv_endo_names), ", Instr.: ", glue(x$iv_inst_names), "\n")
 	    second_line = paste0(ifunit(x$iv_stage, "First", "Second"), " stage: Dep. Var.: ", as.character(x$fml)[[2]], "\n")
 	    cat(first_line, second_line, sep = "")
 	} else {
@@ -8968,7 +8968,6 @@ getFixest_dict = function(){
 
 
 #' @rdname print.fixest
-#' @title Sets/gets what \code{print} does to \code{fixest} estimations
 setFixest_print = function(type = "table", fitstat = NULL){
 
     check_arg_plus(type, "match(coef, table)")

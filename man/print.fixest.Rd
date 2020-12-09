@@ -24,10 +24,10 @@ getFixest_print()
 \item{...}{Other arguments to be passed to \code{\link[fixest]{vcov.fixest}}.}
 }
 \description{
-This function is very similar to usual \code{summary} functions as it provides the table of coefficients along with other information on the fit of the estimation. The type of output is customizable by the user (using function \code{\link[fixest]{setFixest_print}}).
+This function is very similar to usual \code{summary} functions as it provides the table of coefficients along with other information on the fit of the estimation. The type of output can be customized by the user (using function \code{setFixest_print}).
 }
 \details{
-It is possible to set the default values for the arguments \code{type} and \code{fitstat} by using the function \code{\link[fixest]{setFixest_print}}.
+It is possible to set the default values for the arguments \code{type} and \code{fitstat} by using the function \code{setFixest_print}.
 }
 \examples{
 
