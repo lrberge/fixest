@@ -280,9 +280,20 @@ print.fixest_multi = function(x, ...){
         }
     }
 
-    depth = length(index)
-
     dict_title = c("sample" = "Sample", "lhs" = "Dep. var.", "rhs" = "Expl. vars.", "iv" = "IV", "fixef" = "Fixed-effects")
+
+    qui_drop = apply(tree, 2, max) == 1
+    if(any(qui_drop)){
+        var2drop = names(tree)[qui_drop]
+        for(d in var2drop){
+            cat(dict_title[d], ": ", all_names[[d]][1], "\n", sep = "")
+        }
+
+        tree = tree[, !qui_drop, drop = FALSE]
+        index = index[!names(index) %in% var2drop]
+    }
+
+    depth = length(index)
 
     headers = list()
     headers[[1]] = function(d, i) cat(dict_title[d], ": ", all_names[[d]][i], "\n", sep = "")
@@ -401,7 +412,7 @@ print.fixest_multi = function(x, ...){
 #'
 "[.fixest_multi" = function(x, i, sample, lhs, rhs, fixef, iv, I, reorder = TRUE, drop = TRUE){
 
-    core_args = c("sample", "lhs", "rhs", "iv")
+    core_args = c("sample", "lhs", "rhs", "fixef", "iv")
     check_arg(reorder, drop, "logical scalar")
 
     mc = match.call()
@@ -498,46 +509,19 @@ print.fixest_multi = function(x, ...){
 
     s_max = index[["sample"]]
     if(is_sample){
-        check_arg_plus(sample, "evalset logical scalar | multi match | integer vector no na", .choices = all_names[["sample"]], .data = list(.N = s_max))
-
-        if(is.logical(sample)){
-            if(isFALSE(sample)){
-                last[length(last) + 1] = "sample"
-            }
-            sample = 1:s_max
-        } else if(is.character(sample)){
-            dict = 1:s_max
-            names(dict) = all_names[["sample"]]
-            sample = as.integer(dict[sample])
-        }
-
-        if(any(abs(sample) > s_max)){
-            stop("The index 'sample' cannot be greater than ", s_max, ". Currently ", I[which.max(abs(sample))], " is not valid.")
-        }
+        check_arg_plus(sample, "evalset logical scalar | vector(character, integer) no na", .data = list(.N = s_max))
+        sample = set_index_multi(sample, s_max, all_names)
 
         selection$sample = (1:s_max)[sample]
+
     } else if("sample" %in% names(index)){
         selection$sample = 1:s_max
     }
 
     lhs_max = index[["lhs"]]
     if(is_lhs){
-        check_arg_plus(lhs, "evalset logical scalar | multi match | integer vector no na", .choices = all_names[["lhs"]], .data = list(.N = lhs_max))
-
-        if(is.logical(lhs)){
-            if(isFALSE(lhs)){
-                last[length(last) + 1] = "lhs"
-            }
-            lhs = 1:lhs_max
-        } else if(is.character(lhs)){
-            dict = 1:lhs_max
-            names(dict) = all_names[["lhs"]]
-            lhs = as.integer(dict[lhs])
-        }
-
-        if(any(abs(lhs) > lhs_max)){
-            stop("The index 'lhs' cannot be greater than ", lhs_max, ". Currently ", I[which.max(abs(lhs))], " is not valid.")
-        }
+        check_arg_plus(lhs, "evalset logical scalar | vector(character, integer) no na", .data = list(.N = lhs_max))
+        lhs = set_index_multi(lhs, lhs_max, all_names)
 
         selection$lhs = (1:lhs_max)[lhs]
     } else if("lhs" %in% names(index)){
@@ -546,22 +530,8 @@ print.fixest_multi = function(x, ...){
 
     rhs_max = index[["rhs"]]
     if(is_rhs){
-        check_arg_plus(rhs, "evalset logical scalar | multi match | integer vector no na", .choices = all_names[["rhs"]], .data = list(.N = rhs_max))
-
-        if(is.logical(rhs)){
-            if(isFALSE(rhs)){
-                last[length(last) + 1] = "rhs"
-            }
-            rhs = 1:rhs_max
-        } else if(is.character(rhs)){
-            dict = 1:rhs_max
-            names(dict) = all_names[["rhs"]]
-            rhs = as.integer(dict[rhs])
-        }
-
-        if(any(abs(rhs) > rhs_max)){
-            stop("The index 'rhs' cannot be greater than ", rhs_max, ". Currently ", I[which.max(abs(rhs))], " is not valid.")
-        }
+        check_arg_plus(rhs, "evalset logical scalar | vector(character, integer) no na", .data = list(.N = rhs_max))
+        rhs = set_index_multi(rhs, rhs_max, all_names)
 
         selection$rhs = (1:rhs_max)[rhs]
     } else if("rhs" %in% names(index)){
@@ -570,22 +540,8 @@ print.fixest_multi = function(x, ...){
 
     fixef_max = index[["fixef"]]
     if(is_fixef){
-        check_arg_plus(fixef, "evalset logical scalar | multi match | integer vector no na", .choices = all_names[["fixef"]], .data = list(.N = fixef_max))
-
-        if(is.logical(fixef)){
-            if(isFALSE(fixef)){
-                last[length(last) + 1] = "fixef"
-            }
-            fixef = 1:fixef_max
-        } else if(is.character(fixef)){
-            dict = 1:fixef_max
-            names(dict) = all_names[["fixef"]]
-            fixef = as.integer(dict[fixef])
-        }
-
-        if(any(abs(fixef) > fixef_max)){
-            stop("The index 'fixef' cannot be greater than ", fixef_max, ". Currently ", I[which.max(abs(fixef))], " is not valid.")
-        }
+        check_arg_plus(fixef, "evalset logical scalar | vector(character, integer) no na", .data = list(.N = fixef_max))
+        fixef = set_index_multi(fixef, fixef_max, all_names)
 
         selection$fixef = (1:fixef_max)[fixef]
     } else if("fixef" %in% names(index)){
@@ -594,22 +550,8 @@ print.fixest_multi = function(x, ...){
 
     iv_max = index[["iv"]]
     if(is_iv){
-        check_arg_plus(iv, "evalset logical scalar | multi match | integer vector no na", .choices = all_names[["iv"]], .data = list(.N = iv_max))
-
-        if(is.logical(iv)){
-            if(isFALSE(iv)){
-                last[length(last) + 1] = "iv"
-            }
-            iv = 1:iv_max
-        } else if(is.character(iv)){
-            dict = 1:iv_max
-            names(dict) = all_names[["iv"]]
-            iv = as.integer(dict[iv])
-        }
-
-        if(any(abs(iv) > iv_max)){
-            stop("The index 'iv' cannot be greater than ", iv_max, ". Currently ", I[which.max(abs(iv))], " is not valid.")
-        }
+        check_arg_plus(iv, "evalset logical scalar | vector(character, integer) no na", .data = list(.N = iv_max))
+        iv = set_index_multi(iv, iv_max, all_names)
 
         selection$iv = (1:iv_max)[iv]
     } else if("iv" %in% names(index)){
@@ -735,7 +677,35 @@ as.list.fixest_multi = function(x, ...){
 }
 
 
+set_index_multi = function(x, vmax, all_names){
+    # Function specific to [.fixest_multi => global assignments!!!
+    arg = deparse(substitute(x))
 
+    if(is.logical(x)){
+        if(isFALSE(x)){
+            last = get("last", parent.frame())
+            last[length(last) + 1] = arg
+            assign("last", last, parent.frame())
+        }
+        x = 1:vmax
+    } else if(is.character(x)){
+        dict = 1:vmax
+        names(dict) = all_names[[arg]]
+        vars = keep_apply(all_names[[arg]], x)
+        vars = order_apply(vars, x)
+
+        x = as.integer(dict[vars])
+
+        if(length(x) == 0){
+            stop_up("The set of regular expressions in '", arg, "' didn't match any choice.")
+        }
+
+    } else if(any(abs(x) > vmax)){
+        stop_up("The index '", arg, "' cannot be greater than ", vmax, ". Currently ", x[which.max(abs(x))], " is not valid.")
+    }
+
+    x
+}
 
 
 
