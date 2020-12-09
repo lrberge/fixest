@@ -6,13 +6,13 @@ output:
   html_document:
     number_sections: yes
     toc: yes
-    toc_depth: 3
+    toc_depth: 2
     toc_float:
       collapsed: no
       smooth_scroll: no
   pdf_document:
     toc: yes
-    toc_depth: '3'
+    toc_depth: '2'
 vignette: > 
   %\VignetteIndexEntry{fixest introduction} 
   %\VignetteEngine{knitr::rmarkdown}
@@ -46,8 +46,6 @@ setFixest_nthreads(1)
 
 <!-- Help on vignette writing here: http://r-pkgs.had.co.nz/vignettes.html. -->
 
-<!-- Ajouter example simple et intuitif fixed-effects  -->
-
 The package `fixest` provides a family of functions to perform estimations with multiple fixed-effects.
 The two main functions are `feols` for linear models and `feglm` for generalized linear models. In addition, the function `femlm` performs direct maximum likelihood estimation, and `feNmlm` extends the latter to allow the inclusion of non-linear in parameters right-hand-sides. 
 Each of these functions supports any number of fixed-effects and is implemented with full fledged multi-threading in c++. Functions `feols` and `feglm` further support variables with varying slopes.
@@ -56,7 +54,7 @@ This package is currently (Feb. 2020) the fastest software available to perform 
 
 The standard-errors of the estimates can be easily and intuitively clustered (up to four-way).
 
-The function `etable` allows to seamlessly export the results of multiple estimations into either a data.frame, or into a Latex table of "article-like" quality.
+The function `etable` allows to seamlessly export the results of multiple estimations into either a data.frame, or into a Latex table.
 
 The main features of the package are illustrated in this vignette. The theory used to obtain the fixed-effects is based on Berge (2018), "*Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm.*" CREA Discussion Papers, 13 (<https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13>).
 
@@ -94,18 +92,16 @@ $E\left(Trade_{i,j,p,t}\right)=\exp\left(\gamma_{i}^{Exporter}+\gamma_{j}^{Impor
 The estimation of this model using a Poisson likelihood is as follows:
 
 ```{r}
-gravity_pois <- feglm(Euros ~ log(dist_km)|Origin+Destination+Product+Year, trade)
+gravity_pois = fepois(Euros ~ log(dist_km) | Origin + Destination + Product + Year, trade)
 ```
 
-Note that you need not provide the argument `family` since the Poisson model is the default.
-
-The results can be shown directly with the `print` method:
+The function `fepois` is actually an alias to the function `feglm` with `family = poisson`. The results can be shown directly with the `print` method:
 ```{r}
 print(gravity_pois)
 ```
 
-The `print` reports the coefficient estimates and standard-errors as well as some other information. Among the quality of fit information, the squared-correlation corresponds to the correlation between the dependent variable and the expected predictor; it reflects somehow to the idea of R-square in OLS estimations.
-Note taht the estimation is performed using parallel computing which you can control using the argument `nthreads` (see the "multi-threading" section for more details).
+The `print` reports the coefficient estimates and standard-errors as well as some other information. Among the quality of fit information, the squared-correlation corresponds to the correlation between the dependent variable and the expected predictor; it reflects somehow the idea of R-square in OLS estimations.
+Note that the estimation is performed using parallel computing which you can control using the argument `nthreads` (see the "multi-threading" section for more details).
 
 ## Clustering the standard-errors
 
@@ -132,17 +128,24 @@ summary(gravity_pois, cluster = ~Product)
 ```
 
 
-Note that you can always cluster the standard-errors, even when the estimation contained no fixed-effect. Buth then you must use the argument `cluster`:
+Note that you can always cluster the standard-errors, even when the estimation contained no fixed-effect. But then you must use the argument `cluster`:
 
 ```{r}
-gravity_simple = feglm(Euros ~ log(dist_km), trade)
+gravity_simple = fepois(Euros ~ log(dist_km), trade)
 # Two way clustering is deduced from the argument 'cluster'
 # Using data:
 summary(gravity_simple, cluster = trade[, c("Origin", "Destination")])
 # Using a formula (note that the values of the variables are 
 #  fetched directly in the original database):
-summary(gravity_simple, cluster = ~Origin+Destination)
+summary(gravity_simple, cluster = ~Origin + Destination)
 ```
+
+Finally, the standard-errors can also be computed at estimation time, you simply need to add the `se` or `cluster` argument:
+
+```{r}
+fepois(Euros ~ log(dist_km), trade, cluster = ~Product)
+```
+
 
 
 ## Other estimation functions
@@ -150,7 +153,7 @@ summary(gravity_simple, cluster = ~Origin+Destination)
 Now we estimate the same relationship by OLS. We need to put the left hand side in logarithm (since the right-hand-side is not exponentialized):
 
 ```{r}
-gravity_ols <- feols(log(Euros) ~ log(dist_km)|Origin+Destination+Product+Year, trade)
+gravity_ols = feols(log(Euros) ~ log(dist_km) | Origin + Destination + Product + Year, trade)
 ```
 
 Of course you can use different families in `feglm`, exactly as in `glm`. 
@@ -158,7 +161,7 @@ Of course you can use different families in `feglm`, exactly as in `glm`.
 To get the estimation for the fixed-effects Negative Binomial:
 
 ```{r}
-gravity_negbin <- fenegbin(Euros ~ log(dist_km)|Origin+Destination+Product+Year, trade)
+gravity_negbin = fenegbin(Euros ~ log(dist_km) | Origin + Destination + Product + Year, trade)
 
 ```
 
@@ -178,7 +181,7 @@ tab = etable(gravity_pois, gravity_negbin, gravity_ols, se = "twoway", subtitles
 knitr::kable(tab[-2, ])
 ```
 
-We added the argument `se="twoway"` to cluster the standard-errors for all estimations. As can be seen this function gives an overview of the estimates and standard-errors, as well as some quality of fit measures. The argument `titles` is used to add information on each estimation column.
+We added the argument `se="twoway"` to cluster the standard-errors for all estimations. As can be seen this function gives an overview of the estimates and standard-errors, as well as some quality of fit measures. The argument `subtitles` is used to add information on each estimation column.
 
 In the previous example, we directly added the estimation results as arguments of the function `etable`. But the function also accepts lists of estimations.
 Let's give an example. Say you want to see the influence of the introduction of fixed-effects on the estimate of the elasticity of distance. You can do it with the following code where we use the argument `fixef` to include fixed-effects (instead of inserting them directly in the formula):
@@ -187,7 +190,7 @@ Let's give an example. Say you want to see the influence of the introduction of 
 gravity_subfe = list()
 all_FEs = c("Year", "Destination", "Origin")
 for(i in 0:3){
-	gravity_subfe[[i+1]] = feglm(Euros ~ log(dist_km), trade, fixef = all_FEs[0:i])
+	gravity_subfe[[i+1]] = fepois(Euros ~ log(dist_km), trade, fixef = all_FEs[0:i])
 }
 ```
 
@@ -203,6 +206,18 @@ knitr::kable(tab)
 
 We have a view of the 4 estimations, all reporting two-way clustered standard-errors thanks to the use of the argument `cluster`.
 
+## Multiple estimations
+
+Note that since version 0.8.0, multiple estimations can be performed at once without requiring loops. Let's replicate the previous example using `fixest` stepwise functions:
+
+```{r}
+res_multi = fepois(Euros ~ log(dist_km) | csw0(Year, Destination, Origin), trade)
+```
+
+The previous line of code performs 4 estimations. The function `csw0` is the key here, it means: *cumulative stepwise starting with the empty element*. Starting with the empty element, each new estimation adds a new element in the `csw0()` function, quite like the previous loop. Then you can consider the results, here `res_multi`, as a list of results, although with specific methods to easily access each element. 
+
+Stepwise functions can be applied to the linear right-hand-side and to the fixed-effects, you can also have multiple dependent variables and perform split sample estimations with the argument `split`. All of this is detailed in the dedicated vignette: [Multiple estimations](https://cran.r-project.org/package=fixest/vignettes/multiple_estimations.html).
+
 
 ## Exporting the results to Latex
 
@@ -210,14 +225,14 @@ So far we have seen how to report the results of multiple estimations on the R c
 
 ```{r}
 # with two-way clustered SEs
-etable(gravity_subfe, cluster = ~Origin+Destination, tex = TRUE)
+etable(res_multi, cluster = ~Origin+Destination, tex = TRUE)
 ```
 
 The user can export the Latex table directly into a file (argument `file`), add a title (arg. `title`) and a label to the table (arg. `label`).  Note that when the argument `file` is present, the Latex format becomes the default (i.e. `tex = TRUE` by default).
 
 The coefficients can be renamed easily (arg. `dict`), some can be dropped (arg. `drop`) and they can be easily reordered with regular expressions (arg. `order`). 
 
-The significance codes can easily be changed (arg. `signifCode`) and all quality of fit information can be customized. Among others, the number of fixed-effect per fixed-effect dimension can also be displayed using the argument `fixef_sizes`.
+The significance codes can easily be changed (arg. `signifCode`) and all quality of fit information can be customized (argument `fitstat`). Among others, the number of fixed-effect per fixed-effect dimension can also be displayed using the argument `fixef_sizes`.
 
 ### An elaborate example
 
@@ -227,23 +242,23 @@ Consider the following example of the exportation of two tables:
 # we set the dictionary once and for all
 myDict = c("log(dist_km)" = "$\\ln (Distance)$", "(Intercept)" = "Constant")
 # 1st export: we change the signif code and drop the intercept
-etable(gravity_subfe, signifCode = c("a" = 0.01, "b" = 0.05),
+etable(res_multi, signifCode = c("a" = 0.01, "b" = 0.05),
        drop = "Const", dict = myDict, file = "Estimation Tables.tex", 
        replace = TRUE, title = "First export -- normal Standard-errors")
 # 2nd export: clustered S-E + distance as the first coefficient
-etable(gravity_subfe, cluster = ~Product, order = "Dist", 
+etable(res_multi, cluster = ~Product, order = "Dist", 
        dict = myDict, file = "Estimation Tables.tex", 
        title = "Second export -- clustered standard-errors (on Product variable)")
 
 ```
 
-In this example, two tables containing the results of the 4 estimations are directly exported to a Latex table into the file "Estimation Tables.tex". First take notice (again) that **we do not need to use the argument** `tex=TRUE` since when the argument `file` is present, the Latex format becomes the default. The file is re-created in the first exportation thanks to the argument `replace = TRUE`. 
+In this example, two tables containing the results of the 4 estimations are directly exported to a Latex table into the file "Estimation Tables.tex". First take notice (again) that *we do not need to use the argument* `tex=TRUE` since when the argument `file` is present, the Latex format becomes the default. The file is re-created in the first exportation thanks to the argument `replace = TRUE`. 
 
 To change the variable names in the Latex table, we use the argument `dict`. The variable `myDict` is the dictionary we use to rename the variables, it is simply a named vector. The original name of the variables correspond to the names of `myDict` while the new names of the variables are the values of this vector. Any variable that matches the names of `myDict` will be replaced by its value. Thus we do not care of the order of appearance of the variables in the estimation results. 
 
 In the first export, the coefficient of the intercept is dropped by using `drop = "Const"` (could be anything such that `grepl(drop[1], "Constant")` is TRUE). In the second, the coefficient of the distance is put before the intercept (which is kept) thanks to the argument `order`. Note that the actions performed by the arguments `drop` or `order` are performed **after** the renaming takes place with the argument `dict`.
 
-Note that you can completely customize the style of the table by using the argument `style`, please have a look at the dedicated vignette: [Exporting estimation tables](https://cran.r-project.org/package=fixest/vignettes/exporting_tables.html). 
+Note that you can completely customize the style of the table by using the `style` and `postprocessing` arguments, please have a look at the dedicated vignette: [Exporting estimation tables](https://cran.r-project.org/package=fixest/vignettes/exporting_tables.html). 
 
 
 ## Extracting the fixed-effects coefficients
@@ -251,7 +266,7 @@ Note that you can completely customize the style of the table by using the argum
 To obtain the fixed-effects of the estimation, the function `fixef` must be performed on the results. This function returns a list containing the fixed-effects coefficients for each dimension. The `summary` method helps to have a quick overview:
 
 ```{r}
-fixedEffects <- fixef(gravity_pois)
+fixedEffects = fixef(gravity_pois)
 summary(fixedEffects)
 ```
 
@@ -272,9 +287,87 @@ For each dimension, the fixed-effects are first centered, then sorted, and final
 
 Note however that the interpretation of the fixed-effects must be taken with extra care. In particular, here the fixed-effects can be interpreted only because they are perfectly balanced. 
 
+# Instrumental variables
+
+Two stage least square estimations can be performed by simply adding in the formula the link between the endogenous and the instrumental variables. Let's have an example.
+
+```{r}
+base = iris
+names(base) = c("y", "x1", "x_endo_1", "x_inst_1", "fe")
+set.seed(2)
+base$x_inst_2 = 0.2 * base$y + 0.2 * base$x_endo_1 + rnorm(150, sd = 0.5)
+base$x_endo_2 = 0.2 * base$y - 0.2 * base$x_inst_1 + rnorm(150, sd = 0.5)
+
+est_iv = feols(y ~ x1 | x_endo_1 + x_endo_2 ~ x_inst_1 + x_inst_2, base)
+est_iv
+```
+
+So we've just performed a two stage least squares estimation. The formula coming after the pipe, `x_endo_1 + x_endo_2 ~ x_inst_1 + x_inst_2`, describes the endogenous variables (on the left) and the instruments (on the right). 
+
+By default, three statistics are displayed: the F-test from the first stage (weak instrument test), the Wu-Hausman endogeneity test and the overidentifying restrictions (Sargan) test. Note that the Sargan statistic appears only when relevant (i.e. when # instr. > # endo. vars., not the case here).
+
+You can use the `fitstat` command to summon other kind of tests, notably Wald tests on the first/second stages:
+
+```{r}
+fitstat(est_iv, ~ ivf1 + ivwald1 + ivf2 + ivwald2, cluster = "fe")
+```
+
+As the Wald test relies on a given variance-covariance matrix, you can pass extra arguments to `fitstat`, as the argument `cluster` in the previous example, to specify which type of VCOV matrix is desired.
+
+Note that you can display the statistics that you wish when printing by changing the default print values:
+
+```{r}
+setFixest_print(fitstat = ~ . + ivwald2)
+est_iv
+```
+
+In the previous code, `fitstat = ~ . + ivwald2` means that we want to add the second stage Wald test to the existing printed statistics (represented here by the point). 
+
+Now what about adding some fixed-effects? That's of course possible, you need to add them after the first right-hand-side, as follows:
+
+```{r}
+est_iv_fe = feols(y ~ x1 | fe | x_endo_1 + x_endo_2 ~ x_inst_1 + x_inst_2, base)
+est_iv_fe
+```
+
+To access the first stage(s), you can use the summary method:
+
+```{r}
+summary(est_iv_fe, stage = 1)
+```
+
+When `summary` shall return more than one element, the object returned is not a regular `fixest` object but a `fixest_multi` object. These kind of objects are covered in the vignette: [Multiple estimations](https://cran.r-project.org/package=fixest/vignettes/multiple_estimations.html). You can display the first and second stages in a table with `etable`:
+
+```{r}
+etable(summary(est_iv_fe, stage = 1:2), fitstat = ~ . + ivfall + ivwaldall.p)
+```
+
+Here we use `stage = 1:2` to get all first stage regressions followed by the second stage. Using `stage = 2:1` would have done the opposite. 
+
+Now some explanations regarding `fitstat`. The suffix `all` concerns IV only and means the following: if it's a first stage regression, then the first-stage F-stat is displayed, otherwise it's the second stage F-stat. The suffix `.p` is used in `ivwaldall.p` to access the p-value and not the statistic. Finally, you can permanently set which fit statistic to display in `etable` by using `setFixest_etable`, like for example `setFixest_etable(fitstat = ~ . + ivfall + ivwaldall.p)`.
+
+
+
 # Additional features 
 
-Now we present some other features of the package. First the possibility to add variables with varying slopes. Second how to combine several fixed-effects. Third, in the case of difference-in-difference analysis, the estimation and graph of the yearly average treatment effects. Fourth the lag.formula utility to lag variables easily. Fifth the possibility for non-linear in parameter estimation. Finally the use of parallelism to accelerate the estimation. 
+Now we present some other features of the package:
+
+  1. [How to add variables with varying slopes](#varying-slopes). 
+  
+  2. [How to combine several fixed-effects](#combining-several-fixed-effects). 
+  
+  3. [Formula macros](#formula-macros). 
+  
+  4. [The function `i()` to create factors and interactions](#the-function-i-for-factors-and-interactions).
+  
+  5. [How to add lead/lags](#lagging-variables).
+  
+  6. [Non-linear in parameter estimation](#non-linear-in-parameters-example). 
+  
+  7. [Parallelism](#multi-threading). 
+  
+  
+<!-- NOTE: you can't have ":" or "(" in titles to make links -->
 
 ## Varying slopes
 
@@ -321,12 +414,71 @@ The function `^` does the same as `paste0(species, "_", fe)` but is more conveni
 fixef(est_comb)[[1]]
 ```
 
-## Adding interactions: Yearly treatment effect
+## Formula macros
 
-The package `fixest` offers a special tool to add interactions in estimations. You can simply add `i(var, fe, ref)` in the formula, and the variable `var` will be interacted with the values taken by `fe`, with the argument `ref` specifying a reference value of `fe`. Using `i()` opens up a special treatment of the results when using the function `etable` and `coefplot`, as will be shown.
+It can be useful, to tidy up the workflow or simply for convenience, to define formula macros: i.e. macro variables each representing several variables. This package offers two functions to deal with that: `setFixest_fml` to set macro variables globally, and `xpd` to create formula with macro variables either globally defined or defined at run time.
 
-In some difference-in-difference analyses, it is often useful not only to have the total treatment effect but to trace the evolution of the treatment. Let's take an example. In the following data base, some persons (identified with the variable `id`) receive a treatment and others not, represented by the variable `treat`. The treatment takes effect from `period` 6 onwards.
+Here is an example:
+```{r}
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
+# Defining the macro variables
+setFixest_fml(..ctrl = ~poly(x2, 2) + poly(x3, 2))
+# Accessing them
+xpd(y ~ x1 + ..ctrl)
 
+# Definition at run time
+vars = c("x2", "x2^2", "x3")
+for(i in 1:3){
+  print(xpd(y ~ x1 + ..ctrl, ..ctrl = vars[1:i]))
+}
+```
+
+Macro variables must start with two dots. As seen in the example, once set globally they can be directly accessed with `xpd`. In the example, `xpd` redefines the formula at run-time by having a character vector as input. 
+
+All `fixest` estimations call `xpd` internally if appropriate. This means that the following code works just fine:
+```{r}
+feols(y ~ x1 + ..ctrl, base)
+```
+
+The function `xpd` also accepts regular expression macros of the form `..("regex")`. If these macros are encountered and provided a character vector/data.frame is in the argument `data`,  then all variables names matching the regular expression will be placed in the formula.
+
+```{r}
+data(longley)
+xpd(Armed.Forces ~ Population + ..("GNP|ployed"), data = longley)
+```
+
+Again, since `xpd` is called internally, the following works:
+
+```{r}
+feols(Armed.Forces ~ Population + ..("GNP|ployed"), longley)
+```
+
+## The function i for factors and interactions
+
+The function `i()` is a versatile function allowing either: to consider a variable as a factor, with the possibility to easily keep/drop levels, or to create an interaction between a variable and another one treated as a factor. 
+
+As opposed to the `R` function `factor()`, `i()` has synergies with the other functions of the package: namely `etable` and `coefplot`. We now illustrate the two main uses of that function in turn.
+
+### A compact syntax for factors
+
+The function `i` accepts the arguments `ref`, `drop` and `keep`, the three are used to identify which level to keep. Note that the argument `ref` accepts only one value while `drop` accepts several. Here's an example how to use them:
+
+```{r}
+data(airquality)
+res_i1 = feols(Ozone ~ Solar.R + i(Month), airquality)
+res_i2 = feols(Ozone ~ Solar.R + i(Month, ref = 8), airquality)
+res_i3 = feols(Ozone ~ Solar.R + i(Month, keep = 5:6), airquality)
+
+etable(res_i1, res_i2, res_i3, dict = c("6" = "June", "Month::5" = "May"), 
+       order = c("Int|May", "Mon"))
+```
+
+### Estimating yearly treatment effects
+
+To illustrate interactions, we will estimate yearly treatment effects in a difference-in-difference setup. 
+
+Consider the the following data base where some persons (identified with the variable `id`) receive a treatment and others not, represented by the variable `treat`. The treatment takes effect from `period` 6 onward. The data looks like this:
 
 ```{r, eval = TRUE}
 # Sample data illustrating the DiD
@@ -334,14 +486,14 @@ data(base_did)
 head(base_did)
 ```
 
+Using a two way fixed-effect setup, to create a variable capturing the yearly treatment effect we use `i(treat, period, 5)` which corresponds to interacting the variable `treat` to a dummy variable for each `period`, and excluding period 5 (the syntax is `i(var, f, ref)`). Note that, although the reference is optional, we need it otherwise there is a collinearity problem because of the fixed-effect `id`.
+
 ```{r, eval = TRUE}
-# Estimation of yearly effect
+# Estimation of yearly treatment effect
 # We also add individual/time fixed-effects:
 est_did = feols(y ~ x1 + i(treat, period, 5) | id + period, base_did)
 est_did
 ```
-
-In the example above, we create the interaction between the variable `treat` and the periods using the syntax `i(var, fe, ref)`. Note that, although the reference is optional, we need it otherwise there is a collinearity problem because of the fixed-effect `id`.
 
 Now to display the yearly treatment effects on a graph, we can use the function `coefplot`:
 
@@ -350,21 +502,6 @@ coefplot(est_did)
 ```
 
 The function `coefplot` detects that the results contain interactions and plot the appropriate graph. In case you wanted to display al the coefficients, including `x1`, you can use the argument `only.inter = FALSE`. 
-
-Note that (since version 0.7.0) the function `i()` is versatile and can be used to create factors. When you do so, contrary to regular factors, there are synergies with the functions `coefplot` and `etable`. Let's have an example where instead of using the variable `period` as a fixed-effect we just want to include its values from 3 to 6:
-
-```{r, eval = TRUE}
-# Estimation of yearly effect
-# We also add individual/time fixed-effects:
-est_f_did = feols(y ~ x1 + i(period, keep = 3:6) + i(treat, period, 5) | id, base_did)
-# The display in etable is now 'nicer' than when using regular factors
-etable(est_f_did, dict = c("period" = "Period", "6" = "six"))
-```
-
-And coefplot automatically "groups" the values of factors created with `i()`:
-```{r, fig.width=7}
-coefplot(est_f_did, only.inter = FALSE)
-```
 
 ## Lagging variables
 
