@@ -1,0 +1,155 @@
+---
+title: "Multiple estimations"
+author: "Laurent Berge"
+date: "`r Sys.Date()`"
+output: html_document
+vignette: >
+  %\VignetteIndexEntry{Multiple estimations}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(fixest)
+setFixest_nthreads(1)
+```
+
+Multiple estimations can be a chore to set up. Varying left-hand-sides (LHS), right-hand-sides (RHS) or samples require either many lines of code, or loops with formula/data manipulation. The package `fixest` simplifies multiple estimations by providing an optimized procedure along with a clear yet concise syntax.
+
+On the one hand, stepwise functions facilitate the sequential inclusion of variables in the RHS or in the fixed-effects part of the formula. On the other hand, intuitive methods are introduced to manipulate the results from multiple estimations, making it easy to visualize or export any wanted set of results.
+
+# First illustration
+
+What does a multiple estimation look like? Let's give it a try:
+
+```{r}
+base = iris
+names(base) = c("y1", "y2", "x1", "x2", "species")
+
+res_multi = feols(c(y1, y2) ~ x1 + csw(x2, x2^2) | sw0(species), base, fsplit = ~species)
+
+```
+
+With the previous line of code (90 characters long), we have just performed 32 estimations: eight different functional forms on four different samples. 
+
+The previous code leads to the following results:
+
+```{r}
+summary(res_multi, "compact", se = "hetero")
+```
+
+This vignette now details how to perform multiple estimations for multiple: LHSs, RHSs, fixed-effects, or samples. It then comes to describe the various methods to access the results.
+
+
+# Performing multiple estimations
+
+#### Multiple LHS
+
+To perform an estimation on multiple LHS, simply wrap the different LHS in `c()`:
+
+```{r}
+etable(feols(c(y1, y2) ~ x1 + x2, base))
+```
+
+
+#### Multiple RHS and fixed-effects: stepwise functions
+
+To estimate multiple RHS (or fixed-effects), you need to use a specific set of functions: the *stepwise* functions. There are four of them: `sw`, `sw0`, `csw`, `csw0`.
+
+ - `sw`: this function is replaced sequentially by each of its arguments. For example, `y ~ x1 + sw(x2, x3)` leads to two estimations: `y ~ x1 + x2` and `y ~ x1 + x3`.
+    
+ - `sw0`: identical to `sw` but first adds the empty element. E.g.  `y ~ x1 + sw0(x2, x3)` leads to three estimations: `y ~ x1`, `y ~ x1 + x2` and `y ~ x1 + x3`.
+    
+ - `csw`: it stands for *cumulative* stepwise. It adds to the formula each of its arguments sequentially. E.g. `y ~ x1 + csw(x2, x3)` will become `y ~ x1 + x2` and `y ~ x1 + x2 + x3`.
+    
+ - `csw0`: identical to `csw` but first adds the empty element. E.g.  `y ~ x1 + csw0(x2, x3)` leads to three estimations: `y ~ x1`, `y ~ x1 + x2` and `y ~ x1 + x2 + x3`.
+
+The stepwise functions can be applied both to the linear part and the fixed-effects part of the formula. Note that at most one stepwise function can be applied per part. 
+
+Here is an example:
+
+```{r}
+etable(feols(y1 ~ csw(x1, x2) | sw0(species), base, cluster = ~species))
+```
+
+As you can see, if the stepwise functions are in both parts, there will be as many estimations as the cardinal product of the two parts. 
+
+#### Split sample estimations
+
+To perform split sample estimations, use either the argument `split` or `fsplit`. The argument `split` accepts a variable that will be treated as a factor, and an estimation will be performed for each sub-sample defined by each level of this variable. The argument `fsplit` is identical but first adds the full sample. 
+
+```{r}
+etable(feols(y1 ~ x1 + x2, base, fsplit = ~species))
+```
+
+#### Combining multiple estimations
+
+You can combine multiple LHs to multiple RHS to multiple fixed-effects to multiple samples. The total number of estimations is always equal to the cardinal product of the total number of parts.
+
+
+# Manipulation of multiple estimations
+
+We've just seen how to perform multiple estimations, now let's see how to manipulate them. First a multiple estimation is a `fixest_multi` object with its own set of methods. We can access its elements by using keys. There are five keys: `sample`, `lhs`, `rhs`, `fixef`, and `iv`.
+
+#### Basic access
+
+`res_multi[sample = 1]` returns the all the results for the first sample. `res_multi[lhs = .N]` returns all the results for the last dependent variable (the special variable `.N` can be used to refer to the last element). etc.
+
+You can combine different keys: `res_multi[sample = -1, lhs = 1]` will select all results for all samples but the first, and for the first dependent variable. 
+
+Note that these arguments accept regular expressions, so `res_multi[fixef = "spe"]` returns all results for which the character string `"spe"` is contained in the fixed-effects part of the formula. 
+
+#### Putting order
+
+The results in a `fixest_multi` object have a specific order, organized in a tree. By default the order is $sample \rightarrow lhs \rightarrow fixef \rightarrow rhs \rightarrow iv$.
+
+Changing the order of the results is important to organize/export them. By default, when one accesses `fixest_multi` objects the results are reordered according to the order of the arguments used.
+
+For instance, `res_mutli[rhs = 1:.N, fixef = 1:.N]` will place the RHS at the root of the tree followed by the fixed-effects. Then the sample and the LHS will follow. 
+
+The arguments accept logical values: `res_multi[fixef = TRUE, sample = FALSE]` will keep *all* results but will place `fixef` as the root and `sample` as the last leaf.
+
+This subsetting can then be used to easily obtain the appropriate set of results and ordering:
+
+```{r}
+etable(res_multi[lhs = 1, fixef = 1, rhs = TRUE, sample = -1])
+```
+
+#### Note on standard-errors
+
+Defining the standard-errors at estimation time, by using the arguments `se` or `cluster`, can be useful to obtain a coherent set of standard-errors across results, especially if the fixed-effects are modified (which will modify the default clustering of standard-errors across models).
+
+#### Note on IVs
+
+IV estimations return a regular `fixest` object. The `summary` applied to it however can return a `fixest_multi` object. This is the case when both the first and second stage regressions are requested using the argument `stage = 1:2`. You can then cherry-pick the results as before using, e.g. `res[iv = 1]`. Note, importantly, that the index refers to the order of the results and 1 here does not mean the first stage. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
