@@ -3337,7 +3337,7 @@ multi_split = function(env, fun){
     }
 
     if(split.full){
-        split.items = c("full_sample", split.items)
+        split.items = c("Full sample", split.items)
     }
 
     index = list(sample = length(res_all))
