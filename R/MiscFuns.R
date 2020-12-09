@@ -7464,6 +7464,11 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 		        se = se_default$two_FE
 		    }
 
+		    if(!is.null(object$fixef_sizes) && object$fixef_sizes[1] == 1){
+		        # Special case => cleaner output
+		        se = se_default$no_FE
+		    }
+
 		} else {
 			if("formula" %in% class(cluster)){
 				# we just find the nway clustering and do only minor control
