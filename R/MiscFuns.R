@@ -3094,8 +3094,9 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
 demean = function(X, f, slope.vars, slope.flag, data, weights,
                   nthreads = getFixest_nthreads(), notes = getFixest_notes(),
                   iter = 2000, tol = 1e-6, na.rm = TRUE,
-                  as.matrix = is.atomic(X), # I strongly prefer input type = output type, let people decide what kind of objects they pass and have them coerce their objects as needed.
+                  as.matrix = is.atomic(X),
                   im_confident = FALSE) {
+
 
     ANY_NA = FALSE
     # to reassign class if X is data.frame, data.table or tibble. Optimally you would preserve all attributes,
@@ -3108,6 +3109,8 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
     }
     # The reassignment of attributes to data.frames is actually a very good idea, thanks Seb!
 
+    # To avoid delayed evaluation problems (due to new default is.atomic(X))
+    as_matrix = as.matrix
 
     # Step 1: formatting the input
     if(!im_confident){
@@ -3189,7 +3192,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
             if(is.list(f)) {
                 if(!is.data.frame(f)) {
                     n_all = lengths(f)
-                    if(!all(n_all == n_all[1L])) { # Much faster than any(diff(n_all) != 0)
+                    if(!all(n_all == n_all[1L])) {
                         n_unik = unique(n_all)
                         stop("In argument 'f' all elements of the list must be of the same length. This is currently not the case (ex: one is of length ", n_unik[1], " while another is of length ", n_unik[2], ").")
                     }
@@ -3200,7 +3203,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
                 }
 
             } else {
-                # as.data.frame on matrix is also very slow, you could do in C++ as in at collapse::mctl.. but I suppose most will pass lists of factors anyway..
+                # SK: as.data.frame on matrix is also very slow, you could do in C++ as in at collapse::mctl.. but I suppose most will pass lists of factors anyway..
                 # LB: In the long run I'll deal with that but that's really low priority
                 f = if(!is.array(f)) list(f) else unclass(as.data.frame(f))
             }
@@ -3226,29 +3229,30 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
                 if(is.list(slope.vars)){
                     if(!is.data.frame(slope.vars)){
                         n_all = lengths(slope.vars)
-                        if(!all(n_all == n_all[1L])) { # Much faster than any(diff(n_all) != 0)
+                        if(!all(n_all == n_all[1L])) {
                             n_unik = unique(n_all)
                             stop("In argument 'slope.vars' all elements of the list must be of the same length. This is currently not the case (ex: one is of length ", n_unik[1], " while another is of length ", n_unik[2], ").")
                         }
-                        # See commentary above.
-                        # slope.vars = as.data.frame(slope.vars)
+
                     } else {
                         oldClass(slope.vars) <- NULL
                     }
 
-                    is_numeric = vapply(`attributes<-`(slope.vars, NULL), is.numeric, TRUE) # Much faster than !sapply(slope.vars, is.numeric)
-                    # Note: you can still reverse in the error message, !all(vec) is faster than any(!vec)
+                    is_numeric = vapply(`attributes<-`(slope.vars, NULL), is.numeric, TRUE)
+                    # SK: Much faster than !sapply(slope.vars, is.numeric)
+                    # LB: 10us diff, only impedes readability IMO
                     if(!all(is_numeric)) stop("In the argument 'slope.vars', the variables with varying slopes must be numeric. Currently variable", enumerate_items(names(slope.vars)[!is_numeric], "s.is.quote"), " not.")
 
-                } else { # Same as above.. Necessary to convert ??
-                    slope.vars = if(!is.array(slope.vars)) list(slope.vars) else unclass(as.data.frame(slope.vars))
+                } else {
+                    # SK: Same as above.. Necessary to convert ??
+                    # LB: The new C++ code accepts lists of vector/matrices or vector/matrices directly // So if we're here (meaning vector or matrix), that's fine
                 }
 
                 if(length(slope.flag) != length(f)) stop("The argument 'slope.flag' must be a vector representing, for each fixed-effect, the number of variables with varying slopes associated to it. Problem: the lengths of slope.flag and the fixed-effect differ: ", length(slope.flag), " vs ", length(f), ".")
 
 
                 # SK: if(sum(abs(slope.flag)) != length(slope.vars))  : This means that slope flag can only be 0, 1 or -1. In the documentation you only talk about positive and negative values. The change I made reflects this.
-                # LB: Cmon Sebastian why change sum(abs(slope.flag)) != length(slope.vars) into sum(slope.flag != 0L) != length(slope.vars)?  The time gains lies in a handful of nano second and you've just introduced a bug!
+                # LB: Cmon Sebastian why change sum(abs(slope.flag)) != length(slope.vars) into sum(slope.flag != 0L) != length(slope.vars)?  The time gains lie in a handful of nano second and you've just introduced a bug!
 
                 if(sum(abs(slope.flag)) != length(slope.vars)) stop("The argument 'slope.flag' must be a vector representing, for each fixed-effect, the number of variables with varying slopes associated to it. Problem: currently the number of variables in 'slope.flag' differ from the number of variables in 'slope.vars': ", sum(abs(slope.flag)), " vs ", length(slope.vars), ".")
 
@@ -3321,12 +3325,14 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
             message("NOTE: ", signif_plus(n_na), " observation", plural(n_na), " removed because of NA values (Breakup: X: ", n_na_x, ", f: ", n_na_fe, slopes_msg, weight_msg, ").")
         }
 
-        if(n_na) { # better subsetting -> Yup
+        if(n_na) {
             ANY_NA = TRUE
-            cc <- which(!is_NA) # subsetting integer is faster than logical !!
-            X = if(lX) lapply(X, `[`, cc) else if(is.matrix(X)) X[cc, , drop = FALSE] else X[cc] # X[!is_NA, , drop = FALSE]
-            f = lapply(f, `[`, cc) # f[!is_NA, , drop = FALSE]
-            if(isSlope) slope.vars = lapply(slope.vars, `[`, cc) # slope.vars[!is_NA, , drop = FALSE]
+            # SK: subsetting integer is faster than logical !!
+            # LB: Indeed, just checked, quite a diff. Good to know!
+            cc <- which(!is_NA)
+            X = if(lX) lapply(X, `[`, cc) else if(is.matrix(X)) X[cc, , drop = FALSE] else X[cc]
+            f = lapply(f, `[`, cc)
+            if(isSlope) slope.vars = lapply(slope.vars, `[`, cc)
             if(is_weight) weights = weights[cc]
         }
 
@@ -3361,7 +3367,9 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
     #
 
     # y => list, X => matrix
-    if(as.matrix) y = 0 else {
+    if(as_matrix){
+        y = 0
+    } else {
         # Quirk => y returns a list only if NCOL(y) > 1 or is.list(y)
         y = if(lX) X else list(X) # This does the same, a bit more frugal
         X = 0
@@ -3373,9 +3381,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
                               slope_flag_Q = slope.flag, slope_vars_list = slope.vars,
                               r_init = 0, nthreads = nthreads)
 
-    # I restructured this code (changed the nesting) and made it more efficient:
-
-    if(as.matrix) {
+    if(as_matrix) {
         if(ANY_NA && na.rm == FALSE) {
             K = NCOL(vars_demean$X_demean)
             res = matrix(NA_real_, length(is_NA), K)
@@ -3389,7 +3395,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
 
     } else {
         if(ANY_NA && na.rm == FALSE) {
-            n = length(is_NA) # One-line efficient solution to the task:
+            n = length(is_NA) # SK: One-line efficient solution to the task:
             res = lapply(vars_demean$y_demean, function(x) `[<-`(rep(NA_real_, n), cc, value = x))
 
         } else {
@@ -3397,9 +3403,11 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
         }
 
         names(res) = var_names
-        # This makes your function class-agnostic to lists, data.frame's, data.table's and tibbles (with the exception for any custom data.frame row.names which are not preserved, but the as.data.frame solution also did not do that)
-        if(!lX || length(clx)) attr(res, "row.names") <- .set_row_names(length(res[[1L]])) # Here !lX || length(clx) means add row.names if either X was a matrix or is classed that is a data.frame
-        oldClass(res) <- if(lX) clx else "data.frame" # If X is a plain list, and since oldClass returns NULL, this will assign a null class again.
+        # SK: This makes your function class-agnostic to lists, data.frame's, data.table's and tibbles (with the exception for any custom data.frame row.names which are not preserved, but the as.data.frame solution also did not do that)
+        if(!lX || length(clx)) attr(res, "row.names") <- .set_row_names(length(res[[1L]]))
+        # SK: Here !lX || length(clx) means add row.names if either X was a matrix or is classed that is a data.frame
+        oldClass(res) <- if(lX) clx else "data.frame"
+        # SK: If X is a plain list, and since oldClass returns NULL, this will assign a null class again.
     }
     res
 }
