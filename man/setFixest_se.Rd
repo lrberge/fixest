@@ -46,7 +46,7 @@ etable(est_no_FE, est_one_FE, est_two_FE)
 setFixest_se(no_FE = "hetero", one_FE = "standard", two_FE = "twoway")
 etable(est_no_FE, est_one_FE, est_two_FE)
 
-# Reseting the defaults
+# Resetting the defaults
 setFixest_se()
 
 
