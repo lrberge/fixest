@@ -2749,11 +2749,15 @@ i_noref = function(var, f, ref, drop, keep){
 #'
 #'
 xpd = function(fml, ..., data = NULL){
-    check_arg(fml, .type = "formula mbt")
+    .xpd(fml = fml, ..., data = data, check = TRUE)
+}
 
-    macros = parse_macros(..., from_xpd = TRUE)
+.xpd = function(fml, ..., data = NULL, check = FALSE){
+    if(check) check_arg(fml, .type = "formula mbt")
 
-    if(length(macros) == 0 && missing(data)) return(fml)
+    macros = parse_macros(..., from_xpd = TRUE, check = check)
+
+    if(length(macros) == 0 && missnull(data)) return(fml)
 
     fml_dp = NULL
 
@@ -3132,9 +3136,9 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
             check_arg(X, "ts formula var(data)", .data = data)
 
             # Extracting the information
-            terms_fixef = fixef_terms(xpd(~ ..fixef, ..fixef = X[[3L]]))
+            terms_fixef = fixef_terms(.xpd(~ ..fixef, ..fixef = X[[3L]]))
             # We add the intercept only for only slope models, otherwise this is void since the result is always 0
-            X = fixest_model_matrix(xpd(y ~ -1 + ..rhs, ..rhs = X[[2L]]), data, fake_intercept = any(terms_fixef$slope_flag >= 0))
+            X = fixest_model_matrix(.xpd(y ~ -1 + ..rhs, ..rhs = X[[2L]]), data, fake_intercept = any(terms_fixef$slope_flag >= 0))
             var_names = dimnames(X)[[2]]
 
             lX = TRUE # Needed for the rest of the code to work
@@ -4308,14 +4312,16 @@ fitstat_validate = function(x, vector = FALSE){
 ####
 
 
-parse_macros = function(..., reset = FALSE, from_xpd = FALSE){
+parse_macros = function(..., reset = FALSE, from_xpd = FALSE, check = TRUE){
     set_up(1)
 
-    check_arg(..., "dotnames os formula | character vector no na | numeric scalar | class(call, name)", .message = paste0("Each element of '...' must be a one-sided formula, and the name of each argument must start with two dots (ex: ", ifelse(from_xpd, "xpd(fml, ..ctrl = ~ x5 + x6)", "setFixest_fml(..ctrl = ~ x5 + x6)"), ").\nAlternatively it can be a character vector of variable names, or a numeric scalar."))
+    if(check) check_arg(..., "dotnames os formula | character vector no na | numeric scalar | class(call, name)", .message = paste0("Each element of '...' must be a one-sided formula, and the name of each argument must start with two dots (ex: ", ifelse(from_xpd, "xpd(fml, ..ctrl = ~ x5 + x6)", "setFixest_fml(..ctrl = ~ x5 + x6)"), ").\nAlternatively it can be a character vector of variable names, or a numeric scalar."))
 
     # We require os formulas instead of character strings because:
     # 1) I find it more handy
     # 2) there is a parsing check from R
+    # Update:
+    # Now character vectors are allowed as well as calls/names
 
     # Original macros
     fml_macro = getOption("fixest_fml_macro")
@@ -4333,11 +4339,13 @@ parse_macros = function(..., reset = FALSE, from_xpd = FALSE){
     dots = list(...)
 
     # Setting the new macros
-    qui_pblm = !grepl("^\\.\\.", names(dots))
-    if(any(qui_pblm)){
-        arg_name = names(dots)[qui_pblm][1]
-        correct_name = gsub("^\\.*", "\\.\\.", arg_name)
-        stop_up("Each argument name must start with two dots. Use '", correct_name, "' instead of '", arg_name, "'.")
+    if(check){
+        qui_pblm = !grepl("^\\.\\.", names(dots))
+        if(any(qui_pblm)){
+            arg_name = names(dots)[qui_pblm][1]
+            correct_name = gsub("^\\.*", "\\.\\.", arg_name)
+            stop_up("Each argument name must start with two dots. Use '", correct_name, "' instead of '", arg_name, "'.")
+        }
     }
 
     for(v in names(dots)){
@@ -4352,10 +4360,8 @@ parse_macros = function(..., reset = FALSE, from_xpd = FALSE){
 
             if(length(fml_raw) > 0){
                 fml_str = paste("~", paste(fml_raw, collapse = " + "))
-                fml = try(as.formula(fml_str))
-                if("try-error" %in% class(fml)){
-                    stop("The variable '", v, "' does not lead to a valid formula (i.e. ", fml_str, " is not valid).")
-                }
+                fml = error_sender(as.formula(fml_str), "The variable '", v, "' does not lead to a valid formula (i.e. ", fml_str, " is not valid).", up = 1)
+
             } else {
                 fml = ~1
             }

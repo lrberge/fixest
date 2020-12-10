@@ -300,7 +300,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         # We apply expand for macros => we return fml_no_xpd
         if(length(getFixest_fml()) > 0 || ".." %in% all.vars(fml, functions = TRUE)){
             fml_no_xpd = fml
-            fml = xpd(fml, data = dataNames)
+            fml = .xpd(fml, data = dataNames)
         }
 
         #
@@ -476,7 +476,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         check_arg(cluster, "os formula | character vector")
 
         if(is.character(cluster)){
-            cluster = xpd(~..clu, ..clu = cluster)
+            cluster = .xpd(~..clu, ..clu = cluster)
         }
 
         complete_vars = unique(c(complete_vars, all.vars(cluster)))
@@ -755,7 +755,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             }
 
             # The formula
-            fml_linear = xpd(..lhs ~ ..rhs, ..lhs = fml_linear[[2]], ..rhs = colnames(linear.mat))
+            fml_linear = .xpd(..lhs ~ ..rhs, ..lhs = fml_linear[[2]], ..rhs = colnames(linear.mat))
 
             linear.varnames = NULL
 
@@ -1223,7 +1223,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         #
 
         # Now LHS evaluated as a regular formula
-        iv_lhs_mat = error_sender(fixest_model_matrix(xpd(y ~ ..rhs, ..rhs = iv_fml_parts[[1]]), data, TRUE),
+        iv_lhs_mat = error_sender(fixest_model_matrix(.xpd(y ~ ..rhs, ..rhs = iv_fml_parts[[1]]), data, TRUE),
                                   "Evaluation of the left-hand-side of the IV part (equal to ", deparse_long(iv_fml_parts[[1]]), ") raises an error: \n")
 
         # Not great => to improve later
@@ -1401,7 +1401,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             fixef_vars = names(fixef_mat)
 
             # The formula
-            fml_fixef = xpd(~..fe, ..fe = fixef_vars)
+            fml_fixef = .xpd(~..fe, ..fe = fixef_vars)
 
             if(delayed.subset){
                 fixef_mat = fixef_mat[subset, , drop = FALSE]
@@ -1453,7 +1453,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             }
 
             # fml update
-            fml_fixef = xpd(~ ..fe, ..fe = fixef_terms)
+            fml_fixef = .xpd(~ ..fe, ..fe = fixef_terms)
 
         }
 
@@ -3174,7 +3174,7 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
         fml_linear = res$fml_all$linear
         fml_iv = res$fml_all$iv
 
-        new_fml_linear = xpd(..y ~ ..rhs + ..inst,
+        new_fml_linear = .xpd(..y ~ ..rhs + ..inst,
                              ..y = fml_iv_endo, ..rhs = fml_linear[[3]], ..inst = fml_iv[[3]])
         res$fml = res$fml_all$linear = new_fml_linear
         res$fml_all$iv = NULL
@@ -3334,9 +3334,9 @@ extract_stepwise = function(fml, tms, all_vars = TRUE){
 
             # lhs_text: created in the LHS section
             if(osf){
-                fml_new = xpd(~ ..rhs, ..rhs = tl_new)
+                fml_new = .xpd(~ ..rhs, ..rhs = tl_new)
             } else {
-                fml_new = xpd(..lhs ~ ..rhs, ..lhs = fml[[2]], ..rhs = tl_new)
+                fml_new = .xpd(..lhs ~ ..rhs, ..lhs = fml[[2]], ..rhs = tl_new)
             }
 
             if(is_fml){
@@ -3350,14 +3350,14 @@ extract_stepwise = function(fml, tms, all_vars = TRUE){
         } else {
 
             tl_new[qui] = "..STEPWISE_VARIABLES"
-            fml_raw = xpd(~..rhs, ..rhs = tl_new)
+            fml_raw = .xpd(~..rhs, ..rhs = tl_new)
 
             fml_all_full = list()
             fml_all_sw = list()
             for(i in seq_along(sw_terms)){
                 if(nchar(sw_terms[i]) == 0 && length(tl_new) > 1){
                     # adding 1 when empty is "ugly"
-                    fml_all_full[[i]] = xpd(~..rhs, ..rhs = tl_new[!qui])
+                    fml_all_full[[i]] = .xpd(~..rhs, ..rhs = tl_new[!qui])
                     if(osf){
                         fml_all_sw[[i]] = ~ 1
                     } else {
@@ -3365,15 +3365,15 @@ extract_stepwise = function(fml, tms, all_vars = TRUE){
                     }
                 } else {
                     if(is_cumul){
-                        fml_all_full[[i]] = xpd(fml_raw, ..STEPWISE_VARIABLES = sw_terms[1:i])
+                        fml_all_full[[i]] = .xpd(fml_raw, ..STEPWISE_VARIABLES = sw_terms[1:i])
                     } else {
-                        fml_all_full[[i]] = xpd(fml_raw, ..STEPWISE_VARIABLES = sw_terms[i])
+                        fml_all_full[[i]] = .xpd(fml_raw, ..STEPWISE_VARIABLES = sw_terms[i])
                     }
 
                     if(osf){
-                        fml_all_sw[[i]] = xpd(~ ..STEPWISE_VARIABLES, ..STEPWISE_VARIABLES = sw_terms[i])
+                        fml_all_sw[[i]] = .xpd(~ ..STEPWISE_VARIABLES, ..STEPWISE_VARIABLES = sw_terms[i])
                     } else {
-                        fml_all_sw[[i]] = xpd(lhs ~ ..STEPWISE_VARIABLES, ..STEPWISE_VARIABLES = sw_terms[i])
+                        fml_all_sw[[i]] = .xpd(lhs ~ ..STEPWISE_VARIABLES, ..STEPWISE_VARIABLES = sw_terms[i])
                     }
 
                 }
@@ -3397,11 +3397,11 @@ extract_stepwise = function(fml, tms, all_vars = TRUE){
             if(length(tl_right) == 0) tl_right = ""
 
             if(osf){
-                fml_core_left = xpd(~ ..rhs, ..rhs = tl_left)
-                fml_core_right = xpd(~ ..rhs, ..rhs = tl_right)
+                fml_core_left = .xpd(~ ..rhs, ..rhs = tl_left)
+                fml_core_right = .xpd(~ ..rhs, ..rhs = tl_right)
             } else {
-                fml_core_left = xpd(lhs ~ ..rhs, ..rhs = tl_left)
-                fml_core_right = xpd(lhs ~ ..rhs, ..rhs = tl_right)
+                fml_core_left = .xpd(lhs ~ ..rhs, ..rhs = tl_left)
+                fml_core_right = .xpd(lhs ~ ..rhs, ..rhs = tl_right)
             }
 
 
@@ -3410,10 +3410,10 @@ extract_stepwise = function(fml, tms, all_vars = TRUE){
                     sw_all_vars = all.vars(fml[[3]])
                 } else {
                     # we need to recreate the formula because of impossible_var_name in tms
-                    sw_all_vars = all.vars(xpd(~..rhs, ..rhs = tl))
+                    sw_all_vars = all.vars(.xpd(~..rhs, ..rhs = tl))
                 }
             } else {
-                sw_all_vars = all.vars(xpd(~ ..sw, ..sw = sw_terms))
+                sw_all_vars = all.vars(.xpd(~ ..sw, ..sw = sw_terms))
             }
 
             # Creating the current formula
@@ -3429,9 +3429,9 @@ extract_stepwise = function(fml, tms, all_vars = TRUE){
 
             # => this is only useful to deduce fake_intercept
             if(osf){
-                fml_new = xpd(~ ..rhs, ..rhs = tl_new)
+                fml_new = .xpd(~ ..rhs, ..rhs = tl_new)
             } else {
-                fml_new = xpd(lhs ~ ..rhs, ..rhs = tl_new)
+                fml_new = .xpd(lhs ~ ..rhs, ..rhs = tl_new)
             }
 
         }
