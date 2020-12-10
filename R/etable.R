@@ -1416,10 +1416,11 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
             if(any(grepl("^poly\\(", var_left))){
 
                 # We clean only "clean" polys
-                qui_poly = grepl("^poly\\([^,]+,[[:digit:]]+)[[:digit:]]+$", var_left)
-                if(any(qui_poly)){
+                qui_poly = which(grepl("^poly\\([^,]+,[[:digit:]]+)[[:digit:]]*$", var_left))
+                if(length(qui_poly)){
                     poly_var = gsub("^poly\\(|,.+$", "", var_left[qui_poly])
                     poly_pow = as.numeric(gsub(".+\\)", "", var_left[qui_poly]))
+                    poly_pow[is.na(poly_pow)] = 1
 
                     poly_pow_clean = poly_dict[poly_pow]
                     if(isTex){
