@@ -812,8 +812,12 @@ X_int = X
 X_int[[1]] = as.integer(X_int[[1]])
 X_demean = demean(X_int, fe)
 
-# matrix
+# matrix/DF
 X_demean = demean(X_int, fe, as.matrix = TRUE)
+test(is.matrix(X_demean), TRUE)
+
+X_demean = demean(as.matrix(X_int), fe, as.matrix = FALSE)
+test(!is.matrix(X_demean), TRUE)
 
 # fml
 X_demean = demean(ln_dist ~ Origin + Destination, data = base)
@@ -822,7 +826,7 @@ X_demean = demean(ln_dist ~ Origin + Destination, data = base)
 X_dm_slopes = demean(ln_dist ~ Origin + Destination[ln_euros], data = base)
 X_dm_slopes_bis = demean(base$ln_dist, fe, slope.vars = base$ln_euros, slope.flag = c(0, 1))
 
-test(X_dm_slopes, X_dm_slopes_bis)
+test(X_dm_slopes[[1]], X_dm_slopes_bis)
 
 ####
 #### fixef ####
@@ -1315,7 +1319,7 @@ test(coef(est_iv), coef(res_2nd))
 
 # the SE
 resid_iv = base$y - predict(res_2nd, data.frame(x1 = base$x1, fit_x_endo_1 = base$x_endo_1, fit_x_endo_2 = base$x_endo_2))
-sigma2_iv = cpp_ssq(resid_iv) / (res_2nd$nobs - res_2nd$nparams)
+sigma2_iv = sum(resid_iv**2) / (res_2nd$nobs - res_2nd$nparams)
 
 sum_2nd = summary(res_2nd, .vcov = res_2nd$cov.unscaled / res_2nd$sigma2 * sigma2_iv)
 
