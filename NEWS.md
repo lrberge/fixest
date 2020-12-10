@@ -7,9 +7,9 @@
 
  - Major bug when predict was used in the presence of fixed-effects (thanks to @jurojas5, [#54](https://github.com/lrberge/fixest/issues/54)). Introduced in version 0.7.
 
-  - When using variable names to cluster the standard-errors inside functions, summary may not fetch the data in the right frame (thanks to @chenwang, [#52](https://github.com/lrberge/fixest/issues/52)).
+  - When using variable names to cluster the standard-errors inside functions, summary may not fetch the data in the right frame (thanks to @chenwang, [#52](https://github.com/lrberge/fixest/issues/52)). Now a completely new internal mechanic is in place.
   
-  - When using variables with varying slopes and the number of iterations is greater than 300, a bug occured in the function checking the convergence was right (thanks to @kendonB, [#53](https://github.com/lrberge/fixest/issues/53)). 
+  - When using variables with varying slopes and the number of iterations is greater than 300, a bug occurred in the function checking the convergence was right (thanks to @kendonB, [#53](https://github.com/lrberge/fixest/issues/53)). 
   
   - Fix bug in the demeaning algorithm when two variables with varying slopes were identical.
   
@@ -24,14 +24,8 @@
   - Fix bug display of how the standard-errors were clustered in `etable`.
   
   - Fix bug occurring when lags were used in combination with combined fixed-effects (i.e. fe1 ^ fe2) (thanks to @SuperMayo [#59](https://github.com/lrberge/fixest/issues/59)).
-
-#### Improvements of the internal algorithm
-
- - Internal demeaning algorithm: some copies of the data are avoided when using `feglm`.
- 
- - Internal algorithm of `to_integer` (used in all estimations): one copy of the input data is now avoided.
- 
- - All estimations: smarter handling of the intercept, thus avoiding the reconstruction of the design matrix.
+  
+  - Fix bug `coefplot` when representing multiple estimations and coefficient names are numbers.
  
 #### IV
 
@@ -52,6 +46,28 @@ res_iv2 = feols(y ~ x1 | species | x_endo ~ x_inst, base)
 res_iv3 = feols(y ~ x1 | c(x_endo, x_endo_bis) ~ x_inst + x_inst_bis, base)
 
 ```
+
+#### fit statistics
+
+  - The `fitstat` function has been significantly enhanced. 
+  
+  - Now the following types are supported:
+  
+    * Likelihood ratios
+    
+    * F-tests
+    
+    * Wald tests
+    
+    * IV related tests (F/Wald/Sargan)
+    
+    * common stats like the R2s, the RMSE, Log-likelihood, etc
+    
+  - You can register your own fit statistics. These can then be seamlessly summoned in `etable` via the argument `fitstat`.
+  
+  - The `print.fixest` function now supports the `fitstat` argument. This means that you can display your own desired fit statistics when printing `fixest` objects. This is especially useful in combination with the `setFixest_print` function that allows to define the default fit statistics to display once and for all. See the example in the "Instrumental variables" section of the Walkthrough vignette.
+  
+  - The new function `wald` computes basic Wald tests.
  
 #### Multiple estimations
 
@@ -59,7 +75,7 @@ res_iv3 = feols(y ~ x1 | c(x_endo, x_endo_bis) ~ x_inst + x_inst_bis, base)
     
   - Estimations for multiple left-hand-sides can be done at once by wrapping the variables in `c()`.
     
-  - In the right-hand-side, stepwise estimations can be performed with the new stepwise functions (`sw`, `sw0`, `csw` and `csw0`).
+  - In the right-hand-side and the fixed-effects parts of the formula, stepwise estimations can be performed with the new stepwise functions (`sw`, `sw0`, `csw` and `csw0`).
     
   - The object returned is of class `fixest_multi`. You can easily navigate through the results with its subset methods.
 
@@ -72,7 +88,7 @@ est_split = feols(c(Ozone, Solar.R) ~ sw(poly(Wind, 2), poly(Temp, 2)),
 etable(est_split)
 
 # Let's reorder, by considering lhs the root
-etable(est_split[lhs = 1:.N])
+etable(est_split[lhs = TRUE])
 
 # Selecting only one LHS and RHS
 etable(est_split[lhs = "Ozone", rhs = 1])
@@ -83,24 +99,36 @@ etable(est_split[I = 1])
 # The first and last estimations
 etable(est_split[i = c(1, .N)])
 ```
+
+#### Formula macros
+
+  - The algorithm now accepts regular expressions with the syntax `..("regex")`:
+  ```R
+  data(longley)
+  # All variables containing "GNP" or "ployed" in their names are fetched
+  feols(Armed.Forces ~ Population + ..("GNP|ployed"), longley)
+  ```
+  
     
 #### New features in etable
 
-  - Major overhaul of the style argument. 
+  - New `style.tex` and `style.df` arguments that define the look of either Latex tables or the output data.frames. 
   
-    * it can be set with the new function `style` that contains its own documentation. 
+    * it can be set with the new functions `style.tex` and `style.df` that contain their own documentation. 
     
-    * some `etable` arguments have been ported to the `style` function (`yesNo`, `tablefoot`).
+    * some `etable` arguments have been ported to the `style` functions (`yesNo`, `tablefoot`).
     
-    * new `tabular` arguments which allows to create `tabular*` tables (suggestion by @fostermeijer [#51](https://github.com/lrberge/fixest/issues/51)).
+  - New `postprocess.tex` and `postprocess.df` arguments which allow the automatic postprocessing of the outputs. See the dedicated vignette on exporting tables for an illustration.
+    
+  - new `tabular` arguments which allows to create `tabular*` tables (suggestion by @fostermeijer [#51](https://github.com/lrberge/fixest/issues/51)).
 
-  - polynomials are automatically renamed to facilitate comparison across models.
+  - polynomials and powers are automatically renamed to facilitate comparison across models. You can set their style with the argument `poly_dict`.
   
-  - the labelling of models is enhanced when `rep.fixest` is used with different standard-errors (the model names are now "model INDEX.SUB-INDEX").
+  - the labeling of models is enhanced when `rep.fixest` is used with different standard-errors (the model names are now "model INDEX.SUB-INDEX").
   
   - the argument `subtitles` has been improved, and now automatically displays the samples when split sample estimations are performed.
  
-#### New features
+#### Other new features
 
  - In all estimations:
     
@@ -109,6 +137,25 @@ etable(est_split[i = c(1, .N)])
     * `split`, `fsplit`: to perform split sample estimations.
     
     * `se`, `cluster`: to cluster the standard-errors during the call.
+    
+    * auto parsing of powers. Now you don't need to use `I()` to have powers of variables in the RHS, it is automatically done for you (i.e. `x^3` becomes `I(x^3)`):
+    ```R
+    base = iris
+    names(base) = c("y", "x1", "x2", "x3", "species")
+
+    # The multiple estimation below works just fine
+    feols(y ~ csw(x, x^2, x^3), base)
+    ```
+  
+  - The `demean` function has been enhanced (with the contribution of Sebastian Krantz).
+  
+#### Improvements of the internal algorithm
+
+ - Internal demeaning algorithm: some copies of the data are avoided when using `feglm`.
+ 
+ - Internal algorithm of `to_integer` (used in all estimations): one copy of the input data is now avoided.
+ 
+ - All estimations: smarter handling of the intercept, thus avoiding the reconstruction of the design matrix.
 
 ## Changes in version 0.7.1 (27-10-2020)
 
