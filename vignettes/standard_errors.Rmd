@@ -40,7 +40,7 @@ This document applies to `fixest` version 0.8.0 or higher.
 
 There are two components defining the standard-errors in `fixest`. The main type of standard-error is given by the argument `se`, the small sample correction is defined by the argument `dof` (*degree of freedom*).
 
-In `fixest`, the `summary` method is used to obtain coefficient tables with different types of standard-errors. Here's an example, the explanations follow in the next two sections:
+Here's an example, the explanations follow in the next two sections:
 ```{r}
 library(fixest)
 data(trade)
@@ -146,11 +146,11 @@ res_lm    = lm(y ~ x, base)
 res_feols = feols(y ~ x, base)
 
 # Same standard-errors
-rbind(se(res_lm), se(res_feols, se = "standard"))
+rbind(se(res_lm), se(res_feols))
 
 # Heteroskedasticity-robust covariance
 se_lm_hc    = sqrt(diag(vcovHC(res_lm, type = "HC1")))
-se_feols_hc = se(res_feols) # by default, it's the HC1 VCOV
+se_feols_hc = se(res_feols, se = "hetero")
 rbind(se_lm_hc, se_feols_hc)
 ```
 
@@ -292,10 +292,6 @@ setFixest_se(no_FE = "standard", one_FE = "standard", two_FE = "standard")
 which changes the way the default standard-errors are computed when the estimation contains no fixed-effects, one fixed-effect, or two or more fixed-effects.
 
 ## Changelog
-
- - Version 0.8.0:
- 
-    * The new default standard-errors for estimations without fixed-effects is heteroskedasticity-robust SEs (i.e. `se = "hetero"`).
 
  - Version 0.7.0 introduces the following important modifications:
  
