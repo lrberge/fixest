@@ -15,17 +15,17 @@ demean(
   notes = getFixest_notes(),
   iter = 2000,
   tol = 1e-06,
-  na.rm = FALSE,
-  as.matrix = FALSE,
+  na.rm = TRUE,
+  as.matrix = is.atomic(X),
   im_confident = FALSE
 )
 }
 \arguments{
-\item{X}{A matrix, vector or a list OR a formula. If equal to a formula, then the argument \code{data} is required, and it must be of the type: \code{x1 + x2 ~ f1 + fe2} with on the LHS the variables to be centered, and on the RHS the factors used for centering. Note that you can use variables with varying slopes with the syntax \code{fe[v1, v2]} (see details in \code{\link[fixest]{feols}}). If not a formula, it must represent the data to be centered. Of course the dimension of that data must be the same as the factors used for centering (argument \code{f}).}
+\item{X}{A matrix, vector or a list OR a formula. If equal to a formula, then the argument \code{data} is required, and it must be of the type: \code{x1 + x2 ~ f1 + fe2} with on the LHS the variables to be centered, and on the RHS the factors used for centering. Note that you can use variables with varying slopes with the syntax \code{fe[v1, v2]} (see details in \code{\link[fixest]{feols}}). Note also that transformations to LHS variables such as \code{log(x1) + log(x2) ~ f1 + fe2} are disabled (i.e. you will get x1 and x2 centered, not their logs). If not a formula, it must represent the data to be centered. Of course the dimension of that data must be the same as the factors used for centering (argument \code{f}).}
 
-\item{f}{A matrix, vector or list. The factors used to center the variables in argument \code{X}.}
+\item{f}{A matrix, vector or list. The factors used to center the variables in argument \code{X}. Matrices will be coerced using \code{as.data.frame}.}
 
-\item{slope.vars}{A vector, matrix or list representing the variables with varying slopes. Note that if this argument is used it MUST be in conjunction with the argument \code{slope.flag} that maps the factors to which the varying slopes are attached. See examples.}
+\item{slope.vars}{A vector, matrix or list representing the variables with varying slopes. Matrices will be coerced using \code{as.data.frame}. Note that if this argument is used it MUST be in conjunction with the argument \code{slope.flag} that maps the factors to which the varying slopes are attached. See examples.}
 
 \item{slope.flag}{An integer vector of the same length as the number of variables in \code{f} (the factors used for centering). It indicates for each factor the number of variables with varying slopes to which it is associated. Positive values mean that the raw factor should also be included in the centering, negative values that it should be excluded. Sorry it's complicated... but see the examples it may get clearer.}
 
@@ -41,11 +41,11 @@ demean(
 
 \item{tol}{Stopping criterion of the algorithm. Default is \code{1e-6}. The algorithm stops when the maximum absolute increase in the coefficients values is lower than \code{tol}.}
 
-\item{na.rm}{Logical, default is \code{FALSE}. If \code{TRUE} and the input data contains any NA value, then any observation with NA will be discarded leading to an output with less observations than the input. By default, if NAs are present the output will also be filled with NAs for each NA observation in input.}
+\item{na.rm}{Logical, default is \code{TRUE}. If \code{TRUE} and the input data contains any NA value, then any observation with NA will be discarded leading to an output with less observations than the input. If \code{FALSE}, if NAs are present the output will also be filled with NAs for each NA observation in input.}
 
-\item{as.matrix}{Logical, default is \code{FALSE}. By default a \code{data.frame} is returned. If \code{TRUE}, then a matrix will be returned.}
+\item{as.matrix}{Logical, if \code{TRUE} a matrix is returned, if \code{FALSE} it will be a data.frame. The default depends on the input, if atomic then a matrix will be returned.}
 
-\item{im_confident}{Logical, default is \code{FALSE}. FOR EXPERT USERS ONLY! This argument allows to skip some of the preprocessing of the arguments given in input. If \code{TRUE}, then \code{X} MUST be a numeric vector/matrix/list (not a formula!), \code{f} MUST be a list, \code{slope.vars} and \code{slope.flag} MUST be consistent and \code{weights}, if given, MUST be numeric (not integer!). Further there MUST be not any NA value, and the number of observations of each element MUST be consistent. Non compliance to these rules may simply lead your R session to break.}
+\item{im_confident}{Logical, default is \code{FALSE}. FOR EXPERT USERS ONLY! This argument allows to skip some of the preprocessing of the arguments given in input. If \code{TRUE}, then \code{X} MUST be a numeric vector/matrix/list (not a formula!), \code{f} MUST be a list, \code{slope.vars} MUST be a list, \code{slope.vars} MUST be consistent with \code{slope.flag}, and \code{weights}, if given, MUST be numeric (not integer!). Further there MUST be not any NA value, and the number of observations of each element MUST be consistent. Non compliance to these rules may simply lead your R session to break.}
 }
 \value{
 It returns a data.frame of the same number of columns as the number of variables to be centered.
