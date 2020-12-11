@@ -2736,8 +2736,8 @@ i_noref = function(var, f, ref, drop, keep){
 #' @inheritParams setFixest_fml
 #'
 #' @param fml A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}. Special macros of the form \code{..("regex")} can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument \code{data}. See examples.
-#' @param lhs If present then a formula will be constructed with \code{lhs} as the full left-hand-side. The value of \code{lhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{rhs}.
-#' @param rhs If present, then a formula will be constructed with \code{rhs} as the full right-hand-side. The value of \code{rhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{lhs}.
+#' @param lhs If present then a formula will be constructed with \code{lhs} as the full left-hand-side. The value of \code{lhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{rhs}. Note that if \code{fml} is not missing, its LHS will be replaced by \code{lhs}.
+#' @param rhs If present, then a formula will be constructed with \code{rhs} as the full right-hand-side. The value of \code{rhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{lhs}. Note that if \code{fml} is not missing, its RHS will be replaced by \code{rhs}.
 #' @param data Either a character vector or a data.frame. This argument will only be used if a macro of the type \code{..("regex")} is used in the formula of the argument \code{fml}. If so, any variable name from \code{data} that matches the regular expression will be added to the formula.
 #'
 #' @details
@@ -2759,15 +2759,22 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
     if((is_lhs <- !missing(lhs)) | (is_rhs <- !missing(rhs))){
         # No short-circuit in condition!
 
+        if(check) check_arg(fml, .type = "formula", .up = 1)
+
         # Direct formula creation
-        res = if(is_lhs) 1 ~ 1 else ~ 1
+        if(missing(fml)){
+            res = if(is_lhs) 1 ~ 1 else ~ 1
+        } else {
+            res = fml
+        }
+
 
         if(is_lhs){
             res[[2]] = value2stringCall(lhs, call = TRUE, check = check)
         }
 
         if(is_rhs){
-            res[[2 + is_lhs]] = value2stringCall(rhs, call = TRUE, check = check)
+            res[[length(res)]] = value2stringCall(rhs, call = TRUE, check = check)
         }
 
         return(res)
@@ -2785,7 +2792,7 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
         qui = which(names(macros) %in% all.vars(fml))
         if(length(qui) > 0){
             fml_dp = deparse_long(fml)
-            # We need to add a lookafter assertion: otherwise if we have ..ctrl + .. ctrl_long, there will be a replacement in ..ctrl_long
+            # We need to add a lookafter assertion: otherwise if we have ..ctrl + ..ctrl_long, there will be a replacement in ..ctrl_long
             for(i in qui){
                 fml_dp = gsub(paste0(escape_regex(names(macros)[i]), "(?=$|[^[:alnum:]_\\.])"), macros[[i]], fml_dp, perl = TRUE)
             }
