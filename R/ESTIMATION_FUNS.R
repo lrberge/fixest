@@ -609,7 +609,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 	    } else if(do_multi_rhs == FALSE){
 
-	        multi_rhs_fml_full = list(.xpd(~ ..rhs, ..rhs = deparse_long(fml[[3]])))
+	        multi_rhs_fml_full = list(.xpd(rhs = fml[[3]]))
 	        multi_rhs_cumul = FALSE
 	        rhs_group_is_na = list(FALSE)
 	        rhs_group_n_na = 0
@@ -789,7 +789,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	                        my_X = 0
 	                    }
 
-	                    my_fml = .xpd(..lhs ~ ..rhs, ..lhs = lhs_names[i_lhs], ..rhs = multi_rhs_fml_full[[jj]])
+	                    my_fml = .xpd(lhs = lhs_names[i_lhs], rhs = multi_rhs_fml_full[[jj]])
 	                    current_env = reshape_env(my_env, lhs = my_lhs[[ii]], rhs = my_X, fml_linear = my_fml)
 
 	                    if(do_iv){
@@ -3387,7 +3387,7 @@ multi_LHS_RHS = function(env, fun){
         rhs_sw = get("rhs_sw", env)
 
     } else {
-        multi_rhs_fml_full = list(.xpd(~ ..rhs, ..rhs = deparse_long(fml[[3]])))
+        multi_rhs_fml_full = list(.xpd(rhs = fml[[3]]))
         multi_rhs_cumul = FALSE
         linear.mat = get("linear.mat", env)
         linear_core = list(left = linear.mat, right = 1)
@@ -3437,7 +3437,7 @@ multi_LHS_RHS = function(env, fun){
                 is_na_current = !is.finite(lhs[[i]]) | cpppar_which_na_inf_mat(my_rhs, nthreads)$is_na_inf
             }
 
-            my_fml = .xpd(..lhs ~ ..rhs, ..lhs = lhs_names[i], ..rhs = multi_rhs_fml_full[[j]])
+            my_fml = .xpd(lhs = lhs_names[i], rhs = multi_rhs_fml_full[[j]])
 
             if(any(is_na_current)){
                 my_env = reshape_env(env, which(!is_na_current), lhs = lhs[[i]], rhs = my_rhs, fml_linear = my_fml)
@@ -3525,7 +3525,7 @@ multi_fixef = function(env, estfun){
             }
 
             # fml update
-            fml_fixef = .xpd(~ ..fe, ..fe = fixef_terms)
+            fml_fixef = .xpd(rhs = fixef_terms)
 
             #
             # NA

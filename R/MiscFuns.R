@@ -2736,24 +2736,44 @@ i_noref = function(var, f, ref, drop, keep){
 #' @inheritParams setFixest_fml
 #'
 #' @param fml A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}. Special macros of the form \code{..("regex")} can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument \code{data}. See examples.
+#' @param lhs If present then a formula will be constructed with \code{lhs} as the full left-hand-side. The value of \code{lhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{rhs}.
+#' @param rhs If present, then a formula will be constructed with \code{rhs} as the full right-hand-side. The value of \code{rhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{lhs}.
 #' @param data Either a character vector or a data.frame. This argument will only be used if a macro of the type \code{..("regex")} is used in the formula of the argument \code{fml}. If so, any variable name from \code{data} that matches the regular expression will be added to the formula.
 #'
 #' @details
 #' In \code{xpd}, the default macro variables are taken from \code{getFixest_fml}. Any value in the \code{...} argument of \code{xpd} will replace these default values.
 #'
-#' The definitions of the macro variables will replace in verbatim the macro variables. Therefore, you can include multipart formulas if you wish but then beware of the order of the macros variable in the formula. For example, using the airquality data, say you want to set as controls the variable \code{Temp} and \code{Day} fixed-effects, you can do \code{setFixest_fml(..ctrl = ~Temp | Day)}, but then \code{feols(Ozone ~ Wind + ..ctrl, airquality)} will be quite different from \code{feols(Ozone ~ ..ctrl + Wind, airquality)}, so beware!
+#' The definitions of the macro variables will replace in verbatim the macro variables. Therefore, you can include multi-part formulas if you wish but then beware of the order of the macros variable in the formula. For example, using the \code{airquality} data, say you want to set as controls the variable \code{Temp} and \code{Day} fixed-effects, you can do \code{setFixest_fml(..ctrl = ~Temp | Day)}, but then \code{feols(Ozone ~ Wind + ..ctrl, airquality)} will be quite different from \code{feols(Ozone ~ ..ctrl + Wind, airquality)}, so beware!
 #'
 #' @return
 #' It returns a formula where all macros have been expanded.
 #'
 #'
 #'
-xpd = function(fml, ..., data = NULL){
-    .xpd(fml = fml, ..., data = data, check = TRUE)
+xpd = function(fml, ..., lhs, rhs, data = NULL){
+    .xpd(fml = fml, ..., lhs = lhs, rhs = rhs, data = data, check = TRUE)
 }
 
-.xpd = function(fml, ..., data = NULL, check = FALSE){
-    if(check) check_arg(fml, .type = "formula mbt")
+.xpd = function(fml, ..., lhs, rhs, data = NULL, check = FALSE){
+
+    if((is_lhs <- !missing(lhs)) | (is_rhs <- !missing(rhs))){
+        # No short-circuit in condition!
+
+        # Direct formula creation
+        res = if(is_lhs) 1 ~ 1 else ~ 1
+
+        if(is_lhs){
+            res[[2]] = value2stringCall(lhs, call = TRUE, check = check)
+        }
+
+        if(is_rhs){
+            res[[2 + is_lhs]] = value2stringCall(rhs, call = TRUE, check = check)
+        }
+
+        return(res)
+    }
+
+    if(check) check_arg(fml, .type = "formula mbt", .up = 1)
 
     macros = parse_macros(..., from_xpd = TRUE, check = check)
 
@@ -2809,6 +2829,7 @@ xpd = function(fml, ..., data = NULL){
 
     fml
 }
+
 
 
 #' Fast transform of any type of vector(s) into an integer vector
@@ -3140,9 +3161,9 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
             check_arg(X, "ts formula var(data)", .data = data)
 
             # Extracting the information
-            terms_fixef = fixef_terms(.xpd(~ ..fixef, ..fixef = X[[3L]]))
+            terms_fixef = fixef_terms(.xpd(rhs = X[[3L]]))
             # We add the intercept only for only slope models, otherwise this would be void since the result would be always 0
-            X = fixest_model_matrix(.xpd(y ~ -1 + ..rhs, ..rhs = X[[2L]]), data, fake_intercept = any(terms_fixef$slope_flag >= 0))
+            X = fixest_model_matrix(.xpd(lhs = quote(y), rhs = X[[2L]]), data, fake_intercept = any(terms_fixef$slope_flag >= 0))
             var_names = dimnames(X)[[2]]
 
             lX = FALSE # Needed for the rest of the code to work
@@ -4364,32 +4385,49 @@ parse_macros = function(..., reset = FALSE, from_xpd = FALSE, check = TRUE){
     }
 
     for(v in names(dots)){
-        fml_raw = dots[[v]]
-
-        if(any(c("call", "name") %in% class(fml_raw))){
-            fml_raw = deparse_long(fml_raw)
-        }
-
-        if(!"formula" %in% class(fml_raw)){
-            fml_raw = fml_raw[grepl("[[:alnum:]]", fml_raw)]
-
-            if(length(fml_raw) > 0){
-                fml_str = paste("~", paste(fml_raw, collapse = " + "))
-                fml = error_sender(as.formula(fml_str), "The variable '", v, "' does not lead to a valid formula (i.e. ", fml_str, " is not valid).", up = 1)
-
-            } else {
-                fml = ~1
-            }
-
-        } else {
-            fml = fml_raw
-        }
-
-        fml_macro[[v]] = deparse_long(fml[[2]])
+        fml_macro[[v]] = value2stringCall(dots[[v]], check = check)
     }
 
     fml_macro
 }
+
+value2stringCall = function(value_raw, call = FALSE, check = FALSE){
+
+    if(any(c("call", "name") %in% class(value_raw))){
+        res = if(call) value_raw else deparse_long(value_raw)
+
+    } else if(inherits(value_raw, "formula")){
+        res = if(call) value_raw[[2]] else as.character(value_raw)[[2]]
+
+    } else {
+
+        if(check){
+            value_raw = grep("[[:alnum:]]", value_raw, value = TRUE)
+            if(length(value_raw)){
+                # We need to check that it leads to a valid formula => otherwise problems later
+                value_raw = paste(value_raw, collapse = "+")
+                my_call = error_sender(str2lang(value_raw), "The value '", value_raw, "' does not lead to a valid formula: ", up = 2)
+                res = if(call) my_call else value_raw
+
+            } else {
+                res = if(call) 1 else "1"
+            }
+
+        } else {
+            value_raw = value_raw[nzchar(value_raw)]
+            if(length(value_raw)){
+                value_raw = paste(value_raw, collapse = "+")
+                res = if(call) str2lang(value_raw) else value_raw
+            } else {
+                res = if(call) 1 else "1"
+            }
+        }
+    }
+
+    res
+}
+
+
 
 # style_name = "fixef"
 # keywords = c("title", "prefix", "suffix")
