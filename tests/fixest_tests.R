@@ -1146,11 +1146,11 @@ test(head(predict(res)), predict(res, quoi))
 # prediction with lags
 data(base_did)
 res = feols(y ~ x1 + l(x1), base_did, panel.id = ~ id + period)
-test(predict(res), predict(res, base_did))
+test(predict(res, na.rm = FALSE), predict(res, base_did))
 
 qui = sample(which(base_did$id %in% 1:5))
 base_bis = base_did[qui, ]
-test(predict(res)[qui], predict(res, base_bis))
+test(predict(res, na.rm = FALSE)[qui], predict(res, base_bis))
 
 
 

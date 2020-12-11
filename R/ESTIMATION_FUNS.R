@@ -296,10 +296,17 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 		y = as.vector(dots$y)
 		init = dots$means
 		correct_0w = dots$correct_0w
+
+		if(verbose){
+		    time_start = proc.time()
+		    gt = function(x, nl = TRUE) cat(sfill(x, 20), ": ", -(t0 - (t0<<-proc.time()))[3], "s", ifelse(nl, "\n", ""), sep = "")
+		    t0 = proc.time()
+		}
+
 	} else {
-		time_start = proc.time()
-		gt = function(x, nl = TRUE) cat(sfill(x, 20), ": ", -(t0 - (t0<<-proc.time()))[3], "s", ifelse(nl, "\n", ""), sep = "")
-		t0 = proc.time()
+	    time_start = proc.time()
+	    gt = function(x, nl = TRUE) cat(sfill(x, 20), ": ", -(t0 - (t0<<-proc.time()))[3], "s", ifelse(nl, "\n", ""), sep = "")
+	    t0 = proc.time()
 
 		# we use fixest_env for appropriate controls and data handling
 
@@ -2413,7 +2420,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, split, fsplit,
             gc()
         }
 
-        model_null = feglm.fit(X = matrix(1, nrow = n, ncol = 1), fixef_mat = NULL, env = env, lean = TRUE)
+        model_null = feglm.fit(X = matrix(1, nrow = n, ncol = 1), fixef_mat = NULL, env = env, lean_internal = TRUE)
         ll_null = model_null$loglik
         fitted_null = model_null$fitted.values
     }

@@ -3905,7 +3905,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
             res_all[[type]] = BIC(x)
 
         } else if(type == "rmse"){
-            res_all[[type]] = sqrt(x$ssr / x$nobs)
+            res_all[[type]] = if(!is.null(x$ssr)) sqrt(x$ssr / x$nobs) else sqrt(cpp_ssq(resid(x)) / x$nobs)
 
         } else if(type == "g"){
             my_vcov = x$cov.scaled
@@ -9470,6 +9470,8 @@ getFixest_fml = function(){
 #' @inheritParams feols
 #' @inheritParams feNmlm
 #' @inheritParams feglm
+#'
+#' @param reset Logical, default to \code{FALSE}. Whether to reset all values.
 #'
 #' @return
 #' The function \code{getFixest_estimation} returns the currently set global defaults.

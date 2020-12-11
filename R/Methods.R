@@ -158,7 +158,7 @@ hatvalues.fixest = function(model, ...){
     #  model from the reduced form. => we need to reestimate the model with the FEs as
     #  regular variables.
 
-    if(isTRUE(object$lean)){
+    if(isTRUE(model$lean)){
         # LATER: recompute it
         stop("The method 'hatvalues.fixest' cannot be applied to 'lean' fixest objects. Please re-estimate with 'lean = FALSE'.")
     }
@@ -216,7 +216,7 @@ hatvalues.fixest = function(model, ...){
 estfun.fixest = function(x, ...){
     # 'scores' is an object always contained in fixest estimations
 
-    if(isTRUE(object$lean)){
+    if(isTRUE(x$lean)){
         # LATER: recompute it
         stop("The method 'estfun.fixest' cannot be applied to 'lean' fixest objects. Please re-estimate with 'lean = FALSE'.")
     }

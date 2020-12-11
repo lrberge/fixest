@@ -47,6 +47,8 @@ getFixest_estimation()
 \item{glm.iter}{Number of iterations of the glm algorithm. Default is 25.}
 
 \item{glm.tol}{Tolerance level for the glm algorithm. Default is \code{1e-8}.}
+
+\item{reset}{Logical, default to \code{FALSE}. Whether to reset all values.}
 }
 \value{
 The function \code{getFixest_estimation} returns the currently set global defaults.
