@@ -4,8 +4,7 @@
 # ~: package sniff tests
 #----------------------------------------------#
 
-# Not all functionnalities are currenlty covered, but I'll improve it over time
-# I should migrate and clean the code from _CHECK_PACKAGE.R
+# Not everything is currently covered, but I'll improve it over time
 
 # Some functions are not trivial to test properly though
 
@@ -57,7 +56,7 @@ for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
 
                 tol = switch(model, "negbin" = 1e-2, "logit" = 3e-5, 1e-5)
 
-                # Setting up the formula to accomodate FEs
+                # Setting up the formula to accommodate FEs
                 if(id_fe == 0){
                     fml_fixest = fml_stats = y ~ x1
                 } else if(id_fe == 1){
