@@ -138,6 +138,10 @@ etable(est_split[i = c(1, .N)])
     
     * `se`, `cluster`: to cluster the standard-errors during the call.
     
+    * `lean`: if `TRUE`, then summary is applied and any large object is removed from the result. To save memory => but many methods won't work afterwards.
+    
+    * `fixef.rm`: argument that accepts `none`, `perfect`, `singleton`, `both`. Controls the removal of fixed-effects from the observation.
+    
     * auto parsing of powers. Now you don't need to use `I()` to have powers of variables in the RHS, it is automatically done for you (i.e. `x^3` becomes `I(x^3)`):
     ```R
     base = iris
@@ -146,6 +150,7 @@ etable(est_split[i = c(1, .N)])
     # The multiple estimation below works just fine
     feols(y ~ csw(x, x^2, x^3), base)
     ```
+  - Estimation options can be set globally with `setFixest_estimation()`.
   
   - The `demean` function has been enhanced (with the contribution of Sebastian Krantz).
   

@@ -527,7 +527,8 @@ summary.fixest = function(object, se, cluster, dof = getFixest_dof(), .vcov, sta
 	object$se = se
 
 	if(lean){
-	    object[c("fixef_id", "residuals", "fitted.values", "scores", "sumFE", "slope_variables_reordered")] = NULL
+	    object[c("fixef_id", "residuals", "fitted.values", "scores", "sumFE", "slope_variables_reordered", "y", "obs_selection", "weights", "irls_weights")] = NULL
+	    object$lean = TRUE
 	}
 
 	object$summary = TRUE
@@ -686,6 +687,10 @@ r2 = function(x, type = "all", full_names = FALSE){
 		        # => we need to compute the FE model first
 
 		        # 2019-11-26: now self contained call (no need for outer frame evaluation)
+
+		        if(isTRUE()){
+		            stop("Within R2s are not available for 'lean' fixest objects. Please reestimate with 'lean = FALSE'.")
+		        }
 
 		        # constructing the data
 		        newdata = cbind(data.frame(y = x$y), as.data.frame(x$fixef_id))
@@ -1058,6 +1063,11 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, ...){
     dots = list(...)
     fixef.tol = dots$fixef.tol
     check_value_plus(fixef.tol, "NULL{1e-5} numeric scalar GT{0} LT{1}")
+
+    if(isTRUE(object$lean)){
+        # LATER: recompute the FEs by extracting them from the data
+        stop("Fixed-effects from 'lean' fixest objects cannot be extracted. Please re-estimate with 'lean = FALSE'.")
+    }
 
 	# Preliminary stuff
 	S = object$sumFE
@@ -2732,7 +2742,6 @@ i_noref = function(var, f, ref, drop, keep){
 #'
 #' Create macros within formulas and expand them with character vectors or other formulas.
 #'
-#' @inherit setFixest_fml examples
 #' @inheritParams setFixest_fml
 #'
 #' @param fml A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}. Special macros of the form \code{..("regex")} can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument \code{data}. See examples.
@@ -2748,6 +2757,88 @@ i_noref = function(var, f, ref, drop, keep){
 #' @return
 #' It returns a formula where all macros have been expanded.
 #'
+#' @examples
+#'
+#' # Small examples with airquality data
+#' data(airquality)
+#' # we set two macro variables
+#' setFixest_fml(..ctrl = ~ Temp + Day,
+#'               ..ctrl_long = ~ poly(Temp, 2) + poly(Day, 2))
+#'
+#' # Using the macro in lm with xpd:
+#' lm(xpd(Ozone ~ Wind + ..ctrl), airquality)
+#' lm(xpd(Ozone ~ Wind + ..ctrl_long), airquality)
+#'
+#' # You can use the macros without xpd() in fixest estimations
+#' a <- feols(Ozone ~ Wind + ..ctrl, airquality)
+#' b <- feols(Ozone ~ Wind + ..ctrl_long, airquality)
+#' etable(a, b, keep = "Int|Win")
+#'
+#' #
+#' # You can use xpd for stepwise estimations
+#' #
+#'
+#' # we want to look at the effect of x1 on y
+#' # controlling for different variables
+#'
+#' base = iris
+#' names(base) = c("y", "x1", "x2", "x3", "species")
+#'
+#' # We first create a matrix with all possible combinations of variables
+#' my_args = lapply(names(base)[-(1:2)], function(x) c("", x))
+#' (all_combs = as.matrix(do.call("expand.grid", my_args)))
+#'
+#' res_all = list()
+#' for(i in 1:nrow(all_combs)){
+#'   res_all[[i]] = feols(xpd(y ~ x1 + ..v, ..v = all_combs[i, ]), base)
+#' }
+#'
+#' etable(res_all)
+#' coefplot(res_all, group = list(Species = "^^species"))
+#'
+#' #
+#' # You can use macros to grep variables in your data set
+#' #
+#'
+#' # Example 1: setting a macro variable globally
+#'
+#' data(longley)
+#' setFixest_fml(..many_vars = grep("GNP|ployed", names(longley), value = TRUE))
+#' feols(Armed.Forces ~ Population + ..many_vars, longley)
+#'
+#' # Example 2: using ..("regex") to grep the variables "live"
+#'
+#' feols(Armed.Forces ~ Population + ..("GNP|ployed"), longley)
+#'
+#' # Example 3: same as Ex.2 but without using a fixest estimation
+#'
+#' # Here we need to use xpd():
+#' lm(xpd(Armed.Forces ~ Population + ..("GNP|ployed"), data = longley), longley)
+#'
+#' #
+#' # You can also put numbers in macros
+#' #
+#'
+#' res_all = list()
+#' for(p in 1:3){
+#'   res_all[[p]] = feols(xpd(Ozone ~ Wind + poly(Temp, ..p), ..p = p), airquality)
+#' }
+#'
+#' etable(res_all)
+#'
+#' #
+#' # lhs and rhs arguments
+#' #
+#'
+#' # to create a one sided formula from a character vector
+#' vars = letters[1:5]
+#' xpd(rhs = vars)
+#'
+#' # Alternatively, to replace the RHS
+#' xpd(y ~ 1, rhs = vars)
+#'
+#' # To create a two sided formula
+#' xpd(lhs = "y", rhs = vars)
 #'
 #'
 xpd = function(fml, ..., lhs, rhs, data = NULL){
@@ -3309,7 +3400,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
 
         ## nthreads (Also seems unnecessarily costly: 250 microseconds)
         # LB: I know... but it has to be checked
-        nthreads = check_set_nthreads(nthreads)
+        if(!missing(nthreads)) nthreads = check_set_nthreads(nthreads)
 
         #
         # FORMATTING
@@ -3814,7 +3905,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
             res_all[[type]] = BIC(x)
 
         } else if(type == "rmse"){
-            res_all[[type]] = sqrt(cpp_ssq(x$residuals) / x$nobs)
+            res_all[[type]] = sqrt(x$ssr / x$nobs)
 
         } else if(type == "g"){
             my_vcov = x$cov.scaled
@@ -6876,6 +6967,7 @@ coef.fixest = coefficients.fixest = function(object, ...){
 #' @inheritParams nobs.fixest
 #'
 #' @param type Character either equal to \code{"response"} (default) or \code{"link"}. If \code{type="response"}, then the output is at the level of the response variable, i.e. it is the expected predictor \eqn{E(Y|X)}. If \code{"link"}, then the output is at the level of the explanatory variables, i.e. the linear predictor \eqn{X\cdot \beta}.
+#' @param na.rm Logical, default is \code{TRUE}. If \code{FALSE} the number of observation returned will be the number of observations in the original data set, otherwise it will be the number of observations used in the estimation.
 #' @param ... Not currently used.
 #'
 #' @details
@@ -6913,15 +7005,17 @@ coef.fixest = coefficients.fixest = function(object, ...){
 #' points(iris$Sepal.Length, y_fitted_gaussian, col = 2, pch = 2)
 #'
 #'
-fitted.fixest = fitted.values.fixest = function(object, type = c("response", "link"), ...){
+fitted.fixest = fitted.values.fixest = function(object, type = c("response", "link"), na.rm = TRUE, ...){
 
     # Checking the arguments
     validate_dots(suggest_args = "type")
 
 	type = match.arg(type)
 
+	fit = predict(object)
+
 	if(type == "response" || object$method == "feols"){
-		res = object$fitted.values
+		res = fit
 	} else if(!is.null(object$mu)){
 		res = object$mu
 	} else if(object$method == "femlm"){
@@ -6932,16 +7026,16 @@ fitted.fixest = fitted.values.fixest = function(object, type = c("response", "li
 							  logit = ml_logit(),
 							  gaussian = ml_gaussian())
 
-		res = famFuns$linearFromExpected(object$fitted.values)
+		res = famFuns$linearFromExpected(fit)
 	} else {
-		res = object$family$linkfun(object$fitted.values)
+		res = object$family$linkfun(fit)
 	}
 
 	# Nota: obs can be removed: either because of NA, either because perfect fit
 	# Shall I put perfect fit as NA since they're out of the estimation???
 	# Still pondering...
-	# Actually adding them means a lot of work to ensure consitency (also in predict...)
-	res = fill_with_na(res, object)
+	# Actually adding them means a lot of work to ensure consistency (also in predict...)
+	if(!na.rm) res = fill_with_na(res, object)
 
 	res
 }
@@ -6990,8 +7084,8 @@ resid.fixest = residuals.fixest = function(object, type = c("response", "devianc
     r = object$residuals
     w = object[["weights"]]
 
-    if(is.null(r)){
-        stop("The method 'resid.fixest' cannot be applied to a 'lean' summary. Please apply it to the estimation object directly.")
+    if(isTRUE(object$lean)){
+        stop("The method 'resid.fixest' cannot be applied to a 'lean' fixest object. Please apply reestimate with 'lean = FALSE'.")
     }
 
     if(method == "feols" || (method %in% c("feNmlm", "femlm") && family == "gaussian")){
@@ -7104,6 +7198,7 @@ resid.fixest = residuals.fixest = function(object, type = c("response", "devianc
 #' @inheritParams fitted.fixest
 #'
 #' @param newdata A data.frame containing the variables used to make the prediction. If not provided, the fitted expected (or linear if \code{type = "link"}) predictors are returned.
+#' @param na.rm Logical, default is \code{TRUE}. Only used when the argument \code{newdata} is missing. If \code{FALSE} the number of observation returned will be the number of observations in the original data set, otherwise it will be the number of observations used in the estimation.
 #' @param ... Not currently used.
 #'
 #' @return
@@ -7144,7 +7239,7 @@ resid.fixest = residuals.fixest = function(object, type = c("response", "devianc
 #' points(iris$Petal.Length, iris$Sepal.Length, col = iris$Species, pch = 18)
 #' legend("topleft", lty = 1, col = 1:3, legend = levels(iris$Species))
 #'
-predict.fixest = function(object, newdata, type = c("response", "link"), ...){
+predict.fixest = function(object, newdata, type = c("response", "link"), na.rm = TRUE, ...){
 
     # Checking the arguments
     validate_dots(suggest_args = "type")
@@ -7154,6 +7249,12 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 
 	# if newdata is missing
 	if(missing(newdata)){
+
+	    if(isTRUE(object$lean)){
+	        # LATER: recompute it
+	        stop("The method 'predict.fixest' cannot be applied to 'lean' fixest objects. Please re-estimate with 'lean = FALSE'.")
+	    }
+
 		if(type == "response" || object$method == "feols"){
 			res = object$fitted.values
 		} else if(object$method == "femlm") {
@@ -7173,7 +7274,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), ...){
 			res = object$family$linkfun(object$fitted.values)
 		}
 
-	    res = fill_with_na(res, object)
+	    if(!na.rm) res = fill_with_na(res, object)
 
 		return(res)
 	}
@@ -7599,9 +7700,14 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 
 	if(se.val == "white") se.val = "hetero"
 
+	if(isTRUE(object$lean) && se != "standard"){
+	    # we can't compute the SE because scores are gone!
+	    # LATER: recompute the scores (costly but maybe only possibility for user?)
+	    stop("VCOV of 'lean' fixest objects cannot be computed. Please re-estimate with 'lean = FALSE'.")
+	}
 
 	# Checking the nber of threads
-	nthreads = check_set_nthreads(nthreads)
+	if(!missing(nthreads)) nthreads = check_set_nthreads(nthreads)
 
 	dots = list(...)
 
@@ -8946,7 +9052,7 @@ getFixest_notes = function(){
 #'
 #'
 setFixest_nthreads = function(nthreads){
-	# By default, we leave 2 nthreads (never use all)
+	# By default, we use only 50% of threads (never use all)
 
     max_CRAN = as.numeric(Sys.getenv("OMP_THREAD_LIMIT"))
     max_CRAN[is.na(max_CRAN)] = 1000
@@ -9315,6 +9421,8 @@ getFixest_se = function(){
 #'
 #' You can set formula macros globally with \code{setFixest_fml}. These macros can then be used in \code{fixest} estimations or when using the function \code{\link[fixest:setFixest_fml]{xpd}}.
 #'
+#' @inherit xpd examples
+#'
 #' @param ... Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. \code{..ctrl}). The value of each argument must be a one-sided formula or a character vector, it is the definition of the macro variable. Example of a valid call: \code{setFixest_fml(..ctrl = ~ var1 + var2)}. In the function \code{xpd}, the default macro variables are taken from \code{getFixest_fml}, any variable in \code{...} will replace these values.
 #' @param reset A logical scalar, defaults to \code{FALSE}. If \code{TRUE}, all macro variables are first reset (i.e. deleted).
 #'
@@ -9326,74 +9434,6 @@ getFixest_se = function(){
 #' @return
 #' The function \code{getFixest_fml()} returns a list of character strings, the names corresponding to the macro variable names, the character strings corresponding to their definition.
 #'
-#' @examples
-#'
-#' # Small examples with airquality data
-#' data(airquality)
-#' # we set two macro variables
-#' setFixest_fml(..ctrl = ~ Temp + Day,
-#'               ..ctrl_long = ~ poly(Temp, 2) + poly(Day, 2))
-#'
-#' # Using the macro in lm with xpd:
-#' lm(xpd(Ozone ~ Wind + ..ctrl), airquality)
-#' lm(xpd(Ozone ~ Wind + ..ctrl_long), airquality)
-#'
-#' # You can use the macros without xpd() in fixest estimations
-#' a <- feols(Ozone ~ Wind + ..ctrl, airquality)
-#' b <- feols(Ozone ~ Wind + ..ctrl_long, airquality)
-#' etable(a, b, keep = "Int|Win")
-#'
-#' #
-#' # You can use xpd for stepwise estimations
-#' #
-#'
-#' # we want to look at the effect of x1 on y
-#' # controlling for different variables
-#'
-#' base = iris
-#' names(base) = c("y", "x1", "x2", "x3", "species")
-#'
-#' # We first create a matrix with all possible combinations of variables
-#' my_args = lapply(names(base)[-(1:2)], function(x) c("", x))
-#' (all_combs = as.matrix(do.call("expand.grid", my_args)))
-#'
-#' res_all = list()
-#' for(i in 1:nrow(all_combs)){
-#'   res_all[[i]] = feols(xpd(y ~ x1 + ..v, ..v = all_combs[i, ]), base)
-#' }
-#'
-#' etable(res_all)
-#' coefplot(res_all, group = list(Species = "^^species"))
-#'
-#' #
-#' # You can use macros to grep variables in your data set
-#' #
-#'
-#' # Example 1: setting a macro variable globally
-#'
-#' data(longley)
-#' setFixest_fml(..many_vars = grep("GNP|ployed", names(longley), value = TRUE))
-#' feols(Armed.Forces ~ Population + ..many_vars, longley)
-#'
-#' # Example 2: using ..("regex") to grep the variables "live"
-#'
-#' feols(Armed.Forces ~ Population + ..("GNP|ployed"), longley)
-#'
-#' # Example 3: same as Ex.2 but without using a fixest estimation
-#'
-#' # Here we need to use xpd():
-#' lm(xpd(Armed.Forces ~ Population + ..("GNP|ployed"), data = longley), longley)
-#'
-#' #
-#' # You can also put numbers in macros
-#' #
-#'
-#' res_all = list()
-#' for(p in 1:3){
-#'   res_all[[p]] = feols(xpd(Ozone ~ Wind + poly(Temp, ..p), ..p = p), airquality)
-#' }
-#'
-#' etable(res_all)
 #'
 #'
 setFixest_fml = function(..., reset = FALSE){
@@ -9422,6 +9462,82 @@ getFixest_fml = function(){
 }
 
 
+
+#' Default arguments for fixest estimations
+#'
+#' This function sets globally the default arguments of fixest estimations.
+#'
+#' @inheritParams feols
+#' @inheritParams feNmlm
+#' @inheritParams feglm
+#'
+#' @return
+#' The function \code{getFixest_estimation} returns the currently set global defaults.
+#'
+#' @examples
+#'
+#' #
+#' # Example: removing singletons is FALSE by default
+#' #
+#'
+#' # => changing this default
+#'
+#' # Let's create data with singletons
+#' base = iris
+#' names(base) = c("y", "x1", "x2", "x3", "species")
+#' base$fe_singletons = as.character(base$species)
+#' base$fe_singletons[1:5] = letters[1:5]
+#'
+#' res          = feols(y ~ x1 + x2 | fe_singletons, base)
+#' res_noSingle = feols(y ~ x1 + x2 | fe_singletons, base, fixef.rm = "single")
+#'
+#' # New defaults
+#' setFixest_estimation(fixef.rm = "single")
+#' res_newDefault = feols(y ~ x1 + x2 | fe_singletons, base)
+#'
+#' etable(res, res_noSingle, res_newDefault)
+#'
+#' # Resetting the defaults
+#' setFixest_estimation(reset = TRUE)
+#'
+#'
+#'
+setFixest_estimation = function(fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10, lean = FALSE, verbose = 0, warn = TRUE, combine.quick = NULL, demeaned = FALSE, mem.clean = FALSE, glm.iter = 25, glm.tol = 1e-8, reset = FALSE){
+
+    check_arg_plus(fixef.rm, "match(none, perfect, singleton, both)")
+    check_arg(fixef.tol, collin.tol, glm.tol, "numeric scalar GT{0}")
+    check_arg(fixef.iter, glm.iter, "integer scalar GE{1}")
+    check_arg(verbose, "integer scalar GE{0}")
+    check_arg(lean, warn, demeaned, mem.clean, reset, "logical scalar")
+    check_arg(combine.quick, "NULL logical scalar")
+
+    # Getting the existing defaults
+    opts = getOption("fixest_estimation")
+
+    if(reset || is.null(opts)){
+        opts = list()
+    } else if(!is.list(opts)){
+        warning("Wrong formatting of option 'fixest_estimation', all options are reset.")
+        opts = list()
+    }
+
+    # Saving the default values
+    mc = match.call()
+    args_default = setdiff(names(mc)[-1], "reset")
+
+    # NOTA: we don't allow delayed evaluation => all arguments must have hard values
+    for(v in args_default){
+        opts[[v]] = eval(as.name(v))
+    }
+
+    options(fixest_estimation = opts)
+
+}
+
+#' @rdname setFixest_estimation
+getFixest_estimation = function(){
+    getOption("fixest_estimation")
+}
 
 
 #### .................. ####

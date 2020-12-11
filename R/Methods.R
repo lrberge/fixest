@@ -83,6 +83,11 @@ sigma.fixest = function(object, ...){
 #'
 deviance.fixest = function(object, ...){
 
+    if(isTRUE(object$lean)){
+        # LATER: recompute it
+        stop("The method 'deviance.fixest' cannot be applied to 'lean' fixest objects. Please re-estimate with 'lean = FALSE'.")
+    }
+
     method = object$method
     family = object$family
     r = object$residuals
@@ -153,6 +158,11 @@ hatvalues.fixest = function(model, ...){
     #  model from the reduced form. => we need to reestimate the model with the FEs as
     #  regular variables.
 
+    if(isTRUE(object$lean)){
+        # LATER: recompute it
+        stop("The method 'hatvalues.fixest' cannot be applied to 'lean' fixest objects. Please re-estimate with 'lean = FALSE'.")
+    }
+
     validate_dots()
 
     method = model$method
@@ -205,6 +215,12 @@ hatvalues.fixest = function(model, ...){
 #'
 estfun.fixest = function(x, ...){
     # 'scores' is an object always contained in fixest estimations
+
+    if(isTRUE(object$lean)){
+        # LATER: recompute it
+        stop("The method 'estfun.fixest' cannot be applied to 'lean' fixest objects. Please re-estimate with 'lean = FALSE'.")
+    }
+
     x$scores
 }
 
@@ -233,7 +249,7 @@ NULL
 
 #' Extracts the bread matrix from fixest objects
 #'
-#' Extracts the bread matrix from fixest objects to be used to compute sanwich variance-covariance matrices.
+#' Extracts the bread matrix from fixest objects to be used to compute sandwich variance-covariance matrices.
 #'
 #' @param x A \code{fixest} object, obtained for instance from \code{\link[fixest]{feols}}.
 #' @param ... Not currently used.

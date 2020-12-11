@@ -12,7 +12,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                        useHessian = TRUE, hessian.args = NULL, opt.control = list(),
                        cluster, se,
                        y, X, fixef_mat, panel.id, fixef.rm = "perfect",
-                       nthreads = getFixest_nthreads(),
+                       nthreads = getFixest_nthreads(), lean = FALSE,
                        verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000, collin.tol = 1e-14,
                        deriv.iter = 5000, deriv.tol = 1e-4, glm.iter = 25, glm.tol = 1e-8,
                        etastart, mustart,
@@ -63,7 +63,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     #
     # Arguments control
-    main_args = c("fml", "data", "panel.id", "offset", "subset", "split", "fsplit", "cluster", "se", "fixef.rm", "fixef.tol", "fixef.iter", "fixef", "nthreads", "verbose", "warn", "notes", "combine.quick", "start", "only.env", "mem.clean")
+    main_args = c("fml", "data", "panel.id", "offset", "subset", "split", "fsplit", "cluster", "se", "fixef.rm", "fixef.tol", "fixef.iter", "fixef", "nthreads", "lean", "verbose", "warn", "notes", "combine.quick", "start", "only.env", "mem.clean")
     femlm_args = c("family", "theta.init", "linear.start", "opt.control", "deriv.tol", "deriv.iter")
     feNmlm_args = c("NL.fml", "NL.start", "lower", "upper", "NL.start.init", "jacobian.method", "useHessian", "hessian.args")
     feglm_args = c("family", "weights", "glm.iter", "glm.tol", "etastart", "mustart", "collin.tol")
@@ -1294,7 +1294,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
         do_summary = TRUE
 
-        cluster_terms = error_sender(fixef_terms(cluster), "Problem in the argument 'cluster':", clean = "_impossible_var_name_ => ^")
+        cluster_terms = error_sender(fixef_terms(cluster), "Problem in the argument 'cluster':\n", clean = "_impossible_var_name_ => ^")
         if(any(cluster_terms$slope_flag != 0)){
             stop("You cannot use variables with varying slopes in the argument 'cluster'.")
         }
@@ -1351,6 +1351,11 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     } else {
         se = NULL
+    }
+
+    check_arg(lean, "logical scalar")
+    if(lean){
+        do_summary = TRUE
     }
 
 
@@ -2118,6 +2123,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     if(do_summary){
         assign("cluster", cluster, env)
         assign("se", se, env)
+        assign("lean", lean, env)
     }
 
     # Multi
