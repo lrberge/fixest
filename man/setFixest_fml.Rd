@@ -94,5 +94,19 @@ for(p in 1:3){
 
 etable(res_all)
 
+#
+# lhs and rhs arguments
+#
+
+# to create a one sided formula from a character vector
+vars = letters[1:5]
+xpd(rhs = vars)
+
+# Alternatively, to replace the RHS
+xpd(y ~ 1, rhs = vars)
+
+# To create a two sided formula
+xpd(lhs = "y", rhs = vars)
+
 
 }

@@ -15,7 +15,7 @@
 Returns a matrix of the same dimension as the number of variables used in the estimation.
 }
 \description{
-Extracts the bread matrix from fixest objects to be used to compute sanwich variance-covariance matrices.
+Extracts the bread matrix from fixest objects to be used to compute sandwich variance-covariance matrices.
 }
 \examples{
 

@@ -21,6 +21,7 @@ feols(
   fixef.iter = 10000,
   collin.tol = 1e-10,
   nthreads = getFixest_nthreads(),
+  lean = FALSE,
   verbose = 0,
   warn = TRUE,
   notes = getFixest_notes(),
@@ -64,6 +65,8 @@ feols(
 \item{collin.tol}{Numeric scalar, default is \code{1e-10}. Threshold decising when variables should be considered collinear and subsequently removed from the estimation. Higher values means more variables will be removed (if there is presence of collinearity). One signal of presence of collinearity is t-stats that are extremely low (for instance when t-stats < 1e-3).}
 
 \item{nthreads}{The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. The default is to use 50\% of all threads. You can set permanently the number of threads used within this package using the function \code{\link[fixest]{setFixest_nthreads}}.}
+
+\item{lean}{Logical, default is \code{FALSE}. If \code{TRUE} then all large objects are removed from the returned result: this will save memory but will block the possibility to use many methods. It is recommended to use the arguments \code{se} or \code{cluster} to obtain the appropriate standard-errors at estimation time, since obtaining different SEs won't be possible afterwards.}
 
 \item{verbose}{Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algoritmh (the first number is the left-hand-side, the other numbers are the right-hand-side variables).}
 

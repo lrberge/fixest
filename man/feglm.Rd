@@ -25,10 +25,11 @@ feglm(
   fixef.rm = "perfect",
   fixef.tol = 1e-06,
   fixef.iter = 10000,
-  collin.tol = 1e-14,
+  collin.tol = 1e-10,
   glm.iter = 25,
   glm.tol = 1e-08,
   nthreads = getFixest_nthreads(),
+  lean = FALSE,
   warn = TRUE,
   notes = getFixest_notes(),
   verbose = 0,
@@ -61,6 +62,7 @@ feglm.fit(
   glm.iter = 25,
   glm.tol = 1e-08,
   nthreads = getFixest_nthreads(),
+  lean = FALSE,
   warn = TRUE,
   notes = getFixest_notes(),
   mem.clean = FALSE,
@@ -92,6 +94,7 @@ fepois(
   glm.iter = 25,
   glm.tol = 1e-08,
   nthreads = getFixest_nthreads(),
+  lean = FALSE,
   warn = TRUE,
   notes = getFixest_notes(),
   verbose = 0,
@@ -146,6 +149,8 @@ fepois(
 \item{glm.tol}{Tolerance level for the glm algorithm. Default is \code{1e-8}.}
 
 \item{nthreads}{The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. The default is to use 50\% of all threads. You can set permanently the number of threads used within this package using the function \code{\link[fixest]{setFixest_nthreads}}.}
+
+\item{lean}{Logical, default is \code{FALSE}. If \code{TRUE} then all large objects are removed from the returned result: this will save memory but will block the possibility to use many methods. It is recommended to use the arguments \code{se} or \code{cluster} to obtain the appropriate standard-errors at estimation time, since obtaining different SEs won't be possible afterwards.}
 
 \item{warn}{Logical, default is \code{TRUE}. Whether warnings should be displayed (concerns warnings relating to convergence state).}
 

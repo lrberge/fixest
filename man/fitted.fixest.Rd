@@ -9,7 +9,7 @@
 An object of class \code{function} of length 1.
 }
 \usage{
-\method{fitted}{fixest}(object, type = c("response", "link"), ...)
+\method{fitted}{fixest}(object, type = c("response", "link"), na.rm = TRUE, ...)
 
 fitted.values.fixest
 }
@@ -17,6 +17,8 @@ fitted.values.fixest
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
 
 \item{type}{Character either equal to \code{"response"} (default) or \code{"link"}. If \code{type="response"}, then the output is at the level of the response variable, i.e. it is the expected predictor \eqn{E(Y|X)}. If \code{"link"}, then the output is at the level of the explanatory variables, i.e. the linear predictor \eqn{X\cdot \beta}.}
+
+\item{na.rm}{Logical, default is \code{TRUE}. If \code{FALSE} the number of observation returned will be the number of observations in the original data set, otherwise it will be the number of observations used in the estimation.}
 
 \item{...}{Not currently used.}
 }

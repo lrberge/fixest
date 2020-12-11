@@ -4,7 +4,7 @@
 \alias{predict.fixest}
 \title{Predict method for \code{fixest} fits}
 \usage{
-\method{predict}{fixest}(object, newdata, type = c("response", "link"), ...)
+\method{predict}{fixest}(object, newdata, type = c("response", "link"), na.rm = TRUE, ...)
 }
 \arguments{
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
@@ -12,6 +12,8 @@
 \item{newdata}{A data.frame containing the variables used to make the prediction. If not provided, the fitted expected (or linear if \code{type = "link"}) predictors are returned.}
 
 \item{type}{Character either equal to \code{"response"} (default) or \code{"link"}. If \code{type="response"}, then the output is at the level of the response variable, i.e. it is the expected predictor \eqn{E(Y|X)}. If \code{"link"}, then the output is at the level of the explanatory variables, i.e. the linear predictor \eqn{X\cdot \beta}.}
+
+\item{na.rm}{Logical, default is \code{TRUE}. Only used when the argument \code{newdata} is missing. If \code{FALSE} the number of observation returned will be the number of observations in the original data set, otherwise it will be the number of observations used in the estimation.}
 
 \item{...}{Not currently used.}
 }
