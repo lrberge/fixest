@@ -416,7 +416,7 @@ fixef(est_comb)[[1]]
 
 ## Formula macros
 
-It can be useful, to tidy up the workflow or simply for convenience, to define formula macros: i.e. macro variables each representing several variables. This package offers two functions to deal with that: `setFixest_fml` to set macro variables globally, and `xpd` to create formula with macro variables either globally defined or defined at run time.
+It can be useful, to tidy up the workflow or simply for convenience, to define formula macros: i.e. macro variables each representing several variables. This package offers two functions to deal with that: `setFixest_fml` to set macro variables globally, and `xpd` to create a formula with macro variables either globally defined or defined at run time.
 
 Here is an example:
 ```{r}
