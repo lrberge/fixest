@@ -6,18 +6,6 @@ Benchmark:
 - ~: Replication in Julia
 =#
 
-#=
-using Pkg
-Pkg.add("RData")
-Pkg.add("DelimitedFiles")
-Pkg.add("FixedEffectModels")
-Pkg.add("DataFrames")
-Pkg.add("CSV")
-
-pwd()
-cd("./Google Drive/R_packages/fixest/fixest/_BENCHMARK")
-=#
-
 println("Loading packages...")
 using RData, DelimitedFiles, FixedEffectModels, DataFrames, CSV
 println("done.")
@@ -26,7 +14,7 @@ println("Loading data...")
 base_all = load("DATA/base_all_simulations.RData", convert=true);
 base_all = base_all["base_all"];
 println(".")
-base_10M = CSV.read("DATA/base_10M.csv", DataFrame)
+base_10M = CSV.read("DATA/base_10M.csv")
 println("done.")
 
 # warming up
