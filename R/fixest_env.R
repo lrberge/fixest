@@ -283,10 +283,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         if(!"data.frame" %in% class(data)){
             stop("The argument 'data' must be a data.frame or a matrix.")
         }
-        if("data.table" %in% class(data)){
-            # this is a local change only
-            class(data) = "data.frame"
-        }
+
+        class(data) = NULL
 
         dataNames = names(data)
 
@@ -391,7 +389,6 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                 }
                 panel__meta__info = panel_setup(data, panel.id, from_fixest = TRUE)
             }
-            class(data) = "data.frame"
         }
 
         fml_parts = fml_split(fml, raw = TRUE)
@@ -551,9 +548,15 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
             if(isFit){
                 delayed.subset = TRUE
+
+                if(is.logical(subset)){
+                    # subsetting indices is faster => worth if done more than once
+                    subset = which(subset)
+                }
+
                 lhs = lhs[subset]
             } else {
-                nobs_origin = NROW(data)
+                nobs_origin = length(data[[1]])
 
                 # subsetting creates a deep copy. We avoid copying the entire data set.
 
@@ -566,7 +569,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
                 complete_vars = intersect(unique(complete_vars), names(data))
 
-                data = data[subset, complete_vars, drop = FALSE]
+                data = select_both(data, subset, complete_vars)
             }
 
 
@@ -926,7 +929,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             warning("As there is no parameter to estimate in argument 'NL.fml', this argument is ignored. If you want to add an offset, use argument 'offset'.")
         }
 
-        data_NL = data[, nonlinear.varnames, drop = FALSE]
+        data_NL = select_vars(data, nonlinear.varnames)
 
         # Update 08-2020 => We now allow non-numeric variables in the NL part (they can be used as identifiers)
         anyNA_NL = FALSE
@@ -1303,7 +1306,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         if(isFixef && all(cluster_terms %in% fixef_terms_full$fe_vars)){
                 # we do nothing => the algo will use the FE ids
         } else {
-            cluster = error_sender(prepare_df(cluster_terms, data, TRUE),
+            cluster = error_sender(prepare_list(cluster_terms, data, TRUE),
                                    "Problem evaluating the argument 'cluster':\n")
 
             # Type conversion
@@ -1379,28 +1382,26 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             #
 
             if(isVector(fixef_mat)){
-                fixef_mat = data.frame(x = fixef_mat, stringsAsFactors = FALSE)
+                fixef_mat = list(x = fixef_mat)
                 names(fixef_mat) = deparse(mc_origin[["fixef_mat"]])[1]
 
             } else if(is.list(fixef_mat)){
+                class(fixef_mat) = NULL
                 all_len = lengths(fixef_mat)
-                if(any(diff(all_len) != 0)){
+                if(any(all_len != all_len[1])){
                     stop("The lengths of the vectors in fixef_mat differ (currently it is: ", enumerate_items(all_len), ").")
                 }
-                fixef_mat = as.data.frame(fixef_mat)
-            }
-
-            if(!is.matrix(fixef_mat) && !"data.frame" %in% class(fixef_mat)){
+            } else if(is.matrix(fixef_mat)){
+                if(is.null(colnames(fixef_mat))){
+                    colnames(fixef_mat) = paste0("fixef_", 1:ncol(fixef_mat))
+                }
+                fixef_mat = unclass(as.data.frame(fixef_mat))
+            } else {
                 stop("Argument fixef_mat must be a vector, a matrix, a list or a data.frame (currently its class is ", enumerate_items(class(fixef_mat)), ").")
             }
 
-            if(is.matrix(fixef_mat) && is.null(colnames(fixef_mat))){
-                colnames(fixef_mat) = paste0("fixef_", 1:ncol(fixef_mat))
-                fixef_mat = as.data.frame(fixef_mat)
-            }
-
-            if(nrow(fixef_mat) != nobs){
-                stop("The number of observations of fixef_mat (", nrow(fixef_mat), ") must match the length of y (", nobs, ").")
+            if(n_row(fixef_mat) != nobs){
+                stop("The number of observations of fixef_mat (", n_row(fixef_mat), ") must match the length of y (", nobs, ").")
             }
 
             fixef_vars = names(fixef_mat)
@@ -1409,7 +1410,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             fml_fixef = .xpd(rhs = fixef_vars)
 
             if(delayed.subset){
-                fixef_mat = fixef_mat[subset, , drop = FALSE]
+                fixef_mat = select_obs(fixef_mat, subset)
             }
 
         } else {
@@ -1419,7 +1420,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
             # Managing fast combine
             if(missnull(combine.quick)){
-                if(NROW(data) > 5e4){
+                if(n_row(data) > 5e4){
                     combine.quick = TRUE
                 } else {
                     combine.quick = FALSE
@@ -1430,7 +1431,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             fixef_terms = fixef_terms_full$fml_terms
 
             # FEs
-            fixef_mat = error_sender(prepare_df(fixef_terms_full$fe_vars, data, combine.quick),
+            fixef_mat = error_sender(prepare_list(fixef_terms_full$fe_vars, data, combine.quick),
                                      "Problem evaluating the fixed-effects part of the formula:\n")
 
             fixef_vars = names(fixef_mat)
@@ -1439,7 +1440,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             isSlope = any(fixef_terms_full$slope_flag != 0)
             if(isSlope){
 
-                slope_mat = error_sender(prepare_df(fixef_terms_full$slope_vars, data),
+                slope_mat = error_sender(prepare_list(fixef_terms_full$slope_vars, data),
                                          "Problem evaluating the variables with varying slopes in the fixed-effects part of the formula:\n")
 
                 slope_flag = fixef_terms_full$slope_flag
@@ -3507,8 +3508,26 @@ select_obs = function(x, index, nthreads = 1, msg = "explanatory variable"){
     x
 }
 
+select_vars = function(x, vars){
+    if(is.list(x)){
+        x = x[vars]
 
+    } else if(is.matrix(x)){
+        x = x[, vars, drop = FALSE]
+    }
 
+    x
+}
 
+select_both = function(x, index, vars, nthreads = 1, msg = "explanatory variable"){
+    x = select_vars(x, vars)
+    select_obs(x, index, nthreads, msg)
+}
 
-
+n_row = function(x){
+    if(is.list(x)){
+        return(length(x[[1]]))
+    } else {
+        return(nrow(x))
+    }
+}

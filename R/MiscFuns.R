@@ -2897,7 +2897,7 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 
         if(grepl('..("', fml_dp, fixed = TRUE)){
 
-            check_arg(data, "character vector no na | matrix | data.frame")
+            check_arg(data, "character vector no na | matrix | list")
 
             if(is.matrix(data)){
                 data = colnames(data)
@@ -3268,11 +3268,11 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
 
             # FE
             fe_done = TRUE
-            f = unclass(error_sender(prepare_df(terms_fixef$fe_vars, data), "Error when evaluating the fixed-effects variables: "))
+            f = unclass(error_sender(prepare_list(terms_fixef$fe_vars, data), "Error when evaluating the fixed-effects variables: "))
             isSlope = any(terms_fixef$slope_flag != 0)
 
             if(isSlope) {
-                slope.vars = unclass(error_sender(prepare_df(terms_fixef$slope_vars, data), "Error when evaluating the variable with varying slopes: "))
+                slope.vars = unclass(error_sender(prepare_list(terms_fixef$slope_vars, data), "Error when evaluating the variable with varying slopes: "))
                 slope.flag = terms_fixef$slope_flag
 
                 is_numeric = vapply(`attributes<-`(slope.vars, NULL), is.numeric, TRUE)
@@ -5026,7 +5026,7 @@ fixef_terms = function(fml, stepwise = FALSE, origin_type = "feols"){
     res
 }
 
-prepare_df = function(vars, base, fastCombine = NA){
+prepare_list = function(vars, base, fastCombine = NA){
     # vars: vector of variables to evaluate
 
     # we drop NAs and make it unique

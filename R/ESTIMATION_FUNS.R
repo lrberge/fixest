@@ -3514,7 +3514,7 @@ multi_fixef = function(env, estfun){
             fixef_terms = fixef_terms_full$fml_terms
 
             # FEs
-            fixef_mat = error_sender(prepare_df(fixef_terms_full$fe_vars, data, combine.quick),
+            fixef_mat = error_sender(prepare_list(fixef_terms_full$fe_vars, data, combine.quick),
                                      "Problem evaluating the fixed-effects part of the formula:\n")
 
             fixef_vars = names(fixef_mat)
@@ -3524,7 +3524,7 @@ multi_fixef = function(env, estfun){
             slope_vars_list = list(0)
             if(isSlope){
 
-                slope_mat = error_sender(prepare_df(fixef_terms_full$slope_vars, data),
+                slope_mat = error_sender(prepare_list(fixef_terms_full$slope_vars, data),
                                          "Problem evaluating the variables with varying slopes in the fixed-effects part of the formula:\n")
 
                 slope_flag = fixef_terms_full$slope_flag
