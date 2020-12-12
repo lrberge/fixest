@@ -600,12 +600,12 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
         lhs_text2eval = gsub("^(c|(c?(stepwise|sw)0?))\\(", "list(", lhs_text)
 
-        lhs = error_sender(eval(parse(text = lhs_text2eval), data),
+        lhs = error_sender(eval(str2lang(lhs_text2eval), data),
                            "Evaluation of the left-hand-side (equal to ", lhs_text, ") raises an error: \n")
 
         if(is.list(lhs)){
             # we check the consistency
-            lhs_names = eval(parse(text = gsub("^list\\(", "stepwise(", lhs_text2eval)))
+            lhs_names = eval(str2lang(gsub("^list\\(", "stepwise(", lhs_text2eval)))
 
             n_all = lengths(lhs)
             if(!all(n_all == n_all[1])){
@@ -3323,7 +3323,7 @@ extract_stepwise = function(fml, tms, all_vars = TRUE){
         tl_new = tl
 
         sw_text = tl[qui]
-        sw_terms = eval(parse(text = sw_text))
+        sw_terms = eval(str2lang(sw_text))
         is_cumul = isTRUE(attr(sw_terms, "is_cumul"))
 
         if(length(sw_terms) == 1){

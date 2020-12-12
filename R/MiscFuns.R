@@ -1591,10 +1591,10 @@ collinearity = function(x, verbose){
 
 	    slope_var_list = list()
 	    for(i in 1:length(slope_vars_unik)){
-	        variable = all.vars(parse(text = slope_vars_unik[i]))
+	        variable = all.vars(str2lang(slope_vars_unik[i]))
 
 	        # as.numeric => we'll use cpp so required
-	        svar = as.numeric(as.vector(eval(parse(text = slope_vars_unik[i]), data)))
+	        svar = as.numeric(as.vector(eval(str2lang(slope_vars_unik[i]), data)))
 	        if(length(svar) == 1) svar = rep(svar, n_obs)
 
 	        slope_var_list[[slope_vars_unik[i]]] = svar
@@ -2024,7 +2024,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
                 stop("In argument 'indiv': the variable", enumerate_items(pblm, "s.is")," not in the data set.")
             }
 
-            indiv_var = try(eval(parse(text = indiv_varname), base), silent = TRUE)
+            indiv_var = try(eval(str2lang(indiv_varname), base), silent = TRUE)
             if("try-error" %in% class(indiv_var)){
                 stop("Evaluation of 'indiv' raises and error:\n", indiv_var)
             }
@@ -4735,10 +4735,10 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
     # Forming the call
     if(attr(t, "intercept") == 1 && !fake_intercept){
         n = nrow(base)
-        all_vars_call = parse(text = paste0("list('(Intercept)' = rep(1, ", n, "), ", paste0(all_vars, collapse = ", "), ")"))
+        all_vars_call = str2lang(paste0("list('(Intercept)' = rep(1, ", n, "), ", paste0(all_vars, collapse = ", "), ")"))
         all_var_names = c("(Intercept)", all_var_names)
     } else {
-        all_vars_call = parse(text = paste0("list(", paste0(all_vars, collapse = ", "), ")"))
+        all_vars_call = str2lang(paste0("list(", paste0(all_vars, collapse = ", "), ")"))
     }
 
     # evaluation
@@ -4826,7 +4826,7 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
             for(i in seq_along(i_naked)){
                 j = i_naked[i]
                 txt = gsub("(^|(?<=[^[:alnum:]\\._]))i(nteract)?\\(", "i_noref(", tl[qui_inter][j], perl = TRUE)
-                tl[qui_inter][j] = eval(parse(text = txt))
+                tl[qui_inter][j] = eval(str2lang(txt))
             }
         } else {
             for(i in seq_along(i_naked)){
@@ -4834,7 +4834,7 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
 
                 j = i_naked[i]
                 txt = gsub("(^|(?<=[^[:alnum:]\\._]))i(nteract)?\\(", "i_ref(", tl[qui_inter][j], perl = TRUE)
-                tl[qui_inter][j] = eval(parse(text = txt))
+                tl[qui_inter][j] = eval(str2lang(txt))
             }
         }
 
@@ -4976,7 +4976,7 @@ fixef_terms = function(fml, stepwise = FALSE, origin_type = "feols"){
                 add_dum = ifelse(grepl("\\[\\[", v), ", add_dum = FALSE", "")
                 v_mod = gsub("\\]+", paste0(add_dum, ")"), v_mod)
 
-                new_v = eval(parse(text = v_mod))
+                new_v = eval(str2lang(v_mod))
                 new_terms = c(new_terms, new_v)
             } else {
                 new_terms = c(new_terms, my_vars[i])
@@ -5056,7 +5056,7 @@ prepare_df = function(vars, base, fastCombine = NA){
     if(all(all_vars %in% names(base))){
         res = base[, all_vars, drop = FALSE]
     } else {
-        all_vars_call = parse(text = paste0("list(", paste0(all_vars, collapse = ", "), ")"))
+        all_vars_call = str2lang(paste0("list(", paste0(all_vars, collapse = ", "), ")"))
         data_list <- try(eval(all_vars_call, base))
 
         # if error: we send it back to the main function
@@ -5109,7 +5109,7 @@ prepare_cluster_mat = function(fml, base, fastCombine){
     if(all(all_vars %in% names(base))){
         res = base[, all_vars, drop = FALSE]
     } else {
-        all_vars_call = parse(text = paste0("list(", paste0(all_vars, collapse = ", "), ")"))
+        all_vars_call = str2lang(paste0("list(", paste0(all_vars, collapse = ", "), ")"))
         data_list <- eval(all_vars_call, base)
         names(data_list) = all_var_names
         data_list$stringsAsFactors = FALSE
@@ -5247,7 +5247,7 @@ expand_interactions_internal = function(x){
             }
 
             my_call = gsub("^[\\.]?[[:alnum:]\\._]+\\(", "interact_control(", terms_split[2])
-            args = try(eval(parse(text = my_call)), silent = TRUE)
+            args = try(eval(str2lang(my_call)), silent = TRUE)
             fe_name = gsub("^([\\.]?[[:alnum:]\\._]+)\\(.+", "\\1", terms_split[2])
             if("try-error" %in% class(args)){
                 stop("Problem in the interaction of the formula: Error in ", terms_split[1], "::", fe_name, gsub(".+interact_control", "", args))
@@ -6592,7 +6592,7 @@ fixest_fml_rewriter = function(fml){
 
             if(grepl("^(c|(c?(stepwise|sw)0?)|list)\\(", lhs_text)){
                 lhs_text2eval = gsub("^(c|(c?(stepwise|sw)0?|list))\\(", "stepwise(", lhs_text)
-                lhs_names = eval(parse(text = lhs_text2eval))
+                lhs_names = eval(str2lang(lhs_text2eval))
             } else {
                 lhs_names = lhs_text
             }
@@ -7347,7 +7347,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 		for(i in 1:n_cluster){
 			# checking if the variable is in the newdata
 		    fe_var = fixef_vars[i]
-			variable = all.vars(parse(text = fe_var))
+			variable = all.vars(str2lang(fe_var))
 			isNotHere = !variable %in% names(newdata)
 			if(any(isNotHere)){
 				stop("The variable ", variable[isNotHere][1], " is absent from the 'newdata' but is needed for prediction (it is a fixed-effect variable).")
@@ -7371,7 +7371,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 			}
 
 			# Obtaining the vector of clusters
-			cluster_current = eval(parse(text = fe_var), newdata)
+			cluster_current = eval(str2lang(fe_var), newdata)
 
 			cluster_current_num = unclass(factor(cluster_current, levels = fixef_values_possible))
 			id_cluster[[i]] = cluster_current_num
@@ -7396,13 +7396,13 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 
 		    slope_var_list = list()
 		    for(i in 1:length(slope_vars_unik)){
-		        variable = all.vars(parse(text = slope_vars_unik[i]))
+		        variable = all.vars(str2lang(slope_vars_unik[i]))
 		        isNotHere = !variable %in% names(newdata)
 		        if(any(isNotHere)){
 		            stop("The variable ", variable[isNotHere][1], " is absent from the 'newdata' but is needed for prediction (it is a variable with varying slope).")
 		        }
 
-		        slope_var_list[[slope_vars_unik[i]]] = eval(parse(text = slope_vars_unik[i]), newdata)
+		        slope_var_list[[slope_vars_unik[i]]] = eval(str2lang(slope_vars_unik[i]), newdata)
 		    }
 
 		    # Adding the FE values
@@ -7953,7 +7953,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 									value_text = paste0("combine_clusters_fast(", value_text, ")")
 								}
 
-								value_call = parse(text = value_text)
+								value_call = str2lang(value_text)
 								value = eval(value_call, object$fixef_id)
 								cluster[[i]] = value
 							}
@@ -8021,7 +8021,7 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 								    value_text = cname
 								}
 
-								value_call = parse(text = value_text)
+								value_call = str2lang(value_text)
 								cluster[[i]] = eval(value_call, data)
 							}
 						}

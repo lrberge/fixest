@@ -1356,7 +1356,7 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, hor
 
             if(!is.null(group_name)){
                 if(grepl("^&", group_name)){
-                    group_name = eval(parse(text = gsub("^&", "", group_name)))
+                    group_name = eval(str2lang(gsub("^&", "", group_name)))
                 }
 
                 axis(side, mean(info), labels = group_name, tick = FALSE, line = par_fit(group.par$text.line, i), cex.axis = par_fit(group.par$text.cex, i), font = par_fit(group.par$text.font, i), col.axis = par_fit(group.par$text.col, i))
@@ -1985,7 +1985,7 @@ replace_and_make_callable = function(text, varlist, text_as_expr = FALSE){
                     if(grepl("^expression\\(", res)){
                         res = gsub("(^expression\\()|(\\)$)", "", res)
                     } else if(grepl("^substitute\\(", res)){
-                        res = deparse(eval(parse(text = res)))
+                        res = deparse(eval(str2lang(res)))
                     }
                 } else {
                     res = x
@@ -2046,9 +2046,9 @@ expr_builder = function(x){
         my_expr = gsub("^&", "", x)
         if(grepl("^(expression|substitute)\\(", my_expr)){
             # direct evaluation
-            res = eval(parse(text = my_expr), parent.frame(2))
+            res = eval(str2lang(my_expr), parent.frame(2))
         } else {
-            res = eval(parse(text = paste0("expression(", my_expr, ")")))
+            res = eval(str2lang(paste0("expression(", my_expr, ")")))
         }
     } else {
         res = x
@@ -2206,7 +2206,7 @@ setFixest_coefplot = function(style, horiz = FALSE, dict = getFixest_dict(), kee
         } else {
             my_extra_args = setdiff(my_arg_vars, arg_list)
             if(length(my_extra_args) > 0){
-                for(v in my_extra_args) extra_values[[v]] = eval(parse(text = v), parent.frame())
+                for(v in my_extra_args) extra_values[[v]] = eval(str2lang(v), parent.frame())
             }
             # control that the order is proper
             arg2eval = intersect(my_arg_vars, arg_list)

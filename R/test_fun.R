@@ -160,5 +160,7 @@ run_test = function(chunk){
     parsed_code = parse(text = test_code)
 
     eval(parsed_code, .GlobalEnv)
+
+    "tests performed successfully"
 }
 

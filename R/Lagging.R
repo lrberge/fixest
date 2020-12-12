@@ -49,15 +49,15 @@ panel_setup = function(data, panel.id, time.step = NULL, duplicate.method = "non
             pblm = setdiff(all_vars, ls(parent.frame(2)))
             stop_up("In the argument 'panel.id', the variable", enumerate_items(pblm, "s.is.past.quote"), " not found in the environment.")
         }
-        id = eval(parse(text = var_id_time[1]), parent.frame(2))
-        time = eval(parse(text = var_id_time[2]), parent.frame(2))
+        id = eval(str2lang(var_id_time[1]), parent.frame(2))
+        time = eval(str2lang(var_id_time[2]), parent.frame(2))
     } else {
         if(!all(all_vars %in% names(data))){
             pblm = setdiff(all_vars, names(data))
             stop_up("In the argument 'panel.id', the variable", enumerate_items(pblm, "s.is.quote"), " not in the data set.")
         }
-        id = eval(parse(text = var_id_time[1]), data)
-        time = eval(parse(text = var_id_time[2]), data)
+        id = eval(str2lang(var_id_time[1]), data)
+        time = eval(str2lang(var_id_time[2]), data)
     }
 
     panel.id = as.formula(paste0("~", var_id_time[1], "+", var_id_time[2]))
@@ -328,7 +328,7 @@ l = function(x, lag = 1, fill = NA){
             }
 
             var = gsub("^[^\\(]+\\(|,.+", "", sys_calls[qui])
-            m = eval(parse(text = var), envir = sys.frames()[qui])
+            m = eval(str2lang(var), envir = sys.frames()[qui])
 
             if(!"fixest_panel" %in% class(m)){
                 stop("You can use l() or f() only when the data set is of class 'fixest_panel', you can use function panel() to set it.")
@@ -897,7 +897,7 @@ unpanel = function(x){
             # data.table is quite a pain in the neck to handle...
 
             data.table::set(x_dt, j = "x__ID__x", value = 1:nrow(x_dt))
-            select = eval(parse(text = paste0("x_dt[", deparse_long(mc_new$i), "]")))$x__ID__x
+            select = eval(str2lang(paste0("x_dt[", deparse_long(mc_new$i), "]")))$x__ID__x
 
         } else {
             select = i
@@ -1010,13 +1010,13 @@ expand_lags_internal = function(x){
 
                     end = find_closing(val)
                     if(end == nchar(val)){
-                        quoi = eval(parse(text = paste0(key[i], "__expand", val)))
+                        quoi = eval(str2lang(paste0(key[i], "__expand", val)))
                         end_text = ""
 
                     } else {
                         what = paste0(key[i], "__expand", substr(val, 1, end))
                         end_text = substr(val, end + 1, nchar(val))
-                        quoi = eval(parse(text = what))
+                        quoi = eval(str2lang(what))
                     }
 
                     if(is_in_par){
@@ -1054,7 +1054,7 @@ expand_lags = function(fml){
     lhs_text = fml_split(fml, 1, text = TRUE, split.lhs = TRUE)
     if(grepl("^(c|(c?(stepwise|sw)0?)|list)\\(", lhs_text)){
         lhs_text2eval = gsub("^(c|(c?(stepwise|sw)0?|list))\\(", "stepwise(", lhs_text)
-        lhs_names = eval(parse(text = lhs_text2eval))
+        lhs_names = eval(str2lang(lhs_text2eval))
     } else {
         lhs_names = lhs_text
     }
@@ -1086,7 +1086,7 @@ expand_lags = function(fml){
             iv_text = fml_split(iv_tmp, 1, text = TRUE, split.lhs = TRUE)
             if(grepl("^(c|(c?(stepwise|sw)0?)|list)\\(", iv_text)){
                 iv_text2eval = gsub("^(c|(c?(stepwise|sw)0?|list))\\(", "stepwise(", iv_text)
-                iv_names = eval(parse(text = gsub("^list\\(", "stepwise(", iv_text2eval)))
+                iv_names = eval(str2lang(gsub("^list\\(", "stepwise(", iv_text2eval)))
             } else {
                 iv_names = iv_text
             }
