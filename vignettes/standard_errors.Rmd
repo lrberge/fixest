@@ -21,11 +21,6 @@ if(requireNamespace("plm", quietly = TRUE)) library(plm)
 
 if(requireNamespace("sandwich", quietly = TRUE)) library(sandwich)
 
-if(requireNamespace("lfe", quietly = TRUE)){
-  library(lfe)
-  options(lfe.threads = 1)
-}
-
 setFixest_nthreads(1)
 ```
 
@@ -228,16 +223,7 @@ From `fixest` version 0.7.0 onwards, the standard-errors and p-values are comput
 
 Here are the differences and similarities with `lfe`:
 
-```{r, echo = FALSE}
-if(!requireNamespace("lfe", quietly = TRUE)){
-    knitr::opts_chunk$set(eval = FALSE)
-    cat("Evaluation of the next chunk requires 'lfe', which is not present.")
-} else {
-    knitr::opts_chunk$set(eval = TRUE)
-}
-```
-
-```{r}
+```{r, eval = FALSE}
 library(lfe)
 
 # lfe: clustered by id
@@ -246,28 +232,45 @@ se_lfe_id = se(est_lfe)
 
 # The two are different, and it cannot be directly replicated by feols
 rbind(se_lfe_id, se_feols_id)
+#>                     x
+#> se_lfe_id   0.1458559
+#> se_feols_id 0.1653850
 
 # You have to provide a custom VCOV to replicate lfe's VCOV
 my_vcov = vcov(est_feols, dof = dof(adj = FALSE))
 se(est_feols, .vcov = my_vcov * 19/18) # Note that there are 20 observations
+#>         x 
+#> 0.1458559
 
 # Differently from feols, the SEs in lfe are different if time is not a FE:
-# => now SEs are identical. (The warning is from lfe.)
+# => now SEs are identical.
 rbind(se(felm(y ~ x + factor(time) | id | 0 | id, base))["x"],
       se(feols(y ~ x + factor(time) | id, base))["x"])
+#>             x
+#> [1,] 0.165385
+#> [2,] 0.165385
 
 # Now with two-way clustered standard-errors
 est_lfe_2way = felm(y ~ x | id + time | 0 | id + time, base)
 se_lfe_2way  = se(est_lfe_2way)
 se_feols_2way = se(est_feols, se = "twoway")
 rbind(se_lfe_2way, se_feols_2way)
+#>                       x
+#> se_lfe_2way   0.3268584
+#> se_feols_2way 0.3080378
 
 # To obtain the same SEs, use cluster.df = "conventional"
 sum_feols_2way_conv = summary(est_feols, se = "twoway", dof = dof(cluster.df = "conv"))
 rbind(se_lfe_2way, se(sum_feols_2way_conv))
+#>                     x
+#> se_lfe_2way 0.3268584
+#>             0.3268584
 
 # We also obtain the same p-values
 rbind(pvalue(est_lfe_2way), pvalue(sum_feols_2way_conv))
+#>              x
+#> [1,] 0.3347851
+#> [2,] 0.3347851
 ```
 
 As we can see, there is only slight differences with `lfe` when computing clustered standard-errors. For multiway clustered standard-errors, it is easy to replicate the way `lfe` computes them.
@@ -292,6 +295,8 @@ setFixest_se(no_FE = "standard", one_FE = "standard", two_FE = "standard")
 which changes the way the default standard-errors are computed when the estimation contains no fixed-effects, one fixed-effect, or two or more fixed-effects.
 
 ## Changelog
+
+ - Version 0.8.0. Evaluation of the chunks related to `lfe` have been removed since its archival on the CRAN. Hard values from the last CRAN version are maintained.
 
  - Version 0.7.0 introduces the following important modifications:
  
