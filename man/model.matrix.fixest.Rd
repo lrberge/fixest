@@ -4,22 +4,24 @@
 \alias{model.matrix.fixest}
 \title{Design matrix of a \code{femlm} model}
 \usage{
-\method{model.matrix}{fixest}(object, data, na.rm = TRUE, ...)
+\method{model.matrix}{fixest}(object, data, type = "rhs", na.rm = TRUE, ...)
 }
 \arguments{
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
 
 \item{data}{If missing (default) then the original data is obtained by evaluating the \code{call}. Otherwise, it should be a \code{data.frame}.}
 
+\item{type}{Character vector or one sided formula, default is "rhs". Contains the type of matrix/data.frame to be returned. Possible values are: "lhs", "rhs", "fixef", "iv.rhs1", "iv.rhs2".}
+
 \item{na.rm}{Default is \code{TRUE}. Should observations with NAs be removed from the matrix?}
 
 \item{...}{Not currently used.}
 }
 \value{
-It returns a design matrix.
+It returns either a matrix or a data.frame. It returns a matrix for the "rhs", "iv.rhs1" and "iv.rhs2" parts. A data.frame for "lhs" and "fixef".
 }
 \description{
-This function creates a design matrix of the linear part of a \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}} estimation. Note that it is only the linear part. The fixed-effects variables (which can be considered as factors) are excluded from the matrix.
+This function creates the left-hand-side or the right-hand-side(s) of a \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}} estimation.
 }
 \examples{
 
