@@ -1293,6 +1293,8 @@ cat("\n")
 #### IV ####
 ####
 
+chunk("IV")
+
 base = iris
 names(base) = c("y", "x1", "x_endo_1", "x_inst_1", "fe")
 set.seed(2)
@@ -1324,7 +1326,7 @@ sum_2nd = summary(res_2nd, .vcov = res_2nd$cov.unscaled / res_2nd$sigma2 * sigma
 
 test(se(sum_2nd), se(est_iv))
 
-
+# check no bug
 etable(summary(est_iv, stage = 1:2))
 
 
