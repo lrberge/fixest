@@ -7256,7 +7256,7 @@ resid.fixest = residuals.fixest = function(object, type = c("response", "devianc
 predict.fixest = function(object, newdata, type = c("response", "link"), na.rm = TRUE, ...){
 
     # Checking the arguments
-    validate_dots(suggest_args = "type")
+    validate_dots(suggest_args = c("newdata", "type"))
 
 	# Controls
 	type = match.arg(type)
@@ -7265,32 +7265,33 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 	if(missing(newdata)){
 
 	    if(isTRUE(object$lean)){
-	        # LATER: recompute it
-	        stop("The method 'predict.fixest' cannot be applied to 'lean' fixest objects. Please re-estimate with 'lean = FALSE'.")
+	        newdata = fetch_data(object, "In 'predict', ")
+
+	    } else {
+	        if(type == "response" || object$method == "feols"){
+	            res = object$fitted.values
+	        } else if(object$method == "femlm") {
+	            if("mu" %in% names(object)){
+	                res = object$mu
+	            } else {
+	                family = object$family
+	                famFuns = switch(family,
+	                                 poisson = ml_poisson(),
+	                                 negbin = ml_negbin(),
+	                                 logit = ml_logit(),
+	                                 gaussian = ml_gaussian())
+
+	                res = famFuns$linearFromExpected(object$fitted.values)
+	            }
+	        } else {
+	            res = object$family$linkfun(object$fitted.values)
+	        }
+
+	        if(!na.rm) res = fill_with_na(res, object)
+
+	        return(res)
 	    }
 
-		if(type == "response" || object$method == "feols"){
-			res = object$fitted.values
-		} else if(object$method == "femlm") {
-			if("mu" %in% names(object)){
-				res = object$mu
-			} else {
-				family = object$family
-				famFuns = switch(family,
-									  poisson = ml_poisson(),
-									  negbin = ml_negbin(),
-									  logit = ml_logit(),
-									  gaussian = ml_gaussian())
-
-				res = famFuns$linearFromExpected(object$fitted.values)
-			}
-		} else {
-			res = object$family$linkfun(object$fitted.values)
-		}
-
-	    if(!na.rm) res = fill_with_na(res, object)
-
-		return(res)
 	}
 
 	if(!is.matrix(newdata) && !"data.frame" %in% class(newdata)){
@@ -7310,25 +7311,15 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 
 	n = nrow(newdata)
 
-	# message for the user NOT to use newdata if its the same data set
-	# The user is not stupid: so just once
-	mc = match.call()
-	if(n == object$nobs_origin && deparse_long(object$call$data) == deparse_long(mc$newdata) && getFixest_notes()){
-	    dont_warn = getOption("fixest_predict_dont_warn")
-	    if(!isTRUE(dont_warn)){
-	        message("NOTE: It looks like the data in 'newdata' is the same as the one used to run the regression. If so, to predict() on the existing data, you can leave the argument 'newdata' as missing, this is faster.")
-	        options("fixest_predict_dont_warn" = TRUE)
-	    }
-	}
-
 	# NOTA 2019-11-26: I'm pondering whether to include NA-related messages
 	# (would it be useful???)
 
 
 	# STEP 0: panel setup
 
+	fml_full = formula(object, type = "full")
 	fml = object$fml
-	if(check_lag(fml)){
+	if(check_lag(fml_full)){
 	    if(!is.null(object$panel.info)){
 	        if(is.null(attr(newdata, "panel_info"))){
                 # We try to recreate the panel
@@ -7466,18 +7457,22 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 
 	if(length(linear.varnames) > 0){
 		# Checking all variables are there
+
+	    if(isTRUE(object$iv) && object$iv_stage == 2){
+	        names(coef) = gsub("^fit_", "", names(coef))
+	        linear.varnames = c(linear.varnames, all.vars(object$fml_all$iv[[2]]))
+	        iv_fml = object$fml_all$iv
+	        rhs_fml = .xpd(..lhs ~ ..endo + ..rhs, ..lhs = rhs_fml[[2]], ..endo = iv_fml[[2]], ..rhs = rhs_fml[[3]])
+	    }
+
 		varNotHere = setdiff(linear.varnames, names(newdata))
 		if(length(varNotHere) > 0){
 			stop("The variable", enumerate_items(varNotHere, "s.quote"), " used to estimate the model (in fml) ", ifsingle(varNotHere, "is", "are"), " missing in the data.frame given by the argument 'newdata'.")
 		}
 
-		# We check if it's a panel or not (if so, we need to create it...)
-
 		# we create the matrix
-		matrix_linear = try(fixest_model_matrix(rhs_fml, newdata, i_noref = TRUE), silent = TRUE)
-		if("try-error" %in% class(matrix_linear)){
-		    stop("Error when creating the linear matrix: ", matrix_linear)
-		}
+		matrix_linear = error_sender(fixest_model_matrix(rhs_fml, newdata, i_noref = TRUE),
+		                             "Error when creating the linear matrix: ")
 
 		keep = intersect(names(coef), colnames(matrix_linear))
 		value_linear = value_linear + as.vector(matrix_linear[, keep, drop = FALSE] %*% coef[keep])
@@ -8629,18 +8624,19 @@ formula.fixest = function(x, type = c("full", "linear", "iv", "NL"), ...){
 
 #' Design matrix of a \code{femlm} model
 #'
-#' This function creates a design matrix of the linear part of a \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}} estimation. Note that it is only the linear part. The fixed-effects variables (which can be considered as factors) are excluded from the matrix.
+#' This function creates the left-hand-side or the right-hand-side(s) of a \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}} estimation.
 #'
 #' @method model.matrix fixest
 #'
 #' @inheritParams nobs.fixest
 #'
 #' @param data If missing (default) then the original data is obtained by evaluating the \code{call}. Otherwise, it should be a \code{data.frame}.
+#' @param type Character vector or one sided formula, default is "rhs". Contains the type of matrix/data.frame to be returned. Possible values are: "lhs", "rhs", "fixef", "iv.rhs1", "iv.rhs2".
 #' @param na.rm Default is \code{TRUE}. Should observations with NAs be removed from the matrix?
 #' @param ... Not currently used.
 #'
 #' @return
-#' It returns a design matrix.
+#' It returns either a matrix or a data.frame. It returns a matrix for the "rhs", "iv.rhs1" and "iv.rhs2" parts. A data.frame for "lhs" and "fixef".
 #'
 #' @seealso
 #' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. \code{\link[fixest]{formula.fixest}}, \code{\link[fixest]{update.fixest}}, \code{\link[fixest]{summary.fixest}}, \code{\link[fixest]{vcov.fixest}}.
@@ -8659,25 +8655,25 @@ formula.fixest = function(x, type = c("full", "linear", "iv", "NL"), ...){
 #'
 #'
 #'
-model.matrix.fixest = function(object, data, na.rm = TRUE, ...){
+model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, ...){
 	# We evaluate the formula with the past call
+    # type: lhs, rhs, fixef, iv.endo, iv.inst, iv.rhs1, iv.rhs2
+    # if fixef => return a DF
 
     # Checking the arguments
     validate_dots(suggest_args = c("data", "type"))
+
+    type = check_set_types(type, c("lhs", "rhs", "fixef", "iv.endo", "iv.inst", "iv.rhs1", "iv.rhs2"))
 
     if(isTRUE(object$fromFit)){
         stop("model.matrix method not available for fixest estimations obtained from fit methods.")
     }
 
-	# I) we obtain the right formula
-	fml = object$fml
+	# The formulas
+	fml_full = formula(object, type = "full")
+	fml_linear = formula(object, type = "linear")
 
-	# we kick out the intercept if there is presence of fixed-effects
-	if(attr(terms(fml), "intercept") == 1 && !is.null(object$fixef_vars)){
-		fml = update(fml, . ~ . - 1)
-	}
-
-	# II) evaluation with the data
+	# Evaluation with the data
 	original_data = FALSE
 	if(missing(data)){
 	    original_data = TRUE
@@ -8689,7 +8685,7 @@ model.matrix.fixest = function(object, data, na.rm = TRUE, ...){
 	# control of the data
 	if(is.matrix(data)){
 		if(is.null(colnames(data))){
-			stop("If argument data is to be a matrix, its columns must be named.")
+			stop("If argument 'data' is to be a matrix, its columns must be named.")
 		}
 		data = as.data.frame(data)
 	}
@@ -8701,7 +8697,7 @@ model.matrix.fixest = function(object, data, na.rm = TRUE, ...){
 	data = as.data.frame(data)
 
 	# Panel setup
-	if(check_lag(fml)){
+	if(check_lag(fml_full)){
 	    if(!is.null(object$panel.info)){
 	        if(is.null(attr(data, "panel_info"))){
 	            # We try to recreate the panel
@@ -8719,38 +8715,167 @@ model.matrix.fixest = function(object, data, na.rm = TRUE, ...){
 	    }
 	}
 
-	linear.mat = fixest_model_matrix(fml, data)
+	res = list()
+
+	if("lhs" %in% type){
+	    lhs = list()
+
+	    namesLHS = all.vars(fml_linear[[2]])
+	    if(length(pblm <- setdiff(namesLHS, names(data)))){
+	        stop("In 'model.matrix', to create the LHS, the variable", enumerate_items(pblm, "s.is.quote"), " not in the data set.")
+	    }
+
+	    lhs_text = deparse_long(fml_linear[[2]])
+	    lhs[[lhs_text]] = eval(fml_linear[[2]], data)
+
+        res[["lhs"]] = as.data.frame(lhs)
+	}
+
+	if("rhs" %in% type){
+	    # we kick out the intercept if there is presence of fixed-effects
+	    fake_intercept = !is.null(object$slope_flag) && any(object$slope_flag >= 0)
+
+	    fml = fml_linear
+	    if(isTRUE(object$iv)){
+	        fml_iv = object$fml_all$iv
+	        fml = .xpd(..lhs ~ ..endo + ..rhs, ..lhs = fml[[2]], ..endo = fml_iv[[2]], ..rhs = fml[[3]])
+	    }
+
+	    linear.mat = error_sender(fixest_model_matrix(fml, data, fake_intercept),
+	                              "In 'model.matrix', the RHS could not be evaluated: ")
+
+        res[["rhs"]] = linear.mat
+	}
+
+	if("fixef" %in% type){
+
+	    if(!is.null(object$fixef_vars)){
+	        stop("In model.matrix, the type 'fixef' is only valid for models with fixed-effects. This estimation does not contain fixed-effects.")
+	    }
+
+	    fixef_terms_full = fixef_terms(object$fml_all$fixef)
+	    fixef_terms = fixef_terms_full$fml_terms
+
+	    fixef_mat = error_sender(prepare_df(fixef_terms_full$fe_vars, data, combine.quick = FALSE),
+	                             "In 'model.matrix', problem evaluating the fixed-effects part of the formula:\n")
+
+	    isSlope = any(fixef_terms_full$slope_flag != 0)
+	    if(isSlope){
+	        slope_mat = error_sender(prepare_df(fixef_terms_full$slope_vars, data),
+	                                 "In 'model.matrix', problem evaluating the variables with varying slopes in the fixed-effects part of the formula:\n")
+
+	        fixef_mat = cbind(fixef_mat, slope_mat)
+	    }
+
+	    res[["fixef"]] = fixef_mat
+	}
+
+	if("iv.rhs1" %in% type){
+	    # First stage
+
+	    if(!isTRUE(object$iv)){
+	        stop("In model.matrix, the type 'iv.rhs1' is only valid for IV models. This estimation is no IV.")
+	    }
+
+	    fml = object$fml
+	    if(object$iv_stage == 2){
+	        fml_iv = object$fml_all$iv
+	        fml = .xpd(..lhs ~ ..inst + ..rhs, ..lhs = fml[[2]], ..inst = fml_iv[[3]], ..rhs = fml[[3]])
+	    }
+
+	    fake_intercept = !is.null(object$slope_flag) && any(object$slope_flag >= 0)
+	    iv_rhs1 = error_sender(fixest_model_matrix(fml, data, fake_intercept = fake_intercept),
+	                           "In 'model.matrix', the RHS of the 1st stage could not be evaluated: ")
+
+	    res[["iv.rhs1"]] = iv_rhs1
+	}
+
+	if("iv.rhs2" %in% type){
+	    # Second stage
+
+	    if(!isTRUE(object$iv)){
+	        stop("In model.matrix, the type 'iv.rhs2' is only valid for second stage IV models. This estimation is not even IV.")
+	    }
+
+	    if(!object$iv_stage == 2){
+	        stop("In model.matrix, the type 'iv.rhs2' is only valid for second stage IV models. This estimation is the first stage.")
+	    }
+
+	    # I) we get the fit
+	    if("fixest" %in% class(object$iv_first_stage)){
+	        stage_1 = setNames(list(object$iv_first_stage), deparse_long(object$iv_first_stage$fml[[2]]))
+	    } else {
+	        stage_1 = object$iv_first_stage
+	    }
+
+	    fit_vars = c()
+	    for(i in seq_along(stage_1)){
+	        fit_vars[i] = v = paste0("fit_", names(stage_1)[i])
+	        data[[v]] = predict(stage_1[[i]], newdata = data, na.rm = FALSE)
+	    }
+
+	    # II) we create the variables
+
+	    fml = object$fml
+	    fml = .xpd(..lhs ~ ..fit + ..rhs, ..lhs = fml[[2]], ..fit = fit_vars, ..rhs = fml[[3]])
+
+	    fake_intercept = !is.null(object$slope_flag) && any(object$slope_flag >= 0)
+	    iv_rhs2 = error_sender(fixest_model_matrix(fml, data, fake_intercept = fake_intercept),
+	                           "In 'model.matrix', the RHS of the 2nd stage could not be evaluated: ")
+
+	    res[["iv.rhs2"]] = iv_rhs2
+	}
+
+	# Formatting res
+	if(length(type) > 1){
+	    res = res[type]
+	    res = do.call(cbind, unname(res))
+	} else {
+	    res = res[[1]]
+	}
+
+
+	#
+	# Removing obs if needed
+	#
 
 	check_0 = FALSE
-	if(original_data){
+	if(original_data && na.rm){
 	    if(!is.null(object$obsRemoved)){
 	        check_0 = TRUE
-	        linear.mat = linear.mat[-object$obsRemoved, , drop = FALSE]
+	        res = res[-object$obsRemoved, , drop = FALSE]
 	    }
 
 	    for(i in seq_along(object$obs_selection)){
 	        check_0 = TRUE
-	        linear.mat = linear.mat[object$obs_selection[[i]], , drop = FALSE]
-	    }
-
-	} else if(na.rm){
-	    check_0 = TRUE
-	    info = cpppar_which_na_inf_mat(linear.mat, nthreads = 1)
-
-	    if(info$any_na_inf){
-	        isNA_L = info$is_na_inf
-
-	        if(sum(isNA_L) == nrow(linear.mat)){
-	            warning("All observations contain NA values.")
-	            return(linear.mat[-which(isNA_L), , drop = FALSE])
-	        }
-
-	        linear.mat = linear.mat[-which(isNA_L), , drop = FALSE]
+	        res = res[object$obs_selection[[i]], , drop = FALSE]
 	    }
 	}
 
-	if(check_0){
-	    only_0 = cpppar_check_only_0(linear.mat, nthreads = 1)
+	if(na.rm){
+
+	    if(!all(sapply(res, is.numeric))){
+	        info = list(any_na_inf = anyNA(res))
+	        if(info$any_na_inf) info$is_na_inf = !complete.cases(res)
+	    } else {
+	        info = cpp_which_na_inf(res, nthreads = 1)
+	    }
+
+	    if(info$any_na_inf){
+	        check_0 = TRUE
+	        isNA_L = info$is_na_inf
+
+	        if(sum(isNA_L) == nrow(res)){
+	            warning("All observations contain NA values.")
+	            return(res[-which(isNA_L), , drop = FALSE])
+	        }
+
+	        res = res[-which(isNA_L), , drop = FALSE]
+	    }
+	}
+
+	if(check_0 && !"fixef" %in% type){
+	    only_0 = cpppar_check_only_0(as.matrix(res), nthreads = 1)
 	    if(all(only_0 == 1)){
 	        stop("After removing NAs, not a single explanatory variable is different from 0.")
 
@@ -8759,7 +8884,7 @@ model.matrix.fixest = function(object, data, na.rm = TRUE, ...){
 	    }
 	}
 
-    linear.mat
+    res
 }
 
 
