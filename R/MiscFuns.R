@@ -8756,7 +8756,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, ...){
 	    fixef_terms_full = fixef_terms(object$fml_all$fixef)
 	    fixef_terms = fixef_terms_full$fml_terms
 
-	    fixef_mat = error_sender(prepare_df(fixef_terms_full$fe_vars, data, combine.quick = FALSE),
+	    fixef_mat = error_sender(prepare_df(fixef_terms_full$fe_vars, data, fastCombine = FALSE),
 	                             "In 'model.matrix', problem evaluating the fixed-effects part of the formula:\n")
 
 	    isSlope = any(fixef_terms_full$slope_flag != 0)
