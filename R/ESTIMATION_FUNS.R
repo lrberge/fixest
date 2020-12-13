@@ -3572,13 +3572,14 @@ multi_fixef = function(env, estfun){
 
             if(any(is_NA)){
                 # Remember that isFixef is FALSE so far => so we only change the reg vars
-                my_env = reshape_env(env = env, obs2keep = which(!is_NA))
+                obs2keep = which(!is_NA)
+                my_env = reshape_env(env = env, obs2keep = obs2keep)
 
                 # NA removal in fixef
-                fixef_mat = fixef_mat[!is_NA, , drop = FALSE]
+                fixef_mat = select_obs(fixef_mat, obs2keep)
 
                 if(isSlope){
-                    slope_mat = slope_mat[!is_NA, , drop = FALSE]
+                    slope_mat = select_obs(slope_mat, obs2keep)
                 }
             } else {
                 my_env = new.env(parent = env)
@@ -3659,7 +3660,7 @@ multi_fixef = function(env, estfun){
             my_env_est = reshape_env(my_env, assign_fixef = TRUE)
 
         } else {
-            # No fixed-effect // new.env is indispensible => otherwise multi RHS/LHS not possible
+            # No fixed-effect // new.env is indispensable => otherwise multi RHS/LHS not possible
             my_env_est = reshape_env(env)
         }
 

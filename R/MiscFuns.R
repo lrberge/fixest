@@ -4734,7 +4734,7 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
 
     # Forming the call
     if(attr(t, "intercept") == 1 && !fake_intercept){
-        n = nrow(base)
+        n = n_row(base)
         all_vars_call = str2lang(paste0("list('(Intercept)' = rep(1, ", n, "), ", paste0(all_vars, collapse = ", "), ")"))
         all_var_names = c("(Intercept)", all_var_names)
     } else {
@@ -4745,16 +4745,16 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
     data_list <- eval(all_vars_call, base)
 
     # Handling the multi columns case (ex: bs(x1), splines)
-    if(any(lengths(data_list) != nrow(base))){
+    if(any(lengths(data_list) != n_row(base))){
 
-        all_n = as.vector(lengths(data_list) / nrow(base))
+        all_n = as.vector(lengths(data_list) / n_row(base))
 
         qui_pblm = which(all_n %% 1 != 0)
         if(length(qui_pblm) > 0){
             what = data_list[[qui_pblm]]
             reason = ifelse(is.null(nrow(what)), paste0("of length ", length(what)), paste0("with ", nrow(what), " rows"))
 
-            stop("Evaluation of ", all_var_names[qui_pblm], " returns an object ", reason, " while the data set has ", nrow(base)," rows.", call. = FALSE)
+            stop("Evaluation of ", all_var_names[qui_pblm], " returns an object ", reason, " while the data set has ", n_row(base)," rows.", call. = FALSE)
         }
 
         all_n_vector = rep(all_n, all_n)
@@ -4810,7 +4810,7 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
             return(1)
         }
 
-        res = matrix(1, nrow = nrow(data), ncol = 1, dimnames = list(NULL, "(Intercept)"))
+        res = matrix(1, nrow = n_row(data), ncol = 1, dimnames = list(NULL, "(Intercept)"))
         return(res)
     }
 
@@ -4847,22 +4847,14 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
     # Are there factors NOT in i()? If so => model.matrix is used
     dataNames = names(data)
 
-    if(IS_INTER){
-        linear.varnames = all.vars(fml_no_inter[[3]])
-        is_num = sapply(data[, dataNames %in% linear.varnames, FALSE], is.numeric)
-        if(length(is_num) > 0 && (any(!is_num) || grepl("factor", deparse_long(fml_no_inter)))){
-            useModel.matrix = TRUE
-        } else {
-            useModel.matrix = FALSE
-        }
+    my_fml = if(IS_INTER) fml_no_inter else fml
+
+    linear.varnames = all.vars(my_fml[[3]])
+    is_num = sapply(select_vars(data, dataNames %in% linear.varnames), is.numeric)
+    if(length(is_num) > 0 && (any(!is_num) || grepl("factor", deparse_long(my_fml)))){
+        useModel.matrix = TRUE
     } else {
-        linear.varnames = all.vars(fml[[3]])
-        is_num = sapply(data[, dataNames %in% linear.varnames, FALSE], is.numeric)
-        if(length(is_num) == 0 || any(!is_num) || grepl("factor", deparse_long(fml))){
-            useModel.matrix = TRUE
-        } else {
-            useModel.matrix = FALSE
-        }
+        useModel.matrix = FALSE
     }
 
     if(useModel.matrix){
@@ -5054,70 +5046,18 @@ prepare_list = function(vars, base, fastCombine = NA){
     all_vars = gsub(":", "*", vars)
 
     if(all(all_vars %in% names(base))){
-        res = base[, all_vars, drop = FALSE]
+        res = select_vars(base, all_vars)
     } else {
         all_vars_call = str2lang(paste0("list(", paste0(all_vars, collapse = ", "), ")"))
-        data_list <- try(eval(all_vars_call, base))
+        res = try(eval(all_vars_call, base))
 
         # if error: we send it back to the main function
-        if("try-error" %in% class(data_list)){
-            return(data_list)
+        if("try-error" %in% class(res)){
+            return(res)
         }
-
-        names(data_list) = all_var_names
-        data_list$stringsAsFactors = FALSE
-
-        res = do.call("data.frame", data_list)
 
         if(changeNames){
             qui = grepl("combine_clusters", all_var_names, fixed = TRUE)
-            new_names = gsub("combine_clusters(_fast)?\\(|\\)", "", all_var_names[qui])
-            new_names = gsub(", ?", "^", new_names)
-            all_var_names[qui] = new_names
-        }
-
-        names(res) = all_var_names
-    }
-
-    res
-}
-
-prepare_cluster_mat = function(fml, base, fastCombine){
-    # prepares the data.frame of the cluster variables
-
-    fml_char = as.character(fml[2])
-    changeNames = FALSE
-    if(grepl("^", fml_char, fixed = TRUE)){
-        # special indicator to combine factors
-
-        fun2combine = ifelse(fastCombine, "combine_clusters_fast", "combine_clusters")
-
-        fml_char_new = gsub("([[:alpha:]\\.][[:alnum:]_\\.]*(\\^[[:alpha:]\\.][[:alnum:]_\\.]*)+)",
-                            paste0(fun2combine, "(\\1)"),
-                            fml_char)
-
-        fml_char_new = gsub("([[:alpha:]\\.][[:alnum:]_\\.]*)\\^([[:alpha:]\\.][[:alnum:]_\\.]*)", "\\1, \\2", fml_char_new)
-        fml = as.formula(paste0("~", fml_char_new))
-        changeNames = TRUE
-    }
-
-    t = terms(fml, data = base)
-
-    all_var_names = attr(t, "term.labels")
-    all_vars = gsub(":", "*", all_var_names)
-
-    if(all(all_vars %in% names(base))){
-        res = base[, all_vars, drop = FALSE]
-    } else {
-        all_vars_call = str2lang(paste0("list(", paste0(all_vars, collapse = ", "), ")"))
-        data_list <- eval(all_vars_call, base)
-        names(data_list) = all_var_names
-        data_list$stringsAsFactors = FALSE
-
-        res = do.call("data.frame", data_list)
-
-        if(changeNames){
-            qui = grepl("combine_clusters", all_var_names)
             new_names = gsub("combine_clusters(_fast)?\\(|\\)", "", all_var_names[qui])
             new_names = gsub(", ?", "^", new_names)
             all_var_names[qui] = new_names

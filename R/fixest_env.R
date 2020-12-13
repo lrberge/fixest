@@ -279,11 +279,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             data = as.data.frame(data)
         }
 
-        # The conversion of the data (due to data.table)
-        if(!"data.frame" %in% class(data)){
-            stop("The argument 'data' must be a data.frame or a matrix.")
-        }
-
+        # We set it to list (methods are faster)
         class(data) = NULL
 
         dataNames = names(data)
@@ -521,15 +517,15 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
                 check_value(subset, "os formula var(data)", .data = data)
                 subset.value = subset[[2]]
-                subset = check_value_plus(subset.value, "evalset integer vector gt{0} | logical vector len(data)", .data = data, .prefix = "In argument 'subset', the expression")
+                subset = check_value_plus(subset.value, "evalset integer vector gt{0} | logical vector len(value)", .data = data, .value = n_row(data), .prefix = "In argument 'subset', the expression")
 
             } else {
 
                 if(isFit){
                     check_value(subset, "integer vector gt{0} | logical vector len(data)", .data = lhs)
                 } else {
-                    check_value(subset, "integer vector gt{0} | logical vector len(data)",
-                                .prefix = "If not a formula, argument 'subset'", .data = data)
+                    check_value(subset, "integer vector gt{0} | logical vector len(value)",
+                                .prefix = "If not a formula, argument 'subset'", .value = n_row(data))
                 }
             }
 
@@ -546,14 +542,13 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                 }
             }
 
+            if(is.logical(subset)){
+                # subsetting indices is faster => worth if done more than once
+                subset = which(subset)
+            }
+
             if(isFit){
                 delayed.subset = TRUE
-
-                if(is.logical(subset)){
-                    # subsetting indices is faster => worth if done more than once
-                    subset = which(subset)
-                }
-
                 lhs = lhs[subset]
             } else {
                 nobs_origin = length(data[[1]])
@@ -1175,7 +1170,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             if(isFit){
                 check_value(split, "vector len(value)", .value = nobs_origin)
             } else {
-                check_value(split, "vector len(data)", .data = data, .prefix = "If not a formula, argument 'split'")
+                check_value(split, "vector len(value)", .value = n_row(data), .prefix = "If not a formula, argument 'split'")
             }
 
             split.name = gsub("^[[:alpha:]][[:alnum:]\\._]*\\$", "", deparse_long(mc_origin$split))
@@ -1316,7 +1311,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                 }
             }
 
-            if(anyNA(cluster)){
+            if(anyNA.data.frame(cluster)){
                 isNA_cluster = !complete.cases(cluster)
 
                 ANY_NA = TRUE
@@ -1468,19 +1463,16 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         #
 
         # We change non-numeric to character (important for parallel qufing)
-        is_not_num = sapply(fixef_mat, function(x) !is.numeric(x))
-        if(any(is_not_num)){
-            for(i in which(is_not_num)){
-                # we don't convert Dates to numeric because conversion can lead to NA in some cases!
-                # e.g dates < 1970 with non-robust parsers
-                if(!is.character(fixef_mat[[i]])){
-                    fixef_mat[[i]] = as.character(fixef_mat[[i]])
-                }
-            }
+        is_pblm = which(sapply(fixef_mat, function(x) !is.numeric(x) && !is.character(x)))
+
+        for(i in seq_along(is_pblm)){
+            # we don't convert Dates to numeric because conversion can lead to NA in some cases!
+            # e.g dates < 1970 with non-robust parsers
+            fixef_mat[[i]] = as.character(fixef_mat[[i]])
         }
 
         msgNA_fixef = ""
-        if(anyNA(fixef_mat)){
+        if(anyNA.data.frame(fixef_mat)){
             isNA_fixef = !complete.cases(fixef_mat)
 
             ANY_NA = TRUE
@@ -1572,31 +1564,16 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             }
 
             # we drop the NAs from the fixef matrix
-            fixef_mat = fixef_mat[!isNA_sample, , drop = FALSE]
             obs2remove_NA = which(isNA_sample)
+            fixef_mat = select_obs(fixef_mat, -obs2remove_NA)
+
 
             if(isSlope){
-                slope_mat = slope_mat[!isNA_sample, , drop = FALSE]
+                slope_mat = select_obs(slope_mat, -obs2remove_NA)
             }
 
             # we change the LHS variable
-            if(is.list(lhs)){
-                for(i in seq_along(lhs)){
-                    lhs[[i]] = lhs[[i]][-obs2remove_NA]
-                }
-            } else {
-                lhs = lhs[-obs2remove_NA]
-
-                if(cpp_isConstant(lhs)){
-                    # We absolutely need to control for that, otherwise, the code breaks later on
-
-                    message(ifsingle(notes, "NOTE: ", "NOTES: "), paste(notes, collapse = "\n       "))
-                    msg = "NAs"
-                    if(any0W && !anyNA_sample) msg = "0-weight"
-                    if(any0W && anyNA_sample) msg = "NAs and 0-weight"
-                    stop("The dependent variable (after cleaning for ", msg, ") is a constant. Estimation cannot be done.")
-                }
-            }
+            lhs = select_obs(lhs, -obs2remove_NA)
         }
 
         #
@@ -1723,7 +1700,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         }
 
         if(isNonLinear){
-            data_NL = data_NL[-obs2remove, , drop = FALSE]
+            data_NL = select_obs(data_NL, -obs2remove)
         }
 
         if(isSplit){
@@ -1738,11 +1715,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     }
 
     # NEW NUMBER OF OBS AFTER NA/FE REMOVAL
-    if(is.list(lhs)){
-        nobs = length(lhs[[1]])
-    } else {
-        nobs = length(lhs)
-    }
+    nobs = n_row(lhs)
 
     # If presence of FEs => we exclude the intercept only if not all slopes
     if(Q > 0 && onlySlope == FALSE){
@@ -2152,9 +2125,9 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
         if(length(var_sw) > 0){
             if(length(obs2remove) > 0){
-                assign("data", data[-obs2remove, var_sw, drop = FALSE], env)
+                assign("data", select_both(data, -obs2remove, var_sw), env)
             } else {
-                assign("data", data[, var_sw, drop = FALSE], env)
+                assign("data", select_vars(data, var_sw), env)
             }
         }
     }
@@ -2465,12 +2438,10 @@ setup_fixef = function(fixef_mat, lhs, fixef_vars, fixef.rm, family, isSplit, sp
         only_slope = slope_flag < 0
 
         # shallow copy
-        slope_variables = as.list(slope_mat)
+        slope_variables = slope_mat
 
         if(!is.null(obs2keep)){
-            for(i in seq_along(slope_variables)){
-                slope_variables[[i]] = slope_variables[[i]][obs2keep]
-            }
+            slope_variables = select_obs(slope_variables, obs2keep)
         }
     } else {
         slope_flag = rep(0L, length(fixef_mat))
@@ -2487,7 +2458,7 @@ setup_fixef = function(fixef_mat, lhs, fixef_vars, fixef.rm, family, isSplit, sp
     do_keep = !is.null(obs2keep)
 
     if(isSplitNoFull && do_keep){
-        # Here fixef_mat is a DF
+        # Here fixef_mat is a list
         fixef_mat = select_obs(fixef_mat, obs2keep)
     }
 
@@ -2542,12 +2513,12 @@ setup_fixef = function(fixef_mat, lhs, fixef_vars, fixef.rm, family, isSplit, sp
         # which obs are removed
         obs2remove = which(quf_info_all$obs_removed)
 
-        # update of the lhs (only if not multi LHS)
-        if(multi_lhs == FALSE) lhs = lhs[-obs2remove]
+        # update of the lhs
+        lhs = select_obs(lhs, -obs2remove)
 
         # update of the slope variables
         if(isSlope){
-            for(i in seq_along(slope_variables)) slope_variables[[i]] = slope_variables[[i]][-obs2remove]
+            slope_variables = select_obs(slope_variables, -obs2remove)
         }
 
         # Names of the FE removed
@@ -2576,6 +2547,8 @@ setup_fixef = function(fixef_mat, lhs, fixef_vars, fixef.rm, family, isSplit, sp
         #
         # we save the fixed-effects IDs + sizes (to be returned in "res") [original order!]
         #
+
+        # Note: for non OLS families => we always get into this function for a single RHS
 
         fixef_id_res = list()
         for(i in 1:Q){
@@ -2797,11 +2770,6 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
                 obs2keep = 1:length(fixef_mat[[1]])
             }
 
-            if(assign_lhs && is.list(lhs)){
-                # list means multiple LHS
-                lhs = select_obs(lhs, -obs2remove)
-            }
-
             obs2keep = obs2keep[-obs2remove]
         }
 
@@ -2913,8 +2881,8 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
             do_summary = get("do_summary", env)
             if(do_summary){
                 cluster = get("cluster", env)
-                if(is.data.frame(cluster)){
-                    cluster = cluster[obs2keep, , drop = FALSE]
+                if(is.list(cluster)){
+                    cluster = select_obs(cluster, obs2keep)
                     assign("cluster", cluster, new_env)
                 }
             }
@@ -2938,7 +2906,7 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
             # So far this is used only in stepwise FE
             if(get("do_multi_fixef", env)){
                 data = get("data", env)
-                assign("data", data[obs2keep, , drop = FALSE], new_env)
+                assign("data", select_obs(data, obs2keep), new_env)
             }
 
             #
@@ -3527,7 +3495,9 @@ select_both = function(x, index, vars, nthreads = 1, msg = "explanatory variable
 n_row = function(x){
     if(is.list(x)){
         return(length(x[[1]]))
-    } else {
+    } else if(is.matrix(x)){
         return(nrow(x))
+    } else {
+        return(length(x))
     }
 }
