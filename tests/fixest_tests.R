@@ -1330,8 +1330,34 @@ test(se(sum_2nd), se(est_iv))
 etable(summary(est_iv, stage = 1:2))
 
 
+####
+#### model.matrix ####
+####
 
+chunk("Model matrix")
 
+base = iris
+names(base) = c("y1", "x1", "x2", "x3", "species")
+base$y2 = 10 + rnorm(150) + 0.5 * base$x1
+base$x4 = rnorm(150) + 0.5 * base$y1
+base$fe2 = rep(letters[1:15], 10)
+base$fe2[50:51] = NA
+base$y2[base$fe2 == "a" & !is.na(base$fe2)] = 0
+base$x2[1:5] = NA
+base$x3[6] = NA
+base$fe3 = rep(letters[1:10], 15)
 
+res = feols(y1 ~ x1 + x2 + x3, base)
+m1 = model.matrix(res, type = "lhs")
+test(nrow(m1), res$nobs)
+
+m1_na = model.matrix(res, type = "lhs", na.rm = FALSE)
+test(nrow(m1_na), res$nobs_origin)
+test(max(abs(m1_na - base$y1), na.rm = TRUE), 0)
+
+y = model.matrix(res, type = "lhs", data = base, na.rm = FALSE)
+X = model.matrix(res, type = "rhs", data = base, na.rm = FALSE)
+res_bis = lm.fit(X[-res$obsRemoved, ], y[-res$obsRemoved,])
+test(res_bis$coefficients, res$coefficients)
 
 
