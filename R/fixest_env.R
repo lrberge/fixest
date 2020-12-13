@@ -3180,7 +3180,7 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
         fml_linear = res$fml_all$linear
         fml_iv = res$fml_all$iv
 
-        new_fml_linear = .xpd(..y ~ ..rhs + ..inst,
+        new_fml_linear = .xpd(..y ~ ..inst + ..rhs,
                              ..y = fml_iv_endo, ..rhs = fml_linear[[3]], ..inst = fml_iv[[3]])
         res$fml = res$fml_all$linear = new_fml_linear
         res$fml_all$iv = NULL
