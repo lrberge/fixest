@@ -6720,8 +6720,22 @@ fixest_fml_rewriter = function(fml){
 }
 
 
+check_set_types = function(x, types, msg){
+    arg_name = deparse(substitute(x))
+    check_arg(x, "os formula | character vector no na", .arg_name = arg_name, .up = 1)
+
+    if("formula" %in% class(x)){
+        x = attr(terms(x), "term.labels")
+    }
+
+    check_value_plus(x, "multi match", .choices = types, .arg_name = arg_name, .up = 1)
+
+    x
+}
+
+
 #### ................. ####
-#### Aditional Methods ####
+#### Additional Methods ####
 ####
 
 # Here we add common statistical functions
