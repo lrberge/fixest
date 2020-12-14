@@ -1,7 +1,13 @@
 
 # News for the R Package `fixest`
 
-## Changes in version 0.8.0
+## Changes in version 0.8.1
+
+#### Bugs
+
+ - Bug in `etable` when the default value of `fitstat` was set with `setFixest_etable`.
+
+## Changes in version 0.8.0 (14-12-2020)
 
 #### Bugs
 

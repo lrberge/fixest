@@ -1078,6 +1078,10 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
     # ... fitstat ####
     #
 
+    if("fitstat" %in% names(opts)){
+        fitstat_all = opts$fitstat
+    }
+
     if(missing(fitstat_all)){
         # => do default
         fitstat_all = "."
