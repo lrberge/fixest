@@ -21,9 +21,9 @@ demean(
 )
 }
 \arguments{
-\item{X}{A matrix, vector or a list OR a formula. If equal to a formula, then the argument \code{data} is required, and it must be of the type: \code{x1 + x2 ~ f1 + fe2} with on the LHS the variables to be centered, and on the RHS the factors used for centering. Note that you can use variables with varying slopes with the syntax \code{fe[v1, v2]} (see details in \code{\link[fixest]{feols}}). Note also that transformations to LHS variables such as \code{log(x1) + log(x2) ~ f1 + fe2} are disabled (i.e. you will get x1 and x2 centered, not their logs). If not a formula, it must represent the data to be centered. Of course the dimension of that data must be the same as the factors used for centering (argument \code{f}).}
+\item{X}{A matrix, vector, data.frame or a list OR a formula. If equal to a formula, then the argument \code{data} is required, and it must be of the type: \code{x1 + x2 ~ f1 + fe2} with on the LHS the variables to be centered, and on the RHS the factors used for centering. Note that you can use variables with varying slopes with the syntax \code{fe[v1, v2]} (see details in \code{\link[fixest]{feols}}). If not a formula, it must represent the data to be centered. Of course the dimension of that data must be the same as the factors used for centering (argument \code{f}).}
 
-\item{f}{A matrix, vector or list. The factors used to center the variables in argument \code{X}. Matrices will be coerced using \code{as.data.frame}.}
+\item{f}{A matrix, vector, data.frame or list. The factors used to center the variables in argument \code{X}. Matrices will be coerced using \code{as.data.frame}.}
 
 \item{slope.vars}{A vector, matrix or list representing the variables with varying slopes. Matrices will be coerced using \code{as.data.frame}. Note that if this argument is used it MUST be in conjunction with the argument \code{slope.flag} that maps the factors to which the varying slopes are attached. See examples.}
 
