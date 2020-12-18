@@ -8733,7 +8733,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, ...){
 
 	if("rhs" %in% type){
 	    # we kick out the intercept if there is presence of fixed-effects
-	    fake_intercept = !is.null(object$slope_flag) && any(object$slope_flag >= 0)
+	    fake_intercept = !is.null(object$fixef_vars) && !(!is.null(object$slope_flag) && all(object$slope_flag < 0))
 
 	    fml = fml_linear
 	    if(isTRUE(object$iv)){
@@ -8783,7 +8783,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, ...){
 	        fml = .xpd(..lhs ~ ..inst + ..rhs, ..lhs = fml[[2]], ..inst = fml_iv[[3]], ..rhs = fml[[3]])
 	    }
 
-	    fake_intercept = !is.null(object$slope_flag) && any(object$slope_flag >= 0)
+	    fake_intercept = !is.null(object$fixef_vars) && !(!is.null(object$slope_flag) && all(object$slope_flag < 0))
 	    iv_rhs1 = error_sender(fixest_model_matrix(fml, data, fake_intercept = fake_intercept),
 	                           "In 'model.matrix', the RHS of the 1st stage could not be evaluated: ")
 
@@ -8819,7 +8819,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, ...){
 	    fml = object$fml
 	    fml = .xpd(..lhs ~ ..fit + ..rhs, ..lhs = fml[[2]], ..fit = fit_vars, ..rhs = fml[[3]])
 
-	    fake_intercept = !is.null(object$slope_flag) && any(object$slope_flag >= 0)
+	    fake_intercept = !is.null(object$fixef_vars) && !(!is.null(object$slope_flag) && all(object$slope_flag < 0))
 	    iv_rhs2 = error_sender(fixest_model_matrix(fml, data, fake_intercept = fake_intercept),
 	                           "In 'model.matrix', the RHS of the 2nd stage could not be evaluated: ")
 
