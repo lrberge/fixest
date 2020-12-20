@@ -2470,12 +2470,15 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #'
 #' @param var A vector to be interacted with \code{f}. If the other argument \code{f} is missing, then this vector will be treated as the argument \code{f}.
 #' @param f A vector (of any type) that will be treated as a factor. Must be of the same length as \code{var} if \code{var} is not missing.
-#' @param ref A single value that belongs to the interacted variable (\code{f}). Can be missing.
-#' @param drop A vector of values that belongs to the factor variable (\code{f}). If provided, all values from \code{f} that match \code{drop} will be removed.
-#' @param keep A vector of values that belongs to the factor variable (\code{f}). If provided, only the values from \code{f} that match \code{keep} will be kept.
+#' @param f2 A vector (of any type) that will be treated as a factor. Must be of the same length as \code{f}.
+#' @param ref A single value that belongs to the interacted variable (\code{f}). Can be missing, can also be a logical: if \code{TRUE}, then the first value of \code{f} will be removed..
+#' @param drop A vector of regular expressions or integers (if \code{f} is integer). If provided, all values from \code{f} that match \code{drop} will be removed.
+#' @param keep A vector of regular expressions or integers (if \code{f} is integer). If provided, only the values from \code{f} that match \code{keep} will be kept.
+#' @param drop2 A vector of regular expressions or integers (if \code{f2} is integer). If provided, all values from \code{f2} that match \code{drop2} will be removed.
+#' @param keep2 A vector of regular expressions or integers (if \code{f2} is integer). If provided, only the values from \code{f2} that match \code{keep2} will be kept.
 #'
 #' @return
-#' It returns a matrix with number of rows the length of \code{var}. The number of columns is equal to the number of cases contained in \code{f} minus the reference.
+#' It returns a matrix with number of rows the length of \code{var}. The number of columns is equal to the number of cases contained in \code{f} minus the reference(s).
 #'
 #' @section Shorthand in \code{fixest} estimations:
 #' In \code{fixest} estimations, instead of using \code{i(var, f, ref)}, you can instead use the following writing \code{var::f(ref)}. Note that this way of doing interactions is not endorsed any more and will likely be deprecated in the future.
@@ -2524,9 +2527,27 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' # => special treatment in etable
 #' etable(est_bis, dict = c("6" = "six"))
 #'
+#' #
+#' # Interact two factors => f2
+#' #
 #'
-i = interact = function(var, f, ref, drop, keep){
+#' # To interact two factor, use the argument f2
+#' data(airquality)
+#' aq = airquality
+#' aq$week = aq$Day %/% 7 + 1
+#'
+#' # Interacting Month and week:
+#' res_2F = feols(Ozone ~ Solar.R + i(Month, f2 = week), aq)
+#'
+#' # Same but dropping the 5th Month and 1st week
+#' res_2F_bis = feols(Ozone ~ Solar.R + i(Month, f2 = week, drop = 5, drop2 = 1), aq)
+#'
+#' etable(res_2F, res_2F_bis)
+#'
+i = interact = function(var, f, f2, ref, drop, keep, drop2, keep2){
     # Used to create interactions
+
+    # Later: binning (bin = 1:3 // bin = list("a" = "[abc]")). Default name is bin name (eg "1:3")
 
     # gt = function(x) cat(sfill(x, 20), ": ", -(t0 - (t0<<-proc.time()))[3], "s\n", sep = "")
     # t0 = proc.time()
@@ -2541,8 +2562,7 @@ i = interact = function(var, f, ref, drop, keep){
     FROM_FIXEST = sys.nframe() > 5 && any(sapply(sys.calls(), function(x) any(grepl("fixest", x[[1]], fixed = TRUE))))
 
     # General checks
-    check_arg(var, "vector")
-    check_arg(f, "vector")
+    check_arg(var, f, f2, "vector")
 
     IS_INTER = TRUE
     if(missing(f) || missing(var)){
@@ -2551,14 +2571,14 @@ i = interact = function(var, f, ref, drop, keep){
 
         if(missing(f)){
             f = var
-            fe_name = deparse_long(mc$var)
+            f_name = deparse_long(mc$var)
         } else {
-            fe_name = deparse_long(mc$f)
+            f_name = deparse_long(mc$f)
         }
 
     } else {
         var_name = deparse_long(mc$var)
-        fe_name = deparse_long(mc$f)
+        f_name = deparse_long(mc$f)
 
         if(length(var) != length(f)){
             if(grepl("^[[:alpha:]\\.][[:alnum:]\\._]*:[[:alpha:]\\.][[:alnum:]\\._]*$", var_name)){
@@ -2570,20 +2590,57 @@ i = interact = function(var, f, ref, drop, keep){
         }
     }
 
+    f_num = is.numeric(f)
+
+    IS_F2 = FALSE
+    if(!missing(f2)){
+
+        if(length(f2) == 1 && !"ref" %in% names(mc)){
+            # ref is implicitly called via the location of f2
+            ref = f2
+        } else if(length(f2) != length(f)){
+            stop("The arguments 'f2' and 'f' must be of the same length (currently ", length(f2), " vs ", length(f), ").")
+        } else {
+            IS_F2 = TRUE
+            f2_name = deparse_long(mc$f2)
+            f2_num = is.numeric(f2)
+        }
+    }
+
     # The NAs + recreation of f if necessary
     IS_FACTOR_INTER = FALSE
     if(IS_INTER){
 
         is_na_all = is.na(var) | is.na(f)
+        if(IS_F2) is_na_all = is_na_all | is.na(f2)
 
         if(!is.numeric(var)){
             IS_FACTOR_INTER = TRUE
             # It's an interaction between factors
             f_new = rep(NA_character_, length(f))
-            f_new[!is_na_all] = paste0(var[!is_na_all], "__%%__", f[!is_na_all])
+
+            if(IS_F2){
+                f_new[!is_na_all] = paste0(var[!is_na_all], "__%%__", f[!is_na_all], "__%%__", f2[!is_na_all])
+            } else {
+                f_new[!is_na_all] = paste0(var[!is_na_all], "__%%__", f[!is_na_all])
+            }
+
             f = f_new
             IS_INTER = FALSE
+
+        } else if(IS_F2){
+            f_new = rep(NA_character_, length(f))
+            f_new[!is_na_all] = paste0(f[!is_na_all], "__%%__", f2[!is_na_all])
+            f = f_new
         }
+
+    } else if(IS_F2){
+        is_na_all = is.na(f) | is.na(f2)
+        f_new = rep(NA_character_, length(f))
+
+        f_new[!is_na_all] = paste0(f[!is_na_all], "__%%__", f2[!is_na_all])
+
+        f = f_new
 
     } else {
         is_na_all = is.na(f)
@@ -2600,8 +2657,41 @@ i = interact = function(var, f, ref, drop, keep){
     fe_num = info$x
     items = info$items
 
-    check_arg(ref, "logical scalar | charin", .choices = items, .message = paste0("Argument 'ref' must be a single element of the variable '", fe_name, "'."))
-    check_arg(drop, keep, "multi charin", .choices = items, .message = paste0("Argument '__ARG__' must consist of elements of the variable '", fe_name, "'."))
+    # Now we check with regex
+    if(IS_FACTOR_INTER || IS_F2){
+        items_split = strsplit(items, "__%%__", fixed = TRUE)
+
+        f_items = sapply(items_split, `[`, 1 + IS_FACTOR_INTER)
+        if(IS_F2){
+            f2_items = sapply(items_split, `[`, 2 + IS_FACTOR_INTER)
+        }
+
+        if(f_num || f2_num){
+            # we reorder the stuff
+            f_items_fm = if(f_num) as.numeric(f_items) else f_items
+
+            if(IS_F2){
+                f2_items_fm = if(f2_num) as.numeric(f2_items) else f2_items
+                new_order = order(f_items_fm, f2_items_fm)
+                f2_items = f2_items[new_order]
+            } else {
+                new_order = order(f_items_fm)
+            }
+
+            if(IS_FACTOR_INTER) items_split = items_split[new_order]
+            fe_num = order(new_order)[fe_num]
+            f_items = f_items[new_order]
+            items = items[new_order]
+
+        }
+
+    } else {
+        f_items = items
+    }
+
+    check_arg(ref, "logical scalar | charin", .choices = items, .message = paste0("Argument 'ref' must be a single element of the variable '", f_name, "'."))
+
+    check_arg(drop, keep, drop2, keep2, "vector no na")
 
     no_rm = TRUE
     any_ref = FALSE
@@ -2611,20 +2701,71 @@ i = interact = function(var, f, ref, drop, keep){
             if(ref == TRUE){
                 # We always delete the first value
                 any_ref = TRUE
+                # Que ce soit items ici est normal (et pas f_items)
                 id_drop = ref = which(items == items[1])
             }
         } else {
             any_ref = TRUE
-            id_drop = ref = which(items %in% ref)
+            id_drop = ref = which(f_items %in% ref)
         }
     }
 
     if(!missing(drop)){
-        id_drop = c(id_drop, which(items %in% drop))
+        if(is.numeric(drop)){
+            # numeric => equality
+            id_drop = c(id_drop, which(f_items %in% drop))
+        } else {
+            # => regex
+            drop = as.character(drop)
+            qui = which(keep_apply(f_items, drop, TRUE))
+            if(length(qui) == 0){
+                stop("The regular expression", plural_len(drop), " in 'drop' ", plural_len(drop, "don't"), " match any value of 'f'.")
+            }
+            id_drop = c(id_drop, qui)
+        }
     }
 
     if(!missing(keep)){
-        id_drop = c(id_drop, which(!items %in% keep))
+        if(is.numeric(keep)){
+            id_drop = c(id_drop, which(!f_items %in% keep))
+        } else {
+            keep = as.character(keep)
+            qui = which(!keep_apply(f_items, keep, TRUE))
+            if(length(qui) == 0){
+                stop("The regular expression", plural_len(keep), " in 'keep' ", plural_len(keep, "don't"), " match any value of 'f'.")
+            }
+            id_drop = c(id_drop, qui)
+        }
+    }
+
+    if(IS_F2){
+        if(!missing(drop2)){
+            if(is.numeric(drop2)){
+                # numeric => equality
+                id_drop = c(id_drop, which(f2_items %in% drop2))
+            } else {
+                # => regex
+                drop2 = as.character(drop2)
+                qui = which(keep_apply(f2_items, drop2, TRUE))
+                if(length(qui) == 0){
+                    stop("The regular expression", plural_len(drop2), " in 'drop2' ", plural_len(drop2, "don't"), " match any value of 'f2'.")
+                }
+                id_drop = c(id_drop, qui)
+            }
+        }
+
+        if(!missing(keep2)){
+            if(is.numeric(keep2)){
+                id_drop = c(id_drop, which(!f2_items %in% keep2))
+            } else {
+                keep2 = as.character(keep2)
+                qui = which(!keep_apply(f2_items, keep2, TRUE))
+                if(length(qui) == 0){
+                    stop("The regular expression", plural_len(keep2), " in 'keep2' ", plural_len(keep2, "don't"), " match any value of 'f2'.")
+                }
+                id_drop = c(id_drop, qui)
+            }
+        }
     }
 
     if(length(id_drop) > 0){
@@ -2641,6 +2782,10 @@ i = interact = function(var, f, ref, drop, keep){
 
     if(length(id_drop) > 0){
         items_name = items[-id_drop]
+        if(IS_FACTOR_INTER || IS_F2){
+            f_items = f_items[-id_drop]
+            if(IS_F2) f2_items = f2_items[-id_drop]
+        }
     } else {
         items_name = items
     }
@@ -2649,22 +2794,32 @@ i = interact = function(var, f, ref, drop, keep){
         # Pour avoir des jolis noms c'est un vrai gloubiboulga,
         # mais j'ai pas trouve plus simple...
         if(IS_FACTOR_INTER){
-            name_split = strsplit(items_name, "__%%__", fixed = TRUE)
-            var_items = sapply(name_split, function(x) x[1])
-            f_items = sapply(name_split, function(x) x[2])
-            col_names = paste0("__CLEAN__", var_name, "::", var_items, ":", fe_name, "::", f_items)
+            var_items = sapply(items_split, `[`, 1)
+
+            if(IS_F2){
+                col_names = paste0("__CLEAN__", var_name, "::", var_items, ":", f_name, "::", f_items, ":", f2_name, "::", f2_items)
+            } else {
+                col_names = paste0("__CLEAN__", var_name, "::", var_items, ":", f_name, "::", f_items)
+            }
 
         } else if(IS_INTER){
-            col_names = paste0("__CLEAN__", var_name, ":", fe_name, "::", items_name)
+            if(IS_F2){
+                col_names = paste0("__CLEAN__", var_name, ":", f_name, "::", f_items, ":", f2_name, "::", f2_items)
+            } else {
+                col_names = paste0("__CLEAN__", var_name, ":", f_name, "::", items_name)
+            }
 
         } else {
-            col_names = paste0("__CLEAN__", fe_name, "::", items_name)
+            if(IS_F2){
+                col_names = paste0("__CLEAN__", f_name, "::", f_items, ":", f2_name, "::", f2_items)
+            } else {
+                col_names = paste0("__CLEAN__", f_name, "::", items_name)
+            }
         }
     } else {
 
-        if(IS_FACTOR_INTER){
-            name_split = strsplit(items_name, "__%%__", fixed = TRUE)
-            items_name = sapply(name_split, paste, collapse = ":")
+        if(IS_FACTOR_INTER || IS_F2){
+            items_name = gsub("__%%__", ":", items_name, fixed = TRUE)
         }
 
         col_names = items_name
@@ -2700,7 +2855,7 @@ i = interact = function(var, f, ref, drop, keep){
                 opt$is_ref = rep(FALSE, length(opt$items))
             }
 
-            opt$prefix = paste0(var_name, ":", fe_name)
+            opt$prefix = paste0(var_name, ":", f_name)
 
             options("fixest_interaction_ref" = opt)
         }
@@ -2712,26 +2867,27 @@ i = interact = function(var, f, ref, drop, keep){
 #' @rdname i
 "interact"
 
-i_ref = function(var, f, ref, drop, keep){
+i_ref = function(var, f, f2, ref, drop, keep, drop2, keep2){
 
     mc = match.call()
 
     mc[[1]] = as.name("i")
 
-    if(!all(c("var", "f") %in% names(mc)) && !any(c("ref", "drop", "keep") %in% names(mc))){
+    if(!any(c("ref", "drop", "keep", "drop2", "keep2") %in% names(mc)) && any(!c("var", "f") %in% names(mc))){
         mc$ref = TRUE
     }
 
     return(deparse_long(mc))
 }
 
-i_noref = function(var, f, ref, drop, keep){
+i_noref = function(var, f, f2, ref, drop, keep, drop2, keep2){
+    # Used only in predict => to create data without restriction
 
     mc = match.call()
 
     mc[[1]] = as.name("i")
 
-    mc$ref = mc$drop = mc$keep = NULL
+    mc$ref = mc$drop = mc$keep = mc$drop2 = mc$keep2 = NULL
 
     return(deparse_long(mc))
 }
@@ -4720,7 +4876,7 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
     if(any(qui_inter <- (grepl("^i(nteract)?\\(", all_var_names) & grepl(":", all_var_names, fixed = TRUE)))){
         # beware of ":" in drop/keep!!!
 
-        for(arg in c("drop", "keep")){
+        for(arg in c("drop", "keep", "drop2", "keep2")){
             if(any(qui_ref <- grepl(paste0(arg, " =[^\\)]+:"), all_var_names[qui_inter]))){
                 var_inter_ref = all_var_names[qui_inter][qui_ref]
                 var_inter_ref_split = strsplit(var_inter_ref, paste0(arg, " = "))
@@ -5878,7 +6034,11 @@ dict_apply = function(x, dict = NULL){
 keep_apply = function(x, keep = NULL, logical = FALSE){
 
     if(missing(keep) || length(keep) == 0){
-        return(x)
+        if(logical){
+            return(rep(TRUE, length(x)))
+        } else {
+            return(x)
+        }
     }
 
     check_arg(keep, "character vector no na", .message = "The arg. 'keep' must be a vector of regular expressions (see help(regex)).")

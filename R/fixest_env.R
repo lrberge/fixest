@@ -2,7 +2,7 @@
 # Author: Laurent Berge
 # Date creation: Mon Jun 10 23:46:47 2019
 # Purpose: sets up the params + performs
-#           all necessay checks
+#           all necessary checks
 #----------------------------------------------#
 
 

@@ -9,7 +9,7 @@
 An object of class \code{function} of length 1.
 }
 \usage{
-i(var, f, ref, drop, keep)
+i(var, f, f2, ref, drop, keep, drop2, keep2)
 
 interact
 }
@@ -18,14 +18,20 @@ interact
 
 \item{f}{A vector (of any type) that will be treated as a factor. Must be of the same length as \code{var} if \code{var} is not missing.}
 
-\item{ref}{A single value that belongs to the interacted variable (\code{f}). Can be missing.}
+\item{f2}{A vector (of any type) that will be treated as a factor. Must be of the same length as \code{f}.}
 
-\item{drop}{A vector of values that belongs to the factor variable (\code{f}). If provided, all values from \code{f} that match \code{drop} will be removed.}
+\item{ref}{A single value that belongs to the interacted variable (\code{f}). Can be missing, can also be a logical: if \code{TRUE}, then the first value of \code{f} will be removed..}
 
-\item{keep}{A vector of values that belongs to the factor variable (\code{f}). If provided, only the values from \code{f} that match \code{keep} will be kept.}
+\item{drop}{A vector of regular expressions or integers (if \code{f} is integer). If provided, all values from \code{f} that match \code{drop} will be removed.}
+
+\item{keep}{A vector of regular expressions or integers (if \code{f} is integer). If provided, only the values from \code{f} that match \code{keep} will be kept.}
+
+\item{drop2}{A vector of regular expressions or integers (if \code{f2} is integer). If provided, all values from \code{f2} that match \code{drop2} will be removed.}
+
+\item{keep2}{A vector of regular expressions or integers (if \code{f2} is integer). If provided, only the values from \code{f2} that match \code{keep2} will be kept.}
 }
 \value{
-It returns a matrix with number of rows the length of \code{var}. The number of columns is equal to the number of cases contained in \code{f} minus the reference.
+It returns a matrix with number of rows the length of \code{var}. The number of columns is equal to the number of cases contained in \code{f} minus the reference(s).
 }
 \description{
 Treat a variable as a factor, or interacts a variable with another treated as a factor. Values to be dropped/kept from the factor can be easily set.
@@ -73,6 +79,22 @@ coefplot(est_bis, only.inter = FALSE)
 # => special treatment in etable
 etable(est_bis, dict = c("6" = "six"))
 
+#
+# Interact two factors => f2
+#
+
+# To interact two factor, use the argument f2
+data(airquality)
+aq = airquality
+aq$week = aq$Day \%/\% 7 + 1
+
+# Interacting Month and week:
+res_2F = feols(Ozone ~ Solar.R + i(Month, f2 = week), aq)
+
+# Same but dropping the 5th Month and 1st week
+res_2F_bis = feols(Ozone ~ Solar.R + i(Month, f2 = week, drop = 5, drop2 = 1), aq)
+
+etable(res_2F, res_2F_bis)
 
 }
 \seealso{
