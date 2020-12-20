@@ -1358,30 +1358,34 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
 
                     qui_factor = grepl("::", x)
                     if(any(qui_factor)){
-                        res = x[base::order(qui_factor)]
+                        res = x
+                        x_split = strsplit(res, "::")
 
-                        n_last = length(res)
-
-                        if(res[n_last] %in% names(dict)){
-                            res[n_last] = dict[res[n_last]]
-                        } else {
-                            last_value_split = strsplit(res[n_last], "::")[[1]]
-                            last_value_split = dict_apply(last_value_split, dict)
-
-                            if(isTex){
-                                res[n_last] = paste(last_value_split, collapse = " $=$ ")
+                        # There may be svl factors
+                        for(i in which(qui_factor)){
+                            if(res[i] %in% names(dict)){
+                                res[i] = dict[res[i]]
                             } else {
-                                res[n_last] = paste(last_value_split, collapse = " = ")
+                                value_split = dict_apply(x_split[[i]], dict)
+
+                                if(isTex){
+                                    res[i] = paste(value_split, collapse = " $=$ ")
+                                } else {
+                                    res[i] = paste(value_split, collapse = " = ")
+                                }
                             }
                         }
+
+                        # We put the factors on the right
+                        res = res[base::order(qui_factor)]
 
                     } else {
                         res = x
                     }
 
                     who = res %in% names(dict)
-
                     res[who] = dict[res[who]]
+
                     if(isTex){
                         res = paste0(res, collapse = interaction.combine)
                     } else {
