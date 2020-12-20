@@ -4650,7 +4650,7 @@ fitstat_validate = function(x, vector = FALSE){
 #' Simple tool that aggregates the value of coefficients.
 #'
 #' @param x A fixest object.
-#' @param var A character scalar describing the pattern to be matched. All variables that match the pattern will be aggregated. It must be of the form \code{"(root)"}, the parentheses must be there. You can add another root with parentheses: \code{"(root)regex(root2)"}.
+#' @param var A character scalar describing the pattern to be matched. All variables that match the pattern will be aggregated. It must be of the form \code{"(root)"}, the parentheses must be there and the resulting variable name will be \code{"root"}. You can add another root with parentheses: \code{"(root)regex(root2)"}, in which case the resulting name is \code{"root::root2"}. To name the resulting variable differently you can pass a named vector: \code{c("name" = "pattern")} or \code{c("name" = "pattern(root2)")}.
 #' @param ... Arguments to be passed to \code{\link[fixest]{summary.fixest}}.
 #'
 #' @return
@@ -4696,7 +4696,7 @@ fitstat_validate = function(x, vector = FALSE){
 #' points(-9:8 + 0.15, att_true, pch = 15, col = 2)
 #'
 #' # The aggregate effect for each period
-#' agg_coef = coefagg(res_cohort, "(ti.*nt)::(-?[[:digit:]]+)")
+#' agg_coef = aggregate(res_cohort, "(ti.*nt)::(-?[[:digit:]]+)")
 #' x = c(-9:-2, 0:8) + .35
 #' points(x, agg_coef[, 1], pch = 17, col = 4)
 #' ci_low = agg_coef[, 1] - 1.96 * agg_coef[, 2]
@@ -4705,10 +4705,10 @@ fitstat_validate = function(x, vector = FALSE){
 #'
 #'
 #' # The ATT
-#' coefagg(res_cohort, c("ATT" = "(treatment)::[^-]"))
+#' aggregate(res_cohort, c("ATT" = "treatment::[^-]"))
 #' mean(base[base$treat_post == 1, "y_true"])
 #'
-coefagg = function(x, var, ...){
+aggregate.fixest = function(x, var, ...){
     # Aggregates the value of coefficients
 
     check_arg(x, "class(fixest) mbt")

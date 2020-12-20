@@ -41,6 +41,7 @@ S3method(print, fixest_fitstat)
 S3method(summary, fixest.fixef)
 S3method(summary, fixest)
 S3method(summary, fixest_list)
+S3method(aggregate, fixest)
 export(summ) # alias for summary.fixest
 S3method(plot, fixest.fixef)
 S3method("[", fixest_panel) # Lag related
