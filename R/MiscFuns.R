@@ -4644,6 +4644,165 @@ fitstat_validate = function(x, vector = FALSE){
     x
 }
 
+
+#' Aggregates the values of coefficients
+#'
+#' Simple tool that aggregates the value of coefficients.
+#'
+#' @param x A fixest object.
+#' @param var A character scalar describing the pattern to be matched. All variables that match the pattern will be aggregated. It must be of the form \code{"(root)"}, the parentheses must be there. You can add another root with parentheses: \code{"(root)regex(root2)"}.
+#' @param ... Arguments to be passed to \code{\link[fixest]{summary.fixest}}.
+#'
+#' @return
+#' It returns a matrix representing a table of coefficients.
+#'
+#' @examples
+#'
+#' #
+#' # DiD example
+#' #
+#'
+#' # first we set up the data
+#'
+#' set.seed(1)
+#' n_group = 20
+#' n_per_group = 5
+#'
+#' id_i = paste0((1:n_group), ":", rep(1:n_per_group, each = n_group))
+#' id_t = 1:10
+#'
+#' base = expand.grid(id = id_i, year = id_t)
+#' base$group = as.numeric(gsub(":.+", "", base$id))
+#'
+#' base$year_treated = base$group
+#' base$year_treated[base$group > 10] = 10000
+#' base$treat_post = (base$year >= base$year_treated) * 1
+#' base$time_to_treatment = pmax(base$year - base$year_treated, -1000)
+#' base$treated = (base$year_treated < 10000) * 1
+#'
+#' base$y_true = base$treat_post * (1 + 1 * base$time_to_treatment - 1 * base$group)
+#' base$y = base$y_true + rnorm(nrow(base))
+#'
+#' # we drop the always treated
+#' base = base[base$group > 1,]
+#'
+#' # Now we perform the estimation
+#' res_naive = feols(y ~ i(treated, time_to_treatment, -1, drop = -1000) | id + year, base)
+#'
+#' res_cohort = feols(y ~ i(time_to_treatment, f2 = group, drop = c(-1, -1000)) | id + year, base)
+#'
+#' coefplot(res_naive, ylim = c(-6, 8))
+#' att_true = tapply(base$y_true, base$time_to_treatment, mean)[-1]
+#' points(-9:8 + 0.15, att_true, pch = 15, col = 2)
+#'
+#' # The aggregate effect for each period
+#' agg_coef = coefagg(res_cohort, "(ti.*nt)::(-?[[:digit:]]+)")
+#' x = c(-9:-2, 0:8) + .35
+#' points(x, agg_coef[, 1], pch = 17, col = 4)
+#' ci_low = agg_coef[, 1] - 1.96 * agg_coef[, 2]
+#' ci_up = agg_coef[, 1] + 1.96 * agg_coef[, 2]
+#' segments(x0 = x, y0 = ci_low, x1 = x, y1 = ci_up, col = 4)
+#'
+#'
+#' # The ATT
+#' coefagg(res_cohort, c("ATT" = "(treatment)::[^-]"))
+#' mean(base[base$treat_post == 1, "y_true"])
+#'
+coefagg = function(x, var, ...){
+    # Aggregates the value of coefficients
+
+    check_arg(x, "class(fixest) mbt")
+    check_arg(var, "character scalar")
+    # => later => extend it to more than one set of vars to agg
+
+    is_name = !is.null(names(var))
+
+    if(!is_name && !grepl("(", var, fixed = TRUE)){
+        stop("Argument 'var' must be a character in which the pattern to match must be in between parentheses. So far there are no parenthesis: please have a look at the examples.")
+    }
+
+    coef = coef(x)
+    cname = names(coef)
+
+    qui = grepl(var, cname)
+    if(!any(qui)){
+        stop("The argument 'var' does not match any variable.")
+    }
+
+    cname_select = cname[qui]
+    if(is_name){
+        root = rep(names(var), length(cname_select))
+        val = gsub(paste0(".*", var, ".*"), "\\1", cname_select)
+    } else {
+        root = gsub(paste0(".*", var, ".*"), "\\1", cname_select)
+        val = gsub(paste0(".*", var, ".*"), "\\2", cname_select)
+    }
+
+    mm = model.matrix(x)
+
+    if(!isTRUE(x$summary)){
+        x = summary(x, ...)
+    }
+
+    V = x$cov.scaled
+
+    name_df = unique(data.frame(root, val, stringsAsFactors = FALSE))
+
+    c_all = c()
+    se_all = c()
+    for(i in 1:nrow(name_df)){
+
+        r = name_df[i, 1]
+        v = name_df[i, 2]
+        v_names = cname_select[root == r & val == v]
+
+        shares = colSums(mm[, v_names, drop = FALSE])
+        shares = shares / sum(shares)
+
+        # The coef
+        c_value = sum(shares * coef[v_names])
+
+        # The variance
+        n = length(v_names)
+        s1 = matrix(shares, n, n)
+        s2 = matrix(shares, n, n, byrow = TRUE)
+
+        var_value = sum(s1 * s2 * V[v_names, v_names])
+        se_value = sqrt(var_value)
+
+        c_all[length(c_all) + 1] = c_value
+        se_all[length(se_all) + 1] = se_value
+    }
+
+    # th z & p values
+    zvalue <- c_all/se_all
+    if(x$method %in% "feols" || (x$method %in% "feglm" && !x$family$family %in% c("poisson", "binomial"))){
+
+        # I have renamed t.df into G
+        t.df = attr(vcov, "G")
+
+        if(!is.null(t.df)){
+            pvalue <- 2*pt(-abs(zvalue), max(t.df - 1, 1))
+        } else {
+            pvalue <- 2*pt(-abs(zvalue), max(x$nobs - x$nparams, 1))
+        }
+
+    } else {
+        pvalue <- 2*pnorm(-abs(zvalue))
+    }
+
+    res = cbind(c_all, se_all, zvalue, pvalue)
+    if(max(nchar(val)) == 0){
+        rownames(res) = name_df[[1]]
+    } else {
+        rownames(res) = apply(name_df, 1, paste, collapse = "::")
+    }
+
+    colnames(res) = c("Estimate", "Std. Error", "t value", "Pr(>|t|)")
+
+    res
+}
+
 #### ................. ####
 #### Internal Funs     ####
 ####
