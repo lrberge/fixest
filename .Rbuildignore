@@ -6,4 +6,5 @@
 ^vignettes/images$
 ^inst/NEWS\.Rd$
 ^ONGOING_ISSUES\.md$
-
+^_pkgdown\.yml$
+^pkgdown$
