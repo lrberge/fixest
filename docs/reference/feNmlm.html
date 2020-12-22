@@ -10,23 +10,27 @@
 
 
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
 <!-- headroom.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -36,8 +40,7 @@
 
 
 <meta property="og:title" content="Fixed effects nonlinear maximum likelihood models — feNmlm" />
-<meta property="og:description" content="This function estimates maximum likelihood models (e.g., Poisson or Logit) with non-linear in parameters right-hand-sides and is efficient to handle any number of fixed effects. If you do not use non-linear in parameters right-hand-side, use femlm or feglm instead (design is simpler)." />
-<meta name="twitter:card" content="summary" />
+<meta property="og:description" content="This function estimates maximum likelihood models (e.g., Poisson or Logit) with non-linear in parameters right-hand-sides and is efficient to handle any number of fixed effects. If you do not use non-linear in parameters right-hand-side, use femlm or feglm instead (their design is simpler)." />
 
 
 
@@ -55,7 +58,7 @@
 
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -69,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
       </span>
     </div>
 
@@ -92,13 +95,30 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
       <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+    </li>
+    <li>
+      <a href="../articles/multiple_estimations.html">Multiple estimations</a>
+    </li>
+    <li>
+      <a href="../articles/standard_errors.html">On standard-errors</a>
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/lrberge/fixest/">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -113,29 +133,60 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Fixed effects nonlinear maximum likelihood models</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/ESTIMATION_FUNS.R'><code>R/ESTIMATION_FUNS.R</code></a></small>
     <div class="hidden name"><code>feNmlm.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>This function estimates maximum likelihood models (e.g., Poisson or Logit) with non-linear in parameters right-hand-sides and is efficient to handle any number of fixed effects. If you do not use non-linear in parameters right-hand-side, use <code><a href='femlm.html'>femlm</a></code> or <code><a href='feglm.html'>feglm</a></code> instead (design is simpler).</p>
+    <p>This function estimates maximum likelihood models (e.g., Poisson or Logit) with non-linear in parameters right-hand-sides and is efficient to handle any number of fixed effects. If you do not use non-linear in parameters right-hand-side, use <code><a href='femlm.html'>femlm</a></code> or <code><a href='feglm.html'>feglm</a></code> instead (their design is simpler).</p>
     </div>
 
-    <pre class="usage"><span class='fu'>feNmlm</span>(<span class='no'>fml</span>, <span class='no'>data</span>, <span class='kw'>family</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"poisson"</span>, <span class='st'>"negbin"</span>, <span class='st'>"logit"</span>, <span class='st'>"gaussian"</span>),
-  <span class='no'>NL.fml</span>, <span class='no'>fixef</span>, <span class='kw'>na_inf.rm</span> <span class='kw'>=</span> <span class='fu'><a href='setFixest_na_inf.rm.html'>getFixest_na_inf.rm</a></span>(), <span class='no'>NL.start</span>, <span class='no'>lower</span>,
-  <span class='no'>upper</span>, <span class='no'>NL.start.init</span>, <span class='no'>offset</span>, <span class='no'>panel.id</span>, <span class='kw'>start</span> <span class='kw'>=</span> <span class='fl'>0</span>,
-  <span class='kw'>jacobian.method</span> <span class='kw'>=</span> <span class='st'>"simple"</span>, <span class='kw'>useHessian</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>hessian.args</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>opt.control</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(), <span class='kw'>nthreads</span> <span class='kw'>=</span> <span class='fu'><a href='setFixest_nthreads.html'>getFixest_nthreads</a></span>(), <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>0</span>,
-  <span class='no'>theta.init</span>, <span class='kw'>fixef.tol</span> <span class='kw'>=</span> <span class='fl'>1e-05</span>, <span class='kw'>fixef.iter</span> <span class='kw'>=</span> <span class='fl'>1000</span>,
-  <span class='kw'>deriv.tol</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>deriv.iter</span> <span class='kw'>=</span> <span class='fl'>1000</span>, <span class='kw'>warn</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>notes</span> <span class='kw'>=</span> <span class='fu'><a href='setFixest_notes.html'>getFixest_notes</a></span>(), <span class='no'>combine.quick</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>feNmlm</span><span class='op'>(</span>
+  <span class='va'>fml</span>,
+  <span class='va'>data</span>,
+  family <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"poisson"</span>, <span class='st'>"negbin"</span>, <span class='st'>"logit"</span>, <span class='st'>"gaussian"</span><span class='op'>)</span>,
+  <span class='va'>NL.fml</span>,
+  <span class='va'>fixef</span>,
+  fixef.rm <span class='op'>=</span> <span class='st'>"perfect"</span>,
+  <span class='va'>NL.start</span>,
+  <span class='va'>lower</span>,
+  <span class='va'>upper</span>,
+  <span class='va'>NL.start.init</span>,
+  <span class='va'>offset</span>,
+  <span class='va'>subset</span>,
+  <span class='va'>split</span>,
+  <span class='va'>fsplit</span>,
+  <span class='va'>cluster</span>,
+  <span class='va'>se</span>,
+  <span class='va'>panel.id</span>,
+  start <span class='op'>=</span> <span class='fl'>0</span>,
+  jacobian.method <span class='op'>=</span> <span class='st'>"simple"</span>,
+  useHessian <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  hessian.args <span class='op'>=</span> <span class='cn'>NULL</span>,
+  opt.control <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
+  nthreads <span class='op'>=</span> <span class='fu'><a href='setFixest_nthreads.html'>getFixest_nthreads</a></span><span class='op'>(</span><span class='op'>)</span>,
+  lean <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  verbose <span class='op'>=</span> <span class='fl'>0</span>,
+  <span class='va'>theta.init</span>,
+  fixef.tol <span class='op'>=</span> <span class='fl'>1e-05</span>,
+  fixef.iter <span class='op'>=</span> <span class='fl'>10000</span>,
+  deriv.tol <span class='op'>=</span> <span class='fl'>1e-04</span>,
+  deriv.iter <span class='op'>=</span> <span class='fl'>1000</span>,
+  warn <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  notes <span class='op'>=</span> <span class='fu'><a href='setFixest_notes.html'>getFixest_notes</a></span><span class='op'>(</span><span class='op'>)</span>,
+  <span class='va'>combine.quick</span>,
+  mem.clean <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  only.env <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  <span class='va'>env</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>fml</th>
-      <td><p>A formula. This formula gives the linear formula to be estimated (it is similar to a <code>lm</code> formula), for example: <code>fml = z~x+y</code>. To include cluster variables, you can 1) either insert them in this formula using a pipe (e.g. <code>fml = z~x+y|cluster1+cluster2</code>), or 2) either use the argument <code>cluster</code>. To include a non-linear in parameters element, you must use the argment <code>NL.fml</code>.</p></td>
+      <td><p>A formula. This formula gives the linear formula to be estimated (it is similar to a <code>lm</code> formula), for example: <code>fml = z~x+y</code>. To include fixed-effects variables, insert them in this formula using a pipe (e.g. <code>fml = z~x+y|fixef_1+fixef_2</code>). To include a non-linear in parameters element, you must use the argment <code>NL.fml</code>. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in <code><a href='https://rdrr.io/r/base/c.html'>c()</a></code>: ex <code><a href='https://rdrr.io/r/base/c.html'>c(y1, y2)</a></code>. For multiple indep. vars, use the stepwise functions: ex <code>x1 + csw(x2, x3)</code>. This leads to 6 estimation <code>fml = c(y1, y2) ~ x1 + cw0(x2, x3)</code>. See details.</p></td>
     </tr>
     <tr>
       <th>data</th>
@@ -151,15 +202,15 @@
     </tr>
     <tr>
       <th>fixef</th>
-      <td><p>Character vector. The name/s of a/some variable/s within the dataset to be used as fixed-effects. These variables should contain the identifier of each observation (e.g., think of it as a panel identifier).</p></td>
+      <td><p>Character vector. The names of variables to be used as fixed-effects. These variables should contain the identifier of each observation (e.g., think of it as a panel identifier). Note that the recommended way to include fixed-effects is to insert them directly in the formula.</p></td>
     </tr>
     <tr>
-      <th>na_inf.rm</th>
-      <td><p>Logical, default is <code>TRUE</code>. If the variables necessary for the estimation contain NA/Infs and <code>na_inf.rm = TRUE</code>, then all observations containing NA are removed prior to estimation and a note is displayed detailing the number of observations removed. Otherwise, an error is raised.</p></td>
+      <th>fixef.rm</th>
+      <td><p>Can be equal to "perfect" (default), "singleton", "both" or "none". Controls which observations are to be removed. If "perfect", then observations having a fixed-effect with perfect fit (e.g. only 0 outcomes in Poisson estimations) will be removed. If "singleton", all observations for which a fixed-effect appears only once will be removed. The meaning of "both" and "none" is direct.</p></td>
     </tr>
     <tr>
       <th>NL.start</th>
-      <td><p>(For NL models only) A list of starting values for the non-linear parameters. ALL the parameters are to be named and given a staring value. Example: <code>NL.start=list(a=1,b=5,c=0)</code>. Though, there is an exception: if all parameters are to be given the same starting value, you can use the argument <code>NL.start.init</code>.</p></td>
+      <td><p>(For NL models only) A list of starting values for the non-linear parameters. ALL the parameters are to be named and given a staring value. Example: <code>NL.start=list(a=1,b=5,c=0)</code>. Though, there is an exception: if all parameters are to be given the same starting value, you can use a numeric scalar.</p></td>
     </tr>
     <tr>
       <th>lower</th>
@@ -178,8 +229,28 @@
       <td><p>A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) <code>~0.5*x**2</code>. This offset is linearly added to the elements of the main formula 'fml'.</p></td>
     </tr>
     <tr>
+      <th>subset</th>
+      <td><p>A vector (logical or numeric) or a one-sided formula. If provided, then the estimation will be performed only on the observations defined by this argument.</p></td>
+    </tr>
+    <tr>
+      <th>split</th>
+      <td><p>A one sided formula representing a variable (eg <code>split = ~var</code>) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. If you also want to include the estimation for the full sample, use the argument <code>fsplit</code> instead.</p></td>
+    </tr>
+    <tr>
+      <th>fsplit</th>
+      <td><p>A one sided formula representing a variable (eg <code>split = ~var</code>) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. This argument is the same as split but also includes the full sample as the first estimation.</p></td>
+    </tr>
+    <tr>
+      <th>cluster</th>
+      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as clusters in the estimation, you could further use <code>cluster = 1:2</code> or leave it blank with <code>se = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] cluster). You can interact two variables using <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
+    </tr>
+    <tr>
+      <th>se</th>
+      <td><p>Character scalar. Which kind of standard error should be computed: &#8220;standard&#8221;, &#8220;hetero&#8221;, &#8220;cluster&#8221;, &#8220;twoway&#8221;, &#8220;threeway&#8221; or &#8220;fourway&#8221;? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "standard"</code>. Note that this argument can be implicitly deduced from the argument <code>cluster</code>.</p></td>
+    </tr>
+    <tr>
       <th>panel.id</th>
-      <td><p>The panel identifiers. Can either be: i) a one sided formula (e.g. <code>panel.id~id+time</code>), ii) a character vector of length 2 (e.g. <code>panel.id=c('id', 'time')</code>, or iii) a character scalar of two variables separated by a comma (e.g. <code>panel.id='id,time'</code>). Note that you can combine variables with <code>^</code> only inside formulas (see the dedicated section in <code><a href='feols.html'>feols</a></code>).</p></td>
+      <td><p>The panel identifiers. Can either be: i) a one sided formula (e.g. <code>panel.id = ~id+time</code>), ii) a character vector of length 2 (e.g. <code>panel.id=c('id', 'time')</code>, or iii) a character scalar of two variables separated by a comma (e.g. <code>panel.id='id,time'</code>). Note that you can combine variables with <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> only inside formulas (see the dedicated section in <code><a href='feols.html'>feols</a></code>).</p></td>
     </tr>
     <tr>
       <th>start</th>
@@ -203,11 +274,15 @@
     </tr>
     <tr>
       <th>nthreads</th>
-      <td><p>Integer: Number of nthreads to be used (accelerates the algorithm via the use of openMP routines). The default is to use the total number of nthreads available minus two. You can set permanently the number of nthreads used within this package using the function <code><a href='setFixest_nthreads.html'>setFixest_nthreads</a></code>.</p></td>
+      <td><p>The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. The default is to use 50% of all threads. You can set permanently the number of threads used within this package using the function <code><a href='setFixest_nthreads.html'>setFixest_nthreads</a></code>.</p></td>
+    </tr>
+    <tr>
+      <th>lean</th>
+      <td><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code> then all large objects are removed from the returned result: this will save memory but will block the possibility to use many methods. It is recommended to use the arguments <code>se</code> or <code>cluster</code> to obtain the appropriate standard-errors at estimation time, since obtaining different SEs won't be possible afterwards.</p></td>
     </tr>
     <tr>
       <th>verbose</th>
-      <td><p>Integer, default is 0. It represents the level of information that should be reported during the optimisation process. If <code>verbose=0</code>: nothing is reported. If <code>verbose=1</code>: the value of the coefficients and the likelihood are reported. If <code>verbose=2</code>: <code>1</code> + information on the computing time of the null model, the cluster coefficients and the hessian are reported.</p></td>
+      <td><p>Integer, default is 0. It represents the level of information that should be reported during the optimisation process. If <code>verbose=0</code>: nothing is reported. If <code>verbose=1</code>: the value of the coefficients and the likelihood are reported. If <code>verbose=2</code>: <code>1</code> + information on the computing time of the null model, the fixed-effects coefficients and the hessian are reported.</p></td>
     </tr>
     <tr>
       <th>theta.init</th>
@@ -215,11 +290,11 @@
     </tr>
     <tr>
       <th>fixef.tol</th>
-      <td><p>Precision used to obtain the fixed-effects (ie cluster coefficients). Defaults to <code>1e-5</code>. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument <code>fixef.tol</code> cannot be lower than <code>10000*.Machine$double.eps</code>. Note that this parameter is dynamically controlled by the algorithm.</p></td>
+      <td><p>Precision used to obtain the fixed-effects. Defaults to <code>1e-5</code>. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument <code>fixef.tol</code> cannot be lower than <code>10000*.Machine$double.eps</code>. Note that this parameter is dynamically controlled by the algorithm.</p></td>
     </tr>
     <tr>
       <th>fixef.iter</th>
-      <td><p>Maximum number of iterations in the step obtaining the fixed-effects (only in use for 2+ clusters). Default is 10000.</p></td>
+      <td><p>Maximum number of iterations in fixed-effects algorithm (only in use for 2+ fixed-effects). Default is 10000.</p></td>
     </tr>
     <tr>
       <th>deriv.tol</th>
@@ -227,19 +302,31 @@
     </tr>
     <tr>
       <th>deriv.iter</th>
-      <td><p>Maximum number of iterations in the step obtaining the derivative of the fixed-effects (only in use for 2+ clusters). Default is 1000.</p></td>
+      <td><p>Maximum number of iterations in the algorithm to obtain the derivative of the fixed-effects (only in use for 2+ fixed-effects). Default is 1000.</p></td>
     </tr>
     <tr>
       <th>warn</th>
-      <td><p>Logical, default is <code>TRUE</code>. Whether warnings should be displayed (concerns warnings relating to: convergence state, collinearity issues and observation removal due to only 0/1 outcomes or presence of NA values).</p></td>
+      <td><p>Logical, default is <code>TRUE</code>. Whether warnings should be displayed (concerns warnings relating to convergence state).</p></td>
     </tr>
     <tr>
       <th>notes</th>
-      <td><p>Logical. By default, two notes are displayed: when NAs are removed (to show additional information) and when some observations are removed because of only 0 (or 0/1) outcomes in a fixed-effect (in Poisson/Neg. Bin./Logit models). To avoid displaying these messages, you can set <code>notes = FALSE</code>. You can remove these messages permanently by using <code><a href='setFixest_notes.html'>setFixest_notes(FALSE)</a></code>.</p></td>
+      <td><p>Logical. By default, two notes are displayed: when NAs are removed (to show additional information) and when some observations are removed because of only 0 (or 0/1) outcomes in a fixed-effect setup (in Poisson/Neg. Bin./Logit models). To avoid displaying these messages, you can set <code>notes = FALSE</code>. You can remove these messages permanently by using <code><a href='setFixest_notes.html'>setFixest_notes(FALSE)</a></code>.</p></td>
     </tr>
     <tr>
       <th>combine.quick</th>
       <td><p>Logical. When you combine different variables to transform them into a single fixed-effects you can do e.g. <code>y ~ x | paste(var1, var2)</code>. The algorithm provides a shorthand to do the same operation: <code>y ~ x | var1^var2</code>. Because pasting variables is a costly operation, the internal algorithm may use a numerical trick to hasten the process. The cost of doing so is that you lose the labels. If you are interested in getting the value of the fixed-effects coefficients after the estimation, you should use <code>combine.quick = FALSE</code>. By default it is equal to <code>FALSE</code> if the number of observations is lower than 50,000, and to <code>TRUE</code> otherwise.</p></td>
+    </tr>
+    <tr>
+      <th>mem.clean</th>
+      <td><p>Logical, default is <code>FALSE</code>. Only to be used if the data set is large compared to the available RAM. If <code>TRUE</code> then intermediary objects are removed as much as possible and <code><a href='https://rdrr.io/r/base/gc.html'>gc</a></code> is run before each substantial C++ section in the internal code to avoid memory issues.</p></td>
+    </tr>
+    <tr>
+      <th>only.env</th>
+      <td><p>(Advanced users.) Logical, default is <code>FALSE</code>. If <code>TRUE</code>, then only the environment used to make the estimation is returned.</p></td>
+    </tr>
+    <tr>
+      <th>env</th>
+      <td><p>(Advanced users.) A <code>fixest</code> environment created by a <code>fixest</code> estimation with <code>only.env = TRUE</code>. Default is missing. If provided, the data from this environment will be used to perform the estimation.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -249,15 +336,16 @@
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>An <code>femlm</code> object.</p>
+    <p>A <code>fixest</code> object.</p>
 <dt>coefficients</dt><dd><p>The named vector of coefficients.</p></dd>
 <dt>coeftable</dt><dd><p>The table of the coefficients with their standard errors, z-values and p-values.</p></dd>
 <dt>loglik</dt><dd><p>The loglikelihood.</p></dd>
 <dt>iterations</dt><dd><p>Number of iterations of the algorithm.</p></dd>
-<dt>n</dt><dd><p>The number of observations.</p></dd>
+<dt>nobs</dt><dd><p>The number of observations.</p></dd>
 <dt>nparams</dt><dd><p>The number of parameters of the model.</p></dd>
 <dt>call</dt><dd><p>The call.</p></dd>
 <dt>fml</dt><dd><p>The linear formula of the call.</p></dd>
+<dt>fml_all</dt><dd><p>A list containing different parts of the formula. Always contain the linear formula. Then, if relevant: <code>fixef</code>: the fixed-effects; <code>NL</code>: the non linear part of the formula.</p></dd>
 <dt>ll_null</dt><dd><p>Log-likelihood of the null model (i.e. with the intercept only).</p></dd>
 <dt>pseudo_r2</dt><dd><p>The adjusted pseudo R2.</p></dd>
 <dt>message</dt><dd><p>The convergence message from the optimization procedures.</p></dd>
@@ -274,15 +362,15 @@
 <dt>NL.fml</dt><dd><p>The nonlinear formula of the call.</p></dd>
 <dt>bounds</dt><dd><p>Whether the coefficients were upper or lower bounded. -- This can only be the case when a non-linear formula is included and the arguments 'lower' or 'upper' are provided.</p></dd>
 <dt>isBounded</dt><dd><p>The logical vector that gives for each coefficient whether it was bounded or not. This can only be the case when a non-linear formula is included and the arguments 'lower' or 'upper' are provided.</p></dd>
-<dt>fixef_vars</dt><dd><p>The names of each cluster.</p></dd>
-<dt>fixef_id</dt><dd><p>The list (of length the number of clusters) of the cluster identifiers for each observation.</p></dd>
-<dt>fixef_sizes</dt><dd><p>The size of each cluster.</p></dd>
-<dt>obsRemoved</dt><dd><p>In the case there were clusters and some observations were removed because of only 0/1 outcome within a cluster, it gives the row numbers of the observations that were removed.</p></dd>
-<dt>fixef_removed</dt><dd><p>In the case there were clusters and some observations were removed because of only 0/1 outcome within a cluster, it gives the list (for each cluster) of the cluster identifiers that were removed.</p></dd>
+<dt>fixef_vars</dt><dd><p>The names of each fixed-effect dimension.</p></dd>
+<dt>fixef_id</dt><dd><p>The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.</p></dd>
+<dt>fixef_sizes</dt><dd><p>The size of each fixed-effect (i.e. the number of unique identifierfor each fixed-effect dimension).</p></dd>
+<dt>obsRemoved</dt><dd><p>In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the row numbers of the observations that were removed. Also reports the NA observations that were removed.</p></dd>
+<dt>fixef_removed</dt><dd><p>In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.</p></dd>
 <dt>theta</dt><dd><p>In the case of a negative binomial estimation: the overdispersion parameter.</p></dd>
 
  @seealso
-See also <a href='summary.fixest.html'>summary.fixest</a> to see the results with the appropriate standard-errors, <a href='fixef.fixest.html'>fixef.fixest</a> to extract the cluster coefficients, and the function <a href='etable.html'>etable</a> to visualize the results of multiple estimations.
+See also <a href='summary.fixest.html'>summary.fixest</a> to see the results with the appropriate standard-errors, <a href='fixef.fixest.html'>fixef.fixest</a> to extract the fixed-effects coefficients, and the function <a href='etable.html'>etable</a> to visualize the results of multiple estimations.
 
 And other estimation methods: <a href='feols.html'>feols</a>, <a href='femlm.html'>femlm</a>, <a href='feglm.html'>feglm</a>, <a href='feglm.html'>fepois</a>, <a href='femlm.html'>fenegbin</a>.
 
@@ -296,12 +384,12 @@ $$E(Y|X)=\exp(X\beta)$$
 where in the Negative Binomial there is the parameter \(\theta\) used to model the variance as \(\mu+\mu^2/\theta\), with \(\mu\) the conditional expectation.
 Logit likelihood:
 $$E(Y|X)=\frac{\exp(X\beta)}{1+\exp(X\beta)}$$</p>
-<p>When there are one or more clusters, the conditional expectation can be written as:
+<p>When there are one or more fixed-effects, the conditional expectation can be written as:
 $$E(Y|X) = h(X\beta+\sum_{k}\sum_{m}\gamma_{m}^{k}\times C_{im}^{k}),$$
-where \(h(.)\) is the function corresponding to the likelihood function as shown before. \(C^k\) is the matrix associated to cluster \(k\) such that \(C^k_{im}\) is equal to 1 if observation \(i\) is of category \(m\) in cluster \(k\) and 0 otherwise.</p>
+where \(h(.)\) is the function corresponding to the likelihood function as shown before. \(C^k\) is the matrix associated to fixed-effect dimension \(k\) such that \(C^k_{im}\) is equal to 1 if observation \(i\) is of category \(m\) in the fixed-effect dimension \(k\) and 0 otherwise.</p>
 <p>When there are non linear in parameters functions, we can schematically split the set of regressors in two:
 $$f(X,\beta)=X^1\beta^1 + g(X^2,\beta^2)$$
-with first a linear term and then a non linear part expressed by the function g. That is, we add a non-linear term to the linear terms (which are \(X*beta\) and the cluster coefficients). It is always better (more efficient) to put into the argument <code>NL.fml</code> only the non-linear in parameter terms, and add all linear terms in the <code>fml</code> argument.</p>
+with first a linear term and then a non linear part expressed by the function g. That is, we add a non-linear term to the linear terms (which are \(X*beta\) and the fixed-effects coefficients). It is always better (more efficient) to put into the argument <code>NL.fml</code> only the non-linear in parameter terms, and add all linear terms in the <code>fml</code> argument.</p>
 <p>To estimate only a non-linear formula without even the intercept, you must exclude the intercept from the linear formula by using, e.g., <code>fml = z~0</code>.</p>
 <p>The over-dispersion parameter of the Negative Binomial family, theta, is capped at 10,000. If theta reaches this high value, it means that there is no overdispersion.</p>
     <h2 class="hasAnchor" id="lagging-variables"><a class="anchor" href="#lagging-variables"></a>Lagging variables</h2>
@@ -309,17 +397,38 @@ with first a linear term and then a non linear part expressed by the function g.
     
 
 
-<p>To use leads/lags of variables in the estimation, you can: i) either provide the argument <code>panel.id</code>, ii) either set you data set as a panel with the function <code><a href='panel.html'>panel</a></code>. Doing either of the two will give you acceess to the lagging functions <code><a href='l.html'>l</a></code> and <code><a href='l.html'>f</a></code>.</p>
-<p>You can provide several leads/lags at once: e.g. if your formula is equal to <code>f(y) ~ l(x, -1:1)</code>, it means that the dependent variable is equal to the lead of <code>y</code>, and you will have as explanatory variables the lead of <code>x1</code>, <code>x1</code> and the lag of <code>x1</code>. See the examples in function <code><a href='l.html'>l</a></code> for more details.</p>
+<p>To use leads/lags of variables in the estimation, you can: i) either provide the argument <code>panel.id</code>, ii) either set your data set as a panel with the function <code><a href='panel.html'>panel</a></code>. Doing either of the two will give you acceess to the lagging functions <code><a href='f.html'>l</a></code>,  <code><a href='f.html'>f</a></code> and <code><a href='f.html'>d</a></code>.</p>
+<p>You can provide several leads/lags/differences at once: e.g. if your formula is equal to <code>f(y) ~ l(x, -1:1)</code>, it means that the dependent variable is equal to the lead of <code>y</code>, and you will have as explanatory variables the lead of <code>x1</code>, <code>x1</code> and the lag of <code>x1</code>. See the examples in function <code><a href='f.html'>l</a></code> for more details.</p>
     <h2 class="hasAnchor" id="interactions"><a class="anchor" href="#interactions"></a>Interactions</h2>
 
     
 
 
-<p>You can interact a variable with a "factor-like" variable by using the syntax <code>var::fe(ref)</code>, where <code>fe</code> is the variable to be interacted with and the argument <code>ref</code> is a value of <code>fe</code> taken as a reference.</p>
-<p>The full syntax is: <code>var::fe(ref, confirm)</code>. You have two arguments, <code>ref</code> and <code>confirm</code>, the two are optional. The argument <code>confirm</code> is there to avoid mistakenly estimating a model with (too) many variables. If the variable <code>fe</code> takes over 100 different values, then you have to add the argument <code>confirm = TRUE</code>. It is important to note that *if you do not care about the standard-errors of the interactions*, then you can add interactions in the fixed-effects part of the formula (using the syntax fe[[var]], as explained in the section &#8220;Varying slopes&#8221;).</p>
-<p>Introducing interactions with this syntax leads to a different display of the interacted values in <code><a href='etable.html'>etable</a></code> and offers a special representation of the interacted coefficients in the function <code><a href='coefplot.html'>coefplot</a></code>. See examples.</p>
-<p>The syntax <code>var::fe(ref)</code> is in fact a shorthand for <code><a href='i.html'>interact(var, fe, ref)</a></code>, you have more information in <code><a href='i.html'>interact</a></code> help pages.</p>
+<p>You can interact a numeric variable with a "factor-like" variable by using <code><a href='i.html'>interact(var, fe, ref)</a></code>, where <code>fe</code> is the variable to be interacted with and the argument <code>ref</code> is a value of <code>fe</code> taken as a reference (optional). Instead of using the function <code><a href='i.html'>interact</a></code>, you can use the alias <code><a href='i.html'>i(var, fe, ref)</a></code>.</p>
+<p>Using this specific way to create interactions leads to a different display of the interacted values in <code><a href='etable.html'>etable</a></code> and offers a special representation of the interacted coefficients in the function <code><a href='coefplot.html'>coefplot</a></code>. See examples.</p>
+<p>It is important to note that *if you do not care about the standard-errors of the interactions*, then you can add interactions in the fixed-effects part of the formula (using the syntax fe[[var]], as explained in the section &#8220;Varying slopes&#8221;).</p>
+<p>The function <code><a href='i.html'>interact</a></code> has in fact more arguments, please see details in its associated help page.</p>
+    <h2 class="hasAnchor" id="on-standard-errors"><a class="anchor" href="#on-standard-errors"></a>On standard-errors</h2>
+
+    
+
+
+<p>Standard-errors can be computed in different ways, you can use the arguments <code>se</code> and <code>dof</code> in <code><a href='summary.fixest.html'>summary.fixest</a></code> to define how to compute them. By default, in the presence of fixed-effects, standard-errors are automatically clustered.</p>
+<p>The following vignette: <a href='https://cran.r-project.org/package=fixest/vignettes/standard_errors.html'>On standard-errors</a> describes in details how the standard-errors are computed in <code>fixest</code> and how you can replicate standard-errors from other software.</p>
+<p>You can use the functions <code><a href='setFixest_se.html'>setFixest_se</a></code> and <code><a href='dof.html'>setFixest_dof</a></code> to permanently set the way the standard-errors are computed.</p>
+    <h2 class="hasAnchor" id="multiple-estimations"><a class="anchor" href="#multiple-estimations"></a>Multiple estimations</h2>
+
+    
+
+
+<p>Multiple estimations can be performed at once, they just have to be specified in the formula. Multiple estimations yield a <code>fixest_multi</code> object which is &#8216;kind of&#8217; a list of all the results but includes specific methods to access the results in a handy way.</p>
+<p>To include mutliple dependent variables, wrap them in <code><a href='https://rdrr.io/r/base/c.html'>c()</a></code> (<code><a href='https://rdrr.io/r/base/list.html'>list()</a></code> also works). For instance <code>fml = c(y1, y2) ~ x1</code> would estimate the model <code>fml = y1 ~ x1</code> and then the model <code>fml = y2 ~ x1</code>.</p>
+<p>To include multiple independent variables, you need to use the stepwise functions. There are 4 stepwise functions associated to 4 short aliases. These are a) stepwise, stepwise0, cstepwise, cstepwise0, and b) sw, sw0, csw, csw0. Let's explain that.
+Assume you have the following formula: <code>fml = y ~ x1 + sw(x2, x3)</code>. The stepwise function <code>sw</code> will estimate the following two models: <code>y ~ x1 + x2</code> and <code>y ~ x1 + x3</code>. That is, each element in <code><a href='stepwise.html'>sw()</a></code> is sequentially, and separately, added to the formula. Would have you used <code>sw0</code> in lieu of <code>sw</code>, then the model <code>y ~ x1</code> would also have been estimated. The <code>0</code> in the name means that the model wihtout any stepwise element also needs to be estimated.
+Finally, the prefix <code>c</code> means cumulative: each stepwise element is added to the next. That is, <code>fml = y ~ x1 + csw(x2, x3)</code> would lead to the following models <code>y ~ x1 + x2</code> and <code>y ~ x1 + x2 + x3</code>. The <code>0</code> has the same meaning and would also lead to the model without the stepwise elements to be estimated: in other words, <code>fml = y ~ x1 + csw0(x2, x3)</code> leads to the following three models: <code>y ~ x1</code>, <code>y ~ x1 + x2</code> and <code>y ~ x1 + x2 + x3</code>.</p>
+<p>Multiple independent variables can be combined with multiple dependent variables, as in <code>fml = c(y1, y2) ~ cw(x1, x2, x3)</code> which would lead to 6 estimations. Multiple estimations can also be combined to split samples (with the arguments <code>split</code>, <code>fsplit</code>).</p>
+<p>Fixed-effects cannot be included in a stepwise fashion: they are there or not and stay the same for all estimations.</p>
+<p>A note on performance. The feature of multiple estimations has been highly optimized for <code>feols</code>, in particular in the presence of fixed-effects. It is faster to estimate multiple models using the formula rather than with a loop. For non-<code>feols</code> models using the formula is roughly similar to using a loop performance-wise.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (<a href='https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13'>https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13</a>).</p>
@@ -327,79 +436,82 @@ with first a linear term and then a non linear part expressed by the function g.
 <p>Gaure, Simen, 2013, "OLS with multiple high dimensional category variables", Computational Statistics &amp; Data Analysis 66 pp. 8--18</p>
 <p>On the unconditionnal Negative Binomial model:</p>
 <p>Allison, Paul D and Waterman, Richard P, 2002, "Fixed-Effects Negative Binomial Regression Models", Sociological Methodology 32(1) pp. 247--265</p>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Laurent Berge</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
 <span class='co'># This section covers only non-linear in parameters examples</span>
-<span class='co'># For linear relationships: use femlm instead</span>
+<span class='co'># For linear relationships: use femlm or feglm instead</span>
 
 <span class='co'># Generating data for a simple example</span>
-<span class='no'>n</span> <span class='kw'>=</span> <span class='fl'>100</span>
-<span class='no'>x</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='no'>n</span>, <span class='fl'>1</span>, <span class='fl'>5</span>)**<span class='fl'>2</span>
-<span class='no'>y</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='no'>n</span>, -<span class='fl'>1</span>, <span class='fl'>5</span>)**<span class='fl'>2</span>
-<span class='no'>z1</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/Poisson.html'>rpois</a></span>(<span class='no'>n</span>, <span class='no'>x</span>*<span class='no'>y</span>) + <span class='fu'><a href='https://rdrr.io/r/stats/Poisson.html'>rpois</a></span>(<span class='no'>n</span>, <span class='fl'>2</span>)
-<span class='no'>base</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span>(<span class='no'>x</span>, <span class='no'>y</span>, <span class='no'>z1</span>)
+<span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>
+<span class='va'>n</span> <span class='op'>=</span> <span class='fl'>100</span>
+<span class='va'>x</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='va'>n</span>, <span class='fl'>1</span>, <span class='fl'>5</span><span class='op'>)</span><span class='op'>**</span><span class='fl'>2</span>
+<span class='va'>y</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='va'>n</span>, <span class='op'>-</span><span class='fl'>1</span>, <span class='fl'>5</span><span class='op'>)</span><span class='op'>**</span><span class='fl'>2</span>
+<span class='va'>z1</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/Poisson.html'>rpois</a></span><span class='op'>(</span><span class='va'>n</span>, <span class='va'>x</span><span class='op'>*</span><span class='va'>y</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/stats/Poisson.html'>rpois</a></span><span class='op'>(</span><span class='va'>n</span>, <span class='fl'>2</span><span class='op'>)</span>
+<span class='va'>base</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>y</span>, <span class='va'>z1</span><span class='op'>)</span>
 
 <span class='co'># Estimating a 'linear' relation:</span>
-<span class='no'>est1_L</span> <span class='kw'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span>(<span class='no'>z1</span> ~ <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span>(<span class='no'>x</span>) + <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span>(<span class='no'>y</span>), <span class='no'>base</span>)
+<span class='va'>est1_L</span> <span class='op'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>z1</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>y</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span>
 <span class='co'># Estimating the same 'linear' relation using a 'non-linear' call</span>
-<span class='no'>est1_NL</span> <span class='kw'>=</span> <span class='fu'>feNmlm</span>(<span class='no'>z1</span> ~ <span class='fl'>1</span>, <span class='no'>base</span>, <span class='kw'>NL.fml</span> <span class='kw'>=</span> ~<span class='no'>a</span>*<span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span>(<span class='no'>x</span>)+<span class='no'>b</span>*<span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span>(<span class='no'>y</span>), <span class='kw'>NL.start</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>a</span><span class='kw'>=</span><span class='fl'>0</span>, <span class='kw'>b</span><span class='kw'>=</span><span class='fl'>0</span>))
+<span class='va'>est1_NL</span> <span class='op'>=</span> <span class='fu'>feNmlm</span><span class='op'>(</span><span class='va'>z1</span> <span class='op'>~</span> <span class='fl'>1</span>, <span class='va'>base</span>, NL.fml <span class='op'>=</span> <span class='op'>~</span><span class='va'>a</span><span class='op'>*</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span><span class='op'>+</span><span class='va'>b</span><span class='op'>*</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>y</span><span class='op'>)</span>, NL.start <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>a<span class='op'>=</span><span class='fl'>0</span>, b<span class='op'>=</span><span class='fl'>0</span><span class='op'>)</span><span class='op'>)</span>
 <span class='co'># we compare the estimates with the function esttable (they are identical)</span>
-<span class='fu'><a href='etable.html'>esttable</a></span>(<span class='no'>est1_L</span>, <span class='no'>est1_NL</span>)</div><div class='output co'>#&gt;                                 est1_L            est1_NL
-#&gt; (Intercept)            0.033. (0.0197)    0.033. (0.0197)
-#&gt; log(x)               0.996*** (0.0044)                   
-#&gt; log(y)              0.9956*** (0.0036)                   
-#&gt; a                                       0.996*** (0.0044)
-#&gt; b                                      0.9956*** (0.0036)
-#&gt; ___________________ __________________ __________________
-#&gt; Observations                       100                100
-#&gt; S.E. type                     Standard           Standard
-#&gt; Squared Corr.                        1                  1
-#&gt; Pseudo R2                      0.99694            0.99694
-#&gt; BIC                             845.93             845.93</div><div class='input'>
+<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est1_L</span>, <span class='va'>est1_NL</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                               est1_L              est1_NL
+#&gt; Dependent Var.:                   z1                   z1
+#&gt;                                                          
+#&gt; (Intercept)       0.06324* (0.02977)   0.06324* (0.02977)
+#&gt; log(x)          0.9945*** (0.005095)                     
+#&gt; log(y)          0.9901*** (0.005828)                     
+#&gt; a                                    0.9945*** (0.005095)
+#&gt; b                                    0.9901*** (0.005828)
+#&gt; _______________ ____________________ ____________________
+#&gt; S.E. type                   Standard             Standard
+#&gt; Observations                     100                  100
+#&gt; Squared Cor.                0.999573             0.999573
+#&gt; Pseudo R2                    0.99338              0.99338
+#&gt; BIC                           797.47               797.47</div><div class='input'>
 <span class='co'># Now generating a non-linear relation (E(z2) = x + y + 1):</span>
-<span class='no'>z2</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/Poisson.html'>rpois</a></span>(<span class='no'>n</span>, <span class='no'>x</span> + <span class='no'>y</span>) + <span class='fu'><a href='https://rdrr.io/r/stats/Poisson.html'>rpois</a></span>(<span class='no'>n</span>, <span class='fl'>1</span>)
-<span class='no'>base</span>$<span class='no'>z2</span> <span class='kw'>=</span> <span class='no'>z2</span>
+<span class='va'>z2</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/Poisson.html'>rpois</a></span><span class='op'>(</span><span class='va'>n</span>, <span class='va'>x</span> <span class='op'>+</span> <span class='va'>y</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/stats/Poisson.html'>rpois</a></span><span class='op'>(</span><span class='va'>n</span>, <span class='fl'>1</span><span class='op'>)</span>
+<span class='va'>base</span><span class='op'>$</span><span class='va'>z2</span> <span class='op'>=</span> <span class='va'>z2</span>
 
 <span class='co'># Estimation using this non-linear form</span>
-<span class='no'>est2_NL</span> <span class='kw'>=</span> <span class='fu'>feNmlm</span>(<span class='no'>z2</span>~<span class='fl'>0</span>, <span class='no'>base</span>, <span class='kw'>NL.fml</span> <span class='kw'>=</span> ~<span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span>(<span class='no'>a</span>*<span class='no'>x</span> + <span class='no'>b</span>*<span class='no'>y</span>),
-               <span class='kw'>NL.start</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>a</span><span class='kw'>=</span><span class='fl'>1</span>, <span class='kw'>b</span><span class='kw'>=</span><span class='fl'>2</span>), <span class='kw'>lower</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>a</span><span class='kw'>=</span><span class='fl'>0</span>, <span class='kw'>b</span><span class='kw'>=</span><span class='fl'>0</span>))
+<span class='va'>est2_NL</span> <span class='op'>=</span> <span class='fu'>feNmlm</span><span class='op'>(</span><span class='va'>z2</span> <span class='op'>~</span> <span class='fl'>0</span>, <span class='va'>base</span>, NL.fml <span class='op'>=</span> <span class='op'>~</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>a</span><span class='op'>*</span><span class='va'>x</span> <span class='op'>+</span> <span class='va'>b</span><span class='op'>*</span><span class='va'>y</span><span class='op'>)</span>,
+               NL.start <span class='op'>=</span> <span class='fl'>2</span>, lower <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>a<span class='op'>=</span><span class='fl'>0</span>, b<span class='op'>=</span><span class='fl'>0</span><span class='op'>)</span><span class='op'>)</span>
 <span class='co'># we can't estimate this relation linearily</span>
 <span class='co'># =&gt; closest we can do:</span>
-<span class='no'>est2_L</span> <span class='kw'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span>(<span class='no'>z2</span>~<span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span>(<span class='no'>x</span>)+<span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span>(<span class='no'>y</span>), <span class='no'>base</span>)
+<span class='va'>est2_L</span> <span class='op'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>z2</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>y</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span>
 
 <span class='co'># Difference between the two models:</span>
-<span class='fu'><a href='etable.html'>esttable</a></span>(<span class='no'>est2_L</span>, <span class='no'>est2_NL</span>)</div><div class='output co'>#&gt;                                 est2_L            est2_NL
-#&gt; (Intercept)         2.2783*** (0.0429)                   
-#&gt; log(x)              0.3083*** (0.0101)                   
-#&gt; log(y)              0.3232*** (0.0096)                   
-#&gt; a                                       1.0035*** (0.026)
-#&gt; b                                      1.0019*** (0.0245)
-#&gt; ___________________ __________________ __________________
-#&gt; Observations                       100                100
-#&gt; S.E. type                     Standard           Standard
-#&gt; Squared Corr.                    0.731              0.986
-#&gt; Pseudo R2                      0.58932            0.87527
-#&gt; BIC                           2,022.68             624.32</div><div class='input'>
+<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est2_L</span>, <span class='va'>est2_NL</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                               est2_L            est2_NL
+#&gt; Dependent Var.:                   z2                 z2
+#&gt;                                                        
+#&gt; (Intercept)       2.824*** (0.03863)                   
+#&gt; log(x)          0.2695*** (0.009432)                   
+#&gt; log(y)          0.1774*** (0.008724)                   
+#&gt; a                                    1.057*** (0.02652)
+#&gt; b                                    1.005*** (0.02479)
+#&gt; _______________ ____________________ __________________
+#&gt; S.E. type                   Standard           Standard
+#&gt; Observations                     100                100
+#&gt; Squared Cor.                0.465961           0.962475
+#&gt; Pseudo R2                   0.320784           0.816259
+#&gt; BIC                         2,545.92             694.19</div><div class='input'>
 <span class='co'># Plotting the fits:</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>x</span>, <span class='no'>z2</span>, <span class='kw'>pch</span> <span class='kw'>=</span> <span class='fl'>18</span>)</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/points.html'>points</a></span>(<span class='no'>x</span>, <span class='fu'><a href='https://rdrr.io/r/stats/fitted.values.html'>fitted</a></span>(<span class='no'>est2_L</span>), <span class='kw'>col</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>pch</span> <span class='kw'>=</span> <span class='fl'>1</span>)</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/points.html'>points</a></span>(<span class='no'>x</span>, <span class='fu'><a href='https://rdrr.io/r/stats/fitted.values.html'>fitted</a></span>(<span class='no'>est2_NL</span>), <span class='kw'>col</span> <span class='kw'>=</span> <span class='fl'>4</span>, <span class='kw'>pch</span> <span class='kw'>=</span> <span class='fl'>2</span>)</div><div class='img'><img src='feNmlm-1.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>z2</span>, pch <span class='op'>=</span> <span class='fl'>18</span><span class='op'>)</span>
+</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/points.html'>points</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='fu'><a href='https://rdrr.io/r/stats/fitted.values.html'>fitted</a></span><span class='op'>(</span><span class='va'>est2_L</span><span class='op'>)</span>, col <span class='op'>=</span> <span class='fl'>2</span>, pch <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>
+</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/points.html'>points</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='fu'><a href='https://rdrr.io/r/stats/fitted.values.html'>fitted</a></span><span class='op'>(</span><span class='va'>est2_NL</span><span class='op'>)</span>, col <span class='op'>=</span> <span class='fl'>4</span>, pch <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
+</div><div class='img'><img src='feNmlm-1.png' alt='' width='700' height='433' /></div><div class='input'>
 
 </div></pre>
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      <li><a href="#value">Value</a></li>
-      <li><a href="#details">Details</a></li>
-      <li><a href="#lagging-variables">Lagging variables</a></li>
-      <li><a href="#interactions">Interactions</a></li>
-      <li><a href="#references">References</a></li>
-      <li><a href="#examples">Examples</a></li>
-    </ul>
-
-    <h2>Author</h2>
-    <p>Laurent Berge</p>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
 
@@ -410,7 +522,7 @@ with first a linear term and then a non linear part expressed by the function g.
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

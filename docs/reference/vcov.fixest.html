@@ -6,27 +6,31 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Extracts the variance/covariance of a <code>femlm</code> fit — vcov.fixest • fixest</title>
+<title>Extracts the variance/covariance of a femlm fit — vcov.fixest • fixest</title>
 
 
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
 <!-- headroom.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -35,9 +39,8 @@
 
 
 
-<meta property="og:title" content="Extracts the variance/covariance of a <code>femlm</code> fit — vcov.fixest" />
+<meta property="og:title" content="Extracts the variance/covariance of a femlm fit — vcov.fixest" />
 <meta property="og:description" content="This function extracts the variance-covariance of estimated parameters from a model estimated with femlm, feols or feglm." />
-<meta name="twitter:card" content="summary" />
 
 
 
@@ -55,7 +58,7 @@
 
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -69,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
       </span>
     </div>
 
@@ -92,13 +95,30 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
       <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+    </li>
+    <li>
+      <a href="../articles/multiple_estimations.html">Multiple estimations</a>
+    </li>
+    <li>
+      <a href="../articles/standard_errors.html">On standard-errors</a>
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/lrberge/fixest/">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -113,7 +133,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Extracts the variance/covariance of a <code>femlm</code> fit</h1>
-    
+    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/MiscFuns.R'><code>R/MiscFuns.R</code></a></small>
     <div class="hidden name"><code>vcov.fixest.Rd</code></div>
     </div>
 
@@ -122,8 +142,17 @@
     </div>
 
     <pre class="usage"><span class='co'># S3 method for fixest</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span>(<span class='no'>object</span>, <span class='no'>se</span>, <span class='no'>cluster</span>, <span class='kw'>dof</span> <span class='kw'>=</span> <span class='fu'><a href='setFixest_dof.html'>getFixest_dof</a></span>(),
-  <span class='kw'>forceCovariance</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>keepBounded</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>...</span>)</pre>
+<span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span>
+  <span class='va'>object</span>,
+  <span class='va'>se</span>,
+  <span class='va'>cluster</span>,
+  dof <span class='op'>=</span> <span class='fu'><a href='dof.html'>getFixest_dof</a></span><span class='op'>(</span><span class='op'>)</span>,
+  attr <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  forceCovariance <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  keepBounded <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  nthreads <span class='op'>=</span> <span class='fu'><a href='setFixest_nthreads.html'>getFixest_nthreads</a></span><span class='op'>(</span><span class='op'>)</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -134,15 +163,19 @@
     </tr>
     <tr>
       <th>se</th>
-      <td><p>Character scalar. Which kind of standard error should be computed: &#8220;standard&#8221;, &#8220;White&#8221;, &#8220;cluster&#8221;, &#8220;twoway&#8221;, &#8220;threeway&#8221; or &#8220;fourway&#8221;? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "standard"</code>. Note that this argument can be implicitly deduced from the argument <code>cluster</code>.</p></td>
+      <td><p>Character scalar. Which kind of standard error should be computed: &#8220;standard&#8221;, &#8220;hetero&#8221;, &#8220;cluster&#8221;, &#8220;twoway&#8221;, &#8220;threeway&#8221; or &#8220;fourway&#8221;? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "standard"</code>. Note that this argument can be implicitly deduced from the argument <code>cluster</code>.</p></td>
     </tr>
     <tr>
       <th>cluster</th>
-      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1, "var2")]}, \code{cluster = c("var1, "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as clusters in the estimation, you could further use <code>cluster = 1:2</code> or leave it blank with <code>se = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] cluster).</p></td>
+      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as clusters in the estimation, you could further use <code>cluster = 1:2</code> or leave it blank with <code>se = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] cluster). You can interact two variables using <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
     </tr>
     <tr>
       <th>dof</th>
-      <td><p>An object of class <code>dof.type</code> obtained with the function <code><a href='dof.html'>dof</a></code>. Represent how the degree of freedom correction should be done. Defaults to <code><a href='dof.html'>dof(fixef="nested", exact=FALSE, cluster = TRUE)</a></code>. See the help of the function <code><a href='dof.html'>dof</a></code> for details.</p></td>
+      <td><p>An object of class <code>dof.type</code> obtained with the function <code><a href='dof.html'>dof</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href='dof.html'>dof</a></code> for this argument. The arguments and defaults of the function <code><a href='dof.html'>dof</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "conventional"</code>, <code>t.df = "conventional"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href='dof.html'>dof</a></code> for details.</p></td>
+    </tr>
+    <tr>
+      <th>attr</th>
+      <td><p>Logical, defaults to <code>FALSE</code>. Whether to include the attributes describing how the VCOV was computed.</p></td>
     </tr>
     <tr>
       <th>forceCovariance</th>
@@ -150,7 +183,11 @@
     </tr>
     <tr>
       <th>keepBounded</th>
-      <td><p>(Advanced users -- feNmlm with non-linear part and bounded coefficients only.) Logical, default is <code>FALSE</code>. If <code>TRUE</code>, then the bounded coefficients (if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise it is not).</p></td>
+      <td><p>(Advanced users -- <code>feNmlm</code> with non-linear part and bounded coefficients only.) Logical, default is <code>FALSE</code>. If <code>TRUE</code>, then the bounded coefficients (if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise it is not).</p></td>
+    </tr>
+    <tr>
+      <th>nthreads</th>
+      <td><p>The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. The default is to use 50% of all threads. You can set permanently the number of threads used within this package using the function <code><a href='setFixest_nthreads.html'>setFixest_nthreads</a></code>.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -162,99 +199,68 @@
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>It returns a \(N\times N\) square matrix where \(N\) is the number of variables of the fitted model.
-This matrix has an attribute &#8220;type&#8221; specifying how this variance/covariance matrix has been computed (i.e. was it created using White correction, or was it clustered along a specific factor, etc).</p>
+This matrix has an attribute &#8220;type&#8221; specifying how this variance/covariance matrix has been computed (i.e. if it was created using a heteroskedascity-robust correction, or if it was clustered along a specific factor, etc).</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>For an explanation on how the standard-errors are computed and what is the exact meaning of the arguments, please have a look at the dedicated vignette: <a href='https://cran.r-project.org/package=fixest/vignettes/standard_errors.html'>On standard-errors</a>.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p>See also the main estimation functions <code><a href='femlm.html'>femlm</a></code>, <code><a href='feols.html'>feols</a></code> or <code><a href='feglm.html'>feglm</a></code>. <code><a href='summary.fixest.html'>summary.fixest</a></code>, <code><a href='confint.fixest.html'>confint.fixest</a></code>, <code><a href='resid.fixest.html'>resid.fixest</a></code>, <code><a href='predict.fixest.html'>predict.fixest</a></code>, <code><a href='fixef.fixest.html'>fixef.fixest</a></code>.</p></div>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Laurent Berge</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
 <span class='co'># Load trade data</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>(<span class='no'>trade</span>)
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>trade</span><span class='op'>)</span>
 
 <span class='co'># We estimate the effect of distance on trade (with 3 fixed-effects)</span>
-<span class='no'>est_pois</span> <span class='kw'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span>(<span class='no'>Euros</span> ~ <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span>(<span class='no'>dist_km</span>) + <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span>(<span class='no'>Year</span>) <span class='kw'>|</span> <span class='no'>Origin</span> + <span class='no'>Destination</span> +
-                 <span class='no'>Product</span>, <span class='no'>trade</span>)
+<span class='va'>est_pois</span> <span class='op'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>Euros</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>dist_km</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>Year</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>Origin</span> <span class='op'>+</span> <span class='va'>Destination</span> <span class='op'>+</span>
+                 <span class='va'>Product</span>, <span class='va'>trade</span><span class='op'>)</span>
 
 <span class='co'># By default, in the presence of FEs</span>
 <span class='co'># the VCOV is clustered along the first FE</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span>(<span class='no'>est_pois</span>)</div><div class='output co'>#&gt;            [,1]       [,2]
+<span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_pois</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;            [,1]       [,2]
 #&gt; [1,] 0.01337806  0.2270412
-#&gt; [2,] 0.22704123 48.7565447
-#&gt; attr(,"type")
-#&gt; [1] "Clustered (Origin)"
-#&gt; attr(,"dof.type")
-#&gt; [1] "dof(fixef = \"nested\", exact = FALSE, cluster = TRUE)"
-#&gt; attr(,"dof.K")
-#&gt; [1] 36</div><div class='input'>
-<span class='co'># "white" VCOV</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span>(<span class='no'>est_pois</span>, <span class='kw'>se</span> <span class='kw'>=</span> <span class='st'>"white"</span>)</div><div class='output co'>#&gt;              [,1]         [,2]
-#&gt; [1,] 0.0004774988  0.002270112
-#&gt; [2,] 0.0022701117 39.998250222
-#&gt; attr(,"type")
-#&gt; [1] "White"
-#&gt; attr(,"dof.type")
-#&gt; [1] "dof(fixef = \"nested\", exact = FALSE, cluster = TRUE)"
-#&gt; attr(,"dof.K")
-#&gt; [1] 50</div><div class='input'>
+#&gt; [2,] 0.22704123 48.7565447</div><div class='input'>
+<span class='co'># Heteroskedasticity-robust VCOV</span>
+<span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_pois</span>, se <span class='op'>=</span> <span class='st'>"hetero"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;              [,1]         [,2]
+#&gt; [1,] 0.0004775112  0.002270171
+#&gt; [2,] 0.0022701710 39.999293909</div><div class='input'>
 <span class='co'># "clustered" VCOV (with respect to the Product factor)</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span>(<span class='no'>est_pois</span>, <span class='kw'>se</span> <span class='kw'>=</span> <span class='st'>"cluster"</span>, <span class='kw'>cluster</span> <span class='kw'>=</span> <span class='no'>trade</span>$<span class='no'>Product</span>)</div><div class='output co'>#&gt;            [,1]        [,2]
+<span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_pois</span>, se <span class='op'>=</span> <span class='st'>"cluster"</span>, cluster <span class='op'>=</span> <span class='va'>trade</span><span class='op'>$</span><span class='va'>Product</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;            [,1]        [,2]
 #&gt; [1,] 0.00965938  0.09050064
-#&gt; [2,] 0.09050064 45.72458483
-#&gt; attr(,"type")
-#&gt; [1] "Clustered"
-#&gt; attr(,"dof.type")
-#&gt; [1] "dof(fixef = \"nested\", exact = FALSE, cluster = TRUE)"
-#&gt; attr(,"dof.K")
-#&gt; [1] 31</div><div class='input'><span class='co'># another way to make the same request:</span>
+#&gt; [2,] 0.09050064 45.72458483</div><div class='input'><span class='co'># another way to make the same request:</span>
 <span class='co'># note that previously arg. se was optional since deduced from arg. cluster</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span>(<span class='no'>est_pois</span>, <span class='kw'>cluster</span> <span class='kw'>=</span> <span class='st'>"Product"</span>)</div><div class='output co'>#&gt;            [,1]        [,2]
+<span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_pois</span>, cluster <span class='op'>=</span> <span class='st'>"Product"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;            [,1]        [,2]
 #&gt; [1,] 0.00965938  0.09050064
-#&gt; [2,] 0.09050064 45.72458483
-#&gt; attr(,"type")
-#&gt; [1] "Clustered (Product)"
-#&gt; attr(,"dof.type")
-#&gt; [1] "dof(fixef = \"nested\", exact = FALSE, cluster = TRUE)"
-#&gt; attr(,"dof.K")
-#&gt; [1] 31</div><div class='input'><span class='co'># yet another way:</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span>(<span class='no'>est_pois</span>, <span class='kw'>cluster</span> <span class='kw'>=</span> ~<span class='no'>Product</span>)</div><div class='output co'>#&gt;            [,1]        [,2]
+#&gt; [2,] 0.09050064 45.72458483</div><div class='input'><span class='co'># yet another way:</span>
+<span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_pois</span>, cluster <span class='op'>=</span> <span class='op'>~</span><span class='va'>Product</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;            [,1]        [,2]
 #&gt; [1,] 0.00965938  0.09050064
-#&gt; [2,] 0.09050064 45.72458483
-#&gt; attr(,"type")
-#&gt; [1] "Clustered (Product)"
-#&gt; attr(,"dof.type")
-#&gt; [1] "dof(fixef = \"nested\", exact = FALSE, cluster = TRUE)"
-#&gt; attr(,"dof.K")
-#&gt; [1] 31</div><div class='input'>
-<span class='co'># Another estimation without cluster:</span>
-<span class='no'>est_pois_simple</span> <span class='kw'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span>(<span class='no'>Euros</span> ~ <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span>(<span class='no'>dist_km</span>) + <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span>(<span class='no'>Year</span>), <span class='no'>trade</span>)
+#&gt; [2,] 0.09050064 45.72458483</div><div class='input'>
+<span class='co'># Another estimation without fixed-effects:</span>
+<span class='va'>est_pois_simple</span> <span class='op'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>Euros</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>dist_km</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>Year</span><span class='op'>)</span>, <span class='va'>trade</span><span class='op'>)</span>
 
 <span class='co'># We can still get the clustered VCOV,</span>
 <span class='co'># but we need to give the argument cluster:</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span>(<span class='no'>est_pois_simple</span>, <span class='kw'>cluster</span> <span class='kw'>=</span> ~<span class='no'>Product</span>)</div><div class='output co'>#&gt;              [,1]         [,2]          [,3]
-#&gt; [1,] 2590.3952791 -0.362100706 -339.93823080
-#&gt; [2,]   -0.3621007  0.002112443    0.04584858
-#&gt; [3,] -339.9382308  0.045848576   44.61192316
-#&gt; attr(,"type")
-#&gt; [1] "Clustered (Product)"
-#&gt; attr(,"dof.type")
-#&gt; [1] "dof(fixef = \"nested\", exact = FALSE, cluster = TRUE)"
-#&gt; attr(,"dof.K")
-#&gt; [1] 3</div><div class='input'>
+<span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_pois_simple</span>, cluster <span class='op'>=</span> <span class='op'>~</span><span class='va'>Product</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;              [,1]         [,2]          [,3]
+#&gt; [1,] 2590.3808228 -0.362099664 -339.93633206
+#&gt; [2,]   -0.3620997  0.002112443    0.04584844
+#&gt; [3,] -339.9363321  0.045848439   44.61167377</div><div class='input'>
 
 </div></pre>
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      <li><a href="#value">Value</a></li>
-      <li><a href="#see-also">See also</a></li>
-      <li><a href="#examples">Examples</a></li>
-    </ul>
-
-    <h2>Author</h2>
-    <p>Laurent Berge</p>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
 
@@ -265,7 +271,7 @@ This matrix has an attribute &#8220;type&#8221; specifying how this variance/cov
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

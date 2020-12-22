@@ -6,27 +6,31 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Interact variables with factors — i • fixest</title>
+<title>Create, or interact variables with, factors — i • fixest</title>
 
 
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
 <!-- headroom.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -35,9 +39,8 @@
 
 
 
-<meta property="og:title" content="Interact variables with factors — i" />
-<meta property="og:description" content="Interacts a variable with another treated as a factor, and sets a reference" />
-<meta name="twitter:card" content="summary" />
+<meta property="og:title" content="Create, or interact variables with, factors — i" />
+<meta property="og:description" content="Treat a variable as a factor, or interacts a variable with another treated as a factor. Values to be dropped/kept from the factor can be easily set." />
 
 
 
@@ -55,7 +58,7 @@
 
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -69,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
       </span>
     </div>
 
@@ -92,13 +95,30 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
       <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+    </li>
+    <li>
+      <a href="../articles/multiple_estimations.html">Multiple estimations</a>
+    </li>
+    <li>
+      <a href="../articles/standard_errors.html">On standard-errors</a>
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/lrberge/fixest/">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -112,51 +132,73 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Interact variables with factors</h1>
-    
+    <h1>Create, or interact variables with, factors</h1>
+    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/MiscFuns.R'><code>R/MiscFuns.R</code></a></small>
     <div class="hidden name"><code>i.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Interacts a variable with another treated as a factor, and sets a reference</p>
+    <p>Treat a variable as a factor, or interacts a variable with another treated as a factor. Values to be dropped/kept from the factor can be easily set.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>i</span>(<span class='no'>var</span>, <span class='no'>fe</span>, <span class='no'>ref</span>, <span class='kw'>confirm</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
+    <pre class="usage"><span class='fu'>i</span><span class='op'>(</span><span class='va'>var</span>, <span class='va'>f</span>, <span class='va'>f2</span>, <span class='va'>ref</span>, <span class='va'>drop</span>, <span class='va'>keep</span>, <span class='va'>drop2</span>, <span class='va'>keep2</span><span class='op'>)</span>
 
-<span class='fu'>interact</span>(<span class='no'>var</span>, <span class='no'>fe</span>, <span class='no'>ref</span>, <span class='kw'>confirm</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+<span class='va'>interact</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>var</th>
-      <td><p>A vector.</p></td>
+      <td><p>A vector to be interacted with <code>f</code>. If the other argument <code>f</code> is missing, then this vector will be treated as the argument <code>f</code>.</p></td>
     </tr>
     <tr>
-      <th>fe</th>
-      <td><p>A vector (of any type). Must be of the same length as <code>var</code>.</p></td>
+      <th>f</th>
+      <td><p>A vector (of any type) that will be treated as a factor. Must be of the same length as <code>var</code> if <code>var</code> is not missing.</p></td>
+    </tr>
+    <tr>
+      <th>f2</th>
+      <td><p>A vector (of any type) that will be treated as a factor. Must be of the same length as <code>f</code>.</p></td>
     </tr>
     <tr>
       <th>ref</th>
-      <td><p>A single value that belongs to the interacted variable (<code>fe</code>). Can be missing.</p></td>
+      <td><p>A single value that belongs to the interacted variable (<code>f</code>). Can be missing, can also be a logical: if <code>TRUE</code>, then the first value of <code>f</code> will be removed..</p></td>
     </tr>
     <tr>
-      <th>confirm</th>
-      <td><p>Logical, default is <code>FALSE</code>. If the factor variable has over 100 cases, you need to use <code>confirm = TRUE</code> to carry on.</p></td>
+      <th>drop</th>
+      <td><p>A vector of regular expressions or integers (if <code>f</code> is integer). If provided, all values from <code>f</code> that match <code>drop</code> will be removed.</p></td>
+    </tr>
+    <tr>
+      <th>keep</th>
+      <td><p>A vector of regular expressions or integers (if <code>f</code> is integer). If provided, only the values from <code>f</code> that match <code>keep</code> will be kept.</p></td>
+    </tr>
+    <tr>
+      <th>drop2</th>
+      <td><p>A vector of regular expressions or integers (if <code>f2</code> is integer). If provided, all values from <code>f2</code> that match <code>drop2</code> will be removed.</p></td>
+    </tr>
+    <tr>
+      <th>keep2</th>
+      <td><p>A vector of regular expressions or integers (if <code>f2</code> is integer). If provided, only the values from <code>f2</code> that match <code>keep2</code> will be kept.</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
+
+    <p>An object of class <code>function</code> of length 1.</p>
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>It returns a matrix with number of rows the length of <code>var</code>. The number of columns is equal to the number of cases contained in <code>fe</code> minus the reference.</p>
+    <p>It returns a matrix with number of rows the length of <code>var</code>. The number of columns is equal to the number of cases contained in <code>f</code> minus the reference(s).</p>
     <h2 class="hasAnchor" id="shorthand-in-fixest-estimations"><a class="anchor" href="#shorthand-in-fixest-estimations"></a>Shorthand in <code>fixest</code> estimations</h2>
 
     
 
-<p>In <code>fixest</code> estimations, instead of using <code>i(var, fe, ref)</code>, you can instead use the following writing <code>var::fe(ref)</code>.</p>
+<p>In <code>fixest</code> estimations, instead of using <code>i(var, f, ref)</code>, you can instead use the following writing <code>var::f(ref)</code>. Note that this way of doing interactions is not endorsed any more and will likely be deprecated in the future.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='coefplot.html'>coefplot</a></code> to plot interactions, <code><a href='feols.html'>feols</a></code> for OLS estimation with multiple fixed-effects.</p></div>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Laurent Berge</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
@@ -164,45 +206,68 @@
 <span class='co'># Simple illustration</span>
 <span class='co'>#</span>
 
-<span class='no'>x</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fl'>10</span>)
-<span class='no'>y</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='fl'>1</span>:<span class='fl'>4</span>, <span class='fl'>3</span>)[<span class='fl'>1</span>:<span class='fl'>10</span>]
+<span class='va'>x</span> <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>10</span>
+<span class='va'>y</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>4</span>, <span class='fl'>3</span><span class='op'>)</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>10</span><span class='op'>]</span>
 
-<span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span>(<span class='no'>x</span>, <span class='no'>y</span>, <span class='fu'>i</span>(<span class='no'>x</span>, <span class='no'>y</span>, <span class='fl'>1</span>))</div><div class='output co'>#&gt;              x y      x:y::2   x:y::3     x:y::4
-#&gt; 1   0.35859089 1  0.00000000 0.000000  0.0000000
-#&gt; 2  -0.02899503 2 -0.02899503 0.000000  0.0000000
-#&gt; 3   1.14704207 3  0.00000000 1.147042  0.0000000
-#&gt; 4   0.37358894 4  0.00000000 0.000000  0.3735889
-#&gt; 5   0.32333921 1  0.00000000 0.000000  0.0000000
-#&gt; 6  -0.82981932 2 -0.82981932 0.000000  0.0000000
-#&gt; 7   1.39446258 3  0.00000000 1.394463  0.0000000
-#&gt; 8  -0.19154358 4  0.00000000 0.000000 -0.1915436
-#&gt; 9   0.27227702 1  0.00000000 0.000000  0.0000000
-#&gt; 10 -1.08165901 2 -1.08165901 0.000000  0.0000000</div><div class='input'>
+<span class='co'># interaction</span>
+<span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>y</span>, <span class='fu'>i</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>y</span>, <span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in as.character(x): cannot coerce type 'closure' to vector of type 'character'</span></div><div class='input'>
+<span class='co'># without interaction</span>
+<span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>y</span>, <span class='fu'>i</span><span class='op'>(</span><span class='va'>y</span>, ref <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in as.character(x): cannot coerce type 'closure' to vector of type 'character'</span></div><div class='input'>
+<span class='co'># You can interact factors too</span>
+<span class='va'>z</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"a"</span>, <span class='st'>"b"</span>, <span class='st'>"c"</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>5</span>, <span class='fl'>3</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='va'>z</span>, <span class='va'>y</span>, <span class='fu'>i</span><span class='op'>(</span><span class='va'>z</span>, <span class='va'>y</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in as.character(x): cannot coerce type 'closure' to vector of type 'character'</span></div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># In fixest estimations</span>
 <span class='co'>#</span>
 
-<span class='co'># NOTA: in fixest estimations, i(var, fe, ref) is equivalent to var::fe(ref)</span>
-
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>(<span class='no'>base_did</span>)
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>base_did</span><span class='op'>)</span>
 <span class='co'># We interact the variable 'period' with the variable 'treat'</span>
-<span class='no'>est_did</span> <span class='kw'>=</span> <span class='fu'><a href='feols.html'>feols</a></span>(<span class='no'>y</span> ~ <span class='no'>x1</span> + <span class='fu'>i</span>(<span class='no'>treat</span>, <span class='no'>period</span>, <span class='fl'>5</span>) <span class='kw'>|</span> <span class='no'>id</span>+<span class='no'>period</span>, <span class='no'>base_did</span>)
+<span class='va'>est_did</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'>i</span><span class='op'>(</span><span class='va'>treat</span>, <span class='va'>period</span>, <span class='fl'>5</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span>, <span class='va'>base_did</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in feols(y ~ x1 + i(treat, period, 5) | id + period, base_did): Evaluation of the right-hand-side of the formula raises an error: cannot</span>
+#&gt; <span class='error'>coerce type 'closure' to vector of type 'character'</span></div><div class='input'>
+<span class='co'># =&gt; special treatment in coefplot</span>
+<span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='va'>est_did</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in coefplot_prms(object = object, ..., sd = sd, ci_low = ci_low,     ci_high = ci_high, x = x, x.shift = x.shift, dict = dict,     keep = keep, drop = drop, order = order, ci_level = ci_level,     ref = ref, only.inter = only.inter, sep = sep, as.multiple = as.multiple): object 'est_did' not found</span></div><div class='input'>
+<span class='co'># Using i() for factors</span>
+<span class='va'>est_bis</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'>i</span><span class='op'>(</span><span class='va'>period</span>, keep <span class='op'>=</span> <span class='fl'>3</span><span class='op'>:</span><span class='fl'>6</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>i</span><span class='op'>(</span><span class='va'>treat</span>, <span class='va'>period</span>, <span class='fl'>5</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>id</span>, <span class='va'>base_did</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in feols(y ~ x1 + i(period, keep = 3:6) + i(treat, period, 5) |     id, base_did): Evaluation of the right-hand-side of the formula raises an error: cannot</span>
+#&gt; <span class='error'>coerce type 'closure' to vector of type 'character'</span></div><div class='input'>
+<span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='va'>est_bis</span>, only.inter <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in coefplot_prms(object = object, ..., sd = sd, ci_low = ci_low,     ci_high = ci_high, x = x, x.shift = x.shift, dict = dict,     keep = keep, drop = drop, order = order, ci_level = ci_level,     ref = ref, only.inter = only.inter, sep = sep, as.multiple = as.multiple): object 'est_bis' not found</span></div><div class='input'>
+<span class='co'># =&gt; special treatment in etable</span>
+<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_bis</span>, dict <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"6"</span> <span class='op'>=</span> <span class='st'>"six"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error: in etable(est_bis, dict = c(`6` = "six")):</span>
+#&gt; <span class='error'> Some elements in '...' could not be evaluated: object 'est_bis' not</span>
+#&gt; <span class='error'>found</span></div><div class='input'>
+<span class='co'>#</span>
+<span class='co'># Interact two factors =&gt; f2</span>
+<span class='co'>#</span>
 
-<span class='co'># You could have used the following formula instead:</span>
-<span class='co'># y ~ x1 + treat::period(5) | id+period</span></div></pre>
+<span class='co'># To interact two factor, use the argument f2</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>airquality</span><span class='op'>)</span>
+<span class='va'>aq</span> <span class='op'>=</span> <span class='va'>airquality</span>
+<span class='va'>aq</span><span class='op'>$</span><span class='va'>week</span> <span class='op'>=</span> <span class='va'>aq</span><span class='op'>$</span><span class='va'>Day</span> <span class='op'>%/%</span> <span class='fl'>7</span> <span class='op'>+</span> <span class='fl'>1</span>
+
+<span class='co'># Interacting Month and week:</span>
+<span class='va'>res_2F</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='fu'>i</span><span class='op'>(</span><span class='va'>Month</span>, f2 <span class='op'>=</span> <span class='va'>week</span><span class='op'>)</span>, <span class='va'>aq</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in feols(Ozone ~ Solar.R + i(Month, f2 = week), aq): Evaluation of the right-hand-side of the formula raises an error: cannot</span>
+#&gt; <span class='error'>coerce type 'closure' to vector of type 'character'</span></div><div class='input'>
+<span class='co'># Same but dropping the 5th Month and 1st week</span>
+<span class='va'>res_2F_bis</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='fu'>i</span><span class='op'>(</span><span class='va'>Month</span>, f2 <span class='op'>=</span> <span class='va'>week</span>, drop <span class='op'>=</span> <span class='fl'>5</span>, drop2 <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>, <span class='va'>aq</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in feols(Ozone ~ Solar.R + i(Month, f2 = week, drop = 5, drop2 = 1),     aq): Evaluation of the right-hand-side of the formula raises an error: cannot</span>
+#&gt; <span class='error'>coerce type 'closure' to vector of type 'character'</span></div><div class='input'>
+<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res_2F</span>, <span class='va'>res_2F_bis</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error: in etable(res_2F, res_2F_bis):</span>
+#&gt; <span class='error'> Some elements in '...' could not be evaluated: object 'res_2F' not found</span></div><div class='input'>
+</div></pre>
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      <li><a href="#value">Value</a></li>
-      <li><a href="#shorthand-in-fixest-estimations">Shorthand in <code>fixest</code> estimations</a></li>
-      <li><a href="#see-also">See also</a></li>
-      <li><a href="#examples">Examples</a></li>
-    </ul>
-
-    <h2>Author</h2>
-    <p>Laurent Berge</p>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
 
@@ -213,7 +278,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

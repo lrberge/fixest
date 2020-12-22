@@ -6,27 +6,31 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Sets/gets the dictionary used in <code>esttex</code> — setFixest_dict • fixest</title>
+<title>Sets/gets the dictionary relabeling the variables — setFixest_dict • fixest</title>
 
 
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
 <!-- headroom.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -35,9 +39,8 @@
 
 
 
-<meta property="og:title" content="Sets/gets the dictionary used in <code>esttex</code> — setFixest_dict" />
-<meta property="og:description" content="Sets/gets the default dictionary used in the function esttex. The dictionaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table. By setting the dictionary with setFixest_dict, you can avoid providing the argument dict in function esttex." />
-<meta name="twitter:card" content="summary" />
+<meta property="og:title" content="Sets/gets the dictionary relabeling the variables — setFixest_dict" />
+<meta property="og:description" content="Sets/gets the default dictionary used in the function etable, did_means and coefplot. The dictionaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table or displaying in graphs. By setting the dictionary with setFixest_dict, you can avoid providing the argument dict." />
 
 
 
@@ -55,7 +58,7 @@
 
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -69,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
       </span>
     </div>
 
@@ -92,13 +95,30 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
       <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+    </li>
+    <li>
+      <a href="../articles/multiple_estimations.html">Multiple estimations</a>
+    </li>
+    <li>
+      <a href="../articles/standard_errors.html">On standard-errors</a>
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/lrberge/fixest/">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -112,104 +132,90 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Sets/gets the dictionary used in <code>esttex</code></h1>
-    
+    <h1>Sets/gets the dictionary relabeling the variables</h1>
+    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/MiscFuns.R'><code>R/MiscFuns.R</code></a></small>
     <div class="hidden name"><code>setFixest_dict.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Sets/gets the default dictionary used in the function <code><a href='etable.html'>esttex</a></code>. The dictionaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table. By setting the dictionary with <code>setFixest_dict</code>, you can avoid providing the argument <code>dict</code> in function <code><a href='etable.html'>esttex</a></code>.</p>
+    <p>Sets/gets the default dictionary used in the function <code><a href='etable.html'>etable</a></code>, <code><a href='did_means.html'>did_means</a></code> and <code><a href='coefplot.html'>coefplot</a></code>. The dictionaries are used to relabel variables (usually towards a fancier, more explicit formatting) when exporting them into a Latex table or displaying in graphs. By setting the dictionary with <code>setFixest_dict</code>, you can avoid providing the argument <code>dict</code>.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>setFixest_dict</span>(<span class='no'>dict</span>)
+    <pre class="usage"><span class='fu'>setFixest_dict</span><span class='op'>(</span><span class='va'>dict</span><span class='op'>)</span>
 
-<span class='fu'>getFixest_dict</span>()</pre>
+<span class='va'>getFixest_dict</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>dict</th>
-      <td><p>A named character vector. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use <code>dict = c(a="$log(a)$", b3="$bonus^3$")</code>.</p></td>
+      <td><p>A named character vector. E.g. to change my variable named "a" and "b" to (resp.) "$log(a)$" and "$bonus^3$", then use <code>dict = c(a="$log(a)$", b3="$bonus^3$")</code>. This dictionary is used in Latex tables or in graphs by the function <code><a href='coefplot.html'>coefplot</a></code>. If you want to separate Latex rendering from rendering in graphs, use an ampersand first to make the variable specific to <code>coefplot</code>.</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
+
+    <p>An object of class <code>function</code> of length 1.</p>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Laurent Berge</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='co'># \donttest{</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>(<span class='no'>trade</span>)
-<span class='no'>est</span> <span class='kw'>=</span> <span class='fu'><a href='feols.html'>feols</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span>(<span class='no'>Euros</span>) ~ <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span>(<span class='no'>dist_km</span>)<span class='kw'>|</span><span class='no'>Origin</span>+<span class='no'>Destination</span>+<span class='no'>Product</span>, <span class='no'>trade</span>)
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>trade</span><span class='op'>)</span>
+<span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>Euros</span><span class='op'>)</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>dist_km</span><span class='op'>)</span><span class='op'>|</span><span class='va'>Origin</span><span class='op'>+</span><span class='va'>Destination</span><span class='op'>+</span><span class='va'>Product</span>, <span class='va'>trade</span><span class='op'>)</span>
 <span class='co'># we export the result &amp; rename some variables</span>
-<span class='fu'><a href='etable.html'>esttex</a></span>(<span class='no'>est</span>, <span class='kw'>dict</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"log(Euros)"</span><span class='kw'>=</span><span class='st'>"Euros (ln)"</span>, <span class='kw'>Origin</span><span class='kw'>=</span><span class='st'>"Country of Origin"</span>))</div><div class='output co'>#&gt; \begin{table}[htbp]\centering
-#&gt; \caption{no title}
-#&gt; \begin{tabular}{lc}
-#&gt;  &amp; \tabularnewline
-#&gt; \hline
-#&gt; \hline
+<span class='fu'><a href='etable.html'>esttex</a></span><span class='op'>(</span><span class='va'>est</span>, dict <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"log(Euros)"</span><span class='op'>=</span><span class='st'>"Euros (ln)"</span>, Origin<span class='op'>=</span><span class='st'>"Country of Origin"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='warning'>Warning: This function is deprecated and will disappear in 1 year from 12/11/2020. Use 'etable' instead.</span></div><div class='output co'>#&gt; \begin{tabular}{lc}
+#&gt; \tabularnewline\midrule\midrule
 #&gt; Dependent Variable:&amp;Euros (ln)\\
 #&gt; Model:&amp;(1)\\
-#&gt; \hline
-#&gt; \emph{Variables}\tabularnewline
-#&gt; log(dist\_km)&amp;-2.1689$^{***}$\\
+#&gt; \midrule \emph{Variables}&amp;  \\
+#&gt; log(dist\_km)&amp;-2.169$^{***}$\\
 #&gt;   &amp;(0.1542)\\
-#&gt; \hline
-#&gt; \emph{Fixed-Effects}&amp;  \\
-#&gt; Country of Origin&amp;Yes\\
-#&gt; Destination&amp;Yes\\
-#&gt; Product&amp;Yes\\
-#&gt; \hline
-#&gt; \emph{Fit statistics}&amp;  \\
-#&gt; Observations&amp; 38,325\\
-#&gt; R$^2$ &amp; 0.70402\\
-#&gt; Within R$^2$ &amp; 0.21827\\
-#&gt; \hline
-#&gt; \hline
-#&gt; \multicolumn{2}{l}{\emph{One-way (Country of Origin) standard-errors in parentheses.}}\\
-#&gt; \multicolumn{2}{l}{\emph{Signif Codes: ***: 0.01, **: 0.05, *: 0.1}}\\
+#&gt; \midrule \emph{Fixed-effects}&amp;  \\
+#&gt; Country of Origin &amp; Yes\\
+#&gt; Destination &amp; Yes\\
+#&gt; Product &amp; Yes\\
+#&gt; \midrule \emph{Fit statistics}&amp;  \\
+#&gt; Observations &amp; 38,325\\
+#&gt; R$^2$ &amp; 0.704019\\
+#&gt; Within R$^2$ &amp; 0.218273\\
+#&gt; \midrule\midrule\multicolumn{2}{l}{\emph{One-way (Country of Origin) standard-errors in parentheses}}\\
+#&gt; \multicolumn{2}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\
 #&gt; \end{tabular}
-#&gt; \end{table}</div><div class='input'><span class='co'># If you export many tables, it can be more convenient to use setFixest_dict:</span>
-<span class='fu'>setFixest_dict</span>(<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"log(Euros)"</span><span class='kw'>=</span><span class='st'>"Euros (ln)"</span>, <span class='kw'>Origin</span><span class='kw'>=</span><span class='st'>"Country of Origin"</span>))
-<span class='fu'><a href='etable.html'>esttex</a></span>(<span class='no'>est</span>) <span class='co'># variables are properly relabeled</span></div><div class='output co'>#&gt; \begin{table}[htbp]\centering
-#&gt; \caption{no title}
-#&gt; \begin{tabular}{lc}
-#&gt;  &amp; \tabularnewline
-#&gt; \hline
-#&gt; \hline
+#&gt; 
+#&gt; </div><div class='input'>
+<span class='co'># If you export many tables, it can be more convenient to use setFixest_dict:</span>
+<span class='fu'>setFixest_dict</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"log(Euros)"</span><span class='op'>=</span><span class='st'>"Euros (ln)"</span>, Origin<span class='op'>=</span><span class='st'>"Country of Origin"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='etable.html'>esttex</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span> <span class='co'># variables are properly relabeled</span>
+</div><div class='output co'>#&gt; \begin{tabular}{lc}
+#&gt; \tabularnewline\midrule\midrule
 #&gt; Dependent Variable:&amp;Euros (ln)\\
 #&gt; Model:&amp;(1)\\
-#&gt; \hline
-#&gt; \emph{Variables}\tabularnewline
-#&gt; log(dist\_km)&amp;-2.1689$^{***}$\\
+#&gt; \midrule \emph{Variables}&amp;  \\
+#&gt; log(dist\_km)&amp;-2.169$^{***}$\\
 #&gt;   &amp;(0.1542)\\
-#&gt; \hline
-#&gt; \emph{Fixed-Effects}&amp;  \\
-#&gt; Country of Origin&amp;Yes\\
-#&gt; Destination&amp;Yes\\
-#&gt; Product&amp;Yes\\
-#&gt; \hline
-#&gt; \emph{Fit statistics}&amp;  \\
-#&gt; Observations&amp; 38,325\\
-#&gt; R$^2$ &amp; 0.70402\\
-#&gt; Within R$^2$ &amp; 0.21827\\
-#&gt; \hline
-#&gt; \hline
-#&gt; \multicolumn{2}{l}{\emph{One-way (Country of Origin) standard-errors in parentheses.}}\\
-#&gt; \multicolumn{2}{l}{\emph{Signif Codes: ***: 0.01, **: 0.05, *: 0.1}}\\
+#&gt; \midrule \emph{Fixed-effects}&amp;  \\
+#&gt; Country of Origin &amp; Yes\\
+#&gt; Destination &amp; Yes\\
+#&gt; Product &amp; Yes\\
+#&gt; \midrule \emph{Fit statistics}&amp;  \\
+#&gt; Observations &amp; 38,325\\
+#&gt; R$^2$ &amp; 0.704019\\
+#&gt; Within R$^2$ &amp; 0.218273\\
+#&gt; \midrule\midrule\multicolumn{2}{l}{\emph{One-way (Country of Origin) standard-errors in parentheses}}\\
+#&gt; \multicolumn{2}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\
 #&gt; \end{tabular}
-#&gt; \end{table}</div><div class='input'># }
-
+#&gt; 
+#&gt; </div><div class='input'>
 </div></pre>
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      <li><a href="#examples">Examples</a></li>
-    </ul>
-
-    <h2>Author</h2>
-    <p>Laurent Berge</p>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
 
@@ -220,7 +226,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

@@ -10,23 +10,27 @@
 
 
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
 <!-- headroom.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -53,7 +57,7 @@
 
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-index">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -67,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
       </span>
     </div>
 
@@ -90,13 +94,30 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+    </li>
+    <li>
       <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+    </li>
+    <li>
+      <a href="../articles/multiple_estimations.html">Multiple estimations</a>
+    </li>
+    <li>
+      <a href="../articles/standard_errors.html">On standard-errors</a>
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        
+        <li>
+  <a href="https://github.com/lrberge/fixest/">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
       </ul>
       
     </div><!--/.nav-collapse -->
@@ -128,12 +149,23 @@
           <p class="section-desc"></p>
         </th>
       </tr>
+      
+      
+    </tbody><tbody>
+      
+      
       <tr>
         
         <td>
           <p><code><a href="AIC.fixest.html">AIC(<i>&lt;fixest&gt;</i>)</a></code> </p>
         </td>
         <td><p>Aikake's an information criterion</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="as.list.fixest_multi.html">as.list(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Transforms a fixest_multi object into a list</p></td>
       </tr><tr>
         
         <td>
@@ -149,7 +181,19 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="coef.fixest.html">coef(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="coef.fixest.html">coefficients(<i>&lt;fixest&gt;</i>)</a></code> </p>
+          <p><code><a href="bread.fixest.html">bread(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extracts the bread matrix from fixest objects</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cash-.fixest_multi.html">`$`(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extracts the root of a fixest_multi object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="coef.fixest.html">coef(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="coef.fixest.html">coefficients.fixest</a></code> </p>
         </td>
         <td><p>Extracts the coefficients from a <code>fixest</code> estimation</p></td>
       </tr><tr>
@@ -157,11 +201,11 @@
         <td>
           <p><code><a href="coefplot.html">coefplot()</a></code> </p>
         </td>
-        <td><p>Plots confidence intervals</p></td>
+        <td><p>Plots confidence intervals and point estimates</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="coeftable.html">coeftable()</a></code> <code><a href="coeftable.html">ctable()</a></code> <code><a href="coeftable.html">pvalue()</a></code> <code><a href="coeftable.html">tstat()</a></code> <code><a href="coeftable.html">se()</a></code> </p>
+          <p><code><a href="coeftable.html">coeftable()</a></code> <code><a href="coeftable.html">ctable</a></code> <code><a href="coeftable.html">pvalue()</a></code> <code><a href="coeftable.html">tstat()</a></code> <code><a href="coeftable.html">se()</a></code> </p>
         </td>
         <td><p>Obtain various statistics from an estimation</p></td>
       </tr><tr>
@@ -179,19 +223,37 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="demean.html">demean()</a></code> </p>
+        </td>
+        <td><p>Centers a set of variables around a set of factors</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="deviance.fixest.html">deviance(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extracts the deviance of a fixest estimation</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="did_means.html">did_means()</a></code> </p>
         </td>
         <td><p>Treated and control sample descriptives</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="dof.html">dof()</a></code> </p>
+          <p><code><a href="dof.html">dof()</a></code> <code><a href="dof.html">setFixest_dof()</a></code> <code><a href="dof.html">getFixest_dof</a></code> </p>
         </td>
         <td><p>Type of degree of freedom in fixest summary</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="etable.html">etable()</a></code> <code><a href="etable.html">esttex()</a></code> <code><a href="etable.html">esttable()</a></code> </p>
+          <p><code><a href="estfun.fixest.html">estfun(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extracts the scores from a fixest estimation</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="etable.html">etable()</a></code> <code><a href="etable.html">esttex()</a></code> <code><a href="etable.html">esttable()</a></code> <code><a href="etable.html">setFixest_etable()</a></code> <code><a href="etable.html">getFixest_etable()</a></code> </p>
         </td>
         <td><p>Estimations table (export the results of multiples estimations to a DF or to Latex)</p></td>
       </tr><tr>
@@ -221,7 +283,19 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="fitted.fixest.html">fitted(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="fitted.fixest.html">fitted(<i>&lt;values.fixest&gt;</i>)</a></code> </p>
+          <p><code><a href="fitstat.html">fitstat()</a></code> </p>
+        </td>
+        <td><p>Computes fit statistics of fixest objects</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="fitstat_register.html">fitstat_register()</a></code> </p>
+        </td>
+        <td><p>Register custom fit statistics</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="fitted.fixest.html">fitted(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="fitted.fixest.html">fitted.values.fixest</a></code> </p>
         </td>
         <td><p>Extracts fitted values from a <code>fixest</code> fit</p></td>
       </tr><tr>
@@ -233,7 +307,7 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="fixest-package.html">fixest-package</a></code> </p>
+          <p><code><a href="fixest.html">_index_</a></code> </p>
         </td>
         <td><p>Fast and User-Friendly Fixed-Effects Estimations</p></td>
       </tr><tr>
@@ -245,13 +319,19 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="i.html">i()</a></code> <code><a href="i.html">interact()</a></code> </p>
+          <p><code><a href="hatvalues.fixest.html">hatvalues(<i>&lt;fixest&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Interact variables with factors</p></td>
+        <td><p>Hat values for <code>fixest</code> objects</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="l.html">f()</a></code> <code><a href="l.html">l()</a></code> </p>
+          <p><code><a href="i.html">i()</a></code> <code><a href="i.html">interact</a></code> </p>
+        </td>
+        <td><p>Create, or interact variables with, factors</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="l.html">f()</a></code> <code><a href="l.html">d()</a></code> <code><a href="l.html">l()</a></code> </p>
         </td>
         <td><p>Lags a variable in a <code>fixest</code> estimation</p></td>
       </tr><tr>
@@ -281,12 +361,6 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="obs2remove.html">obs2remove()</a></code> </p>
-        </td>
-        <td><p>Finds observations to be removed from ML estimation with factors/clusters</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="panel.html">panel()</a></code> </p>
         </td>
         <td><p>Constructs a <code>fixest</code> panel data base</p></td>
@@ -305,9 +379,21 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="print.fixest.html">print(<i>&lt;fixest&gt;</i>)</a></code> </p>
+          <p><code><a href="print.fixest.html">print(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="print.fixest.html">setFixest_print()</a></code> <code><a href="print.fixest.html">getFixest_print()</a></code> </p>
         </td>
         <td><p>A print facility for <code>fixest</code> objects.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="print.fixest_fitstat.html">print(<i>&lt;fixest_fitstat&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Print method for fit statistics of fixest estimations</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="print.fixest_multi.html">print(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Print method for fixest_multi objects</p></td>
       </tr><tr>
         
         <td>
@@ -317,7 +403,13 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="resid.fixest.html">resid(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="resid.fixest.html">residuals(<i>&lt;fixest&gt;</i>)</a></code> </p>
+          <p><code><a href="rep.fixest.html">rep(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="rep.fixest.html">rep(<i>&lt;fixest_list&gt;</i>)</a></code> <code><a href="rep.fixest.html">.l()</a></code> </p>
+        </td>
+        <td><p>Replicates fixest objects</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="resid.fixest.html">resid(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="resid.fixest.html">residuals.fixest</a></code> </p>
         </td>
         <td><p>Extracts residuals from a <code>fixest</code> object</p></td>
       </tr><tr>
@@ -329,39 +421,69 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="setFixest_dict.html">setFixest_dict()</a></code> <code><a href="setFixest_dict.html">getFixest_dict()</a></code> </p>
+          <p><code><a href="setFixest_dict.html">setFixest_dict()</a></code> <code><a href="setFixest_dict.html">getFixest_dict</a></code> </p>
         </td>
-        <td><p>Sets/gets the dictionary used in <code>esttex</code></p></td>
+        <td><p>Sets/gets the dictionary relabeling the variables</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="setFixest_dof.html">setFixest_dof()</a></code> <code><a href="setFixest_dof.html">getFixest_dof()</a></code> </p>
+          <p><code><a href="setFixest_estimation.html">setFixest_estimation()</a></code> <code><a href="setFixest_estimation.html">getFixest_estimation()</a></code> </p>
         </td>
-        <td><p>Sets the default type of DoF correction in summary/vcov.fixest</p></td>
+        <td><p>Default arguments for fixest estimations</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="setFixest_na_inf.rm.html">setFixest_na_inf.rm()</a></code> <code><a href="setFixest_na_inf.rm.html">getFixest_na_inf.rm()</a></code> </p>
+          <p><code><a href="setFixest_fml.html">setFixest_fml()</a></code> <code><a href="setFixest_fml.html">getFixest_fml()</a></code> </p>
         </td>
-        <td><p>Sets/gets whether to remove NA/Inf values from <code>fixest</code> estimations</p></td>
+        <td><p>Sets/gets formula macros</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="setFixest_notes.html">setFixest_notes()</a></code> <code><a href="setFixest_notes.html">getFixest_notes()</a></code> </p>
+          <p><code><a href="setFixest_notes.html">setFixest_notes()</a></code> <code><a href="setFixest_notes.html">getFixest_notes</a></code> </p>
         </td>
         <td><p>Sets/gets whether to display notes in <code>fixest</code> estimation functions</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="setFixest_nthreads.html">setFixest_nthreads()</a></code> <code><a href="setFixest_nthreads.html">getFixest_nthreads()</a></code> </p>
+          <p><code><a href="setFixest_nthreads.html">setFixest_nthreads()</a></code> <code><a href="setFixest_nthreads.html">getFixest_nthreads</a></code> </p>
         </td>
         <td><p>Sets/gets the number of threads to use in <code>fixest</code> functions</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="setFixest_print.type.html">setFixest_print.type()</a></code> <code><a href="setFixest_print.type.html">getFixest_print.type()</a></code> </p>
+          <p><code><a href="setFixest_se.html">setFixest_se()</a></code> <code><a href="setFixest_se.html">getFixest_se()</a></code> </p>
         </td>
-        <td><p>Sets/gets what <code>print</code> does to <code>fixest</code> estimations</p></td>
+        <td><p>Sets the default type of standard errors to be used</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sigma.fixest.html">sigma(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Residual standard deviation of fixest estimations</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="stepwise.html">stepwise()</a></code> <code><a href="stepwise.html">sw</a></code> <code><a href="stepwise.html">cstepwise</a></code> <code><a href="stepwise.html">csw</a></code> <code><a href="stepwise.html">stepwise0</a></code> <code><a href="stepwise.html">sw0</a></code> <code><a href="stepwise.html">cstepwise0</a></code> <code><a href="stepwise.html">csw0</a></code> </p>
+        </td>
+        <td><p>Stepwise estimation tools</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="style.df.html">style.df()</a></code> </p>
+        </td>
+        <td><p>Style of data.frames created by etable</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="style.tex.html">style.tex()</a></code> </p>
+        </td>
+        <td><p>Style definitions for Latex tables</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sub-.fixest_multi.html">`[`(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Subset a fixest_multi object</p></td>
       </tr><tr>
         
         <td>
@@ -371,21 +493,39 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="sub-sub-.fixest_multi.html">`[[`(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extracts one element from a <code>fixest_multi</code> object</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="summary.fixest.fixef.html">summary(<i>&lt;fixest.fixef&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Summary method for cluster coefficients</p></td>
+        <td><p>Summary method for fixed-effects coefficients</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="summary.fixest.obs2remove.html">summary(<i>&lt;fixest.obs2remove&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Summary method for fixest.obs2remove objects</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="summary.fixest.html">summary(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="summary.fixest.html">summ()</a></code> </p>
+          <p><code><a href="summary.fixest.html">summary(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="summary.fixest.html">summ</a></code> <code><a href="summary.fixest.html">summary(<i>&lt;fixest_list&gt;</i>)</a></code> </p>
         </td>
         <td><p>Summary of a <code>fixest</code> object. Computes different types of standard errors.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="summary.fixest_multi.html">summary(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Summary for fixest_multi objects</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="terms.fixest.html">terms(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extract the terms</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="to_integer.html">to_integer()</a></code> </p>
+        </td>
+        <td><p>Fast transform of any type of vector(s) into an integer vector</p></td>
       </tr><tr>
         
         <td>
@@ -410,16 +550,33 @@
           <p><code><a href="vcov.fixest.html">vcov(<i>&lt;fixest&gt;</i>)</a></code> </p>
         </td>
         <td><p>Extracts the variance/covariance of a <code>femlm</code> fit</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="wald.html">wald()</a></code> </p>
+        </td>
+        <td><p>Wald test of nullity of coefficients</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="weights.fixest.html">weights(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extracts the weights from a fixest object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="xpd.html">xpd()</a></code> </p>
+        </td>
+        <td><p>Expands formula macros</p></td>
       </tr>
     </tbody>
     </table>
   </div>
 
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#section-all-functions">All functions</a></li>
-    </ul>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
 
@@ -430,7 +587,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

@@ -1,6 +1,10 @@
-pandoc: 2.7.2
-pkgdown: 1.4.1
+pandoc: 2.7.3
+pkgdown: 1.6.1
 pkgdown_sha: ~
 articles:
+  exporting_tables: exporting_tables.html
   fixest_walkthrough: fixest_walkthrough.html
+  multiple_estimations: multiple_estimations.html
+  standard_errors: standard_errors.html
+last_built: 2020-12-22T13:58Z
 
