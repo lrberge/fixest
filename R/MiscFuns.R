@@ -457,7 +457,7 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	    vcov_name = "Custom"
 	    if(is.function(.vcov)){
 	        arg_names = formalArgs(.vcov)
-	        # we contruct the call
+	        # we construct the call
 	        dots = list(...)
 
 	        if(".vcov_args" %in% names(dots)){
@@ -499,7 +499,6 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	} else {
 	    vcov = vcov(object, se=se, cluster=cluster, dof=dof, forceCovariance = forceCovariance, keepBounded = keepBounded, nthreads = nthreads, attr = TRUE, keep_se_info = isTRUE(dots$keep_se_info))
 	}
-
 
 	sd2 = diag(vcov)
 	sd2[sd2 < 0] = NA
@@ -4645,16 +4644,27 @@ fitstat_validate = function(x, vector = FALSE){
 }
 
 
-#' Aggregates the values of coefficients
+#' Aggregates the values of DiD coefficients a la Sun and Abraham
 #'
-#' Simple tool that aggregates the value of coefficients.
+#' Simple tool that aggregates the value of CATT coefficients in staggered difference-in-difference setups (see details).
 #'
-#' @param x A fixest object.
+#' @param x A \code{fixest} object.
 #' @param var A character scalar describing the pattern to be matched. All variables that match the pattern will be aggregated. It must be of the form \code{"(root)"}, the parentheses must be there and the resulting variable name will be \code{"root"}. You can add another root with parentheses: \code{"(root)regex(root2)"}, in which case the resulting name is \code{"root::root2"}. To name the resulting variable differently you can pass a named vector: \code{c("name" = "pattern")} or \code{c("name" = "pattern(root2)")}.
 #' @param ... Arguments to be passed to \code{\link[fixest]{summary.fixest}}.
 #'
+#' @details
+#' This is a function helping to replicate the estimator from Sun and Abraham (2020). You first need to perform an estimation with cohort and relative periods dummies (typically using the function \code{\link[fixest]{i}}), this leads to estimators of the cohort average treatment effect on the treated (CATT). Then you can use this function to retrieve the average treatment effect on each relative period, or for any other way you wish to aggregate the CATT.
+#'
+#' Note that contrary to the article, here the cohort share in the sample is considered to be a perfect measure for the cohort share in the population.
+#'
 #' @return
 #' It returns a matrix representing a table of coefficients.
+#'
+#' @references
+#' Liyang Sun and Sarah Abraham, forthcoming, "Estimating Dynamic Treatment Effects in Event Studies with Heterogeneous Treatment Effects". Journal of Econometrics.
+#'
+#' @author
+#' Laurent Berge
 #'
 #' @examples
 #'
@@ -4680,16 +4690,22 @@ fitstat_validate = function(x, vector = FALSE){
 #' base$time_to_treatment = pmax(base$year - base$year_treated, -1000)
 #' base$treated = (base$year_treated < 10000) * 1
 #'
+#' # The effect of the treatment is cohort specific and increase with time
 #' base$y_true = base$treat_post * (1 + 1 * base$time_to_treatment - 1 * base$group)
 #' base$y = base$y_true + rnorm(nrow(base))
+#'
+#'
+#' # The controls have a time_to_treatment equal to -1000
 #'
 #' # we drop the always treated
 #' base = base[base$group > 1,]
 #'
 #' # Now we perform the estimation
-#' res_naive = feols(y ~ i(treated, time_to_treatment, -1, drop = -1000) | id + year, base)
+#' res_naive = feols(y ~ i(treated, time_to_treatment,
+#'                         ref = -1, drop = -1000) | id + year, base)
 #'
-#' res_cohort = feols(y ~ i(time_to_treatment, f2 = group, drop = c(-1, -1000)) | id + year, base)
+#' res_cohort = feols(y ~ i(time_to_treatment, f2 = group,
+#'                          drop = c(-1, -1000)) | id + year, base)
 #'
 #' coefplot(res_naive, ylim = c(-6, 8))
 #' att_true = tapply(base$y_true, base$time_to_treatment, mean)[-1]
