@@ -2559,7 +2559,7 @@ i = interact = function(var, f, f2, ref, drop, keep, drop2, keep2){
     }
 
     # Finding if it's a call from fixest
-    FROM_FIXEST = sys.nframe() > 5 && any(sapply(sys.calls(), function(x) any(grepl("fixest", x[[1]], fixed = TRUE))))
+    FROM_FIXEST = sys.nframe() > 5 && any(sapply(tail(sys.calls(), 6), function(x) any(grepl("fixest", deparse(x)[1], fixed = TRUE))))
 
     # General checks
     check_arg(var, f, f2, "vector")
