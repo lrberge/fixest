@@ -8,6 +8,12 @@
  - Bug in `model.matrix` when the model contained fixed-effects and the RHS was requested: the intercept was wrongfully added.
  
  - Fix rare bug when `i()` was called within a very specific set of functions.
+ 
+ - Fix bug in R old release when due to `anyNA.data.frame`.
+ 
+# New features
+
+ - Function `i()` now has the new arguments `f2`, `drop2` and `keep2` which allows the interaction of two factors.
 
 # fixest 0.8.0 (2020-12-14)
 
