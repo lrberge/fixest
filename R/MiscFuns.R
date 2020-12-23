@@ -536,9 +536,8 @@ summary.fixest = function(object, se, cluster, dof = getFixest_dof(), .vcov, sta
 	return(object)
 }
 
-#' @rdname summary.fixest
-"summ"
 
+#' @rdname summary.fixest
 summ = function(object, se, cluster, dof = getFixest_dof(), forceCovariance = FALSE, keepBounded = FALSE, ...){
 
     # we reiterate the call
@@ -796,7 +795,7 @@ r2 = function(x, type = "all", full_names = FALSE){
 #'
 #'
 #'
-coeftable = ctable = function(object, se, cluster, ...){
+coeftable = function(object, se, cluster, ...){
     # We don't explicitely refer to the other arguments
 
     # We make the same call to summary if necessary
@@ -835,7 +834,7 @@ coeftable = ctable = function(object, se, cluster, ...){
 }
 
 #' @rdname coeftable
-"ctable"
+ctable <- coeftable
 
 #' @describeIn coeftable Extracts the p-value of an estimation
 pvalue = function(object, se, cluster, ...){
@@ -2544,7 +2543,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #'
 #' etable(res_2F, res_2F_bis)
 #'
-i = interact = function(var, f, f2, ref, drop, keep, drop2, keep2){
+i = function(var, f, f2, ref, drop, keep, drop2, keep2){
     # Used to create interactions
 
     # Later: binning (bin = 1:3 // bin = list("a" = "[abc]")). Default name is bin name (eg "1:3")
@@ -2865,7 +2864,7 @@ i = interact = function(var, f, f2, ref, drop, keep, drop2, keep2){
 }
 
 #' @rdname i
-"interact"
+interact <- i
 
 i_ref = function(var, f, f2, ref, drop, keep, drop2, keep2){
 
@@ -7131,7 +7130,7 @@ coef.fixest = coefficients.fixest = function(object, ...){
 }
 
 #' @rdname coef.fixest
-"coefficients.fixest"
+coefficients.fixest <- coef.fixest
 
 
 #' Extracts fitted values from a \code{fixest} fit
@@ -7216,7 +7215,7 @@ fitted.fixest = fitted.values.fixest = function(object, type = c("response", "li
 
 #' @rdname fitted.fixest
 #' @method fitted.values fixest
-"fitted.values.fixest"
+fitted.values.fixest <- fitted.fixest
 
 #' Extracts residuals from a \code{fixest} object
 #'
@@ -7362,7 +7361,7 @@ resid.fixest = residuals.fixest = function(object, type = c("response", "devianc
 }
 
 #' @rdname resid.fixest
-"residuals.fixest"
+residuals.fixest <- resid.fixest
 
 #' Predict method for \code{fixest} fits
 #'

@@ -3266,26 +3266,28 @@ cstepwise0 = csw0 = stepwise0 = sw0 = function(...){
     res
 }
 
-#' @rdname stepwise
-"sw"
+# To add a proper documentation:
 
 #' @rdname stepwise
-"cstepwise"
+sw <- sw
 
 #' @rdname stepwise
-"csw"
+cstepwise <- csw
 
 #' @rdname stepwise
-"stepwise0"
+csw <- csw
 
 #' @rdname stepwise
-"sw0"
+stepwise0 <- sw0
 
 #' @rdname stepwise
-"cstepwise0"
+sw0 <- sw0
 
 #' @rdname stepwise
-"csw0"
+cstepwise0 <- csw0
+
+#' @rdname stepwise
+csw0 <- csw0
 
 
 extract_stepwise = function(fml, tms, all_vars = TRUE){
