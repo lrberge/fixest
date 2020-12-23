@@ -8,6 +8,8 @@
  - Bug in `etable` when the default value of `fitstat` was set with `setFixest_etable`.
  
  - Bug in `model.matrix` when the model contained fixed-effects and the RHS was requested: the intercept was wrongfully added.
+ 
+ - Fix rare bug when `i()` was called within a very specific set of functions.
 
 ## Changes in version 0.8.0 (14-12-2020)
 
