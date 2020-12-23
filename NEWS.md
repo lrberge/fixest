@@ -1,9 +1,7 @@
 
-# News for the R Package `fixest`
+# fixest 0.8.1
 
-## Changes in version 0.8.1
-
-#### Bugs
+## Bugs
 
  - Bug in `etable` when the default value of `fitstat` was set with `setFixest_etable`.
  
@@ -11,9 +9,9 @@
  
  - Fix rare bug when `i()` was called within a very specific set of functions.
 
-## Changes in version 0.8.0 (14-12-2020)
+# fixest 0.8.0 (2020-12-14)
 
-#### Bugs
+## Bugs
 
  - Major bug when predict was used in the presence of fixed-effects (thanks to @jurojas5, [#54](https://github.com/lrberge/fixest/issues/54)). Introduced in version 0.7.
 
@@ -37,7 +35,7 @@
   
   - Fix bug `coefplot` when representing multiple estimations and coefficient names are numbers.
  
-#### IV
+## IV
 
  - IV estimations are now supported. It is summoned by adding a formula defining the endogenous regressors and the instruments after a pipe.
 ```R
@@ -57,7 +55,7 @@ res_iv3 = feols(y ~ x1 | c(x_endo, x_endo_bis) ~ x_inst + x_inst_bis, base)
 
 ```
 
-#### fit statistics
+## fit statistics
 
   - The `fitstat` function has been significantly enhanced. 
   
@@ -79,7 +77,7 @@ res_iv3 = feols(y ~ x1 | c(x_endo, x_endo_bis) ~ x_inst + x_inst_bis, base)
   
   - The new function `wald` computes basic Wald tests.
  
-#### Multiple estimations
+## Multiple estimations
 
   - New arguments `split` and `fsplit`: you can now perform split sample estimations (`fsplit` adds the full sample).
     
@@ -110,7 +108,7 @@ etable(est_split[I = 1])
 etable(est_split[i = c(1, .N)])
 ```
 
-#### Formula macros
+## Formula macros
 
   - The algorithm now accepts regular expressions with the syntax `..("regex")`:
   ```R
@@ -120,7 +118,7 @@ etable(est_split[i = c(1, .N)])
   ```
   
     
-#### New features in etable
+## New features in etable
 
   - New `style.tex` and `style.df` arguments that define the look of either Latex tables or the output data.frames. 
   
@@ -138,7 +136,7 @@ etable(est_split[i = c(1, .N)])
   
   - the argument `subtitles` has been improved, and now automatically displays the samples when split sample estimations are performed.
  
-#### Other new features
+## Other new features
 
  - In all estimations:
     
@@ -164,7 +162,7 @@ etable(est_split[i = c(1, .N)])
   
   - The `demean` function has been enhanced (with the contribution of Sebastian Krantz).
   
-#### Improvements of the internal algorithm
+## Improvements of the internal algorithm
 
  - Internal demeaning algorithm: some copies of the data are avoided when using `feglm`.
  
@@ -172,9 +170,9 @@ etable(est_split[i = c(1, .N)])
  
  - All estimations: smarter handling of the intercept, thus avoiding the reconstruction of the design matrix.
 
-## Changes in version 0.7.1 (27-10-2020)
+# fixest 0.7.1 (2020-10-27)
 
-#### Hotfixes
+## Hotfixes
 
  - Fix bug int overflow in estimations with only one variable.
  
@@ -182,13 +180,13 @@ etable(est_split[i = c(1, .N)])
  
  - Fix bug in examples occurring in R old release.
 
-#### Improvements
+## Improvements
 
  - Function `i()` now behaves as `factor()`, setting automatically a reference when appropriate.
  
  - Internal algorithm of `i()` is much faster.
  
-#### New features
+## New features
 
  - In `etable`, the user can now provide a type of clustering for each model.
  
@@ -197,9 +195,9 @@ etable(est_split[i = c(1, .N)])
  - Automatic fix when the variance is not positive definite.
 
 
-## Changes in version 0.7.0 (24-10-2020)
+# fixest 0.7.0 (2020-10-24)
 
-#### Bugs
+## Bugs
 
  - Major bug when fixed-effects were combined with `^` and they contained NAs (thanks to @poliquin [#35](https://github.com/lrberge/fixest/issues/35)).
  
@@ -213,29 +211,29 @@ etable(est_split[i = c(1, .N)])
  
  - Fix the stack imbalance warning (report by @shoonlee, [#46](https://github.com/lrberge/fixest/issues/46)).
  
-#### Internal improvements
+## Internal improvements
 
  - Brand new internal algorithm which now uses closed form solutions when dealing with variables with varying slopes. This means that when variables with varying slopes are present, the algorithm is incomparably faster and more accurate.
 
  - Two deep copies of some data are now avoided in the demeaning function. This improves the performance in terms of memory footprint, and also makes the algorithm faster. 
  
-#### Standard-errors, important changes
+## Standard-errors, important changes
   
  - New default values for standard-errors (only concerns multiway clustering). They become similar to `reghdfe` to increase cross-software comparability. Computing the standard-errors the old way is still possible using the argument `dof`. See the dedicated vignette: [On standard errors](https://cran.r-project.org/package=fixest/vignettes/standard_errors.html).
  
  - Name change in `summary`/`vcov`/`etable`: To get heteroskedasticity-robust standard-errors, `se = "hetero"` now replaces `se = "white"` to enhance clarity. Note that `se = "white"` still works.
  
-#### New function: `fitstat` 
+## New function: `fitstat` 
 
   - New function `fitsat` that computes various fit statistics. It is integrated with `etable` and can be invoked with the argument `fitstat`. So far only two fit statistics are included, but more will come.
  
-#### New features in `interact()`
+## New features in `interact()`
 
   - You can now use `i(var)` to treat the variable `var` as a factor. You can select which values to drop/keep with the respective arguments. 
   
   - Using `i(var)` leads to a special treatment of these variables in the functions `coefplot` and `etable`.
  
-#### New features in `etable`
+## New features in `etable`
 
   - New argument `placement` to define the position of the float in Latex (suggestion by Caleb Kwon).
   
@@ -253,7 +251,7 @@ etable(est_split[i = c(1, .N)])
   
   - The dictionnary now applies to the factors of interactions, and the values of factors.
 
-#### User visible changes
+## User visible changes
 
  - Argument `nthreads`:
  
@@ -312,13 +310,13 @@ etable(est_split[i = c(1, .N)])
   
     * the Cholesky decomposition now checks for user interrupts (matters for models with MANY variables to estimate).
   
-#### Deprecation
+## Deprecation
 
  - Argument `na_inf.rm` has been removed. It was present for historical reasons, and is removed to increase code clarity.
 
-## Changes in version 0.6.0 (13-07-2020)
+# fixest 0.6.0 (2020-07-13)
 
-#### Bugs
+## Bugs
 
  - In `vcov`, the degree-of-freedom in the small sample correction correction was fixed to "nested" and couldn't be modified, now corrected. Further, "nested" was not properly accounted for, now corrected.
  
@@ -332,13 +330,13 @@ etable(est_split[i = c(1, .N)])
  
  - Bug in `coefplot` when some interacted variables were removed because of collinearity. Now corrected.
  
-#### New vignettes
+## New vignettes
 
  - On standard-errors: how are the SEs computed in fixest and how to replicate the SEs from other software.
  
  - Exporting estimation tables: how to use efficiently `etable`, in particular how to customize the tables.
  
-#### Major changes: etable
+## Major changes: etable
 
   - New arguments: `group`, `extraline`, `notes`, `tablefoot`. 
   
@@ -354,11 +352,11 @@ etable(est_split[i = c(1, .N)])
   
   - Most default values can be set globally with the new function `setFixest_etable`.
  
-#### Major changes: dof
+## Major changes: dof
 
  - Function `dof`, used to adjust the small sample corrections, is now much more complete and allows to replicate a large set of estimation results from alternative software.
 
-#### User visible changes
+## User visible changes
 
  - You can now provide custom VCOVs to summary by using the argument `.vcov`.
  
@@ -370,41 +368,41 @@ etable(est_split[i = c(1, .N)])
  
  - `interact` gains two new arguments: `drop` and `keep` (suggestion by @SuperMayo [#23](https://github.com/lrberge/fixest/issues/23)).
  
-#### New methods
+## New methods
 
  - `hatvalues` has been implemented for feols and feglm estimations.
  
  - the `estfun` from `sandwich` has been implemented.
 
-## Changes in version 0.5.1 (18-06-2020)
+# fixest 0.5.1 (2020-06-18)
 
-#### Hotfix
+## Hotfix
  
  - Fixed bug introduced in the previous update (memory access error). Does not affect any of the results but could lead R to crash unexpectedly (odds were low though since access was adjacent).
  
-#### Bugs
+## Bugs
 
  - Fix image link to the equation in the README.md.
  - Fix bug R2 and logLik when observations were removed because of NA values. Due to the update in `residuals.fixest`.
  
-#### User visible change
+## User visible change
 
  - Rewriting of the internal algorithm computing the VCOV. 1) About 30% performance gain for estimations with many variables. 2) The code is much less memory hungry. 
 
-#### Major update of `etable`
+## Major update of `etable`
 
  - New argument `style` which allows to set many elements of the output table. 
  - (minor) `signifCode` can be equal to `"letters"` to display letters instead of stars.
  
-#### Other
+## Other
 
  - `setFixest_nthreads` now respects the `OMP_THREAD_LIMIT` environment variable.
  - Rd links are now made to the proper htlm files.
 
 
-## Changes in version 0.5.0 (10-06-2020)
+# fixest 0.5.0 (2020-06-10)
 
-#### Bug fixes
+## Bug fixes
         
  - Bug with estimations with varying slopes if the fixed-effect relative to the slope is not in its decreasing order (thanks to Davide Proserpio).
  - Bug when interacting two variables with the `var::fe` syntax with `confirm = TRUE` and no reference.
@@ -413,19 +411,19 @@ etable(est_split[i = c(1, .N)])
  - Standard-errors in `feglm` for non-poisson, non-binomial families, are now correct (minor differences).
  - `fixef` did not work when the slope was an integer, now corrected (thanks to @clerousset [#20](https://github.com/lrberge/fixest/issues/20)).
 
-#### New functionality: formula macros
+## New functionality: formula macros
         
  - You can use macros in formulas.
  - To set a macro variable, use e.g., `setFixest_fml(..ctrl = ~ var1 + var2)`. Here the macro variable `..ctrl` has been set to the value `"var1 + var2"`.
  - Now you can use this macro variable in any `fixest` estimation: e.g. `data(airquality) ; setFixest_fml(..ctrl = ~ Temp + Day) ; feols(Ozone ~ Wind + ..ctrl, airquality)`.
  - You can use macros in non-fixest estimations with `xpd`, which expands formulas. E.g. `lm(xpd(Ozone ~ Wind + ..ctrl), airquality)`.
  
-#### New functions
+## New functions
 
  - `to_integer`: user-level version of the internal algorithm transforming any kind of vector (or combination of vectors) into an integer ranging from 1 to the number of unique elements of the vector. Very fast.
  - `demean`: user-level version of the demeaning algorithm used in `feols`.
 
-#### Major user-visible changes
+## Major user-visible changes
         
  - New internal algorithm to estimate OLS (applies to both `feols` and `feglm`):
  
@@ -435,7 +433,7 @@ etable(est_split[i = c(1, .N)])
     
     3. Collinear variables are removed on the fly.
 
-#### User-visible changes
+## User-visible changes
         
  - Interactions in `var::fe(ref)` now accept multiple references (i.e. `ref` can be a vector).
  - In `etable`, the variable names of non-Latex output can now be changed.
@@ -445,32 +443,32 @@ etable(est_split[i = c(1, .N)])
  - Function `dof` gains a new argument `adj` which allows to make different types of common small sample corrections. Its other arguments have been renamed for clarity (`fixef` => `fixef.K`, `exact` => `fixef.exact`, `cluster` => `cluster.adj`).
  - Now t-statistics are used for `feols` and non-poisson, non-binomial models in `feglm`. For all other models, z-statistics are used. This complies with the default's R-stats behavior.
 
-#### New Methods
+## New Methods
         
  - The `residuals` method has been substantially improved, now allowing different types.
  - New stats methods: sigma, deviance, weights.
 
-#### Vignette and Readme
+## Vignette and Readme
         
  - Typos corrected.
  - Images in the Readme set to 1200px.
  
-#### Issue found: convergence problems with multiples variables with varying slopes
+## Issue found: convergence problems with multiples variables with varying slopes
         
  - Convergence problems may arise in the presence of **multiple** variables with varying slopes. Theoretical work helped find a solution to this problem, but the implementation in R is proving not instantaneous.
  - In the meantime, now a warning is prompted when the algorithm suspects a convergence problem leading to poor precision of the estimated coefficients.
 
-#### Error-handling
+## Error-handling
         
  - Improved error-handling with [dreamerr](https://cran.r-project.org/package=dreamerr)'s functions.
  
-#### Other
+## Other
 
  -  Dependency to MASS has been removed.
 
-## Changes in version 0.4.1 (2020-04-13)
+# fixest 0.4.1 (2020-04-13)
 
-#### Bug fixes
+## Bug fixes
   
  - Major bug leading R to crash when using non-linear-in-parameters right-hand-sides in feNmlm. Only occured when some observations were removed from the data set (due to NAness or to perfect fit). [Thanks to @marissachilds, GH issue [#17]](https://github.com/lrberge/fixest/issues/17).]
  - In the `collinearity` help pages: an example could lead to an error (due to random data generation). It has been removed.
@@ -478,18 +476,18 @@ etable(est_split[i = c(1, .N)])
  - Defaults for the arguments `cex` and `lwd` in `coefplot` have been changed to 1 and 1 (instead of par("cex") and par("lwd")). Otherwise this led to the creation of `Rplots.pdf` in the working directory (thanks to Kurt Hornik).
  - Corrected a typo in the article's title in the vignette.
 
-#### Help
+## Help
   
  - Rewriting of sections, correction of small mistakes (wrong argument names), dropping completely the 'cluster' terminology (meant for fixed-effects), addition of what is contained in fixest objects.
 
-#### Other
+## Other
   
  - Adding a README.md.
  - Small corrections in the vignette.
 
-## Changes in version 0.4.0 (2020-03-27)
+# fixest 0.4.0 (2020-03-27)
 
-#### User visible changes: Latex export
+## User visible changes: Latex export
         
  - Better Latex special character escaping (errors reported by @dlindzee [#15](https://github.com/lrberge/fixest/issues/15)).
  - New argument `fixef_sizes.simplify`, which provides the sizes of the fixed-effects in parentheses when there is no ambiguity.
@@ -500,50 +498,50 @@ etable(est_split[i = c(1, .N)])
  - New argument `coefstat` defining what should be shown below the coefficients (standard-errors, t-stats or confidence intervals). Suggestion by @d712 [#16](https://github.com/lrberge/fixest/issues/16).
  - Better rendering of significant digits.
 
-#### User visible changes: coefplot
+## User visible changes: coefplot
         
  - Argument `horiz`. The coefficients can now be displayed horizontally instead of vertically.
  - The coefficient labels, when in the x-axis, can now be displayed in three different ways thanks to the new argument `lab.fit`: "simple", the classic axis, "multi", the labels appear across multiple lines to avoid collision, and "tilted" for tilted labels.
  - The margins now automatically fit.
  - Argument `style` allows you to set styles with the function `setFixest_coefplot`, you can then summon the style in `coefplot` with this argument.
- - Use the ampersand to set dictionnary variables specific to `coefplot` (e.g. setFixest_dict(c(var1 = "a $\\times$ b", "&var1" = "&a\%*\%b")), the variable `var1` will be rendered differently in `etable` and in `coefplot`).
+ - Use the ampersand to set dictionary variables specific to `coefplot`.
  - Better display of groups (with the arguments `group` and `group.par`).
 
-#### New methods
+## New methods
         
  - `terms.fixest` giving the terms of the estimation.
 
-#### Other
+## Other
         
  - All `donttest` sections were removed from help pages.
 
 
-## Changes in version 0.3.1 (2020-02-09)
+# fixest 0.3.1 (2020-02-09)
 
-#### Major bug fix
+## Major bug fix
         
  - [panel] Fixed faulty memory access when taking the lead of a variable.
 
-#### Other bug fixes
+## Other bug fixes
         
  - [esttable/esttex] These two functions were replaced by the function `etable`. In the process, some of their arguments were "lost", this is now corrected.
  - [etable] Better escaping of special characters.
  - [estimations] Bug when particular non-numeric vectors were used in explanatory variables.
 
-#### New features
+## New features
         
  - [coefplot] The function `coefplot` now accepts lists of estimations.
 
 
-## Changes in version 0.3.0 (2020-02-01)
+# fixest 0.3.0 (2020-02-01)
 
-#### New feature: Lagging
+## New feature: Lagging
          
  - You can now add lags and leads in any `fixest` estimations. You only need to provide the panel identifiers with the new argument `panel.id`, then you're free to use the new functions `l()` for lags and `f()` for leads.
  
  - You can also set up a panel data set using the function `panel` which allows you to use the lagging functions without having to provide the argument `panel.id`, and which dispose of more options for setting the panel.
 
-#### New feature: Interactions
+## New feature: Interactions
          
  - You can now add interactions in formulas with a new syntax: `var::fe(ref)`
  
@@ -551,7 +549,7 @@ etable(est_split[i = c(1, .N)])
  
  - Using `var::fe(ref)` to write interactions opens up a special treatment of such variables in the exporting function `etable` and in the coefficient plotting function `coefplot`.
 
-#### New feature: `coefplot`
+## New feature: `coefplot`
          
  - You can plot coefficients and their associated confidence intervals with the function `coefplot`.
  
@@ -561,7 +559,7 @@ etable(est_split[i = c(1, .N)])
  
  - `coefplot` detects when interactions have been used and offers a special display for it.
 
-#### New functions
+## New functions
          
  - [etable] Estimations table: new function to export the results of multiple estimations. Replaces the two functions `esttex` and `esttable` (the two functions still exist but they will be deprecated in the future).
  
@@ -573,7 +571,7 @@ etable(est_split[i = c(1, .N)])
  
  - [dof] New function to set the type of degree of freedom adjustment when computing the variance-covariance matrix. You can permanently set the type of DoF adjustment with the new function setFixest_dof().
 
-#### User visible changes
+## User visible changes
          
  - [all estimations] A key pre-processing step has been paralellized => algorithm faster in general and much faster for multi-FEs.
  - [predict & fitted] Predict and fitted now returns vectors of the length equal to the one of original data.
@@ -583,13 +581,13 @@ etable(est_split[i = c(1, .N)])
  - [feols] Estimations are slightly faster.
  - [etable/esttex] When there are interactions, R may change the order of the interactions, making two interactions in two different estimations look different while they are in fact the same (e.g. x3:x2 and x2:x3). Now esstable automatically reorders the interactions when needed for comparison across estimations.
  - [etable/esttable] The type of standard errors is now always shown.
- - [etable/esttex] The aliases provided by 'dict' are also applied within interactions. For example: `dict=c(x1="Wind", x2="Rain")`, with an estimation with the following variables 'x1', 'x2', 'x1:x2' will lead to the following aliases in Latex 'Wind', 'Rain' and 'Wind $\\times$ Rain'.
+ - [etable/esttex] The aliases provided by 'dict' are also applied within interactions. For example: `dict=c(x1="Wind", x2="Rain")`, with an estimation with the following variables 'x1', 'x2', 'x1:x2' will lead to the following aliases in Latex 'Wind', 'Rain' and 'Wind $times$ Rain'.
  - [etable/esttex] Interactions of similar values but of different order (e.g. x1:x2 and x2:x1) are reorderd to appear in the same lines.
  - [etable/esttex] The i) type of standard errors and ii) the significance codes, are now displayed in two separate lines (otherwise the line would be too wide).
  - [etable/esttex] Argument `yesNoFixef` can be of length one, defaulting the second element to the empty string.
  - [etable/esttex] Escaping of Latex special characters is now much more robust.
 
-#### Bug correction
+## Bug correction
          
  - [all estimations] Fixed: bug when functions in the formula returned matrices.
  - [update] Fixed: error message when the data is missing.
@@ -603,26 +601,26 @@ etable(est_split[i = c(1, .N)])
  - [r2] Small bug regarding objects obtained with `did_estimate_yearly_effects`.
  - [estimations] bug when using weights in `feglm`.
 
-## Changes in version 0.2.1 (2019-11-22)
+# fixest 0.2.1 (2019-11-22)
 
-#### Major bug correction
+## Major bug correction
         
  - lag.formula: Bug introduced from previous update which could lead to wrong results. Now fixed.
 
-#### Major user visible changes
+## Major user visible changes
          
  - [All estimation methods] Significant speed improvement when the fixed-effects variables (i.e. the identifiers) are string vectors.
 
 
-## Changes in version 0.2.0 (2019-11-19)
+# fixest 0.2.0 (2019-11-19)
 
-#### New function
+## New function
          
  -[did_means] New function `did_means` to conveniently compare means of groups of observations (both treat/control and pre/post). Contains tools to easily export in Latex.
 
 
 
-#### Major user visible changes
+## Major user visible changes
         
  - [All estimation methods] Significant speed improvement when the fixed-effects variables (i.e. the identifiers) are of type integer or double.
  - [esttex, esttable] New argument 'fitstat' to select which fit statistic to display. The default adapts to the models. Old arguments (loglik, bic, aic, sq.cor) are dropped.
@@ -631,14 +629,14 @@ etable(est_split[i = c(1, .N)])
 
 
 
-#### Minor user visible changes
+## Minor user visible changes
         
  - [did_plot_yearly_effects] Now the name of the dependent variable appears on the y-axis.
  - [esttex] Usage of the `sym` macro in Latex is dropped.
 
 
 
-#### Bug correction
+## Bug correction
         
  - [fixef.fixest] bug could appear when using varying slopes coefficients in some specific circumstances (when the slope FEs were different from the regular FEs).
  - [fixef.fixest] bug when many regular FEs jointly with varying slopes.
@@ -649,24 +647,24 @@ etable(est_split[i = c(1, .N)])
 
 
 
-#### Error handling
+## Error handling
         
  - [esttex, esttable] More informative error messages in functions esttex and esttable.
 
 
-## Changes in version 0.1.2 (2019-10-04)
-#### Major bug correction
+# fixest 0.1.2 (2019-10-04)
+## Major bug correction
         
  - lag.formula: When the data was not in a particular format, the results could be wrong. Now corrected.
 
 
-## Changes in version 0.1.1 (2019-09-20)
-#### Major bug correction
+# fixest 0.1.1 (2019-09-20)
+## Major bug correction
 	    
  - feglm: bug when a) the deviance at initialization was higher than the deviance of the first iteration of the IRWLS and b) the step-halving was unable to find a lower deviance. This led the estimation to fail with an error although it should have been performed properly.
  - did_estimate_yearly_effects: bug when the estimation involved periods with negative values.
 
-#### Minor bug correction
+## Minor bug correction
         
  - esttex: bug regarding the number of digits of negative coefficients to be displayed
  - esttex: now properly escaping the percentage and the underscore for exports in Latex
@@ -675,13 +673,13 @@ etable(est_split[i = c(1, .N)])
  - update: bug update when using the argument nframes
  - update: bug when updating the function fepois
 
-#### Error handling
+## Error handling
         
  - Better error messages for: did_estimate_yearly_effects, main estimation functions, setFixest_dict, fepois and fenegbin.
 
-## Version 0.1.0 (2019-09-03)
+# fixest 0.1.0 (2019-09-03)
 
-#### First version
+## First version
 	    
  - This package is an effort to create a family of fast and user-friendly functions to perform estimations with multiple fixed-effects (F.E.).
 
