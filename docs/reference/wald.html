@@ -209,16 +209,14 @@
 <span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>base_did</span><span class='op'>)</span>
 
 <span class='va'>est_did</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'><a href='i.html'>i</a></span><span class='op'>(</span><span class='va'>treat</span>, <span class='va'>period</span>, <span class='fl'>5</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span>, <span class='va'>base_did</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in feols(y ~ x1 + i(treat, period, 5) | id + period, base_did): Evaluation of the right-hand-side of the formula raises an error: cannot</span>
-#&gt; <span class='error'>coerce type 'closure' to vector of type 'character'</span></div><div class='input'>
+
 <span class='co'># The graph of the coefficients</span>
 <span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='va'>est_did</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in coefplot_prms(object = object, ..., sd = sd, ci_low = ci_low,     ci_high = ci_high, x = x, x.shift = x.shift, dict = dict,     keep = keep, drop = drop, order = order, ci_level = ci_level,     ref = ref, only.inter = only.inter, sep = sep, as.multiple = as.multiple): object 'est_did' not found</span></div><div class='input'>
+</div><div class='img'><img src='wald-1.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># The pre-trend test</span>
 <span class='fu'>wald</span><span class='op'>(</span><span class='va'>est_did</span>, <span class='st'>"period::[1234]$"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error: in wald(est_did, "period::[1234]$"):</span>
-#&gt; <span class='error'> Argument 'x' (equal to 'est_did') could not be evaluated. Problem:</span>
-#&gt; <span class='error'>object 'est_did' not found.</span></div><div class='input'>
+</div><div class='output co'>#&gt; Wald test, H0: joint nullity of treat:period::1, treat:period::2, treat:period::3 and treat:period::4
+#&gt;  stat = 0.938394, p-value = 0.440877, on 4 and 953 DoF. Using a Clustered (id) VCOV matrix.</div><div class='input'>
 <span class='co'># If "period::[1234]$" looks weird to you, check out</span>
 <span class='co'># regular expressions: e.g. see ?regex.</span>
 <span class='co'># Learn it, you won't regret it!</span>

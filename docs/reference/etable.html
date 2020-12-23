@@ -508,35 +508,144 @@
 <span class='va'>aq</span> <span class='op'>=</span> <span class='va'>airquality</span>
 
 <span class='va'>est1</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='fu'><a href='i.html'>i</a></span><span class='op'>(</span><span class='va'>Month</span><span class='op'>)</span> <span class='op'>/</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='va'>Temp</span>, data <span class='op'>=</span> <span class='va'>aq</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in feols(Ozone ~ i(Month)/Wind + Temp, data = aq): Evaluation of the right-hand-side of the formula raises an error: cannot</span>
-#&gt; <span class='error'>coerce type 'closure' to vector of type 'character'</span></div><div class='input'><span class='va'>est2</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='fu'><a href='i.html'>i</a></span><span class='op'>(</span><span class='va'>Wind</span>, <span class='va'>Month</span><span class='op'>)</span> <span class='op'>+</span> <span class='va'>Temp</span> <span class='op'>|</span> <span class='va'>Month</span>, data <span class='op'>=</span> <span class='va'>aq</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in feols(Ozone ~ i(Wind, Month) + Temp | Month, data = aq): Evaluation of the right-hand-side of the formula raises an error: cannot</span>
-#&gt; <span class='error'>coerce type 'closure' to vector of type 'character'</span></div><div class='input'>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 37 observations removed because of NA values (LHS: 37).</span></div><div class='input'><span class='va'>est2</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='fu'><a href='i.html'>i</a></span><span class='op'>(</span><span class='va'>Wind</span>, <span class='va'>Month</span><span class='op'>)</span> <span class='op'>+</span> <span class='va'>Temp</span> <span class='op'>|</span> <span class='va'>Month</span>, data <span class='op'>=</span> <span class='va'>aq</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 37 observations removed because of NA values (LHS: 37).</span></div><div class='input'>
 <span class='co'># Displaying the two results in a single table</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error: in etable(est1, est2):</span>
-#&gt; <span class='error'> Some elements in '...' could not be evaluated: object 'est1' not found</span></div><div class='input'>
+</div><div class='output co'>#&gt;                               est1               est2
+#&gt; Dependent Var.:              Ozone              Ozone
+#&gt;                                                      
+#&gt; (Intercept)      -100.2*** (26.35)                   
+#&gt; Month = 6          -54.99* (26.34)                   
+#&gt; Month = 7           35.89. (18.37)                   
+#&gt; Month = 8           44.52* (18.05)                   
+#&gt; Month = 9           -11.78 (18.22)                   
+#&gt; Temp             2.042*** (0.3078)  2.042*** (0.2242)
+#&gt; Wind x Month = 5    -1.086 (1.127)  -1.086** (0.1408)
+#&gt; Wind x Month = 6     2.046 (1.784) 2.046*** (0.03985)
+#&gt; Wind x Month = 7 -5.616*** (1.316) -5.616*** (0.1554)
+#&gt; Wind x Month = 8  -6.515*** (1.22) -6.515*** (0.2203)
+#&gt; Wind x Month = 9    -1.349 (1.147)   -1.349* (0.3175)
+#&gt; Fixed-Effects:   ----------------- ------------------
+#&gt; Month                           No                Yes
+#&gt; ________________ _________________ __________________
+#&gt; S.E. type                 Standard          by: Month
+#&gt; Observations                   116                116
+#&gt; R2                        0.681063           0.681063
+#&gt; Within R2                       --           0.582962</div><div class='input'>
 <span class='co'># keep/drop: keeping only interactions</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, keep <span class='op'>=</span> <span class='st'>" x "</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error: in etable(est1, est2, keep = " x "):</span>
-#&gt; <span class='error'> Some elements in '...' could not be evaluated: object 'est1' not found</span></div><div class='input'><span class='co'># or using drop  (see regexp help):</span>
+</div><div class='output co'>#&gt;                               est1               est2
+#&gt; Dependent Var.:              Ozone              Ozone
+#&gt;                                                      
+#&gt; Wind x Month = 5    -1.086 (1.127)  -1.086** (0.1408)
+#&gt; Wind x Month = 6     2.046 (1.784) 2.046*** (0.03985)
+#&gt; Wind x Month = 7 -5.616*** (1.316) -5.616*** (0.1554)
+#&gt; Wind x Month = 8  -6.515*** (1.22) -6.515*** (0.2203)
+#&gt; Wind x Month = 9    -1.349 (1.147)   -1.349* (0.3175)
+#&gt; Fixed-Effects:   ----------------- ------------------
+#&gt; Month                           No                Yes
+#&gt; ________________ _________________ __________________
+#&gt; S.E. type                 Standard          by: Month
+#&gt; Observations                   116                116
+#&gt; R2                        0.681063           0.681063
+#&gt; Within R2                       --           0.582962</div><div class='input'><span class='co'># or using drop  (see regexp help):</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, drop <span class='op'>=</span> <span class='st'>"^(Month|Temp|\\()"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error: in etable(est1, est2, drop = "^(Month|Temp|\\()"):</span>
-#&gt; <span class='error'> Some elements in '...' could not be evaluated: object 'est1' not found</span></div><div class='input'>
+</div><div class='output co'>#&gt;                               est1               est2
+#&gt; Dependent Var.:              Ozone              Ozone
+#&gt;                                                      
+#&gt; Wind x Month = 5    -1.086 (1.127)  -1.086** (0.1408)
+#&gt; Wind x Month = 6     2.046 (1.784) 2.046*** (0.03985)
+#&gt; Wind x Month = 7 -5.616*** (1.316) -5.616*** (0.1554)
+#&gt; Wind x Month = 8  -6.515*** (1.22) -6.515*** (0.2203)
+#&gt; Wind x Month = 9    -1.349 (1.147)   -1.349* (0.3175)
+#&gt; Fixed-Effects:   ----------------- ------------------
+#&gt; Month                           No                Yes
+#&gt; ________________ _________________ __________________
+#&gt; S.E. type                 Standard          by: Month
+#&gt; Observations                   116                116
+#&gt; R2                        0.681063           0.681063
+#&gt; Within R2                       --           0.582962</div><div class='input'>
 <span class='co'># keep/drop: dropping interactions</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, drop <span class='op'>=</span> <span class='st'>" x "</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error: in etable(est1, est2, drop = " x "):</span>
-#&gt; <span class='error'> Some elements in '...' could not be evaluated: object 'est1' not found</span></div><div class='input'><span class='co'># or using keep ("!" reverses the effect):</span>
+</div><div class='output co'>#&gt;                              est1              est2
+#&gt; Dependent Var.:             Ozone             Ozone
+#&gt;                                                    
+#&gt; (Intercept)     -100.2*** (26.35)                  
+#&gt; Month = 6         -54.99* (26.34)                  
+#&gt; Month = 7          35.89. (18.37)                  
+#&gt; Month = 8          44.52* (18.05)                  
+#&gt; Month = 9          -11.78 (18.22)                  
+#&gt; Temp            2.042*** (0.3078) 2.042*** (0.2242)
+#&gt; Fixed-Effects:  ----------------- -----------------
+#&gt; Month                          No               Yes
+#&gt; _______________ _________________ _________________
+#&gt; S.E. type                Standard         by: Month
+#&gt; Observations                  116               116
+#&gt; R2                       0.681063          0.681063
+#&gt; Within R2                      --          0.582962</div><div class='input'><span class='co'># or using keep ("!" reverses the effect):</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, keep <span class='op'>=</span> <span class='st'>"! x "</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error: in etable(est1, est2, keep = "! x "):</span>
-#&gt; <span class='error'> Some elements in '...' could not be evaluated: object 'est1' not found</span></div><div class='input'>
+</div><div class='output co'>#&gt;                              est1              est2
+#&gt; Dependent Var.:             Ozone             Ozone
+#&gt;                                                    
+#&gt; (Intercept)     -100.2*** (26.35)                  
+#&gt; Month = 6         -54.99* (26.34)                  
+#&gt; Month = 7          35.89. (18.37)                  
+#&gt; Month = 8          44.52* (18.05)                  
+#&gt; Month = 9          -11.78 (18.22)                  
+#&gt; Temp            2.042*** (0.3078) 2.042*** (0.2242)
+#&gt; Fixed-Effects:  ----------------- -----------------
+#&gt; Month                          No               Yes
+#&gt; _______________ _________________ _________________
+#&gt; S.E. type                Standard         by: Month
+#&gt; Observations                  116               116
+#&gt; R2                       0.681063          0.681063
+#&gt; Within R2                      --          0.582962</div><div class='input'>
 <span class='co'># order: Wind variable first, intercept last (note the "!" to reverse the effect)</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, order <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Wind"</span>, <span class='st'>"!Inter"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error: in etable(est1, est2, order = c("Wind", "!Inter")):</span>
-#&gt; <span class='error'> Some elements in '...' could not be evaluated: object 'est1' not found</span></div><div class='input'><span class='co'># Month, then interactions, then the rest</span>
+</div><div class='output co'>#&gt;                               est1               est2
+#&gt; Dependent Var.:              Ozone              Ozone
+#&gt;                                                      
+#&gt; Wind x Month = 5    -1.086 (1.127)  -1.086** (0.1408)
+#&gt; Wind x Month = 6     2.046 (1.784) 2.046*** (0.03985)
+#&gt; Wind x Month = 7 -5.616*** (1.316) -5.616*** (0.1554)
+#&gt; Wind x Month = 8  -6.515*** (1.22) -6.515*** (0.2203)
+#&gt; Wind x Month = 9    -1.349 (1.147)   -1.349* (0.3175)
+#&gt; Month = 6          -54.99* (26.34)                   
+#&gt; Month = 7           35.89. (18.37)                   
+#&gt; Month = 8           44.52* (18.05)                   
+#&gt; Month = 9           -11.78 (18.22)                   
+#&gt; Temp             2.042*** (0.3078)  2.042*** (0.2242)
+#&gt; (Intercept)      -100.2*** (26.35)                   
+#&gt; Fixed-Effects:   ----------------- ------------------
+#&gt; Month                           No                Yes
+#&gt; ________________ _________________ __________________
+#&gt; S.E. type                 Standard          by: Month
+#&gt; Observations                   116                116
+#&gt; R2                        0.681063           0.681063
+#&gt; Within R2                       --           0.582962</div><div class='input'><span class='co'># Month, then interactions, then the rest</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, order <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"^Month"</span>, <span class='st'>" x "</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error: in etable(est1, est2, order = c("^Month", " x ")):</span>
-#&gt; <span class='error'> Some elements in '...' could not be evaluated: object 'est1' not found</span></div><div class='input'>
+</div><div class='output co'>#&gt;                               est1               est2
+#&gt; Dependent Var.:              Ozone              Ozone
+#&gt;                                                      
+#&gt; Month = 6          -54.99* (26.34)                   
+#&gt; Month = 7           35.89. (18.37)                   
+#&gt; Month = 8           44.52* (18.05)                   
+#&gt; Month = 9           -11.78 (18.22)                   
+#&gt; Wind x Month = 5    -1.086 (1.127)  -1.086** (0.1408)
+#&gt; Wind x Month = 6     2.046 (1.784) 2.046*** (0.03985)
+#&gt; Wind x Month = 7 -5.616*** (1.316) -5.616*** (0.1554)
+#&gt; Wind x Month = 8  -6.515*** (1.22) -6.515*** (0.2203)
+#&gt; Wind x Month = 9    -1.349 (1.147)   -1.349* (0.3175)
+#&gt; (Intercept)      -100.2*** (26.35)                   
+#&gt; Temp             2.042*** (0.3078)  2.042*** (0.2242)
+#&gt; Fixed-Effects:   ----------------- ------------------
+#&gt; Month                           No                Yes
+#&gt; ________________ _________________ __________________
+#&gt; S.E. type                 Standard          by: Month
+#&gt; Observations                   116                116
+#&gt; R2                        0.681063           0.681063
+#&gt; Within R2                       --           0.582962</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># dict</span>
 <span class='co'>#</span>
@@ -546,8 +655,27 @@
 <span class='co'># Here's a full example:</span>
 <span class='va'>dict</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span>Temp <span class='op'>=</span> <span class='st'>"Temperature"</span>, <span class='st'>"Month::5"</span><span class='op'>=</span><span class='st'>"May"</span>, <span class='st'>"6"</span><span class='op'>=</span><span class='st'>"Jun"</span><span class='op'>)</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, dict <span class='op'>=</span> <span class='va'>dict</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error: in etable(est1, est2, dict = dict):</span>
-#&gt; <span class='error'> Some elements in '...' could not be evaluated: object 'est1' not found</span></div><div class='input'><span class='co'># Note the difference of treatment between Jun and May</span>
+</div><div class='output co'>#&gt;                                 est1               est2
+#&gt; Dependent Var.:                Ozone              Ozone
+#&gt;                                                        
+#&gt; (Intercept)        -100.2*** (26.35)                   
+#&gt; Month = Jun          -54.99* (26.34)                   
+#&gt; Month = 7             35.89. (18.37)                   
+#&gt; Month = 8             44.52* (18.05)                   
+#&gt; Month = 9             -11.78 (18.22)                   
+#&gt; Temperature        2.042*** (0.3078)  2.042*** (0.2242)
+#&gt; Wind x May            -1.086 (1.127)  -1.086** (0.1408)
+#&gt; Wind x Month = Jun     2.046 (1.784) 2.046*** (0.03985)
+#&gt; Wind x Month = 7   -5.616*** (1.316) -5.616*** (0.1554)
+#&gt; Wind x Month = 8    -6.515*** (1.22) -6.515*** (0.2203)
+#&gt; Wind x Month = 9      -1.349 (1.147)   -1.349* (0.3175)
+#&gt; Fixed-Effects:     ----------------- ------------------
+#&gt; Month                             No                Yes
+#&gt; __________________ _________________ __________________
+#&gt; S.E. type                   Standard          by: Month
+#&gt; Observations                     116                116
+#&gt; R2                          0.681063           0.681063
+#&gt; Within R2                         --           0.582962</div><div class='input'><span class='co'># Note the difference of treatment between Jun and May</span>
 
 <span class='co'># Assume the following dictionnary:</span>
 <span class='va'>dict</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Month::5"</span><span class='op'>=</span><span class='st'>"May"</span>, <span class='st'>"Month::6"</span><span class='op'>=</span><span class='st'>"Jun"</span>, <span class='st'>"Month::7"</span><span class='op'>=</span><span class='st'>"Jul"</span>,
@@ -558,15 +686,51 @@
 <span class='co'># We can use the special character '%' to make reference to the original names.</span>
 
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, dict <span class='op'>=</span> <span class='va'>dict</span>, keep <span class='op'>=</span> <span class='st'>"%Month"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error: in etable(est1, est2, dict = dict, keep = "%Month"):</span>
-#&gt; <span class='error'> Some elements in '...' could not be evaluated: object 'est1' not found</span></div><div class='input'>
+</div><div class='output co'>#&gt;                              est1               est2
+#&gt; Dependent Var.:             Ozone              Ozone
+#&gt;                                                     
+#&gt; Jun               -54.99* (26.34)                   
+#&gt; Jul                35.89. (18.37)                   
+#&gt; Aug                44.52* (18.05)                   
+#&gt; Sep                -11.78 (18.22)                   
+#&gt; Wind x May         -1.086 (1.127)  -1.086** (0.1408)
+#&gt; Wind x Jun          2.046 (1.784) 2.046*** (0.03985)
+#&gt; Wind x Jul      -5.616*** (1.316) -5.616*** (0.1554)
+#&gt; Wind x Aug       -6.515*** (1.22) -6.515*** (0.2203)
+#&gt; Wind x Sep         -1.349 (1.147)   -1.349* (0.3175)
+#&gt; Fixed-Effects:  ----------------- ------------------
+#&gt; Month                          No                Yes
+#&gt; _______________ _________________ __________________
+#&gt; S.E. type                Standard          by: Month
+#&gt; Observations                  116                116
+#&gt; R2                       0.681063           0.681063
+#&gt; Within R2                      --           0.582962</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># signifCode</span>
 <span class='co'>#</span>
 
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, signifCode <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>" A"</span><span class='op'>=</span><span class='fl'>0.01</span>, <span class='st'>" B"</span><span class='op'>=</span><span class='fl'>0.05</span>, <span class='st'>" C"</span><span class='op'>=</span><span class='fl'>0.1</span>, <span class='st'>" D"</span><span class='op'>=</span><span class='fl'>0.15</span>, <span class='st'>" F"</span><span class='op'>=</span><span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error: in etable(est1, est2, signifCode = c(` A` = 0.01, ` ...:</span>
-#&gt; <span class='error'> Some elements in '...' could not be evaluated: object 'est1' not found</span></div><div class='input'>
+</div><div class='output co'>#&gt;                              est1              est2
+#&gt; Dependent Var.:             Ozone             Ozone
+#&gt;                                                    
+#&gt; (Intercept)      -100.2 A (26.35)                  
+#&gt; Month = 6        -54.99 B (26.34)                  
+#&gt; Month = 7         35.89 C (18.37)                  
+#&gt; Month = 8         44.52 B (18.05)                  
+#&gt; Month = 9        -11.78 F (18.22)                  
+#&gt; Temp             2.042 A (0.3078)  2.042 A (0.2242)
+#&gt; Wind x Month = 5 -1.086 F (1.127) -1.086 A (0.1408)
+#&gt; Wind x Month = 6  2.046 F (1.784) 2.046 A (0.03985)
+#&gt; Wind x Month = 7 -5.616 A (1.316) -5.616 A (0.1554)
+#&gt; Wind x Month = 8  -6.515 A (1.22) -6.515 A (0.2203)
+#&gt; Wind x Month = 9 -1.349 F (1.147) -1.349 B (0.3175)
+#&gt; Fixed-Effects:   ---------------- -----------------
+#&gt; Month                          No               Yes
+#&gt; ________________ ________________ _________________
+#&gt; S.E. type                Standard         by: Month
+#&gt; Observations                  116               116
+#&gt; R2                       0.681063          0.681063
+#&gt; Within R2                      --          0.582962</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># Using the argument style to customize Latex exports</span>
 <span class='co'>#</span>
@@ -578,18 +742,117 @@
 <span class='co'># Note that a space adds an extra line</span>
 <span class='va'>style_noHeaders</span> <span class='op'>=</span> <span class='fu'><a href='style.tex.html'>style.tex</a></span><span class='op'>(</span>var.title <span class='op'>=</span> <span class='st'>""</span>, fixef.title <span class='op'>=</span> <span class='st'>""</span>, stats.title <span class='op'>=</span> <span class='st'>" "</span><span class='op'>)</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, dict <span class='op'>=</span> <span class='va'>dict</span>, tex <span class='op'>=</span> <span class='cn'>TRUE</span>, style.tex <span class='op'>=</span> <span class='va'>style_noHeaders</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error: in etable(est1, est2, dict = dict, tex = TRUE, style...:</span>
-#&gt; <span class='error'> Some elements in '...' could not be evaluated: object 'est1' not found</span></div><div class='input'>
+</div><div class='output co'>#&gt; \begin{tabular}{lcc}
+#&gt; \tabularnewline\midrule\midrule
+#&gt; Dependent Variable:&amp;\multicolumn{2}{c}{Ozone}\\
+#&gt; Model:&amp;(1) &amp; (2)\\
+#&gt; (Intercept)&amp;-100.2$^{***}$ &amp;   \\
+#&gt;   &amp;(26.35) &amp;   \\
+#&gt; Jun&amp;-54.99$^{**}$ &amp;   \\
+#&gt;   &amp;(26.34) &amp;   \\
+#&gt; Jul&amp;35.89$^{*}$ &amp;   \\
+#&gt;   &amp;(18.37) &amp;   \\
+#&gt; Aug&amp;44.52$^{**}$ &amp;   \\
+#&gt;   &amp;(18.05) &amp;   \\
+#&gt; Sep&amp;-11.78 &amp;   \\
+#&gt;   &amp;(18.22) &amp;   \\
+#&gt; Temp&amp;2.042$^{***}$ &amp; 2.042$^{***}$\\
+#&gt;   &amp;(0.3078) &amp; (0.2242)\\
+#&gt; Wind $\times $ May&amp;-1.086 &amp; -1.086$^{***}$\\
+#&gt;   &amp;(1.127) &amp; (0.1408)\\
+#&gt; Wind $\times $ Jun&amp;2.046 &amp; 2.046$^{***}$\\
+#&gt;   &amp;(1.784) &amp; (0.0398)\\
+#&gt; Wind $\times $ Jul&amp;-5.616$^{***}$ &amp; -5.616$^{***}$\\
+#&gt;   &amp;(1.316) &amp; (0.1554)\\
+#&gt; Wind $\times $ Aug&amp;-6.515$^{***}$ &amp; -6.515$^{***}$\\
+#&gt;   &amp;(1.22) &amp; (0.2203)\\
+#&gt; Wind $\times $ Sep&amp;-1.349 &amp; -1.349$^{**}$\\
+#&gt;   &amp;(1.147) &amp; (0.3175)\\
+#&gt; Month &amp;  &amp; Yes\\
+#&gt;  &amp;  &amp; \\
+#&gt; Standard-Errors&amp; Standard&amp;Month\\
+#&gt; Observations &amp; 116&amp;116\\
+#&gt; R$^2$ &amp; 0.681063&amp;0.681063\\
+#&gt; Within R$^2$ &amp; &amp;0.582962\\
+#&gt; \midrule\midrule\multicolumn{3}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\
+#&gt; \end{tabular}</div><div class='input'>
 <span class='co'># To change the lines of the table + dropping the table footer</span>
 <span class='va'>style_lines</span> <span class='op'>=</span> <span class='fu'><a href='style.tex.html'>style.tex</a></span><span class='op'>(</span>line.top <span class='op'>=</span> <span class='st'>"\\toprule"</span>, line.bottom <span class='op'>=</span> <span class='st'>"\\bottomrule"</span>,
                     tablefoot <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, dict <span class='op'>=</span> <span class='va'>dict</span>, tex <span class='op'>=</span> <span class='cn'>TRUE</span>, style.tex <span class='op'>=</span> <span class='va'>style_lines</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error: in etable(est1, est2, dict = dict, tex = TRUE, style...:</span>
-#&gt; <span class='error'> Some elements in '...' could not be evaluated: object 'est1' not found</span></div><div class='input'>
+</div><div class='output co'>#&gt; \begin{tabular}{lcc}
+#&gt; \toprule
+#&gt; Dependent Variable:&amp;\multicolumn{2}{c}{Ozone}\\
+#&gt; Model:&amp;(1) &amp; (2)\\
+#&gt; \midrule \emph{Variables}&amp;   &amp;  \\
+#&gt; (Intercept)&amp;-100.2$^{***}$ &amp;   \\
+#&gt;   &amp;(26.35) &amp;   \\
+#&gt; Jun&amp;-54.99$^{**}$ &amp;   \\
+#&gt;   &amp;(26.34) &amp;   \\
+#&gt; Jul&amp;35.89$^{*}$ &amp;   \\
+#&gt;   &amp;(18.37) &amp;   \\
+#&gt; Aug&amp;44.52$^{**}$ &amp;   \\
+#&gt;   &amp;(18.05) &amp;   \\
+#&gt; Sep&amp;-11.78 &amp;   \\
+#&gt;   &amp;(18.22) &amp;   \\
+#&gt; Temp&amp;2.042$^{***}$ &amp; 2.042$^{***}$\\
+#&gt;   &amp;(0.3078) &amp; (0.2242)\\
+#&gt; Wind $\times $ May&amp;-1.086 &amp; -1.086$^{***}$\\
+#&gt;   &amp;(1.127) &amp; (0.1408)\\
+#&gt; Wind $\times $ Jun&amp;2.046 &amp; 2.046$^{***}$\\
+#&gt;   &amp;(1.784) &amp; (0.0398)\\
+#&gt; Wind $\times $ Jul&amp;-5.616$^{***}$ &amp; -5.616$^{***}$\\
+#&gt;   &amp;(1.316) &amp; (0.1554)\\
+#&gt; Wind $\times $ Aug&amp;-6.515$^{***}$ &amp; -6.515$^{***}$\\
+#&gt;   &amp;(1.22) &amp; (0.2203)\\
+#&gt; Wind $\times $ Sep&amp;-1.349 &amp; -1.349$^{**}$\\
+#&gt;   &amp;(1.147) &amp; (0.3175)\\
+#&gt; \midrule \emph{Fixed-effects}&amp;   &amp;  \\
+#&gt; Month &amp;  &amp; Yes\\
+#&gt; \midrule \emph{Fit statistics}&amp;  &amp; \\
+#&gt; Standard-Errors&amp; Standard&amp;Month\\
+#&gt; Observations &amp; 116&amp;116\\
+#&gt; R$^2$ &amp; 0.681063&amp;0.681063\\
+#&gt; Within R$^2$ &amp; &amp;0.582962\\
+#&gt; \bottomrule
+#&gt; \end{tabular}</div><div class='input'>
 <span class='co'># Or you have the predefined type "aer"</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, dict <span class='op'>=</span> <span class='va'>dict</span>, tex <span class='op'>=</span> <span class='cn'>TRUE</span>, style.tex <span class='op'>=</span> <span class='fu'><a href='style.tex.html'>style.tex</a></span><span class='op'>(</span><span class='st'>"aer"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error: in etable(est1, est2, dict = dict, tex = TRUE, style...:</span>
-#&gt; <span class='error'> Some elements in '...' could not be evaluated: object 'est1' not found</span></div><div class='input'>
+</div><div class='output co'>#&gt; \begin{tabular}{lcc}
+#&gt; \toprule
+#&gt; &amp;\multicolumn{2}{c}{Ozone}\\
+#&gt; &amp;(1) &amp; (2)\\
+#&gt; \midrule (Intercept)&amp;-100.2$^{***}$ &amp;   \\
+#&gt;   &amp;(26.35) &amp;   \\
+#&gt; Jun&amp;-54.99$^{**}$ &amp;   \\
+#&gt;   &amp;(26.34) &amp;   \\
+#&gt; Jul&amp;35.89$^{*}$ &amp;   \\
+#&gt;   &amp;(18.37) &amp;   \\
+#&gt; Aug&amp;44.52$^{**}$ &amp;   \\
+#&gt;   &amp;(18.05) &amp;   \\
+#&gt; Sep&amp;-11.78 &amp;   \\
+#&gt;   &amp;(18.22) &amp;   \\
+#&gt; Temp&amp;2.042$^{***}$ &amp; 2.042$^{***}$\\
+#&gt;   &amp;(0.3078) &amp; (0.2242)\\
+#&gt; Wind $\times $ May&amp;-1.086 &amp; -1.086$^{***}$\\
+#&gt;   &amp;(1.127) &amp; (0.1408)\\
+#&gt; Wind $\times $ Jun&amp;2.046 &amp; 2.046$^{***}$\\
+#&gt;   &amp;(1.784) &amp; (0.0398)\\
+#&gt; Wind $\times $ Jul&amp;-5.616$^{***}$ &amp; -5.616$^{***}$\\
+#&gt;   &amp;(1.316) &amp; (0.1554)\\
+#&gt; Wind $\times $ Aug&amp;-6.515$^{***}$ &amp; -6.515$^{***}$\\
+#&gt;   &amp;(1.22) &amp; (0.2203)\\
+#&gt; Wind $\times $ Sep&amp;-1.349 &amp; -1.349$^{**}$\\
+#&gt;   &amp;(1.147) &amp; (0.3175)\\
+#&gt;  &amp;  &amp; \\
+#&gt; Standard-Errors&amp; Standard&amp;Month\\
+#&gt; Observations &amp; 116&amp;116\\
+#&gt; R$^2$ &amp; 0.681063&amp;0.681063\\
+#&gt; Within R$^2$ &amp; &amp;0.582962\\
+#&gt;  &amp;   &amp;  \\
+#&gt; Month fixed effects &amp;  &amp; $\checkmark$\\
+#&gt; \bottomrule
+#&gt; \end{tabular}</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># Group and extraline</span>
 <span class='co'>#</span>
@@ -763,12 +1026,51 @@
 <span class='co'># You can change the fit statistics with the argument fitstat</span>
 <span class='co'># and you can rename them with the dictionnary</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, fitstat <span class='op'>=</span> <span class='op'>~</span> <span class='va'>r2</span> <span class='op'>+</span> <span class='va'>n</span> <span class='op'>+</span> <span class='va'>G</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error: in etable(est1, est2, fitstat = ~r2 + n + G):</span>
-#&gt; <span class='error'> Some elements in '...' could not be evaluated: object 'est1' not found</span></div><div class='input'>
+</div><div class='output co'>#&gt;                               est1               est2
+#&gt; Dependent Var.:              Ozone              Ozone
+#&gt;                                                      
+#&gt; (Intercept)      -100.2*** (26.35)                   
+#&gt; Month = 6          -54.99* (26.34)                   
+#&gt; Month = 7           35.89. (18.37)                   
+#&gt; Month = 8           44.52* (18.05)                   
+#&gt; Month = 9           -11.78 (18.22)                   
+#&gt; Temp             2.042*** (0.3078)  2.042*** (0.2242)
+#&gt; Wind x Month = 5    -1.086 (1.127)  -1.086** (0.1408)
+#&gt; Wind x Month = 6     2.046 (1.784) 2.046*** (0.03985)
+#&gt; Wind x Month = 7 -5.616*** (1.316) -5.616*** (0.1554)
+#&gt; Wind x Month = 8  -6.515*** (1.22) -6.515*** (0.2203)
+#&gt; Wind x Month = 9    -1.349 (1.147)   -1.349* (0.3175)
+#&gt; Fixed-Effects:   ----------------- ------------------
+#&gt; Month                           No                Yes
+#&gt; ________________ _________________ __________________
+#&gt; S.E. type                 Standard          by: Month
+#&gt; R2                        0.681063           0.681063
+#&gt; Observations                   116                116
+#&gt; G                              116                116</div><div class='input'>
 <span class='co'># If you use a formula, '.' means the default:</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, fitstat <span class='op'>=</span> <span class='op'>~</span> <span class='va'>ll</span> <span class='op'>+</span> <span class='va'>.</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error: in etable(est1, est2, fitstat = ~ll + .):</span>
-#&gt; <span class='error'> Some elements in '...' could not be evaluated: object 'est1' not found</span></div><div class='input'>
+</div><div class='output co'>#&gt;                               est1               est2
+#&gt; Dependent Var.:              Ozone              Ozone
+#&gt;                                                      
+#&gt; (Intercept)      -100.2*** (26.35)                   
+#&gt; Month = 6          -54.99* (26.34)                   
+#&gt; Month = 7           35.89. (18.37)                   
+#&gt; Month = 8           44.52* (18.05)                   
+#&gt; Month = 9           -11.78 (18.22)                   
+#&gt; Temp             2.042*** (0.3078)  2.042*** (0.2242)
+#&gt; Wind x Month = 5    -1.086 (1.127)  -1.086** (0.1408)
+#&gt; Wind x Month = 6     2.046 (1.784) 2.046*** (0.03985)
+#&gt; Wind x Month = 7 -5.616*** (1.316) -5.616*** (0.1554)
+#&gt; Wind x Month = 8  -6.515*** (1.22) -6.515*** (0.2203)
+#&gt; Wind x Month = 9    -1.349 (1.147)   -1.349* (0.3175)
+#&gt; Fixed-Effects:   ----------------- ------------------
+#&gt; Month                           No                Yes
+#&gt; ________________ _________________ __________________
+#&gt; S.E. type                 Standard          by: Month
+#&gt; Log-Likelihood             -503.36            -503.36
+#&gt; Observations                   116                116
+#&gt; R2                        0.681063           0.681063
+#&gt; Within R2                       --           0.582962</div><div class='input'>
 
 <span class='co'>#</span>
 <span class='co'># Computing a different SE for each model</span>

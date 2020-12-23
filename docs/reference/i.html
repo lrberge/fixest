@@ -211,14 +211,44 @@
 
 <span class='co'># interaction</span>
 <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>y</span>, <span class='fu'>i</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>y</span>, <span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in as.character(x): cannot coerce type 'closure' to vector of type 'character'</span></div><div class='input'>
+</div><div class='output co'>#&gt;        x y  2 3 4
+#&gt;  [1,]  1 1  0 0 0
+#&gt;  [2,]  2 2  2 0 0
+#&gt;  [3,]  3 3  0 3 0
+#&gt;  [4,]  4 4  0 0 4
+#&gt;  [5,]  5 1  0 0 0
+#&gt;  [6,]  6 2  6 0 0
+#&gt;  [7,]  7 3  0 7 0
+#&gt;  [8,]  8 4  0 0 8
+#&gt;  [9,]  9 1  0 0 0
+#&gt; [10,] 10 2 10 0 0</div><div class='input'>
 <span class='co'># without interaction</span>
 <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>y</span>, <span class='fu'>i</span><span class='op'>(</span><span class='va'>y</span>, ref <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in as.character(x): cannot coerce type 'closure' to vector of type 'character'</span></div><div class='input'>
+</div><div class='output co'>#&gt;        x y 2 3 4
+#&gt;  [1,]  1 1 0 0 0
+#&gt;  [2,]  2 2 1 0 0
+#&gt;  [3,]  3 3 0 1 0
+#&gt;  [4,]  4 4 0 0 1
+#&gt;  [5,]  5 1 0 0 0
+#&gt;  [6,]  6 2 1 0 0
+#&gt;  [7,]  7 3 0 1 0
+#&gt;  [8,]  8 4 0 0 1
+#&gt;  [9,]  9 1 0 0 0
+#&gt; [10,] 10 2 1 0 0</div><div class='input'>
 <span class='co'># You can interact factors too</span>
 <span class='va'>z</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"a"</span>, <span class='st'>"b"</span>, <span class='st'>"c"</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>5</span>, <span class='fl'>3</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
 <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='va'>z</span>, <span class='va'>y</span>, <span class='fu'>i</span><span class='op'>(</span><span class='va'>z</span>, <span class='va'>y</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in as.character(x): cannot coerce type 'closure' to vector of type 'character'</span></div><div class='input'>
+</div><div class='output co'>#&gt;    z y a.1 c.1 a.2 b.2 c.2 a.3 b.3 a.4 b.4
+#&gt; 1  a 1   1   0   0   0   0   0   0   0   0
+#&gt; 2  a 2   0   0   1   0   0   0   0   0   0
+#&gt; 3  a 3   0   0   0   0   0   1   0   0   0
+#&gt; 4  a 4   0   0   0   0   0   0   0   1   0
+#&gt; 5  a 1   1   0   0   0   0   0   0   0   0
+#&gt; 6  b 2   0   0   0   1   0   0   0   0   0
+#&gt; 7  b 3   0   0   0   0   0   0   1   0   0
+#&gt; 8  b 4   0   0   0   0   0   0   0   0   1
+#&gt; 9  c 1   0   1   0   0   0   0   0   0   0
+#&gt; 10 c 2   0   0   0   0   1   0   0   0   0</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># In fixest estimations</span>
 <span class='co'>#</span>
@@ -226,22 +256,41 @@
 <span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>base_did</span><span class='op'>)</span>
 <span class='co'># We interact the variable 'period' with the variable 'treat'</span>
 <span class='va'>est_did</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'>i</span><span class='op'>(</span><span class='va'>treat</span>, <span class='va'>period</span>, <span class='fl'>5</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span>, <span class='va'>base_did</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in feols(y ~ x1 + i(treat, period, 5) | id + period, base_did): Evaluation of the right-hand-side of the formula raises an error: cannot</span>
-#&gt; <span class='error'>coerce type 'closure' to vector of type 'character'</span></div><div class='input'>
+
 <span class='co'># =&gt; special treatment in coefplot</span>
 <span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='va'>est_did</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in coefplot_prms(object = object, ..., sd = sd, ci_low = ci_low,     ci_high = ci_high, x = x, x.shift = x.shift, dict = dict,     keep = keep, drop = drop, order = order, ci_level = ci_level,     ref = ref, only.inter = only.inter, sep = sep, as.multiple = as.multiple): object 'est_did' not found</span></div><div class='input'>
+</div><div class='img'><img src='i-1.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># Using i() for factors</span>
 <span class='va'>est_bis</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'>i</span><span class='op'>(</span><span class='va'>period</span>, keep <span class='op'>=</span> <span class='fl'>3</span><span class='op'>:</span><span class='fl'>6</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>i</span><span class='op'>(</span><span class='va'>treat</span>, <span class='va'>period</span>, <span class='fl'>5</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>id</span>, <span class='va'>base_did</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in feols(y ~ x1 + i(period, keep = 3:6) + i(treat, period, 5) |     id, base_did): Evaluation of the right-hand-side of the formula raises an error: cannot</span>
-#&gt; <span class='error'>coerce type 'closure' to vector of type 'character'</span></div><div class='input'>
+
 <span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='va'>est_bis</span>, only.inter <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in coefplot_prms(object = object, ..., sd = sd, ci_low = ci_low,     ci_high = ci_high, x = x, x.shift = x.shift, dict = dict,     keep = keep, drop = drop, order = order, ci_level = ci_level,     ref = ref, only.inter = only.inter, sep = sep, as.multiple = as.multiple): object 'est_bis' not found</span></div><div class='input'>
+</div><div class='img'><img src='i-2.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># =&gt; special treatment in etable</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_bis</span>, dict <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"6"</span> <span class='op'>=</span> <span class='st'>"six"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error: in etable(est_bis, dict = c(`6` = "six")):</span>
-#&gt; <span class='error'> Some elements in '...' could not be evaluated: object 'est_bis' not</span>
-#&gt; <span class='error'>found</span></div><div class='input'>
+</div><div class='output co'>#&gt;                                 est_bis
+#&gt; Dependent Var.:                       y
+#&gt;                                        
+#&gt; x1                   0.972*** (0.04556)
+#&gt; period = 3             -1.111* (0.5354)
+#&gt; period = 4              0.4034 (0.5423)
+#&gt; period = 5              -0.898 (0.5698)
+#&gt; period = six            0.8031 (0.5467)
+#&gt; treat x period = 1      -2.252* (1.002)
+#&gt; treat x period = 2      -1.523 (0.9927)
+#&gt; treat x period = 3       -0.272 (1.104)
+#&gt; treat x period = 4       -1.794 (1.086)
+#&gt; treat x period = six      0.785 (1.026)
+#&gt; treat x period = 7     3.65*** (0.9172)
+#&gt; treat x period = 8     4.31*** (0.9989)
+#&gt; treat x period = 9     5.636*** (1.037)
+#&gt; treat x period = 10    6.276*** (1.045)
+#&gt; Fixed-Effects:       ------------------
+#&gt; id                                  Yes
+#&gt; ____________________ __________________
+#&gt; S.E.: Clustered                  by: id
+#&gt; Observations                      1,080
+#&gt; R2                             0.544663
+#&gt; Within R2                      0.453962</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># Interact two factors =&gt; f2</span>
 <span class='co'>#</span>
@@ -253,15 +302,42 @@
 
 <span class='co'># Interacting Month and week:</span>
 <span class='va'>res_2F</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='fu'>i</span><span class='op'>(</span><span class='va'>Month</span>, f2 <span class='op'>=</span> <span class='va'>week</span><span class='op'>)</span>, <span class='va'>aq</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in feols(Ozone ~ Solar.R + i(Month, f2 = week), aq): Evaluation of the right-hand-side of the formula raises an error: cannot</span>
-#&gt; <span class='error'>coerce type 'closure' to vector of type 'character'</span></div><div class='input'>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'>
 <span class='co'># Same but dropping the 5th Month and 1st week</span>
 <span class='va'>res_2F_bis</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='fu'>i</span><span class='op'>(</span><span class='va'>Month</span>, f2 <span class='op'>=</span> <span class='va'>week</span>, drop <span class='op'>=</span> <span class='fl'>5</span>, drop2 <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>, <span class='va'>aq</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in feols(Ozone ~ Solar.R + i(Month, f2 = week, drop = 5, drop2 = 1),     aq): Evaluation of the right-hand-side of the formula raises an error: cannot</span>
-#&gt; <span class='error'>coerce type 'closure' to vector of type 'character'</span></div><div class='input'>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res_2F</span>, <span class='va'>res_2F_bis</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error: in etable(res_2F, res_2F_bis):</span>
-#&gt; <span class='error'> Some elements in '...' could not be evaluated: object 'res_2F' not found</span></div><div class='input'>
+</div><div class='output co'>#&gt;                                   res_2F         res_2F_bis
+#&gt; Dependent Var.:                    Ozone              Ozone
+#&gt;                                                            
+#&gt; (Intercept)                8.207 (14.16)     18.51* (7.343)
+#&gt; Solar.R              0.09633** (0.03139) 0.1007** (0.03244)
+#&gt; Month = 5 x week = 2      -11.36 (17.18)                   
+#&gt; Month = 5 x week = 3       -9.66 (16.05)                   
+#&gt; Month = 5 x week = 4      -6.923 (18.28)                   
+#&gt; Month = 5 x week = 5        28.32 (18.1)                   
+#&gt; Month = 6 x week = 2       10.88 (18.13)    -0.3936 (14.93)
+#&gt; Month = 6 x week = 3      -2.422 (17.22)      -13.4 (13.47)
+#&gt; Month = 7 x week = 1      31.87. (17.27)                   
+#&gt; Month = 7 x week = 2      34.35* (16.59)        23. (12.58)
+#&gt; Month = 7 x week = 3       20.17 (16.54)      8.938 (12.47)
+#&gt; Month = 7 x week = 4      33.76. (17.26)     22.85. (13.51)
+#&gt; Month = 7 x week = 5      31.58. (18.19)      20.19 (15.04)
+#&gt; Month = 8 x week = 1       7.218 (19.98)                   
+#&gt; Month = 8 x week = 2     48.12** (17.22)    36.81** (13.56)
+#&gt; Month = 8 x week = 3       19.17 (16.62)      8.257 (12.48)
+#&gt; Month = 8 x week = 4       36.5* (17.18)     25.35. (13.46)
+#&gt; Month = 8 x week = 5       62*** (18.12)   50.76*** (14.91)
+#&gt; Month = 9 x week = 1     46.47** (16.57)                   
+#&gt; Month = 9 x week = 2      -5.661 (16.12)     -17.03 (11.82)
+#&gt; Month = 9 x week = 3       -2.978 (16.1)     -13.95 (11.65)
+#&gt; Month = 9 x week = 4       1.809 (16.73)     -8.973 (12.61)
+#&gt; Month = 9 x week = 5      -8.373 (19.56)     -19.47 (16.95)
+#&gt; ____________________ ___________________ __________________
+#&gt; S.E. type                       Standard           Standard
+#&gt; Observations                         111                111
+#&gt; R2                              0.526361           0.376835
+#&gt; Adj. R2                         0.407951           0.278441</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

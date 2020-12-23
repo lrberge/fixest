@@ -513,8 +513,7 @@
 
 <span class='co'># We interact the variable 'period' with the variable 'treat'</span>
 <span class='va'>est_did</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'><a href='i.html'>i</a></span><span class='op'>(</span><span class='va'>treat</span>, <span class='va'>period</span>, <span class='fl'>5</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>id</span><span class='op'>+</span><span class='va'>period</span>, <span class='va'>base_inter</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in feols(y ~ x1 + i(treat, period, 5) | id + period, base_inter): Evaluation of the right-hand-side of the formula raises an error: cannot</span>
-#&gt; <span class='error'>coerce type 'closure' to vector of type 'character'</span></div><div class='input'>
+
 <span class='co'># You could have written the following formula instead:</span>
 <span class='co'># y ~ x1 + treat::period(5) | id+period</span>
 
@@ -525,7 +524,7 @@
 <span class='co'>#  the default behavior of coefplot changes,</span>
 <span class='co'>#  it now only plots interactions:</span>
 <span class='fu'>coefplot</span><span class='op'>(</span><span class='va'>est_did</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in coefplot_prms(object = object, ..., sd = sd, ci_low = ci_low,     ci_high = ci_high, x = x, x.shift = x.shift, dict = dict,     keep = keep, drop = drop, order = order, ci_level = ci_level,     ref = ref, only.inter = only.inter, sep = sep, as.multiple = as.multiple): object 'est_did' not found</span></div><div class='input'>
+</div><div class='img'><img src='coefplot-3.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># We can see that the graph is different from before:</span>
 <span class='co'>#  - only interactions are shown,</span>
 <span class='co'>#  - the reference is present,</span>
@@ -533,10 +532,10 @@
 <span class='co'># =&gt; this is fully flexible</span>
 
 <span class='fu'>coefplot</span><span class='op'>(</span><span class='va'>est_did</span>, ref.line <span class='op'>=</span> <span class='cn'>FALSE</span>, pt.join <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in coefplot_prms(object = object, ..., sd = sd, ci_low = ci_low,     ci_high = ci_high, x = x, x.shift = x.shift, dict = dict,     keep = keep, drop = drop, order = order, ci_level = ci_level,     ref = ref, only.inter = only.inter, sep = sep, as.multiple = as.multiple): object 'est_did' not found</span></div><div class='input'>
+</div><div class='img'><img src='coefplot-4.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># Now to display all coefficients, use 'only.inter'</span>
 <span class='fu'>coefplot</span><span class='op'>(</span><span class='va'>est_did</span>, only.inter <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in coefplot_prms(object = object, ..., sd = sd, ci_low = ci_low,     ci_high = ci_high, x = x, x.shift = x.shift, dict = dict,     keep = keep, drop = drop, order = order, ci_level = ci_level,     ref = ref, only.inter = only.inter, sep = sep, as.multiple = as.multiple): object 'est_did' not found</span></div><div class='input'>
+</div><div class='img'><img src='coefplot-5.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># What if the interacted variable is not numeric?</span>
 
@@ -547,16 +546,14 @@
 
 <span class='co'># The new estimation</span>
 <span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'><a href='i.html'>i</a></span><span class='op'>(</span><span class='va'>treat</span>, <span class='va'>period_month</span>, <span class='st'>"oct"</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>id</span><span class='op'>+</span><span class='va'>period</span>, <span class='va'>base_inter</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in feols(y ~ x1 + i(treat, period_month, "oct") | id + period, base_inter): Evaluation of the right-hand-side of the formula raises an error: cannot</span>
-#&gt; <span class='error'>coerce type 'closure' to vector of type 'character'</span></div><div class='input'><span class='co'># Since 'period_month' of type character, coefplot sorts it</span>
+<span class='co'># Since 'period_month' of type character, coefplot sorts it</span>
 <span class='fu'>coefplot</span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>
-</div><div class='input'>
+</div><div class='img'><img src='coefplot-6.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># To respect a plotting order, use a factor</span>
 <span class='va'>base_inter</span><span class='op'>$</span><span class='va'>month_factor</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span><span class='op'>(</span><span class='va'>base_inter</span><span class='op'>$</span><span class='va'>period_month</span>, levels <span class='op'>=</span> <span class='va'>all_months</span><span class='op'>)</span>
 <span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'><a href='i.html'>i</a></span><span class='op'>(</span><span class='va'>treat</span>, <span class='va'>month_factor</span>, <span class='st'>"oct"</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>id</span><span class='op'>+</span><span class='va'>period</span>, <span class='va'>base_inter</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in feols(y ~ x1 + i(treat, month_factor, "oct") | id + period, base_inter): Evaluation of the right-hand-side of the formula raises an error: cannot</span>
-#&gt; <span class='error'>coerce type 'closure' to vector of type 'character'</span></div><div class='input'><span class='fu'>coefplot</span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>
-</div><div class='img'><img src='coefplot-3.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='fu'>coefplot</span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>
+</div><div class='img'><img src='coefplot-7.png' alt='' width='700' height='433' /></div><div class='input'>
 
 <span class='co'>#</span>
 <span class='co'># Example 3: Setting defaults</span>
@@ -578,11 +575,11 @@
 
 <span class='co'># Tadaaa! (Although the colors could be better)</span>
 <span class='fu'>coefplot</span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>
-</div><div class='img'><img src='coefplot-4.png' alt='' width='700' height='433' /></div><div class='input'>
+</div><div class='img'><img src='coefplot-8.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># To reset to the default settings:</span>
 <span class='fu'><a href='setFixest_coefplot.html'>setFixest_coefplot</a></span><span class='op'>(</span>reset <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
 <span class='fu'>coefplot</span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>
-</div><div class='img'><img src='coefplot-5.png' alt='' width='700' height='433' /></div><div class='input'>
+</div><div class='img'><img src='coefplot-9.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># Example 4: group + cleaning</span>
 <span class='co'>#</span>
@@ -596,13 +593,13 @@
 
 <span class='co'># No grouping:</span>
 <span class='fu'>coefplot</span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>
-</div><div class='img'><img src='coefplot-6.png' alt='' width='700' height='433' /></div><div class='input'>
+</div><div class='img'><img src='coefplot-10.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># now we group by Sepal and Species</span>
 <span class='fu'>coefplot</span><span class='op'>(</span><span class='va'>est</span>, group <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>Sepal <span class='op'>=</span> <span class='st'>"Sepal"</span>, Species <span class='op'>=</span> <span class='st'>"Species"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='img'><img src='coefplot-7.png' alt='' width='700' height='433' /></div><div class='input'>
+</div><div class='img'><img src='coefplot-11.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># now we group + clean the beginning of the names using the special character ^^</span>
 <span class='fu'>coefplot</span><span class='op'>(</span><span class='va'>est</span>, group <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>Sepal <span class='op'>=</span> <span class='st'>"^^Sepal."</span>, Species <span class='op'>=</span> <span class='st'>"^^Species"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='img'><img src='coefplot-8.png' alt='' width='700' height='433' /></div><div class='input'>
+</div><div class='img'><img src='coefplot-12.png' alt='' width='700' height='433' /></div><div class='input'>
 
 </div></pre>
   </div>

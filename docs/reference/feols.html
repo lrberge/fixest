@@ -511,11 +511,10 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 <span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>base_did</span><span class='op'>)</span>
 <span class='co'># We interact the variable 'period' with the variable 'treat'</span>
 <span class='va'>est_did</span> <span class='op'>=</span> <span class='fu'>feols</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'><a href='i.html'>i</a></span><span class='op'>(</span><span class='va'>treat</span>, <span class='va'>period</span>, <span class='fl'>5</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>id</span><span class='op'>+</span><span class='va'>period</span>, <span class='va'>base_did</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in feols(y ~ x1 + i(treat, period, 5) | id + period, base_did): Evaluation of the right-hand-side of the formula raises an error: cannot</span>
-#&gt; <span class='error'>coerce type 'closure' to vector of type 'character'</span></div><div class='input'>
+
 <span class='co'># Now we can plot the result of the interaction with coefplot</span>
 <span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='va'>est_did</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in coefplot_prms(object = object, ..., sd = sd, ci_low = ci_low,     ci_high = ci_high, x = x, x.shift = x.shift, dict = dict,     keep = keep, drop = drop, order = order, ci_level = ci_level,     ref = ref, only.inter = only.inter, sep = sep, as.multiple = as.multiple): object 'est_did' not found</span></div><div class='input'><span class='co'># You have many more example in coefplot help</span>
+</div><div class='img'><img src='feols-1.png' alt='' width='700' height='433' /></div><div class='input'><span class='co'># You have many more example in coefplot help</span>
 
 <span class='co'>#</span>
 <span class='co'># Instrumental variables</span>

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Extract the terms — terms.fixest • fixest</title>
+<title>Changelog • fixest</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,7 @@
 
 
 
-<meta property="og:title" content="Extract the terms — terms.fixest" />
-<meta property="og:description" content="This function extracts the terms of a fixest estimation, excluding the fixed-effects part." />
+<meta property="og:title" content="Changelog" />
 
 
 
@@ -59,7 +58,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-topic">
+    <div class="container template-news">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -132,71 +131,18 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Extract the terms</h1>
-    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/MiscFuns.R'><code>R/MiscFuns.R</code></a></small>
-    <div class="hidden name"><code>terms.fixest.Rd</code></div>
+      <h1 data-toc-skip>Changelog <small></small></h1>
+      <small>Source: <a href='https://github.com/lrberge/fixest/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
-    <div class="ref-description">
-    <p>This function extracts the terms of a <code>fixest</code> estimation, excluding the fixed-effects part.</p>
-    </div>
-
-    <pre class="usage"><span class='co'># S3 method for fixest</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/terms.html'>terms</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span></pre>
-
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>x</th>
-      <td><p>A <code>fixest</code> object. Obtained using the functions <code><a href='femlm.html'>femlm</a></code>, <code><a href='feols.html'>feols</a></code> or <code><a href='feglm.html'>feglm</a></code>.</p></td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td><p>Not currently used.</p></td>
-    </tr>
-    </table>
-
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
-    <p>An object of class <code><a href='https://rdrr.io/r/base/c.html'>c("terms", "formula")</a></code> which contains the terms representation of a symbolic model.</p>
-
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='co'># simple estimation on iris data, using "Species" fixed-effects</span>
-<span class='va'>res</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Sepal.Length</span> <span class='op'>~</span> <span class='va'>Sepal.Width</span><span class='op'>*</span><span class='va'>Petal.Length</span> <span class='op'>+</span>
-            <span class='va'>Petal.Width</span> <span class='op'>|</span> <span class='va'>Species</span>, <span class='va'>iris</span><span class='op'>)</span>
-
-<span class='co'># Terms of the linear part</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/terms.html'>terms</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Sepal.Length ~ Sepal.Width * Petal.Length + Petal.Width
-#&gt; attr(,"variables")
-#&gt; list(Sepal.Length, Sepal.Width, Petal.Length, Petal.Width)
-#&gt; attr(,"factors")
-#&gt;              Sepal.Width Petal.Length Petal.Width Sepal.Width:Petal.Length
-#&gt; Sepal.Length           0            0           0                        0
-#&gt; Sepal.Width            1            0           0                        1
-#&gt; Petal.Length           0            1           0                        1
-#&gt; Petal.Width            0            0           1                        0
-#&gt; attr(,"term.labels")
-#&gt; [1] "Sepal.Width"              "Petal.Length"            
-#&gt; [3] "Petal.Width"              "Sepal.Width:Petal.Length"
-#&gt; attr(,"order")
-#&gt; [1] 1 1 1 2
-#&gt; attr(,"intercept")
-#&gt; [1] 1
-#&gt; attr(,"response")
-#&gt; [1] 1
-#&gt; attr(,".Environment")
-#&gt; &lt;environment: 0x0000000032a6adb0&gt;</div><div class='input'>
-
-</div></pre>
   </div>
+
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>
     </nav>
   </div>
+
 </div>
 
 
