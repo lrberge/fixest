@@ -2,7 +2,7 @@
 % Please edit documentation in R/Methods.R
 \name{sigma.fixest}
 \alias{sigma.fixest}
-\title{Residual standard deviation of fixest estimations}
+\title{Residual standard deviation of \code{fixest} estimations}
 \usage{
 \method{sigma}{fixest}(object, ...)
 }

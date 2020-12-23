@@ -7722,7 +7722,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 	res
 }
 
-#' Extracts the variance/covariance of a \code{femlm} fit
+#' Computes the variance/covariance of a \code{fixest} object
 #'
 #' This function extracts the variance-covariance of estimated parameters from a model estimated with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
 #'

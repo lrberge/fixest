@@ -5,7 +5,7 @@
 #----------------------------------------------#
 
 
-#' Extracts the weights from a fixest object
+#' Extracts the weights from a \code{fixest} object
 #'
 #' Simply extracts the weights used to estimate a \code{fixest} model.
 #'
@@ -36,7 +36,7 @@ weights.fixest = function(object, ...){
 
 
 
-#' Residual standard deviation of fixest estimations
+#' Residual standard deviation of \code{fixest} estimations
 #'
 #' Extract the estimated standard deviation of the errors from \code{fixest} estimations.
 #'

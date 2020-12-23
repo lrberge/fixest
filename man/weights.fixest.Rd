@@ -2,7 +2,7 @@
 % Please edit documentation in R/Methods.R
 \name{weights.fixest}
 \alias{weights.fixest}
-\title{Extracts the weights from a fixest object}
+\title{Extracts the weights from a \code{fixest} object}
 \usage{
 \method{weights}{fixest}(object, ...)
 }
