@@ -145,8 +145,8 @@
     <tbody>
       <tr>
         <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
+          <h2 id="section-estimation" class="hasAnchor"><a href="#section-estimation" class="anchor"></a>Estimation</h2>
+          <p class="section-desc"><p>Methods to perform fixed-effects estimations</p></p>
         </th>
       </tr>
       
@@ -157,105 +157,9 @@
       <tr>
         
         <td>
-          <p><code><a href="AIC.fixest.html">AIC(<i>&lt;fixest&gt;</i>)</a></code> </p>
+          <p><code><a href="feols.html">feols()</a></code> </p>
         </td>
-        <td><p>Aikake's an information criterion</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="as.list.fixest_multi.html">as.list(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Transforms a fixest_multi object into a list</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="base_did.html">base_did</a></code> </p>
-        </td>
-        <td><p>Sample data for difference in difference</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="BIC.fixest.html">BIC(<i>&lt;fixest&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Bayesian information criterion</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="bread.fixest.html">bread(<i>&lt;fixest&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Extracts the bread matrix from fixest objects</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="cash-.fixest_multi.html">`$`(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Extracts the root of a fixest_multi object</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="coef.fixest.html">coef(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="coef.fixest.html">coefficients.fixest</a></code> </p>
-        </td>
-        <td><p>Extracts the coefficients from a <code>fixest</code> estimation</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="coefplot.html">coefplot()</a></code> </p>
-        </td>
-        <td><p>Plots confidence intervals and point estimates</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="coeftable.html">coeftable()</a></code> <code><a href="coeftable.html">ctable</a></code> <code><a href="coeftable.html">pvalue()</a></code> <code><a href="coeftable.html">tstat()</a></code> <code><a href="coeftable.html">se()</a></code> </p>
-        </td>
-        <td><p>Obtain various statistics from an estimation</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="collinearity.html">collinearity()</a></code> </p>
-        </td>
-        <td><p>Collinearity diagnostics for <code>fixest</code> objects</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="confint.fixest.html">confint(<i>&lt;fixest&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Confidence interval for parameters estimated with <code>fixest</code></p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="demean.html">demean()</a></code> </p>
-        </td>
-        <td><p>Centers a set of variables around a set of factors</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="deviance.fixest.html">deviance(<i>&lt;fixest&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Extracts the deviance of a fixest estimation</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="did_means.html">did_means()</a></code> </p>
-        </td>
-        <td><p>Treated and control sample descriptives</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="dof.html">dof()</a></code> <code><a href="dof.html">setFixest_dof()</a></code> <code><a href="dof.html">getFixest_dof</a></code> </p>
-        </td>
-        <td><p>Type of degree of freedom in fixest summary</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="estfun.fixest.html">estfun(<i>&lt;fixest&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Extracts the scores from a fixest estimation</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="etable.html">etable()</a></code> <code><a href="etable.html">esttex()</a></code> <code><a href="etable.html">esttable()</a></code> <code><a href="etable.html">setFixest_etable()</a></code> <code><a href="etable.html">getFixest_etable()</a></code> </p>
-        </td>
-        <td><p>Estimations table (export the results of multiples estimations to a DF or to Latex)</p></td>
+        <td><p>Fixed-effects OLS estimation</p></td>
       </tr><tr>
         
         <td>
@@ -274,13 +178,395 @@
           <p><code><a href="feNmlm.html">feNmlm()</a></code> </p>
         </td>
         <td><p>Fixed effects nonlinear maximum likelihood models</p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-handling-results-multiple" class="hasAnchor"><a href="#section-handling-results-multiple" class="anchor"></a>Handling results, multiple</h2>
+          <p class="section-desc"><p>Visualize results in tables or graphs</p></p>
+        </th>
+      </tr>
+      
+      
+    </tbody><tbody>
+      
+      
+      <tr>
+        
+        <td>
+          <p><code><a href="etable.html">etable()</a></code> <code><a href="etable.html">esttex()</a></code> <code><a href="etable.html">esttable()</a></code> <code><a href="etable.html">setFixest_etable()</a></code> <code><a href="etable.html">getFixest_etable()</a></code> </p>
+        </td>
+        <td><p>Estimations table (export the results of multiples estimations to a DF or to Latex)</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="feols.html">feols()</a></code> </p>
+          <p><code><a href="style.df.html">style.df()</a></code> </p>
         </td>
-        <td><p>Fixed-effects OLS estimation</p></td>
+        <td><p>Style of data.frames created by etable</p></td>
       </tr><tr>
+        
+        <td>
+          <p><code><a href="style.tex.html">style.tex()</a></code> </p>
+        </td>
+        <td><p>Style definitions for Latex tables</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="coefplot.html">coefplot()</a></code> </p>
+        </td>
+        <td><p>Plots confidence intervals and point estimates</p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-handling-results-single" class="hasAnchor"><a href="#section-handling-results-single" class="anchor"></a>Handling results, single</h2>
+          <p class="section-desc"><p>Extracts values from single estimations</p></p>
+        </th>
+      </tr>
+      
+      
+    </tbody><tbody>
+      
+      
+      <tr>
+        
+        <td>
+          <p><code><a href="summary.fixest.html">summary(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="summary.fixest.html">summ()</a></code> <code><a href="summary.fixest.html">summary(<i>&lt;fixest_list&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Summary of a <code>fixest</code> object. Computes different types of standard errors.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="coeftable.html">coeftable()</a></code> <code><a href="coeftable.html">ctable()</a></code> <code><a href="coeftable.html">pvalue()</a></code> <code><a href="coeftable.html">tstat()</a></code> <code><a href="coeftable.html">se()</a></code> </p>
+        </td>
+        <td><p>Obtain various statistics from an estimation</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="coef.fixest.html">coef(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="coef.fixest.html">coefficients(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extracts the coefficients from a <code>fixest</code> estimation</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="confint.fixest.html">confint(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Confidence interval for parameters estimated with <code>fixest</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="print.fixest.html">print(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="print.fixest.html">setFixest_print()</a></code> <code><a href="print.fixest.html">getFixest_print()</a></code> </p>
+        </td>
+        <td><p>A print facility for <code>fixest</code> objects.</p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-standard-errors" class="hasAnchor"><a href="#section-standard-errors" class="anchor"></a>Standard-errors</h2>
+          <p class="section-desc"><p>Computing the Standard-errors</p></p>
+        </th>
+      </tr>
+      
+      
+    </tbody><tbody>
+      
+      
+      <tr>
+        
+        <td>
+          <p><code><a href="vcov.fixest.html">vcov(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Computes the variance/covariance of a <code>fixest</code> object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="summary.fixest.html">summary(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="summary.fixest.html">summ()</a></code> <code><a href="summary.fixest.html">summary(<i>&lt;fixest_list&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Summary of a <code>fixest</code> object. Computes different types of standard errors.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="dof.html">dof()</a></code> <code><a href="dof.html">setFixest_dof()</a></code> <code><a href="dof.html">getFixest_dof</a></code> </p>
+        </td>
+        <td><p>Type of degree of freedom in fixest summary</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="setFixest_se.html">setFixest_se()</a></code> <code><a href="setFixest_se.html">getFixest_se()</a></code> </p>
+        </td>
+        <td><p>Sets the default type of standard errors to be used</p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-multiple-estimations" class="hasAnchor"><a href="#section-multiple-estimations" class="anchor"></a>Multiple estimations</h2>
+          <p class="section-desc"><p>Perform, and handle, multiple estimations</p></p>
+        </th>
+      </tr>
+      
+      
+    </tbody><tbody>
+      
+      
+      <tr>
+        
+        <td>
+          <p><code><a href="stepwise.html">stepwise()</a></code> <code><a href="stepwise.html">sw()</a></code> <code><a href="stepwise.html">cstepwise()</a></code> <code><a href="stepwise.html">csw()</a></code> <code><a href="stepwise.html">stepwise0()</a></code> <code><a href="stepwise.html">sw0()</a></code> <code><a href="stepwise.html">cstepwise0()</a></code> <code><a href="stepwise.html">csw0()</a></code> </p>
+        </td>
+        <td><p>Stepwise estimation tools</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="as.list.fixest_multi.html">as.list(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Transforms a fixest_multi object into a list</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cash-.fixest_multi.html">`$`(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extracts the root of a fixest_multi object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="print.fixest_multi.html">print(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Print method for fixest_multi objects</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sub-.fixest_multi.html">`[`(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Subset a fixest_multi object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sub-sub-.fixest_multi.html">`[[`(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extracts one element from a <code>fixest_multi</code> object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="summary.fixest_multi.html">summary(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Summary for fixest_multi objects</p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-stats-method" class="hasAnchor"><a href="#section-stats-method" class="anchor"></a>stats method</h2>
+          <p class="section-desc"><p>Various methods from the stats package</p></p>
+        </th>
+      </tr>
+      
+      
+    </tbody><tbody>
+      
+      
+      <tr>
+        
+        <td>
+          <p><code><a href="model.matrix.fixest.html">model.matrix(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Design matrix of a <code>femlm</code> model</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="predict.fixest.html">predict(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Predict method for <code>fixest</code> fits</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="fitted.fixest.html">fitted(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="fitted.fixest.html">fitted.values(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extracts fitted values from a <code>fixest</code> fit</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="hatvalues.fixest.html">hatvalues(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Hat values for <code>fixest</code> objects</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="update.fixest.html">update(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Updates a <code>fixest</code> estimation</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="resid.fixest.html">resid(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="resid.fixest.html">residuals(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extracts residuals from a <code>fixest</code> object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sigma.fixest.html">sigma(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Residual standard deviation of <code>fixest</code> estimations</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="weights.fixest.html">weights(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extracts the weights from a <code>fixest</code> object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="formula.fixest.html">formula(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extract the formula of a <code>fixest</code> fit</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="terms.fixest.html">terms(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extract the terms</p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-formula-tools" class="hasAnchor"><a href="#section-formula-tools" class="anchor"></a>Formula tools</h2>
+          <p class="section-desc"><p>Tools to manipulate formulas</p></p>
+        </th>
+      </tr>
+      
+      
+    </tbody><tbody>
+      
+      
+      <tr>
+        
+        <td>
+          <p><code><a href="xpd.html">xpd()</a></code> </p>
+        </td>
+        <td><p>Expands formula macros</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="setFixest_fml.html">setFixest_fml()</a></code> <code><a href="setFixest_fml.html">getFixest_fml()</a></code> </p>
+        </td>
+        <td><p>Sets/gets formula macros</p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-utility-tools" class="hasAnchor"><a href="#section-utility-tools" class="anchor"></a>Utility tools</h2>
+          <p class="section-desc"><p>User-level versions of internal tools</p></p>
+        </th>
+      </tr>
+      
+      
+    </tbody><tbody>
+      
+      
+      <tr>
+        
+        <td>
+          <p><code><a href="demean.html">demean()</a></code> </p>
+        </td>
+        <td><p>Centers a set of variables around a set of factors</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="to_integer.html">to_integer()</a></code> </p>
+        </td>
+        <td><p>Fast transform of any type of vector(s) into an integer vector</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="i.html">i()</a></code> <code><a href="i.html">interact()</a></code> </p>
+        </td>
+        <td><p>Create, or interact variables with, factors</p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-panel-data-tools" class="hasAnchor"><a href="#section-panel-data-tools" class="anchor"></a>Panel data tools</h2>
+          <p class="section-desc"><p>Set of tools for panel data</p></p>
+        </th>
+      </tr>
+      
+      
+    </tbody><tbody>
+      
+      
+      <tr>
+        
+        <td>
+          <p><code><a href="panel.html">panel()</a></code> </p>
+        </td>
+        <td><p>Constructs a <code>fixest</code> panel data base</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="unpanel.html">unpanel()</a></code> </p>
+        </td>
+        <td><p>Dissolves a <code>fixest</code> panel</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="lag.formula.html">lag(<i>&lt;formula&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Lags a variable using a formula</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="l.html">f()</a></code> <code><a href="l.html">d()</a></code> <code><a href="l.html">l()</a></code> </p>
+        </td>
+        <td><p>Lags a variable in a <code>fixest</code> estimation</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sub-.fixest_panel.html">`[`(<i>&lt;fixest_panel&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Method to subselect from a <code>fixest_panel</code></p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-handling-the-fixed-effects" class="hasAnchor"><a href="#section-handling-the-fixed-effects" class="anchor"></a>Handling the fixed-effects</h2>
+          <p class="section-desc"><p>Tools to extract and manipulate the fixed-effects</p></p>
+        </th>
+      </tr>
+      
+      
+    </tbody><tbody>
+      
+      
+      <tr>
+        
+        <td>
+          <p><code><a href="fixef.fixest.html">fixef(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extract the Fixed-Effects from a <code>fixest</code> estimation.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="plot.fixest.fixef.html">plot(<i>&lt;fixest.fixef&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Displaying the most notable fixed-effects</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="summary.fixest.fixef.html">summary(<i>&lt;fixest.fixef&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Summary method for fixed-effects coefficients</p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-fit-statistics" class="hasAnchor"><a href="#section-fit-statistics" class="anchor"></a>Fit statistics</h2>
+          <p class="section-desc"><p>Methods to extract fit statistics from estimations</p></p>
+        </th>
+      </tr>
+      
+      
+    </tbody><tbody>
+      
+      
+      <tr>
         
         <td>
           <p><code><a href="fitstat.html">fitstat()</a></code> </p>
@@ -295,51 +581,21 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="fitted.fixest.html">fitted(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="fitted.fixest.html">fitted.values.fixest</a></code> </p>
+          <p><code><a href="r2.html">r2()</a></code> </p>
         </td>
-        <td><p>Extracts fitted values from a <code>fixest</code> fit</p></td>
+        <td><p>R2s of <code>fixest</code> models</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="fixef.fixest.html">fixef(<i>&lt;fixest&gt;</i>)</a></code> </p>
+          <p><code><a href="AIC.fixest.html">AIC(<i>&lt;fixest&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Extract the Fixed-Effects from a <code>fixest</code> estimation.</p></td>
+        <td><p>Aikake's an information criterion</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="fixest.html">_index_</a></code> </p>
+          <p><code><a href="BIC.fixest.html">BIC(<i>&lt;fixest&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Fast and User-Friendly Fixed-Effects Estimations</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="formula.fixest.html">formula(<i>&lt;fixest&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Extract the formula of a <code>fixest</code> fit</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="hatvalues.fixest.html">hatvalues(<i>&lt;fixest&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Hat values for <code>fixest</code> objects</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="i.html">i()</a></code> <code><a href="i.html">interact</a></code> </p>
-        </td>
-        <td><p>Create, or interact variables with, factors</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="l.html">f()</a></code> <code><a href="l.html">d()</a></code> <code><a href="l.html">l()</a></code> </p>
-        </td>
-        <td><p>Lags a variable in a <code>fixest</code> estimation</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="lag.formula.html">lag(<i>&lt;formula&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Lags a variable using a formula</p></td>
+        <td><p>Bayesian information criterion</p></td>
       </tr><tr>
         
         <td>
@@ -349,9 +605,9 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="model.matrix.fixest.html">model.matrix(<i>&lt;fixest&gt;</i>)</a></code> </p>
+          <p><code><a href="deviance.fixest.html">deviance(<i>&lt;fixest&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Design matrix of a <code>femlm</code> model</p></td>
+        <td><p>Extracts the deviance of a fixest estimation</p></td>
       </tr><tr>
         
         <td>
@@ -361,57 +617,46 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="panel.html">panel()</a></code> </p>
+          <p><code><a href="wald.html">wald()</a></code> </p>
         </td>
-        <td><p>Constructs a <code>fixest</code> panel data base</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot.fixest.fixef.html">plot(<i>&lt;fixest.fixef&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Displaying the most notable fixed-effects</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="predict.fixest.html">predict(<i>&lt;fixest&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Predict method for <code>fixest</code> fits</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="print.fixest.html">print(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="print.fixest.html">setFixest_print()</a></code> <code><a href="print.fixest.html">getFixest_print()</a></code> </p>
-        </td>
-        <td><p>A print facility for <code>fixest</code> objects.</p></td>
+        <td><p>Wald test of nullity of coefficients</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="print.fixest_fitstat.html">print(<i>&lt;fixest_fitstat&gt;</i>)</a></code> </p>
         </td>
         <td><p>Print method for fit statistics of fixest estimations</p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-default-values" class="hasAnchor"><a href="#section-default-values" class="anchor"></a>Default values</h2>
+          <p class="section-desc"><p>The default arguments of many fixest functions can be set at will</p></p>
+        </th>
+      </tr>
+      
+      
+    </tbody><tbody>
+      
+      
+      <tr>
+        
+        <td>
+          <p><code><a href="dof.html">dof()</a></code> <code><a href="dof.html">setFixest_dof()</a></code> <code><a href="dof.html">getFixest_dof</a></code> </p>
+        </td>
+        <td><p>Type of degree of freedom in fixest summary</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="print.fixest_multi.html">print(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
+          <p><code><a href="etable.html">etable()</a></code> <code><a href="etable.html">esttex()</a></code> <code><a href="etable.html">esttable()</a></code> <code><a href="etable.html">setFixest_etable()</a></code> <code><a href="etable.html">getFixest_etable()</a></code> </p>
         </td>
-        <td><p>Print method for fixest_multi objects</p></td>
+        <td><p>Estimations table (export the results of multiples estimations to a DF or to Latex)</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="r2.html">r2()</a></code> </p>
+          <p><code><a href="print.fixest.html">print(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="print.fixest.html">setFixest_print()</a></code> <code><a href="print.fixest.html">getFixest_print()</a></code> </p>
         </td>
-        <td><p>R2s of <code>fixest</code> models</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="rep.fixest.html">rep(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="rep.fixest.html">rep(<i>&lt;fixest_list&gt;</i>)</a></code> <code><a href="rep.fixest.html">.l()</a></code> </p>
-        </td>
-        <td><p>Replicates fixest objects</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="resid.fixest.html">resid(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="resid.fixest.html">residuals.fixest</a></code> </p>
-        </td>
-        <td><p>Extracts residuals from a <code>fixest</code> object</p></td>
+        <td><p>A print facility for <code>fixest</code> objects.</p></td>
       </tr><tr>
         
         <td>
@@ -454,120 +699,80 @@
           <p><code><a href="setFixest_se.html">setFixest_se()</a></code> <code><a href="setFixest_se.html">getFixest_se()</a></code> </p>
         </td>
         <td><p>Sets the default type of standard errors to be used</p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-other-methods-and-functions" class="hasAnchor"><a href="#section-other-methods-and-functions" class="anchor"></a>Other methods and functions</h2>
+          <p class="section-desc"><p>Other methods and functions that didn’t fit the previous sections</p></p>
+        </th>
+      </tr>
+      
+      
+    </tbody><tbody>
+      
+      
+      <tr>
+        
+        <td>
+          <p><code><a href="did_means.html">did_means()</a></code> </p>
+        </td>
+        <td><p>Treated and control sample descriptives</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="sigma.fixest.html">sigma(<i>&lt;fixest&gt;</i>)</a></code> </p>
+          <p><code><a href="bread.fixest.html">bread(<i>&lt;fixest&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Residual standard deviation of fixest estimations</p></td>
+        <td><p>Extracts the bread matrix from fixest objects</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="stepwise.html">stepwise()</a></code> <code><a href="stepwise.html">sw</a></code> <code><a href="stepwise.html">cstepwise</a></code> <code><a href="stepwise.html">csw</a></code> <code><a href="stepwise.html">stepwise0</a></code> <code><a href="stepwise.html">sw0</a></code> <code><a href="stepwise.html">cstepwise0</a></code> <code><a href="stepwise.html">csw0</a></code> </p>
+          <p><code><a href="collinearity.html">collinearity()</a></code> </p>
         </td>
-        <td><p>Stepwise estimation tools</p></td>
+        <td><p>Collinearity diagnostics for <code>fixest</code> objects</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="style.df.html">style.df()</a></code> </p>
+          <p><code><a href="estfun.fixest.html">estfun(<i>&lt;fixest&gt;</i>)</a></code> </p>
         </td>
-        <td><p>Style of data.frames created by etable</p></td>
+        <td><p>Extracts the scores from a fixest estimation</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="style.tex.html">style.tex()</a></code> </p>
+          <p><code><a href="fixest.html">_index_</a></code> </p>
         </td>
-        <td><p>Style definitions for Latex tables</p></td>
+        <td><p>Fast and User-Friendly Fixed-Effects Estimations</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="sub-.fixest_multi.html">`[`(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
+          <p><code><a href="rep.fixest.html">rep(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="rep.fixest.html">rep(<i>&lt;fixest_list&gt;</i>)</a></code> <code><a href="rep.fixest.html">.l()</a></code> </p>
         </td>
-        <td><p>Subset a fixest_multi object</p></td>
-      </tr><tr>
+        <td><p>Replicates fixest objects</p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-data-sets" class="hasAnchor"><a href="#section-data-sets" class="anchor"></a>Data sets</h2>
+          <p class="section-desc"><p>Data sets used in the examples</p></p>
+        </th>
+      </tr>
+      
+      
+    </tbody><tbody>
+      
+      
+      <tr>
         
         <td>
-          <p><code><a href="sub-.fixest_panel.html">`[`(<i>&lt;fixest_panel&gt;</i>)</a></code> </p>
+          <p><code><a href="base_did.html">base_did</a></code> </p>
         </td>
-        <td><p>Method to subselect from a <code>fixest_panel</code></p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="sub-sub-.fixest_multi.html">`[[`(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Extracts one element from a <code>fixest_multi</code> object</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="summary.fixest.fixef.html">summary(<i>&lt;fixest.fixef&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Summary method for fixed-effects coefficients</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="summary.fixest.html">summary(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="summary.fixest.html">summ</a></code> <code><a href="summary.fixest.html">summary(<i>&lt;fixest_list&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Summary of a <code>fixest</code> object. Computes different types of standard errors.</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="summary.fixest_multi.html">summary(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Summary for fixest_multi objects</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="terms.fixest.html">terms(<i>&lt;fixest&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Extract the terms</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="to_integer.html">to_integer()</a></code> </p>
-        </td>
-        <td><p>Fast transform of any type of vector(s) into an integer vector</p></td>
+        <td><p>Sample data for difference in difference</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="trade.html">trade</a></code> </p>
         </td>
         <td><p>Trade data sample</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="unpanel.html">unpanel()</a></code> </p>
-        </td>
-        <td><p>Dissolves a <code>fixest</code> panel</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="update.fixest.html">update(<i>&lt;fixest&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Updates a <code>fixest</code> estimation</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="vcov.fixest.html">vcov(<i>&lt;fixest&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Extracts the variance/covariance of a <code>femlm</code> fit</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="wald.html">wald()</a></code> </p>
-        </td>
-        <td><p>Wald test of nullity of coefficients</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="weights.fixest.html">weights(<i>&lt;fixest&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Extracts the weights from a fixest object</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="xpd.html">xpd()</a></code> </p>
-        </td>
-        <td><p>Expands formula macros</p></td>
       </tr>
     </tbody>
     </table>
