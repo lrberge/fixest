@@ -3572,7 +3572,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
         } else n_na_x = 0L
 
 
-        if(anyNA.data.frame(f)){
+        if(anyNA(f)){
             is_na_fe = !complete.cases(f)
             n_na_fe = 1L
             is_NA = is_NA | is_na_fe
