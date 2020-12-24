@@ -1,4 +1,3 @@
-
 Replication code and data for the benchmarking of the package:
     ____________
     || fixest ||
@@ -8,11 +7,21 @@ Replication code and data for the benchmarking of the package:
 * SCRIPTS *
 ***********
 
-    - Data generation.R: R code for data simulation
-    - Benchmark_R.R: benchmarking code in R
-    - Benchmark_Stata.do: benchmarking code in Stata
-    - Benchmark.jl: Benchmarking code in Julia
-    - Collecting results: compilation of R and Stata results
+    - src/10_data_generation.R: R code for data simulation
+    - src/20_benchmakr_r.R: benchmarking code in R
+    - src/30_benchmark.jl: Benchmarking code in Julia
+    - src/40_benchmark_stata.do: benchmarking code in Stata
+    - src/50_collecting_results.R: compilation of R and Stata results
+
+***************
+* REPLICATING *
+***************
+
+We ran these benchmarks on a 2019 15-inch MacBook Pro with a 2.6GHz 6-Core Intel Core i7 and 32GB of RAM.
+
+R (version 4.0.3) and Julia (1.5.3) were installed using Homebrew (commit 2c77a540b). Stata (version 16.0 Revision 24 Jul 2019) was installed from the DMG.
+
+See the `setup` folder for scripts to setup your environment.
 
 *************
 * DATA SETS *
