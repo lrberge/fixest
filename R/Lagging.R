@@ -328,7 +328,7 @@ l = function(x, lag = 1, fill = NA){
             }
 
             var = gsub("^[^\\(]+\\(|,.+", "", sys_calls[qui])
-            m = eval(str2lang(var), envir = sys.frames()[qui])
+            m = eval(str2lang(var), parent.frame(qui))
 
             if(!"fixest_panel" %in% class(m)){
                 stop("You can use l() or f() only when the data set is of class 'fixest_panel', you can use function panel() to set it.")
@@ -868,7 +868,9 @@ unpanel = function(x){
 
             # I have to do it that way... really not elegant...
             mc_new[[1]] = as.name('[.data.table')
-            eval(mc_new, asNamespace("data.table"), parent.frame())
+            my_frame = parent.frame()
+            assign("[.data.table", asNamespace("data.table")[["[.data.table"]], my_frame)
+            eval(mc_new, my_frame)
 
             return(invisible(TRUE))
         } else {
