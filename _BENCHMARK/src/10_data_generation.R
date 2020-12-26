@@ -4,7 +4,6 @@
 # ~: Benchmarking: data generation
 #----------------------------------------------#
 
-
 ####
 #### SIMULATION ####
 ####
@@ -13,6 +12,16 @@ library(MASS)
 library(here)
 library(data.table)
 library(haven)
+
+# Some constants
+
+DATA_DIR <- "data"
+STATA_DIR <- "_STATA"
+RESULTS_DIR <- "results"
+
+dir.create(DATA_DIR, showWarnings = FALSE)
+dir.create(STATA_DIR, showWarnings = FALSE)
+dir.create(RESULTS_DIR, showWarnings = FALSE)
 
 # We simulate databases
 
@@ -65,7 +74,7 @@ for (i in 1:length(all_n)) {
   cat("\n")
 }
 
-save(base_all, file = here("DATA", "base_all_simulations.Rdata"))
+save(base_all, file = here(DATA_DIR, "base_all_simulations.Rdata"))
 
 #
 # Data with 10M observation for OLS (just one to save size)
@@ -99,7 +108,7 @@ for (m in 1:3) {
   base[[paste0("dum_", m)]] <- dum_all[[m]]
 }
 
-fwrite(base, here("DATA", "base_10M.csv"))
+fwrite(base, here(DATA_DIR, "base_10M.csv"))
 
 
 
@@ -107,7 +116,7 @@ fwrite(base, here("DATA", "base_10M.csv"))
 # Exportation to stata
 #
 
-load(here("DATA", "base_all_simulations.Rdata"))
+load(here(DATA_DIR, "base_all_simulations.Rdata"))
 
 # base_all: 4 sizes, 2 groups, 10 replications
 
@@ -154,4 +163,4 @@ for (pow in 4:7) {
   }
 }
 
-save(base_all_diff, file = here("DATA", "base_all_diff.Rdata"))
+save(base_all_diff, file = here(DATA_DIR, "base_all_diff.Rdata"))

@@ -6,9 +6,7 @@ STATA=/Applications/Stata/StataSE.app/Contents/MacOS/StataSE
 # Data generation
 
 $(DATA_DIR)/base_all_simulations.Rdata:
-	date 2>&1
 	Rscript --vanilla src/10_data_generation.R
-	date 2>&1
 
 $(DATA_DIR)/base_10M.csv: $(DATA_DIR)/base_all_simulations.Rdata
 $(DATA_DIR)/base_all_diff.Rdata: $(DATA_DIR)/base_all_simulations.Rdata

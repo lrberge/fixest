@@ -14,6 +14,11 @@ library(plm)
 library(fixest)
 library(here)
 
+# Some constants
+
+DATA_DIR <- "data"
+RESULTS_DIR <- "results"
+
 ####
 #### Estimations ####
 ####
@@ -25,7 +30,7 @@ library(here)
 # - logit
 
 # The simulated data sets (see script "Data generation.R" for details on the generation process)
-load(here("DATA", "base_all_simulations.Rdata"))
+load(here(DATA_DIR, "base_all_simulations.Rdata"))
 
 # Loading the packages
 # install.packages(c("fixest", "lfe", "glmmML", "alpaca", "plm"))
@@ -238,7 +243,7 @@ results_all <- results_all[-1, ]
 # Adding the 10M obs OLS
 #
 
-base <- fread(here("DATA", "base_10M.csv"))
+base <- fread(here(DATA_DIR, "base_10M.csv"))
 
 for (g in 1:3) {
   cat("g =", g)
@@ -272,7 +277,7 @@ for (g in 1:3) {
 }
 
 
-data.table::fwrite(results_all, file = here("DATA", "results_bench_R.txt"))
+data.table::fwrite(results_all, file = here(RESULTS_DIR, "results_bench_R.txt"))
 
 
 ####
@@ -284,7 +289,7 @@ data.table::fwrite(results_all, file = here("DATA", "results_bench_R.txt"))
 library(fixest)
 library(lfe)
 
-load(here("DATA", "base_all_diff.Rdata"))
+load(here(DATA_DIR, "base_all_diff.Rdata"))
 
 results_all_diff <- data.frame(family = NA, method = NA, n_obs = NA, G = NA, rep = NA, time = NA)
 
@@ -336,4 +341,4 @@ for (i in 1:4) {
 
 results_all_diff <- results_all_diff[-1, ]
 
-data.table::fwrite(results_all_diff, file = here("DATA", "results_diff_bench_R.txt"))
+data.table::fwrite(results_all_diff, file = here(RESULTS_DIR, "results_diff_bench_R.txt"))
