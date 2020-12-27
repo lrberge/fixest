@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 JULIA=julia
 R=Rscript
@@ -12,11 +12,12 @@ case "${unameOut}" in
     MINGW*)     machine=MinGw;;
     *)          machine="UNKNOWN:${unameOut}"
 esac
-echo ${machine}
 
 if [[ "${machine}" == "Mac" ]]; then
-    sh ./00_macos.sh
-fi;
+    bash ./00_macos.sh
+elif [[ "${machine}" == "Linux" ]]; then
+    sudo bash ./01_aws.sh
+fi
 
 ${R} --vanilla ./10_setup_r.R
 ${JULIA} ./20_setup_julia.jl

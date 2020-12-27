@@ -8,4 +8,6 @@ just be able to run
 bash ./main.sh
 ```
 
-Currently, this only works on MacOS with homebrew and StataSE installed.
+Currently, this only works on MacOS with homebrew and StataSE installed. If you don't mind
+not having Stata installed, this will also work on an Ubuntu 20.04 box, e.g., a fresh
+AWS box.
