@@ -1,0 +1,1581 @@
+method,n_obs,G,rep,time,model
+fepois,1000,1,1,0.0600000000000023,Poisson
+glmmboot,1000,1,1,0.0199999999999818,Poisson
+feglm (alpaca),1000,1,1,0.0200000000000102,Poisson
+fepois,1000,1,2,0.0299999999999727,Poisson
+glmmboot,1000,1,2,0.0100000000000193,Poisson
+feglm (alpaca),1000,1,2,0.0199999999999818,Poisson
+fepois,1000,1,3,0.0100000000000193,Poisson
+glmmboot,1000,1,3,0.0199999999999818,Poisson
+feglm (alpaca),1000,1,3,0.0100000000000193,Poisson
+fepois,1000,1,4,0.0199999999999818,Poisson
+glmmboot,1000,1,4,0.0200000000000102,Poisson
+feglm (alpaca),1000,1,4,0,Poisson
+fepois,1000,1,5,0.0200000000000102,Poisson
+glmmboot,1000,1,5,0,Poisson
+feglm (alpaca),1000,1,5,0.00999999999999091,Poisson
+fepois,1000,1,6,0.0300000000000011,Poisson
+glmmboot,1000,1,6,0,Poisson
+feglm (alpaca),1000,1,6,0.0200000000000102,Poisson
+fepois,1000,1,7,0.0300000000000011,Poisson
+glmmboot,1000,1,7,0,Poisson
+feglm (alpaca),1000,1,7,0.0199999999999818,Poisson
+fepois,1000,1,8,0.0300000000000011,Poisson
+glmmboot,1000,1,8,0,Poisson
+feglm (alpaca),1000,1,8,0,Poisson
+fepois,1000,1,9,0.0300000000000011,Poisson
+glmmboot,1000,1,9,0.0199999999999818,Poisson
+feglm (alpaca),1000,1,9,0.0200000000000102,Poisson
+fepois,1000,1,10,0.00999999999999091,Poisson
+glmmboot,1000,1,10,0.0200000000000102,Poisson
+feglm (alpaca),1000,1,10,0.00999999999999091,Poisson
+fepois,1000,2,1,0.0500000000000114,Poisson
+feglm (alpaca),1000,2,1,0.0200000000000102,Poisson
+fepois,1000,2,2,0.039999999999992,Poisson
+feglm (alpaca),1000,2,2,0.0300000000000011,Poisson
+fepois,1000,2,3,0.049999999999983,Poisson
+feglm (alpaca),1000,2,3,0.0300000000000011,Poisson
+fepois,1000,2,4,0.0300000000000011,Poisson
+feglm (alpaca),1000,2,4,0.0300000000000011,Poisson
+fepois,1000,2,5,0.0400000000000205,Poisson
+feglm (alpaca),1000,2,5,0.0199999999999818,Poisson
+fepois,1000,2,6,0.0400000000000205,Poisson
+feglm (alpaca),1000,2,6,0.0199999999999818,Poisson
+fepois,1000,2,7,0.0500000000000114,Poisson
+feglm (alpaca),1000,2,7,0.0300000000000011,Poisson
+fepois,1000,2,8,0.0300000000000011,Poisson
+feglm (alpaca),1000,2,8,0.00999999999999091,Poisson
+fepois,1000,2,9,0.0500000000000114,Poisson
+feglm (alpaca),1000,2,9,0.0199999999999818,Poisson
+fepois,1000,2,10,0.0400000000000205,Poisson
+feglm (alpaca),1000,2,10,0.0199999999999818,Poisson
+fepois,1000,3,1,0.0500000000000114,Poisson
+feglm (alpaca),1000,3,1,0.0300000000000011,Poisson
+fepois,1000,3,2,0.0300000000000011,Poisson
+feglm (alpaca),1000,3,2,0.0300000000000011,Poisson
+fepois,1000,3,3,0.049999999999983,Poisson
+feglm (alpaca),1000,3,3,0.0300000000000011,Poisson
+fepois,1000,3,4,0.0300000000000011,Poisson
+feglm (alpaca),1000,3,4,0.0199999999999818,Poisson
+fepois,1000,3,5,0.0500000000000114,Poisson
+feglm (alpaca),1000,3,5,0.00999999999999091,Poisson
+fepois,1000,3,6,0.0300000000000011,Poisson
+feglm (alpaca),1000,3,6,0.0300000000000011,Poisson
+fepois,1000,3,7,0.0300000000000011,Poisson
+feglm (alpaca),1000,3,7,0.0100000000000193,Poisson
+fepois,1000,3,8,0.0300000000000011,Poisson
+feglm (alpaca),1000,3,8,0.0300000000000011,Poisson
+fepois,1000,3,9,0.0500000000000114,Poisson
+feglm (alpaca),1000,3,9,0.00999999999999091,Poisson
+fepois,1000,3,10,0.0300000000000011,Poisson
+feglm (alpaca),1000,3,10,0.0300000000000011,Poisson
+fepois,10000,1,1,0.0300000000000011,Poisson
+glmmboot,10000,1,1,0.189999999999998,Poisson
+feglm (alpaca),10000,1,1,0.0300000000000011,Poisson
+fepois,10000,1,2,0.049999999999983,Poisson
+glmmboot,10000,1,2,0.0800000000000125,Poisson
+feglm (alpaca),10000,1,2,0.0300000000000011,Poisson
+fepois,10000,1,3,0.0300000000000011,Poisson
+glmmboot,10000,1,3,0.0799999999999841,Poisson
+feglm (alpaca),10000,1,3,0.0300000000000011,Poisson
+fepois,10000,1,4,0.0500000000000114,Poisson
+glmmboot,10000,1,4,0.0900000000000034,Poisson
+feglm (alpaca),10000,1,4,0.0300000000000011,Poisson
+fepois,10000,1,5,0.0300000000000011,Poisson
+glmmboot,10000,1,5,0.0799999999999841,Poisson
+feglm (alpaca),10000,1,5,0.0300000000000011,Poisson
+fepois,10000,1,6,0.0300000000000011,Poisson
+glmmboot,10000,1,6,0.0800000000000125,Poisson
+feglm (alpaca),10000,1,6,0.0300000000000011,Poisson
+fepois,10000,1,7,0.049999999999983,Poisson
+glmmboot,10000,1,7,0.0800000000000125,Poisson
+feglm (alpaca),10000,1,7,0.0300000000000011,Poisson
+fepois,10000,1,8,0.0300000000000011,Poisson
+glmmboot,10000,1,8,0.0599999999999739,Poisson
+feglm (alpaca),10000,1,8,0.0300000000000011,Poisson
+fepois,10000,1,9,0.0300000000000011,Poisson
+glmmboot,10000,1,9,0.0900000000000034,Poisson
+feglm (alpaca),10000,1,9,0.0400000000000205,Poisson
+fepois,10000,1,10,0.039999999999992,Poisson
+glmmboot,10000,1,10,0.0600000000000023,Poisson
+feglm (alpaca),10000,1,10,0.039999999999992,Poisson
+fepois,10000,2,1,0.0600000000000023,Poisson
+feglm (alpaca),10000,2,1,0.0500000000000114,Poisson
+fepois,10000,2,2,0.0599999999999739,Poisson
+feglm (alpaca),10000,2,2,0.0400000000000205,Poisson
+fepois,10000,2,3,0.049999999999983,Poisson
+feglm (alpaca),10000,2,3,0.0600000000000023,Poisson
+fepois,10000,2,4,0.0699999999999932,Poisson
+feglm (alpaca),10000,2,4,0.0400000000000205,Poisson
+fepois,10000,2,5,0.0500000000000114,Poisson
+feglm (alpaca),10000,2,5,0.0600000000000023,Poisson
+fepois,10000,2,6,0.0500000000000114,Poisson
+feglm (alpaca),10000,2,6,0.0599999999999739,Poisson
+fepois,10000,2,7,0.0600000000000023,Poisson
+feglm (alpaca),10000,2,7,0.0500000000000114,Poisson
+fepois,10000,2,8,0.0600000000000023,Poisson
+feglm (alpaca),10000,2,8,0.049999999999983,Poisson
+fepois,10000,2,9,0.0400000000000205,Poisson
+feglm (alpaca),10000,2,9,0.0699999999999932,Poisson
+fepois,10000,2,10,0.039999999999992,Poisson
+feglm (alpaca),10000,2,10,0.0500000000000114,Poisson
+fepois,10000,3,1,0.0599999999999739,Poisson
+feglm (alpaca),10000,3,1,0.0900000000000034,Poisson
+fepois,10000,3,2,0.0500000000000114,Poisson
+feglm (alpaca),10000,3,2,0.0799999999999841,Poisson
+fepois,10000,3,3,0.0600000000000023,Poisson
+feglm (alpaca),10000,3,3,0.0900000000000034,Poisson
+fepois,10000,3,4,0.0700000000000216,Poisson
+feglm (alpaca),10000,3,4,0.0699999999999932,Poisson
+fepois,10000,3,5,0.0799999999999841,Poisson
+feglm (alpaca),10000,3,5,0.0800000000000125,Poisson
+fepois,10000,3,6,0.049999999999983,Poisson
+feglm (alpaca),10000,3,6,0.120000000000005,Poisson
+fepois,10000,3,7,0.0600000000000023,Poisson
+feglm (alpaca),10000,3,7,0.0800000000000125,Poisson
+fepois,10000,3,8,0.0600000000000023,Poisson
+feglm (alpaca),10000,3,8,0.0699999999999932,Poisson
+fepois,10000,3,9,0.0800000000000125,Poisson
+feglm (alpaca),10000,3,9,0.0699999999999932,Poisson
+fepois,10000,3,10,0.0699999999999932,Poisson
+feglm (alpaca),10000,3,10,0.0699999999999932,Poisson
+fepois,1e+05,1,1,0.129999999999995,Poisson
+glmmboot,1e+05,1,1,1.19,Poisson
+feglm (alpaca),1e+05,1,1,0.310000000000002,Poisson
+fepois,1e+05,1,2,0.129999999999995,Poisson
+glmmboot,1e+05,1,2,0.909999999999997,Poisson
+feglm (alpaca),1e+05,1,2,0.259999999999991,Poisson
+fepois,1e+05,1,3,0.139999999999986,Poisson
+glmmboot,1e+05,1,3,0.940000000000026,Poisson
+feglm (alpaca),1e+05,1,3,0.279999999999973,Poisson
+fepois,1e+05,1,4,0.120000000000005,Poisson
+glmmboot,1e+05,1,4,1,Poisson
+feglm (alpaca),1e+05,1,4,0.330000000000013,Poisson
+fepois,1e+05,1,5,0.089999999999975,Poisson
+glmmboot,1e+05,1,5,1,Poisson
+feglm (alpaca),1e+05,1,5,0.330000000000013,Poisson
+fepois,1e+05,1,6,0.109999999999985,Poisson
+glmmboot,1e+05,1,6,0.810000000000002,Poisson
+feglm (alpaca),1e+05,1,6,0.420000000000016,Poisson
+fepois,1e+05,1,7,0.129999999999995,Poisson
+glmmboot,1e+05,1,7,0.810000000000002,Poisson
+feglm (alpaca),1e+05,1,7,0.300000000000011,Poisson
+fepois,1e+05,1,8,0.0999999999999943,Poisson
+glmmboot,1e+05,1,8,1.19,Poisson
+feglm (alpaca),1e+05,1,8,0.310000000000002,Poisson
+fepois,1e+05,1,9,0.179999999999978,Poisson
+glmmboot,1e+05,1,9,0.810000000000002,Poisson
+feglm (alpaca),1e+05,1,9,0.310000000000002,Poisson
+fepois,1e+05,1,10,0.129999999999995,Poisson
+glmmboot,1e+05,1,10,0.820000000000022,Poisson
+feglm (alpaca),1e+05,1,10,0.299999999999983,Poisson
+fepois,1e+05,2,1,0.170000000000016,Poisson
+feglm (alpaca),1e+05,2,1,1.15999999999997,Poisson
+fepois,1e+05,2,2,0.160000000000025,Poisson
+feglm (alpaca),1e+05,2,2,0.860000000000014,Poisson
+fepois,1e+05,2,3,0.169999999999959,Poisson
+feglm (alpaca),1e+05,2,3,0.980000000000018,Poisson
+fepois,1e+05,2,4,0.160000000000025,Poisson
+feglm (alpaca),1e+05,2,4,0.859999999999957,Poisson
+fepois,1e+05,2,5,0.140000000000043,Poisson
+feglm (alpaca),1e+05,2,5,1.10999999999996,Poisson
+fepois,1e+05,2,6,0.150000000000034,Poisson
+feglm (alpaca),1e+05,2,6,0.930000000000007,Poisson
+fepois,1e+05,2,7,0.149999999999977,Poisson
+feglm (alpaca),1e+05,2,7,0.879999999999996,Poisson
+fepois,1e+05,2,8,0.180000000000007,Poisson
+feglm (alpaca),1e+05,2,8,0.879999999999996,Poisson
+fepois,1e+05,2,9,0.170000000000016,Poisson
+feglm (alpaca),1e+05,2,9,0.790000000000021,Poisson
+fepois,1e+05,2,10,0.159999999999968,Poisson
+feglm (alpaca),1e+05,2,10,1.34999999999997,Poisson
+fepois,1e+05,3,1,0.240000000000009,Poisson
+feglm (alpaca),1e+05,3,1,1.30000000000001,Poisson
+fepois,1e+05,3,2,0.20999999999998,Poisson
+feglm (alpaca),1e+05,3,2,1.13,Poisson
+fepois,1e+05,3,3,0.270000000000039,Poisson
+feglm (alpaca),1e+05,3,3,3.20999999999998,Poisson
+fepois,1e+05,3,4,0.25,Poisson
+feglm (alpaca),1e+05,3,4,1.31999999999999,Poisson
+fepois,1e+05,3,5,0.230000000000018,Poisson
+feglm (alpaca),1e+05,3,5,1.61000000000001,Poisson
+fepois,1e+05,3,6,0.199999999999989,Poisson
+feglm (alpaca),1e+05,3,6,1.20999999999998,Poisson
+fepois,1e+05,3,7,0.259999999999991,Poisson
+feglm (alpaca),1e+05,3,7,1.44,Poisson
+fepois,1e+05,3,8,0.25,Poisson
+feglm (alpaca),1e+05,3,8,2.83000000000004,Poisson
+fepois,1e+05,3,9,0.199999999999989,Poisson
+feglm (alpaca),1e+05,3,9,1.13999999999999,Poisson
+fepois,1e+05,3,10,0.25,Poisson
+feglm (alpaca),1e+05,3,10,1.60000000000002,Poisson
+fepois,1e+06,1,1,1.19999999999999,Poisson
+glmmboot,1e+06,1,1,9.57999999999998,Poisson
+feglm (alpaca),1e+06,1,1,3.47000000000003,Poisson
+fepois,1e+06,1,2,1.06,Poisson
+glmmboot,1e+06,1,2,10.17,Poisson
+feglm (alpaca),1e+06,1,2,3.17000000000002,Poisson
+fepois,1e+06,1,3,1,Poisson
+glmmboot,1e+06,1,3,10.04,Poisson
+feglm (alpaca),1e+06,1,3,3.25,Poisson
+fepois,1e+06,1,4,1.10000000000002,Poisson
+glmmboot,1e+06,1,4,10.36,Poisson
+feglm (alpaca),1e+06,1,4,3.12,Poisson
+fepois,1e+06,1,5,1.13,Poisson
+glmmboot,1e+06,1,5,11.39,Poisson
+feglm (alpaca),1e+06,1,5,3.14999999999998,Poisson
+fepois,1e+06,1,6,1.01999999999998,Poisson
+glmmboot,1e+06,1,6,9.64000000000004,Poisson
+feglm (alpaca),1e+06,1,6,3.22999999999996,Poisson
+fepois,1e+06,1,7,1.02000000000004,Poisson
+glmmboot,1e+06,1,7,9.72999999999996,Poisson
+feglm (alpaca),1e+06,1,7,3.55000000000001,Poisson
+fepois,1e+06,1,8,1,Poisson
+glmmboot,1e+06,1,8,9.66000000000003,Poisson
+feglm (alpaca),1e+06,1,8,3.28999999999996,Poisson
+fepois,1e+06,1,9,1.05000000000001,Poisson
+glmmboot,1e+06,1,9,9.76999999999998,Poisson
+feglm (alpaca),1e+06,1,9,3.78000000000003,Poisson
+fepois,1e+06,1,10,1.05000000000001,Poisson
+glmmboot,1e+06,1,10,9.62,Poisson
+feglm (alpaca),1e+06,1,10,3.41999999999996,Poisson
+fepois,1e+06,2,1,1.49000000000001,Poisson
+feglm (alpaca),1e+06,2,1,11.95,Poisson
+fepois,1e+06,2,2,1.69,Poisson
+feglm (alpaca),1e+06,2,2,12.45,Poisson
+fepois,1e+06,2,3,1.5,Poisson
+feglm (alpaca),1e+06,2,3,12.3,Poisson
+fepois,1e+06,2,4,1.92000000000002,Poisson
+feglm (alpaca),1e+06,2,4,27.95,Poisson
+fepois,1e+06,2,5,1.75,Poisson
+feglm (alpaca),1e+06,2,5,13.41,Poisson
+fepois,1e+06,2,6,1.70000000000005,Poisson
+feglm (alpaca),1e+06,2,6,10.83,Poisson
+fepois,1e+06,2,7,1.68999999999994,Poisson
+feglm (alpaca),1e+06,2,7,32.9500000000001,Poisson
+fepois,1e+06,2,8,1.76999999999998,Poisson
+feglm (alpaca),1e+06,2,8,12.42,Poisson
+fepois,1e+06,2,9,1.65000000000009,Poisson
+feglm (alpaca),1e+06,2,9,24.16,Poisson
+fepois,1e+06,2,10,1.54999999999995,Poisson
+feglm (alpaca),1e+06,2,10,11.53,Poisson
+fepois,1e+06,3,1,3.25,Poisson
+feglm (alpaca),1e+06,3,1,50.5100000000001,Poisson
+fepois,1e+06,3,2,3.40999999999997,Poisson
+feglm (alpaca),1e+06,3,2,36.09,Poisson
+fepois,1e+06,3,3,3.07999999999993,Poisson
+feglm (alpaca),1e+06,3,3,22.75,Poisson
+fepois,1e+06,3,4,3.46000000000004,Poisson
+feglm (alpaca),1e+06,3,4,33.01,Poisson
+fepois,1e+06,3,5,3.38999999999999,Poisson
+feglm (alpaca),1e+06,3,5,33.02,Poisson
+fepois,1e+06,3,6,2.97000000000003,Poisson
+feglm (alpaca),1e+06,3,6,20.89,Poisson
+fepois,1e+06,3,7,4.5,Poisson
+feglm (alpaca),1e+06,3,7,35.14,Poisson
+fepois,1e+06,3,8,3.59000000000003,Poisson
+feglm (alpaca),1e+06,3,8,27.8,Poisson
+fepois,1e+06,3,9,3.65000000000009,Poisson
+feglm (alpaca),1e+06,3,9,70.3299999999999,Poisson
+fepois,1e+06,3,10,3.40999999999997,Poisson
+feglm (alpaca),1e+06,3,10,23.8499999999999,Poisson
+ppmlhdfe,1000,1,1,0.859,Poisson
+ppmlhdfe,1000,1,2,0.1,Poisson
+ppmlhdfe,1000,1,3,0.132,Poisson
+ppmlhdfe,1000,1,4,0.111,Poisson
+ppmlhdfe,1000,1,5,0.349,Poisson
+ppmlhdfe,1000,1,6,0.136,Poisson
+ppmlhdfe,1000,1,7,0.113,Poisson
+ppmlhdfe,1000,1,8,0.114,Poisson
+ppmlhdfe,1000,1,9,0.158,Poisson
+ppmlhdfe,1000,1,10,0.131,Poisson
+ppmlhdfe,10000,1,1,0.223,Poisson
+ppmlhdfe,10000,1,2,0.212,Poisson
+ppmlhdfe,10000,1,3,0.219,Poisson
+ppmlhdfe,10000,1,4,0.229,Poisson
+ppmlhdfe,10000,1,5,0.186,Poisson
+ppmlhdfe,10000,1,6,0.23,Poisson
+ppmlhdfe,10000,1,7,0.223,Poisson
+ppmlhdfe,10000,1,8,0.201,Poisson
+ppmlhdfe,10000,1,9,0.258,Poisson
+ppmlhdfe,10000,1,10,0.218,Poisson
+ppmlhdfe,1e+05,1,1,1.137,Poisson
+ppmlhdfe,1e+05,1,2,1.164,Poisson
+ppmlhdfe,1e+05,1,3,1.261,Poisson
+ppmlhdfe,1e+05,1,4,1.194,Poisson
+ppmlhdfe,1e+05,1,5,1.13,Poisson
+ppmlhdfe,1e+05,1,6,1.148,Poisson
+ppmlhdfe,1e+05,1,7,0.932,Poisson
+ppmlhdfe,1e+05,1,8,1.067,Poisson
+ppmlhdfe,1e+05,1,9,1.023,Poisson
+ppmlhdfe,1e+05,1,10,1.052,Poisson
+ppmlhdfe,1e+06,1,1,8.852,Poisson
+ppmlhdfe,1e+06,1,2,8.607,Poisson
+ppmlhdfe,1e+06,1,3,8.501,Poisson
+ppmlhdfe,1e+06,1,4,8.511,Poisson
+ppmlhdfe,1e+06,1,5,8.557,Poisson
+ppmlhdfe,1e+06,1,6,8.7,Poisson
+ppmlhdfe,1e+06,1,7,8.442,Poisson
+ppmlhdfe,1e+06,1,8,8.608,Poisson
+ppmlhdfe,1e+06,1,9,8.63,Poisson
+ppmlhdfe,1e+06,1,10,8.625,Poisson
+ppmlhdfe,1000,2,1,0.174,Poisson
+ppmlhdfe,1000,2,2,0.196,Poisson
+ppmlhdfe,1000,2,3,0.15,Poisson
+ppmlhdfe,1000,2,4,0.154,Poisson
+ppmlhdfe,1000,2,5,0.162,Poisson
+ppmlhdfe,1000,2,6,0.174,Poisson
+ppmlhdfe,1000,2,7,0.241,Poisson
+ppmlhdfe,1000,2,8,0.18,Poisson
+ppmlhdfe,1000,2,9,0.245,Poisson
+ppmlhdfe,1000,2,10,0.202,Poisson
+ppmlhdfe,10000,2,1,0.487,Poisson
+ppmlhdfe,10000,2,2,0.507,Poisson
+ppmlhdfe,10000,2,3,0.463,Poisson
+ppmlhdfe,10000,2,4,0.497,Poisson
+ppmlhdfe,10000,2,5,0.529,Poisson
+ppmlhdfe,10000,2,6,0.569,Poisson
+ppmlhdfe,10000,2,7,0.497,Poisson
+ppmlhdfe,10000,2,8,0.516,Poisson
+ppmlhdfe,10000,2,9,0.549,Poisson
+ppmlhdfe,10000,2,10,0.573,Poisson
+ppmlhdfe,1e+05,2,1,3.104,Poisson
+ppmlhdfe,1e+05,2,2,2.732,Poisson
+ppmlhdfe,1e+05,2,3,2.845,Poisson
+ppmlhdfe,1e+05,2,4,2.885,Poisson
+ppmlhdfe,1e+05,2,5,2.983,Poisson
+ppmlhdfe,1e+05,2,6,2.819,Poisson
+ppmlhdfe,1e+05,2,7,2.94,Poisson
+ppmlhdfe,1e+05,2,8,3.058,Poisson
+ppmlhdfe,1e+05,2,9,3.105,Poisson
+ppmlhdfe,1e+05,2,10,3.039,Poisson
+ppmlhdfe,1e+06,2,1,29.328,Poisson
+ppmlhdfe,1e+06,2,2,29.404,Poisson
+ppmlhdfe,1e+06,2,3,28.297,Poisson
+ppmlhdfe,1e+06,2,4,30.548,Poisson
+ppmlhdfe,1e+06,2,5,28.781,Poisson
+ppmlhdfe,1e+06,2,6,28.49,Poisson
+ppmlhdfe,1e+06,2,7,30.278,Poisson
+ppmlhdfe,1e+06,2,8,29.812,Poisson
+ppmlhdfe,1e+06,2,9,30.51,Poisson
+ppmlhdfe,1e+06,2,10,28.667,Poisson
+ppmlhdfe,1000,3,1,0.258,Poisson
+ppmlhdfe,1000,3,2,0.327,Poisson
+ppmlhdfe,1000,3,3,0.775,Poisson
+ppmlhdfe,1000,3,4,0.345,Poisson
+ppmlhdfe,1000,3,5,0.357,Poisson
+ppmlhdfe,1000,3,6,0.307,Poisson
+ppmlhdfe,1000,3,7,0.313,Poisson
+ppmlhdfe,1000,3,8,0.324,Poisson
+ppmlhdfe,1000,3,9,0.319,Poisson
+ppmlhdfe,1000,3,10,0.29,Poisson
+ppmlhdfe,10000,3,1,0.593,Poisson
+ppmlhdfe,10000,3,2,0.615,Poisson
+ppmlhdfe,10000,3,3,0.571,Poisson
+ppmlhdfe,10000,3,4,0.641,Poisson
+ppmlhdfe,10000,3,5,0.611,Poisson
+ppmlhdfe,10000,3,6,0.753,Poisson
+ppmlhdfe,10000,3,7,0.698,Poisson
+ppmlhdfe,10000,3,8,0.674,Poisson
+ppmlhdfe,10000,3,9,0.722,Poisson
+ppmlhdfe,10000,3,10,0.683,Poisson
+ppmlhdfe,1e+05,3,1,4.67,Poisson
+ppmlhdfe,1e+05,3,2,4.108,Poisson
+ppmlhdfe,1e+05,3,3,4.098,Poisson
+ppmlhdfe,1e+05,3,4,3.927,Poisson
+ppmlhdfe,1e+05,3,5,4.229,Poisson
+ppmlhdfe,1e+05,3,6,3.853,Poisson
+ppmlhdfe,1e+05,3,7,4.235,Poisson
+ppmlhdfe,1e+05,3,8,4.073,Poisson
+ppmlhdfe,1e+05,3,9,3.701,Poisson
+ppmlhdfe,1e+05,3,10,4.04,Poisson
+ppmlhdfe,1e+06,3,1,42.878,Poisson
+ppmlhdfe,1e+06,3,2,44.852,Poisson
+ppmlhdfe,1e+06,3,3,41.611,Poisson
+ppmlhdfe,1e+06,3,4,45.981,Poisson
+ppmlhdfe,1e+06,3,5,43.838,Poisson
+ppmlhdfe,1e+06,3,6,41.265,Poisson
+ppmlhdfe,1e+06,3,7,46.141,Poisson
+ppmlhdfe,1e+06,3,8,45.159,Poisson
+ppmlhdfe,1e+06,3,9,44.397,Poisson
+ppmlhdfe,1e+06,3,10,42.184,Poisson
+fenegbin,1000,1,1,0.0599999999999454,Negative Binomial
+glmnb,1000,1,1,0.190000000000055,Negative Binomial
+fenegbin,1000,1,2,0.0299999999999727,Negative Binomial
+glmnb,1000,1,2,0.149999999999864,Negative Binomial
+fenegbin,1000,1,3,0.0700000000001637,Negative Binomial
+glmnb,1000,1,3,0.139999999999873,Negative Binomial
+fenegbin,1000,1,4,0.0299999999999727,Negative Binomial
+glmnb,1000,1,4,0.190000000000055,Negative Binomial
+fenegbin,1000,1,5,0.0399999999999636,Negative Binomial
+glmnb,1000,1,5,0.110000000000127,Negative Binomial
+fenegbin,1000,1,6,0.0499999999999545,Negative Binomial
+glmnb,1000,1,6,0.119999999999891,Negative Binomial
+fenegbin,1000,1,7,0.0399999999999636,Negative Binomial
+glmnb,1000,1,7,0.220000000000027,Negative Binomial
+fenegbin,1000,1,8,0.0600000000001728,Negative Binomial
+glmnb,1000,1,8,0.159999999999854,Negative Binomial
+fenegbin,1000,1,9,0.0499999999999545,Negative Binomial
+glmnb,1000,1,9,0.340000000000146,Negative Binomial
+fenegbin,1000,1,10,0.0299999999999727,Negative Binomial
+glmnb,1000,1,10,0.160000000000082,Negative Binomial
+fenegbin,1000,2,1,0.0799999999999272,Negative Binomial
+glmnb,1000,2,1,0.299999999999955,Negative Binomial
+fenegbin,1000,2,2,0.0799999999999272,Negative Binomial
+glmnb,1000,2,2,0.570000000000164,Negative Binomial
+fenegbin,1000,2,3,0.0999999999999091,Negative Binomial
+glmnb,1000,2,3,0.339999999999918,Negative Binomial
+fenegbin,1000,2,4,0.0800000000001546,Negative Binomial
+glmnb,1000,2,4,0.710000000000036,Negative Binomial
+fenegbin,1000,2,5,0.0899999999999182,Negative Binomial
+glmnb,1000,2,5,0.529999999999973,Negative Binomial
+fenegbin,1000,2,6,0.0799999999999272,Negative Binomial
+glmnb,1000,2,6,0.630000000000109,Negative Binomial
+fenegbin,1000,2,7,0.0699999999999363,Negative Binomial
+glmnb,1000,2,7,0.410000000000082,Negative Binomial
+fenegbin,1000,2,8,0.0599999999999454,Negative Binomial
+glmnb,1000,2,8,0.480000000000018,Negative Binomial
+fenegbin,1000,2,9,0.110000000000127,Negative Binomial
+glmnb,1000,2,9,0.5,Negative Binomial
+fenegbin,1000,2,10,0.0799999999999272,Negative Binomial
+glmnb,1000,2,10,0.569999999999936,Negative Binomial
+fenegbin,1000,3,1,0.130000000000109,Negative Binomial
+glmnb,1000,3,1,0.369999999999891,Negative Binomial
+fenegbin,1000,3,2,0.130000000000109,Negative Binomial
+glmnb,1000,3,2,0.659999999999855,Negative Binomial
+fenegbin,1000,3,3,0.120000000000118,Negative Binomial
+glmnb,1000,3,3,0.660000000000082,Negative Binomial
+fenegbin,1000,3,4,0.1099999999999,Negative Binomial
+glmnb,1000,3,4,0.559999999999945,Negative Binomial
+fenegbin,1000,3,5,0.100000000000136,Negative Binomial
+glmnb,1000,3,5,0.659999999999855,Negative Binomial
+fenegbin,1000,3,6,0.110000000000127,Negative Binomial
+glmnb,1000,3,6,0.75,Negative Binomial
+fenegbin,1000,3,7,0.119999999999891,Negative Binomial
+glmnb,1000,3,7,0.610000000000127,Negative Binomial
+fenegbin,1000,3,8,0.1099999999999,Negative Binomial
+glmnb,1000,3,8,0.660000000000082,Negative Binomial
+fenegbin,1000,3,9,0.119999999999891,Negative Binomial
+glmnb,1000,3,9,0.860000000000127,Negative Binomial
+fenegbin,1000,3,10,0.129999999999882,Negative Binomial
+glmnb,1000,3,10,0.590000000000146,Negative Binomial
+fenegbin,10000,1,1,0.0999999999999091,Negative Binomial
+glmnb,10000,1,1,74.3399999999999,Negative Binomial
+fenegbin,10000,1,2,0.110000000000127,Negative Binomial
+glmnb,10000,1,2,78.76,Negative Binomial
+fenegbin,10000,1,3,0.0999999999999091,Negative Binomial
+glmnb,10000,1,3,72.48,Negative Binomial
+fenegbin,10000,1,4,0.0799999999999272,Negative Binomial
+glmnb,10000,1,4,86.3800000000001,Negative Binomial
+fenegbin,10000,1,5,0.0699999999999363,Negative Binomial
+glmnb,10000,1,5,75.1100000000001,Negative Binomial
+fenegbin,10000,1,6,0.0999999999999091,Negative Binomial
+glmnb,10000,1,6,69.01,Negative Binomial
+fenegbin,10000,1,7,0.100000000000136,Negative Binomial
+glmnb,10000,1,7,82.04,Negative Binomial
+fenegbin,10000,1,8,0.0999999999999091,Negative Binomial
+glmnb,10000,1,8,77.81,Negative Binomial
+fenegbin,10000,1,9,0.0900000000001455,Negative Binomial
+glmnb,10000,1,9,76.8599999999999,Negative Binomial
+fenegbin,10000,1,10,0.100000000000136,Negative Binomial
+glmnb,10000,1,10,94.8999999999999,Negative Binomial
+fenegbin,10000,2,1,0.240000000000009,Negative Binomial
+glmnb,10000,2,1,111.23,Negative Binomial
+fenegbin,10000,2,2,0.220000000000027,Negative Binomial
+glmnb,10000,2,2,161.84,Negative Binomial
+fenegbin,10000,2,3,0.269999999999982,Negative Binomial
+glmnb,10000,2,3,112.83,Negative Binomial
+fenegbin,10000,2,4,0.2199999999998,Negative Binomial
+glmnb,10000,2,4,126.5,Negative Binomial
+fenegbin,10000,2,5,0.200000000000273,Negative Binomial
+glmnb,10000,2,5,120.48,Negative Binomial
+fenegbin,10000,2,6,0.2199999999998,Negative Binomial
+glmnb,10000,2,6,120.58,Negative Binomial
+fenegbin,10000,2,7,0.220000000000255,Negative Binomial
+glmnb,10000,2,7,128.93,Negative Binomial
+fenegbin,10000,2,8,0.220000000000255,Negative Binomial
+glmnb,10000,2,8,131.6,Negative Binomial
+fenegbin,10000,2,9,0.210000000000036,Negative Binomial
+glmnb,10000,2,9,137.88,Negative Binomial
+fenegbin,10000,2,10,0.260000000000218,Negative Binomial
+glmnb,10000,2,10,122.83,Negative Binomial
+fenegbin,10000,3,1,0.360000000000127,Negative Binomial
+glmnb,10000,3,1,119.22,Negative Binomial
+fenegbin,10000,3,2,0.300000000000182,Negative Binomial
+glmnb,10000,3,2,130.98,Negative Binomial
+fenegbin,10000,3,3,0.279999999999745,Negative Binomial
+glmnb,10000,3,3,106.5,Negative Binomial
+fenegbin,10000,3,4,0.3100000000004,Negative Binomial
+glmnb,10000,3,4,158.39,Negative Binomial
+fenegbin,10000,3,5,0.360000000000127,Negative Binomial
+glmnb,10000,3,5,118.13,Negative Binomial
+fenegbin,10000,3,6,0.289999999999964,Negative Binomial
+glmnb,10000,3,6,112.8,Negative Binomial
+fenegbin,10000,3,7,0.300000000000182,Negative Binomial
+glmnb,10000,3,7,137.01,Negative Binomial
+fenegbin,10000,3,8,0.329999999999927,Negative Binomial
+glmnb,10000,3,8,125.91,Negative Binomial
+fenegbin,10000,3,9,0.289999999999964,Negative Binomial
+glmnb,10000,3,9,130.940000000001,Negative Binomial
+fenegbin,10000,3,10,0.300000000000182,Negative Binomial
+glmnb,10000,3,10,140,Negative Binomial
+fenegbin,1e+05,1,1,0.469999999999345,Negative Binomial
+fenegbin,1e+05,1,2,0.5,Negative Binomial
+fenegbin,1e+05,1,3,0.480000000000473,Negative Binomial
+fenegbin,1e+05,1,4,0.5,Negative Binomial
+fenegbin,1e+05,1,5,0.469999999999345,Negative Binomial
+fenegbin,1e+05,1,6,0.480000000000473,Negative Binomial
+fenegbin,1e+05,1,7,0.569999999999709,Negative Binomial
+fenegbin,1e+05,1,8,0.470000000000255,Negative Binomial
+fenegbin,1e+05,1,9,0.569999999999709,Negative Binomial
+fenegbin,1e+05,1,10,0.5,Negative Binomial
+fenegbin,1e+05,2,1,1.57999999999993,Negative Binomial
+fenegbin,1e+05,2,2,1.55000000000018,Negative Binomial
+fenegbin,1e+05,2,3,1.5,Negative Binomial
+fenegbin,1e+05,2,4,1.48999999999978,Negative Binomial
+fenegbin,1e+05,2,5,1.48000000000047,Negative Binomial
+fenegbin,1e+05,2,6,1.51999999999953,Negative Binomial
+fenegbin,1e+05,2,7,1.5600000000004,Negative Binomial
+fenegbin,1e+05,2,8,1.55999999999949,Negative Binomial
+fenegbin,1e+05,2,9,1.5,Negative Binomial
+fenegbin,1e+05,2,10,1.52000000000044,Negative Binomial
+fenegbin,1e+05,3,1,2.17000000000007,Negative Binomial
+fenegbin,1e+05,3,2,2.34999999999945,Negative Binomial
+fenegbin,1e+05,3,3,2.14000000000033,Negative Binomial
+fenegbin,1e+05,3,4,2.17000000000007,Negative Binomial
+fenegbin,1e+05,3,5,2.22999999999956,Negative Binomial
+fenegbin,1e+05,3,6,2.14000000000033,Negative Binomial
+fenegbin,1e+05,3,7,2.17000000000007,Negative Binomial
+fenegbin,1e+05,3,8,2.25,Negative Binomial
+fenegbin,1e+05,3,9,2.06999999999971,Negative Binomial
+fenegbin,1e+05,3,10,2.18000000000029,Negative Binomial
+fenegbin,1e+06,1,1,4.80000000000018,Negative Binomial
+fenegbin,1e+06,1,2,4.75,Negative Binomial
+fenegbin,1e+06,1,3,5.75,Negative Binomial
+fenegbin,1e+06,1,4,4.6899999999996,Negative Binomial
+fenegbin,1e+06,1,5,4.82999999999993,Negative Binomial
+fenegbin,1e+06,1,6,4.77999999999975,Negative Binomial
+fenegbin,1e+06,1,7,4.61000000000058,Negative Binomial
+fenegbin,1e+06,1,8,4.57999999999993,Negative Binomial
+fenegbin,1e+06,1,9,4.84000000000015,Negative Binomial
+fenegbin,1e+06,1,10,4.80000000000018,Negative Binomial
+fenegbin,1e+06,2,1,16.54,Negative Binomial
+fenegbin,1e+06,2,2,16.1899999999996,Negative Binomial
+fenegbin,1e+06,2,3,16.6600000000008,Negative Binomial
+fenegbin,1e+06,2,4,16.5499999999993,Negative Binomial
+fenegbin,1e+06,2,5,16.5,Negative Binomial
+fenegbin,1e+06,2,6,16.5100000000002,Negative Binomial
+fenegbin,1e+06,2,7,16.4099999999999,Negative Binomial
+fenegbin,1e+06,2,8,16.3900000000003,Negative Binomial
+fenegbin,1e+06,2,9,16.5900000000001,Negative Binomial
+fenegbin,1e+06,2,10,16.4899999999998,Negative Binomial
+fenegbin,1e+06,3,1,25.2600000000002,Negative Binomial
+fenegbin,1e+06,3,2,25.2699999999995,Negative Binomial
+fenegbin,1e+06,3,3,24.8400000000001,Negative Binomial
+fenegbin,1e+06,3,4,25.4899999999998,Negative Binomial
+fenegbin,1e+06,3,5,25.1800000000003,Negative Binomial
+fenegbin,1e+06,3,6,25.3599999999997,Negative Binomial
+fenegbin,1e+06,3,7,24.9200000000001,Negative Binomial
+fenegbin,1e+06,3,8,25.25,Negative Binomial
+fenegbin,1e+06,3,9,25.25,Negative Binomial
+fenegbin,1e+06,3,10,23.5,Negative Binomial
+nbreg,1000,1,1,1.808,Negative Binomial
+nbreg,1000,1,2,1.55,Negative Binomial
+nbreg,1000,1,3,1.483,Negative Binomial
+nbreg,1000,1,4,1.163,Negative Binomial
+nbreg,1000,1,5,1.263,Negative Binomial
+nbreg,1000,1,6,1.293,Negative Binomial
+nbreg,1000,1,7,1.355,Negative Binomial
+nbreg,1000,1,8,1.326,Negative Binomial
+nbreg,1000,1,9,1.361,Negative Binomial
+nbreg,1000,1,10,1.178,Negative Binomial
+nbreg,10000,1,1,16.925,Negative Binomial
+nbreg,10000,1,2,13.764,Negative Binomial
+nbreg,10000,1,3,17.9,Negative Binomial
+nbreg,10000,1,4,21.834,Negative Binomial
+nbreg,10000,1,5,18.828,Negative Binomial
+nbreg,10000,1,6,27.417,Negative Binomial
+nbreg,10000,1,7,15.552,Negative Binomial
+nbreg,10000,1,8,18.719,Negative Binomial
+nbreg,10000,1,9,22.05,Negative Binomial
+nbreg,10000,1,10,27.956,Negative Binomial
+nbreg,1000,2,1,1.643,Negative Binomial
+nbreg,1000,2,2,2.625,Negative Binomial
+nbreg,1000,2,3,2.134,Negative Binomial
+nbreg,1000,2,4,1.758,Negative Binomial
+nbreg,1000,2,5,2.051,Negative Binomial
+nbreg,1000,2,6,1.818,Negative Binomial
+nbreg,1000,2,7,1.924,Negative Binomial
+nbreg,1000,2,8,2.112,Negative Binomial
+nbreg,1000,2,9,1.893,Negative Binomial
+nbreg,1000,2,10,1.644,Negative Binomial
+nbreg,10000,2,1,29.671,Negative Binomial
+nbreg,10000,2,2,22.673,Negative Binomial
+nbreg,10000,2,3,29.691,Negative Binomial
+nbreg,10000,2,4,33.276,Negative Binomial
+nbreg,10000,2,5,31.061,Negative Binomial
+nbreg,10000,2,6,62.723,Negative Binomial
+nbreg,10000,2,7,27.47,Negative Binomial
+nbreg,10000,2,8,34.795,Negative Binomial
+nbreg,10000,2,9,40.807,Negative Binomial
+nbreg,10000,2,10,32.757,Negative Binomial
+nbreg,1000,3,1,2.157,Negative Binomial
+nbreg,1000,3,2,2.457,Negative Binomial
+nbreg,1000,3,3,2.547,Negative Binomial
+nbreg,1000,3,4,2.077,Negative Binomial
+nbreg,1000,3,5,2.272,Negative Binomial
+nbreg,1000,3,6,1.885,Negative Binomial
+nbreg,1000,3,7,2.298,Negative Binomial
+nbreg,1000,3,8,2.164,Negative Binomial
+nbreg,1000,3,9,2.368,Negative Binomial
+nbreg,1000,3,10,1.967,Negative Binomial
+nbreg,10000,3,1,33.113,Negative Binomial
+nbreg,10000,3,2,35.254,Negative Binomial
+nbreg,10000,3,3,43.833,Negative Binomial
+nbreg,10000,3,4,42.31,Negative Binomial
+nbreg,10000,3,5,38.089,Negative Binomial
+nbreg,10000,3,6,64.055,Negative Binomial
+nbreg,10000,3,7,31.486,Negative Binomial
+nbreg,10000,3,8,40.131,Negative Binomial
+nbreg,10000,3,9,45.776,Negative Binomial
+nbreg,10000,3,10,48.864,Negative Binomial
+feglm (fixest),1000,1,1,0.0200000000004366,Logit
+glmmboot,1000,1,1,0.0299999999997453,Logit
+feglm (alpaca),1000,1,1,0,Logit
+feglm (fixest),1000,1,2,0.00999999999930878,Logit
+glmmboot,1000,1,2,0.0300000000006548,Logit
+feglm (alpaca),1000,1,2,0,Logit
+feglm (fixest),1000,1,3,0.0100000000002183,Logit
+glmmboot,1000,1,3,0.0199999999995271,Logit
+feglm (alpaca),1000,1,3,0.0200000000004366,Logit
+feglm (fixest),1000,1,4,0.0100000000002183,Logit
+glmmboot,1000,1,4,0.0199999999995271,Logit
+feglm (alpaca),1000,1,4,0.0100000000002183,Logit
+feglm (fixest),1000,1,5,0,Logit
+glmmboot,1000,1,5,0.0500000000001819,Logit
+feglm (alpaca),1000,1,5,0,Logit
+feglm (fixest),1000,1,6,0.0199999999995271,Logit
+glmmboot,1000,1,6,0.0300000000006548,Logit
+feglm (alpaca),1000,1,6,0.00999999999930878,Logit
+feglm (fixest),1000,1,7,0,Logit
+glmmboot,1000,1,7,0.0299999999997453,Logit
+feglm (alpaca),1000,1,7,0,Logit
+feglm (fixest),1000,1,8,0.0100000000002183,Logit
+glmmboot,1000,1,8,0.0399999999999636,Logit
+feglm (alpaca),1000,1,8,0.0100000000002183,Logit
+feglm (fixest),1000,1,9,0.0199999999995271,Logit
+glmmboot,1000,1,9,0.0100000000002183,Logit
+feglm (alpaca),1000,1,9,0,Logit
+feglm (fixest),1000,1,10,0.00999999999930878,Logit
+glmmboot,1000,1,10,0.0399999999999636,Logit
+feglm (alpaca),1000,1,10,0.0100000000002183,Logit
+feglm (fixest),1000,2,1,0.0299999999997453,Logit
+feglm (alpaca),1000,2,1,0.0200000000004366,Logit
+feglm (fixest),1000,2,2,0.0299999999997453,Logit
+feglm (alpaca),1000,2,2,0.0299999999997453,Logit
+feglm (fixest),1000,2,3,0.0300000000006548,Logit
+feglm (alpaca),1000,2,3,0.0199999999995271,Logit
+feglm (fixest),1000,2,4,0.0300000000006548,Logit
+feglm (alpaca),1000,2,4,0.00999999999930878,Logit
+feglm (fixest),1000,2,5,0.0399999999999636,Logit
+feglm (alpaca),1000,2,5,0.0300000000006548,Logit
+feglm (fixest),1000,2,6,0.0299999999997453,Logit
+feglm (alpaca),1000,2,6,0.0100000000002183,Logit
+feglm (fixest),1000,2,7,0.0299999999997453,Logit
+feglm (alpaca),1000,2,7,0.0199999999995271,Logit
+feglm (fixest),1000,2,8,0.0300000000006548,Logit
+feglm (alpaca),1000,2,8,0.0199999999995271,Logit
+feglm (fixest),1000,2,9,0.0399999999999636,Logit
+feglm (alpaca),1000,2,9,0.0200000000004366,Logit
+feglm (fixest),1000,2,10,0.0299999999997453,Logit
+feglm (alpaca),1000,2,10,0.0200000000004366,Logit
+feglm (fixest),1000,3,1,0.0299999999997453,Logit
+feglm (alpaca),1000,3,1,0.0299999999997453,Logit
+feglm (fixest),1000,3,2,0.0399999999999636,Logit
+feglm (alpaca),1000,3,2,0.0100000000002183,Logit
+feglm (fixest),1000,3,3,0.0300000000006548,Logit
+feglm (alpaca),1000,3,3,0.00999999999930878,Logit
+feglm (fixest),1000,3,4,0.0399999999999636,Logit
+feglm (alpaca),1000,3,4,0.0300000000006548,Logit
+feglm (fixest),1000,3,5,0.0299999999997453,Logit
+feglm (alpaca),1000,3,5,0.0299999999997453,Logit
+feglm (fixest),1000,3,6,0.0299999999997453,Logit
+feglm (alpaca),1000,3,6,0.0300000000006548,Logit
+feglm (fixest),1000,3,7,0.0299999999997453,Logit
+feglm (alpaca),1000,3,7,0.0299999999997453,Logit
+feglm (fixest),1000,3,8,0.0399999999999636,Logit
+feglm (alpaca),1000,3,8,0.0100000000002183,Logit
+feglm (fixest),1000,3,9,0.0299999999997453,Logit
+feglm (alpaca),1000,3,9,0.0100000000002183,Logit
+feglm (fixest),1000,3,10,0.0299999999997453,Logit
+feglm (alpaca),1000,3,10,0.0399999999999636,Logit
+feglm (fixest),10000,1,1,0.0299999999997453,Logit
+glmmboot,10000,1,1,0.260000000000218,Logit
+feglm (alpaca),10000,1,1,0.0299999999997453,Logit
+feglm (fixest),10000,1,2,0.0399999999999636,Logit
+glmmboot,10000,1,2,0.180000000000291,Logit
+feglm (alpaca),10000,1,2,0.00999999999930878,Logit
+feglm (fixest),10000,1,3,0.0299999999997453,Logit
+glmmboot,10000,1,3,0.199999999999818,Logit
+feglm (alpaca),10000,1,3,0.0199999999995271,Logit
+feglm (fixest),10000,1,4,0.0399999999999636,Logit
+glmmboot,10000,1,4,0.220000000000255,Logit
+feglm (alpaca),10000,1,4,0.0299999999997453,Logit
+feglm (fixest),10000,1,5,0.0300000000006548,Logit
+glmmboot,10000,1,5,0.25,Logit
+feglm (alpaca),10000,1,5,0.0299999999997453,Logit
+feglm (fixest),10000,1,6,0.0500000000001819,Logit
+glmmboot,10000,1,6,0.220000000000255,Logit
+feglm (alpaca),10000,1,6,0.0299999999997453,Logit
+feglm (fixest),10000,1,7,0.0300000000006548,Logit
+glmmboot,10000,1,7,0.279999999999745,Logit
+feglm (alpaca),10000,1,7,0.0599999999994907,Logit
+feglm (fixest),10000,1,8,0.0300000000006548,Logit
+glmmboot,10000,1,8,0.210000000000036,Logit
+feglm (alpaca),10000,1,8,0.0300000000006548,Logit
+feglm (fixest),10000,1,9,0.0299999999997453,Logit
+glmmboot,10000,1,9,0.210000000000036,Logit
+feglm (alpaca),10000,1,9,0.0299999999997453,Logit
+feglm (fixest),10000,1,10,0.0500000000001819,Logit
+glmmboot,10000,1,10,0.210000000000036,Logit
+feglm (alpaca),10000,1,10,0.0399999999999636,Logit
+feglm (fixest),10000,2,1,0.0399999999999636,Logit
+feglm (alpaca),10000,2,1,0.0500000000001819,Logit
+feglm (fixest),10000,2,2,0.0299999999997453,Logit
+feglm (alpaca),10000,2,2,0.0299999999997453,Logit
+feglm (fixest),10000,2,3,0.0399999999999636,Logit
+feglm (alpaca),10000,2,3,0.0500000000001819,Logit
+feglm (fixest),10000,2,4,0.0299999999997453,Logit
+feglm (alpaca),10000,2,4,0.0500000000001819,Logit
+feglm (fixest),10000,2,5,0.0500000000001819,Logit
+feglm (alpaca),10000,2,5,0.0399999999999636,Logit
+feglm (fixest),10000,2,6,0.0299999999997453,Logit
+feglm (alpaca),10000,2,6,0.0500000000001819,Logit
+feglm (fixest),10000,2,7,0.0500000000001819,Logit
+feglm (alpaca),10000,2,7,0.0499999999992724,Logit
+feglm (fixest),10000,2,8,0.0600000000004002,Logit
+feglm (alpaca),10000,2,8,0.0399999999999636,Logit
+feglm (fixest),10000,2,9,0.0500000000001819,Logit
+feglm (alpaca),10000,2,9,0.0500000000001819,Logit
+feglm (fixest),10000,2,10,0.0499999999992724,Logit
+feglm (alpaca),10000,2,10,0.0399999999999636,Logit
+feglm (fixest),10000,3,1,0.0500000000001819,Logit
+feglm (alpaca),10000,3,1,0.0799999999999272,Logit
+feglm (fixest),10000,3,2,0.0399999999999636,Logit
+feglm (alpaca),10000,3,2,0.0500000000001819,Logit
+feglm (fixest),10000,3,3,0.0500000000001819,Logit
+feglm (alpaca),10000,3,3,0.0599999999994907,Logit
+feglm (fixest),10000,3,4,0.0500000000001819,Logit
+feglm (alpaca),10000,3,4,0.0600000000004002,Logit
+feglm (fixest),10000,3,5,0.0500000000001819,Logit
+feglm (alpaca),10000,3,5,0.0399999999999636,Logit
+feglm (fixest),10000,3,6,0.0499999999992724,Logit
+feglm (alpaca),10000,3,6,0.0600000000004002,Logit
+feglm (fixest),10000,3,7,0.0500000000001819,Logit
+feglm (alpaca),10000,3,7,0.0599999999994907,Logit
+feglm (fixest),10000,3,8,0.0500000000001819,Logit
+feglm (alpaca),10000,3,8,0.0600000000004002,Logit
+feglm (fixest),10000,3,9,0.0299999999997453,Logit
+feglm (alpaca),10000,3,9,0.069999999999709,Logit
+feglm (fixest),10000,3,10,0.0399999999999636,Logit
+feglm (alpaca),10000,3,10,0.0600000000004002,Logit
+feglm (fixest),1e+05,1,1,0.100000000000364,Logit
+glmmboot,1e+05,1,1,2.38999999999942,Logit
+feglm (alpaca),1e+05,1,1,0.25,Logit
+feglm (fixest),1e+05,1,2,0.149999999999636,Logit
+glmmboot,1e+05,1,2,2.39000000000033,Logit
+feglm (alpaca),1e+05,1,2,0.279999999999745,Logit
+feglm (fixest),1e+05,1,3,0.110000000000582,Logit
+glmmboot,1e+05,1,3,2.30999999999949,Logit
+feglm (alpaca),1e+05,1,3,0.260000000000218,Logit
+feglm (fixest),1e+05,1,4,0.109999999999673,Logit
+glmmboot,1e+05,1,4,2.38000000000011,Logit
+feglm (alpaca),1e+05,1,4,0.420000000000073,Logit
+feglm (fixest),1e+05,1,5,0.130000000000109,Logit
+glmmboot,1e+05,1,5,2.35999999999967,Logit
+feglm (alpaca),1e+05,1,5,0.280000000000655,Logit
+feglm (fixest),1e+05,1,6,0.119999999999891,Logit
+glmmboot,1e+05,1,6,2.48999999999978,Logit
+feglm (alpaca),1e+05,1,6,0.279999999999745,Logit
+feglm (fixest),1e+05,1,7,0.110000000000582,Logit
+glmmboot,1e+05,1,7,2.55999999999949,Logit
+feglm (alpaca),1e+05,1,7,0.289999999999964,Logit
+feglm (fixest),1e+05,1,8,0.149999999999636,Logit
+glmmboot,1e+05,1,8,2.44000000000051,Logit
+feglm (alpaca),1e+05,1,8,0.269999999999527,Logit
+feglm (fixest),1e+05,1,9,0.140000000000327,Logit
+glmmboot,1e+05,1,9,2.46000000000004,Logit
+feglm (alpaca),1e+05,1,9,0.269999999999527,Logit
+feglm (fixest),1e+05,1,10,0.0900000000001455,Logit
+glmmboot,1e+05,1,10,2.52999999999975,Logit
+feglm (alpaca),1e+05,1,10,0.3100000000004,Logit
+feglm (fixest),1e+05,2,1,0.130000000000109,Logit
+feglm (alpaca),1e+05,2,1,0.4399999999996,Logit
+feglm (fixest),1e+05,2,2,0.119999999999891,Logit
+feglm (alpaca),1e+05,2,2,0.470000000000255,Logit
+feglm (fixest),1e+05,2,3,0.170000000000073,Logit
+feglm (alpaca),1e+05,2,3,0.409999999999855,Logit
+feglm (fixest),1e+05,2,4,0.140000000000327,Logit
+feglm (alpaca),1e+05,2,4,0.4399999999996,Logit
+feglm (fixest),1e+05,2,5,0.149999999999636,Logit
+feglm (alpaca),1e+05,2,5,0.420000000000073,Logit
+feglm (fixest),1e+05,2,6,0.130000000000109,Logit
+feglm (alpaca),1e+05,2,6,0.440000000000509,Logit
+feglm (fixest),1e+05,2,7,0.139999999999418,Logit
+feglm (alpaca),1e+05,2,7,0.460000000000036,Logit
+feglm (fixest),1e+05,2,8,0.119999999999891,Logit
+feglm (alpaca),1e+05,2,8,0.429999999999382,Logit
+feglm (fixest),1e+05,2,9,0.159999999999854,Logit
+feglm (alpaca),1e+05,2,9,0.410000000000764,Logit
+feglm (fixest),1e+05,2,10,0.170000000000073,Logit
+feglm (alpaca),1e+05,2,10,0.4399999999996,Logit
+feglm (fixest),1e+05,3,1,0.149999999999636,Logit
+feglm (alpaca),1e+05,3,1,0.640000000000327,Logit
+feglm (fixest),1e+05,3,2,0.159999999999854,Logit
+feglm (alpaca),1e+05,3,2,0.659999999999855,Logit
+feglm (fixest),1e+05,3,3,0.170000000000073,Logit
+feglm (alpaca),1e+05,3,3,0.510000000000218,Logit
+feglm (fixest),1e+05,3,4,0.139999999999418,Logit
+feglm (alpaca),1e+05,3,4,0.579999999999927,Logit
+feglm (fixest),1e+05,3,5,0.1899999999996,Logit
+feglm (alpaca),1e+05,3,5,0.610000000000582,Logit
+feglm (fixest),1e+05,3,6,0.170000000000073,Logit
+feglm (alpaca),1e+05,3,6,0.599999999999454,Logit
+feglm (fixest),1e+05,3,7,0.150000000000546,Logit
+feglm (alpaca),1e+05,3,7,0.610000000000582,Logit
+feglm (fixest),1e+05,3,8,0.219999999999345,Logit
+feglm (alpaca),1e+05,3,8,0.590000000000146,Logit
+feglm (fixest),1e+05,3,9,0.159999999999854,Logit
+feglm (alpaca),1e+05,3,9,0.570000000000619,Logit
+feglm (fixest),1e+05,3,10,0.179999999999382,Logit
+feglm (alpaca),1e+05,3,10,0.600000000000364,Logit
+feglm (fixest),1e+06,1,1,0.9399999999996,Logit
+glmmboot,1e+06,1,1,31.0300000000007,Logit
+feglm (alpaca),1e+06,1,1,2.67000000000007,Logit
+feglm (fixest),1e+06,1,2,0.989999999999782,Logit
+glmmboot,1e+06,1,2,27.75,Logit
+feglm (alpaca),1e+06,1,2,2.71000000000004,Logit
+feglm (fixest),1e+06,1,3,1.14000000000033,Logit
+glmmboot,1e+06,1,3,27.5799999999999,Logit
+feglm (alpaca),1e+06,1,3,3.0600000000004,Logit
+feglm (fixest),1e+06,1,4,1.1899999999996,Logit
+glmmboot,1e+06,1,4,29.2600000000002,Logit
+feglm (alpaca),1e+06,1,4,2.69999999999982,Logit
+feglm (fixest),1e+06,1,5,1.17000000000007,Logit
+glmmboot,1e+06,1,5,27.6700000000001,Logit
+feglm (alpaca),1e+06,1,5,2.82999999999993,Logit
+feglm (fixest),1e+06,1,6,1.15000000000055,Logit
+glmmboot,1e+06,1,6,29.2799999999997,Logit
+feglm (alpaca),1e+06,1,6,2.93000000000029,Logit
+feglm (fixest),1e+06,1,7,0.980000000000473,Logit
+glmmboot,1e+06,1,7,27.5,Logit
+feglm (alpaca),1e+06,1,7,2.86999999999989,Logit
+feglm (fixest),1e+06,1,8,0.970000000000255,Logit
+glmmboot,1e+06,1,8,28.6099999999997,Logit
+feglm (alpaca),1e+06,1,8,2.89999999999964,Logit
+feglm (fixest),1e+06,1,9,1,Logit
+glmmboot,1e+06,1,9,32.7200000000003,Logit
+feglm (alpaca),1e+06,1,9,2.88999999999942,Logit
+feglm (fixest),1e+06,1,10,0.970000000000255,Logit
+glmmboot,1e+06,1,10,27.54,Logit
+feglm (alpaca),1e+06,1,10,2.86999999999989,Logit
+feglm (fixest),1e+06,2,1,1.22000000000025,Logit
+feglm (alpaca),1e+06,2,1,5.25,Logit
+feglm (fixest),1e+06,2,2,1.21000000000004,Logit
+feglm (alpaca),1e+06,2,2,5.25,Logit
+feglm (fixest),1e+06,2,3,1.22000000000025,Logit
+feglm (alpaca),1e+06,2,3,5.23000000000047,Logit
+feglm (fixest),1e+06,2,4,1.22000000000025,Logit
+feglm (alpaca),1e+06,2,4,5.11000000000058,Logit
+feglm (fixest),1e+06,2,5,1.42999999999938,Logit
+feglm (alpaca),1e+06,2,5,5.09000000000015,Logit
+feglm (fixest),1e+06,2,6,1.25,Logit
+feglm (alpaca),1e+06,2,6,5.28999999999996,Logit
+feglm (fixest),1e+06,2,7,1.22000000000025,Logit
+feglm (alpaca),1e+06,2,7,5.11000000000058,Logit
+feglm (fixest),1e+06,2,8,1.25,Logit
+feglm (alpaca),1e+06,2,8,5.32999999999993,Logit
+feglm (fixest),1e+06,2,9,1.22000000000025,Logit
+feglm (alpaca),1e+06,2,9,5.19999999999982,Logit
+feglm (fixest),1e+06,2,10,1.46000000000004,Logit
+feglm (alpaca),1e+06,2,10,5.09000000000015,Logit
+feglm (fixest),1e+06,3,1,1.81999999999971,Logit
+feglm (alpaca),1e+06,3,1,8.97000000000026,Logit
+feglm (fixest),1e+06,3,2,1.76999999999953,Logit
+feglm (alpaca),1e+06,3,2,9.22000000000025,Logit
+feglm (fixest),1e+06,3,3,1.80999999999949,Logit
+feglm (alpaca),1e+06,3,3,8.82999999999993,Logit
+feglm (fixest),1e+06,3,4,1.64999999999964,Logit
+feglm (alpaca),1e+06,3,4,8.84000000000015,Logit
+feglm (fixest),1e+06,3,5,1.77999999999975,Logit
+feglm (alpaca),1e+06,3,5,8.67000000000007,Logit
+feglm (fixest),1e+06,3,6,1.67000000000007,Logit
+feglm (alpaca),1e+06,3,6,8.01000000000022,Logit
+feglm (fixest),1e+06,3,7,1.64000000000033,Logit
+feglm (alpaca),1e+06,3,7,9.13000000000011,Logit
+feglm (fixest),1e+06,3,8,1.67000000000007,Logit
+feglm (alpaca),1e+06,3,8,8.96000000000004,Logit
+feglm (fixest),1e+06,3,9,1.82999999999993,Logit
+feglm (alpaca),1e+06,3,9,8.72000000000026,Logit
+feglm (fixest),1e+06,3,10,1.6899999999996,Logit
+feglm (alpaca),1e+06,3,10,8.10999999999967,Logit
+logit,1000,1,1,0.445,Logit
+logit,1000,1,2,0.348,Logit
+logit,1000,1,3,0.31,Logit
+logit,1000,1,4,0.336,Logit
+logit,1000,1,5,0.316,Logit
+logit,1000,1,6,0.328,Logit
+logit,1000,1,7,0.327,Logit
+logit,1000,1,8,0.318,Logit
+logit,1000,1,9,0.314,Logit
+logit,1000,1,10,0.32,Logit
+logit,10000,1,1,5.124,Logit
+logit,10000,1,2,4.647,Logit
+logit,10000,1,3,4.861,Logit
+logit,10000,1,4,4.497,Logit
+logit,10000,1,5,4.482,Logit
+logit,10000,1,6,4.749,Logit
+logit,10000,1,7,4.799,Logit
+logit,10000,1,8,5.083,Logit
+logit,10000,1,9,5.302,Logit
+logit,10000,1,10,5.104,Logit
+logit,1000,2,1,0.407,Logit
+logit,1000,2,2,0.417,Logit
+logit,1000,2,3,0.521,Logit
+logit,1000,2,4,0.443,Logit
+logit,1000,2,5,0.459,Logit
+logit,1000,2,6,0.399,Logit
+logit,1000,2,7,0.432,Logit
+logit,1000,2,8,0.396,Logit
+logit,1000,2,9,0.437,Logit
+logit,1000,2,10,0.457,Logit
+logit,10000,2,1,6.873,Logit
+logit,10000,2,2,6.175,Logit
+logit,10000,2,3,6.507,Logit
+logit,10000,2,4,5.91,Logit
+logit,10000,2,5,6.07,Logit
+logit,10000,2,6,6.123,Logit
+logit,10000,2,7,6.551,Logit
+logit,10000,2,8,6.518,Logit
+logit,10000,2,9,6.473,Logit
+logit,10000,2,10,6.449,Logit
+logit,1000,3,1,0.436,Logit
+logit,1000,3,2,0.43,Logit
+logit,1000,3,3,0.524,Logit
+logit,1000,3,4,0.502,Logit
+logit,1000,3,5,0.477,Logit
+logit,1000,3,6,0.475,Logit
+logit,1000,3,7,0.51,Logit
+logit,1000,3,8,0.441,Logit
+logit,1000,3,9,0.483,Logit
+logit,1000,3,10,0.455,Logit
+logit,10000,3,1,7.361,Logit
+logit,10000,3,2,6.398,Logit
+logit,10000,3,3,6.813,Logit
+logit,10000,3,4,6.368,Logit
+logit,10000,3,5,6.366,Logit
+logit,10000,3,6,7.014,Logit
+logit,10000,3,7,6.948,Logit
+logit,10000,3,8,6.848,Logit
+logit,10000,3,9,6.422,Logit
+logit,10000,3,10,6.833,Logit
+feols,1000,1,1,0,Gaussian
+lfe,1000,1,1,0.0300000000000864,Gaussian
+feols,1000,1,2,0.00999999999999091,Gaussian
+lfe,1000,1,2,0.0199999999999818,Gaussian
+feols,1000,1,3,0,Gaussian
+lfe,1000,1,3,0.0199999999999818,Gaussian
+feols,1000,1,4,0,Gaussian
+lfe,1000,1,4,0.00999999999999091,Gaussian
+feols,1000,1,5,0.0199999999999818,Gaussian
+lfe,1000,1,5,0,Gaussian
+feols,1000,1,6,0.00999999999999091,Gaussian
+lfe,1000,1,6,0,Gaussian
+feols,1000,1,7,0.0199999999999818,Gaussian
+lfe,1000,1,7,0.0100000000001046,Gaussian
+feols,1000,1,8,0,Gaussian
+lfe,1000,1,8,0.0199999999999818,Gaussian
+feols,1000,1,9,0,Gaussian
+lfe,1000,1,9,0.0199999999999818,Gaussian
+feols,1000,1,10,0,Gaussian
+lfe,1000,1,10,0.00999999999999091,Gaussian
+feols,1000,2,1,0.0199999999999818,Gaussian
+lfe,1000,2,1,0,Gaussian
+feols,1000,2,2,0.00999999999999091,Gaussian
+lfe,1000,2,2,0,Gaussian
+feols,1000,2,3,0.0199999999999818,Gaussian
+lfe,1000,2,3,0.00999999999999091,Gaussian
+feols,1000,2,4,0,Gaussian
+lfe,1000,2,4,0.0200000000000955,Gaussian
+feols,1000,2,5,0.00999999999999091,Gaussian
+lfe,1000,2,5,0,Gaussian
+feols,1000,2,6,0.0199999999999818,Gaussian
+lfe,1000,2,6,0.0199999999999818,Gaussian
+feols,1000,2,7,0,Gaussian
+lfe,1000,2,7,0,Gaussian
+feols,1000,2,8,0.0199999999999818,Gaussian
+lfe,1000,2,8,0.00999999999999091,Gaussian
+feols,1000,2,9,0,Gaussian
+lfe,1000,2,9,0.0199999999999818,Gaussian
+feols,1000,2,10,0.0100000000001046,Gaussian
+lfe,1000,2,10,0.0199999999999818,Gaussian
+feols,1000,3,1,0,Gaussian
+lfe,1000,3,1,0.0199999999999818,Gaussian
+feols,1000,3,2,0.00999999999999091,Gaussian
+lfe,1000,3,2,0.0199999999999818,Gaussian
+feols,1000,3,3,0,Gaussian
+lfe,1000,3,3,0.00999999999999091,Gaussian
+feols,1000,3,4,0,Gaussian
+lfe,1000,3,4,0.0300000000000864,Gaussian
+feols,1000,3,5,0,Gaussian
+lfe,1000,3,5,0.00999999999999091,Gaussian
+feols,1000,3,6,0,Gaussian
+lfe,1000,3,6,0,Gaussian
+feols,1000,3,7,0.0199999999999818,Gaussian
+lfe,1000,3,7,0,Gaussian
+feols,1000,3,8,0.00999999999999091,Gaussian
+lfe,1000,3,8,0.0199999999999818,Gaussian
+feols,1000,3,9,0,Gaussian
+lfe,1000,3,9,0.00999999999999091,Gaussian
+feols,1000,3,10,0,Gaussian
+lfe,1000,3,10,0.0199999999999818,Gaussian
+feols,10000,1,1,0,Gaussian
+lfe,10000,1,1,0.0300000000000864,Gaussian
+feols,10000,1,2,0.0199999999999818,Gaussian
+lfe,10000,1,2,0.0299999999999727,Gaussian
+feols,10000,1,3,0,Gaussian
+lfe,10000,1,3,0.0299999999999727,Gaussian
+feols,10000,1,4,0.0200000000000955,Gaussian
+lfe,10000,1,4,0.0299999999999727,Gaussian
+feols,10000,1,5,0.0199999999999818,Gaussian
+lfe,10000,1,5,0.0399999999999636,Gaussian
+feols,10000,1,6,0,Gaussian
+lfe,10000,1,6,0.0300000000000864,Gaussian
+feols,10000,1,7,0.0199999999999818,Gaussian
+lfe,10000,1,7,0.0299999999999727,Gaussian
+feols,10000,1,8,0.0199999999999818,Gaussian
+lfe,10000,1,8,0.0299999999999727,Gaussian
+feols,10000,1,9,0,Gaussian
+lfe,10000,1,9,0.0300000000000864,Gaussian
+feols,10000,1,10,0.00999999999999091,Gaussian
+lfe,10000,1,10,0.0399999999999636,Gaussian
+feols,10000,2,1,0.00999999999999091,Gaussian
+lfe,10000,2,1,0,Gaussian
+feols,10000,2,2,0.0199999999999818,Gaussian
+lfe,10000,2,2,0.00999999999999091,Gaussian
+feols,10000,2,3,0.0199999999999818,Gaussian
+lfe,10000,2,3,0,Gaussian
+feols,10000,2,4,0.0100000000001046,Gaussian
+lfe,10000,2,4,0.0199999999999818,Gaussian
+feols,10000,2,5,0.0199999999999818,Gaussian
+lfe,10000,2,5,0.00999999999999091,Gaussian
+feols,10000,2,6,0,Gaussian
+lfe,10000,2,6,0.0199999999999818,Gaussian
+feols,10000,2,7,0.00999999999999091,Gaussian
+lfe,10000,2,7,0.0199999999999818,Gaussian
+feols,10000,2,8,0,Gaussian
+lfe,10000,2,8,0.0300000000000864,Gaussian
+feols,10000,2,9,0.00999999999999091,Gaussian
+lfe,10000,2,9,0,Gaussian
+feols,10000,2,10,0.0199999999999818,Gaussian
+lfe,10000,2,10,0.0199999999999818,Gaussian
+feols,10000,3,1,0.00999999999999091,Gaussian
+lfe,10000,3,1,0.0199999999999818,Gaussian
+feols,10000,3,2,0.00999999999999091,Gaussian
+lfe,10000,3,2,0,Gaussian
+feols,10000,3,3,0.0199999999999818,Gaussian
+lfe,10000,3,3,0.0100000000001046,Gaussian
+feols,10000,3,4,0.0199999999999818,Gaussian
+lfe,10000,3,4,0,Gaussian
+feols,10000,3,5,0,Gaussian
+lfe,10000,3,5,0.00999999999999091,Gaussian
+feols,10000,3,6,0.0199999999999818,Gaussian
+lfe,10000,3,6,0.00999999999999091,Gaussian
+feols,10000,3,7,0.0199999999999818,Gaussian
+lfe,10000,3,7,0.00999999999999091,Gaussian
+feols,10000,3,8,0.0200000000000955,Gaussian
+lfe,10000,3,8,0.00999999999999091,Gaussian
+feols,10000,3,9,0.0199999999999818,Gaussian
+lfe,10000,3,9,0.0199999999999818,Gaussian
+feols,10000,3,10,0,Gaussian
+lfe,10000,3,10,0.0299999999999727,Gaussian
+feols,1e+05,1,1,0.00999999999999091,Gaussian
+lfe,1e+05,1,1,0.269999999999982,Gaussian
+feols,1e+05,1,2,0.0500000000000682,Gaussian
+lfe,1e+05,1,2,0.279999999999973,Gaussian
+feols,1e+05,1,3,0.0299999999999727,Gaussian
+lfe,1e+05,1,3,0.25,Gaussian
+feols,1e+05,1,4,0.0300000000000864,Gaussian
+lfe,1e+05,1,4,0.309999999999945,Gaussian
+feols,1e+05,1,5,0.0299999999999727,Gaussian
+lfe,1e+05,1,5,0.269999999999982,Gaussian
+feols,1e+05,1,6,0.0100000000001046,Gaussian
+lfe,1e+05,1,6,0.299999999999955,Gaussian
+feols,1e+05,1,7,0.0299999999999727,Gaussian
+lfe,1e+05,1,7,0.25,Gaussian
+feols,1e+05,1,8,0.0299999999999727,Gaussian
+lfe,1e+05,1,8,0.32000000000005,Gaussian
+feols,1e+05,1,9,0.00999999999999091,Gaussian
+lfe,1e+05,1,9,0.330000000000041,Gaussian
+feols,1e+05,1,10,0.00999999999999091,Gaussian
+lfe,1e+05,1,10,0.25,Gaussian
+feols,1e+05,2,1,0.0299999999999727,Gaussian
+lfe,1e+05,2,1,0.0900000000000318,Gaussian
+feols,1e+05,2,2,0.0299999999999727,Gaussian
+lfe,1e+05,2,2,0.0800000000000409,Gaussian
+feols,1e+05,2,3,0.0499999999999545,Gaussian
+lfe,1e+05,2,3,0.139999999999986,Gaussian
+feols,1e+05,2,4,0.0100000000001046,Gaussian
+lfe,1e+05,2,4,0.120000000000005,Gaussian
+feols,1e+05,2,5,0.0199999999999818,Gaussian
+lfe,1e+05,2,5,0.0900000000000318,Gaussian
+feols,1e+05,2,6,0.0399999999999636,Gaussian
+lfe,1e+05,2,6,0.100000000000023,Gaussian
+feols,1e+05,2,7,0.0399999999999636,Gaussian
+lfe,1e+05,2,7,0.120000000000005,Gaussian
+feols,1e+05,2,8,0.0299999999999727,Gaussian
+lfe,1e+05,2,8,0.0900000000000318,Gaussian
+feols,1e+05,2,9,0.0299999999999727,Gaussian
+lfe,1e+05,2,9,0.0800000000000409,Gaussian
+feols,1e+05,2,10,0.0900000000000318,Gaussian
+lfe,1e+05,2,10,0.0799999999999272,Gaussian
+feols,1e+05,3,1,0.0300000000000864,Gaussian
+lfe,1e+05,3,1,0.0999999999999091,Gaussian
+feols,1e+05,3,2,0.0400000000000773,Gaussian
+lfe,1e+05,3,2,0.129999999999995,Gaussian
+feols,1e+05,3,3,0.0499999999999545,Gaussian
+lfe,1e+05,3,3,0.120000000000005,Gaussian
+feols,1e+05,3,4,0.0299999999999727,Gaussian
+lfe,1e+05,3,4,0.0900000000000318,Gaussian
+feols,1e+05,3,5,0.0500000000000682,Gaussian
+lfe,1e+05,3,5,0.189999999999941,Gaussian
+feols,1e+05,3,6,0.0399999999999636,Gaussian
+lfe,1e+05,3,6,0.100000000000023,Gaussian
+feols,1e+05,3,7,0.0400000000000773,Gaussian
+lfe,1e+05,3,7,0.0999999999999091,Gaussian
+feols,1e+05,3,8,0.0400000000000773,Gaussian
+lfe,1e+05,3,8,0.0799999999999272,Gaussian
+feols,1e+05,3,9,0.0500000000000682,Gaussian
+lfe,1e+05,3,9,0.139999999999986,Gaussian
+feols,1e+05,3,10,0.0499999999999545,Gaussian
+lfe,1e+05,3,10,0.149999999999977,Gaussian
+feols,1e+06,1,1,0.129999999999995,Gaussian
+lfe,1e+06,1,1,2.72000000000003,Gaussian
+feols,1e+06,1,2,0.120000000000005,Gaussian
+lfe,1e+06,1,2,2.67000000000007,Gaussian
+feols,1e+06,1,3,0.189999999999941,Gaussian
+lfe,1e+06,1,3,2.87,Gaussian
+feols,1e+06,1,4,0.129999999999995,Gaussian
+lfe,1e+06,1,4,2.61000000000013,Gaussian
+feols,1e+06,1,5,0.139999999999873,Gaussian
+lfe,1e+06,1,5,2.68000000000006,Gaussian
+feols,1e+06,1,6,0.180000000000064,Gaussian
+lfe,1e+06,1,6,2.64999999999986,Gaussian
+feols,1e+06,1,7,0.1400000000001,Gaussian
+lfe,1e+06,1,7,2.82999999999993,Gaussian
+feols,1e+06,1,8,0.349999999999909,Gaussian
+lfe,1e+06,1,8,2.59000000000015,Gaussian
+feols,1e+06,1,9,0.1099999999999,Gaussian
+lfe,1e+06,1,9,2.69000000000005,Gaussian
+feols,1e+06,1,10,0.150000000000091,Gaussian
+lfe,1e+06,1,10,2.70999999999981,Gaussian
+feols,1e+06,2,1,0.230000000000018,Gaussian
+lfe,1e+06,2,1,1.09000000000015,Gaussian
+feols,1e+06,2,2,0.179999999999836,Gaussian
+lfe,1e+06,2,2,1.17000000000007,Gaussian
+feols,1e+06,2,3,0.180000000000064,Gaussian
+lfe,1e+06,2,3,1.09999999999991,Gaussian
+feols,1e+06,2,4,0.25,Gaussian
+lfe,1e+06,2,4,1.12000000000012,Gaussian
+feols,1e+06,2,5,0.220000000000027,Gaussian
+lfe,1e+06,2,5,1.2199999999998,Gaussian
+feols,1e+06,2,6,0.170000000000073,Gaussian
+lfe,1e+06,2,6,1.13000000000011,Gaussian
+feols,1e+06,2,7,0.25,Gaussian
+lfe,1e+06,2,7,1.07999999999993,Gaussian
+feols,1e+06,2,8,0.3599999999999,Gaussian
+lfe,1e+06,2,8,1.11000000000013,Gaussian
+feols,1e+06,2,9,0.160000000000082,Gaussian
+lfe,1e+06,2,9,1.06999999999994,Gaussian
+feols,1e+06,2,10,0.210000000000036,Gaussian
+lfe,1e+06,2,10,1.07999999999993,Gaussian
+feols,1e+06,3,1,0.319999999999936,Gaussian
+lfe,1e+06,3,1,1.20000000000005,Gaussian
+feols,1e+06,3,2,0.240000000000009,Gaussian
+lfe,1e+06,3,2,1.37000000000012,Gaussian
+feols,1e+06,3,3,0.25,Gaussian
+lfe,1e+06,3,3,1.20999999999981,Gaussian
+feols,1e+06,3,4,0.290000000000191,Gaussian
+lfe,1e+06,3,4,1.30999999999995,Gaussian
+feols,1e+06,3,5,0.319999999999936,Gaussian
+lfe,1e+06,3,5,1.47000000000003,Gaussian
+feols,1e+06,3,6,0.240000000000009,Gaussian
+lfe,1e+06,3,6,1.27999999999997,Gaussian
+feols,1e+06,3,7,0.339999999999918,Gaussian
+lfe,1e+06,3,7,1.42000000000007,Gaussian
+feols,1e+06,3,8,0.299999999999955,Gaussian
+lfe,1e+06,3,8,1.26999999999998,Gaussian
+feols,1e+06,3,9,0.259999999999991,Gaussian
+lfe,1e+06,3,9,1.31000000000017,Gaussian
+feols,1e+06,3,10,0.379999999999882,Gaussian
+lfe,1e+06,3,10,1.33000000000015,Gaussian
+feols,1e+07,1,1,1.35999999999967,Gaussian
+lfe,1e+07,1,1,27.0600000000004,Gaussian
+feols,1e+07,1,2,1.42000000000007,Gaussian
+lfe,1e+07,1,2,26.8899999999994,Gaussian
+feols,1e+07,1,3,1.24000000000069,Gaussian
+lfe,1e+07,1,3,26.8399999999992,Gaussian
+feols,1e+07,1,4,1.52000000000044,Gaussian
+lfe,1e+07,1,4,26.6999999999998,Gaussian
+feols,1e+07,1,5,1.22000000000025,Gaussian
+lfe,1e+07,1,5,26.9399999999996,Gaussian
+feols,1e+07,1,6,1.0600000000004,Gaussian
+lfe,1e+07,1,6,26.6499999999996,Gaussian
+feols,1e+07,1,7,1.64000000000033,Gaussian
+lfe,1e+07,1,7,26.4700000000003,Gaussian
+feols,1e+07,1,8,1.5,Gaussian
+lfe,1e+07,1,8,27.0600000000004,Gaussian
+feols,1e+07,1,9,1.26999999999953,Gaussian
+lfe,1e+07,1,9,26.6400000000003,Gaussian
+feols,1e+07,1,10,1.26000000000022,Gaussian
+lfe,1e+07,1,10,27.2199999999993,Gaussian
+feols,1e+07,2,1,2.3100000000004,Gaussian
+lfe,1e+07,2,1,16.54,Gaussian
+feols,1e+07,2,2,2.18000000000029,Gaussian
+lfe,1e+07,2,2,16.7399999999998,Gaussian
+feols,1e+07,2,3,2.32999999999993,Gaussian
+lfe,1e+07,2,3,16.6800000000003,Gaussian
+feols,1e+07,2,4,2.17999999999938,Gaussian
+lfe,1e+07,2,4,16.5100000000002,Gaussian
+feols,1e+07,2,5,2.25,Gaussian
+lfe,1e+07,2,5,16.5600000000004,Gaussian
+feols,1e+07,2,6,2.22000000000025,Gaussian
+lfe,1e+07,2,6,16.6700000000001,Gaussian
+feols,1e+07,2,7,2.22000000000025,Gaussian
+lfe,1e+07,2,7,17.1399999999994,Gaussian
+feols,1e+07,2,8,2.44000000000051,Gaussian
+lfe,1e+07,2,8,16.3899999999994,Gaussian
+feols,1e+07,2,9,2.25,Gaussian
+lfe,1e+07,2,9,16.7300000000005,Gaussian
+feols,1e+07,2,10,2.23999999999978,Gaussian
+lfe,1e+07,2,10,16.5299999999997,Gaussian
+feols,1e+07,3,1,2.84000000000015,Gaussian
+lfe,1e+07,3,1,17.1300000000001,Gaussian
+feols,1e+07,3,2,2.84000000000015,Gaussian
+lfe,1e+07,3,2,17.2800000000007,Gaussian
+feols,1e+07,3,3,2.88999999999942,Gaussian
+lfe,1e+07,3,3,17.75,Gaussian
+feols,1e+07,3,4,2.82999999999993,Gaussian
+lfe,1e+07,3,4,17.1700000000001,Gaussian
+feols,1e+07,3,5,2.82999999999993,Gaussian
+lfe,1e+07,3,5,17.3000000000002,Gaussian
+feols,1e+07,3,6,2.80999999999949,Gaussian
+lfe,1e+07,3,6,17.1600000000008,Gaussian
+feols,1e+07,3,7,2.78999999999996,Gaussian
+lfe,1e+07,3,7,17.21,Gaussian
+feols,1e+07,3,8,2.82999999999993,Gaussian
+lfe,1e+07,3,8,17.3100000000004,Gaussian
+feols,1e+07,3,9,2.98999999999978,Gaussian
+lfe,1e+07,3,9,16.75,Gaussian
+feols,1e+07,3,10,2.97000000000025,Gaussian
+lfe,1e+07,3,10,17.3199999999997,Gaussian
+reghdfe,1000,1,1,1.256,Gaussian
+reghdfe,1000,1,2,0.11,Gaussian
+reghdfe,1000,1,3,0.1,Gaussian
+reghdfe,1000,1,4,0.112,Gaussian
+reghdfe,1000,1,5,0.119,Gaussian
+reghdfe,1000,1,6,0.103,Gaussian
+reghdfe,1000,1,7,0.117,Gaussian
+reghdfe,1000,1,8,0.1,Gaussian
+reghdfe,1000,1,9,0.113,Gaussian
+reghdfe,1000,1,10,0.114,Gaussian
+reghdfe,10000,1,1,0.135,Gaussian
+reghdfe,10000,1,2,0.132,Gaussian
+reghdfe,10000,1,3,0.118,Gaussian
+reghdfe,10000,1,4,0.122,Gaussian
+reghdfe,10000,1,5,0.125,Gaussian
+reghdfe,10000,1,6,0.11,Gaussian
+reghdfe,10000,1,7,0.112,Gaussian
+reghdfe,10000,1,8,0.1,Gaussian
+reghdfe,10000,1,9,0.111,Gaussian
+reghdfe,10000,1,10,0.113,Gaussian
+reghdfe,1e+05,1,1,0.193,Gaussian
+reghdfe,1e+05,1,2,0.24,Gaussian
+reghdfe,1e+05,1,3,0.174,Gaussian
+reghdfe,1e+05,1,4,0.19,Gaussian
+reghdfe,1e+05,1,5,0.179,Gaussian
+reghdfe,1e+05,1,6,0.171,Gaussian
+reghdfe,1e+05,1,7,0.155,Gaussian
+reghdfe,1e+05,1,8,0.147,Gaussian
+reghdfe,1e+05,1,9,0.142,Gaussian
+reghdfe,1e+05,1,10,0.168,Gaussian
+reghdfe,1e+06,1,1,0.698,Gaussian
+reghdfe,1e+06,1,2,0.695,Gaussian
+reghdfe,1e+06,1,3,0.718,Gaussian
+reghdfe,1e+06,1,4,0.698,Gaussian
+reghdfe,1e+06,1,5,0.715,Gaussian
+reghdfe,1e+06,1,6,0.721,Gaussian
+reghdfe,1e+06,1,7,0.707,Gaussian
+reghdfe,1e+06,1,8,0.733,Gaussian
+reghdfe,1e+06,1,9,0.696,Gaussian
+reghdfe,1e+06,1,10,0.723,Gaussian
+reghdfe,1e+07,1,1,7.099,Gaussian
+reghdfe,1e+07,1,2,7.313,Gaussian
+reghdfe,1e+07,1,3,7.001,Gaussian
+reghdfe,1e+07,1,4,7.067,Gaussian
+reghdfe,1e+07,1,5,7.132,Gaussian
+reghdfe,1e+07,1,6,6.968,Gaussian
+reghdfe,1e+07,1,7,7.028,Gaussian
+reghdfe,1e+07,1,8,7.002,Gaussian
+reghdfe,1e+07,1,9,6.916,Gaussian
+reghdfe,1e+07,1,10,7.244,Gaussian
+reghdfe,1000,2,1,0.125,Gaussian
+reghdfe,1000,2,2,0.119,Gaussian
+reghdfe,1000,2,3,0.1,Gaussian
+reghdfe,1000,2,4,0.116,Gaussian
+reghdfe,1000,2,5,0.129,Gaussian
+reghdfe,1000,2,6,0.187,Gaussian
+reghdfe,1000,2,7,0.127,Gaussian
+reghdfe,1000,2,8,0.12,Gaussian
+reghdfe,1000,2,9,0.115,Gaussian
+reghdfe,1000,2,10,0.154,Gaussian
+reghdfe,10000,2,1,0.196,Gaussian
+reghdfe,10000,2,2,0.178,Gaussian
+reghdfe,10000,2,3,0.16,Gaussian
+reghdfe,10000,2,4,0.155,Gaussian
+reghdfe,10000,2,5,0.163,Gaussian
+reghdfe,10000,2,6,0.181,Gaussian
+reghdfe,10000,2,7,0.204,Gaussian
+reghdfe,10000,2,8,0.204,Gaussian
+reghdfe,10000,2,9,0.209,Gaussian
+reghdfe,10000,2,10,0.178,Gaussian
+reghdfe,1e+05,2,1,0.584,Gaussian
+reghdfe,1e+05,2,2,0.548,Gaussian
+reghdfe,1e+05,2,3,0.63,Gaussian
+reghdfe,1e+05,2,4,0.593,Gaussian
+reghdfe,1e+05,2,5,0.627,Gaussian
+reghdfe,1e+05,2,6,0.71,Gaussian
+reghdfe,1e+05,2,7,0.635,Gaussian
+reghdfe,1e+05,2,8,0.593,Gaussian
+reghdfe,1e+05,2,9,0.695,Gaussian
+reghdfe,1e+05,2,10,0.648,Gaussian
+reghdfe,1e+06,2,1,4.765,Gaussian
+reghdfe,1e+06,2,2,4.753,Gaussian
+reghdfe,1e+06,2,3,4.709,Gaussian
+reghdfe,1e+06,2,4,4.726,Gaussian
+reghdfe,1e+06,2,5,4.762,Gaussian
+reghdfe,1e+06,2,6,4.779,Gaussian
+reghdfe,1e+06,2,7,4.775,Gaussian
+reghdfe,1e+06,2,8,4.822,Gaussian
+reghdfe,1e+06,2,9,4.745,Gaussian
+reghdfe,1e+06,2,10,4.792,Gaussian
+reghdfe,1e+07,2,1,51.988,Gaussian
+reghdfe,1e+07,2,2,52.089,Gaussian
+reghdfe,1e+07,2,3,52.352,Gaussian
+reghdfe,1e+07,2,4,51.946,Gaussian
+reghdfe,1e+07,2,5,51.075,Gaussian
+reghdfe,1e+07,2,6,51.403,Gaussian
+reghdfe,1e+07,2,7,54.494,Gaussian
+reghdfe,1e+07,2,8,74.779,Gaussian
+reghdfe,1e+07,2,9,74.27,Gaussian
+reghdfe,1e+07,2,10,71.128,Gaussian
+reghdfe,1000,3,1,0.107,Gaussian
+reghdfe,1000,3,2,0.115,Gaussian
+reghdfe,1000,3,3,0.113,Gaussian
+reghdfe,1000,3,4,0.101,Gaussian
+reghdfe,1000,3,5,0.095,Gaussian
+reghdfe,1000,3,6,0.139,Gaussian
+reghdfe,1000,3,7,0.155,Gaussian
+reghdfe,1000,3,8,0.153,Gaussian
+reghdfe,1000,3,9,0.121,Gaussian
+reghdfe,1000,3,10,0.137,Gaussian
+reghdfe,10000,3,1,0.224,Gaussian
+reghdfe,10000,3,2,0.188,Gaussian
+reghdfe,10000,3,3,0.187,Gaussian
+reghdfe,10000,3,4,0.182,Gaussian
+reghdfe,10000,3,5,0.184,Gaussian
+reghdfe,10000,3,6,0.205,Gaussian
+reghdfe,10000,3,7,0.189,Gaussian
+reghdfe,10000,3,8,0.183,Gaussian
+reghdfe,10000,3,9,0.204,Gaussian
+reghdfe,10000,3,10,0.194,Gaussian
+reghdfe,1e+05,3,1,1.013,Gaussian
+reghdfe,1e+05,3,2,1.011,Gaussian
+reghdfe,1e+05,3,3,0.989,Gaussian
+reghdfe,1e+05,3,4,1.047,Gaussian
+reghdfe,1e+05,3,5,1.203,Gaussian
+reghdfe,1e+05,3,6,0.975,Gaussian
+reghdfe,1e+05,3,7,0.892,Gaussian
+reghdfe,1e+05,3,8,0.929,Gaussian
+reghdfe,1e+05,3,9,0.933,Gaussian
+reghdfe,1e+05,3,10,0.907,Gaussian
+reghdfe,1e+06,3,1,9.03,Gaussian
+reghdfe,1e+06,3,2,9.019,Gaussian
+reghdfe,1e+06,3,3,9.716,Gaussian
+reghdfe,1e+06,3,4,9.064,Gaussian
+reghdfe,1e+06,3,5,8.921,Gaussian
+reghdfe,1e+06,3,6,9.029,Gaussian
+reghdfe,1e+06,3,7,9.316,Gaussian
+reghdfe,1e+06,3,8,8.924,Gaussian
+reghdfe,1e+06,3,9,9.072,Gaussian
+reghdfe,1e+06,3,10,8.954,Gaussian
+reghdfe,1e+07,3,1,94.953,Gaussian
+reghdfe,1e+07,3,2,94.647,Gaussian
+reghdfe,1e+07,3,3,96.002,Gaussian
+reghdfe,1e+07,3,4,94.684,Gaussian
+reghdfe,1e+07,3,5,94.485,Gaussian
+reghdfe,1e+07,3,6,95.738,Gaussian
+reghdfe,1e+07,3,7,94.906,Gaussian
+reghdfe,1e+07,3,8,95.424,Gaussian
+reghdfe,1e+07,3,9,95.73,Gaussian
+reghdfe,1e+07,3,10,94.26,Gaussian
+FixedEffectModels,1000,1,1,0.3973052,Gaussian
+FixedEffectModels,10000,1,2,0.0039084,Gaussian
+FixedEffectModels,1e+05,1,3,0.0179951,Gaussian
+FixedEffectModels,1e+06,1,4,0.240427399,Gaussian
+FixedEffectModels,1000,1,5,0.000760001,Gaussian
+FixedEffectModels,10000,1,6,0.002979,Gaussian
+FixedEffectModels,1e+05,1,7,0.0212683,Gaussian
+FixedEffectModels,1e+06,1,8,0.221022399,Gaussian
+FixedEffectModels,1000,1,9,0.000666601,Gaussian
+FixedEffectModels,10000,1,10,0.0033209,Gaussian
+FixedEffectModels,1e+05,1,1,0.0214211,Gaussian
+FixedEffectModels,1e+06,1,2,0.5099384,Gaussian
+FixedEffectModels,1000,1,3,0.0006903,Gaussian
+FixedEffectModels,10000,1,4,0.003461401,Gaussian
+FixedEffectModels,1e+05,1,5,0.1430856,Gaussian
+FixedEffectModels,1e+06,1,6,0.2249746,Gaussian
+FixedEffectModels,1000,1,7,0.0007435,Gaussian
+FixedEffectModels,10000,1,8,0.003437401,Gaussian
+FixedEffectModels,1e+05,1,9,0.028882599,Gaussian
+FixedEffectModels,1e+06,1,10,0.236704999,Gaussian
+FixedEffectModels,1000,1,1,0.0007662,Gaussian
+FixedEffectModels,10000,1,2,0.0036505,Gaussian
+FixedEffectModels,1e+05,1,3,0.020943,Gaussian
+FixedEffectModels,1e+06,1,4,0.324384401,Gaussian
+FixedEffectModels,1000,1,5,0.000956899,Gaussian
+FixedEffectModels,10000,1,6,0.0032166,Gaussian
+FixedEffectModels,1e+05,1,7,0.026584,Gaussian
+FixedEffectModels,1e+06,1,8,0.2443556,Gaussian
+FixedEffectModels,1000,1,9,0.000740501,Gaussian
+FixedEffectModels,10000,1,10,0.0035433,Gaussian
+FixedEffectModels,1e+05,1,1,0.020325901,Gaussian
+FixedEffectModels,1e+06,1,2,0.332552599,Gaussian
+FixedEffectModels,1000,1,3,0.000770399,Gaussian
+FixedEffectModels,10000,1,4,0.003479899,Gaussian
+FixedEffectModels,1e+05,1,5,0.029651299,Gaussian
+FixedEffectModels,1e+06,1,6,0.2387512,Gaussian
+FixedEffectModels,1000,1,7,0.000804099,Gaussian
+FixedEffectModels,10000,1,8,0.003004301,Gaussian
+FixedEffectModels,1e+05,1,9,0.017834799,Gaussian
+FixedEffectModels,1e+06,1,10,0.3305279,Gaussian
+FixedEffectModels,1e+07,1,1,4.4033749,Gaussian
+FixedEffectModels,1e+07,1,2,3.5033631,Gaussian
+FixedEffectModels,1e+07,1,3,3.5065588,Gaussian
+FixedEffectModels,1e+07,1,4,3.561126601,Gaussian
+FixedEffectModels,1e+07,1,5,3.588651999,Gaussian
+FixedEffectModels,1e+07,1,6,3.5086662,Gaussian
+FixedEffectModels,1e+07,1,7,3.4983665,Gaussian
+FixedEffectModels,1e+07,1,8,3.523674299,Gaussian
+FixedEffectModels,1e+07,1,9,3.523267299,Gaussian
+FixedEffectModels,1e+07,1,10,3.5165278,Gaussian
+FixedEffectModels,1000,2,1,0.361032301,Gaussian
+FixedEffectModels,10000,2,2,0.004807301,Gaussian
+FixedEffectModels,1e+05,2,3,0.042696699,Gaussian
+FixedEffectModels,1e+06,2,4,0.411099701,Gaussian
+FixedEffectModels,1000,2,5,0.001398599,Gaussian
+FixedEffectModels,10000,2,6,0.005496701,Gaussian
+FixedEffectModels,1e+05,2,7,0.033289401,Gaussian
+FixedEffectModels,1e+06,2,8,0.5918832,Gaussian
+FixedEffectModels,1000,2,9,0.001123599,Gaussian
+FixedEffectModels,10000,2,10,0.005447599,Gaussian
+FixedEffectModels,1e+05,2,1,0.0349615,Gaussian
+FixedEffectModels,1e+06,2,2,0.547926499,Gaussian
+FixedEffectModels,1000,2,3,0.0017277,Gaussian
+FixedEffectModels,10000,2,4,0.003878201,Gaussian
+FixedEffectModels,1e+05,2,5,0.1562838,Gaussian
+FixedEffectModels,1e+06,2,6,0.418362999,Gaussian
+FixedEffectModels,1000,2,7,0.0012533,Gaussian
+FixedEffectModels,10000,2,8,0.0059914,Gaussian
+FixedEffectModels,1e+05,2,9,0.0359728,Gaussian
+FixedEffectModels,1e+06,2,10,0.561856299,Gaussian
+FixedEffectModels,1000,2,1,0.0018641,Gaussian
+FixedEffectModels,10000,2,2,0.004126501,Gaussian
+FixedEffectModels,1e+05,2,3,0.035576001,Gaussian
+FixedEffectModels,1e+06,2,4,0.545681,Gaussian
+FixedEffectModels,1000,2,5,0.0012162,Gaussian
+FixedEffectModels,10000,2,6,0.005204001,Gaussian
+FixedEffectModels,1e+05,2,7,0.153919899,Gaussian
+FixedEffectModels,1e+06,2,8,0.426174099,Gaussian
+FixedEffectModels,1000,2,9,0.0010704,Gaussian
+FixedEffectModels,10000,2,10,0.005543999,Gaussian
+FixedEffectModels,1e+05,2,1,0.0352261,Gaussian
+FixedEffectModels,1e+06,2,2,0.5348728,Gaussian
+FixedEffectModels,1000,2,3,0.001290901,Gaussian
+FixedEffectModels,10000,2,4,0.004900499,Gaussian
+FixedEffectModels,1e+05,2,5,0.034841201,Gaussian
+FixedEffectModels,1e+06,2,6,0.544835401,Gaussian
+FixedEffectModels,1000,2,7,0.001042499,Gaussian
+FixedEffectModels,10000,2,8,0.0057006,Gaussian
+FixedEffectModels,1e+05,2,9,0.157431,Gaussian
+FixedEffectModels,1e+06,2,10,0.4464646,Gaussian
+FixedEffectModels,1e+07,2,1,6.3759718,Gaussian
+FixedEffectModels,1e+07,2,2,6.650252799,Gaussian
+FixedEffectModels,1e+07,2,3,6.964926,Gaussian
+FixedEffectModels,1e+07,2,4,6.4015072,Gaussian
+FixedEffectModels,1e+07,2,5,6.348668801,Gaussian
+FixedEffectModels,1e+07,2,6,6.5722691,Gaussian
+FixedEffectModels,1e+07,2,7,5.836596499,Gaussian
+FixedEffectModels,1e+07,2,8,5.743431799,Gaussian
+FixedEffectModels,1e+07,2,9,6.209922301,Gaussian
+FixedEffectModels,1e+07,2,10,6.674423401,Gaussian
+FixedEffectModels,1000,3,1,0.516212101,Gaussian
+FixedEffectModels,10000,3,2,0.0071514,Gaussian
+FixedEffectModels,1e+05,3,3,0.0462766,Gaussian
+FixedEffectModels,1e+06,3,4,0.570871301,Gaussian
+FixedEffectModels,1000,3,5,0.001614999,Gaussian
+FixedEffectModels,10000,3,6,0.006902501,Gaussian
+FixedEffectModels,1e+05,3,7,0.2102226,Gaussian
+FixedEffectModels,1e+06,3,8,0.544756101,Gaussian
+FixedEffectModels,1000,3,9,0.001322901,Gaussian
+FixedEffectModels,10000,3,10,0.0065575,Gaussian
+FixedEffectModels,1e+05,3,1,0.1703499,Gaussian
+FixedEffectModels,1e+06,3,2,0.5136066,Gaussian
+FixedEffectModels,1000,3,3,0.001275499,Gaussian
+FixedEffectModels,10000,3,4,0.007804701,Gaussian
+FixedEffectModels,1e+05,3,5,0.1642964,Gaussian
+FixedEffectModels,1e+06,3,6,0.5159634,Gaussian
+FixedEffectModels,1000,3,7,0.001353999,Gaussian
+FixedEffectModels,10000,3,8,0.0066647,Gaussian
+FixedEffectModels,1e+05,3,9,0.165010999,Gaussian
+FixedEffectModels,1e+06,3,10,0.518046901,Gaussian
+FixedEffectModels,1000,3,1,0.0016335,Gaussian
+FixedEffectModels,10000,3,2,0.006028899,Gaussian
+FixedEffectModels,1e+05,3,3,0.168550101,Gaussian
+FixedEffectModels,1e+06,3,4,0.5166088,Gaussian
+FixedEffectModels,1000,3,5,0.001248701,Gaussian
+FixedEffectModels,10000,3,6,0.006829199,Gaussian
+FixedEffectModels,1e+05,3,7,0.179803299,Gaussian
+FixedEffectModels,1e+06,3,8,0.5198458,Gaussian
+FixedEffectModels,1000,3,9,0.001583301,Gaussian
+FixedEffectModels,10000,3,10,0.005770201,Gaussian
+FixedEffectModels,1e+05,3,1,0.163105301,Gaussian
+FixedEffectModels,1e+06,3,2,0.518649,Gaussian
+FixedEffectModels,1000,3,3,0.0013166,Gaussian
+FixedEffectModels,10000,3,4,0.0065102,Gaussian
+FixedEffectModels,1e+05,3,5,0.1706976,Gaussian
+FixedEffectModels,1e+06,3,6,0.562000001,Gaussian
+FixedEffectModels,1000,3,7,0.001775301,Gaussian
+FixedEffectModels,10000,3,8,0.007485299,Gaussian
+FixedEffectModels,1e+05,3,9,0.1901733,Gaussian
+FixedEffectModels,1e+06,3,10,0.562843901,Gaussian
+FixedEffectModels,1e+07,3,1,8.117901501,Gaussian
+FixedEffectModels,1e+07,3,2,6.927741401,Gaussian
+FixedEffectModels,1e+07,3,3,6.7224801,Gaussian
+FixedEffectModels,1e+07,3,4,6.779548099,Gaussian
+FixedEffectModels,1e+07,3,5,6.802784301,Gaussian
+FixedEffectModels,1e+07,3,6,6.8006686,Gaussian
+FixedEffectModels,1e+07,3,7,6.756505299,Gaussian
+FixedEffectModels,1e+07,3,8,6.802479501,Gaussian
+FixedEffectModels,1e+07,3,9,6.761793299,Gaussian
+FixedEffectModels,1e+07,3,10,6.7591431,Gaussian

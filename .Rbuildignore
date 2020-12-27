@@ -8,3 +8,4 @@
 ^ONGOING_ISSUES\.md$
 ^_pkgdown\.yml$
 ^pkgdown$
+^_AUTO_BENCHMARK$
