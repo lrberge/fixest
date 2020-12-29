@@ -8,3 +8,4 @@ src/*.dll
 src-i386/*
 Rplots.pdf
 .Rhistor*
+/check
