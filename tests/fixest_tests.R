@@ -1100,6 +1100,8 @@ cat("done.\n\n")
 cat("data.table...")
 # We just check there is no bug (consistency should be OK)
 
+library(data.table)
+
 base_dt = data.table(id = c("A", "A", "B", "B"),
                      time = c(1, 2, 1, 3),
                      x = c(5, 6, 7, 8))
