@@ -1,0 +1,7 @@
+# Google cruft
+desktop.ini
+
+# Large data files
+DATA/*.csv
+DATA/*.Rdata
+_STATA/*.dta
