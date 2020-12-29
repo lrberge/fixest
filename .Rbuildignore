@@ -8,4 +8,6 @@
 ^ONGOING_ISSUES\.md$
 ^_pkgdown\.yml$
 ^pkgdown$
+^.github$
+^check$
 ^_AUTO_BENCHMARK$
