@@ -320,15 +320,34 @@ l = function(x, lag = 1, fill = NA){
             }
 
             # we fetch the panel information
-            qui  = which.max(grepl("^.\\[\\.data\\.table", sys_calls))
+            i = 2
+            sysEval = sys.parent(i)
+            while(sysEval != 0 && !grepl("[.data.table", deparse(sys.call(sysEval)[[1]])[1], fixed = TRUE)){
+                i = i + 1
+                sysEval = sys.parent(i)
+            }
 
-            if(length(qui) == 0){
+            if(sysEval == 0){
                 options(fixest_fl_authorized = FALSE)
                 stop("Unknown error when trying to create a lag (or lead) with function l() (or f()) within data.table. This is a 'fixest' error, may be worth reporting if needed.")
             }
 
-            var = gsub("^[^\\(]+\\(|,.+", "", sys_calls[qui])
-            m = eval(str2lang(var), envir = sys.frames()[qui])
+            # Bug #76
+            # I don't understand why but the frame numbers got messed up when
+            # variables are created within a function
+
+            var = sys.call(sysEval)$x
+
+            m = NULL
+            up = 0
+            while(is.null(m) && sys.parent(i + up) != 0){
+                try(m <- eval(var, parent.frame(i + up)), silent = TRUE)
+                up = up + 1
+            }
+
+            if(sys.parent(i + up - 1) == 0){
+                stop("We tried to lag a variable but the data set could not be fetched. This is an internal error to 'fixest'. It could be interesting to report this bug.")
+            }
 
             if(!"fixest_panel" %in% class(m)){
                 stop("You can use l() or f() only when the data set is of class 'fixest_panel', you can use function panel() to set it.")
@@ -868,7 +887,9 @@ unpanel = function(x){
 
             # I have to do it that way... really not elegant...
             mc_new[[1]] = as.name('[.data.table')
-            eval(mc_new, asNamespace("data.table"), parent.frame())
+            my_frame = parent.frame()
+            assign("[.data.table", asNamespace("data.table")[["[.data.table"]], my_frame)
+            eval(mc_new, my_frame)
 
             return(invisible(TRUE))
         } else {

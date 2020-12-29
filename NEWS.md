@@ -11,6 +11,8 @@
  
  - Fix bug in R old release when due to `anyNA.data.frame`.
  
+ - Fix bug regarding `panel` data sets when variables were created in a `data.table` within functions (thanks to @tcovert [#76](https://github.com/lrberge/fixest/issues/76)).
+ 
 # New features
 
  - Function `i()` now has the new arguments `f2`, `drop2` and `keep2` which allows the interaction of two factors.

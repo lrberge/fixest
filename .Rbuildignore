@@ -10,3 +10,4 @@
 ^pkgdown$
 ^.github$
 ^check$
+^_AUTO_BENCHMARK$

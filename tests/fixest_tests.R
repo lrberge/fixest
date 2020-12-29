@@ -1093,7 +1093,33 @@ for(depvar in c("y", "y_na", "y_0")){
 
 cat("done.\n\n")
 
+#
+# Data table
+#
 
+cat("data.table...")
+# We just check there is no bug (consistency should be OK)
+
+base_dt = data.table(id = c("A", "A", "B", "B"),
+                     time = c(1, 2, 1, 3),
+                     x = c(5, 6, 7, 8))
+
+base_dt = panel(base_dt, ~id + time)
+
+base_dt[, x_l := l(x)]
+test(base_dt$x_l, c(NA, 5, NA, NA))
+
+lag_creator = function(dt) {
+    dt2 = panel(dt, ~id + time)
+    dt2[, x_l := l(x)]
+    return(dt2)
+}
+
+base_bis = lag_creator(base_dt)
+
+base_bis[, x_d := d(x)]
+
+cat("done.\n\n")
 
 
 ####
