@@ -3464,6 +3464,9 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
             var_names = dimnames(X)[[2L]]
         }
 
+        # nobs: useful for checks
+        nobs = if(is.list(X)) length(.subset2(X, 1L)) else NROW(X)
+
         #
         # f + slope.vars
         #
@@ -3498,9 +3501,9 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
                 for(i in which(is_pblm)) f[[i]] = as.character(f[[i]])
             }
 
-            # Why call NROW here when f is already a list? -> calling dim on a data.frame is costly
-            if(length(f[[1L]]) != (if(lX) length(X[[1L]]) else NROW(X)))
+            if(length(f[[1L]]) != nobs){
                 stop("The number of observations in 'X' and in 'f' don't match (", if(lX) length(X[[1L]]) else NROW(X), " vs ", length(f[[1L]]), ").")
+            }
 
             # Now the slopes
             isSlope = FALSE
@@ -3550,7 +3553,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
 
 
         ## weights
-        check_arg_plus(weights, "NULL numeric conv vector len(data) GE{0}", .data = X)
+        check_arg_plus(weights, "NULL numeric conv vector len(value) GE{0}", .value = nobs)
         is_weight = !missing(weights) && !is.null(weights)
 
         ## nthreads (Also seems unnecessarily costly: 250 microseconds)
