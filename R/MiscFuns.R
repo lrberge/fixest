@@ -7910,7 +7910,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 #' vcov(est_pois_simple, cluster = ~Product)
 #'
 #'
-vcov.fixest = function(object, se, cluster, dof, attr = FALSE, forceCovariance = FALSE, keepBounded = FALSE, nthreads = getFixest_nthreads(), ...){
+vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovariance = FALSE, keepBounded = FALSE, nthreads = getFixest_nthreads(), ...){
 	# computes the clustered vcov
 
     check_arg(attr, "logical scalar")

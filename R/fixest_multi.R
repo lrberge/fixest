@@ -120,7 +120,7 @@ setup_multi = function(index, all_names, data, simplify = TRUE){
 #' summary(res, type = "se_compact")
 #'
 #'
-summary.fixest_multi = function(object, type = "short", se, cluster, dof = getFixest_dof(), .vcov, stage = 2, lean = FALSE, n, ...){
+summary.fixest_multi = function(object, type = "short", se = NULL, cluster = NULL, dof = NULL, .vcov, stage = 2, lean = FALSE, n, ...){
     dots = list(...)
     data = attr(object, "data")
 

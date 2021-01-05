@@ -261,7 +261,7 @@
 #' etable(rep(.l(est, est_bis), each = 3, cluster = list("standard", ~ Month, ~ Day)))
 #'
 #'
-etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, stage = 2, .vcov, .vcov_args = NULL, digits=4, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode, label, float, subtitles = list("auto"), fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar = TRUE, style.tex = NULL, style.df = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube"), postprocess.tex = NULL, postprocess.df = NULL, fit_format = "__var__"){
+etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, .vcov, .vcov_args = NULL, digits=4, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode, label, float, subtitles = list("auto"), fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar = TRUE, style.tex = NULL, style.df = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube"), postprocess.tex = NULL, postprocess.df = NULL, fit_format = "__var__"){
 
     #
     # Checking the arguments
@@ -269,12 +269,12 @@ etable = function(..., se = c("standard", "hetero", "cluster", "twoway", "threew
 
     # Need to check for the presence of the se
     useSummary = TRUE
-    if(missing(se) && missing(cluster) && missing(.vcov) && missing(stage)){
+    if(missnull(se) && missnull(cluster) && missing(.vcov) && missing(stage)){
         useSummary = FALSE
     }
 
-    if(!missing(se)){
-        check_arg_plus(se, "match")
+    if(!missnull(se)){
+        check_arg_plus(se, "match(standard, white, hetero, oneway, twoway, threeway, fourway)")
     } else {
         se = NULL
     }
