@@ -99,7 +99,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 	msgRemaining = ""
 	nb_coef = length(coef(x)) - isNegbin
 	if(missing(n) && is.null(x$n_print)){
-		if(fromSummary){
+		if(fromSummary && !isTRUE(x$summary_from_fit)){
 			n = Inf
 		} else {
 			if(nb_coef <= 10){
@@ -273,7 +273,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' @param stage Can be equal to \code{2} (default), \code{1}, \code{1:2} or \code{2:1}. Only used if the object is an IV estimation: defines the stage to which \code{summary} should be applied. If \code{stage = 1} and there are multiple endogenous regressors or if \code{stage} is of length 2, then an object of class \code{fixest_multi} is returned.
 #' @param object A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
 #' @param dof An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{dof}} for this argument. The arguments and defaults of the function \code{\link[fixest]{dof}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "conventional"}, \code{t.df = "conventional"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{dof}} for details.
-#' @param .vcov A user provided covariance matrix or a function computing this matrix. If a matrix, it must be a square matrix of the same number of rows as the number of variables estimated. If a function, it must return the previsouly mentioned matrix.
+#' @param .vcov A user provided covariance matrix or a function computing this matrix. If a matrix, it must be a square matrix of the same number of rows as the number of variables estimated. If a function, it must return the previously mentioned matrix.
 #' @param lean Logical, default is \code{FALSE}. Used to reduce the (memory) size of the summary object. If \code{TRUE}, then all objects of length N (the number of observations) are removed from the result. Note that some \code{fixest} methods may consequently not work when applied to the summary.
 #' @param forceCovariance (Advanced users.) Logical, default is \code{FALSE}. In the peculiar case where the obtained Hessian is not invertible (usually because of collinearity of some variables), use this option to force the covariance matrix, by using a generalized inverse of the Hessian. This can be useful to spot where possible problems come from.
 #' @param keepBounded (Advanced users -- \code{feNmlm} with non-linear part and bounded coefficients only.) Logical, default is \code{FALSE}. If \code{TRUE}, then the bounded coefficients (if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise it is not).
@@ -341,21 +341,54 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' summary(est_pois, .vcov = vcovCL, cluster = trade[, c("Destination", "Product")])
 #'
 #'
-summary.fixest = function(object, se, cluster, dof = getFixest_dof(), .vcov, stage = 2, lean = FALSE, forceCovariance = FALSE, keepBounded = FALSE, n, nthreads = getFixest_nthreads(), ...){
-	# computes the clustered SD and returns the modified vcov and coeftable
+summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, stage = 2, lean = FALSE, forceCovariance = FALSE, keepBounded = FALSE, n, nthreads = getFixest_nthreads(), ...){
+	# computes the clustered SEs and returns the modified vcov and coeftable
+    # NOTA: if the object is already a summary
 
 	if(!is.null(object$onlyFixef)){
 		# means that the estimation is done without variables
 		return(object)
 	}
 
+
 	dots = list(...)
 
-	# If cov.scaled exists => means that it has already been computed
-	if(!is.null(object$cov.scaled) && "fromPrint" %in% names(dots)) return(object)
+	check_arg(n, "integer scalar GE{1}")
+	if(!missing(n)){
+	    object$n_print = n
+	}
+
+	if(isTRUE(object$summary)){
+	    if("fromPrint" %in% names(dots)){
+	        # From print
+	        return(object)
+
+	    } else if(is.null(se) && is.null(cluster) && is.null(dof) && missing(.vcov) && missing(stage)){
+	        # No modification required
+	        object$summary_from_fit = FALSE
+	        return(object)
+	    }
+
+	    # why is it always so complicated??? => I really should remove the argument "se" and only keep "cluster"
+	    # It's only because the two can be contradictory that I'm having a hassle...
+	    # even better => only have one argument: vcov => takes "standard"/"hetero"/formulas/data/matrix/function => to implement in the future
+
+	    check_arg_plus(se, "NULL match", .choices = c("standard", "white", "hetero", "cluster", "twoway", "threeway", "fourway", "1", "2", "3", "4"), .message = "Argument argument 'se' should be equal to one of 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
+
+	    is_se = !is.null(se)
+	    is_cluster = !is.null(cluster)
+	    assign_flags(object$summary_flags, se = se, cluster = cluster, dof = dof)
+	    # We need to clean some arguments...
+	    if(is_se && se %in% c("standard", "white", "hetero")){
+	        cluster = NULL
+	    } else if(is_cluster){
+	        se = NULL
+	    }
+	}
 
 	# Checking arguments in ...
-	if(!any(c("fromPrint", "iv", "keep_se_info") %in% names(match.call()))){
+	mc = match.call()
+	if(!any(c("fromPrint", "iv", "keep_se_info", "summary_flags") %in% names(mc))){
 	    # condition means NOT internal call => thus client call
 	    if(missing(.vcov) || !is.function(.vcov)){
 	        validate_dots(suggest_args = c("se", "cluster", "dof"))
@@ -365,11 +398,6 @@ summary.fixest = function(object, se, cluster, dof = getFixest_dof(), .vcov, sta
 	check_arg(stage, "integer vector no na len(,2) GE{1} LE{2}")
 
 	check_arg(lean, "logical scalar")
-
-	check_value(n, "integer scalar GE{1}", .arg_name = "n")
-	if(!missing(n)){
-	    object$n_print = n
-	}
 
 	# IV
 	if(isTRUE(object$iv) && !isTRUE(dots$iv)){
@@ -532,6 +560,16 @@ summary.fixest = function(object, se, cluster, dof = getFixest_dof(), .vcov, sta
 	}
 
 	object$summary = TRUE
+
+	# We save the arguments used to construct the summary
+	if("summary_flags" %in% names(dots)){
+	    # If here => this is a call from fit
+	    object$summary_flags = dots$summary_flags
+	    object$summary_from_fit = TRUE
+	} else {
+	    object$summary_flags = build_flags(mc, se = se, cluster = cluster, dof = dof)
+	    object$summary_from_fit = NULL
+	}
 
 	return(object)
 }
@@ -5744,6 +5782,78 @@ fetch_data = function(x, prefix = "", suffix = ""){
 
 }
 
+is_large_object = function(x){
+
+    if(is.list(x)){
+        if(length(x[[1]]) > 10000){
+            return(TRUE)
+        } else {
+            return(FALSE)
+        }
+    } else if(length(x)[1] > 10000){
+        return(TRUE)
+    }
+
+    FALSE
+}
+
+build_flags = function(mc, ..., call_env){
+    # Returns a list of arguments
+    # If the arguments are too large => we use calls instead and save the calling environment
+    # Note that the arguments that will be passed in ... must NOT be missing // they must be initialized to NULL
+    # All that stuff just to avoid too large objects....
+
+    dots = list(...)
+
+    args = names(dots)
+
+    res = list()
+    for(i in seq_along(dots)){
+
+        x = dots[[i]]
+        if(is.null(x)){
+            # nothing // NULL arguments are still in 'dots', so we want to avoid them
+        } else if(is_large_object(x)){
+            res[[args[i]]] = mc[[args[i]]]
+            if(is.null(res$call_env)){
+                if(missing(call_env)){
+                    res$call_env = new.env(parent = parent.frame(2))
+                } else {
+                    res$call_env = call_env
+                }
+            }
+        } else {
+            res[[args[i]]] = x
+        }
+    }
+
+    res
+}
+
+assign_flags = function(flags, ...){
+    # flags == arguments
+    # We get the arguments used when the function was originally called
+    # we assign these arguments to the previous frame
+
+    dots = list(...)
+
+    res = list()
+
+    for(arg in setdiff(names(flags), "call_env")){
+
+        if(is.null(dots[[arg]])){
+            # we only assign values that were not provided by the user
+            x = flags[[arg]]
+            if(is.name(x) || is.call(x)){
+                x = eval(x, flags$call_env)
+            }
+            assign(arg, x, parent.frame())
+        }
+    }
+}
+
+
+
 #### ................. ####
 #### Small Utilities ####
 ####
@@ -7782,7 +7892,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 #' vcov(est_pois_simple, cluster = ~Product)
 #'
 #'
-vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE, forceCovariance = FALSE, keepBounded = FALSE, nthreads = getFixest_nthreads(), ...){
+vcov.fixest = function(object, se, cluster, dof, attr = FALSE, forceCovariance = FALSE, keepBounded = FALSE, nthreads = getFixest_nthreads(), ...){
 	# computes the clustered vcov
 
     check_arg(attr, "logical scalar")
@@ -7797,6 +7907,14 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 		# means that the estimation is done without variables
 		stop("No explanatory variable was used: vcov() cannot be applied.")
 	}
+
+    # If it's a summary => we give the vcov directly without further computation! except if arguments are provided which would mean that the user wants the new vcov
+    if(isTRUE(object$summary) && missnull(se) && missnull(cluster) && missnull(dof)){
+        vcov = object$cov.scaled
+        if(!attr) attr(vcov, "se_info") = NULL
+        return(vcov)
+    }
+
 
 	# Default behavior se:
 	suffix = ""
@@ -7882,8 +8000,8 @@ vcov.fixest = function(object, se, cluster, dof = getFixest_dof(), attr = FALSE,
 
 	dots = list(...)
 
-	# DoF related
-	check_arg(dof, "class(dof.type)", .message = "The argument 'dof.type' must be an object created by the function dof().")
+	# DoF related => we accept NULL
+	check_arg_plus(dof, "NULL{getFixest_dof()} class(dof.type)", .message = "The argument 'dof.type' must be an object created by the function dof().")
 
     dof.fixef.K = dof$fixef.K
     dof.adj = dof$adj

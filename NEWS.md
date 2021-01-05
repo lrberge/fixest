@@ -16,6 +16,13 @@
 # New features
 
  - Function `i()` now has the new arguments `f2`, `drop2` and `keep2` which allows the interaction of two factors.
+ 
+ - Argument `dof`, used to compute the standard-errors, can now be used at estimation time.
+ 
+
+# Other
+
+  - More coherence regarding the use of `summary` applied to models for which the SEs were computed at estimation time. Now there is a memory of how the SEs were computed, so that, for example, if only the argument `dof` is passed to `summary`, then the SEs will be clustered in the same way as estimation time but and only `dof` will change.
 
 # fixest 0.8.0 (2020-12-14)
 
