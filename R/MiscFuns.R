@@ -567,6 +567,10 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	    object$summary_flags = dots$summary_flags
 	    object$summary_from_fit = TRUE
 	} else {
+	    # build_flags does not accept missing arguments
+	    if(missing(se)) se = NULL
+	    if(missing(cluster)) cluster = NULL
+	    if(missing(dof)) dof = NULL
 	    object$summary_flags = build_flags(mc, se = se, cluster = cluster, dof = dof)
 	    object$summary_from_fit = NULL
 	}
