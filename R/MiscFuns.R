@@ -5139,7 +5139,22 @@ fixef_terms = function(fml, stepwise = FALSE, origin_type = "feols"){
                 return(msg)
             }
         }
+    }
 
+    # And yet again some error checking => i() should NOT be used
+    if(any(grepl("^i(nteract)?\\(", my_vars))){
+        # We create an error instead of simply correcting the syntax => this is because the function i is
+        # very different and should not be confused
+
+        var_pblm = my_vars[grepl("^i(nteract)?\\(", my_vars)][1]
+
+        get_new_var = function(var, f, f2, ...) match.call()
+
+        what = eval(str2lang(gsub("^i(nteract)?", "get_new_var", var_pblm)))
+        n_var = sum(c("var", "f", "f2") %in% names(what))
+        msg = if(n_var == 1) "Using i() to create fixed-effects is not possible, use directly the variable." else paste0("To interact fixed-effects, use the syntax fe1^fe2 (in your case ", deparse(what[[2]]), "^", deparse(what[[3]]), ").")
+
+        stop("The function i() should not be used in the fixed-effects part of the formula. ", msg)
     }
 
     # Internal function
