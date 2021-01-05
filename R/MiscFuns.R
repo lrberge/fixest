@@ -2503,7 +2503,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 
 #' Create, or interact variables with, factors
 #'
-#' Treat a variable as a factor, or interacts a variable with another treated as a factor. Values to be dropped/kept from the factor can be easily set.
+#' Treat a variable as a factor, or interacts a variable with another treated as a factor. Values to be dropped/kept from the factor can be easily set. Note that to interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2}.
 #'
 #' @param var A vector to be interacted with \code{f}. If the other argument \code{f} is missing, then this vector will be treated as the argument \code{f}.
 #' @param f A vector (of any type) that will be treated as a factor. Must be of the same length as \code{var} if \code{var} is not missing.
@@ -2513,6 +2513,9 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' @param keep A vector of regular expressions or integers (if \code{f} is integer). If provided, only the values from \code{f} that match \code{keep} will be kept.
 #' @param drop2 A vector of regular expressions or integers (if \code{f2} is integer). If provided, all values from \code{f2} that match \code{drop2} will be removed.
 #' @param keep2 A vector of regular expressions or integers (if \code{f2} is integer). If provided, only the values from \code{f2} that match \code{keep2} will be kept.
+#'
+#' @details
+#' To interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2} in the fixed-effects part of the formula. Please see the details and examples in the help page of \code{\link[fixest]{feols}}.
 #'
 #' @return
 #' It returns a matrix with number of rows the length of \code{var}. The number of columns is equal to the number of cases contained in \code{f} minus the reference(s).
@@ -5139,7 +5142,22 @@ fixef_terms = function(fml, stepwise = FALSE, origin_type = "feols"){
                 return(msg)
             }
         }
+    }
 
+    # And yet again some error checking => i() should NOT be used
+    if(any(grepl("^i(nteract)?\\(", my_vars))){
+        # We create an error instead of simply correcting the syntax => this is because the function i is
+        # very different and should not be confused
+
+        var_pblm = my_vars[grepl("^i(nteract)?\\(", my_vars)][1]
+
+        get_new_var = function(var, f, f2, ...) match.call()
+
+        what = eval(str2lang(gsub("^i(nteract)?", "get_new_var", var_pblm)))
+        n_var = sum(c("var", "f", "f2") %in% names(what))
+        msg = if(n_var == 1) "Using i() to create fixed-effects is not possible, use directly the variable." else paste0("To interact fixed-effects, use the syntax fe1^fe2 (in your case ", deparse(what[[2]]), "^", deparse(what[[3]]), ").")
+
+        stop("The function i() should not be used in the fixed-effects part of the formula. ", msg)
     }
 
     # Internal function

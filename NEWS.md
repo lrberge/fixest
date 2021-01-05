@@ -23,6 +23,8 @@
 # Other
 
   - More coherence regarding the use of `summary` applied to models for which the SEs were computed at estimation time. Now there is a memory of how the SEs were computed, so that, for example, if only the argument `dof` is passed to `summary`, then the SEs will be clustered in the same way as estimation time but and only `dof` will change.
+  
+  - Now an error is raised when `i()` is used in the fixed-effects part of the formula. The appropriate way is indicated (related to [#77](https://github.com/lrberge/fixest/issues/77)).
 
 # fixest 0.8.0 (2020-12-14)
 
