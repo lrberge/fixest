@@ -10,9 +10,9 @@
 \usage{
 etable(
   ...,
-  se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"),
-  dof = getFixest_dof(),
-  cluster,
+  se = NULL,
+  dof = NULL,
+  cluster = NULL,
   stage = 2,
   .vcov,
   .vcov_args = NULL,

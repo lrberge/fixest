@@ -8,7 +8,7 @@
   object,
   se,
   cluster,
-  dof = getFixest_dof(),
+  dof = NULL,
   attr = FALSE,
   forceCovariance = FALSE,
   keepBounded = FALSE,
