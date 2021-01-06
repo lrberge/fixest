@@ -265,6 +265,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' This function is similar to \code{print.fixest}. It provides the table of coefficients along with other information on the fit of the estimation. It can compute different types of standard errors. The new variance covariance matrix is an object returned.
 #'
 #' @inheritParams feNmlm
+#' @inheritParams aggregate.fixest
 #'
 #' @method summary fixest
 #'
@@ -341,7 +342,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' summary(est_pois, .vcov = vcovCL, cluster = trade[, c("Destination", "Product")])
 #'
 #'
-summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, stage = 2, lean = FALSE, forceCovariance = FALSE, keepBounded = FALSE, n, nthreads = getFixest_nthreads(), ...){
+summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, stage = 2, lean = FALSE, agg = NULL, forceCovariance = FALSE, keepBounded = FALSE, n, nthreads = getFixest_nthreads(), ...){
 	# computes the clustered SEs and returns the modified vcov and coeftable
     # NOTA: if the object is already a summary
 
@@ -349,7 +350,6 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 		# means that the estimation is done without variables
 		return(object)
 	}
-
 
 	dots = list(...)
 
@@ -572,6 +572,11 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	    if(missing(dof)) dof = NULL
 	    object$summary_flags = build_flags(mc, se = se, cluster = cluster, dof = dof)
 	    object$summary_from_fit = NULL
+	}
+
+	# agg
+	if(!missnull(agg)){
+	    object$coeftable = aggregate(object, agg, full = TRUE, from_summary = TRUE)
 	}
 
 	return(object)
