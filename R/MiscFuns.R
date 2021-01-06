@@ -4654,13 +4654,14 @@ fitstat_validate = function(x, vector = FALSE){
 #' Simple tool that aggregates the value of CATT coefficients in staggered difference-in-difference setups (see details).
 #'
 #' @param x A \code{fixest} object.
-#' @param var A character scalar describing the pattern to be matched. All variables that match the pattern will be aggregated. It must be of the form \code{"(root)"}, the parentheses must be there and the resulting variable name will be \code{"root"}. You can add another root with parentheses: \code{"(root)regex(root2)"}, in which case the resulting name is \code{"root::root2"}. To name the resulting variable differently you can pass a named vector: \code{c("name" = "pattern")} or \code{c("name" = "pattern(root2)")}.
+#' @param agg A character scalar describing the variable names to be aggregated, it is pattern-based. All variables that match the pattern will be aggregated. It must be of the form \code{"(root)"}, the parentheses must be there and the resulting variable name will be \code{"root"}. You can add another root with parentheses: \code{"(root1)regex(root2)"}, in which case the resulting name is \code{"root1::root2"}. To name the resulting variable differently you can pass a named vector: \code{c("name" = "pattern")} or \code{c("name" = "pattern(root2)")}. It's a bit intricate sorry, please see the examples.
+#' @param full Logical scalar, defaults to \code{FALSE}. If \code{TRUE}, then all coefficients are returned, not only the aggregated coefficients.
 #' @param ... Arguments to be passed to \code{\link[fixest]{summary.fixest}}.
 #'
 #' @details
 #' This is a function helping to replicate the estimator from Sun and Abraham (2020). You first need to perform an estimation with cohort and relative periods dummies (typically using the function \code{\link[fixest]{i}}), this leads to estimators of the cohort average treatment effect on the treated (CATT). Then you can use this function to retrieve the average treatment effect on each relative period, or for any other way you wish to aggregate the CATT.
 #'
-#' Note that contrary to the article, here the cohort share in the sample is considered to be a perfect measure for the cohort share in the population.
+#' Note that contrary to the SA article, here the cohort share in the sample is considered to be a perfect measure for the cohort share in the population.
 #'
 #' @return
 #' It returns a matrix representing a table of coefficients.
@@ -4724,46 +4725,62 @@ fitstat_validate = function(x, vector = FALSE){
 #' ci_up = agg_coef[, 1] + 1.96 * agg_coef[, 2]
 #' segments(x0 = x, y0 = ci_low, x1 = x, y1 = ci_up, col = 4)
 #'
+#' legend("topleft", col = c(1, 2, 4), pch = c(20, 15, 17), legend = c("Naive", "True", "Sun & Abraham"))
+#'
 #'
 #' # The ATT
 #' aggregate(res_cohort, c("ATT" = "treatment::[^-]"))
 #' mean(base[base$treat_post == 1, "y_true"])
 #'
-aggregate.fixest = function(x, var, ...){
+#' # With etable
+#' etable(res_naive, res_cohort, agg = "(ti.*nt)::(-?[[:digit:]]+):gro")
+#'
+aggregate.fixest = function(x, agg, full = FALSE, ...){
     # Aggregates the value of coefficients
 
     check_arg(x, "class(fixest) mbt")
-    check_arg(var, "character scalar")
+    check_arg(agg, "character scalar")
+    check_arg(full, "logical scalar")
     # => later => extend it to more than one set of vars to agg
 
-    is_name = !is.null(names(var))
+    dots = list(...)
+    from_summary = isTRUE(dots$from_summary)
 
-    if(!is_name && !grepl("(", var, fixed = TRUE)){
-        stop("Argument 'var' must be a character in which the pattern to match must be in between parentheses. So far there are no parenthesis: please have a look at the examples.")
+    is_name = !is.null(names(agg))
+
+    if(!is_name && !grepl("(", agg, fixed = TRUE)){
+        stop("Argument 'agg' must be a character in which the pattern to match must be in between parentheses. So far there are no parenthesis: please have a look at the examples.")
     }
 
     coef = coef(x)
     cname = names(coef)
 
-    qui = grepl(var, cname)
+    qui = grepl(agg, cname)
     if(!any(qui)){
-        stop("The argument 'var' does not match any variable.")
+        if(from_summary){
+            # We make it silent when aggregate is used in summary
+            # => this way we can pool calls to agg even for models that don't have it
+            # ==> useful in etable eg
+            return(x$coeftable)
+        } else {
+            stop("The argument 'agg' does not match any variable.")
+        }
     }
-
-    cname_select = cname[qui]
-    if(is_name){
-        root = rep(names(var), length(cname_select))
-        val = gsub(paste0(".*", var, ".*"), "\\1", cname_select)
-    } else {
-        root = gsub(paste0(".*", var, ".*"), "\\1", cname_select)
-        val = gsub(paste0(".*", var, ".*"), "\\2", cname_select)
-    }
-
-    mm = model.matrix(x)
 
     if(!isTRUE(x$summary)){
         x = summary(x, ...)
     }
+
+    cname_select = cname[qui]
+    if(is_name){
+        root = rep(names(agg), length(cname_select))
+        val = gsub(paste0(".*", agg, ".*"), "\\1", cname_select)
+    } else {
+        root = gsub(paste0(".*", agg, ".*"), "\\1", cname_select)
+        val = gsub(paste0(".*", agg, ".*"), "\\2", cname_select)
+    }
+
+    mm = model.matrix(x)
 
     V = x$cov.scaled
 
@@ -4777,7 +4794,7 @@ aggregate.fixest = function(x, var, ...){
         v = name_df[i, 2]
         v_names = cname_select[root == r & val == v]
 
-        shares = colSums(mm[, v_names, drop = FALSE])
+        shares = colSums(sign(mm[, v_names, drop = FALSE]))
         shares = shares / sum(shares)
 
         # The coef
@@ -4820,6 +4837,17 @@ aggregate.fixest = function(x, var, ...){
     }
 
     colnames(res) = c("Estimate", "Std. Error", "t value", "Pr(>|t|)")
+
+    if(full){
+        table_origin = x$coeftable
+        i_min = min(which(qui)) - 1
+        before = if(i_min > 0) table_origin[1:i_min, , drop = FALSE] else NULL
+
+        i_after = (1:nrow(table_origin)) > i_min & !qui
+        after = if(any(i_after)) table_origin[i_after, , drop = FALSE] else NULL
+
+        res = rbind(before, res, after)
+    }
 
     res
 }
