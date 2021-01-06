@@ -4847,6 +4847,8 @@ aggregate.fixest = function(x, agg, full = FALSE, ...){
         after = if(any(i_after)) table_origin[i_after, , drop = FALSE] else NULL
 
         res = rbind(before, res, after)
+
+        attr(res, "type") = attr(table_origin, "type")
     }
 
     res
