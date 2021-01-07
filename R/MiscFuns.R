@@ -6152,84 +6152,15 @@ escape_regex = function(x){
     res
 }
 
-formatBicLL = function(bic, ll){
-	# entry: bic and ll
+.addCommas = function(x){
 
-	bic = numberFormatNormal(bic)
-	ll = numberFormatNormal(ll)
+	if(!is.finite(x)) return(as.character(x))
 
-	bic_split = strsplit(bic, "\\.")[[1]]
-	ll_split = strsplit(ll, "\\.")[[1]]
-
-	n = max(nchar(bic_split[1]), nchar(ll_split[1]))
-
-	bic_new = sprintf("% *s.%s", n, bic_split[1], ifelse(length(bic_split) == 2, bic_split[2], 0))
-	ll_new = sprintf("% *s.%s", n, ll_split[1], ifelse(length(ll_split) == 2, ll_split[2], 0))
-
-	sep = "  "
-	myWidth = max(nchar(c(bic_new, ll_new))) + length(sep) + 1
-
-	bic_format = paste0(bic_new, sprintf("% *s", myWidth - nchar(bic_new), sep))
-	ll_format = paste0(ll_new, sprintf("% *s", myWidth - nchar(ll_new), sep))
-
-	list(bic = bic_format, ll = ll_format)
-}
-
-addCommas_single = function(x){
-
-	if (!is.finite(x)) return(as.character(x))
-
-	s = sign(x)
-	x = abs(x)
-	decimal = x - floor(x)
-	if (decimal > 0){
-		dec_string = substr(decimal, 2, 4)
-	} else {
-		dec_string = ""
-	}
-
-	entier = sprintf("%.0f", floor(x))
-	quoi = rev(strsplit(entier, "")[[1]])
-	n = length(quoi)
-	sol = c()
-	for (i in 1:n) {
-		sol = c(sol, quoi[i])
-		if (i%%3 == 0 && i != n) sol = c(sol, ",")
-	}
-	res = paste0(ifelse(s == -1, "-", ""), paste0(rev(sol), collapse = ""),
-					 dec_string)
-	res
+    cpp_add_commas(x)
 }
 
 addCommas = function(x){
-	sapply(x, addCommas_single)
-}
-
-myRound_single = function(x, digits=5){
-	# There can be non numeric values...
-	# we give away the non numeric ones and round the others
-
-	if(is.na(x)){
-		return(NA)
-	}
-
-	if(is.numeric(x)){
-		res = round(x, digits)
-	} else {
-
-		if(!grepl("[[:digit:]]", x)){
-			# means it is a character
-			res = x
-		} else {
-			res = round(as.numeric(x), digits)
-		}
-	}
-
-	res
-}
-
-myRound = function(x, digits=5){
-	sapply(x, myRound_single, digits = digits)
+	sapply(x, .addCommas)
 }
 
 decimalFormat = function(x){
@@ -6255,46 +6186,6 @@ decimalFormat = function(x){
 	sapply(x, decimalFormat_single)
 }
 
-coefFormatLatex = function(x, digits = 4, power = 5){
-
-	coefFormatLatex_single = function(x, digits, power){
-		# format decimals: 5.3 10**-7 instead of 0.00000053
-		# format large numbers 6356516.12464 => 6356516.1
-
-		nbSignif = 3
-
-		if(is.na(x)) return(x)
-
-		if(!is.numeric(x)){
-			if(grepl("[^[:digit:]e\\.-]", x)){
-				return(x)
-			} else {
-				x = as.numeric(x)
-			}
-		}
-
-		exponent = floor(log10(abs(x)))
-
-		if(exponent >= 0){
-			# return(sprintf("%.*f", max(1, digits - abs(exponent)), x))
-			return(mysignif(x, digits))
-		}
-
-		if(abs(exponent) >= power){
-			left_value = round(x*10**-exponent, 3)
-			res = paste0("$", left_value, "\\times 10^{", exponent, "}$")
-		} else if(abs(x) > 10**(-digits)){
-			res = sprintf("%.*f", digits, x)
-		} else {
-			res = sprintf("%.*f", abs(exponent), x)
-		}
-
-		res
-	}
-
-	sapply(x, coefFormatLatex_single, digits = digits, power = power)
-}
-
 numberFormat_single = function(x, type = "normal"){
 	# For numbers higher than 1e9 => we apply a specific formatting
 	# idem for numbers lower than 1e-4
@@ -6303,7 +6194,6 @@ numberFormat_single = function(x, type = "normal"){
 
     if(is.na(x)){
         return(NA)
-        # return(ifelse(type == "normal", "--", ""))
     }
 
 	if(x == 0) return("0")
@@ -6340,18 +6230,67 @@ numberFormatNormal = function(x){
 
 mysignif = function (x, d = 2, r = 1){
 
-    mysignif_single = function(x, d, r) {
+    .mysignif = function(x, d, r) {
         if (is.na(x)) {
             return(NA)
         }
 
-        if (abs(x) >= 10^(d - 1)){
+        if(abs(x) >= 10^(d - 1)){
             return(round(x, r))
         } else {
             return(signif(x, d))
         }
     }
-    sapply(x, mysignif_single, d = d, r = r)
+    sapply(x, .mysignif, d = d, r = r)
+}
+
+format_nber_single = function(x, digits, round = FALSE, pow_above = 10, pow_below = -5, tex = FALSE){
+    # Attention aux nombres ronds => pas chiffre apres la virgule!
+
+    if(is.na(x) || !is.numeric(x)){
+        return(x)
+    }
+
+    if(round){
+        # super simple
+        return(cpp_add_commas(x, digits))
+
+    } else {
+        whole = (x %% 1) == 0
+        if(abs(x) >= 10^(digits - 1)){
+            x = round(x, 1)
+        } else {
+            x = signif(x, digits)
+        }
+    }
+
+    exponent = floor(log10(abs(x)))
+
+    if(exponent >= pow_above || exponent <= pow_below){
+        left_value = round(x*10**-exponent, 3)
+
+        if(tex){
+            res = paste0("$", left_value, "\\times 10^{", exponent, "}$")
+        } else {
+            res = paste0(left_value, "e", ifelse(exponent > 0, "+", ""), exponent)
+        }
+
+    } else if(exponent >= 0){
+        r = max(-(exponent + 1 - digits), 1)
+        res = cpp_add_commas(x, r)
+
+    } else if(abs(x) > 10**(-digits)){
+        res = sprintf("%.*f", digits, x)
+
+    } else {
+        res = sprintf("%.*f", abs(exponent), x)
+    }
+
+    res
+}
+
+format_number = function(x, digits = 4, round = FALSE, pow_above = 10, pow_below = -5, tex = FALSE){
+    sapply(x, format_nber_single, digits = digits, round = round, pow_above = pow_above, pow_below = pow_below, tex = tex)
 }
 
 index_2D_to_1D = function(i, j, n_j) 1 + (i - 1) * n_j + j - 1
