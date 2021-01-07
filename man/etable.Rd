@@ -173,7 +173,7 @@ getFixest_etable()
 
 \item{.vcov_args}{A list containing arguments to be passed to the function \code{.vcov}.}
 
-\item{digits}{Integer, default is 4. The number of digits to be displayed.}
+\item{digits}{Integer or character scalar. Default is 4 and represents the number of significant digits to be displayed for the coefficients, standard-errors and fit statistics. To apply rounding instead of significance use, e.g., \code{digits = "r3"} which will round at the first 3 decimals. If character, it must be of the form \code{"rd"} or \code{"sd"} with \code{d} a digit (\code{r} is for round and \code{s} is for significance).}
 
 \item{tex}{Logical: whether the results should be a data.frame or a Latex table. By default, this argument is \code{TRUE} if the argument \code{file} (used for exportation) is not missing; it is equal to \code{FALSE} otherwise.}
 
@@ -201,7 +201,7 @@ getFixest_etable()
 
 \item{convergence}{Logical, default is missing. Should the convergence state of the algorithm be displayed? By default, convergence information is displayed if at least one model did not converge.}
 
-\item{signifCode}{Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is \code{c("***"=0.01, "**"=0.05, "*"=0.10)} for a Latex table and \code{c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)} for a data.frame (to conform with R's default). To supress the significance codes, use \code{signifCode=NA} or \code{signifCode=NULL}. Can also be equal to \code{"letters"}, then the default becomes \code{c("a"=0.01, "b"=0.05, "c"=0.10)}.}
+\item{signifCode}{Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is \code{c("***"=0.01, "**"=0.05, "*"=0.10)} for a Latex table and \code{c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)} for a data.frame (to conform with R's default). To suppress the significance codes, use \code{signifCode=NA} or \code{signifCode=NULL}. Can also be equal to \code{"letters"}, then the default becomes \code{c("a"=0.01, "b"=0.05, "c"=0.10)}.}
 
 \item{label}{(Tex only.) Character scalar. The label of the Latex table.}
 
