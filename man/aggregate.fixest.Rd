@@ -50,7 +50,7 @@ base$treat_post = (base$year >= base$year_treated) * 1
 base$time_to_treatment = pmax(base$year - base$year_treated, -1000)
 base$treated = (base$year_treated < 10000) * 1
 
-# The effect of the treatment is cohort specific and increase with time
+# The effect of the treatment is cohort specific and increases with time
 base$y_true = base$treat_post * (1 + 1 * base$time_to_treatment - 1 * base$group)
 base$y = base$y_true + rnorm(nrow(base))
 
@@ -79,7 +79,8 @@ ci_low = agg_coef[, 1] - 1.96 * agg_coef[, 2]
 ci_up = agg_coef[, 1] + 1.96 * agg_coef[, 2]
 segments(x0 = x, y0 = ci_low, x1 = x, y1 = ci_up, col = 4)
 
-legend("topleft", col = c(1, 2, 4), pch = c(20, 15, 17), legend = c("Naive", "True", "Sun & Abraham"))
+legend("topleft", col = c(1, 2, 4), pch = c(20, 15, 17),
+       legend = c("Naive", "True", "Sun & Abraham"))
 
 
 # The ATT
