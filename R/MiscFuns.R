@@ -6267,7 +6267,7 @@ format_nber_single = function(x, digits, round = FALSE, pow_above = 10, pow_belo
     exponent = floor(log10(abs(x)))
 
     if(exponent >= pow_above || exponent <= pow_below){
-        left_value = round(x*10**-exponent, 3)
+        left_value = round(x*10**-exponent, min(digits, 2))
 
         if(tex){
             res = paste0("$", left_value, "\\times 10^{", exponent, "}$")
@@ -6277,7 +6277,7 @@ format_nber_single = function(x, digits, round = FALSE, pow_above = 10, pow_belo
 
     } else if(exponent >= 0){
         r = max(-(exponent + 1 - digits), 1)
-        res = cpp_add_commas(x, r)
+        res = cpp_add_commas(x, r, whole)
 
     } else if(abs(x) > 10**(-digits)){
         res = sprintf("%.*f", digits, x)
