@@ -995,7 +995,7 @@ NumericVector cpp_factor_matrix(IntegerVector fact, LogicalVector is_na_all, Int
 }
 
 // [[Rcpp::export]]
-std::string cpp_add_commas(double x, int r = 1){
+std::string cpp_add_commas(double x, int r = 1, bool whole = true){
     // a bit like (but not exactly equal to) format(x, nsmall = 1, big.mark = ",") but about 40-100 times faster
     // for whole numbers => no trailing digits
     // does not accept vectors, although super easy to expand to vectors
@@ -1025,7 +1025,7 @@ std::string cpp_add_commas(double x, int r = 1){
     }
 
     double rest = x - floor(x);
-    if(rest != 0 && r > 0){
+    if((rest != 0 || !whole) && r > 0){
         // not a whole number
 
         res.push_back('.');

@@ -169,8 +169,8 @@ cpp_factor_matrix <- function(fact, is_na_all, who_is_dropped, var, col_names) {
     .Call(`_fixest_cpp_factor_matrix`, fact, is_na_all, who_is_dropped, var, col_names)
 }
 
-cpp_add_commas <- function(x, r = 1L) {
-    .Call(`_fixest_cpp_add_commas`, x, r)
+cpp_add_commas <- function(x, r = 1L, whole = TRUE) {
+    .Call(`_fixest_cpp_add_commas`, x, r, whole)
 }
 
 cpp_get_nb_threads <- function() {
