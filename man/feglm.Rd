@@ -17,6 +17,7 @@ feglm(
   fsplit,
   cluster,
   se,
+  dof,
   panel.id,
   start = NULL,
   etastart = NULL,
@@ -50,6 +51,7 @@ feglm.fit(
   fsplit,
   cluster,
   se,
+  dof,
   weights,
   subset,
   start = NULL,
@@ -82,6 +84,7 @@ fepois(
   fsplit,
   cluster,
   se,
+  dof,
   panel.id,
   start = NULL,
   etastart = NULL,
@@ -126,6 +129,8 @@ fepois(
 
 \item{se}{Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.}
 
+\item{dof}{An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{dof}} for this argument. The arguments and defaults of the function \code{\link[fixest]{dof}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "conventional"}, \code{t.df = "conventional"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{dof}} for details.}
+
 \item{panel.id}{The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id = ~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link[fixest]{feols}}).}
 
 \item{start}{Starting values for the coefficients. Can be: i) a numeric of length 1 (e.g. \code{start = 0}), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients). Default is missing.}
@@ -142,7 +147,7 @@ fepois(
 
 \item{fixef.iter}{Maximum number of iterations in fixed-effects algorithm (only in use for 2+ fixed-effects). Default is 10000.}
 
-\item{collin.tol}{Numeric scalar, default is \code{1e-10}. Threshold decising when variables should be considered collinear and subsequently removed from the estimation. Higher values means more variables will be removed (if there is presence of collinearity). One signal of presence of collinearity is t-stats that are extremely low (for instance when t-stats < 1e-3).}
+\item{collin.tol}{Numeric scalar, default is \code{1e-10}. Threshold deciding when variables should be considered collinear and subsequently removed from the estimation. Higher values means more variables will be removed (if there is presence of collinearity). One signal of presence of collinearity is t-stats that are extremely low (for instance when t-stats < 1e-3).}
 
 \item{glm.iter}{Number of iterations of the glm algorithm. Default is 25.}
 

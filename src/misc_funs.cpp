@@ -23,6 +23,7 @@
 #include <math.h>
 #include <vector>
 #include <stdio.h>
+#include <cmath>
 
 using namespace Rcpp;
 using namespace std;
@@ -993,7 +994,58 @@ NumericVector cpp_factor_matrix(IntegerVector fact, LogicalVector is_na_all, Int
     return res;
 }
 
+// [[Rcpp::export]]
+std::string cpp_add_commas(double x, int r = 1, bool whole = true){
+    // a bit like (but not exactly equal to) format(x, nsmall = 1, big.mark = ",") but about 40-100 times faster
+    // for whole numbers => no trailing digits
+    // does not accept vectors, although super easy to expand to vectors
 
+    std::string x_str = std::to_string(static_cast<int>(abs(x)));
+    std::string res;
+
+    if(x < 0){
+        res.push_back('-');
+        x = -x;
+    }
+
+    if(x < 1000){
+        res.insert(res.size(), x_str);
+
+    } else {
+        int n = x_str.size();
+        int e = n; // e: exponent
+
+        while(e > 0){
+            res.push_back(x_str[n - e]);
+            --e;
+            if(e > 1 && e % 3 == 0) {
+                res.push_back(',');
+            }
+        }
+    }
+
+    double rest = x - floor(x);
+    if((rest != 0 || !whole) && r > 0){
+        // not a whole number
+
+        res.push_back('.');
+
+        if(r == 1){
+            res.push_back(std::to_string(static_cast<int>(round(rest * 10)))[0]);
+
+        } else {
+            double rounded_rest = round(rest * pow(10, r)) / pow(10, r);
+            std::string rest_str = std::to_string(rounded_rest);
+            int nr = rest_str.size();
+
+            for(int i=2 ; i < nr && i-1 <= r ; ++i){
+                res.push_back(rest_str[i]);
+            }
+        }
+    }
+
+    return res;
+}
 
 
 

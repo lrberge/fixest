@@ -9,7 +9,8 @@ setFixest_se(
   no_FE = "standard",
   one_FE = "cluster",
   two_FE = "cluster",
-  all = NULL
+  all = NULL,
+  reset = FALSE
 )
 
 getFixest_se()
@@ -22,9 +23,11 @@ getFixest_se()
 \item{two_FE}{Character scalar equal to either: \code{"standard"}, \code{"hetero"}, \code{"cluster"} (default), or \code{"twoway"}. The type of standard-errors to use by default for estimations with \emph{two or more} fixed-effects.}
 
 \item{all}{Character scalar equal to either: \code{"standard"}, or \code{"hetero"}. By default is is NULL. If provided, it sets all the SEs to that value.}
+
+\item{reset}{Logical, default is \code{FALSE}. Whether to reset to the default values.}
 }
 \value{
-The function \code{getFixest_se()} returns a list with three elements containing the default for estimations i) wihtout, ii) with one, or iii) with two or more fixed-effects.
+The function \code{getFixest_se()} returns a list with three elements containing the default for estimations i) without, ii) with one, or iii) with two or more fixed-effects.
 }
 \description{
 This functions defines or extracts the default type of standard-errors to computed in \code{fixest} \code{\link[fixest:summary.fixest]{summary}}, and \code{\link[fixest:vcov.fixest]{vcov}}.

@@ -13,9 +13,36 @@
  
  - Fix bug regarding `panel` data sets when variables were created in a `data.table` within functions (thanks to @tcovert [#76](https://github.com/lrberge/fixest/issues/76)).
  
+ - Add extra elements to be removed when `lean = TRUE` to keep the object as small as possible.
+ 
+# Sun and Abraham (forthcoming, Journal of Econometrics) method for staggered DiD
+
+ - For staggered difference-in-difference analyzes: the method of Sun and Abraham (forthcoming, Journal of Econometrics) has been implemented. 
+ 
+ - After having using `i()` to interact cohort dummies with time to treatment dummies, use the function `aggregate` to recover the yearly treatment effects.
+ 
+ - So far the way to do it, although easy, is a bit arcane but the next versions of the software will include a user-friendly way. 
+ 
+ - For detail, check out the help page of aggregate or the staggered DiD section in the vignette [fixest walkthrough](https://CRAN.R-project.org/package=fixest/vignettes/fixest_walkthrough.html).
+ 
 # New features
 
  - Function `i()` now has the new arguments `f2`, `drop2` and `keep2` which allows the interaction of two factors.
+ 
+ - Argument `dof`, used to compute the standard-errors, can now be used at estimation time.
+ 
+ - In `etable`, the argument `digits` can now accepts a character value specifying the way the decimals should be displayed. For example if `digits = "r2"` this means that all numbers will be rounded at two decimals and these two decimals will always be displayed. The default behavior is to display significant digits. Follows feature request [#82](https://github.com/lrberge/fixest/issues/82).
+ 
+ - `etable` also gains the argument `digits.stats` which monitors how the fit statistics decimals should be displayed.
+ 
+
+# Other
+
+  - More coherence regarding the use of `summary` applied to models for which the SEs were computed at estimation time. Now there is a memory of how the SEs were computed, so that, for example, if only the argument `dof` is passed to `summary`, then the SEs will be clustered in the same way as estimation time but and only `dof` will change.
+  
+  - Now an error is raised when `i()` is used in the fixed-effects part of the formula. The appropriate way is indicated (related to [#77](https://github.com/lrberge/fixest/issues/77)).
+  
+  - Improved default setting of standard-errors.
 
 # fixest 0.8.0 (2020-12-14)
 

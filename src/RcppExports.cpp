@@ -679,6 +679,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_add_commas
+std::string cpp_add_commas(double x, int r, bool whole);
+RcppExport SEXP _fixest_cpp_add_commas(SEXP xSEXP, SEXP rSEXP, SEXP wholeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type x(xSEXP);
+    Rcpp::traits::input_parameter< int >::type r(rSEXP);
+    Rcpp::traits::input_parameter< bool >::type whole(wholeSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_add_commas(x, r, whole));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_get_nb_threads
 int cpp_get_nb_threads();
 RcppExport SEXP _fixest_cpp_get_nb_threads() {
@@ -1014,6 +1027,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_check_nested", (DL_FUNC) &_fixest_cpp_check_nested, 4},
     {"_fixest_cpp_diag_XUtX", (DL_FUNC) &_fixest_cpp_diag_XUtX, 2},
     {"_fixest_cpp_factor_matrix", (DL_FUNC) &_fixest_cpp_factor_matrix, 5},
+    {"_fixest_cpp_add_commas", (DL_FUNC) &_fixest_cpp_add_commas, 3},
     {"_fixest_cpp_get_nb_threads", (DL_FUNC) &_fixest_cpp_get_nb_threads, 0},
     {"_fixest_cpppar_exp", (DL_FUNC) &_fixest_cpppar_exp, 2},
     {"_fixest_cpppar_log", (DL_FUNC) &_fixest_cpppar_log, 2},

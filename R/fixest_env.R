@@ -10,7 +10,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                        fixef, NL.start, lower, upper, NL.start.init,
                        offset, subset, split = NULL, fsplit = NULL, linear.start = 0, jacobian.method = "simple",
                        useHessian = TRUE, hessian.args = NULL, opt.control = list(),
-                       cluster, se,
+                       cluster, se, dof,
                        y, X, fixef_mat, panel.id, fixef.rm = "perfect",
                        nthreads = getFixest_nthreads(), lean = FALSE,
                        verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000, collin.tol = 1e-14,
@@ -63,7 +63,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     #
     # Arguments control
-    main_args = c("fml", "data", "panel.id", "offset", "subset", "split", "fsplit", "cluster", "se", "fixef.rm", "fixef.tol", "fixef.iter", "fixef", "nthreads", "lean", "verbose", "warn", "notes", "combine.quick", "start", "only.env", "mem.clean")
+    main_args = c("fml", "data", "panel.id", "offset", "subset", "split", "fsplit", "cluster", "se", "dof", "fixef.rm", "fixef.tol", "fixef.iter", "fixef", "nthreads", "lean", "verbose", "warn", "notes", "combine.quick", "start", "only.env", "mem.clean")
     femlm_args = c("family", "theta.init", "linear.start", "opt.control", "deriv.tol", "deriv.iter")
     feNmlm_args = c("NL.fml", "NL.start", "lower", "upper", "NL.start.init", "jacobian.method", "useHessian", "hessian.args")
     feglm_args = c("family", "weights", "glm.iter", "glm.tol", "etastart", "mustart", "collin.tol")
@@ -478,6 +478,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         if(is.character(cluster)){
             cluster = .xpd(rhs = cluster)
         }
+
+        cluster_origin = cluster
 
         complete_vars = unique(c(complete_vars, all.vars(cluster)))
     }
@@ -1329,7 +1331,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             }
         }
     } else {
-        cluster = NULL
+        # Cluster origin was first defined when we first check cluster, way up
+        cluster_origin = cluster = NULL
     }
 
     if(!missnull(se)){
@@ -1351,6 +1354,15 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     } else {
         se = NULL
+    }
+
+    if(!missnull(dof)){
+        do_summary = TRUE
+        if(!identical(class(dof), "dof.type")){
+            stop("The argument 'dof' must be an object obtained from the function dof().")
+        }
+    } else {
+        dof = NULL
     }
 
     check_arg(lean, "logical scalar")
@@ -2118,12 +2130,15 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     assign("mem.clean", mem.clean, env)
     assign("nthreads", nthreads, env)
 
-    # summary
+    # Summary
     assign("do_summary", do_summary, env)
     if(do_summary){
         assign("cluster", cluster, env)
         assign("se", se, env)
         assign("lean", lean, env)
+        assign("dof", dof, env)
+
+        assign("summary_flags", build_flags(mc_origin, se = se, cluster = cluster_origin, dof = dof), env)
     }
 
     # Multi

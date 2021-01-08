@@ -1389,3 +1389,96 @@ res_bis = lm.fit(X[-res$obsRemoved, ], y[-res$obsRemoved,])
 test(res_bis$coefficients, res$coefficients)
 
 
+####
+#### VCOV at estimation ####
+####
+
+chunk("vcov at estimation")
+
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
+base$clu = sample(6, 150, TRUE)
+base$clu[1:5] = NA
+
+est = feols(y ~ x1 | species, base, cluster = ~clu, dof = dof(adj = FALSE))
+
+# The three should be identical
+v1 = est$cov.scaled
+v1b = vcov(est)
+v1c = summary(est)$cov.scaled
+
+test(v1, v1b)
+test(v1, v1c)
+
+# Only dof change
+v2 = summary(est, dof = dof())$cov.scaled
+v2b = vcov(est, cluster = ~clu, dof = dof())
+
+test(v2, v2b)
+test(max(abs(v1 - v2)) == 0, FALSE)
+
+# SE change only
+v3 = summary(est, se = "hetero")$cov.scaled
+v3b = vcov(est, se = "hetero", dof = dof(adj = FALSE))
+
+test(v3, v3b)
+test(max(abs(v1 - v3)) == 0, FALSE)
+test(max(abs(v2 - v3)) == 0, FALSE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -41,6 +41,7 @@ S3method(print, fixest_fitstat)
 S3method(summary, fixest.fixef)
 S3method(summary, fixest)
 S3method(summary, fixest_list)
+S3method(aggregate, fixest)
 export(summ) # alias for summary.fixest
 S3method(plot, fixest.fixef)
 S3method("[", fixest_panel) # Lag related
@@ -110,7 +111,8 @@ importFrom(stats, cor, dnorm, lm, nlminb, optim,
 importFrom(stats, model.matrix, sigma, deviance, weights, terms,
              nobs, AIC, BIC, update, predict, fitted, fitted.values,
 			  resid, residuals, logLik, coef, coefficients, lag,
-			  confint, vcov, binomial, setNames, complete.cases, pchisq, pf)
+			  confint, vcov, binomial, setNames, complete.cases, pchisq, pf,
+			  aggregate)
 
 importFrom(utils, combn, head, tail)
 

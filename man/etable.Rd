@@ -10,13 +10,15 @@
 \usage{
 etable(
   ...,
-  se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"),
-  dof = getFixest_dof(),
-  cluster,
+  se = NULL,
+  dof = NULL,
+  cluster = NULL,
   stage = 2,
+  agg = NULL,
   .vcov,
   .vcov_args = NULL,
   digits = 4,
+  digits.stats = 5,
   tex,
   fitstat,
   title,
@@ -63,6 +65,7 @@ esttex(
   .vcov,
   .vcov_args = NULL,
   digits = 4,
+  digits.stats = 5,
   fitstat,
   coefstat = c("se", "tstat", "confint"),
   ci = 0.95,
@@ -111,6 +114,7 @@ esttable(
   dict,
   order,
   digits = 4,
+  digits.stats = 5,
   fitstat,
   convergence,
   signifCode = c(`***` = 0.001, `**` = 0.01, `*` = 0.05, . = 0.1),
@@ -124,6 +128,7 @@ esttable(
 
 setFixest_etable(
   digits = 4,
+  digits.stats = 5,
   fitstat,
   coefstat = c("se", "tstat", "confint"),
   ci = 0.95,
@@ -166,11 +171,15 @@ getFixest_etable()
 
 \item{stage}{Can be equal to \code{2} (default), \code{1}, \code{1:2} or \code{2:1}. Only used if the object is an IV estimation: defines the stage to which \code{summary} should be applied. If \code{stage = 1} and there are multiple endogenous regressors or if \code{stage} is of length 2, then an object of class \code{fixest_multi} is returned.}
 
+\item{agg}{A character scalar describing the variable names to be aggregated, it is pattern-based. All variables that match the pattern will be aggregated. It must be of the form \code{"(root)"}, the parentheses must be there and the resulting variable name will be \code{"root"}. You can add another root with parentheses: \code{"(root1)regex(root2)"}, in which case the resulting name is \code{"root1::root2"}. To name the resulting variable differently you can pass a named vector: \code{c("name" = "pattern")} or \code{c("name" = "pattern(root2)")}. It's a bit intricate sorry, please see the examples.}
+
 \item{.vcov}{A function to be used to compute the standard-errors of each fixest object. You can pass extra arguments to this function using the argument \code{.vcov_args}. See the example.}
 
 \item{.vcov_args}{A list containing arguments to be passed to the function \code{.vcov}.}
 
-\item{digits}{Integer, default is 4. The number of digits to be displayed.}
+\item{digits}{Integer or character scalar. Default is 4 and represents the number of significant digits to be displayed for the coefficients and standard-errors. To apply rounding instead of significance use, e.g., \code{digits = "r3"} which will round at the first 3 decimals. If character, it must be of the form \code{"rd"} or \code{"sd"} with \code{d} a digit (\code{r} is for round and \code{s} is for significance). For the number of digits for the fit statistics, use \code{digits.stats}. Note that when significance is used it does not exactly display the number of significant digits: see details for its exact meaning.}
+
+\item{digits.stats}{Integer or character scalar. Default is 5 and represents the number of significant digits to be displayed for the fit statistics. To apply rounding instead of significance use, e.g., \code{digits = "r3"} which will round at the first 3 decimals. If character, it must be of the form \code{"rd"} or \code{"sd"} with \code{d} a digit (\code{r} is for round and \code{s} is for significance). Note that when significance is used it does not exactly display the number of significant digits: see details for its exact meaning.}
 
 \item{tex}{Logical: whether the results should be a data.frame or a Latex table. By default, this argument is \code{TRUE} if the argument \code{file} (used for exportation) is not missing; it is equal to \code{FALSE} otherwise.}
 
@@ -198,7 +207,7 @@ getFixest_etable()
 
 \item{convergence}{Logical, default is missing. Should the convergence state of the algorithm be displayed? By default, convergence information is displayed if at least one model did not converge.}
 
-\item{signifCode}{Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is \code{c("***"=0.01, "**"=0.05, "*"=0.10)} for a Latex table and \code{c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)} for a data.frame (to conform with R's default). To supress the significance codes, use \code{signifCode=NA} or \code{signifCode=NULL}. Can also be equal to \code{"letters"}, then the default becomes \code{c("a"=0.01, "b"=0.05, "c"=0.10)}.}
+\item{signifCode}{Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is \code{c("***"=0.01, "**"=0.05, "*"=0.10)} for a Latex table and \code{c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)} for a data.frame (to conform with R's default). To suppress the significance codes, use \code{signifCode=NA} or \code{signifCode=NULL}. Can also be equal to \code{"letters"}, then the default becomes \code{c("a"=0.01, "b"=0.05, "c"=0.10)}.}
 
 \item{label}{(Tex only.) Character scalar. The label of the Latex table.}
 
@@ -267,6 +276,16 @@ When the argument \code{postprocessing.tex} is not missing, two additional tags 
 
 \item \code{esttable}: Facility to display the results of multiple \code{fixest} estimations.
 }}
+
+\section{How does \code{digits} handle the number of decimals displayed?}{
+
+
+The default display of decimals is the outcome of an algorithm. Let's take the example of \code{digits = 3} which "kind of" requires 3 significant digits to be displayed.
+
+For numbers greater than 1 (in absolute terms), their integral part is always be displayed and the number of decimals shown is equal to \code{digits} minus the number of digits in the integral part. This means that \code{12.345} will be displayed as \code{12.3}. If the number of decimals should be 0, then a single decimal is displayed to suggest that the number is not whole. This means that \code{1234.56} will be displayed as \code{1234.5}. Note that if the number is whole, no decimals are shown.
+
+For numbers lower than 1 (in absolute terms), the number of decimals displayed is equal to \code{digits} except if there are only 0s in which case the first significant digit is shown. This means that \code{0.01234} will be displayed as \code{0.012} (first rule), and that 0.000123 will be displayed as \code{0.0001} (second rule).
+}
 
 \section{Arguments keep, drop and order}{
 
