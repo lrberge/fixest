@@ -9947,9 +9947,10 @@ getFixest_dof = function(){
 #' @param one_FE Character scalar equal to either: \code{"standard"}, \code{"hetero"}, or \code{"cluster"} (default). The type of standard-errors to use by default for estimations with \emph{one} fixed-effect.
 #' @param two_FE Character scalar equal to either: \code{"standard"}, \code{"hetero"}, \code{"cluster"} (default), or \code{"twoway"}. The type of standard-errors to use by default for estimations with \emph{two or more} fixed-effects.
 #' @param all Character scalar equal to either: \code{"standard"}, or \code{"hetero"}. By default is is NULL. If provided, it sets all the SEs to that value.
+#' @param reset Logical, default is \code{FALSE}. Whether to reset to the default values.
 #'
 #' @return
-#' The function \code{getFixest_se()} returns a list with three elements containing the default for estimations i) wihtout, ii) with one, or iii) with two or more fixed-effects.
+#' The function \code{getFixest_se()} returns a list with three elements containing the default for estimations i) without, ii) with one, or iii) with two or more fixed-effects.
 #'
 #' @examples
 #'
@@ -9972,18 +9973,31 @@ getFixest_dof = function(){
 #' setFixest_se()
 #'
 #'
-setFixest_se = function(no_FE = "standard", one_FE = "cluster", two_FE = "cluster", all = NULL){
+setFixest_se = function(no_FE = "standard", one_FE = "cluster", two_FE = "cluster", all = NULL, reset = FALSE){
 
+    check_arg_plus(no_FE,  "match(standard, hetero)")
+    check_arg_plus(one_FE, "match(standard, hetero, cluster)")
+    check_arg_plus(two_FE, "match(standard, hetero, cluster, twoway)")
     check_arg_plus(all,  "NULL match(standard, hetero)")
-    if(is.null(all)){
-        check_arg_plus(no_FE,  "match(standard, hetero)")
-        check_arg_plus(one_FE, "match(standard, hetero, cluster)")
-        check_arg_plus(two_FE, "match(standard, hetero, cluster, twoway)")
-    } else {
-        no_FE = one_FE = two_FE = all
+    check_arg_plus(reset, "logical scalar")
+
+    opts = getOption("fixest_se")
+    if(is.null(opts) || !is.list(opts) || reset){
+        opts = list(no_FE = "standard", one_FE = "cluster", two_FE = "cluster")
     }
 
-    options(fixest_se = list(no_FE = no_FE, one_FE = one_FE, two_FE = two_FE))
+    if(!is.null(all)){
+        opts$no_FE = opts$one_FE = opts$two_FE = all
+    }
+
+
+    args = intersect(c("no_FE", "one_FE", "two_FE"), names(match.call()))
+
+    for(a in args){
+        opts[[a]] = eval(as.name(a))
+    }
+
+    options(fixest_se = opts)
 
 }
 
