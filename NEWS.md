@@ -23,6 +23,8 @@
  
  - In `etable`, the argument `digits` can now accepts a character value specifying the way the decimals should be displayed. For example if `digits = "r2"` this means that all numbers will be rounded at two decimals and these two decimals will always be displayed. The default behavior is to display significant digits. Follows feature request [#82](https://github.com/lrberge/fixest/issues/82).
  
+ - `etable` also gains the argument `digits.stats` which monitors how the fit statistics decimals should be displayed.
+ 
 
 # Other
 

@@ -7182,6 +7182,38 @@ check_set_types = function(x, types, msg){
     x
 }
 
+check_set_digits = function(digits, up = 1){
+    # Note that the argument name can be either digits or digits.stats
+
+    set_up(up)
+    check_value(digits, "integer scalar GE{1} | character scalar", .arg_name = deparse(substitute(digits)))
+
+    if(is.character(digits)){
+        d_type = substr(digits, 1, 1)
+        d_value = substr(digits, 2, nchar(digits))
+
+        # Control
+        if(!d_type %in% c("r", "s")){
+            arg = deparse(substitute(digits))
+            stop_up("The argument '", arg, "' must start with 'r' (for round) or 's' (for significant). Currently it starts with '", d_type,"' which is not valid.\nExample of valid use: digits = 'r3'.")
+        }
+
+        round = d_type == "r"
+
+        if(!grepl("^[0-9]$", d_value)){
+            arg = deparse(substitute(digits))
+            stop_up("The argument '", arg, "' must be equal to the character 'r' or 's' followed by a single digit. Currently '", digits,"' is not valid.\nExample of valid use: digits = '", d_type, "3'.")
+        }
+
+        digits = as.numeric(d_value)
+
+    } else {
+        round = FALSE
+    }
+
+    list(digits = digits, round = round)
+}
+
 
 #### ................. ####
 #### Additional Methods ####

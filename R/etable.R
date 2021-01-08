@@ -270,7 +270,7 @@
 #' etable(rep(.l(est, est_bis), each = 3, cluster = list("standard", ~ Month, ~ Day)))
 #'
 #'
-etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, agg = NULL, .vcov, .vcov_args = NULL, digits=4, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode, label, float, subtitles = list("auto"), fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar = TRUE, style.tex = NULL, style.df = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube"), postprocess.tex = NULL, postprocess.df = NULL, fit_format = "__var__"){
+etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, agg = NULL, .vcov, .vcov_args = NULL, digits = 4, digits.stats = 5, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, file, replace = FALSE, convergence, signifCode, label, float, subtitles = list("auto"), fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar = TRUE, style.tex = NULL, style.df = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube"), postprocess.tex = NULL, postprocess.df = NULL, fit_format = "__var__"){
 
     #
     # Checking the arguments
@@ -404,7 +404,7 @@ etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, agg = N
         }
     }
 
-    info = results2formattedList(dots = dots, se=se, dof=dof, fitstat_all=fitstat, cluster=cluster, stage=stage, agg = agg, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, sdBelow=sdBelow, signifCode=signifCode, coefstat = coefstat, ci = ci, title=title, float=float, subtitles=subtitles, keepFactors=keepFactors, tex = tex, useSummary=useSummary, dots_call=dots_call, powerBelow=powerBelow, dict=dict, interaction.combine=interaction.combine, convergence=convergence, family=family, keep=keep, drop=drop, file=file, order=order, label=label, fixef_sizes=fixef_sizes, fixef_sizes.simplify=fixef_sizes.simplify, depvar=depvar, style.tex=style.tex, style.df=style.df, replace=replace, notes = notes, group = group, extraline=extraline, placement = placement, drop.section = drop.section, poly_dict = poly_dict, tex_tag = DO_POSTPROCESS, fit_format = fit_format)
+    info = results2formattedList(dots = dots, se=se, dof=dof, fitstat_all=fitstat, cluster=cluster, stage=stage, agg = agg, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, digits.stats=digits.stats, sdBelow=sdBelow, signifCode=signifCode, coefstat = coefstat, ci = ci, title=title, float=float, subtitles=subtitles, keepFactors=keepFactors, tex = tex, useSummary=useSummary, dots_call=dots_call, powerBelow=powerBelow, dict=dict, interaction.combine=interaction.combine, convergence=convergence, family=family, keep=keep, drop=drop, file=file, order=order, label=label, fixef_sizes=fixef_sizes, fixef_sizes.simplify=fixef_sizes.simplify, depvar=depvar, style.tex=style.tex, style.df=style.df, replace=replace, notes = notes, group = group, extraline=extraline, placement = placement, drop.section = drop.section, poly_dict = poly_dict, tex_tag = DO_POSTPROCESS, fit_format = fit_format)
 
     if(tex){
         res = etable_internal_latex(info)
@@ -487,7 +487,7 @@ etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, agg = N
 NULL
 
 #' @describeIn etable Exports the results of multiple \code{fixest} estimations in a Latex table.
-esttex = function(..., se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, stage = 2, .vcov, .vcov_args = NULL, digits=4, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, title, float = float, sdBelow=TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles = list("auto"), fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", style.tex = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube")){
+esttex = function(..., se = c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, stage = 2, .vcov, .vcov_args = NULL, digits=4, digits.stats = 5, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, title, float = float, sdBelow=TRUE, keep, drop, order, dict, file, replace=FALSE, convergence, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), label, subtitles = list("auto"), fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", style.tex = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube")){
     # drop: a vector of regular expressions
     # order: a vector of regular expressions
     # dict: a 'named' vector
@@ -527,7 +527,7 @@ esttex = function(..., se = c("standard", "hetero", "cluster", "twoway", "threew
 
     dots = list(...)
 
-    info = results2formattedList(dots = dots, tex = TRUE, useSummary=useSummary, se=se, dof=dof, cluster=cluster, stage=stage, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, fitstat_all=fitstat, title=title, float=float, sdBelow=sdBelow, keep=keep, drop=drop, order=order, dict=dict, file=file, replace=replace, convergence=convergence, signifCode=signifCode, coefstat=coefstat, ci=ci, label=label, subtitles=subtitles, fixef_sizes=fixef_sizes, fixef_sizes.simplify=fixef_sizes.simplify, keepFactors=keepFactors, family=family, powerBelow=powerBelow, interaction.combine=interaction.combine, dots_call=dots_call, depvar=TRUE, style.tex=style.tex, notes=notes, group=group, extraline=extraline, placement=placement, drop.section=drop.section, poly_dict = poly_dict)
+    info = results2formattedList(dots = dots, tex = TRUE, useSummary=useSummary, se=se, dof=dof, cluster=cluster, stage=stage, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, digits.stats=digits.stats, fitstat_all=fitstat, title=title, float=float, sdBelow=sdBelow, keep=keep, drop=drop, order=order, dict=dict, file=file, replace=replace, convergence=convergence, signifCode=signifCode, coefstat=coefstat, ci=ci, label=label, subtitles=subtitles, fixef_sizes=fixef_sizes, fixef_sizes.simplify=fixef_sizes.simplify, keepFactors=keepFactors, family=family, powerBelow=powerBelow, interaction.combine=interaction.combine, dots_call=dots_call, depvar=TRUE, style.tex=style.tex, notes=notes, group=group, extraline=extraline, placement=placement, drop.section=drop.section, poly_dict = poly_dict)
 
     res = etable_internal_latex(info)
 
@@ -550,7 +550,7 @@ esttex = function(..., se = c("standard", "hetero", "cluster", "twoway", "threew
 NULL
 
 #' @describeIn etable Facility to display the results of multiple \code{fixest} estimations.
-esttable = function(..., se=c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, stage = 2, .vcov, .vcov_args = NULL, coefstat = c("se", "tstat", "confint"), ci = 0.95, depvar, style.df = NULL, keep, drop, dict, order, digits=4, fitstat, convergence, signifCode = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10), subtitles = list("auto"), keepFactors = FALSE, family, group = NULL, extraline = NULL, poly_dict = c("", " square", " cube")){
+esttable = function(..., se=c("standard", "hetero", "cluster", "twoway", "threeway", "fourway"), dof = getFixest_dof(), cluster, stage = 2, .vcov, .vcov_args = NULL, coefstat = c("se", "tstat", "confint"), ci = 0.95, depvar, style.df = NULL, keep, drop, dict, order, digits = 4, digits.stats = 5, fitstat, convergence, signifCode = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10), subtitles = list("auto"), keepFactors = FALSE, family, group = NULL, extraline = NULL, poly_dict = c("", " square", " cube")){
 
     counter = getOption("fixest_deprec_esttable")
     if(is.null(counter)){
@@ -577,14 +577,14 @@ esttable = function(..., se=c("standard", "hetero", "cluster", "twoway", "threew
 
     dots = list(...)
 
-    info = results2formattedList(dots = dots, se=se, dof = dof, cluster=cluster, stage=stage, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, signifCode=signifCode, coefstat = coefstat, ci = ci, subtitles=subtitles, style.df=style.df, keepFactors=keepFactors, useSummary=useSummary, dots_call=dots_call, fitstat_all=fitstat, depvar = depvar, family = family, keep = keep, drop = drop, order = order, dict = dict, interaction.combine = ":", group = group, extraline = extraline, poly_dict = poly_dict)
+    info = results2formattedList(dots = dots, se=se, dof = dof, cluster=cluster, stage=stage, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, digits.stats=digits.stats, signifCode=signifCode, coefstat = coefstat, ci = ci, subtitles=subtitles, style.df=style.df, keepFactors=keepFactors, useSummary=useSummary, dots_call=dots_call, fitstat_all=fitstat, depvar = depvar, family = family, keep = keep, drop = drop, order = order, dict = dict, interaction.combine = ":", group = group, extraline = extraline, poly_dict = poly_dict)
 
     res = etable_internal_df(info)
 
     return(res)
 }
 
-results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage = 2, agg = NULL, .vcov, .vcov_args = NULL, digits = 4, fitstat_all, sdBelow=TRUE, dict, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), coefstat = "se", ci = 0.95, label, subtitles, title, float = FALSE, replace = FALSE, keepFactors = FALSE, tex = FALSE, useSummary, dots_call, powerBelow = -5, interaction.combine, convergence, family, drop, order, keep, file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, depvar = FALSE, style.tex = NULL, style.df=NULL, notes = NULL, group = NULL, extraline=NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube"), tex_tag = FALSE, fit_format = "__var__"){
+results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage = 2, agg = NULL, .vcov, .vcov_args = NULL, digits = 4, digits.stats = 5, fitstat_all, sdBelow=TRUE, dict, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), coefstat = "se", ci = 0.95, label, subtitles, title, float = FALSE, replace = FALSE, keepFactors = FALSE, tex = FALSE, useSummary, dots_call, powerBelow = -5, interaction.combine, convergence, family, drop, order, keep, file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, depvar = FALSE, style.tex = NULL, style.df=NULL, notes = NULL, group = NULL, extraline=NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube"), tex_tag = FALSE, fit_format = "__var__"){
     # This function is the core of the function etable
 
     set_up(1)
@@ -664,29 +664,17 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
     }
 
     # digits argument + formatting
-    check_arg(digits, "integer scalar GE{1} | character scalar")
-    if(is.character(digits)){
-        d_type = substr(digits, 1, 1)
-        d_value = substr(digits, 2, nchar(digits))
-
-        # Control
-        if(!d_type %in% c("r", "s")){
-            stop_up("The argument 'digits' must start with 'r' (for round) or 's' (for significant). Currently it start with '", d_type,"' which is not valid.\nExample of valid use: digits = 'r3'.")
-        }
-
-        round = d_type == "r"
-
-        if(!grepl("^[0-9]$", d_value)){
-            stop_up("The argument 'digits' must be equal to the character 'r' or 's' followed by a single digit. Currently '", digits,"' is not valid.\nExample of valid use: digits = '", d_type, "3'.")
-        }
-
-        digits = as.numeric(d_value)
-
-    } else {
-        round = FALSE
-    }
+    digits_list = check_set_digits(digits, up = 2)
+    digits = digits_list$digits
+    round = digits_list$round
 
     fun_format = function(x) format_number(x, digits = digits, round = round, pow_below = powerBelow, tex = isTex)
+
+    digits_list = check_set_digits(digits.stats, up = 2)
+    digits.stats = digits_list$digits
+    round.stats = digits_list$round
+
+    fun_format_stats = function(x) format_number(x, digits = digits.stats, round = round.stats, pow_below = powerBelow, tex = isTex)
 
     # we rename the argument
     if(missing(depvar)){
@@ -1580,17 +1568,17 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
         #  Fit statistics
         #
 
-        n <- nobs(x)
-        obs_list[[m]] <- n
+        n = nobs(x)
+        obs_list[[m]] = n
         convergence_list[[m]] = ifelse(is.null(x$convStatus), TRUE, x$convStatus)
 
-        K <- x$nparams
+        K = x$nparams
 
         if(length(fitstat_all) == 0){
             fitstat_list[[m]] = NA
         } else {
 
-            my_stats = lapply(fitstat(x, fitstat_all, etable = TRUE, verbose = FALSE), fun_format)
+            my_stats = lapply(fitstat(x, fitstat_all, etable = TRUE, verbose = FALSE), fun_format_stats)
 
             if(any(grepl("::", names(my_stats), fixed = TRUE))){
                 reformat_fitstat = TRUE
@@ -2672,7 +2660,7 @@ etable_internal_df = function(info){
 
 
 #' @rdname etable
-setFixest_etable = function(digits = 4, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, signifCode, float, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style.tex = NULL, style.df = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, postprocess.tex = NULL, postprocess.df = NULL, fit_format = "__var__", reset = FALSE){
+setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, signifCode, float, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style.tex = NULL, style.df = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, postprocess.tex = NULL, postprocess.df = NULL, fit_format = "__var__", reset = FALSE){
 
     # cat(names(formals(setFixest_etable)), sep = '", "')
     arg_list = c("digits", "fitstat", "coefstat", "ci", "sdBelow", "keep", "drop", "order", "dict", "signifCode", "float", "fixef_sizes", "fixef_sizes.simplify", "family", "powerBelow", "interaction.combine", "depvar", "style.tex", "style.df", "notes", "group", "extraline", "placement", "drop.section", "postprocess.tex", "postprocess.df", "fit_format", "reset")
@@ -2681,19 +2669,8 @@ setFixest_etable = function(digits = 4, fitstat, coefstat = c("se", "tstat", "co
     # Argument checking => strong since these will become default values
     #
 
-    check_arg(digits, "integer scalar GE{1} | character scalar")
-    if(is.character(digits)){
-        d_type = substr(digits, 1, 1)
-        d_value = substr(digits, 2, nchar(digits))
-
-        # Control
-        if(!d_type %in% c("r", "s")){
-            stop_up("The argument 'digits' must start with 'r' (for round) or 's' (for significant). Currently it start with '", d_type,"' which is not valid.\nExample of valid use: digits = 'r3'.")
-        }
-        if(!grepl("^[0-9]$", d_value)){
-            stop_up("The argument 'digits' must be equal to the character 'r' or 's' followed by a single digit. Currently '", digits,"' is not valid.\nExample of valid use: digits = '", d_type, "3'.")
-        }
-    }
+    check_set_digits(digits)
+    check_set_digits(digits.stats)
 
     # fitstat (chiant) => controle reporte a fitstat_validate
     if(!missing(fitstat)){
