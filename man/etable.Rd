@@ -18,6 +18,7 @@ etable(
   .vcov,
   .vcov_args = NULL,
   digits = 4,
+  digits.stats = 5,
   tex,
   fitstat,
   title,
@@ -64,6 +65,7 @@ esttex(
   .vcov,
   .vcov_args = NULL,
   digits = 4,
+  digits.stats = 5,
   fitstat,
   coefstat = c("se", "tstat", "confint"),
   ci = 0.95,
@@ -112,6 +114,7 @@ esttable(
   dict,
   order,
   digits = 4,
+  digits.stats = 5,
   fitstat,
   convergence,
   signifCode = c(`***` = 0.001, `**` = 0.01, `*` = 0.05, . = 0.1),
@@ -125,6 +128,7 @@ esttable(
 
 setFixest_etable(
   digits = 4,
+  digits.stats = 5,
   fitstat,
   coefstat = c("se", "tstat", "confint"),
   ci = 0.95,
@@ -173,7 +177,9 @@ getFixest_etable()
 
 \item{.vcov_args}{A list containing arguments to be passed to the function \code{.vcov}.}
 
-\item{digits}{Integer or character scalar. Default is 4 and represents the number of significant digits to be displayed for the coefficients, standard-errors and fit statistics. To apply rounding instead of significance use, e.g., \code{digits = "r3"} which will round at the first 3 decimals. If character, it must be of the form \code{"rd"} or \code{"sd"} with \code{d} a digit (\code{r} is for round and \code{s} is for significance).}
+\item{digits}{Integer or character scalar. Default is 4 and represents the number of significant digits to be displayed for the coefficients and standard-errors. To apply rounding instead of significance use, e.g., \code{digits = "r3"} which will round at the first 3 decimals. If character, it must be of the form \code{"rd"} or \code{"sd"} with \code{d} a digit (\code{r} is for round and \code{s} is for significance). For the number of digits for the fit statistics, use \code{digits.stats}. Note that when significance is used it does not exactly display the number of significant digits: see details for its exact meaning.}
+
+\item{digits.stats}{Integer or character scalar. Default is 5 and represents the number of significant digits to be displayed for the fit statistics. To apply rounding instead of significance use, e.g., \code{digits = "r3"} which will round at the first 3 decimals. If character, it must be of the form \code{"rd"} or \code{"sd"} with \code{d} a digit (\code{r} is for round and \code{s} is for significance). Note that when significance is used it does not exactly display the number of significant digits: see details for its exact meaning.}
 
 \item{tex}{Logical: whether the results should be a data.frame or a Latex table. By default, this argument is \code{TRUE} if the argument \code{file} (used for exportation) is not missing; it is equal to \code{FALSE} otherwise.}
 
@@ -270,6 +276,16 @@ When the argument \code{postprocessing.tex} is not missing, two additional tags 
 
 \item \code{esttable}: Facility to display the results of multiple \code{fixest} estimations.
 }}
+
+\section{How does \code{digits} handle the number of decimals displayed?}{
+
+
+The default display of decimals is the outcome of an algorithm. Let's take the example of \code{digits = 3} which "kind of" requires 3 significant digits to be displayed.
+
+For numbers greater than 1 (in absolute terms), their integral part is always be displayed and the number of decimals shown is equal to \code{digits} minus the number of digits in the integral part. This means that \code{12.345} will be displayed as \code{12.3}. If the number of decimals should be 0, then a single decimal is displayed to suggest that the number is not whole. This means that \code{1234.56} will be displayed as \code{1234.5}. Note that if the number is whole, no decimals are shown.
+
+For numbers lower than 1 (in absolute terms), the number of decimals displayed is equal to \code{digits} except if there are only 0s in which case the first significant digit is shown. This means that \code{0.01234} will be displayed as \code{0.012} (first rule), and that 0.000123 will be displayed as \code{0.0001} (second rule).
+}
 
 \section{Arguments keep, drop and order}{
 
