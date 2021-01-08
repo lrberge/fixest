@@ -6544,12 +6544,18 @@ quickUnclassFactor = function(x, addItem = FALSE, sorted = FALSE){
 missnull = function(x) missing(x) || is.null(x)
 
 isScalar = function(x, int = FALSE) {
-    if(length(x) == 1L && is.numeric(x) && is.finite(x))
-        return(!(int && !(x %% 1 == 0))) else return(FALSE)
+    if(length(x) == 1L && is.numeric(x) && is.finite(x)){
+        if(int){
+            return(x %% 1 == 0)
+        } else {
+            return(TRUE)
+        }
+    } else {
+        return(FALSE)
+    }
 }
 
 isLogical = function(x) length(x) == 1L && is.logical(x) && !is.na(x)
-
 
 isSingleChar = function(x) length(x) == 1L && is.character(x) && !is.na(x)
 
