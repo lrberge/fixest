@@ -2672,7 +2672,19 @@ setFixest_etable = function(digits = 4, fitstat, coefstat = c("se", "tstat", "co
     # Argument checking => strong since these will become default values
     #
 
-    check_arg(digits, "integer scalar GE{1}")
+    check_arg(digits, "integer scalar GE{1} | character scalar")
+    if(is.character(digits)){
+        d_type = substr(digits, 1, 1)
+        d_value = substr(digits, 2, nchar(digits))
+
+        # Control
+        if(!d_type %in% c("r", "s")){
+            stop_up("The argument 'digits' must start with 'r' (for round) or 's' (for significant). Currently it start with '", d_type,"' which is not valid.\nExample of valid use: digits = 'r3'.")
+        }
+        if(!grepl("^[0-9]$", d_value)){
+            stop_up("The argument 'digits' must be equal to the character 'r' or 's' followed by a single digit. Currently '", digits,"' is not valid.\nExample of valid use: digits = '", d_type, "3'.")
+        }
+    }
 
     # fitstat (chiant) => controle reporte a fitstat_validate
     if(!missing(fitstat)){
