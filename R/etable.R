@@ -2663,7 +2663,7 @@ etable_internal_df = function(info){
 setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, signifCode, float, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style.tex = NULL, style.df = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, postprocess.tex = NULL, postprocess.df = NULL, fit_format = "__var__", reset = FALSE){
 
     # cat(names(formals(setFixest_etable)), sep = '", "')
-    arg_list = c("digits", "fitstat", "coefstat", "ci", "sdBelow", "keep", "drop", "order", "dict", "signifCode", "float", "fixef_sizes", "fixef_sizes.simplify", "family", "powerBelow", "interaction.combine", "depvar", "style.tex", "style.df", "notes", "group", "extraline", "placement", "drop.section", "postprocess.tex", "postprocess.df", "fit_format", "reset")
+    arg_list = c("digits", "digits.stats", "fitstat", "coefstat", "ci", "sdBelow", "keep", "drop", "order", "dict", "signifCode", "float", "fixef_sizes", "fixef_sizes.simplify", "family", "powerBelow", "interaction.combine", "depvar", "style.tex", "style.df", "notes", "group", "extraline", "placement", "drop.section", "postprocess.tex", "postprocess.df", "fit_format", "reset")
 
     #
     # Argument checking => strong since these will become default values
