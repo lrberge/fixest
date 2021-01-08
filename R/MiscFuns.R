@@ -8715,7 +8715,9 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
 	if(any(diag(vcov) < 0)){
 	    # We 'fix' it
 	    e = eigen(vcov)
+	    dm = dimnames(vcov)
 	    vcov = tcrossprod(e$vectors %*% diag(pmax(e$values, 1e-8)), e$vectors)
+	    dimnames(vcov) = dm
 	    message("Variance contained negative values in the diagonal and was 'fixed' (a la Cameron, Gelbach & Miller 2011).")
 	}
 
