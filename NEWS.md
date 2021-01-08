@@ -15,6 +15,8 @@
  
  - Add extra elements to be removed when `lean = TRUE` to keep the object as small as possible.
  
+ - Fix bug in fixed-effects estimations with multiple LHS and different number of observations per estimation that prevented to get the default behavior for standard-errors to work.
+ 
 # Sun and Abraham (forthcoming, Journal of Econometrics) method for staggered DiD
 
  - For staggered difference-in-difference analyzes: the method of Sun and Abraham (forthcoming, Journal of Econometrics) has been implemented. 
@@ -43,6 +45,8 @@
   - Now an error is raised when `i()` is used in the fixed-effects part of the formula. The appropriate way is indicated (related to [#77](https://github.com/lrberge/fixest/issues/77)).
   
   - Improved default setting of standard-errors.
+  
+  - Improved error messages.
 
 # fixest 0.8.0 (2020-12-14)
 
