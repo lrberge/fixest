@@ -476,6 +476,11 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         check_arg(cluster, "os formula | character vector")
 
         if(is.character(cluster)){
+            # We check this is a valid variable name
+            if(any(!cluster %in% dataNames)){
+                stop("In argument 'cluster' the variable", enumerate_items(setdiff(cluster, dataNames), "s.is"), " is not in the data set. It must be composed of variable names only.")
+            }
+
             cluster = .xpd(rhs = cluster)
         }
 
@@ -2754,6 +2759,8 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 
     lhs_done = FALSE
 
+    res = get("res", new_env)
+
     #
     # fixef ####
     #
@@ -2823,12 +2830,13 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 
         assign_fixef_env(new_env, family, origin_type, fixef_id, fixef_sizes, fixef_table, sum_y_all, slope_flag, slope_variables, slope_vars_list)
 
+        assign_fixef = TRUE
+
     } else if(isFixef){
         slope_flag = get("slope_flag", env)
         isSlope = any(slope_flag != 0)
     }
 
-    res = get("res", new_env)
 
     # This is very tedious
     if(!is.null(obs2keep) || assign_fixef){
@@ -2839,6 +2847,9 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
         #
 
         if(!is.null(obs2keep)){
+            # I set both values to FALSE since they're done here
+            save_lhs = save_rhs = FALSE
+
             #
             # The left hand side
             #
@@ -3078,108 +3089,106 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
             res$fixef_sizes = fixef_sizes_res
         }
 
-    } else {
+    }
 
-        #
-        # Save LHS/RHS ####
-        #
+    #
+    # Save LHS/RHS ####
+    #
 
-        if(save_lhs){
-            # Here lhs is ALWAYS a vector
-            assign("lhs", lhs, new_env)
+    if(save_lhs){
+        # Here lhs is ALWAYS a vector
+        assign("lhs", lhs, new_env)
 
-            if(origin_type == "feglm"){
-                family_funs = get("family_funs", env)
+        if(origin_type == "feglm"){
+            family_funs = get("family_funs", env)
 
-                if(family_funs$family_equiv == "poisson"){
+            if(family_funs$family_equiv == "poisson"){
 
-                    y_pos = lhs[lhs > 0]
-                    qui_pos = lhs > 0
+                y_pos = lhs[lhs > 0]
+                qui_pos = lhs > 0
 
-                    weights.value = get("weights.value", env)
-                    isWeight = length(weights.value) > 1
+                weights.value = get("weights.value", env)
+                isWeight = length(weights.value) > 1
 
-                    if(isWeight){
-                        constant = sum(weights.value[qui_pos] * y_pos * cpppar_log(y_pos, nthreads) - weights.value[qui_pos] * y_pos)
-                        sum_dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(wt[qui_pos] * y_pos * eta[qui_pos]) + sum(wt * mu))
-                    } else {
-                        constant = sum(y_pos * cpppar_log(y_pos, nthreads) - y_pos)
-                        sum_dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(y_pos * eta[qui_pos]) + sum(mu))
-                    }
-
-                    family_funs$sum_dev.resids = sum_dev.resids
-
-                    assign("family_funs", family_funs, new_env)
-                }
-            }
-
-            if(origin_type == "feglm" && isFixef){
-                res$y = lhs
-            }
-        }
-
-        if(save_rhs){
-            assign("linear.mat", rhs, new_env)
-
-            isLinear = FALSE
-            if(length(rhs) > 1){
-                isLinear = TRUE
-
-                linear.params = colnames(rhs)
-                nonlinear.params = get("nonlinear.params", env)
-                params = c(nonlinear.params, linear.params)
-                assign("linear.params", linear.params, new_env)
-                assign("params", params, new_env)
-
-                # useful when feNmlm or feglm
-                if(origin_type %in% c("feNmlm", "feglm")){
-
-                    start = get("start", env)
-                    if(!is.null(start)){
-                        new_start = setNames(start[params], params)
-                        new_start[is.na(new_start)] = 0
-                        assign("start", new_start, new_env)
-                    }
-
-                    if(origin_type == "feNmlm"){
-                        upper = get("upper", env)
-                        new_upper = setNames(upper[params], params)
-                        new_upper[is.na(new_upper)] = Inf
-                        assign("upper", new_upper, new_env)
-
-                        lower = get("lower", env)
-                        new_lower = setNames(lower[params], params)
-                        new_lower[is.na(new_lower)] = -Inf
-                        assign("lower", new_lower, new_env)
-                    }
-                }
-            }
-
-            assign("isLinear", isLinear, new_env)
-
-            # Finally the DoF
-            params = get("params", new_env)
-            K = length(params)
-            if(isFixef){
-                fixef_sizes = get("fixef_sizes", new_env)
-                slope_flag = get("slope_flag", new_env)
-                if(isSlope){
-                    K = K + sum(fixef_sizes * (1 + abs(slope_flag) - (slope_flag < 0)))
-                    # now the references
-                    if(any(slope_flag >= 0)){
-                        K = K + 1 - sum(slope_flag >= 0)
-                    }
+                if(isWeight){
+                    constant = sum(weights.value[qui_pos] * y_pos * cpppar_log(y_pos, nthreads) - weights.value[qui_pos] * y_pos)
+                    sum_dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(wt[qui_pos] * y_pos * eta[qui_pos]) + sum(wt * mu))
                 } else {
-                    K = K + sum(fixef_sizes - 1) + 1
+                    constant = sum(y_pos * cpppar_log(y_pos, nthreads) - y_pos)
+                    sum_dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(y_pos * eta[qui_pos]) + sum(mu))
                 }
-            }
-            res$nparams = K
 
-            if(!isLinear && !isTRUE(res$iv)){
-                res$onlyFixef = TRUE
+                family_funs$sum_dev.resids = sum_dev.resids
+
+                assign("family_funs", family_funs, new_env)
             }
         }
 
+        if(origin_type == "feglm" && isFixef){
+            res$y = lhs
+        }
+    }
+
+    if(save_rhs){
+        assign("linear.mat", rhs, new_env)
+
+        isLinear = FALSE
+        if(length(rhs) > 1){
+            isLinear = TRUE
+
+            linear.params = colnames(rhs)
+            nonlinear.params = get("nonlinear.params", env)
+            params = c(nonlinear.params, linear.params)
+            assign("linear.params", linear.params, new_env)
+            assign("params", params, new_env)
+
+            # useful when feNmlm or feglm
+            if(origin_type %in% c("feNmlm", "feglm")){
+
+                start = get("start", env)
+                if(!is.null(start)){
+                    new_start = setNames(start[params], params)
+                    new_start[is.na(new_start)] = 0
+                    assign("start", new_start, new_env)
+                }
+
+                if(origin_type == "feNmlm"){
+                    upper = get("upper", env)
+                    new_upper = setNames(upper[params], params)
+                    new_upper[is.na(new_upper)] = Inf
+                    assign("upper", new_upper, new_env)
+
+                    lower = get("lower", env)
+                    new_lower = setNames(lower[params], params)
+                    new_lower[is.na(new_lower)] = -Inf
+                    assign("lower", new_lower, new_env)
+                }
+            }
+        }
+
+        assign("isLinear", isLinear, new_env)
+
+        # Finally the DoF
+        params = get("params", new_env)
+        K = length(params)
+        if(isFixef){
+            fixef_sizes = get("fixef_sizes", new_env)
+            slope_flag = get("slope_flag", new_env)
+            if(isSlope){
+                K = K + sum(fixef_sizes * (1 + abs(slope_flag) - (slope_flag < 0)))
+                # now the references
+                if(any(slope_flag >= 0)){
+                    K = K + 1 - sum(slope_flag >= 0)
+                }
+            } else {
+                K = K + sum(fixef_sizes - 1) + 1
+            }
+        }
+        res$nparams = K
+
+        if(!isLinear && !isTRUE(res$iv)){
+            res$onlyFixef = TRUE
+        }
     }
 
     # We save the formulas
