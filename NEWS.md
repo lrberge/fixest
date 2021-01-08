@@ -15,6 +15,16 @@
  
  - Add extra elements to be removed when `lean = TRUE` to keep the object as small as possible.
  
+# Sun and Abraham (forthcoming, Journal of Econometrics) method for staggered DiD
+
+ - For staggered difference-in-difference analyzes: the method of Sun and Abraham (forthcoming, Journal of Econometrics) has been implemented. 
+ 
+ - After having using `i()` to interact cohort dummies with time to treatment dummies, use the function `aggregate` to recover the yearly treatment effects.
+ 
+ - So far the way to do it, although easy, is a bit arcane but the next versions of the software will include a user-friendly way. 
+ 
+ - For detail, check out the help page of aggregate or the staggered DiD section in the vignette [fixest walkthrough](https://CRAN.R-project.org/package=fixest/vignettes/fixest_walkthrough.html).
+ 
 # New features
 
  - Function `i()` now has the new arguments `f2`, `drop2` and `keep2` which allows the interaction of two factors.
