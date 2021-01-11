@@ -21,7 +21,9 @@
  
  - `xpd` now appropriately returns a two sided formula when a one sided formula is fed in and the argument `lhs` is provided.
  
- - Fix bug in `coefplot` preventing the proper scaling of the x-axis for interactions when mulitple models are displayed.
+ - Fix bug in `coefplot` preventing the proper scaling of the x-axis for interactions when multiple models are displayed.
+ 
+ - Fix occasional bug in the ordering of sub-selections of multiple estimations. 
  
 # Sun and Abraham (forthcoming, Journal of Econometrics) method for staggered DiD
 
