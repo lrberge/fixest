@@ -476,17 +476,18 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         check_arg(cluster, "os formula | character vector")
 
         if(is.character(cluster)){
-            # We check this is a valid variable name
-            if(any(!cluster %in% dataNames)){
-                stop("In argument 'cluster' the variable", enumerate_items(setdiff(cluster, dataNames), "s.is"), " is not in the data set. It must be composed of variable names only.")
-            }
-
             cluster = .xpd(rhs = cluster)
         }
 
         cluster_origin = cluster
 
-        complete_vars = unique(c(complete_vars, all.vars(cluster)))
+        # Check
+        clust_vars = all.vars(cluster)
+        if(any(!clust_vars %in% dataNames)){
+            stop("In argument 'cluster' the variable", enumerate_items(setdiff(clust_vars, dataNames), "s.is.quote"), " is not in the data set. It must be composed of variable names only.")
+        }
+
+        complete_vars = unique(c(complete_vars, clust_vars))
     }
 
     #

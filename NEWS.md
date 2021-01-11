@@ -37,6 +37,8 @@
  
  - `etable` also gains the argument `digits.stats` which monitors how the fit statistics decimals should be displayed.
  
+ - Argument `split` now accepts variable names.
+ 
 
 # Other
 
