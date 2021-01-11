@@ -1180,10 +1180,17 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             if(isFit){
                 check_value(split, "vector len(value)", .value = nobs_origin)
             } else {
-                check_value(split, "vector len(data)", .data = data, .prefix = "If not a formula, argument 'split'")
+                check_value(split, "vector len(data) | character scalar", .data = data, .prefix = "If not a formula, argument 'split'")
             }
 
-            split.name = gsub("^[[:alpha:]][[:alnum:]\\._]*\\$", "", deparse_long(mc_origin$split))
+            if(length(split) == 1){
+                split.name = split
+                check_value(split, "charin", .choices = dataNames, .message = "If equal to a character scalar, argument 'split' must be a variable name.")
+                split = data[[split]]
+            } else {
+                split.name = gsub("^[[:alpha:]][[:alnum:]\\._]*\\$", "", deparse_long(mc_origin$split))
+            }
+
         }
 
         if(delayed.subset){
@@ -2508,7 +2515,7 @@ setup_fixef = function(fixef_mat, lhs, fixef_vars, fixef.rm, family, isSplit, sp
 
     if(isSplitNoFull && do_keep){
         # Here fixef_mat is a DF
-        fixef_mat = select_obs(fixef_mat, obs2keep)
+        fixef_mat = fixef_mat[obs2keep, , drop = FALSE]
     }
 
     if(is.null(obs2keep)){

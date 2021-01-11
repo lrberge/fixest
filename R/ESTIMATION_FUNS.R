@@ -3312,12 +3312,12 @@ format_error_msg = function(x, origin){
 
     # LATER:
     # - for object not found: provide a better error msg by calling the name of the missing
-    #   argument => likely I'll need an match.call argument
+    #   argument => likely I'll need a match.call argument
 
     x = gsub("\n+$", "", x)
 
-    if(grepl("^Error (in|:|: in) (fe|fixest)[^\n]+\n", x)){
-        res = gsub("^Error (in|:|: in) (fe|fixest)[^\n]+\n *(.+)", "\\3", x)
+    if(grepl("^Error (in|:|: in) (fe|fixest|fun)[^\n]+\n", x)){
+        res = gsub("^Error (in|:|: in) (fe|fixest|fun)[^\n]+\n *(.+)", "\\3", x)
     } else if(grepl("[Oo]bject '.+' not found", x) || grepl("memory|cannot allocate", x)) {
         res = x
     } else {
