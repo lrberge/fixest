@@ -176,6 +176,7 @@ base$fe1[110:118] = NA
 base$fe2[base$fe2 == 1] = 0
 base$fe3 = sample(letters[1:5], 150, TRUE)
 base$period = rep(1:50, 3)
+base$x_cst = 1
 
 res = feols(y ~ 1 | csw(fe1, fe1^fe2), base)
 
@@ -183,8 +184,30 @@ res = feols(y ~ 1 + csw(x1, i(fe1)) | fe2, base)
 
 res = feols(y ~ csw(f(x1, 1:2), x2) | sw0(fe2, fe2^fe3), base, panel.id = ~ fe1 + period)
 
-
 res = feols(c(y, x1) ~ 1 | fe1 | x2 ~ x3, base)
+
+#
+# NA models (ie all variables are collinear with the FEs)
+#
+
+# Should work when warn = FALSE or multiple est
+for(i in 1:2){
+    fun = switch(i, "1" = feols, "2" = feglm)
+
+    res = feols(y ~ x_cst | fe1, base, warn = FALSE)
+    res         # => no error
+    etable(res) # => no error
+
+    # error when warn = TRUE
+    test(feols(y ~ x_cst | fe1, base), "err")
+
+    # multiple est => no error
+    res = feols(c(y, x1) ~ x_cst | fe1, base)
+    res         # => no error
+    etable(res) # => no error
+}
+
+
 
 ####
 #### Fit methods ####

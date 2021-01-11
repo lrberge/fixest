@@ -843,6 +843,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     if(check_LHS_const){
         # Estimation cannot be done if fixed-effects or the constant are present
+        # Note that the fit stats get messed up in such estimation => but since it's super niche I don't correct for it
 
         if(isFixef){
             stop("The dependent variable is a constant. The estimation with fixed-effects cannot be done.")
@@ -2198,6 +2199,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             }
         }
     }
+
+    assign("IN_MULTI", multi_lhs || multi_rhs || multi_fixef || isSplit, env)
 
 
     # IV
@@ -3565,7 +3568,7 @@ fixest_NA_results = function(env){
     X = get("linear.mat", env)
 
     n = ncol(X)
-    NA_values = rep(NA, n)
+    NA_values = rep(NA_real_, n)
 
     coef = se = NA_values
     names(coef) = names(se) = colnames(X)
@@ -3580,6 +3583,12 @@ fixest_NA_results = function(env){
     res$coeftable = coeftable
     res$se = se
     res$cov.scaled = cov.scaled
+
+    res$summary = TRUE
+
+    # Fit stats
+    res$nobs = nrow(X)
+    res$ssr = res$ssr_null = res$ssr_fe_only = res$sigma2 = res$loglik = res$ll_null = res$ll_fe_only = res$pseudo_r2 = res$deviance = res$sq.cor = NA_real_
 
     res$NA_model = TRUE
     class(res) = "fixest"

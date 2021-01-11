@@ -214,6 +214,10 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 		}
 	}
 
+	if(isTRUE(x$NA_mode)){
+	    return(invisible())
+	}
+
 	if(!is.null(fitstat) && identical(fitstat, NA)){
 	    # No fitstat
 
@@ -346,7 +350,7 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	# computes the clustered SEs and returns the modified vcov and coeftable
     # NOTA: if the object is already a summary
 
-	if(!is.null(object$onlyFixef)){
+	if(isTRUE(object$onlyFixef) || isTRUE(object$NA_model)){
 		# means that the estimation is done without variables
 		return(object)
 	}
@@ -8106,6 +8110,11 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
 	# computes the clustered vcov
 
     check_arg(attr, "logical scalar")
+
+    if(isTRUE(object$NA_model)){
+        # means that the estimation is done without any valid variable
+        return(object$cov.scaled)
+    }
 
     if(!any("keep_se_info" %in% names(match.call(expand.dots = TRUE)))){
         # means NOT a client call

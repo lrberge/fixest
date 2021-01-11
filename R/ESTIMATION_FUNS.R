@@ -1335,11 +1335,25 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	    if(!is.null(est$all_removed)){
 	        all_vars = colnames(X)
 
+	        IN_MULTI = get("IN_MULTI", env)
+
 	        if(isFixef){
-	            stop_up(ifsingle(all_vars, "The only variable ", "All variables"), enumerate_items(all_vars, "quote.is", nmax = 3), " collinear with the fixed effects. In such circumstances, the estimation is void.", up = fromGLM)
+	            msg = paste0(ifsingle(all_vars, "The only variable ", "All variables"), enumerate_items(all_vars, "quote.is", nmax = 3), " collinear with the fixed effects. In such circumstances, the estimation is void.")
 	        } else {
-	            stop_up(ifsingle(all_vars, "The only variable ", "All variables"), enumerate_items(all_vars, "quote.is", nmax = 3), " virtually constant and equal to 0. In such circumstances, the estimation is void.", up = fromGLM)
+	            msg =  paste0(ifsingle(all_vars, "The only variable ", "All variables"), enumerate_items(all_vars, "quote.is", nmax = 3), " virtually constant and equal to 0. In such circumstances, the estimation is void.")
 	        }
+
+	        if(IN_MULTI || !warn){
+
+	            if(warn) warning(msg)
+
+	            return(fixest_NA_results(env))
+
+	        } else {
+	            stop_up(msg, up = fromGLM)
+	        }
+
+
 	    }
 
 		# Formatting the result
@@ -1501,7 +1515,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 	# fit stats
 	if(!cpp_isConstant(res$fitted.values)){
-	    res$sq.cor =  stats::cor(y, res$fitted.values)**2
+	    res$sq.cor = stats::cor(y, res$fitted.values)**2
 	} else {
 	    res$sq.cor = NA
 	}
@@ -1513,7 +1527,6 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	res$ssr_null = cpp_ssr_null(y, weights)
 	res$ssr = cpp_ssq(res$residuals, weights)
 	sigma_null = sqrt(res$ssr_null / ifelse(isWeight, sum(weights), n))
-	# res$ll_null = -1/2/sigma_null^2*res$ssr_null - n*log(sigma_null) - n*log(2*pi)/2
 	res$ll_null = -1/2/sigma_null^2*res$ssr_null - (log(sigma_null) + log(2*pi)/2) * ifelse(isWeight, sum(weights), n)
 
 	# fixef info
@@ -1522,7 +1535,6 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 		if(!onlyFixef){
 			res$ssr_fe_only = cpp_ssq(y_demean, weights)
 			sigma = sqrt(res$ssr_fe_only / ifelse(isWeight, sum(weights), n))
-			# res$ll_fe_only = -1/2/sigma^2*res$ssr_fe_only - n*log(sigma) - n*log(2*pi)/2
 			res$ll_fe_only = -1/2/sigma^2*res$ssr_fe_only - (log(sigma) + log(2*pi)/2) * ifelse(isWeight, sum(weights), n)
 		}
 	}
@@ -2120,6 +2132,10 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, split, fsplit,
         }
 
         wols = feols(y = z, X = X, weights = w, means = wols_means, correct_0w = any_0w, env = env, fixef.tol = fixef.tol * 10**(iter==1), fixef.iter = fixef.iter, collin.tol = collin.tol, nthreads = nthreads, mem.clean = mem.clean, verbose = verbose - 1)
+
+        if(isTRUE(wols$NA_model)){
+            return(wols)
+        }
 
         # In theory OLS estimation is guaranteed to exist
         # yet, NA coef may happen with non-infinite very large values of z/w (e.g. values > 1e100)
