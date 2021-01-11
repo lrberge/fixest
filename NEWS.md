@@ -17,6 +17,8 @@
  
  - Fix bug in fixed-effects estimations with multiple LHS and different number of observations per estimation that prevented to get the default behavior for standard-errors to work.
  
+ - Fix bug when using `split` and fixed-effects.
+ 
 # Sun and Abraham (forthcoming, Journal of Econometrics) method for staggered DiD
 
  - For staggered difference-in-difference analyzes: the method of Sun and Abraham (forthcoming, Journal of Econometrics) has been implemented. 
