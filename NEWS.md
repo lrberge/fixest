@@ -21,6 +21,8 @@
  
  - `xpd` now appropriately returns a two sided formula when a one sided formula is fed in and the argument `lhs` is provided.
  
+ - Fix bug in `coefplot` preventing the proper scaling of the x-axis for interactions when mulitple models are displayed.
+ 
 # Sun and Abraham (forthcoming, Journal of Econometrics) method for staggered DiD
 
  - For staggered difference-in-difference analyzes: the method of Sun and Abraham (forthcoming, Journal of Econometrics) has been implemented. 

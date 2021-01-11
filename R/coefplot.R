@@ -771,7 +771,7 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, hor
         first.par$type = "n"
         do.call("plot", first.par)
 
-        # The backgound
+        # The background
         if(!missing(bg)){
             dx = diff(my_xlim)
             dy = diff(my_ylim)
@@ -1483,7 +1483,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
         all_estimates$id_order = my_order[as.character(all_estimates$estimate_names)]
         all_estimates = all_estimates[base::order(all_estimates$id_order, all_estimates$est_nb), ]
 
-        # we rescale
+        # we rescale -- beware of multiple est whose x is numeric!!!
 
         if(nb_est > 1){
             if(missing(sep)){
@@ -1505,7 +1505,12 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
                 }
             }
 
-            all_estimates$x_new = all_estimates$id_order + ((all_estimates$est_nb - 1) / (nb_est - 1) - 0.5) * ((nb_est - 1) * sep)
+            if(AXIS_AS_NUM){
+                all_estimates$x_new = all_estimates$x + ((all_estimates$est_nb - 1) / (nb_est - 1) - 0.5) * ((nb_est - 1) * sep)
+            } else {
+                all_estimates$x_new = all_estimates$id_order + ((all_estimates$est_nb - 1) / (nb_est - 1) - 0.5) * ((nb_est - 1) * sep)
+            }
+
         } else {
             sep = 0
             all_estimates$x_new = all_estimates$id_order
