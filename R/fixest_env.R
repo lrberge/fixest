@@ -649,6 +649,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         nobs_origin = nobs
     }
 
+    check_LHS_const = FALSE
     anyNA_y = FALSE
     msgNA_y = ""
     if(multi_lhs){
@@ -695,7 +696,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
         # we check the var is not a constant
         if(cpp_isConstant(lhs_clean)){
-            stop("The dependent variable is a constant. Estimation cannot be done.")
+            # We delay this evaluation
+            check_LHS_const = TRUE
         }
 
         if(family %in% c("poisson", "negbin") && any(lhs_clean < 0)){
@@ -836,6 +838,17 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                 # Interaction information => if no interaction: NULL, only the first is there
                 interaction.info = getOption("fixest_interaction_ref")
             }
+        }
+    }
+
+    if(check_LHS_const){
+        # Estimation cannot be done if fixed-effects or the constant are present
+
+        if(isFixef){
+            stop("The dependent variable is a constant. The estimation with fixed-effects cannot be done.")
+
+        } else if(isLinear && (!isFit && attr(fml_terms, "intercept") == 1)){
+            stop("The dependent variable is a constant. The estimation cannot be done. If you really want to carry on, please remove the intercept first.")
         }
     }
 
@@ -3543,6 +3556,35 @@ select_obs = function(x, index, nthreads = 1, msg = "explanatory variable"){
 
 
 
+fixest_NA_results = function(env){
+    # Container for NA results
+    # so far the non-linear part is not covered
 
+    res = get("res", env)
+
+    X = get("linear.mat", env)
+
+    n = ncol(X)
+    NA_values = rep(NA, n)
+
+    coef = se = NA_values
+    names(coef) = names(se) = colnames(X)
+
+    coeftable = data.frame("Estimate" = NA_values, "Std. Error" = NA_values, "t value" = NA_values, "Pr(>|t|)" = NA_values)
+    names(coeftable) = c("Estimate", "Std. Error", "t value",  "Pr(>|t|)")
+    row.names(coeftable) = names(coef)
+
+    cov.scaled = matrix(NA, n, n)
+
+    attr(se, "type") = attr(coeftable, "type") = attr(cov.scaled, "type") = "Void"
+    res$coeftable = coeftable
+    res$se = se
+    res$cov.scaled = cov.scaled
+
+    res$NA_model = TRUE
+    class(res) = "fixest"
+
+    res
+}
 
 
