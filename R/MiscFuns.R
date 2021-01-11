@@ -3064,9 +3064,15 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
         if(missing(fml)){
             res = if(is_lhs) 1 ~ 1 else ~ 1
         } else {
-            res = fml
-        }
+            if(is_lhs && length(fml)[1] == 2){
+                # Means: RHS formula and we add the LHS
+                res = 1 ~ 1
+                res[[3]] = fml[[2]]
 
+            } else {
+                res = fml
+            }
+        }
 
         if(is_lhs){
             res[[2]] = value2stringCall(lhs, call = TRUE, check = check)

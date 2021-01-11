@@ -19,6 +19,8 @@
  
  - Fix bug when using `split` and fixed-effects.
  
+ - `xpd` now appropriately returns a two sided formula when a one sided formula is fed in and the argument `lhs` is provided.
+ 
 # Sun and Abraham (forthcoming, Journal of Econometrics) method for staggered DiD
 
  - For staggered difference-in-difference analyzes: the method of Sun and Abraham (forthcoming, Journal of Econometrics) has been implemented. 
@@ -51,6 +53,8 @@
   - Improved default setting of standard-errors.
   
   - Improved error messages.
+  
+  - In multiple estimations, models returning full NA coefficients are not returned (instead of raising an error).
 
 # fixest 0.8.0 (2020-12-14)
 
