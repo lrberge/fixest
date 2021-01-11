@@ -2530,8 +2530,8 @@ setup_fixef = function(fixef_mat, lhs, fixef_vars, fixef.rm, family, isSplit, sp
     do_keep = !is.null(obs2keep)
 
     if(isSplitNoFull && do_keep){
-        # Here fixef_mat is a DF
-        fixef_mat = fixef_mat[obs2keep, , drop = FALSE]
+        # Here fixef_mat is a DF or a list (outcome of previous calls) => that's why I need to use select_obs
+        fixef_mat = select_obs(fixef_mat, obs2keep)
     }
 
     if(is.null(obs2keep)){
@@ -3531,6 +3531,9 @@ select_obs = function(x, index, nthreads = 1, msg = "explanatory variable"){
             # We check the length because RHS = 1 means not linear (we don't want to subset on that)
             x = x[index]
         }
+
+    } else if(is.data.frame(x)){
+        x = x[index, , drop = FALSE]
 
     } else if(is.matrix(x[[1]]) || length(x[[1]]) == 1){
         # Means RHS
