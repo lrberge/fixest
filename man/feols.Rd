@@ -90,7 +90,7 @@ feols(
 \item{...}{Not currently used.}
 }
 \value{
-A \code{fixest} object.
+A \code{fixest} object. Note that \code{fixest} objects contain many elements and most of them are for internal use, they are presented here only for information. To access them, it is safer to use the user-level methods (e.g. \code{\link[fixest]{vcov.fixest}}, \code{\link[fixest]{resid.fixest}}, etc) or functions (like for instance \code{\link[fixest]{fitstat}} to access any fit statistic).
 \item{nobs}{The number of observations.}
 \item{fml}{The linear formula of the call.}
 \item{call}{The call of the function.}
@@ -108,7 +108,6 @@ A \code{fixest} object.
 \item{ssr_fe_only}{Sum of the squared residuals of the model estimated with fixed-effects only.}
 \item{ll_null}{The log-likelihood of the null model (containing only with the intercept).}
 \item{ll_fe_only}{The log-likelihood of the model estimated with fixed-effects only.}
-\item{pseudo_r2}{The adjusted pseudo R2.}
 \item{fitted.values}{The fitted values.}
 \item{linear.predictors}{The linear predictors.}
 \item{residuals}{The residuals (y minus the fitted values).}

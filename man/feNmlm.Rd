@@ -123,7 +123,7 @@ feNmlm(
 \item{...}{Not currently used.}
 }
 \value{
-A \code{fixest} object.
+A \code{fixest} object. Note that \code{fixest} objects contain many elements and most of them are for internal use, they are presented here only for information. To access them, it is safer to use the user-level methods (e.g. \code{\link[fixest]{vcov.fixest}}, \code{\link[fixest]{resid.fixest}}, etc) or functions (like for instance \code{\link[fixest]{fitstat}} to access any fit statistic).
 \item{coefficients}{The named vector of coefficients.}
 \item{coeftable}{The table of the coefficients with their standard errors, z-values and p-values.}
 \item{loglik}{The loglikelihood.}

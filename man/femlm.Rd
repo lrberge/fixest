@@ -120,7 +120,7 @@ fenegbin(
 \item{...}{Not currently used.}
 }
 \value{
-A \code{fixest} object.
+A \code{fixest} object. Note that \code{fixest} objects contain many elements and most of them are for internal use, they are presented here only for information. To access them, it is safer to use the user-level methods (e.g. \code{\link[fixest]{vcov.fixest}}, \code{\link[fixest]{resid.fixest}}, etc) or functions (like for instance \code{\link[fixest]{fitstat}} to access any fit statistic).
 \item{nobs}{The number of observations.}
 \item{fml}{The linear formula of the call.}
 \item{call}{The call of the function.}
@@ -228,7 +228,7 @@ est_pois = femlm(Euros ~ log(dist_km) | Origin + Destination + Product, trade)
 # 2) Log-Log Gaussian estimation (with same FEs)
 est_gaus = update(est_pois, log(Euros+1) ~ ., family = "gaussian")
 
-# Comparison of the results using the function esttable
+# Comparison of the results using the function etable
 etable(est_pois, est_gaus)
 # Now using two way clustered standard-errors
 etable(est_pois, est_gaus, se = "twoway")
@@ -247,7 +247,7 @@ etable(sum_hetero, sum_oneway, sum_twoway, sum_threeway)
 #
 
 # 6 estimations
-est_mult = fepois(c(Ozone, Solar.R) ~ Wind + Temp + csw0(Wind:Temp, Day), airquality)
+est_mult = femlm(c(Ozone, Solar.R) ~ Wind + Temp + csw0(Wind:Temp, Day), airquality)
 
 # We can display the results for the first lhs:
 etable(est_mult[lhs = 1])

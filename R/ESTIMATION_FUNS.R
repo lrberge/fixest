@@ -94,7 +94,7 @@
 #'
 #'
 #' @return
-#' A \code{fixest} object.
+#' A \code{fixest} object. Note that \code{fixest} objects contain many elements and most of them are for internal use, they are presented here only for information. To access them, it is safer to use the user-level methods (e.g. \code{\link[fixest]{vcov.fixest}}, \code{\link[fixest]{resid.fixest}}, etc) or functions (like for instance \code{\link[fixest]{fitstat}} to access any fit statistic).
 #' \item{nobs}{The number of observations.}
 #' \item{fml}{The linear formula of the call.}
 #' \item{call}{The call of the function.}
@@ -112,7 +112,6 @@
 #' \item{ssr_fe_only}{Sum of the squared residuals of the model estimated with fixed-effects only.}
 #' \item{ll_null}{The log-likelihood of the null model (containing only with the intercept).}
 #' \item{ll_fe_only}{The log-likelihood of the model estimated with fixed-effects only.}
-#' \item{pseudo_r2}{The adjusted pseudo R2.}
 #' \item{fitted.values}{The fitted values.}
 #' \item{linear.predictors}{The linear predictors.}
 #' \item{residuals}{The residuals (y minus the fitted values).}
@@ -1687,7 +1686,7 @@ check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights){
 #' The core of the GLM are the weighted OLS estimations. These estimations are performed with \code{\link[fixest]{feols}}. The method used to demean each variable along the fixed-effects is based on Berge (2018), since this is the same problem to solve as for the Gaussian case in a ML setup.
 #'
 #' @return
-#' A \code{fixest} object.
+#' A \code{fixest} object. Note that \code{fixest} objects contain many elements and most of them are for internal use, they are presented here only for information. To access them, it is safer to use the user-level methods (e.g. \code{\link[fixest]{vcov.fixest}}, \code{\link[fixest]{resid.fixest}}, etc) or functions (like for instance \code{\link[fixest]{fitstat}} to access any fit statistic).
 #' \item{nobs}{The number of observations.}
 #' \item{fml}{The linear formula of the call.}
 #' \item{call}{The call of the function.}
@@ -2502,7 +2501,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, split, fsplit,
 #' Note that the functions \code{\link[fixest]{feglm}} and \code{\link[fixest]{femlm}} provide the same results when using the same families but differ in that the latter is a direct maximum likelihood optimization (so the two can really have different convergence rates).
 #'
 #' @return
-#' A \code{fixest} object.
+#' A \code{fixest} object. Note that \code{fixest} objects contain many elements and most of them are for internal use, they are presented here only for information. To access them, it is safer to use the user-level methods (e.g. \code{\link[fixest]{vcov.fixest}}, \code{\link[fixest]{resid.fixest}}, etc) or functions (like for instance \code{\link[fixest]{fitstat}} to access any fit statistic).
 #' \item{nobs}{The number of observations.}
 #' \item{fml}{The linear formula of the call.}
 #' \item{call}{The call of the function.}
@@ -2569,7 +2568,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, split, fsplit,
 #' # 2) Log-Log Gaussian estimation (with same FEs)
 #' est_gaus = update(est_pois, log(Euros+1) ~ ., family = "gaussian")
 #'
-#' # Comparison of the results using the function esttable
+#' # Comparison of the results using the function etable
 #' etable(est_pois, est_gaus)
 #' # Now using two way clustered standard-errors
 #' etable(est_pois, est_gaus, se = "twoway")
@@ -2588,7 +2587,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, split, fsplit,
 #' #
 #'
 #' # 6 estimations
-#' est_mult = fepois(c(Ozone, Solar.R) ~ Wind + Temp + csw0(Wind:Temp, Day), airquality)
+#' est_mult = femlm(c(Ozone, Solar.R) ~ Wind + Temp + csw0(Wind:Temp, Day), airquality)
 #'
 #' # We can display the results for the first lhs:
 #' etable(est_mult[lhs = 1])
@@ -2752,7 +2751,7 @@ fepois = function(fml, data, offset, weights, subset, split, fsplit, cluster, se
 #' The over-dispersion parameter of the Negative Binomial family, theta, is capped at 10,000. If theta reaches this high value, it means that there is no overdispersion.
 #'
 #' @return
-#' A \code{fixest} object.
+#' A \code{fixest} object. Note that \code{fixest} objects contain many elements and most of them are for internal use, they are presented here only for information. To access them, it is safer to use the user-level methods (e.g. \code{\link[fixest]{vcov.fixest}}, \code{\link[fixest]{resid.fixest}}, etc) or functions (like for instance \code{\link[fixest]{fitstat}} to access any fit statistic).
 #' \item{coefficients}{The named vector of coefficients.}
 #' \item{coeftable}{The table of the coefficients with their standard errors, z-values and p-values.}
 #' \item{loglik}{The loglikelihood.}
