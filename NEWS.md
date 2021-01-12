@@ -1,4 +1,10 @@
 
+# fixest 0.8.2
+
+## Other
+
+ - `i()` now automatically converts its first argument to numeric if it was of type logical. The user can still pass logicals to the argument `f2` if the expected behavior is really to treat it as a logical.
+
 # fixest 0.8.1
 
 ## Bugs

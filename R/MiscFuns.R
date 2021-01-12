@@ -2666,6 +2666,10 @@ i = function(var, f, f2, ref, drop, keep, drop2, keep2){
         is_na_all = is.na(var) | is.na(f)
         if(IS_F2) is_na_all = is_na_all | is.na(f2)
 
+        # Conversion of var to numeric if logical
+        # => that makes sense now, if the user isn't happy => f2 (before that the automatic conversion wouldn't leave room to really use logicals)
+        if(is.logical(var)) var = as.numeric(var)
+
         if(!is.numeric(var)){
             IS_FACTOR_INTER = TRUE
             # It's an interaction between factors
