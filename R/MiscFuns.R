@@ -362,31 +362,52 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	    object$n_print = n
 	}
 
+	# we need this to save the summary flags
+	if(missing(se)){
+	    se = se_in = NULL
+	} else {
+	    se_in = se
+	}
+
+	if(missing(cluster)) {
+	    cluster = cluster_in = NULL
+	} else {
+	    cluster_in = cluster
+	}
+
 	if(isTRUE(object$summary)){
+	    do_assign = TRUE
 	    if("fromPrint" %in% names(dots)){
 	        # From print
 	        return(object)
 
-	    } else if(is.null(se) && is.null(cluster) && is.null(dof) && missing(.vcov) && missing(stage)){
-	        # No modification required
-	        object$summary_from_fit = FALSE
-	        return(object)
+	    } else if(is.null(se) && is.null(cluster) && is.null(dof) && missing(.vcov)){
+	        if(missing(stage)){
+	            # No modification required
+	            object$summary_from_fit = FALSE
+	            return(object)
+	        } else {
+	            # No modification required
+	            do_assign = FALSE
+	        }
 	    }
 
 	    # why is it always so complicated??? => I really should remove the argument "se" and only keep "cluster"
 	    # It's only because the two can be contradictory that I'm having a hassle...
 	    # even better => only have one argument: vcov => takes "standard"/"hetero"/formulas/data/matrix/function => to implement in the future
 
-	    check_arg_plus(se, "NULL match", .choices = c("standard", "white", "hetero", "cluster", "twoway", "threeway", "fourway", "1", "2", "3", "4"), .message = "Argument argument 'se' should be equal to one of 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
+	    if(do_assign){
+	        check_arg_plus(se, "NULL match", .choices = c("standard", "white", "hetero", "cluster", "twoway", "threeway", "fourway", "1", "2", "3", "4"), .message = "Argument argument 'se' should be equal to one of 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
 
-	    is_se = !is.null(se)
-	    is_cluster = !is.null(cluster)
-	    assign_flags(object$summary_flags, se = se, cluster = cluster, dof = dof)
-	    # We need to clean some arguments...
-	    if(is_se && se %in% c("standard", "white", "hetero")){
-	        cluster = NULL
-	    } else if(is_cluster){
-	        se = NULL
+	        is_se = !is.null(se)
+	        is_cluster = !is.null(cluster)
+	        assign_flags(object$summary_flags, se = se, cluster = cluster, dof = dof)
+	        # We need to clean some arguments...
+	        if(is_se && se %in% c("standard", "white", "hetero")){
+	            cluster = NULL
+	        } else if(is_cluster){
+	            se = NULL
+	        }
 	    }
 	}
 
@@ -571,10 +592,8 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	    object$summary_from_fit = TRUE
 	} else {
 	    # build_flags does not accept missing arguments
-	    if(missing(se)) se = NULL
-	    if(missing(cluster)) cluster = NULL
 	    if(missing(dof)) dof = NULL
-	    object$summary_flags = build_flags(mc, se = se, cluster = cluster, dof = dof)
+	    object$summary_flags = build_flags(mc, se = se_in, cluster = cluster_in, dof = dof)
 	    object$summary_from_fit = NULL
 	}
 
