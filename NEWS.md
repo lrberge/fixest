@@ -1,11 +1,17 @@
 
 # fixest 0.8.2
 
+## Bugs
+
+  - Fix bug in IV estimations when `lean = TRUE` (thanks to @reifjulian [#88](https://github.com/lrberge/fixest/issues/88)).
+  
+  - Fix various bugs related to the use of `summary` when `lean = TRUE` in the estimation.
+
 ## Other
 
  - `i()` now automatically converts its first argument to numeric if it was of type logical. The user can still pass logicals to the argument `f2` if the expected behavior is really to treat it as a logical.
 
-# fixest 0.8.1
+# fixest 0.8.1 (2021-01-13)
 
 ## Bugs
 
