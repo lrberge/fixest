@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
       </span>
     </div>
 
@@ -209,151 +209,151 @@
 
 <span class='co'># By default: sample is the root</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_split</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                         model 1         model 2          model 3
-#&gt; Sample (Month)                5               5                5
-#&gt; Dependent Var.:           Ozone           Ozone          Solar.R
-#&gt;                                                                 
-#&gt; (Intercept)     26.06*** (4.09) 41.22*** (6.91) 182.7*** (23.38)
-#&gt; Wind            -89.96* (35.56)                   -142.3 (205.4)
-#&gt; Wind square       66.46 (39.66)                   -177.1 (233.1)
-#&gt; Temp                            215.9** (67.18)                 
-#&gt; Temp square                       92.23 (63.43)                 
-#&gt; _______________ _______________ _______________ ________________
-#&gt; S.E. type              Standard        Standard         Standard
-#&gt; Observations                 26              26               27
-#&gt; R2                     0.233658        0.365341         0.073743
-#&gt; Adj. R2                 0.16702        0.310153        -0.003445
-#&gt;                          model 4        model 5         model 6         model 7
-#&gt; Sample (Month)                 5              6               6               6
-#&gt; Dependent Var.:          Solar.R          Ozone           Ozone         Solar.R
-#&gt;                                                                                
-#&gt; (Intercept)     191.6*** (37.62)  25.43* (7.31) 30.73** (6.188) 196.5*** (16.7)
-#&gt; Wind                              91.24 (82.49)                    233.8. (129)
-#&gt; Wind square                      -43.18 (65.91)                  -51.86 (111.4)
-#&gt; Temp               124.1 (373.5)                 -6.996 (59.32)                
-#&gt; Temp square       -484.8 (322.7)                 121.6* (47.13)                
-#&gt; _______________ ________________ ______________ _______________ _______________
-#&gt; S.E. type               Standard       Standard        Standard        Standard
-#&gt; Observations                  27              9               9              30
-#&gt; R2                      0.274975       0.185875        0.737806        0.129418
-#&gt; Adj. R2                 0.214557        -0.0855        0.650408        0.064931
-#&gt;                          model 8
-#&gt; Sample (Month)                 6
-#&gt; Dependent Var.:          Solar.R
-#&gt;                                 
-#&gt; (Intercept)     161.7*** (37.25)
-#&gt; Wind                            
-#&gt; Wind square                     
-#&gt; Temp               313.2 (344.5)
-#&gt; Temp square        78.76 (214.4)
-#&gt; _______________ ________________
-#&gt; S.E. type               Standard
-#&gt; Observations                  30
-#&gt; R2                      0.167188
-#&gt; Adj. R2                 0.105498</div><div class='input'>
+</div><div class='output co'>#&gt;                          model 1         model 2          model 3
+#&gt; Sample (Month)                 5               5                5
+#&gt; Dependent Var.:            Ozone           Ozone          Solar.R
+#&gt;                                                                  
+#&gt; (Intercept)     26.06*** (5.362) 41.22** (13.30) 182.7*** (20.86)
+#&gt; Wind              -89.96 (62.29)                   -142.3 (152.9)
+#&gt; Wind square        66.46 (64.42)                   -177.1 (159.3)
+#&gt; Temp                              215.9. (124.4)                 
+#&gt; Temp square                        92.23 (82.96)                 
+#&gt; _______________ ________________ _______________ ________________
+#&gt; S.E. type       Heterosked.-rob. Heteroske.-rob. Heterosked.-rob.
+#&gt; Observations                  26              26               27
+#&gt; R2                       0.23366         0.36534          0.07374
+#&gt; Adj. R2                  0.16702         0.31015         -0.00345
+#&gt;                          model 4          model 5         model 6
+#&gt; Sample (Month)                 5                6               6
+#&gt; Dependent Var.:          Solar.R            Ozone           Ozone
+#&gt;                                                                  
+#&gt; (Intercept)     191.6*** (17.17) 25.43*** (3.932) 30.73** (5.840)
+#&gt; Wind                                91.24 (92.26)                
+#&gt; Wind square                        -43.18 (70.87)                
+#&gt; Temp               124.1 (225.4)                   -6.996 (42.86)
+#&gt; Temp square      -484.8. (244.3)                   121.6* (37.99)
+#&gt; _______________ ________________ ________________ _______________
+#&gt; S.E. type       Heterosked.-rob. Heterosked.-rob. Heteroske.-rob.
+#&gt; Observations                  27                9               9
+#&gt; R2                       0.27498          0.18587         0.73781
+#&gt; Adj. R2                  0.21456         -0.08550         0.65041
+#&gt;                          model 7          model 8
+#&gt; Sample (Month)                 6                6
+#&gt; Dependent Var.:          Solar.R          Solar.R
+#&gt;                                                  
+#&gt; (Intercept)     196.5*** (17.37) 161.7*** (42.26)
+#&gt; Wind              233.8* (97.08)                 
+#&gt; Wind square       -51.86 (63.48)                 
+#&gt; Temp                                313.2 (388.3)
+#&gt; Temp square                         78.76 (205.2)
+#&gt; _______________ ________________ ________________
+#&gt; S.E. type       Heterosked.-rob. Heterosked.-rob.
+#&gt; Observations                  30               30
+#&gt; R2                       0.12942          0.16719
+#&gt; Adj. R2                  0.06493          0.10550</div><div class='input'>
 <span class='co'># Let's reorder, by considering lhs the root</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_split</span><span class='op'>[</span>lhs <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='va'>.N</span><span class='op'>]</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                         model 1         model 2        model 3         model 4
-#&gt; Sample (Month)                5               5              6               6
-#&gt; Dependent Var.:           Ozone           Ozone          Ozone           Ozone
-#&gt;                                                                               
-#&gt; (Intercept)     26.06*** (4.09) 41.22*** (6.91)  25.43* (7.31) 30.73** (6.188)
-#&gt; Wind            -89.96* (35.56)                  91.24 (82.49)                
-#&gt; Wind square       66.46 (39.66)                 -43.18 (65.91)                
-#&gt; Temp                            215.9** (67.18)                 -6.996 (59.32)
-#&gt; Temp square                       92.23 (63.43)                 121.6* (47.13)
-#&gt; _______________ _______________ _______________ ______________ _______________
-#&gt; S.E. type              Standard        Standard       Standard        Standard
-#&gt; Observations                 26              26              9               9
-#&gt; R2                     0.233658        0.365341       0.185875        0.737806
-#&gt; Adj. R2                 0.16702        0.310153        -0.0855        0.650408
-#&gt;                          model 5          model 6         model 7
-#&gt; Sample (Month)                 5                5               6
-#&gt; Dependent Var.:          Solar.R          Solar.R         Solar.R
+</div><div class='output co'>#&gt;                          model 1         model 2          model 3
+#&gt; Sample (Month)                 5               5                6
+#&gt; Dependent Var.:            Ozone           Ozone            Ozone
 #&gt;                                                                  
-#&gt; (Intercept)     182.7*** (23.38) 191.6*** (37.62) 196.5*** (16.7)
-#&gt; Wind              -142.3 (205.4)                     233.8. (129)
-#&gt; Wind square       -177.1 (233.1)                   -51.86 (111.4)
-#&gt; Temp                                124.1 (373.5)                
-#&gt; Temp square                        -484.8 (322.7)                
-#&gt; _______________ ________________ ________________ _______________
-#&gt; S.E. type               Standard         Standard        Standard
-#&gt; Observations                  27               27              30
-#&gt; R2                      0.073743         0.274975        0.129418
-#&gt; Adj. R2                -0.003445         0.214557        0.064931
-#&gt;                          model 8
-#&gt; Sample (Month)                 6
-#&gt; Dependent Var.:          Solar.R
-#&gt;                                 
-#&gt; (Intercept)     161.7*** (37.25)
-#&gt; Wind                            
-#&gt; Wind square                     
-#&gt; Temp               313.2 (344.5)
-#&gt; Temp square        78.76 (214.4)
-#&gt; _______________ ________________
-#&gt; S.E. type               Standard
-#&gt; Observations                  30
-#&gt; R2                      0.167188
-#&gt; Adj. R2                 0.105498</div><div class='input'>
+#&gt; (Intercept)     26.06*** (5.362) 41.22** (13.30) 25.43*** (3.932)
+#&gt; Wind              -89.96 (62.29)                    91.24 (92.26)
+#&gt; Wind square        66.46 (64.42)                   -43.18 (70.87)
+#&gt; Temp                              215.9. (124.4)                 
+#&gt; Temp square                        92.23 (82.96)                 
+#&gt; _______________ ________________ _______________ ________________
+#&gt; S.E. type       Heterosked.-rob. Heteroske.-rob. Heterosked.-rob.
+#&gt; Observations                  26              26                9
+#&gt; R2                       0.23366         0.36534          0.18587
+#&gt; Adj. R2                  0.16702         0.31015         -0.08550
+#&gt;                         model 4          model 5          model 6
+#&gt; Sample (Month)                6                5                5
+#&gt; Dependent Var.:           Ozone          Solar.R          Solar.R
+#&gt;                                                                  
+#&gt; (Intercept)     30.73** (5.840) 182.7*** (20.86) 191.6*** (17.17)
+#&gt; Wind                              -142.3 (152.9)                 
+#&gt; Wind square                       -177.1 (159.3)                 
+#&gt; Temp             -6.996 (42.86)                     124.1 (225.4)
+#&gt; Temp square      121.6* (37.99)                   -484.8. (244.3)
+#&gt; _______________ _______________ ________________ ________________
+#&gt; S.E. type       Heteroske.-rob. Heterosked.-rob. Heterosked.-rob.
+#&gt; Observations                  9               27               27
+#&gt; R2                      0.73781          0.07374          0.27498
+#&gt; Adj. R2                 0.65041         -0.00345          0.21456
+#&gt;                          model 7          model 8
+#&gt; Sample (Month)                 6                6
+#&gt; Dependent Var.:          Solar.R          Solar.R
+#&gt;                                                  
+#&gt; (Intercept)     196.5*** (17.37) 161.7*** (42.26)
+#&gt; Wind              233.8* (97.08)                 
+#&gt; Wind square       -51.86 (63.48)                 
+#&gt; Temp                                313.2 (388.3)
+#&gt; Temp square                         78.76 (205.2)
+#&gt; _______________ ________________ ________________
+#&gt; S.E. type       Heterosked.-rob. Heterosked.-rob.
+#&gt; Observations                  30               30
+#&gt; R2                       0.12942          0.16719
+#&gt; Adj. R2                  0.06493          0.10550</div><div class='input'>
 <span class='co'># Selecting only one LHS and RHS</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_split</span><span class='op'>[</span>lhs <span class='op'>=</span> <span class='st'>"Ozone"</span>, rhs <span class='op'>=</span> <span class='fl'>1</span><span class='op'>]</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                         model 1        model 2
-#&gt; Sample (Month)                5              6
-#&gt; Dependent Var.:           Ozone          Ozone
-#&gt;                                               
-#&gt; (Intercept)     26.06*** (4.09)  25.43* (7.31)
-#&gt; Wind            -89.96* (35.56)  91.24 (82.49)
-#&gt; Wind square       66.46 (39.66) -43.18 (65.91)
-#&gt; _______________ _______________ ______________
-#&gt; S.E. type              Standard       Standard
-#&gt; Observations                 26              9
-#&gt; R2                     0.233658       0.185875
-#&gt; Adj. R2                 0.16702        -0.0855</div><div class='input'>
+</div><div class='output co'>#&gt;                          model 1          model 2
+#&gt; Sample (Month)                 5                6
+#&gt; Dependent Var.:            Ozone            Ozone
+#&gt;                                                  
+#&gt; (Intercept)     26.06*** (5.362) 25.43*** (3.932)
+#&gt; Wind              -89.96 (62.29)    91.24 (92.26)
+#&gt; Wind square        66.46 (64.42)   -43.18 (70.87)
+#&gt; _______________ ________________ ________________
+#&gt; S.E. type       Heterosked.-rob. Heterosked.-rob.
+#&gt; Observations                  26                9
+#&gt; R2                       0.23366          0.18587
+#&gt; Adj. R2                  0.16702         -0.08550</div><div class='input'>
 <span class='co'># Taking the first root (here sample = 5)</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_split</span><span class='op'>[</span>I <span class='op'>=</span> <span class='fl'>1</span><span class='op'>]</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                         model 1         model 2          model 3
-#&gt; Sample (Month)                5               5                5
-#&gt; Dependent Var.:           Ozone           Ozone          Solar.R
-#&gt;                                                                 
-#&gt; (Intercept)     26.06*** (4.09) 41.22*** (6.91) 182.7*** (23.38)
-#&gt; Wind            -89.96* (35.56)                   -142.3 (205.4)
-#&gt; Wind square       66.46 (39.66)                   -177.1 (233.1)
-#&gt; Temp                            215.9** (67.18)                 
-#&gt; Temp square                       92.23 (63.43)                 
-#&gt; _______________ _______________ _______________ ________________
-#&gt; S.E. type              Standard        Standard         Standard
-#&gt; Observations                 26              26               27
-#&gt; R2                     0.233658        0.365341         0.073743
-#&gt; Adj. R2                 0.16702        0.310153        -0.003445
+</div><div class='output co'>#&gt;                          model 1         model 2          model 3
+#&gt; Sample (Month)                 5               5                5
+#&gt; Dependent Var.:            Ozone           Ozone          Solar.R
+#&gt;                                                                  
+#&gt; (Intercept)     26.06*** (5.362) 41.22** (13.30) 182.7*** (20.86)
+#&gt; Wind              -89.96 (62.29)                   -142.3 (152.9)
+#&gt; Wind square        66.46 (64.42)                   -177.1 (159.3)
+#&gt; Temp                              215.9. (124.4)                 
+#&gt; Temp square                        92.23 (82.96)                 
+#&gt; _______________ ________________ _______________ ________________
+#&gt; S.E. type       Heterosked.-rob. Heteroske.-rob. Heterosked.-rob.
+#&gt; Observations                  26              26               27
+#&gt; R2                       0.23366         0.36534          0.07374
+#&gt; Adj. R2                  0.16702         0.31015         -0.00345
 #&gt;                          model 4
 #&gt; Sample (Month)                 5
 #&gt; Dependent Var.:          Solar.R
 #&gt;                                 
-#&gt; (Intercept)     191.6*** (37.62)
+#&gt; (Intercept)     191.6*** (17.17)
 #&gt; Wind                            
 #&gt; Wind square                     
-#&gt; Temp               124.1 (373.5)
-#&gt; Temp square       -484.8 (322.7)
+#&gt; Temp               124.1 (225.4)
+#&gt; Temp square      -484.8. (244.3)
 #&gt; _______________ ________________
-#&gt; S.E. type               Standard
+#&gt; S.E. type       Heterosked.-rob.
 #&gt; Observations                  27
-#&gt; R2                      0.274975
-#&gt; Adj. R2                 0.214557</div><div class='input'>
+#&gt; R2                       0.27498
+#&gt; Adj. R2                  0.21456</div><div class='input'>
 <span class='co'># The first and last estimations</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_split</span><span class='op'>[</span>i <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='va'>.N</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                         model 1          model 2
-#&gt; Dependent Var.:           Ozone          Solar.R
-#&gt;                                                 
-#&gt; (Intercept)     26.06*** (4.09) 161.7*** (37.25)
-#&gt; Wind            -89.96* (35.56)                 
-#&gt; Wind square       66.46 (39.66)                 
-#&gt; Temp                               313.2 (344.5)
-#&gt; Temp square                        78.76 (214.4)
-#&gt; _______________ _______________ ________________
-#&gt; S.E. type              Standard         Standard
-#&gt; Observations                 26               30
-#&gt; R2                     0.233658         0.167188
-#&gt; Adj. R2                 0.16702         0.105498</div><div class='input'>
+</div><div class='output co'>#&gt;                          model 1          model 2
+#&gt; Dependent Var.:            Ozone          Solar.R
+#&gt;                                                  
+#&gt; (Intercept)     26.06*** (5.362) 161.7*** (42.26)
+#&gt; Wind              -89.96 (62.29)                 
+#&gt; Wind square        66.46 (64.42)                 
+#&gt; Temp                                313.2 (388.3)
+#&gt; Temp square                         78.76 (205.2)
+#&gt; _______________ ________________ ________________
+#&gt; S.E. type       Heterosked.-rob. Heterosked.-rob.
+#&gt; Observations                  26               30
+#&gt; R2                       0.23366          0.16719
+#&gt; Adj. R2                  0.16702          0.10550</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

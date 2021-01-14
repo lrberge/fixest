@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
       </span>
     </div>
 
@@ -193,7 +193,7 @@
 <li><p>r2, ar2, wr2, awr2, pr2, apr2, wpr2, awpr2All r2 that can be obtained with the function <code><a href='r2.html'>r2</a></code>. The <code>a</code> stands for 'adjusted', the <code>w</code> for 'within' and the <code>p</code> for 'pseudo'. Note that the order of the letters <code>a</code>, <code>w</code> and <code>p</code> does not matter.</p></li>
 <li><p>f, wfThe F-tests of nullity of the coefficients. The <code>w</code> stands for 'within'. These types return the following values: stat, p, df1 and df2. If you want to display only one of these, use their name after a dot: e.g. <code>f.stat</code> will give the statistic of the F-test, or <code>wf.p</code> will give the p-values of the F-test on the projected model (i.e. projected onto the fixed-effects).</p></li>
 <li><p>waldWald test of joint nullity of the coefficients. This test always excludes the intercept and the fixed-effects. These type returns the following values: stat, p, df1, df2 and vcov. The element <code>vcov</code> reports the way the VCOV matrix was computed since it directly influences this statistic.</p></li>
-<li><p>ivf, ivf1, ivf2, ivfallThese statistics are specific to IV estimations. They report either the IV F-test of the first stage (<code>ivf</code> or <code>ivf1</code>), of the second stage (<code>ivf2</code>) or of both (<code>ivfall</code>). The F-test of the first stage is commonly named weak instrument test. The value of <code>ivfall</code> is only useful in <code><a href='etable.html'>etable</a></code> when both the 1st and 2nd stages are displayed (it leads to the 1st stage F-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, <code>ivf1</code> would also be displayed on the 2nd stage estimation). These types return the following values: stat, p, df1 and df2.</p></li>
+<li><p>ivf, ivf1, ivf2, ivfallThese statistics are specific to IV estimations. They report either the IV F-test (namely the Cragg-Donald F statistic) of the first stage (<code>ivf</code> or <code>ivf1</code>), of the second stage (<code>ivf2</code>) or of both (<code>ivfall</code>). The F-test of the first stage is commonly named weak instrument test. The value of <code>ivfall</code> is only useful in <code><a href='etable.html'>etable</a></code> when both the 1st and 2nd stages are displayed (it leads to the 1st stage F-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, <code>ivf1</code> would also be displayed on the 2nd stage estimation). These types return the following values: stat, p, df1 and df2.</p></li>
 <li><p>ivwald, ivwald1, ivwald2, ivwaldallThese statistics are specific to IV estimations. They report either the IV Wald-test of the first stage (<code>ivwald</code> or <code>ivwald1</code>), of the second stage (<code>ivwald2</code>) or of both (<code>ivwaldall</code>). The Wald-test of the first stage is commonly named weak instrument test. The value of <code>ivwaldall</code> is only useful in <code><a href='etable.html'>etable</a></code> when both the 1st and 2nd stages are displayed (it leads to the 1st stage Wald-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, <code>ivwald1</code> would also be displayed on the 2nd stage estimation). These types return the following values: stat, p, df1, df2, and vcov.</p></li>
 <li><p>whThis statistic is specific to IV estimations. Wu-Hausman endogeneity test. H0 is the absence of endogeneity of the instrumented variables. It returns the following values: stat, p, df1, df2.</p></li>
 <li><p>sarganSargan test of overidentifying restrictions. H0: the instruments are not correlated with the second stage residuals. It returns the following values: stat, p, df.</p></li>
@@ -213,8 +213,8 @@
 <span class='fu'>fitstat</span><span class='op'>(</span><span class='va'>gravity</span>, <span class='op'>~</span> <span class='va'>rmse</span> <span class='op'>+</span> <span class='va'>r2</span> <span class='op'>+</span> <span class='va'>wald</span> <span class='op'>+</span> <span class='va'>wf</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;         RMSE: 2.2622
 #&gt;          R2: 0.50428
-#&gt; Wald (joint nullity): stat =   272.89, p &lt; 2.2e-16, on 1 and 38,295 DoF, VCOV matrix: Clustered (Destination).
-#&gt;   F-test (projected): stat = 5,832.84, p &lt; 2.2e-16, on 1 and 38,295 DoF.</div><div class='input'>
+#&gt; Wald (joint nullity): stat =   272.9, p &lt; 2.2e-16, on 1 and 38,295 DoF, VCOV matrix: Clustered (Destination).
+#&gt;   F-test (projected): stat = 5,832.8, p &lt; 2.2e-16, on 1 and 38,295 DoF.</div><div class='input'>
 <span class='co'># You can use them in etable</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>gravity</span>, fitstat <span class='op'>=</span> <span class='op'>~</span> <span class='va'>rmse</span> <span class='op'>+</span> <span class='va'>r2</span> <span class='op'>+</span> <span class='va'>wald</span> <span class='op'>+</span> <span class='va'>wf</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                                 gravity
@@ -228,8 +228,8 @@
 #&gt; S.E.: Clustered         by: Destination
 #&gt; RMSE                             2.2622
 #&gt; R2                              0.50428
-#&gt; Wald (joint nullity)             272.89
-#&gt; F-test (projected)             5,832.84</div><div class='input'>
+#&gt; Wald (joint nullity)             272.90
+#&gt; F-test (projected)              5,832.8</div><div class='input'>
 <span class='co'># For wald and wf, you could show the pvalue instead:</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>gravity</span>, fitstat <span class='op'>=</span> <span class='op'>~</span> <span class='va'>rmse</span> <span class='op'>+</span> <span class='va'>r2</span> <span class='op'>+</span> <span class='va'>wald.p</span> <span class='op'>+</span> <span class='va'>wf.p</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                                          gravity
@@ -244,7 +244,7 @@
 #&gt; RMSE                                      2.2622
 #&gt; R2                                       0.50428
 #&gt; Wald (joint nullity), p-value           4.32e-61
-#&gt; F-test (projected), p-value                    0</div><div class='input'>
+#&gt; F-test (projected), p-value             NaNe-Inf</div><div class='input'>
 <span class='co'># Now let's display some statistics that are not built-in</span>
 <span class='co'># =&gt; we use fitstat_register to create them</span>
 
@@ -269,11 +269,11 @@
 #&gt; S.E.: Clustered       by: Destination
 #&gt; Observations                   38,325
 #&gt; R2                            0.50428
-#&gt; Within R2                    0.132181
-#&gt; t-stat (regular)               -76.37
-#&gt; t-stat (HC1)                   -80.12
-#&gt; t-stat (clustered)             -16.51
-#&gt; t-stat (2-way)                 -13.26</div><div class='input'>
+#&gt; Within R2                     0.13218
+#&gt; t-stat (regular)              -76.373
+#&gt; t-stat (HC1)                  -80.129
+#&gt; t-stat (clustered)            -16.520
+#&gt; t-stat (2-way)                -13.268</div><div class='input'>
 <span class='co'># Note that the custom stats we created are can easily lead</span>
 <span class='co'># to errors, but that's another story!</span>
 

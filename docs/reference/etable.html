@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
       </span>
     </div>
 
@@ -143,13 +143,15 @@
 
     <pre class="usage"><span class='fu'>etable</span><span class='op'>(</span>
   <span class='va'>...</span>,
-  se <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"standard"</span>, <span class='st'>"hetero"</span>, <span class='st'>"cluster"</span>, <span class='st'>"twoway"</span>, <span class='st'>"threeway"</span>, <span class='st'>"fourway"</span><span class='op'>)</span>,
-  dof <span class='op'>=</span> <span class='fu'><a href='dof.html'>getFixest_dof</a></span><span class='op'>(</span><span class='op'>)</span>,
-  <span class='va'>cluster</span>,
+  se <span class='op'>=</span> <span class='cn'>NULL</span>,
+  dof <span class='op'>=</span> <span class='cn'>NULL</span>,
+  cluster <span class='op'>=</span> <span class='cn'>NULL</span>,
   stage <span class='op'>=</span> <span class='fl'>2</span>,
+  agg <span class='op'>=</span> <span class='cn'>NULL</span>,
   <span class='va'>.vcov</span>,
   .vcov_args <span class='op'>=</span> <span class='cn'>NULL</span>,
   digits <span class='op'>=</span> <span class='fl'>4</span>,
+  digits.stats <span class='op'>=</span> <span class='fl'>5</span>,
   <span class='va'>tex</span>,
   <span class='va'>fitstat</span>,
   <span class='va'>title</span>,
@@ -196,6 +198,7 @@
   <span class='va'>.vcov</span>,
   .vcov_args <span class='op'>=</span> <span class='cn'>NULL</span>,
   digits <span class='op'>=</span> <span class='fl'>4</span>,
+  digits.stats <span class='op'>=</span> <span class='fl'>5</span>,
   <span class='va'>fitstat</span>,
   coefstat <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"se"</span>, <span class='st'>"tstat"</span>, <span class='st'>"confint"</span><span class='op'>)</span>,
   ci <span class='op'>=</span> <span class='fl'>0.95</span>,
@@ -244,6 +247,7 @@
   <span class='va'>dict</span>,
   <span class='va'>order</span>,
   digits <span class='op'>=</span> <span class='fl'>4</span>,
+  digits.stats <span class='op'>=</span> <span class='fl'>5</span>,
   <span class='va'>fitstat</span>,
   <span class='va'>convergence</span>,
   signifCode <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span>`***` <span class='op'>=</span> <span class='fl'>0.001</span>, `**` <span class='op'>=</span> <span class='fl'>0.01</span>, `*` <span class='op'>=</span> <span class='fl'>0.05</span>, . <span class='op'>=</span> <span class='fl'>0.1</span><span class='op'>)</span>,
@@ -257,6 +261,7 @@
 
 <span class='fu'>setFixest_etable</span><span class='op'>(</span>
   digits <span class='op'>=</span> <span class='fl'>4</span>,
+  digits.stats <span class='op'>=</span> <span class='fl'>5</span>,
   <span class='va'>fitstat</span>,
   coefstat <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"se"</span>, <span class='st'>"tstat"</span>, <span class='st'>"confint"</span><span class='op'>)</span>,
   ci <span class='op'>=</span> <span class='fl'>0.95</span>,
@@ -312,6 +317,10 @@
       <td><p>Can be equal to <code>2</code> (default), <code>1</code>, <code>1:2</code> or <code>2:1</code>. Only used if the object is an IV estimation: defines the stage to which <code>summary</code> should be applied. If <code>stage = 1</code> and there are multiple endogenous regressors or if <code>stage</code> is of length 2, then an object of class <code>fixest_multi</code> is returned.</p></td>
     </tr>
     <tr>
+      <th>agg</th>
+      <td><p>A character scalar describing the variable names to be aggregated, it is pattern-based. All variables that match the pattern will be aggregated. It must be of the form <code>"(root)"</code>, the parentheses must be there and the resulting variable name will be <code>"root"</code>. You can add another root with parentheses: <code>"(root1)regex(root2)"</code>, in which case the resulting name is <code>"root1::root2"</code>. To name the resulting variable differently you can pass a named vector: <code><a href='https://rdrr.io/r/base/c.html'>c("name" = "pattern")</a></code> or <code><a href='https://rdrr.io/r/base/c.html'>c("name" = "pattern(root2)")</a></code>. It's a bit intricate sorry, please see the examples.</p></td>
+    </tr>
+    <tr>
       <th>.vcov</th>
       <td><p>A function to be used to compute the standard-errors of each fixest object. You can pass extra arguments to this function using the argument <code>.vcov_args</code>. See the example.</p></td>
     </tr>
@@ -321,7 +330,11 @@
     </tr>
     <tr>
       <th>digits</th>
-      <td><p>Integer, default is 4. The number of digits to be displayed.</p></td>
+      <td><p>Integer or character scalar. Default is 4 and represents the number of significant digits to be displayed for the coefficients and standard-errors. To apply rounding instead of significance use, e.g., <code>digits = "r3"</code> which will round at the first 3 decimals. If character, it must be of the form <code>"rd"</code> or <code>"sd"</code> with <code>d</code> a digit (<code>r</code> is for round and <code>s</code> is for significance). For the number of digits for the fit statistics, use <code>digits.stats</code>. Note that when significance is used it does not exactly display the number of significant digits: see details for its exact meaning.</p></td>
+    </tr>
+    <tr>
+      <th>digits.stats</th>
+      <td><p>Integer or character scalar. Default is 5 and represents the number of significant digits to be displayed for the fit statistics. To apply rounding instead of significance use, e.g., <code>digits = "r3"</code> which will round at the first 3 decimals. If character, it must be of the form <code>"rd"</code> or <code>"sd"</code> with <code>d</code> a digit (<code>r</code> is for round and <code>s</code> is for significance). Note that when significance is used it does not exactly display the number of significant digits: see details for its exact meaning.</p></td>
     </tr>
     <tr>
       <th>tex</th>
@@ -377,7 +390,7 @@
     </tr>
     <tr>
       <th>signifCode</th>
-      <td><p>Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is <code><a href='https://rdrr.io/r/base/c.html'>c("***"=0.01, "**"=0.05, "*"=0.10)</a></code> for a Latex table and <code><a href='https://rdrr.io/r/base/c.html'>c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)</a></code> for a data.frame (to conform with R's default). To supress the significance codes, use <code>signifCode=NA</code> or <code>signifCode=NULL</code>. Can also be equal to <code>"letters"</code>, then the default becomes <code><a href='https://rdrr.io/r/base/c.html'>c("a"=0.01, "b"=0.05, "c"=0.10)</a></code>.</p></td>
+      <td><p>Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is <code><a href='https://rdrr.io/r/base/c.html'>c("***"=0.01, "**"=0.05, "*"=0.10)</a></code> for a Latex table and <code><a href='https://rdrr.io/r/base/c.html'>c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)</a></code> for a data.frame (to conform with R's default). To suppress the significance codes, use <code>signifCode=NA</code> or <code>signifCode=NULL</code>. Can also be equal to <code>"letters"</code>, then the default becomes <code><a href='https://rdrr.io/r/base/c.html'>c("a"=0.01, "b"=0.05, "c"=0.10)</a></code>.</p></td>
     </tr>
     <tr>
       <th>label</th>
@@ -429,7 +442,7 @@
     </tr>
     <tr>
       <th>notes</th>
-      <td><p>Character vector. If provided, a <code>"notes"</code> section will be added at the end right after the end of the table, containing the text of this argument. Note that if it is a vector, it will be collapsed with new lines.</p></td>
+      <td><p>(Tex only.) Character vector. If provided, a <code>"notes"</code> section will be added at the end right after the end of the table, containing the text of this argument. Note that if it is a vector, it will be collapsed with new lines.</p></td>
     </tr>
     <tr>
       <th>group</th>
@@ -486,6 +499,14 @@
 <li><p><code>esttex</code>: Exports the results of multiple <code>fixest</code> estimations in a Latex table.</p></li>
 <li><p><code>esttable</code>: Facility to display the results of multiple <code>fixest</code> estimations.</p></li>
 </ul>
+    <h2 class="hasAnchor" id="how-does-digits-handle-the-number-of-decimals-displayed-"><a class="anchor" href="#how-does-digits-handle-the-number-of-decimals-displayed-"></a>How does <code>digits</code> handle the number of decimals displayed?</h2>
+
+    
+
+
+<p>The default display of decimals is the outcome of an algorithm. Let's take the example of <code>digits = 3</code> which "kind of" requires 3 significant digits to be displayed.</p>
+<p>For numbers greater than 1 (in absolute terms), their integral part is always be displayed and the number of decimals shown is equal to <code>digits</code> minus the number of digits in the integral part. This means that <code>12.345</code> will be displayed as <code>12.3</code>. If the number of decimals should be 0, then a single decimal is displayed to suggest that the number is not whole. This means that <code>1234.56</code> will be displayed as <code>1234.5</code>. Note that if the number is whole, no decimals are shown.</p>
+<p>For numbers lower than 1 (in absolute terms), the number of decimals displayed is equal to <code>digits</code> except if there are only 0s in which case the first significant digit is shown. This means that <code>0.01234</code> will be displayed as <code>0.012</code> (first rule), and that 0.000123 will be displayed as <code>0.0001</code> (second rule).</p>
     <h2 class="hasAnchor" id="arguments-keep-drop-and-order"><a class="anchor" href="#arguments-keep-drop-and-order"></a>Arguments keep, drop and order</h2>
 
     
@@ -522,50 +543,50 @@
 #&gt; Month = 9           -11.78 (18.22)                   
 #&gt; Temp             2.042*** (0.3078)  2.042*** (0.2242)
 #&gt; Wind x Month = 5    -1.086 (1.127)  -1.086** (0.1408)
-#&gt; Wind x Month = 6     2.046 (1.784) 2.046*** (0.03985)
+#&gt; Wind x Month = 6     2.046 (1.784)  2.046*** (0.0398)
 #&gt; Wind x Month = 7 -5.616*** (1.316) -5.616*** (0.1554)
-#&gt; Wind x Month = 8  -6.515*** (1.22) -6.515*** (0.2203)
+#&gt; Wind x Month = 8 -6.515*** (1.220) -6.515*** (0.2203)
 #&gt; Wind x Month = 9    -1.349 (1.147)   -1.349* (0.3175)
 #&gt; Fixed-Effects:   ----------------- ------------------
 #&gt; Month                           No                Yes
 #&gt; ________________ _________________ __________________
 #&gt; S.E. type                 Standard          by: Month
 #&gt; Observations                   116                116
-#&gt; R2                        0.681063           0.681063
-#&gt; Within R2                       --           0.582962</div><div class='input'>
+#&gt; R2                         0.68106            0.68106
+#&gt; Within R2                       --            0.58296</div><div class='input'>
 <span class='co'># keep/drop: keeping only interactions</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, keep <span class='op'>=</span> <span class='st'>" x "</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                               est1               est2
 #&gt; Dependent Var.:              Ozone              Ozone
 #&gt;                                                      
 #&gt; Wind x Month = 5    -1.086 (1.127)  -1.086** (0.1408)
-#&gt; Wind x Month = 6     2.046 (1.784) 2.046*** (0.03985)
+#&gt; Wind x Month = 6     2.046 (1.784)  2.046*** (0.0398)
 #&gt; Wind x Month = 7 -5.616*** (1.316) -5.616*** (0.1554)
-#&gt; Wind x Month = 8  -6.515*** (1.22) -6.515*** (0.2203)
+#&gt; Wind x Month = 8 -6.515*** (1.220) -6.515*** (0.2203)
 #&gt; Wind x Month = 9    -1.349 (1.147)   -1.349* (0.3175)
 #&gt; Fixed-Effects:   ----------------- ------------------
 #&gt; Month                           No                Yes
 #&gt; ________________ _________________ __________________
 #&gt; S.E. type                 Standard          by: Month
 #&gt; Observations                   116                116
-#&gt; R2                        0.681063           0.681063
-#&gt; Within R2                       --           0.582962</div><div class='input'><span class='co'># or using drop  (see regexp help):</span>
+#&gt; R2                         0.68106            0.68106
+#&gt; Within R2                       --            0.58296</div><div class='input'><span class='co'># or using drop  (see regexp help):</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, drop <span class='op'>=</span> <span class='st'>"^(Month|Temp|\\()"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                               est1               est2
 #&gt; Dependent Var.:              Ozone              Ozone
 #&gt;                                                      
 #&gt; Wind x Month = 5    -1.086 (1.127)  -1.086** (0.1408)
-#&gt; Wind x Month = 6     2.046 (1.784) 2.046*** (0.03985)
+#&gt; Wind x Month = 6     2.046 (1.784)  2.046*** (0.0398)
 #&gt; Wind x Month = 7 -5.616*** (1.316) -5.616*** (0.1554)
-#&gt; Wind x Month = 8  -6.515*** (1.22) -6.515*** (0.2203)
+#&gt; Wind x Month = 8 -6.515*** (1.220) -6.515*** (0.2203)
 #&gt; Wind x Month = 9    -1.349 (1.147)   -1.349* (0.3175)
 #&gt; Fixed-Effects:   ----------------- ------------------
 #&gt; Month                           No                Yes
 #&gt; ________________ _________________ __________________
 #&gt; S.E. type                 Standard          by: Month
 #&gt; Observations                   116                116
-#&gt; R2                        0.681063           0.681063
-#&gt; Within R2                       --           0.582962</div><div class='input'>
+#&gt; R2                         0.68106            0.68106
+#&gt; Within R2                       --            0.58296</div><div class='input'>
 <span class='co'># keep/drop: dropping interactions</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, drop <span class='op'>=</span> <span class='st'>" x "</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                              est1              est2
@@ -582,8 +603,8 @@
 #&gt; _______________ _________________ _________________
 #&gt; S.E. type                Standard         by: Month
 #&gt; Observations                  116               116
-#&gt; R2                       0.681063          0.681063
-#&gt; Within R2                      --          0.582962</div><div class='input'><span class='co'># or using keep ("!" reverses the effect):</span>
+#&gt; R2                        0.68106           0.68106
+#&gt; Within R2                      --           0.58296</div><div class='input'><span class='co'># or using keep ("!" reverses the effect):</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, keep <span class='op'>=</span> <span class='st'>"! x "</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                              est1              est2
 #&gt; Dependent Var.:             Ozone             Ozone
@@ -599,17 +620,17 @@
 #&gt; _______________ _________________ _________________
 #&gt; S.E. type                Standard         by: Month
 #&gt; Observations                  116               116
-#&gt; R2                       0.681063          0.681063
-#&gt; Within R2                      --          0.582962</div><div class='input'>
+#&gt; R2                        0.68106           0.68106
+#&gt; Within R2                      --           0.58296</div><div class='input'>
 <span class='co'># order: Wind variable first, intercept last (note the "!" to reverse the effect)</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, order <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Wind"</span>, <span class='st'>"!Inter"</span><span class='op'>)</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                               est1               est2
 #&gt; Dependent Var.:              Ozone              Ozone
 #&gt;                                                      
 #&gt; Wind x Month = 5    -1.086 (1.127)  -1.086** (0.1408)
-#&gt; Wind x Month = 6     2.046 (1.784) 2.046*** (0.03985)
+#&gt; Wind x Month = 6     2.046 (1.784)  2.046*** (0.0398)
 #&gt; Wind x Month = 7 -5.616*** (1.316) -5.616*** (0.1554)
-#&gt; Wind x Month = 8  -6.515*** (1.22) -6.515*** (0.2203)
+#&gt; Wind x Month = 8 -6.515*** (1.220) -6.515*** (0.2203)
 #&gt; Wind x Month = 9    -1.349 (1.147)   -1.349* (0.3175)
 #&gt; Month = 6          -54.99* (26.34)                   
 #&gt; Month = 7           35.89. (18.37)                   
@@ -622,8 +643,8 @@
 #&gt; ________________ _________________ __________________
 #&gt; S.E. type                 Standard          by: Month
 #&gt; Observations                   116                116
-#&gt; R2                        0.681063           0.681063
-#&gt; Within R2                       --           0.582962</div><div class='input'><span class='co'># Month, then interactions, then the rest</span>
+#&gt; R2                         0.68106            0.68106
+#&gt; Within R2                       --            0.58296</div><div class='input'><span class='co'># Month, then interactions, then the rest</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, order <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"^Month"</span>, <span class='st'>" x "</span><span class='op'>)</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                               est1               est2
 #&gt; Dependent Var.:              Ozone              Ozone
@@ -633,9 +654,9 @@
 #&gt; Month = 8           44.52* (18.05)                   
 #&gt; Month = 9           -11.78 (18.22)                   
 #&gt; Wind x Month = 5    -1.086 (1.127)  -1.086** (0.1408)
-#&gt; Wind x Month = 6     2.046 (1.784) 2.046*** (0.03985)
+#&gt; Wind x Month = 6     2.046 (1.784)  2.046*** (0.0398)
 #&gt; Wind x Month = 7 -5.616*** (1.316) -5.616*** (0.1554)
-#&gt; Wind x Month = 8  -6.515*** (1.22) -6.515*** (0.2203)
+#&gt; Wind x Month = 8 -6.515*** (1.220) -6.515*** (0.2203)
 #&gt; Wind x Month = 9    -1.349 (1.147)   -1.349* (0.3175)
 #&gt; (Intercept)      -100.2*** (26.35)                   
 #&gt; Temp             2.042*** (0.3078)  2.042*** (0.2242)
@@ -644,8 +665,8 @@
 #&gt; ________________ _________________ __________________
 #&gt; S.E. type                 Standard          by: Month
 #&gt; Observations                   116                116
-#&gt; R2                        0.681063           0.681063
-#&gt; Within R2                       --           0.582962</div><div class='input'>
+#&gt; R2                         0.68106            0.68106
+#&gt; Within R2                       --            0.58296</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># dict</span>
 <span class='co'>#</span>
@@ -665,17 +686,17 @@
 #&gt; Month = 9             -11.78 (18.22)                   
 #&gt; Temperature        2.042*** (0.3078)  2.042*** (0.2242)
 #&gt; Wind x May            -1.086 (1.127)  -1.086** (0.1408)
-#&gt; Wind x Month = Jun     2.046 (1.784) 2.046*** (0.03985)
+#&gt; Wind x Month = Jun     2.046 (1.784)  2.046*** (0.0398)
 #&gt; Wind x Month = 7   -5.616*** (1.316) -5.616*** (0.1554)
-#&gt; Wind x Month = 8    -6.515*** (1.22) -6.515*** (0.2203)
+#&gt; Wind x Month = 8   -6.515*** (1.220) -6.515*** (0.2203)
 #&gt; Wind x Month = 9      -1.349 (1.147)   -1.349* (0.3175)
 #&gt; Fixed-Effects:     ----------------- ------------------
 #&gt; Month                             No                Yes
 #&gt; __________________ _________________ __________________
 #&gt; S.E. type                   Standard          by: Month
 #&gt; Observations                     116                116
-#&gt; R2                          0.681063           0.681063
-#&gt; Within R2                         --           0.582962</div><div class='input'><span class='co'># Note the difference of treatment between Jun and May</span>
+#&gt; R2                           0.68106            0.68106
+#&gt; Within R2                         --            0.58296</div><div class='input'><span class='co'># Note the difference of treatment between Jun and May</span>
 
 <span class='co'># Assume the following dictionnary:</span>
 <span class='va'>dict</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Month::5"</span><span class='op'>=</span><span class='st'>"May"</span>, <span class='st'>"Month::6"</span><span class='op'>=</span><span class='st'>"Jun"</span>, <span class='st'>"Month::7"</span><span class='op'>=</span><span class='st'>"Jul"</span>,
@@ -694,17 +715,17 @@
 #&gt; Aug                44.52* (18.05)                   
 #&gt; Sep                -11.78 (18.22)                   
 #&gt; Wind x May         -1.086 (1.127)  -1.086** (0.1408)
-#&gt; Wind x Jun          2.046 (1.784) 2.046*** (0.03985)
+#&gt; Wind x Jun          2.046 (1.784)  2.046*** (0.0398)
 #&gt; Wind x Jul      -5.616*** (1.316) -5.616*** (0.1554)
-#&gt; Wind x Aug       -6.515*** (1.22) -6.515*** (0.2203)
+#&gt; Wind x Aug      -6.515*** (1.220) -6.515*** (0.2203)
 #&gt; Wind x Sep         -1.349 (1.147)   -1.349* (0.3175)
 #&gt; Fixed-Effects:  ----------------- ------------------
 #&gt; Month                          No                Yes
 #&gt; _______________ _________________ __________________
 #&gt; S.E. type                Standard          by: Month
 #&gt; Observations                  116                116
-#&gt; R2                       0.681063           0.681063
-#&gt; Within R2                      --           0.582962</div><div class='input'>
+#&gt; R2                        0.68106            0.68106
+#&gt; Within R2                      --            0.58296</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># signifCode</span>
 <span class='co'>#</span>
@@ -720,17 +741,17 @@
 #&gt; Month = 9        -11.78 F (18.22)                  
 #&gt; Temp             2.042 A (0.3078)  2.042 A (0.2242)
 #&gt; Wind x Month = 5 -1.086 F (1.127) -1.086 A (0.1408)
-#&gt; Wind x Month = 6  2.046 F (1.784) 2.046 A (0.03985)
+#&gt; Wind x Month = 6  2.046 F (1.784)  2.046 A (0.0398)
 #&gt; Wind x Month = 7 -5.616 A (1.316) -5.616 A (0.1554)
-#&gt; Wind x Month = 8  -6.515 A (1.22) -6.515 A (0.2203)
+#&gt; Wind x Month = 8 -6.515 A (1.220) -6.515 A (0.2203)
 #&gt; Wind x Month = 9 -1.349 F (1.147) -1.349 B (0.3175)
 #&gt; Fixed-Effects:   ---------------- -----------------
 #&gt; Month                          No               Yes
 #&gt; ________________ ________________ _________________
 #&gt; S.E. type                Standard         by: Month
 #&gt; Observations                  116               116
-#&gt; R2                       0.681063          0.681063
-#&gt; Within R2                      --          0.582962</div><div class='input'>
+#&gt; R2                        0.68106           0.68106
+#&gt; Within R2                      --           0.58296</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># Using the argument style to customize Latex exports</span>
 <span class='co'>#</span>
@@ -765,15 +786,15 @@
 #&gt; Wind $\times $ Jul&amp;-5.616$^{***}$ &amp; -5.616$^{***}$\\
 #&gt;   &amp;(1.316) &amp; (0.1554)\\
 #&gt; Wind $\times $ Aug&amp;-6.515$^{***}$ &amp; -6.515$^{***}$\\
-#&gt;   &amp;(1.22) &amp; (0.2203)\\
+#&gt;   &amp;(1.220) &amp; (0.2203)\\
 #&gt; Wind $\times $ Sep&amp;-1.349 &amp; -1.349$^{**}$\\
 #&gt;   &amp;(1.147) &amp; (0.3175)\\
 #&gt; Month &amp;  &amp; Yes\\
 #&gt;  &amp;  &amp; \\
 #&gt; Standard-Errors&amp; Standard&amp;Month\\
 #&gt; Observations &amp; 116&amp;116\\
-#&gt; R$^2$ &amp; 0.681063&amp;0.681063\\
-#&gt; Within R$^2$ &amp; &amp;0.582962\\
+#&gt; R$^2$ &amp; 0.68106&amp;0.68106\\
+#&gt; Within R$^2$ &amp; &amp;0.58296\\
 #&gt; \midrule\midrule\multicolumn{3}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\
 #&gt; \end{tabular}</div><div class='input'>
 <span class='co'># To change the lines of the table + dropping the table footer</span>
@@ -804,7 +825,7 @@
 #&gt; Wind $\times $ Jul&amp;-5.616$^{***}$ &amp; -5.616$^{***}$\\
 #&gt;   &amp;(1.316) &amp; (0.1554)\\
 #&gt; Wind $\times $ Aug&amp;-6.515$^{***}$ &amp; -6.515$^{***}$\\
-#&gt;   &amp;(1.22) &amp; (0.2203)\\
+#&gt;   &amp;(1.220) &amp; (0.2203)\\
 #&gt; Wind $\times $ Sep&amp;-1.349 &amp; -1.349$^{**}$\\
 #&gt;   &amp;(1.147) &amp; (0.3175)\\
 #&gt; \midrule \emph{Fixed-effects}&amp;   &amp;  \\
@@ -812,8 +833,8 @@
 #&gt; \midrule \emph{Fit statistics}&amp;  &amp; \\
 #&gt; Standard-Errors&amp; Standard&amp;Month\\
 #&gt; Observations &amp; 116&amp;116\\
-#&gt; R$^2$ &amp; 0.681063&amp;0.681063\\
-#&gt; Within R$^2$ &amp; &amp;0.582962\\
+#&gt; R$^2$ &amp; 0.68106&amp;0.68106\\
+#&gt; Within R$^2$ &amp; &amp;0.58296\\
 #&gt; \bottomrule
 #&gt; \end{tabular}</div><div class='input'>
 <span class='co'># Or you have the predefined type "aer"</span>
@@ -841,14 +862,14 @@
 #&gt; Wind $\times $ Jul&amp;-5.616$^{***}$ &amp; -5.616$^{***}$\\
 #&gt;   &amp;(1.316) &amp; (0.1554)\\
 #&gt; Wind $\times $ Aug&amp;-6.515$^{***}$ &amp; -6.515$^{***}$\\
-#&gt;   &amp;(1.22) &amp; (0.2203)\\
+#&gt;   &amp;(1.220) &amp; (0.2203)\\
 #&gt; Wind $\times $ Sep&amp;-1.349 &amp; -1.349$^{**}$\\
 #&gt;   &amp;(1.147) &amp; (0.3175)\\
 #&gt;  &amp;  &amp; \\
 #&gt; Standard-Errors&amp; Standard&amp;Month\\
 #&gt; Observations &amp; 116&amp;116\\
-#&gt; R$^2$ &amp; 0.681063&amp;0.681063\\
-#&gt; Within R$^2$ &amp; &amp;0.582962\\
+#&gt; R$^2$ &amp; 0.68106&amp;0.68106\\
+#&gt; Within R$^2$ &amp; &amp;0.58296\\
 #&gt;  &amp;   &amp;  \\
 #&gt; Month fixed effects &amp;  &amp; $\checkmark$\\
 #&gt; \bottomrule
@@ -866,18 +887,18 @@
 </div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'><span class='va'>est_c2</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='va'>Solar.R</span><span class='op'>^</span><span class='fl'>2</span> <span class='op'>+</span> <span class='va'>..ctrl</span>, data <span class='op'>=</span> <span class='va'>aq</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_c0</span>, <span class='va'>est_c1</span>, <span class='va'>est_c2</span>, group <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>Controls <span class='op'>=</span> <span class='st'>"%poly"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                              est_c0              est_c1                 est_c2
-#&gt; Dependent Var.:               Ozone               Ozone                  Ozone
-#&gt;                                                                               
-#&gt; (Intercept)          18.6** (6.748)    29.83*** (4.101)       25.79*** (6.506)
-#&gt; Solar.R         0.1272*** (0.03278) 0.06593** (0.02007)       0.1347 (0.08806)
-#&gt; Solar.R square                                          -0.0002044 (0.0002549)
-#&gt; Controls                         No                 Yes                    Yes
-#&gt; _______________ ___________________ ___________________ ______________________
-#&gt; S.E. type                  Standard            Standard               Standard
-#&gt; Observations                    111                 111                    111
-#&gt; R2                         0.121342            0.712308               0.714076
-#&gt; Adj. R2                    0.113281            0.698608                0.69758</div><div class='input'>
+</div><div class='output co'>#&gt;                             est_c0            est_c1           est_c2
+#&gt; Dependent Var.:              Ozone             Ozone            Ozone
+#&gt;                                                                      
+#&gt; (Intercept)        18.60** (6.748)  29.83*** (4.101) 25.79*** (6.506)
+#&gt; Solar.R         0.1272*** (0.0328) 0.0659** (0.0201)  0.1347 (0.0881)
+#&gt; Solar.R square                                       -0.0002 (0.0003)
+#&gt; Controls                        No               Yes              Yes
+#&gt; _______________ __________________ _________________ ________________
+#&gt; S.E. type                 Standard          Standard         Standard
+#&gt; Observations                   111               111              111
+#&gt; R2                         0.12134           0.71231          0.71408
+#&gt; Adj. R2                    0.11328           0.69861          0.69758</div><div class='input'>
 <span class='co'># 'group' here does the same as drop = "%poly", but adds an extra line</span>
 <span class='co'># with TRUE/FALSE where the variables were found</span>
 <span class='co'># Note that the "%" is needed because polnomials are automatically renamed</span>
@@ -891,32 +912,32 @@
 </div><div class='output co'>#&gt; <span class='message'>NOTE: 1 observation removed because of NA values (LHS: 1).</span></div><div class='input'>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_all</span>, <span class='va'>est_sub1</span>, <span class='va'>est_sub2</span>, <span class='va'>est_sub3</span>,
        extraline <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"Sub-sample"</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"All"</span>, <span class='st'>"May-June"</span>, <span class='st'>"Jul.-Aug."</span>, <span class='st'>"Sept."</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                            est_all          est_sub1           est_sub2
-#&gt; Dependent Var.:              Ozone             Ozone              Ozone
-#&gt;                                                                        
-#&gt; (Intercept)       -64.34** (23.05)    -48.52 (30.42)     -80.06 (57.59)
-#&gt; Solar.R         0.05982* (0.02319) 0.02487 (0.03185) 0.09933* (0.04144)
-#&gt; Temp             1.652*** (0.2535)  1.184** (0.4123)   2.037** (0.6508)
-#&gt; Wind            -3.334*** (0.6544)   -1.107 (0.9236)   -5.83*** (1.124)
-#&gt; Sub-sample                     All          May-June          Jul.-Aug.
-#&gt; _______________ __________________ _________________ __________________
-#&gt; S.E. type                 Standard          Standard           Standard
-#&gt; Observations                   111                33                 49
-#&gt; R2                        0.605895          0.350058            0.66607
-#&gt; Adj. R2                   0.594845          0.282822           0.643808
+</div><div class='output co'>#&gt;                            est_all         est_sub1          est_sub2
+#&gt; Dependent Var.:              Ozone            Ozone             Ozone
+#&gt;                                                                      
+#&gt; (Intercept)       -64.34** (23.05)   -48.52 (30.42)    -80.06 (57.59)
+#&gt; Solar.R           0.0598* (0.0232)  0.0249 (0.0319)  0.0993* (0.0414)
+#&gt; Temp             1.652*** (0.2535) 1.184** (0.4123)  2.037** (0.6508)
+#&gt; Wind            -3.334*** (0.6544)  -1.107 (0.9236) -5.830*** (1.124)
+#&gt; Sub-sample                     All         May-June         Jul.-Aug.
+#&gt; _______________ __________________ ________________ _________________
+#&gt; S.E. type                 Standard         Standard          Standard
+#&gt; Observations                   111               33                49
+#&gt; R2                         0.60589          0.35006           0.66607
+#&gt; Adj. R2                    0.59484          0.28282           0.64381
 #&gt;                          est_sub3
 #&gt; Dependent Var.:             Ozone
 #&gt;                                  
 #&gt; (Intercept)      -112.9** (34.81)
-#&gt; Solar.R         0.02252 (0.03219)
+#&gt; Solar.R           0.0225 (0.0322)
 #&gt; Temp            2.005*** (0.3716)
 #&gt; Wind              -1.353 (0.9065)
 #&gt; Sub-sample                  Sept.
 #&gt; _______________ _________________
 #&gt; S.E. type                Standard
 #&gt; Observations                   29
-#&gt; R2                       0.717236
-#&gt; Adj. R2                  0.683304</div><div class='input'>
+#&gt; R2                        0.71724
+#&gt; Adj. R2                   0.68330</div><div class='input'>
 <span class='co'># When exporting to Latex, you can add meta arguments to 'group' and 'extraline'</span>
 <span class='co'># Two keywords are allowed: 'title' and 'where'</span>
 <span class='co'># 'title' adds a line just before with the content of 'title' in the leftmost cell</span>
@@ -932,7 +953,7 @@
 #&gt; Dependent Variable:&amp;\multicolumn{3}{c}{Ozone}\\
 #&gt; Model:&amp;(1) &amp; (2) &amp; (3)\\
 #&gt; \midrule \emph{Variables}&amp;   &amp;   &amp;  \\
-#&gt; (Intercept)&amp;18.6$^{***}$ &amp; 29.83$^{***}$ &amp; 25.79$^{***}$\\
+#&gt; (Intercept)&amp;18.60$^{***}$ &amp; 29.83$^{***}$ &amp; 25.79$^{***}$\\
 #&gt;   &amp;(6.748) &amp; (4.101) &amp; (6.506)\\
 #&gt; Solar.R&amp;0.1272$^{***}$ &amp; 0.0659$^{***}$ &amp; 0.1347\\
 #&gt;   &amp;(0.0328) &amp; (0.0201) &amp; (0.0881)\\
@@ -941,15 +962,15 @@
 #&gt; Wind square&amp;   &amp; 98.77$^{***}$ &amp; 98.88$^{***}$\\
 #&gt;   &amp;   &amp; (21.49) &amp; (21.52)\\
 #&gt; Temp&amp;   &amp; 166.7$^{***}$ &amp; 159.3$^{***}$\\
-#&gt;   &amp;   &amp; (25.89) &amp; (27.5)\\
-#&gt; Temp square&amp;   &amp; 67.2$^{***}$ &amp; 68.77$^{***}$\\
+#&gt;   &amp;   &amp; (25.89) &amp; (27.50)\\
+#&gt; Temp square&amp;   &amp; 67.20$^{***}$ &amp; 68.77$^{***}$\\
 #&gt;   &amp;   &amp; (23.39) &amp; (23.51)\\
 #&gt; Solar.R square&amp;   &amp;    &amp; -0.0002\\
 #&gt;   &amp;   &amp;    &amp; (0.0003)\\
 #&gt; \midrule \emph{Fit statistics}&amp;  &amp; &amp; \\
 #&gt; Observations &amp; 111&amp;111&amp;111\\
-#&gt; R$^2$ &amp; 0.121342&amp;0.712308&amp;0.714076\\
-#&gt; Adjusted R$^2$ &amp; 0.113281&amp;0.698608&amp;0.69758\\
+#&gt; R$^2$ &amp; 0.12134&amp;0.71231&amp;0.71408\\
+#&gt; Adjusted R$^2$ &amp; 0.11328&amp;0.69861&amp;0.69758\\
 #&gt; Controls &amp;  &amp;  &amp; \\
 #&gt; \midrule\midrule\multicolumn{4}{l}{\emph{Normal standard-errors in parentheses}}\\
 #&gt; \multicolumn{4}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\
@@ -967,13 +988,13 @@
 #&gt;   &amp;(0.0232) &amp; (0.0319) &amp; (0.0414) &amp; (0.0322)\\
 #&gt; Temp&amp;1.652$^{***}$ &amp; 1.184$^{***}$ &amp; 2.037$^{***}$ &amp; 2.005$^{***}$\\
 #&gt;   &amp;(0.2535) &amp; (0.4123) &amp; (0.6508) &amp; (0.3716)\\
-#&gt; Wind&amp;-3.334$^{***}$ &amp; -1.107 &amp; -5.83$^{***}$ &amp; -1.353\\
+#&gt; Wind&amp;-3.334$^{***}$ &amp; -1.107 &amp; -5.830$^{***}$ &amp; -1.353\\
 #&gt;   &amp;(0.6544) &amp; (0.9236) &amp; (1.124) &amp; (0.9065)\\
 #&gt; \midrule Sub-sample &amp; All &amp; May-June &amp; Jul.-Aug. &amp; Sept.\\
 #&gt; \midrule \emph{Fit statistics}&amp;  &amp; &amp; &amp; \\
 #&gt; Observations &amp; 111&amp;33&amp;49&amp;29\\
-#&gt; R$^2$ &amp; 0.605895&amp;0.350058&amp;0.66607&amp;0.717236\\
-#&gt; Adjusted R$^2$ &amp; 0.594845&amp;0.282822&amp;0.643808&amp;0.683304\\
+#&gt; R$^2$ &amp; 0.60589&amp;0.35006&amp;0.66607&amp;0.71724\\
+#&gt; Adjusted R$^2$ &amp; 0.59484&amp;0.28282&amp;0.64381&amp;0.68330\\
 #&gt; \midrule\midrule\multicolumn{5}{l}{\emph{Normal standard-errors in parentheses}}\\
 #&gt; \multicolumn{5}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\
 #&gt; \end{tabular}</div><div class='input'>
@@ -986,38 +1007,38 @@
 <span class='co'># Let's use some covariances from the sandwich package</span>
 
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_c0</span>, <span class='va'>est_c1</span>, <span class='va'>est_c2</span>, .vcov <span class='op'>=</span> <span class='fu'>sandwich</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/sandwich/man/vcovHC.html'>vcovHC</a></span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                              est_c0               est_c1                 est_c2
-#&gt; Dependent Var.:               Ozone                Ozone                  Ozone
-#&gt;                                                                                
-#&gt; (Intercept)         18.6*** (3.949)     29.83*** (3.064)       25.79*** (4.436)
-#&gt; Solar.R         0.1272*** (0.02658) 0.06593*** (0.01496)      0.1347* (0.06509)
-#&gt; Wind                                    -155.5*** (39.2)      -153.6*** (39.12)
-#&gt; Wind square                              98.77** (36.32)        98.88** (36.42)
-#&gt; Temp                                    166.7*** (25.38)       159.3*** (25.99)
-#&gt; Temp square                                67.2* (27.38)         68.77* (27.36)
-#&gt; Solar.R square                                           -0.0002044 (0.0001922)
-#&gt; _______________ ___________________ ____________________ ______________________
-#&gt; S.E. type                    vcovHC               vcovHC                 vcovHC
-#&gt; Observations                    111                  111                    111
-#&gt; R2                         0.121342             0.712308               0.714076
-#&gt; Adj. R2                    0.113281             0.698608                0.69758</div><div class='input'>
+</div><div class='output co'>#&gt;                             est_c0             est_c1            est_c2
+#&gt; Dependent Var.:              Ozone              Ozone             Ozone
+#&gt;                                                                        
+#&gt; (Intercept)       18.60*** (3.949)   29.83*** (3.064)  25.79*** (4.436)
+#&gt; Solar.R         0.1272*** (0.0266) 0.0659*** (0.0150)  0.1347* (0.0651)
+#&gt; Wind                                -155.5*** (39.20) -153.6*** (39.12)
+#&gt; Wind square                           98.77** (36.32)   98.88** (36.42)
+#&gt; Temp                                 166.7*** (25.38)  159.3*** (25.99)
+#&gt; Temp square                            67.20* (27.38)    68.77* (27.36)
+#&gt; Solar.R square                                         -0.0002 (0.0002)
+#&gt; _______________ __________________ __________________ _________________
+#&gt; S.E. type                   vcovHC             vcovHC            vcovHC
+#&gt; Observations                   111                111               111
+#&gt; R2                         0.12134            0.71231           0.71408
+#&gt; Adj. R2                    0.11328            0.69861           0.69758</div><div class='input'>
 <span class='co'># To add extra arguments to vcovHC, you need to use .vcov_args</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_c0</span>, <span class='va'>est_c1</span>, <span class='va'>est_c2</span>, .vcov <span class='op'>=</span> <span class='fu'>sandwich</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/sandwich/man/vcovHC.html'>vcovHC</a></span>, .vcov_args <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>type <span class='op'>=</span> <span class='st'>"HC0"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                              est_c0               est_c1                 est_c2
-#&gt; Dependent Var.:               Ozone                Ozone                  Ozone
-#&gt;                                                                                
-#&gt; (Intercept)          18.6*** (3.85)      29.83*** (2.89)       25.79*** (4.091)
-#&gt; Solar.R         0.1272*** (0.02598) 0.06593*** (0.01404)      0.1347* (0.06027)
-#&gt; Wind                                   -155.5*** (35.29)      -153.6*** (35.11)
-#&gt; Wind square                              98.77** (32.31)        98.88** (32.35)
-#&gt; Temp                                    166.7*** (23.41)       159.3*** (23.76)
-#&gt; Temp square                               67.2** (24.84)        68.77** (24.68)
-#&gt; Solar.R square                                           -0.0002044 (0.0001781)
-#&gt; _______________ ___________________ ____________________ ______________________
-#&gt; S.E. type                    vcovHC               vcovHC                 vcovHC
-#&gt; Observations                    111                  111                    111
-#&gt; R2                         0.121342             0.712308               0.714076
-#&gt; Adj. R2                    0.113281             0.698608                0.69758</div><div class='input'>
+</div><div class='output co'>#&gt;                             est_c0             est_c1            est_c2
+#&gt; Dependent Var.:              Ozone              Ozone             Ozone
+#&gt;                                                                        
+#&gt; (Intercept)       18.60*** (3.850)   29.83*** (2.890)  25.79*** (4.091)
+#&gt; Solar.R         0.1272*** (0.0260) 0.0659*** (0.0140)  0.1347* (0.0603)
+#&gt; Wind                                -155.5*** (35.29) -153.6*** (35.11)
+#&gt; Wind square                           98.77** (32.31)   98.88** (32.35)
+#&gt; Temp                                 166.7*** (23.41)  159.3*** (23.76)
+#&gt; Temp square                           67.20** (24.84)   68.77** (24.68)
+#&gt; Solar.R square                                         -0.0002 (0.0002)
+#&gt; _______________ __________________ __________________ _________________
+#&gt; S.E. type                   vcovHC             vcovHC            vcovHC
+#&gt; Observations                   111                111               111
+#&gt; R2                         0.12134            0.71231           0.71408
+#&gt; Adj. R2                    0.11328            0.69861           0.69758</div><div class='input'>
 
 <span class='co'>#</span>
 <span class='co'># Customize which fit statistic to display</span>
@@ -1036,15 +1057,15 @@
 #&gt; Month = 9           -11.78 (18.22)                   
 #&gt; Temp             2.042*** (0.3078)  2.042*** (0.2242)
 #&gt; Wind x Month = 5    -1.086 (1.127)  -1.086** (0.1408)
-#&gt; Wind x Month = 6     2.046 (1.784) 2.046*** (0.03985)
+#&gt; Wind x Month = 6     2.046 (1.784)  2.046*** (0.0398)
 #&gt; Wind x Month = 7 -5.616*** (1.316) -5.616*** (0.1554)
-#&gt; Wind x Month = 8  -6.515*** (1.22) -6.515*** (0.2203)
+#&gt; Wind x Month = 8 -6.515*** (1.220) -6.515*** (0.2203)
 #&gt; Wind x Month = 9    -1.349 (1.147)   -1.349* (0.3175)
 #&gt; Fixed-Effects:   ----------------- ------------------
 #&gt; Month                           No                Yes
 #&gt; ________________ _________________ __________________
 #&gt; S.E. type                 Standard          by: Month
-#&gt; R2                        0.681063           0.681063
+#&gt; R2                         0.68106            0.68106
 #&gt; Observations                   116                116
 #&gt; G                              116                116</div><div class='input'>
 <span class='co'># If you use a formula, '.' means the default:</span>
@@ -1059,18 +1080,18 @@
 #&gt; Month = 9           -11.78 (18.22)                   
 #&gt; Temp             2.042*** (0.3078)  2.042*** (0.2242)
 #&gt; Wind x Month = 5    -1.086 (1.127)  -1.086** (0.1408)
-#&gt; Wind x Month = 6     2.046 (1.784) 2.046*** (0.03985)
+#&gt; Wind x Month = 6     2.046 (1.784)  2.046*** (0.0398)
 #&gt; Wind x Month = 7 -5.616*** (1.316) -5.616*** (0.1554)
-#&gt; Wind x Month = 8  -6.515*** (1.22) -6.515*** (0.2203)
+#&gt; Wind x Month = 8 -6.515*** (1.220) -6.515*** (0.2203)
 #&gt; Wind x Month = 9    -1.349 (1.147)   -1.349* (0.3175)
 #&gt; Fixed-Effects:   ----------------- ------------------
 #&gt; Month                           No                Yes
 #&gt; ________________ _________________ __________________
 #&gt; S.E. type                 Standard          by: Month
-#&gt; Log-Likelihood             -503.36            -503.36
+#&gt; Log-Likelihood             -503.37            -503.37
 #&gt; Observations                   116                116
-#&gt; R2                        0.681063           0.681063
-#&gt; Within R2                       --           0.582962</div><div class='input'>
+#&gt; R2                         0.68106            0.68106
+#&gt; Within R2                       --            0.58296</div><div class='input'>
 
 <span class='co'>#</span>
 <span class='co'># Computing a different SE for each model</span>
@@ -1087,30 +1108,30 @@
 <span class='va'>s4</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='op'>~</span> <span class='va'>Day</span> <span class='op'>+</span> <span class='va'>Month</span><span class='op'>)</span>
 
 <span class='fu'>etable</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>s1</span>, <span class='va'>s2</span>, <span class='va'>s3</span>, <span class='va'>s4</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                            model 1           model 2              model 3
-#&gt; Dependent Var.:              Ozone             Ozone                Ozone
-#&gt;                                                                          
-#&gt; (Intercept)       -64.34** (23.05)    -64.34* (21.3)     -64.34** (20.15)
-#&gt; Solar.R         0.05982* (0.02319) 0.05982 (0.03345) 0.05982*** (0.01618)
-#&gt; Wind            -3.334*** (0.6544)   -3.334* (1.181)   -3.334*** (0.8343)
-#&gt; Temp             1.652*** (0.2535) 1.652*** (0.1583)    1.652*** (0.1927)
-#&gt; _______________ __________________ _________________ ____________________
-#&gt; S.E. type                 Standard         by: Month              by: Day
-#&gt; Observations                   111               111                  111
-#&gt; R2                        0.605895          0.605895             0.605895
-#&gt; Adj. R2                   0.594845          0.594845             0.594845
+</div><div class='output co'>#&gt;                            model 1           model 2            model 3
+#&gt; Dependent Var.:              Ozone             Ozone              Ozone
+#&gt;                                                                        
+#&gt; (Intercept)       -64.34** (23.05)   -64.34* (21.30)   -64.34** (20.15)
+#&gt; Solar.R           0.0598* (0.0232)   0.0598 (0.0335) 0.0598*** (0.0162)
+#&gt; Wind            -3.334*** (0.6544)   -3.334* (1.181) -3.334*** (0.8343)
+#&gt; Temp             1.652*** (0.2535) 1.652*** (0.1583)  1.652*** (0.1927)
+#&gt; _______________ __________________ _________________ __________________
+#&gt; S.E. type                 Standard         by: Month            by: Day
+#&gt; Observations                   111               111                111
+#&gt; R2                         0.60589           0.60589            0.60589
+#&gt; Adj. R2                    0.59484           0.59484            0.59484
 #&gt;                           model 4
 #&gt; Dependent Var.:             Ozone
 #&gt;                                  
 #&gt; (Intercept)       -64.34* (19.66)
-#&gt; Solar.R         0.05982 (0.03135)
+#&gt; Solar.R           0.0598 (0.0314)
 #&gt; Wind              -3.334* (1.135)
 #&gt; Temp            1.652*** (0.1386)
 #&gt; _______________ _________________
 #&gt; S.E. type         by: Day &amp; Month
 #&gt; Observations                  111
-#&gt; R2                       0.605895
-#&gt; Adj. R2                  0.594845</div><div class='input'>
+#&gt; R2                        0.60589
+#&gt; Adj. R2                   0.59484</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># Method 2: using a list in the argument 'cluster'</span>
 
@@ -1120,7 +1141,7 @@
 #&gt; Dependent Var.:              Ozone             Ozone
 #&gt;                                                     
 #&gt; (Intercept)       -64.34** (23.05)                  
-#&gt; Solar.R         0.05982* (0.02319) 0.05222 (0.04082)
+#&gt; Solar.R           0.0598* (0.0232)   0.0522 (0.0408)
 #&gt; Wind            -3.334*** (0.6544)   -3.109. (1.306)
 #&gt; Temp             1.652*** (0.2535) 1.875*** (0.1816)
 #&gt; Fixed-Effects:  ------------------ -----------------
@@ -1128,8 +1149,8 @@
 #&gt; _______________ __________________ _________________
 #&gt; S.E. type                 Standard         by: Month
 #&gt; Observations                   111               111
-#&gt; R2                        0.605895          0.636861
-#&gt; Within R2                       --          0.531544</div><div class='input'>
+#&gt; R2                         0.60589           0.63686
+#&gt; Within R2                       --           0.53154</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># Method 3: Using rep()</span>
 
@@ -1137,22 +1158,22 @@
 </div><div class='output co'>#&gt;                          model 1.1         model 1.2
 #&gt; Dependent Var.:              Ozone             Ozone
 #&gt;                                                     
-#&gt; (Intercept)       -64.34** (23.05)    -64.34* (21.3)
-#&gt; Solar.R         0.05982* (0.02319) 0.05982 (0.03345)
+#&gt; (Intercept)       -64.34** (23.05)   -64.34* (21.30)
+#&gt; Solar.R           0.0598* (0.0232)   0.0598 (0.0335)
 #&gt; Wind            -3.334*** (0.6544)   -3.334* (1.181)
 #&gt; Temp             1.652*** (0.2535) 1.652*** (0.1583)
 #&gt; _______________ __________________ _________________
 #&gt; S.E. type                 Standard         by: Month
 #&gt; Observations                   111               111
-#&gt; R2                        0.605895          0.605895
-#&gt; Adj. R2                   0.594845          0.594845</div><div class='input'>
+#&gt; R2                         0.60589           0.60589
+#&gt; Adj. R2                    0.59484           0.59484</div><div class='input'>
 <span class='co'># When using rep on 2 or more objects, you need to embed them in .l()</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'><a href='rep.fixest.html'>.l</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span><span class='op'>)</span>, cluster <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"standard"</span>, <span class='op'>~</span> <span class='va'>Month</span>, <span class='op'>~</span> <span class='va'>Day</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                          model 1.1          model 2.1         model 1.2
 #&gt; Dependent Var.:              Ozone              Ozone             Ozone
 #&gt;                                                                        
-#&gt; (Intercept)       -64.34** (23.05)                       -64.34* (21.3)
-#&gt; Solar.R         0.05982* (0.02319) 0.05222* (0.02367) 0.05982 (0.03345)
+#&gt; (Intercept)       -64.34** (23.05)                      -64.34* (21.30)
+#&gt; Solar.R           0.0598* (0.0232)   0.0522* (0.0237)   0.0598 (0.0335)
 #&gt; Wind            -3.334*** (0.6544) -3.109*** (0.6601)   -3.334* (1.181)
 #&gt; Temp             1.652*** (0.2535)  1.875*** (0.3407) 1.652*** (0.1583)
 #&gt; Fixed-Effects:  ------------------ ------------------ -----------------
@@ -1160,43 +1181,43 @@
 #&gt; _______________ __________________ __________________ _________________
 #&gt; S.E. type                 Standard           Standard         by: Month
 #&gt; Observations                   111                111               111
-#&gt; R2                        0.605895           0.636861          0.605895
-#&gt; Within R2                       --           0.531544                --
-#&gt;                         model 2.2            model 1.3          model 2.3
-#&gt; Dependent Var.:             Ozone                Ozone              Ozone
-#&gt;                                                                          
-#&gt; (Intercept)                           -64.34** (20.15)                   
-#&gt; Solar.R         0.05222 (0.04082) 0.05982*** (0.01618) 0.05222* (0.02016)
-#&gt; Wind              -3.109. (1.306)   -3.334*** (0.8343) -3.109*** (0.7986)
-#&gt; Temp            1.875*** (0.1816)    1.652*** (0.1927)  1.875*** (0.3671)
-#&gt; Fixed-Effects:  ----------------- -------------------- ------------------
-#&gt; Month                         Yes                   No                Yes
-#&gt; _______________ _________________ ____________________ __________________
-#&gt; S.E. type               by: Month              by: Day            by: Day
-#&gt; Observations                  111                  111                111
-#&gt; R2                       0.636861             0.605895           0.636861
-#&gt; Within R2                0.531544                   --           0.531544</div><div class='input'>
+#&gt; R2                         0.60589            0.63686           0.60589
+#&gt; Within R2                       --            0.53154                --
+#&gt;                         model 2.2          model 1.3          model 2.3
+#&gt; Dependent Var.:             Ozone              Ozone              Ozone
+#&gt;                                                                        
+#&gt; (Intercept)                         -64.34** (20.15)                   
+#&gt; Solar.R           0.0522 (0.0408) 0.0598*** (0.0162)   0.0522* (0.0202)
+#&gt; Wind              -3.109. (1.306) -3.334*** (0.8343) -3.109*** (0.7986)
+#&gt; Temp            1.875*** (0.1816)  1.652*** (0.1927)  1.875*** (0.3671)
+#&gt; Fixed-Effects:  ----------------- ------------------ ------------------
+#&gt; Month                         Yes                 No                Yes
+#&gt; _______________ _________________ __________________ __________________
+#&gt; S.E. type               by: Month            by: Day            by: Day
+#&gt; Observations                  111                111                111
+#&gt; R2                        0.63686            0.60589            0.63686
+#&gt; Within R2                 0.53154                 --            0.53154</div><div class='input'>
 <span class='co'># Using each to order differently</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'><a href='rep.fixest.html'>.l</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span><span class='op'>)</span>, each <span class='op'>=</span> <span class='fl'>3</span>, cluster <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"standard"</span>, <span class='op'>~</span> <span class='va'>Month</span>, <span class='op'>~</span> <span class='va'>Day</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                          model 1.1         model 1.2            model 1.3
-#&gt; Dependent Var.:              Ozone             Ozone                Ozone
-#&gt;                                                                          
-#&gt; (Intercept)       -64.34** (23.05)    -64.34* (21.3)     -64.34** (20.15)
-#&gt; Solar.R         0.05982* (0.02319) 0.05982 (0.03345) 0.05982*** (0.01618)
-#&gt; Wind            -3.334*** (0.6544)   -3.334* (1.181)   -3.334*** (0.8343)
-#&gt; Temp             1.652*** (0.2535) 1.652*** (0.1583)    1.652*** (0.1927)
-#&gt; Fixed-Effects:  ------------------ ----------------- --------------------
-#&gt; Month                           No                No                   No
-#&gt; _______________ __________________ _________________ ____________________
-#&gt; S.E. type                 Standard         by: Month              by: Day
-#&gt; Observations                   111               111                  111
-#&gt; R2                        0.605895          0.605895             0.605895
-#&gt; Within R2                       --                --                   --
+</div><div class='output co'>#&gt;                          model 1.1         model 1.2          model 1.3
+#&gt; Dependent Var.:              Ozone             Ozone              Ozone
+#&gt;                                                                        
+#&gt; (Intercept)       -64.34** (23.05)   -64.34* (21.30)   -64.34** (20.15)
+#&gt; Solar.R           0.0598* (0.0232)   0.0598 (0.0335) 0.0598*** (0.0162)
+#&gt; Wind            -3.334*** (0.6544)   -3.334* (1.181) -3.334*** (0.8343)
+#&gt; Temp             1.652*** (0.2535) 1.652*** (0.1583)  1.652*** (0.1927)
+#&gt; Fixed-Effects:  ------------------ ----------------- ------------------
+#&gt; Month                           No                No                 No
+#&gt; _______________ __________________ _________________ __________________
+#&gt; S.E. type                 Standard         by: Month            by: Day
+#&gt; Observations                   111               111                111
+#&gt; R2                         0.60589           0.60589            0.60589
+#&gt; Within R2                       --                --                 --
 #&gt;                          model 2.1         model 2.2          model 2.3
 #&gt; Dependent Var.:              Ozone             Ozone              Ozone
 #&gt;                                                                        
 #&gt; (Intercept)                                                            
-#&gt; Solar.R         0.05222* (0.02367) 0.05222 (0.04082) 0.05222* (0.02016)
+#&gt; Solar.R           0.0522* (0.0237)   0.0522 (0.0408)   0.0522* (0.0202)
 #&gt; Wind            -3.109*** (0.6601)   -3.109. (1.306) -3.109*** (0.7986)
 #&gt; Temp             1.875*** (0.3407) 1.875*** (0.1816)  1.875*** (0.3671)
 #&gt; Fixed-Effects:  ------------------ ----------------- ------------------
@@ -1204,8 +1225,8 @@
 #&gt; _______________ __________________ _________________ __________________
 #&gt; S.E. type                 Standard         by: Month            by: Day
 #&gt; Observations                   111               111                111
-#&gt; R2                        0.636861          0.636861           0.636861
-#&gt; Within R2                 0.531544          0.531544           0.531544</div><div class='input'>
+#&gt; R2                         0.63686           0.63686            0.63686
+#&gt; Within R2                  0.53154           0.53154            0.53154</div><div class='input'>
 
 </div></pre>
   </div>

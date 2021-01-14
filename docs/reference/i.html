@@ -40,7 +40,7 @@
 
 
 <meta property="og:title" content="Create, or interact variables with, factors — i" />
-<meta property="og:description" content="Treat a variable as a factor, or interacts a variable with another treated as a factor. Values to be dropped/kept from the factor can be easily set." />
+<meta property="og:description" content="Treat a variable as a factor, or interacts a variable with another treated as a factor. Values to be dropped/kept from the factor can be easily set. Note that to interact fixed-effects, this function should not be used: instead use directly the syntax fe1^fe2." />
 
 
 
@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
       </span>
     </div>
 
@@ -138,7 +138,7 @@
     </div>
 
     <div class="ref-description">
-    <p>Treat a variable as a factor, or interacts a variable with another treated as a factor. Values to be dropped/kept from the factor can be easily set.</p>
+    <p>Treat a variable as a factor, or interacts a variable with another treated as a factor. Values to be dropped/kept from the factor can be easily set. Note that to interact fixed-effects, this function should not be used: instead use directly the syntax <code>fe1^fe2</code>.</p>
     </div>
 
     <pre class="usage"><span class='fu'>i</span><span class='op'>(</span><span class='va'>var</span>, <span class='va'>f</span>, <span class='va'>f2</span>, <span class='va'>ref</span>, <span class='va'>drop</span>, <span class='va'>keep</span>, <span class='va'>drop2</span>, <span class='va'>keep2</span><span class='op'>)</span>
@@ -185,6 +185,9 @@
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>It returns a matrix with number of rows the length of <code>var</code>. The number of columns is equal to the number of cases contained in <code>f</code> minus the reference(s).</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>To interact fixed-effects, this function should not be used: instead use directly the syntax <code>fe1^fe2</code> in the fixed-effects part of the formula. Please see the details and examples in the help page of <code><a href='feols.html'>feols</a></code>.</p>
     <h2 class="hasAnchor" id="shorthand-in-fixest-estimations"><a class="anchor" href="#shorthand-in-fixest-estimations"></a>Shorthand in <code>fixest</code> estimations</h2>
 
     
@@ -267,18 +270,18 @@
 </div><div class='output co'>#&gt;                                 est_bis
 #&gt; Dependent Var.:                       y
 #&gt;                                        
-#&gt; x1                   0.972*** (0.04556)
+#&gt; x1                   0.9720*** (0.0456)
 #&gt; period = 3             -1.111* (0.5354)
 #&gt; period = 4              0.4034 (0.5423)
-#&gt; period = 5              -0.898 (0.5698)
+#&gt; period = 5             -0.8980 (0.5698)
 #&gt; period = six            0.8031 (0.5467)
 #&gt; treat x period = 1      -2.252* (1.002)
 #&gt; treat x period = 2      -1.523 (0.9927)
-#&gt; treat x period = 3       -0.272 (1.104)
+#&gt; treat x period = 3      -0.2720 (1.104)
 #&gt; treat x period = 4       -1.794 (1.086)
-#&gt; treat x period = six      0.785 (1.026)
-#&gt; treat x period = 7     3.65*** (0.9172)
-#&gt; treat x period = 8     4.31*** (0.9989)
+#&gt; treat x period = six     0.7850 (1.026)
+#&gt; treat x period = 7    3.650*** (0.9172)
+#&gt; treat x period = 8    4.310*** (0.9989)
 #&gt; treat x period = 9     5.636*** (1.037)
 #&gt; treat x period = 10    6.276*** (1.045)
 #&gt; Fixed-Effects:       ------------------
@@ -286,8 +289,8 @@
 #&gt; ____________________ __________________
 #&gt; S.E.: Clustered                  by: id
 #&gt; Observations                      1,080
-#&gt; R2                             0.544663
-#&gt; Within R2                      0.453962</div><div class='input'>
+#&gt; R2                              0.54466
+#&gt; Within R2                       0.45396</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># Interact two factors =&gt; f2</span>
 <span class='co'>#</span>
@@ -304,37 +307,37 @@
 <span class='va'>res_2F_bis</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='fu'>i</span><span class='op'>(</span><span class='va'>Month</span>, f2 <span class='op'>=</span> <span class='va'>week</span>, drop <span class='op'>=</span> <span class='fl'>5</span>, drop2 <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>, <span class='va'>aq</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res_2F</span>, <span class='va'>res_2F_bis</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                                   res_2F         res_2F_bis
-#&gt; Dependent Var.:                    Ozone              Ozone
-#&gt;                                                            
-#&gt; (Intercept)                8.207 (14.16)     18.51* (7.343)
-#&gt; Solar.R              0.09633** (0.03139) 0.1007** (0.03244)
-#&gt; Month = 5 x week = 2      -11.36 (17.18)                   
-#&gt; Month = 5 x week = 3       -9.66 (16.05)                   
-#&gt; Month = 5 x week = 4      -6.923 (18.28)                   
-#&gt; Month = 5 x week = 5        28.32 (18.1)                   
-#&gt; Month = 6 x week = 2       10.88 (18.13)    -0.3936 (14.93)
-#&gt; Month = 6 x week = 3      -2.422 (17.22)      -13.4 (13.47)
-#&gt; Month = 7 x week = 1      31.87. (17.27)                   
-#&gt; Month = 7 x week = 2      34.35* (16.59)        23. (12.58)
-#&gt; Month = 7 x week = 3       20.17 (16.54)      8.938 (12.47)
-#&gt; Month = 7 x week = 4      33.76. (17.26)     22.85. (13.51)
-#&gt; Month = 7 x week = 5      31.58. (18.19)      20.19 (15.04)
-#&gt; Month = 8 x week = 1       7.218 (19.98)                   
-#&gt; Month = 8 x week = 2     48.12** (17.22)    36.81** (13.56)
-#&gt; Month = 8 x week = 3       19.17 (16.62)      8.257 (12.48)
-#&gt; Month = 8 x week = 4       36.5* (17.18)     25.35. (13.46)
-#&gt; Month = 8 x week = 5       62*** (18.12)   50.76*** (14.91)
-#&gt; Month = 9 x week = 1     46.47** (16.57)                   
-#&gt; Month = 9 x week = 2      -5.661 (16.12)     -17.03 (11.82)
-#&gt; Month = 9 x week = 3       -2.978 (16.1)     -13.95 (11.65)
-#&gt; Month = 9 x week = 4       1.809 (16.73)     -8.973 (12.61)
-#&gt; Month = 9 x week = 5      -8.373 (19.56)     -19.47 (16.95)
-#&gt; ____________________ ___________________ __________________
-#&gt; S.E. type                       Standard           Standard
-#&gt; Observations                         111                111
-#&gt; R2                              0.526361           0.376835
-#&gt; Adj. R2                         0.407951           0.278441</div><div class='input'>
+</div><div class='output co'>#&gt;                                 res_2F        res_2F_bis
+#&gt; Dependent Var.:                  Ozone             Ozone
+#&gt;                                                         
+#&gt; (Intercept)              8.207 (14.16)    18.51* (7.343)
+#&gt; Solar.R              0.0963** (0.0314) 0.1007** (0.0324)
+#&gt; Month = 5 x week = 2    -11.36 (17.18)                  
+#&gt; Month = 5 x week = 3    -9.660 (16.05)                  
+#&gt; Month = 5 x week = 4    -6.923 (18.28)                  
+#&gt; Month = 5 x week = 5     28.32 (18.10)                  
+#&gt; Month = 6 x week = 2     10.88 (18.13)   -0.3936 (14.93)
+#&gt; Month = 6 x week = 3    -2.422 (17.22)    -13.40 (13.47)
+#&gt; Month = 7 x week = 1    31.87. (17.27)                  
+#&gt; Month = 7 x week = 2    34.35* (16.59)    23.00. (12.58)
+#&gt; Month = 7 x week = 3     20.17 (16.54)     8.938 (12.47)
+#&gt; Month = 7 x week = 4    33.76. (17.26)    22.85. (13.51)
+#&gt; Month = 7 x week = 5    31.58. (18.19)     20.19 (15.04)
+#&gt; Month = 8 x week = 1     7.218 (19.98)                  
+#&gt; Month = 8 x week = 2   48.12** (17.22)   36.81** (13.56)
+#&gt; Month = 8 x week = 3     19.17 (16.62)     8.257 (12.48)
+#&gt; Month = 8 x week = 4    36.50* (17.18)    25.35. (13.46)
+#&gt; Month = 8 x week = 5  62.00*** (18.12)  50.76*** (14.91)
+#&gt; Month = 9 x week = 1   46.47** (16.57)                  
+#&gt; Month = 9 x week = 2    -5.661 (16.12)    -17.03 (11.82)
+#&gt; Month = 9 x week = 3    -2.978 (16.10)    -13.95 (11.65)
+#&gt; Month = 9 x week = 4     1.809 (16.73)    -8.973 (12.61)
+#&gt; Month = 9 x week = 5    -8.373 (19.56)    -19.47 (16.95)
+#&gt; ____________________ _________________ _________________
+#&gt; S.E. type                     Standard          Standard
+#&gt; Observations                       111               111
+#&gt; R2                             0.52636           0.37684
+#&gt; Adj. R2                        0.40795           0.27844</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

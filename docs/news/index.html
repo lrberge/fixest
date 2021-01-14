@@ -71,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
       </span>
     </div>
 
@@ -135,17 +135,46 @@
       <small>Source: <a href='https://github.com/lrberge/fixest/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
-    <div id="fixest-081" class="section level1">
-<h1 class="page-header" data-toc-text="0.8.1">
-<a href="#fixest-081" class="anchor"></a>fixest 0.8.1<small> Unreleased </small>
+    <div id="fixest-082" class="section level1">
+<h1 class="page-header" data-toc-text="0.8.2">
+<a href="#fixest-082" class="anchor"></a>fixest 0.8.2<small> Unreleased </small>
 </h1>
 <div id="bugs" class="section level2">
 <h2 class="hasAnchor">
 <a href="#bugs" class="anchor"></a>Bugs</h2>
 <ul>
+<li><p>Fix bug in IV estimations when <code>lean = TRUE</code> (thanks to <a href='https://github.com/reifjulian'>@reifjulian</a> <a href="https://github.com/lrberge/fixest/issues/88"><a href='https://github.com/lrberge/fixest/issues/88'>#88</a></a>).</p></li>
+<li><p>Fix various bugs related to the use of <code>summary</code> when <code>lean = TRUE</code> in the estimation.</p></li>
+</ul>
+</div>
+<div id="other" class="section level2">
+<h2 class="hasAnchor">
+<a href="#other" class="anchor"></a>Other</h2>
+<ul>
+<li>
+<code><a href="../reference/i.html">i()</a></code> now automatically converts its first argument to numeric if it was of type logical. The user can still pass logicals to the argument <code>f2</code> if the expected behavior is really to treat it as a logical.</li>
+</ul>
+</div>
+</div>
+    <div id="fixest-081-2021-01-13" class="section level1">
+<h1 class="page-header" data-toc-text="0.8.1">
+<a href="#fixest-081-2021-01-13" class="anchor"></a>fixest 0.8.1 (2021-01-13)<small> 2021-01-13 </small>
+</h1>
+<div id="bugs-1" class="section level2">
+<h2 class="hasAnchor">
+<a href="#bugs-1" class="anchor"></a>Bugs</h2>
+<ul>
 <li><p>Bug in <code>etable</code> when the default value of <code>fitstat</code> was set with <code>setFixest_etable</code>.</p></li>
 <li><p>Bug in <code>model.matrix</code> when the model contained fixed-effects and the RHS was requested: the intercept was wrongfully added.</p></li>
 <li><p>Fix rare bug when <code><a href="../reference/i.html">i()</a></code> was called within a very specific set of functions.</p></li>
+<li><p>Fix bug in R old release due to <code>anyNA.data.frame</code>.</p></li>
+<li><p>Fix bug regarding <code>panel</code> data sets when variables were created in a <code>data.table</code> within functions (thanks to <a href='https://github.com/tcovert'>@tcovert</a> <a href="https://github.com/lrberge/fixest/issues/76"><a href='https://github.com/lrberge/fixest/issues/76'>#76</a></a>).</p></li>
+<li><p>Add extra elements to be removed when <code>lean = TRUE</code> to keep the object as small as possible (reported by @ zozotintin <a href="https://github.com/lrberge/fixest/issues/81"><a href='https://github.com/lrberge/fixest/issues/81'>#81</a></a>).</p></li>
+<li><p>Fix bug in fixed-effects estimations with multiple LHS and different number of observations per estimation that prevented to get the default behavior for standard-errors to work.</p></li>
+<li><p>Fix occasional bug when using <code>split</code> with fixed-effects.</p></li>
+<li><p><code>xpd</code> now appropriately returns a two sided formula when a one sided formula is fed in and the argument <code>lhs</code> is provided.</p></li>
+<li><p>Fix bug in <code>coefplot</code> preventing the proper scaling of the x-axis for interactions when multiple models are displayed.</p></li>
+<li><p>Fix occasional bug in the ordering of sub-selections of multiple estimations.</p></li>
 </ul>
 </div>
 </div>
@@ -153,9 +182,9 @@
 <h1 class="page-header" data-toc-text="0.8.0">
 <a href="#fixest-080-2020-12-14" class="anchor"></a>fixest 0.8.0 (2020-12-14)<small> 2020-12-14 </small>
 </h1>
-<div id="bugs-1" class="section level2">
+<div id="bugs-2" class="section level2">
 <h2 class="hasAnchor">
-<a href="#bugs-1" class="anchor"></a>Bugs</h2>
+<a href="#bugs-2" class="anchor"></a>Bugs</h2>
 <ul>
 <li><p>Major bug when predict was used in the presence of fixed-effects (thanks to <a href='https://github.com/jurojas5'>@jurojas5</a>, <a href="https://github.com/lrberge/fixest/issues/54"><a href='https://github.com/lrberge/fixest/issues/54'>#54</a></a>). Introduced in version 0.7.</p></li>
 <li><p>When using variable names to cluster the standard-errors inside functions, summary may not fetch the data in the right frame (thanks to <a href='https://github.com/chenwang'>@chenwang</a>, <a href="https://github.com/lrberge/fixest/issues/52"><a href='https://github.com/lrberge/fixest/issues/52'>#52</a></a>). Now a completely new internal mechanic is in place.</p></li>
@@ -329,9 +358,9 @@
 <li><p>Internal algorithm of <code><a href="../reference/i.html">i()</a></code> is much faster.</p></li>
 </ul>
 </div>
-<div id="new-features" class="section level2">
+<div id="new-features-1" class="section level2">
 <h2 class="hasAnchor">
-<a href="#new-features" class="anchor"></a>New features</h2>
+<a href="#new-features-1" class="anchor"></a>New features</h2>
 <ul>
 <li><p>In <code>etable</code>, the user can now provide a type of clustering for each model.</p></li>
 <li><p>New method <code>rep.fixest</code> to replicate fixest objects, mostly useful in <code>etable</code> when several SEs for the same models are to be reported.</p></li>
@@ -343,9 +372,9 @@
 <h1 class="page-header" data-toc-text="0.7.0">
 <a href="#fixest-070-2020-10-24" class="anchor"></a>fixest 0.7.0 (2020-10-24)<small> 2020-10-24 </small>
 </h1>
-<div id="bugs-2" class="section level2">
+<div id="bugs-3" class="section level2">
 <h2 class="hasAnchor">
-<a href="#bugs-2" class="anchor"></a>Bugs</h2>
+<a href="#bugs-3" class="anchor"></a>Bugs</h2>
 <ul>
 <li><p>Major bug when fixed-effects were combined with <code><a href="https://rdrr.io/r/base/Arithmetic.html">^</a></code> and they contained NAs (thanks to <a href='https://github.com/poliquin'>@poliquin</a> <a href="https://github.com/lrberge/fixest/issues/35"><a href='https://github.com/lrberge/fixest/issues/35'>#35</a></a>).</p></li>
 <li><p>Bug when using lead/lags in estimations. The bug was due to a bug in a dependency (<a href="https://cran.r-project.org/package=dreamerr">dreamerr</a>) and was fixed. Now fixest requires <strong>dreamerr</strong> version &gt;= 1.2.1. Bug spotted by <a href='https://github.com/seunghoon001'>@seunghoon001</a> (<a href="https://github.com/lrberge/fixest/issues/44"><a href='https://github.com/lrberge/fixest/issues/44'>#44</a></a>).</p></li>
@@ -495,9 +524,9 @@
 <h1 class="page-header" data-toc-text="0.6.0">
 <a href="#fixest-060-2020-07-13" class="anchor"></a>fixest 0.6.0 (2020-07-13)<small> 2020-07-13 </small>
 </h1>
-<div id="bugs-3" class="section level2">
+<div id="bugs-4" class="section level2">
 <h2 class="hasAnchor">
-<a href="#bugs-3" class="anchor"></a>Bugs</h2>
+<a href="#bugs-4" class="anchor"></a>Bugs</h2>
 <ul>
 <li><p>In <code>vcov</code>, the degree-of-freedom in the small sample correction correction was fixed to “nested” and couldn’t be modified, now corrected. Further, “nested” was not properly accounted for, now corrected.</p></li>
 <li><p>In <code>etable</code>, <code>fitsat = FALSE</code> or <code>fitsat = NA</code> led to a bug.</p></li>
@@ -570,9 +599,9 @@
 <li>Fixed bug introduced in the previous update (memory access error). Does not affect any of the results but could lead R to crash unexpectedly (odds were low though since access was adjacent).</li>
 </ul>
 </div>
-<div id="bugs-4" class="section level2">
+<div id="bugs-5" class="section level2">
 <h2 class="hasAnchor">
-<a href="#bugs-4" class="anchor"></a>Bugs</h2>
+<a href="#bugs-5" class="anchor"></a>Bugs</h2>
 <ul>
 <li>Fix image link to the equation in the README.md.</li>
 <li>Fix bug R2 and logLik when observations were removed because of NA values. Due to the update in <code>residuals.fixest</code>.</li>
@@ -594,9 +623,9 @@
 <li>(minor) <code>signifCode</code> can be equal to <code>"letters"</code> to display letters instead of stars.</li>
 </ul>
 </div>
-<div id="other" class="section level2">
+<div id="other-2" class="section level2">
 <h2 class="hasAnchor">
-<a href="#other" class="anchor"></a>Other</h2>
+<a href="#other-2" class="anchor"></a>Other</h2>
 <ul>
 <li>
 <code>setFixest_nthreads</code> now respects the <code>OMP_THREAD_LIMIT</code> environment variable.</li>
@@ -700,9 +729,9 @@
 <li>Improved error-handling with <a href="https://cran.r-project.org/package=dreamerr">dreamerr</a>’s functions.</li>
 </ul>
 </div>
-<div id="other-1" class="section level2">
+<div id="other-3" class="section level2">
 <h2 class="hasAnchor">
-<a href="#other-1" class="anchor"></a>Other</h2>
+<a href="#other-3" class="anchor"></a>Other</h2>
 <ul>
 <li>Dependency to MASS has been removed.</li>
 </ul>
@@ -730,9 +759,9 @@
 <li>Rewriting of sections, correction of small mistakes (wrong argument names), dropping completely the ‘cluster’ terminology (meant for fixed-effects), addition of what is contained in fixest objects.</li>
 </ul>
 </div>
-<div id="other-2" class="section level2">
+<div id="other-4" class="section level2">
 <h2 class="hasAnchor">
-<a href="#other-2" class="anchor"></a>Other</h2>
+<a href="#other-4" class="anchor"></a>Other</h2>
 <ul>
 <li>Adding a README.md.</li>
 <li>Small corrections in the vignette.</li>
@@ -777,9 +806,9 @@
 <code>terms.fixest</code> giving the terms of the estimation.</li>
 </ul>
 </div>
-<div id="other-3" class="section level2">
+<div id="other-5" class="section level2">
 <h2 class="hasAnchor">
-<a href="#other-3" class="anchor"></a>Other</h2>
+<a href="#other-5" class="anchor"></a>Other</h2>
 <ul>
 <li>All <code>donttest</code> sections were removed from help pages.</li>
 </ul>
@@ -805,9 +834,9 @@
 <li>[estimations] Bug when particular non-numeric vectors were used in explanatory variables.</li>
 </ul>
 </div>
-<div id="new-features-1" class="section level2">
+<div id="new-features-2" class="section level2">
 <h2 class="hasAnchor">
-<a href="#new-features-1" class="anchor"></a>New features</h2>
+<a href="#new-features-2" class="anchor"></a>New features</h2>
 <ul>
 <li>[coefplot] The function <code>coefplot</code> now accepts lists of estimations.</li>
 </ul>

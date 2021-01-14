@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
       </span>
     </div>
 
@@ -253,20 +253,20 @@
 <span class='co'># The results are the same as if we used the two factors</span>
 <span class='co'># as fixed-effects</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_fe</span>, se <span class='op'>=</span> <span class='st'>"st"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                                 est              est_fe
-#&gt; Dependent Var.:         ln_euros_dm            ln_euros
-#&gt;                                                        
-#&gt; (Intercept)     -6.89e-14 (0.01156)                    
-#&gt; ln_dist_dm      -2.072*** (0.02712)                    
-#&gt; ln_dist                             -2.072*** (0.02713)
-#&gt; Fixed-Effects:  ------------------- -------------------
-#&gt; Origin                           No                 Yes
-#&gt; Destination                      No                 Yes
-#&gt; _______________ ___________________ ___________________
-#&gt; S.E. type                  Standard            Standard
-#&gt; Observations                 38,325              38,325
-#&gt; R2                         0.132181             0.50428
-#&gt; Within R2                        --            0.132181</div><div class='input'>
+</div><div class='output co'>#&gt;                                est             est_fe
+#&gt; Dependent Var.:        ln_euros_dm           ln_euros
+#&gt;                                                      
+#&gt; (Intercept)     -6.89e-14 (0.0116)                   
+#&gt; ln_dist_dm      -2.072*** (0.0271)                   
+#&gt; ln_dist                            -2.072*** (0.0271)
+#&gt; Fixed-Effects:  ------------------ ------------------
+#&gt; Origin                          No                Yes
+#&gt; Destination                     No                Yes
+#&gt; _______________ __________________ __________________
+#&gt; S.E. type                 Standard           Standard
+#&gt; Observations                38,325             38,325
+#&gt; R2                         0.13218            0.50428
+#&gt; Within R2                       --            0.13218</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># Variables with varying slopes</span>
 <span class='co'>#</span>
@@ -294,15 +294,15 @@
 
 <span class='co'># only the small sample adj. differ in the SEs</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res_vs_1</span>, <span class='va'>res_vs_2</span>, <span class='va'>res_vs_3</span>, keep <span class='op'>=</span> <span class='st'>"x1"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                          res_vs_1          res_vs_2          res_vs_3
-#&gt; Dependent Var.:                 y                 y                 y
-#&gt;                                                                      
-#&gt; x1              0.45*** (0.08061) 0.45*** (0.07923) 0.45*** (0.07923)
-#&gt; _______________ _________________ _________________ _________________
-#&gt; S.E. type                Standard          Standard          Standard
-#&gt; Observations                  150               150               150
-#&gt; R2                       0.869003          0.178944          0.178944
-#&gt; Adj. R2                  0.863506          0.173396          0.173396</div><div class='input'>
+</div><div class='output co'>#&gt;                           res_vs_1           res_vs_2           res_vs_3
+#&gt; Dependent Var.:                  y                  y                  y
+#&gt;                                                                         
+#&gt; x1              0.4500*** (0.0806) 0.4500*** (0.0792) 0.4500*** (0.0792)
+#&gt; _______________ __________________ __________________ __________________
+#&gt; S.E. type                 Standard           Standard           Standard
+#&gt; Observations                   150                150                150
+#&gt; R2                         0.86900            0.17894            0.17894
+#&gt; Adj. R2                    0.86351            0.17340            0.17340</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># center on x2 * species and on another FE</span>
 
@@ -328,15 +328,15 @@
 
 <span class='co'># only the small sample adj. differ in the SEs</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res_vs_1</span>, <span class='va'>res_vs_2</span>, <span class='va'>res_vs_3</span>, keep <span class='op'>=</span> <span class='st'>"x1"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                            res_vs_1            res_vs_2            res_vs_3
-#&gt; Dependent Var.:                   y                   y                   y
-#&gt;                                                                            
-#&gt; x1              0.4915*** (0.08389) 0.4915*** (0.08188) 0.4915*** (0.08188)
-#&gt; _______________ ___________________ ___________________ ___________________
-#&gt; S.E. type                  Standard            Standard            Standard
-#&gt; Observations                    150                 150                 150
-#&gt; R2                         0.855145            0.195802            0.195802
-#&gt; Adj. R2                    0.846926            0.190368            0.190368</div><div class='input'>
+</div><div class='output co'>#&gt;                           res_vs_1           res_vs_2           res_vs_3
+#&gt; Dependent Var.:                  y                  y                  y
+#&gt;                                                                         
+#&gt; x1              0.4915*** (0.0839) 0.4915*** (0.0819) 0.4915*** (0.0819)
+#&gt; _______________ __________________ __________________ __________________
+#&gt; S.E. type                 Standard           Standard           Standard
+#&gt; Observations                   150                150                150
+#&gt; R2                         0.85514            0.19580            0.19580
+#&gt; Adj. R2                    0.84693            0.19037            0.19037</div><div class='input'>
 
 
 

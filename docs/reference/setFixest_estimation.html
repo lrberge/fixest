@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
       </span>
     </div>
 
@@ -176,7 +176,7 @@
     </tr>
     <tr>
       <th>collin.tol</th>
-      <td><p>Numeric scalar, default is <code>1e-10</code>. Threshold decising when variables should be considered collinear and subsequently removed from the estimation. Higher values means more variables will be removed (if there is presence of collinearity). One signal of presence of collinearity is t-stats that are extremely low (for instance when t-stats &lt; 1e-3).</p></td>
+      <td><p>Numeric scalar, default is <code>1e-10</code>. Threshold deciding when variables should be considered collinear and subsequently removed from the estimation. Higher values means more variables will be removed (if there is presence of collinearity). One signal of presence of collinearity is t-stats that are extremely low (for instance when t-stats &lt; 1e-3).</p></td>
     </tr>
     <tr>
       <th>lean</th>
@@ -184,7 +184,7 @@
     </tr>
     <tr>
       <th>verbose</th>
-      <td><p>Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algoritmh (the first number is the left-hand-side, the other numbers are the right-hand-side variables).</p></td>
+      <td><p>Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algorithm (the first number is the left-hand-side, the other numbers are the right-hand-side variables).</p></td>
     </tr>
     <tr>
       <th>warn</th>
@@ -242,18 +242,18 @@
 <span class='va'>res_newDefault</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='va'>x2</span> <span class='op'>|</span> <span class='va'>fe_singletons</span>, <span class='va'>base</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; <span class='message'>NOTE: 5 fixed-effect singletons were removed (5 observations).</span></div><div class='input'>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res</span>, <span class='va'>res_noSingle</span>, <span class='va'>res_newDefault</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                                res    res_noSingle  res_newDefault
-#&gt; Dependent Var.:                  y               y               y
-#&gt;                                                                   
-#&gt; x1                0.4274* (0.1409) 0.4274 (0.1615) 0.4274 (0.1615)
-#&gt; x2              0.7774*** (0.1099) 0.7774* (0.126) 0.7774* (0.126)
-#&gt; Fixed-Effects:  ------------------ --------------- ---------------
-#&gt; fe_singletons                  Yes             Yes             Yes
-#&gt; _______________ __________________ _______________ _______________
-#&gt; S.E.: Clustered  by: fe_singletons by: fe_single.. by: fe_single..
-#&gt; Observations                   150             145             145
-#&gt; R2                        0.864517        0.857291        0.857291
-#&gt; Within R2                 0.642007        0.642007        0.642007</div><div class='input'>
+</div><div class='output co'>#&gt;                                res     res_noSingle   res_newDefault
+#&gt; Dependent Var.:                  y                y                y
+#&gt;                                                                     
+#&gt; x1                0.4274* (0.1409)  0.4274 (0.1615)  0.4274 (0.1615)
+#&gt; x2              0.7774*** (0.1099) 0.7774* (0.1260) 0.7774* (0.1260)
+#&gt; Fixed-Effects:  ------------------ ---------------- ----------------
+#&gt; fe_singletons                  Yes              Yes              Yes
+#&gt; _______________ __________________ ________________ ________________
+#&gt; S.E.: Clustered  by: fe_singletons by: fe_singlet.. by: fe_singlet..
+#&gt; Observations                   150              145              145
+#&gt; R2                         0.86452          0.85729          0.85729
+#&gt; Within R2                  0.64201          0.64201          0.64201</div><div class='input'>
 <span class='co'># Resetting the defaults</span>
 <span class='fu'>setFixest_estimation</span><span class='op'>(</span>reset <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
 

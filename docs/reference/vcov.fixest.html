@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
       </span>
     </div>
 
@@ -146,7 +146,7 @@
   <span class='va'>object</span>,
   <span class='va'>se</span>,
   <span class='va'>cluster</span>,
-  dof <span class='op'>=</span> <span class='fu'><a href='dof.html'>getFixest_dof</a></span><span class='op'>(</span><span class='op'>)</span>,
+  dof <span class='op'>=</span> <span class='cn'>NULL</span>,
   attr <span class='op'>=</span> <span class='cn'>FALSE</span>,
   forceCovariance <span class='op'>=</span> <span class='cn'>FALSE</span>,
   keepBounded <span class='op'>=</span> <span class='cn'>FALSE</span>,
@@ -222,9 +222,9 @@ This matrix has an attribute &#8220;type&#8221; specifying how this variance/cov
 <span class='co'># By default, in the presence of FEs</span>
 <span class='co'># the VCOV is clustered along the first FE</span>
 <span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_pois</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;            [,1]       [,2]
-#&gt; [1,] 0.01337806  0.2270412
-#&gt; [2,] 0.22704123 48.7565447</div><div class='input'>
+</div><div class='output co'>#&gt;           [,1]       [,2]
+#&gt; [1,] 0.0170877  0.1671701
+#&gt; [2,] 0.1671701 61.4930375</div><div class='input'>
 <span class='co'># Heteroskedasticity-robust VCOV</span>
 <span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_pois</span>, se <span class='op'>=</span> <span class='st'>"hetero"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;              [,1]         [,2]
@@ -251,9 +251,9 @@ This matrix has an attribute &#8220;type&#8221; specifying how this variance/cov
 <span class='co'># but we need to give the argument cluster:</span>
 <span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_pois_simple</span>, cluster <span class='op'>=</span> <span class='op'>~</span><span class='va'>Product</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;              [,1]         [,2]          [,3]
-#&gt; [1,] 2590.3808228 -0.362099664 -339.93633206
-#&gt; [2,]   -0.3620997  0.002112443    0.04584844
-#&gt; [3,] -339.9363321  0.045848439   44.61167377</div><div class='input'>
+#&gt; [1,] 2590.3952791 -0.362100706 -339.93823080
+#&gt; [2,]   -0.3621007  0.002112443    0.04584858
+#&gt; [3,] -339.9382308  0.045848576   44.61192316</div><div class='input'>
 
 </div></pre>
   </div>

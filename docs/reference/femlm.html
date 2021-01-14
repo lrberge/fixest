@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
       </span>
     </div>
 
@@ -154,6 +154,7 @@
   <span class='va'>fsplit</span>,
   <span class='va'>cluster</span>,
   <span class='va'>se</span>,
+  <span class='va'>dof</span>,
   <span class='va'>panel.id</span>,
   fixef.tol <span class='op'>=</span> <span class='fl'>1e-05</span>,
   fixef.iter <span class='op'>=</span> <span class='fl'>10000</span>,
@@ -183,6 +184,7 @@
   <span class='va'>fsplit</span>,
   <span class='va'>cluster</span>,
   <span class='va'>se</span>,
+  <span class='va'>dof</span>,
   <span class='va'>panel.id</span>,
   fixef.tol <span class='op'>=</span> <span class='fl'>1e-05</span>,
   fixef.iter <span class='op'>=</span> <span class='fl'>10000</span>,
@@ -250,6 +252,10 @@
       <td><p>Character scalar. Which kind of standard error should be computed: &#8220;standard&#8221;, &#8220;hetero&#8221;, &#8220;cluster&#8221;, &#8220;twoway&#8221;, &#8220;threeway&#8221; or &#8220;fourway&#8221;? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "standard"</code>. Note that this argument can be implicitly deduced from the argument <code>cluster</code>.</p></td>
     </tr>
     <tr>
+      <th>dof</th>
+      <td><p>An object of class <code>dof.type</code> obtained with the function <code><a href='dof.html'>dof</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href='dof.html'>dof</a></code> for this argument. The arguments and defaults of the function <code><a href='dof.html'>dof</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "conventional"</code>, <code>t.df = "conventional"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href='dof.html'>dof</a></code> for details.</p></td>
+    </tr>
+    <tr>
       <th>panel.id</th>
       <td><p>The panel identifiers. Can either be: i) a one sided formula (e.g. <code>panel.id = ~id+time</code>), ii) a character vector of length 2 (e.g. <code>panel.id=c('id', 'time')</code>, or iii) a character scalar of two variables separated by a comma (e.g. <code>panel.id='id,time'</code>). Note that you can combine variables with <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> only inside formulas (see the dedicated section in <code><a href='feols.html'>feols</a></code>).</p></td>
     </tr>
@@ -309,7 +315,7 @@
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A <code>fixest</code> object.</p>
+    <p>A <code>fixest</code> object. Note that <code>fixest</code> objects contain many elements and most of them are for internal use, they are presented here only for information. To access them, it is safer to use the user-level methods (e.g. <code><a href='vcov.fixest.html'>vcov.fixest</a></code>, <code><a href='resid.fixest.html'>resid.fixest</a></code>, etc) or functions (like for instance <code><a href='fitstat.html'>fitstat</a></code> to access any fit statistic).</p>
 <dt>nobs</dt><dd><p>The number of observations.</p></dd>
 <dt>fml</dt><dd><p>The linear formula of the call.</p></dd>
 <dt>call</dt><dd><p>The call of the function.</p></dd>
@@ -417,7 +423,7 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 <span class='co'># 2) Log-Log Gaussian estimation (with same FEs)</span>
 <span class='va'>est_gaus</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/update.html'>update</a></span><span class='op'>(</span><span class='va'>est_pois</span>, <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>Euros</span><span class='op'>+</span><span class='fl'>1</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>.</span>, family <span class='op'>=</span> <span class='st'>"gaussian"</span><span class='op'>)</span>
 
-<span class='co'># Comparison of the results using the function esttable</span>
+<span class='co'># Comparison of the results using the function etable</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_pois</span>, <span class='va'>est_gaus</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                           est_pois           est_gaus
 #&gt; Dependent Var.:              Euros       log(Euros+1)
@@ -431,9 +437,9 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 #&gt; Family                     Poisson           Gaussian
 #&gt; S.E.: Clustered         by: Origin         by: Origin
 #&gt; Observations                38,325             38,325
-#&gt; Squared Cor.               0.60377           0.704336
-#&gt; Pseudo R2                 0.760389           0.235632
-#&gt; BIC                      1.427e+12         152,008.41</div><div class='input'><span class='co'># Now using two way clustered standard-errors</span>
+#&gt; Squared Cor.               0.60377            0.70434
+#&gt; Pseudo R2                  0.76039            0.23563
+#&gt; BIC                       1.43e+12          152,008.4</div><div class='input'><span class='co'># Now using two way clustered standard-errors</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_pois</span>, <span class='va'>est_gaus</span>, se <span class='op'>=</span> <span class='st'>"twoway"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                           est_pois           est_gaus
 #&gt; Dependent Var.:              Euros       log(Euros+1)
@@ -447,9 +453,9 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 #&gt; Family                     Poisson           Gaussian
 #&gt; S.E.: Clustered  by: Orig. &amp; Dest.  by: Orig. &amp; Dest.
 #&gt; Observations                38,325             38,325
-#&gt; Squared Cor.               0.60377           0.704336
-#&gt; Pseudo R2                 0.760389           0.235632
-#&gt; BIC                      1.427e+12         152,008.41</div><div class='input'>
+#&gt; Squared Cor.               0.60377            0.70434
+#&gt; Pseudo R2                  0.76039            0.23563
+#&gt; BIC                       1.43e+12          152,008.4</div><div class='input'>
 <span class='co'># Comparing different types of standard errors</span>
 <span class='va'>sum_hetero</span>   <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, se <span class='op'>=</span> <span class='st'>"hetero"</span><span class='op'>)</span>
 <span class='va'>sum_oneway</span>   <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, se <span class='op'>=</span> <span class='st'>"cluster"</span><span class='op'>)</span>
@@ -457,133 +463,105 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 <span class='va'>sum_threeway</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, se <span class='op'>=</span> <span class='st'>"threeway"</span><span class='op'>)</span>
 
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>sum_hetero</span>, <span class='va'>sum_oneway</span>, <span class='va'>sum_twoway</span>, <span class='va'>sum_threeway</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                          sum_hetero         sum_oneway         sum_twoway
-#&gt; Dependent Var.:               Euros              Euros              Euros
-#&gt;                                                                          
-#&gt; log(dist_km)    -1.528*** (0.02202) -1.528*** (0.1156) -1.528*** (0.1307)
-#&gt; Fixed-Effects:  ------------------- ------------------ ------------------
-#&gt; Origin                          Yes                Yes                Yes
-#&gt; Destination                     Yes                Yes                Yes
-#&gt; Product                         Yes                Yes                Yes
-#&gt; _______________ ___________________ __________________ __________________
-#&gt; S.E. type       Heteroskedast.-rob.         by: Origin  by: Orig. &amp; Dest.
-#&gt; Observations                 38,325             38,325             38,325
-#&gt; Squared Cor.                0.60377            0.60377            0.60377
-#&gt; Pseudo R2                  0.760389           0.760389           0.760389
-#&gt; BIC                       1.427e+12          1.427e+12          1.427e+12
-#&gt;                      sum_threeway
-#&gt; Dependent Var.:             Euros
-#&gt;                                  
-#&gt; log(dist_km)    -1.528*** (0.134)
-#&gt; Fixed-Effects:  -----------------
-#&gt; Origin                        Yes
-#&gt; Destination                   Yes
-#&gt; Product                       Yes
-#&gt; _______________ _________________
-#&gt; S.E. type       by: Orig. &amp; Des..
-#&gt; Observations               38,325
-#&gt; Squared Cor.              0.60377
-#&gt; Pseudo R2                0.760389
-#&gt; BIC                     1.427e+12</div><div class='input'>
+</div><div class='output co'>#&gt;                         sum_hetero         sum_oneway         sum_twoway
+#&gt; Dependent Var.:              Euros              Euros              Euros
+#&gt;                                                                         
+#&gt; log(dist_km)    -1.528*** (0.0220) -1.528*** (0.1156) -1.528*** (0.1307)
+#&gt; Fixed-Effects:  ------------------ ------------------ ------------------
+#&gt; Origin                         Yes                Yes                Yes
+#&gt; Destination                    Yes                Yes                Yes
+#&gt; Product                        Yes                Yes                Yes
+#&gt; _______________ __________________ __________________ __________________
+#&gt; S.E. type       Heteroskedas.-rob.         by: Origin  by: Orig. &amp; Dest.
+#&gt; Observations                38,325             38,325             38,325
+#&gt; Squared Cor.               0.60377            0.60377            0.60377
+#&gt; Pseudo R2                  0.76039            0.76039            0.76039
+#&gt; BIC                       1.43e+12           1.43e+12           1.43e+12
+#&gt;                       sum_threeway
+#&gt; Dependent Var.:              Euros
+#&gt;                                   
+#&gt; log(dist_km)    -1.528*** (0.1340)
+#&gt; Fixed-Effects:  ------------------
+#&gt; Origin                         Yes
+#&gt; Destination                    Yes
+#&gt; Product                        Yes
+#&gt; _______________ __________________
+#&gt; S.E. type       by: Orig. &amp; Dest..
+#&gt; Observations                38,325
+#&gt; Squared Cor.               0.60377
+#&gt; Pseudo R2                  0.76039
+#&gt; BIC                       1.43e+12</div><div class='input'>
 
 <span class='co'>#</span>
 <span class='co'># Multiple estimations:</span>
 <span class='co'>#</span>
 
 <span class='co'># 6 estimations</span>
-<span class='va'>est_mult</span> <span class='op'>=</span> <span class='fu'><a href='feglm.html'>fepois</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>Ozone</span>, <span class='va'>Solar.R</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='va'>Temp</span> <span class='op'>+</span> <span class='fu'><a href='stepwise.html'>csw0</a></span><span class='op'>(</span><span class='va'>Wind</span><span class='op'>:</span><span class='va'>Temp</span>, <span class='va'>Day</span><span class='op'>)</span>, <span class='va'>airquality</span><span class='op'>)</span>
+<span class='va'>est_mult</span> <span class='op'>=</span> <span class='fu'>femlm</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>Ozone</span>, <span class='va'>Solar.R</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='va'>Temp</span> <span class='op'>+</span> <span class='fu'><a href='stepwise.html'>csw0</a></span><span class='op'>(</span><span class='va'>Wind</span><span class='op'>:</span><span class='va'>Temp</span>, <span class='va'>Day</span><span class='op'>)</span>, <span class='va'>airquality</span><span class='op'>)</span>
 
 <span class='co'># We can display the results for the first lhs:</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_mult</span><span class='op'>[</span>lhs <span class='op'>=</span> <span class='fl'>1</span><span class='op'>]</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                                model 1               model 2
-#&gt; Dependent Var.:                  Ozone                 Ozone
-#&gt;                                                             
-#&gt; (Intercept)          0.5334** (0.1943)        0.889* (0.443)
-#&gt; Wind            -0.07615*** (0.005209)   -0.1151** (0.04393)
-#&gt; Temp             0.04834*** (0.002021) 0.04413*** (0.005131)
-#&gt; Wind x Temp                            0.0004702 (0.0005266)
-#&gt; Day                                                         
-#&gt; _______________ ______________________ _____________________
-#&gt; S.E. type                     Standard              Standard
-#&gt; Observations                       116                   116
-#&gt; Squared Cor.                  0.626149              0.631294
-#&gt; Pseudo R2                     0.533771               0.53402
-#&gt; BIC                           1,564.72              1,568.65
-#&gt;                               model 3
-#&gt; Dependent Var.:                 Ozone
-#&gt;                                      
-#&gt; (Intercept)          0.8028. (0.4441)
-#&gt; Wind              -0.1152** (0.04405)
-#&gt; Temp            0.04435*** (0.005136)
-#&gt; Wind x Temp     0.0004574 (0.0005281)
-#&gt; Day             0.00508*** (0.001498)
-#&gt; _______________ _____________________
-#&gt; S.E. type                    Standard
-#&gt; Observations                      116
-#&gt; Squared Cor.                 0.633792
-#&gt; Pseudo R2                    0.537586
-#&gt; BIC                          1,561.54</div><div class='input'>
+</div><div class='output co'>#&gt;                             model 1            model 2            model 3
+#&gt; Dependent Var.:               Ozone              Ozone              Ozone
+#&gt;                                                                          
+#&gt; (Intercept)       0.5334** (0.1943)   0.8890* (0.4430)   0.8028. (0.4441)
+#&gt; Wind            -0.0761*** (0.0052) -0.1151** (0.0439) -0.1152** (0.0440)
+#&gt; Temp             0.0483*** (0.0020) 0.0441*** (0.0051) 0.0444*** (0.0051)
+#&gt; Wind x Temp                            0.0005 (0.0005)    0.0005 (0.0005)
+#&gt; Day                                                    0.0051*** (0.0015)
+#&gt; _______________ ___________________ __________________ __________________
+#&gt; S.E. type                  Standard           Standard           Standard
+#&gt; Observations                    116                116                116
+#&gt; Squared Cor.                0.62615            0.63129            0.63379
+#&gt; Pseudo R2                   0.53377            0.53402            0.53759
+#&gt; BIC                         1,564.7            1,568.7            1,561.5</div><div class='input'>
 <span class='co'># And now the second (access can be made by name)</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_mult</span><span class='op'>[</span>lhs <span class='op'>=</span> <span class='st'>"Solar.R"</span><span class='op'>]</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                                model 1                 model 2
-#&gt; Dependent Var.:                Solar.R                 Solar.R
-#&gt;                                                               
-#&gt; (Intercept)         3.777*** (0.07144)       4.343*** (0.1689)
-#&gt; Wind             0.01189*** (0.001956)    -0.04155** (0.01463)
-#&gt; Temp            0.01689*** (0.0007612)  0.009846*** (0.002055)
-#&gt; Wind x Temp                            0.000677*** (0.0001836)
-#&gt; Day                                                           
-#&gt; _______________ ______________________ _______________________
-#&gt; S.E. type                     Standard                Standard
-#&gt; Observations                       146                     146
-#&gt; Squared Cor.                  0.080756                0.081661
-#&gt; Pseudo R2                     0.060448                0.062068
-#&gt; BIC                           8,192.57                8,183.45
-#&gt;                                  model 3
-#&gt; Dependent Var.:                  Solar.R
-#&gt;                                         
-#&gt; (Intercept)            4.529*** (0.1708)
-#&gt; Wind                -0.04327** (0.01466)
-#&gt; Temp              0.008778*** (0.002064)
-#&gt; Wind x Temp     0.0006913*** (0.0001839)
-#&gt; Day              -0.00611*** (0.0007036)
-#&gt; _______________ ________________________
-#&gt; S.E. type                       Standard
-#&gt; Observations                         146
-#&gt; Squared Cor.                    0.089833
-#&gt; Pseudo R2                       0.070995
-#&gt; BIC                             8,110.73</div><div class='input'>
+</div><div class='output co'>#&gt;                            model 1            model 2             model 3
+#&gt; Dependent Var.:            Solar.R            Solar.R             Solar.R
+#&gt;                                                                          
+#&gt; (Intercept)      3.777*** (0.0714)  4.343*** (0.1689)   4.529*** (0.1708)
+#&gt; Wind            0.0119*** (0.0020) -0.0415** (0.0146)  -0.0433** (0.0147)
+#&gt; Temp            0.0169*** (0.0008) 0.0098*** (0.0021)  0.0088*** (0.0021)
+#&gt; Wind x Temp                        0.0007*** (0.0002)  0.0007*** (0.0002)
+#&gt; Day                                                   -0.0061*** (0.0007)
+#&gt; _______________ __________________ __________________ ___________________
+#&gt; S.E. type                 Standard           Standard            Standard
+#&gt; Observations                   146                146                 146
+#&gt; Squared Cor.               0.08076            0.08166             0.08983
+#&gt; Pseudo R2                  0.06045            0.06207             0.07100
+#&gt; BIC                        8,192.6            8,183.5             8,110.7</div><div class='input'>
 <span class='co'># Now we focus on the two last right hand sides</span>
 <span class='co'># (note that .N can be used to specify the last item)</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_mult</span><span class='op'>[</span>rhs <span class='op'>=</span> <span class='fl'>2</span><span class='op'>:</span><span class='va'>.N</span><span class='op'>]</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                               model 1                 model 2
-#&gt; Dependent Var.:                 Ozone                 Solar.R
-#&gt;                                                              
-#&gt; (Intercept)            0.889* (0.443)       4.343*** (0.1689)
-#&gt; Wind              -0.1151** (0.04393)    -0.04155** (0.01463)
-#&gt; Temp            0.04413*** (0.005131)  0.009846*** (0.002055)
-#&gt; Wind x Temp     0.0004702 (0.0005266) 0.000677*** (0.0001836)
-#&gt; Day                                                          
-#&gt; _______________ _____________________ _______________________
-#&gt; S.E. type                    Standard                Standard
-#&gt; Observations                      116                     146
-#&gt; Squared Cor.                 0.631294                0.081661
-#&gt; Pseudo R2                     0.53402                0.062068
-#&gt; BIC                          1,568.65                8,183.45
-#&gt;                               model 3                  model 4
-#&gt; Dependent Var.:                 Ozone                  Solar.R
-#&gt;                                                               
-#&gt; (Intercept)          0.8028. (0.4441)        4.529*** (0.1708)
-#&gt; Wind              -0.1152** (0.04405)     -0.04327** (0.01466)
-#&gt; Temp            0.04435*** (0.005136)   0.008778*** (0.002064)
-#&gt; Wind x Temp     0.0004574 (0.0005281) 0.0006913*** (0.0001839)
-#&gt; Day             0.00508*** (0.001498)  -0.00611*** (0.0007036)
-#&gt; _______________ _____________________ ________________________
-#&gt; S.E. type                    Standard                 Standard
-#&gt; Observations                      116                      146
-#&gt; Squared Cor.                 0.633792                 0.089833
-#&gt; Pseudo R2                    0.537586                 0.070995
-#&gt; BIC                          1,561.54                 8,110.73</div><div class='input'>
+</div><div class='output co'>#&gt;                            model 1            model 2            model 3
+#&gt; Dependent Var.:              Ozone            Solar.R              Ozone
+#&gt;                                                                         
+#&gt; (Intercept)       0.8890* (0.4430)  4.343*** (0.1689)   0.8028. (0.4441)
+#&gt; Wind            -0.1151** (0.0439) -0.0415** (0.0146) -0.1152** (0.0440)
+#&gt; Temp            0.0441*** (0.0051) 0.0098*** (0.0021) 0.0444*** (0.0051)
+#&gt; Wind x Temp        0.0005 (0.0005) 0.0007*** (0.0002)    0.0005 (0.0005)
+#&gt; Day                                                   0.0051*** (0.0015)
+#&gt; _______________ __________________ __________________ __________________
+#&gt; S.E. type                 Standard           Standard           Standard
+#&gt; Observations                   116                146                116
+#&gt; Squared Cor.               0.63129            0.08166            0.63379
+#&gt; Pseudo R2                  0.53402            0.06207            0.53759
+#&gt; BIC                        1,568.7            8,183.5            1,561.5
+#&gt;                             model 4
+#&gt; Dependent Var.:             Solar.R
+#&gt;                                    
+#&gt; (Intercept)       4.529*** (0.1708)
+#&gt; Wind             -0.0433** (0.0147)
+#&gt; Temp             0.0088*** (0.0021)
+#&gt; Wind x Temp      0.0007*** (0.0002)
+#&gt; Day             -0.0061*** (0.0007)
+#&gt; _______________ ___________________
+#&gt; S.E. type                  Standard
+#&gt; Observations                    146
+#&gt; Squared Cor.                0.08983
+#&gt; Pseudo R2                   0.07100
+#&gt; BIC                         8,110.7</div><div class='input'>
 <span class='co'># Combining with split</span>
 <span class='va'>est_split</span> <span class='op'>=</span> <span class='fu'><a href='feglm.html'>fepois</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>Ozone</span>, <span class='va'>Solar.R</span><span class='op'>)</span> <span class='op'>~</span> <span class='fu'><a href='stepwise.html'>sw</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/poly.html'>poly</a></span><span class='op'>(</span><span class='va'>Wind</span>, <span class='fl'>2</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/stats/poly.html'>poly</a></span><span class='op'>(</span><span class='va'>Temp</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>,
                   <span class='va'>airquality</span>, split <span class='op'>=</span> <span class='op'>~</span> <span class='va'>Month</span><span class='op'>)</span>

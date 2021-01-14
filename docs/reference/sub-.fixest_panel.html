@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
       </span>
     </div>
 
@@ -193,17 +193,17 @@
 <span class='va'>base_small</span> <span class='op'>=</span> <span class='va'>base_did</span><span class='op'>[</span><span class='op'>!</span><span class='va'>base_did</span><span class='op'>$</span><span class='va'>period</span> <span class='op'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>2</span>, <span class='fl'>4</span><span class='op'>)</span>, <span class='op'>]</span>
 <span class='va'>b</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span><span class='op'>~</span><span class='fu'><a href='f.html'>l</a></span><span class='op'>(</span><span class='va'>x1</span>, <span class='fl'>0</span><span class='op'>:</span><span class='fl'>1</span><span class='op'>)</span>, <span class='va'>base_small</span>, panel.id <span class='op'>=</span> <span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>period</span><span class='op'>)</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>a</span>, <span class='va'>b</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                                   a                   b
-#&gt; Dependent Var.:                   y                   y
-#&gt;                                                        
-#&gt; (Intercept)       3.691*** (0.2167)   3.691*** (0.2167)
-#&gt; x1               1.013*** (0.07326)  1.013*** (0.07326)
-#&gt; l(x1,1)         -0.006268 (0.07624) -0.006268 (0.07624)
-#&gt; _______________ ___________________ ___________________
-#&gt; S.E. type                  Standard            Standard
-#&gt; Observations                    540                 540
-#&gt; R2                         0.262581            0.262581
-#&gt; Adj. R2                    0.259834            0.259834</div><div class='input'>
+</div><div class='output co'>#&gt;                                 a                 b
+#&gt; Dependent Var.:                 y                 y
+#&gt;                                                    
+#&gt; (Intercept)     3.691*** (0.2169) 3.691*** (0.2169)
+#&gt; x1              1.013*** (0.0779) 1.013*** (0.0779)
+#&gt; l(x1,1)          -0.0063 (0.0773)  -0.0063 (0.0773)
+#&gt; _______________ _________________ _________________
+#&gt; S.E. type       Heteroskeda.-rob. Heteroskeda.-rob.
+#&gt; Observations                  540               540
+#&gt; R2                        0.26258           0.26258
+#&gt; Adj. R2                   0.25983           0.25983</div><div class='input'>
 
 <span class='co'># Using data.table to create new lead/lag variables</span>
 <span class='kw'>if</span><span class='op'>(</span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>require</a></span><span class='op'>(</span><span class='st'><a href='http://r-datatable.com'>"data.table"</a></span><span class='op'>)</span><span class='op'>)</span><span class='op'>{</span>
@@ -217,7 +217,16 @@
   <span class='co'>#  (the lead/lags work appropriately)</span>
   <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span><span class='op'>~</span><span class='fu'><a href='f.html'>l</a></span><span class='op'>(</span><span class='va'>x1</span>, <span class='fl'>0</span><span class='op'>:</span><span class='fl'>1</span><span class='op'>)</span>, <span class='va'>pdat_dt</span><span class='op'>[</span><span class='op'>!</span><span class='va'>period</span> <span class='op'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>2</span>, <span class='fl'>4</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>
 <span class='op'>}</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in `[.data.table`(x = pdat_dt, j = `:=`(x_l1, l(x1))): object 'pdat_dt' not found</span></div><div class='input'>
+</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
+#&gt; Observations: 540 
+#&gt; Standard-errors: Heteroskedasticity-robust 
+#&gt;              Estimate Std. Error   t value  Pr(&gt;|t|)    
+#&gt; (Intercept)  3.691400   0.216873 17.021000 &lt; 2.2e-16 ***
+#&gt; x1           1.013000   0.077942 12.997000 &lt; 2.2e-16 ***
+#&gt; l(x1, 1)    -0.006268   0.077270 -0.081115  0.935381    
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; RMSE: 5.0207   Adj. R2: 0.259834</div><div class='input'>
 
 </div></pre>
   </div>

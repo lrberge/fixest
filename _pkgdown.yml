@@ -100,6 +100,7 @@ reference:
       desc: Other methods and functions that didn't fit the previous sections
       contents:
         - did_means
+        - aggregate.fixest
         - bread.fixest
         - collinearity
         - estfun.fixest

@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
       </span>
     </div>
 
@@ -88,14 +88,13 @@
 
       
 
-      </header><script src="multiple_estimations_files/accessible-code-block-0.0.1/empty-anchor.js"></script><link href="multiple_estimations_files/anchor-sections-1.0/anchor-sections.css" rel="stylesheet">
-<script src="multiple_estimations_files/anchor-sections-1.0/anchor-sections.js"></script><div class="row">
+      </header><script src="multiple_estimations_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Multiple estimations</h1>
                         <h4 class="author">Laurent Berge</h4>
             
-            <h4 class="date">2020-12-23</h4>
+            <h4 class="date">2021-01-14</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/multiple_estimations.Rmd"><code>vignettes/multiple_estimations.Rmd</code></a></small>
       <div class="hidden name"><code>multiple_estimations.Rmd</code></div>
@@ -196,17 +195,17 @@
 <p>To perform an estimation on multiple LHS, simply wrap the different LHS in <code><a href="https://rdrr.io/r/base/c.html">c()</a></code>:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">y1</span>, <span class="va">y2</span><span class="op">)</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span>, <span class="va">base</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>##                             model 1              model 2
-## Dependent Var.:                  y1                   y2
-##                                                         
-## (Intercept)      4.191*** (0.09705)   3.587*** (0.09373)
-## x1              0.5418*** (0.06928) -0.2571*** (0.06691)
-## x2                -0.3196* (0.1605)       0.364* (0.155)
-## _______________ ___________________ ____________________
-## S.E. type                  Standard             Standard
-## Observations                    150                  150
-## R2                         0.766261             0.213103
-## Adj. R2                    0.763081             0.202397</code></pre>
+<pre><code>##                            model 1             model 2
+## Dependent Var.:                 y1                  y2
+##                                                       
+## (Intercept)      4.191*** (0.0970)   3.587*** (0.0937)
+## x1              0.5418*** (0.0693) -0.2571*** (0.0669)
+## x2               -0.3196* (0.1605)    0.3640* (0.1550)
+## _______________ __________________ ___________________
+## S.E. type                 Standard            Standard
+## Observations                   150                 150
+## R2                         0.76626             0.21310
+## Adj. R2                    0.76308             0.20240</code></pre>
 </div>
 <div id="multiple-rhs-and-fixed-effects-stepwise-functions" class="section level4">
 <h4 class="hasAnchor">
@@ -222,32 +221,32 @@
 <p>Here is an example:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y1</span> <span class="op">~</span> <span class="fu"><a href="../reference/stepwise.html">csw</a></span><span class="op">(</span><span class="va">x1</span>, <span class="va">x2</span><span class="op">)</span> <span class="op">|</span> <span class="fu"><a href="../reference/stepwise.html">sw0</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span>, <span class="va">base</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">species</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>##                            model 1          model 2           model 3
-## Dependent Var.:                 y1               y1                y1
-##                                                                      
-## (Intercept)       4.307** (0.1917) 4.191** (0.2443)                  
-## x1              0.4089** (0.04008) 0.5418* (0.1115) 0.9046** (0.0758)
-## x2                                 -0.3196 (0.1707)                  
-## Fixed-Effects:  ------------------ ---------------- -----------------
-## species                         No               No               Yes
-## _______________ __________________ ________________ _________________
-## S.E.: Clustered        by: species      by: species       by: species
-## Observations                   150              150               150
-## R2                        0.759955         0.766261          0.836724
-## Within R2                       --               --          0.571784
-##                            model 4
-## Dependent Var.:                 y1
-##                                   
-## (Intercept)                       
-## x1              0.9059** (0.08138)
-## x2               -0.005995 (0.126)
-## Fixed-Effects:  ------------------
-## species                        Yes
-## _______________ __________________
-## S.E.: Clustered        by: species
-## Observations                   150
-## R2                        0.836725
-## Within R2                 0.571789</code></pre>
+<pre><code>##                           model 1          model 2           model 3
+## Dependent Var.:                y1               y1                y1
+##                                                                     
+## (Intercept)      4.307** (0.1917) 4.191** (0.2443)                  
+## x1              0.4089** (0.0401) 0.5418* (0.1115) 0.9046** (0.0758)
+## x2                                -0.3196 (0.1707)                  
+## Fixed-Effects:  ----------------- ---------------- -----------------
+## species                        No               No               Yes
+## _______________ _________________ ________________ _________________
+## S.E.: Clustered       by: species      by: species       by: species
+## Observations                  150              150               150
+## R2                        0.75995          0.76626           0.83672
+## Within R2                      --               --           0.57178
+##                           model 4
+## Dependent Var.:                y1
+##                                  
+## (Intercept)                      
+## x1              0.9059** (0.0814)
+## x2               -0.0060 (0.1260)
+## Fixed-Effects:  -----------------
+## species                       Yes
+## _______________ _________________
+## S.E.: Clustered       by: species
+## Observations                  150
+## R2                        0.83673
+## Within R2                 0.57179</code></pre>
 <p>As you can see, if the stepwise functions are in both parts, there will be as many estimations as the cardinal product of the two parts.</p>
 </div>
 <div id="split-sample-estimations" class="section level4">
@@ -256,30 +255,30 @@
 <p>To perform split sample estimations, use either the argument <code>split</code> or <code>fsplit</code>. The argument <code>split</code> accepts a variable that will be treated as a factor, and an estimation will be performed for each sub-sample defined by each level of this variable. The argument <code>fsplit</code> is identical but first adds the full sample.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y1</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span>, <span class="va">base</span>, fsplit <span class="op">=</span> <span class="op">~</span><span class="va">species</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>##                              model 1           model 2            model 3
-## Sample (species)         Full sample            setosa         versicolor
-## Dependent Var.:                   y1                y1                 y1
-##                                                                          
-## (Intercept)       4.191*** (0.09705) 4.248*** (0.4114)  2.381*** (0.4493)
-## x1               0.5418*** (0.06928)    0.399 (0.2958) 0.9342*** (0.1693)
-## x2                 -0.3196* (0.1605)   0.7121 (0.4874)     -0.32 (0.4024)
-## ________________ ___________________ _________________ __________________
-## S.E. type                   Standard          Standard           Standard
-## Observations                     150                50                 50
-## R2                          0.766261          0.111728           0.574318
-## Adj. R2                     0.763081           0.07393           0.556204
-##                              model 4
-## Sample (species)           virginica
-## Dependent Var.:                   y1
-##                                     
-## (Intercept)          1.052* (0.5139)
-## x1               0.9946*** (0.08931)
-## x2                 0.007062 (0.1795)
-## ________________ ___________________
-## S.E. type                   Standard
-## Observations                      50
-## R2                          0.746893
-## Adj. R2                     0.736122</code></pre>
+<pre><code>##                             model 1           model 2            model 3
+## Sample (species)        Full sample            setosa         versicolor
+## Dependent Var.:                  y1                y1                 y1
+##                                                                         
+## (Intercept)       4.191*** (0.0970) 4.248*** (0.4114)  2.381*** (0.4493)
+## x1               0.5418*** (0.0693)   0.3990 (0.2958) 0.9342*** (0.1693)
+## x2                -0.3196* (0.1605)   0.7121 (0.4874)   -0.3200 (0.4024)
+## ________________ __________________ _________________ __________________
+## S.E. type                  Standard          Standard           Standard
+## Observations                    150                50                 50
+## R2                          0.76626           0.11173            0.57432
+## Adj. R2                     0.76308           0.07393            0.55620
+##                             model 4
+## Sample (species)          virginica
+## Dependent Var.:                  y1
+##                                    
+## (Intercept)         1.052* (0.5139)
+## x1               0.9946*** (0.0893)
+## x2                  0.0071 (0.1795)
+## ________________ __________________
+## S.E. type                  Standard
+## Observations                     50
+## R2                          0.74689
+## Adj. R2                     0.73612</code></pre>
 </div>
 <div id="combining-multiple-estimations" class="section level4">
 <h4 class="hasAnchor">
@@ -308,32 +307,32 @@
 <p>This subsetting can then be used to easily obtain the appropriate set of results and ordering:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">res_multi</span><span class="op">[</span>lhs <span class="op">=</span> <span class="fl">1</span>, fixef <span class="op">=</span> <span class="fl">1</span>, rhs <span class="op">=</span> <span class="cn">TRUE</span>, sample <span class="op">=</span> <span class="op">-</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></code></pre></div>
-<pre><code>##                            model 1            model 2             model 3
-## Sample (species)            setosa         versicolor           virginica
-## Dependent Var.:                 y1                 y1                  y1
-##                                                                          
-## (Intercept)      4.248*** (0.4114)  2.381*** (0.4493)     1.052* (0.5139)
-## x1                  0.399 (0.2958) 0.9342*** (0.1693) 0.9946*** (0.08931)
-## x2                 0.7121 (0.4874)     -0.32 (0.4024)   0.007062 (0.1795)
-## x2 square                                                                
-## ________________ _________________ __________________ ___________________
-## S.E. type                 Standard           Standard            Standard
-## Observations                    50                 50                  50
-## R2                        0.111728           0.574318            0.746893
-## Adj. R2                    0.07393           0.556204            0.736122
-##                            model 4           model 5             model 6
-## Sample (species)            setosa        versicolor           virginica
-## Dependent Var.:                 y1                y1                  y1
+<pre><code>##                            model 1            model 2            model 3
+## Sample (species)            setosa         versicolor          virginica
+## Dependent Var.:                 y1                 y1                 y1
 ##                                                                         
-## (Intercept)      4.004*** (0.4892)    0.3234 (1.791)      -2.393 (2.173)
-## x1                 0.4048 (0.2963) 0.9006*** (0.171) 0.9939*** (0.08778)
-## x2                   2.511 (2.011)     3.015 (2.839)       3.504 (2.153)
-## x2 square           -2.913 (3.157)    -1.236 (1.042)     -0.8703 (0.534)
-## ________________ _________________ _________________ ___________________
-## S.E. type                 Standard          Standard            Standard
-## Observations                    50                50                  50
-## R2                        0.127863          0.586958            0.760711
-## Adj. R2                   0.070984           0.56002            0.745105</code></pre>
+## (Intercept)      4.248*** (0.4114)  2.381*** (0.4493)    1.052* (0.5139)
+## x1                 0.3990 (0.2958) 0.9342*** (0.1693) 0.9946*** (0.0893)
+## x2                 0.7121 (0.4874)   -0.3200 (0.4024)    0.0071 (0.1795)
+## x2 square                                                               
+## ________________ _________________ __________________ __________________
+## S.E. type                 Standard           Standard           Standard
+## Observations                    50                 50                 50
+## R2                         0.11173            0.57432            0.74689
+## Adj. R2                    0.07393            0.55620            0.73612
+##                            model 4            model 5            model 6
+## Sample (species)            setosa         versicolor          virginica
+## Dependent Var.:                 y1                 y1                 y1
+##                                                                         
+## (Intercept)      4.004*** (0.4892)     0.3234 (1.791)     -2.393 (2.173)
+## x1                 0.4048 (0.2963) 0.9006*** (0.1710) 0.9939*** (0.0878)
+## x2                   2.511 (2.011)      3.015 (2.839)      3.504 (2.153)
+## x2 square           -2.913 (3.157)     -1.236 (1.042)   -0.8703 (0.5340)
+## ________________ _________________ __________________ __________________
+## S.E. type                 Standard           Standard           Standard
+## Observations                    50                 50                 50
+## R2                         0.12786            0.58696            0.76071
+## Adj. R2                    0.07098            0.56002            0.74510</code></pre>
 </div>
 </div>
 <div id="some-notes" class="section level1">

@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
       </span>
     </div>
 
@@ -151,6 +151,7 @@
   <span class='va'>fsplit</span>,
   <span class='va'>cluster</span>,
   <span class='va'>se</span>,
+  <span class='va'>dof</span>,
   <span class='va'>panel.id</span>,
   <span class='va'>fixef</span>,
   fixef.rm <span class='op'>=</span> <span class='st'>"none"</span>,
@@ -210,6 +211,10 @@
       <td><p>Character scalar. Which kind of standard error should be computed: &#8220;standard&#8221;, &#8220;hetero&#8221;, &#8220;cluster&#8221;, &#8220;twoway&#8221;, &#8220;threeway&#8221; or &#8220;fourway&#8221;? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "standard"</code>. Note that this argument can be implicitly deduced from the argument <code>cluster</code>.</p></td>
     </tr>
     <tr>
+      <th>dof</th>
+      <td><p>An object of class <code>dof.type</code> obtained with the function <code><a href='dof.html'>dof</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href='dof.html'>dof</a></code> for this argument. The arguments and defaults of the function <code><a href='dof.html'>dof</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "conventional"</code>, <code>t.df = "conventional"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href='dof.html'>dof</a></code> for details.</p></td>
+    </tr>
+    <tr>
       <th>panel.id</th>
       <td><p>The panel identifiers. Can either be: i) a one sided formula (e.g. <code>panel.id = ~id+time</code>), ii) a character vector of length 2 (e.g. <code>panel.id=c('id', 'time')</code>, or iii) a character scalar of two variables separated by a comma (e.g. <code>panel.id='id,time'</code>). Note that you can combine variables with <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> only inside formulas (see the dedicated section in <code>feols</code>).</p></td>
     </tr>
@@ -231,7 +236,7 @@
     </tr>
     <tr>
       <th>collin.tol</th>
-      <td><p>Numeric scalar, default is <code>1e-10</code>. Threshold decising when variables should be considered collinear and subsequently removed from the estimation. Higher values means more variables will be removed (if there is presence of collinearity). One signal of presence of collinearity is t-stats that are extremely low (for instance when t-stats &lt; 1e-3).</p></td>
+      <td><p>Numeric scalar, default is <code>1e-10</code>. Threshold deciding when variables should be considered collinear and subsequently removed from the estimation. Higher values means more variables will be removed (if there is presence of collinearity). One signal of presence of collinearity is t-stats that are extremely low (for instance when t-stats &lt; 1e-3).</p></td>
     </tr>
     <tr>
       <th>nthreads</th>
@@ -243,7 +248,7 @@
     </tr>
     <tr>
       <th>verbose</th>
-      <td><p>Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algoritmh (the first number is the left-hand-side, the other numbers are the right-hand-side variables).</p></td>
+      <td><p>Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algorithm (the first number is the left-hand-side, the other numbers are the right-hand-side variables).</p></td>
     </tr>
     <tr>
       <th>warn</th>
@@ -281,7 +286,7 @@
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A <code>fixest</code> object.</p>
+    <p>A <code>fixest</code> object. Note that <code>fixest</code> objects contain many elements and most of them are for internal use, they are presented here only for information. To access them, it is safer to use the user-level methods (e.g. <code><a href='vcov.fixest.html'>vcov.fixest</a></code>, <code><a href='resid.fixest.html'>resid.fixest</a></code>, etc) or functions (like for instance <code><a href='fitstat.html'>fitstat</a></code> to access any fit statistic).</p>
 <dt>nobs</dt><dd><p>The number of observations.</p></dd>
 <dt>fml</dt><dd><p>The linear formula of the call.</p></dd>
 <dt>call</dt><dd><p>The call of the function.</p></dd>
@@ -299,7 +304,6 @@
 <dt>ssr_fe_only</dt><dd><p>Sum of the squared residuals of the model estimated with fixed-effects only.</p></dd>
 <dt>ll_null</dt><dd><p>The log-likelihood of the null model (containing only with the intercept).</p></dd>
 <dt>ll_fe_only</dt><dd><p>The log-likelihood of the model estimated with fixed-effects only.</p></dd>
-<dt>pseudo_r2</dt><dd><p>The adjusted pseudo R2.</p></dd>
 <dt>fitted.values</dt><dd><p>The fitted values.</p></dd>
 <dt>linear.predictors</dt><dd><p>The linear predictors.</p></dd>
 <dt>residuals</dt><dd><p>The residuals (y minus the fitted values).</p></dd>
@@ -493,17 +497,17 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 <span class='va'>est1</span> <span class='op'>=</span> <span class='fu'>feols</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fu'><a href='f.html'>l</a></span><span class='op'>(</span><span class='va'>x1</span>, <span class='fl'>0</span><span class='op'>:</span><span class='fl'>1</span><span class='op'>)</span>, <span class='va'>base_did</span>, panel.id <span class='op'>=</span> <span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>period</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; <span class='message'>NOTE: 108 observations removed because of NA values (RHS: 108).</span></div><div class='input'><span class='va'>est2</span> <span class='op'>=</span> <span class='fu'>feols</span><span class='op'>(</span><span class='fu'><a href='f.html'>f</a></span><span class='op'>(</span><span class='va'>y</span><span class='op'>)</span> <span class='op'>~</span> <span class='fu'><a href='f.html'>l</a></span><span class='op'>(</span><span class='va'>x1</span>, <span class='op'>-</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>1</span><span class='op'>)</span>, <span class='va'>base_did</span>, panel.id <span class='op'>=</span> <span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>period</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; <span class='message'>NOTE: 216 observations removed because of NA values (LHS: 108, RHS: 216).</span></div><div class='input'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, order <span class='op'>=</span> <span class='st'>"f"</span>, drop<span class='op'>=</span><span class='st'>"Int"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                                est1               est2
-#&gt; Dependent Var.:                   y             f(y,1)
-#&gt;                                                       
-#&gt; f(x1,1)                             0.994*** (0.05786)
-#&gt; x1              0.9948*** (0.05315)  0.008072 (0.0584)
-#&gt; l(x1,1)           0.04096 (0.05401)  0.01569 (0.05854)
-#&gt; _______________ ___________________ __________________
-#&gt; S.E. type                  Standard           Standard
-#&gt; Observations                    972                864
-#&gt; R2                          0.26558           0.256969
-#&gt; Adj. R2                    0.264064           0.254377</div><div class='input'>
+</div><div class='output co'>#&gt;                               est1               est2
+#&gt; Dependent Var.:                  y             f(y,1)
+#&gt;                                                      
+#&gt; f(x1,1)                            0.9940*** (0.0579)
+#&gt; x1              0.9948*** (0.0532)    0.0081 (0.0584)
+#&gt; l(x1,1)            0.0410 (0.0540)    0.0157 (0.0585)
+#&gt; _______________ __________________ __________________
+#&gt; S.E. type                 Standard           Standard
+#&gt; Observations                   972                864
+#&gt; R2                         0.26558            0.25697
+#&gt; Adj. R2                    0.26406            0.25438</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># Using interactions:</span>
 <span class='co'>#</span>
@@ -546,7 +550,7 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; x2          -1.358100    19.6740 -0.069030 0.945060 
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 7.9776   Adj. R2: -94.35
+#&gt; RMSE: 7.9776   Adj. R2: -94.4
 #&gt; F-test (1st stage): stat = 0.008704, p = 0.925795, on 1 and 146 DoF.
 #&gt;         Wu-Hausman: stat = 5.2387  , p = 0.023535, on 1 and 145 DoF.</div><div class='input'>
 <span class='co'># To show the first stage:</span>
@@ -593,7 +597,7 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; x2          -1.358100    19.6740 -0.069030 0.945060 
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 7.9776   Adj. R2: -94.35
+#&gt; RMSE: 7.9776   Adj. R2: -94.4
 #&gt; F-test (1st stage): stat = 0.008704, p = 0.925795, on 1 and 146 DoF.
 #&gt;         Wu-Hausman: stat = 5.2387  , p = 0.023535, on 1 and 145 DoF.</div><div class='input'>
 <span class='co'># Adding a fixed-effect =&gt; IV formula always last!</span>
@@ -636,42 +640,42 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; _______________ ______________ _______________ ________________
 #&gt; S.E. type             Standard         by: fe1         Standard
 #&gt; Observations               150             150              150
-#&gt; R2                      -92.43          -61.94           -18.72
+#&gt; R2                     -92.436         -61.946          -18.724
 #&gt; Within R2                   --         -164.08               --</div><div class='input'>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res_iv</span>, <span class='va'>res_iv_fe</span>, <span class='va'>res_iv2</span>, stage <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span>, order <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"endo"</span>, <span class='st'>"inst"</span><span class='op'>)</span>,
        group <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>control <span class='op'>=</span> <span class='st'>"!endo|inst"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                          res_iv.1      res_iv.2       res_iv_fe.1   res_iv_fe.2
-#&gt; IV stages                   First        Second             First        Second
-#&gt; Dependent Var.:           x_endo1             y           x_endo1             y
-#&gt;                                                                                
-#&gt; x_endo1                           4.157 (44.68)                   3.414 (15.83)
-#&gt; x_endo2                                                                        
-#&gt; x_inst1         -0.01114 (0.1194)               -0.0127 (0.05084)              
-#&gt; x_inst2                                                                        
-#&gt; control                       Yes           Yes               Yes           Yes
-#&gt; Fixed-Effects:  ----------------- ------------- ----------------- -------------
-#&gt; fe1                            No            No               Yes           Yes
-#&gt; _______________ _________________ _____________ _________________ _____________
-#&gt; S.E. type                Standard      Standard           by: fe1       by: fe1
-#&gt; Observations                  150           150               150           150
-#&gt; R2                       0.139931        -92.43          0.141566        -61.94
-#&gt; Within R2                      --            --          0.008294       -164.08
-#&gt;                          res_iv2.1        res_iv2.2        res_iv2.3
-#&gt; IV stages                    First            First           Second
-#&gt; Dependent Var.:            x_endo1          x_endo2                y
-#&gt;                                                                     
-#&gt; x_endo1                                               -1.912 (56.41)
-#&gt; x_endo2                                             -0.0206 (0.2092)
-#&gt; x_inst1          -0.01139 (0.1199) 3.295*** (0.331)                 
-#&gt; x_inst2         0.003804 (0.09103)  -0.207 (0.2513)                 
-#&gt; control                        Yes              Yes              Yes
-#&gt; Fixed-Effects:  ------------------ ---------------- ----------------
-#&gt; fe1                             No               No               No
-#&gt; _______________ __________________ ________________ ________________
-#&gt; S.E. type                 Standard         Standard         Standard
-#&gt; Observations                   150              150              150
-#&gt; R2                        0.139941         0.577614           -18.72
-#&gt; Within R2                       --               --               --</div><div class='input'>
+</div><div class='output co'>#&gt;                         res_iv.1      res_iv.2      res_iv_fe.1   res_iv_fe.2
+#&gt; IV stages                  First        Second            First        Second
+#&gt; Dependent Var.:          x_endo1             y          x_endo1             y
+#&gt;                                                                              
+#&gt; x_endo1                          4.157 (44.68)                  3.414 (15.83)
+#&gt; x_endo2                                                                      
+#&gt; x_inst1         -0.0111 (0.1194)               -0.0127 (0.0508)              
+#&gt; x_inst2                                                                      
+#&gt; control                      Yes           Yes              Yes           Yes
+#&gt; Fixed-Effects:  ---------------- ------------- ---------------- -------------
+#&gt; fe1                           No            No              Yes           Yes
+#&gt; _______________ ________________ _____________ ________________ _____________
+#&gt; S.E. type               Standard      Standard          by: fe1       by: fe1
+#&gt; Observations                 150           150              150           150
+#&gt; R2                       0.13993       -92.436          0.14157       -61.946
+#&gt; Within R2                     --            --          0.00829       -164.08
+#&gt;                        res_iv2.1         res_iv2.2        res_iv2.3
+#&gt; IV stages                  First             First           Second
+#&gt; Dependent Var.:          x_endo1           x_endo2                y
+#&gt;                                                                    
+#&gt; x_endo1                                              -1.912 (56.41)
+#&gt; x_endo2                                            -0.0206 (0.2092)
+#&gt; x_inst1         -0.0114 (0.1199) 3.295*** (0.3310)                 
+#&gt; x_inst2          0.0038 (0.0910)  -0.2070 (0.2513)                 
+#&gt; control                      Yes               Yes              Yes
+#&gt; Fixed-Effects:  ---------------- ----------------- ----------------
+#&gt; fe1                           No                No               No
+#&gt; _______________ ________________ _________________ ________________
+#&gt; S.E. type               Standard          Standard         Standard
+#&gt; Observations                 150               150              150
+#&gt; R2                       0.13994           0.57761          -18.724
+#&gt; Within R2                     --                --               --</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># Multiple estimations:</span>
 <span class='co'>#</span>
@@ -681,50 +685,50 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 
 <span class='co'># We can display the results for the first lhs:</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_mult</span><span class='op'>[</span>lhs <span class='op'>=</span> <span class='fl'>1</span><span class='op'>]</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                            model 1              model 2              model 3
-#&gt; Dependent Var.:              Ozone                Ozone                Ozone
-#&gt;                                                                             
-#&gt; (Intercept)       -71.03** (23.58)    -248.5*** (48.14)    -257.7*** (48.45)
-#&gt; Wind            -3.055*** (0.6633)     14.34*** (4.239)     14.58*** (4.228)
-#&gt; Temp                1.84*** (0.25)    4.076*** (0.5875)    4.136*** (0.5871)
-#&gt; Wind x Temp                        -0.2239*** (0.05399) -0.2273*** (0.05385)
-#&gt; Day                                                           0.294 (0.2185)
-#&gt; _______________ __________________ ____________________ ____________________
-#&gt; S.E. type                 Standard             Standard             Standard
-#&gt; Observations                   116                  116                  116
-#&gt; R2                         0.56871             0.626129             0.632126
-#&gt; Adj. R2                   0.561076             0.616114             0.618869</div><div class='input'>
+</div><div class='output co'>#&gt;                            model 1             model 2             model 3
+#&gt; Dependent Var.:              Ozone               Ozone               Ozone
+#&gt;                                                                           
+#&gt; (Intercept)       -71.03** (23.58)   -248.5*** (48.14)   -257.7*** (48.45)
+#&gt; Wind            -3.055*** (0.6633)    14.34*** (4.239)    14.58*** (4.228)
+#&gt; Temp             1.840*** (0.2500)   4.076*** (0.5875)   4.136*** (0.5871)
+#&gt; Wind x Temp                        -0.2239*** (0.0540) -0.2273*** (0.0539)
+#&gt; Day                                                        0.2940 (0.2185)
+#&gt; _______________ __________________ ___________________ ___________________
+#&gt; S.E. type                 Standard            Standard            Standard
+#&gt; Observations                   116                 116                 116
+#&gt; R2                         0.56871             0.62613             0.63213
+#&gt; Adj. R2                    0.56108             0.61611             0.61887</div><div class='input'>
 <span class='co'># And now the second (access can be made by name)</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_mult</span><span class='op'>[</span>lhs <span class='op'>=</span> <span class='st'>"Solar.R"</span><span class='op'>]</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                           model 1         model 2         model 3
 #&gt; Dependent Var.:           Solar.R         Solar.R         Solar.R
 #&gt;                                                                  
-#&gt; (Intercept)           -76.36 (82)   10.01 (189.6)   45.19 (190.6)
-#&gt; Wind                2.211 (2.308)   -5.893 (16.2)  -6.214 (16.15)
+#&gt; (Intercept)        -76.36 (82.00)   10.01 (189.6)   45.19 (190.6)
+#&gt; Wind                2.211 (2.308)  -5.893 (16.20)  -6.214 (16.15)
 #&gt; Temp            3.075*** (0.8778)   1.982 (2.333)   1.788 (2.329)
 #&gt; Wind x Temp                       0.1044 (0.2064) 0.1069 (0.2057)
 #&gt; Day                                               -1.161 (0.8277)
 #&gt; _______________ _________________ _______________ _______________
 #&gt; S.E. type                Standard        Standard        Standard
 #&gt; Observations                  146             146             146
-#&gt; R2                        0.08198        0.083628        0.096245
-#&gt; Adj. R2                   0.06914        0.064269        0.070607</div><div class='input'>
+#&gt; R2                        0.08198         0.08363         0.09624
+#&gt; Adj. R2                   0.06914         0.06427         0.07061</div><div class='input'>
 <span class='co'># Now we focus on the two last right hand sides</span>
 <span class='co'># (note that .N can be used to specify the last item)</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_mult</span><span class='op'>[</span>rhs <span class='op'>=</span> <span class='fl'>2</span><span class='op'>:</span><span class='va'>.N</span><span class='op'>]</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                              model 1         model 2              model 3
-#&gt; Dependent Var.:                Ozone         Solar.R                Ozone
-#&gt;                                                                          
-#&gt; (Intercept)        -248.5*** (48.14)   10.01 (189.6)    -257.7*** (48.45)
-#&gt; Wind                14.34*** (4.239)   -5.893 (16.2)     14.58*** (4.228)
-#&gt; Temp               4.076*** (0.5875)   1.982 (2.333)    4.136*** (0.5871)
-#&gt; Wind x Temp     -0.2239*** (0.05399) 0.1044 (0.2064) -0.2273*** (0.05385)
-#&gt; Day                                                        0.294 (0.2185)
-#&gt; _______________ ____________________ _______________ ____________________
-#&gt; S.E. type                   Standard        Standard             Standard
-#&gt; Observations                     116             146                  116
-#&gt; R2                          0.626129        0.083628             0.632126
-#&gt; Adj. R2                     0.616114        0.064269             0.618869
+</div><div class='output co'>#&gt;                             model 1         model 2             model 3
+#&gt; Dependent Var.:               Ozone         Solar.R               Ozone
+#&gt;                                                                        
+#&gt; (Intercept)       -248.5*** (48.14)   10.01 (189.6)   -257.7*** (48.45)
+#&gt; Wind               14.34*** (4.239)  -5.893 (16.20)    14.58*** (4.228)
+#&gt; Temp              4.076*** (0.5875)   1.982 (2.333)   4.136*** (0.5871)
+#&gt; Wind x Temp     -0.2239*** (0.0540) 0.1044 (0.2064) -0.2273*** (0.0539)
+#&gt; Day                                                     0.2940 (0.2185)
+#&gt; _______________ ___________________ _______________ ___________________
+#&gt; S.E. type                  Standard        Standard            Standard
+#&gt; Observations                    116             146                 116
+#&gt; R2                          0.62613         0.08363             0.63213
+#&gt; Adj. R2                     0.61611         0.06427             0.61887
 #&gt;                         model 4
 #&gt; Dependent Var.:         Solar.R
 #&gt;                                
@@ -736,8 +740,8 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; _______________ _______________
 #&gt; S.E. type              Standard
 #&gt; Observations                146
-#&gt; R2                     0.096245
-#&gt; Adj. R2                0.070607</div><div class='input'>
+#&gt; R2                      0.09624
+#&gt; Adj. R2                 0.07061</div><div class='input'>
 <span class='co'># Combining with split</span>
 <span class='va'>est_split</span> <span class='op'>=</span> <span class='fu'>feols</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>Ozone</span>, <span class='va'>Solar.R</span><span class='op'>)</span> <span class='op'>~</span> <span class='fu'><a href='stepwise.html'>sw</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/poly.html'>poly</a></span><span class='op'>(</span><span class='va'>Wind</span>, <span class='fl'>2</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/stats/poly.html'>poly</a></span><span class='op'>(</span><span class='va'>Temp</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>,
                   <span class='va'>airquality</span>, split <span class='op'>=</span> <span class='op'>~</span> <span class='va'>Month</span><span class='op'>)</span>

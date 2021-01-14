@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
       </span>
     </div>
 
@@ -88,14 +88,13 @@
 
       
 
-      </header><script src="fixest_walkthrough_files/accessible-code-block-0.0.1/empty-anchor.js"></script><link href="fixest_walkthrough_files/anchor-sections-1.0/anchor-sections.css" rel="stylesheet">
-<script src="fixest_walkthrough_files/anchor-sections-1.0/anchor-sections.js"></script><div class="row">
+      </header><script src="fixest_walkthrough_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Fast Fixed-Effects Estimation: Short introduction</h1>
                         <h4 class="author">Laurent Berge</h4>
             
-            <h4 class="date">2020-12-23</h4>
+            <h4 class="date">2021-01-14</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/fixest_walkthrough.Rmd"><code>vignettes/fixest_walkthrough.Rmd</code></a></small>
       <div class="hidden name"><code>fixest_walkthrough.Rmd</code></div>
@@ -115,7 +114,7 @@
 <a href="#simple-example-using-trade-data" class="anchor"></a>Simple example using trade data</h1>
 <p>This example deals with international trade, which is a setup that usually requires performing estimations with many fixed-effects. We estimate a very simple gravity model in which we are interested in finding out the negative effect of geographic distance on trade. The sample data consists of European trade extracted from Eurostat. Let’s load the data contained in the package:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">fixest</span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://lrberge.github.io/fixest/">fixest</a></span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">trade</span><span class="op">)</span></code></pre></div>
 <p>This data is a sample of bilateral importations between EU15 countries from 2007 and 2016. The data is further broken down according to 20 product categories. Here is a sample of the data:</p>
 <table class="table">
@@ -328,13 +327,13 @@
 <td align="left">log(dist_km)</td>
 <td align="left">-1.528*** (0.1307)</td>
 <td align="left">-1.711*** (0.1773)</td>
-<td align="left">-2.17*** (0.1714)</td>
+<td align="left">-2.170*** (0.1714)</td>
 </tr>
 <tr class="even">
 <td align="left">Fixed-Effects:</td>
 <td align="left">——————</td>
 <td align="left">——————</td>
-<td align="left">—————–</td>
+<td align="left">——————</td>
 </tr>
 <tr class="odd">
 <td align="left">Origin</td>
@@ -364,7 +363,7 @@
 <td align="left">_______________</td>
 <td align="left">__________________</td>
 <td align="left">__________________</td>
-<td align="left">_________________</td>
+<td align="left">__________________</td>
 </tr>
 <tr class="even">
 <td align="left">Family</td>
@@ -386,26 +385,26 @@
 </tr>
 <tr class="odd">
 <td align="left">Squared Cor.</td>
-<td align="left">0.612021</td>
-<td align="left">0.437605</td>
-<td align="left">0.705577</td>
+<td align="left">0.61202</td>
+<td align="left">0.43760</td>
+<td align="left">0.70558</td>
 </tr>
 <tr class="even">
 <td align="left">Pseudo R2</td>
-<td align="left">0.764032</td>
+<td align="left">0.76403</td>
 <td align="left">0.03473</td>
-<td align="left">0.236404</td>
+<td align="left">0.23640</td>
 </tr>
 <tr class="odd">
 <td align="left">BIC</td>
-<td align="left">1.405e+12</td>
-<td align="left">1,293,786.09</td>
-<td align="left">151,977.21</td>
+<td align="left">1.4e+12</td>
+<td align="left">1,293,786.1</td>
+<td align="left">151,977.2</td>
 </tr>
 <tr class="even">
 <td align="left">Over-dispersion</td>
 <td align="left">–</td>
-<td align="left">0.548774</td>
+<td align="left">0.54877</td>
 <td align="left">–</td>
 </tr>
 </tbody>
@@ -424,7 +423,7 @@
 <table class="table">
 <colgroup>
 <col width="17%">
-<col width="19%">
+<col width="20%">
 <col width="20%">
 <col width="20%">
 <col width="20%">
@@ -460,14 +459,14 @@
 </tr>
 <tr class="even">
 <td align="left">log(dist_km)</td>
-<td align="left">-1.029*** (0.158)</td>
+<td align="left">-1.029*** (0.1580)</td>
 <td align="left">-1.029*** (0.1581)</td>
 <td align="left">-1.226*** (0.2045)</td>
 <td align="left">-1.518*** (0.1282)</td>
 </tr>
 <tr class="odd">
 <td align="left">Fixed-Effects:</td>
-<td align="left">—————–</td>
+<td align="left">——————</td>
 <td align="left">——————</td>
 <td align="left">——————</td>
 <td align="left">——————</td>
@@ -495,7 +494,7 @@
 </tr>
 <tr class="odd">
 <td align="left">_______________</td>
-<td align="left">_________________</td>
+<td align="left">__________________</td>
 <td align="left">__________________</td>
 <td align="left">__________________</td>
 <td align="left">__________________</td>
@@ -516,24 +515,24 @@
 </tr>
 <tr class="even">
 <td align="left">Squared Cor.</td>
-<td align="left">0.055107</td>
-<td align="left">0.057114</td>
-<td align="left">0.164195</td>
-<td align="left">0.384786</td>
+<td align="left">0.05511</td>
+<td align="left">0.05711</td>
+<td align="left">0.16420</td>
+<td align="left">0.38479</td>
 </tr>
 <tr class="odd">
 <td align="left">Pseudo R2</td>
-<td align="left">0.185023</td>
-<td align="left">0.188326</td>
-<td align="left">0.358257</td>
-<td align="left">0.593121</td>
+<td align="left">0.18502</td>
+<td align="left">0.18833</td>
+<td align="left">0.35826</td>
+<td align="left">0.59312</td>
 </tr>
 <tr class="even">
 <td align="left">BIC</td>
-<td align="left">4.852e+12</td>
-<td align="left">4.833e+12</td>
-<td align="left">3.821e+12</td>
-<td align="left">2.423e+12</td>
+<td align="left">4.85e+12</td>
+<td align="left">4.83e+12</td>
+<td align="left">3.82e+12</td>
+<td align="left">2.42e+12</td>
 </tr>
 </tbody>
 </table>
@@ -570,9 +569,9 @@
 <span class="co">#&gt; Origin &amp;  &amp;  &amp;  &amp; Yes\\</span>
 <span class="co">#&gt; \midrule \emph{Fit statistics}&amp;  &amp; &amp; &amp; \\</span>
 <span class="co">#&gt; Observations &amp; 38,325&amp;38,325&amp;38,325&amp;38,325\\</span>
-<span class="co">#&gt; Squared Correlation &amp; 0.055107&amp;0.057114&amp;0.164195&amp;0.384786\\</span>
-<span class="co">#&gt; Pseudo R$^2$ &amp; 0.185023&amp;0.188326&amp;0.358257&amp;0.593121\\</span>
-<span class="co">#&gt; BIC &amp; $4.852\times 10^{12}$&amp;$4.833\times 10^{12}$&amp;$3.821\times 10^{12}$&amp;$2.423\times 10^{12}$\\</span>
+<span class="co">#&gt; Squared Correlation &amp; 0.05511&amp;0.05711&amp;0.16420&amp;0.38479\\</span>
+<span class="co">#&gt; Pseudo R$^2$ &amp; 0.18502&amp;0.18833&amp;0.35826&amp;0.59312\\</span>
+<span class="co">#&gt; BIC &amp; $4.85\times 10^{12}$&amp;$4.83\times 10^{12}$&amp;$3.82\times 10^{12}$&amp;$2.42\times 10^{12}$\\</span>
 <span class="co">#&gt; \midrule\midrule\multicolumn{5}{l}{\emph{Two-way (Origin \&amp; Destination) standard-errors in parentheses}}\\</span>
 <span class="co">#&gt; \multicolumn{5}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\</span>
 <span class="co">#&gt; \end{tabular}</span></code></pre></div>
@@ -666,7 +665,7 @@
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 0.398842   Adj. R2: 0.761653</span>
-<span class="co">#&gt; F-test (1st stage), x_endo_1: stat = 903.16  , p &lt; 2.2e-16 , on 2 and 146 DoF.</span>
+<span class="co">#&gt; F-test (1st stage), x_endo_1: stat = 903.2   , p &lt; 2.2e-16 , on 2 and 146 DoF.</span>
 <span class="co">#&gt; F-test (1st stage), x_endo_2: stat =   3.2583, p = 0.041268, on 2 and 146 DoF.</span>
 <span class="co">#&gt;                   Wu-Hausman: stat =   6.7918, p = 0.001518, on 2 and 144 DoF.</span></code></pre></div>
 <p>So we’ve just performed a two stage least squares estimation. The formula coming after the pipe, <code>x_endo_1 + x_endo_2 ~ x_inst_1 + x_inst_2</code>, describes the endogenous variables (on the left) and the instruments (on the right).</p>
@@ -674,12 +673,12 @@
 <p>You can use the <code>fitstat</code> command to summon other kind of tests, notably Wald tests on the first/second stages:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/fitstat.html">fitstat</a></span><span class="op">(</span><span class="va">est_iv</span>, <span class="op">~</span> <span class="va">ivf1</span> <span class="op">+</span> <span class="va">ivwald1</span> <span class="op">+</span> <span class="va">ivf2</span> <span class="op">+</span> <span class="va">ivwald2</span>, cluster <span class="op">=</span> <span class="st">"fe"</span><span class="op">)</span>
-<span class="co">#&gt; F-test (1st stage), x_endo_1: stat =     903.16  , p &lt; 2.2e-16 , on 2 and 146 DoF.</span>
+<span class="co">#&gt; F-test (1st stage), x_endo_1: stat =     903.2   , p &lt; 2.2e-16 , on 2 and 146 DoF.</span>
 <span class="co">#&gt; F-test (1st stage), x_endo_2: stat =       3.2583, p = 0.041268, on 2 and 146 DoF.</span>
-<span class="co">#&gt; Wald (1st stage), x_endo_1  : stat =   1,482.63  , p &lt; 2.2e-16 , on 2 and 146 DoF, VCOV matrix: Clustered (fe).</span>
+<span class="co">#&gt; Wald (1st stage), x_endo_1  : stat =   1,482.6   , p &lt; 2.2e-16 , on 2 and 146 DoF, VCOV matrix: Clustered (fe).</span>
 <span class="co">#&gt; Wald (1st stage), x_endo_2  : stat =       2.2216, p = 0.112092, on 2 and 146 DoF, VCOV matrix: Clustered (fe).</span>
-<span class="co">#&gt;           F-test (2nd stage): stat =     194.19  , p &lt; 2.2e-16 , on 2 and 146 DoF.</span>
-<span class="co">#&gt;             Wald (2nd stage): stat = 539,363.18  , p &lt; 2.2e-16 , on 2 and 146 DoF, VCOV matrix: Clustered (fe).</span></code></pre></div>
+<span class="co">#&gt;           F-test (2nd stage): stat =     194.2   , p &lt; 2.2e-16 , on 2 and 146 DoF.</span>
+<span class="co">#&gt;             Wald (2nd stage): stat = 539,363.2   , p &lt; 2.2e-16 , on 2 and 146 DoF, VCOV matrix: Clustered (fe).</span></code></pre></div>
 <p>As the Wald test relies on a given variance-covariance matrix, you can pass extra arguments to <code>fitstat</code>, as the argument <code>cluster</code> in the previous example, to specify which type of VCOV matrix is desired.</p>
 <p>Note that you can display the statistics that you wish when printing by changing the default print values:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
@@ -697,10 +696,10 @@
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 0.398842   Adj. R2: 0.761653</span>
-<span class="co">#&gt; F-test (1st stage), x_endo_1: stat = 903.16  , p &lt; 2.2e-16 , on 2 and 146 DoF.</span>
+<span class="co">#&gt; F-test (1st stage), x_endo_1: stat = 903.2   , p &lt; 2.2e-16 , on 2 and 146 DoF.</span>
 <span class="co">#&gt; F-test (1st stage), x_endo_2: stat =   3.2583, p = 0.041268, on 2 and 146 DoF.</span>
 <span class="co">#&gt;                   Wu-Hausman: stat =   6.7918, p = 0.001518, on 2 and 144 DoF.</span>
-<span class="co">#&gt;             Wald (2nd stage): stat = 224.03  , p &lt; 2.2e-16 , on 2 and 146 DoF, VCOV matrix: Standard.</span></code></pre></div>
+<span class="co">#&gt;             Wald (2nd stage): stat = 224.0   , p &lt; 2.2e-16 , on 2 and 146 DoF, VCOV matrix: Standard.</span></code></pre></div>
 <p>In the previous code, <code>fitstat = ~ . + ivwald2</code> means that we want to add the second stage Wald test to the existing printed statistics (represented here by the point).</p>
 <p>Now what about adding some fixed-effects? That’s of course possible, you need to add them after the first right-hand-side, as follows:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
@@ -719,10 +718,10 @@
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 0.327938     Adj. R2: 0.836626</span>
 <span class="co">#&gt;                  Within R2: 0.585907</span>
-<span class="co">#&gt; F-test (1st stage), x_endo_1: stat = 21.28  , p = 7.969e-9, on 2 and 144 DoF.</span>
+<span class="co">#&gt; F-test (1st stage), x_endo_1: stat = 21.3   , p = 7.969e-9, on 2 and 144 DoF.</span>
 <span class="co">#&gt; F-test (1st stage), x_endo_2: stat =  4.7226, p = 0.010315, on 2 and 144 DoF.</span>
 <span class="co">#&gt;                   Wu-Hausman: stat =  1.3141, p = 0.271968, on 2 and 142 DoF.</span>
-<span class="co">#&gt;             Wald (2nd stage): stat = 19.57  , p = 3.02e-8 , on 2 and 144 DoF, VCOV matrix: Clustered (fe).</span></code></pre></div>
+<span class="co">#&gt;             Wald (2nd stage): stat = 19.6   , p = 3.02e-8 , on 2 and 144 DoF, VCOV matrix: Clustered (fe).</span></code></pre></div>
 <p>To access the first stage(s), you can use the summary method:</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">est_iv_fe</span>, stage <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>
@@ -740,7 +739,7 @@
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 0.346509     Adj. R2: 0.959865</span>
 <span class="co">#&gt;                  Within R2: 0.338407</span>
-<span class="co">#&gt; F-test (1st stage): stat = 21.28, p = 7.969e-9, on 2 and 144 DoF.</span>
+<span class="co">#&gt; F-test (1st stage): stat = 21.3, p = 7.969e-9, on 2 and 144 DoF.</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; IV: First stage: x_endo_2</span>
 <span class="co">#&gt; TSLS estimation, Dep. Var.: x_endo_2, Endo.: x_endo_1, x_endo_2, Instr.: x_inst_1, x_inst_2</span>
@@ -760,23 +759,23 @@
 <p>When <code>summary</code> shall return more than one element, the object returned is not a regular <code>fixest</code> object but a <code>fixest_multi</code> object. These kind of objects are covered in the vignette: <a href="https://cran.r-project.org/package=fixest/vignettes/multiple_estimations.html">Multiple estimations</a>. You can display the first and second stages in a table with <code>etable</code>:</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">est_iv_fe</span>, stage <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span>, fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">.</span> <span class="op">+</span> <span class="va">ivfall</span> <span class="op">+</span> <span class="va">ivwaldall.p</span><span class="op">)</span>
-<span class="co">#&gt;                                 model 1            model 2          model 3</span>
-<span class="co">#&gt; Dependent Var.:                x_endo_1           x_endo_2                y</span>
-<span class="co">#&gt;                                                                            </span>
-<span class="co">#&gt; x_inst_1                 0.706 (0.4856) -0.5467* (0.08137)                 </span>
-<span class="co">#&gt; x_inst_2                0.2023 (0.1433)   0.1831 (0.08345)                 </span>
-<span class="co">#&gt; x1                      0.1893 (0.1356)   0.1532 (0.08915) 0.4517. (0.1534)</span>
-<span class="co">#&gt; x_endo_1                                                   0.6667* (0.1066)</span>
-<span class="co">#&gt; x_endo_2                                                    0.4138 (0.1778)</span>
-<span class="co">#&gt; Fixed-Effects:          --------------- ------------------ ----------------</span>
-<span class="co">#&gt; fe                                  Yes                Yes              Yes</span>
-<span class="co">#&gt; _______________________ _______________ __________________ ________________</span>
-<span class="co">#&gt; S.E.: Clustered                  by: fe             by: fe           by: fe</span>
-<span class="co">#&gt; Observations                        150                150              150</span>
-<span class="co">#&gt; R2                             0.961212           0.072344         0.842109</span>
-<span class="co">#&gt; Within R2                      0.338407           0.063919         0.585907</span>
-<span class="co">#&gt; F-test (IV only)                  21.28             4.7226            8.221</span>
-<span class="co">#&gt; Wald (IV only), p-value        2.373e-9           1.373e-9          3.02e-8</span></code></pre></div>
+<span class="co">#&gt;                                 model 1           model 2          model 3</span>
+<span class="co">#&gt; Dependent Var.:                x_endo_1          x_endo_2                y</span>
+<span class="co">#&gt;                                                                           </span>
+<span class="co">#&gt; x_inst_1                0.7060 (0.4856) -0.5467* (0.0814)                 </span>
+<span class="co">#&gt; x_inst_2                0.2023 (0.1433)   0.1831 (0.0834)                 </span>
+<span class="co">#&gt; x1                      0.1893 (0.1356)   0.1532 (0.0891) 0.4517. (0.1534)</span>
+<span class="co">#&gt; x_endo_1                                                  0.6667* (0.1066)</span>
+<span class="co">#&gt; x_endo_2                                                   0.4138 (0.1778)</span>
+<span class="co">#&gt; Fixed-Effects:          --------------- ----------------- ----------------</span>
+<span class="co">#&gt; fe                                  Yes               Yes              Yes</span>
+<span class="co">#&gt; _______________________ _______________ _________________ ________________</span>
+<span class="co">#&gt; S.E.: Clustered                  by: fe            by: fe           by: fe</span>
+<span class="co">#&gt; Observations                        150               150              150</span>
+<span class="co">#&gt; R2                              0.96121           0.07234          0.84211</span>
+<span class="co">#&gt; Within R2                       0.33841           0.06392          0.58591</span>
+<span class="co">#&gt; F-test (IV only)                 21.285            4.7226           8.2210</span>
+<span class="co">#&gt; Wald (IV only), p-value         2.37e-9           1.37e-9          3.02e-8</span></code></pre></div>
 <p>Here we use <code>stage = 1:2</code> to get all first stage regressions followed by the second stage. Using <code>stage = 2:1</code> would have done the opposite.</p>
 <p>Now some explanations regarding <code>fitstat</code>. The suffix <code>all</code> concerns IV only and means the following: if it’s a first stage regression, then the first-stage F-stat is displayed, otherwise it’s the second stage F-stat. The suffix <code>.p</code> is used in <code>ivwaldall.p</code> to access the p-value and not the statistic. Finally, you can permanently set which fit statistic to display in <code>etable</code> by using <code>setFixest_etable</code>, like for example <code><a href="../reference/etable.html">setFixest_etable(fitstat = ~ . + ivfall + ivwaldall.p)</a></code>.</p>
 </div>
@@ -884,7 +883,7 @@
 <span class="co"># Accessing them</span>
 <span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">..ctrl</span><span class="op">)</span>
 <span class="co">#&gt; y ~ x1 + poly(x2, 2) + poly(x3, 2)</span>
-<span class="co">#&gt; &lt;environment: 0x0000000020272100&gt;</span>
+<span class="co">#&gt; &lt;environment: 0x000000002592ef28&gt;</span>
 
 <span class="co"># Definition at run time</span>
 <span class="va">vars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x2"</span>, <span class="st">"x2^2"</span>, <span class="st">"x3"</span><span class="op">)</span>
@@ -892,11 +891,11 @@
   <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">..ctrl</span>, ..ctrl <span class="op">=</span> <span class="va">vars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
 <span class="op">}</span>
 <span class="co">#&gt; y ~ x1 + x2</span>
-<span class="co">#&gt; &lt;environment: 0x000000001fd76f78&gt;</span>
+<span class="co">#&gt; &lt;environment: 0x000000001fad38a8&gt;</span>
 <span class="co">#&gt; y ~ x1 + x2 + x2^2</span>
-<span class="co">#&gt; &lt;environment: 0x000000001fdb0a10&gt;</span>
+<span class="co">#&gt; &lt;environment: 0x000000001fa993c8&gt;</span>
 <span class="co">#&gt; y ~ x1 + x2 + x2^2 + x3</span>
-<span class="co">#&gt; &lt;environment: 0x000000001fdec230&gt;</span></code></pre></div>
+<span class="co">#&gt; &lt;environment: 0x000000001fa5fb70&gt;</span></code></pre></div>
 <p>Macro variables must start with two dots. As seen in the example, once set globally they can be directly accessed with <code>xpd</code>. In the example, <code>xpd</code> redefines the formula at run-time by having a character vector as input.</p>
 <p>All <code>fixest</code> estimations call <code>xpd</code> internally if appropriate. This means that the following code works just fine:</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
@@ -920,7 +919,7 @@
 <span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">longley</span><span class="op">)</span>
 <span class="co">#&gt; Armed.Forces ~ Population + GNP.deflator + GNP + Unemployed + </span>
 <span class="co">#&gt;     Employed</span>
-<span class="co">#&gt; &lt;environment: 0x00000000215e4848&gt;</span></code></pre></div>
+<span class="co">#&gt; &lt;environment: 0x000000001c980438&gt;</span></code></pre></div>
 <p>Again, since <code>xpd</code> is called internally, the following works:</p>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, <span class="va">longley</span><span class="op">)</span>
@@ -936,7 +935,7 @@
 <span class="co">#&gt; Employed      -50.060000   25.348000 -1.974900 0.076522 .  </span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="co">#&gt; RMSE: 36.10   Adj. R2: 0.569345</span></code></pre></div>
+<span class="co">#&gt; RMSE: 36.1   Adj. R2: 0.569345</span></code></pre></div>
 </div>
 <div id="the-function-i-for-factors-and-interactions" class="section level2">
 <h2 class="hasAnchor">
@@ -958,21 +957,21 @@
 
 <span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">res_i1</span>, <span class="va">res_i2</span>, <span class="va">res_i3</span>, dict <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"6"</span> <span class="op">=</span> <span class="st">"June"</span>, <span class="st">"Month::5"</span> <span class="op">=</span> <span class="st">"May"</span><span class="op">)</span>, 
        order <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Int|May"</span>, <span class="st">"Mon"</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt;                           res_i1            res_i2              res_i3</span>
-<span class="co">#&gt; Dependent Var.:            Ozone             Ozone               Ozone</span>
-<span class="co">#&gt;                                                                       </span>
-<span class="co">#&gt; (Intercept)        3.219 (7.919)  40.12*** (7.828)    25.82*** (6.681)</span>
-<span class="co">#&gt; May                               -36.9*** (8.201)    -24.5*** (6.936)</span>
-<span class="co">#&gt; Month = June       5.069 (10.98)  -31.83** (11.05)     -19.46. (10.46)</span>
-<span class="co">#&gt; Month = 7       31.04*** (8.018)    -5.861 (8.146)                    </span>
-<span class="co">#&gt; Month = 8        36.9*** (8.201)                                      </span>
-<span class="co">#&gt; Month = 9          8.912 (7.763) -27.99*** (7.845)                    </span>
-<span class="co">#&gt; Solar.R         0.1148*** (0.03)  0.1148*** (0.03) 0.1253*** (0.03108)</span>
-<span class="co">#&gt; _______________ ________________ _________________ ___________________</span>
-<span class="co">#&gt; S.E. type               Standard          Standard            Standard</span>
-<span class="co">#&gt; Observations                 111               111                 111</span>
-<span class="co">#&gt; R2                      0.319741          0.319741            0.224521</span>
-<span class="co">#&gt; Adj. R2                 0.287347          0.287347            0.202778</span></code></pre></div>
+<span class="co">#&gt;                             res_i1             res_i2             res_i3</span>
+<span class="co">#&gt; Dependent Var.:              Ozone              Ozone              Ozone</span>
+<span class="co">#&gt;                                                                         </span>
+<span class="co">#&gt; (Intercept)          3.219 (7.919)   40.12*** (7.828)   25.82*** (6.681)</span>
+<span class="co">#&gt; May                                 -36.90*** (8.201)  -24.50*** (6.936)</span>
+<span class="co">#&gt; Month = June         5.069 (10.98)   -31.83** (11.05)    -19.46. (10.46)</span>
+<span class="co">#&gt; Month = 7         31.04*** (8.018)     -5.861 (8.146)                   </span>
+<span class="co">#&gt; Month = 8         36.90*** (8.201)                                      </span>
+<span class="co">#&gt; Month = 9            8.912 (7.763)  -27.99*** (7.845)                   </span>
+<span class="co">#&gt; Solar.R         0.1148*** (0.0300) 0.1148*** (0.0300) 0.1253*** (0.0311)</span>
+<span class="co">#&gt; _______________ __________________ __________________ __________________</span>
+<span class="co">#&gt; S.E. type                 Standard           Standard           Standard</span>
+<span class="co">#&gt; Observations                   111                111                111</span>
+<span class="co">#&gt; R2                         0.31974            0.31974            0.22452</span>
+<span class="co">#&gt; Adj. R2                    0.28735            0.28735            0.20278</span></code></pre></div>
 </div>
 <div id="estimating-yearly-treatment-effects" class="section level3">
 <h3 class="hasAnchor">
@@ -1021,6 +1020,125 @@
 <p><img src="fixest_walkthrough_files/figure-html/unnamed-chunk-42-1.png" width="672"></p>
 <p>The function <code>coefplot</code> detects that the results contain interactions and plot the appropriate graph. In case you wanted to display al the coefficients, including <code>x1</code>, you can use the argument <code>only.inter = FALSE</code>.</p>
 </div>
+<div id="staggered-difference-in-difference" class="section level3">
+<h3 class="hasAnchor">
+<a href="#staggered-difference-in-difference" class="anchor"></a>Staggered difference-in-difference</h3>
+<p>For staggered difference-in-difference analyzes, the method of Sun and Abraham (forthcoming, Journal of Econometrics) has been implemented. You first need to use <code><a href="../reference/i.html">i()</a></code> to insert <code>cohort x time to treatment</code> dummies, then you have to use the function <code>aggregate</code> to recover the yearly treatment effects. There is also a new argument <code>agg</code> in the functions <code>summary</code> and <code>etable</code>.</p>
+<p>Here’s an example with generated data where different cohorts get the treatment at different periods, and the effect of the treatment is cohort-specific and increasing over time.</p>
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<code class="sourceCode R">
+<span class="co">#</span>
+<span class="co"># Data</span>
+<span class="co">#</span>
+
+<span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>
+<span class="va">n_group</span> <span class="op">=</span> <span class="fl">20</span>
+<span class="va">n_per_group</span> <span class="op">=</span> <span class="fl">5</span>
+<span class="va">id_i</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n_group</span><span class="op">)</span>, <span class="st">":"</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n_per_group</span>, each <span class="op">=</span> <span class="va">n_group</span><span class="op">)</span><span class="op">)</span>
+<span class="va">id_t</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span>
+<span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html">expand.grid</a></span><span class="op">(</span>id <span class="op">=</span> <span class="va">id_i</span>, year <span class="op">=</span> <span class="va">id_t</span><span class="op">)</span>
+<span class="va">base</span><span class="op">$</span><span class="va">group</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html">gsub</a></span><span class="op">(</span><span class="st">":.+"</span>, <span class="st">""</span>, <span class="va">base</span><span class="op">$</span><span class="va">id</span><span class="op">)</span><span class="op">)</span>
+<span class="va">base</span><span class="op">$</span><span class="va">year_treated</span> <span class="op">=</span> <span class="va">base</span><span class="op">$</span><span class="va">group</span>
+<span class="va">base</span><span class="op">$</span><span class="va">year_treated</span><span class="op">[</span><span class="va">base</span><span class="op">$</span><span class="va">group</span> <span class="op">&gt;</span> <span class="fl">10</span><span class="op">]</span> <span class="op">=</span> <span class="fl">10000</span>
+<span class="va">base</span><span class="op">$</span><span class="va">treat_post</span> <span class="op">=</span> <span class="op">(</span><span class="va">base</span><span class="op">$</span><span class="va">year</span> <span class="op">&gt;=</span> <span class="va">base</span><span class="op">$</span><span class="va">year_treated</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1</span>
+<span class="va">base</span><span class="op">$</span><span class="va">time_to_treatment</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">pmax</a></span><span class="op">(</span><span class="va">base</span><span class="op">$</span><span class="va">year</span> <span class="op">-</span> <span class="va">base</span><span class="op">$</span><span class="va">year_treated</span>, <span class="op">-</span><span class="fl">1000</span><span class="op">)</span>
+<span class="va">base</span><span class="op">$</span><span class="va">treated</span> <span class="op">=</span> <span class="op">(</span><span class="va">base</span><span class="op">$</span><span class="va">year_treated</span> <span class="op">&lt;</span> <span class="fl">10000</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1</span>
+<span class="co"># The effect of the treatment is cohort specific and increases with time</span>
+<span class="va">base</span><span class="op">$</span><span class="va">y_true</span> <span class="op">=</span> <span class="va">base</span><span class="op">$</span><span class="va">treat_post</span> <span class="op">*</span> <span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="fl">1</span> <span class="op">*</span> <span class="va">base</span><span class="op">$</span><span class="va">time_to_treatment</span> <span class="op">-</span> <span class="fl">1</span> <span class="op">*</span> <span class="va">base</span><span class="op">$</span><span class="va">group</span><span class="op">)</span>
+<span class="va">base</span><span class="op">$</span><span class="va">y</span> <span class="op">=</span> <span class="va">base</span><span class="op">$</span><span class="va">y_true</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span><span class="op">)</span>
+
+<span class="co"># Note that the time_to_treatment for controls is set to -1000</span>
+
+<span class="co"># we need to drop the always treated</span>
+<span class="va">base</span> <span class="op">=</span> <span class="va">base</span><span class="op">[</span><span class="va">base</span><span class="op">$</span><span class="va">group</span> <span class="op">&gt;</span> <span class="fl">1</span>,<span class="op">]</span>
+
+<span class="co">#</span>
+<span class="co"># Estimations</span>
+<span class="co">#</span>
+
+<span class="co"># "Regular" DiD</span>
+<span class="va">res_naive</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="../reference/i.html">i</a></span><span class="op">(</span><span class="va">treated</span>, <span class="va">time_to_treatment</span>, ref <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>, drop <span class="op">=</span> <span class="op">-</span><span class="fl">1000</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base</span><span class="op">)</span>
+
+<span class="co"># with cohort x time to treatment dummies</span>
+<span class="va">res_cohort</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="../reference/i.html">i</a></span><span class="op">(</span><span class="va">time_to_treatment</span>, f2 <span class="op">=</span> <span class="va">group</span>, drop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1000</span><span class="op">)</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base</span><span class="op">)</span>
+
+<span class="co"># Looking at the difference between estimates</span>
+<span class="fu"><a href="../reference/coefplot.html">coefplot</a></span><span class="op">(</span><span class="va">res_naive</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">6</span>, <span class="fl">8</span><span class="op">)</span><span class="op">)</span>
+<span class="va">att_true</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">base</span><span class="op">$</span><span class="va">y_true</span>, <span class="va">base</span><span class="op">$</span><span class="va">time_to_treatment</span>, <span class="va">mean</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/points.html">points</a></span><span class="op">(</span><span class="op">-</span><span class="fl">9</span><span class="op">:</span><span class="fl">8</span> <span class="op">+</span> <span class="fl">0.15</span>, <span class="va">att_true</span>, pch <span class="op">=</span> <span class="fl">15</span>, col <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>
+
+<span class="co"># SA method: we aggregate the effects for each period</span>
+<span class="va">agg_coef</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html">aggregate</a></span><span class="op">(</span><span class="va">res_cohort</span>, <span class="st">"(ti.*nt)::(-?[[:digit:]])"</span><span class="op">)</span>
+<span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">9</span><span class="op">:</span><span class="op">-</span><span class="fl">2</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span> <span class="op">+</span> <span class="fl">.35</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/points.html">points</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">agg_coef</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">17</span>, col <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>
+<span class="va">ci_low</span> <span class="op">=</span> <span class="va">agg_coef</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">agg_coef</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>
+<span class="va">ci_up</span> <span class="op">=</span> <span class="va">agg_coef</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">agg_coef</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/segments.html">segments</a></span><span class="op">(</span>x0 <span class="op">=</span> <span class="va">x</span>, y0 <span class="op">=</span> <span class="va">ci_low</span>, x1 <span class="op">=</span> <span class="va">x</span>, y1 <span class="op">=</span> <span class="va">ci_up</span>, col <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/legend.html">legend</a></span><span class="op">(</span><span class="st">"topleft"</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span>, pch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">15</span>, <span class="fl">17</span><span class="op">)</span>, legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Naive"</span>, <span class="st">"True"</span>, <span class="st">"Sun &amp; Abraham"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p><img src="fixest_walkthrough_files/figure-html/unnamed-chunk-43-1.png" width="700"></p>
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<code class="sourceCode R">
+<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="va">agg_coef</span><span class="op">)</span>
+<span class="co">#&gt;                           Estimate Std. Error      t value     Pr(&gt;|t|)</span>
+<span class="co">#&gt; time_to_treatment::-9  0.806840136  0.4334011   1.86164745 6.303610e-02</span>
+<span class="co">#&gt; time_to_treatment::-8 -0.431400563  0.4818055  -0.89538322 3.708639e-01</span>
+<span class="co">#&gt; time_to_treatment::-7 -0.260711493  0.3347393  -0.77884941 4.363093e-01</span>
+<span class="co">#&gt; time_to_treatment::-6 -0.181541616  0.3103924  -0.58487774 5.588024e-01</span>
+<span class="co">#&gt; time_to_treatment::-5 -0.337881150  0.2777754  -1.21638269 2.242143e-01</span>
+<span class="co">#&gt; time_to_treatment::-4  0.004743884  0.2384895   0.01989138 9.841352e-01</span>
+<span class="co">#&gt; time_to_treatment::-3 -0.101172692  0.2619010  -0.38630134 6.993809e-01</span>
+<span class="co">#&gt; time_to_treatment::-2  0.075010517  0.2475293   0.30303691 7.619441e-01</span>
+<span class="co">#&gt; time_to_treatment::0  -4.904426782  0.1997866 -24.54832966 1.351668e-98</span>
+<span class="co">#&gt; time_to_treatment::1  -3.368242259  0.2352098 -14.32015901 2.208909e-41</span>
+<span class="co">#&gt; time_to_treatment::2  -1.954957777  0.2779783  -7.03277138 4.495328e-12</span>
+<span class="co">#&gt; time_to_treatment::3  -0.016010209  0.2798159  -0.05721695 9.543873e-01</span>
+<span class="co">#&gt; time_to_treatment::4   1.230228678  0.3215409   3.82604045 1.408435e-04</span>
+<span class="co">#&gt; time_to_treatment::5   2.657887580  0.3336853   7.96525177 5.969184e-15</span>
+<span class="co">#&gt; time_to_treatment::6   4.617598200  0.4548655  10.15156921 8.412069e-23</span>
+<span class="co">#&gt; time_to_treatment::7   5.384759098  0.5911951   9.10826010 7.186030e-19</span>
+<span class="co">#&gt; time_to_treatment::8   7.669704318  0.3394547  22.59419127 5.445229e-87</span></code></pre></div>
+<p>The function <code>aggregate</code> asks to aggregate the coefficients whose names match the regular expression <code>"(ti.*nt)::(-?[[:digit:]]+)"</code>. The two sets of parentheses are important here since the aggregation will be performed for each unique value in between parentheses. Here the aggregation will be done for each <code>time_to_treatment</code> (<code>ti.*nt</code>) and period (<code>-?[[:digit:]]</code>, which means negative and positive periods).</p>
+<p>Here is how to get the total treatment effect for the treated:</p>
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># The full ATT</span>
+<span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html">aggregate</a></span><span class="op">(</span><span class="va">res_cohort</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"ATT"</span> <span class="op">=</span> <span class="st">"treatment::[^-]"</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt;       Estimate Std. Error t value     Pr(&gt;|t|)</span>
+<span class="co">#&gt; ATT -0.7953741  0.2000186 -3.9765 7.657048e-05</span>
+<span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">base</span><span class="op">[</span><span class="va">base</span><span class="op">$</span><span class="va">treat_post</span> <span class="op">==</span> <span class="fl">1</span>, <span class="st">"y_true"</span><span class="op">]</span><span class="op">)</span>
+<span class="co">#&gt; [1] -1</span></code></pre></div>
+<p>This time the aggregation is operated across each cohort for non-negative time to treatment (<code>treatment::[^-]</code>). The previous code also requests that the outcome variable should be named <code>ATT</code>.</p>
+<p>Note that the functions <code>summary</code> and <code>etable</code> now accept the new argument <code>agg</code> which applies the function <code>aggregate</code>:</p>
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">res_cohort</span>, agg <span class="op">=</span> <span class="st">"(ti.*nt)::(-?[[:digit:]])"</span><span class="op">)</span>
+<span class="co">#&gt;                                res_cohort</span>
+<span class="co">#&gt; Dependent Var.:                         y</span>
+<span class="co">#&gt;                                          </span>
+<span class="co">#&gt; time_to_treatment = -9   0.8068. (0.4334)</span>
+<span class="co">#&gt; time_to_treatment = -8   -0.4314 (0.4818)</span>
+<span class="co">#&gt; time_to_treatment = -7   -0.2607 (0.3347)</span>
+<span class="co">#&gt; time_to_treatment = -6   -0.1815 (0.3104)</span>
+<span class="co">#&gt; time_to_treatment = -5   -0.3379 (0.2778)</span>
+<span class="co">#&gt; time_to_treatment = -4    0.0047 (0.2385)</span>
+<span class="co">#&gt; time_to_treatment = -3   -0.1012 (0.2619)</span>
+<span class="co">#&gt; time_to_treatment = -2    0.0750 (0.2475)</span>
+<span class="co">#&gt; time_to_treatment = 0  -4.904*** (0.1998)</span>
+<span class="co">#&gt; time_to_treatment = 1  -3.368*** (0.2352)</span>
+<span class="co">#&gt; time_to_treatment = 2  -1.955*** (0.2780)</span>
+<span class="co">#&gt; time_to_treatment = 3    -0.0160 (0.2798)</span>
+<span class="co">#&gt; time_to_treatment = 4   1.230*** (0.3215)</span>
+<span class="co">#&gt; time_to_treatment = 5   2.658*** (0.3337)</span>
+<span class="co">#&gt; time_to_treatment = 6   4.618*** (0.4549)</span>
+<span class="co">#&gt; time_to_treatment = 7   5.385*** (0.5912)</span>
+<span class="co">#&gt; time_to_treatment = 8   7.670*** (0.3395)</span>
+<span class="co">#&gt; Fixed-Effects:         ------------------</span>
+<span class="co">#&gt; id                                    Yes</span>
+<span class="co">#&gt; year                                  Yes</span>
+<span class="co">#&gt; ______________________ __________________</span>
+<span class="co">#&gt; S.E.: Clustered                    by: id</span>
+<span class="co">#&gt; Observations                          950</span>
+<span class="co">#&gt; R2                                0.81955</span>
+<span class="co">#&gt; Within R2                         0.75085</span></code></pre></div>
+</div>
 </div>
 <div id="lagging-variables" class="section level2">
 <h2 class="hasAnchor">
@@ -1031,7 +1149,7 @@
 <a href="#lagging-variables-in-an-estimation" class="anchor"></a>Lagging variables in an estimation</h3>
 <p>There are two ways to provide leads and/or lags in a <code>fixest</code> estimation. Either “on-the-fly” by using the argument <code>panel.id</code>, either by setting up a panel data set with the function <code>panel</code> (useful if you run multiple models needing lags and/or leads), described in the next subsection.</p>
 <p>To set up the panel on-the-fly, you need to use the <code>panel.id</code> argument, which will give you access to the functions <code>f</code> and <code>l</code> to create leads and lags, respectively. Let’s give an example, using the previous data set, where we use lags and leads of the explanatory and dependent variables.</p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">est1</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="../reference/f.html">l</a></span><span class="op">(</span><span class="va">x1</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>, <span class="va">base_did</span>, panel.id <span class="op">=</span> <span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">period</span><span class="op">)</span>
 <span class="co">#&gt; NOTE: 108 observations removed because of NA values (RHS: 108).</span>
 <span class="va">est2</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="../reference/f.html">f</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="../reference/f.html">l</a></span><span class="op">(</span><span class="va">x1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>, <span class="va">base_did</span>, panel.id <span class="op">=</span> <span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">period</span><span class="op">)</span>
@@ -1039,19 +1157,19 @@
 <span class="va">est3</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="../reference/f.html">l</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="../reference/f.html">l</a></span><span class="op">(</span><span class="va">x1</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>, <span class="va">base_did</span>, panel.id <span class="op">=</span> <span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">period</span><span class="op">)</span>
 <span class="co">#&gt; NOTE: 324 observations removed because of NA values (LHS: 108, RHS: 324).</span>
 <span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, <span class="va">est3</span>, order <span class="op">=</span> <span class="st">"f"</span>, drop <span class="op">=</span> <span class="st">"Int"</span><span class="op">)</span>
-<span class="co">#&gt;                                est1               est2                est3</span>
-<span class="co">#&gt; Dependent Var.:                   y             f(y,1)              l(y,1)</span>
-<span class="co">#&gt;                                                                           </span>
-<span class="co">#&gt; f(x1,1)                             0.994*** (0.05786)                    </span>
-<span class="co">#&gt; x1              0.9948*** (0.05315)  0.008072 (0.0584)  -0.05338 (0.05991)</span>
-<span class="co">#&gt; l(x1,1)           0.04096 (0.05401)  0.01569 (0.05854) 0.9871*** (0.06134)</span>
-<span class="co">#&gt; l(x1,2)                                                  0.02201 (0.06075)</span>
-<span class="co">#&gt; l(x1,3)                                                   0.0102 (0.05982)</span>
-<span class="co">#&gt; _______________ ___________________ __________________ ___________________</span>
-<span class="co">#&gt; S.E. type                  Standard           Standard            Standard</span>
-<span class="co">#&gt; Observations                    972                864                 756</span>
-<span class="co">#&gt; R2                          0.26558           0.256969            0.258748</span>
-<span class="co">#&gt; Adj. R2                    0.264064           0.254377            0.254799</span></code></pre></div>
+<span class="co">#&gt;                               est1               est2               est3</span>
+<span class="co">#&gt; Dependent Var.:                  y             f(y,1)             l(y,1)</span>
+<span class="co">#&gt;                                                                         </span>
+<span class="co">#&gt; f(x1,1)                            0.9940*** (0.0579)                   </span>
+<span class="co">#&gt; x1              0.9948*** (0.0532)    0.0081 (0.0584)   -0.0534 (0.0599)</span>
+<span class="co">#&gt; l(x1,1)            0.0410 (0.0540)    0.0157 (0.0585) 0.9871*** (0.0613)</span>
+<span class="co">#&gt; l(x1,2)                                                  0.0220 (0.0607)</span>
+<span class="co">#&gt; l(x1,3)                                                  0.0102 (0.0598)</span>
+<span class="co">#&gt; _______________ __________________ __________________ __________________</span>
+<span class="co">#&gt; S.E. type                 Standard           Standard           Standard</span>
+<span class="co">#&gt; Observations                   972                864                756</span>
+<span class="co">#&gt; R2                         0.26558            0.25697            0.25875</span>
+<span class="co">#&gt; Adj. R2                    0.26406            0.25438            0.25480</span></code></pre></div>
 <p>First of all, the value of <code>panel.id</code> corresponds to panel identifiers: first comes the variable identifying the panel-individuals, then comes the variables identifying the time. In the example, the <code>panel.id</code> came in the form of a one-sided formula, but it could equivalently be equal to <code>panel.id = c("id", "period")</code> or <code>panel.id = "id,period"</code>.</p>
 <p>As we can see, in the first estimation, a lag is created with the function <code>l</code>. The second argument of the function consists of a vector giving the lags we want. In this case, <code><a href="../reference/f.html">l(x1, 0:1)</a></code> means we want <code>x1</code> and the first lag of <code>x1</code>. This argument accepts negative values which give leads, as shown in the second estimation where <code><a href="../reference/f.html">l(x1, -1:1)</a></code> means that we want the first lead of <code>x1</code>, <code>x1</code>, then its first lag. In this example, we also use the first lead of <code>y</code> as a dependent variable with <code><a href="../reference/f.html">f(y)</a></code>.</p>
 </div>
@@ -1060,7 +1178,7 @@
 <a href="#setting-up-a-panel-data-set" class="anchor"></a>Setting up a panel data set</h3>
 <p>You can set up a panel data set with the function <code>panel</code>. There are between two and three advantages of doing so. First, if you have to estimate many models with leads and/or lags, setting up a panel gives you access to the lagging functions, <code>f</code> and <code>l</code>, without having to provide the <code>panel.id</code> argument we’ve seen in the previous subsection. Second, even when you estimate models with a sub-selection of the panel data, the data set is still a proper panel, meaning you can still use the lagging functions. Finally, and only if you are a <code>data.table</code> user, you can use the lagging functions to create new variables.</p>
 <p>Let’s repeat the previous example, now with a panel data set:</p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># setting up the panel</span>
 <span class="va">pdat</span> <span class="op">=</span> <span class="fu"><a href="../reference/panel.html">panel</a></span><span class="op">(</span><span class="va">base_did</span>, <span class="op">~</span><span class="va">id</span> <span class="op">+</span> <span class="va">period</span><span class="op">)</span>
 <span class="co"># Now the panel.id argument is not required</span>
@@ -1072,19 +1190,19 @@
 <span class="va">est_sub</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="../reference/f.html">l</a></span><span class="op">(</span><span class="va">x1</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>, <span class="va">pdat</span><span class="op">[</span><span class="op">!</span><span class="va">pdat</span><span class="op">$</span><span class="va">period</span> <span class="op">%in%</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>
 <span class="co">#&gt; NOTE: 324 observations removed because of NA values (RHS: 324).</span>
 <span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, <span class="va">est_sub</span>, order <span class="op">=</span> <span class="st">"f"</span>, drop <span class="op">=</span> <span class="st">"Int"</span><span class="op">)</span>
-<span class="co">#&gt;                                est1               est2             est_sub</span>
-<span class="co">#&gt; Dependent Var.:                   y             f(y,1)                   y</span>
-<span class="co">#&gt;                                                                           </span>
-<span class="co">#&gt; f(x1,1)                             0.994*** (0.05786)                    </span>
-<span class="co">#&gt; x1              0.9948*** (0.05315)  0.008072 (0.0584)  1.013*** (0.07326)</span>
-<span class="co">#&gt; l(x1,1)           0.04096 (0.05401)  0.01569 (0.05854) -0.006268 (0.07624)</span>
-<span class="co">#&gt; _______________ ___________________ __________________ ___________________</span>
-<span class="co">#&gt; S.E. type                  Standard           Standard            Standard</span>
-<span class="co">#&gt; Observations                    972                864                 540</span>
-<span class="co">#&gt; R2                          0.26558           0.256969            0.262581</span>
-<span class="co">#&gt; Adj. R2                    0.264064           0.254377            0.259834</span></code></pre></div>
+<span class="co">#&gt;                               est1               est2           est_sub</span>
+<span class="co">#&gt; Dependent Var.:                  y             f(y,1)                 y</span>
+<span class="co">#&gt;                                                                        </span>
+<span class="co">#&gt; f(x1,1)                            0.9940*** (0.0579)                  </span>
+<span class="co">#&gt; x1              0.9948*** (0.0532)    0.0081 (0.0584) 1.013*** (0.0733)</span>
+<span class="co">#&gt; l(x1,1)            0.0410 (0.0540)    0.0157 (0.0585)  -0.0063 (0.0762)</span>
+<span class="co">#&gt; _______________ __________________ __________________ _________________</span>
+<span class="co">#&gt; S.E. type                 Standard           Standard          Standard</span>
+<span class="co">#&gt; Observations                   972                864               540</span>
+<span class="co">#&gt; R2                         0.26558            0.25697           0.26258</span>
+<span class="co">#&gt; Adj. R2                    0.26406            0.25438           0.25983</span></code></pre></div>
 <p>Last, if you also use <code>data.table</code>, let’s give an example of lead/lag creation:</p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://r-datatable.com">data.table</a></span><span class="op">)</span>
 <span class="va">pdat_dt</span> <span class="op">=</span> <span class="fu"><a href="../reference/panel.html">panel</a></span><span class="op">(</span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html">as.data.table</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span>, <span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">period</span><span class="op">)</span>
 <span class="co"># we create a lagged value of the variable x1</span>
@@ -1113,7 +1231,7 @@
 <h3 class="hasAnchor">
 <a href="#creating-laglead-variables" class="anchor"></a>Creating lag/lead variables</h3>
 <p>If you just want to create a single lag/lead variable, a simple and fast method has been implemented: <code>lag.formula</code>. Let’s give an example:</p>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">base_lag</span> <span class="op">=</span> <span class="va">base_did</span>
 <span class="co"># we create a lagged value of the variable x1</span>
 <span class="va">base_lag</span><span class="op">$</span><span class="va">x1.l1</span> <span class="op">=</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/shift.html">lag</a></span><span class="op">(</span><span class="va">x1</span> <span class="op">~</span> <span class="va">id</span> <span class="op">+</span> <span class="va">period</span>, <span class="fl">1</span>, <span class="va">base_lag</span><span class="op">)</span>
@@ -1127,7 +1245,7 @@
 <span class="co">#&gt; 6  1.72873240 -0.6363849  1      6    1     1 -5.0443544</span></code></pre></div>
 <p>The first two arguments are mandatory. The formula informs on the variable to be lagged (on the left hand side), and the two panel identifiers. Note that the time index <strong>must</strong> appear second. The second argument tells how much lags we want. Using negative values gives leads. Finally the last argument informs on where to find the variables.</p>
 <p>In case you use the popular package <code>data.table</code>, you can create lagged variables very simply:</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://r-datatable.com">data.table</a></span><span class="op">)</span>
 <span class="va">base_lag_dt</span> <span class="op">=</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html">as.data.table</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span>
 <span class="co"># we create a lagged value of the variable x1</span>
@@ -1142,7 +1260,7 @@
 <p>In fact, this type of model is non-linear in the context of a Poisson model because the sum is embedded within the log:</p>
 <p><span class="math inline">\(E\left(z_i\right) = \exp\left(\log\left(a\times x_i + b\times y_i\right)\right)\)</span>.</p>
 <p>So let’s estimate such a relation. (Note that you can estimate this relation with GLM and identity link, but I carry on for the example.) First we generate the data:</p>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Generating data:</span>
 <span class="va">n</span> <span class="op">=</span> <span class="fl">1000</span>
 <span class="co"># x and y: two positive random variables</span>
@@ -1152,21 +1270,21 @@
 <span class="va">z</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html">rpois</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">2</span><span class="op">*</span><span class="va">x</span> <span class="op">+</span> <span class="fl">3</span><span class="op">*</span><span class="va">y</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html">rpois</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">1</span><span class="op">)</span>
 <span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">z</span><span class="op">)</span></code></pre></div>
 <p>To estimate the non-linear relationship, we need to use the argument <code>NL.fml</code> where we put the non-linear part. We also have to provide starting values with the argument <code>NL.start</code>. Finally, to ensure the RHS can be evaluated in any situation, we add lower bounds for the parameters with the argument <code>lower</code>.</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">result_NL</span> <span class="op">=</span> <span class="fu"><a href="../reference/feNmlm.html">feNmlm</a></span><span class="op">(</span><span class="va">z</span><span class="op">~</span><span class="fl">0</span>, <span class="va">base</span>, NL.fml <span class="op">=</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">a</span><span class="op">*</span><span class="va">x</span> <span class="op">+</span> <span class="va">b</span><span class="op">*</span><span class="va">y</span><span class="op">)</span>, NL.start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>a<span class="op">=</span><span class="fl">1</span>, b<span class="op">=</span><span class="fl">1</span><span class="op">)</span>, lower <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>a<span class="op">=</span><span class="fl">0</span>, b<span class="op">=</span><span class="fl">0</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>Note that the arguments <code>NL.start</code> and <code>lower</code> are named lists. Setting <code>lower = list(a=0, b=0)</code> means that the optimization algorithm will never explore parameters for <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> that are lower than 0. The results obtained can be interpreted similarly to results with linear RHS. We can see them with a print:</p>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="va">result_NL</span><span class="op">)</span>
 <span class="co">#&gt; Non-linear ML estimation, family = Poisson, Dep. Var.: z</span>
 <span class="co">#&gt; Observations: 1,000 </span>
 <span class="co">#&gt; Standard-errors: Standard </span>
 <span class="co">#&gt;   Estimate Std. Error z value  Pr(&gt;|z|)    </span>
-<span class="co">#&gt; a   2.0233   0.011217  180.38 &lt; 2.2e-16 ***</span>
-<span class="co">#&gt; b   3.0282   0.012684  238.74 &lt; 2.2e-16 ***</span>
+<span class="co">#&gt; a   2.0166   0.010686  188.71 &lt; 2.2e-16 ***</span>
+<span class="co">#&gt; b   3.0100   0.012371  243.30 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="co">#&gt; Log-Likelihood: -3,596.84   Adj. Pseudo R2: 0.942674</span>
-<span class="co">#&gt;            BIC:  7,207.51     Squared Cor.: 0.993353</span></code></pre></div>
+<span class="co">#&gt; Log-Likelihood: -3,648.2   Adj. Pseudo R2: 0.940644</span>
+<span class="co">#&gt;            BIC:  7,310.1     Squared Cor.: 0.992497</span></code></pre></div>
 <p>We can see that we obtain coefficients close to the generating values.</p>
 <div id="adding-fixed-effects-to-non-linear-in-parameters-models" class="section level3">
 <h3 class="hasAnchor">
@@ -1179,7 +1297,7 @@
 <p><span class="math inline">\(\gamma_{k} \left( a\times x_i + b\times y_i \right) = \gamma_{k}^{\prime} \left(a^{\prime}\times x_i + b^{\prime}\times y_i \right),\forall i,k\)</span>.</p>
 <p>An example is <span class="math inline">\(\gamma^{\prime}_{k} = 2\times \gamma_k\)</span>, <span class="math inline">\(a^{\prime} = a/2\)</span> and <span class="math inline">\(b^{\prime} = b/2\)</span>. Thus estimating this relation directly will lead to a problem to uniquely identify the coefficients. To circumvent this problem, we just have to fix one of the coefficient, this will ensure that we uniquely identify them.</p>
 <p>Let’s generate this relation:</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># the class of each observation</span>
 <span class="va">id</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fl">20</span>, <span class="va">n</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 <span class="va">base</span><span class="op">$</span><span class="va">id</span> <span class="op">=</span> <span class="va">id</span>
@@ -1189,24 +1307,24 @@
 <span class="va">z_bis</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html">rpois</a></span><span class="op">(</span><span class="va">n</span>, <span class="va">gamma</span><span class="op">[</span><span class="va">id</span><span class="op">]</span> <span class="op">*</span> <span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="va">x</span> <span class="op">+</span> <span class="fl">3</span><span class="op">*</span><span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html">rpois</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">1</span><span class="op">)</span>
 <span class="va">base</span><span class="op">$</span><span class="va">z_bis</span> <span class="op">=</span> <span class="va">z_bis</span></code></pre></div>
 <p>Now we estimate it with the fixed-effects while fixing one of the coefficients (we fix <span class="math inline">\(a\)</span> to its true value but it could be any value):</p>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># we add the fixed-effect in the formula</span>
 <span class="va">result_NL_fe</span> <span class="op">=</span> <span class="fu"><a href="../reference/feNmlm.html">feNmlm</a></span><span class="op">(</span><span class="va">z_bis</span><span class="op">~</span><span class="fl">0</span><span class="op">|</span><span class="va">id</span>, <span class="va">base</span>, NL.fml <span class="op">=</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="va">x</span> <span class="op">+</span> <span class="va">b</span><span class="op">*</span><span class="va">y</span><span class="op">)</span>, NL.start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>b<span class="op">=</span><span class="fl">1</span><span class="op">)</span>, lower <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>b<span class="op">=</span><span class="fl">0</span><span class="op">)</span><span class="op">)</span>
 <span class="co"># The coef should be around 3</span>
 <span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">result_NL_fe</span><span class="op">)</span>
 <span class="co">#&gt;        b </span>
-<span class="co">#&gt; 3.024891</span>
+<span class="co">#&gt; 3.044592</span>
 <span class="co"># the gamma and the exponential of the fixed-effects should be similar</span>
 <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="va">gamma</span>, <span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span><span class="op">(</span><span class="fu"><a href="../reference/fixef_reexported.html">fixef</a></span><span class="op">(</span><span class="va">result_NL_fe</span><span class="op">)</span><span class="op">$</span><span class="va">id</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt;              1         2         3         4           5        6          7</span>
-<span class="co">#&gt; gamma 2.679535 0.1707382 0.7294981 0.6375940 0.002920490 2.202472 0.08203791</span>
-<span class="co">#&gt;       2.670332 0.1831774 0.7519754 0.6240016 0.008805172 2.220800 0.08548657</span>
-<span class="co">#&gt;              8        9       10       11        12       13        14</span>
-<span class="co">#&gt; gamma 1.501218 1.262652 1.515043 1.681641 0.1949462 1.095457 1.0023382</span>
-<span class="co">#&gt;       1.454965 1.276599 1.493300 1.705419 0.1975139 1.104186 0.9971681</span>
-<span class="co">#&gt;              15       16        17        18        19        20</span>
-<span class="co">#&gt; gamma 0.3743722 2.606235 0.5238710 0.1428949 0.4871731 0.1550584</span>
-<span class="co">#&gt;       0.3896577 2.609243 0.5372464 0.1433603 0.4910665 0.1629123</span></code></pre></div>
+<span class="co">#&gt;               1        2        3        4       5        6         7        8</span>
+<span class="co">#&gt; gamma 0.1966356 2.321714 1.336874 1.433107 2.94581 1.294748 0.9059432 2.622001</span>
+<span class="co">#&gt;       0.2086638 2.337661 1.341064 1.410246 2.89515 1.292770 0.9150742 2.595100</span>
+<span class="co">#&gt;                9        10       11           12         13       14       15</span>
+<span class="co">#&gt; gamma 0.02816140 0.8247869 1.800416 0.0004859137 0.04285126 1.253855 1.056575</span>
+<span class="co">#&gt;       0.03537906 0.8300962 1.791857 0.0086916585 0.04710542 1.247642 1.026239</span>
+<span class="co">#&gt;               16        17         18         19         20</span>
+<span class="co">#&gt; gamma 0.09861765 0.9374176 0.08124185 0.07887982 0.01447222</span>
+<span class="co">#&gt;       0.10735884 0.9262197 0.08392894 0.08752722 0.01966111</span></code></pre></div>
 <p>As we can see, we obtain the “right” estimates.</p>
 </div>
 </div>
@@ -1214,7 +1332,7 @@
 <h2 class="hasAnchor">
 <a href="#multi-threading" class="anchor"></a>Multi-threading</h2>
 <p>The package <code>fixest</code> integrates multi-platform parallelism to hasten the estimation process. By default it makes use of 50% of all available threads. To change the number of threads used, just use the argument <code>nthreads</code>:</p>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Sample of results:</span>
 <span class="co"># 1 nthreads: 3.13s</span>
 <span class="fu"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span><span class="op">(</span><span class="fu"><a href="../reference/femlm.html">fenegbin</a></span><span class="op">(</span><span class="va">Euros</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span><span class="op">|</span><span class="va">Origin</span><span class="op">+</span><span class="va">Destination</span><span class="op">+</span><span class="va">Product</span><span class="op">+</span><span class="va">Year</span>, <span class="va">trade</span>, nthreads <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span>

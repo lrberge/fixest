@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
       </span>
     </div>
 
@@ -194,19 +194,19 @@
 </div><div class='output co'>#&gt; <span class='message'>NOTE: 108 observations removed because of NA values (RHS: 108).</span></div><div class='input'><span class='va'>est2</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='fu'>f</span><span class='op'>(</span><span class='va'>y</span><span class='op'>)</span> <span class='op'>~</span> <span class='fu'>l</span><span class='op'>(</span><span class='va'>x1</span>, <span class='op'>-</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>1</span><span class='op'>)</span>, <span class='va'>pdat</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; <span class='message'>NOTE: 216 observations removed because of NA values (LHS: 108, RHS: 216).</span></div><div class='input'><span class='va'>est3</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='fu'>l</span><span class='op'>(</span><span class='va'>y</span><span class='op'>)</span> <span class='op'>~</span> <span class='fu'>l</span><span class='op'>(</span><span class='va'>x1</span>, <span class='fl'>0</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>)</span>, <span class='va'>pdat</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; <span class='message'>NOTE: 324 observations removed because of NA values (LHS: 108, RHS: 324).</span></div><div class='input'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, <span class='va'>est3</span>, order <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"f"</span>, <span class='st'>"^x"</span><span class='op'>)</span>, drop <span class='op'>=</span> <span class='st'>"Int"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                                est1               est2                est3
-#&gt; Dependent Var.:                   y             f(y,1)              l(y,1)
-#&gt;                                                                           
-#&gt; f(x1,1)                             0.994*** (0.05786)                    
-#&gt; x1              0.9948*** (0.05315)  0.008072 (0.0584)  -0.05338 (0.05991)
-#&gt; l(x1,1)           0.04096 (0.05401)  0.01569 (0.05854) 0.9871*** (0.06134)
-#&gt; l(x1,2)                                                  0.02201 (0.06075)
-#&gt; l(x1,3)                                                   0.0102 (0.05982)
-#&gt; _______________ ___________________ __________________ ___________________
-#&gt; S.E. type                  Standard           Standard            Standard
-#&gt; Observations                    972                864                 756
-#&gt; R2                          0.26558           0.256969            0.258748
-#&gt; Adj. R2                    0.264064           0.254377            0.254799</div><div class='input'>
+</div><div class='output co'>#&gt;                               est1               est2               est3
+#&gt; Dependent Var.:                  y             f(y,1)             l(y,1)
+#&gt;                                                                         
+#&gt; f(x1,1)                            0.9940*** (0.0579)                   
+#&gt; x1              0.9948*** (0.0532)    0.0081 (0.0584)   -0.0534 (0.0599)
+#&gt; l(x1,1)            0.0410 (0.0540)    0.0157 (0.0585) 0.9871*** (0.0613)
+#&gt; l(x1,2)                                                  0.0220 (0.0607)
+#&gt; l(x1,3)                                                  0.0102 (0.0598)
+#&gt; _______________ __________________ __________________ __________________
+#&gt; S.E. type                 Standard           Standard           Standard
+#&gt; Observations                   972                864                756
+#&gt; R2                         0.26558            0.25697            0.25875
+#&gt; Adj. R2                    0.26406            0.25438            0.25480</div><div class='input'>
 <span class='co'># or using the argument panel.id</span>
 <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='fu'>f</span><span class='op'>(</span><span class='va'>y</span><span class='op'>)</span> <span class='op'>~</span> <span class='fu'>l</span><span class='op'>(</span><span class='va'>x1</span>, <span class='op'>-</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>1</span><span class='op'>)</span>, <span class='va'>base_did</span>, panel.id <span class='op'>=</span> <span class='op'>~</span><span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; <span class='message'>NOTE: 216 observations removed because of NA values (LHS: 108, RHS: 216).</span></div><div class='output co'>#&gt; OLS estimation, Dep. Var.: f(y, 1)
@@ -238,7 +238,7 @@
   <span class='va'>pdat_dt</span><span class='op'>[</span>, <span class='va'>x1_d1</span> <span class='op'>:=</span> <span class='fu'>d</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span><span class='op'>]</span>
   <span class='va'>pdat_dt</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"x1_l1_fill0"</span>, <span class='st'>"y_f2"</span><span class='op'>)</span> <span class='op'>:=</span> <span class='fu'>.</span><span class='op'>(</span><span class='fu'>l</span><span class='op'>(</span><span class='va'>x1</span>, fill <span class='op'>=</span> <span class='fl'>0</span><span class='op'>)</span>, <span class='fu'>f</span><span class='op'>(</span><span class='va'>y</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span><span class='op'>]</span>
 <span class='op'>}</span>
-</div><div class='output co'>#&gt; <span class='message'>Loading required package: data.table</span></div><div class='output co'>#&gt; <span class='error'>Error in `[.data.table`(x = pdat_dt, j = `:=`(x1_l1, l(x1))): object 'pdat_dt' not found</span></div><div class='input'>
+</div><div class='output co'>#&gt; <span class='message'>Loading required package: data.table</span></div><div class='output co'>#&gt; [1] TRUE</div><div class='input'>
 
 
 </div></pre>

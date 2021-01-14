@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
       </span>
     </div>
 
@@ -173,8 +173,8 @@
 <span class='fu'><a href='fitstat.html'>fitstat</a></span><span class='op'>(</span><span class='va'>gravity</span>, <span class='op'>~</span> <span class='va'>rmse</span> <span class='op'>+</span> <span class='va'>r2</span> <span class='op'>+</span> <span class='va'>wald</span> <span class='op'>+</span> <span class='va'>wf</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;         RMSE: 2.2622
 #&gt;          R2: 0.50428
-#&gt; Wald (joint nullity): stat =   272.89, p &lt; 2.2e-16, on 1 and 38,295 DoF, VCOV matrix: Clustered (Destination).
-#&gt;   F-test (projected): stat = 5,832.84, p &lt; 2.2e-16, on 1 and 38,295 DoF.</div><div class='input'>
+#&gt; Wald (joint nullity): stat =   272.9, p &lt; 2.2e-16, on 1 and 38,295 DoF, VCOV matrix: Clustered (Destination).
+#&gt;   F-test (projected): stat = 5,832.8, p &lt; 2.2e-16, on 1 and 38,295 DoF.</div><div class='input'>
 <span class='co'># You can use them in etable</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>gravity</span>, fitstat <span class='op'>=</span> <span class='op'>~</span> <span class='va'>rmse</span> <span class='op'>+</span> <span class='va'>r2</span> <span class='op'>+</span> <span class='va'>wald</span> <span class='op'>+</span> <span class='va'>wf</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                                 gravity
@@ -188,8 +188,8 @@
 #&gt; S.E.: Clustered         by: Destination
 #&gt; RMSE                             2.2622
 #&gt; R2                              0.50428
-#&gt; Wald (joint nullity)             272.89
-#&gt; F-test (projected)             5,832.84</div><div class='input'>
+#&gt; Wald (joint nullity)             272.90
+#&gt; F-test (projected)              5,832.8</div><div class='input'>
 <span class='co'># For wald and wf, you could show the pvalue instead:</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>gravity</span>, fitstat <span class='op'>=</span> <span class='op'>~</span> <span class='va'>rmse</span> <span class='op'>+</span> <span class='va'>r2</span> <span class='op'>+</span> <span class='va'>wald.p</span> <span class='op'>+</span> <span class='va'>wf.p</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                                          gravity
@@ -204,7 +204,7 @@
 #&gt; RMSE                                      2.2622
 #&gt; R2                                       0.50428
 #&gt; Wald (joint nullity), p-value           4.32e-61
-#&gt; F-test (projected), p-value                    0</div><div class='input'>
+#&gt; F-test (projected), p-value             NaNe-Inf</div><div class='input'>
 <span class='co'># Now let's display some statistics that are not built-in</span>
 <span class='co'># =&gt; we use fitstat_register to create them</span>
 
@@ -229,11 +229,11 @@
 #&gt; S.E.: Clustered       by: Destination
 #&gt; Observations                   38,325
 #&gt; R2                            0.50428
-#&gt; Within R2                    0.132181
-#&gt; t-stat (regular)               -76.37
-#&gt; t-stat (HC1)                   -80.12
-#&gt; t-stat (clustered)             -16.51
-#&gt; t-stat (2-way)                 -13.26</div><div class='input'>
+#&gt; Within R2                     0.13218
+#&gt; t-stat (regular)              -76.373
+#&gt; t-stat (HC1)                  -80.129
+#&gt; t-stat (clustered)            -16.520
+#&gt; t-stat (2-way)                -13.268</div><div class='input'>
 <span class='co'># Note that the custom stats we created are can easily lead</span>
 <span class='co'># to errors, but that's another story!</span>
 
