@@ -873,6 +873,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	    iv.mat = get("iv.mat", env) # we enforce (before) at least one variable in iv.mat
 	    K = ncol(iv.mat)
 	    n_endo = length(iv_lhs)
+	    lean = get("lean", env)
 
 	    if(isFixef){
 	        # we batch demean first
@@ -945,7 +946,8 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	            current_env = reshape_env(env, lhs = iv_lhs[[i]], rhs = ZX, fml_iv_endo = iv_lhs_names[i])
 
 	            my_res = feols(env = current_env, xwx = ZXtZX, xwy = ZXtu[[i]],
-	                           X_demean = ZX_demean, y_demean = iv_lhs_demean[[i]], add_fitted_demean = TRUE)
+	                           X_demean = ZX_demean, y_demean = iv_lhs_demean[[i]],
+	                           add_fitted_demean = TRUE, iv_call = TRUE)
 
 	            # For the F-stats
 	            if(n_vars_X == 0){
@@ -1007,7 +1009,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	        current_env = reshape_env(env, rhs = UX)
 	        res_second_stage = feols(env = current_env, xwx = UXtUX, xwy = UXty,
 	                                 X_demean = UX_demean, y_demean = y_demean,
-	                                 resid_1st_stage = resid_s1)
+	                                 resid_1st_stage = resid_s1, iv_call = TRUE)
 
 	        # For the F-stats
 	        if(n_vars_X == 0){
@@ -1061,7 +1063,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 	        for(i in 1:n_endo){
 	            current_env = reshape_env(env, lhs = iv_lhs[[i]], rhs = ZX, fml_iv_endo = iv_lhs_names[i])
-	            my_res = feols(env = current_env, xwx = ZXtZX, xwy = ZXtu[[i]])
+	            my_res = feols(env = current_env, xwx = ZXtZX, xwy = ZXtu[[i]], iv_call = TRUE)
 
 	            # For the F-stats
 	            fit_no_inst = ols_fit(iv_lhs[[i]], X, w = weights, correct_0w = FALSE, collin.tol = collin.tol, nthreads = nthreads,
@@ -1117,7 +1119,8 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	        resid_s1 = lapply(res_first_stage, function(x) x$residuals)
 
 	        current_env = reshape_env(env, rhs = UX)
-	        res_second_stage = feols(env = current_env, xwx = UXtUX, xwy = UXty, resid_1st_stage = resid_s1)
+	        res_second_stage = feols(env = current_env, xwx = UXtUX, xwy = UXty,
+	                                 resid_1st_stage = resid_s1, iv_call = TRUE)
 
 	        # For the F-stats
 	        fit_no_endo = ols_fit(y, X, w = weights, correct_0w = FALSE,
@@ -1186,6 +1189,15 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	        stat = length(r) * (1 - cpp_ssq(r, weights) / cpp_ssr_null(resid_2nd))
 	        p = pchisq(stat, df, lower.tail = FALSE)
 	        res_second_stage$iv_sargan = list(stat = stat, p = p, df = df)
+	    }
+
+	    # if lean = TRUE: we clean the IV residuals (which were needed so far)
+	    if(lean){
+	        for(i in 1:n_endo){
+	            res_first_stage[[i]]$residuals = NULL
+	        }
+
+	        res_second_stage$residuals = NULL
 	    }
 
 	    if(n_endo == 1){
@@ -1550,7 +1562,12 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	    dof = get("dof", env)
 	    summary_flags = get("summary_flags", env)
 
+	    # If lean = TRUE, 1st stage residuals are still needed for the 2nd stage
+	    if(isTRUE(dots$iv_call) && lean) r = res$residuals
+
 	    res = summary(res, se = se, cluster = cluster, dof = dof, lean = lean, summary_flags = summary_flags)
+
+	    if(isTRUE(dots$iv_call) && lean) res$residuals = r
 	}
 
 	res
