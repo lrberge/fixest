@@ -38,7 +38,7 @@ zozotintin [#81](https://github.com/lrberge/fixest/issues/81)).
  
  - Fix occasional bug in the ordering of sub-selections of multiple estimations. 
  
-# Sun and Abraham (forthcoming, Journal of Econometrics) method for staggered DiD
+## Sun and Abraham method for staggered DiD
 
  - For staggered difference-in-difference analyzes: the method of Sun and Abraham (forthcoming, Journal of Econometrics) has been implemented. 
  
@@ -48,7 +48,7 @@ zozotintin [#81](https://github.com/lrberge/fixest/issues/81)).
  
  - For details, check out the help page of the function `aggregate` or the staggered DiD section in the vignette [fixest walkthrough](https://CRAN.R-project.org/package=fixest/vignettes/fixest_walkthrough.html).
  
-# New features
+## New features
 
  - Function `i()` now has the new arguments `f2`, `drop2` and `keep2` which allows the interaction of two factors (useful for staggered DiD estimations).
  
@@ -61,7 +61,7 @@ zozotintin [#81](https://github.com/lrberge/fixest/issues/81)).
  - Argument `split` now accepts variable names.
  
 
-# Other
+## Other
 
   - More coherence regarding the use of `summary` applied to models for which the SEs were computed at estimation time. Now there is a memory of how the SEs were computed, so that, for example, if only the argument `dof` is passed to `summary`, then the SEs will be clustered in the same way as estimation time and only `dof` will change.
   

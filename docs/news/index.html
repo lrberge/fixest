@@ -177,6 +177,38 @@
 <li><p>Fix occasional bug in the ordering of sub-selections of multiple estimations.</p></li>
 </ul>
 </div>
+<div id="sun-and-abraham-method-for-staggered-did" class="section level2">
+<h2 class="hasAnchor">
+<a href="#sun-and-abraham-method-for-staggered-did" class="anchor"></a>Sun and Abraham method for staggered DiD</h2>
+<ul>
+<li><p>For staggered difference-in-difference analyzes: the method of Sun and Abraham (forthcoming, Journal of Econometrics) has been implemented.</p></li>
+<li><p>After having used <code><a href="../reference/i.html">i()</a></code> to interact cohort dummies with time to treatment dummies, use the function <code>aggregate</code> to recover the yearly treatment effects.</p></li>
+<li><p>So far the way to do it, although easy, is a bit arcane but the next versions of the software will include a user-friendly way.</p></li>
+<li><p>For details, check out the help page of the function <code>aggregate</code> or the staggered DiD section in the vignette <a href="https://CRAN.R-project.org/package=fixest/vignettes/fixest_walkthrough.html">fixest walkthrough</a>.</p></li>
+</ul>
+</div>
+<div id="new-features" class="section level2">
+<h2 class="hasAnchor">
+<a href="#new-features" class="anchor"></a>New features</h2>
+<ul>
+<li><p>Function <code><a href="../reference/i.html">i()</a></code> now has the new arguments <code>f2</code>, <code>drop2</code> and <code>keep2</code> which allows the interaction of two factors (useful for staggered DiD estimations).</p></li>
+<li><p>Argument <code>dof</code>, used to compute the standard-errors, can now be used at estimation time.</p></li>
+<li><p>In <code>etable</code>, the argument <code>digits</code> can now accepts a character value specifying the way the decimals should be displayed. For example if <code>digits = "r2"</code> this means that all numbers will be rounded at two decimals and these two decimals will always be displayed. The default behavior is to display significant digits. Follows feature request <a href="https://github.com/lrberge/fixest/issues/82"><a href='https://github.com/lrberge/fixest/issues/82'>#82</a></a> by <a href='https://github.com/lyifa'>@lyifa</a>.</p></li>
+<li><p><code>etable</code> also gains the argument <code>digits.stats</code> which monitors how the fit statistics decimals should be displayed.</p></li>
+<li><p>Argument <code>split</code> now accepts variable names.</p></li>
+</ul>
+</div>
+<div id="other-1" class="section level2">
+<h2 class="hasAnchor">
+<a href="#other-1" class="anchor"></a>Other</h2>
+<ul>
+<li><p>More coherence regarding the use of <code>summary</code> applied to models for which the SEs were computed at estimation time. Now there is a memory of how the SEs were computed, so that, for example, if only the argument <code>dof</code> is passed to <code>summary</code>, then the SEs will be clustered in the same way as estimation time and only <code>dof</code> will change.</p></li>
+<li><p>Now an error is raised when <code><a href="../reference/i.html">i()</a></code> is used in the fixed-effects part of the formula. The appropriate way is indicated (related to <a href="https://github.com/lrberge/fixest/issues/77"><a href='https://github.com/lrberge/fixest/issues/77'>#77</a></a> by <a href='https://github.com/rrichmond'>@rrichmond</a>).</p></li>
+<li><p>Improved default setting of standard-errors.</p></li>
+<li><p>Improved error messages.</p></li>
+<li><p>In multiple estimations, models returning full NA coefficients are not returned (instead of raising an error).</p></li>
+</ul>
+</div>
 </div>
     <div id="fixest-080-2020-12-14" class="section level1">
 <h1 class="page-header" data-toc-text="0.8.0">
