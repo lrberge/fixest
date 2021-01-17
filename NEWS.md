@@ -6,6 +6,8 @@
   - Fix bug in IV estimations when `lean = TRUE` (thanks to @reifjulian [#88](https://github.com/lrberge/fixest/issues/88)).
   
   - Fix various bugs related to the use of `summary` when `lean = TRUE` in the estimation.
+  
+  - Fix bug preventin `se = cluster` to be used in `etable` (thanks to Caleb Kwon).
 
 ## Other
 

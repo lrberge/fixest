@@ -283,7 +283,7 @@ etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, agg = N
     }
 
     if(!missnull(se)){
-        check_arg_plus(se, "match(standard, white, hetero, oneway, twoway, threeway, fourway)")
+        check_arg_plus(se, "match(standard, white, hetero, cluster, twoway, threeway, fourway)")
     } else {
         se = NULL
     }
