@@ -1905,6 +1905,7 @@ etable_internal_latex = function(info){
         }
         coef_lines = paste0(coef_lines, collapse="")
     } else {
+        coef_mat[, 1] = aliasVars
         coef_lines = paste0(paste0(apply(coef_mat, 1, paste0, collapse = " & "), collapse="\\\\\n"), "\\\\\n")
     }
 
