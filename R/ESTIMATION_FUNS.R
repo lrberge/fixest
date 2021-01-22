@@ -17,7 +17,7 @@
 #' @param verbose Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algorithm (the first number is the left-hand-side, the other numbers are the right-hand-side variables).
 #' @param demeaned Logical, default is \code{FALSE}. Only used in the presence of fixed-effects: should the centered variables be returned? If \code{TRUE}, it creates the items \code{y_demeaned} and \code{X_demeaned}.
 #' @param notes Logical. By default, two notes are displayed: when NAs are removed (to show additional information) and when some observations are removed because of collinearity. To avoid displaying these messages, you can set \code{notes = FALSE}. You can remove these messages permanently by using \code{setFixest_notes(FALSE)}.
-#' @param collin.tol Numeric scalar, default is \code{1e-10}. Threshold deciding when variables should be considered collinear and subsequently removed from the estimation. Higher values means more variables will be removed (if there is presence of collinearity). One signal of presence of collinearity is t-stats that are extremely low (for instance when t-stats < 1e-3).
+#' @param collin.tol Numeric scalar, default is \code{1e-4}. Threshold deciding when variables should be considered collinear and subsequently removed from the estimation. Higher values means more variables will be removed (if there is presence of collinearity). One signal of presence of collinearity is t-stats that are extremely low (for instance when t-stats < 1e-3).
 #'
 #' @details
 #' The method used to demean each variable along the fixed-effects is based on Berge (2018), since this is the same problem to solve as for the Gaussian case in a ML setup.
@@ -280,7 +280,7 @@
 #' est_split[sample = 1:2, lhs = 1, rhs = 1]
 #'
 feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se, dof, panel.id, fixef, fixef.rm = "none", fixef.tol = 1e-6,
-                 fixef.iter = 10000, collin.tol = 1e-10, nthreads = getFixest_nthreads(), lean = FALSE, verbose = 0, warn = TRUE,
+                 fixef.iter = 10000, collin.tol = 1e-4, nthreads = getFixest_nthreads(), lean = FALSE, verbose = 0, warn = TRUE,
                  notes = getFixest_notes(), combine.quick, demeaned = FALSE, mem.clean = FALSE, only.env = FALSE, env, ...){
 
 	dots = list(...)
@@ -1809,7 +1809,7 @@ check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights){
 #'
 #'
 feglm = function(fml, data, family = "poisson", offset, weights, subset, split, fsplit, cluster, se, dof, panel.id, start = NULL,
-                 etastart = NULL, mustart = NULL, fixef, fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
+                 etastart = NULL, mustart = NULL, fixef, fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-4,
                  glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(), lean = FALSE,
                  warn = TRUE, notes = getFixest_notes(), verbose = 0, combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
 
@@ -1852,7 +1852,7 @@ feglm = function(fml, data, family = "poisson", offset, weights, subset, split, 
 #' @rdname feglm
 feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, split, fsplit, cluster, se, dof, weights, subset, start = NULL,
                      etastart = NULL, mustart = NULL, fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000,
-                     collin.tol = 1e-10, glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(), lean = FALSE, warn = TRUE,
+                     collin.tol = 1e-4, glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(), lean = FALSE, warn = TRUE,
                      notes = getFixest_notes(), mem.clean = FALSE, verbose = 0, only.env = FALSE, env, ...){
 
     dots = list(...)
@@ -2675,7 +2675,7 @@ fenegbin = function(fml, data, theta.init, start = 0, fixef, fixef.rm = "perfect
 #' @rdname feglm
 fepois = function(fml, data, offset, weights, subset, split, fsplit, cluster, se, dof, panel.id,
                   start = NULL, etastart = NULL, mustart = NULL,
-                  fixef, fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
+                  fixef, fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-4,
                   glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(), lean = FALSE, warn = TRUE, notes = getFixest_notes(),
                   verbose = 0, combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
 
@@ -3718,24 +3718,3 @@ multi_fixef = function(env, estfun){
     return(res_multi)
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

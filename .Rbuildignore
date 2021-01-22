@@ -11,3 +11,4 @@
 ^.github$
 ^check$
 ^_AUTO_BENCHMARK$
+^tests-slow/

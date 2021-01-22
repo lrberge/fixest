@@ -9,7 +9,7 @@ setFixest_estimation(
   fixef.rm = "perfect",
   fixef.tol = 1e-06,
   fixef.iter = 10000,
-  collin.tol = 1e-10,
+  collin.tol = 1e-04,
   lean = FALSE,
   verbose = 0,
   warn = TRUE,
@@ -30,7 +30,7 @@ getFixest_estimation()
 
 \item{fixef.iter}{Maximum number of iterations in fixed-effects algorithm (only in use for 2+ fixed-effects). Default is 10000.}
 
-\item{collin.tol}{Numeric scalar, default is \code{1e-10}. Threshold deciding when variables should be considered collinear and subsequently removed from the estimation. Higher values means more variables will be removed (if there is presence of collinearity). One signal of presence of collinearity is t-stats that are extremely low (for instance when t-stats < 1e-3).}
+\item{collin.tol}{Numeric scalar, default is \code{1e-4}. Threshold deciding when variables should be considered collinear and subsequently removed from the estimation. Higher values means more variables will be removed (if there is presence of collinearity). One signal of presence of collinearity is t-stats that are extremely low (for instance when t-stats < 1e-3).}
 
 \item{lean}{Logical, default is \code{FALSE}. If \code{TRUE} then all large objects are removed from the returned result: this will save memory but will block the possibility to use many methods. It is recommended to use the arguments \code{se} or \code{cluster} to obtain the appropriate standard-errors at estimation time, since obtaining different SEs won't be possible afterwards.}
 

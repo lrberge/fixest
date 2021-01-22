@@ -13,7 +13,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                        cluster, se, dof,
                        y, X, fixef_mat, panel.id, fixef.rm = "perfect",
                        nthreads = getFixest_nthreads(), lean = FALSE,
-                       verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000, collin.tol = 1e-14,
+                       verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000, collin.tol = 1e-4,
                        deriv.iter = 5000, deriv.tol = 1e-4, glm.iter = 25, glm.tol = 1e-8,
                        etastart, mustart,
                        warn = TRUE, notes = getFixest_notes(), combine.quick, demeaned = FALSE,
@@ -3598,5 +3598,3 @@ fixest_NA_results = function(env){
 
     res
 }
-
-
