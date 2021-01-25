@@ -14,6 +14,8 @@
 ## Other
 
  - `i()` now automatically converts its first argument to numeric if it was of type logical. The user can still pass logicals to the argument `f2` if the expected behavior is really to treat it as a logical.
+ 
+ - Improve `fitstat` help and error messages.
 
 # fixest 0.8.1 (2021-01-13)
 
