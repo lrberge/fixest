@@ -39,7 +39,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -74,7 +74,7 @@
 <ul class="nav navbar-nav navbar-right">
 <li>
   <a href="https://github.com/lrberge/fixest/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -88,13 +88,13 @@
 
       
 
-      </header><script src="fixest_walkthrough_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><script src="fixest_walkthrough_files/header-attrs-2.6/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Fast Fixed-Effects Estimation: Short introduction</h1>
                         <h4 class="author">Laurent Berge</h4>
             
-            <h4 class="date">2021-01-14</h4>
+            <h4 class="date">2021-01-26</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/fixest_walkthrough.Rmd"><code>vignettes/fixest_walkthrough.Rmd</code></a></small>
       <div class="hidden name"><code>fixest_walkthrough.Rmd</code></div>
@@ -883,7 +883,7 @@
 <span class="co"># Accessing them</span>
 <span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">..ctrl</span><span class="op">)</span>
 <span class="co">#&gt; y ~ x1 + poly(x2, 2) + poly(x3, 2)</span>
-<span class="co">#&gt; &lt;environment: 0x000000002592ef28&gt;</span>
+<span class="co">#&gt; &lt;environment: 0x000000001c4da710&gt;</span>
 
 <span class="co"># Definition at run time</span>
 <span class="va">vars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x2"</span>, <span class="st">"x2^2"</span>, <span class="st">"x3"</span><span class="op">)</span>
@@ -891,11 +891,11 @@
   <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">..ctrl</span>, ..ctrl <span class="op">=</span> <span class="va">vars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
 <span class="op">}</span>
 <span class="co">#&gt; y ~ x1 + x2</span>
-<span class="co">#&gt; &lt;environment: 0x000000001fad38a8&gt;</span>
+<span class="co">#&gt; &lt;environment: 0x000000001c1ab0c0&gt;</span>
 <span class="co">#&gt; y ~ x1 + x2 + x2^2</span>
-<span class="co">#&gt; &lt;environment: 0x000000001fa993c8&gt;</span>
+<span class="co">#&gt; &lt;environment: 0x000000001c173920&gt;</span>
 <span class="co">#&gt; y ~ x1 + x2 + x2^2 + x3</span>
-<span class="co">#&gt; &lt;environment: 0x000000001fa5fb70&gt;</span></code></pre></div>
+<span class="co">#&gt; &lt;environment: 0x000000001d1b6a80&gt;</span></code></pre></div>
 <p>Macro variables must start with two dots. As seen in the example, once set globally they can be directly accessed with <code>xpd</code>. In the example, <code>xpd</code> redefines the formula at run-time by having a character vector as input.</p>
 <p>All <code>fixest</code> estimations call <code>xpd</code> internally if appropriate. This means that the following code works just fine:</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
@@ -919,7 +919,7 @@
 <span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">longley</span><span class="op">)</span>
 <span class="co">#&gt; Armed.Forces ~ Population + GNP.deflator + GNP + Unemployed + </span>
 <span class="co">#&gt;     Employed</span>
-<span class="co">#&gt; &lt;environment: 0x000000001c980438&gt;</span></code></pre></div>
+<span class="co">#&gt; &lt;environment: 0x0000000017574810&gt;</span></code></pre></div>
 <p>Again, since <code>xpd</code> is called internally, the following works:</p>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, <span class="va">longley</span><span class="op">)</span>
@@ -1023,6 +1023,7 @@
 <div id="staggered-difference-in-difference" class="section level3">
 <h3 class="hasAnchor">
 <a href="#staggered-difference-in-difference" class="anchor"></a>Staggered difference-in-difference</h3>
+<p><em>Note that the content of this section is only valid for <code>fixest</code> version 0.8.1 or later.</em></p>
 <p>For staggered difference-in-difference analyzes, the method of Sun and Abraham (forthcoming, Journal of Econometrics) has been implemented. You first need to use <code><a href="../reference/i.html">i()</a></code> to insert <code>cohort x time to treatment</code> dummies, then you have to use the function <code>aggregate</code> to recover the yearly treatment effects. There is also a new argument <code>agg</code> in the functions <code>summary</code> and <code>etable</code>.</p>
 <p>Here’s an example with generated data where different cohorts get the treatment at different periods, and the effect of the treatment is cohort-specific and increasing over time.</p>
 <div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
@@ -1203,7 +1204,7 @@
 <span class="co">#&gt; Adj. R2                    0.26406            0.25438           0.25983</span></code></pre></div>
 <p>Last, if you also use <code>data.table</code>, let’s give an example of lead/lag creation:</p>
 <div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://r-datatable.com">data.table</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://Rdatatable.gitlab.io/data.table">data.table</a></span><span class="op">)</span>
 <span class="va">pdat_dt</span> <span class="op">=</span> <span class="fu"><a href="../reference/panel.html">panel</a></span><span class="op">(</span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html">as.data.table</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span>, <span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">period</span><span class="op">)</span>
 <span class="co"># we create a lagged value of the variable x1</span>
 <span class="va">pdat_dt</span><span class="op">[</span>, <span class="va">x1_l1</span> <span class="op">:=</span> <span class="fu"><a href="../reference/f.html">l</a></span><span class="op">(</span><span class="va">x1</span><span class="op">)</span><span class="op">]</span>
@@ -1246,7 +1247,7 @@
 <p>The first two arguments are mandatory. The formula informs on the variable to be lagged (on the left hand side), and the two panel identifiers. Note that the time index <strong>must</strong> appear second. The second argument tells how much lags we want. Using negative values gives leads. Finally the last argument informs on where to find the variables.</p>
 <p>In case you use the popular package <code>data.table</code>, you can create lagged variables very simply:</p>
 <div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://r-datatable.com">data.table</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://Rdatatable.gitlab.io/data.table">data.table</a></span><span class="op">)</span>
 <span class="va">base_lag_dt</span> <span class="op">=</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html">as.data.table</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span>
 <span class="co"># we create a lagged value of the variable x1</span>
 <span class="va">base_lag_dt</span><span class="op">[</span>, <span class="va">x1.l1</span> <span class="op">:=</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/shift.html">lag</a></span><span class="op">(</span><span class="va">x1</span> <span class="op">~</span> <span class="va">id</span> <span class="op">+</span> <span class="va">period</span>, <span class="fl">1</span><span class="op">)</span><span class="op">]</span></code></pre></div>

@@ -505,6 +505,8 @@ The function `coefplot` detects that the results contain interactions and plot t
 
 ### Staggered difference-in-difference
 
+*Note that the content of this section is only valid for `fixest` version 0.8.1 or later.*
+
 For staggered difference-in-difference analyzes, the method of Sun and Abraham (forthcoming, Journal of Econometrics) has been implemented. You first need to use `i()` to insert `cohort x time to treatment` dummies, then you have to use the function `aggregate` to recover the yearly treatment effects. There is also a new argument `agg` in the functions `summary` and `etable`.
 
 Here's an example with generated data where different cohorts get the treatment at different periods, and the effect of the treatment is cohort-specific and increasing over time.
