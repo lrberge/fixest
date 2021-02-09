@@ -9,7 +9,7 @@ fitstat(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE, ...)
 \arguments{
 \item{x}{A \code{fixest} estimation.}
 
-\item{type}{Character vector. The type of fit statistic to be computed. The classic ones are: n, rmse, r2, pr2, f, wald, ivf, ivwald. You have the full list in the details section. Further, you can register your own types with \code{\link[fixest]{fitstat_register}}.}
+\item{type}{Character vector or one sided formula. The type of fit statistic to be computed. The classic ones are: n, rmse, r2, pr2, f, wald, ivf, ivwald. You have the full list in the details section or use \code{show_types = TRUE}. Further, you can register your own types with \code{\link[fixest]{fitstat_register}}.}
 
 \item{simplify}{Logical, default is \code{FALSE}. By default a list is returned whose names are the selected types. If \code{simplify = TRUE} and only one type is selected, then the element is directly returned (ie will not be nested in a list).}
 
