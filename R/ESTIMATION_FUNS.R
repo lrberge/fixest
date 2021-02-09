@@ -353,6 +353,8 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 		mem.clean = get("mem.clean", env)
 
+		demeaned = get("demeaned", env)
+
 		verbose = get("verbose", env)
 		if(verbose >= 2) gt("Setup")
 	}

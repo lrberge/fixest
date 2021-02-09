@@ -2156,6 +2156,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     assign("warn", warn, env)
     assign("mem.clean", mem.clean, env)
     assign("nthreads", nthreads, env)
+    assign("demeaned", demeaned, env)
 
     # Summary
     assign("do_summary", do_summary, env)
