@@ -1197,9 +1197,11 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	    if(lean){
 	        for(i in 1:n_endo){
 	            res_first_stage[[i]]$residuals = NULL
+	            res_first_stage[[i]]$fitted.values = NULL
 	        }
 
 	        res_second_stage$residuals = NULL
+	        res_second_stage$fitted.values = NULL
 	    }
 
 	    if(n_endo == 1){
@@ -1565,11 +1567,17 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	    summary_flags = get("summary_flags", env)
 
 	    # If lean = TRUE, 1st stage residuals are still needed for the 2nd stage
-	    if(isTRUE(dots$iv_call) && lean) r = res$residuals
+	    if(isTRUE(dots$iv_call) && lean){
+	        r = res$residuals
+	        fv = res$fitted.values
+	    }
 
 	    res = summary(res, se = se, cluster = cluster, dof = dof, lean = lean, summary_flags = summary_flags)
 
-	    if(isTRUE(dots$iv_call) && lean) res$residuals = r
+	    if(isTRUE(dots$iv_call) && lean){
+	        res$residuals = r
+	        res$fitted.values = fv
+	    }
 	}
 
 	res
