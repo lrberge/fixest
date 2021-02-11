@@ -447,7 +447,7 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	            }
 	        } else {
 	            # We keep the information on clustering => matters for wald tests of 1st stage
-	            keep_se_info = length(stage) == 1
+	            keep_se_info = length(stage) == 1 && !lean
 	            my_res = summary(object, se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nthreads = nthreads, iv = TRUE, keep_se_info = keep_se_info)
 
 	            if(keep_se_info){
@@ -579,7 +579,33 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	object$se = se
 
 	if(lean){
-	    object[c("fixef_id", "residuals", "fitted.values", "scores", "sumFE", "slope_variables_reordered", "y", "weights", "irls_weights", "obsRemoved", "obs_selection", "iv_residuals")] = NULL
+	    var2clean = c("fixef_id", "residuals", "fitted.values", "scores", "sumFE", "slope_variables_reordered", "y", "weights", "irls_weights", "obsRemoved", "obs_selection", "iv_residuals")
+
+	    object[var2clean] = NULL
+
+	    # Pfff, I need to further clean the IV first stages
+	    # => I can't just remove "iv_first_stage" because some stuff in there is needed in fitstat
+	    if(!is.null(object$iv_first_stage)){
+	        # NOTE that I do not compute the SEs of the 1st stages => I only remove stuff!
+	        # If the user wants 1st stage SEs => s/he just need to use the 'stage' argument!
+	        if("fixest" %in% class(object$iv_first_stage)){
+	            tmp = object$iv_first_stage
+	            tmp[var2clean] = NULL
+	            tmp$lean = TRUE
+	            object$iv_first_stage = tmp
+	        } else {
+	            tmp_all = object$iv_first_stage
+	            for(i in seq_along(tmp_all)){
+	                tmp = tmp_all[[i]]
+	                tmp[var2clean] = NULL
+	                tmp$lean = TRUE
+	                tmp_all[[i]] = tmp
+	            }
+	            object$iv_first_stage = tmp_all
+	        }
+	    }
+
+
 	    object$lean = TRUE
 	}
 
@@ -593,6 +619,14 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	} else {
 	    # build_flags does not accept missing arguments
 	    if(missing(dof)) dof = NULL
+
+	    if(lean && !is.null(cluster_in) &&
+	       !(inherits(cluster_in, "formula") || (!is.list(cluster_in) && length(cluster_in) <= 3))){
+	        # Here => means the user has manually provided a cluster => will be of size N at least
+	        # To respect lean = TRUE we keep no memory of this choice
+	        se_in = cluster_in = NULL
+	    }
+
 	    object$summary_flags = build_flags(mc, se = se_in, cluster = cluster_in, dof = dof)
 	    object$summary_from_fit = NULL
 	}
