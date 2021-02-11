@@ -7,9 +7,13 @@
   
   - Fix various bugs related to the use of `summary` when `lean = TRUE` in the estimation.
   
-  - Fix bug preventing `se = cluster` to be used in `etable` (thanks to Caleb Kwon).
+  - Fix bug preventing `se = "cluster"` to be used in `etable` (thanks to Caleb Kwon).
   
   - Fix bug `etable` not escaping variable names properly when `sdBelow = FALSE` (thanks to Jeppe Viero).
+  
+  - Fix bug in IV estimation with `lean = TRUE`.
+  
+  - Fix bug preventing the return of demeaned variables in IV estimations (thanks to @amarbler [#94](https://github.com/lrberge/fixest/issues/94)).
 
 ## Other
 
