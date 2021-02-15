@@ -3146,9 +3146,9 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
         # This entails a 50% performance drop in terms of speed.
         # Now, without macro variables, speed is at 30us while it was 20us before
 
+    } else if(check){
+        check_arg(fml, .type = "formula mbt", .up = 1)
     }
-
-    if(check) check_arg(fml, .type = "formula mbt", .up = 1)
 
     macros = parse_macros(..., from_xpd = TRUE, check = check)
 
