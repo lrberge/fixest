@@ -1,5 +1,16 @@
 
-# fixest 0.8.2
+
+# fixest 0.8.3
+
+## Bugs
+
+ - Remove test that leads to a (uber odd) bug on fedora devel.
+ 
+## New features
+
+ - In `xpd`, macros are parsed even after creating the formula with the `lhs` and `rhs` arguments.  
+
+# fixest 0.8.2 (2021-01-13)
 
 ## Bugs
 
