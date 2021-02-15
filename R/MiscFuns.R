@@ -3139,7 +3139,13 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
             res[[length(res)]] = value2stringCall(rhs, call = TRUE, check = check)
         }
 
-        return(res)
+        fml = res
+
+        # NOTA: version < 0.8.3 we had return(res)
+        # now we allow for macro implementation ex post
+        # This entails a 50% performance drop in terms of speed.
+        # Now, without macro variables, speed is at 30us while it was 20us before
+
     }
 
     if(check) check_arg(fml, .type = "formula mbt", .up = 1)
@@ -3198,7 +3204,6 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 
     fml
 }
-
 
 
 #' Fast transform of any type of vector(s) into an integer vector
