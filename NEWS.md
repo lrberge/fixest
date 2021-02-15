@@ -10,7 +10,7 @@
 
  - In `xpd`, macros are parsed even after creating the formula with the `lhs` and `rhs` arguments.  
 
-# fixest 0.8.2 (2021-01-13)
+# fixest 0.8.2 (2021-02-11)
 
 ## Bugs
 
