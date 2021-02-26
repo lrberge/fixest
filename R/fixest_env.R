@@ -3229,6 +3229,12 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
         fml_linear = res$fml_all$linear
         fml_iv = res$fml_all$iv
 
+        is_pblm = "try-error" %in% class(try(str2lang(fml_iv_endo), silent = TRUE))
+        if(is_pblm){
+            # Avoids a bug
+            fml_iv_endo = paste0("`", fml_iv_endo, "`")
+        }
+
         new_fml_linear = .xpd(..y ~ ..inst + ..rhs,
                              ..y = fml_iv_endo, ..rhs = fml_linear[[3]], ..inst = fml_iv[[3]])
         res$fml = res$fml_all$linear = new_fml_linear

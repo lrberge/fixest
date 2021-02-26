@@ -3939,7 +3939,7 @@ print.fixest_fitstat = function(x, na.rm = FALSE, ...){
 
         if(grepl("::", type, fixed = TRUE)){
             dict = getFixest_dict()
-            rename_fun = function(x) paste0(dict_type[x[1]], ", ", dict_apply(x[2], dict))
+            rename_fun = function(x) paste0(dict_type[x[1]], ", ", paste(sapply(x[-1], dict_apply, dict = dict), collapse = "::"))
             test_name = rename_fun(strsplit(type, "::")[[1]])
             qui_right[i] = TRUE
         } else {
@@ -5355,6 +5355,13 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
     if(useModel.matrix){
         # to catch the NAs, model.frame needs to be used....
         linear.mat = stats::model.matrix(fml[c(1, 3)], stats::model.frame(fml[c(1, 3)], data, na.action=na.pass))
+
+        if(fake_intercept){
+            who_int = which("(Intercept)" %in% colnames(linear.mat))
+            if(length(who_int) > 0){
+                linear.mat = linear.mat[, -who_int, drop = FALSE]
+            }
+        }
     } else {
         linear.mat = prepare_matrix(fml, data, fake_intercept)
     }

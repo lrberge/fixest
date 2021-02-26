@@ -928,7 +928,6 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 	        }
 
-
 	        if(n_vars_X == 0){
 	            ZX_demean = iv.mat_demean
 	            ZX = iv.mat
