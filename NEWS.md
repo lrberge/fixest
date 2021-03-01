@@ -6,6 +6,10 @@
 
  - Remove test that leads to a (uber odd) bug on fedora devel.
  
+ - Fix bug in IV estimation when using factors as instrumented variables (thanks to @adamaltmejd [#99](https://github.com/lrberge/fixest/issues/99)).
+ 
+ - Fix bug when using at least two fixed-effects and varying slopes with singletons (thanks to @adamtheising [#89](https://github.com/lrberge/fixest/issues/89)). 
+ 
 ## New features
 
  - In `xpd`, macros are parsed even after creating the formula with the `lhs` and `rhs` arguments.  
