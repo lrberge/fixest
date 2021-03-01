@@ -901,11 +901,15 @@ void FEClass::compute_fe_coef_2_internal(double *fe_coef_in_out_C, double *fe_co
         for(int c=0 ; c<nb_id_b ; ++c){
             // We backward solve
             for(int v=V_b - 1 ; v>=0 ; --v){
-                val = rhs_b(c, v);
-                for(int v_done=v + 1 ; v_done<V_b ; ++v_done){
-                    val -= rhs_b(c, v_done) * my_system_b(c, v, v_done);
+                if(my_system_b(c, v, v) == 0){
+                    rhs_b(c, v) = 0;
+                } else {
+                    val = rhs_b(c, v);
+                    for(int v_done=v + 1 ; v_done<V_b ; ++v_done){
+                        val -= rhs_b(c, v_done) * my_system_b(c, v, v_done);
+                    }
+                    rhs_b(c, v) = val / my_system_b(c, v, v);
                 }
-                rhs_b(c, v) = val / my_system_b(c, v, v);
             }
         }
     }
@@ -924,11 +928,23 @@ void FEClass::compute_fe_coef_2(double *fe_coef_in_C, double *fe_coef_out_C, dou
 
     compute_fe_coef_2_internal(fe_coef_in_C, fe_coef_tmp, in_out_C);
 
+    // Rcout << "Coefs IN:\nFirst dim: ";
+    // for(int i=0 ; i<nb_coef_Q[0] ; ++i){
+    //     Rcout << fe_coef_in_C[i] << ", ";
+    // }
+    // Rcout << "\n";
+
     //
     // Step 2: Updating a
     //
 
     compute_fe_coef_2_internal(fe_coef_out_C, fe_coef_tmp, in_out_C, true);
+
+    // Rcout << "Coefs OUT:\nFirst dim: ";
+    // for(int i=0 ; i<nb_coef_Q[0] ; ++i){
+    //     Rcout << fe_coef_out_C[i] << ", ";
+    // }
+    // Rcout << "\n";
 
 }
 
