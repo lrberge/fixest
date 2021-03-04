@@ -3,7 +3,10 @@
 
 ## Bugs
 
- - Fig bug depvar = FALSE not working when tex output was requested (thanks to @apoorvalal and @pbaylis [#104](https://github.com/lrberge/fixest/issues/104))
+ - Fix bug depvar = FALSE not working when tex output was requested (thanks to @apoorvalal and @pbaylis [#104](https://github.com/lrberge/fixest/issues/104))
+ 
+ - Fix bug in naming when `i()` led to only one variable being retained (thanks to @
+colejharvey [#105](https://github.com/lrberge/fixest/issues/105)). 
 
 # fixest 0.8.3 (2021-03-01)
 
