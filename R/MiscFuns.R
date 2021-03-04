@@ -5232,7 +5232,10 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
     data_list <- eval(all_vars_call, base)
 
     # Handling the multi columns case (ex: bs(x1), splines)
-    if(any(lengths(data_list) != nrow(base))){
+    # NOTA: I need to add a check for i() because of 1 value interactions
+    #       not caught by the != nber of obs
+    qui_inter = grepl("\\bi(nteract)?\\(", all_var_names)
+    if(any(lengths(data_list) != nrow(base)) || any(qui_inter)){
 
         all_n = as.vector(lengths(data_list) / nrow(base))
 
@@ -5247,7 +5250,7 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
         all_n_vector = rep(all_n, all_n)
 
         new_names = as.list(all_var_names)
-        for(i in which(all_n > 1)){
+        for(i in which(all_n > 1 | qui_inter)){
             my_names = colnames(data_list[[i]])
             if(is.null(my_names)){
                 my_names = 1:all_n[i]
