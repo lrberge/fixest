@@ -1690,6 +1690,7 @@ etable_internal_latex = function(info){
     coef_below = info$coef_below
     sd_below = info$sd_below
     depvar_list = info$depvar_list
+    depvar = info$depvar # flag for including the depvar
     obs_list = info$obs_list
     convergence_list = info$convergence_list
     fe_names = info$fe_names
@@ -1802,6 +1803,8 @@ etable_internal_latex = function(info){
         }
     }
     first_line = paste0(first_line, "\\\\\n")
+
+    if(!depvar) first_line = NULL
 
     # Model line
     if(nchar(style$model.format) > 0){

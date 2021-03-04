@@ -1,6 +1,11 @@
 
+# fixest 0.8.4
 
-# fixest 0.8.3
+## Bugs
+
+ - Fig bug depvar = FALSE not working when tex output was requested (thanks to @apoorvalal and @pbaylis [#104](https://github.com/lrberge/fixest/issues/104))
+
+# fixest 0.8.3 (2021-03-01)
 
 ## Bugs
 
