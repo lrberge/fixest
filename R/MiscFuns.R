@@ -4051,7 +4051,7 @@ fitstat_register = function(type, fun, alias){
 #'
 #' \itemize{
 #' \item{\code{n}, \code{ll}, \code{aic}, \code{bic}, \code{rmse}: }{The number of observations, the log-likelihood, the AIC, the BIC and the root mean squared error, respectively.}
-#' \item{\code{g}: }{The effective sample size. This is used only when the standard-errors are clustered and is used when computing the p-values of the coefficients.}
+#' \item{\code{g}: }{The degrees of freedom used to compute the t-test (it influences the p-values of the coefficients). When the VCOV is clustered, this value is equal to the minimum cluster size, otherwise, it is equal to the sample size minus the number of variables.}
 #' \item{\code{r2}, \code{ar2}, \code{wr2}, \code{awr2}, \code{pr2}, \code{apr2}, \code{wpr2}, \code{awpr2}: }{All r2 that can be obtained with the function \code{\link[fixest]{r2}}. The \code{a} stands for 'adjusted', the \code{w} for 'within' and the \code{p} for 'pseudo'. Note that the order of the letters \code{a}, \code{w} and \code{p} does not matter.}
 #' \item{\code{theta}: }{The over-dispersion parameter in Negative Binomial models. Low values mean high overdispersion. }
 #' \item{\code{f}, \code{wf}: }{The F-tests of nullity of the coefficients. The \code{w} stands for 'within'. These types return the following values: \code{stat}, \code{p}, \code{df1} and \code{df2}. If you want to display only one of these, use their name after a dot: e.g. \code{f.stat} will give the statistic of the F-test, or \code{wf.p} will give the p-values of the F-test on the projected model (i.e. projected onto the fixed-effects).}
@@ -4121,7 +4121,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
         comp_types = c("f", "wf", "ivf", "ivf1", "ivf2", "ivfall", "wald", "ivwald", "ivwald1", "ivwald2", "ivwaldall", "wh", "sargan", "lr", "wlr")
         full_comp_types = paste(comp_types, rep(c("stat", "p"), each = length(comp_types)), sep = ".")
 
-        comp_alias = c(f = "F-test", wf = "F-test (projected)", ivfall = "F-test (IV only)", ivf1 = "F-test (1st stage)", ivf2 = "F-test (2nd stage)", wald = "Wald (joint nullity)", ivwaldall = "Wald (IV only)", ivwald1 = "Wald (1st stage)", ivwald2 = "Wald (2nd stage)", wh = "Wu-Hausman", sargan = "Sargan", lr = "LR", wlr = "LR (within)")
+        comp_alias = c(f = "F-test", wf = "F-test (projected)", ivfall = "F-test (IV only)", ivf1 = "F-test (1st stage)", ivf2 = "F-test (2nd stage)", wald = "Wald (joint nullity)", ivwaldall = "Wald (IV only)", ivwald1 = "Wald (1st stage)", ivwald2 = "Wald (2nd stage)", wh = "Wu-Hausman", sargan = "Sargan", lr = "LR", wlr = "LR (within)", df1 = "DoF (first)", df2 = "DoF (second)", df = "DoF")
         my_names = paste(names(comp_alias), rep(c("stat", "p"), each = length(comp_alias)), sep = ".")
         full_comp_alias = setNames(paste0(comp_alias, ", ", rep(c("stat.", "p-value"), each = length(comp_alias))), my_names)
 
@@ -4205,7 +4205,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
             my_vcov = x$cov.scaled
 
             G = attr(my_vcov, "g")
-            if(is.null(G)) G = x$nobs
+            if(is.null(G)) G = x$nobs - x$nparams
 
             res_all[[type]] = G
 
