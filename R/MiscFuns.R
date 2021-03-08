@@ -2722,7 +2722,11 @@ i = function(var, f, f2, ref, drop, keep, drop2, keep2){
 
         # Conversion of var to numeric if logical
         # => that makes sense now, if the user isn't happy => f2 (before that the automatic conversion wouldn't leave room to really use logicals)
-        if(is.logical(var)) var = as.numeric(var)
+        if(is.logical(var)){
+            var = as.numeric(var)
+        } else if(is.factor(var) && length(levels(var)) == 2 && all(c(0, 1) %in% levels(var))){
+            var = as.numeric(as.character(var))
+        }
 
         if(!is.numeric(var)){
             IS_FACTOR_INTER = TRUE
@@ -3944,7 +3948,16 @@ print.fixest_fitstat = function(x, na.rm = FALSE, ...){
             test_name = rename_fun(strsplit(type, "::")[[1]])
             qui_right[i] = TRUE
         } else {
-            test_name = dict_type[type]
+            if(type %in% names(dict_type)){
+                test_name = dict_type[type]
+            } else if(!grepl(".", type, fixed = TRUE)) {
+                warning("Current type '", type, "' has no alias.")
+                test_name = type
+            } else {
+                type_split = strsplit(type, ".", fixed = TRUE)[[1]]
+                test_name = paste0(dict_type[type_split[1]], ", ", dict_type[type_split[2]])
+            }
+
         }
 
         if(length(v) == 1){
