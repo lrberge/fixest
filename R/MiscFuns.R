@@ -2698,6 +2698,7 @@ i = function(var, f, f2, ref, drop, keep, drop2, keep2){
     f_num = is.numeric(f)
 
     IS_F2 = FALSE
+    f2_num = FALSE
     if(!missing(f2)){
 
         if(length(f2) == 1 && !"ref" %in% names(mc)){
