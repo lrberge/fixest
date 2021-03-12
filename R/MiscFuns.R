@@ -579,7 +579,7 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	object$se = se
 
 	if(lean){
-	    var2clean = c("fixef_id", "residuals", "fitted.values", "scores", "sumFE", "slope_variables_reordered", "y", "weights", "irls_weights", "obsRemoved", "obs_selection", "iv_residuals")
+	    var2clean = c("fixef_id", "residuals", "fitted.values", "scores", "sumFE", "slope_variables_reordered", "y", "weights", "irls_weights", "obsRemoved", "obs_selection", "iv_residuals", "fitted.values_demean")
 
 	    object[var2clean] = NULL
 
