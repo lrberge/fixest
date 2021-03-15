@@ -3,10 +3,22 @@
 
 ## Bugs
 
- - Fix bug depvar = FALSE not working when tex output was requested (thanks to @apoorvalal and @pbaylis [#104](https://github.com/lrberge/fixest/issues/104))
+ - Fix bug `depvar = FALSE` not working when tex output was requested (thanks to @apoorvalal and @pbaylis [#104](https://github.com/lrberge/fixest/issues/104))
  
  - Fix bug in naming when `i()` led to only one variable being retained (thanks to @
-colejharvey [#105](https://github.com/lrberge/fixest/issues/105)). 
+colejharvey [#106](https://github.com/lrberge/fixest/issues/105)). 
+
+ - Fix bug display when only degrees of freedom are selected in `fitstat`.
+
+ - Fix bug when `lean = TRUE` in IV estimations with fixed-effects (a large object was still present, thanks to @zozotintin).
+ 
+ - Fix bug display of `etable` in Rmarkdown (thanks to @kdzhang [#93](https://github.com/lrberge/fixest/issues/93) and @nikolassch [#112](https://github.com/lrberge/fixest/issues/112))
+
+## Other changes
+
+  - `i`: Factor variables with only the values of 0 and 1 are treated as numeric. 
+  
+  - `fitstat`: The statistic `G` is now equal to the degrees of freedom used in the t-test of coefficients testing.
 
 # fixest 0.8.3 (2021-03-01)
 
