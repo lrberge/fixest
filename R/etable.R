@@ -2631,7 +2631,12 @@ etable_internal_df = function(info){
     # we shorten the model names to fit the width
     for(m in 1:n_models) modelNames[m] = charShorten(modelNames[[m]], longueur[[1+m]])
 
-    res = as.data.frame(res)
+    # I need to do that otherwise as.data.frame goes wild
+    res_list = list()
+    for(i in 1:ncol(res)) res_list[[i]] = unlist(res[, i])
+    names(res_list) = paste0("x", 1:length(res_list))
+
+    res = as.data.frame(res_list)
     names(res) = c("variables", modelNames)
     tvar = table(res$variables)
     if(any(tvar > 1)){
