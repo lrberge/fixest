@@ -4166,6 +4166,11 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
         if(length(vec) == 1) return(vec)
 
         if(value != ""){
+
+            if(!value %in% names(vec)){
+                stop_up("'", value, "' is not a valid component of the statistic '", root, "'. Only the following are valid: ", enumerate_items(names(vec), "quote"), ".")
+            }
+
             return(vec[[value]])
         } else if(IS_ETABLE){
             return(vec[1])
@@ -9216,7 +9221,7 @@ formula.fixest = function(x, type = c("full", "linear", "iv", "NL"), ...){
 }
 
 
-#' Design matrix of a \code{femlm} model
+#' Design matrix of a \code{fixest} object
 #'
 #' This function creates the left-hand-side or the right-hand-side(s) of a \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}} estimation.
 #'

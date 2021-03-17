@@ -13,6 +13,8 @@ colejharvey [#106](https://github.com/lrberge/fixest/issues/105)).
  - Fix bug when `lean = TRUE` in IV estimations with fixed-effects (a large object was still present, thanks to @zozotintin).
  
  - Fix bug display of `etable` in Rmarkdown (thanks to @kdzhang [#93](https://github.com/lrberge/fixest/issues/93) and @nikolassch [#112](https://github.com/lrberge/fixest/issues/112))
+ 
+ - Improve error messages in `fitstat` when selecting statistics components.
 
 ## Other changes
 
