@@ -1203,8 +1203,13 @@ qui = sample(which(base_did$id %in% 1:5))
 base_bis = base_did[qui, ]
 test(predict(res, na.rm = FALSE)[qui], predict(res, base_bis))
 
-
-
+# prediction with poly
+res_poly = feols(y ~ poly(x1, 2), base)
+pred_all = predict(res_poly)
+pred_head = predict(res_poly, head(base, 20))
+pred_tail = predict(res_poly, tail(base, 20))
+test(head(pred_all, 20), pred_head)
+test(tail(pred_all, 20), pred_tail)
 
 ####
 #### subset ####
@@ -1402,11 +1407,19 @@ base$y2[base$fe2 == "a" & !is.na(base$fe2)] = 0
 base$x2[1:5] = NA
 base$x3[6] = NA
 base$fe3 = rep(letters[1:10], 15)
+base$id = rep(1:15, each = 10)
+base$time = rep(1:10, 15)
 
+base_bis = base[1:50, ]
+base_bis$id = rep(1:5, each = 10)
+base_bis$time = rep(1:10, 5)
+
+# NA removed
 res = feols(y1 ~ x1 + x2 + x3, base)
 m1 = model.matrix(res, type = "lhs")
 test(nrow(m1), res$nobs)
 
+# we check this is identical
 m1_na = model.matrix(res, type = "lhs", na.rm = FALSE)
 test(nrow(m1_na), res$nobs_origin)
 test(max(abs(m1_na - base$y1), na.rm = TRUE), 0)
@@ -1416,6 +1429,28 @@ X = model.matrix(res, type = "rhs", data = base, na.rm = FALSE)
 res_bis = lm.fit(X[-res$obsRemoved, ], y[-res$obsRemoved,])
 test(res_bis$coefficients, res$coefficients)
 
+
+# Lag
+res_lag = feols(y1 ~ l(x1, 1:2) + x2 + x3, base, panel = ~id + time)
+m_lag = model.matrix(res_lag)
+test(nrow(m_lag), nobs(res_lag))
+
+# lag with partial
+m_lag_x1 = model.matrix(res_lag, partial = "x1")
+test(ncol(m_lag_x1), 2)
+
+# lag with partial, new data
+mbis_lag_x1 = model.matrix(res_lag, base_bis[, c("x1", "x2", "id", "time")], partial = TRUE)
+# Intercept + l(x1, 1) + l(x1, 2) + x2
+test(ncol(mbis_lag_x1), 4)
+# 13 NAs: 2 per ID for the lags, 3 for x2
+test(nrow(mbis_lag_x1), 37)
+
+# With poly
+res_poly = feols(y1 ~ poly(x1, 2), base)
+m_poly_old = model.matrix(res_poly)
+m_poly_new = model.matrix(res_poly, base_bis)
+test(m_poly_old[1:50, 3], m_poly_new[, 3])
 
 ####
 #### VCOV at estimation ####
