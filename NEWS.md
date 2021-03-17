@@ -3,10 +3,10 @@
 
 ## Bugs
 
- - Fix bug `depvar = FALSE` not working when tex output was requested (thanks to @apoorvalal and @pbaylis [#104](https://github.com/lrberge/fixest/issues/104))
+ - Fix bug `depvar = FALSE` not working when tex output was requested (thanks to @apoorvalal and @pbaylis [#104](https://github.com/lrberge/fixest/issues/104)).
  
  - Fix bug in naming when `i()` led to only one variable being retained (thanks to @
-colejharvey [#106](https://github.com/lrberge/fixest/issues/105)). 
+colejharvey [#106](https://github.com/lrberge/fixest/issues/106)). 
 
  - Fix bug display when only degrees of freedom are selected in `fitstat`.
 
@@ -15,6 +15,13 @@ colejharvey [#106](https://github.com/lrberge/fixest/issues/105)).
  - Fix bug display of `etable` in Rmarkdown (thanks to @kdzhang [#93](https://github.com/lrberge/fixest/issues/93) and @nikolassch [#112](https://github.com/lrberge/fixest/issues/112))
  
  - Improve error messages in `fitstat` when selecting statistics components.
+ 
+ - Fix bug in `predict` when poly() was used in the estimation (thanks to @
+tholdaway [#109](https://github.com/lrberge/fixest/issues/109)).
+ 
+## New features
+
+ - `model.matrix` gains the new argument `partial` which allows the creation of the design matrix for a subset of variables only.
 
 ## Other changes
 
