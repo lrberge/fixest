@@ -48,7 +48,7 @@
 #' @param reset (\code{setFixest_etable} only.) Logical, default is \code{FALSE}. If \code{TRUE}, this will reset all the default values that were already set by the user in previous calls.
 #' @param .vcov A function to be used to compute the standard-errors of each fixest object. You can pass extra arguments to this function using the argument \code{.vcov_args}. See the example.
 #' @param .vcov_args A list containing arguments to be passed to the function \code{.vcov}.
-#' @param poly_dict Character vector, default is \code{c("", " square", " cube")}. When polynomials are used with the function \code{\link[stats]{poly}}, the variables are automatically renamed and \code{poly_dict} rules the display of the power. For powers greater than the number of elements of the vector, the value displayed is \code{$^{pow}$} in Latex and \code{^ pow} in the R console.
+#' @param poly_dict Character vector, default is \code{c("", " square", " cube")}. When raw polynomials (\code{x^2}, etc) are used, the variables are automatically renamed and \code{poly_dict} rules the display of the power. For powers greater than the number of elements of the vector, the value displayed is \code{$^{pow}$} in Latex and \code{^ pow} in the R console.
 #' @param postprocess.tex A function that will postprocess the character vector defining the latex table. Only when \code{tex = TRUE}. By default it is equal to \code{NULL}, meaning that there is no postprocessing. When \code{tex = FALSE}, see the argument \code{postprocess.df}. See details.
 #' @param postprocess.df A function that will postprocess.tex the resulting data.frame. Only when \code{tex = FALSE}. By default it is equal to \code{NULL}, meaning that there is no postprocessing. When \code{tex = TRUE}, see the argument \code{postprocess.tex}.
 #' @param fit_format Character scalar, default is \code{"__var__"}. Only used in the presence of IVs. By default the endogenous regressors are named \code{fit_varname} in the second stage. The format of the endogenous regressor to appear in the table is governed by \code{fit_format}. For instance, by default, the prefix \code{"fit_"} is removed, leading to only \code{varname} to appear. If \code{fit_format = "$\\\\hat{__var__}$"}, then \code{"$\\hat{varname}$"} will appear in the table.
@@ -1442,27 +1442,9 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
             }
 
             # We take care of poly
-            if(any(grepl("^poly\\(", var_left))){
-
-                # We clean only "clean" polys
-                qui_poly = which(grepl("^poly\\([^,]+,[[:digit:]]+)[[:digit:]]*$", var_left))
-                if(length(qui_poly)){
-                    poly_var = gsub("^poly\\(|,.+$", "", var_left[qui_poly])
-                    poly_pow = as.numeric(gsub(".+\\)", "", var_left[qui_poly]))
-                    poly_pow[is.na(poly_pow)] = 1
-
-                    poly_pow_clean = poly_dict[poly_pow]
-                    if(isTex){
-                        poly_pow_clean[is.na(poly_pow_clean)] = paste0("$ ^{", poly_pow[is.na(poly_pow_clean)], "}")
-                    } else {
-                        poly_pow_clean[is.na(poly_pow_clean)] = paste0(" ^ ", poly_pow[is.na(poly_pow_clean)])
-                    }
-
-                    poly_named = paste0(dict_apply(poly_var, dict), poly_pow_clean)
-
-                    var[!qui][qui_poly] = new_var[!qui][qui_poly] = poly_named
-                }
-            }
+            # DEPRECATED: this should not be done!!!!!!!!!!!
+            # Poly is no regular polynomial but orthogonal polynomial!!!!!
+            # This will imply difference in estimates with raw powers, we should not conflate them
 
             # We take care of raw powers
             if(any(grepl("^I\\([^\\^]+\\^[[:digit:]]+\\)", var_left))){
