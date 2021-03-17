@@ -9443,7 +9443,7 @@ formula.fixest = function(x, type = c("full", "linear", "iv", "NL"), ...){
 #' names(base) = c("y", "x1", "x2", "x3", "species")
 #'
 #' est = feols(y ~ poly(x1, 2) + x2, base)
-#' head(model.matrix(res))
+#' head(model.matrix(est))
 #'
 #' # Illustration of partial
 #'
