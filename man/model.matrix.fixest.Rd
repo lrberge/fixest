@@ -2,9 +2,9 @@
 % Please edit documentation in R/MiscFuns.R
 \name{model.matrix.fixest}
 \alias{model.matrix.fixest}
-\title{Design matrix of a \code{femlm} model}
+\title{Design matrix of a \code{fixest} object}
 \usage{
-\method{model.matrix}{fixest}(object, data, type = "rhs", na.rm = TRUE, ...)
+\method{model.matrix}{fixest}(object, data, type = "rhs", na.rm = TRUE, partial = FALSE, ...)
 }
 \arguments{
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
@@ -14,6 +14,8 @@
 \item{type}{Character vector or one sided formula, default is "rhs". Contains the type of matrix/data.frame to be returned. Possible values are: "lhs", "rhs", "fixef", "iv.rhs1", "iv.rhs2".}
 
 \item{na.rm}{Default is \code{TRUE}. Should observations with NAs be removed from the matrix?}
+
+\item{partial}{Logical or character vector. Default is \code{FALSE}. If \code{TRUE}, then the matrix created will be restricted only to the variables contained in the argument \code{data}, which can then contain a subset of the variables used in the estimation. If a character vector, then only the variables matching the elements of the vector via regular expressions will be created.}
 
 \item{...}{Not currently used.}
 }
@@ -25,11 +27,19 @@ This function creates the left-hand-side or the right-hand-side(s) of a \code{\l
 }
 \examples{
 
-# simple estimation on iris data, using "Species" fixed-effects
-res = femlm(Sepal.Length ~ Sepal.Width*Petal.Length +
-            Petal.Width | Species, iris)
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
 
+est = feols(y ~ poly(x1, 2) + x2, base)
 head(model.matrix(res))
+
+# Illustration of partial
+
+# partial => character vector
+head(model.matrix(est, partial = "x1"))
+
+# partial => TRUE, only works with data argument!!
+head(model.matrix(est, data = base[, "x1", drop = FALSE], partial = TRUE))
 
 
 
