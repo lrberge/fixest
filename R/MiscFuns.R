@@ -5401,6 +5401,190 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
     linear.mat
 }
 
+
+fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_intercept = FALSE, i_noref = FALSE, partial = FALSE){
+    # Only used within model.matrix and predict
+    # Overlay of fixest_model_matrix to take care of special things, eg:
+    # - poly
+    # - partial
+    # - ?
+
+    #
+    # partial
+    #
+
+    # partial => we allow the extraction of only some variables
+    if(isFALSE(partial)){
+
+        if(!original_data && any(!all.vars(fml[[3]]) %in% names(newdata))){
+            pblm = setdiff(all.vars(fml[[3]]), names(newdata))
+            stop("In 'model.matrix', the variable", enumerate_items(pblm, "is.s.quote"), " in the formula but not in the argument 'data'. Use 'partial = TRUE' to enable the creation of partial data.")
+        }
+
+    } else {
+        vars_keep = names(newdata)
+
+        if(is.character(partial)){
+            # ex: partial = c("x1$", "x2$")
+
+            vars_keep = keep_apply(vars_keep, partial)
+            if(length(vars_keep) == 0){
+                stop("The variables in 'partial' do not match any variable in the 'data'.")
+            }
+
+            if(isFALSE(keep_apply("(Intercept)", partial, logical = TRUE))){
+                fake_intercept = TRUE
+            }
+
+        } else {
+            # intercept always removed if partial = TRUE!!!
+            # that's the point of partial.
+
+            fake_intercept = TRUE
+        }
+
+        if(!all(all.vars(fml[[3]]) %in% vars_keep)){
+
+            terms_all = attr(terms(fml), "term.labels")
+            # We first check pure variables (because non pure variables are slower to check)
+            is_var = grepl("^[\\.[:alpha:]][[:alnum:]\\._]*$", terms_all)
+            terms_drop = is_var & !terms_all %in% vars_keep
+
+            for(i in which(!is_var)){
+                if(any(!all.vars(str2lang(terms_all[i])) %in% vars_keep)){
+                    terms_drop[i] = TRUE
+                }
+            }
+
+            if(all(terms_drop)){
+                stop("Due to the use of the argument 'partial', not a single variable is left.")
+            }
+
+            fml = .xpd(lhs = "y", rhs = terms_all[!terms_drop])
+        }
+    }
+
+    fml_dp = deparse(fml)
+
+    #
+    # poly
+    #
+
+    # We check for the presence of poly only in the case of new data
+    # if it's the original data set, that's OK
+
+    is_poly = FALSE
+    if(!original_data && grepl("(?<![\\.[:alnum:]_])poly\\(", fml_dp, perl = TRUE)){
+        # checking the regex: 87us on a small vector
+
+        poly_parts = strsplit(fml_dp, "(?<![\\.[:alnum:]_])poly\\(", perl = TRUE)[[1]]
+
+        split_by_poly = function(r){
+
+            if(!grepl("(", r, fixed = TRUE) && grepl("\\)$", r)){
+                return(c(paste0("poly(", r), ""))
+            }
+
+            letter_vec = strsplit(r, "")[[1]]
+            open = 1 + cumsum(letter_vec == "(")
+            close = cumsum(letter_vec == ")")
+            index = which.max(close - open == 0)
+
+            c(paste0("poly(", substr(r, 1, index)), substr(r, index + 1, nchar(r)))
+        }
+
+        poly_parts_full = lapply(poly_parts[-1], split_by_poly)
+
+        poly_variables_all = sapply(poly_parts_full, function(x) x[1])
+        rest_all = sapply(poly_parts_full, function(x) x[2])
+
+        poly_variables_unik = unique(poly_variables_all)
+
+        # We now evaluate these in the old data => we get the nber of variables and the coefs
+        data = fetch_data(object, "To apply 'model.matrix.fixest', ")
+
+        poly_call = function(x, ..., degree = 1, coefs = NULL, raw = FALSE, simple = FALSE, data, i){
+            mc = match.call()
+            if(raw == TRUE || !is.null(coefs)){
+                return(list(is_OK = TRUE))
+            }
+
+            # We write evaluate the data to get the coefs
+            # We will return:
+            # - degree
+            # - deparsed call to evaluate
+
+            mc_new = mc
+            mc_new$simple = FALSE
+            mc_new$data = NULL
+            mc_new[[1]] = as.name("poly")
+
+            tmp = eval(mc_new, data)
+
+            mc_new$coefs = attr(tmp, "coefs")
+            res = list(degree = attr(tmp, "degree"), new_call = deparse_long(mc_new))
+
+            res
+        }
+
+        poly_variables_all_new = poly_variables_all
+        old_varname_all = new_varname_all = list()
+        poly_dict_full = c()
+        for(i in seq_along(poly_variables_unik)){
+
+            polyvar = poly_variables_unik[i]
+            my_call_txt = gsub("poly(", "poly_call(", polyvar, fixed = TRUE)
+            my_call_txt = gsub("\\)$", ", data = data)", my_call_txt)
+            info = eval(str2lang(my_call_txt))
+
+            if(isTRUE(info$is_OK)){
+                next
+            }
+
+            old_var_name = paste0(polyvar, info$degree)
+            new_var_name = paste0("POLY__VAR", i, "__", info$degree)
+            poly_dict_full[polyvar] = paste0("(", paste(new_var_name, collapse = " + "), ")")
+
+            poly_variables_all_new[i] = poly_dict_full[polyvar]
+
+            old_varname_all[[length(old_varname_all) + 1]] = old_var_name
+            new_varname_all[[length(new_varname_all) + 1]] = new_var_name
+
+            # Evaluation in the new data
+            tmp = eval(str2lang(info$new_call), newdata)
+            for(j in 1:ncol(tmp)){
+                newdata[[new_var_name[j]]] = tmp[, j]
+            }
+        }
+
+        old_varname_all = unlist(old_varname_all)
+        new_varname_all = unlist(new_varname_all)
+
+        # Now => recreation of the fml
+        if(length(old_varname_all) > 0){
+            is_poly = TRUE
+            fml = as.formula(paste0("y ~ ", poly_parts[1], paste0(poly_variables_all_new, rest_all, collapse = "")))
+        }
+    }
+
+    new_matrix = fixest_model_matrix(fml, newdata, fake_intercept, i_noref)
+
+    # Renaming if poly
+    if(is_poly){
+        mat_names = colnames(new_matrix)
+        for(i in seq_along(new_varname_all)){
+            mat_names = gsub(new_varname_all[i], old_varname_all[i], mat_names, fixed = TRUE)
+        }
+        colnames(new_matrix) = mat_names
+    }
+
+    new_matrix
+}
+
+
+
+
+
 fixef_terms = function(fml, stepwise = FALSE, origin_type = "feols"){
     # separate all terms of fml into fixed effects and varying slopes
     # fml: one sided formula
@@ -7921,7 +8105,9 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 	    }
 	}
 
-	# 1) Cluster
+	#
+	# 1) Fixed-effects (cluster)
+	#
 
 	# init cluster values
 	value_cluster = 0
@@ -8026,7 +8212,9 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 		value_cluster = as.vector(value_cluster)
 	}
 
+	#
 	# 2) Linear values
+	#
 
 	coef = object$coefficients
 
@@ -8055,14 +8243,16 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 		}
 
 		# we create the matrix
-		matrix_linear = error_sender(fixest_model_matrix(rhs_fml, newdata, i_noref = TRUE),
-		                             "Error when creating the linear matrix: ")
+		# matrix_linear = error_sender(fixest_model_matrix(rhs_fml, newdata, i_noref = TRUE), "Error when creating the linear matrix: ")
+		matrix_linear = error_sender(fixest_model_matrix_extra(object = object, newdata = newdata, original_data = FALSE, fml = rhs_fml, i_noref = TRUE), "Error when creating the linear matrix: ")
 
 		keep = intersect(names(coef), colnames(matrix_linear))
 		value_linear = value_linear + as.vector(matrix_linear[, keep, drop = FALSE] %*% coef[keep])
 	}
 
+	#
 	# 3) Non linear terms
+	#
 
 	value_NL = 0
 	NL_fml = object$NL.fml
@@ -8089,7 +8279,9 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 		value_NL = eval(NL_fml[[2]], env)
 	}
 
+	#
 	# 4) offset value
+	#
 
 	value_offset = 0
 	offset = object$call$offset
@@ -9232,6 +9424,7 @@ formula.fixest = function(x, type = c("full", "linear", "iv", "NL"), ...){
 #' @param data If missing (default) then the original data is obtained by evaluating the \code{call}. Otherwise, it should be a \code{data.frame}.
 #' @param type Character vector or one sided formula, default is "rhs". Contains the type of matrix/data.frame to be returned. Possible values are: "lhs", "rhs", "fixef", "iv.rhs1", "iv.rhs2".
 #' @param na.rm Default is \code{TRUE}. Should observations with NAs be removed from the matrix?
+#' @param partial Logical or character vector. Default is \code{FALSE}. If \code{TRUE}, then the matrix created will be restricted only to the variables contained in the argument \code{data}, which can then contain a subset of the variables used in the estimation. If a character vector, then only the variables matching the elements of the vector via regular expressions will be created.
 #' @param ... Not currently used.
 #'
 #' @return
@@ -9246,15 +9439,23 @@ formula.fixest = function(x, type = c("full", "linear", "iv", "NL"), ...){
 #'
 #' @examples
 #'
-#' # simple estimation on iris data, using "Species" fixed-effects
-#' res = femlm(Sepal.Length ~ Sepal.Width*Petal.Length +
-#'             Petal.Width | Species, iris)
+#' base = iris
+#' names(base) = c("y", "x1", "x2", "x3", "species")
 #'
+#' est = feols(y ~ poly(x1, 2) + x2, base)
 #' head(model.matrix(res))
 #'
+#' # Illustration of partial
+#'
+#' # partial => character vector
+#' head(model.matrix(est, partial = "x1"))
+#'
+#' # partial => TRUE, only works with data argument!!
+#' head(model.matrix(est, data = base[, "x1", drop = FALSE], partial = TRUE))
 #'
 #'
-model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, ...){
+#'
+model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, partial = FALSE, ...){
 	# We evaluate the formula with the past call
     # type: lhs, rhs, fixef, iv.endo, iv.inst, iv.rhs1, iv.rhs2
     # if fixef => return a DF
@@ -9267,6 +9468,8 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, ...){
     if(isTRUE(object$fromFit)){
         stop("model.matrix method not available for fixest estimations obtained from fit methods.")
     }
+
+    check_arg(partial, "logical scalar | character vector no na")
 
 	# The formulas
 	fml_full = formula(object, type = "full")
@@ -9340,8 +9543,9 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, ...){
 	        fml = .xpd(..lhs ~ ..endo + ..rhs, ..lhs = fml[[2]], ..endo = fml_iv[[2]], ..rhs = fml[[3]])
 	    }
 
-	    linear.mat = error_sender(fixest_model_matrix(fml, data, fake_intercept),
-	                              "In 'model.matrix', the RHS could not be evaluated: ")
+	    # linear.mat = error_sender(fixest_model_matrix(fml, data, fake_intercept),
+	    #                           "In 'model.matrix', the RHS could not be evaluated: ")
+	    linear.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data,original_data = original_data, fml = fml, fake_intercept = fake_intercept, partial = partial), "In 'model.matrix', the RHS could not be evaluated: ")
 
         res[["rhs"]] = linear.mat
 	}
@@ -9383,8 +9587,9 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, ...){
 	    }
 
 	    fake_intercept = !is.null(object$fixef_vars) && !(!is.null(object$slope_flag) && all(object$slope_flag < 0))
-	    iv_rhs1 = error_sender(fixest_model_matrix(fml, data, fake_intercept = fake_intercept),
-	                           "In 'model.matrix', the RHS of the 1st stage could not be evaluated: ")
+	    # iv_rhs1 = error_sender(fixest_model_matrix(fml, data, fake_intercept = fake_intercept),
+	    #                        "In 'model.matrix', the RHS of the 1st stage could not be evaluated: ")
+	    iv_rhs1 = error_sender(fixest_model_matrix_extra(object = object, newdata = data,original_data = original_data, fml = fml, fake_intercept = fake_intercept, partial = partial), "In 'model.matrix', the RHS of the 1st stage could not be evaluated: ")
 
 	    res[["iv.rhs1"]] = iv_rhs1
 	}
@@ -9419,8 +9624,9 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, ...){
 	    fml = .xpd(..lhs ~ ..fit + ..rhs, ..lhs = fml[[2]], ..fit = fit_vars, ..rhs = fml[[3]])
 
 	    fake_intercept = !is.null(object$fixef_vars) && !(!is.null(object$slope_flag) && all(object$slope_flag < 0))
-	    iv_rhs2 = error_sender(fixest_model_matrix(fml, data, fake_intercept = fake_intercept),
-	                           "In 'model.matrix', the RHS of the 2nd stage could not be evaluated: ")
+	    # iv_rhs2 = error_sender(fixest_model_matrix(fml, data, fake_intercept = fake_intercept),
+	    #                        "In 'model.matrix', the RHS of the 2nd stage could not be evaluated: ")
+	    iv_rhs2 = error_sender(fixest_model_matrix_extra(object = object, newdata = data,original_data = original_data, fml = fml, fake_intercept = fake_intercept, partial = partial), "In 'model.matrix', the RHS of the 2nd stage could not be evaluated: ")
 
 	    res[["iv.rhs2"]] = iv_rhs2
 	}
@@ -9439,15 +9645,16 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, ...){
 	#
 
 	check_0 = FALSE
-	if(original_data && na.rm){
-	    if(!is.null(object$obsRemoved)){
-	        check_0 = TRUE
-	        res = res[-object$obsRemoved, , drop = FALSE]
-	    }
+	if(original_data){
 
 	    for(i in seq_along(object$obs_selection)){
 	        check_0 = TRUE
 	        res = res[object$obs_selection[[i]], , drop = FALSE]
+	    }
+
+	    if(na.rm && !is.null(object$obsRemoved)){
+	        check_0 = TRUE
+	        res = res[-object$obsRemoved, , drop = FALSE]
 	    }
 	}
 
