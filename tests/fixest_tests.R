@@ -1441,8 +1441,8 @@ test(ncol(m_lag_x1), 2)
 
 # lag with partial, new data
 mbis_lag_x1 = model.matrix(res_lag, base_bis[, c("x1", "x2", "id", "time")], partial = TRUE)
-# Intercept + l(x1, 1) + l(x1, 2) + x2
-test(ncol(mbis_lag_x1), 4)
+# l(x1, 1) + l(x1, 2) + x2
+test(ncol(mbis_lag_x1), 3)
 # 13 NAs: 2 per ID for the lags, 3 for x2
 test(nrow(mbis_lag_x1), 37)
 
