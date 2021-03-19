@@ -71,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.4</span>
       </span>
     </div>
 
@@ -135,20 +135,57 @@
       <small>Source: <a href='https://github.com/lrberge/fixest/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
-    <div id="fixest-083" class="section level1">
-<h1 class="page-header" data-toc-text="0.8.3">
-<a href="#fixest-083" class="anchor"></a>fixest 0.8.3<small> Unreleased </small>
+    <div id="fixest-084" class="section level1">
+<h1 class="page-header" data-toc-text="0.8.4">
+<a href="#fixest-084" class="anchor"></a>fixest 0.8.4<small> Unreleased </small>
 </h1>
 <div id="bugs" class="section level2">
 <h2 class="hasAnchor">
 <a href="#bugs" class="anchor"></a>Bugs</h2>
 <ul>
-<li>Remove test that leads to a (uber odd) bug on fedora devel.</li>
+<li><p>Fix bug <code>depvar = FALSE</code> not working when tex output was requested (thanks to <a href='https://github.com/apoorvalal'>@apoorvalal</a> and <a href='https://github.com/pbaylis'>@pbaylis</a> <a href="https://github.com/lrberge/fixest/issues/104"><a href='https://github.com/lrberge/fixest/issues/104'>#104</a></a>).</p></li>
+<li><p>Fix bug in naming when <code><a href="../reference/i.html">i()</a></code> led to only one variable being retained (thanks to @ colejharvey <a href="https://github.com/lrberge/fixest/issues/106"><a href='https://github.com/lrberge/fixest/issues/106'>#106</a></a>).</p></li>
+<li><p>Fix bug display when only degrees of freedom are selected in <code>fitstat</code>.</p></li>
+<li><p>Fix bug when <code>lean = TRUE</code> in IV estimations with fixed-effects (a large object was still present, thanks to <a href='https://github.com/zozotintin'>@zozotintin</a>).</p></li>
+<li><p>Fix bug display of <code>etable</code> in Rmarkdown (thanks to <a href='https://github.com/kdzhang'>@kdzhang</a> <a href="https://github.com/lrberge/fixest/issues/93"><a href='https://github.com/lrberge/fixest/issues/93'>#93</a></a> and <a href='https://github.com/nikolassch'>@nikolassch</a> <a href="https://github.com/lrberge/fixest/issues/112"><a href='https://github.com/lrberge/fixest/issues/112'>#112</a></a>)</p></li>
+<li><p>Improve error messages in <code>fitstat</code> when selecting statistics components.</p></li>
+<li><p>Fix bug in <code>predict</code> when poly() was used in the estimation (thanks to <a href='https://github.com/tholdaway'>@tholdaway</a> <a href="https://github.com/lrberge/fixest/issues/109"><a href='https://github.com/lrberge/fixest/issues/109'>#109</a></a>).</p></li>
+<li><p>Fix bug in <code>predict</code>: an error message would not pop when combined fixed-effects are used with <code>combine.quick = TRUE</code> (thanks to <a href='https://github.com/benzipperer'>@benzipperer</a> <a href="https://github.com/lrberge/fixest/issues/115"><a href='https://github.com/lrberge/fixest/issues/115'>#115</a></a>).</p></li>
 </ul>
 </div>
 <div id="new-features" class="section level2">
 <h2 class="hasAnchor">
 <a href="#new-features" class="anchor"></a>New features</h2>
+<ul>
+<li>
+<code>model.matrix</code> gains the new argument <code>partial</code> which allows the creation of the design matrix for a subset of variables only.</li>
+</ul>
+</div>
+<div id="other-changes" class="section level2">
+<h2 class="hasAnchor">
+<a href="#other-changes" class="anchor"></a>Other changes</h2>
+<ul>
+<li><p><code>i</code>: Factor variables with only the values of 0 and 1 are treated as numeric.</p></li>
+<li><p><code>fitstat</code>: The statistic <code>G</code> is now equal to the degrees of freedom used in the t-test of coefficients testing.</p></li>
+</ul>
+</div>
+</div>
+    <div id="fixest-083-2021-03-01" class="section level1">
+<h1 class="page-header" data-toc-text="0.8.3">
+<a href="#fixest-083-2021-03-01" class="anchor"></a>fixest 0.8.3 (2021-03-01)<small> 2021-03-01 </small>
+</h1>
+<div id="bugs-1" class="section level2">
+<h2 class="hasAnchor">
+<a href="#bugs-1" class="anchor"></a>Bugs</h2>
+<ul>
+<li><p>Remove test that leads to a (uber odd) bug on fedora devel.</p></li>
+<li><p>Fix bug in IV estimation when using factors as instrumented variables (thanks to <a href='https://github.com/adamaltmejd'>@adamaltmejd</a> <a href="https://github.com/lrberge/fixest/issues/99"><a href='https://github.com/lrberge/fixest/issues/99'>#99</a></a>).</p></li>
+<li><p>Fix bug when using at least two fixed-effects and varying slopes with singletons (thanks to <a href='https://github.com/adamtheising'>@adamtheising</a> <a href="https://github.com/lrberge/fixest/issues/89"><a href='https://github.com/lrberge/fixest/issues/89'>#89</a></a>).</p></li>
+</ul>
+</div>
+<div id="new-features-1" class="section level2">
+<h2 class="hasAnchor">
+<a href="#new-features-1" class="anchor"></a>New features</h2>
 <ul>
 <li>In <code>xpd</code>, macros are parsed even after creating the formula with the <code>lhs</code> and <code>rhs</code> arguments.</li>
 </ul>
@@ -158,9 +195,9 @@
 <h1 class="page-header" data-toc-text="0.8.2">
 <a href="#fixest-082-2021-02-11" class="anchor"></a>fixest 0.8.2 (2021-02-11)<small> 2021-02-11 </small>
 </h1>
-<div id="bugs-1" class="section level2">
+<div id="bugs-2" class="section level2">
 <h2 class="hasAnchor">
-<a href="#bugs-1" class="anchor"></a>Bugs</h2>
+<a href="#bugs-2" class="anchor"></a>Bugs</h2>
 <ul>
 <li><p>Fix bug in IV estimations when <code>lean = TRUE</code> (thanks to <a href='https://github.com/reifjulian'>@reifjulian</a> <a href="https://github.com/lrberge/fixest/issues/88"><a href='https://github.com/lrberge/fixest/issues/88'>#88</a></a>).</p></li>
 <li><p>Fix various bugs related to the use of <code>summary</code> when <code>lean = TRUE</code> in the estimation.</p></li>
@@ -183,9 +220,9 @@
 <h1 class="page-header" data-toc-text="0.8.1">
 <a href="#fixest-081-2021-01-13" class="anchor"></a>fixest 0.8.1 (2021-01-13)<small> 2021-01-13 </small>
 </h1>
-<div id="bugs-2" class="section level2">
+<div id="bugs-3" class="section level2">
 <h2 class="hasAnchor">
-<a href="#bugs-2" class="anchor"></a>Bugs</h2>
+<a href="#bugs-3" class="anchor"></a>Bugs</h2>
 <ul>
 <li><p>Bug in <code>etable</code> when the default value of <code>fitstat</code> was set with <code>setFixest_etable</code>.</p></li>
 <li><p>Bug in <code>model.matrix</code> when the model contained fixed-effects and the RHS was requested: the intercept was wrongfully added.</p></li>
@@ -210,9 +247,9 @@
 <li><p>For details, check out the help page of the function <code>aggregate</code> or the staggered DiD section in the vignette <a href="https://CRAN.R-project.org/package=fixest/vignettes/fixest_walkthrough.html">fixest walkthrough</a>.</p></li>
 </ul>
 </div>
-<div id="new-features-1" class="section level2">
+<div id="new-features-2" class="section level2">
 <h2 class="hasAnchor">
-<a href="#new-features-1" class="anchor"></a>New features</h2>
+<a href="#new-features-2" class="anchor"></a>New features</h2>
 <ul>
 <li><p>Function <code><a href="../reference/i.html">i()</a></code> now has the new arguments <code>f2</code>, <code>drop2</code> and <code>keep2</code> which allows the interaction of two factors (useful for staggered DiD estimations).</p></li>
 <li><p>Argument <code>dof</code>, used to compute the standard-errors, can now be used at estimation time.</p></li>
@@ -237,9 +274,9 @@
 <h1 class="page-header" data-toc-text="0.8.0">
 <a href="#fixest-080-2020-12-14" class="anchor"></a>fixest 0.8.0 (2020-12-14)<small> 2020-12-14 </small>
 </h1>
-<div id="bugs-3" class="section level2">
+<div id="bugs-4" class="section level2">
 <h2 class="hasAnchor">
-<a href="#bugs-3" class="anchor"></a>Bugs</h2>
+<a href="#bugs-4" class="anchor"></a>Bugs</h2>
 <ul>
 <li><p>Major bug when predict was used in the presence of fixed-effects (thanks to <a href='https://github.com/jurojas5'>@jurojas5</a>, <a href="https://github.com/lrberge/fixest/issues/54"><a href='https://github.com/lrberge/fixest/issues/54'>#54</a></a>). Introduced in version 0.7.</p></li>
 <li><p>When using variable names to cluster the standard-errors inside functions, summary may not fetch the data in the right frame (thanks to <a href='https://github.com/chenwang'>@chenwang</a>, <a href="https://github.com/lrberge/fixest/issues/52"><a href='https://github.com/lrberge/fixest/issues/52'>#52</a></a>). Now a completely new internal mechanic is in place.</p></li>
@@ -413,9 +450,9 @@
 <li><p>Internal algorithm of <code><a href="../reference/i.html">i()</a></code> is much faster.</p></li>
 </ul>
 </div>
-<div id="new-features-2" class="section level2">
+<div id="new-features-3" class="section level2">
 <h2 class="hasAnchor">
-<a href="#new-features-2" class="anchor"></a>New features</h2>
+<a href="#new-features-3" class="anchor"></a>New features</h2>
 <ul>
 <li><p>In <code>etable</code>, the user can now provide a type of clustering for each model.</p></li>
 <li><p>New method <code>rep.fixest</code> to replicate fixest objects, mostly useful in <code>etable</code> when several SEs for the same models are to be reported.</p></li>
@@ -427,9 +464,9 @@
 <h1 class="page-header" data-toc-text="0.7.0">
 <a href="#fixest-070-2020-10-24" class="anchor"></a>fixest 0.7.0 (2020-10-24)<small> 2020-10-24 </small>
 </h1>
-<div id="bugs-4" class="section level2">
+<div id="bugs-5" class="section level2">
 <h2 class="hasAnchor">
-<a href="#bugs-4" class="anchor"></a>Bugs</h2>
+<a href="#bugs-5" class="anchor"></a>Bugs</h2>
 <ul>
 <li><p>Major bug when fixed-effects were combined with <code><a href="https://rdrr.io/r/base/Arithmetic.html">^</a></code> and they contained NAs (thanks to <a href='https://github.com/poliquin'>@poliquin</a> <a href="https://github.com/lrberge/fixest/issues/35"><a href='https://github.com/lrberge/fixest/issues/35'>#35</a></a>).</p></li>
 <li><p>Bug when using lead/lags in estimations. The bug was due to a bug in a dependency (<a href="https://cran.r-project.org/package=dreamerr">dreamerr</a>) and was fixed. Now fixest requires <strong>dreamerr</strong> version &gt;= 1.2.1. Bug spotted by <a href='https://github.com/seunghoon001'>@seunghoon001</a> (<a href="https://github.com/lrberge/fixest/issues/44"><a href='https://github.com/lrberge/fixest/issues/44'>#44</a></a>).</p></li>
@@ -579,9 +616,9 @@
 <h1 class="page-header" data-toc-text="0.6.0">
 <a href="#fixest-060-2020-07-13" class="anchor"></a>fixest 0.6.0 (2020-07-13)<small> 2020-07-13 </small>
 </h1>
-<div id="bugs-5" class="section level2">
+<div id="bugs-6" class="section level2">
 <h2 class="hasAnchor">
-<a href="#bugs-5" class="anchor"></a>Bugs</h2>
+<a href="#bugs-6" class="anchor"></a>Bugs</h2>
 <ul>
 <li><p>In <code>vcov</code>, the degree-of-freedom in the small sample correction correction was fixed to “nested” and couldn’t be modified, now corrected. Further, “nested” was not properly accounted for, now corrected.</p></li>
 <li><p>In <code>etable</code>, <code>fitsat = FALSE</code> or <code>fitsat = NA</code> led to a bug.</p></li>
@@ -654,9 +691,9 @@
 <li>Fixed bug introduced in the previous update (memory access error). Does not affect any of the results but could lead R to crash unexpectedly (odds were low though since access was adjacent).</li>
 </ul>
 </div>
-<div id="bugs-6" class="section level2">
+<div id="bugs-7" class="section level2">
 <h2 class="hasAnchor">
-<a href="#bugs-6" class="anchor"></a>Bugs</h2>
+<a href="#bugs-7" class="anchor"></a>Bugs</h2>
 <ul>
 <li>Fix image link to the equation in the README.md.</li>
 <li>Fix bug R2 and logLik when observations were removed because of NA values. Due to the update in <code>residuals.fixest</code>.</li>
@@ -889,9 +926,9 @@
 <li>[estimations] Bug when particular non-numeric vectors were used in explanatory variables.</li>
 </ul>
 </div>
-<div id="new-features-3" class="section level2">
+<div id="new-features-4" class="section level2">
 <h2 class="hasAnchor">
-<a href="#new-features-3" class="anchor"></a>New features</h2>
+<a href="#new-features-4" class="anchor"></a>New features</h2>
 <ul>
 <li>[coefplot] The function <code>coefplot</code> now accepts lists of estimations.</li>
 </ul>
