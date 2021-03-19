@@ -24,7 +24,7 @@ etable(
   title,
   coefstat = c("se", "tstat", "confint"),
   ci = 0.95,
-  sdBelow = TRUE,
+  sdBelow = NULL,
   keep,
   drop,
   order,
@@ -191,7 +191,7 @@ getFixest_etable()
 
 \item{ci}{Level of the confidence interval, defaults to \code{0.95}. Only used if \code{coefstat = confint}.}
 
-\item{sdBelow}{(Tex only.) Logical, default is \code{TRUE}. Should the standard-errors be displayed below the coefficients?}
+\item{sdBelow}{Logical or \code{NULL} (default). Should the standard-errors be displayed below the coefficients? If \code{NULL}, then this is \code{TRUE} for Latex and \code{FALSE} otherwise.}
 
 \item{keep}{Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is kept). See details.}
 
