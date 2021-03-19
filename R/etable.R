@@ -2369,6 +2369,19 @@ etable_internal_df = function(info){
     coef_mat <- all_vars
     for(m in 1:n_models) coef_mat <- cbind(coef_mat, coef_list[[m]][all_vars])
     coef_mat[is.na(coef_mat)] <- "  "
+
+    sdBelow = TRUE
+    if(sdBelow){
+        browser()
+        # We put the coefs below manually
+        new_coef_mat = c()
+        for(i in 1:nrow(coef_mat)){
+            row_split = strsplit(coef_mat[i, ], " (", fixed = TRUE)
+        }
+
+
+    }
+
     res = coef_mat
 
     #
