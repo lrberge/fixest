@@ -16,8 +16,9 @@ colejharvey [#106](https://github.com/lrberge/fixest/issues/106)).
  
  - Improve error messages in `fitstat` when selecting statistics components.
  
- - Fix bug in `predict` when poly() was used in the estimation (thanks to @
-tholdaway [#109](https://github.com/lrberge/fixest/issues/109)).
+ - Fix bug in `predict` when poly() was used in the estimation (thanks to @tholdaway [#109](https://github.com/lrberge/fixest/issues/109)).
+
+ - Fix bug in `predict`: an error message would not pop when combined fixed-effects are used with `combine.quick = TRUE` (thanks to @benzipperer [#115](https://github.com/lrberge/fixest/issues/115)).
  
 ## New features
 

@@ -8134,8 +8134,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 			# Checking if ^ is present
 			if(grepl("\\^", fe_var)){
 			    # If fastCombine was used => we're screwed, impossible to recover
-
-			    if(!is.character(fixef_values_possible)){
+			    if(!all(grepl("_", fixef_values_possible, fixed = TRUE))){
 			        stop("You cannot use predict() based on the initial regression since the fixed-effect '", variable, "' was combined using an algorithm dropping the FE values (but fast). Please re-run the regression using the argument 'combine.quick=FALSE'.")
 			    }
 
