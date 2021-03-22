@@ -5402,43 +5402,43 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
 }
 
 
-fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_intercept = FALSE, i_noref = FALSE, partial = FALSE){
+fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_intercept = FALSE, i_noref = FALSE, subset = FALSE){
     # Only used within model.matrix and predict
     # Overlay of fixest_model_matrix to take care of special things, eg:
     # - poly
-    # - partial
+    # - subset
     # - ?
 
     #
-    # partial
+    # subset
     #
 
-    # partial => we allow the extraction of only some variables
-    if(isFALSE(partial)){
+    # subset => we allow the extraction of only some variables
+    if(isFALSE(subset)){
 
         if(!original_data && any(!all.vars(fml[[3]]) %in% names(newdata))){
             pblm = setdiff(all.vars(fml[[3]]), names(newdata))
-            stop("In 'model.matrix', the variable", enumerate_items(pblm, "is.s.quote"), " in the formula but not in the argument 'data'. Use 'partial = TRUE' to enable the creation of partial data.")
+            stop("In 'model.matrix', the variable", enumerate_items(pblm, "is.s.quote"), " in the formula but not in the argument 'data'. Use 'subset = TRUE' to enable the creation of partial data.")
         }
 
     } else {
         vars_keep = names(newdata)
 
-        if(is.character(partial)){
-            # ex: partial = c("x1$", "x2$")
+        if(is.character(subset)){
+            # ex: subset = c("x1$", "x2$")
 
-            vars_keep = keep_apply(vars_keep, partial)
+            vars_keep = keep_apply(vars_keep, subset)
             if(length(vars_keep) == 0){
-                stop("The variables in 'partial' do not match any variable in the 'data'.")
+                stop("The variables in 'subset' do not match any variable in the 'data'.")
             }
 
-            if(isFALSE(keep_apply("(Intercept)", partial, logical = TRUE))){
+            if(isFALSE(keep_apply("(Intercept)", subset, logical = TRUE))){
                 fake_intercept = TRUE
             }
 
         } else {
-            # intercept always removed if partial = TRUE!!!
-            # that's the point of partial.
+            # intercept always removed if subset = TRUE!!!
+            # that's the point of subset.
 
             fake_intercept = TRUE
         }
@@ -5457,7 +5457,7 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
             }
 
             if(all(terms_drop)){
-                stop("Due to the use of the argument 'partial', not a single variable is left.")
+                stop("Due to the use of the argument 'subset', not a single variable is left.")
             }
 
             fml = .xpd(lhs = "y", rhs = terms_all[!terms_drop])
@@ -9423,7 +9423,7 @@ formula.fixest = function(x, type = c("full", "linear", "iv", "NL"), ...){
 #' @param data If missing (default) then the original data is obtained by evaluating the \code{call}. Otherwise, it should be a \code{data.frame}.
 #' @param type Character vector or one sided formula, default is "rhs". Contains the type of matrix/data.frame to be returned. Possible values are: "lhs", "rhs", "fixef", "iv.rhs1", "iv.rhs2".
 #' @param na.rm Default is \code{TRUE}. Should observations with NAs be removed from the matrix?
-#' @param partial Logical or character vector. Default is \code{FALSE}. If \code{TRUE}, then the matrix created will be restricted only to the variables contained in the argument \code{data}, which can then contain a subset of the variables used in the estimation. If a character vector, then only the variables matching the elements of the vector via regular expressions will be created.
+#' @param subset Logical or character vector. Default is \code{FALSE}. If \code{TRUE}, then the matrix created will be restricted only to the variables contained in the argument \code{data}, which can then contain a subset of the variables used in the estimation. If a character vector, then only the variables matching the elements of the vector via regular expressions will be created.
 #' @param ... Not currently used.
 #'
 #' @return
@@ -9444,17 +9444,17 @@ formula.fixest = function(x, type = c("full", "linear", "iv", "NL"), ...){
 #' est = feols(y ~ poly(x1, 2) + x2, base)
 #' head(model.matrix(est))
 #'
-#' # Illustration of partial
+#' # Illustration of subset
 #'
-#' # partial => character vector
-#' head(model.matrix(est, partial = "x1"))
+#' # subset => character vector
+#' head(model.matrix(est, subset = "x1"))
 #'
-#' # partial => TRUE, only works with data argument!!
-#' head(model.matrix(est, data = base[, "x1", drop = FALSE], partial = TRUE))
+#' # subset => TRUE, only works with data argument!!
+#' head(model.matrix(est, data = base[, "x1", drop = FALSE], subset = TRUE))
 #'
 #'
 #'
-model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, partial = FALSE, ...){
+model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset = FALSE, ...){
 	# We evaluate the formula with the past call
     # type: lhs, rhs, fixef, iv.endo, iv.inst, iv.rhs1, iv.rhs2
     # if fixef => return a DF
@@ -9468,7 +9468,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, partial
         stop("model.matrix method not available for fixest estimations obtained from fit methods.")
     }
 
-    check_arg(partial, "logical scalar | character vector no na")
+    check_arg(subset, "logical scalar | character vector no na")
 
 	# The formulas
 	fml_full = formula(object, type = "full")
@@ -9544,7 +9544,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, partial
 
 	    # linear.mat = error_sender(fixest_model_matrix(fml, data, fake_intercept),
 	    #                           "In 'model.matrix', the RHS could not be evaluated: ")
-	    linear.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data,original_data = original_data, fml = fml, fake_intercept = fake_intercept, partial = partial), "In 'model.matrix', the RHS could not be evaluated: ")
+	    linear.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data,original_data = original_data, fml = fml, fake_intercept = fake_intercept, subset = subset), "In 'model.matrix', the RHS could not be evaluated: ")
 
         res[["rhs"]] = linear.mat
 	}
@@ -9588,7 +9588,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, partial
 	    fake_intercept = !is.null(object$fixef_vars) && !(!is.null(object$slope_flag) && all(object$slope_flag < 0))
 	    # iv_rhs1 = error_sender(fixest_model_matrix(fml, data, fake_intercept = fake_intercept),
 	    #                        "In 'model.matrix', the RHS of the 1st stage could not be evaluated: ")
-	    iv_rhs1 = error_sender(fixest_model_matrix_extra(object = object, newdata = data,original_data = original_data, fml = fml, fake_intercept = fake_intercept, partial = partial), "In 'model.matrix', the RHS of the 1st stage could not be evaluated: ")
+	    iv_rhs1 = error_sender(fixest_model_matrix_extra(object = object, newdata = data,original_data = original_data, fml = fml, fake_intercept = fake_intercept, subset = subset), "In 'model.matrix', the RHS of the 1st stage could not be evaluated: ")
 
 	    res[["iv.rhs1"]] = iv_rhs1
 	}
@@ -9625,7 +9625,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, partial
 	    fake_intercept = !is.null(object$fixef_vars) && !(!is.null(object$slope_flag) && all(object$slope_flag < 0))
 	    # iv_rhs2 = error_sender(fixest_model_matrix(fml, data, fake_intercept = fake_intercept),
 	    #                        "In 'model.matrix', the RHS of the 2nd stage could not be evaluated: ")
-	    iv_rhs2 = error_sender(fixest_model_matrix_extra(object = object, newdata = data,original_data = original_data, fml = fml, fake_intercept = fake_intercept, partial = partial), "In 'model.matrix', the RHS of the 2nd stage could not be evaluated: ")
+	    iv_rhs2 = error_sender(fixest_model_matrix_extra(object = object, newdata = data,original_data = original_data, fml = fml, fake_intercept = fake_intercept, subset = subset), "In 'model.matrix', the RHS of the 2nd stage could not be evaluated: ")
 
 	    res[["iv.rhs2"]] = iv_rhs2
 	}

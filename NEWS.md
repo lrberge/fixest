@@ -22,7 +22,7 @@ colejharvey [#106](https://github.com/lrberge/fixest/issues/106)).
  
 ## New features
 
- - `model.matrix` gains the new argument `partial` which allows the creation of the design matrix for a subset of variables only.
+ - `model.matrix` gains the new argument `subset` which allows the creation of the design matrix for a subset of variables only.
 
 ## Other changes
 

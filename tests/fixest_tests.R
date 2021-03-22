@@ -1435,12 +1435,12 @@ res_lag = feols(y1 ~ l(x1, 1:2) + x2 + x3, base, panel = ~id + time)
 m_lag = model.matrix(res_lag)
 test(nrow(m_lag), nobs(res_lag))
 
-# lag with partial
-m_lag_x1 = model.matrix(res_lag, partial = "x1")
+# lag with subset
+m_lag_x1 = model.matrix(res_lag, subset = "x1")
 test(ncol(m_lag_x1), 2)
 
-# lag with partial, new data
-mbis_lag_x1 = model.matrix(res_lag, base_bis[, c("x1", "x2", "id", "time")], partial = TRUE)
+# lag with subset, new data
+mbis_lag_x1 = model.matrix(res_lag, base_bis[, c("x1", "x2", "id", "time")], subset = TRUE)
 # l(x1, 1) + l(x1, 2) + x2
 test(ncol(mbis_lag_x1), 3)
 # 13 NAs: 2 per ID for the lags, 3 for x2
