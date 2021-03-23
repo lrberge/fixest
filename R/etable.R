@@ -2510,7 +2510,7 @@ etable_internal_df = function(info){
     # The slopes
     #
 
-    if(length(slope_names) > 0 && !"fixef" %in% drop.section){
+    if(length(slope_names) > 0 && !"slopes" %in% drop.section){
 
         # reformatting the yes/no
         for(m in 1:n_models) {
