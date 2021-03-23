@@ -23,6 +23,8 @@ colejharvey [#106](https://github.com/lrberge/fixest/issues/106)).
 ## New features
 
  - `model.matrix` gains the new argument `subset` which allows the creation of the design matrix for a subset of variables only.
+ 
+ - `drop.section` now works for `etable` when `tex = FALSE`.
 
 ## Other changes
 
