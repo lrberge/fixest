@@ -22,6 +22,8 @@ colejharvey [#106](https://github.com/lrberge/fixest/issues/106)).
  
  - Fix bug to properly account for the nestedness of combined fixed-effects when clustered standard-errors are requested (thanks to @Oravishayrizi  [#116](https://github.com/lrberge/fixest/issues/116)).
  
+ - Fig bug in `model.matrix` that could make it very slow.
+ 
 ## New features
 
  - `model.matrix` gains the new argument `subset` which allows the creation of the design matrix for a subset of variables only.

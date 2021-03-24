@@ -9673,7 +9673,6 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	    res = res[[1]]
 	}
 
-
 	#
 	# Removing obs if needed
 	#
@@ -9690,15 +9689,17 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	        check_0 = TRUE
 	        res = res[-object$obsRemoved, , drop = FALSE]
 	    }
+
+	    na.rm = FALSE
 	}
 
 	if(na.rm){
 
-	    if(!all(sapply(res, is.numeric))){
+	    if(is.numeric(res) || all(sapply(res, is.numeric))){
+	        info = cpp_which_na_inf(res, nthreads = 1)
+	    } else {
 	        info = list(any_na_inf = anyNA(res))
 	        if(info$any_na_inf) info$is_na_inf = !complete.cases(res)
-	    } else {
-	        info = cpp_which_na_inf(res, nthreads = 1)
 	    }
 
 	    if(info$any_na_inf){
