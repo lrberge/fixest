@@ -8661,7 +8661,7 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
 		#
 
 		# Controlling the clusters
-		do.unclass = TRUE
+		do.unclass = check_nested = TRUE
 		if(missing(cluster) || is.null(cluster)){
 
 			if(is.null(object$fixef_id)){
@@ -8679,6 +8679,7 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
 
 				# in that specific case, there is no need of doing unclass.factor because already done
 				do.unclass = FALSE
+				check_nested = FALSE
 			}
 
 		} else {
@@ -8713,7 +8714,38 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
 					# cluster == names of clusters used in the estimation
 					type_info = paste0(" (", paste0(cluster, collapse = " & "), ")")
 
-					is_nested = which(names(object$fixef_id) %in% cluster)
+					check_nested = FALSE
+					# We do that to avoid checking nestedness later
+					if(all(object$fixef_vars %in% cluster)){
+					    # everyone nested (also works for var1^var2)
+					    is_nested = 1:length(object$fixef_id)
+
+					} else if(!any(grepl("^", object$fixef_vars, fixed = TRUE))){
+					    # simple cases only
+					    is_nested = which(names(object$fixef_id) %in% cluster)
+
+					} else if(!any(grepl("^", cluster, fixed = TRUE))){
+					    # simple cases in cluster
+					    check_var_in_there = function(x){
+					        # cluster is a global
+					        if(x %in% cluster){
+					            return(TRUE)
+
+					        } else if(grepl("^", x, fixed = TRUE)){
+					            x_split = strsplit(x, "^", fixed = TRUE)[[1]]
+					            if(any(x_split %in% cluster)){
+					                return(TRUE)
+					            }
+					        }
+
+					        return(FALSE)
+					    }
+
+					    is_nested = which(sapply(names(object$fixef_id), check_var_in_there))
+					} else {
+					    # too complex to apply tricks => we make real check
+					    check_nested = TRUE
+					}
 
 					cluster = object$fixef_id[cluster]
 
@@ -8926,7 +8958,8 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
 
 		# We recompute K
 		if(dof.adj && dof.fixef.K == "nested" && n_fe_ok >= 1){
-            if(do.unclass){
+
+            if(check_nested){
                 # we need to find out which is nested
                 is_nested = which(cpp_check_nested(object$fixef_id, cluster, object$fixef_sizes, n = n) == 1)
             } else {
@@ -8935,7 +8968,8 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
             }
 
 		    if(length(is_nested) == n_fe){
-		        K = K - (sum(fixef_sizes_ok) - (n_fe_ok - 1))
+		        # All FEs are removed, we add 1 for the intercept
+		        K = K - (sum(fixef_sizes_ok) - (n_fe_ok - 1)) + 1
 		    } else {
 		        if(is_exact && n_fe >= 2){
 		            fe = fixef(object, notes = FALSE)
@@ -8955,6 +8989,7 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
 		        }
 		    }
 
+		    # below for consistency => should not be triggered
 		    K = max(K, length(object$coefficients) + 1)
 
 		    correction.dof = (n - 1) / (n - K)

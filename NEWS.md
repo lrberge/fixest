@@ -20,6 +20,8 @@ colejharvey [#106](https://github.com/lrberge/fixest/issues/106)).
 
  - Fix bug in `predict`: an error message would not pop when combined fixed-effects are used with `combine.quick = TRUE` (thanks to @benzipperer [#115](https://github.com/lrberge/fixest/issues/115)).
  
+ - Fix bug to properly account for the nestedness of combined fixed-effects when clustered standard-errors are requested (thanks to @Oravishayrizi  [#116](https://github.com/lrberge/fixest/issues/116)).
+ 
 ## New features
 
  - `model.matrix` gains the new argument `subset` which allows the creation of the design matrix for a subset of variables only.
