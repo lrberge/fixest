@@ -41,8 +41,8 @@
 #' @param style.tex An object created by the function \code{\link[fixest]{style.tex}}. It represents the style of the Latex table, see the documentation of \code{\link[fixest]{style.tex}}.
 #' @param style.df An object created by the function \code{\link[fixest]{style.df}. }It represents the style of the data frame returned (if \code{tex = FALSE}), see the documentation of \code{\link[fixest]{style.df}}.
 #' @param notes (Tex only.) Character vector. If provided, a \code{"notes"} section will be added at the end right after the end of the table, containing the text of this argument. Note that if it is a vector, it will be collapsed with new lines.
-#' @param group A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument \code{drop}) and \code{TRUE} or \code{FALSE} will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: \code{group=list("Controls: personal traits"=c("gender", "height", "weight"))} will create an new line with \code{"Controls: personal traits"} in the leftmost cell, all three variables gender, height and weight are discared, TRUE appearing in each model containing at least one of the three variables (the style of TRUE/FALSE is governed by the argument \code{yesNo}). You can control the style with the \code{title} and \code{where} keywords in curly brackets. For example \code{group=list("{title:Controls; where:stats}Personal traits"=c("gender", "height", "weight"))} will add an extra line right before with "Control" written in it, and the group information will appear after the statistics. The keyword where can be equal to either \code{var} (default), \code{fixef} or \code{stats}. Starting the list name with an underscore is equivalent to adding \code{"{where:stats}"}: eg \code{list("_Controls"="x")} is equivalent to \code{list("{where:stats}Controls"="x")}.
-#' @param extraline A list. The list elements should be either a single logical or a vector of the same length as the number of models. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extraline=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the style with the \code{title} and \code{where} keywords in curly brackets. For example \code{extraline=list("{title:Sub-sample; where:stats}By age"=c("<20 yo", "all", ">50 yo"))} will add an extra line right before with "Sub-sample" written in it, and the extraline information will appear after the statistics section. The keyword where can be equal to either \code{var} (default), \code{fixef} or \code{stats}. Starting the list name with an underscore is equivalent to adding \code{"{where:stats}"}: eg \code{list("_Controls"=TRUE)} is equivalent to \code{list("{where:stats}Controls"=TRUE)}.
+#' @param group A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument \code{drop}) and \code{TRUE} or \code{FALSE} will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: \code{group=list("Controls: personal traits"=c("gender", "height", "weight"))} will create an new line with \code{"Controls: personal traits"} in the leftmost cell, all three variables gender, height and weight are discared, TRUE appearing in each model containing at least one of the three variables (the style of TRUE/FALSE is governed by the argument \code{yesNo}). You can control the style with the \code{title} and \code{where} keywords in curly brackets. For example \code{group=list("{title:Controls; where:stats}Personal traits"=c("gender", "height", "weight"))} will add an extra line right before with "Control" written in it, and the group information will appear after the statistics. The keyword where can be equal to either \code{var} (default), \code{fixef} or \code{stats}. Starting the list name with an underscore is equivalent to adding \code{"{where:stats}"}: eg \code{list("_Controls"="x")} is equivalent to \code{list("{where:stats}Controls"="x")}. Use \code{"^"} as a first character of the title to make the line appear "on top of" the section. See details.
+#' @param extraline A list. The list elements should be either a single logical or a vector of the same length as the number of models. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extraline=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the style with the \code{title} and \code{where} keywords in curly brackets. For example \code{extraline=list("{title:Sub-sample; where:stats}By age"=c("<20 yo", "all", ">50 yo"))} will add an extra line right before with "Sub-sample" written in it, and the extraline information will appear after the statistics section. The keyword where can be equal to either \code{var} (default), \code{fixef} or \code{stats}. Starting the list name with an underscore is equivalent to adding \code{"{where:stats}"}: eg \code{list("_Controls"=TRUE)} is equivalent to \code{list("{where:stats}Controls"=TRUE)}. Use \code{"^"} as a first character of the title to make the line appear "on top of" the section. See details.
 #' @param placement (Tex only.) Character string giving the position of the float in Latex. Default is "htbp". It must consist of only the characters 'h', 't', 'b', 'p', 'H' and '!'. Reminder: h: here; t: top; b: bottom; p: float page; H: definitely here; !: prevents Latex to look for other positions. Note that it can be equal to the empty string (and you'll get the default placement).
 #' @param drop.section Character vector which can be of length 0 (i.e. equal to \code{NULL}). Can contain the values "fixef", "slopes" or "stats". It would drop, respectively, the fixed-effects section, the variables with varying slopes section or the fit statistics section.
 #' @param reset (\code{setFixest_etable} only.) Logical, default is \code{FALSE}. If \code{TRUE}, this will reset all the default values that were already set by the user in previous calls.
@@ -77,13 +77,25 @@
 #'
 #' Although you can combine several regular expressions in a single character string using pipes, \code{drop} also accepts a vector of regular expressions.
 #'
-#' You can use the special character "!" (exclamation mark) to reverse the effect of the regular expression (this feature is specific to this fonction). For example \code{drop = "!Wind"} would drop any variable that does not contain "Wind".
+#' You can use the special character "!" (exclamation mark) to reverse the effect of the regular expression (this feature is specific to this function). For example \code{drop = "!Wind"} would drop any variable that does not contain "Wind".
 #'
 #' You can use the special character "\%" (percentage) to make reference to the original variable name instead of the aliased name. For example, you have a variable named \code{"Month6"}, and use a dictionary \code{dict = c(Month6="June")}. Thus the variable will be displayed as \code{"June"}. If you want to delete that variable, you can use either \code{drop="June"}, or \code{drop="\%Month6"} (which makes reference to its original name).
 #'
-#' The argument \code{order} takes in a vector of regular expressions, the order will follow the elments of this vector. The vector gives a list of priorities, on the left the elements with highest priority. For example, order = c("Wind", "!Inter", "!Temp") would give highest priorities to the variables containing "Wind" (which would then appear first), second highest priority is the variables not containing "Inter", last, with lowest priority, the variables not containing "Temp". If you had the following variables: (Intercept), Temp:Wind, Wind, Temp you would end up with the following order: Wind, Temp:Wind, Temp, (Intercept).
+#' The argument \code{order} takes in a vector of regular expressions, the order will follow the elements of this vector. The vector gives a list of priorities, on the left the elements with highest priority. For example, order = c("Wind", "!Inter", "!Temp") would give highest priorities to the variables containing "Wind" (which would then appear first), second highest priority is the variables not containing "Inter", last, with lowest priority, the variables not containing "Temp". If you had the following variables: (Intercept), Temp:Wind, Wind, Temp you would end up with the following order: Wind, Temp:Wind, Temp, (Intercept).
 #'
+#' @section Controlling the placement of extra lines:
 #'
+#' The arguments \code{group} and \code{extraline} allow to add customized lines in the table. The two are defined via a list where the list name will be the row name. By default, the placement of the extra line is right after the coefficients. For instance, \code{group = list("Controls" = "x[[:digit:]]")} will create a line right after the coefficients telling which models contain the control variables.
+#'
+#' But the placement can be customized. This example of the controls line will be used for illustration (the mechanism for \code{extraline} is identical).
+#'
+#' The row name, here \code{"Controls"}, accepts the specials characters \code{"^"} and/or \code{"_"}. These must be the very first characters, and in that order (if present).
+#'
+#' The caret, "^", means "first": it places the extra line at the beginning of the section. So \code{"^Controls"} would lead the controls line to be at the top of the coefficients section.
+#'
+#' The underscore relates to the idea of "below", and places the extra line in the statistics section (which is usually at the bottom). Using \code{"_Controls"} would place the extra line in the last row of the statistics section.
+#'
+#' You can combine the two, so that \code{"^_Controls"} would place the extra line in the first row of the statistics section.
 #'
 #' @return
 #' If \code{tex = TRUE}, the lines composing the Latex table are returned invisibly while the table is directly prompted on the console.
@@ -1825,11 +1837,11 @@ etable_internal_latex = function(info){
 
     # a simple line with only "variables" written in the first cell
     if(nchar(style$var.title) == 0){
-        variable_line = ""
+        coef_title = ""
     } else if(style$var.title == "\\midrule"){
-        variable_line = "\\midrule "
+        coef_title = "\\midrule "
     } else {
-        variable_line = paste0(escape_latex(style$var.title), "& ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
+        coef_title = paste0(escape_latex(style$var.title), "& ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
     }
 
     # Coefficients,  the tricky part
@@ -1902,11 +1914,11 @@ etable_internal_latex = function(info){
     if(length(fe_names) > 0 && !"fixef" %in% drop.section){
 
         if(nchar(style$fixef.title) == 0){
-            dumIntro = ""
+            fixef_title = ""
         } else if(style$fixef.title == "\\midrule"){
-            dumIntro = "\\midrule "
+            fixef_title = "\\midrule "
         } else {
-            dumIntro = paste0(escape_latex(style$fixef.title), "& ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
+            fixef_title = paste0(escape_latex(style$fixef.title), "& ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
         }
 
         # The number of FEs
@@ -1973,7 +1985,7 @@ etable_internal_latex = function(info){
 
     } else {
         FE_lines = NULL
-        dumIntro = NULL
+        fixef_title = NULL
     }
 
     #
@@ -2121,14 +2133,14 @@ etable_internal_latex = function(info){
 
     if(!"stats" %in% drop.section){
         if(nchar(style$stats.title) == 0){
-            fit_info = ""
+            stat_title = ""
         } else if(style$stats.title == "\\midrule"){
-            fit_info = "\\midrule "
+            stat_title = "\\midrule "
         } else {
-            fit_info = paste0(escape_latex(style$stats.title), "& ", paste(rep(" ", n_models), collapse = "&"), "\\\\\n")
+            stat_title = paste0(escape_latex(style$stats.title), "& ", paste(rep(" ", n_models), collapse = "&"), "\\\\\n")
         }
 
-        fit_info = paste0(fit_info, nb_FE_lines, info_convergence, info_muli_se)
+        stat_lines = paste0(nb_FE_lines, info_convergence, info_muli_se)
 
         if(!all(sapply(fitstat_list, function(x) all(is.na(x))))){
 
@@ -2138,11 +2150,11 @@ etable_internal_latex = function(info){
                 fit = sapply(fitstat_list, function(x) x[[fit_id]])
                 if(all(is.na(fit))) next
                 fit[is.na(fit)] = ""
-                fit_info = paste0(fit_info, fit_names[fit_id], " & ", paste0(fit, collapse = "&"), "\\\\\n")
+                stat_lines = paste0(stat_lines, fit_names[fit_id], " & ", paste0(fit, collapse = "&"), "\\\\\n")
             }
         }
     } else {
-        fit_info = ""
+        stat_title = stat_lines = ""
     }
 
 
@@ -2151,11 +2163,6 @@ etable_internal_latex = function(info){
     if(nchar(notes) > 0){
         info_notes = paste0("\n", escape_latex(style$notes.title), notes, "\n")
     }
-
-    # Stacking var and stat
-    var_stack = c(variable_line, coef_lines)
-    stat_stack = c(fit_info)
-    dum_stack = c(dumIntro, FE_lines, slope_intro, slope_lines)
 
     #
     # Group
@@ -2170,10 +2177,11 @@ etable_internal_latex = function(info){
         gi_full = ""
         gi_where = "var"
 
+        gi_top = FALSE
         if(grepl("^\\{", gi_name)){
             # style component
             gi_style = gsub("\\{|\\}.+", "", gi_name)
-            gi_style_parsed = parse_style(gi_style, c("title", "where"))
+            gi_style_parsed = parse_style(gi_style, c("title", "where", "top"))
             from = nchar(strsplit(gi_name, "}", fixed = TRUE)[[1]][1])
             gi_name = substr(gi_name, from + 2, nchar(gi_name))
 
@@ -2191,21 +2199,49 @@ etable_internal_latex = function(info){
                 }
 
             }
-        } else if(grepl("^_", gi_name)){
-            # We place it at the stats level
-            gi_name = substr(gi_name, 2, nchar(gi_name))
-            gi_where = "stats"
+
+            if(nchar(gi_style_parsed$top) > 0){
+                if(trimws(gi_style_parsed$top) %in% c("true", "1")){
+                    gi_top = TRUE
+                }
+            }
+
+
+        } else {
+            if(grepl("^\\^", gi_name)){
+                # means at the top
+                gi_top = TRUE
+                gi_name = substr(gi_name, 2, nchar(gi_name))
+            }
+
+            if(grepl("^_", gi_name)){
+                # We place it at the stats level
+                gi_name = substr(gi_name, 2, nchar(gi_name))
+                gi_where = "stats"
+            }
+
         }
 
         gi_full = paste0(gi_full, gi_name, " & ", paste0(gi_format, collapse = " & "), "\\\\\n")
 
-        if(gi_where == "var"){
-            var_stack = c(var_stack, gi_full)
-        } else if(gi_where == "fixef"){
-            dum_stack = c(dum_stack, gi_full)
+        if(gi_top){
+            if(gi_where == "var"){
+                coef_lines = c(gi_full, coef_lines)
+            } else if(gi_where == "fixef"){
+                FE_lines = c(gi_full, FE_lines)
+            } else {
+                stat_lines = c(gi_full, stat_lines)
+            }
         } else {
-            stat_stack = c(stat_stack, gi_full)
+            if(gi_where == "var"){
+                coef_lines = c(coef_lines, gi_full)
+            } else if(gi_where == "fixef"){
+                FE_lines = c(FE_lines, gi_full)
+            } else {
+                stat_lines = c(stat_lines, gi_full)
+            }
         }
+
 
     }
 
@@ -2234,10 +2270,11 @@ etable_internal_latex = function(info){
         el_full = ""
         el_where = "var"
 
+        el_top = FALSE
         if(grepl("^\\{", el_name)){
             # style component
             el_style = gsub("\\{|\\}.+", "", el_name)
-            el_style_parsed = parse_style(el_style, c("title", "where"))
+            el_style_parsed = parse_style(el_style, c("title", "where", "top"))
             from = nchar(strsplit(el_name, "}", fixed = TRUE)[[1]][1])
             el_name = substr(el_name, from + 2, nchar(el_name))
 
@@ -2254,29 +2291,59 @@ etable_internal_latex = function(info){
                     el_full = paste0(el_style_parsed$title, "& ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
                 }
             }
-        } else if(grepl("^_", el_name)){
-            # We place it at the stats level
-            el_name = substr(el_name, 2, nchar(el_name))
-            el_where = "stats"
+
+            if(nchar(el_style_parsed$top) > 0){
+                if(trimws(el_style_parsed$top) %in% c("true", "1")){
+                    el_top = TRUE
+                }
+            }
+
+        } else {
+            if(grepl("^\\^", el_name)){
+                # means at the top
+                el_top = TRUE
+                el_name = substr(el_name, 2, nchar(el_name))
+            }
+
+            if(grepl("^_", el_name)){
+                # We place it at the stats level
+                el_name = substr(el_name, 2, nchar(el_name))
+                el_where = "stats"
+            }
         }
 
         el_full = paste0(el_full, el_name, " & ", paste0(el_format, collapse = " & "), "\\\\\n")
 
-        if(el_where == "var"){
-            var_stack = c(var_stack, el_full)
-        } else if(el_where == "fixef"){
-            dum_stack = c(dum_stack, el_full)
+        if(el_top){
+            if(el_where == "var"){
+                coef_lines = c(el_full, coef_lines)
+            } else if(el_where == "fixef"){
+                FE_lines = c(el_full, FE_lines)
+            } else {
+                stat_lines = c(el_full, stat_lines)
+            }
         } else {
-            stat_stack = c(stat_stack, el_full)
+            if(el_where == "var"){
+                coef_lines = c(coef_lines, el_full)
+            } else if(el_where == "fixef"){
+                FE_lines = c(FE_lines, el_full)
+            } else {
+                stat_lines = c(stat_lines, el_full)
+            }
         }
 
     }
 
+    # Stacking var and stat
+    coef_stack = c(coef_title, coef_lines)
+    stat_stack = c(stat_title, stat_lines)
+    fixef_stack = c(fixef_title, FE_lines, slope_intro, slope_lines)
+
     # Now we place the fixed-effects
     if(style$fixef.where == "var"){
-        var_stack = c(var_stack, dum_stack)
+        coef_stack = c(coef_stack, fixef_stack)
     } else {
-        stat_stack = c(stat_stack, dum_stack)
+        stat_stack = c(stat_stack, fixef_stack)
     }
 
     if(tex_tag){
@@ -2286,7 +2353,7 @@ etable_internal_latex = function(info){
         start_tag = end_tag = ""
     }
 
-    res = c(supplemental_info, start_table, start_tag, intro_latex, first_line, info_subtitles, model_line, info_family, var_stack, stat_stack, info_SD, style$line.bottom, outro_latex, end_tag, info_notes, end_table)
+    res = c(supplemental_info, start_table, start_tag, intro_latex, first_line, info_subtitles, model_line, info_family, coef_stack, stat_stack, info_SD, style$line.bottom, outro_latex, end_tag, info_notes, end_table)
 
     res = res[nchar(res) > 0]
 
@@ -2376,7 +2443,7 @@ etable_internal_df = function(info){
     # Group
     #
 
-    after_stat = c()
+    before_stat = after_stat = c()
 
     for(i in seq_along(group)){
         gi = group[[i]]
@@ -2384,20 +2451,39 @@ etable_internal_df = function(info){
 
         after = FALSE
         gi_name = names(group)[i]
+        gi_top = FALSE
         from = nchar(strsplit(gi_name, "}", fixed = TRUE)[[1]][1])
         if(from < nchar(gi_name)){
+            # We don't parse the {where,title,top} instructions
             gi_name = substr(gi_name, from + 2, nchar(gi_name))
-        } else if(grepl("^_", gi_name)){
-            after = TRUE
-            gi_name = substr(gi_name, 2, nchar(gi_name))
+        } else {
+
+            if(grepl("^\\^", gi_name)){
+                gi_top = TRUE
+                gi_name = substr(gi_name, 2, nchar(gi_name))
+            }
+
+            if(grepl("^_", gi_name)){
+                after = TRUE
+                gi_name = substr(gi_name, 2, nchar(gi_name))
+            }
+
         }
 
         my_line = c(gi_name, gi_format)
 
-        if(after){
-            after_stat = rbind(after_stat, my_line)
+        if(gi_top){
+            if(after){
+                before_stat = rbind(before_stat, my_line)
+            } else {
+                res = rbind(my_line, res)
+            }
         } else {
-            res = rbind(res, my_line)
+            if(after){
+                after_stat = rbind(after_stat, my_line)
+            } else {
+                res = rbind(res, my_line)
+            }
         }
 
     }
@@ -2425,20 +2511,37 @@ etable_internal_df = function(info){
 
         after = FALSE
         el_name = names(extraline)[i]
+        el_top = FALSE
         from = nchar(strsplit(el_name, "}", fixed = TRUE)[[1]][1])
         if(from < nchar(el_name)){
             el_name = substr(el_name, from + 2, nchar(el_name))
-        } else if(grepl("^_", el_name)){
-            after = TRUE
-            el_name = substr(el_name, 2, nchar(el_name))
+        } else {
+
+            if(grepl("^\\^", el_name)){
+                el_top = TRUE
+                el_name = substr(el_name, 2, nchar(el_name))
+            }
+
+            if(grepl("^_", el_name)){
+                after = TRUE
+                el_name = substr(el_name, 2, nchar(el_name))
+            }
         }
 
         my_line = c(el_name, el_format)
 
-        if(after){
-            after_stat = rbind(after_stat, my_line)
+        if(el_top){
+            if(after){
+                before_stat = rbind(before_stat, my_line)
+            } else {
+                res = rbind(my_line, res)
+            }
         } else {
-            res = rbind(res, my_line)
+            if(after){
+                after_stat = rbind(after_stat, my_line)
+            } else {
+                res = rbind(res, my_line)
+            }
         }
     }
 
@@ -2591,6 +2694,10 @@ etable_internal_df = function(info){
     #
     # Fit statistics
     #
+
+    if(length(before_stat) > 0){
+        res = rbind(res, before_stat)
+    }
 
     if(!"stats" %in% drop.section && !all(sapply(fitstat_list, function(x) all(is.na(x))))){
 
