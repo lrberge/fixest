@@ -22,7 +22,7 @@ colejharvey [#106](https://github.com/lrberge/fixest/issues/106)).
  
  - Fix bug to properly account for the nestedness of combined fixed-effects when clustered standard-errors are requested (thanks to @Oravishayrizi  [#116](https://github.com/lrberge/fixest/issues/116)).
  
- - Fig bug in `model.matrix` that could make it very slow.
+ - Fig major bug in `model.matrix` that could make it very slow. Led the function `aggregate` to be very slow (thanks to Benny Goldman).
  
 ## New features
 
