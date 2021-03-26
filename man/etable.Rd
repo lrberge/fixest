@@ -48,6 +48,7 @@ etable(
   notes = NULL,
   group = NULL,
   extraline = NULL,
+  fixef.group = NULL,
   placement = "htbp",
   drop.section = NULL,
   poly_dict = c("", " square", " cube"),
@@ -155,6 +156,7 @@ setFixest_etable(
   postprocess.tex = NULL,
   postprocess.df = NULL,
   fit_format = "__var__",
+  fixef.group = NULL,
   reset = FALSE
 )
 
@@ -235,9 +237,11 @@ getFixest_etable()
 
 \item{notes}{(Tex only.) Character vector. If provided, a \code{"notes"} section will be added at the end right after the end of the table, containing the text of this argument. Note that if it is a vector, it will be collapsed with new lines.}
 
-\item{group}{A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument \code{drop}) and \code{TRUE} or \code{FALSE} will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: \code{group=list("Controls: personal traits"=c("gender", "height", "weight"))} will create an new line with \code{"Controls: personal traits"} in the leftmost cell, all three variables gender, height and weight are discared, TRUE appearing in each model containing at least one of the three variables (the style of TRUE/FALSE is governed by the argument \code{yesNo}). You can control the style with the \code{title} and \code{where} keywords in curly brackets. For example \code{group=list("{title:Controls; where:stats}Personal traits"=c("gender", "height", "weight"))} will add an extra line right before with "Control" written in it, and the group information will appear after the statistics. The keyword where can be equal to either \code{var} (default), \code{fixef} or \code{stats}. Starting the list name with an underscore is equivalent to adding \code{"{where:stats}"}: eg \code{list("_Controls"="x")} is equivalent to \code{list("{where:stats}Controls"="x")}. Use \code{"^"} as a first character of the title to make the line appear "on top of" the section. See details.}
+\item{group}{A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument \code{drop}) and \code{TRUE} or \code{FALSE} will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: \code{group=list("Controls: personal traits"=c("gender", "height", "weight"))} will create an new line with \code{"Controls: personal traits"} in the leftmost cell, all three variables gender, height and weight are discarded, \code{TRUE} appearing in each model containing at least one of the three variables (the style of \code{TRUE}/\code{FALSE} is governed by the argument \code{yesNo}). You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: 1st, \code{"_"}: last, row; 2) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section. For example: \code{group=list("_Controls"=stuff)} will place the line last in the stats sections, and using \code{group=list("^_Controls"=stuff)} will make the row appear first in the stats section. For details, see the dedicated section.}
 
-\item{extraline}{A list. The list elements should be either a single logical or a vector of the same length as the number of models. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extraline=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the style with the \code{title} and \code{where} keywords in curly brackets. For example \code{extraline=list("{title:Sub-sample; where:stats}By age"=c("<20 yo", "all", ">50 yo"))} will add an extra line right before with "Sub-sample" written in it, and the extraline information will appear after the statistics section. The keyword where can be equal to either \code{var} (default), \code{fixef} or \code{stats}. Starting the list name with an underscore is equivalent to adding \code{"{where:stats}"}: eg \code{list("_Controls"=TRUE)} is equivalent to \code{list("{where:stats}Controls"=TRUE)}. Use \code{"^"} as a first character of the title to make the line appear "on top of" the section. See details.}
+\item{extraline}{A list. The list elements should be either a single logical or a vector of the same length as the number of models. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extraline=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: 1st, \code{"_"}: last, row; 2) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section. For example: \code{group=list("_Controls"=stuff)} will place the line last in the stats sections, and using \code{group=list("^_Controls"=stuff)} will make the row appear first in the stats section. For details, see the dedicated section.}
+
+\item{fixef.group}{Logical scalar or list (default is \code{NULL}). If equal to \code{TRUE}, then all fixed-effects always appearing jointly in models will be grouped in one row. If a list, its elements must be character vectors of regular expressions and the list names will be the row names. For ex. \code{fixef.group=list("Dates fixed-effects"="Month|Day")} will remove the \code{"Month"} and \code{"Day"} fixed effects from the display and replace them with a single row named "Dates fixed-effects". You can monitor the placement of the new row with the special characters telling where to place the row within a section: \code{"^"} (first), or \code{"_"} (last); and in which section it should appear: \code{"^"} (coef.), \code{"-"} (fixed-effects), or \code{"_"} (stat.). These two special characters must appear first in the row names. Please see the dedicated section.}
 
 \item{placement}{(Tex only.) Character string giving the position of the float in Latex. Default is "htbp". It must consist of only the characters 'h', 't', 'b', 'p', 'H' and '!'. Reminder: h: here; t: top; b: bottom; p: float page; H: definitely here; !: prevents Latex to look for other positions. Note that it can be equal to the empty string (and you'll get the default placement).}
 
@@ -305,17 +309,17 @@ The argument \code{order} takes in a vector of regular expressions, the order wi
 \section{Controlling the placement of extra lines}{
 
 
-The arguments \code{group} and \code{extraline} allow to add customized lines in the table. The two are defined via a list where the list name will be the row name. By default, the placement of the extra line is right after the coefficients. For instance, \code{group = list("Controls" = "x[[:digit:]]")} will create a line right after the coefficients telling which models contain the control variables.
+The arguments \code{group}, \code{extraline} and \code{fixef.group} allow to add customized lines in the table. They can be defined via a list where the list name will be the row name. By default, the placement of the extra line is right after the coefficients (except for \code{fixef.group}, covered in the last paragraph). For instance, \code{group = list("Controls" = "x[[:digit:]]")} will create a line right after the coefficients telling which models contain the control variables.
 
-But the placement can be customized. This example of the controls line will be used for illustration (the mechanism for \code{extraline} is identical).
+But the placement can be customized. The previous example (of the controls) will be used for illustration (the mechanism for \code{extraline} and \code{fixef.group} is identical).
 
-The row name, here \code{"Controls"}, accepts the specials characters \code{"^"} and/or \code{"_"}. These must be the very first characters, and in that order (if present).
+The row names accept 2 special characters at the very start. The first governs the placement of the new line within the section: it can be equal to \code{"^"}, meaning first line, or \code{"_"}, meaning last line. The second character tells in which section the line should appear: it can be equal to \code{"^"}, \code{"-"}, or \code{"_"}, meaning respectively the coefficients, the fixed-effects and the statistics section (which typically appear at the top, mid and bottom of the table).
 
-The caret, "^", means "first": it places the extra line at the beginning of the section. So \code{"^Controls"} would lead the controls line to be at the top of the coefficients section.
+Let's have some examples. Using the previous example, writing \code{"^_Controls"} would place the new line in at the top of the statistics section. Writing \code{"_-Controls"} places it as the last row of the fixed-effects section; \code{"^^Controls"} at the top row of the coefficients section; etc...
 
-The underscore relates to the idea of "below", and places the extra line in the statistics section (which is usually at the bottom). Using \code{"_Controls"} would place the extra line in the last row of the statistics section.
+On top of that there are shortcuts to avoid writing the two special characters. If only one special character is found, it is assumed to reflect the section, unless it corresponds to the default section, a case where the character then reflects the position within the section. An example will make it clear. Writing \code{"^Controls"} would place the line at the top of the coefficients section (since the default placement would have been this section). \code{"_Controls"} would place it at the bottom of the statistics section.
 
-You can combine the two, so that \code{"^_Controls"} would place the extra line in the first row of the statistics section.
+The placement in \code{fixef.group} is defined similarly, only the default placement is different. Its default placement is at the top of the fixed-effects section. This means that the only difference with \code{group} and \code{extraline} is when a single special character is used. Here using, e.g., \code{"^My FEs"} would place the row at the bottom of the coefficients section, since \code{"^"} would refer to the section (and not the row within the section).
 }
 
 \examples{
@@ -354,7 +358,7 @@ dict = c(Temp = "Temperature", "Month::5"="May", "6"="Jun")
 etable(est1, est2, dict = dict)
 # Note the difference of treatment between Jun and May
 
-# Assume the following dictionnary:
+# Assume the following dictionary:
 dict = c("Month::5"="May", "Month::6"="Jun", "Month::7"="Jul",
          "Month::8"="Aug", "Month::9"="Sep")
 
@@ -402,12 +406,10 @@ est_c0 = feols(Ozone ~ Solar.R, data = aq)
 est_c1 = feols(Ozone ~ Solar.R + ..ctrl, data = aq)
 est_c2 = feols(Ozone ~ Solar.R + Solar.R^2 + ..ctrl, data = aq)
 
-etable(est_c0, est_c1, est_c2, group = list(Controls = "\%poly"))
+etable(est_c0, est_c1, est_c2, group = list(Controls = "poly"))
 
-# 'group' here does the same as drop = "\%poly", but adds an extra line
+# 'group' here does the same as drop = "poly", but adds an extra line
 # with TRUE/FALSE where the variables were found
-# Note that the "\%" is needed because polnomials are automatically renamed
-#  so we need to make reference to the original name.
 
 # 'extraline' adds an extra line, where you can add the value for each model
 est_all  = feols(Ozone ~ Solar.R + Temp + Wind, data = aq)
@@ -418,19 +420,65 @@ est_sub3 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month == 9, ])
 etable(est_all, est_sub1, est_sub2, est_sub3,
        extraline = list("Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
 
-# When exporting to Latex, you can add meta arguments to 'group' and 'extraline'
-# Two keywords are allowed: 'title' and 'where'
-# 'title' adds a line just before with the content of 'title' in the leftmost cell
-# 'where' governs the location of the line. It can be equal to 'var', 'stats' or 'fixef'.
-# The syntax is: {"{title:Controls; where:stats}Group name"}
-# (the enclosing curly braces are only here to make Rd work, please ignore them)
-# You can use the shortcut "_Group name" which is equivalent to {"{where:stats}Group name"}
+# You can monitor the placement of the new lines with two special characters
+# at the beginning of the row name.
+# 1) "^" or "_" which mean first or last line of the section
+# 2) "^", "-" or "_" which mean the coefficients, the fixed-effects or the
+# statistics section.
+#
+# Ex: starting with "^_" will place the line at the top of the stat. section
+#     starting with "_-" will place the line at the bottom of the FEs section
+#     etc.
+#
+# You can use a single character which will represent the section, unless
+# it's
 
 # Examples
-etable(est_c0, est_c1, est_c2, tex = TRUE, group = list("{where:stats}Controls" = "poly"))
-etable(est_all, est_sub1, est_sub2, est_sub3, tex = TRUE,
-       extraline = list("{title:\\\\midrule}Sub-sample" =
-                          c("All", "May-June", "Jul.-Aug.", "Sept.")))
+etable(est_c0, est_c1, est_c2, group = list("_Controls" = "poly"))
+etable(est_all, est_sub1, est_sub2, est_sub3,
+       extraline = list("^Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
+# Note that since the default placement is the coefficients section,
+# a single "^" then refers to the position within the section. We end
+# up at the top of the coefficients section.
+
+#
+# fixef.group
+#
+
+# You can group the fixed-effects line with fixef.group
+
+est_0fe = feols(Ozone ~ Solar.R + Temp + Wind, aq)
+est_1fe = feols(Ozone ~ Solar.R + Temp + Wind | Month, aq)
+est_2fe = feols(Ozone ~ Solar.R + Temp + Wind | Month + Day, aq)
+
+# A) automatic way => simply use fixef.group = TRUE
+
+etable(est_0fe, est_2fe, fixef.group = TRUE)
+
+# Note that when grouping would lead to inconsistencies across models,
+# it is avoided
+
+etable(est_0fe, est_1fe, est_2fe, fixef.group = TRUE)
+
+# B) customized way => use a list
+
+etable(est_0fe, est_2fe, fixef.group = list("Dates" = "Month|Day"))
+
+# Note that when a user grouping would lead to inconsistencies,
+# the term partial replaces yes/no and the fixed-effects are not removed.
+
+etable(est_0fe, est_1fe, est_2fe, fixef.group = list("Dates" = "Month|Day"))
+
+# Using customized placement => as with 'group' and 'extraline',
+# the user can control the placement of the new line.
+# See the previous 'group' examples and the dedicated section in the help.
+
+# On top of the coefficients:
+etable(est_0fe, est_2fe, fixef.group = list("^^Dates" = "Month|Day"))
+
+# Last line of the statistics
+etable(est_0fe, est_2fe, fixef.group = list("_Dates" = "Month|Day"))
+
 
 
 #

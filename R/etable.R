@@ -41,8 +41,9 @@
 #' @param style.tex An object created by the function \code{\link[fixest]{style.tex}}. It represents the style of the Latex table, see the documentation of \code{\link[fixest]{style.tex}}.
 #' @param style.df An object created by the function \code{\link[fixest]{style.df}. }It represents the style of the data frame returned (if \code{tex = FALSE}), see the documentation of \code{\link[fixest]{style.df}}.
 #' @param notes (Tex only.) Character vector. If provided, a \code{"notes"} section will be added at the end right after the end of the table, containing the text of this argument. Note that if it is a vector, it will be collapsed with new lines.
-#' @param group A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument \code{drop}) and \code{TRUE} or \code{FALSE} will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: \code{group=list("Controls: personal traits"=c("gender", "height", "weight"))} will create an new line with \code{"Controls: personal traits"} in the leftmost cell, all three variables gender, height and weight are discared, TRUE appearing in each model containing at least one of the three variables (the style of TRUE/FALSE is governed by the argument \code{yesNo}). You can control the style with the \code{title} and \code{where} keywords in curly brackets. For example \code{group=list("{title:Controls; where:stats}Personal traits"=c("gender", "height", "weight"))} will add an extra line right before with "Control" written in it, and the group information will appear after the statistics. The keyword where can be equal to either \code{var} (default), \code{fixef} or \code{stats}. Starting the list name with an underscore is equivalent to adding \code{"{where:stats}"}: eg \code{list("_Controls"="x")} is equivalent to \code{list("{where:stats}Controls"="x")}. Use \code{"^"} as a first character of the title to make the line appear "on top of" the section. See details.
-#' @param extraline A list. The list elements should be either a single logical or a vector of the same length as the number of models. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extraline=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the style with the \code{title} and \code{where} keywords in curly brackets. For example \code{extraline=list("{title:Sub-sample; where:stats}By age"=c("<20 yo", "all", ">50 yo"))} will add an extra line right before with "Sub-sample" written in it, and the extraline information will appear after the statistics section. The keyword where can be equal to either \code{var} (default), \code{fixef} or \code{stats}. Starting the list name with an underscore is equivalent to adding \code{"{where:stats}"}: eg \code{list("_Controls"=TRUE)} is equivalent to \code{list("{where:stats}Controls"=TRUE)}. Use \code{"^"} as a first character of the title to make the line appear "on top of" the section. See details.
+#' @param group A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument \code{drop}) and \code{TRUE} or \code{FALSE} will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: \code{group=list("Controls: personal traits"=c("gender", "height", "weight"))} will create an new line with \code{"Controls: personal traits"} in the leftmost cell, all three variables gender, height and weight are discarded, \code{TRUE} appearing in each model containing at least one of the three variables (the style of \code{TRUE}/\code{FALSE} is governed by the argument \code{yesNo}). You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: 1st, \code{"_"}: last, row; 2) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section. For example: \code{group=list("_Controls"=stuff)} will place the line last in the stats sections, and using \code{group=list("^_Controls"=stuff)} will make the row appear first in the stats section. For details, see the dedicated section.
+#' @param extraline A list. The list elements should be either a single logical or a vector of the same length as the number of models. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extraline=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: 1st, \code{"_"}: last, row; 2) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section. For example: \code{group=list("_Controls"=stuff)} will place the line last in the stats sections, and using \code{group=list("^_Controls"=stuff)} will make the row appear first in the stats section. For details, see the dedicated section.
+#' @param fixef.group Logical scalar or list (default is \code{NULL}). If equal to \code{TRUE}, then all fixed-effects always appearing jointly in models will be grouped in one row. If a list, its elements must be character vectors of regular expressions and the list names will be the row names. For ex. \code{fixef.group=list("Dates fixed-effects"="Month|Day")} will remove the \code{"Month"} and \code{"Day"} fixed effects from the display and replace them with a single row named "Dates fixed-effects". You can monitor the placement of the new row with the special characters telling where to place the row within a section: \code{"^"} (first), or \code{"_"} (last); and in which section it should appear: \code{"^"} (coef.), \code{"-"} (fixed-effects), or \code{"_"} (stat.). These two special characters must appear first in the row names. Please see the dedicated section.
 #' @param placement (Tex only.) Character string giving the position of the float in Latex. Default is "htbp". It must consist of only the characters 'h', 't', 'b', 'p', 'H' and '!'. Reminder: h: here; t: top; b: bottom; p: float page; H: definitely here; !: prevents Latex to look for other positions. Note that it can be equal to the empty string (and you'll get the default placement).
 #' @param drop.section Character vector which can be of length 0 (i.e. equal to \code{NULL}). Can contain the values "fixef", "slopes" or "stats". It would drop, respectively, the fixed-effects section, the variables with varying slopes section or the fit statistics section.
 #' @param reset (\code{setFixest_etable} only.) Logical, default is \code{FALSE}. If \code{TRUE}, this will reset all the default values that were already set by the user in previous calls.
@@ -85,17 +86,17 @@
 #'
 #' @section Controlling the placement of extra lines:
 #'
-#' The arguments \code{group} and \code{extraline} allow to add customized lines in the table. The two are defined via a list where the list name will be the row name. By default, the placement of the extra line is right after the coefficients. For instance, \code{group = list("Controls" = "x[[:digit:]]")} will create a line right after the coefficients telling which models contain the control variables.
+#' The arguments \code{group}, \code{extraline} and \code{fixef.group} allow to add customized lines in the table. They can be defined via a list where the list name will be the row name. By default, the placement of the extra line is right after the coefficients (except for \code{fixef.group}, covered in the last paragraph). For instance, \code{group = list("Controls" = "x[[:digit:]]")} will create a line right after the coefficients telling which models contain the control variables.
 #'
-#' But the placement can be customized. This example of the controls line will be used for illustration (the mechanism for \code{extraline} is identical).
+#' But the placement can be customized. The previous example (of the controls) will be used for illustration (the mechanism for \code{extraline} and \code{fixef.group} is identical).
 #'
-#' The row name, here \code{"Controls"}, accepts the specials characters \code{"^"} and/or \code{"_"}. These must be the very first characters, and in that order (if present).
+#' The row names accept 2 special characters at the very start. The first governs the placement of the new line within the section: it can be equal to \code{"^"}, meaning first line, or \code{"_"}, meaning last line. The second character tells in which section the line should appear: it can be equal to \code{"^"}, \code{"-"}, or \code{"_"}, meaning respectively the coefficients, the fixed-effects and the statistics section (which typically appear at the top, mid and bottom of the table).
 #'
-#' The caret, "^", means "first": it places the extra line at the beginning of the section. So \code{"^Controls"} would lead the controls line to be at the top of the coefficients section.
+#' Let's have some examples. Using the previous example, writing \code{"^_Controls"} would place the new line in at the top of the statistics section. Writing \code{"_-Controls"} places it as the last row of the fixed-effects section; \code{"^^Controls"} at the top row of the coefficients section; etc...
 #'
-#' The underscore relates to the idea of "below", and places the extra line in the statistics section (which is usually at the bottom). Using \code{"_Controls"} would place the extra line in the last row of the statistics section.
+#' On top of that there are shortcuts to avoid writing the two special characters. If only one special character is found, it is assumed to reflect the section, unless it corresponds to the default section, a case where the character then reflects the position within the section. An example will make it clear. Writing \code{"^Controls"} would place the line at the top of the coefficients section (since the default placement would have been this section). \code{"_Controls"} would place it at the bottom of the statistics section.
 #'
-#' You can combine the two, so that \code{"^_Controls"} would place the extra line in the first row of the statistics section.
+#' The placement in \code{fixef.group} is defined similarly, only the default placement is different. Its default placement is at the top of the fixed-effects section. This means that the only difference with \code{group} and \code{extraline} is when a single special character is used. Here using, e.g., \code{"^My FEs"} would place the row at the bottom of the coefficients section, since \code{"^"} would refer to the section (and not the row within the section).
 #'
 #' @return
 #' If \code{tex = TRUE}, the lines composing the Latex table are returned invisibly while the table is directly prompted on the console.
@@ -144,7 +145,7 @@
 #' etable(est1, est2, dict = dict)
 #' # Note the difference of treatment between Jun and May
 #'
-#' # Assume the following dictionnary:
+#' # Assume the following dictionary:
 #' dict = c("Month::5"="May", "Month::6"="Jun", "Month::7"="Jul",
 #'          "Month::8"="Aug", "Month::9"="Sep")
 #'
@@ -192,12 +193,10 @@
 #' est_c1 = feols(Ozone ~ Solar.R + ..ctrl, data = aq)
 #' est_c2 = feols(Ozone ~ Solar.R + Solar.R^2 + ..ctrl, data = aq)
 #'
-#' etable(est_c0, est_c1, est_c2, group = list(Controls = "%poly"))
+#' etable(est_c0, est_c1, est_c2, group = list(Controls = "poly"))
 #'
-#' # 'group' here does the same as drop = "%poly", but adds an extra line
+#' # 'group' here does the same as drop = "poly", but adds an extra line
 #' # with TRUE/FALSE where the variables were found
-#' # Note that the "%" is needed because polnomials are automatically renamed
-#' #  so we need to make reference to the original name.
 #'
 #' # 'extraline' adds an extra line, where you can add the value for each model
 #' est_all  = feols(Ozone ~ Solar.R + Temp + Wind, data = aq)
@@ -208,19 +207,65 @@
 #' etable(est_all, est_sub1, est_sub2, est_sub3,
 #'        extraline = list("Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
 #'
-#' # When exporting to Latex, you can add meta arguments to 'group' and 'extraline'
-#' # Two keywords are allowed: 'title' and 'where'
-#' # 'title' adds a line just before with the content of 'title' in the leftmost cell
-#' # 'where' governs the location of the line. It can be equal to 'var', 'stats' or 'fixef'.
-#' # The syntax is: {"{title:Controls; where:stats}Group name"}
-#' # (the enclosing curly braces are only here to make Rd work, please ignore them)
-#' # You can use the shortcut "_Group name" which is equivalent to {"{where:stats}Group name"}
+#' # You can monitor the placement of the new lines with two special characters
+#' # at the beginning of the row name.
+#' # 1) "^" or "_" which mean first or last line of the section
+#' # 2) "^", "-" or "_" which mean the coefficients, the fixed-effects or the
+#' # statistics section.
+#' #
+#' # Ex: starting with "^_" will place the line at the top of the stat. section
+#' #     starting with "_-" will place the line at the bottom of the FEs section
+#' #     etc.
+#' #
+#' # You can use a single character which will represent the section, unless
+#' # it's
 #'
 #' # Examples
-#' etable(est_c0, est_c1, est_c2, tex = TRUE, group = list("{where:stats}Controls" = "poly"))
-#' etable(est_all, est_sub1, est_sub2, est_sub3, tex = TRUE,
-#'        extraline = list("{title:\\midrule}Sub-sample" =
-#'                           c("All", "May-June", "Jul.-Aug.", "Sept.")))
+#' etable(est_c0, est_c1, est_c2, group = list("_Controls" = "poly"))
+#' etable(est_all, est_sub1, est_sub2, est_sub3,
+#'        extraline = list("^Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
+#' # Note that since the default placement is the coefficients section,
+#' # a single "^" then refers to the position within the section. We end
+#' # up at the top of the coefficients section.
+#'
+#' #
+#' # fixef.group
+#' #
+#'
+#' # You can group the fixed-effects line with fixef.group
+#'
+#' est_0fe = feols(Ozone ~ Solar.R + Temp + Wind, aq)
+#' est_1fe = feols(Ozone ~ Solar.R + Temp + Wind | Month, aq)
+#' est_2fe = feols(Ozone ~ Solar.R + Temp + Wind | Month + Day, aq)
+#'
+#' # A) automatic way => simply use fixef.group = TRUE
+#'
+#' etable(est_0fe, est_2fe, fixef.group = TRUE)
+#'
+#' # Note that when grouping would lead to inconsistencies across models,
+#' # it is avoided
+#'
+#' etable(est_0fe, est_1fe, est_2fe, fixef.group = TRUE)
+#'
+#' # B) customized way => use a list
+#'
+#' etable(est_0fe, est_2fe, fixef.group = list("Dates" = "Month|Day"))
+#'
+#' # Note that when a user grouping would lead to inconsistencies,
+#' # the term partial replaces yes/no and the fixed-effects are not removed.
+#'
+#' etable(est_0fe, est_1fe, est_2fe, fixef.group = list("Dates" = "Month|Day"))
+#'
+#' # Using customized placement => as with 'group' and 'extraline',
+#' # the user can control the placement of the new line.
+#' # See the previous 'group' examples and the dedicated section in the help.
+#'
+#' # On top of the coefficients:
+#' etable(est_0fe, est_2fe, fixef.group = list("^^Dates" = "Month|Day"))
+#'
+#' # Last line of the statistics
+#' etable(est_0fe, est_2fe, fixef.group = list("_Dates" = "Month|Day"))
+#'
 #'
 #'
 #' #
@@ -282,7 +327,7 @@
 #' etable(rep(.l(est, est_bis), each = 3, cluster = list("standard", ~ Month, ~ Day)))
 #'
 #'
-etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, agg = NULL, .vcov, .vcov_args = NULL, digits = 4, digits.stats = 5, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, file, replace = FALSE, convergence, signifCode, label, float, subtitles = list("auto"), fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar = TRUE, style.tex = NULL, style.df = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube"), postprocess.tex = NULL, postprocess.df = NULL, fit_format = "__var__"){
+etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, agg = NULL, .vcov, .vcov_args = NULL, digits = 4, digits.stats = 5, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, file, replace = FALSE, convergence, signifCode, label, float, subtitles = list("auto"), fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar = TRUE, style.tex = NULL, style.df = NULL, notes = NULL, group = NULL, extraline = NULL, fixef.group = NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube"), postprocess.tex = NULL, postprocess.df = NULL, fit_format = "__var__"){
 
     #
     # Checking the arguments
@@ -416,7 +461,7 @@ etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, agg = N
         }
     }
 
-    info = results2formattedList(dots = dots, se=se, dof=dof, fitstat_all=fitstat, cluster=cluster, stage=stage, agg = agg, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, digits.stats=digits.stats, sdBelow=sdBelow, signifCode=signifCode, coefstat = coefstat, ci = ci, title=title, float=float, subtitles=subtitles, keepFactors=keepFactors, tex = tex, useSummary=useSummary, dots_call=dots_call, powerBelow=powerBelow, dict=dict, interaction.combine=interaction.combine, convergence=convergence, family=family, keep=keep, drop=drop, file=file, order=order, label=label, fixef_sizes=fixef_sizes, fixef_sizes.simplify=fixef_sizes.simplify, depvar=depvar, style.tex=style.tex, style.df=style.df, replace=replace, notes = notes, group = group, extraline=extraline, placement = placement, drop.section = drop.section, poly_dict = poly_dict, tex_tag = DO_POSTPROCESS, fit_format = fit_format)
+    info = results2formattedList(dots = dots, se=se, dof=dof, fitstat_all=fitstat, cluster=cluster, stage=stage, agg = agg, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, digits.stats=digits.stats, sdBelow=sdBelow, signifCode=signifCode, coefstat = coefstat, ci = ci, title=title, float=float, subtitles=subtitles, keepFactors=keepFactors, tex = tex, useSummary=useSummary, dots_call=dots_call, powerBelow=powerBelow, dict=dict, interaction.combine=interaction.combine, convergence=convergence, family=family, keep=keep, drop=drop, file=file, order=order, label=label, fixef_sizes=fixef_sizes, fixef_sizes.simplify=fixef_sizes.simplify, depvar=depvar, style.tex=style.tex, style.df=style.df, replace=replace, notes = notes, group = group, extraline=extraline, placement = placement, drop.section = drop.section, poly_dict = poly_dict, tex_tag = DO_POSTPROCESS, fit_format = fit_format, fixef.group=fixef.group)
 
     if(tex){
         res = etable_internal_latex(info)
@@ -596,7 +641,7 @@ esttable = function(..., se=c("standard", "hetero", "cluster", "twoway", "threew
     return(res)
 }
 
-results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage = 2, agg = NULL, .vcov, .vcov_args = NULL, digits = 4, digits.stats = 5, fitstat_all, sdBelow=TRUE, dict, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), coefstat = "se", ci = 0.95, label, subtitles, title, float = FALSE, replace = FALSE, keepFactors = FALSE, tex = FALSE, useSummary, dots_call, powerBelow = -5, interaction.combine, convergence, family, drop, order, keep, file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, depvar = FALSE, style.tex = NULL, style.df=NULL, notes = NULL, group = NULL, extraline=NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube"), tex_tag = FALSE, fit_format = "__var__"){
+results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage = 2, agg = NULL, .vcov, .vcov_args = NULL, digits = 4, digits.stats = 5, fitstat_all, sdBelow=TRUE, dict, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), coefstat = "se", ci = 0.95, label, subtitles, title, float = FALSE, replace = FALSE, keepFactors = FALSE, tex = FALSE, useSummary, dots_call, powerBelow = -5, interaction.combine, convergence, family, drop, order, keep, file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, depvar = FALSE, style.tex = NULL, style.df=NULL, notes = NULL, group = NULL, extraline=NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube"), tex_tag = FALSE, fit_format = "__var__", fixef.group = NULL){
     # This function is the core of the function etable
 
     set_up(1)
@@ -722,6 +767,13 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
 
     check_arg_plus(group, extraline, "NULL{list()} named list l0")
     # we check it more in depth later
+
+    check_arg(fixef.group, "NULL{list()} logical scalar | named list l0")
+    if(isFALSE(fixef.group)){
+        fixef.group = list()
+    }
+
+    IS_FIXEF_GROUP = length(fixef.group) > 0
 
     check_arg(fit_format, "character scalar")
     if(!grepl("__var__", fit_format, fixed = TRUE)){
@@ -1283,7 +1335,10 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
             nbItems = character(0)
         }
 
-        # now the normal FEs
+        #
+        # Fixed-effects
+        #
+
         if(!is.null(x$fixef_terms)){
             terms_full = extract_fe_slope(x$fixef_terms)
             fixef_vars = terms_full$fixef_vars
@@ -1668,6 +1723,163 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
     if(missing(file)) file = NULL
     if(missing(label)) label = NULL
 
+    if(IS_FIXEF_GROUP && length(fe_names) > 0){
+
+        # Table of presence of fixed-effects
+        is_fe_mat = c()
+        for(i in 1:length(is_fe)){
+            # The order of the FEs needs not be the same since is_FE is
+            # sequentially constructed (hence the following construct)
+            is_fe_mat = cbind(is_fe_mat, 1 * (!is.na(is_fe[[i]][fe_names])))
+        }
+
+        # row => FEs
+        # column => models
+
+        if(isTRUE(fixef.group) && length(fe_names) > 1){
+
+            fe_groups = list()
+            n_fe = nrow(is_fe_mat)
+            g = 1 # => group
+            i_left = 1:n_fe
+            while(length(i_left) > 1){
+
+                i = i_left[1]
+                i_left = i_left[-1]
+                any_done = FALSE
+                for(j in i_left){
+
+                    # we check if same pattern
+                    if(all(is_fe_mat[i, ] == is_fe_mat[j, ])){
+                        any_done = TRUE
+                        if(length(fe_groups) < g){
+                            # we initialize it
+                            fe_groups[[g]] = c(i, j)
+                        } else {
+                            # we add j
+                            fe_groups[[g]] = c(fe_groups[[g]], j)
+                        }
+
+                        i_left = setdiff(i_left, j)
+                    }
+                }
+
+                if(any_done){
+                    g = g + 1
+                }
+            }
+
+            # We simply group the fixed-effects + we apply dict
+            fe_names_origin = fe_names
+            for(my_group in fe_groups){
+                # We drop the old
+                group_fe = fe_names_origin[my_group]
+                fe_names = setdiff(fe_names, group_fe)
+
+                # and add the new
+                group_fe_new = rename_fe(group_fe, dict)
+                new_fe = enumerate_items(group_fe_new)
+
+                fe_names = c(new_fe, fe_names)
+
+                # Now we update is_fe
+                for(i in seq_along(is_fe)){
+                    current_fe = is_fe[[i]]
+                    if(all(group_fe %in% names(current_fe))){
+                        current_fe[new_fe] = yesNo[1]
+                        is_fe[[i]] = current_fe[new_fe]
+                    }
+                }
+            }
+
+        } else {
+            # Custom grouping from the user
+
+            # Behavior:
+            # The values in the row:
+            # - if all the row's FEs are in the model => TRUE
+            # - if some of the row's FEs are in the model => partial
+            # - if none is in the model => FALSE
+            #
+            # The regular fixed-effects:
+            # - FEs of a group are removed if they are either always fully present or fully absent
+            # - if an FE from a group is partially present at least once
+            #   * it will stay as regular FE
+            #   * this avoids messing up from the user side
+            #
+
+            fe_names_full = rename_fe(fe_names, dict)
+            names(fe_names_full) = fe_names
+
+            fixef.extralines = list()
+            fe2remove = c()
+            for(i in seq_along(fixef.group)){
+                my_group = keep_apply(fe_names_full, fixef.group[[i]])
+
+                if(length(my_group) == 0){
+                    # not any FE found, even partial => we skip the row
+                    # we skip the row
+                    next
+                }
+
+                is_there = c()
+                for(m in 1:length(is_fe)){
+                    # We check full and partial presence
+
+                    fe_model = names(is_fe[[m]])
+                    if(all(my_group %in% fe_model)){
+                        is_there[m] = TRUE
+
+                    } else if(any(my_group %in% fe_model)){
+                        # partial presence
+                        is_there[m] = NA
+
+                    } else {
+                        is_there[m] = FALSE
+                    }
+
+                }
+
+                ok_removal = !any(is.na(is_there))
+                if(ok_removal){
+                    fe2remove = c(fe2remove, my_group)
+                }
+
+                is_there = yesNo[2 - is_there]
+                is_there[is.na(is_there)] = "partial"
+
+                # Now we create the extra line
+                el_name = names(fixef.group)[i]
+                if(grepl("^(\\^|_|-)", el_name)){
+                    # => the user specifies the placement => replaces the default
+
+                    # If one ^ only => we replace it with _^ to override default of extraline
+                    if(!grepl("^\\^(_|-|\\^)", el_name)){
+                        el_name = paste0("_", el_name)
+                    }
+
+                } else {
+                    # we add the default placement
+                    el_name = paste0("^-", el_name)
+                }
+
+                fixef.extralines[[el_name]] = is_there
+
+            }
+
+            if(length(fixef.extralines) > 0){
+                # We add it to extra lines
+                extraline[names(fixef.extralines)] = fixef.extralines
+            }
+
+            if(length(fe2remove) > 0){
+                fe_names = setdiff(fe_names, fe2remove)
+            }
+
+        }
+
+    }
+
     res = list(se_type_list=se_type_list, var_list=var_list, coef_list=coef_list, coef_below=coef_below, sd_below=sd_below, depvar_list=depvar_list, obs_list=obs_list, convergence_list=convergence_list, fe_names=fe_names, is_fe=is_fe, nb_fe=nb_fe, slope_flag_list = slope_flag_list, slope_names=slope_names, useSummary=useSummary, model_names=model_names, family_list=family_list, fitstat_list=fitstat_list, subtitles=subtitles, isSubtitles=isSubtitles, title=title, convergence=convergence, family=family, keep=keep, drop=drop, order=order, file=file, label=label, sdBelow=sdBelow, signifCode=signifCode, fixef_sizes=fixef_sizes, fixef_sizes.simplify = fixef_sizes.simplify, depvar=depvar, useSummary=useSummary, dict=dict, yesNo=yesNo, add_signif=add_signif, float=float, coefstat=coefstat, ci=ci, style=style, notes=notes, group=group, extraline=extraline, placement=placement, drop.section=drop.section, tex_tag=tex_tag, fun_format = fun_format)
 
     return(res)
@@ -1936,20 +2148,7 @@ etable_internal_latex = function(info){
         all_fe = matrix(c(is_fe, recursive = TRUE), nrow = length(fe_names))
 
         # We change the names of the FEs
-        for(i in seq_along(fe_names)){
-            fe = fe_names[i]
-
-            if(fe %in% names(dict)){
-                fe_names[i] = dict[fe]
-            } else if(grepl("\\^", fe)){
-                fe_split = strsplit(fe, "\\^")[[1]]
-                who = fe_split %in% names(dict)
-                fe_split[who] = dict[fe_split[who]]
-                fe_names[i] = paste(fe_split, collapse = "$\\times$")
-            } else {
-                fe_names[i] = fe
-            }
-        }
+        fe_names = rename_fe(fe_names, dict)
         fe_names_raw = escape_latex(fe_names)
 
         fe_names = paste0(style$fixef.prefix, fe_names_raw, style$fixef.suffix)
@@ -2175,57 +2374,40 @@ etable_internal_latex = function(info){
         gi_name = names(group)[i]
 
         gi_full = ""
-        gi_where = "var"
+        gi_where = "coef"
 
         gi_top = FALSE
-        if(grepl("^\\{", gi_name)){
-            # style component
-            gi_style = gsub("\\{|\\}.+", "", gi_name)
-            gi_style_parsed = parse_style(gi_style, c("title", "where", "top"))
-            from = nchar(strsplit(gi_name, "}", fixed = TRUE)[[1]][1])
-            gi_name = substr(gi_name, from + 2, nchar(gi_name))
+        if(grepl("^(\\^|_|-)", gi_name)){
+            # sec: section
 
-            if(nchar(gi_style_parsed$where) == 0){
-                gi_where = "var"
+            row = substr(gi_name, 1, 1)
+            gi_name = substr(gi_name, 2, nchar(gi_name))
+            if(row == "-"){
+                # FE section
+                sec = "fixef"
+
+            } else if(grepl("^(\\^|_|-)", gi_name)){
+                sec = substr(gi_name, 1, 1)
+                gi_name = substr(gi_name, 2, nchar(gi_name))
+
             } else {
-                gi_where = check_value_plus(gi_style_parsed$where, "match(var, stats, fixef)", .message = "In 'group', the keyword 'where' accepts only three values: either 'var', 'fixef' or 'stats'.")
-            }
-
-            if(nchar(gi_style_parsed$title) > 0){
-                if(gi_style_parsed$title == "\\midrule"){
-                    gi_full = "\\midrule "
+                if(row == "^"){
+                    # implicit location
+                    sec = "coef"
                 } else {
-                    gi_full = paste0(gi_style_parsed$title, "& ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
-                }
-
-            }
-
-            if(nchar(gi_style_parsed$top) > 0){
-                if(trimws(gi_style_parsed$top) %in% c("true", "1")){
-                    gi_top = TRUE
+                    sec = row
+                    row = "_"
                 }
             }
 
-
-        } else {
-            if(grepl("^\\^", gi_name)){
-                # means at the top
-                gi_top = TRUE
-                gi_name = substr(gi_name, 2, nchar(gi_name))
-            }
-
-            if(grepl("^_", gi_name)){
-                # We place it at the stats level
-                gi_name = substr(gi_name, 2, nchar(gi_name))
-                gi_where = "stats"
-            }
-
+            gi_top = row == "^"
+            gi_where = switch(sec, "^" = "coef", "-" = "fixef", "_" = "stat", sec)
         }
 
         gi_full = paste0(gi_full, gi_name, " & ", paste0(gi_format, collapse = " & "), "\\\\\n")
 
         if(gi_top){
-            if(gi_where == "var"){
+            if(gi_where == "coef"){
                 coef_lines = c(gi_full, coef_lines)
             } else if(gi_where == "fixef"){
                 FE_lines = c(gi_full, FE_lines)
@@ -2233,7 +2415,7 @@ etable_internal_latex = function(info){
                 stat_lines = c(gi_full, stat_lines)
             }
         } else {
-            if(gi_where == "var"){
+            if(gi_where == "coef"){
                 coef_lines = c(coef_lines, gi_full)
             } else if(gi_where == "fixef"){
                 FE_lines = c(FE_lines, gi_full)
@@ -2241,8 +2423,6 @@ etable_internal_latex = function(info){
                 stat_lines = c(stat_lines, gi_full)
             }
         }
-
-
     }
 
     #
@@ -2268,54 +2448,40 @@ etable_internal_latex = function(info){
         el_name = names(extraline)[i]
 
         el_full = ""
-        el_where = "var"
+        el_where = "coef"
 
         el_top = FALSE
-        if(grepl("^\\{", el_name)){
-            # style component
-            el_style = gsub("\\{|\\}.+", "", el_name)
-            el_style_parsed = parse_style(el_style, c("title", "where", "top"))
-            from = nchar(strsplit(el_name, "}", fixed = TRUE)[[1]][1])
-            el_name = substr(el_name, from + 2, nchar(el_name))
+        if(grepl("^(\\^|_|-)", el_name)){
+            # sec: section
 
-            if(nchar(el_style_parsed$where) == 0){
-                el_where = "var"
+            row = substr(el_name, 1, 1)
+            el_name = substr(el_name, 2, nchar(el_name))
+            if(row == "-"){
+                # FE section
+                sec = "fixef"
+
+            } else if(grepl("^(\\^|_|-)", el_name)){
+                sec = substr(el_name, 1, 1)
+                el_name = substr(el_name, 2, nchar(el_name))
+
             } else {
-                el_where = check_value_plus(el_style_parsed$where, "match(var, stats, fixef)", .message = "In 'extraline', the keyword 'where' accepts only three values: either 'var', 'fixef' or 'stats'.")
-            }
-
-            if(nchar(el_style_parsed$title) > 0){
-                if(el_style_parsed$title == "\\midrule"){
-                    el_full = "\\midrule "
+                if(row == "^"){
+                    # implicit location
+                    sec = "coef"
                 } else {
-                    el_full = paste0(el_style_parsed$title, "& ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
+                    sec = row
+                    row = "_"
                 }
             }
 
-            if(nchar(el_style_parsed$top) > 0){
-                if(trimws(el_style_parsed$top) %in% c("true", "1")){
-                    el_top = TRUE
-                }
-            }
-
-        } else {
-            if(grepl("^\\^", el_name)){
-                # means at the top
-                el_top = TRUE
-                el_name = substr(el_name, 2, nchar(el_name))
-            }
-
-            if(grepl("^_", el_name)){
-                # We place it at the stats level
-                el_name = substr(el_name, 2, nchar(el_name))
-                el_where = "stats"
-            }
+            el_top = row == "^"
+            el_where = switch(sec, "^" = "coef", "-" = "fixef", "_" = "stat", sec)
         }
 
         el_full = paste0(el_full, el_name, " & ", paste0(el_format, collapse = " & "), "\\\\\n")
 
         if(el_top){
-            if(el_where == "var"){
+            if(el_where == "coef"){
                 coef_lines = c(el_full, coef_lines)
             } else if(el_where == "fixef"){
                 FE_lines = c(el_full, FE_lines)
@@ -2323,7 +2489,7 @@ etable_internal_latex = function(info){
                 stat_lines = c(el_full, stat_lines)
             }
         } else {
-            if(el_where == "var"){
+            if(el_where == "coef"){
                 coef_lines = c(coef_lines, el_full)
             } else if(el_where == "fixef"){
                 FE_lines = c(FE_lines, el_full)
@@ -2444,45 +2610,60 @@ etable_internal_df = function(info){
     #
 
     before_stat = after_stat = c()
+    before_fixef = after_fixef = c()
 
     for(i in seq_along(group)){
         gi = group[[i]]
         gi_format = style$yesNo[2 - gi]
 
-        after = FALSE
         gi_name = names(group)[i]
+        gi_where = "coef"
+
         gi_top = FALSE
-        from = nchar(strsplit(gi_name, "}", fixed = TRUE)[[1]][1])
-        if(from < nchar(gi_name)){
-            # We don't parse the {where,title,top} instructions
-            gi_name = substr(gi_name, from + 2, nchar(gi_name))
-        } else {
+        if(grepl("^(\\^|_|-)", gi_name)){
+            # sec: section
 
-            if(grepl("^\\^", gi_name)){
-                gi_top = TRUE
+            row = substr(gi_name, 1, 1)
+            gi_name = substr(gi_name, 2, nchar(gi_name))
+            if(row == "-"){
+                # FE section
+                sec = "fixef"
+
+            } else if(grepl("^(\\^|_|-)", gi_name)){
+                sec = substr(gi_name, 1, 1)
                 gi_name = substr(gi_name, 2, nchar(gi_name))
+
+            } else {
+                if(row == "^"){
+                    # implicit location
+                    sec = "coef"
+                } else {
+                    sec = row
+                    row = "_"
+                }
             }
 
-            if(grepl("^_", gi_name)){
-                after = TRUE
-                gi_name = substr(gi_name, 2, nchar(gi_name))
-            }
-
+            gi_top = row == "^"
+            gi_where = switch(sec, "^" = "coef", "-" = "fixef", "_" = "stat", sec)
         }
 
         my_line = c(gi_name, gi_format)
 
         if(gi_top){
-            if(after){
-                before_stat = rbind(before_stat, my_line)
-            } else {
+            if(gi_where == "coef"){
                 res = rbind(my_line, res)
+            } else if(gi_where == "fixef"){
+                before_fixef = rbind(before_fixef, my_line)
+            } else {
+                before_stat = rbind(before_stat, my_line)
             }
         } else {
-            if(after){
-                after_stat = rbind(after_stat, my_line)
-            } else {
+            if(gi_where == "coef"){
                 res = rbind(res, my_line)
+            } else if(gi_where == "fixef"){
+                after_fixef = rbind(after_fixef, my_line)
+            } else {
+                after_stat = rbind(after_stat, my_line)
             }
         }
 
@@ -2509,38 +2690,55 @@ etable_internal_df = function(info){
             el_format = el
         }
 
-        after = FALSE
+        el_where = "coef"
+
         el_name = names(extraline)[i]
         el_top = FALSE
-        from = nchar(strsplit(el_name, "}", fixed = TRUE)[[1]][1])
-        if(from < nchar(el_name)){
-            el_name = substr(el_name, from + 2, nchar(el_name))
-        } else {
 
-            if(grepl("^\\^", el_name)){
-                el_top = TRUE
+        if(grepl("^(\\^|_|-)", el_name)){
+            # sec: section
+
+            row = substr(el_name, 1, 1)
+            el_name = substr(el_name, 2, nchar(el_name))
+            if(row == "-"){
+                # FE section
+                sec = "fixef"
+
+            } else if(grepl("^(\\^|_|-)", el_name)){
+                sec = substr(el_name, 1, 1)
                 el_name = substr(el_name, 2, nchar(el_name))
+
+            } else {
+                if(row == "^"){
+                    # implicit location
+                    sec = "coef"
+                } else {
+                    sec = row
+                    row = "_"
+                }
             }
 
-            if(grepl("^_", el_name)){
-                after = TRUE
-                el_name = substr(el_name, 2, nchar(el_name))
-            }
+            el_top = row == "^"
+            el_where = switch(sec, "^" = "coef", "-" = "fixef", "_" = "stat", sec)
         }
 
         my_line = c(el_name, el_format)
 
         if(el_top){
-            if(after){
-                before_stat = rbind(before_stat, my_line)
-            } else {
+            if(el_where == "coef"){
                 res = rbind(my_line, res)
+            } else if(el_where == "fixef"){
+                before_fixef = rbind(before_fixef, my_line)
+            } else {
+                before_stat = rbind(before_stat, my_line)
             }
         } else {
-            if(after){
-                after_stat = rbind(after_stat, my_line)
-            } else {
+            if(el_where == "coef"){
                 res = rbind(res, my_line)
+            } else if(el_where == "fixef"){
+                after_fixef = rbind(after_fixef, my_line)
+            } else {
+                after_stat = rbind(after_stat, my_line)
             }
         }
     }
@@ -2580,7 +2778,7 @@ etable_internal_df = function(info){
     # fixed-effects
     #
 
-    if(length(fe_names)>0 && !"fixef" %in% drop.section){
+    if(length(fe_names) > 0 && !"fixef" %in% drop.section){
 
         for(m in 1:n_models) {
             quoi = is_fe[[m]][fe_names]
@@ -2588,7 +2786,7 @@ etable_internal_df = function(info){
             is_fe[[m]] = quoi
         }
 
-        fe_names = dict_apply(fe_names, dict)
+        fe_names = rename_fe(fe_names, dict)
 
         if(nchar(style$fixef.prefix) > 0){
             fe_names = paste0(style$fixef.prefix, fe_names)
@@ -2606,7 +2804,19 @@ etable_internal_df = function(info){
             res = rbind(res, c(style$fixef.title, sprintf("%.*s", longueur[-1], myLine)))
         }
 
+        if(length(before_fixef) > 0){
+            res = rbind(res, before_fixef)
+        }
+
         res = rbind(res, all_fe)
+    } else {
+        if(length(before_fixef) > 0){
+            res = rbind(res, before_fixef)
+        }
+    }
+
+    if(length(after_fixef) > 0){
+        res = rbind(res, after_fixef)
     }
 
     #
@@ -2759,10 +2969,10 @@ etable_internal_df = function(info){
 
 
 #' @rdname etable
-setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, signifCode, float, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style.tex = NULL, style.df = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, postprocess.tex = NULL, postprocess.df = NULL, fit_format = "__var__", reset = FALSE){
+setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, signifCode, float, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style.tex = NULL, style.df = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, postprocess.tex = NULL, postprocess.df = NULL, fit_format = "__var__", fixef.group = NULL, reset = FALSE){
 
     # cat(names(formals(setFixest_etable)), sep = '", "')
-    arg_list = c("digits", "digits.stats", "fitstat", "coefstat", "ci", "sdBelow", "keep", "drop", "order", "dict", "signifCode", "float", "fixef_sizes", "fixef_sizes.simplify", "family", "powerBelow", "interaction.combine", "depvar", "style.tex", "style.df", "notes", "group", "extraline", "placement", "drop.section", "postprocess.tex", "postprocess.df", "fit_format", "reset")
+    arg_list = c("digits", "digits.stats", "fitstat", "coefstat", "ci", "sdBelow", "keep", "drop", "order", "dict", "signifCode", "float", "fixef_sizes", "fixef_sizes.simplify", "family", "powerBelow", "interaction.combine", "depvar", "style.tex", "style.df", "notes", "group", "extraline", "placement", "drop.section", "postprocess.tex", "postprocess.df", "fit_format", "fixef.group", "reset")
 
     #
     # Argument checking => strong since these will become default values
@@ -2795,6 +3005,8 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c(
     check_arg(dict, "NULL logical scalar | named character vector no na")
 
     check_arg_plus(group, extraline, "NULL{list()} named list l0")
+
+    check_arg_plus(fixef.group, "NULL{list()} logical scalar | named list l0")
 
     check_arg(placement, "character scalar")
     if(!missing(placement)){
@@ -2891,6 +3103,31 @@ tex_multicol = function(x){
     res = paste(names_multi, collapse = " & ")
 
     return(res)
+}
+
+rename_fe = function(fe_all, dict){
+    # Function used to rename the FEs
+
+    res = c()
+
+    for(i in seq_along(fe_all)){
+
+        fe = fe_all[i]
+        if(fe %in% names(dict)){
+            res[i] = dict[fe]
+
+        } else if(grepl("\\^", fe)){
+            fe_split = strsplit(fe, "\\^")[[1]]
+            who = fe_split %in% names(dict)
+            fe_split[who] = dict[fe_split[who]]
+            res[i] = paste(fe_split, collapse = "-")
+
+        } else {
+            res[i] = fe
+        }
+    }
+
+    res
 }
 
 
