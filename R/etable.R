@@ -2383,6 +2383,8 @@ etable_internal_latex = function(info){
     # Group
     #
 
+    create.fixef_title = FALSE
+
     for(i in seq_along(group)){
         gi = group[[i]]
         gi_format = yesNo[2 - gi]
@@ -2426,6 +2428,7 @@ etable_internal_latex = function(info){
             if(gi_where == "coef"){
                 coef_lines = c(gi_full, coef_lines)
             } else if(gi_where == "fixef"){
+                create.fixef_title = TRUE
                 FE_lines = c(gi_full, FE_lines)
             } else {
                 stat_lines = c(gi_full, stat_lines)
@@ -2434,6 +2437,7 @@ etable_internal_latex = function(info){
             if(gi_where == "coef"){
                 coef_lines = c(coef_lines, gi_full)
             } else if(gi_where == "fixef"){
+                create.fixef_title = TRUE
                 FE_lines = c(FE_lines, gi_full)
             } else {
                 stat_lines = c(stat_lines, gi_full)
@@ -2500,6 +2504,7 @@ etable_internal_latex = function(info){
             if(el_where == "coef"){
                 coef_lines = c(el_full, coef_lines)
             } else if(el_where == "fixef"){
+                create.fixef_title = TRUE
                 FE_lines = c(el_full, FE_lines)
             } else {
                 stat_lines = c(el_full, stat_lines)
@@ -2508,12 +2513,23 @@ etable_internal_latex = function(info){
             if(el_where == "coef"){
                 coef_lines = c(coef_lines, el_full)
             } else if(el_where == "fixef"){
+                create.fixef_title = TRUE
                 FE_lines = c(FE_lines, el_full)
             } else {
                 stat_lines = c(stat_lines, el_full)
             }
         }
 
+    }
+
+    if(create.fixef_title && is.null(fixef_title) && !"fixef" %in% drop.section){
+        if(nchar(style$fixef.title) == 0){
+            fixef_title = ""
+        } else if(style$fixef.title == "\\midrule"){
+            fixef_title = "\\midrule "
+        } else {
+            fixef_title = paste0(escape_latex(style$fixef.title), "& ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
+        }
     }
 
     # Stacking var and stat
@@ -2826,6 +2842,15 @@ etable_internal_df = function(info){
 
         res = rbind(res, all_fe)
     } else {
+
+        if(length(before_fixef) > 0 || length(after_fixef) > 0){
+            # We create the fixed-effects title if needed
+            if(!"fixef" %in% drop.section && nchar(style$fixef.title) > 0){
+                myLine = paste(rep(style$fixef.line, 30), collapse = "")
+                res = rbind(res, c(style$fixef.title, sprintf("%.*s", longueur[-1], myLine)))
+            }
+        }
+
         if(length(before_fixef) > 0){
             res = rbind(res, before_fixef)
         }
