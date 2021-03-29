@@ -41,6 +41,8 @@ colejharvey [#106](https://github.com/lrberge/fixest/issues/106)).
   - `fitstat`: The statistic `G` is now equal to the degrees of freedom used in the t-test of coefficients testing.
   
   - `esttable` and `esttex` are not deprecated any more: they are now pure aliases of `etable`.
+  
+  - `aggregate`: for weighted regressions, `use_weight` controls whether to use the weights to perform the aggregation.
 
 # fixest 0.8.3 (2021-03-01)
 
