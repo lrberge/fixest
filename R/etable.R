@@ -270,7 +270,7 @@
 #' etable(rep(.l(est, est_bis), each = 3, cluster = list("standard", ~ Month, ~ Day)))
 #'
 #'
-etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, agg = NULL, .vcov, .vcov_args = NULL, digits = 4, digits.stats = 5, tex, fitstat, title, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, file, replace = FALSE, convergence, signifCode, label, float, subtitles = list("auto"), fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar = TRUE, style.tex = NULL, style.df = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube"), postprocess.tex = NULL, postprocess.df = NULL, fit_format = "__var__"){
+etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, agg = NULL, .vcov, .vcov_args = NULL, digits = 4, digits.stats = 5, tex, fitstat, title, coefstat = "se", ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, file, replace = FALSE, convergence, signifCode, label, float, subtitles = list("auto"), fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar = TRUE, style.tex = NULL, style.df = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube"), postprocess.tex = NULL, postprocess.df = NULL, fit_format = "__var__"){
 
     #
     # Checking the arguments
@@ -330,9 +330,6 @@ etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, agg = N
         dict = TRUE
     }
 
-    # to get the model names
-    dots_call = match.call(expand.dots = FALSE)[["..."]]
-
     dots = error_sender(list(...), "Some elements in '...' could not be evaluated: ")
 
     if(".up" %in% names(dots)){
@@ -346,6 +343,17 @@ etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, agg = N
     if(length(dots) == 0){
         stop("You must provide at least one element in '...'.")
     }
+
+    # Getting the model names
+    if(.up == 2){
+        # it's pain in the necky
+        sysOrigin = sys.parent()
+        mc = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin), expand.dots = FALSE)
+        dots_call = mc[["..."]]
+    } else {
+        dots_call = match.call(expand.dots = FALSE)[["..."]]
+    }
+
 
     #
     # postprocess.tex
@@ -408,7 +416,11 @@ etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, agg = N
 
     for(i in seq_along(dots)){
         if(!any(c("fixest", "fixest_list", "fixest_multi") %in% class(dots[[i]])) && !is.list(dots[[i]])){
-            stop("The ", n_th(i), " element of '...' is not valid: it should be a fixest object or a list, it is neither.")
+            msg = ""
+            if(!is.null(names(dots))){
+                msg = paste0(" (named '", names(dots)[i], "')")
+            }
+            stop("The ", n_th(i), " element of '...'", msg, " is not valid: it should be a fixest object or a list, it is neither.")
         }
     }
 
@@ -569,7 +581,7 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
 
     opts = getOption("fixest_etable")
     if(length(opts) > 0){
-        sysOrigin = sys.parent()
+        sysOrigin = sys.parent(.up)
         mc = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin), expand.dots = FALSE)
         args_usr = setdiff(names(mc), c("style.tex", "style.df"))
 
@@ -870,7 +882,7 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
     check_arg(stage, "integer vector no na len(,2) GE{1} LE{2}")
 
     if(!missing(.vcov)){
-        sysOrigin = sys.parent()
+        sysOrigin = sys.parent(.up)
         mc = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin), expand.dots = FALSE)
         vcov_name = deparse_long(mc$.vcov)
 
