@@ -10503,7 +10503,7 @@ getFixest_fml = function(){
 #'
 #'
 #'
-setFixest_estimation = function(fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10, lean = FALSE, verbose = 0, warn = TRUE, combine.quick = NULL, demeaned = FALSE, mem.clean = FALSE, glm.iter = 25, glm.tol = 1e-8, reset = FALSE){
+setFixest_estimation = function(fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10, lean = FALSE, verbose = 0, warn = TRUE, combine.quick = NULL, demeaned = FALSE, mem.clean = FALSE, glm.iter = 25, glm.tol = 1e-8, panel.id = NULL, reset = FALSE){
 
     check_arg_plus(fixef.rm, "match(none, perfect, singleton, both)")
     check_arg(fixef.tol, collin.tol, glm.tol, "numeric scalar GT{0}")
@@ -10511,6 +10511,7 @@ setFixest_estimation = function(fixef.rm = "perfect", fixef.tol = 1e-6, fixef.it
     check_arg(verbose, "integer scalar GE{0}")
     check_arg(lean, warn, demeaned, mem.clean, reset, "logical scalar")
     check_arg(combine.quick, "NULL logical scalar")
+    check_arg(panel.id, "NULL character vector len(,2) no na | os formula")
 
     # Getting the existing defaults
     opts = getOption("fixest_estimation")
