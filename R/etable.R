@@ -510,7 +510,7 @@ gen_etable_aliases = function(){
     etable_call = paste0(arg_name[qui_df][-1], " = ", arg_name[qui_df][-1], collapse = ", ")
 
     esttable_fun = paste0("esttable = function(", esttable_args, "){\n\n",
-                          "\tetable(..., ", etable_call, ", tex = FALSE)\n}")
+                          "\tetable(..., ", etable_call, ", tex = FALSE, .up = 2)\n}")
 
     esttable_rox = "#' @describeIn etable Exports the results of multiple \\code{fixest} estimations in a Latex table."
 
@@ -526,7 +526,7 @@ gen_etable_aliases = function(){
     etable_call = paste0(arg_name[qui_tex][-1], " = ", arg_name[qui_tex][-1], collapse = ", ")
 
     esttex_fun = paste0("esttex = function(", esttex_args, "){\n\n",
-                        "\tetable(..., ", etable_call, ", tex = TRUE)\n}")
+                        "\tetable(..., ", etable_call, ", tex = TRUE, .up = 2)\n}")
 
     esttex_rox = "#' @describeIn etable Exports the results of multiple \\code{fixest} estimations in a Latex table."
 
