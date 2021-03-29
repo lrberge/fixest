@@ -4748,7 +4748,7 @@ fitstat_validate = function(x, vector = FALSE){
 #' @param x A \code{fixest} object.
 #' @param agg A character scalar describing the variable names to be aggregated, it is pattern-based. All variables that match the pattern will be aggregated. It must be of the form \code{"(root)"}, the parentheses must be there and the resulting variable name will be \code{"root"}. You can add another root with parentheses: \code{"(root1)regex(root2)"}, in which case the resulting name is \code{"root1::root2"}. To name the resulting variable differently you can pass a named vector: \code{c("name" = "pattern")} or \code{c("name" = "pattern(root2)")}. It's a bit intricate sorry, please see the examples.
 #' @param full Logical scalar, defaults to \code{FALSE}. If \code{TRUE}, then all coefficients are returned, not only the aggregated coefficients.
-#' @param use_weight Logical, default is \code{TRUE}. If the estimation was weighted, whether the aggregation should take into account the weights. Basically if the weights reflected frequency it should be \code{TRUE}.
+#' @param use_weights Logical, default is \code{TRUE}. If the estimation was weighted, whether the aggregation should take into account the weights. Basically if the weights reflected frequency it should be \code{TRUE}.
 #' @param ... Arguments to be passed to \code{\link[fixest]{summary.fixest}}.
 #'
 #' @details
@@ -4829,7 +4829,7 @@ fitstat_validate = function(x, vector = FALSE){
 #' # With etable
 #' etable(res_naive, res_cohort, agg = "(ti.*nt)::(-?[[:digit:]]+):gro")
 #'
-aggregate.fixest = function(x, agg, full = FALSE, use_weight = TRUE, ...){
+aggregate.fixest = function(x, agg, full = FALSE, use_weights = TRUE, ...){
     # Aggregates the value of coefficients
 
     check_arg(x, "class(fixest) mbt")
@@ -4888,7 +4888,7 @@ aggregate.fixest = function(x, agg, full = FALSE, use_weight = TRUE, ...){
         v = name_df[i, 2]
         v_names = cname_select[root == r & val == v]
 
-        if(use_weight && !is.null(x$weights)){
+        if(use_weights && !is.null(x$weights)){
             shares = colSums(x$weights * sign(mm[, v_names, drop = FALSE]))
         } else {
             shares = colSums(sign(mm[, v_names, drop = FALSE]))

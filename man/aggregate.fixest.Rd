@@ -4,7 +4,7 @@
 \alias{aggregate.fixest}
 \title{Aggregates the values of DiD coefficients a la Sun and Abraham}
 \usage{
-\method{aggregate}{fixest}(x, agg, full = FALSE, use_weight = TRUE, ...)
+\method{aggregate}{fixest}(x, agg, full = FALSE, use_weights = TRUE, ...)
 }
 \arguments{
 \item{x}{A \code{fixest} object.}
@@ -13,7 +13,7 @@
 
 \item{full}{Logical scalar, defaults to \code{FALSE}. If \code{TRUE}, then all coefficients are returned, not only the aggregated coefficients.}
 
-\item{use_weight}{Logical, default is \code{TRUE}. If the estimation was weighted, whether the aggregation should take into account the weights. Basically if the weights reflected frequency it should be \code{TRUE}.}
+\item{use_weights}{Logical, default is \code{TRUE}. If the estimation was weighted, whether the aggregation should take into account the weights. Basically if the weights reflected frequency it should be \code{TRUE}.}
 
 \item{...}{Arguments to be passed to \code{\link[fixest]{summary.fixest}}.}
 }

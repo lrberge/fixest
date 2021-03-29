@@ -42,7 +42,7 @@ colejharvey [#106](https://github.com/lrberge/fixest/issues/106)).
   
   - `esttable` and `esttex` are not deprecated any more: they are now pure aliases of `etable`.
   
-  - `aggregate`: for weighted regressions, `use_weight` controls whether to use the weights to perform the aggregation.
+  - `aggregate`: for weighted regressions, `use_weights` controls whether to use the weights to perform the aggregation.
 
 # fixest 0.8.3 (2021-03-01)
 
