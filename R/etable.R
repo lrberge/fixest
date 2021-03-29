@@ -1812,6 +1812,7 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
             fe_names_full = rename_fe(fe_names, dict)
             names(fe_names_full) = fe_names
 
+            is_inconsistent = rep(FALSE, length(fixef.group))
             fixef.extralines = list()
             fe2remove = c()
             for(i in seq_along(fixef.group)){
@@ -1834,6 +1835,7 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
                     } else if(any(my_group %in% fe_model)){
                         # partial presence
                         is_there[m] = NA
+                        is_inconsistent[i] = TRUE
 
                     } else {
                         is_there[m] = FALSE
@@ -1875,6 +1877,19 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
 
             if(length(fe2remove) > 0){
                 fe_names = setdiff(fe_names, fe2remove)
+            }
+
+            # Warning for inconsistencies
+            if(any(is_inconsistent)){
+                i = which(is_inconsistent)[1]
+                if(length(is_inconsistent) == 1){
+                    msg = "the group leads to an inconsistent row (defined by "
+                } else if(all(is_inconsistent)){
+                    msg = "all groups lead to inconsistent rows (e.g. the one defined by "
+                } else {
+                    msg = paste0("some groups lead to inconsistent rows (the ", n_th(i), " one defined by ")
+                }
+                warn_up("In 'fixef.group', ", msg, deparse_long(fixef.group[[i]]), ").\nTo create inconsistent rows: use drop.section = 'fixef' combined with the arghument 'extraline'.")
             }
 
         }
