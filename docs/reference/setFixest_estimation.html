@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.4</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -115,7 +115,7 @@
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/lrberge/fixest/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -154,6 +154,7 @@
   mem.clean <span class='op'>=</span> <span class='cn'>FALSE</span>,
   glm.iter <span class='op'>=</span> <span class='fl'>25</span>,
   glm.tol <span class='op'>=</span> <span class='fl'>1e-08</span>,
+  panel.id <span class='op'>=</span> <span class='cn'>NULL</span>,
   reset <span class='op'>=</span> <span class='cn'>FALSE</span>
 <span class='op'>)</span>
 
@@ -209,6 +210,10 @@
     <tr>
       <th>glm.tol</th>
       <td><p>Tolerance level for the glm algorithm. Default is <code>1e-8</code>.</p></td>
+    </tr>
+    <tr>
+      <th>panel.id</th>
+      <td><p>The panel identifiers. Can either be: i) a one sided formula (e.g. <code>panel.id = ~id+time</code>), ii) a character vector of length 2 (e.g. <code>panel.id=c('id', 'time')</code>, or iii) a character scalar of two variables separated by a comma (e.g. <code>panel.id='id,time'</code>). Note that you can combine variables with <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> only inside formulas (see the dedicated section in <code><a href='feols.html'>feols</a></code>).</p></td>
     </tr>
     <tr>
       <th>reset</th>
