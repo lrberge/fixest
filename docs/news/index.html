@@ -149,16 +149,19 @@
 <li><p>Fix bug when <code>lean = TRUE</code> in IV estimations with fixed-effects (a large object was still present, thanks to <a href='https://github.com/zozotintin'>@zozotintin</a>).</p></li>
 <li><p>Fix bug display of <code>etable</code> in Rmarkdown (thanks to <a href='https://github.com/kdzhang'>@kdzhang</a> <a href="https://github.com/lrberge/fixest/issues/93"><a href='https://github.com/lrberge/fixest/issues/93'>#93</a></a> and <a href='https://github.com/nikolassch'>@nikolassch</a> <a href="https://github.com/lrberge/fixest/issues/112"><a href='https://github.com/lrberge/fixest/issues/112'>#112</a></a>)</p></li>
 <li><p>Improve error messages in <code>fitstat</code> when selecting statistics components.</p></li>
-<li><p>Fix bug in <code>predict</code> when poly() was used in the estimation (thanks to <a href='https://github.com/tholdaway'>@tholdaway</a> <a href="https://github.com/lrberge/fixest/issues/109"><a href='https://github.com/lrberge/fixest/issues/109'>#109</a></a>).</p></li>
+<li><p>Fix bug in <code>predict</code> when <code><a href="https://rdrr.io/r/stats/poly.html">poly()</a></code> was used in the estimation (thanks to <a href='https://github.com/tholdaway'>@tholdaway</a> <a href="https://github.com/lrberge/fixest/issues/109"><a href='https://github.com/lrberge/fixest/issues/109'>#109</a></a>).</p></li>
 <li><p>Fix bug in <code>predict</code>: an error message would not pop when combined fixed-effects are used with <code>combine.quick = TRUE</code> (thanks to <a href='https://github.com/benzipperer'>@benzipperer</a> <a href="https://github.com/lrberge/fixest/issues/115"><a href='https://github.com/lrberge/fixest/issues/115'>#115</a></a>).</p></li>
+<li><p>Fix bug to properly account for the nestedness of combined fixed-effects when clustered standard-errors are requested (thanks to <a href='https://github.com/Oravishayrizi'>@Oravishayrizi</a> <a href="https://github.com/lrberge/fixest/issues/116"><a href='https://github.com/lrberge/fixest/issues/116'>#116</a></a>).</p></li>
+<li><p>Fig major bug in <code>model.matrix</code> that could make it very slow. Led the function <code>aggregate</code> to be very slow (thanks to Benny Goldman).</p></li>
+<li><p>Fix bug that prevented <code>aggregate</code> to effectively use weights (thanks to Benny Goldman).</p></li>
 </ul>
 </div>
 <div id="new-features" class="section level2">
 <h2 class="hasAnchor">
 <a href="#new-features" class="anchor"></a>New features</h2>
 <ul>
-<li>
-<code>model.matrix</code> gains the new argument <code>subset</code> which allows the creation of the design matrix for a subset of variables only.</li>
+<li><p><code>model.matrix</code> gains the new argument <code>subset</code> which allows the creation of the design matrix for a subset of variables only.</p></li>
+<li><p><code>drop.section</code> now works for <code>etable</code> when <code>tex = FALSE</code>.</p></li>
 </ul>
 </div>
 <div id="other-changes" class="section level2">
