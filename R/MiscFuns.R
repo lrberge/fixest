@@ -4887,7 +4887,12 @@ aggregate.fixest = function(x, agg, full = FALSE, ...){
         v = name_df[i, 2]
         v_names = cname_select[root == r & val == v]
 
-        shares = colSums(sign(mm[, v_names, drop = FALSE]))
+        if(!is.null(x$weights)){
+            shares = colSums(x$weights * sign(mm[, v_names, drop = FALSE]))
+        } else {
+            shares = colSums(sign(mm[, v_names, drop = FALSE]))
+        }
+
         shares = shares / sum(shares)
 
         # The coef

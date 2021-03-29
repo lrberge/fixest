@@ -16,13 +16,15 @@ colejharvey [#106](https://github.com/lrberge/fixest/issues/106)).
  
  - Improve error messages in `fitstat` when selecting statistics components.
  
- - Fix bug in `predict` when poly() was used in the estimation (thanks to @tholdaway [#109](https://github.com/lrberge/fixest/issues/109)).
+ - Fix bug in `predict` when `poly()` was used in the estimation (thanks to @tholdaway [#109](https://github.com/lrberge/fixest/issues/109)).
 
  - Fix bug in `predict`: an error message would not pop when combined fixed-effects are used with `combine.quick = TRUE` (thanks to @benzipperer [#115](https://github.com/lrberge/fixest/issues/115)).
  
  - Fix bug to properly account for the nestedness of combined fixed-effects when clustered standard-errors are requested (thanks to @Oravishayrizi  [#116](https://github.com/lrberge/fixest/issues/116)).
  
  - Fig major bug in `model.matrix` that could make it very slow. Led the function `aggregate` to be very slow (thanks to Benny Goldman).
+ 
+ - Fix bug that prevented `aggregate` to effectively use weights (thanks to Benny Goldman).
  
 ## New features
 
