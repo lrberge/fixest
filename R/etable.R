@@ -1787,10 +1787,11 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
                     current_fe = is_fe[[i]]
                     if(all(group_fe %in% names(current_fe))){
                         current_fe[new_fe] = yesNo[1]
-                        is_fe[[i]] = current_fe[new_fe]
+                        is_fe[[i]] = current_fe
                     }
                 }
             }
+
 
         } else {
             # Custom grouping from the user
