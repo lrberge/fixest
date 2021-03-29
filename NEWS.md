@@ -39,6 +39,8 @@ colejharvey [#106](https://github.com/lrberge/fixest/issues/106)).
   - `i`: Factor variables with only the values of 0 and 1 are treated as numeric. 
   
   - `fitstat`: The statistic `G` is now equal to the degrees of freedom used in the t-test of coefficients testing.
+  
+  - `esttable` and `esttex` are not deprecated any more: they are now pure aliases of `etable`.
 
 # fixest 0.8.3 (2021-03-01)
 
