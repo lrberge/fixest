@@ -4748,6 +4748,7 @@ fitstat_validate = function(x, vector = FALSE){
 #' @param x A \code{fixest} object.
 #' @param agg A character scalar describing the variable names to be aggregated, it is pattern-based. All variables that match the pattern will be aggregated. It must be of the form \code{"(root)"}, the parentheses must be there and the resulting variable name will be \code{"root"}. You can add another root with parentheses: \code{"(root1)regex(root2)"}, in which case the resulting name is \code{"root1::root2"}. To name the resulting variable differently you can pass a named vector: \code{c("name" = "pattern")} or \code{c("name" = "pattern(root2)")}. It's a bit intricate sorry, please see the examples.
 #' @param full Logical scalar, defaults to \code{FALSE}. If \code{TRUE}, then all coefficients are returned, not only the aggregated coefficients.
+#' @param use_weights Logical, default is \code{TRUE}. If the estimation was weighted, whether the aggregation should take into account the weights. Basically if the weights reflected frequency it should be \code{TRUE}.
 #' @param ... Arguments to be passed to \code{\link[fixest]{summary.fixest}}.
 #'
 #' @details
@@ -4828,7 +4829,7 @@ fitstat_validate = function(x, vector = FALSE){
 #' # With etable
 #' etable(res_naive, res_cohort, agg = "(ti.*nt)::(-?[[:digit:]]+):gro")
 #'
-aggregate.fixest = function(x, agg, full = FALSE, ...){
+aggregate.fixest = function(x, agg, full = FALSE, use_weights = TRUE, ...){
     # Aggregates the value of coefficients
 
     check_arg(x, "class(fixest) mbt")
@@ -4887,7 +4888,12 @@ aggregate.fixest = function(x, agg, full = FALSE, ...){
         v = name_df[i, 2]
         v_names = cname_select[root == r & val == v]
 
-        shares = colSums(sign(mm[, v_names, drop = FALSE]))
+        if(use_weights && !is.null(x$weights)){
+            shares = colSums(x$weights * sign(mm[, v_names, drop = FALSE]))
+        } else {
+            shares = colSums(sign(mm[, v_names, drop = FALSE]))
+        }
+
         shares = shares / sum(shares)
 
         # The coef
@@ -10498,7 +10504,7 @@ getFixest_fml = function(){
 #'
 #'
 #'
-setFixest_estimation = function(fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10, lean = FALSE, verbose = 0, warn = TRUE, combine.quick = NULL, demeaned = FALSE, mem.clean = FALSE, glm.iter = 25, glm.tol = 1e-8, reset = FALSE){
+setFixest_estimation = function(fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10, lean = FALSE, verbose = 0, warn = TRUE, combine.quick = NULL, demeaned = FALSE, mem.clean = FALSE, glm.iter = 25, glm.tol = 1e-8, panel.id = NULL, reset = FALSE){
 
     check_arg_plus(fixef.rm, "match(none, perfect, singleton, both)")
     check_arg(fixef.tol, collin.tol, glm.tol, "numeric scalar GT{0}")
@@ -10506,6 +10512,7 @@ setFixest_estimation = function(fixef.rm = "perfect", fixef.tol = 1e-6, fixef.it
     check_arg(verbose, "integer scalar GE{0}")
     check_arg(lean, warn, demeaned, mem.clean, reset, "logical scalar")
     check_arg(combine.quick, "NULL logical scalar")
+    check_arg(panel.id, "NULL character vector len(,2) no na | os formula")
 
     # Getting the existing defaults
     opts = getOption("fixest_estimation")

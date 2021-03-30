@@ -18,6 +18,7 @@ setFixest_estimation(
   mem.clean = FALSE,
   glm.iter = 25,
   glm.tol = 1e-08,
+  panel.id = NULL,
   reset = FALSE
 )
 
@@ -47,6 +48,8 @@ getFixest_estimation()
 \item{glm.iter}{Number of iterations of the glm algorithm. Default is 25.}
 
 \item{glm.tol}{Tolerance level for the glm algorithm. Default is \code{1e-8}.}
+
+\item{panel.id}{The panel identifiers. Can either be: i) a one sided formula (e.g. \code{panel.id = ~id+time}), ii) a character vector of length 2 (e.g. \code{panel.id=c('id', 'time')}, or iii) a character scalar of two variables separated by a comma (e.g. \code{panel.id='id,time'}). Note that you can combine variables with \code{^} only inside formulas (see the dedicated section in \code{\link[fixest]{feols}}).}
 
 \item{reset}{Logical, default to \code{FALSE}. Whether to reset all values.}
 }

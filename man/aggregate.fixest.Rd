@@ -4,7 +4,7 @@
 \alias{aggregate.fixest}
 \title{Aggregates the values of DiD coefficients a la Sun and Abraham}
 \usage{
-\method{aggregate}{fixest}(x, agg, full = FALSE, ...)
+\method{aggregate}{fixest}(x, agg, full = FALSE, use_weights = TRUE, ...)
 }
 \arguments{
 \item{x}{A \code{fixest} object.}
@@ -12,6 +12,8 @@
 \item{agg}{A character scalar describing the variable names to be aggregated, it is pattern-based. All variables that match the pattern will be aggregated. It must be of the form \code{"(root)"}, the parentheses must be there and the resulting variable name will be \code{"root"}. You can add another root with parentheses: \code{"(root1)regex(root2)"}, in which case the resulting name is \code{"root1::root2"}. To name the resulting variable differently you can pass a named vector: \code{c("name" = "pattern")} or \code{c("name" = "pattern(root2)")}. It's a bit intricate sorry, please see the examples.}
 
 \item{full}{Logical scalar, defaults to \code{FALSE}. If \code{TRUE}, then all coefficients are returned, not only the aggregated coefficients.}
+
+\item{use_weights}{Logical, default is \code{TRUE}. If the estimation was weighted, whether the aggregation should take into account the weights. Basically if the weights reflected frequency it should be \code{TRUE}.}
 
 \item{...}{Arguments to be passed to \code{\link[fixest]{summary.fixest}}.}
 }

@@ -26,7 +26,7 @@ colejharvey [#106](https://github.com/lrberge/fixest/issues/106)).
  
  - Improve error messages in `fitstat` when selecting statistics components.
  
- - Fix bug in `predict` when poly() was used in the estimation (thanks to @tholdaway [#109](https://github.com/lrberge/fixest/issues/109)).
+ - Fix bug in `predict` when `poly()` was used in the estimation (thanks to @tholdaway [#109](https://github.com/lrberge/fixest/issues/109)).
 
  - Fix bug in `predict`: an error message would not pop when combined fixed-effects are used with `combine.quick = TRUE` (thanks to @benzipperer [#115](https://github.com/lrberge/fixest/issues/115)).
  
@@ -34,17 +34,25 @@ colejharvey [#106](https://github.com/lrberge/fixest/issues/106)).
  
  - Fig major bug in `model.matrix` that could make it very slow. Led the function `aggregate` to be very slow (thanks to Benny Goldman).
  
+ - Fix bug that prevented `aggregate` to effectively use weights (thanks to Benny Goldman).
+ 
 ## New features
 
  - `model.matrix` gains the new argument `subset` which allows the creation of the design matrix for a subset of variables only.
  
  - `drop.section` now works for `etable` when `tex = FALSE`.
+ 
+ - The argument `panel.id` used in all estimations can be set globally with the function `setFixest_estimation`.
 
 ## Other changes
 
   - `i`: Factor variables with only the values of 0 and 1 are treated as numeric. 
   
   - `fitstat`: The statistic `G` is now equal to the degrees of freedom used in the t-test of coefficients testing.
+  
+  - `esttable` and `esttex` are not deprecated any more: they are now pure aliases of `etable`.
+  
+  - `aggregate`: for weighted regressions, `use_weights` controls whether to use the weights to perform the aggregation.
 
 # fixest 0.8.3 (2021-03-01)
 
