@@ -8,6 +8,8 @@
   - `group` and `extraline`: enhanced and simplified control of the placement of the new rows. Now only two special characters at the beginning of the row name decide its location.
   
   - new argument `fixest.group`. If `TRUE`, then fixed-effects appearing always jointly across models will be grouped in a single row. The user can alternatively specify a list to declare which fixed-effect to group and customize the row name. 
+  
+  - `sdBelow` now works when `tex = FALSE` (request by Sasha Indarte).
 
 # fixest 0.8.4
 
