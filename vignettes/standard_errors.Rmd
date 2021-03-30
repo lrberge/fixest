@@ -310,7 +310,7 @@ I wish to thank Karl Dunkle Werner, Grant McDermott and Ivo Welch for raising th
 
 Zeileis A, Koll S, Graham N (2020). "[Various Versatile Variances: An Object-Oriented Implementation of Clustered Covariances in R.](https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf)" Journal of Statistical Software, 95(1), 1–36.
 
-MacKinnon, JG, White, H (1985). "[Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties](http://qed.econ.queensu.ca/working_papers/papers/qed_wp_537.pdf)" Journal of Econometrics, 29(3), 305–325.
+MacKinnon, JG, White, H (1985). "Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties" Journal of Econometrics, 29(3), 305–325.
 
 Kauermann G, Carroll RJ (2001). "[A Note on the Efficiency of Sandwich Covariance Matrix Estimation](https://www.tandfonline.com/doi/abs/10.1198/016214501753382309)", Journal of the American Statistical Association, 96(456), 1387–1396.
 

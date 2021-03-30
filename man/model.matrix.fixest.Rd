@@ -4,7 +4,7 @@
 \alias{model.matrix.fixest}
 \title{Design matrix of a \code{fixest} object}
 \usage{
-\method{model.matrix}{fixest}(object, data, type = "rhs", na.rm = TRUE, partial = FALSE, ...)
+\method{model.matrix}{fixest}(object, data, type = "rhs", na.rm = TRUE, subset = FALSE, ...)
 }
 \arguments{
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
@@ -15,7 +15,7 @@
 
 \item{na.rm}{Default is \code{TRUE}. Should observations with NAs be removed from the matrix?}
 
-\item{partial}{Logical or character vector. Default is \code{FALSE}. If \code{TRUE}, then the matrix created will be restricted only to the variables contained in the argument \code{data}, which can then contain a subset of the variables used in the estimation. If a character vector, then only the variables matching the elements of the vector via regular expressions will be created.}
+\item{subset}{Logical or character vector. Default is \code{FALSE}. If \code{TRUE}, then the matrix created will be restricted only to the variables contained in the argument \code{data}, which can then contain a subset of the variables used in the estimation. If a character vector, then only the variables matching the elements of the vector via regular expressions will be created.}
 
 \item{...}{Not currently used.}
 }
@@ -33,13 +33,13 @@ names(base) = c("y", "x1", "x2", "x3", "species")
 est = feols(y ~ poly(x1, 2) + x2, base)
 head(model.matrix(est))
 
-# Illustration of partial
+# Illustration of subset
 
-# partial => character vector
-head(model.matrix(est, partial = "x1"))
+# subset => character vector
+head(model.matrix(est, subset = "x1"))
 
-# partial => TRUE, only works with data argument!!
-head(model.matrix(est, data = base[, "x1", drop = FALSE], partial = TRUE))
+# subset => TRUE, only works with data argument!!
+head(model.matrix(est, data = base[, "x1", drop = FALSE], subset = TRUE))
 
 
 

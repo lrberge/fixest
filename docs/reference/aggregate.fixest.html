@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.4</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -115,7 +115,7 @@
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/lrberge/fixest/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -142,7 +142,7 @@
     </div>
 
     <pre class="usage"><span class='co'># S3 method for fixest</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/aggregate.html'>aggregate</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>agg</span>, full <span class='op'>=</span> <span class='cn'>FALSE</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+<span class='fu'><a href='https://rdrr.io/r/stats/aggregate.html'>aggregate</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>agg</span>, full <span class='op'>=</span> <span class='cn'>FALSE</span>, use_weights <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -158,6 +158,10 @@
     <tr>
       <th>full</th>
       <td><p>Logical scalar, defaults to <code>FALSE</code>. If <code>TRUE</code>, then all coefficients are returned, not only the aggregated coefficients.</p></td>
+    </tr>
+    <tr>
+      <th>use_weights</th>
+      <td><p>Logical, default is <code>TRUE</code>. If the estimation was weighted, whether the aggregation should take into account the weights. Basically if the weights reflected frequency it should be <code>TRUE</code>.</p></td>
     </tr>
     <tr>
       <th>...</th>

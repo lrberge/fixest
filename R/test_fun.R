@@ -31,6 +31,9 @@ test = function(x, y, type = "=", tol = 1e-6){
         } else if(IS_Y && !grepl(tolower(y), tolower(m), fixed = TRUE)){
             stop("This is an error, but the messages don't match:\nEXPECTED: \n", y, "\nACTUAL: \n", x)
         }
+    } else if(length(x) == 0){
+        stop("Argument 'x' is of length 0. This is not allowed.")
+
     } else if(type %in% c("equal", "=")){
         if(length(x) != length(y)){
             stop("Lengths differ: EXPECTED: ", length(y), "\n",

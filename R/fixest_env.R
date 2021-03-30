@@ -377,7 +377,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         if(isPanel){
             panel.info = NULL
             if(!is.null(attr(data, "panel_info"))){
-                if(!missing(panel.id)){
+                if(!missnull(panel.id)){
                     warning("The argument 'panel.id' is provided but argument 'data' is already a 'fixest_panel' object. Thus the argument 'panel.id' is ignored.", immediate. = TRUE)
                 }
 
@@ -386,7 +386,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                 panel.info = panel__meta__info$call
             } else {
                 # Later: automatic deduction using the first two clusters
-                if(missing(panel.id)){
+                if(missnull(panel.id)){
                     stop("To use lag/leads (with l()/f()): either provide the argument 'panel.id' with the panel identifiers OR set your data as a panel with function panel().")
                 }
                 panel__meta__info = panel_setup(data, panel.id, from_fixest = TRUE)

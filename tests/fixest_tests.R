@@ -618,7 +618,7 @@ test(var(c1 - m_fe$species[names(c1)]), 0, "~")
 c2  = get_coef(all_coef, "factor\\(fe_bis\\)")
 test(var(c2 - m_fe$fe_bis[names(c2)]), 0, "~")
 
-c3  = get_coef(all_coef, "x3:fe_bis::")
+c3  = get_coef(all_coef, "i\\(x3, fe_bis\\)")
 test(c3, m_fe[["fe_bis[[x3]]"]][names(c3)], "~", tol = 1e-5)
 
 #
@@ -635,10 +635,10 @@ test(var(c1 - m_fe$species[names(c1)]), 0, "~")
 c2  = get_coef(all_coef, "^factor\\(fe_bis\\)")
 test(var(c2 - m_fe$fe_bis[names(c2)]), 0, "~")
 
-c3  = get_coef(all_coef, "x3:fe_bis::")
+c3  = get_coef(all_coef, "i\\(var = x3, f = fe_bis\\)")
 test(c3, m_fe[["fe_bis[[x3]]"]][names(c3)], "~", tol = 2e-4)
 
-c4  = get_coef(all_coef, "x2:species::")
+c4  = get_coef(all_coef, "i\\(x2, species\\)")
 test(c4, m_fe[["species[[x2]]"]][names(c4)], "~", tol = 2e-4)
 
 #
@@ -655,10 +655,10 @@ test(var(c1 - m_fe$species[names(c1)]), 0, "~")
 c2  = get_coef(all_coef, "^factor\\(fe_bis\\)")
 test(var(c2 - m_fe$fe_bis[names(c2)]), 0, "~")
 
-c3  = get_coef(all_coef, "x2:fe_bis::")
+c3  = get_coef(all_coef, "i\\(var = x2, f = fe_bis\\)")
 test(c3, m_fe[["fe_bis[[x2]]"]][names(c3)], "~", tol = 2e-4)
 
-c4  = get_coef(all_coef, "x3:fe_bis::")
+c4  = get_coef(all_coef, "i\\(var = x3, f = fe_bis\\)")
 test(c4, m_fe[["fe_bis[[x3]]"]][names(c4)], "~", tol = 2e-4)
 
 
@@ -677,10 +677,10 @@ test(var(c1 - m_fe$species[names(c1)]), 0, "~")
 c2  = get_coef(all_coef, "^factor\\(fe_bis\\)")
 test(var(c2 - m_fe$fe_bis[names(c2)]), 0, "~")
 
-c3  = get_coef(all_coef, "x2:fe_bis::")
+c3  = get_coef(all_coef, "i\\(var = x2, f = fe_bis\\)")
 test(c3, m_fe[["fe_bis[[x2]]"]][names(c3)], "~", tol = 2e-4)
 
-c4  = get_coef(all_coef, "x3:fe_bis::")
+c4  = get_coef(all_coef, "i\\(var = x3, f = fe_bis\\)")
 test(c4, m_fe[["fe_bis[[x3]]"]][names(c4)], "~", tol = 2e-4)
 
 
@@ -849,58 +849,6 @@ X_dm_slopes = demean(ln_dist ~ Origin + Destination[ln_euros], data = base)
 X_dm_slopes_bis = demean(base$ln_dist, fe, slope.vars = base$ln_euros, slope.flag = c(0, 1))
 
 test(X_dm_slopes[[1]], X_dm_slopes_bis)
-
-####
-#### fixef ####
-####
-
-chunk("FIXEF")
-
-data(trade)
-
-base = trade
-base$ln_euros = log(base$Euros)
-base$ln_dist = log(base$dist_km)
-
-# 1 FE
-
-res_lm    = lm(ln_euros ~ ln_dist + factor(Origin) - 1, base)
-res_feols = feols(ln_euros ~ ln_dist | Origin, base)
-
-fe_fixest = fixef(res_feols)$Origin
-coef_lm = coef(res_lm)
-fe_lm = coef_lm[grepl("factor", names(coef_lm))]
-names(fe_lm) = gsub("factor(Origin)", "", names(fe_lm), fixed = TRUE)
-
-test(fe_fixest, fe_lm[names(fe_fixest)], "~")
-
-# 2 FE
-
-res_lm    = lm(ln_euros ~ ln_dist + factor(Origin) + factor(Destination), base)
-res_feols = feols(ln_euros ~ ln_dist | Origin + Destination, base)
-
-fe_fixest_origin = fixef(res_feols)$Origin
-
-coef_lm = coef(res_lm)
-fe_lm_origin = coef_lm[grepl("factor(Origin)", names(coef_lm), fixed = TRUE)]
-names(fe_lm_origin) = gsub("factor(Origin)", "", names(fe_lm_origin), fixed = TRUE)
-
-# The difference should be equal across all FEs
-test(sd(fe_fixest_origin[names(fe_lm_origin)] - fe_lm_origin), 0, "~")
-
-# 3 FE
-
-res_lm    = lm(ln_euros ~ ln_dist + factor(Origin) + factor(Destination) + factor(Year), base)
-res_feols = feols(ln_euros ~ ln_dist | Origin + Destination + Year, base)
-
-fe_fixest_origin = fixef(res_feols)$Origin
-
-coef_lm = coef(res_lm)
-fe_lm_origin = coef_lm[grepl("factor(Origin)", names(coef_lm), fixed = TRUE)]
-names(fe_lm_origin) = gsub("factor(Origin)", "", names(fe_lm_origin), fixed = TRUE)
-
-# The difference should be equal across all FEs
-test(sd(fe_fixest_origin[names(fe_lm_origin)] - fe_lm_origin), 0, "~")
 
 
 ####
@@ -1435,12 +1383,12 @@ res_lag = feols(y1 ~ l(x1, 1:2) + x2 + x3, base, panel = ~id + time)
 m_lag = model.matrix(res_lag)
 test(nrow(m_lag), nobs(res_lag))
 
-# lag with partial
-m_lag_x1 = model.matrix(res_lag, partial = "x1")
+# lag with subset
+m_lag_x1 = model.matrix(res_lag, subset = "x1")
 test(ncol(m_lag_x1), 2)
 
-# lag with partial, new data
-mbis_lag_x1 = model.matrix(res_lag, base_bis[, c("x1", "x2", "id", "time")], partial = TRUE)
+# lag with subset, new data
+mbis_lag_x1 = model.matrix(res_lag, base_bis[, c("x1", "x2", "id", "time")], subset = TRUE)
 # l(x1, 1) + l(x1, 2) + x2
 test(ncol(mbis_lag_x1), 3)
 # 13 NAs: 2 per ID for the lags, 3 for x2
