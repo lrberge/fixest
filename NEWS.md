@@ -10,6 +10,14 @@
   - new argument `fixest.group`. If `TRUE`, then fixed-effects appearing always jointly across models will be grouped in a single row. The user can alternatively specify a list to declare which fixed-effect to group and customize the row name. 
   
   - `sdBelow` now works when `tex = FALSE` (request by Sasha Indarte).
+  
+  - `extraline` can now be equal to a formula containing `extraline` macros or valid `fitstat` types.
+  
+  - When a list, `extraline` can contain functions (returning a scalar) that will be applied to each model.  
+  
+  - When a list, `extraline` can contain formulas containing `extraline` macros or valid `fitstat` types. 
+  
+  - You can register `extraline` macros with the new function `extraline_register`.
 
 # fixest 0.8.4
 

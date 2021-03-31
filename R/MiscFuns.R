@@ -4014,7 +4014,7 @@ fitstat_register = function(type, fun, alias){
     opts = getOption("fixest_fitstat_user")
 
     if(type %in% setdiff(existing_types, names(opts))){
-        stop("The type name '", type, "' is the same as one built-in type. Please chose another one.")
+        stop("The type name '", type, "' is the same as one built-in type. Please choose another one.")
     }
 
     if(missnull(alias)){

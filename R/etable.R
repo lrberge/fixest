@@ -42,7 +42,7 @@
 #' @param style.df An object created by the function \code{\link[fixest]{style.df}. }It represents the style of the data frame returned (if \code{tex = FALSE}), see the documentation of \code{\link[fixest]{style.df}}.
 #' @param notes (Tex only.) Character vector. If provided, a \code{"notes"} section will be added at the end right after the end of the table, containing the text of this argument. Note that if it is a vector, it will be collapsed with new lines.
 #' @param group A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument \code{drop}) and \code{TRUE} or \code{FALSE} will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: \code{group=list("Controls: personal traits"=c("gender", "height", "weight"))} will create an new line with \code{"Controls: personal traits"} in the leftmost cell, all three variables gender, height and weight are discarded, \code{TRUE} appearing in each model containing at least one of the three variables (the style of \code{TRUE}/\code{FALSE} is governed by the argument \code{yesNo}). You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: 1st, \code{"_"}: last, row; 2) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section. For example: \code{group=list("_Controls"=stuff)} will place the line last in the stats sections, and using \code{group=list("^_Controls"=stuff)} will make the row appear first in the stats section. For details, see the dedicated section.
-#' @param extraline A list. The list elements should be either a single logical or a vector of the same length as the number of models. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extraline=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: 1st, \code{"_"}: last, row; 2) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section. For example: \code{group=list("_Controls"=stuff)} will place the line last in the stats sections, and using \code{group=list("^_Controls"=stuff)} will make the row appear first in the stats section. For details, see the dedicated section.
+#' @param extraline A list or a one sided formula. The list elements should be either a logical scalar,a vector of the same length as the number of models, or a function. This argument can be many things, please have a look at the dedicated help section; a simplified description follows. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extraline=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: 1st, \code{"_"}: last, row; 2) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section. For example: \code{group=list("_Controls"=stuff)} will place the line last in the stats sections, and using \code{group=list("^_Controls"=stuff)} will make the row appear first in the stats section. For details, see the dedicated section.
 #' @param fixef.group Logical scalar or list (default is \code{NULL}). If equal to \code{TRUE}, then all fixed-effects always appearing jointly in models will be grouped in one row. If a list, its elements must be character vectors of regular expressions and the list names will be the row names. For ex. \code{fixef.group=list("Dates fixed-effects"="Month|Day")} will remove the \code{"Month"} and \code{"Day"} fixed effects from the display and replace them with a single row named "Dates fixed-effects". You can monitor the placement of the new row with the special characters telling where to place the row within a section: \code{"^"} (first), or \code{"_"} (last); and in which section it should appear: \code{"^"} (coef.), \code{"-"} (fixed-effects), or \code{"_"} (stat.). These two special characters must appear first in the row names. Please see the dedicated section.
 #' @param placement (Tex only.) Character string giving the position of the float in Latex. Default is "htbp". It must consist of only the characters 'h', 't', 'b', 'p', 'H' and '!'. Reminder: h: here; t: top; b: bottom; p: float page; H: definitely here; !: prevents Latex to look for other positions. Note that it can be equal to the empty string (and you'll get the default placement).
 #' @param drop.section Character vector which can be of length 0 (i.e. equal to \code{NULL}). Can contain the values "fixef", "slopes" or "stats". It would drop, respectively, the fixed-effects section, the variables with varying slopes section or the fit statistics section.
@@ -67,7 +67,7 @@
 #'
 #' The default display of decimals is the outcome of an algorithm. Let's take the example of \code{digits = 3} which "kind of" requires 3 significant digits to be displayed.
 #'
-#' For numbers greater than 1 (in absolute terms), their integral part is always be displayed and the number of decimals shown is equal to \code{digits} minus the number of digits in the integral part. This means that \code{12.345} will be displayed as \code{12.3}. If the number of decimals should be 0, then a single decimal is displayed to suggest that the number is not whole. This means that \code{1234.56} will be displayed as \code{1234.5}. Note that if the number is whole, no decimals are shown.
+#' For numbers greater than 1 (in absolute terms), their integral part is always displayed and the number of decimals shown is equal to \code{digits} minus the number of digits in the integral part. This means that \code{12.345} will be displayed as \code{12.3}. If the number of decimals should be 0, then a single decimal is displayed to suggest that the number is not whole. This means that \code{1234.56} will be displayed as \code{1234.5}. Note that if the number is whole, no decimals are shown.
 #'
 #' For numbers lower than 1 (in absolute terms), the number of decimals displayed is equal to \code{digits} except if there are only 0s in which case the first significant digit is shown. This means that \code{0.01234} will be displayed as \code{0.012} (first rule), and that 0.000123 will be displayed as \code{0.0001} (second rule).
 #'
@@ -83,6 +83,18 @@
 #' You can use the special character "\%" (percentage) to make reference to the original variable name instead of the aliased name. For example, you have a variable named \code{"Month6"}, and use a dictionary \code{dict = c(Month6="June")}. Thus the variable will be displayed as \code{"June"}. If you want to delete that variable, you can use either \code{drop="June"}, or \code{drop="\%Month6"} (which makes reference to its original name).
 #'
 #' The argument \code{order} takes in a vector of regular expressions, the order will follow the elements of this vector. The vector gives a list of priorities, on the left the elements with highest priority. For example, order = c("Wind", "!Inter", "!Temp") would give highest priorities to the variables containing "Wind" (which would then appear first), second highest priority is the variables not containing "Inter", last, with lowest priority, the variables not containing "Temp". If you had the following variables: (Intercept), Temp:Wind, Wind, Temp you would end up with the following order: Wind, Temp:Wind, Temp, (Intercept).
+#'
+#' @section The argument \code{extraline}:
+#'
+#' The argument \code{extraline} adds well... extra lines to the table. It accepts either a list, or a one-sided formula.
+#'
+#' If a one-sided formula: then the elements in the formula must represent either \code{extraline} macros, either fit statistics (i.e. valid types of the function \code{\link[fixest]{fitstat}}). One new line will be added for each element of the formula, they will be appended right after the coefficients. To register \code{extraline} macros, you must first register them in \code{\link[fixest]{extraline_register}}.
+#'
+#' If a list: then the elements must be either: a) a logical scalar, b) a vector of the same length as the number of models, c) a function to be applied to each model and which returns a scalar, or d) a one-sided formula of \code{extraline} macros (registered with \code{\link[fixest]{extraline_register}}) or valid \code{\link[fixest]{fitstat}} types.
+#'
+#' When a list, the elements of type a), b) and c) must have a name! Example: \code{extraline = list("Controls" = TRUE)} is good, \code{extraline = list(TRUE)} is bad. The name for element of type d) is optional. Example: \code{extraline = list("^^My F-stat" = ~f)} will add the row named \code{"My F-stat"} on top of the coefficients (for the placement, see the dedicated section), while \code{extraline = list(~f)} will add the F-stat row with its default name (\code{"F-test"}) at its default placement (below the coefficients).
+#'
+#' You can combine elements in the list, so that the following \code{extraline = list(~r2, "Controls" = TRUE), ~f+ivf} is valid.
 #'
 #' @section Controlling the placement of extra lines:
 #'
@@ -745,7 +757,8 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
 
     check_arg_plus(drop.section, "NULL multi match(fixef, slopes, stats)")
 
-    check_arg_plus(group, extraline, "NULL{list()} named list l0")
+    check_arg_plus(group, "NULL{list()} named list l0")
+    check_arg_plus(extraline, "NULL{list()} list l0 | os formula")
     # we check it more in depth later
 
     check_arg(fixef.group, "NULL{list()} logical scalar | named list l0")
@@ -1107,16 +1120,60 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
 
     }
 
+    #
     # We check the group and extraline arguments
+    #
+
     if(missing(drop)) drop = NULL
     for(i in seq_along(group)){
         check_value(group[[i]], "character vector", .message = "The elements of argument 'group' must be character vectors of regular expressions.")
         drop = unique(c(drop, group[[i]]))
     }
 
-    for(i in seq_along(extraline)){
-        check_value(extraline[[i]], "logical scalar | vector(character, numeric, logical) len(value)", .message = paste0("The elements of argument 'extraline' must be vectors of length ", n_models, " or logical scalars."), .value = n_models)
+    #
+    # ... extraline ####
+    #
+
+    if(inherits(extraline, "formula")){
+        # If a formula => to summon registered stats
+        extraline = extraline_extractor(extraline, tex = isTex)
     }
+
+
+    el_new = list() # I need it to cope with list(~f+ivf+macro, "my vars" = TRUE)
+    # => the first command will create several lines
+    el_names = names(extraline)
+    for(i in seq_along(extraline)){
+        check_value(extraline[[i]], "logical scalar | vector(character, numeric, logical) len(value) | function | os formula", .message = paste0("The elements of argument 'extraline' must be vectors of length ", n_models, ",  logical scalars, functions, or one-sided formulas."), .value = n_models)
+
+        el = extraline[[i]]
+        if("formula" %in% class(el)){
+            el_tmp = extraline_extractor(el, names(extraline)[i], tex = isTex)
+            for(k in seq_along(el_tmp)){
+                el_new[[names(el_tmp)[k]]] = el_tmp[[k]]
+            }
+        } else {
+            if(is.null(el_names) || nchar(el_names[i]) == 0){
+                stop_up("The argument 'extraline' must have names that will correspond to the row names. This is not the case for the ", n_th(i), " element.")
+            }
+
+            el_new[[names(extraline)[i]]] = extraline[[i]]
+        }
+    }
+
+    extraline = el_new
+
+    # Now we catch the functions
+    el_fun_id = NULL
+    if(length(extraline) > 0){
+        el_fun_id = which(sapply(extraline, is.function)) # set of ID such that el[id] is a function
+        if(length(el_fun_id) > 0){
+            el_origin = extraline
+        }
+    }
+
+
+    # end: extraline
 
     # we keep track of the SEs
     se_type_list = list()
@@ -1561,7 +1618,7 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
         }
 
 
-        # If the coefficient is bounded, we supress the 'stars'
+        # If the coefficient is bounded, we suppress the 'stars'
         isBounded = grepl("bounded", se_value)
         if(any(isBounded)){
             pval[isBounded] = ""
@@ -1616,6 +1673,22 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
             fitstat_list[[m]] = my_stats
         }
 
+        #
+        # Extraline, when function
+        #
+
+        for(i in el_fun_id){
+            f = el_origin[[i]]
+
+            if(m == 1){
+                extraline[[i]] = f(x)
+
+            } else {
+                extraline[[i]] = c(extraline[[i]], f(x))
+            }
+        }
+
+
     }
 
     if(check_interaction_reorder){
@@ -1627,7 +1700,9 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
         }
     }
 
-
+    #
+    # Fitstat reformating
+    #
 
     if(length(fitstat_all) > 0){
 
@@ -2445,6 +2520,8 @@ etable_internal_latex = function(info){
             el_format = el
         }
 
+        el_format[is.na(el_format)] = ""
+
         el_name = names(extraline)[i]
 
         el_full = ""
@@ -2780,6 +2857,8 @@ etable_internal_df = function(info){
             el_format = el
         }
 
+        el_format[is.na(el_format)] = ""
+
         el_where = "coef"
 
         el_name = names(extraline)[i]
@@ -3068,7 +3147,7 @@ etable_internal_df = function(info){
 
 
 #' @rdname etable
-setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, signifCode, float, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style.tex = NULL, style.df = NULL, notes = NULL, group = NULL, extraline = NULL, placement = "htbp", drop.section = NULL, postprocess.tex = NULL, postprocess.df = NULL, fit_format = "__var__", fixef.group = NULL, reset = FALSE){
+setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, signifCode, float, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style.tex = NULL, style.df = NULL, notes = NULL, group = NULL, extraline = NULL, fixef.group = NULL, placement = "htbp", drop.section = NULL, postprocess.tex = NULL, postprocess.df = NULL, fit_format = "__var__", reset = FALSE){
 
     # cat(names(formals(setFixest_etable)), sep = '", "')
     arg_list = c("digits", "digits.stats", "fitstat", "coefstat", "ci", "sdBelow", "keep", "drop", "order", "dict", "signifCode", "float", "fixef_sizes", "fixef_sizes.simplify", "family", "powerBelow", "interaction.combine", "depvar", "style.tex", "style.df", "notes", "group", "extraline", "placement", "drop.section", "postprocess.tex", "postprocess.df", "fit_format", "fixef.group", "reset")
@@ -3433,13 +3512,139 @@ style.df = function(depvar.title = "Dependent Var.:", fixef.title = "Fixed-Effec
 }
 
 
+extraline_extractor = function(x, name = NULL, tex = FALSE){
+    # x must be a one sided formula
+    # name: name of the listed element (empty = "")
+    # => returns a named list
+
+    is_name = !is.null(name) && nchar(name) > 0
+
+    # extraline registered
+    el_default = getOption("fixest_extraline")
+    key_registered = names(el_default)
+
+    # fitstat
+    fitstat_fun_types = fitstat(give_types = TRUE)
+    fitstat_type_allowed = fitstat_fun_types$types
+    type_alias = fitstat_fun_types$type_alias
+
+    # The variable(s) requested
+    current_vars = attr(terms(x), "term.labels")
+
+    if(length(current_vars) > 1 && is_name){
+        stop_up("You cannot give list names in 'extraline' when several values are summoned via a formula. Simply remove the name associated to the formula to make it work (concerns '", name, "').", up = 2)
+    }
+
+    valid_keys = c(key_registered, fitstat_type_allowed)
+
+    if(!all(current_vars %in% valid_keys)){
+        pblm = setdiff(current_vars, valid_keys)
+        stop_up("Argument 'extraline' can be a one-sided formula whose variables refer to the macros registered using the function 'extraline_register' or fit statistics (valid fitstat keywords). Problem: the values", enumerate_items(pblm, "s.were"), " not valid.", up = 2)
+    }
+
+    if(length(current_vars) == 0){
+        extraline = list()
+    } else {
+        el_tmp = list()
+        for(i in seq_along(current_vars)){
+
+            key = current_vars[i]
+
+            if(key %in% key_registered){
+                element = el_default[[key]]
+
+                if(is_name){
+                    el_tmp[[name]] = element$fun
+                } else {
+                    el_tmp[[element$alias]] = element$fun
+                }
+
+            } else {
+                # this is a fit statistic
+                fun = eval(str2lang(paste0("function(est) fitstat(est, '", key, "', simplify = TRUE)[[1]]")))
+
+                if(is_name){
+                    el_tmp[[name]] = fun
+                } else {
+                    my_alias = if(tex) fitstat_fun_types$tex_alias else fitstat_fun_types$R_alias
+                    el_tmp[[my_alias[[key]]]] = fun
+                }
+            }
+        }
+    }
+
+    el_tmp
+}
 
 
+#' Register \code{extraline} macros to be used in \code{etable}
+#'
+#' This function is used to create \code{extraline} (which is an argument of \code{\link[fixest]{etable}}) macros that can be easily summoned in \code{\link[fixest]{etable}}.
+#'
+#' @param type A character scalar giving the type-name.
+#' @param fun A function to be applied to a \code{fixest} estimation. It must return a scalar.
+#' @param alias A character scalar. This is the alias to be used in lieu of the type name to form the row name.
+#'
+#' @details
+#' You can register as many macros as you wish, the only constraint is that the type name should not conflict with a \code{\link[fixest]{fitstat}} type name.
+#'
+#'
+#' @examples
+#'
+#'
+#' # We register a function computing the mean of the dependent variable
+#' my_fun = function(x) mean(model.matrix(x, type = "lhs")[[1]])
+#' extraline_register("my", my_fun, "Mean(y)")
+#'
+#' # An estimation
+#' est = feols(Petal.Length ~ Sepal.Length | species, base)
+#'
+#' # Now we can easily create a row with the mean of y.
+#' # We just "summon" it in a one-sided formula
+#' etable(est, extraline = ~ my)
+#'
+#' # We can change the alias on the fly:
+#' etable(est, extraline = list("_Average of y" = ~ my))
+#'
+#'
+#'
+#'
+extraline_register = function(type, fun, alias){
+    check_arg(type, "character scalar mbt")
+    check_arg(fun, "function mbt")
+    check_arg(alias, "character scalar mbt")
 
+    # We check the type is not conflicting
+    existing_types = fitstat(give_types = TRUE)$types
 
+    opts = getOption("fixest_extraline")
 
+    if(type %in% setdiff(existing_types, names(opts))){
+        stop("The type name '", type, "' is the same as one of fitstat's built-in type. Please choose another one.")
+    }
 
+    if(missnull(alias)){
+        alias = type
+    }
 
+    # We test the function on a simple estimation
+    est = feols(Petal.Length ~ Sepal.Length, iris)
+    mc = match.call()
+    fun_name = deparse_long(mc$fun)
+    value = error_sender(fun(est), "The function '", fun_name, "' could not evaluated on a simple fixest object. Please try to improve it.")
+
+    if(length(value) != 1){
+        stop("The value returned by ", fun_name, " should be exactly of length 1. This is actually not the case (the result is of length ", length(value), ").")
+    }
+
+    res = list(fun = fun, alias = alias)
+
+    opts[[type]] = res
+
+    options(fixest_extraline = opts)
+
+    invisible(NULL)
+}
 
 
 

@@ -81,12 +81,12 @@ setFixest_etable(
   notes = NULL,
   group = NULL,
   extraline = NULL,
+  fixef.group = NULL,
   placement = "htbp",
   drop.section = NULL,
   postprocess.tex = NULL,
   postprocess.df = NULL,
   fit_format = "__var__",
-  fixef.group = NULL,
   reset = FALSE
 )
 
@@ -254,7 +254,7 @@ esttex(
 
 \item{group}{A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument \code{drop}) and \code{TRUE} or \code{FALSE} will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: \code{group=list("Controls: personal traits"=c("gender", "height", "weight"))} will create an new line with \code{"Controls: personal traits"} in the leftmost cell, all three variables gender, height and weight are discarded, \code{TRUE} appearing in each model containing at least one of the three variables (the style of \code{TRUE}/\code{FALSE} is governed by the argument \code{yesNo}). You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: 1st, \code{"_"}: last, row; 2) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section. For example: \code{group=list("_Controls"=stuff)} will place the line last in the stats sections, and using \code{group=list("^_Controls"=stuff)} will make the row appear first in the stats section. For details, see the dedicated section.}
 
-\item{extraline}{A list. The list elements should be either a single logical or a vector of the same length as the number of models. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extraline=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: 1st, \code{"_"}: last, row; 2) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section. For example: \code{group=list("_Controls"=stuff)} will place the line last in the stats sections, and using \code{group=list("^_Controls"=stuff)} will make the row appear first in the stats section. For details, see the dedicated section.}
+\item{extraline}{A list or a one sided formula. The list elements should be either a logical scalar,a vector of the same length as the number of models, or a function. This argument can be many things, please have a look at the dedicated help section; a simplified description follows. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extraline=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: 1st, \code{"_"}: last, row; 2) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section. For example: \code{group=list("_Controls"=stuff)} will place the line last in the stats sections, and using \code{group=list("^_Controls"=stuff)} will make the row appear first in the stats section. For details, see the dedicated section.}
 
 \item{fixef.group}{Logical scalar or list (default is \code{NULL}). If equal to \code{TRUE}, then all fixed-effects always appearing jointly in models will be grouped in one row. If a list, its elements must be character vectors of regular expressions and the list names will be the row names. For ex. \code{fixef.group=list("Dates fixed-effects"="Month|Day")} will remove the \code{"Month"} and \code{"Day"} fixed effects from the display and replace them with a single row named "Dates fixed-effects". You can monitor the placement of the new row with the special characters telling where to place the row within a section: \code{"^"} (first), or \code{"_"} (last); and in which section it should appear: \code{"^"} (coef.), \code{"-"} (fixed-effects), or \code{"_"} (stat.). These two special characters must appear first in the row names. Please see the dedicated section.}
 
@@ -301,7 +301,7 @@ When the argument \code{postprocessing.tex} is not missing, two additional tags 
 
 The default display of decimals is the outcome of an algorithm. Let's take the example of \code{digits = 3} which "kind of" requires 3 significant digits to be displayed.
 
-For numbers greater than 1 (in absolute terms), their integral part is always be displayed and the number of decimals shown is equal to \code{digits} minus the number of digits in the integral part. This means that \code{12.345} will be displayed as \code{12.3}. If the number of decimals should be 0, then a single decimal is displayed to suggest that the number is not whole. This means that \code{1234.56} will be displayed as \code{1234.5}. Note that if the number is whole, no decimals are shown.
+For numbers greater than 1 (in absolute terms), their integral part is always displayed and the number of decimals shown is equal to \code{digits} minus the number of digits in the integral part. This means that \code{12.345} will be displayed as \code{12.3}. If the number of decimals should be 0, then a single decimal is displayed to suggest that the number is not whole. This means that \code{1234.56} will be displayed as \code{1234.5}. Note that if the number is whole, no decimals are shown.
 
 For numbers lower than 1 (in absolute terms), the number of decimals displayed is equal to \code{digits} except if there are only 0s in which case the first significant digit is shown. This means that \code{0.01234} will be displayed as \code{0.012} (first rule), and that 0.000123 will be displayed as \code{0.0001} (second rule).
 }
@@ -319,6 +319,20 @@ You can use the special character "!" (exclamation mark) to reverse the effect o
 You can use the special character "\%" (percentage) to make reference to the original variable name instead of the aliased name. For example, you have a variable named \code{"Month6"}, and use a dictionary \code{dict = c(Month6="June")}. Thus the variable will be displayed as \code{"June"}. If you want to delete that variable, you can use either \code{drop="June"}, or \code{drop="\%Month6"} (which makes reference to its original name).
 
 The argument \code{order} takes in a vector of regular expressions, the order will follow the elements of this vector. The vector gives a list of priorities, on the left the elements with highest priority. For example, order = c("Wind", "!Inter", "!Temp") would give highest priorities to the variables containing "Wind" (which would then appear first), second highest priority is the variables not containing "Inter", last, with lowest priority, the variables not containing "Temp". If you had the following variables: (Intercept), Temp:Wind, Wind, Temp you would end up with the following order: Wind, Temp:Wind, Temp, (Intercept).
+}
+
+\section{The argument \code{extraline}}{
+
+
+The argument \code{extraline} adds well... extra lines to the table. It accepts either a list, or a one-sided formula.
+
+If a one-sided formula: then the elements in the formula must represent either \code{extraline} macros, either fit statistics (i.e. valid types of the function \code{\link[fixest]{fitstat}}). One new line will be added for each element of the formula, they will be appended right after the coefficients. To register \code{extraline} macros, you must first register them in \code{\link[fixest]{extraline_register}}.
+
+If a list: then the elements must be either: a) a logical scalar, b) a vector of the same length as the number of models, c) a function to be applied to each model and which returns a scalar, or d) a one-sided formula of \code{extraline} macros (registered with \code{\link[fixest]{extraline_register}}) or valid \code{\link[fixest]{fitstat}} types.
+
+When a list, the elements of type a), b) and c) must have a name! Example: \code{extraline = list("Controls" = TRUE)} is good, \code{extraline = list(TRUE)} is bad. The name for element of type d) is optional. Example: \code{extraline = list("^^My F-stat" = ~f)} will add the row named \code{"My F-stat"} on top of the coefficients (for the placement, see the dedicated section), while \code{extraline = list(~f)} will add the F-stat row with its default name (\code{"F-test"}) at its default placement (below the coefficients).
+
+You can combine elements in the list, so that the following \code{extraline = list(~r2, "Controls" = TRUE), ~f+ivf} is valid.
 }
 
 \section{Controlling the placement of extra lines}{
