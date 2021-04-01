@@ -2508,8 +2508,22 @@ setup_fixef = function(fixef_mat, lhs, fixef_vars, fixef.rm, family, isSplit, sp
         # only slope: not any non-slope
         only_slope = slope_flag < 0
 
-        # shallow copy
-        slope_variables = as.list(slope_mat)
+        # To prevent the case where one variable can have != varying slopes,
+        # we need this condition
+        # (super corner case....)
+        my_vs_vars = unlist(slope_vars_list, use.names = FALSE)
+        if(length(slope_mat) == length(my_vs_vars)){
+            # simple case
+            slope_variables = as.list(slope_mat)
+
+        } else {
+            slope_variables = list()
+            for(i in seq_along(my_vs_vars)){
+                slope_variables[[i]] = slope_mat[[my_vs_vars[i]]]
+            }
+            # unfortunately, we need the names...
+            names(slope_variables) = my_vs_vars
+        }
 
         if(!is.null(obs2keep)){
             for(i in seq_along(slope_variables)){

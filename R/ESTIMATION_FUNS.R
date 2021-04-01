@@ -1254,7 +1254,6 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 		    gc()
 		}
 
-
 		vars_demean = cpp_demean(y, X, weights, iterMax = fixef.iter,
 		                            diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
 		                            fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,

@@ -3,6 +3,8 @@
 
 ## Bugs
 
+ - Major bug, leading R to crash, occurring when the same variable was used with several different slopes (thanks to @Oravishayrizi [#119](https://github.com/lrberge/fixest/issues/119)). 
+
 ## etable
 
   - `group` and `extraline`: enhanced and simplified control of the placement of the new rows. Now only two special characters at the beginning of the row name decide its location.

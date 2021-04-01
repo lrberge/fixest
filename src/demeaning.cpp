@@ -1796,7 +1796,7 @@ List cpp_demean(SEXP y, SEXP X_raw, SEXP r_weights, int iterMax, double diffMax,
                    SEXP fe_id_list, SEXP table_id_I, SEXP slope_flag_Q, SEXP slope_vars_list,
                    SEXP r_init, int nthreads, bool save_fixef = false){
     // main fun that calls demean_single
-    // preformat all the information needed on the clusters
+    // preformats all the information needed on the fixed-effects
     // y: the dependent variable
     // X_raw: the matrix of the explanatory variables -- can be "empty"
 
