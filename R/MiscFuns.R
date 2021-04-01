@@ -4241,8 +4241,8 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
 
             if(root == "f"){
                 if(!is.null(x$ssr)){
-                    df1 = x$nparams - 1
-                    df2 = x$nobs - x$nparams
+                    df1 = degrees_freedom(x, 1) - 1
+                    df2 = degrees_freedom(x, 2, se = "standard")
 
                     if(isTRUE(x$iv) && x$iv_stage == 2){
                         # We need to compute the SSR
@@ -4279,8 +4279,9 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
             } else if(root == "ivfall"){
                 if(isTRUE(x$iv)){
                     if(x$iv_stage == 1){
-                        df1 = x$iv_n_inst
-                        df2 = x$nobs - x$nparams
+                        df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd)
+                        df2 = degrees_freedom(x, se = "standard")
+
                         stat = ((x$ssr_no_inst - x$ssr) / df1) / (x$ssr / df2)
                         p = pf(stat, df1, df2, lower.tail = FALSE)
                         vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
@@ -4289,8 +4290,8 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                     } else {
                         # f stat for the second stage
 
-                        df1 = length(x$iv_endo_names)
-                        df2 = x$nobs - x$nparams
+                        df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
+                        df2 = degrees_freedom(x, se = "standard")
 
                         w = 1
                         if(!is.null(x$weights)) w = x$weights
@@ -4307,11 +4308,13 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                 }
 
             } else if(root == "ivf1"){
+
                 if(isTRUE(x$iv)){
-                    df1 = x$iv_n_inst
+                    df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd, stage = 1)
+                    df2 = degrees_freedom(x, 2, se = "standard", stage = 1)
 
                     if(x$iv_stage == 1){
-                        df2 = x$nobs - x$nparams
+
                         stat = ((x$ssr_no_inst - x$ssr) / df1) / (x$ssr / df2)
                         p = pf(stat, df1, df2, lower.tail = FALSE)
                         vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
@@ -4320,7 +4323,6 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                     } else {
                         x_first = x$iv_first_stage
 
-                        df2 = x$nobs - x_first[[1]]$nparams
                         for(endo in names(x_first)){
                             stat = ((x_first[[endo]]$ssr_no_inst - x_first[[endo]]$ssr) / df1) / (x_first[[endo]]$ssr / df2)
                             p = pf(stat, df1, df2, lower.tail = FALSE)
@@ -4337,8 +4339,9 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                 if(isTRUE(x$iv) && x$iv_stage == 2){
                     # f stat for the second stage
 
-                    df1 = length(x$iv_endo_names)
-                    df2 = x$nobs - x$nparams
+                    df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
+                    df2 = degrees_freedom(x, 2, se = "standard")
+
                     w = 1
                     if(!is.null(x$weights)) w = x$weights
                     ssr = cpp_ssq(x$iv_residuals, w)
@@ -4361,7 +4364,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                 df1 = length(my_coef)
 
                 if(df1 > 0){
-                    df2 = x$nobs - x$nparams
+                    df2 = degrees_freedom(x, 2)
 
                     # The VCOV is always full rank in here
                     stat = drop(my_coef %*% solve(x$cov.scaled[qui, qui]) %*% my_coef) / df1
@@ -4378,28 +4381,24 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
 
                 if(isTRUE(x$iv)){
                     if(x$iv_stage == 1){
-                        inst = x$iv_inst_names
 
-                        my_coef = x$coefficients[inst]
+                        df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd)
+                        df2 = degrees_freedom(x, 2)
 
-                        df1 = length(my_coef)
-                        df2 = x$nobs - x$nparams
+                        stat = .wald(x, x$iv_inst_names_xpd)
 
-                        stat = drop(my_coef %*% solve(x$cov.scaled[inst, inst]) %*% my_coef) / df1
                         p = pf(stat, df1, df2, lower.tail = FALSE)
                         vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
                         res_all[[type]] = set_value(vec, value)
 
                     } else {
                         # wald stat for the second stage
-                        endo = paste0("fit_", x$iv_endo_names)
 
-                        my_coef = x$coefficients[endo]
+                        df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
+                        df2 = degrees_freedom(x, 2)
 
-                        df1 = length(my_coef)
-                        df2 = x$nobs - x$nparams
+                        stat = .wald(x, x$iv_endo_names_fit)
 
-                        stat = drop(my_coef %*% solve(x$cov.scaled[endo, endo]) %*% my_coef) / df1
                         p = pf(stat, df1, df2, lower.tail = FALSE)
                         vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
                         res_all[[type]] = set_value(vec, value)
@@ -4410,30 +4409,27 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                 }
 
             } else if(root %in% "ivwald1"){
-                if(isTRUE(x$iv)){
-                    df1 = x$iv_n_inst
 
+                df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd, stage = 1)
+                df2 = degrees_freedom(x, 2, stage = 1)
+
+                if(isTRUE(x$iv)){
 
                     if(x$iv_stage == 1){
-                        df2 = x$nobs - x$nparams
-                        inst = x$iv_inst_names_xpd
-                        my_coef = x$coefficients[inst]
 
-                        stat = drop(my_coef %*% solve(x$cov.scaled[inst, inst]) %*% my_coef) / df1
+                        stat = .wald(x, x$iv_inst_names_xpd)
+
                         p = pf(stat, df1, df2, lower.tail = FALSE)
                         vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
                         res_all[[type]] = set_value(vec, value)
 
                     } else {
                         x_first = x$iv_first_stage
-                        inst = x_first$iv_inst_names_xpd
-
-                        df2 = x$nobs - x_first[[1]]$nparams
+                        inst = x$iv_inst_names_xpd
 
                         for(endo in names(x_first)){
 
                             my_x_first = x_first[[endo]]
-                            inst = my_x_first$iv_inst_names_xpd
 
                             if(is.null(my_x_first$cov.scaled)){
                                 # We compute the VCOV like for the second stage
@@ -4444,9 +4440,8 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                                 }
                             }
 
-                            my_coef = my_x_first$coefficients[inst]
+                            stat = .wald(my_x_first, inst)
 
-                            stat = drop(my_coef %*% solve(my_x_first$cov.scaled[inst, inst]) %*% my_coef) / df1
                             p = pf(stat, df1, df2, lower.tail = FALSE)
                             vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
                             res_all[[paste0(type, "::", endo)]] = set_value(vec, value)
@@ -4460,14 +4455,12 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
             } else if(root == "ivwald2"){
                 if(isTRUE(x$iv) && x$iv_stage == 2){
                     # wald stat for the second stage
-                    endo = paste0("fit_", x$iv_endo_names)
 
-                    my_coef = x$coefficients[endo]
+                    df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
+                    df2 = degrees_freedom(x, 2)
 
-                    df1 = length(my_coef)
-                    df2 = x$nobs - x$nparams
+                    stat = .wald(x, x$iv_endo_names_fit)
 
-                    stat = drop(my_coef %*% solve(x$cov.scaled[endo, endo]) %*% my_coef) / df1
                     p = pf(stat, df1, df2, lower.tail = FALSE)
                     vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
                     res_all[[type]] = set_value(vec, value)
@@ -4661,13 +4654,37 @@ wald = function(x, keep = NULL, drop = NULL, print = TRUE, se, cluster, ...){
         cat("Wald test, H0: ", ifsingle(coef_name, "", "joint "), "nullity of ", enumerate_items(coef_name), "\n", sep  ="")
         cat(" stat = ", numberFormatNormal(stat),
             ", p-value ", ifelse(p < 2.2e-16, "< 2.2e-16", paste0("= ", numberFormatNormal(p))),
-            ", on ", numberFormatNormal(df1), " and ", numberFormatNormal(df2), " DoF.",
-            " Using a ", vcov, " VCOV matrix.", sep = "")
+            ", on ", numberFormatNormal(df1), " and ", numberFormatNormal(df2), " DoF,",
+            "VCOV: ", vcov, ".", sep = "")
 
         return(invisible(vec))
     } else {
         return(vec)
     }
+}
+
+.wald = function(x, var){
+    # x: fixest estimation
+
+    coef = x$coefficients
+
+    vcov = x$cov.scaled
+    if(is.null(vcov)){
+        # => INTERNAL ERROR
+        stop("INTERNAL ERROR: .wald should be applied only to objects with a VCOV already computed. Could you report the error to the maintainer of fixest?")
+    }
+
+    var_keep = intersect(var, names(coef))
+
+    if(length(var_keep) == 0){
+        # All vars removed bc of collin => stat = 0
+        return(0)
+    }
+
+    my_coef = coef[var_keep]
+    stat = drop(my_coef %*% solve(vcov[var_keep, var_keep]) %*% my_coef) / length(my_coef)
+
+    stat
 }
 
 fitstat_validate = function(x, vector = FALSE){
