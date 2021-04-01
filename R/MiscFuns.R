@@ -433,18 +433,12 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 
 	    for(s in seq_along(stage)){
 	        if(stage[s] == 1){
-	            if("fixest" %in% class(object$iv_first_stage)){
-	                res[[length(res) + 1]] = summary(object$iv_first_stage, se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nthreads = nthreads, iv = TRUE)
+                for(i in seq_along(object$iv_first_stage)){
+                    res[[length(res) + 1]] = summary(object$iv_first_stage[[i]], se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nthreads = nthreads, iv = TRUE)
 
-	                stage_names[length(stage_names) + 1] = paste0("First stage: ", deparse_long(object$iv_first_stage$fml[[2]]))
+                    stage_names[length(stage_names) + 1] = paste0("First stage: ", names(object$iv_first_stage)[i])
+                }
 
-	            } else {
-	                for(i in seq_along(object$iv_first_stage)){
-	                    res[[length(res) + 1]] = summary(object$iv_first_stage[[i]], se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nthreads = nthreads, iv = TRUE)
-
-	                    stage_names[length(stage_names) + 1] = paste0("First stage: ", names(object$iv_first_stage)[i])
-	                }
-	            }
 	        } else {
 	            # We keep the information on clustering => matters for wald tests of 1st stage
 	            keep_se_info = length(stage) == 1 && !lean
@@ -588,22 +582,16 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	    if(!is.null(object$iv_first_stage)){
 	        # NOTE that I do not compute the SEs of the 1st stages => I only remove stuff!
 	        # If the user wants 1st stage SEs => s/he just need to use the 'stage' argument!
-	        if("fixest" %in% class(object$iv_first_stage)){
-	            tmp = object$iv_first_stage
-	            tmp[var2clean] = NULL
-	            tmp$lean = TRUE
-	            object$iv_first_stage = tmp
-	        } else {
-	            tmp_all = object$iv_first_stage
-	            for(i in seq_along(tmp_all)){
-	                tmp = tmp_all[[i]]
-	                tmp[var2clean] = NULL
-	                tmp$lean = TRUE
-	                tmp_all[[i]] = tmp
-	            }
-	            object$iv_first_stage = tmp_all
-	        }
-	    }
+
+            tmp_all = object$iv_first_stage
+            for(i in seq_along(tmp_all)){
+                tmp = tmp_all[[i]]
+                tmp[var2clean] = NULL
+                tmp$lean = TRUE
+                tmp_all[[i]] = tmp
+            }
+            object$iv_first_stage = tmp_all
+        }
 
 
 	    object$lean = TRUE
@@ -4323,21 +4311,12 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                     } else {
                         x_first = x$iv_first_stage
 
-                        if("fixest" %in% class(x_first)){
-                            df2 = x$nobs - x_first$nparams
-                            stat = ((x_first$ssr_no_inst - x_first$ssr) / df1) / (x_first$ssr / df2)
+                        df2 = x$nobs - x_first[[1]]$nparams
+                        for(endo in names(x_first)){
+                            stat = ((x_first[[endo]]$ssr_no_inst - x_first[[endo]]$ssr) / df1) / (x_first[[endo]]$ssr / df2)
                             p = pf(stat, df1, df2, lower.tail = FALSE)
                             vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
-                            res_all[[type]] = set_value(vec, value)
-
-                        } else {
-                            df2 = x$nobs - x_first[[1]]$nparams
-                            for(endo in names(x_first)){
-                                stat = ((x_first[[endo]]$ssr_no_inst - x_first[[endo]]$ssr) / df1) / (x_first[[endo]]$ssr / df2)
-                                p = pf(stat, df1, df2, lower.tail = FALSE)
-                                vec = list(stat = stat, p = p, df1 = df1, df2 = df2)
-                                res_all[[paste0(type, "::", endo)]] = set_value(vec, value)
-                            }
+                            res_all[[paste0(type, "::", endo)]] = set_value(vec, value)
                         }
                     }
 
@@ -4440,50 +4419,28 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                         x_first = x$iv_first_stage
                         inst = x_first$iv_inst_names_xpd
 
-                        if("fixest" %in% class(x_first)){
+                        df2 = x$nobs - x_first[[1]]$nparams
 
-                            df2 = x$nobs - x_first$nparams
+                        for(endo in names(x_first)){
 
-                            if(is.null(x_first$cov.scaled)){
+                            my_x_first = x_first[[endo]]
+                            inst = my_x_first$iv_inst_names_xpd
+
+                            if(is.null(my_x_first$cov.scaled)){
                                 # We compute the VCOV like for the second stage
                                 if(is.null(x$se_info) || !is.null(dots$se) || !is.null(dots$cluster)){
-                                    x_first = summary(x_first, ...)
+                                    my_x_first = summary(my_x_first, ...)
                                 } else {
-                                    x_first = summary(x_first, se = x$se_info$se, cluster = x$se_info$cluster, dof = x$se_info$dof, ...)
+                                    my_x_first = summary(my_x_first, se = x$se_info$se, cluster = x$se_info$cluster, dof = x$se_info$dof, ...)
                                 }
                             }
 
-                            my_coef = x_first$coefficients[inst]
+                            my_coef = my_x_first$coefficients[inst]
 
-                            stat = drop(my_coef %*% solve(x_first$cov.scaled[inst, inst]) %*% my_coef) / df1
+                            stat = drop(my_coef %*% solve(my_x_first$cov.scaled[inst, inst]) %*% my_coef) / df1
                             p = pf(stat, df1, df2, lower.tail = FALSE)
                             vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
-                            res_all[[type]] = set_value(vec, value)
-
-                        } else {
-                            df2 = x$nobs - x_first[[1]]$nparams
-
-                            for(endo in names(x_first)){
-
-                                my_x_first = x_first[[endo]]
-                                inst = my_x_first$iv_inst_names_xpd
-
-                                if(is.null(my_x_first$cov.scaled)){
-                                    # We compute the VCOV like for the second stage
-                                    if(is.null(x$se_info) || !is.null(dots$se) || !is.null(dots$cluster)){
-                                        my_x_first = summary(my_x_first, ...)
-                                    } else {
-                                        my_x_first = summary(my_x_first, se = x$se_info$se, cluster = x$se_info$cluster, dof = x$se_info$dof, ...)
-                                    }
-                                }
-
-                                my_coef = my_x_first$coefficients[inst]
-
-                                stat = drop(my_coef %*% solve(my_x_first$cov.scaled[inst, inst]) %*% my_coef) / df1
-                                p = pf(stat, df1, df2, lower.tail = FALSE)
-                                vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
-                                res_all[[paste0(type, "::", endo)]] = set_value(vec, value)
-                            }
+                            res_all[[paste0(type, "::", endo)]] = set_value(vec, value)
                         }
                     }
 
@@ -8887,11 +8844,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	    }
 
 	    # I) we get the fit
-	    if("fixest" %in% class(object$iv_first_stage)){
-	        stage_1 = setNames(list(object$iv_first_stage), deparse_long(object$iv_first_stage$fml[[2]]))
-	    } else {
-	        stage_1 = object$iv_first_stage
-	    }
+	    stage_1 = object$iv_first_stage
 
 	    fit_vars = c()
 	    for(i in seq_along(stage_1)){

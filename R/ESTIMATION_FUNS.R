@@ -1203,11 +1203,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	        res_second_stage$fitted.values = NULL
 	    }
 
-	    if(n_endo == 1){
-	        res_second_stage$iv_first_stage = res_first_stage[[1]]
-	    } else {
-	        res_second_stage$iv_first_stage = res_first_stage
-	    }
+	    res_second_stage$iv_first_stage = res_first_stage
 
 	    # meta info
 	    res_second_stage$iv_stage = 2
