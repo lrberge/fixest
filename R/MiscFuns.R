@@ -3967,7 +3967,7 @@ print.fixest_fitstat = function(x, na.rm = FALSE, ...){
             if(!is.null(v$p)) p_line = v$p
             if(!is.null(v$df)) dof_line = paste0("on ", numberFormatNormal(v$df), " DoF")
             if(!is.null(v$df1)) dof_line = paste0("on ", numberFormatNormal(v$df1), " and ", numberFormatNormal(v$df2), " DoF")
-            if(!is.null(v$vcov)) vcov_line = paste0("VCOV matrix: ", v$vcov)
+            if(!is.null(v$vcov)) vcov_line = paste0("VCOV: ", v$vcov)
 
             res[i] = paste0(test_name, "! ", glue(c(stat_line, p_line, dof_line, vcov_line)), ".")
         }
