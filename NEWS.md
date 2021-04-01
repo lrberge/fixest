@@ -4,6 +4,12 @@
 ## Bugs
 
  - Major bug, leading R to crash, occurring when the same variable was used with several different slopes (thanks to @Oravishayrizi [#119](https://github.com/lrberge/fixest/issues/119)). 
+ 
+ - Fix bug occurring for undefined covariances with only one regressor (thanks to @joseph-richard-martinez [#118](https://github.com/lrberge/fixest/issues/118)).
+ 
+ - Fix bug in IV estimations regarding the Wald statistic of the first stage when `lean = TRUE` and the VCOV computation is done post estimation.  
+ 
+ - Fix bug in the Wald test in IV estimations when variables are removed because of collinearity (thanks to @pei-huang [#117](https://github.com/lrberge/fixest/issues/117)).
 
 ## etable
 
@@ -22,6 +28,12 @@
   - You can register `extraline` macros with the new function `extraline_register`.
   
   - When `tex = TRUE`, n-way clustering now always leads to the name of clustered SEs (n-way is not shown any more).
+  
+## New features
+
+  - New function `degrees_freedom`: to access the DoFs of the models (sometimes that can be intricate).
+  
+  - Better handling of the DoFs in fitstat (in particular when the VCOV is clustered).
   
 ## Other changes
 
