@@ -6993,6 +6993,7 @@ format_se_type_latex = function(x, dict = c(), inline = FALSE){
     }
 
     # Now the FEs
+    main_type = gsub(" \\(.*", "", x)
     all_fe = gsub(".+\\((.+)\\)", "\\1", x)
 
     all_fe_split = gsub(" ", "", strsplit(all_fe, "&")[[1]])
@@ -7010,7 +7011,7 @@ format_se_type_latex = function(x, dict = c(), inline = FALSE){
             fe_split = strsplit(fe, "\\^")[[1]]
             who = fe_split %in% names(dict)
             fe_split[who] = dict[fe_split[who]]
-            all_fe_format[i] = paste(fe_split, collapse = "$\\times$")
+            all_fe_format[i] = paste(fe_split, collapse = "-")
         } else {
             all_fe_format[i] = fe
         }
@@ -7018,17 +7019,18 @@ format_se_type_latex = function(x, dict = c(), inline = FALSE){
 
     fe_format = paste(all_fe_format, collapse = " \\& ")
 
-    # Full string
-    nb = c("One", "Two", "Three", "Four")
-    nway = paste0(nb[n_fe], "-way")
+    # We add some flexibility: anticipation of more VCOV types
+    main_type_dict = c("Clustered" = "Clustered", "Two-way" = "Clustered",
+                       "Three-way" = "Clustered", "Four-way" = "Clustered")
+    main_type = main_type_dict[main_type]
+
 
     if(inline){
-        # se_formatted = paste0(nway, ": ", fe_format)
+        # The fact that it is clustered is deduced
         se_formatted = fe_format
     } else {
-        se_formatted = paste0(nway, " (", fe_format, ")")
+        se_formatted = paste0(main_type, " (", fe_format, ")")
     }
-    # se_formatted = fe_format
 
     escape_latex(se_formatted)
 }
