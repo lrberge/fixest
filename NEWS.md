@@ -20,6 +20,10 @@
   - You can register `extraline` macros with the new function `extraline_register`.
   
   - When `tex = TRUE`, n-way clustering now always leads to the name of clustered SEs (n-way is not shown any more).
+  
+## Other changes
+
+  - Improve error messages. 
 
 # fixest 0.8.4
 

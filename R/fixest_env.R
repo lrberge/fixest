@@ -313,7 +313,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         # checking iv
         if(n_parts > 2){
             if(!origin_type == "feols"){
-                stop("The argument 'fml' cannot contain more than two parts separated by a pipe ('|').\nThe syntax is: DEP VAR ~ EXPL VARS | FIXED EFFECTS.")
+                stop("The argument 'fml' cannot contain more than two parts separated by a pipe ('|'). IVs are available only for 'feols'.\nThe syntax is: DEP VAR ~ EXPL VARS | FIXED EFFECTS. (No IVs allowed.)")
             } else {
                 if(n_parts > 3){
                     stop("In feols, the argument 'fml' cannot contain more than three parts separated by a pipe ('|').\nThe syntax is: DEP VAR ~ EXPL VARS | FIXED EFFECTS | IV FORMULA.")
