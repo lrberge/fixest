@@ -6896,6 +6896,7 @@ extract_fe_slope = function(t){
 
 format_se_type = function(x, width, by = FALSE){
     # we make 'nice' se types
+    # format_se_type("Two-way (species & fe2)", 10, by = TRUE)
 
     if(!grepl("\\(", x)){
         # means not clustered
@@ -6974,11 +6975,14 @@ format_se_type = function(x, width, by = FALSE){
     }
 
 
-    # if still too large, we trim right
-    if(nchar(se_formatted) > width){
-        # se_formatted = gsub("-way: ", "way: ", se_formatted)
-        se_formatted = paste0(substr(se_formatted, 1, width - 2), "..")
-    }
+    # NOTA:
+    # we do not trim if still too large because the SE-type IS informative!
+    # A table without that information is useless, it's trimmed enough already
+
+    # if(nchar(se_formatted) > width){
+    #     # se_formatted = gsub("-way: ", "way: ", se_formatted)
+    #     se_formatted = paste0(substr(se_formatted, 1, width - 2), "..")
+    # }
 
     se_formatted
 }
