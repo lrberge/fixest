@@ -429,6 +429,16 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	    stage = unique(stage)
 	    res = list()
 
+	    # if lean, we still compute the summary for the first stage,
+	    #  then we will inject it in the iv_first_stage object of the 2nd stage
+	    # => this is critical to get the right Wald stat (of the 1st stage),
+	    #  otherwise it won't be possible to get it.
+	    remove_stage_1 = FALSE
+	    if(lean && !1 %in% stage){
+	        remove_stage_1 = TRUE
+	        stage = 1:2
+	    }
+
 	    stage_names = c()
 
 	    for(s in seq_along(stage)){
@@ -453,6 +463,22 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	            res[[length(res) + 1]] = my_res
 	            stage_names[length(stage_names) + 1] = "Second stage"
 	        }
+	    }
+
+	    if(lean && 2 %in% stage){
+	        # we inject the summary of the first stage into the iv_first_stage
+	        qui_1st = which(grepl("^First", stage_names))
+	        qui_2nd = which(stage_names == "Second stage")
+
+	        tmp_1st = res[qui_1st]
+	        names(tmp_1st) = names(object$iv_first_stage)
+
+	        res[[qui_2nd]][["iv_first_stage"]] = tmp_1st
+	    }
+
+	    if(remove_stage_1){
+	        qui_2nd = which(stage_names == "Second stage")
+	        return(res[[qui_2nd]])
 	    }
 
 	    if(length(res) == 1){
@@ -576,23 +602,6 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	    var2clean = c("fixef_id", "residuals", "fitted.values", "scores", "sumFE", "slope_variables_reordered", "y", "weights", "irls_weights", "obsRemoved", "obs_selection", "iv_residuals", "fitted.values_demean")
 
 	    object[var2clean] = NULL
-
-	    # Pfff, I need to further clean the IV first stages
-	    # => I can't just remove "iv_first_stage" because some stuff in there is needed in fitstat
-	    if(!is.null(object$iv_first_stage)){
-	        # NOTE that I do not compute the SEs of the 1st stages => I only remove stuff!
-	        # If the user wants 1st stage SEs => s/he just need to use the 'stage' argument!
-
-            tmp_all = object$iv_first_stage
-            for(i in seq_along(tmp_all)){
-                tmp = tmp_all[[i]]
-                tmp[var2clean] = NULL
-                tmp$lean = TRUE
-                tmp_all[[i]] = tmp
-            }
-            object$iv_first_stage = tmp_all
-        }
-
 
 	    object$lean = TRUE
 	}
