@@ -1192,6 +1192,10 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	        res_second_stage$iv_sargan = list(stat = stat, p = p, df = df)
 	    }
 
+	    # extra information
+	    res_second_stage$iv_inst_names_xpd = res_first_stage[[1]]$iv_inst_names_xpd
+	    res_second_stage$iv_endo_names_fit = paste0("fit_", res_second_stage$iv_endo_names)
+
 	    # if lean = TRUE: we clean the IV residuals (which were needed so far)
 	    if(lean){
 	        for(i in 1:n_endo){
