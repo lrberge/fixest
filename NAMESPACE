@@ -9,6 +9,7 @@ export(feNmlm, femlm, feols, feglm, fepois, fenegbin)
 export(feglm.fit)
 # etable
 export(etable, style.tex, style.df)
+export(extraline_register)
 # misc funs
 export(collinearity)
 export(r2, fitstat, fitstat_register, wald)
@@ -19,7 +20,7 @@ export(coefplot)
 # small funs
 export(coeftable, ctable, se, tstat, pvalue)
 # dof
-export(dof)
+export(dof, degrees_freedom)
 # Lag related
 export(panel, unpanel, f, l, d)
 # interactions
