@@ -4,6 +4,9 @@
 # ~: etable
 #----------------------------------------------#
 
+# Don't forget to run gen_etable_aliases before cran submissions
+# gen_etable_aliases()
+
 
 #' Estimations table (export the results of multiples estimations to a DF or to Latex)
 #'

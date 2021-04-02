@@ -10,6 +10,8 @@
  - Fix bug in IV estimations regarding the Wald statistic of the first stage when `lean = TRUE` and the VCOV computation is done post estimation.  
  
  - Fix bug in the Wald test in IV estimations when variables are removed because of collinearity (thanks to @pei-huang [#117](https://github.com/lrberge/fixest/issues/117)).
+ 
+ - Fix bug regarding multiple estimations when the multiple fixed-effects contained variables with varying slopes.
 
 ## etable
 
@@ -21,9 +23,9 @@
   
   - `extraline` can now be equal to a formula containing `extraline` macros or valid `fitstat` types.
   
-  - When a list, `extraline` can contain functions (returning a scalar) that will be applied to each model.  
+    - When a list, `extraline` can contain functions (returning a scalar) that will be applied to each model.  
   
-  - When a list, `extraline` can contain formulas containing `extraline` macros or valid `fitstat` types. 
+    - When a list, `extraline` can contain formulas containing `extraline` macros or valid `fitstat` types. 
   
   - You can register `extraline` macros with the new function `extraline_register`.
   
