@@ -4997,7 +4997,7 @@ degrees_freedom = function(x, type, vars = NULL, se = NULL, cluster = NULL, dof 
         stop("The argument 'type' is required but is currently missing.")
     }
 
-    if(!isTRUE(x$summary) || !missnull(se) || !missnull(cluser) || !missnull(dof)){
+    if(!isTRUE(x$summary) || !missnull(se) || !missnull(cluster) || !missnull(dof)){
         x = summary(x, se = se, cluster = cluster, dof = dof)
     }
 
