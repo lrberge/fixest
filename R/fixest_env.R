@@ -2766,7 +2766,7 @@ assign_fixef_env = function(env, family, origin_type, fixef_id, fixef_sizes, fix
 
 reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs = TRUE, assign_rhs = TRUE, fml_linear = NULL, fml_fixef = NULL, fml_iv_endo = NULL, check_lhs = FALSE, assign_fixef = FALSE){
     # env: environment from an estimation
-    # This functions reshapes the environment to perform the neww estimation
+    # This functions reshapes the environment to perform the new estimation
     # either by selecting some observation (in split)
     # either by changing the depvar (leading to new NAs, etc)
     # obs2keep => must be a which()

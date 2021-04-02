@@ -3697,6 +3697,9 @@ multi_fixef = function(env, estfun){
             res = get("res", my_env)
             res$fml_all$fixef = fml_fixef
             res$fixef_vars = fixef_vars
+            if(isSlope){
+                res$fixef_terms = fixef_terms
+            }
             assign("res", res, my_env)
 
             #
