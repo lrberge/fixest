@@ -186,6 +186,8 @@ res = feols(y ~ csw(f(x1, 1:2), x2) | sw0(fe2, fe2^fe3), base, panel.id = ~ fe1 
 
 res = feols(c(y, x1) ~ 1 | fe1 | x2 ~ x3, base)
 
+res = feols(y ~ x1 | fe1[x2] + fe2[x2], base)
+
 #
 # NA models (ie all variables are collinear with the FEs)
 #
