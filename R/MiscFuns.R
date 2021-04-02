@@ -3959,7 +3959,7 @@ print.fixest_fitstat = function(x, na.rm = FALSE, ...){
 
         if(length(v) == 1){
             # Basic display
-            res[i] = paste0(test_name, ": ", numberFormatNormal(v))
+            res[i] = paste0(test_name, "! ", numberFormatNormal(v))
         } else {
 
             stat_line = p_line = dof_line = vcov_line = ""
@@ -4127,9 +4127,9 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
 
         user_alias = sapply(opts, function(x) x$alias)
 
-        tex_alias = c(n = "Observations", ll = "Log-Likelihood", aic = "AIC", bic = "BIC", g = "Size of the 'effective' sample", rmse = "RMSE", theta = "Over-dispersion", "cor2"="Squared Correlation", r2="R$^2$", ar2="Adjusted R$^2$", pr2="Pseudo R$^2$", apr2="Adjusted Pseudo R$^2$", wr2="Within R$^2$", war2="Within Adjusted R$^2$", wpr2="Within Pseudo R$^2$", wapr2="Whithin Adjusted Pseudo R$^2$", comp_alias, full_comp_alias, user_alias)
+        tex_alias = c(n = "Observations", ll = "Log-Likelihood", aic = "AIC", bic = "BIC", g = "Size of the 'effective' sample", rmse = "RMSE", theta = "Over-dispersion", sq.cor = "Squared Correlation", cor2 = "Squared Correlation", r2="R$^2$", ar2="Adjusted R$^2$", pr2="Pseudo R$^2$", apr2="Adjusted Pseudo R$^2$", wr2="Within R$^2$", war2="Within Adjusted R$^2$", wpr2="Within Pseudo R$^2$", wapr2="Whithin Adjusted Pseudo R$^2$", comp_alias, full_comp_alias, user_alias)
 
-        R_alias = c(n = "Observations", ll = "Log-Likelihood", aic = "AIC", bic = "BIC", g = "G", rmse = "RMSE", theta = "Over-dispersion", cor2="Squared Cor.", r2="R2", ar2="Adj. R2", pr2="Pseudo R2", apr2="Adj. Pseudo R2", wr2="Within R2", war2="Within Adj. R2", wpr2="Within Pseudo R2", wapr2="Whithin Adj. Pseudo R2", comp_alias, full_comp_alias, user_alias)
+        R_alias = c(n = "Observations", ll = "Log-Likelihood", aic = "AIC", bic = "BIC", g = "G", rmse = "RMSE", theta = "Over-dispersion", sq.cor = "Squared Cor.", cor2 = "Squared Cor.", r2="R2", ar2="Adj. R2", pr2="Pseudo R2", apr2="Adj. Pseudo R2", wr2="Within R2", war2="Within Adj. R2", wpr2="Within Pseudo R2", wapr2="Whithin Adj. Pseudo R2", comp_alias, full_comp_alias, user_alias)
 
         # add r2 type alias
         type_alias = c(ivf = "ivf1", ivf.stat = "ivf1.stat", ivf.p = "ivf1.p", ivwald = "ivwald1", ivwald.stat = "ivwald1", ivwald.p = "ivwald1.p", par2 = "apr2", awr2 = "war2", pwr2 = "wpr2", wpar2 = "wapr2", pwar2 = "wapr2", pawr2 = "wapr2", apwr2 = "wapr2", awpr2 = "wapr2", sq.cor = "cor2")
@@ -4280,7 +4280,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                 if(isTRUE(x$iv)){
                     if(x$iv_stage == 1){
                         df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd)
-                        df2 = degrees_freedom(x, se = "standard")
+                        df2 = degrees_freedom(x, 2, se = "standard")
 
                         stat = ((x$ssr_no_inst - x$ssr) / df1) / (x$ssr / df2)
                         p = pf(stat, df1, df2, lower.tail = FALSE)
@@ -4291,7 +4291,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                         # f stat for the second stage
 
                         df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
-                        df2 = degrees_freedom(x, se = "standard")
+                        df2 = degrees_freedom(x, 2, se = "standard")
 
                         w = 1
                         if(!is.null(x$weights)) w = x$weights
