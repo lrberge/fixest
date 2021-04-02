@@ -1703,7 +1703,7 @@ check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights){
 #' @param glm.tol Tolerance level for the glm algorithm. Default is \code{1e-8}.
 #' @param y Numeric vector of the dependent variable.
 #' @param X Numeric matrix of the regressors.
-#' @param fixef_mat Matrix/data.frame of the fixed-effects.
+#' @param fixef_df Matrix/data.frame of the fixed-effects.
 #' @param verbose Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algoritmh (the first number is the left-hand-side, the other numbers are the right-hand-side variables). It can also detail the step-halving algorithm.
 #' @param notes Logical. By default, three notes are displayed: when NAs are removed, when some fixed-effects are removed because of only 0 (or 0/1) outcomes, or when a variable is dropped because of collinearity. To avoid displaying these messages, you can set \code{notes = FALSE}. You can remove these messages permanently by using \code{setFixest_notes(FALSE)}.
 #'
@@ -1858,7 +1858,7 @@ feglm = function(fml, data, family = "poisson", offset, weights, subset, split, 
 
 
 #' @rdname feglm
-feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, split, fsplit, cluster, se, dof, weights, subset, start = NULL,
+feglm.fit = function(y, X, fixef_df, family = "poisson", offset, split, fsplit, cluster, se, dof, weights, subset, start = NULL,
                      etastart = NULL, mustart = NULL, fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000,
                      collin.tol = 1e-10, glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(), lean = FALSE, warn = TRUE,
                      notes = getFixest_notes(), mem.clean = FALSE, verbose = 0, only.env = FALSE, env, ...){
@@ -1879,7 +1879,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, split, fsplit,
         # main variables
         if(missing(y)) y = get("lhs", env)
         if(missing(X)) X = get("linear.mat", env)
-        if(!missing(fixef_mat) && is.null(fixef_mat)){
+        if(!missing(fixef_df) && is.null(fixef_df)){
             assign("isFixef", FALSE, env)
         }
 
@@ -1919,7 +1919,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, split, fsplit,
         set_defaults("fixest_estimation")
         call_env = new.env(parent = parent.frame())
 
-        env = try(fixest_env(y = y, X = X, fixef_mat = fixef_mat, family = family, nthreads = nthreads, lean = lean, offset = offset, weights = weights, subset = subset, split = split, fsplit = fsplit, cluster = cluster, se = se, dof = dof, linear.start = start, etastart=etastart, mustart=mustart, fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter, collin.tol = collin.tol, glm.iter = glm.iter, glm.tol = glm.tol, notes=notes, mem.clean = mem.clean, warn=warn, verbose = verbose, origin = "feglm.fit", mc_origin = match.call(), call_env = call_env, ...), silent = TRUE)
+        env = try(fixest_env(y = y, X = X, fixef_df = fixef_df, family = family, nthreads = nthreads, lean = lean, offset = offset, weights = weights, subset = subset, split = split, fsplit = fsplit, cluster = cluster, se = se, dof = dof, linear.start = start, etastart=etastart, mustart=mustart, fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter, collin.tol = collin.tol, glm.iter = glm.iter, glm.tol = glm.tol, notes=notes, mem.clean = mem.clean, warn=warn, verbose = verbose, origin = "feglm.fit", mc_origin = match.call(), call_env = call_env, ...), silent = TRUE)
 
         if("try-error" %in% class(env)){
             stop(format_error_msg(env, "feglm.fit"))
@@ -2463,7 +2463,7 @@ feglm.fit = function(y, X, fixef_mat, family = "poisson", offset, split, fsplit,
             gc()
         }
 
-        model_null = feglm.fit(X = matrix(1, nrow = n, ncol = 1), fixef_mat = NULL, env = env, lean_internal = TRUE)
+        model_null = feglm.fit(X = matrix(1, nrow = n, ncol = 1), fixef_df = NULL, env = env, lean_internal = TRUE)
         ll_null = model_null$loglik
         fitted_null = model_null$fitted.values
     }
@@ -3561,10 +3561,10 @@ multi_fixef = function(env, estfun){
             fixef_terms = fixef_terms_full$fml_terms
 
             # FEs
-            fixef_mat = error_sender(prepare_df(fixef_terms_full$fe_vars, data, combine.quick),
+            fixef_df = error_sender(prepare_df(fixef_terms_full$fe_vars, data, combine.quick),
                                      "Problem evaluating the fixed-effects part of the formula:\n")
 
-            fixef_vars = names(fixef_mat)
+            fixef_vars = names(fixef_df)
 
             # Slopes
             isSlope = any(fixef_terms_full$slope_flag != 0)
@@ -3596,13 +3596,13 @@ multi_fixef = function(env, estfun){
             # NA
             #
 
-            for(j in seq_along(fixef_mat)){
-                if(!is.numeric(fixef_mat[[j]]) && !is.character(fixef_mat[[j]])){
-                    fixef_mat[[j]] = as.character(fixef_mat[[j]])
+            for(j in seq_along(fixef_df)){
+                if(!is.numeric(fixef_df[[j]]) && !is.character(fixef_df[[j]])){
+                    fixef_df[[j]] = as.character(fixef_df[[j]])
                 }
             }
 
-            is_NA = !complete.cases(fixef_mat)
+            is_NA = !complete.cases(fixef_df)
 
             if(isSlope){
                 # Convert to double
@@ -3622,7 +3622,7 @@ multi_fixef = function(env, estfun){
                 my_env = reshape_env(env = env, obs2keep = which(!is_NA))
 
                 # NA removal in fixef
-                fixef_mat = fixef_mat[!is_NA, , drop = FALSE]
+                fixef_df = fixef_df[!is_NA, , drop = FALSE]
 
                 if(isSlope){
                     slope_df = slope_df[!is_NA, , drop = FALSE]
@@ -3662,7 +3662,7 @@ multi_fixef = function(env, estfun){
 
             # We delay the computation by using isSplit = TRUE and split.full = FALSE
             # Real QUF will be done in the last reshape env
-            info_fe = setup_fixef(fixef_mat = fixef_mat, lhs = lhs, fixef_vars = fixef_vars, fixef.rm = fixef.rm, family = family, isSplit = TRUE, split.full = FALSE, origin_type = origin_type, isSlope = isSlope, slope_flag = slope_flag, slope_df = slope_df, slope_vars_list = slope_vars_list, nthreads = nthreads)
+            info_fe = setup_fixef(fixef_df = fixef_df, lhs = lhs, fixef_vars = fixef_vars, fixef.rm = fixef.rm, family = family, isSplit = TRUE, split.full = FALSE, origin_type = origin_type, isSlope = isSlope, slope_flag = slope_flag, slope_df = slope_df, slope_vars_list = slope_vars_list, nthreads = nthreads)
 
             fixef_id        = info_fe$fixef_id
             fixef_names     = info_fe$fixef_names

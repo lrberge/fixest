@@ -11,7 +11,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                        offset, subset, split = NULL, fsplit = NULL, linear.start = 0, jacobian.method = "simple",
                        useHessian = TRUE, hessian.args = NULL, opt.control = list(),
                        cluster, se, dof,
-                       y, X, fixef_mat, panel.id, fixef.rm = "perfect",
+                       y, X, fixef_df, panel.id, fixef.rm = "perfect",
                        nthreads = getFixest_nthreads(), lean = FALSE,
                        verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000, collin.tol = 1e-14,
                        deriv.iter = 5000, deriv.tol = 1e-4, glm.iter = 25, glm.tol = 1e-8,
@@ -75,7 +75,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     common_args = c(main_args, internal_args, deprec_old_new)
 
     # FIT methods
-    feglm.fit_args = c(setdiff(common_args, c("fml", "data")), feglm_args, "y", "X", "fixef_mat")
+    feglm.fit_args = c(setdiff(common_args, c("fml", "data")), feglm_args, "y", "X", "fixef_df")
 
     args = names(mc_origin)
     args = args[nchar(args) > 0]
@@ -263,7 +263,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     fixef_terms_full = NULL
     complete_vars = c()
     if(isFit){
-        isFixef = !missnull(fixef_mat)
+        isFixef = !missnull(fixef_df)
     } else {
 
         #
@@ -1417,38 +1417,38 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             # ... From fit ####
             #
 
-            if(isVector(fixef_mat)){
-                fixef_mat = data.frame(x = fixef_mat, stringsAsFactors = FALSE)
-                names(fixef_mat) = deparse(mc_origin[["fixef_mat"]])[1]
+            if(isVector(fixef_df)){
+                fixef_df = data.frame(x = fixef_df, stringsAsFactors = FALSE)
+                names(fixef_df) = deparse(mc_origin[["fixef_df"]])[1]
 
-            } else if(is.list(fixef_mat)){
-                all_len = lengths(fixef_mat)
+            } else if(is.list(fixef_df)){
+                all_len = lengths(fixef_df)
                 if(any(diff(all_len) != 0)){
-                    stop("The lengths of the vectors in fixef_mat differ (currently it is: ", enumerate_items(all_len), ").")
+                    stop("The lengths of the vectors in fixef_df differ (currently it is: ", enumerate_items(all_len), ").")
                 }
-                fixef_mat = as.data.frame(fixef_mat)
+                fixef_df = as.data.frame(fixef_df)
             }
 
-            if(!is.matrix(fixef_mat) && !"data.frame" %in% class(fixef_mat)){
-                stop("Argument fixef_mat must be a vector, a matrix, a list or a data.frame (currently its class is ", enumerate_items(class(fixef_mat)), ").")
+            if(!is.matrix(fixef_df) && !"data.frame" %in% class(fixef_df)){
+                stop("Argument fixef_df must be a vector, a matrix, a list or a data.frame (currently its class is ", enumerate_items(class(fixef_df)), ").")
             }
 
-            if(is.matrix(fixef_mat) && is.null(colnames(fixef_mat))){
-                colnames(fixef_mat) = paste0("fixef_", 1:ncol(fixef_mat))
-                fixef_mat = as.data.frame(fixef_mat)
+            if(is.matrix(fixef_df) && is.null(colnames(fixef_df))){
+                colnames(fixef_df) = paste0("fixef_", 1:ncol(fixef_df))
+                fixef_df = as.data.frame(fixef_df)
             }
 
-            if(nrow(fixef_mat) != nobs){
-                stop("The number of observations of fixef_mat (", nrow(fixef_mat), ") must match the length of y (", nobs, ").")
+            if(nrow(fixef_df) != nobs){
+                stop("The number of observations of fixef_df (", nrow(fixef_df), ") must match the length of y (", nobs, ").")
             }
 
-            fixef_vars = names(fixef_mat)
+            fixef_vars = names(fixef_df)
 
             # The formula
             fml_fixef = .xpd(rhs = fixef_vars)
 
             if(delayed.subset){
-                fixef_mat = fixef_mat[subset, , drop = FALSE]
+                fixef_df = fixef_df[subset, , drop = FALSE]
             }
 
         } else {
@@ -1469,10 +1469,10 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             fixef_terms = fixef_terms_full$fml_terms
 
             # FEs
-            fixef_mat = error_sender(prepare_df(fixef_terms_full$fe_vars, data, combine.quick),
+            fixef_df = error_sender(prepare_df(fixef_terms_full$fe_vars, data, combine.quick),
                                      "Problem evaluating the fixed-effects part of the formula:\n")
 
-            fixef_vars = names(fixef_mat)
+            fixef_vars = names(fixef_df)
 
             # Slopes
             isSlope = any(fixef_terms_full$slope_flag != 0)
@@ -1506,20 +1506,20 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         #
 
         # We change non-numeric to character (important for parallel qufing)
-        is_not_num = sapply(fixef_mat, function(x) !is.numeric(x))
+        is_not_num = sapply(fixef_df, function(x) !is.numeric(x))
         if(any(is_not_num)){
             for(i in which(is_not_num)){
                 # we don't convert Dates to numeric because conversion can lead to NA in some cases!
                 # e.g dates < 1970 with non-robust parsers
-                if(!is.character(fixef_mat[[i]])){
-                    fixef_mat[[i]] = as.character(fixef_mat[[i]])
+                if(!is.character(fixef_df[[i]])){
+                    fixef_df[[i]] = as.character(fixef_df[[i]])
                 }
             }
         }
 
         msgNA_fixef = ""
-        if(anyNA(fixef_mat)){
-            isNA_fixef = !complete.cases(fixef_mat)
+        if(anyNA(fixef_df)){
+            isNA_fixef = !complete.cases(fixef_df)
 
             ANY_NA = TRUE
             anyNA_sample = TRUE
@@ -1610,7 +1610,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             }
 
             # we drop the NAs from the fixef matrix
-            fixef_mat = fixef_mat[!isNA_sample, , drop = FALSE]
+            fixef_df = fixef_df[!isNA_sample, , drop = FALSE]
             obs2remove_NA = which(isNA_sample)
 
             if(isSlope){
@@ -1641,7 +1641,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         # ... QUF setup ####
         #
 
-        info_fe = setup_fixef(fixef_mat = fixef_mat, lhs = lhs, fixef_vars = fixef_vars, fixef.rm = fixef.rm, family = family, isSplit = isSplit, split.full = split.full, origin_type = origin_type, isSlope = isSlope, slope_flag = slope_flag, slope_df = slope_df, slope_vars_list = slope_vars_list, nthreads = nthreads)
+        info_fe = setup_fixef(fixef_df = fixef_df, lhs = lhs, fixef_vars = fixef_vars, fixef.rm = fixef.rm, family = family, isSplit = isSplit, split.full = split.full, origin_type = origin_type, isSlope = isSlope, slope_flag = slope_flag, slope_df = slope_df, slope_vars_list = slope_vars_list, nthreads = nthreads)
 
         Q               = info_fe$Q
         fixef_id        = info_fe$fixef_id
@@ -2484,7 +2484,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 }
 
 
-setup_fixef = function(fixef_mat, lhs, fixef_vars, fixef.rm, family, isSplit, split.full = FALSE, origin_type, isSlope, slope_flag, slope_df, slope_vars_list, fixef_names_old = NULL, fixef_sizes = NULL, obs2keep = NULL, nthreads){
+setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, split.full = FALSE, origin_type, isSlope, slope_flag, slope_df, slope_vars_list, fixef_names_old = NULL, fixef_sizes = NULL, obs2keep = NULL, nthreads){
 
     isSplitNoFull = identical(fixef_names_old, "SPLIT_NO_FULL")
     isRefactor = !isSplitNoFull && !is.null(fixef_names_old)
@@ -2531,13 +2531,13 @@ setup_fixef = function(fixef_mat, lhs, fixef_vars, fixef.rm, family, isSplit, sp
             }
         }
     } else {
-        slope_flag = rep(0L, length(fixef_mat))
+        slope_flag = rep(0L, length(fixef_df))
         slope_variables = list(0)
     }
 
     if(isSplit && split.full == FALSE){
         # We don't do anything => it will be taken care of in the splits
-        res = list(Q = Q, fixef_id = fixef_mat, fixef_names = "SPLIT_NO_FULL", sum_y_all = 0, fixef_sizes = 0, fixef_table = 0, obs2remove = NULL, fixef_removed = NULL, message_fixef = NULL, lhs = lhs, slope_variables = slope_variables, slope_flag = slope_flag, new_order = 1:Q)
+        res = list(Q = Q, fixef_id = fixef_df, fixef_names = "SPLIT_NO_FULL", sum_y_all = 0, fixef_sizes = 0, fixef_table = 0, obs2remove = NULL, fixef_removed = NULL, message_fixef = NULL, lhs = lhs, slope_variables = slope_variables, slope_flag = slope_flag, new_order = 1:Q)
 
         return(res)
     }
@@ -2545,8 +2545,8 @@ setup_fixef = function(fixef_mat, lhs, fixef_vars, fixef.rm, family, isSplit, sp
     do_keep = !is.null(obs2keep)
 
     if(isSplitNoFull && do_keep){
-        # Here fixef_mat is a DF or a list (outcome of previous calls) => that's why I need to use select_obs
-        fixef_mat = select_obs(fixef_mat, obs2keep)
+        # Here fixef_df is a DF or a list (outcome of previous calls) => that's why I need to use select_obs
+        fixef_df = select_obs(fixef_df, obs2keep)
     }
 
     if(is.null(obs2keep)){
@@ -2557,22 +2557,22 @@ setup_fixef = function(fixef_mat, lhs, fixef_vars, fixef.rm, family, isSplit, sp
         fixef_sizes = 0
     }
 
-    # quoi = list(fixef_mat=fixef_mat, lhs=lhs, do_sum_y=do_sum_y, rm_0=rm_0, rm_1=rm_1, rm_single=rm_single, only_slope=only_slope, nthreads=nthreads, isRefactor=isRefactor, fixef_sizes=fixef_sizes, obs2keep=obs2keep)
+    # quoi = list(fixef_df=fixef_df, lhs=lhs, do_sum_y=do_sum_y, rm_0=rm_0, rm_1=rm_1, rm_single=rm_single, only_slope=only_slope, nthreads=nthreads, isRefactor=isRefactor, fixef_sizes=fixef_sizes, obs2keep=obs2keep)
     # save(quoi, file = "../_DATA/problem.Rdata")
 
     # browser()
 
-    quf_info_all = cpppar_quf_table_sum(x = fixef_mat, y = lhs, do_sum_y = do_sum_y, rm_0 = rm_0, rm_1 = rm_1, rm_single = rm_single, only_slope = only_slope, nthreads = nthreads, do_refactor = isRefactor, r_x_sizes = fixef_sizes, obs2keep = obs2keep)
+    quf_info_all = cpppar_quf_table_sum(x = fixef_df, y = lhs, do_sum_y = do_sum_y, rm_0 = rm_0, rm_1 = rm_1, rm_single = rm_single, only_slope = only_slope, nthreads = nthreads, do_refactor = isRefactor, r_x_sizes = fixef_sizes, obs2keep = obs2keep)
 
     fixef_id = quf_info_all$quf
     # names
 
     fixef_names = list()
     if(isRefactor == FALSE){
-        is_string = sapply(fixef_mat, is.character)
+        is_string = sapply(fixef_df, is.character)
         for(i in 1:length(fixef_id)){
             if(is_string[i]){
-                fixef_names[[i]] = fixef_mat[[i]][quf_info_all$items[[i]]]
+                fixef_names[[i]] = fixef_df[[i]][quf_info_all$items[[i]]]
             } else {
                 fixef_names[[i]] = quf_info_all$items[[i]]
             }
@@ -2610,8 +2610,8 @@ setup_fixef = function(fixef_mat, lhs, fixef_vars, fixef.rm, family, isSplit, sp
 
         # Names of the FE removed
         for(i in 1:length(fixef_id)){
-            if(is.character(fixef_mat[[i]])){
-                fixef_removed[[i]] = fixef_mat[[i]][quf_info_all$fe_removed[[i]]]
+            if(is.character(fixef_df[[i]])){
+                fixef_removed[[i]] = fixef_df[[i]][quf_info_all$fe_removed[[i]]]
             } else {
                 fixef_removed[[i]] = quf_info_all$fe_removed[[i]]
             }
@@ -2814,7 +2814,7 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 
         # gt("fixef, dropping lhs")
 
-        fixef_mat       = get("fixef_id_list", env)
+        fixef_df       = get("fixef_id_list", env)
         fixef_vars      = get("fixef_vars", env)
         fixef.rm        = get("fixef.rm", env)
         fixef_names_old = get("fixef_names", env)
@@ -2828,7 +2828,7 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
         # gt("fixef, dropping")
 
         # We refactor the fixed effects => we may remove even more obs
-        info_fe = setup_fixef(fixef_mat = fixef_mat, lhs = lhs, fixef_vars = fixef_vars, fixef.rm = fixef.rm, family = family, isSplit = FALSE, origin_type = origin_type, isSlope = isSlope, slope_flag = slope_flag, slope_df = slope_df, slope_vars_list = slope_vars_list, fixef_names_old = fixef_names_old, fixef_sizes = fixef_sizes, obs2keep = obs2keep, nthreads = nthreads)
+        info_fe = setup_fixef(fixef_df = fixef_df, lhs = lhs, fixef_vars = fixef_vars, fixef.rm = fixef.rm, family = family, isSplit = FALSE, origin_type = origin_type, isSlope = isSlope, slope_flag = slope_flag, slope_df = slope_df, slope_vars_list = slope_vars_list, fixef_names_old = fixef_names_old, fixef_sizes = fixef_sizes, obs2keep = obs2keep, nthreads = nthreads)
 
         # gt("fixef, recompute")
 
@@ -2854,7 +2854,7 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
         if(length(obs2remove) > 0){
 
             if(is.null(obs2keep)){
-                obs2keep = 1:length(fixef_mat[[1]])
+                obs2keep = 1:length(fixef_df[[1]])
             }
 
             if(assign_lhs && is.list(lhs)){

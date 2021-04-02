@@ -8914,7 +8914,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	    fixef_terms_full = fixef_terms(object$fml_all$fixef)
 	    fixef_terms = fixef_terms_full$fml_terms
 
-	    fixef_mat = error_sender(prepare_df(fixef_terms_full$fe_vars, data, fastCombine = FALSE),
+	    fixef_df = error_sender(prepare_df(fixef_terms_full$fe_vars, data, fastCombine = FALSE),
 	                             "In 'model.matrix', problem evaluating the fixed-effects part of the formula:\n")
 
 	    isSlope = any(fixef_terms_full$slope_flag != 0)
@@ -8922,10 +8922,10 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	        slope_df = error_sender(prepare_df(fixef_terms_full$slope_vars, data),
 	                                 "In 'model.matrix', problem evaluating the variables with varying slopes in the fixed-effects part of the formula:\n")
 
-	        fixef_mat = cbind(fixef_mat, slope_df)
+	        fixef_df = cbind(fixef_df, slope_df)
 	    }
 
-	    res[["fixef"]] = fixef_mat
+	    res[["fixef"]] = fixef_df
 	}
 
 	if("iv.rhs1" %in% type){
