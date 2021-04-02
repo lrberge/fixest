@@ -877,6 +877,14 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	    n_endo = length(iv_lhs)
 	    lean = get("lean", env)
 
+	    # Simple check that the function is not misused
+	    pblm = intersect(iv_lhs_names, colnames(X))
+	    if(length(pblm) > 0){
+	        any_exo = length(setdiff(colnames(X), iv_lhs_names)) > 0
+	        msg = if(any_exo) "" else " If there is no exogenous variable, just use '1' in the first part of the formula."
+	        stop("Endogenous variables should not be used as exogenous regressors. The variable", enumerate_items(pblm, "s.quote.were"), " found in the first part of the multipart formula: ", ifsingle(pblm, "it", "they"), " should not be there.", msg)
+	    }
+
 	    if(isFixef){
 	        # we batch demean first
 
