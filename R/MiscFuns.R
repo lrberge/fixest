@@ -8919,10 +8919,10 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 
 	    isSlope = any(fixef_terms_full$slope_flag != 0)
 	    if(isSlope){
-	        slope_mat = error_sender(prepare_df(fixef_terms_full$slope_vars, data),
+	        slope_df = error_sender(prepare_df(fixef_terms_full$slope_vars, data),
 	                                 "In 'model.matrix', problem evaluating the variables with varying slopes in the fixed-effects part of the formula:\n")
 
-	        fixef_mat = cbind(fixef_mat, slope_mat)
+	        fixef_mat = cbind(fixef_mat, slope_df)
 	    }
 
 	    res[["fixef"]] = fixef_mat

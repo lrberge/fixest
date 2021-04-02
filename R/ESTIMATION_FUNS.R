@@ -3571,7 +3571,7 @@ multi_fixef = function(env, estfun){
             slope_vars_list = list(0)
             if(isSlope){
 
-                slope_mat = error_sender(prepare_df(fixef_terms_full$slope_vars, data),
+                slope_df = error_sender(prepare_df(fixef_terms_full$slope_vars, data),
                                          "Problem evaluating the variables with varying slopes in the fixed-effects part of the formula:\n")
 
                 slope_flag = fixef_terms_full$slope_flag
@@ -3579,9 +3579,9 @@ multi_fixef = function(env, estfun){
                 slope_vars_list = fixef_terms_full$slope_vars_list
 
                 # Further controls
-                not_numeric = !sapply(slope_mat, is.numeric)
+                not_numeric = !sapply(slope_df, is.numeric)
                 if(any(not_numeric)){
-                    stop("In the fixed-effects part of the formula (i.e. in ", as.character(fml_fixef[2]), "), variables with varying slopes must be numeric. Currently variable", enumerate_items(names(slope_mat)[not_numeric], "s.is.quote"), " not.")
+                    stop("In the fixed-effects part of the formula (i.e. in ", as.character(fml_fixef[2]), "), variables with varying slopes must be numeric. Currently variable", enumerate_items(names(slope_df)[not_numeric], "s.is.quote"), " not.")
                 }
 
                 # slope_flag: 0: no Varying slope // > 0: varying slope AND fixed-effect // < 0: varying slope WITHOUT fixed-effect
@@ -3606,12 +3606,12 @@ multi_fixef = function(env, estfun){
 
             if(isSlope){
                 # Convert to double
-                who_not_double = which(sapply(slope_mat, is.integer))
+                who_not_double = which(sapply(slope_df, is.integer))
                 for(i in who_not_double){
-                    slope_mat[[i]] = as.numeric(slope_mat[[i]])
+                    slope_df[[i]] = as.numeric(slope_df[[i]])
                 }
 
-                info = cpppar_which_na_inf_df(slope_mat, nthreads)
+                info = cpppar_which_na_inf_df(slope_df, nthreads)
                 if(info$any_na_inf){
                     is_NA = is_NA | info$is_na_inf
                 }
@@ -3625,7 +3625,7 @@ multi_fixef = function(env, estfun){
                 fixef_mat = fixef_mat[!is_NA, , drop = FALSE]
 
                 if(isSlope){
-                    slope_mat = slope_mat[!is_NA, , drop = FALSE]
+                    slope_df = slope_df[!is_NA, , drop = FALSE]
                 }
             } else {
                 my_env = new.env(parent = env)
@@ -3662,7 +3662,7 @@ multi_fixef = function(env, estfun){
 
             # We delay the computation by using isSplit = TRUE and split.full = FALSE
             # Real QUF will be done in the last reshape env
-            info_fe = setup_fixef(fixef_mat = fixef_mat, lhs = lhs, fixef_vars = fixef_vars, fixef.rm = fixef.rm, family = family, isSplit = TRUE, split.full = FALSE, origin_type = origin_type, isSlope = isSlope, slope_flag = slope_flag, slope_mat = slope_mat, slope_vars_list = slope_vars_list, nthreads = nthreads)
+            info_fe = setup_fixef(fixef_mat = fixef_mat, lhs = lhs, fixef_vars = fixef_vars, fixef.rm = fixef.rm, family = family, isSplit = TRUE, split.full = FALSE, origin_type = origin_type, isSlope = isSlope, slope_flag = slope_flag, slope_df = slope_df, slope_vars_list = slope_vars_list, nthreads = nthreads)
 
             fixef_id        = info_fe$fixef_id
             fixef_names     = info_fe$fixef_names

@@ -1478,7 +1478,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             isSlope = any(fixef_terms_full$slope_flag != 0)
             if(isSlope){
 
-                slope_mat = error_sender(prepare_df(fixef_terms_full$slope_vars, data),
+                slope_df = error_sender(prepare_df(fixef_terms_full$slope_vars, data),
                                          "Problem evaluating the variables with varying slopes in the fixed-effects part of the formula:\n")
 
                 slope_flag = fixef_terms_full$slope_flag
@@ -1486,9 +1486,9 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                 slope_vars_list = fixef_terms_full$slope_vars_list
 
                 # Further controls
-                not_numeric = !sapply(slope_mat, is.numeric)
+                not_numeric = !sapply(slope_df, is.numeric)
                 if(any(not_numeric)){
-                    stop("In the fixed-effects part of the formula (i.e. in ", as.character(fml_fixef[2]), "), variables with varying slopes must be numeric. Currently variable", enumerate_items(names(slope_mat)[not_numeric], "s.is.quote"), " not.")
+                    stop("In the fixed-effects part of the formula (i.e. in ", as.character(fml_fixef[2]), "), variables with varying slopes must be numeric. Currently variable", enumerate_items(names(slope_df)[not_numeric], "s.is.quote"), " not.")
                 }
 
                 # slope_flag: 0: no Varying slope // > 0: varying slope AND fixed-effect // < 0: varying slope WITHOUT fixed-effect
@@ -1542,12 +1542,12 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             }
 
             # Convert to double => to remove in the future
-            who_not_double = which(sapply(slope_mat, is.integer))
+            who_not_double = which(sapply(slope_df, is.integer))
             for(i in who_not_double){
-                slope_mat[[i]] = as.numeric(slope_mat[[i]])
+                slope_df[[i]] = as.numeric(slope_df[[i]])
             }
 
-            info = cpppar_which_na_inf_df(slope_mat, nthreads)
+            info = cpppar_which_na_inf_df(slope_df, nthreads)
             if(info$any_na_inf){
 
                 if(info$any_na) ANY_NA = TRUE
@@ -1614,7 +1614,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             obs2remove_NA = which(isNA_sample)
 
             if(isSlope){
-                slope_mat = slope_mat[!isNA_sample, , drop = FALSE]
+                slope_df = slope_df[!isNA_sample, , drop = FALSE]
             }
 
             # we change the LHS variable
@@ -1641,7 +1641,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         # ... QUF setup ####
         #
 
-        info_fe = setup_fixef(fixef_mat = fixef_mat, lhs = lhs, fixef_vars = fixef_vars, fixef.rm = fixef.rm, family = family, isSplit = isSplit, split.full = split.full, origin_type = origin_type, isSlope = isSlope, slope_flag = slope_flag, slope_mat = slope_mat, slope_vars_list = slope_vars_list, nthreads = nthreads)
+        info_fe = setup_fixef(fixef_mat = fixef_mat, lhs = lhs, fixef_vars = fixef_vars, fixef.rm = fixef.rm, family = family, isSplit = isSplit, split.full = split.full, origin_type = origin_type, isSlope = isSlope, slope_flag = slope_flag, slope_df = slope_df, slope_vars_list = slope_vars_list, nthreads = nthreads)
 
         Q               = info_fe$Q
         fixef_id        = info_fe$fixef_id
@@ -2484,7 +2484,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 }
 
 
-setup_fixef = function(fixef_mat, lhs, fixef_vars, fixef.rm, family, isSplit, split.full = FALSE, origin_type, isSlope, slope_flag, slope_mat, slope_vars_list, fixef_names_old = NULL, fixef_sizes = NULL, obs2keep = NULL, nthreads){
+setup_fixef = function(fixef_mat, lhs, fixef_vars, fixef.rm, family, isSplit, split.full = FALSE, origin_type, isSlope, slope_flag, slope_df, slope_vars_list, fixef_names_old = NULL, fixef_sizes = NULL, obs2keep = NULL, nthreads){
 
     isSplitNoFull = identical(fixef_names_old, "SPLIT_NO_FULL")
     isRefactor = !isSplitNoFull && !is.null(fixef_names_old)
@@ -2512,14 +2512,14 @@ setup_fixef = function(fixef_mat, lhs, fixef_vars, fixef.rm, family, isSplit, sp
         # we need this condition
         # (super corner case....)
         my_vs_vars = unlist(slope_vars_list, use.names = FALSE)
-        if(length(slope_mat) == length(my_vs_vars)){
+        if(length(slope_df) == length(my_vs_vars)){
             # simple case
-            slope_variables = as.list(slope_mat)
+            slope_variables = as.list(slope_df)
 
         } else {
             slope_variables = list()
             for(i in seq_along(my_vs_vars)){
-                slope_variables[[i]] = slope_mat[[my_vs_vars[i]]]
+                slope_variables[[i]] = slope_df[[my_vs_vars[i]]]
             }
             # unfortunately, we need the names...
             names(slope_variables) = my_vs_vars
@@ -2821,14 +2821,14 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
         fixef_sizes     = get("fixef_sizes", env)
 
         slope_flag      = get("slope_flag", env)
-        slope_mat       = get("slope_variables", env)
+        slope_df        = get("slope_variables", env)
         slope_vars_list = get("slope_vars_list", env)
         isSlope         = any(slope_flag != 0)
 
         # gt("fixef, dropping")
 
         # We refactor the fixed effects => we may remove even more obs
-        info_fe = setup_fixef(fixef_mat = fixef_mat, lhs = lhs, fixef_vars = fixef_vars, fixef.rm = fixef.rm, family = family, isSplit = FALSE, origin_type = origin_type, isSlope = isSlope, slope_flag = slope_flag, slope_mat = slope_mat, slope_vars_list = slope_vars_list, fixef_names_old = fixef_names_old, fixef_sizes = fixef_sizes, obs2keep = obs2keep, nthreads = nthreads)
+        info_fe = setup_fixef(fixef_mat = fixef_mat, lhs = lhs, fixef_vars = fixef_vars, fixef.rm = fixef.rm, family = family, isSplit = FALSE, origin_type = origin_type, isSlope = isSlope, slope_flag = slope_flag, slope_df = slope_df, slope_vars_list = slope_vars_list, fixef_names_old = fixef_names_old, fixef_sizes = fixef_sizes, obs2keep = obs2keep, nthreads = nthreads)
 
         # gt("fixef, recompute")
 
