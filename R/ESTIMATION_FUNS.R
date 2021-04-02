@@ -3607,8 +3607,8 @@ multi_fixef = function(env, estfun){
             if(isSlope){
                 # Convert to double
                 who_not_double = which(sapply(slope_df, is.integer))
-                for(i in who_not_double){
-                    slope_df[[i]] = as.numeric(slope_df[[i]])
+                for(j in who_not_double){
+                    slope_df[[j]] = as.numeric(slope_df[[j]])
                 }
 
                 info = cpppar_which_na_inf_df(slope_df, nthreads)
@@ -3706,7 +3706,7 @@ multi_fixef = function(env, estfun){
             my_env_est = reshape_env(my_env, assign_fixef = TRUE)
 
         } else {
-            # No fixed-effect // new.env is indispensible => otherwise multi RHS/LHS not possible
+            # No fixed-effect // new.env is indispensable => otherwise multi RHS/LHS not possible
             my_env_est = reshape_env(env)
         }
 
