@@ -12,6 +12,12 @@
  - Fix bug in the Wald test in IV estimations when variables are removed because of collinearity (thanks to @pei-huang [#117](https://github.com/lrberge/fixest/issues/117)).
  
  - Fix bug regarding multiple estimations when the multiple fixed-effects contained variables with varying slopes.
+ 
+ - Fix various display bugs in `fitstat`.
+ 
+ - Fix bug in `etable`: using split sample estimations prevented the argument `title` to render correctly. 
+ 
+ - Fix incorrect information message when observations are removed because of infinite values (in some circumstances the removal was wrongly attributed to NAness).
 
 ## etable
 
@@ -35,7 +41,7 @@
 
   - New function `degrees_freedom`: to access the DoFs of the models (sometimes that can be intricate).
   
-  - Better handling of the DoFs in fitstat (in particular when the VCOV is clustered).
+  - Better handling of the DoFs in `fitstat` (in particular when the VCOV is clustered).
   
 ## Other changes
 

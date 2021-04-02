@@ -1689,7 +1689,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             msg_details = paste(details[nchar(details) > 0], collapse = ", ")
 
             if(anyNA_sample){
-                message_NA = paste0(numberFormatNormal(nbNA), " observation", plural(nbNA), " removed because of NA values (", msg_details, ").")
+                msg = msg_na_inf(ANY_NA, ANY_INF)
+                message_NA = paste0(numberFormatNormal(nbNA), " observation", plural(nbNA), " removed because of ", msg, " (", msg_details, ").")
                 notes = c(notes, message_NA)
 
                 if(nbNA == nobs){
@@ -2559,8 +2560,6 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, spl
 
     # quoi = list(fixef_df=fixef_df, lhs=lhs, do_sum_y=do_sum_y, rm_0=rm_0, rm_1=rm_1, rm_single=rm_single, only_slope=only_slope, nthreads=nthreads, isRefactor=isRefactor, fixef_sizes=fixef_sizes, obs2keep=obs2keep)
     # save(quoi, file = "../_DATA/problem.Rdata")
-
-    # browser()
 
     quf_info_all = cpppar_quf_table_sum(x = fixef_df, y = lhs, do_sum_y = do_sum_y, rm_0 = rm_0, rm_1 = rm_1, rm_single = rm_single, only_slope = only_slope, nthreads = nthreads, do_refactor = isRefactor, r_x_sizes = fixef_sizes, obs2keep = obs2keep)
 
