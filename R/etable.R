@@ -3597,7 +3597,7 @@ extraline_extractor = function(x, name = NULL, tex = FALSE){
 #' extraline_register("my", my_fun, "Mean(y)")
 #'
 #' # An estimation
-#' est = feols(Petal.Length ~ Sepal.Length | species, base)
+#' est = feols(Petal.Length ~ Sepal.Length | Species, iris)
 #'
 #' # Now we can easily create a row with the mean of y.
 #' # We just "summon" it in a one-sided formula
