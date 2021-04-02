@@ -1340,6 +1340,8 @@ if(Sys.info()["sysname"] == "Windows"){
 # check no bug
 etable(summary(est_iv, stage = 1:2))
 
+setFixest_se(reset = TRUE)
+
 
 ####
 #### model.matrix ####
