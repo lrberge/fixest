@@ -1094,8 +1094,8 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
 
     if(length(auto_subtitles_clean) > 0){
         for(i in seq_along(auto_subtitles_clean)){
-            title = names(auto_subtitles_clean)[i]
-            subtitles[[dict_apply(title, dict)]] = dict_apply(auto_subtitles_clean[[i]], dict)
+            my_title = names(auto_subtitles_clean)[i]
+            subtitles[[dict_apply(my_title, dict)]] = dict_apply(auto_subtitles_clean[[i]], dict)
         }
     }
 
