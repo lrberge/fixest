@@ -110,8 +110,8 @@ setup_multi = function(index, all_names, data, simplify = TRUE){
 #' res = feols(y ~ csw(x1, x2, x3), base, split = ~species)
 #'
 #' # By default, the type is "short"
-#' # You can stil use the arguments from summary.fixest
-#' summary(res, cluster = ~ species)
+#' # You can still use the arguments from summary.fixest
+#' summary(res, se = "hetero")
 #'
 #' summary(res, type = "long")
 #'
