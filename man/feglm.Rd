@@ -44,7 +44,7 @@ feglm(
 feglm.fit(
   y,
   X,
-  fixef_mat,
+  fixef_df,
   family = "poisson",
   offset,
   split,
@@ -177,7 +177,7 @@ fepois(
 
 \item{X}{Numeric matrix of the regressors.}
 
-\item{fixef_mat}{Matrix/data.frame of the fixed-effects.}
+\item{fixef_df}{Matrix/data.frame of the fixed-effects.}
 }
 \value{
 A \code{fixest} object. Note that \code{fixest} objects contain many elements and most of them are for internal use, they are presented here only for information. To access them, it is safer to use the user-level methods (e.g. \code{\link[fixest]{vcov.fixest}}, \code{\link[fixest]{resid.fixest}}, etc) or functions (like for instance \code{\link[fixest]{fitstat}} to access any fit statistic).

@@ -976,7 +976,7 @@ getFixest_dof = function(){
 #' etable(est_no_FE, est_one_FE, est_two_FE)
 #'
 #' # Resetting the defaults
-#' setFixest_se()
+#' setFixest_se(reset = TRUE)
 #'
 #'
 setFixest_se = function(no_FE = "standard", one_FE = "cluster", two_FE = "cluster", all = NULL, reset = FALSE){
