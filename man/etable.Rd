@@ -107,7 +107,7 @@ esttable(
   fitstat,
   coefstat = "se",
   ci = 0.95,
-  sdBelow = TRUE,
+  sdBelow = NULL,
   keep,
   drop,
   order,
@@ -127,10 +127,12 @@ esttable(
   style.df = NULL,
   group = NULL,
   extraline = NULL,
+  fixef.group = NULL,
   drop.section = NULL,
   poly_dict = c("", " square", " cube"),
   postprocess.df = NULL,
-  fit_format = "__var__"
+  fit_format = "__var__",
+  coef.just = NULL
 )
 
 esttex(
@@ -148,7 +150,7 @@ esttex(
   title,
   coefstat = "se",
   ci = 0.95,
-  sdBelow = TRUE,
+  sdBelow = NULL,
   keep,
   drop,
   order,
@@ -171,6 +173,7 @@ esttex(
   notes = NULL,
   group = NULL,
   extraline = NULL,
+  fixef.group = NULL,
   placement = "htbp",
   drop.section = NULL,
   poly_dict = c("", " square", " cube"),
