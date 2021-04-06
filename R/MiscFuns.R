@@ -4681,8 +4681,22 @@ wald = function(x, keep = NULL, drop = NULL, print = TRUE, se, cluster, ...){
         return(0)
     }
 
+    # To handle errors (rarely can happen)
+    chol_decomp = cpp_cholesky(vcov[var_keep, var_keep, drop = FALSE])
+    vcov_inv = chol_decomp$XtX_inv
+
+    if(isTRUE(chol_decomp$all_removed)){
+        # Can happen for indicators + clustering at the same level
+        return(100000)
+    }
+
+    if(any(chol_decomp$id_excl)){
+        var_keep = var_keep[!chol_decomp$id_excl]
+    }
+
     my_coef = coef[var_keep]
-    stat = drop(my_coef %*% solve(vcov[var_keep, var_keep]) %*% my_coef) / length(my_coef)
+
+    stat = drop(my_coef %*% vcov_inv %*% my_coef) / length(my_coef)
 
     stat
 }
