@@ -501,21 +501,82 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     # ... subset ####
     #
 
+    multi_lhs = FALSE
     nobs_origin = NULL
     if(isFit){
         # We have to first eval y if isFit in order to check subset properly
         if(missing(y)){
-            stop("You must provide argument 'y' when using ", origin_type, ".fit.")
+            stop("You must provide argument 'y' when using ", origin, ".")
         }
 
-        lhs = check_value_plus(y, "numeric vmatrix ncol(1) conv")
-        if(is.matrix(lhs)) lhs = as.vector(lhs)
+        lhs = check_value_plus(y, "numeric vmatrix conv | data.frame")
+        lhs_names = NULL
+        if(is.data.frame(lhs)){
+
+            lhs_names = names(lhs)
+
+            if(ncol(lhs) > 1){
+                multi_lhs = TRUE
+
+                lhs_new = list()
+                for(i in 1:ncol(lhs)){
+                    lhs_current = lhs[[i]]
+                    if(!is.numeric(lhs_current) || !is.logical(lhs_current)){
+                        stop("The ", n_th(i), " column of argument 'y' is not numeric. Estimation cannot be done.")
+                    }
+
+                    if(is.logical(lhs_current) || is.integer(lhs_current)){
+                        lhs_new[[i]] = as.numeric(lhs_current)
+                    } else {
+                        lhs_new[[i]] = lhs_current
+                    }
+                }
+
+                lhs = lhs_new
+                if(mem.clean) rm(lhs_new)
+
+            } else {
+                if(!is.numeric(lhs[[1]]) || !is.logical(lhs[[1]])){
+                    stop("The argument 'y' is not numeric. Estimation cannot be done.")
+                }
+
+                lhs = lhs[[1]]
+            }
+        } else if(is.matrix(lhs)){
+
+            lhs_names = colnames(lhs)
+
+            if(ncol(lhs) > 1){
+                multi_lhs = TRUE
+
+                lhs_new = list()
+                for(i in 1:ncol(lhs)){
+                    lhs_new[[i]] = lhs[, i]
+                }
+
+                lhs = lhs_new
+                if(mem.clean) rm(lhs_new)
+            } else {
+                lhs = as.vector(lhs)
+            }
+        }
+
+        n_lhs = if(multi_lhs) length(lhs) else 1
+        if(is.null(lhs_names)){
+
+            lhs_names_raw = deparse_long(mc_origin[["y"]])
+
+            if(n_lhs > 1){
+                lhs_names = paste0(lhs_names_raw, 1:n_lhs)
+            } else {
+                lhs_names = lhs_names_raw
+            }
+        }
 
         # we reconstruct a formula
-        fml_linear = as.formula(paste0(deparse_long(mc_origin[["y"]]), "~1"))
-        lhs_names = as.character(fml_linear[[2]])
+        fml_linear = .xpd(lhs = lhs_names, rhs = 1)
 
-        nobs_origin = nobs = length(lhs)
+        nobs_origin = nobs = if(multi_lhs) length(lhs[[1]]) else length(lhs)
     }
 
     # delayed.subset only concerns isFit // subsetting must always occur before NA checking
@@ -597,7 +658,6 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     # the LHS for isFit has been done just before subset
 
     # evaluation
-    multi_lhs = FALSE
     if(isFit == FALSE){
 
         # The LHS must contain only values in the DF

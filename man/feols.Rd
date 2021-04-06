@@ -2,6 +2,7 @@
 % Please edit documentation in R/ESTIMATION_FUNS.R
 \name{feols}
 \alias{feols}
+\alias{feols.fit}
 \title{Fixed-effects OLS estimation}
 \usage{
 feols(
@@ -29,6 +30,33 @@ feols(
   combine.quick,
   demeaned = FALSE,
   mem.clean = FALSE,
+  only.env = FALSE,
+  env,
+  ...
+)
+
+feols.fit(
+  y,
+  X,
+  fixef_df,
+  offset,
+  split,
+  fsplit,
+  cluster,
+  se,
+  dof,
+  weights,
+  subset,
+  fixef.rm = "perfect",
+  fixef.tol = 1e-06,
+  fixef.iter = 10000,
+  collin.tol = 1e-10,
+  nthreads = getFixest_nthreads(),
+  lean = FALSE,
+  warn = TRUE,
+  notes = getFixest_notes(),
+  mem.clean = FALSE,
+  verbose = 0,
   only.env = FALSE,
   env,
   ...
@@ -88,6 +116,12 @@ feols(
 \item{env}{(Advanced users.) A \code{fixest} environment created by a \code{fixest} estimation with \code{only.env = TRUE}. Default is missing. If provided, the data from this environment will be used to perform the estimation.}
 
 \item{...}{Not currently used.}
+
+\item{y}{Numeric vector/matrix/data.frame of the dependent variable(s). Multiple dependent variables will return a \code{fixest_multi} object.}
+
+\item{X}{Numeric matrix of the regressors.}
+
+\item{fixef_df}{Matrix/data.frame of the fixed-effects.}
 }
 \value{
 A \code{fixest} object. Note that \code{fixest} objects contain many elements and most of them are for internal use, they are presented here only for information. To access them, it is safer to use the user-level methods (e.g. \code{\link[fixest]{vcov.fixest}}, \code{\link[fixest]{resid.fixest}}, etc) or functions (like for instance \code{\link[fixest]{fitstat}} to access any fit statistic).

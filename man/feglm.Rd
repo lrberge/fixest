@@ -173,7 +173,7 @@ fepois(
 
 \item{...}{Not currently used.}
 
-\item{y}{Numeric vector of the dependent variable.}
+\item{y}{Numeric vector/matrix/data.frame of the dependent variable(s). Multiple dependent variables will return a \code{fixest_multi} object.}
 
 \item{X}{Numeric matrix of the regressors.}
 

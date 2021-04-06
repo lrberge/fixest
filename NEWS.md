@@ -49,6 +49,10 @@
   
   - `model.matrix`: the endogenous regressors and the instruments from IV estimations can now be easily extracted.
   
+  - New function `feols.fit`.
+  
+  - `.fit` methods (`feols.fit` and `feglm.fit`) now handle multiple dependent variables.
+  
 ## Other changes
 
   - Improve error messages. 

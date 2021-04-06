@@ -18,6 +18,9 @@
 #' @param demeaned Logical, default is \code{FALSE}. Only used in the presence of fixed-effects: should the centered variables be returned? If \code{TRUE}, it creates the items \code{y_demeaned} and \code{X_demeaned}.
 #' @param notes Logical. By default, two notes are displayed: when NAs are removed (to show additional information) and when some observations are removed because of collinearity. To avoid displaying these messages, you can set \code{notes = FALSE}. You can remove these messages permanently by using \code{setFixest_notes(FALSE)}.
 #' @param collin.tol Numeric scalar, default is \code{1e-10}. Threshold deciding when variables should be considered collinear and subsequently removed from the estimation. Higher values means more variables will be removed (if there is presence of collinearity). One signal of presence of collinearity is t-stats that are extremely low (for instance when t-stats < 1e-3).
+#' @param y Numeric vector/matrix/data.frame of the dependent variable(s). Multiple dependent variables will return a \code{fixest_multi} object.
+#' @param X Numeric matrix of the regressors.
+#' @param fixef_df Matrix/data.frame of the fixed-effects.
 #'
 #' @details
 #' The method used to demean each variable along the fixed-effects is based on Berge (2018), since this is the same problem to solve as for the Gaussian case in a ML setup.
@@ -1689,7 +1692,7 @@ check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights){
 }
 
 
-
+#' @rdname feols
 feols.fit = function(y, X, fixef_df, offset, split, fsplit, cluster, se, dof, weights, subset,
                      fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000,
                      collin.tol = 1e-10, nthreads = getFixest_nthreads(), lean = FALSE, warn = TRUE,
@@ -1752,9 +1755,6 @@ feols.fit = function(y, X, fixef_df, offset, split, fsplit, cluster, se, dof, we
 #' @param fixef.tol Precision used to obtain the fixed-effects. Defaults to \code{1e-6}. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations.
 #' @param glm.iter Number of iterations of the glm algorithm. Default is 25.
 #' @param glm.tol Tolerance level for the glm algorithm. Default is \code{1e-8}.
-#' @param y Numeric vector of the dependent variable.
-#' @param X Numeric matrix of the regressors.
-#' @param fixef_df Matrix/data.frame of the fixed-effects.
 #' @param verbose Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algoritmh (the first number is the left-hand-side, the other numbers are the right-hand-side variables). It can also detail the step-halving algorithm.
 #' @param notes Logical. By default, three notes are displayed: when NAs are removed, when some fixed-effects are removed because of only 0 (or 0/1) outcomes, or when a variable is dropped because of collinearity. To avoid displaying these messages, you can set \code{notes = FALSE}. You can remove these messages permanently by using \code{setFixest_notes(FALSE)}.
 #'
