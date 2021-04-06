@@ -18,6 +18,8 @@
  - Fix bug in `etable`: using split sample estimations prevented the argument `title` to render correctly. 
  
  - Fix incorrect information message when observations are removed because of infinite values (in some circumstances the removal was wrongly attributed to NAness).
+ 
+ - Fix bug in `etable` when checking the argument `coefstat`.
 
 ## etable
 
@@ -36,6 +38,8 @@
   - You can register `extraline` macros with the new function `extraline_register`.
   
   - When `tex = TRUE`, n-way clustering now always leads to the name of clustered SEs (n-way is not shown any more).
+  
+  - Add the argument `coef.just` that controls the justification of the coefficients and standard-errors. Only works when `tex = FALSE` (i.e. a `data.frame` is requested).
   
 ## New features
 
