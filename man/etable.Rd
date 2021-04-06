@@ -274,7 +274,7 @@ esttex(
 
 \item{fit_format}{Character scalar, default is \code{"__var__"}. Only used in the presence of IVs. By default the endogenous regressors are named \code{fit_varname} in the second stage. The format of the endogenous regressor to appear in the table is governed by \code{fit_format}. For instance, by default, the prefix \code{"fit_"} is removed, leading to only \code{varname} to appear. If \code{fit_format = "$\\\\hat{__var__}$"}, then \code{"$\\hat{varname}$"} will appear in the table.}
 
-\item{coef.just}{(DF only.) Either \code{"."}, \code{"l"}, \code{"c"} or \code{"r"}, default is \code{NULL}. How the coefficients should be justified. If \code{NULL} then they are right aligned if \code{sdBelow = FALSE} and aligned to the dot if \code{sdBelow = TRUE}. The keywords stand respectively for dot-, left-, center- and right-aligned.}
+\item{coef.just}{(DF only.) Either \code{"."}, \code{"("}, \code{"l"}, \code{"c"} or \code{"r"}, default is \code{NULL}. How the coefficients should be justified. If \code{NULL} then they are right aligned if \code{sdBelow = FALSE} and aligned to the dot if \code{sdBelow = TRUE}. The keywords stand respectively for dot-, parenthesis-, left-, center- and right-aligned.}
 
 \item{reset}{(\code{setFixest_etable} only.) Logical, default is \code{FALSE}. If \code{TRUE}, this will reset all the default values that were already set by the user in previous calls.}
 }

@@ -58,7 +58,7 @@
 #' @param postprocess.tex A function that will postprocess the character vector defining the latex table. Only when \code{tex = TRUE}. By default it is equal to \code{NULL}, meaning that there is no postprocessing. When \code{tex = FALSE}, see the argument \code{postprocess.df}. See details.
 #' @param postprocess.df A function that will postprocess.tex the resulting data.frame. Only when \code{tex = FALSE}. By default it is equal to \code{NULL}, meaning that there is no postprocessing. When \code{tex = TRUE}, see the argument \code{postprocess.tex}.
 #' @param fit_format Character scalar, default is \code{"__var__"}. Only used in the presence of IVs. By default the endogenous regressors are named \code{fit_varname} in the second stage. The format of the endogenous regressor to appear in the table is governed by \code{fit_format}. For instance, by default, the prefix \code{"fit_"} is removed, leading to only \code{varname} to appear. If \code{fit_format = "$\\\\hat{__var__}$"}, then \code{"$\\hat{varname}$"} will appear in the table.
-#' @param coef.just (DF only.) Either \code{"."}, \code{"l"}, \code{"c"} or \code{"r"}, default is \code{NULL}. How the coefficients should be justified. If \code{NULL} then they are right aligned if \code{sdBelow = FALSE} and aligned to the dot if \code{sdBelow = TRUE}. The keywords stand respectively for dot-, left-, center- and right-aligned.
+#' @param coef.just (DF only.) Either \code{"."}, \code{"("}, \code{"l"}, \code{"c"} or \code{"r"}, default is \code{NULL}. How the coefficients should be justified. If \code{NULL} then they are right aligned if \code{sdBelow = FALSE} and aligned to the dot if \code{sdBelow = TRUE}. The keywords stand respectively for dot-, parenthesis-, left-, center- and right-aligned.
 #'
 #' @details
 #' The function \code{esttex} is equivalent to the function \code{etable} with argument \code{tex = TRUE}.
@@ -717,11 +717,11 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
     }
 
     # start: coef.just
-    check_arg(coef.just, "NULL charin(., c, r, l)")
+    check_arg(coef.just, "NULL charin", .choices = c(".", "(", "l", "c", "r"))
 
     if(!isTex){
         # this parameter is only used in DF
-        if(is.null(coef.just)){
+        if(is.null(coef.just) && sdBelow){
             coef.just = "."
         }
 
@@ -2798,6 +2798,8 @@ etable_internal_df = function(info){
 
         if(coef.just == "."){
             align_fun = function(x) sfill(sfill(x, anchor = "."), right = TRUE)
+        } else if(coef.just == "("){
+            align_fun = function(x) sfill(sfill(x, anchor = "("), right = TRUE)
         } else if(coef.just == "c"){
             align_fun = function(x) format(x, justify = "centre")
         } else if(coef.just == "l"){
