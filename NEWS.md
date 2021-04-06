@@ -43,6 +43,8 @@
   
   - Better handling of the DoFs in `fitstat` (in particular when the VCOV is clustered).
   
+  - `model.matrix`: the endogenous regressors and the instruments from IV estimations can now be easily extracted.
+  
 ## Other changes
 
   - Improve error messages. 

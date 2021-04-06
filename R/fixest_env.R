@@ -1252,7 +1252,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         #
 
         # Now LHS evaluated as a regular formula
-        iv_lhs_mat = error_sender(fixest_model_matrix(.xpd(lhs = quote(y), rhs = iv_fml_parts[[1]]), data, TRUE),
+        iv_endo_fml = .xpd(lhs = 1, rhs = iv_fml_parts[[1]])
+        iv_lhs_mat = error_sender(fixest_model_matrix(iv_endo_fml, data, TRUE),
                                   "Evaluation of the left-hand-side of the IV part (equal to ", deparse_long(iv_fml_parts[[1]]), ") raises an error: \n")
 
         # Not great => to improve later
@@ -2396,6 +2397,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         res$iv_inst_names = inst_names
         res$iv_n_inst = ncol(iv.mat)
         res$iv_endo_names = iv_lhs_names
+        res$iv_endo_fml = iv_endo_fml
     }
 
     # nber of params

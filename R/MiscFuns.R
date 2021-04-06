@@ -8838,6 +8838,10 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
         stop("model.matrix method not available for fixest estimations obtained from fit methods.")
     }
 
+    if(any(grepl("^iv", type)) && !isTRUE(object$iv)){
+        stop("The type", enumerate_items(grep("^iv", type, value = TRUE), "s.is"), " only valid for IV estimations.")
+    }
+
     check_arg(subset, "logical scalar | character vector no na")
 
 	# The formulas
@@ -8912,9 +8916,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	        fml = .xpd(..lhs ~ ..endo + ..rhs, ..lhs = fml[[2]], ..endo = fml_iv[[2]], ..rhs = fml[[3]])
 	    }
 
-	    # linear.mat = error_sender(fixest_model_matrix(fml, data, fake_intercept),
-	    #                           "In 'model.matrix', the RHS could not be evaluated: ")
-	    linear.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data,original_data = original_data, fml = fml, fake_intercept = fake_intercept, subset = subset), "In 'model.matrix', the RHS could not be evaluated: ")
+	    linear.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = fake_intercept, subset = subset), "In 'model.matrix', the RHS could not be evaluated: ")
 
         res[["rhs"]] = linear.mat
 	}
@@ -8942,6 +8944,22 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	    res[["fixef"]] = fixef_df
 	}
 
+	if("iv.endo" %in% type){
+	    fml = object$iv_endo_fml
+
+	    endo.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = TRUE), "In 'model.matrix', the endogenous variables could not be evaluated: ")
+
+	    res[["iv.endo"]] = endo.mat
+	}
+
+	if("iv.inst" %in% type){
+	    fml = object$fml_all$iv
+
+	    endo.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = TRUE), "In 'model.matrix', the instruments could not be evaluated: ")
+
+	    res[["iv.inst"]] = endo.mat
+	}
+
 	if("iv.rhs1" %in% type){
 	    # First stage
 
@@ -8958,7 +8976,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	    fake_intercept = !is.null(object$fixef_vars) && !(!is.null(object$slope_flag) && all(object$slope_flag < 0))
 	    # iv_rhs1 = error_sender(fixest_model_matrix(fml, data, fake_intercept = fake_intercept),
 	    #                        "In 'model.matrix', the RHS of the 1st stage could not be evaluated: ")
-	    iv_rhs1 = error_sender(fixest_model_matrix_extra(object = object, newdata = data,original_data = original_data, fml = fml, fake_intercept = fake_intercept, subset = subset), "In 'model.matrix', the RHS of the 1st stage could not be evaluated: ")
+	    iv_rhs1 = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = fake_intercept, subset = subset), "In 'model.matrix', the RHS of the 1st stage could not be evaluated: ")
 
 	    res[["iv.rhs1"]] = iv_rhs1
 	}
@@ -8991,7 +9009,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	    fake_intercept = !is.null(object$fixef_vars) && !(!is.null(object$slope_flag) && all(object$slope_flag < 0))
 	    # iv_rhs2 = error_sender(fixest_model_matrix(fml, data, fake_intercept = fake_intercept),
 	    #                        "In 'model.matrix', the RHS of the 2nd stage could not be evaluated: ")
-	    iv_rhs2 = error_sender(fixest_model_matrix_extra(object = object, newdata = data,original_data = original_data, fml = fml, fake_intercept = fake_intercept, subset = subset), "In 'model.matrix', the RHS of the 2nd stage could not be evaluated: ")
+	    iv_rhs2 = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = fake_intercept, subset = subset), "In 'model.matrix', the RHS of the 2nd stage could not be evaluated: ")
 
 	    res[["iv.rhs2"]] = iv_rhs2
 	}
