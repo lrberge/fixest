@@ -360,8 +360,6 @@ etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, agg = N
         se = NULL
     }
 
-    check_arg_plus(coefstat, "match")
-
     # The depvar
     if(missing(depvar) && !missing(file)){
         depvar = TRUE
