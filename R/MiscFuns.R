@@ -130,7 +130,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 	    if(is.null(last_warn) || (proc.time() - last_warn)[3] > 1){
 	        if(x$method %in% c("femlm", "feNmlm", "fenegbin")){
 	            warning("The optimization algorithm did not converge, the results are not reliable. (", x$message, ")", call. = FALSE)
-	        } else if(x$method == "feols"){
+	        } else if(x$method_type == "feols"){
 	            warning("The demeaning algorithm did not converge, the results are not reliable. (", x$message, ")", call. = FALSE)
 	        } else {
 	            warning("The GLM algorithm did not converge, the results are not reliable. (", x$message, ")", call. = FALSE)
@@ -224,7 +224,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 	} else {
 
 	    if(is.null(fitstat) || "." %in% fitstat){
-	        if(x$method == "feols"){
+	        if(x$method_type == "feols"){
 	            default_fit = c("rmse", "ar2")
 
 	            if(!is.null(x$fixef_sizes) && is.null(x$onlyFixef)){
@@ -750,7 +750,7 @@ r2 = function(x, type = "all", full_names = FALSE){
 
 	type_all = dict_apply(type_all, types_alias)
 
-	is_ols = x$method == "feols"
+	is_ols = x$method_type == "feols"
 	isFixef = "fixef_vars" %in% names(x)
 	n = nobs(x)
 
@@ -787,7 +787,7 @@ r2 = function(x, type = "all", full_names = FALSE){
 
 		        # 2019-11-26: now self contained call (no need for outer frame evaluation)
 
-		        if(isTRUE()){
+		        if(isTRUE(x$lean)){
 		            stop("Within R2s are not available for 'lean' fixest objects. Please reestimate with 'lean = FALSE'.")
 		        }
 
@@ -4910,7 +4910,7 @@ aggregate.fixest = function(x, agg, full = FALSE, use_weights = TRUE, ...){
 
     # th z & p values
     zvalue <- c_all/se_all
-    if(x$method %in% "feols" || (x$method %in% "feglm" && !x$family$family %in% c("poisson", "binomial"))){
+    if(x$method_type == "feols" || (x$method %in% "feglm" && !x$family$family %in% c("poisson", "binomial"))){
 
         # I have renamed t.df into G
         t.df = attr(vcov, "G")
@@ -7752,7 +7752,7 @@ BIC.fixest = function(object, ...){
 #'
 logLik.fixest = function(object, ...){
 
-	if(object$method == "feols"){
+	if(object$method_type == "feols"){
 	    # if the summary is 'lean', then no way we can compute that
 	    resid = object$residuals
 	    if(is.null(resid)) resid = NA
@@ -7864,7 +7864,7 @@ fitted.fixest = fitted.values.fixest = function(object, type = c("response", "li
 
 	fit = predict(object)
 
-	if(type == "response" || object$method == "feols"){
+	if(type == "response" || object$method_type == "feols"){
 		res = fit
 	} else if(!is.null(object$mu)){
 		res = object$mu
@@ -7938,7 +7938,7 @@ resid.fixest = residuals.fixest = function(object, type = c("response", "devianc
         stop("The method 'resid.fixest' cannot be applied to a 'lean' fixest object. Please apply reestimate with 'lean = FALSE'.")
     }
 
-    if(method == "feols" || (method %in% c("feNmlm", "femlm") && family == "gaussian")){
+    if(method %in% c("feols", "feols.fit") || (method %in% c("feNmlm", "femlm") && family == "gaussian")){
 
         if(type == "working") stop("Type 'working' only applies to models fitted via feglm (thus is not valid for feols).")
 
@@ -8104,7 +8104,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 	        newdata = fetch_data(object, "In 'predict', ")
 
 	    } else {
-	        if(type == "response" || object$method == "feols"){
+	        if(type == "response" || object$method_type == "feols"){
 	            res = object$fitted.values
 	        } else if(object$method == "femlm") {
 	            if("mu" %in% names(object)){
@@ -8381,7 +8381,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 
 	value_predicted = value_cluster + value_linear + value_NL + value_offset
 
-	if(type == "link" || object$method == "feols"){
+	if(type == "link" || object$method_type == "feols"){
 		res = value_predicted
 	} else if(object$method == "femlm") {
 		# Now the expected predictor
@@ -8582,7 +8582,7 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 
 	# Family information
 	if(!is.null(dots$family)){
-	    if(object$method == "feols"){
+	    if(object$method_type == "feols"){
 	        stop("'family' is not an argument of function feols().")
 	    } else if(object$method %in% c("femlm", "feNmlm", "fepois", "fenegbin")){
 			family_new = match.arg(dots$family, c("poisson", "negbin", "gaussian", "logit"))
@@ -8598,8 +8598,8 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 	updt_fml_parts = fml_split(fml.update, raw = TRUE)
 	n_parts = length(updt_fml_parts)
 
-	if(n_parts > 2 + (object$method == "feols")){
-	    stop("The update formula cannot have more than ", 2 + (object$method == "feols"), " parts for the method ", object$method, ".")
+	if(n_parts > 2 + (object$method_type == "feols")){
+	    stop("The update formula cannot have more than ", 2 + (object$method_type == "feols"), " parts for the method ", object$method, ".")
 	}
 
 	is_fe = n_parts > 1 && !is_fml_inside(updt_fml_parts[[2]])

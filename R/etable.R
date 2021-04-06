@@ -1249,7 +1249,7 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
         # Default values:
         #   - if all OLS: typical R2
         #   - if any non-OLS: pseudo R2 + squared cor.
-        is_ols = sapply(all_models, function(x) x$method == "feols")
+        is_ols = sapply(all_models, function(x) x$method_type == "feols")
 
         if(all(is_ols)){
             if(any(sapply(all_models, function(x) "fixef_vars" %in% names(x)))){

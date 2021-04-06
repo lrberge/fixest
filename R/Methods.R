@@ -98,7 +98,7 @@ deviance.fixest = function(object, ...){
         stop("The method 'deviance.fixest' cannot be applied to a 'lean' summary. Please apply it to the estimation object directly.")
     }
 
-    if(method == "feols" || (method %in% c("femlm", "feNmlm") && family == "gaussian")){
+    if(method %in% c("feols", "feols.fit") || (method %in% c("femlm", "feNmlm") && family == "gaussian")){
         res = sum(w * r**2)
 
     } else if(method %in% c("fepois", "feglm")){
@@ -165,7 +165,7 @@ hatvalues.fixest = function(model, ...){
 
     validate_dots()
 
-    method = model$method
+    method = model$method_type
     family = model$family
 
     msg = "hatvalues.fixest: 'hatvalues' is not implemented for estimations with fixed-effects."
@@ -181,7 +181,7 @@ hatvalues.fixest = function(model, ...){
 
         res = cpp_diag_XUtX(X, model$cov.unscaled / model$sigma2)
 
-    } else if(method %in% c("fepois", "feglm")){
+    } else if(method == "feglm"){
 
         if(!is.null(model$fixef_id)){
             message(msg)
@@ -265,14 +265,14 @@ NULL
 bread.fixest = function(x, ...){
     validate_dots()
 
-    method = x$method
+    method = x$method_type
     family = x$family
 
     if(method == "feols"){
 
         res = x$cov.unscaled / x$sigma2 * x$nobs
 
-    } else if(method %in% c("fepois", "feglm")){
+    } else if(method == "feglm"){
 
         res = x$cov.unscaled * x$nobs
 

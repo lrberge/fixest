@@ -76,6 +76,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     # FIT methods
     feglm.fit_args = c(setdiff(common_args, c("fml", "data")), feglm_args, "y", "X", "fixef_df")
+    feols.fit_args = c(setdiff(common_args, c("fml", "data")), feols_args, "y", "X", "fixef_df")
 
     args = names(mc_origin)
     args = args[nchar(args) > 0]
@@ -85,6 +86,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                         feols = c(common_args, feols_args),
                         feglm = c(common_args, feglm_args),
                         feglm.fit = feglm.fit_args,
+                        feols.fit = feols.fit_args,
                         femlm = c(common_args, femlm_args),
                         fenegbin = c(common_args, femlm_args),
                         fepois = c(common_args, feglm_args),
