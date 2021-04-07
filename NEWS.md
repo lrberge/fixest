@@ -48,6 +48,8 @@
 Common methods have been extended to `fixest_multi` objects.
 
  - `coef.fixest_multi`: re-arranges the coefficients of multiple estimations into a matrix.
+ 
+ - `resid.fixest_multi`: re-arranges the residuals of multiple estimations into a matrix.
   
 ## New features
 

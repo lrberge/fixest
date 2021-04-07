@@ -166,6 +166,7 @@ summary.fixest_multi = function(object, type = "short", se = NULL, cluster = NUL
         if(!"lhs" %in% names(index)){
             res$lhs = sapply(data, function(x) as.character(x$fml[[2]]))
         }
+
         for(my_dim in names(index)){
             res[[my_dim]] = sfill(as.character(factor(tree[[my_dim]], labels = all_names[[my_dim]])), right = TRUE)
         }
@@ -781,10 +782,60 @@ coef.fixest_multi = function(object, keep, drop, order, ...){
 coefficients.fixest_multi <- coef.fixest_multi
 
 
+#' Extracts the residuals from a \code{fixest_multi} object
+#'
+#' Utility to extract the residuals from multiple \code{fixest} estimations. If possible, all the residuals are coerced into
+#'
+#' @inheritParams resid.fixest
+#'
+#' @param object A \code{fixes_multi} object.
+#' @param na.rm Logical, default is \code{FALSE}. Should the NAs be kept? If \code{TRUE}, they are removed.
+#'
+#' @return
+#' If all the models return residuals of the same length, a matrix is returned. Otherwise, a \code{data.frame} is returned.
+#'
+#' @examples
+#'
+#' base = iris
+#' names(base) = c("y", "x1", "x2", "x3", "species")
+#'
+#' # A multiple estimation
+#' est = feols(y ~ x1 + csw0(x2, x3), base)
+#'
+#' # We can get all the residuals at once,
+#' # each column is a model
+#' head(resid(est))
+#'
+#' # We can select/order the model using fixest_multi extraction
+#' head(resid(est[rhs = .N:1]))
+#'
+resid.fixest_multi = function(object, type = c("response", "deviance", "pearson", "working"), na.rm = FALSE, ...){
+
+    # Je fais un prototype pour le moment, je l'ameliorerai apres (07-04-2021)
+
+    check_arg_plus(type, "match")
+    check_arg_plus(na.rm, "logical scalar")
+
+    data = attr(object, "data")
+
+    res_list = list()
+    for(i in seq_along(data)){
+        res_list[[i]] = resid(data[[i]], type = type, na.rm = na.rm)
+    }
+
+    n_all = sapply(res_list, length)
+
+    if(all(n_all == n_all[1])){
+        res = do.call(cbind, res_list)
+    } else {
+        res = res_list
+    }
+
+    res
+}
 
 
-
-
-
+#' @rdname resid.fixest_multi
+residuals.fixest_multi <- resid.fixest_multi
 
 

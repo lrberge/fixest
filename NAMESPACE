@@ -86,6 +86,8 @@ S3method(hatvalues, fixest)
 # Stats methods => fixest_multi
 S3method(coef, fixest_multi)
 S3method(coefficients, fixest_multi)
+S3method(resid, fixest_multi)
+S3method(residuals, fixest_multi)
 
 # nlme method
 S3method(fixef, fixest)
