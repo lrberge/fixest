@@ -20,6 +20,8 @@
  - Fix incorrect information message when observations are removed because of infinite values (in some circumstances the removal was wrongly attributed to NAness).
  
  - Fix bug in `etable` when checking the argument `coefstat` (thanks to @waynelapierre [#121](https://github.com/lrberge/fixest/issues/121)).
+ 
+ - Fix bug in `feols` when IV estimations contained fixed-effects and `lean = TRUE` (thanks to @adamaltmejd [#123](https://github.com/lrberge/fixest/issues/123)).
 
 ## etable
 

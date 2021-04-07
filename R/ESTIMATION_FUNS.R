@@ -1212,10 +1212,12 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	        for(i in 1:n_endo){
 	            res_first_stage[[i]]$residuals = NULL
 	            res_first_stage[[i]]$fitted.values = NULL
+	            res_first_stage[[i]]$fitted.values_demean = NULL
 	        }
 
 	        res_second_stage$residuals = NULL
 	        res_second_stage$fitted.values = NULL
+	        res_second_stage$fitted.values_demean = NULL
 	    }
 
 	    res_second_stage$iv_first_stage = res_first_stage
@@ -1579,6 +1581,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	    if(isTRUE(dots$iv_call) && lean){
 	        r = res$residuals
 	        fv = res$fitted.values
+	        fvd = res$fitted.values_demean
 	    }
 
 	    res = summary(res, se = se, cluster = cluster, dof = dof, lean = lean, summary_flags = summary_flags)
@@ -1586,6 +1589,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	    if(isTRUE(dots$iv_call) && lean){
 	        res$residuals = r
 	        res$fitted.values = fv
+	        res$fitted.values_demean = fvd
 	    }
 	}
 
