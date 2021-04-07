@@ -83,6 +83,10 @@ S3method(sigma, fixest)
 S3method(weights, fixest)
 S3method(hatvalues, fixest)
 
+# Stats methods => fixest_multi
+S3method(coef, fixest_multi)
+S3method(coefficients, fixest_multi)
+
 # nlme method
 S3method(fixef, fixest)
 

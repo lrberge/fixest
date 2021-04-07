@@ -715,6 +715,70 @@ set_index_multi = function(x, vmax, all_names){
 
 
 
+#' Extracts the coefficients of fixest_multi objects
+#'
+#' Utility to extract the coefficients of multiple estimations and rearrange them into a matrix.
+#'
+#' @inheritParams etable
+#'
+#' @param object A \code{fixest_multi} object. Obtained from a multiple estimation.
+#' @param ... Not currently used.
+#'
+#'
+#' @examples
+#'
+#' base = iris
+#' names(base) = c("y", "x1", "x2", "x3", "species")
+#'
+#' # A multiple estimation
+#' est = feols(y ~ x1 + csw0(x2, x3), base)
+#'
+#' # Getting all the coefficients at once,
+#' # each row is a model
+#' coef(est)
+#'
+#' # Example of keep/drop/order
+#' coef(est, keep = "Int|x1", order = "x1")
+#'
+#'
+#' # To change the order of the model, use fixest_multi
+#' # extraction tools:
+#' coef(est[rhs = .N:1])
+#'
+#'
+coef.fixest_multi = function(object, keep, drop, order, ...){
+    # row: model
+    # col: coefficient
+
+    check_arg(keep, drop, order, "NULL character vector no na")
+
+    data = attr(object, "data")
+
+    res_list = list()
+    for(i in seq_along(data)){
+        res_list[[i]] = coef(data[[i]])
+    }
+
+    all_names = unique(unlist(lapply(res_list, names)))
+
+    if(!missnull(keep)) all_names = keep_apply(all_names, keep)
+    if(!missnull(drop)) all_names = drop_apply(all_names, drop)
+    if(!missnull(order)) all_names = order_apply(all_names, order)
+
+    if(length(all_names) == 0) return(NULL)
+
+    nr = length(res_list)
+    nc = length(all_names)
+
+    res_list = lapply(res_list, function(x) x[all_names])
+    res = do.call(rbind, res_list)
+    colnames(res) = all_names
+
+    res
+}
+
+#' @rdname coef.fixest_multi
+coefficients.fixest_multi <- coef.fixest_multi
 
 
 

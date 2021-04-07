@@ -43,6 +43,12 @@
   
   - Add the argument `coef.just` that controls the justification of the coefficients and standard-errors. Only works when `tex = FALSE` (i.e. a `data.frame` is requested).
   
+## fixest_multi methods
+
+Common methods have been extended to `fixest_multi` objects.
+
+ - `coef.fixest_multi`: re-arranges the coefficients of multiple estimations into a matrix.
+  
 ## New features
 
   - New function `degrees_freedom`: to access the DoFs of the models (sometimes that can be intricate).
