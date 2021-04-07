@@ -99,7 +99,9 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
 
     # Default behavior se:
     suffix = ""
+    se_in = TRUE
     if(missnull(se)){
+        se_in = FALSE
 
         if(missnull(cluster)){
 
@@ -174,6 +176,13 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
         # we can't compute the SE because scores are gone!
         # LATER: recompute the scores (costly but maybe only possibility for user?)
         stop("VCOV of 'lean' fixest objects cannot be computed. Please re-estimate with 'lean = FALSE'.")
+    }
+
+    if(se_in && !missnull(cluster)){
+        if(se %in% c("standard", "hetero")){
+            cluster = NULL
+            warning("Argument se = '", se, "' cannot be used with the argument 'cluster'. Argument 'cluster' is ignored.")
+        }
     }
 
     # Checking the nber of threads
