@@ -8,15 +8,15 @@
 \alias{se}
 \title{Obtain various statistics from an estimation}
 \usage{
-coeftable(object, se, cluster, ...)
+coeftable(object, se, cluster, keep, drop, order, ...)
 
-ctable(object, se, cluster, ...)
+ctable(object, se, cluster, keep, drop, order, ...)
 
-pvalue(object, se, cluster, ...)
+pvalue(object, se, cluster, keep, drop, order, ...)
 
-tstat(object, se, cluster, ...)
+tstat(object, se, cluster, keep, drop, order, ...)
 
-se(object, se, cluster, ...)
+se(object, se, cluster, keep, drop, order, ...)
 }
 \arguments{
 \item{object}{An estimation. For example obtained from \code{\link[fixest]{feols}}.}
@@ -24,6 +24,12 @@ se(object, se, cluster, ...)
 \item{se}{[Fixest specific.] Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.}
 
 \item{cluster}{[Fixest specific.] Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1, "var2")]}, \code{cluster = c("var1, "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster).}
+
+\item{keep}{Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is kept). See details.}
+
+\item{drop}{Character vector. This element is used if some variables are not to be displayed. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be discarded. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{drop = "x[[:digit:]]{2}"}. If the first character is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is dropped). See details.}
+
+\item{order}{Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument \code{dict}). Example: you have the following variables: \code{month1} to \code{month6}, then \code{x1} to \code{x5}, then \code{year1} to \code{year6}. If you want to display first the x's, then the years, then the months you could use: \code{order = c("x", "year")}. If the first character is an exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that does not contain \dQuote{Intercept} goes first).  See details.}
 
 \item{...}{Other arguments to be passed to \code{summary}.}
 }
@@ -75,6 +81,19 @@ ctable(est_sum)
 se(est_sum)
 tstat(est_sum)
 pvalue(est_sum)
+
+# You can use the arguments keep, drop, order
+# to rearrange the results
+
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
+
+est_iv = feols(y ~ x1 | x2 ~ x3, base)
+
+tstat(est_iv, keep = "x1")
+coeftable(est_iv, keep = "x1|Int")
+
+coeftable(est_iv, order = "!Int")
 
 
 

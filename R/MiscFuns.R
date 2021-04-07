@@ -851,6 +851,8 @@ r2 = function(x, type = "all", full_names = FALSE){
 #'
 #' Set of functions to directly extract some commonly used statistics, like the p-value or the table of coefficients, from estimations. This was first implemented for \code{fixest} estimations, but has some support for other models.
 #'
+#' @inheritParams etable
+#'
 #' @param object An estimation. For example obtained from \code{\link[fixest]{feols}}.
 #' @param se [Fixest specific.] Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.
 #' @param cluster [Fixest specific.] Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1, "var2")]}, \code{cluster = c("var1, "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster).
@@ -893,10 +895,25 @@ r2 = function(x, type = "all", full_names = FALSE){
 #' tstat(est_sum)
 #' pvalue(est_sum)
 #'
+#' # You can use the arguments keep, drop, order
+#' # to rearrange the results
+#'
+#' base = iris
+#' names(base) = c("y", "x1", "x2", "x3", "species")
+#'
+#' est_iv = feols(y ~ x1 | x2 ~ x3, base)
+#'
+#' tstat(est_iv, keep = "x1")
+#' coeftable(est_iv, keep = "x1|Int")
+#'
+#' coeftable(est_iv, order = "!Int")
 #'
 #'
-coeftable = function(object, se, cluster, ...){
-    # We don't explicitely refer to the other arguments
+#'
+coeftable = function(object, se, cluster, keep, drop, order, ...){
+    # We don't explicitly refer to the other arguments
+
+    check_arg(keep, drop, order, "NULL character vector no na")
 
     # We make the same call to summary if necessary
     mc = match.call()
@@ -906,6 +923,7 @@ coeftable = function(object, se, cluster, ...){
     if(!any(grepl("summary", class(object))) && (!IS_FIXEST || any(!names(mc) %in% c("", "object")) || !"cov.scaled" %in% names(object))){
         # We call summary
         mc[[1]] = as.name("summary")
+        mc$drop = mc$keep = mc$order = NULL
         object = eval(mc, parent.frame())
     }
 
@@ -930,6 +948,19 @@ coeftable = function(object, se, cluster, ...){
 
     }
 
+    if(!missnull(keep) || !missnull(drop) || !missnull(order)){
+        r_names = rownames(res)
+        r_names = keep_apply(r_names, keep)
+        r_names = drop_apply(r_names, drop)
+        r_names = order_apply(r_names, order)
+
+        if(length(r_names) == 0){
+            return(NULL)
+        }
+
+        res = res[r_names, , drop = FALSE]
+    }
+
     res
 }
 
@@ -937,7 +968,9 @@ coeftable = function(object, se, cluster, ...){
 ctable <- coeftable
 
 #' @describeIn coeftable Extracts the p-value of an estimation
-pvalue = function(object, se, cluster, ...){
+pvalue = function(object, se, cluster, keep, drop, order, ...){
+
+    check_arg(keep, drop, order, "NULL character vector no na")
 
     mc = match.call()
     mc[[1]] = as.name("coeftable")
@@ -952,11 +985,27 @@ pvalue = function(object, se, cluster, ...){
     if(is.null(names(res))) {
         names(res) = rownames(mat)
     }
+
+    if(!missnull(keep) || !missnull(drop) || !missnull(order)){
+        r_names = names(res)
+        r_names = keep_apply(r_names, keep)
+        r_names = drop_apply(r_names, drop)
+        r_names = order_apply(r_names, order)
+
+        if(length(r_names) == 0){
+            return(numeric(0))
+        }
+
+        res = res[r_names]
+    }
+
     res
 }
 
 #' @describeIn coeftable Extracts the t-statistics of an estimation
-tstat = function(object, se, cluster, ...){
+tstat = function(object, se, cluster, keep, drop, order, ...){
+
+    check_arg(keep, drop, order, "NULL character vector no na")
 
     mc = match.call()
     mc[[1]] = as.name("coeftable")
@@ -971,11 +1020,27 @@ tstat = function(object, se, cluster, ...){
     if(is.null(names(res))) {
         names(res) = rownames(mat)
     }
+
+    if(!missnull(keep) || !missnull(drop) || !missnull(order)){
+        r_names = names(res)
+        r_names = keep_apply(r_names, keep)
+        r_names = drop_apply(r_names, drop)
+        r_names = order_apply(r_names, order)
+
+        if(length(r_names) == 0){
+            return(numeric(0))
+        }
+
+        res = res[r_names]
+    }
+
     res
 }
 
 #' @describeIn coeftable Extracts the standard-error of an estimation
-se = function(object, se, cluster, ...){
+se = function(object, se, cluster, keep, drop, order, ...){
+
+    check_arg(keep, drop, order, "NULL character vector no na")
 
     mc = match.call()
     mc[[1]] = as.name("coeftable")
@@ -990,6 +1055,20 @@ se = function(object, se, cluster, ...){
     if(is.null(names(res))) {
         names(res) = rownames(mat)
     }
+
+    if(!missnull(keep) || !missnull(drop) || !missnull(order)){
+        r_names = names(res)
+        r_names = keep_apply(r_names, keep)
+        r_names = drop_apply(r_names, drop)
+        r_names = order_apply(r_names, order)
+
+        if(length(r_names) == 0){
+            return(numeric(0))
+        }
+
+        res = res[r_names]
+    }
+
     res
 }
 
@@ -7772,6 +7851,7 @@ logLik.fixest = function(object, ...){
 #' This function extracts the coefficients obtained from a model estimated with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
 #'
 #' @inheritParams nobs.fixest
+#' @inheritParams etable
 #'
 #' @param ... Not currently used.
 #'
@@ -7802,8 +7882,26 @@ logLik.fixest = function(object, ...){
 #' fixef(res)
 #'
 #'
-coef.fixest = coefficients.fixest = function(object, ...){
-	object$coefficients
+coef.fixest = coefficients.fixest = function(object, keep, drop, order, ...){
+
+    check_arg(keep, drop, order, "NULL character vector no na")
+
+    res = object$coefficients
+
+    if(!missnull(keep) || !missnull(drop) || !missnull(order)){
+        cnames = names(res)
+        cnames = keep_apply(cnames, keep)
+        cnames = drop_apply(cnames, drop)
+        cnames = order_apply(cnames, order)
+
+        if(length(cnames) == 0){
+            return(numeric(0))
+        }
+
+        res = res[cnames]
+    }
+
+    res
 }
 
 #' @rdname coef.fixest

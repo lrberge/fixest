@@ -6,7 +6,7 @@ useDynLib(fixest, .registration = TRUE)
 
 # main funs
 export(feNmlm, femlm, feols, feglm, fepois, fenegbin)
-export(feglm.fit)
+export(feglm.fit, feols.fit)
 # etable
 export(etable, style.tex, style.df)
 export(extraline_register)
