@@ -65,6 +65,8 @@ Common methods have been extended to `fixest_multi` objects.
   
   - `.fit` methods (`feols.fit` and `feglm.fit`) now handle multiple dependent variables.
   
+  - The argument `only.inter` can now have user-defined default values using `setFixest_coefplot`.
+  
 ## Other changes
 
   - Improve error messages. 

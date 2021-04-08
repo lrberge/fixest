@@ -2,11 +2,13 @@
 % Please edit documentation in R/coefplot.R
 \name{setFixest_coefplot}
 \alias{setFixest_coefplot}
+\alias{getFixest_coefplot}
 \title{Sets the defaults of coefplot}
 \usage{
 setFixest_coefplot(
   style,
   horiz = FALSE,
+  only.inter = TRUE,
   dict = getFixest_dict(),
   keep,
   ci.width = "1\%",
@@ -51,11 +53,15 @@ setFixest_coefplot(
   sub = NULL,
   reset = FALSE
 )
+
+getFixest_coefplot()
 }
 \arguments{
 \item{style}{A character scalar giving the style of the plot to be used. You can set styles with the function \code{\link[fixest]{setFixest_coefplot}}, setting all the default values of the function. If missing, then it switches to either "default", "interaction" or "multiple", depending on the data given in input.}
 
 \item{horiz}{A logical scalar, default is \code{FALSE}. Whether to display the confidence intervals horizontally instead of vertically.}
+
+\item{only.inter}{Logical, default is \code{TRUE}. If an interaction of the type of \code{var::fe} (see \code{\link[fixest]{feols}} help for details) is found, then only these interactions are plotted. If \code{FALSE}, then interactions are treated as regular coefficients.}
 
 \item{dict}{A named character vector or a logical scalar. It changes the original variable names to the ones contained in the \code{dict}ionary. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default, it is equal to \code{getFixest_dict()}, a default dictionary which can be set with \code{\link[fixest]{setFixest_dict}}. You can use \code{dict = FALSE} to disable it..}
 

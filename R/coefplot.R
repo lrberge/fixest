@@ -245,6 +245,12 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, hor
     # Getting the parameters => function coefplot_prms
     #
 
+    # Getting only.inter in the default values
+    opts = getOption("fixest_coefplot")
+    if(missing(only.inter) && "only.inter" %in% names(opts$default)){
+        only.inter = opts$default$only.inter
+    }
+
     info = coefplot_prms(object = object, ..., sd = sd, ci_low = ci_low, ci_high = ci_high, x = x, x.shift = x.shift, dict = dict, keep = keep, drop = drop, order = order, ci_level = ci_level, ref = ref, only.inter = only.inter, sep = sep, as.multiple = as.multiple)
 
     prms = info$prms
@@ -280,7 +286,6 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, hor
     # Setting the default values ####
     #
 
-    opts = getOption("fixest_coefplot")
     check_arg(style, "character scalar")
     if(missing(style)){
         if(is_interaction){
@@ -2110,7 +2115,7 @@ expr_builder = function(x){
 #' setFixest_coefplot()
 #' coefplot(est)
 #'
-setFixest_coefplot = function(style, horiz = FALSE, dict = getFixest_dict(), keep, ci.width = "1%", ci_level = 0.95, pt.pch = 20, pt.bg = NULL, cex = 1, pt.cex = cex, col = 1:8, pt.col = col, ci.col = col, lwd = 1, pt.lwd = lwd, ci.lwd = lwd, ci.lty = 1, grid = TRUE, grid.par = list(lty = 3, col = "gray"), zero = TRUE, zero.par = list(col = "black", lwd = 1), pt.join = FALSE, pt.join.par = list(col = pt.col, lwd = lwd), ci.join = FALSE, ci.join.par = list(lwd = lwd, col = col, lty = 2), ci.fill = FALSE, ci.fill.par = list(col = "lightgray", alpha = 0.5), ref.line = "auto", ref.line.par = list(col = "black", lty = 2), lab.cex, lab.min.cex = 0.85, lab.max.mar = 0.25, lab.fit = "auto", xlim.add, ylim.add, sep, bg, group = "auto", group.par = list(lwd = 2, line = 3, tcl = 0.75), main = "Effect on __depvar__", value.lab = "Estimate and __ci__ Conf. Int.", ylab = NULL, xlab = NULL, sub = NULL, reset = FALSE){
+setFixest_coefplot = function(style, horiz = FALSE, only.inter = TRUE, dict = getFixest_dict(), keep, ci.width = "1%", ci_level = 0.95, pt.pch = 20, pt.bg = NULL, cex = 1, pt.cex = cex, col = 1:8, pt.col = col, ci.col = col, lwd = 1, pt.lwd = lwd, ci.lwd = lwd, ci.lty = 1, grid = TRUE, grid.par = list(lty = 3, col = "gray"), zero = TRUE, zero.par = list(col = "black", lwd = 1), pt.join = FALSE, pt.join.par = list(col = pt.col, lwd = lwd), ci.join = FALSE, ci.join.par = list(lwd = lwd, col = col, lty = 2), ci.fill = FALSE, ci.fill.par = list(col = "lightgray", alpha = 0.5), ref.line = "auto", ref.line.par = list(col = "black", lty = 2), lab.cex, lab.min.cex = 0.85, lab.max.mar = 0.25, lab.fit = "auto", xlim.add, ylim.add, sep, bg, group = "auto", group.par = list(lwd = 2, line = 3, tcl = 0.75), main = "Effect on __depvar__", value.lab = "Estimate and __ci__ Conf. Int.", ylab = NULL, xlab = NULL, sub = NULL, reset = FALSE){
 
     fm_cp = formals(coefplot)
     arg_list = names(fm_cp)
@@ -2130,7 +2135,7 @@ setFixest_coefplot = function(style, horiz = FALSE, dict = getFixest_dict(), kee
     check_arg(ci.width, "scalar(numeric, character) GE{0}")
     check_arg(ci_level, "numeric scalar GT{0} LT{1}")
     check_arg(lwd, ci.lwd, "numeric scalar GE{0}")
-    check_arg(grid, zero, "logical scalar")
+    check_arg(grid, zero, only.inter, "logical scalar")
 
     check_arg_plus("L0 list NULL{list()}", grid.par, zero.par, pt.join.par, ref.line.par)
 
@@ -2232,10 +2237,10 @@ setFixest_coefplot = function(style, horiz = FALSE, dict = getFixest_dict(), kee
     options("fixest_coefplot" = opts)
 }
 
-
-
-
-
+#' @rdname setFixest_coefplot
+getFixest_coefplot = function(){
+    getOption("fixest_coefplot")
+}
 
 
 
