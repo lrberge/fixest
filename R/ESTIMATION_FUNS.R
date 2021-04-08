@@ -1172,11 +1172,16 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 	    df1 = n_endo
 	    df2 = length(y) - (res_second_stage$nparams + df1)
-	    qui = df1 + 1:df1 + ("(Intercept)" %in% names(res_second_stage$coefficients))
-	    my_coef = fit_wh$coefficients[qui]
-	    vcov_wh = fit_wh$xwx_inv[qui, qui] * cpp_ssq(fit_wh$residuals, weights) / df2
-	    stat = drop(my_coef %*% solve(vcov_wh) %*% my_coef) / df1
-	    p = pf(stat, df1, df2, lower.tail = FALSE)
+	    if(any(fit_wh$is_excluded)){
+	        stat = p = NA
+	    } else {
+	        qui = df1 + 1:df1 + ("(Intercept)" %in% names(res_second_stage$coefficients))
+	        my_coef = fit_wh$coefficients[qui]
+	        vcov_wh = fit_wh$xwx_inv[qui, qui] * cpp_ssq(fit_wh$residuals, weights) / df2
+	        stat = drop(my_coef %*% solve(vcov_wh) %*% my_coef) / df1
+	        p = pf(stat, df1, df2, lower.tail = FALSE)
+	    }
+
 	    res_second_stage$iv_wh = list(stat = stat, p = p, df1 = df1, df2 = df2)
 
 	    #
