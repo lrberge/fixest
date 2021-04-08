@@ -123,6 +123,16 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 	if(!is.null(x$collin.var)){
 	    n_collin = length(x$collin.var)
 	    collinearity_msg = paste0("... ", n_collin, " variable", plural(n_collin, "s.was"), " removed because of collinearity (", enumerate_items(x$collin.var, nmax = 3), ifelse(n_collin > 3, " [full set in $collin.var]", ""), ")\n")
+	    if(isTRUE(x$iv) && any(grepl("^fit_", x$collin.var))){
+	        if(!any(grepl("^fit_", names(x$coefficients)))){
+	            iv_msg = "NOTE: all endogenous regressors were removed.\n"
+	        } else {
+	            n_rm = sum(grepl("^fit_", x$collin.var))
+	            iv_msg = paste0("Important note: ", n_letter(n_rm), " endogenous regressor", plural(n_rm, "s.was"), " removed => IV estimation not valid.\n")
+	        }
+
+	        collinearity_msg = paste0(collinearity_msg, iv_msg)
+	    }
 	}
 
 	if(isFALSE(x$convStatus)){
@@ -166,27 +176,27 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 
 	if(isTRUE(x$iv)){
 	    glue = function(...) paste(..., collapse = ", ")
-	    first_line = paste0("TSLS estimation, Dep. Var.: ", as.character(x$fml)[[2]], ", Endo.: ", glue(x$iv_endo_names), ", Instr.: ", glue(x$iv_inst_names), "\n")
+	    first_line = paste0("TSLS estimation, Dep. Var.: ", as.character(x$fml)[[2]], ", Endo.: ", glue(get_vars(x$iv_endo_fml)), ", Instr.: ", glue(x$iv_inst_names), "\n")
 	    second_line = paste0(ifunit(x$iv_stage, "First", "Second"), " stage: Dep. Var.: ", as.character(x$fml)[[2]], "\n")
 	    cat(first_line, second_line, sep = "")
 	} else {
 	    cat(half_line, ", Dep. Var.: ", as.character(x$fml)[[2]], "\n", sep="")
 	}
 
-	# cat(msg, "ML estimation, family = ", family_format[x$family], ", Dep. Var.: ", as.character(x$fml)[[2]], "\n", sep="")
+
 	cat("Observations:", addCommas(x$nobs), "\n")
 	if(!is.null(x$fixef_terms)){
 	    terms_full = extract_fe_slope(x$fixef_terms)
 	    fixef_vars = terms_full$fixef_vars
 
 	    if(length(fixef_vars) > 0){
-	        cat("Fixed-effects: ", paste0(fixef_vars, ": ", addCommas(x$fixef_sizes[fixef_vars]), collapse=",  "), "\n", sep="")
+	        cat("Fixed-effects: ", paste0(fixef_vars, ": ", addCommas(x$fixef_sizes[fixef_vars]), collapse=",  "), "\n", sep = "")
 	    }
 
-	    cat("Varying slopes: ", paste0(terms_full$slope_vars, " (", terms_full$slope_fe, ": ", addCommas(x$fixef_sizes[terms_full$slope_fe]), ")", collapse=",  "), "\n", sep="")
+	    cat("Varying slopes: ", paste0(terms_full$slope_vars, " (", terms_full$slope_fe, ": ", addCommas(x$fixef_sizes[terms_full$slope_fe]), ")", collapse = ",  "), "\n", sep = "")
 
 	} else {
-	    if(!is.null(x$fixef_sizes)) cat("Fixed-effects: ", paste0(x$fixef_vars, ": ", addCommas(x$fixef_sizes), collapse=",  "), "\n", sep="")
+	    if(!is.null(x$fixef_sizes)) cat("Fixed-effects: ", paste0(x$fixef_vars, ": ", addCommas(x$fixef_sizes), collapse = ",  "), "\n", sep = "")
 	}
 
 
@@ -4001,9 +4011,10 @@ print.fixest_fitstat = function(x, na.rm = FALSE, ...){
 
     if(any(is_pval)){
         pval_all = sapply(x[is_pval], function(z) z$p)
-        low = pval_all < 2.2e-16
+        low = pval_all < 2.2e-16 & !is.na(pval_all)
         pval_all[low] = 2.2e-16
         pval_all = paste0("p ", ifelse(low, "< ", "= "), sfill(numberFormatNormal(pval_all), right = TRUE))
+
         for(i in seq_along(pval_all)){
             j = which(is_pval)[i]
             x[[j]]$p = pval_all[i]
@@ -7646,6 +7657,10 @@ check_set_digits = function(digits, up = 1){
     }
 
     list(digits = digits, round = round)
+}
+
+get_vars = function(x){
+    attr(terms(x), "term.labels")
 }
 
 
