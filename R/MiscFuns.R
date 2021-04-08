@@ -7518,7 +7518,7 @@ fixest_fml_rewriter = function(fml){
             fml_rhs = fml_maker(fml_parts[[1]])
         }
 
-        rhs_terms = attr(terms(fml_rhs), "term.labels")
+        rhs_terms = get_vars(fml_rhs)
 
         if(isPanel){
             rhs_terms = error_sender(expand_lags_internal(rhs_terms),
@@ -7528,6 +7528,10 @@ fixest_fml_rewriter = function(fml){
         if(isInteract){
             rhs_terms = error_sender(expand_interactions_internal(rhs_terms),
                                      "Error in the interaction in the RHS of the formula: ")
+        }
+
+        if(attr(terms(fml_rhs), "intercept") == 0){
+            rhs_terms = c("-1", rhs_terms)
         }
 
         rhs_text = paste(rhs_terms, collapse = "+")

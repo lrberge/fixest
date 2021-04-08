@@ -24,6 +24,8 @@
  - Fix bug in `feols` when IV estimations contained fixed-effects and `lean = TRUE` (thanks to @adamaltmejd [#123](https://github.com/lrberge/fixest/issues/123)).
  
  - Fix bug in IV estimations when an endogenous regressor was removed because of collinearity.
+ 
+ - Fix bug estimation without intercept not working when lags are present in the formula (thanks to @nreigl [#126](https://github.com/lrberge/fixest/issues/126)). 
 
 ## etable
 
