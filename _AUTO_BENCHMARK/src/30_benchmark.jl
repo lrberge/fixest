@@ -33,7 +33,7 @@ println("done.")
 # warming up
 println("warming up...")
 base = base_all[1]
-test = @elapsed reg(base, @formula(ln_y ~ X1 + fe(dum_1)))
+test = @elapsed reg(base, @formula(ln_y ~ X1 + fe(dum_1)), tol = 1e-6, drop_singletons = false)
 println("done.")
 
 # 1 FE
@@ -45,13 +45,13 @@ for i = 1:40
     println("i = ", i)
     base = base_all[i]
     print(size(base))
-    timings[i] = @elapsed reg(base, @formula(ln_y ~ X1 + fe(dum_1)))
+    timings[i] = @elapsed reg(base, @formula(ln_y ~ X1 + fe(dum_1)), tol = 1e-6, drop_singletons = false)
 end
 
 # The 10M DB
 for i = 1:10
     println("i = ", i + 40)
-    timings[i + 40] = @elapsed reg(base_10M, @formula(ln_y ~ X1 + fe(dum_1)))
+    timings[i + 40] = @elapsed reg(base_10M, @formula(ln_y ~ X1 + fe(dum_1)), tol = 1e-6, drop_singletons = false)
 end
 
 # saving
@@ -67,13 +67,13 @@ timings = Vector{Float64}(undef, 50)
 for i = 1:40
     println("i = ", i)
     base = base_all[i]
-    timings[i] = @elapsed reg(base, @formula(ln_y ~ X1 + fe(dum_1) + fe(dum_2)))
+    timings[i] = @elapsed reg(base, @formula(ln_y ~ X1 + fe(dum_1) + fe(dum_2)), tol = 1e-6, drop_singletons = false)
 end
 
 # The 10M DB
 for i = 1:10
     println("i = ", i + 40)
-    timings[i + 40] = @elapsed reg(base_10M, @formula(ln_y ~ X1 + fe(dum_1) + fe(dum_2)))
+    timings[i + 40] = @elapsed reg(base_10M, @formula(ln_y ~ X1 + fe(dum_1) + fe(dum_2)), tol = 1e-6, drop_singletons = false)
 end
 
 # saving
@@ -90,13 +90,13 @@ timings = Vector{Float64}(undef, 50)
 for i = 1:40
     println("i = ", i)
     base = base_all[i]
-    timings[i] = @elapsed reg(base, @formula(ln_y ~ X1 + fe(dum_1) + fe(dum_2) + fe(dum_3)))
+    timings[i] = @elapsed reg(base, @formula(ln_y ~ X1 + fe(dum_1) + fe(dum_2) + fe(dum_3)), tol = 1e-6, drop_singletons = false)
 end
 
 # The 10M DB
 for i = 1:10
     println("i = ", i + 40)
-    timings[i + 40] = @elapsed reg(base_10M, @formula(ln_y ~ X1 + fe(dum_1) + fe(dum_2) + fe(dum_3)))
+    timings[i + 40] = @elapsed reg(base_10M, @formula(ln_y ~ X1 + fe(dum_1) + fe(dum_2) + fe(dum_3)), tol = 1e-6, drop_singletons = false)
 end
 
 # saving
@@ -118,7 +118,7 @@ println("done.")
 # warming up
 println("warming up...")
 base = base_diff[1]
-test = @elapsed reg(base, @formula(y ~ x1 + x2 + fe(id_indiv)))
+test = @elapsed reg(base, @formula(y ~ x1 + x2 + fe(id_indiv)), tol = 1e-6, drop_singletons = false)
 println("done.")
 
 timings = Vector{Float64}(undef, 120)
@@ -131,11 +131,11 @@ for size = 1:4
         println("g = ", g)
         for r = 1:10
             if g == 1
-                global timings[index] = @elapsed reg(base, @formula(y ~ x1 + x2 + fe(id_indiv)))
+                global timings[index] = @elapsed reg(base, @formula(y ~ x1 + x2 + fe(id_indiv)), tol = 1e-6, drop_singletons = false)
             elseif g == 2
-                global timings[index] = @elapsed reg(base, @formula(y ~ x1 + x2 + fe(id_indiv) + fe(id_firm)))
+                global timings[index] = @elapsed reg(base, @formula(y ~ x1 + x2 + fe(id_indiv) + fe(id_firm)), tol = 1e-6, drop_singletons = false)
             else
-                global timings[index] = @elapsed reg(base, @formula(y ~ x1 + x2 + fe(id_indiv) + fe(id_firm) + fe(id_year)))
+                global timings[index] = @elapsed reg(base, @formula(y ~ x1 + x2 + fe(id_indiv) + fe(id_firm) + fe(id_year)), tol = 1e-6, drop_singletons = false)
             end
             global index = index + 1
         end
