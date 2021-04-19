@@ -7827,7 +7827,7 @@ formula.fixest = function(x, type = c("full", "linear", "iv", "NL"), ...){
 #' @inheritParams nobs.fixest
 #'
 #' @param data If missing (default) then the original data is obtained by evaluating the \code{call}. Otherwise, it should be a \code{data.frame}.
-#' @param type Character vector or one sided formula, default is "rhs". Contains the type of matrix/data.frame to be returned. Possible values are: "lhs", "rhs", "fixef", "iv.rhs1", "iv.rhs2".
+#' @param type Character vector or one sided formula, default is "rhs". Contains the type of matrix/data.frame to be returned. Possible values are: "lhs", "rhs", "fixef", "iv.rhs1", "iv.rhs2", "iv.endo", "iv.exo", "iv.inst".
 #' @param na.rm Default is \code{TRUE}. Should observations with NAs be removed from the matrix?
 #' @param subset Logical or character vector. Default is \code{FALSE}. If \code{TRUE}, then the matrix created will be restricted only to the variables contained in the argument \code{data}, which can then contain a subset of the variables used in the estimation. If a character vector, then only the variables matching the elements of the vector via regular expressions will be created.
 #' @param ... Not currently used.
@@ -7868,7 +7868,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
     # Checking the arguments
     validate_dots(suggest_args = c("data", "type"))
 
-    type = check_set_types(type, c("lhs", "rhs", "fixef", "iv.endo", "iv.inst", "iv.rhs1", "iv.rhs2"))
+    type = check_set_types(type, c("lhs", "rhs", "fixef", "iv.endo", "iv.inst", "iv.exo", "iv.rhs1", "iv.rhs2"))
 
     if(isTRUE(object$fromFit)){
         stop("model.matrix method not available for fixest estimations obtained from fit methods.")
@@ -7994,6 +7994,14 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	    endo.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = TRUE), "In 'model.matrix', the instruments could not be evaluated: ")
 
 	    res[["iv.inst"]] = endo.mat
+	}
+
+	if("iv.exo" %in% type){
+	    fml = object$fml_all$linear
+
+	    exo.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = TRUE), "In 'model.matrix', the instruments could not be evaluated: ")
+
+	    res[["iv.exo"]] = exo.mat
 	}
 
 	if("iv.rhs1" %in% type){

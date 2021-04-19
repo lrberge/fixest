@@ -11,7 +11,7 @@
 
 \item{data}{If missing (default) then the original data is obtained by evaluating the \code{call}. Otherwise, it should be a \code{data.frame}.}
 
-\item{type}{Character vector or one sided formula, default is "rhs". Contains the type of matrix/data.frame to be returned. Possible values are: "lhs", "rhs", "fixef", "iv.rhs1", "iv.rhs2".}
+\item{type}{Character vector or one sided formula, default is "rhs". Contains the type of matrix/data.frame to be returned. Possible values are: "lhs", "rhs", "fixef", "iv.rhs1", "iv.rhs2", "iv.endo", "iv.exo", "iv.inst".}
 
 \item{na.rm}{Default is \code{TRUE}. Should observations with NAs be removed from the matrix?}
 
