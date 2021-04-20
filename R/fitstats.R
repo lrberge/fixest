@@ -5,6 +5,11 @@
 #----------------------------------------------#
 
 
+####
+#### stats -- User level ####
+####
+
+
 
 #' Print method for fit statistics of fixest estimations
 #'
@@ -838,44 +843,6 @@ wald = function(x, keep = NULL, drop = NULL, print = TRUE, se, cluster, ...){
     }
 }
 
-.wald = function(x, var){
-    # x: fixest estimation
-
-    coef = x$coefficients
-
-    vcov = x$cov.scaled
-    if(is.null(vcov)){
-        # => INTERNAL ERROR
-        stop("INTERNAL ERROR: .wald should be applied only to objects with a VCOV already computed. Could you report the error to the maintainer of fixest?")
-    }
-
-    var_keep = intersect(var, names(coef))
-
-    if(length(var_keep) == 0){
-        # All vars removed bc of collin => stat = 0
-        return(0)
-    }
-
-    # To handle errors (rarely can happen)
-    chol_decomp = cpp_cholesky(vcov[var_keep, var_keep, drop = FALSE])
-    vcov_inv = chol_decomp$XtX_inv
-
-    if(isTRUE(chol_decomp$all_removed)){
-        # Can happen for indicators + clustering at the same level
-        return(100000)
-    }
-
-    if(any(chol_decomp$id_excl)){
-        var_keep = var_keep[!chol_decomp$id_excl]
-    }
-
-    my_coef = coef[var_keep]
-
-    stat = drop(my_coef %*% vcov_inv %*% my_coef) / length(my_coef)
-
-    stat
-}
-
 fitstat_validate = function(x, vector = FALSE){
     check_value(x, "NA | os formula | charin(FALSE) | character vector no na", .arg_name = "fitstat", .up = 1)
 
@@ -1085,10 +1052,203 @@ r2 = function(x, type = "all", full_names = FALSE){
     res
 }
 
+####
+#### Stats -- internal ####
+####
+
+.wald = function(x, var){
+    # x: fixest estimation
+
+    coef = x$coefficients
+
+    vcov = x$cov.scaled
+    if(is.null(vcov)){
+        # => INTERNAL ERROR
+        stop("INTERNAL ERROR: .wald should be applied only to objects with a VCOV already computed. Could you report the error to the maintainer of fixest?")
+    }
+
+    var_keep = intersect(var, names(coef))
+
+    if(length(var_keep) == 0){
+        # All vars removed bc of collin => stat = 0
+        return(0)
+    }
+
+    # To handle errors (rarely can happen)
+    chol_decomp = cpp_cholesky(vcov[var_keep, var_keep, drop = FALSE])
+    vcov_inv = chol_decomp$XtX_inv
+
+    if(isTRUE(chol_decomp$all_removed)){
+        # Can happen for indicators + clustering at the same level
+        return(100000)
+    }
+
+    if(any(chol_decomp$id_excl)){
+        var_keep = var_keep[!chol_decomp$id_excl]
+    }
+
+    my_coef = coef[var_keep]
+
+    stat = drop(my_coef %*% vcov_inv %*% my_coef) / length(my_coef)
+
+    stat
+}
+
+
+kp_stat = function(x){
+    # internal function => x must be a fixest object
+    #
+    # The code here is a translation of the ranktest.jl function from the Vcov.jl package
+    # from @matthieugomez (see https://github.com/matthieugomez/Vcov.jl)
+    #
+
+
+    if(!isTRUE(x$iv) || !x$iv_stage == 2) return(NA)
+
+    # Necessary data
+
+    X_proj = resid(summary(x, stage = 1))
+
+    # while the projection of X has already been computed, we need to do it
+    # for Z => that's a pain in the neck
+    # computational cost is much lower is I include the KP computation at
+    # estimation time.... since here we do the job twice... we'll see
+
+    Z = model.matrix(x, type = "iv.inst")
+    U = model.matrix(x, type = "iv.exo")
+    is_U = !is.null(U)
+
+    if(!is.null(x$fixef_vars)){
+        # we need to center the variables
+        # Of course, if there are varying slopes, that's a pain in the neck
+
+        if(!is.null(x$slope_flag)){
+            Z_dm = demean(Z, x$fixef_id[order(x$fixef_sizes, decreasing = TRUE)],
+                          slope.vars = x$slope_variables_reordered,
+                          slope.flag = x$slope_flag_reordered)
+
+            if(is_U){
+                U_dm = demean(U, x$fixef_id[order(x$fixef_sizes, decreasing = TRUE)],
+                              slope.vars = x$slope_variables_reordered,
+                              slope.flag = x$slope_flag_reordered)
+            }
+
+        } else {
+            Z_dm = demean(Z, x$fixef_id)
+            if(is_U){
+                U_dm = demean(U, x$fixef_id)
+            }
+        }
+
+        if(is_U){
+            Z_proj = resid(feols.fit(Z_dm, U_dm))
+        } else {
+            Z_proj = Z_dm
+        }
+
+    } else if(is_U){
+        Z_proj = resid(feols.fit(Z, U))
+    } else {
+        Z_proj = Z
+    }
+
+    # Let's go
+
+    PI = coef(summary(x, stage = 1))
+    PI = t(PI[, colnames(PI) %in% x$iv_inst_names_xpd])
+
+    Fmat = chol(crossprod(Z_proj))
+    Gmat = chol(crossprod(X_proj))
+    theta = Fmat %*% t(solve(t(Gmat)) %*% t(PI))
+
+    svddecomposition = mat_svd(theta)
+    u = svddecomposition$u
+    vt = svddecomposition$vt
+
+    k = n_endo = ncol(X_proj)
+    l = n_inst = ncol(Z)
+
+    u_sub = u[k:l, k:l]
+    vt_sub = vt[k, k]
+
+    ssign = function(x) if(x == 0) 1 else sign(x)
+
+    if(k == l){
+        a_qq = ssign(u_sub[1]) * u[1:l, k:l]
+        b_qq = ssign(vt_sub[1]) * t(vt[1:k, k])
+    } else {
+        a_qq = u[1:l, k:l]  %*% (solve(u_sub) %*% mat_sqrt(u_sub %*% t(u_sub)))
+        b_qq = mat_sqrt(vt_sub %*% t(vt_sub)) %*% (solve(t(vt_sub)) %*% t(vt[1:k, k]))
+    }
+
+    # kronecker
+    kronv = kronecker(b_qq, t(a_qq))
+    lambda = kronv %*% c(theta)
+
+    # There is need to compute the vcov specifically for this case
+    # We do it the same way as it was for x
+
+    if(identical(x$se_info$se, "standard")){
+        vlab = chol(tcrossprod(kronv) / nrow(X_proj))
+
+    } else {
+        K = t(kronecker(Gmat, Fmat))
+
+        my_scores = do.call(cbind, lapply(1:ncol(X_proj), function(i) Z_proj * X_proj[, i]))
+        my_vcov_raw = solve(K)
+
+        x_new = x
+        x_new$scores = my_scores
+        x_new$cov.unscaled =  my_vcov_raw * x_new$sigma2
+
+        se = x$summary_flags$se
+        cluster = x$summary_flags$cluster
+        dof = x$summary_flags$dof
+
+        vhat = vcov(x_new, se = se, cluster = cluster, dof = dof)
+
+        vlab = kronv %*% vhat %*% t(kronv)
+    }
+
+    r_kp = t(lambda) %*% solve(vlab, lambda)
+
+    # Now the results
+    kp_df = n_inst - n_endo + 1
+    kp_f = r_kp / n_inst
+    kp_p = pchisq(kp_f, kp_df, lower.tail = FALSE)
+
+    list(stat = kp_f, p = kp_p, df = kp_df)
+}
 
 
 
+####
+#### Misc internal funs ####
+####
 
+mat_sqrt = function(A){
+    e = eigen(A)
+    # e$vectors %*% diag(x = sqrt(e$values), nrow = nrow(A)) %*% t(e$vectors)
+    ev = pmax(e$values, 1e-10)
+    M = e$vectors %*% diag(x = ev**.25, nrow = nrow(A))
+    tcrossprod(M)
+}
+
+
+mat_svd = function(A){
+    # From https://rpubs.com/aaronsc32/singular-value-decomposition-r
+
+    ATA = crossprod(A)
+    ATA.e = eigen(ATA)
+    v.mat = ATA.e$vectors
+
+    AAT = tcrossprod(A)
+    AAT.e = eigen(AAT)
+    u.mat = AAT.e$vectors
+    r = sqrt(ATA.e$values)
+
+    list(u = u.mat, vt = t(v.mat), d = r)
+}
 
 
 
