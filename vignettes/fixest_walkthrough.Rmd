@@ -6,13 +6,13 @@ output:
   html_document:
     number_sections: yes
     toc: yes
-    toc_depth: 2
+    toc_depth: 3
     toc_float:
-      collapsed: no
+      collapsed: yes
       smooth_scroll: no
   pdf_document:
     toc: yes
-    toc_depth: '2'
+    toc_depth: 3
 vignette: > 
   %\VignetteIndexEntry{fixest introduction} 
   %\VignetteEngine{knitr::rmarkdown}
@@ -164,7 +164,6 @@ To get the estimation for the fixed-effects Negative Binomial:
 gravity_negbin = fenegbin(Euros ~ log(dist_km) | Origin + Destination + Product + Year, trade)
 
 ```
-
 
 
 ## Viewing the results in R
@@ -346,73 +345,248 @@ Here we use `stage = 1:2` to get all first stage regressions followed by the sec
 
 Now some explanations regarding `fitstat`. The suffix `all` concerns IV only and means the following: if it's a first stage regression, then the first-stage F-stat is displayed, otherwise it's the second stage F-stat. The suffix `.p` is used in `ivwaldall.p` to access the p-value and not the statistic. Finally, you can permanently set which fit statistic to display in `etable` by using `setFixest_etable`, like for example `setFixest_etable(fitstat = ~ . + ivfall + ivwaldall.p)`.
 
+# Interaction terms
+
+Most R users will be familiar with the base expansion operators for creating model interaction terms, e.g. `x1*x2`, `x1:x2`, and `x1/x2`. These base operators all work with `fixest` models. However, the package also provides its own specialized syntax for creating interaction terms and combining variables. Relative to the base methods, these `fixest` methods offer significant performance gains and synergies with the package's other functions. To balance performance and convenience, the exact syntax depends on whether the interaction involves fixed-effects or not. Here we walk through both categories, further providing examples of common use-cases.
+
+## Interactions involving fixed-effects
+
+There are two reasons why we would want to interact variables in the fixed-effects slot. First, we may simply wish to combine fixed-effects (e.g. firm × country effects). Second, we wish to allow for varying slopes (e.g. a time trend for each firm). Let us consider each in turn, using a lightly modified version of the `iris` dataset:
+
+```{r}
+# Our base data for this section
+base = iris
+names(base) = c("y", paste0("x", 1:3), "fe1")
+# Create another "fixed-effect"
+base$fe2 = rep(letters[1:5], 30)
+head(base)
+```
+
+### Combining several fixed-effects (`fe1^fe2^fe3...`)
+
+Say we want to "combine" the two fixed-effect variables `fe1` and `fe2` to create a brand new fixed-effect variable. We can do it simply via `fixest`'s special `^` operator:
+
+```{r}
+est_comb = feols(y ~ x1 | fe1^fe2, base)
+est_comb
+```
+
+The `^` operator does the same thing as `paste0(species, "_", fe)`, but is more convenient and significantly faster for large datasets. You can still extract the fixed-effects the same way:
+
+```{r}
+fixef(est_comb)[[1]]
+```
+
+Note further that more than two fixed-effects can be combined in exactly the same manner (e.g. `fe1^fe2^fe3`), and the syntax carries over to multivariate clustering too (e.g. `cluster = ~fe1^fe2^fe3`).
+
+### Varying slopes (`fe[x]`)
+
+You can introduce variables with varying slopes directly into the fixed-effects part of the formula using square brackets (`[]`). Recall that varying slopes allow us to flexibly control for heterogeneous effects across groups. Common real-life examples could be the inclusion of time trends for each observational unit (e.g. country), or allowing for the effect of some control variable (e.g. income) to be moderated by a fixed-effect (e.g. gender). Here we demonstrate by continuing with our simple dataset.
+
+```{r}
+head(base)
+```
+
+Say we want to estimate `y` as a function of `x1`, but controlling for `x2`. Moreover, we think that the slope coefficient of our `x2` control variable should be allowed to vary by the `fe1` fixed-effect variable. We just have to do:
+
+```{r}
+est_vs = feols(y ~ x1 | fe1[x2], base)
+est_vs
+```
+
+If you want to see the slopes for `x2`, just use the function `fixef`:
+
+```{r}
+summary(fixef(est_vs))
+```
+
+Note that this produces the same result as `feols(y ~ x1 + fe1/x2, base)`, but is much more performant for large datasets. The trade-off from the `fe1[x2]` method is that we lose the ability to estimate confidence intervals on the resulting slope coefficients. This should be fine in cases where we are just trying to control for some confounding or nuisance parameters. If you are interested in conducting statistical inference on the resulting slope coefficients and require confidence intervals, then you should use the slower `fe1/x2` approach instead.
+
+## Interactions that don't involve fixed-effects:
+
+The preceding interaction examples all took place in the fixed-effects slot (i.e. after the `|`). Underneath the hood, methods like `fe1^fe2` and `fe1[x2]` use numerical shortcuts that greatly speed up computation. This comes at the cost of being able to do richer inference with the interacted terms --- e.g. construct confidence intervals --- since they are swept out of the model at estimation time. In many cases, this should prove to be a perfectly acceptable trade-off. After all, the primary motivation for estimating fixed-effects models in the first place is to remove the confounding effect of such "nuisance" parameters. 
+
+Yet, there are equally many cases where we do want to retain full inferential information about interaction terms. For example, in a difference-in-differences (DiD) research design. Here too `fixest` offers its own specialized syntax for combining terms in the model formula: `i()`. 
+
+As we'll see, `i()` is more versatile than just creating interaction terms. It is also able to coerce individual variables to a factor and, compared to base R `factor()`, does so in a way that allows for better synergies with other `fixest` functions like `etable` and `coefplot`. This will allow us to perform some common estimation tasks much more easily.
+
+We now illustrate the main uses of `i()` with the help of some examples.
+
+### A compact syntax for factors and interactions: `i()`
+
+The function `i()` accepts the arguments `ref`, `drop` and `keep`,  which are used to identify which level to keep. Note that the argument `ref` accepts only one value while `drop` accepts several. Here's an example how to use them:
+
+```{r}
+data(airquality)
+res_i1 = feols(Ozone ~ Solar.R + i(Month), airquality)
+res_i2 = feols(Ozone ~ Solar.R + i(Month, ref = 8), airquality)
+res_i3 = feols(Ozone ~ Solar.R + i(Month, keep = 5:6), airquality)
+
+etable(res_i1, res_i2, res_i3, dict = c("6" = "June", "Month::5" = "May"), 
+       order = c("Int|May", "Mon"))
+```
+
+Now that we've seen the basic `i()` functionality with a single variable, let's see how it can be used in an interaction term context. We will consider two DiD examples of increasing complexity.
+
+### Simple difference-in-differences (TWFE)
+
+To illustrate `i()`'s interaction functionality, we will estimate treatment effects over time in a simple DiD setup. 
+
+Consider the following dataset where some individuals (identified by the variable `id`) receive a treatment and others do not (as represented by the variable `treat`). The treatment takes effect from `period` 6 onward. The data look like this:
+
+```{r, eval = TRUE}
+# Sample data illustrating the DiD
+data(base_did)
+head(base_did)
+```
+
+The empirical approach that we will use here is the canonical two-way fixed effects (TWFE) model that should be familiar to many empirical researchers. In a regression context, TWFE essentially amounts to an interaction between our `treat` and `period` variables. This is easily done using the `i(variable, factor, reference)` syntax:
+
+```{r, eval = TRUE}
+# Estimation of treatment × period effects
+# We also add individual and period fixed-effects:
+est_did = feols(y ~ x1 + i(treat, period, 5) | id + period, base_did)
+est_did
+```
+
+Here, `i(treat, period, 5)` creates a set of interact terms: One `treat` dummy for each `period`, but excluding period 5 as a reference. While the explicit reference period is optional, note that we need a reference to avoid a collinearity problem posed by the `id` fixed effects. More to the point, for this DiD analysis we are interested in whether the treatment generated a sustained impact on our outcome variable relative to the control group. This makes period 5 (immediately prior to treatment) the obvious choice to base our relative comparison. It also demonstrates the advantages over the equivalent base `treat*factor(period)` expansion, which will automatically use period 1 as a reference. Of course, we could be specify the levels of `factor(period)` ahead of time. But this is rather tedious, whereas `i()` allows us to do so concisely on the fly.
+
+To display the treatment effects on a graph, we can use the function `coefplot`:
+
+```{r, fig.width=7}
+coefplot(est_did)
+```
+
+The function `coefplot` detects that the results contain interactions and plots the appropriate graph. In case you wanted to display al the coefficients, including `x1`, you can use the argument `only.inter = FALSE`.
+
+### Staggered difference-in-differences (Sun and Abraham)
+
+*Note that the content of this section is only valid for `fixest` version 0.8.1 or later.*
+
+Despite TWFE's long-standing popularity for DiD designs, recent research has a shone a light on the biases that in can introduce under differential timing. For example, under staggered treatment or policy rollouts. 
+
+For staggered DiD analyzes, `fixest` provides convenience functions for implementing the method of Sun and Abraham (hereafter: SA), which is forthcoming at _Journal of Econometrics_. The summary version is that we again use `i()` to create `cohort x time to treatment` dummies. But we then use the `aggregate()` function to recover the correct time treatment effects as per SA. 
+
+(Aside: Note that we use `time to treatment` rather than just `time`, because we need to account for the staggered treatment via a relative time measure.)
+
+Let's walk through an example with generated data, where (a) different cohorts get the treatment at different periods, and (b) the effect of the treatment is cohort-specific and increasing over time. First generate the data:
+
+```{r}
+# Generate some (fake) staggered DiD data
+
+set.seed(1)
+n_group = 20
+n_per_group = 5
+id_i = paste0((1:n_group), ":", rep(1:n_per_group, each = n_group))
+id_t = 1:10
+base = expand.grid(id = id_i, year = id_t)
+base$group = as.numeric(gsub(":.+", "", base$id))
+base$year_treated = base$group
+base$year_treated[base$group > 10] = 10000
+base$treat_post = (base$year >= base$year_treated) * 1
+base$time_to_treatment = pmax(base$year - base$year_treated, -1000)
+base$treated = (base$year_treated < 10000) * 1
+# The effect of the treatment is cohort specific and increases with time
+base$y_true = base$treat_post * (1 + 1 * base$time_to_treatment - 1 * base$group)
+base$y = base$y_true + rnorm(nrow(base))
+
+# Note that the time_to_treatment for controls is set to -1000
+
+# We need to drop the always treated individuals (just a data generation artifact)
+base = base[base$group > 1,]
+
+head(base)
+```
+
+Here's a quick visual depiction of the data. Again, notice the staggered treatment rollout and time-varying intensity.
+
+```{r, echo=FALSE}
+library(ggplot2)
+ggplot(aggregate(base[, c('year_treated', 'y_true')], 
+                 by = list(year = base$year, group = base$group), 
+                 mean), 
+       aes(year, group, fill = year>=year_treated, alpha = y_true)) + 
+  geom_tile(colour = "white", lwd = 1) + 
+  scale_fill_brewer('Treated?', palette = 'Set1') +
+  scale_alpha('Avg. treatment\neffect') +
+  labs(x = 'Year', y = 'Group') +
+  theme_minimal()
+```
+
+With our generated data in hand, let's move on to the estimations. We'll implement two DiD models:
+
+  1. A "naive" DiD consisting of a standard TWFE interaction (i.e. treatment × time_to_treatment).
+  2. A "cohort" DiD that instead creates cohort interactions (i.e. time_to_treatment × group).
+
+```{r}
+# "Naive" TWFE DiD
+res_twfe = feols(y ~ i(treated, time_to_treatment, ref = -1, drop = -1000) | id + year, base)
+
+# With cohort x time-to-treatment dummies
+res_cohort = feols(y ~ i(time_to_treatment, f2 = group, drop = c(-1, -1000)) | id + year, base)
+```
+
+For our "cohort" model, we can now apply the SA method of aggregating the coefficients by relative time-to-treatment. We'll use the `aggregate()` function alongside some regexp:
+
+```{r}
+# SA method: we aggregate the effects for each period
+sa_coefs = aggregate(res_cohort, "(ti.*nt)::(-?[[:digit:]])")
+sa_coefs
+```
+
+The function `aggregate` aggregates the coefficients whose names match the regular expression `"(ti.*nt)::(-?[[:digit:]]+)"`. The two sets of parentheses are important here since the aggregation will be performed for each unique value in between parentheses. In this case the aggregation will be done for each `time_to_treatment` (i.e. `ti.*nt`) and period (i.e. `-?[[:digit:]]`). 
+
+Note that `fixest` objects can also be aggregated on-the-fly via the complementary "agg" argument of `summary.fixest`. This argument calls `aggregate` behind the scenes and can be passed down from high-order functions like `coefplot` and `etable`, which users may find more convenient. For example:
+
+```{r}
+# Same result as `sa_coefs`, using the complementary "agg" argument of summary.fixest
+res_sa = summary(res_cohort, agg = "(ti.*nt)::(-?[[:digit:]])")
+res_sa
+```
+
+Now that we've done the careful work of adjusting for staggered treatment, let's compare our results in plot form. As we can see, the TWFE results suffer from varying degrees of bias due to the staggered rollout. In contrast, the aggregated SA results do a much better job of consistently estimating the true effects:
+
+```{r}
+# Plot the naive TWFE results
+coefplot(res_twfe, ylim = c(-6, 8), pt.join.par = list(lty = 0))
+
+# Add the SA aggregated results
+x = c(-9:-2, 0:8) + .35 # shift for the plot
+coefplot(res_sa, x = x, add = TRUE, col = 4, pt.pch = 17)
+
+# Add the true results
+att_true = tapply(base$y_true, base$time_to_treatment, mean)[-1]
+points(-9:8 + 0.15, att_true, pch = 15, col = 2)
+
+legend("topleft", col = c(1, 4, 2), pch = c(20, 17, 15), 
+       legend = c("TWFE", "Sun & Abraham", "Truth"))
+```
+
+As a final example, here's how to get the average treatment effect for the treated (ATT):
+
+```{r}
+# The full ATT
+aggregate(res_cohort, c("ATT" = "treatment::[^-]"))
+```
+
+This time the aggregation is operated across each cohort for non-negative time to treatment (i.e. `treatment::[^-]`). Note that the estimated ATT compares favourably with the true value of `r mean(base[base$treat_post == 1, "y_true"])`.
 
 
 # Additional features 
 
 Now we present some other features of the package:
 
-  1. [How to add variables with varying slopes](#varying-slopes). 
+  1. [Formula macros](#formula-macros). 
   
-  2. [How to combine several fixed-effects](#combining-several-fixed-effects). 
+  2. [How to add lead/lags](#lagging-variables).
   
-  3. [Formula macros](#formula-macros). 
+  3. [Non-linear in parameter estimation](#non-linear-in-parameters-example). 
   
-  4. [The function `i()` to create factors and interactions](#the-function-i-for-factors-and-interactions).
-  
-  5. [How to add lead/lags](#lagging-variables).
-  
-  6. [Non-linear in parameter estimation](#non-linear-in-parameters-example). 
-  
-  7. [Parallelism](#multi-threading). 
+  4. [Parallelism](#multi-threading). 
   
   
 <!-- NOTE: you can't have ":" or "(" in titles to make links -->
 
-## Varying slopes
-
-You can introduce variables with varying slopes directly in the fixed-effects part of the formula using square brackets. Let's go through a simple example using `iris` data:
-
-```{r}
-base_vs = iris
-names(base_vs) = c(paste0("x", 1:4), "species")
-```
-
-We want to estimate `x1` as a function of `x2` and the variable `x3` with slopes varying according to `species`. We also want the `species` fixed-effect. We just have to do:
-
-```{r}
-est_vs = feols(x1 ~ x2 | species[x3], base_vs)
-est_vs
-```
-
-If you want to see the slopes for `x3`, just use the function `fixef`:
-
-```{r}
-summary(fixef(est_vs))
-```
-
-## Combining several fixed-effects
-
-Let's use the data we created in the previous section, and add a new variable:
-
-```{r}
-# we create another "fixed-effect"
-base_vs$fe = rep(1:5, 30)
-head(base_vs)
-```
-
-Say we want to "combine" the variable `species` with the variable `fe` and create a brand new fixed-effect variable. We can do it simply using `^`:
-
-```{r}
-est_comb = feols(x1 ~ x2 | species^fe, base_vs)
-est_comb
-```
-
-The function `^` does the same as `paste0(species, "_", fe)` but is more convenient (and faster for large data sets). You can still extract the fixed-effects the same way:
-
-```{r}
-fixef(est_comb)[[1]]
-```
 
 ## Formula macros
 
@@ -453,137 +627,6 @@ Again, since `xpd` is called internally, the following works:
 ```{r}
 feols(Armed.Forces ~ Population + ..("GNP|ployed"), longley)
 ```
-
-## The function i for factors and interactions
-
-The function `i()` is a versatile function allowing either: to consider a variable as a factor, with the possibility to easily keep/drop levels, or to create an interaction between a variable and another one treated as a factor. 
-
-As opposed to the `R` function `factor()`, `i()` has synergies with the other functions of the package: namely `etable` and `coefplot`. We now illustrate the two main uses of that function in turn.
-
-### A compact syntax for factors
-
-The function `i` accepts the arguments `ref`, `drop` and `keep`, the three are used to identify which level to keep. Note that the argument `ref` accepts only one value while `drop` accepts several. Here's an example how to use them:
-
-```{r}
-data(airquality)
-res_i1 = feols(Ozone ~ Solar.R + i(Month), airquality)
-res_i2 = feols(Ozone ~ Solar.R + i(Month, ref = 8), airquality)
-res_i3 = feols(Ozone ~ Solar.R + i(Month, keep = 5:6), airquality)
-
-etable(res_i1, res_i2, res_i3, dict = c("6" = "June", "Month::5" = "May"), 
-       order = c("Int|May", "Mon"))
-```
-
-### Estimating yearly treatment effects
-
-To illustrate interactions, we will estimate yearly treatment effects in a difference-in-difference setup. 
-
-Consider the the following data base where some persons (identified with the variable `id`) receive a treatment and others not, represented by the variable `treat`. The treatment takes effect from `period` 6 onward. The data looks like this:
-
-```{r, eval = TRUE}
-# Sample data illustrating the DiD
-data(base_did)
-head(base_did)
-```
-
-Using a two way fixed-effect setup, to create a variable capturing the yearly treatment effect we use `i(treat, period, 5)` which corresponds to interacting the variable `treat` to a dummy variable for each `period`, and excluding period 5 (the syntax is `i(var, f, ref)`). Note that, although the reference is optional, we need it otherwise there is a collinearity problem because of the fixed-effect `id`.
-
-```{r, eval = TRUE}
-# Estimation of yearly treatment effect
-# We also add individual/time fixed-effects:
-est_did = feols(y ~ x1 + i(treat, period, 5) | id + period, base_did)
-est_did
-```
-
-Now to display the yearly treatment effects on a graph, we can use the function `coefplot`:
-
-```{r, fig.width=7}
-coefplot(est_did)
-```
-
-The function `coefplot` detects that the results contain interactions and plot the appropriate graph. In case you wanted to display al the coefficients, including `x1`, you can use the argument `only.inter = FALSE`. 
-
-### Staggered difference-in-difference
-
-*Note that the content of this section is only valid for `fixest` version 0.8.1 or later.*
-
-For staggered difference-in-difference analyzes, the method of Sun and Abraham (forthcoming, Journal of Econometrics) has been implemented. You first need to use `i()` to insert `cohort x time to treatment` dummies, then you have to use the function `aggregate` to recover the yearly treatment effects. There is also a new argument `agg` in the functions `summary` and `etable`.
-
-Here's an example with generated data where different cohorts get the treatment at different periods, and the effect of the treatment is cohort-specific and increasing over time.
-
-```{r}
-
-#
-# Data
-#
-
-set.seed(1)
-n_group = 20
-n_per_group = 5
-id_i = paste0((1:n_group), ":", rep(1:n_per_group, each = n_group))
-id_t = 1:10
-base = expand.grid(id = id_i, year = id_t)
-base$group = as.numeric(gsub(":.+", "", base$id))
-base$year_treated = base$group
-base$year_treated[base$group > 10] = 10000
-base$treat_post = (base$year >= base$year_treated) * 1
-base$time_to_treatment = pmax(base$year - base$year_treated, -1000)
-base$treated = (base$year_treated < 10000) * 1
-# The effect of the treatment is cohort specific and increases with time
-base$y_true = base$treat_post * (1 + 1 * base$time_to_treatment - 1 * base$group)
-base$y = base$y_true + rnorm(nrow(base))
-
-# Note that the time_to_treatment for controls is set to -1000
-
-# we need to drop the always treated
-base = base[base$group > 1,]
-
-#
-# Estimations
-#
-
-# "Regular" DiD
-res_naive = feols(y ~ i(treated, time_to_treatment, ref = -1, drop = -1000) | id + year, base)
-
-# with cohort x time to treatment dummies
-res_cohort = feols(y ~ i(time_to_treatment, f2 = group, drop = c(-1, -1000)) | id + year, base)
-
-# Looking at the difference between estimates
-coefplot(res_naive, ylim = c(-6, 8))
-att_true = tapply(base$y_true, base$time_to_treatment, mean)[-1]
-points(-9:8 + 0.15, att_true, pch = 15, col = 2)
-
-# SA method: we aggregate the effects for each period
-agg_coef = aggregate(res_cohort, "(ti.*nt)::(-?[[:digit:]])")
-x = c(-9:-2, 0:8) + .35
-points(x, agg_coef[, 1], pch = 17, col = 4)
-ci_low = agg_coef[, 1] - 1.96 * agg_coef[, 2]
-ci_up = agg_coef[, 1] + 1.96 * agg_coef[, 2]
-segments(x0 = x, y0 = ci_low, x1 = x, y1 = ci_up, col = 4)
-legend("topleft", col = c(1, 2, 4), pch = c(20, 15, 17), legend = c("Naive", "True", "Sun & Abraham"))
-
-print(agg_coef)
-
-```
-
-The function `aggregate` asks to aggregate the coefficients whose names match the regular expression `"(ti.*nt)::(-?[[:digit:]]+)"`. The two sets of parentheses are important here since the aggregation will be performed for each unique value in between parentheses. Here the aggregation will be done for each `time_to_treatment` (`ti.*nt`) and period (`-?[[:digit:]]`, which means negative and positive periods). 
-
-Here is how to get the total treatment effect for the treated:
-
-```{r}
-# The full ATT
-aggregate(res_cohort, c("ATT" = "treatment::[^-]"))
-mean(base[base$treat_post == 1, "y_true"])
-```
-
-This time the aggregation is operated across each cohort for non-negative time to treatment (`treatment::[^-]`). The previous code also requests that the outcome variable should be named `ATT`.
-
-Note that the functions `summary` and `etable` now accept the new argument `agg` which applies the function `aggregate`:
-
-```{r}
-etable(res_cohort, agg = "(ti.*nt)::(-?[[:digit:]])")
-```
-
 
 ## Lagging variables
 
