@@ -402,7 +402,7 @@ summary(fixef(est_vs))
 
 Note that this produces the same result as `feols(y ~ x1 + fe1/x2, base)`, but is much more performant for large datasets. The trade-off from the `fe1[x2]` method is that we lose the ability to estimate confidence intervals on the resulting slope coefficients. This should be fine in cases where we are just trying to control for some confounding or nuisance parameters. If you are interested in conducting statistical inference on the resulting slope coefficients and require confidence intervals, then you should use the slower `fe1/x2` approach instead.
 
-## Interactions that don't involve fixed-effects:
+## Interactions that don't involve fixed-effects
 
 The preceding interaction examples all took place in the fixed-effects slot (i.e. after the `|`). Underneath the hood, methods like `fe1^fe2` and `fe1[x2]` use numerical shortcuts that greatly speed up computation. This comes at the cost of being able to do richer inference with the interacted terms --- e.g. construct confidence intervals --- since they are swept out of the model at estimation time. In many cases, this should prove to be a perfectly acceptable trade-off. After all, the primary motivation for estimating fixed-effects models in the first place is to remove the confounding effect of such "nuisance" parameters. 
 
