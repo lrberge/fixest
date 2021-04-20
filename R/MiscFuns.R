@@ -8001,6 +8001,19 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 
 	    exo.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = TRUE), "In 'model.matrix', the instruments could not be evaluated: ")
 
+	    if(is.atomic(exo.mat) && length(exo.mat) == 1){
+	        # This is the intercept only
+	        # Two cases:
+	        is_int = attr(terms(fml), "intercept")
+	        if(is_int && is.null(object$fixef_vars)){
+	            # Valid intercept
+	            exo.mat = matrix(1, nrow(data))
+	        } else {
+	            # should be NULL
+	            exo.mat = NULL
+	        }
+	    }
+
 	    res[["iv.exo"]] = exo.mat
 	}
 
@@ -8059,7 +8072,9 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	}
 
 	# Formatting res
-	if(length(type) > 1){
+	if(length(res) == 0){
+	    return(NULL)
+	} else if(length(type) > 1){
 	    res = res[type]
 	    res = do.call(cbind, unname(res))
 	} else {
