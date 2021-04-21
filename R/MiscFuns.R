@@ -7840,13 +7840,15 @@ formula.fixest = function(x, type = c("full", "linear", "iv", "NL"), ...){
 #' @inheritParams nobs.fixest
 #'
 #' @param data If missing (default) then the original data is obtained by evaluating the \code{call}. Otherwise, it should be a \code{data.frame}.
-#' @param type Character vector or one sided formula, default is "rhs". Contains the type of matrix/data.frame to be returned. Possible values are: "lhs", "rhs", "fixef", "iv.rhs1", "iv.rhs2", "iv.endo", "iv.exo", "iv.inst".
+#' @param type Character vector or one sided formula, default is "rhs". Contains the type of matrix/data.frame to be returned. Possible values are: "lhs", "rhs", "fixef", "iv.rhs1" (1st stage RHS), "iv.rhs2" (2nd stage RHS), "iv.endo" (endogenous vars.), "iv.exo" (exogenous vars), "iv.inst" (instruments).
 #' @param na.rm Default is \code{TRUE}. Should observations with NAs be removed from the matrix?
 #' @param subset Logical or character vector. Default is \code{FALSE}. If \code{TRUE}, then the matrix created will be restricted only to the variables contained in the argument \code{data}, which can then contain a subset of the variables used in the estimation. If a character vector, then only the variables matching the elements of the vector via regular expressions will be created.
+#' @param as.matrix Logical scalar, default is \code{FALSE}. Whether to coerce the result to a matrix.
+#' @param as.df Logical scalar, default is \code{FALSE}. Whether to coerce the result to a data.frame.
 #' @param ... Not currently used.
 #'
 #' @return
-#' It returns either a matrix or a data.frame. It returns a matrix for the "rhs", "iv.rhs1" and "iv.rhs2" parts. A data.frame for "lhs" and "fixef".
+#' It returns either a vector, a matrix or a data.frame. It returns a vector for the dependent variable ("lhs"), a data.frame for the fixed-effects ("fixef") and a matrix for any other type.
 #'
 #' @seealso
 #' See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. \code{\link[fixest]{formula.fixest}}, \code{\link[fixest]{update.fixest}}, \code{\link[fixest]{summary.fixest}}, \code{\link[fixest]{vcov.fixest}}.
@@ -7873,13 +7875,26 @@ formula.fixest = function(x, type = c("full", "linear", "iv", "NL"), ...){
 #'
 #'
 #'
-model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset = FALSE, ...){
+model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset = FALSE, as.matrix = FALSE, as.df = FALSE, ...){
 	# We evaluate the formula with the past call
     # type: lhs, rhs, fixef, iv.endo, iv.inst, iv.rhs1, iv.rhs2
     # if fixef => return a DF
 
     # Checking the arguments
     validate_dots(suggest_args = c("data", "type"))
+
+    # We allow type to be used in the location of data if data is missing
+    if(!missing(data) && missing(type)){
+        sc = sys.call()
+        if(!"data" %in% names(sc)){
+            if(!is.null(data) && (is.character(data) || "formula" %in% class(data))){
+                # data is in fact the type
+                type = data
+                data = NULL
+            }
+        }
+    }
+
 
     type = check_set_types(type, c("lhs", "rhs", "fixef", "iv.endo", "iv.inst", "iv.exo", "iv.rhs1", "iv.rhs2"))
 
@@ -7893,13 +7908,15 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 
     check_arg(subset, "logical scalar | character vector no na")
 
+    check_arg_plus(as.matrix, as.df, "logical scalar")
+
 	# The formulas
 	fml_full = formula(object, type = "full")
 	fml_linear = formula(object, type = "linear")
 
 	# Evaluation with the data
 	original_data = FALSE
-	if(missing(data)){
+	if(missnull(data)){
 	    original_data = TRUE
 
 	    data = fetch_data(object, "To apply 'model.matrix.fixest', ")
@@ -7952,7 +7969,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	    lhs_text = deparse_long(fml_linear[[2]])
 	    lhs[[lhs_text]] = eval(fml_linear[[2]], data)
 
-        res[["lhs"]] = as.data.frame(lhs)
+        res[["lhs"]] = lhs
 	}
 
 	if("rhs" %in% type){
@@ -8103,14 +8120,14 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	check_0 = FALSE
 	if(original_data){
 
-	    for(i in seq_along(object$obs_selection)){
-	        check_0 = TRUE
-	        res = res[object$obs_selection[[i]], , drop = FALSE]
-	    }
-
 	    if(na.rm && !is.null(object$obsRemoved)){
 	        check_0 = TRUE
-	        res = res[-object$obsRemoved, , drop = FALSE]
+	        res = select_obs(res, -object$obsRemoved)
+	    }
+
+	    for(i in seq_along(object$obs_selection)){
+	        check_0 = TRUE
+	        res = select_obs(res, object$obs_selection[[i]])
 	    }
 
 	    na.rm = FALSE
@@ -8134,17 +8151,28 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	            return(res[-which(isNA_L), , drop = FALSE])
 	        }
 
-	        res = res[-which(isNA_L), , drop = FALSE]
+	        res = select_obs(res, -which(isNA_L))
 	    }
 	}
 
+
+	if(as.matrix){
+	    res = as.matrix(res)
+	}
+
+	if(as.df){
+	    res = as.data.frame(res)
+	}
+
 	if(check_0 && !"fixef" %in% type){
-	    only_0 = cpppar_check_only_0(as.matrix(res), nthreads = 1)
+	    only_0 = cpppar_check_only_0(base::as.matrix(res), nthreads = 1)
 	    if(all(only_0 == 1)){
 	        stop("After removing NAs, not a single explanatory variable is different from 0.")
 
 	    } else if(any(only_0 == 1)){
-	        linear.mat = linear.mat[, only_0 == 0, drop = FALSE]
+	        # At that point it must be either a matrix or a DF
+	        # (can't be a vector)
+	        res = res[, only_0 == 0, drop = FALSE]
 	    }
 	}
 

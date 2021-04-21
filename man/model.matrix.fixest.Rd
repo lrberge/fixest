@@ -4,23 +4,36 @@
 \alias{model.matrix.fixest}
 \title{Design matrix of a \code{fixest} object}
 \usage{
-\method{model.matrix}{fixest}(object, data, type = "rhs", na.rm = TRUE, subset = FALSE, ...)
+\method{model.matrix}{fixest}(
+  object,
+  data,
+  type = "rhs",
+  na.rm = TRUE,
+  subset = FALSE,
+  as.matrix = FALSE,
+  as.df = FALSE,
+  ...
+)
 }
 \arguments{
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
 
 \item{data}{If missing (default) then the original data is obtained by evaluating the \code{call}. Otherwise, it should be a \code{data.frame}.}
 
-\item{type}{Character vector or one sided formula, default is "rhs". Contains the type of matrix/data.frame to be returned. Possible values are: "lhs", "rhs", "fixef", "iv.rhs1", "iv.rhs2", "iv.endo", "iv.exo", "iv.inst".}
+\item{type}{Character vector or one sided formula, default is "rhs". Contains the type of matrix/data.frame to be returned. Possible values are: "lhs", "rhs", "fixef", "iv.rhs1" (1st stage RHS), "iv.rhs2" (2nd stage RHS), "iv.endo" (endogenous vars.), "iv.exo" (exogenous vars), "iv.inst" (instruments).}
 
 \item{na.rm}{Default is \code{TRUE}. Should observations with NAs be removed from the matrix?}
 
 \item{subset}{Logical or character vector. Default is \code{FALSE}. If \code{TRUE}, then the matrix created will be restricted only to the variables contained in the argument \code{data}, which can then contain a subset of the variables used in the estimation. If a character vector, then only the variables matching the elements of the vector via regular expressions will be created.}
 
+\item{as.matrix}{Logical scalar, default is \code{FALSE}. Whether to coerce the result to a matrix.}
+
+\item{as.df}{Logical scalar, default is \code{FALSE}. Whether to coerce the result to a data.frame.}
+
 \item{...}{Not currently used.}
 }
 \value{
-It returns either a matrix or a data.frame. It returns a matrix for the "rhs", "iv.rhs1" and "iv.rhs2" parts. A data.frame for "lhs" and "fixef".
+It returns either a vector, a matrix or a data.frame. It returns a vector for the dependent variable ("lhs"), a data.frame for the fixed-effects ("fixef") and a matrix for any other type.
 }
 \description{
 This function creates the left-hand-side or the right-hand-side(s) of a \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}} estimation.
