@@ -6586,6 +6586,19 @@ get_vars = function(x){
     attr(terms(x), "term.labels")
 }
 
+mat_posdef_fix = function(X, tol = 1e-10){
+    # X must be a symmetric matrix
+    # We don't check it
+
+    if(any(diag(X) < tol)){
+        e = eigen(X)
+        dm = dimnames(X)
+        X = tcrossprod(e$vectors %*% diag(pmax(e$values, tol), nrow(X)), e$vectors)
+        dimnames(X) = dm
+    }
+
+    return(X)
+}
 
 #### ................. ####
 #### Additional Methods ####
