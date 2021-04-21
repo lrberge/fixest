@@ -7997,9 +7997,11 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	}
 
 	if("iv.exo" %in% type){
+
+	    fake_intercept = !is.null(object$fixef_vars) && !(!is.null(object$slope_flag) && all(object$slope_flag < 0))
 	    fml = object$fml_all$linear
 
-	    exo.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = TRUE), "In 'model.matrix', the instruments could not be evaluated: ")
+	    exo.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = fake_intercept), "In 'model.matrix', the instruments could not be evaluated: ")
 
 	    if(is.atomic(exo.mat) && length(exo.mat) == 1){
 	        # This is the intercept only
