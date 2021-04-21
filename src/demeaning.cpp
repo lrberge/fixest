@@ -110,17 +110,21 @@ int pending_interrupt() {
 // Later I may use the number of observations
 // I don't at the moment because everything is strongly checked beforehand
 class sVec{
-    bool is_int = false;
     double *p_dble = nullptr;
     int *p_int = nullptr;
 
 public:
     // several constructors
+
+    // is_int public member
+    bool is_int = false;
+
     sVec(){};
     sVec(SEXP);
-    sVec(double *p_x): is_int(false), p_dble(p_x){};
-    sVec(int *p_x): is_int(true), p_int(p_x){};
+    sVec(double *p_x): p_dble(p_x), is_int(false){};
+    sVec(int *p_x): p_int(p_x), is_int(true){};
     sVec(std::nullptr_t){};
+
 
     double operator[](int i){
         if(is_int) return static_cast<double>(p_int[i]);
@@ -2087,7 +2091,12 @@ List cpp_which_na_inf(SEXP x, int nthreads){
     for(int t=0 ; t<nthreads ; ++t){
         for(int k=0 ; k<K ; ++k){
             for(int i=bounds[t]; i<bounds[t + 1] && !anyNAInf ; ++i){
-                if(std::isnan(mat(i, k)) || std::isinf(mat(i, k))){
+
+                if(mat[k].is_int){
+                    if(mat(i, k) == -2147483648.0){
+                        anyNAInf = true;
+                    }
+                } else if(std::isnan(mat(i, k)) || std::isinf(mat(i, k))){
                     anyNAInf = true;
                 }
             }
@@ -2103,7 +2112,13 @@ List cpp_which_na_inf(SEXP x, int nthreads){
             double x_tmp = 0;
             for(int k=0 ; k<K ; ++k){
                 x_tmp = mat(i, k);
-                if(std::isnan(x_tmp)){
+                if(mat[k].is_int){
+                    if(mat(i, k) == -2147483648.0){
+                        is_na_inf[i] = true;
+                        any_na = true;
+                        break;
+                    }
+                } else if(std::isnan(x_tmp)){
                     is_na_inf[i] = true;
                     any_na = true;
                     break;
