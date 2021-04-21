@@ -1372,18 +1372,17 @@ base_bis$time = rep(1:10, 5)
 # NA removed
 res = feols(y1 ~ x1 + x2 + x3, base)
 m1 = model.matrix(res, type = "lhs")
-test(nrow(m1), res$nobs)
+test(length(m1), res$nobs)
 
 # we check this is identical
 m1_na = model.matrix(res, type = "lhs", na.rm = FALSE)
-test(nrow(m1_na), res$nobs_origin)
+test(length(m1_na), res$nobs_origin)
 test(max(abs(m1_na - base$y1), na.rm = TRUE), 0)
 
 y = model.matrix(res, type = "lhs", data = base, na.rm = FALSE)
 X = model.matrix(res, type = "rhs", data = base, na.rm = FALSE)
-res_bis = lm.fit(X[-res$obsRemoved, ], y[-res$obsRemoved,])
+res_bis = lm.fit(X[-res$obsRemoved, ], y[-res$obsRemoved])
 test(res_bis$coefficients, res$coefficients)
-
 
 # Lag
 res_lag = feols(y1 ~ l(x1, 1:2) + x2 + x3, base, panel = ~id + time)

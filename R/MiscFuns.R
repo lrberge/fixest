@@ -7969,7 +7969,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	    lhs_text = deparse_long(fml_linear[[2]])
 	    lhs[[lhs_text]] = eval(fml_linear[[2]], data)
 
-        res[["lhs"]] = lhs
+        res[["lhs"]] = as.data.frame(lhs)
 	}
 
 	if("rhs" %in% type){
@@ -8158,10 +8158,10 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 
 	if(as.matrix){
 	    res = as.matrix(res)
-	}
-
-	if(as.df){
+	} else if(as.df){
 	    res = as.data.frame(res)
+	} else if(identical(type, "lhs")){
+	    res = res[[1]]
 	}
 
 	if(check_0 && !"fixef" %in% type){

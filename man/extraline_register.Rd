@@ -23,7 +23,7 @@ You can register as many macros as you wish, the only constraint is that the typ
 
 
 # We register a function computing the mean of the dependent variable
-my_fun = function(x) mean(model.matrix(x, type = "lhs")[[1]])
+my_fun = function(x) mean(model.matrix(x, type = "lhs"))
 extraline_register("my", my_fun, "Mean(y)")
 
 # An estimation
