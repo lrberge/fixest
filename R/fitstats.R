@@ -233,8 +233,10 @@ fitstat_register = function(type, fun, alias){
 #' \item{\code{theta}: }{The over-dispersion parameter in Negative Binomial models. Low values mean high overdispersion. }
 #' \item{\code{f}, \code{wf}: }{The F-tests of nullity of the coefficients. The \code{w} stands for 'within'. These types return the following values: \code{stat}, \code{p}, \code{df1} and \code{df2}. If you want to display only one of these, use their name after a dot: e.g. \code{f.stat} will give the statistic of the F-test, or \code{wf.p} will give the p-values of the F-test on the projected model (i.e. projected onto the fixed-effects).}
 #' \item{\code{wald}: }{Wald test of joint nullity of the coefficients. This test always excludes the intercept and the fixed-effects. These type returns the following values: \code{stat}, \code{p}, \code{df1}, \code{df2} and \code{vcov}. The element \code{vcov} reports the way the VCOV matrix was computed since it directly influences this statistic.}
-#' \item{\code{ivf}, \code{ivf1}, \code{ivf2}, \code{ivfall}: }{These statistics are specific to IV estimations. They report either the IV F-test (namely the Cragg-Donald F statistic) of the first stage (\code{ivf} or \code{ivf1}), of the second stage (\code{ivf2}) or of both (\code{ivfall}). The F-test of the first stage is commonly named weak instrument test. The value of \code{ivfall} is only useful in \code{\link[fixest]{etable}} when both the 1st and 2nd stages are displayed (it leads to the 1st stage F-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, \code{ivf1} would also be displayed on the 2nd stage estimation). These types return the following values: \code{stat}, \code{p}, \code{df1} and \code{df2}.}
-#' \item{\code{ivwald}, \code{ivwald1}, \code{ivwald2}, \code{ivwaldall}: }{These statistics are specific to IV estimations. They report either the IV Wald-test of the first stage (\code{ivwald} or \code{ivwald1}), of the second stage (\code{ivwald2}) or of both (\code{ivwaldall}). The Wald-test of the first stage is commonly named weak instrument test. Note that if the estimation was done with a robust VCOV, this is also known as the Kleibergen-Paap Wald test. The value of \code{ivwaldall} is only useful in \code{\link[fixest]{etable}} when both the 1st and 2nd stages are displayed (it leads to the 1st stage Wald-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, \code{ivwald1} would also be displayed on the 2nd stage estimation). These types return the following values: \code{stat}, \code{p}, \code{df1}, \code{df2}, and \code{vcov}.}
+#' \item{\code{ivf}, \code{ivf1}, \code{ivf2}, \code{ivfall}: }{These statistics are specific to IV estimations. They report either the IV F-test (namely the Cragg-Donald F statistic in the presence of only one endogenous regressor) of the first stage (\code{ivf} or \code{ivf1}), of the second stage (\code{ivf2}) or of both (\code{ivfall}). The F-test of the first stage is commonly named weak instrument test. The value of \code{ivfall} is only useful in \code{\link[fixest]{etable}} when both the 1st and 2nd stages are displayed (it leads to the 1st stage F-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, \code{ivf1} would also be displayed on the 2nd stage estimation). These types return the following values: \code{stat}, \code{p}, \code{df1} and \code{df2}.}
+#' \item{\code{ivwald}, \code{ivwald1}, \code{ivwald2}, \code{ivwaldall}: }{These statistics are specific to IV estimations. They report either the IV Wald-test of the first stage (\code{ivwald} or \code{ivwald1}), of the second stage (\code{ivwald2}) or of both (\code{ivwaldall}). The Wald-test of the first stage is commonly named weak instrument test. Note that if the estimation was done with a robust VCOV and there is only one endogenous regressor, this is equivalent to the Kleibergen-Paap statistic. The value of \code{ivwaldall} is only useful in \code{\link[fixest]{etable}} when both the 1st and 2nd stages are displayed (it leads to the 1st stage Wald-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, \code{ivwald1} would also be displayed on the 2nd stage estimation). These types return the following values: \code{stat}, \code{p}, \code{df1}, \code{df2}, and \code{vcov}.}
+#' \item{\code{cd}: }{The Cragg-Donald test for weak instruments.}
+#' \item{\code{kpr}: }{The Kleibergen-Paap test for weak instruments.}
 #' \item{\code{wh}: }{This statistic is specific to IV estimations. Wu-Hausman endogeneity test. H0 is the absence of endogeneity of the instrumented variables. It returns the following values: \code{stat}, \code{p}, \code{df1}, \code{df2}.}
 #' \item{\code{sargan}: }{Sargan test of overidentifying restrictions. H0: the instruments are not correlated with the second stage residuals. It returns the following values: \code{stat}, \code{p}, \code{df}.}
 #' \item{\code{lr}, \code{wlr}: }{Likelihood ratio and within likelihood ratio tests. It returns the following elements: \code{stat}, \code{p}, \code{df}. Concerning the within-LR test, note that, contrary to estimations with \code{femlm} or \code{feNmlm}, estimations with \code{feglm}/\code{fepois} need to estimate the model with fixed-effects only which may prove time-consuming (depending on your model). Bottom line, if you really need the within-LR and estimate a Poisson model, use \code{femlm} instead of \code{fepois} (the former uses direct ML maximization for which the only FEs model is a by product).}
@@ -295,10 +297,10 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
         # Compound types => types yielding several values
 
         # F-test etc
-        comp_types = c("f", "wf", "ivf", "ivf1", "ivf2", "ivfall", "wald", "ivwald", "ivwald1", "ivwald2", "ivwaldall", "wh", "sargan", "lr", "wlr")
+        comp_types = c("f", "wf", "ivf", "ivf1", "ivf2", "ivfall", "wald", "ivwald", "ivwald1", "ivwald2", "ivwaldall", "wh", "sargan", "lr", "wlr", "kpr", "cd")
         full_comp_types = paste(comp_types, rep(c("stat", "p"), each = length(comp_types)), sep = ".")
 
-        comp_alias = c(f = "F-test", wf = "F-test (projected)", ivfall = "F-test (IV only)", ivf1 = "F-test (1st stage)", ivf2 = "F-test (2nd stage)", wald = "Wald (joint nullity)", ivwaldall = "Wald (IV only)", ivwald1 = "Wald (1st stage)", ivwald2 = "Wald (2nd stage)", wh = "Wu-Hausman", sargan = "Sargan", lr = "LR", wlr = "LR (within)", df1 = "DoF (first)", df2 = "DoF (second)", df = "DoF")
+        comp_alias = c(f = "F-test", wf = "F-test (projected)", ivfall = "F-test (IV only)", ivf1 = "F-test (1st stage)", ivf2 = "F-test (2nd stage)", wald = "Wald (joint nullity)", ivwaldall = "Wald (IV only)", ivwald1 = "Wald (1st stage)", ivwald2 = "Wald (2nd stage)", wh = "Wu-Hausman", sargan = "Sargan", lr = "LR", wlr = "LR (within)", df1 = "DoF (first)", df2 = "DoF (second)", df = "DoF", kpr = "Kleibergen-Paap", cd = "Cragg-Donald")
         my_names = paste(names(comp_alias), rep(c("stat", "p"), each = length(comp_alias)), sep = ".")
         full_comp_alias = setNames(paste0(comp_alias, ", ", rep(c("stat.", "p-value"), each = length(comp_alias))), my_names)
 
@@ -535,6 +537,28 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                     res_all[[type]] = NA
                 }
 
+            } else if(root == "kpr"){
+                if(isTRUE(x$iv) && x$iv_stage == 2){
+                    # The KP rank test is computed in a specific function
+
+                    vec = kp_stat(x)
+                    res_all[[type]] = set_value(vec, value)
+
+                } else {
+                    res_all[[type]] = NA
+                }
+
+            } else if(root == "cd"){
+                if(isTRUE(x$iv) && x$iv_stage == 2){
+                    # The KP rank test is computed in a specific function
+
+                    vec = cd_stat(x)
+                    res_all[[type]] = set_value(vec, value)
+
+                } else {
+                    res_all[[type]] = NA
+                }
+
             } else if(root == "wald"){
                 # Joint nullity of the coefficients
                 # if FE => on the projected model only
@@ -717,7 +741,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                 res_all[[type]] = set_value(opts[[root]]$fun(x), value)
 
             } else {
-                stop("The type ", type, " is not supported, see details of ?fitstat, or use fitstat(show_types = TRUE) to get the names of all supported tests.")
+                stop("The type '", type, "' is not supported, see details of ?fitstat, or use fitstat(show_types = TRUE) to get the names of all supported tests.")
             }
         }
 
@@ -1074,13 +1098,17 @@ r2 = function(x, type = "all", full_names = FALSE){
         return(0)
     }
 
-    # To handle errors (rarely can happen)
+    # To handle errors (rare but can happen)
+    if(any(diag(vcov) < 1e-10)){
+        vcov = mat_posdef_fix(vcov)
+    }
+
     chol_decomp = cpp_cholesky(vcov[var_keep, var_keep, drop = FALSE])
     vcov_inv = chol_decomp$XtX_inv
 
     if(isTRUE(chol_decomp$all_removed)){
         # Can happen for indicators + clustering at the same level
-        return(100000)
+        return(1e6)
     }
 
     if(any(chol_decomp$id_excl)){
@@ -1115,42 +1143,7 @@ kp_stat = function(x){
     # estimation time.... since here we do the job twice... we'll see
 
     Z = model.matrix(x, type = "iv.inst")
-    U = model.matrix(x, type = "iv.exo")
-    is_U = !is.null(U)
-
-    if(!is.null(x$fixef_vars)){
-        # we need to center the variables
-        # Of course, if there are varying slopes, that's a pain in the neck
-
-        if(!is.null(x$slope_flag)){
-            Z_dm = demean(Z, x$fixef_id[order(x$fixef_sizes, decreasing = TRUE)],
-                          slope.vars = x$slope_variables_reordered,
-                          slope.flag = x$slope_flag_reordered)
-
-            if(is_U){
-                U_dm = demean(U, x$fixef_id[order(x$fixef_sizes, decreasing = TRUE)],
-                              slope.vars = x$slope_variables_reordered,
-                              slope.flag = x$slope_flag_reordered)
-            }
-
-        } else {
-            Z_dm = demean(Z, x$fixef_id)
-            if(is_U){
-                U_dm = demean(U, x$fixef_id)
-            }
-        }
-
-        if(is_U){
-            Z_proj = resid(feols.fit(Z_dm, U_dm))
-        } else {
-            Z_proj = Z_dm
-        }
-
-    } else if(is_U){
-        Z_proj = resid(feols.fit(Z, U))
-    } else {
-        Z_proj = Z
-    }
+    Z_proj = proj_on_U(x, Z)
 
     # Let's go
 
@@ -1220,6 +1213,48 @@ kp_stat = function(x){
     list(stat = kp_f, p = kp_p, df = kp_df)
 }
 
+cd_stat = function(x){
+    # internal function
+    # x: fixest object
+    #
+
+    if(!isTRUE(x$iv) || !x$iv_stage == 2) return(NA)
+
+    # Necessary data
+    X = model.matrix(x, type = "iv.endo")
+    X_proj = proj_on_U(x, X)
+
+    Z = model.matrix(x, type = "iv.inst")
+    Z_proj = proj_on_U(x, Z)
+
+    n = nobs(x)
+    n_endo = ncol(X_proj)
+    n_inst = ncol(Z_proj)
+
+    # The stat
+    if(FALSE){
+        # => just use the canonical correlation, it's faster
+
+        df_resid = degrees_freedom(x$iv_first_stage[[1]], 2)
+        V = resid(summary(x, stage = 1))
+
+        P_Z_proj = Z_proj %*% solve(crossprod(Z_proj)) %*% t(Z_proj)
+
+        SIGMA_vv_hat = (t(X) %*% V) / df_resid
+
+        inv_sqrt_SIGMA_vv_hat = solve(mat_sqrt(SIGMA_vv_hat))
+
+        G = (t(inv_sqrt_SIGMA_vv_hat) %*% t(X_proj) %*% P_Z_proj %*% X_proj %*% inv_sqrt_SIGMA_vv_hat) / n_inst
+
+        cd = min(eigen(G)$values)
+
+    } else {
+        cc = min(cancor(X_proj, Z_proj)$cor)
+        cd = ((n - n_endo - n_inst - 1) / n_inst) / ((1 - cc^2) / cc^2)
+    }
+
+    cd
+}
 
 
 ####
@@ -1250,6 +1285,58 @@ mat_svd = function(A){
     list(u = u.mat, vt = t(v.mat), d = r)
 }
 
+
+
+
+
+proj_on_U = function(x, Z){
+    # Projects some variables (either the endo or the inst) on the
+    # exogenous variables (U)
+    #
+    # x: a fixest IV estimation
+    #
+    # I write Z in the arguments, but it can be any matrix (like X)
+    #
+
+    U = model.matrix(x, type = "iv.exo")
+    is_U = !is.null(U)
+
+    if(!is.null(x$fixef_vars)){
+        # we need to center the variables
+        # Of course, if there are varying slopes, that's a pain in the neck
+
+        if(!is.null(x$slope_flag)){
+            Z_dm = demean(Z, x$fixef_id[order(x$fixef_sizes, decreasing = TRUE)],
+                          slope.vars = x$slope_variables_reordered,
+                          slope.flag = x$slope_flag_reordered)
+
+            if(is_U){
+                U_dm = demean(U, x$fixef_id[order(x$fixef_sizes, decreasing = TRUE)],
+                              slope.vars = x$slope_variables_reordered,
+                              slope.flag = x$slope_flag_reordered)
+            }
+
+        } else {
+            Z_dm = demean(Z, x$fixef_id)
+            if(is_U){
+                U_dm = demean(U, x$fixef_id)
+            }
+        }
+
+        if(is_U){
+            Z_proj = resid(feols.fit(Z_dm, U_dm))
+        } else {
+            Z_proj = Z_dm
+        }
+
+    } else if(is_U){
+        Z_proj = resid(feols.fit(Z, U))
+    } else {
+        Z_proj = Z
+    }
+
+    Z_proj
+}
 
 
 
