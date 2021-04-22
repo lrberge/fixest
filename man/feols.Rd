@@ -154,7 +154,7 @@ A \code{fixest} object. Note that \code{fixest} objects contain many elements an
 \item{sumFE}{The sum of the fixed-effects coefficients for each observation.}
 \item{offset}{(When relevant.) The offset formula.}
 \item{weights}{(When relevant.) The weights formula.}
-\item{obsRemoved}{(When relevant.) Vector of observations that were removed because of NA values.}
+\item{obs_selection}{(When relevant.) List containing vectors of integers. It represents the sequential selection of observation vis a vis the original data set.}
 \item{collin.var}{(When relevant.) Vector containing the variables removed because of collinearity.}
 \item{collin.coef}{(When relevant.) Vector of coefficients, where the values of the variables removed because of collinearity are NA.}
 \item{collin.min_norm}{The minimal diagonal value of the Cholesky decomposition. Small values indicate possible presence collinearity.}

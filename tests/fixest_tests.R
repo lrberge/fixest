@@ -123,8 +123,8 @@ for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
 
                     res = feglm(fml_fixest, base, family = my_family, weights = my_weight, offset = my_offset)
 
-                    if(!is.null(res$obsRemoved)){
-                        qui = -res$obsRemoved
+                    if(!is.null(res$obs_selection$obsRemoved)){
+                        qui = res$obs_selection$obsRemoved
 
                         # I MUST do that.... => subset does not work...
                         base_tmp = base[qui, ]
@@ -1381,7 +1381,8 @@ test(max(abs(m1_na - base$y1), na.rm = TRUE), 0)
 
 y = model.matrix(res, type = "lhs", data = base, na.rm = FALSE)
 X = model.matrix(res, type = "rhs", data = base, na.rm = FALSE)
-res_bis = lm.fit(X[-res$obsRemoved, ], y[-res$obsRemoved])
+obs_rm = res$obs_selection$obsRemoved
+res_bis = lm.fit(X[obs_rm, ], y[obs_rm])
 test(res_bis$coefficients, res$coefficients)
 
 # Lag

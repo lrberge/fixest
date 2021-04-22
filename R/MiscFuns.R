@@ -609,7 +609,7 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	object$se = se
 
 	if(lean){
-	    var2clean = c("fixef_id", "residuals", "fitted.values", "scores", "sumFE", "slope_variables_reordered", "y", "weights", "irls_weights", "obsRemoved", "obs_selection", "iv_residuals", "fitted.values_demean")
+	    var2clean = c("fixef_id", "residuals", "fitted.values", "scores", "sumFE", "slope_variables_reordered", "y", "weights", "irls_weights", "obs_selection", "iv_residuals", "fitted.values_demean")
 
 	    object[var2clean] = NULL
 
@@ -1534,10 +1534,6 @@ collinearity = function(x, verbose){
 	if(isLinear || isFixef || "(Intercept)" %in% names(coef)){
 		# linear.matrix = model.matrix(linear_fml, data)
 		linear.matrix = fixest_model_matrix(rhs_fml, data)
-	}
-
-	if(!is.null(x$obsRemoved)){
-	    linear.matrix = linear.matrix[-x$obsRemoved, , drop = FALSE]
 	}
 
 	for(i in seq_along(x$obs_selection)){
@@ -6168,16 +6164,12 @@ isVector = function(x){
 
 
 fill_with_na = function(x, object){
-    if(is.null(object$obsRemoved) && is.null(object$obs_selection)){
+    if(is.null(object$obs_selection)){
         return(x)
     }
 
     res = rep(NA, object$nobs_origin)
     qui = 1:object$nobs_origin
-
-    if(!is.null(object$obsRemoved)){
-        qui = qui[-object$obsRemoved]
-    }
 
     for(i in seq_along(object$obs_selection)){
         qui = qui[object$obs_selection[[i]]]
@@ -8120,15 +8112,30 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	check_0 = FALSE
 	if(original_data){
 
-	    if(na.rm && !is.null(object$obsRemoved)){
-	        check_0 = TRUE
-	        res = select_obs(res, -object$obsRemoved)
-	    }
+	    if(na.rm == FALSE){
+	        # We do nothing. Or shall I add NA values for obs not
+	        # included in the estimation?
+	        if(FALSE && length(object$obs_selection) > 0){
 
-	    for(i in seq_along(object$obs_selection)){
-	        check_0 = TRUE
-	        res = select_obs(res, object$obs_selection[[i]])
-	    }
+	            # we reconstruct the full vector of obs
+	            # and we fill with NA
+	            obs_id = 1:nrow(data)
+	            for(i in seq_along(object$obs_selection)){
+	                obs_id = select_obs(obs_id, object$obs_selection[[i]])
+	            }
+
+	            res[!1:nrow(res) %in% obs_id, ] = NA
+
+	        }
+
+	    } else {
+	        for(i in seq_along(object$obs_selection)){
+	            check_0 = TRUE
+	            res = select_obs(res, object$obs_selection[[i]])
+	        }
+        }
+
+
 
 	    na.rm = FALSE
 	}

@@ -8,7 +8,7 @@
 
 fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), NL.fml = NULL,
                        fixef, NL.start, lower, upper, NL.start.init,
-                       offset, subset, split = NULL, fsplit = NULL, linear.start = 0, jacobian.method = "simple",
+                       offset = NULL, subset, split = NULL, fsplit = NULL, linear.start = 0, jacobian.method = "simple",
                        useHessian = TRUE, hessian.args = NULL, opt.control = list(),
                        cluster, se, dof,
                        y, X, fixef_df, panel.id, fixef.rm = "perfect",
@@ -18,7 +18,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                        etastart, mustart,
                        warn = TRUE, notes = getFixest_notes(), combine.quick, demeaned = FALSE,
                        origin_bis, origin = "feNmlm", mc_origin, mc_origin_bis, mc_origin_ter,
-                       computeModel0 = FALSE, weights,
+                       computeModel0 = FALSE, weights = NULL,
                        debug = FALSE, mem.clean = FALSE, call_env = NULL, call_env_bis, ...){
 
     # INTERNAL function:
@@ -501,6 +501,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     # ... subset ####
     #
 
+    obs_selection = list()
     multi_lhs = FALSE
     nobs_origin = NULL
     if(isFit){
@@ -620,6 +621,10 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                 }
             }
 
+            if(is.logical(subset)){
+                subset = which(subset)
+            }
+
             if(isFit){
                 delayed.subset = TRUE
                 lhs = lhs[subset]
@@ -627,19 +632,24 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                 nobs_origin = NROW(data)
 
                 # subsetting creates a deep copy. We avoid copying the entire data set.
+                # Note that we don't need to check that complete_vars exists in the data set
+                # that will be done in the dedicated sections.
 
-                # Note that we already checked that complete_vars existed in the data set
+                if(missnull(offset)) offset = NULL
+                if(missnull(weights)) weights = NULL
+                if(missnull(split)) split = NULL
+                if(missnull(NL.fml)) NL.fml = NULL
 
-                if(!missnull(NL.fml)){
-                    check_value(NL.fml, "os formula")
-                    complete_vars = c(complete_vars, all.vars(NL.fml))
-                }
+                additional_vars = collect_vars(NL.fml, offset, weights, split)
+                complete_vars = c(complete_vars, additional_vars)
 
                 complete_vars = intersect(unique(complete_vars), names(data))
 
                 data = data[subset, complete_vars, drop = FALSE]
             }
 
+            # We add subset to the obs selected
+            obs_selection = list(subset = subset)
 
         } else if(!is.null(mc_origin$subset)){
             dp = deparse_long(mc_origin$subset)
@@ -1076,10 +1086,16 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
                 if(length(offset) == 1){
                     offset.value = rep(offset, nobs)
-                } else if(length(offset) != nobs){
-                    stop("The offset's length should be equal to the data's length (currently it's ", numberFormatNormal(length(offset)), " instead of ", numberFormatNormal(nobs), ").")
                 } else {
-                    offset.value = offset
+                    if(length(offset) != nobs_origin){
+                        stop("The offset's length should be equal to the data's length (currently it's ", numberFormatNormal(length(offset)), " instead of ", numberFormatNormal(nobs_origin), ").")
+                    } else {
+                        offset.value = offset
+                    }
+
+                    if(length(obs_selection$subset) > 0){
+                        offset.value = offset.value[obs_selection$subset]
+                    }
                 }
             }
 
@@ -1158,10 +1174,16 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                         # No point in having all obs the same weight... yet...
                         weights.value = rep(weights, nobs)
                     }
-                } else if(length(weights) != nobs){
-                    stop("The weights's length should be equal to the data's length (currently it's ", numberFormatNormal(length(weights)), " instead of ", numberFormatNormal(nobs), ").")
                 } else {
-                    weights.value = weights
+                    if(length(weights) != nobs_origin){
+                        stop("The weights's length should be equal to the data's length (currently it's ", numberFormatNormal(length(weights)), " instead of ", numberFormatNormal(nobs_origin), ").")
+                    } else {
+                        weights.value = weights
+                    }
+
+                    if(length(obs_selection$subset) > 0){
+                        weights.value = weights.value[obs_selection$subset]
+                    }
                 }
             }
 
@@ -1256,7 +1278,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             if(isFit){
                 check_value(split, "vector len(value)", .value = nobs_origin)
             } else {
-                check_value(split, "vector len(data) | character scalar", .data = data, .prefix = "If not a formula, argument 'split'")
+                check_value(split, "vector len(value) | character scalar", .value = nobs_origin, .prefix = "If not a formula, argument 'split'")
             }
 
             if(length(split) == 1){
@@ -1265,6 +1287,10 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                 split = data[[split]]
             } else {
                 split.name = gsub("^[[:alpha:]][[:alnum:]\\._]*\\$", "", deparse_long(mc_origin$split))
+
+                if(length(obs_selection$subset) > 0){
+                    split = split[obs_selection$subset]
+                }
             }
 
         }
@@ -2501,20 +2527,15 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     }
 
     # Observations removed (either NA or fixed-effects)
-    if(isSubset){
-        # subset does not accept duplicate values eg c(1, 1, 1, 2)
-        all_obs = 1:nobs_origin
-        obs2keep = all_obs[subset]
-        obs2remove_subset = all_obs[-obs2keep]
-        obs2remove = sort(c(obs2remove_subset, obs2keep[obs2remove]))
-    }
 
     if(length(obs2remove) > 0){
-        res$obsRemoved = obs2remove
+        obs_selection$obsRemoved = -obs2remove
         if(isFixef && any(lengths(fixef_removed) > 0)){
             res$fixef_removed = fixef_removed
         }
     }
+
+    res$obs_selection = obs_selection
 
     # offset and weight
     if(isOffset){
@@ -3644,7 +3665,23 @@ select_obs = function(x, index, nthreads = 1, msg = "explanatory variable"){
     x
 }
 
+collect_vars = function(...){
+    # utility tool to collect the variables used in some arguments
 
+    dots = list(...)
+    vars = c()
+
+    for(i in seq_along(dots)){
+        di = dots[[i]]
+        if("formula" %in% class(di)){
+            vars = c(vars, all.vars(di))
+        } else if(length(di) < 5 && is.character(di)){
+            vars = c(vars, di)
+        }
+    }
+
+    unique(vars)
+}
 
 fixest_NA_results = function(env){
     # Container for NA results

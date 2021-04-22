@@ -77,7 +77,7 @@ NULL
 #'
 #' esttable(res_1, res_2)
 #'
-#' all(res_1$obsRemoved == x)
+#' all(res_1$obs_selection$obsRemoved == x)
 #'
 obs2remove = function(fml, data, family = c("poisson", "negbin", "logit")){
     # in the formula, the fixed-effects must be there:

@@ -194,7 +194,7 @@ A \code{fixest} object. Note that \code{fixest} objects contain many elements an
 \item{y}{(When relevant.) The dependent variable (used to compute the within-R2 when fixed-effects are present).}
 \item{convStatus}{Logical, convergence status of the IRWLS algorithm.}
 \item{irls_weights}{The weights of the last iteration of the IRWLS algorithm.}
-\item{obsRemoved}{(When relevant.) Vector of observations that were removed because of NA values or because of only 0/1 outcome within a fixed-effect (depends on the family though).}
+\item{obs_selection}{(When relevant.) List containing vectors of integers. It represents the sequential selection of observation vis a vis the original data set.}
 \item{fixef_removed}{(When relevant.) In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.}
 \item{coefficients}{The named vector of estimated coefficients.}
 \item{coeftable}{The table of the coefficients with their standard errors, z-values and p-values.}

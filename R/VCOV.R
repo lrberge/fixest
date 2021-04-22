@@ -492,11 +492,7 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
                             stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(var2fetch, "s"), " in the original dataset (", deparse_long(object$call$data), "), yet the dataset doesn't have the same number of observations as was used in the estimation (", NROW(data), " instead of ", object$nobs_origin, ").")
                         }
 
-                        if(length(object$obsRemoved) > 0){
-                            data = data[-object$obsRemoved, all_vars, drop = FALSE]
-                        } else {
-                            data = data[, all_vars, drop = FALSE]
-                        }
+                        data = data[, all_vars, drop = FALSE]
 
                         for(i in seq_along(object$obs_selection)){
                             data = data[object$obs_selection[[i]], , drop = FALSE]
@@ -600,10 +596,7 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
             if(n_per_cluster[1] == object$nobs_origin){
                 # We modify the clusters
                 for(i in 1:nway){
-                    # first we take care of obsRemoved
-                    if(!is.null(object$obsRemoved)){
-                        cluster[[i]] = cluster[[i]][-object$obsRemoved]
-                    }
+                    # first we take care of the observations removed
 
                     for(j in seq_along(object$obs_selection)){
                         cluster[[i]] = cluster[[i]][object$obs_selection[[j]]]

@@ -39,7 +39,7 @@ res_2 = femlm(v6 ~ Petal.Width | Species, base[-x, ])
 
 esttable(res_1, res_2)
 
-all(res_1$obsRemoved == x)
+all(res_1$obs_selection$obsRemoved == x)
 
 }
 \seealso{

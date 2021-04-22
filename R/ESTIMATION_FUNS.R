@@ -127,7 +127,7 @@
 #' \item{sumFE}{The sum of the fixed-effects coefficients for each observation.}
 #' \item{offset}{(When relevant.) The offset formula.}
 #' \item{weights}{(When relevant.) The weights formula.}
-#' \item{obsRemoved}{(When relevant.) Vector of observations that were removed because of NA values.}
+#' \item{obs_selection}{(When relevant.) List containing vectors of integers. It represents the sequential selection of observation vis a vis the original data set.}
 #' \item{collin.var}{(When relevant.) Vector containing the variables removed because of collinearity.}
 #' \item{collin.coef}{(When relevant.) Vector of coefficients, where the values of the variables removed because of collinearity are NA.}
 #' \item{collin.min_norm}{The minimal diagonal value of the Cholesky decomposition. Small values indicate possible presence collinearity.}
@@ -1785,7 +1785,7 @@ feols.fit = function(y, X, fixef_df, offset, split, fsplit, cluster, se, dof, we
 #' \item{y}{(When relevant.) The dependent variable (used to compute the within-R2 when fixed-effects are present).}
 #' \item{convStatus}{Logical, convergence status of the IRWLS algorithm.}
 #' \item{irls_weights}{The weights of the last iteration of the IRWLS algorithm.}
-#' \item{obsRemoved}{(When relevant.) Vector of observations that were removed because of NA values or because of only 0/1 outcome within a fixed-effect (depends on the family though).}
+#' \item{obs_selection}{(When relevant.) List containing vectors of integers. It represents the sequential selection of observation vis a vis the original data set.}
 #' \item{fixef_removed}{(When relevant.) In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.}
 #' \item{coefficients}{The named vector of estimated coefficients.}
 #' \item{coeftable}{The table of the coefficients with their standard errors, z-values and p-values.}
@@ -2599,7 +2599,7 @@ feglm.fit = function(y, X, fixef_df, family = "poisson", offset, split, fsplit, 
 #' \item{fixef_sizes}{The size of each fixed-effect (i.e. the number of unique identifierfor each fixed-effect dimension).}
 #' \item{convStatus}{Logical, convergence status.}
 #' \item{message}{The convergence message from the optimization procedures.}
-#' \item{obsRemoved}{(When relevant.) In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the row numbers of the observations that were removed. Also reports the NA observations that were removed.}
+#' \item{obs_selection}{(When relevant.) List containing vectors of integers. It represents the sequential selection of observation vis a vis the original data set.}
 #' \item{fixef_removed}{(When relevant.) In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.}
 #' \item{coefficients}{The named vector of estimated coefficients.}
 #' \item{coeftable}{The table of the coefficients with their standard errors, z-values and p-values.}
@@ -2865,7 +2865,7 @@ fepois = function(fml, data, offset, weights, subset, split, fsplit, cluster, se
 #' \item{fixef_vars}{The names of each fixed-effect dimension.}
 #' \item{fixef_id}{The list (of length the number of fixed-effects) of the fixed-effects identifiers for each observation.}
 #' \item{fixef_sizes}{The size of each fixed-effect (i.e. the number of unique identifierfor each fixed-effect dimension).}
-#' \item{obsRemoved}{In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the row numbers of the observations that were removed. Also reports the NA observations that were removed.}
+#' \item{obs_selection}{(When relevant.) List containing vectors of integers. It represents the sequential selection of observation vis a vis the original data set.}
 #' \item{fixef_removed}{In the case there were fixed-effects and some observations were removed because of only 0/1 outcome within a fixed-effect, it gives the list (for each fixed-effect dimension) of the fixed-effect identifiers that were removed.}
 #' \item{theta}{In the case of a negative binomial estimation: the overdispersion parameter.}
 #'
