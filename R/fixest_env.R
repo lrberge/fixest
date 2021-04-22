@@ -596,17 +596,20 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
                 check_value(subset, "os formula var(data)", .data = data)
                 subset.value = subset[[2]]
-                subset = check_value_plus(subset.value, "evalset integer vector gt{0} | logical vector len(data)", .data = data, .prefix = "In argument 'subset', the expression")
+                subset = check_value_plus(subset.value, "evalset integer vmatrix ncol(1) gt{0} | logical vector len(data)", .data = data, .prefix = "In argument 'subset', the expression")
 
             } else {
 
                 if(isFit){
-                    check_value(subset, "integer vector gt{0} | logical vector len(data)", .data = lhs)
+                    check_value(subset, "integer vmatrix ncol(1) gt{0} | logical vector len(data)", .data = lhs)
                 } else {
-                    check_value(subset, "integer vector gt{0} | logical vector len(data)",
+                    check_value(subset, "integer vmatrix ncol(1) gt{0} | logical vector len(data)",
                                 .prefix = "If not a formula, argument 'subset'", .data = data)
                 }
+
             }
+
+            if(is.matrix(subset)) subset = as.vector(subset)
 
             isNA_subset = is.na(subset)
             if(anyNA(isNA_subset)){
@@ -1078,11 +1081,11 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
                 check_value(offset, "os formula var(data)", .data = data)
                 offset.value = offset[[2]]
-                check_value_plus(offset.value, "evalset numeric vector conv", .data = data, .prefix = "In argument 'offset', the expression")
+                check_value_plus(offset.value, "evalset numeric vmatrix ncol(1) conv", .data = data, .prefix = "In argument 'offset', the expression")
 
             } else {
 
-                check_value_plus(offset, "numeric vector conv", .prefix = "If not a formula, argument 'offset'")
+                check_value_plus(offset, "numeric vmatrix ncol(1) conv", .prefix = "If not a formula, argument 'offset'")
 
                 if(length(offset) == 1){
                     offset.value = rep(offset, nobs)
@@ -1098,6 +1101,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                     }
                 }
             }
+
+            if(is.matrix(offset.value)) offset.value = as.vector(offset.value)
 
             if(delayed.subset){
                 offset.value = offset.value[subset]
@@ -1159,12 +1164,12 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
                 check_value(weights, "os formula var(data)", .data = data)
                 weights.value = weights[[2]]
-                check_value_plus(weights.value, "evalset numeric vector conv", .data = data, .prefix = "In argument 'weights', the expression")
+                check_value_plus(weights.value, "evalset numeric vmatrix ncol(1) conv", .data = data, .prefix = "In argument 'weights', the expression")
 
 
             } else {
 
-                check_value_plus(weights, "numeric vector conv", .prefix = "If not a formula, argument 'weights'")
+                check_value_plus(weights, "numeric vmatrix ncol(1) conv", .prefix = "If not a formula, argument 'weights'")
 
                 if(length(weights) == 1){
                     if(weights == 1){
@@ -1186,6 +1191,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                     }
                 }
             }
+
+            if(is.matrix(weights.value)) weights.value = as.vector(weights.value)
 
             if(delayed.subset){
                 weights.value = weights.value[subset]
