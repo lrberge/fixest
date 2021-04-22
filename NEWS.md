@@ -26,6 +26,9 @@
  - Fix bug in IV estimations when an endogenous regressor was removed because of collinearity.
  
  - Fix bug estimation without intercept not working when lags are present in the formula (thanks to @nreigl [#126](https://github.com/lrberge/fixest/issues/126)). 
+ 
+ - Fix various bugs when using `subset` in the estimations (reported by @noahmbuckley and @
+Oravishayrizi, [#129](https://github.com/lrberge/fixest/issues/129) and [#131](https://github.com/lrberge/fixest/issues/131)).
 
 ## etable
 
@@ -54,20 +57,39 @@ Common methods have been extended to `fixest_multi` objects.
  - `coef.fixest_multi`: re-arranges the coefficients of multiple estimations into a matrix.
  
  - `resid.fixest_multi`: re-arranges the residuals of multiple estimations into a matrix.
+ 
+ 
+## New fit statistics
+
+  - `kpr`: Kleibergen-Paap rank test for IV estimations.
   
-## New features
+  - `cd`: Cragg-Donald F statistic for IV estimations.
+  
+  
+## New functions
 
   - New function `degrees_freedom`: to access the DoFs of the models (sometimes that can be intricate).
   
+  - `feols.fit`: fit method for feols. 
+  
+## New features
+  
   - Better handling of the DoFs in `fitstat` (in particular when the VCOV is clustered).
   
-  - `model.matrix`: the endogenous regressors and the instruments from IV estimations can now be easily extracted.
+  - `model.matrix`: 
   
-  - New function `feols.fit`.
+    * the endogenous and exogenous regressors, and the instruments from IV estimations can now be easily extracted.
+    
+    * new arguments `as.matrix` and `as.df` to coerce the result to a particular format.
   
   - `.fit` methods (`feols.fit` and `feglm.fit`) now handle multiple dependent variables.
   
   - The argument `only.inter` can now have user-defined default values using `setFixest_coefplot`.
+  
+  
+## Minor breaking changes
+
+ - in `model.matrix` when `type = "lhs"` the return object is now a vector (previously it was a data.frame).
   
 ## Other changes
 
