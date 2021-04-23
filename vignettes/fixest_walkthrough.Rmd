@@ -1,6 +1,6 @@
 ---
 title: 'Fast Fixed-Effects Estimation: Short introduction'
-author: "Laurent Berge"
+author: "Laurent Berge and Grant McDermott"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -503,16 +503,20 @@ head(base)
 Here's a quick visual depiction of the data. Again, notice the staggered treatment rollout and time-varying intensity.
 
 ```{r, echo=FALSE}
-library(ggplot2)
-ggplot(aggregate(base[, c('year_treated', 'y_true')], 
-                 by = list(year = base$year, group = base$group), 
-                 mean), 
-       aes(year, group, fill = year>=year_treated, alpha = y_true)) + 
-  geom_tile(colour = "white", lwd = 1) + 
-  scale_fill_brewer('Treated?', palette = 'Set1') +
-  scale_alpha('Avg. treatment\neffect') +
-  labs(x = 'Year', y = 'Group') +
-  theme_minimal()
+if(requireNamespace("ggplot2", quietly = TRUE)){
+  library(ggplot2)
+  ggplot(aggregate(base[, c('year_treated', 'y_true')], 
+                   by = list(year = base$year, group = base$group), 
+                   mean), 
+         aes(year, group, fill = year>=year_treated, alpha = y_true)) + 
+    geom_tile(colour = "white", lwd = 1) + 
+    scale_fill_brewer('Treated?', palette = 'Set1') +
+    scale_alpha('Avg. treatment\neffect') +
+    labs(x = 'Year', y = 'Group') +
+    theme_minimal()
+} else {
+  print("This graph requires ggplot2 which is currently not available.")
+}
 ```
 
 With our generated data in hand, let's move on to the estimations. We'll implement two DiD models:
