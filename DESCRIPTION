@@ -2,8 +2,20 @@ Package: fixest
 Type: Package
 Title: Fast Fixed-Effects Estimations
 Version: 0.9.0
-Authors@R: c(person("Laurent", "Berge", email = "laurent.berge@u-bordeaux.fr", role = c("aut", "cre")), person("Sebastian", "Krantz", role = "ctb"))
-Imports: stats, graphics, grDevices, utils, methods, numDeriv, nlme, sandwich, Rcpp, dreamerr(>= 1.2.3)
+Authors@R:
+    c(person(given = "Laurent",
+             family = "Berge",
+             role = c("aut", "cre"),
+             email = "laurent.berge@u-bordeaux.fr"),
+      person(given = "Sebastian",
+             family = "Krantz",
+             role = "ctb"),
+      person(given = "Grant",
+             family = "McDermott",
+             role = "ctb",
+             email = "grantmcd@uoregon.edu",
+             comment = c(ORCID = "0000-0001-7883-8573")))
+Imports: stats, graphics, grDevices, utils, methods, numDeriv, nlme, sandwich, Rcpp, dreamerr(>= 1.2.3), ggplot2
 Suggests: knitr, rmarkdown, data.table, plm, MASS, pander
 LinkingTo: Rcpp
 Depends: R(>= 3.1.0)
