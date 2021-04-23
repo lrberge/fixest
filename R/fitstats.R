@@ -1135,7 +1135,7 @@ kp_stat = function(x){
 
     # Necessary data
 
-    X_proj = resid(summary(x, stage = 1))
+    X_proj = as.matrix(resid(summary(x, stage = 1)))
 
     # while the projection of X has already been computed, we need to do it
     # for Z => that's a pain in the neck
@@ -1145,32 +1145,40 @@ kp_stat = function(x){
     Z = model.matrix(x, type = "iv.inst")
     Z_proj = proj_on_U(x, Z)
 
+    k = n_endo = ncol(X_proj)
+    l = n_inst = ncol(Z)
+
+    # We assume l >= k
+    q = min(k, l) - 1
+
     # Let's go
 
-    PI = coef(summary(x, stage = 1))
-    PI = t(PI[, colnames(PI) %in% x$iv_inst_names_xpd])
+    if(n_endo == 1){
+        PI = t(coef(summary(x, stage = 1)))
+    } else {
+        PI = coef(summary(x, stage = 1))
+    }
+    PI = PI[, colnames(PI) %in% x$iv_inst_names_xpd, drop = FALSE]
 
     Fmat = chol(crossprod(Z_proj))
     Gmat = chol(crossprod(X_proj))
     theta = Fmat %*% t(solve(t(Gmat)) %*% t(PI))
 
-    svddecomposition = mat_svd(theta)
-    u = svddecomposition$u
-    vt = svddecomposition$vt
-
-    k = n_endo = ncol(X_proj)
-    l = n_inst = ncol(Z)
+    svd_decomp = mat_svd(theta)
+    u = svd_decomp$u
+    vt = svd_decomp$vt
 
     u_sub = u[k:l, k:l]
     vt_sub = vt[k, k]
 
     ssign = function(x) if(x == 0) 1 else sign(x)
 
+    # I am having a sign problem
     if(k == l){
         a_qq = ssign(u_sub[1]) * u[1:l, k:l]
         b_qq = ssign(vt_sub[1]) * t(vt[1:k, k])
     } else {
-        a_qq = u[1:l, k:l]  %*% (solve(u_sub) %*% mat_sqrt(u_sub %*% t(u_sub)))
+        a_qq = u[1:l, k:l] %*% (solve(u_sub) %*% mat_sqrt(u_sub %*% t(u_sub)))
         b_qq = mat_sqrt(vt_sub %*% t(vt_sub)) %*% (solve(t(vt_sub)) %*% t(vt[1:k, k]))
     }
 
@@ -1275,14 +1283,14 @@ mat_svd = function(A){
 
     ATA = crossprod(A)
     ATA.e = eigen(ATA)
-    v.mat = ATA.e$vectors
+    v = ATA.e$vectors
 
     AAT = tcrossprod(A)
     AAT.e = eigen(AAT)
-    u.mat = AAT.e$vectors
+    u = AAT.e$vectors
     r = sqrt(ATA.e$values)
 
-    list(u = u.mat, vt = t(v.mat), d = r)
+    list(u = u, vt = t(v), d = r)
 }
 
 
