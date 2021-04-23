@@ -2,7 +2,10 @@
 title: "Exporting estimation tables"
 author: "Laurent Berge"
 date: "`r Sys.Date()`"
-output: html_document
+output: 
+  html_document:
+    theme: journal
+    highlight: haddock
 vignette: >
   %\VignetteIndexEntry{Exporting estimation tables}
   %\VignetteEngine{knitr::rmarkdown}

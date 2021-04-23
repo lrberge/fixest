@@ -2,7 +2,10 @@
 title: "On standard-errors"
 author: "Laurent Berge"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_document
+output: 
+  html_document:
+    theme: journal
+    highlight: haddock
 vignette: >
   %\VignetteIndexEntry{On standard-errors}
   %\VignetteEngine{knitr::rmarkdown}
