@@ -2,7 +2,7 @@
 Github made it a collaborative project, channeling the attention of dozens of persons who took the time to report bugs, suggest new features and even make direct additions to the code.
 The overall software quality is now nowhere near what it would have been without this global collaboration.<sup>[1](#fnt1)</sup>
 
-This document reports direct and indirect contributors to the project whom Laurent Berge (and likely the community) warmly thanks.<sup>[1](#fnt2)</sup>
+This document reports direct and indirect contributors to the project whom Laurent Berge (and likely the community) wishes to thank.<sup>[1](#fnt2)</sup>
 
 ## Direct contributors (PRs):
 
@@ -14,9 +14,9 @@ This document reports direct and indirect contributors to the project whom Laure
  
 ## Indirect contributors:
 
-Through issue filing, countless bugs have been resolved and many features have been added. In alphabetical order, a tentative list of persons to thank: @adamaltmejd, @adamtheising, @amarbler, @apoorvalal, @benzipperer, @bgchamps, @chenwang, @clerousset, @clukewatson, @colejharvey, @d712, @dlindzee, @edrubin, @fostermeijer, @joseph-richard-martinez, @jurojas5, @kdzhang, @kendonB, @lyifa, @marissachilds, @nikolassch, @noahmbuckley, @nreigl, @Oravishayrizi, @pbaylis, @pei-huang, @phisherblack, @poliquin, @reifjulian, @rrichmond, @seunghoon001, @shoonlee, @SuperMayo, @tcovert, @tholdaway, @waynelapierre and @zozotintin. 
+Through issue filing, countless bugs have been resolved and many features have been added. In alphabetical order, a tentative and incomplete list of persons to thank: @adamaltmejd, @adamtheising, @amarbler, @apoorvalal, @benzipperer, @bgchamps, @chenwang, @clerousset, @clukewatson, @colejharvey, @d712, @dlindzee, @edrubin, @fostermeijer, @joseph-richard-martinez, @jurojas5, @kdzhang, @kendonB, @lyifa, @marissachilds, @nikolassch, @noahmbuckley, @nreigl, @Oravishayrizi, @pbaylis, @pei-huang, @phisherblack, @poliquin, @reifjulian, @rrichmond, @seunghoon001, @shoonlee, @SuperMayo, @tcovert, @tholdaway, @waynelapierre and @zozotintin. 
 
-Special thanks to @karldw for writing the broom method very early and to @zozotintin for helping to debug problems occurring at the billion observations scale.
+Special thanks to @karldw for writing the `broom` method very early, to @zozotintin for helping to debug problems occurring at the billion observations scale, and of course to Grant McDermott for single-handedly popularizing the package.
 
 <a name="fnt1">1</a>: Unfortunately, on the downside, with about 2/3 new issues a week, collaboration substantially increased the workload of the maintainer: we can't have everything!
 
