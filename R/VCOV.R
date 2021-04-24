@@ -68,7 +68,7 @@
 #' vcov(est_pois_simple, cluster = ~Product)
 #'
 #'
-vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovariance = FALSE, keepBounded = FALSE, nthreads = getFixest_nthreads(), ...){
+vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forceCovariance = FALSE, keepBounded = FALSE, nthreads = getFixest_nthreads(), ...){
     # computes the clustered vcov
 
     check_arg(attr, "logical scalar")
@@ -80,109 +80,92 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
 
     if(!any("keep_se_info" %in% names(match.call(expand.dots = TRUE)))){
         # means NOT a client call
-        validate_dots(suggest_args = c("se", "cluster", "dof"))
+        validate_dots(suggest_args = c("vcov", "dof"))
+    }
+
+    # We transform se and cluster into vcov
+    vcov_vars = NULL
+    if(!missnull(se) || !missnull(cluster)){
+        if(!missnull(vcov)){
+            id = c(!missnull(se), !missnull(cluster))
+            msg = c("se", "cluster")[id]
+            stop("You cannot use the argument 'vcov' in combination with ", enumerate_items(msg, "or.quote"), ".")
+        }
+
+        check_arg_plus(se, "NULL{'cluster'} match", .choices = c("standard", "white", "hetero", "cluster", "twoway", "threeway", "fourway"), .message = "Argument 'se' (which has been replaced by arg. 'vcov') should be equal to one of 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
+        if(se == "white") se = "hetero"
+
+        if(se %in% c("standard", "hetero") || missnull(cluster)){
+            vcov = se
+        } else {
+            if(inherits(cluster, "formula")){
+                vcov = cluster
+            } else {
+                vcov = cluster
+                vcov_vars = cluster
+            }
+        }
     }
 
 
     if(!is.null(object$onlyFixef)){
         # means that the estimation is done without variables
-        stop("No explanatory variable was used: vcov() cannot be applied.")
+        return(NULL)
     }
 
     # If it's a summary => we give the vcov directly without further computation! except if arguments are provided which would mean that the user wants the new vcov
-    if(isTRUE(object$summary) && missnull(se) && missnull(cluster) && missnull(dof)){
+    if(isTRUE(object$summary) && missnull(vcov) && missnull(dof)){
         vcov = object$cov.scaled
         if(!attr) attr(vcov, "se_info") = NULL
         return(vcov)
     }
 
 
-    # Default behavior se:
+    # Default behavior vcov:
     suffix = ""
-    se_in = TRUE
-    if(missnull(se)){
-        se_in = FALSE
+    if(missnull(vcov)){
 
-        if(missnull(cluster)){
+        vcov_default = getFixest_vcov()
 
-            se_default = getFixest_se()
+        n_fe = length(object$fixef_id)
 
-            n_fe = length(object$fixef_id)
-
-            if(n_fe == 0){
-                se = se_default$no_FE
-            } else if(n_fe == 1){
-                se = se_default$one_FE
-            } else {
-                se = se_default$two_FE
-            }
-
-            if(!is.null(object$fixef_sizes) && object$fixef_sizes[1] == 1){
-                # Special case => cleaner output
-                se = se_default$no_FE
-            }
-
+        if(n_fe == 0){
+            vcov = vcov_default$no_FE
+        } else if(n_fe == 1){
+            vcov = vcov_default$one_FE
         } else {
-            if("formula" %in% class(cluster)){
-                # we just find the nway clustering and do only minor control
-
-                cluster = formula(cluster) # regularization to check it
-
-                if(length(cluster) != 2){
-                    stop("If argument cluster is to be a formula, it must be one sided: e.g. ~fe_1+fe_2.")
-                }
-
-                all_vars = fml2varnames(cluster)
-                doEval = TRUE
-                nway = length(all_vars)
-
-                if(nway > 4){
-                    stop("From argument 'cluster', ", nway, "-way clustering is deduced. However, only up to fourway clustering is supported.")
-                }
-
-            } else if(length(cluster) <= 4){
-                nway = length(cluster)
-
-            } else if(length(cluster) %in% c(object$nobs, object$nobs_origin)){
-                nway = 1
-
-            } else {
-                stop("The length of argument cluster (", length(cluster), ") is invalid, no clustering can be deduced. Alternatively, you could use a formula.")
-            }
-
-            se = switch(nway, "1"="cluster", "2"="twoway", "3"="threeway", "4"="fourway")
+            vcov = vcov_default$two_FE
         }
 
+        if(!is.null(object$fixef_sizes) && object$fixef_sizes[1] == 1){
+            # Special case => cleaner output
+            vcov = vcov_default$no_FE
+        }
     }
 
-    # Argument se
-    if(!length(se) == 1) {
-        stop("Argument 'se' must be of length 1.")
-    }
 
-    if(isScalar(se) && se %in% 1:4){
-        # we allow for integer values
-        se = c("cluster", "twoway", "threeway", "fourway")[se]
-    } else if(!is.character(se)){
-        stop("Argument 'se' must be a character scalar equal to: 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
-    }
-
-    check_arg_plus(se, "match", .choices = c("standard", "white", "hetero", "cluster", "twoway", "threeway", "fourway", "1", "2", "3", "4"), .message = "Argument argument 'se' should be equal to one of 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
-    se.val = se
-
-    if(se.val == "white") se.val = "hetero"
-
-    if(isTRUE(object$lean) && se != "standard"){
+    if(isTRUE(object$lean) && !identical(vcov, "standard")){
         # we can't compute the SE because scores are gone!
         # LATER: recompute the scores (costly but maybe only possibility for user?)
         stop("VCOV of 'lean' fixest objects cannot be computed. Please re-estimate with 'lean = FALSE'.")
     }
 
-    if(se_in && !missnull(cluster)){
-        if(se %in% c("standard", "hetero")){
-            cluster = NULL
-            warning("Argument se = '", se, "' cannot be used with the argument 'cluster'. Argument 'cluster' is ignored.")
-        }
+    # Checking the value of vcov
+    check_arg_plus(vcov, "match(standard, hetero, cluster, twoway, threeway, fourway, hac, conley, conley_hac) | formula | function | matrix")
+
+    # WIP => to implement (not that difficult)
+    if(is.function(vcov)){
+        stop("Argument 'vcov' does not accept functions yet.")
+
+        return(vcov__)
+    }
+
+    if(is.matrix(vcov)){
+        # Check that this makes sense
+        nr = ncol(object$cov.unscaled)
+        check_value(vcov, "square matrix nrow(value)", .value = nr)
+
+        return(vcov)
     }
 
     # Checking the nber of threads
@@ -888,19 +871,19 @@ vcovClust <- function (cluster, myBread, scores, dof=FALSE, do.unclass=TRUE, nth
     # Source: http://cameron.econ.ucdavis.edu/research/Cameron_Miller_JHR_2015_February.pdf
     #         Cameron & Miller -- A Practitioner’s Guide to Cluster-Robust Inference
 
-    n <- NROW(scores)
+    n = NROW(scores)
 
     # Control for cluster type
     if(do.unclass){
-        cluster <- quickUnclassFactor(cluster)
+        cluster = quickUnclassFactor(cluster)
     }
 
-    Q <- max(cluster)
+    Q = max(cluster)
     RightScores = cpp_tapply_sum(Q, scores, cluster)
 
     # Finite sample correction:
     if(dof){
-        dof_value  <- Q / (Q - 1)
+        dof_value  = Q / (Q - 1)
     } else {
         dof_value = 1
     }
@@ -911,6 +894,103 @@ vcovClust <- function (cluster, myBread, scores, dof=FALSE, do.unclass=TRUE, nth
 }
 
 
+vcov_setup = function(){
+
+    #
+    # cluster(s)
+    #
+
+    vcov_clust_setup = list(name = c("cluster", ""), fun_name = "vcov_cluster_internal")
+    vcov_clust_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1)),
+                                 cl2 = "optional",
+                                 cl3 = "optional",
+                                 cl4 = "optional")
+    vcov_clust_setup$patterns = c("", "cl1", "cl1 + cl2", "cl1 + cl2 + cl3",
+                                  "c1 + cl2 + cl3 + cl4")
+
+    # Other keywords
+    vcov_twoway_setup = list(name = "twoway", fun_name = "vcov_cluster_internal")
+    vcov_twoway_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1)),
+                                  cl2 = list("guess_from" = list(fixef = 2)))
+    vcov_twoway_setup$patterns = c("", "cl1 + cl2")
+
+    vcov_threeway_setup = list(name = "threeway", fun_name = "vcov_cluster_internal")
+    vcov_threeway_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1)),
+                                    cl2 = list("guess_from" = list(fixef = 2)),
+                                    cl3 = list("guess_from" = list(fixef = 3)))
+    vcov_threeway_setup$patterns = c("", "cl1 + cl2 + cl3")
+
+    vcov_fourway_setup = list(name = "fourway", fun_name = "vcov_cluster_internal")
+    vcov_fourway_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1)),
+                                   cl2 = list("guess_from" = list(fixef = 2)),
+                                   cl3 = list("guess_from" = list(fixef = 3)),
+                                   cl4 = list("guess_from" = list(fixef = 4)))
+    vcov_fourway_setup$patterns = c("", "cl1 + cl2 + cl3 + cl4")
+
+
+    #
+    # hac (panel)
+    #
+
+    vcov_hac_setup = list(name = "hac", fun_name = "vcov_hac_internal")
+    # The variables
+    id = list(guess_from = list(panel.id = 1))
+    time = list(guess_from = list(panel.id = 2))
+    vcov_hac_setup$vars = list(id = list(id = id, time = time))
+    vcov_hac_setup$arg_main = "lag"
+    vcov_clust_setup$patterns = c("", "id + time")
+
+
+    #
+    # conley
+    #
+
+    vcov_conley_setup = list(name = "conley", fun_name = "vcov_conley_internal")
+    # The variables
+    lat = list(guess_from = list(regex = c("^lat(itude)$", "^lat_.+")))
+    lng = list(guess_from = list(regex = c("^lng$", "^long?(itude)", "^(lng|lon|long)_.+")))
+    vcov_conley_setup$vars = list(id = list(lat = lat, lng = lng))
+    vcov_conley_setup$arg_main = "cutoff"
+    vcov_clust_setup$patterns = c("", "lat + lng")
+
+
+    #
+    # conley hac
+    #
+
+    vcov_conley_hac_setup = list(name = c("conley_hac", "hac_conley"), fun_name = "vcov_conley_hac_internal")
+    # The variables
+    lat = list(guess_from = list(regex = c("^lat(itude)$", "^lat_.+")))
+    lng = list(guess_from = list(regex = c("^lng$", "^long?(itude)", "^(lng|lon|long)_.+")))
+    time = list(guess_from = list(panel.id = 2))
+    vcov_conley_hac_setup$vars = list(id = list(lat = lat, lng = lng, time = time))
+    vcov_conley_hac_setup$arg_main = ""
+    vcov_clust_setup$patterns = c("", "lat + lng", "time", "lat + lng + time")
+
+    #
+    # Saving all the vcov possibilities
+    #
+
+    all_vcov = list(vcov_clust_setup,
+                    vcov_oneway_setup,
+                    vcov_twoway_setup,
+                    vcov_threeway_setup,
+                    vcov_fourway_setup,
+                    vcov_hac_setup,
+                    vcov_conley_setup,
+                    vcov_conley_hac_setup)
+
+    options(fixest_vcov_builtin = all_vcov)
+
+}
+
+vcov_clust_internal = function(VCOV_raw, scores, vars){
+
+    nway = length(vars)
+
+
+
+}
 
 ####
 #### SET / GET ========== ####
@@ -955,7 +1035,7 @@ getFixest_dof = function(){
 #' @param reset Logical, default is \code{FALSE}. Whether to reset to the default values.
 #'
 #' @return
-#' The function \code{getFixest_se()} returns a list with three elements containing the default for estimations i) without, ii) with one, or iii) with two or more fixed-effects.
+#' The function \code{getFixest_vcov()} returns a list with three elements containing the default for estimations i) without, ii) with one, or iii) with two or more fixed-effects.
 #'
 #' @examples
 #'
@@ -971,57 +1051,54 @@ getFixest_dof = function(){
 #' etable(est_no_FE, est_one_FE, est_two_FE)
 #'
 #' # Changing the default standard-errors
-#' setFixest_se(no_FE = "hetero", one_FE = "standard", two_FE = "twoway")
+#' setFixest_vcov(no_FE = "hetero", one_FE = "standard", two_FE = "twoway")
 #' etable(est_no_FE, est_one_FE, est_two_FE)
 #'
 #' # Resetting the defaults
-#' setFixest_se(reset = TRUE)
+#' setFixest_vcov(reset = TRUE)
 #'
 #'
-setFixest_se = function(no_FE = "standard", one_FE = "cluster", two_FE = "cluster", all = NULL, reset = FALSE){
+setFixest_vcov = function(no_FE = "standard", one_FE = "cluster", two_FE = "cluster", panel = "cluster", all = NULL, reset = FALSE){
 
     check_arg_plus(no_FE,  "match(standard, hetero)")
     check_arg_plus(one_FE, "match(standard, hetero, cluster)")
     check_arg_plus(two_FE, "match(standard, hetero, cluster, twoway)")
+    check_arg_plus(panel, "match(standard, hetero, cluster, twoway, hac)")
     check_arg_plus(all,  "NULL match(standard, hetero)")
     check_arg_plus(reset, "logical scalar")
 
-    opts = getOption("fixest_se")
+    opts = getOption("fixest_vcov_default")
     if(is.null(opts) || !is.list(opts) || reset){
-        opts = list(no_FE = "standard", one_FE = "cluster", two_FE = "cluster")
+        opts = list(no_FE = "standard", one_FE = "cluster", two_FE = "cluster", panel = "cluster")
     }
 
     if(!is.null(all)){
-        opts$no_FE = opts$one_FE = opts$two_FE = all
+        opts$no_FE = opts$one_FE = opts$two_FE = opts$panel = all
     }
 
 
-    args = intersect(c("no_FE", "one_FE", "two_FE"), names(match.call()))
+    args = intersect(c("no_FE", "one_FE", "two_FE", "panel"), names(match.call()))
 
     for(a in args){
         opts[[a]] = eval(as.name(a))
     }
 
-    options(fixest_se = opts)
+    options(fixest_vcov_default = opts)
 
 }
 
-#' @rdname setFixest_se
-getFixest_se = function(){
+#' @rdname setFixest_vcov
+getFixest_vcov = function(){
 
-    se_default = getOption("fixest_se")
+    vcov_default = getOption("fixest_vcov_default")
 
-    if(is.null(se_default)){
-        se_default = list(no_FE = "standard", one_FE = "cluster", two_FE = "cluster")
-        options(fixest_se = se_default)
-        return(se_default)
+    if(is.null(vcov_default)){
+        vcov_default = list(no_FE = "standard", one_FE = "cluster", two_FE = "cluster", panel = "cluster")
+        options(fixest_vcov_default = vcov_default)
+        return(vcov_default)
     }
 
-    if(!is.list(se_default) || !all(unlist(se_default) %in% c("standard", "hetero", "cluster", "twoway"))){
-        stop("The value of getOption(\"se_default\") is currently not legal. Please use function setFixest_se to set it to an appropriate value.")
-    }
-
-    se_default
+    vcov_default
 }
 
 

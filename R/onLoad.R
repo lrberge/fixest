@@ -16,6 +16,9 @@
 	# cpp_setup_fork_presence()
 	setFixest_nthreads()
 
+	# Setup of builtin VCOVs
+	vcov_setup()
+
 	invisible()
 }
 
