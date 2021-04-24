@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
       </span>
     </div>
 
@@ -39,7 +39,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -74,7 +74,7 @@
 <ul class="nav navbar-nav navbar-right">
 <li>
   <a href="https://github.com/lrberge/fixest/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -88,13 +88,13 @@
 
       
 
-      </header><script src="standard_errors_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><script src="standard_errors_files/header-attrs-2.6/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>On standard-errors</h1>
                         <h4 class="author">Laurent Berge</h4>
             
-            <h4 class="date">2021-01-14</h4>
+            <h4 class="date">2021-04-24</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/standard_errors.Rmd"><code>vignettes/standard_errors.Rmd</code></a></small>
       <div class="hidden name"><code>standard_errors.Rmd</code></div>
@@ -195,7 +195,7 @@
                   time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n_time</span>, each <span class="op">=</span> <span class="va">n_id</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>Here are some comparisons when the estimation doesn’t contain fixed-effects.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">sandwich</span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://sandwich.R-Forge.R-project.org/">sandwich</a></span><span class="op">)</span>
 
 <span class="co"># Estimations</span>
 <span class="va">res_lm</span>    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span>, <span class="va">base</span><span class="op">)</span>
@@ -208,7 +208,7 @@
 #&gt; [2,]     0.23693 0.3347682</code></pre>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Heteroskedasticity-robust covariance</span>
-<span class="va">se_lm_hc</span>    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/sandwich/man/vcovHC.html">vcovHC</a></span><span class="op">(</span><span class="va">res_lm</span>, type <span class="op">=</span> <span class="st">"HC1"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<span class="va">se_lm_hc</span>    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span><span class="op">(</span><span class="fu"><a href="https://sandwich.R-Forge.R-project.org//reference/vcovHC.html">vcovHC</a></span><span class="op">(</span><span class="va">res_lm</span>, type <span class="op">=</span> <span class="st">"HC1"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
 <span class="va">se_feols_hc</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">res_feols</span>, se <span class="op">=</span> <span class="st">"hetero"</span><span class="op">)</span>
 <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="va">se_lm_hc</span>, <span class="va">se_feols_hc</span><span class="op">)</span></code></pre></div>
 <pre><code>#&gt;             (Intercept)        x
@@ -246,7 +246,7 @@
 <p>Now for clustered SEs:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Clustered by id</span>
-<span class="va">se_lm_id</span>    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/sandwich/man/vcovCL.html">vcovCL</a></span><span class="op">(</span><span class="va">est_lm</span>, cluster <span class="op">=</span> <span class="va">base</span><span class="op">$</span><span class="va">id</span>, type <span class="op">=</span> <span class="st">"HC1"</span><span class="op">)</span><span class="op">[</span><span class="st">"x"</span>, <span class="st">"x"</span><span class="op">]</span><span class="op">)</span>
+<span class="va">se_lm_id</span>    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://sandwich.R-Forge.R-project.org//reference/vcovCL.html">vcovCL</a></span><span class="op">(</span><span class="va">est_lm</span>, cluster <span class="op">=</span> <span class="va">base</span><span class="op">$</span><span class="va">id</span>, type <span class="op">=</span> <span class="st">"HC1"</span><span class="op">)</span><span class="op">[</span><span class="st">"x"</span>, <span class="st">"x"</span><span class="op">]</span><span class="op">)</span>
 <span class="va">se_plm_id</span>   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/plm/man/re-export_functions.html">vcovHC</a></span><span class="op">(</span><span class="va">est_plm</span>, cluster <span class="op">=</span> <span class="st">"group"</span><span class="op">)</span><span class="op">[</span><span class="st">"x"</span>, <span class="st">"x"</span><span class="op">]</span><span class="op">)</span>
 <span class="va">se_stata_id</span> <span class="op">=</span> <span class="fl">0.165385</span>      <span class="co"># vce(cluster id)</span>
 <span class="va">se_feols_id</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span><span class="op">)</span> <span class="co"># By default: clustered according to id</span>
@@ -362,7 +362,7 @@
 <a href="#references-acknowledgments" class="anchor"></a>References &amp; acknowledgments</h2>
 <p>I wish to thank Karl Dunkle Werner, Grant McDermott and Ivo Welch for raising the issue and for helpful discussions. Any error is of course my own.</p>
 <p>Zeileis A, Koll S, Graham N (2020). “<a href="https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf">Various Versatile Variances: An Object-Oriented Implementation of Clustered Covariances in R.</a>” Journal of Statistical Software, 95(1), 1–36.</p>
-<p>MacKinnon, JG, White, H (1985). “<a href="http://qed.econ.queensu.ca/working_papers/papers/qed_wp_537.pdf">Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties</a>” Journal of Econometrics, 29(3), 305–325.</p>
+<p>MacKinnon, JG, White, H (1985). “Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties” Journal of Econometrics, 29(3), 305–325.</p>
 <p>Kauermann G, Carroll RJ (2001). “<a href="https://www.tandfonline.com/doi/abs/10.1198/016214501753382309">A Note on the Efficiency of Sandwich Covariance Matrix Estimation</a>”, Journal of the American Statistical Association, 96(456), 1387–1396.</p>
 <p>Cameron AC, Gelbach JB, Miller DL (2011). “<a href="https://www.nber.org/papers/t0327">Robust Inference with Multiway Clustering</a>”, Journal of Business &amp; Ecomomic Statistics, 29(2), 238–249.</p>
 </div>
