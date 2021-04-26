@@ -345,7 +345,17 @@
 #' etable(rep(.l(est, est_bis), each = 3, cluster = list("standard", ~ Month, ~ Day)))
 #'
 #'
-etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, agg = NULL, .vcov, .vcov_args = NULL, digits = 4, digits.stats = 5, tex, fitstat, title, coefstat = "se", ci = 0.95, sdBelow = NULL, keep, drop, order, dict, file, replace = FALSE, convergence, signifCode, label, float, subtitles = list("auto"), fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar = TRUE, style.tex = NULL, style.df = NULL, notes = NULL, group = NULL, extraline = NULL, fixef.group = NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube"), postprocess.tex = NULL, postprocess.df = NULL, fit_format = "__var__", coef.just = NULL){
+etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, agg = NULL,
+                  .vcov, .vcov_args = NULL, digits = 4, digits.stats = 5, tex,
+                  fitstat, title, coefstat = "se", ci = 0.95, sdBelow = NULL,
+                  keep, drop, order, dict, file, replace = FALSE, convergence,
+                  signifCode, label, float, subtitles = list("auto"), fixef_sizes = FALSE,
+                  fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5,
+                  interaction.combine = " $\\times $ ", depvar = TRUE, style.tex = NULL,
+                  style.df = NULL, notes = NULL, group = NULL, extraline = NULL,
+                  fixef.group = NULL, placement = "htbp", drop.section = NULL,
+                  poly_dict = c("", " square", " cube"), postprocess.tex = NULL,
+                  postprocess.df = NULL, fit_format = "__var__", coef.just = NULL){
 
     #
     # Checking the arguments
@@ -497,7 +507,23 @@ etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, agg = N
         }
     }
 
-    info = results2formattedList(dots = dots, se=se, dof=dof, fitstat_all=fitstat, cluster=cluster, stage=stage, agg = agg, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, digits.stats=digits.stats, sdBelow=sdBelow, signifCode=signifCode, coefstat = coefstat, ci = ci, title=title, float=float, subtitles=subtitles, keepFactors=keepFactors, tex = tex, useSummary=useSummary, dots_call=dots_call, powerBelow=powerBelow, dict=dict, interaction.combine=interaction.combine, convergence=convergence, family=family, keep=keep, drop=drop, file=file, order=order, label=label, fixef_sizes=fixef_sizes, fixef_sizes.simplify=fixef_sizes.simplify, depvar=depvar, style.tex=style.tex, style.df=style.df, replace=replace, notes = notes, group = group, extraline=extraline, fixef.group=fixef.group, placement = placement, drop.section = drop.section, poly_dict = poly_dict, tex_tag = DO_POSTPROCESS, fit_format = fit_format, coef.just = coef.just, .up = .up)
+    info = results2formattedList(dots = dots, se=se, dof=dof, fitstat_all=fitstat,
+                                 cluster=cluster, stage=stage, agg = agg, .vcov=.vcov,
+                                 .vcov_args=.vcov_args, digits=digits, digits.stats=digits.stats,
+                                 sdBelow=sdBelow, signifCode=signifCode, coefstat = coefstat,
+                                 ci = ci, title=title, float=float, subtitles=subtitles,
+                                 keepFactors=keepFactors, tex = tex, useSummary=useSummary,
+                                 dots_call=dots_call, powerBelow=powerBelow, dict=dict,
+                                 interaction.combine=interaction.combine, convergence=convergence,
+                                 family=family, keep=keep, drop=drop, file=file, order=order,
+                                 label=label, fixef_sizes=fixef_sizes,
+                                 fixef_sizes.simplify=fixef_sizes.simplify,
+                                 depvar=depvar, style.tex=style.tex, style.df=style.df,
+                                 replace=replace, notes = notes, group = group, extraline=extraline,
+                                 fixef.group=fixef.group, placement = placement,
+                                 drop.section = drop.section, poly_dict = poly_dict,
+                                 tex_tag = DO_POSTPROCESS, fit_format = fit_format,
+                                 coef.just = coef.just, .up = .up)
 
     if(tex){
         res = etable_internal_latex(info)
