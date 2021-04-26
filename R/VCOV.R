@@ -720,14 +720,15 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
             }
         }
 
-        if(meat_only){
-            return(meat)
-        }
-
         G_min = NULL
         if(is_cluster && is_cluster_min){
             G_min = min(sapply(cluster, max))
             correction.dof = correction.dof * G_min / (G_min - 1)
+        }
+
+        if(meat_only){
+            if(!is.null(G_min)) meat = meat * G_min / (G_min - 1)
+            return(meat)
         }
 
         vcov = vcov * correction.dof
