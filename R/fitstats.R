@@ -335,7 +335,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
     type = tolower(type)
 
     # To update
-    type_with_summary = any(grepl("^(g|(iv)?wald)", type))
+    type_with_summary = any(grepl("^(g|(iv)?wald|cd|kpr)", type))
     if(type_with_summary && (!isTRUE(x$summary) || !is.null(dots$se) || !is.null(dots$cluster))){
         x = summary(x, ...)
     }
@@ -1254,24 +1254,34 @@ kp_stat = function(x){
 
     Fmat = chol(crossprod(Z_proj))
     Gmat = chol(crossprod(X_proj))
-    theta = Fmat %*% t(solve(t(Gmat)) %*% t(PI))
+    theta = Fmat %*% t(solve(t(Gmat)) %*% PI)
+    # theta: n_inst x n_endo
 
-    svd_decomp = mat_svd(theta)
-    u = svd_decomp$u
-    vt = svd_decomp$vt
+    if(n_inst == n_endo){
+        svd_decomp = svd(theta)
+        u = svd_decomp$u
+        vt = t(svd_decomp$v)
+    } else {
+        # we need full decomp => un optimized decomp
+        svd_decomp = mat_svd(theta)
+        u = svd_decomp$u
+        vt = svd_decomp$vt
+    }
 
-    u_sub = u[k:l, k:l]
+    u_sub = u[k:l, k:l, drop = FALSE]
     vt_sub = vt[k, k]
+
+    vt_k = vt[1:k, k, drop = FALSE]
 
     ssign = function(x) if(x == 0) 1 else sign(x)
 
-    # I am having a sign problem
+    # There may be more sign problems here
     if(k == l){
-        a_qq = ssign(u_sub[1]) * u[1:l, k:l]
-        b_qq = ssign(vt_sub[1]) * t(vt[1:k, k])
+        a_qq = ssign(u_sub[1]) * u[1:l, k:l, drop = FALSE]
+        b_qq = ssign(vt_sub[1]) * t(vt_k)
     } else {
         a_qq = u[1:l, k:l] %*% (solve(u_sub) %*% mat_sqrt(u_sub %*% t(u_sub)))
-        b_qq = mat_sqrt(vt_sub %*% t(vt_sub)) %*% (solve(t(vt_sub)) %*% t(vt[1:k, k]))
+        b_qq = mat_sqrt(vt_sub %*% t(vt_sub)) %*% (solve(t(vt_sub)) %*% t(vt_k))
     }
 
     # kronecker
@@ -1288,22 +1298,27 @@ kp_stat = function(x){
         K = t(kronecker(Gmat, Fmat))
 
         my_scores = do.call(cbind, lapply(1:ncol(X_proj), function(i) Z_proj * X_proj[, i]))
-        my_vcov_raw = solve(K)
 
         x_new = x
         x_new$scores = my_scores
-        x_new$cov.unscaled =  my_vcov_raw * x_new$sigma2
 
         se = x$summary_flags$se
         cluster = x$summary_flags$cluster
         dof = x$summary_flags$dof
 
-        vhat = vcov(x_new, se = se, cluster = cluster, dof = dof)
+        meat = vcov(x_new, se = se, cluster = cluster, dof = dof, meat_only = TRUE)
+        vhat = solve(K, t(solve(K, meat)))
+
+        # DOF correction now
+        n = nobs(x) - (x$se_info$se == "cluster")
+        df_resid = degrees_freedom(x, "resid", stage = 1)
+        vhat = vhat * n / df_resid
 
         vlab = kronv %*% vhat %*% t(kronv)
     }
 
     r_kp = t(lambda) %*% solve(vlab, lambda)
+    # cat("KP r:\n") ; print(r_kp)
 
     # Now the results
     kp_df = n_inst - n_endo + 1
@@ -1335,7 +1350,7 @@ cd_stat = function(x){
     if(FALSE){
         # => just use the canonical correlation, it's faster
 
-        df_resid = degrees_freedom(x$iv_first_stage[[1]], 2)
+        df_resid = degrees_freedom(x, resid, stage = 1)
         V = resid(summary(x, stage = 1))
 
         P_Z_proj = Z_proj %*% solve(crossprod(Z_proj)) %*% t(Z_proj)
@@ -1372,6 +1387,7 @@ mat_sqrt = function(A){
 
 mat_svd = function(A){
     # From https://rpubs.com/aaronsc32/singular-value-decomposition-r
+    # https://math.stackexchange.com/questions/2359992/how-to-resolve-the-sign-issue-in-a-svd-problem
 
     ATA = crossprod(A)
     ATA.e = eigen(ATA)
@@ -1382,7 +1398,15 @@ mat_svd = function(A){
     u = AAT.e$vectors
     r = sqrt(ATA.e$values)
 
-    list(u = u, vt = t(v), d = r)
+    # we want the last diag element of vt to be positive
+    vt = t(v)
+    k = nrow(vt)
+    if(nrow(u) == k && vt[k, k] < 0){
+        vt[k, ] = - vt[k, ]
+        u[, k] = - u[, k]
+    }
+
+    list(u = u, vt = vt, d = r)
 }
 
 
