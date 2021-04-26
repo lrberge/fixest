@@ -68,7 +68,8 @@
 #' vcov(est_pois_simple, cluster = ~Product)
 #'
 #'
-vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovariance = FALSE, keepBounded = FALSE, nthreads = getFixest_nthreads(), ...){
+vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovariance = FALSE,
+                       keepBounded = FALSE, nthreads = getFixest_nthreads(), ...){
     # computes the clustered vcov
 
     check_arg(attr, "logical scalar")
@@ -80,9 +81,11 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
 
     if(!any("keep_se_info" %in% names(match.call(expand.dots = TRUE)))){
         # means NOT a client call
-        validate_dots(suggest_args = c("se", "cluster", "dof"))
+        validate_dots(suggest_args = c("se", "cluster", "dof"), valid_args = c("meat_only"))
     }
 
+    dots = list(...)
+    meat_only = isTRUE(dots$meat_only)
 
     if(!is.null(object$onlyFixef)){
         # means that the estimation is done without variables
@@ -322,12 +325,18 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
     } else if(se.val == "hetero"){
 
         # we make a n/(n-1) adjustment to match vcovHC(type = "HC1")
-        # vcov = crossprod(myScore %*% VCOV_raw) * correction.dof * ifelse(is_cluster, n/(n-1), 1)
-        vcov = cpppar_crossprod(cpppar_matprod(myScore, VCOV_raw, nthreads), 1, nthreads) * correction.dof * ifelse(is_cluster, n/(n-1), 1)
+        if(meat_only){
+            meat = cpppar_crossprod(myScore, 1, nthreads)
+            return(meat)
+
+        } else {
+            vcov = cpppar_crossprod(cpppar_matprod(myScore, VCOV_raw, nthreads), 1, nthreads) * correction.dof * ifelse(is_cluster, n/(n-1), 1)
+        }
+
         dimnames(vcov) = dimnames(VCOV_raw)
 
     } else {
-        # Clustered SD!
+        # Clustered SE!
         nway = switch(se.val, cluster=1, twoway=2, threeway=3, fourway=4)
 
         # MISC
@@ -624,6 +633,7 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
 
         # initialisation
         vcov = VCOV_raw * 0
+        meat = 0
 
         if(do.unclass){
             for(i in 1:nway){
@@ -701,8 +711,17 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
                 }
 
                 # When cluster.df == "min" => no dof here but later
-                vcov = vcov + (-1)**(i+1) * vcovClust(index, VCOV_raw, myScore, dof = is_cluster && !is_cluster_min, do.unclass=FALSE, nthreads = nthreads)
+                if(meat_only){
+                    meat = meat + (-1)**(i+1) * vcovClust(index, VCOV_raw, myScore, dof = is_cluster && !is_cluster_min, do.unclass=FALSE, meat_only = TRUE, nthreads = nthreads)
+                } else {
+                    vcov = vcov + (-1)**(i+1) * vcovClust(index, VCOV_raw, myScore, dof = is_cluster && !is_cluster_min, do.unclass=FALSE, nthreads = nthreads)
+                }
+
             }
+        }
+
+        if(meat_only){
+            return(meat)
         }
 
         G_min = NULL
@@ -879,7 +898,7 @@ dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = 
 
 
 
-vcovClust <- function (cluster, myBread, scores, dof=FALSE, do.unclass=TRUE, nthreads = 1){
+vcovClust = function (cluster, myBread, scores, dof=FALSE, do.unclass=TRUE, meat_only = FALSE, nthreads = 1){
     # Internal function: no need for controls, they come beforehand
     # - cluster: the vector of dummies
     # - myBread: original vcov
@@ -888,21 +907,26 @@ vcovClust <- function (cluster, myBread, scores, dof=FALSE, do.unclass=TRUE, nth
     # Source: http://cameron.econ.ucdavis.edu/research/Cameron_Miller_JHR_2015_February.pdf
     #         Cameron & Miller -- A Practitioner’s Guide to Cluster-Robust Inference
 
-    n <- NROW(scores)
+    n = NROW(scores)
 
     # Control for cluster type
     if(do.unclass){
-        cluster <- quickUnclassFactor(cluster)
+        cluster = quickUnclassFactor(cluster)
     }
 
-    Q <- max(cluster)
+    Q = max(cluster)
     RightScores = cpp_tapply_sum(Q, scores, cluster)
 
     # Finite sample correction:
     if(dof){
-        dof_value  <- Q / (Q - 1)
+        dof_value = Q / (Q - 1)
     } else {
         dof_value = 1
+    }
+
+    if(meat_only){
+        res = cpppar_crossprod(RightScores, 1, nthreads) * dof_value
+        return(res)
     }
 
     xy = cpppar_matprod(RightScores, myBread, nthreads)
