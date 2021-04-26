@@ -423,8 +423,8 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
 
             if(root == "f"){
                 if(!is.null(x$ssr)){
-                    df1 = degrees_freedom(x, 1) - 1
-                    df2 = degrees_freedom(x, 2, se = "standard")
+                    df1 = degrees_freedom(x, "k") - 1
+                    df2 = degrees_freedom(x, "resid", se = "standard")
 
                     if(isTRUE(x$iv) && x$iv_stage == 2){
                         # We need to compute the SSR
@@ -462,7 +462,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                 if(isTRUE(x$iv)){
                     if(x$iv_stage == 1){
                         df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd)
-                        df2 = degrees_freedom(x, 2, se = "standard")
+                        df2 = degrees_freedom(x, "resid", se = "standard")
 
                         stat = ((x$ssr_no_inst - x$ssr) / df1) / (x$ssr / df2)
                         p = pf(stat, df1, df2, lower.tail = FALSE)
@@ -473,7 +473,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                         # f stat for the second stage
 
                         df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
-                        df2 = degrees_freedom(x, 2, se = "standard")
+                        df2 = degrees_freedom(x, "resid", se = "standard")
 
                         w = 1
                         if(!is.null(x$weights)) w = x$weights
@@ -493,7 +493,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
 
                 if(isTRUE(x$iv)){
                     df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd, stage = 1)
-                    df2 = degrees_freedom(x, 2, se = "standard", stage = 1)
+                    df2 = degrees_freedom(x, "resid", se = "standard", stage = 1)
 
                     if(x$iv_stage == 1){
 
@@ -522,7 +522,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                     # f stat for the second stage
 
                     df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
-                    df2 = degrees_freedom(x, 2, se = "standard")
+                    df2 = degrees_freedom(x, "resid", se = "standard")
 
                     w = 1
                     if(!is.null(x$weights)) w = x$weights
@@ -568,7 +568,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                 df1 = length(my_coef)
 
                 if(df1 > 0){
-                    df2 = degrees_freedom(x, 2)
+                    df2 = degrees_freedom(x, "resid")
 
                     # The VCOV is always full rank in here
                     stat = drop(my_coef %*% solve(x$cov.scaled[qui, qui]) %*% my_coef) / df1
@@ -587,7 +587,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                     if(x$iv_stage == 1){
 
                         df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd)
-                        df2 = degrees_freedom(x, 2)
+                        df2 = degrees_freedom(x, "resid")
 
                         stat = .wald(x, x$iv_inst_names_xpd)
 
@@ -599,7 +599,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                         # wald stat for the second stage
 
                         df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
-                        df2 = degrees_freedom(x, 2)
+                        df2 = degrees_freedom(x, "resid")
 
                         stat = .wald(x, x$iv_endo_names_fit)
 
@@ -615,7 +615,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
             } else if(root %in% "ivwald1"){
 
                 df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd, stage = 1)
-                df2 = degrees_freedom(x, 2, stage = 1)
+                df2 = degrees_freedom(x, "resid", stage = 1)
 
                 if(isTRUE(x$iv)){
 
@@ -661,7 +661,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                     # wald stat for the second stage
 
                     df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
-                    df2 = degrees_freedom(x, 2)
+                    df2 = degrees_freedom(x, "resid")
 
                     stat = .wald(x, x$iv_endo_names_fit)
 
@@ -1072,6 +1072,98 @@ r2 = function(x, type = "all", full_names = FALSE){
         names(res) = type_all
     }
 
+
+    res
+}
+
+
+#' Gets the degrees of freedom of a \code{fixest} estimation
+#'
+#' Simple utility to extract the degrees of freedom from a \code{fixest} estimation.
+#'
+#' @inheritParams vcov.fixest
+#'
+#' @param x A \code{fixest} estimation.
+#' @param type Character scalar, equal to "k", "resid", "t". If "k", then the number of regressors is returned. If "resid", then it is the "residuals degree of freedom", i.e. the number of observations minus the number of regressors. If "t", it is the degrees of freedom used in the t-test. Note that these values are affected by how the VCOV of \code{x} is computed, in particular when the VCOV is clustered.
+#' @param vars A vector of variable names, of the regressors. This is optional. If provided, then \code{type} is set to 1 by default and the number of regressors contained in \code{vars} is returned. This is only useful in the presence of collinearity and we want a subset of the regressors only. (Mostly for internal use.)
+#' @param stage Either 1 or 2. Only concerns IV regressions, which stage to look at.
+#'
+#'
+#' @examples
+#'
+#' # First: an estimation
+#'
+#' base = iris
+#' names(base) = c("y", "x1", "x2", "x3", "species")
+#' est = feols(y ~ x1 + x2 | species, base)
+#'
+#' # "Normal" standard-errors (SE)
+#' est_standard = summary(est, se = "st")
+#'
+#' # Clustered SEs
+#' est_clustered = summary(est, se = "clu")
+#'
+#' # The different degrees of freedom
+#'
+#' # => different type 1 DoF (because of the clustering)
+#' degrees_freedom(est_standard, type = "k")
+#' degrees_freedom(est_clustered, type = "k") # fixed-effects are excluded
+#'
+#' # => different type 2 DoF (because of the clustering)
+#' degrees_freedom(est_standard, type = "resid") # => equivalent to the df.residual from lm
+#' degrees_freedom(est_clustered, type = "resid")
+#'
+#'
+#'
+degrees_freedom = function(x, type, vars = NULL, se = NULL, cluster = NULL, dof = NULL, stage = 2){
+    check_arg(x, "class(fixest) mbt")
+    check_arg_plus(type, "match(k, resid, t)")
+    check_arg(stage, "integer scalar GE{1} LE{2}")
+    check_arg(vars, "character vector no na")
+
+    if(stage == 1 && isTRUE(x$iv) && x$iv_stage == 2){
+        x = x$iv_first_stage[[1]]
+    }
+
+    if(!missnull(vars)){
+        if(!missing(type) && type != "k"){
+            warning("The argument 'type' is ignored when the argument 'vars' is present. Type 'k' is returned.")
+        }
+
+        vars_keep = intersect(vars, names(x$coefficients))
+        return(length(vars_keep))
+    }
+
+    if(missing(type)){
+        stop("The argument 'type' is required but is currently missing.")
+    }
+
+    if(!isTRUE(x$summary) || !missnull(se) || !missnull(cluster) || !missnull(dof)){
+        x = summary(x, se = se, cluster = cluster, dof = dof)
+    }
+
+    vcov = x$cov.scaled
+
+    if(is.null(vcov)){
+        dof.K = x$nparams
+        t.df = NULL
+    } else {
+        t.df = attr(vcov, "G")
+        dof.K = attr(vcov, "dof.K")
+    }
+
+
+    if(type == "k"){
+        res = dof.K
+    } else if(type == "resid"){
+        res = x$nobs - dof.K
+    } else if(type == "t"){
+        if(is.null(t.df)){
+            res = nobs(x) - dof.K
+        } else {
+            res = t.df - 1
+        }
+    }
 
     res
 }
