@@ -30,6 +30,8 @@
  - Fix various bugs when using `subset` in the estimations (reported by @noahmbuckley and @Oravishayrizi, [#129](https://github.com/lrberge/fixest/issues/129) and [#131](https://github.com/lrberge/fixest/issues/131)).
 
  - Fix error message when data cannot be fetched (reported by @Oravishayrizi [#134](https://github.com/lrberge/fixest/issues/134)).
+ 
+ - Fix bug getting the "G" statistic in `fitstat`.
 
 ## etable
 

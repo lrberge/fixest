@@ -388,7 +388,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
         } else if(type == "g"){
             my_vcov = x$cov.scaled
 
-            G = attr(my_vcov, "g")
+            G = attr(my_vcov, "G")
             if(is.null(G)) G = x$nobs - x$nparams
 
             res_all[[type]] = G
