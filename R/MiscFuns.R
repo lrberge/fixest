@@ -5339,7 +5339,7 @@ fetch_data = function(x, prefix = "", suffix = ""){
 
     # 3) Global environment
 
-    if(!identical(parent.env(x$call_env))){
+    if(!identical(parent.env(x$call_env), .GlobalEnv)){
         # ...and again
         try(data <- eval(x$call$data, .GlobalEnv), silent = TRUE)
 
@@ -5361,7 +5361,17 @@ fetch_data = function(x, prefix = "", suffix = ""){
         }
     }
 
-    msg = ifelse(nchar(prefix) > 0, gsub(" +", " ", paste0(prefix, ", w")), "W")
+    if(nchar(prefix) == 0){
+        msg = "W"
+    } else if(grepl("\\. *$", prefix)){
+        msg = paste0(gsub(" +$", "", prefix), " W")
+    } else {
+        msg = paste0(gsub(prefix, " +$", ""), " w")
+    }
+
+    if(nchar(suffix) > 0){
+       suffix = gsub("^ +", "", suffix)
+    }
 
     stop_up(msg, "e fetch the data in the enviroment where the estimation was made, but the data does not seem to be there any more (btw it was ", charShorten(deparse(x$call$data)[1], 15), "). ", suffix)
 
