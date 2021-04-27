@@ -959,7 +959,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 	            my_res = feols(env = current_env, xwx = ZXtZX, xwy = ZXtu[[i]],
 	                           X_demean = ZX_demean, y_demean = iv_lhs_demean[[i]],
-	                           add_fitted_demean = TRUE, iv_call = TRUE)
+	                           add_fitted_demean = TRUE, iv_call = TRUE, notes = FALSE)
 
 	            # For the F-stats
 	            if(n_vars_X == 0){
@@ -1021,7 +1021,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	        current_env = reshape_env(env, rhs = UX)
 	        res_second_stage = feols(env = current_env, xwx = UXtUX, xwy = UXty,
 	                                 X_demean = UX_demean, y_demean = y_demean,
-	                                 resid_1st_stage = resid_s1, iv_call = TRUE)
+	                                 resid_1st_stage = resid_s1, iv_call = TRUE, notes = FALSE)
 
 	        # For the F-stats
 	        if(n_vars_X == 0){
@@ -1075,11 +1075,14 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 	        for(i in 1:n_endo){
 	            current_env = reshape_env(env, lhs = iv_lhs[[i]], rhs = ZX, fml_iv_endo = iv_lhs_names[i])
-	            my_res = feols(env = current_env, xwx = ZXtZX, xwy = ZXtu[[i]], iv_call = TRUE)
+	            my_res = feols(env = current_env, xwx = ZXtZX, xwy = ZXtu[[i]],
+	                           iv_call = TRUE, notes = FALSE)
 
 	            # For the F-stats
-	            fit_no_inst = ols_fit(iv_lhs[[i]], X, w = weights, correct_0w = FALSE, collin.tol = collin.tol, nthreads = nthreads,
-	                                  xwx = ZXtZX[-(1:K + is_int), -(1:K + is_int), drop = FALSE], xwy = ZXtu[[i]][-(1:K + is_int)])
+	            fit_no_inst = ols_fit(iv_lhs[[i]], X, w = weights, correct_0w = FALSE,
+	                                  collin.tol = collin.tol, nthreads = nthreads,
+	                                  xwx = ZXtZX[-(1:K + is_int), -(1:K + is_int), drop = FALSE],
+	                                  xwy = ZXtu[[i]][-(1:K + is_int)])
 	            my_res$ssr_no_inst = cpp_ssq(fit_no_inst$residuals, weights)
 
 	            my_res$iv_stage = 1
@@ -1132,7 +1135,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 	        current_env = reshape_env(env, rhs = UX)
 	        res_second_stage = feols(env = current_env, xwx = UXtUX, xwy = UXty,
-	                                 resid_1st_stage = resid_s1, iv_call = TRUE)
+	                                 resid_1st_stage = resid_s1, iv_call = TRUE, notes = FALSE)
 
 	        # For the F-stats
 	        fit_no_endo = ols_fit(y, X, w = weights, correct_0w = FALSE,
@@ -1211,6 +1214,35 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	    # extra information
 	    res_second_stage$iv_inst_names_xpd = res_first_stage[[1]]$iv_inst_names_xpd
 	    res_second_stage$iv_endo_names_fit = paste0("fit_", res_second_stage$iv_endo_names)
+
+	    # Collineaity message
+	    if(notes){
+	        collin.vars = c(res_second_stage$collin.vars, res_first_stage[[1]]$collin.vars)
+	        if(length(collin.vars) > 0){
+	            coll.endo = intersect(collin.vars, res_second_stage$iv_endo_names_fit)
+	            coll.inst = intersect(collin.vars, res_second_stage$iv_inst_names_xpd)
+	            coll.exo = setdiff(collin.vars, c(coll.endo, coll.inst))
+
+	            n_c = length(collin.vars)
+	            n_c_endo = length(coll.endo)
+	            n_c_inst = length(coll.inst)
+	            n_c_exo = length(coll.exo)
+
+	            msg_endo = msg_exo = msg_inst = NULL
+	           if(n_c_endo > 0){
+	               msg_endo = paste0("The endogenous regressor", plural(n_c_endo), enumerate_items(coll.endo, "quote", nmax = 3))
+	           } else if(n_c_inst > 0){
+	               msg_inst = paste0("the instrument", plural(n_c_inst), enumerate_items(coll.inst, "quote", nmax = 3))
+	           } else if(n_c_exo > 0){
+	               msg_exo = paste0("the exogenous variable", plural(n_c_exo), enumerate_items(coll.exo, "quote", nmax = 3))
+	           }
+
+	            msg = enumerate_items(c(msg_endo, msg_inst, msg_exo))
+	            msg = gsub("^t", "T", msg)
+    	        message(msg, plural(n_c, "has", nmax = 3), " been removed because of collinearity (see $collin.var).")
+
+	        }
+	    }
 
 	    # if lean = TRUE: we clean the IV residuals (which were needed so far)
 	    if(lean){
