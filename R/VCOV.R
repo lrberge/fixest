@@ -24,7 +24,7 @@
 #' The computation of the VCOV matrix is first done in \code{\link[fixest]{summary.fixest}}.
 #'
 #' @details
-#' For an explanation on how the standard-errors are computed and what is the exact meaning of the arguments, please have a look at the dedicated vignette: \href{https://cran.r-project.org/package=fixest/vignettes/standard_errors.html}{On standard-errors}.
+#' For an explanation on how the standard-errors are computed and what is the exact meaning of the arguments, please have a look at the dedicated vignette: \href{https://lrberge.github.io/fixest/articles/standard_errors.html}{On standard-errors}.
 #'
 #' @return
 #' It returns a \eqn{N\times N} square matrix where \eqn{N} is the number of variables of the fitted model.
@@ -784,7 +784,7 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
 #'
 #' @details
 #'
-#' The following vignette: \href{https://cran.r-project.org/package=fixest/vignettes/standard_errors.html}{On standard-errors}, describes in details how the standard-errors are computed in \code{fixest} and how you can replicate standard-errors from other software.
+#' The following vignette: \href{https://lrberge.github.io/fixest/articles/standard_errors.html}{On standard-errors}, describes in details how the standard-errors are computed in \code{fixest} and how you can replicate standard-errors from other software.
 #'
 #' @return
 #' It returns a \code{dof.type} object.

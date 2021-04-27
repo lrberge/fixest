@@ -217,7 +217,7 @@ res_multi = fepois(Euros ~ log(dist_km) | csw0(Year, Destination, Origin), trade
 
 The previous line of code performs 4 estimations. The function `csw0` is the key here, it means: *cumulative stepwise starting with the empty element*. Starting with the empty element, each new estimation adds a new element in the `csw0()` function, quite like the previous loop. Then you can consider the results, here `res_multi`, as a list of results, although with specific methods to easily access each element. 
 
-Stepwise functions can be applied to the linear right-hand-side and to the fixed-effects, you can also have multiple dependent variables and perform split sample estimations with the argument `split`. All of this is detailed in the dedicated vignette: [Multiple estimations](https://cran.r-project.org/package=fixest/vignettes/multiple_estimations.html).
+Stepwise functions can be applied to the linear right-hand-side and to the fixed-effects, you can also have multiple dependent variables and perform split sample estimations with the argument `split`. All of this is detailed in the dedicated vignette: [Multiple estimations](https://lrberge.github.io/fixest/articles/multiple_estimations.html).
 
 
 ## Exporting the results to Latex
@@ -259,7 +259,7 @@ To change the variable names in the Latex table, we use the argument `dict`. The
 
 In the first export, the coefficient of the intercept is dropped by using `drop = "Const"` (could be anything such that `grepl(drop[1], "Constant")` is TRUE). In the second, the coefficient of the distance is put before the intercept (which is kept) thanks to the argument `order`. Note that the actions performed by the arguments `drop` or `order` are performed **after** the renaming takes place with the argument `dict`.
 
-Note that you can completely customize the style of the table by using the `style` and `postprocessing` arguments, please have a look at the dedicated vignette: [Exporting estimation tables](https://cran.r-project.org/package=fixest/vignettes/exporting_tables.html). 
+Note that you can completely customize the style of the table by using the `style` and `postprocessing` arguments, please have a look at the dedicated vignette: [Exporting estimation tables](https://lrberge.github.io/fixest/articles/exporting_tables.html). 
 
 
 ## Extracting the fixed-effects coefficients
@@ -337,7 +337,7 @@ To access the first stage(s), you can use the summary method:
 summary(est_iv_fe, stage = 1)
 ```
 
-When `summary` shall return more than one element, the object returned is not a regular `fixest` object but a `fixest_multi` object. These kind of objects are covered in the vignette: [Multiple estimations](https://cran.r-project.org/package=fixest/vignettes/multiple_estimations.html). You can display the first and second stages in a table with `etable`:
+When `summary` shall return more than one element, the object returned is not a regular `fixest` object but a `fixest_multi` object. These kind of objects are covered in the vignette: [Multiple estimations](https://lrberge.github.io/fixest/articles/multiple_estimations.html). You can display the first and second stages in a table with `etable`:
 
 ```{r}
 etable(summary(est_iv_fe, stage = 1:2), fitstat = ~ . + ivfall + ivwaldall.p)

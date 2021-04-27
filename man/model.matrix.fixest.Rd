@@ -12,6 +12,7 @@
   subset = FALSE,
   as.matrix = FALSE,
   as.df = FALSE,
+  collin.rm = TRUE,
   ...
 )
 }
