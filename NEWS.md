@@ -32,6 +32,8 @@
  - Fix error message when data cannot be fetched (reported by @Oravishayrizi [#134](https://github.com/lrberge/fixest/issues/134)).
  
  - Fix bug getting the "G" statistic in `fitstat`.
+ 
+ - Fix bug in `predict` when a `poly()` term was used and the formula was long (reported by @XiangLiu-github [#135](https://github.com/lrberge/fixest/issues/135)). 
 
 ## etable
 
