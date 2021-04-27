@@ -4440,7 +4440,7 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
         }
     }
 
-    fml_dp = deparse(fml)
+    fml_dp = deparse_long(fml)
 
     #
     # poly
