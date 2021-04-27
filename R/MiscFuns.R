@@ -7756,6 +7756,7 @@ formula.fixest = function(x, type = c("full", "linear", "iv", "NL"), ...){
 #' @param subset Logical or character vector. Default is \code{FALSE}. If \code{TRUE}, then the matrix created will be restricted only to the variables contained in the argument \code{data}, which can then contain a subset of the variables used in the estimation. If a character vector, then only the variables matching the elements of the vector via regular expressions will be created.
 #' @param as.matrix Logical scalar, default is \code{FALSE}. Whether to coerce the result to a matrix.
 #' @param as.df Logical scalar, default is \code{FALSE}. Whether to coerce the result to a data.frame.
+#' @param collin.rm Logical scalar, default is \code{TRUE}. Whether to remove variables that were found to be collinear during the estimation. Beware: it does not perform a collinearity check.
 #' @param ... Not currently used.
 #'
 #' @return
@@ -7786,7 +7787,8 @@ formula.fixest = function(x, type = c("full", "linear", "iv", "NL"), ...){
 #'
 #'
 #'
-model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset = FALSE, as.matrix = FALSE, as.df = FALSE, ...){
+model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset = FALSE,
+                               as.matrix = FALSE, as.df = FALSE, collin.rm = TRUE, ...){
 	# We evaluate the formula with the past call
     # type: lhs, rhs, fixef, iv.endo, iv.inst, iv.rhs1, iv.rhs2
     # if fixef => return a DF
@@ -7819,7 +7821,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 
     check_arg(subset, "logical scalar | character vector no na")
 
-    check_arg_plus(as.matrix, as.df, "logical scalar")
+    check_arg_plus(as.matrix, as.df, collin.rm, "logical scalar")
 
 	# The formulas
 	fml_full = formula(object, type = "full")
@@ -7895,6 +7897,15 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 
 	    linear.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = fake_intercept, subset = subset), "In 'model.matrix', the RHS could not be evaluated: ")
 
+	    if(collin.rm){
+	        qui = which(colnames(linear.mat) %in% object$collin.var)
+	        if(length(qui) == ncol(linear.mat)){
+	            linear.mat = NULL
+	        } else if(length(qui) > 0){
+	            linear.mat =  linear.mat[, -qui, drop = FALSE]
+	        }
+	    }
+
         res[["rhs"]] = linear.mat
 	}
 
@@ -7926,15 +7937,33 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 
 	    endo.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = TRUE), "In 'model.matrix', the endogenous variables could not be evaluated: ")
 
+	    if(collin.rm){
+	        qui = which(colnames(endo.mat) %in% object$collin.var)
+	        if(length(qui) == ncol(endo.mat)){
+	            endo.mat = NULL
+	        } else if(length(qui) > 0){
+	            endo.mat =  endo.mat[, -qui, drop = FALSE]
+	        }
+	    }
+
 	    res[["iv.endo"]] = endo.mat
 	}
 
 	if("iv.inst" %in% type){
 	    fml = object$fml_all$iv
 
-	    endo.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = TRUE), "In 'model.matrix', the instruments could not be evaluated: ")
+	    inst.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = TRUE), "In 'model.matrix', the instruments could not be evaluated: ")
 
-	    res[["iv.inst"]] = endo.mat
+	    if(collin.rm){
+	        qui = which(colnames(inst.mat) %in% object$collin.var)
+	        if(length(qui) == ncol(inst.mat)){
+	            inst.mat = NULL
+	        } else if(length(qui) > 0){
+	            inst.mat =  inst.mat[, -qui, drop = FALSE]
+	        }
+	    }
+
+	    res[["iv.inst"]] = inst.mat
 	}
 
 	if("iv.exo" %in% type){
@@ -7954,6 +7983,13 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	        } else {
 	            # should be NULL
 	            exo.mat = NULL
+	        }
+	    } else if(collin.rm){
+	        qui = which(colnames(exo.mat) %in% object$collin.var)
+	        if(length(qui) == ncol(exo.mat)){
+	            exo.mat = NULL
+	        } else if(length(qui) > 0){
+	            exo.mat =  exo.mat[, -qui, drop = FALSE]
 	        }
 	    }
 
@@ -7977,6 +8013,15 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	    # iv_rhs1 = error_sender(fixest_model_matrix(fml, data, fake_intercept = fake_intercept),
 	    #                        "In 'model.matrix', the RHS of the 1st stage could not be evaluated: ")
 	    iv_rhs1 = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = fake_intercept, subset = subset), "In 'model.matrix', the RHS of the 1st stage could not be evaluated: ")
+
+	    if(collin.rm){
+	        qui = which(colnames(iv_rhs1) %in% object$collin.var)
+	        if(length(qui) == ncol(iv_rhs1)){
+	            iv_rhs1 = NULL
+	        } else if(length(qui) > 0){
+	            iv_rhs1 =  iv_rhs1[, -qui, drop = FALSE]
+	        }
+	    }
 
 	    res[["iv.rhs1"]] = iv_rhs1
 	}
@@ -8010,6 +8055,15 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	    # iv_rhs2 = error_sender(fixest_model_matrix(fml, data, fake_intercept = fake_intercept),
 	    #                        "In 'model.matrix', the RHS of the 2nd stage could not be evaluated: ")
 	    iv_rhs2 = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = fake_intercept, subset = subset), "In 'model.matrix', the RHS of the 2nd stage could not be evaluated: ")
+
+	    if(collin.rm){
+	        qui = which(colnames(iv_rhs2) %in% object$collin.var)
+	        if(length(qui) == ncol(iv_rhs2)){
+	            iv_rhs2 = NULL
+	        } else if(length(qui) > 0){
+	            iv_rhs2 =  iv_rhs2[, -qui, drop = FALSE]
+	        }
+	    }
 
 	    res[["iv.rhs2"]] = iv_rhs2
 	}
