@@ -3224,12 +3224,19 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
     }
 
     if(Q == 1){
-        if(sorted && is.factor(dots[[1]])){
-            # Special treatment for factors => we keep their order
-            f = dots[[1]][drop = TRUE]
-            res = quickUnclassFactor(unclass(f), addItem = add_items, sorted = sorted)
+        if(sorted && !is.numeric(dots[[1]]) && !is.character(dots[[1]])){
+            # general way => works for any type with a sort method
+            f = dots[[1]]
+            res_raw = quickUnclassFactor(f, addItem = TRUE, sorted = FALSE)
+            obs_1st = cpp_get_first_item(res_raw$x, length(res_raw$items))
+            f_unik = f[obs_1st]
+            f_order = order(f_unik)
+            x_new = f_order[res_raw$x]
             if(add_items){
-                res$items = levels(f)[res$items]
+                items_new = as.character(f_unik[f_order])
+                res = list(x = x_new, items = items_new)
+            } else {
+                res = x_new
             }
 
         } else {
