@@ -27,7 +27,7 @@
 #'
 #' If the RPs have to be constructed on the fly, any cohort that is not present in the period is considered as never treated. This means that if the period ranges from 1995 to 2005, \code{cohort = 1994} will be considered as never treated, although it should be considered as always treated: so be careful.
 #'
-#' If you construct your own relative periods, the controls cohorts should have only a negative RP.
+#' If you construct your own relative periods, the controls cohorts should have only negative RPs.
 #'
 #' @return
 #' If not used within a \code{fixest} estimation, this function will return a matrix of interacted coefficients.
@@ -38,7 +38,7 @@
 #'
 #'
 #'
-sunab = function(cohort, period, ref.c = NULL, ref.p = c(.F, 0)){
+sunab = function(cohort, period, ref.c = NULL, ref.p = c(.F, 0), att = FALSE, no_agg = FALSE){
     # LATER:
     # - add id or indiv argument, just to remove always treated
     # - add argument bin.p
@@ -46,6 +46,7 @@ sunab = function(cohort, period, ref.c = NULL, ref.p = c(.F, 0)){
     check_arg(cohort, "mbt vector")
     check_arg(period, "mbt vector len(data)", .data = cohort)
     check_arg(ref.c, "NULL vector no na")
+    check_arg(att, no_agg, "logical scalar")
 
     period_name = deparse_long(substitute(period))
     period_name = gsub("^[[:alpha:]][[:alpha:]_\\.]*\\$", "", period_name)
@@ -169,26 +170,36 @@ sunab = function(cohort, period, ref.c = NULL, ref.p = c(.F, 0)){
 
 
     # We add the agg argument to GLOBAL_fixest_mm_info
-    is_GLOBAL = FALSE
-    for(where in 1:min(6, sys.nframe())){
-        if(exists("GLOBAL_fixest_mm_info", parent.frame(where))){
-            GLOBAL_fixest_mm_info = get("GLOBAL_fixest_mm_info", parent.frame(where))
-            is_GLOBAL = TRUE
-            break
+    if(!no_agg){
+        is_GLOBAL = FALSE
+        for(where in 1:min(8, sys.nframe())){
+            if(exists("GLOBAL_fixest_mm_info", parent.frame(where))){
+                GLOBAL_fixest_mm_info = get("GLOBAL_fixest_mm_info", parent.frame(where))
+                is_GLOBAL = TRUE
+                break
+            }
         }
-    }
 
-    if(is_GLOBAL){
-        GLOBAL_fixest_mm_info$agg = paste0("(\\Q", period_name, "\\E)::(-?[[:digit:]]+)")
-        # re assignment
-        assign("GLOBAL_fixest_mm_info", GLOBAL_fixest_mm_info, parent.frame(where))
+        if(is_GLOBAL){
+            if(att){
+                agg = c("ATT" = paste0("\\Q", period_name, "\\E::[[:digit:]]+"))
+            } else {
+                agg = paste0("(\\Q", period_name, "\\E)::(-?[[:digit:]]+)")
+            }
+
+            GLOBAL_fixest_mm_info$agg = agg
+            # re assignment
+            assign("GLOBAL_fixest_mm_info", GLOBAL_fixest_mm_info, parent.frame(where))
+        }
     }
 
     res
 }
 
-
-
+#' @rdname sunab
+sunab_att = function(cohort, period, ref.c = NULL, ref.p = c(.F, 0)){
+    sunab(cohort, period, ref.c, ref.p, att = TRUE)
+}
 
 
 
