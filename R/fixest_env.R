@@ -234,6 +234,9 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     isNA_sample = FALSE
     message_NA = ""
 
+    # summary information
+    do_summary = FALSE
+
     # Note on mem.clean
     # we remove the most intermediary objects as possible
     # we apply gc only from time to time since it is costly
@@ -790,6 +793,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     #
 
     interaction.info = NULL
+    agg = NULL
     multi_rhs = FALSE
     if(isFit){
 
@@ -853,6 +857,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     } else {
         isLinear = FALSE
         options("fixest_interaction_ref" = NULL)
+        # This variables will be set globally from within fixest_model_matrix!
+        GLOBAL_fixest_mm_info = list()
 
         linear.varnames = all.vars(fml_linear[[3]])
 
@@ -914,6 +920,12 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                 interaction.info = getOption("fixest_interaction_ref")
             }
         }
+
+        if("agg" %in% names(GLOBAL_fixest_mm_info)){
+            agg = GLOBAL_fixest_mm_info$agg
+            do_summary = TRUE
+        }
+
     }
 
     if(check_LHS_const){
@@ -1412,7 +1424,6 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     #
 
     msgNA_cluster = ""
-    do_summary = FALSE
     if(!missnull(cluster)){
         # cluster was checked already before subset => to get the right variables
         # Here cluster is a formula
@@ -2262,8 +2273,9 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         assign("cluster", cluster, env)
         assign("se", se, env)
         assign("dof", dof, env)
+        assign("agg", agg, env)
 
-        assign("summary_flags", build_flags(mc_origin, se = se, cluster = cluster_origin, dof = dof), env)
+        assign("summary_flags", build_flags(mc_origin, se = se, cluster = cluster_origin, dof = dof, agg = agg), env)
     }
 
     # Multi

@@ -1612,6 +1612,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	    cluster = get("cluster", env)
 	    lean = get("lean", env)
 	    dof = get("dof", env)
+	    agg = get("agg", env)
 	    summary_flags = get("summary_flags", env)
 
 	    # If lean = TRUE, 1st stage residuals are still needed for the 2nd stage
@@ -1621,7 +1622,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	        fvd = res$fitted.values_demean
 	    }
 
-	    res = summary(res, se = se, cluster = cluster, dof = dof, lean = lean, summary_flags = summary_flags)
+	    res = summary(res, se = se, cluster = cluster, agg = agg, dof = dof, lean = lean, summary_flags = summary_flags)
 
 	    if(isTRUE(dots$iv_call) && lean){
 	        res$residuals = r
@@ -2587,12 +2588,13 @@ feglm.fit = function(y, X, fixef_df, family = "poisson", offset, split, fsplit, 
         cluster = get("cluster", env)
         lean = get("lean", env)
         dof = get("dof", env)
+        agg = get("agg", env)
         summary_flags = get("summary_flags", env)
 
         # To compute the RMSE and lean = TRUE
         if(lean) res$ssr = cpp_ssq(res$residuals, weights)
 
-        res = summary(res, se = se, cluster = cluster, dof = dof, lean = lean, summary_flags = summary_flags)
+        res = summary(res, se = se, cluster = cluster, agg = agg, dof = dof, lean = lean, summary_flags = summary_flags)
     }
 
     return(res)
@@ -3373,12 +3375,13 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	    cluster = get("cluster", env)
 	    lean = get("lean", env)
 	    dof = get("dof", env)
+	    agg = get("agg", env)
 	    summary_flags = get("summary_flags", env)
 
 	    # To compute the RMSE and lean = TRUE
 	    if(lean) res$ssr = cpp_ssq(res$residuals)
 
-	    res = summary(res, se = se, cluster = cluster, dof = dof, lean = lean, summary_flags = summary_flags)
+	    res = summary(res, se = se, cluster = cluster, dof = dof, agg = agg, lean = lean, summary_flags = summary_flags)
 	}
 
 	return(res)
