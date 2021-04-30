@@ -5572,16 +5572,18 @@ quickUnclassFactor = function(x, addItem = FALSE, sorted = FALSE){
 	# does as unclass(as.factor(x))
 	# but waaaaay quicker
 
-	if(!is.numeric(x)){
-		# level and unclass is much slower
-		x = as.character(x)
-	}
+    not_num = !is.numeric(x)
+    is_char_convert = not_num && !is.character(x)
 
-    res = cpp_quf_gnl(x)
+    if(is_char_convert){
+        res = cpp_quf_gnl(as.character(x))
+    } else {
+        res = cpp_quf_gnl(x)
+    }
 
     if(sorted){
 
-        if(is.character(x)){
+        if(not_num){
             items = x[res$x_unik]
         } else {
             items = res$x_unik
@@ -5594,7 +5596,12 @@ quickUnclassFactor = function(x, addItem = FALSE, sorted = FALSE){
         x_uf = order_new_order[x]
 
         if(addItem){
-            res = list(x = x_uf, items = items[new_order])
+            if(is_char_convert){
+                res = list(x = x_uf, items = as.character(items[new_order]))
+            } else {
+                res = list(x = x_uf, items = items[new_order])
+            }
+
             return(res)
         } else {
             return(x_uf)
@@ -5603,8 +5610,13 @@ quickUnclassFactor = function(x, addItem = FALSE, sorted = FALSE){
 
     if(addItem){
 
-        if(is.character(x)){
-            items = x[res$x_unik]
+        if(not_num){
+            if(is_char_convert){
+                items = as.character(x[res$x_unik])
+            } else {
+                items = x[res$x_unik]
+            }
+
             res = list(x = res$x_uf, items = items)
         } else {
             names(res) = c("x", "items")
