@@ -3135,10 +3135,8 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 #' @param sorted Logical, default is \code{FALSE}. Whether the integer vector should make reference to sorted values?
 #' @param add_items Logical, default is \code{FALSE}. Whether to add the unique values of the original vector(s). If requested, an attribute \code{items} is created containing the values (alternatively, they can appear in a list if \code{items.list=TRUE}).
 #' @param items.list Logical, default is \code{FALSE}. Only used if \code{add_items=TRUE}. If \code{TRUE}, then a list of length 2 is returned with \code{x} the integer vector and \code{items} the vector of items.
-#' @param multi.join Logical, or character, scalar, defaults to \code{FALSE}. Only used if multiple vectors are to be transformed into integers. If \code{multi.join} is not \code{FALSE}, then the values of the different vectors will be collated using \code{\link[base]{paste}} with \code{collapse=multi.join}.
+#' @param multi.join Character scalar used to join the items of multiple vectors. The default is \code{"_"}. Ignored if \code{add_items = FALSE}.
 #'
-#' @details
-#' If multiple vectors have to be combined and \code{add_items=TRUE}, to have user readable values in the items, you should add the argument \code{multi.join} so that the values of the vectors are combined in a "user-readable" way. Note that in the latter case, the algorithm is much much slower.
 #'
 #' @return
 #' Reruns a vector of the same length as the input vectors.
@@ -3172,19 +3170,16 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 #' # Multiple vectors
 #' #
 #'
-#' # by default, the two vector are fast combined, and items are meaningless
 #' to_integer(x1, x2, add_items = TRUE)
 #'
-#' # You can use multi.join to have human-readable values for the items:
-#' to_integer(x1, x2, add_items = TRUE, multi.join = TRUE)
-#'
+#' # You can use multi.join to handle the join of the items:
 #' to_integer(x1, x2, add_items = TRUE, multi.join = "; ")
 #'
-to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE, multi.join = FALSE){
+to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE, multi.join = "_"){
 
     check_arg(..., "vector mbt")
     check_arg(sorted, add_items, items.list, "logical scalar")
-    check_arg(multi.join, "scalar(logical, character)")
+    check_arg(multi.join, "character scalar")
 
     dots = list(...)
 
@@ -3225,12 +3220,6 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
     # Creating the ID
     #
 
-    do_join = FALSE
-    if(!isFALSE(multi.join) && Q > 1){
-        do_join = TRUE
-        if(isTRUE(multi.join)) multi.join = "_"
-    }
-
     if(Q == 1){
         if(sorted && !is.numeric(dots[[1]]) && !is.character(dots[[1]])){
             # general way => works for any type with a sort method
@@ -3239,7 +3228,7 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
             obs_1st = cpp_get_first_item(res_raw$x, length(res_raw$items))
             f_unik = f[obs_1st]
             f_order = order(f_unik)
-            x_new = f_order[res_raw$x]
+            x_new = order(f_order)[res_raw$x]
             if(add_items){
                 items_new = as.character(f_unik[f_order])
                 res = list(x = x_new, items = items_new)
@@ -3253,34 +3242,54 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
 
     } else {
 
-        if(do_join){
-            myDots = dots
-            myDots$sep = multi.join
-            index = do.call("paste", myDots)
+        QUF_raw = list()
+        for(q in 1:Q){
+            QUF_raw[[q]] = quickUnclassFactor(dots[[q]], sorted = FALSE, addItem = TRUE)
+        }
 
+        # Then we combine
+        power = floor(1 + log10(sapply(QUF_raw, function(x) length(x$items))))
+
+        is_large = sum(power) > 14
+        if(is_large){
+            # We can't do differently
+            arg_list = lapply(QUF_raw, `[[`, 1)
+            arg_list$sep = "_"
+            index = do.call("paste", arg_list)
         } else {
-
-            for(q in 1:Q){
-                dots[[q]] = quickUnclassFactor(dots[[q]], sorted = sorted)
-            }
-
-            # Then we combine
-            power = floor(1 + log10(sapply(dots, max)))
-
-            if(sum(power) > 14){
-                myDots = dots
-                myDots$sep = multi.join
-                index = do.call("paste", myDots)
-            } else {
-                # quicker, but limited by the precision of doubles
-                index = dots[[1]]
-                for(q in 2:Q){
-                    index = index + dots[[q]]*10**sum(power[1:(q-1)])
-                }
+            # quicker, but limited by the precision of doubles
+            index = QUF_raw[[1]]$x
+            for(q in 2:Q){
+                index = index + QUF_raw[[q]]$x*10**sum(power[1:(q-1)])
             }
         }
 
         res = quickUnclassFactor(index, addItem = add_items, sorted = sorted)
+
+        if(add_items || sorted){
+            # we re order appropriately
+
+            obs_1st = cpp_get_first_item(res$x, length(res$items))
+            f_all = list()
+            for(q in 1:Q){
+                f_all[[q]] = dots[[q]][obs_1st]
+            }
+
+            f_order = do.call("order", f_all)
+
+            x_new = order(f_order)[res$x]
+
+            arg_list = f_all
+            arg_list$sep = multi.join
+            f_char = do.call("paste", arg_list)
+            items_new = f_char[f_order]
+
+            if(add_items){
+                res = list(x = x_new, items = items_new)
+            } else {
+                res = x_new
+            }
+        }
     }
 
     if(ANY_NA){
