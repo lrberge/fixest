@@ -233,33 +233,7 @@ sunab_att = function(cohort, period, ref.c = NULL, ref.p = c(.F, 0)){
 #' # DiD example
 #' #
 #'
-#' # first we set up the data
-#'
-#' set.seed(1)
-#' n_group = 20
-#' n_per_group = 5
-#'
-#' id_i = paste0((1:n_group), ":", rep(1:n_per_group, each = n_group))
-#' id_t = 1:10
-#'
-#' base = expand.grid(id = id_i, year = id_t)
-#' base$group = as.numeric(gsub(":.+", "", base$id))
-#'
-#' base$year_treated = base$group
-#' base$year_treated[base$group > 10] = 10000
-#' base$treat_post = (base$year >= base$year_treated) * 1
-#' base$time_to_treatment = pmax(base$year - base$year_treated, -1000)
-#' base$treated = (base$year_treated < 10000) * 1
-#'
-#' # The effect of the treatment is cohort specific and increases with time
-#' base$y_true = base$treat_post * (1 + 1 * base$time_to_treatment - 1 * base$group)
-#' base$y = base$y_true + rnorm(nrow(base))
-#'
-#'
-#' # The controls have a time_to_treatment equal to -1000
-#'
-#' # we drop the always treated
-#' base = base[base$group > 1,]
+#' data(base_stagg)
 #'
 #' # Now we perform the estimation
 #' res_naive = feols(y ~ i(treated, time_to_treatment,
@@ -419,11 +393,69 @@ aggregate.fixest = function(x, agg, full = FALSE, use_weights = TRUE, ...){
 
 
 
+####
+#### DATASETS ####
+####
+
+
+#' Sample data for difference in difference
+#'
+#' This data has been generated to illustrate the use of difference in difference functions in package \pkg{fixest}. This is a balanced panel of 104 individuals and 10 periods. About half the individuals are treated, the treatment having a positive effect on the dependent variable \code{y} after the 5th period. The effect of the treatment on \code{y} is gradual.
+#'
+#' @usage
+#' data(base_did)
+#'
+#' @format
+#' \code{base_did} is a data frame with 1,040 observations and 6 variables named \code{y}, \code{x1}, \code{id}, \code{period}, \code{post} and \code{treat}.
+#'
+#' \itemize{
+#' \item{y: The dependent variable affected by the treatment.}
+#' \item{x1: An explanatory variable.}
+#' \item{id: Identifier of the individual.}
+#' \item{period: From 1 to 10}
+#' \item{post: Indicator taking value 1 if the period is strictly greater than 5, 0 otherwise.}
+#' \item{treat: Indicator taking value 1 if the individual is treated, 0 otherwise.}
+#'
+#' }
+#'
+#' @source
+#' This data has been generated from \pkg{R}.
+#'
+#'
+#'
+#'
+"base_did"
 
 
 
 
 
+#' Sample data for staggered difference in difference
+#'
+#' This data has been generated to illustrate the Sun and Abraham (Journal of Econometrics, forthcoming) method for staggered difference-in-difference. This is a balanced panel of 95 individuals and 10 periods. Half the individuals are treated. For those treated, the treatment date can vary from the second to the last period. The effect of the treatment depends on the time since the treatment: it is first negative and then increasing.
+#'
+#' @usage
+#' data(base_stagg)
+#'
+#' @format
+#' \code{base_stagg} is a data frame with 950 observations and 7 variables:
+#'
+#' \itemize{
+#' \item{id: panel identifier.}
+#' \item{year: from 1 to 10.}
+#' \item{year_treated: the period at which the individual is treated.}
+#' \item{time_to_treatment: different between the year and the treatment year.}
+#' \item{treated: indicator taking value 1 if the individual is treated, 0 otherwise.}
+#' \item{treatment_effect_true: true effect of the treatment.}
+#' \item{x1: explanatory variable, correlated with the period.}
+#' \item{y: the dependent variable affected by the treatment.}
+#'
+#' }
+#'
+#' @source
+#' This data has been generated from \pkg{R}.
+#'
+"base_stagg"
 
 
 

@@ -8588,33 +8588,6 @@ getFixest_estimation = function(){
 "trade"
 
 
-#' Sample data for difference in difference
-#'
-#' This data has been generated to illustrate the use of difference in difference functions in package \pkg{fixest}. This is a balanced panel of 104 individuals and 10 periods. About half the individuals are treated, the treatment having a positive effect on the dependent variable \code{y} after the 5th period. The effect of the treatment on \code{y} is gradual.
-#'
-#' @usage
-#' data(base_did)
-#'
-#' @format
-#' \code{base_did} is a data frame with 1,040 observations and 6 variables named \code{y}, \code{x1}, \code{id}, \code{period}, \code{post} and \code{treat}.
-#'
-#' \itemize{
-#' \item{y: The dependent variable affected by the treatment.}
-#' \item{x1: An explanatory variable.}
-#' \item{id: Identifier of the individual.}
-#' \item{period: From 1 to 10}
-#' \item{post: Indicator taking value 1 if the period is strictly greater than 5, 0 otherwise.}
-#' \item{treat: Indicator taking value 1 if the individual is treated, 0 otherwise.}
-#'
-#' }
-#'
-#' @source
-#' This data has been generated from \pkg{R}.
-#'
-#'
-#'
-#'
-"base_did"
 
 
 
