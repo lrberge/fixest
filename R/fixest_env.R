@@ -794,6 +794,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     interaction.info = NULL
     agg = NULL
+    # This variables will be set globally from within fixest_model_matrix!
+    GLOBAL_fixest_mm_info = list()
     multi_rhs = FALSE
     if(isFit){
 
@@ -856,9 +858,6 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     } else {
         isLinear = FALSE
-        options("fixest_interaction_ref" = NULL)
-        # This variables will be set globally from within fixest_model_matrix!
-        GLOBAL_fixest_mm_info = list()
 
         linear.varnames = all.vars(fml_linear[[3]])
 
@@ -916,8 +915,6 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                     isLinear = FALSE
                 }
 
-                # Interaction information => if no interaction: NULL, only the first is there
-                interaction.info = getOption("fixest_interaction_ref")
             }
         }
 
@@ -2579,8 +2576,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     }
 
     # Interaction information
-    if(!is.null(interaction.info)){
-        res$interaction.info = interaction.info
+    if(length(GLOBAL_fixest_mm_info) > 0){
+        res$model_matrix_info = GLOBAL_fixest_mm_info
     }
 
     assign("res", res, env)

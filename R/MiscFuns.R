@@ -2558,7 +2558,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #'
 #' etable(res_2F, res_2F_bis)
 #'
-i = function(var, f, f2, ref, drop, keep, drop2, keep2, ...){
+i = function(fvar, var, ref, keep, ref2, keep2, ...){
     # Used to create interactions
 
     # Later: binning (bin = 1:3 // bin = list("a" = "[abc]")). Default name is bin name (eg "1:3")
@@ -2566,235 +2566,263 @@ i = function(var, f, f2, ref, drop, keep, drop2, keep2, ...){
     # gt = function(x) cat(sfill(x, 20), ": ", -(t0 - (t0<<-proc.time()))[3], "s\n", sep = "")
     # t0 = proc.time()
 
-    validate_dots(valid_args = "f_name")
+    validate_dots(valid_args = c("f2", "f_name"))
     dots = list(...)
 
     mc = match.call()
-
-    if(missing(var) && missing(f)){
-        stop("You must provide at least one of the two arguments: 'var' or 'f'.")
-    }
 
     # Finding if it's a call from fixest
     FROM_FIXEST = is_fixest_call()
 
     # General checks
-    check_arg(var, f, f2, "vector")
+    check_arg(fvar, "mbt vector")
 
-    IS_INTER = TRUE
-    if(missing(f) || missing(var)){
-        # => i() is used to create a factor
-        IS_INTER = FALSE
+    # NOTA:
+    # the user can use the prefix "f." to tell the algorithm to consider the
+    # variable var as a factor. This requires a non standard evaluation
+    #
 
-        if(missing(f)){
-            f = var
-            f_name = deparse_long(mc$var)
+    var_name = NULL
+    if(!is.null(mc$f2)){
+        # should be only used internally
+
+        var_name = deparse_long(mc$f2)
+        if(grepl("^f\\.", var_name)){
+            var_name = gsub("^f\\.", "", var_name)
+            var = str2lang(var_name)
+            check_value_plus(var, "evalset vector", .data = parent.frame(), .arg_name = "f2")
         } else {
-            f_name = deparse_long(mc$f)
+            var = dots$f2
+            check_value(var, "vector", .arg_name = "f2")
+        }
+    }
+
+    # General information on the factor variable
+    if(!is.null(dots$f_name)){
+        f_name = dots$f_name
+    } else {
+        f_name = deparse_long(mc$fvar)
+    }
+    f = fvar # renaming for clarity
+
+    # checking var
+    IS_INTER_COUNT = IS_INTER_FACTOR = FALSE
+    if(!missing(var)){
+        # Evaluation of var (with possibly, user prepending with f.)
+        if(is.null(var_name)){
+            var_name = deparse_long(mc$var)
+            if(grepl("^f\\.", var_name)){
+                var_name = gsub("^f\\.", "", var_name)
+                var = str2lang(var_name)
+                check_value_plus(var, "evalset vector", .data = parent.frame(), .arg_name = "var")
+                IS_INTER_FACTOR = TRUE
+            } else {
+                check_value(var, "vector", .arg_name = "var")
+            }
         }
 
-    } else {
-        var_name = deparse_long(mc$var)
-        f_name = deparse_long(mc$f)
+        # is it an interaction with a factor or with a continuous variable?
+        if(length(var) == length(f)){
+            # Logical => numeric by default
+            # otherwise, just setting the flags
 
-        if(length(var) != length(f)){
+            if(IS_INTER_FACTOR == FALSE){
+                # If previous condition == TRUE, means was requested by the user
+
+                if(is.logical(var)){
+                    var = as.numeric(var)
+                    IS_INTER_COUNT = TRUE
+                } else if(is.numeric(var)){
+                    IS_INTER_COUNT = TRUE
+                } else {
+                    IS_INTER_FACTOR = TRUE
+                }
+            }
+
+        } else {
+            if(length(var) <= 2 && !"ref" %in% names(mc)){
+                # ref is implicitly called via the location of var
+                ref = var
+            }
+
             if(grepl("^[[:alpha:]\\.][[:alnum:]\\._]*:[[:alpha:]\\.][[:alnum:]\\._]*$", var_name)){
                 info = strsplit(var_name, ":")[[1]]
-                stop("In interact(): When 'var' is equal to a product, please use I(", info[1], "*", info[2], ") instead of ", var_name, ".")
+                stop("In i(): When 'var' is equal to a product, please use I(", info[1], "*", info[2], ") instead of ", var_name, ".")
             } else {
                 stop("The arguments 'var' and 'f' must be of the same length (currently ", length(var), " vs ", length(f), ").")
             }
         }
     }
 
-    if(!is.null(dots$f_name)){
-        f_name = dots$f_name
-    }
+    IS_INTER = IS_INTER_COUNT || IS_INTER_FACTOR
 
-    f_num = is.numeric(f)
 
-    IS_F2 = FALSE
-    f2_num = FALSE
-    if(!missing(f2)){
+    # IS_F2 = FALSE
+    # f2_num = FALSE
+    # if(!missing(f2)){
+    #
+    #     if(length(f2) == 1 && !"ref" %in% names(mc)){
+    #         # ref is implicitly called via the location of f2
+    #         ref = f2
+    #     } else if(length(f2) != length(f)){
+    #         stop("The arguments 'f2' and 'f' must be of the same length (currently ", length(f2), " vs ", length(f), ").")
+    #     } else {
+    #         IS_F2 = TRUE
+    #         f2_name = deparse_long(mc$f2)
+    #         f2_num = is.numeric(f2)
+    #     }
+    # }
 
-        if(length(f2) == 1 && !"ref" %in% names(mc)){
-            # ref is implicitly called via the location of f2
-            ref = f2
-        } else if(length(f2) != length(f)){
-            stop("The arguments 'f2' and 'f' must be of the same length (currently ", length(f2), " vs ", length(f), ").")
-        } else {
-            IS_F2 = TRUE
-            f2_name = deparse_long(mc$f2)
-            f2_num = is.numeric(f2)
-        }
-    }
+    # # The NAs + recreation of f if necessary
+    # IS_FACTOR_INTER = FALSE
+    # if(IS_INTER_COUNT){
+    #
+    #     is_na_all = is.na(var) | is.na(f)
+    #     if(IS_F2) is_na_all = is_na_all | is.na(f2)
+    #
+    #     # Conversion of var to numeric if logical
+    #     # => that makes sense now, if the user isn't happy => f2 (before that the automatic conversion wouldn't leave room to really use logicals)
+    #     if(is.logical(var)){
+    #         var = as.numeric(var)
+    #     } else if(is.factor(var) && length(levels(var)) == 2 && all(c(0, 1) %in% levels(var))){
+    #         var = as.numeric(as.character(var))
+    #     }
+    #
+    #     if(!is.numeric(var)){
+    #         IS_FACTOR_INTER = TRUE
+    #         # It's an interaction between factors
+    #         f_new = rep(NA_character_, length(f))
+    #
+    #         if(IS_F2){
+    #             f_new[!is_na_all] = paste0(var[!is_na_all], "__%%__", f[!is_na_all], "__%%__", f2[!is_na_all])
+    #         } else {
+    #             f_new[!is_na_all] = paste0(var[!is_na_all], "__%%__", f[!is_na_all])
+    #         }
+    #
+    #         f = f_new
+    #         IS_INTER_COUNT = FALSE
+    #
+    #     } else if(IS_F2){
+    #         f_new = rep(NA_character_, length(f))
+    #         f_new[!is_na_all] = paste0(f[!is_na_all], "__%%__", f2[!is_na_all])
+    #         f = f_new
+    #     }
+    #
+    # } else if(IS_F2){
+    #     is_na_all = is.na(f) | is.na(f2)
+    #     f_new = rep(NA_character_, length(f))
+    #
+    #     f_new[!is_na_all] = paste0(f[!is_na_all], "__%%__", f2[!is_na_all])
+    #
+    #     f = f_new
+    #
+    # } else {
+    #     is_na_all = is.na(f)
+    # }
 
-    # The NAs + recreation of f if necessary
-    IS_FACTOR_INTER = FALSE
+    #
+    # QUFing + NA
+    #
+
     if(IS_INTER){
-
-        is_na_all = is.na(var) | is.na(f)
-        if(IS_F2) is_na_all = is_na_all | is.na(f2)
-
-        # Conversion of var to numeric if logical
-        # => that makes sense now, if the user isn't happy => f2 (before that the automatic conversion wouldn't leave room to really use logicals)
-        if(is.logical(var)){
-            var = as.numeric(var)
-        } else if(is.factor(var) && length(levels(var)) == 2 && all(c(0, 1) %in% levels(var))){
-            var = as.numeric(as.character(var))
-        }
-
-        if(!is.numeric(var)){
-            IS_FACTOR_INTER = TRUE
-            # It's an interaction between factors
-            f_new = rep(NA_character_, length(f))
-
-            if(IS_F2){
-                f_new[!is_na_all] = paste0(var[!is_na_all], "__%%__", f[!is_na_all], "__%%__", f2[!is_na_all])
-            } else {
-                f_new[!is_na_all] = paste0(var[!is_na_all], "__%%__", f[!is_na_all])
-            }
-
-            f = f_new
-            IS_INTER = FALSE
-
-        } else if(IS_F2){
-            f_new = rep(NA_character_, length(f))
-            f_new[!is_na_all] = paste0(f[!is_na_all], "__%%__", f2[!is_na_all])
-            f = f_new
-        }
-
-    } else if(IS_F2){
-        is_na_all = is.na(f) | is.na(f2)
-        f_new = rep(NA_character_, length(f))
-
-        f_new[!is_na_all] = paste0(f[!is_na_all], "__%%__", f2[!is_na_all])
-
-        f = f_new
-
+        is_na_all = is.na(f) | is.na(var)
     } else {
         is_na_all = is.na(f)
     }
 
-    if(!IS_INTER){
+    if(IS_INTER_FACTOR){
+        info = to_integer(f, var, add_items = TRUE, items.list = TRUE, sorted = TRUE, multi.join = "__%%__")
+    } else {
+        info = to_integer(f, add_items = TRUE, items.list = TRUE, sorted = TRUE)
+    }
+
+    fe_num = info$x
+    items = info$items
+
+    if(!IS_INTER_COUNT){
         # neutral var in C code
         var = 1
     }
 
-    # QUFing
-
-    info = to_integer(f, add_items = TRUE, items.list = TRUE, sorted = TRUE)
-    fe_num = info$x
-    items = info$items
-
-    # Now we check with regex
-    if(IS_FACTOR_INTER || IS_F2){
+    if(IS_INTER_FACTOR){
         items_split = strsplit(items, "__%%__", fixed = TRUE)
 
-        f_items = sapply(items_split, `[`, 1 + IS_FACTOR_INTER)
-        if(IS_F2){
-            f2_items = sapply(items_split, `[`, 2 + IS_FACTOR_INTER)
-        }
-
-        if(f_num || f2_num){
-            # we reorder the stuff
-            f_items_fm = if(f_num) as.numeric(f_items) else f_items
-
-            if(IS_F2){
-                f2_items_fm = if(f2_num) as.numeric(f2_items) else f2_items
-                new_order = order(f_items_fm, f2_items_fm)
-                f2_items = f2_items[new_order]
-            } else {
-                new_order = order(f_items_fm)
-            }
-
-            if(IS_FACTOR_INTER) items_split = items_split[new_order]
-            fe_num = order(new_order)[fe_num]
-            f_items = f_items[new_order]
-            items = items[new_order]
-
-        }
-
+        f_items = sapply(items_split, `[`, 1)
+        var_items = sapply(items_split, `[`, 2)
     } else {
         f_items = items
     }
 
-    check_arg(ref, "logical scalar | charin", .choices = items, .message = paste0("Argument 'ref' must be a single element of the variable '", f_name, "'."))
+    # Now we check with regex
+    # if(IS_FACTOR_INTER || IS_F2){
+    #     items_split = strsplit(items, "__%%__", fixed = TRUE)
+    #
+    #     f_items = sapply(items_split, `[`, 1 + IS_FACTOR_INTER)
+    #     if(IS_F2){
+    #         f2_items = sapply(items_split, `[`, 2 + IS_FACTOR_INTER)
+    #     }
+    #
+    #     if(f_num || f2_num){
+    #         # we reorder the stuff
+    #         f_items_fm = if(f_num) as.numeric(f_items) else f_items
+    #
+    #         if(IS_F2){
+    #             f2_items_fm = if(f2_num) as.numeric(f2_items) else f2_items
+    #             new_order = order(f_items_fm, f2_items_fm)
+    #             f2_items = f2_items[new_order]
+    #         } else {
+    #             new_order = order(f_items_fm)
+    #         }
+    #
+    #         if(IS_FACTOR_INTER) items_split = items_split[new_order]
+    #         fe_num = order(new_order)[fe_num]
+    #         f_items = f_items[new_order]
+    #         items = items[new_order]
+    #
+    #     }
+    #
+    # } else {
+    #     f_items = items
+    # }
 
-    check_arg(drop, keep, drop2, keep2, "vector no na")
+    check_arg(ref, "logical scalar | vector no na", .choices = items)
+
+    check_arg(ref2, keep, keep2, "vector no na")
+
+    # TODO ###################################################################
+    stop("todo: ref accepte: numerique/character/regex")
+    # si caractere par default =>
+    #   + partial match
+    #   + si premiere lettre est @ => alors la suite est regex
+    # si pas caractere => perfect match
 
     no_rm = TRUE
     any_ref = FALSE
     id_drop = c()
     if(!missing(ref)){
-        if(is.logical(ref)){
-            if(ref == TRUE){
-                # We always delete the first value
-                any_ref = TRUE
-                # Que ce soit items ici est normal (et pas f_items)
-                id_drop = ref = which(items == items[1])
-            }
+        any_ref = !isFALSE(ref)
+
+        if(isTRUE(ref)){
+            # We always delete the first value
+            # Que ce soit items ici est normal (et pas f_items)
+            id_drop = ref = which(items == items[1])
         } else {
-            any_ref = TRUE
-            id_drop = ref = which(f_items %in% ref)
+            id_drop = c(id_drop, items_to_drop(f_items, ref, "fvar"))
         }
     }
 
-    if(!missing(drop)){
-        if(is.numeric(drop)){
-            # numeric => equality
-            id_drop = c(id_drop, which(f_items %in% drop))
-        } else {
-            # => regex
-            drop = as.character(drop)
-            qui = which(keep_apply(f_items, drop, TRUE))
-            if(length(qui) == 0){
-                stop("The regular expression", plural_len(drop), " in 'drop' ", plural_len(drop, "don't"), " match any value of 'f'.")
-            }
-            id_drop = c(id_drop, qui)
-        }
-    }
 
     if(!missing(keep)){
-        if(is.numeric(keep)){
-            id_drop = c(id_drop, which(!f_items %in% keep))
-        } else {
-            keep = as.character(keep)
-            qui = which(!keep_apply(f_items, keep, TRUE))
-            if(length(qui) == 0){
-                stop("The regular expression", plural_len(keep), " in 'keep' ", plural_len(keep, "don't"), " match any value of 'f'.")
-            }
-            id_drop = c(id_drop, qui)
-        }
+        id_drop = c(id_drop, items_to_drop(f_items, keep, "fvar", keep = TRUE))
     }
 
-    if(IS_F2){
-        if(!missing(drop2)){
-            if(is.numeric(drop2)){
-                # numeric => equality
-                id_drop = c(id_drop, which(f2_items %in% drop2))
-            } else {
-                # => regex
-                drop2 = as.character(drop2)
-                qui = which(keep_apply(f2_items, drop2, TRUE))
-                if(length(qui) == 0){
-                    stop("The regular expression", plural_len(drop2), " in 'drop2' ", plural_len(drop2, "don't"), " match any value of 'f2'.")
-                }
-                id_drop = c(id_drop, qui)
-            }
+    if(IS_INTER_FACTOR){
+        if(!missing(ref2)){
+            id_drop = c(id_drop, items_to_drop(var_items, ref2, "var"))
         }
 
         if(!missing(keep2)){
-            if(is.numeric(keep2)){
-                id_drop = c(id_drop, which(!f2_items %in% keep2))
-            } else {
-                keep2 = as.character(keep2)
-                qui = which(!keep_apply(f2_items, keep2, TRUE))
-                if(length(qui) == 0){
-                    stop("The regular expression", plural_len(keep2), " in 'keep2' ", plural_len(keep2, "don't"), " match any value of 'f2'.")
-                }
-                id_drop = c(id_drop, qui)
-            }
+            id_drop = c(id_drop, items_to_drop(var_items, keep2, "var", keep = TRUE))
         }
     }
 
@@ -2812,9 +2840,9 @@ i = function(var, f, f2, ref, drop, keep, drop2, keep2, ...){
 
     if(length(id_drop) > 0){
         items_name = items[-id_drop]
-        if(IS_FACTOR_INTER || IS_F2){
+        if(IS_INTER_FACTOR){
             f_items = f_items[-id_drop]
-            if(IS_F2) f2_items = f2_items[-id_drop]
+            var_items = var_items[-id_drop]
         }
     } else {
         items_name = items
@@ -2823,32 +2851,18 @@ i = function(var, f, f2, ref, drop, keep, drop2, keep2, ...){
     if(FROM_FIXEST){
         # Pour avoir des jolis noms c'est un vrai gloubiboulga,
         # mais j'ai pas trouve plus simple...
-        if(IS_FACTOR_INTER){
-            var_items = sapply(items_split, `[`, 1)
+        if(IS_INTER_FACTOR){
+            col_names = paste0("__CLEAN__", f_name, "::", f_items, ":", var_name, "::", var_items)
 
-            if(IS_F2){
-                col_names = paste0("__CLEAN__", var_name, "::", var_items, ":", f_name, "::", f_items, ":", f2_name, "::", f2_items)
-            } else {
-                col_names = paste0("__CLEAN__", var_name, "::", var_items, ":", f_name, "::", f_items)
-            }
-
-        } else if(IS_INTER){
-            if(IS_F2){
-                col_names = paste0("__CLEAN__", var_name, ":", f_name, "::", f_items, ":", f2_name, "::", f2_items)
-            } else {
-                col_names = paste0("__CLEAN__", var_name, ":", f_name, "::", items_name)
-            }
+        } else if(IS_INTER_COUNT){
+            col_names = paste0("__CLEAN__", f_name, "::", f_items, ":", var_name)
 
         } else {
-            if(IS_F2){
-                col_names = paste0("__CLEAN__", f_name, "::", f_items, ":", f2_name, "::", f2_items)
-            } else {
-                col_names = paste0("__CLEAN__", f_name, "::", items_name)
-            }
+            col_names = paste0("__CLEAN__", f_name, "::", items_name)
         }
     } else {
 
-        if(IS_FACTOR_INTER || IS_F2){
+        if(IS_INTER_FACTOR){
             items_name = gsub("__%%__", ":", items_name, fixed = TRUE)
         }
 
@@ -2864,31 +2878,28 @@ i = function(var, f, f2, ref, drop, keep, drop2, keep2, ...){
 
 
     # We send the information on the reference
-    if(FROM_FIXEST && IS_INTER){
-        opt = getOption("fixest_interaction_ref")
-        if(is.null(opt)){
-
-            opt = list(fe_type = class(f))
-
-            qui_drop = (1:length(items)) %in% id_drop
-
-            if(any_ref){
-                qui_drop[ref] = FALSE
-                opt$items = items[!qui_drop]
-
-                is_ref = rep(FALSE, length(opt$items))
-                is_ref[sum(!qui_drop[1:ref])] = TRUE
-
-                opt$is_ref = is_ref
-            } else {
-                opt$items = items[!qui_drop]
-                opt$is_ref = rep(FALSE, length(opt$items))
+    if(FROM_FIXEST){
+        is_GLOBAL = FALSE
+        for(where in 1:min(8, sys.nframe())){
+            if(exists("GLOBAL_fixest_mm_info", parent.frame(where))){
+                GLOBAL_fixest_mm_info = get("GLOBAL_fixest_mm_info", parent.frame(where))
+                is_GLOBAL = TRUE
+                break
             }
-
-            opt$prefix = paste0(var_name, ":", f_name)
-
-            options("fixest_interaction_ref" = opt)
         }
+
+        if(is_GLOBAL){
+
+            info = list()
+            info$items = items
+            info$items_clean = if(length(id_drop) > 0) items[-id_drop] else items
+            if(!missing(ref)) info$ref = ref
+
+            GLOBAL_fixest_mm_info[[length(GLOBAL_fixest_mm_info) + 1]] = info
+            # re assignment
+            assign("GLOBAL_fixest_mm_info", GLOBAL_fixest_mm_info, parent.frame(where))
+        }
+
     }
 
     res
@@ -5168,7 +5179,54 @@ assign_flags = function(flags, ...){
     }
 }
 
+items_to_drop = function(items, x, varname, keep = FALSE){
+    # selection of items
+    # the selection depends on the type of x
+    # always returns the IDs of the items to drop
 
+    set_up(1)
+
+    argname = deparse(substitute(x))
+
+    if(is.character(x)){
+        all_x = c()
+        for(i in x){
+
+            my_x = x[i]
+            if(grepl("^@", my_x)){
+                # A) regex
+                pattern = substr(my_x, 2, nchar(my_x))
+                new_x = grep(pattern, items, value = TRUE)
+                if(length(new_x) == 0){
+                    # strong checking!
+                    stop_up("In argument '", argname, "', the regular expression '", pattern, "' does not match any value of '", varname, "'.")
+                }
+                all_x = c(all_x, new_x)
+            } else {
+                # B) partial matching
+                check_value_plus(my_x, "match", .choices = items, .message = paste0("The argument '", argname, "' should contain values of the variable '", varname, "'."))
+                all_x = c(all_x, my_x)
+            }
+        }
+
+        if(keep){
+            id_drop = which(!items %in% all_x)
+        } else {
+            id_drop = which(items %in% all_x)
+        }
+
+    } else {
+        # exact matching
+        if(keep){
+            id_drop = which(!items %in% x)
+        } else {
+            id_drop = which(items %in% x)
+        }
+
+    }
+
+    id_drop
+}
 
 #### ................. ####
 #### Small Utilities ####
