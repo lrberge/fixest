@@ -13,6 +13,7 @@
 
 
 #include <Rcpp.h>
+#include <cfloat>
 #include <math.h>
 #include <vector>
 #ifdef _OPENMP
@@ -182,7 +183,7 @@ NumericVector cpppar_trigamma(NumericVector x, int nthreads){
 }
 
 inline double poisson_linkinv(double x){
-    return x < -36 ? DOUBLE_EPS : exp(x);
+    return x < -36 ? DBL_EPSILON : exp(x);
 }
 
 // [[Rcpp::export]]
@@ -236,7 +237,7 @@ NumericVector cpppar_logit_linkfun(NumericVector x, int nthreads){
 }
 
 inline double logit_linkinv(double x){
-    return x < -30 ? DOUBLE_EPS : (x > 30) ? 1-DOUBLE_EPS : 1 / (1 + 1 / exp(x));
+    return x < -30 ? DBL_EPSILON : (x > 30) ? 1-DBL_EPSILON : 1 / (1 + 1 / exp(x));
 }
 
 // [[Rcpp::export]]
@@ -257,7 +258,7 @@ NumericVector cpppar_logit_linkinv(NumericVector x, int nthreads){
 
 inline double logit_mueta(double x){
     if(fabs(x) > 30){
-        return DOUBLE_EPS;
+        return DBL_EPSILON;
     } else {
         double exp_x = exp(x);
         return (1 / ((1 + 1 / exp_x) * (1 + exp_x)));
