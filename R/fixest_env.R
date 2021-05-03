@@ -918,8 +918,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             }
         }
 
-        if("agg" %in% names(GLOBAL_fixest_mm_info)){
-            agg = GLOBAL_fixest_mm_info$agg
+        if("sunab" %in% names(GLOBAL_fixest_mm_info)){
+            agg = GLOBAL_fixest_mm_info$sunab$agg
             do_summary = TRUE
         }
 
@@ -2578,6 +2578,9 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     # Interaction information
     if(length(GLOBAL_fixest_mm_info) > 0){
         res$model_matrix_info = GLOBAL_fixest_mm_info
+        if("sunab" %in% names(GLOBAL_fixest_mm_info)){
+            res$is_sunab = TRUE
+        }
     }
 
     assign("res", res, env)

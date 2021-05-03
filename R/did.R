@@ -148,7 +148,7 @@ sunab = function(cohort, period, ref.c = NULL, ref.p = c(.F, 0), att = FALSE, no
     cohort = cohort[-qui_drop]
     period = period[-qui_drop]
 
-    res_raw = i(f = period, f2 = cohort, f_name = period_name)
+    res_raw = i(fvar = period, f2 = cohort, f_name = period_name)
 
     # We extend the matrix
 
@@ -181,13 +181,16 @@ sunab = function(cohort, period, ref.c = NULL, ref.p = c(.F, 0), att = FALSE, no
         }
 
         if(is_GLOBAL){
+            agg_att = c("ATT" = paste0("\\Q", period_name, "\\E::[[:digit:]]+"))
+            agg_period = paste0("(\\Q", period_name, "\\E)::(-?[[:digit:]]+)")
+
             if(att){
-                agg = c("ATT" = paste0("\\Q", period_name, "\\E::[[:digit:]]+"))
+                agg = agg_att
             } else {
-                agg = paste0("(\\Q", period_name, "\\E)::(-?[[:digit:]]+)")
+                agg = agg_period
             }
 
-            GLOBAL_fixest_mm_info$agg = agg
+            GLOBAL_fixest_mm_info$sunab = list(agg = agg, agg_att = agg_att, agg_period = agg_period)
             # re assignment
             assign("GLOBAL_fixest_mm_info", GLOBAL_fixest_mm_info, parent.frame(where))
         }
@@ -236,11 +239,11 @@ sunab_att = function(cohort, period, ref.c = NULL, ref.p = c(.F, 0)){
 #' data(base_stagg)
 #'
 #' # Now we perform the estimation
-#' res_naive = feols(y ~ i(treated, time_to_treatment,
-#'                         ref = -1, drop = -1000) | id + year, base)
+#' res_naive = feols(y ~ i(time_to_treatment, treated,
+#'                         ref = c(-1, -1000)) | id + year, base_stagg)
 #'
-#' res_cohort = feols(y ~ i(time_to_treatment, f2 = group,
-#'                          drop = c(-1, -1000)) | id + year, base)
+#' res_cohort = feols(y ~ i(time_to_treatment, f.year_treated,
+#'                          ref = c(-1, -1000)) | id + year, base_stagg)
 #'
 #' coefplot(res_naive, ylim = c(-6, 8))
 #' att_true = tapply(base$y_true, base$time_to_treatment, mean)[-1]
@@ -275,6 +278,16 @@ aggregate.fixest = function(x, agg, full = FALSE, use_weights = TRUE, ...){
 
     dots = list(...)
     from_summary = isTRUE(dots$from_summary)
+
+    if(agg %in% c("att", "period")){
+        if(isTRUE(x$is_sunab)){
+            if(agg == "att"){
+                agg = x$model_matrix_info$sunab$agg_att
+            } else {
+                agg = x$model_matrix_info$sunab$agg_period
+            }
+        }
+    }
 
     is_name = !is.null(names(agg))
 

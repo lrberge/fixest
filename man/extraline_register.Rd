@@ -27,6 +27,7 @@ my_fun = function(x) mean(model.matrix(x, type = "lhs"))
 extraline_register("my", my_fun, "Mean(y)")
 
 # An estimation
+data(iris)
 est = feols(Petal.Length ~ Sepal.Length | Species, iris)
 
 # Now we can easily create a row with the mean of y.
