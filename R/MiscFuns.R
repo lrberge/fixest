@@ -2477,25 +2477,24 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 
 #' Create, or interact variables with, factors
 #'
-#' Treat a variable as a factor, or interacts a variable with another treated as a factor. Values to be dropped/kept from the factor can be easily set. Note that to interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2}.
+#' Treat a variable as a factor, or interacts a variable with a factor. Values to be dropped/kept from the factor can be easily set. Note that to interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2}.
 #'
-#' @param var A vector to be interacted with \code{f}. If the other argument \code{f} is missing, then this vector will be treated as the argument \code{f}.
-#' @param f A vector (of any type) that will be treated as a factor. Must be of the same length as \code{var} if \code{var} is not missing.
-#' @param f2 A vector (of any type) that will be treated as a factor. Must be of the same length as \code{f}.
-#' @param ref A single value that belongs to the interacted variable (\code{f}). Can be missing, can also be a logical: if \code{TRUE}, then the first value of \code{f} will be removed..
-#' @param drop A vector of regular expressions or integers (if \code{f} is integer). If provided, all values from \code{f} that match \code{drop} will be removed.
-#' @param keep A vector of regular expressions or integers (if \code{f} is integer). If provided, only the values from \code{f} that match \code{keep} will be kept.
-#' @param drop2 A vector of regular expressions or integers (if \code{f2} is integer). If provided, all values from \code{f2} that match \code{drop2} will be removed.
-#' @param keep2 A vector of regular expressions or integers (if \code{f2} is integer). If provided, only the values from \code{f2} that match \code{keep2} will be kept.
+#' @param fvar  A vector (of any type) that will be treated as a factor. You can set references with the \code{ref} argument.
+#' @param var A variable of the same length as \code{fvar}. This variable will be interacted with the factor in \code{fvar}. It can be numeric or factor-like. To force a numeric variable to be treated as a factor, you can add the \code{f.} prefix to a variable name. For instance take a numeric variable \code{x_num}: \code{i(x_fact, x_num)} will treat \code{x_num} as numeric while \code{i(x_fact, f.x_num)} will treat \code{x_num} as a factor (it's a shortcut to \code{as.factor(x_num)}).
+#' @param ref A vector of values to be taken as references from \code{fvar}. Can also be a logical: if \code{TRUE}, then the first value of \code{fvar} will be removed. If \code{ref} is a character vector, partial matching is applied to values; use "@" as the first character to enable regular expression matching. See examples.
+#' @param keep A vector of values to be kept from \code{fvar} (all others are dropped). By default they should be values from \code{fvar} and if \code{keep} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
+#' @param ref2 A vector of values to be dropped from \code{var}. By default they should be values from \code{var} and if \code{ref2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
+#' @param keep2 A vector of values to be kept from \code{var} (all others are dropped). By default they should be values from \code{var} and if \code{keep2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
+#' @param ... Not currently used.
 #'
 #' @details
 #' To interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2} in the fixed-effects part of the formula. Please see the details and examples in the help page of \code{\link[fixest]{feols}}.
 #'
 #' @return
-#' It returns a matrix with number of rows the length of \code{var}. The number of columns is equal to the number of cases contained in \code{f} minus the reference(s).
+#' It returns a matrix with number of rows the length of \code{fvar}. If there is no interacted variable or theit is numeric, the number of columns is equal to the number of cases contained in \code{fvar} minus the reference(s). If the interacted variable is a factor, the number of columns is the number of combined cases between \code{fvar} and \code{var}.
 #'
 #' @section Shorthand in \code{fixest} estimations:
-#' In \code{fixest} estimations, instead of using \code{i(var, f, ref)}, you can instead use the following writing \code{var::f(ref)}. Note that this way of doing interactions is not endorsed any more and will likely be deprecated in the future.
+#' In \code{fixest} estimations, instead of using \code{i(fvar, var, ref)}, you can instead use the following writing \code{var::fvar(ref)}. Note that this way of doing interactions is deprecated and will be removed in the future.
 #'
 #' @author
 #' Laurent Berge
@@ -2509,18 +2508,21 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' # Simple illustration
 #' #
 #'
-#' x = 1:10
-#' y = rep(1:4, 3)[1:10]
+#' x = rep(letters[1:4], 3)[1:10]
+#' y = rep(1:4, c(1, 2, 3, 4))
 #'
 #' # interaction
-#' cbind(x, y, i(x, y, 1))
+#' data.frame(x, y, i(x, y, ref = TRUE))
 #'
 #' # without interaction
-#' cbind(x, y, i(y, ref = 1))
+#' data.frame(x, i(x, "b"))
 #'
-#' # You can interact factors too
-#' z = rep(c("a", "b", "c"), c(5, 3, 2))
-#' data.frame(z, y, i(z, y))
+#' # you can interact factors too
+#' z = rep(c("e", "f", "g"), c(5, 3, 2))
+#' data.frame(x, z, i(x, z))
+#'
+#' # to force a numeric variable to be treated as a factor: use f.
+#' data.frame(x, y, i(x, f.y))
 #'
 #' #
 #' # In fixest estimations
@@ -2528,13 +2530,13 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #'
 #' data(base_did)
 #' # We interact the variable 'period' with the variable 'treat'
-#' est_did = feols(y ~ x1 + i(treat, period, 5) | id + period, base_did)
+#' est_did = feols(y ~ x1 + i(period, treat, 5) | id + period, base_did)
 #'
 #' # => special treatment in coefplot
 #' coefplot(est_did)
 #'
 #' # Using i() for factors
-#' est_bis = feols(y ~ x1 + i(period, keep = 3:6) + i(treat, period, 5) | id, base_did)
+#' est_bis = feols(y ~ x1 + i(period, keep = 3:6) + i(period, treat, 5) | id, base_did)
 #'
 #' coefplot(est_bis, only.inter = FALSE)
 #'
@@ -2542,19 +2544,19 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' etable(est_bis, dict = c("6" = "six"))
 #'
 #' #
-#' # Interact two factors => f2
+#' # Interact two factors
 #' #
 #'
-#' # To interact two factor, use the argument f2
+#' # We use the f. prefix to consider week as a factor
 #' data(airquality)
 #' aq = airquality
 #' aq$week = aq$Day %/% 7 + 1
 #'
 #' # Interacting Month and week:
-#' res_2F = feols(Ozone ~ Solar.R + i(Month, f2 = week), aq)
+#' res_2F = feols(Ozone ~ Solar.R + i(Month, f.week), aq)
 #'
 #' # Same but dropping the 5th Month and 1st week
-#' res_2F_bis = feols(Ozone ~ Solar.R + i(Month, f2 = week, drop = 5, drop2 = 1), aq)
+#' res_2F_bis = feols(Ozone ~ Solar.R + i(Month, f.week, ref = 5, ref2 = 1), aq)
 #'
 #' etable(res_2F, res_2F_bis)
 #'
@@ -2566,7 +2568,7 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
     # gt = function(x) cat(sfill(x, 20), ": ", -(t0 - (t0<<-proc.time()))[3], "s\n", sep = "")
     # t0 = proc.time()
 
-    validate_dots(valid_args = c("f2", "f_name"))
+    validate_dots(valid_args = c("f2", "f_name", "ref_special"))
     dots = list(...)
 
     mc = match.call()
@@ -2587,14 +2589,8 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
         # should be only used internally
 
         var_name = deparse_long(mc$f2)
-        if(grepl("^f\\.", var_name)){
-            var_name = gsub("^f\\.", "", var_name)
-            var = str2lang(var_name)
-            check_value_plus(var, "evalset vector", .data = parent.frame(), .arg_name = "f2")
-        } else {
-            var = dots$f2
-            check_value(var, "vector", .arg_name = "f2")
-        }
+        var = dots$f2
+        check_value(var, "vector", .arg_name = "f2")
     }
 
     # General information on the factor variable
@@ -2619,6 +2615,9 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
             } else {
                 check_value(var, "vector", .arg_name = "var")
             }
+        } else {
+            # f2 was used
+            IS_INTER_FACTOR = TRUE
         }
 
         # is it an interaction with a factor or with a continuous variable?
@@ -2639,11 +2638,10 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
                 }
             }
 
+        } else if(length(var) <= 2 && !"ref" %in% names(mc)){
+            # ref is implicitly called via the location of var
+            ref = var
         } else {
-            if(length(var) <= 2 && !"ref" %in% names(mc)){
-                # ref is implicitly called via the location of var
-                ref = var
-            }
 
             if(grepl("^[[:alpha:]\\.][[:alnum:]\\._]*:[[:alpha:]\\.][[:alnum:]\\._]*$", var_name)){
                 info = strsplit(var_name, ":")[[1]]
@@ -2655,6 +2653,10 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
     }
 
     IS_INTER = IS_INTER_COUNT || IS_INTER_FACTOR
+
+    if(isTRUE(dots$ref_special) && (!IS_INTER || IS_INTER_FACTOR)){
+        ref = TRUE
+    }
 
 
     # IS_F2 = FALSE
@@ -2789,13 +2791,6 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
 
     check_arg(ref2, keep, keep2, "vector no na")
 
-    # TODO ###################################################################
-    stop("todo: ref accepte: numerique/character/regex")
-    # si caractere par default =>
-    #   + partial match
-    #   + si premiere lettre est @ => alors la suite est regex
-    # si pas caractere => perfect match
-
     no_rm = TRUE
     any_ref = FALSE
     id_drop = c()
@@ -2840,8 +2835,8 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
 
     if(length(id_drop) > 0){
         items_name = items[-id_drop]
+        f_items = f_items[-id_drop]
         if(IS_INTER_FACTOR){
-            f_items = f_items[-id_drop]
             var_items = var_items[-id_drop]
         }
     } else {
@@ -2894,6 +2889,7 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
             info$items = items
             info$items_clean = if(length(id_drop) > 0) items[-id_drop] else items
             if(!missing(ref)) info$ref = ref
+            info$is_num = is.numeric(items)
 
             GLOBAL_fixest_mm_info[[length(GLOBAL_fixest_mm_info) + 1]] = info
             # re assignment
@@ -2906,29 +2902,30 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
 }
 
 #' @rdname i
-interact <- i
+interact = i
 
-i_ref = function(var, f, f2, ref, drop, keep, drop2, keep2){
+i_ref = function(fvar, var, ref, keep, ref2, keep2){
+    # To automatically add references when i(x) is used
 
     mc = match.call()
 
     mc[[1]] = as.name("i")
 
-    if(!any(c("ref", "drop", "keep", "drop2", "keep2") %in% names(mc)) && any(!c("var", "f") %in% names(mc))){
-        mc$ref = TRUE
+    if(!any(c("ref", "keep", "ref2", "keep2") %in% names(mc))){
+        mc$ref_special = TRUE
     }
 
     return(deparse_long(mc))
 }
 
-i_noref = function(var, f, f2, ref, drop, keep, drop2, keep2){
+i_noref = function(fvar, var, ref, keep, ref2, keep2){
     # Used only in predict => to create data without restriction
 
     mc = match.call()
 
     mc[[1]] = as.name("i")
 
-    mc$ref = mc$drop = mc$keep = mc$drop2 = mc$keep2 = NULL
+    mc$ref = mc$keep = mc$ref2 = mc$keep2 = NULL
 
     return(deparse_long(mc))
 }
@@ -4025,7 +4022,7 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
     if(any(qui_inter <- (grepl("^i(nteract)?\\(", all_var_names) & grepl(":", all_var_names, fixed = TRUE)))){
         # beware of ":" in drop/keep!!!
 
-        for(arg in c("drop", "keep", "drop2", "keep2")){
+        for(arg in c("ref", "keep", "ref2", "keep2")){
             if(any(qui_ref <- grepl(paste0(arg, " =[^\\)]+:"), all_var_names[qui_inter]))){
                 var_inter_ref = all_var_names[qui_inter][qui_ref]
                 var_inter_ref_split = strsplit(var_inter_ref, paste0(arg, " = "))
@@ -4047,7 +4044,7 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
     }
 
     # evaluation
-    data_list <- eval(all_vars_call, base)
+    data_list = eval(all_vars_call, base)
 
     # Handling the multi columns case (ex: bs(x1), splines)
     # NOTA: I need to add a check for i() because of 1 value interactions
@@ -4212,10 +4209,11 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
     #
 
     # subset => we allow the extraction of only some variables
+    all_vars = all_vars_with_f(fml[[3]])
     if(isFALSE(subset)){
 
-        if(!original_data && any(!all.vars(fml[[3]]) %in% names(newdata))){
-            pblm = setdiff(all.vars(fml[[3]]), names(newdata))
+        if(!original_data && any(!all_vars %in% names(newdata))){
+            pblm = setdiff(all_vars, names(newdata))
             stop("In 'model.matrix', the variable", enumerate_items(pblm, "is.s.quote"), " in the formula but not in the argument 'data'. Use 'subset = TRUE' to enable the creation of partial data.")
         }
 
@@ -4241,7 +4239,7 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
             fake_intercept = TRUE
         }
 
-        if(!all(all.vars(fml[[3]]) %in% vars_keep)){
+        if(!all(all_vars %in% vars_keep)){
 
             terms_all = attr(terms(fml), "term.labels")
             # We first check pure variables (because non pure variables are slower to check)
@@ -4249,7 +4247,7 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
             terms_drop = is_var & !terms_all %in% vars_keep
 
             for(i in which(!is_var)){
-                if(any(!all.vars(str2lang(terms_all[i])) %in% vars_keep)){
+                if(any(!all_vars_with_f(str2lang(terms_all[i])) %in% vars_keep)){
                     terms_drop[i] = TRUE
                 }
             }
@@ -4766,10 +4764,10 @@ expand_interactions_internal = function(x){
                 stop("Problem in the interaction of the formula: Error in ", terms_split[1], "::", fe_name, gsub(".+interact_control", "", args))
             }
 
-            new_term = paste0("interact(", terms_split[1], ", ", fe_name, ", ", paste(args, collapse = ", "), ")")
+            new_term = paste0("interact(", fe_name, ", ", terms_split[1], ", ", paste(args, collapse = ", "), ")")
 
         } else {
-            new_term = paste0("interact(", terms_split[1], ", ", terms_split[2], ")")
+            new_term = paste0("interact(", terms_split[2], ", ", terms_split[1], ")")
         }
 
         terms_all_list[[i]] = new_term
@@ -5006,7 +5004,6 @@ is_naked_fun = function(x, fun_pattern){
     left_ok & right_ok
 }
 
-
 set_defaults = function(opts_name){
 
     opts = getOption(opts_name)
@@ -5190,7 +5187,7 @@ items_to_drop = function(items, x, varname, keep = FALSE){
 
     if(is.character(x)){
         all_x = c()
-        for(i in x){
+        for(i in seq_along(x)){
 
             my_x = x[i]
             if(grepl("^@", my_x)){
@@ -5221,6 +5218,10 @@ items_to_drop = function(items, x, varname, keep = FALSE){
             id_drop = which(!items %in% x)
         } else {
             id_drop = which(items %in% x)
+
+            if(length(id_drop) == 0){
+                stop_up("In argument '", argname, "', the value", plural_len(x, "s.don't"), " match any value of '", varname, "'.")
+            }
         }
 
     }
@@ -6397,6 +6398,47 @@ is_fixest_call = function(){
     sys.nframe() > 5 && any(sapply(tail(sys.calls(), 7), function(x) any(grepl("fixest", deparse(x)[1], fixed = TRUE))))
 }
 
+all_vars_with_f = function(fml){
+    # fml = a ~ x1^x2 + i(x3, f.x4) + x5*i(x6, I(f.x7))
+
+    vars = all.vars(fml)
+    if(any(grepl("^f\\..+", vars))){
+        fml_dp = deparse_long(fml)
+        # for f. to work it MUST be the second argument (var)
+        # valid cases:
+        # - i(x1, f.x2)
+        # - i(var = f.x2, x1)
+        # - i(x1, f.I(x7))
+        # Not valid:
+        # - i(x1, I(f.x7))
+        #
+        # This means that in the parsed formula, f. is always preceded by a space and
+        # either a "," or a "="
+
+        # Maybe later: add nice error messages reminding how to use f.
+
+        qui_f = which(grepl("^f\\..+", vars))
+        f_vars = vars[qui_f]
+        for(i in seq_along(f_vars)){
+            fml_split = strsplit(fml_dp, f_vars[i], fixed = TRUE)[[1]]
+            n = length(fml_split) - 1
+            for(j in 1:n){
+                part = fml_split[j]
+                if(grepl("(,|var =) *$", part)){
+                    part = gsub("\\([^\\)]+\\)", "", part)
+                    if(grepl("i(nteract)?\\(", part)){
+                        # OK!
+                        ii = qui_f[i]
+                        vars[ii] = substr(vars[ii], 3, nchar(vars[ii]))
+                    }
+                }
+            }
+        }
+    }
+
+    vars
+}
+
 #### ................. ####
 #### Additional Methods ####
 ####
@@ -7142,9 +7184,9 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 	rhs_fml = fml_split(fml, 1)
 	if(grepl("[^:]::[^:]", deparse_long(rhs_fml[[3]]))){
 	    new_fml = expand_interactions(rhs_fml)
-	    linear.varnames = all.vars(new_fml[[3]])
+	    linear.varnames = all_vars_with_f(new_fml[[3]])
 	} else {
-	    linear.varnames = all.vars(rhs_fml[[3]])
+	    linear.varnames = all_vars_with_f(rhs_fml[[3]])
 	}
 
 	if(length(linear.varnames) > 0){
@@ -7152,7 +7194,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 
 	    if(isTRUE(object$iv) && object$iv_stage == 2){
 	        names(coef) = gsub("^fit_", "", names(coef))
-	        linear.varnames = c(linear.varnames, all.vars(object$fml_all$iv[[2]]))
+	        linear.varnames = c(linear.varnames, all_vars_with_f(object$fml_all$iv[[2]]))
 	        iv_fml = object$fml_all$iv
 	        rhs_fml = .xpd(..lhs ~ ..endo + ..rhs, ..lhs = rhs_fml[[2]], ..endo = iv_fml[[2]], ..rhs = rhs_fml[[3]])
 	    }

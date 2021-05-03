@@ -329,7 +329,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                 }
 
                 if(is_fml_inside(fml_parts[[2]])){
-                    stop("In feols, problem in the formula: the RHS must contain at most one formula, currently there are two formulas.")
+                    stop("In feols, problem in the formula: the RHS must contain at most one formula (the IV formula), currently there are two formulas.")
                 }
 
                 do_iv = TRUE
@@ -346,7 +346,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         }
 
         # Checking the presence
-        complete_vars = all.vars(fml)
+        complete_vars = all_vars_with_f(fml)
         if(any(!complete_vars %in% dataNames)){
             # Error => we take the time to provide an informative error message
             LHS = all.vars(fml_parts[[1]][[2]])
@@ -859,7 +859,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     } else {
         isLinear = FALSE
 
-        linear.varnames = all.vars(fml_linear[[3]])
+        linear.varnames = all_vars_with_f(fml_linear[[3]])
 
         fml_terms = terms(fml_linear)
         if(length(linear.varnames) > 0 || attr(fml_terms, "intercept") == 1){
@@ -3584,13 +3584,13 @@ extract_stepwise = function(fml, tms, all_vars = TRUE){
 
             if(all_vars){
                 if(is_fml){
-                    sw_all_vars = all.vars(fml[[3]])
+                    sw_all_vars = all_vars_with_f(fml[[3]])
                 } else {
                     # we need to recreate the formula because of impossible_var_name in tms
-                    sw_all_vars = all.vars(.xpd(rhs = tl))
+                    sw_all_vars = all_vars_with_f(.xpd(rhs = tl))
                 }
             } else {
-                sw_all_vars = all.vars(.xpd(rhs = sw_terms))
+                sw_all_vars = all_vars_with_f(.xpd(rhs = sw_terms))
             }
 
             # Creating the current formula
