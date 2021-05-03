@@ -55,6 +55,13 @@
   
   - Add the argument `coef.just` that controls the justification of the coefficients and standard-errors. Only works when `tex = FALSE` (i.e. a `data.frame` is requested).
   
+  
+## Sun and Abraham staggered DiD method
+
+ - new function `sunab` that simplifies the implementation of the SA method. 
+ 
+ - just type `sunab(cohort, period)` in a `fixest` estimation and it works!
+  
 ## fixest_multi methods
 
 Common methods have been extended to `fixest_multi` objects.
@@ -90,6 +97,8 @@ Common methods have been extended to `fixest_multi` objects.
   - `.fit` methods (`feols.fit` and `feglm.fit`) now handle multiple dependent variables.
   
   - The argument `only.inter` can now have user-defined default values using `setFixest_coefplot`.
+  
+  - `to_integer` now sorts appropriately any kind of vectors (not just numeric/character/factors).
   
   
 ## Minor breaking changes

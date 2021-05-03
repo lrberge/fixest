@@ -234,6 +234,9 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     isNA_sample = FALSE
     message_NA = ""
 
+    # summary information
+    do_summary = FALSE
+
     # Note on mem.clean
     # we remove the most intermediary objects as possible
     # we apply gc only from time to time since it is costly
@@ -326,7 +329,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                 }
 
                 if(is_fml_inside(fml_parts[[2]])){
-                    stop("In feols, problem in the formula: the RHS must contain at most one formula, currently there are two formulas.")
+                    stop("In feols, problem in the formula: the RHS must contain at most one formula (the IV formula), currently there are two formulas.")
                 }
 
                 do_iv = TRUE
@@ -343,7 +346,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         }
 
         # Checking the presence
-        complete_vars = all.vars(fml)
+        complete_vars = all_vars_with_f(fml)
         if(any(!complete_vars %in% dataNames)){
             # Error => we take the time to provide an informative error message
             LHS = all.vars(fml_parts[[1]][[2]])
@@ -790,6 +793,9 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     #
 
     interaction.info = NULL
+    agg = NULL
+    # This variables will be set globally from within fixest_model_matrix!
+    GLOBAL_fixest_mm_info = list()
     multi_rhs = FALSE
     if(isFit){
 
@@ -852,9 +858,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     } else {
         isLinear = FALSE
-        options("fixest_interaction_ref" = NULL)
 
-        linear.varnames = all.vars(fml_linear[[3]])
+        linear.varnames = all_vars_with_f(fml_linear[[3]])
 
         fml_terms = terms(fml_linear)
         if(length(linear.varnames) > 0 || attr(fml_terms, "intercept") == 1){
@@ -910,10 +915,14 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                     isLinear = FALSE
                 }
 
-                # Interaction information => if no interaction: NULL, only the first is there
-                interaction.info = getOption("fixest_interaction_ref")
             }
         }
+
+        if("sunab" %in% names(GLOBAL_fixest_mm_info)){
+            agg = GLOBAL_fixest_mm_info$sunab$agg
+            do_summary = TRUE
+        }
+
     }
 
     if(check_LHS_const){
@@ -1412,7 +1421,6 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     #
 
     msgNA_cluster = ""
-    do_summary = FALSE
     if(!missnull(cluster)){
         # cluster was checked already before subset => to get the right variables
         # Here cluster is a formula
@@ -2262,8 +2270,9 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         assign("cluster", cluster, env)
         assign("se", se, env)
         assign("dof", dof, env)
+        assign("agg", agg, env)
 
-        assign("summary_flags", build_flags(mc_origin, se = se, cluster = cluster_origin, dof = dof), env)
+        assign("summary_flags", build_flags(mc_origin, se = se, cluster = cluster_origin, dof = dof, agg = agg), env)
     }
 
     # Multi
@@ -2567,8 +2576,11 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     }
 
     # Interaction information
-    if(!is.null(interaction.info)){
-        res$interaction.info = interaction.info
+    if(length(GLOBAL_fixest_mm_info) > 0){
+        res$model_matrix_info = GLOBAL_fixest_mm_info
+        if("sunab" %in% names(GLOBAL_fixest_mm_info)){
+            res$is_sunab = TRUE
+        }
     }
 
     assign("res", res, env)
@@ -3575,13 +3587,13 @@ extract_stepwise = function(fml, tms, all_vars = TRUE){
 
             if(all_vars){
                 if(is_fml){
-                    sw_all_vars = all.vars(fml[[3]])
+                    sw_all_vars = all_vars_with_f(fml[[3]])
                 } else {
                     # we need to recreate the formula because of impossible_var_name in tms
-                    sw_all_vars = all.vars(.xpd(rhs = tl))
+                    sw_all_vars = all_vars_with_f(.xpd(rhs = tl))
                 }
             } else {
-                sw_all_vars = all.vars(.xpd(rhs = sw_terms))
+                sw_all_vars = all_vars_with_f(.xpd(rhs = sw_terms))
             }
 
             # Creating the current formula

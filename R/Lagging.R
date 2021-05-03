@@ -286,7 +286,7 @@ l = function(x, lag = 1, fill = NA){
 
     # To improve => you don't wanna check all frames, only the relevant ones
     from_fixest = FALSE
-    for(where in 1:min(6, sys.nframe())){
+    for(where in 1:min(22, sys.nframe())){
         if(exists("panel__meta__info", parent.frame(where))){
             from_fixest = TRUE
             meta_info = get("panel__meta__info", parent.frame(where))

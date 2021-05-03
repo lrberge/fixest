@@ -5,9 +5,9 @@
 \alias{coefficients.fixest}
 \title{Extracts the coefficients from a \code{fixest} estimation}
 \usage{
-\method{coef}{fixest}(object, keep, drop, order, ...)
+\method{coef}{fixest}(object, keep, drop, order, agg = TRUE, ...)
 
-\method{coefficients}{fixest}(object, keep, drop, order, ...)
+\method{coefficients}{fixest}(object, keep, drop, order, agg = TRUE, ...)
 }
 \arguments{
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
@@ -17,6 +17,8 @@
 \item{drop}{Character vector. This element is used if some variables are not to be displayed. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be discarded. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{drop = "x[[:digit:]]{2}"}. If the first character is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is dropped). See details.}
 
 \item{order}{Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument \code{dict}). Example: you have the following variables: \code{month1} to \code{month6}, then \code{x1} to \code{x5}, then \code{year1} to \code{year6}. If you want to display first the x's, then the years, then the months you could use: \code{order = c("x", "year")}. If the first character is an exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that does not contain \dQuote{Intercept} goes first).  See details.}
+
+\item{agg}{Logical scalar, default is \code{TRUE}. If the coefficients of the estimation have been aggregated, whether to report the aggregated coefficients. If \code{FALSE}, the raw coefficients will be returned.}
 
 \item{...}{Not currently used.}
 }

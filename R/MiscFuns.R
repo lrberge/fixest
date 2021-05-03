@@ -641,6 +641,7 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	# agg
 	if(!missnull(agg)){
 	    object$coeftable = aggregate(object, agg, full = TRUE, from_summary = TRUE)
+	    object$is_agg = TRUE
 	}
 
 	return(object)
@@ -2476,25 +2477,24 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 
 #' Create, or interact variables with, factors
 #'
-#' Treat a variable as a factor, or interacts a variable with another treated as a factor. Values to be dropped/kept from the factor can be easily set. Note that to interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2}.
+#' Treat a variable as a factor, or interacts a variable with a factor. Values to be dropped/kept from the factor can be easily set. Note that to interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2}.
 #'
-#' @param var A vector to be interacted with \code{f}. If the other argument \code{f} is missing, then this vector will be treated as the argument \code{f}.
-#' @param f A vector (of any type) that will be treated as a factor. Must be of the same length as \code{var} if \code{var} is not missing.
-#' @param f2 A vector (of any type) that will be treated as a factor. Must be of the same length as \code{f}.
-#' @param ref A single value that belongs to the interacted variable (\code{f}). Can be missing, can also be a logical: if \code{TRUE}, then the first value of \code{f} will be removed..
-#' @param drop A vector of regular expressions or integers (if \code{f} is integer). If provided, all values from \code{f} that match \code{drop} will be removed.
-#' @param keep A vector of regular expressions or integers (if \code{f} is integer). If provided, only the values from \code{f} that match \code{keep} will be kept.
-#' @param drop2 A vector of regular expressions or integers (if \code{f2} is integer). If provided, all values from \code{f2} that match \code{drop2} will be removed.
-#' @param keep2 A vector of regular expressions or integers (if \code{f2} is integer). If provided, only the values from \code{f2} that match \code{keep2} will be kept.
+#' @param fvar  A vector (of any type) that will be treated as a factor. You can set references with the \code{ref} argument.
+#' @param var A variable of the same length as \code{fvar}. This variable will be interacted with the factor in \code{fvar}. It can be numeric or factor-like. To force a numeric variable to be treated as a factor, you can add the \code{f.} prefix to a variable name. For instance take a numeric variable \code{x_num}: \code{i(x_fact, x_num)} will treat \code{x_num} as numeric while \code{i(x_fact, f.x_num)} will treat \code{x_num} as a factor (it's a shortcut to \code{as.factor(x_num)}).
+#' @param ref A vector of values to be taken as references from \code{fvar}. Can also be a logical: if \code{TRUE}, then the first value of \code{fvar} will be removed. If \code{ref} is a character vector, partial matching is applied to values; use "@" as the first character to enable regular expression matching. See examples.
+#' @param keep A vector of values to be kept from \code{fvar} (all others are dropped). By default they should be values from \code{fvar} and if \code{keep} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
+#' @param ref2 A vector of values to be dropped from \code{var}. By default they should be values from \code{var} and if \code{ref2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
+#' @param keep2 A vector of values to be kept from \code{var} (all others are dropped). By default they should be values from \code{var} and if \code{keep2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
+#' @param ... Not currently used.
 #'
 #' @details
 #' To interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2} in the fixed-effects part of the formula. Please see the details and examples in the help page of \code{\link[fixest]{feols}}.
 #'
 #' @return
-#' It returns a matrix with number of rows the length of \code{var}. The number of columns is equal to the number of cases contained in \code{f} minus the reference(s).
+#' It returns a matrix with number of rows the length of \code{fvar}. If there is no interacted variable or theit is numeric, the number of columns is equal to the number of cases contained in \code{fvar} minus the reference(s). If the interacted variable is a factor, the number of columns is the number of combined cases between \code{fvar} and \code{var}.
 #'
 #' @section Shorthand in \code{fixest} estimations:
-#' In \code{fixest} estimations, instead of using \code{i(var, f, ref)}, you can instead use the following writing \code{var::f(ref)}. Note that this way of doing interactions is not endorsed any more and will likely be deprecated in the future.
+#' In \code{fixest} estimations, instead of using \code{i(fvar, var, ref)}, you can instead use the following writing \code{var::fvar(ref)}. Note that this way of doing interactions is deprecated and will be removed in the future.
 #'
 #' @author
 #' Laurent Berge
@@ -2508,18 +2508,21 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' # Simple illustration
 #' #
 #'
-#' x = 1:10
-#' y = rep(1:4, 3)[1:10]
+#' x = rep(letters[1:4], 3)[1:10]
+#' y = rep(1:4, c(1, 2, 3, 4))
 #'
 #' # interaction
-#' cbind(x, y, i(x, y, 1))
+#' data.frame(x, y, i(x, y, ref = TRUE))
 #'
 #' # without interaction
-#' cbind(x, y, i(y, ref = 1))
+#' data.frame(x, i(x, "b"))
 #'
-#' # You can interact factors too
-#' z = rep(c("a", "b", "c"), c(5, 3, 2))
-#' data.frame(z, y, i(z, y))
+#' # you can interact factors too
+#' z = rep(c("e", "f", "g"), c(5, 3, 2))
+#' data.frame(x, z, i(x, z))
+#'
+#' # to force a numeric variable to be treated as a factor: use f.
+#' data.frame(x, y, i(x, f.y))
 #'
 #' #
 #' # In fixest estimations
@@ -2527,13 +2530,13 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #'
 #' data(base_did)
 #' # We interact the variable 'period' with the variable 'treat'
-#' est_did = feols(y ~ x1 + i(treat, period, 5) | id + period, base_did)
+#' est_did = feols(y ~ x1 + i(period, treat, 5) | id + period, base_did)
 #'
 #' # => special treatment in coefplot
 #' coefplot(est_did)
 #'
 #' # Using i() for factors
-#' est_bis = feols(y ~ x1 + i(period, keep = 3:6) + i(treat, period, 5) | id, base_did)
+#' est_bis = feols(y ~ x1 + i(period, keep = 3:6) + i(period, treat, 5) | id, base_did)
 #'
 #' coefplot(est_bis, only.inter = FALSE)
 #'
@@ -2541,23 +2544,23 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' etable(est_bis, dict = c("6" = "six"))
 #'
 #' #
-#' # Interact two factors => f2
+#' # Interact two factors
 #' #
 #'
-#' # To interact two factor, use the argument f2
+#' # We use the f. prefix to consider week as a factor
 #' data(airquality)
 #' aq = airquality
 #' aq$week = aq$Day %/% 7 + 1
 #'
 #' # Interacting Month and week:
-#' res_2F = feols(Ozone ~ Solar.R + i(Month, f2 = week), aq)
+#' res_2F = feols(Ozone ~ Solar.R + i(Month, f.week), aq)
 #'
 #' # Same but dropping the 5th Month and 1st week
-#' res_2F_bis = feols(Ozone ~ Solar.R + i(Month, f2 = week, drop = 5, drop2 = 1), aq)
+#' res_2F_bis = feols(Ozone ~ Solar.R + i(Month, f.week, ref = 5, ref2 = 1), aq)
 #'
 #' etable(res_2F, res_2F_bis)
 #'
-i = function(var, f, f2, ref, drop, keep, drop2, keep2){
+i = function(fvar, var, ref, keep, ref2, keep2, ...){
     # Used to create interactions
 
     # Later: binning (bin = 1:3 // bin = list("a" = "[abc]")). Default name is bin name (eg "1:3")
@@ -2565,228 +2568,256 @@ i = function(var, f, f2, ref, drop, keep, drop2, keep2){
     # gt = function(x) cat(sfill(x, 20), ": ", -(t0 - (t0<<-proc.time()))[3], "s\n", sep = "")
     # t0 = proc.time()
 
+    validate_dots(valid_args = c("f2", "f_name", "ref_special"))
+    dots = list(...)
+
     mc = match.call()
 
-    if(missing(var) && missing(f)){
-        stop("You must provide at least one of the two arguments: 'var' or 'f'.")
-    }
-
     # Finding if it's a call from fixest
-    FROM_FIXEST = sys.nframe() > 5 && any(sapply(tail(sys.calls(), 6), function(x) any(grepl("fixest", deparse(x)[1], fixed = TRUE))))
+    FROM_FIXEST = is_fixest_call()
 
     # General checks
-    check_arg(var, f, f2, "vector")
+    check_arg(fvar, "mbt vector")
 
-    IS_INTER = TRUE
-    if(missing(f) || missing(var)){
-        # => i() is used to create a factor
-        IS_INTER = FALSE
+    # NOTA:
+    # the user can use the prefix "f." to tell the algorithm to consider the
+    # variable var as a factor. This requires a non standard evaluation
+    #
 
-        if(missing(f)){
-            f = var
-            f_name = deparse_long(mc$var)
+    var_name = NULL
+    if(!is.null(mc$f2)){
+        # should be only used internally
+
+        var_name = deparse_long(mc$f2)
+        var = dots$f2
+        check_value(var, "vector", .arg_name = "f2")
+    }
+
+    # General information on the factor variable
+    if(!is.null(dots$f_name)){
+        f_name = dots$f_name
+    } else {
+        f_name = deparse_long(mc$fvar)
+    }
+    f = fvar # renaming for clarity
+
+    # checking var
+    IS_INTER_COUNT = IS_INTER_FACTOR = FALSE
+    if(!missing(var)){
+        # Evaluation of var (with possibly, user prepending with f.)
+        if(is.null(var_name)){
+            var_name = deparse_long(mc$var)
+            if(grepl("^f\\.", var_name)){
+                var_name = gsub("^f\\.", "", var_name)
+                var = str2lang(var_name)
+                check_value_plus(var, "evalset vector", .data = parent.frame(), .arg_name = "var")
+                IS_INTER_FACTOR = TRUE
+            } else {
+                check_value(var, "vector", .arg_name = "var")
+            }
         } else {
-            f_name = deparse_long(mc$f)
+            # f2 was used
+            IS_INTER_FACTOR = TRUE
         }
 
-    } else {
-        var_name = deparse_long(mc$var)
-        f_name = deparse_long(mc$f)
+        # is it an interaction with a factor or with a continuous variable?
+        if(length(var) == length(f)){
+            # Logical => numeric by default
+            # otherwise, just setting the flags
 
-        if(length(var) != length(f)){
+            if(IS_INTER_FACTOR == FALSE){
+                # If previous condition == TRUE, means was requested by the user
+
+                if(is.logical(var)){
+                    var = as.numeric(var)
+                    IS_INTER_COUNT = TRUE
+                } else if(is.numeric(var)){
+                    IS_INTER_COUNT = TRUE
+                } else {
+                    IS_INTER_FACTOR = TRUE
+                }
+            }
+
+        } else if(length(var) <= 2 && !"ref" %in% names(mc)){
+            # ref is implicitly called via the location of var
+            ref = var
+        } else {
+
             if(grepl("^[[:alpha:]\\.][[:alnum:]\\._]*:[[:alpha:]\\.][[:alnum:]\\._]*$", var_name)){
                 info = strsplit(var_name, ":")[[1]]
-                stop("In interact(): When 'var' is equal to a product, please use I(", info[1], "*", info[2], ") instead of ", var_name, ".")
+                stop("In i(): When 'var' is equal to a product, please use I(", info[1], "*", info[2], ") instead of ", var_name, ".")
             } else {
                 stop("The arguments 'var' and 'f' must be of the same length (currently ", length(var), " vs ", length(f), ").")
             }
         }
     }
 
-    f_num = is.numeric(f)
+    IS_INTER = IS_INTER_COUNT || IS_INTER_FACTOR
 
-    IS_F2 = FALSE
-    f2_num = FALSE
-    if(!missing(f2)){
-
-        if(length(f2) == 1 && !"ref" %in% names(mc)){
-            # ref is implicitly called via the location of f2
-            ref = f2
-        } else if(length(f2) != length(f)){
-            stop("The arguments 'f2' and 'f' must be of the same length (currently ", length(f2), " vs ", length(f), ").")
-        } else {
-            IS_F2 = TRUE
-            f2_name = deparse_long(mc$f2)
-            f2_num = is.numeric(f2)
-        }
+    if(isTRUE(dots$ref_special) && (!IS_INTER || IS_INTER_FACTOR)){
+        ref = TRUE
     }
 
-    # The NAs + recreation of f if necessary
-    IS_FACTOR_INTER = FALSE
+
+    # IS_F2 = FALSE
+    # f2_num = FALSE
+    # if(!missing(f2)){
+    #
+    #     if(length(f2) == 1 && !"ref" %in% names(mc)){
+    #         # ref is implicitly called via the location of f2
+    #         ref = f2
+    #     } else if(length(f2) != length(f)){
+    #         stop("The arguments 'f2' and 'f' must be of the same length (currently ", length(f2), " vs ", length(f), ").")
+    #     } else {
+    #         IS_F2 = TRUE
+    #         f2_name = deparse_long(mc$f2)
+    #         f2_num = is.numeric(f2)
+    #     }
+    # }
+
+    # # The NAs + recreation of f if necessary
+    # IS_FACTOR_INTER = FALSE
+    # if(IS_INTER_COUNT){
+    #
+    #     is_na_all = is.na(var) | is.na(f)
+    #     if(IS_F2) is_na_all = is_na_all | is.na(f2)
+    #
+    #     # Conversion of var to numeric if logical
+    #     # => that makes sense now, if the user isn't happy => f2 (before that the automatic conversion wouldn't leave room to really use logicals)
+    #     if(is.logical(var)){
+    #         var = as.numeric(var)
+    #     } else if(is.factor(var) && length(levels(var)) == 2 && all(c(0, 1) %in% levels(var))){
+    #         var = as.numeric(as.character(var))
+    #     }
+    #
+    #     if(!is.numeric(var)){
+    #         IS_FACTOR_INTER = TRUE
+    #         # It's an interaction between factors
+    #         f_new = rep(NA_character_, length(f))
+    #
+    #         if(IS_F2){
+    #             f_new[!is_na_all] = paste0(var[!is_na_all], "__%%__", f[!is_na_all], "__%%__", f2[!is_na_all])
+    #         } else {
+    #             f_new[!is_na_all] = paste0(var[!is_na_all], "__%%__", f[!is_na_all])
+    #         }
+    #
+    #         f = f_new
+    #         IS_INTER_COUNT = FALSE
+    #
+    #     } else if(IS_F2){
+    #         f_new = rep(NA_character_, length(f))
+    #         f_new[!is_na_all] = paste0(f[!is_na_all], "__%%__", f2[!is_na_all])
+    #         f = f_new
+    #     }
+    #
+    # } else if(IS_F2){
+    #     is_na_all = is.na(f) | is.na(f2)
+    #     f_new = rep(NA_character_, length(f))
+    #
+    #     f_new[!is_na_all] = paste0(f[!is_na_all], "__%%__", f2[!is_na_all])
+    #
+    #     f = f_new
+    #
+    # } else {
+    #     is_na_all = is.na(f)
+    # }
+
+    #
+    # QUFing + NA
+    #
+
     if(IS_INTER){
-
-        is_na_all = is.na(var) | is.na(f)
-        if(IS_F2) is_na_all = is_na_all | is.na(f2)
-
-        # Conversion of var to numeric if logical
-        # => that makes sense now, if the user isn't happy => f2 (before that the automatic conversion wouldn't leave room to really use logicals)
-        if(is.logical(var)){
-            var = as.numeric(var)
-        } else if(is.factor(var) && length(levels(var)) == 2 && all(c(0, 1) %in% levels(var))){
-            var = as.numeric(as.character(var))
-        }
-
-        if(!is.numeric(var)){
-            IS_FACTOR_INTER = TRUE
-            # It's an interaction between factors
-            f_new = rep(NA_character_, length(f))
-
-            if(IS_F2){
-                f_new[!is_na_all] = paste0(var[!is_na_all], "__%%__", f[!is_na_all], "__%%__", f2[!is_na_all])
-            } else {
-                f_new[!is_na_all] = paste0(var[!is_na_all], "__%%__", f[!is_na_all])
-            }
-
-            f = f_new
-            IS_INTER = FALSE
-
-        } else if(IS_F2){
-            f_new = rep(NA_character_, length(f))
-            f_new[!is_na_all] = paste0(f[!is_na_all], "__%%__", f2[!is_na_all])
-            f = f_new
-        }
-
-    } else if(IS_F2){
-        is_na_all = is.na(f) | is.na(f2)
-        f_new = rep(NA_character_, length(f))
-
-        f_new[!is_na_all] = paste0(f[!is_na_all], "__%%__", f2[!is_na_all])
-
-        f = f_new
-
+        is_na_all = is.na(f) | is.na(var)
     } else {
         is_na_all = is.na(f)
     }
 
-    if(!IS_INTER){
+    if(IS_INTER_FACTOR){
+        info = to_integer(f, var, add_items = TRUE, items.list = TRUE, sorted = TRUE, multi.join = "__%%__")
+    } else {
+        info = to_integer(f, add_items = TRUE, items.list = TRUE, sorted = TRUE)
+    }
+
+    fe_num = info$x
+    items = info$items
+
+    if(!IS_INTER_COUNT){
         # neutral var in C code
         var = 1
     }
 
-    # QUFing
-
-    info = to_integer(f, add_items = TRUE, items.list = TRUE, sorted = TRUE)
-    fe_num = info$x
-    items = info$items
-
-    # Now we check with regex
-    if(IS_FACTOR_INTER || IS_F2){
+    if(IS_INTER_FACTOR){
         items_split = strsplit(items, "__%%__", fixed = TRUE)
 
-        f_items = sapply(items_split, `[`, 1 + IS_FACTOR_INTER)
-        if(IS_F2){
-            f2_items = sapply(items_split, `[`, 2 + IS_FACTOR_INTER)
-        }
-
-        if(f_num || f2_num){
-            # we reorder the stuff
-            f_items_fm = if(f_num) as.numeric(f_items) else f_items
-
-            if(IS_F2){
-                f2_items_fm = if(f2_num) as.numeric(f2_items) else f2_items
-                new_order = order(f_items_fm, f2_items_fm)
-                f2_items = f2_items[new_order]
-            } else {
-                new_order = order(f_items_fm)
-            }
-
-            if(IS_FACTOR_INTER) items_split = items_split[new_order]
-            fe_num = order(new_order)[fe_num]
-            f_items = f_items[new_order]
-            items = items[new_order]
-
-        }
-
+        f_items = sapply(items_split, `[`, 1)
+        var_items = sapply(items_split, `[`, 2)
     } else {
         f_items = items
     }
 
-    check_arg(ref, "logical scalar | charin", .choices = items, .message = paste0("Argument 'ref' must be a single element of the variable '", f_name, "'."))
+    # Now we check with regex
+    # if(IS_FACTOR_INTER || IS_F2){
+    #     items_split = strsplit(items, "__%%__", fixed = TRUE)
+    #
+    #     f_items = sapply(items_split, `[`, 1 + IS_FACTOR_INTER)
+    #     if(IS_F2){
+    #         f2_items = sapply(items_split, `[`, 2 + IS_FACTOR_INTER)
+    #     }
+    #
+    #     if(f_num || f2_num){
+    #         # we reorder the stuff
+    #         f_items_fm = if(f_num) as.numeric(f_items) else f_items
+    #
+    #         if(IS_F2){
+    #             f2_items_fm = if(f2_num) as.numeric(f2_items) else f2_items
+    #             new_order = order(f_items_fm, f2_items_fm)
+    #             f2_items = f2_items[new_order]
+    #         } else {
+    #             new_order = order(f_items_fm)
+    #         }
+    #
+    #         if(IS_FACTOR_INTER) items_split = items_split[new_order]
+    #         fe_num = order(new_order)[fe_num]
+    #         f_items = f_items[new_order]
+    #         items = items[new_order]
+    #
+    #     }
+    #
+    # } else {
+    #     f_items = items
+    # }
 
-    check_arg(drop, keep, drop2, keep2, "vector no na")
+    check_arg(ref, "logical scalar | vector no na", .choices = items)
+
+    check_arg(ref2, keep, keep2, "vector no na")
 
     no_rm = TRUE
     any_ref = FALSE
     id_drop = c()
     if(!missing(ref)){
-        if(is.logical(ref)){
-            if(ref == TRUE){
-                # We always delete the first value
-                any_ref = TRUE
-                # Que ce soit items ici est normal (et pas f_items)
-                id_drop = ref = which(items == items[1])
-            }
+        any_ref = !isFALSE(ref)
+
+        if(isTRUE(ref)){
+            # We always delete the first value
+            # Que ce soit items ici est normal (et pas f_items)
+            id_drop = ref = which(items == items[1])
         } else {
-            any_ref = TRUE
-            id_drop = ref = which(f_items %in% ref)
+            id_drop = c(id_drop, items_to_drop(f_items, ref, "fvar"))
         }
     }
 
-    if(!missing(drop)){
-        if(is.numeric(drop)){
-            # numeric => equality
-            id_drop = c(id_drop, which(f_items %in% drop))
-        } else {
-            # => regex
-            drop = as.character(drop)
-            qui = which(keep_apply(f_items, drop, TRUE))
-            if(length(qui) == 0){
-                stop("The regular expression", plural_len(drop), " in 'drop' ", plural_len(drop, "don't"), " match any value of 'f'.")
-            }
-            id_drop = c(id_drop, qui)
-        }
-    }
 
     if(!missing(keep)){
-        if(is.numeric(keep)){
-            id_drop = c(id_drop, which(!f_items %in% keep))
-        } else {
-            keep = as.character(keep)
-            qui = which(!keep_apply(f_items, keep, TRUE))
-            if(length(qui) == 0){
-                stop("The regular expression", plural_len(keep), " in 'keep' ", plural_len(keep, "don't"), " match any value of 'f'.")
-            }
-            id_drop = c(id_drop, qui)
-        }
+        id_drop = c(id_drop, items_to_drop(f_items, keep, "fvar", keep = TRUE))
     }
 
-    if(IS_F2){
-        if(!missing(drop2)){
-            if(is.numeric(drop2)){
-                # numeric => equality
-                id_drop = c(id_drop, which(f2_items %in% drop2))
-            } else {
-                # => regex
-                drop2 = as.character(drop2)
-                qui = which(keep_apply(f2_items, drop2, TRUE))
-                if(length(qui) == 0){
-                    stop("The regular expression", plural_len(drop2), " in 'drop2' ", plural_len(drop2, "don't"), " match any value of 'f2'.")
-                }
-                id_drop = c(id_drop, qui)
-            }
+    if(IS_INTER_FACTOR){
+        if(!missing(ref2)){
+            id_drop = c(id_drop, items_to_drop(var_items, ref2, "var"))
         }
 
         if(!missing(keep2)){
-            if(is.numeric(keep2)){
-                id_drop = c(id_drop, which(!f2_items %in% keep2))
-            } else {
-                keep2 = as.character(keep2)
-                qui = which(!keep_apply(f2_items, keep2, TRUE))
-                if(length(qui) == 0){
-                    stop("The regular expression", plural_len(keep2), " in 'keep2' ", plural_len(keep2, "don't"), " match any value of 'f2'.")
-                }
-                id_drop = c(id_drop, qui)
-            }
+            id_drop = c(id_drop, items_to_drop(var_items, keep2, "var", keep = TRUE))
         }
     }
 
@@ -2804,9 +2835,9 @@ i = function(var, f, f2, ref, drop, keep, drop2, keep2){
 
     if(length(id_drop) > 0){
         items_name = items[-id_drop]
-        if(IS_FACTOR_INTER || IS_F2){
-            f_items = f_items[-id_drop]
-            if(IS_F2) f2_items = f2_items[-id_drop]
+        f_items = f_items[-id_drop]
+        if(IS_INTER_FACTOR){
+            var_items = var_items[-id_drop]
         }
     } else {
         items_name = items
@@ -2815,32 +2846,18 @@ i = function(var, f, f2, ref, drop, keep, drop2, keep2){
     if(FROM_FIXEST){
         # Pour avoir des jolis noms c'est un vrai gloubiboulga,
         # mais j'ai pas trouve plus simple...
-        if(IS_FACTOR_INTER){
-            var_items = sapply(items_split, `[`, 1)
+        if(IS_INTER_FACTOR){
+            col_names = paste0("__CLEAN__", f_name, "::", f_items, ":", var_name, "::", var_items)
 
-            if(IS_F2){
-                col_names = paste0("__CLEAN__", var_name, "::", var_items, ":", f_name, "::", f_items, ":", f2_name, "::", f2_items)
-            } else {
-                col_names = paste0("__CLEAN__", var_name, "::", var_items, ":", f_name, "::", f_items)
-            }
-
-        } else if(IS_INTER){
-            if(IS_F2){
-                col_names = paste0("__CLEAN__", var_name, ":", f_name, "::", f_items, ":", f2_name, "::", f2_items)
-            } else {
-                col_names = paste0("__CLEAN__", var_name, ":", f_name, "::", items_name)
-            }
+        } else if(IS_INTER_COUNT){
+            col_names = paste0("__CLEAN__", f_name, "::", f_items, ":", var_name)
 
         } else {
-            if(IS_F2){
-                col_names = paste0("__CLEAN__", f_name, "::", f_items, ":", f2_name, "::", f2_items)
-            } else {
-                col_names = paste0("__CLEAN__", f_name, "::", items_name)
-            }
+            col_names = paste0("__CLEAN__", f_name, "::", items_name)
         }
     } else {
 
-        if(IS_FACTOR_INTER || IS_F2){
+        if(IS_INTER_FACTOR){
             items_name = gsub("__%%__", ":", items_name, fixed = TRUE)
         }
 
@@ -2856,60 +2873,59 @@ i = function(var, f, f2, ref, drop, keep, drop2, keep2){
 
 
     # We send the information on the reference
-    if(FROM_FIXEST && IS_INTER){
-        opt = getOption("fixest_interaction_ref")
-        if(is.null(opt)){
-
-            opt = list(fe_type = class(f))
-
-            qui_drop = (1:length(items)) %in% id_drop
-
-            if(any_ref){
-                qui_drop[ref] = FALSE
-                opt$items = items[!qui_drop]
-
-                is_ref = rep(FALSE, length(opt$items))
-                is_ref[sum(!qui_drop[1:ref])] = TRUE
-
-                opt$is_ref = is_ref
-            } else {
-                opt$items = items[!qui_drop]
-                opt$is_ref = rep(FALSE, length(opt$items))
+    if(FROM_FIXEST){
+        is_GLOBAL = FALSE
+        for(where in 1:min(8, sys.nframe())){
+            if(exists("GLOBAL_fixest_mm_info", parent.frame(where))){
+                GLOBAL_fixest_mm_info = get("GLOBAL_fixest_mm_info", parent.frame(where))
+                is_GLOBAL = TRUE
+                break
             }
-
-            opt$prefix = paste0(var_name, ":", f_name)
-
-            options("fixest_interaction_ref" = opt)
         }
+
+        if(is_GLOBAL){
+
+            info = list()
+            info$items = items
+            info$items_clean = if(length(id_drop) > 0) items[-id_drop] else items
+            if(!missing(ref)) info$ref = ref
+            info$is_num = is.numeric(items)
+
+            GLOBAL_fixest_mm_info[[length(GLOBAL_fixest_mm_info) + 1]] = info
+            # re assignment
+            assign("GLOBAL_fixest_mm_info", GLOBAL_fixest_mm_info, parent.frame(where))
+        }
+
     }
 
     res
 }
 
 #' @rdname i
-interact <- i
+interact = i
 
-i_ref = function(var, f, f2, ref, drop, keep, drop2, keep2){
+i_ref = function(fvar, var, ref, keep, ref2, keep2){
+    # To automatically add references when i(x) is used
 
     mc = match.call()
 
     mc[[1]] = as.name("i")
 
-    if(!any(c("ref", "drop", "keep", "drop2", "keep2") %in% names(mc)) && any(!c("var", "f") %in% names(mc))){
-        mc$ref = TRUE
+    if(!any(c("ref", "keep", "ref2", "keep2") %in% names(mc))){
+        mc$ref_special = TRUE
     }
 
     return(deparse_long(mc))
 }
 
-i_noref = function(var, f, f2, ref, drop, keep, drop2, keep2){
+i_noref = function(fvar, var, ref, keep, ref2, keep2){
     # Used only in predict => to create data without restriction
 
     mc = match.call()
 
     mc[[1]] = as.name("i")
 
-    mc$ref = mc$drop = mc$keep = mc$drop2 = mc$keep2 = NULL
+    mc$ref = mc$keep = mc$ref2 = mc$keep2 = NULL
 
     return(deparse_long(mc))
 }
@@ -3127,10 +3143,8 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 #' @param sorted Logical, default is \code{FALSE}. Whether the integer vector should make reference to sorted values?
 #' @param add_items Logical, default is \code{FALSE}. Whether to add the unique values of the original vector(s). If requested, an attribute \code{items} is created containing the values (alternatively, they can appear in a list if \code{items.list=TRUE}).
 #' @param items.list Logical, default is \code{FALSE}. Only used if \code{add_items=TRUE}. If \code{TRUE}, then a list of length 2 is returned with \code{x} the integer vector and \code{items} the vector of items.
-#' @param multi.join Logical, or character, scalar, defaults to \code{FALSE}. Only used if multiple vectors are to be transformed into integers. If \code{multi.join} is not \code{FALSE}, then the values of the different vectors will be collated using \code{\link[base]{paste}} with \code{collapse=multi.join}.
+#' @param multi.join Character scalar used to join the items of multiple vectors. The default is \code{"_"}. Ignored if \code{add_items = FALSE}.
 #'
-#' @details
-#' If multiple vectors have to be combined and \code{add_items=TRUE}, to have user readable values in the items, you should add the argument \code{multi.join} so that the values of the vectors are combined in a "user-readable" way. Note that in the latter case, the algorithm is much much slower.
 #'
 #' @return
 #' Reruns a vector of the same length as the input vectors.
@@ -3164,19 +3178,16 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 #' # Multiple vectors
 #' #
 #'
-#' # by default, the two vector are fast combined, and items are meaningless
 #' to_integer(x1, x2, add_items = TRUE)
 #'
-#' # You can use multi.join to have human-readable values for the items:
-#' to_integer(x1, x2, add_items = TRUE, multi.join = TRUE)
-#'
+#' # You can use multi.join to handle the join of the items:
 #' to_integer(x1, x2, add_items = TRUE, multi.join = "; ")
 #'
-to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE, multi.join = FALSE){
+to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE, multi.join = "_"){
 
     check_arg(..., "vector mbt")
     check_arg(sorted, add_items, items.list, "logical scalar")
-    check_arg(multi.join, "scalar(logical, character)")
+    check_arg(multi.join, "character scalar")
 
     dots = list(...)
 
@@ -3217,19 +3228,20 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
     # Creating the ID
     #
 
-    do_join = FALSE
-    if(!isFALSE(multi.join) && Q > 1){
-        do_join = TRUE
-        if(isTRUE(multi.join)) multi.join = "_"
-    }
-
     if(Q == 1){
-        if(sorted && is.factor(dots[[1]])){
-            # Special treatment for factors => we keep their order
-            f = dots[[1]][drop = TRUE]
-            res = quickUnclassFactor(unclass(f), addItem = add_items, sorted = sorted)
+        if(sorted && !is.numeric(dots[[1]]) && !is.character(dots[[1]])){
+            # general way => works for any type with a sort method
+            f = dots[[1]]
+            res_raw = quickUnclassFactor(f, addItem = TRUE, sorted = FALSE)
+            obs_1st = cpp_get_first_item(res_raw$x, length(res_raw$items))
+            f_unik = f[obs_1st]
+            f_order = order(f_unik)
+            x_new = order(f_order)[res_raw$x]
             if(add_items){
-                res$items = levels(f)[res$items]
+                items_new = as.character(f_unik[f_order])
+                res = list(x = x_new, items = items_new)
+            } else {
+                res = x_new
             }
 
         } else {
@@ -3238,34 +3250,54 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
 
     } else {
 
-        if(do_join){
-            myDots = dots
-            myDots$sep = multi.join
-            index = do.call("paste", myDots)
+        QUF_raw = list()
+        for(q in 1:Q){
+            QUF_raw[[q]] = quickUnclassFactor(dots[[q]], sorted = FALSE, addItem = TRUE)
+        }
 
+        # Then we combine
+        power = floor(1 + log10(sapply(QUF_raw, function(x) length(x$items))))
+
+        is_large = sum(power) > 14
+        if(is_large){
+            # We can't do differently
+            arg_list = lapply(QUF_raw, `[[`, 1)
+            arg_list$sep = "_"
+            index = do.call("paste", arg_list)
         } else {
-
-            for(q in 1:Q){
-                dots[[q]] = quickUnclassFactor(dots[[q]], sorted = sorted)
-            }
-
-            # Then we combine
-            power = floor(1 + log10(sapply(dots, max)))
-
-            if(sum(power) > 14){
-                myDots = dots
-                myDots$sep = multi.join
-                index = do.call("paste", myDots)
-            } else {
-                # quicker, but limited by the precision of doubles
-                index = dots[[1]]
-                for(q in 2:Q){
-                    index = index + dots[[q]]*10**sum(power[1:(q-1)])
-                }
+            # quicker, but limited by the precision of doubles
+            index = QUF_raw[[1]]$x
+            for(q in 2:Q){
+                index = index + QUF_raw[[q]]$x*10**sum(power[1:(q-1)])
             }
         }
 
         res = quickUnclassFactor(index, addItem = add_items, sorted = sorted)
+
+        if(add_items || sorted){
+            # we re order appropriately
+
+            obs_1st = cpp_get_first_item(res$x, length(res$items))
+            f_all = list()
+            for(q in 1:Q){
+                f_all[[q]] = dots[[q]][obs_1st]
+            }
+
+            f_order = do.call("order", f_all)
+
+            x_new = order(f_order)[res$x]
+
+            arg_list = f_all
+            arg_list$sep = multi.join
+            f_char = do.call("paste", arg_list)
+            items_new = f_char[f_order]
+
+            if(add_items){
+                res = list(x = x_new, items = items_new)
+            } else {
+                res = x_new
+            }
+        }
     }
 
     if(ANY_NA){
@@ -3743,218 +3775,6 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
 }
 
 
-#' Aggregates the values of DiD coefficients a la Sun and Abraham
-#'
-#' Simple tool that aggregates the value of CATT coefficients in staggered difference-in-difference setups (see details).
-#'
-#' @param x A \code{fixest} object.
-#' @param agg A character scalar describing the variable names to be aggregated, it is pattern-based. All variables that match the pattern will be aggregated. It must be of the form \code{"(root)"}, the parentheses must be there and the resulting variable name will be \code{"root"}. You can add another root with parentheses: \code{"(root1)regex(root2)"}, in which case the resulting name is \code{"root1::root2"}. To name the resulting variable differently you can pass a named vector: \code{c("name" = "pattern")} or \code{c("name" = "pattern(root2)")}. It's a bit intricate sorry, please see the examples.
-#' @param full Logical scalar, defaults to \code{FALSE}. If \code{TRUE}, then all coefficients are returned, not only the aggregated coefficients.
-#' @param use_weights Logical, default is \code{TRUE}. If the estimation was weighted, whether the aggregation should take into account the weights. Basically if the weights reflected frequency it should be \code{TRUE}.
-#' @param ... Arguments to be passed to \code{\link[fixest]{summary.fixest}}.
-#'
-#' @details
-#' This is a function helping to replicate the estimator from Sun and Abraham (2020). You first need to perform an estimation with cohort and relative periods dummies (typically using the function \code{\link[fixest]{i}}), this leads to estimators of the cohort average treatment effect on the treated (CATT). Then you can use this function to retrieve the average treatment effect on each relative period, or for any other way you wish to aggregate the CATT.
-#'
-#' Note that contrary to the SA article, here the cohort share in the sample is considered to be a perfect measure for the cohort share in the population.
-#'
-#' @return
-#' It returns a matrix representing a table of coefficients.
-#'
-#' @references
-#' Liyang Sun and Sarah Abraham, forthcoming, "Estimating Dynamic Treatment Effects in Event Studies with Heterogeneous Treatment Effects". Journal of Econometrics.
-#'
-#' @author
-#' Laurent Berge
-#'
-#' @examples
-#'
-#' #
-#' # DiD example
-#' #
-#'
-#' # first we set up the data
-#'
-#' set.seed(1)
-#' n_group = 20
-#' n_per_group = 5
-#'
-#' id_i = paste0((1:n_group), ":", rep(1:n_per_group, each = n_group))
-#' id_t = 1:10
-#'
-#' base = expand.grid(id = id_i, year = id_t)
-#' base$group = as.numeric(gsub(":.+", "", base$id))
-#'
-#' base$year_treated = base$group
-#' base$year_treated[base$group > 10] = 10000
-#' base$treat_post = (base$year >= base$year_treated) * 1
-#' base$time_to_treatment = pmax(base$year - base$year_treated, -1000)
-#' base$treated = (base$year_treated < 10000) * 1
-#'
-#' # The effect of the treatment is cohort specific and increases with time
-#' base$y_true = base$treat_post * (1 + 1 * base$time_to_treatment - 1 * base$group)
-#' base$y = base$y_true + rnorm(nrow(base))
-#'
-#'
-#' # The controls have a time_to_treatment equal to -1000
-#'
-#' # we drop the always treated
-#' base = base[base$group > 1,]
-#'
-#' # Now we perform the estimation
-#' res_naive = feols(y ~ i(treated, time_to_treatment,
-#'                         ref = -1, drop = -1000) | id + year, base)
-#'
-#' res_cohort = feols(y ~ i(time_to_treatment, f2 = group,
-#'                          drop = c(-1, -1000)) | id + year, base)
-#'
-#' coefplot(res_naive, ylim = c(-6, 8))
-#' att_true = tapply(base$y_true, base$time_to_treatment, mean)[-1]
-#' points(-9:8 + 0.15, att_true, pch = 15, col = 2)
-#'
-#' # The aggregate effect for each period
-#' agg_coef = aggregate(res_cohort, "(ti.*nt)::(-?[[:digit:]]+)")
-#' x = c(-9:-2, 0:8) + .35
-#' points(x, agg_coef[, 1], pch = 17, col = 4)
-#' ci_low = agg_coef[, 1] - 1.96 * agg_coef[, 2]
-#' ci_up = agg_coef[, 1] + 1.96 * agg_coef[, 2]
-#' segments(x0 = x, y0 = ci_low, x1 = x, y1 = ci_up, col = 4)
-#'
-#' legend("topleft", col = c(1, 2, 4), pch = c(20, 15, 17),
-#'        legend = c("Naive", "True", "Sun & Abraham"))
-#'
-#'
-#' # The ATT
-#' aggregate(res_cohort, c("ATT" = "treatment::[^-]"))
-#' mean(base[base$treat_post == 1, "y_true"])
-#'
-#' # With etable
-#' etable(res_naive, res_cohort, agg = "(ti.*nt)::(-?[[:digit:]]+):gro")
-#'
-aggregate.fixest = function(x, agg, full = FALSE, use_weights = TRUE, ...){
-    # Aggregates the value of coefficients
-
-    check_arg(x, "class(fixest) mbt")
-    check_arg(agg, "character scalar")
-    check_arg(full, "logical scalar")
-    # => later => extend it to more than one set of vars to agg
-
-    dots = list(...)
-    from_summary = isTRUE(dots$from_summary)
-
-    is_name = !is.null(names(agg))
-
-    if(!is_name && !grepl("(", agg, fixed = TRUE)){
-        stop("Argument 'agg' must be a character in which the pattern to match must be in between parentheses. So far there are no parenthesis: please have a look at the examples.")
-    }
-
-    coef = coef(x)
-    cname = names(coef)
-
-    qui = grepl(agg, cname)
-    if(!any(qui)){
-        if(from_summary){
-            # We make it silent when aggregate is used in summary
-            # => this way we can pool calls to agg even for models that don't have it
-            # ==> useful in etable eg
-            return(x$coeftable)
-        } else {
-            stop("The argument 'agg' does not match any variable.")
-        }
-    }
-
-    if(!isTRUE(x$summary)){
-        x = summary(x, ...)
-    }
-
-    cname_select = cname[qui]
-    if(is_name){
-        root = rep(names(agg), length(cname_select))
-        val = gsub(paste0(".*", agg, ".*"), "\\1", cname_select)
-    } else {
-        root = gsub(paste0(".*", agg, ".*"), "\\1", cname_select)
-        val = gsub(paste0(".*", agg, ".*"), "\\2", cname_select)
-    }
-
-    V = x$cov.scaled
-
-    mm = model.matrix(x)
-
-    name_df = unique(data.frame(root, val, stringsAsFactors = FALSE))
-
-    c_all = c()
-    se_all = c()
-    for(i in 1:nrow(name_df)){
-
-        r = name_df[i, 1]
-        v = name_df[i, 2]
-        v_names = cname_select[root == r & val == v]
-
-        if(use_weights && !is.null(x$weights)){
-            shares = colSums(x$weights * sign(mm[, v_names, drop = FALSE]))
-        } else {
-            shares = colSums(sign(mm[, v_names, drop = FALSE]))
-        }
-
-        shares = shares / sum(shares)
-
-        # The coef
-        c_value = sum(shares * coef[v_names])
-
-        # The variance
-        n = length(v_names)
-        s1 = matrix(shares, n, n)
-        s2 = matrix(shares, n, n, byrow = TRUE)
-
-        var_value = sum(s1 * s2 * V[v_names, v_names])
-        se_value = sqrt(var_value)
-
-        c_all[length(c_all) + 1] = c_value
-        se_all[length(se_all) + 1] = se_value
-    }
-
-    # th z & p values
-    zvalue <- c_all/se_all
-    if(x$method_type == "feols" || (x$method %in% "feglm" && !x$family$family %in% c("poisson", "binomial"))){
-
-        # I have renamed t.df into G
-        t.df = attr(vcov, "G")
-
-        if(!is.null(t.df)){
-            pvalue <- 2*pt(-abs(zvalue), max(t.df - 1, 1))
-        } else {
-            pvalue <- 2*pt(-abs(zvalue), max(x$nobs - x$nparams, 1))
-        }
-
-    } else {
-        pvalue <- 2*pnorm(-abs(zvalue))
-    }
-
-    res = cbind(c_all, se_all, zvalue, pvalue)
-    if(max(nchar(val)) == 0){
-        rownames(res) = name_df[[1]]
-    } else {
-        rownames(res) = apply(name_df, 1, paste, collapse = "::")
-    }
-
-    colnames(res) = c("Estimate", "Std. Error", "t value", "Pr(>|t|)")
-
-    if(full){
-        table_origin = x$coeftable
-        i_min = min(which(qui)) - 1
-        before = if(i_min > 0) table_origin[1:i_min, , drop = FALSE] else NULL
-
-        i_after = (1:nrow(table_origin)) > i_min & !qui
-        after = if(any(i_after)) table_origin[i_after, , drop = FALSE] else NULL
-
-        res = rbind(before, res, after)
-
-        attr(res, "type") = attr(table_origin, "type")
-    }
-
-    res
-}
-
 #### ................. ####
 #### Internal Funs     ####
 ####
@@ -4202,7 +4022,7 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
     if(any(qui_inter <- (grepl("^i(nteract)?\\(", all_var_names) & grepl(":", all_var_names, fixed = TRUE)))){
         # beware of ":" in drop/keep!!!
 
-        for(arg in c("drop", "keep", "drop2", "keep2")){
+        for(arg in c("ref", "keep", "ref2", "keep2")){
             if(any(qui_ref <- grepl(paste0(arg, " =[^\\)]+:"), all_var_names[qui_inter]))){
                 var_inter_ref = all_var_names[qui_inter][qui_ref]
                 var_inter_ref_split = strsplit(var_inter_ref, paste0(arg, " = "))
@@ -4224,7 +4044,7 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
     }
 
     # evaluation
-    data_list <- eval(all_vars_call, base)
+    data_list = eval(all_vars_call, base)
 
     # Handling the multi columns case (ex: bs(x1), splines)
     # NOTA: I need to add a check for i() because of 1 value interactions
@@ -4259,7 +4079,6 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
     res = do.call("cbind", data_list)
 
     colnames(res) = all_var_names
-
 
     res
 }
@@ -4390,10 +4209,11 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
     #
 
     # subset => we allow the extraction of only some variables
+    all_vars = all_vars_with_f(fml[[3]])
     if(isFALSE(subset)){
 
-        if(!original_data && any(!all.vars(fml[[3]]) %in% names(newdata))){
-            pblm = setdiff(all.vars(fml[[3]]), names(newdata))
+        if(!original_data && any(!all_vars %in% names(newdata))){
+            pblm = setdiff(all_vars, names(newdata))
             stop("In 'model.matrix', the variable", enumerate_items(pblm, "is.s.quote"), " in the formula but not in the argument 'data'. Use 'subset = TRUE' to enable the creation of partial data.")
         }
 
@@ -4419,7 +4239,7 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
             fake_intercept = TRUE
         }
 
-        if(!all(all.vars(fml[[3]]) %in% vars_keep)){
+        if(!all(all_vars %in% vars_keep)){
 
             terms_all = attr(terms(fml), "term.labels")
             # We first check pure variables (because non pure variables are slower to check)
@@ -4427,7 +4247,7 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
             terms_drop = is_var & !terms_all %in% vars_keep
 
             for(i in which(!is_var)){
-                if(any(!all.vars(str2lang(terms_all[i])) %in% vars_keep)){
+                if(any(!all_vars_with_f(str2lang(terms_all[i])) %in% vars_keep)){
                     terms_drop[i] = TRUE
                 }
             }
@@ -4944,10 +4764,10 @@ expand_interactions_internal = function(x){
                 stop("Problem in the interaction of the formula: Error in ", terms_split[1], "::", fe_name, gsub(".+interact_control", "", args))
             }
 
-            new_term = paste0("interact(", terms_split[1], ", ", fe_name, ", ", paste(args, collapse = ", "), ")")
+            new_term = paste0("interact(", fe_name, ", ", terms_split[1], ", ", paste(args, collapse = ", "), ")")
 
         } else {
-            new_term = paste0("interact(", terms_split[1], ", ", terms_split[2], ")")
+            new_term = paste0("interact(", terms_split[2], ", ", terms_split[1], ")")
         }
 
         terms_all_list[[i]] = new_term
@@ -5125,7 +4945,7 @@ clean_interact_names = function(x){
 
     x2clean = x[who2clean]
 
-    x_split = strsplit(x2clean, "(^|(?<=[^[:alnum:]\\._]))i(nteract)?\\(|__CLEAN__", perl = TRUE)
+    x_split = strsplit(x2clean, "(^|(?<=[^[:alnum:]\\._]))(i(nteract)?|sunab(_att)?)\\(|__CLEAN__", perl = TRUE)
 
     x_left = sapply(x_split, function(v) v[1])
     x_right = sapply(x_split, function(v) v[2])
@@ -5183,7 +5003,6 @@ is_naked_fun = function(x, fun_pattern){
 
     left_ok & right_ok
 }
-
 
 set_defaults = function(opts_name){
 
@@ -5357,7 +5176,58 @@ assign_flags = function(flags, ...){
     }
 }
 
+items_to_drop = function(items, x, varname, keep = FALSE){
+    # selection of items
+    # the selection depends on the type of x
+    # always returns the IDs of the items to drop
 
+    set_up(1)
+
+    argname = deparse(substitute(x))
+
+    if(is.character(x)){
+        all_x = c()
+        for(i in seq_along(x)){
+
+            my_x = x[i]
+            if(grepl("^@", my_x)){
+                # A) regex
+                pattern = substr(my_x, 2, nchar(my_x))
+                new_x = grep(pattern, items, value = TRUE)
+                if(length(new_x) == 0){
+                    # strong checking!
+                    stop_up("In argument '", argname, "', the regular expression '", pattern, "' does not match any value of '", varname, "'.")
+                }
+                all_x = c(all_x, new_x)
+            } else {
+                # B) partial matching
+                check_value_plus(my_x, "match", .choices = items, .message = paste0("The argument '", argname, "' should contain values of the variable '", varname, "'."))
+                all_x = c(all_x, my_x)
+            }
+        }
+
+        if(keep){
+            id_drop = which(!items %in% all_x)
+        } else {
+            id_drop = which(items %in% all_x)
+        }
+
+    } else {
+        # exact matching
+        if(keep){
+            id_drop = which(!items %in% x)
+        } else {
+            id_drop = which(items %in% x)
+
+            if(length(id_drop) == 0){
+                stop_up("In argument '", argname, "', the value", plural_len(x, "s.don't"), " match any value of '", varname, "'.")
+            }
+        }
+
+    }
+
+    id_drop
+}
 
 #### ................. ####
 #### Small Utilities ####
@@ -5770,16 +5640,18 @@ quickUnclassFactor = function(x, addItem = FALSE, sorted = FALSE){
 	# does as unclass(as.factor(x))
 	# but waaaaay quicker
 
-	if(!is.numeric(x)){
-		# level and unclass is much slower
-		x = as.character(x)
-	}
+    not_num = !is.numeric(x)
+    is_char_convert = not_num && !is.character(x)
 
-    res = cpp_quf_gnl(x)
+    if(is_char_convert){
+        res = cpp_quf_gnl(as.character(x))
+    } else {
+        res = cpp_quf_gnl(x)
+    }
 
     if(sorted){
 
-        if(is.character(x)){
+        if(not_num){
             items = x[res$x_unik]
         } else {
             items = res$x_unik
@@ -5792,7 +5664,12 @@ quickUnclassFactor = function(x, addItem = FALSE, sorted = FALSE){
         x_uf = order_new_order[x]
 
         if(addItem){
-            res = list(x = x_uf, items = items[new_order])
+            if(is_char_convert){
+                res = list(x = x_uf, items = as.character(items[new_order]))
+            } else {
+                res = list(x = x_uf, items = items[new_order])
+            }
+
             return(res)
         } else {
             return(x_uf)
@@ -5801,8 +5678,13 @@ quickUnclassFactor = function(x, addItem = FALSE, sorted = FALSE){
 
     if(addItem){
 
-        if(is.character(x)){
-            items = x[res$x_unik]
+        if(not_num){
+            if(is_char_convert){
+                items = as.character(x[res$x_unik])
+            } else {
+                items = x[res$x_unik]
+            }
+
             res = list(x = res$x_uf, items = items)
         } else {
             names(res) = c("x", "items")
@@ -6511,6 +6393,52 @@ mat_posdef_fix = function(X, tol = 1e-10){
     return(X)
 }
 
+
+is_fixest_call = function(){
+    sys.nframe() > 5 && any(sapply(tail(sys.calls(), 7), function(x) any(grepl("fixest", deparse(x)[1], fixed = TRUE))))
+}
+
+all_vars_with_f = function(fml){
+    # fml = a ~ x1^x2 + i(x3, f.x4) + x5*i(x6, I(f.x7))
+
+    vars = all.vars(fml)
+    if(any(grepl("^f\\..+", vars))){
+        fml_dp = deparse_long(fml)
+        # for f. to work it MUST be the second argument (var)
+        # valid cases:
+        # - i(x1, f.x2)
+        # - i(var = f.x2, x1)
+        # - i(x1, f.I(x7))
+        # Not valid:
+        # - i(x1, I(f.x7))
+        #
+        # This means that in the parsed formula, f. is always preceded by a space and
+        # either a "," or a "="
+
+        # Maybe later: add nice error messages reminding how to use f.
+
+        qui_f = which(grepl("^f\\..+", vars))
+        f_vars = vars[qui_f]
+        for(i in seq_along(f_vars)){
+            fml_split = strsplit(fml_dp, f_vars[i], fixed = TRUE)[[1]]
+            n = length(fml_split) - 1
+            for(j in 1:n){
+                part = fml_split[j]
+                if(grepl("(,|var =) *$", part)){
+                    part = gsub("\\([^\\)]+\\)", "", part)
+                    if(grepl("i(nteract)?\\(", part)){
+                        # OK!
+                        ii = qui_f[i]
+                        vars[ii] = substr(vars[ii], 3, nchar(vars[ii]))
+                    }
+                }
+            }
+        }
+    }
+
+    vars
+}
+
 #### ................. ####
 #### Additional Methods ####
 ####
@@ -6715,6 +6643,7 @@ logLik.fixest = function(object, ...){
 #' @inheritParams nobs.fixest
 #' @inheritParams etable
 #'
+#' @param agg Logical scalar, default is \code{TRUE}. If the coefficients of the estimation have been aggregated, whether to report the aggregated coefficients. If \code{FALSE}, the raw coefficients will be returned.
 #' @param ... Not currently used.
 #'
 #' @details
@@ -6744,11 +6673,17 @@ logLik.fixest = function(object, ...){
 #' fixef(res)
 #'
 #'
-coef.fixest = coefficients.fixest = function(object, keep, drop, order, ...){
+coef.fixest = coefficients.fixest = function(object, keep, drop, order, agg = TRUE, ...){
 
     check_arg(keep, drop, order, "NULL character vector no na")
+    check_arg(agg, "logical scalar")
 
-    res = object$coefficients
+    if(isTRUE(object$is_agg) && agg){
+        res = object$coeftable[, 1]
+        names(res) = rownames(object$coeftable)
+    } else {
+        res = object$coefficients
+    }
 
     if(!missnull(keep) || !missnull(drop) || !missnull(order)){
         cnames = names(res)
@@ -7249,9 +7184,9 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 	rhs_fml = fml_split(fml, 1)
 	if(grepl("[^:]::[^:]", deparse_long(rhs_fml[[3]]))){
 	    new_fml = expand_interactions(rhs_fml)
-	    linear.varnames = all.vars(new_fml[[3]])
+	    linear.varnames = all_vars_with_f(new_fml[[3]])
 	} else {
-	    linear.varnames = all.vars(rhs_fml[[3]])
+	    linear.varnames = all_vars_with_f(rhs_fml[[3]])
 	}
 
 	if(length(linear.varnames) > 0){
@@ -7259,7 +7194,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 
 	    if(isTRUE(object$iv) && object$iv_stage == 2){
 	        names(coef) = gsub("^fit_", "", names(coef))
-	        linear.varnames = c(linear.varnames, all.vars(object$fml_all$iv[[2]]))
+	        linear.varnames = c(linear.varnames, all_vars_with_f(object$fml_all$iv[[2]]))
 	        iv_fml = object$fml_all$iv
 	        rhs_fml = .xpd(..lhs ~ ..endo + ..rhs, ..lhs = rhs_fml[[2]], ..endo = iv_fml[[2]], ..rhs = rhs_fml[[3]])
 	    }
@@ -8774,33 +8709,6 @@ getFixest_estimation = function(){
 "trade"
 
 
-#' Sample data for difference in difference
-#'
-#' This data has been generated to illustrate the use of difference in difference functions in package \pkg{fixest}. This is a balanced panel of 104 individuals and 10 periods. About half the individuals are treated, the treatment having a positive effect on the dependent variable \code{y} after the 5th period. The effect of the treatment on \code{y} is gradual.
-#'
-#' @usage
-#' data(base_did)
-#'
-#' @format
-#' \code{base_did} is a data frame with 1,040 observations and 6 variables named \code{y}, \code{x1}, \code{id}, \code{period}, \code{post} and \code{treat}.
-#'
-#' \itemize{
-#' \item{y: The dependent variable affected by the treatment.}
-#' \item{x1: An explanatory variable.}
-#' \item{id: Identifier of the individual.}
-#' \item{period: From 1 to 10}
-#' \item{post: Indicator taking value 1 if the period is strictly greater than 5, 0 otherwise.}
-#' \item{treat: Indicator taking value 1 if the individual is treated, 0 otherwise.}
-#'
-#' }
-#'
-#' @source
-#' This data has been generated from \pkg{R}.
-#'
-#'
-#'
-#'
-"base_did"
 
 
 
