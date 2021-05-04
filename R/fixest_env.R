@@ -2463,7 +2463,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     assign("do_split", isSplit, env)
     if(isSplit){
         split = to_integer(split, add_items = TRUE, sorted = TRUE, items.list = TRUE)
-        split.items = split$items
+        split.items = as.character(split$items)
         split = split$x
 
         assign("split", split, env)
