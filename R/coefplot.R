@@ -1383,8 +1383,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
 
 
     dots = list(...)
-    is_internal = dots$internal__
-    if(is.null(is_internal)) is_internal = FALSE
+    is_internal = isTRUE(dots$internal__)
 
     varlist = list(ci = paste0(ci_level * 100, "%"))
     dots_drop = c()
@@ -1625,7 +1624,35 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
         ref_id = NA
         if(only.inter && !is.null(names(estimate))){
             all_vars = names(estimate)
-            if(any(grepl(":.+::", all_vars))){
+
+            if(any(grepl("::", all_vars)){
+                IS_INTER = TRUE
+
+                # Four cases:
+                # - fvar::value
+                # - fvar::value:xnum
+                # - xnum:fvar::value
+                # - fvar::value:xfact::value
+                #
+
+                # We can handle only case 1, 2, and 3
+                # case 4 is too messy
+
+
+
+                if(grepl("(::)|()", ))
+
+            }
+
+
+
+
+
+
+
+
+
+            if(FALSE && any(grepl(":.+::", all_vars))){
 
                 IS_INTER = TRUE
 
@@ -1640,7 +1667,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
                     root_interaction = interaction.info$prefix
 
                 } else {
-                    # We retrict only to interactions
+                    # We restrict only to interactions
                     root_interaction = all_vars[grepl("::", all_vars)]
                     # We keep only the first one !
                     root_interaction = unique(gsub("::.+", "", root_interaction))[1]
