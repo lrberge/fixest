@@ -93,6 +93,8 @@ Common methods have been extended to `fixest_multi` objects.
   - `feols.fit`: fit method for feols. 
   
 ## New features
+
+  - All `fixest` estimation now accept scalars from the global environment (variables are still not allowed!).
   
   - Better handling of the DoFs in `fitstat` (in particular when the VCOV is clustered).
   
