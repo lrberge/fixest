@@ -73,6 +73,7 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
     # computes the clustered vcov
 
     check_arg(attr, "logical scalar")
+    is_attr = attr
 
     if(isTRUE(object$NA_model)){
         # means that the estimation is done without any valid variable
@@ -95,7 +96,11 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
     # If it's a summary => we give the vcov directly without further computation! except if arguments are provided which would mean that the user wants the new vcov
     if(isTRUE(object$summary) && missnull(se) && missnull(cluster) && missnull(dof)){
         vcov = object$cov.scaled
-        if(!attr) attr(vcov, "se_info") = NULL
+        if(!is_attr) {
+            attr(vcov, "se_info") = NULL
+            attr(vcov, "dof.type") = NULL
+            attr(vcov, "dof.K") = NULL
+        }
         return(vcov)
     }
 
@@ -736,7 +741,7 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
         if(is_t_min){
             if(is.null(G_min)) G_min = min(sapply(cluster, max))
 
-            if(attr) base::attr(vcov, "G") = G_min
+            if(is_attr) base::attr(vcov, "G") = G_min
         }
 
     }
@@ -749,7 +754,7 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
 
     sd.dict = c("standard" = "Standard", "hetero"="Heteroskedasticity-robust", "cluster"="Clustered", "twoway"="Two-way", "threeway"="Three-way", "fourway"="Four-way")
 
-    if(attr){
+    if(is_attr){
         base::attr(vcov, "type") = paste0(as.vector(sd.dict[se.val]), type_info)
         base::attr(vcov, "dof.type") = paste0("dof(adj = ", dof.adj, ", fixef.K = '", dof.fixef.K, "', cluster.adj = ", is_cluster, ", cluster.df = '", dof$cluster.df, "', t.df = '", dof$t.df, "', fixef.force_exact = ", is_exact, ")")
         base::attr(vcov, "dof.K") = K

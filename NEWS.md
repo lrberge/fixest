@@ -116,6 +116,8 @@ Common methods have been extended to `fixest_multi` objects.
 ## Other changes
 
   - Improve error messages. 
+  
+  - hatvalues.fixest: now returns an error instead of a message when fixed-effects are present (it makes the interplay with `sadnwich` 'nicer').
 
 # fixest 0.8.4
 
