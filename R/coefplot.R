@@ -841,32 +841,36 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, hor
 
         # Reference line
 
+        check_arg(ref.line, "logical scalar | numeric vector no na | charin(auto)")
+
         if(identical(ref.line, "auto")){
             ref.line = suggest_ref_line && length(unique(prms[prms$is_ref, "estimate_names_raw"])) == 1
         }
 
-        if(!isLogical(ref.line)){
-            stop("Argument 'ref.line' must be either a logical, either equal to 'auto'. Currently it is none of these.")
-        } else if(ref.line) {
+        is_ref_line = !isFALSE(ref.line)
+        line_direction = if(horiz) "h" else "v"
+        if(is.logical(ref.line)){
+            if(ref.line) {
+                ref_pblm = is.null(prms$is_ref) || !any(prms$is_ref)
 
-            ref_pblm = is.null(prms$is_ref) || !any(prms$is_ref)
-
-            if(ref_pblm && !"v" %in% names(ref.line.par)){
-                warning("You can use the argument 'ref.line' only when interactions are provided and a reference is found, or if you provided a reference with argument 'ref'. You can still draw vertical lines by using 'v' in argument 'ref.line.par'. Example: ref.line.par=list(v = ", round(x_value[floor(length(x_value)/2)]), ", col=2).")
-            } else {
-
-                if(!ref_pblm){
+                if(ref_pblm && !"v" %in% names(ref.line.par)){
+                    warning("You can use the argument 'ref.line = TRUE' only when a 'natural' reference is found, or if you provided a reference with argument 'ref'. You can still draw vertical lines by using 'v' in argument 'ref.line.par'. Example: ref.line.par=list(v = ", round(x_value[floor(length(x_value)/2)]), ", col=2).")
+                } else if(!ref_pblm){
                     where = tapply(prms[prms$is_ref, "x"], prms[prms$is_ref, "estimate_names_raw"], mean)
+                    listDefault(ref.line.par, line_direction, where)
                 }
-
-                listDefault(ref.line.par, "v", where)
-                listDefault(ref.line.par, "lty", 2)
-                do.call("abline", ref.line.par)
             }
+
+        } else {
+            listDefault(ref.line.par, line_direction, ref.line)
+        }
+
+        if(is_ref_line){
+            listDefault(ref.line.par, "lty", 2)
+            do.call("abline", ref.line.par)
         }
 
         box()
-
 
         if(horiz){
             axis(1)
