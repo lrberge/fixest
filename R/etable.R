@@ -1191,13 +1191,15 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
 
     el_new = list() # I need it to cope with list(~f+ivf+macro, "my vars" = TRUE)
     # => the first command will create several lines
-    el_names = names(extraline)
+    el_names = uniquify_names(names(extraline))
     for(i in seq_along(extraline)){
-        check_value(extraline[[i]], "logical scalar | vector(character, numeric, logical) len(value) | function | os formula", .message = paste0("The elements of argument 'extraline' must be vectors of length ", n_models, ",  logical scalars, functions, or one-sided formulas."), .value = n_models)
+        check_value(extraline[[i]], "scalar | vector(character, numeric, logical) len(value) | function | os formula",
+                    .message = paste0("The elements of argument 'extraline' must be vectors of length ", n_models, ", logical scalars, functions, or one-sided formulas."),
+                    .value = n_models)
 
         el = extraline[[i]]
         if("formula" %in% class(el)){
-            el_tmp = extraline_extractor(el, names(extraline)[i], tex = isTex)
+            el_tmp = extraline_extractor(el, el_names[i], tex = isTex)
             for(k in seq_along(el_tmp)){
                 el_new[[names(el_tmp)[k]]] = el_tmp[[k]]
             }
@@ -1206,18 +1208,28 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
                 stop_up("The argument 'extraline' must have names that will correspond to the row names. This is not the case for the ", n_th(i), " element.")
             }
 
-            el_new[[names(extraline)[i]]] = extraline[[i]]
+            if(!is.function(el) && length(el) < n_models){
+                # we extend
+                el = rep(el, n_models)
+            }
+
+            el_new[[el_names[i]]] = el
         }
     }
 
     extraline = el_new
 
-    # Now we catch the functions
+    # Now we catch the functions + normalization of the names
     el_fun_id = NULL
     if(length(extraline) > 0){
         el_fun_id = which(sapply(extraline, is.function)) # set of ID such that el[id] is a function
         if(length(el_fun_id) > 0){
             el_origin = extraline
+        }
+
+        if(length(unique(names(extraline))) != length(extraline)){
+            new_names = uniquify_names(names(extraline))
+            names(extraline) = new_names
         }
     }
 
@@ -3195,7 +3207,7 @@ etable_internal_df = function(info){
         res$variables[qui] = paste0(res$variables[qui], add_space)
     }
 
-    row.names(res) = unlist(res$variables)
+    row.names(res) = uniquify_names(unlist(res$variables))
     res$variables = NULL
 
     # We rename theta when NB is used
@@ -3579,6 +3591,33 @@ style.df = function(depvar.title = "Dependent Var.:", fixef.title = "Fixed-Effec
     class(res) = "fixest_style_df"
 
     return(res)
+}
+
+uniquify_names = function(x){
+    # x: vector of names
+    # we make each value of x unique by adding white spaces
+
+    if(length(x) == 0) return(NULL)
+
+    x_unik = unique(x)
+
+    if(length(x_unik) == length(x)) return(x)
+
+    x = gsub(" +$", " ", x)
+    x_unik = unique(x)
+    tab = rep(0, length(x_unik))
+    names(tab) = x_unik
+
+    x_new = x
+    for(i in seq_along(x)){
+        n = tab[x[i]]
+        if(n > 0){
+            x_new[i] = paste0(x_new[i], sprintf("% *s", n, ""))
+        }
+        tab[x[i]] = n + 1
+    }
+
+    x_new
 }
 
 

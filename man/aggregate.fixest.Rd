@@ -37,11 +37,11 @@ Note that contrary to the SA article, here the cohort share in the sample is con
 data(base_stagg)
 
 # Now we perform the estimation
-res_naive = feols(y ~ i(treated, time_to_treatment,
-                        ref = -1, drop = -1000) | id + year, base)
+res_naive = feols(y ~ i(time_to_treatment, treated,
+                        ref = c(-1, -1000)) | id + year, base_stagg)
 
-res_cohort = feols(y ~ i(time_to_treatment, f2 = group,
-                         drop = c(-1, -1000)) | id + year, base)
+res_cohort = feols(y ~ i(time_to_treatment, f.year_treated,
+                         ref = c(-1, -1000)) | id + year, base_stagg)
 
 coefplot(res_naive, ylim = c(-6, 8))
 att_true = tapply(base$y_true, base$time_to_treatment, mean)[-1]
