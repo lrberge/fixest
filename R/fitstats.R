@@ -614,10 +614,10 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
 
             } else if(root %in% "ivwald1"){
 
-                df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd, stage = 1)
-                df2 = degrees_freedom(x, "resid", stage = 1)
-
                 if(isTRUE(x$iv)){
+                    df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd, stage = 1)
+                    df2 = degrees_freedom(x, "resid", stage = 1)
+
 
                     if(x$iv_stage == 1){
 
