@@ -1810,31 +1810,49 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
         # We add the reference
         if(!identical(ref, "auto") && length(ref) > 0 && !isFALSE(ref)){
 
-            if(is.null(names(ref))){
-                if(!is.character(ref) || length(ref) > 1){
-                    check_arg(ref, "character scalar", .message = "Argument 'ref' must be either: a single character, either a list or a named integer vector of length 1 (The integer gives the position of the reference among the coefficients).")
+            if(AXIS_AS_NUM){
+                if(!is.numeric(ref) || length(ref) > 1){
+                    check_arg(ref, "numeric scalar")
                 } else {
-                    refname = ref
-                    ref = list()
-                    ref[[refname]] = 1
+                    names(ref) = "reference"
                 }
-            }
 
-            ref = unlist(ref)
-            if(!isScalar(ref, int = TRUE)){
-                reason = ifelse(length(ref) == 1, " an integer", " of length 1")
-                stop("Argument 'ref' must be either: a single character, either a list or a named integer vector of length 1. The integer gives the position of the reference among the coefficients. Currently this is not ", reason, ".")
+            } else {
+                if(is.null(names(ref))){
+                    if(!is.character(ref) || length(ref) > 1){
+                        check_arg(ref, "character scalar", .message = "Argument 'ref' must be either: a single character, either a list or a named integer vector of length 1 (The integer gives the position of the reference among the coefficients).")
+                    } else {
+                        refname = ref
+                        ref = list()
+                        ref[[refname]] = 1
+                    }
+                }
+
+                ref = unlist(ref)
+
+                if(!isScalar(ref, int = TRUE)){
+                    reason = ifelse(length(ref) == 1, " an integer", " of length 1")
+                    stop("Argument 'ref' must be either: a single character, either a list or a named integer vector of length 1. The integer gives the position of the reference among the coefficients. Currently this is not ", reason, ".")
+                }
             }
 
             # we recreate the parameters
             n = nrow(prms)
             prms$is_ref = FALSE
             ref_row = data.frame(estimate = 0, ci_low = 0, ci_high = 0, estimate_names = names(ref), estimate_names_raw = names(ref), is_ref = TRUE)
-            prms = rbind(prms, ref_row)
-            if(ref > n) ref = n + 1
-            ids = 1:n
-            ids[ids >= ref] = ids[ids >= ref] + 1
-            prms = prms[base::order(c(ids, ref)), ]
+            if(AXIS_AS_NUM){
+                ref_row$x = unname(ref)
+                prms = rbind(prms, ref_row)
+                prms = prms[base::order(prms$x), ]
+                x = prms$x
+
+            } else {
+                prms = rbind(prms, ref_row)
+                if(ref > n) ref = n + 1
+                ids = 1:n
+                ids[ids >= ref] = ids[ids >= ref] + 1
+                prms = prms[base::order(c(ids, ref)), ]
+            }
 
         }
     }
