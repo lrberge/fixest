@@ -126,7 +126,9 @@ sunab = function(cohort, period, ref.c = NULL, ref.p = c(.F, 0), att = FALSE, no
     }
 
     # Now the reference expressed in relative periods
-    check_arg_plus(ref.p, "evalset integer vector no na", .data = list(.F = min(period), .L = max(period)))
+    period_min = min(period)
+    period_max = max(period)
+    check_arg_plus(ref.p, "evalset integer vector no na", .data = list(.F = period_min, .L = period_max))
     if(missing(ref.p)) ref.p = c(min(period), 0)
 
     #
@@ -188,9 +190,20 @@ sunab = function(cohort, period, ref.c = NULL, ref.p = c(.F, 0), att = FALSE, no
                 agg = agg_att
             } else {
                 agg = agg_period
+
+                # We add the attribute containing the appropriate model_matrix_info
+                info = list()
+                info$coef_names_full = paste0(period_name, "::", period_min:period_max)
+                info$items = period_min:period_max
+                info$ref_id = info$items %in% ref.p
+                info$ref = info$items[info$ref_id]
+                info$is_num = TRUE
+                info$is_inter_num = info$is_inter_fact = FALSE
+
+                attr(agg, "model_matrix_info") = info
             }
 
-            GLOBAL_fixest_mm_info$sunab = list(agg = agg, agg_att = agg_att, agg_period = agg_period)
+            GLOBAL_fixest_mm_info$sunab = list(agg = agg, agg_att = agg_att, agg_period = agg_period, ref.p = ref.p)
             # re assignment
             assign("GLOBAL_fixest_mm_info", GLOBAL_fixest_mm_info, parent.frame(where))
         }
@@ -304,7 +317,7 @@ aggregate.fixest = function(x, agg, full = FALSE, use_weights = TRUE, ...){
             # We make it silent when aggregate is used in summary
             # => this way we can pool calls to agg even for models that don't have it
             # ==> useful in etable eg
-            return(x$coeftable)
+            return(list(coeftable = x$coeftable, model_matrix_info = x$model_matrix_info))
         } else {
             stop("The argument 'agg' does not match any variable.")
         }
@@ -361,20 +374,20 @@ aggregate.fixest = function(x, agg, full = FALSE, use_weights = TRUE, ...){
     }
 
     # th z & p values
-    zvalue <- c_all/se_all
+    zvalue = c_all/se_all
     if(x$method_type == "feols" || (x$method %in% "feglm" && !x$family$family %in% c("poisson", "binomial"))){
 
         # I have renamed t.df into G
         t.df = attr(vcov, "G")
 
         if(!is.null(t.df)){
-            pvalue <- 2*pt(-abs(zvalue), max(t.df - 1, 1))
+            pvalue = 2*pt(-abs(zvalue), max(t.df - 1, 1))
         } else {
-            pvalue <- 2*pt(-abs(zvalue), max(x$nobs - x$nparams, 1))
+            pvalue = 2*pt(-abs(zvalue), max(x$nobs - x$nparams, 1))
         }
 
     } else {
-        pvalue <- 2*pnorm(-abs(zvalue))
+        pvalue = 2*pnorm(-abs(zvalue))
     }
 
     res = cbind(c_all, se_all, zvalue, pvalue)
@@ -398,6 +411,28 @@ aggregate.fixest = function(x, agg, full = FALSE, use_weights = TRUE, ...){
 
         attr(res, "type") = attr(table_origin, "type")
     }
+
+    if(from_summary){
+        # We add the model_matrix_info needed in iplot()
+        mm_info = x$model_matrix_info
+        mm_info_agg = attr(agg, "model_matrix_info")
+        if(!is.null(mm_info_agg)){
+            tmp = list(mm_info_agg)
+            for(i in seq_along(mm_info)){
+                my_name = names(mm_info)[i]
+                if(my_name != ""){
+                    tmp[[my_name]] = mm_info[[i]]
+                } else {
+                    tmp[[1 + i]] = mm_info[[i]]
+                }
+
+            }
+            mm_info = tmp
+        }
+
+        res = list(coeftable = res, model_matrix_info = mm_info)
+    }
+
 
     res
 }
