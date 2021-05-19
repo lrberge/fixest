@@ -39,14 +39,13 @@
 #' @param zero Logical, default is \code{TRUE}. Whether the 0-line should be emphasized. You can set the parameters of that line with the argument \code{zero.par}.
 #' @param zero.par List. Parameters of the zero-line. The default values are \code{col = "black"} and \code{lwd = 1}. You can add any graphical parameter that will be passed to \code{\link[graphics]{abline}}. Example: \code{zero.par = list(col = "darkblue", lwd = 3)}.
 #' @param pt.join Logical, default depends on the situation. If \code{TRUE}, then the coefficient estimates are joined with a line. By default, it is equal to \code{TRUE} only if: i) interactions are plotted, ii) the x values are numeric and iii) a reference is found.
-#' @param pt.join.par List. Parameters of the line joining the cofficients. The default values are: \code{col = pt.col} and \code{lwd = lwd}. You can add any graphical parameter that will be passed to \code{\link[graphics]{lines}}. Eg: \code{pt.join.par = list(lty = 2)}.
+#' @param pt.join.par List. Parameters of the line joining the coefficients. The default values are: \code{col = pt.col} and \code{lwd = lwd}. You can add any graphical parameter that will be passed to \code{\link[graphics]{lines}}. Eg: \code{pt.join.par = list(lty = 2)}.
 #' @param ref Only used in interactions. Either: i) "auto" (default), ii) a character vector of length 1, iii) a list of length 1, or iv) a named integer vector of length 1. It gives the value that has been set as a reference in the estimation of the interactions. By default, if the estimation has been done with \code{fixest}, the reference is automatically found. If ii), ie a character scalar, then that coefficient equal to zero is added as the first coefficient. If a list or a named integer vector of length 1, then the integer gives the position of the reference among the coefficients and the name gives the coefficient name.
 #' @param ref.line Logical, default is "auto", the behavior depending on the situation. It is \code{TRUE} only if: i) interactions are plotted, ii) the x values are numeric and iii) a reference is found. If \code{TRUE}, then a vertical line is drawn at the level of the reference value. You can set the parameters of this line with the argument \code{ref.line.par}.
 #' @param ref.line.par List. Parameters of the vertical line on the reference. The default values are: \code{col = "black"} and \code{lty = 2}. You can add any graphical parameter that will be passed to \code{\link[graphics]{abline}}. Eg: \code{ref.line.par = list(lty = 1, lwd = 3)}.
-#' @param xlim.add A numeric vector of length 1 or 2. It represents an extension factor of xlim, in percentage. Eg: \code{xlim.add = c(0, 0.5)} extends \code{xlim} of 50\% on the right. If of lentgh 1, positive values represent the right, and negative values the left (Eg: \code{xlim.add = -0.5} is equivalent to \code{xlim.add = c(0.5, 0)}).
-#' @param ylim.add A numeric vector of length 1 or 2. It represents an extension factor of ylim, in percentage. Eg: \code{ylim.add = c(0, 0.5)} extends \code{ylim} of 50\% on the top. If of lentgh 1, positive values represent the top, and negative values the bottom (Eg: \code{ylim.add = -0.5} is equivalent to \code{ylim.add = c(0.5, 0)}).
+#' @param xlim.add A numeric vector of length 1 or 2. It represents an extension factor of xlim, in percentage. Eg: \code{xlim.add = c(0, 0.5)} extends \code{xlim} of 50\% on the right. If of length 1, positive values represent the right, and negative values the left (Eg: \code{xlim.add = -0.5} is equivalent to \code{xlim.add = c(0.5, 0)}).
+#' @param ylim.add A numeric vector of length 1 or 2. It represents an extension factor of ylim, in percentage. Eg: \code{ylim.add = c(0, 0.5)} extends \code{ylim} of 50\% on the top. If of length 1, positive values represent the top, and negative values the bottom (Eg: \code{ylim.add = -0.5} is equivalent to \code{ylim.add = c(0.5, 0)}).
 #' @param only.params Logical, default is \code{FALSE}. If \code{TRUE} no graphic is displayed, only the values of \code{x} and \code{y} used in the plot are returned.
-#' @param only.inter Logical, default is \code{TRUE}. If an interaction of the type of \code{var::fe} (see \code{\link[fixest]{feols}} help for details) is found, then only these interactions are plotted. If \code{FALSE}, then interactions are treated as regular coefficients.
 #' @param ... Other arguments to be passed to \code{summary}, if \code{object} is an estimation, and/or to the function \code{plot} or \code{lines} (if \code{add = TRUE}).
 #' @param sep The distance between two estimates -- only when argument \code{object} is a list of estimation results.
 #' @param as.multiple Logical: default is \code{FALSE}. Only when \code{object} is a single estimation result: whether each coefficient should have a different color, line type, etc. By default they all get the same style.
@@ -191,7 +190,7 @@
 #' est = feols(Petal.Length ~ Petal.Width + Sepal.Length +
 #'                 Sepal.Width | Species, iris)
 #'
-#' # Tadaaa! (Although the colors could be better)
+#' # And that's it
 #' coefplot(est)
 #'
 #' # To reset to the default settings:
@@ -219,7 +218,22 @@
 #' coefplot(est, group = list(Sepal = "^^Sepal.", Species = "^^Species"))
 #'
 #'
-coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, horiz = FALSE, dict = getFixest_dict(), keep, drop, order, ci.width="1%", ci_level = 0.95, add = FALSE, pt.pch = 20, pt.bg = NULL, cex = 1, pt.cex = cex, col = 1:8, pt.col = col, ci.col = col, lwd = 1, pt.lwd = lwd, ci.lwd = lwd, ci.lty = 1, grid = TRUE, grid.par = list(lty=3, col = "gray"), zero = TRUE, zero.par = list(col="black", lwd=1), pt.join = FALSE, pt.join.par = list(col = pt.col, lwd=lwd), ci.join = FALSE, ci.join.par = list(lwd = lwd, col = col, lty = 2), ci.fill = FALSE, ci.fill.par = list(col = "lightgray", alpha = 0.5), ref = "auto", ref.line = "auto", ref.line.par = list(col = "black", lty = 2), lab.cex, lab.min.cex = 0.85, lab.max.mar = 0.25, lab.fit = "auto", xlim.add, ylim.add, only.params = FALSE, only.inter = TRUE, sep, as.multiple = FALSE, bg, group = "auto", group.par = list(lwd=2, line=3, tcl=0.75), main = "Effect on __depvar__", value.lab = "Estimate and __ci__ Conf. Int.", ylab = NULL, xlab = NULL, sub = NULL){
+coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, horiz = FALSE,
+                    dict = getFixest_dict(), keep, drop, order, ci.width = "1%",
+                    coef.sort = FALSE,
+                    ci_level = 0.95, add = FALSE, pt.pch = 20, pt.bg = NULL, cex = 1,
+                    pt.cex = cex, col = 1:8, pt.col = col, ci.col = col, lwd = 1, pt.lwd = lwd,
+                    ci.lwd = lwd, ci.lty = 1, grid = TRUE, grid.par = list(lty=3, col = "gray"),
+                    zero = TRUE, zero.par = list(col="black", lwd=1), pt.join = FALSE,
+                    pt.join.par = list(col = pt.col, lwd=lwd), ci.join = FALSE,
+                    ci.join.par = list(lwd = lwd, col = col, lty = 2), ci.fill = FALSE,
+                    ci.fill.par = list(col = "lightgray", alpha = 0.5), ref = "auto",
+                    ref.line = "auto", ref.line.par = list(col = "black", lty = 2), lab.cex,
+                    lab.min.cex = 0.85, lab.max.mar = 0.25, lab.fit = "auto", xlim.add,
+                    ylim.add, only.params = FALSE, sep, as.multiple = FALSE,
+                    bg, group = "auto", group.par = list(lwd=2, line=3, tcl=0.75),
+                    main = "Effect on __depvar__", value.lab = "Estimate and __ci__ Conf. Int.",
+                    ylab = NULL, xlab = NULL, sub = NULL){
 
     # Set up the dictionary
     if(is.null(dict)){
@@ -245,13 +259,11 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, hor
     # Getting the parameters => function coefplot_prms
     #
 
-    # Getting only.inter in the default values
     opts = getOption("fixest_coefplot")
-    if(missing(only.inter) && "only.inter" %in% names(opts$default)){
-        only.inter = opts$default$only.inter
-    }
 
-    info = coefplot_prms(object = object, ..., sd = sd, ci_low = ci_low, ci_high = ci_high, x = x, x.shift = x.shift, dict = dict, keep = keep, drop = drop, order = order, ci_level = ci_level, ref = ref, only.inter = only.inter, sep = sep, as.multiple = as.multiple)
+    only.i = isTRUE(dots$internal.only.i)
+
+    info = coefplot_prms(object = object, ..., sd = sd, ci_low = ci_low, ci_high = ci_high, x = x, x.shift = x.shift, dict = dict, keep = keep, drop = drop, order = order, ci_level = ci_level, ref = ref, only.i = only.i, sep = sep, as.multiple = as.multiple)
 
     prms = info$prms
     is_interaction = info$is_interaction
@@ -266,7 +278,7 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, hor
     multiple_est = info$multiple_est
 
     if(only.params){
-        return(list(prms=prms, is_interaction = is_interaction, at = x_at, labels = x_labels))
+        return(list(prms = prms, is_interaction = is_interaction, at = x_at, labels = x_labels))
     }
 
     dots = dots[!names(dots) %in% dots_drop]
@@ -449,7 +461,7 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, hor
         }
     }
 
-    IS_GROUP = !add && !missing(group) && !is.null(group) && length(group) > 0 && !is.null(x_labels)
+    IS_GROUP = !identical(group, "auto") && !add && !missing(group) && !is.null(group) && length(group) > 0 && !is.null(x_labels)
 
     line_height = par("mai")[1] / par("mar")[1]
 
@@ -744,7 +756,7 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, hor
     all_plot_args = unique(c(names(par()), names(formals(plot.default))))
     pblm = setdiff(names(dots), all_plot_args)
     if(length(pblm) > 0){
-        warning("The following argument", ifsingle(pblm, " is not a", "s are not"), " plotting argument", ifsingle(pblm, " and is", "s and are"), " therefore ignored: ", enumerate_items(pblm), ".")
+        # warning("The following argument", ifsingle(pblm, " is not a", "s are not"), " plotting argument", ifsingle(pblm, " and is", "s and are"), " therefore ignored: ", enumerate_items(pblm), ".")
         dots[pblm] = NULL
     }
 
@@ -1380,10 +1392,10 @@ coefplot = function(object, ..., style, sd, ci_low, ci_high, x, x.shift = 0, hor
 
 
 
-coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict, keep, drop, order, ci_level = 0.95, ref = "auto", only.inter = TRUE, sep, as.multiple = FALSE){
+coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict, keep, drop, order, ci_level = 0.95, ref = "auto", only.i = TRUE, sep, as.multiple = FALSE){
 
     # get the default for:
-    # dict, ci.level, ref, only.inter
+    # dict, ci.level, ref, only.i
 
 
     dots = list(...)
@@ -1445,7 +1457,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
                 if(prms$is_interaction){
                     if(i > 1 && any(!all_inter)){
                         rerun = TRUE
-                        mc$only.inter = FALSE
+                        mc$only.i = FALSE
                         break
                     } else {
                         all_inter[i] = TRUE
@@ -1454,7 +1466,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
                             all_inter_root[i] = my_root
                         } else {
                             rerun = TRUE
-                            mc$only.inter = FALSE
+                            mc$only.i = FALSE
                             break
                         }
                     }
@@ -1606,7 +1618,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
             estimate = object
         }
 
-        n <- length(estimate)
+        n = length(estimate)
 
         if(missing(sd)){
             if(missing(ci_low) || missing(ci_high)) stop("If 'sd' is not provided, you must provide the arguments 'ci_low' and 'ci_high'.")
@@ -1626,10 +1638,10 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
         #
 
         ref_id = NA
-        if(only.inter && !is.null(names(estimate))){
+        if(only.i && !is.null(names(estimate))){
             all_vars = names(estimate)
 
-            if(any(grepl("::", all_vars)){
+            if(any(grepl("::", all_vars))){
                 IS_INTER = TRUE
 
                 # Four cases:
@@ -1637,23 +1649,84 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
                 # - fvar::value:xnum
                 # - xnum:fvar::value
                 # - fvar::value:xfact::value
-                #
+
+                # Restriction:
+                # it only accepts "pure" i() variables
 
                 # We can handle only case 1, 2, and 3
                 # case 4 is too messy
+                # case 4: multiple lines + legend
 
+                # We take the first i() in the list
+                # after having applied keep_apply
 
+                all_vars = keep_apply(all_vars, keep)
 
-                if(grepl("(::)|()", ))
+                mm_info = object$model_matrix_info
 
+                # Finding out which to display
+                ok = FALSE
+                for(i in seq_along(mm_info)){
+                    info = mm_info[[i]]
+                    if(isFALSE(info$is_inter_fact) && any(info$coef_names %in% all_vars)){
+                        # That's the one
+                        ok = TRUE
+                        break
+                    }
+                }
+
+                if(!ok){
+                    # Now we look at the cause
+                    msg = if(!missnull(keep)) "reshape your 'keep' argument?" else "note that this function only works with i() variables (which should not be interacted with any other variable)."
+                    stop("No variable was selected: ", msg)
+                }
+
+                # "keep" here works differently => new arg. i.select?
+
+                # Global variables for fill_coef function
+                names_coef = names(estimate)
+                names_all = info$coef_names_full
+                new_names = info$items
+                fill_coef = function(coef){
+                    # we get the vector right
+                    res = rep(0, length(names_all))
+                    names(res) = names_all
+
+                    # we need it for CI
+                    names(coef) = names_coef
+                    inter_names = intersect(names_all, names_coef)
+                    res[inter_names] = coef[inter_names]
+
+                    names(res) = new_names
+                    res
+                }
+
+                estimate = fill_coef(estimate)
+                ci_high = fill_coef(ci_high)
+                ci_low = fill_coef(ci_low)
+                estimate_names = new_names
+                estimate_names_raw = names_all
+
+                if(isTRUE(info$is_num) && missing(x)){
+                    AXIS_AS_NUM = TRUE
+                    names(estimate) = NULL
+                    x = info$items
+                }
+
+                # ref
+                if(length(info$ref_id) > 0){
+                    suggest_ref_line = length(info$ref_id) == 1 && info$is_inter_num
+                    is_ref = seq_along(estimate) == info$ref_id[1]
+
+                } else {
+                    is_ref = rep(FALSE, length(estimate))
+                }
+
+                n = length(estimate)
+
+            } else {
+                stop("This function only works with variables created with i(), currently none was found (and not interacted with any other variable).")
             }
-
-
-
-
-
-
-
 
 
             if(FALSE && any(grepl(":.+::", all_vars))){
@@ -2001,7 +2074,7 @@ replace_and_make_callable = function(text, varlist, text_as_expr = FALSE){
                 info = paste0("In this estimation, the only special variable", enumerate_items(paste0("__", names(varlist), "__"), "s.is.start"), ". ")
             }
 
-            warning(info, enumerate_items(paste0("__", setdiff(my_variables, names(varlist)), "__"), "is"), " not valid, thus ignored.", call. = FALSE)
+            # warning(info, enumerate_items(paste0("__", setdiff(my_variables, names(varlist)), "__"), "is"), " not valid, thus ignored.", call. = FALSE)
 
             return("")
 
@@ -2116,6 +2189,50 @@ expr_builder = function(x){
     res
 }
 
+####
+#### iplot ####
+####
+
+
+gen_iplot = function(){
+    # iplot has the same arguments as coefplot
+    # we make all changes in coefplot
+    # I automatically generate the iplot function, matching all coefplot arguments
+
+    coefplot_args = formals(coefplot)
+
+    arg_name = names(coefplot_args)
+    arg_default = sapply(coefplot_args, deparse_long)
+
+    #
+    # iplot
+    #
+
+    qui_keep = !arg_name %in% c("object", "...")
+
+    iplot_args = paste0(arg_name[qui_keep], " = ", arg_default[qui_keep], collapse = ", ")
+    iplot_args = gsub(" = ,", ",", iplot_args)
+
+    coefplot_call = paste0(arg_name[qui_keep], " = ", arg_name[qui_keep], collapse = ", ")
+
+    iplot_fun = paste0("iplot = function(object, ..., ", iplot_args, "){\n\n",
+                        "\tcoefplot(object = object, ..., ", coefplot_call, ", internal.only.i = TRUE)\n}")
+
+    iplot_rox = "#' @describeIn coefplot Plots the coefficients generated with i()"
+
+    # Writing the functions
+
+    f = file("R/iplot.R", "w", encoding = "utf-8")
+
+    intro = c("# Do not edit by hand\n# => iplot calls coefplot internally\n\n\n")
+
+    s = "\n\n\n\n"
+    text = c(intro, s, iplot_rox, iplot_fun, s)
+    writeLines(text, f)
+    close(f)
+
+}
+
 
 
 ####
@@ -2164,11 +2281,11 @@ expr_builder = function(x){
 #' setFixest_coefplot()
 #' coefplot(est)
 #'
-setFixest_coefplot = function(style, horiz = FALSE, only.inter = TRUE, dict = getFixest_dict(), keep, ci.width = "1%", ci_level = 0.95, pt.pch = 20, pt.bg = NULL, cex = 1, pt.cex = cex, col = 1:8, pt.col = col, ci.col = col, lwd = 1, pt.lwd = lwd, ci.lwd = lwd, ci.lty = 1, grid = TRUE, grid.par = list(lty = 3, col = "gray"), zero = TRUE, zero.par = list(col = "black", lwd = 1), pt.join = FALSE, pt.join.par = list(col = pt.col, lwd = lwd), ci.join = FALSE, ci.join.par = list(lwd = lwd, col = col, lty = 2), ci.fill = FALSE, ci.fill.par = list(col = "lightgray", alpha = 0.5), ref.line = "auto", ref.line.par = list(col = "black", lty = 2), lab.cex, lab.min.cex = 0.85, lab.max.mar = 0.25, lab.fit = "auto", xlim.add, ylim.add, sep, bg, group = "auto", group.par = list(lwd = 2, line = 3, tcl = 0.75), main = "Effect on __depvar__", value.lab = "Estimate and __ci__ Conf. Int.", ylab = NULL, xlab = NULL, sub = NULL, reset = FALSE){
+setFixest_coefplot = function(style, horiz = FALSE, dict = getFixest_dict(), keep, ci.width = "1%", ci_level = 0.95, pt.pch = 20, pt.bg = NULL, cex = 1, pt.cex = cex, col = 1:8, pt.col = col, ci.col = col, lwd = 1, pt.lwd = lwd, ci.lwd = lwd, ci.lty = 1, grid = TRUE, grid.par = list(lty = 3, col = "gray"), zero = TRUE, zero.par = list(col = "black", lwd = 1), pt.join = FALSE, pt.join.par = list(col = pt.col, lwd = lwd), ci.join = FALSE, ci.join.par = list(lwd = lwd, col = col, lty = 2), ci.fill = FALSE, ci.fill.par = list(col = "lightgray", alpha = 0.5), ref.line = "auto", ref.line.par = list(col = "black", lty = 2), lab.cex, lab.min.cex = 0.85, lab.max.mar = 0.25, lab.fit = "auto", xlim.add, ylim.add, sep, bg, group = "auto", group.par = list(lwd = 2, line = 3, tcl = 0.75), main = "Effect on __depvar__", value.lab = "Estimate and __ci__ Conf. Int.", ylab = NULL, xlab = NULL, sub = NULL, reset = FALSE){
 
     fm_cp = formals(coefplot)
     arg_list = names(fm_cp)
-    # arg_no_default = c("object", "sd", "ci_low", "ci_high", "drop", "order", "ref", "add", "only.params", "only.inter", "as.multiple", "...", "x", "x.shift")
+    # arg_no_default = c("object", "sd", "ci_low", "ci_high", "drop", "order", "ref", "add", "only.params", "only.i", "as.multiple", "...", "x", "x.shift")
     # m = fm_cp[!names(fm_cp) %in% arg_no_default]
     # cat(gsub(" = ,", ",", paste0(names(m), " = ", sapply(m, deparse), collapse = ", ")))
 
@@ -2184,7 +2301,7 @@ setFixest_coefplot = function(style, horiz = FALSE, only.inter = TRUE, dict = ge
     check_arg(ci.width, "scalar(numeric, character) GE{0}")
     check_arg(ci_level, "numeric scalar GT{0} LT{1}")
     check_arg(lwd, ci.lwd, "numeric scalar GE{0}")
-    check_arg(grid, zero, only.inter, "logical scalar")
+    check_arg(grid, zero, "logical scalar")
 
     check_arg_plus("L0 list NULL{list()}", grid.par, zero.par, pt.join.par, ref.line.par)
 
