@@ -356,7 +356,10 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' summary(est_pois, .vcov = vcovCL, cluster = trade[, c("Destination", "Product")])
 #'
 #'
-summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, stage = 2, lean = FALSE, agg = NULL, forceCovariance = FALSE, keepBounded = FALSE, n, nthreads = getFixest_nthreads(), ...){
+summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, stage = 2, lean = FALSE,
+                          agg = NULL, forceCovariance = FALSE, keepBounded = FALSE, n,
+                          nthreads = getFixest_nthreads(), ...){
+
 	# computes the clustered SEs and returns the modified vcov and coeftable
     # NOTA: if the object is already a summary
 
@@ -640,7 +643,9 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 
 	# agg
 	if(!missnull(agg)){
-	    object$coeftable = aggregate(object, agg, full = TRUE, from_summary = TRUE)
+	    agg_result = aggregate(object, agg, full = TRUE, from_summary = TRUE)
+	    object$coeftable = agg_result$coeftable
+	    object$model_matrix_info = agg_result$model_matrix_info
 	    object$is_agg = TRUE
 	}
 
@@ -2602,7 +2607,7 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
     f = fvar # renaming for clarity
 
     # checking var
-    IS_INTER_COUNT = IS_INTER_FACTOR = FALSE
+    IS_INTER_NUMERIC = IS_INTER_FACTOR = FALSE
     if(!missing(var)){
         # Evaluation of var (with possibly, user prepending with f.)
         if(is.null(var_name)){
@@ -2630,9 +2635,9 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
 
                 if(is.logical(var)){
                     var = as.numeric(var)
-                    IS_INTER_COUNT = TRUE
+                    IS_INTER_NUMERIC = TRUE
                 } else if(is.numeric(var)){
-                    IS_INTER_COUNT = TRUE
+                    IS_INTER_NUMERIC = TRUE
                 } else {
                     IS_INTER_FACTOR = TRUE
                 }
@@ -2641,6 +2646,7 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
         } else if(length(var) <= 2 && !"ref" %in% names(mc)){
             # ref is implicitly called via the location of var
             ref = var
+            dots$ref_special = FALSE
         } else {
 
             if(grepl("^[[:alpha:]\\.][[:alnum:]\\._]*:[[:alpha:]\\.][[:alnum:]\\._]*$", var_name)){
@@ -2652,7 +2658,7 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
         }
     }
 
-    IS_INTER = IS_INTER_COUNT || IS_INTER_FACTOR
+    IS_INTER = IS_INTER_NUMERIC || IS_INTER_FACTOR
 
     if(isTRUE(dots$ref_special) && (!IS_INTER || IS_INTER_FACTOR)){
         ref = TRUE
@@ -2677,7 +2683,7 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
 
     # # The NAs + recreation of f if necessary
     # IS_FACTOR_INTER = FALSE
-    # if(IS_INTER_COUNT){
+    # if(IS_INTER_NUMERIC){
     #
     #     is_na_all = is.na(var) | is.na(f)
     #     if(IS_F2) is_na_all = is_na_all | is.na(f2)
@@ -2702,7 +2708,7 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
     #         }
     #
     #         f = f_new
-    #         IS_INTER_COUNT = FALSE
+    #         IS_INTER_NUMERIC = FALSE
     #
     #     } else if(IS_F2){
     #         f_new = rep(NA_character_, length(f))
@@ -2741,7 +2747,7 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
     fe_num = info$x
     items = info$items
 
-    if(!IS_INTER_COUNT){
+    if(!IS_INTER_NUMERIC){
         # neutral var in C code
         var = 1
     }
@@ -2792,18 +2798,16 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
     check_arg(ref2, keep, keep2, "vector no na")
 
     no_rm = TRUE
-    any_ref = FALSE
     id_drop = c()
     if(!missing(ref)){
-        any_ref = !isFALSE(ref)
-
         if(isTRUE(ref)){
             # We always delete the first value
             # Que ce soit items ici est normal (et pas f_items)
-            id_drop = ref = which(items == items[1])
+            id_drop = which(items == items[1])
         } else {
-            id_drop = c(id_drop, items_to_drop(f_items, ref, "fvar"))
+            id_drop = items_to_drop(f_items, ref, "fvar")
         }
+        ref_id = id_drop
     }
 
 
@@ -2848,12 +2852,15 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
         # mais j'ai pas trouve plus simple...
         if(IS_INTER_FACTOR){
             col_names = paste0("__CLEAN__", f_name, "::", f_items, ":", var_name, "::", var_items)
+            col_names_full = NULL
 
-        } else if(IS_INTER_COUNT){
+        } else if(IS_INTER_NUMERIC){
             col_names = paste0("__CLEAN__", f_name, "::", f_items, ":", var_name)
+            col_names_full = paste0(f_name, "::", items, ":", var_name)
 
         } else {
             col_names = paste0("__CLEAN__", f_name, "::", items_name)
+            col_names_full = paste0(f_name, "::", items)
         }
     } else {
 
@@ -2883,13 +2890,21 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
             }
         }
 
-        if(is_GLOBAL){
+        if(is_GLOBAL && !IS_INTER_FACTOR){
 
             info = list()
+            info$coef_names_full = col_names_full
             info$items = items
-            info$items_clean = if(length(id_drop) > 0) items[-id_drop] else items
-            if(!missing(ref)) info$ref = ref
+            if(!missing(ref)){
+                info$ref_id = ref_id
+                info$ref = items[ref_id]
+            }
             info$is_num = is.numeric(items)
+            info$is_inter_num = IS_INTER_NUMERIC
+            if(IS_INTER_NUMERIC){
+                info$var_name = var_name
+            }
+            info$is_inter_fact = IS_INTER_FACTOR
 
             GLOBAL_fixest_mm_info[[length(GLOBAL_fixest_mm_info) + 1]] = info
             # re assignment
