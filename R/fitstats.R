@@ -358,11 +358,6 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
         }
     }
 
-    if(any(type %in% c("ivwald", "ivf"))){
-        type[type == "ivwald"] = "ivwald1"
-        type[type == "ivf"] = "ivf1"
-    }
-
     res_all = list()
     type_all = type
 
@@ -419,6 +414,13 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
             } else {
                 root = type
                 value = ""
+            }
+
+            # We need to normalize the types
+            from_to = c("ivwald" = "ivwald1", "ivf" = "ivf1")
+            if(root %in% names(from_to)){
+                type = gsub(root, from_to[root], type, fixed = TRUE)
+                root = from_to[root]
             }
 
             if(root == "f"){
@@ -571,7 +573,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                     df2 = degrees_freedom(x, "resid")
 
                     # The VCOV is always full rank in here
-                    stat = drop(my_coef %*% solve(x$cov.scaled[qui, qui]) %*% my_coef) / df1
+                    stat = .wald(x, names(my_coef))
                     p = pf(stat, df1, df2, lower.tail = FALSE)
                     vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
                     res_all[[type]] = set_value(vec, value)

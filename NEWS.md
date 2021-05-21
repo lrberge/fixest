@@ -35,6 +35,8 @@
  
  - Fix bug in `predict` when a `poly()` term was used and the formula was long (reported by @XiangLiu-github [#135](https://github.com/lrberge/fixest/issues/135)). 
  
+ - fix bug for extracting sub statistics of `"ivwald"` and `"ivf"` in `fitstat`.
+ 
 ## Breaking changes: new i() function
 
  - the function `i()`, used to create factors or interactions has been tidied up, leading to breaking changes.
