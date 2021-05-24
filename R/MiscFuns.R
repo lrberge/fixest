@@ -4134,7 +4134,7 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
     }
 
     # We check for calls to i()
-    qui_inter <- grepl("(^|[^[:alnum:]_\\.])i(nteract)?\\(", tl)
+    qui_inter = grepl("(^|[^[:alnum:]_\\.])i(nteract)?\\(", tl)
     IS_INTER = any(qui_inter)
     if(IS_INTER){
         # OMG... why do I always have to reinvent the wheel???
@@ -4157,9 +4157,10 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
             }
         }
 
+        fml_no_inter = .xpd(lhs = "y", rhs = tl[!qui_inter])
 
-        fml_no_inter = as.formula(paste0("y ~ ", paste(c(1, tl[!qui_inter]), collapse = "+")))
-        fml = as.formula(paste0("y ~ ", paste(tl, collapse = "+")))
+        if(!is_intercept) tl = c("-1", tl)
+        fml = .xpd(lhs = "y", rhs = tl)
 
     }
 
@@ -4186,7 +4187,7 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
 
     if(useModel.matrix){
         # to catch the NAs, model.frame needs to be used....
-        linear.mat = stats::model.matrix(fml[c(1, 3)], stats::model.frame(fml[c(1, 3)], data, na.action=na.pass))
+        linear.mat = stats::model.matrix(fml[c(1, 3)], stats::model.frame(fml[c(1, 3)], data, na.action = na.pass))
 
         if(fake_intercept){
             who_int = which("(Intercept)" %in% colnames(linear.mat))

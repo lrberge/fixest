@@ -213,6 +213,19 @@ for(i in 1:2){
 }
 
 
+# Removing the intercept!!!
+
+res = feols(y ~ -1 + x1 + i(fe1), base)
+test("(Intercept)" %in% names(res$coefficients), FALSE)
+
+res = feols(y ~ -1 + x1 + factor(fe1), base)
+test("(Intercept)" %in% names(res$coefficients), FALSE)
+
+res = feols(y ~ -1 + x1 + i(fe1) + i(fe2), base)
+test("(Intercept)" %in% names(res$coefficients), FALSE)
+test(is.null(res$collin.var), TRUE)
+
+
 
 ####
 #### Fit methods ####
