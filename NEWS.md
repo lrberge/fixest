@@ -37,13 +37,17 @@
  
  - fix bug for extracting sub statistics of `"ivwald"` and `"ivf"` in `fitstat`.
  
+ - fix bug when `i()` was used without intercept.
+ 
+ - Fix display bug in `etable` when Tex output is requested and interactions composed of identical variables with different interacted orders are present (reported by @Oravishayrizi [#148](https://github.com/lrberge/fixest/issues/148)).
+ 
 ## Breaking changes: new i() function
 
  - the function `i()`, used to create factors or interactions has been tidied up, leading to breaking changes.
  
  - the first two arguments have been swapped! such that now the first argument will always be treated as a factor. 
  
- - the new syntax is `i(fvar, var, ref, keep, ref2, keep2)` where `var` can be either continuous or factor-like (the argument `f2`, for interaction with factors, has been removed). 
+ - the new syntax is `i(fvar, var, ref, keep, ref2, keep2)` where `var` can be either continuous or factor-like (the argument `f2`, for interaction with factors, has been removed).
 
 ## etable
 

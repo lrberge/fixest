@@ -1756,7 +1756,12 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
         if(length(unique(unlist(var_reorder_list))) < length(unique(unlist(var_list)))){
             var_list = var_reorder_list
             for(m in 1:length(var_list)){
-                names(coef_list[[m]]) <- var_list[[m]]
+                names(coef_list[[m]]) = var_list[[m]]
+                if(sdBelow){
+                    names(coef_below[[m]]) = var_list[[m]]
+                    names(sd_below[[m]]) = var_list[[m]]
+                }
+
             }
         }
     }
@@ -2231,7 +2236,7 @@ etable_internal_latex = function(info){
     if(sdBelow){
         coef_lines = c()
         for(v in all_vars){
-            myCoef = mySd= myLine = c()
+            myCoef = mySd = myLine = c()
             for(m in 1:n_models){
                 myCoef = c(myCoef, coef_below[[m]][v])
                 mySd = c(mySd, sd_below[[m]][v])
@@ -2239,7 +2244,7 @@ etable_internal_latex = function(info){
 
             myCoef[is.na(myCoef)] = "  "
             mySd[is.na(mySd)] = "  "
-            myCoef = paste0(aliasVars[v], "&", paste0(myCoef, collapse = " & "))
+            myCoef = paste0(aliasVars[v], " & ", paste0(myCoef, collapse = " & "))
             mySd = paste0("  &", paste0(mySd, collapse = " & "))
             myLines = paste0(myCoef, "\\\\\n", mySd, "\\\\\n")
             coef_lines = c(coef_lines, myLines)
