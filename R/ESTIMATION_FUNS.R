@@ -1781,8 +1781,8 @@ feols.fit = function(y, X, fixef_df, offset, split, fsplit, cluster, se, dof, we
 #'
 #' Estimates GLM models with any number of fixed-effects.
 #'
-#' @inheritParams feols
 #' @inheritParams femlm
+#' @inheritParams feols
 #' @inheritSection feols Combining the fixed-effects
 #' @inheritSection feols Varying slopes
 #' @inheritSection feols Lagging variables
