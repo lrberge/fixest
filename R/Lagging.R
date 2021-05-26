@@ -966,19 +966,9 @@ unpanel = function(x){
 terms_hat = function(fml, fastCombine = TRUE){
 
     fml_char = as.character(fml[length(fml)])
-    changeNames = FALSE
     if(grepl("^", fml_char, fixed = TRUE)){
         # special indicator to combine factors
-
-        fun2combine = ifelse(fastCombine, "combine_clusters_fast", "combine_clusters")
-
-        fml_char_new = gsub("([[:alpha:]\\.][[:alnum:]_\\.]*(\\^[[:alpha:]\\.][[:alnum:]_\\.]*)+)",
-                            paste0(fun2combine, "(\\1)"),
-                            fml_char)
-
-        fml_char_new = gsub("([[:alpha:]\\.][[:alnum:]_\\.]*)\\^([[:alpha:]\\.][[:alnum:]_\\.]*)", "\\1, \\2", fml_char_new)
-        fml = as.formula(paste0("~", fml_char_new))
-        changeNames = TRUE
+        fml = fml_combine(fml_char, fastCombine)
     }
 
     t = terms(fml)

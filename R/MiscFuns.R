@@ -3051,10 +3051,10 @@ i_noref = function(fvar, var, ref, keep, ref2, keep2){
 #'
 #'
 xpd = function(fml, ..., lhs, rhs, data = NULL){
-    .xpd(fml = fml, ..., lhs = lhs, rhs = rhs, data = data, check = TRUE)
+    .xpd(fml = fml, ..., lhs = lhs, rhs = rhs, data = data, check = TRUE, macro = TRUE)
 }
 
-.xpd = function(fml, ..., lhs, rhs, data = NULL, check = FALSE){
+.xpd = function(fml, ..., lhs, rhs, data = NULL, check = FALSE, macro = FALSE){
 
     if((is_lhs <- !missing(lhs)) | (is_rhs <- !missing(rhs))){
         # No short-circuit in condition!
@@ -3085,10 +3085,13 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 
         fml = res
 
-        # NOTA: version < 0.8.3 we had return(res)
-        # now we allow for macro implementation ex post
+        if(!macro) return(fml)
+
+        # NOTA:
+        # if we allow for macro implementation ex post:
         # This entails a 50% performance drop in terms of speed.
         # Now, without macro variables, speed is at 30us while it was 20us before
+        # so in .xpd => macro argument
 
     } else if(check){
         check_arg(fml, .type = "formula mbt", .up = 1)
@@ -4609,6 +4612,23 @@ prepare_df = function(vars, base, fastCombine = NA){
     res
 }
 
+
+fml_combine = function(fml_char, fastCombine){
+    # function that transforms "hat" interactions into a proper function call:
+    # Origin^Destination^Product + Year becomes ~combine_clusters(Origin, Destination, Product) + Year
+
+    fun2combine = ifelse(fastCombine, "combine_clusters_fast", "combine_clusters")
+
+    fml_char_new = gsub("([[:alpha:]\\.][[:alnum:]_\\.]*(\\^[[:alpha:]\\.][[:alnum:]_\\.]*)+)",
+                        paste0(fun2combine, "(\\1)"),
+                        fml_char)
+
+    fml_char_new = gsub("\\^(?=[[:alpha:]\\.])", ", ", fml_char_new, perl = TRUE)
+    fml = as.formula(paste0("~", fml_char_new))
+
+    fml
+}
+
 prepare_cluster_mat = function(fml, base, fastCombine){
     # prepares the data.frame of the cluster variables
 
@@ -4616,15 +4636,7 @@ prepare_cluster_mat = function(fml, base, fastCombine){
     changeNames = FALSE
     if(grepl("^", fml_char, fixed = TRUE)){
         # special indicator to combine factors
-
-        fun2combine = ifelse(fastCombine, "combine_clusters_fast", "combine_clusters")
-
-        fml_char_new = gsub("([[:alpha:]\\.][[:alnum:]_\\.]*(\\^[[:alpha:]\\.][[:alnum:]_\\.]*)+)",
-                            paste0(fun2combine, "(\\1)"),
-                            fml_char)
-
-        fml_char_new = gsub("([[:alpha:]\\.][[:alnum:]_\\.]*)\\^([[:alpha:]\\.][[:alnum:]_\\.]*)", "\\1, \\2", fml_char_new)
-        fml = as.formula(paste0("~", fml_char_new))
+        fml = fml_combine(fml_char, fastCombine)
         changeNames = TRUE
     }
 
@@ -4637,7 +4649,7 @@ prepare_cluster_mat = function(fml, base, fastCombine){
         res = base[, all_vars, drop = FALSE]
     } else {
         all_vars_call = str2lang(paste0("list(", paste0(all_vars, collapse = ", "), ")"))
-        data_list <- eval(all_vars_call, base)
+        data_list = eval(all_vars_call, base)
         names(data_list) = all_var_names
         data_list$stringsAsFactors = FALSE
 

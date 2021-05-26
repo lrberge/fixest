@@ -305,7 +305,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         # We apply expand for macros => we return fml_no_xpd
         if(length(getFixest_fml()) > 0 || ".." %in% all.vars(fml, functions = TRUE)){
             fml_no_xpd = fml
-            fml = .xpd(fml, data = dataNames)
+            fml = .xpd(fml, data = dataNames, macro = TRUE)
         }
 
         #
@@ -1748,7 +1748,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             # we remove all NAs obs + 0 weight obs
             gc2trig = TRUE
 
-            details = c(msgNA_y, msgNA_L, msgNA_iv, msgNA_NL, msgNA_fixef, msgNA_slope, msgNA_offset, msgNA_weight, msgNA_split, msgNA_cluster)
+            details = c(msgNA_y, msgNA_L, msgNA_iv, msgNA_NL, msgNA_fixef, msgNA_slope,
+                        msgNA_offset, msgNA_weight, msgNA_split, msgNA_cluster)
             msg_details = paste(details[nchar(details) > 0], collapse = ", ")
 
             nbNA = sum(isNA_sample)
@@ -1811,7 +1812,11 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         # ... QUF setup ####
         #
 
-        info_fe = setup_fixef(fixef_df = fixef_df, lhs = lhs, fixef_vars = fixef_vars, fixef.rm = fixef.rm, family = family, isSplit = isSplit, split.full = split.full, origin_type = origin_type, isSlope = isSlope, slope_flag = slope_flag, slope_df = slope_df, slope_vars_list = slope_vars_list, nthreads = nthreads)
+        info_fe = setup_fixef(fixef_df = fixef_df, lhs = lhs, fixef_vars = fixef_vars,
+                              fixef.rm = fixef.rm, family = family, isSplit = isSplit,
+                              split.full = split.full, origin_type = origin_type,
+                              isSlope = isSlope, slope_flag = slope_flag, slope_df = slope_df,
+                              slope_vars_list = slope_vars_list, nthreads = nthreads)
 
         Q               = info_fe$Q
         fixef_id        = info_fe$fixef_id
@@ -1855,7 +1860,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
             nbNA = sum(isNA_sample)
 
-            details = c(msgNA_y, msgNA_L, msgNA_iv, msgNA_NL, msgNA_offset, msgNA_weight, msgNA_split, msgNA_cluster)
+            details = c(msgNA_y, msgNA_L, msgNA_iv, msgNA_NL, msgNA_offset,
+                        msgNA_weight, msgNA_split, msgNA_cluster)
             msg_details = paste(details[nchar(details) > 0], collapse = ", ")
 
             if(anyNA_sample){
@@ -2417,7 +2423,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         assign("fixef_names", fixef_names, env)
         assign("fixef_vars", fixef_vars, env)
 
-        assign_fixef_env(env, family, origin_type, fixef_id, fixef_sizes, fixef_table, sum_y_all, slope_flag, slope_variables, slope_vars_list)
+        assign_fixef_env(env, family, origin_type, fixef_id, fixef_sizes, fixef_table,
+                         sum_y_all, slope_flag, slope_variables, slope_vars_list)
     }
 
 
@@ -2546,10 +2553,11 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     #
 
     #
-    # Preparation of the results list (avoid code repetition in estimation funs)
+    # Preparation of the results list (avoids code repetition in estimation funs)
     #
 
-    res = list(nobs=nobs, nobs_origin=nobs_origin, fml=fml_linear, call = mc_origin, call_env = call_env, method = origin, method_type = origin_type)
+    res = list(nobs=nobs, nobs_origin=nobs_origin, fml=fml_linear, call = mc_origin,
+               call_env = call_env, method = origin, method_type = origin_type)
 
     fml_all = list()
     fml_all$linear = fml_linear
@@ -2655,7 +2663,9 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 }
 
 
-setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, split.full = FALSE, origin_type, isSlope, slope_flag, slope_df, slope_vars_list, fixef_names_old = NULL, fixef_sizes = NULL, obs2keep = NULL, nthreads){
+setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, split.full = FALSE,
+                       origin_type, isSlope, slope_flag, slope_df, slope_vars_list,
+                       fixef_names_old = NULL, fixef_sizes = NULL, obs2keep = NULL, nthreads){
 
     isSplitNoFull = identical(fixef_names_old, "SPLIT_NO_FULL")
     isRefactor = !isSplitNoFull && !is.null(fixef_names_old)
@@ -2708,7 +2718,10 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, spl
 
     if(isSplit && split.full == FALSE){
         # We don't do anything => it will be taken care of in the splits
-        res = list(Q = Q, fixef_id = fixef_df, fixef_names = "SPLIT_NO_FULL", sum_y_all = 0, fixef_sizes = 0, fixef_table = 0, obs2remove = NULL, fixef_removed = NULL, message_fixef = NULL, lhs = lhs, slope_variables = slope_variables, slope_flag = slope_flag, new_order = 1:Q)
+        res = list(Q = Q, fixef_id = fixef_df, fixef_names = "SPLIT_NO_FULL",
+                   sum_y_all = 0, fixef_sizes = 0, fixef_table = 0, obs2remove = NULL,
+                   fixef_removed = NULL, message_fixef = NULL, lhs = lhs,
+                   slope_variables = slope_variables, slope_flag = slope_flag, new_order = 1:Q)
 
         return(res)
     }
@@ -2731,7 +2744,10 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, spl
     # quoi = list(fixef_df=fixef_df, lhs=lhs, do_sum_y=do_sum_y, rm_0=rm_0, rm_1=rm_1, rm_single=rm_single, only_slope=only_slope, nthreads=nthreads, isRefactor=isRefactor, fixef_sizes=fixef_sizes, obs2keep=obs2keep)
     # save(quoi, file = "../_DATA/problem.Rdata")
 
-    quf_info_all = cpppar_quf_table_sum(x = fixef_df, y = lhs, do_sum_y = do_sum_y, rm_0 = rm_0, rm_1 = rm_1, rm_single = rm_single, only_slope = only_slope, nthreads = nthreads, do_refactor = isRefactor, r_x_sizes = fixef_sizes, obs2keep = obs2keep)
+    quf_info_all = cpppar_quf_table_sum(x = fixef_df, y = lhs, do_sum_y = do_sum_y,
+                                        rm_0 = rm_0, rm_1 = rm_1, rm_single = rm_single,
+                                        only_slope = only_slope, nthreads = nthreads,
+                                        do_refactor = isRefactor, r_x_sizes = fixef_sizes, obs2keep = obs2keep)
 
     fixef_id = quf_info_all$quf
     # names
@@ -2846,7 +2862,9 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, spl
     }
 
     # saving
-    res = list(Q = Q, fixef_id = fixef_id, fixef_names = fixef_names, sum_y_all = sum_y_all, fixef_sizes = fixef_sizes, fixef_table = fixef_table, obs2remove = obs2remove, fixef_removed = fixef_removed, message_fixef = message_fixef, lhs = lhs)
+    res = list(Q = Q, fixef_id = fixef_id, fixef_names = fixef_names, sum_y_all = sum_y_all,
+               fixef_sizes = fixef_sizes, fixef_table = fixef_table, obs2remove = obs2remove,
+               fixef_removed = fixef_removed, message_fixef = message_fixef, lhs = lhs)
 
     res$slope_variables = slope_variables
     res$slope_flag = slope_flag
@@ -2864,7 +2882,8 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, spl
 
 
 
-assign_fixef_env = function(env, family, origin_type, fixef_id, fixef_sizes, fixef_table, sum_y_all, slope_flag, slope_variables, slope_vars_list){
+assign_fixef_env = function(env, family, origin_type, fixef_id, fixef_sizes, fixef_table,
+                            sum_y_all, slope_flag, slope_variables, slope_vars_list){
 
     Q = length(fixef_id)
 
@@ -2933,7 +2952,9 @@ assign_fixef_env = function(env, family, origin_type, fixef_id, fixef_sizes, fix
 
 
 
-reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs = TRUE, assign_rhs = TRUE, fml_linear = NULL, fml_fixef = NULL, fml_iv_endo = NULL, check_lhs = FALSE, assign_fixef = FALSE){
+reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs = TRUE,
+                       assign_rhs = TRUE, fml_linear = NULL, fml_fixef = NULL, fml_iv_endo = NULL,
+                       check_lhs = FALSE, assign_fixef = FALSE){
     # env: environment from an estimation
     # This functions reshapes the environment to perform the new estimation
     # either by selecting some observation (in split)
@@ -2997,7 +3018,12 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
         # gt("fixef, dropping")
 
         # We refactor the fixed effects => we may remove even more obs
-        info_fe = setup_fixef(fixef_df = fixef_df, lhs = lhs, fixef_vars = fixef_vars, fixef.rm = fixef.rm, family = family, isSplit = FALSE, origin_type = origin_type, isSlope = isSlope, slope_flag = slope_flag, slope_df = slope_df, slope_vars_list = slope_vars_list, fixef_names_old = fixef_names_old, fixef_sizes = fixef_sizes, obs2keep = obs2keep, nthreads = nthreads)
+        info_fe = setup_fixef(fixef_df = fixef_df, lhs = lhs, fixef_vars = fixef_vars,
+                              fixef.rm = fixef.rm, family = family, isSplit = FALSE,
+                              origin_type = origin_type, isSlope = isSlope, slope_flag = slope_flag,
+                              slope_df = slope_df, slope_vars_list = slope_vars_list,
+                              fixef_names_old = fixef_names_old, fixef_sizes = fixef_sizes,
+                              obs2keep = obs2keep, nthreads = nthreads)
 
         # gt("fixef, recompute")
 
@@ -3036,7 +3062,8 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 
         lhs_done = TRUE
 
-        assign_fixef_env(new_env, family, origin_type, fixef_id, fixef_sizes, fixef_table, sum_y_all, slope_flag, slope_variables, slope_vars_list)
+        assign_fixef_env(new_env, family, origin_type, fixef_id, fixef_sizes, fixef_table,
+                         sum_y_all, slope_flag, slope_variables, slope_vars_list)
 
         assign_fixef = TRUE
 
@@ -3689,7 +3716,9 @@ extract_stepwise = function(fml, tms, all_vars = TRUE){
         return(res)
     }
 
-    res = list(do_multi = TRUE, fml = fml_new, fml_all_full = fml_all_full, fml_all_sw = fml_all_sw, is_cumul = is_cumul, fml_core_left = fml_core_left, fml_core_right = fml_core_right, sw_all_vars = sw_all_vars)
+    res = list(do_multi = TRUE, fml = fml_new, fml_all_full = fml_all_full,
+               fml_all_sw = fml_all_sw, is_cumul = is_cumul, fml_core_left = fml_core_left,
+               fml_core_right = fml_core_right, sw_all_vars = sw_all_vars)
 
     return(res)
 }
