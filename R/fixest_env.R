@@ -1921,7 +1921,6 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         if(Q == 0){
             # if Q > 0: done already when managing the fixed-effects
             lhs = select_obs(lhs, -obs2remove)
-
         }
 
         if(do_iv){
@@ -2412,6 +2411,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     # The Fixed-effects
     #
 
+
     assign("isFixef", isFixef, env)
     if(isFixef){
 
@@ -2744,6 +2744,7 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, spl
     # quoi = list(fixef_df=fixef_df, lhs=lhs, do_sum_y=do_sum_y, rm_0=rm_0, rm_1=rm_1, rm_single=rm_single, only_slope=only_slope, nthreads=nthreads, isRefactor=isRefactor, fixef_sizes=fixef_sizes, obs2keep=obs2keep)
     # save(quoi, file = "../_DATA/problem.Rdata")
 
+
     quf_info_all = cpppar_quf_table_sum(x = fixef_df, y = lhs, do_sum_y = do_sum_y,
                                         rm_0 = rm_0, rm_1 = rm_1, rm_single = rm_single,
                                         only_slope = only_slope, nthreads = nthreads,
@@ -2785,8 +2786,14 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, spl
         # which obs are removed
         obs2remove = which(quf_info_all$obs_removed)
 
-        # update of the lhs (only if not multi LHS)
-        if(multi_lhs == FALSE) lhs = lhs[-obs2remove]
+        # update of the lhs
+        # if multi_lhs, only reason we're here is because of rm_single, which is performed
+        # only in main fixest_env
+        if(!identical(lhs, list(0))){
+            # list(0): should be unnecessary, when assign_lhs = FALSE
+            # (singletons shouldn't be there any more, so no reason to be here with a list)
+            lhs = select_obs(lhs, -obs2remove)
+        }
 
         # update of the slope variables
         if(isSlope){
@@ -2808,9 +2815,9 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, spl
         nb_missing = lengths(fixef_removed)
         if(rm_0 == FALSE){
             n_single = sum(nb_missing)
-            message_fixef = paste0(n_single, " fixed-effect singleton", plural(n_single, "s.was"), " removed (", numberFormatNormal(length(obs2remove)), " observation", plural_len(obs2remove), ifelse(Q == 1, "", paste0(", breakup: ", paste0(nb_missing, collapse = "/"))), ").")
+            message_fixef = paste0(fsignif(n_single), " fixed-effect singleton", plural(n_single, "s.was"), " removed (", numberFormatNormal(length(obs2remove)), " observation", plural_len(obs2remove), ifelse(Q == 1, "", paste0(", breakup: ", paste0(nb_missing, collapse = "/"))), ").")
         } else {
-            message_fixef = paste0(paste0(nb_missing, collapse = "/"), " fixed-effect", plural(sum(nb_missing)), " (", numberFormatNormal(length(obs2remove)), " observation", plural_len(obs2remove), ") removed because of only ", ifelse(rm_1, "0 (or only 1)", "0"), " outcomes", ifelse(rm_single && !rm_1, " or singletons", ""), ".")
+            message_fixef = paste0(paste0(fsignif(nb_missing), collapse = "/"), " fixed-effect", plural(sum(nb_missing)), " (", numberFormatNormal(length(obs2remove)), " observation", plural_len(obs2remove), ") removed because of only ", ifelse(rm_1, "0 (or only 1)", "0"), " outcomes", ifelse(rm_single && !rm_1, " or singletons", ""), ".")
         }
 
     }
@@ -2961,6 +2968,10 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
     # either by changing the depvar (leading to new NAs, etc)
     # obs2keep => must be a which()
 
+    # assing_lhs/assign_rhs:
+    # => avoids assigning inappropriate values in res
+    # => present only in OLS!
+
     # Mainly:
     # - dropping the NAs from the new y
     # - reformatting of res
@@ -3050,11 +3061,6 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 
             if(is.null(obs2keep)){
                 obs2keep = 1:length(fixef_df[[1]])
-            }
-
-            if(assign_lhs && is.list(lhs)){
-                # list means multiple LHS
-                lhs = select_obs(lhs, -obs2remove)
             }
 
             obs2keep = obs2keep[-obs2remove]

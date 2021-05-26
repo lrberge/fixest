@@ -7,6 +7,8 @@
  
  - Major bug, leading R to crash, occurring when 3+ fixed-effects are to be combined.
  
+ - Major bug, leading R to crash, occurring when multiple LHS are estimated with the option `fixef.rm = "singleton"` (thanks to Ole Rogeberg).
+ 
  - Fix bug occurring for undefined covariances with only one regressor (thanks to @joseph-richard-martinez [#118](https://github.com/lrberge/fixest/issues/118)).
  
  - Fix bug in IV estimations regarding the Wald statistic of the first stage when `lean = TRUE` and the VCOV computation is done post estimation.  

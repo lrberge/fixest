@@ -396,6 +396,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	# Multi LHS and RHS ####
 	#
 
+
 	do_multi_lhs = get("do_multi_lhs", env)
 	do_multi_rhs = get("do_multi_rhs", env)
 	if(do_multi_lhs || do_multi_rhs){
