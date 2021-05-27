@@ -4782,7 +4782,7 @@ expand_interactions_internal = function(x){
 
         if(grepl("\\(", terms_split[2])){
             if(!grepl("^[\\.]?[[:alnum:]\\._]+\\(", terms_split[2])){
-                stop("Problem in ", x[i], ": the format should be var::fe. See details.")
+                stop("Problem in ", x[i], ": the format should be continuous_var::factor_var. See details.")
             }
 
             my_call = gsub("^[\\.]?[[:alnum:]\\._]+\\(", "interact_control(", terms_split[2])
@@ -4792,10 +4792,10 @@ expand_interactions_internal = function(x){
                 stop("Problem in the interaction of the formula: Error in ", terms_split[1], "::", fe_name, gsub(".+interact_control", "", args))
             }
 
-            new_term = paste0("interact(", fe_name, ", ", terms_split[1], ", ", paste(args, collapse = ", "), ")")
+            new_term = paste0("interact(", terms_split[1], ", ", fe_name, ", ", paste(args, collapse = ", "), ")")
 
         } else {
-            new_term = paste0("interact(", terms_split[2], ", ", terms_split[1], ")")
+            new_term = paste0("interact(", terms_split[1], ", ", terms_split[2], ")")
         }
 
         terms_all_list[[i]] = new_term
@@ -4827,14 +4827,14 @@ expand_interactions = function(fml){
     as.formula(paste0(lhs_fml, "~", rhs_fml))
 }
 
-interact_control = function(ref, drop, keep){
+interact_control = function(ref, keep){
     # Internal call
     # used to control the call to interact is valid
 
     counter = getOption("fixest_deprec_interact")
     if(is.null(counter)){
         options("fixest_deprec_interact" = TRUE)
-        .Deprecated(msg = "Interactions with the syntax var::fe is deprecated and will disappear in 1 year from 12/11/2020. Please use the function i() instead.")
+        .Deprecated(msg = "Interactions with the syntax continuous_var::factor_var is deprecated and will disappear in 1 year from 12/11/2020. Please use the function i() instead.")
     }
 
     mc = match.call()
@@ -4842,10 +4842,6 @@ interact_control = function(ref, drop, keep){
     res = c()
     if("ref" %in% names(mc)){
         res = paste0("ref = ", deparse_long(mc$ref))
-    }
-
-    if("drop" %in% names(mc)){
-        res = paste0("drop = ", deparse_long(mc$drop))
     }
 
     if("keep" %in% names(mc)){

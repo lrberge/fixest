@@ -132,7 +132,7 @@
 #' aq = airquality
 #'
 #' est1 = feols(Ozone ~ i(Month) / Wind + Temp, data = aq)
-#' est2 = feols(Ozone ~ i(Wind, Month) + Temp | Month, data = aq)
+#' est2 = feols(Ozone ~ i(Month, Wind) + Temp | Month, data = aq)
 #'
 #' # Displaying the two results in a single table
 #' etable(est1, est2)

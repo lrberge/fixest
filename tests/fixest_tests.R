@@ -87,10 +87,10 @@ for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
                     fml_stats = y ~ x1 + x2 + paste(species, fe_2)
                 } else if(id_fe == 8){
                     fml_fixest = y ~ x1 | species[x2] + fe_2[x3] + fe_3
-                    fml_stats = y ~ x1 + species + i(x2, species) + factor(fe_2) + i(x3, fe_2) + factor(fe_3)
+                    fml_stats = y ~ x1 + species + i(species, x2) + factor(fe_2) + i(fe_2, x3) + factor(fe_3)
                 } else if(id_fe == 9){
                     fml_fixest = y ~ x1 | species + fe_2[x2,x3] + fe_3
-                    fml_stats = y ~ x1 + species + factor(fe_2) + i(x2, fe_2) + i(x3, fe_2) + factor(fe_3)
+                    fml_stats = y ~ x1 + species + factor(fe_2) + i(fe_2, x2) + i(fe_2, x3) + factor(fe_3)
                 }
 
                 # ad hoc modifications of the formula
@@ -627,7 +627,7 @@ test(var(c2 - m_fe$fe_bis[names(c2)]), 0)
 #
 
 m = feols(y ~ x1 + x2 | species + fe_bis[x3], base)
-all_coef = coef(feols(y ~ -1 + x1 + x2 + species + factor(fe_bis) + i(x3, fe_bis), base))
+all_coef = coef(feols(y ~ -1 + x1 + x2 + species + factor(fe_bis) + i(fe_bis, x3), base))
 
 m_fe = fixef(m)
 c1  = get_coef(all_coef, "species")
@@ -644,7 +644,7 @@ test(c3, m_fe[["fe_bis[[x3]]"]][names(c3)], "~", tol = 1e-5)
 #
 
 m = feols(y ~ x1 | species[x2] + fe_bis[x3] + fe_ter, base)
-all_coef = coef(feols(y ~ -1 + x1 + species + i(x2, species) + factor(fe_bis) + i(x3, fe_bis) + factor(fe_ter), base))
+all_coef = coef(feols(y ~ -1 + x1 + species + i(species, x2) + factor(fe_bis) + i(fe_bis, x3) + factor(fe_ter), base))
 
 m_fe = fixef(m)
 c1  = get_coef(all_coef, "^species")
@@ -664,7 +664,7 @@ test(c4, m_fe[["species[[x2]]"]][names(c4)], "~", tol = 2e-4)
 #
 
 m = feols(y ~ x1 | species + fe_bis[x2,x3] + fe_ter, base)
-all_coef = coef(feols(y ~ x1 + species + factor(fe_bis) + i(x2, fe_bis) + i(x3, fe_bis) + factor(fe_ter), base))
+all_coef = coef(feols(y ~ x1 + species + factor(fe_bis) + i(fe_bis, x2) + i(fe_bis, x3) + factor(fe_ter), base))
 
 m_fe = fixef(m)
 c1  = get_coef(all_coef, "^species")
@@ -686,7 +686,7 @@ test(c4, m_fe[["fe_bis[[x3]]"]][names(c4)], "~", tol = 2e-4)
 
 w = 3 * (as.integer(base$species) - 0.95)
 m = feols(y ~ x1 | species + fe_bis[x2,x3] + fe_ter, base, weights = w)
-all_coef = coef(feols(y ~ x1 + species + factor(fe_bis) + i(x2, fe_bis) + i(x3, fe_bis) + factor(fe_ter), base, weights = w))
+all_coef = coef(feols(y ~ x1 + species + factor(fe_bis) + i(fe_bis, x2) + i(fe_bis, x3) + factor(fe_ter), base, weights = w))
 
 m_fe = fixef(m)
 c1  = get_coef(all_coef, "^species")
@@ -799,7 +799,7 @@ m = feols(y ~ x1 + i(fe_2), base)
 coefplot(m)
 etable(m, dict = c("0" = "zero"))
 
-m = feols(y ~ x1 + i(fe_2) + i(x2, fe_2), base)
+m = feols(y ~ x1 + i(fe_2) + i(fe_2, x2), base)
 coefplot(m, only.inter = FALSE)
 etable(m, dict = c("0" = "zero"))
 

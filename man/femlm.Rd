@@ -179,13 +179,13 @@ You can provide several leads/lags/differences at once: e.g. if your formula is 
 \section{Interactions}{
 
 
-You can interact a numeric variable with a "factor-like" variable by using \code{interact(var, fe, ref)}, where \code{fe} is the variable to be interacted with and the argument \code{ref} is a value of \code{fe} taken as a reference (optional). Instead of using the function \code{\link[fixest:i]{interact}}, you can use the alias \code{i(var, fe, ref)}.
+You can interact a numeric variable with a "factor-like" variable by using \code{i(factor_var, continuous_var, ref)}, where \code{continuous_var} will be interacted with each value of \code{factor_var} and the argument \code{ref} is a value of \code{factor_var} taken as a reference (optional).
 
 Using this specific way to create interactions leads to a different display of the interacted values in \code{\link[fixest]{etable}} and offers a special representation of the interacted coefficients in the function \code{\link[fixest]{coefplot}}. See examples.
 
- It is important to note that *if you do not care about the standard-errors of the interactions*, then you can add interactions in the fixed-effects part of the formula (using the syntax fe[[var]], as explained in the section \dQuote{Varying slopes}).
+ It is important to note that *if you do not care about the standard-errors of the interactions*, then you can add interactions in the fixed-effects part of the formula (using the syntax \code{factor_var[continuous_var]}, as explained in the section \dQuote{Varying slopes}).
 
-The function \code{\link[fixest:i]{interact}} has in fact more arguments, please see details in its associated help page.
+The function \code{\link[fixest:i]{i}} has in fact more arguments, please see details in its associated help page.
 }
 
 \section{On standard-errors}{

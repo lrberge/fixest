@@ -410,13 +410,13 @@ The preceding interaction examples all took place in the fixed-effects slot (i.e
 
 Yet, there are equally many cases where we do want to retain full inferential information about interaction terms. For example, in a difference-in-differences (DiD) research design. Here too `fixest` offers its own specialized syntax for combining terms in the model formula: `i()`. 
 
-As we shall see, `i()` is more versatile than just creating interaction terms. It is also able to coerce individual variables to a factor and, compared to base R `factor()`, does so in a way that allows for better synergies with other `fixest` functions like `etable` and `coefplot`. This will allow us to perform some common estimation tasks much more easily.
+As we shall see, `i()` is more versatile than just creating interaction terms. It is also able to coerce individual variables to a factor and, compared to base R `factor()`, does so in a way that allows for better synergies with other `fixest` functions like `etable` and `coefplot`/`iplot`. This will allow us to perform some common estimation tasks much more easily.
 
 We now illustrate the main uses of `i()` with the help of some examples.
 
 ### A compact syntax for factors and interactions: `i()`
 
-The function `i()` accepts the arguments `ref`, `drop` and `keep`,  which are used to identify which level to keep. Note that the argument `ref` accepts only one value while `drop` accepts several. Here's an example how to use them:
+The function `i()` accepts the arguments `ref`, and `keep` which are used to identify which levels to keep. Here's an example how to use them:
 
 ```{r}
 data(airquality)
@@ -442,24 +442,24 @@ data(base_did)
 head(base_did)
 ```
 
-The empirical approach that we will use here is the canonical two-way fixed effects (TWFE) model that should be familiar to many empirical researchers. In a regression context, TWFE essentially amounts to an interaction between our `treat` and `period` variables. This is easily done using the `i(variable, factor, reference)` syntax:
+The empirical approach that we will use here is the canonical two-way fixed effects (TWFE) model that should be familiar to many empirical researchers. In a regression context, TWFE essentially amounts to an interaction between our `treat` and `period` variables. This is easily done using the `i(fact_var, num_var, reference)` syntax:
 
 ```{r, eval = TRUE}
 # Estimation of treatment × period effects
 # We also add individual and period fixed-effects:
-est_did = feols(y ~ x1 + i(treat, period, 5) | id + period, base_did)
+est_did = feols(y ~ x1 + i(period, treat, 5) | id + period, base_did)
 est_did
 ```
 
-Here, `i(treat, period, 5)` creates a set of interact terms: One `treat` dummy for each `period`, but excluding period 5 as a reference. While the explicit reference period is optional, note that we need a reference to avoid the collinearity problem posed by the `id` fixed effects. More to the point, for this DiD analysis we are interested in whether the treatment generated a sustained impact on our outcome variable relative to the control group. This makes period 5 (immediately prior to treatment) the obvious choice to use as our relative anchor. It also demonstrates an advantage that `i()`'s syntax offers over the equivalent base `treat*factor(period)` expansion, which would automatically use period 1 as a reference. Of course, we could specify the levels of `factor(period)` ahead of time. But this is rather tedious, whereas `i()` allows us to do so concisely on the fly.
+Here, `i(period, treat, 5)` creates a set of interact terms: One `treat` dummy for each `period`, but excluding period 5 as a reference. While the explicit reference period is optional, note that we need a reference to avoid the collinearity problem posed by the `id` fixed effects. More to the point, for this DiD analysis we are interested in whether the treatment generated a sustained impact on our outcome variable relative to the control group. This makes period 5 (immediately prior to treatment) the obvious choice to use as our relative anchor. It also demonstrates an advantage that `i()`'s syntax offers over the equivalent base `treat*factor(period)` expansion, which would automatically use period 1 as a reference. Of course, we could specify the levels of `factor(period)` ahead of time. But this is rather tedious, whereas `i()` allows us to do so concisely on the fly.
 
-To display the treatment effects on a graph, we can use the function `coefplot`:
+To display the treatment effects on a graph, we can use the function `iplot`:
 
 ```{r, fig.width=7}
-coefplot(est_did)
+iplot(est_did)
 ```
 
-The function `coefplot` detects that the results contain interactions and plots the appropriate graph. In case you wanted to display all the coefficients, including `x1`, you can use the argument `only.inter = FALSE`.
+The function `iplot` reports the coefficients of variables created with `i()`, and only them. In case you wanted to display all the coefficients, including `x1`, you can use the function `coefplot` instead.
 
 ### Staggered difference-in-differences (Sun and Abraham, 2020)
 
@@ -526,10 +526,10 @@ With our generated data in hand, let's move on to the estimations. We'll impleme
 
 ```{r}
 # "Naive" TWFE DiD
-res_twfe = feols(y ~ i(treated, time_to_treatment, ref = -1, drop = -1000) | id + year, base)
+res_twfe = feols(y ~ i(treated, time_to_treatment, ref = c(-1, -1000)) | id + year, base)
 
 # With cohort x time-to-treatment dummies
-res_cohort = feols(y ~ i(time_to_treatment, f2 = group, drop = c(-1, -1000)) | id + year, base)
+res_cohort = feols(y ~ i(time_to_treatment, f.group, ref = c(-1, -1000)) | id + year, base)
 ```
 
 For our "cohort" model, we can now apply the SA20 method of aggregating the coefficients by relative time-to-treatment. We'll use the `aggregate()` function alongside some regexp:
