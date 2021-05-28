@@ -16,7 +16,7 @@ export(r2, fitstat, fitstat_register, wald)
 # did
 export(did_means)
 # graph
-export(coefplot)
+export(coefplot, iplot)
 # small funs
 export(coeftable, ctable, se, tstat, pvalue)
 # dof
@@ -43,7 +43,6 @@ S3method(summary, fixest.fixef)
 S3method(summary, fixest)
 S3method(summary, fixest_list)
 S3method(aggregate, fixest)
-export(summ) # alias for summary.fixest
 S3method(plot, fixest.fixef)
 S3method("[", fixest_panel) # Lag related
 # fixest_multi

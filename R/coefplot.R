@@ -228,7 +228,7 @@
 coefplot = function(object, ..., style = NULL, sd, ci_low, ci_high, x, x.shift = 0, horiz = FALSE,
                     dict = getFixest_dict(), keep, drop, order, ci.width = "1%",
                     coef.sort = FALSE,
-                    ci_level = 0.95, add = FALSE, pt.pch = 20, pt.bg = NULL, cex = 1,
+                    ci_level = 0.95, add = FALSE, pt.pch = c(20, 17, 15, 21, 24, 22), pt.bg = NULL, cex = 1,
                     pt.cex = cex, col = 1:8, pt.col = col, ci.col = col, lwd = 1, pt.lwd = lwd,
                     ci.lwd = lwd, ci.lty = 1, grid = TRUE, grid.par = list(lty=3, col = "gray"),
                     zero = TRUE, zero.par = list(col="black", lwd=1), pt.join = FALSE,
@@ -1475,32 +1475,12 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
                     stop("The ", n_th(i), " element of 'object' raises and error:\n", prms)
                 }
 
-                # dealing with iplot
-                # if(prms$is_iplot){
-                #     if(i > 1 && any(!all_inter)){
-                #         rerun = TRUE
-                #         mc$only.i = FALSE
-                #         break
-                #     } else {
-                #         all_inter[i] = TRUE
-                #         my_root = names(prms$is_iplot)
-                #         if(i == 1 || all(all_inter_root == my_root)){
-                #             all_inter_root[i] = my_root
-                #         } else {
-                #             rerun = TRUE
-                #             mc$only.i = FALSE
-                #             break
-                #         }
-                #     }
-                # } else {
-                #     all_inter[i] = FALSE
-                # }
-
                 # Some meta variables
                 varlist$ci = unique(prms$varlist$ci)
                 varlist$depvar = unique(prms$varlist$depvar)
                 varlist$var = unique(prms$varlist$var)
                 varlist$fe = unique(prms$varlist$fe)
+                varlist$i = unique(prms$varlist$i)
 
                 dots_drop = unique(c(dots_drop, prms$dots_drop))
                 suggest_ref_line = suggest_ref_line && prms$suggest_ref_line
@@ -1711,16 +1691,28 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
             # "keep" here works differently => new arg. i.select?
 
             ANY_AUTO_REF = length(info$ref_id) > 0
-            IS_REF = (identical(ref, "auto") || isTRUE(ref)) && ANY_AUTO_REF
+            SHOW_REF = (identical(ref, "auto") || isTRUE(ref) || identical(ref, "all")) && ANY_AUTO_REF
+            SHOW_REF_FIRST = SHOW_REF && !identical(ref, "all")
 
             # Global variables for fill_coef function
             names_coef = names(estimate)
             names_all = info$coef_names_full
             new_names = info$items
 
-            if(!IS_REF && ANY_AUTO_REF){
-                names_all = names_all[-info$ref_id]
-                new_names = new_names[-info$ref_id]
+            is_rm = FALSE
+            ID_rm = NULL
+            if(ANY_AUTO_REF){
+                if(SHOW_REF_FIRST){
+                    ID_rm = info$ref_id[-1]
+                } else if(SHOW_REF == FALSE){
+                    ID_rm = info$ref_id
+                }
+                is_rm = length(ID_rm) > 0
+            }
+
+            if(is_rm){
+                names_all = names_all[-ID_rm]
+                new_names = new_names[-ID_rm]
             }
 
             fill_coef = function(coef){
@@ -1747,10 +1739,11 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
                 AXIS_AS_NUM = TRUE
                 names(estimate) = NULL
                 x = info$items
+                if(is_rm) x = x[-ID_rm]
             }
 
             # ref
-            if(IS_REF){
+            if(SHOW_REF){
                 suggest_ref_line = length(info$ref_id) == 1 && info$is_inter_num
                 is_ref = seq_along(estimate) == info$ref_id[1]
 
@@ -1793,7 +1786,7 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
         }
 
         # We add the reference
-        if(!identical(ref, "auto") && length(ref) > 0 && !isFALSE(ref)){
+        if(!(identical(ref, "auto") || identical(ref, "all")) && length(ref) > 0 && !isFALSE(ref)){
 
             if(AXIS_AS_NUM){
                 if(!is.numeric(ref) || length(ref) > 1){

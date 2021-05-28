@@ -463,52 +463,31 @@ The function `iplot` reports the coefficients of variables created with `i()`, a
 
 ### Staggered difference-in-differences (Sun and Abraham, 2020)
 
-*Note that the content of this section is only valid for `fixest` version 0.8.1 or later.*
+*Note that the content of this section is only valid for `fixest` version 0.9.0 or later.*
 
 Despite TWFE's long-standing popularity for DiD designs, recent research has a shone a light on the biases that it can introduce under differential timing. For example, under staggered treatment or policy rollout. 
 
-For staggered DiD analyzes, `fixest` provides convenience functions for implementing the unbiased method of [Sun and Abraham (2020)](https://doi.org/10.1016/j.jeconom.2020.09.006) --- hereafter: SA20. The summary version is that we again use `i()` to create `cohort x time to treatment` dummies. But we then use the `aggregate()` function to recover the correct time treatment effects as per SA20. 
+For staggered DiD analyzes, `fixest` provides the `sunab` function for implementing the unbiased method of [Sun and Abraham (2020)](https://doi.org/10.1016/j.jeconom.2020.09.006) --- hereafter: SA20. The method is based on the estimation of `treated cohort x time to treatment` dummies which are later aggregated to obtain the average treatment for the treated (ATT) for each period (or for the full post treatment period).
 
 (Aside: Note that we use `time to treatment` rather than just `time`, because we need to account for the staggered treatment via a relative time measure.)
 
-Let's walk through an example with generated data, where (a) different cohorts get the treatment at different periods, and (b) the effect of the treatment is cohort-specific and increasing over time. First generate the data:
+Let's walk through an example with the `base_stagg` data set, where (a) different cohorts get the treatment at different periods, and (b) the effect of the treatment is cohort-specific and increasing over time. Let's have a first look at the data:
 
 ```{r}
-# Generate some (fake) staggered DiD data
+data(base_stagg)
 
-set.seed(1)
-n_group = 20
-n_per_group = 5
-id_i = paste0((1:n_group), ":", rep(1:n_per_group, each = n_group))
-id_t = 1:10
-base = expand.grid(id = id_i, year = id_t)
-base$group = as.numeric(gsub(":.+", "", base$id))
-base$year_treated = base$group
-base$year_treated[base$group > 10] = 10000
-base$treat_post = (base$year >= base$year_treated) * 1
-base$time_to_treatment = pmax(base$year - base$year_treated, -1000)
-base$treated = (base$year_treated < 10000) * 1
-# The effect of the treatment is cohort specific and increases with time
-base$y_true = base$treat_post * (1 + 1 * base$time_to_treatment - 1 * base$group)
-base$y = base$y_true + rnorm(nrow(base))
-
-# Note that the time_to_treatment for controls is set to -1000
-
-# We need to drop the always treated individuals (just a data generation artifact)
-base = base[base$group > 1,]
-
-head(base)
+head(base_stagg)
 ```
 
-Here's a quick visual depiction of the data. Again, notice the staggered treatment rollout and time-varying intensity.
+Note that the variable `year_treated` is set to 1000 (i.e. above the maximum value of `year`) for the never treated. Here's a quick visual depiction of the data. Again, notice the staggered treatment rollout and time-varying intensity.
 
 ```{r, echo=FALSE}
 if(requireNamespace("ggplot2", quietly = TRUE)){
   library(ggplot2)
-  ggplot(aggregate(base[, c('year_treated', 'y_true')], 
-                   by = list(year = base$year, group = base$group), 
+  ggplot(aggregate(base_stagg[, c('year_treated', 'treatment_effect_true')], 
+                   by = list(year = base_stagg$year, group = to_integer(base_stagg$year_treated)), 
                    mean), 
-         aes(year, group, fill = year>=year_treated, alpha = y_true)) + 
+         aes(year, group, fill = year>=year_treated, alpha = treatment_effect_true)) + 
     geom_tile(colour = "white", lwd = 1) + 
     scale_fill_brewer('Treated?', palette = 'Set1') +
     scale_alpha('Avg. treatment\neffect') +
@@ -519,53 +498,34 @@ if(requireNamespace("ggplot2", quietly = TRUE)){
 }
 ```
 
-With our generated data in hand, let's move on to the estimations. We'll implement two DiD models:
+With our data in hand, let's move on to the estimations. We'll implement two DiD models:
 
   1. A "naive" DiD consisting of a standard TWFE interaction (i.e. treatment × time_to_treatment).
-  2. A "cohort" DiD that instead creates cohort interactions (i.e. time_to_treatment × group).
+  2. A DiD using the SA20 method.
 
 ```{r}
-# "Naive" TWFE DiD
-res_twfe = feols(y ~ i(treated, time_to_treatment, ref = c(-1, -1000)) | id + year, base)
+# "Naive" TWFE DiD (note that the time to treatment for the never treated is -1000)
+# (by using ref = c(-1, -1000) we exclude the period just before the treatment and 
+# the never treated)
+res_twfe = feols(y ~ x1 + i(treated, time_to_treatment, ref = c(-1, -1000)) | id + year, base_stagg)
 
-# With cohort x time-to-treatment dummies
-res_cohort = feols(y ~ i(time_to_treatment, f.group, ref = c(-1, -1000)) | id + year, base)
+# To implement the Sun and Abraham (2020) method,
+# we use the sunab(cohort, period) function
+res_sa20 = feols(y ~ x1 + sunab(year_treated, year) | id + year, base_stagg)
 ```
 
-For our "cohort" model, we can now apply the SA20 method of aggregating the coefficients by relative time-to-treatment. We'll use the `aggregate()` function alongside some regexp:
+Let's compare our results in plot form:
 
 ```{r}
-# SA20 method: we aggregate the effects for each period
-sa20_coefs = aggregate(res_cohort, "(ti.*nt)::(-?[[:digit:]])")
-sa20_coefs
-```
-
-The function `aggregate` aggregates the coefficients whose names match the regular expression `"(ti.*nt)::(-?[[:digit:]]+)"`. The two sets of parentheses are important here since the aggregation will be performed for each unique value in between parentheses. In this case the aggregation will be done for each `time_to_treatment` (i.e. `ti.*nt`) and period (i.e. `-?[[:digit:]]`). 
-
-Note that `fixest` objects can also be aggregated on-the-fly via the complementary "agg" argument of `summary.fixest`. This argument calls `aggregate` behind the scenes and can be passed down from high-order functions like `coefplot` and `etable`, which users may find more convenient. For example:
-
-```{r}
-# Same result as `sa20_coefs`, using the complementary "agg" argument of summary.fixest
-res_sa20 = summary(res_cohort, agg = "(ti.*nt)::(-?[[:digit:]])")
-res_sa20
-```
-
-Now that we've done the careful work of adjusting for staggered treatment, let's compare our results in plot form:
-
-```{r}
-# Plot the naive TWFE results
-coefplot(res_twfe, ylim = c(-6, 8), pt.join.par = list(lty = 0))
-
-# Add the SA aggregated results
-x = c(-9:-2, 0:8) + .35 # shift for the plot
-coefplot(res_sa20, x = x, add = TRUE, col = 4, pt.pch = 17)
+# Plot the two TWFE results
+coefplot(list(res_twfe, res_sa20), sep = 0.5)
 
 # Add the true results
-att_true = tapply(base$y_true, base$time_to_treatment, mean)[-1]
-points(-9:8 + 0.15, att_true, pch = 15, col = 2)
+att_true = tapply(base_stagg$treatment_effect_true, base_stagg$time_to_treatment, mean)[-1]
+points(-9:8, att_true, pch = 15, col = 4)
 
 legend("topleft", col = c(1, 4, 2), pch = c(20, 17, 15), 
-       legend = c("TWFE", "Sun & Abraham (2020)", "Truth"))
+       legend = c("TWFE", "Truth", "Sun & Abraham (2020)"))
 ```
 
 As we can see, the TWFE results suffer from varying degrees of bias due to the staggered rollout. In contrast, the aggregated SA20 results do a much better job of consistently estimating the true effects.
@@ -574,10 +534,17 @@ As a final example, here's how to get the average treatment effect for the treat
 
 ```{r}
 # The full ATT
-aggregate(res_cohort, c("ATT" = "treatment::[^-]"))
+summary(res_sa20, agg = "att")
 ```
 
-This time the aggregation is operated across each cohort for non-negative time to treatment (i.e. `treatment::[^-]`). Note that the estimated ATT compares favourably with the true value of `r mean(base[base$treat_post == 1, "y_true"])`.
+This time the aggregation of the coefficients is operated across each cohort for non-negative time to treatment. Note that the estimated ATT compares favourably with the true value of `r with(base_stagg(treatment_effect_true[time_to_treatment >= 0]))`.
+
+Under the hood, the `sunab()` function creates `cohort x time to treatment` interactions with the function `i()`, the coefficients are then aggregated at the appropriate level with the function `aggregate.fixest`. To obtain the coefficients for each `cohort x time to treatment`, one simply needs to remove the aggregation:
+
+```{r}
+# Full disaggregation (you could have used summary instead of etable)
+head(etable(res_sa20, agg = FALSE), 20)
+```
 
 
 # Additional features 

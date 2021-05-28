@@ -9,7 +9,7 @@ sunab(
   cohort,
   period,
   ref.c = NULL,
-  ref.p = c(.F, 0),
+  ref.p = c(-1, .F),
   att = FALSE,
   no_agg = FALSE
 )
@@ -23,7 +23,7 @@ sunab_att(cohort, period, ref.c = NULL, ref.p = c(.F, 0))
 
 \item{ref.c}{A vector of references for the cohort. By default the never treated cohorts are taken as reference and the always treated are excluded from the estimation. You can add more references with this argument, which means that dummies will not be created for them (but they will remain in the estimation).}
 
-\item{ref.p}{A vector of references for the (relative!) period. By default the first relative period (RP) and the 0 are taken as reference. You can instead use your own references (i.e. RPs for which dummies will not be created -- but these observations remain in the sample). Please note that you will need at least two references. You can use the special variables \code{.F} and \code{.L} to access the first and the last relative periods. Using these notations, the default is \code{c(.F, 0)}.}
+\item{ref.p}{A vector of references for the (relative!) period. By default the first relative period (RP) and the 0 are taken as reference. You can instead use your own references (i.e. RPs for which dummies will not be created -- but these observations remain in the sample). Please note that you will need at least two references. You can use the special variables \code{.F} and \code{.L} to access the first and the last relative periods. Using these notations, the default is \code{c(.F, -1)}.}
 }
 \value{
 If not used within a \code{fixest} estimation, this function will return a matrix of interacted coefficients.
@@ -44,8 +44,40 @@ If you construct your own relative periods, the controls cohorts should have onl
 }
 \examples{
 
+# Simple DiD example
+data(base_stagg)
+head(base_stagg)
+
+# Note that the year_treated is set to 1000 for the never treated
+table(base_stagg$year_treated)
+table(base_stagg$time_to_treatment)
+
+# The DiD estimation
+res_sunab = feols(y ~ x1 + sunab(year_treated, year), base_stagg)
+etable(res_sunab)
+
+# By default the reference periods are the first year and the year before the treatment
+# i.e. ref.p = c(-1, .F); where .F is a shortcut for the first period.
+# Say you want to set as references the first three periods on top of -1
+
+res_sunab_3ref = feols(y ~ x1 + sunab(year_treated, year, ref.p = c(.F + 0:2, -1)), base_stagg)
+
+# Display the two results
+iplot(list(res_sunab, res_sunab_3ref))
+
+# ... + show all refs
+iplot(list(res_sunab, res_sunab_3ref), ref = "all")
 
 
+#
+# ATT
+#
+
+# To get the total ATT, you can use summary with the agg argument:
+summary(res_sunab, agg = "ATT")
+
+# You can also look at the total effect per cohort
+summary(res_sunab, agg = "cohort")
 
 
 }

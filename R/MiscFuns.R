@@ -395,13 +395,17 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	        return(object)
 
 	    } else if(is.null(se) && is.null(cluster) && is.null(dof) && missing(.vcov)){
-	        if(missing(stage)){
-	            # No modification required
-	            object$summary_from_fit = FALSE
-	            return(object)
+	        if(is.null(agg)){
+	            if(missing(stage)){
+	                # No modification required
+	                object$summary_from_fit = FALSE
+	                return(object)
+	            } else {
+	                # No modification required
+	                do_assign = FALSE
+	            }
 	        } else {
-	            # No modification required
-	            do_assign = FALSE
+	            do_assign = TRUE
 	        }
 	    }
 
@@ -414,7 +418,7 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 
 	        is_se = !is.null(se)
 	        is_cluster = !is.null(cluster)
-	        assign_flags(object$summary_flags, se = se, cluster = cluster, dof = dof)
+	        assign_flags(object$summary_flags, se = se, cluster = cluster, dof = dof, agg = agg)
 	        # We need to clean some arguments...
 	        if(is_se && se %in% c("standard", "white", "hetero")){
 	            cluster = NULL
@@ -573,20 +577,20 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	coeftable = object$coeftable
 
 	# th z & p values
-	zvalue <- object$coefficients/se
+	zvalue = object$coefficients/se
 	if(object$method %in% "feols" || (object$method %in% "feglm" && !object$family$family %in% c("poisson", "binomial"))){
 
 	    # I have renamed t.df into G
 	    t.df = attr(vcov, "G")
 
 	    if(!is.null(t.df)){
-	        pvalue <- 2*pt(-abs(zvalue), max(t.df - 1, 1))
+	        pvalue = 2*pt(-abs(zvalue), max(t.df - 1, 1))
 	    } else {
-	        pvalue <- 2*pt(-abs(zvalue), max(object$nobs - object$nparams, 1))
+	        pvalue = 2*pt(-abs(zvalue), max(object$nobs - object$nparams, 1))
 	    }
 
 	} else {
-	    pvalue <- 2*pnorm(-abs(zvalue))
+	    pvalue = 2*pnorm(-abs(zvalue))
 	}
 
 
@@ -601,9 +605,8 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	}
 
 	# modifs of the table
-	coeftable[, 2] = se_format
-	coeftable[, 3] = zvalue
-	coeftable[, 4] = pvalue
+	coeftable = cbind("Estimate" = object$coefficients, "Std. Error" = se_format,
+	                  "t value" = zvalue, "Pr(>|t|))" = pvalue)
 
 	attr(coeftable, "type") = attr(se, "type") = attr(vcov, "type")
 
@@ -652,16 +655,6 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	return(object)
 }
 
-
-#' @rdname summary.fixest
-summ = function(object, se, cluster, dof = getFixest_dof(), forceCovariance = FALSE, keepBounded = FALSE, ...){
-
-    # we reiterate the call
-    mc = match.call()
-    mc[[1]] = as.name("summary")
-
-    eval(mc, parent.frame())
-}
 
 #' @rdname summary.fixest
 summary.fixest_list = function(object, se, cluster, dof = getFixest_dof(), .vcov, stage = 2, lean = FALSE, n, ...){
@@ -2664,70 +2657,6 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
         ref = TRUE
     }
 
-
-    # IS_F2 = FALSE
-    # f2_num = FALSE
-    # if(!missing(f2)){
-    #
-    #     if(length(f2) == 1 && !"ref" %in% names(mc)){
-    #         # ref is implicitly called via the location of f2
-    #         ref = f2
-    #     } else if(length(f2) != length(f)){
-    #         stop("The arguments 'f2' and 'f' must be of the same length (currently ", length(f2), " vs ", length(f), ").")
-    #     } else {
-    #         IS_F2 = TRUE
-    #         f2_name = deparse_long(mc$f2)
-    #         f2_num = is.numeric(f2)
-    #     }
-    # }
-
-    # # The NAs + recreation of f if necessary
-    # IS_FACTOR_INTER = FALSE
-    # if(IS_INTER_NUMERIC){
-    #
-    #     is_na_all = is.na(var) | is.na(f)
-    #     if(IS_F2) is_na_all = is_na_all | is.na(f2)
-    #
-    #     # Conversion of var to numeric if logical
-    #     # => that makes sense now, if the user isn't happy => f2 (before that the automatic conversion wouldn't leave room to really use logicals)
-    #     if(is.logical(var)){
-    #         var = as.numeric(var)
-    #     } else if(is.factor(var) && length(levels(var)) == 2 && all(c(0, 1) %in% levels(var))){
-    #         var = as.numeric(as.character(var))
-    #     }
-    #
-    #     if(!is.numeric(var)){
-    #         IS_FACTOR_INTER = TRUE
-    #         # It's an interaction between factors
-    #         f_new = rep(NA_character_, length(f))
-    #
-    #         if(IS_F2){
-    #             f_new[!is_na_all] = paste0(var[!is_na_all], "__%%__", f[!is_na_all], "__%%__", f2[!is_na_all])
-    #         } else {
-    #             f_new[!is_na_all] = paste0(var[!is_na_all], "__%%__", f[!is_na_all])
-    #         }
-    #
-    #         f = f_new
-    #         IS_INTER_NUMERIC = FALSE
-    #
-    #     } else if(IS_F2){
-    #         f_new = rep(NA_character_, length(f))
-    #         f_new[!is_na_all] = paste0(f[!is_na_all], "__%%__", f2[!is_na_all])
-    #         f = f_new
-    #     }
-    #
-    # } else if(IS_F2){
-    #     is_na_all = is.na(f) | is.na(f2)
-    #     f_new = rep(NA_character_, length(f))
-    #
-    #     f_new[!is_na_all] = paste0(f[!is_na_all], "__%%__", f2[!is_na_all])
-    #
-    #     f = f_new
-    #
-    # } else {
-    #     is_na_all = is.na(f)
-    # }
-
     #
     # QUFing + NA
     #
@@ -2760,38 +2689,6 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
     } else {
         f_items = items
     }
-
-    # Now we check with regex
-    # if(IS_FACTOR_INTER || IS_F2){
-    #     items_split = strsplit(items, "__%%__", fixed = TRUE)
-    #
-    #     f_items = sapply(items_split, `[`, 1 + IS_FACTOR_INTER)
-    #     if(IS_F2){
-    #         f2_items = sapply(items_split, `[`, 2 + IS_FACTOR_INTER)
-    #     }
-    #
-    #     if(f_num || f2_num){
-    #         # we reorder the stuff
-    #         f_items_fm = if(f_num) as.numeric(f_items) else f_items
-    #
-    #         if(IS_F2){
-    #             f2_items_fm = if(f2_num) as.numeric(f2_items) else f2_items
-    #             new_order = order(f_items_fm, f2_items_fm)
-    #             f2_items = f2_items[new_order]
-    #         } else {
-    #             new_order = order(f_items_fm)
-    #         }
-    #
-    #         if(IS_FACTOR_INTER) items_split = items_split[new_order]
-    #         fe_num = order(new_order)[fe_num]
-    #         f_items = f_items[new_order]
-    #         items = items[new_order]
-    #
-    #     }
-    #
-    # } else {
-    #     f_items = items
-    # }
 
     check_arg(ref, "logical scalar | vector no na", .choices = items)
 
@@ -4035,22 +3932,7 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
     all_var_names = attr(t, "term.labels")
 
     # We take care of interactions: references can be multiple, then ':' is legal
-    all_vars = gsub(":", "*", all_var_names)
-
-    if(any(qui_inter <- (grepl("^i(nteract)?\\(", all_var_names) & grepl(":", all_var_names, fixed = TRUE)))){
-        # beware of ":" in drop/keep!!!
-
-        for(arg in c("ref", "keep", "ref2", "keep2")){
-            if(any(qui_ref <- grepl(paste0(arg, " =[^\\)]+:"), all_var_names[qui_inter]))){
-                var_inter_ref = all_var_names[qui_inter][qui_ref]
-                var_inter_ref_split = strsplit(var_inter_ref, paste0(arg, " = "))
-                fun2apply = function(x) paste(gsub(":", "*", x[1]), x[2], sep = paste0(arg, " = "))
-                new_var_inter_ref = sapply(var_inter_ref_split, fun2apply)
-                all_vars[qui_inter][qui_ref] = new_var_inter_ref
-            }
-        }
-
-    }
+    all_vars = colon_to_star(all_var_names)
 
     # Forming the call
     if(attr(t, "intercept") == 1 && !fake_intercept){
@@ -5208,6 +5090,7 @@ items_to_drop = function(items, x, varname, keep = FALSE){
     set_up(1)
 
     argname = deparse(substitute(x))
+    ref = argname == "ref"
 
     if(is.character(x)){
         all_x = c()
@@ -5230,7 +5113,13 @@ items_to_drop = function(items, x, varname, keep = FALSE){
             }
         }
 
-        if(keep){
+        if(ref){
+            if(length(all_x) == 1){
+                id_drop = which(items %in% all_x)
+            } else {
+                id_drop = c(which(items %in% all_x[1]), which(items %in% all_x[-1]))
+            }
+        } else if(keep){
             id_drop = which(!items %in% all_x)
         } else {
             id_drop = which(items %in% all_x)
@@ -5241,7 +5130,16 @@ items_to_drop = function(items, x, varname, keep = FALSE){
         if(keep){
             id_drop = which(!items %in% x)
         } else {
-            id_drop = which(items %in% x)
+
+            if(ref){
+                if(length(x) == 1){
+                    id_drop = which(items %in% x)
+                } else {
+                    id_drop = c(which(items %in% x[1]), which(items %in% x[-1]))
+                }
+            } else {
+                id_drop = which(items %in% x)
+            }
 
             if(length(id_drop) == 0){
                 stop_up("In argument '", argname, "', the value", plural_len(x, "s.don't"), " match any value of '", varname, "'.")
@@ -6461,6 +6359,58 @@ all_vars_with_f = function(fml){
     }
 
     vars
+}
+
+
+colon_to_star = function(x){
+    # used to transform ":" from interactions into proper multiplications
+    # This is needed for evaluation (so that : is not interpreted as the sequence operator)
+    # basically we leave all colon in parentheses untouched
+    # this code is not robust to formulas including textual parentheses, like "(" or ")"
+    # I don't see when it should happen so it's OK
+    #
+    # it would have been easier to write c code dealing at the character level
+    # but this also works
+    #
+    # fml = ~ x1:x2:a(6:7) + x5 + i(aa, 5:6):jjl + base::poly(x, 5)
+    # x = get_vars(fml)
+
+    qui_colon = grepl(":", x, fixed = TRUE)
+    qui_paren = grepl("(", x, fixed = TRUE)
+
+    qui_check = qui_colon & qui_paren
+    if(any(qui_check)){
+
+        res = x
+        for(i in which(qui_check)){
+            var = x[i]
+
+            var_split_open = strsplit(var, "(", fixed = TRUE)[[1]]
+            n_open = -1
+            for(j in 1:length(var_split_open)){
+                n_open = n_open + 1
+
+                element = var_split_open[j]
+                element_split_close = strsplit(element, ")", fixed = TRUE)[[1]]
+
+                n_close = length(element_split_close) - 1
+                n_open = n_open - n_close
+                if(n_open == 0){
+                    n_el = length(element_split_close)
+                    element_split_close[n_el] = gsub("(^|[^:]):($|[^:])", "\\1*\\2", element_split_close[n_el])
+                    var_split_open[j] = paste(element_split_close, collapse = ")")
+                }
+            }
+
+            res[i] = paste(var_split_open, collapse = "(")
+
+        }
+
+        return(res)
+
+    } else {
+        return(x)
+    }
 }
 
 #### ................. ####

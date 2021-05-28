@@ -347,7 +347,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
         # Checking the presence
         complete_vars = all_vars_with_f(fml)
-        if(any(!complete_vars %in% dataNames)){
+        if(any(!complete_vars %in% c(dataNames, ".F", ".L"))){
             # Question: is the missing variable a scalar from the global environment?
             var_pblm = setdiff(complete_vars, dataNames)
             n_pblm = length(var_pblm)

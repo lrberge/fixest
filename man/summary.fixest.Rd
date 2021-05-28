@@ -2,7 +2,6 @@
 % Please edit documentation in R/MiscFuns.R
 \name{summary.fixest}
 \alias{summary.fixest}
-\alias{summ}
 \alias{summary.fixest_list}
 \title{Summary of a \code{fixest} object. Computes different types of standard errors.}
 \usage{
@@ -19,16 +18,6 @@
   keepBounded = FALSE,
   n,
   nthreads = getFixest_nthreads(),
-  ...
-)
-
-summ(
-  object,
-  se,
-  cluster,
-  dof = getFixest_dof(),
-  forceCovariance = FALSE,
-  keepBounded = FALSE,
   ...
 )
 

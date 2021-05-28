@@ -36,15 +36,24 @@ Note that contrary to the SA article, here the cohort share in the sample is con
 
 data(base_stagg)
 
+# 2 kind of estimations:
+# - regular TWFE model
+# - estimation with cohort x time_to_treatment interactions, later aggregated
+
+# Note: the never treated have a time_to_treatment equal to -1000
+
 # Now we perform the estimation
-res_naive = feols(y ~ i(time_to_treatment, treated,
-                        ref = c(-1, -1000)) | id + year, base_stagg)
+res_twfe = feols(y ~ x1 + i(time_to_treatment, treated,
+                            ref = c(-1, -1000)) | id + year, base_stagg)
 
-res_cohort = feols(y ~ i(time_to_treatment, f.year_treated,
-                         ref = c(-1, -1000)) | id + year, base_stagg)
+# we use the "f." prefix to force year_treated to be considered as a factor
+res_cohort = feols(y ~ x1 + i(time_to_treatment, f.year_treated,
+                              ref = c(-1, -1000)) | id + year, base_stagg)
 
-coefplot(res_naive, ylim = c(-6, 8))
-att_true = tapply(base$y_true, base$time_to_treatment, mean)[-1]
+# Displaying the results
+iplot(res_twfe, ylim = c(-6, 8))
+att_true = tapply(base_stagg$treatment_effect_true,
+                  base_stagg$time_to_treatment, mean)[-1]
 points(-9:8 + 0.15, att_true, pch = 15, col = 2)
 
 # The aggregate effect for each period
@@ -56,15 +65,16 @@ ci_up = agg_coef[, 1] + 1.96 * agg_coef[, 2]
 segments(x0 = x, y0 = ci_low, x1 = x, y1 = ci_up, col = 4)
 
 legend("topleft", col = c(1, 2, 4), pch = c(20, 15, 17),
-       legend = c("Naive", "True", "Sun & Abraham"))
+       legend = c("TWFE", "True", "Sun & Abraham"))
 
 
 # The ATT
 aggregate(res_cohort, c("ATT" = "treatment::[^-]"))
-mean(base[base$treat_post == 1, "y_true"])
+with(base_stagg, mean(treatment_effect_true[time_to_treatment >= 0]))
 
-# With etable
-etable(res_naive, res_cohort, agg = "(ti.*nt)::(-?[[:digit:]]+):gro")
+# The total effect for each cohort
+aggregate(res_cohort, c("cohort" = "::[^-].*year_treated::([[:digit:]]+)"))
+
 
 }
 \references{
