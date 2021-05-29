@@ -16,7 +16,9 @@
 #' @param cohort A vector representing the cohort. It should represent the period at which the treatment has been received (and thus be fixed for each unit).
 #' @param period A vector representing the period. It can be either a relative time period (with negative values representing the before the treatment and positive values after the treatment), or a regular time period. In the latter case, the relative time period will be created from the cohort information (which represents the time at which the treatment has been received).
 #' @param ref.c A vector of references for the cohort. By default the never treated cohorts are taken as reference and the always treated are excluded from the estimation. You can add more references with this argument, which means that dummies will not be created for them (but they will remain in the estimation).
-#' @param ref.p A vector of references for the (relative!) period. By default the first relative period (RP) and the 0 are taken as reference. You can instead use your own references (i.e. RPs for which dummies will not be created -- but these observations remain in the sample). Please note that you will need at least two references. You can use the special variables \code{.F} and \code{.L} to access the first and the last relative periods. Using these notations, the default is \code{c(.F, -1)}.
+#' @param ref.p A vector of references for the (relative!) period. By default the first relative period (RP) before the treatment, i.e. -1, is taken as reference. You can instead use your own references (i.e. RPs for which dummies will not be created -- but these observations remain in the sample). Please note that you will need at least two references. You can use the special variables \code{.F} and \code{.L} to access the first and the last relative periods.
+#' @param att Logical, default is \code{FALSE}. If \code{TRUE}: then the total average treatment effect for the treated is computed (instead of the ATT for each relative period).
+#' @param no_agg Logical, default is \code{FALSE}. If \code{TRUE}: then there is no aggregation, leading to the esimation of all \code{cohort x time to treatment} coefficients.
 #'
 #' @details
 #' This function creates a matrix of \code{cohort x relative_period} interactions, and if used within a \code{fixest} estimation, the coefficients will automatically be aggregated to obtain the ATT for each relative period. In practice, the coefficients are aggregated with the \code{\link[fixest]{aggregate.fixest}} function whose argument \code{agg} is automatically set to the appropriate value.
@@ -70,7 +72,7 @@
 #' summary(res_sunab, agg = "cohort")
 #'
 #'
-sunab = function(cohort, period, ref.c = NULL, ref.p = c(-1, .F), att = FALSE, no_agg = FALSE){
+sunab = function(cohort, period, ref.c = NULL, ref.p = -1, att = FALSE, no_agg = FALSE){
     # LATER:
     # - add id or indiv argument, just to remove always treated
     # - add argument bin.p
@@ -183,7 +185,7 @@ sunab = function(cohort, period, ref.c = NULL, ref.p = c(-1, .F), att = FALSE, n
     cohort = cohort[-qui_drop]
     period = period[-qui_drop]
 
-    res_raw = i(fvar = period, f2 = cohort, f_name = period_name)
+    res_raw = i(factor_var = period, f2 = cohort, f_name = period_name)
 
     # We extend the matrix
 
@@ -250,7 +252,7 @@ sunab = function(cohort, period, ref.c = NULL, ref.p = c(-1, .F), att = FALSE, n
 }
 
 #' @rdname sunab
-sunab_att = function(cohort, period, ref.c = NULL, ref.p = c(.F, 0)){
+sunab_att = function(cohort, period, ref.c = NULL, ref.p = -1){
     sunab(cohort, period, ref.c, ref.p, att = TRUE)
 }
 
@@ -298,8 +300,8 @@ sunab_att = function(cohort, period, ref.c = NULL, ref.p = c(.F, 0)){
 #' res_twfe = feols(y ~ x1 + i(time_to_treatment, treated,
 #'                             ref = c(-1, -1000)) | id + year, base_stagg)
 #'
-#' # we use the "f." prefix to force year_treated to be considered as a factor
-#' res_cohort = feols(y ~ x1 + i(time_to_treatment, f.year_treated,
+#' # we use the "i." prefix to force year_treated to be considered as a factor
+#' res_cohort = feols(y ~ x1 + i(time_to_treatment, i.year_treated,
 #'                               ref = c(-1, -1000)) | id + year, base_stagg)
 #'
 #' # Displaying the results
@@ -346,18 +348,21 @@ aggregate.fixest = function(x, agg, full = FALSE, use_weights = TRUE, ...){
 
     no_agg = FALSE
     agg_rm = NULL
-    if(tolower(agg) %in% c("att", "period", "cohort", "TRUE")){
+    check_value_plus(agg, "match(att, period, cohort, TRUE) | scalar")
+    if(agg %in% c("att", "period", "cohort", "TRUE")){
         if(isTRUE(x$is_sunab)){
-            if(tolower(agg) == "att"){
+            agg_name = names(agg)
+            if(agg == "att"){
                 agg = x$model_matrix_info$sunab$agg_att
                 # we also remove the previous vars
                 agg_rm = gsub("E::", "E::-?", agg, fixed = TRUE)
-            } else if(tolower(agg) == "cohort"){
+            } else if(agg == "cohort"){
                 agg = c("cohort" = "::[^-].*:cohort::(.+)")
                 agg_rm = gsub("E::", "E::-?", x$model_matrix_info$sunab$agg_att, fixed = TRUE)
             } else {
                 agg = x$model_matrix_info$sunab$agg_period
             }
+            if(!is.null(agg_name)) names(agg) = agg_name
         }
     } else if(isFALSE(agg)){
         agg = c("nothing to remove" = "we want all the coefficients")

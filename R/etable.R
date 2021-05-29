@@ -3743,7 +3743,8 @@ extraline_register = function(type, fun, alias){
     }
 
     # We test the function on a simple estimation
-    est = feols(Petal.Length ~ Sepal.Length, iris)
+    base = data.frame(y = rnorm(100), x = rnorm(100))
+    est = feols(y ~ x, base)
     mc = match.call()
     fun_name = deparse_long(mc$fun)
     value = error_sender(fun(est), "The function '", fun_name, "' could not evaluated on a simple fixest object. Please try to improve it.")

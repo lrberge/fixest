@@ -227,7 +227,6 @@
 #'
 coefplot = function(object, ..., style = NULL, sd, ci_low, ci_high, x, x.shift = 0, horiz = FALSE,
                     dict = getFixest_dict(), keep, drop, order, ci.width = "1%",
-                    coef.sort = FALSE,
                     ci_level = 0.95, add = FALSE, pt.pch = c(20, 17, 15, 21, 24, 22), pt.bg = NULL, cex = 1,
                     pt.cex = cex, col = 1:8, pt.col = col, ci.col = col, lwd = 1, pt.lwd = lwd,
                     ci.lwd = lwd, ci.lty = 1, grid = TRUE, grid.par = list(lty=3, col = "gray"),
@@ -1652,10 +1651,10 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
             }
 
             # Four cases:
-            # - fvar::value
-            # - fvar::value:xnum
-            # - xnum:fvar::value
-            # - fvar::value:xfact::value
+            # - factor_var::value
+            # - factor_var::value:xnum
+            # - xnum:factor_var::value
+            # - factor_var::value:xfact::value
 
             # Restriction:
             # it only accepts "pure" i() variables

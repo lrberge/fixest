@@ -2477,10 +2477,10 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #'
 #' Treat a variable as a factor, or interacts a variable with a factor. Values to be dropped/kept from the factor can be easily set. Note that to interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2}.
 #'
-#' @param fvar  A vector (of any type) that will be treated as a factor. You can set references with the \code{ref} argument.
-#' @param var A variable of the same length as \code{fvar}. This variable will be interacted with the factor in \code{fvar}. It can be numeric or factor-like. To force a numeric variable to be treated as a factor, you can add the \code{f.} prefix to a variable name. For instance take a numeric variable \code{x_num}: \code{i(x_fact, x_num)} will treat \code{x_num} as numeric while \code{i(x_fact, f.x_num)} will treat \code{x_num} as a factor (it's a shortcut to \code{as.factor(x_num)}).
-#' @param ref A vector of values to be taken as references from \code{fvar}. Can also be a logical: if \code{TRUE}, then the first value of \code{fvar} will be removed. If \code{ref} is a character vector, partial matching is applied to values; use "@" as the first character to enable regular expression matching. See examples.
-#' @param keep A vector of values to be kept from \code{fvar} (all others are dropped). By default they should be values from \code{fvar} and if \code{keep} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
+#' @param factor_var  A vector (of any type) that will be treated as a factor. You can set references (i.e. exclude values for which to create dummies) with the \code{ref} argument.
+#' @param var A variable of the same length as \code{factor_var}. This variable will be interacted with the factor in \code{factor_var}. It can be numeric or factor-like. To force a numeric variable to be treated as a factor, you can add the \code{i.} prefix to a variable name. For instance take a numeric variable \code{x_num}: \code{i(x_fact, x_num)} will treat \code{x_num} as numeric while \code{i(x_fact, i.x_num)} will treat \code{x_num} as a factor (it's a shortcut to \code{as.factor(x_num)}).
+#' @param ref A vector of values to be taken as references from \code{factor_var}. Can also be a logical: if \code{TRUE}, then the first value of \code{factor_var} will be removed. If \code{ref} is a character vector, partial matching is applied to values; use "@" as the first character to enable regular expression matching. See examples.
+#' @param keep A vector of values to be kept from \code{factor_var} (all others are dropped). By default they should be values from \code{factor_var} and if \code{keep} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
 #' @param ref2 A vector of values to be dropped from \code{var}. By default they should be values from \code{var} and if \code{ref2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
 #' @param keep2 A vector of values to be kept from \code{var} (all others are dropped). By default they should be values from \code{var} and if \code{keep2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
 #' @param ... Not currently used.
@@ -2489,10 +2489,10 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' To interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2} in the fixed-effects part of the formula. Please see the details and examples in the help page of \code{\link[fixest]{feols}}.
 #'
 #' @return
-#' It returns a matrix with number of rows the length of \code{fvar}. If there is no interacted variable or theit is numeric, the number of columns is equal to the number of cases contained in \code{fvar} minus the reference(s). If the interacted variable is a factor, the number of columns is the number of combined cases between \code{fvar} and \code{var}.
+#' It returns a matrix with number of rows the length of \code{factor_var}. If there is no interacted variable or it is interacted with a numeric variable, the number of columns is equal to the number of cases contained in \code{factor_var} minus the reference(s). If the interacted variable is a factor, the number of columns is the number of combined cases between \code{factor_var} and \code{var}.
 #'
 #' @section Shorthand in \code{fixest} estimations:
-#' In \code{fixest} estimations, instead of using \code{i(fvar, var, ref)}, you can instead use the following writing \code{var::fvar(ref)}. Note that this way of doing interactions is deprecated and will be removed in the future.
+#' In \code{fixest} estimations, instead of using \code{i(factor_var, var, ref)}, you can instead use the following writing \code{var::factor_var(ref)}. Note that this way of doing interactions is deprecated and will be removed in the future.
 #'
 #' @author
 #' Laurent Berge
@@ -2519,8 +2519,8 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' z = rep(c("e", "f", "g"), c(5, 3, 2))
 #' data.frame(x, z, i(x, z))
 #'
-#' # to force a numeric variable to be treated as a factor: use f.
-#' data.frame(x, y, i(x, f.y))
+#' # to force a numeric variable to be treated as a factor: use i.
+#' data.frame(x, y, i(x, i.y))
 #'
 #' #
 #' # In fixest estimations
@@ -2545,20 +2545,20 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' # Interact two factors
 #' #
 #'
-#' # We use the f. prefix to consider week as a factor
+#' # We use the i. prefix to consider week as a factor
 #' data(airquality)
 #' aq = airquality
 #' aq$week = aq$Day %/% 7 + 1
 #'
 #' # Interacting Month and week:
-#' res_2F = feols(Ozone ~ Solar.R + i(Month, f.week), aq)
+#' res_2F = feols(Ozone ~ Solar.R + i(Month, i.week), aq)
 #'
 #' # Same but dropping the 5th Month and 1st week
-#' res_2F_bis = feols(Ozone ~ Solar.R + i(Month, f.week, ref = 5, ref2 = 1), aq)
+#' res_2F_bis = feols(Ozone ~ Solar.R + i(Month, i.week, ref = 5, ref2 = 1), aq)
 #'
 #' etable(res_2F, res_2F_bis)
 #'
-i = function(fvar, var, ref, keep, ref2, keep2, ...){
+i = function(factor_var, var, ref, keep, ref2, keep2, ...){
     # Used to create interactions
 
     # Later: binning (bin = 1:3 // bin = list("a" = "[abc]")). Default name is bin name (eg "1:3")
@@ -2575,10 +2575,10 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
     FROM_FIXEST = is_fixest_call()
 
     # General checks
-    check_arg(fvar, "mbt vector")
+    check_arg(factor_var, "mbt vector")
 
     # NOTA:
-    # the user can use the prefix "f." to tell the algorithm to consider the
+    # the user can use the prefix "i." to tell the algorithm to consider the
     # variable var as a factor. This requires a non standard evaluation
     #
 
@@ -2595,14 +2595,14 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
     if(!is.null(dots$f_name)){
         f_name = dots$f_name
     } else {
-        f_name = deparse_long(mc$fvar)
+        f_name = deparse_long(mc$factor_var)
     }
-    f = fvar # renaming for clarity
+    f = factor_var # renaming for clarity
 
     # checking var
     IS_INTER_NUMERIC = IS_INTER_FACTOR = FALSE
     if(!missing(var)){
-        # Evaluation of var (with possibly, user prepending with f.)
+        # Evaluation of var (with possibly, user prepending with i.)
         if(is.null(var_name)){
             var_name = deparse_long(mc$var)
             if(grepl("^f\\.", var_name)){
@@ -2702,14 +2702,14 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
             # Que ce soit items ici est normal (et pas f_items)
             id_drop = which(items == items[1])
         } else {
-            id_drop = items_to_drop(f_items, ref, "fvar")
+            id_drop = items_to_drop(f_items, ref, "factor_var")
         }
         ref_id = id_drop
     }
 
 
     if(!missing(keep)){
-        id_drop = c(id_drop, items_to_drop(f_items, keep, "fvar", keep = TRUE))
+        id_drop = c(id_drop, items_to_drop(f_items, keep, "factor_var", keep = TRUE))
     }
 
     if(IS_INTER_FACTOR){
@@ -2816,7 +2816,7 @@ i = function(fvar, var, ref, keep, ref2, keep2, ...){
 #' @rdname i
 interact = i
 
-i_ref = function(fvar, var, ref, keep, ref2, keep2){
+i_ref = function(factor_var, var, ref, keep, ref2, keep2){
     # To automatically add references when i(x) is used
 
     mc = match.call()
@@ -2830,7 +2830,7 @@ i_ref = function(fvar, var, ref, keep, ref2, keep2){
     return(deparse_long(mc))
 }
 
-i_noref = function(fvar, var, ref, keep, ref2, keep2){
+i_noref = function(factor_var, var, ref, keep, ref2, keep2){
     # Used only in predict => to create data without restriction
 
     mc = match.call()
@@ -4110,7 +4110,7 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
     #
 
     # subset => we allow the extraction of only some variables
-    all_vars = all_vars_with_f(fml[[3]])
+    all_vars = all_vars_with_i_prefix(fml[[3]])
     if(isFALSE(subset)){
 
         if(!original_data && any(!all_vars %in% names(newdata))){
@@ -4148,7 +4148,7 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
             terms_drop = is_var & !terms_all %in% vars_keep
 
             for(i in which(!is_var)){
-                if(any(!all_vars_with_f(str2lang(terms_all[i])) %in% vars_keep)){
+                if(any(!all_vars_with_i_prefix(str2lang(terms_all[i])) %in% vars_keep)){
                     terms_drop[i] = TRUE
                 }
             }
@@ -6320,29 +6320,29 @@ is_fixest_call = function(){
     sys.nframe() > 5 && any(sapply(tail(sys.calls(), 7), function(x) any(grepl("fixest", deparse(x)[1], fixed = TRUE))))
 }
 
-all_vars_with_f = function(fml){
-    # fml = a ~ x1^x2 + i(x3, f.x4) + x5*i(x6, I(f.x7))
+all_vars_with_i_prefix = function(fml){
+    # fml = a ~ x1^x2 + i(x3, i.x4) + x5*i(x6, I(i.x7))
 
     vars = all.vars(fml)
-    if(any(grepl("^f\\..+", vars))){
+    if(any(grepl("^i\\..+", vars))){
         fml_dp = deparse_long(fml)
-        # for f. to work it MUST be the second argument (var)
+        # for i. to work it MUST be the second argument (var)
         # valid cases:
-        # - i(x1, f.x2)
-        # - i(var = f.x2, x1)
-        # - i(x1, f.I(x7))
+        # - i(x1, i.x2)
+        # - i(var = i.x2, x1)
+        # - i(x1, i.I(x7))
         # Not valid:
-        # - i(x1, I(f.x7))
+        # - i(x1, I(i.x7))
         #
-        # This means that in the parsed formula, f. is always preceded by a space and
+        # This means that in the parsed formula, i. is always preceded by a space and
         # either a "," or a "="
 
-        # Maybe later: add nice error messages reminding how to use f.
+        # Maybe later: add nice error messages reminding how to use i.
 
-        qui_f = which(grepl("^f\\..+", vars))
-        f_vars = vars[qui_f]
-        for(i in seq_along(f_vars)){
-            fml_split = strsplit(fml_dp, f_vars[i], fixed = TRUE)[[1]]
+        qui_i = which(grepl("^i\\..+", vars))
+        i_vars = vars[qui_i]
+        for(i in seq_along(i_vars)){
+            fml_split = strsplit(fml_dp, i_vars[i], fixed = TRUE)[[1]]
             n = length(fml_split) - 1
             for(j in 1:n){
                 part = fml_split[j]
@@ -6350,7 +6350,7 @@ all_vars_with_f = function(fml){
                     part = gsub("\\([^\\)]+\\)", "", part)
                     if(grepl("i(nteract)?\\(", part)){
                         # OK!
-                        ii = qui_f[i]
+                        ii = qui_i[i]
                         vars[ii] = substr(vars[ii], 3, nchar(vars[ii]))
                     }
                 }
@@ -6378,10 +6378,13 @@ colon_to_star = function(x){
     qui_colon = grepl(":", x, fixed = TRUE)
     qui_paren = grepl("(", x, fixed = TRUE)
 
-    qui_check = qui_colon & qui_paren
-    if(any(qui_check)){
+    if(any(qui_colon)){
 
         res = x
+        res[qui_colon & !qui_paren] = gsub("(^|[^:]):($|[^:])", "\\1*\\2", res[qui_colon & !qui_paren])
+
+        qui_check = qui_colon & qui_paren
+
         for(i in which(qui_check)){
             var = x[i]
 
@@ -7158,9 +7161,9 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 	rhs_fml = fml_split(fml, 1)
 	if(grepl("[^:]::[^:]", deparse_long(rhs_fml[[3]]))){
 	    new_fml = expand_interactions(rhs_fml)
-	    linear.varnames = all_vars_with_f(new_fml[[3]])
+	    linear.varnames = all_vars_with_i_prefix(new_fml[[3]])
 	} else {
-	    linear.varnames = all_vars_with_f(rhs_fml[[3]])
+	    linear.varnames = all_vars_with_i_prefix(rhs_fml[[3]])
 	}
 
 	if(length(linear.varnames) > 0){
@@ -7168,7 +7171,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 
 	    if(isTRUE(object$iv) && object$iv_stage == 2){
 	        names(coef) = gsub("^fit_", "", names(coef))
-	        linear.varnames = c(linear.varnames, all_vars_with_f(object$fml_all$iv[[2]]))
+	        linear.varnames = c(linear.varnames, all_vars_with_i_prefix(object$fml_all$iv[[2]]))
 	        iv_fml = object$fml_all$iv
 	        rhs_fml = .xpd(..lhs ~ ..endo + ..rhs, ..lhs = rhs_fml[[2]], ..endo = iv_fml[[2]], ..rhs = rhs_fml[[3]])
 	    }

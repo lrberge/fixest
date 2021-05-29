@@ -30,10 +30,19 @@
 
 	setFixest_nthreads(nthreads)
 
-	# breaking message: don't know how long I'll keep it
-	is_msg = !isFALSE(Sys.getenv("fixest_startup_msg"))
-	if(is_msg) message("fixest 0.9.0, BREAKING changes! \nin i():\n  a) the two first arguments have been swapped! Now it's i(factor_var, continuous_var) for interactions. \n  b) argument 'drop' has been removed (put everything in 'ref' now).")
+
 
 	invisible()
 }
+
+
+
+.onAttach = function(libname, pkgname) {
+
+    # breaking message: don't know how long I'll keep it
+    is_msg = !isFALSE(Sys.getenv("fixest_startup_msg"))
+    if(is_msg) packageStartupMessage("fixest 0.9.0, BREAKING changes! \nin i():\n  a) the two first arguments have been swapped! Now it's i(factor_var, continuous_var) for interactions. \n  b) argument 'drop' has been removed (put everything in 'ref' now).")
+
+}
+
 

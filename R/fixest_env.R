@@ -346,7 +346,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         }
 
         # Checking the presence
-        complete_vars = all_vars_with_f(fml)
+        complete_vars = all_vars_with_i_prefix(fml)
         if(any(!complete_vars %in% c(dataNames, ".F", ".L"))){
             # Question: is the missing variable a scalar from the global environment?
             var_pblm = setdiff(complete_vars, dataNames)
@@ -925,7 +925,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     } else {
         isLinear = FALSE
 
-        linear.varnames = all_vars_with_f(fml_linear[[3]])
+        linear.varnames = all_vars_with_i_prefix(fml_linear[[3]])
 
         fml_terms = terms(fml_linear)
         if(length(linear.varnames) > 0 || attr(fml_terms, "intercept") == 1){
@@ -3686,13 +3686,13 @@ extract_stepwise = function(fml, tms, all_vars = TRUE){
 
             if(all_vars){
                 if(is_fml){
-                    sw_all_vars = all_vars_with_f(fml[[3]])
+                    sw_all_vars = all_vars_with_i_prefix(fml[[3]])
                 } else {
                     # we need to recreate the formula because of impossible_var_name in tms
-                    sw_all_vars = all_vars_with_f(.xpd(rhs = tl))
+                    sw_all_vars = all_vars_with_i_prefix(.xpd(rhs = tl))
                 }
             } else {
-                sw_all_vars = all_vars_with_f(.xpd(rhs = sw_terms))
+                sw_all_vars = all_vars_with_i_prefix(.xpd(rhs = sw_terms))
             }
 
             # Creating the current formula
