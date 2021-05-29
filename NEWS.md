@@ -51,7 +51,7 @@
  
  - the first two arguments have been swapped! such that now the first argument will always be treated as a factor. 
  
- - the new syntax is `i(fvar, var, ref, keep, ref2, keep2)` where `var` can be either continuous or factor-like (the argument `f2`, for interaction with factors, has been removed).
+ - the new syntax is `i(factor_var, var, ref, keep, ref2, keep2)` where `var` can be either continuous or factor-like (the argument `f2`, for interaction with factors, has been removed).
 
 ## etable
 
@@ -129,7 +129,7 @@ Common methods have been extended to `fixest_multi` objects.
 
   - Improve error messages. 
   
-  - hatvalues.fixest: now returns an error instead of a message when fixed-effects are present (it makes the interplay with `sadnwich` 'nicer').
+  - `hatvalues.fixest`: now returns an error instead of a message when fixed-effects are present (it makes the interplay with `sadnwich` 'nicer').
 
 # fixest 0.8.4
 
