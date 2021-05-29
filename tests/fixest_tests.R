@@ -602,8 +602,8 @@ base$fe_bis = sample(10, 150, TRUE)
 base$fe_ter = sample(15, 150, TRUE)
 
 get_coef = function(all_coef, x){
-    res = all_coef[grepl(x, names(all_coef))]
-    names(res) = gsub(x, "", names(res))
+    res = all_coef[grepl(x, names(all_coef), perl = TRUE)]
+    names(res) = gsub(x, "", names(res), perl = TRUE)
     res
 }
 
@@ -636,7 +636,7 @@ test(var(c1 - m_fe$species[names(c1)]), 0, "~")
 c2  = get_coef(all_coef, "factor\\(fe_bis\\)")
 test(var(c2 - m_fe$fe_bis[names(c2)]), 0, "~")
 
-c3  = get_coef(all_coef, "i\\(x3, fe_bis\\)")
+c3  = get_coef(all_coef, "fe_bis::|:x3")
 test(c3, m_fe[["fe_bis[[x3]]"]][names(c3)], "~", tol = 1e-5)
 
 #
@@ -647,16 +647,16 @@ m = feols(y ~ x1 | species[x2] + fe_bis[x3] + fe_ter, base)
 all_coef = coef(feols(y ~ -1 + x1 + species + i(species, x2) + factor(fe_bis) + i(fe_bis, x3) + factor(fe_ter), base))
 
 m_fe = fixef(m)
-c1  = get_coef(all_coef, "^species")
+c1  = get_coef(all_coef, "^species(?=[^:])")
 test(var(c1 - m_fe$species[names(c1)]), 0, "~")
 
 c2  = get_coef(all_coef, "^factor\\(fe_bis\\)")
 test(var(c2 - m_fe$fe_bis[names(c2)]), 0, "~")
 
-c3  = get_coef(all_coef, "i\\(var = x3, f = fe_bis\\)")
+c3  = get_coef(all_coef, "fe_bis::|:x3")
 test(c3, m_fe[["fe_bis[[x3]]"]][names(c3)], "~", tol = 2e-4)
 
-c4  = get_coef(all_coef, "i\\(x2, species\\)")
+c4  = get_coef(all_coef, "species::|:x2")
 test(c4, m_fe[["species[[x2]]"]][names(c4)], "~", tol = 2e-4)
 
 #
@@ -673,10 +673,10 @@ test(var(c1 - m_fe$species[names(c1)]), 0, "~")
 c2  = get_coef(all_coef, "^factor\\(fe_bis\\)")
 test(var(c2 - m_fe$fe_bis[names(c2)]), 0, "~")
 
-c3  = get_coef(all_coef, "i\\(var = x2, f = fe_bis\\)")
+c3  = get_coef(all_coef, "fe_bis::(?=.+x2)|:x2")
 test(c3, m_fe[["fe_bis[[x2]]"]][names(c3)], "~", tol = 2e-4)
 
-c4  = get_coef(all_coef, "i\\(var = x3, f = fe_bis\\)")
+c4  = get_coef(all_coef, "fe_bis::(?=.+x3)|:x3")
 test(c4, m_fe[["fe_bis[[x3]]"]][names(c4)], "~", tol = 2e-4)
 
 
@@ -695,10 +695,10 @@ test(var(c1 - m_fe$species[names(c1)]), 0, "~")
 c2  = get_coef(all_coef, "^factor\\(fe_bis\\)")
 test(var(c2 - m_fe$fe_bis[names(c2)]), 0, "~")
 
-c3  = get_coef(all_coef, "i\\(var = x2, f = fe_bis\\)")
+c3  = get_coef(all_coef, "fe_bis::(?=.+x2)|:x2")
 test(c3, m_fe[["fe_bis[[x2]]"]][names(c3)], "~", tol = 2e-4)
 
-c4  = get_coef(all_coef, "i\\(var = x3, f = fe_bis\\)")
+c4  = get_coef(all_coef, "fe_bis::(?=.+x3)|:x3")
 test(c4, m_fe[["fe_bis[[x3]]"]][names(c4)], "~", tol = 2e-4)
 
 
@@ -800,11 +800,11 @@ coefplot(m)
 etable(m, dict = c("0" = "zero"))
 
 m = feols(y ~ x1 + i(fe_2) + i(fe_2, x2), base)
-coefplot(m, only.inter = FALSE)
+coefplot(m)
 etable(m, dict = c("0" = "zero"))
 
 a = i(base$fe_2)
-b = i(base$fe_2, drop = 0:1)
+b = i(base$fe_2, ref = 0:1)
 d = i(base$fe_2, keep = 0:1)
 
 test(ncol(a), ncol(b) + 2)

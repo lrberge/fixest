@@ -5,16 +5,9 @@
 \alias{sunab_att}
 \title{Sun and Abraham interactions}
 \usage{
-sunab(
-  cohort,
-  period,
-  ref.c = NULL,
-  ref.p = c(-1, .F),
-  att = FALSE,
-  no_agg = FALSE
-)
+sunab(cohort, period, ref.c = NULL, ref.p = -1, att = FALSE, no_agg = FALSE)
 
-sunab_att(cohort, period, ref.c = NULL, ref.p = c(.F, 0))
+sunab_att(cohort, period, ref.c = NULL, ref.p = -1)
 }
 \arguments{
 \item{cohort}{A vector representing the cohort. It should represent the period at which the treatment has been received (and thus be fixed for each unit).}
@@ -23,7 +16,11 @@ sunab_att(cohort, period, ref.c = NULL, ref.p = c(.F, 0))
 
 \item{ref.c}{A vector of references for the cohort. By default the never treated cohorts are taken as reference and the always treated are excluded from the estimation. You can add more references with this argument, which means that dummies will not be created for them (but they will remain in the estimation).}
 
-\item{ref.p}{A vector of references for the (relative!) period. By default the first relative period (RP) and the 0 are taken as reference. You can instead use your own references (i.e. RPs for which dummies will not be created -- but these observations remain in the sample). Please note that you will need at least two references. You can use the special variables \code{.F} and \code{.L} to access the first and the last relative periods. Using these notations, the default is \code{c(.F, -1)}.}
+\item{ref.p}{A vector of references for the (relative!) period. By default the first relative period (RP) before the treatment, i.e. -1, is taken as reference. You can instead use your own references (i.e. RPs for which dummies will not be created -- but these observations remain in the sample). Please note that you will need at least two references. You can use the special variables \code{.F} and \code{.L} to access the first and the last relative periods.}
+
+\item{att}{Logical, default is \code{FALSE}. If \code{TRUE}: then the total average treatment effect for the treated is computed (instead of the ATT for each relative period).}
+
+\item{no_agg}{Logical, default is \code{FALSE}. If \code{TRUE}: then there is no aggregation, leading to the esimation of all \code{cohort x time to treatment} coefficients.}
 }
 \value{
 If not used within a \code{fixest} estimation, this function will return a matrix of interacted coefficients.
