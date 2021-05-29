@@ -46,7 +46,7 @@ data(base_stagg)
 res_twfe = feols(y ~ x1 + i(time_to_treatment, treated,
                             ref = c(-1, -1000)) | id + year, base_stagg)
 
-# we use the "f." prefix to force year_treated to be considered as a factor
+# we use the "i." prefix to force year_treated to be considered as a factor
 res_cohort = feols(y ~ x1 + i(time_to_treatment, i.year_treated,
                               ref = c(-1, -1000)) | id + year, base_stagg)
 

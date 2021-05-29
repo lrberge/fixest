@@ -98,9 +98,11 @@ Common methods have been extended to `fixest_multi` objects.
   
 ## New functions
 
-  - New function `degrees_freedom`: to access the DoFs of the models (sometimes that can be intricate).
+  - `degrees_freedom`: to access the DoFs of the models (sometimes that can be intricate).
   
   - `feols.fit`: fit method for feols. 
+  
+  - `obs`: to obtain the observations used in the estimation.
   
 ## New features
 

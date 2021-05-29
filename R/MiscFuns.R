@@ -3689,6 +3689,44 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
     res
 }
 
+#' Extracts the observations used for the estimation
+#'
+#' This function extracts the observations used in \code{fixest} estimation.
+#'
+#' @param x A \code{fixest} object.
+#'
+#' @return
+#' It returns a simple vector of integers.
+#'
+#' @examples
+#'
+#' base = iris
+#' names(base) = c("y", "x1", "x2", "x3", "species")
+#' base$y[1:5] = NA
+#'
+#' # Split sample estimations
+#' est_split = feols(y ~ x1, base, split = ~species)
+#' (obs_setosa = obs(est_split$setosa))
+#' (obs_versi = obs(est_split$versicolor))
+#'
+#' est_versi = feols(y ~ x1, base, subset = obs_versi)
+#'
+#' etable(est_split, est_versi)
+#'
+#'
+#'
+#'
+obs = function(x){
+    check_arg(x, "class(fixest)")
+
+    id = 1:x$nobs_origin
+
+    for(i in seq_along(x$obs_selection)){
+        id = id[x$obs_selection[[i]]]
+    }
+
+    return(id)
+}
 
 #### ................. ####
 #### Internal Funs     ####

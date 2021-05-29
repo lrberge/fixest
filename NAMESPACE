@@ -28,7 +28,7 @@ export(i, interact)
 # macro
 export(xpd)
 # utilities
-export(to_integer, demean)
+export(to_integer, demean, obs)
 # setters & getters
 exportPattern("^(s|g)etFixest")
 
