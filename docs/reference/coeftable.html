@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -115,7 +115,7 @@
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/lrberge/fixest/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -141,15 +141,15 @@
     <p>Set of functions to directly extract some commonly used statistics, like the p-value or the table of coefficients, from estimations. This was first implemented for <code>fixest</code> estimations, but has some support for other models.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>coeftable</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>se</span>, <span class='va'>cluster</span>, <span class='va'>...</span><span class='op'>)</span>
+    <pre class="usage"><span class='fu'>coeftable</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>se</span>, <span class='va'>cluster</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, <span class='va'>...</span><span class='op'>)</span>
 
-<span class='fu'>ctable</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>se</span>, <span class='va'>cluster</span>, <span class='va'>...</span><span class='op'>)</span>
+<span class='fu'>ctable</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>se</span>, <span class='va'>cluster</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, <span class='va'>...</span><span class='op'>)</span>
 
-<span class='fu'>pvalue</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>se</span>, <span class='va'>cluster</span>, <span class='va'>...</span><span class='op'>)</span>
+<span class='fu'>pvalue</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>se</span>, <span class='va'>cluster</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, <span class='va'>...</span><span class='op'>)</span>
 
-<span class='fu'>tstat</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>se</span>, <span class='va'>cluster</span>, <span class='va'>...</span><span class='op'>)</span>
+<span class='fu'>tstat</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>se</span>, <span class='va'>cluster</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, <span class='va'>...</span><span class='op'>)</span>
 
-<span class='fu'>se</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>se</span>, <span class='va'>cluster</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+<span class='fu'>se</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>se</span>, <span class='va'>cluster</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -165,6 +165,18 @@
     <tr>
       <th>cluster</th>
       <td><p>[Fixest specific.] Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1, "var2")]}, \code{cluster = c("var1, "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as clusters in the estimation, you could further use <code>cluster = 1:2</code> or leave it blank with <code>se = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] cluster).</p></td>
+    </tr>
+    <tr>
+      <th>keep</th>
+      <td><p>Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see <code><a href='https://rdrr.io/r/base/regex.html'>regex</a></code> help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to display only <code>x1</code> to <code>x9</code>, then you could use <code>keep = "x[[:digit:]]$"</code>. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain &#8220;Intercept&#8221; is kept). See details.</p></td>
+    </tr>
+    <tr>
+      <th>drop</th>
+      <td><p>Character vector. This element is used if some variables are not to be displayed. This should be a vector of regular expressions (see <code><a href='https://rdrr.io/r/base/regex.html'>regex</a></code> help for more info). Each variable satisfying any of the regular expressions will be discarded. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to display only <code>x1</code> to <code>x9</code>, then you could use <code>drop = "x[[:digit:]]{2}"</code>. If the first character is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable that does not contain &#8220;Intercept&#8221; is dropped). See details.</p></td>
+    </tr>
+    <tr>
+      <th>order</th>
+      <td><p>Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see <code><a href='https://rdrr.io/r/base/regex.html'>regex</a></code> help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the following variables: <code>month1</code> to <code>month6</code>, then <code>x1</code> to <code>x5</code>, then <code>year1</code> to <code>year6</code>. If you want to display first the x's, then the years, then the months you could use: <code>order = c("x", "year")</code>. If the first character is an exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that does not contain &#8220;Intercept&#8221; goes first).  See details.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -199,8 +211,10 @@
 
 <span class='co'># Default is clustering along Origin^Product</span>
 <span class='fu'>coeftable</span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;               Estimate Std. Error   z value      Pr(&gt;|z|)
-#&gt; log(dist_km) -1.023957 0.04728994 -21.65275 5.725404e-104</div><div class='input'><span class='fu'>se</span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;               Estimate Std. Error   t value     Pr(&gt;|t|))
+#&gt; log(dist_km) -1.023957 0.04728994 -21.65275 5.725404e-104
+#&gt; attr(,"type")
+#&gt; [1] "Clustered (Origin^Product)"</div><div class='input'><span class='fu'>se</span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; log(dist_km) 
 #&gt;   0.04728994 </div><div class='input'><span class='fu'>tstat</span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; log(dist_km) 
@@ -211,8 +225,10 @@
 <span class='co'>#  and using ctable(), the alias to coeftable()</span>
 
 <span class='fu'>ctable</span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='op'>~</span><span class='va'>Origin</span> <span class='op'>+</span> <span class='va'>Product</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;               Estimate Std. Error   z value    Pr(&gt;|z|)
-#&gt; log(dist_km) -1.023957  0.0906375 -11.29728 1.35342e-29</div><div class='input'><span class='fu'>se</span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='op'>~</span><span class='va'>Origin</span> <span class='op'>+</span> <span class='va'>Product</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;               Estimate Std. Error   t value   Pr(&gt;|t|))
+#&gt; log(dist_km) -1.023957  0.0906375 -11.29728 1.35342e-29
+#&gt; attr(,"type")
+#&gt; [1] "Two-way (Origin &amp; Product)"</div><div class='input'><span class='fu'>se</span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='op'>~</span><span class='va'>Origin</span> <span class='op'>+</span> <span class='va'>Product</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; log(dist_km) 
 #&gt;    0.0906375 </div><div class='input'><span class='fu'>pvalue</span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='op'>~</span><span class='va'>Origin</span> <span class='op'>+</span> <span class='va'>Product</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; log(dist_km) 
@@ -222,14 +238,35 @@
 <span class='co'># Or you can cluster only once:</span>
 <span class='va'>est_sum</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='op'>~</span><span class='va'>Origin</span> <span class='op'>+</span> <span class='va'>Product</span><span class='op'>)</span>
 <span class='fu'>ctable</span><span class='op'>(</span><span class='va'>est_sum</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;               Estimate Std. Error   z value    Pr(&gt;|z|)
-#&gt; log(dist_km) -1.023957  0.0906375 -11.29728 1.35342e-29</div><div class='input'><span class='fu'>se</span><span class='op'>(</span><span class='va'>est_sum</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;               Estimate Std. Error   t value   Pr(&gt;|t|))
+#&gt; log(dist_km) -1.023957  0.0906375 -11.29728 1.35342e-29
+#&gt; attr(,"type")
+#&gt; [1] "Two-way (Origin &amp; Product)"</div><div class='input'><span class='fu'>se</span><span class='op'>(</span><span class='va'>est_sum</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; log(dist_km) 
 #&gt;    0.0906375 </div><div class='input'><span class='fu'>tstat</span><span class='op'>(</span><span class='va'>est_sum</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; log(dist_km) 
 #&gt;    -11.29728 </div><div class='input'><span class='fu'>pvalue</span><span class='op'>(</span><span class='va'>est_sum</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; log(dist_km) 
 #&gt;  1.35342e-29 </div><div class='input'>
+<span class='co'># You can use the arguments keep, drop, order</span>
+<span class='co'># to rearrange the results</span>
+
+<span class='va'>base</span> <span class='op'>=</span> <span class='va'>iris</span>
+<span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>)</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span>
+
+<span class='va'>est_iv</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>|</span> <span class='va'>x2</span> <span class='op'>~</span> <span class='va'>x3</span>, <span class='va'>base</span><span class='op'>)</span>
+
+<span class='fu'>tstat</span><span class='op'>(</span><span class='va'>est_iv</span>, keep <span class='op'>=</span> <span class='st'>"x1"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;       x1 
+#&gt; 7.960735 </div><div class='input'><span class='fu'>coeftable</span><span class='op'>(</span><span class='va'>est_iv</span>, keep <span class='op'>=</span> <span class='st'>"x1|Int"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;             Estimate Std. Error  t value    Pr(&gt;|t|))
+#&gt; (Intercept) 2.438955 0.25349903 9.621160 2.688392e-17
+#&gt; x1          0.559183 0.07024264 7.960735 4.261663e-13</div><div class='input'>
+<span class='fu'>coeftable</span><span class='op'>(</span><span class='va'>est_iv</span>, order <span class='op'>=</span> <span class='st'>"!Int"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;              Estimate Std. Error   t value    Pr(&gt;|t|))
+#&gt; fit_x2      0.4509765 0.01794806 25.126759 4.556383e-55
+#&gt; x1          0.5591830 0.07024264  7.960735 4.261663e-13
+#&gt; (Intercept) 2.4389548 0.25349903  9.621160 2.688392e-17</div><div class='input'>
 
 
 </div></pre>

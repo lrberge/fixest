@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Fast and User-Friendly Fixed-Effects Estimations — _index_ • fixest</title>
+<title>Register extraline macros to be used in etable — extraline_register • fixest</title>
 
 
 <!-- jquery -->
@@ -39,11 +39,8 @@
 
 
 
-<meta property="og:title" content="Fast and User-Friendly Fixed-Effects Estimations — _index_" />
-<meta property="og:description" content="The package fixest provides a family of functions to perform estimations with multiple fixed-effects. Standard-errors can be easily and intuitively clustered. It also includes tools to seamlessly export the results of various estimations.
-To get started, look at the introduction.
-
-" />
+<meta property="og:title" content="Register extraline macros to be used in etable — extraline_register" />
+<meta property="og:description" content="This function is used to create extraline (which is an argument of etable) macros that can be easily summoned in etable." />
 
 
 
@@ -135,34 +132,82 @@ To get started, look at the introduction.
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Fast and User-Friendly Fixed-Effects Estimations</h1>
-    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/index.R'><code>R/index.R</code></a></small>
-    <div class="hidden name"><code>fixest.Rd</code></div>
+    <h1>Register <code>extraline</code> macros to be used in <code>etable</code></h1>
+    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/etable.R'><code>R/etable.R</code></a></small>
+    <div class="hidden name"><code>extraline_register.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>The package <span class="pkg">fixest</span> provides a family of functions to perform estimations with multiple fixed-effects. Standard-errors can be easily and intuitively clustered. It also includes tools to seamlessly export the results of various estimations.</p><ul>
-<li><p>To get started, look at the <a href='https://cran.r-project.org/package=fixest/vignettes/fixest_walkthrough.html'>introduction</a>.</p></li>
-</ul>
-
+    <p>This function is used to create <code>extraline</code> (which is an argument of <code><a href='etable.html'>etable</a></code>) macros that can be easily summoned in <code><a href='etable.html'>etable</a></code>.</p>
     </div>
 
+    <pre class="usage"><span class='fu'>extraline_register</span><span class='op'>(</span><span class='va'>type</span>, <span class='va'>fun</span>, <span class='va'>alias</span><span class='op'>)</span></pre>
 
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>type</th>
+      <td><p>A character scalar giving the type-name.</p></td>
+    </tr>
+    <tr>
+      <th>fun</th>
+      <td><p>A function to be applied to a <code>fixest</code> estimation. It must return a scalar.</p></td>
+    </tr>
+    <tr>
+      <th>alias</th>
+      <td><p>A character scalar. This is the alias to be used in lieu of the type name to form the row name.</p></td>
+    </tr>
+    </table>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>The main features are:</p><ul>
-<li><p>Estimation. The core functions are: <code><a href='feols.html'>feols</a></code>, <code><a href='feglm.html'>feglm</a></code> and <code><a href='femlm.html'>femlm</a></code> to estimate, respectively, linear models, generalized linear models and maximum likelihood models with multiple fixed-effects. The function <code><a href='feNmlm.html'>feNmlm</a></code> allows the inclusion of non-linear in parameters right hand sides. Finally <code><a href='feglm.html'>fepois</a></code> and <code><a href='femlm.html'>fenegbin</a></code> are shorthands to estimate Poisson and Negative Binomial models.</p></li>
-<li><p>Multiple estimationsYou can perform multiple estimations at once with the <code><a href='stepwise.html'>stepwise</a></code> functions. It's then very easy to manipulate multiple results with the associated methods. See an introduction in the dedicated vignette: <a href='https://cran.r-project.org/package=fixest/vignettes/multiple_estimations.html'>Multiple estimations</a></p></li>
-<li><p>Easy and flexible clustering of standard-errors. By using the arguments <code>se</code> and <code>dof</code> (see <code><a href='summary.fixest.html'>summary.fixest</a></code>). To have a sense of how the standard errors are computed, see the vignette <a href='https://lrberge.github.io/fixest/articles/standard_errors.html'>On standard-errors</a>.</p></li>
-<li><p>Visualization and exportation of results. You can visualize the results of multiple estimations in R, or export them in Latex using the function <code><a href='etable.html'>etable</a></code>. This vignette details how to customize the Latex tables: <a href='https://lrberge.github.io/fixest/articles/exporting_tables.html'>Exporting estimation tables</a>.</p></li>
-<li><p>Plot multiple results. You can plot the coefficients and confidence intervals of estimations easily with the function <code><a href='coefplot.html'>coefplot</a></code>. This function also offers a specific layout for interactions.</p></li>
-</ul>
+    <p>You can register as many macros as you wish, the only constraint is that the type name should not conflict with a <code><a href='fitstat.html'>fitstat</a></code> type name.</p>
 
-    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'>
 
-    <p>Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (<a href='https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13'>https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13</a>).</p>
+<span class='co'># We register a function computing the mean of the dependent variable</span>
+<span class='va'>my_fun</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/model.matrix.html'>model.matrix</a></span><span class='op'>(</span><span class='va'>x</span>, type <span class='op'>=</span> <span class='st'>"lhs"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'>extraline_register</span><span class='op'>(</span><span class='st'>"my"</span>, <span class='va'>my_fun</span>, <span class='st'>"Mean(y)"</span><span class='op'>)</span>
 
+<span class='co'># An estimation</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>)</span>
+<span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Petal.Length</span> <span class='op'>~</span> <span class='va'>Sepal.Length</span> <span class='op'>|</span> <span class='va'>Species</span>, <span class='va'>iris</span><span class='op'>)</span>
+
+<span class='co'># Now we can easily create a row with the mean of y.</span>
+<span class='co'># We just "summon" it in a one-sided formula</span>
+<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est</span>, extraline <span class='op'>=</span> <span class='op'>~</span> <span class='va'>my</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                              est
+#&gt; Dependent Var.:     Petal.Length
+#&gt;                                 
+#&gt; Sepal.Length    0.6321* (0.1232)
+#&gt; Mean(y)                    3.758
+#&gt; Fixed-Effects:  ----------------
+#&gt; Species                      Yes
+#&gt; _______________ ________________
+#&gt; S.E.: Clustered      by: Species
+#&gt; Observations                 150
+#&gt; R2                       0.97489
+#&gt; Within R2                0.57178</div><div class='input'>
+<span class='co'># We can change the alias on the fly:</span>
+<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est</span>, extraline <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"_Average of y"</span> <span class='op'>=</span> <span class='op'>~</span> <span class='va'>my</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                              est
+#&gt; Dependent Var.:     Petal.Length
+#&gt;                                 
+#&gt; Sepal.Length    0.6321* (0.1232)
+#&gt; Fixed-Effects:  ----------------
+#&gt; Species                      Yes
+#&gt; _______________ ________________
+#&gt; S.E.: Clustered      by: Species
+#&gt; Observations                 150
+#&gt; R2                       0.97489
+#&gt; Within R2                0.57178
+#&gt; Average of y               3.758</div><div class='input'>
+
+
+
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

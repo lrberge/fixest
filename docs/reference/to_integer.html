@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -115,7 +115,7 @@
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/lrberge/fixest/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -146,7 +146,7 @@
   sorted <span class='op'>=</span> <span class='cn'>FALSE</span>,
   add_items <span class='op'>=</span> <span class='cn'>FALSE</span>,
   items.list <span class='op'>=</span> <span class='cn'>FALSE</span>,
-  multi.join <span class='op'>=</span> <span class='cn'>FALSE</span>
+  multi.join <span class='op'>=</span> <span class='st'>"_"</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -170,7 +170,7 @@
     </tr>
     <tr>
       <th>multi.join</th>
-      <td><p>Logical, or character, scalar, defaults to <code>FALSE</code>. Only used if multiple vectors are to be transformed into integers. If <code>multi.join</code> is not <code>FALSE</code>, then the values of the different vectors will be collated using <code><a href='https://rdrr.io/r/base/paste.html'>paste</a></code> with <code>collapse=multi.join</code>.</p></td>
+      <td><p>Character scalar used to join the items of multiple vectors. The default is <code>"_"</code>. Ignored if <code>add_items = FALSE</code>.</p></td>
     </tr>
     </table>
 
@@ -178,9 +178,6 @@
 
     <p>Reruns a vector of the same length as the input vectors.
 If <code>add_items=TRUE</code> and <code>items.list=TRUE</code>, a list of two elements is returned: <code>x</code> being the integer vector and <code>items</code> being the unique values to which the values in <code>x</code> make reference.</p>
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
-    <p>If multiple vectors have to be combined and <code>add_items=TRUE</code>, to have user readable values in the items, you should add the argument <code>multi.join</code> so that the values of the vectors are combined in a "user-readable" way. Note that in the latter case, the algorithm is much much slower.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
@@ -190,29 +187,29 @@ If <code>add_items=TRUE</code> and <code>items.list=TRUE</code>, a list of two e
 <span class='co'># transforms the species vector into integers</span>
 <span class='fu'>to_integer</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;   [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-#&gt;  [38] 1 1 1 1 1 1 1 1 1 1 1 1 1 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
-#&gt;  [75] 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 2 2 2 2 2 2 2 2 2 2 2
-#&gt; [112] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
-#&gt; [149] 2 2</div><div class='input'>
+#&gt;  [38] 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+#&gt;  [75] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 3
+#&gt; [112] 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
+#&gt; [149] 3 3</div><div class='input'>
 <span class='co'># To obtain the "items":</span>
 <span class='fu'>to_integer</span><span class='op'>(</span><span class='va'>x1</span>, add_items <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;   [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-#&gt;  [38] 1 1 1 1 1 1 1 1 1 1 1 1 1 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
-#&gt;  [75] 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 2 2 2 2 2 2 2 2 2 2 2
-#&gt; [112] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
-#&gt; [149] 2 2
+#&gt;  [38] 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+#&gt;  [75] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 3
+#&gt; [112] 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
+#&gt; [149] 3 3
 #&gt; attr(,"items")
-#&gt; [1] "setosa"     "virginica"  "versicolor"</div><div class='input'><span class='co'># same but in list form</span>
+#&gt; [1] "setosa"     "versicolor" "virginica" </div><div class='input'><span class='co'># same but in list form</span>
 <span class='fu'>to_integer</span><span class='op'>(</span><span class='va'>x1</span>, add_items <span class='op'>=</span> <span class='cn'>TRUE</span>, items.list <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; $x
 #&gt;   [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-#&gt;  [38] 1 1 1 1 1 1 1 1 1 1 1 1 1 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
-#&gt;  [75] 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 2 2 2 2 2 2 2 2 2 2 2
-#&gt; [112] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
-#&gt; [149] 2 2
+#&gt;  [38] 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+#&gt;  [75] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 3
+#&gt; [112] 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
+#&gt; [149] 3 3
 #&gt; 
 #&gt; $items
-#&gt; [1] "setosa"     "virginica"  "versicolor"
+#&gt; [1] "setosa"     "versicolor" "virginica" 
 #&gt; </div><div class='input'>
 <span class='co'># transforms x2 into an integer vector from 1 to 4</span>
 <span class='fu'>to_integer</span><span class='op'>(</span><span class='va'>x2</span>, add_items <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
@@ -241,38 +238,28 @@ If <code>add_items=TRUE</code> and <code>items.list=TRUE</code>, a list of two e
 <span class='co'># Multiple vectors</span>
 <span class='co'>#</span>
 
-<span class='co'># by default, the two vector are fast combined, and items are meaningless</span>
 <span class='fu'>to_integer</span><span class='op'>(</span><span class='va'>x1</span>, <span class='va'>x2</span>, add_items <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;   [1]  1  2  2  2  1  1  2  1  2  2  1  2  2  2  1  1  1  1  1  1  1  1  2  1  2
-#&gt;  [26]  1  1  1  1  2  2  1  1  1  2  1  1  2  2  1  1  2  2  1  1  2  1  2  1  1
-#&gt;  [51]  3  4  4  5  4  5  4  6  4  5  5  5  4  4  5  4  5  5  4  5  5  4  4  4  4
-#&gt;  [76]  4  4  4  4  5  5  5  5  4  5  4  4  4  5  5  5  4  5  5  5  5  5  4  5  5
-#&gt; [101]  7  8  9  7  7  9 10  9  7  9  7  7  7  8  8  7  7  9  9  7  7  8  9  7  7
-#&gt; [126]  9  7  7  7  9  9  9  7  7  7  9  7  7  7  7  7  7  8  7  7  7  7  7  7  8
+</div><div class='output co'>#&gt;   [1]  2  1  1  1  2  2  1  2  1  1  2  1  1  1  2  2  2  2  2  2  2  2  1  2  1
+#&gt;  [26]  2  2  2  2  1  1  2  2  2  1  2  2  1  1  2  2  1  1  2  2  1  2  1  2  2
+#&gt;  [51]  6  5  5  4  5  4  5  3  5  4  4  4  5  5  4  5  4  4  5  4  4  5  5  5  5
+#&gt;  [76]  5  5  5  5  4  4  4  4  5  4  5  5  5  4  4  4  5  4  4  4  4  4  5  4  4
+#&gt; [101]  9  8 10  9  9 10  7 10  9 10  9  9  9  8  8  9  9 10 10  9  9  8 10  9  9
+#&gt; [126] 10  9  9  9 10 10 10  9  9  9 10  9  9  9  9  9  9  8  9  9  9  9  9  9  8
 #&gt; attr(,"items")
-#&gt;  [1] 11 21 33 43 13 23 42 12 32 22</div><div class='input'>
-<span class='co'># You can use multi.join to have human-readable values for the items:</span>
-<span class='fu'>to_integer</span><span class='op'>(</span><span class='va'>x1</span>, <span class='va'>x2</span>, add_items <span class='op'>=</span> <span class='cn'>TRUE</span>, multi.join <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;   [1]  1  2  2  2  1  1  2  1  2  2  1  2  2  2  1  1  1  1  1  1  1  1  2  1  2
-#&gt;  [26]  1  1  1  1  2  2  1  1  1  2  1  1  2  2  1  1  2  2  1  1  2  1  2  1  1
-#&gt;  [51]  3  4  4  5  4  5  4  6  4  5  5  5  4  4  5  4  5  5  4  5  5  4  4  4  4
-#&gt;  [76]  4  4  4  4  5  5  5  5  4  5  4  4  4  5  5  5  4  5  5  5  5  5  4  5  5
-#&gt; [101]  7  8  9  7  7  9 10  9  7  9  7  7  7  8  8  7  7  9  9  7  7  8  9  7  7
-#&gt; [126]  9  7  7  7  9  9  9  7  7  7  9  7  7  7  7  7  7  8  7  7  7  7  7  7  8
-#&gt; attr(,"items")
-#&gt;  [1] "setosa_5"     "setosa_4"     "versicolor_7" "versicolor_6" "versicolor_5"
-#&gt;  [6] "versicolor_4" "virginica_6"  "virginica_5"  "virginica_7"  "virginica_4" </div><div class='input'>
+#&gt;  [1] "setosa_4"     "setosa_5"     "versicolor_4" "versicolor_5" "versicolor_6"
+#&gt;  [6] "versicolor_7" "virginica_4"  "virginica_5"  "virginica_6"  "virginica_7" </div><div class='input'>
+<span class='co'># You can use multi.join to handle the join of the items:</span>
 <span class='fu'>to_integer</span><span class='op'>(</span><span class='va'>x1</span>, <span class='va'>x2</span>, add_items <span class='op'>=</span> <span class='cn'>TRUE</span>, multi.join <span class='op'>=</span> <span class='st'>"; "</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;   [1]  1  2  2  2  1  1  2  1  2  2  1  2  2  2  1  1  1  1  1  1  1  1  2  1  2
-#&gt;  [26]  1  1  1  1  2  2  1  1  1  2  1  1  2  2  1  1  2  2  1  1  2  1  2  1  1
-#&gt;  [51]  3  4  4  5  4  5  4  6  4  5  5  5  4  4  5  4  5  5  4  5  5  4  4  4  4
-#&gt;  [76]  4  4  4  4  5  5  5  5  4  5  4  4  4  5  5  5  4  5  5  5  5  5  4  5  5
-#&gt; [101]  7  8  9  7  7  9 10  9  7  9  7  7  7  8  8  7  7  9  9  7  7  8  9  7  7
-#&gt; [126]  9  7  7  7  9  9  9  7  7  7  9  7  7  7  7  7  7  8  7  7  7  7  7  7  8
+</div><div class='output co'>#&gt;   [1]  2  1  1  1  2  2  1  2  1  1  2  1  1  1  2  2  2  2  2  2  2  2  1  2  1
+#&gt;  [26]  2  2  2  2  1  1  2  2  2  1  2  2  1  1  2  2  1  1  2  2  1  2  1  2  2
+#&gt;  [51]  6  5  5  4  5  4  5  3  5  4  4  4  5  5  4  5  4  4  5  4  4  5  5  5  5
+#&gt;  [76]  5  5  5  5  4  4  4  4  5  4  5  5  5  4  4  4  5  4  4  4  4  4  5  4  4
+#&gt; [101]  9  8 10  9  9 10  7 10  9 10  9  9  9  8  8  9  9 10 10  9  9  8 10  9  9
+#&gt; [126] 10  9  9  9 10 10 10  9  9  9 10  9  9  9  9  9  9  8  9  9  9  9  9  9  8
 #&gt; attr(,"items")
-#&gt;  [1] "setosa; 5"     "setosa; 4"     "versicolor; 7" "versicolor; 6"
-#&gt;  [5] "versicolor; 5" "versicolor; 4" "virginica; 6"  "virginica; 5" 
-#&gt;  [9] "virginica; 7"  "virginica; 4" </div><div class='input'>
+#&gt;  [1] "setosa; 4"     "setosa; 5"     "versicolor; 4" "versicolor; 5"
+#&gt;  [5] "versicolor; 6" "versicolor; 7" "virginica; 4"  "virginica; 5" 
+#&gt;  [9] "virginica; 6"  "virginica; 7" </div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

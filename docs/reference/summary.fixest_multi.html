@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -115,7 +115,7 @@
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/lrberge/fixest/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -216,69 +216,69 @@
 <span class='va'>res</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fu'><a href='stepwise.html'>csw</a></span><span class='op'>(</span><span class='va'>x1</span>, <span class='va'>x2</span>, <span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span>, split <span class='op'>=</span> <span class='op'>~</span><span class='va'>species</span><span class='op'>)</span>
 
 <span class='co'># By default, the type is "short"</span>
-<span class='co'># You can stil use the arguments from summary.fixest</span>
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>res</span>, cluster <span class='op'>=</span> <span class='op'>~</span> <span class='va'>species</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Standard-errors: Clustered (species) 
+<span class='co'># You can still use the arguments from summary.fixest</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>res</span>, se <span class='op'>=</span> <span class='st'>"hetero"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; Standard-errors: Heteroskedasticity-robust 
 #&gt; 
 #&gt; ### Sample: setosa
 #&gt; 
 #&gt; Expl. vars.: x1
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|) 
-#&gt; (Intercept)  2.63900        Inf       0        1 
-#&gt; x1           0.69049        Inf       0        1 
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept)  2.63900   0.298624  8.8372  1.23e-11 ***
+#&gt; x1           0.69049   0.085903  8.0380  1.93e-10 ***
 #&gt; ---
 #&gt; Expl. vars.: x1 + x2
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|) 
-#&gt; (Intercept) 2.303700        Inf       0        1 
-#&gt; x1          0.667416        Inf       0        1 
-#&gt; x2          0.283419        Inf       0        1 
+#&gt;             Estimate Std. Error t value   Pr(&gt;|t|))    
+#&gt; (Intercept) 2.303700   0.433561  5.3135 2.89000e-06 ***
+#&gt; x1          0.667416   0.092247  7.2351 3.60000e-09 ***
+#&gt; x2          0.283419   0.264794  1.0703 2.89933e-01    
 #&gt; ---
 #&gt; Expl. vars.: x1 + x2 + x3
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|) 
-#&gt; (Intercept) 2.351900        Inf       0        1 
-#&gt; x1          0.654835        Inf       0        1 
-#&gt; x2          0.237560        Inf       0        1 
-#&gt; x3          0.252126        Inf       0        1 
+#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|))    
+#&gt; (Intercept) 2.351900   0.437230 5.379100 2.44000e-06 ***
+#&gt; x1          0.654835   0.092468 7.081800 6.87000e-09 ***
+#&gt; x2          0.237560   0.275270 0.863009 3.92610e-01    
+#&gt; x3          0.252126   0.284622 0.885827 3.80318e-01    
 #&gt; 
 #&gt; ### Sample: versicolor
 #&gt; 
 #&gt; Expl. vars.: x1
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|) 
-#&gt; (Intercept) 3.539700        Inf       0        1 
-#&gt; x1          0.865078        Inf       0        1 
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept) 3.539700   0.617019  5.7368  6.31e-07 ***
+#&gt; x1          0.865078   0.220701  3.9197  2.81e-04 ***
 #&gt; ---
 #&gt; Expl. vars.: x1 + x2
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|) 
-#&gt; (Intercept) 2.116400        Inf       0        1 
-#&gt; x1          0.247642        Inf       0        1 
-#&gt; x2          0.735587        Inf       0        1 
+#&gt;             Estimate Std. Error t value   Pr(&gt;|t|))    
+#&gt; (Intercept) 2.116400   0.431296  4.9071 1.20000e-05 ***
+#&gt; x1          0.247642   0.176500  1.4031 1.67167e-01    
+#&gt; x2          0.735587   0.111386  6.6040 3.26000e-08 ***
 #&gt; ---
 #&gt; Expl. vars.: x1 + x2 + x3
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|) 
-#&gt; (Intercept)  1.895500        Inf       0        1 
-#&gt; x1           0.386858        Inf       0        1 
-#&gt; x2           0.908337        Inf       0        1 
-#&gt; x3          -0.679224        Inf       0        1 
+#&gt;              Estimate Std. Error t value   Pr(&gt;|t|))    
+#&gt; (Intercept)  1.895500   0.434294  4.3646 0.000071000 ***
+#&gt; x1           0.386858   0.207117  1.8678 0.068165000 .  
+#&gt; x2           0.908337   0.159800  5.6842 0.000000859 ***
+#&gt; x3          -0.679224   0.436600 -1.5557 0.126631000    
 #&gt; 
 #&gt; ### Sample: virginica
 #&gt; 
 #&gt; Expl. vars.: x1
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|) 
-#&gt; (Intercept) 3.906800        Inf       0        1 
-#&gt; x1          0.901534        Inf       0        1 
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept) 3.906800   0.760748  5.1355  5.07e-06 ***
+#&gt; x1          0.901534   0.246200  3.6618  6.23e-04 ***
 #&gt; ---
 #&gt; Expl. vars.: x1 + x2
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|) 
-#&gt; (Intercept) 0.624782        Inf       0        1 
-#&gt; x1          0.259954        Inf       0        1 
-#&gt; x2          0.934819        Inf       0        1 
+#&gt;             Estimate Std. Error t value   Pr(&gt;|t|))    
+#&gt; (Intercept) 0.624782   0.538060  1.1612 2.51434e-01    
+#&gt; x1          0.259954   0.130150  1.9973 5.15960e-02 .  
+#&gt; x2          0.934819   0.076962 12.1460 4.20000e-16 ***
 #&gt; ---
 #&gt; Expl. vars.: x1 + x2 + x3
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|) 
-#&gt; (Intercept)  0.699883        Inf       0        1 
-#&gt; x1           0.330337        Inf       0        1 
-#&gt; x2           0.945536        Inf       0        1 
-#&gt; x3          -0.169753        Inf       0        1 </div><div class='input'>
+#&gt;              Estimate Std. Error   t value   Pr(&gt;|t|))    
+#&gt; (Intercept)  0.699883   0.553402  1.264700 2.12352e-01    
+#&gt; x1           0.330337   0.122494  2.696800 9.75100e-03 ** 
+#&gt; x2           0.945536   0.080881 11.691000 2.26000e-15 ***
+#&gt; x3          -0.169753   0.210310 -0.807154 4.23732e-01    </div><div class='input'>
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>res</span>, type <span class='op'>=</span> <span class='st'>"long"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; 
 #&gt; ### Sample: setosa
@@ -286,10 +286,10 @@
 #&gt; Expl. vars.: x1
 #&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 50 
-#&gt; Standard-errors: Heteroskedasticity-robust 
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; (Intercept)  2.63900   0.298624  8.8372 1.23e-11 ***
-#&gt; x1           0.69049   0.085903  8.0380 1.93e-10 ***
+#&gt; Standard-errors: Standard 
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept)  2.63900   0.310014  8.5125  3.74e-11 ***
+#&gt; x1           0.69049   0.089899  7.6807  6.71e-10 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.233723   Adj. R2: 0.542029
@@ -297,11 +297,11 @@
 #&gt; Expl. vars.: x1 + x2
 #&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 50 
-#&gt; Standard-errors: Heteroskedasticity-robust 
-#&gt;             Estimate Std. Error t value    Pr(&gt;|t|)    
-#&gt; (Intercept) 2.303700   0.433561  5.3135 2.89000e-06 ***
-#&gt; x1          0.667416   0.092247  7.2351 3.60000e-09 ***
-#&gt; x2          0.283419   0.264794  1.0703 2.89933e-01    
+#&gt; Standard-errors: Standard 
+#&gt;             Estimate Std. Error t value  Pr(&gt;|t|))    
+#&gt; (Intercept) 2.303700   0.385294  5.9792 2.8900e-07 ***
+#&gt; x1          0.667416   0.090356  7.3865 2.1300e-09 ***
+#&gt; x2          0.283419   0.197224  1.4370 1.5733e-01    
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.228751   Adj. R2: 0.551971
@@ -309,12 +309,12 @@
 #&gt; Expl. vars.: x1 + x2 + x3
 #&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 50 
-#&gt; Standard-errors: Heteroskedasticity-robust 
-#&gt;             Estimate Std. Error  t value    Pr(&gt;|t|)    
-#&gt; (Intercept) 2.351900   0.437230 5.379100 2.44000e-06 ***
-#&gt; x1          0.654835   0.092468 7.081800 6.87000e-09 ***
-#&gt; x2          0.237560   0.275270 0.863009 3.92610e-01    
-#&gt; x3          0.252126   0.284622 0.885827 3.80318e-01    
+#&gt; Standard-errors: Standard 
+#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|))    
+#&gt; (Intercept) 2.351900   0.392868 5.986500 3.03000e-07 ***
+#&gt; x1          0.654835   0.092447 7.083300 6.83000e-09 ***
+#&gt; x2          0.237560   0.208019 1.142000 2.59359e-01    
+#&gt; x3          0.252126   0.346864 0.726873 4.70987e-01    
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.227449   Adj. R2: 0.547429
@@ -324,10 +324,10 @@
 #&gt; Expl. vars.: x1
 #&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 50 
-#&gt; Standard-errors: Heteroskedasticity-robust 
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; (Intercept) 3.539700   0.617019  5.7368 6.31e-07 ***
-#&gt; x1          0.865078   0.220701  3.9197 2.81e-04 ***
+#&gt; Standard-errors: Standard 
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept) 3.539700   0.562874  6.2887  9.07e-08 ***
+#&gt; x1          0.865078   0.201938  4.2839  8.80e-05 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.434612   Adj. R2: 0.261511
@@ -335,11 +335,11 @@
 #&gt; Expl. vars.: x1 + x2
 #&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 50 
-#&gt; Standard-errors: Heteroskedasticity-robust 
-#&gt;             Estimate Std. Error t value    Pr(&gt;|t|)    
-#&gt; (Intercept) 2.116400   0.431296  4.9071 1.20000e-05 ***
-#&gt; x1          0.247642   0.176500  1.4031 1.67167e-01    
-#&gt; x2          0.735587   0.111386  6.6040 3.26000e-08 ***
+#&gt; Standard-errors: Standard 
+#&gt;             Estimate Std. Error t value   Pr(&gt;|t|))    
+#&gt; (Intercept) 2.116400   0.494256  4.2821 0.000091000 ***
+#&gt; x1          0.247642   0.186839  1.3254 0.191435000    
+#&gt; x2          0.735587   0.124768  5.8956 0.000000387 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.329521   Adj. R2: 0.566438
@@ -347,12 +347,12 @@
 #&gt; Expl. vars.: x1 + x2 + x3
 #&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 50 
-#&gt; Standard-errors: Heteroskedasticity-robust 
-#&gt;              Estimate Std. Error t value    Pr(&gt;|t|)    
-#&gt; (Intercept)  1.895500   0.434294  4.3646 0.000071000 ***
-#&gt; x1           0.386858   0.207117  1.8678 0.068165000 .  
-#&gt; x2           0.908337   0.159800  5.6842 0.000000859 ***
-#&gt; x3          -0.679224   0.436600 -1.5557 0.126631000    
+#&gt; Standard-errors: Standard 
+#&gt;              Estimate Std. Error t value  Pr(&gt;|t|))    
+#&gt; (Intercept)  1.895500   0.507055  3.7383 0.00051100 ***
+#&gt; x1           0.386858   0.204545  1.8913 0.06489000 .  
+#&gt; x2           0.908337   0.165432  5.4907 0.00000167 ***
+#&gt; x3          -0.679224   0.435382 -1.5601 0.12559900    
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.321135   Adj. R2: 0.579273
@@ -362,10 +362,10 @@
 #&gt; Expl. vars.: x1
 #&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 50 
-#&gt; Standard-errors: Heteroskedasticity-robust 
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; (Intercept) 3.906800   0.760748  5.1355 5.07e-06 ***
-#&gt; x1          0.901534   0.246200  3.6618 6.23e-04 ***
+#&gt; Standard-errors: Standard 
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept) 3.906800   0.757061  5.1605  4.66e-06 ***
+#&gt; x1          0.901534   0.253106  3.5619  8.43e-04 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.559836   Adj. R2: 0.192579
@@ -373,11 +373,11 @@
 #&gt; Expl. vars.: x1 + x2
 #&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 50 
-#&gt; Standard-errors: Heteroskedasticity-robust 
-#&gt;             Estimate Std. Error t value    Pr(&gt;|t|)    
-#&gt; (Intercept) 0.624782   0.538060  1.1612 2.51434e-01    
-#&gt; x1          0.259954   0.130150  1.9973 5.15960e-02 .  
-#&gt; x2          0.934819   0.076962 12.1460 4.20000e-16 ***
+#&gt; Standard-errors: Standard 
+#&gt;             Estimate Std. Error t value   Pr(&gt;|t|))    
+#&gt; (Intercept) 0.624782   0.524867  1.1904 2.39882e-01    
+#&gt; x1          0.259954   0.153338  1.6953 9.66340e-02 .  
+#&gt; x2          0.934819   0.089602 10.4330 8.01000e-14 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.307439   Adj. R2: 0.75132
@@ -385,57 +385,57 @@
 #&gt; Expl. vars.: x1 + x2 + x3
 #&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 50 
-#&gt; Standard-errors: Heteroskedasticity-robust 
-#&gt;              Estimate Std. Error   t value    Pr(&gt;|t|)    
-#&gt; (Intercept)  0.699883   0.553402  1.264700 2.12352e-01    
-#&gt; x1           0.330337   0.122494  2.696800 9.75100e-03 ** 
-#&gt; x2           0.945536   0.080881 11.691000 2.26000e-15 ***
-#&gt; x3          -0.169753   0.210310 -0.807154 4.23732e-01    
+#&gt; Standard-errors: Standard 
+#&gt;              Estimate Std. Error   t value   Pr(&gt;|t|))    
+#&gt; (Intercept)  0.699883   0.533601  1.311600 1.96156e-01    
+#&gt; x1           0.330337   0.174329  1.894900 6.44000e-02 .  
+#&gt; x2           0.945536   0.090722 10.422000 1.07000e-13 ***
+#&gt; x3          -0.169753   0.198072 -0.857023 3.95875e-01    
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.305014   Adj. R2: 0.749908</div><div class='input'>
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>res</span>, type <span class='op'>=</span> <span class='st'>"compact"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;   lhs     sample          rhs     (Intercept)                x1
-#&gt; 1   y setosa     x1           2.64*** (0.299)  0.69*** (0.0859)
-#&gt; 2   y setosa     x1 + x2       2.3*** (0.434) 0.667*** (0.0922)
-#&gt; 3   y setosa     x1 + x2 + x3 2.35*** (0.437) 0.655*** (0.0925)
-#&gt; 4   y versicolor x1           3.54*** (0.617) 0.865*** (0.221) 
-#&gt; 5   y versicolor x1 + x2      2.12*** (0.431)    0.248 (0.176) 
-#&gt; 6   y versicolor x1 + x2 + x3  1.9*** (0.434)   0.387. (0.207) 
-#&gt; 7   y virginica  x1           3.91*** (0.761) 0.902*** (0.246) 
-#&gt; 8   y virginica  x1 + x2        0.625 (0.538)    0.26. (0.13)  
-#&gt; 9   y virginica  x1 + x2 + x3     0.7 (0.553)   0.33** (0.122) 
+#&gt; 1   y setosa     x1           2.64*** (0.31)   0.69*** (0.0899)
+#&gt; 2   y setosa     x1 + x2       2.3*** (0.385) 0.667*** (0.0904)
+#&gt; 3   y setosa     x1 + x2 + x3 2.35*** (0.393) 0.655*** (0.0924)
+#&gt; 4   y versicolor x1           3.54*** (0.563) 0.865*** (0.202) 
+#&gt; 5   y versicolor x1 + x2      2.12*** (0.494)    0.248 (0.187) 
+#&gt; 6   y versicolor x1 + x2 + x3  1.9*** (0.507)   0.387. (0.205) 
+#&gt; 7   y virginica  x1           3.91*** (0.757) 0.902*** (0.253) 
+#&gt; 8   y virginica  x1 + x2        0.625 (0.525)    0.26. (0.153) 
+#&gt; 9   y virginica  x1 + x2 + x3     0.7 (0.534)    0.33. (0.174) 
 #&gt;                  x2             x3
 #&gt; 1                                 
-#&gt; 2    0.283 (0.265)                
-#&gt; 3    0.238 (0.275)   0.252 (0.285)
+#&gt; 2    0.283 (0.197)                
+#&gt; 3    0.238 (0.208)   0.252 (0.347)
 #&gt; 4                                 
-#&gt; 5 0.736*** (0.111)                
-#&gt; 6 0.908*** (0.16)   -0.679 (0.437)
+#&gt; 5 0.736*** (0.125)                
+#&gt; 6 0.908*** (0.165)  -0.679 (0.435)
 #&gt; 7                                 
-#&gt; 8 0.935*** (0.077)                
-#&gt; 9 0.946*** (0.0809)  -0.17 (0.21) </div><div class='input'>
+#&gt; 8 0.935*** (0.0896)               
+#&gt; 9 0.946*** (0.0907)  -0.17 (0.198)</div><div class='input'>
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>res</span>, type <span class='op'>=</span> <span class='st'>"se_compact"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;   lhs     sample          rhs (Intercept) (Intercept)__se        x1     x1__se
-#&gt; 1   y setosa     x1             2.6390012       0.2986236 0.6904897 0.08590283
-#&gt; 2   y setosa     x1 + x2        2.3037382       0.4335613 0.6674162 0.09224729
-#&gt; 3   y setosa     x1 + x2 + x3   2.3518898       0.4372300 0.6548350 0.09246765
-#&gt; 4   y versicolor x1             3.5397347       0.6170191 0.8650777 0.22070069
-#&gt; 5   y versicolor x1 + x2        2.1164314       0.4312960 0.2476422 0.17649964
-#&gt; 6   y versicolor x1 + x2 + x3   1.8955395       0.4342939 0.3868576 0.20711711
-#&gt; 7   y virginica  x1             3.9068365       0.7607485 0.9015345 0.24620049
-#&gt; 8   y virginica  x1 + x2        0.6247824       0.5380596 0.2599540 0.13015020
-#&gt; 9   y virginica  x1 + x2 + x3   0.6998830       0.5534022 0.3303370 0.12249409
+#&gt; 1   y setosa     x1             2.6390012       0.3100143 0.6904897 0.08989888
+#&gt; 2   y setosa     x1 + x2        2.3037382       0.3852942 0.6674162 0.09035581
+#&gt; 3   y setosa     x1 + x2 + x3   2.3518898       0.3928675 0.6548350 0.09244742
+#&gt; 4   y versicolor x1             3.5397347       0.5628736 0.8650777 0.20193757
+#&gt; 5   y versicolor x1 + x2        2.1164314       0.4942556 0.2476422 0.18683892
+#&gt; 6   y versicolor x1 + x2 + x3   1.8955395       0.5070552 0.3868576 0.20454490
+#&gt; 7   y virginica  x1             3.9068365       0.7570605 0.9015345 0.25310551
+#&gt; 8   y virginica  x1 + x2        0.6247824       0.5248675 0.2599540 0.15333757
+#&gt; 9   y virginica  x1 + x2 + x3   0.6998830       0.5336009 0.3303370 0.17432873
 #&gt;          x2     x2__se         x3    x3__se
 #&gt; 1        NA         NA         NA        NA
-#&gt; 2 0.2834193 0.26479386         NA        NA
-#&gt; 3 0.2375602 0.27526952  0.2521257 0.2846217
+#&gt; 2 0.2834193 0.19722377         NA        NA
+#&gt; 3 0.2375602 0.20801921  0.2521257 0.3468636
 #&gt; 4        NA         NA         NA        NA
-#&gt; 5 0.7355868 0.11138587         NA        NA
-#&gt; 6 0.9083370 0.15980020 -0.6792238 0.4366002
+#&gt; 5 0.7355868 0.12476776         NA        NA
+#&gt; 6 0.9083370 0.16543248 -0.6792238 0.4353821
 #&gt; 7        NA         NA         NA        NA
-#&gt; 8 0.9348189 0.07696200         NA        NA
-#&gt; 9 0.9455356 0.08088054 -0.1697527 0.2103101</div><div class='input'>
+#&gt; 8 0.9348189 0.08960197         NA        NA
+#&gt; 9 0.9455356 0.09072204 -0.1697527 0.1980724</div><div class='input'>
 
 </div></pre>
   </div>

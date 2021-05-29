@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -115,7 +115,7 @@
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/lrberge/fixest/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -133,7 +133,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Wald test of nullity of coefficients</h1>
-    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/MiscFuns.R'><code>R/MiscFuns.R</code></a></small>
+    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/fitstats.R'><code>R/fitstats.R</code></a></small>
     <div class="hidden name"><code>wald.Rd</code></div>
     </div>
 
@@ -189,34 +189,33 @@
 <span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>airquality</span><span class='op'>)</span>
 
 <span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/stats/poly.html'>poly</a></span><span class='op'>(</span><span class='va'>Temp</span>, <span class='fl'>3</span><span class='op'>)</span>, <span class='va'>airquality</span><span class='op'>)</span>
-
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'>
 <span class='co'># Testing the joint nullity of the Temp polynomial</span>
 <span class='fu'>wald</span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"poly"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; Wald test, H0: joint nullity of poly(Temp, 3)1, poly(Temp, 3)2 and poly(Temp, 3)3
-#&gt;  stat = 40.2, p-value &lt; 2.2e-16, on 3 and 105 DoF. Using a Heteroskedasticity-robust VCOV matrix.</div><div class='input'>
+#&gt;  stat = 23.1, p-value = 1.452e-11, on 3 and 105 DoF,VCOV: Standard.</div><div class='input'>
 <span class='co'># Same but with clustered SEs</span>
 <span class='fu'>wald</span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"poly"</span>, cluster <span class='op'>=</span> <span class='st'>"Month"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; Wald test, H0: joint nullity of poly(Temp, 3)1, poly(Temp, 3)2 and poly(Temp, 3)3
-#&gt;  stat = 170.3, p-value &lt; 2.2e-16, on 3 and 105 DoF. Using a Clustered (Month) VCOV matrix.</div><div class='input'>
+#&gt;  stat = 170.3, p-value &lt; 2.2e-16, on 3 and 105 DoF,VCOV: Clustered (Month).</div><div class='input'>
 <span class='co'># Now: all vars but the polynomial and the intercept</span>
 <span class='fu'>wald</span><span class='op'>(</span><span class='va'>est</span>, drop <span class='op'>=</span> <span class='st'>"Inte|poly"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; Wald test, H0: joint nullity of Solar.R and Wind
-#&gt;  stat = 11.1, p-value = 4.353e-5, on 2 and 105 DoF. Using a Heteroskedasticity-robust VCOV matrix.</div><div class='input'>
+#&gt;  stat = 19.1, p-value = 8.538e-8, on 2 and 105 DoF,VCOV: Standard.</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># Toy example: testing pre-trends</span>
 <span class='co'>#</span>
 
 <span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>base_did</span><span class='op'>)</span>
 
-<span class='va'>est_did</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'><a href='i.html'>i</a></span><span class='op'>(</span><span class='va'>treat</span>, <span class='va'>period</span>, <span class='fl'>5</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span>, <span class='va'>base_did</span><span class='op'>)</span>
+<span class='va'>est_did</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'><a href='i.html'>i</a></span><span class='op'>(</span><span class='va'>period</span>, <span class='va'>treat</span>, <span class='fl'>5</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span>, <span class='va'>base_did</span><span class='op'>)</span>
 
 <span class='co'># The graph of the coefficients</span>
 <span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='va'>est_did</span><span class='op'>)</span>
 </div><div class='img'><img src='wald-1.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># The pre-trend test</span>
 <span class='fu'>wald</span><span class='op'>(</span><span class='va'>est_did</span>, <span class='st'>"period::[1234]$"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Wald test, H0: joint nullity of treat:period::1, treat:period::2, treat:period::3 and treat:period::4
-#&gt;  stat = 6.4988, p-value = 3.682e-5, on 4 and 953 DoF. Using a Two-way (id &amp; period) VCOV matrix.</div><div class='input'>
+</div><div class='output co'>#&gt; [1] NA</div><div class='input'>
 <span class='co'># If "period::[1234]$" looks weird to you, check out</span>
 <span class='co'># regular expressions: e.g. see ?regex.</span>
 <span class='co'># Learn it, you won't regret it!</span>

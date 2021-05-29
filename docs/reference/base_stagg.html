@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Fast and User-Friendly Fixed-Effects Estimations — _index_ • fixest</title>
+<title>Sample data for staggered difference in difference — base_stagg • fixest</title>
 
 
 <!-- jquery -->
@@ -39,11 +39,8 @@
 
 
 
-<meta property="og:title" content="Fast and User-Friendly Fixed-Effects Estimations — _index_" />
-<meta property="og:description" content="The package fixest provides a family of functions to perform estimations with multiple fixed-effects. Standard-errors can be easily and intuitively clustered. It also includes tools to seamlessly export the results of various estimations.
-To get started, look at the introduction.
-
-" />
+<meta property="og:title" content="Sample data for staggered difference in difference — base_stagg" />
+<meta property="og:description" content="This data has been generated to illustrate the Sun and Abraham (Journal of Econometrics, forthcoming) method for staggered difference-in-difference. This is a balanced panel of 95 individuals and 10 periods. Half the individuals are treated. For those treated, the treatment date can vary from the second to the last period. The effect of the treatment depends on the time since the treatment: it is first negative and then increasing." />
 
 
 
@@ -135,33 +132,35 @@ To get started, look at the introduction.
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Fast and User-Friendly Fixed-Effects Estimations</h1>
-    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/index.R'><code>R/index.R</code></a></small>
-    <div class="hidden name"><code>fixest.Rd</code></div>
+    <h1>Sample data for staggered difference in difference</h1>
+    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/did.R'><code>R/did.R</code></a></small>
+    <div class="hidden name"><code>base_stagg.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>The package <span class="pkg">fixest</span> provides a family of functions to perform estimations with multiple fixed-effects. Standard-errors can be easily and intuitively clustered. It also includes tools to seamlessly export the results of various estimations.</p><ul>
-<li><p>To get started, look at the <a href='https://cran.r-project.org/package=fixest/vignettes/fixest_walkthrough.html'>introduction</a>.</p></li>
-</ul>
-
+    <p>This data has been generated to illustrate the Sun and Abraham (Journal of Econometrics, forthcoming) method for staggered difference-in-difference. This is a balanced panel of 95 individuals and 10 periods. Half the individuals are treated. For those treated, the treatment date can vary from the second to the last period. The effect of the treatment depends on the time since the treatment: it is first negative and then increasing.</p>
     </div>
 
+    <pre class="usage"><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>base_stagg</span><span class='op'>)</span></pre>
 
 
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
 
-    <p>The main features are:</p><ul>
-<li><p>Estimation. The core functions are: <code><a href='feols.html'>feols</a></code>, <code><a href='feglm.html'>feglm</a></code> and <code><a href='femlm.html'>femlm</a></code> to estimate, respectively, linear models, generalized linear models and maximum likelihood models with multiple fixed-effects. The function <code><a href='feNmlm.html'>feNmlm</a></code> allows the inclusion of non-linear in parameters right hand sides. Finally <code><a href='feglm.html'>fepois</a></code> and <code><a href='femlm.html'>fenegbin</a></code> are shorthands to estimate Poisson and Negative Binomial models.</p></li>
-<li><p>Multiple estimationsYou can perform multiple estimations at once with the <code><a href='stepwise.html'>stepwise</a></code> functions. It's then very easy to manipulate multiple results with the associated methods. See an introduction in the dedicated vignette: <a href='https://cran.r-project.org/package=fixest/vignettes/multiple_estimations.html'>Multiple estimations</a></p></li>
-<li><p>Easy and flexible clustering of standard-errors. By using the arguments <code>se</code> and <code>dof</code> (see <code><a href='summary.fixest.html'>summary.fixest</a></code>). To have a sense of how the standard errors are computed, see the vignette <a href='https://lrberge.github.io/fixest/articles/standard_errors.html'>On standard-errors</a>.</p></li>
-<li><p>Visualization and exportation of results. You can visualize the results of multiple estimations in R, or export them in Latex using the function <code><a href='etable.html'>etable</a></code>. This vignette details how to customize the Latex tables: <a href='https://lrberge.github.io/fixest/articles/exporting_tables.html'>Exporting estimation tables</a>.</p></li>
-<li><p>Plot multiple results. You can plot the coefficients and confidence intervals of estimations easily with the function <code><a href='coefplot.html'>coefplot</a></code>. This function also offers a specific layout for interactions.</p></li>
+    <p><code>base_stagg</code> is a data frame with 950 observations and 7 variables:</p>
+<ul>
+<li><p>id: panel identifier.</p></li>
+<li><p>year: from 1 to 10.</p></li>
+<li><p>year_treated: the period at which the individual is treated.</p></li>
+<li><p>time_to_treatment: different between the year and the treatment year.</p></li>
+<li><p>treated: indicator taking value 1 if the individual is treated, 0 otherwise.</p></li>
+<li><p>treatment_effect_true: true effect of the treatment.</p></li>
+<li><p>x1: explanatory variable, correlated with the period.</p></li>
+<li><p>y: the dependent variable affected by the treatment.</p></li>
 </ul>
 
-    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
+    <h2 class="hasAnchor" id="source"><a class="anchor" href="#source"></a>Source</h2>
 
-    <p>Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (<a href='https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13'>https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13</a>).</p>
+    <p>This data has been generated from <span class="pkg">R</span>.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

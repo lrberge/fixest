@@ -17,9 +17,17 @@ reference:
       desc: Visualize results in tables or graphs
       contents:
         - etable
+        - coefplot
+        - iplot
         - style.df
         - style.tex
-        - coefplot
+        - extraline_register
+    - title: Difference-in-difference tools
+      desc: Various tools to perform DiD estimations
+      contents:
+        - sunab
+        - aggregate.fixest
+        - i
     - title: Handling results, single
       desc: Extracts values from single estimations
       contents:
@@ -84,6 +92,7 @@ reference:
       contents:
         - fitstat
         - fitstat_register
+        - degrees_freedom
         - r2
         - AIC.fixest
         - BIC.fixest
@@ -100,7 +109,6 @@ reference:
       desc: Other methods and functions that didn't fit the previous sections
       contents:
         - did_means
-        - aggregate.fixest
         - bread.fixest
         - collinearity
         - estfun.fixest
@@ -111,5 +119,6 @@ reference:
       contents:
         - base_did
         - trade
+        - base_stagg
 
 
