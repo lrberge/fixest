@@ -2605,8 +2605,8 @@ i = function(factor_var, var, ref, keep, ref2, keep2, ...){
         # Evaluation of var (with possibly, user prepending with i.)
         if(is.null(var_name)){
             var_name = deparse_long(mc$var)
-            if(grepl("^f\\.", var_name)){
-                var_name = gsub("^f\\.", "", var_name)
+            if(grepl("^i\\.", var_name)){
+                var_name = gsub("^i\\.", "", var_name)
                 var = str2lang(var_name)
                 check_value_plus(var, "evalset vector", .data = parent.frame(), .arg_name = "var")
                 IS_INTER_FACTOR = TRUE
