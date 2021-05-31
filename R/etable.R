@@ -1945,15 +1945,16 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
                     next
                 }
 
+                my_group_origin = names(my_group)
                 is_there = c()
                 for(m in 1:length(is_fe)){
                     # We check full and partial presence
 
                     fe_model = names(is_fe[[m]])
-                    if(all(my_group %in% fe_model)){
+                    if(all(my_group_origin %in% fe_model)){
                         is_there[m] = TRUE
 
-                    } else if(any(my_group %in% fe_model)){
+                    } else if(any(my_group_origin %in% fe_model)){
                         # partial presence
                         is_there[m] = NA
                         is_inconsistent[i] = TRUE
@@ -1966,7 +1967,7 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
 
                 ok_removal = !any(is.na(is_there))
                 if(ok_removal){
-                    fe2remove = c(fe2remove, my_group)
+                    fe2remove = c(fe2remove, my_group_origin)
                 }
 
                 is_there = yesNo[2 - is_there]

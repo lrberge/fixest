@@ -45,6 +45,8 @@
  
  - Fix display bug in `etable` when Tex output is requested and interactions composed of identical variables with different interacted orders are present (reported by @Oravishayrizi [#148](https://github.com/lrberge/fixest/issues/148)).
  
+ - Fix bug in `etabe` when `fixef.group` is used and fixed-effects are renamed (reported by @jamesfeigenbaum).
+ 
 ## Breaking changes: new i() function
 
  - the function `i()`, used to create factors or interactions has been tidied up, leading to breaking changes.
