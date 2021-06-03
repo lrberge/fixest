@@ -516,7 +516,7 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
                         if(anyNA(data)){
                             varsNA = sapply(data, anyNA)
                             varsNA = names(varsNA)[varsNA]
-                            stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(varsNA, "s"), " in the original dataset (", deparse_long(object$call$data), "). But ", ifsingle(varsNA, "this variable", "these variables"), " contain", ifsingle(varsNA, "s", ""), " NAs", msgRemoved, ". This is not allowed.")
+                            stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(varsNA, "s"), " in the original dataset (", deparse_long(object$call$data), "). But ", ifsingle(varsNA, "this variable", "these variables"), " contain", ifsingle(varsNA, "s", ""), " NAs", msgRemoved, ". This is not allowed since the sample used to compute the SEs would be different from the sample used in the estimation.")
                         }
 
                         # We create the cluster list
@@ -619,7 +619,7 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
                 }
             } else {
                 # If this is not the case: there is a problem
-                stop("The length of the clusters (", n_per_cluster[1], ") does not match the number of observations in the estimation (", object$nobs, ").")
+                stop("The length of the clusters (", fsignif(n_per_cluster[1]), ") does not match the number of observations in the estimation (", fsignif(object$nobs), ").")
             }
         }
 

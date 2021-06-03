@@ -1949,6 +1949,10 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             rhs_sw = select_obs(rhs_sw, -obs2remove, nthreads)
         }
 
+        if(!is.null(cluster)){
+            cluster = select_obs(cluster, -obs2remove)
+        }
+
     }
 
     # NEW NUMBER OF OBS AFTER NA/FE REMOVAL
