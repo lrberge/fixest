@@ -712,7 +712,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                 if(missnull(split)) split = NULL
                 if(missnull(NL.fml)) NL.fml = NULL
 
-                additional_vars = collect_vars(NL.fml, offset, weights, split)
+                additional_vars = collect_vars(NL.fml, offset, weights, split, fsplit)
                 complete_vars = c(complete_vars, additional_vars)
 
                 complete_vars = intersect(unique(complete_vars), names(data))

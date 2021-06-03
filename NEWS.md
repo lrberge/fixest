@@ -47,6 +47,10 @@
  
  - Fix bug in `etabe` when `fixef.group` is used and fixed-effects are renamed (reported by @jamesfeigenbaum).
  
+ - Fix bug when `fplit` is used with subset.
+ 
+ - Fix bug when using `cluster` with `subset` and NA values are removed (reported by @adamaltmejd [#154](https://github.com/lrberge/fixest/issues/154)).
+ 
 ## Breaking changes: new i() function
 
  - the function `i()`, used to create factors or interactions has been tidied up, leading to breaking changes.
