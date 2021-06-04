@@ -750,14 +750,14 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
         }
 
-        lhs_text2eval = gsub("^(c|(c?(stepwise|sw)0?))\\(", "list(", lhs_text)
+        lhs_text2eval = gsub("^(c|(c?sw0?))\\(", "list(", lhs_text)
 
         lhs = error_sender(eval(str2lang(lhs_text2eval), data),
                            "Evaluation of the left-hand-side (equal to ", lhs_text, ") raises an error: \n")
 
         if(is.list(lhs)){
             # we check the consistency
-            lhs_names = eval(str2lang(gsub("^list\\(", "stepwise(", lhs_text2eval)))
+            lhs_names = eval(str2lang(gsub("^list\\(", "sw(", lhs_text2eval)))
 
             n_all = lengths(lhs)
             if(!all(n_all == n_all[1])){
@@ -3476,9 +3476,9 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 #'
 #' @details
 #'
-#' To include multiple independent variables, you need to use the stepwise functions. There are 4 stepwise functions associated to 4 short aliases. These are a) stepwise, stepwise0, cstepwise, cstepwise0, and b) sw, sw0, csw, csw0. Let's explain that.
+#' To include multiple independent variables, you need to use the stepwise functions. There are 4 stepwise functions: sw, sw0, csw, csw0. Let's explain that.
 #'
-#' Assume you have the following formula: \code{fml = y ~ x1 + sw(x2, x3)}. The stepwise function \code{sw} will estimate the following two models: \code{y ~ x1 + x2} and \code{y ~ x1 + x3}. That is, each element in \code{sw()} is sequentially, and separately, added to the formula. Would have you used \code{sw0} in lieu of \code{sw}, then the model \code{y ~ x1} would also have been estimated. The \code{0} in the name means that the model wihtout any stepwise element also needs to be estimated.
+#' Assume you have the following formula: \code{fml = y ~ x1 + sw(x2, x3)}. The stepwise function \code{sw} will estimate the following two models: \code{y ~ x1 + x2} and \code{y ~ x1 + x3}. That is, each element in \code{sw()} is sequentially, and separately, added to the formula. Would have you used \code{sw0} in lieu of \code{sw}, then the model \code{y ~ x1} would also have been estimated. The \code{0} in the name implies that the model without any stepwise element will also be estimated.
 #'
 #' Finally, the prefix \code{c} means cumulative: each stepwise element is added to the next. That is, \code{fml = y ~ x1 + csw(x2, x3)} would lead to the following models \code{y ~ x1 + x2} and \code{y ~ x1 + x2 + x3}. The \code{0} has the same meaning and would also lead to the model without the stepwise elements to be estimated: in other words, \code{fml = y ~ x1 + csw0(x2, x3)} leads to the following three models: \code{y ~ x1}, \code{y ~ x1 + x2} and \code{y ~ x1 + x2 + x3}.
 #'
@@ -3497,7 +3497,7 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 #' # Using the 0
 #' feols(y ~ x1 + x2 + sw0(x3), base)
 #'
-stepwise = sw = cstepwise = csw = function(...){
+sw = csw = function(...){
     mc = match.call(expand.dots = TRUE)
 
     n = length(mc) - 1
@@ -3519,7 +3519,7 @@ stepwise = sw = cstepwise = csw = function(...){
     res
 }
 
-cstepwise0 = csw0 = stepwise0 = sw0 = function(...){
+csw0 = sw0 = function(...){
     mc = match.call(expand.dots = TRUE)
 
     n = length(mc) - 1
@@ -3544,22 +3544,10 @@ cstepwise0 = csw0 = stepwise0 = sw0 = function(...){
 # To add a proper documentation:
 
 #' @rdname stepwise
-sw <- sw
-
-#' @rdname stepwise
-cstepwise <- csw
-
-#' @rdname stepwise
 csw <- csw
 
 #' @rdname stepwise
-stepwise0 <- sw0
-
-#' @rdname stepwise
 sw0 <- sw0
-
-#' @rdname stepwise
-cstepwise0 <- csw0
 
 #' @rdname stepwise
 csw0 <- csw0
@@ -3574,26 +3562,26 @@ extract_stepwise = function(fml, tms, all_vars = TRUE){
         n_parts = length(fml)
         osf = n_parts == 2
         fml_txt = deparse_long(fml[[n_parts]])
-        do_stepwise = grepl("(^|[^[:alnum:]_\\.])c?(stepwise|sw)0?\\(", fml_txt)
+        do_stepwise = grepl("(^|[^[:alnum:]_\\.])c?sw0?\\(", fml_txt)
         tl = attr(terms(fml), "term.labels")
 
     } else {
         osf = TRUE
         tl = attr(tms, "term.labels")
         tl = gsub("_impossible_var_name_", "^", tl, fixed = TRUE)
-        do_stepwise = any(grepl("(^|[^[:alnum:]_\\.])c?(stepwise|sw)0?\\(", tl))
+        do_stepwise = any(grepl("(^|[^[:alnum:]_\\.])c?sw0?\\(", tl))
 
     }
 
     if(do_stepwise){
         # We will partially create the linear matrix
 
-        qui = grepl("(^|[^[:alnum:]_\\.])c?(stepwise|sw)0?\\(", tl)
+        qui = grepl("(^|[^[:alnum:]_\\.])c?sw0?\\(", tl)
         if(sum(qui) >= 2){
             stop("You cannot use more than one stepwise function.")
         }
 
-        if(!is_naked_fun(tl[qui], "c?(stepwise|sw)0?")){
+        if(!is_naked_fun(tl[qui], "c?sw0?")){
             stop("You cannot combine stepwise functions with any other element.")
         }
 
