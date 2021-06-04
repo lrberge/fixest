@@ -58,6 +58,16 @@
  - the first two arguments have been swapped! such that now the first argument will always be treated as a factor. 
  
  - the new syntax is `i(factor_var, var, ref, keep, ref2, keep2)` where `var` can be either continuous or factor-like (the argument `f2`, for interaction with factors, has been removed).
+ 
+## Breaking changes: coefplot is now split in two
+
+ - the function `coefplot` has been split in two: 
+ 
+   - `coefplot`: always plots *all* the coefficients. 
+   
+   - `iplot`: plots only interactions or factors created with the function `i()`.
+  
+ - the function `iplot` hence replaces `coefplot`'s former argument `only.inter` which controlled whether or not to focus on interactions.
 
 ## etable
 
@@ -100,6 +110,8 @@ Common methods have been extended to `fixest_multi` objects.
   - `kpr`: Kleibergen-Paap rank test for IV estimations.
   
   - `cd`: Cragg-Donald F statistic for IV estimations.
+  
+  - `my`: gives the mean of the dependent variable.
   
   
 ## New functions
