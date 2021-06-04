@@ -2498,7 +2498,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' Laurent Berge
 #'
 #' @seealso
-#' \code{\link[fixest]{coefplot}} to plot interactions, \code{\link[fixest]{feols}} for OLS estimation with multiple fixed-effects.
+#' \code{\link[fixest]{iplot}} to plot interactions or factors created with \code{i()}, \code{\link[fixest]{feols}} for OLS estimation with multiple fixed-effects.
 #'
 #' @examples
 #'
@@ -2519,8 +2519,8 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' z = rep(c("e", "f", "g"), c(5, 3, 2))
 #' data.frame(x, z, i(x, z))
 #'
-#' # to force a numeric variable to be treated as a factor: use i.
-#' data.frame(x, y, i(x, i.y))
+#' # to force a numeric variable to be treated as a factor: use i()
+#' data.frame(x, y, i(x, i(y)))
 #'
 #' #
 #' # In fixest estimations
@@ -2530,13 +2530,15 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' # We interact the variable 'period' with the variable 'treat'
 #' est_did = feols(y ~ x1 + i(period, treat, 5) | id + period, base_did)
 #'
-#' # => special treatment in coefplot
-#' coefplot(est_did)
+#' # => plot only interactions with iplot
+#' iplot(est_did)
 #'
 #' # Using i() for factors
 #' est_bis = feols(y ~ x1 + i(period, keep = 3:6) + i(period, treat, 5) | id, base_did)
 #'
-#' coefplot(est_bis, only.inter = FALSE)
+#' # we plot the second set of variables created with i()
+#' # => we need to use keep (otherwise only the first one is represented)
+#' iplot(est_bis, keep = "trea")
 #'
 #' # => special treatment in etable
 #' etable(est_bis, dict = c("6" = "six"))
