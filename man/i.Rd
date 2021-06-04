@@ -97,7 +97,7 @@ etable(res_2F, res_2F_bis)
 
 }
 \seealso{
-\code{\link[fixest]{iplot}} to plot interactions or factors created with \code{i()}, \code{\link[fixest]{feols}} for OLS estimation with multiple fixed-effects.
+\code{\link[fixest:coefplot]{iplot}} to plot interactions or factors created with \code{i()}, \code{\link[fixest]{feols}} for OLS estimation with multiple fixed-effects.
 }
 \author{
 Laurent Berge
