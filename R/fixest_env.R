@@ -710,6 +710,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                 if(missnull(offset)) offset = NULL
                 if(missnull(weights)) weights = NULL
                 if(missnull(split)) split = NULL
+                if(missnull(fsplit)) fsplit = NULL
                 if(missnull(NL.fml)) NL.fml = NULL
 
                 additional_vars = collect_vars(NL.fml, offset, weights, split, fsplit)
