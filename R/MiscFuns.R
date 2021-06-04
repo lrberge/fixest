@@ -2813,8 +2813,6 @@ i = function(factor_var, var, ref, keep, ref2, keep2, ...){
     res
 }
 
-#' @rdname i
-interact = i
 
 i_ref = function(factor_var, var, ref, keep, ref2, keep2){
     # To automatically add references when i(x) is used
@@ -3987,7 +3985,7 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
     # Handling the multi columns case (ex: bs(x1), splines)
     # NOTA: I need to add a check for i() because of 1 value interactions
     #       not caught by the != nber of obs
-    qui_inter = grepl("\\bi(nteract)?\\(", all_var_names)
+    qui_inter = grepl("\\bi\\(", all_var_names)
     if(any(lengths(data_list) != nrow(base)) || any(qui_inter)){
 
         all_n = as.vector(lengths(data_list) / nrow(base))
@@ -4057,17 +4055,17 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
     }
 
     # We check for calls to i()
-    qui_inter = grepl("(^|[^[:alnum:]_\\.])i(nteract)?\\(", tl)
+    qui_inter = grepl("(^|[^[:alnum:]_\\.])i\\(", tl)
     IS_INTER = any(qui_inter)
     if(IS_INTER){
         # OMG... why do I always have to reinvent the wheel???
         is_intercept = fake_intercept || (attr(t_fml,"intercept") == 1)
-        i_naked = which(is_naked_fun(tl[qui_inter], "i(nteract)?"))
+        i_naked = which(is_naked_fun(tl[qui_inter], "i"))
 
         if(i_noref){
             for(i in seq_along(i_naked)){
                 j = i_naked[i]
-                txt = gsub("(^|(?<=[^[:alnum:]\\._]))i(nteract)?\\(", "i_noref(", tl[qui_inter][j], perl = TRUE)
+                txt = gsub("(^|(?<=[^[:alnum:]\\._]))i\\(", "i_noref(", tl[qui_inter][j], perl = TRUE)
                 tl[qui_inter][j] = eval(str2lang(txt))
             }
         } else {
@@ -4075,7 +4073,7 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
                 if(!is_intercept && i == 1) next
 
                 j = i_naked[i]
-                txt = gsub("(^|(?<=[^[:alnum:]\\._]))i(nteract)?\\(", "i_ref(", tl[qui_inter][j], perl = TRUE)
+                txt = gsub("(^|(?<=[^[:alnum:]\\._]))i\\(", "i_ref(", tl[qui_inter][j], perl = TRUE)
                 tl[qui_inter][j] = eval(str2lang(txt))
             }
         }
@@ -4381,15 +4379,15 @@ fixef_terms = function(fml, stepwise = FALSE, origin_type = "feols"){
     }
 
     # And yet again some error checking => i() should NOT be used
-    if(any(grepl("^i(nteract)?\\(", my_vars))){
+    if(any(grepl("^i\\(", my_vars))){
         # We create an error instead of simply correcting the syntax => this is because the function i is
         # very different and should not be confused
 
-        var_pblm = my_vars[grepl("^i(nteract)?\\(", my_vars)][1]
+        var_pblm = my_vars[grepl("^i\\(", my_vars)][1]
 
         get_new_var = function(var, f, f2, ...) match.call()
 
-        what = eval(str2lang(gsub("^i(nteract)?", "get_new_var", var_pblm)))
+        what = eval(str2lang(gsub("^i", "get_new_var", var_pblm)))
         n_var = sum(c("var", "f", "f2") %in% names(what))
         msg = if(n_var == 1) "Using i() to create fixed-effects is not possible, use directly the variable." else paste0("To interact fixed-effects, use the syntax fe1^fe2 (in your case ", deparse(what[[2]]), "^", deparse(what[[3]]), ").")
 
@@ -4889,7 +4887,7 @@ clean_interact_names = function(x){
 
     x2clean = x[who2clean]
 
-    x_split = strsplit(x2clean, "(^|(?<=[^[:alnum:]\\._]))(i(nteract)?|sunab(_att)?)\\(|__CLEAN__", perl = TRUE)
+    x_split = strsplit(x2clean, "(^|(?<=[^[:alnum:]\\._]))(i|sunab(_att)?)\\(|__CLEAN__", perl = TRUE)
 
     x_left = sapply(x_split, function(v) v[1])
     x_right = sapply(x_split, function(v) v[2])
@@ -4920,7 +4918,7 @@ clean_interact_names = function(x){
 
 is_naked_fun = function(x, fun_pattern){
     # Why is it always so complicated... There must be an easier way
-    # x = c("i(x1)", "i(I(x3))", "interact(x3, x4, TRUE, drop = c(1, 3:5))", "Temp:i(x2)", "i(x3):Wind")
+    # x = c("i(x1)", "i(I(x3))", "i(x3, x4, TRUE, drop = c(1, 3:5))", "Temp:i(x2)", "i(x3):Wind")
 
     x_split = strsplit(x, paste0("(^|(?<=[^[:alnum:]\\._]))", fun_pattern, "\\("), perl = TRUE)
 
@@ -6386,7 +6384,7 @@ all_vars_with_i_prefix = function(fml){
                 part = fml_split[j]
                 if(grepl("(,|var =) *$", part)){
                     part = gsub("\\([^\\)]+\\)", "", part)
-                    if(grepl("i(nteract)?\\(", part)){
+                    if(grepl("i\\(", part)){
                         # OK!
                         ii = qui_i[i]
                         vars[ii] = substr(vars[ii], 3, nchar(vars[ii]))

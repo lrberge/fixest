@@ -24,7 +24,7 @@ export(dof, degrees_freedom)
 # Lag related
 export(panel, unpanel, f, l, d)
 # interactions
-export(i, interact)
+export(i)
 # macro
 export(xpd)
 # utilities
