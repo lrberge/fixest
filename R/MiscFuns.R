@@ -3717,6 +3717,10 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
 obs = function(x){
     check_arg(x, "class(fixest)")
 
+    if(isTRUE(x$lean)){
+        stop("obs() does not work with models estimated with 'lean = TRUE'.")
+    }
+
     id = 1:x$nobs_origin
 
     for(i in seq_along(x$obs_selection)){
