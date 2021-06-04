@@ -2478,7 +2478,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' Treat a variable as a factor, or interacts a variable with a factor. Values to be dropped/kept from the factor can be easily set. Note that to interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2}.
 #'
 #' @param factor_var  A vector (of any type) that will be treated as a factor. You can set references (i.e. exclude values for which to create dummies) with the \code{ref} argument.
-#' @param var A variable of the same length as \code{factor_var}. This variable will be interacted with the factor in \code{factor_var}. It can be numeric or factor-like. To force a numeric variable to be treated as a factor, you can add the \code{i.} prefix to a variable name. For instance take a numeric variable \code{x_num}: \code{i(x_fact, x_num)} will treat \code{x_num} as numeric while \code{i(x_fact, i.x_num)} will treat \code{x_num} as a factor (it's a shortcut to \code{as.factor(x_num)}).
+#' @param var A variable of the same length as \code{factor_var}. This variable will be interacted with the factor in \code{factor_var}. It can be numeric or factor-like. To force a numeric variable to be treated as a factor, you can either use the classic \code{factor()} function or \code{i()}. But note however that if you use i(), it must be a naked call (i.e. containing only the first argument). For instance take a numeric variable \code{x_num}: \code{i(x_fact, x_num)} will treat \code{x_num} as numeric while \code{i(x_fact, i(x_num))} will treat \code{x_num} as a factor (note that \code{i(x_fact, i(x_num, 2))}, where you want to use \code{2} as a reference for \code{x_num} would not work; you need to use the argument \code{ref2}: \code{i(x_fact, i(x_num), ref2 = 2)}.).
 #' @param ref A vector of values to be taken as references from \code{factor_var}. Can also be a logical: if \code{TRUE}, then the first value of \code{factor_var} will be removed. If \code{ref} is a character vector, partial matching is applied to values; use "@" as the first character to enable regular expression matching. See examples.
 #' @param keep A vector of values to be kept from \code{factor_var} (all others are dropped). By default they should be values from \code{factor_var} and if \code{keep} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
 #' @param ref2 A vector of values to be dropped from \code{var}. By default they should be values from \code{var} and if \code{ref2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
@@ -2551,7 +2551,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' aq$week = aq$Day %/% 7 + 1
 #'
 #' # Interacting Month and week:
-#' res_2F = feols(Ozone ~ Solar.R + i(Month, i.week), aq)
+#' res_2F = feols(Ozone ~ Solar.R + i(Month, i(week)), aq)
 #'
 #' # Same but dropping the 5th Month and 1st week
 #' res_2F_bis = feols(Ozone ~ Solar.R + i(Month, i.week, ref = 5, ref2 = 1), aq)
@@ -2610,6 +2610,21 @@ i = function(factor_var, var, ref, keep, ref2, keep2, ...){
                 var = str2lang(var_name)
                 check_value_plus(var, "evalset vector", .data = parent.frame(), .arg_name = "var")
                 IS_INTER_FACTOR = TRUE
+            } else if(grepl("^i\\(", var_name)){
+                # nested call to i()
+
+                args = eval(str2lang(gsub("^i", "i_args", var_name)))
+                if("factor_var" %in% names(args) && length(args) == 2){
+                    # naked call => OK
+                    var = args$factor_var
+                    check_value_plus(var, "evalset vector", .data = parent.frame(), .arg_name = "var")
+                    IS_INTER_FACTOR = TRUE
+                } else {
+                    arg_names = names(args)[-1]
+                    arg_pblm = setdiff(arg_names, "factor_var")
+                    stop("The argument 'var' accepts only 'naked' calls to i() meaning only the first argument shall be provided. The argument", enumerate_items(arg_pblm, "s.quote.is"), " not valid.")
+                }
+
             } else {
                 check_value(var, "vector", .arg_name = "var")
             }
@@ -2838,6 +2853,15 @@ i_noref = function(factor_var, var, ref, keep, ref2, keep2){
     mc$ref = mc$keep = mc$ref2 = mc$keep2 = NULL
 
     return(deparse_long(mc))
+}
+
+
+i_args = function(factor_var, var, ref, keep, ref2, keep2){
+    # Only used to check whether nested i() calls are valid
+
+    mc = match.call()
+
+    return(mc)
 }
 
 
