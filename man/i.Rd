@@ -2,12 +2,9 @@
 % Please edit documentation in R/MiscFuns.R
 \name{i}
 \alias{i}
-\alias{interact}
 \title{Create, or interact variables with, factors}
 \usage{
 i(factor_var, var, ref, keep, ref2, keep2, ...)
-
-interact(factor_var, var, ref, keep, ref2, keep2, ...)
 }
 \arguments{
 \item{factor_var}{A vector (of any type) that will be treated as a factor. You can set references (i.e. exclude values for which to create dummies) with the \code{ref} argument.}
@@ -68,13 +65,15 @@ data(base_did)
 # We interact the variable 'period' with the variable 'treat'
 est_did = feols(y ~ x1 + i(period, treat, 5) | id + period, base_did)
 
-# => special treatment in coefplot
-coefplot(est_did)
+# => plot only interactions with iplot
+iplot(est_did)
 
 # Using i() for factors
 est_bis = feols(y ~ x1 + i(period, keep = 3:6) + i(period, treat, 5) | id, base_did)
 
-coefplot(est_bis, only.inter = FALSE)
+# we plot the second set of variables created with i()
+# => we need to use keep (otherwise only the first one is represented)
+iplot(est_bis, keep = "trea")
 
 # => special treatment in etable
 etable(est_bis, dict = c("6" = "six"))
@@ -98,7 +97,7 @@ etable(res_2F, res_2F_bis)
 
 }
 \seealso{
-\code{\link[fixest]{coefplot}} to plot interactions, \code{\link[fixest]{feols}} for OLS estimation with multiple fixed-effects.
+\code{\link[fixest]{iplot}} to plot interactions or factors created with \code{i()}, \code{\link[fixest]{feols}} for OLS estimation with multiple fixed-effects.
 }
 \author{
 Laurent Berge

@@ -2519,8 +2519,8 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' z = rep(c("e", "f", "g"), c(5, 3, 2))
 #' data.frame(x, z, i(x, z))
 #'
-#' # to force a numeric variable to be treated as a factor: use i()
-#' data.frame(x, y, i(x, i(y)))
+#' # to force a numeric variable to be treated as a factor: use i.
+#' data.frame(x, y, i(x, i.y))
 #'
 #' #
 #' # In fixest estimations

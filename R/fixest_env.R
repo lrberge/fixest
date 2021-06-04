@@ -3497,6 +3497,9 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 #' # Using the 0
 #' feols(y ~ x1 + x2 + sw0(x3), base)
 #'
+#' @name stepwise
+NULL
+
 sw = csw = function(...){
     mc = match.call(expand.dots = TRUE)
 
@@ -3542,6 +3545,9 @@ csw0 = sw0 = function(...){
 }
 
 # To add a proper documentation:
+
+#' @rdname stepwise
+sw <- sw
 
 #' @rdname stepwise
 csw <- csw
