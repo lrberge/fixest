@@ -30,7 +30,7 @@
  *  new values.                                                       *
  *  Finally for string vectors, I use R's feature of stocking         *
  *  character strings in a unique location. They are therefore        *
- *  uniquely identified by their pointer. I then tranform the         *
+ *  uniquely identified by their pointer. I then transform the        *
  *  pointer to int, and sort accordingly.                             *
  *                                                                    *
  *  The sorting, when sorting is required, is radix-based. My code    *
@@ -41,7 +41,7 @@
  *                                                                    *
  *  As said before, all that matters for qufing is that identical     *
  *  values are consecutive after the sort. Thus, the endianness of    *
- *  the system is of no importantce: whatever the order of bytes      *
+ *  the system is of no importance: whatever the order of bytes       *
  *  on which we sort, we obtain what we want.                         *
  *                                                                    *
  *                                                                    *
@@ -949,8 +949,10 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
 
     #pragma omp parallel for num_threads(nthreads)
     for(int q=0 ; q<Q ; ++q){
-        quf_table_sum_single(px_all[q], x_type_all[q], n, q, p_x_quf_all[q], x_unik_all[q], x_table_all[q],
-                             py, sum_y_all[q], do_sum_y, rm_0, rm_1, rm_single, any_pblm, id_pblm_all[q], check_pblm[q],
+        quf_table_sum_single(px_all[q], x_type_all[q], n, q, p_x_quf_all[q],
+                             x_unik_all[q], x_table_all[q],
+                             py, sum_y_all[q], do_sum_y, rm_0, rm_1,
+                             rm_single, any_pblm, id_pblm_all[q], check_pblm[q],
                              do_refactor, px_sizes[q], obs2keep);
     }
 
@@ -965,6 +967,7 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
 
     // Rcout << "Any problem: " << is_pblm << "\n";
 
+
     if(obs2keep[0] != 0){
         n = n_keep;
     }
@@ -976,6 +979,7 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
         std::fill(obs_removed.begin(), obs_removed.end(), false);
 
         // No need to take care of race conditions
+        // => Update: it leads to a bug.... I cannot understand...
         #pragma omp parallel for num_threads(nthreads)
         for(int q=0 ; q<Q ; ++q){
             // skipping loop if no problem
@@ -984,11 +988,16 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
                 int *pquf = p_x_quf_all[q];
                 for(int i=0 ; i<n ; ++i){
                     if(id_pblm[pquf[i] - 1]){
-                        obs_removed[i] = true;
+                        #pragma omp critical
+                        {
+                            obs_removed[i] = true;
+                        }
                     }
                 }
             }
         }
+
+
 
         // int nb_rm = 0;
         // for(int i=0 ; i<n ; ++i){
