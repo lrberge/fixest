@@ -146,6 +146,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     # Formatting + checks
     #
 
+    if(debug) cat(" - Formatting + checks\n")
+
     # we check the family => only for femlm/feNmlm and feglm
     # PROBLEM: the argument family has the same name in femlm and feglm but different meanings
     if(origin_type == "feNmlm"){
@@ -441,6 +443,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         # ... Panel setup ####
         #
 
+        if(debug) cat(" ---> Panel setup\n")
+
         info = fixest_fml_rewriter(fml)
         isPanel = info$isPanel
         fml = info$fml
@@ -483,8 +487,10 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         fml_linear = fml_maker(fml_parts[[1]])
 
         #
-        # ... Fixef-effects ####
+        # ... Fixed-effects ####
         #
+
+        if(debug) cat(" ---> Fixed effects\n")
 
         # for clarity, arg fixef is transformed into fml_fixef
         if(!is.null(fml_fixef) && !missnull(fixef)){
@@ -565,10 +571,14 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     # Data formatting ####
     #
 
+    if(debug) cat(" - Data formattiing\n")
+
 
     #
     # ... subset ####
     #
+
+    if(debug) cat(" ---> subset\n")
 
     obs_selection = list()
     multi_lhs = FALSE
@@ -738,6 +748,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     # ... The left hand side ####
     #
 
+    if(debug) cat(" ---> LHS\n")
+
     # the LHS for isFit has been done just before subset
 
     # evaluation
@@ -858,6 +870,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     #
     # ... linear part ####
     #
+
+    if(debug) cat(" ---> Linear part\n")
 
     interaction.info = NULL
     agg = NULL
@@ -1082,6 +1096,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     # ... nonlinear part ####
     #
 
+    if(debug) cat(" ---> Non-linear part\n")
+
     msgNA_NL = ""
     if(!missnull(NL.fml)){
 
@@ -1141,6 +1157,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     #
     # ... Offset ####
     #
+
+    if(debug) cat(" ---> offset\n")
 
     isOffset = FALSE
     offset.value = 0
@@ -1223,6 +1241,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     #
     # ... Weights ####
     #
+
+    if(debug) cat(" ---> weights\n")
 
     any0W = anyNA_W = FALSE
     msgNA_weight = message_0W = ""
@@ -1332,6 +1352,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     # ... Split ####
     #
 
+    if(debug) cat(" ---> split\n")
+
     isSplit = FALSE
     msgNA_split = ""
     split.full = FALSE
@@ -1412,6 +1434,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     # ... IV ####
     #
 
+    if(debug) cat(" ---> IV\n")
+
     msgNA_iv = ""
     if(do_iv){
         # We create the IV LHS and the IV RHS
@@ -1486,6 +1510,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     #
     # ... Cluster ####
     #
+
+    if(debug) cat(" ---> cluster\n")
 
     msgNA_cluster = ""
     if(!missnull(cluster)){
@@ -1572,6 +1598,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     #
     # Fixed-effects ####
     #
+
+    if(debug) cat(" - Fixed-effects\n")
 
     # NOTA on stepwise FEs:
     # I wanted to evaluate all the FEs first, then send the evaluated stuff for later. Like in stepwise linear.
@@ -1675,6 +1703,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         #
         # ... NA handling ####
         #
+
+        if(debug) cat(" ---> NA handling\n")
 
         # We change non-numeric to character (important for parallel qufing)
         is_not_num = sapply(fixef_df, function(x) !is.numeric(x))
@@ -1813,6 +1843,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         # ... QUF setup ####
         #
 
+        if(debug) cat(" ---> QUF\n")
+
         info_fe = setup_fixef(fixef_df = fixef_df, lhs = lhs, fixef_vars = fixef_vars,
                               fixef.rm = fixef.rm, family = family, isSplit = isSplit,
                               split.full = split.full, origin_type = origin_type,
@@ -1905,6 +1937,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     # NA removal ####
     #
 
+    if(debug) cat(" - NA Removal\n")
+
     # NA & problem management
     if(length(obs2remove) > 0){
         # we kick out the problems (both NA related and fixef related)
@@ -1996,6 +2030,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     #
     # Other setups ####
     #
+
+    if(debug) cat(" - Other setups\n")
 
     # Starting values:
     # NOTA: within this function it is called linear.start while in the client functions, it is called start
@@ -2250,6 +2286,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     # PRECISION + controls ####
     #
 
+    if(debug) cat(" - Precision setting + controls\n")
+
     # The main precision
 
     check_value(fixef.tol, "numeric scalar GT{(10000*.Machine$double.eps)}")
@@ -2303,6 +2341,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     ####
     #### Sending to the env ####
     ####
+
+    if(debug) cat(" - sending to the env\n")
 
     #
     # General elements
