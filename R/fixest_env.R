@@ -1950,7 +1950,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             rhs_sw = select_obs(rhs_sw, -obs2remove, nthreads)
         }
 
-        if(!is.null(cluster)){
+        if(!is.null(cluster) && !"formula" %in% class(cluster)){
             cluster = select_obs(cluster, -obs2remove)
         }
 
@@ -2746,9 +2746,9 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, spl
         fixef_sizes = 0
     }
 
-    # quoi = list(fixef_df=fixef_df, lhs=lhs, do_sum_y=do_sum_y, rm_0=rm_0, rm_1=rm_1, rm_single=rm_single, only_slope=only_slope, nthreads=nthreads, isRefactor=isRefactor, fixef_sizes=fixef_sizes, obs2keep=obs2keep)
-    # save(quoi, file = "../_DATA/problem.Rdata")
-
+#     quoi = list(fixef_df=fixef_df, lhs=lhs, do_sum_y=do_sum_y, rm_0=rm_0, rm_1=rm_1, rm_single=rm_single, only_slope=only_slope, nthreads=nthreads, isRefactor=isRefactor, fixef_sizes=fixef_sizes, obs2keep=obs2keep)
+#     save(quoi, file = "../_PROBLEM/fepois crashes/problem_quf.Rdata")
+# stop()
 
     quf_info_all = cpppar_quf_table_sum(x = fixef_df, y = lhs, do_sum_y = do_sum_y,
                                         rm_0 = rm_0, rm_1 = rm_1, rm_single = rm_single,
