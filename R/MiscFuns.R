@@ -8694,6 +8694,93 @@ getFixest_estimation = function(){
 }
 
 
+#' Permanently removes the fixest package startup message
+#'
+#' Package startup messages can be very annoying, although sometimes they can be necessary. Use this function to prevent \code{fixest}'s package startup message from popping when loading. This will be specific to your current project.
+#'
+#' @param x Logical, no default. If \code{FALSE}, the package startup message is removed.
+#'
+#' @details
+#' Note that this function is introduced to cope with the first \code{fixest} startup message (in version 0.9.0). In the future, all startup messages may be removed, but the function will still exist.
+#'
+#' This function works by adding a variable in the \code{.Renviron} file, so it is very lightweight and project-specific.
+#'
+fixest_startup_msg = function(x){
+
+    check_arg(x, "logical scalar mbt")
+
+    if(x){
+        renvir_update("fixest_startup_msg", NULL)
+    } else {
+        renvir_update("fixest_startup_msg", FALSE)
+    }
+
+}
+
+renvir_get = function(key){
+    # Get the values of envir variables
+    # we also evaluate them
+
+    value_raw = Sys.getenv(key)
+
+    if(value_raw == ""){
+        return(NULL)
+    }
+
+    # Any default value should be able to be evaluated "as such"
+    value = eval(str2lang(gsub("__%%;;", "\n", value_raw)))
+
+    return(value)
+}
+
+renvir_update = function(key, value){
+    # Updates the .Renviron file
+
+    check_arg(key, "character scalar mbt")
+    check_arg(value, "NULL mbt")
+
+    if(file.exists(".Renviron")){
+        file = file(".Renviron", "r", encoding = "UTF-8")
+
+        renvir_raw = readLines(file)
+
+        close(file)
+    } else {
+        renvir_raw = ""
+    }
+
+    all_keys = trimws(gsub("=.*", "", renvir_raw))
+
+    do_write = TRUE
+    if(is.null(value)){
+
+        line_to_drop = all_keys == key
+        if(any(line_to_drop)){
+            renvir_raw = renvir_raw[!line_to_drop]
+        } else {
+            do_write = TRUE
+        }
+
+    } else {
+
+        value_text = deparse_long(value)
+        value_text = gsub("\n", "__%%;;", value_text)
+
+        key_line = all_keys == key
+        renvir_raw = c(renvir_raw[!key_line], paste0(key, " = ", value_text))
+    }
+
+    if(do_write){
+        file = file(".Renviron", "w", encoding = "UTF-8")
+
+        renvir_raw = writeLines(renvir_raw, file)
+
+        close(file)
+    }
+
+
+}
+
 #### .................. ####
 #### DOCUMENTATION DATA ####
 ####

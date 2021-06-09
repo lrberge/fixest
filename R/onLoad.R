@@ -40,8 +40,8 @@
 .onAttach = function(libname, pkgname) {
 
     # breaking message: don't know how long I'll keep it
-    is_msg = !isFALSE(Sys.getenv("fixest_startup_msg"))
-    if(is_msg) packageStartupMessage("fixest 0.9.0, BREAKING changes! \nIn i():\n  a) the first two arguments have been swapped! Now it's i(factor_var, continuous_var) for interactions. \n  b) argument 'drop' has been removed (put everything in 'ref' now).")
+    is_msg = !isFALSE(renvir_get("fixest_startup_msg"))
+    if(is_msg) packageStartupMessage("fixest 0.9.0, BREAKING changes! (Permanently remove this message with fixest_startup_msg(FALSE).) \nIn i():\n  a) the first two arguments have been swapped! Now it's i(factor_var, continuous_var) for interactions. \n  b) argument 'drop' has been removed (put everything in 'ref' now).")
 
 }
 

@@ -13,6 +13,7 @@ export(extraline_register)
 # misc funs
 export(collinearity)
 export(r2, fitstat, fitstat_register, wald)
+export(fixest_startup_msg)
 # did
 export(did_means)
 # graph
