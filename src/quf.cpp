@@ -974,38 +974,71 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
 
     if(is_pblm){
 
+        //
+        // finding which observation to remove based on the removed fixed-effects
+        //
+
+        // New scheme:
+        // - if parallel, we create an int vector gathering the obs removed
+        //   => this will allows to avoid a critical section which makes the
+        //      parallel useless
+        //   we then copy the values into the bool vector
+        // - if not parallel, we fill the bool vector directly
+        //
+
+        int n_problems = std::accumulate(any_pblm.begin(), any_pblm.end(), 0);
+        bool is_parallel = n_problems > 1 && nthreads > 1;
+
         // creating the obs2remove vector
         obs_removed.resize(n);
         std::fill(obs_removed.begin(), obs_removed.end(), false);
 
-        // No need to take care of race conditions
-        // => Update: it leads to a bug.... I cannot understand...
-        #pragma omp parallel for num_threads(nthreads)
-        for(int q=0 ; q<Q ; ++q){
-            // skipping loop if no problem
-            if(any_pblm[q]){
-                vector<bool> &id_pblm = id_pblm_all[q];
-                int *pquf = p_x_quf_all[q];
-                for(int i=0 ; i<n ; ++i){
-                    if(id_pblm[pquf[i] - 1]){
-                        #pragma omp critical
-                        {
+        if(is_parallel){
+
+            // using an int vector removes the race condition issue
+            // => we can't use a boolean vector directly bc of the way
+            // boolean vectors are stored (allocation of new values depends
+            // on the position of the existing values => creating a race condition
+            // problem)
+            //
+            // using a omp critical section is a no go, renders parallel useless
+            vector<int> obs_removed_int(n, 0);
+
+            #pragma omp parallel for num_threads(nthreads)
+            for(int q=0 ; q<Q ; ++q){
+                if(any_pblm[q]){
+                    vector<bool> &id_pblm = id_pblm_all[q];
+                    int *pquf = p_x_quf_all[q];
+                    for(int i=0 ; i<n ; ++i){
+                        if(id_pblm[pquf[i] - 1]){
+                            obs_removed_int[i] = 1;
+                        }
+                    }
+                }
+            }
+
+            // we copy the values into the boolean vector
+            for(int i=0 ; i<n ; ++i){
+                if(obs_removed_int[i]){
+                    obs_removed[i] = true;
+                }
+            }
+
+        } else {
+
+            // we fill the boolean vector directly
+            for(int q=0 ; q<Q ; ++q){
+                if(any_pblm[q]){
+                    vector<bool> &id_pblm = id_pblm_all[q];
+                    int *pquf = p_x_quf_all[q];
+                    for(int i=0 ; i<n ; ++i){
+                        if(id_pblm[pquf[i] - 1]){
                             obs_removed[i] = true;
                         }
                     }
                 }
             }
         }
-
-
-
-        // int nb_rm = 0;
-        // for(int i=0 ; i<n ; ++i){
-        //     nb_rm += obs_removed[i];
-        // }
-        //
-        // Rcout << "#obs removed = " << nb_rm << "\n";
-        // stop("end after removing obs.");
 
 
         // refactoring, recomputing all the stuff
