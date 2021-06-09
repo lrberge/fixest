@@ -1,7 +1,7 @@
 
 # fixest: Fast and user-friendly fixed-effects estimation
 
-<a href="https://cran.r-project.org/web/checks/check_results_fixest.html"><img src="https://cranchecks.info/badges/flavor/release/fixest" alt="CRAN status"></a>
+<a href="https://cran.r-project.org/web/checks/check_results_fixest.html"><img src="https://cranchecks.info/badges/worst/fixest" alt="CRAN status"></a>
 <a href="https://CRAN.R-project.org/package=fixest"><img src="http://www.r-pkg.org/badges/version/fixest" alt="Version"> </a>
 <a href="https://ipub.com/dev-corner/apps/r-package-downloads/"> <img src="https://cranlogs.r-pkg.org/badges/fixest" alt = "Downloads"> </a>
 
