@@ -6158,8 +6158,8 @@ fixest_fml_rewriter = function(fml){
         lhs_text = fml_split(fml, 1, text = TRUE, split.lhs = TRUE)
         if(isPanel){
 
-            if(grepl("^(c|(c?(stepwise|sw)0?)|list)\\(", lhs_text)){
-                lhs_text2eval = gsub("^(c|(c?(stepwise|sw)0?|list))\\(", "stepwise(", lhs_text)
+            if(grepl("^(c|c?sw0?|list)\\(", lhs_text)){
+                lhs_text2eval = gsub("^(c|c?sw0?|list)\\(", "sw(", lhs_text)
                 lhs_names = eval(str2lang(lhs_text2eval))
             } else {
                 lhs_names = lhs_text
@@ -6169,7 +6169,7 @@ fixest_fml_rewriter = function(fml){
                                    "Problem in the formula regarding lag/leads: ", clean = "__expand")
 
             if(length(lhs_all) > 1){
-                lhs_fml = paste("c(", paste(lhs_all, collapse = "+"), ")")
+                lhs_fml = paste("c(", paste(lhs_all, collapse = ","), ")")
             } else {
                 lhs_fml = lhs_all
             }

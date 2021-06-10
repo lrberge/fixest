@@ -55,6 +55,8 @@
  
  - Fix bug argument `lean` not working on `summary` when applied to an existing `summary` and only the argument `lean` was present (reported by @adamaltmejd).
  
+ - Fix bug when using multiple LHS with lags in the formula (reported by @Nicolas Reigl [#158](https://github.com/lrberge/fixest/issues/154)).
+ 
 ## Breaking changes: new i() function
 
  - the function `i()`, used to create factors or interactions has been tidied up, leading to breaking changes.
