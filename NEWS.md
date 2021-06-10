@@ -53,6 +53,8 @@
  
  - Fix bug when using `cluster` with `subset` and NA values are removed (reported by @adamaltmejd [#154](https://github.com/lrberge/fixest/issues/154)).
  
+ - Fix bug argument `lean` not working on `summary` when applied to an existing `summary` and only the argument `lean` was present (reported by @adamaltmejd).
+ 
 ## Breaking changes: new i() function
 
  - the function `i()`, used to create factors or interactions has been tidied up, leading to breaking changes.

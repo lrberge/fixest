@@ -368,6 +368,8 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 		return(object)
 	}
 
+    mc = match.call()
+
 	dots = list(...)
 
 	check_arg(n, "integer scalar GE{1}")
@@ -394,18 +396,15 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	        # From print
 	        return(object)
 
-	    } else if(is.null(se) && is.null(cluster) && is.null(dof) && missing(.vcov)){
-	        if(is.null(agg)){
-	            if(missing(stage)){
-	                # No modification required
-	                object$summary_from_fit = FALSE
-	                return(object)
-	            } else {
-	                # No modification required
-	                do_assign = FALSE
-	            }
+	    } else if(is.null(se) && is.null(cluster) && is.null(dof) && missing(.vcov) && is.null(agg)){
+	        # We return directly the object ONLY if not any other argument has been passed
+	        if(length(mc) == 2){
+	            # No modification required
+	            object$summary_from_fit = FALSE
+	            return(object)
 	        } else {
-	            do_assign = TRUE
+	            # No modification required regarding the computation of the VCOV
+	            do_assign = FALSE
 	        }
 	    }
 
@@ -429,7 +428,6 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	}
 
 	# Checking arguments in ...
-	mc = match.call()
 	if(!any(c("fromPrint", "iv", "keep_se_info", "summary_flags") %in% names(mc))){
 	    # condition means NOT internal call => thus client call
 	    if(missing(.vcov) || !is.function(.vcov)){
