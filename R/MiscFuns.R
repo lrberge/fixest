@@ -4037,8 +4037,13 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
     # fml = ~a*b+c+i(x1)+Temp:i(x2)+i(x3)/Wind
 
     # Modify the formula to add interactions
-    if(grepl("::", deparse_long(fml[[3]]), fixed = TRUE)){
+    rhs_txt = deparse_long(fml[[3]])
+    if(grepl("::", rhs_txt, fixed = TRUE)){
         fml = expand_interactions(fml)
+    }
+
+    if(grepl("\\^[[:alpha:]]", rhs_txt)){
+        stop("The special operator '^' can only be used in the fixed-effects part of the formula. Please use ':' instead.")
     }
 
     #
@@ -6187,6 +6192,11 @@ fixest_fml_rewriter = function(fml){
             # rhs actually also contains the LHS
             rhs_text = deparse_long(fml_parts[[1]])
             rhs_text = gsub("([\\.[:alpha:]][[:alnum:]\\._]*\\^[[:digit:]]+)", "I(\\1)", rhs_text)
+
+            if(grepl("\\^[[:alpha:]]", rhs_text)){
+                stop_up("The operator '^' between variables can be used only in the fixed-effects part of the formula. Otherwise, please use ':' instead.")
+            }
+
             fml_rhs = as.formula(rhs_text)
         } else {
             fml_rhs = fml_maker(fml_parts[[1]])
@@ -6279,6 +6289,11 @@ fixest_fml_rewriter = function(fml){
     } else if(isPower){
         # It's faster not to call terms
         fml_text = gsub("([\\.[:alpha:]][[:alnum:]\\._]*\\^[[:digit:]]+)", "I(\\1)", fml_text)
+
+        if(grepl("\\^[[:alpha:]]", fml_text)){
+            stop_up("The operator '^' between variables can be used only in the fixed-effects part of the formula. Otherwise, please use ':' instead.")
+        }
+
         fml_new = as.formula(fml_text)
 
     } else {
