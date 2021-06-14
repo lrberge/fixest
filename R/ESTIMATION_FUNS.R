@@ -1334,7 +1334,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 		if(any(abs(slope_flag) > 0) && any(res$iterations > 300)){
 		    # Maybe we have a convergence problem
 		    # This is poorly coded, but it's a temporary fix
-		    opt_fe <- check_conv(y_demean, X_demean, fixef_id_list, slope_flag, slope_vars, weights)
+		    opt_fe = check_conv(y_demean, X_demean, fixef_id_list, slope_flag, slope_vars, weights)
 
 		    # This is a bit too rough a check but it should catch the most problematic cases
 		    if(any(opt_fe > 1e-4)){
@@ -1565,12 +1565,12 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 		se = sqrt(se)
 
 		# coeftable
-		zvalue <- coef/se
-		pvalue <- 2*pt(-abs(zvalue), max(n - df_k, 1))
+		zvalue = coef/se
+		pvalue = 2*pt(-abs(zvalue), max(n - df_k, 1))
 
-		coeftable <- data.frame("Estimate"=coef, "Std. Error"=se, "t value"=zvalue, "Pr(>|t|)"=pvalue)
-		names(coeftable) <- c("Estimate", "Std. Error", "t value",  "Pr(>|t|)")
-		row.names(coeftable) <- names(coef)
+		coeftable = data.frame("Estimate"=coef, "Std. Error"=se, "t value"=zvalue, "Pr(>|t|)"=pvalue)
+		names(coeftable) = c("Estimate", "Std. Error", "t value",  "Pr(>|t|)")
+		row.names(coeftable) = names(coef)
 
 		attr(se, "type") = attr(coeftable, "type") = "Standard"
 		res$coeftable = coeftable
@@ -2090,7 +2090,7 @@ feglm.fit = function(y, X, fixef_df, family = "poisson", offset, split, fsplit, 
     nthreads = get("nthreads", env)
     isWeight = length(weights) > 1
     isOffset = length(offset) > 1
-    nobs <- length(y)
+    nobs = length(y)
     onlyFixef = length(X) == 1
 
     # the preformatted results
@@ -2479,19 +2479,19 @@ feglm.fit = function(y, X, fixef_df, family = "poisson", offset, split, fsplit, 
         se = sqrt(se)
 
         # coeftable
-        zvalue <- coef/se
+        zvalue = coef/se
         use_t = !family$family %in% c("poisson", "binomial")
         if(use_t){
-            pvalue <- 2*pt(-abs(zvalue), max(res$nobs - res$nparams, 1))
+            pvalue = 2*pt(-abs(zvalue), max(res$nobs - res$nparams, 1))
             ctable_names = c("Estimate", "Std. Error", "t value",  "Pr(>|t|)")
         } else {
-            pvalue <- 2*pnorm(-abs(zvalue))
+            pvalue = 2*pnorm(-abs(zvalue))
             ctable_names = c("Estimate", "Std. Error", "z value",  "Pr(>|z|)")
         }
 
-        coeftable <- data.frame("Estimate"=coef, "Std. Error"=se, "z value"=zvalue, "Pr(>|z|)"=pvalue)
-        names(coeftable) <- ctable_names
-        row.names(coeftable) <- names(coef)
+        coeftable = data.frame("Estimate"=coef, "Std. Error"=se, "z value"=zvalue, "Pr(>|z|)"=pvalue)
+        names(coeftable) = ctable_names
+        row.names(coeftable) = names(coef)
 
         attr(se, "type") = attr(coeftable, "type") = "Standard"
         res$coeftable = coeftable
@@ -2735,7 +2735,7 @@ feglm.fit = function(y, X, fixef_df, family = "poisson", offset, split, fsplit, 
 #'
 #'
 #'
-femlm <- function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), start = 0, fixef, fixef.rm = "perfect",
+femlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), start = 0, fixef, fixef.rm = "perfect",
 						offset, subset, split, fsplit, cluster, se, dof, panel.id, fixef.tol = 1e-5, fixef.iter = 10000,
 						nthreads = getFixest_nthreads(), lean = FALSE, verbose = 0, warn = TRUE,
 						notes = getFixest_notes(), theta.init, combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
@@ -3104,7 +3104,7 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	# Maximizing the likelihood
 	#
 
-	opt <- try(stats::nlminb(start=start, objective=femlm_ll, env=env, lower=lower, upper=upper, gradient=gradient, hessian=hessian, control=opt.control), silent = TRUE)
+	opt = try(stats::nlminb(start=start, objective=femlm_ll, env=env, lower=lower, upper=upper, gradient=gradient, hessian=hessian, control=opt.control), silent = TRUE)
 
 	if("try-error" %in% class(opt)){
 		# We return the coefficients (can be interesting for debugging)
@@ -3128,7 +3128,7 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 			convStatus = FALSE
 		}
 
-		coef <- opt$par
+		coef = opt$par
 	}
 
 
@@ -3182,7 +3182,7 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 
 	# Variance
 
-	var <- NULL
+	var = NULL
 	try(var <- solve(hessian_noBounded), silent = TRUE)
 	if(is.null(var)){
 		warning_msg = paste(warning_msg, "The information matrix is singular: presence of collinearity. Use function collinearity() to pinpoint the problems.")
@@ -3208,8 +3208,8 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 		names(se) = params
 	}
 
-	zvalue <- coef/se
-	pvalue <- 2*pnorm(-abs(zvalue))
+	zvalue = coef/se
+	pvalue = 2*pnorm(-abs(zvalue))
 
 	# We add the information on the bound for the se & update the var to drop the bounded vars
 	se_format = se
@@ -3218,9 +3218,9 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 		se_format[isBounded] = boundText
 	}
 
-	coeftable <- data.frame("Estimate"=coef, "Std. Error"=se_format, "z value"=zvalue, "Pr(>|z|)"=pvalue, stringsAsFactors = FALSE)
-	names(coeftable) <- c("Estimate", "Std. Error", "z value",  "Pr(>|z|)")
-	row.names(coeftable) <- params
+	coeftable = data.frame("Estimate"=coef, "Std. Error"=se_format, "z value"=zvalue, "Pr(>|z|)"=pvalue, stringsAsFactors = FALSE)
+	names(coeftable) = c("Estimate", "Std. Error", "z value",  "Pr(>|z|)")
+	row.names(coeftable) = params
 
 	attr(se, "type") = attr(coeftable, "type") = "Standard"
 
@@ -3229,13 +3229,13 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	exp_mu = mu_both$exp_mu
 
 	# calcul pseudo r2
-	loglik <- -opt$objective # moins car la fonction minimise
-	ll_null <- model0$loglik
+	loglik = -opt$objective # moins car la fonction minimise
+	ll_null = model0$loglik
 
 	# dummies are constrained, they don't have full dof (cause you need to take one value off for unicity)
 	# this is an approximation, in some cases there can be more than one ref. But good approx.
 	nparams = res$nparams
-	pseudo_r2 <- 1 - (loglik - nparams + 1) / ll_null
+	pseudo_r2 = 1 - (loglik - nparams + 1) / ll_null
 
 	# Calcul residus
 	expected.predictor = famFuns$expected.predictor(mu, exp_mu, env)
@@ -3364,7 +3364,7 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 
 	}
 
-	class(res) <- "fixest"
+	class(res) = "fixest"
 
 	if(verbose > 0){
 		cat("\n")
