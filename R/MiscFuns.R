@@ -6292,7 +6292,12 @@ fixest_fml_rewriter = function(fml){
         fml_text = gsub("([\\.[:alpha:]][[:alnum:]\\._]*\\^[[:digit:]]+)", "I(\\1)", fml_text)
 
         if(grepl("\\^[[:alpha:]]", fml_text)){
-            stop_up("The operator '^' between variables can be used only in the fixed-effects part of the formula. Otherwise, please use ':' instead.")
+            # We check if there is one ^ specifically in the RHS
+            rhs_txt = fml_split(fml, i = 1, text = TRUE)
+
+            if(grepl("\\^[[:alpha:]]", rhs_txt)){
+                stop_up("The operator '^' between variables can be used only in the fixed-effects part of the formula. Otherwise, please use ':' instead.")
+            }
         }
 
         fml_new = as.formula(fml_text)
