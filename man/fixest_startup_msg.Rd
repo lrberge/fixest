@@ -10,8 +10,10 @@ fixest_startup_msg(x)
 \item{x}{Logical, no default. If \code{FALSE}, the package startup message is removed.}
 }
 \description{
-Package startup messages can be very annoying, although sometimes they can be necessary. Use this function to remove \code{fixest}'s package startup message to pop in your current project.
+Package startup messages can be very annoying, although sometimes they can be necessary. Use this function to prevent \code{fixest}'s package startup message from popping when loading. This will be specific to your current project.
 }
 \details{
 Note that this function is introduced to cope with the first \code{fixest} startup message (in version 0.9.0). In the future, all startup messages may be removed, but the function will still exist.
+
+This function works by adding a variable in the \code{.Renviron} file, so it is very lightweight and project-specific.
 }

@@ -292,7 +292,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' @param lean Logical, default is \code{FALSE}. Used to reduce the (memory) size of the summary object. If \code{TRUE}, then all objects of length N (the number of observations) are removed from the result. Note that some \code{fixest} methods may consequently not work when applied to the summary.
 #' @param forceCovariance (Advanced users.) Logical, default is \code{FALSE}. In the peculiar case where the obtained Hessian is not invertible (usually because of collinearity of some variables), use this option to force the covariance matrix, by using a generalized inverse of the Hessian. This can be useful to spot where possible problems come from.
 #' @param keepBounded (Advanced users -- \code{feNmlm} with non-linear part and bounded coefficients only.) Logical, default is \code{FALSE}. If \code{TRUE}, then the bounded coefficients (if any) are treated as unrestricted coefficients and their S.E. is computed (otherwise it is not).
-#' @param n Integer, default is missing (means Inf). Number of coefficients to display when the print method is used.
+#' @param n Integer, default is 1000. Number of coefficients to display when the print method is used.
 #' @param ... Only used if the argument \code{.vocv} is provided and is a function: extra arguments to be passed to that function.
 #'
 #' @section Compatibility with \pkg{sandwich} package:
@@ -356,9 +356,9 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' summary(est_pois, .vcov = vcovCL, cluster = trade[, c("Destination", "Product")])
 #'
 #'
-summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, stage = 2, lean = FALSE,
-                          agg = NULL, forceCovariance = FALSE, keepBounded = FALSE, n,
-                          nthreads = getFixest_nthreads(), ...){
+summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov,
+                          stage = 2, lean = FALSE, agg = NULL, forceCovariance = FALSE,
+                          keepBounded = FALSE, n = 1000, nthreads = getFixest_nthreads(), ...){
 
 	# computes the clustered SEs and returns the modified vcov and coeftable
     # NOTA: if the object is already a summary
@@ -438,6 +438,7 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov, 
 	check_arg(stage, "integer vector no na len(,2) GE{1} LE{2}")
 
 	check_arg(lean, "logical scalar")
+
 
 	# IV
 	if(isTRUE(object$iv) && !isTRUE(dots$iv)){

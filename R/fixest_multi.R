@@ -121,7 +121,7 @@ setup_multi = function(index, all_names, data, simplify = TRUE){
 #'
 #'
 summary.fixest_multi = function(object, type = "short", se = NULL, cluster = NULL, dof = NULL,
-                                .vcov, stage = 2, lean = FALSE, n, ...){
+                                .vcov, stage = 2, lean = FALSE, n = 1000, ...){
     dots = list(...)
     data = attr(object, "data")
 
