@@ -6471,6 +6471,21 @@ colon_to_star = function(x){
     }
 }
 
+# function to normalize character vectors into variable names
+as_varname = function(x){
+    # "x1" => "x1"
+    # "(x1)" => "`(x1)`"
+
+
+    qui_pblm = grepl("[^[:alnum:]\\._]", x)
+    if(any(qui_pblm)){
+        x[qui_pblm] = paste0("`", x[qui_pblm], "`")
+        x[qui_pblm] = gsub("``", "`", x[qui_pblm])
+    }
+
+    x
+}
+
 #### ................. ####
 #### Additional Methods ####
 ####

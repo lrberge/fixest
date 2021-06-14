@@ -927,7 +927,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             }
 
             # The formula
-            fml_linear = .xpd(lhs = fml_linear[[2]], rhs = colnames(linear.mat))
+            rhs = as_varname(colnames(linear.mat))
+            fml_linear = .xpd(lhs = fml_linear[[2]], rhs = rhs)
 
             linear.varnames = NULL
 
