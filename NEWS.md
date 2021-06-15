@@ -57,6 +57,8 @@
  
  - Fix bug when using multiple LHS with lags in the formula (reported by @Nicolas Reigl [#158](https://github.com/lrberge/fixest/issues/154)).
  
+ - Fix bug regarding the intercept-only likelihood when weights are provided (only with Poisson and logit models), reported by @fostermeijer [#155](https://github.com/lrberge/fixest/issues/155).
+ 
 ## Breaking changes: new i() function
 
  - the function `i()`, used to create factors or interactions has been tidied up, leading to breaking changes.
