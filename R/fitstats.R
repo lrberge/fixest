@@ -336,8 +336,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
     type = tolower(type)
 
     # To update
-    type_with_summary = any(grepl("^(g|(iv)?wald|cd|kpr)", type))
-    if(type_with_summary && (!isTRUE(x$summary) || !is.null(dots$se) || !is.null(dots$cluster))){
+    if(!isTRUE(x$summary) || any(c("se", "cluster", "dof") %in% names(dots))){
         x = summary(x, ...)
     }
 
@@ -430,7 +429,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
             if(root == "f"){
                 if(!is.null(x$ssr)){
                     df1 = degrees_freedom(x, "k") - 1
-                    df2 = degrees_freedom(x, "resid", se = "standard")
+                    df2 = degrees_freedom(x, "t")
 
                     if(isTRUE(x$iv) && x$iv_stage == 2){
                         # We need to compute the SSR
@@ -468,7 +467,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                 if(isTRUE(x$iv)){
                     if(x$iv_stage == 1){
                         df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd)
-                        df2 = degrees_freedom(x, "resid", se = "standard")
+                        df2 = degrees_freedom(x, "resid")
 
                         stat = ((x$ssr_no_inst - x$ssr) / df1) / (x$ssr / df2)
                         p = pf(stat, df1, df2, lower.tail = FALSE)
@@ -479,7 +478,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                         # f stat for the second stage
 
                         df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
-                        df2 = degrees_freedom(x, "resid", se = "standard")
+                        df2 = degrees_freedom(x, "resid")
 
                         w = 1
                         if(!is.null(x$weights)) w = x$weights
@@ -499,7 +498,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
 
                 if(isTRUE(x$iv)){
                     df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd, stage = 1)
-                    df2 = degrees_freedom(x, "resid", se = "standard", stage = 1)
+                    df2 = degrees_freedom(x, "resid", stage = 1)
 
                     if(x$iv_stage == 1){
 
@@ -528,7 +527,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                     # f stat for the second stage
 
                     df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
-                    df2 = degrees_freedom(x, "resid", se = "standard")
+                    df2 = degrees_freedom(x, "resid")
 
                     w = 1
                     if(!is.null(x$weights)) w = x$weights
