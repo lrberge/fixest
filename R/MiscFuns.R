@@ -3174,10 +3174,10 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
 
         is_large = sum(power) > 14
         if(is_large){
-            # We can't do differently
-            arg_list = lapply(QUF_raw, `[[`, 1)
-            arg_list$sep = "_"
-            index = do.call("paste", arg_list)
+            # 15 Aug 2021, finally found a solution. It was so obvious with hindsight...
+            QUF_raw_value = lapply(QUF_raw, `[[`, 1)
+            order_index = do.call(order, QUF_raw_value)
+            index = cpp_combine_clusters(QUF_raw_value, order_index)
         } else {
             # quicker, but limited by the precision of doubles
             index = QUF_raw[[1]]$x
@@ -4636,9 +4636,8 @@ combine_clusters_fast = function(...){
     power = floor(1 + log10(sapply(cluster, max)))
 
     if(sum(power) > 14){
-        myDots = cluster
-        myDots$sep = "_"
-        index = do.call("paste", myDots)
+        order_index = do.call(order, cluster)
+        index = cpp_combine_clusters(cluster, order_index)
     } else {
         # quicker, but limited by the precision of doubles
         index = cluster[[1]]

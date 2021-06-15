@@ -144,6 +144,8 @@ Common methods have been extended to `fixest_multi` objects.
   
   - `to_integer` now sorts appropriately any kind of vectors (not just numeric/character/factors).
   
+  - substantial speed improvement when combining several vectors with *many* cases (> millions).
+  
   
 ## Minor breaking changes
 

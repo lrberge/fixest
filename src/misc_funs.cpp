@@ -1127,3 +1127,70 @@ IntegerVector cpp_get_first_item(IntegerVector x, int n_items){
 
     return res;
 }
+
+
+// [[Rcpp::export]]
+IntegerVector cpp_combine_clusters(SEXP cluster_list, IntegerVector index){
+    // cluster: list of integer vectors, each ranging from 1 to the number of cases
+    // index: result of order() on the clusters
+
+    if(TYPEOF(cluster_list) != VECSXP){
+        stop("Internal error: Only lists are accepted!");
+    }
+
+    int Q = Rf_length(cluster_list);
+
+    int n = index.size();
+    IntegerVector res(n);
+
+    // Loading the data
+    vector<int*> pcluster(Q);
+    for(int q=0 ; q<Q ; ++q){
+        SEXP cluster_q = VECTOR_ELT(cluster_list, q);
+
+        pcluster[q] = INTEGER(cluster_q);
+    }
+
+    // the observation ID
+    int obs = index[0] - 1;
+
+    // vector holding the current value
+    vector<int> current_value(Q);
+
+    // initialization
+    int counter = 1;
+    res[obs] = counter;
+    for(int q=0 ; q<Q ; ++q){
+        current_value[q] = pcluster[q][obs];
+    }
+
+    // we loop on the vector and flag values that are different
+    int q = 0;
+    for(int i=1 ; i<n ; ++i){
+        obs = index[i] - 1;
+
+        for(q=0 ; q<Q ; ++q){
+            if(pcluster[q][obs] != current_value[q]){
+                break;
+            }
+        }
+
+        // if the condition holds => means the values are different
+        if(q < Q){
+            ++counter;
+            // we save the new values
+            for(; q<Q ; ++q){
+                current_value[q] = pcluster[q][obs];
+            }
+        }
+
+        res[obs] = counter;
+    }
+
+    return res;
+}
+
+
+
+
+

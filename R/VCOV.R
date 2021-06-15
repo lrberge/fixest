@@ -700,9 +700,10 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
                     vars = myComb[, j]
 
                     if(sum(power[vars]) > 14){
-                        myDots = cluster[vars]
-                        myDots$sep = "_"
-                        index = do.call("paste", myDots)
+                        my_clusters = cluster[vars]
+
+                        order_index = do.call(order, my_clusters)
+                        index = cpp_combine_clusters(my_clusters, order_index)
                     } else {
                         # quicker, but limited by the precision of integers
                         index = cluster[[vars[1]]]
