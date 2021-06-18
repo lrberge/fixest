@@ -176,7 +176,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         }
 
         if(is.function(family)) {
-            family <- family()
+            family = family()
         }
 
         if(is.null(family$family)) {

@@ -292,7 +292,7 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
         if(!forceCovariance){
             last_warn = getOption("fixest_last_warning")
             if(is.null(last_warn) || (proc.time() - last_warn)[3] > 1){
-                warning("Standard errors are NA because of likely presence of collinearity. Use function collinearity() to detect collinearity problems.", call. = FALSE)
+                warning("Standard errors are NA because of likely presence of collinearity.", call. = FALSE)
             }
 
             attr(VCOV_raw, "type") = "NA (not-available)"

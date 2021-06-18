@@ -2409,6 +2409,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", offset, split, fsplit,
         collin.adj = sum(wols$is_excluded)
     }
 
+    res$nparams = res$nparams - collin.adj
 
     res$irls_weights = w # weights from the iteratively reweighted least square
 
@@ -2436,7 +2437,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", offset, split, fsplit,
         weighted_resids = wols$residuals * res$irls_weights
         # res$dispersion = sum(weighted_resids ** 2) / sum(res$irls_weights)
         # I use the second line to fit GLM's
-        res$dispersion = sum(weighted_resids * wols$residuals) / (res$nobs - res$nparams)
+        res$dispersion = sum(weighted_resids * wols$residuals) / max(res$nobs - res$nparams, 1)
     }
 
     res$working_residuals = wols$residuals
@@ -2510,7 +2511,6 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", offset, split, fsplit,
     n = length(y)
     res$nobs = n
 
-    res$nparams = res$nparams - collin.adj
     df_k = res$nparams
 
     # r2s
@@ -3187,7 +3187,7 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	var = NULL
 	try(var <- solve(hessian_noBounded), silent = TRUE)
 	if(is.null(var)){
-		warning_msg = paste(warning_msg, "The information matrix is singular: presence of collinearity. Use function collinearity() to pinpoint the problems.")
+		warning_msg = paste(warning_msg, "The information matrix is singular: presence of collinearity.")
 		var = hessian_noBounded * NA
 		se = diag(var)
 	} else {

@@ -574,7 +574,7 @@ for(method in c("ols", "feglm", "femlm", "fenegbin")){
             mm = lm(y_int ~ x1 + species, base, weights = w)
 
         } else if(method == "feglm"){
-            m = feglm(y_int ~ x1 | species, base, weights = w)
+            m = feglm(y_int ~ x1 | species, base, weights = w, family = "poisson")
             mm = glm(y_int ~ x1 + species, base, weights = w, family = poisson())
 
         } else if(method == "femlm"){
@@ -1196,7 +1196,7 @@ test(tail(pred_all, 20), pred_tail)
 
 chunk("SUBSET")
 
-
+set.seed(5)
 base = iris
 names(base) = c("y", "x1", "x2", "x3", "species")
 base$fe_bis = sample(letters, 150, TRUE)
