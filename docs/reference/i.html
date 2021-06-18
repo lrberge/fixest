@@ -141,9 +141,7 @@
     <p>Treat a variable as a factor, or interacts a variable with a factor. Values to be dropped/kept from the factor can be easily set. Note that to interact fixed-effects, this function should not be used: instead use directly the syntax <code>fe1^fe2</code>.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>i</span><span class='op'>(</span><span class='va'>factor_var</span>, <span class='va'>var</span>, <span class='va'>ref</span>, <span class='va'>keep</span>, <span class='va'>ref2</span>, <span class='va'>keep2</span>, <span class='va'>...</span><span class='op'>)</span>
-
-<span class='fu'>interact</span><span class='op'>(</span><span class='va'>factor_var</span>, <span class='va'>var</span>, <span class='va'>ref</span>, <span class='va'>keep</span>, <span class='va'>ref2</span>, <span class='va'>keep2</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>i</span><span class='op'>(</span><span class='va'>factor_var</span>, <span class='va'>var</span>, <span class='va'>ref</span>, <span class='va'>keep</span>, <span class='va'>ref2</span>, <span class='va'>keep2</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -191,7 +189,7 @@
 <p>In <code>fixest</code> estimations, instead of using <code>i(factor_var, var, ref)</code>, you can instead use the following writing <code>var::factor_var(ref)</code>. Note that this way of doing interactions is deprecated and will be removed in the future.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='coefplot.html'>coefplot</a></code> to plot interactions, <code><a href='feols.html'>feols</a></code> for OLS estimation with multiple fixed-effects.</p></div>
+    <div class='dont-index'><p><code><a href='coefplot.html'>iplot</a></code> to plot interactions or factors created with <code>i()</code>, <code><a href='feols.html'>feols</a></code> for OLS estimation with multiple fixed-effects.</p></div>
     <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
 
     <p>Laurent Berge</p>
@@ -269,8 +267,50 @@
 #&gt; 10                   0                   0                   0</div><div class='input'>
 <span class='co'># to force a numeric variable to be treated as a factor: use i.</span>
 <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>y</span>, <span class='fu'>i</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>i.y</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error: in i(x, i.y):</span>
-#&gt; <span class='error'> Argument 'var' could not be evaluated. Problem: object 'i.y' not found.</span></div><div class='input'>
+</div><div class='output co'>#&gt;    x y X__CLEAN__x..a.y..1 X__CLEAN__x..a.y..3 X__CLEAN__x..a.y..4
+#&gt; 1  a 1                   1                   0                   0
+#&gt; 2  b 2                   0                   0                   0
+#&gt; 3  c 2                   0                   0                   0
+#&gt; 4  d 3                   0                   0                   0
+#&gt; 5  a 3                   0                   1                   0
+#&gt; 6  b 3                   0                   0                   0
+#&gt; 7  c 4                   0                   0                   0
+#&gt; 8  d 4                   0                   0                   0
+#&gt; 9  a 4                   0                   0                   1
+#&gt; 10 b 4                   0                   0                   0
+#&gt;    X__CLEAN__x..b.y..2 X__CLEAN__x..b.y..3 X__CLEAN__x..b.y..4
+#&gt; 1                    0                   0                   0
+#&gt; 2                    1                   0                   0
+#&gt; 3                    0                   0                   0
+#&gt; 4                    0                   0                   0
+#&gt; 5                    0                   0                   0
+#&gt; 6                    0                   1                   0
+#&gt; 7                    0                   0                   0
+#&gt; 8                    0                   0                   0
+#&gt; 9                    0                   0                   0
+#&gt; 10                   0                   0                   1
+#&gt;    X__CLEAN__x..c.y..2 X__CLEAN__x..c.y..4 X__CLEAN__x..d.y..3
+#&gt; 1                    0                   0                   0
+#&gt; 2                    0                   0                   0
+#&gt; 3                    1                   0                   0
+#&gt; 4                    0                   0                   1
+#&gt; 5                    0                   0                   0
+#&gt; 6                    0                   0                   0
+#&gt; 7                    0                   1                   0
+#&gt; 8                    0                   0                   0
+#&gt; 9                    0                   0                   0
+#&gt; 10                   0                   0                   0
+#&gt;    X__CLEAN__x..d.y..4
+#&gt; 1                    0
+#&gt; 2                    0
+#&gt; 3                    0
+#&gt; 4                    0
+#&gt; 5                    0
+#&gt; 6                    0
+#&gt; 7                    0
+#&gt; 8                    1
+#&gt; 9                    0
+#&gt; 10                   0</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># In fixest estimations</span>
 <span class='co'>#</span>
@@ -279,13 +319,15 @@
 <span class='co'># We interact the variable 'period' with the variable 'treat'</span>
 <span class='va'>est_did</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'>i</span><span class='op'>(</span><span class='va'>period</span>, <span class='va'>treat</span>, <span class='fl'>5</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span>, <span class='va'>base_did</span><span class='op'>)</span>
 
-<span class='co'># =&gt; special treatment in coefplot</span>
-<span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='va'>est_did</span><span class='op'>)</span>
+<span class='co'># =&gt; plot only interactions with iplot</span>
+<span class='fu'><a href='coefplot.html'>iplot</a></span><span class='op'>(</span><span class='va'>est_did</span><span class='op'>)</span>
 </div><div class='img'><img src='i-1.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># Using i() for factors</span>
 <span class='va'>est_bis</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'>i</span><span class='op'>(</span><span class='va'>period</span>, keep <span class='op'>=</span> <span class='fl'>3</span><span class='op'>:</span><span class='fl'>6</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'>i</span><span class='op'>(</span><span class='va'>period</span>, <span class='va'>treat</span>, <span class='fl'>5</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>id</span>, <span class='va'>base_did</span><span class='op'>)</span>
 
-<span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='va'>est_bis</span>, only.inter <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
+<span class='co'># we plot the second set of variables created with i()</span>
+<span class='co'># =&gt; we need to use keep (otherwise only the first one is represented)</span>
+<span class='fu'><a href='coefplot.html'>iplot</a></span><span class='op'>(</span><span class='va'>est_bis</span>, keep <span class='op'>=</span> <span class='st'>"trea"</span><span class='op'>)</span>
 </div><div class='img'><img src='i-2.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># =&gt; special treatment in etable</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_bis</span>, dict <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"6"</span> <span class='op'>=</span> <span class='st'>"six"</span><span class='op'>)</span><span class='op'>)</span>
@@ -324,19 +366,42 @@
 
 <span class='co'># Interacting Month and week:</span>
 <span class='va'>res_2F</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='fu'>i</span><span class='op'>(</span><span class='va'>Month</span>, <span class='va'>i.week</span><span class='op'>)</span>, <span class='va'>aq</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in feols(Ozone ~ Solar.R + i(Month, i.week), aq): Evaluation of the right-hand-side of the formula raises an error: in</span>
-#&gt; <span class='error'>i(factor_var = Month, var = i.week, ref...:</span>
-#&gt; <span class='error'> Argument 'var' could not be evaluated. Problem: object 'i.week' not</span>
-#&gt; <span class='error'>found.</span></div><div class='input'>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'>
 <span class='co'># Same but dropping the 5th Month and 1st week</span>
 <span class='va'>res_2F_bis</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='fu'>i</span><span class='op'>(</span><span class='va'>Month</span>, <span class='va'>i.week</span>, ref <span class='op'>=</span> <span class='fl'>5</span>, ref2 <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>, <span class='va'>aq</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in feols(Ozone ~ Solar.R + i(Month, i.week, ref = 5, ref2 = 1),     aq): Evaluation of the right-hand-side of the formula raises an error: in</span>
-#&gt; <span class='error'>i(factor_var = Month, var = i.week, ref...:</span>
-#&gt; <span class='error'> Argument 'var' could not be evaluated. Problem: object 'i.week' not</span>
-#&gt; <span class='error'>found.</span></div><div class='input'>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res_2F</span>, <span class='va'>res_2F_bis</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error: in etable(res_2F, res_2F_bis):</span>
-#&gt; <span class='error'> Some elements in '...' could not be evaluated: object 'res_2F' not found</span></div><div class='input'>
+</div><div class='output co'>#&gt;                                 res_2F        res_2F_bis
+#&gt; Dependent Var.:                  Ozone             Ozone
+#&gt;                                                         
+#&gt; (Intercept)              8.207 (14.16)    18.51* (7.343)
+#&gt; Solar.R              0.0963** (0.0314) 0.1007** (0.0324)
+#&gt; Month = 5 x week = 2    -11.36 (17.18)                  
+#&gt; Month = 5 x week = 3    -9.660 (16.05)                  
+#&gt; Month = 5 x week = 4    -6.923 (18.28)                  
+#&gt; Month = 5 x week = 5     28.32 (18.10)                  
+#&gt; Month = 6 x week = 2     10.88 (18.13)   -0.3936 (14.93)
+#&gt; Month = 6 x week = 3    -2.422 (17.22)    -13.40 (13.47)
+#&gt; Month = 7 x week = 1    31.87. (17.27)                  
+#&gt; Month = 7 x week = 2    34.35* (16.59)    23.00. (12.58)
+#&gt; Month = 7 x week = 3     20.17 (16.54)     8.938 (12.47)
+#&gt; Month = 7 x week = 4    33.76. (17.26)    22.85. (13.51)
+#&gt; Month = 7 x week = 5    31.58. (18.19)     20.19 (15.04)
+#&gt; Month = 8 x week = 1     7.218 (19.98)                  
+#&gt; Month = 8 x week = 2   48.12** (17.22)   36.81** (13.56)
+#&gt; Month = 8 x week = 3     19.17 (16.62)     8.257 (12.48)
+#&gt; Month = 8 x week = 4    36.50* (17.18)    25.35. (13.46)
+#&gt; Month = 8 x week = 5  62.00*** (18.12)  50.76*** (14.91)
+#&gt; Month = 9 x week = 1   46.47** (16.57)                  
+#&gt; Month = 9 x week = 2    -5.661 (16.12)    -17.03 (11.82)
+#&gt; Month = 9 x week = 3    -2.978 (16.10)    -13.95 (11.65)
+#&gt; Month = 9 x week = 4     1.809 (16.73)    -8.973 (12.61)
+#&gt; Month = 9 x week = 5    -8.373 (19.56)    -19.47 (16.95)
+#&gt; ____________________ _________________ _________________
+#&gt; S.E. type                     Standard          Standard
+#&gt; Observations                       111               111
+#&gt; R2                             0.52636           0.37684
+#&gt; Adj. R2                        0.40795           0.27844</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

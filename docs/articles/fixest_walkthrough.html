@@ -94,7 +94,7 @@
       <h1 data-toc-skip>Fast Fixed-Effects Estimation: Short introduction</h1>
                         <h4 class="author">Laurent Berge and Grant McDermott</h4>
             
-            <h4 class="date">2021-05-29</h4>
+            <h4 class="date">2021-06-18</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/fixest_walkthrough.Rmd"><code>vignettes/fixest_walkthrough.Rmd</code></a></small>
       <div class="hidden name"><code>fixest_walkthrough.Rmd</code></div>
@@ -104,7 +104,7 @@
     
     
 <!-- Help on vignette writing here: http://r-pkgs.had.co.nz/vignettes.html. -->
-<p>The package <code>fixest</code> provides a family of functions to perform estimations with multiple fixed-effects. The two main functions are <code>feols</code> for linear models and <code>feglm</code> for generalized linear models. In addition, the function <code>femlm</code> performs direct maximum likelihood estimation, and <code>feNmlm</code> extends the latter to allow the inclusion of non-linear in parameters right-hand-sides. Each of these functions supports any number of fixed-effects and is implemented with full fledged multi-threading in c++. Functions <code>feols</code> and <code>feglm</code> further support variables with varying slopes.</p>
+<p>The package <code>fixest</code> provides a family of functions to perform estimations with multiple fixed-effects. The two main functions are <code>feols</code> for linear models and <code>feglm</code> for generalized linear models. In addition, the function <code>femlm</code> performs direct maximum likelihood estimation, and <code>feNmlm</code> extends the latter to allow the inclusion of non-linear in parameters right-hand-sides. Finally, the functions <code>fepois</code> and <code>fenegbin</code> are aliases for Poisson and negative binomial fixed-effect estimations. Each of these functions supports any number of fixed-effects and is implemented with full fledged multi-threading in c++. Functions <code>feols</code> and <code>feglm</code> further support variables with varying slopes.</p>
 <p>This package is currently (Feb. 2020) the fastest software available to perform fixed-effects estimations. See the project’s <a href="https://lrberge.github.io/fixest/">homepage</a> for a set of benchmarks.</p>
 <p>The standard-errors of the estimates can be easily and intuitively clustered (up to four-way).</p>
 <p>The function <code>etable</code> allows to seamlessly export the results of multiple estimations into either a data.frame, or into a Latex table.</p>
@@ -199,7 +199,7 @@
 <span class="co">#&gt; log(dist_km)  -1.5279   0.115678 -13.208 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="co">#&gt; Log-Likelihood: -7.025e+11   Adj. Pseudo R2: 0.764032</span>
+<span class="co">#&gt; Log-Likelihood: -7.025e+11   Adj. Pseudo R2: 1.0411  </span>
 <span class="co">#&gt;            BIC:  1.405e+12     Squared Cor.: 0.612021</span></code></pre></div>
 <p>The <code>print</code> reports the coefficient estimates and standard-errors as well as some other information. Among the quality of fit information, the squared-correlation corresponds to the correlation between the dependent variable and the expected predictor; it reflects somehow the idea of R-square in OLS estimations. Note that the estimation is performed using parallel computing which you can control using the argument <code>nthreads</code> (see the “multi-threading” section for more details).</p>
 </div>
@@ -217,19 +217,16 @@
 <span class="co">#&gt; log(dist_km)  -1.5279   0.130734 -11.687 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="co">#&gt; Log-Likelihood: -7.025e+11   Adj. Pseudo R2: 0.764032</span>
+<span class="co">#&gt; Log-Likelihood: -7.025e+11   Adj. Pseudo R2: 1.0411  </span>
 <span class="co">#&gt;            BIC:  1.405e+12     Squared Cor.: 0.612021</span></code></pre></div>
 <p>The clustering can be done on one (<code>se="cluster"</code>), two (<code>se="twoway"</code>), three (<code>se="threeway"</code>) or up to four (<code>se="fourway"</code>) variables. If the estimation includes fixed-effects, then by default the clustering will be done using these fixed-effects, in the original order. This is why the <em>Origin</em> and <em>Destination</em> variables were used for the two-way clustering in the previous example. If, instead, you wanted to perform one-way clustering on the <em>Product</em> variable, you need to use the argument <code>cluster</code>:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Equivalent ways of clustering the SEs:</span>
-<span class="co"># One-way clustering is deduced from the arguent 'cluster'</span>
-<span class="co"># - using the vector:</span>
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">gravity_pois</span>, cluster <span class="op">=</span> <span class="va">trade</span><span class="op">$</span><span class="va">Product</span><span class="op">)</span>
+<code class="sourceCode R"><span class="co"># Two ways to summon clustering on the Product variable</span>
 <span class="co"># - by reference:</span>
 <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">gravity_pois</span>, cluster <span class="op">=</span> <span class="st">"Product"</span><span class="op">)</span>
 <span class="co"># - with a formula:</span>
 <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">gravity_pois</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Product</span><span class="op">)</span></code></pre></div>
-<p>All produce the same results:</p>
+<p>Both produce the same results:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">gravity_pois</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Product</span><span class="op">)</span>
 <span class="co">#&gt; Poisson estimation, Dep. Var.: Euros</span>
@@ -240,26 +237,13 @@
 <span class="co">#&gt; log(dist_km)  -1.5279   0.098294 -15.544 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="co">#&gt; Log-Likelihood: -7.025e+11   Adj. Pseudo R2: 0.764032</span>
+<span class="co">#&gt; Log-Likelihood: -7.025e+11   Adj. Pseudo R2: 1.0411  </span>
 <span class="co">#&gt;            BIC:  1.405e+12     Squared Cor.: 0.612021</span></code></pre></div>
 <p>Note that you can always cluster the standard-errors, even when the estimation contained no fixed-effect. But then you must use the argument <code>cluster</code>:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">gravity_simple</span> <span class="op">=</span> <span class="fu"><a href="../reference/feglm.html">fepois</a></span><span class="op">(</span><span class="va">Euros</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span>, <span class="va">trade</span><span class="op">)</span>
-<span class="co"># Two way clustering is deduced from the argument 'cluster'</span>
-<span class="co"># Using data:</span>
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">gravity_simple</span>, cluster <span class="op">=</span> <span class="va">trade</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Origin"</span>, <span class="st">"Destination"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>
-<span class="co">#&gt; Poisson estimation, Dep. Var.: Euros</span>
-<span class="co">#&gt; Observations: 38,325 </span>
-<span class="co">#&gt; Standard-errors: Two-way (Origin &amp; Destination) </span>
-<span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    </span>
-<span class="co">#&gt; (Intercept)    24.709   1.124800 21.9680 &lt; 2.2e-16 ***</span>
-<span class="co">#&gt; log(dist_km)   -1.029   0.158022 -6.5114  7.44e-11 ***</span>
-<span class="co">#&gt; ---</span>
-<span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="co">#&gt; Log-Likelihood: -2.426e+12   Adj. Pseudo R2: 0.185023</span>
-<span class="co">#&gt;            BIC:  4.852e+12     Squared Cor.: 0.055107</span>
-<span class="co"># Using a formula (note that the values of the variables are </span>
-<span class="co">#  fetched directly in the original database):</span>
+<span class="co"># We use a formula to specify the variables used for two way clustering</span>
+<span class="co"># (note that the values of the variables are fetched directly in the original database)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">gravity_simple</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Origin</span> <span class="op">+</span> <span class="va">Destination</span><span class="op">)</span>
 <span class="co">#&gt; Poisson estimation, Dep. Var.: Euros</span>
 <span class="co">#&gt; Observations: 38,325 </span>
@@ -269,7 +253,7 @@
 <span class="co">#&gt; log(dist_km)   -1.029   0.158022 -6.5114  7.44e-11 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="co">#&gt; Log-Likelihood: -2.426e+12   Adj. Pseudo R2: 0.185023</span>
+<span class="co">#&gt; Log-Likelihood: -2.426e+12   Adj. Pseudo R2: 1.1419  </span>
 <span class="co">#&gt;            BIC:  4.852e+12     Squared Cor.: 0.055107</span></code></pre></div>
 <p>Finally, the standard-errors can also be computed at estimation time, you simply need to add the <code>se</code> or <code>cluster</code> argument:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -282,7 +266,7 @@
 <span class="co">#&gt; log(dist_km)   -1.029   0.045954 -22.391 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="co">#&gt; Log-Likelihood: -2.426e+12   Adj. Pseudo R2: 0.185023</span>
+<span class="co">#&gt; Log-Likelihood: -2.426e+12   Adj. Pseudo R2: 1.1419  </span>
 <span class="co">#&gt;            BIC:  4.852e+12     Squared Cor.: 0.055107</span></code></pre></div>
 </div>
 <div id="other-estimation-functions" class="section level2">
@@ -391,7 +375,7 @@
 </tr>
 <tr class="even">
 <td align="left">Pseudo R2</td>
-<td align="left">0.76403</td>
+<td align="left">1.0411</td>
 <td align="left">0.03473</td>
 <td align="left">0.23640</td>
 </tr>
@@ -522,10 +506,10 @@
 </tr>
 <tr class="odd">
 <td align="left">Pseudo R2</td>
-<td align="left">0.18502</td>
-<td align="left">0.18833</td>
-<td align="left">0.35826</td>
-<td align="left">0.59312</td>
+<td align="left">1.1419</td>
+<td align="left">1.1413</td>
+<td align="left">1.1117</td>
+<td align="left">1.0708</td>
 </tr>
 <tr class="even">
 <td align="left">BIC</td>
@@ -718,8 +702,8 @@
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 0.327938     Adj. R2: 0.836626</span>
 <span class="co">#&gt;                  Within R2: 0.585907</span>
-<span class="co">#&gt; F-test (1st stage), x_endo_1: stat = 21.3   , p = 7.969e-9, on 2 and 144 DoF.</span>
-<span class="co">#&gt; F-test (1st stage), x_endo_2: stat =  4.7226, p = 0.010315, on 2 and 144 DoF.</span>
+<span class="co">#&gt; F-test (1st stage), x_endo_1: stat = 21.6   , p = 6.151e-9, on 2 and 146 DoF.</span>
+<span class="co">#&gt; F-test (1st stage), x_endo_2: stat =  4.7882, p = 0.00968 , on 2 and 146 DoF.</span>
 <span class="co">#&gt;                   Wu-Hausman: stat =  1.3141, p = 0.271968, on 2 and 142 DoF.</span>
 <span class="co">#&gt;             Wald (2nd stage): stat = 19.6   , p = 2.941e-8, on 2 and 146 DoF, VCOV: Clustered (fe).</span></code></pre></div>
 <p>To access the first stage(s), you can use the summary method:</p>
@@ -739,7 +723,7 @@
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 0.346509     Adj. R2: 0.959865</span>
 <span class="co">#&gt;                  Within R2: 0.338407</span>
-<span class="co">#&gt; F-test (1st stage): stat = 21.3, p = 7.969e-9, on 2 and 144 DoF.</span>
+<span class="co">#&gt; F-test (1st stage): stat = 21.6, p = 6.151e-9, on 2 and 146 DoF.</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; IV: First stage: x_endo_2</span>
 <span class="co">#&gt; TSLS estimation, Dep. Var.: x_endo_2, Endo.: x_endo_1, x_endo_2, Instr.: x_inst_1, x_inst_2</span>
@@ -755,7 +739,7 @@
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 0.51208     Adj. R2: 0.040133</span>
 <span class="co">#&gt;                 Within R2: 0.063919</span>
-<span class="co">#&gt; F-test (1st stage): stat = 4.7226, p = 0.010315, on 2 and 144 DoF.</span></code></pre></div>
+<span class="co">#&gt; F-test (1st stage): stat = 4.7882, p = 0.00968, on 2 and 146 DoF.</span></code></pre></div>
 <p>When <code>summary</code> shall return more than one element, the object returned is not a regular <code>fixest</code> object but a <code>fixest_multi</code> object. These kind of objects are covered in the vignette: <a href="https://lrberge.github.io/fixest/articles/multiple_estimations.html">Multiple estimations</a>. You can display the first and second stages in a table with <code>etable</code>:</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">est_iv_fe</span>, stage <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span>, fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">.</span> <span class="op">+</span> <span class="va">ivfall</span> <span class="op">+</span> <span class="va">ivwaldall.p</span><span class="op">)</span>
@@ -774,7 +758,7 @@
 <span class="co">#&gt; Observations                        150               150              150</span>
 <span class="co">#&gt; R2                              0.96121           0.07234          0.84211</span>
 <span class="co">#&gt; Within R2                       0.33841           0.06392          0.58591</span>
-<span class="co">#&gt; F-test (IV only)                 21.285            4.7226           8.2210</span>
+<span class="co">#&gt; F-test (IV only)                 21.581            4.7882           8.3352</span>
 <span class="co">#&gt; Wald (IV only), p-value         2.29e-9           1.32e-9          2.94e-8</span></code></pre></div>
 <p>Here we use <code>stage = 1:2</code> to get all first stage regressions followed by the second stage. Using <code>stage = 2:1</code> would have done the opposite.</p>
 <p>Now some explanations regarding <code>fitstat</code>. The suffix <code>all</code> concerns IV only and means the following: if it’s a first stage regression, then the first-stage F-stat is displayed, otherwise it’s the second stage F-stat. The suffix <code>.p</code> is used in <code>ivwaldall.p</code> to access the p-value and not the statistic. Finally, you can permanently set which fit statistic to display in <code>etable</code> by using <code>setFixest_etable</code>, like for example <code><a href="../reference/etable.html">setFixest_etable(fitstat = ~ . + ivfall + ivwaldall.p)</a></code>.</p>
@@ -977,12 +961,12 @@
 
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">base_stagg</span><span class="op">)</span>
 <span class="co">#&gt;   id year year_treated time_to_treatment treated treatment_effect_true</span>
-<span class="co">#&gt; 2  1    1            2                -1       1                     0</span>
-<span class="co">#&gt; 3  2    1            3                -2       1                     0</span>
-<span class="co">#&gt; 4  3    1            4                -3       1                     0</span>
-<span class="co">#&gt; 5  4    1            5                -4       1                     0</span>
-<span class="co">#&gt; 6  5    1            6                -5       1                     0</span>
-<span class="co">#&gt; 7  6    1            7                -6       1                     0</span>
+<span class="co">#&gt; 2 90    1            2                -1       1                     0</span>
+<span class="co">#&gt; 3 89    1            3                -2       1                     0</span>
+<span class="co">#&gt; 4 88    1            4                -3       1                     0</span>
+<span class="co">#&gt; 5 87    1            5                -4       1                     0</span>
+<span class="co">#&gt; 6 86    1            6                -5       1                     0</span>
+<span class="co">#&gt; 7 85    1            7                -6       1                     0</span>
 <span class="co">#&gt;           x1           y</span>
 <span class="co">#&gt; 2 -1.0947021  0.01722971</span>
 <span class="co">#&gt; 3 -3.7100676 -4.58084528</span>
@@ -1028,12 +1012,12 @@
 <span class="co">#&gt; Fixed-effects: id: 95,  year: 10</span>
 <span class="co">#&gt; Standard-errors: Clustered (id) </span>
 <span class="co">#&gt;      Estimate Std. Error t value Pr(&gt;|t|))    </span>
-<span class="co">#&gt; x1   0.995213   0.018363 54.1970 &lt; 2.2e-16 ***</span>
-<span class="co">#&gt; ATT -1.131800   0.204731 -5.5284  4.44e-08 ***</span>
+<span class="co">#&gt; x1   0.994678   0.018378 54.1230 &lt; 2.2e-16 ***</span>
+<span class="co">#&gt; ATT -1.133700   0.205070 -5.5286  4.43e-08 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="co">#&gt; RMSE: 0.921977     Adj. R2: 0.888092</span>
-<span class="co">#&gt;                  Within R2: 0.876363</span></code></pre></div>
+<span class="co">#&gt; RMSE: 0.921817     Adj. R2: 0.887984</span>
+<span class="co">#&gt;                  Within R2: 0.876406</span></code></pre></div>
 <p>This time the aggregation of the coefficients is operated across each cohort for non-negative time to treatment. Note that the estimated ATT compares favourably with the true value of -1.</p>
 <p>Under the hood, the <code><a href="../reference/sunab.html">sunab()</a></code> function creates <code>cohort x time to treatment</code> interactions with the function <code><a href="../reference/i.html">i()</a></code>, the coefficients are then aggregated at the appropriate level with the function <code>aggregate.fixest</code>. To obtain the coefficients for each <code>cohort x time to treatment</code>, one simply needs to remove the aggregation:</p>
 <div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
@@ -1042,24 +1026,24 @@
 <span class="co">#&gt;                                   res_sa20</span>
 <span class="co">#&gt; Dependent Var.:                          y</span>
 <span class="co">#&gt;                                           </span>
-<span class="co">#&gt; x1                      0.9952*** (0.0184)</span>
-<span class="co">#&gt; year = -8 x cohort = 9     0.0189 (0.4681)</span>
-<span class="co">#&gt; year = -8 x cohort = 10   -0.3673 (0.2403)</span>
-<span class="co">#&gt; year = -7 x cohort = 8    -0.6054 (0.7354)</span>
-<span class="co">#&gt; year = -7 x cohort = 9    0.8744. (0.4933)</span>
-<span class="co">#&gt; year = -7 x cohort = 10   -0.1564 (0.5241)</span>
-<span class="co">#&gt; year = -6 x cohort = 7    -0.0582 (0.8639)</span>
-<span class="co">#&gt; year = -6 x cohort = 8    -0.6571 (0.5731)</span>
-<span class="co">#&gt; year = -6 x cohort = 9     0.8786 (0.5330)</span>
-<span class="co">#&gt; year = -6 x cohort = 10  -0.5793* (0.2548)</span>
-<span class="co">#&gt; year = -5 x cohort = 6    -0.6734 (0.9119)</span>
-<span class="co">#&gt; year = -5 x cohort = 7    -0.3182 (0.6975)</span>
-<span class="co">#&gt; year = -5 x cohort = 8    -0.2377 (0.4694)</span>
-<span class="co">#&gt; year = -5 x cohort = 9     0.3030 (0.6040)</span>
-<span class="co">#&gt; year = -5 x cohort = 10  -0.7402. (0.3918)</span>
-<span class="co">#&gt; year = -4 x cohort = 5    -0.9992 (0.6322)</span>
-<span class="co">#&gt; year = -4 x cohort = 6     0.3596 (0.8581)</span>
-<span class="co">#&gt; year = -4 x cohort = 7    -0.4306 (0.6611)</span></code></pre></div>
+<span class="co">#&gt; x1                      0.9947*** (0.0184)</span>
+<span class="co">#&gt; year = -9 x cohort = 10    0.3518 (0.3591)</span>
+<span class="co">#&gt; year = -8 x cohort = 9     0.0339 (0.4714)</span>
+<span class="co">#&gt; year = -8 x cohort = 10   -0.1919 (0.3529)</span>
+<span class="co">#&gt; year = -7 x cohort = 8    -0.5894 (0.7369)</span>
+<span class="co">#&gt; year = -7 x cohort = 9    0.8730. (0.4934)</span>
+<span class="co">#&gt; year = -7 x cohort = 10    0.0195 (0.6034)</span>
+<span class="co">#&gt; year = -6 x cohort = 7    -0.0421 (0.8657)</span>
+<span class="co">#&gt; year = -6 x cohort = 8    -0.6576 (0.5733)</span>
+<span class="co">#&gt; year = -6 x cohort = 9     0.8777 (0.5333)</span>
+<span class="co">#&gt; year = -6 x cohort = 10   -0.4036 (0.3474)</span>
+<span class="co">#&gt; year = -5 x cohort = 6    -0.6580 (0.9134)</span>
+<span class="co">#&gt; year = -5 x cohort = 7    -0.3170 (0.6979)</span>
+<span class="co">#&gt; year = -5 x cohort = 8    -0.2382 (0.4697)</span>
+<span class="co">#&gt; year = -5 x cohort = 9     0.3015 (0.6042)</span>
+<span class="co">#&gt; year = -5 x cohort = 10   -0.5648 (0.4632)</span>
+<span class="co">#&gt; year = -4 x cohort = 5    -0.9835 (0.6345)</span>
+<span class="co">#&gt; year = -4 x cohort = 6     0.3604 (0.8583)</span></code></pre></div>
 </div>
 </div>
 </div>
@@ -1086,7 +1070,7 @@
 <span class="co"># Accessing them</span>
 <span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">..ctrl</span><span class="op">)</span>
 <span class="co">#&gt; y ~ x1 + poly(x2, 2) + poly(x3, 2)</span>
-<span class="co">#&gt; &lt;environment: 0x0000000016477670&gt;</span>
+<span class="co">#&gt; &lt;environment: 0x00000000129931d0&gt;</span>
 
 <span class="co"># Definition at run time</span>
 <span class="va">vars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x2"</span>, <span class="st">"x2^2"</span>, <span class="st">"x3"</span><span class="op">)</span>
@@ -1094,11 +1078,11 @@
   <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">..ctrl</span>, ..ctrl <span class="op">=</span> <span class="va">vars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
 <span class="op">}</span>
 <span class="co">#&gt; y ~ x1 + x2</span>
-<span class="co">#&gt; &lt;environment: 0x00000000141d0730&gt;</span>
+<span class="co">#&gt; &lt;environment: 0x00000000227a3640&gt;</span>
 <span class="co">#&gt; y ~ x1 + x2 + x2^2</span>
-<span class="co">#&gt; &lt;environment: 0x0000000013e6d890&gt;</span>
+<span class="co">#&gt; &lt;environment: 0x00000000227e2e88&gt;</span>
 <span class="co">#&gt; y ~ x1 + x2 + x2^2 + x3</span>
-<span class="co">#&gt; &lt;environment: 0x0000000013e08be0&gt;</span></code></pre></div>
+<span class="co">#&gt; &lt;environment: 0x00000000228249b8&gt;</span></code></pre></div>
 <p>Macro variables must start with two dots. As seen in the example, once set globally they can be directly accessed with <code>xpd</code>. In the example, <code>xpd</code> redefines the formula at run-time by having a character vector as input.</p>
 <p>All <code>fixest</code> estimations call <code>xpd</code> internally if appropriate. This means that the following code works just fine:</p>
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
@@ -1122,7 +1106,7 @@
 <span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">longley</span><span class="op">)</span>
 <span class="co">#&gt; Armed.Forces ~ Population + GNP.deflator + GNP + Unemployed + </span>
 <span class="co">#&gt;     Employed</span>
-<span class="co">#&gt; &lt;environment: 0x0000000022499ff0&gt;</span></code></pre></div>
+<span class="co">#&gt; &lt;environment: 0x000000002299d158&gt;</span></code></pre></div>
 <p>Again, since <code>xpd</code> is called internally, the following works:</p>
 <div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, <span class="va">longley</span><span class="op">)</span>
@@ -1283,7 +1267,7 @@
 <span class="co">#&gt; b   3.0282   0.012684  238.74 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="co">#&gt; Log-Likelihood: -3,596.8   Adj. Pseudo R2: 0.942674</span>
+<span class="co">#&gt; Log-Likelihood: -3,596.8   Adj. Pseudo R2: 1.0042  </span>
 <span class="co">#&gt;            BIC:  7,207.5     Squared Cor.: 0.993353</span></code></pre></div>
 <p>We can see that we obtain coefficients close to the generating values.</p>
 <div id="adding-fixed-effects-to-non-linear-in-parameters-models" class="section level3">

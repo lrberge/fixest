@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Sets/gets the number of threads to use in fixest functions — setFixest_nthreads • fixest</title>
+<title>NA • fixest</title>
 
 
 <!-- jquery -->
@@ -18,8 +18,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
 
 <!-- bootstrap-toc -->
-<link rel="stylesheet" href="../bootstrap-toc.css">
-<script src="../bootstrap-toc.js"></script>
+<link rel="stylesheet" href="bootstrap-toc.css">
+<script src="bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
@@ -33,14 +33,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
-<link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script>
+<link href="pkgdown.css" rel="stylesheet">
+<script src="pkgdown.js"></script>
 
 
 
 
-<meta property="og:title" content="Sets/gets the number of threads to use in fixest functions — setFixest_nthreads" />
-<meta property="og:description" content="Sets/gets the default number of threads to used in fixest estimation functions. The default is the maximum number of threads minus two." />
+<meta property="og:title" content="NA" />
 
 
 
@@ -59,7 +58,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-topic">
+    <div class="container template-title-body">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -71,7 +70,7 @@
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-        <a class="navbar-link" href="../index.html">fixest</a>
+        <a class="navbar-link" href="index.html">fixest</a>
         <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
       </span>
     </div>
@@ -79,13 +78,13 @@
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="../index.html">
+  <a href="index.html">
     <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
-  <a href="../reference/index.html">Reference</a>
+  <a href="reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -95,21 +94,21 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
+      <a href="articles/exporting_tables.html">Exporting estimation tables</a>
     </li>
     <li>
-      <a href="../articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
+      <a href="articles/fixest_walkthrough.html">Fast Fixed-Effects Estimation: Short introduction</a>
     </li>
     <li>
-      <a href="../articles/multiple_estimations.html">Multiple estimations</a>
+      <a href="articles/multiple_estimations.html">Multiple estimations</a>
     </li>
     <li>
-      <a href="../articles/standard_errors.html">On standard-errors</a>
+      <a href="articles/standard_errors.html">On standard-errors</a>
     </li>
   </ul>
 </li>
 <li>
-  <a href="../news/index.html">Changelog</a>
+  <a href="news/index.html">Changelog</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -130,61 +129,44 @@
       </header>
 
 <div class="row">
-  <div class="col-md-9 contents">
+  <div class="contents col-md-9">
     <div class="page-header">
-    <h1>Sets/gets the number of threads to use in <code>fixest</code> functions</h1>
-    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/MiscFuns.R'><code>R/MiscFuns.R</code></a></small>
-    <div class="hidden name"><code>setFixest_nthreads.Rd</code></div>
+      <h1>NA</h1>
     </div>
 
-    <div class="ref-description">
-    <p>Sets/gets the default number of threads to used in <code>fixest</code> estimation functions. The default is the maximum number of threads minus two.</p>
-    </div>
 
-    <pre class="usage"><span class='fu'>setFixest_nthreads</span><span class='op'>(</span><span class='va'>nthreads</span>, save <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-
-<span class='va'>getFixest_nthreads</span></pre>
-
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>nthreads</th>
-      <td><p>The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. If missing, the default is to use 50% of all threads.</p></td>
-    </tr>
-    <tr>
-      <th>save</th>
-      <td><p>Either a logical or equal to <code>"reset"</code>. Default is <code>FALSE</code>. If <code>TRUE</code> then the value is set permanently at the project level, this means that if you restart R, you will still obtain the previously saved defaults. This is done by writing in the <code>".Renviron"</code> file, located in the project's working directory, hence we must have write permission there for this to work. If equal to "reset", the default at the project level is erased.</p></td>
-    </tr>
-    </table>
-
-    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
-
-    <p>An object of class <code>function</code> of length 1.</p>
-    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
-
-    <p>Laurent Berge</p>
-
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='co'># Gets the current number of threads</span>
-<span class='fu'>getFixest_nthreads</span><span class='op'>(</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] 6</div><div class='input'>
-<span class='co'># To set multi-threading off:</span>
-<span class='fu'>setFixest_nthreads</span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>
-
-<span class='co'># To set it back to default:</span>
-<span class='fu'>setFixest_nthreads</span><span class='op'>(</span><span class='op'>)</span>
+<p><code>fixest</code> is the outcome of many many years of development, but development alone in a cave. Github made it a collaborative project, channeling the attention of dozens of persons who took the time to report bugs, suggest new features and even make direct additions to the code. The overall software quality is now nowhere near what it would have been without this global collaboration.<sup><a href="#fnt1">1</a></sup></p>
+<p>This document reports direct and indirect contributors to the project whom Laurent Berge (and likely the community) wishes to thank.<sup><a href="#fnt2">2</a></sup></p>
+<div id="direct-contributors-prs" class="section level2">
+<h2 class="hasAnchor">
+<a href="#direct-contributors-prs" class="anchor"></a>Direct contributors (PRs):</h2>
+<ul>
+<li><p>Sebastian Krantz: PR#66 substantial improvement of the <code>demean</code> function (hunted down overheads making it efficient for small data sizes, improved NA handling, fixed bugs and added user-friendly features).</p></li>
+<li><p>Kevin Wilson: PR#78 automated the benchmarks. PR#79 implemented automatic checks via Github actions.</p></li>
+<li><p>Grant McDermott: PR#130 rewrote substantially the introductory vignette.</p></li>
+</ul>
+</div>
+<div id="indirect-contributors" class="section level2">
+<h2 class="hasAnchor">
+<a href="#indirect-contributors" class="anchor"></a>Indirect contributors:</h2>
+<p>Through issue filing, countless bugs have been resolved and many features have been added. In alphabetical order, a tentative and incomplete list of persons to thank: @adamaltmejd, @adamtheising, @amarbler, @apoorvalal, @benzipperer, @bgchamps, @chenwang, @clerousset, @clukewatson, @colejharvey, @d712, @dlindzee, @edrubin, @fostermeijer, @joseph-richard-martinez, @jurojas5, @kdzhang, @kendonB, @lyifa, @marissachilds, @nikolassch, @noahmbuckley, @nreigl, @Oravishayrizi, @pbaylis, @pei-huang, @phisherblack, @poliquin, @reifjulian, @rrichmond, @seunghoon001, @shoonlee, @SuperMayo, @tcovert, @tholdaway, @waynelapierre and @zozotintin.</p>
+<p>Special thanks to @karldw for writing the <code>broom</code> method very early, to @zozotintin for helping to debug problems occurring at the billion observations scale, and of course to Grant McDermott for single-handedly popularizing the package.</p>
+<hr>
+<p><a name="fnt1">1</a>: Unfortunately, on the downside, with about 2/3 new issues a week, collaboration substantially increased the workload of the maintainer: we can’t have everything!</p>
+<p><a name="fnt2">2</a>: The distinction between direct and indirect contributors is quite arbitrary and does not pay tribute to some issue-filers who spent a lot of time and effort to resolve problems. But the rule, having made a PR, has the merit to be clear and simple.</p>
+</div>
 
 
-</div></pre>
   </div>
+
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>
     </nav>
   </div>
+
 </div>
+
 
 
       <footer>

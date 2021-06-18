@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -115,7 +115,7 @@
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/lrberge/fixest/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -141,19 +141,11 @@
     <p>Functions to perform stepwise estimations.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>stepwise</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span>
-
-<span class='fu'>sw</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span>
-
-<span class='fu'>cstepwise</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span>
+    <pre class="usage"><span class='fu'>sw</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span>
 
 <span class='fu'>csw</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span>
 
-<span class='fu'>stepwise0</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span>
-
 <span class='fu'>sw0</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span>
-
-<span class='fu'>cstepwise0</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span>
 
 <span class='fu'>csw0</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span></pre>
 
@@ -168,8 +160,8 @@
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>To include multiple independent variables, you need to use the stepwise functions. There are 4 stepwise functions associated to 4 short aliases. These are a) stepwise, stepwise0, cstepwise, cstepwise0, and b) sw, sw0, csw, csw0. Let's explain that.</p>
-<p>Assume you have the following formula: <code>fml = y ~ x1 + sw(x2, x3)</code>. The stepwise function <code>sw</code> will estimate the following two models: <code>y ~ x1 + x2</code> and <code>y ~ x1 + x3</code>. That is, each element in <code>sw()</code> is sequentially, and separately, added to the formula. Would have you used <code>sw0</code> in lieu of <code>sw</code>, then the model <code>y ~ x1</code> would also have been estimated. The <code>0</code> in the name means that the model wihtout any stepwise element also needs to be estimated.</p>
+    <p>To include multiple independent variables, you need to use the stepwise functions. There are 4 stepwise functions: sw, sw0, csw, csw0. Let's explain that.</p>
+<p>Assume you have the following formula: <code>fml = y ~ x1 + sw(x2, x3)</code>. The stepwise function <code>sw</code> will estimate the following two models: <code>y ~ x1 + x2</code> and <code>y ~ x1 + x3</code>. That is, each element in <code>sw()</code> is sequentially, and separately, added to the formula. Would have you used <code>sw0</code> in lieu of <code>sw</code>, then the model <code>y ~ x1</code> would also have been estimated. The <code>0</code> in the name implies that the model without any stepwise element will also be estimated.</p>
 <p>Finally, the prefix <code>c</code> means cumulative: each stepwise element is added to the next. That is, <code>fml = y ~ x1 + csw(x2, x3)</code> would lead to the following models <code>y ~ x1 + x2</code> and <code>y ~ x1 + x2 + x3</code>. The <code>0</code> has the same meaning and would also lead to the model without the stepwise elements to be estimated: in other words, <code>fml = y ~ x1 + csw0(x2, x3)</code> leads to the following three models: <code>y ~ x1</code>, <code>y ~ x1 + x2</code> and <code>y ~ x1 + x2 + x3</code>.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
@@ -179,56 +171,56 @@
 
 <span class='co'># Regular stepwise</span>
 <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fu'>sw</span><span class='op'>(</span><span class='va'>x1</span>, <span class='va'>x2</span>, <span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Standard-errors: Heteroskedasticity-robust 
+</div><div class='output co'>#&gt; Standard-errors: Standard 
 #&gt; Expl. vars.: x1
-#&gt;              Estimate Std. Error t value  Pr(&gt;|t|)    
-#&gt; (Intercept)  6.526200   0.430678 15.1530 &lt; 2.2e-16 ***
-#&gt; x1          -0.223361   0.141359 -1.5801   0.11622    
+#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept)  6.526200   0.478896 13.6280 &lt; 2.2e-16 ***
+#&gt; x1          -0.223361   0.155081 -1.4403  0.151898    
 #&gt; ---
 #&gt; Expl. vars.: x2
-#&gt;             Estimate Std. Error t value  Pr(&gt;|t|)    
-#&gt; (Intercept) 4.306600   0.074205  58.037 &lt; 2.2e-16 ***
-#&gt; x2          0.408922   0.019303  21.185 &lt; 2.2e-16 ***
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept) 4.306600   0.078389  54.939 &lt; 2.2e-16 ***
+#&gt; x2          0.408922   0.018891  21.646 &lt; 2.2e-16 ***
 #&gt; ---
 #&gt; Expl. vars.: x3
-#&gt;             Estimate Std. Error t value  Pr(&gt;|t|)    
-#&gt; (Intercept)  4.77760   0.056701  84.259 &lt; 2.2e-16 ***
-#&gt; x3           0.88858   0.051078  17.397 &lt; 2.2e-16 ***</div><div class='input'>
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept)  4.77760   0.072935  65.506 &lt; 2.2e-16 ***
+#&gt; x3           0.88858   0.051374  17.296 &lt; 2.2e-16 ***</div><div class='input'>
 <span class='co'># Cumulative stepwise</span>
 <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fu'>csw</span><span class='op'>(</span><span class='va'>x1</span>, <span class='va'>x2</span>, <span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Standard-errors: Heteroskedasticity-robust 
+</div><div class='output co'>#&gt; Standard-errors: Standard 
 #&gt; Expl. vars.: x1
-#&gt;              Estimate Std. Error t value  Pr(&gt;|t|)    
-#&gt; (Intercept)  6.526200   0.430678 15.1530 &lt; 2.2e-16 ***
-#&gt; x1          -0.223361   0.141359 -1.5801   0.11622    
+#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept)  6.526200   0.478896 13.6280 &lt; 2.2e-16 ***
+#&gt; x1          -0.223361   0.155081 -1.4403  0.151898    
 #&gt; ---
 #&gt; Expl. vars.: x1 + x2
-#&gt;             Estimate Std. Error t value  Pr(&gt;|t|)    
-#&gt; (Intercept) 2.249100   0.231563  9.7128 &lt; 2.2e-16 ***
-#&gt; x1          0.595525   0.064745  9.1980  3.32e-16 ***
-#&gt; x2          0.471920   0.016725 28.2160 &lt; 2.2e-16 ***
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept) 2.249100   0.247970  9.0702  7.04e-16 ***
+#&gt; x1          0.595525   0.069328  8.5899  1.16e-14 ***
+#&gt; x2          0.471920   0.017118 27.5690 &lt; 2.2e-16 ***
 #&gt; ---
 #&gt; Expl. vars.: x1 + x2 + x3
-#&gt;              Estimate Std. Error t value  Pr(&gt;|t|)    
-#&gt; (Intercept)  1.856000   0.225924  8.2151  1.04e-13 ***
-#&gt; x1           0.650837   0.060464 10.7640 &lt; 2.2e-16 ***
-#&gt; x2           0.709132   0.062179 11.4050 &lt; 2.2e-16 ***
-#&gt; x3          -0.556483   0.144078 -3.8624  0.000168 ***</div><div class='input'>
+#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept)  1.856000   0.250777  7.4010  9.85e-12 ***
+#&gt; x1           0.650837   0.066647  9.7654 &lt; 2.2e-16 ***
+#&gt; x2           0.709132   0.056719 12.5020 &lt; 2.2e-16 ***
+#&gt; x3          -0.556483   0.127548 -4.3629   2.4e-05 ***</div><div class='input'>
 <span class='co'># Using the 0</span>
 <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='va'>x2</span> <span class='op'>+</span> <span class='fu'>sw0</span><span class='op'>(</span><span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Standard-errors: Heteroskedasticity-robust 
+</div><div class='output co'>#&gt; Standard-errors: Standard 
 #&gt; Expl. vars.: x1 + x2
-#&gt;             Estimate Std. Error t value  Pr(&gt;|t|)    
-#&gt; (Intercept) 2.249100   0.231563  9.7128 &lt; 2.2e-16 ***
-#&gt; x1          0.595525   0.064745  9.1980  3.32e-16 ***
-#&gt; x2          0.471920   0.016725 28.2160 &lt; 2.2e-16 ***
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept) 2.249100   0.247970  9.0702  7.04e-16 ***
+#&gt; x1          0.595525   0.069328  8.5899  1.16e-14 ***
+#&gt; x2          0.471920   0.017118 27.5690 &lt; 2.2e-16 ***
 #&gt; ---
 #&gt; Expl. vars.: x1 + x2 + x3
-#&gt;              Estimate Std. Error t value  Pr(&gt;|t|)    
-#&gt; (Intercept)  1.856000   0.225924  8.2151  1.04e-13 ***
-#&gt; x1           0.650837   0.060464 10.7640 &lt; 2.2e-16 ***
-#&gt; x2           0.709132   0.062179 11.4050 &lt; 2.2e-16 ***
-#&gt; x3          -0.556483   0.144078 -3.8624  0.000168 ***</div><div class='input'>
+#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept)  1.856000   0.250777  7.4010  9.85e-12 ***
+#&gt; x1           0.650837   0.066647  9.7654 &lt; 2.2e-16 ***
+#&gt; x2           0.709132   0.056719 12.5020 &lt; 2.2e-16 ***
+#&gt; x3          -0.556483   0.127548 -4.3629   2.4e-05 ***</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

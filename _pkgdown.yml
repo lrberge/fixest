@@ -74,7 +74,6 @@ reference:
       contents:
         - demean
         - to_integer
-        - interact
     - title: Panel data tools
       desc: Set of tools for panel data
       contents:
@@ -109,6 +108,7 @@ reference:
       desc: Other methods and functions that didn't fit the previous sections
       contents:
         - did_means
+        - fixest_startup_msg
         - obs
         - bread.fixest
         - collinearity

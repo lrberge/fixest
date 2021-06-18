@@ -146,6 +146,7 @@
 <li><p>Major bug, leading R to crash, occurring when the same variable was used with several different slopes (thanks to <a href='https://github.com/Oravishayrizi'>@Oravishayrizi</a> <a href="https://github.com/lrberge/fixest/issues/119"><a href='https://github.com/lrberge/fixest/issues/119'>#119</a></a>).</p></li>
 <li><p>Major bug, leading R to crash, occurring when 3+ fixed-effects are to be combined.</p></li>
 <li><p>Major bug, leading R to crash, occurring when multiple LHS are estimated with the option <code>fixef.rm = "singleton"</code> (thanks to Ole Rogeberg).</p></li>
+<li><p>Major bug, leading R to crash, occurring when <em>many</em> fixed-effects have to be removed because of only 0/1 outcomes (thanks to <a href='https://github.com/mangelett'>@mangelett</a> <a href="https://github.com/lrberge/fixest/issues/146"><a href='https://github.com/lrberge/fixest/issues/146'>#146</a></a> and <a href='https://github.com/ChristianDueben'>@ChristianDueben</a> <a href="https://github.com/lrberge/fixest/issues/157"><a href='https://github.com/lrberge/fixest/issues/157'>#157</a></a>).</p></li>
 <li><p>Fix bug occurring for undefined covariances with only one regressor (thanks to <a href='https://github.com/joseph-richard-martinez'>@joseph-richard-martinez</a> <a href="https://github.com/lrberge/fixest/issues/118"><a href='https://github.com/lrberge/fixest/issues/118'>#118</a></a>).</p></li>
 <li><p>Fix bug in IV estimations regarding the Wald statistic of the first stage when <code>lean = TRUE</code> and the VCOV computation is done post estimation.</p></li>
 <li><p>Fix bug in the Wald test in IV estimations when variables are removed because of collinearity (thanks to <a href='https://github.com/pei-huang'>@pei-huang</a> <a href="https://github.com/lrberge/fixest/issues/117"><a href='https://github.com/lrberge/fixest/issues/117'>#117</a></a>).</p></li>
@@ -164,6 +165,12 @@
 <li><p>fix bug for extracting sub statistics of <code>"ivwald"</code> and <code>"ivf"</code> in <code>fitstat</code>.</p></li>
 <li><p>fix bug when <code><a href="../reference/i.html">i()</a></code> was used without intercept.</p></li>
 <li><p>Fix display bug in <code>etable</code> when Tex output is requested and interactions composed of identical variables with different interacted orders are present (reported by <a href='https://github.com/Oravishayrizi'>@Oravishayrizi</a> <a href="https://github.com/lrberge/fixest/issues/148"><a href='https://github.com/lrberge/fixest/issues/148'>#148</a></a>).</p></li>
+<li><p>Fix bug in <code>etabe</code> when <code>fixef.group</code> is used and fixed-effects are renamed (reported by <a href='https://github.com/jamesfeigenbaum'>@jamesfeigenbaum</a>).</p></li>
+<li><p>Fix bug when <code>fplit</code> is used with subset.</p></li>
+<li><p>Fix bug when using <code>cluster</code> with <code>subset</code> and NA values are removed (reported by <a href='https://github.com/adamaltmejd'>@adamaltmejd</a> <a href="https://github.com/lrberge/fixest/issues/154"><a href='https://github.com/lrberge/fixest/issues/154'>#154</a></a>).</p></li>
+<li><p>Fix bug argument <code>lean</code> not working on <code>summary</code> when applied to an existing <code>summary</code> and only the argument <code>lean</code> was present (reported by <a href='https://github.com/adamaltmejd'>@adamaltmejd</a>).</p></li>
+<li><p>Fix bug when using multiple LHS with lags in the formula (reported by <a href='https://github.com/Nicolas'>@Nicolas</a> Reigl <a href="https://github.com/lrberge/fixest/issues/154"><a href='https://github.com/lrberge/fixest/issues/158'>#158</a></a>).</p></li>
+<li><p>Fix bug regarding the intercept-only likelihood when weights are provided (only with Poisson and logit models), reported by <a href='https://github.com/fostermeijer'>@fostermeijer</a> <a href="https://github.com/lrberge/fixest/issues/155"><a href='https://github.com/lrberge/fixest/issues/155'>#155</a></a>.</p></li>
 </ul>
 </div>
 <div id="breaking-changes-new-i-function" class="section level2">
@@ -173,6 +180,28 @@
 <li><p>the function <code><a href="../reference/i.html">i()</a></code>, used to create factors or interactions has been tidied up, leading to breaking changes.</p></li>
 <li><p>the first two arguments have been swapped! such that now the first argument will always be treated as a factor.</p></li>
 <li><p>the new syntax is <code><a href="../reference/i.html">i(factor_var, var, ref, keep, ref2, keep2)</a></code> where <code>var</code> can be either continuous or factor-like (the argument <code>f2</code>, for interaction with factors, has been removed).</p></li>
+<li><p>Fix rare bug when the number of parameters is greater than the number of observations and the GLM family has a dispersion parameter.</p></li>
+</ul>
+</div>
+<div id="breaking-changes-new-default-family-for-feglm" class="section level2">
+<h2 class="hasAnchor">
+<a href="#breaking-changes-new-default-family-for-feglm" class="anchor"></a>Breaking changes: new default family for feglm</h2>
+<ul>
+<li>to be in line with R stats’s <code>glm</code>, the new default family for <code>feglm</code> is <code>gaussian</code> (previously it was Poisson, if you were using it, please now use the function <code>fepois</code> instead).</li>
+</ul>
+</div>
+<div id="breaking-changes-coefplot-is-now-split-in-two" class="section level2">
+<h2 class="hasAnchor">
+<a href="#breaking-changes-coefplot-is-now-split-in-two" class="anchor"></a>Breaking changes: coefplot is now split in two</h2>
+<ul>
+<li>
+<p>the function <code>coefplot</code> has been split in two:</p>
+<ul>
+<li><p><code>coefplot</code>: always plots <em>all</em> the coefficients.</p></li>
+<li><p><code>iplot</code>: plots only interactions or factors created with the function <code><a href="../reference/i.html">i()</a></code>.</p></li>
+</ul>
+</li>
+<li><p>the function <code>iplot</code> hence replaces <code>coefplot</code>’s former argument <code>only.inter</code> which controlled whether or not to focus on interactions.</p></li>
 </ul>
 </div>
 <div id="etable" class="section level2">
@@ -217,6 +246,7 @@
 <ul>
 <li><p><code>kpr</code>: Kleibergen-Paap rank test for IV estimations.</p></li>
 <li><p><code>cd</code>: Cragg-Donald F statistic for IV estimations.</p></li>
+<li><p><code>my</code>: gives the mean of the dependent variable.</p></li>
 </ul>
 </div>
 <div id="new-functions" class="section level2">
@@ -243,6 +273,8 @@
 </li>
 <li><p><code>.fit</code> methods (<code>feols.fit</code> and <code>feglm.fit</code>) now handle multiple dependent variables.</p></li>
 <li><p><code>to_integer</code> now sorts appropriately any kind of vectors (not just numeric/character/factors).</p></li>
+<li><p>substantial speed improvement when combining several vectors with <em>many</em> cases (&gt; millions).</p></li>
+<li><p>The number of threads to use can now be set permanently at the project level with the new argument <code>save</code> in the function <code>setFixest_nthreads</code>.</p></li>
 </ul>
 </div>
 <div id="minor-breaking-changes" class="section level2">
