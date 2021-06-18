@@ -67,6 +67,11 @@
  
  - the new syntax is `i(factor_var, var, ref, keep, ref2, keep2)` where `var` can be either continuous or factor-like (the argument `f2`, for interaction with factors, has been removed).
  
+ 
+## Breaking changes: new default family for feglm
+
+ - to be in line with R stats's `glm`, the new default family for `feglm` is `gaussian` (previously it was Poisson, if you were using it, please now use the function `fepois` instead).
+ 
 ## Breaking changes: coefplot is now split in two
 
  - the function `coefplot` has been split in two: 
@@ -147,6 +152,8 @@ Common methods have been extended to `fixest_multi` objects.
   - `to_integer` now sorts appropriately any kind of vectors (not just numeric/character/factors).
   
   - substantial speed improvement when combining several vectors with *many* cases (> millions).
+  
+  - The number of threads to use can now be set permanently at the project level with the new argument `save` in the function `setFixest_nthreads`.
   
   
 ## Minor breaking changes

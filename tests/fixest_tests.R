@@ -251,6 +251,19 @@ res_bis = feglm(y_log ~ -1 + x1 + x2 + x3, base)
 test(coef(res), coef(res_bis))
 
 
+
+res = feglm.fit(base$y, base[, 2:4], family = "poisson")
+res_bis = feglm(y ~ -1 + x1 + x2 + x3, base, family = "poisson")
+test(coef(res), coef(res_bis))
+
+res = feglm.fit(base$y_int, base[, 2:4], family = "poisson")
+res_bis = feglm(y_int ~ -1 + x1 + x2 + x3, base, family = "poisson")
+test(coef(res), coef(res_bis))
+
+res = feglm.fit(base$y_log, base[, 2:4], family = "poisson")
+res_bis = feglm(y_log ~ -1 + x1 + x2 + x3, base, family = "poisson")
+test(coef(res), coef(res_bis))
+
 ####
 #### Standard-errors ####
 ####
