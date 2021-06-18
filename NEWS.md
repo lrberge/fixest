@@ -67,6 +67,8 @@
  
  - the new syntax is `i(factor_var, var, ref, keep, ref2, keep2)` where `var` can be either continuous or factor-like (the argument `f2`, for interaction with factors, has been removed).
  
+ - Fix rare bug when the number of parameters is greater than the number of observations and the GLM family has a dispersion parameter.
+ 
  
 ## Breaking changes: new default family for feglm
 

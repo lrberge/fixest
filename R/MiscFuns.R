@@ -8777,6 +8777,33 @@ fixest_startup_msg = function(x){
         renvir_update("fixest_startup_msg", FALSE)
     }
 
+    current_version = fixest_version()
+    if(!identical(renvir_get("fixest_version"), current_version)){
+        renvir_update("fixest_version", current_version)
+    }
+
+}
+
+initialize_startup_msg = function(){
+    # When new versions of the package are installed => we reset the display of the startup message
+    # we need to keep track of the versions for which this default has been set
+
+    version = renvir_get("fixest_version")
+    current_version = fixest_version()
+
+    if(!is.null(version) && !identical(version, current_version)){
+        # We reset the value of fixest_startup_msg
+        renvir_update("fixest_startup_msg", NULL)
+        renvir_update("fixest_version", current_version)
+        return(TRUE)
+    }
+
+    return(FALSE)
+}
+
+
+fixest_version = function(){
+    as.character(packageVersion("fixest"))
 }
 
 renvir_get = function(key){
@@ -8790,7 +8817,11 @@ renvir_get = function(key){
     }
 
     # Any default value should be able to be evaluated "as such"
-    value = eval(str2lang(gsub("__%%;;", "\n", value_raw)))
+    value_clean = gsub("__%%;;", "\n", value_raw)
+    value_clean = gsub("&quot;", '"', value_clean)
+    value_clean = gsub("&apos;", "'", value_clean)
+
+    value = eval(str2lang(value_clean))
 
     return(value)
 }
@@ -8825,8 +8856,11 @@ renvir_update = function(key, value){
 
     } else {
 
+        # we need to do some extra legwork... => sys env don't do quotes
         value_text = deparse_long(value)
         value_text = gsub("\n", "__%%;;", value_text)
+        value_text = gsub("\"", "&quot;", value_text)
+        value_text = gsub("'", "&apos;", value_text)
 
         key_line = all_keys == key
         renvir_raw = c(renvir_raw[!key_line], paste0(key, " = ", value_text))
