@@ -49,7 +49,7 @@ setFixest_nthreads(1)
 <!-- Help on vignette writing here: http://r-pkgs.had.co.nz/vignettes.html. -->
 
 The package `fixest` provides a family of functions to perform estimations with multiple fixed-effects.
-The two main functions are `feols` for linear models and `feglm` for generalized linear models. In addition, the function `femlm` performs direct maximum likelihood estimation, and `feNmlm` extends the latter to allow the inclusion of non-linear in parameters right-hand-sides. 
+The two main functions are `feols` for linear models and `feglm` for generalized linear models. In addition, the function `femlm` performs direct maximum likelihood estimation, and `feNmlm` extends the latter to allow the inclusion of non-linear in parameters right-hand-sides. Finally, the functions `fepois` and `fenegbin` are aliases for Poisson and negative binomial fixed-effect estimations.
 Each of these functions supports any number of fixed-effects and is implemented with full fledged multi-threading in c++. Functions `feols` and `feglm` further support variables with varying slopes.
 
 This package is currently (Feb. 2020) the fastest software available to perform fixed-effects estimations. See the project's [homepage](https://lrberge.github.io/fixest/) for a set of benchmarks.
@@ -114,17 +114,14 @@ summary(gravity_pois, se = "twoway")
 The clustering can be done on one (`se="cluster"`), two (`se="twoway"`), three (`se="threeway"`) or up to four (`se="fourway"`) variables. If the estimation includes fixed-effects, then by default the clustering will be done using these fixed-effects, in the original order. This is why the *Origin* and *Destination* variables were used for the two-way clustering in the previous example. If, instead, you wanted to perform one-way clustering on the *Product* variable, you need to use the argument `cluster`: 
 
 ```{r, eval = FALSE}
-# Equivalent ways of clustering the SEs:
-# One-way clustering is deduced from the arguent 'cluster'
-# - using the vector:
-summary(gravity_pois, cluster = trade$Product)
+# Two ways to summon clustering on the Product variable
 # - by reference:
 summary(gravity_pois, cluster = "Product")
 # - with a formula:
 summary(gravity_pois, cluster = ~Product)
 ```
 
-All produce the same results:
+Both produce the same results:
 ```{r, eval = TRUE}
 summary(gravity_pois, cluster = ~Product)
 ```
@@ -134,11 +131,8 @@ Note that you can always cluster the standard-errors, even when the estimation c
 
 ```{r}
 gravity_simple = fepois(Euros ~ log(dist_km), trade)
-# Two way clustering is deduced from the argument 'cluster'
-# Using data:
-summary(gravity_simple, cluster = trade[, c("Origin", "Destination")])
-# Using a formula (note that the values of the variables are 
-#  fetched directly in the original database):
+# We use a formula to specify the variables used for two way clustering
+# (note that the values of the variables are fetched directly in the original database)
 summary(gravity_simple, cluster = ~Origin + Destination)
 ```
 
