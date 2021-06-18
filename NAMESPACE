@@ -121,7 +121,7 @@ importFrom(stats, model.matrix, sigma, deviance, weights, terms,
 			  confint, vcov, binomial, setNames, complete.cases, pchisq, pf,
 			  aggregate, cancor, rnorm)
 
-importFrom(utils, combn, head, tail)
+importFrom(utils, combn, head, tail, packageVersion)
 
 importFrom(Rcpp, evalCpp)
 

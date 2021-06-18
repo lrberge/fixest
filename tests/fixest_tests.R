@@ -1261,6 +1261,7 @@ cat("\n")
 
 chunk("Multiple")
 
+set.seed(2)
 base = iris
 names(base) = c("y1", "x1", "x2", "x3", "species")
 base$y2 = 10 + rnorm(150) + 0.5 * base$x1

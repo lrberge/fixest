@@ -2292,7 +2292,8 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", offset, split, fsplit,
         # STEP HALVING
         #
 
-        if(!is.finite(dev) || dev_evol > 0 || !valideta(eta) || !validmu(mu)){
+        no_SH = is.finite(dev) && (abs(dev_evol) < glm.tol || abs(dev_evol)/(0.1 + abs(dev)) < glm.tol)
+        if(no_SH == FALSE && (!is.finite(dev) || dev_evol > 0 || !valideta(eta) || !validmu(mu))){
 
             if(!is.finite(dev)){
                 # we report step-halving but only for non-finite deviances
