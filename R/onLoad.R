@@ -16,21 +16,7 @@
 	# cpp_setup_fork_presence()
 
 	# nthreads
-	nthreads = Sys.getenv("fixest_nthreads")
-	if(identical(nthreads, "")) nthreads = NULL
-	if(!is.null(nthreads)){
-	    # we have extra strong checking in setFixest_nthreads
-	    # so here we create a warning instead if nthreads is not valid
-	    if(length(nthreads) != 1 || !isScalar(nthreads) || nthreads < 0 ||
-	       !(nthreads %% 1 == 0 || nthreads < 1)){
-            warning("Environment variable 'fixest_nthreads' not valid, using the default value of setFixest_nthreads() instead.", call. = FALSE)
-	        nthreads = NULL
-	    }
-	}
-
-	setFixest_nthreads(nthreads)
-
-
+	setFixest_nthreads()
 
 	invisible()
 }
@@ -41,7 +27,7 @@
 
     # breaking message: don't know how long I'll keep it
     is_msg = !isFALSE(renvir_get("fixest_startup_msg"))
-    if(is_msg) packageStartupMessage("fixest 0.9.0, BREAKING changes! (Permanently remove this message with fixest_startup_msg(FALSE).) \nIn i():\n  a) the first two arguments have been swapped! Now it's i(factor_var, continuous_var) for interactions. \n  b) argument 'drop' has been removed (put everything in 'ref' now).")
+    if(is_msg) packageStartupMessage("fixest 0.9.0, BREAKING changes! (Permanently remove this message with fixest_startup_msg(FALSE).) \n- In i():\n    + the first two arguments have been swapped! Now it's i(factor_var, continuous_var) for interactions. \n    + argument 'drop' has been removed (put everything in 'ref' now).\n- In feglm(): \n    + the default family becomes 'gaussian' to be in line with glm(). Hence, for Poisson estimations, please use fepois() instead.")
 
 }
 

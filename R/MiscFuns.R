@@ -8432,6 +8432,7 @@ getFixest_notes = function(){
 #'
 #'
 #' @param nthreads The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. If missing, the default is to use 50\% of all threads.
+#' @param save Either a logical or equal to \code{"reset"}. Default is \code{FALSE}. If \code{TRUE} then the value is set permanently at the project level, this means that if you restart R, you will still obtain the previously saved defaults. This is done by writing in the \code{".Renviron"} file, located in the project's working directory, hence we must have write permission there for this to work. If equal to "reset", the default at the project level is erased.
 #'
 #' @author
 #' Laurent Berge
@@ -8449,7 +8450,7 @@ getFixest_notes = function(){
 #' setFixest_nthreads()
 #'
 #'
-setFixest_nthreads = function(nthreads){
+setFixest_nthreads = function(nthreads, save = FALSE){
 	# By default, we use only 50% of threads (never use all)
 
     max_CRAN = as.numeric(Sys.getenv("OMP_THREAD_LIMIT"))
@@ -8457,12 +8458,40 @@ setFixest_nthreads = function(nthreads){
 
 	max_threads = min(cpp_get_nb_threads(), 1000, max_CRAN) # we cap at 1k nthreads
 
+	check_arg_plus(save, "logical scalar | match(reset)")
+
+	do_reset = identical(save, "reset")
+
 	if(missing(nthreads) || is.null(nthreads)){
-		# New default => 50% of all available threads (usually equiv to the nber of procs)
-		nthreads = check_set_nthreads(0.5)
+	    # We first get the default from the environment variable
+	    # If it is missing => 50% of all threads
+
+	    # 0.5 => 50% of all available threads (usually equiv to the nber of procs)
+
+	    nthreads_default = renvir_get("fixest_nthreads")
+
+	    if(!do_reset && !is.null(nthreads_default)){
+	        if(!isScalar(nthreads_default) || nthreads_default < 0){
+	            warning("The variable setting the number of threads in the .Renviron file is corrupted. It's value has been reset.")
+	            renvir_update("fixest_nthreads", NULL)
+	            nthreads_default = 0.5
+	        }
+
+	    } else {
+	        nthreads_default = 0.5
+	    }
+
+	    nthreads = check_set_nthreads(nthreads_default)
+
 	}
 
 	nthreads = check_set_nthreads(nthreads)
+
+	if(do_reset){
+	    renvir_update("fixest_nthreads", NULL)
+	} else if(save){
+	    renvir_update("fixest_nthreads", nthreads)
+	}
 
 	options("fixest_nthreads" = nthreads)
 
