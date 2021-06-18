@@ -646,7 +646,8 @@ get_model_null <- function(env, theta.init){
 		}
 
 	    w = env$weights.value
-	    if(!is.null(w)){
+	    isWeight = length(w) > 1
+	    if(isWeight){
 	        sy = sum(y * w)
 	        N = sum(w)
 	    } else {
@@ -668,7 +669,8 @@ get_model_null <- function(env, theta.init){
 		# there is a closed form
 
 	    w = env$weights.value
-	    if(!is.null(w)){
+		isWeight = length(w) > 1
+	    if(isWeight){
 	        sy = sum(y * w)
 	        N = sum(w)
 	    } else {

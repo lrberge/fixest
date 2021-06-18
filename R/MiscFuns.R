@@ -155,11 +155,11 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 	se.type = attr(coeftable, "type")
 	if(is.null(se.type)) se.type = "Custom"
 
-	if(x$method %in% c("femlm", "feNmlm")){
+	if(x$method_type %in% c("femlm", "feNmlm")){
 		family_format = c(poisson="Poisson", negbin="Negative Binomial", logit="Logit", gaussian="Gaussian")
 		msg = ifelse(is.null(x$call$NL.fml), "", "Non-linear ")
 		half_line = paste0(msg, "ML estimation, family = ", family_format[x$family])
-	} else if(x$method == "feglm") {
+	} else if(x$method %in% c("feglm", "feglm.fit")) {
 		fam_call = x$call$family
 		if(is.null(names(fam_call))){
 			half_line = paste0("GLM estimation, family = ", x$family$family)
