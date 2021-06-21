@@ -2465,10 +2465,10 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", offset, split, fsplit,
             stop("Negative values in the diagonal of the Hessian found after the weighted-OLS stage. (If possible, could you send a replicable example to fixest's author? He's curious about when that actually happens, since in theory it should never happen.)")
         }
 
-        # I put collin.tol = 0, otherwise we may remove everything mistakenly
+        # I put tol = 0, otherwise we may remove everything mistakenly
         # when VAR(Y) >>> VAR(X) // that is especially TRUE for missspecified
         # Poisson models
-        info_inv = cpp_cholesky(res$hessian, collin.tol = 0, nthreads)
+        info_inv = cpp_cholesky(res$hessian, tol = 0, nthreads = nthreads)
 
         if(!is.null(info_inv$all_removed)){
             # This should not occur, but I prefer to be safe
