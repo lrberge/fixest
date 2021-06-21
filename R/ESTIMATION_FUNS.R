@@ -2459,10 +2459,20 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", offset, split, fsplit,
             res$hessian = cpppar_crossprod(wols$X_demean, res$irls_weights, nthreads) / res$dispersion
         }
 
-        info_inv = cpp_cholesky(res$hessian, collin.tol, nthreads)
+        if(any(diag(res$hessian) < 0)){
+            # This should not occur, but I prefer to be safe
+            # In fact it's the opposite of the Hessian
+            stop("Negative values in the diagonal of the Hessian found after the weighted-OLS stage. (If possible, could you send a replicable example to fixest's author? He's curious about when that actually happens, since in theory it should never happen.)")
+        }
+
+        # I put collin.tol = 0, otherwise we may remove everything mistakenly
+        # when VAR(Y) >>> VAR(X) // that is especially TRUE for missspecified
+        # Poisson models
+        info_inv = cpp_cholesky(res$hessian, collin.tol = 0, nthreads)
+
         if(!is.null(info_inv$all_removed)){
             # This should not occur, but I prefer to be safe
-            stop("Not any single variable with a positive variance was found after the weighted-OLS stage. (If possible, could you send a replicable example to fixest's author? He's curious about when that actually happens, since in theory it should never happen.)")
+            stop("Not a single variable with a minimum of explanatory power found after the weighted-OLS stage. (If possible, could you send a replicable example to fixest's author? He's curious about when that actually happens, since in theory it should never happen.)")
         }
 
         var = info_inv$XtX_inv

@@ -1,4 +1,11 @@
 
+# fixest 0.9.1
+
+## Bugs fixes
+
+ - Minor bug occurring in `feglm` when the model is badly specified and VAR(Y) >>>> VAR(X).
+
+
 # fixest 0.9.0
 
 ## Bugs
