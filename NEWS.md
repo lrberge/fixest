@@ -3,7 +3,11 @@
 
 ## Bugs fixes
 
- - Minor bug occurring in `feglm` when the model is badly specified and VAR(Y) >>>> VAR(X).
+ - Minor, and rare, bug occurring in `feglm` when the model is badly specified and VAR(Y) >>>> VAR(X).
+ 
+## New features
+
+ - `feglm` now accepts partially matched character shortcuts for families: "poisson", "logit", "probit" are now valid `family` arguments.
 
 
 # fixest 0.9.0

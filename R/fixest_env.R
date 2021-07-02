@@ -172,7 +172,25 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
         # Family handling
         if(is.character(family)){
-            family = error_sender(get(family, mode = "function", envir = parent.frame(2)), "Problem in the argument family:\n")
+
+            # we authorize shortcuts with partial matching for some families
+            id_match = pmatch(family, c("poisson", "logit", "probit"))
+            if(is.na(id_match)){
+                family = error_sender(get(family, mode = "function", envir = parent.frame(2)), "Problem in the argument family:\n")
+            } else {
+                family = switch(id_match,
+                                "1" = poisson(),
+                                "2" = binomial(),
+                                "3" = binomial(link = "probit"))
+
+                # To have an explicit family in the print
+                if(id_match == 2){
+                    mc_origin$family = str2lang("binomial(link = \"logit\")")
+                } else if(id_match == 3){
+                    mc_origin$family = str2lang("binomial(link = \"probit\")")
+                }
+            }
+
         }
 
         if(is.function(family)) {

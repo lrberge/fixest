@@ -863,7 +863,7 @@ wald = function(x, keep = NULL, drop = NULL, print = TRUE, se, cluster, ...){
         cat("Wald test, H0: ", ifsingle(coef_name, "", "joint "), "nullity of ", enumerate_items(coef_name), "\n", sep  ="")
         cat(" stat = ", numberFormatNormal(stat),
             ", p-value ", ifelse(p < 2.2e-16, "< 2.2e-16", paste0("= ", numberFormatNormal(p))),
-            ", on ", numberFormatNormal(df1), " and ", numberFormatNormal(df2), " DoF,",
+            ", on ", numberFormatNormal(df1), " and ", numberFormatNormal(df2), " DoF, ",
             "VCOV: ", vcov, ".", sep = "")
 
         return(invisible(vec))
