@@ -140,6 +140,44 @@ print.fixest_fitstat = function(x, na.rm = FALSE, ...){
         if(length(v) == 1){
             # Basic display
             res[i] = paste0(test_name, "! ", numberFormatNormal(v))
+
+        } else if(type %in% all_types$user_types){
+            # we can have extra values for user defined functions
+
+            opts = getOption("fixest_fitstat_user")
+            alias_subtypes = opts[[type]]$alias_subtypes
+
+            arg_list = list()
+            skip_df2 = FALSE
+            for(k in seq_along(v)){
+                subtype = names(v)[k]
+
+                if(subtype == "df2" && skip_df2) next
+
+                if(subtype == "stat"){
+                    arg_list[[k]] = stat_line
+
+                } else if(subtype == "p"){
+                    arg_list[[k]] = p_line
+
+                } else if(subtype == "df" && alias_subtypes["df"] == "df"){
+                    arg_list[[k]] = paste0("on ", numberFormatNormal(v$df), " DoF")
+
+                } else if(subtype == "df1" && "df2" %in% names(v) && alias_subtypes["df1"] == "df1"){
+                    arg_list[[k]] = paste0("on ", numberFormatNormal(v$df1), " and ", numberFormatNormal(v$df2), " DoF")
+                    skip_df2 = TRUE
+
+                } else if(subtype == "vcov"){
+                    arg_list[[k]] = paste0(alias_subtypes[subtype], ": ", v$vcov)
+
+                } else {
+                    arg_list[[k]] = paste0(alias_subtypes[subtype], " = ", numberFormatNormal(v[[subtype]]))
+
+                }
+            }
+
+            res[i] = paste0(test_name, "! ", glue(arg_list), ".")
+
         } else {
 
             stat_line = p_line = dof_line = vcov_line = ""
@@ -178,12 +216,15 @@ print.fixest_fitstat = function(x, na.rm = FALSE, ...){
 #' @param fun A function to be applied to a \code{fixest} estimation. It must return either a scalar, either a list. Note that for the print method to work correctly, the names of the items of the list must be one of: \code{stat}, \code{p}, \code{df}, \code{df1}, \code{df2}, \code{vcov}. Only the print method is affected by this.
 #' @param alias An alias to be used in lieu of the type name in the display methods (ie when used in the function \code{\link[fixest]{print.fixest_fitstat}} or \code{\link[fixest]{etable}}).
 #'
+#' @author Laurent Berge
 #'
-fitstat_register = function(type, fun, alias){
+#'
+fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 
     check_arg(type, "character scalar mbt")
     check_arg(fun, "function mbt")
-    check_arg(alias, "NULL character scalar")
+    check_arg(alias, "NULL character vector no na")
+    check_arg(subtype, "NULL character vector no na")
 
     # We check the type is not conflicting
     existing_types = fitstat(give_types = TRUE)$types
@@ -194,11 +235,113 @@ fitstat_register = function(type, fun, alias){
         stop("The type name '", type, "' is the same as one built-in type. Please choose another one.")
     }
 
+    # Alias:
+    # - type_name = alias_name          => only the type
+    # - subtype_name = alias_name       => only the subtype
+    # - type.subtype_name = alias_name  => full type name
+
+    # if alias is a character vector WITHOUT name, then only the type is named
+
+    IS_SUB = !is.null(subtypes)
+
     if(missnull(alias)){
         alias = type
+        names(alias) = type
+
+    } else {
+        # Handling all the cases is a bit of a pain
+
+        if(is.null(names(alias))){
+
+            if(length(alias) == 1){
+                tmp = alias
+                names(tmp) = type
+                alias = tmp
+
+            } else if(length(alias) == (1 + length(subtypes))){
+                # Implicit naming
+                tmp = alias
+                names(tmp) = c(type, subtypes)
+                alias = tmp
+
+            } else {
+                # We have a problem here, we can't infer implicitly, too arbitrary
+                if(IS_SUB){
+                    check_value(alias, "character scalar", .message = "The alias should be a character scalar.")
+                } else {
+                    stop("To define the aliases, please use a named character vector, with the names being the codes, and the values the aliases. \n",
+                         "E.g.: alias = c(\"", type, "\" = \"alias_1\", \"", subtypes[1], "\" = \"alias_2\").")
+                }
+            }
+
+        } else {
+            alias_names = names(alias)
+
+            is_0 = which(nchar(alias_names) == 0)
+            if(length(is_0) > 0){
+                # checking the problems
+                if(length(is_0) > 1){
+                    stop("In the argument 'alias': only the main type can be implicitly set and should come first (they are several implicitly defined atm). Please explicitly use names for each type/subtype you want.")
+
+                } else if(is_0 != 1){
+                    stop("In the argument 'alias': only the main type can be implicitly set and should come first (it is currenly not first). Please explicitly use names for each type/subtype you want.")
+
+                }
+
+                names(alias)[1] = type
+                alias_names = names(alias)
+            }
+
+            # We check that the names are correct
+            possible_types = type
+            if(IS_SUB){
+                possible_types = c(possible_types, subtypes, paste0(type, ".", subtypes))
+            }
+
+            check_value_plus(alias_names, "multi match", .choices = possible_types, .message = "In argument 'alias', the names should be equal to the type, the subtypes, or of the form 'type.subtype'.")
+            names(alias) = alias_names
+        }
     }
 
-    res = list(fun = fun, alias = alias)
+    # We create the full list of aliases
+    alias_subtypes = NULL
+    if(IS_SUB){
+
+        # subtype aliases => I add some default values if not provided
+
+        default_sub_aliases = setNames(subtypes, subtypes)
+        default_sub_aliases[c("stat", "p")] = c("stat.", "p-value")
+
+        # Note that the names are not kept when NA.. ||
+        alias_subtypes = alias[subtypes] #           ||
+        qui_NA = is.na(alias_subtypes)   #           ||
+        alias_subtypes = alias_subtypes[!qui_NA] #   | = > I need to clean them
+
+        alias_subtypes[subtypes[qui_NA]] = default_sub_aliases[subtypes[qui_NA]]
+
+        # Main aliases
+
+        if(type %in% names(alias)){
+            alias_main = alias[type]
+        } else  {
+            alias_main = setNames(type, type)
+        }
+
+        # The full types
+        full_types = paste0(type, ".", subtypes)
+        alias_full = alias[full_types]
+        qui_NA = is.na(alias_full)
+        alias_full = alias_full[!qui_NA]
+
+        alias_full[full_types[qui_NA]] = paste0(alias_main, ", ", alias_subtypes[subtypes[qui_NA]])
+
+        alias_main = c(alias_main, alias_full)
+
+    } else {
+        alias_main = alias
+    }
+
+    res = list(fun = fun, alias = alias_main, alias_subtypes = alias_subtypes)
 
     opts[[type]] = res
 
@@ -305,10 +448,18 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
         my_names = paste(names(comp_alias), rep(c("stat", "p"), each = length(comp_alias)), sep = ".")
         full_comp_alias = setNames(paste0(comp_alias, ", ", rep(c("stat.", "p-value"), each = length(comp_alias))), my_names)
 
+
+        # Having some trouble with aggregation post lapply due to names....
+        # I have a vectorized solution but it's really ugly => loop is clearer
+        user_alias = c()
+        for(i in seq_along(opts)){
+            user_alias = c(user_alias, opts[[i]]$alias)
+        }
+
+        user_types = names(user_alias)
+
         # "Regular" types
         valid_types = c("n", "ll", "aic", "bic", "rmse", "g", "my", "theta", r2_types, comp_types, full_comp_types, user_types)
-
-        user_alias = sapply(opts, function(x) x$alias)
 
         tex_alias = c(n = "Observations", ll = "Log-Likelihood", aic = "AIC", bic = "BIC", my = "Dependent variable mean", g = "Size of the 'effective' sample", rmse = "RMSE", theta = "Over-dispersion", sq.cor = "Squared Correlation", cor2 = "Squared Correlation", r2="R$^2$", ar2="Adjusted R$^2$", pr2="Pseudo R$^2$", apr2="Adjusted Pseudo R$^2$", wr2="Within R$^2$", war2="Within Adjusted R$^2$", wpr2="Within Pseudo R$^2$", wapr2="Whithin Adjusted Pseudo R$^2$", comp_alias, full_comp_alias, user_alias)
 
@@ -322,7 +473,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
             return(invisible(NULL))
         }
 
-        res = list(types = valid_types, tex_alias = tex_alias, R_alias = R_alias, type_alias = type_alias)
+        res = list(types = valid_types, tex_alias = tex_alias, R_alias = R_alias, type_alias = type_alias, user_types = user_types)
         return(res)
     }
 
