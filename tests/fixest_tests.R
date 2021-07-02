@@ -546,6 +546,20 @@ test(se(est_pois, se = "twoway", cluster = base[, 1:4]), "err")
 test(se(est_pois, se = "twoway", cluster = ~Origin+Destination+Product), "err")
 test(se(est_pois, se = "fourway", cluster = ~Origin+Destination+Product), "err")
 
+
+#
+# Checking that the aliases work fine
+#
+
+se_hetero = se(est_pois, se = "hetero")
+se_hc1    = se(est_pois, se = "hc1")
+se_white  = se(est_pois, se = "white")
+
+test(se_hetero, se_hc1)
+test(se_hetero, se_white)
+
+
+
 ####
 #### Residuals ####
 ####

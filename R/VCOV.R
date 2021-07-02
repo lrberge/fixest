@@ -175,10 +175,10 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
         stop("Argument 'se' must be a character scalar equal to: 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
     }
 
-    check_arg_plus(se, "match", .choices = c("standard", "white", "hetero", "cluster", "twoway", "threeway", "fourway", "1", "2", "3", "4"), .message = "Argument argument 'se' should be equal to one of 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
+    check_arg_plus(se, "match", .choices = c("standard", "white", "hc1", "hetero", "cluster", "twoway", "threeway", "fourway", "1", "2", "3", "4"), .message = "Argument argument 'se' should be equal to one of 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
     se.val = se
 
-    if(se.val == "white") se.val = "hetero"
+    if(se.val %in% c("white", "hc1")) se.val = "hetero"
 
     if(isTRUE(object$lean) && se != "standard"){
         # we can't compute the SE because scores are gone!

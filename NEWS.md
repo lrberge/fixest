@@ -8,6 +8,8 @@
 ## New features
 
  - `feglm` now accepts partially matched character shortcuts for families: "poisson", "logit", "probit" are now valid `family` arguments.
+ 
+ - Argument `se` now accepts the alias `"hc1"` to get heteroskedasticity-robust standard-errors.
 
 
 # fixest 0.9.0
