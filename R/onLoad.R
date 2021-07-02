@@ -4,6 +4,8 @@
 .onLoad <- function(libname, pkgname){
 	# setting some options
 
+    create_aliases()
+
 	options("fixest_dict" = c())
 	options("fixest_notes" = TRUE)
 	options("fixest_print" = list(type = "table"))
