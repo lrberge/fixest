@@ -114,6 +114,8 @@ print.fixest_fitstat = function(x, na.rm = FALSE, ...){
     # formatting for multiple endo regs
     qui_right = rep(FALSE, length(x))
 
+    same_as = function(x, y) isTRUE(all.equal(x, y, check.attributes = FALSE))
+
     for(i in seq_along(x)){
         type = names(x)[i]
 
@@ -155,15 +157,15 @@ print.fixest_fitstat = function(x, na.rm = FALSE, ...){
                 if(subtype == "df2" && skip_df2) next
 
                 if(subtype == "stat"){
-                    arg_list[[k]] = stat_line
+                    arg_list[[k]] = v$stat
 
                 } else if(subtype == "p"){
-                    arg_list[[k]] = p_line
+                    arg_list[[k]] = v$p
 
-                } else if(subtype == "df" && alias_subtypes["df"] == "df"){
+                } else if(subtype == "df" && same_as(alias_subtypes["df"], "df")){
                     arg_list[[k]] = paste0("on ", numberFormatNormal(v$df), " DoF")
 
-                } else if(subtype == "df1" && "df2" %in% names(v) && alias_subtypes["df1"] == "df1"){
+                } else if(subtype == "df1" && "df2" %in% names(v) && same_as(alias_subtypes["df1"], "df1")){
                     arg_list[[k]] = paste0("on ", numberFormatNormal(v$df1), " and ", numberFormatNormal(v$df2), " DoF")
                     skip_df2 = TRUE
 
@@ -209,19 +211,62 @@ print.fixest_fitstat = function(x, na.rm = FALSE, ...){
 #'
 #' Enables the registration of custom fi statistics that can be easily summoned with the function \code{\link[fixest]{fitstat}}.
 #'
-#' @inherit fitstat examples
 #' @inherit fitstat seealso
 #'
 #' @param type A character scalar giving the type-name.
 #' @param fun A function to be applied to a \code{fixest} estimation. It must return either a scalar, or a list of unitary elements. If the number of elements returned is greater than 1, then each element must be named! If the fit statistic is not valid for a given estimation, a plain \code{NA} value should be returned.
 #' @param alias A (named) character vector. An alias to be used in lieu of the type name in the display methods (ie when used in \code{\link[fixest]{print.fixest_fitstat}} or \code{\link[fixest]{etable}}). If the function returns several values, i.e. sub-types, you can give an alias to these sub-types. The syntax is \code{c("type" = "alias", "subtype_i" = "alias_i")}, with "type" (resp. "subtype") the value of the argument \code{type} resp. (\code{subtypes}). You can also give an alias encompassing the type and sub-type with the syntax \code{c("type.subtype_i" = "alias")}.
-#' @param subtypes A character vector giving the name of each element returned by the function \code{fun}. This is only used when the function returns more than one value.
+#' @param subtypes A character vector giving the name of each element returned by the function \code{fun}. This is only used when the function returns more than one value. Note that you can use the shortcut "test" when the sub-types are "stat", "p" and "df"; and "test2" when these are "stat", "p", "df1" and "df2".
 #'
 #' @details
 #' If there are several components to the computed statistics (i.e. the function returns several elements), then using the argument \code{subtypes}, giving the names of each of these components, is mandatory. This is to ensure that the statistic can be used as any other built-in statistic (and there are too many edge cases impeding automatic deduction).
 #'
 #' @author Laurent Berge
 #'
+#' @examples
+#'
+#' # An estimation
+#' base = iris
+#' names(base) = c("y", "x1", "x2", "x3", "species")
+#' est = feols(y ~ x1 + x2 | species, base)
+#'
+#' #
+#' # single valued tests
+#' #
+#'
+#' # say you want to add the coefficient of variation of the dependent variable
+#' cv = function(est){
+#'   y = model.matrix(est, type = "lhs")
+#'   sd(y)/mean(y)
+#' }
+#'
+#' # Now we register the routine
+#' fitstat_register("cvy", cv, "Coef. of Variation (dep. var.)")
+#'
+#' # now we can summon the registered routine with its type ("cvy")
+#' fitstat(est, "cvy")
+#'
+#' #
+#' # Multi valued tests
+#' #
+#'
+#' # Let's say you want a Wald test with an heteroskedasticiy robust variance
+#'
+#' # First we create the function
+#' hc_wald = function(est){
+#'   w = wald(est, keep = "!Intercept", print = FALSE, se = "hetero")
+#'   head(w, 4)
+#' }
+#' # This test returns a vector of 4 elements: stat, p, df1 and df2
+#'
+#' # Now we register the routine
+#' fitstat_register("hc_wald", hc_wald, "Wald (HC1)", "test2")
+#'
+#' # You can access the statistic, as before
+#' fitstat(est, "hc_wald")
+#'
+#' # But you can also access the sub elements
+#' fitstat(est, "hc_wald.p")
 #'
 fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 
@@ -245,6 +290,12 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
     # - type.subtype_name = alias_name  => full type name
 
     # if alias is a character vector WITHOUT name, then only the type is named
+
+    if(identical(subtypes, "test")){
+        subtypes = c("stat", "p", "df")
+    } else if(identical(subtypes, "test2")){
+        subtypes = c("stat", "p", "df1", "df2")
+    }
 
     IS_SUB = !is.null(subtypes)
 

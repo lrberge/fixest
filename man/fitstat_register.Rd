@@ -4,51 +4,69 @@
 \alias{fitstat_register}
 \title{Register custom fit statistics}
 \usage{
-fitstat_register(type, fun, alias)
+fitstat_register(type, fun, alias = NULL, subtypes = NULL)
 }
 \arguments{
 \item{type}{A character scalar giving the type-name.}
 
-\item{fun}{A function to be applied to a \code{fixest} estimation. It must return either a scalar, either a list. Note that for the print method to work correctly, the names of the items of the list must be one of: \code{stat}, \code{p}, \code{df}, \code{df1}, \code{df2}, \code{vcov}. Only the print method is affected by this.}
+\item{fun}{A function to be applied to a \code{fixest} estimation. It must return either a scalar, or a list of unitary elements. If the number of elements returned is greater than 1, then each element must be named! If the fit statistic is not valid for a given estimation, a plain \code{NA} value should be returned.}
 
-\item{alias}{An alias to be used in lieu of the type name in the display methods (ie when used in the function \code{\link[fixest]{print.fixest_fitstat}} or \code{\link[fixest]{etable}}).}
+\item{alias}{A (named) character vector. An alias to be used in lieu of the type name in the display methods (ie when used in \code{\link[fixest]{print.fixest_fitstat}} or \code{\link[fixest]{etable}}). If the function returns several values, i.e. sub-types, you can give an alias to these sub-types. The syntax is \code{c("type" = "alias", "subtype_i" = "alias_i")}, with "type" (resp. "subtype") the value of the argument \code{type} resp. (\code{subtypes}). You can also give an alias encompassing the type and sub-type with the syntax \code{c("type.subtype_i" = "alias")}.}
+
+\item{subtypes}{A character vector giving the name of each element returned by the function \code{fun}. This is only used when the function returns more than one value. Note that you can use the shortcut "test" when the sub-types are "stat", "p" and "df"; and "test2" when these are "stat", "p", "df1" and "df2".}
 }
 \description{
 Enables the registration of custom fi statistics that can be easily summoned with the function \code{\link[fixest]{fitstat}}.
 }
+\details{
+If there are several components to the computed statistics (i.e. the function returns several elements), then using the argument \code{subtypes}, giving the names of each of these components, is mandatory. This is to ensure that the statistic can be used as any other built-in statistic (and there are too many edge cases impeding automatic deduction).
+}
 \examples{
 
-data(trade)
-gravity = feols(log(Euros) ~ log(dist_km) | Destination + Origin, trade)
+# An estimation
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
+est = feols(y ~ x1 + x2 | species, base)
 
-# Extracting the 'working' number of observations used to compute the pvalues
-fitstat(gravity, "g", simplify = TRUE)
+#
+# single valued tests
+#
 
-# Some fit statistics
-fitstat(gravity, ~ rmse + r2 + wald + wf)
+# say you want to add the coefficient of variation of the dependent variable
+cv = function(est){
+  y = model.matrix(est, type = "lhs")
+  sd(y)/mean(y)
+}
 
-# You can use them in etable
-etable(gravity, fitstat = ~ rmse + r2 + wald + wf)
+# Now we register the routine
+fitstat_register("cvy", cv, "Coef. of Variation (dep. var.)")
 
-# For wald and wf, you could show the pvalue instead:
-etable(gravity, fitstat = ~ rmse + r2 + wald.p + wf.p)
+# now we can summon the registered routine with its type ("cvy")
+fitstat(est, "cvy")
 
-# Now let's display some statistics that are not built-in
-# => we use fitstat_register to create them
+#
+# Multi valued tests
+#
 
-# We need: a) type name, b) the function to be applied
-#          c) (optional) an alias
+# Let's say you want a Wald test with an heteroskedasticiy robust variance
 
-fitstat_register("tstand", function(x) tstat(x, se = "stand")[1], "t-stat (regular)")
-fitstat_register("thc", function(x) tstat(x, se = "heter")[1], "t-stat (HC1)")
-fitstat_register("t1w", function(x) tstat(x, se = "clus")[1], "t-stat (clustered)")
-fitstat_register("t2w", function(x) tstat(x, se = "twow")[1], "t-stat (2-way)")
+# First we create the function
+hc_wald = function(est){
+  w = wald(est, keep = "!Intercept", print = FALSE, se = "hetero")
+  head(w, 4)
+}
+# This test returns a vector of 4 elements: stat, p, df1 and df2
 
-# Now we can use these keywords in fitstat:
-etable(gravity, fitstat = ~ . + tstand + thc + t1w + t2w)
+# Now we register the routine
+fitstat_register("hc_wald", hc_wald, "Wald (HC1)", "test2")
 
-# Note that the custom stats we created are can easily lead
-# to errors, but that's another story!
+# You can access the statistic, as before
+fitstat(est, "hc_wald")
 
+# But you can also access the sub elements
+fitstat(est, "hc_wald.p")
 
+}
+\author{
+Laurent Berge
 }
