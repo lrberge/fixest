@@ -6491,6 +6491,26 @@ as_varname = function(x){
     x
 }
 
+update_file = function(path, text){
+
+    text_1 = readLines(path)
+
+    text_clean_1 = unlist(strsplit(text_1, "\n"))
+    text_clean_2 = unlist(strsplit(text, "\n"))
+
+    text_clean_1 = text_clean_1[grepl("[[:alnum:][:punct:]]", text_clean_1)]
+    text_clean_2 = text_clean_2[grepl("[[:alnum:][:punct:]]", text_clean_2)]
+
+    # We write only if the text is different
+    if(length(text_clean_1) != length(text_clean_2) || any(text_clean_1 != text_clean_2)){
+        message("writing '", path, appendLF = FALSE)
+        f = file(path, "w", encoding = "utf-8")
+        writeLines(text, f)
+        close(f)
+        message(".")
+    }
+}
+
 #### ................. ####
 #### Additional Methods ####
 ####

@@ -644,17 +644,12 @@ gen_etable_aliases = function(){
 
 
     # Writing the functions
-
-    f = file("R/etable_aliases.R", "w", encoding = "utf-8")
-
     intro = c("# Do not edit by hand\n# => aliases to the function etable\n\n\n")
 
     s = "\n\n\n\n"
     text = c(intro, s, esttable_rox, esttable_fun, s, esttex_rox, esttex_fun, s)
-    writeLines(text, f)
-    close(f)
 
-
+    update_file("R/etable_aliases.R", text)
 }
 
 results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage = 2, agg = NULL, .vcov, .vcov_args = NULL, digits = 4, digits.stats = 5, fitstat_all, sdBelow=NULL, dict, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), coefstat = "se", ci = 0.95, label, subtitles, title, float = FALSE, replace = FALSE, keepFactors = FALSE, tex = FALSE, useSummary, dots_call, powerBelow = -5, interaction.combine, convergence, family, drop, order, keep, file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, depvar = FALSE, style.tex = NULL, style.df=NULL, notes = NULL, group = NULL, extraline=NULL, fixef.group = NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube"), tex_tag = FALSE, fit_format = "__var__", coef.just = NULL, .up = 1){

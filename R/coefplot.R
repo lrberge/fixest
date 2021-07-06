@@ -2125,16 +2125,12 @@ gen_iplot = function(){
     iplot_rox = "#' @describeIn coefplot Plots the coefficients generated with i()"
 
     # Writing the functions
-
-    f = file("R/iplot.R", "w", encoding = "utf-8")
-
     intro = c("# Do not edit by hand\n# => iplot calls coefplot internally\n\n\n")
 
     s = "\n\n\n\n"
     text = c(intro, s, iplot_rox, iplot_fun, s)
-    writeLines(text, f)
-    close(f)
 
+    update_file("R/iplot.R", text)
 }
 
 
