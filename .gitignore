@@ -9,3 +9,4 @@ src-i386/*
 Rplots.pdf
 .Rhistor*
 /check
+.Renviron
