@@ -2736,8 +2736,8 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, spl
 
     Q = length(fixef_vars) # terms: contains FEs + slopes
 
-    rm_0 = !family == "gaussian"
-    rm_1 = family == "logit"
+    rm_0 = !family == "gaussian" && !fixef.rm %in% c("none", "singleton")
+    rm_1 = family == "logit" && !fixef.rm %in% c("none", "singleton")
     rm_single = fixef.rm %in% c("singleton", "both")
     do_sum_y = !origin_type %in% c("feols", "feglm")
 
