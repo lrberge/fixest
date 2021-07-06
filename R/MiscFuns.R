@@ -7898,7 +7898,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 
 	if("fixef" %in% type){
 
-	    if(!is.null(object$fixef_vars)){
+	    if(is.null(object$fixef_vars)){
 	        stop("In model.matrix, the type 'fixef' is only valid for models with fixed-effects. This estimation does not contain fixed-effects.")
 	    }
 

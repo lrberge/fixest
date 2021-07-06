@@ -1453,6 +1453,40 @@ m_poly_old = model.matrix(res_poly)
 m_poly_new = model.matrix(res_poly, base_bis)
 test(m_poly_old[1:50, 3], m_poly_new[, 3])
 
+
+# fixef
+res = feols(y1 ~ x1 + x2 + x3 | species + fe2, base)
+m_fe = model.matrix(res, type = "fixef")
+test(ncol(m_fe), 2)
+
+# lhs
+m_lhs = model.matrix(res, type = "lhs", na.rm = FALSE)
+test(m_lhs, base$y1)
+
+# IV
+res_iv = feols(y1 ~ x1 | x2 ~ x3, base)
+
+m_rhs1 = model.matrix(res_iv, type = "iv.rhs1")
+test(colnames(m_rhs1)[-1], c("x3", "x1"))
+
+m_rhs2 = model.matrix(res_iv, type = "iv.rhs2")
+test(colnames(m_rhs2)[-1], c("fit_x2", "x1"))
+
+m_endo = model.matrix(res_iv, type = "iv.endo")
+test(colnames(m_endo), "x2")
+
+m_exo  = model.matrix(res_iv, type = "iv.exo")
+test(colnames(m_exo)[-1], "x1")
+
+m_inst  = model.matrix(res_iv, type = "iv.inst")
+test(colnames(m_inst), "x3")
+
+# several
+res_mult = feols(y1 ~ x1 | species | x2 ~ x3, base)
+
+m_lhs_rhs_fixef = model.matrix(res_mult, type = c("lhs", "iv.rhs2", "fixef"), na.rm = FALSE)
+test(names(m_lhs_rhs_fixef), c("y1", "fit_x2", "x1", "species"))
+
 ####
 #### VCOV at estimation ####
 ####
