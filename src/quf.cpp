@@ -834,7 +834,7 @@ void quf_refactor_table_sum_single(int n, int *quf_old, int *quf_new, vector<boo
 // [[Rcpp::export]]
 List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
                           bool rm_single, IntegerVector only_slope, int nthreads,
-                          bool do_refactor, SEXP r_x_sizes, IntegerVector obs2keep){
+                          bool do_refactor, SEXP r_x_sizes, IntegerVector obs2keep, bool early_return = false){
 
     // x: List of vectors of IDs (type int/num or char only)
     // y: dependent variable
@@ -965,7 +965,61 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
         }
     }
 
-    // Rcout << "Any problem: " << is_pblm << "\n";
+    Rcout << "Any problem: " << is_pblm << "\n";
+
+
+    if(early_return){
+        List res_bis;
+
+        // x: UF (the largest object => no copy)
+        res_bis["quf"] = res_x_quf_all;
+
+        // x: Unik
+        List res_bis_tmp(Q);
+        for(int q=0 ; q<Q ; ++q){
+            res_bis_tmp[q] = x_unik_all[q];
+        }
+        res_bis["items"] = clone(res_bis_tmp);
+
+        // table
+        for(int q=0 ; q<Q ; ++q){
+            res_bis_tmp[q] = x_table_all[q];
+        }
+        res_bis["table"] = clone(res_bis_tmp);
+
+        // sum y
+        for(int q=0 ; q<Q ; ++q){
+            if(do_sum_y){
+                res_bis_tmp[q] = sum_y_all[q];
+            } else {
+                res_bis_tmp[q] = 0;
+            }
+        }
+        res_bis["sum_y"] = clone(res_bis_tmp);
+
+
+        // id problem
+        List id_pblm2return;
+        for(int q=0 ; q<Q ; ++q){
+
+            vector<bool> &id_pblm = id_pblm_all[q];
+            int D = id_pblm.size();
+            Rcout << "D = " << D << "\n";
+            LogicalVector lv(D, false);
+            for(int d=0 ; d<D ; ++d){
+                // Rcout << d << "\n";
+                lv[d] = id_pblm[d];
+            }
+
+            id_pblm2return.push_back(lv);
+        }
+        res_bis["id_pblm"] = id_pblm2return;
+
+        UNPROTECT(Q);
+
+        return(res_bis);
+    }
+
 
 
     if(obs2keep[0] != 0){
@@ -987,6 +1041,7 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
         //
 
         int n_problems = std::accumulate(any_pblm.begin(), any_pblm.end(), 0);
+        Rcout << "# problems: " << n_problems << "\n";
         bool is_parallel = n_problems > 1 && nthreads > 1;
 
         // creating the obs2remove vector
@@ -1019,7 +1074,7 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
 
             // we copy the values into the boolean vector
             for(int i=0 ; i<n ; ++i){
-                if(obs_removed_int[i]){
+                if(obs_removed_int[i] > 0){
                     obs_removed[i] = true;
                 }
             }
@@ -1040,6 +1095,20 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
             }
         }
 
+        // We check with the no parallel
+        vector<int> obs_removed_nopar(n, 0);
+        for(int q=0 ; q<Q ; ++q){
+            vector<bool> &id_pblm = id_pblm_all[q];
+            int *pquf = p_x_quf_all[q];
+            for(int i=0 ; i<n ; ++i){
+                if(id_pblm[pquf[i] - 1]){
+                    obs_removed_nopar[i] = true;
+                }
+            }
+        }
+
+        int n_removed_nopar = std::accumulate(obs_removed_nopar.begin(), obs_removed_nopar.end(), 0);
+
 
         // refactoring, recomputing all the stuff
         // ie x_quf, x_unik, x_table, sum_y (if needed)
@@ -1051,6 +1120,10 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
 
         int n_removed = std::accumulate(obs_removed.begin(), obs_removed.end(), 0);
         int n_new = n - n_removed;
+
+
+        Rcout << "        # removed: " << n_removed << "\n";
+        Rcout << "# removed, no par: " << n_removed_nopar << "\n";
 
         List res_x_new_quf_all(Q);
         vector<int*> p_x_new_quf_all(Q);
