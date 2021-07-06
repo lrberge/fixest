@@ -602,7 +602,7 @@ void quf_refactor(int *px_in, int x_size, IntegerVector &obs2keep, int n, int *x
 void quf_table_sum_single(void *px_in, std::string &x_type, int n, int q, int *x_quf,
                           vector<double> &x_unik, vector<int> &x_table, double *py,
                           vector<double> &sum_y, bool do_sum_y, bool rm_0, bool rm_1,
-                          bool rm_single, vector<bool> &any_pblm, vector<bool> &id_pblm,
+                          bool rm_single, vector<int> &any_pblm, vector<bool> &id_pblm,
                           bool check_pblm, bool do_refactor, int x_size, IntegerVector &obs2keep){
 
     // check_pblm => FALSE only if only_slope = TRUE
@@ -665,7 +665,7 @@ void quf_table_sum_single(void *px_in, std::string &x_type, int n, int q, int *x
         int d_end = 0;
         for(int d=0 ; d<D ; ++d){
             if((rm_0 && sum_y[d] == 0) || (rm_1 && sum_y[d] == x_table[d]) || (rm_single && x_table[d] == 1)){
-                any_pblm[q] = true;
+                any_pblm[q] = 1;
                 d_end = d;
                 break;
             }
@@ -897,7 +897,7 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
 
     vector< vector<int> > x_table_all(Q);
     vector< vector<double> > x_unik_all(Q);
-    vector<bool> any_pblm(Q, false);
+    vector<int> any_pblm(Q, 0);
     vector< vector<bool> > id_pblm_all(Q);
     // The following may not be needed:
     vector< vector<double> > sum_y_all(Q);
