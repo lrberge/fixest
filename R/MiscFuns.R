@@ -8813,18 +8813,31 @@ fixest_startup_msg = function(x){
 
 }
 
-initialize_startup_msg = function(){
+initialize_startup_msg = function(msg_version){
     # When new versions of the package are installed => we reset the display of the startup message
     # we need to keep track of the versions for which this default has been set
+
+    # NOTA:
+    # - the variable fixest_version is written when the user uses fixest_startup_msg()
+    # - if this function returns TRUE, then it forces the msg to pop
 
     version = renvir_get("fixest_version")
     current_version = fixest_version()
 
     if(!is.null(version) && !identical(version, current_version)){
-        # We reset the value of fixest_startup_msg
-        renvir_update("fixest_startup_msg", NULL)
+        # A) we update the version
         renvir_update("fixest_version", current_version)
-        return(TRUE)
+
+        # B) we reset the value of fixest_startup_msg
+        #    only if the version is anterior to the version that introduced the
+        #    message (means the message SHOULD pop since it would be the first time)
+
+        if(version < msg_version){
+            renvir_update("fixest_startup_msg", NULL)
+            return(TRUE)
+        } else {
+            return(FALSE)
+        }
     }
 
     return(FALSE)
@@ -8833,6 +8846,10 @@ initialize_startup_msg = function(){
 
 fixest_version = function(){
     as.character(packageVersion("fixest"))
+}
+
+version_lower = function(a, b){
+
 }
 
 renvir_get = function(key){

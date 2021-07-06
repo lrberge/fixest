@@ -3,7 +3,13 @@
 
 ## Bugs fixes
 
- - Minor, and rare, bug occurring in `feglm` when the model is badly specified and VAR(Y) >>>> VAR(X).
+ - Fix minor, rare, bug occurring in `feglm` when the model was badly specified and VAR(Y) >>>> VAR(X).
+ 
+ - `model.matrix` did not work with `type = "fixef"` (thanks to @kylebutts [#172](https://github.com/lrberge/fixest/issues/172)).
+ 
+ - In nonlinear estimations:`fixef.rm = "none"` or `fixef.rm = "singleton"` did not work as expected (thanks to @kre32  [#171](https://github.com/lrberge/fixest/issues/171)).
+ 
+ - Fix bug that could occur when observations had to be removed on several fixed-effects dimensions (had no impact on the estimates though).
  
 ## New features
 
