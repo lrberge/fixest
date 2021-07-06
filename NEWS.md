@@ -11,6 +11,8 @@
  
  - Fix bug that could occur when observations had to be removed on several fixed-effects dimensions (had no impact on the estimates though).
  
+ - Fix bug in `etable` when `file` is provided and `tex = FALSE` (thanks to @roussanoff [#169](https://github.com/lrberge/fixest/issues/169)).
+ 
 ## New features
 
  - `feglm` now accepts partially matched character shortcuts for families: "poisson", "logit", "probit" are now valid `family` arguments.

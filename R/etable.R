@@ -3215,17 +3215,7 @@ etable_internal_df = function(info){
     quiTheta = which(row.names(res) == ".theta")
     row.names(res)[quiTheta] = "Over-dispersion"
 
-    if(!is.null(file)){
-        sink(file = file, append = !replace)
-        on.exit(sink())
-
-        print(res)
-
-        return(invisible(res))
-    } else {
-        return(res)
-    }
-
+    return(res)
 }
 
 
