@@ -753,6 +753,8 @@ coeftable = function(object, se, cluster, keep, drop, order, ...){
     mc = match.call()
 
     IS_FIXEST = "fixest" %in% class(object)
+    # IS_FIXEST_MULI = "fixest_multi" %in% class(object)
+    # IS_FIXEST_LIST = "fixest_multi" %in% class(object)
 
     if(!any(grepl("summary", class(object))) && (!IS_FIXEST || any(!names(mc) %in% c("", "object")) || !"cov.scaled" %in% names(object))){
         # We call summary
@@ -6493,16 +6495,23 @@ as_varname = function(x){
 
 update_file = function(path, text){
 
-    text_1 = readLines(path)
+    if(file.exists(path)){
+        text_1 = readLines(path)
 
-    text_clean_1 = unlist(strsplit(text_1, "\n"))
-    text_clean_2 = unlist(strsplit(text, "\n"))
+        text_clean_1 = unlist(strsplit(text_1, "\n"))
+        text_clean_2 = unlist(strsplit(text, "\n"))
 
-    text_clean_1 = text_clean_1[grepl("[[:alnum:][:punct:]]", text_clean_1)]
-    text_clean_2 = text_clean_2[grepl("[[:alnum:][:punct:]]", text_clean_2)]
+        text_clean_1 = text_clean_1[grepl("[[:alnum:][:punct:]]", text_clean_1)]
+        text_clean_2 = text_clean_2[grepl("[[:alnum:][:punct:]]", text_clean_2)]
+
+        do_write = length(text_clean_1) != length(text_clean_2) || any(text_clean_1 != text_clean_2)
+
+    } else {
+        do_write = TRUE
+    }
 
     # We write only if the text is different
-    if(length(text_clean_1) != length(text_clean_2) || any(text_clean_1 != text_clean_2)){
+    if(do_write){
         message("writing '", path, appendLF = FALSE)
         f = file(path, "w", encoding = "utf-8")
         writeLines(text, f)
