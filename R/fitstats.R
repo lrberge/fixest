@@ -213,8 +213,12 @@ print.fixest_fitstat = function(x, na.rm = FALSE, ...){
 #' @inherit fitstat seealso
 #'
 #' @param type A character scalar giving the type-name.
-#' @param fun A function to be applied to a \code{fixest} estimation. It must return either a scalar, either a list. Note that for the print method to work correctly, the names of the items of the list must be one of: \code{stat}, \code{p}, \code{df}, \code{df1}, \code{df2}, \code{vcov}. Only the print method is affected by this.
-#' @param alias An alias to be used in lieu of the type name in the display methods (ie when used in the function \code{\link[fixest]{print.fixest_fitstat}} or \code{\link[fixest]{etable}}).
+#' @param fun A function to be applied to a \code{fixest} estimation. It must return either a scalar, or a list of unitary elements. If the number of elements returned is greater than 1, then each element must be named! If the fit statistic is not valid for a given estimation, a plain \code{NA} value should be returned.
+#' @param alias A (named) character vector. An alias to be used in lieu of the type name in the display methods (ie when used in \code{\link[fixest]{print.fixest_fitstat}} or \code{\link[fixest]{etable}}). If the function returns several values, i.e. sub-types, you can give an alias to these sub-types. The syntax is \code{c("type" = "alias", "subtype_i" = "alias_i")}, with "type" (resp. "subtype") the value of the argument \code{type} resp. (\code{subtypes}). You can also give an alias encompassing the type and sub-type with the syntax \code{c("type.subtype_i" = "alias")}.
+#' @param subtypes A character vector giving the name of each element returned by the function \code{fun}. This is only used when the function returns more than one value.
+#'
+#' @details
+#' If there are several components to the computed statistics (i.e. the function returns several elements), then using the argument \code{subtypes}, giving the names of each of these components, is mandatory. This is to ensure that the statistic can be used as any other built-in statistic (and there are too many edge cases impeding automatic deduction).
 #'
 #' @author Laurent Berge
 #'
