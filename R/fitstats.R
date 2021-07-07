@@ -273,7 +273,7 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
     check_arg(type, "character scalar mbt")
     check_arg(fun, "function mbt")
     check_arg(alias, "NULL character vector no na")
-    check_arg(subtype, "NULL character vector no na")
+    check_arg(subtypes, "NULL character vector no na")
 
     # We check the type is not conflicting
     existing_types = fitstat(give_types = TRUE)$types
