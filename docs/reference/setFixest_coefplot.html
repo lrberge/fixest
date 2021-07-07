@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -115,7 +115,7 @@
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/lrberge/fixest/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -187,14 +187,16 @@
   xlab <span class='op'>=</span> <span class='cn'>NULL</span>,
   sub <span class='op'>=</span> <span class='cn'>NULL</span>,
   reset <span class='op'>=</span> <span class='cn'>FALSE</span>
-<span class='op'>)</span></pre>
+<span class='op'>)</span>
+
+<span class='fu'>getFixest_coefplot</span><span class='op'>(</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>style</th>
-      <td><p>A character scalar giving the style of the plot to be used. You can set styles with the function <code>setFixest_coefplot</code>, setting all the default values of the function. If missing, then it switches to either "default", "interaction" or "multiple", depending on the data given in input.</p></td>
+      <td><p>A character scalar giving the style of the plot to be used. You can set styles with the function <code>setFixest_coefplot</code>, setting all the default values of the function. If missing, then it switches to either "default" or "iplot", depending on the calling function.</p></td>
     </tr>
     <tr>
       <th>horiz</th>
@@ -246,7 +248,7 @@
     </tr>
     <tr>
       <th>lwd</th>
-      <td><p>General liwe with. Default is 1.</p></td>
+      <td><p>General line with. Default is 1.</p></td>
     </tr>
     <tr>
       <th>pt.lwd</th>
@@ -278,11 +280,11 @@
     </tr>
     <tr>
       <th>pt.join</th>
-      <td><p>Logical, default depends on the situation. If <code>TRUE</code>, then the coefficient estimates are joined with a line. By default, it is equal to <code>TRUE</code> only if: i) interactions are plotted, ii) the x values are numeric and iii) a reference is found.</p></td>
+      <td><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code>, then the coefficient estimates are joined with a line.</p></td>
     </tr>
     <tr>
       <th>pt.join.par</th>
-      <td><p>List. Parameters of the line joining the cofficients. The default values are: <code>col = pt.col</code> and <code>lwd = lwd</code>. You can add any graphical parameter that will be passed to <code><a href='https://rdrr.io/r/graphics/lines.html'>lines</a></code>. Eg: <code>pt.join.par = list(lty = 2)</code>.</p></td>
+      <td><p>List. Parameters of the line joining the coefficients. The default values are: <code>col = pt.col</code> and <code>lwd = lwd</code>. You can add any graphical parameter that will be passed to <code><a href='https://rdrr.io/r/graphics/lines.html'>lines</a></code>. Eg: <code>pt.join.par = list(lty = 2)</code>.</p></td>
     </tr>
     <tr>
       <th>ci.join</th>
@@ -302,7 +304,7 @@
     </tr>
     <tr>
       <th>ref.line</th>
-      <td><p>Logical, default is "auto", the behavior depending on the situation. It is <code>TRUE</code> only if: i) interactions are plotted, ii) the x values are numeric and iii) a reference is found. If <code>TRUE</code>, then a vertical line is drawn at the level of the reference value. You can set the parameters of this line with the argument <code>ref.line.par</code>.</p></td>
+      <td><p>Logical or numeric, default is "auto", whose behavior depends on the situation. It is <code>TRUE</code> only if: i) interactions are plotted, ii) the x values are numeric and iii) a reference is found. If <code>TRUE</code>, then a vertical line is drawn at the level of the reference value. Otherwise, if numeric a vertical line will be drawn at that specific value.</p></td>
     </tr>
     <tr>
       <th>ref.line.par</th>
@@ -326,11 +328,11 @@
     </tr>
     <tr>
       <th>xlim.add</th>
-      <td><p>A numeric vector of length 1 or 2. It represents an extension factor of xlim, in percentage. Eg: <code>xlim.add = c(0, 0.5)</code> extends <code>xlim</code> of 50% on the right. If of lentgh 1, positive values represent the right, and negative values the left (Eg: <code>xlim.add = -0.5</code> is equivalent to <code>xlim.add = c(0.5, 0)</code>).</p></td>
+      <td><p>A numeric vector of length 1 or 2. It represents an extension factor of xlim, in percentage. Eg: <code>xlim.add = c(0, 0.5)</code> extends <code>xlim</code> of 50% on the right. If of length 1, positive values represent the right, and negative values the left (Eg: <code>xlim.add = -0.5</code> is equivalent to <code>xlim.add = c(0.5, 0)</code>).</p></td>
     </tr>
     <tr>
       <th>ylim.add</th>
-      <td><p>A numeric vector of length 1 or 2. It represents an extension factor of ylim, in percentage. Eg: <code>ylim.add = c(0, 0.5)</code> extends <code>ylim</code> of 50% on the top. If of lentgh 1, positive values represent the top, and negative values the bottom (Eg: <code>ylim.add = -0.5</code> is equivalent to <code>ylim.add = c(0.5, 0)</code>).</p></td>
+      <td><p>A numeric vector of length 1 or 2. It represents an extension factor of ylim, in percentage. Eg: <code>ylim.add = c(0, 0.5)</code> extends <code>ylim</code> of 50% on the top. If of length 1, positive values represent the top, and negative values the bottom (Eg: <code>ylim.add = -0.5</code> is equivalent to <code>ylim.add = c(0.5, 0)</code>).</p></td>
     </tr>
     <tr>
       <th>sep</th>

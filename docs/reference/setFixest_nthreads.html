@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -115,7 +115,7 @@
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/lrberge/fixest/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -141,7 +141,7 @@
     <p>Sets/gets the default number of threads to used in <code>fixest</code> estimation functions. The default is the maximum number of threads minus two.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>setFixest_nthreads</span><span class='op'>(</span><span class='va'>nthreads</span><span class='op'>)</span>
+    <pre class="usage"><span class='fu'>setFixest_nthreads</span><span class='op'>(</span><span class='va'>nthreads</span>, save <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
 
 <span class='va'>getFixest_nthreads</span></pre>
 
@@ -151,6 +151,10 @@
     <tr>
       <th>nthreads</th>
       <td><p>The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. If missing, the default is to use 50% of all threads.</p></td>
+    </tr>
+    <tr>
+      <th>save</th>
+      <td><p>Either a logical or equal to <code>"reset"</code>. Default is <code>FALSE</code>. If <code>TRUE</code> then the value is set permanently at the project level, this means that if you restart R, you will still obtain the previously saved defaults. This is done by writing in the <code>".Renviron"</code> file, located in the project's working directory, hence we must have write permission there for this to work. If equal to "reset", the default at the project level is erased.</p></td>
     </tr>
     </table>
 

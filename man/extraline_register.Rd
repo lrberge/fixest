@@ -22,19 +22,20 @@ You can register as many macros as you wish, the only constraint is that the typ
 \examples{
 
 
-# We register a function computing the mean of the dependent variable
-my_fun = function(x) mean(model.matrix(x, type = "lhs"))
-extraline_register("my", my_fun, "Mean(y)")
+# We register a function computing the standard-deviation of the dependent variable
+my_fun = function(x) sd(model.matrix(x, type = "lhs"))
+extraline_register("sdy", my_fun, "SD(y)")
 
 # An estimation
+data(iris)
 est = feols(Petal.Length ~ Sepal.Length | Species, iris)
 
 # Now we can easily create a row with the mean of y.
 # We just "summon" it in a one-sided formula
-etable(est, extraline = ~ my)
+etable(est, extraline = ~ sdy)
 
 # We can change the alias on the fly:
-etable(est, extraline = list("_Average of y" = ~ my))
+etable(est, extraline = list("_Standard deviation of the dep. var." = ~ sdy))
 
 
 

@@ -11,3 +11,5 @@
 ^.github$
 ^check$
 ^_AUTO_BENCHMARK$
+^CONTRIBUTORS\.md$
+^\.Renviron$

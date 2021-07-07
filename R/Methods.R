@@ -170,29 +170,22 @@ hatvalues.fixest = function(model, ...){
 
     msg = "hatvalues.fixest: 'hatvalues' is not implemented for estimations with fixed-effects."
 
+    # An error is in fact nicer than a message + NA return due to the interplay with sandwich
+    if(!is.null(model$fixef_id)){
+        stop(msg)
+    }
+
     if(method == "feols"){
-
-        if(!is.null(model$fixef_id)){
-            message(msg)
-            return(rep(NA_real_, model$nobs))
-        }
-
         X = model.matrix(model)
 
         res = cpp_diag_XUtX(X, model$cov.unscaled / model$sigma2)
 
     } else if(method == "feglm"){
-
-        if(!is.null(model$fixef_id)){
-            message(msg)
-            return(rep(NA_real_, model$nobs))
-        }
-
         XW = model.matrix(model) * sqrt(model$irls_weights)
         res = cpp_diag_XUtX(XW, model$cov.unscaled)
 
     } else {
-        stop("'hatvalues' is not currently implemented for function ", method, ".")
+        stop("'hatvalues' is currently not implemented for function ", method, ".")
     }
 
     res

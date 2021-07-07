@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -115,7 +115,7 @@
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/lrberge/fixest/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -133,7 +133,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Type of degree of freedom in fixest summary</h1>
-    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/MiscFuns.R'><code>R/MiscFuns.R</code></a></small>
+    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/VCOV.R'><code>R/VCOV.R</code></a></small>
     <div class="hidden name"><code>dof.Rd</code></div>
     </div>
 
@@ -195,7 +195,7 @@
     <p>It returns a <code>dof.type</code> object.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>The following vignette: <a href='https://cran.r-project.org/package=fixest/vignettes/standard_errors.html'>On standard-errors</a>, describes in details how the standard-errors are computed in <code>fixest</code> and how you can replicate standard-errors from other software.</p>
+    <p>The following vignette: <a href='https://lrberge.github.io/fixest/articles/standard_errors.html'>On standard-errors</a>, describes in details how the standard-errors are computed in <code>fixest</code> and how you can replicate standard-errors from other software.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='summary.fixest.html'>summary.fixest</a></code>, <code><a href='vcov.fixest.html'>vcov.fixest</a></code></p></div>
@@ -268,12 +268,12 @@
 #&gt; Observations: 10 
 #&gt; Fixed-effects: fe1: 3,  fe2: 5
 #&gt; Standard-errors: Clustered (fe1) 
-#&gt;   Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; x   1.2349    0.33027   3.739  0.06467 .  
+#&gt;   Estimate Std. Error  t value Pr(&gt;|t|)) 
+#&gt; x 0.079171   0.281686 0.281061  0.805072 
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 0.185021     Adj. R2: 0.8854  
-#&gt;                  Within R2: 0.871881</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/attributes.html'>attributes</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, attr <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"dof.type"</span>, <span class='st'>"dof.K"</span><span class='op'>)</span><span class='op'>]</span>
+#&gt; RMSE: 0.873241     Adj. R2: -1.7512 
+#&gt;                  Within R2: 0.003658</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/attributes.html'>attributes</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, attr <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"dof.type"</span>, <span class='st'>"dof.K"</span><span class='op'>)</span><span class='op'>]</span>
 </div><div class='output co'>#&gt; $dof.type
 #&gt; [1] "dof(adj = TRUE, fixef.K = 'nested', cluster.adj = TRUE, cluster.df = 'min', t.df = 'min', fixef.force_exact = FALSE)"
 #&gt; 
@@ -288,12 +288,12 @@
 #&gt; Observations: 10 
 #&gt; Fixed-effects: fe1: 3,  fe2: 5
 #&gt; Standard-errors: Clustered (fe1) 
-#&gt;   Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; x   1.2349    0.22018  5.6085 0.030352 *  
+#&gt;   Estimate Std. Error  t value Pr(&gt;|t|)) 
+#&gt; x 0.079171   0.187791 0.421592  0.714314 
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 0.185021     Adj. R2: 0.8854  
-#&gt;                  Within R2: 0.871881</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/attr.html'>attr</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, dof <span class='op'>=</span> <span class='fu'>dof</span><span class='op'>(</span>fixef.K <span class='op'>=</span> <span class='st'>"none"</span><span class='op'>)</span>, attr <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>, <span class='st'>"dof.K"</span><span class='op'>)</span>
+#&gt; RMSE: 0.873241     Adj. R2: -1.7512 
+#&gt;                  Within R2: 0.003658</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/attr.html'>attr</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, dof <span class='op'>=</span> <span class='fu'>dof</span><span class='op'>(</span>fixef.K <span class='op'>=</span> <span class='st'>"none"</span><span class='op'>)</span>, attr <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>, <span class='st'>"dof.K"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; [1] 1</div><div class='input'>
 
 <span class='co'># fixef.K = TRUE</span>
@@ -303,12 +303,12 @@
 #&gt; Observations: 10 
 #&gt; Fixed-effects: fe1: 3,  fe2: 5
 #&gt; Standard-errors: Clustered (fe1) 
-#&gt;   Estimate Std. Error t value Pr(&gt;|t|) 
-#&gt; x   1.2349   0.467072  2.6439 0.118223 
+#&gt;   Estimate Std. Error t value Pr(&gt;|t|)) 
+#&gt; x 0.079171   0.398364 0.19874  0.860837 
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 0.185021     Adj. R2: 0.8854  
-#&gt;                  Within R2: 0.871881</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/attr.html'>attr</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, dof <span class='op'>=</span> <span class='fu'>dof</span><span class='op'>(</span>fixef.K <span class='op'>=</span> <span class='st'>"full"</span><span class='op'>)</span>, attr <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>, <span class='st'>"dof.K"</span><span class='op'>)</span>
+#&gt; RMSE: 0.873241     Adj. R2: -1.7512 
+#&gt;                  Within R2: 0.003658</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/attr.html'>attr</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, dof <span class='op'>=</span> <span class='fu'>dof</span><span class='op'>(</span>fixef.K <span class='op'>=</span> <span class='st'>"full"</span><span class='op'>)</span>, attr <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>, <span class='st'>"dof.K"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; [1] 8</div><div class='input'>
 
 <span class='co'># fixef.K = TRUE &amp; fixef.force_exact = TRUE</span>
@@ -318,12 +318,12 @@
 #&gt; Observations: 10 
 #&gt; Fixed-effects: fe1: 3,  fe2: 5
 #&gt; Standard-errors: Clustered (fe1) 
-#&gt;   Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; x   1.2349   0.381363   3.238  0.08359 .  
+#&gt;   Estimate Std. Error  t value Pr(&gt;|t|)) 
+#&gt; x 0.079171   0.325263 0.243406   0.83038 
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 0.185021     Adj. R2: 0.8854  
-#&gt;                  Within R2: 0.871881</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/attr.html'>attr</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, dof <span class='op'>=</span> <span class='fu'>dof</span><span class='op'>(</span>fixef.K <span class='op'>=</span> <span class='st'>"full"</span>, fixef.force_exact <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>, attr <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>, <span class='st'>"dof.K"</span><span class='op'>)</span>
+#&gt; RMSE: 0.873241     Adj. R2: -1.7512 
+#&gt;                  Within R2: 0.003658</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/attr.html'>attr</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, dof <span class='op'>=</span> <span class='fu'>dof</span><span class='op'>(</span>fixef.K <span class='op'>=</span> <span class='st'>"full"</span>, fixef.force_exact <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>, attr <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>, <span class='st'>"dof.K"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; [1] 7</div><div class='input'>
 <span class='co'># There are two restrictions:</span>
 <span class='fu'><a href='https://rdrr.io/r/base/attr.html'>attr</a></span><span class='op'>(</span><span class='fu'><a href='fixef_reexported.html'>fixef</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>, <span class='st'>"references"</span><span class='op'>)</span>

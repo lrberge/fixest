@@ -13,7 +13,7 @@
   .vcov,
   stage = 2,
   lean = FALSE,
-  n,
+  n = 1000,
   ...
 )
 }
@@ -34,7 +34,7 @@
 
 \item{lean}{Logical, default is \code{FALSE}. Used to reduce the (memory) size of the summary object. If \code{TRUE}, then all objects of length N (the number of observations) are removed from the result. Note that some \code{fixest} methods may consequently not work when applied to the summary.}
 
-\item{n}{Integer, default is missing (means Inf). Number of coefficients to display when the print method is used.}
+\item{n}{Integer, default is 1000. Number of coefficients to display when the print method is used.}
 
 \item{...}{Not currently used.}
 }

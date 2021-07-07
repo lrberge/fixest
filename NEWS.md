@@ -1,9 +1,36 @@
 
+# fixest 0.9.1
+
+## Bugs fixes
+
+ - Fix minor, rare, bug occurring in `feglm` when the model was badly specified and VAR(Y) >>>> VAR(X).
+ 
+ - `model.matrix` did not work with `type = "fixef"` (thanks to @kylebutts [#172](https://github.com/lrberge/fixest/issues/172)).
+ 
+ - In nonlinear estimations:`fixef.rm = "none"` or `fixef.rm = "singleton"` did not work as expected (thanks to @kre32  [#171](https://github.com/lrberge/fixest/issues/171)).
+ 
+ - Fix bug that could occur when observations had to be removed on several fixed-effects dimensions (had no impact on the estimates though).
+ 
+ - Fix bug in `etable` when `file` is provided and `tex = FALSE` (thanks to @roussanoff [#169](https://github.com/lrberge/fixest/issues/169)).
+ 
+## New features
+
+ - `feglm` now accepts partially matched character shortcuts for families: "poisson", "logit", "probit" are now valid `family` arguments.
+ 
+ - Argument `se` now accepts the alias `"hc1"` to get heteroskedasticity-robust standard-errors.
+
+
 # fixest 0.9.0
 
 ## Bugs
 
  - Major bug, leading R to crash, occurring when the same variable was used with several different slopes (thanks to @Oravishayrizi [#119](https://github.com/lrberge/fixest/issues/119)). 
+ 
+ - Major bug, leading R to crash, occurring when 3+ fixed-effects are to be combined.
+ 
+ - Major bug, leading R to crash, occurring when multiple LHS are estimated with the option `fixef.rm = "singleton"` (thanks to Ole Rogeberg).
+ 
+ - Major bug, leading R to crash, occurring when *many* fixed-effects have to be removed because of only 0/1 outcomes (thanks to @mangelett [#146](https://github.com/lrberge/fixest/issues/146) and @ChristianDueben [#157](https://github.com/lrberge/fixest/issues/157)).
  
  - Fix bug occurring for undefined covariances with only one regressor (thanks to @joseph-richard-martinez [#118](https://github.com/lrberge/fixest/issues/118)).
  
@@ -27,8 +54,56 @@
  
  - Fix bug estimation without intercept not working when lags are present in the formula (thanks to @nreigl [#126](https://github.com/lrberge/fixest/issues/126)). 
  
- - Fix various bugs when using `subset` in the estimations (reported by @noahmbuckley and @
-Oravishayrizi, [#129](https://github.com/lrberge/fixest/issues/129) and [#131](https://github.com/lrberge/fixest/issues/131)).
+ - Fix various bugs when using `subset` in the estimations (reported by @noahmbuckley and @Oravishayrizi, [#129](https://github.com/lrberge/fixest/issues/129) and [#131](https://github.com/lrberge/fixest/issues/131)).
+
+ - Fix error message when data cannot be fetched (reported by @Oravishayrizi [#134](https://github.com/lrberge/fixest/issues/134)).
+ 
+ - Fix bug getting the "G" statistic in `fitstat`.
+ 
+ - Fix bug in `predict` when a `poly()` term was used and the formula was long (reported by @XiangLiu-github [#135](https://github.com/lrberge/fixest/issues/135)). 
+ 
+ - fix bug for extracting sub statistics of `"ivwald"` and `"ivf"` in `fitstat`.
+ 
+ - fix bug when `i()` was used without intercept.
+ 
+ - Fix display bug in `etable` when Tex output is requested and interactions composed of identical variables with different interacted orders are present (reported by @Oravishayrizi [#148](https://github.com/lrberge/fixest/issues/148)).
+ 
+ - Fix bug in `etabe` when `fixef.group` is used and fixed-effects are renamed (reported by @jamesfeigenbaum).
+ 
+ - Fix bug when `fplit` is used with subset.
+ 
+ - Fix bug when using `cluster` with `subset` and NA values are removed (reported by @adamaltmejd [#154](https://github.com/lrberge/fixest/issues/154)).
+ 
+ - Fix bug argument `lean` not working on `summary` when applied to an existing `summary` and only the argument `lean` was present (reported by @adamaltmejd).
+ 
+ - Fix bug when using multiple LHS with lags in the formula (reported by @Nicolas Reigl [#158](https://github.com/lrberge/fixest/issues/154)).
+ 
+ - Fix bug regarding the intercept-only likelihood when weights are provided (only with Poisson and logit models), reported by @fostermeijer [#155](https://github.com/lrberge/fixest/issues/155).
+ 
+## Breaking changes: new i() function
+
+ - the function `i()`, used to create factors or interactions has been tidied up, leading to breaking changes.
+ 
+ - the first two arguments have been swapped! such that now the first argument will always be treated as a factor. 
+ 
+ - the new syntax is `i(factor_var, var, ref, keep, ref2, keep2)` where `var` can be either continuous or factor-like (the argument `f2`, for interaction with factors, has been removed).
+ 
+ - Fix rare bug when the number of parameters is greater than the number of observations and the GLM family has a dispersion parameter.
+ 
+ 
+## Breaking changes: new default family for feglm
+
+ - to be in line with R stats's `glm`, the new default family for `feglm` is `gaussian` (previously it was Poisson, if you were using it, please now use the function `fepois` instead).
+ 
+## Breaking changes: coefplot is now split in two
+
+ - the function `coefplot` has been split in two: 
+ 
+   - `coefplot`: always plots *all* the coefficients. 
+   
+   - `iplot`: plots only interactions or factors created with the function `i()`.
+  
+ - the function `iplot` hence replaces `coefplot`'s former argument `only.inter` which controlled whether or not to focus on interactions.
 
 ## etable
 
@@ -50,6 +125,13 @@ Oravishayrizi, [#129](https://github.com/lrberge/fixest/issues/129) and [#131](h
   
   - Add the argument `coef.just` that controls the justification of the coefficients and standard-errors. Only works when `tex = FALSE` (i.e. a `data.frame` is requested).
   
+  
+## Sun and Abraham staggered DiD method
+
+ - new function `sunab` that simplifies the implementation of the SA method. 
+ 
+ - just type `sunab(cohort, period)` in a `fixest` estimation and it works!
+  
 ## fixest_multi methods
 
 Common methods have been extended to `fixest_multi` objects.
@@ -59,20 +141,26 @@ Common methods have been extended to `fixest_multi` objects.
  - `resid.fixest_multi`: re-arranges the residuals of multiple estimations into a matrix.
  
  
-## New fit statistics
+## fitstat: New fit statistics
 
   - `kpr`: Kleibergen-Paap rank test for IV estimations.
   
   - `cd`: Cragg-Donald F statistic for IV estimations.
   
+  - `my`: gives the mean of the dependent variable.
+  
   
 ## New functions
 
-  - New function `degrees_freedom`: to access the DoFs of the models (sometimes that can be intricate).
+  - `degrees_freedom`: to access the DoFs of the models (sometimes that can be intricate).
   
   - `feols.fit`: fit method for feols. 
   
+  - `obs`: to obtain the observations used in the estimation.
+  
 ## New features
+
+  - All `fixest` estimation now accept scalars from the global environment (variables are still not allowed!).
   
   - Better handling of the DoFs in `fitstat` (in particular when the VCOV is clustered).
   
@@ -84,7 +172,11 @@ Common methods have been extended to `fixest_multi` objects.
   
   - `.fit` methods (`feols.fit` and `feglm.fit`) now handle multiple dependent variables.
   
-  - The argument `only.inter` can now have user-defined default values using `setFixest_coefplot`.
+  - `to_integer` now sorts appropriately any kind of vectors (not just numeric/character/factors).
+  
+  - substantial speed improvement when combining several vectors with *many* cases (> millions).
+  
+  - The number of threads to use can now be set permanently at the project level with the new argument `save` in the function `setFixest_nthreads`.
   
   
 ## Minor breaking changes
@@ -94,6 +186,8 @@ Common methods have been extended to `fixest_multi` objects.
 ## Other changes
 
   - Improve error messages. 
+  
+  - `hatvalues.fixest`: now returns an error instead of a message when fixed-effects are present (it makes the interplay with `sadnwich` 'nicer').
 
 # fixest 0.8.4
 

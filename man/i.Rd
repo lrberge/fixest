@@ -2,42 +2,37 @@
 % Please edit documentation in R/MiscFuns.R
 \name{i}
 \alias{i}
-\alias{interact}
 \title{Create, or interact variables with, factors}
 \usage{
-i(var, f, f2, ref, drop, keep, drop2, keep2)
-
-interact(var, f, f2, ref, drop, keep, drop2, keep2)
+i(factor_var, var, ref, keep, ref2, keep2, ...)
 }
 \arguments{
-\item{var}{A vector to be interacted with \code{f}. If the other argument \code{f} is missing, then this vector will be treated as the argument \code{f}.}
+\item{factor_var}{A vector (of any type) that will be treated as a factor. You can set references (i.e. exclude values for which to create dummies) with the \code{ref} argument.}
 
-\item{f}{A vector (of any type) that will be treated as a factor. Must be of the same length as \code{var} if \code{var} is not missing.}
+\item{var}{A variable of the same length as \code{factor_var}. This variable will be interacted with the factor in \code{factor_var}. It can be numeric or factor-like. To force a numeric variable to be treated as a factor, you can add the \code{i.} prefix to a variable name. For instance take a numeric variable \code{x_num}: \code{i(x_fact, x_num)} will treat \code{x_num} as numeric while \code{i(x_fact, i.x_num)} will treat \code{x_num} as a factor (it's a shortcut to \code{as.factor(x_num)}).}
 
-\item{f2}{A vector (of any type) that will be treated as a factor. Must be of the same length as \code{f}.}
+\item{ref}{A vector of values to be taken as references from \code{factor_var}. Can also be a logical: if \code{TRUE}, then the first value of \code{factor_var} will be removed. If \code{ref} is a character vector, partial matching is applied to values; use "@" as the first character to enable regular expression matching. See examples.}
 
-\item{ref}{A single value that belongs to the interacted variable (\code{f}). Can be missing, can also be a logical: if \code{TRUE}, then the first value of \code{f} will be removed..}
+\item{keep}{A vector of values to be kept from \code{factor_var} (all others are dropped). By default they should be values from \code{factor_var} and if \code{keep} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.}
 
-\item{drop}{A vector of regular expressions or integers (if \code{f} is integer). If provided, all values from \code{f} that match \code{drop} will be removed.}
+\item{ref2}{A vector of values to be dropped from \code{var}. By default they should be values from \code{var} and if \code{ref2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.}
 
-\item{keep}{A vector of regular expressions or integers (if \code{f} is integer). If provided, only the values from \code{f} that match \code{keep} will be kept.}
+\item{keep2}{A vector of values to be kept from \code{var} (all others are dropped). By default they should be values from \code{var} and if \code{keep2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.}
 
-\item{drop2}{A vector of regular expressions or integers (if \code{f2} is integer). If provided, all values from \code{f2} that match \code{drop2} will be removed.}
-
-\item{keep2}{A vector of regular expressions or integers (if \code{f2} is integer). If provided, only the values from \code{f2} that match \code{keep2} will be kept.}
+\item{...}{Not currently used.}
 }
 \value{
-It returns a matrix with number of rows the length of \code{var}. The number of columns is equal to the number of cases contained in \code{f} minus the reference(s).
+It returns a matrix with number of rows the length of \code{factor_var}. If there is no interacted variable or it is interacted with a numeric variable, the number of columns is equal to the number of cases contained in \code{factor_var} minus the reference(s). If the interacted variable is a factor, the number of columns is the number of combined cases between \code{factor_var} and \code{var}.
 }
 \description{
-Treat a variable as a factor, or interacts a variable with another treated as a factor. Values to be dropped/kept from the factor can be easily set. Note that to interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2}.
+Treat a variable as a factor, or interacts a variable with a factor. Values to be dropped/kept from the factor can be easily set. Note that to interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2}.
 }
 \details{
 To interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2} in the fixed-effects part of the formula. Please see the details and examples in the help page of \code{\link[fixest]{feols}}.
 }
 \section{Shorthand in \code{fixest} estimations}{
 
-In \code{fixest} estimations, instead of using \code{i(var, f, ref)}, you can instead use the following writing \code{var::f(ref)}. Note that this way of doing interactions is not endorsed any more and will likely be deprecated in the future.
+In \code{fixest} estimations, instead of using \code{i(factor_var, var, ref)}, you can instead use the following writing \code{var::factor_var(ref)}. Note that this way of doing interactions is deprecated and will be removed in the future.
 }
 
 \examples{
@@ -46,18 +41,21 @@ In \code{fixest} estimations, instead of using \code{i(var, f, ref)}, you can in
 # Simple illustration
 #
 
-x = 1:10
-y = rep(1:4, 3)[1:10]
+x = rep(letters[1:4], 3)[1:10]
+y = rep(1:4, c(1, 2, 3, 4))
 
 # interaction
-cbind(x, y, i(x, y, 1))
+data.frame(x, y, i(x, y, ref = TRUE))
 
 # without interaction
-cbind(x, y, i(y, ref = 1))
+data.frame(x, i(x, "b"))
 
-# You can interact factors too
-z = rep(c("a", "b", "c"), c(5, 3, 2))
-data.frame(z, y, i(z, y))
+# you can interact factors too
+z = rep(c("e", "f", "g"), c(5, 3, 2))
+data.frame(x, z, i(x, z))
+
+# to force a numeric variable to be treated as a factor: use i.
+data.frame(x, y, i(x, i.y))
 
 #
 # In fixest estimations
@@ -65,39 +63,41 @@ data.frame(z, y, i(z, y))
 
 data(base_did)
 # We interact the variable 'period' with the variable 'treat'
-est_did = feols(y ~ x1 + i(treat, period, 5) | id + period, base_did)
+est_did = feols(y ~ x1 + i(period, treat, 5) | id + period, base_did)
 
-# => special treatment in coefplot
-coefplot(est_did)
+# => plot only interactions with iplot
+iplot(est_did)
 
 # Using i() for factors
-est_bis = feols(y ~ x1 + i(period, keep = 3:6) + i(treat, period, 5) | id, base_did)
+est_bis = feols(y ~ x1 + i(period, keep = 3:6) + i(period, treat, 5) | id, base_did)
 
-coefplot(est_bis, only.inter = FALSE)
+# we plot the second set of variables created with i()
+# => we need to use keep (otherwise only the first one is represented)
+iplot(est_bis, keep = "trea")
 
 # => special treatment in etable
 etable(est_bis, dict = c("6" = "six"))
 
 #
-# Interact two factors => f2
+# Interact two factors
 #
 
-# To interact two factor, use the argument f2
+# We use the i. prefix to consider week as a factor
 data(airquality)
 aq = airquality
 aq$week = aq$Day \%/\% 7 + 1
 
 # Interacting Month and week:
-res_2F = feols(Ozone ~ Solar.R + i(Month, f2 = week), aq)
+res_2F = feols(Ozone ~ Solar.R + i(Month, i.week), aq)
 
 # Same but dropping the 5th Month and 1st week
-res_2F_bis = feols(Ozone ~ Solar.R + i(Month, f2 = week, drop = 5, drop2 = 1), aq)
+res_2F_bis = feols(Ozone ~ Solar.R + i(Month, i.week, ref = 5, ref2 = 1), aq)
 
 etable(res_2F, res_2F_bis)
 
 }
 \seealso{
-\code{\link[fixest]{coefplot}} to plot interactions, \code{\link[fixest]{feols}} for OLS estimation with multiple fixed-effects.
+\code{\link[fixest:coefplot]{iplot}} to plot interactions or factors created with \code{i()}, \code{\link[fixest]{feols}} for OLS estimation with multiple fixed-effects.
 }
 \author{
 Laurent Berge

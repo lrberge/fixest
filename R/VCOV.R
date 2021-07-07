@@ -24,7 +24,7 @@
 #' The computation of the VCOV matrix is first done in \code{\link[fixest]{summary.fixest}}.
 #'
 #' @details
-#' For an explanation on how the standard-errors are computed and what is the exact meaning of the arguments, please have a look at the dedicated vignette: \href{https://cran.r-project.org/package=fixest/vignettes/standard_errors.html}{On standard-errors}.
+#' For an explanation on how the standard-errors are computed and what is the exact meaning of the arguments, please have a look at the dedicated vignette: \href{https://lrberge.github.io/fixest/articles/standard_errors.html}{On standard-errors}.
 #'
 #' @return
 #' It returns a \eqn{N\times N} square matrix where \eqn{N} is the number of variables of the fitted model.
@@ -68,10 +68,12 @@
 #' vcov(est_pois_simple, cluster = ~Product)
 #'
 #'
-vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forceCovariance = FALSE, keepBounded = FALSE, nthreads = getFixest_nthreads(), ...){
+vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forceCovariance = FALSE,
+                       keepBounded = FALSE, nthreads = getFixest_nthreads(), ...){
     # computes the clustered vcov
 
     check_arg(attr, "logical scalar")
+    is_attr = attr
 
     if(isTRUE(object$NA_model)){
         # means that the estimation is done without any valid variable
@@ -80,7 +82,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
     if(!any("keep_se_info" %in% names(match.call(expand.dots = TRUE)))){
         # means NOT a client call
-        validate_dots(suggest_args = c("vcov", "dof"))
+        validate_dots(suggest_args = c("vcov", "dof"), valid_args = c("meat_only"))
     }
 
     # We transform se and cluster into vcov
@@ -92,8 +94,8 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
             stop("You cannot use the argument 'vcov' in combination with ", enumerate_items(msg, "or.quote"), ".")
         }
 
-        check_arg_plus(se, "NULL{'cluster'} match", .choices = c("standard", "white", "hetero", "cluster", "twoway", "threeway", "fourway"), .message = "Argument 'se' (which has been replaced by arg. 'vcov') should be equal to one of 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
-        if(se == "white") se = "hetero"
+        check_arg_plus(se, "NULL{'cluster'} match", .choices = c("standard", "white", "hc1", "hetero", "cluster", "twoway", "threeway", "fourway"), .message = "Argument 'se' (which has been replaced by arg. 'vcov') should be equal to one of 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
+        if(se %in% c("white", "hc1")) se = "hetero"
 
         if(se %in% c("standard", "hetero") || missnull(cluster)){
             vcov = se
@@ -101,12 +103,14 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
             if(inherits(cluster, "formula")){
                 vcov = cluster
             } else {
-                vcov = cluster
+                vcov = "cluster"
                 vcov_vars = cluster
             }
         }
     }
 
+    dots = list(...)
+    meat_only = isTRUE(dots$meat_only)
 
     if(!is.null(object$onlyFixef)){
         # means that the estimation is done without variables
@@ -116,7 +120,11 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     # If it's a summary => we give the vcov directly without further computation! except if arguments are provided which would mean that the user wants the new vcov
     if(isTRUE(object$summary) && missnull(vcov) && missnull(dof)){
         vcov = object$cov.scaled
-        if(!attr) attr(vcov, "se_info") = NULL
+        if(!is_attr) {
+            attr(vcov, "se_info") = NULL
+            attr(vcov, "dof.type") = NULL
+            attr(vcov, "dof.K") = NULL
+        }
         return(vcov)
     }
 
@@ -151,7 +159,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     }
 
     # Checking the value of vcov
-    check_arg_plus(vcov, "match(standard, hetero, cluster, twoway, threeway, fourway, hac, conley, conley_hac) | formula | function | matrix")
+    check_arg_plus(vcov, "match(standard, hetero, hc1, white, cluster, twoway, threeway, fourway, hac, conley, conley_hac) | formula | function | matrix")
 
     # WIP => to implement (not that difficult)
     if(is.function(vcov)){
@@ -267,7 +275,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
         if(!forceCovariance){
             last_warn = getOption("fixest_last_warning")
             if(is.null(last_warn) || (proc.time() - last_warn)[3] > 1){
-                warning("Standard errors are NA because of likely presence of collinearity. Use function collinearity() to detect collinearity problems.", call. = FALSE)
+                warning("Standard errors are NA because of likely presence of collinearity.", call. = FALSE)
             }
 
             attr(VCOV_raw, "type") = "NA (not-available)"
@@ -305,12 +313,18 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     } else if(se.val == "hetero"){
 
         # we make a n/(n-1) adjustment to match vcovHC(type = "HC1")
-        # vcov = crossprod(myScore %*% VCOV_raw) * correction.dof * ifelse(is_cluster, n/(n-1), 1)
-        vcov = cpppar_crossprod(cpppar_matprod(myScore, VCOV_raw, nthreads), 1, nthreads) * correction.dof * ifelse(is_cluster, n/(n-1), 1)
+        if(meat_only){
+            meat = cpppar_crossprod(myScore, 1, nthreads)
+            return(meat)
+
+        } else {
+            vcov = cpppar_crossprod(cpppar_matprod(myScore, VCOV_raw, nthreads), 1, nthreads) * correction.dof * ifelse(is_cluster, n/(n-1), 1)
+        }
+
         dimnames(vcov) = dimnames(VCOV_raw)
 
     } else {
-        # Clustered SD!
+        # Clustered SE!
         nway = switch(se.val, cluster=1, twoway=2, threeway=3, fourway=4)
 
         # MISC
@@ -485,7 +499,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
                         if(anyNA(data)){
                             varsNA = sapply(data, anyNA)
                             varsNA = names(varsNA)[varsNA]
-                            stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(varsNA, "s"), " in the original dataset (", deparse_long(object$call$data), "). But ", ifsingle(varsNA, "this variable", "these variables"), " contain", ifsingle(varsNA, "s", ""), " NAs", msgRemoved, ". This is not allowed.")
+                            stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(varsNA, "s"), " in the original dataset (", deparse_long(object$call$data), "). But ", ifsingle(varsNA, "this variable", "these variables"), " contain", ifsingle(varsNA, "s", ""), " NAs", msgRemoved, ". This is not allowed since the sample used to compute the SEs would be different from the sample used in the estimation.")
                         }
 
                         # We create the cluster list
@@ -588,7 +602,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
                 }
             } else {
                 # If this is not the case: there is a problem
-                stop("The length of the clusters (", n_per_cluster[1], ") does not match the number of observations in the estimation (", object$nobs, ").")
+                stop("The length of the clusters (", fsignif(n_per_cluster[1]), ") does not match the number of observations in the estimation (", fsignif(object$nobs), ").")
             }
         }
 
@@ -607,6 +621,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
         # initialisation
         vcov = VCOV_raw * 0
+        meat = 0
 
         if(do.unclass){
             for(i in 1:nway){
@@ -668,9 +683,10 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
                     vars = myComb[, j]
 
                     if(sum(power[vars]) > 14){
-                        myDots = cluster[vars]
-                        myDots$sep = "_"
-                        index = do.call("paste", myDots)
+                        my_clusters = cluster[vars]
+
+                        order_index = do.call(order, my_clusters)
+                        index = cpp_combine_clusters(my_clusters, order_index)
                     } else {
                         # quicker, but limited by the precision of integers
                         index = cluster[[vars[1]]]
@@ -684,7 +700,12 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
                 }
 
                 # When cluster.df == "min" => no dof here but later
-                vcov = vcov + (-1)**(i+1) * vcovClust(index, VCOV_raw, myScore, dof = is_cluster && !is_cluster_min, do.unclass=FALSE, nthreads = nthreads)
+                if(meat_only){
+                    meat = meat + (-1)**(i+1) * vcovClust(index, VCOV_raw, myScore, dof = is_cluster && !is_cluster_min, do.unclass=FALSE, meat_only = TRUE, nthreads = nthreads)
+                } else {
+                    vcov = vcov + (-1)**(i+1) * vcovClust(index, VCOV_raw, myScore, dof = is_cluster && !is_cluster_min, do.unclass=FALSE, nthreads = nthreads)
+                }
+
             }
         }
 
@@ -694,12 +715,17 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
             correction.dof = correction.dof * G_min / (G_min - 1)
         }
 
+        if(meat_only){
+            if(!is.null(G_min)) meat = meat * G_min / (G_min - 1)
+            return(meat)
+        }
+
         vcov = vcov * correction.dof
 
         if(is_t_min){
             if(is.null(G_min)) G_min = min(sapply(cluster, max))
 
-            if(attr) base::attr(vcov, "G") = G_min
+            if(is_attr) base::attr(vcov, "G") = G_min
         }
 
     }
@@ -712,7 +738,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
     sd.dict = c("standard" = "Standard", "hetero"="Heteroskedasticity-robust", "cluster"="Clustered", "twoway"="Two-way", "threeway"="Three-way", "fourway"="Four-way")
 
-    if(attr){
+    if(is_attr){
         base::attr(vcov, "type") = paste0(as.vector(sd.dict[se.val]), type_info)
         base::attr(vcov, "dof.type") = paste0("dof(adj = ", dof.adj, ", fixef.K = '", dof.fixef.K, "', cluster.adj = ", is_cluster, ", cluster.df = '", dof$cluster.df, "', t.df = '", dof$t.df, "', fixef.force_exact = ", is_exact, ")")
         base::attr(vcov, "dof.K") = K
@@ -747,7 +773,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 #'
 #' @details
 #'
-#' The following vignette: \href{https://cran.r-project.org/package=fixest/vignettes/standard_errors.html}{On standard-errors}, describes in details how the standard-errors are computed in \code{fixest} and how you can replicate standard-errors from other software.
+#' The following vignette: \href{https://lrberge.github.io/fixest/articles/standard_errors.html}{On standard-errors}, describes in details how the standard-errors are computed in \code{fixest} and how you can replicate standard-errors from other software.
 #'
 #' @return
 #' It returns a \code{dof.type} object.
@@ -862,7 +888,7 @@ dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = 
 
 
 
-vcovClust <- function (cluster, myBread, scores, dof=FALSE, do.unclass=TRUE, nthreads = 1){
+vcovClust = function (cluster, myBread, scores, dof=FALSE, do.unclass=TRUE, meat_only = FALSE, nthreads = 1){
     # Internal function: no need for controls, they come beforehand
     # - cluster: the vector of dummies
     # - myBread: original vcov
@@ -883,9 +909,14 @@ vcovClust <- function (cluster, myBread, scores, dof=FALSE, do.unclass=TRUE, nth
 
     # Finite sample correction:
     if(dof){
-        dof_value  = Q / (Q - 1)
+        dof_value = Q / (Q - 1)
     } else {
         dof_value = 1
+    }
+
+    if(meat_only){
+        res = cpppar_crossprod(RightScores, 1, nthreads) * dof_value
+        return(res)
     }
 
     xy = cpppar_matprod(RightScores, myBread, nthreads)

@@ -173,6 +173,18 @@ cpp_add_commas <- function(x, r = 1L, whole = TRUE) {
     .Call(`_fixest_cpp_add_commas`, x, r, whole)
 }
 
+cpp_find_never_always_treated <- function(cohort, period) {
+    .Call(`_fixest_cpp_find_never_always_treated`, cohort, period)
+}
+
+cpp_get_first_item <- function(x, n_items) {
+    .Call(`_fixest_cpp_get_first_item`, x, n_items)
+}
+
+cpp_combine_clusters <- function(cluster_list, index) {
+    .Call(`_fixest_cpp_combine_clusters`, cluster_list, index)
+}
+
 cpp_get_nb_threads <- function() {
     .Call(`_fixest_cpp_get_nb_threads`)
 }

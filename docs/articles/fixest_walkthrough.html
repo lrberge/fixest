@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
       </span>
     </div>
 
@@ -92,9 +92,9 @@
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Fast Fixed-Effects Estimation: Short introduction</h1>
-                        <h4 class="author">Laurent Berge</h4>
+                        <h4 class="author">Laurent Berge and Grant McDermott</h4>
             
-            <h4 class="date">2021-01-26</h4>
+            <h4 class="date">2021-06-18</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/fixest_walkthrough.Rmd"><code>vignettes/fixest_walkthrough.Rmd</code></a></small>
       <div class="hidden name"><code>fixest_walkthrough.Rmd</code></div>
@@ -104,11 +104,11 @@
     
     
 <!-- Help on vignette writing here: http://r-pkgs.had.co.nz/vignettes.html. -->
-<p>The package <code>fixest</code> provides a family of functions to perform estimations with multiple fixed-effects. The two main functions are <code>feols</code> for linear models and <code>feglm</code> for generalized linear models. In addition, the function <code>femlm</code> performs direct maximum likelihood estimation, and <code>feNmlm</code> extends the latter to allow the inclusion of non-linear in parameters right-hand-sides. Each of these functions supports any number of fixed-effects and is implemented with full fledged multi-threading in c++. Functions <code>feols</code> and <code>feglm</code> further support variables with varying slopes.</p>
-<p>This package is currently (Feb. 2020) the fastest software available to perform fixed-effects estimations (see the project’s <a href="https://github.com/lrberge/fixest/">homepage</a> for a benchmarking).</p>
+<p>The package <code>fixest</code> provides a family of functions to perform estimations with multiple fixed-effects. The two main functions are <code>feols</code> for linear models and <code>feglm</code> for generalized linear models. In addition, the function <code>femlm</code> performs direct maximum likelihood estimation, and <code>feNmlm</code> extends the latter to allow the inclusion of non-linear in parameters right-hand-sides. Finally, the functions <code>fepois</code> and <code>fenegbin</code> are aliases for Poisson and negative binomial fixed-effect estimations. Each of these functions supports any number of fixed-effects and is implemented with full fledged multi-threading in c++. Functions <code>feols</code> and <code>feglm</code> further support variables with varying slopes.</p>
+<p>This package is currently (Feb. 2020) the fastest software available to perform fixed-effects estimations. See the project’s <a href="https://lrberge.github.io/fixest/">homepage</a> for a set of benchmarks.</p>
 <p>The standard-errors of the estimates can be easily and intuitively clustered (up to four-way).</p>
 <p>The function <code>etable</code> allows to seamlessly export the results of multiple estimations into either a data.frame, or into a Latex table.</p>
-<p>The main features of the package are illustrated in this vignette. The theory used to obtain the fixed-effects is based on Berge (2018), “<em>Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm.</em>” CREA Discussion Papers, 13 (<a href="https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13" class="uri">https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13</a>).</p>
+<p>The main features of the package are illustrated in this vignette. The theory used to obtain the fixed-effects is based on <a href="https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13">Berge (2018)</a>, “<em>Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm.</em>” CREA Discussion Papers, 13.</p>
 <div id="simple-example-using-trade-data" class="section level1">
 <h1 class="hasAnchor">
 <a href="#simple-example-using-trade-data" class="anchor"></a>Simple example using trade data</h1>
@@ -195,11 +195,11 @@
 <span class="co">#&gt; Observations: 38,325 </span>
 <span class="co">#&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20,  Year: 10</span>
 <span class="co">#&gt; Standard-errors: Clustered (Origin) </span>
-<span class="co">#&gt;              Estimate Std. Error z value  Pr(&gt;|z|)    </span>
+<span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    </span>
 <span class="co">#&gt; log(dist_km)  -1.5279   0.115678 -13.208 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="co">#&gt; Log-Likelihood: -7.025e+11   Adj. Pseudo R2: 0.764032</span>
+<span class="co">#&gt; Log-Likelihood: -7.025e+11   Adj. Pseudo R2: 1.0411  </span>
 <span class="co">#&gt;            BIC:  1.405e+12     Squared Cor.: 0.612021</span></code></pre></div>
 <p>The <code>print</code> reports the coefficient estimates and standard-errors as well as some other information. Among the quality of fit information, the squared-correlation corresponds to the correlation between the dependent variable and the expected predictor; it reflects somehow the idea of R-square in OLS estimations. Note that the estimation is performed using parallel computing which you can control using the argument <code>nthreads</code> (see the “multi-threading” section for more details).</p>
 </div>
@@ -213,63 +213,47 @@
 <span class="co">#&gt; Observations: 38,325 </span>
 <span class="co">#&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20,  Year: 10</span>
 <span class="co">#&gt; Standard-errors: Two-way (Origin &amp; Destination) </span>
-<span class="co">#&gt;              Estimate Std. Error z value  Pr(&gt;|z|)    </span>
+<span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    </span>
 <span class="co">#&gt; log(dist_km)  -1.5279   0.130734 -11.687 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="co">#&gt; Log-Likelihood: -7.025e+11   Adj. Pseudo R2: 0.764032</span>
+<span class="co">#&gt; Log-Likelihood: -7.025e+11   Adj. Pseudo R2: 1.0411  </span>
 <span class="co">#&gt;            BIC:  1.405e+12     Squared Cor.: 0.612021</span></code></pre></div>
 <p>The clustering can be done on one (<code>se="cluster"</code>), two (<code>se="twoway"</code>), three (<code>se="threeway"</code>) or up to four (<code>se="fourway"</code>) variables. If the estimation includes fixed-effects, then by default the clustering will be done using these fixed-effects, in the original order. This is why the <em>Origin</em> and <em>Destination</em> variables were used for the two-way clustering in the previous example. If, instead, you wanted to perform one-way clustering on the <em>Product</em> variable, you need to use the argument <code>cluster</code>:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Equivalent ways of clustering the SEs:</span>
-<span class="co"># One-way clustering is deduced from the arguent 'cluster'</span>
-<span class="co"># - using the vector:</span>
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">gravity_pois</span>, cluster <span class="op">=</span> <span class="va">trade</span><span class="op">$</span><span class="va">Product</span><span class="op">)</span>
+<code class="sourceCode R"><span class="co"># Two ways to summon clustering on the Product variable</span>
 <span class="co"># - by reference:</span>
 <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">gravity_pois</span>, cluster <span class="op">=</span> <span class="st">"Product"</span><span class="op">)</span>
 <span class="co"># - with a formula:</span>
 <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">gravity_pois</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Product</span><span class="op">)</span></code></pre></div>
-<p>All produce the same results:</p>
+<p>Both produce the same results:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">gravity_pois</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Product</span><span class="op">)</span>
 <span class="co">#&gt; Poisson estimation, Dep. Var.: Euros</span>
 <span class="co">#&gt; Observations: 38,325 </span>
 <span class="co">#&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20,  Year: 10</span>
 <span class="co">#&gt; Standard-errors: Clustered (Product) </span>
-<span class="co">#&gt;              Estimate Std. Error z value  Pr(&gt;|z|)    </span>
+<span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    </span>
 <span class="co">#&gt; log(dist_km)  -1.5279   0.098294 -15.544 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="co">#&gt; Log-Likelihood: -7.025e+11   Adj. Pseudo R2: 0.764032</span>
+<span class="co">#&gt; Log-Likelihood: -7.025e+11   Adj. Pseudo R2: 1.0411  </span>
 <span class="co">#&gt;            BIC:  1.405e+12     Squared Cor.: 0.612021</span></code></pre></div>
 <p>Note that you can always cluster the standard-errors, even when the estimation contained no fixed-effect. But then you must use the argument <code>cluster</code>:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">gravity_simple</span> <span class="op">=</span> <span class="fu"><a href="../reference/feglm.html">fepois</a></span><span class="op">(</span><span class="va">Euros</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span>, <span class="va">trade</span><span class="op">)</span>
-<span class="co"># Two way clustering is deduced from the argument 'cluster'</span>
-<span class="co"># Using data:</span>
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">gravity_simple</span>, cluster <span class="op">=</span> <span class="va">trade</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Origin"</span>, <span class="st">"Destination"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>
-<span class="co">#&gt; Poisson estimation, Dep. Var.: Euros</span>
-<span class="co">#&gt; Observations: 38,325 </span>
-<span class="co">#&gt; Standard-errors: Two-way (Origin &amp; Destination) </span>
-<span class="co">#&gt;              Estimate Std. Error z value  Pr(&gt;|z|)    </span>
-<span class="co">#&gt; (Intercept)    24.709   1.124800 21.9680 &lt; 2.2e-16 ***</span>
-<span class="co">#&gt; log(dist_km)   -1.029   0.158022 -6.5114  7.44e-11 ***</span>
-<span class="co">#&gt; ---</span>
-<span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="co">#&gt; Log-Likelihood: -2.426e+12   Adj. Pseudo R2: 0.185023</span>
-<span class="co">#&gt;            BIC:  4.852e+12     Squared Cor.: 0.055107</span>
-<span class="co"># Using a formula (note that the values of the variables are </span>
-<span class="co">#  fetched directly in the original database):</span>
+<span class="co"># We use a formula to specify the variables used for two way clustering</span>
+<span class="co"># (note that the values of the variables are fetched directly in the original database)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">gravity_simple</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Origin</span> <span class="op">+</span> <span class="va">Destination</span><span class="op">)</span>
 <span class="co">#&gt; Poisson estimation, Dep. Var.: Euros</span>
 <span class="co">#&gt; Observations: 38,325 </span>
 <span class="co">#&gt; Standard-errors: Two-way (Origin &amp; Destination) </span>
-<span class="co">#&gt;              Estimate Std. Error z value  Pr(&gt;|z|)    </span>
+<span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    </span>
 <span class="co">#&gt; (Intercept)    24.709   1.124800 21.9680 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; log(dist_km)   -1.029   0.158022 -6.5114  7.44e-11 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="co">#&gt; Log-Likelihood: -2.426e+12   Adj. Pseudo R2: 0.185023</span>
+<span class="co">#&gt; Log-Likelihood: -2.426e+12   Adj. Pseudo R2: 1.1419  </span>
 <span class="co">#&gt;            BIC:  4.852e+12     Squared Cor.: 0.055107</span></code></pre></div>
 <p>Finally, the standard-errors can also be computed at estimation time, you simply need to add the <code>se</code> or <code>cluster</code> argument:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -277,12 +261,12 @@
 <span class="co">#&gt; Poisson estimation, Dep. Var.: Euros</span>
 <span class="co">#&gt; Observations: 38,325 </span>
 <span class="co">#&gt; Standard-errors: Clustered (Product) </span>
-<span class="co">#&gt;              Estimate Std. Error z value  Pr(&gt;|z|)    </span>
+<span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    </span>
 <span class="co">#&gt; (Intercept)    24.709   0.330044  74.865 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; log(dist_km)   -1.029   0.045954 -22.391 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="co">#&gt; Log-Likelihood: -2.426e+12   Adj. Pseudo R2: 0.185023</span>
+<span class="co">#&gt; Log-Likelihood: -2.426e+12   Adj. Pseudo R2: 1.1419  </span>
 <span class="co">#&gt;            BIC:  4.852e+12     Squared Cor.: 0.055107</span></code></pre></div>
 </div>
 <div id="other-estimation-functions" class="section level2">
@@ -391,7 +375,7 @@
 </tr>
 <tr class="even">
 <td align="left">Pseudo R2</td>
-<td align="left">0.76403</td>
+<td align="left">1.0411</td>
 <td align="left">0.03473</td>
 <td align="left">0.23640</td>
 </tr>
@@ -522,10 +506,10 @@
 </tr>
 <tr class="odd">
 <td align="left">Pseudo R2</td>
-<td align="left">0.18502</td>
-<td align="left">0.18833</td>
-<td align="left">0.35826</td>
-<td align="left">0.59312</td>
+<td align="left">1.1419</td>
+<td align="left">1.1413</td>
+<td align="left">1.1117</td>
+<td align="left">1.0708</td>
 </tr>
 <tr class="even">
 <td align="left">BIC</td>
@@ -545,7 +529,7 @@
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">res_multi</span> <span class="op">=</span> <span class="fu"><a href="../reference/feglm.html">fepois</a></span><span class="op">(</span><span class="va">Euros</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span> <span class="op">|</span> <span class="fu"><a href="../reference/stepwise.html">csw0</a></span><span class="op">(</span><span class="va">Year</span>, <span class="va">Destination</span>, <span class="va">Origin</span><span class="op">)</span>, <span class="va">trade</span><span class="op">)</span></code></pre></div>
 <p>The previous line of code performs 4 estimations. The function <code>csw0</code> is the key here, it means: <em>cumulative stepwise starting with the empty element</em>. Starting with the empty element, each new estimation adds a new element in the <code><a href="../reference/stepwise.html">csw0()</a></code> function, quite like the previous loop. Then you can consider the results, here <code>res_multi</code>, as a list of results, although with specific methods to easily access each element.</p>
-<p>Stepwise functions can be applied to the linear right-hand-side and to the fixed-effects, you can also have multiple dependent variables and perform split sample estimations with the argument <code>split</code>. All of this is detailed in the dedicated vignette: <a href="https://cran.r-project.org/package=fixest/vignettes/multiple_estimations.html">Multiple estimations</a>.</p>
+<p>Stepwise functions can be applied to the linear right-hand-side and to the fixed-effects, you can also have multiple dependent variables and perform split sample estimations with the argument <code>split</code>. All of this is detailed in the dedicated vignette: <a href="https://lrberge.github.io/fixest/articles/multiple_estimations.html">Multiple estimations</a>.</p>
 </div>
 <div id="exporting-the-results-to-latex" class="section level2">
 <h2 class="hasAnchor">
@@ -559,9 +543,9 @@
 <span class="co">#&gt; Dependent Variable:&amp;\multicolumn{4}{c}{Euros}\\</span>
 <span class="co">#&gt; Model:&amp;(1) &amp; (2) &amp; (3) &amp; (4)\\</span>
 <span class="co">#&gt; \midrule \emph{Variables}&amp;   &amp;   &amp;   &amp;  \\</span>
-<span class="co">#&gt; (Intercept)&amp;24.71$^{***}$ &amp;    &amp;    &amp;   \\</span>
+<span class="co">#&gt; (Intercept) &amp; 24.71$^{***}$ &amp;    &amp;    &amp;   \\</span>
 <span class="co">#&gt;   &amp;(1.125) &amp;    &amp;    &amp;   \\</span>
-<span class="co">#&gt; log(dist\_km)&amp;-1.029$^{***}$ &amp; -1.029$^{***}$ &amp; -1.226$^{***}$ &amp; -1.518$^{***}$\\</span>
+<span class="co">#&gt; log(dist\_km) &amp; -1.029$^{***}$ &amp; -1.029$^{***}$ &amp; -1.226$^{***}$ &amp; -1.518$^{***}$\\</span>
 <span class="co">#&gt;   &amp;(0.1580) &amp; (0.1581) &amp; (0.2045) &amp; (0.1282)\\</span>
 <span class="co">#&gt; \midrule \emph{Fixed-effects}&amp;   &amp;   &amp;   &amp;  \\</span>
 <span class="co">#&gt; Year &amp;  &amp; Yes &amp; Yes &amp; Yes\\</span>
@@ -572,7 +556,7 @@
 <span class="co">#&gt; Squared Correlation &amp; 0.05511&amp;0.05711&amp;0.16420&amp;0.38479\\</span>
 <span class="co">#&gt; Pseudo R$^2$ &amp; 0.18502&amp;0.18833&amp;0.35826&amp;0.59312\\</span>
 <span class="co">#&gt; BIC &amp; $4.85\times 10^{12}$&amp;$4.83\times 10^{12}$&amp;$3.82\times 10^{12}$&amp;$2.42\times 10^{12}$\\</span>
-<span class="co">#&gt; \midrule\midrule\multicolumn{5}{l}{\emph{Two-way (Origin \&amp; Destination) standard-errors in parentheses}}\\</span>
+<span class="co">#&gt; \midrule\midrule\multicolumn{5}{l}{\emph{Clustered (Origin \&amp; Destination) standard-errors in parentheses}}\\</span>
 <span class="co">#&gt; \multicolumn{5}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\</span>
 <span class="co">#&gt; \end{tabular}</span></code></pre></div>
 <p>The user can export the Latex table directly into a file (argument <code>file</code>), add a title (arg. <code>title</code>) and a label to the table (arg. <code>label</code>). Note that when the argument <code>file</code> is present, the Latex format becomes the default (i.e. <code>tex = TRUE</code> by default).</p>
@@ -596,7 +580,7 @@
 <p>In this example, two tables containing the results of the 4 estimations are directly exported to a Latex table into the file “Estimation Tables.tex”. First take notice (again) that <em>we do not need to use the argument</em> <code>tex=TRUE</code> since when the argument <code>file</code> is present, the Latex format becomes the default. The file is re-created in the first exportation thanks to the argument <code>replace = TRUE</code>.</p>
 <p>To change the variable names in the Latex table, we use the argument <code>dict</code>. The variable <code>myDict</code> is the dictionary we use to rename the variables, it is simply a named vector. The original name of the variables correspond to the names of <code>myDict</code> while the new names of the variables are the values of this vector. Any variable that matches the names of <code>myDict</code> will be replaced by its value. Thus we do not care of the order of appearance of the variables in the estimation results.</p>
 <p>In the first export, the coefficient of the intercept is dropped by using <code>drop = "Const"</code> (could be anything such that <code><a href="https://rdrr.io/r/base/grep.html">grepl(drop[1], "Constant")</a></code> is TRUE). In the second, the coefficient of the distance is put before the intercept (which is kept) thanks to the argument <code>order</code>. Note that the actions performed by the arguments <code>drop</code> or <code>order</code> are performed <strong>after</strong> the renaming takes place with the argument <code>dict</code>.</p>
-<p>Note that you can completely customize the style of the table by using the <code>style</code> and <code>postprocessing</code> arguments, please have a look at the dedicated vignette: <a href="https://cran.r-project.org/package=fixest/vignettes/exporting_tables.html">Exporting estimation tables</a>.</p>
+<p>Note that you can completely customize the style of the table by using the <code>style</code> and <code>postprocessing</code> arguments, please have a look at the dedicated vignette: <a href="https://lrberge.github.io/fixest/articles/exporting_tables.html">Exporting estimation tables</a>.</p>
 </div>
 </div>
 <div id="extracting-the-fixed-effects-coefficients" class="section level2">
@@ -657,7 +641,7 @@
 <span class="co">#&gt; Second stage: Dep. Var.: y</span>
 <span class="co">#&gt; Observations: 150 </span>
 <span class="co">#&gt; Standard-errors: Standard </span>
-<span class="co">#&gt;              Estimate Std. Error t value  Pr(&gt;|t|)    </span>
+<span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    </span>
 <span class="co">#&gt; (Intercept)  1.831400   0.411435  4.4512   1.7e-05 ***</span>
 <span class="co">#&gt; fit_x_endo_1 0.444982   0.022086 20.1470 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; fit_x_endo_2 0.639916   0.307376  2.0819    0.0391 *  </span>
@@ -675,10 +659,10 @@
 <code class="sourceCode R"><span class="fu"><a href="../reference/fitstat.html">fitstat</a></span><span class="op">(</span><span class="va">est_iv</span>, <span class="op">~</span> <span class="va">ivf1</span> <span class="op">+</span> <span class="va">ivwald1</span> <span class="op">+</span> <span class="va">ivf2</span> <span class="op">+</span> <span class="va">ivwald2</span>, cluster <span class="op">=</span> <span class="st">"fe"</span><span class="op">)</span>
 <span class="co">#&gt; F-test (1st stage), x_endo_1: stat =     903.2   , p &lt; 2.2e-16 , on 2 and 146 DoF.</span>
 <span class="co">#&gt; F-test (1st stage), x_endo_2: stat =       3.2583, p = 0.041268, on 2 and 146 DoF.</span>
-<span class="co">#&gt; Wald (1st stage), x_endo_1  : stat =   1,482.6   , p &lt; 2.2e-16 , on 2 and 146 DoF, VCOV matrix: Clustered (fe).</span>
-<span class="co">#&gt; Wald (1st stage), x_endo_2  : stat =       2.2216, p = 0.112092, on 2 and 146 DoF, VCOV matrix: Clustered (fe).</span>
+<span class="co">#&gt; Wald (1st stage), x_endo_1  : stat =   1,482.6   , p &lt; 2.2e-16 , on 2 and 146 DoF, VCOV: Clustered (fe).</span>
+<span class="co">#&gt; Wald (1st stage), x_endo_2  : stat =       2.2216, p = 0.112092, on 2 and 146 DoF, VCOV: Clustered (fe).</span>
 <span class="co">#&gt;           F-test (2nd stage): stat =     194.2   , p &lt; 2.2e-16 , on 2 and 146 DoF.</span>
-<span class="co">#&gt;             Wald (2nd stage): stat = 539,363.2   , p &lt; 2.2e-16 , on 2 and 146 DoF, VCOV matrix: Clustered (fe).</span></code></pre></div>
+<span class="co">#&gt;             Wald (2nd stage): stat = 539,363.2   , p &lt; 2.2e-16 , on 2 and 146 DoF, VCOV: Clustered (fe).</span></code></pre></div>
 <p>As the Wald test relies on a given variance-covariance matrix, you can pass extra arguments to <code>fitstat</code>, as the argument <code>cluster</code> in the previous example, to specify which type of VCOV matrix is desired.</p>
 <p>Note that you can display the statistics that you wish when printing by changing the default print values:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
@@ -688,7 +672,7 @@
 <span class="co">#&gt; Second stage: Dep. Var.: y</span>
 <span class="co">#&gt; Observations: 150 </span>
 <span class="co">#&gt; Standard-errors: Standard </span>
-<span class="co">#&gt;              Estimate Std. Error t value  Pr(&gt;|t|)    </span>
+<span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    </span>
 <span class="co">#&gt; (Intercept)  1.831400   0.411435  4.4512   1.7e-05 ***</span>
 <span class="co">#&gt; fit_x_endo_1 0.444982   0.022086 20.1470 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; fit_x_endo_2 0.639916   0.307376  2.0819    0.0391 *  </span>
@@ -699,7 +683,7 @@
 <span class="co">#&gt; F-test (1st stage), x_endo_1: stat = 903.2   , p &lt; 2.2e-16 , on 2 and 146 DoF.</span>
 <span class="co">#&gt; F-test (1st stage), x_endo_2: stat =   3.2583, p = 0.041268, on 2 and 146 DoF.</span>
 <span class="co">#&gt;                   Wu-Hausman: stat =   6.7918, p = 0.001518, on 2 and 144 DoF.</span>
-<span class="co">#&gt;             Wald (2nd stage): stat = 224.0   , p &lt; 2.2e-16 , on 2 and 146 DoF, VCOV matrix: Standard.</span></code></pre></div>
+<span class="co">#&gt;             Wald (2nd stage): stat = 224.0   , p &lt; 2.2e-16 , on 2 and 146 DoF, VCOV: Standard.</span></code></pre></div>
 <p>In the previous code, <code>fitstat = ~ . + ivwald2</code> means that we want to add the second stage Wald test to the existing printed statistics (represented here by the point).</p>
 <p>Now what about adding some fixed-effects? That’s of course possible, you need to add them after the first right-hand-side, as follows:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
@@ -710,18 +694,18 @@
 <span class="co">#&gt; Observations: 150 </span>
 <span class="co">#&gt; Fixed-effects: fe: 3</span>
 <span class="co">#&gt; Standard-errors: Clustered (fe) </span>
-<span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|)    </span>
-<span class="co">#&gt; fit_x_endo_1 0.666671   0.106558  6.2564 0.024608 *  </span>
-<span class="co">#&gt; fit_x_endo_2 0.413839   0.177769  2.3280 0.145344    </span>
-<span class="co">#&gt; x1           0.451680   0.153375  2.9449 0.098553 .  </span>
+<span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt; fit_x_endo_1 0.666671   0.106558  6.2564  0.024608 *  </span>
+<span class="co">#&gt; fit_x_endo_2 0.413839   0.177769  2.3280  0.145344    </span>
+<span class="co">#&gt; x1           0.451680   0.153375  2.9449  0.098553 .  </span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 0.327938     Adj. R2: 0.836626</span>
 <span class="co">#&gt;                  Within R2: 0.585907</span>
-<span class="co">#&gt; F-test (1st stage), x_endo_1: stat = 21.3   , p = 7.969e-9, on 2 and 144 DoF.</span>
-<span class="co">#&gt; F-test (1st stage), x_endo_2: stat =  4.7226, p = 0.010315, on 2 and 144 DoF.</span>
+<span class="co">#&gt; F-test (1st stage), x_endo_1: stat = 21.6   , p = 6.151e-9, on 2 and 146 DoF.</span>
+<span class="co">#&gt; F-test (1st stage), x_endo_2: stat =  4.7882, p = 0.00968 , on 2 and 146 DoF.</span>
 <span class="co">#&gt;                   Wu-Hausman: stat =  1.3141, p = 0.271968, on 2 and 142 DoF.</span>
-<span class="co">#&gt;             Wald (2nd stage): stat = 19.6   , p = 3.02e-8 , on 2 and 144 DoF, VCOV matrix: Clustered (fe).</span></code></pre></div>
+<span class="co">#&gt;             Wald (2nd stage): stat = 19.6   , p = 2.941e-8, on 2 and 146 DoF, VCOV: Clustered (fe).</span></code></pre></div>
 <p>To access the first stage(s), you can use the summary method:</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">est_iv_fe</span>, stage <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>
@@ -731,15 +715,15 @@
 <span class="co">#&gt; Observations: 150 </span>
 <span class="co">#&gt; Fixed-effects: fe: 3</span>
 <span class="co">#&gt; Standard-errors: Clustered (fe) </span>
-<span class="co">#&gt;          Estimate Std. Error t value Pr(&gt;|t|) </span>
-<span class="co">#&gt; x_inst_1 0.705992   0.485614  1.4538 0.283198 </span>
-<span class="co">#&gt; x_inst_2 0.202337   0.143302  1.4120 0.293457 </span>
-<span class="co">#&gt; x1       0.189320   0.135622  1.3959 0.297507 </span>
+<span class="co">#&gt;          Estimate Std. Error t value Pr(&gt;|t|)) </span>
+<span class="co">#&gt; x_inst_1 0.705992   0.485614  1.4538  0.283198 </span>
+<span class="co">#&gt; x_inst_2 0.202337   0.143302  1.4120  0.293457 </span>
+<span class="co">#&gt; x1       0.189320   0.135622  1.3959  0.297507 </span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 0.346509     Adj. R2: 0.959865</span>
 <span class="co">#&gt;                  Within R2: 0.338407</span>
-<span class="co">#&gt; F-test (1st stage): stat = 21.3, p = 7.969e-9, on 2 and 144 DoF.</span>
+<span class="co">#&gt; F-test (1st stage): stat = 21.6, p = 6.151e-9, on 2 and 146 DoF.</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; IV: First stage: x_endo_2</span>
 <span class="co">#&gt; TSLS estimation, Dep. Var.: x_endo_2, Endo.: x_endo_1, x_endo_2, Instr.: x_inst_1, x_inst_2</span>
@@ -747,16 +731,16 @@
 <span class="co">#&gt; Observations: 150 </span>
 <span class="co">#&gt; Fixed-effects: fe: 3</span>
 <span class="co">#&gt; Standard-errors: Clustered (fe) </span>
-<span class="co">#&gt;           Estimate Std. Error t value Pr(&gt;|t|)    </span>
-<span class="co">#&gt; x_inst_1 -0.546745   0.081370 -6.7192 0.021440 *  </span>
-<span class="co">#&gt; x_inst_2  0.183092   0.083446  2.1942 0.159464    </span>
-<span class="co">#&gt; x1        0.153198   0.089148  1.7185 0.227851    </span>
+<span class="co">#&gt;           Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt; x_inst_1 -0.546745   0.081370 -6.7192  0.021440 *  </span>
+<span class="co">#&gt; x_inst_2  0.183092   0.083446  2.1942  0.159464    </span>
+<span class="co">#&gt; x1        0.153198   0.089148  1.7185  0.227851    </span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 0.51208     Adj. R2: 0.040133</span>
 <span class="co">#&gt;                 Within R2: 0.063919</span>
-<span class="co">#&gt; F-test (1st stage): stat = 4.7226, p = 0.010315, on 2 and 144 DoF.</span></code></pre></div>
-<p>When <code>summary</code> shall return more than one element, the object returned is not a regular <code>fixest</code> object but a <code>fixest_multi</code> object. These kind of objects are covered in the vignette: <a href="https://cran.r-project.org/package=fixest/vignettes/multiple_estimations.html">Multiple estimations</a>. You can display the first and second stages in a table with <code>etable</code>:</p>
+<span class="co">#&gt; F-test (1st stage): stat = 4.7882, p = 0.00968, on 2 and 146 DoF.</span></code></pre></div>
+<p>When <code>summary</code> shall return more than one element, the object returned is not a regular <code>fixest</code> object but a <code>fixest_multi</code> object. These kind of objects are covered in the vignette: <a href="https://lrberge.github.io/fixest/articles/multiple_estimations.html">Multiple estimations</a>. You can display the first and second stages in a table with <code>etable</code>:</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">est_iv_fe</span>, stage <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span>, fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">.</span> <span class="op">+</span> <span class="va">ivfall</span> <span class="op">+</span> <span class="va">ivwaldall.p</span><span class="op">)</span>
 <span class="co">#&gt;                                 model 1           model 2          model 3</span>
@@ -774,179 +758,121 @@
 <span class="co">#&gt; Observations                        150               150              150</span>
 <span class="co">#&gt; R2                              0.96121           0.07234          0.84211</span>
 <span class="co">#&gt; Within R2                       0.33841           0.06392          0.58591</span>
-<span class="co">#&gt; F-test (IV only)                 21.285            4.7226           8.2210</span>
-<span class="co">#&gt; Wald (IV only), p-value         2.37e-9           1.37e-9          3.02e-8</span></code></pre></div>
+<span class="co">#&gt; F-test (IV only)                 21.581            4.7882           8.3352</span>
+<span class="co">#&gt; Wald (IV only), p-value         2.29e-9           1.32e-9          2.94e-8</span></code></pre></div>
 <p>Here we use <code>stage = 1:2</code> to get all first stage regressions followed by the second stage. Using <code>stage = 2:1</code> would have done the opposite.</p>
 <p>Now some explanations regarding <code>fitstat</code>. The suffix <code>all</code> concerns IV only and means the following: if it’s a first stage regression, then the first-stage F-stat is displayed, otherwise it’s the second stage F-stat. The suffix <code>.p</code> is used in <code>ivwaldall.p</code> to access the p-value and not the statistic. Finally, you can permanently set which fit statistic to display in <code>etable</code> by using <code>setFixest_etable</code>, like for example <code><a href="../reference/etable.html">setFixest_etable(fitstat = ~ . + ivfall + ivwaldall.p)</a></code>.</p>
 </div>
-<div id="additional-features" class="section level1">
+<div id="interaction-terms" class="section level1">
 <h1 class="hasAnchor">
-<a href="#additional-features" class="anchor"></a>Additional features</h1>
-<p>Now we present some other features of the package:</p>
-<ol style="list-style-type: decimal">
-<li><p><a href="#varying-slopes">How to add variables with varying slopes</a>.</p></li>
-<li><p><a href="#combining-several-fixed-effects">How to combine several fixed-effects</a>.</p></li>
-<li><p><a href="#formula-macros">Formula macros</a>.</p></li>
-<li><p><a href="#the-function-i-for-factors-and-interactions">The function <code>i()</code> to create factors and interactions</a>.</p></li>
-<li><p><a href="#lagging-variables">How to add lead/lags</a>.</p></li>
-<li><p><a href="#non-linear-in-parameters-example">Non-linear in parameter estimation</a>.</p></li>
-<li><p><a href="#multi-threading">Parallelism</a>.</p></li>
-</ol>
-<!-- NOTE: you can't have ":" or "(" in titles to make links --><div id="varying-slopes" class="section level2">
+<a href="#interaction-terms" class="anchor"></a>Interaction terms</h1>
+<p>Most R users will be familiar with the base expansion operators for creating model interaction terms, e.g. <code>x1*x2</code>, <code>x1:x2</code>, and <code>x1/x2</code>. These base operators all work with <code>fixest</code> models. However, the package also provides its own specialized syntax for creating interaction terms and combining variables. Relative to the base methods, these <code>fixest</code> methods offer significant performance gains and synergies with the package’s other functions. To balance performance and convenience, the exact syntax depends on whether the interaction involves fixed-effects or not. Here we walk through both categories, further providing examples of common use-cases.</p>
+<div id="interactions-involving-fixed-effects" class="section level2">
 <h2 class="hasAnchor">
-<a href="#varying-slopes" class="anchor"></a>Varying slopes</h2>
-<p>You can introduce variables with varying slopes directly in the fixed-effects part of the formula using square brackets. Let’s go through a simple example using <code>iris</code> data:</p>
+<a href="#interactions-involving-fixed-effects" class="anchor"></a>Interactions involving fixed-effects</h2>
+<p>There are two reasons why we would want to interact variables in the fixed-effects slot. First, we may simply wish to combine fixed-effects (e.g. firm × country effects). Second, we wish to allow for varying slopes (e.g. a time trend for each firm). Let us consider each in turn, using a lightly modified version of the <code>iris</code> dataset:</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">base_vs</span> <span class="op">=</span> <span class="va">iris</span>
-<span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">base_vs</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span>, <span class="st">"species"</span><span class="op">)</span></code></pre></div>
-<p>We want to estimate <code>x1</code> as a function of <code>x2</code> and the variable <code>x3</code> with slopes varying according to <code>species</code>. We also want the <code>species</code> fixed-effect. We just have to do:</p>
+<code class="sourceCode R"><span class="co"># Our base data for this section</span>
+<span class="va">base</span> <span class="op">=</span> <span class="va">iris</span>
+<span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>, <span class="st">"fe1"</span><span class="op">)</span>
+<span class="co"># Create another "fixed-effect"</span>
+<span class="va">base</span><span class="op">$</span><span class="va">fe2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, <span class="fl">30</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span>
+<span class="co">#&gt;     y  x1  x2  x3    fe1 fe2</span>
+<span class="co">#&gt; 1 5.1 3.5 1.4 0.2 setosa   a</span>
+<span class="co">#&gt; 2 4.9 3.0 1.4 0.2 setosa   b</span>
+<span class="co">#&gt; 3 4.7 3.2 1.3 0.2 setosa   c</span>
+<span class="co">#&gt; 4 4.6 3.1 1.5 0.2 setosa   d</span>
+<span class="co">#&gt; 5 5.0 3.6 1.4 0.2 setosa   e</span>
+<span class="co">#&gt; 6 5.4 3.9 1.7 0.4 setosa   a</span></code></pre></div>
+<div id="combining-several-fixed-effects-fe1fe2fe3---" class="section level3">
+<h3 class="hasAnchor">
+<a href="#combining-several-fixed-effects-fe1fe2fe3---" class="anchor"></a>Combining several fixed-effects (<code>fe1^fe2^fe3...</code>)</h3>
+<p>Say we want to “combine” the two fixed-effect variables <code>fe1</code> and <code>fe2</code> to create a brand new fixed-effect variable. We can do it simply via <code>fixest</code>’s special <code><a href="https://rdrr.io/r/base/Arithmetic.html">^</a></code> operator:</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">est_vs</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">x1</span> <span class="op">~</span> <span class="va">x2</span> <span class="op">|</span> <span class="va">species</span><span class="op">[</span><span class="va">x3</span><span class="op">]</span>, <span class="va">base_vs</span><span class="op">)</span>
-<span class="va">est_vs</span>
-<span class="co">#&gt; OLS estimation, Dep. Var.: x1</span>
-<span class="co">#&gt; Observations: 150 </span>
-<span class="co">#&gt; Fixed-effects: species: 3</span>
-<span class="co">#&gt; Varying slopes: x3 (species: 3)</span>
-<span class="co">#&gt; Standard-errors: Clustered (species) </span>
-<span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|) </span>
-<span class="co">#&gt; x2 0.450006   0.156193  2.8811 0.102315 </span>
-<span class="co">#&gt; ---</span>
-<span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="co">#&gt; RMSE: 0.298706     Adj. R2: 0.863506</span>
-<span class="co">#&gt;                  Within R2: 0.178944</span></code></pre></div>
-<p>If you want to see the slopes for <code>x3</code>, just use the function <code>fixef</code>:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="fu"><a href="../reference/fixef_reexported.html">fixef</a></span><span class="op">(</span><span class="va">est_vs</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt; Fixed-effects/Slope coefficients</span>
-<span class="co">#&gt;                                species x3 (slopes: species)</span>
-<span class="co">#&gt; Number of fixed-effects/slopes       3                    3</span>
-<span class="co">#&gt; Number of references                 0                    0</span>
-<span class="co">#&gt; Mean                               1.7                0.639</span>
-<span class="co">#&gt; Standard-deviation                1.32                0.262</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; COEFFICIENTS:</span>
-<span class="co">#&gt;   species: setosa versicolor virginica</span>
-<span class="co">#&gt;             2.926      1.879    0.3068</span>
-<span class="co">#&gt; -----</span>
-<span class="co">#&gt;   x3 (slopes: species): setosa versicolor virginica</span>
-<span class="co">#&gt;                         0.3677     0.6598    0.8903</span></code></pre></div>
-</div>
-<div id="combining-several-fixed-effects" class="section level2">
-<h2 class="hasAnchor">
-<a href="#combining-several-fixed-effects" class="anchor"></a>Combining several fixed-effects</h2>
-<p>Let’s use the data we created in the previous section, and add a new variable:</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># we create another "fixed-effect"</span>
-<span class="va">base_vs</span><span class="op">$</span><span class="va">fe</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">30</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">base_vs</span><span class="op">)</span>
-<span class="co">#&gt;    x1  x2  x3  x4 species fe</span>
-<span class="co">#&gt; 1 5.1 3.5 1.4 0.2  setosa  1</span>
-<span class="co">#&gt; 2 4.9 3.0 1.4 0.2  setosa  2</span>
-<span class="co">#&gt; 3 4.7 3.2 1.3 0.2  setosa  3</span>
-<span class="co">#&gt; 4 4.6 3.1 1.5 0.2  setosa  4</span>
-<span class="co">#&gt; 5 5.0 3.6 1.4 0.2  setosa  5</span>
-<span class="co">#&gt; 6 5.4 3.9 1.7 0.4  setosa  1</span></code></pre></div>
-<p>Say we want to “combine” the variable <code>species</code> with the variable <code>fe</code> and create a brand new fixed-effect variable. We can do it simply using <code><a href="https://rdrr.io/r/base/Arithmetic.html">^</a></code>:</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">est_comb</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">x1</span> <span class="op">~</span> <span class="va">x2</span> <span class="op">|</span> <span class="va">species</span><span class="op">^</span><span class="va">fe</span>, <span class="va">base_vs</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">est_comb</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">fe1</span><span class="op">^</span><span class="va">fe2</span>, <span class="va">base</span><span class="op">)</span>
 <span class="va">est_comb</span>
-<span class="co">#&gt; OLS estimation, Dep. Var.: x1</span>
+<span class="co">#&gt; OLS estimation, Dep. Var.: y</span>
 <span class="co">#&gt; Observations: 150 </span>
-<span class="co">#&gt; Fixed-effects: species^fe: 15</span>
-<span class="co">#&gt; Standard-errors: Clustered (species^fe) </span>
-<span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|)    </span>
-<span class="co">#&gt; x2 0.782815   0.119465  6.5527  1.3e-05 ***</span>
+<span class="co">#&gt; Fixed-effects: fe1^fe2: 15</span>
+<span class="co">#&gt; Standard-errors: Clustered (fe1^fe2) </span>
+<span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt; x1 0.782815   0.119465  6.5527   1.3e-05 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 0.406785     Adj. R2: 0.729861</span>
 <span class="co">#&gt;                  Within R2: 0.280234</span></code></pre></div>
-<p>The function <code><a href="https://rdrr.io/r/base/Arithmetic.html">^</a></code> does the same as <code><a href="https://rdrr.io/r/base/paste.html">paste0(species, "_", fe)</a></code> but is more convenient (and faster for large data sets). You can still extract the fixed-effects the same way:</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<p>The <code><a href="https://rdrr.io/r/base/Arithmetic.html">^</a></code> operator does the same thing as <code><a href="https://rdrr.io/r/base/paste.html">paste0(species, "_", fe)</a></code>, but is more convenient and significantly faster for large datasets. You can still extract the fixed-effects the same way:</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/fixef_reexported.html">fixef</a></span><span class="op">(</span><span class="va">est_comb</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>
-<span class="co">#&gt;     setosa_1     setosa_2     setosa_3     setosa_4     setosa_5 versicolor_1 </span>
+<span class="co">#&gt;     setosa_a     setosa_b     setosa_c     setosa_d     setosa_e versicolor_a </span>
 <span class="co">#&gt;     2.443630     2.384084     2.164943     2.296256     2.323630     3.713320 </span>
-<span class="co">#&gt; versicolor_2 versicolor_3 versicolor_4 versicolor_5  virginica_1  virginica_2 </span>
+<span class="co">#&gt; versicolor_b versicolor_c versicolor_d versicolor_e  virginica_a  virginica_b </span>
 <span class="co">#&gt;     3.800694     4.003367     3.745539     3.575086     4.513272     3.986351 </span>
-<span class="co">#&gt;  virginica_3  virginica_4  virginica_5 </span>
+<span class="co">#&gt;  virginica_c  virginica_d  virginica_e </span>
 <span class="co">#&gt;     4.423725     4.216804     4.159382</span></code></pre></div>
+<p>Note further that more than two fixed-effects can be combined in exactly the same manner (e.g. <code>fe1^fe2^fe3</code>), and the syntax carries over to multivariate clustering too (e.g. <code>cluster = ~fe1^fe2^fe3</code>).</p>
 </div>
-<div id="formula-macros" class="section level2">
-<h2 class="hasAnchor">
-<a href="#formula-macros" class="anchor"></a>Formula macros</h2>
-<p>It can be useful, to tidy up the workflow or simply for convenience, to define formula macros: i.e. macro variables each representing several variables. This package offers two functions to deal with that: <code>setFixest_fml</code> to set macro variables globally, and <code>xpd</code> to create a formula with macro variables either globally defined or defined at run time.</p>
-<p>Here is an example:</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">base</span> <span class="op">=</span> <span class="va">iris</span>
-<span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span>
-<span class="co"># Defining the macro variables</span>
-<span class="fu"><a href="../reference/setFixest_fml.html">setFixest_fml</a></span><span class="op">(</span>..ctrl <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/stats/poly.html">poly</a></span><span class="op">(</span><span class="va">x2</span>, <span class="fl">2</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/poly.html">poly</a></span><span class="op">(</span><span class="va">x3</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>
-<span class="co"># Accessing them</span>
-<span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">..ctrl</span><span class="op">)</span>
-<span class="co">#&gt; y ~ x1 + poly(x2, 2) + poly(x3, 2)</span>
-<span class="co">#&gt; &lt;environment: 0x000000001c4da710&gt;</span>
-
-<span class="co"># Definition at run time</span>
-<span class="va">vars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x2"</span>, <span class="st">"x2^2"</span>, <span class="st">"x3"</span><span class="op">)</span>
-<span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span><span class="op">{</span>
-  <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">..ctrl</span>, ..ctrl <span class="op">=</span> <span class="va">vars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
-<span class="op">}</span>
-<span class="co">#&gt; y ~ x1 + x2</span>
-<span class="co">#&gt; &lt;environment: 0x000000001c1ab0c0&gt;</span>
-<span class="co">#&gt; y ~ x1 + x2 + x2^2</span>
-<span class="co">#&gt; &lt;environment: 0x000000001c173920&gt;</span>
-<span class="co">#&gt; y ~ x1 + x2 + x2^2 + x3</span>
-<span class="co">#&gt; &lt;environment: 0x000000001d1b6a80&gt;</span></code></pre></div>
-<p>Macro variables must start with two dots. As seen in the example, once set globally they can be directly accessed with <code>xpd</code>. In the example, <code>xpd</code> redefines the formula at run-time by having a character vector as input.</p>
-<p>All <code>fixest</code> estimations call <code>xpd</code> internally if appropriate. This means that the following code works just fine:</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">..ctrl</span>, <span class="va">base</span><span class="op">)</span>
+<div id="varying-slopes-fex" class="section level3">
+<h3 class="hasAnchor">
+<a href="#varying-slopes-fex" class="anchor"></a>Varying slopes (<code>fe[x]</code>)</h3>
+<p>You can introduce variables with varying slopes directly into the fixed-effects part of the formula using square brackets (<code>[]</code>). Recall that varying slopes allow us to flexibly control for heterogeneous effects across groups. Common real-life examples could be the inclusion of time trends for each observational unit (e.g. country), or allowing for the effect of some control variable (e.g. income) to be moderated by a fixed-effect (e.g. gender). Here we demonstrate by continuing with our simple dataset.</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span>
+<span class="co">#&gt;     y  x1  x2  x3    fe1 fe2</span>
+<span class="co">#&gt; 1 5.1 3.5 1.4 0.2 setosa   a</span>
+<span class="co">#&gt; 2 4.9 3.0 1.4 0.2 setosa   b</span>
+<span class="co">#&gt; 3 4.7 3.2 1.3 0.2 setosa   c</span>
+<span class="co">#&gt; 4 4.6 3.1 1.5 0.2 setosa   d</span>
+<span class="co">#&gt; 5 5.0 3.6 1.4 0.2 setosa   e</span>
+<span class="co">#&gt; 6 5.4 3.9 1.7 0.4 setosa   a</span></code></pre></div>
+<p>Say we want to estimate <code>y</code> as a function of <code>x1</code>, but controlling for <code>x2</code>. Moreover, we think that the slope coefficient of our <code>x2</code> control variable should be allowed to vary by the <code>fe1</code> fixed-effect variable. We can do this as follows:</p>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">est_vs</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">fe1</span><span class="op">[</span><span class="va">x2</span><span class="op">]</span>, <span class="va">base</span><span class="op">)</span>
+<span class="va">est_vs</span>
 <span class="co">#&gt; OLS estimation, Dep. Var.: y</span>
 <span class="co">#&gt; Observations: 150 </span>
-<span class="co">#&gt; Standard-errors: Standard </span>
-<span class="co">#&gt;               Estimate Std. Error t value  Pr(&gt;|t|)    </span>
-<span class="co">#&gt; (Intercept)   4.122800   0.233398 17.6640 &lt; 2.2e-16 ***</span>
-<span class="co">#&gt; x1            0.562757   0.075897  7.4147  9.59e-12 ***</span>
-<span class="co">#&gt; poly(x2, 2)1 12.601000   1.783000  7.0676  6.26e-11 ***</span>
-<span class="co">#&gt; poly(x2, 2)2  1.635600   0.589023  2.7767  0.006222 ** </span>
-<span class="co">#&gt; poly(x3, 2)1 -2.757000   1.725000 -1.5983  0.112171    </span>
-<span class="co">#&gt; poly(x3, 2)2 -1.055600   0.668027 -1.5801  0.116273    </span>
+<span class="co">#&gt; Fixed-effects: fe1: 3</span>
+<span class="co">#&gt; Varying slopes: x2 (fe1: 3)</span>
+<span class="co">#&gt; Standard-errors: Clustered (fe1) </span>
+<span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|)) </span>
+<span class="co">#&gt; x1 0.450006   0.156731  2.8712  0.102916 </span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="co">#&gt; RMSE: 0.30128   Adj. R2: 0.862108</span></code></pre></div>
-<p>The function <code>xpd</code> also accepts regular expression macros of the form <code>..("regex")</code>. If these macros are encountered and provided a character vector/data.frame is in the argument <code>data</code>, then all variables names matching the regular expression will be placed in the formula.</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">longley</span><span class="op">)</span>
-<span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">longley</span><span class="op">)</span>
-<span class="co">#&gt; Armed.Forces ~ Population + GNP.deflator + GNP + Unemployed + </span>
-<span class="co">#&gt;     Employed</span>
-<span class="co">#&gt; &lt;environment: 0x0000000017574810&gt;</span></code></pre></div>
-<p>Again, since <code>xpd</code> is called internally, the following works:</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, <span class="va">longley</span><span class="op">)</span>
-<span class="co">#&gt; OLS estimation, Dep. Var.: Armed.Forces</span>
-<span class="co">#&gt; Observations: 16 </span>
-<span class="co">#&gt; Standard-errors: Standard </span>
-<span class="co">#&gt;                 Estimate  Std. Error   t value Pr(&gt;|t|)    </span>
-<span class="co">#&gt; (Intercept)  4403.700000 4091.800000  1.076200 0.307112    </span>
-<span class="co">#&gt; Population    -22.844000   32.671000 -0.699217 0.500356    </span>
-<span class="co">#&gt; GNP.deflator    7.638500   12.348000  0.618611 0.550003    </span>
-<span class="co">#&gt; GNP             3.150500    3.554200  0.886433 0.396201    </span>
-<span class="co">#&gt; Unemployed     -0.591649    0.389005 -1.520900 0.159248    </span>
-<span class="co">#&gt; Employed      -50.060000   25.348000 -1.974900 0.076522 .  </span>
-<span class="co">#&gt; ---</span>
-<span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="co">#&gt; RMSE: 36.1   Adj. R2: 0.569345</span></code></pre></div>
+<span class="co">#&gt; RMSE: 0.298706     Adj. R2: 0.863506</span>
+<span class="co">#&gt;                  Within R2: 0.178944</span></code></pre></div>
+<p>If you want to see the slopes for <code>x2</code>, just use the function <code>fixef</code>:</p>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="fu"><a href="../reference/fixef_reexported.html">fixef</a></span><span class="op">(</span><span class="va">est_vs</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt; Fixed-effects/Slope coefficients</span>
+<span class="co">#&gt;                                 fe1 x2 (slopes: fe1)</span>
+<span class="co">#&gt; Number of fixed-effects/slopes    3                3</span>
+<span class="co">#&gt; Number of references              0                0</span>
+<span class="co">#&gt; Mean                            1.7            0.639</span>
+<span class="co">#&gt; Standard-deviation             1.32            0.262</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; COEFFICIENTS:</span>
+<span class="co">#&gt;   fe1: setosa versicolor virginica</span>
+<span class="co">#&gt;         2.926      1.879    0.3068</span>
+<span class="co">#&gt; -----</span>
+<span class="co">#&gt;   x2 (slopes: fe1): setosa versicolor virginica</span>
+<span class="co">#&gt;                     0.3677     0.6598    0.8903</span></code></pre></div>
+<p>Note that this produces the same result as <code><a href="../reference/feols.html">feols(y ~ x1 + fe1/x2, base)</a></code>, but is much more performant for large datasets. The trade-off from the <code>fe1[x2]</code> method is that we lose the ability to estimate confidence intervals on the resulting slope coefficients. This should be fine in cases where we are just trying to control for some confounding or nuisance parameters. If you are interested in conducting statistical inference on the resulting slope coefficients and require confidence intervals, then you should use the slower <code>fe1/x2</code> approach instead.</p>
 </div>
-<div id="the-function-i-for-factors-and-interactions" class="section level2">
+</div>
+<div id="interactions-that-dont-involve-fixed-effects" class="section level2">
 <h2 class="hasAnchor">
-<a href="#the-function-i-for-factors-and-interactions" class="anchor"></a>The function i for factors and interactions</h2>
-<p>The function <code><a href="../reference/i.html">i()</a></code> is a versatile function allowing either: to consider a variable as a factor, with the possibility to easily keep/drop levels, or to create an interaction between a variable and another one treated as a factor.</p>
-<p>As opposed to the <code>R</code> function <code><a href="https://rdrr.io/r/base/factor.html">factor()</a></code>, <code><a href="../reference/i.html">i()</a></code> has synergies with the other functions of the package: namely <code>etable</code> and <code>coefplot</code>. We now illustrate the two main uses of that function in turn.</p>
-<div id="a-compact-syntax-for-factors" class="section level3">
+<a href="#interactions-that-dont-involve-fixed-effects" class="anchor"></a>Interactions that don’t involve fixed-effects</h2>
+<p>The preceding interaction examples all took place in the fixed-effects slot (i.e. after the <code><a href="https://rdrr.io/r/base/Logic.html">|</a></code>). Underneath the hood, methods like <code>fe1^fe2</code> and <code>fe1[x2]</code> use numerical shortcuts that greatly speed up computation. This comes at the cost of being able to do richer inference with the interacted terms — e.g. construct confidence intervals — since they are swept out of the model at estimation time. In many cases, this should prove to be a perfectly acceptable trade-off. After all, the primary motivation for estimating fixed-effects models in the first place is to remove the confounding effect of such “nuisance” parameters.</p>
+<p>Yet, there are equally many cases where we do want to retain full inferential information about interaction terms. For example, in a difference-in-differences (DiD) research design. Here too <code>fixest</code> offers its own specialized syntax for combining terms in the model formula: <code><a href="../reference/i.html">i()</a></code>.</p>
+<p>As we shall see, <code><a href="../reference/i.html">i()</a></code> is more versatile than just creating interaction terms. It is also able to coerce individual variables to a factor and, compared to base R <code><a href="https://rdrr.io/r/base/factor.html">factor()</a></code>, does so in a way that allows for better synergies with other <code>fixest</code> functions like <code>etable</code> and <code>coefplot</code>/<code>iplot</code>. This will allow us to perform some common estimation tasks much more easily.</p>
+<p>We now illustrate the main uses of <code><a href="../reference/i.html">i()</a></code> with the help of some examples.</p>
+<div id="a-compact-syntax-for-factors-and-interactions-i" class="section level3">
 <h3 class="hasAnchor">
-<a href="#a-compact-syntax-for-factors" class="anchor"></a>A compact syntax for factors</h3>
-<p>The function <code>i</code> accepts the arguments <code>ref</code>, <code>drop</code> and <code>keep</code>, the three are used to identify which level to keep. Note that the argument <code>ref</code> accepts only one value while <code>drop</code> accepts several. Here’s an example how to use them:</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<a href="#a-compact-syntax-for-factors-and-interactions-i" class="anchor"></a>A compact syntax for factors and interactions: <code>i()</code>
+</h3>
+<p>The function <code><a href="../reference/i.html">i()</a></code> accepts the arguments <code>ref</code>, and <code>keep</code> which are used to identify which levels to keep. Here’s an example how to use them:</p>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">airquality</span><span class="op">)</span>
 <span class="va">res_i1</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="fu"><a href="../reference/i.html">i</a></span><span class="op">(</span><span class="va">Month</span><span class="op">)</span>, <span class="va">airquality</span><span class="op">)</span>
 <span class="co">#&gt; NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
@@ -972,13 +898,14 @@
 <span class="co">#&gt; Observations                   111                111                111</span>
 <span class="co">#&gt; R2                         0.31974            0.31974            0.22452</span>
 <span class="co">#&gt; Adj. R2                    0.28735            0.28735            0.20278</span></code></pre></div>
+<p>Now that we’ve seen the basic <code><a href="../reference/i.html">i()</a></code> functionality with a single variable, let’s see how it can be put to use in an interaction context. We will consider two DiD examples of increasing complexity.</p>
 </div>
-<div id="estimating-yearly-treatment-effects" class="section level3">
+<div id="simple-difference-in-differences-twfe" class="section level3">
 <h3 class="hasAnchor">
-<a href="#estimating-yearly-treatment-effects" class="anchor"></a>Estimating yearly treatment effects</h3>
-<p>To illustrate interactions, we will estimate yearly treatment effects in a difference-in-difference setup.</p>
-<p>Consider the the following data base where some persons (identified with the variable <code>id</code>) receive a treatment and others not, represented by the variable <code>treat</code>. The treatment takes effect from <code>period</code> 6 onward. The data looks like this:</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<a href="#simple-difference-in-differences-twfe" class="anchor"></a>Simple difference-in-differences (TWFE)</h3>
+<p>To illustrate <code><a href="../reference/i.html">i()</a></code>’s interaction functionality, we will estimate treatment effects over time in a simple DiD setup.</p>
+<p>Consider the following dataset where some individuals (identified by the variable <code>id</code>) receive a treatment and others do not (as represented by the variable <code>treat</code>). The treatment takes effect from <code>period</code> 6 onward. The data look like this:</p>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Sample data illustrating the DiD</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span>
@@ -989,157 +916,213 @@
 <span class="co">#&gt; 4  3.78147485 -2.8300587  1      4    0     1</span>
 <span class="co">#&gt; 5 -2.55819959 -5.0443544  1      5    0     1</span>
 <span class="co">#&gt; 6  1.72873240 -0.6363849  1      6    1     1</span></code></pre></div>
-<p>Using a two way fixed-effect setup, to create a variable capturing the yearly treatment effect we use <code><a href="../reference/i.html">i(treat, period, 5)</a></code> which corresponds to interacting the variable <code>treat</code> to a dummy variable for each <code>period</code>, and excluding period 5 (the syntax is <code><a href="../reference/i.html">i(var, f, ref)</a></code>). Note that, although the reference is optional, we need it otherwise there is a collinearity problem because of the fixed-effect <code>id</code>.</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Estimation of yearly treatment effect</span>
-<span class="co"># We also add individual/time fixed-effects:</span>
-<span class="va">est_did</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu"><a href="../reference/i.html">i</a></span><span class="op">(</span><span class="va">treat</span>, <span class="va">period</span>, <span class="fl">5</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">period</span>, <span class="va">base_did</span><span class="op">)</span>
+<p>The empirical approach that we will use here is the canonical two-way fixed effects (TWFE) model that should be familiar to many empirical researchers. In a regression context, TWFE essentially amounts to an interaction between our <code>treat</code> and <code>period</code> variables. This is easily done using the <code><a href="../reference/i.html">i(fact_var, num_var, reference)</a></code> syntax:</p>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Estimation of treatment × period effects</span>
+<span class="co"># We also add individual and period fixed-effects:</span>
+<span class="va">est_did</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu"><a href="../reference/i.html">i</a></span><span class="op">(</span><span class="va">period</span>, <span class="va">treat</span>, <span class="fl">5</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">period</span>, <span class="va">base_did</span><span class="op">)</span>
 <span class="va">est_did</span>
 <span class="co">#&gt; OLS estimation, Dep. Var.: y</span>
 <span class="co">#&gt; Observations: 1,080 </span>
 <span class="co">#&gt; Fixed-effects: id: 108,  period: 10</span>
 <span class="co">#&gt; Standard-errors: Clustered (id) </span>
-<span class="co">#&gt;                   Estimate Std. Error   t value  Pr(&gt;|t|)    </span>
+<span class="co">#&gt;                   Estimate Std. Error   t value Pr(&gt;|t|))    </span>
 <span class="co">#&gt; x1                0.973490   0.045678 21.312000 &lt; 2.2e-16 ***</span>
-<span class="co">#&gt; treat:period::1  -1.403000   1.110300 -1.263700  0.209084    </span>
-<span class="co">#&gt; treat:period::2  -1.247500   1.093100 -1.141200  0.256329    </span>
-<span class="co">#&gt; treat:period::3  -0.273206   1.106900 -0.246813  0.805526    </span>
-<span class="co">#&gt; treat:period::4  -1.795700   1.088000 -1.650500  0.101769    </span>
-<span class="co">#&gt; treat:period::6   0.784452   1.028400  0.762798  0.447262    </span>
-<span class="co">#&gt; treat:period::7   3.598900   1.101600  3.267100  0.001461 ** </span>
-<span class="co">#&gt; treat:period::8   3.811800   1.247500  3.055500  0.002837 ** </span>
-<span class="co">#&gt; treat:period::9   4.731400   1.097100  4.312600   3.6e-05 ***</span>
-<span class="co">#&gt; treat:period::10  6.606200   1.120500  5.895800   4.4e-08 ***</span>
+<span class="co">#&gt; period::1:treat  -1.403000   1.110300 -1.263700  0.209084    </span>
+<span class="co">#&gt; period::2:treat  -1.247500   1.093100 -1.141200  0.256329    </span>
+<span class="co">#&gt; period::3:treat  -0.273206   1.106900 -0.246813  0.805526    </span>
+<span class="co">#&gt; period::4:treat  -1.795700   1.088000 -1.650500  0.101769    </span>
+<span class="co">#&gt; period::6:treat   0.784452   1.028400  0.762798  0.447262    </span>
+<span class="co">#&gt; period::7:treat   3.598900   1.101600  3.267100  0.001461 ** </span>
+<span class="co">#&gt; period::8:treat   3.811800   1.247500  3.055500  0.002837 ** </span>
+<span class="co">#&gt; period::9:treat   4.731400   1.097100  4.312600   3.6e-05 ***</span>
+<span class="co">#&gt; period::10:treat  6.606200   1.120500  5.895800   4.4e-08 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 3.8365     Adj. R2: 0.48783 </span>
 <span class="co">#&gt;                Within R2: 0.389628</span></code></pre></div>
-<p>Now to display the yearly treatment effects on a graph, we can use the function <code>coefplot</code>:</p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/coefplot.html">coefplot</a></span><span class="op">(</span><span class="va">est_did</span><span class="op">)</span></code></pre></div>
-<p><img src="fixest_walkthrough_files/figure-html/unnamed-chunk-42-1.png" width="672"></p>
-<p>The function <code>coefplot</code> detects that the results contain interactions and plot the appropriate graph. In case you wanted to display al the coefficients, including <code>x1</code>, you can use the argument <code>only.inter = FALSE</code>.</p>
+<p>Here, <code><a href="../reference/i.html">i(period, treat, 5)</a></code> creates a set of interact terms: One <code>treat</code> dummy for each <code>period</code>, but excluding period 5 as a reference. While the explicit reference period is optional, note that we need a reference to avoid the collinearity problem posed by the <code>id</code> fixed effects. More to the point, for this DiD analysis we are interested in whether the treatment generated a sustained impact on our outcome variable relative to the control group. This makes period 5 (immediately prior to treatment) the obvious choice to use as our relative anchor. It also demonstrates an advantage that <code><a href="../reference/i.html">i()</a></code>’s syntax offers over the equivalent base <code>treat*factor(period)</code> expansion, which would automatically use period 1 as a reference. Of course, we could specify the levels of <code><a href="https://rdrr.io/r/base/factor.html">factor(period)</a></code> ahead of time. But this is rather tedious, whereas <code><a href="../reference/i.html">i()</a></code> allows us to do so concisely on the fly.</p>
+<p>To display the treatment effects on a graph, we can use the function <code>iplot</code>:</p>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/coefplot.html">iplot</a></span><span class="op">(</span><span class="va">est_did</span><span class="op">)</span></code></pre></div>
+<p><img src="fixest_walkthrough_files/figure-html/unnamed-chunk-38-1.png" width="672"></p>
+<p>The function <code>iplot</code> reports the coefficients of variables created with <code><a href="../reference/i.html">i()</a></code>, and only them. In case you wanted to display all the coefficients, including <code>x1</code>, you can use the function <code>coefplot</code> instead.</p>
 </div>
-<div id="staggered-difference-in-difference" class="section level3">
+<div id="staggered-difference-in-differences-sun-and-abraham-2020" class="section level3">
 <h3 class="hasAnchor">
-<a href="#staggered-difference-in-difference" class="anchor"></a>Staggered difference-in-difference</h3>
-<p><em>Note that the content of this section is only valid for <code>fixest</code> version 0.8.1 or later.</em></p>
-<p>For staggered difference-in-difference analyzes, the method of Sun and Abraham (forthcoming, Journal of Econometrics) has been implemented. You first need to use <code><a href="../reference/i.html">i()</a></code> to insert <code>cohort x time to treatment</code> dummies, then you have to use the function <code>aggregate</code> to recover the yearly treatment effects. There is also a new argument <code>agg</code> in the functions <code>summary</code> and <code>etable</code>.</p>
-<p>Here’s an example with generated data where different cohorts get the treatment at different periods, and the effect of the treatment is cohort-specific and increasing over time.</p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="co">#</span>
-<span class="co"># Data</span>
-<span class="co">#</span>
+<a href="#staggered-difference-in-differences-sun-and-abraham-2020" class="anchor"></a>Staggered difference-in-differences (Sun and Abraham, 2020)</h3>
+<p><em>Note that the content of this section is only valid for <code>fixest</code> version 0.9.0 or later.</em></p>
+<p>Despite TWFE’s long-standing popularity for DiD designs, recent research has a shone a light on the biases that it can introduce under differential timing. For example, under staggered treatment or policy rollout.</p>
+<p>For staggered DiD analyzes, <code>fixest</code> provides the <code>sunab</code> function for implementing the unbiased method of <a href="https://doi.org/10.1016/j.jeconom.2020.09.006">Sun and Abraham (2020)</a> — hereafter: SA20. The method is based on the estimation of <code>treated cohort x time to treatment</code> dummies which are later aggregated to obtain the average treatment for the treated (ATT) for each period (or for the full post treatment period).</p>
+<p>(Aside: Note that we use <code>time to treatment</code> rather than just <code>time</code>, because we need to account for the staggered treatment via a relative time measure.)</p>
+<p>Let’s walk through an example with the <code>base_stagg</code> data set, where (a) different cohorts get the treatment at different periods, and (b) the effect of the treatment is cohort-specific and increasing over time. Let’s have a first look at the data:</p>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">base_stagg</span><span class="op">)</span>
 
-<span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>
-<span class="va">n_group</span> <span class="op">=</span> <span class="fl">20</span>
-<span class="va">n_per_group</span> <span class="op">=</span> <span class="fl">5</span>
-<span class="va">id_i</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n_group</span><span class="op">)</span>, <span class="st">":"</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n_per_group</span>, each <span class="op">=</span> <span class="va">n_group</span><span class="op">)</span><span class="op">)</span>
-<span class="va">id_t</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span>
-<span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html">expand.grid</a></span><span class="op">(</span>id <span class="op">=</span> <span class="va">id_i</span>, year <span class="op">=</span> <span class="va">id_t</span><span class="op">)</span>
-<span class="va">base</span><span class="op">$</span><span class="va">group</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html">gsub</a></span><span class="op">(</span><span class="st">":.+"</span>, <span class="st">""</span>, <span class="va">base</span><span class="op">$</span><span class="va">id</span><span class="op">)</span><span class="op">)</span>
-<span class="va">base</span><span class="op">$</span><span class="va">year_treated</span> <span class="op">=</span> <span class="va">base</span><span class="op">$</span><span class="va">group</span>
-<span class="va">base</span><span class="op">$</span><span class="va">year_treated</span><span class="op">[</span><span class="va">base</span><span class="op">$</span><span class="va">group</span> <span class="op">&gt;</span> <span class="fl">10</span><span class="op">]</span> <span class="op">=</span> <span class="fl">10000</span>
-<span class="va">base</span><span class="op">$</span><span class="va">treat_post</span> <span class="op">=</span> <span class="op">(</span><span class="va">base</span><span class="op">$</span><span class="va">year</span> <span class="op">&gt;=</span> <span class="va">base</span><span class="op">$</span><span class="va">year_treated</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1</span>
-<span class="va">base</span><span class="op">$</span><span class="va">time_to_treatment</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">pmax</a></span><span class="op">(</span><span class="va">base</span><span class="op">$</span><span class="va">year</span> <span class="op">-</span> <span class="va">base</span><span class="op">$</span><span class="va">year_treated</span>, <span class="op">-</span><span class="fl">1000</span><span class="op">)</span>
-<span class="va">base</span><span class="op">$</span><span class="va">treated</span> <span class="op">=</span> <span class="op">(</span><span class="va">base</span><span class="op">$</span><span class="va">year_treated</span> <span class="op">&lt;</span> <span class="fl">10000</span><span class="op">)</span> <span class="op">*</span> <span class="fl">1</span>
-<span class="co"># The effect of the treatment is cohort specific and increases with time</span>
-<span class="va">base</span><span class="op">$</span><span class="va">y_true</span> <span class="op">=</span> <span class="va">base</span><span class="op">$</span><span class="va">treat_post</span> <span class="op">*</span> <span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="fl">1</span> <span class="op">*</span> <span class="va">base</span><span class="op">$</span><span class="va">time_to_treatment</span> <span class="op">-</span> <span class="fl">1</span> <span class="op">*</span> <span class="va">base</span><span class="op">$</span><span class="va">group</span><span class="op">)</span>
-<span class="va">base</span><span class="op">$</span><span class="va">y</span> <span class="op">=</span> <span class="va">base</span><span class="op">$</span><span class="va">y_true</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">base_stagg</span><span class="op">)</span>
+<span class="co">#&gt;   id year year_treated time_to_treatment treated treatment_effect_true</span>
+<span class="co">#&gt; 2 90    1            2                -1       1                     0</span>
+<span class="co">#&gt; 3 89    1            3                -2       1                     0</span>
+<span class="co">#&gt; 4 88    1            4                -3       1                     0</span>
+<span class="co">#&gt; 5 87    1            5                -4       1                     0</span>
+<span class="co">#&gt; 6 86    1            6                -5       1                     0</span>
+<span class="co">#&gt; 7 85    1            7                -6       1                     0</span>
+<span class="co">#&gt;           x1           y</span>
+<span class="co">#&gt; 2 -1.0947021  0.01722971</span>
+<span class="co">#&gt; 3 -3.7100676 -4.58084528</span>
+<span class="co">#&gt; 4  2.5274402  2.73817174</span>
+<span class="co">#&gt; 5 -0.7204263 -0.65103066</span>
+<span class="co">#&gt; 6 -3.6711678 -5.33381664</span>
+<span class="co">#&gt; 7 -0.3152137  0.49562631</span></code></pre></div>
+<p>Note that the variable <code>year_treated</code> is set to 1000 (i.e. above the maximum value of <code>year</code>) for the never treated. Here’s a quick visual depiction of the data. Again, notice the staggered treatment rollout and time-varying intensity.</p>
+<p><img src="fixest_walkthrough_files/figure-html/unnamed-chunk-40-1.png" width="700"></p>
+<p>With our data in hand, let’s move on to the estimations. We’ll implement two DiD models:</p>
+<ol style="list-style-type: decimal">
+<li>A “naive” DiD consisting of a standard TWFE interaction (i.e. treatment × time_to_treatment).</li>
+<li>A DiD using the SA20 method.</li>
+</ol>
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># "Naive" TWFE DiD (note that the time to treatment for the never treated is -1000)</span>
+<span class="co"># (by using ref = c(-1, -1000) we exclude the period just before the treatment and </span>
+<span class="co"># the never treated)</span>
+<span class="va">res_twfe</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu"><a href="../reference/i.html">i</a></span><span class="op">(</span><span class="va">time_to_treatment</span>, <span class="va">treated</span>, ref <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1000</span><span class="op">)</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base_stagg</span><span class="op">)</span>
 
-<span class="co"># Note that the time_to_treatment for controls is set to -1000</span>
+<span class="co"># To implement the Sun and Abraham (2020) method,</span>
+<span class="co"># we use the sunab(cohort, period) function</span>
+<span class="va">res_sa20</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu"><a href="../reference/sunab.html">sunab</a></span><span class="op">(</span><span class="va">year_treated</span>, <span class="va">year</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base_stagg</span><span class="op">)</span></code></pre></div>
+<p>Let’s compare our results in plot form:</p>
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Plot the two TWFE results</span>
+<span class="fu"><a href="../reference/coefplot.html">iplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="va">res_twfe</span>, <span class="va">res_sa20</span><span class="op">)</span>, sep <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>
 
-<span class="co"># we need to drop the always treated</span>
-<span class="va">base</span> <span class="op">=</span> <span class="va">base</span><span class="op">[</span><span class="va">base</span><span class="op">$</span><span class="va">group</span> <span class="op">&gt;</span> <span class="fl">1</span>,<span class="op">]</span>
+<span class="co"># Add the true results</span>
+<span class="va">att_true</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">base_stagg</span><span class="op">$</span><span class="va">treatment_effect_true</span>, <span class="va">base_stagg</span><span class="op">$</span><span class="va">time_to_treatment</span>, <span class="va">mean</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/points.html">points</a></span><span class="op">(</span><span class="op">-</span><span class="fl">9</span><span class="op">:</span><span class="fl">8</span>, <span class="va">att_true</span>, pch <span class="op">=</span> <span class="fl">15</span>, col <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>
 
-<span class="co">#</span>
-<span class="co"># Estimations</span>
-<span class="co">#</span>
-
-<span class="co"># "Regular" DiD</span>
-<span class="va">res_naive</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="../reference/i.html">i</a></span><span class="op">(</span><span class="va">treated</span>, <span class="va">time_to_treatment</span>, ref <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>, drop <span class="op">=</span> <span class="op">-</span><span class="fl">1000</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base</span><span class="op">)</span>
-
-<span class="co"># with cohort x time to treatment dummies</span>
-<span class="va">res_cohort</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="../reference/i.html">i</a></span><span class="op">(</span><span class="va">time_to_treatment</span>, f2 <span class="op">=</span> <span class="va">group</span>, drop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">1000</span><span class="op">)</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">base</span><span class="op">)</span>
-
-<span class="co"># Looking at the difference between estimates</span>
-<span class="fu"><a href="../reference/coefplot.html">coefplot</a></span><span class="op">(</span><span class="va">res_naive</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">6</span>, <span class="fl">8</span><span class="op">)</span><span class="op">)</span>
-<span class="va">att_true</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">base</span><span class="op">$</span><span class="va">y_true</span>, <span class="va">base</span><span class="op">$</span><span class="va">time_to_treatment</span>, <span class="va">mean</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/points.html">points</a></span><span class="op">(</span><span class="op">-</span><span class="fl">9</span><span class="op">:</span><span class="fl">8</span> <span class="op">+</span> <span class="fl">0.15</span>, <span class="va">att_true</span>, pch <span class="op">=</span> <span class="fl">15</span>, col <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>
-
-<span class="co"># SA method: we aggregate the effects for each period</span>
-<span class="va">agg_coef</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html">aggregate</a></span><span class="op">(</span><span class="va">res_cohort</span>, <span class="st">"(ti.*nt)::(-?[[:digit:]])"</span><span class="op">)</span>
-<span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">9</span><span class="op">:</span><span class="op">-</span><span class="fl">2</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span> <span class="op">+</span> <span class="fl">.35</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/points.html">points</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">agg_coef</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>, pch <span class="op">=</span> <span class="fl">17</span>, col <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>
-<span class="va">ci_low</span> <span class="op">=</span> <span class="va">agg_coef</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">-</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">agg_coef</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>
-<span class="va">ci_up</span> <span class="op">=</span> <span class="va">agg_coef</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="fl">1.96</span> <span class="op">*</span> <span class="va">agg_coef</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/segments.html">segments</a></span><span class="op">(</span>x0 <span class="op">=</span> <span class="va">x</span>, y0 <span class="op">=</span> <span class="va">ci_low</span>, x1 <span class="op">=</span> <span class="va">x</span>, y1 <span class="op">=</span> <span class="va">ci_up</span>, col <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/legend.html">legend</a></span><span class="op">(</span><span class="st">"topleft"</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span>, pch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">15</span>, <span class="fl">17</span><span class="op">)</span>, legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Naive"</span>, <span class="st">"True"</span>, <span class="st">"Sun &amp; Abraham"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p><img src="fixest_walkthrough_files/figure-html/unnamed-chunk-43-1.png" width="700"></p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="va">agg_coef</span><span class="op">)</span>
-<span class="co">#&gt;                           Estimate Std. Error      t value     Pr(&gt;|t|)</span>
-<span class="co">#&gt; time_to_treatment::-9  0.806840136  0.4334011   1.86164745 6.303610e-02</span>
-<span class="co">#&gt; time_to_treatment::-8 -0.431400563  0.4818055  -0.89538322 3.708639e-01</span>
-<span class="co">#&gt; time_to_treatment::-7 -0.260711493  0.3347393  -0.77884941 4.363093e-01</span>
-<span class="co">#&gt; time_to_treatment::-6 -0.181541616  0.3103924  -0.58487774 5.588024e-01</span>
-<span class="co">#&gt; time_to_treatment::-5 -0.337881150  0.2777754  -1.21638269 2.242143e-01</span>
-<span class="co">#&gt; time_to_treatment::-4  0.004743884  0.2384895   0.01989138 9.841352e-01</span>
-<span class="co">#&gt; time_to_treatment::-3 -0.101172692  0.2619010  -0.38630134 6.993809e-01</span>
-<span class="co">#&gt; time_to_treatment::-2  0.075010517  0.2475293   0.30303691 7.619441e-01</span>
-<span class="co">#&gt; time_to_treatment::0  -4.904426782  0.1997866 -24.54832966 1.351668e-98</span>
-<span class="co">#&gt; time_to_treatment::1  -3.368242259  0.2352098 -14.32015901 2.208909e-41</span>
-<span class="co">#&gt; time_to_treatment::2  -1.954957777  0.2779783  -7.03277138 4.495328e-12</span>
-<span class="co">#&gt; time_to_treatment::3  -0.016010209  0.2798159  -0.05721695 9.543873e-01</span>
-<span class="co">#&gt; time_to_treatment::4   1.230228678  0.3215409   3.82604045 1.408435e-04</span>
-<span class="co">#&gt; time_to_treatment::5   2.657887580  0.3336853   7.96525177 5.969184e-15</span>
-<span class="co">#&gt; time_to_treatment::6   4.617598200  0.4548655  10.15156921 8.412069e-23</span>
-<span class="co">#&gt; time_to_treatment::7   5.384759098  0.5911951   9.10826010 7.186030e-19</span>
-<span class="co">#&gt; time_to_treatment::8   7.669704318  0.3394547  22.59419127 5.445229e-87</span></code></pre></div>
-<p>The function <code>aggregate</code> asks to aggregate the coefficients whose names match the regular expression <code>"(ti.*nt)::(-?[[:digit:]]+)"</code>. The two sets of parentheses are important here since the aggregation will be performed for each unique value in between parentheses. Here the aggregation will be done for each <code>time_to_treatment</code> (<code>ti.*nt</code>) and period (<code>-?[[:digit:]]</code>, which means negative and positive periods).</p>
-<p>Here is how to get the total treatment effect for the treated:</p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<span class="fu"><a href="https://rdrr.io/r/graphics/legend.html">legend</a></span><span class="op">(</span><span class="st">"topleft"</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">4</span>, <span class="fl">2</span><span class="op">)</span>, pch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">17</span>, <span class="fl">15</span><span class="op">)</span>, 
+       legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"TWFE"</span>, <span class="st">"Truth"</span>, <span class="st">"Sun &amp; Abraham (2020)"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p><img src="fixest_walkthrough_files/figure-html/unnamed-chunk-42-1.png" width="700"></p>
+<p>As we can see, the TWFE results suffer from varying degrees of bias due to the staggered rollout. In contrast, the aggregated SA20 results do a much better job of consistently estimating the true effects.</p>
+<p>As a final example, here’s how to get the average treatment effect for the treated (ATT):</p>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># The full ATT</span>
-<span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html">aggregate</a></span><span class="op">(</span><span class="va">res_cohort</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"ATT"</span> <span class="op">=</span> <span class="st">"treatment::[^-]"</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt;       Estimate Std. Error t value     Pr(&gt;|t|)</span>
-<span class="co">#&gt; ATT -0.7953741  0.2000186 -3.9765 7.657048e-05</span>
-<span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">base</span><span class="op">[</span><span class="va">base</span><span class="op">$</span><span class="va">treat_post</span> <span class="op">==</span> <span class="fl">1</span>, <span class="st">"y_true"</span><span class="op">]</span><span class="op">)</span>
-<span class="co">#&gt; [1] -1</span></code></pre></div>
-<p>This time the aggregation is operated across each cohort for non-negative time to treatment (<code>treatment::[^-]</code>). The previous code also requests that the outcome variable should be named <code>ATT</code>.</p>
-<p>Note that the functions <code>summary</code> and <code>etable</code> now accept the new argument <code>agg</code> which applies the function <code>aggregate</code>:</p>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">res_cohort</span>, agg <span class="op">=</span> <span class="st">"(ti.*nt)::(-?[[:digit:]])"</span><span class="op">)</span>
-<span class="co">#&gt;                                res_cohort</span>
-<span class="co">#&gt; Dependent Var.:                         y</span>
-<span class="co">#&gt;                                          </span>
-<span class="co">#&gt; time_to_treatment = -9   0.8068. (0.4334)</span>
-<span class="co">#&gt; time_to_treatment = -8   -0.4314 (0.4818)</span>
-<span class="co">#&gt; time_to_treatment = -7   -0.2607 (0.3347)</span>
-<span class="co">#&gt; time_to_treatment = -6   -0.1815 (0.3104)</span>
-<span class="co">#&gt; time_to_treatment = -5   -0.3379 (0.2778)</span>
-<span class="co">#&gt; time_to_treatment = -4    0.0047 (0.2385)</span>
-<span class="co">#&gt; time_to_treatment = -3   -0.1012 (0.2619)</span>
-<span class="co">#&gt; time_to_treatment = -2    0.0750 (0.2475)</span>
-<span class="co">#&gt; time_to_treatment = 0  -4.904*** (0.1998)</span>
-<span class="co">#&gt; time_to_treatment = 1  -3.368*** (0.2352)</span>
-<span class="co">#&gt; time_to_treatment = 2  -1.955*** (0.2780)</span>
-<span class="co">#&gt; time_to_treatment = 3    -0.0160 (0.2798)</span>
-<span class="co">#&gt; time_to_treatment = 4   1.230*** (0.3215)</span>
-<span class="co">#&gt; time_to_treatment = 5   2.658*** (0.3337)</span>
-<span class="co">#&gt; time_to_treatment = 6   4.618*** (0.4549)</span>
-<span class="co">#&gt; time_to_treatment = 7   5.385*** (0.5912)</span>
-<span class="co">#&gt; time_to_treatment = 8   7.670*** (0.3395)</span>
-<span class="co">#&gt; Fixed-Effects:         ------------------</span>
-<span class="co">#&gt; id                                    Yes</span>
-<span class="co">#&gt; year                                  Yes</span>
-<span class="co">#&gt; ______________________ __________________</span>
-<span class="co">#&gt; S.E.: Clustered                    by: id</span>
-<span class="co">#&gt; Observations                          950</span>
-<span class="co">#&gt; R2                                0.81955</span>
-<span class="co">#&gt; Within R2                         0.75085</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">res_sa20</span>, agg <span class="op">=</span> <span class="st">"att"</span><span class="op">)</span>
+<span class="co">#&gt; OLS estimation, Dep. Var.: y</span>
+<span class="co">#&gt; Observations: 950 </span>
+<span class="co">#&gt; Fixed-effects: id: 95,  year: 10</span>
+<span class="co">#&gt; Standard-errors: Clustered (id) </span>
+<span class="co">#&gt;      Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt; x1   0.994678   0.018378 54.1230 &lt; 2.2e-16 ***</span>
+<span class="co">#&gt; ATT -1.133700   0.205070 -5.5286  4.43e-08 ***</span>
+<span class="co">#&gt; ---</span>
+<span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class="co">#&gt; RMSE: 0.921817     Adj. R2: 0.887984</span>
+<span class="co">#&gt;                  Within R2: 0.876406</span></code></pre></div>
+<p>This time the aggregation of the coefficients is operated across each cohort for non-negative time to treatment. Note that the estimated ATT compares favourably with the true value of -1.</p>
+<p>Under the hood, the <code><a href="../reference/sunab.html">sunab()</a></code> function creates <code>cohort x time to treatment</code> interactions with the function <code><a href="../reference/i.html">i()</a></code>, the coefficients are then aggregated at the appropriate level with the function <code>aggregate.fixest</code>. To obtain the coefficients for each <code>cohort x time to treatment</code>, one simply needs to remove the aggregation:</p>
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Full disaggregation (you could have used summary instead of etable)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">res_sa20</span>, agg <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>, <span class="fl">20</span><span class="op">)</span>
+<span class="co">#&gt;                                   res_sa20</span>
+<span class="co">#&gt; Dependent Var.:                          y</span>
+<span class="co">#&gt;                                           </span>
+<span class="co">#&gt; x1                      0.9947*** (0.0184)</span>
+<span class="co">#&gt; year = -9 x cohort = 10    0.3518 (0.3591)</span>
+<span class="co">#&gt; year = -8 x cohort = 9     0.0339 (0.4714)</span>
+<span class="co">#&gt; year = -8 x cohort = 10   -0.1919 (0.3529)</span>
+<span class="co">#&gt; year = -7 x cohort = 8    -0.5894 (0.7369)</span>
+<span class="co">#&gt; year = -7 x cohort = 9    0.8730. (0.4934)</span>
+<span class="co">#&gt; year = -7 x cohort = 10    0.0195 (0.6034)</span>
+<span class="co">#&gt; year = -6 x cohort = 7    -0.0421 (0.8657)</span>
+<span class="co">#&gt; year = -6 x cohort = 8    -0.6576 (0.5733)</span>
+<span class="co">#&gt; year = -6 x cohort = 9     0.8777 (0.5333)</span>
+<span class="co">#&gt; year = -6 x cohort = 10   -0.4036 (0.3474)</span>
+<span class="co">#&gt; year = -5 x cohort = 6    -0.6580 (0.9134)</span>
+<span class="co">#&gt; year = -5 x cohort = 7    -0.3170 (0.6979)</span>
+<span class="co">#&gt; year = -5 x cohort = 8    -0.2382 (0.4697)</span>
+<span class="co">#&gt; year = -5 x cohort = 9     0.3015 (0.6042)</span>
+<span class="co">#&gt; year = -5 x cohort = 10   -0.5648 (0.4632)</span>
+<span class="co">#&gt; year = -4 x cohort = 5    -0.9835 (0.6345)</span>
+<span class="co">#&gt; year = -4 x cohort = 6     0.3604 (0.8583)</span></code></pre></div>
 </div>
+</div>
+</div>
+<div id="additional-features" class="section level1">
+<h1 class="hasAnchor">
+<a href="#additional-features" class="anchor"></a>Additional features</h1>
+<p>Now we present some other features of the package:</p>
+<ol style="list-style-type: decimal">
+<li><p><a href="#formula-macros">Formula macros</a>.</p></li>
+<li><p><a href="#lagging-variables">How to add lead/lags</a>.</p></li>
+<li><p><a href="#non-linear-in-parameters-example">Non-linear in parameter estimation</a>.</p></li>
+<li><p><a href="#multi-threading">Parallelism</a>.</p></li>
+</ol>
+<!-- NOTE: you can't have ":" or "(" in titles to make links --><div id="formula-macros" class="section level2">
+<h2 class="hasAnchor">
+<a href="#formula-macros" class="anchor"></a>Formula macros</h2>
+<p>It can be useful, to tidy up the workflow or simply for convenience, to define formula macros: i.e. macro variables each representing several variables. This package offers two functions to deal with that: <code>setFixest_fml</code> to set macro variables globally, and <code>xpd</code> to create a formula with macro variables either globally defined or defined at run time.</p>
+<p>Here is an example:</p>
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">base</span> <span class="op">=</span> <span class="va">iris</span>
+<span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span>
+<span class="co"># Defining the macro variables</span>
+<span class="fu"><a href="../reference/setFixest_fml.html">setFixest_fml</a></span><span class="op">(</span>..ctrl <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/stats/poly.html">poly</a></span><span class="op">(</span><span class="va">x2</span>, <span class="fl">2</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/poly.html">poly</a></span><span class="op">(</span><span class="va">x3</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>
+<span class="co"># Accessing them</span>
+<span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">..ctrl</span><span class="op">)</span>
+<span class="co">#&gt; y ~ x1 + poly(x2, 2) + poly(x3, 2)</span>
+<span class="co">#&gt; &lt;environment: 0x00000000129931d0&gt;</span>
+
+<span class="co"># Definition at run time</span>
+<span class="va">vars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x2"</span>, <span class="st">"x2^2"</span>, <span class="st">"x3"</span><span class="op">)</span>
+<span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span><span class="op">{</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">..ctrl</span>, ..ctrl <span class="op">=</span> <span class="va">vars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
+<span class="op">}</span>
+<span class="co">#&gt; y ~ x1 + x2</span>
+<span class="co">#&gt; &lt;environment: 0x00000000227a3640&gt;</span>
+<span class="co">#&gt; y ~ x1 + x2 + x2^2</span>
+<span class="co">#&gt; &lt;environment: 0x00000000227e2e88&gt;</span>
+<span class="co">#&gt; y ~ x1 + x2 + x2^2 + x3</span>
+<span class="co">#&gt; &lt;environment: 0x00000000228249b8&gt;</span></code></pre></div>
+<p>Macro variables must start with two dots. As seen in the example, once set globally they can be directly accessed with <code>xpd</code>. In the example, <code>xpd</code> redefines the formula at run-time by having a character vector as input.</p>
+<p>All <code>fixest</code> estimations call <code>xpd</code> internally if appropriate. This means that the following code works just fine:</p>
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">..ctrl</span>, <span class="va">base</span><span class="op">)</span>
+<span class="co">#&gt; OLS estimation, Dep. Var.: y</span>
+<span class="co">#&gt; Observations: 150 </span>
+<span class="co">#&gt; Standard-errors: Standard </span>
+<span class="co">#&gt;               Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt; (Intercept)   4.122800   0.233398 17.6640 &lt; 2.2e-16 ***</span>
+<span class="co">#&gt; x1            0.562757   0.075897  7.4147  9.59e-12 ***</span>
+<span class="co">#&gt; poly(x2, 2)1 12.601000   1.783000  7.0676  6.26e-11 ***</span>
+<span class="co">#&gt; poly(x2, 2)2  1.635600   0.589023  2.7767  0.006222 ** </span>
+<span class="co">#&gt; poly(x3, 2)1 -2.757000   1.725000 -1.5983  0.112171    </span>
+<span class="co">#&gt; poly(x3, 2)2 -1.055600   0.668027 -1.5801  0.116273    </span>
+<span class="co">#&gt; ---</span>
+<span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class="co">#&gt; RMSE: 0.30128   Adj. R2: 0.862108</span></code></pre></div>
+<p>The function <code>xpd</code> also accepts regular expression macros of the form <code>..("regex")</code>. If these macros are encountered and provided a character vector/data.frame is in the argument <code>data</code>, then all variables names matching the regular expression will be placed in the formula.</p>
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">longley</span><span class="op">)</span>
+<span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">longley</span><span class="op">)</span>
+<span class="co">#&gt; Armed.Forces ~ Population + GNP.deflator + GNP + Unemployed + </span>
+<span class="co">#&gt;     Employed</span>
+<span class="co">#&gt; &lt;environment: 0x000000002299d158&gt;</span></code></pre></div>
+<p>Again, since <code>xpd</code> is called internally, the following works:</p>
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, <span class="va">longley</span><span class="op">)</span>
+<span class="co">#&gt; OLS estimation, Dep. Var.: Armed.Forces</span>
+<span class="co">#&gt; Observations: 16 </span>
+<span class="co">#&gt; Standard-errors: Standard </span>
+<span class="co">#&gt;                 Estimate  Std. Error   t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt; (Intercept)  4403.700000 4091.800000  1.076200  0.307112    </span>
+<span class="co">#&gt; Population    -22.844000   32.671000 -0.699217  0.500356    </span>
+<span class="co">#&gt; GNP.deflator    7.638500   12.348000  0.618611  0.550003    </span>
+<span class="co">#&gt; GNP             3.150500    3.554200  0.886433  0.396201    </span>
+<span class="co">#&gt; Unemployed     -0.591649    0.389005 -1.520900  0.159248    </span>
+<span class="co">#&gt; Employed      -50.060000   25.348000 -1.974900  0.076522 .  </span>
+<span class="co">#&gt; ---</span>
+<span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class="co">#&gt; RMSE: 36.1   Adj. R2: 0.569345</span></code></pre></div>
 </div>
 <div id="lagging-variables" class="section level2">
 <h2 class="hasAnchor">
@@ -1150,7 +1133,7 @@
 <a href="#lagging-variables-in-an-estimation" class="anchor"></a>Lagging variables in an estimation</h3>
 <p>There are two ways to provide leads and/or lags in a <code>fixest</code> estimation. Either “on-the-fly” by using the argument <code>panel.id</code>, either by setting up a panel data set with the function <code>panel</code> (useful if you run multiple models needing lags and/or leads), described in the next subsection.</p>
 <p>To set up the panel on-the-fly, you need to use the <code>panel.id</code> argument, which will give you access to the functions <code>f</code> and <code>l</code> to create leads and lags, respectively. Let’s give an example, using the previous data set, where we use lags and leads of the explanatory and dependent variables.</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">est1</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="../reference/f.html">l</a></span><span class="op">(</span><span class="va">x1</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>, <span class="va">base_did</span>, panel.id <span class="op">=</span> <span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">period</span><span class="op">)</span>
 <span class="co">#&gt; NOTE: 108 observations removed because of NA values (RHS: 108).</span>
 <span class="va">est2</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="../reference/f.html">f</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="../reference/f.html">l</a></span><span class="op">(</span><span class="va">x1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>, <span class="va">base_did</span>, panel.id <span class="op">=</span> <span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">period</span><span class="op">)</span>
@@ -1179,7 +1162,7 @@
 <a href="#setting-up-a-panel-data-set" class="anchor"></a>Setting up a panel data set</h3>
 <p>You can set up a panel data set with the function <code>panel</code>. There are between two and three advantages of doing so. First, if you have to estimate many models with leads and/or lags, setting up a panel gives you access to the lagging functions, <code>f</code> and <code>l</code>, without having to provide the <code>panel.id</code> argument we’ve seen in the previous subsection. Second, even when you estimate models with a sub-selection of the panel data, the data set is still a proper panel, meaning you can still use the lagging functions. Finally, and only if you are a <code>data.table</code> user, you can use the lagging functions to create new variables.</p>
 <p>Let’s repeat the previous example, now with a panel data set:</p>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># setting up the panel</span>
 <span class="va">pdat</span> <span class="op">=</span> <span class="fu"><a href="../reference/panel.html">panel</a></span><span class="op">(</span><span class="va">base_did</span>, <span class="op">~</span><span class="va">id</span> <span class="op">+</span> <span class="va">period</span><span class="op">)</span>
 <span class="co"># Now the panel.id argument is not required</span>
@@ -1203,7 +1186,7 @@
 <span class="co">#&gt; R2                         0.26558            0.25697           0.26258</span>
 <span class="co">#&gt; Adj. R2                    0.26406            0.25438           0.25983</span></code></pre></div>
 <p>Last, if you also use <code>data.table</code>, let’s give an example of lead/lag creation:</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://Rdatatable.gitlab.io/data.table">data.table</a></span><span class="op">)</span>
 <span class="va">pdat_dt</span> <span class="op">=</span> <span class="fu"><a href="../reference/panel.html">panel</a></span><span class="op">(</span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html">as.data.table</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span>, <span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">period</span><span class="op">)</span>
 <span class="co"># we create a lagged value of the variable x1</span>
@@ -1232,7 +1215,7 @@
 <h3 class="hasAnchor">
 <a href="#creating-laglead-variables" class="anchor"></a>Creating lag/lead variables</h3>
 <p>If you just want to create a single lag/lead variable, a simple and fast method has been implemented: <code>lag.formula</code>. Let’s give an example:</p>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">base_lag</span> <span class="op">=</span> <span class="va">base_did</span>
 <span class="co"># we create a lagged value of the variable x1</span>
 <span class="va">base_lag</span><span class="op">$</span><span class="va">x1.l1</span> <span class="op">=</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/shift.html">lag</a></span><span class="op">(</span><span class="va">x1</span> <span class="op">~</span> <span class="va">id</span> <span class="op">+</span> <span class="va">period</span>, <span class="fl">1</span>, <span class="va">base_lag</span><span class="op">)</span>
@@ -1246,7 +1229,7 @@
 <span class="co">#&gt; 6  1.72873240 -0.6363849  1      6    1     1 -5.0443544</span></code></pre></div>
 <p>The first two arguments are mandatory. The formula informs on the variable to be lagged (on the left hand side), and the two panel identifiers. Note that the time index <strong>must</strong> appear second. The second argument tells how much lags we want. Using negative values gives leads. Finally the last argument informs on where to find the variables.</p>
 <p>In case you use the popular package <code>data.table</code>, you can create lagged variables very simply:</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://Rdatatable.gitlab.io/data.table">data.table</a></span><span class="op">)</span>
 <span class="va">base_lag_dt</span> <span class="op">=</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html">as.data.table</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span>
 <span class="co"># we create a lagged value of the variable x1</span>
@@ -1261,7 +1244,7 @@
 <p>In fact, this type of model is non-linear in the context of a Poisson model because the sum is embedded within the log:</p>
 <p><span class="math inline">\(E\left(z_i\right) = \exp\left(\log\left(a\times x_i + b\times y_i\right)\right)\)</span>.</p>
 <p>So let’s estimate such a relation. (Note that you can estimate this relation with GLM and identity link, but I carry on for the example.) First we generate the data:</p>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Generating data:</span>
 <span class="va">n</span> <span class="op">=</span> <span class="fl">1000</span>
 <span class="co"># x and y: two positive random variables</span>
@@ -1271,21 +1254,21 @@
 <span class="va">z</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html">rpois</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">2</span><span class="op">*</span><span class="va">x</span> <span class="op">+</span> <span class="fl">3</span><span class="op">*</span><span class="va">y</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html">rpois</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">1</span><span class="op">)</span>
 <span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">z</span><span class="op">)</span></code></pre></div>
 <p>To estimate the non-linear relationship, we need to use the argument <code>NL.fml</code> where we put the non-linear part. We also have to provide starting values with the argument <code>NL.start</code>. Finally, to ensure the RHS can be evaluated in any situation, we add lower bounds for the parameters with the argument <code>lower</code>.</p>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">result_NL</span> <span class="op">=</span> <span class="fu"><a href="../reference/feNmlm.html">feNmlm</a></span><span class="op">(</span><span class="va">z</span><span class="op">~</span><span class="fl">0</span>, <span class="va">base</span>, NL.fml <span class="op">=</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">a</span><span class="op">*</span><span class="va">x</span> <span class="op">+</span> <span class="va">b</span><span class="op">*</span><span class="va">y</span><span class="op">)</span>, NL.start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>a<span class="op">=</span><span class="fl">1</span>, b<span class="op">=</span><span class="fl">1</span><span class="op">)</span>, lower <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>a<span class="op">=</span><span class="fl">0</span>, b<span class="op">=</span><span class="fl">0</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>Note that the arguments <code>NL.start</code> and <code>lower</code> are named lists. Setting <code>lower = list(a=0, b=0)</code> means that the optimization algorithm will never explore parameters for <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> that are lower than 0. The results obtained can be interpreted similarly to results with linear RHS. We can see them with a print:</p>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="va">result_NL</span><span class="op">)</span>
 <span class="co">#&gt; Non-linear ML estimation, family = Poisson, Dep. Var.: z</span>
 <span class="co">#&gt; Observations: 1,000 </span>
 <span class="co">#&gt; Standard-errors: Standard </span>
-<span class="co">#&gt;   Estimate Std. Error z value  Pr(&gt;|z|)    </span>
-<span class="co">#&gt; a   2.0166   0.010686  188.71 &lt; 2.2e-16 ***</span>
-<span class="co">#&gt; b   3.0100   0.012371  243.30 &lt; 2.2e-16 ***</span>
+<span class="co">#&gt;   Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt; a   2.0233   0.011217  180.38 &lt; 2.2e-16 ***</span>
+<span class="co">#&gt; b   3.0282   0.012684  238.74 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
-<span class="co">#&gt; Log-Likelihood: -3,648.2   Adj. Pseudo R2: 0.940644</span>
-<span class="co">#&gt;            BIC:  7,310.1     Squared Cor.: 0.992497</span></code></pre></div>
+<span class="co">#&gt; Log-Likelihood: -3,596.8   Adj. Pseudo R2: 1.0042  </span>
+<span class="co">#&gt;            BIC:  7,207.5     Squared Cor.: 0.993353</span></code></pre></div>
 <p>We can see that we obtain coefficients close to the generating values.</p>
 <div id="adding-fixed-effects-to-non-linear-in-parameters-models" class="section level3">
 <h3 class="hasAnchor">
@@ -1298,7 +1281,7 @@
 <p><span class="math inline">\(\gamma_{k} \left( a\times x_i + b\times y_i \right) = \gamma_{k}^{\prime} \left(a^{\prime}\times x_i + b^{\prime}\times y_i \right),\forall i,k\)</span>.</p>
 <p>An example is <span class="math inline">\(\gamma^{\prime}_{k} = 2\times \gamma_k\)</span>, <span class="math inline">\(a^{\prime} = a/2\)</span> and <span class="math inline">\(b^{\prime} = b/2\)</span>. Thus estimating this relation directly will lead to a problem to uniquely identify the coefficients. To circumvent this problem, we just have to fix one of the coefficient, this will ensure that we uniquely identify them.</p>
 <p>Let’s generate this relation:</p>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># the class of each observation</span>
 <span class="va">id</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fl">20</span>, <span class="va">n</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 <span class="va">base</span><span class="op">$</span><span class="va">id</span> <span class="op">=</span> <span class="va">id</span>
@@ -1308,24 +1291,24 @@
 <span class="va">z_bis</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html">rpois</a></span><span class="op">(</span><span class="va">n</span>, <span class="va">gamma</span><span class="op">[</span><span class="va">id</span><span class="op">]</span> <span class="op">*</span> <span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="va">x</span> <span class="op">+</span> <span class="fl">3</span><span class="op">*</span><span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html">rpois</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">1</span><span class="op">)</span>
 <span class="va">base</span><span class="op">$</span><span class="va">z_bis</span> <span class="op">=</span> <span class="va">z_bis</span></code></pre></div>
 <p>Now we estimate it with the fixed-effects while fixing one of the coefficients (we fix <span class="math inline">\(a\)</span> to its true value but it could be any value):</p>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># we add the fixed-effect in the formula</span>
 <span class="va">result_NL_fe</span> <span class="op">=</span> <span class="fu"><a href="../reference/feNmlm.html">feNmlm</a></span><span class="op">(</span><span class="va">z_bis</span><span class="op">~</span><span class="fl">0</span><span class="op">|</span><span class="va">id</span>, <span class="va">base</span>, NL.fml <span class="op">=</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="va">x</span> <span class="op">+</span> <span class="va">b</span><span class="op">*</span><span class="va">y</span><span class="op">)</span>, NL.start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>b<span class="op">=</span><span class="fl">1</span><span class="op">)</span>, lower <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>b<span class="op">=</span><span class="fl">0</span><span class="op">)</span><span class="op">)</span>
 <span class="co"># The coef should be around 3</span>
 <span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">result_NL_fe</span><span class="op">)</span>
 <span class="co">#&gt;        b </span>
-<span class="co">#&gt; 3.044592</span>
+<span class="co">#&gt; 3.024891</span>
 <span class="co"># the gamma and the exponential of the fixed-effects should be similar</span>
 <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="va">gamma</span>, <span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span><span class="op">(</span><span class="fu"><a href="../reference/fixef_reexported.html">fixef</a></span><span class="op">(</span><span class="va">result_NL_fe</span><span class="op">)</span><span class="op">$</span><span class="va">id</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt;               1        2        3        4       5        6         7        8</span>
-<span class="co">#&gt; gamma 0.1966356 2.321714 1.336874 1.433107 2.94581 1.294748 0.9059432 2.622001</span>
-<span class="co">#&gt;       0.2086638 2.337661 1.341064 1.410246 2.89515 1.292770 0.9150742 2.595100</span>
-<span class="co">#&gt;                9        10       11           12         13       14       15</span>
-<span class="co">#&gt; gamma 0.02816140 0.8247869 1.800416 0.0004859137 0.04285126 1.253855 1.056575</span>
-<span class="co">#&gt;       0.03537906 0.8300962 1.791857 0.0086916585 0.04710542 1.247642 1.026239</span>
-<span class="co">#&gt;               16        17         18         19         20</span>
-<span class="co">#&gt; gamma 0.09861765 0.9374176 0.08124185 0.07887982 0.01447222</span>
-<span class="co">#&gt;       0.10735884 0.9262197 0.08392894 0.08752722 0.01966111</span></code></pre></div>
+<span class="co">#&gt;              1         2         3         4           5        6          7</span>
+<span class="co">#&gt; gamma 2.679535 0.1707382 0.7294981 0.6375940 0.002920490 2.202472 0.08203791</span>
+<span class="co">#&gt;       2.670332 0.1831774 0.7519754 0.6240016 0.008805172 2.220800 0.08548657</span>
+<span class="co">#&gt;              8        9       10       11        12       13        14</span>
+<span class="co">#&gt; gamma 1.501218 1.262652 1.515043 1.681641 0.1949462 1.095457 1.0023382</span>
+<span class="co">#&gt;       1.454965 1.276599 1.493300 1.705419 0.1975139 1.104186 0.9971681</span>
+<span class="co">#&gt;              15       16        17        18        19        20</span>
+<span class="co">#&gt; gamma 0.3743722 2.606235 0.5238710 0.1428949 0.4871731 0.1550584</span>
+<span class="co">#&gt;       0.3896577 2.609243 0.5372464 0.1433603 0.4910665 0.1629123</span></code></pre></div>
 <p>As we can see, we obtain the “right” estimates.</p>
 </div>
 </div>
@@ -1333,7 +1316,7 @@
 <h2 class="hasAnchor">
 <a href="#multi-threading" class="anchor"></a>Multi-threading</h2>
 <p>The package <code>fixest</code> integrates multi-platform parallelism to hasten the estimation process. By default it makes use of 50% of all available threads. To change the number of threads used, just use the argument <code>nthreads</code>:</p>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Sample of results:</span>
 <span class="co"># 1 nthreads: 3.13s</span>
 <span class="fu"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span><span class="op">(</span><span class="fu"><a href="../reference/femlm.html">fenegbin</a></span><span class="op">(</span><span class="va">Euros</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span><span class="op">|</span><span class="va">Origin</span><span class="op">+</span><span class="va">Destination</span><span class="op">+</span><span class="va">Product</span><span class="op">+</span><span class="va">Year</span>, <span class="va">trade</span>, nthreads <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span>

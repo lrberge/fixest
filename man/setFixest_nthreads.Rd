@@ -9,12 +9,14 @@
 An object of class \code{function} of length 1.
 }
 \usage{
-setFixest_nthreads(nthreads)
+setFixest_nthreads(nthreads, save = FALSE)
 
 getFixest_nthreads
 }
 \arguments{
 \item{nthreads}{The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. If missing, the default is to use 50\% of all threads.}
+
+\item{save}{Either a logical or equal to \code{"reset"}. Default is \code{FALSE}. If \code{TRUE} then the value is set permanently at the project level, this means that if you restart R, you will still obtain the previously saved defaults. This is done by writing in the \code{".Renviron"} file, located in the project's working directory, hence we must have write permission there for this to work. If equal to "reset", the default at the project level is erased.}
 }
 \description{
 Sets/gets the default number of threads to used in \code{fixest} estimation functions. The default is the maximum number of threads minus two.

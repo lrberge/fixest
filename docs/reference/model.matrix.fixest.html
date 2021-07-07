@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
       </span>
     </div>
 
@@ -142,7 +142,17 @@
     </div>
 
     <pre class="usage"><span class='co'># S3 method for fixest</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/model.matrix.html'>model.matrix</a></span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>data</span>, type <span class='op'>=</span> <span class='st'>"rhs"</span>, na.rm <span class='op'>=</span> <span class='cn'>TRUE</span>, subset <span class='op'>=</span> <span class='cn'>FALSE</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+<span class='fu'><a href='https://rdrr.io/r/stats/model.matrix.html'>model.matrix</a></span><span class='op'>(</span>
+  <span class='va'>object</span>,
+  <span class='va'>data</span>,
+  type <span class='op'>=</span> <span class='st'>"rhs"</span>,
+  na.rm <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  subset <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  as.matrix <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  as.df <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  collin.rm <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -157,7 +167,7 @@
     </tr>
     <tr>
       <th>type</th>
-      <td><p>Character vector or one sided formula, default is "rhs". Contains the type of matrix/data.frame to be returned. Possible values are: "lhs", "rhs", "fixef", "iv.rhs1", "iv.rhs2".</p></td>
+      <td><p>Character vector or one sided formula, default is "rhs". Contains the type of matrix/data.frame to be returned. Possible values are: "lhs", "rhs", "fixef", "iv.rhs1" (1st stage RHS), "iv.rhs2" (2nd stage RHS), "iv.endo" (endogenous vars.), "iv.exo" (exogenous vars), "iv.inst" (instruments).</p></td>
     </tr>
     <tr>
       <th>na.rm</th>
@@ -168,6 +178,18 @@
       <td><p>Logical or character vector. Default is <code>FALSE</code>. If <code>TRUE</code>, then the matrix created will be restricted only to the variables contained in the argument <code>data</code>, which can then contain a subset of the variables used in the estimation. If a character vector, then only the variables matching the elements of the vector via regular expressions will be created.</p></td>
     </tr>
     <tr>
+      <th>as.matrix</th>
+      <td><p>Logical scalar, default is <code>FALSE</code>. Whether to coerce the result to a matrix.</p></td>
+    </tr>
+    <tr>
+      <th>as.df</th>
+      <td><p>Logical scalar, default is <code>FALSE</code>. Whether to coerce the result to a data.frame.</p></td>
+    </tr>
+    <tr>
+      <th>collin.rm</th>
+      <td><p>Logical scalar, default is <code>TRUE</code>. Whether to remove variables that were found to be collinear during the estimation. Beware: it does not perform a collinearity check.</p></td>
+    </tr>
+    <tr>
       <th>...</th>
       <td><p>Not currently used.</p></td>
     </tr>
@@ -175,7 +197,7 @@
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>It returns either a matrix or a data.frame. It returns a matrix for the "rhs", "iv.rhs1" and "iv.rhs2" parts. A data.frame for "lhs" and "fixef".</p>
+    <p>It returns either a vector, a matrix or a data.frame. It returns a vector for the dependent variable ("lhs"), a data.frame for the fixed-effects ("fixef") and a matrix for any other type.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p>See also the main estimation functions <code><a href='femlm.html'>femlm</a></code>, <code><a href='feols.html'>feols</a></code> or <code><a href='feglm.html'>feglm</a></code>. <code><a href='formula.fixest.html'>formula.fixest</a></code>, <code><a href='update.fixest.html'>update.fixest</a></code>, <code><a href='summary.fixest.html'>summary.fixest</a></code>, <code><a href='vcov.fixest.html'>vcov.fixest</a></code>.</p></div>

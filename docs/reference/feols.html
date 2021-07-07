@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -115,7 +115,7 @@
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/lrberge/fixest/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -166,6 +166,33 @@
   <span class='va'>combine.quick</span>,
   demeaned <span class='op'>=</span> <span class='cn'>FALSE</span>,
   mem.clean <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  only.env <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  <span class='va'>env</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span>
+
+<span class='fu'>feols.fit</span><span class='op'>(</span>
+  <span class='va'>y</span>,
+  <span class='va'>X</span>,
+  <span class='va'>fixef_df</span>,
+  <span class='va'>offset</span>,
+  <span class='va'>split</span>,
+  <span class='va'>fsplit</span>,
+  <span class='va'>cluster</span>,
+  <span class='va'>se</span>,
+  <span class='va'>dof</span>,
+  <span class='va'>weights</span>,
+  <span class='va'>subset</span>,
+  fixef.rm <span class='op'>=</span> <span class='st'>"perfect"</span>,
+  fixef.tol <span class='op'>=</span> <span class='fl'>1e-06</span>,
+  fixef.iter <span class='op'>=</span> <span class='fl'>10000</span>,
+  collin.tol <span class='op'>=</span> <span class='fl'>1e-10</span>,
+  nthreads <span class='op'>=</span> <span class='fu'><a href='setFixest_nthreads.html'>getFixest_nthreads</a></span><span class='op'>(</span><span class='op'>)</span>,
+  lean <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  warn <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  notes <span class='op'>=</span> <span class='fu'><a href='setFixest_notes.html'>getFixest_notes</a></span><span class='op'>(</span><span class='op'>)</span>,
+  mem.clean <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  verbose <span class='op'>=</span> <span class='fl'>0</span>,
   only.env <span class='op'>=</span> <span class='cn'>FALSE</span>,
   <span class='va'>env</span>,
   <span class='va'>...</span>
@@ -282,6 +309,18 @@
       <th>...</th>
       <td><p>Not currently used.</p></td>
     </tr>
+    <tr>
+      <th>y</th>
+      <td><p>Numeric vector/matrix/data.frame of the dependent variable(s). Multiple dependent variables will return a <code>fixest_multi</code> object.</p></td>
+    </tr>
+    <tr>
+      <th>X</th>
+      <td><p>Numeric matrix of the regressors.</p></td>
+    </tr>
+    <tr>
+      <th>fixef_df</th>
+      <td><p>Matrix/data.frame of the fixed-effects.</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
@@ -316,7 +355,7 @@
 <dt>sumFE</dt><dd><p>The sum of the fixed-effects coefficients for each observation.</p></dd>
 <dt>offset</dt><dd><p>(When relevant.) The offset formula.</p></dd>
 <dt>weights</dt><dd><p>(When relevant.) The weights formula.</p></dd>
-<dt>obsRemoved</dt><dd><p>(When relevant.) Vector of observations that were removed because of NA values.</p></dd>
+<dt>obs_selection</dt><dd><p>(When relevant.) List containing vectors of integers. It represents the sequential selection of observation vis a vis the original data set.</p></dd>
 <dt>collin.var</dt><dd><p>(When relevant.) Vector containing the variables removed because of collinearity.</p></dd>
 <dt>collin.coef</dt><dd><p>(When relevant.) Vector of coefficients, where the values of the variables removed because of collinearity are NA.</p></dd>
 <dt>collin.min_norm</dt><dd><p>The minimal diagonal value of the Cholesky decomposition. Small values indicate possible presence collinearity.</p></dd>
@@ -356,17 +395,17 @@
     
 
 
-<p>You can interact a numeric variable with a "factor-like" variable by using <code><a href='i.html'>interact(var, fe, ref)</a></code>, where <code>fe</code> is the variable to be interacted with and the argument <code>ref</code> is a value of <code>fe</code> taken as a reference (optional). Instead of using the function <code><a href='i.html'>interact</a></code>, you can use the alias <code><a href='i.html'>i(var, fe, ref)</a></code>.</p>
+<p>You can interact a numeric variable with a "factor-like" variable by using <code><a href='i.html'>i(factor_var, continuous_var, ref)</a></code>, where <code>continuous_var</code> will be interacted with each value of <code>factor_var</code> and the argument <code>ref</code> is a value of <code>factor_var</code> taken as a reference (optional).</p>
 <p>Using this specific way to create interactions leads to a different display of the interacted values in <code><a href='etable.html'>etable</a></code> and offers a special representation of the interacted coefficients in the function <code><a href='coefplot.html'>coefplot</a></code>. See examples.</p>
-<p>It is important to note that *if you do not care about the standard-errors of the interactions*, then you can add interactions in the fixed-effects part of the formula (using the syntax fe[[var]], as explained in the section &#8220;Varying slopes&#8221;).</p>
-<p>The function <code><a href='i.html'>interact</a></code> has in fact more arguments, please see details in its associated help page.</p>
+<p>It is important to note that *if you do not care about the standard-errors of the interactions*, then you can add interactions in the fixed-effects part of the formula, it will be incomparably faster (using the syntax <code>factor_var[continuous_var]</code>, as explained in the section &#8220;Varying slopes&#8221;).</p>
+<p>The function <code><a href='i.html'>i</a></code> has in fact more arguments, please see details in its associated help page.</p>
     <h2 class="hasAnchor" id="on-standard-errors"><a class="anchor" href="#on-standard-errors"></a>On standard-errors</h2>
 
     
 
 
 <p>Standard-errors can be computed in different ways, you can use the arguments <code>se</code> and <code>dof</code> in <code><a href='summary.fixest.html'>summary.fixest</a></code> to define how to compute them. By default, in the presence of fixed-effects, standard-errors are automatically clustered.</p>
-<p>The following vignette: <a href='https://cran.r-project.org/package=fixest/vignettes/standard_errors.html'>On standard-errors</a> describes in details how the standard-errors are computed in <code>fixest</code> and how you can replicate standard-errors from other software.</p>
+<p>The following vignette: <a href='https://lrberge.github.io/fixest/articles/standard_errors.html'>On standard-errors</a> describes in details how the standard-errors are computed in <code>fixest</code> and how you can replicate standard-errors from other software.</p>
 <p>You can use the functions <code><a href='setFixest_se.html'>setFixest_se</a></code> and <code><a href='dof.html'>setFixest_dof</a></code> to permanently set the way the standard-errors are computed.</p>
     <h2 class="hasAnchor" id="instrumental-variables"><a class="anchor" href="#instrumental-variables"></a>Instrumental variables</h2>
 
@@ -377,19 +416,20 @@
 <p>For example, <code>fml = y ~ x1 | x_endo ~ x_inst</code> will use the variables <code>x1</code> and <code>x_inst</code> in the first stage to explain <code>x_endo</code>. Then will use the fitted value of <code>x_endo</code> (which will be named <code>fit_x_endo</code>) and <code>x1</code> to explain <code>y</code>.
 To include several endogenous regressors, just use "+", like in: <code>fml = y ~ x1 | x_endo1 + x_end2 ~ x_inst1 + x_inst2</code>.</p>
 <p>Of course you can still add the fixed-effects, but the IV formula must always come last, like in <code>fml = y ~ x1 | fe1 + fe2 | x_endo ~ x_inst</code>.</p>
+<p>If you want to estimate a model without exogenous variables, use <code>"1"</code> as a placeholder: e.g. <code>fml = y ~ 1 | x_endo + x_inst</code>.</p>
 <p>By default, the second stage regression is returned. You can access the first stage(s) regressions either directly in the slot <code>iv_first_stage</code> (not recommended), or using the argument <code>stage = 1</code> from the function <code><a href='summary.fixest.html'>summary.fixest</a></code>. For example <code><a href='https://rdrr.io/r/base/summary.html'>summary(iv_est, stage = 1)</a></code> will give the first stage(s). Note that using summary you can display both the second and first stages at the same time using, e.g., <code>stage = 1:2</code> (using <code>2:1</code> would reverse the order).</p>
     <h2 class="hasAnchor" id="multiple-estimations"><a class="anchor" href="#multiple-estimations"></a>Multiple estimations</h2>
 
     
 
 
-<p>Multiple estimations can be performed at once, they just have to be specified in the formula. Multiple estimations yield a <code>fixest_multi</code> object which is &#8216;kind of&#8217; a list of all the results but includes specific methods to access the results in a handy way.</p>
-<p>To include mutliple dependent variables, wrap them in <code><a href='https://rdrr.io/r/base/c.html'>c()</a></code> (<code><a href='https://rdrr.io/r/base/list.html'>list()</a></code> also works). For instance <code>fml = c(y1, y2) ~ x1</code> would estimate the model <code>fml = y1 ~ x1</code> and then the model <code>fml = y2 ~ x1</code>.</p>
-<p>To include multiple independent variables, you need to use the stepwise functions. There are 4 stepwise functions associated to 4 short aliases. These are a) stepwise, stepwise0, cstepwise, cstepwise0, and b) sw, sw0, csw, csw0. Let's explain that.
-Assume you have the following formula: <code>fml = y ~ x1 + sw(x2, x3)</code>. The stepwise function <code>sw</code> will estimate the following two models: <code>y ~ x1 + x2</code> and <code>y ~ x1 + x3</code>. That is, each element in <code><a href='stepwise.html'>sw()</a></code> is sequentially, and separately, added to the formula. Would have you used <code>sw0</code> in lieu of <code>sw</code>, then the model <code>y ~ x1</code> would also have been estimated. The <code>0</code> in the name means that the model wihtout any stepwise element also needs to be estimated.
+<p>Multiple estimations can be performed at once, they just have to be specified in the formula. Multiple estimations yield a <code>fixest_multi</code> object which is &#8216;kind of&#8217; a list of all the results but includes specific methods to access the results in a handy way. Please have a look at the dedicated vignette: <a href='https://lrberge.github.io/fixest/articles/multiple_estimations.html'>Multiple estimations</a>.</p>
+<p>To include multiple dependent variables, wrap them in <code><a href='https://rdrr.io/r/base/c.html'>c()</a></code> (<code><a href='https://rdrr.io/r/base/list.html'>list()</a></code> also works). For instance <code>fml = c(y1, y2) ~ x1</code> would estimate the model <code>fml = y1 ~ x1</code> and then the model <code>fml = y2 ~ x1</code>.</p>
+<p>To include multiple independent variables, you need to use the stepwise functions. There are 4 stepwise functions: <code>sw</code>, <code>sw0</code>, <code>csw</code>, <code>csw0</code>. Of course <code>sw</code> stands for stepwise, and <code>csw</code> for cumulative stepwise. Let's explain that.
+Assume you have the following formula: <code>fml = y ~ x1 + sw(x2, x3)</code>. The stepwise function <code>sw</code> will estimate the following two models: <code>y ~ x1 + x2</code> and <code>y ~ x1 + x3</code>. That is, each element in <code><a href='stepwise.html'>sw()</a></code> is sequentially, and separately, added to the formula. Would have you used <code>sw0</code> in lieu of <code>sw</code>, then the model <code>y ~ x1</code> would also have been estimated. The <code>0</code> in the name means that the model without any stepwise element also needs to be estimated.
 Finally, the prefix <code>c</code> means cumulative: each stepwise element is added to the next. That is, <code>fml = y ~ x1 + csw(x2, x3)</code> would lead to the following models <code>y ~ x1 + x2</code> and <code>y ~ x1 + x2 + x3</code>. The <code>0</code> has the same meaning and would also lead to the model without the stepwise elements to be estimated: in other words, <code>fml = y ~ x1 + csw0(x2, x3)</code> leads to the following three models: <code>y ~ x1</code>, <code>y ~ x1 + x2</code> and <code>y ~ x1 + x2 + x3</code>.</p>
 <p>Multiple independent variables can be combined with multiple dependent variables, as in <code>fml = c(y1, y2) ~ cw(x1, x2, x3)</code> which would lead to 6 estimations. Multiple estimations can also be combined to split samples (with the arguments <code>split</code>, <code>fsplit</code>).</p>
-<p>Fixed-effects cannot be included in a stepwise fashion: they are there or not and stay the same for all estimations.</p>
+<p>You can also add fixed-effects in a stepwise fashion. Note that you cannot perform stepwise estimations on the IV part of the formula (<code>feols</code> only).</p>
 <p>A note on performance. The feature of multiple estimations has been highly optimized for <code>feols</code>, in particular in the presence of fixed-effects. It is faster to estimate multiple models using the formula rather than with a loop. For non-<code>feols</code> models using the formula is roughly similar to using a loop performance-wise.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
@@ -416,10 +456,10 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: Sepal.Length
 #&gt; Observations: 150 
 #&gt; Standard-errors: Clustered (Species) 
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; (Intercept)  2.249100   0.162626  13.830 0.005187 ** 
-#&gt; Sepal.Width  0.595525   0.051733  11.511 0.007462 ** 
-#&gt; Petal.Length 0.471920   0.006873  68.667 0.000212 ***
+#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept)  2.249100   0.162626  13.830  0.005187 ** 
+#&gt; Sepal.Width  0.595525   0.051733  11.511  0.007462 ** 
+#&gt; Petal.Length 0.471920   0.006873  68.667  0.000212 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.329937   Adj. R2: 0.838003</div><div class='input'>
@@ -434,9 +474,9 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; Observations: 150 
 #&gt; Fixed-effects: Species: 3
 #&gt; Standard-errors: Clustered (Species) 
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; Sepal.Width  0.432217   0.161308  2.6794 0.115623    
-#&gt; Petal.Length 0.775629   0.126546  6.1293 0.025601 *  
+#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; Sepal.Width  0.432217   0.161308  2.6794  0.115623    
+#&gt; Petal.Length 0.775629   0.126546  6.1293  0.025601 *  
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.305129     Adj. R2: 0.859538
@@ -452,8 +492,8 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; Fixed-effects: Species: 3
 #&gt; Varying slopes: Sepal.Width (Species: 3)
 #&gt; Standard-errors: Clustered (Species) 
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; Petal.Length 0.822045   0.100265  8.1987 0.014553 *  
+#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; Petal.Length 0.822045    0.10061  8.1706  0.014651 *  
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.298903     Adj. R2: 0.863326
@@ -470,8 +510,8 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; Observations: 150 
 #&gt; Fixed-effects: Species^fe_2: 30
 #&gt; Standard-errors: Clustered (Species^fe_2) 
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; Petal.Length 0.875613   0.062395  14.033 1.85e-14 ***
+#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; Petal.Length 0.875613   0.062395  14.033  1.85e-14 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.309865     Adj. R2: 0.823494
@@ -514,7 +554,7 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 
 <span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>base_did</span><span class='op'>)</span>
 <span class='co'># We interact the variable 'period' with the variable 'treat'</span>
-<span class='va'>est_did</span> <span class='op'>=</span> <span class='fu'>feols</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'><a href='i.html'>i</a></span><span class='op'>(</span><span class='va'>treat</span>, <span class='va'>period</span>, <span class='fl'>5</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>id</span><span class='op'>+</span><span class='va'>period</span>, <span class='va'>base_did</span><span class='op'>)</span>
+<span class='va'>est_did</span> <span class='op'>=</span> <span class='fu'>feols</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'><a href='i.html'>i</a></span><span class='op'>(</span><span class='va'>period</span>, <span class='va'>treat</span>, <span class='fl'>5</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>id</span><span class='op'>+</span><span class='va'>period</span>, <span class='va'>base_did</span><span class='op'>)</span>
 
 <span class='co'># Now we can plot the result of the interaction with coefplot</span>
 <span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='va'>est_did</span><span class='op'>)</span>
@@ -543,27 +583,27 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; Second stage: Dep. Var.: y
 #&gt; Observations: 150 
 #&gt; Standard-errors: Standard 
-#&gt;              Estimate Std. Error   t value Pr(&gt;|t|) 
-#&gt; (Intercept) -5.444100    82.9070 -0.065665 0.947735 
-#&gt; fit_x_endo1  4.156900    44.6790  0.093038 0.926001 
-#&gt; x1           0.533483     1.8094  0.294843 0.768532 
-#&gt; x2          -1.358100    19.6740 -0.069030 0.945060 
+#&gt;              Estimate Std. Error   t value Pr(&gt;|t|)) 
+#&gt; (Intercept) -5.444100    82.9070 -0.065665  0.947735 
+#&gt; fit_x_endo1  4.156900    44.6790  0.093038  0.926001 
+#&gt; x1           0.533483     1.8094  0.294843  0.768532 
+#&gt; x2          -1.358100    19.6740 -0.069030  0.945060 
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 7.9776   Adj. R2: -94.4
-#&gt; F-test (1st stage): stat = 0.008704, p = 0.925795, on 1 and 146 DoF.
-#&gt;         Wu-Hausman: stat = 5.2387  , p = 0.023535, on 1 and 145 DoF.</div><div class='input'>
+#&gt; F-test (1st stage), x_endo1: stat = 0.008704, p = 0.925795, on 1 and 146 DoF.
+#&gt;                  Wu-Hausman: stat = 5.2387  , p = 0.023535, on 1 and 145 DoF.</div><div class='input'>
 <span class='co'># To show the first stage:</span>
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>res_iv</span>, stage <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; TSLS estimation, Dep. Var.: x_endo1, Endo.: x_endo1, Instr.: x_inst1
 #&gt; First stage: Dep. Var.: x_endo1
 #&gt; Observations: 150 
 #&gt; Standard-errors: Standard 
-#&gt;              Estimate Std. Error   t value Pr(&gt;|t|)    
-#&gt; (Intercept)  1.867800   1.454900  1.283900 0.201226    
-#&gt; x_inst1     -0.011136   0.119357 -0.093298 0.925795    
-#&gt; x1           0.018677   0.405512  0.046059 0.963326    
-#&gt; x2           0.447831   0.128635  3.481400 0.000658 ***
+#&gt;              Estimate Std. Error   t value Pr(&gt;|t|))    
+#&gt; (Intercept)  1.867800   1.454900  1.283900  0.201226    
+#&gt; x_inst1     -0.011136   0.119357 -0.093298  0.925795    
+#&gt; x1           0.018677   0.405512  0.046059  0.963326    
+#&gt; x2           0.447831   0.128635  3.481400  0.000658 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 1.9138   Adj. R2: 0.122258
@@ -575,11 +615,11 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; First stage: Dep. Var.: x_endo1
 #&gt; Observations: 150 
 #&gt; Standard-errors: Standard 
-#&gt;              Estimate Std. Error   t value Pr(&gt;|t|)    
-#&gt; (Intercept)  1.867800   1.454900  1.283900 0.201226    
-#&gt; x_inst1     -0.011136   0.119357 -0.093298 0.925795    
-#&gt; x1           0.018677   0.405512  0.046059 0.963326    
-#&gt; x2           0.447831   0.128635  3.481400 0.000658 ***
+#&gt;              Estimate Std. Error   t value Pr(&gt;|t|))    
+#&gt; (Intercept)  1.867800   1.454900  1.283900  0.201226    
+#&gt; x_inst1     -0.011136   0.119357 -0.093298  0.925795    
+#&gt; x1           0.018677   0.405512  0.046059  0.963326    
+#&gt; x2           0.447831   0.128635  3.481400  0.000658 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 1.9138   Adj. R2: 0.122258
@@ -590,16 +630,16 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; Second stage: Dep. Var.: y
 #&gt; Observations: 150 
 #&gt; Standard-errors: Standard 
-#&gt;              Estimate Std. Error   t value Pr(&gt;|t|) 
-#&gt; (Intercept) -5.444100    82.9070 -0.065665 0.947735 
-#&gt; fit_x_endo1  4.156900    44.6790  0.093038 0.926001 
-#&gt; x1           0.533483     1.8094  0.294843 0.768532 
-#&gt; x2          -1.358100    19.6740 -0.069030 0.945060 
+#&gt;              Estimate Std. Error   t value Pr(&gt;|t|)) 
+#&gt; (Intercept) -5.444100    82.9070 -0.065665  0.947735 
+#&gt; fit_x_endo1  4.156900    44.6790  0.093038  0.926001 
+#&gt; x1           0.533483     1.8094  0.294843  0.768532 
+#&gt; x2          -1.358100    19.6740 -0.069030  0.945060 
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 7.9776   Adj. R2: -94.4
-#&gt; F-test (1st stage): stat = 0.008704, p = 0.925795, on 1 and 146 DoF.
-#&gt;         Wu-Hausman: stat = 5.2387  , p = 0.023535, on 1 and 145 DoF.</div><div class='input'>
+#&gt; F-test (1st stage), x_endo1: stat = 0.008704, p = 0.925795, on 1 and 146 DoF.
+#&gt;                  Wu-Hausman: stat = 5.2387  , p = 0.023535, on 1 and 145 DoF.</div><div class='input'>
 <span class='co'># Adding a fixed-effect =&gt; IV formula always last!</span>
 <span class='va'>res_iv_fe</span> <span class='op'>=</span> <span class='fu'>feols</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='va'>x2</span> <span class='op'>|</span> <span class='va'>fe1</span> <span class='op'>|</span> <span class='va'>x_endo1</span> <span class='op'>~</span> <span class='va'>x_inst1</span>, <span class='va'>base</span><span class='op'>)</span>
 
@@ -615,12 +655,12 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; First stage: Dep. Var.: x_endo1
 #&gt; Observations: 150 
 #&gt; Standard-errors: Standard 
-#&gt;              Estimate Std. Error   t value Pr(&gt;|t|)    
-#&gt; (Intercept)  1.850700   1.516300  1.220500 0.224240    
-#&gt; x_inst1     -0.011391   0.119922 -0.094984 0.924459    
-#&gt; x_inst2      0.003804   0.091032  0.041784 0.966728    
-#&gt; x1           0.020822   0.410131  0.050770 0.959578    
-#&gt; x2           0.446540   0.132727  3.364300 0.000982 ***
+#&gt;              Estimate Std. Error   t value Pr(&gt;|t|))    
+#&gt; (Intercept)  1.850700   1.516300  1.220500  0.224240    
+#&gt; x_inst1     -0.011391   0.119922 -0.094984  0.924459    
+#&gt; x_inst2      0.003804   0.091032  0.041784  0.966728    
+#&gt; x1           0.020822   0.410131  0.050770  0.959578    
+#&gt; x2           0.446540   0.132727  3.364300  0.000982 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 1.9138   Adj. R2: 0.116216
@@ -757,30 +797,30 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; ### Dep. var.: Ozone
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error t value   Pr(&gt;|t|)    
+#&gt;                Estimate Std. Error t value  Pr(&gt;|t|))    
 #&gt; (Intercept)      29.851     4.6248  6.4545 0.00000138 ***
 #&gt; poly(Wind, 2)1 -180.150    68.1460 -2.6436 0.01451600 *  
 #&gt; poly(Wind, 2)2   93.319    55.6890  1.6757 0.10734000    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; (Intercept)      60.885     13.331  4.5670 0.000137 ***
-#&gt; poly(Temp, 2)1  436.080    162.610  2.6817 0.013321 *  
-#&gt; poly(Temp, 2)2  156.570    107.680  1.4540 0.159455    
+#&gt;                Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept)      60.885     13.331  4.5670  0.000137 ***
+#&gt; poly(Temp, 2)1  436.080    162.610  2.6817  0.013321 *  
+#&gt; poly(Temp, 2)2  156.570    107.680  1.4540  0.159455    
 #&gt; 
 #&gt; ### Dep. var.: Solar.R
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error   t value    Pr(&gt;|t|)    
+#&gt;                Estimate Std. Error   t value   Pr(&gt;|t|))    
 #&gt; (Intercept)      185.98     27.217  6.833200 0.000000456 ***
 #&gt; poly(Wind, 2)1  -101.51    403.970 -0.251277 0.803739000    
 #&gt; poly(Wind, 2)2  -248.61    327.310 -0.759552 0.454919000    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error   t value Pr(&gt;|t|)    
-#&gt; (Intercept)      184.74     72.527  2.547100 0.017690 *  
-#&gt; poly(Temp, 2)1  -306.20    881.230 -0.347473 0.731265    
-#&gt; poly(Temp, 2)2  -822.99    547.850 -1.502200 0.146087    
+#&gt;                Estimate Std. Error   t value Pr(&gt;|t|))    
+#&gt; (Intercept)      184.74     72.527  2.547100  0.017690 *  
+#&gt; poly(Temp, 2)1  -306.20    881.230 -0.347473  0.731265    
+#&gt; poly(Temp, 2)2  -822.99    547.850 -1.502200  0.146087    
 #&gt; 
 #&gt; 
 #&gt; # SAMPLE: 6
@@ -789,27 +829,27 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; ### Dep. var.: Ozone
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error   t value Pr(&gt;|t|)    
-#&gt; (Intercept)      21.821      9.489  2.299600 0.061137 .  
-#&gt; poly(Wind, 2)1  166.960    161.900  1.031300 0.342179    
-#&gt; poly(Wind, 2)2  -60.631     92.541 -0.655171 0.536652    
+#&gt;                Estimate Std. Error   t value Pr(&gt;|t|))    
+#&gt; (Intercept)      21.821      9.489  2.299600  0.061137 .  
+#&gt; poly(Wind, 2)1  166.960    161.900  1.031300  0.342179    
+#&gt; poly(Wind, 2)2  -60.631     92.541 -0.655171  0.536652    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; (Intercept)      34.296     4.1531  8.2579 0.000171 ***
-#&gt; poly(Temp, 2)1  114.920    62.2060  1.8474 0.114205    
-#&gt; poly(Temp, 2)2  206.490    79.9990  2.5811 0.041707 *  
+#&gt;                Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept)      34.296     4.1531  8.2579  0.000171 ***
+#&gt; poly(Temp, 2)1  114.920    62.2060  1.8474  0.114205    
+#&gt; poly(Temp, 2)2  206.490    79.9990  2.5811  0.041707 *  
 #&gt; 
 #&gt; ### Dep. var.: Solar.R
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error   t value    Pr(&gt;|t|)    
+#&gt;                Estimate Std. Error   t value   Pr(&gt;|t|))    
 #&gt; (Intercept)     187.780     16.466 11.404000 7.89000e-12 ***
 #&gt; poly(Wind, 2)1  389.560    194.900  1.998800 5.57870e-02 .  
 #&gt; poly(Wind, 2)2  -72.818    156.400 -0.465574 6.45254e-01    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error  t value    Pr(&gt;|t|)    
+#&gt;                Estimate Std. Error  t value   Pr(&gt;|t|))    
 #&gt; (Intercept)      188.34      21.41 8.796900 2.06000e-09 ***
 #&gt; poly(Temp, 2)1   575.59     374.37 1.537500 1.35815e-01    
 #&gt; poly(Temp, 2)2   133.70     363.96 0.367352 7.16220e-01    
@@ -821,30 +861,30 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; ### Dep. var.: Ozone
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error   t value    Pr(&gt;|t|)    
+#&gt;                Estimate Std. Error   t value   Pr(&gt;|t|))    
 #&gt; (Intercept)      49.812     5.5194  9.024800 5.11000e-09 ***
 #&gt; poly(Wind, 2)1 -280.640    84.2530 -3.330900 2.90600e-03 ** 
 #&gt; poly(Wind, 2)2   58.003   107.6300  0.538924 5.95118e-01    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error  t value Pr(&gt;|t|)    
-#&gt; (Intercept)      29.211     16.069 1.817800 0.082138 .  
-#&gt; poly(Temp, 2)1  584.100    265.920 2.196500 0.038399 *  
-#&gt; poly(Temp, 2)2   14.189    198.960 0.071314 0.943764    
+#&gt;                Estimate Std. Error  t value Pr(&gt;|t|))    
+#&gt; (Intercept)      29.211     16.069 1.817800  0.082138 .  
+#&gt; poly(Temp, 2)1  584.100    265.920 2.196500  0.038399 *  
+#&gt; poly(Temp, 2)2   14.189    198.960 0.071314  0.943764    
 #&gt; 
 #&gt; ### Dep. var.: Solar.R
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                 Estimate Std. Error   t value    Pr(&gt;|t|)    
+#&gt;                 Estimate Std. Error   t value   Pr(&gt;|t|))    
 #&gt; (Intercept)     213.1600     16.335 13.049000 2.01000e-13 ***
 #&gt; poly(Wind, 2)1 -144.0800    246.760 -0.583909 5.63956e-01    
 #&gt; poly(Wind, 2)2    8.7091    324.820  0.026812 9.78800e-01    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error   t value Pr(&gt;|t|)    
-#&gt; (Intercept)      172.30     54.609  3.155200 0.003813 ** 
-#&gt; poly(Temp, 2)1   835.02    904.970  0.922697 0.364048    
-#&gt; poly(Temp, 2)2  -107.28    645.970 -0.166070 0.869295    
+#&gt;                Estimate Std. Error   t value Pr(&gt;|t|))    
+#&gt; (Intercept)      172.30     54.609  3.155200  0.003813 ** 
+#&gt; poly(Temp, 2)1   835.02    904.970  0.922697  0.364048    
+#&gt; poly(Temp, 2)2  -107.28    645.970 -0.166070  0.869295    
 #&gt; 
 #&gt; 
 #&gt; # SAMPLE: 8
@@ -853,30 +893,30 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; ### Dep. var.: Ozone
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error t value    Pr(&gt;|t|)    
+#&gt;                Estimate Std. Error t value   Pr(&gt;|t|))    
 #&gt; (Intercept)      49.732     6.1498  8.0867 3.56000e-08 ***
 #&gt; poly(Wind, 2)1 -289.250    97.1100 -2.9786 6.71900e-03 ** 
 #&gt; poly(Wind, 2)2  116.300    90.0030  1.2922 2.09134e-01    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error   t value Pr(&gt;|t|)    
-#&gt; (Intercept)      26.129     16.648  1.569500 0.130195    
-#&gt; poly(Temp, 2)1  678.140    325.990  2.080200 0.048834 *  
-#&gt; poly(Temp, 2)2 -162.120    188.330 -0.860822 0.398222    
+#&gt;                Estimate Std. Error   t value Pr(&gt;|t|))    
+#&gt; (Intercept)      26.129     16.648  1.569500  0.130195    
+#&gt; poly(Temp, 2)1  678.140    325.990  2.080200  0.048834 *  
+#&gt; poly(Temp, 2)2 -162.120    188.330 -0.860822  0.398222    
 #&gt; 
 #&gt; ### Dep. var.: Solar.R
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error   t value    Pr(&gt;|t|)    
+#&gt;                Estimate Std. Error   t value   Pr(&gt;|t|))    
 #&gt; (Intercept)     170.340     15.836 10.757000 7.21000e-11 ***
 #&gt; poly(Wind, 2)1  -78.922    265.260 -0.297520 7.68528e-01    
 #&gt; poly(Wind, 2)2  130.240    250.900  0.519111 6.08249e-01    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error   t value Pr(&gt;|t|)    
-#&gt; (Intercept)     141.740     34.927  4.058100 0.000427 ***
-#&gt; poly(Temp, 2)1  610.440    708.890  0.861125 0.397354    
-#&gt; poly(Temp, 2)2  -62.816    420.060 -0.149540 0.882327    
+#&gt;                Estimate Std. Error   t value Pr(&gt;|t|))    
+#&gt; (Intercept)     141.740     34.927  4.058100  0.000427 ***
+#&gt; poly(Temp, 2)1  610.440    708.890  0.861125  0.397354    
+#&gt; poly(Temp, 2)2  -62.816    420.060 -0.149540  0.882327    
 #&gt; 
 #&gt; 
 #&gt; # SAMPLE: 9
@@ -885,13 +925,13 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; ### Dep. var.: Ozone
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error t value  Pr(&gt;|t|)    
+#&gt;                Estimate Std. Error t value Pr(&gt;|t|))    
 #&gt; (Intercept)       32.49     3.0073 10.8040 4.140e-11 ***
 #&gt; poly(Wind, 2)1  -151.11    39.2660 -3.8484 6.930e-04 ***
 #&gt; poly(Wind, 2)2   166.75    45.9360  3.6301 1.217e-03 ** 
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error t value  Pr(&gt;|t|)    
+#&gt;                Estimate Std. Error t value Pr(&gt;|t|))    
 #&gt; (Intercept)      35.773     1.9254 18.5800 &lt; 2.2e-16 ***
 #&gt; poly(Temp, 2)1  198.970    30.2130  6.5854  5.53e-07 ***
 #&gt; poly(Temp, 2)2  160.480    32.3630  4.9588   3.7e-05 ***
@@ -899,13 +939,13 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; ### Dep. var.: Solar.R
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error   t value    Pr(&gt;|t|)    
+#&gt;                Estimate Std. Error   t value   Pr(&gt;|t|))    
 #&gt; (Intercept)     168.050     14.943 11.246000 1.08000e-11 ***
 #&gt; poly(Wind, 2)1  -94.963    195.710 -0.485211 6.31440e-01    
 #&gt; poly(Wind, 2)2   28.000    231.670  0.120859 9.04697e-01    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error   t value    Pr(&gt;|t|)    
+#&gt;                Estimate Std. Error   t value   Pr(&gt;|t|))    
 #&gt; (Intercept)      166.48     15.317 10.869000 2.31000e-11 ***
 #&gt; poly(Temp, 2)1   204.78    241.870  0.846686 4.04613e-01    
 #&gt; poly(Temp, 2)2  -146.65    256.410 -0.571947 5.72090e-01    </div><div class='input'>
@@ -959,16 +999,16 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; Dep. var.: Ozone
 #&gt; Expl. vars.: poly(Wind, 2)
 #&gt; Sample: 5
-#&gt;                Estimate Std. Error t value   Pr(&gt;|t|)    
+#&gt;                Estimate Std. Error t value  Pr(&gt;|t|))    
 #&gt; (Intercept)      29.851     4.6248  6.4545 0.00000138 ***
 #&gt; poly(Wind, 2)1 -180.150    68.1460 -2.6436 0.01451600 *  
 #&gt; poly(Wind, 2)2   93.319    55.6890  1.6757 0.10734000    
 #&gt; ---
 #&gt; Sample: 6
-#&gt;                Estimate Std. Error   t value Pr(&gt;|t|)    
-#&gt; (Intercept)      21.821      9.489  2.299600 0.061137 .  
-#&gt; poly(Wind, 2)1  166.960    161.900  1.031300 0.342179    
-#&gt; poly(Wind, 2)2  -60.631     92.541 -0.655171 0.536652    </div><div class='input'>
+#&gt;                Estimate Std. Error   t value Pr(&gt;|t|))    
+#&gt; (Intercept)      21.821      9.489  2.299600  0.061137 .  
+#&gt; poly(Wind, 2)1  166.960    161.900  1.031300  0.342179    
+#&gt; poly(Wind, 2)2  -60.631     92.541 -0.655171  0.536652    </div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

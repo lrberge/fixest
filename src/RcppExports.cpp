@@ -692,6 +692,42 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_find_never_always_treated
+List cpp_find_never_always_treated(IntegerVector cohort, NumericVector period);
+RcppExport SEXP _fixest_cpp_find_never_always_treated(SEXP cohortSEXP, SEXP periodSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type cohort(cohortSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type period(periodSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_find_never_always_treated(cohort, period));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_get_first_item
+IntegerVector cpp_get_first_item(IntegerVector x, int n_items);
+RcppExport SEXP _fixest_cpp_get_first_item(SEXP xSEXP, SEXP n_itemsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< int >::type n_items(n_itemsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_get_first_item(x, n_items));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_combine_clusters
+IntegerVector cpp_combine_clusters(SEXP cluster_list, IntegerVector index);
+RcppExport SEXP _fixest_cpp_combine_clusters(SEXP cluster_listSEXP, SEXP indexSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type cluster_list(cluster_listSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type index(indexSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_combine_clusters(cluster_list, index));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_get_nb_threads
 int cpp_get_nb_threads();
 RcppExport SEXP _fixest_cpp_get_nb_threads() {
@@ -1028,6 +1064,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_diag_XUtX", (DL_FUNC) &_fixest_cpp_diag_XUtX, 2},
     {"_fixest_cpp_factor_matrix", (DL_FUNC) &_fixest_cpp_factor_matrix, 5},
     {"_fixest_cpp_add_commas", (DL_FUNC) &_fixest_cpp_add_commas, 3},
+    {"_fixest_cpp_find_never_always_treated", (DL_FUNC) &_fixest_cpp_find_never_always_treated, 2},
+    {"_fixest_cpp_get_first_item", (DL_FUNC) &_fixest_cpp_get_first_item, 2},
+    {"_fixest_cpp_combine_clusters", (DL_FUNC) &_fixest_cpp_combine_clusters, 2},
     {"_fixest_cpp_get_nb_threads", (DL_FUNC) &_fixest_cpp_get_nb_threads, 0},
     {"_fixest_cpppar_exp", (DL_FUNC) &_fixest_cpppar_exp, 2},
     {"_fixest_cpppar_log", (DL_FUNC) &_fixest_cpppar_log, 2},

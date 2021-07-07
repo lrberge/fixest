@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
       </span>
     </div>
 
@@ -133,7 +133,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Computes fit statistics of fixest objects</h1>
-    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/MiscFuns.R'><code>R/MiscFuns.R</code></a></small>
+    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/fitstats.R'><code>R/fitstats.R</code></a></small>
     <div class="hidden name"><code>fitstat.Rd</code></div>
     </div>
 
@@ -189,13 +189,16 @@
 <p>The types are case sensitive, please use lower case only. The types available are:</p>
 <ul>
 <li><p><code>n</code>, <code>ll</code>, <code>aic</code>, <code>bic</code>, <code>rmse</code>: The number of observations, the log-likelihood, the AIC, the BIC and the root mean squared error, respectively.</p></li>
+<li><p><code>my</code>: Mean of the dependent variable.</p></li>
 <li><p><code>g</code>: The degrees of freedom used to compute the t-test (it influences the p-values of the coefficients). When the VCOV is clustered, this value is equal to the minimum cluster size, otherwise, it is equal to the sample size minus the number of variables.</p></li>
 <li><p><code>r2</code>, <code>ar2</code>, <code>wr2</code>, <code>awr2</code>, <code>pr2</code>, <code>apr2</code>, <code>wpr2</code>, <code>awpr2</code>: All r2 that can be obtained with the function <code><a href='r2.html'>r2</a></code>. The <code>a</code> stands for 'adjusted', the <code>w</code> for 'within' and the <code>p</code> for 'pseudo'. Note that the order of the letters <code>a</code>, <code>w</code> and <code>p</code> does not matter.</p></li>
 <li><p><code>theta</code>: The over-dispersion parameter in Negative Binomial models. Low values mean high overdispersion.</p></li>
 <li><p><code>f</code>, <code>wf</code>: The F-tests of nullity of the coefficients. The <code>w</code> stands for 'within'. These types return the following values: <code>stat</code>, <code>p</code>, <code>df1</code> and <code>df2</code>. If you want to display only one of these, use their name after a dot: e.g. <code>f.stat</code> will give the statistic of the F-test, or <code>wf.p</code> will give the p-values of the F-test on the projected model (i.e. projected onto the fixed-effects).</p></li>
 <li><p><code>wald</code>: Wald test of joint nullity of the coefficients. This test always excludes the intercept and the fixed-effects. These type returns the following values: <code>stat</code>, <code>p</code>, <code>df1</code>, <code>df2</code> and <code>vcov</code>. The element <code>vcov</code> reports the way the VCOV matrix was computed since it directly influences this statistic.</p></li>
-<li><p><code>ivf</code>, <code>ivf1</code>, <code>ivf2</code>, <code>ivfall</code>: These statistics are specific to IV estimations. They report either the IV F-test (namely the Cragg-Donald F statistic) of the first stage (<code>ivf</code> or <code>ivf1</code>), of the second stage (<code>ivf2</code>) or of both (<code>ivfall</code>). The F-test of the first stage is commonly named weak instrument test. The value of <code>ivfall</code> is only useful in <code><a href='etable.html'>etable</a></code> when both the 1st and 2nd stages are displayed (it leads to the 1st stage F-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, <code>ivf1</code> would also be displayed on the 2nd stage estimation). These types return the following values: <code>stat</code>, <code>p</code>, <code>df1</code> and <code>df2</code>.</p></li>
-<li><p><code>ivwald</code>, <code>ivwald1</code>, <code>ivwald2</code>, <code>ivwaldall</code>: These statistics are specific to IV estimations. They report either the IV Wald-test of the first stage (<code>ivwald</code> or <code>ivwald1</code>), of the second stage (<code>ivwald2</code>) or of both (<code>ivwaldall</code>). The Wald-test of the first stage is commonly named weak instrument test. Note that if the estimation was done with a robust VCOV, this is also known as the Kleibergen-Paap Wald test. The value of <code>ivwaldall</code> is only useful in <code><a href='etable.html'>etable</a></code> when both the 1st and 2nd stages are displayed (it leads to the 1st stage Wald-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, <code>ivwald1</code> would also be displayed on the 2nd stage estimation). These types return the following values: <code>stat</code>, <code>p</code>, <code>df1</code>, <code>df2</code>, and <code>vcov</code>.</p></li>
+<li><p><code>ivf</code>, <code>ivf1</code>, <code>ivf2</code>, <code>ivfall</code>: These statistics are specific to IV estimations. They report either the IV F-test (namely the Cragg-Donald F statistic in the presence of only one endogenous regressor) of the first stage (<code>ivf</code> or <code>ivf1</code>), of the second stage (<code>ivf2</code>) or of both (<code>ivfall</code>). The F-test of the first stage is commonly named weak instrument test. The value of <code>ivfall</code> is only useful in <code><a href='etable.html'>etable</a></code> when both the 1st and 2nd stages are displayed (it leads to the 1st stage F-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, <code>ivf1</code> would also be displayed on the 2nd stage estimation). These types return the following values: <code>stat</code>, <code>p</code>, <code>df1</code> and <code>df2</code>.</p></li>
+<li><p><code>ivwald</code>, <code>ivwald1</code>, <code>ivwald2</code>, <code>ivwaldall</code>: These statistics are specific to IV estimations. They report either the IV Wald-test of the first stage (<code>ivwald</code> or <code>ivwald1</code>), of the second stage (<code>ivwald2</code>) or of both (<code>ivwaldall</code>). The Wald-test of the first stage is commonly named weak instrument test. Note that if the estimation was done with a robust VCOV and there is only one endogenous regressor, this is equivalent to the Kleibergen-Paap statistic. The value of <code>ivwaldall</code> is only useful in <code><a href='etable.html'>etable</a></code> when both the 1st and 2nd stages are displayed (it leads to the 1st stage Wald-test(s) to be displayed on the 1st stage estimation(s), and the 2nd stage one on the 2nd stage estimation -- otherwise, <code>ivwald1</code> would also be displayed on the 2nd stage estimation). These types return the following values: <code>stat</code>, <code>p</code>, <code>df1</code>, <code>df2</code>, and <code>vcov</code>.</p></li>
+<li><p><code>cd</code>: The Cragg-Donald test for weak instruments.</p></li>
+<li><p><code>kpr</code>: The Kleibergen-Paap test for weak instruments.</p></li>
 <li><p><code>wh</code>: This statistic is specific to IV estimations. Wu-Hausman endogeneity test. H0 is the absence of endogeneity of the instrumented variables. It returns the following values: <code>stat</code>, <code>p</code>, <code>df1</code>, <code>df2</code>.</p></li>
 <li><p><code>sargan</code>: Sargan test of overidentifying restrictions. H0: the instruments are not correlated with the second stage residuals. It returns the following values: <code>stat</code>, <code>p</code>, <code>df</code>.</p></li>
 <li><p><code>lr</code>, <code>wlr</code>: Likelihood ratio and within likelihood ratio tests. It returns the following elements: <code>stat</code>, <code>p</code>, <code>df</code>. Concerning the within-LR test, note that, contrary to estimations with <code>femlm</code> or <code>feNmlm</code>, estimations with <code>feglm</code>/<code>fepois</code> need to estimate the model with fixed-effects only which may prove time-consuming (depending on your model). Bottom line, if you really need the within-LR and estimate a Poisson model, use <code>femlm</code> instead of <code>fepois</code> (the former uses direct ML maximization for which the only FEs model is a by product).</p></li>
@@ -209,12 +212,12 @@
 
 <span class='co'># Extracting the 'working' number of observations used to compute the pvalues</span>
 <span class='fu'>fitstat</span><span class='op'>(</span><span class='va'>gravity</span>, <span class='st'>"g"</span>, simplify <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] 38295</div><div class='input'>
+</div><div class='output co'>#&gt; [1] 15</div><div class='input'>
 <span class='co'># Some fit statistics</span>
 <span class='fu'>fitstat</span><span class='op'>(</span><span class='va'>gravity</span>, <span class='op'>~</span> <span class='va'>rmse</span> <span class='op'>+</span> <span class='va'>r2</span> <span class='op'>+</span> <span class='va'>wald</span> <span class='op'>+</span> <span class='va'>wf</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;         RMSE: 2.2622
-#&gt;          R2: 0.50428
-#&gt; Wald (joint nullity): stat =   272.9, p &lt; 2.2e-16, on 1 and 38,295 DoF, VCOV matrix: Clustered (Destination).
+</div><div class='output co'>#&gt;                 RMSE: 2.2622
+#&gt;                   R2: 0.50428
+#&gt; Wald (joint nullity): stat =   272.9, p &lt; 2.2e-16, on 1 and 38,309 DoF, VCOV: Clustered (Destination).
 #&gt;   F-test (projected): stat = 5,832.8, p &lt; 2.2e-16, on 1 and 38,295 DoF.</div><div class='input'>
 <span class='co'># You can use them in etable</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>gravity</span>, fitstat <span class='op'>=</span> <span class='op'>~</span> <span class='va'>rmse</span> <span class='op'>+</span> <span class='va'>r2</span> <span class='op'>+</span> <span class='va'>wald</span> <span class='op'>+</span> <span class='va'>wf</span><span class='op'>)</span>

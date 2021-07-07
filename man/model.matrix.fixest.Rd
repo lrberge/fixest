@@ -12,6 +12,7 @@
   subset = FALSE,
   as.matrix = FALSE,
   as.df = FALSE,
+  collin.rm = TRUE,
   ...
 )
 }
@@ -29,6 +30,8 @@
 \item{as.matrix}{Logical scalar, default is \code{FALSE}. Whether to coerce the result to a matrix.}
 
 \item{as.df}{Logical scalar, default is \code{FALSE}. Whether to coerce the result to a data.frame.}
+
+\item{collin.rm}{Logical scalar, default is \code{TRUE}. Whether to remove variables that were found to be collinear during the estimation. Beware: it does not perform a collinearity check.}
 
 \item{...}{Not currently used.}
 }

@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
       </span>
     </div>
 
@@ -157,7 +157,7 @@
   <span class='va'>title</span>,
   coefstat <span class='op'>=</span> <span class='st'>"se"</span>,
   ci <span class='op'>=</span> <span class='fl'>0.95</span>,
-  sdBelow <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  sdBelow <span class='op'>=</span> <span class='cn'>NULL</span>,
   <span class='va'>keep</span>,
   <span class='va'>drop</span>,
   <span class='va'>order</span>,
@@ -181,12 +181,14 @@
   notes <span class='op'>=</span> <span class='cn'>NULL</span>,
   group <span class='op'>=</span> <span class='cn'>NULL</span>,
   extraline <span class='op'>=</span> <span class='cn'>NULL</span>,
+  fixef.group <span class='op'>=</span> <span class='cn'>NULL</span>,
   placement <span class='op'>=</span> <span class='st'>"htbp"</span>,
   drop.section <span class='op'>=</span> <span class='cn'>NULL</span>,
   poly_dict <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>""</span>, <span class='st'>" square"</span>, <span class='st'>" cube"</span><span class='op'>)</span>,
   postprocess.tex <span class='op'>=</span> <span class='cn'>NULL</span>,
   postprocess.df <span class='op'>=</span> <span class='cn'>NULL</span>,
-  fit_format <span class='op'>=</span> <span class='st'>"__var__"</span>
+  fit_format <span class='op'>=</span> <span class='st'>"__var__"</span>,
+  coef.just <span class='op'>=</span> <span class='cn'>NULL</span>
 <span class='op'>)</span>
 
 <span class='fu'>setFixest_etable</span><span class='op'>(</span>
@@ -213,6 +215,7 @@
   notes <span class='op'>=</span> <span class='cn'>NULL</span>,
   group <span class='op'>=</span> <span class='cn'>NULL</span>,
   extraline <span class='op'>=</span> <span class='cn'>NULL</span>,
+  fixef.group <span class='op'>=</span> <span class='cn'>NULL</span>,
   placement <span class='op'>=</span> <span class='st'>"htbp"</span>,
   drop.section <span class='op'>=</span> <span class='cn'>NULL</span>,
   postprocess.tex <span class='op'>=</span> <span class='cn'>NULL</span>,
@@ -237,7 +240,7 @@
   <span class='va'>fitstat</span>,
   coefstat <span class='op'>=</span> <span class='st'>"se"</span>,
   ci <span class='op'>=</span> <span class='fl'>0.95</span>,
-  sdBelow <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  sdBelow <span class='op'>=</span> <span class='cn'>NULL</span>,
   <span class='va'>keep</span>,
   <span class='va'>drop</span>,
   <span class='va'>order</span>,
@@ -257,10 +260,12 @@
   style.df <span class='op'>=</span> <span class='cn'>NULL</span>,
   group <span class='op'>=</span> <span class='cn'>NULL</span>,
   extraline <span class='op'>=</span> <span class='cn'>NULL</span>,
+  fixef.group <span class='op'>=</span> <span class='cn'>NULL</span>,
   drop.section <span class='op'>=</span> <span class='cn'>NULL</span>,
   poly_dict <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>""</span>, <span class='st'>" square"</span>, <span class='st'>" cube"</span><span class='op'>)</span>,
   postprocess.df <span class='op'>=</span> <span class='cn'>NULL</span>,
-  fit_format <span class='op'>=</span> <span class='st'>"__var__"</span>
+  fit_format <span class='op'>=</span> <span class='st'>"__var__"</span>,
+  coef.just <span class='op'>=</span> <span class='cn'>NULL</span>
 <span class='op'>)</span>
 
 <span class='fu'>esttex</span><span class='op'>(</span>
@@ -278,7 +283,7 @@
   <span class='va'>title</span>,
   coefstat <span class='op'>=</span> <span class='st'>"se"</span>,
   ci <span class='op'>=</span> <span class='fl'>0.95</span>,
-  sdBelow <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  sdBelow <span class='op'>=</span> <span class='cn'>NULL</span>,
   <span class='va'>keep</span>,
   <span class='va'>drop</span>,
   <span class='va'>order</span>,
@@ -301,6 +306,7 @@
   notes <span class='op'>=</span> <span class='cn'>NULL</span>,
   group <span class='op'>=</span> <span class='cn'>NULL</span>,
   extraline <span class='op'>=</span> <span class='cn'>NULL</span>,
+  fixef.group <span class='op'>=</span> <span class='cn'>NULL</span>,
   placement <span class='op'>=</span> <span class='st'>"htbp"</span>,
   drop.section <span class='op'>=</span> <span class='cn'>NULL</span>,
   poly_dict <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>""</span>, <span class='st'>" square"</span>, <span class='st'>" cube"</span><span class='op'>)</span>,
@@ -373,7 +379,7 @@
     </tr>
     <tr>
       <th>sdBelow</th>
-      <td><p>(Tex only.) Logical, default is <code>TRUE</code>. Should the standard-errors be displayed below the coefficients?</p></td>
+      <td><p>Logical or <code>NULL</code> (default). Should the standard-errors be displayed below the coefficients? If <code>NULL</code>, then this is <code>TRUE</code> for Latex and <code>FALSE</code> otherwise.</p></td>
     </tr>
     <tr>
       <th>keep</th>
@@ -461,11 +467,15 @@
     </tr>
     <tr>
       <th>group</th>
-      <td><p>A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument <code>drop</code>) and <code>TRUE</code> or <code>FALSE</code> will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: <code>group=list("Controls: personal traits"=c("gender", "height", "weight"))</code> will create an new line with <code>"Controls: personal traits"</code> in the leftmost cell, all three variables gender, height and weight are discared, TRUE appearing in each model containing at least one of the three variables (the style of TRUE/FALSE is governed by the argument <code>yesNo</code>). You can control the style with the <code>title</code> and <code>where</code> keywords in curly brackets. For example <code>group=list("{title:Controls; where:stats}Personal traits"=c("gender", "height", "weight"))</code> will add an extra line right before with "Control" written in it, and the group information will appear after the statistics. The keyword where can be equal to either <code>var</code> (default), <code>fixef</code> or <code>stats</code>. Starting the list name with an underscore is equivalent to adding <code>"{where:stats}"</code>: eg <code><a href='https://rdrr.io/r/base/list.html'>list("_Controls"="x")</a></code> is equivalent to <code><a href='https://rdrr.io/r/base/list.html'>list("{where:stats}Controls"="x")</a></code>.</p></td>
+      <td><p>A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument <code>drop</code>) and <code>TRUE</code> or <code>FALSE</code> will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: <code>group=list("Controls: personal traits"=c("gender", "height", "weight"))</code> will create an new line with <code>"Controls: personal traits"</code> in the leftmost cell, all three variables gender, height and weight are discarded, <code>TRUE</code> appearing in each model containing at least one of the three variables (the style of <code>TRUE</code>/<code>FALSE</code> is governed by the argument <code>yesNo</code>). You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) <code>"^"</code>: 1st, <code>"_"</code>: last, row; 2) <code>"^"</code>: coef., <code>"-"</code>: fixed-effect, <code>"_"</code>: stats, section. For example: <code>group=list("_Controls"=stuff)</code> will place the line last in the stats sections, and using <code>group=list("^_Controls"=stuff)</code> will make the row appear first in the stats section. For details, see the dedicated section.</p></td>
     </tr>
     <tr>
       <th>extraline</th>
-      <td><p>A list. The list elements should be either a single logical or a vector of the same length as the number of models. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: <code>extraline=list("Sub-sample"=c("&lt;20 yo", "all", "&gt;50 yo"))</code> will create an new line with <code>"Sub-sample"</code> in the leftmost cell, the vector filling the content of the cells for the three models. You can control the style with the <code>title</code> and <code>where</code> keywords in curly brackets. For example <code>extraline=list("{title:Sub-sample; where:stats}By age"=c("&lt;20 yo", "all", "&gt;50 yo"))</code> will add an extra line right before with "Sub-sample" written in it, and the extraline information will appear after the statistics section. The keyword where can be equal to either <code>var</code> (default), <code>fixef</code> or <code>stats</code>. Starting the list name with an underscore is equivalent to adding <code>"{where:stats}"</code>: eg <code><a href='https://rdrr.io/r/base/list.html'>list("_Controls"=TRUE)</a></code> is equivalent to <code><a href='https://rdrr.io/r/base/list.html'>list("{where:stats}Controls"=TRUE)</a></code>.</p></td>
+      <td><p>A list or a one sided formula. The list elements should be either a logical scalar,a vector of the same length as the number of models, or a function. This argument can be many things, please have a look at the dedicated help section; a simplified description follows. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: <code>extraline=list("Sub-sample"=c("&lt;20 yo", "all", "&gt;50 yo"))</code> will create an new line with <code>"Sub-sample"</code> in the leftmost cell, the vector filling the content of the cells for the three models. You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) <code>"^"</code>: 1st, <code>"_"</code>: last, row; 2) <code>"^"</code>: coef., <code>"-"</code>: fixed-effect, <code>"_"</code>: stats, section. For example: <code>group=list("_Controls"=stuff)</code> will place the line last in the stats sections, and using <code>group=list("^_Controls"=stuff)</code> will make the row appear first in the stats section. For details, see the dedicated section.</p></td>
+    </tr>
+    <tr>
+      <th>fixef.group</th>
+      <td><p>Logical scalar or list (default is <code>NULL</code>). If equal to <code>TRUE</code>, then all fixed-effects always appearing jointly in models will be grouped in one row. If a list, its elements must be character vectors of regular expressions and the list names will be the row names. For ex. <code>fixef.group=list("Dates fixed-effects"="Month|Day")</code> will remove the <code>"Month"</code> and <code>"Day"</code> fixed effects from the display and replace them with a single row named "Dates fixed-effects". You can monitor the placement of the new row with the special characters telling where to place the row within a section: <code>"^"</code> (first), or <code>"_"</code> (last); and in which section it should appear: <code>"^"</code> (coef.), <code>"-"</code> (fixed-effects), or <code>"_"</code> (stat.). These two special characters must appear first in the row names. Please see the dedicated section.</p></td>
     </tr>
     <tr>
       <th>placement</th>
@@ -492,6 +502,10 @@
       <td><p>Character scalar, default is <code>"__var__"</code>. Only used in the presence of IVs. By default the endogenous regressors are named <code>fit_varname</code> in the second stage. The format of the endogenous regressor to appear in the table is governed by <code>fit_format</code>. For instance, by default, the prefix <code>"fit_"</code> is removed, leading to only <code>varname</code> to appear. If <code>fit_format = "$\\hat{__var__}$"</code>, then <code>"$\hat{varname}$"</code> will appear in the table.</p></td>
     </tr>
     <tr>
+      <th>coef.just</th>
+      <td><p>(DF only.) Either <code>"."</code>, <code>"("</code>, <code>"l"</code>, <code>"c"</code> or <code>"r"</code>, default is <code>NULL</code>. How the coefficients should be justified. If <code>NULL</code> then they are right aligned if <code>sdBelow = FALSE</code> and aligned to the dot if <code>sdBelow = TRUE</code>. The keywords stand respectively for dot-, parenthesis-, left-, center- and right-aligned.</p></td>
+    </tr>
+    <tr>
       <th>reset</th>
       <td><p>(<code>setFixest_etable</code> only.) Logical, default is <code>FALSE</code>. If <code>TRUE</code>, this will reset all the default values that were already set by the user in previous calls.</p></td>
     </tr>
@@ -503,9 +517,9 @@
 <p>If <code>tex = FALSE</code>, the data.frame is directly returned. If the argument <code>file</code> is not missing, the <code>data.frame</code> is printed and returned invisibly.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>The function <code>esttex</code> is equivalent to the function <code>etable</code> with argument <code>tex = TRUE</code>. This function is deprecated.</p>
-<p>The function <code>esttable</code> is equivalent to the function <code>etable</code> with argument <code>tex = FALSE</code>. This function is deprecated.</p>
-<p>You can permanently change the way your table looks in Latex by using <code>setFixest_etable</code>. The following vignette gives an example as well as illustrates how to use the <code>style</code> and postprocessing functions: <a href='https://cran.r-project.org/package=fixest/vignettes/exporting_tables.html'>Exporting estimation tables</a>.</p>
+    <p>The function <code>esttex</code> is equivalent to the function <code>etable</code> with argument <code>tex = TRUE</code>.</p>
+<p>The function <code>esttable</code> is equivalent to the function <code>etable</code> with argument <code>tex = FALSE</code>.</p>
+<p>You can permanently change the way your table looks in Latex by using <code>setFixest_etable</code>. The following vignette gives an example as well as illustrates how to use the <code>style</code> and postprocessing functions: <a href='https://lrberge.github.io/fixest/articles/exporting_tables.html'>Exporting estimation tables</a>.</p>
 <p>When the argument <code>postprocessing.tex</code> is not missing, two additional tags will be included in the character vector returned by <code>etable</code>: <code>"%start:tab\n"</code> and <code>"%end:tab\n"</code>. These can be used to identify the start and end of the tabular and are useful to insert code within the <code>table</code> environment.</p>
     <h2 class="hasAnchor" id="functions"><a class="anchor" href="#functions"></a>Functions</h2>
 
@@ -520,7 +534,7 @@
 
 
 <p>The default display of decimals is the outcome of an algorithm. Let's take the example of <code>digits = 3</code> which "kind of" requires 3 significant digits to be displayed.</p>
-<p>For numbers greater than 1 (in absolute terms), their integral part is always be displayed and the number of decimals shown is equal to <code>digits</code> minus the number of digits in the integral part. This means that <code>12.345</code> will be displayed as <code>12.3</code>. If the number of decimals should be 0, then a single decimal is displayed to suggest that the number is not whole. This means that <code>1234.56</code> will be displayed as <code>1234.5</code>. Note that if the number is whole, no decimals are shown.</p>
+<p>For numbers greater than 1 (in absolute terms), their integral part is always displayed and the number of decimals shown is equal to <code>digits</code> minus the number of digits in the integral part. This means that <code>12.345</code> will be displayed as <code>12.3</code>. If the number of decimals should be 0, then a single decimal is displayed to suggest that the number is not whole. This means that <code>1234.56</code> will be displayed as <code>1234.5</code>. Note that if the number is whole, no decimals are shown.</p>
 <p>For numbers lower than 1 (in absolute terms), the number of decimals displayed is equal to <code>digits</code> except if there are only 0s in which case the first significant digit is shown. This means that <code>0.01234</code> will be displayed as <code>0.012</code> (first rule), and that 0.000123 will be displayed as <code>0.0001</code> (second rule).</p>
     <h2 class="hasAnchor" id="arguments-keep-drop-and-order"><a class="anchor" href="#arguments-keep-drop-and-order"></a>Arguments keep, drop and order</h2>
 
@@ -529,9 +543,30 @@
 <p>The arguments <code>keep</code>, <code>drop</code> and <code>order</code> use regular expressions. If you are not aware of regular expressions, I urge you to learn it, since it is an extremely powerful way to manipulate character strings (and it exists across most programming languages).</p>
 <p>For example drop = "Wind" would drop any variable whose name contains "Wind". Note that variables such as "Temp:Wind" or "StrongWind" do contain "Wind", so would be dropped. To drop only the variable named "Wind", you need to use <code>drop = "^Wind$"</code> (with "^" meaning beginning, resp. "$" meaning end, of the string =&gt; this is the language of regular expressions).</p>
 <p>Although you can combine several regular expressions in a single character string using pipes, <code>drop</code> also accepts a vector of regular expressions.</p>
-<p>You can use the special character "!" (exclamation mark) to reverse the effect of the regular expression (this feature is specific to this fonction). For example <code>drop = "!Wind"</code> would drop any variable that does not contain "Wind".</p>
+<p>You can use the special character "!" (exclamation mark) to reverse the effect of the regular expression (this feature is specific to this function). For example <code>drop = "!Wind"</code> would drop any variable that does not contain "Wind".</p>
 <p>You can use the special character "%" (percentage) to make reference to the original variable name instead of the aliased name. For example, you have a variable named <code>"Month6"</code>, and use a dictionary <code>dict = c(Month6="June")</code>. Thus the variable will be displayed as <code>"June"</code>. If you want to delete that variable, you can use either <code>drop="June"</code>, or <code>drop="%Month6"</code> (which makes reference to its original name).</p>
-<p>The argument <code>order</code> takes in a vector of regular expressions, the order will follow the elments of this vector. The vector gives a list of priorities, on the left the elements with highest priority. For example, order = c("Wind", "!Inter", "!Temp") would give highest priorities to the variables containing "Wind" (which would then appear first), second highest priority is the variables not containing "Inter", last, with lowest priority, the variables not containing "Temp". If you had the following variables: (Intercept), Temp:Wind, Wind, Temp you would end up with the following order: Wind, Temp:Wind, Temp, (Intercept).</p>
+<p>The argument <code>order</code> takes in a vector of regular expressions, the order will follow the elements of this vector. The vector gives a list of priorities, on the left the elements with highest priority. For example, order = c("Wind", "!Inter", "!Temp") would give highest priorities to the variables containing "Wind" (which would then appear first), second highest priority is the variables not containing "Inter", last, with lowest priority, the variables not containing "Temp". If you had the following variables: (Intercept), Temp:Wind, Wind, Temp you would end up with the following order: Wind, Temp:Wind, Temp, (Intercept).</p>
+    <h2 class="hasAnchor" id="the-argument-extraline"><a class="anchor" href="#the-argument-extraline"></a>The argument <code>extraline</code></h2>
+
+    
+
+
+<p>The argument <code>extraline</code> adds well... extra lines to the table. It accepts either a list, or a one-sided formula.</p>
+<p>If a one-sided formula: then the elements in the formula must represent either <code>extraline</code> macros, either fit statistics (i.e. valid types of the function <code><a href='fitstat.html'>fitstat</a></code>). One new line will be added for each element of the formula, they will be appended right after the coefficients. To register <code>extraline</code> macros, you must first register them in <code><a href='extraline_register.html'>extraline_register</a></code>.</p>
+<p>If a list: then the elements must be either: a) a logical scalar, b) a vector of the same length as the number of models, c) a function to be applied to each model and which returns a scalar, or d) a one-sided formula of <code>extraline</code> macros (registered with <code><a href='extraline_register.html'>extraline_register</a></code>) or valid <code><a href='fitstat.html'>fitstat</a></code> types.</p>
+<p>When a list, the elements of type a), b) and c) must have a name! Example: <code>extraline = list("Controls" = TRUE)</code> is good, <code>extraline = list(TRUE)</code> is bad. The name for element of type d) is optional. Example: <code>extraline = list("^^My F-stat" = ~f)</code> will add the row named <code>"My F-stat"</code> on top of the coefficients (for the placement, see the dedicated section), while <code>extraline = list(~f)</code> will add the F-stat row with its default name (<code>"F-test"</code>) at its default placement (below the coefficients).</p>
+<p>You can combine elements in the list, so that the following <code>extraline = list(~r2, "Controls" = TRUE), ~f+ivf</code> is valid.</p>
+    <h2 class="hasAnchor" id="controlling-the-placement-of-extra-lines"><a class="anchor" href="#controlling-the-placement-of-extra-lines"></a>Controlling the placement of extra lines</h2>
+
+    
+
+
+<p>The arguments <code>group</code>, <code>extraline</code> and <code>fixef.group</code> allow to add customized lines in the table. They can be defined via a list where the list name will be the row name. By default, the placement of the extra line is right after the coefficients (except for <code>fixef.group</code>, covered in the last paragraph). For instance, <code>group = list("Controls" = "x[[:digit:]]")</code> will create a line right after the coefficients telling which models contain the control variables.</p>
+<p>But the placement can be customized. The previous example (of the controls) will be used for illustration (the mechanism for <code>extraline</code> and <code>fixef.group</code> is identical).</p>
+<p>The row names accept 2 special characters at the very start. The first governs the placement of the new line within the section: it can be equal to <code>"^"</code>, meaning first line, or <code>"_"</code>, meaning last line. The second character tells in which section the line should appear: it can be equal to <code>"^"</code>, <code>"-"</code>, or <code>"_"</code>, meaning respectively the coefficients, the fixed-effects and the statistics section (which typically appear at the top, mid and bottom of the table).</p>
+<p>Let's have some examples. Using the previous example, writing <code>"^_Controls"</code> would place the new line in at the top of the statistics section. Writing <code>"_-Controls"</code> places it as the last row of the fixed-effects section; <code>"^^Controls"</code> at the top row of the coefficients section; etc...</p>
+<p>On top of that there are shortcuts to avoid writing the two special characters. If only one special character is found, it is assumed to reflect the section, unless it corresponds to the default section, a case where the character then reflects the position within the section. An example will make it clear. Writing <code>"^Controls"</code> would place the line at the top of the coefficients section (since the default placement would have been this section). <code>"_Controls"</code> would place it at the bottom of the statistics section.</p>
+<p>The placement in <code>fixef.group</code> is defined similarly, only the default placement is different. Its default placement is at the top of the fixed-effects section. This means that the only difference with <code>group</code> and <code>extraline</code> is when a single special character is used. Here using, e.g., <code>"^My FEs"</code> would place the row at the bottom of the coefficients section, since <code>"^"</code> would refer to the section (and not the row within the section).</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p>See also the main estimation functions <code><a href='femlm.html'>femlm</a></code>, <code><a href='feols.html'>feols</a></code> or <code><a href='feglm.html'>feglm</a></code>. Use <code><a href='summary.fixest.html'>summary.fixest</a></code> to see the results with the appropriate standard-errors, <code><a href='fixef.fixest.html'>fixef.fixest</a></code> to extract the fixed-effects coefficients.</p></div>
@@ -544,7 +579,7 @@
 <span class='va'>aq</span> <span class='op'>=</span> <span class='va'>airquality</span>
 
 <span class='va'>est1</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='fu'><a href='i.html'>i</a></span><span class='op'>(</span><span class='va'>Month</span><span class='op'>)</span> <span class='op'>/</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='va'>Temp</span>, data <span class='op'>=</span> <span class='va'>aq</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>NOTE: 37 observations removed because of NA values (LHS: 37).</span></div><div class='input'><span class='va'>est2</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='fu'><a href='i.html'>i</a></span><span class='op'>(</span><span class='va'>Wind</span>, <span class='va'>Month</span><span class='op'>)</span> <span class='op'>+</span> <span class='va'>Temp</span> <span class='op'>|</span> <span class='va'>Month</span>, data <span class='op'>=</span> <span class='va'>aq</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 37 observations removed because of NA values (LHS: 37).</span></div><div class='input'><span class='va'>est2</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='fu'><a href='i.html'>i</a></span><span class='op'>(</span><span class='va'>Month</span>, <span class='va'>Wind</span><span class='op'>)</span> <span class='op'>+</span> <span class='va'>Temp</span> <span class='op'>|</span> <span class='va'>Month</span>, data <span class='op'>=</span> <span class='va'>aq</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; <span class='message'>NOTE: 37 observations removed because of NA values (LHS: 37).</span></div><div class='input'>
 <span class='co'># Displaying the two results in a single table</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span><span class='op'>)</span>
@@ -713,7 +748,7 @@
 #&gt; R2                           0.68106            0.68106
 #&gt; Within R2                         --            0.58296</div><div class='input'><span class='co'># Note the difference of treatment between Jun and May</span>
 
-<span class='co'># Assume the following dictionnary:</span>
+<span class='co'># Assume the following dictionary:</span>
 <span class='va'>dict</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Month::5"</span><span class='op'>=</span><span class='st'>"May"</span>, <span class='st'>"Month::6"</span><span class='op'>=</span><span class='st'>"Jun"</span>, <span class='st'>"Month::7"</span><span class='op'>=</span><span class='st'>"Jul"</span>,
          <span class='st'>"Month::8"</span><span class='op'>=</span><span class='st'>"Aug"</span>, <span class='st'>"Month::9"</span><span class='op'>=</span><span class='st'>"Sep"</span><span class='op'>)</span>
 
@@ -782,27 +817,27 @@
 #&gt; \tabularnewline\midrule\midrule
 #&gt; Dependent Variable:&amp;\multicolumn{2}{c}{Ozone}\\
 #&gt; Model:&amp;(1) &amp; (2)\\
-#&gt; (Intercept)&amp;-100.2$^{***}$ &amp;   \\
+#&gt; (Intercept) &amp; -100.2$^{***}$ &amp;   \\
 #&gt;   &amp;(26.35) &amp;   \\
-#&gt; Jun&amp;-54.99$^{**}$ &amp;   \\
+#&gt; Jun &amp; -54.99$^{**}$ &amp;   \\
 #&gt;   &amp;(26.34) &amp;   \\
-#&gt; Jul&amp;35.89$^{*}$ &amp;   \\
+#&gt; Jul &amp; 35.89$^{*}$ &amp;   \\
 #&gt;   &amp;(18.37) &amp;   \\
-#&gt; Aug&amp;44.52$^{**}$ &amp;   \\
+#&gt; Aug &amp; 44.52$^{**}$ &amp;   \\
 #&gt;   &amp;(18.05) &amp;   \\
-#&gt; Sep&amp;-11.78 &amp;   \\
+#&gt; Sep &amp; -11.78 &amp;   \\
 #&gt;   &amp;(18.22) &amp;   \\
-#&gt; Temp&amp;2.042$^{***}$ &amp; 2.042$^{***}$\\
+#&gt; Temp &amp; 2.042$^{***}$ &amp; 2.042$^{***}$\\
 #&gt;   &amp;(0.3078) &amp; (0.2242)\\
-#&gt; Wind $\times $ May&amp;-1.086 &amp; -1.086$^{***}$\\
+#&gt; Wind $\times $ May &amp; -1.086 &amp; -1.086$^{***}$\\
 #&gt;   &amp;(1.127) &amp; (0.1408)\\
-#&gt; Wind $\times $ Jun&amp;2.046 &amp; 2.046$^{***}$\\
+#&gt; Wind $\times $ Jun &amp; 2.046 &amp; 2.046$^{***}$\\
 #&gt;   &amp;(1.784) &amp; (0.0398)\\
-#&gt; Wind $\times $ Jul&amp;-5.616$^{***}$ &amp; -5.616$^{***}$\\
+#&gt; Wind $\times $ Jul &amp; -5.616$^{***}$ &amp; -5.616$^{***}$\\
 #&gt;   &amp;(1.316) &amp; (0.1554)\\
-#&gt; Wind $\times $ Aug&amp;-6.515$^{***}$ &amp; -6.515$^{***}$\\
+#&gt; Wind $\times $ Aug &amp; -6.515$^{***}$ &amp; -6.515$^{***}$\\
 #&gt;   &amp;(1.220) &amp; (0.2203)\\
-#&gt; Wind $\times $ Sep&amp;-1.349 &amp; -1.349$^{**}$\\
+#&gt; Wind $\times $ Sep &amp; -1.349 &amp; -1.349$^{**}$\\
 #&gt;   &amp;(1.147) &amp; (0.3175)\\
 #&gt; Month &amp;  &amp; Yes\\
 #&gt;  &amp;  &amp; \\
@@ -821,27 +856,27 @@
 #&gt; Dependent Variable:&amp;\multicolumn{2}{c}{Ozone}\\
 #&gt; Model:&amp;(1) &amp; (2)\\
 #&gt; \midrule \emph{Variables}&amp;   &amp;  \\
-#&gt; (Intercept)&amp;-100.2$^{***}$ &amp;   \\
+#&gt; (Intercept) &amp; -100.2$^{***}$ &amp;   \\
 #&gt;   &amp;(26.35) &amp;   \\
-#&gt; Jun&amp;-54.99$^{**}$ &amp;   \\
+#&gt; Jun &amp; -54.99$^{**}$ &amp;   \\
 #&gt;   &amp;(26.34) &amp;   \\
-#&gt; Jul&amp;35.89$^{*}$ &amp;   \\
+#&gt; Jul &amp; 35.89$^{*}$ &amp;   \\
 #&gt;   &amp;(18.37) &amp;   \\
-#&gt; Aug&amp;44.52$^{**}$ &amp;   \\
+#&gt; Aug &amp; 44.52$^{**}$ &amp;   \\
 #&gt;   &amp;(18.05) &amp;   \\
-#&gt; Sep&amp;-11.78 &amp;   \\
+#&gt; Sep &amp; -11.78 &amp;   \\
 #&gt;   &amp;(18.22) &amp;   \\
-#&gt; Temp&amp;2.042$^{***}$ &amp; 2.042$^{***}$\\
+#&gt; Temp &amp; 2.042$^{***}$ &amp; 2.042$^{***}$\\
 #&gt;   &amp;(0.3078) &amp; (0.2242)\\
-#&gt; Wind $\times $ May&amp;-1.086 &amp; -1.086$^{***}$\\
+#&gt; Wind $\times $ May &amp; -1.086 &amp; -1.086$^{***}$\\
 #&gt;   &amp;(1.127) &amp; (0.1408)\\
-#&gt; Wind $\times $ Jun&amp;2.046 &amp; 2.046$^{***}$\\
+#&gt; Wind $\times $ Jun &amp; 2.046 &amp; 2.046$^{***}$\\
 #&gt;   &amp;(1.784) &amp; (0.0398)\\
-#&gt; Wind $\times $ Jul&amp;-5.616$^{***}$ &amp; -5.616$^{***}$\\
+#&gt; Wind $\times $ Jul &amp; -5.616$^{***}$ &amp; -5.616$^{***}$\\
 #&gt;   &amp;(1.316) &amp; (0.1554)\\
-#&gt; Wind $\times $ Aug&amp;-6.515$^{***}$ &amp; -6.515$^{***}$\\
+#&gt; Wind $\times $ Aug &amp; -6.515$^{***}$ &amp; -6.515$^{***}$\\
 #&gt;   &amp;(1.220) &amp; (0.2203)\\
-#&gt; Wind $\times $ Sep&amp;-1.349 &amp; -1.349$^{**}$\\
+#&gt; Wind $\times $ Sep &amp; -1.349 &amp; -1.349$^{**}$\\
 #&gt;   &amp;(1.147) &amp; (0.3175)\\
 #&gt; \midrule \emph{Fixed-effects}&amp;   &amp;  \\
 #&gt; Month &amp;  &amp; Yes\\
@@ -858,27 +893,27 @@
 #&gt; \toprule
 #&gt; &amp;\multicolumn{2}{c}{Ozone}\\
 #&gt; &amp;(1) &amp; (2)\\
-#&gt; \midrule (Intercept)&amp;-100.2$^{***}$ &amp;   \\
+#&gt; \midrule (Intercept) &amp; -100.2$^{***}$ &amp;   \\
 #&gt;   &amp;(26.35) &amp;   \\
-#&gt; Jun&amp;-54.99$^{**}$ &amp;   \\
+#&gt; Jun &amp; -54.99$^{**}$ &amp;   \\
 #&gt;   &amp;(26.34) &amp;   \\
-#&gt; Jul&amp;35.89$^{*}$ &amp;   \\
+#&gt; Jul &amp; 35.89$^{*}$ &amp;   \\
 #&gt;   &amp;(18.37) &amp;   \\
-#&gt; Aug&amp;44.52$^{**}$ &amp;   \\
+#&gt; Aug &amp; 44.52$^{**}$ &amp;   \\
 #&gt;   &amp;(18.05) &amp;   \\
-#&gt; Sep&amp;-11.78 &amp;   \\
+#&gt; Sep &amp; -11.78 &amp;   \\
 #&gt;   &amp;(18.22) &amp;   \\
-#&gt; Temp&amp;2.042$^{***}$ &amp; 2.042$^{***}$\\
+#&gt; Temp &amp; 2.042$^{***}$ &amp; 2.042$^{***}$\\
 #&gt;   &amp;(0.3078) &amp; (0.2242)\\
-#&gt; Wind $\times $ May&amp;-1.086 &amp; -1.086$^{***}$\\
+#&gt; Wind $\times $ May &amp; -1.086 &amp; -1.086$^{***}$\\
 #&gt;   &amp;(1.127) &amp; (0.1408)\\
-#&gt; Wind $\times $ Jun&amp;2.046 &amp; 2.046$^{***}$\\
+#&gt; Wind $\times $ Jun &amp; 2.046 &amp; 2.046$^{***}$\\
 #&gt;   &amp;(1.784) &amp; (0.0398)\\
-#&gt; Wind $\times $ Jul&amp;-5.616$^{***}$ &amp; -5.616$^{***}$\\
+#&gt; Wind $\times $ Jul &amp; -5.616$^{***}$ &amp; -5.616$^{***}$\\
 #&gt;   &amp;(1.316) &amp; (0.1554)\\
-#&gt; Wind $\times $ Aug&amp;-6.515$^{***}$ &amp; -6.515$^{***}$\\
+#&gt; Wind $\times $ Aug &amp; -6.515$^{***}$ &amp; -6.515$^{***}$\\
 #&gt;   &amp;(1.220) &amp; (0.2203)\\
-#&gt; Wind $\times $ Sep&amp;-1.349 &amp; -1.349$^{**}$\\
+#&gt; Wind $\times $ Sep &amp; -1.349 &amp; -1.349$^{**}$\\
 #&gt;   &amp;(1.147) &amp; (0.3175)\\
 #&gt;  &amp;  &amp; \\
 #&gt; Standard-Errors&amp; Standard&amp;Month\\
@@ -901,7 +936,7 @@
 </div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'><span class='va'>est_c1</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='va'>..ctrl</span>, data <span class='op'>=</span> <span class='va'>aq</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'><span class='va'>est_c2</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='va'>Solar.R</span><span class='op'>^</span><span class='fl'>2</span> <span class='op'>+</span> <span class='va'>..ctrl</span>, data <span class='op'>=</span> <span class='va'>aq</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'>
-<span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_c0</span>, <span class='va'>est_c1</span>, <span class='va'>est_c2</span>, group <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>Controls <span class='op'>=</span> <span class='st'>"%poly"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_c0</span>, <span class='va'>est_c1</span>, <span class='va'>est_c2</span>, group <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>Controls <span class='op'>=</span> <span class='st'>"poly"</span><span class='op'>)</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                             est_c0            est_c1           est_c2
 #&gt; Dependent Var.:              Ozone             Ozone            Ozone
 #&gt;                                                                      
@@ -914,10 +949,8 @@
 #&gt; Observations                   111               111              111
 #&gt; R2                         0.12134           0.71231          0.71408
 #&gt; Adj. R2                    0.11328           0.69861          0.69758</div><div class='input'>
-<span class='co'># 'group' here does the same as drop = "%poly", but adds an extra line</span>
+<span class='co'># 'group' here does the same as drop = "poly", but adds an extra line</span>
 <span class='co'># with TRUE/FALSE where the variables were found</span>
-<span class='co'># Note that the "%" is needed because polnomials are automatically renamed</span>
-<span class='co'>#  so we need to make reference to the original name.</span>
 
 <span class='co'># 'extraline' adds an extra line, where you can add the value for each model</span>
 <span class='va'>est_all</span>  <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='va'>Temp</span> <span class='op'>+</span> <span class='va'>Wind</span>, data <span class='op'>=</span> <span class='va'>aq</span><span class='op'>)</span>
@@ -953,58 +986,185 @@
 #&gt; Observations                   29
 #&gt; R2                        0.71724
 #&gt; Adj. R2                   0.68330</div><div class='input'>
-<span class='co'># When exporting to Latex, you can add meta arguments to 'group' and 'extraline'</span>
-<span class='co'># Two keywords are allowed: 'title' and 'where'</span>
-<span class='co'># 'title' adds a line just before with the content of 'title' in the leftmost cell</span>
-<span class='co'># 'where' governs the location of the line. It can be equal to 'var', 'stats' or 'fixef'.</span>
-<span class='co'># The syntax is: {"{title:Controls; where:stats}Group name"}</span>
-<span class='co'># (the enclosing curly braces are only here to make Rd work, please ignore them)</span>
-<span class='co'># You can use the shortcut "_Group name" which is equivalent to {"{where:stats}Group name"}</span>
+<span class='co'># You can monitor the placement of the new lines with two special characters</span>
+<span class='co'># at the beginning of the row name.</span>
+<span class='co'># 1) "^" or "_" which mean first or last line of the section</span>
+<span class='co'># 2) "^", "-" or "_" which mean the coefficients, the fixed-effects or the</span>
+<span class='co'># statistics section.</span>
+<span class='co'>#</span>
+<span class='co'># Ex: starting with "^_" will place the line at the top of the stat. section</span>
+<span class='co'>#     starting with "_-" will place the line at the bottom of the FEs section</span>
+<span class='co'>#     etc.</span>
+<span class='co'>#</span>
+<span class='co'># You can use a single character which will represent the section, unless</span>
+<span class='co'># it's</span>
 
 <span class='co'># Examples</span>
-<span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_c0</span>, <span class='va'>est_c1</span>, <span class='va'>est_c2</span>, tex <span class='op'>=</span> <span class='cn'>TRUE</span>, group <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"{where:stats}Controls"</span> <span class='op'>=</span> <span class='st'>"poly"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; \begin{tabular}{lccc}
-#&gt; \tabularnewline\midrule\midrule
-#&gt; Dependent Variable:&amp;\multicolumn{3}{c}{Ozone}\\
-#&gt; Model:&amp;(1) &amp; (2) &amp; (3)\\
-#&gt; \midrule \emph{Variables}&amp;   &amp;   &amp;  \\
-#&gt; (Intercept)&amp;18.60$^{***}$ &amp; 29.83$^{***}$ &amp; 25.79$^{***}$\\
-#&gt;   &amp;(6.748) &amp; (4.101) &amp; (6.506)\\
-#&gt; Solar.R&amp;0.1272$^{***}$ &amp; 0.0659$^{***}$ &amp; 0.1347\\
-#&gt;   &amp;(0.0328) &amp; (0.0201) &amp; (0.0881)\\
-#&gt; Solar.R square&amp;   &amp;    &amp; -0.0002\\
-#&gt;   &amp;   &amp;    &amp; (0.0003)\\
-#&gt; \midrule \emph{Fit statistics}&amp;  &amp; &amp; \\
-#&gt; Observations &amp; 111&amp;111&amp;111\\
-#&gt; R$^2$ &amp; 0.12134&amp;0.71231&amp;0.71408\\
-#&gt; Adjusted R$^2$ &amp; 0.11328&amp;0.69861&amp;0.69758\\
-#&gt; Controls &amp;  &amp; Yes &amp; Yes\\
-#&gt; \midrule\midrule\multicolumn{4}{l}{\emph{Normal standard-errors in parentheses}}\\
-#&gt; \multicolumn{4}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\
-#&gt; \end{tabular}</div><div class='input'><span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_all</span>, <span class='va'>est_sub1</span>, <span class='va'>est_sub2</span>, <span class='va'>est_sub3</span>, tex <span class='op'>=</span> <span class='cn'>TRUE</span>,
-       extraline <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"{title:\\midrule}Sub-sample"</span> <span class='op'>=</span>
-                          <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"All"</span>, <span class='st'>"May-June"</span>, <span class='st'>"Jul.-Aug."</span>, <span class='st'>"Sept."</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; \begin{tabular}{lcccc}
-#&gt; \tabularnewline\midrule\midrule
-#&gt; Dependent Variable:&amp;\multicolumn{4}{c}{Ozone}\\
-#&gt; Model:&amp;(1) &amp; (2) &amp; (3) &amp; (4)\\
-#&gt; \midrule \emph{Variables}&amp;   &amp;   &amp;   &amp;  \\
-#&gt; (Intercept)&amp;-64.34$^{***}$ &amp; -48.52 &amp; -80.06 &amp; -112.9$^{***}$\\
-#&gt;   &amp;(23.05) &amp; (30.42) &amp; (57.59) &amp; (34.81)\\
-#&gt; Solar.R&amp;0.0598$^{**}$ &amp; 0.0249 &amp; 0.0993$^{**}$ &amp; 0.0225\\
-#&gt;   &amp;(0.0232) &amp; (0.0319) &amp; (0.0414) &amp; (0.0322)\\
-#&gt; Temp&amp;1.652$^{***}$ &amp; 1.184$^{***}$ &amp; 2.037$^{***}$ &amp; 2.005$^{***}$\\
-#&gt;   &amp;(0.2535) &amp; (0.4123) &amp; (0.6508) &amp; (0.3716)\\
-#&gt; Wind&amp;-3.334$^{***}$ &amp; -1.107 &amp; -5.830$^{***}$ &amp; -1.353\\
-#&gt;   &amp;(0.6544) &amp; (0.9236) &amp; (1.124) &amp; (0.9065)\\
-#&gt; \midrule Sub-sample &amp; All &amp; May-June &amp; Jul.-Aug. &amp; Sept.\\
-#&gt; \midrule \emph{Fit statistics}&amp;  &amp; &amp; &amp; \\
-#&gt; Observations &amp; 111&amp;33&amp;49&amp;29\\
-#&gt; R$^2$ &amp; 0.60589&amp;0.35006&amp;0.66607&amp;0.71724\\
-#&gt; Adjusted R$^2$ &amp; 0.59484&amp;0.28282&amp;0.64381&amp;0.68330\\
-#&gt; \midrule\midrule\multicolumn{5}{l}{\emph{Normal standard-errors in parentheses}}\\
-#&gt; \multicolumn{5}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\
-#&gt; \end{tabular}</div><div class='input'>
+<span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_c0</span>, <span class='va'>est_c1</span>, <span class='va'>est_c2</span>, group <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"_Controls"</span> <span class='op'>=</span> <span class='st'>"poly"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                             est_c0            est_c1           est_c2
+#&gt; Dependent Var.:              Ozone             Ozone            Ozone
+#&gt;                                                                      
+#&gt; (Intercept)        18.60** (6.748)  29.83*** (4.101) 25.79*** (6.506)
+#&gt; Solar.R         0.1272*** (0.0328) 0.0659** (0.0201)  0.1347 (0.0881)
+#&gt; Solar.R square                                       -0.0002 (0.0003)
+#&gt; _______________ __________________ _________________ ________________
+#&gt; S.E. type                 Standard          Standard         Standard
+#&gt; Observations                   111               111              111
+#&gt; R2                         0.12134           0.71231          0.71408
+#&gt; Adj. R2                    0.11328           0.69861          0.69758
+#&gt; Controls                        No               Yes              Yes</div><div class='input'><span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_all</span>, <span class='va'>est_sub1</span>, <span class='va'>est_sub2</span>, <span class='va'>est_sub3</span>,
+       extraline <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"^Sub-sample"</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"All"</span>, <span class='st'>"May-June"</span>, <span class='st'>"Jul.-Aug."</span>, <span class='st'>"Sept."</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                            est_all         est_sub1          est_sub2
+#&gt; Dependent Var.:              Ozone            Ozone             Ozone
+#&gt;                                                                      
+#&gt; Sub-sample                     All         May-June         Jul.-Aug.
+#&gt; (Intercept)       -64.34** (23.05)   -48.52 (30.42)    -80.06 (57.59)
+#&gt; Solar.R           0.0598* (0.0232)  0.0249 (0.0319)  0.0993* (0.0414)
+#&gt; Temp             1.652*** (0.2535) 1.184** (0.4123)  2.037** (0.6508)
+#&gt; Wind            -3.334*** (0.6544)  -1.107 (0.9236) -5.830*** (1.124)
+#&gt; _______________ __________________ ________________ _________________
+#&gt; S.E. type                 Standard         Standard          Standard
+#&gt; Observations                   111               33                49
+#&gt; R2                         0.60589          0.35006           0.66607
+#&gt; Adj. R2                    0.59484          0.28282           0.64381
+#&gt;                          est_sub3
+#&gt; Dependent Var.:             Ozone
+#&gt;                                  
+#&gt; Sub-sample                  Sept.
+#&gt; (Intercept)      -112.9** (34.81)
+#&gt; Solar.R           0.0225 (0.0322)
+#&gt; Temp            2.005*** (0.3716)
+#&gt; Wind              -1.353 (0.9065)
+#&gt; _______________ _________________
+#&gt; S.E. type                Standard
+#&gt; Observations                   29
+#&gt; R2                        0.71724
+#&gt; Adj. R2                   0.68330</div><div class='input'><span class='co'># Note that since the default placement is the coefficients section,</span>
+<span class='co'># a single "^" then refers to the position within the section. We end</span>
+<span class='co'># up at the top of the coefficients section.</span>
+
+<span class='co'>#</span>
+<span class='co'># fixef.group</span>
+<span class='co'>#</span>
+
+<span class='co'># You can group the fixed-effects line with fixef.group</span>
+
+<span class='va'>est_0fe</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='va'>Temp</span> <span class='op'>+</span> <span class='va'>Wind</span>, <span class='va'>aq</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'><span class='va'>est_1fe</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='va'>Temp</span> <span class='op'>+</span> <span class='va'>Wind</span> <span class='op'>|</span> <span class='va'>Month</span>, <span class='va'>aq</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'><span class='va'>est_2fe</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='va'>Temp</span> <span class='op'>+</span> <span class='va'>Wind</span> <span class='op'>|</span> <span class='va'>Month</span> <span class='op'>+</span> <span class='va'>Day</span>, <span class='va'>aq</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'>
+<span class='co'># A) automatic way =&gt; simply use fixef.group = TRUE</span>
+
+<span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_0fe</span>, <span class='va'>est_2fe</span>, fixef.group <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                            est_0fe          est_2fe
+#&gt; Dependent Var.:              Ozone            Ozone
+#&gt;                                                    
+#&gt; (Intercept)       -64.34** (23.05)                 
+#&gt; Solar.R           0.0598* (0.0232)  0.0509 (0.0428)
+#&gt; Temp             1.652*** (0.2535) 2.052** (0.2390)
+#&gt; Wind            -3.334*** (0.6544)  -3.289* (1.051)
+#&gt; Fixed-Effects:  ------------------ ----------------
+#&gt; Month and Day                   No              Yes
+#&gt; _______________ __________________ ________________
+#&gt; S.E. type                 Standard        by: Month
+#&gt; Observations                   111              111
+#&gt; R2                         0.60589          0.81604
+#&gt; Within R2                       --          0.61471</div><div class='input'>
+<span class='co'># Note that when grouping would lead to inconsistencies across models,</span>
+<span class='co'># it is avoided</span>
+
+<span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_0fe</span>, <span class='va'>est_1fe</span>, <span class='va'>est_2fe</span>, fixef.group <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                            est_0fe           est_1fe          est_2fe
+#&gt; Dependent Var.:              Ozone             Ozone            Ozone
+#&gt;                                                                      
+#&gt; (Intercept)       -64.34** (23.05)                                   
+#&gt; Solar.R           0.0598* (0.0232)   0.0522 (0.0408)  0.0509 (0.0428)
+#&gt; Temp             1.652*** (0.2535) 1.875*** (0.1816) 2.052** (0.2390)
+#&gt; Wind            -3.334*** (0.6544)   -3.109. (1.306)  -3.289* (1.051)
+#&gt; Fixed-Effects:  ------------------ ----------------- ----------------
+#&gt; Month                           No               Yes              Yes
+#&gt; Day                             No                No              Yes
+#&gt; _______________ __________________ _________________ ________________
+#&gt; S.E. type                 Standard         by: Month        by: Month
+#&gt; Observations                   111               111              111
+#&gt; R2                         0.60589           0.63686          0.81604
+#&gt; Within R2                       --           0.53154          0.61471</div><div class='input'>
+<span class='co'># B) customized way =&gt; use a list</span>
+
+<span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_0fe</span>, <span class='va'>est_2fe</span>, fixef.group <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"Dates"</span> <span class='op'>=</span> <span class='st'>"Month|Day"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                            est_0fe          est_2fe
+#&gt; Dependent Var.:              Ozone            Ozone
+#&gt;                                                    
+#&gt; (Intercept)       -64.34** (23.05)                 
+#&gt; Solar.R           0.0598* (0.0232)  0.0509 (0.0428)
+#&gt; Temp             1.652*** (0.2535) 2.052** (0.2390)
+#&gt; Wind            -3.334*** (0.6544)  -3.289* (1.051)
+#&gt; Fixed-Effects:  ------------------ ----------------
+#&gt; Dates                           No              Yes
+#&gt; _______________ __________________ ________________
+#&gt; S.E. type                 Standard        by: Month
+#&gt; Observations                   111              111
+#&gt; R2                         0.60589          0.81604
+#&gt; Within R2                       --          0.61471</div><div class='input'>
+<span class='co'># Note that when a user grouping would lead to inconsistencies,</span>
+<span class='co'># the term partial replaces yes/no and the fixed-effects are not removed.</span>
+
+<span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_0fe</span>, <span class='va'>est_1fe</span>, <span class='va'>est_2fe</span>, fixef.group <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"Dates"</span> <span class='op'>=</span> <span class='st'>"Month|Day"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='warning'>Warning: In etable(est_0fe, est_1fe, est_2fe, fixef.group = l...:</span>
+#&gt; <span class='warning'> In 'fixef.group', the group leads to an inconsistent row (defined by</span>
+#&gt; <span class='warning'>"Month|Day").</span>
+#&gt; <span class='warning'>To create inconsistent rows: use drop.section = 'fixef' combined with</span>
+#&gt; <span class='warning'>the arghument 'extraline'.</span></div><div class='output co'>#&gt;                            est_0fe           est_1fe          est_2fe
+#&gt; Dependent Var.:              Ozone             Ozone            Ozone
+#&gt;                                                                      
+#&gt; (Intercept)       -64.34** (23.05)                                   
+#&gt; Solar.R           0.0598* (0.0232)   0.0522 (0.0408)  0.0509 (0.0428)
+#&gt; Temp             1.652*** (0.2535) 1.875*** (0.1816) 2.052** (0.2390)
+#&gt; Wind            -3.334*** (0.6544)   -3.109. (1.306)  -3.289* (1.051)
+#&gt; Fixed-Effects:  ------------------ ----------------- ----------------
+#&gt; Dates                           No           partial              Yes
+#&gt; Month                           No               Yes              Yes
+#&gt; Day                             No                No              Yes
+#&gt; _______________ __________________ _________________ ________________
+#&gt; S.E. type                 Standard         by: Month        by: Month
+#&gt; Observations                   111               111              111
+#&gt; R2                         0.60589           0.63686          0.81604
+#&gt; Within R2                       --           0.53154          0.61471</div><div class='input'>
+<span class='co'># Using customized placement =&gt; as with 'group' and 'extraline',</span>
+<span class='co'># the user can control the placement of the new line.</span>
+<span class='co'># See the previous 'group' examples and the dedicated section in the help.</span>
+
+<span class='co'># On top of the coefficients:</span>
+<span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_0fe</span>, <span class='va'>est_2fe</span>, fixef.group <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"^^Dates"</span> <span class='op'>=</span> <span class='st'>"Month|Day"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                            est_0fe          est_2fe
+#&gt; Dependent Var.:              Ozone            Ozone
+#&gt;                                                    
+#&gt; Dates                           No              Yes
+#&gt; (Intercept)       -64.34** (23.05)                 
+#&gt; Solar.R           0.0598* (0.0232)  0.0509 (0.0428)
+#&gt; Temp             1.652*** (0.2535) 2.052** (0.2390)
+#&gt; Wind            -3.334*** (0.6544)  -3.289* (1.051)
+#&gt; _______________ __________________ ________________
+#&gt; S.E. type                 Standard        by: Month
+#&gt; Observations                   111              111
+#&gt; R2                         0.60589          0.81604
+#&gt; Within R2                       --          0.61471</div><div class='input'>
+<span class='co'># Last line of the statistics</span>
+<span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_0fe</span>, <span class='va'>est_2fe</span>, fixef.group <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"_Dates"</span> <span class='op'>=</span> <span class='st'>"Month|Day"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                            est_0fe          est_2fe
+#&gt; Dependent Var.:              Ozone            Ozone
+#&gt;                                                    
+#&gt; (Intercept)       -64.34** (23.05)                 
+#&gt; Solar.R           0.0598* (0.0232)  0.0509 (0.0428)
+#&gt; Temp             1.652*** (0.2535) 2.052** (0.2390)
+#&gt; Wind            -3.334*** (0.6544)  -3.289* (1.051)
+#&gt; _______________ __________________ ________________
+#&gt; S.E. type                 Standard        by: Month
+#&gt; Observations                   111              111
+#&gt; R2                         0.60589          0.81604
+#&gt; Within R2                       --          0.61471
+#&gt; Dates                           No              Yes</div><div class='input'>
+
 
 <span class='co'>#</span>
 <span class='co'># Using custom functions to compute the standard errors</span>
@@ -1074,7 +1234,7 @@
 #&gt; S.E. type                 Standard          by: Month
 #&gt; R2                         0.68106            0.68106
 #&gt; Observations                   116                116
-#&gt; G                              105                105</div><div class='input'>
+#&gt; G                              105                  5</div><div class='input'>
 <span class='co'># If you use a formula, '.' means the default:</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, fitstat <span class='op'>=</span> <span class='op'>~</span> <span class='va'>ll</span> <span class='op'>+</span> <span class='va'>.</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                               est1               est2
@@ -1144,7 +1304,7 @@
 
 <span class='va'>est_bis</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='va'>Temp</span> <span class='op'>|</span> <span class='va'>Month</span>, data <span class='op'>=</span> <span class='va'>aq</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'><span class='fu'>etable</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span><span class='op'>)</span>, cluster <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"standard"</span>, <span class='op'>~</span> <span class='va'>Month</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                            model 1           model 2
+</div><div class='output co'>#&gt; <span class='warning'>Warning: Argument se = 'standard' cannot be used with the argument 'cluster'. Argument 'cluster' is ignored.</span></div><div class='output co'>#&gt;                            model 1           model 2
 #&gt; Dependent Var.:              Ozone             Ozone
 #&gt;                                                     
 #&gt; (Intercept)       -64.34** (23.05)                  
@@ -1162,7 +1322,7 @@
 <span class='co'># Method 3: Using rep()</span>
 
 <span class='fu'>etable</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"standard"</span>, <span class='op'>~</span> <span class='va'>Month</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                          model 1.1         model 1.2
+</div><div class='output co'>#&gt; <span class='warning'>Warning: Argument se = 'standard' cannot be used with the argument 'cluster'. Argument 'cluster' is ignored.</span></div><div class='output co'>#&gt;                          model 1.1         model 1.2
 #&gt; Dependent Var.:              Ozone             Ozone
 #&gt;                                                     
 #&gt; (Intercept)       -64.34** (23.05)   -64.34* (21.30)
@@ -1176,7 +1336,7 @@
 #&gt; Adj. R2                    0.59484           0.59484</div><div class='input'>
 <span class='co'># When using rep on 2 or more objects, you need to embed them in .l()</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'><a href='rep.fixest.html'>.l</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span><span class='op'>)</span>, cluster <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"standard"</span>, <span class='op'>~</span> <span class='va'>Month</span>, <span class='op'>~</span> <span class='va'>Day</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                          model 1.1          model 2.1         model 1.2
+</div><div class='output co'>#&gt; <span class='warning'>Warning: Argument se = 'standard' cannot be used with the argument 'cluster'. Argument 'cluster' is ignored.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Argument se = 'standard' cannot be used with the argument 'cluster'. Argument 'cluster' is ignored.</span></div><div class='output co'>#&gt;                          model 1.1          model 2.1         model 1.2
 #&gt; Dependent Var.:              Ozone              Ozone             Ozone
 #&gt;                                                                        
 #&gt; (Intercept)       -64.34** (23.05)                      -64.34* (21.30)
@@ -1206,7 +1366,7 @@
 #&gt; Within R2                 0.53154                 --            0.53154</div><div class='input'>
 <span class='co'># Using each to order differently</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'><a href='rep.fixest.html'>.l</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span><span class='op'>)</span>, each <span class='op'>=</span> <span class='fl'>3</span>, cluster <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"standard"</span>, <span class='op'>~</span> <span class='va'>Month</span>, <span class='op'>~</span> <span class='va'>Day</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                          model 1.1         model 1.2          model 1.3
+</div><div class='output co'>#&gt; <span class='warning'>Warning: Argument se = 'standard' cannot be used with the argument 'cluster'. Argument 'cluster' is ignored.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Argument se = 'standard' cannot be used with the argument 'cluster'. Argument 'cluster' is ignored.</span></div><div class='output co'>#&gt;                          model 1.1         model 1.2          model 1.3
 #&gt; Dependent Var.:              Ozone             Ozone              Ozone
 #&gt;                                                                        
 #&gt; (Intercept)       -64.34** (23.05)   -64.34* (21.30)   -64.34** (20.15)

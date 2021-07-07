@@ -645,20 +645,41 @@ get_model_null <- function(env, theta.init){
 			assign("lfactorial", lfact, env)
 		}
 
-		sy = sum(y)
-		constant = log(sy / N)
-		loglik =  sy*log(sy) - sy*log(N) - sy - lfact
+	    w = env$weights.value
+	    isWeight = length(w) > 1
+	    if(isWeight){
+	        sy = sum(y * w)
+	        N = sum(w)
+	    } else {
+	        sy = sum(y)
+	    }
+
+	    constant = log(sy / N)
+	    loglik =  sy*log(sy) - sy*log(N) - sy - lfact
+
+
 	} else if(family == "gaussian"){
 		# there is a closed form
 		constant = mean(y)
 		ss = sum( (y - constant)**2 )
 		sigma = sqrt( ss / N )
 		loglik = -1/2/sigma^2*ss - N*log(sigma) - N*log(2*pi)/2
+
 	} else if(family == "logit"){
 		# there is a closed form
-		sy = sum(y)
+
+	    w = env$weights.value
+		isWeight = length(w) > 1
+	    if(isWeight){
+	        sy = sum(y * w)
+	        N = sum(w)
+	    } else {
+	        sy = sum(y)
+	    }
+
 		constant = log(sy) - log(N - sy)
 		loglik = sy*log(sy) - sy*log(N-sy) - N*log(N) + N*log(N-sy)
+
 	} else if(family=="negbin"){
 
 		if("lgamma" %in% names(env)){

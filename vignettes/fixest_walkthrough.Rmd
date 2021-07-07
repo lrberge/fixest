@@ -49,7 +49,7 @@ setFixest_nthreads(1)
 <!-- Help on vignette writing here: http://r-pkgs.had.co.nz/vignettes.html. -->
 
 The package `fixest` provides a family of functions to perform estimations with multiple fixed-effects.
-The two main functions are `feols` for linear models and `feglm` for generalized linear models. In addition, the function `femlm` performs direct maximum likelihood estimation, and `feNmlm` extends the latter to allow the inclusion of non-linear in parameters right-hand-sides. 
+The two main functions are `feols` for linear models and `feglm` for generalized linear models. In addition, the function `femlm` performs direct maximum likelihood estimation, and `feNmlm` extends the latter to allow the inclusion of non-linear in parameters right-hand-sides. Finally, the functions `fepois` and `fenegbin` are aliases for Poisson and negative binomial fixed-effect estimations.
 Each of these functions supports any number of fixed-effects and is implemented with full fledged multi-threading in c++. Functions `feols` and `feglm` further support variables with varying slopes.
 
 This package is currently (Feb. 2020) the fastest software available to perform fixed-effects estimations. See the project's [homepage](https://lrberge.github.io/fixest/) for a set of benchmarks.
@@ -114,17 +114,14 @@ summary(gravity_pois, se = "twoway")
 The clustering can be done on one (`se="cluster"`), two (`se="twoway"`), three (`se="threeway"`) or up to four (`se="fourway"`) variables. If the estimation includes fixed-effects, then by default the clustering will be done using these fixed-effects, in the original order. This is why the *Origin* and *Destination* variables were used for the two-way clustering in the previous example. If, instead, you wanted to perform one-way clustering on the *Product* variable, you need to use the argument `cluster`: 
 
 ```{r, eval = FALSE}
-# Equivalent ways of clustering the SEs:
-# One-way clustering is deduced from the arguent 'cluster'
-# - using the vector:
-summary(gravity_pois, cluster = trade$Product)
+# Two ways to summon clustering on the Product variable
 # - by reference:
 summary(gravity_pois, cluster = "Product")
 # - with a formula:
 summary(gravity_pois, cluster = ~Product)
 ```
 
-All produce the same results:
+Both produce the same results:
 ```{r, eval = TRUE}
 summary(gravity_pois, cluster = ~Product)
 ```
@@ -134,11 +131,8 @@ Note that you can always cluster the standard-errors, even when the estimation c
 
 ```{r}
 gravity_simple = fepois(Euros ~ log(dist_km), trade)
-# Two way clustering is deduced from the argument 'cluster'
-# Using data:
-summary(gravity_simple, cluster = trade[, c("Origin", "Destination")])
-# Using a formula (note that the values of the variables are 
-#  fetched directly in the original database):
+# We use a formula to specify the variables used for two way clustering
+# (note that the values of the variables are fetched directly in the original database)
 summary(gravity_simple, cluster = ~Origin + Destination)
 ```
 
@@ -217,7 +211,7 @@ res_multi = fepois(Euros ~ log(dist_km) | csw0(Year, Destination, Origin), trade
 
 The previous line of code performs 4 estimations. The function `csw0` is the key here, it means: *cumulative stepwise starting with the empty element*. Starting with the empty element, each new estimation adds a new element in the `csw0()` function, quite like the previous loop. Then you can consider the results, here `res_multi`, as a list of results, although with specific methods to easily access each element. 
 
-Stepwise functions can be applied to the linear right-hand-side and to the fixed-effects, you can also have multiple dependent variables and perform split sample estimations with the argument `split`. All of this is detailed in the dedicated vignette: [Multiple estimations](https://cran.r-project.org/package=fixest/vignettes/multiple_estimations.html).
+Stepwise functions can be applied to the linear right-hand-side and to the fixed-effects, you can also have multiple dependent variables and perform split sample estimations with the argument `split`. All of this is detailed in the dedicated vignette: [Multiple estimations](https://lrberge.github.io/fixest/articles/multiple_estimations.html).
 
 
 ## Exporting the results to Latex
@@ -259,7 +253,7 @@ To change the variable names in the Latex table, we use the argument `dict`. The
 
 In the first export, the coefficient of the intercept is dropped by using `drop = "Const"` (could be anything such that `grepl(drop[1], "Constant")` is TRUE). In the second, the coefficient of the distance is put before the intercept (which is kept) thanks to the argument `order`. Note that the actions performed by the arguments `drop` or `order` are performed **after** the renaming takes place with the argument `dict`.
 
-Note that you can completely customize the style of the table by using the `style` and `postprocessing` arguments, please have a look at the dedicated vignette: [Exporting estimation tables](https://cran.r-project.org/package=fixest/vignettes/exporting_tables.html). 
+Note that you can completely customize the style of the table by using the `style` and `postprocessing` arguments, please have a look at the dedicated vignette: [Exporting estimation tables](https://lrberge.github.io/fixest/articles/exporting_tables.html). 
 
 
 ## Extracting the fixed-effects coefficients
@@ -337,7 +331,7 @@ To access the first stage(s), you can use the summary method:
 summary(est_iv_fe, stage = 1)
 ```
 
-When `summary` shall return more than one element, the object returned is not a regular `fixest` object but a `fixest_multi` object. These kind of objects are covered in the vignette: [Multiple estimations](https://cran.r-project.org/package=fixest/vignettes/multiple_estimations.html). You can display the first and second stages in a table with `etable`:
+When `summary` shall return more than one element, the object returned is not a regular `fixest` object but a `fixest_multi` object. These kind of objects are covered in the vignette: [Multiple estimations](https://lrberge.github.io/fixest/articles/multiple_estimations.html). You can display the first and second stages in a table with `etable`:
 
 ```{r}
 etable(summary(est_iv_fe, stage = 1:2), fitstat = ~ . + ivfall + ivwaldall.p)
@@ -410,13 +404,13 @@ The preceding interaction examples all took place in the fixed-effects slot (i.e
 
 Yet, there are equally many cases where we do want to retain full inferential information about interaction terms. For example, in a difference-in-differences (DiD) research design. Here too `fixest` offers its own specialized syntax for combining terms in the model formula: `i()`. 
 
-As we shall see, `i()` is more versatile than just creating interaction terms. It is also able to coerce individual variables to a factor and, compared to base R `factor()`, does so in a way that allows for better synergies with other `fixest` functions like `etable` and `coefplot`. This will allow us to perform some common estimation tasks much more easily.
+As we shall see, `i()` is more versatile than just creating interaction terms. It is also able to coerce individual variables to a factor and, compared to base R `factor()`, does so in a way that allows for better synergies with other `fixest` functions like `etable` and `coefplot`/`iplot`. This will allow us to perform some common estimation tasks much more easily.
 
 We now illustrate the main uses of `i()` with the help of some examples.
 
 ### A compact syntax for factors and interactions: `i()`
 
-The function `i()` accepts the arguments `ref`, `drop` and `keep`,  which are used to identify which level to keep. Note that the argument `ref` accepts only one value while `drop` accepts several. Here's an example how to use them:
+The function `i()` accepts the arguments `ref`, and `keep` which are used to identify which levels to keep. Here's an example how to use them:
 
 ```{r}
 data(airquality)
@@ -442,73 +436,52 @@ data(base_did)
 head(base_did)
 ```
 
-The empirical approach that we will use here is the canonical two-way fixed effects (TWFE) model that should be familiar to many empirical researchers. In a regression context, TWFE essentially amounts to an interaction between our `treat` and `period` variables. This is easily done using the `i(variable, factor, reference)` syntax:
+The empirical approach that we will use here is the canonical two-way fixed effects (TWFE) model that should be familiar to many empirical researchers. In a regression context, TWFE essentially amounts to an interaction between our `treat` and `period` variables. This is easily done using the `i(fact_var, num_var, reference)` syntax:
 
 ```{r, eval = TRUE}
 # Estimation of treatment × period effects
 # We also add individual and period fixed-effects:
-est_did = feols(y ~ x1 + i(treat, period, 5) | id + period, base_did)
+est_did = feols(y ~ x1 + i(period, treat, 5) | id + period, base_did)
 est_did
 ```
 
-Here, `i(treat, period, 5)` creates a set of interact terms: One `treat` dummy for each `period`, but excluding period 5 as a reference. While the explicit reference period is optional, note that we need a reference to avoid the collinearity problem posed by the `id` fixed effects. More to the point, for this DiD analysis we are interested in whether the treatment generated a sustained impact on our outcome variable relative to the control group. This makes period 5 (immediately prior to treatment) the obvious choice to use as our relative anchor. It also demonstrates an advantage that `i()`'s syntax offers over the equivalent base `treat*factor(period)` expansion, which would automatically use period 1 as a reference. Of course, we could specify the levels of `factor(period)` ahead of time. But this is rather tedious, whereas `i()` allows us to do so concisely on the fly.
+Here, `i(period, treat, 5)` creates a set of interact terms: One `treat` dummy for each `period`, but excluding period 5 as a reference. While the explicit reference period is optional, note that we need a reference to avoid the collinearity problem posed by the `id` fixed effects. More to the point, for this DiD analysis we are interested in whether the treatment generated a sustained impact on our outcome variable relative to the control group. This makes period 5 (immediately prior to treatment) the obvious choice to use as our relative anchor. It also demonstrates an advantage that `i()`'s syntax offers over the equivalent base `treat*factor(period)` expansion, which would automatically use period 1 as a reference. Of course, we could specify the levels of `factor(period)` ahead of time. But this is rather tedious, whereas `i()` allows us to do so concisely on the fly.
 
-To display the treatment effects on a graph, we can use the function `coefplot`:
+To display the treatment effects on a graph, we can use the function `iplot`:
 
 ```{r, fig.width=7}
-coefplot(est_did)
+iplot(est_did)
 ```
 
-The function `coefplot` detects that the results contain interactions and plots the appropriate graph. In case you wanted to display all the coefficients, including `x1`, you can use the argument `only.inter = FALSE`.
+The function `iplot` reports the coefficients of variables created with `i()`, and only them. In case you wanted to display all the coefficients, including `x1`, you can use the function `coefplot` instead.
 
 ### Staggered difference-in-differences (Sun and Abraham, 2020)
 
-*Note that the content of this section is only valid for `fixest` version 0.8.1 or later.*
+*Note that the content of this section is only valid for `fixest` version 0.9.0 or later.*
 
 Despite TWFE's long-standing popularity for DiD designs, recent research has a shone a light on the biases that it can introduce under differential timing. For example, under staggered treatment or policy rollout. 
 
-For staggered DiD analyzes, `fixest` provides convenience functions for implementing the unbiased method of [Sun and Abraham (2020)](https://doi.org/10.1016/j.jeconom.2020.09.006) --- hereafter: SA20. The summary version is that we again use `i()` to create `cohort x time to treatment` dummies. But we then use the `aggregate()` function to recover the correct time treatment effects as per SA20. 
+For staggered DiD analyzes, `fixest` provides the `sunab` function for implementing the unbiased method of [Sun and Abraham (2020)](https://doi.org/10.1016/j.jeconom.2020.09.006) --- hereafter: SA20. The method is based on the estimation of `treated cohort x time to treatment` dummies which are later aggregated to obtain the average treatment for the treated (ATT) for each period (or for the full post treatment period).
 
 (Aside: Note that we use `time to treatment` rather than just `time`, because we need to account for the staggered treatment via a relative time measure.)
 
-Let's walk through an example with generated data, where (a) different cohorts get the treatment at different periods, and (b) the effect of the treatment is cohort-specific and increasing over time. First generate the data:
+Let's walk through an example with the `base_stagg` data set, where (a) different cohorts get the treatment at different periods, and (b) the effect of the treatment is cohort-specific and increasing over time. Let's have a first look at the data:
 
 ```{r}
-# Generate some (fake) staggered DiD data
+data(base_stagg)
 
-set.seed(1)
-n_group = 20
-n_per_group = 5
-id_i = paste0((1:n_group), ":", rep(1:n_per_group, each = n_group))
-id_t = 1:10
-base = expand.grid(id = id_i, year = id_t)
-base$group = as.numeric(gsub(":.+", "", base$id))
-base$year_treated = base$group
-base$year_treated[base$group > 10] = 10000
-base$treat_post = (base$year >= base$year_treated) * 1
-base$time_to_treatment = pmax(base$year - base$year_treated, -1000)
-base$treated = (base$year_treated < 10000) * 1
-# The effect of the treatment is cohort specific and increases with time
-base$y_true = base$treat_post * (1 + 1 * base$time_to_treatment - 1 * base$group)
-base$y = base$y_true + rnorm(nrow(base))
-
-# Note that the time_to_treatment for controls is set to -1000
-
-# We need to drop the always treated individuals (just a data generation artifact)
-base = base[base$group > 1,]
-
-head(base)
+head(base_stagg)
 ```
 
-Here's a quick visual depiction of the data. Again, notice the staggered treatment rollout and time-varying intensity.
+Note that the variable `year_treated` is set to 1000 (i.e. above the maximum value of `year`) for the never treated. Here's a quick visual depiction of the data. Again, notice the staggered treatment rollout and time-varying intensity.
 
 ```{r, echo=FALSE}
 if(requireNamespace("ggplot2", quietly = TRUE)){
   library(ggplot2)
-  ggplot(aggregate(base[, c('year_treated', 'y_true')], 
-                   by = list(year = base$year, group = base$group), 
+  ggplot(aggregate(base_stagg[, c('year_treated', 'treatment_effect_true')], 
+                   by = list(year = base_stagg$year, group = to_integer(base_stagg$year_treated)), 
                    mean), 
-         aes(year, group, fill = year>=year_treated, alpha = y_true)) + 
+         aes(year, group, fill = year>=year_treated, alpha = treatment_effect_true)) + 
     geom_tile(colour = "white", lwd = 1) + 
     scale_fill_brewer('Treated?', palette = 'Set1') +
     scale_alpha('Avg. treatment\neffect') +
@@ -519,53 +492,34 @@ if(requireNamespace("ggplot2", quietly = TRUE)){
 }
 ```
 
-With our generated data in hand, let's move on to the estimations. We'll implement two DiD models:
+With our data in hand, let's move on to the estimations. We'll implement two DiD models:
 
   1. A "naive" DiD consisting of a standard TWFE interaction (i.e. treatment × time_to_treatment).
-  2. A "cohort" DiD that instead creates cohort interactions (i.e. time_to_treatment × group).
+  2. A DiD using the SA20 method.
 
 ```{r}
-# "Naive" TWFE DiD
-res_twfe = feols(y ~ i(treated, time_to_treatment, ref = -1, drop = -1000) | id + year, base)
+# "Naive" TWFE DiD (note that the time to treatment for the never treated is -1000)
+# (by using ref = c(-1, -1000) we exclude the period just before the treatment and 
+# the never treated)
+res_twfe = feols(y ~ x1 + i(time_to_treatment, treated, ref = c(-1, -1000)) | id + year, base_stagg)
 
-# With cohort x time-to-treatment dummies
-res_cohort = feols(y ~ i(time_to_treatment, f2 = group, drop = c(-1, -1000)) | id + year, base)
+# To implement the Sun and Abraham (2020) method,
+# we use the sunab(cohort, period) function
+res_sa20 = feols(y ~ x1 + sunab(year_treated, year) | id + year, base_stagg)
 ```
 
-For our "cohort" model, we can now apply the SA20 method of aggregating the coefficients by relative time-to-treatment. We'll use the `aggregate()` function alongside some regexp:
+Let's compare our results in plot form:
 
 ```{r}
-# SA20 method: we aggregate the effects for each period
-sa20_coefs = aggregate(res_cohort, "(ti.*nt)::(-?[[:digit:]])")
-sa20_coefs
-```
-
-The function `aggregate` aggregates the coefficients whose names match the regular expression `"(ti.*nt)::(-?[[:digit:]]+)"`. The two sets of parentheses are important here since the aggregation will be performed for each unique value in between parentheses. In this case the aggregation will be done for each `time_to_treatment` (i.e. `ti.*nt`) and period (i.e. `-?[[:digit:]]`). 
-
-Note that `fixest` objects can also be aggregated on-the-fly via the complementary "agg" argument of `summary.fixest`. This argument calls `aggregate` behind the scenes and can be passed down from high-order functions like `coefplot` and `etable`, which users may find more convenient. For example:
-
-```{r}
-# Same result as `sa20_coefs`, using the complementary "agg" argument of summary.fixest
-res_sa20 = summary(res_cohort, agg = "(ti.*nt)::(-?[[:digit:]])")
-res_sa20
-```
-
-Now that we've done the careful work of adjusting for staggered treatment, let's compare our results in plot form:
-
-```{r}
-# Plot the naive TWFE results
-coefplot(res_twfe, ylim = c(-6, 8), pt.join.par = list(lty = 0))
-
-# Add the SA aggregated results
-x = c(-9:-2, 0:8) + .35 # shift for the plot
-coefplot(res_sa20, x = x, add = TRUE, col = 4, pt.pch = 17)
+# Plot the two TWFE results
+iplot(list(res_twfe, res_sa20), sep = 0.5)
 
 # Add the true results
-att_true = tapply(base$y_true, base$time_to_treatment, mean)[-1]
-points(-9:8 + 0.15, att_true, pch = 15, col = 2)
+att_true = tapply(base_stagg$treatment_effect_true, base_stagg$time_to_treatment, mean)[-1]
+points(-9:8, att_true, pch = 15, col = 4)
 
 legend("topleft", col = c(1, 4, 2), pch = c(20, 17, 15), 
-       legend = c("TWFE", "Sun & Abraham (2020)", "Truth"))
+       legend = c("TWFE", "Truth", "Sun & Abraham (2020)"))
 ```
 
 As we can see, the TWFE results suffer from varying degrees of bias due to the staggered rollout. In contrast, the aggregated SA20 results do a much better job of consistently estimating the true effects.
@@ -574,10 +528,17 @@ As a final example, here's how to get the average treatment effect for the treat
 
 ```{r}
 # The full ATT
-aggregate(res_cohort, c("ATT" = "treatment::[^-]"))
+summary(res_sa20, agg = "att")
 ```
 
-This time the aggregation is operated across each cohort for non-negative time to treatment (i.e. `treatment::[^-]`). Note that the estimated ATT compares favourably with the true value of `r mean(base[base$treat_post == 1, "y_true"])`.
+This time the aggregation of the coefficients is operated across each cohort for non-negative time to treatment. Note that the estimated ATT compares favourably with the true value of `r with(base_stagg, mean(treatment_effect_true[time_to_treatment >= 0]))`.
+
+Under the hood, the `sunab()` function creates `cohort x time to treatment` interactions with the function `i()`, the coefficients are then aggregated at the appropriate level with the function `aggregate.fixest`. To obtain the coefficients for each `cohort x time to treatment`, one simply needs to remove the aggregation:
+
+```{r}
+# Full disaggregation (you could have used summary instead of etable)
+head(etable(res_sa20, agg = FALSE), 20)
+```
 
 
 # Additional features 

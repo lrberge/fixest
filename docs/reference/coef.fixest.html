@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -115,7 +115,7 @@
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/lrberge/fixest/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -142,10 +142,10 @@
     </div>
 
     <pre class="usage"><span class='co'># S3 method for fixest</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>...</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, agg <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>...</span><span class='op'>)</span>
 
 <span class='co'># S3 method for fixest</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coefficients</a></span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coefficients</a></span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, agg <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -153,6 +153,22 @@
     <tr>
       <th>object</th>
       <td><p>A <code>fixest</code> object. Obtained using the functions <code><a href='femlm.html'>femlm</a></code>, <code><a href='feols.html'>feols</a></code> or <code><a href='feglm.html'>feglm</a></code>.</p></td>
+    </tr>
+    <tr>
+      <th>keep</th>
+      <td><p>Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see <code><a href='https://rdrr.io/r/base/regex.html'>regex</a></code> help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to display only <code>x1</code> to <code>x9</code>, then you could use <code>keep = "x[[:digit:]]$"</code>. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain &#8220;Intercept&#8221; is kept). See details.</p></td>
+    </tr>
+    <tr>
+      <th>drop</th>
+      <td><p>Character vector. This element is used if some variables are not to be displayed. This should be a vector of regular expressions (see <code><a href='https://rdrr.io/r/base/regex.html'>regex</a></code> help for more info). Each variable satisfying any of the regular expressions will be discarded. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the variable <code>x1</code> to <code>x55</code> and want to display only <code>x1</code> to <code>x9</code>, then you could use <code>drop = "x[[:digit:]]{2}"</code>. If the first character is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable that does not contain &#8220;Intercept&#8221; is dropped). See details.</p></td>
+    </tr>
+    <tr>
+      <th>order</th>
+      <td><p>Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see <code><a href='https://rdrr.io/r/base/regex.html'>regex</a></code> help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument <code>dict</code>). Example: you have the following variables: <code>month1</code> to <code>month6</code>, then <code>x1</code> to <code>x5</code>, then <code>year1</code> to <code>year6</code>. If you want to display first the x's, then the years, then the months you could use: <code>order = c("x", "year")</code>. If the first character is an exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that does not contain &#8220;Intercept&#8221; goes first).  See details.</p></td>
+    </tr>
+    <tr>
+      <th>agg</th>
+      <td><p>Logical scalar, default is <code>TRUE</code>. If the coefficients of the estimation have been aggregated, whether to report the aggregated coefficients. If <code>FALSE</code>, the raw coefficients will be returned.</p></td>
     </tr>
     <tr>
       <th>...</th>

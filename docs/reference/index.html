@@ -71,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
       </span>
     </div>
 
@@ -157,7 +157,7 @@
       <tr>
         
         <td>
-          <p><code><a href="feols.html">feols()</a></code> </p>
+          <p><code><a href="feols.html">feols()</a></code> <code><a href="feols.html">feols.fit()</a></code> </p>
         </td>
         <td><p>Fixed-effects OLS estimation</p></td>
       </tr><tr>
@@ -200,6 +200,12 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="coefplot.html">coefplot()</a></code> <code><a href="coefplot.html">iplot()</a></code> </p>
+        </td>
+        <td><p>Plots confidence intervals and point estimates</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="style.df.html">style.df()</a></code> </p>
         </td>
         <td><p>Style of data.frames created by etable</p></td>
@@ -212,9 +218,40 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="coefplot.html">coefplot()</a></code> </p>
+          <p><code><a href="extraline_register.html">extraline_register()</a></code> </p>
         </td>
-        <td><p>Plots confidence intervals and point estimates</p></td>
+        <td><p>Register <code>extraline</code> macros to be used in <code>etable</code></p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-difference-in-difference-tools" class="hasAnchor"><a href="#section-difference-in-difference-tools" class="anchor"></a>Difference-in-difference tools</h2>
+          <p class="section-desc"><p>Various tools to perform DiD estimations</p></p>
+        </th>
+      </tr>
+      
+      
+    </tbody><tbody>
+      
+      
+      <tr>
+        
+        <td>
+          <p><code><a href="sunab.html">sunab()</a></code> <code><a href="sunab.html">sunab_att()</a></code> </p>
+        </td>
+        <td><p>Sun and Abraham interactions</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="aggregate.fixest.html">aggregate(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Aggregates the values of DiD coefficients a la Sun and Abraham</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="i.html">i()</a></code> </p>
+        </td>
+        <td><p>Create, or interact variables with, factors</p></td>
       </tr>
     </tbody><tbody>
       <tr>
@@ -231,7 +268,7 @@
       <tr>
         
         <td>
-          <p><code><a href="summary.fixest.html">summary(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="summary.fixest.html">summ()</a></code> <code><a href="summary.fixest.html">summary(<i>&lt;fixest_list&gt;</i>)</a></code> </p>
+          <p><code><a href="summary.fixest.html">summary(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="summary.fixest.html">summary(<i>&lt;fixest_list&gt;</i>)</a></code> </p>
         </td>
         <td><p>Summary of a <code>fixest</code> object. Computes different types of standard errors.</p></td>
       </tr><tr>
@@ -280,7 +317,7 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="summary.fixest.html">summary(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="summary.fixest.html">summ()</a></code> <code><a href="summary.fixest.html">summary(<i>&lt;fixest_list&gt;</i>)</a></code> </p>
+          <p><code><a href="summary.fixest.html">summary(<i>&lt;fixest&gt;</i>)</a></code> <code><a href="summary.fixest.html">summary(<i>&lt;fixest_list&gt;</i>)</a></code> </p>
         </td>
         <td><p>Summary of a <code>fixest</code> object. Computes different types of standard errors.</p></td>
       </tr><tr>
@@ -311,7 +348,7 @@
       <tr>
         
         <td>
-          <p><code><a href="stepwise.html">stepwise()</a></code> <code><a href="stepwise.html">sw()</a></code> <code><a href="stepwise.html">cstepwise()</a></code> <code><a href="stepwise.html">csw()</a></code> <code><a href="stepwise.html">stepwise0()</a></code> <code><a href="stepwise.html">sw0()</a></code> <code><a href="stepwise.html">cstepwise0()</a></code> <code><a href="stepwise.html">csw0()</a></code> </p>
+          <p><code><a href="stepwise.html">sw()</a></code> <code><a href="stepwise.html">csw()</a></code> <code><a href="stepwise.html">sw0()</a></code> <code><a href="stepwise.html">csw0()</a></code> </p>
         </td>
         <td><p>Stepwise estimation tools</p></td>
       </tr><tr>
@@ -329,9 +366,21 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="coef.fixest_multi.html">coef(<i>&lt;fixest_multi&gt;</i>)</a></code> <code><a href="coef.fixest_multi.html">coefficients(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extracts the coefficients of fixest_multi objects</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="print.fixest_multi.html">print(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
         </td>
         <td><p>Print method for fixest_multi objects</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="resid.fixest_multi.html">resid(<i>&lt;fixest_multi&gt;</i>)</a></code> <code><a href="resid.fixest_multi.html">residuals(<i>&lt;fixest_multi&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Extracts the residuals from a <code>fixest_multi</code> object</p></td>
       </tr><tr>
         
         <td>
@@ -473,12 +522,6 @@
           <p><code><a href="to_integer.html">to_integer()</a></code> </p>
         </td>
         <td><p>Fast transform of any type of vector(s) into an integer vector</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="i.html">i()</a></code> <code><a href="i.html">interact()</a></code> </p>
-        </td>
-        <td><p>Create, or interact variables with, factors</p></td>
       </tr>
     </tbody><tbody>
       <tr>
@@ -581,6 +624,12 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="degrees_freedom.html">degrees_freedom()</a></code> </p>
+        </td>
+        <td><p>Gets the degrees of freedom of a <code>fixest</code> estimation</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="r2.html">r2()</a></code> </p>
         </td>
         <td><p>R2s of <code>fixest</code> models</p></td>
@@ -660,7 +709,7 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="setFixest_coefplot.html">setFixest_coefplot()</a></code> </p>
+          <p><code><a href="setFixest_coefplot.html">setFixest_coefplot()</a></code> <code><a href="setFixest_coefplot.html">getFixest_coefplot()</a></code> </p>
         </td>
         <td><p>Sets the defaults of coefplot</p></td>
       </tr><tr>
@@ -721,9 +770,15 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="aggregate.fixest.html">aggregate(<i>&lt;fixest&gt;</i>)</a></code> </p>
+          <p><code><a href="fixest_startup_msg.html">fixest_startup_msg()</a></code> </p>
         </td>
-        <td><p>Aggregates the values of DiD coefficients a la Sun and Abraham</p></td>
+        <td><p>Permanently removes the fixest package startup message</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="obs.html">obs()</a></code> </p>
+        </td>
+        <td><p>Extracts the observations used for the estimation</p></td>
       </tr><tr>
         
         <td>
@@ -779,6 +834,12 @@
           <p><code><a href="trade.html">trade</a></code> </p>
         </td>
         <td><p>Trade data sample</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="base_stagg.html">base_stagg</a></code> </p>
+        </td>
+        <td><p>Sample data for staggered difference in difference</p></td>
       </tr>
     </tbody>
     </table>

@@ -65,7 +65,7 @@
 #'
 #' The function \code{esttable} is equivalent to the function \code{etable} with argument \code{tex = FALSE}.
 #'
-#' You can permanently change the way your table looks in Latex by using \code{setFixest_etable}. The following vignette gives an example as well as illustrates how to use the \code{style} and postprocessing functions: \href{https://cran.r-project.org/package=fixest/vignettes/exporting_tables.html}{Exporting estimation tables}.
+#' You can permanently change the way your table looks in Latex by using \code{setFixest_etable}. The following vignette gives an example as well as illustrates how to use the \code{style} and postprocessing functions: \href{https://lrberge.github.io/fixest/articles/exporting_tables.html}{Exporting estimation tables}.
 #'
 #' When the argument \code{postprocessing.tex} is not missing, two additional tags will be included in the character vector returned by \code{etable}: \code{"\%start:tab\\n"} and \code{"\%end:tab\\n"}. These can be used to identify the start and end of the tabular and are useful to insert code within the \code{table} environment.
 #'
@@ -132,7 +132,7 @@
 #' aq = airquality
 #'
 #' est1 = feols(Ozone ~ i(Month) / Wind + Temp, data = aq)
-#' est2 = feols(Ozone ~ i(Wind, Month) + Temp | Month, data = aq)
+#' est2 = feols(Ozone ~ i(Month, Wind) + Temp | Month, data = aq)
 #'
 #' # Displaying the two results in a single table
 #' etable(est1, est2)
@@ -345,7 +345,17 @@
 #' etable(rep(.l(est, est_bis), each = 3, cluster = list("standard", ~ Month, ~ Day)))
 #'
 #'
-etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, agg = NULL, .vcov, .vcov_args = NULL, digits = 4, digits.stats = 5, tex, fitstat, title, coefstat = "se", ci = 0.95, sdBelow = NULL, keep, drop, order, dict, file, replace = FALSE, convergence, signifCode, label, float, subtitles = list("auto"), fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar = TRUE, style.tex = NULL, style.df = NULL, notes = NULL, group = NULL, extraline = NULL, fixef.group = NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube"), postprocess.tex = NULL, postprocess.df = NULL, fit_format = "__var__", coef.just = NULL){
+etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, agg = NULL,
+                  .vcov, .vcov_args = NULL, digits = 4, digits.stats = 5, tex,
+                  fitstat, title, coefstat = "se", ci = 0.95, sdBelow = NULL,
+                  keep, drop, order, dict, file, replace = FALSE, convergence,
+                  signifCode, label, float, subtitles = list("auto"), fixef_sizes = FALSE,
+                  fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5,
+                  interaction.combine = " $\\times $ ", depvar = TRUE, style.tex = NULL,
+                  style.df = NULL, notes = NULL, group = NULL, extraline = NULL,
+                  fixef.group = NULL, placement = "htbp", drop.section = NULL,
+                  poly_dict = c("", " square", " cube"), postprocess.tex = NULL,
+                  postprocess.df = NULL, fit_format = "__var__", coef.just = NULL){
 
     #
     # Checking the arguments
@@ -497,7 +507,23 @@ etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, agg = N
         }
     }
 
-    info = results2formattedList(dots = dots, se=se, dof=dof, fitstat_all=fitstat, cluster=cluster, stage=stage, agg = agg, .vcov=.vcov, .vcov_args=.vcov_args, digits=digits, digits.stats=digits.stats, sdBelow=sdBelow, signifCode=signifCode, coefstat = coefstat, ci = ci, title=title, float=float, subtitles=subtitles, keepFactors=keepFactors, tex = tex, useSummary=useSummary, dots_call=dots_call, powerBelow=powerBelow, dict=dict, interaction.combine=interaction.combine, convergence=convergence, family=family, keep=keep, drop=drop, file=file, order=order, label=label, fixef_sizes=fixef_sizes, fixef_sizes.simplify=fixef_sizes.simplify, depvar=depvar, style.tex=style.tex, style.df=style.df, replace=replace, notes = notes, group = group, extraline=extraline, fixef.group=fixef.group, placement = placement, drop.section = drop.section, poly_dict = poly_dict, tex_tag = DO_POSTPROCESS, fit_format = fit_format, coef.just = coef.just, .up = .up)
+    info = results2formattedList(dots = dots, se=se, dof=dof, fitstat_all=fitstat,
+                                 cluster=cluster, stage=stage, agg = agg, .vcov=.vcov,
+                                 .vcov_args=.vcov_args, digits=digits, digits.stats=digits.stats,
+                                 sdBelow=sdBelow, signifCode=signifCode, coefstat = coefstat,
+                                 ci = ci, title=title, float=float, subtitles=subtitles,
+                                 keepFactors=keepFactors, tex = tex, useSummary=useSummary,
+                                 dots_call=dots_call, powerBelow=powerBelow, dict=dict,
+                                 interaction.combine=interaction.combine, convergence=convergence,
+                                 family=family, keep=keep, drop=drop, file=file, order=order,
+                                 label=label, fixef_sizes=fixef_sizes,
+                                 fixef_sizes.simplify=fixef_sizes.simplify,
+                                 depvar=depvar, style.tex=style.tex, style.df=style.df,
+                                 replace=replace, notes = notes, group = group, extraline=extraline,
+                                 fixef.group=fixef.group, placement = placement,
+                                 drop.section = drop.section, poly_dict = poly_dict,
+                                 tex_tag = DO_POSTPROCESS, fit_format = fit_format,
+                                 coef.just = coef.just, .up = .up)
 
     if(tex){
         res = etable_internal_latex(info)
@@ -618,17 +644,12 @@ gen_etable_aliases = function(){
 
 
     # Writing the functions
-
-    f = file("R/etable_aliases.R", "w", encoding = "utf-8")
-
     intro = c("# Do not edit by hand\n# => aliases to the function etable\n\n\n")
 
     s = "\n\n\n\n"
     text = c(intro, s, esttable_rox, esttable_fun, s, esttex_rox, esttex_fun, s)
-    writeLines(text, f)
-    close(f)
 
-
+    update_file("R/etable_aliases.R", text)
 }
 
 results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage = 2, agg = NULL, .vcov, .vcov_args = NULL, digits = 4, digits.stats = 5, fitstat_all, sdBelow=NULL, dict, signifCode = c("***"=0.01, "**"=0.05, "*"=0.10), coefstat = "se", ci = 0.95, label, subtitles, title, float = FALSE, replace = FALSE, keepFactors = FALSE, tex = FALSE, useSummary, dots_call, powerBelow = -5, interaction.combine, convergence, family, drop, order, keep, file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, depvar = FALSE, style.tex = NULL, style.df=NULL, notes = NULL, group = NULL, extraline=NULL, fixef.group = NULL, placement = "htbp", drop.section = NULL, poly_dict = c("", " square", " cube"), tex_tag = FALSE, fit_format = "__var__", coef.just = NULL, .up = 1){
@@ -1165,13 +1186,15 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
 
     el_new = list() # I need it to cope with list(~f+ivf+macro, "my vars" = TRUE)
     # => the first command will create several lines
-    el_names = names(extraline)
+    el_names = uniquify_names(names(extraline))
     for(i in seq_along(extraline)){
-        check_value(extraline[[i]], "logical scalar | vector(character, numeric, logical) len(value) | function | os formula", .message = paste0("The elements of argument 'extraline' must be vectors of length ", n_models, ",  logical scalars, functions, or one-sided formulas."), .value = n_models)
+        check_value(extraline[[i]], "scalar | vector(character, numeric, logical) len(value) | function | os formula",
+                    .message = paste0("The elements of argument 'extraline' must be vectors of length ", n_models, ", logical scalars, functions, or one-sided formulas."),
+                    .value = n_models)
 
         el = extraline[[i]]
         if("formula" %in% class(el)){
-            el_tmp = extraline_extractor(el, names(extraline)[i], tex = isTex)
+            el_tmp = extraline_extractor(el, el_names[i], tex = isTex)
             for(k in seq_along(el_tmp)){
                 el_new[[names(el_tmp)[k]]] = el_tmp[[k]]
             }
@@ -1180,18 +1203,28 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
                 stop_up("The argument 'extraline' must have names that will correspond to the row names. This is not the case for the ", n_th(i), " element.")
             }
 
-            el_new[[names(extraline)[i]]] = extraline[[i]]
+            if(!is.function(el) && length(el) < n_models){
+                # we extend
+                el = rep(el, n_models)
+            }
+
+            el_new[[el_names[i]]] = el
         }
     }
 
     extraline = el_new
 
-    # Now we catch the functions
+    # Now we catch the functions + normalization of the names
     el_fun_id = NULL
     if(length(extraline) > 0){
         el_fun_id = which(sapply(extraline, is.function)) # set of ID such that el[id] is a function
         if(length(el_fun_id) > 0){
             el_origin = extraline
+        }
+
+        if(length(unique(names(extraline))) != length(extraline)){
+            new_names = uniquify_names(names(extraline))
+            names(extraline) = new_names
         }
     }
 
@@ -1718,7 +1751,12 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
         if(length(unique(unlist(var_reorder_list))) < length(unique(unlist(var_list)))){
             var_list = var_reorder_list
             for(m in 1:length(var_list)){
-                names(coef_list[[m]]) <- var_list[[m]]
+                names(coef_list[[m]]) = var_list[[m]]
+                if(sdBelow){
+                    names(coef_below[[m]]) = var_list[[m]]
+                    names(sd_below[[m]]) = var_list[[m]]
+                }
+
             }
         }
     }
@@ -1902,15 +1940,16 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
                     next
                 }
 
+                my_group_origin = names(my_group)
                 is_there = c()
                 for(m in 1:length(is_fe)){
                     # We check full and partial presence
 
                     fe_model = names(is_fe[[m]])
-                    if(all(my_group %in% fe_model)){
+                    if(all(my_group_origin %in% fe_model)){
                         is_there[m] = TRUE
 
-                    } else if(any(my_group %in% fe_model)){
+                    } else if(any(my_group_origin %in% fe_model)){
                         # partial presence
                         is_there[m] = NA
                         is_inconsistent[i] = TRUE
@@ -1923,7 +1962,7 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
 
                 ok_removal = !any(is.na(is_there))
                 if(ok_removal){
-                    fe2remove = c(fe2remove, my_group)
+                    fe2remove = c(fe2remove, my_group_origin)
                 }
 
                 is_there = yesNo[2 - is_there]
@@ -2193,7 +2232,7 @@ etable_internal_latex = function(info){
     if(sdBelow){
         coef_lines = c()
         for(v in all_vars){
-            myCoef = mySd= myLine = c()
+            myCoef = mySd = myLine = c()
             for(m in 1:n_models){
                 myCoef = c(myCoef, coef_below[[m]][v])
                 mySd = c(mySd, sd_below[[m]][v])
@@ -2201,7 +2240,7 @@ etable_internal_latex = function(info){
 
             myCoef[is.na(myCoef)] = "  "
             mySd[is.na(mySd)] = "  "
-            myCoef = paste0(aliasVars[v], "&", paste0(myCoef, collapse = " & "))
+            myCoef = paste0(aliasVars[v], " & ", paste0(myCoef, collapse = " & "))
             mySd = paste0("  &", paste0(mySd, collapse = " & "))
             myLines = paste0(myCoef, "\\\\\n", mySd, "\\\\\n")
             coef_lines = c(coef_lines, myLines)
@@ -3169,24 +3208,14 @@ etable_internal_df = function(info){
         res$variables[qui] = paste0(res$variables[qui], add_space)
     }
 
-    row.names(res) = unlist(res$variables)
+    row.names(res) = uniquify_names(unlist(res$variables))
     res$variables = NULL
 
     # We rename theta when NB is used
     quiTheta = which(row.names(res) == ".theta")
     row.names(res)[quiTheta] = "Over-dispersion"
 
-    if(!is.null(file)){
-        sink(file = file, append = !replace)
-        on.exit(sink())
-
-        print(res)
-
-        return(invisible(res))
-    } else {
-        return(res)
-    }
-
+    return(res)
 }
 
 
@@ -3555,6 +3584,33 @@ style.df = function(depvar.title = "Dependent Var.:", fixef.title = "Fixed-Effec
     return(res)
 }
 
+uniquify_names = function(x){
+    # x: vector of names
+    # we make each value of x unique by adding white spaces
+
+    if(length(x) == 0) return(NULL)
+
+    x_unik = unique(x)
+
+    if(length(x_unik) == length(x)) return(x)
+
+    x = gsub(" +$", " ", x)
+    x_unik = unique(x)
+    tab = rep(0, length(x_unik))
+    names(tab) = x_unik
+
+    x_new = x
+    for(i in seq_along(x)){
+        n = tab[x[i]]
+        if(n > 0){
+            x_new[i] = paste0(x_new[i], sprintf("% *s", n, ""))
+        }
+        tab[x[i]] = n + 1
+    }
+
+    x_new
+}
+
 
 extraline_extractor = function(x, name = NULL, tex = FALSE){
     # x must be a one sided formula
@@ -3636,19 +3692,20 @@ extraline_extractor = function(x, name = NULL, tex = FALSE){
 #' @examples
 #'
 #'
-#' # We register a function computing the mean of the dependent variable
-#' my_fun = function(x) mean(model.matrix(x, type = "lhs"))
-#' extraline_register("my", my_fun, "Mean(y)")
+#' # We register a function computing the standard-deviation of the dependent variable
+#' my_fun = function(x) sd(model.matrix(x, type = "lhs"))
+#' extraline_register("sdy", my_fun, "SD(y)")
 #'
 #' # An estimation
+#' data(iris)
 #' est = feols(Petal.Length ~ Sepal.Length | Species, iris)
 #'
 #' # Now we can easily create a row with the mean of y.
 #' # We just "summon" it in a one-sided formula
-#' etable(est, extraline = ~ my)
+#' etable(est, extraline = ~ sdy)
 #'
 #' # We can change the alias on the fly:
-#' etable(est, extraline = list("_Average of y" = ~ my))
+#' etable(est, extraline = list("_Standard deviation of the dep. var." = ~ sdy))
 #'
 #'
 #'
@@ -3672,7 +3729,8 @@ extraline_register = function(type, fun, alias){
     }
 
     # We test the function on a simple estimation
-    est = feols(Petal.Length ~ Sepal.Length, iris)
+    base = data.frame(y = rnorm(100), x = rnorm(100))
+    est = feols(y ~ x, base)
     mc = match.call()
     fun_name = deparse_long(mc$fun)
     value = error_sender(fun(est), "The function '", fun_name, "' could not evaluated on a simple fixest object. Please try to improve it.")

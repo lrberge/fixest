@@ -30,7 +30,7 @@
  *  new values.                                                       *
  *  Finally for string vectors, I use R's feature of stocking         *
  *  character strings in a unique location. They are therefore        *
- *  uniquely identified by their pointer. I then tranform the         *
+ *  uniquely identified by their pointer. I then transform the        *
  *  pointer to int, and sort accordingly.                             *
  *                                                                    *
  *  The sorting, when sorting is required, is radix-based. My code    *
@@ -41,7 +41,7 @@
  *                                                                    *
  *  As said before, all that matters for qufing is that identical     *
  *  values are consecutive after the sort. Thus, the endianness of    *
- *  the system is of no importantce: whatever the order of bytes      *
+ *  the system is of no importance: whatever the order of bytes       *
  *  on which we sort, we obtain what we want.                         *
  *                                                                    *
  *                                                                    *
@@ -602,7 +602,7 @@ void quf_refactor(int *px_in, int x_size, IntegerVector &obs2keep, int n, int *x
 void quf_table_sum_single(void *px_in, std::string &x_type, int n, int q, int *x_quf,
                           vector<double> &x_unik, vector<int> &x_table, double *py,
                           vector<double> &sum_y, bool do_sum_y, bool rm_0, bool rm_1,
-                          bool rm_single, vector<bool> &any_pblm, vector<bool> &id_pblm,
+                          bool rm_single, vector<int> &any_pblm, vector<bool> &id_pblm,
                           bool check_pblm, bool do_refactor, int x_size, IntegerVector &obs2keep){
 
     // check_pblm => FALSE only if only_slope = TRUE
@@ -665,7 +665,7 @@ void quf_table_sum_single(void *px_in, std::string &x_type, int n, int q, int *x
         int d_end = 0;
         for(int d=0 ; d<D ; ++d){
             if((rm_0 && sum_y[d] == 0) || (rm_1 && sum_y[d] == x_table[d]) || (rm_single && x_table[d] == 1)){
-                any_pblm[q] = true;
+                any_pblm[q] = 1;
                 d_end = d;
                 break;
             }
@@ -897,7 +897,7 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
 
     vector< vector<int> > x_table_all(Q);
     vector< vector<double> > x_unik_all(Q);
-    vector<bool> any_pblm(Q, false);
+    vector<int> any_pblm(Q, 0);
     vector< vector<bool> > id_pblm_all(Q);
     // The following may not be needed:
     vector< vector<double> > sum_y_all(Q);
@@ -949,8 +949,10 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
 
     #pragma omp parallel for num_threads(nthreads)
     for(int q=0 ; q<Q ; ++q){
-        quf_table_sum_single(px_all[q], x_type_all[q], n, q, p_x_quf_all[q], x_unik_all[q], x_table_all[q],
-                             py, sum_y_all[q], do_sum_y, rm_0, rm_1, rm_single, any_pblm, id_pblm_all[q], check_pblm[q],
+        quf_table_sum_single(px_all[q], x_type_all[q], n, q, p_x_quf_all[q],
+                             x_unik_all[q], x_table_all[q],
+                             py, sum_y_all[q], do_sum_y, rm_0, rm_1,
+                             rm_single, any_pblm, id_pblm_all[q], check_pblm[q],
                              do_refactor, px_sizes[q], obs2keep);
     }
 
@@ -965,38 +967,78 @@ List cpppar_quf_table_sum(SEXP x, SEXP y, bool do_sum_y, bool rm_0, bool rm_1,
 
     // Rcout << "Any problem: " << is_pblm << "\n";
 
+
     if(obs2keep[0] != 0){
         n = n_keep;
     }
 
     if(is_pblm){
 
+        //
+        // finding which observation to remove based on the removed fixed-effects
+        //
+
+        // New scheme:
+        // - if parallel, we create an int vector gathering the obs removed
+        //   => this will allows to avoid a critical section which makes the
+        //      parallel useless
+        //   we then copy the values into the bool vector
+        // - if not parallel, we fill the bool vector directly
+        //
+
+        int n_problems = std::accumulate(any_pblm.begin(), any_pblm.end(), 0);
+        bool is_parallel = n_problems > 1 && nthreads > 1;
+
         // creating the obs2remove vector
         obs_removed.resize(n);
         std::fill(obs_removed.begin(), obs_removed.end(), false);
 
-        // No need to take care of race conditions
-        #pragma omp parallel for num_threads(nthreads)
-        for(int q=0 ; q<Q ; ++q){
-            // skipping loop if no problem
-            if(any_pblm[q]){
-                vector<bool> &id_pblm = id_pblm_all[q];
-                int *pquf = p_x_quf_all[q];
-                for(int i=0 ; i<n ; ++i){
-                    if(id_pblm[pquf[i] - 1]){
-                        obs_removed[i] = true;
+        if(is_parallel){
+
+            // using an int vector removes the race condition issue
+            // => we can't use a boolean vector directly bc of the way
+            // boolean vectors are stored (allocation of new values depends
+            // on the position of the existing values => creating a race condition
+            // problem)
+            //
+            // using a omp critical section is a no go, renders parallel useless
+            vector<int> obs_removed_int(n, 0);
+
+            #pragma omp parallel for num_threads(nthreads)
+            for(int q=0 ; q<Q ; ++q){
+                if(any_pblm[q]){
+                    vector<bool> &id_pblm = id_pblm_all[q];
+                    int *pquf = p_x_quf_all[q];
+                    for(int i=0 ; i<n ; ++i){
+                        if(id_pblm[pquf[i] - 1]){
+                            obs_removed_int[i] = 1;
+                        }
+                    }
+                }
+            }
+
+            // we copy the values into the boolean vector
+            for(int i=0 ; i<n ; ++i){
+                if(obs_removed_int[i]){
+                    obs_removed[i] = true;
+                }
+            }
+
+        } else {
+
+            // we fill the boolean vector directly
+            for(int q=0 ; q<Q ; ++q){
+                if(any_pblm[q]){
+                    vector<bool> &id_pblm = id_pblm_all[q];
+                    int *pquf = p_x_quf_all[q];
+                    for(int i=0 ; i<n ; ++i){
+                        if(id_pblm[pquf[i] - 1]){
+                            obs_removed[i] = true;
+                        }
                     }
                 }
             }
         }
-
-        // int nb_rm = 0;
-        // for(int i=0 ; i<n ; ++i){
-        //     nb_rm += obs_removed[i];
-        // }
-        //
-        // Rcout << "#obs removed = " << nb_rm << "\n";
-        // stop("end after removing obs.");
 
 
         // refactoring, recomputing all the stuff

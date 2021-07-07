@@ -120,7 +120,8 @@ setup_multi = function(index, all_names, data, simplify = TRUE){
 #' summary(res, type = "se_compact")
 #'
 #'
-summary.fixest_multi = function(object, type = "short", se = NULL, cluster = NULL, dof = NULL, .vcov, stage = 2, lean = FALSE, n, ...){
+summary.fixest_multi = function(object, type = "short", se = NULL, cluster = NULL, dof = NULL,
+                                .vcov, stage = 2, lean = FALSE, n = 1000, ...){
     dots = list(...)
     data = attr(object, "data")
 
@@ -134,7 +135,8 @@ summary.fixest_multi = function(object, type = "short", se = NULL, cluster = NUL
     if(is.null(est_1$cov.scaled) || !isTRUE(dots$fromPrint)){
 
         for(i in 1:length(data)){
-            data[[i]] = summary(data[[i]], se = se, cluster = cluster, dof = dof, .vcov = .vcov, stage = stage, lean = lean, n = n, ...)
+            data[[i]] = summary(data[[i]], se = se, cluster = cluster, dof = dof,
+                                .vcov = .vcov, stage = stage, lean = lean, n = n, ...)
         }
 
         # In IV: multiple estimations can be returned
