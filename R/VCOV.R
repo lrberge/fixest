@@ -75,6 +75,8 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     check_arg(attr, "logical scalar")
     is_attr = attr
 
+    vcov_vars = NULL
+
     if(isTRUE(object$NA_model)){
         # means that the estimation is done without any valid variable
         return(object$cov.scaled)
@@ -94,8 +96,13 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
             stop("You cannot use the argument 'vcov' in combination with ", enumerate_items(msg, "or.quote"), ".")
         }
 
-        check_arg_plus(se, "NULL{'cluster'} match", .choices = c("standard", "white", "hc1", "hetero", "cluster", "twoway", "threeway", "fourway"), .message = "Argument 'se' (which has been replaced by arg. 'vcov') should be equal to one of 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
-        if(se %in% c("white", "hc1")) se = "hetero"
+        check_arg_plus(se, "NULL{'cluster'} match", .choices = c("standard", "iid", "white", "hc1", "hetero", "cluster", "twoway", "threeway", "fourway"), .message = "Argument 'se' (which has been replaced by arg. 'vcov') should be equal to one of 'iid', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
+
+        se = switch(se,
+                    white = "hetero",
+                    hc1 = "hetero",
+                    standard = "iid",
+                    se)
 
         if(se %in% c("standard", "hetero") || missnull(cluster)){
             vcov = se
@@ -159,7 +166,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     }
 
     # Checking the value of vcov
-    check_arg_plus(vcov, "match(standard, hetero, hc1, white, cluster, twoway, threeway, fourway, hac, conley, conley_hac) | formula | function | matrix")
+    check_arg_plus(vcov, "match(standard, iid, hetero, hc1, white, cluster, twoway, threeway, fourway, hac, conley, conley_hac) | formula | function | matrix")
 
     # WIP => to implement (not that difficult)
     if(is.function(vcov)){
@@ -175,6 +182,141 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
         return(vcov)
     }
+
+    if(inherits(vcov, "formula")){
+
+        vcov_fml = vcov
+
+        if(length(vcov_fml) == 2){
+            vcov = ""
+            vcov_vars = fml2varnames(vcov_fml)
+        } else {
+            vcov = deparse_long(vcov_fml[[2]])
+
+            check_arg_plus(vcov, "match(standard, iid, hetero, hc1, white, cluster, twoway, threeway, fourway, hac, conley, conley_hac)", .message = "If a formula, the arg. 'vcov' must be of the form 'vcov_type ~ vars'. The vcov_type must be a supported VCOV type.")
+
+            vcov_vars = fml2varnames(vcov_fml[c(1, 3)])
+        }
+
+    }
+
+    vcov = switch(vcov,
+                  white = "hetero",
+                  hc1 = "hetero",
+                  standard = "iid",
+                  vcov)
+
+    # Here vcov must be a character vector
+
+    if(!vcov %in% c("iid", "hetero")){
+        # We find out the vcov
+        all_vcov = getOption("fixest_vcov_builtin")
+
+        data = fetch_data(object)
+
+        vcov_id = which(sapply(all_vcov, function(x) vcov %in% x$name))
+
+        if(length(vcov_id) != 1){
+            stop("Unexpected problem in the selection of the VCOV. This is an internal error. Could you report?")
+        }
+
+        vcov_select = all_vcov[[vcov_id]]
+
+        patterns_split = strsplit(vcov_select$patterns, " ?\\+ ?")
+        n_patterns = lengths(patterns_split)
+        if(!length(vcov_vars) %in% n_patterns){
+            stop("In the argument 'vcov', the number of variables in the RHS of the formula (", length(vcov_vars), ") is not valid, it should be one of ", enumerate_items(vcov_select$patterns[n_patterns != 0], "quote.or"), ".")
+        }
+
+        var_names_all = list()
+
+        pattern = patterns_split[[which(n_patterns == length(vcov_vars))]]
+
+        # We find all the variable names and then evaluate them
+        for(i in seq_along(vcov_select$vars)){
+            var_name = names(vcov_select$vars)[i]
+            var_value = vcov_select$vars[[i]]
+
+            if(!var_name %in% pattern && identical(var_value, "optional")){
+                next
+
+            } else if(var_name %in% pattern){
+                # => provided by the user, we find which one it corresponds to
+                # based on the pattern
+
+                vname = vcov_vars[which(pattern == var_name)]
+
+                if(!vname %in% names(data)){
+                    stop("The variable ", vname, " used to compute the VCOV is not in the original data set. Only variables in the data set can be used.")
+                }
+
+                var_names_all[[var_name]] = trim_obs_removed(data[[vname]], object)
+
+            } else {
+                # not provided by the user: GUESSED!
+                # 3 types of guesses:
+                # - fixef (fixed-effects used in the estimation)
+                # - panel.id (panel identifiers used in the estimation)
+                # - regex (based on variable names)
+                #
+
+                guesses = var_value$guess_from
+                for(k in seq_along(guesses)){
+                    type = names(guesses)[k]
+
+                    if(type == "fixef"){
+
+                        if(is.null(object$fixef_vars)){
+                            stop("The variable(s) used to compute the VCOV are typically deduced from the fixed-effects used in the estimation, but this one had no fixed-effect! Hence, please provide the variable name(s) explicitely in the RHS of the 'vcov' formula.")
+                        }
+
+                        if(length(object$fixef_vars) > guesses$fixef){
+                            stop("One variable used to compute the VCOV is typically deduced from the ", n_th(guesses$fixef), " fixed-effect used in the estimation, but this one had only ", length(object$fixef_vars), " fixed-effects! Hence, please provide all variable names explicitely in the RHS of the 'vcov' formula.")
+                        }
+
+                        var_names_all[[var_name]] = object$fixef_id[[guesses$fixef]]
+                        break
+
+                    } else if(type == "panel.id"){
+
+                        if(is.null(object$panel.id)){
+                            stop("One variable used to compute the VCOV is typically deduced from the 'panel.id' used in the estimation, but this one had no 'panel.id' specified! Hence, please provide the variable names explicitely in the RHS of the 'vcov' formula.")
+                        }
+
+                        vname = object$panel.id[guesses$fixef]
+
+                        if(!vname %in% names(data)){
+                            stop("The variable ", vname, " used to compute the VCOV is not in the original data set. Only variables in the data set can be used.")
+                        }
+
+                        var_names_all[[var_name]] = trim_obs_removed(data[[vname]], object)
+                        break
+
+                    } else if(type == "regex"){
+
+
+
+
+                    }
+
+                }
+
+
+            }
+
+
+        }
+
+
+
+    }
+
+
+
+
+
+
+
 
     # Checking the nber of threads
     if(!missing(nthreads)) nthreads = check_set_nthreads(nthreads)
@@ -239,7 +381,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
         if(n_fe_ok > 0){
             K = K - (sum(fixef_sizes_ok) - (n_fe_ok - 1))
         }
-    } else if(dof.fixef.K == "full" || se.val %in% c("standard", "hetero")){
+    } else if(dof.fixef.K == "full" || se.val %in% c("iid", "hetero")){
         K = object$nparams
         if(is_exact && n_fe >= 2 && n_fe_ok >= 1){
             fe = fixef(object, notes = FALSE)
@@ -252,7 +394,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     }
 
     if(object$method_type == "feols"){
-        if(se.val != "standard"){
+        if(se.val != "iid"){
             VCOV_raw = object$cov.unscaled / object$sigma2
         } else {
             VCOV_raw = object$cov.unscaled / ((n - 1) / (n - object$nparams))
@@ -306,7 +448,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
             return(vcov(object, se=se.val, cluster=cluster, dof=dof))
         }
 
-    } else if(se.val == "standard"){
+    } else if(se.val == "iid"){
 
         vcov = VCOV_raw * correction.dof
 
@@ -736,7 +878,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
         message("Variance contained negative values in the diagonal and was 'fixed' (a la Cameron, Gelbach & Miller 2011).")
     }
 
-    sd.dict = c("standard" = "Standard", "hetero"="Heteroskedasticity-robust", "cluster"="Clustered", "twoway"="Two-way", "threeway"="Three-way", "fourway"="Four-way")
+    sd.dict = c("iid" = "IID", "hetero"="Heteroskedasticity-robust", "cluster"="Clustered", "twoway"="Two-way", "threeway"="Three-way", "fourway"="Four-way")
 
     if(is_attr){
         base::attr(vcov, "type") = paste0(as.vector(sd.dict[se.val]), type_info)
