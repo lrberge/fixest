@@ -5950,6 +5950,18 @@ fill_with_na = function(x, object){
     return(res)
 }
 
+trim_obs_removed = function(x, object){
+    if(is.null(object$obs_selection)){
+        return(x)
+    }
+
+    for(i in seq_along(object$obs_selection)){
+        x = x[object$obs_selection[[i]]]
+    }
+
+    x
+}
+
 is_operator = function(x, op) if(length(x) <= 1) FALSE else x[[1]] == op
 
 fml_breaker = function(fml, op){
