@@ -75,14 +75,20 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     check_arg(attr, "logical scalar")
     is_attr = attr
 
-    vcov_vars = NULL
+    dots = list(...)
+    only_varnames = isTRUE(dots$only_varnames)
+    data_names = dots$data_names
+    if(only_varnames){
+        object = list()
+    }
+
 
     if(isTRUE(object$NA_model)){
         # means that the estimation is done without any valid variable
         return(object$cov.scaled)
     }
 
-    if(!any("keep_se_info" %in% names(match.call(expand.dots = TRUE)))){
+    if(!any(c("keep_se_info", "only_varnames") %in% names(match.call(expand.dots = TRUE)))){
         # means NOT a client call
         validate_dots(suggest_args = c("vcov", "dof"), valid_args = c("meat_only"))
     }
@@ -116,7 +122,6 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
         }
     }
 
-    dots = list(...)
     meat_only = isTRUE(dots$meat_only)
 
     if(!is.null(object$onlyFixef)){
@@ -212,7 +217,10 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
         # We find out the vcov
         all_vcov = getOption("fixest_vcov_builtin")
 
-        data = fetch_data(object)
+        if(only_varnames == FALSE){
+            data = fetch_data(object)
+            data_names = names(data)
+        }
 
         vcov_id = which(sapply(all_vcov, function(x) vcov %in% x$name))
 
@@ -237,7 +245,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
             var_name = names(vcov_select$vars)[i]
             var_value = vcov_select$vars[[i]]
 
-            if(!var_name %in% pattern && identical(var_value, "optional")){
+            if(!var_name %in% pattern && isTRUE(var_value$optional)){
                 next
 
             } else if(var_name %in% pattern){
@@ -246,7 +254,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
                 vname = vcov_vars[which(pattern == var_name)]
 
-                if(!vname %in% names(data)){
+                if(!vname %in% data_names){
                     stop("The variable ", vname, " used to compute the VCOV is not in the original data set. Only variables in the data set can be used.")
                 }
 
@@ -261,17 +269,27 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
                 #
 
                 guesses = var_value$guess_from
+                # err_msg, vector of elements of the form c("expect" = "pblm")
+                err_msg = c()
                 for(k in seq_along(guesses)){
                     type = names(guesses)[k]
 
                     if(type == "fixef"){
 
                         if(is.null(object$fixef_vars)){
-                            stop("The variable(s) used to compute the VCOV are typically deduced from the fixed-effects used in the estimation, but this one had no fixed-effect! Hence, please provide the variable name(s) explicitely in the RHS of the 'vcov' formula.")
+                            msg = setNames(nm = "the fixed-effects",
+                                           "there was no fixed-effect in the estimation")
+                            err_msg = c(err_msg, msg)
+                            next
+                            # stop("The variable(s) used to compute the VCOV are typically deduced from the fixed-effects used in the estimation, but this one had no fixed-effect! Hence, please provide the variable name(s) explicitely in the RHS of the 'vcov' formula.")
                         }
 
                         if(length(object$fixef_vars) > guesses$fixef){
-                            stop("One variable used to compute the VCOV is typically deduced from the ", n_th(guesses$fixef), " fixed-effect used in the estimation, but this one had only ", length(object$fixef_vars), " fixed-effects! Hence, please provide all variable names explicitely in the RHS of the 'vcov' formula.")
+                            msg = setNames(nm = paste0("the ", n_th(guesses$fixef), " fixed-effect"),
+                                           paste0("the estimation had only ", length(object$fixef_vars), " fixed-effect", plural_len(object$fixef_vars)))
+                            err_msg = c(err_msg, msg)
+                            next
+                            # stop("One variable used to compute the VCOV is typically deduced from the ", n_th(guesses$fixef), " fixed-effect used in the estimation, but this one had only ", length(object$fixef_vars), " fixed-effects! Hence, please provide all variable names explicitly in the RHS of the 'vcov' formula.")
                         }
 
                         var_names_all[[var_name]] = object$fixef_id[[guesses$fixef]]
@@ -280,13 +298,21 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
                     } else if(type == "panel.id"){
 
                         if(is.null(object$panel.id)){
-                            stop("One variable used to compute the VCOV is typically deduced from the 'panel.id' used in the estimation, but this one had no 'panel.id' specified! Hence, please provide the variable names explicitely in the RHS of the 'vcov' formula.")
+                            msg = setNames(nm = "the 'panel.id' identifiers",
+                                           "no 'panel.id' was set in this estimation")
+                            err_msg = c(err_msg, msg)
+                            next
+                            # stop("One variable used to compute the VCOV is typically deduced from the 'panel.id' used in the estimation, but this one had no 'panel.id' specified! Hence, please provide the variable names explicitly in the RHS of the 'vcov' formula.")
                         }
 
                         vname = object$panel.id[guesses$fixef]
 
                         if(!vname %in% names(data)){
-                            stop("The variable ", vname, " used to compute the VCOV is not in the original data set. Only variables in the data set can be used.")
+                            msg = setNames(nm = "the 'panel.id' identifiers",
+                                           paste0("the variable ", vname, " set in 'panel.id' is not in the data set"))
+                            err_msg = c(err_msg, msg)
+                            next
+                            # stop("The variable ", vname, " used to compute the VCOV is not in the original data set. Only variables in the data set can be used.")
                         }
 
                         var_names_all[[var_name]] = trim_obs_removed(data[[vname]], object)
@@ -294,21 +320,52 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
                     } else if(type == "regex"){
 
+                        ok = FALSE
+                        msg = NULL
+                        for(pat in guesses$regex){
+                            var_id = which(grepl(pat, data_names))
 
+                            if(length(var_id) == 0){
+                                if(is.null(msg)){
+                                    msg = setnames(nm = "the variable names of the data set",
+                                                   paste0("no match was found for ", var_value$label))
+                                }
+                            } else if(length(var_id) == 1){
+                                ok = TRUE
+                                vname = data_names[var_id]
+                                break
+                            } else {
+                                msg = setnames(nm = "the variable names of the data set",
+                                               paste0("several matches were found: ",
+                                                      enumerate_items(data_names[var_id], "quote.enum i")))
+                            }
+                        }
 
-
+                        if(ok){
+                            var_names_all[[var_name]] = trim_obs_removed(data[[vname]], object)
+                            break
+                        } else {
+                            err_msg = c(err_msg, msg)
+                        }
                     }
-
                 }
 
+                if(length(err_msg) > 0){
 
+                    if(length(err_msg) == 1){
+                        expect = names(err_msg)
+                        pblm = err_msg
+                    } else {
+                        expect = enumerate_items(names(err_msg), "enum a.or")
+                        pblm = enumerate_items(err_msg, "enum a")
+                    }
+
+                    stop("To compute the ", vcov_select$vcov_label, " VCOV, we need a variable for the ",
+                         var_value$label, ". Since you didn't provide it in the formula, we typically deduce it from ", expect,
+                         ". Problem: ", pblm, ".")
+                }
             }
-
-
         }
-
-
-
     }
 
 
@@ -1073,31 +1130,31 @@ vcov_setup = function(){
     # cluster(s)
     #
 
-    vcov_clust_setup = list(name = c("cluster", ""), fun_name = "vcov_cluster_internal")
-    vcov_clust_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1)),
-                                 cl2 = "optional",
-                                 cl3 = "optional",
-                                 cl4 = "optional")
+    vcov_clust_setup = list(name = c("cluster", ""), fun_name = "vcov_cluster_internal", vcov_label = "clustered")
+    vcov_clust_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1), label = "clusters"),
+                                 cl2 = list(optional = TRUE, label = "second cluster"),
+                                 cl3 = list(optional = TRUE, label = "third cluster"),
+                                 cl4 = list(optional = TRUE, label = "fourth cluster"))
     vcov_clust_setup$patterns = c("", "cl1", "cl1 + cl2", "cl1 + cl2 + cl3",
                                   "c1 + cl2 + cl3 + cl4")
 
     # Other keywords
-    vcov_twoway_setup = list(name = "twoway", fun_name = "vcov_cluster_internal")
-    vcov_twoway_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1)),
-                                  cl2 = list("guess_from" = list(fixef = 2)))
+    vcov_twoway_setup = list(name = "twoway", fun_name = "vcov_cluster_internal", vcov_label = "2-way clustered")
+    vcov_twoway_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1), label = "first cluster"),
+                                  cl2 = list("guess_from" = list(fixef = 2), label = "second cluster"))
     vcov_twoway_setup$patterns = c("", "cl1 + cl2")
 
-    vcov_threeway_setup = list(name = "threeway", fun_name = "vcov_cluster_internal")
-    vcov_threeway_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1)),
-                                    cl2 = list("guess_from" = list(fixef = 2)),
-                                    cl3 = list("guess_from" = list(fixef = 3)))
+    vcov_threeway_setup = list(name = "threeway", fun_name = "vcov_cluster_internal", vcov_label = "3-way clustered")
+    vcov_threeway_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1), label = "first cluster"),
+                                    cl2 = list("guess_from" = list(fixef = 2), label = "second cluster"),
+                                    cl3 = list("guess_from" = list(fixef = 3), label = "third cluster"))
     vcov_threeway_setup$patterns = c("", "cl1 + cl2 + cl3")
 
-    vcov_fourway_setup = list(name = "fourway", fun_name = "vcov_cluster_internal")
-    vcov_fourway_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1)),
-                                   cl2 = list("guess_from" = list(fixef = 2)),
-                                   cl3 = list("guess_from" = list(fixef = 3)),
-                                   cl4 = list("guess_from" = list(fixef = 4)))
+    vcov_fourway_setup = list(name = "fourway", fun_name = "vcov_cluster_internal", vcov_label = "4-way clustered")
+    vcov_fourway_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1), label = "first cluster"),
+                                   cl2 = list("guess_from" = list(fixef = 2), label = "second cluster"),
+                                   cl3 = list("guess_from" = list(fixef = 3), label = "third cluster"),
+                                   cl4 = list("guess_from" = list(fixef = 4), label = "fourth cluster"))
     vcov_fourway_setup$patterns = c("", "cl1 + cl2 + cl3 + cl4")
 
 
@@ -1105,11 +1162,11 @@ vcov_setup = function(){
     # hac (panel)
     #
 
-    vcov_hac_setup = list(name = "hac", fun_name = "vcov_hac_internal")
+    vcov_hac_setup = list(name = "hac", fun_name = "vcov_hac_internal", vcov_label = "HAC")
     # The variables
-    id = list(guess_from = list(panel.id = 1))
-    time = list(guess_from = list(panel.id = 2))
-    vcov_hac_setup$vars = list(id = list(id = id, time = time))
+    id = list(guess_from = list(panel.id = 1), label = "panel ID")
+    time = list(guess_from = list(panel.id = 2), label = "time")
+    vcov_hac_setup$vars = list(id = id, time = time)
     vcov_hac_setup$arg_main = "lag"
     vcov_hac_setup$patterns = c("", "id + time")
 
@@ -1118,11 +1175,11 @@ vcov_setup = function(){
     # conley
     #
 
-    vcov_conley_setup = list(name = "conley", fun_name = "vcov_conley_internal")
+    vcov_conley_setup = list(name = "conley", fun_name = "vcov_conley_internal", vcov_label = "Conley")
     # The variables
-    lat = list(guess_from = list(regex = c("^lat(itude)?$", "^lat_.+")))
-    lng = list(guess_from = list(regex = c("^lng$", "^long?(itude)?$", "^(lng|lon|long)_.+")))
-    vcov_conley_setup$vars = list(id = list(lat = lat, lng = lng))
+    lat = list(guess_from = list(regex = c("^lat(itude)?$", "^lat_.+")), label = "latitude")
+    lng = list(guess_from = list(regex = c("^lng$", "^long?(itude)?$", "^(lng|lon|long)_.+")), label = "longitude")
+    vcov_conley_setup$vars = list(lat = lat, lng = lng)
     vcov_conley_setup$arg_main = "cutoff"
     vcov_conley_setup$patterns = c("", "lat + lng")
 
@@ -1131,12 +1188,9 @@ vcov_setup = function(){
     # conley hac
     #
 
-    vcov_conley_hac_setup = list(name = c("conley_hac", "hac_conley"), fun_name = "vcov_conley_hac_internal")
-    # The variables
-    lat = list(guess_from = list(regex = c("^lat(itude)?$", "^lat_.+")))
-    lng = list(guess_from = list(regex = c("^lng$", "^long?(itude)?", "^(lng|lon|long)_.+")))
-    time = list(guess_from = list(panel.id = 2))
-    vcov_conley_hac_setup$vars = list(id = list(lat = lat, lng = lng, time = time))
+    vcov_conley_hac_setup = list(name = c("conley_hac", "hac_conley"), fun_name = "vcov_conley_hac_internal", vcov_label = "Conley-HAC")
+    # The variables (already defined earlier)
+    vcov_conley_hac_setup$vars = list(lat = lat, lng = lng, time = time)
     vcov_conley_hac_setup$arg_main = ""
     vcov_conley_hac_setup$patterns = c("", "lat + lng", "time", "lat + lng + time")
 
