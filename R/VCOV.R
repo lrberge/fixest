@@ -969,7 +969,7 @@ vcov_setup = function(){
     time = list(guess_from = list(panel.id = 2))
     vcov_hac_setup$vars = list(id = list(id = id, time = time))
     vcov_hac_setup$arg_main = "lag"
-    vcov_clust_setup$patterns = c("", "id + time")
+    vcov_hac_setup$patterns = c("", "id + time")
 
 
     #
@@ -978,11 +978,11 @@ vcov_setup = function(){
 
     vcov_conley_setup = list(name = "conley", fun_name = "vcov_conley_internal")
     # The variables
-    lat = list(guess_from = list(regex = c("^lat(itude)$", "^lat_.+")))
-    lng = list(guess_from = list(regex = c("^lng$", "^long?(itude)", "^(lng|lon|long)_.+")))
+    lat = list(guess_from = list(regex = c("^lat(itude)?$", "^lat_.+")))
+    lng = list(guess_from = list(regex = c("^lng$", "^long?(itude)?$", "^(lng|lon|long)_.+")))
     vcov_conley_setup$vars = list(id = list(lat = lat, lng = lng))
     vcov_conley_setup$arg_main = "cutoff"
-    vcov_clust_setup$patterns = c("", "lat + lng")
+    vcov_conley_setup$patterns = c("", "lat + lng")
 
 
     #
@@ -991,19 +991,18 @@ vcov_setup = function(){
 
     vcov_conley_hac_setup = list(name = c("conley_hac", "hac_conley"), fun_name = "vcov_conley_hac_internal")
     # The variables
-    lat = list(guess_from = list(regex = c("^lat(itude)$", "^lat_.+")))
-    lng = list(guess_from = list(regex = c("^lng$", "^long?(itude)", "^(lng|lon|long)_.+")))
+    lat = list(guess_from = list(regex = c("^lat(itude)?$", "^lat_.+")))
+    lng = list(guess_from = list(regex = c("^lng$", "^long?(itude)?", "^(lng|lon|long)_.+")))
     time = list(guess_from = list(panel.id = 2))
     vcov_conley_hac_setup$vars = list(id = list(lat = lat, lng = lng, time = time))
     vcov_conley_hac_setup$arg_main = ""
-    vcov_clust_setup$patterns = c("", "lat + lng", "time", "lat + lng + time")
+    vcov_conley_hac_setup$patterns = c("", "lat + lng", "time", "lat + lng + time")
 
     #
     # Saving all the vcov possibilities
     #
 
     all_vcov = list(vcov_clust_setup,
-                    vcov_oneway_setup,
                     vcov_twoway_setup,
                     vcov_threeway_setup,
                     vcov_fourway_setup,
@@ -1015,7 +1014,14 @@ vcov_setup = function(){
 
 }
 
-vcov_clust_internal = function(VCOV_raw, scores, vars){
+# vcov_xx_internal arguments
+# - bread: typically the VCOV_raw
+# - scores
+# - vars: a *list* of variables all of the same length which matches the scores
+#
+
+
+vcov_cluster_internal = function(VCOV_raw, scores, vars){
 
     nway = length(vars)
 
