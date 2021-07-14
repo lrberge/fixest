@@ -5683,24 +5683,46 @@ isLogical = function(x) length(x) == 1L && is.logical(x) && !is.na(x)
 
 isSingleChar = function(x) length(x) == 1L && is.character(x) && !is.na(x)
 
-fml2varnames = function(fml){
+fml2varnames = function(fml, combine_fun = FALSE){
 	# This function transforms a one sided formula into a
 	# character vector for each variable
-
-	fml_char = gsub(" +", "", as.character(fml)[2])
 
 	# In theory, I could just use terms.formula to extract the variable.
 	# But I can't!!!! Because of this damn ^ argument.
 	# I need to apply a trick
-	if(grepl("[[:alpha:]\\.][[:alnum:]\\._]*\\^", fml_char)){
-		fml_char_new = gsub("([[:alpha:]\\.][[:alnum:]\\._]*)\\^", "\\1_xXx_", fml_char)
-		fml = as.formula(paste("~", fml_char_new))
-	}
 
-	t = terms(fml)
-	all_var_names = attr(t, "term.labels")
-	all_var_names = gsub("_xXx_", "^", all_var_names)
-	all_var_names = gsub(":", "*", all_var_names) # for very special cases
+    # combine_fun: whether to add a call to combine_clusters_fast
+
+    # Only the ^ users "pay the price"
+
+    if("^" %in% all.vars(fml, functions = TRUE)){
+        fml_char = gsub(" ", "", as.character(fml)[2], fixed = TRUE)
+
+        if(grepl("[[:alpha:]\\.][[:alnum:]\\._]*\\^", fml_char)){
+            fml_char_new = gsub("([[:alpha:]\\.][[:alnum:]\\._]*)\\^", "\\1_xXx_", fml_char)
+            fml = .xpd(rhs = fml_char_new)
+        }
+
+        t = terms(fml)
+        all_var_names = attr(t, "term.labels")
+
+        if(combine_fun){
+            # we rewrite the variables with combine_cluster_fast
+
+            qui = grepl("_xXx_[[:alpha:]\\.]", all_var_names)
+
+            all_var_names[qui] = paste0("combine_cluster_fast(", gsub("_xXx_", ", ", all_var_names[qui]), ")")
+        }
+
+        all_var_names = gsub("_xXx_", "^", all_var_names) # even with combine_fun=TRUE, some can remain (real powers)
+        all_var_names = gsub(":", "*", all_var_names)
+    } else {
+        t = terms(fml)
+        all_var_names = attr(t, "term.labels")
+        # => maybe I should be more cautious below???? Sometimes ':' really means stuff like 1:5
+        all_var_names = gsub(":", "*", all_var_names) # for very special cases
+    }
+
 
 	all_var_names
 }
