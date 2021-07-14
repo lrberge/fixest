@@ -76,11 +76,17 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     is_attr = attr
 
     dots = list(...)
+
+    # START :: SECTION used only internally in fixest_env
     only_varnames = isTRUE(dots$only_varnames)
     data_names = dots$data_names
     if(only_varnames){
-        object = list()
+        # Used internally in fixest_env to find out which variable to keep
+        # => we need panel.id, so we can remove the NAs from it if it is implicitly deduced to be used
+        # => idem for fixef_vars
+        object = list(panel.id = dots$panel.id, fixef_vars = dots$fixef_vars)
     }
+    #   END
 
 
     if(isTRUE(object$NA_model)){
@@ -194,13 +200,13 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
         if(length(vcov_fml) == 2){
             vcov = ""
-            vcov_vars = fml2varnames(vcov_fml)
+            vcov_vars = fml2varnames(vcov_fml, combine_fun = TRUE)
         } else {
             vcov = deparse_long(vcov_fml[[2]])
 
             check_arg_plus(vcov, "match(standard, iid, hetero, hc1, white, cluster, twoway, threeway, fourway, hac, conley, conley_hac)", .message = "If a formula, the arg. 'vcov' must be of the form 'vcov_type ~ vars'. The vcov_type must be a supported VCOV type.")
 
-            vcov_vars = fml2varnames(vcov_fml[c(1, 3)])
+            vcov_vars = fml2varnames(vcov_fml[c(1, 3)], combine_fun = TRUE)
         }
 
     }
@@ -233,32 +239,41 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
         patterns_split = strsplit(vcov_select$patterns, " ?\\+ ?")
         n_patterns = lengths(patterns_split)
         if(!length(vcov_vars) %in% n_patterns){
-            stop("In the argument 'vcov', the number of variables in the RHS of the formula (", length(vcov_vars), ") is not valid, it should be one of ", enumerate_items(vcov_select$patterns[n_patterns != 0], "quote.or"), ".")
+            stop("In the argument 'vcov', the number of variables in the RHS of the formula (", length(vcov_vars), ") is not valid, it should correspond to ", ifsingle(n_patterns, "", "one of "), enumerate_items(vcov_select$patterns[n_patterns != 0], "quote.or"), ".")
         }
 
-        var_names_all = list()
+
+        var_values_all = list()
+        # => list of variables used to compute the VCOV
+        var_names_all = c()
+        # => same as var_values_all but the variable names
 
         pattern = patterns_split[[which(n_patterns == length(vcov_vars))]]
 
         # We find all the variable names and then evaluate them
         for(i in seq_along(vcov_select$vars)){
-            var_name = names(vcov_select$vars)[i]
-            var_value = vcov_select$vars[[i]]
+            vcov_var_name = names(vcov_select$vars)[i]
+            vcov_var_value = vcov_select$vars[[i]]
 
-            if(!var_name %in% pattern && isTRUE(var_value$optional)){
+            if(!vcov_var_name %in% pattern && isTRUE(vcov_var_value$optional)){
                 next
 
-            } else if(var_name %in% pattern){
+            } else if(vcov_var_name %in% pattern){
                 # => provided by the user, we find which one it corresponds to
                 # based on the pattern
 
-                vname = vcov_vars[which(pattern == var_name)]
+                vname = vcov_vars[which(pattern == vcov_var_name)]
 
-                if(!vname %in% data_names){
-                    stop("The variable ", vname, " used to compute the VCOV is not in the original data set. Only variables in the data set can be used.")
+                vname_all = all.vars(str2expression(vname))
+                if(!all(vname_all %in% data_names)){
+                    pblm = setdiff(vname_all, data_names)
+                    stop("The variable", enumerate_items(pblm, "s"), " used to compute the VCOV ", plural_len(pblm, "is"), " not in the original data set. Only variables in the data set can be used.")
                 }
 
-                var_names_all[[var_name]] = trim_obs_removed(data[[vname]], object)
+                var_names_all[vcov_var_name] = vname
+                if(only_varnames) next
+
+                var_values_all[[vcov_var_name]] = trim_obs_removed(data[[vname]], object)
 
             } else {
                 # not provided by the user: GUESSED!
@@ -268,7 +283,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
                 # - regex (based on variable names)
                 #
 
-                guesses = var_value$guess_from
+                guesses = vcov_var_value$guess_from
                 # err_msg, vector of elements of the form c("expect" = "pblm")
                 err_msg = c()
                 for(k in seq_along(guesses)){
@@ -281,10 +296,10 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
                                            "there was no fixed-effect in the estimation")
                             err_msg = c(err_msg, msg)
                             next
-                            # stop("The variable(s) used to compute the VCOV are typically deduced from the fixed-effects used in the estimation, but this one had no fixed-effect! Hence, please provide the variable name(s) explicitely in the RHS of the 'vcov' formula.")
+                            # stop("The variable(s) used to compute the VCOV are typically deduced from the fixed-effects used in the estimation, but this one had no fixed-effect! Hence, please provide the variable name(s) explicitly in the RHS of the 'vcov' formula.")
                         }
 
-                        if(length(object$fixef_vars) > guesses$fixef){
+                        if(length(object$fixef_vars) < guesses$fixef){
                             msg = setNames(nm = paste0("the ", n_th(guesses$fixef), " fixed-effect"),
                                            paste0("the estimation had only ", length(object$fixef_vars), " fixed-effect", plural_len(object$fixef_vars)))
                             err_msg = c(err_msg, msg)
@@ -292,7 +307,10 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
                             # stop("One variable used to compute the VCOV is typically deduced from the ", n_th(guesses$fixef), " fixed-effect used in the estimation, but this one had only ", length(object$fixef_vars), " fixed-effects! Hence, please provide all variable names explicitly in the RHS of the 'vcov' formula.")
                         }
 
-                        var_names_all[[var_name]] = object$fixef_id[[guesses$fixef]]
+                        var_names_all[vcov_var_name] = object$fixef_vars[guesses$fixef]
+                        if(only_varnames) break
+
+                        var_values_all[[vcov_var_name]] = object$fixef_id[[guesses$fixef]]
                         break
 
                     } else if(type == "panel.id"){
@@ -307,15 +325,26 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
                         vname = object$panel.id[guesses$fixef]
 
-                        if(!vname %in% names(data)){
+                        vname_all = all.vars(str2expression(vname))
+                        if(!all(vname_all %in% data_names)){
+                            pblm = setdiff(vname_all, data_names)
                             msg = setNames(nm = "the 'panel.id' identifiers",
-                                           paste0("the variable ", vname, " set in 'panel.id' is not in the data set"))
+                                           paste0("the variable", enumerate_items(pblm, "s"), " set in 'panel.id' ", plural_len(pblm, "is"), " not in the data set"))
                             err_msg = c(err_msg, msg)
                             next
                             # stop("The variable ", vname, " used to compute the VCOV is not in the original data set. Only variables in the data set can be used.")
                         }
 
-                        var_names_all[[var_name]] = trim_obs_removed(data[[vname]], object)
+                        # ATTENTION:
+                        # if the panel.id variable has NA values, and there are no lags used in the estimation
+                        # (which would trigger obs removal), then we cannot use the panel.id
+                        # for the VCOV reliably since the sample would differ from the sample used in the
+                        # estimation
+
+                        var_names_all[vcov_var_name] = vname
+                        if(only_varnames) break
+
+                        var_values_all[[vcov_var_name]] = trim_obs_removed(data[[vname]], object)
                         break
 
                     } else if(type == "regex"){
@@ -328,7 +357,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
                             if(length(var_id) == 0){
                                 if(is.null(msg)){
                                     msg = setnames(nm = "the variable names of the data set",
-                                                   paste0("no match was found for ", var_value$label))
+                                                   paste0("no match was found for ", vcov_var_value$label))
                                 }
                             } else if(length(var_id) == 1){
                                 ok = TRUE
@@ -342,7 +371,10 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
                         }
 
                         if(ok){
-                            var_names_all[[var_name]] = trim_obs_removed(data[[vname]], object)
+                            var_names_all[vcov_var_name] = vname
+                            if(only_varnames) break
+
+                            var_values_all[[vcov_var_name]] = trim_obs_removed(data[[vname]], object)
                             break
                         } else {
                             err_msg = c(err_msg, msg)
@@ -361,12 +393,20 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
                     }
 
                     stop("To compute the ", vcov_select$vcov_label, " VCOV, we need a variable for the ",
-                         var_value$label, ". Since you didn't provide it in the formula, we typically deduce it from ", expect,
+                         vcov_var_value$label, ". Since you didn't provide it in the formula, we typically deduce it from ", expect,
                          ". Problem: ", pblm, ".")
                 }
             }
         }
+
+        if(only_varnames){
+            return(var_names_all)
+        }
+
+    } else if(only_varnames){
+        return(character(0))
     }
+
 
 
 
