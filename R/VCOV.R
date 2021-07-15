@@ -176,6 +176,10 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
         stop("VCOV of 'lean' fixest objects cannot be computed. Please re-estimate with 'lean = FALSE'.")
     }
 
+    ####
+    #### vcov parsing ####
+    ####
+
     # Checking the value of vcov
     check_arg_plus(vcov, "match(standard, iid, hetero, hc1, white, cluster, twoway, threeway, fourway, hac, conley, conley_hac) | formula | function | matrix")
 
@@ -207,6 +211,13 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
             check_arg_plus(vcov, "match(standard, iid, hetero, hc1, white, cluster, twoway, threeway, fourway, hac, conley, conley_hac)", .message = "If a formula, the arg. 'vcov' must be of the form 'vcov_type ~ vars'. The vcov_type must be a supported VCOV type.")
 
             vcov_vars = fml2varnames(vcov_fml[c(1, 3)], combine_fun = TRUE)
+
+            qui_dof = grepl("dof(", vcov_vars, fixed = TRUE)
+            if(any(qui_dof)){
+                dof_txt = vcov_vars[qui_dof]
+                dof = eval(str2lang(dof_txt))
+                vcov_vars = vcov_vars[!qui_dof]
+            }
         }
 
     }
@@ -248,6 +259,9 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
         var_names_all = c()
         # => same as var_values_all but the variable names
 
+        is_int_all = list()
+        # => flag to avoid reapplying to_integer
+
         pattern = patterns_split[[which(n_patterns == length(vcov_vars))]]
 
         # We find all the variable names and then evaluate them
@@ -276,6 +290,11 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
                 var_values_all[[vcov_var_name]] = trim_obs_removed(data[[vname]], object)
 
             } else {
+
+                ####
+                #### ... --- guessing the variables ####
+                ####
+
                 # not provided by the user: GUESSED!
                 # 3 types of guesses:
                 # - fixef (fixed-effects used in the estimation)
@@ -309,6 +328,8 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
                         var_names_all[vcov_var_name] = object$fixef_vars[guesses$fixef]
                         if(only_varnames) break
+
+                        is_int_all[[vcov_var_name]] = TRUE
 
                         var_values_all[[vcov_var_name]] = object$fixef_id[[guesses$fixef]]
                         break
@@ -403,22 +424,40 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
             return(var_names_all)
         }
 
+        # Extra checking + putting into int if requested
+        for(i in seq_along(var_values_all)){
+            vcov_var_name = names(var_values_all)[i]
+            vname = var_names_all[vcov_var_name]
+            value = var_values_all[[i]]
+
+            vcov_var_value = vcov_select$vars[[vcov_var_name]]
+
+            if(anyNA(value)){
+                stop("The variable '", vname, "' used to estimate the VCOV (employed as ", vcov_var_value$label, ") has NA values which would lead to a sample used to compute the VCOV different from the sample used to estimate the parameters. This would lead to wrong inference.\nPossible solutions: i) ex ante prune them or ii) use the argument 'vcov' at estimation time.")
+            }
+
+            if(vcov_var_value$to_int){
+                # if to_int => we do not have to check the type since it can be applied to any type
+
+                if(!isTRUE(is_int_all[[vcov_var_name]])){
+                    var_values_all[[vcov_var_name]] = quickUnclassFactor(value)
+                }
+
+            } else if(!is.null(vcov_var_value$expected_type)){
+                check_value(value, .type = vcov_var_value$expected_type,
+                            .prefix = paste0("To compute the VCOV, the ", vcov_var_value$label, " (here '", vname, "') "))
+            }
+        }
+
+        vcov_vars = var_values_all
+
     } else if(only_varnames){
         return(character(0))
     }
 
 
-
-
-
-
-
-
-
     # Checking the nber of threads
     if(!missing(nthreads)) nthreads = check_set_nthreads(nthreads)
-
-    dots = list(...)
 
     # DoF related => we accept NULL
     check_arg_plus(dof, "NULL{getFixest_dof()} class(dof.type)", .message = "The argument 'dof.type' must be an object created by the function dof().")
@@ -430,9 +469,9 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     is_cluster_min = dof$cluster.df == "min"
     is_t_min = dof$t.df == "min"
 
-    #
-    # non-linear: handling bounded parameters
-    #
+    ####
+    #### scores ####
+    ####
 
     # We handle the bounded parameters:
     isBounded = object$isBounded
@@ -443,21 +482,71 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     if(any(isBounded)){
         if(keepBounded){
             # we treat the bounded parameters as regular variables
-            myScore = object$scores
+            scores = object$scores
             object$cov.unscaled = solve(object$hessian)
         } else {
-            myScore = object$scores[, -which(isBounded), drop = FALSE]
+            scores = object$scores[, -which(isBounded), drop = FALSE]
         }
     } else {
-        myScore = object$scores
+        scores = object$scores
     }
 
+
+    ####
+    #### bread ####
+    ####
+
+    n = object$nobs
+
+    if(object$method_type == "feols"){
+        if(vcov != "iid"){
+            bread = object$cov.unscaled / object$sigma2
+        } else {
+            bread = object$cov.unscaled / ((n - 1) / (n - object$nparams))
+        }
+    } else {
+        bread = object$cov.unscaled
+    }
+
+    if(anyNA(bread)){
+
+        if(!forceCovariance){
+            last_warn = getOption("fixest_last_warning")
+            if(is.null(last_warn) || (proc.time() - last_warn)[3] > 1){
+                warning("Standard errors are NA because of likely presence of collinearity.", call. = FALSE)
+            }
+
+            attr(bread, "type") = "NA (not-available)"
+
+            return(bread)
+        } else {
+            info_inv = cpp_cholesky(object$hessian)
+            if(!is.null(info_inv$all_removed)){
+                # Means all variables are collinear! => can happen when using FEs
+                stop("All variables have virtually no effect on the dependent variable. Covariance is not defined.")
+            }
+
+            VCOV_raw_forced = info_inv$XtX_inv
+            if(any(info_inv$id_excl)){
+                n_collin = sum(info_inv$all_removed)
+                message("NOTE: ", n_letter(n_collin), " variable", plural(n_collin, "s.has"), " been found to be singular.")
+
+                VCOV_raw_forced = cpp_mat_reconstruct(VCOV_raw_forced, info_inv$id_excl)
+                VCOV_raw_forced[, info_inv$id_excl] = NA
+                VCOV_raw_forced[info_inv$id_excl, ] = NA
+            }
+
+            object$cov.unscaled = VCOV_raw_forced
+            return(vcov(object, se=se.val, cluster=cluster, dof=dof))
+        }
+
+    }
 
     #
     # Core function
     #
 
-    n = object$nobs
+
     n_fe = n_fe_ok = length(object$fixef_id)
 
     # we adjust the fixef sizes to account for slopes
@@ -490,15 +579,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
         K = object$nparams
     }
 
-    if(object$method_type == "feols"){
-        if(se.val != "iid"){
-            VCOV_raw = object$cov.unscaled / object$sigma2
-        } else {
-            VCOV_raw = object$cov.unscaled / ((n - 1) / (n - object$nparams))
-        }
-    } else {
-        VCOV_raw = object$cov.unscaled
-    }
+
 
 
     # Small sample adjustment
@@ -509,58 +590,22 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     type_info = ""
 
     is_nested = c()
-    if(anyNA(VCOV_raw)){
+    if(se.val == "iid"){
 
-        if(!forceCovariance){
-            last_warn = getOption("fixest_last_warning")
-            if(is.null(last_warn) || (proc.time() - last_warn)[3] > 1){
-                warning("Standard errors are NA because of likely presence of collinearity.", call. = FALSE)
-            }
-
-            attr(VCOV_raw, "type") = "NA (not-available)"
-
-            return(VCOV_raw)
-        } else {
-            # VCOV_raw_forced = MASS::ginv(object$hessian)
-            # if(anyNA(VCOV_raw_forced)) {
-            # 	stop("The covariance matrix could not be 'forced'.")
-            # }
-            info_inv = cpp_cholesky(object$hessian)
-            if(!is.null(info_inv$all_removed)){
-                # Means all variables are collinear! => can happen when using FEs
-                stop("All variables have virtually no effect on the dependent variable. Covariance is not defined.")
-            }
-
-            VCOV_raw_forced = info_inv$XtX_inv
-            if(any(info_inv$id_excl)){
-                n_collin = sum(info_inv$all_removed)
-                message("NOTE: ", n_letter(n_collin), " variable", plural(n_collin, "s.has"), " been found to be singular.")
-
-                VCOV_raw_forced = cpp_mat_reconstruct(VCOV_raw_forced, info_inv$id_excl)
-                VCOV_raw_forced[, info_inv$id_excl] = NA
-                VCOV_raw_forced[info_inv$id_excl, ] = NA
-            }
-
-            object$cov.unscaled = VCOV_raw_forced
-            return(vcov(object, se=se.val, cluster=cluster, dof=dof))
-        }
-
-    } else if(se.val == "iid"){
-
-        vcov = VCOV_raw * correction.dof
+        vcov = bread * correction.dof
 
     } else if(se.val == "hetero"){
 
         # we make a n/(n-1) adjustment to match vcovHC(type = "HC1")
         if(meat_only){
-            meat = cpppar_crossprod(myScore, 1, nthreads)
+            meat = cpppar_crossprod(scores, 1, nthreads)
             return(meat)
 
         } else {
-            vcov = cpppar_crossprod(cpppar_matprod(myScore, VCOV_raw, nthreads), 1, nthreads) * correction.dof * ifelse(is_cluster, n/(n-1), 1)
+            vcov = cpppar_crossprod(cpppar_matprod(scores, bread, nthreads), 1, nthreads) * correction.dof * ifelse(is_cluster, n/(n-1), 1)
         }
 
-        dimnames(vcov) = dimnames(VCOV_raw)
+        dimnames(vcov) = dimnames(bread)
 
     } else {
         # Clustered SE!
@@ -859,7 +904,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
         #
 
         # initialisation
-        vcov = VCOV_raw * 0
+        vcov = bread * 0
         meat = 0
 
         if(do.unclass){
@@ -940,9 +985,9 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
                 # When cluster.df == "min" => no dof here but later
                 if(meat_only){
-                    meat = meat + (-1)**(i+1) * vcovClust(index, VCOV_raw, myScore, dof = is_cluster && !is_cluster_min, do.unclass=FALSE, meat_only = TRUE, nthreads = nthreads)
+                    meat = meat + (-1)**(i+1) * vcovClust(index, bread, scores, dof = is_cluster && !is_cluster_min, do.unclass=FALSE, meat_only = TRUE, nthreads = nthreads)
                 } else {
-                    vcov = vcov + (-1)**(i+1) * vcovClust(index, VCOV_raw, myScore, dof = is_cluster && !is_cluster_min, do.unclass=FALSE, nthreads = nthreads)
+                    vcov = vcov + (-1)**(i+1) * vcovClust(index, bread, scores, dof = is_cluster && !is_cluster_min, do.unclass=FALSE, nthreads = nthreads)
                 }
 
             }
@@ -1171,30 +1216,30 @@ vcov_setup = function(){
     #
 
     vcov_clust_setup = list(name = c("cluster", ""), fun_name = "vcov_cluster_internal", vcov_label = "clustered")
-    vcov_clust_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1), label = "clusters"),
-                                 cl2 = list(optional = TRUE, label = "second cluster"),
-                                 cl3 = list(optional = TRUE, label = "third cluster"),
-                                 cl4 = list(optional = TRUE, label = "fourth cluster"))
+    vcov_clust_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1), label = "clusters", to_int = TRUE),
+                                 cl2 = list(optional = TRUE, label = "second cluster", to_int = TRUE),
+                                 cl3 = list(optional = TRUE, label = "third cluster", to_int = TRUE),
+                                 cl4 = list(optional = TRUE, label = "fourth cluster", to_int = TRUE))
     vcov_clust_setup$patterns = c("", "cl1", "cl1 + cl2", "cl1 + cl2 + cl3",
                                   "c1 + cl2 + cl3 + cl4")
 
     # Other keywords
     vcov_twoway_setup = list(name = "twoway", fun_name = "vcov_cluster_internal", vcov_label = "2-way clustered")
-    vcov_twoway_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1), label = "first cluster"),
-                                  cl2 = list("guess_from" = list(fixef = 2), label = "second cluster"))
+    vcov_twoway_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1), label = "first cluster", to_int = TRUE),
+                                  cl2 = list("guess_from" = list(fixef = 2), label = "second cluster", to_int = TRUE))
     vcov_twoway_setup$patterns = c("", "cl1 + cl2")
 
     vcov_threeway_setup = list(name = "threeway", fun_name = "vcov_cluster_internal", vcov_label = "3-way clustered")
-    vcov_threeway_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1), label = "first cluster"),
-                                    cl2 = list("guess_from" = list(fixef = 2), label = "second cluster"),
-                                    cl3 = list("guess_from" = list(fixef = 3), label = "third cluster"))
+    vcov_threeway_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1), label = "first cluster", to_int = TRUE),
+                                    cl2 = list("guess_from" = list(fixef = 2), label = "second cluster", to_int = TRUE),
+                                    cl3 = list("guess_from" = list(fixef = 3), label = "third cluster", to_int = TRUE))
     vcov_threeway_setup$patterns = c("", "cl1 + cl2 + cl3")
 
     vcov_fourway_setup = list(name = "fourway", fun_name = "vcov_cluster_internal", vcov_label = "4-way clustered")
-    vcov_fourway_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1), label = "first cluster"),
-                                   cl2 = list("guess_from" = list(fixef = 2), label = "second cluster"),
-                                   cl3 = list("guess_from" = list(fixef = 3), label = "third cluster"),
-                                   cl4 = list("guess_from" = list(fixef = 4), label = "fourth cluster"))
+    vcov_fourway_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1), label = "first cluster", to_int = TRUE),
+                                   cl2 = list("guess_from" = list(fixef = 2), label = "second cluster", to_int = TRUE),
+                                   cl3 = list("guess_from" = list(fixef = 3), label = "third cluster", to_int = TRUE),
+                                   cl4 = list("guess_from" = list(fixef = 4), label = "fourth cluster", to_int = TRUE))
     vcov_fourway_setup$patterns = c("", "cl1 + cl2 + cl3 + cl4")
 
 
@@ -1204,8 +1249,8 @@ vcov_setup = function(){
 
     vcov_hac_setup = list(name = "hac", fun_name = "vcov_hac_internal", vcov_label = "HAC")
     # The variables
-    id = list(guess_from = list(panel.id = 1), label = "panel ID")
-    time = list(guess_from = list(panel.id = 2), label = "time")
+    id = list(guess_from = list(panel.id = 1), label = "panel ID", to_int = TRUE)
+    time = list(guess_from = list(panel.id = 2), label = "time", expected_type = "numeric vector")
     vcov_hac_setup$vars = list(id = id, time = time)
     vcov_hac_setup$arg_main = "lag"
     vcov_hac_setup$patterns = c("", "id + time")
@@ -1217,8 +1262,14 @@ vcov_setup = function(){
 
     vcov_conley_setup = list(name = "conley", fun_name = "vcov_conley_internal", vcov_label = "Conley")
     # The variables
-    lat = list(guess_from = list(regex = c("^lat(itude)?$", "^lat_.+")), label = "latitude")
-    lng = list(guess_from = list(regex = c("^lng$", "^long?(itude)?$", "^(lng|lon|long)_.+")), label = "longitude")
+    lat = list(guess_from = list(regex = c("^lat(itude)?$", "^lat_.+")),
+               label = "latitude",
+               expected_type = "numeric vector")
+
+    lng = list(guess_from = list(regex = c("^lng$", "^long?(itude)?$", "^(lng|lon|long)_.+")),
+               label = "longitude",
+               expected_type = "numeric vector")
+
     vcov_conley_setup$vars = list(lat = lat, lng = lng)
     vcov_conley_setup$arg_main = "cutoff"
     vcov_conley_setup$patterns = c("", "lat + lng")
@@ -1255,9 +1306,7 @@ vcov_setup = function(){
 # - scores
 # - vars: a *list* of variables all of the same length which matches the scores
 #
-
-
-vcov_cluster_internal = function(VCOV_raw, scores, vars){
+vcov_cluster_internal = function(bread, scores, vars){
 
     nway = length(vars)
 
