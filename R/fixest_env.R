@@ -308,8 +308,13 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         if(!"data.frame" %in% class(data)){
             stop("The argument 'data' must be a data.frame or a matrix.")
         }
+
         if("data.table" %in% class(data)){
             # this is a local change only
+            class(data) = "data.frame"
+        } else if("fixest_panel" %in% class(data)){
+            # I know it's weird but it's to disable the specific [.fixest_panel method
+            # which would not be appropriate here
             class(data) = "data.frame"
         }
 
