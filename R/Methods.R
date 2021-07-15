@@ -178,11 +178,11 @@ hatvalues.fixest = function(model, ...){
     if(method == "feols"){
         X = model.matrix(model)
 
-        res = cpp_diag_XUtX(X, model$cov.unscaled / model$sigma2)
+        res = cpp_diag_XUtX(X, model$cov.iid / model$sigma2)
 
     } else if(method == "feglm"){
         XW = model.matrix(model) * sqrt(model$irls_weights)
-        res = cpp_diag_XUtX(XW, model$cov.unscaled)
+        res = cpp_diag_XUtX(XW, model$cov.iid)
 
     } else {
         stop("'hatvalues' is currently not implemented for function ", method, ".")
@@ -263,11 +263,11 @@ bread.fixest = function(x, ...){
 
     if(method == "feols"){
 
-        res = x$cov.unscaled / x$sigma2 * x$nobs
+        res = x$cov.iid / x$sigma2 * x$nobs
 
     } else if(method == "feglm"){
 
-        res = x$cov.unscaled * x$nobs
+        res = x$cov.iid * x$nobs
 
     } else {
         stop("'bread' is not currently implemented for function ", method, ".")

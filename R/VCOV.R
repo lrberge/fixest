@@ -222,7 +222,7 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
         if(keepBounded){
             # we treat the bounded parameters as regular variables
             myScore = object$scores
-            object$cov.unscaled = solve(object$hessian)
+            object$cov.iid = solve(object$hessian)
         } else {
             myScore = object$scores[, -which(isBounded), drop = FALSE]
         }
