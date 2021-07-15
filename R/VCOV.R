@@ -192,7 +192,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
     if(is.matrix(vcov)){
         # Check that this makes sense
-        nr = ncol(object$cov.unscaled)
+        nr = ncol(object$cov.iid)
         check_value(vcov, "square matrix nrow(value)", .value = nr)
 
         return(vcov)
@@ -483,7 +483,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
         if(keepBounded){
             # we treat the bounded parameters as regular variables
             scores = object$scores
-            object$cov.unscaled = solve(object$hessian)
+            object$cov.iid = solve(object$hessian)
         } else {
             scores = object$scores[, -which(isBounded), drop = FALSE]
         }
@@ -500,12 +500,12 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
     if(object$method_type == "feols"){
         if(vcov != "iid"){
-            bread = object$cov.unscaled / object$sigma2
+            bread = object$cov.iid / object$sigma2
         } else {
-            bread = object$cov.unscaled / ((n - 1) / (n - object$nparams))
+            bread = object$cov.iid / ((n - 1) / (n - object$nparams))
         }
     } else {
-        bread = object$cov.unscaled
+        bread = object$cov.iid
     }
 
     if(anyNA(bread)){
@@ -536,7 +536,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
                 VCOV_raw_forced[info_inv$id_excl, ] = NA
             }
 
-            object$cov.unscaled = VCOV_raw_forced
+            object$cov.iid = VCOV_raw_forced
             return(vcov(object, se=se.val, cluster=cluster, dof=dof))
         }
 

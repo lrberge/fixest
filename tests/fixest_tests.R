@@ -310,7 +310,7 @@ test(attr(vcov(est, dof = dof(fixef.K = "full", fixef.force_exact = TRUE), attr 
 #
 
 n = est$nobs
-VCOV_raw = est$cov.unscaled / ((n - 1) / (n - est$nparams))
+VCOV_raw = est$cov.iid / ((n - 1) / (n - est$nparams))
 
 # standard
 for(k_val in c("none", "nested", "full")){
@@ -326,7 +326,7 @@ for(k_val in c("none", "nested", "full")){
 }
 
 # Clustered, fe1
-VCOV_raw = est$cov.unscaled / est$sigma2
+VCOV_raw = est$cov.iid / est$sigma2
 H = vcovClust(est$fixef_id$fe1, VCOV_raw, scores = est$scores, dof = FALSE)
 
 for(tdf in c("conventional", "min")){
@@ -355,7 +355,7 @@ for(tdf in c("conventional", "min")){
 
 
 # 2-way Clustered, fe1 fe2
-VCOV_raw = est$cov.unscaled / est$sigma2
+VCOV_raw = est$cov.iid / est$sigma2
 M_i  = vcovClust(est$fixef_id$fe1, VCOV_raw, scores = est$scores, dof = FALSE)
 M_t  = vcovClust(est$fixef_id$fe2, VCOV_raw, scores = est$scores, dof = FALSE)
 M_it = vcovClust(paste(base$fe1, base$fe2), VCOV_raw, scores = est$scores, dof = FALSE, do.unclass = TRUE)
@@ -1377,7 +1377,7 @@ test(coef(est_iv), coef(res_2nd))
 resid_iv = base$y - predict(res_2nd, data.frame(x1 = base$x1, fit_x_endo_1 = base$x_endo_1, fit_x_endo_2 = base$x_endo_2))
 sigma2_iv = sum(resid_iv**2) / (res_2nd$nobs - res_2nd$nparams)
 
-sum_2nd = summary(res_2nd, .vcov = res_2nd$cov.unscaled / res_2nd$sigma2 * sigma2_iv)
+sum_2nd = summary(res_2nd, .vcov = res_2nd$cov.iid / res_2nd$sigma2 * sigma2_iv)
 
 # We only check that on Windows => avoids super odd bug in fedora devel
 # The worst is that I just can't debug it.... so that's the way it's done.
