@@ -13,6 +13,8 @@
  
  - Fix bug in `etable` when `file` is provided and `tex = FALSE` (thanks to @roussanoff [#169](https://github.com/lrberge/fixest/issues/169)).
  
+ - Fix bug when: i) a `fixest_panel` is used as a data set in an estimation, ii) NA values are to be removed and iii) fixed-effects are used. Thanks to Nicola Cortinovis for the report!
+ 
 ## New features
 
  - `feglm` now accepts partially matched character shortcuts for families: "poisson", "logit", "probit" are now valid `family` arguments.

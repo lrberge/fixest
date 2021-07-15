@@ -11,7 +11,7 @@ error_catcher = function(expr) tryCatch(expr, error = function(e) structure(cond
 test = function(x, y, type = "=", tol = 1e-6){
     mc = match.call()
     IS_Y = TRUE
-    if(missing(type) && is.character(y) && y %in% c("err", "=", "~")){
+    if(missing(type) && length(y) == 1 && is.character(y) && y %in% c("err", "=", "~")){
         IS_Y = FALSE
         type = y
     }
