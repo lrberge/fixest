@@ -222,7 +222,7 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
         if(keepBounded){
             # we treat the bounded parameters as regular variables
             myScore = object$scores
-            object$cov.unscaled = solve(object$hessian)
+            object$cov.iid = solve(object$hessian)
         } else {
             myScore = object$scores[, -which(isBounded), drop = FALSE]
         }
@@ -270,12 +270,12 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
 
     if(object$method_type == "feols"){
         if(se.val != "standard"){
-            VCOV_raw = object$cov.unscaled / object$sigma2
+            VCOV_raw = object$cov.iid / object$sigma2
         } else {
-            VCOV_raw = object$cov.unscaled / ((n - 1) / (n - object$nparams))
+            VCOV_raw = object$cov.iid / ((n - 1) / (n - object$nparams))
         }
     } else {
-        VCOV_raw = object$cov.unscaled
+        VCOV_raw = object$cov.iid
     }
 
 

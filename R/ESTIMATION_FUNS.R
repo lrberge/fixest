@@ -122,7 +122,7 @@
 #' \item{residuals}{The residuals (y minus the fitted values).}
 #' \item{sq.cor}{Squared correlation between the dependent variable and the expected predictor (i.e. fitted.values) obtained by the estimation.}
 #' \item{hessian}{The Hessian of the parameters.}
-#' \item{cov.unscaled}{The variance-covariance matrix of the parameters.}
+#' \item{cov.iid}{The variance-covariance matrix of the parameters.}
 #' \item{se}{The standard-error of the parameters.}
 #' \item{scores}{The matrix of the scores (first derivative for each observation).}
 #' \item{residuals}{The difference between the dependent variable and the expected predictor.}
@@ -1557,12 +1557,12 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 		res$sigma2 = cpp_ssq(res$residuals, weights) / (length(y) - df_k)
 
-		res$cov.unscaled = est$xwx_inv * res$sigma2
+		res$cov.iid = est$xwx_inv * res$sigma2
 
-		rownames(res$cov.unscaled) = colnames(res$cov.unscaled) = names(coef)
+		rownames(res$cov.iid) = colnames(res$cov.iid) = names(coef)
 
 		# se
-		se = diag(res$cov.unscaled)
+		se = diag(res$cov.iid)
 		se[se < 0] = NA
 		se = sqrt(se)
 
@@ -1836,7 +1836,7 @@ feols.fit = function(y, X, fixef_df, offset, split, fsplit, cluster, se, dof, we
 #' \item{residuals}{The residuals (y minus the fitted values).}
 #' \item{sq.cor}{Squared correlation between the dependent variable and the expected predictor (i.e. fitted.values) obtained by the estimation.}
 #' \item{hessian}{The Hessian of the parameters.}
-#' \item{cov.unscaled}{The variance-covariance matrix of the parameters.}
+#' \item{cov.iid}{The variance-covariance matrix of the parameters.}
 #' \item{se}{The standard-error of the parameters.}
 #' \item{scores}{The matrix of the scores (first derivative for each observation).}
 #' \item{residuals}{The difference between the dependent variable and the expected predictor.}
@@ -2483,12 +2483,12 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", offset, split, fsplit,
             warning_msg = paste(warning_msg, "Residual collinearity was found after the weighted-OLS stage. The covariance is not defined. (This should not happen. If possible, could you send a replicable example to fixest's author? He's curious about when that actually happen.)")
             var = matrix(NA, length(is_excluded), length(is_excluded))
         }
-        res$cov.unscaled = var
+        res$cov.iid = var
 
-        rownames(res$cov.unscaled) = colnames(res$cov.unscaled) = names(coef)
+        rownames(res$cov.iid) = colnames(res$cov.iid) = names(coef)
 
         # se
-        se = diag(res$cov.unscaled)
+        se = diag(res$cov.iid)
         se[se < 0] = NA
         se = sqrt(se)
 
@@ -2661,7 +2661,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", offset, split, fsplit,
 #' \item{residuals}{The residuals (y minus the fitted values).}
 #' \item{sq.cor}{Squared correlation between the dependent variable and the expected predictor (i.e. fitted.values) obtained by the estimation.}
 #' \item{hessian}{The Hessian of the parameters.}
-#' \item{cov.unscaled}{The variance-covariance matrix of the parameters.}
+#' \item{cov.iid}{The variance-covariance matrix of the parameters.}
 #' \item{se}{The standard-error of the parameters.}
 #' \item{scores}{The matrix of the scores (first derivative for each observation).}
 #' \item{residuals}{The difference between the dependent variable and the expected predictor.}
@@ -2900,7 +2900,7 @@ fepois = function(fml, data, offset, weights, subset, split, fsplit, cluster, se
 #' \item{sq.cor}{Squared correlation between the dependent variable and the expected predictor (i.e. fitted.values) obtained by the estimation.}
 #' \item{hessian}{The Hessian of the parameters.}
 #' \item{fitted.values}{The fitted values are the expected value of the dependent variable for the fitted model: that is \eqn{E(Y|X)}.}
-#' \item{cov.unscaled}{The variance-covariance matrix of the parameters.}
+#' \item{cov.iid}{The variance-covariance matrix of the parameters.}
 #' \item{se}{The standard-error of the parameters.}
 #' \item{scores}{The matrix of the scores (first derivative for each observation).}
 #' \item{family}{The ML family that was used for the estimation.}
@@ -3284,7 +3284,7 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	res$sq.cor = sq.cor
 	res$fitted.values = expected.predictor
 	res$hessian = hessian
-	res$cov.unscaled = var
+	res$cov.iid = var
 	res$se = se
 	res$scores = scores
 	res$family = family
