@@ -180,8 +180,13 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     #### vcov parsing ####
     ####
 
+    all_vcov = getOption("fixest_vcov_builtin")
+
+    all_vcov_names = unlist(lapply(all_vcov, `[[`, "name"))
+    all_vcov_names = vcov_names[nchar(vcov_names) > 0]
+
     # Checking the value of vcov
-    check_arg_plus(vcov, "match(standard, iid, hetero, hc1, white, cluster, twoway, threeway, fourway, hac, conley, conley_hac) | formula | function | matrix")
+    check_arg_plus(vcov, "match | formula | function | matrix", .choices = all_vcov_names)
 
     # WIP => to implement (not that difficult)
     if(is.function(vcov)){
@@ -222,30 +227,23 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
     }
 
-    vcov = switch(vcov,
-                  white = "hetero",
-                  hc1 = "hetero",
-                  standard = "iid",
-                  vcov)
+    # Here vcov **must** be a character vector
 
-    # Here vcov must be a character vector
+    vcov_id = which(sapply(all_vcov, function(x) vcov %in% x$name))
 
-    if(!vcov %in% c("iid", "hetero")){
+    if(length(vcov_id) != 1){
+        stop("Unexpected problem in the selection of the VCOV. This is an internal error. Could you report?")
+    }
+
+    vcov_select = all_vcov[[vcov_id]]
+
+    if(length(vcov_select$vars) > 0){
         # We find out the vcov
-        all_vcov = getOption("fixest_vcov_builtin")
 
         if(only_varnames == FALSE){
             data = fetch_data(object)
             data_names = names(data)
         }
-
-        vcov_id = which(sapply(all_vcov, function(x) vcov %in% x$name))
-
-        if(length(vcov_id) != 1){
-            stop("Unexpected problem in the selection of the VCOV. This is an internal error. Could you report?")
-        }
-
-        vcov_select = all_vcov[[vcov_id]]
 
         patterns_split = strsplit(vcov_select$patterns, " ?\\+ ?")
         n_patterns = lengths(patterns_split)
@@ -462,13 +460,6 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     # DoF related => we accept NULL
     check_arg_plus(dof, "NULL{getFixest_dof()} class(dof.type)", .message = "The argument 'dof.type' must be an object created by the function dof().")
 
-    dof.fixef.K = dof$fixef.K
-    dof.adj = dof$adj
-    is_exact = dof$fixef.force_exact
-    is_cluster = dof$cluster.adj
-    is_cluster_min = dof$cluster.df == "min"
-    is_t_min = dof$t.df == "min"
-
     ####
     #### scores ####
     ####
@@ -542,6 +533,134 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
     }
 
+    ####
+    #### vcov no adj ####
+    ####
+
+    # we compute the vcov. The adjustment (which is a pain in the neck) will come after that
+    # Here vcov is ALWAYS a character scalar
+
+    if(vcov == "iid"){
+        vcov_noAdj = bread
+
+    } else if(vcov == "hetero"){
+
+        # we make a n/(n-1) adjustment to match vcovHC(type = "HC1")
+        if(meat_only){
+            meat = cpppar_crossprod(scores, 1, nthreads)
+            return(meat)
+
+        } else {
+            # vcov = cpppar_crossprod(cpppar_matprod(scores, bread, nthreads), 1, nthreads) * correction.dof * ifelse(is_cluster, n/(n-1), 1)
+            vcov_noAdj = cpppar_crossprod(cpppar_matprod(scores, bread, nthreads), 1, nthreads)
+        }
+
+        dimnames(vcov_noAdj) = dimnames(bread)
+
+    } else {
+        fun_name = vcov_select$fun_name
+
+        args = list(bread = bread, scores = scores, vars = vcov_vars)
+
+        vcov_noAdj = do.call(fun_name, args)
+    }
+
+
+    ####
+    #### DoF adj ####
+    ####
+
+    dof.fixef.K = dof$fixef.K
+    dof.adj = dof$adj
+    is_exact = dof$fixef.force_exact
+    is_cluster = dof$cluster.adj
+    is_cluster_min = dof$cluster.df == "min"
+    is_t_min = dof$t.df == "min"
+
+    n_fe = n_fe_ok = length(object$fixef_id)
+
+    # we adjust the fixef sizes to account for slopes
+    fixef_sizes_ok = object$fixef_sizes
+    isSlope = FALSE
+    if(!is.null(object$fixef_terms)){
+        isSlope = TRUE
+        # The drop the fixef_sizes for only slopes
+        fixef_sizes_ok[object$slope_flag < 0] = 0
+        n_fe_ok = sum(fixef_sizes_ok > 0)
+    }
+
+    # How do we choose K? => argument dof
+
+    if(dof.fixef.K == "none"){
+        # we do it with "minus" because of only slopes
+        K = object$nparams
+        if(n_fe_ok > 0){
+            K = K - (sum(fixef_sizes_ok) - (n_fe_ok - 1))
+        }
+    } else if(dof.fixef.K == "full" || vcov %in% c("iid", "hetero")){
+        K = object$nparams
+        if(is_exact && n_fe >= 2 && n_fe_ok >= 1){
+            fe = fixef(object, notes = FALSE)
+            K = K + (n_fe_ok - 1) - sum(attr(fe, "references"))
+        }
+    } else {
+        # nested
+        # we delay the adjustment
+        K = object$nparams
+    }
+
+    #
+    # NESTING (== pain in the neck)
+    #
+
+    # We recompute K depending on nesting
+    if(dof.adj && dof.fixef.K == "nested" && n_fe_ok >= 1){
+
+        if(check_nested){
+            # we need to find out which is nested
+            is_nested = which(cpp_check_nested(object$fixef_id, cluster, object$fixef_sizes, n = n) == 1)
+        } else {
+            # no need to compute is_nested,
+            # we created it earlier
+        }
+
+        if(length(is_nested) == n_fe){
+            # All FEs are removed, we add 1 for the intercept
+            K = K - (sum(fixef_sizes_ok) - (n_fe_ok - 1)) + 1
+        } else {
+            if(is_exact && n_fe >= 2){
+                fe = fixef(object, notes = FALSE)
+                nb_ref = attr(fe, "references")
+
+                # Slopes are a pain in the neck!!!
+                if(length(is_nested) > 1){
+                    id_nested = intersect(names(nb_ref), names(object$fixef_id)[is_nested])
+                    nb_ref[id_nested] = object$fixef_sizes[id_nested]
+                }
+
+                total_refs = sum(nb_ref)
+
+                K = K - total_refs
+            } else {
+                K = K - (sum(fixef_sizes_ok[is_nested]) - sum(fixef_sizes_ok[is_nested] > 0))
+            }
+        }
+
+        # below for consistency => should not be triggered
+        K = max(K, length(object$coefficients) + 1)
+
+        correction.dof = (n - 1) / (n - K)
+    }
+
+
+
+    # Small sample adjustment
+    correction.dof = ifelse(dof.adj, (n - 1) / (n - K), 1)
+
+
+
+
+
     #
     # Core function
     #
@@ -578,9 +697,6 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
         # we delay the adjustment
         K = object$nparams
     }
-
-
-
 
     # Small sample adjustment
     correction.dof = ifelse(dof.adj, (n - 1) / (n - K), 1)
@@ -913,44 +1029,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
             }
         }
 
-        # We recompute K
-        if(dof.adj && dof.fixef.K == "nested" && n_fe_ok >= 1){
 
-            if(check_nested){
-                # we need to find out which is nested
-                is_nested = which(cpp_check_nested(object$fixef_id, cluster, object$fixef_sizes, n = n) == 1)
-            } else {
-                # no need to compute is_nested,
-                # we created it earlier
-            }
-
-            if(length(is_nested) == n_fe){
-                # All FEs are removed, we add 1 for the intercept
-                K = K - (sum(fixef_sizes_ok) - (n_fe_ok - 1)) + 1
-            } else {
-                if(is_exact && n_fe >= 2){
-                    fe = fixef(object, notes = FALSE)
-                    nb_ref = attr(fe, "references")
-
-                    # Slopes are a pain in the neck!!!
-                    if(length(is_nested) > 1){
-                        id_nested = intersect(names(nb_ref), names(object$fixef_id)[is_nested])
-                        nb_ref[id_nested] = object$fixef_sizes[id_nested]
-                    }
-
-                    total_refs = sum(nb_ref)
-
-                    K = K - total_refs
-                } else {
-                    K = K - (sum(fixef_sizes_ok[is_nested]) - sum(fixef_sizes_ok[is_nested] > 0))
-                }
-            }
-
-            # below for consistency => should not be triggered
-            K = max(K, length(object$coefficients) + 1)
-
-            correction.dof = (n - 1) / (n - K)
-        }
 
         for(i in 1:nway){
 
@@ -1212,6 +1291,18 @@ vcovClust = function (cluster, myBread, scores, dof=FALSE, do.unclass=TRUE, meat
 vcov_setup = function(){
 
     #
+    # iid
+    #
+
+    vcov_iid_setup = list(name = c("iid", "normal", "standard"), fun_name = "vcov_iid_internal", vcov_label = "IID")
+
+    #
+    # Heterskedasticity robust
+    #
+
+    vcov_hetero_setup = list(name = c("hetero", "white", "hc1"), fun_name = "vcov_hetero_internal", vcov_label = "Heteroskedasticity-robust")
+
+    #
     # cluster(s)
     #
 
@@ -1289,7 +1380,9 @@ vcov_setup = function(){
     # Saving all the vcov possibilities
     #
 
-    all_vcov = list(vcov_clust_setup,
+    all_vcov = list(vcov_iid_setup,
+                    vcov_hetero_setup,
+                    vcov_clust_setup,
                     vcov_twoway_setup,
                     vcov_threeway_setup,
                     vcov_fourway_setup,
@@ -1299,6 +1392,25 @@ vcov_setup = function(){
 
     options(fixest_vcov_builtin = all_vcov)
 
+}
+
+vcov_iid_internal = function(bread, scores, vars, meat_only){
+    bread
+}
+
+vcov_hetero_internal = function(bread, scores, vars, meat_only){
+
+    # we make a n/(n-1) adjustment to match vcovHC(type = "HC1")
+    if(meat_only){
+        meat = cpppar_crossprod(scores, 1, nthreads)
+        return(meat)
+
+    } else {
+        # vcov = cpppar_crossprod(cpppar_matprod(scores, bread, nthreads), 1, nthreads) * correction.dof * ifelse(is_cluster, n/(n-1), 1)
+        vcov_noAdj = cpppar_crossprod(cpppar_matprod(scores, bread, nthreads), 1, nthreads)
+    }
+
+    vcov_noAdj
 }
 
 # vcov_xx_internal arguments
