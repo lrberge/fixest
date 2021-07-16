@@ -183,7 +183,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     all_vcov = getOption("fixest_vcov_builtin")
 
     all_vcov_names = unlist(lapply(all_vcov, `[[`, "name"))
-    all_vcov_names = vcov_names[nchar(vcov_names) > 0]
+    all_vcov_names = all_vcov_names[nchar(all_vcov_names) > 0]
 
     # Checking the value of vcov
     check_arg_plus(vcov, "match | formula | function | matrix", .choices = all_vcov_names)
@@ -457,8 +457,6 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     # Checking the nber of threads
     if(!missing(nthreads)) nthreads = check_set_nthreads(nthreads)
 
-    # DoF related => we accept NULL
-    check_arg_plus(dof, "NULL{getFixest_dof()} class(dof.type)", .message = "The argument 'dof.type' must be an object created by the function dof().")
 
     ####
     #### scores ####
@@ -527,8 +525,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
                 VCOV_raw_forced[info_inv$id_excl, ] = NA
             }
 
-            object$cov.iid = VCOV_raw_forced
-            return(vcov(object, se=se.val, cluster=cluster, dof=dof))
+            bread = VCOV_raw_forced
         }
 
     }
@@ -540,35 +537,19 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     # we compute the vcov. The adjustment (which is a pain in the neck) will come after that
     # Here vcov is ALWAYS a character scalar
 
-    if(vcov == "iid"){
-        vcov_noAdj = bread
-
-    } else if(vcov == "hetero"){
-
-        # we make a n/(n-1) adjustment to match vcovHC(type = "HC1")
-        if(meat_only){
-            meat = cpppar_crossprod(scores, 1, nthreads)
-            return(meat)
-
-        } else {
-            # vcov = cpppar_crossprod(cpppar_matprod(scores, bread, nthreads), 1, nthreads) * correction.dof * ifelse(is_cluster, n/(n-1), 1)
-            vcov_noAdj = cpppar_crossprod(cpppar_matprod(scores, bread, nthreads), 1, nthreads)
-        }
-
-        dimnames(vcov_noAdj) = dimnames(bread)
-
-    } else {
-        fun_name = vcov_select$fun_name
-
-        args = list(bread = bread, scores = scores, vars = vcov_vars)
-
-        vcov_noAdj = do.call(fun_name, args)
-    }
+    fun_name = vcov_select$fun_name
+    args = list(bread = bread, scores = scores, vars = vcov_vars)
+    vcov_noAdj = do.call(fun_name, args)
 
 
     ####
     #### DoF adj ####
     ####
+
+    # dof is a dof object in here
+
+    # DoF related => we accept NULL
+    check_arg_plus(dof, "NULL{getFixest_dof()} class(dof.type)", .message = "The argument 'dof.type' must be an object created by the function dof().")
 
     dof.fixef.K = dof$fixef.K
     dof.adj = dof$adj
@@ -591,15 +572,18 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
     # How do we choose K? => argument dof
 
-    if(dof.fixef.K == "none"){
+    nested_vars = sapply(vcov_select$vars, function(x) isTRUE(x$rm_nested))
+    any_nested_var = length(nested_vars) > 0 && length(vcov_vars > 0) && any(nested_vars[names(vcov_vars)])
+
+    if(dof$fixef.K == "none"){
         # we do it with "minus" because of only slopes
         K = object$nparams
         if(n_fe_ok > 0){
             K = K - (sum(fixef_sizes_ok) - (n_fe_ok - 1))
         }
-    } else if(dof.fixef.K == "full" || vcov %in% c("iid", "hetero")){
+    } else if(dof$fixef.K == "full" || !any_nested_var){
         K = object$nparams
-        if(is_exact && n_fe >= 2 && n_fe_ok >= 1){
+        if(dof$fixef.force_exact && n_fe >= 2 && n_fe_ok >= 1){
             fe = fixef(object, notes = FALSE)
             K = K + (n_fe_ok - 1) - sum(attr(fe, "references"))
         }
@@ -613,8 +597,79 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     # NESTING (== pain in the neck)
     #
 
+    if(dof$fixef.K == "nested" && n_fe_ok > 0 && any_nested_var){
+        # OK, let's go checking....
+        # We always try to minimize computation.
+        # So we maximize deduction and apply computation only in last resort.
+
+        nested_vcov_var_names = intersect(names(nested_vars[nested_vars]), names(vcov_vars))
+        nested_var_names = var_names_all[nested_vcov_var_names]
+
+
+
+
+        if(!any(grepl("^", object$fixef_vars, fixed = TRUE))){
+            # simple cases only
+
+            id_nested = which(object$fixef_vars %in% cluster)
+
+        }
+
+
+        id_nested = c()
+        for(v_nested in nested_var_names){
+
+
+
+        }
+
+
+        if(all(nested_var_names %in% object$fixef_vars)){
+
+            check_nested = FALSE
+            # We do that to avoid checking nestedness later
+            if(all(object$fixef_vars %in% cluster)){
+                # everyone nested (also works for var1^var2)
+                is_nested = 1:length(object$fixef_id)
+
+            } else if(!any(grepl("^", object$fixef_vars, fixed = TRUE))){
+                # simple cases only
+                is_nested = which(names(object$fixef_id) %in% cluster)
+
+            } else if(!any(grepl("^", cluster, fixed = TRUE))){
+                # simple cases in cluster
+                check_var_in_there = function(x){
+                    # cluster is a global
+                    if(x %in% cluster){
+                        return(TRUE)
+
+                    } else if(grepl("^", x, fixed = TRUE)){
+                        x_split = strsplit(x, "^", fixed = TRUE)[[1]]
+                        if(any(x_split %in% cluster)){
+                            return(TRUE)
+                        }
+                    }
+
+                    return(FALSE)
+                }
+
+                is_nested = which(sapply(names(object$fixef_id), check_var_in_there))
+            } else {
+                # too complex to apply tricks => we make real check
+                check_nested = TRUE
+            }
+
+            cluster = object$fixef_id[cluster]
+
+            do.unclass = FALSE
+
+        }
+
+
+    }
+
     # We recompute K depending on nesting
-    if(dof.adj && dof.fixef.K == "nested" && n_fe_ok >= 1){
+    if(dof$adj && dof$fixef.K == "nested" && n_fe_ok >= 1){
 
         if(check_nested){
             # we need to find out which is nested
@@ -655,7 +710,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
 
     # Small sample adjustment
-    correction.dof = ifelse(dof.adj, (n - 1) / (n - K), 1)
+    correction.dof = ifelse(dof$adj, (n - 1) / (n - K), 1)
 
 
 
@@ -1297,7 +1352,7 @@ vcov_setup = function(){
     vcov_iid_setup = list(name = c("iid", "normal", "standard"), fun_name = "vcov_iid_internal", vcov_label = "IID")
 
     #
-    # Heterskedasticity robust
+    # Heteroskedasticity robust
     #
 
     vcov_hetero_setup = list(name = c("hetero", "white", "hc1"), fun_name = "vcov_hetero_internal", vcov_label = "Heteroskedasticity-robust")
@@ -1307,30 +1362,29 @@ vcov_setup = function(){
     #
 
     vcov_clust_setup = list(name = c("cluster", ""), fun_name = "vcov_cluster_internal", vcov_label = "clustered")
-    vcov_clust_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1), label = "clusters", to_int = TRUE),
-                                 cl2 = list(optional = TRUE, label = "second cluster", to_int = TRUE),
-                                 cl3 = list(optional = TRUE, label = "third cluster", to_int = TRUE),
-                                 cl4 = list(optional = TRUE, label = "fourth cluster", to_int = TRUE))
+    vcov_clust_setup$vars = list(cl1 = list(guess_from = list(fixef = 1), label = "clusters", to_int = TRUE, rm_nested = TRUE),
+                                 cl2 = list(optional = TRUE, label = "second cluster", to_int = TRUE, rm_nested = TRUE),
+                                 cl3 = list(optional = TRUE, label = "third cluster", to_int = TRUE, rm_nested = TRUE),
+                                 cl4 = list(optional = TRUE, label = "fourth cluster", to_int = TRUE, rm_nested = TRUE))
     vcov_clust_setup$patterns = c("", "cl1", "cl1 + cl2", "cl1 + cl2 + cl3",
                                   "c1 + cl2 + cl3 + cl4")
 
-    # Other keywords
+    # Other keywords => direct two-/three-/four-way clustering
+    cl1 = list(guess_from = list(fixef = 1), label = "first cluster", to_int = TRUE, rm_nested = TRUE)
+    cl2 = list(guess_from = list(fixef = 2), label = "second cluster", to_int = TRUE, rm_nested = TRUE)
+    cl3 = list(guess_from = list(fixef = 3), label = "third cluster", to_int = TRUE, rm_nested = TRUE)
+    cl4 = list(guess_from = list(fixef = 4), label = "fourth cluster", to_int = TRUE, rm_nested = TRUE)
+
     vcov_twoway_setup = list(name = "twoway", fun_name = "vcov_cluster_internal", vcov_label = "2-way clustered")
-    vcov_twoway_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1), label = "first cluster", to_int = TRUE),
-                                  cl2 = list("guess_from" = list(fixef = 2), label = "second cluster", to_int = TRUE))
+    vcov_twoway_setup$vars = list(cl1, cl2)
     vcov_twoway_setup$patterns = c("", "cl1 + cl2")
 
     vcov_threeway_setup = list(name = "threeway", fun_name = "vcov_cluster_internal", vcov_label = "3-way clustered")
-    vcov_threeway_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1), label = "first cluster", to_int = TRUE),
-                                    cl2 = list("guess_from" = list(fixef = 2), label = "second cluster", to_int = TRUE),
-                                    cl3 = list("guess_from" = list(fixef = 3), label = "third cluster", to_int = TRUE))
+    vcov_threeway_setup$vars = list(cl1, cl2, cl3)
     vcov_threeway_setup$patterns = c("", "cl1 + cl2 + cl3")
 
     vcov_fourway_setup = list(name = "fourway", fun_name = "vcov_cluster_internal", vcov_label = "4-way clustered")
-    vcov_fourway_setup$vars = list(cl1 = list("guess_from" = list(fixef = 1), label = "first cluster", to_int = TRUE),
-                                   cl2 = list("guess_from" = list(fixef = 2), label = "second cluster", to_int = TRUE),
-                                   cl3 = list("guess_from" = list(fixef = 3), label = "third cluster", to_int = TRUE),
-                                   cl4 = list("guess_from" = list(fixef = 4), label = "fourth cluster", to_int = TRUE))
+    vcov_fourway_setup$vars = list(cl1, cl2, cl3, cl4)
     vcov_fourway_setup$patterns = c("", "cl1 + cl2 + cl3 + cl4")
 
 
@@ -1340,7 +1394,7 @@ vcov_setup = function(){
 
     vcov_hac_setup = list(name = "hac", fun_name = "vcov_hac_internal", vcov_label = "HAC")
     # The variables
-    id = list(guess_from = list(panel.id = 1), label = "panel ID", to_int = TRUE)
+    id = list(guess_from = list(panel.id = 1), label = "panel ID", to_int = TRUE, rm_nested = TRUE)
     time = list(guess_from = list(panel.id = 2), label = "time", expected_type = "numeric vector")
     vcov_hac_setup$vars = list(id = id, time = time)
     vcov_hac_setup$arg_main = "lag"
@@ -1355,11 +1409,13 @@ vcov_setup = function(){
     # The variables
     lat = list(guess_from = list(regex = c("^lat(itude)?$", "^lat_.+")),
                label = "latitude",
-               expected_type = "numeric vector")
+               expected_type = "numeric vector",
+               rm_nested = TRUE)
 
     lng = list(guess_from = list(regex = c("^lng$", "^long?(itude)?$", "^(lng|lon|long)_.+")),
                label = "longitude",
-               expected_type = "numeric vector")
+               expected_type = "numeric vector",
+               rm_nested = TRUE)
 
     vcov_conley_setup$vars = list(lat = lat, lng = lng)
     vcov_conley_setup$arg_main = "cutoff"
