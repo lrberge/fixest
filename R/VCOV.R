@@ -68,7 +68,7 @@
 #' vcov(est_pois_simple, cluster = ~Product)
 #'
 #'
-vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forceCovariance = FALSE,
+vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr = FALSE, forceCovariance = FALSE,
                        keepBounded = FALSE, nthreads = getFixest_nthreads(), ...){
     # computes the clustered vcov
 
@@ -99,8 +99,13 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
         validate_dots(suggest_args = c("vcov", "dof"), valid_args = c("no_sandwich"))
     }
 
+    # All the available VCOVs
+    all_vcov = getOption("fixest_vcov_builtin")
+    all_vcov_names = unlist(lapply(all_vcov, `[[`, "name"))
+    all_vcov_names = all_vcov_names[nchar(all_vcov_names) > 0]
+
     # We transform se and cluster into vcov
-    vcov_vars = NULL
+    vcov_vars = vcov_vars_retro = NULL
     if(!missnull(se) || !missnull(cluster)){
         if(!missnull(vcov)){
             id = c(!missnull(se), !missnull(cluster))
@@ -108,22 +113,18 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
             stop("You cannot use the argument 'vcov' in combination with ", enumerate_items(msg, "or.quote"), ".")
         }
 
-        check_arg_plus(se, "NULL{'cluster'} match", .choices = c("standard", "iid", "white", "hc1", "hetero", "cluster", "twoway", "threeway", "fourway"), .message = "Argument 'se' (which has been replaced by arg. 'vcov') should be equal to one of 'iid', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
+        check_value_plus(se, "NULL{'cluster'} match", .choices = all_vcov_names, .prefix = "Argument 'se' (which has been replaced by arg. 'vcov')")
 
-        se = switch(se,
-                    white = "hetero",
-                    hc1 = "hetero",
-                    standard = "iid",
-                    se)
-
-        if(se %in% c("standard", "hetero") || missnull(cluster)){
+        if(missnull(cluster)){
             vcov = se
         } else {
             if(inherits(cluster, "formula")){
                 vcov = cluster
+            } else if(is.character(cluster) && length(cluster) <= 4){
+                vcov = .xpd(lhs = "cluster", rhs = cluster)
             } else {
                 vcov = "cluster"
-                vcov_vars = cluster
+                vcov_vars_retro = cluster
             }
         }
     }
@@ -139,9 +140,10 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     if(isTRUE(object$summary) && missnull(vcov) && missnull(dof)){
         vcov = object$cov.scaled
         if(!is_attr) {
-            attr(vcov, "se_info") = NULL
-            attr(vcov, "dof.type") = NULL
-            attr(vcov, "dof.K") = NULL
+            all_attr = names(attributes(vcov_mat))
+            for(v in setdiff(all_attr, c("dim", "dimnames"))){
+                attr(vcov_mat, v) = NULL
+            }
         }
         return(vcov)
     }
@@ -179,11 +181,6 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     ####
     #### vcov parsing ####
     ####
-
-    all_vcov = getOption("fixest_vcov_builtin")
-
-    all_vcov_names = unlist(lapply(all_vcov, `[[`, "name"))
-    all_vcov_names = all_vcov_names[nchar(all_vcov_names) > 0]
 
     # Checking the value of vcov
     check_arg_plus(vcov, "match | formula | function | matrix", .choices = all_vcov_names)
@@ -227,7 +224,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
     }
 
-    # Here vcov **must** be a character vector
+    # Here vcov **must** be a character scalar
 
     vcov_id = which(sapply(all_vcov, function(x) vcov %in% x$name))
 
@@ -237,8 +234,66 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
     vcov_select = all_vcov[[vcov_id]]
 
-    if(length(vcov_select$vars) > 0){
-        # We find out the vcov
+    if(length(vcov_select$vars) == 0){
+        var_names_all = character(0)
+
+        if(only_varnames){
+            return(var_names_all)
+        }
+    } else if(vcov == "cluster" && !is.null(vcov_vars_retro)){
+        # This means retro compatibility
+
+        vcov_vars = vcov_vars_retro
+
+        n_origin = object$nobs_origin
+        var_names_all = c()
+
+        mc = match.call()
+
+        # No names for internal summary calls
+        cl_name = if("keep_se_info" %in% names(mc)) "" else deparse_long(mc$cluster)
+
+        if(is.atomic(vcov_vars)){
+            vcov_vars = list(cl1 = vcov_vars)
+            var_names_all["cl1"] = gsub("^.+\\$", "", cl_name)
+
+        } else if(!is.list(vcov_vars) || length(vcov_vars) > 4){
+            # We send an error + a reminder of the accepted types
+            check_value(vcov_vars, "os formula | character vector | list len(,4)", .arg_name = "cluster")
+        } else {
+            vcov_var_names = paste0("cl", 1:length(vcov_vars))
+            if(!is.null(names(vcov_vars))){
+                var_names_all[vcov_var_names] = names(vcov_vars)
+            } else {
+                new_name = character(length(vcov_vars))
+                new_name[1] = cl_name
+
+                var_names_all[vcov_var_names] = new_name
+            }
+
+            names(vcov_vars) = vcov_var_names
+        }
+
+        for(i in seq_along(vcov_vars)){
+            # we check, put to int, etc
+            value = vcov_vars[[i]]
+
+            if(length(value) != n_origin){
+                stop("In argument 'cluster', the number of observations in the", ifsingle(vcov_vars, "", paste0(" ", n_th(i))), " variable (", length(value), ") differ from the number of observations used in the estimation (", n_origin, ").")
+            }
+
+            value = trim_obs_removed(value, object)
+
+            if(anyNA(value)){
+                stop("In argument 'cluster', the", ifsingle(vcov_vars, "", paste0(" ", n_th(i))), " variable has NA values which would lead to a sample used to compute the VCOV different from the sample used to estimate the parameters. This would lead to wrong inference.\nPossible solutions: i) ex ante prune them or ii) use the argument 'vcov' at estimation time.")
+            }
+
+            vcov_vars[[i]] = quickUnclassFactor(value)
+        }
+
+
+    } else {
+        # We find out the variables used to compute the vcov
 
         if(only_varnames == FALSE){
             data = fetch_data(object)
@@ -285,7 +340,8 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
                 var_names_all[vcov_var_name] = vname
                 if(only_varnames) next
 
-                var_values_all[[vcov_var_name]] = trim_obs_removed(data[[vname]], object)
+                value = eval(str2expression(vname), data)
+                var_values_all[[vcov_var_name]] = trim_obs_removed(value, object)
 
             } else {
 
@@ -363,7 +419,8 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
                         var_names_all[vcov_var_name] = vname
                         if(only_varnames) break
 
-                        var_values_all[[vcov_var_name]] = trim_obs_removed(data[[vname]], object)
+                        value = eval(str2expression(vname), data)
+                        var_values_all[[vcov_var_name]] = trim_obs_removed(value, object)
                         break
 
                     } else if(type == "regex"){
@@ -430,7 +487,8 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
             vcov_var_value = vcov_select$vars[[vcov_var_name]]
 
-            if(anyNA(value)){
+            if(!isTRUE(is_int_all[[vcov_var_name]]) && anyNA(value)){
+                # First condition means: it is a fixed-effect used in the estimation => no need to check
                 stop("The variable '", vname, "' used to estimate the VCOV (employed as ", vcov_var_value$label, ") has NA values which would lead to a sample used to compute the VCOV different from the sample used to estimate the parameters. This would lead to wrong inference.\nPossible solutions: i) ex ante prune them or ii) use the argument 'vcov' at estimation time.")
             }
 
@@ -449,8 +507,6 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
         vcov_vars = var_values_all
 
-    } else if(only_varnames){
-        return(character(0))
     }
 
 
@@ -488,10 +544,11 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     n = object$nobs
 
     if(object$method_type == "feols"){
-        if(vcov != "iid"){
-            bread = object$cov.iid / object$sigma2
-        } else {
+        iid_names = all_vcov[[1]]$name
+        if(vcov %in% iid_names){
             bread = object$cov.iid / ((n - 1) / (n - object$nparams))
+        } else {
+            bread = object$cov.iid / object$sigma2
         }
     } else {
         bread = object$cov.iid
@@ -539,7 +596,8 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
     # DoF related => we accept NULL
     # we check dof since it can be used by the funs
-    check_arg_plus(dof, "NULL{getFixest_dof()} class(dof.type)", .message = "The argument 'dof.type' must be an object created by the function dof().")
+    if(missnull(dof)) dof = getFixest_dof()
+    check_arg(dof, "class(dof.type)", .message = "The argument 'dof.type' must be an object created by the function dof().")
 
     fun_name = vcov_select$fun_name
     args = list(bread = bread, scores = scores, vars = vcov_vars, dof = dof,
@@ -551,7 +609,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
         return(vcov_noAdj)
     }
 
-    vcov_noAdj = dimnames(bread)
+    dimnames(vcov_noAdj) = dimnames(bread)
 
     ####
     #### DoF adj ####
@@ -572,7 +630,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     }
 
     nested_vars = sapply(vcov_select$vars, function(x) isTRUE(x$rm_nested))
-    any_nested_var = length(nested_vars) > 0 && length(vcov_vars > 0) && any(nested_vars[names(vcov_vars)])
+    any_nested_var = length(nested_vars) > 0 && length(vcov_vars) > 0 && any(nested_vars[names(vcov_vars)])
 
     if(dof$fixef.K == "none"){
         # we do it with "minus" because of only slopes
@@ -684,7 +742,9 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
     if(any(diag(vcov_mat) < 0)){
         # We 'fix' it
+        all_attr = attributes(vcov_mat)
         vcov_mat = mat_posdef_fix(vcov_mat)
+        attributes(vcov_mat) = all_attr
         message("Variance contained negative values in the diagonal and was 'fixed' (a la Cameron, Gelbach & Miller 2011).")
     }
 
@@ -698,9 +758,12 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
             attr(vcov_mat, "df.t") = max(n - K, 1)
         }
 
-        type_info = attr(vcov_mat, "type_info")
+        if(is.null(attr(vcov_mat, "type", exact = TRUE))){
+            type_info = attr(vcov_mat, "type_info")
+            attr(vcov_mat, "type") = paste0(vcov_select$vcov_label, type_info)
+            attr(vcov_mat, "type_info") = NULL
+        }
 
-        attr(vcov_mat, "type") = paste0(vcov_select$vcov_label, type_info)
         attr(vcov_mat, "dof") = dof
         attr(vcov_mat, "dof.K") = K
     } else {
@@ -910,7 +973,7 @@ vcov_setup = function(){
     # cluster(s)
     #
 
-    vcov_clust_setup = list(name = c("cluster", ""), fun_name = "vcov_cluster_internal", vcov_label = "clustered")
+    vcov_clust_setup = list(name = c("cluster", ""), fun_name = "vcov_cluster_internal", vcov_label = "Clustered")
     vcov_clust_setup$vars = list(cl1 = list(guess_from = list(fixef = 1), label = "clusters", to_int = TRUE, rm_nested = TRUE),
                                  cl2 = list(optional = TRUE, label = "second cluster", to_int = TRUE, rm_nested = TRUE),
                                  cl3 = list(optional = TRUE, label = "third cluster", to_int = TRUE, rm_nested = TRUE),
@@ -924,15 +987,15 @@ vcov_setup = function(){
     cl3 = list(guess_from = list(fixef = 3), label = "third cluster", to_int = TRUE, rm_nested = TRUE)
     cl4 = list(guess_from = list(fixef = 4), label = "fourth cluster", to_int = TRUE, rm_nested = TRUE)
 
-    vcov_twoway_setup = list(name = "twoway", fun_name = "vcov_cluster_internal", vcov_label = "2-way clustered")
+    vcov_twoway_setup = list(name = "twoway", fun_name = "vcov_cluster_internal", vcov_label = "Clustered")
     vcov_twoway_setup$vars = list(cl1, cl2)
     vcov_twoway_setup$patterns = c("", "cl1 + cl2")
 
-    vcov_threeway_setup = list(name = "threeway", fun_name = "vcov_cluster_internal", vcov_label = "3-way clustered")
+    vcov_threeway_setup = list(name = "threeway", fun_name = "vcov_cluster_internal", vcov_label = "Clustered")
     vcov_threeway_setup$vars = list(cl1, cl2, cl3)
     vcov_threeway_setup$patterns = c("", "cl1 + cl2 + cl3")
 
-    vcov_fourway_setup = list(name = "fourway", fun_name = "vcov_cluster_internal", vcov_label = "4-way clustered")
+    vcov_fourway_setup = list(name = "fourway", fun_name = "vcov_cluster_internal", vcov_label = "Clustered")
     vcov_fourway_setup$vars = list(cl1, cl2, cl3, cl4)
     vcov_fourway_setup$patterns = c("", "cl1 + cl2 + cl3 + cl4")
 
@@ -1082,7 +1145,16 @@ vcov_cluster_internal = function(bread, scores, vars, dof, no_sandwich, nthreads
     # I know I duplicate the information, but they refer to two different things
     attr(vcov, "min_cluster_size") = G_min
 
-    attr(vcov, "type_info") = paste0(" (", paste(var_names_all, collapse = " & "), ")")
+    var_names_all = var_names_all[nchar(var_names_all) > 0]
+    if(length(var_names_all) > 0){
+        attr(vcov, "type_info") = paste0(" (", paste(var_names_all, collapse = " & "), ")")
+    } else {
+        attr(vcov, "type") = switch(nway,
+                                    "1" = "Clustered",
+                                    "2" = "Two-way",
+                                    "3" = "Three-way",
+                                    "4" = "Four-way")
+    }
 
     vcov
 }

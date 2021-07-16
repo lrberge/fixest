@@ -5706,7 +5706,7 @@ fml2varnames = function(fml, combine_fun = FALSE){
 
             qui = grepl("_xXx_[[:alpha:]\\.]", all_var_names)
 
-            all_var_names[qui] = paste0("combine_cluster_fast(", gsub("_xXx_", ", ", all_var_names[qui]), ")")
+            all_var_names[qui] = paste0("combine_clusters_fast(", gsub("_xXx_", ", ", all_var_names[qui]), ")")
         }
 
         all_var_names = gsub("_xXx_", "^", all_var_names) # even with combine_fun=TRUE, some can remain (real powers)
