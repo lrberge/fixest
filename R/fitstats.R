@@ -1517,7 +1517,7 @@ kp_stat = function(x){
         cluster = x$summary_flags$cluster
         dof = x$summary_flags$dof
 
-        meat = vcov(x_new, se = se, cluster = cluster, dof = dof, meat_only = TRUE)
+        meat = vcov(x_new, se = se, cluster = cluster, dof = dof, no_sandwich = TRUE)
         vhat = solve(K, t(solve(K, meat)))
 
         # DOF correction now

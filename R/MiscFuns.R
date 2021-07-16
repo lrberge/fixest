@@ -579,14 +579,9 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov,
 	zvalue = object$coefficients/se
 	if(object$method %in% "feols" || (object$method %in% "feglm" && !object$family$family %in% c("poisson", "binomial"))){
 
-	    # I have renamed t.df into G
-	    t.df = attr(vcov, "G")
-
-	    if(!is.null(t.df)){
-	        pvalue = 2*pt(-abs(zvalue), max(t.df - 1, 1))
-	    } else {
-	        pvalue = 2*pt(-abs(zvalue), max(object$nobs - object$nparams, 1))
-	    }
+	    # df.t is always an attribute of the vcov
+	    df.t = attr(vcov, "df.t")
+	    pvalue = 2*pt(-abs(zvalue), df.t)
 
 	} else {
 	    pvalue = 2*pnorm(-abs(zvalue))

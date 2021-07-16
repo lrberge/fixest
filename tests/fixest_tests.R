@@ -327,7 +327,7 @@ for(k_val in c("none", "nested", "full")){
 
 # Clustered, fe1
 VCOV_raw = est$cov.iid / est$sigma2
-H = vcovClust(est$fixef_id$fe1, VCOV_raw, scores = est$scores, dof = FALSE)
+H = vcovClust(est$fixef_id$fe1, VCOV_raw, scores = est$scores, adj = FALSE)
 
 for(tdf in c("conventional", "min")){
     for(k_val in c("none", "nested", "full")){
@@ -356,9 +356,9 @@ for(tdf in c("conventional", "min")){
 
 # 2-way Clustered, fe1 fe2
 VCOV_raw = est$cov.iid / est$sigma2
-M_i  = vcovClust(est$fixef_id$fe1, VCOV_raw, scores = est$scores, dof = FALSE)
-M_t  = vcovClust(est$fixef_id$fe2, VCOV_raw, scores = est$scores, dof = FALSE)
-M_it = vcovClust(paste(base$fe1, base$fe2), VCOV_raw, scores = est$scores, dof = FALSE, do.unclass = TRUE)
+M_i  = vcovClust(est$fixef_id$fe1, VCOV_raw, scores = est$scores, adj = FALSE)
+M_t  = vcovClust(est$fixef_id$fe2, VCOV_raw, scores = est$scores, adj = FALSE)
+M_it = vcovClust(paste(base$fe1, base$fe2), VCOV_raw, scores = est$scores, adj = FALSE, do.unclass = TRUE)
 
 M_i + M_t - M_it
 vcov(est, se = "two", dof = dof(adj = FALSE, cluster.adj = FALSE))

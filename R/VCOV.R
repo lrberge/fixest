@@ -96,7 +96,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
 
     if(!any(c("keep_se_info", "only_varnames") %in% names(match.call(expand.dots = TRUE)))){
         # means NOT a client call
-        validate_dots(suggest_args = c("vcov", "dof"), valid_args = c("meat_only"))
+        validate_dots(suggest_args = c("vcov", "dof"), valid_args = c("no_sandwich"))
     }
 
     # We transform se and cluster into vcov
@@ -128,7 +128,7 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
         }
     }
 
-    meat_only = isTRUE(dots$meat_only)
+    no_sandwich = isTRUE(dots$no_sandwich)
 
     if(!is.null(object$onlyFixef)){
         # means that the estimation is done without variables
@@ -537,26 +537,27 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
     # we compute the vcov. The adjustment (which is a pain in the neck) will come after that
     # Here vcov is ALWAYS a character scalar
 
+    # DoF related => we accept NULL
+    # we check dof since it can be used by the funs
+    check_arg_plus(dof, "NULL{getFixest_dof()} class(dof.type)", .message = "The argument 'dof.type' must be an object created by the function dof().")
+
     fun_name = vcov_select$fun_name
-    args = list(bread = bread, scores = scores, vars = vcov_vars)
+    args = list(bread = bread, scores = scores, vars = vcov_vars, dof = dof,
+                no_sandwich = no_sandwich, nthreads = nthreads,
+                var_names_all = var_names_all)
     vcov_noAdj = do.call(fun_name, args)
 
+    if(no_sandwich){
+        return(vcov_noAdj)
+    }
+
+    vcov_noAdj = dimnames(bread)
 
     ####
     #### DoF adj ####
     ####
 
     # dof is a dof object in here
-
-    # DoF related => we accept NULL
-    check_arg_plus(dof, "NULL{getFixest_dof()} class(dof.type)", .message = "The argument 'dof.type' must be an object created by the function dof().")
-
-    dof.fixef.K = dof$fixef.K
-    dof.adj = dof$adj
-    is_exact = dof$fixef.force_exact
-    is_cluster = dof$cluster.adj
-    is_cluster_min = dof$cluster.df == "min"
-    is_t_min = dof$t.df == "min"
 
     n_fe = n_fe_ok = length(object$fixef_id)
 
@@ -569,8 +570,6 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
         fixef_sizes_ok[object$slope_flag < 0] = 0
         n_fe_ok = sum(fixef_sizes_ok > 0)
     }
-
-    # How do we choose K? => argument dof
 
     nested_vars = sapply(vcov_select$vars, function(x) isTRUE(x$rm_nested))
     any_nested_var = length(nested_vars) > 0 && length(vcov_vars > 0) && any(nested_vars[names(vcov_vars)])
@@ -605,90 +604,58 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
         nested_vcov_var_names = intersect(names(nested_vars[nested_vars]), names(vcov_vars))
         nested_var_names = var_names_all[nested_vcov_var_names]
 
+        is_nested = rep(FALSE, n_fe)
+        for(i in 1:n_fe){
+            # We check for each FE
+            fe_name = object$fixef_vars[i]
 
+            if(fe_name %in% nested_var_names){
+                is_nested[i] = TRUE
+                next
 
-
-        if(!any(grepl("^", object$fixef_vars, fixed = TRUE))){
-            # simple cases only
-
-            id_nested = which(object$fixef_vars %in% cluster)
-
-        }
-
-
-        id_nested = c()
-        for(v_nested in nested_var_names){
-
-
-
-        }
-
-
-        if(all(nested_var_names %in% object$fixef_vars)){
-
-            check_nested = FALSE
-            # We do that to avoid checking nestedness later
-            if(all(object$fixef_vars %in% cluster)){
-                # everyone nested (also works for var1^var2)
-                is_nested = 1:length(object$fixef_id)
-
-            } else if(!any(grepl("^", object$fixef_vars, fixed = TRUE))){
-                # simple cases only
-                is_nested = which(names(object$fixef_id) %in% cluster)
-
-            } else if(!any(grepl("^", cluster, fixed = TRUE))){
-                # simple cases in cluster
-                check_var_in_there = function(x){
-                    # cluster is a global
-                    if(x %in% cluster){
-                        return(TRUE)
-
-                    } else if(grepl("^", x, fixed = TRUE)){
-                        x_split = strsplit(x, "^", fixed = TRUE)[[1]]
-                        if(any(x_split %in% cluster)){
-                            return(TRUE)
-                        }
-                    }
-
-                    return(FALSE)
+            } else if(grepl("^", fe_name, fixed = TRUE)){
+                # nesting of the FE in the parent term
+                fe_name_split = strsplit(fe_name, "^", fixed = TRUE)[[1]]
+                if(any(fe_name_split %in% nested_var_names)){
+                    is_nested[i] = TRUE
+                    next
                 }
+            }
+        }
 
-                is_nested = which(sapply(names(object$fixef_id), check_var_in_there))
-            } else {
-                # too complex to apply tricks => we make real check
-                check_nested = TRUE
+
+        # We check the remaining FEs, only if necessary
+        if(!all(is_nested) && !all(nested_var_names %in% object$fixef_vars)){
+            # Note that if all(nested_var_names %in% object$fixef_vars) == TRUE
+            # Then all the variables used to compute the VCOV are part of the FEs
+            # So the nesting would have been correctly spotted right before.
+            # Only caveat: if the user has a^b in FE and includes the parent terms (a and b), we may forget some nested FEs
+            # But then that's the user problem bc it's an erroneous specification
+
+            vcov_vars_nesting = vcov_vars[nested_vcov_var_names]
+            # We put the non integer to integer (needed)
+            id_to_int = which(sapply(vcov_select$vars[nested_vcov_var_names], function(x) !isTRUE(x$to_int)))
+
+            for(i in id_to_int){
+                vcov_vars_nesting[[i]] = quickUnclassFactor(vcov_vars_nesting[[i]])
             }
 
-            cluster = object$fixef_id[cluster]
-
-            do.unclass = FALSE
-
+            id2check = which(is_nested == FALSE)
+            info = cpp_check_nested(object$fixef_id[id2check], vcov_vars_nesting, object$fixef_sizes[id2check], n = n)
+            is_nested[id2check] = info == 1
         }
 
 
-    }
-
-    # We recompute K depending on nesting
-    if(dof$adj && dof$fixef.K == "nested" && n_fe_ok >= 1){
-
-        if(check_nested){
-            # we need to find out which is nested
-            is_nested = which(cpp_check_nested(object$fixef_id, cluster, object$fixef_sizes, n = n) == 1)
-        } else {
-            # no need to compute is_nested,
-            # we created it earlier
-        }
-
-        if(length(is_nested) == n_fe){
+        if(sum(is_nested) == n_fe){
             # All FEs are removed, we add 1 for the intercept
             K = K - (sum(fixef_sizes_ok) - (n_fe_ok - 1)) + 1
         } else {
-            if(is_exact && n_fe >= 2){
+            if(dof$fixef.force_exact && n_fe >= 2){
                 fe = fixef(object, notes = FALSE)
                 nb_ref = attr(fe, "references")
 
                 # Slopes are a pain in the neck!!!
-                if(length(is_nested) > 1){
+                if(sum(is_nested) > 1){
                     id_nested = intersect(names(nb_ref), names(object$fixef_id)[is_nested])
                     nb_ref[id_nested] = object$fixef_sizes[id_nested]
                 }
@@ -701,473 +668,55 @@ vcov.fixest = function(object, vcov, se, cluster, dof = NULL, attr = FALSE, forc
             }
         }
 
-        # below for consistency => should not be triggered
+        # below for consistency => should *not* be triggered
         K = max(K, length(object$coefficients) + 1)
-
-        correction.dof = (n - 1) / (n - K)
-    }
-
-
-
-    # Small sample adjustment
-    correction.dof = ifelse(dof$adj, (n - 1) / (n - K), 1)
-
-
-
-
-
-    #
-    # Core function
-    #
-
-
-    n_fe = n_fe_ok = length(object$fixef_id)
-
-    # we adjust the fixef sizes to account for slopes
-    fixef_sizes_ok = object$fixef_sizes
-    isSlope = FALSE
-    if(!is.null(object$fixef_terms)){
-        isSlope = TRUE
-        # The drop the fixef_sizes for only slopes
-        fixef_sizes_ok[object$slope_flag < 0] = 0
-        n_fe_ok = sum(fixef_sizes_ok > 0)
-    }
-
-    # How do we choose K? => argument dof
-
-    if(dof.fixef.K == "none"){
-        # we do it with "minus" because of only slopes
-        K = object$nparams
-        if(n_fe_ok > 0){
-            K = K - (sum(fixef_sizes_ok) - (n_fe_ok - 1))
-        }
-    } else if(dof.fixef.K == "full" || se.val %in% c("iid", "hetero")){
-        K = object$nparams
-        if(is_exact && n_fe >= 2 && n_fe_ok >= 1){
-            fe = fixef(object, notes = FALSE)
-            K = K + (n_fe_ok - 1) - sum(attr(fe, "references"))
-        }
-    } else {
-        # nested
-        # we delay the adjustment
-        K = object$nparams
     }
 
     # Small sample adjustment
-    correction.dof = ifelse(dof.adj, (n - 1) / (n - K), 1)
+    ss_adj = ifelse(dof$adj, (n - 1) / (n - K), 1)
 
+    vcov_mat = vcov_noAdj * ss_adj
 
-    # information on the variable used for the clustering
-    type_info = ""
+    ####
+    #### vcov attributes ####
+    ####
 
-    is_nested = c()
-    if(se.val == "iid"){
 
-        vcov = bread * correction.dof
-
-    } else if(se.val == "hetero"){
-
-        # we make a n/(n-1) adjustment to match vcovHC(type = "HC1")
-        if(meat_only){
-            meat = cpppar_crossprod(scores, 1, nthreads)
-            return(meat)
-
-        } else {
-            vcov = cpppar_crossprod(cpppar_matprod(scores, bread, nthreads), 1, nthreads) * correction.dof * ifelse(is_cluster, n/(n-1), 1)
-        }
-
-        dimnames(vcov) = dimnames(bread)
-
-    } else {
-        # Clustered SE!
-        nway = switch(se.val, cluster=1, twoway=2, threeway=3, fourway=4)
-
-        # MISC
-
-        # used twice later:
-        msgRemoved = ""
-        if(!is.null(object$call$na.rm) && object$call$na.rm){
-            msgRemoved = " (additionnaly from the observations removed from the original estimation)"
-        }
-
-        #
-        # Controls
-        #
-
-        # Controlling the clusters
-        do.unclass = check_nested = TRUE
-        if(missing(cluster) || is.null(cluster)){
-
-            if(is.null(object$fixef_id)){
-                stop("To display clustered standard errors, you must provide the argument 'cluster'", ifelse(!missing(cluster), ", currently it is equal to NULL", ""), ".")
-
-            } else if(length(object$fixef_id) < nway) {
-                stop(nway, "-way clustering is asked for but the estimation was not performed with ", nway, " or more fixed-effects: You must provide the argument 'cluster' with ", nway, " clusters.")
-
-            } else {
-                cluster = object$fixef_id[1:nway]
-
-                type_info = paste0(" (", paste0(object$fixef_vars[1:nway], collapse = " & "), ")")
-
-                is_nested = 1:nway
-
-                # in that specific case, there is no need of doing unclass.factor because already done
-                do.unclass = FALSE
-                check_nested = FALSE
-            }
-
-        } else {
-
-            #
-            # Handle formulas
-            #
-
-            doEval = FALSE
-            if("formula" %in% class(cluster)){
-
-                cluster = formula(cluster) # regularization to check it
-
-                if(length(cluster) != 2){
-                    stop("If argument cluster is to be a formula, it must be one sided: e.g. ~dum_1+dum_2.")
-                }
-
-                all_var_names = fml2varnames(cluster)
-
-                if(length(all_var_names) != nway){
-                    stop("Asked for ", nway, "-way clustering but evaluating argument cluster leads to ", length(all_var_names), " clusters (", enumerate_items(all_var_names), "). Please provide exactly ", nway, " clusters.")
-                }
-
-                cluster = all_var_names # Now a regular character vector
-
-                doEval = TRUE
-            }
-
-            if(length(cluster) == nway && is.character(cluster)){
-
-                if(all(cluster %in% object$fixef_vars)){
-                    # cluster == names of clusters used in the estimation
-                    type_info = paste0(" (", paste0(cluster, collapse = " & "), ")")
-
-                    check_nested = FALSE
-                    # We do that to avoid checking nestedness later
-                    if(all(object$fixef_vars %in% cluster)){
-                        # everyone nested (also works for var1^var2)
-                        is_nested = 1:length(object$fixef_id)
-
-                    } else if(!any(grepl("^", object$fixef_vars, fixed = TRUE))){
-                        # simple cases only
-                        is_nested = which(names(object$fixef_id) %in% cluster)
-
-                    } else if(!any(grepl("^", cluster, fixed = TRUE))){
-                        # simple cases in cluster
-                        check_var_in_there = function(x){
-                            # cluster is a global
-                            if(x %in% cluster){
-                                return(TRUE)
-
-                            } else if(grepl("^", x, fixed = TRUE)){
-                                x_split = strsplit(x, "^", fixed = TRUE)[[1]]
-                                if(any(x_split %in% cluster)){
-                                    return(TRUE)
-                                }
-                            }
-
-                            return(FALSE)
-                        }
-
-                        is_nested = which(sapply(names(object$fixef_id), check_var_in_there))
-                    } else {
-                        # too complex to apply tricks => we make real check
-                        check_nested = TRUE
-                    }
-
-                    cluster = object$fixef_id[cluster]
-
-                    do.unclass = FALSE
-
-                } else {
-                    cluster = gsub(" *", "", cluster)
-                    if(!doEval){
-                        is_ok = grepl("^[\\.[:alpha:]][[:alnum:]_\\.]*(\\^[\\.[:alpha:]][[:alnum:]_\\.]*)*$", cluster)
-                        if(any(!is_ok)){
-                            stop("In argument cluster, only variable names and the '^' operator are accepted. The expression", enumerate_items(cluster[!is_ok], "s.is"), " not valid.\nAlternatively, you can use a list of vectors.")
-                        }
-
-                    }
-
-                    cluster_fml = as.formula(paste0("~", paste0(cluster, collapse = " + ")))
-                    all_vars = all.vars(cluster_fml)
-
-                    if(all(all_vars %in% object$fixef_vars) || all(cluster %in% object$fixef_vars)){
-                        # Means dum_1^dum_2 with dum_1 and dum_2 used as clusters
-
-                        cluster_names = cluster
-                        type_info = paste0(" (", paste0(cluster, collapse = " & "), ")")
-
-                        cluster = list()
-                        for(i in 1:nway){
-                            cname = cluster_names[i]
-                            if(cname %in% object$fixef_vars){
-                                cluster[[i]] = object$fixef_id[[cname]]
-                            } else {
-                                # combination
-                                if(grepl("^", cname, fixed = TRUE)){
-                                    value_text = gsub("\\^", ", ", cname)
-                                    value_text = paste0("combine_clusters_fast(", value_text, ")")
-                                }
-
-                                value_call = str2lang(value_text)
-                                value = eval(value_call, object$fixef_id)
-                                cluster[[i]] = value
-                            }
-                        }
-
-                    } else {
-                        # we try to get the variable from the base used in the estimation
-                        var2fetch = setdiff(all_vars, object$fixef_vars)
-
-                        # evaluation
-                        data = fetch_data(object, paste0("Cannot apply ", nway, "-way clustering with current 'cluster' argument. Variable", enumerate_items(var2fetch, "s.is.past"), " not used as fixed-effects in the estimation so ", plural_len(var2fetch, "need"), " to be taken from the data. "), " Alternatively, use a list of vectors.")
-
-                        data = as.data.frame(data)
-
-                        # we check the variables are there
-                        # we use all_vars and not var2fetch: safer to catch all variables (case clustvar^datavar)
-
-                        if(any(!all_vars %in% names(data))){
-                            var_pblm = setdiff(all_vars, names(data))
-                            stop("In argument 'cluster', the variable", enumerate_items(var_pblm, "s.is"), " not present in the original dataset. Alternatively, use a list of vectors.")
-                        }
-
-                        # we check length consistency
-                        if(NROW(data) != object$nobs_origin){
-                            stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(var2fetch, "s"), " in the original dataset (", deparse_long(object$call$data), "), yet the dataset doesn't have the same number of observations as was used in the estimation (", NROW(data), " instead of ", object$nobs_origin, ").")
-                        }
-
-                        data = data[, all_vars, drop = FALSE]
-
-                        for(i in seq_along(object$obs_selection)){
-                            data = data[object$obs_selection[[i]], , drop = FALSE]
-                        }
-
-                        # Final check: NAs
-                        if(anyNA(data)){
-                            varsNA = sapply(data, anyNA)
-                            varsNA = names(varsNA)[varsNA]
-                            stop("To evaluate argument 'cluster', we fetched the variable", enumerate_items(varsNA, "s"), " in the original dataset (", deparse_long(object$call$data), "). But ", ifsingle(varsNA, "this variable", "these variables"), " contain", ifsingle(varsNA, "s", ""), " NAs", msgRemoved, ". This is not allowed since the sample used to compute the SEs would be different from the sample used in the estimation.")
-                        }
-
-                        # We create the cluster list
-                        cluster_names = cluster
-                        type_info = paste0(" (", paste0(cluster, collapse = " & "), ")")
-
-                        cluster = list()
-                        for(i in 1:nway){
-                            cname = cluster_names[i]
-                            if(cname %in% object$fixef_vars){
-                                cluster[[i]] = object$fixef_id[[cname]]
-
-                            } else if(cname %in% names(data)){
-                                # data is already of the right size
-                                cluster[[i]] = data[[cname]]
-
-                            } else {
-                                # combination
-                                if(grepl("^", cname, fixed = TRUE)){
-                                    value_text = gsub("\\^", ", ", cname)
-                                    value_text = paste0("combine_clusters_fast(", value_text, ")")
-                                } else {
-                                    value_text = cname
-                                }
-
-                                value_call = str2lang(value_text)
-                                cluster[[i]] = eval(value_call, data)
-                            }
-                        }
-
-                    }
-
-                }
-            } else if(length(cluster) == nway && is.numeric(cluster)){
-                # You can use a number to tell which cluster to use
-
-                if(length(object$fixef_vars) == 0){
-                    stop("You can use an integer in the argument 'cluster' only when there have been fixed-effects in the estimation. Currenlty this is not the case. Alternatively, arg. 'cluster' can be a formula, a vector of variables or a list of vectors.")
-                }
-
-                if(!all(cluster %% 1 == 0) || any(cluster < 1 | cluster > 4)){
-                    msg = ifelse(!all(cluster %% 1 == 0), "it is not made of integers", "it contains values different from 1 to 4")
-                    stop("Argument 'cluster' can be a numeric vector, if so it must have integer values between 1 and 4 (currently ", msg, ").")
-                }
-
-                if(length(object$fixef_vars) < max(cluster)){
-                    nb_name = c("1st", "2nd", "3rd", "4th")
-                    stop("In argument 'cluster', it is requested to cluster along the ", nb_name[max(cluster)], " fixed-effect, however the estimation was done with only ", length(object$fixef_vars), " fixed-effects. Alternatively, arg. 'cluster' can be a formula, a vector of variables or a list of vectors.")
-                }
-
-                # Eventually, it should be all right by now
-                type_info = paste0(" (", paste0(object$fixef_vars[cluster], collapse = " & "), ")")
-                cluster = object$fixef_id[cluster]
-
-            } else if(nway == 1){
-                if(!is.list(cluster) && (isVector(cluster) || is.factor(cluster))){
-                    cluster = list(cluster)
-
-                } else if(! (is.list(cluster) && length(cluster) == 1)){
-                    stop("For one way clustering, the argument 'cluster' must be either the name of a cluster variable (e.g. \"dum_1\"), a vector (e.g. data$dum_1), a list containing the vector of clusters (e.g. list(data$dum_1)), or a one-sided formula (e.g. ~dum_1). Currently the class of cluster is ", enumerate_items(class(cluster)), ".")
-
-                } else if(!is.null(names(cluster))){
-                    type_info = paste0(" (", names(cluster), ")")
-                }
-
-            } else if(length(cluster) != nway){
-
-                msgList = "a list of vectors"
-                if(is.list(cluster)) msgList = "a vector of variables names"
-                stop(nway, "-way clustering is asked for, but the length of argument 'cluster' is ", length(cluster), " (it should be ", nway, "). Alternatively, you can use ", msgList, " or a one-sided formula.")
-
-            } else if(!is.list(cluster)){
-                stop("For ", nway, "-way clustering, the argument 'cluster' must be either a vector of cluster variables (e.g. c(\"", paste0("dum_", 1:nway, collapse = "\", \""), "\")), a list containing the vector of clusters (e.g. data[, c(\"", paste0("dum_", 1:nway, collapse = "\", \""), "\")]), or a one-sided formula (e.g. ~", paste0("dum_", 1:nway, collapse = "+"), "). Currently the class of cluster is: ", enumerate_items(class(cluster)), ".")
-
-            } else if(!is.null(names(cluster))){
-                type_info = paste0(" (", paste0(names(cluster), collapse = " & "), ")")
-            }
-
-            cluster = as.list(cluster)
-        }
-
-        # now we check the lengths:
-        n_per_cluster = sapply(cluster, length)
-        if(!all(diff(n_per_cluster) == 0)){
-            stop("The vectors of the argument 'cluster' must be of the same length. Currently the lengths are: ", enumerate_items(n_per_cluster), ".")
-        }
-
-        # Either they are of the same length of the data
-        if(n_per_cluster[1] != object$nobs){
-            # Then two cases: either the user introduces the original data and it is OK
-            if(n_per_cluster[1] == object$nobs_origin){
-                # We modify the clusters
-                for(i in 1:nway){
-                    # first we take care of the observations removed
-
-                    for(j in seq_along(object$obs_selection)){
-                        cluster[[i]] = cluster[[i]][object$obs_selection[[j]]]
-                    }
-
-                }
-            } else {
-                # If this is not the case: there is a problem
-                stop("The length of the clusters (", fsignif(n_per_cluster[1]), ") does not match the number of observations in the estimation (", fsignif(object$nobs), ").")
-            }
-        }
-
-        # final NA check
-        varsNA = sapply(cluster, anyNA)
-        if(any(varsNA)){
-            varsNA = which(varsNA)
-            nb_name = c("1st", "2nd", "3rd", "4th")
-            stop("In argument cluster, the ", enumerate_items(nb_name[varsNA]), " cluster variable", ifsingle(varsNA, " contains", "s contain"), " NAs", msgRemoved, ". This is not allowed.")
-        }
-
-
-        #
-        # Calculus
-        #
-
-        # initialisation
-        vcov = bread * 0
-        meat = 0
-
-        if(do.unclass){
-            for(i in 1:nway){
-                cluster[[i]] = quickUnclassFactor(cluster[[i]])
-            }
-        }
-
-
-
-        for(i in 1:nway){
-
-            myComb = combn(nway, i)
-
-            power = floor(1 + log10(sapply(cluster, max)))
-
-            for(j in 1:ncol(myComb)){
-
-                if(i == 1){
-                    index = cluster[[myComb[, j]]]
-                } else if(i > 1){
-
-                    vars = myComb[, j]
-
-                    if(sum(power[vars]) > 14){
-                        my_clusters = cluster[vars]
-
-                        order_index = do.call(order, my_clusters)
-                        index = cpp_combine_clusters(my_clusters, order_index)
-                    } else {
-                        # quicker, but limited by the precision of integers
-                        index = cluster[[vars[1]]]
-                        for(k in 2:length(vars)){
-                            index = index + cluster[[vars[k]]]*10**sum(power[vars[1:(k-1)]])
-                        }
-                    }
-
-                    index = quickUnclassFactor(index)
-
-                }
-
-                # When cluster.df == "min" => no dof here but later
-                if(meat_only){
-                    meat = meat + (-1)**(i+1) * vcovClust(index, bread, scores, dof = is_cluster && !is_cluster_min, do.unclass=FALSE, meat_only = TRUE, nthreads = nthreads)
-                } else {
-                    vcov = vcov + (-1)**(i+1) * vcovClust(index, bread, scores, dof = is_cluster && !is_cluster_min, do.unclass=FALSE, nthreads = nthreads)
-                }
-
-            }
-        }
-
-        G_min = NULL
-        if(is_cluster && is_cluster_min){
-            G_min = min(sapply(cluster, max))
-            correction.dof = correction.dof * G_min / (G_min - 1)
-        }
-
-        if(meat_only){
-            if(!is.null(G_min)) meat = meat * G_min / (G_min - 1)
-            return(meat)
-        }
-
-        vcov = vcov * correction.dof
-
-        if(is_t_min){
-            if(is.null(G_min)) G_min = min(sapply(cluster, max))
-
-            if(is_attr) base::attr(vcov, "G") = G_min
-        }
-
-    }
-
-    if(any(diag(vcov) < 0)){
+    if(any(diag(vcov_mat) < 0)){
         # We 'fix' it
-        vcov = mat_posdef_fix(vcov)
+        vcov_mat = mat_posdef_fix(vcov_mat)
         message("Variance contained negative values in the diagonal and was 'fixed' (a la Cameron, Gelbach & Miller 2011).")
     }
 
-    sd.dict = c("iid" = "IID", "hetero"="Heteroskedasticity-robust", "cluster"="Clustered", "twoway"="Two-way", "threeway"="Three-way", "fourway"="Four-way")
-
     if(is_attr){
-        base::attr(vcov, "type") = paste0(as.vector(sd.dict[se.val]), type_info)
-        base::attr(vcov, "dof.type") = paste0("dof(adj = ", dof.adj, ", fixef.K = '", dof.fixef.K, "', cluster.adj = ", is_cluster, ", cluster.df = '", dof$cluster.df, "', t.df = '", dof$t.df, "', fixef.force_exact = ", is_exact, ")")
-        base::attr(vcov, "dof.K") = K
+
+        min_cluster_size = attr(vcov_mat, "min_cluster_size")
+        if(dof$t.df == "min" && !is.null(min_cluster_size)){
+            attr(vcov_mat, "df.t") = max(min_cluster_size - 1, 1)
+
+        } else {
+            attr(vcov_mat, "df.t") = max(n - K, 1)
+        }
+
+        type_info = attr(vcov_mat, "type_info")
+
+        attr(vcov_mat, "type") = paste0(vcov_select$vcov_label, type_info)
+        attr(vcov_mat, "dof") = dof
+        attr(vcov_mat, "dof.K") = K
+    } else {
+        # We clean the attributes
+        all_attr = names(attributes(vcov_mat))
+        for(v in setdiff(all_attr, c("dim", "dimnames"))){
+            attr(vcov_mat, v) = NULL
+        }
     }
 
     if(isTRUE(dots$keep_se_info)){
         if(missing(cluster)) cluster = NULL
-        attr(vcov, "se_info") = list(se = se.val, dof = dof, cluster = cluster)
+        attr(vcov_mat, "se_info") = list(se = se.val, dof = dof, cluster = cluster)
     }
 
-    vcov
+    vcov_mat
 }
 
 
@@ -1306,12 +855,12 @@ dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = 
 
 
 
-vcovClust = function (cluster, myBread, scores, dof=FALSE, do.unclass=TRUE, meat_only = FALSE, nthreads = 1){
+vcovClust = function (cluster, myBread, scores, adj = FALSE, do.unclass = TRUE, no_sandwich = FALSE, nthreads = 1){
     # Internal function: no need for controls, they come beforehand
     # - cluster: the vector of dummies
     # - myBread: original vcov
     # - scores
-    # Note: if length(unique(cluster)) == n (i.e. White correction), then the dof are such that vcovClust is equivalent to vcovHC(res, type="HC1")
+    # Note: if length(unique(cluster)) == n (i.e. White correction), then the adj are such that vcovClust is equivalent to vcovHC(res, type="HC1")
     # Source: http://cameron.econ.ucdavis.edu/research/Cameron_Miller_JHR_2015_February.pdf
     #         Cameron & Miller -- A Practitioner’s Guide to Cluster-Robust Inference
 
@@ -1326,19 +875,19 @@ vcovClust = function (cluster, myBread, scores, dof=FALSE, do.unclass=TRUE, meat
     RightScores = cpp_tapply_sum(Q, scores, cluster)
 
     # Finite sample correction:
-    if(dof){
-        dof_value = Q / (Q - 1)
+    if(adj){
+        adj_value = Q / (Q - 1)
     } else {
-        dof_value = 1
+        adj_value = 1
     }
 
-    if(meat_only){
-        res = cpppar_crossprod(RightScores, 1, nthreads) * dof_value
+    if(no_sandwich){
+        res = cpppar_crossprod(RightScores, 1, nthreads) * adj_value
         return(res)
     }
 
     xy = cpppar_matprod(RightScores, myBread, nthreads)
-    res = cpppar_crossprod(xy, 1, nthreads) * dof_value
+    res = cpppar_crossprod(xy, 1, nthreads) * adj_value
     res
 }
 
@@ -1450,36 +999,92 @@ vcov_setup = function(){
 
 }
 
-vcov_iid_internal = function(bread, scores, vars, meat_only){
+vcov_iid_internal = function(bread, ...){
     bread
 }
 
-vcov_hetero_internal = function(bread, scores, vars, meat_only){
+vcov_hetero_internal = function(bread, scores, no_sandwich, dof, nthreads, ...){
 
-    # we make a n/(n-1) adjustment to match vcovHC(type = "HC1")
-    if(meat_only){
-        meat = cpppar_crossprod(scores, 1, nthreads)
-        return(meat)
-
+    if(no_sandwich){
+        vcov_noAdj = cpppar_crossprod(scores, 1, nthreads)
     } else {
-        # vcov = cpppar_crossprod(cpppar_matprod(scores, bread, nthreads), 1, nthreads) * correction.dof * ifelse(is_cluster, n/(n-1), 1)
-        vcov_noAdj = cpppar_crossprod(cpppar_matprod(scores, bread, nthreads), 1, nthreads)
+        # we make a n/(n-1) adjustment to match vcovHC(type = "HC1")
+
+        n = nrow(scores)
+        adj = ifelse(dof$cluster.adj, n / (n-1), 1)
+
+        vcov_noAdj = cpppar_crossprod(cpppar_matprod(scores, bread, nthreads), 1, nthreads) * adj
     }
 
     vcov_noAdj
 }
 
-# vcov_xx_internal arguments
-# - bread: typically the VCOV_raw
-# - scores
-# - vars: a *list* of variables all of the same length which matches the scores
-#
-vcov_cluster_internal = function(bread, scores, vars){
 
-    nway = length(vars)
+vcov_cluster_internal = function(bread, scores, vars, dof, no_sandwich, nthreads, var_names_all, ...){
 
+    # aliasing to add (a bit of) clarity
+    cluster = vars
+    nway = length(cluster)
 
+    # initialization
+    vcov = bread * 0
+    meat = 0
 
+    for(i in 1:nway){
+
+        myComb = combn(nway, i)
+
+        power = floor(1 + log10(sapply(cluster, max)))
+
+        for(j in 1:ncol(myComb)){
+
+            if(i == 1){
+                index = cluster[[myComb[, j]]]
+
+            } else if(i > 1){
+
+                vars = myComb[, j]
+
+                if(sum(power[vars]) > 14){
+                    my_clusters = cluster[vars]
+
+                    order_index = do.call(order, my_clusters)
+                    index = cpp_combine_clusters(my_clusters, order_index)
+                } else {
+                    # quicker, but limited by the precision of integers
+                    index = cluster[[vars[1]]]
+                    for(k in 2:length(vars)){
+                        index = index + cluster[[vars[k]]]*10**sum(power[vars[1:(k-1)]])
+                    }
+                }
+
+                index = quickUnclassFactor(index)
+
+            }
+
+            vcov = vcov + (-1)**(i+1) * vcovClust(index, bread, scores,
+                                                  adj = dof$cluster.adj && dof$cluster.df == "conv",
+                                                  no_sandwich = TRUE, nthreads = nthreads)
+
+        }
+    }
+
+    G_min = min(sapply(cluster, max))
+    if(dof$cluster.adj && dof$cluster.df == "min"){
+        vcov = vcov * G_min / (G_min - 1)
+        attr(vcov, "G") = G_min
+    }
+
+    if(no_sandwich){
+        return(vcov)
+    }
+
+    # I know I duplicate the information, but they refer to two different things
+    attr(vcov, "min_cluster_size") = G_min
+
+    attr(vcov, "type_info") = paste0(" (", paste(var_names_all, collapse = " & "), ")")
+
+    vcov
 }
 
 ####
