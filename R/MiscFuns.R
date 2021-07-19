@@ -8113,7 +8113,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	    fit_vars = c()
 	    for(i in seq_along(stage_1)){
 	        fit_vars[i] = v = paste0("fit_", names(stage_1)[i])
-	        data[[v]] = predict(stage_1[[i]], newdata = data, na.rm = FALSE)
+	        data[[v]] = predict(stage_1[[i]], newdata = data, sample = "original")
 	    }
 
 	    # II) we create the variables
