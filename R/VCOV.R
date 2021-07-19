@@ -270,12 +270,12 @@ vcov.fixest = function(object, se, cluster, dof = NULL, attr = FALSE, forceCovar
 
     if(object$method_type == "feols"){
         if(se.val != "standard"){
-            VCOV_raw = object$cov.unscaled / object$sigma2
+            VCOV_raw = object$cov.iid / object$sigma2
         } else {
-            VCOV_raw = object$cov.unscaled / ((n - 1) / (n - object$nparams))
+            VCOV_raw = object$cov.iid / ((n - 1) / (n - object$nparams))
         }
     } else {
-        VCOV_raw = object$cov.unscaled
+        VCOV_raw = object$cov.iid
     }
 
 
