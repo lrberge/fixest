@@ -38,8 +38,8 @@ lm(xpd(Ozone ~ Wind + ..ctrl), airquality)
 lm(xpd(Ozone ~ Wind + ..ctrl_long), airquality)
 
 # You can use the macros without xpd() in fixest estimations
-a <- feols(Ozone ~ Wind + ..ctrl, airquality)
-b <- feols(Ozone ~ Wind + ..ctrl_long, airquality)
+a = feols(Ozone ~ Wind + ..ctrl, airquality)
+b = feols(Ozone ~ Wind + ..ctrl_long, airquality)
 etable(a, b, keep = "Int|Win")
 
 #

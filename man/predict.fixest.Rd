@@ -4,7 +4,14 @@
 \alias{predict.fixest}
 \title{Predict method for \code{fixest} fits}
 \usage{
-\method{predict}{fixest}(object, newdata, type = c("response", "link"), na.rm = TRUE, ...)
+\method{predict}{fixest}(
+  object,
+  newdata,
+  type = c("response", "link"),
+  fixef = FALSE,
+  sample = c("estimation", "original"),
+  ...
+)
 }
 \arguments{
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
@@ -13,12 +20,16 @@
 
 \item{type}{Character either equal to \code{"response"} (default) or \code{"link"}. If \code{type="response"}, then the output is at the level of the response variable, i.e. it is the expected predictor \eqn{E(Y|X)}. If \code{"link"}, then the output is at the level of the explanatory variables, i.e. the linear predictor \eqn{X\cdot \beta}.}
 
-\item{na.rm}{Logical, default is \code{TRUE}. Only used when the argument \code{newdata} is missing. If \code{FALSE} the number of observation returned will be the number of observations in the original data set, otherwise it will be the number of observations used in the estimation.}
+\item{fixef}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, a data.frame is returned, with each column representing the fixed-effects coefficients for each observation in \code{newdata} -- with as many columns as fixed-effects. Note that when there are variables with varying slopes, the slope coefficients are returned (i.e. they are not multiplied by the variable).}
+
+\item{sample}{Either "estimation" (default) or "original". This argument is only used when arg. 'newdata' is missing, and is ignored otherwise. If equal to "estimation", the vector returned matches the sample used for the estimation. If equal to "original", it matches the original data set (the observations not used for the estimation being filled with NAs).}
 
 \item{...}{Not currently used.}
 }
 \value{
 It returns a numeric vector of length equal to the number of observations in argument \code{newdata}.
+If \code{newdata} is missing, it returns a vector of the same length as the estimation sample, except if \code{sample = "original"}, in which case the length of the vector will match the one of the original data set (which can, but also cannot, be the estimation sample).
+If \code{fixef=TRUE}, a \code{data.frame} is returned.
 }
 \description{
 This function obtains prediction from a fitted model estimated with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
@@ -26,7 +37,7 @@ This function obtains prediction from a fitted model estimated with \code{\link[
 \examples{
 
 # Estimation on iris data
-res = femlm(Sepal.Length ~ Petal.Length | Species, iris)
+res = fepois(Sepal.Length ~ Petal.Length | Species, iris)
 
 # what would be the prediction if the data was all setosa?
 newdata = data.frame(Petal.Length = iris$Petal.Length, Species = "setosa")
@@ -51,6 +62,21 @@ lines(newdata$Petal.Length, predict(res, newdata), col=3)
 # The original data
 points(iris$Petal.Length, iris$Sepal.Length, col = iris$Species, pch = 18)
 legend("topleft", lty = 1, col = 1:3, legend = levels(iris$Species))
+
+
+#
+# Getting the fixed-effect coefficients for each obs.
+#
+
+data(trade)
+est_trade = fepois(Euros ~ log(dist_km) | Destination^Product +
+                                           Origin^Product + Year, trade)
+obs_fe = predict(est_trade, fixef = TRUE)
+head(obs_fe)
+
+# can we check we get the right sum of fixed-effects
+head(cbind(rowSums(obs_fe), est_trade$sumFE))
+
 
 }
 \seealso{

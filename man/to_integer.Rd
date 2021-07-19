@@ -9,7 +9,8 @@ to_integer(
   sorted = FALSE,
   add_items = FALSE,
   items.list = FALSE,
-  multi.join = "_"
+  multi.join = "_",
+  internal = FALSE
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ to_integer(
 \item{items.list}{Logical, default is \code{FALSE}. Only used if \code{add_items=TRUE}. If \code{TRUE}, then a list of length 2 is returned with \code{x} the integer vector and \code{items} the vector of items.}
 
 \item{multi.join}{Character scalar used to join the items of multiple vectors. The default is \code{"_"}. Ignored if \code{add_items = FALSE}.}
+
+\item{internal}{Logical, default is \code{FALSE}. For programming only. If this function is used within another function, setting \code{internal = TRUE} is needed to make the evaluation of \code{...} valid. End users of \code{to_integer} should not care.}
 }
 \value{
 Reruns a vector of the same length as the input vectors.
