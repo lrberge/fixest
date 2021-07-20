@@ -139,7 +139,7 @@ A \code{fixest} object. Note that \code{fixest} objects contain many elements an
 \item{sq.cor}{Squared correlation between the dependent variable and the expected predictor (i.e. fitted.values) obtained by the estimation.}
 \item{hessian}{The Hessian of the parameters.}
 \item{fitted.values}{The fitted values are the expected value of the dependent variable for the fitted model: that is \eqn{E(Y|X)}.}
-\item{cov.unscaled}{The variance-covariance matrix of the parameters.}
+\item{cov.iid}{The variance-covariance matrix of the parameters.}
 \item{se}{The standard-error of the parameters.}
 \item{scores}{The matrix of the scores (first derivative for each observation).}
 \item{family}{The ML family that was used for the estimation.}

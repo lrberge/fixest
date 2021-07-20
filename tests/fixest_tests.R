@@ -1165,7 +1165,7 @@ res = femlm(y ~ x1 | species + fe_bis, base)
 test(predict(res), predict(res, base))
 
 
-# Predict with varying slopes -- That's normal that precision is high (because FEs are computed with low precision)
+# Predict with varying slopes -- That's normal that tolerance is high (because FEs are computed with low precision)
 res = feols(y ~ x1 | species + fe_bis[x3], base)
 test(predict(res), predict(res, base), "~", tol = 1e-4)
 
@@ -1190,11 +1190,11 @@ test(head(predict(res)), predict(res, quoi))
 # prediction with lags
 data(base_did)
 res = feols(y ~ x1 + l(x1), base_did, panel.id = ~ id + period)
-test(predict(res, na.rm = FALSE), predict(res, base_did))
+test(predict(res, sample = "original"), predict(res, base_did))
 
 qui = sample(which(base_did$id %in% 1:5))
 base_bis = base_did[qui, ]
-test(predict(res, na.rm = FALSE)[qui], predict(res, base_bis))
+test(predict(res, sample = "original")[qui], predict(res, base_bis))
 
 # prediction with poly
 res_poly = feols(y ~ poly(x1, 2), base)
@@ -1203,6 +1203,24 @@ pred_head = predict(res_poly, head(base, 20))
 pred_tail = predict(res_poly, tail(base, 20))
 test(head(pred_all, 20), pred_head)
 test(tail(pred_all, 20), pred_tail)
+
+#
+# "Predicting" fixed-effects
+#
+
+
+res = feols(y ~ x1 | species^fe_bis[x2], base, combine.quick = FALSE)
+
+obs_fe = predict(res, fixef = TRUE)
+fe_coef_all = fixef(res, sorted = FALSE)
+
+coef_fe = fe_coef_all[[1]]
+coef_vs = fe_coef_all[[2]]
+
+fe_names = paste0(base$species, "_", base$fe_bis)
+
+test(coef_fe[fe_names], obs_fe[, 1])
+test(coef_vs[fe_names], obs_fe[, 2])
 
 ####
 #### subset ####

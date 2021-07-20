@@ -1133,7 +1133,7 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, ...){
 
 	    table_id_I = as.integer(unlist(lapply(fe_id_list, table), use.names = FALSE))
 
-	    S_demean <- cpp_demean(y = S, X_raw = 0, r_weights = 0, iterMax = 1000L,
+	    S_demean = cpp_demean(y = S, X_raw = 0, r_weights = 0, iterMax = 1000L,
 	                           diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
 	                           fe_id_list = fe_id_list, table_id_I = table_id_I,
 	                           slope_flag_Q = slope_flag, slope_vars_list = slope_variables,
@@ -1190,12 +1190,12 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, ...){
 
 	        my_dum = fe_id_list[who_fe]
 
-	        dumMat <- matrix(unlist(my_dum, use.names = FALSE), N, Q_fe) - 1
-	        orderCluster <- matrix(unlist(lapply(my_dum, order), use.names = FALSE), N, Q_fe) - 1
+	        dumMat = matrix(unlist(my_dum, use.names = FALSE), N, Q_fe) - 1
+	        orderCluster = matrix(unlist(lapply(my_dum, order), use.names = FALSE), N, Q_fe) - 1
 
 	        nbCluster = sapply(my_dum, max)
 
-	        fixef_values_tmp <- cpp_get_fe_gnl(Q_fe, N, rep(1, N), dumMat, nbCluster, orderCluster)
+	        fixef_values_tmp = cpp_get_fe_gnl(Q_fe, N, rep(1, N), dumMat, nbCluster, orderCluster)
 
 	        # the information on the references
 	        nb_ref_fe = fixef_values_tmp[[Q_fe+1]]
@@ -1255,12 +1255,12 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, ...){
 	} else {
 		# We apply a Rcpp script to handle complicated cases (and we don't know beforehand if the input is one)
 
-		dumMat <- matrix(unlist(id_dummies_vect), N, Q) - 1
-		orderCluster <- matrix(unlist(lapply(id_dummies_vect, order)), N, Q) - 1
+		dumMat = matrix(unlist(id_dummies_vect), N, Q) - 1
+		orderCluster = matrix(unlist(lapply(id_dummies_vect, order)), N, Q) - 1
 
 		nbCluster = sapply(fixef_id, max)
 
-		fixef_values <- cpp_get_fe_gnl(Q, N, S, dumMat, nbCluster, orderCluster)
+		fixef_values = cpp_get_fe_gnl(Q, N, S, dumMat, nbCluster, orderCluster)
 
 		# the information on the references
 		nb_ref = fixef_values[[Q+1]]
@@ -1389,7 +1389,7 @@ plot.fixest.fixef = function(x, n = 5, ...){
 	}
 
 	# modification par:
-	opar <- par(no.readonly =TRUE)
+	opar = par(no.readonly =TRUE)
 	on.exit(par(opar))
 
 	par(mfrow = as.numeric(strsplit(mfrow[Q], "")[[1]]), mar = c(3, 3, 2.5, 3))
@@ -2872,8 +2872,8 @@ i_noref = function(factor_var, var, ref, keep, ref2, keep2){
 #' lm(xpd(Ozone ~ Wind + ..ctrl_long), airquality)
 #'
 #' # You can use the macros without xpd() in fixest estimations
-#' a <- feols(Ozone ~ Wind + ..ctrl, airquality)
-#' b <- feols(Ozone ~ Wind + ..ctrl_long, airquality)
+#' a = feols(Ozone ~ Wind + ..ctrl, airquality)
+#' b = feols(Ozone ~ Wind + ..ctrl_long, airquality)
 #' etable(a, b, keep = "Int|Win")
 #'
 #' #
@@ -3055,6 +3055,7 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 #' @param add_items Logical, default is \code{FALSE}. Whether to add the unique values of the original vector(s). If requested, an attribute \code{items} is created containing the values (alternatively, they can appear in a list if \code{items.list=TRUE}).
 #' @param items.list Logical, default is \code{FALSE}. Only used if \code{add_items=TRUE}. If \code{TRUE}, then a list of length 2 is returned with \code{x} the integer vector and \code{items} the vector of items.
 #' @param multi.join Character scalar used to join the items of multiple vectors. The default is \code{"_"}. Ignored if \code{add_items = FALSE}.
+#' @param internal Logical, default is \code{FALSE}. For programming only. If this function is used within another function, setting \code{internal = TRUE} is needed to make the evaluation of \code{...} valid. End users of \code{to_integer} should not care.
 #'
 #'
 #' @return
@@ -3094,9 +3095,9 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 #' # You can use multi.join to handle the join of the items:
 #' to_integer(x1, x2, add_items = TRUE, multi.join = "; ")
 #'
-to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE, multi.join = "_"){
+to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE, multi.join = "_", internal = FALSE){
 
-    check_arg(..., "vector mbt")
+    if(!internal) check_arg(..., "vector mbt")
     check_arg(sorted, add_items, items.list, "logical scalar")
     check_arg(multi.join, "character scalar")
 
@@ -3645,7 +3646,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
         X = 0
     }
 
-    vars_demean <- cpp_demean(y, X, weights, iterMax = iter,
+    vars_demean = cpp_demean(y, X, weights, iterMax = iter,
                               diffMax = tol, r_nb_id_Q = fixef_sizes,
                               fe_id_list = quf_info_all$quf, table_id_I = fixef_table_vector,
                               slope_flag_Q = slope.flag, slope_vars_list = slope.vars,
@@ -4512,7 +4513,7 @@ prepare_df = function(vars, base, fastCombine = NA){
         res = base[, all_vars, drop = FALSE]
     } else {
         all_vars_call = str2lang(paste0("list(", paste0(all_vars, collapse = ", "), ")"))
-        data_list <- try(eval(all_vars_call, base))
+        data_list = try(eval(all_vars_call, base))
 
         # if error: we send it back to the main function
         if("try-error" %in% class(data_list)){
@@ -4657,40 +4658,13 @@ combine_clusters_fast = function(...){
 combine_clusters = function(...){
     # This functions creates a new cluster from several clusters
     # basically: paste(cluster1, cluster2, ... etc, sep = "_")
+    # No, it's mow much more fatser than that!!!! Thanks for my new algo
+    # => the paste only applies to the unique number of items
 
-    cluster = list(...)
-    Q = length(cluster)
 
-    # See comments in combine_cluster_fast
-    ANY_NA = FALSE
-    if(any(who_NA <- sapply(cluster, anyNA))){
-        ANY_NA = TRUE
-        who_NA = which(who_NA)
-        IS_NA = is.na(cluster[[who_NA[1]]])
-        for(i in who_NA[-1]){
-            IS_NA = IS_NA | is.na(cluster[[i]])
-        }
+    clusters = to_integer(..., add_items = TRUE, items.list = TRUE, internal = TRUE)
 
-        if(all(IS_NA)) return(rep(NA, length(IS_NA)))
-
-        # we recreate the clusters
-        for(i in 1:Q){
-            cluster[[i]] = cluster[[i]][!IS_NA]
-        }
-    }
-
-    # We just paste
-    myDots = cluster
-    myDots$sep = "_"
-    index = do.call("paste", myDots)
-
-    if(ANY_NA){
-        # we recreate the return vector with appropriate NAs
-        res = rep(NA_character_, length(IS_NA))
-        res[!IS_NA] = index
-    } else {
-        res = index
-    }
+    res = clusters$items[clusters$x]
 
     return(res)
 }
@@ -4817,7 +4791,7 @@ vgrid = function(lty = 3, col = "darkgray", xmin = -Inf, xmax = Inf, ...){
     }
 }
 
-shade_area <- function(y1, y2, x, xmin, xmax, col="grey", ...){
+shade_area = function(y1, y2, x, xmin, xmax, col="grey", ...){
     # fonction plus pratique que polygon
     # elle permet de griser une partie delimitee par
     # y1 et y2 pour chacune des valeurs de x
@@ -4828,18 +4802,18 @@ shade_area <- function(y1, y2, x, xmin, xmax, col="grey", ...){
     # qqes parametres graphiques:
     # lwd / border (couleur du bord, peut etre NA) / lty
 
-    n <- length(x)
+    n = length(x)
     stopifnot(length(y1)==n | length(y1)==1)
     stopifnot(length(y2)==n | length(y2)==1)
 
-    if(length(y1)==1) y1 <- rep(y1,n)
-    if(length(y2)==1) y2 <- rep(y2,n)
+    if(length(y1)==1) y1 = rep(y1,n)
+    if(length(y2)==1) y2 = rep(y2,n)
 
-    if(missing(xmin)) xmin <- min(x)
-    if(missing(xmax)) xmax <- max(x)
+    if(missing(xmin)) xmin = min(x)
+    if(missing(xmax)) xmax = max(x)
 
-    ind <- which(x>=xmin & x<=xmax)
-    x1 <- x[ind] ; x2 <- x[rev(ind)]
+    ind = which(x>=xmin & x<=xmax)
+    x1 = x[ind] ; x2 = x[rev(ind)]
     polygon(c(x1,x2), c(y1[ind], y2[rev(ind)]), col=col, ...)
 }
 
@@ -7053,11 +7027,16 @@ residuals.fixest <- resid.fixest
 #' @inheritParams fitted.fixest
 #'
 #' @param newdata A data.frame containing the variables used to make the prediction. If not provided, the fitted expected (or linear if \code{type = "link"}) predictors are returned.
-#' @param na.rm Logical, default is \code{TRUE}. Only used when the argument \code{newdata} is missing. If \code{FALSE} the number of observation returned will be the number of observations in the original data set, otherwise it will be the number of observations used in the estimation.
+#' @param sample Either "estimation" (default) or "original". This argument is only used when arg. 'newdata' is missing, and is ignored otherwise. If equal to "estimation", the vector returned matches the sample used for the estimation. If equal to "original", it matches the original data set (the observations not used for the estimation being filled with NAs).
+#' @param fixef Logical scalar, default is \code{FALSE}. If \code{TRUE}, a data.frame is returned, with each column representing the fixed-effects coefficients for each observation in \code{newdata} -- with as many columns as fixed-effects. Note that when there are variables with varying slopes, the slope coefficients are returned (i.e. they are not multiplied by the variable).
 #' @param ... Not currently used.
+#'
 #'
 #' @return
 #' It returns a numeric vector of length equal to the number of observations in argument \code{newdata}.
+#' If \code{newdata} is missing, it returns a vector of the same length as the estimation sample, except if \code{sample = "original"}, in which case the length of the vector will match the one of the original data set (which can, but also cannot, be the estimation sample).
+#' If \code{fixef=TRUE}, a \code{data.frame} is returned.
+#'
 #'
 #' @author
 #' Laurent Berge
@@ -7068,7 +7047,7 @@ residuals.fixest <- resid.fixest
 #' @examples
 #'
 #' # Estimation on iris data
-#' res = femlm(Sepal.Length ~ Petal.Length | Species, iris)
+#' res = fepois(Sepal.Length ~ Petal.Length | Species, iris)
 #'
 #' # what would be the prediction if the data was all setosa?
 #' newdata = data.frame(Petal.Length = iris$Petal.Length, Species = "setosa")
@@ -7094,20 +7073,41 @@ residuals.fixest <- resid.fixest
 #' points(iris$Petal.Length, iris$Sepal.Length, col = iris$Species, pch = 18)
 #' legend("topleft", lty = 1, col = 1:3, legend = levels(iris$Species))
 #'
-predict.fixest = function(object, newdata, type = c("response", "link"), na.rm = TRUE, ...){
+#'
+#' #
+#' # Getting the fixed-effect coefficients for each obs.
+#' #
+#'
+#' data(trade)
+#' est_trade = fepois(Euros ~ log(dist_km) | Destination^Product +
+#'                                            Origin^Product + Year, trade)
+#' obs_fe = predict(est_trade, fixef = TRUE)
+#' head(obs_fe)
+#'
+#' # can we check we get the right sum of fixed-effects
+#' head(cbind(rowSums(obs_fe), est_trade$sumFE))
+#'
+#'
+predict.fixest = function(object, newdata, type = c("response", "link"), fixef = FALSE,
+                          sample = c("estimation", "original"), ...){
 
     # Checking the arguments
     validate_dots(suggest_args = c("newdata", "type"))
 
 	# Controls
-	type = match.arg(type)
+	check_arg_plus(type, sample, "match")
+	check_arg(fixef, "logical scalar")
+
+	# renaming to clarify
+	fixef.return = fixef
 
 	# if newdata is missing
+	is_original_data = FALSE
 	if(missing(newdata)){
 
-	    if(isTRUE(object$lean)){
+	    if(fixef.return || isTRUE(object$lean)){
 	        newdata = fetch_data(object, "In 'predict', ")
-
+	        is_original_data = TRUE
 	    } else {
 	        if(type == "response" || object$method_type == "feols"){
 	            res = object$fitted.values
@@ -7128,7 +7128,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 	            res = object$family$linkfun(object$fitted.values)
 	        }
 
-	        if(!na.rm) res = fill_with_na(res, object)
+	        if(sample == "original") res = fill_with_na(res, object)
 
 	        return(res)
 	    }
@@ -7141,6 +7141,18 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 
 	# we ensure it really is a clean data.frame
 	newdata = as.data.frame(newdata)
+
+	mc = match.call()
+	if(fixef.return){
+
+	    if(is.null(object$fixef_vars)){
+	        stop("The argument 'fixef=TRUE' cannot work since the estimation did not contain fixed-effects.")
+	    }
+
+	    if("type" %in% names(mc)){
+	        warning("Argument 'type' is ignored when fixef = TRUE.")
+	    }
+	}
 
 	# We deconstruct it in four steps:
 	# 1) cluster
@@ -7179,20 +7191,20 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 	}
 
 	#
-	# 1) Fixed-effects (cluster)
+	# 1) Fixed-effects
 	#
 
-	# init cluster values
-	value_cluster = 0
+	# init fixed-effect values
+	value_fixef = 0
 
 	fixef_vars = object$fixef_vars
 	if(!is.null(fixef_vars)){
 
-		n_cluster = length(fixef_vars)
+		n_fe = length(fixef_vars)
 
 		# Extraction of the FEs
-		id_cluster = list()
-		for(i in 1:n_cluster){
+		id_fixef = list()
+		for(i in 1:n_fe){
 			# checking if the variable is in the newdata
 		    fe_var = fixef_vars[i]
 			variable = all.vars(str2lang(fe_var))
@@ -7217,17 +7229,22 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 			    fe_var = gsub("\\^", ", ", fe_var_new)
 			}
 
-			# Obtaining the vector of clusters
-			cluster_current = eval(str2lang(fe_var), newdata)
+			# Obtaining the vector of fixed-effect
+			fixef_current = eval(str2lang(fe_var), newdata)
 
-			cluster_current_num = unclass(factor(cluster_current, levels = fixef_values_possible))
-			id_cluster[[i]] = cluster_current_num
+			fixef_current_num = unclass(factor(fixef_current, levels = fixef_values_possible))
+			id_fixef[[i]] = fixef_current_num
 		}
 
-		names(id_cluster) = fixef_vars
+		names(id_fixef) = fixef_vars
 
-		# Value of the cluster coefficients
-		cluster_coef = fixef(object, sorted = FALSE)
+		# Value of the fixef coefficients // we don't show the notes, it's inelegant
+		fixef_coef = fixef(object, sorted = FALSE, notes = FALSE)
+
+		# We create the DF to be returned
+		if(fixef.return){
+		    fixef_df = list()
+		}
 
 		# Adding the FEs and Slopes
 		if(!is.null(object$fixef_terms)){
@@ -7254,34 +7271,71 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 
 		    # Adding the FE values
 		    for(var in fixef_vars){
-		        cluster_current_num = id_cluster[[var]]
-		        cluster_coef_current = cluster_coef[[var]]
+		        fixef_current_num = id_fixef[[var]]
+		        fixef_coef_current = fixef_coef[[var]]
 
-		        value_cluster = value_cluster + cluster_coef_current[cluster_current_num]
+		        if(fixef.return){
+		            fixef_df[[var]] = fixef_coef_current[fixef_current_num]
+
+		        } else {
+		            value_fixef = value_fixef + fixef_coef_current[fixef_current_num]
+		        }
+
 		    }
 
 		    # Adding the slopes
 		    for(i in seq_along(slope_vars)){
 
-		        cluster_current_num = id_cluster[[slope_fe[i]]]
-		        cluster_coef_current = cluster_coef[[slope_terms[i]]]
+		        fixef_current_num = id_fixef[[slope_fe[i]]]
+		        fixef_coef_current = fixef_coef[[slope_terms[i]]]
 
-		        value_cluster = value_cluster + cluster_coef_current[cluster_current_num] * slope_var_list[[slope_vars[i]]]
+		        if(fixef.return){
+		            # We only return the coef, no multiplication with the value of the variable!!!
+		            vname = slope_terms[i]
+		            fixef_df[[vname]] = fixef_coef_current[fixef_current_num]
+
+		        } else {
+		            value_fixef = value_fixef + fixef_coef_current[fixef_current_num] * slope_var_list[[slope_vars[i]]]
+		        }
 		    }
 
 
 		} else {
 		    # Adding only FEs
-		    for(i in 1:n_cluster){
-		        cluster_current_num = id_cluster[[i]]
-		        cluster_coef_current = cluster_coef[[i]]
+		    for(i in 1:n_fe){
+		        fixef_current_num = id_fixef[[i]]
+		        fixef_coef_current = fixef_coef[[i]]
 
-		        value_cluster = value_cluster + cluster_coef_current[cluster_current_num]
+		        if(fixef.return){
+		            fixef_df[[fixef_vars[i]]] = fixef_coef_current[fixef_current_num]
+
+		        } else {
+		            value_fixef = value_fixef + fixef_coef_current[fixef_current_num]
+		        }
+
 		    }
 		}
 
+		if(fixef.return){
+
+		    # putting the results into a DF
+		    res = fixef_df
+		    attr(res, "row.names") = .set_row_names(length(res[[1L]]))
+		    oldClass(res) = "data.frame"
+
+		    if(is_original_data && sample == "estimation"){
+		        # here we want the same nber of obs
+		        # as in the estimation sample
+	            for(i in seq_along(object$obs_selection)){
+	                res = res[object$obs_selection[[i]], , drop = FALSE]
+	            }
+		    }
+
+		    return(res)
+		}
+
 		# dropping names
-		value_cluster = as.vector(value_cluster)
+		value_fixef = as.vector(value_fixef)
 	}
 
 	#
@@ -7384,7 +7438,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), na.rm =
 
 	}
 
-	value_predicted = value_cluster + value_linear + value_NL + value_offset
+	value_predicted = value_fixef + value_linear + value_NL + value_offset
 
 	if(type == "link" || object$method_type == "feols"){
 		res = value_predicted
@@ -7486,7 +7540,7 @@ confint.fixest = function(object, parm, level = 0.95, se, cluster, dof = getFixe
 
 	# multiplicative factor
 	val = (1 - level) / 2
-	fact <- abs(qnorm(val))
+	fact = abs(qnorm(val))
 
 	# The confints
 	lower_bound = coef_all[parm_use] - fact * se_all[parm_use]
@@ -7528,19 +7582,19 @@ confint.fixest = function(object, parm, level = 0.95, se, cluster, dof = getFixe
 #' data(trade)
 #'
 #' # main estimation
-#' est_pois <- femlm(Euros ~ log(dist_km) | Origin + Destination, trade)
+#' est_pois = fepois(Euros ~ log(dist_km) | Origin + Destination, trade)
 #'
 #' # we add the variable log(Year)
-#' est_2 <- update(est_pois, . ~ . + log(Year))
+#' est_2 = update(est_pois, . ~ . + log(Year))
 #'
 #' # we add another fixed-effect: "Product"
-#' est_3 <- update(est_2, . ~ . | . + Product)
+#' est_3 = update(est_2, . ~ . | . + Product)
 #'
 #' # we remove the fixed-effect "Origin" and the variable log(dist_km)
-#' est_4 <- update(est_3, . ~ . - log(dist_km) | . - Origin)
+#' est_4 = update(est_3, . ~ . - log(dist_km) | . - Origin)
 #'
 #' # Quick look at the 4 estimations
-#' esttable(est_pois, est_2, est_3, est_4)
+#' etable(est_pois, est_2, est_3, est_4)
 #'
 update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 	# Update method
@@ -8088,7 +8142,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	    fit_vars = c()
 	    for(i in seq_along(stage_1)){
 	        fit_vars[i] = v = paste0("fit_", names(stage_1)[i])
-	        data[[v]] = predict(stage_1[[i]], newdata = data, na.rm = FALSE)
+	        data[[v]] = predict(stage_1[[i]], newdata = data, sample = "original")
 	    }
 
 	    # II) we create the variables

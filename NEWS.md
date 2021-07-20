@@ -20,6 +20,8 @@
  - `feglm` now accepts partially matched character shortcuts for families: "poisson", "logit", "probit" are now valid `family` arguments.
  
  - Argument `se` now accepts the alias `"hc1"` to get heteroskedasticity-robust standard-errors.
+ 
+ - `predict.fixest` accepts the new argument `fixef` which, if `TRUE`, returns a data.frame of the fixed-effects coefficients for each observation, with the same number of columns as the number of fixed-effects (feature requests [#144](https://github.com/lrberge/fixest/issues/144) and [#175](https://github.com/lrberge/fixest/issues/175) by @pp2382 and @cseveren).
 
 
 # fixest 0.9.0
