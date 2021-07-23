@@ -284,9 +284,11 @@
 #' # You can still select which sample/LHS/RHS to display
 #' est_split[sample = 1:2, lhs = 1, rhs = 1]
 #'
-feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se, dof, panel.id, fixef, fixef.rm = "none", fixef.tol = 1e-6,
-                 fixef.iter = 10000, collin.tol = 1e-10, nthreads = getFixest_nthreads(), lean = FALSE, verbose = 0, warn = TRUE,
-                 notes = getFixest_notes(), combine.quick, demeaned = FALSE, mem.clean = FALSE, only.env = FALSE, env, ...){
+feols = function(fml, data, weights, offset, subset, split, fsplit, vcov, cluster, se,
+                 dof, panel.id, fixef, fixef.rm = "none", fixef.tol = 1e-6,
+                 fixef.iter = 10000, collin.tol = 1e-10, nthreads = getFixest_nthreads(),
+                 lean = FALSE, verbose = 0, warn = TRUE, notes = getFixest_notes(),
+                 combine.quick, demeaned = FALSE, mem.clean = FALSE, only.env = FALSE, env, ...){
 
 	dots = list(...)
 
@@ -318,7 +320,16 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 		    set_defaults("fixest_estimation")
 		    call_env = new.env(parent = parent.frame())
 
-		    env = try(fixest_env(fml = fml, data = data, weights = weights, offset = offset, subset = subset, split = split, fsplit = fsplit, cluster = cluster, se = se, dof = dof, panel.id = panel.id, fixef = fixef, fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter, collin.tol = collin.tol, nthreads = nthreads, lean = lean, verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick, demeaned = demeaned, mem.clean = mem.clean, origin = "feols", mc_origin = match.call(), call_env = call_env, ...), silent = TRUE)
+		    env = try(fixest_env(fml = fml, data = data, weights = weights, offset = offset,
+		                         subset = subset, split = split, fsplit = fsplit,
+		                         vcov = vcov, cluster = cluster, se = se, dof = dof,
+		                         panel.id = panel.id, fixef = fixef, fixef.rm = fixef.rm,
+		                         fixef.tol = fixef.tol, fixef.iter = fixef.iter, collin.tol = collin.tol,
+		                         nthreads = nthreads, lean = lean, verbose = verbose, warn = warn,
+		                         notes = notes, combine.quick = combine.quick, demeaned = demeaned,
+		                         mem.clean = mem.clean, origin = "feols", mc_origin = match.call(),
+		                         call_env = call_env, ...), silent = TRUE)
+
 		} else if((r <- !is.environment(env)) || !isTRUE(env$fixest_env)) {
 		    stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(r, "an", "a 'fixest'"), " environment.")
 		}
@@ -1574,7 +1585,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 		names(coeftable) = c("Estimate", "Std. Error", "t value",  "Pr(>|t|)")
 		row.names(coeftable) = names(coef)
 
-		attr(se, "type") = attr(coeftable, "type") = "Standard"
+		attr(se, "type") = attr(coeftable, "type") = "IID"
 		res$coeftable = coeftable
 		res$se = se
 	}
@@ -1611,8 +1622,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 
 	do_summary = get("do_summary", env)
 	if(do_summary){
-	    se = get("se", env)
-	    cluster = get("cluster", env)
+	    vcov = get("vcov", env)
 	    lean = get("lean", env)
 	    dof = get("dof", env)
 	    agg = get("agg", env)
@@ -1625,7 +1635,7 @@ feols = function(fml, data, weights, offset, subset, split, fsplit, cluster, se,
 	        fvd = res$fitted.values_demean
 	    }
 
-	    res = summary(res, se = se, cluster = cluster, agg = agg, dof = dof, lean = lean, summary_flags = summary_flags)
+	    res = summary(res, vcov = vcov, agg = agg, dof = dof, lean = lean, summary_flags = summary_flags)
 
 	    if(isTRUE(dots$iv_call) && lean){
 	        res$residuals = r
@@ -1738,10 +1748,11 @@ check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights){
 
 
 #' @rdname feols
-feols.fit = function(y, X, fixef_df, offset, split, fsplit, cluster, se, dof, weights, subset,
-                     fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000,
-                     collin.tol = 1e-10, nthreads = getFixest_nthreads(), lean = FALSE, warn = TRUE,
-                     notes = getFixest_notes(), mem.clean = FALSE, verbose = 0, only.env = FALSE, env, ...){
+feols.fit = function(y, X, fixef_df, offset, split, fsplit, vcov, cluster, se, dof, weights,
+                     subset, fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000,
+                     collin.tol = 1e-10, nthreads = getFixest_nthreads(), lean = FALSE,
+                     warn = TRUE, notes = getFixest_notes(), mem.clean = FALSE, verbose = 0,
+                     only.env = FALSE, env, ...){
 
 
     if(missing(weights)) weights = NULL
@@ -1752,7 +1763,13 @@ feols.fit = function(y, X, fixef_df, offset, split, fsplit, cluster, se, dof, we
         set_defaults("fixest_estimation")
         call_env = new.env(parent = parent.frame())
 
-        env = try(fixest_env(y = y, X = X, fixef_df = fixef_df, offset = offset, weights = weights, subset = subset, split = split, fsplit = fsplit, cluster = cluster, se = se, dof = dof, fixef.rm = fixef.rm, fixef.tol=fixef.tol, fixef.iter=fixef.iter, collin.tol = collin.tol, nthreads = nthreads, lean = lean, warn=warn, notes=notes, verbose = verbose, mem.clean = mem.clean, origin = "feols.fit", mc_origin = match.call(), call_env = call_env, ...), silent = TRUE)
+        env = try(fixest_env(y = y, X = X, fixef_df = fixef_df, offset = offset, weights = weights,
+                             subset = subset, split = split, fsplit = fsplit, vcov = vcov,
+                             cluster = cluster, se = se, dof = dof, fixef.rm = fixef.rm,
+                             fixef.tol=fixef.tol, fixef.iter=fixef.iter, collin.tol = collin.tol,
+                             nthreads = nthreads, lean = lean, warn=warn, notes=notes,
+                             verbose = verbose, mem.clean = mem.clean, origin = "feols.fit",
+                             mc_origin = match.call(), call_env = call_env, ...), silent = TRUE)
 
     } else if((r <- !is.environment(env)) || !isTRUE(env$fixest_env)){
         stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(r, "an", "a 'fixest'"), " environment.")
@@ -1912,7 +1929,7 @@ feols.fit = function(y, X, fixef_df, offset, split, fsplit, cluster, se, dof, we
 #' est_split[sample = 1:2, lhs = 1, rhs = 1]
 #'
 #'
-feglm = function(fml, data, family = "gaussian", offset, weights, subset, split, fsplit, cluster, se, dof, panel.id, start = NULL,
+feglm = function(fml, data, family = "gaussian", offset, weights, subset, split, fsplit, vcov, cluster, se, dof, panel.id, start = NULL,
                  etastart = NULL, mustart = NULL, fixef, fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
                  glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(), lean = FALSE,
                  warn = TRUE, notes = getFixest_notes(), verbose = 0, combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
@@ -1925,7 +1942,7 @@ feglm = function(fml, data, family = "gaussian", offset, weights, subset, split,
         set_defaults("fixest_estimation")
         call_env = new.env(parent = parent.frame())
 
-        env = try(fixest_env(fml=fml, data=data, family = family, offset = offset, weights = weights, subset = subset, split = split, fsplit = fsplit, cluster = cluster, se = se, dof = dof, panel.id = panel.id, linear.start = start, etastart=etastart, mustart=mustart, fixef = fixef, fixef.rm = fixef.rm, fixef.tol=fixef.tol, fixef.iter=fixef.iter, collin.tol = collin.tol, glm.iter = glm.iter, glm.tol = glm.tol, nthreads = nthreads, lean = lean, warn=warn, notes=notes, verbose = verbose, combine.quick = combine.quick, mem.clean = mem.clean, origin = "feglm", mc_origin = match.call(), call_env = call_env, ...), silent = TRUE)
+        env = try(fixest_env(fml=fml, data=data, family = family, offset = offset, weights = weights, subset = subset, split = split, fsplit = fsplit, vcov = vcov, cluster = cluster, se = se, dof = dof, panel.id = panel.id, linear.start = start, etastart=etastart, mustart=mustart, fixef = fixef, fixef.rm = fixef.rm, fixef.tol=fixef.tol, fixef.iter=fixef.iter, collin.tol = collin.tol, glm.iter = glm.iter, glm.tol = glm.tol, nthreads = nthreads, lean = lean, warn=warn, notes=notes, verbose = verbose, combine.quick = combine.quick, mem.clean = mem.clean, origin = "feglm", mc_origin = match.call(), call_env = call_env, ...), silent = TRUE)
 
     } else if((r <- !is.environment(env)) || !isTRUE(env$fixest_env)){
         stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(r, "an", "a 'fixest'"), " environment.")
@@ -1954,7 +1971,7 @@ feglm = function(fml, data, family = "gaussian", offset, weights, subset, split,
 
 
 #' @rdname feglm
-feglm.fit = function(y, X, fixef_df, family = "gaussian", offset, split, fsplit, cluster, se, dof, weights, subset, start = NULL,
+feglm.fit = function(y, X, fixef_df, family = "gaussian", offset, split, fsplit, vcov, cluster, se, dof, weights, subset, start = NULL,
                      etastart = NULL, mustart = NULL, fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000,
                      collin.tol = 1e-10, glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(), lean = FALSE, warn = TRUE,
                      notes = getFixest_notes(), mem.clean = FALSE, verbose = 0, only.env = FALSE, env, ...){
@@ -2015,7 +2032,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", offset, split, fsplit,
         set_defaults("fixest_estimation")
         call_env = new.env(parent = parent.frame())
 
-        env = try(fixest_env(y = y, X = X, fixef_df = fixef_df, family = family, nthreads = nthreads, lean = lean, offset = offset, weights = weights, subset = subset, split = split, fsplit = fsplit, cluster = cluster, se = se, dof = dof, linear.start = start, etastart=etastart, mustart=mustart, fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter, collin.tol = collin.tol, glm.iter = glm.iter, glm.tol = glm.tol, notes=notes, mem.clean = mem.clean, warn=warn, verbose = verbose, origin = "feglm.fit", mc_origin = match.call(), call_env = call_env, ...), silent = TRUE)
+        env = try(fixest_env(y = y, X = X, fixef_df = fixef_df, family = family, nthreads = nthreads, lean = lean, offset = offset, weights = weights, subset = subset, split = split, fsplit = fsplit, vcov = vcov, cluster = cluster, se = se, dof = dof, linear.start = start, etastart=etastart, mustart=mustart, fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter, collin.tol = collin.tol, glm.iter = glm.iter, glm.tol = glm.tol, notes=notes, mem.clean = mem.clean, warn=warn, verbose = verbose, origin = "feglm.fit", mc_origin = match.call(), call_env = call_env, ...), silent = TRUE)
 
         if("try-error" %in% class(env)){
             stop(format_error_msg(env, "feglm.fit"))
@@ -2507,7 +2524,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", offset, split, fsplit,
         names(coeftable) = ctable_names
         row.names(coeftable) = names(coef)
 
-        attr(se, "type") = attr(coeftable, "type") = "Standard"
+        attr(se, "type") = attr(coeftable, "type") = "IID"
         res$coeftable = coeftable
         res$se = se
     }
@@ -2598,8 +2615,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", offset, split, fsplit,
 
     do_summary = get("do_summary", env)
     if(do_summary){
-        se = get("se", env)
-        cluster = get("cluster", env)
+        vcov = get("vcov", env)
         lean = get("lean", env)
         dof = get("dof", env)
         agg = get("agg", env)
@@ -2608,7 +2624,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", offset, split, fsplit,
         # To compute the RMSE and lean = TRUE
         if(lean) res$ssr = cpp_ssq(res$residuals, weights)
 
-        res = summary(res, se = se, cluster = cluster, agg = agg, dof = dof, lean = lean, summary_flags = summary_flags)
+        res = summary(res, vcov = vcov, agg = agg, dof = dof, lean = lean, summary_flags = summary_flags)
     }
 
     return(res)
@@ -2748,16 +2764,26 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", offset, split, fsplit,
 #'
 #'
 #'
-femlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), start = 0, fixef, fixef.rm = "perfect",
-						offset, subset, split, fsplit, cluster, se, dof, panel.id, fixef.tol = 1e-5, fixef.iter = 10000,
-						nthreads = getFixest_nthreads(), lean = FALSE, verbose = 0, warn = TRUE,
-						notes = getFixest_notes(), theta.init, combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
+femlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
+                 start = 0, fixef, fixef.rm = "perfect", offset, subset, split, fsplit,
+                 vcov, cluster, se, dof, panel.id, fixef.tol = 1e-5, fixef.iter = 10000,
+                 nthreads = getFixest_nthreads(), lean = FALSE, verbose = 0, warn = TRUE,
+                 notes = getFixest_notes(), theta.init, combine.quick, mem.clean = FALSE,
+                 only.env = FALSE, env, ...){
 
 	# This is just an alias
 
     call_env_bis = new.env(parent = parent.frame())
 
-	res = try(feNmlm(fml = fml, data = data, family = family, fixef = fixef, fixef.rm = fixef.rm, offset = offset, subset = subset, split = split, fsplit = fsplit, cluster = cluster, se = se, dof = dof, panel.id = panel.id, start = start, fixef.tol=fixef.tol, fixef.iter=fixef.iter, nthreads=nthreads, lean = lean, verbose=verbose, warn=warn, notes=notes, theta.init = theta.init, combine.quick = combine.quick, mem.clean = mem.clean, origin = "femlm", mc_origin_bis = match.call(), call_env_bis = call_env_bis, only.env = only.env, env = env, ...), silent = TRUE)
+	res = try(feNmlm(fml = fml, data = data, family = family, fixef = fixef,
+	                 fixef.rm = fixef.rm, offset = offset, subset = subset,
+	                 split = split, fsplit = fsplit, vcov = vcov, cluster = cluster,
+	                 se = se, dof = dof, panel.id = panel.id, start = start,
+	                 fixef.tol=fixef.tol, fixef.iter=fixef.iter, nthreads=nthreads,
+	                 lean = lean, verbose=verbose, warn=warn, notes=notes,
+	                 theta.init = theta.init, combine.quick = combine.quick,
+	                 mem.clean = mem.clean, origin = "femlm", mc_origin_bis = match.call(),
+	                 call_env_bis = call_env_bis, only.env = only.env, env = env, ...), silent = TRUE)
 
 	if("try-error" %in% class(res)){
 		stop(format_error_msg(res, "femlm"))
@@ -2779,7 +2805,14 @@ fenegbin = function(fml, data, theta.init, start = 0, fixef, fixef.rm = "perfect
     # This is just an alias
     call_env_bis = new.env(parent = parent.frame())
 
-    res = try(feNmlm(fml = fml, data=data, family = "negbin", theta.init = theta.init, start = start, fixef = fixef, fixef.rm = fixef.rm, offset = offset, subset = subset, split = split, fsplit = fsplit, cluster = cluster, se = se, dof = dof, panel.id = panel.id, fixef.tol = fixef.tol, fixef.iter = fixef.iter, nthreads = nthreads, lean = lean, verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick, mem.clean = mem.clean, origin = "fenegbin", mc_origin_bis = match.call(), call_env_bis = call_env_bis, only.env = only.env, env = env, ...), silent = TRUE)
+    res = try(feNmlm(fml = fml, data=data, family = "negbin", theta.init = theta.init,
+                     start = start, fixef = fixef, fixef.rm = fixef.rm, offset = offset,
+                     subset = subset, split = split, fsplit = fsplit, vcov = vcov, cluster = cluster,
+                     se = se, dof = dof, panel.id = panel.id, fixef.tol = fixef.tol,
+                     fixef.iter = fixef.iter, nthreads = nthreads, lean = lean,
+                     verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick,
+                     mem.clean = mem.clean, origin = "fenegbin", mc_origin_bis = match.call(),
+                     call_env_bis = call_env_bis, only.env = only.env, env = env, ...), silent = TRUE)
 
     if("try-error" %in% class(res)){
         stop(format_error_msg(res, "fenegbin"))
@@ -2789,7 +2822,7 @@ fenegbin = function(fml, data, theta.init, start = 0, fixef, fixef.rm = "perfect
 }
 
 #' @rdname feglm
-fepois = function(fml, data, offset, weights, subset, split, fsplit, cluster, se, dof, panel.id,
+fepois = function(fml, data, offset, weights, subset, split, fsplit, vcov, cluster, se, dof, panel.id,
                   start = NULL, etastart = NULL, mustart = NULL,
                   fixef, fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
                   glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(), lean = FALSE, warn = TRUE, notes = getFixest_notes(),
@@ -2803,7 +2836,16 @@ fepois = function(fml, data, offset, weights, subset, split, fsplit, cluster, se
     # This is just an alias
     call_env_bis = new.env(parent = parent.frame())
 
-    res = try(feglm(fml = fml, data = data, family = "poisson", offset = offset, weights = weights, subset = subset, split = split, fsplit = fsplit, cluster = cluster, se = se, dof = dof, panel.id = panel.id, start = start, etastart = etastart, mustart = mustart, fixef = fixef, fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter, collin.tol = collin.tol, glm.iter = glm.iter, glm.tol = glm.tol, nthreads = nthreads, lean = lean, warn = warn, notes = notes, verbose = verbose, combine.quick = combine.quick, mem.clean = mem.clean, origin_bis = "fepois", mc_origin_bis = match.call(), call_env_bis = call_env_bis, only.env=only.env, env=env, ...), silent = TRUE)
+    res = try(feglm(fml = fml, data = data, family = "poisson", offset = offset,
+                    weights = weights, subset = subset, split = split, fsplit = fsplit,
+                    vcov = vcov, cluster = cluster, se = se, dof = dof, panel.id = panel.id,
+                    start = start, etastart = etastart, mustart = mustart, fixef = fixef,
+                    fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter,
+                    collin.tol = collin.tol, glm.iter = glm.iter, glm.tol = glm.tol,
+                    nthreads = nthreads, lean = lean, warn = warn, notes = notes,
+                    verbose = verbose, combine.quick = combine.quick, mem.clean = mem.clean,
+                    origin_bis = "fepois", mc_origin_bis = match.call(),
+                    call_env_bis = call_env_bis, only.env=only.env, env=env, ...), silent = TRUE)
 
     if("try-error" %in% class(res)){
         stop(format_error_msg(res, "fepois"))
@@ -2977,7 +3019,14 @@ fepois = function(fml, data, offset, weights, subset, split, fsplit, cluster, se
 #' points(x, fitted(est2_NL), col = 4, pch = 2)
 #'
 #'
-feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), NL.fml, fixef, fixef.rm = "perfect", NL.start, lower, upper, NL.start.init, offset, subset, split, fsplit, cluster, se, dof, panel.id, start = 0, jacobian.method="simple", useHessian = TRUE, hessian.args = NULL, opt.control = list(), nthreads = getFixest_nthreads(), lean = FALSE, verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000, deriv.tol = 1e-4, deriv.iter = 1000, warn = TRUE, notes = getFixest_notes(), combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
+feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), NL.fml,
+                  fixef, fixef.rm = "perfect", NL.start, lower, upper, NL.start.init,
+                  offset, subset, split, fsplit, vcov, cluster, se, dof, panel.id,
+                  start = 0, jacobian.method="simple", useHessian = TRUE,
+                  hessian.args = NULL, opt.control = list(), nthreads = getFixest_nthreads(),
+                  lean = FALSE, verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000,
+                  deriv.tol = 1e-4, deriv.iter = 1000, warn = TRUE, notes = getFixest_notes(),
+                  combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
 
 	time_start = proc.time()
 
@@ -2986,7 +3035,18 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	    set_defaults("fixest_estimation")
 	    call_env = new.env(parent = parent.frame())
 
-	    env = try(fixest_env(fml = fml, data = data, family = family, NL.fml = NL.fml, fixef = fixef, fixef.rm = fixef.rm, NL.start = NL.start, lower = lower, upper = upper, NL.start.init = NL.start.init, offset = offset, subset = subset, split = split, fsplit = fsplit, cluster = cluster, se = se, dof = dof, panel.id = panel.id, linear.start = start, jacobian.method = jacobian.method, useHessian = useHessian, opt.control = opt.control, nthreads = nthreads, lean = lean, verbose = verbose, theta.init = theta.init, fixef.tol = fixef.tol, fixef.iter = fixef.iter, deriv.iter = deriv.iter, warn = warn, notes = notes, combine.quick = combine.quick, mem.clean = mem.clean, mc_origin = match.call(), call_env = call_env, computeModel0 = TRUE, ...), silent = TRUE)
+	    env = try(fixest_env(fml = fml, data = data, family = family, NL.fml = NL.fml,
+	                         fixef = fixef, fixef.rm = fixef.rm, NL.start = NL.start,
+	                         lower = lower, upper = upper, NL.start.init = NL.start.init,
+	                         offset = offset, subset = subset, split = split, fsplit = fsplit,
+	                         vcov = vcov, cluster = cluster, se = se, dof = dof,
+	                         panel.id = panel.id, linear.start = start, jacobian.method = jacobian.method,
+	                         useHessian = useHessian, opt.control = opt.control, nthreads = nthreads,
+	                         lean = lean, verbose = verbose, theta.init = theta.init,
+	                         fixef.tol = fixef.tol, fixef.iter = fixef.iter, deriv.iter = deriv.iter,
+	                         warn = warn, notes = notes, combine.quick = combine.quick,
+	                         mem.clean = mem.clean, mc_origin = match.call(), call_env = call_env,
+	                         computeModel0 = TRUE, ...), silent = TRUE)
 
 	} else if((r <- !is.environment(env)) || !isTRUE(env$fixest_env)) {
 	    stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(r, "an", "a 'fixest'"), " environment.")
@@ -3235,7 +3295,7 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	names(coeftable) = c("Estimate", "Std. Error", "z value",  "Pr(>|z|)")
 	row.names(coeftable) = params
 
-	attr(se, "type") = attr(coeftable, "type") = "Standard"
+	attr(se, "type") = attr(coeftable, "type") = "IID"
 
 	mu_both = get_mu(coef, env, final = TRUE)
 	mu = mu_both$mu
@@ -3385,8 +3445,7 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 
 	do_summary = get("do_summary", env)
 	if(do_summary){
-	    se = get("se", env)
-	    cluster = get("cluster", env)
+	    vcov = get("vcov", env)
 	    lean = get("lean", env)
 	    dof = get("dof", env)
 	    agg = get("agg", env)
@@ -3395,7 +3454,7 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	    # To compute the RMSE and lean = TRUE
 	    if(lean) res$ssr = cpp_ssq(res$residuals)
 
-	    res = summary(res, se = se, cluster = cluster, dof = dof, agg = agg, lean = lean, summary_flags = summary_flags)
+	    res = summary(res, vcov = vcov, dof = dof, agg = agg, lean = lean, summary_flags = summary_flags)
 	}
 
 	return(res)

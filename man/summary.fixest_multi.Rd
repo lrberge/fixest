@@ -7,10 +7,11 @@
 \method{summary}{fixest_multi}(
   object,
   type = "short",
+  vcov = NULL,
   se = NULL,
   cluster = NULL,
   dof = NULL,
-  .vcov,
+  .vcov = NULL,
   stage = 2,
   lean = FALSE,
   n = 1000,
@@ -21,6 +22,8 @@
 \item{object}{A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to multiple results.}
 
 \item{type}{A character either equal to \code{"short"}, \code{"long"}, \code{"compact"}, or \code{"se_compact"}. If \code{short}, only the table of coefficients is displayed for each estimation. If \code{long}, then the full results are displayed for each estimation. If \code{compact}, a \code{data.frame} is returned with one line per model and the formatted coefficients + standard-errors in the columns. If \code{se_compact}, a \code{data.frame} is returned with one line per model, one numeric column for each coefficient and one numeric column for each standard-error.}
+
+\item{vcov}{A user provided covariance matrix or a function computing this matrix. If a matrix, it must be a square matrix of the same number of rows as the number of variables estimated. If a function, it must return the previously mentioned matrix.}
 
 \item{se}{Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.}
 

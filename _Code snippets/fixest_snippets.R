@@ -95,8 +95,8 @@ meffect = function(x, at_means = TRUE, se, cluster, ...){
 base = iris
 names(base) = c("y", "x1", "x2", "x3", "species")
 
-# I set the default SE to "standard" for comparability with Stata
-setFixest_se(all = "standard")
+# I set the default SE to "iid" for comparability with Stata
+setFixest_se(all = "iid")
 
 res = fepois(y ~ x1 + x2, base)
 meffect(res)

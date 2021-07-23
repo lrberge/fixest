@@ -7,10 +7,11 @@
 \usage{
 \method{summary}{fixest}(
   object,
+  vcov = NULL,
   se = NULL,
   cluster = NULL,
   dof = NULL,
-  .vcov,
+  .vcov = NULL,
   stage = 2,
   lean = FALSE,
   agg = NULL,
@@ -84,7 +85,7 @@ data(trade)
 est_pois = fepois(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
 
 # Comparing different types of standard errors
-sum_standard = summary(est_pois, se = "standard")
+sum_standard = summary(est_pois, se = "iid")
 sum_hetero   = summary(est_pois, se = "hetero")
 sum_oneway   = summary(est_pois, se = "cluster")
 sum_twoway   = summary(est_pois, se = "twoway")

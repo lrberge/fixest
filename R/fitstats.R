@@ -848,10 +848,11 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
 
                             if(is.null(my_x_first$cov.scaled)){
                                 # We compute the VCOV like for the second stage
-                                if(is.null(x$se_info) || !is.null(dots$se) || !is.null(dots$cluster)){
+                                flags = x$summary_flags
+                                if(is.null(flags) || !is.null(dots$se) || !is.null(dots$cluster)){
                                     my_x_first = summary(my_x_first, ...)
                                 } else {
-                                    my_x_first = summary(my_x_first, se = x$se_info$se, cluster = x$se_info$cluster, dof = x$se_info$dof, ...)
+                                    my_x_first = summary(my_x_first, vcov = flags$vcov, dof = flags$dof, ...)
                                 }
                             }
 
@@ -1502,7 +1503,7 @@ kp_stat = function(x){
     # There is need to compute the vcov specifically for this case
     # We do it the same way as it was for x
 
-    if(identical(x$se_info$se, "standard")){
+    if(identical(x$se_info$se, "IID")){
         vlab = chol(tcrossprod(kronv) / nrow(X_proj))
 
     } else {
@@ -1513,11 +1514,10 @@ kp_stat = function(x){
         x_new = x
         x_new$scores = my_scores
 
-        se = x$summary_flags$se
-        cluster = x$summary_flags$cluster
+        vcov = x$summary_flags$vcov
         dof = x$summary_flags$dof
 
-        meat = vcov(x_new, se = se, cluster = cluster, dof = dof, no_sandwich = TRUE)
+        meat = vcov(x_new, vcov = vcov, dof = dof, sandwich = FALSE)
         vhat = solve(K, t(solve(K, meat)))
 
         # DOF correction now

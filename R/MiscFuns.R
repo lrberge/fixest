@@ -320,7 +320,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' est_pois = fepois(Euros ~ log(dist_km)|Origin+Destination+Product, trade)
 #'
 #' # Comparing different types of standard errors
-#' sum_standard = summary(est_pois, se = "standard")
+#' sum_standard = summary(est_pois, se = "iid")
 #' sum_hetero   = summary(est_pois, se = "hetero")
 #' sum_oneway   = summary(est_pois, se = "cluster")
 #' sum_twoway   = summary(est_pois, se = "twoway")
@@ -356,7 +356,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' summary(est_pois, .vcov = vcovCL, cluster = trade[, c("Destination", "Product")])
 #'
 #'
-summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov,
+summary.fixest = function(object, vcov = NULL, se = NULL, cluster = NULL, dof = NULL, .vcov = NULL,
                           stage = 2, lean = FALSE, agg = NULL, forceCovariance = FALSE,
                           keepBounded = FALSE, n = 1000, nthreads = getFixest_nthreads(), ...){
 
@@ -378,17 +378,8 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov,
 	}
 
 	# we need this to save the summary flags
-	if(missing(se)){
-	    se = se_in = NULL
-	} else {
-	    se_in = se
-	}
-
-	if(missing(cluster)) {
-	    cluster = cluster_in = NULL
-	} else {
-	    cluster_in = cluster
-	}
+	# All three arguments se+cluster+.vcov are formatted into a valid vcov arg.
+	vcov_in = vcov = oldargs_to_vcov(se, cluster, vcov, .vcov)
 
 	if(isTRUE(object$summary)){
 	    do_assign = TRUE
@@ -396,7 +387,7 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov,
 	        # From print
 	        return(object)
 
-	    } else if(is.null(se) && is.null(cluster) && is.null(dof) && missing(.vcov) && is.null(agg)){
+	    } else if(is.null(vcov) && is.null(dof) && is.null(agg)){
 	        # We return directly the object ONLY if not any other argument has been passed
 	        if(length(mc) == 2){
 	            # No modification required
@@ -408,29 +399,15 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov,
 	        }
 	    }
 
-	    # why is it always so complicated??? => I really should remove the argument "se" and only keep "cluster"
-	    # It's only because the two can be contradictory that I'm having a hassle...
-	    # even better => only have one argument: vcov => takes "standard"/"hetero"/formulas/data/matrix/function => to implement in the future
-
 	    if(do_assign){
-	        check_arg_plus(se, "NULL match", .choices = c("standard", "white", "hetero", "cluster", "twoway", "threeway", "fourway", "1", "2", "3", "4"), .message = "Argument argument 'se' should be equal to one of 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
-
-	        is_se = !is.null(se)
-	        is_cluster = !is.null(cluster)
-	        assign_flags(object$summary_flags, se = se, cluster = cluster, dof = dof, agg = agg)
-	        # We need to clean some arguments...
-	        if(is_se && se %in% c("standard", "white", "hetero")){
-	            cluster = NULL
-	        } else if(is_cluster){
-	            se = NULL
-	        }
+	        assign_flags(object$summary_flags, vcov = vcov, dof = dof, agg = agg)
 	    }
 	}
 
 	# Checking arguments in ...
-	if(!any(c("fromPrint", "iv", "keep_se_info", "summary_flags") %in% names(mc))){
+	if(!any(c("fromPrint", "iv", "summary_flags") %in% names(mc))){
 	    # condition means NOT internal call => thus client call
-	    if(missing(.vcov) || !is.function(.vcov)){
+	    if(!is.function(vcov)){
 	        validate_dots(suggest_args = c("se", "cluster", "dof"))
 	    }
 	}
@@ -460,21 +437,14 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov,
 	    for(s in seq_along(stage)){
 	        if(stage[s] == 1){
                 for(i in seq_along(object$iv_first_stage)){
-                    res[[length(res) + 1]] = summary(object$iv_first_stage[[i]], se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nthreads = nthreads, iv = TRUE)
+                    res[[length(res) + 1]] = summary(object$iv_first_stage[[i]], vcov = vcov, dof = dof, lean = lean, forceCovariance = forceCovariance, n = n, nthreads = nthreads, iv = TRUE)
 
                     stage_names[length(stage_names) + 1] = paste0("First stage: ", names(object$iv_first_stage)[i])
                 }
 
 	        } else {
 	            # We keep the information on clustering => matters for wald tests of 1st stage
-	            keep_se_info = length(stage) == 1 && !lean
-	            my_res = summary(object, se = se, cluster = cluster, dof = dof, .vcov = .vcov, lean = lean, forceCovariance = forceCovariance, n = n, nthreads = nthreads, iv = TRUE, keep_se_info = keep_se_info)
-
-	            if(keep_se_info){
-	                se_info = attr(my_res$cov.scaled, "se_info")
-	                attr(my_res$cov.scaled, "se_info") = NULL
-	                my_res$se_info = se_info
-	            }
+	            my_res = summary(object, vcov = vcov, dof = dof, lean = lean, forceCovariance = forceCovariance, n = n, nthreads = nthreads, iv = TRUE)
 
 	            res[[length(res) + 1]] = my_res
 	            stage_names[length(stage_names) + 1] = "Second stage"
@@ -511,55 +481,7 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov,
 
 
 	# The new VCOV
-	if(!missnull(.vcov)){
-	    n_coef = length(object$coefficients)
-	    check_arg(.vcov, "square numeric matrix nrow(value) | function", .value = n_coef)
-
-	    vcov_name = "Custom"
-	    if(is.function(.vcov)){
-	        arg_names = formalArgs(.vcov)
-	        # we construct the call
-	        dots = list(...)
-
-	        if(".vcov_args" %in% names(dots)){
-	            # internal call
-	            vcov_name = dots$vcov_name
-	            dots = dots$.vcov_args
-	        } else {
-	            mc = match.call()
-	            vcov_name = deparse_long(mc$.vcov)
-	        }
-
-	        vcov_name = gsub("sandwich::", "", vcov_name, fixed = TRUE)
-
-	        # We shouldn't have a prior on the name of the first argument
-	        dots[[arg_names[1]]] = as.name("object")
-	        if("cluster" %in% arg_names && !missing(cluster)){
-	            dots[["cluster"]] = as.name("cluster")
-	        }
-
-	        vcov = do.call(.vcov, dots)
-
-	        check_value(vcov, "square numeric matrix nrow(value)", .value = n_coef,
-	                    .message = paste0("If argument '.vcov' is to be a function, it should return a square numeric matrix of the same dimension as the number of coefficients (here ", n_coef, ")."))
-
-	    } else {
-	        # square matrix
-	        vcov = .vcov
-	    }
-
-	    # We add the type of the matrix
-	    attr(vcov, "type") = vcov_name
-
-	    warn_ignore = c()
-	    if(!missnull(se)) warn_ignore = "se"
-	    if(length(warn_ignore) > 0){
-	        warning("Since argument '.vcov' is provided, the argument", enumerate_items(warn_ignore, "s.quote.is"), " ignored.")
-	    }
-
-	} else {
-	    vcov = vcov(object, se=se, cluster=cluster, dof=dof, forceCovariance = forceCovariance, keepBounded = keepBounded, nthreads = nthreads, attr = TRUE, keep_se_info = isTRUE(dots$keep_se_info))
-	}
+	vcov = vcov.fixest(object, vcov = vcov, dof = dof, forceCovariance = forceCovariance, keepBounded = keepBounded, nthreads = nthreads, attr = TRUE, ...)
 
 	sd2 = diag(vcov)
 	sd2[sd2 < 0] = NA
@@ -581,6 +503,10 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov,
 
 	    # df.t is always an attribute of the vcov
 	    df.t = attr(vcov, "df.t")
+	    if(is.null(df.t)){
+	        df.t = object$nobs - object$nparams
+	    }
+
 	    pvalue = 2*pt(-abs(zvalue), df.t)
 
 	} else {
@@ -620,21 +546,26 @@ summary.fixest = function(object, se = NULL, cluster = NULL, dof = NULL, .vcov,
 
 	# We save the arguments used to construct the summary
 	if("summary_flags" %in% names(dots)){
-	    # If here => this is a call from fit
+	    # If here => this is a call from an estimation (=fit)
 	    object$summary_flags = dots$summary_flags
 	    object$summary_from_fit = TRUE
 	} else {
 	    # build_flags does not accept missing arguments
 	    if(missing(dof)) dof = NULL
 
-	    if(lean && !is.null(cluster_in) &&
-	       !(inherits(cluster_in, "formula") || (!is.list(cluster_in) && length(cluster_in) <= 3))){
-	        # Here => means the user has manually provided a cluster => will be of size N at least
-	        # To respect lean = TRUE we keep no memory of this choice
-	        se_in = cluster_in = NULL
+	    if(lean){
+
+	        size_KB = as.numeric(object.size(vcov)) / 8 / 1000
+
+	        if(size_KB > 100){
+	            # Here => means the user has manually provided a cluster => will be of size N at least
+	            # To respect lean = TRUE we keep no memory of this choice
+	            vcov_in = NULL
+	        }
+
 	    }
 
-	    object$summary_flags = build_flags(mc, se = se_in, cluster = cluster_in, dof = dof)
+	    object$summary_flags = build_flags(mc, vcov = vcov_in, dof = dof)
 	    object$summary_from_fit = NULL
 	}
 
@@ -683,7 +614,7 @@ summary.fixest_list = function(object, se, cluster, dof = getFixest_dof(), .vcov
 #' @inheritParams etable
 #'
 #' @param object An estimation. For example obtained from \code{\link[fixest]{feols}}.
-#' @param se [Fixest specific.] Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.
+#' @param se [Fixest specific.] Character scalar. Which kind of standard error should be computed: \dQuote{iid}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are fixed-effects in the estimation: \code{se = "cluster"}, otherwise \code{se = "iid"}. Note that this argument is not needed if the argument \code{cluster} is present.
 #' @param cluster [Fixest specific.] Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1, "var2")]}, \code{cluster = c("var1, "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster).
 #' @param ... Other arguments to be passed to \code{summary}.
 #'
@@ -6523,6 +6454,31 @@ update_file = function(path, text){
     }
 }
 
+
+fetch_arg_deparse = function(arg){
+    # Utility to find out what the user originally provided as argument
+    # Only useful for functions that are deeply nested (typically vcov)
+
+    sc = rev(sys.calls())
+
+    # initialization of the name
+    arg_name = deparse_long(sc[[2]][[arg]])
+
+    n = length(sc)
+    if(n > 2){
+        for(i in 2:length(sc)){
+            mc = sc[[i]]
+            if(grepl("[tT]ry", mc[[1]])) next
+            if(!arg %in% names(mc)) break
+            arg_name = deparse_long(mc[[arg]])
+        }
+    }
+
+    arg_name
+}
+
+
+
 #### ................. ####
 #### Additional Methods ####
 ####
@@ -8396,8 +8352,8 @@ rep.fixest = function(x, times = 1, each = 1, cluster, ...){
 
         se_all = vector("list", n_clu)
         for(m in 1:n_clu){
-            if(identical(cluster[[m]], "standard")){
-                se_all[[m]] = "standard"
+            if(identical(cluster[[m]], "IID")){
+                se_all[[m]] = "iid"
             } else if(identical(cluster[[m]], "hetero")){
                 se_all[[m]] = "hetero"
             }
@@ -8829,7 +8785,7 @@ getFixest_fml = function(){
 #'
 #'
 #'
-setFixest_estimation = function(fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10, lean = FALSE, verbose = 0, warn = TRUE, combine.quick = NULL, demeaned = FALSE, mem.clean = FALSE, glm.iter = 25, glm.tol = 1e-8, panel.id = NULL, reset = FALSE){
+setFixest_estimation = function(data = NULL, panel.id = NULL, fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10, lean = FALSE, verbose = 0, warn = TRUE, combine.quick = NULL, demeaned = FALSE, mem.clean = FALSE, glm.iter = 25, glm.tol = 1e-8, reset = FALSE){
 
     check_arg_plus(fixef.rm, "match(none, perfect, singleton, both)")
     check_arg(fixef.tol, collin.tol, glm.tol, "numeric scalar GT{0}")
@@ -8838,6 +8794,12 @@ setFixest_estimation = function(fixef.rm = "perfect", fixef.tol = 1e-6, fixef.it
     check_arg(lean, warn, demeaned, mem.clean, reset, "logical scalar")
     check_arg(combine.quick, "NULL logical scalar")
     check_arg(panel.id, "NULL character vector len(,2) no na | os formula")
+
+    if(!missing(data)){
+        check_arg(data, "data.frame | matrix")
+        data = deparse_long(substitute(data))
+        class(data) = "default_data"
+    }
 
     # Getting the existing defaults
     opts = getOption("fixest_estimation")

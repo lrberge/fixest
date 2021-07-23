@@ -1019,6 +1019,51 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_newey_west_meat
+NumericMatrix cpp_newey_west_meat(NumericMatrix S, NumericVector w, int nthreads);
+RcppExport SEXP _fixest_cpp_newey_west_meat(SEXP SSEXP, SEXP wSEXP, SEXP nthreadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type S(SSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_newey_west_meat(S, w, nthreads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_newey_west_panel_meat
+NumericMatrix cpp_newey_west_panel_meat(NumericMatrix S, NumericVector w, IntegerVector unit, int G, IntegerVector time, int T, int nthreads);
+RcppExport SEXP _fixest_cpp_newey_west_panel_meat(SEXP SSEXP, SEXP wSEXP, SEXP unitSEXP, SEXP GSEXP, SEXP timeSEXP, SEXP TSEXP, SEXP nthreadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type S(SSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type unit(unitSEXP);
+    Rcpp::traits::input_parameter< int >::type G(GSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type time(timeSEXP);
+    Rcpp::traits::input_parameter< int >::type T(TSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_newey_west_panel_meat(S, w, unit, G, time, T, nthreads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_driscoll_kraay_meat
+NumericMatrix cpp_driscoll_kraay_meat(NumericMatrix S, NumericVector w, IntegerVector time, int T, int nthreads);
+RcppExport SEXP _fixest_cpp_driscoll_kraay_meat(SEXP SSEXP, SEXP wSEXP, SEXP timeSEXP, SEXP TSEXP, SEXP nthreadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type S(SSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type time(timeSEXP);
+    Rcpp::traits::input_parameter< int >::type T(TSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_driscoll_kraay_meat(S, w, time, T, nthreads));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_fixest_compute_cluster_coef_r", (DL_FUNC) &_fixest_compute_cluster_coef_r, 12},
@@ -1090,6 +1135,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpppar_check_only_0", (DL_FUNC) &_fixest_cpppar_check_only_0, 2},
     {"_fixest_cpp_quf_gnl", (DL_FUNC) &_fixest_cpp_quf_gnl, 1},
     {"_fixest_cpppar_quf_table_sum", (DL_FUNC) &_fixest_cpppar_quf_table_sum, 11},
+    {"_fixest_cpp_newey_west_meat", (DL_FUNC) &_fixest_cpp_newey_west_meat, 3},
+    {"_fixest_cpp_newey_west_panel_meat", (DL_FUNC) &_fixest_cpp_newey_west_panel_meat, 7},
+    {"_fixest_cpp_driscoll_kraay_meat", (DL_FUNC) &_fixest_cpp_driscoll_kraay_meat, 5},
     {NULL, NULL, 0}
 };
 

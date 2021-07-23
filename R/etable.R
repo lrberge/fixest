@@ -320,7 +320,7 @@
 #' #
 #' # Method 1: use summary
 #'
-#' s1 = summary(est, "standard")
+#' s1 = summary(est, "iid")
 #' s2 = summary(est, cluster = ~ Month)
 #' s3 = summary(est, cluster = ~ Day)
 #' s4 = summary(est, cluster = ~ Day + Month)
@@ -331,18 +331,18 @@
 #' # Method 2: using a list in the argument 'cluster'
 #'
 #' est_bis = feols(Ozone ~ Solar.R + Wind + Temp | Month, data = aq)
-#' etable(list(est, est_bis), cluster = list("standard", ~ Month))
+#' etable(list(est, est_bis), cluster = list("iid", ~ Month))
 #'
 #' #
 #' # Method 3: Using rep()
 #'
-#' etable(rep(est, cluster = list("standard", ~ Month)))
+#' etable(rep(est, cluster = list("iid", ~ Month)))
 #'
 #' # When using rep on 2 or more objects, you need to embed them in .l()
-#' etable(rep(.l(est, est_bis), cluster = list("standard", ~ Month, ~ Day)))
+#' etable(rep(.l(est, est_bis), cluster = list("iid", ~ Month, ~ Day)))
 #'
 #' # Using each to order differently
-#' etable(rep(.l(est, est_bis), each = 3, cluster = list("standard", ~ Month, ~ Day)))
+#' etable(rep(.l(est, est_bis), each = 3, cluster = list("iid", ~ Month, ~ Day)))
 #'
 #'
 etable = function(..., se = NULL, dof = NULL, cluster = NULL, stage = 2, agg = NULL,
@@ -1030,8 +1030,8 @@ results2formattedList = function(dots, se, dof = getFixest_dof(), cluster, stage
 
         se = vector("list", n_models)
         for(m in 1:n_models){
-            if(identical(cluster[[m]], "standard")){
-                se[[m]] = "standard"
+            if(identical(cluster[[m]], "IID")){
+                se[[m]] = "iid"
             } else if(identical(cluster[[m]], "hetero")){
                 se[[m]] = "hetero"
             }
@@ -2402,7 +2402,7 @@ etable_internal_latex = function(info){
     if(isUniqueSD){
         my_se = unique(unlist(se_type_list)) # it comes from summary
         # every model has the same type of SE
-        if(my_se == "Standard") my_se = "Normal"
+        # if(my_se == "IID") my_se = "Normal"
 
         # Now we modify the names of the clusters if needed
         my_se = format_se_type_latex(my_se, dict)

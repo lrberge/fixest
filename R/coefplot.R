@@ -92,7 +92,7 @@
 #' # (the default when fixed-effects are present)
 #' est_clu = summary(est)
 #' # Now with "regular" standard-errors
-#' est_std = summary(est, se = "standard")
+#' est_std = summary(est, se = "iid")
 #'
 #' # You can plot the two results at once
 #' coefplot(list(est_clu, est_std))
@@ -108,14 +108,14 @@
 #'
 #' # Second set of results: this time with
 #' #  standard-errors that are not clustered.
-#' coefplot(est, se = "standard", x.shift = .2,
+#' coefplot(est, se = "iid", x.shift = .2,
 #'          add = TRUE, col = 2, ci.lty = 2, pch=15)
 #'
 #'  # Note that we used 'se', an argument that will
 #'  #  be passed to summary.fixest
 #'
 #' legend("topright", col = 1:2, pch = 20, lwd = 1, lty = 1:2,
-#'        legend = c("Clustered", "Standard"), title = "Standard-Errors")
+#'        legend = c("Clustered", "IID"), title = "Standard-Errors")
 #'
 #'
 #' #

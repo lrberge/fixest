@@ -7,19 +7,18 @@
 
 
 fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), NL.fml = NULL,
-                       fixef, NL.start, lower, upper, NL.start.init,
-                       offset = NULL, subset, split = NULL, fsplit = NULL, linear.start = 0, jacobian.method = "simple",
-                       useHessian = TRUE, hessian.args = NULL, opt.control = list(),
-                       cluster, se, dof,
-                       y, X, fixef_df, panel.id, fixef.rm = "perfect",
-                       nthreads = getFixest_nthreads(), lean = FALSE,
-                       verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000, collin.tol = 1e-14,
-                       deriv.iter = 5000, deriv.tol = 1e-4, glm.iter = 25, glm.tol = 1e-8,
-                       etastart, mustart,
-                       warn = TRUE, notes = getFixest_notes(), combine.quick, demeaned = FALSE,
-                       origin_bis, origin = "feNmlm", mc_origin, mc_origin_bis, mc_origin_ter,
-                       computeModel0 = FALSE, weights = NULL,
-                       debug = FALSE, mem.clean = FALSE, call_env = NULL, call_env_bis, ...){
+                      fixef, NL.start, lower, upper, NL.start.init, offset = NULL,
+                      subset, split = NULL, fsplit = NULL, linear.start = 0,
+                      jacobian.method = "simple",useHessian = TRUE, hessian.args = NULL,
+                      opt.control = list(), vcov = NULL, cluster, se, dof, y, X, fixef_df,
+                      panel.id, fixef.rm = "perfect", nthreads = getFixest_nthreads(),
+                      lean = FALSE, verbose = 0, theta.init, fixef.tol = 1e-5,
+                      fixef.iter = 10000, collin.tol = 1e-14, deriv.iter = 5000,
+                      deriv.tol = 1e-4, glm.iter = 25, glm.tol = 1e-8, etastart, mustart,
+                      warn = TRUE, notes = getFixest_notes(), combine.quick, demeaned = FALSE,
+                      origin_bis, origin = "feNmlm", mc_origin, mc_origin_bis, mc_origin_ter,
+                      computeModel0 = FALSE, weights = NULL,
+                      debug = FALSE, mem.clean = FALSE, call_env = NULL, call_env_bis, ...){
 
     # INTERNAL function:
     # the estimation functions need input data in the exact format without any mistake possible (bc of c++)
@@ -63,7 +62,11 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     #
     # Arguments control
-    main_args = c("fml", "data", "panel.id", "offset", "subset", "split", "fsplit", "cluster", "se", "dof", "fixef.rm", "fixef.tol", "fixef.iter", "fixef", "nthreads", "lean", "verbose", "warn", "notes", "combine.quick", "start", "only.env", "mem.clean")
+    main_args = c("fml", "data", "panel.id", "offset", "subset", "split", "fsplit", "vcov",
+                  "cluster", "se", "dof", "fixef.rm", "fixef.tol", "fixef.iter", "fixef",
+                  "nthreads", "lean", "verbose", "warn", "notes", "combine.quick",
+                  "start", "only.env", "mem.clean")
+
     femlm_args = c("family", "theta.init", "linear.start", "opt.control", "deriv.tol", "deriv.iter")
     feNmlm_args = c("NL.fml", "NL.start", "lower", "upper", "NL.start.init", "jacobian.method", "useHessian", "hessian.args")
     feglm_args = c("family", "weights", "glm.iter", "glm.tol", "etastart", "mustart", "collin.tol")
@@ -244,6 +247,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     check_arg(collin.tol, "numeric scalar GT{0}")
 
+    if(missing(panel.id)) panel.id = NULL
+
     show_notes = notes
     notes = c()
 
@@ -295,6 +300,18 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         # The data
 
         if(missing(data)) stop("You must provide the argument 'data' (currently it is missing).")
+
+        if(!"data" %in% names(mc_origin)){
+            # Means this is the default value
+            if(inherits(data, "default_data")){
+                data_lang = str2lang(data)
+                data = eval(data_lang, call_env)
+                mc_origin$data = data_lang
+            } else {
+                stop("Argument 'data' could not be propery evaluated: this is an internal error, could you report?")
+            }
+        }
+
         check_value(data, "matrix | data.frame", .arg_name = "data")
 
         if(is.matrix(data)){
@@ -490,6 +507,30 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                 panel__meta__info = panel_setup(data, panel.id, from_fixest = TRUE)
             }
             class(data) = "data.frame"
+        } else if(!missnull(panel.id)){
+            # basic checking
+            if(inherits(panel.id, "formula")){
+                panel_vars = all.vars(panel.id)
+            } else {
+                panel_vars = all.vars(.xpd(rhs = panel.id))
+            }
+
+            pblm = setdiff(panel_vars, dataNames)
+            if("panel.id" %in% names(mc_origin)){
+                # user provided
+                if(length(pblm) > 0){
+                    stop("Problem in the argument 'panel.id': the variable", enumerate_items(pblm, "s.is.quote"), " not in the data set.")
+                }
+            } else {
+                # default value => if pblm, we silence it
+                if(length(pblm) > 0){
+                    panel.id = NULL
+                }
+            }
+        }
+
+        if(!is.null(panel.id) && inherits(panel.id, "formula")){
+            panel.id = fml2varnames(panel.id)
         }
 
         fml_parts = fml_split(fml, raw = TRUE)
@@ -524,7 +565,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             check_arg_plus(fixef, "multi match", .choices = dataNames, .message = "Argument 'fixef', when provided, must be a character vector of variable names.")
 
             # we transform it into a formula
-            fml_fixef = as.formula(paste0("~", paste(fixef, collapse = " + ")))
+            fml_fixef = .xpd(rhs = fixef)
         }
 
         isFixef = !is.null(fml_fixef)
@@ -569,25 +610,23 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     }
 
-    # We need to get the variables from the argument cluster and add them to fml_full
+    # We need to get the variables from the argument vcov and add them to fml_full
     # so that subset works properly
-    if(!missnull(cluster)){
+    vcov = oldargs_to_vcov(se, cluster, vcov)
+    vcov_vars = NULL
+    if(!missnull(vcov)){
 
-        check_arg(cluster, "os formula | character vector")
+        vcov_varnames = error_sender(vcov.fixest(only_varnames = TRUE, vcov = vcov, data_names = names(data),
+                                                 panel.id = panel.id, fixef_vars = all.vars(fml_fixef)),
+                                     "Problem in the VCOV:\n")
 
-        if(is.character(cluster)){
-            cluster = .xpd(rhs = cluster)
-        }
-
-        cluster_origin = cluster
 
         # Check
-        clust_vars = all.vars(cluster)
-        if(any(!clust_vars %in% dataNames)){
-            stop("In argument 'cluster' the variable", enumerate_items(setdiff(clust_vars, dataNames), "s.is.quote"), " is not in the data set. It must be composed of variable names only.")
+        if(any(!vcov_varnames %in% dataNames)){
+            stop("In argument 'vcov' the variable", enumerate_items(setdiff(vcov_varnames, dataNames), "s.is.quote"), " not in the data set. It must be composed of variable names only.")
         }
 
-        complete_vars = unique(c(complete_vars, clust_vars))
+        complete_vars = unique(c(complete_vars, vcov_varnames))
     }
 
     #
@@ -1532,76 +1571,66 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
 
     #
-    # ... Cluster ####
+    # ... vcov ####
     #
 
-    if(debug) cat(" ---> cluster\n")
+    if(debug) cat(" ---> vcov\n")
 
-    msgNA_cluster = ""
-    if(!missnull(cluster)){
-        # cluster was checked already before subset => to get the right variables
-        # Here cluster is a formula
+    mwsNA_vcov = ""
+    if(!missnull(vcov)){
+        # vcov was checked already before subset => to get the right variables
+        # vcov_varnames: variables used in the computation of the VCOV
+        # here we remove the NAS
 
         do_summary = TRUE
 
-        cluster_terms = error_sender(fixef_terms(cluster), "Problem in the argument 'cluster':\n", clean = "_impossible_var_name_ => ^")
-        if(any(cluster_terms$slope_flag != 0)){
-            stop("You cannot use variables with varying slopes in the argument 'cluster'.")
-        }
+        # we don't re-check the fixed-effects
+        vcov_varnames = setdiff(vcov_varnames, fixef_terms_full$fe_vars)
 
-        cluster_terms = cluster_terms$fe_vars
-        if(isFixef && all(cluster_terms %in% fixef_terms_full$fe_vars)){
-                # we do nothing => the algo will use the FE ids
-        } else {
-            cluster = error_sender(prepare_df(cluster_terms, data, TRUE),
-                                   "Problem evaluating the argument 'cluster':\n")
+        isNA_vcov = NULL
+        if(length(vcov_varnames) > 0){
+            vcov_var_values = data[, vcov_varnames, drop = FALSE]
 
-            # Type conversion
-            for(i in seq_along(cluster)){
-                if(!is.numeric(cluster[[i]]) && !is.character(cluster[[i]])){
-                    cluster[[i]] = as.character(cluster[[i]])
-                }
-            }
-
-            if(anyNA(cluster)){
-                isNA_cluster = !complete.cases(cluster)
-
-                ANY_NA = TRUE
-                anyNA_sample = TRUE
-                isNA_sample = isNA_sample | isNA_cluster
-                msgNA_cluster = paste0("cluster: ", numberFormatNormal(sum(isNA_cluster)))
-
-                if(mem.clean){
-                    rm(isNA_cluster)
-                    gc2trig = TRUE
-                }
-
+            if(anyNA(vcov_var_values)){
+                isNA_vcov = !complete.cases(vcov_var_values)
             }
         }
-    } else {
-        # Cluster origin was first defined when we first check cluster, way up
-        cluster_origin = cluster = NULL
-    }
 
-    if(!missnull(se)){
-        do_summary = TRUE
+        if(inherits(vcov, "fixest_vcov_request")){
+            # We check the variables used in the VCOV
+            if(!is.null(vcov$vcov_vars)){
+                # basic check
+                vcov_vars = vcov_vars
+                n_vcov_all = lengths(vcov_vars)
+                if(any(n_vcov_all != nobs_origin)){
+                    pblm = setdiff(n_vcov_all, nobs_origin)[1]
+                    stop("The length of a variable used to compute the VCOV is different from the number of observations in the data set used for the estimation (", pblm, " vs ", nobs_origin, ").")
+                }
 
-        check_arg_plus(se, "match", .choices = c("standard", "white", "hetero", "cluster", "twoway", "threeway", "fourway", "1", "2", "3", "4"), .message = "Argument argument 'se' should be equal to one of 'standard', 'hetero', 'cluster', 'twoway', 'threeway' or 'fourway'.")
+                # below, anyNA.data.frame but applied to a list
+                if(anyNA.data.frame(vcov_vars)){
 
-        # we check consistency
-        if(isFixef){
-            n_fe = length(fixef_terms_full$fe_vars)
-        } else {
-            n_fe = 0
+                    if(is.null(isNA_vcov)){
+                        isNA_vcov = !complete.cases(vcov_vars)
+                    } else {
+                        isNA_vcov = isNA_vcov | !complete.cases(vcov_vars)
+                    }
+                }
+            }
         }
 
-        n_clu = c(cluster = 1, twoway = 2, threeway = 3, fourway = 4)[se]
-        if(missnull(cluster) && !is.na(n_clu) && n_clu > n_fe){
-            stop("In argument 'se': ", n_letter(n_clu), "-way clustering cannot be done with the current estimation which has ", ifelse(n_fe == 0, "no fixed-effect.", paste0("only ", n_letter(n_fe), " fixed-effects.")), " Please provide the argument cluster.")
+        if(!is.null(isNA_vcov)){
+            ANY_NA = TRUE
+            anyNA_sample = TRUE
+            isNA_sample = isNA_sample | isNA_vcov
+            mwsNA_vcov = paste0("vcov: ", numberFormatNormal(sum(isNA_vcov)))
+
+            if(mem.clean){
+                rm(isNA_vcov)
+                gc2trig = TRUE
+            }
         }
 
-    } else {
-        se = NULL
     }
 
     if(!missnull(dof)){
@@ -1804,7 +1833,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             gc2trig = TRUE
 
             details = c(msgNA_y, msgNA_L, msgNA_iv, msgNA_NL, msgNA_fixef, msgNA_slope,
-                        msgNA_offset, msgNA_weight, msgNA_split, msgNA_cluster)
+                        msgNA_offset, msgNA_weight, msgNA_split, mwsNA_vcov)
             msg_details = paste(details[nchar(details) > 0], collapse = ", ")
 
             nbNA = sum(isNA_sample)
@@ -1918,7 +1947,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             nbNA = sum(isNA_sample)
 
             details = c(msgNA_y, msgNA_L, msgNA_iv, msgNA_NL, msgNA_offset,
-                        msgNA_weight, msgNA_split, msgNA_cluster)
+                        msgNA_weight, msgNA_split, mwsNA_vcov)
             msg_details = paste(details[nchar(details) > 0], collapse = ", ")
 
             if(anyNA_sample){
@@ -2006,10 +2035,6 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         if(multi_rhs){
             linear_core = select_obs(linear_core, -obs2remove, nthreads)
             rhs_sw = select_obs(rhs_sw, -obs2remove, nthreads)
-        }
-
-        if(!is.null(cluster) && !"formula" %in% class(cluster)){
-            cluster = select_obs(cluster, -obs2remove)
         }
 
     }
@@ -2407,12 +2432,11 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     assign("do_summary", do_summary, env)
     assign("lean", lean, env)
     if(do_summary){
-        assign("cluster", cluster, env)
-        assign("se", se, env)
+        assign("vcov", vcov, env)
         assign("dof", dof, env)
         assign("agg", agg, env)
 
-        assign("summary_flags", build_flags(mc_origin, se = se, cluster = cluster_origin, dof = dof, agg = agg), env)
+        assign("summary_flags", build_flags(mc_origin, vcov = vcov, dof = dof, agg = agg), env)
     }
 
     # Multi
@@ -2711,11 +2735,12 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     }
 
     # Panel information
-    if(isPanel){
+    if(!is.null(panel.id)){
         res$panel.id = panel.id
-        if(!is.null(panel.info)){
-            res$panel.info = panel.info
-        }
+    }
+
+    if(isPanel && !is.null(panel.info)){
+        res$panel.info = panel.info
     }
 
     # Interaction information
@@ -3241,18 +3266,6 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 
             }
 
-            #
-            # The cluster
-            #
-
-            do_summary = get("do_summary", env)
-            if(do_summary){
-                cluster = get("cluster", env)
-                if(is.data.frame(cluster)){
-                    cluster = cluster[obs2keep, , drop = FALSE]
-                    assign("cluster", cluster, new_env)
-                }
-            }
 
             #
             # Stepwise RHS
