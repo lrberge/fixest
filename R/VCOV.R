@@ -1394,7 +1394,7 @@ vcov_newey_west_internal = function(bread, scores, vars, dof, sandwich, nthreads
         dup = cpp_find_duplicates(unit_ro, time_ro)
 
         if(dup$n_dup > 0){
-            stop("Newey-West VCOV cannot be computed: there are (unit x time) duplicates. You have to sort that out first, eg by creating new units free of duplicates or dropping duplicates. Or you can use a Driscoll-Kraay VCOV for which duplicates does not matter.")
+            stop("In vcov.fixest: Newey-West VCOV cannot be computed: there are (unit x time) duplicates. You have to sort that out first, eg by creating new units free of duplicates or dropping duplicates. Or you can use a Driscoll-Kraay VCOV for which duplicates does not matter.", call. = FALSE)
         }
 
         scores_ro = scores[my_order, , drop = FALSE]
@@ -1407,7 +1407,7 @@ vcov_newey_west_internal = function(bread, scores, vars, dof, sandwich, nthreads
     } else {
 
         if(max(time) < length(time)){
-            stop("Newey-West VCOV cannot be computed: there are time duplicates. You may provide a panel identifier (if relevant) to sort that out. Or you can use a Driscoll-Kraay VCOV for which duplicates does not matter.")
+            stop("In vcov.fixest: Newey-West VCOV cannot be computed: there are time duplicates. You may provide a panel identifier (if relevant) to sort that out. Or you can use a Driscoll-Kraay VCOV for which duplicates does not matter.", call. = FALSE)
         }
 
         my_order = order(time)
@@ -1423,11 +1423,6 @@ vcov_newey_west_internal = function(bread, scores, vars, dof, sandwich, nthreads
         vcov = meat
     }
 
-    # if(dof$adj){
-    #     K_noFE = min(ncol(scores), n_time - 1)
-    #     ss_adj = n_time / (n_time - K_noFE)
-    #     attr(vcov, "ss_adj") = ss_adj
-    # }
     if(dof$cluster.adj){
         vcov = vcov * n_time / (n_time - 1)
     }
@@ -1467,16 +1462,6 @@ vcov_driscoll_kraay_internal = function(bread, scores, vars, dof, sandwich, nthr
     } else {
         vcov = meat
     }
-
-    # browser()
-
-    # g:  17 , nT:  816 , k:  3
-    # if(dof$adj){
-    #     K_noFE = min(ncol(scores), n_time - 1)
-    #     n = nrow(scores)
-    #     ss_adj = n_time / (n_time - 1) * (n - 1) / (n - K_noFE)
-    #     attr(vcov, "ss_adj") = ss_adj
-    # }
 
     if(dof$cluster.adj){
         vcov = vcov * n_time / (n_time - 1)
