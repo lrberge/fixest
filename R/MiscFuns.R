@@ -256,7 +256,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 	        }
 	    }
 
-	    print(fixest::fitstat(x, fitstat), na.rm = TRUE, group.solo = TRUE)
+	    print(fitstat(x, fitstat), na.rm = TRUE, group.solo = TRUE)
 	}
 
 	if(isFALSE(x$convStatus)){
@@ -3115,12 +3115,13 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
             }
         }
 
-        res = quickUnclassFactor(index, addItem = add_items, sorted = sorted)
+        res = quickUnclassFactor(index, addItem = add_items || sorted, sorted = sorted)
 
         if(add_items || sorted){
             # we re order appropriately
 
             obs_1st = cpp_get_first_item(res$x, length(res$items))
+
             f_all = list()
             for(q in 1:Q){
                 f_all[[q]] = dots[[q]][obs_1st]

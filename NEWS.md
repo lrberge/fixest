@@ -15,6 +15,8 @@
  
  - Fix bug when: i) a `fixest_panel` is used as a data set in an estimation, ii) NA values are to be removed and iii) fixed-effects are used. Thanks to Nicola Cortinovis for the report!
  
+ - Fix bug in `to_integer` when converting multiple vectors and sorting is required, without items.
+ 
 ## New features
 
  - `feglm` now accepts partially matched character shortcuts for families: "poisson", "logit", "probit" are now valid `family` arguments.
