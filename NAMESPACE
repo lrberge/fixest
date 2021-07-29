@@ -135,3 +135,11 @@ importFrom(methods, formalArgs)
 
 
 
+
+
+
+# Auto-exports::vcov_aliases
+export(NW, newey, west, newey_west, DK, driscoll, kraay, driscoll_kraay, conley)
+
+
+

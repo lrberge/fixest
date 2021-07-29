@@ -1630,6 +1630,98 @@ prepare_sandwich = function(bread, meat, nthreads = 1){
     cpppar_matprod(cpppar_matprod(bread, meat, nthreads), bread, nthreads)
 }
 
+check_set_cutoff = function(cutoff){
+
+    set_up(1)
+
+    if(is.null(cutoff)){
+        stop("In vcov.fixest, Conley VCOV cannot be computed: the argument 'cutoff' (the cutoff distance in km) must be provided.", call. = FALSE)
+    }
+
+    check_value(cutoff, "numeric scalar GE{0} | character scalar",
+                .message = "In vcov.fixest, Conley VCOV cannot be computed: the argument 'cutoff' must be a numeric for kilometers, or a number in character form with the 'mi' suffix for miles (ex: 100 means 100km, '100mi' means 100 miles).")
+
+    metric = attr(cutoff, "metric")
+    if(is.null(metric)) metric = "km"
+
+    if(is.character(cutoff)){
+        if(!grepl("^[[:digit:]]+ ?((m|mi|mil|mile|miles)|(k|km))?$", cutoff)){
+            stop("In vcov.fixest, Conley VCOV cannot be computed: the argument 'cutoff', equal to '", cutoff,  "' is not valid. It must be either a numeric scalar or a number in character form with the suffix 'mi' (ex: 100 means 100km, '100mi' means 100 miles).", call. = FALSE)
+        }
+
+        if(grepl("k", cutoff)){
+            cutoff = as.numeric(gsub("k.*", "", cutoff))
+        } else if(grepl("m", cutoff)){
+            cutoff = as.numeric(gsub("m.*", "", cutoff)) * 1.60934
+            metric = "mi"
+        } else {
+            cutoff = as.numeric(cutoff)
+        }
+    }
+
+    attr(cutoff, "metric") = metric
+
+    cutoff
+}
+
+
+
+gen_vcov_aliases = function(){
+    # only for vcov functions having one or more main argument
+
+    all_vcov = getOption("fixest_vcov_builtin")
+    all_vcov_names = unlist(lapply(all_vcov, `[[`, "name"))
+    all_vcov_names = all_vcov_names[nchar(all_vcov_names) > 0]
+
+    text = c()
+    all_fun_names = c()
+
+    for(i in seq_along(all_vcov)){
+        vcov_current = all_vcov[[i]]
+
+        arg_main = vcov_current$arg_main
+        if(!is.null(arg_main)){
+
+            core = paste0("__FUN__ = function(", paste0(arg_main, " = NULL", collapse = ", "), "){\n",
+                          "    list(", paste0(arg_main, " = ", arg_main, collapse = ", "), ")\n",
+                          "}\n\n")
+
+
+            vcov_names_all = vcov_current$name
+            for(fname in vcov_names_all){
+                text = c(text, gsub("__FUN__", fname, core, fixed = TRUE))
+                all_fun_names = c(all_fun_names, fname)
+            }
+        }
+    }
+
+    # Writing the functions
+    intro = c("# Do not edit by hand\n# => aliases some VCOV functions\n\n\n")
+
+    text = c(intro, text)
+
+    update_file("R/VCOV_aliases.R", text)
+
+    # We also add the exports to the name space
+    header = "# Auto-exports::vcov_aliases"
+    fun_line = paste0("export(", paste0(all_fun_names, collapse = ", "), ")")
+
+    NAMESPACE = readLines("NAMESPACE")
+
+    if(header %in% NAMESPACE){
+        # update
+        qui = which(NAMESPACE == header)
+        NAMESPACE[qui + 1] = fun_line
+    } else {
+        # creation
+        NAMESPACE = c(NAMESPACE, "\n\n", header, fun_line, "\n\n")
+    }
+
+    update_file("NAMESPACE", NAMESPACE)
+
+
+}
+
 ####
 #### SET / GET ========== ####
 ####

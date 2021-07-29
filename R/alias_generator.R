@@ -9,8 +9,8 @@
 # arguments, then we also need to make the changes in the aliased ones, we usually need to
 # make those changes by hand, incurring substantial maintainance costs and highly susceptible to errors
 #
-# It is much safer to generate aliased functions automatially
-# This cuts the maintainance costs to almost 0 and avoids any mistake
+# It is much safer to generate aliased functions automatically
+# This cuts the maintenance costs to almost 0 and avoids any mistake
 #
 
 
@@ -25,7 +25,7 @@ create_aliases = function(){
 
     gen_etable_aliases()
     gen_iplot()
-
+    gen_vcov_aliases()
 
 }
 
