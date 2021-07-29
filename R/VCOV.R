@@ -246,7 +246,16 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
         } else {
             vcov = deparse_long(vcov_fml[[2]])
 
+            is_extra = grepl("(", vcov, fixed = TRUE)
+            if(is_extra){
+                vcov = trimws(gsub("\\(.+", "", vcov))
+            }
+
             check_arg_plus(vcov, "match", .message = "If a formula, the arg. 'vcov' must be of the form 'vcov_type ~ vars'. The vcov_type must be a supported VCOV type.", .choices = all_vcov_names)
+
+            if(is_extra){
+                extra_args = eval(vcov_fml[[2]], environment(vcov_fml))
+            }
 
             vcov_vars = fml2varnames(vcov_fml[c(1, 3)], combine_fun = TRUE)
 
@@ -1096,6 +1105,59 @@ vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, dof = NULL){
 }
 
 
+vcov_conley = function(x, lat = NULL, lon = NULL, cutoff = NULL, pixel = 0, distance = "triangular", dof = NULL){
+
+    # slide_args allows the implicit allocation of arguments
+    # it makes semi-global changes => the values of the args here are modified
+    slide_args(x, lat = lat, lon = lon, cutoff = cutoff, pixel = pixel, distance = distance, dof = dof)
+    IS_REQUEST = is.null(x)
+
+    check_value(dof, "NULL class(dof.type)", .message = "The argument 'dof.type' must be an object created by the function dof().")
+
+    # lat
+    check_value(lat, "NULL character scalar | os formula")
+
+    if(inherits(lat, "formula")){
+        lat_txt = fml2varnames(lat)
+        check_value(lat_txt, "character scalar", .message = "The argument 'lat' must be composed of only one variable.")
+    }
+
+
+    # lon
+    check_value(lon, "NULL character scalar | os formula")
+
+    if(inherits(lon, "formula")){
+        lon_txt = fml2varnames(lon)
+        check_value(lon_txt, "character scalar", .message = "The argument 'lon' must be composed of only one variable.")
+    }
+
+    # cutoff
+    cutoff = check_set_cutoff(cutoff)
+
+    # pixel
+    check_value(pixel, "numeric scalar GE{0}",
+                .prefix = "In vcov.fixest, Conley VCOV cannot be computed: the argument 'pixel'")
+
+    # distance
+    check_value_plus(distance, "match(triangular, spherical)")
+
+    # recreating the call
+    vcov = .xpd(lhs = "conley", rhs = c(lat, lon))
+
+    extra_args = list(cutoff = cutoff, pixel = pixel, distance = distance)
+    vcov_request = list(vcov = vcov, dof = dof, extra_args = extra_args)
+    class(vcov_request) = "fixest_vcov_request"
+
+    if(IS_REQUEST){
+        res = vcov_request
+    } else {
+        res = vcov(x, vcov = vcov_request)
+    }
+
+    res
+}
+
+
 ####
 #### Internal ####
 ####
@@ -1226,14 +1288,14 @@ vcov_setup = function(){
                expected_type = "numeric vector",
                rm_nested = TRUE)
 
-    lng = list(guess_from = list(regex = c("^lng$", "^long?(itude)?$", "^(lng|lon|long)_.+")),
+    lng = list(guess_from = list(regex = c("^(lon|lng|long|longitude)$", "^(lng|lon|long)_.+")),
                label = "longitude",
                expected_type = "numeric vector",
                rm_nested = TRUE)
 
     vcov_conley_setup = list(name = "conley", fun_name = "vcov_conley_internal", vcov_label = "Conley")
     vcov_conley_setup$vars = list(lat = lat, lng = lng)
-    vcov_conley_setup$arg_main = "cutoff"
+    vcov_conley_setup$arg_main = c("cutoff", "pixel", "distance")
     vcov_conley_setup$patterns = c("", "lat + lng")
 
 
@@ -1243,9 +1305,11 @@ vcov_setup = function(){
 
     vcov_conley_hac_setup = list(name = c("conley_hac", "hac_conley"), fun_name = "vcov_conley_hac_internal", vcov_label = "Conley-HAC")
     # The variables (already defined earlier)
-    vcov_conley_hac_setup$vars = list(lat = lat, lng = lng, time = time)
-    vcov_conley_hac_setup$arg_main = ""
-    vcov_conley_hac_setup$patterns = c("", "lat + lng", "time", "lat + lng + time")
+    unit_conleyHAC = unit
+    unit_conleyHAC$optional = NULL
+    vcov_conley_hac_setup$vars = list(lat = lat, lng = lng, unit = unit_conleyHAC, time = time)
+    vcov_conley_hac_setup$arg_main = c("cutoff", "pixel", "distance", "lag")
+    vcov_conley_hac_setup$patterns = c("", "lat + lng", "time", "lat + lng + unit + time")
 
     #
     # Saving all the vcov possibilities
@@ -1259,8 +1323,8 @@ vcov_setup = function(){
                     vcov_fourway_setup,
                     vcov_newey_west_setup,
                     vcov_driscoll_kraay_setup,
-                    vcov_conley_setup,
-                    vcov_conley_hac_setup)
+                    vcov_conley_setup)
+                    # vcov_conley_hac_setup)
 
     options(fixest_vcov_builtin = all_vcov)
 
@@ -1394,27 +1458,27 @@ vcov_newey_west_internal = function(bread, scores, vars, dof, sandwich, nthreads
         dup = cpp_find_duplicates(unit_ro, time_ro)
 
         if(dup$n_dup > 0){
-            stop("In vcov.fixest: Newey-West VCOV cannot be computed: there are (unit x time) duplicates. You have to sort that out first, eg by creating new units free of duplicates or dropping duplicates. Or you can use a Driscoll-Kraay VCOV for which duplicates does not matter.", call. = FALSE)
+            stop("In vcov.fixest, Newey-West VCOV cannot be computed: there are (unit x time) duplicates. You have to sort that out first, eg by creating new units free of duplicates or dropping duplicates. Or you can use a Driscoll-Kraay VCOV for which duplicates does not matter.", call. = FALSE)
         }
 
         scores_ro = scores[my_order, , drop = FALSE]
 
         n_unit = max(unit_ro)
 
-        meat = cpp_newey_west_panel_meat(scores_ro, w, unit_ro, n_unit,
+        meat = cpp_newey_west_panel(scores_ro, w, unit_ro, n_unit,
                                          time_ro, n_time, nthreads)
 
     } else {
 
         if(max(time) < length(time)){
-            stop("In vcov.fixest: Newey-West VCOV cannot be computed: there are time duplicates. You may provide a panel identifier (if relevant) to sort that out. Or you can use a Driscoll-Kraay VCOV for which duplicates does not matter.", call. = FALSE)
+            stop("In vcov.fixest, Newey-West VCOV cannot be computed: there are time duplicates. You may provide a panel identifier (if relevant) to sort that out. Or you can use a Driscoll-Kraay VCOV for which duplicates does not matter.", call. = FALSE)
         }
 
         my_order = order(time)
         time_ro = time[my_order]
         scores_ro = scores[my_order, , drop = FALSE]
 
-        meat = cpp_newey_west_meat(scores_ro, w, nthreads)
+        meat = cpp_newey_west(scores_ro, w, nthreads)
     }
 
     if(sandwich){
@@ -1473,6 +1537,85 @@ vcov_driscoll_kraay_internal = function(bread, scores, vars, dof, sandwich, nthr
     vcov
 }
 
+vcov_conley_internal = function(bread, scores, vars, dof, sandwich, nthreads,
+                                cutoff = NULL, pixel = 0, distance = "triangular", ...){
+
+    lon = vars$lng
+    lat = vars$lat
+
+    #
+    # START :: checks
+
+    # lon
+    lon_range = range(lon)
+    if(lon_range[1] < -180 || lon_range[2] > 360 || diff(lon_range) > 360){
+        stop("In vcov.fixest, Conley VCOV cannot be computed: the longitude is outside the [-180, 180] range (current range is [", fsignif(lon_range[1]), ", ", fsignif(lon_range[2]), "]).", call. = FALSE)
+    }
+
+    if(lon_range[2] > 180){
+        # we normalize
+        lon = (lon + 180) %% 360 - 180
+    }
+
+    # lat
+    lat_range = range(lat)
+    if(lat_range[1] < -90 || lat_range[2] > 90){
+        stop("In vcov.fixest, Conley VCOV cannot be computed: the latitude is outside the [-90, 90] range (current range is [", fsignif(lat_range[1]), ", ", fsignif(lat_range[2]), "]).", call. = FALSE)
+    }
+
+    # pixel
+    check_value(pixel, "numeric scalar GE{0}",
+                .prefix = "In vcov.fixest, Conley VCOV cannot be computed: the argument 'pixel'")
+
+
+    # cutoff
+    cutoff = check_set_cutoff(cutoff)
+
+    # distance
+    check_value_plus(distance, "match(triangular, spherical)")
+    distance = switch(distance,
+                      spherical = 1,
+                      triangular = 2)
+
+    #   END :: checks
+    #
+
+    if(pixel > 0){
+        pixel_lat = pixel / 111
+        lat_cell = ((lat + 90) %/% pixel_lat) * pixel_lat - 90
+
+        pixel_lon = pixel / (111 * cos(lat * pi / 180))
+        lon_cell = ((lon + 180) %/% pixel_lon) * pixel_lon - 180
+    } else {
+        lat_cell = lat
+        lon_cell = lon
+    }
+
+    deg2rad = function(x) x / 180 * pi
+
+    id_full = to_integer(lat_cell, lon_cell, sorted = TRUE, add_items = TRUE, items.list = TRUE, multi.df = TRUE)
+
+    lon_ro = deg2rad(id_full$items$lon_cell)
+    lat_ro = deg2rad(id_full$items$lat_cell)
+
+    n_cases = length(lon_ro)
+    scores_ro = cpp_tapply_sum(n_cases, scores, id_full$x)
+
+    meat = cpp_vcov_conley(scores_ro, lon_ro, lat_ro, distance = distance, cutoff = cutoff, nthreads = nthreads)
+
+    if(sandwich){
+        vcov = prepare_sandwich(bread, meat, nthreads)
+    } else {
+        vcov = meat
+    }
+
+    metric = attr(cutoff, "metric")
+    scale = if(metric == "km") 1 else 1 / 1.60934
+
+    attr(vcov, "type_info") = paste0(" (", cutoff * scale, metric, ")")
+
+    vcov
+}
 
 ####
 #### Utilities ####
@@ -1480,6 +1623,8 @@ vcov_driscoll_kraay_internal = function(bread, scores, vars, dof, sandwich, nthr
 
 oldargs_to_vcov = function(se, cluster, vcov, .vcov = NULL){
     # Transforms se + cluster + .vcov into a vcov call
+
+    set_up(1)
 
     if(missnull(se) && missnull(cluster) && missnull(.vcov)){
         if(!missnull(vcov)){
@@ -1492,7 +1637,7 @@ oldargs_to_vcov = function(se, cluster, vcov, .vcov = NULL){
     if(!missnull(vcov)){
         id = c(!missnull(se), !missnull(cluster), !missnull(.vcov))
         msg = c("se", "cluster", ".vcov")[id]
-        stop("You cannot use the argument 'vcov' in combination with ", enumerate_items(msg, "or.quote"), ".")
+        stop_up("You cannot use the argument 'vcov' in combination with ", enumerate_items(msg, "or.quote"), ".")
     }
 
     if(!missnull(.vcov)){
@@ -1500,7 +1645,7 @@ oldargs_to_vcov = function(se, cluster, vcov, .vcov = NULL){
         if(!missnull(se) || !missnull(cluster)){
             id = c(!missnull(se), !missnull(cluster))
             msg = c("se", "cluster")[id]
-            stop("You cannot use the argument '.vcov' in combination with ", enumerate_items(msg, "or.quote"), ".")
+            stop_up("You cannot use the argument '.vcov' in combination with ", enumerate_items(msg, "or.quote"), ".")
         }
 
         check_arg(.vcov, "matrix | function")
