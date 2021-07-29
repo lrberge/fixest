@@ -284,7 +284,7 @@
 #' # You can still select which sample/LHS/RHS to display
 #' est_split[sample = 1:2, lhs = 1, rhs = 1]
 #'
-feols = function(fml, data, weights, offset, subset, split, fsplit, vcov, cluster, se,
+feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluster, se,
                  dof, panel.id, fixef, fixef.rm = "none", fixef.tol = 1e-6,
                  fixef.iter = 10000, collin.tol = 1e-10, nthreads = getFixest_nthreads(),
                  lean = FALSE, verbose = 0, warn = TRUE, notes = getFixest_notes(),
@@ -1748,7 +1748,7 @@ check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights){
 
 
 #' @rdname feols
-feols.fit = function(y, X, fixef_df, offset, split, fsplit, vcov, cluster, se, dof, weights,
+feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, cluster, se, dof, weights,
                      subset, fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000,
                      collin.tol = 1e-10, nthreads = getFixest_nthreads(), lean = FALSE,
                      warn = TRUE, notes = getFixest_notes(), mem.clean = FALSE, verbose = 0,
@@ -1929,10 +1929,13 @@ feols.fit = function(y, X, fixef_df, offset, split, fsplit, vcov, cluster, se, d
 #' est_split[sample = 1:2, lhs = 1, rhs = 1]
 #'
 #'
-feglm = function(fml, data, family = "gaussian", offset, weights, subset, split, fsplit, vcov, cluster, se, dof, panel.id, start = NULL,
-                 etastart = NULL, mustart = NULL, fixef, fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
-                 glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(), lean = FALSE,
-                 warn = TRUE, notes = getFixest_notes(), verbose = 0, combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
+feglm = function(fml, data, family = "gaussian", vcov, offset, weights, subset, split,
+                 fsplit, cluster, se, dof, panel.id, start = NULL,
+                 etastart = NULL, mustart = NULL, fixef, fixef.rm = "perfect",
+                 fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
+                 glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
+                 lean = FALSE, warn = TRUE, notes = getFixest_notes(), verbose = 0,
+                 combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
 
     if(missing(weights)) weights = NULL
 
@@ -1971,10 +1974,13 @@ feglm = function(fml, data, family = "gaussian", offset, weights, subset, split,
 
 
 #' @rdname feglm
-feglm.fit = function(y, X, fixef_df, family = "gaussian", offset, split, fsplit, vcov, cluster, se, dof, weights, subset, start = NULL,
-                     etastart = NULL, mustart = NULL, fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000,
-                     collin.tol = 1e-10, glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(), lean = FALSE, warn = TRUE,
-                     notes = getFixest_notes(), mem.clean = FALSE, verbose = 0, only.env = FALSE, env, ...){
+feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
+                     fsplit, cluster, se, dof, weights, subset, start = NULL,
+                     etastart = NULL, mustart = NULL, fixef.rm = "perfect",
+                     fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
+                     glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
+                     lean = FALSE, warn = TRUE, notes = getFixest_notes(), mem.clean = FALSE,
+                     verbose = 0, only.env = FALSE, env, ...){
 
     dots = list(...)
 
@@ -2764,9 +2770,9 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", offset, split, fsplit,
 #'
 #'
 #'
-femlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
+femlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian"), vcov,
                  start = 0, fixef, fixef.rm = "perfect", offset, subset, split, fsplit,
-                 vcov, cluster, se, dof, panel.id, fixef.tol = 1e-5, fixef.iter = 10000,
+                 cluster, se, dof, panel.id, fixef.tol = 1e-5, fixef.iter = 10000,
                  nthreads = getFixest_nthreads(), lean = FALSE, verbose = 0, warn = TRUE,
                  notes = getFixest_notes(), theta.init, combine.quick, mem.clean = FALSE,
                  only.env = FALSE, env, ...){
@@ -2793,9 +2799,11 @@ femlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 }
 
 #' @rdname femlm
-fenegbin = function(fml, data, theta.init, start = 0, fixef, fixef.rm = "perfect", offset, subset, split, fsplit, cluster, se, dof, panel.id,
-                    fixef.tol = 1e-5, fixef.iter = 10000, nthreads = getFixest_nthreads(), lean = FALSE,
-                    verbose = 0, warn = TRUE, notes = getFixest_notes(), combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
+fenegbin = function(fml, data, theta.init, vcov, start = 0, fixef, fixef.rm = "perfect",
+                    offset, subset, split, fsplit, cluster, se, dof, panel.id,
+                    fixef.tol = 1e-5, fixef.iter = 10000, nthreads = getFixest_nthreads(),
+                    lean = FALSE, verbose = 0, warn = TRUE, notes = getFixest_notes(),
+                    combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
 
     # We control for the problematic argument family
     if("family" %in% names(match.call())){
@@ -2822,10 +2830,11 @@ fenegbin = function(fml, data, theta.init, start = 0, fixef, fixef.rm = "perfect
 }
 
 #' @rdname feglm
-fepois = function(fml, data, offset, weights, subset, split, fsplit, vcov, cluster, se, dof, panel.id,
-                  start = NULL, etastart = NULL, mustart = NULL,
-                  fixef, fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
-                  glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(), lean = FALSE, warn = TRUE, notes = getFixest_notes(),
+fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
+                  cluster, se, dof, panel.id, start = NULL, etastart = NULL,
+                  mustart = NULL, fixef, fixef.rm = "perfect", fixef.tol = 1e-6,
+                  fixef.iter = 10000, collin.tol = 1e-10, glm.iter = 25, glm.tol = 1e-8,
+                  nthreads = getFixest_nthreads(), lean = FALSE, warn = TRUE, notes = getFixest_notes(),
                   verbose = 0, combine.quick, mem.clean = FALSE, only.env = FALSE, env, ...){
 
     # We control for the problematic argument family
@@ -3019,9 +3028,9 @@ fepois = function(fml, data, offset, weights, subset, split, fsplit, vcov, clust
 #' points(x, fitted(est2_NL), col = 4, pch = 2)
 #'
 #'
-feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), NL.fml,
+feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), NL.fml, vcov,
                   fixef, fixef.rm = "perfect", NL.start, lower, upper, NL.start.init,
-                  offset, subset, split, fsplit, vcov, cluster, se, dof, panel.id,
+                  offset, subset, split, fsplit, cluster, se, dof, panel.id,
                   start = 0, jacobian.method="simple", useHessian = TRUE,
                   hessian.args = NULL, opt.control = list(), nthreads = getFixest_nthreads(),
                   lean = FALSE, verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000,
