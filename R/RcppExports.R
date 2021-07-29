@@ -277,15 +277,19 @@ cpppar_quf_table_sum <- function(x, y, do_sum_y, rm_0, rm_1, rm_single, only_slo
     .Call(`_fixest_cpppar_quf_table_sum`, x, y, do_sum_y, rm_0, rm_1, rm_single, only_slope, nthreads, do_refactor, r_x_sizes, obs2keep)
 }
 
-cpp_newey_west_meat <- function(S, w, nthreads) {
-    .Call(`_fixest_cpp_newey_west_meat`, S, w, nthreads)
+cpp_newey_west <- function(S, w, nthreads) {
+    .Call(`_fixest_cpp_newey_west`, S, w, nthreads)
 }
 
-cpp_newey_west_panel_meat <- function(S, w, unit, G, time, T, nthreads) {
-    .Call(`_fixest_cpp_newey_west_panel_meat`, S, w, unit, G, time, T, nthreads)
+cpp_newey_west_panel <- function(S, w, unit, G, time, T, nthreads) {
+    .Call(`_fixest_cpp_newey_west_panel`, S, w, unit, G, time, T, nthreads)
 }
 
-cpp_driscoll_kraay_meat <- function(S, w, time, T, nthreads) {
-    .Call(`_fixest_cpp_driscoll_kraay_meat`, S, w, time, T, nthreads)
+cpp_driscoll_kraay <- function(S, w, time, T, nthreads) {
+    .Call(`_fixest_cpp_driscoll_kraay`, S, w, time, T, nthreads)
+}
+
+cpp_vcov_conley <- function(S, lon_rad, lat_rad, distance, cutoff, nthreads) {
+    .Call(`_fixest_cpp_vcov_conley`, S, lon_rad, lat_rad, distance, cutoff, nthreads)
 }
 

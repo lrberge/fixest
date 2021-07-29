@@ -5,6 +5,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // compute_cluster_coef_r
 SEXP compute_cluster_coef_r(int family, int nb_coef, double theta, double diffMax_NR, SEXP r_mu, SEXP r_lhs, SEXP r_sum_y, SEXP r_dum, SEXP r_obsCluster, SEXP r_table, SEXP r_cumtable, int nthreads);
 RcppExport SEXP _fixest_compute_cluster_coef_r(SEXP familySEXP, SEXP nb_coefSEXP, SEXP thetaSEXP, SEXP diffMax_NRSEXP, SEXP r_muSEXP, SEXP r_lhsSEXP, SEXP r_sum_ySEXP, SEXP r_dumSEXP, SEXP r_obsClusterSEXP, SEXP r_tableSEXP, SEXP r_cumtableSEXP, SEXP nthreadsSEXP) {
@@ -1019,22 +1024,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cpp_newey_west_meat
-NumericMatrix cpp_newey_west_meat(NumericMatrix S, NumericVector w, int nthreads);
-RcppExport SEXP _fixest_cpp_newey_west_meat(SEXP SSEXP, SEXP wSEXP, SEXP nthreadsSEXP) {
+// cpp_newey_west
+NumericMatrix cpp_newey_west(NumericMatrix S, NumericVector w, int nthreads);
+RcppExport SEXP _fixest_cpp_newey_west(SEXP SSEXP, SEXP wSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type S(SSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_newey_west_meat(S, w, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_newey_west(S, w, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpp_newey_west_panel_meat
-NumericMatrix cpp_newey_west_panel_meat(NumericMatrix S, NumericVector w, IntegerVector unit, int G, IntegerVector time, int T, int nthreads);
-RcppExport SEXP _fixest_cpp_newey_west_panel_meat(SEXP SSEXP, SEXP wSEXP, SEXP unitSEXP, SEXP GSEXP, SEXP timeSEXP, SEXP TSEXP, SEXP nthreadsSEXP) {
+// cpp_newey_west_panel
+NumericMatrix cpp_newey_west_panel(NumericMatrix S, NumericVector w, IntegerVector unit, int G, IntegerVector time, int T, int nthreads);
+RcppExport SEXP _fixest_cpp_newey_west_panel(SEXP SSEXP, SEXP wSEXP, SEXP unitSEXP, SEXP GSEXP, SEXP timeSEXP, SEXP TSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -1045,13 +1050,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< IntegerVector >::type time(timeSEXP);
     Rcpp::traits::input_parameter< int >::type T(TSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_newey_west_panel_meat(S, w, unit, G, time, T, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_newey_west_panel(S, w, unit, G, time, T, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
-// cpp_driscoll_kraay_meat
-NumericMatrix cpp_driscoll_kraay_meat(NumericMatrix S, NumericVector w, IntegerVector time, int T, int nthreads);
-RcppExport SEXP _fixest_cpp_driscoll_kraay_meat(SEXP SSEXP, SEXP wSEXP, SEXP timeSEXP, SEXP TSEXP, SEXP nthreadsSEXP) {
+// cpp_driscoll_kraay
+NumericMatrix cpp_driscoll_kraay(NumericMatrix S, NumericVector w, IntegerVector time, int T, int nthreads);
+RcppExport SEXP _fixest_cpp_driscoll_kraay(SEXP SSEXP, SEXP wSEXP, SEXP timeSEXP, SEXP TSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -1060,7 +1065,23 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< IntegerVector >::type time(timeSEXP);
     Rcpp::traits::input_parameter< int >::type T(TSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_driscoll_kraay_meat(S, w, time, T, nthreads));
+    rcpp_result_gen = Rcpp::wrap(cpp_driscoll_kraay(S, w, time, T, nthreads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_vcov_conley
+NumericMatrix cpp_vcov_conley(NumericMatrix S, NumericVector lon_rad, NumericVector lat_rad, const int distance, const double cutoff, int nthreads);
+RcppExport SEXP _fixest_cpp_vcov_conley(SEXP SSEXP, SEXP lon_radSEXP, SEXP lat_radSEXP, SEXP distanceSEXP, SEXP cutoffSEXP, SEXP nthreadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type S(SSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type lon_rad(lon_radSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type lat_rad(lat_radSEXP);
+    Rcpp::traits::input_parameter< const int >::type distance(distanceSEXP);
+    Rcpp::traits::input_parameter< const double >::type cutoff(cutoffSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_vcov_conley(S, lon_rad, lat_rad, distance, cutoff, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -1135,9 +1156,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpppar_check_only_0", (DL_FUNC) &_fixest_cpppar_check_only_0, 2},
     {"_fixest_cpp_quf_gnl", (DL_FUNC) &_fixest_cpp_quf_gnl, 1},
     {"_fixest_cpppar_quf_table_sum", (DL_FUNC) &_fixest_cpppar_quf_table_sum, 11},
-    {"_fixest_cpp_newey_west_meat", (DL_FUNC) &_fixest_cpp_newey_west_meat, 3},
-    {"_fixest_cpp_newey_west_panel_meat", (DL_FUNC) &_fixest_cpp_newey_west_panel_meat, 7},
-    {"_fixest_cpp_driscoll_kraay_meat", (DL_FUNC) &_fixest_cpp_driscoll_kraay_meat, 5},
+    {"_fixest_cpp_newey_west", (DL_FUNC) &_fixest_cpp_newey_west, 3},
+    {"_fixest_cpp_newey_west_panel", (DL_FUNC) &_fixest_cpp_newey_west_panel, 7},
+    {"_fixest_cpp_driscoll_kraay", (DL_FUNC) &_fixest_cpp_driscoll_kraay, 5},
+    {"_fixest_cpp_vcov_conley", (DL_FUNC) &_fixest_cpp_vcov_conley, 6},
     {NULL, NULL, 0}
 };
 
