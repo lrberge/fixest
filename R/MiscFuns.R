@@ -2985,6 +2985,7 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 #' @param sorted Logical, default is \code{FALSE}. Whether the integer vector should make reference to sorted values?
 #' @param add_items Logical, default is \code{FALSE}. Whether to add the unique values of the original vector(s). If requested, an attribute \code{items} is created containing the values (alternatively, they can appear in a list if \code{items.list=TRUE}).
 #' @param items.list Logical, default is \code{FALSE}. Only used if \code{add_items=TRUE}. If \code{TRUE}, then a list of length 2 is returned with \code{x} the integer vector and \code{items} the vector of items.
+#' @param multi.df Logical, default is \code{FALSE}. If \code{TRUE} then a data.frame listing the unique elements is returned in the form of a data.frame. Ignored if \code{add_items = FALSE}.
 #' @param multi.join Character scalar used to join the items of multiple vectors. The default is \code{"_"}. Ignored if \code{add_items = FALSE}.
 #' @param internal Logical, default is \code{FALSE}. For programming only. If this function is used within another function, setting \code{internal = TRUE} is needed to make the evaluation of \code{...} valid. End users of \code{to_integer} should not care.
 #'
@@ -3026,7 +3027,7 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 #' # You can use multi.join to handle the join of the items:
 #' to_integer(x1, x2, add_items = TRUE, multi.join = "; ")
 #'
-to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE, multi.join = "_", internal = FALSE){
+to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE, multi.df = FALSE, multi.join = "_", internal = FALSE){
 
     if(!internal) check_arg(..., "vector mbt")
     check_arg(sorted, add_items, items.list, "logical scalar")
@@ -3081,7 +3082,7 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
             f_order = order(f_unik)
             x_new = order(f_order)[res_raw$x]
             if(add_items){
-                items_new = as.character(f_unik[f_order])
+                items_new = f_unik[f_order]
                 res = list(x = x_new, items = items_new)
             } else {
                 res = x_new
@@ -3119,6 +3120,7 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
 
         if(add_items || sorted){
             # we re order appropriately
+            # f prefix means factor
 
             obs_1st = cpp_get_first_item(res$x, length(res$items))
 
@@ -3131,10 +3133,34 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
 
             x_new = order(f_order)[res$x]
 
-            arg_list = f_all
-            arg_list$sep = multi.join
-            f_char = do.call("paste", arg_list)
-            items_new = f_char[f_order]
+            if(multi.df){
+                # Putting into a DF => we take care of names
+                mc_dots = match.call(expand.dots = FALSE)[["..."]]
+                n_dots = length(mc_dots)
+                mc_dots_names = names(mc_dots)
+                if(is.null(mc_dots_names)) mc_dots_names = character(n_dots)
+
+                my_names = character(n_dots)
+                for(q in 1:n_dots){
+                    if(nchar(mc_dots_names[q]) > 0){
+                        my_names[q] = mc_dots_names[q]
+                    } else {
+                        my_names[q] = deparse_long(mc_dots[[q]])
+                    }
+                }
+
+                names(f_all) = my_names
+
+                f_df = as.data.frame(f_all)
+                items_new = f_df[f_order, , drop = FALSE]
+                row.names(items_new) = 1:nrow(items_new)
+            } else {
+                # we "paste" them
+                arg_list = f_all
+                arg_list$sep = multi.join
+                f_char = do.call("paste", arg_list)
+                items_new = f_char[f_order]
+            }
 
             if(add_items){
                 res = list(x = x_new, items = items_new)
@@ -6447,7 +6473,7 @@ update_file = function(path, text){
 
     # We write only if the text is different
     if(do_write){
-        message("writing '", path, appendLF = FALSE)
+        message("writing '", path, "'", appendLF = FALSE)
         f = file(path, "w", encoding = "utf-8")
         writeLines(text, f)
         close(f)

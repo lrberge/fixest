@@ -9,6 +9,7 @@ to_integer(
   sorted = FALSE,
   add_items = FALSE,
   items.list = FALSE,
+  multi.df = FALSE,
   multi.join = "_",
   internal = FALSE
 )
@@ -21,6 +22,8 @@ to_integer(
 \item{add_items}{Logical, default is \code{FALSE}. Whether to add the unique values of the original vector(s). If requested, an attribute \code{items} is created containing the values (alternatively, they can appear in a list if \code{items.list=TRUE}).}
 
 \item{items.list}{Logical, default is \code{FALSE}. Only used if \code{add_items=TRUE}. If \code{TRUE}, then a list of length 2 is returned with \code{x} the integer vector and \code{items} the vector of items.}
+
+\item{multi.df}{Logical, default is \code{FALSE}. If \code{TRUE} then a data.frame listing the unique elements is returned in the form of a data.frame. Ignored if \code{add_items = FALSE}.}
 
 \item{multi.join}{Character scalar used to join the items of multiple vectors. The default is \code{"_"}. Ignored if \code{add_items = FALSE}.}
 
