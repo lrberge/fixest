@@ -5,7 +5,7 @@
 \alias{dof}
 \alias{setFixest_dof}
 \alias{getFixest_dof}
-\title{Type of degree of freedom in fixest summary}
+\title{Type of degree of freedom in \code{fixest} VCOVs}
 \format{
 An object of class \code{function} of length 1.
 }

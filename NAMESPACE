@@ -33,6 +33,10 @@ export(to_integer, demean, obs)
 # setters & getters
 exportPattern("^(s|g)etFixest")
 
+# VCOV funs
+export(vcov_cluster, vcov_DK, vcov_NW, vcov_conley)
+
+
 # deprecated
 export(obs2remove, esttex, esttable)
 S3method(summary, fixest.obs2remove)
@@ -139,7 +143,7 @@ importFrom(methods, formalArgs)
 
 
 # Auto-exports::vcov_aliases
-export(NW, newey, west, newey_west, DK, driscoll, kraay, driscoll_kraay, conley)
+export(NW, newey_west, DK, driscoll_kraay, conley)
 
 
 

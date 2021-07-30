@@ -228,7 +228,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
 
     extra_args = NULL
     if(inherits(vcov, "fixest_vcov_request")){
-        dof = vcov$dof
+        if(!is.null(vcov$dof)) dof = vcov$dof
         var_names_all = vcov$var_names_all
         var_values_all = vcov$vcov_vars
         extra_args = vcov$extra_args
@@ -254,17 +254,18 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
             check_arg_plus(vcov, "match", .message = "If a formula, the arg. 'vcov' must be of the form 'vcov_type ~ vars'. The vcov_type must be a supported VCOV type.", .choices = all_vcov_names)
 
             if(is_extra){
-                extra_args = eval(vcov_fml[[2]], environment(vcov_fml))
+                new_req = eval(vcov_fml[[2]], environment(vcov_fml))
+                extra_args = new_req$extra_args
             }
 
             vcov_vars = fml2varnames(vcov_fml[c(1, 3)], combine_fun = TRUE)
+        }
 
-            qui_dof = grepl("dof(", vcov_vars, fixed = TRUE)
-            if(any(qui_dof)){
-                dof_txt = vcov_vars[qui_dof]
-                dof = eval(str2lang(dof_txt))
-                vcov_vars = vcov_vars[!qui_dof]
-            }
+        qui_dof = grepl("dof(", vcov_vars, fixed = TRUE)
+        if(any(qui_dof)){
+            dof_txt = vcov_vars[qui_dof]
+            dof = eval(str2lang(dof_txt))
+            vcov_vars = vcov_vars[!qui_dof]
         }
 
     }
@@ -298,6 +299,10 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
 
             is_int_all = list()
 
+            if(only_varnames){
+                return(character(0))
+            }
+
         } else {
 
 
@@ -309,7 +314,8 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
             patterns_split = strsplit(vcov_select$patterns, " ?\\+ ?")
             n_patterns = lengths(patterns_split)
             if(!length(vcov_vars) %in% n_patterns){
-                stop("In the argument 'vcov', the number of variables in the RHS of the formula (", length(vcov_vars), ") is not valid, it should correspond to ", ifsingle(n_patterns, "", "one of "), enumerate_items(vcov_select$patterns[n_patterns != 0], "quote.or"), ".")
+                fml_display = paste0("~", paste0(vcov_select$patterns[n_patterns != 0], collapse = "+"))
+                stop("In the argument 'vcov', the number of variables in the RHS of the formula (", length(vcov_vars), ") is not valid. The formula should correspond to ", ifunit(n_patterns, "", "one of "), enumerate_items(fml_display, "or"), ".")
             }
 
 
@@ -328,10 +334,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
                 vcov_var_name = names(vcov_select$vars)[i]
                 vcov_var_value = vcov_select$vars[[i]]
 
-                if(!vcov_var_name %in% pattern && isTRUE(vcov_var_value$optional)){
-                    next
-
-                } else if(vcov_var_name %in% pattern){
+                if(vcov_var_name %in% pattern){
                     # => provided by the user, we find which one it corresponds to
                     # based on the pattern
 
@@ -464,7 +467,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
                         }
                     }
 
-                    if(length(err_msg) > 0){
+                    if(length(err_msg) > 0 && !isTRUE(vcov_var_value$optional)){
 
                         if(length(err_msg) == 1){
                             expect = names(err_msg)
@@ -497,7 +500,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
 
             if(!isTRUE(is_int_all[[vcov_var_name]]) && anyNA(value)){
                 # First condition means: it is a fixed-effect used in the estimation => no need to check
-                stop("The variable '", vname, "' used to estimate the VCOV (employed as ", vcov_var_value$label, ") has NA values which would lead to a sample used to compute the VCOV different from the sample used to estimate the parameters. This would lead to wrong inference.\nPossible solutions: i) ex ante prune them or ii) use the argument 'vcov' at estimation time.")
+                stop("The variable '", vname, "' used to estimate the VCOV (employed as ", vcov_var_value$label, ") has NA values which would lead to a sample used to compute the VCOV different from the sample used to estimate the parameters. This would lead to wrong inference.\nPossible solutions: i) ex ante prune them, ii) impute them, or iii) use the argument 'vcov' at estimation time.")
             }
 
             if(isTRUE(vcov_var_value$to_int)){
@@ -612,7 +615,10 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
                 sandwich = sandwich, nthreads = nthreads,
                 var_names_all = var_names_all)
 
-    for(a in names(extra_args)) args[[a]] = extra_args[[a]]
+    for(a in names(extra_args)){
+        # I have to add this weird condition (because of the aliases)
+        if(!is.null(extra_args[[a]])) args[[a]] = extra_args[[a]]
+    }
 
     vcov_noAdj = do.call(fun_name, args)
 
@@ -752,7 +758,6 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
         ss_adj = ifelse(dof$adj, (n - 1) / (n - K), 1)
     }
 
-
     vcov_mat = vcov_noAdj * ss_adj
 
     ####
@@ -805,7 +810,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
 
 
 
-#' Type of degree of freedom in fixest summary
+#' Type of degree of freedom in \code{fixest} VCOVs
 #'
 #' Provides how the degrees of freedom should be calculated in \code{\link[fixest]{vcov.fixest}}/\code{\link[fixest]{summary.fixest}}.
 #'
@@ -929,6 +934,61 @@ dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = 
 ####
 
 
+#' Clustered VCOV
+#'
+#' Computes the clustered VCOV of \code{fixest} objects.
+#'
+#' @param x A \code{fixest} object.
+#' @param cluster Either i) a character vector giving the names of the variables onto which to cluster, or ii) a formula giving those names, or iii) a vector/list/data.frame giving the hard values of the clusters. Note that in cases i) and ii) the variables are fetched directly in the data set used for the estimation.
+#' @param dof An object returned by the function \code{\link[fixest]{dof}}. It specifies how to perform the small sample correction.
+#'
+#' @return
+#' If the first argument is a \code{fixest} object, then a VCOV is returned (i.e. a symmetric matrix).
+#'
+#' If the first argument is not a \code{fixest} object, then a) implicitly the arguments are shifted to the left (i.e. \code{vcov_cluster(~var1 + var2)} is equivalent to \code{vcov_cluster(cluster = ~var1 + var2)}) and b) a VCOV-\emph{request} is returned and NOT a VCOV. That VCOV-request can then be used in the argument \code{vcov} of various \code{fixest} functions (e.g. \code{\link[fixest]{vcov.fixest}} or even in the estimation calls).
+#'
+#' @author
+#' Laurent Berge
+#'
+#' @references
+#' Cameron AC, Gelbach JB, Miller DL (2011). "Robust Inference with Multiway Clustering." \emph{Journal of Business & Economic Statistics}, 29(2), 238–249. doi:10.1198/jbes.2010.07136.
+#'
+#' @examples
+#'
+#' base = iris
+#' names(base) = c("y", "x1", "x2", "x3", "species")
+#' base$clu = rep(1:5, 30)
+#'
+#' est = feols(y ~ x1, base)
+#'
+#' # VCOV: using a formula giving the name of the clusters
+#' vcov_cluster(est, ~species + clu)
+#'
+#' # works as well with a character vector
+#' vcov_cluster(est, c("species", "clu"))
+#'
+#' # you can also combine the two with '^'
+#' vcov_cluster(est, ~species^clu)
+#'
+#' #
+#' # Using VCOV requests
+#' #
+#'
+#' # per se: pretty useless...
+#' vcov_cluster(~species)
+#'
+#' # ...but VCOV-requests can be used at estimation time:
+#' # it may be more explicit than...
+#' feols(y ~ x1, base, vcov = vcov_cluster("species"))
+#'
+#' # ...the equivalent, built-in way:
+#' feols(y ~ x1, base, vcov = ~species)
+#'
+#' # The argument vcov does not accept hard values,
+#' # so you can feed them with a VCOV-request:
+#' feols(y ~ x1, base, vcov = vcov_cluster(rep(1:5, 30)))
+#'
+#'
 vcov_cluster = function(x, cluster = NULL, dof = NULL){
     # User-level function to compute clustered SEs
     # typically we only do checking and reshaping here
@@ -961,7 +1021,12 @@ vcov_cluster = function(x, cluster = NULL, dof = NULL){
     # and give proper names
     if(!is.null(vcov_vars)){
 
-        cl_name = fetch_arg_deparse("cluster")
+        sc = sys.call()
+        if("cluster" %in% names(sc)){
+            cl_name = fetch_arg_deparse("cluster")
+        } else {
+            cl_name = deparse_long(sc[[2]])
+        }
 
         if(is.atomic(vcov_vars)){
             vcov_vars = list(cl1 = vcov_vars)
@@ -1010,6 +1075,68 @@ vcov_cluster = function(x, cluster = NULL, dof = NULL){
 }
 
 
+
+#' HAC VCOVs
+#'
+#' Set of functions to compute the VCOVs robust to different forms correlation in panel or time series settings.
+#'
+#' There are currently three VCOV types: Newey-West applied to time series, Newey-West applied to a panel setting (when the argument 'unit' is not missing), and Driscoll-Kraay.
+#'
+#' The functions on this page without the prefix "vcov_" do not compute VCOVs directly but are meant to be used in the argument \code{vcov} of \code{fixest} functions (e.g. in \code{\link[fixest]{vcov.fixest}} or even in the estimation calls).
+#'
+#' Note that for Driscoll-Kraay VCOVs, to ensure its properties there should be a minimum of 20 periods or so.
+#'
+#' @inheritParams vcov_cluster
+#'
+#' @param unit A character scalar or a one sided formula giving the name of the variable representing the units of the panel.
+#' @param time A character scalar or a one sided formula giving the name of the variable representing the time.
+#' @param lag An integer scalar, default is \code{NULL}. If \code{NULL}, then the default lag is equal to \code{n_t^0.25} with \code{n_t} the number of time periods.
+#'
+#'
+#' @references
+#' Newey WK, West KD (1987). "A Simple, Positive Semi-Deﬁnite, Heteroskedasticity and Autocorrelation Consistent Covariance Matrix." \emph{Econometrica}, 55(3), 703–708. doi:10.2307/1913610.
+#'
+#' Driscoll JC, Kraay AC (1998). "Consistent Covariance Matrix Estimation with Spatially Dependent Panel Data." \emph{The Review of Economics and Statistics}, 80(4), 549–560. doi:10.1162/003465398557825.
+#'
+#' Milo G (2017). "Robust Standard Error Estimators for Panel Models: A Unifying Approach" \emph{Journal of Statistical Software}, 82(3). doi:10.18637/jss.v082.i03.
+#'
+#' @return
+#' If the first argument is a \code{fixest} object, then a VCOV is returned (i.e. a symmetric matrix).
+#'
+#' If the first argument is not a \code{fixest} object, then a) implicitly the arguments are shifted to the left (i.e. \code{vcov_DK(~year)} is equivalent to \code{vcov_DK(time = ~year)}) and b) a VCOV-\emph{request} is returned and NOT a VCOV. That VCOV-request can then be used in the argument \code{vcov} of various \code{fixest} functions (e.g. \code{\link[fixest]{vcov.fixest}} or even in the estimation calls).
+#'
+#' @examples
+#'
+#' data(base_did)
+#'
+#' #
+#' # During the estimation
+#' #
+#'
+#' # Panel Newey-West, lag = 2
+#' feols(y ~ x1, base_did, NW(2) ~ id + period)
+#'
+#' # Driscoll-Kraay
+#' feols(y ~ x1, base_did, DK ~ period)
+#'
+#' # If the estimation is made with a panel.id, the dimensions are
+#' # automatically deduced:
+#' est = feols(y ~ x1, base_did, "NW", panel.id = ~id + period)
+#' est
+#'
+#' #
+#' # Post estimation
+#' #
+#'
+#' # If missing, the unit and time are automatically deduced from
+#' # the panel.id used in the estimation
+#' vcov_NW(est, lag = 2)
+#'
+#'
+#' @name vcov_hac
+NULL
+
+#' @rdname vcov_hac
 vcov_DK = function(x, time = NULL, lag = NULL, dof = NULL){
     # unit and time MUST be variables of the data set
     # otherwise: too error prone + extremely complex to set up + very edge case, so not worth it
@@ -1053,6 +1180,7 @@ vcov_DK = function(x, time = NULL, lag = NULL, dof = NULL){
 
 }
 
+#' @rdname vcov_hac
 vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, dof = NULL){
     # unit and time MUST be variables of the data set
     # otherwise: too error prone + extremely complex to set up + very edge case, so not worth it
@@ -1105,7 +1233,47 @@ vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, dof = NULL){
 }
 
 
-vcov_conley = function(x, lat = NULL, lon = NULL, cutoff = NULL, pixel = 0, distance = "triangular", dof = NULL){
+#' Conley VCOV
+#'
+#' Compute VCOVs robust to spatial correlation, a la Conley (1999).
+#'
+#' This function computes VCOVs that are robust to spatial correlations by assuming a correlation between the units that are at a geographic distance lower than a given cutoff.
+#'
+#' The user must provide the cutoff since, so far, there is no automatic deduction implemented.
+#'
+#' The function \code{conley} does not compute VCOVs directly but is meant to be used in the argument \code{vcov} of \code{fixest} functions (e.g. in \code{\link[fixest]{vcov.fixest}} or even in the estimation calls).
+#'
+#' @inheritParams vcov_cluster
+#'
+#' @param lat A character scalar or a one sided formula giving the name of the variable representing the latitude. The latitude must lie in [-90, 90].
+#' @param lon A character scalar or a one sided formula giving the name of the variable representing the longitude. The longitude must be in [-180, 180] or in [0, 360].
+#' @param cutoff The distance cutoff, in km. You can express the cutoff in miles by writing the number in character form and adding "mi" as a suffix: cutoff = "100mi" would be 100 miles.
+#' @param pixel A positive numeric scalar, default is 0. If a positive number, the coordinates of each observation are pooled into \code{pixel} x \code{pixel} km squares. This lowers the precision but can (depending on the cases) greatly improve computational speed at a low precision cost. Note that if the \code{cutoff} was expressed in miles, then \code{pixel} will also be in miles.
+#' @param distance How to compute the distance between points. It can be equal to "triangular" (default) or "spherical". The latter case corresponds to the great circle distance and is more precise than triangular but is a bit more intensive computationally.
+#'
+#' @return
+#' If the first argument is a \code{fixest} object, then a VCOV is returned (i.e. a symmetric matrix).
+#'
+#' If the first argument is not a \code{fixest} object, then a) implicitly the arguments are shifted to the left (i.e. \code{vcov_conley(100)} is equivalent to \code{vcov_conley(cutoff = 100)}) and b) a VCOV-\emph{request} is returned and NOT a VCOV. That VCOV-request can then be used in the argument \code{vcov} of various \code{fixest} functions (e.g. \code{\link[fixest]{vcov.fixest}} or even in the estimation calls).
+#'
+#' @references
+#' Conley TG (1999). "GMM Estimation with Cross Sectional Dependence", \emph{Journal of Econometrics}, 92, 1-45.
+#'
+#' @examples
+#'
+#' data(quakes)
+#'
+#' # We use conley() in the vcov argument of the estimation
+#' feols(depth ~ mag, quakes, conley(100))
+#'
+#' # Post estimation
+#' est = feols(depth ~ mag, quakes)
+#' vcov_conley(est, cutoff = 100)
+#'
+#'
+#'
+vcov_conley = function(x, lat = NULL, lon = NULL, cutoff = NULL, pixel = 0,
+                       distance = "triangular", dof = NULL){
 
     # slide_args allows the implicit allocation of arguments
     # it makes semi-global changes => the values of the args here are modified
@@ -1159,47 +1327,9 @@ vcov_conley = function(x, lat = NULL, lon = NULL, cutoff = NULL, pixel = 0, dist
 
 
 ####
-#### Internal ####
+#### SETUP ####
 ####
 
-
-
-
-vcovClust = function (cluster, myBread, scores, adj = FALSE, do.unclass = TRUE, sandwich = TRUE, nthreads = 1){
-    # Internal function: no need for controls, they come beforehand
-    # - cluster: the vector of dummies
-    # - myBread: original vcov
-    # - scores
-    # Note: if length(unique(cluster)) == n (i.e. White correction), then the adj are such that vcovClust is equivalent to vcovHC(res, type="HC1")
-    # Source: http://cameron.econ.ucdavis.edu/research/Cameron_Miller_JHR_2015_February.pdf
-    #         Cameron & Miller -- A Practitioner’s Guide to Cluster-Robust Inference
-
-    n = NROW(scores)
-
-    # Control for cluster type
-    if(do.unclass){
-        cluster = quickUnclassFactor(cluster)
-    }
-
-    Q = max(cluster)
-    RightScores = cpp_tapply_sum(Q, scores, cluster)
-
-    # Finite sample correction:
-    if(adj){
-        adj_value = Q / (Q - 1)
-    } else {
-        adj_value = 1
-    }
-
-    if(!sandwich){
-        res = cpppar_crossprod(RightScores, 1, nthreads) * adj_value
-        return(res)
-    }
-
-    xy = cpppar_matprod(RightScores, myBread, nthreads)
-    res = cpppar_crossprod(xy, 1, nthreads) * adj_value
-    res
-}
 
 
 vcov_setup = function(){
@@ -1256,12 +1386,13 @@ vcov_setup = function(){
                 optional = TRUE)
     time = list(guess_from = list(panel.id = 2), label = "time")
 
-    vcov_newey_west_setup = list(name = c("NW", "newey", "west", "newey_west"),
+    vcov_newey_west_setup = list(name = c("NW", "newey_west"),
                                  fun_name = "vcov_newey_west_internal",
                                  vcov_label = "Newey-West")
 
     vcov_newey_west_setup$vars = list(unit = unit, time = time)
     vcov_newey_west_setup$arg_main = "lag"
+    vcov_newey_west_setup$rdname = "vcov_hac"
     vcov_newey_west_setup$patterns = c("", "time", "unit + time")
 
 
@@ -1269,12 +1400,13 @@ vcov_setup = function(){
     # driscoll_kraay
     #
 
-    vcov_driscoll_kraay_setup = list(name = c("DK", "driscoll", "kraay", "driscoll_kraay"),
-                                 fun_name = "vcov_driscoll_kraay_internal",
-                                 vcov_label = "Driscoll-Kraay")
+    vcov_driscoll_kraay_setup = list(name = c("DK", "driscoll_kraay"),
+                                     fun_name = "vcov_driscoll_kraay_internal",
+                                     vcov_label = "Driscoll-Kraay")
 
     vcov_driscoll_kraay_setup$vars = list(time = time)
     vcov_driscoll_kraay_setup$arg_main = "lag"
+    vcov_driscoll_kraay_setup$rdname = "vcov_hac"
     vcov_driscoll_kraay_setup$patterns = c("", "time")
 
 
@@ -1296,6 +1428,7 @@ vcov_setup = function(){
     vcov_conley_setup = list(name = "conley", fun_name = "vcov_conley_internal", vcov_label = "Conley")
     vcov_conley_setup$vars = list(lat = lat, lng = lng)
     vcov_conley_setup$arg_main = c("cutoff", "pixel", "distance")
+    vcov_conley_setup$rdname = "vcov_conley"
     vcov_conley_setup$patterns = c("", "lat + lng")
 
 
@@ -1324,11 +1457,57 @@ vcov_setup = function(){
                     vcov_newey_west_setup,
                     vcov_driscoll_kraay_setup,
                     vcov_conley_setup)
-                    # vcov_conley_hac_setup)
+    # vcov_conley_hac_setup)
 
     options(fixest_vcov_builtin = all_vcov)
 
 }
+
+
+
+####
+#### Internal ####
+####
+
+
+
+
+vcovClust = function (cluster, myBread, scores, adj = FALSE, do.unclass = TRUE, sandwich = TRUE, nthreads = 1){
+    # Internal function: no need for controls, they come beforehand
+    # - cluster: the vector of dummies
+    # - myBread: original vcov
+    # - scores
+    # Note: if length(unique(cluster)) == n (i.e. White correction), then the adj are such that vcovClust is equivalent to vcovHC(res, type="HC1")
+    # Source: http://cameron.econ.ucdavis.edu/research/Cameron_Miller_JHR_2015_February.pdf
+    #         Cameron & Miller -- A Practitioner’s Guide to Cluster-Robust Inference
+
+    n = NROW(scores)
+
+    # Control for cluster type
+    if(do.unclass){
+        cluster = quickUnclassFactor(cluster)
+    }
+
+    Q = max(cluster)
+    RightScores = cpp_tapply_sum(Q, scores, cluster)
+
+    # Finite sample correction:
+    if(adj){
+        adj_value = Q / (Q - 1)
+    } else {
+        adj_value = 1
+    }
+
+    if(!sandwich){
+        res = cpppar_crossprod(RightScores, 1, nthreads) * adj_value
+        return(res)
+    }
+
+    xy = cpppar_matprod(RightScores, myBread, nthreads)
+    res = cpppar_crossprod(xy, 1, nthreads) * adj_value
+    res
+}
+
 
 vcov_iid_internal = function(bread, ...){
     bread
@@ -1494,6 +1673,8 @@ vcov_newey_west_internal = function(bread, scores, vars, dof, sandwich, nthreads
     attr(vcov, "G") = n_time
     attr(vcov, "min_cluster_size") = n_time
 
+    attr(vcov, "type_info") = paste0(" (L=", lag, ")")
+
     vcov
 }
 
@@ -1508,7 +1689,7 @@ vcov_driscoll_kraay_internal = function(bread, scores, vars, dof, sandwich, nthr
 
     # Lag: simple rule of thumb
     if(missnull(lag)){
-        lag = max(floor(n_time^(1/4)), 1)
+        lag = floor(n_time^(1/4))
     }
 
     w = seq(1, 0, by = -(1/(lag + 1)))
@@ -1519,7 +1700,7 @@ vcov_driscoll_kraay_internal = function(bread, scores, vars, dof, sandwich, nthr
     time_ro = time[my_order]
     scores_ro = scores[my_order, , drop = FALSE]
 
-    meat = cpp_driscoll_kraay_meat(scores_ro, w, time_ro, n_time, nthreads)
+    meat = cpp_driscoll_kraay(scores_ro, w, time_ro, n_time, nthreads)
 
     if(sandwich){
         vcov = prepare_sandwich(bread, meat, nthreads)
@@ -1534,10 +1715,12 @@ vcov_driscoll_kraay_internal = function(bread, scores, vars, dof, sandwich, nthr
     attr(vcov, "G") = n_time
     attr(vcov, "min_cluster_size") = n_time
 
+    attr(vcov, "type_info") = paste0(" (L=", lag, ")")
+
     vcov
 }
 
-vcov_conley_internal = function(bread, scores, vars, dof, sandwich, nthreads,
+vcov_conley_internal = function(bread, scores, vars, sandwich, nthreads,
                                 cutoff = NULL, pixel = 0, distance = "triangular", ...){
 
     lon = vars$lng
@@ -1563,13 +1746,12 @@ vcov_conley_internal = function(bread, scores, vars, dof, sandwich, nthreads,
         stop("In vcov.fixest, Conley VCOV cannot be computed: the latitude is outside the [-90, 90] range (current range is [", fsignif(lat_range[1]), ", ", fsignif(lat_range[2]), "]).", call. = FALSE)
     }
 
+    # cutoff
+    cutoff = check_set_cutoff(cutoff)
+
     # pixel
     check_value(pixel, "numeric scalar GE{0}",
                 .prefix = "In vcov.fixest, Conley VCOV cannot be computed: the argument 'pixel'")
-
-
-    # cutoff
-    cutoff = check_set_cutoff(cutoff)
 
     # distance
     check_value_plus(distance, "match(triangular, spherical)")
@@ -1579,6 +1761,11 @@ vcov_conley_internal = function(bread, scores, vars, dof, sandwich, nthreads,
 
     #   END :: checks
     #
+
+    metric = attr(cutoff, "metric")
+    if(metric == "mi"){
+        pixel = pixel * 1.60934
+    }
 
     if(pixel > 0){
         pixel_lat = pixel / 111
@@ -1609,7 +1796,6 @@ vcov_conley_internal = function(bread, scores, vars, dof, sandwich, nthreads,
         vcov = meat
     }
 
-    metric = attr(cutoff, "metric")
     scale = if(metric == "km") 1 else 1 / 1.60934
 
     attr(vcov, "type_info") = paste0(" (", cutoff * scale, metric, ")")
@@ -1742,7 +1928,7 @@ slide_args = function(x, ...){
                 # => implicit specification
                 # sliding
 
-                implicit_args = setdiff(names(mc), names(sc))
+                implicit_args = setdiff(names(mc), c(names(sc), ""))
                 remaining_args = setdiff(names(dots), names(sc))
 
                 for(i in seq_along(implicit_args)){
@@ -1815,8 +2001,16 @@ gen_vcov_aliases = function(){
     # only for vcov functions having one or more main argument
 
     all_vcov = getOption("fixest_vcov_builtin")
-    all_vcov_names = unlist(lapply(all_vcov, `[[`, "name"))
-    all_vcov_names = all_vcov_names[nchar(all_vcov_names) > 0]
+
+    fun_core = '
+    #\' @rdname __RDNAME__
+    __FUN__ = function(__ARGS__){
+        extra_args = list(__EXTRA__)
+        vcov_request = list(vcov = "__VCOV__", extra_args = extra_args)
+        class(vcov_request) = "fixest_vcov_request"
+        vcov_request
+    }'
+
 
     text = c()
     all_fun_names = c()
@@ -1826,13 +2020,18 @@ gen_vcov_aliases = function(){
 
         arg_main = vcov_current$arg_main
         if(!is.null(arg_main)){
-
-            core = paste0("__FUN__ = function(", paste0(arg_main, " = NULL", collapse = ", "), "){\n",
-                          "    list(", paste0(arg_main, " = ", arg_main, collapse = ", "), ")\n",
-                          "}\n\n")
-
-
             vcov_names_all = vcov_current$name
+
+            vcov_name = vcov_names_all[1]
+            rdname = vcov_current$rdname
+            args = paste0(arg_main, " = NULL", collapse = ", ")
+            extra = paste0(arg_main, " = ", arg_main, collapse = ", ")
+
+            core = gsub("__RDNAME__", rdname, fun_core)
+            core = gsub("__VCOV__", vcov_name, core)
+            core = gsub("__ARGS__", args, core)
+            core = gsub("__EXTRA__", extra, core)
+
             for(fname in vcov_names_all){
                 text = c(text, gsub("__FUN__", fname, core, fixed = TRUE))
                 all_fun_names = c(all_fun_names, fname)

@@ -3,48 +3,43 @@
 
 
 
-NW = function(lag = NULL){
-    list(lag = lag)
-}
 
+    #' @rdname vcov_hac
+    NW = function(lag = NULL){
+        extra_args = list(lag = lag)
+        vcov_request = list(vcov = "NW", extra_args = extra_args)
+        class(vcov_request) = "fixest_vcov_request"
+        vcov_request
+    }
 
-newey = function(lag = NULL){
-    list(lag = lag)
-}
+    #' @rdname vcov_hac
+    newey_west = function(lag = NULL){
+        extra_args = list(lag = lag)
+        vcov_request = list(vcov = "NW", extra_args = extra_args)
+        class(vcov_request) = "fixest_vcov_request"
+        vcov_request
+    }
 
+    #' @rdname vcov_hac
+    DK = function(lag = NULL){
+        extra_args = list(lag = lag)
+        vcov_request = list(vcov = "DK", extra_args = extra_args)
+        class(vcov_request) = "fixest_vcov_request"
+        vcov_request
+    }
 
-west = function(lag = NULL){
-    list(lag = lag)
-}
+    #' @rdname vcov_hac
+    driscoll_kraay = function(lag = NULL){
+        extra_args = list(lag = lag)
+        vcov_request = list(vcov = "DK", extra_args = extra_args)
+        class(vcov_request) = "fixest_vcov_request"
+        vcov_request
+    }
 
-
-newey_west = function(lag = NULL){
-    list(lag = lag)
-}
-
-
-DK = function(lag = NULL){
-    list(lag = lag)
-}
-
-
-driscoll = function(lag = NULL){
-    list(lag = lag)
-}
-
-
-kraay = function(lag = NULL){
-    list(lag = lag)
-}
-
-
-driscoll_kraay = function(lag = NULL){
-    list(lag = lag)
-}
-
-
-conley = function(cutoff = NULL, pixel = NULL, distance = NULL){
-    list(cutoff = cutoff, pixel = pixel, distance = distance)
-}
-
-
+    #' @rdname vcov_conley
+    conley = function(cutoff = NULL, pixel = NULL, distance = NULL){
+        extra_args = list(cutoff = cutoff, pixel = pixel, distance = distance)
+        vcov_request = list(vcov = "conley", extra_args = extra_args)
+        class(vcov_request) = "fixest_vcov_request"
+        vcov_request
+    }
