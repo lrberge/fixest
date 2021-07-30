@@ -1,5 +1,5 @@
 
-# fixest 0.9.1
+# fixest 0.10.0
 
 ## Bugs fixes
 

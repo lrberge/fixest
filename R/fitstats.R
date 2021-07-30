@@ -542,7 +542,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
     type = tolower(type)
 
     # To update
-    if(!isTRUE(x$summary) || any(c("se", "cluster", "dof") %in% names(dots))){
+    if(!isTRUE(x$summary) || any(c("se", "cluster", "ssc") %in% names(dots))){
         x = summary(x, ...)
     }
 
@@ -852,7 +852,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
                                 if(is.null(flags) || !is.null(dots$se) || !is.null(dots$cluster)){
                                     my_x_first = summary(my_x_first, ...)
                                 } else {
-                                    my_x_first = summary(my_x_first, vcov = flags$vcov, dof = flags$dof, ...)
+                                    my_x_first = summary(my_x_first, vcov = flags$vcov, ssc = flags$ssc, ...)
                                 }
                             }
 
@@ -1327,7 +1327,7 @@ r2 = function(x, type = "all", full_names = FALSE){
 #'
 #'
 #'
-degrees_freedom = function(x, type, vars = NULL, se = NULL, cluster = NULL, dof = NULL, stage = 2){
+degrees_freedom = function(x, type, vars = NULL, se = NULL, cluster = NULL, ssc = NULL, stage = 2){
     check_arg(x, "class(fixest) mbt")
     check_arg_plus(type, "match(k, resid, t)")
     check_arg(stage, "integer scalar GE{1} LE{2}")
@@ -1350,8 +1350,8 @@ degrees_freedom = function(x, type, vars = NULL, se = NULL, cluster = NULL, dof 
         stop("The argument 'type' is required but is currently missing.")
     }
 
-    if(!isTRUE(x$summary) || !missnull(se) || !missnull(cluster) || !missnull(dof)){
-        x = summary(x, se = se, cluster = cluster, dof = dof)
+    if(!isTRUE(x$summary) || !missnull(se) || !missnull(cluster) || !missnull(ssc)){
+        x = summary(x, se = se, cluster = cluster, ssc = ssc)
     }
 
     vcov = x$cov.scaled
@@ -1515,9 +1515,9 @@ kp_stat = function(x){
         x_new$scores = my_scores
 
         vcov = x$summary_flags$vcov
-        dof = x$summary_flags$dof
+        ssc = x$summary_flags$ssc
 
-        meat = vcov(x_new, vcov = vcov, dof = dof, sandwich = FALSE)
+        meat = vcov(x_new, vcov = vcov, ssc = ssc, sandwich = FALSE)
         vhat = solve(K, t(solve(K, meat)))
 
         # DOF correction now

@@ -67,7 +67,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 
     # checking the arguments
     validate_dots(suggest_args = c("n", "type", "se", "cluster"),
-                  valid_args = c("se", "cluster", "dof", "forceCovariance", "keepBounded"))
+                  valid_args = c("se", "cluster", "ssc", "forceCovariance", "keepBounded"))
 
     # The objects from the estimation and the summary are identical, except regarding the vcov
 	fromSummary = isTRUE(x$summary)
@@ -283,11 +283,11 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #'
 #' @method summary fixest
 #'
-#' @param se Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.
+#' @param se Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "iid"}. Note that this argument is deprecated, you should use \code{vcov} instead.
 #' @param cluster Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1", "var2")]}, \code{cluster = c("var1", "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster). You can interact two variables using \code{^} with the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.
 #' @param stage Can be equal to \code{2} (default), \code{1}, \code{1:2} or \code{2:1}. Only used if the object is an IV estimation: defines the stage to which \code{summary} should be applied. If \code{stage = 1} and there are multiple endogenous regressors or if \code{stage} is of length 2, then an object of class \code{fixest_multi} is returned.
 #' @param object A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
-#' @param dof An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{dof}} for this argument. The arguments and defaults of the function \code{\link[fixest]{dof}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "conventional"}, \code{t.df = "conventional"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{dof}} for details.
+#' @param ssc An object of class \code{ssc.type} obtained with the function \code{\link[fixest]{ssc}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{ssc}} for this argument. The arguments and defaults of the function \code{\link[fixest]{ssc}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "conventional"}, \code{t.df = "conventional"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{ssc}} for details.
 #' @param .vcov A user provided covariance matrix or a function computing this matrix. If a matrix, it must be a square matrix of the same number of rows as the number of variables estimated. If a function, it must return the previously mentioned matrix.
 #' @param lean Logical, default is \code{FALSE}. Used to reduce the (memory) size of the summary object. If \code{TRUE}, then all objects of length N (the number of observations) are removed from the result. Note that some \code{fixest} methods may consequently not work when applied to the summary.
 #' @param forceCovariance (Advanced users.) Logical, default is \code{FALSE}. In the peculiar case where the obtained Hessian is not invertible (usually because of collinearity of some variables), use this option to force the covariance matrix, by using a generalized inverse of the Hessian. This can be useful to spot where possible problems come from.
@@ -356,9 +356,10 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' summary(est_pois, .vcov = vcovCL, cluster = trade[, c("Destination", "Product")])
 #'
 #'
-summary.fixest = function(object, vcov = NULL, se = NULL, cluster = NULL, dof = NULL, .vcov = NULL,
+summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov = NULL,
                           stage = 2, lean = FALSE, agg = NULL, forceCovariance = FALSE,
-                          keepBounded = FALSE, n = 1000, nthreads = getFixest_nthreads(), ...){
+                          se = NULL, keepBounded = FALSE, n = 1000,
+                          nthreads = getFixest_nthreads(), ...){
 
 	# computes the clustered SEs and returns the modified vcov and coeftable
     # NOTA: if the object is already a summary
@@ -387,7 +388,7 @@ summary.fixest = function(object, vcov = NULL, se = NULL, cluster = NULL, dof = 
 	        # From print
 	        return(object)
 
-	    } else if(is.null(vcov) && is.null(dof) && is.null(agg)){
+	    } else if(is.null(vcov) && is.null(ssc) && is.null(agg)){
 	        # We return directly the object ONLY if not any other argument has been passed
 	        if(length(mc) == 2){
 	            # No modification required
@@ -400,7 +401,7 @@ summary.fixest = function(object, vcov = NULL, se = NULL, cluster = NULL, dof = 
 	    }
 
 	    if(do_assign){
-	        assign_flags(object$summary_flags, vcov = vcov, dof = dof, agg = agg)
+	        assign_flags(object$summary_flags, vcov = vcov, ssc = ssc, agg = agg)
 	    }
 	}
 
@@ -408,7 +409,7 @@ summary.fixest = function(object, vcov = NULL, se = NULL, cluster = NULL, dof = 
 	if(!any(c("fromPrint", "iv", "summary_flags") %in% names(mc))){
 	    # condition means NOT internal call => thus client call
 	    if(!is.function(vcov)){
-	        validate_dots(suggest_args = c("se", "cluster", "dof"))
+	        validate_dots(suggest_args = c("se", "cluster", "ssc"))
 	    }
 	}
 
@@ -437,14 +438,14 @@ summary.fixest = function(object, vcov = NULL, se = NULL, cluster = NULL, dof = 
 	    for(s in seq_along(stage)){
 	        if(stage[s] == 1){
                 for(i in seq_along(object$iv_first_stage)){
-                    res[[length(res) + 1]] = summary(object$iv_first_stage[[i]], vcov = vcov, dof = dof, lean = lean, forceCovariance = forceCovariance, n = n, nthreads = nthreads, iv = TRUE)
+                    res[[length(res) + 1]] = summary(object$iv_first_stage[[i]], vcov = vcov, ssc = ssc, lean = lean, forceCovariance = forceCovariance, n = n, nthreads = nthreads, iv = TRUE)
 
                     stage_names[length(stage_names) + 1] = paste0("First stage: ", names(object$iv_first_stage)[i])
                 }
 
 	        } else {
 	            # We keep the information on clustering => matters for wald tests of 1st stage
-	            my_res = summary(object, vcov = vcov, dof = dof, lean = lean, forceCovariance = forceCovariance, n = n, nthreads = nthreads, iv = TRUE)
+	            my_res = summary(object, vcov = vcov, ssc = ssc, lean = lean, forceCovariance = forceCovariance, n = n, nthreads = nthreads, iv = TRUE)
 
 	            res[[length(res) + 1]] = my_res
 	            stage_names[length(stage_names) + 1] = "Second stage"
@@ -481,7 +482,10 @@ summary.fixest = function(object, vcov = NULL, se = NULL, cluster = NULL, dof = 
 
 
 	# The new VCOV
-	vcov = vcov.fixest(object, vcov = vcov, dof = dof, forceCovariance = forceCovariance, keepBounded = keepBounded, nthreads = nthreads, attr = TRUE, ...)
+	vcov = vcov.fixest(object, vcov = vcov, ssc = ssc, forceCovariance = forceCovariance, keepBounded = keepBounded, nthreads = nthreads, attr = TRUE, se = se, cluster = cluster, ...)
+	# NOTA:
+	# I need to add se and cluster even if they're not needed only to ensure it
+	# works fine when vcov is a function and cluster/se are arguments
 
 	sd2 = diag(vcov)
 	sd2[sd2 < 0] = NA
@@ -551,7 +555,7 @@ summary.fixest = function(object, vcov = NULL, se = NULL, cluster = NULL, dof = 
 	    object$summary_from_fit = TRUE
 	} else {
 	    # build_flags does not accept missing arguments
-	    if(missing(dof)) dof = NULL
+	    if(missing(ssc)) ssc = NULL
 
 	    if(lean){
 
@@ -565,7 +569,7 @@ summary.fixest = function(object, vcov = NULL, se = NULL, cluster = NULL, dof = 
 
 	    }
 
-	    object$summary_flags = build_flags(mc, vcov = vcov_in, dof = dof)
+	    object$summary_flags = build_flags(mc, vcov = vcov_in, ssc = ssc)
 	    object$summary_from_fit = NULL
 	}
 
@@ -582,13 +586,13 @@ summary.fixest = function(object, vcov = NULL, se = NULL, cluster = NULL, dof = 
 
 
 #' @rdname summary.fixest
-summary.fixest_list = function(object, se, cluster, dof = getFixest_dof(), .vcov, stage = 2, lean = FALSE, n, ...){
+summary.fixest_list = function(object, se, cluster, ssc = getFixest_ssc(), .vcov, stage = 2, lean = FALSE, n, ...){
 
     dots = list(...)
 
     res = list()
     for(i in seq_along(object)){
-        my_res = summary(object[[i]], se = se, cluster = cluster, dof = dof, .vcov = .vcov, stage = stage, lean = lean, n = n)
+        my_res = summary(object[[i]], se = se, cluster = cluster, ssc = ssc, .vcov = .vcov, stage = stage, lean = lean, n = n)
 
         # we unroll in case of IV
         if("fixest_multi" %in% class(my_res)){
@@ -670,7 +674,7 @@ summary.fixest_list = function(object, se, cluster, dof = getFixest_dof(), .vcov
 #'
 #'
 #'
-coeftable = function(object, se, cluster, keep, drop, order, ...){
+coeftable = function(object, vcov, ssc, cluster, keep, drop, order, ...){
     # We don't explicitly refer to the other arguments
 
     check_arg(keep, drop, order, "NULL character vector no na")
@@ -705,7 +709,7 @@ coeftable = function(object, se, cluster, keep, drop, order, ...){
         }
 
         if(ok == FALSE){
-            stop("No coefficient table found. Was the 'object' really an estimation?")
+            stop("Sorry, the coeffficients table could not be extracted.")
         }
 
     }
@@ -726,11 +730,8 @@ coeftable = function(object, se, cluster, keep, drop, order, ...){
     res
 }
 
-#' @rdname coeftable
-ctable <- coeftable
-
 #' @describeIn coeftable Extracts the p-value of an estimation
-pvalue = function(object, se, cluster, keep, drop, order, ...){
+pvalue = function(object, vcov, ssc, cluster, keep, drop, order, ...){
 
     check_arg(keep, drop, order, "NULL character vector no na")
 
@@ -765,7 +766,7 @@ pvalue = function(object, se, cluster, keep, drop, order, ...){
 }
 
 #' @describeIn coeftable Extracts the t-statistics of an estimation
-tstat = function(object, se, cluster, keep, drop, order, ...){
+tstat = function(object, vcov, ssc, cluster, keep, drop, order, ...){
 
     check_arg(keep, drop, order, "NULL character vector no na")
 
@@ -775,7 +776,7 @@ tstat = function(object, se, cluster, keep, drop, order, ...){
     mat = eval(mc, parent.frame())
 
     if(ncol(mat) != 4){
-        stop("No appropriate coefficient table found (number of columns is ", ncol(mat), " instead of 4). You can investigate the problem using function ctable().")
+        stop("No appropriate coefficient table found (number of columns is ", ncol(mat), " instead of 4). You can investigate the problem using function coeftable().")
     }
 
     res = mat[, 3]
@@ -800,9 +801,15 @@ tstat = function(object, se, cluster, keep, drop, order, ...){
 }
 
 #' @describeIn coeftable Extracts the standard-error of an estimation
-se = function(object, se, cluster, keep, drop, order, ...){
+se = function(object, vcov, ssc, cluster, keep, drop, order, ...){
 
     check_arg(keep, drop, order, "NULL character vector no na")
+
+    if(is.matrix(object) && nrow(object) == ncol(object)){
+        # special case => object is a VCOV matrix and NOT an estimation
+        return(sqrt(diag(object)))
+    }
+
 
     mc = match.call()
     mc[[1]] = as.name("coeftable")
@@ -810,7 +817,7 @@ se = function(object, se, cluster, keep, drop, order, ...){
     mat = eval(mc, parent.frame())
 
     if(ncol(mat) != 4){
-        stop("No appropriate coefficient table found (number of columns is ", ncol(mat), " instead of 4). You can investigate the problem using function ctable().")
+        stop("No appropriate coefficient table found (number of columns is ", ncol(mat), " instead of 4). You can investigate the problem using function coeftable().")
     }
 
     res = mat[, 2]
@@ -7481,11 +7488,11 @@ predict.fixest = function(object, newdata, type = c("response", "link"), fixef =
 #' confint(est_pois, se = "cluster")
 #'
 #'
-confint.fixest = function(object, parm, level = 0.95, se, cluster, dof = getFixest_dof(), ...){
+confint.fixest = function(object, parm, level = 0.95, se, cluster, ssc = getFixest_ssc(), ...){
 
     # Checking the arguments
     validate_dots(suggest_args = c("parm", "level", "se", "cluster"),
-                  valid_args = c("exact_dof", "forceCovariance", "keepBounded"))
+                  valid_args = c("forceCovariance", "keepBounded"))
 
 	# Control
 	if(!is.numeric(level) || !length(level) == 1 || level >= 1 || level <= .50){
@@ -7516,7 +7523,7 @@ confint.fixest = function(object, parm, level = 0.95, se, cluster, dof = getFixe
 	}
 
 	# The proper SE
-	sum_object = summary(object, se = se, cluster = cluster, dof = dof, ...)
+	sum_object = summary(object, se = se, cluster = cluster, ssc = ssc, ...)
 
 	se_all = sum_object$se
 	coef_all = object$coefficients

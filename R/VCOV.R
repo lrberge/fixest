@@ -68,7 +68,7 @@
 #' vcov(est_pois_simple, cluster = ~Product)
 #'
 #'
-vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr = FALSE, forceCovariance = FALSE,
+vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr = FALSE, forceCovariance = FALSE,
                        keepBounded = FALSE, nthreads = getFixest_nthreads(), ...){
     # computes the clustered vcov
 
@@ -96,7 +96,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
 
     if(!any(c("only_varnames", "sandwich") %in% names(dots)) && !is.function(vcov)){
         # 1st condition means NOT a client call
-        validate_dots(suggest_args = c("vcov", "dof"))
+        validate_dots(suggest_args = c("vcov", "ssc"))
     }
 
     # All the available VCOVs
@@ -116,7 +116,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
     }
 
     # If it's a summary => we give the vcov directly without further computation! except if arguments are provided which would mean that the user wants the new vcov
-    if(isTRUE(object$summary) && missnull(vcov) && missnull(dof)){
+    if(isTRUE(object$summary) && missnull(vcov) && missnull(ssc)){
         vcov = object$cov.scaled
         if(!is_attr) {
             all_attr = names(attributes(vcov_mat))
@@ -134,20 +134,27 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
 
         vcov_default = getFixest_vcov()
 
-        n_fe = length(object$fixef_id)
+        if(!is.null(object$panel.id)){
+            # Panel has precedence over FEs
+            vcov = vcov_default$panel
 
-        if(n_fe == 0){
-            vcov = vcov_default$no_FE
-        } else if(n_fe == 1){
-            vcov = vcov_default$one_FE
         } else {
-            vcov = vcov_default$two_FE
+            n_fe = length(object$fixef_id)
+
+            if(n_fe == 0){
+                vcov = vcov_default$no_FE
+            } else if(n_fe == 1){
+                vcov = vcov_default$one_FE
+            } else {
+                vcov = vcov_default$two_FE
+            }
+
+            if(!is.null(object$fixef_sizes) && object$fixef_sizes[1] == 1){
+                # Special case => cleaner output
+                vcov = vcov_default$no_FE
+            }
         }
 
-        if(!is.null(object$fixef_sizes) && object$fixef_sizes[1] == 1){
-            # Special case => cleaner output
-            vcov = vcov_default$no_FE
-        }
     }
 
 
@@ -177,7 +184,6 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
     # Checking the value of vcov
     check_arg_plus(vcov, "match | formula | function | matrix | class(fixest_vcov_request)", .choices = all_vcov_names)
 
-    # WIP => to implement (not that difficult)
     if(is.function(vcov)){
 
         # The name
@@ -194,12 +200,13 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
                 # cleaning
                 attr(vcov, "deparsed_arg") = NULL
             }
+
+            # Getting the right arguments
+            arg_list = catch_fun_args(vcov, arg_list, exclude_args = "vcov")
         }
 
         vcov_name = gsub("sandwich::", "", vcov_name, fixed = TRUE)
 
-        # Getting the right arguments
-        arg_list = catch_fun_args(vcov, arg_list, exclude_args = "vcov")
         # We shouldn't have a prior on the name of the first argument
         arg_names = formalArgs(vcov)
         arg_list[[arg_names[1]]] = object
@@ -228,7 +235,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
 
     extra_args = NULL
     if(inherits(vcov, "fixest_vcov_request")){
-        if(!is.null(vcov$dof)) dof = vcov$dof
+        if(!is.null(vcov$ssc)) ssc = vcov$ssc
         var_names_all = vcov$var_names_all
         var_values_all = vcov$vcov_vars
         extra_args = vcov$extra_args
@@ -261,11 +268,11 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
             vcov_vars = fml2varnames(vcov_fml[c(1, 3)], combine_fun = TRUE)
         }
 
-        qui_dof = grepl("dof(", vcov_vars, fixed = TRUE)
-        if(any(qui_dof)){
-            dof_txt = vcov_vars[qui_dof]
-            dof = eval(str2lang(dof_txt))
-            vcov_vars = vcov_vars[!qui_dof]
+        qui_ssc = grepl("ssc(", vcov_vars, fixed = TRUE)
+        if(any(qui_ssc)){
+            ssc_txt = vcov_vars[qui_ssc]
+            ssc = eval(str2lang(ssc_txt))
+            vcov_vars = vcov_vars[!qui_ssc]
         }
 
     }
@@ -365,6 +372,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
                     # - regex (based on variable names)
                     #
 
+
                     guesses = vcov_var_value$guess_from
                     # err_msg, vector of elements of the form c("expect" = "pblm")
                     err_msg = c()
@@ -378,7 +386,6 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
                                                "there was no fixed-effect in the estimation")
                                 err_msg = c(err_msg, msg)
                                 next
-                                # stop("The variable(s) used to compute the VCOV are typically deduced from the fixed-effects used in the estimation, but this one had no fixed-effect! Hence, please provide the variable name(s) explicitly in the RHS of the 'vcov' formula.")
                             }
 
                             if(length(object$fixef_vars) < guesses$fixef){
@@ -386,7 +393,6 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
                                                paste0("the estimation had only ", n_letter(length(object$fixef_vars)), " fixed-effect", plural_len(object$fixef_vars)))
                                 err_msg = c(err_msg, msg)
                                 next
-                                # stop("One variable used to compute the VCOV is typically deduced from the ", n_th(guesses$fixef), " fixed-effect used in the estimation, but this one had only ", length(object$fixef_vars), " fixed-effects! Hence, please provide all variable names explicitly in the RHS of the 'vcov' formula.")
                             }
 
                             var_names_all[vcov_var_name] = object$fixef_vars[guesses$fixef]
@@ -404,7 +410,6 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
                                                "no 'panel.id' was set in this estimation")
                                 err_msg = c(err_msg, msg)
                                 next
-                                # stop("One variable used to compute the VCOV is typically deduced from the 'panel.id' used in the estimation, but this one had no 'panel.id' specified! Hence, please provide the variable names explicitly in the RHS of the 'vcov' formula.")
                             }
 
                             vname = object$panel.id[guesses$panel.id]
@@ -416,7 +421,6 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
                                                paste0("the variable", enumerate_items(pblm, "s"), " set in 'panel.id' ", plural_len(pblm, "is"), " not in the data set"))
                                 err_msg = c(err_msg, msg)
                                 next
-                                # stop("The variable ", vname, " used to compute the VCOV is not in the original data set. Only variables in the data set can be used.")
                             }
 
                             # ATTENTION:
@@ -467,7 +471,8 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
                         }
                     }
 
-                    if(length(err_msg) > 0 && !isTRUE(vcov_var_value$optional)){
+                    if(is.null(var_values_all[[vcov_var_name]]) &&
+                       length(err_msg) > 0 && !isTRUE(vcov_var_value$optional)){
 
                         if(length(err_msg) == 1){
                             expect = names(err_msg)
@@ -605,13 +610,13 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
     # we compute the vcov. The adjustment (which is a pain in the neck) will come after that
     # Here vcov is ALWAYS a character scalar
 
-    # DoF related => we accept NULL
-    # we check dof since it can be used by the funs
-    if(missnull(dof)) dof = getFixest_dof()
-    check_arg(dof, "class(dof.type)", .message = "The argument 'dof.type' must be an object created by the function dof().")
+    # ssc related => we accept NULL
+    # we check ssc since it can be used by the funs
+    if(missnull(ssc)) ssc = getFixest_ssc()
+    check_arg(ssc, "class(ssc.type)", .message = "The argument 'ssc' must be an object created by the function ssc().")
 
     fun_name = vcov_select$fun_name
-    args = list(bread = bread, scores = scores, vars = vcov_vars, dof = dof,
+    args = list(bread = bread, scores = scores, vars = vcov_vars, ssc = ssc,
                 sandwich = sandwich, nthreads = nthreads,
                 var_names_all = var_names_all)
 
@@ -629,10 +634,10 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
     dimnames(vcov_noAdj) = dimnames(bread)
 
     ####
-    #### DoF adj ####
+    #### ssc ####
     ####
 
-    # dof is a dof object in here
+    # ssc is a ssc object in here
 
     n_fe = n_fe_ok = length(object$fixef_id)
 
@@ -649,15 +654,15 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
     nested_vars = sapply(vcov_select$vars, function(x) isTRUE(x$rm_nested))
     any_nested_var = length(nested_vars) > 0 && length(vcov_vars) > 0 && any(nested_vars[names(vcov_vars)])
 
-    if(dof$fixef.K == "none"){
+    if(ssc$fixef.K == "none"){
         # we do it with "minus" because of only slopes
         K = object$nparams
         if(n_fe_ok > 0){
             K = K - (sum(fixef_sizes_ok) - (n_fe_ok - 1))
         }
-    } else if(dof$fixef.K == "full" || !any_nested_var){
+    } else if(ssc$fixef.K == "full" || !any_nested_var){
         K = object$nparams
-        if(dof$fixef.force_exact && n_fe >= 2 && n_fe_ok >= 1){
+        if(ssc$fixef.force_exact && n_fe >= 2 && n_fe_ok >= 1){
             fe = fixef(object, notes = FALSE)
             K = K + (n_fe_ok - 1) - sum(attr(fe, "references"))
         }
@@ -671,7 +676,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
     # NESTING (== pain in the neck)
     #
 
-    if(dof$fixef.K == "nested" && n_fe_ok > 0 && any_nested_var){
+    if(ssc$fixef.K == "nested" && n_fe_ok > 0 && any_nested_var){
         # OK, let's go checking....
         # We always try to minimize computation.
         # So we maximize deduction and apply computation only in last resort.
@@ -725,7 +730,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
             # All FEs are removed, we add 1 for the intercept
             K = K - (sum(fixef_sizes_ok) - (n_fe_ok - 1)) + 1
         } else {
-            if(dof$fixef.force_exact && n_fe >= 2){
+            if(ssc$fixef.force_exact && n_fe >= 2){
                 fe = fixef(object, notes = FALSE)
                 nb_ref = attr(fe, "references")
 
@@ -755,7 +760,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
         }
         attr(vcov_noAdj, "ss_adj") = NULL
     } else {
-        ss_adj = ifelse(dof$adj, (n - 1) / (n - K), 1)
+        ss_adj = ifelse(ssc$adj, (n - 1) / (n - K), 1)
     }
 
     vcov_mat = vcov_noAdj * ss_adj
@@ -776,7 +781,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
     if(is_attr){
 
         min_cluster_size = attr(vcov_mat, "min_cluster_size")
-        if(dof$t.df == "min" && !is.null(min_cluster_size)){
+        if(ssc$t.df == "min" && !is.null(min_cluster_size)){
             attr(vcov_mat, "df.t") = max(min_cluster_size - 1, 1)
 
         } else {
@@ -789,7 +794,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
             attr(vcov_mat, "type_info") = NULL
         }
 
-        attr(vcov_mat, "dof") = dof
+        attr(vcov_mat, "ssc") = ssc
         attr(vcov_mat, "dof.K") = K
     } else {
         # We clean the attributes
@@ -805,6 +810,9 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
 
 
 
+####
+#### Small Sample Correction ####
+####
 
 
 
@@ -826,7 +834,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
 #' The following vignette: \href{https://lrberge.github.io/fixest/articles/standard_errors.html}{On standard-errors}, describes in details how the standard-errors are computed in \code{fixest} and how you can replicate standard-errors from other software.
 #'
 #' @return
-#' It returns a \code{dof.type} object.
+#' It returns a \code{ssc.type} object.
 #'
 #' @author
 #' Laurent Berge
@@ -850,16 +858,16 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
 #'
 #' # GLM
 #' # By default, there is no small sample adjustment in glm, as opposed to feglm.
-#' # To get the same SEs, we need to use dof(adj = FALSE)
+#' # To get the same SEs, we need to use ssc(adj = FALSE)
 #'
 #' res_pois = fepois(round(Petal.Length) ~ Petal.Width + Species, iris)
 #' res_glm = glm(round(Petal.Length) ~ Petal.Width + Species, iris, family = poisson())
-#' vcov(res_pois, dof = dof(adj = FALSE)) / vcov(res_glm)
+#' vcov(res_pois, ssc = ssc(adj = FALSE)) / vcov(res_glm)
 #'
 #' # Same example with the Gamma
 #' res_gamma = feglm(round(Petal.Length) ~ Petal.Width + Species, iris, family = Gamma())
 #' res_glm_gamma = glm(round(Petal.Length) ~ Petal.Width + Species, iris, family = Gamma())
-#' vcov(res_gamma, dof = dof(adj = FALSE)) / vcov(res_glm_gamma)
+#' vcov(res_gamma, ssc = ssc(adj = FALSE)) / vcov(res_glm_gamma)
 #'
 #' #
 #' # Fixed-effects corrections
@@ -883,40 +891,40 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, dof = NULL, attr
 #' # Default: fixef.K = "nested"
 #' #  => adjustment K = 1 + 5 (i.e. x + fe2)
 #' summary(est)
-#' attributes(vcov(est, attr = TRUE))[c("dof.type", "dof.K")]
+#' attributes(vcov(est, attr = TRUE))[c("ssc.type", "dof.K")]
 #'
 #'
 #' # fixef.K = FALSE
 #' #  => adjustment K = 1 (i.e. only x)
-#' summary(est, dof = dof(fixef.K = "none"))
-#' attr(vcov(est, dof = dof(fixef.K = "none"), attr = TRUE), "dof.K")
+#' summary(est, ssc = ssc(fixef.K = "none"))
+#' attr(vcov(est, ssc = ssc(fixef.K = "none"), attr = TRUE), "dof.K")
 #'
 #'
 #' # fixef.K = TRUE
 #' #  => adjustment K = 1 + 3 + 5 - 1 (i.e. x + fe1 + fe2 - 1 restriction)
-#' summary(est, dof = dof(fixef.K = "full"))
-#' attr(vcov(est, dof = dof(fixef.K = "full"), attr = TRUE), "dof.K")
+#' summary(est, ssc = ssc(fixef.K = "full"))
+#' attr(vcov(est, ssc = ssc(fixef.K = "full"), attr = TRUE), "dof.K")
 #'
 #'
 #' # fixef.K = TRUE & fixef.force_exact = TRUE
 #' #  => adjustment K = 1 + 3 + 5 - 2 (i.e. x + fe1 + fe2 - 2 restrictions)
-#' summary(est, dof = dof(fixef.K = "full", fixef.force_exact = TRUE))
-#' attr(vcov(est, dof = dof(fixef.K = "full", fixef.force_exact = TRUE), attr = TRUE), "dof.K")
+#' summary(est, ssc = ssc(fixef.K = "full", fixef.force_exact = TRUE))
+#' attr(vcov(est, ssc = ssc(fixef.K = "full", fixef.force_exact = TRUE), attr = TRUE), "dof.K")
 #'
 #' # There are two restrictions:
 #' attr(fixef(est), "references")
 #'
 #' #
-#' # To permanently set the default dof:
+#' # To permanently set the default ssc:
 #' #
 #'
 #' # eg no small sample adjustment:
-#' setFixest_dof(dof(adj = FALSE))
+#' setFixest_ssc(ssc(adj = FALSE))
 #'
 #' # Factory default
-#' setFixest_dof()
+#' setFixest_ssc()
 #'
-dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = "min", t.df = "min", fixef.force_exact = FALSE){
+ssc = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = "min", t.df = "min", fixef.force_exact = FALSE){
 
     check_arg_plus(adj, "loose logical scalar conv")
     check_arg_plus(fixef.K, "match(none, full, nested)")
@@ -925,7 +933,8 @@ dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = 
     check_arg(fixef.force_exact, cluster.adj, "logical scalar")
 
     res = list(adj = adj, fixef.K = fixef.K, cluster.adj = cluster.adj, cluster.df = cluster.df, t.df = t.df, fixef.force_exact = fixef.force_exact)
-    class(res) = "dof.type"
+    class(res) = "ssc.type"
+
     res
 }
 
@@ -940,7 +949,7 @@ dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = 
 #'
 #' @param x A \code{fixest} object.
 #' @param cluster Either i) a character vector giving the names of the variables onto which to cluster, or ii) a formula giving those names, or iii) a vector/list/data.frame giving the hard values of the clusters. Note that in cases i) and ii) the variables are fetched directly in the data set used for the estimation.
-#' @param dof An object returned by the function \code{\link[fixest]{dof}}. It specifies how to perform the small sample correction.
+#' @param ssc An object returned by the function \code{\link[fixest]{ssc}}. It specifies how to perform the small sample correction.
 #'
 #' @return
 #' If the first argument is a \code{fixest} object, then a VCOV is returned (i.e. a symmetric matrix).
@@ -989,16 +998,16 @@ dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = 
 #' feols(y ~ x1, base, vcov = vcov_cluster(rep(1:5, 30)))
 #'
 #'
-vcov_cluster = function(x, cluster = NULL, dof = NULL){
+vcov_cluster = function(x, cluster = NULL, ssc = NULL){
     # User-level function to compute clustered SEs
     # typically we only do checking and reshaping here
 
     # slide_args allows the implicit allocation of arguments
     # it makes semi-global changes => the values of the args here are modified
-    slide_args(x, cluster = cluster, dof = dof)
+    slide_args(x, cluster = cluster, ssc = ssc)
     IS_REQUEST = is.null(x)
 
-    check_value(dof, "NULL class(dof.type)", .message = "The argument 'dof.type' must be an object created by the function dof().")
+    check_value(ssc, "NULL class(ssc.type)", .message = "The argument 'ssc' must be an object created by the function ssc().")
 
 
     # We create the request
@@ -1055,9 +1064,9 @@ vcov_cluster = function(x, cluster = NULL, dof = NULL){
 
     }
 
-    if(use_request || !is.null(dof)){
+    if(use_request || !is.null(ssc)){
         vcov_request = list(vcov = vcov, vcov_vars = vcov_vars,
-                            var_names_all = var_names_all, dof = dof)
+                            var_names_all = var_names_all, ssc = ssc)
         class(vcov_request) = "fixest_vcov_request"
 
     } else {
@@ -1084,7 +1093,7 @@ vcov_cluster = function(x, cluster = NULL, dof = NULL){
 #'
 #' The functions on this page without the prefix "vcov_" do not compute VCOVs directly but are meant to be used in the argument \code{vcov} of \code{fixest} functions (e.g. in \code{\link[fixest]{vcov.fixest}} or even in the estimation calls).
 #'
-#' Note that for Driscoll-Kraay VCOVs, to ensure its properties there should be a minimum of 20 periods or so.
+#' Note that for Driscoll-Kraay VCOVs, to ensure its properties the number of periods should be long enough (a minimum of 20 periods or so).
 #'
 #' @inheritParams vcov_cluster
 #'
@@ -1137,18 +1146,18 @@ vcov_cluster = function(x, cluster = NULL, dof = NULL){
 NULL
 
 #' @rdname vcov_hac
-vcov_DK = function(x, time = NULL, lag = NULL, dof = NULL){
+vcov_DK = function(x, time = NULL, lag = NULL, ssc = NULL){
     # unit and time MUST be variables of the data set
     # otherwise: too error prone + extremely complex to set up + very edge case, so not worth it
     #
 
     # slide_args allows the implicit allocation of arguments
     # it makes semi-global changes => the values of the args here are modified
-    slide_args(x, time = time, lag = lag, dof = dof)
+    slide_args(x, time = time, lag = lag, ssc = ssc)
     IS_REQUEST = is.null(x)
 
     check_value(lag, "NULL integer scalar GE{1}")
-    check_value(dof, "NULL class(dof.type)", .message = "The argument 'dof.type' must be an object created by the function dof().")
+    check_value(ssc, "NULL class(ssc.type)", .message = "The argument 'ssc' must be an object created by the function ssc().")
 
     # time
     check_value(time, "NULL character scalar | os formula")
@@ -1161,9 +1170,9 @@ vcov_DK = function(x, time = NULL, lag = NULL, dof = NULL){
     # recreating the call
     vcov = .xpd(lhs = "dk", rhs = time)
 
-    if(!is.null(lag) || !is.null(dof)){
+    if(!is.null(lag) || !is.null(ssc)){
         extra_args = list(lag = lag)
-        vcov_request = list(vcov = vcov, dof = dof, extra_args = extra_args)
+        vcov_request = list(vcov = vcov, ssc = ssc, extra_args = extra_args)
         class(vcov_request) = "fixest_vcov_request"
     } else {
         # Everything can fit into a vcov formula
@@ -1181,18 +1190,18 @@ vcov_DK = function(x, time = NULL, lag = NULL, dof = NULL){
 }
 
 #' @rdname vcov_hac
-vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, dof = NULL){
+vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, ssc = NULL){
     # unit and time MUST be variables of the data set
     # otherwise: too error prone + extremely complex to set up + very edge case, so not worth it
     #
 
     # slide_args allows the implicit allocation of arguments
     # it makes semi-global changes => the values of the args here are modified
-    slide_args(x, unit = unit, time = time, lag = lag, dof = dof)
+    slide_args(x, unit = unit, time = time, lag = lag, ssc = ssc)
     IS_REQUEST = is.null(x)
 
     check_value(lag, "NULL integer scalar GE{1}")
-    check_value(dof, "NULL class(dof.type)", .message = "The argument 'dof.type' must be an object created by the function dof().")
+    check_value(ssc, "NULL class(ssc.type)", .message = "The argument 'ssc' must be an object created by the function ssc().")
 
     # unit
     check_value(unit, "NULL character scalar | os formula")
@@ -1213,9 +1222,9 @@ vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, dof = NULL){
     # recreating the call
     vcov = .xpd(lhs = "nw", rhs = c(unit, time))
 
-    if(!is.null(lag) || !is.null(dof)){
+    if(!is.null(lag) || !is.null(ssc)){
         extra_args = list(lag = lag)
-        vcov_request = list(vcov = vcov, dof = dof, extra_args = extra_args)
+        vcov_request = list(vcov = vcov, ssc = ssc, extra_args = extra_args)
         class(vcov_request) = "fixest_vcov_request"
     } else {
         # Everything can fit into a vcov formula
@@ -1273,14 +1282,14 @@ vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, dof = NULL){
 #'
 #'
 vcov_conley = function(x, lat = NULL, lon = NULL, cutoff = NULL, pixel = 0,
-                       distance = "triangular", dof = NULL){
+                       distance = "triangular", ssc = NULL){
 
     # slide_args allows the implicit allocation of arguments
     # it makes semi-global changes => the values of the args here are modified
-    slide_args(x, lat = lat, lon = lon, cutoff = cutoff, pixel = pixel, distance = distance, dof = dof)
+    slide_args(x, lat = lat, lon = lon, cutoff = cutoff, pixel = pixel, distance = distance, ssc = ssc)
     IS_REQUEST = is.null(x)
 
-    check_value(dof, "NULL class(dof.type)", .message = "The argument 'dof.type' must be an object created by the function dof().")
+    check_value(ssc, "NULL class(ssc.type)", .message = "The argument 'ssc' must be an object created by the function ssc().")
 
     # lat
     check_value(lat, "NULL character scalar | os formula")
@@ -1313,7 +1322,7 @@ vcov_conley = function(x, lat = NULL, lon = NULL, cutoff = NULL, pixel = 0,
     vcov = .xpd(lhs = "conley", rhs = c(lat, lon))
 
     extra_args = list(cutoff = cutoff, pixel = pixel, distance = distance)
-    vcov_request = list(vcov = vcov, dof = dof, extra_args = extra_args)
+    vcov_request = list(vcov = vcov, ssc = ssc, extra_args = extra_args)
     class(vcov_request) = "fixest_vcov_request"
 
     if(IS_REQUEST){
@@ -1351,7 +1360,7 @@ vcov_setup = function(){
     #
 
     vcov_clust_setup = list(name = c("cluster", ""), fun_name = "vcov_cluster_internal", vcov_label = "Clustered")
-    vcov_clust_setup$vars = list(cl1 = list(guess_from = list(fixef = 1), label = "clusters", to_int = TRUE, rm_nested = TRUE),
+    vcov_clust_setup$vars = list(cl1 = list(guess_from = list(panel.id = 1, fixef = 1), label = "clusters", to_int = TRUE, rm_nested = TRUE),
                                  cl2 = list(optional = TRUE, label = "second cluster", to_int = TRUE, rm_nested = TRUE),
                                  cl3 = list(optional = TRUE, label = "third cluster", to_int = TRUE, rm_nested = TRUE),
                                  cl4 = list(optional = TRUE, label = "fourth cluster", to_int = TRUE, rm_nested = TRUE))
@@ -1384,7 +1393,7 @@ vcov_setup = function(){
     # The variables
     unit = list(guess_from = list(panel.id = 1), label = "panel ID", to_int = TRUE, rm_nested = TRUE,
                 optional = TRUE)
-    time = list(guess_from = list(panel.id = 2), label = "time")
+    time = list(guess_from = list(panel.id = 2), label = "time", rm_nested = TRUE)
 
     vcov_newey_west_setup = list(name = c("NW", "newey_west"),
                                  fun_name = "vcov_newey_west_internal",
@@ -1513,7 +1522,7 @@ vcov_iid_internal = function(bread, ...){
     bread
 }
 
-vcov_hetero_internal = function(bread, scores, sandwich, dof, nthreads, ...){
+vcov_hetero_internal = function(bread, scores, sandwich, ssc, nthreads, ...){
 
     if(!sandwich){
         vcov_noAdj = cpppar_crossprod(scores, 1, nthreads)
@@ -1521,7 +1530,7 @@ vcov_hetero_internal = function(bread, scores, sandwich, dof, nthreads, ...){
         # we make a n/(n-1) adjustment to match vcovHC(type = "HC1")
 
         n = nrow(scores)
-        adj = ifelse(dof$cluster.adj, n / (n-1), 1)
+        adj = ifelse(ssc$cluster.adj, n / (n-1), 1)
 
         vcov_noAdj = cpppar_crossprod(cpppar_matprod(scores, bread, nthreads), 1, nthreads) * adj
     }
@@ -1530,7 +1539,7 @@ vcov_hetero_internal = function(bread, scores, sandwich, dof, nthreads, ...){
 }
 
 
-vcov_cluster_internal = function(bread, scores, vars, dof, sandwich, nthreads, var_names_all, ...){
+vcov_cluster_internal = function(bread, scores, vars, ssc, sandwich, nthreads, var_names_all, ...){
 
     # aliasing to add (a bit of) clarity
     cluster = vars
@@ -1573,14 +1582,14 @@ vcov_cluster_internal = function(bread, scores, vars, dof, sandwich, nthreads, v
             }
 
             vcov = vcov + (-1)**(i+1) * vcovClust(index, bread, scores,
-                                                  adj = dof$cluster.adj && dof$cluster.df == "conv",
+                                                  adj = ssc$cluster.adj && ssc$cluster.df == "conventional",
                                                   sandwich = sandwich, nthreads = nthreads)
 
         }
     }
 
     G_min = min(sapply(cluster, max))
-    if(dof$cluster.adj && dof$cluster.df == "min"){
+    if(ssc$cluster.adj && ssc$cluster.df == "min"){
         vcov = vcov * G_min / (G_min - 1)
         attr(vcov, "G") = G_min
     }
@@ -1607,7 +1616,7 @@ vcov_cluster_internal = function(bread, scores, vars, dof, sandwich, nthreads, v
 }
 
 
-vcov_newey_west_internal = function(bread, scores, vars, dof, sandwich, nthreads, lag = NULL, ...){
+vcov_newey_west_internal = function(bread, scores, vars, ssc, sandwich, nthreads, lag = NULL, ...){
     # Function that computes Newey-West VCOV
 
     # Setting up
@@ -1666,7 +1675,7 @@ vcov_newey_west_internal = function(bread, scores, vars, dof, sandwich, nthreads
         vcov = meat
     }
 
-    if(dof$cluster.adj){
+    if(ssc$cluster.adj){
         vcov = vcov * n_time / (n_time - 1)
     }
 
@@ -1679,7 +1688,7 @@ vcov_newey_west_internal = function(bread, scores, vars, dof, sandwich, nthreads
 }
 
 
-vcov_driscoll_kraay_internal = function(bread, scores, vars, dof, sandwich, nthreads, lag = NULL, ...){
+vcov_driscoll_kraay_internal = function(bread, scores, vars, ssc, sandwich, nthreads, lag = NULL, ...){
     # Function that computes Driscoll-Kraay VCOV
 
     # Setting up
@@ -1708,7 +1717,7 @@ vcov_driscoll_kraay_internal = function(bread, scores, vars, dof, sandwich, nthr
         vcov = meat
     }
 
-    if(dof$cluster.adj){
+    if(ssc$cluster.adj){
         vcov = vcov * n_time / (n_time - 1)
     }
 
@@ -1821,17 +1830,25 @@ oldargs_to_vcov = function(se, cluster, vcov, .vcov = NULL){
     }
 
     if(!missnull(vcov)){
-        id = c(!missnull(se), !missnull(cluster), !missnull(.vcov))
-        msg = c("se", "cluster", ".vcov")[id]
-        stop_up("You cannot use the argument 'vcov' in combination with ", enumerate_items(msg, "or.quote"), ".")
+
+        if(is.function(vcov)){
+            return(vcov)
+
+        } else {
+            id = c(!missnull(se), !missnull(cluster), !missnull(.vcov))
+            msg = c("se", "cluster", ".vcov")[id]
+            stop_up("You cannot use the argument 'vcov' in combination with ", enumerate_items(msg, "or.quote"), ".")
+        }
     }
 
     if(!missnull(.vcov)){
 
-        if(!missnull(se) || !missnull(cluster)){
-            id = c(!missnull(se), !missnull(cluster))
-            msg = c("se", "cluster")[id]
-            stop_up("You cannot use the argument '.vcov' in combination with ", enumerate_items(msg, "or.quote"), ".")
+        if(!is.function(.vcov)){
+            if(!missnull(se) || !missnull(cluster)){
+                id = c(!missnull(se), !missnull(cluster))
+                msg = c("se", "cluster")[id]
+                stop_up("You cannot use the argument '.vcov' in combination with ", enumerate_items(msg, "or.quote"), ".")
+            }
         }
 
         check_arg(.vcov, "matrix | function")
@@ -1863,7 +1880,7 @@ oldargs_to_vcov = function(se, cluster, vcov, .vcov = NULL){
     vcov
 }
 
-catch_fun_args = function(fun, dots, exclude_args = NULL, erase_args = FALSE, keep_dots = TRUE){
+catch_fun_args = function(fun, dots, exclude_args = NULL, erase_args = FALSE){
 
     arg_names = formalArgs(fun)
 
@@ -1873,27 +1890,20 @@ catch_fun_args = function(fun, dots, exclude_args = NULL, erase_args = FALSE, ke
         stop_up("When the argument '", fname, "' is a function, this function cannot contain any argument named ", enumerate_items(pblm, "or.quote"), " since ", ifsingle(pblm, "this name is", "these names are"), " reserved.")
     }
 
-    if(keep_dots && "..." %in% arg_names){
-        # we keep all variables
-        arg_list = dots
-
-    } else {
-        # we keep only the variables in formalArgs
-        vars = intersect(names(dots), arg_names)
-        arg_list = list()
-        if(length(vars) > 0){
-            arg_list[vars] = dots[vars]
-        }
+    # we keep only the variables in formalArgs
+    vars = intersect(names(dots), arg_names)
+    arg_list = list()
+    if(length(vars) > 0){
+        arg_list[vars] = dots[vars]
     }
 
-
-
     # variables from the main function call
-    sc = sys.calls()[[length(sys.calls()) - 1]]
-    args_previous = names(sc)[-1]
+    sysOrigin = sys.parent()
+    mc = match.call(sys.function(sysOrigin), sys.call(sysOrigin), expand.dots = FALSE)
+    args_previous = setdiff(names(mc)[-1], c("", "..."))
 
     for(var in intersect(args_previous, arg_names)){
-        arg_list[[var]] = eval(var, parent.frame())
+        arg_list[[var]] = eval(str2expression(var), parent.frame())
         # NOTA: shall I put to null these arguments? Since they are now used in
         # this function... I don't know... I think it's a good idea but there can be problems.
         # Let's do it then! I'm just adding the argument erase_args.
@@ -2072,29 +2082,29 @@ gen_vcov_aliases = function(){
 
 
 
-#' @rdname dof
+#' @rdname ssc
 #'
-#' @param dof.type An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}.
-setFixest_dof = function(dof.type = dof()){
+#' @param ssc.type An object of class \code{ssc.type} obtained with the function \code{\link[fixest]{ssc}}.
+setFixest_ssc = function(ssc.type = ssc()){
 
-    if(!"dof.type" %in% class(dof.type)){
-        stop("The argument 'dof.type' must be an object created by the function dof().")
+    if(!"ssc.type" %in% class(ssc.type)){
+        stop("The argument 'ssc' must be an object created by the function ssc().")
     }
 
-    options("fixest_dof" = dof.type)
+    options("fixest_ssc" = ssc.type)
 }
 
-#' @rdname dof
-"getFixest_dof"
+#' @rdname ssc
+"getFixest_ssc"
 
-getFixest_dof = function(){
+getFixest_ssc = function(){
 
-    dof.type = getOption("fixest_dof")
-    if(!"dof.type" %in% class(dof.type)){
-        stop("The value of getOption(\"fixest_dof\") is currently not legal. Please use function setFixest_dict to set it to an appropriate value.")
+    ssc = getOption("fixest_ssc")
+    if(!"ssc.type" %in% class(ssc)){
+        stop("The value of getOption(\"fixest_ssc\") is currently not legal. Please use function setFixest_dict to set it to an appropriate value.")
     }
 
-    dof.type
+    ssc
 }
 
 
@@ -2105,6 +2115,7 @@ getFixest_dof = function(){
 #' @param no_FE Character scalar equal to either: \code{"iid"} (default), or \code{"hetero"}. The type of standard-errors to use by default for estimations without fixed-effects.
 #' @param one_FE Character scalar equal to either: \code{"iid"}, \code{"hetero"}, or \code{"cluster"} (default). The type of standard-errors to use by default for estimations with \emph{one} fixed-effect.
 #' @param two_FE Character scalar equal to either: \code{"iid"}, \code{"hetero"}, \code{"cluster"} (default), or \code{"twoway"}. The type of standard-errors to use by default for estimations with \emph{two or more} fixed-effects.
+#' @param panel Character scalar equal to either: \code{"iid"}, \code{"hetero"}, \code{"cluster"} (default), or \code{"driscoll_kraaay"}. The type of standard-errors to use by default for estimations with the argument \code{panel.id} set up. Note that panel has precedence over the presence of fixed-effects.
 #' @param all Character scalar equal to either: \code{"iid"}, or \code{"hetero"}. By default is is NULL. If provided, it sets all the SEs to that value.
 #' @param reset Logical, default is \code{FALSE}. Whether to reset to the default values.
 #'
@@ -2116,34 +2127,43 @@ getFixest_dof = function(){
 #' # By default:
 #' # - no fixed-effect (FE): standard
 #' # - one or more FEs: cluster
+#' # - panel: cluster on panel id
 #'
 #' data(base_did)
 #' est_no_FE  = feols(y ~ x1, base_did)
 #' est_one_FE = feols(y ~ x1 | id, base_did)
 #' est_two_FE = feols(y ~ x1 | id + period, base_did)
+#' est_panel = feols(y ~ x1 | id + period, base_did, panel.id = ~id + period)
 #'
 #' etable(est_no_FE, est_one_FE, est_two_FE)
 #'
 #' # Changing the default standard-errors
-#' setFixest_vcov(no_FE = "hetero", one_FE = "standard", two_FE = "twoway")
-#' etable(est_no_FE, est_one_FE, est_two_FE)
+#' setFixest_vcov(no_FE = "hetero", one_FE = "iid",
+#'                two_FE = "twoway", panel = "drisc")
+#' etable(est_no_FE, est_one_FE, est_two_FE, est_panel)
 #'
 #' # Resetting the defaults
 #' setFixest_vcov(reset = TRUE)
 #'
 #'
-setFixest_vcov = function(no_FE = "standard", one_FE = "cluster", two_FE = "cluster", panel = "cluster", all = NULL, reset = FALSE){
+setFixest_vcov = function(no_FE = "iid", one_FE = "cluster", two_FE = "cluster",
+                          panel = "cluster", all = NULL, reset = FALSE){
+
+    # NOTE:
+    # The default walues should ALWAYS be working.
+    # That's why I don't allow conley SEs nor NW SEs
+    # => they can be not working at times
 
     check_arg_plus(no_FE,  "match(iid, hetero)")
     check_arg_plus(one_FE, "match(iid, hetero, cluster)")
     check_arg_plus(two_FE, "match(iid, hetero, cluster, twoway)")
-    check_arg_plus(panel, "match(iid, hetero, cluster, twoway, hac)")
+    check_arg_plus(panel, "match(iid, hetero, cluster, DK, driscoll_kraay)")
     check_arg_plus(all,  "NULL match(iid, hetero)")
     check_arg_plus(reset, "logical scalar")
 
     opts = getOption("fixest_vcov_default")
     if(is.null(opts) || !is.list(opts) || reset){
-        opts = list(no_FE = "standard", one_FE = "cluster", two_FE = "cluster", panel = "cluster")
+        opts = list(no_FE = "iid", one_FE = "cluster", two_FE = "cluster", panel = "cluster")
     }
 
     if(!is.null(all)){

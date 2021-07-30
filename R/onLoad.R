@@ -11,7 +11,7 @@
 	options("fixest_fl_authorized" = FALSE)
 
 	setFixest_coefplot("all", reset = TRUE)
-	setFixest_dof()
+	setFixest_ssc()
 
 	# # To include later
 	# cpp_setup_fork_presence()

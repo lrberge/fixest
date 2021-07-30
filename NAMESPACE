@@ -19,9 +19,9 @@ export(did_means)
 # graph
 export(coefplot, iplot)
 # small funs
-export(coeftable, ctable, se, tstat, pvalue)
+export(coeftable, se, tstat, pvalue)
 # dof
-export(dof, degrees_freedom)
+export(ssc, degrees_freedom)
 # Lag related
 export(panel, unpanel, f, l, d)
 # interactions

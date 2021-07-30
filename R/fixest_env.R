@@ -10,7 +10,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                       fixef, NL.start, lower, upper, NL.start.init, offset = NULL,
                       subset, split = NULL, fsplit = NULL, linear.start = 0,
                       jacobian.method = "simple",useHessian = TRUE, hessian.args = NULL,
-                      opt.control = list(), vcov = NULL, cluster, se, dof, y, X, fixef_df,
+                      opt.control = list(), vcov = NULL, cluster, se, ssc, y, X, fixef_df,
                       panel.id, fixef.rm = "perfect", nthreads = getFixest_nthreads(),
                       lean = FALSE, verbose = 0, theta.init, fixef.tol = 1e-5,
                       fixef.iter = 10000, collin.tol = 1e-14, deriv.iter = 5000,
@@ -63,7 +63,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     #
     # Arguments control
     main_args = c("fml", "data", "panel.id", "offset", "subset", "split", "fsplit", "vcov",
-                  "cluster", "se", "dof", "fixef.rm", "fixef.tol", "fixef.iter", "fixef",
+                  "cluster", "se", "ssc", "fixef.rm", "fixef.tol", "fixef.iter", "fixef",
                   "nthreads", "lean", "verbose", "warn", "notes", "combine.quick",
                   "start", "only.env", "mem.clean")
 
@@ -1633,13 +1633,13 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     }
 
-    if(!missnull(dof)){
+    if(!missnull(ssc)){
         do_summary = TRUE
-        if(!identical(class(dof), "dof.type")){
-            stop("The argument 'dof' must be an object obtained from the function dof().")
+        if(!identical(class(ssc), "ssc.type")){
+            stop("The argument 'ssc' must be an object obtained from the function ssc().")
         }
     } else {
-        dof = NULL
+        ssc = NULL
     }
 
     check_arg(lean, "logical scalar")
@@ -2433,10 +2433,10 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     assign("lean", lean, env)
     if(do_summary){
         assign("vcov", vcov, env)
-        assign("dof", dof, env)
+        assign("ssc", ssc, env)
         assign("agg", agg, env)
 
-        assign("summary_flags", build_flags(mc_origin, vcov = vcov, dof = dof, agg = agg), env)
+        assign("summary_flags", build_flags(mc_origin, vcov = vcov, ssc = ssc, agg = agg), env)
     }
 
     # Multi

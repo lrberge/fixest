@@ -346,7 +346,7 @@
 #'
 #'
 etable = function(..., vcov = NULL, stage = 2, agg = NULL,
-                  se = NULL, dof = NULL, cluster = NULL,
+                  se = NULL, ssc = NULL, cluster = NULL,
                   .vcov, .vcov_args = NULL, digits = 4, digits.stats = 5, tex,
                   fitstat, title, coefstat = "se", ci = 0.95, sdBelow = NULL,
                   keep, drop, order, dict, file, replace = FALSE, convergence,
@@ -443,6 +443,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
 
     if(is.function(vcov) && missnull(.vcov_args)){
         .vcov_args = catch_fun_args(vcov, dots, exclude_args = "vcov", erase_args = TRUE)
+        for(var in intersect(names(.vcov_args), names(dots))) dots[[var]] = NULL
     }
 
     #
@@ -514,7 +515,8 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
         }
     }
 
-    info = results2formattedList(dots = dots, vcov=vcov, dof=dof, fitstat_all=fitstat,
+
+    info = results2formattedList(dots = dots, vcov=vcov, ssc=ssc, fitstat_all=fitstat,
                                  stage=stage, agg = agg,
                                  .vcov_args=.vcov_args, digits=digits, digits.stats=digits.stats,
                                  sdBelow=sdBelow, signifCode=signifCode, coefstat = coefstat,
@@ -659,7 +661,7 @@ gen_etable_aliases = function(){
     update_file("R/etable_aliases.R", text)
 }
 
-results2formattedList = function(dots, vcov = NULL, dof = getFixest_dof(), stage = 2,
+results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage = 2,
                                  agg = NULL, .vcov_args = NULL, digits = 4,
                                  digits.stats = 5, fitstat_all, sdBelow=NULL, dict,
                                  signifCode = c("***"=0.01, "**"=0.05, "*"=0.10),
@@ -1090,10 +1092,9 @@ results2formattedList = function(dots, vcov = NULL, dof = getFixest_dof(), stage
             vcov_name = deparse_long(mc$vcov)
         }
 
-        check_arg_plus(.vcov_args, "NULL{list()} list", .message = "The argument '.vcov_args' must be a list of arguments to be passed to the function in '.vcov'.")
+        if(missnull(.vcov_args)) .vcov_args = list()
+        check_arg_plus(.vcov_args, "list", .message = "The argument '.vcov_args' must be a list of arguments to be passed to the function in '.cov'.")
     }
-
-
 
     # If vcov is provided, we use summary
     # if is_mult, we'll have to unroll the results
@@ -1122,9 +1123,9 @@ results2formattedList = function(dots, vcov = NULL, dof = getFixest_dof(), stage
                 x = summary(all_models[[m]], vcov = vcov, stage = stage, .vcov_args = .vcov_args, vcov_name = vcov_name, agg = agg)
             } else {
                 if(IS_MULTI_CLUST){
-                    x = summary(all_models[[m]], vcov = vcov[[m]], dof = dof, stage = stage, agg = agg)
+                    x = summary(all_models[[m]], vcov = vcov[[m]], ssc = ssc, stage = stage, agg = agg)
                 } else {
-                    x = summary(all_models[[m]], vcov = vcov, dof = dof, stage = stage, agg = agg)
+                    x = summary(all_models[[m]], vcov = vcov, ssc = ssc, stage = stage, agg = agg)
                 }
             }
 
@@ -1134,7 +1135,7 @@ results2formattedList = function(dots, vcov = NULL, dof = getFixest_dof(), stage
             x = all_models[[m]]
             if(!isTRUE(x$summary)){
                 # not a summary => we apply summary to trigger default behavior
-                x = summary(x, dof = dof)
+                x = summary(x, ssc = ssc)
             }
         }
 
