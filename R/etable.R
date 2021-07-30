@@ -108,13 +108,13 @@
 #'
 #' But the placement can be customized. The previous example (of the controls) will be used for illustration (the mechanism for \code{extraline} and \code{fixef.group} is identical).
 #'
-#' The row names accept 2 special characters at the very start. The first governs the placement of the new line within the section: it can be equal to \code{"^"}, meaning first line, or \code{"_"}, meaning last line. The second character tells in which section the line should appear: it can be equal to \code{"^"}, \code{"-"}, or \code{"_"}, meaning respectively the coefficients, the fixed-effects and the statistics section (which typically appear at the top, mid and bottom of the table).
+#' The row names accept 2 special characters at the very start. The first character tells in which section the line should appear: it can be equal to \code{"^"}, \code{"-"}, or \code{"_"}, meaning respectively the coefficients, the fixed-effects and the statistics section (which typically appear at the top, mid and bottom of the table). The second one governs the placement of the new line within the section: it can be equal to \code{"^"}, meaning first line, or \code{"_"}, meaning last line.
 #'
-#' Let's have some examples. Using the previous example, writing \code{"^_Controls"} would place the new line in at the top of the statistics section. Writing \code{"_-Controls"} places it as the last row of the fixed-effects section; \code{"^^Controls"} at the top row of the coefficients section; etc...
+#' Let's have some examples. Using the previous example, writing \code{"_^Controls"} would place the new line at the top of the statistics section. Writing \code{"-_Controls"} places it as the last row of the fixed-effects section; \code{"^^Controls"} at the top row of the coefficients section; etc...
 #'
-#' On top of that there are shortcuts to avoid writing the two special characters. If only one special character is found, it is assumed to reflect the section, unless it corresponds to the default section, a case where the character then reflects the position within the section. An example will make it clear. Writing \code{"^Controls"} would place the line at the top of the coefficients section (since the default placement would have been this section). \code{"_Controls"} would place it at the bottom of the statistics section.
+#' The second character is optional, the default placement being in the bottom. This means that \code{"_Controls"} would place it at the bottom of the statistics section.
 #'
-#' The placement in \code{fixef.group} is defined similarly, only the default placement is different. Its default placement is at the top of the fixed-effects section. This means that the only difference with \code{group} and \code{extraline} is when a single special character is used. Here using, e.g., \code{"^My FEs"} would place the row at the bottom of the coefficients section, since \code{"^"} would refer to the section (and not the row within the section).
+#' The placement in \code{fixef.group} is defined similarly, only the default placement is different. Its default placement is at the top of the fixed-effects section.
 #'
 #' @return
 #' If \code{tex = TRUE}, the lines composing the Latex table are returned invisibly while the table is directly prompted on the console.
@@ -227,24 +227,21 @@
 #'
 #' # You can monitor the placement of the new lines with two special characters
 #' # at the beginning of the row name.
-#' # 1) "^" or "_" which mean first or last line of the section
-#' # 2) "^", "-" or "_" which mean the coefficients, the fixed-effects or the
+#' # 1) "^", "-" or "_" which mean the coefficients, the fixed-effects or the
 #' # statistics section.
+#' # 2) "^" or "_" which mean first or last line of the section
 #' #
-#' # Ex: starting with "^_" will place the line at the top of the stat. section
-#' #     starting with "_-" will place the line at the bottom of the FEs section
+#' # Ex: starting with "_^" will place the line at the top of the stat. section
+#' #     starting with "-_" will place the line at the bottom of the FEs section
 #' #     etc.
 #' #
-#' # You can use a single character which will represent the section, unless
-#' # it's
+#' # You can use a single character which will represent the section,
+#' # the line would then appear at the bottom of the section.
 #'
 #' # Examples
 #' etable(est_c0, est_c1, est_c2, group = list("_Controls" = "poly"))
 #' etable(est_all, est_sub1, est_sub2, est_sub3,
-#'        extraline = list("^Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
-#' # Note that since the default placement is the coefficients section,
-#' # a single "^" then refers to the position within the section. We end
-#' # up at the top of the coefficients section.
+#'        extraline = list("^^Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
 #'
 #' #
 #' # fixef.group
@@ -290,13 +287,15 @@
 #' # Using custom functions to compute the standard errors
 #' #
 #'
-#' # You can customize the way you compute the SEs with the argument .vcov
+#' # You can use external functions to compute the VCOVs
+#' # by feeding functions in the 'vcov' argument.
 #' # Let's use some covariances from the sandwich package
 #'
-#' etable(est_c0, est_c1, est_c2, .vcov = sandwich::vcovHC)
+#' etable(est_c0, est_c1, est_c2, vcov = sandwich::vcovHC)
 #'
-#' # To add extra arguments to vcovHC, you need to use .vcov_args
-#' etable(est_c0, est_c1, est_c2, .vcov = sandwich::vcovHC, .vcov_args = list(type = "HC0"))
+#' # To add extra arguments to vcovHC, you can simply pass them in etable.
+#' # In this example 'type' is an argument of sandwich::vcovHC:
+#' etable(est_c0, est_c1, est_c2, vcov = sandwich::vcovHC, type = "HC0")
 #'
 #'
 #' #
@@ -304,7 +303,7 @@
 #' #
 #'
 #' # You can change the fit statistics with the argument fitstat
-#' # and you can rename them with the dictionnary
+#' # and you can rename them with the dictionary
 #' etable(est1, est2, fitstat = ~ r2 + n + G)
 #'
 #' # If you use a formula, '.' means the default:
@@ -328,21 +327,24 @@
 #' etable(list(s1, s2, s3, s4))
 #'
 #' #
-#' # Method 2: using a list in the argument 'cluster'
+#' # Method 2: using a list in the argument 'vcov'
 #'
 #' est_bis = feols(Ozone ~ Solar.R + Wind + Temp | Month, data = aq)
-#' etable(list(est, est_bis), cluster = list("iid", ~ Month))
+#' etable(list(est, est_bis), vcov = list("hetero", ~ Month))
+#'
+#' # When you have only one model, this model is replicated
+#' # along the elements of the vcov list.
+#' etable(est, vcov = list("hetero", ~ Month))
 #'
 #' #
-#' # Method 3: Using rep()
+#' # Method 3: Using "each" or "times" in vcov
 #'
-#' etable(rep(est, cluster = list("iid", ~ Month)))
 #'
-#' # When using rep on 2 or more objects, you need to embed them in .l()
-#' etable(rep(.l(est, est_bis), cluster = list("iid", ~ Month, ~ Day)))
+#' # each
+#' etable(est, est_bis, vcov = list("each", "iid", ~ Month, ~ Day))
 #'
-#' # Using each to order differently
-#' etable(rep(.l(est, est_bis), each = 3, cluster = list("iid", ~ Month, ~ Day)))
+#' # times
+#' etable(est, est_bis, vcov = list("times", "iid", ~ Month, ~ Day))
 #'
 #'
 etable = function(..., vcov = NULL, stage = 2, agg = NULL,
@@ -953,7 +955,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
             vcov = mega_vcov
 
         } else {
-            check_value(vcov, "list len(value)", .value = n_models, .message = "If 'vcov' is a list, it must be of the same length as the number of models.")
+            check_value(vcov, "list len(value)", .value = n_dots, .message = "If 'vcov' is a list, it must be of the same length as the number of models.")
         }
     }
 
@@ -2026,14 +2028,9 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                 if(grepl("^(\\^|_|-)", el_name)){
                     # => the user specifies the placement => replaces the default
 
-                    # If one ^ only => we replace it with _^ to override default of extraline
-                    if(!grepl("^\\^(_|-|\\^)", el_name)){
-                        el_name = paste0("_", el_name)
-                    }
-
                 } else {
                     # we add the default placement
-                    el_name = paste0("^-", el_name)
+                    el_name = paste0("-^", el_name)
                 }
 
                 fixef.extralines[[el_name]] = is_there
@@ -2403,7 +2400,7 @@ etable_internal_latex = function(info){
         # Matrix with yes/no information
         all_slopes = matrix(c(slope_flag_list, recursive = TRUE), nrow = length(slope_names))
         all_slopes = cbind(slope_names, all_slopes)
-        slope_lines <- paste0(paste0(apply(all_slopes, 1, paste0, collapse = " & "), collapse="\\\\\n"), "\\\\\n")
+        slope_lines = paste0(paste0(apply(all_slopes, 1, paste0, collapse = " & "), collapse="\\\\\n"), "\\\\\n")
 
     } else {
         slope_intro = NULL
@@ -2566,30 +2563,20 @@ etable_internal_latex = function(info){
 
         gi_top = FALSE
         if(grepl("^(\\^|_|-)", gi_name)){
+            # first character: section: ^|-|_
+            # second character: the location: ^|_
+
             # sec: section
 
-            row = substr(gi_name, 1, 1)
+            sec = substr(gi_name, 1, 1)
             gi_name = substr(gi_name, 2, nchar(gi_name))
-            if(row == "-"){
-                # FE section
-                sec = "fixef"
-
-            } else if(grepl("^(\\^|_|-)", gi_name)){
-                sec = substr(gi_name, 1, 1)
+            if(grepl("^(\\^|_)", gi_name)){
+                row = substr(gi_name, 1, 1)
                 gi_name = substr(gi_name, 2, nchar(gi_name))
-
-            } else {
-                if(row == "^"){
-                    # implicit location
-                    sec = "coef"
-                } else {
-                    sec = row
-                    row = "_"
-                }
+                gi_top = row == "^"
             }
 
-            gi_top = row == "^"
-            gi_where = switch(sec, "^" = "coef", "-" = "fixef", "_" = "stat", sec)
+            gi_where = switch(sec, "^" = "coef", "-" = "fixef", "_" = "stat")
         }
 
         gi_full = paste0(gi_full, gi_name, " & ", paste0(gi_format, collapse = " & "), "\\\\\n")
@@ -2644,30 +2631,20 @@ etable_internal_latex = function(info){
 
         el_top = FALSE
         if(grepl("^(\\^|_|-)", el_name)){
+            # first character: section: ^|-|_
+            # second character: the location: ^|_
+
             # sec: section
 
-            row = substr(el_name, 1, 1)
+            sec = substr(el_name, 1, 1)
             el_name = substr(el_name, 2, nchar(el_name))
-            if(row == "-"){
-                # FE section
-                sec = "fixef"
-
-            } else if(grepl("^(\\^|_|-)", el_name)){
-                sec = substr(el_name, 1, 1)
+            if(grepl("^(\\^|_)", el_name)){
+                row = substr(el_name, 1, 1)
                 el_name = substr(el_name, 2, nchar(el_name))
-
-            } else {
-                if(row == "^"){
-                    # implicit location
-                    sec = "coef"
-                } else {
-                    sec = row
-                    row = "_"
-                }
+                el_top = row == "^"
             }
 
-            el_top = row == "^"
-            el_where = switch(sec, "^" = "coef", "-" = "fixef", "_" = "stat", sec)
+            el_where = switch(sec, "^" = "coef", "-" = "fixef", "_" = "stat")
         }
 
         el_full = paste0(el_full, el_name, " & ", paste0(el_format, collapse = " & "), "\\\\\n")
@@ -2924,30 +2901,20 @@ etable_internal_df = function(info){
 
         gi_top = FALSE
         if(grepl("^(\\^|_|-)", gi_name)){
+            # first character: section: ^|-|_
+            # second character: the location: ^|_
+
             # sec: section
 
-            row = substr(gi_name, 1, 1)
+            sec = substr(gi_name, 1, 1)
             gi_name = substr(gi_name, 2, nchar(gi_name))
-            if(row == "-"){
-                # FE section
-                sec = "fixef"
-
-            } else if(grepl("^(\\^|_|-)", gi_name)){
-                sec = substr(gi_name, 1, 1)
+            if(grepl("^(\\^|_)", gi_name)){
+                row = substr(gi_name, 1, 1)
                 gi_name = substr(gi_name, 2, nchar(gi_name))
-
-            } else {
-                if(row == "^"){
-                    # implicit location
-                    sec = "coef"
-                } else {
-                    sec = row
-                    row = "_"
-                }
+                gi_top = row == "^"
             }
 
-            gi_top = row == "^"
-            gi_where = switch(sec, "^" = "coef", "-" = "fixef", "_" = "stat", sec)
+            gi_where = switch(sec, "^" = "coef", "-" = "fixef", "_" = "stat")
         }
 
         my_line = c(gi_name, gi_format)
@@ -3001,30 +2968,20 @@ etable_internal_df = function(info){
         el_top = FALSE
 
         if(grepl("^(\\^|_|-)", el_name)){
+            # first character: section: ^|-|_
+            # second character: the location: ^|_
+
             # sec: section
 
-            row = substr(el_name, 1, 1)
+            sec = substr(el_name, 1, 1)
             el_name = substr(el_name, 2, nchar(el_name))
-            if(row == "-"){
-                # FE section
-                sec = "fixef"
-
-            } else if(grepl("^(\\^|_|-)", el_name)){
-                sec = substr(el_name, 1, 1)
+            if(grepl("^(\\^|_)", el_name)){
+                row = substr(el_name, 1, 1)
                 el_name = substr(el_name, 2, nchar(el_name))
-
-            } else {
-                if(row == "^"){
-                    # implicit location
-                    sec = "coef"
-                } else {
-                    sec = row
-                    row = "_"
-                }
+                el_top = row == "^"
             }
 
-            el_top = row == "^"
-            el_where = switch(sec, "^" = "coef", "-" = "fixef", "_" = "stat", sec)
+            el_where = switch(sec, "^" = "coef", "-" = "fixef", "_" = "stat")
         }
 
         my_line = c(el_name, el_format)

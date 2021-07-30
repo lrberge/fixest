@@ -1028,7 +1028,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
 #' # Learn it, you won't regret it!
 #'
 #'
-wald = function(x, keep = NULL, drop = NULL, print = TRUE, se, cluster, ...){
+wald = function(x, keep = NULL, drop = NULL, print = TRUE, vcov, se, cluster, ...){
     # LATER:
     # - keep can be a list
     #   * list("fit_" = 1, "x5$")
@@ -1040,8 +1040,8 @@ wald = function(x, keep = NULL, drop = NULL, print = TRUE, se, cluster, ...){
     if(isTRUE(x$onlyFixef)) return(NA)
 
     dots = list(...)
-    if(!isTRUE(x$summary) || !missing(se) || !missing(cluster) || ...length() > 0){
-        x = summary(x, se = se, cluster = cluster, ...)
+    if(!isTRUE(x$summary)|| !missing(vcov) || !missing(se) || !missing(cluster) || ...length() > 0){
+        x = summary(x, vcov = vcov, se = se, cluster = cluster, ...)
     }
 
     if(missing(keep) && missing(drop)){
@@ -1327,7 +1327,7 @@ r2 = function(x, type = "all", full_names = FALSE){
 #'
 #'
 #'
-degrees_freedom = function(x, type, vars = NULL, se = NULL, cluster = NULL, ssc = NULL, stage = 2){
+degrees_freedom = function(x, type, vars = NULL, vcov = NULL, se = NULL, cluster = NULL, ssc = NULL, stage = 2){
     check_arg(x, "class(fixest) mbt")
     check_arg_plus(type, "match(k, resid, t)")
     check_arg(stage, "integer scalar GE{1} LE{2}")
@@ -1350,8 +1350,8 @@ degrees_freedom = function(x, type, vars = NULL, se = NULL, cluster = NULL, ssc 
         stop("The argument 'type' is required but is currently missing.")
     }
 
-    if(!isTRUE(x$summary) || !missnull(se) || !missnull(cluster) || !missnull(ssc)){
-        x = summary(x, se = se, cluster = cluster, ssc = ssc)
+    if(!isTRUE(x$summary) || !missnull(vcov) || !missnull(se) || !missnull(cluster) || !missnull(ssc)){
+        x = summary(x, vcov = vcov, se = se, cluster = cluster, ssc = ssc)
     }
 
     vcov = x$cov.scaled

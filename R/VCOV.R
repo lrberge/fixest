@@ -26,9 +26,12 @@
 #' @details
 #' For an explanation on how the standard-errors are computed and what is the exact meaning of the arguments, please have a look at the dedicated vignette: \href{https://lrberge.github.io/fixest/articles/standard_errors.html}{On standard-errors}.
 #'
+#' @seealso
+#' You can also compute VCOVs with the following functions: \code{\link[fixest]{vcov_cluster}}, \code{\link[fixest]{vcov_hac}}, \code{\link[fixest]{vcov_conley}}.
+#'
 #' @return
-#' It returns a \eqn{N\times N} square matrix where \eqn{N} is the number of variables of the fitted model.
-#' This matrix has an attribute \dQuote{type} specifying how this variance/covariance matrix has been computed (i.e. if it was created using a heteroskedascity-robust correction, or if it was clustered along a specific factor, etc).
+#' It returns a \eqn{K\times K} square matrix where \eqn{K} is the number of variables of the fitted model.
+#' If \code{attr = TRUE}, this matrix has an attribute \dQuote{type} specifying how this variance/covariance matrix has been computed.
 #'
 #' @author
 #' Laurent Berge
@@ -38,34 +41,153 @@
 #'
 #' @examples
 #'
-#' # Load trade data
-#' data(trade)
+#' # Load panel data
+#' data(base_did)
 #'
-#' # We estimate the effect of distance on trade (with 3 fixed-effects)
-#' est_pois = femlm(Euros ~ log(dist_km) + log(Year) | Origin + Destination +
-#'                  Product, trade)
+#' # Simple estimation on a panel
+#' est = feols(y ~ x1, base_did)
 #'
-#' # By default, in the presence of FEs
-#' # the VCOV is clustered along the first FE
-#' vcov(est_pois)
+#' # ======== #
+#' # IID VCOV #
+#' # ======== #
 #'
+#' # By default the VCOV assumes iid errors:
+#' se(vcov(est))
+#'
+#' # You can make the call for an iid VCOV explicitly:
+#' se(vcov(est, "iid"))
+#'
+#' #
 #' # Heteroskedasticity-robust VCOV
-#' vcov(est_pois, se = "hetero")
+#' #
 #'
-#' # "clustered" VCOV (with respect to the Product factor)
-#' vcov(est_pois, se = "cluster", cluster = trade$Product)
-#' # another way to make the same request:
-#' # note that previously arg. se was optional since deduced from arg. cluster
-#' vcov(est_pois, cluster = "Product")
-#' # yet another way:
-#' vcov(est_pois, cluster = ~Product)
+#' # By default the VCOV assumes iid errors:
+#' se(vcov(est, "hetero"))
 #'
-#' # Another estimation without fixed-effects:
-#' est_pois_simple = femlm(Euros ~ log(dist_km) + log(Year), trade)
+#' # => note that it also accepts vcov = "White" and vcov = "HC1" as aliases.
 #'
-#' # We can still get the clustered VCOV,
-#' # but we need to give the argument cluster:
-#' vcov(est_pois_simple, cluster = ~Product)
+#' # =============== #
+#' # Clustered VCOVs #
+#' # =============== #
+#'
+#' # To cluster the VCOV, you can use a formula of the form cluster ~ var1 + var2 etc
+#' # Let's cluster by the panel ID:
+#' se(vcov(est, cluster ~ id))
+#'
+#' # Alternative ways:
+#'
+#' # -> cluster is implicitly assumed when a one-sided formula is provided
+#' se(vcov(est, ~ id))
+#'
+#' # -> using the argument cluster instead of vcov
+#' se(vcov(est, cluster = ~ id))
+#'
+#' # For two-/three- way clustering, just add more variables:
+#' se(vcov(est, ~ id + period))
+#'
+#' # -------------------|
+#' # Implicit deduction |
+#' # -------------------|
+#' # When the estimation contains FEs, the dimension on which to cluster
+#' # is directly inferred from the FEs used in the estimation, so you don't need
+#' # to explicitly add them.
+#'
+#' est_fe = feols(y ~ x1 | id + period, base_did)
+#'
+#' # Clustered along "id"
+#' se(vcov(est_fe, "cluster"))
+#'
+#' # Clustered along "id" and "period"
+#' se(vcov(est_fe, "twoway"))
+#'
+#'
+#' # =========== #
+#' # Panel VCOVs #
+#' # =========== #
+#'
+#' # ---------------------|
+#' # Newey West (NW) VCOV |
+#' # ---------------------|
+#' # To obtain NW VCOVs, use a formula of the form NW ~ id + period
+#' se(vcov(est, NW ~ id + period))
+#'
+#' # If you want to change the lag:
+#' se(vcov(est, NW(3) ~ id + period))
+#'
+#' # Alternative way:
+#'
+#' # -> using the vcov_NW function
+#' se(vcov(est, vcov_NW(unit = "id", time = "period", lag = 3)))
+#'
+#' # -------------------------|
+#' # Driscoll-Kraay (DK) VCOV |
+#' # -------------------------|
+#' # To obtain DK VCOVs, use a formula of the form DK ~ period
+#'
+#' se(vcov(est, DK ~ period))
+#'
+#' # If you want to change the lag:
+#' se(vcov(est, DK(3) ~ period))
+#'
+#' # Alternative way:
+#'
+#' # -> using the vcov_DK function
+#' se(vcov(est, vcov_DK(time = "period", lag = 3)))
+#'
+#' # -------------------|
+#' # Implicit deduction |
+#' # -------------------|
+#' # When the estimation contains a panel identifier, you don't need
+#' # to re-write them later on
+#'
+#' est_panel = feols(y ~ x1, base_did, panel.id = ~id + period)
+#'
+#' # Both methods, NM and DK, now work automatically
+#' se(vcov(est_panel, "NW"))
+#' se(vcov(est_panel, "DK"))
+#'
+#'
+#' # =================================== #
+#' # VCOVs robust to spatial correlation #
+#' # =================================== #
+#'
+#' data(quakes)
+#' est_geo = feols(depth ~ mag, quakes)
+#'
+#' # ------------|
+#' # Conley VCOV |
+#' # ------------|
+#' # To obtain a Conley VCOV, use a formula of the form conley(cutoff) ~ lat + lon
+#' se(vcov(est_geo, conley(100) ~ lat + long))
+#'
+#' # Alternative way:
+#'
+#' # -> using the vcov_DK function
+#' se(vcov(est, vcov_conley(lat = "lat", lon = "long", cutoff = 100)))
+#'
+#' # -------------------|
+#' # Implicit deduction |
+#' # -------------------|
+#' # By default the latitude and longitude are directly fetched in the data based
+#' # on pattern matching. So you don't have to specify them.
+#'
+#' # The following works:
+#' se(vcov(est_geo, conley(100)))
+#'
+#'
+#' # ======================== #
+#' # Small Sample Corrections #
+#' # ======================== #
+#'
+#' # You can change the way the small sample corrections are done with the argument ssc.
+#' # The argument ssc must be created by the ssc function
+#' se(vcov(est, ssc = ssc(adj = FALSE)))
+#'
+#' # You can add directly the call to ssc in the vcov formula.
+#' # You need to add it like a variable:
+#' se(vcov(est, iid ~ ssc(adj = FALSE)))
+#' se(vcov(est, DK ~ period + ssc(adj = FALSE)))
+#'
 #'
 #'
 vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr = FALSE, forceCovariance = FALSE,
@@ -186,6 +308,15 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 
     if(is.function(vcov)){
 
+        if(only_varnames){
+            return(character(0))
+        }
+
+        # cleaning dots
+        for(var in c("summary_flags")){
+            dots[[var]] = NULL
+        }
+
         # The name
         arg_list = dots
         if(".vcov_args" %in% names(dots)){
@@ -202,10 +333,12 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
             }
 
             # Getting the right arguments
-            arg_list = catch_fun_args(vcov, arg_list, exclude_args = "vcov")
+            arg_list = catch_fun_args(vcov, arg_list, exclude_args = "vcov", keep_dots = TRUE)
         }
 
         vcov_name = gsub("sandwich::", "", vcov_name, fixed = TRUE)
+        vcov_name = gsub("^function\\([^\\)]+\\) ", "", vcov_name)
+        vcov_name = gsub("^vcov$", "Custom", vcov_name)
 
         # We shouldn't have a prior on the name of the first argument
         arg_names = formalArgs(vcov)
@@ -224,6 +357,11 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     }
 
     if(is.matrix(vcov)){
+
+        if(only_varnames){
+            stop("A custom VCOV matrix cannot be used directly in fixest estimation.")
+        }
+
         # Check that this makes sense
         n_coef = length(object$coefficients)
         check_value(vcov, "square matrix nrow(value)", .value = n_coef)
@@ -471,7 +609,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
                         }
                     }
 
-                    if(is.null(var_values_all[[vcov_var_name]]) &&
+                    if(is.null(var_names_all[vcov_var_name]) &&
                        length(err_msg) > 0 && !isTRUE(vcov_var_value$optional)){
 
                         if(length(err_msg) == 1){
@@ -484,7 +622,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 
                         stop("To compute the ", vcov_select$vcov_label, " VCOV, we need a variable for the ",
                              vcov_var_value$label, ". Since you didn't provide it in the formula, we typically deduce it from ", expect,
-                             ". Problem: ", pblm, ".")
+                             ". Problem: ", pblm, ". Please provide it in the formula.")
                     }
                 }
             }
@@ -1248,7 +1386,9 @@ vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, ssc = NULL){
 #'
 #' This function computes VCOVs that are robust to spatial correlations by assuming a correlation between the units that are at a geographic distance lower than a given cutoff.
 #'
-#' The user must provide the cutoff since, so far, there is no automatic deduction implemented.
+#' The kernel is uniform.
+#'
+#' If the cutoff is not provided, a rough estimation (not theoretically grounded but robust to sub-sampling) is given. This automatic cutoff is only here for convenience and is likely not the most appropriate for the given application.
 #'
 #' The function \code{conley} does not compute VCOVs directly but is meant to be used in the argument \code{vcov} of \code{fixest} functions (e.g. in \code{\link[fixest]{vcov.fixest}} or even in the estimation calls).
 #'
@@ -1256,7 +1396,7 @@ vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, ssc = NULL){
 #'
 #' @param lat A character scalar or a one sided formula giving the name of the variable representing the latitude. The latitude must lie in [-90, 90].
 #' @param lon A character scalar or a one sided formula giving the name of the variable representing the longitude. The longitude must be in [-180, 180] or in [0, 360].
-#' @param cutoff The distance cutoff, in km. You can express the cutoff in miles by writing the number in character form and adding "mi" as a suffix: cutoff = "100mi" would be 100 miles.
+#' @param cutoff The distance cutoff, in km. You can express the cutoff in miles by writing the number in character form and adding "mi" as a suffix: cutoff = "100mi" would be 100 miles. If missing, a rough rule of thumb is used to deduce the cutoff.
 #' @param pixel A positive numeric scalar, default is 0. If a positive number, the coordinates of each observation are pooled into \code{pixel} x \code{pixel} km squares. This lowers the precision but can (depending on the cases) greatly improve computational speed at a low precision cost. Note that if the \code{cutoff} was expressed in miles, then \code{pixel} will also be in miles.
 #' @param distance How to compute the distance between points. It can be equal to "triangular" (default) or "spherical". The latter case corresponds to the great circle distance and is more precise than triangular but is a bit more intensive computationally.
 #'
@@ -1758,6 +1898,10 @@ vcov_conley_internal = function(bread, scores, vars, sandwich, nthreads,
     # cutoff
     cutoff = check_set_cutoff(cutoff)
 
+    if(is.null(cutoff)){
+        cutoff = cutoff_deduce(lat, lon)
+    }
+
     # pixel
     check_value(pixel, "numeric scalar GE{0}",
                 .prefix = "In vcov.fixest, Conley VCOV cannot be computed: the argument 'pixel'")
@@ -1880,7 +2024,7 @@ oldargs_to_vcov = function(se, cluster, vcov, .vcov = NULL){
     vcov
 }
 
-catch_fun_args = function(fun, dots, exclude_args = NULL, erase_args = FALSE){
+catch_fun_args = function(fun, dots, exclude_args = NULL, erase_args = FALSE, keep_dots = FALSE){
 
     arg_names = formalArgs(fun)
 
@@ -1891,10 +2035,14 @@ catch_fun_args = function(fun, dots, exclude_args = NULL, erase_args = FALSE){
     }
 
     # we keep only the variables in formalArgs
-    vars = intersect(names(dots), arg_names)
-    arg_list = list()
-    if(length(vars) > 0){
-        arg_list[vars] = dots[vars]
+    if(keep_dots){
+        arg_list = dots
+    } else {
+        vars = intersect(names(dots), arg_names)
+        arg_list = list()
+        if(length(vars) > 0){
+            arg_list[vars] = dots[vars]
+        }
     }
 
     # variables from the main function call
@@ -1976,7 +2124,8 @@ check_set_cutoff = function(cutoff){
     set_up(1)
 
     if(is.null(cutoff)){
-        stop("In vcov.fixest, Conley VCOV cannot be computed: the argument 'cutoff' (the cutoff distance in km) must be provided.", call. = FALSE)
+        return(NULL)
+        # stop("In vcov.fixest, Conley VCOV cannot be computed: the argument 'cutoff' (the cutoff distance in km) must be provided.", call. = FALSE)
     }
 
     check_value(cutoff, "numeric scalar GE{0} | character scalar",
@@ -2074,6 +2223,51 @@ gen_vcov_aliases = function(){
     update_file("NAMESPACE", NAMESPACE)
 
 
+}
+
+
+great_circle_distance = function (lat1, long1, lat2, long2){
+    deg2rad = function(x) x / 180 * pi
+
+    lat1 = deg2rad(lat1)
+    lat2 = deg2rad(lat2)
+    long1 = deg2rad(long1)
+    long2 = deg2rad(long2)
+
+    R = 6371
+    delta.long = (long2 - long1)
+    delta.lat = (lat2 - lat1)
+    a = sin(delta.lat/2)^2 + cos(lat1) * cos(lat2) * sin(delta.long/2)^2
+    c = 2 * asin(pmin(1, sqrt(a)))
+    d = R * c
+
+    return(d)
+}
+
+
+cutoff_deduce = function(lat, lon){
+    # To deduce the cutoff, we apply a basic rule of thumb
+
+    quoi = unique(data.frame(lat, lon))
+
+    order_latlon = with(quoi, order(lat, lon))
+    order_lonlat = with(quoi, order(lon, lat))
+
+    quoi_latlon = quoi[order_latlon, ]
+    quoi_lonlat = quoi[order_lonlat, ]
+
+    N = nrow(quoi)
+    d_latlon = with(quoi_latlon, great_circle_distance(lat[-N], lon[-N], lat[-1], lon[-1]))
+    d_lonlat = with(quoi_lonlat, great_circle_distance(lat[-N], lon[-N], lat[-1], lon[-1]))
+
+    cutoff = (median(d_latlon) + median(d_lonlat)) / 2
+    # we round it to make it nicer and more robust
+    m = floor(log10(cutoff)) - 1
+    cutoff = (cutoff %/% 10**m) * 10**m
+
+    attr(cutoff, "metric") = "km"
+
+    cutoff
 }
 
 ####

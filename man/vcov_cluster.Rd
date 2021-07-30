@@ -4,14 +4,14 @@
 \alias{vcov_cluster}
 \title{Clustered VCOV}
 \usage{
-vcov_cluster(x, cluster = NULL, dof = NULL)
+vcov_cluster(x, cluster = NULL, ssc = NULL)
 }
 \arguments{
 \item{x}{A \code{fixest} object.}
 
 \item{cluster}{Either i) a character vector giving the names of the variables onto which to cluster, or ii) a formula giving those names, or iii) a vector/list/data.frame giving the hard values of the clusters. Note that in cases i) and ii) the variables are fetched directly in the data set used for the estimation.}
 
-\item{dof}{An object returned by the function \code{\link[fixest]{dof}}. It specifies how to perform the small sample correction.}
+\item{ssc}{An object returned by the function \code{\link[fixest]{ssc}}. It specifies how to perform the small sample correction.}
 }
 \value{
 If the first argument is a \code{fixest} object, then a VCOV is returned (i.e. a symmetric matrix).

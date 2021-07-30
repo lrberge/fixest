@@ -13,7 +13,7 @@
 # Very limited but does the job. Easy to expand.
 
 require(dreamerr) ; require(fixest)
-meffect = function(x, at_means = TRUE, se, cluster, ...){
+meffect = function(x, at_means = TRUE, vcov, se, cluster, ...){
     # x: fixest object
 
     check_arg(x, "class(fixest) mbt")
@@ -29,7 +29,7 @@ meffect = function(x, at_means = TRUE, se, cluster, ...){
     }
 
     if(!isTRUE(x$summary) || !missing(se) || !missing(cluster)){
-        x = summary(x, se = se, cluster = cluster, ...)
+        x = summary(x, vcov = vcov, se = se, cluster = cluster, ...)
     }
 
     coef = x$coefficients

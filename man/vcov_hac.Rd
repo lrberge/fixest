@@ -10,9 +10,9 @@
 \alias{driscoll_kraay}
 \title{HAC VCOVs}
 \usage{
-vcov_DK(x, time = NULL, lag = NULL, dof = NULL)
+vcov_DK(x, time = NULL, lag = NULL, ssc = NULL)
 
-vcov_NW(x, unit = NULL, time = NULL, lag = NULL, dof = NULL)
+vcov_NW(x, unit = NULL, time = NULL, lag = NULL, ssc = NULL)
 
 NW(lag = NULL)
 
@@ -29,7 +29,7 @@ driscoll_kraay(lag = NULL)
 
 \item{lag}{An integer scalar, default is \code{NULL}. If \code{NULL}, then the default lag is equal to \code{n_t^0.25} with \code{n_t} the number of time periods.}
 
-\item{dof}{An object returned by the function \code{\link[fixest]{dof}}. It specifies how to perform the small sample correction.}
+\item{ssc}{An object returned by the function \code{\link[fixest]{ssc}}. It specifies how to perform the small sample correction.}
 
 \item{unit}{A character scalar or a one sided formula giving the name of the variable representing the units of the panel.}
 }
@@ -46,7 +46,7 @@ There are currently three VCOV types: Newey-West applied to time series, Newey-W
 
 The functions on this page without the prefix "vcov_" do not compute VCOVs directly but are meant to be used in the argument \code{vcov} of \code{fixest} functions (e.g. in \code{\link[fixest]{vcov.fixest}} or even in the estimation calls).
 
-Note that for Driscoll-Kraay VCOVs, to ensure its properties there should be a minimum of 20 periods or so.
+Note that for Driscoll-Kraay VCOVs, to ensure its properties the number of periods should be long enough (a minimum of 20 periods or so).
 }
 \examples{
 

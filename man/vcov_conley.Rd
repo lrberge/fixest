@@ -12,7 +12,7 @@ vcov_conley(
   cutoff = NULL,
   pixel = 0,
   distance = "triangular",
-  dof = NULL
+  ssc = NULL
 )
 
 conley(cutoff = NULL, pixel = NULL, distance = NULL)
@@ -24,13 +24,13 @@ conley(cutoff = NULL, pixel = NULL, distance = NULL)
 
 \item{lon}{A character scalar or a one sided formula giving the name of the variable representing the longitude. The longitude must be in [-180, 180] or in [0, 360].}
 
-\item{cutoff}{The distance cutoff, in km. You can express the cutoff in miles by writing the number in character form and adding "mi" as a suffix: cutoff = "100mi" would be 100 miles.}
+\item{cutoff}{The distance cutoff, in km. You can express the cutoff in miles by writing the number in character form and adding "mi" as a suffix: cutoff = "100mi" would be 100 miles. If missing, a rough rule of thumb is used to deduce the cutoff.}
 
 \item{pixel}{A positive numeric scalar, default is 0. If a positive number, the coordinates of each observation are pooled into \code{pixel} x \code{pixel} km squares. This lowers the precision but can (depending on the cases) greatly improve computational speed at a low precision cost. Note that if the \code{cutoff} was expressed in miles, then \code{pixel} will also be in miles.}
 
 \item{distance}{How to compute the distance between points. It can be equal to "triangular" (default) or "spherical". The latter case corresponds to the great circle distance and is more precise than triangular but is a bit more intensive computationally.}
 
-\item{dof}{An object returned by the function \code{\link[fixest]{dof}}. It specifies how to perform the small sample correction.}
+\item{ssc}{An object returned by the function \code{\link[fixest]{ssc}}. It specifies how to perform the small sample correction.}
 }
 \value{
 If the first argument is a \code{fixest} object, then a VCOV is returned (i.e. a symmetric matrix).
@@ -43,7 +43,9 @@ Compute VCOVs robust to spatial correlation, a la Conley (1999).
 \details{
 This function computes VCOVs that are robust to spatial correlations by assuming a correlation between the units that are at a geographic distance lower than a given cutoff.
 
-The user must provide the cutoff since, so far, there is no automatic deduction implemented.
+The kernel is uniform.
+
+If the cutoff is not provided, a rough estimation (not theoretically grounded but robust to sub-sampling) is given. This automatic cutoff is only here for convenience and is likely not the most appropriate for the given application.
 
 The function \code{conley} does not compute VCOVs directly but is meant to be used in the argument \code{vcov} of \code{fixest} functions (e.g. in \code{\link[fixest]{vcov.fixest}} or even in the estimation calls).
 }
