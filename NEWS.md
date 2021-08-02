@@ -35,6 +35,11 @@
     
     * Conley (1999) for spatially correlated errors
     
+## Breaking changes
+
+ - Function `dof` has been renamed into `ssc` (stands for small sample correction) to improve clarity. **No retro compatibility ensured.**
+ 
+ - Functions `setFixest_dof` and `setFixest_se` have been renamed into `setFixest_ssc` and `setFixest_vcov`. **No retro compatibility ensured.**
  
 ## New features
 
