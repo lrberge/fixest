@@ -433,7 +433,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
         }
     } else {
 
-        if(is.null(var_values_all) == FALSE){
+        if(!is.null(var_values_all)){
             # If we're here, this means that vcov_vars
             # has been provided via a vcov_request:
             #   - either via retro-compatibility (use of "cluster" with a vector or list)
@@ -447,6 +447,17 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
             if(only_varnames){
                 return(character(0))
             }
+
+            # We trim the observations if needed
+            for(i in seq_along(var_values_all)){
+                value = var_values_all[[i]]
+                if(length(value) != object$nobs_origin){
+                    stop("To compute the ", vcov_select$vcov_label, " VCOV, you need to provide variables with the same number of observations as in the original data set. Currently there are ", length(value), " instead of ", object$nobs_origin, ".")
+                }
+
+                var_values_all[[i]] = trim_obs_removed(value, object)
+            }
+
 
         } else {
 
@@ -1196,6 +1207,9 @@ vcov_cluster = function(x, cluster = NULL, ssc = NULL){
 
                 var_names_all[vcov_var_names] = new_name
             }
+
+            # We ensure it's a plain list
+            vcov_vars = unclass(vcov_vars)
 
             names(vcov_vars) = vcov_var_names
         }
@@ -2001,6 +2015,10 @@ oldargs_to_vcov = function(se, cluster, vcov, .vcov = NULL){
         attr(vcov, "deparsed_arg") = fetch_arg_deparse(".vcov")
 
     } else {
+        all_vcov = getOption("fixest_vcov_builtin")
+        all_vcov_names = unlist(lapply(all_vcov, `[[`, "name"))
+        all_vcov_names = all_vcov_names[nchar(all_vcov_names) > 0]
+
         check_value_plus(se, "NULL{'cluster'} match", .choices = all_vcov_names, .prefix = "Argument 'se' (which has been replaced by arg. 'vcov')")
 
         if(missnull(cluster)){
@@ -2019,6 +2037,9 @@ oldargs_to_vcov = function(se, cluster, vcov, .vcov = NULL){
                 vcov = vcov_cluster(cluster = cluster)
             }
         }
+
+        assign("se", NULL, parent.frame())
+        assign("cluster", NULL, parent.frame())
     }
 
     vcov

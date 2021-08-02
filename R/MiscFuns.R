@@ -556,7 +556,7 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
 	    # df.t is always an attribute of the vcov
 	    df.t = attr(vcov, "df.t")
 	    if(is.null(df.t)){
-	        df.t = object$nobs - object$nparams
+	        df.t = object$nobs - attr(vcov,"dof.K")
 	    }
 
 	    pvalue = 2*pt(-abs(zvalue), df.t)
