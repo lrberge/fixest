@@ -300,7 +300,7 @@ So far (version 0.10.0), six types of standard-errors can be computed, here are 
  
  - `NW`, `newey_west`: Newey and West (1987) SEs for time series or panel data, assumes heteroskedastic and serially correlated errors.
  
- - `DK`, `driscoll_kraay`: Driscoll and Kraay (1998) SEs for panel data, assumes cross-sectional correlated and serially correlated errors.
+ - `DK`, `driscoll_kraay`: Driscoll and Kraay (1998) SEs for panel data, assumes cross-sectionally and serially correlated errors.
  
  - `conley`: Conley (1999) SEs for cross-sections, assumes spatially correlated errors.
  
@@ -346,11 +346,16 @@ The SEs are clustered at the unit identifier of the panel. Note that even if fix
 ```{r}
 feols(y ~ x1 | period, base_did, "cluster")
 ```
-Of course, if the panel identifier is missing, the automatic clustering falls back to the fixed-effect:
+Of course, if the panel identifier is missing, the automatic clustering falls back to the first fixed-effect present:
 ```{r}
 # Removing the panel
 setFixest_estimation(reset = TRUE)
 feols(y ~ x1 | period, base_did, "cluster")
+```
+
+Talking about clustered SEs, note that this is such a common operation that the empty keyword *is* equivalent to clustered SEs, so that `vcov = ~id + period` would lead to SEs clustered by `id` and `period`:
+```{r}
+feols(y ~ x1 | period, base_did, ~id + period)
 ```
 
 Finally, a last example using Conley SEs:
@@ -421,7 +426,7 @@ feols(y ~ x1 | id, base_did, hetero ~ ssc(adj = FALSE))
 
 Finally, we're approaching the end of the tour of the `vcov` argument. That argument can also accept:
 
- - a matrix, which will be used as the VCOV (can be useful in `summary` or `etable`)
+ - a matrix, which will be used as the VCOV (possibly useful in specific contexts)
  
  - a function to be applied to a `fixest` object to compute the VCOV.
 
