@@ -35,7 +35,7 @@ conley(cutoff = NULL, pixel = NULL, distance = NULL)
 \value{
 If the first argument is a \code{fixest} object, then a VCOV is returned (i.e. a symmetric matrix).
 
-If the first argument is not a \code{fixest} object, then a) implicitly the arguments are shifted to the left (i.e. \code{vcov_conley(100)} is equivalent to \code{vcov_conley(cutoff = 100)}) and b) a VCOV-\emph{request} is returned and NOT a VCOV. That VCOV-request can then be used in the argument \code{vcov} of various \code{fixest} functions (e.g. \code{\link[fixest]{vcov.fixest}} or even in the estimation calls).
+If the first argument is not a \code{fixest} object, then a) implicitly the arguments are shifted to the left (i.e. \code{vcov_conley("lat", "long")} is equivalent to \code{vcov_conley(lat = "lat", lon = "long")}) and b) a VCOV-\emph{request} is returned and NOT a VCOV. That VCOV-request can then be used in the argument \code{vcov} of various \code{fixest} functions (e.g. \code{\link[fixest]{vcov.fixest}} or even in the estimation calls).
 }
 \description{
 Compute VCOVs robust to spatial correlation, a la Conley (1999).
@@ -45,7 +45,7 @@ This function computes VCOVs that are robust to spatial correlations by assuming
 
 The kernel is uniform.
 
-If the cutoff is not provided, a rough estimation (not theoretically grounded but robust to sub-sampling) is given. This automatic cutoff is only here for convenience and is likely not the most appropriate for the given application.
+If the cutoff is not provided, a rough estimation (not theoretically grounded but very robust to sub-sampling) is given. This automatic cutoff is only here for convenience and is likely not the most appropriate for the given application.
 
 The function \code{conley} does not compute VCOVs directly but is meant to be used in the argument \code{vcov} of \code{fixest} functions (e.g. in \code{\link[fixest]{vcov.fixest}} or even in the estimation calls).
 }

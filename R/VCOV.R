@@ -1388,7 +1388,7 @@ vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, ssc = NULL){
 #'
 #' The kernel is uniform.
 #'
-#' If the cutoff is not provided, a rough estimation (not theoretically grounded but robust to sub-sampling) is given. This automatic cutoff is only here for convenience and is likely not the most appropriate for the given application.
+#' If the cutoff is not provided, a rough estimation (not theoretically grounded but very robust to sub-sampling) is given. This automatic cutoff is only here for convenience and is likely not the most appropriate for the given application.
 #'
 #' The function \code{conley} does not compute VCOVs directly but is meant to be used in the argument \code{vcov} of \code{fixest} functions (e.g. in \code{\link[fixest]{vcov.fixest}} or even in the estimation calls).
 #'
@@ -1403,7 +1403,7 @@ vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, ssc = NULL){
 #' @return
 #' If the first argument is a \code{fixest} object, then a VCOV is returned (i.e. a symmetric matrix).
 #'
-#' If the first argument is not a \code{fixest} object, then a) implicitly the arguments are shifted to the left (i.e. \code{vcov_conley(100)} is equivalent to \code{vcov_conley(cutoff = 100)}) and b) a VCOV-\emph{request} is returned and NOT a VCOV. That VCOV-request can then be used in the argument \code{vcov} of various \code{fixest} functions (e.g. \code{\link[fixest]{vcov.fixest}} or even in the estimation calls).
+#' If the first argument is not a \code{fixest} object, then a) implicitly the arguments are shifted to the left (i.e. \code{vcov_conley("lat", "long")} is equivalent to \code{vcov_conley(lat = "lat", lon = "long")}) and b) a VCOV-\emph{request} is returned and NOT a VCOV. That VCOV-request can then be used in the argument \code{vcov} of various \code{fixest} functions (e.g. \code{\link[fixest]{vcov.fixest}} or even in the estimation calls).
 #'
 #' @references
 #' Conley TG (1999). "GMM Estimation with Cross Sectional Dependence", \emph{Journal of Econometrics}, 92, 1-45.
@@ -2257,8 +2257,19 @@ cutoff_deduce = function(lat, lon){
     quoi_lonlat = quoi[order_lonlat, ]
 
     N = nrow(quoi)
-    d_latlon = with(quoi_latlon, great_circle_distance(lat[-N], lon[-N], lat[-1], lon[-1]))
-    d_lonlat = with(quoi_lonlat, great_circle_distance(lat[-N], lon[-N], lat[-1], lon[-1]))
+    keep = 1:(N - 3)
+
+    # To increase stability, we take the closest among the 3 closest lat or long
+    d_latlon_1 = with(quoi_latlon, great_circle_distance(lat[-N], lon[-N], lat[-(1:1)], lon[-(1:1)]))
+    d_latlon_2 = with(quoi_latlon, great_circle_distance(lat[-((N - 1):N)], lon[-((N - 1):N)], lat[-(1:2)], lon[-(1:2)]))
+    d_latlon_3 = with(quoi_latlon, great_circle_distance(lat[-((N - 2):N)], lon[-((N - 2):N)], lat[-(1:3)], lon[-(1:3)]))
+
+    d_lonlat_1 = with(quoi_lonlat, great_circle_distance(lat[-N], lon[-N], lat[-1], lon[-1]))
+    d_lonlat_2 = with(quoi_lonlat, great_circle_distance(lat[-((N - 1):N)], lon[-((N - 1):N)], lat[-(1:2)], lon[-(1:2)]))
+    d_lonlat_3 = with(quoi_lonlat, great_circle_distance(lat[-((N - 2):N)], lon[-((N - 2):N)], lat[-(1:3)], lon[-(1:3)]))
+
+    d_latlon = pmin(d_latlon_1[keep], d_latlon_2[keep], d_latlon_3[keep])
+    d_lonlat = pmin(d_lonlat_1[keep], d_lonlat_2[keep], d_lonlat_3[keep])
 
     cutoff = (median(d_latlon) + median(d_lonlat)) / 2
     # we round it to make it nicer and more robust
