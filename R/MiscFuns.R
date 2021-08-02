@@ -6820,6 +6820,10 @@ coef.fixest = coefficients.fixest = function(object, keep, drop, order, agg = TR
         res = res[cnames]
     }
 
+    if(identical(object$family, "negbin")){
+        res = res[-length(res)]
+    }
+
     res
 }
 
@@ -8927,20 +8931,11 @@ fixest_startup_msg = function(x){
 
     check_arg(x, "logical scalar mbt")
 
-    if(x){
-        renvir_update("fixest_startup_msg", NULL)
-    } else {
-        renvir_update("fixest_startup_msg", FALSE)
-    }
-
-    current_version = fixest_version()
-    if(!identical(renvir_get("fixest_version"), current_version)){
-        renvir_update("fixest_version", current_version)
-    }
+    renvir_update("fixest_startup_msg", x)
 
 }
 
-initialize_startup_msg = function(msg_version){
+initialize_startup_msg = function(startup_msg){
     # When new versions of the package are installed => we reset the display of the startup message
     # we need to keep track of the versions for which this default has been set
 
@@ -8948,35 +8943,112 @@ initialize_startup_msg = function(msg_version){
     # - the variable fixest_version is written when the user uses fixest_startup_msg()
     # - if this function returns TRUE, then it forces the msg to pop
 
-    version = renvir_get("fixest_version")
+    # NOTA:
+    # - one problem is that I check the version using a local variable
+    # specific to a project.
+    # - this means that when one creates a new project, the message will necessarily pop!
+    # - so I MUST turn off the message for newly created projects.
+    # otherwise it would be so annoying.
+    # - still => this is a problem if the person uses fixest for the first time
+    # -> the project can be deemed old, while in fact fixest was never used
+    # so startup messages weren't necessary (bc it would break nothing in the existing code)
+    # -> new way: I look at the R files to check whether fixest is used:
+    # - if TRUE: startup message
+    # - if FALSE: nothing
+    # - that's quite costly, but should happen only the very first time the package is attached
+
+    # Note that we must return the value of 'fixest_startup_msg' since these are
+    # updated only at session restart (and hence are not directly accessible)
+
+    previous_version = renvir_get("fixest_version")
     current_version = fixest_version()
 
-    if(!is.null(version) && !identical(version, current_version)){
+    if(is.null(previous_version)){
+        # We first update the version
+        renvir_update("fixest_version", current_version)
+
+        # Is it a new project? Or was fixest simply never used before?
+        if(is_fixest_used()){
+            # => message
+            # Since I register versions since 0.9.0, this means that the
+            # version of fixest used was anterior => all msgs should pop
+
+            renvir_update("fixest_startup_msg", TRUE)
+            return(TRUE)
+        } else {
+            # fixest was never used
+            # => we don't show any message since it will not break any existing code
+            renvir_update("fixest_startup_msg", FALSE)
+            return(FALSE)
+        }
+
+    } else if(!identical(previous_version, current_version)){
         # A) we update the version
         renvir_update("fixest_version", current_version)
 
         # B) we reset the value of fixest_startup_msg
-        #    only if the version is anterior to the version that introduced the
+        #    only if the previous_version is anterior to the version that introduced the
         #    message (means the message SHOULD pop since it would be the first time)
 
-        if(version < msg_version){
-            renvir_update("fixest_startup_msg", NULL)
-            return(TRUE)
+        max_version_msg = names(startup_msg)[1]
+
+        if(version2num(previous_version) < version2num(max_version_msg)){
+            # You force a startup message even if it was turned off in a previous version
+
+            # use case:
+            # - v0.9.0: startup message, user uses fixest_startup_msg(FALSE)
+            # - v0.10.0: new breaking changes, you want to inform the user even if he had set
+            # fixest_startup_msg(FALSE) in v0.9.0
+            #
+
+            renvir_update("fixest_startup_msg", previous_version)
+            return(previous_version)
+
         } else {
+            # The previous version is already posterior to the last message
+            # => no startup message any more
+
+            renvir_update("fixest_startup_msg", FALSE)
             return(FALSE)
         }
     }
 
-    return(FALSE)
+    # If null, we'll get the value thanks to renvir_get("fixest_startup_msg")
+    # but in some instances, it may be corrupt, so we fix it
+    res = renvir_get("fixest_startup_msg")
+    if(is.null(res)){
+        # corrupt situation (can occur in dev)
+        renvir_update("fixest_startup_msg", FALSE)
+        return(FALSE)
+    }
+
+    return(res)
 }
 
+version2num = function(x){
+    sum(as.numeric(strsplit(x, "\\.")[[1]]) * c(1e6, 1e3, 1))
+}
 
 fixest_version = function(){
     as.character(packageVersion("fixest"))
 }
 
-version_lower = function(a, b){
+is_fixest_used = function(){
+    # It takes quite some time though....
 
+    # Only level 1 recursivity
+    files = list.files(pattern = "\\.(r|R)$")
+    dirs = c("./", list.dirs(recursive = FALSE))
+    sub_files = unlist(lapply(dirs, list.files, pattern = "\\.(r|R)$", full.names = TRUE))
+    file_extra = grep("\\.Rprofile", list.files(all.files = TRUE), value = TRUE)
+
+    files = c(files, file_extra, sub_files)
+
+    if(length(files) == 0) return(FALSE)
+
+    big_text = lapply(files, readLines, warn = FALSE)
+
+    return(any(grepl("fixest", big_text)))
 }
 
 renvir_get = function(key){

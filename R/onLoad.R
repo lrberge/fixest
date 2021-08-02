@@ -32,13 +32,35 @@
 
 .onAttach = function(libname, pkgname) {
 
-    # breaking message: don't know how long I'll keep it
+    # The startup message mechanism ends up being a bit complex because I try to avoid
+    # annoyance as much as possible.
+    # I also want to keep track of all the breaking changes so that someone that didn't update for
+    # a while is fully informed on how to change his/her old code
 
-    do_msg = initialize_startup_msg("0.9.0")
+    startup_msg = c("0.9.0" = "From fixest 0.9.0 onward: BREAKING changes! \n- In i():\n    + the first two arguments have been swapped! Now it's i(factor_var, continuous_var) for interactions. \n    + argument 'drop' has been removed (put everything in 'ref' now).\n- In feglm(): \n    + the default family becomes 'gaussian' to be in line with glm(). Hence, for Poisson estimations, please use fepois() instead.")
 
-    is_msg = do_msg || !isFALSE(renvir_get("fixest_startup_msg"))
+    fixest_startup_msg = initialize_startup_msg(startup_msg)
 
-    if(is_msg) packageStartupMessage("From fixest 0.9.0 onward: BREAKING changes! (Permanently remove this message with fixest_startup_msg(FALSE).) \n- In i():\n    + the first two arguments have been swapped! Now it's i(factor_var, continuous_var) for interactions. \n    + argument 'drop' has been removed (put everything in 'ref' now).\n- In feglm(): \n    + the default family becomes 'gaussian' to be in line with glm(). Hence, for Poisson estimations, please use fepois() instead.")
+    if(isTRUE(fixest_startup_msg)){
+        msg = startup_msg
+
+    } else if(isFALSE(fixest_startup_msg)){
+        msg = NULL
+
+    } else {
+        v = version2num(fixest_startup_msg)
+        msg = c()
+        for(i in seq_along(startup_msg)){
+            if(version2num(names(startup_msg)[i]) > v){
+                msg = c(msg, startup_msg[i])
+            }
+        }
+    }
+
+    if(length(msg) > 0) {
+        msg = c("(Permanently remove the following message with fixest_startup_msg(FALSE).)", msg)
+        packageStartupMessage(fit_screen(paste(msg, collapse = "\n"), .95))
+    }
 
 }
 
