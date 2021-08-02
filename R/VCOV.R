@@ -2292,9 +2292,12 @@ cutoff_deduce = function(lat, lon){
     d_latlon = pmin(d_latlon_1[keep], d_latlon_2[keep], d_latlon_3[keep])
     d_lonlat = pmin(d_lonlat_1[keep], d_lonlat_2[keep], d_lonlat_3[keep])
 
-    cutoff = (median(d_latlon) + median(d_lonlat)) / 2
+    # We take twice the median distance => corresponds to two units radius
+    # roughly 50% of units have at least around 8 neighbors (=> we ensure a minimum)
+    cutoff = (median(d_latlon) + median(d_lonlat))
     # we round it to make it nicer and more robust
     m = floor(log10(cutoff)) - 1
+    if(cutoff > 20) m = max(m, 1)
     cutoff = (cutoff %/% 10**m) * 10**m
 
     attr(cutoff, "metric") = "km"
