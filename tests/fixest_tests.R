@@ -1455,7 +1455,7 @@ base$x_endo_2 = 0.2 * base$y - 0.2 * base$x_inst_1 + rnorm(150, sd = 0.5)
 
 # Checking a basic estimation
 
-setFixest_se(all = "standard")
+setFixest_vcov(all = "iid")
 
 est_iv = feols(y ~ x1 | x_endo_1 + x_endo_2 ~ x_inst_1 + x_inst_2, base)
 
@@ -1486,7 +1486,7 @@ if(Sys.info()["sysname"] == "Windows"){
 # check no bug
 etable(summary(est_iv, stage = 1:2))
 
-setFixest_se(reset = TRUE)
+setFixest_vcov(reset = TRUE)
 
 
 ####
