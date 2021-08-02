@@ -17,13 +17,36 @@
  
  - Fix bug in `to_integer` when converting multiple vectors and sorting is required, without items.
  
+## Major changes
+
+ - New argument `vcov`:
+ 
+    * greatly simplifies and extends how to specify the SEs
+ 
+    * completely replaces the arguments `se` and `cluster` (they still work)
+    
+    * accepts functions
+    
+ - New built-in VCOVs:
+
+    * Newey-West (1987) for serially correlated errors
+    
+    * Driscoll-Kraay (1998) for cross-sectionally and serially correlated errors
+    
+    * Conley (1999) for spatially correlated errors
+    
+ 
 ## New features
 
  - `feglm` now accepts partially matched character shortcuts for families: "poisson", "logit", "probit" are now valid `family` arguments.
  
- - Argument `se` now accepts the alias `"hc1"` to get heteroskedasticity-robust standard-errors.
- 
  - `predict.fixest` accepts the new argument `fixef` which, if `TRUE`, returns a data.frame of the fixed-effects coefficients for each observation, with the same number of columns as the number of fixed-effects (feature requests [#144](https://github.com/lrberge/fixest/issues/144) and [#175](https://github.com/lrberge/fixest/issues/175) by @pp2382 and @cseveren).
+ 
+ - VCOV aliases (both Grant McDermott's suggestions: thanks Grant!): 
+ 
+    * the default standard-errors is now `"iid"` (former keywords still work)
+    
+    * the keyword `hc1` can be used to summon heteroskedasticity-robust SEs
 
 
 # fixest 0.9.0
