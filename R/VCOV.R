@@ -241,9 +241,9 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     if(isTRUE(object$summary) && missnull(vcov) && missnull(ssc)){
         vcov = object$cov.scaled
         if(!is_attr) {
-            all_attr = names(attributes(vcov_mat))
+            all_attr = names(attributes(vcov))
             for(v in setdiff(all_attr, c("dim", "dimnames"))){
-                attr(vcov_mat, v) = NULL
+                attr(vcov, v) = NULL
             }
         }
         return(vcov)
@@ -352,6 +352,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 
         # We add the type of the matrix
         attr(vcov, "type") = vcov_name
+        attr(vcov, "dof.K") = object$nparams
 
         return(vcov)
     }
@@ -367,6 +368,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
         check_value(vcov, "square matrix nrow(value)", .value = n_coef)
 
         attr(vcov, "type") = "Custom"
+        attr(vcov, "dof.K") = object$nparams
 
         return(vcov)
     }
@@ -2019,7 +2021,8 @@ oldargs_to_vcov = function(se, cluster, vcov, .vcov = NULL){
         all_vcov_names = unlist(lapply(all_vcov, `[[`, "name"))
         all_vcov_names = all_vcov_names[nchar(all_vcov_names) > 0]
 
-        check_value_plus(se, "NULL{'cluster'} match", .choices = all_vcov_names, .prefix = "Argument 'se' (which has been replaced by arg. 'vcov')")
+        if(missnull(se)) se = "cluster"
+        check_value_plus(se, "match", .choices = all_vcov_names, .prefix = "Argument 'se' (which has been replaced by arg. 'vcov')")
 
         if(missnull(cluster)){
             vcov = se
