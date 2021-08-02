@@ -328,27 +328,29 @@ for(k_val in c("none", "nested", "full")){
 # Clustered, fe1
 VCOV_raw = est$cov.iid / est$sigma2
 H = vcovClust(est$fixef_id$fe1, VCOV_raw, scores = est$scores, adj = FALSE)
+n = nobs(est)
 
 for(tdf in c("conventional", "min")){
     for(k_val in c("none", "nested", "full")){
         for(c_adj in c(FALSE, TRUE)){
-            for(adj in c(FALSE, TRUE))
+            for(adj in c(FALSE, TRUE)){
 
                 K = switch(k_val, none = 1, nested = 6, full = 8)
-            cluster_factor = ifelse(c_adj, 3/2, 1)
-            df = ifelse(tdf == "min", 2, 20 - 8)
-            my_adj = ifelse(adj, (n - 1) / (n - K), 1)
+                cluster_factor = ifelse(c_adj, 3/2, 1)
+                df = ifelse(tdf == "min", 2, 20 - K)
+                my_adj = ifelse(adj, (n - 1) / (n - K), 1)
 
-            V = H * cluster_factor
+                V = H * cluster_factor
 
-            # test SE
-            test(vcov(est, se = "cluster", ssc = ssc(adj = adj, fixef.K = k_val, cluster.adj = c_adj)), V * my_adj)
+                # test SE
+                test(vcov(est, se = "cluster", ssc = ssc(adj = adj, fixef.K = k_val, cluster.adj = c_adj)), V * my_adj)
 
-            # test pvalue
-            my_tstat = tstat(est, se = "cluster", ssc = ssc(adj = adj, fixef.K = k_val, cluster.adj = c_adj))
-            test(pvalue(est, se = "cluster", ssc = ssc(adj = adj, fixef.K = k_val, cluster.adj = c_adj, t.df = tdf)), 2*pt(-abs(my_tstat), df))
+                # test pvalue
+                my_tstat = tstat(est, se = "cluster", ssc = ssc(adj = adj, fixef.K = k_val, cluster.adj = c_adj))
+                test(pvalue(est, se = "cluster", ssc = ssc(adj = adj, fixef.K = k_val, cluster.adj = c_adj, t.df = tdf)), 2*pt(-abs(my_tstat), df))
 
-            # cat("adj = ", adj, " ; fixef.K = ", k_val, " ; cluster.adj = ", c_adj, " t.df = ", tdf, "\n", sep = "")
+                # cat("adj = ", adj, " ; fixef.K = ", k_val, " ; cluster.adj = ", c_adj, " t.df = ", tdf, "\n", sep = "")
+            }
         }
     }
 }
@@ -381,7 +383,7 @@ for(cdf in c("conventional", "min")){
                         V = M_i + M_t - M_it
                     }
 
-                    df = ifelse(tdf == "min", 2, 20 - 8)
+                    df = ifelse(tdf == "min", 2, 20 - K)
                     my_adj = ifelse(adj, (n - 1) / (n - K), 1)
 
                     # test SE
@@ -541,12 +543,6 @@ test(se(est_pois, cluster = ~Origin_na^Destination), "err")
 
 test(se(est_pois, se = "cluster", cluster = ~Origin_na^not_there), "err")
 
-test(se(est_pois, se = "twoway", cluster = c("Origin^Destination", "Product", "error")), "err")
-test(se(est_pois, se = "twoway", cluster = base[, 1:4]), "err")
-test(se(est_pois, se = "twoway", cluster = ~Origin+Destination+Product), "err")
-test(se(est_pois, se = "fourway", cluster = ~Origin+Destination+Product), "err")
-
-
 #
 # Checking that the aliases work fine
 #
@@ -557,6 +553,89 @@ se_white  = se(est_pois, se = "white")
 
 test(se_hetero, se_hc1)
 test(se_hetero, se_white)
+
+#
+# New argument vcov
+#
+
+# We mostly check the absence of errors
+data(base_did)
+
+est_panel = feols(y ~ x1, base_did, panel.id = ~id + period, subset = 1:500)
+
+se_est = se(est_panel)
+test(se(est_panel, ~id), se_est)
+
+# changing ssc argument
+test(se(est_panel, ssc = ssc(adj = FALSE)), se(est_panel, ~id + ssc(adj = FALSE)))
+
+# using vcov_cluster
+test(se_est, se(est_panel, vcov_cluster("id")))
+test(se_est, se(vcov_cluster(est_panel, "id")))
+
+# NW
+se_NW = se(est_panel, "NW")
+test(se_NW, se(est_panel, NW ~ id + period))
+test(se_NW, se(est_panel, newey ~ id + period))
+test(se_NW, se(est_panel, vcov_NW("id", "period")))
+test(se_NW, se(est_panel, vcov_NW(time = "period"))) # here unit is deduced
+
+se_NW2 = se(est_panel, NW(2))
+test(se_NW2, se(est_panel, NW(2) ~ id + period))
+test(se_NW2, se(est_panel, vcov_NW(lag = 2)))
+
+# errors
+est = feols(y ~ x1, base_did)
+test(se(est, NW ~ period), "err")
+
+# DK
+se_DK = se(est_panel, "DK")
+test(se_DK, se(est_panel, DK ~ period))
+test(se_DK, se(est_panel, dris ~ period))
+test(se_DK, se(est_panel, vcov_DK("period")))
+
+se_DK2 = se(est_panel, DK(2))
+test(se_DK2, se(est_panel, DK(2) ~ period))
+test(se_DK2, se(est_panel, vcov_DK(lag = 2)))
+
+
+# Conley
+data(quakes)
+
+est = feols(depth ~ mag, quakes, "conley")
+
+se_conley = se(est)
+test(se_conley, se(est, conley(100) ~ 1))
+test(se_conley, se(est, conley(100) ~ lat + long))
+
+se_conley200 = se(est, conley(200) ~ lat + long)
+test(se_conley200, se(est, vcov_conley(cutoff = 200)))
+test(se_conley200, se(est, vcov_conley("lat", "long", cutoff = 200)))
+
+se_conleyExtra = se(est, conley(pixel = 20, distance = "spherical"))
+test(se_conleyExtra, se(vcov_conley(est, pixel = 20, distance = "spherical")))
+
+
+# Checking the value of Conley SEs with equivalences
+# we generate data that leads to simple values
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
+
+# scattered along 111km
+base$lat = rep(seq(-0.5, 0.5, length.out = 50), 3)
+
+# scattered across very long distances
+base$lon = rep(c(0, 80, 160), each = 50)
+
+est = feols(y ~ x1, base)
+
+# Equivalence 1 -- clustered SEs
+se_clu = se(est, ~lon + ssc(adj = FALSE, cluster.adj = FALSE))
+test(se_clu, se(est, conley(200) ~ ssc(adj = FALSE)))
+
+# Equivalence 2 -- White SEs
+se_hc1 = se(est, hetero ~ ssc(adj = FALSE, cluster.adj = FALSE))
+test(se_hc1, se(est, conley(1) ~ ssc(adj = FALSE)))
 
 
 
