@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
@@ -146,6 +146,7 @@
   <span class='va'>data</span>,
   family <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"poisson"</span>, <span class='st'>"negbin"</span>, <span class='st'>"logit"</span>, <span class='st'>"gaussian"</span><span class='op'>)</span>,
   <span class='va'>NL.fml</span>,
+  <span class='va'>vcov</span>,
   <span class='va'>fixef</span>,
   fixef.rm <span class='op'>=</span> <span class='st'>"perfect"</span>,
   <span class='va'>NL.start</span>,
@@ -158,7 +159,7 @@
   <span class='va'>fsplit</span>,
   <span class='va'>cluster</span>,
   <span class='va'>se</span>,
-  <span class='va'>dof</span>,
+  <span class='va'>ssc</span>,
   <span class='va'>panel.id</span>,
   start <span class='op'>=</span> <span class='fl'>0</span>,
   jacobian.method <span class='op'>=</span> <span class='st'>"simple"</span>,
@@ -200,6 +201,10 @@
     <tr>
       <th>NL.fml</th>
       <td><p>A formula. If provided, this formula represents the non-linear part of the right hand side (RHS). Note that contrary to the <code>fml</code> argument, the coefficients must explicitly appear in this formula. For instance, it can be <code>~a*log(b*x + c*x^3)</code>, where <code>a</code>, <code>b</code>, and <code>c</code> are the coefficients to be estimated. Note that only the RHS of the formula is to be provided, and NOT the left hand side.</p></td>
+    </tr>
+    <tr>
+      <th>vcov</th>
+      <td><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href='vcov_cluster.html'>vcov_cluster</a></code>, <code><a href='vcov_hac.html'>vcov_NW</a></code>, <code><a href='vcov_hac.html'>NW</a></code>, <code><a href='vcov_hac.html'>vcov_DK</a></code>, <code><a href='vcov_hac.html'>DK</a></code>, <code><a href='vcov_conley.html'>vcov_conley</a></code> and <code><a href='vcov_conley.html'>conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances.</p></td>
     </tr>
     <tr>
       <th>fixef</th>
@@ -247,11 +252,11 @@
     </tr>
     <tr>
       <th>se</th>
-      <td><p>Character scalar. Which kind of standard error should be computed: &#8220;standard&#8221;, &#8220;hetero&#8221;, &#8220;cluster&#8221;, &#8220;twoway&#8221;, &#8220;threeway&#8221; or &#8220;fourway&#8221;? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "standard"</code>. Note that this argument can be implicitly deduced from the argument <code>cluster</code>.</p></td>
+      <td><p>Character scalar. Which kind of standard error should be computed: &#8220;standard&#8221;, &#8220;hetero&#8221;, &#8220;cluster&#8221;, &#8220;twoway&#8221;, &#8220;threeway&#8221; or &#8220;fourway&#8221;? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "iid"</code>. Note that this argument is deprecated, you should use <code>vcov</code> instead.</p></td>
     </tr>
     <tr>
-      <th>dof</th>
-      <td><p>An object of class <code>dof.type</code> obtained with the function <code><a href='dof.html'>dof</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href='dof.html'>dof</a></code> for this argument. The arguments and defaults of the function <code><a href='dof.html'>dof</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "conventional"</code>, <code>t.df = "conventional"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href='dof.html'>dof</a></code> for details.</p></td>
+      <th>ssc</th>
+      <td><p>An object of class <code>ssc.type</code> obtained with the function <code><a href='ssc.html'>ssc</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href='ssc.html'>ssc</a></code> for this argument. The arguments and defaults of the function <code><a href='ssc.html'>ssc</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "conventional"</code>, <code>t.df = "conventional"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href='ssc.html'>ssc</a></code> for details.</p></td>
     </tr>
     <tr>
       <th>panel.id</th>
@@ -357,7 +362,7 @@
 <dt>sq.cor</dt><dd><p>Squared correlation between the dependent variable and the expected predictor (i.e. fitted.values) obtained by the estimation.</p></dd>
 <dt>hessian</dt><dd><p>The Hessian of the parameters.</p></dd>
 <dt>fitted.values</dt><dd><p>The fitted values are the expected value of the dependent variable for the fitted model: that is \(E(Y|X)\).</p></dd>
-<dt>cov.unscaled</dt><dd><p>The variance-covariance matrix of the parameters.</p></dd>
+<dt>cov.iid</dt><dd><p>The variance-covariance matrix of the parameters.</p></dd>
 <dt>se</dt><dd><p>The standard-error of the parameters.</p></dd>
 <dt>scores</dt><dd><p>The matrix of the scores (first derivative for each observation).</p></dd>
 <dt>family</dt><dd><p>The ML family that was used for the estimation.</p></dd>
@@ -418,9 +423,9 @@ with first a linear term and then a non linear part expressed by the function g.
     
 
 
-<p>Standard-errors can be computed in different ways, you can use the arguments <code>se</code> and <code>dof</code> in <code><a href='summary.fixest.html'>summary.fixest</a></code> to define how to compute them. By default, in the presence of fixed-effects, standard-errors are automatically clustered.</p>
+<p>Standard-errors can be computed in different ways, you can use the arguments <code>se</code> and <code>ssc</code> in <code><a href='summary.fixest.html'>summary.fixest</a></code> to define how to compute them. By default, in the presence of fixed-effects, standard-errors are automatically clustered.</p>
 <p>The following vignette: <a href='https://lrberge.github.io/fixest/articles/standard_errors.html'>On standard-errors</a> describes in details how the standard-errors are computed in <code>fixest</code> and how you can replicate standard-errors from other software.</p>
-<p>You can use the functions <code><a href='setFixest_se.html'>setFixest_se</a></code> and <code><a href='dof.html'>setFixest_dof</a></code> to permanently set the way the standard-errors are computed.</p>
+<p>You can use the functions <code>setFixest_se</code> and <code><a href='ssc.html'>setFixest_ssc</a></code> to permanently set the way the standard-errors are computed.</p>
     <h2 class="hasAnchor" id="multiple-estimations"><a class="anchor" href="#multiple-estimations"></a>Multiple estimations</h2>
 
     
@@ -473,7 +478,7 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; a                                  0.9945*** (0.0051)
 #&gt; b                                  0.9901*** (0.0058)
 #&gt; _______________ __________________ __________________
-#&gt; S.E. type                 Standard           Standard
+#&gt; S.E. type                      IID                IID
 #&gt; Observations                   100                100
 #&gt; Squared Cor.               0.99957            0.99957
 #&gt; Pseudo R2                  0.99338            0.99338
@@ -500,7 +505,7 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; a                                  1.057*** (0.0265)
 #&gt; b                                  1.005*** (0.0248)
 #&gt; _______________ __________________ _________________
-#&gt; S.E. type                 Standard          Standard
+#&gt; S.E. type                      IID               IID
 #&gt; Observations                   100               100
 #&gt; Squared Cor.               0.46596           0.96247
 #&gt; Pseudo R2                  0.32078           0.81626

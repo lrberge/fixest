@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -115,7 +115,7 @@
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/lrberge/fixest/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -185,45 +185,49 @@
 <span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>trade</span><span class='op'>)</span>
 
 <span class='co'># main estimation</span>
-<span class='va'>est_pois</span> <span class='op'>&lt;-</span> <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>Euros</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>dist_km</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>Origin</span> <span class='op'>+</span> <span class='va'>Destination</span>, <span class='va'>trade</span><span class='op'>)</span>
+<span class='va'>est_pois</span> <span class='op'>=</span> <span class='fu'><a href='feglm.html'>fepois</a></span><span class='op'>(</span><span class='va'>Euros</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>dist_km</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>Origin</span> <span class='op'>+</span> <span class='va'>Destination</span>, <span class='va'>trade</span><span class='op'>)</span>
 
 <span class='co'># we add the variable log(Year)</span>
-<span class='va'>est_2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/update.dev.pkg.html'>update</a></span><span class='op'>(</span><span class='va'>est_pois</span>, <span class='va'>.</span> <span class='op'>~</span> <span class='va'>.</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>Year</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>est_2</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/update.dev.pkg.html'>update</a></span><span class='op'>(</span><span class='va'>est_pois</span>, <span class='va'>.</span> <span class='op'>~</span> <span class='va'>.</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>Year</span><span class='op'>)</span><span class='op'>)</span>
 
 <span class='co'># we add another fixed-effect: "Product"</span>
-<span class='va'>est_3</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/update.dev.pkg.html'>update</a></span><span class='op'>(</span><span class='va'>est_2</span>, <span class='va'>.</span> <span class='op'>~</span> <span class='va'>.</span> <span class='op'>|</span> <span class='va'>.</span> <span class='op'>+</span> <span class='va'>Product</span><span class='op'>)</span>
+<span class='va'>est_3</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/update.dev.pkg.html'>update</a></span><span class='op'>(</span><span class='va'>est_2</span>, <span class='va'>.</span> <span class='op'>~</span> <span class='va'>.</span> <span class='op'>|</span> <span class='va'>.</span> <span class='op'>+</span> <span class='va'>Product</span><span class='op'>)</span>
 
 <span class='co'># we remove the fixed-effect "Origin" and the variable log(dist_km)</span>
-<span class='va'>est_4</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/update.dev.pkg.html'>update</a></span><span class='op'>(</span><span class='va'>est_3</span>, <span class='va'>.</span> <span class='op'>~</span> <span class='va'>.</span> <span class='op'>-</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>dist_km</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>.</span> <span class='op'>-</span> <span class='va'>Origin</span><span class='op'>)</span>
+<span class='va'>est_4</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/update.dev.pkg.html'>update</a></span><span class='op'>(</span><span class='va'>est_3</span>, <span class='va'>.</span> <span class='op'>~</span> <span class='va'>.</span> <span class='op'>-</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>dist_km</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>.</span> <span class='op'>-</span> <span class='va'>Origin</span><span class='op'>)</span>
 
 <span class='co'># Quick look at the 4 estimations</span>
-<span class='fu'><a href='etable.html'>esttable</a></span><span class='op'>(</span><span class='va'>est_pois</span>, <span class='va'>est_2</span>, <span class='va'>est_3</span>, <span class='va'>est_4</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                           est_pois              est_2              est_3
-#&gt; log(dist_km)    -1.517*** (0.1281) -1.518*** (0.1282) -1.528*** (0.1307)
-#&gt; log(Year)                            72.37*** (7.783)   72.62*** (7.842)
-#&gt; Fixed-Effects:  ------------------ ------------------ ------------------
-#&gt; Origin                         Yes                Yes                Yes
-#&gt; Destination                    Yes                Yes                Yes
-#&gt; Product                         No                 No                Yes
-#&gt; _______________ __________________ __________________ __________________
-#&gt; S.E.: Clustered  by: Orig. &amp; Dest.  by: Orig. &amp; Dest.  by: Orig. &amp; Dest.
-#&gt; Observations                38,325             38,325             38,325
-#&gt; Squared Cor.               0.37832            0.38444            0.61155
-#&gt; Pseudo R2                  0.58950            0.59290            0.76381
-#&gt; BIC                       2.44e+12           2.42e+12           1.41e+12
-#&gt;                            est_4
-#&gt; log(dist_km)                    
-#&gt; log(Year)       70.82*** (8.110)
-#&gt; Fixed-Effects:  ----------------
-#&gt; Origin                        No
-#&gt; Destination                  Yes
-#&gt; Product                      Yes
-#&gt; _______________ ________________
-#&gt; S.E.: Clustered by: Dest. &amp; Pr..
-#&gt; Observations              38,325
-#&gt; Squared Cor.             0.17893
-#&gt; Pseudo R2                0.35377
-#&gt; BIC                     3.85e+12</div><div class='input'>
+<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_pois</span>, <span class='va'>est_2</span>, <span class='va'>est_3</span>, <span class='va'>est_4</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                             est_pois              est_2              est_3
+#&gt; Dependent Var.:                Euros              Euros              Euros
+#&gt;                                                                           
+#&gt; log(dist_km)      -1.517*** (0.1131) -1.518*** (0.1132) -1.528*** (0.1157)
+#&gt; log(Year)                              72.37*** (6.900)   72.62*** (6.983)
+#&gt; Fixed-Effects:    ------------------ ------------------ ------------------
+#&gt; Country of Origin                Yes                Yes                Yes
+#&gt; Destination                      Yes                Yes                Yes
+#&gt; Product                           No                 No                Yes
+#&gt; _________________ __________________ __________________ __________________
+#&gt; S.E.: Clustered           by: Origin         by: Origin         by: Origin
+#&gt; Observations                  38,325             38,325             38,325
+#&gt; Squared Cor.                 0.37832            0.38444            0.61155
+#&gt; Pseudo R2                    0.58950            0.59290            0.76381
+#&gt; BIC                         2.44e+12           2.42e+12           1.41e+12
+#&gt;                              est_4
+#&gt; Dependent Var.:              Euros
+#&gt;                                   
+#&gt; log(dist_km)                      
+#&gt; log(Year)         70.82*** (5.989)
+#&gt; Fixed-Effects:    ----------------
+#&gt; Country of Origin               No
+#&gt; Destination                    Yes
+#&gt; Product                        Yes
+#&gt; _________________ ________________
+#&gt; S.E.: Clustered    by: Destination
+#&gt; Observations                38,325
+#&gt; Squared Cor.               0.17893
+#&gt; Pseudo R2                  0.35377
+#&gt; BIC                       3.85e+12</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

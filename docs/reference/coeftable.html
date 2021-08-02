@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
@@ -141,15 +141,13 @@
     <p>Set of functions to directly extract some commonly used statistics, like the p-value or the table of coefficients, from estimations. This was first implemented for <code>fixest</code> estimations, but has some support for other models.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>coeftable</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>se</span>, <span class='va'>cluster</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, <span class='va'>...</span><span class='op'>)</span>
+    <pre class="usage"><span class='fu'>coeftable</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>vcov</span>, <span class='va'>ssc</span>, <span class='va'>cluster</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, <span class='va'>...</span><span class='op'>)</span>
 
-<span class='fu'>ctable</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>se</span>, <span class='va'>cluster</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, <span class='va'>...</span><span class='op'>)</span>
+<span class='fu'>pvalue</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>vcov</span>, <span class='va'>ssc</span>, <span class='va'>cluster</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, <span class='va'>...</span><span class='op'>)</span>
 
-<span class='fu'>pvalue</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>se</span>, <span class='va'>cluster</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, <span class='va'>...</span><span class='op'>)</span>
+<span class='fu'>tstat</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>vcov</span>, <span class='va'>ssc</span>, <span class='va'>cluster</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, <span class='va'>...</span><span class='op'>)</span>
 
-<span class='fu'>tstat</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>se</span>, <span class='va'>cluster</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, <span class='va'>...</span><span class='op'>)</span>
-
-<span class='fu'>se</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>se</span>, <span class='va'>cluster</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+<span class='fu'>se</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>vcov</span>, <span class='va'>ssc</span>, <span class='va'>cluster</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -159,8 +157,12 @@
       <td><p>An estimation. For example obtained from <code><a href='feols.html'>feols</a></code>.</p></td>
     </tr>
     <tr>
-      <th>se</th>
-      <td><p>[Fixest specific.] Character scalar. Which kind of standard error should be computed: &#8220;standard&#8221;, &#8220;hetero&#8221;, &#8220;cluster&#8221;, &#8220;twoway&#8221;, &#8220;threeway&#8221; or &#8220;fourway&#8221;? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "standard"</code>. Note that this argument can be implicitly deduced from the argument <code>cluster</code>.</p></td>
+      <th>vcov</th>
+      <td><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href='vcov_cluster.html'>vcov_cluster</a></code>, <code><a href='vcov_hac.html'>vcov_NW</a></code>, <code><a href='vcov_hac.html'>NW</a></code>, <code><a href='vcov_hac.html'>vcov_DK</a></code>, <code><a href='vcov_hac.html'>DK</a></code>, <code><a href='vcov_conley.html'>vcov_conley</a></code> and <code><a href='vcov_conley.html'>conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances.</p></td>
+    </tr>
+    <tr>
+      <th>ssc</th>
+      <td><p>An object of class <code>ssc.type</code> obtained with the function <code><a href='ssc.html'>ssc</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href='ssc.html'>ssc</a></code> for this argument. The arguments and defaults of the function <code><a href='ssc.html'>ssc</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "conventional"</code>, <code>t.df = "conventional"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href='ssc.html'>ssc</a></code> for details.</p></td>
     </tr>
     <tr>
       <th>cluster</th>
@@ -181,6 +183,10 @@
     <tr>
       <th>...</th>
       <td><p>Other arguments to be passed to <code>summary</code>.</p></td>
+    </tr>
+    <tr>
+      <th>se</th>
+      <td><p>[Fixest specific.] Character scalar. Which kind of standard error should be computed: &#8220;iid&#8221;, &#8220;hetero&#8221;, &#8220;cluster&#8221;, &#8220;twoway&#8221;, &#8220;threeway&#8221; or &#8220;fourway&#8221;? By default if there are fixed-effects in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "iid"</code>. Note that this argument is not needed if the argument <code>cluster</code> is present.</p></td>
     </tr>
     </table>
 
@@ -222,13 +228,13 @@
 </div><div class='output co'>#&gt;  log(dist_km) 
 #&gt; 5.725404e-104 </div><div class='input'>
 <span class='co'># Now with two-way clustered standard-errors</span>
-<span class='co'>#  and using ctable(), the alias to coeftable()</span>
+<span class='co'>#  and using coeftable()</span>
 
-<span class='fu'>ctable</span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='op'>~</span><span class='va'>Origin</span> <span class='op'>+</span> <span class='va'>Product</span><span class='op'>)</span>
+<span class='fu'>coeftable</span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='op'>~</span><span class='va'>Origin</span> <span class='op'>+</span> <span class='va'>Product</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;               Estimate Std. Error   t value   Pr(&gt;|t|))
 #&gt; log(dist_km) -1.023957  0.0906375 -11.29728 1.35342e-29
 #&gt; attr(,"type")
-#&gt; [1] "Two-way (Origin &amp; Product)"</div><div class='input'><span class='fu'>se</span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='op'>~</span><span class='va'>Origin</span> <span class='op'>+</span> <span class='va'>Product</span><span class='op'>)</span>
+#&gt; [1] "Clustered (Origin &amp; Product)"</div><div class='input'><span class='fu'>se</span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='op'>~</span><span class='va'>Origin</span> <span class='op'>+</span> <span class='va'>Product</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; log(dist_km) 
 #&gt;    0.0906375 </div><div class='input'><span class='fu'>pvalue</span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='op'>~</span><span class='va'>Origin</span> <span class='op'>+</span> <span class='va'>Product</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; log(dist_km) 
@@ -237,11 +243,11 @@
 #&gt;    -11.29728 </div><div class='input'>
 <span class='co'># Or you can cluster only once:</span>
 <span class='va'>est_sum</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='op'>~</span><span class='va'>Origin</span> <span class='op'>+</span> <span class='va'>Product</span><span class='op'>)</span>
-<span class='fu'>ctable</span><span class='op'>(</span><span class='va'>est_sum</span><span class='op'>)</span>
+<span class='fu'>coeftable</span><span class='op'>(</span><span class='va'>est_sum</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;               Estimate Std. Error   t value   Pr(&gt;|t|))
 #&gt; log(dist_km) -1.023957  0.0906375 -11.29728 1.35342e-29
 #&gt; attr(,"type")
-#&gt; [1] "Two-way (Origin &amp; Product)"</div><div class='input'><span class='fu'>se</span><span class='op'>(</span><span class='va'>est_sum</span><span class='op'>)</span>
+#&gt; [1] "Clustered (Origin &amp; Product)"</div><div class='input'><span class='fu'>se</span><span class='op'>(</span><span class='va'>est_sum</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; log(dist_km) 
 #&gt;    0.0906375 </div><div class='input'><span class='fu'>tstat</span><span class='op'>(</span><span class='va'>est_sum</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; log(dist_km) 

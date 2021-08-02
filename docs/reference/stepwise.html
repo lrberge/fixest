@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
@@ -171,7 +171,7 @@
 
 <span class='co'># Regular stepwise</span>
 <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fu'>sw</span><span class='op'>(</span><span class='va'>x1</span>, <span class='va'>x2</span>, <span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Standard-errors: Standard 
+</div><div class='output co'>#&gt; Standard-errors: IID 
 #&gt; Expl. vars.: x1
 #&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
 #&gt; (Intercept)  6.526200   0.478896 13.6280 &lt; 2.2e-16 ***
@@ -188,7 +188,7 @@
 #&gt; x3           0.88858   0.051374  17.296 &lt; 2.2e-16 ***</div><div class='input'>
 <span class='co'># Cumulative stepwise</span>
 <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fu'>csw</span><span class='op'>(</span><span class='va'>x1</span>, <span class='va'>x2</span>, <span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Standard-errors: Standard 
+</div><div class='output co'>#&gt; Standard-errors: IID 
 #&gt; Expl. vars.: x1
 #&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
 #&gt; (Intercept)  6.526200   0.478896 13.6280 &lt; 2.2e-16 ***
@@ -208,7 +208,7 @@
 #&gt; x3          -0.556483   0.127548 -4.3629   2.4e-05 ***</div><div class='input'>
 <span class='co'># Using the 0</span>
 <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='va'>x2</span> <span class='op'>+</span> <span class='fu'>sw0</span><span class='op'>(</span><span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Standard-errors: Standard 
+</div><div class='output co'>#&gt; Standard-errors: IID 
 #&gt; Expl. vars.: x1 + x2
 #&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
 #&gt; (Intercept) 2.249100   0.247970  9.0702  7.04e-16 ***

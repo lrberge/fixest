@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -115,7 +115,7 @@
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/lrberge/fixest/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -197,13 +197,13 @@
 </div><div class='output co'>#&gt;                               est1               est2               est3
 #&gt; Dependent Var.:                  y             f(y,1)             l(y,1)
 #&gt;                                                                         
-#&gt; f(x1,1)                            0.9940*** (0.0579)                   
-#&gt; x1              0.9948*** (0.0532)    0.0081 (0.0584)   -0.0534 (0.0599)
-#&gt; l(x1,1)            0.0410 (0.0540)    0.0157 (0.0585) 0.9871*** (0.0613)
-#&gt; l(x1,2)                                                  0.0220 (0.0607)
-#&gt; l(x1,3)                                                  0.0102 (0.0598)
+#&gt; f(x1,1)                            0.9940*** (0.0542)                   
+#&gt; x1              0.9948*** (0.0487)    0.0081 (0.0592)   -0.0534 (0.0545)
+#&gt; l(x1,1)            0.0410 (0.0558)    0.0157 (0.0640) 0.9871*** (0.0551)
+#&gt; l(x1,2)                                                  0.0220 (0.0580)
+#&gt; l(x1,3)                                                  0.0102 (0.0639)
 #&gt; _______________ __________________ __________________ __________________
-#&gt; S.E. type                 Standard           Standard           Standard
+#&gt; S.E.: Clustered             by: id             by: id             by: id
 #&gt; Observations                   972                864                756
 #&gt; R2                         0.26558            0.25697            0.25875
 #&gt; Adj. R2                    0.26406            0.25438            0.25480</div><div class='input'>
@@ -211,26 +211,26 @@
 <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='fu'>f</span><span class='op'>(</span><span class='va'>y</span><span class='op'>)</span> <span class='op'>~</span> <span class='fu'>l</span><span class='op'>(</span><span class='va'>x1</span>, <span class='op'>-</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>1</span><span class='op'>)</span>, <span class='va'>base_did</span>, panel.id <span class='op'>=</span> <span class='op'>~</span><span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; <span class='message'>NOTE: 216 observations removed because of NA values (LHS: 108, RHS: 216).</span></div><div class='output co'>#&gt; OLS estimation, Dep. Var.: f(y, 1)
 #&gt; Observations: 864 
-#&gt; Standard-errors: Standard 
-#&gt;             Estimate Std. Error   t value  Pr(&gt;|t|)    
-#&gt; (Intercept) 2.464300   0.169710 14.521000 &lt; 2.2e-16 ***
-#&gt; f(x1, 1)    0.994018   0.057861 17.179000 &lt; 2.2e-16 ***
-#&gt; x1          0.008072   0.058400  0.138217  0.890101    
-#&gt; l(x1, 1)    0.015693   0.058540  0.268068  0.788711    
+#&gt; Standard-errors: Clustered (id) 
+#&gt;             Estimate Std. Error   t value Pr(&gt;|t|))    
+#&gt; (Intercept) 2.464300   0.223277 11.037000 &lt; 2.2e-16 ***
+#&gt; f(x1, 1)    0.994018   0.054216 18.335000 &lt; 2.2e-16 ***
+#&gt; x1          0.008072   0.059247  0.136241  0.891887    
+#&gt; l(x1, 1)    0.015693   0.063958  0.245360  0.806648    
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 4.9742   Adj. R2: 0.254377</div><div class='input'><span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='fu'>d</span><span class='op'>(</span><span class='va'>y</span><span class='op'>)</span> <span class='op'>~</span> <span class='fu'>d</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span>, <span class='va'>base_did</span>, panel.id <span class='op'>=</span> <span class='op'>~</span><span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; <span class='message'>NOTE: 108 observations removed because of NA values (LHS: 108, RHS: 108).</span></div><div class='output co'>#&gt; OLS estimation, Dep. Var.: d(y, 1)
 #&gt; Observations: 972 
-#&gt; Standard-errors: Standard 
-#&gt;             Estimate Std. Error t value  Pr(&gt;|t|)    
-#&gt; (Intercept) 0.510685   0.187474   2.724  0.006565 ** 
-#&gt; d(x1, 1)    0.972664   0.044505  21.855 &lt; 2.2e-16 ***
+#&gt; Standard-errors: Clustered (id) 
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept) 0.510685   0.072720  7.0226  2.09e-10 ***
+#&gt; d(x1, 1)    0.972664   0.053437 18.2020 &lt; 2.2e-16 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 5.8389   Adj. R2: 0.329253</div><div class='input'>
 <span class='co'># l() and f() can also be used within a data.table:</span>
-<span class='kw'>if</span><span class='op'>(</span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>require</a></span><span class='op'>(</span><span class='st'><a href='http://r-datatable.com'>"data.table"</a></span><span class='op'>)</span><span class='op'>)</span><span class='op'>{</span>
+<span class='kw'>if</span><span class='op'>(</span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>require</a></span><span class='op'>(</span><span class='st'><a href='https://r-datatable.com'>"data.table"</a></span><span class='op'>)</span><span class='op'>)</span><span class='op'>{</span>
   <span class='va'>pdat_dt</span> <span class='op'>=</span> <span class='fu'><a href='panel.html'>panel</a></span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>base_did</span><span class='op'>)</span>, <span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>period</span><span class='op'>)</span>
   <span class='co'># Now since pdat_dt is also a data.table</span>
   <span class='co'>#   you can create lags/leads directly</span>

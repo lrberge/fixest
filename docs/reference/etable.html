@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
@@ -143,11 +143,12 @@
 
     <pre class="usage"><span class='fu'>etable</span><span class='op'>(</span>
   <span class='va'>...</span>,
-  se <span class='op'>=</span> <span class='cn'>NULL</span>,
-  dof <span class='op'>=</span> <span class='cn'>NULL</span>,
-  cluster <span class='op'>=</span> <span class='cn'>NULL</span>,
+  vcov <span class='op'>=</span> <span class='cn'>NULL</span>,
   stage <span class='op'>=</span> <span class='fl'>2</span>,
   agg <span class='op'>=</span> <span class='cn'>NULL</span>,
+  se <span class='op'>=</span> <span class='cn'>NULL</span>,
+  ssc <span class='op'>=</span> <span class='cn'>NULL</span>,
+  cluster <span class='op'>=</span> <span class='cn'>NULL</span>,
   <span class='va'>.vcov</span>,
   .vcov_args <span class='op'>=</span> <span class='cn'>NULL</span>,
   digits <span class='op'>=</span> <span class='fl'>4</span>,
@@ -228,11 +229,12 @@
 
 <span class='fu'>esttable</span><span class='op'>(</span>
   <span class='va'>...</span>,
-  se <span class='op'>=</span> <span class='cn'>NULL</span>,
-  dof <span class='op'>=</span> <span class='cn'>NULL</span>,
-  cluster <span class='op'>=</span> <span class='cn'>NULL</span>,
+  vcov <span class='op'>=</span> <span class='cn'>NULL</span>,
   stage <span class='op'>=</span> <span class='fl'>2</span>,
   agg <span class='op'>=</span> <span class='cn'>NULL</span>,
+  se <span class='op'>=</span> <span class='cn'>NULL</span>,
+  ssc <span class='op'>=</span> <span class='cn'>NULL</span>,
+  cluster <span class='op'>=</span> <span class='cn'>NULL</span>,
   <span class='va'>.vcov</span>,
   .vcov_args <span class='op'>=</span> <span class='cn'>NULL</span>,
   digits <span class='op'>=</span> <span class='fl'>4</span>,
@@ -270,11 +272,12 @@
 
 <span class='fu'>esttex</span><span class='op'>(</span>
   <span class='va'>...</span>,
-  se <span class='op'>=</span> <span class='cn'>NULL</span>,
-  dof <span class='op'>=</span> <span class='cn'>NULL</span>,
-  cluster <span class='op'>=</span> <span class='cn'>NULL</span>,
+  vcov <span class='op'>=</span> <span class='cn'>NULL</span>,
   stage <span class='op'>=</span> <span class='fl'>2</span>,
   agg <span class='op'>=</span> <span class='cn'>NULL</span>,
+  se <span class='op'>=</span> <span class='cn'>NULL</span>,
+  ssc <span class='op'>=</span> <span class='cn'>NULL</span>,
+  cluster <span class='op'>=</span> <span class='cn'>NULL</span>,
   <span class='va'>.vcov</span>,
   .vcov_args <span class='op'>=</span> <span class='cn'>NULL</span>,
   digits <span class='op'>=</span> <span class='fl'>4</span>,
@@ -322,16 +325,8 @@
       <td><p>Used to capture different <code>fixest</code> estimation objects (obtained with <code><a href='femlm.html'>femlm</a></code>, <code><a href='feols.html'>feols</a></code> or <code><a href='feglm.html'>feglm</a></code>). Note that any other type of element is discarded. Note that you can give a list of <code>fixest</code> objects.</p></td>
     </tr>
     <tr>
-      <th>se</th>
-      <td><p>Character scalar. Which kind of standard error should be computed: &#8220;standard&#8221;, &#8220;hetero&#8221;, &#8220;cluster&#8221;, &#8220;twoway&#8221;, &#8220;threeway&#8221; or &#8220;fourway&#8221;? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "standard"</code>. Note that this argument can be implicitly deduced from the argument <code>cluster</code>.</p></td>
-    </tr>
-    <tr>
-      <th>dof</th>
-      <td><p>An object of class <code>dof.type</code> obtained with the function <code><a href='dof.html'>dof</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href='dof.html'>dof</a></code> for this argument. The arguments and defaults of the function <code><a href='dof.html'>dof</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "conventional"</code>, <code>t.df = "conventional"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href='dof.html'>dof</a></code> for details.</p></td>
-    </tr>
-    <tr>
-      <th>cluster</th>
-      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as clusters in the estimation, you could further use <code>cluster = 1:2</code> or leave it blank with <code>se = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] cluster). You can interact two variables using <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
+      <th>vcov</th>
+      <td><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href='vcov_cluster.html'>vcov_cluster</a></code>, <code><a href='vcov_hac.html'>vcov_NW</a></code>, <code><a href='vcov_hac.html'>NW</a></code>, <code><a href='vcov_hac.html'>vcov_DK</a></code>, <code><a href='vcov_hac.html'>DK</a></code>, <code><a href='vcov_conley.html'>vcov_conley</a></code> and <code><a href='vcov_conley.html'>conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances.</p></td>
     </tr>
     <tr>
       <th>stage</th>
@@ -340,6 +335,18 @@
     <tr>
       <th>agg</th>
       <td><p>A character scalar describing the variable names to be aggregated, it is pattern-based. All variables that match the pattern will be aggregated. It must be of the form <code>"(root)"</code>, the parentheses must be there and the resulting variable name will be <code>"root"</code>. You can add another root with parentheses: <code>"(root1)regex(root2)"</code>, in which case the resulting name is <code>"root1::root2"</code>. To name the resulting variable differently you can pass a named vector: <code><a href='https://rdrr.io/r/base/c.html'>c("name" = "pattern")</a></code> or <code><a href='https://rdrr.io/r/base/c.html'>c("name" = "pattern(root2)")</a></code>. It's a bit intricate sorry, please see the examples.</p></td>
+    </tr>
+    <tr>
+      <th>se</th>
+      <td><p>Character scalar. Which kind of standard error should be computed: &#8220;standard&#8221;, &#8220;hetero&#8221;, &#8220;cluster&#8221;, &#8220;twoway&#8221;, &#8220;threeway&#8221; or &#8220;fourway&#8221;? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "iid"</code>. Note that this argument is deprecated, you should use <code>vcov</code> instead.</p></td>
+    </tr>
+    <tr>
+      <th>ssc</th>
+      <td><p>An object of class <code>ssc.type</code> obtained with the function <code><a href='ssc.html'>ssc</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href='ssc.html'>ssc</a></code> for this argument. The arguments and defaults of the function <code><a href='ssc.html'>ssc</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "conventional"</code>, <code>t.df = "conventional"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href='ssc.html'>ssc</a></code> for details.</p></td>
+    </tr>
+    <tr>
+      <th>cluster</th>
+      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as clusters in the estimation, you could further use <code>cluster = 1:2</code> or leave it blank with <code>se = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] cluster). You can interact two variables using <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
     </tr>
     <tr>
       <th>.vcov</th>
@@ -555,7 +562,7 @@
 <p>If a one-sided formula: then the elements in the formula must represent either <code>extraline</code> macros, either fit statistics (i.e. valid types of the function <code><a href='fitstat.html'>fitstat</a></code>). One new line will be added for each element of the formula, they will be appended right after the coefficients. To register <code>extraline</code> macros, you must first register them in <code><a href='extraline_register.html'>extraline_register</a></code>.</p>
 <p>If a list: then the elements must be either: a) a logical scalar, b) a vector of the same length as the number of models, c) a function to be applied to each model and which returns a scalar, or d) a one-sided formula of <code>extraline</code> macros (registered with <code><a href='extraline_register.html'>extraline_register</a></code>) or valid <code><a href='fitstat.html'>fitstat</a></code> types.</p>
 <p>When a list, the elements of type a), b) and c) must have a name! Example: <code>extraline = list("Controls" = TRUE)</code> is good, <code>extraline = list(TRUE)</code> is bad. The name for element of type d) is optional. Example: <code>extraline = list("^^My F-stat" = ~f)</code> will add the row named <code>"My F-stat"</code> on top of the coefficients (for the placement, see the dedicated section), while <code>extraline = list(~f)</code> will add the F-stat row with its default name (<code>"F-test"</code>) at its default placement (below the coefficients).</p>
-<p>You can combine elements in the list, so that the following <code>extraline = list(~r2, "Controls" = TRUE), ~f+ivf</code> is valid.</p>
+<p>You can combine elements in the list, so that the following <code>extraline = list(~r2, "Controls" = TRUE, ~f+ivf)</code> is valid.</p>
     <h2 class="hasAnchor" id="controlling-the-placement-of-extra-lines"><a class="anchor" href="#controlling-the-placement-of-extra-lines"></a>Controlling the placement of extra lines</h2>
 
     
@@ -563,10 +570,10 @@
 
 <p>The arguments <code>group</code>, <code>extraline</code> and <code>fixef.group</code> allow to add customized lines in the table. They can be defined via a list where the list name will be the row name. By default, the placement of the extra line is right after the coefficients (except for <code>fixef.group</code>, covered in the last paragraph). For instance, <code>group = list("Controls" = "x[[:digit:]]")</code> will create a line right after the coefficients telling which models contain the control variables.</p>
 <p>But the placement can be customized. The previous example (of the controls) will be used for illustration (the mechanism for <code>extraline</code> and <code>fixef.group</code> is identical).</p>
-<p>The row names accept 2 special characters at the very start. The first governs the placement of the new line within the section: it can be equal to <code>"^"</code>, meaning first line, or <code>"_"</code>, meaning last line. The second character tells in which section the line should appear: it can be equal to <code>"^"</code>, <code>"-"</code>, or <code>"_"</code>, meaning respectively the coefficients, the fixed-effects and the statistics section (which typically appear at the top, mid and bottom of the table).</p>
-<p>Let's have some examples. Using the previous example, writing <code>"^_Controls"</code> would place the new line in at the top of the statistics section. Writing <code>"_-Controls"</code> places it as the last row of the fixed-effects section; <code>"^^Controls"</code> at the top row of the coefficients section; etc...</p>
-<p>On top of that there are shortcuts to avoid writing the two special characters. If only one special character is found, it is assumed to reflect the section, unless it corresponds to the default section, a case where the character then reflects the position within the section. An example will make it clear. Writing <code>"^Controls"</code> would place the line at the top of the coefficients section (since the default placement would have been this section). <code>"_Controls"</code> would place it at the bottom of the statistics section.</p>
-<p>The placement in <code>fixef.group</code> is defined similarly, only the default placement is different. Its default placement is at the top of the fixed-effects section. This means that the only difference with <code>group</code> and <code>extraline</code> is when a single special character is used. Here using, e.g., <code>"^My FEs"</code> would place the row at the bottom of the coefficients section, since <code>"^"</code> would refer to the section (and not the row within the section).</p>
+<p>The row names accept 2 special characters at the very start. The first character tells in which section the line should appear: it can be equal to <code>"^"</code>, <code>"-"</code>, or <code>"_"</code>, meaning respectively the coefficients, the fixed-effects and the statistics section (which typically appear at the top, mid and bottom of the table). The second one governs the placement of the new line within the section: it can be equal to <code>"^"</code>, meaning first line, or <code>"_"</code>, meaning last line.</p>
+<p>Let's have some examples. Using the previous example, writing <code>"_^Controls"</code> would place the new line at the top of the statistics section. Writing <code>"-_Controls"</code> places it as the last row of the fixed-effects section; <code>"^^Controls"</code> at the top row of the coefficients section; etc...</p>
+<p>The second character is optional, the default placement being in the bottom. This means that <code>"_Controls"</code> would place it at the bottom of the statistics section.</p>
+<p>The placement in <code>fixef.group</code> is defined similarly, only the default placement is different. Its default placement is at the top of the fixed-effects section.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p>See also the main estimation functions <code><a href='femlm.html'>femlm</a></code>, <code><a href='feols.html'>feols</a></code> or <code><a href='feglm.html'>feglm</a></code>. Use <code><a href='summary.fixest.html'>summary.fixest</a></code> to see the results with the appropriate standard-errors, <code><a href='fixef.fixest.html'>fixef.fixest</a></code> to extract the fixed-effects coefficients.</p></div>
@@ -600,7 +607,7 @@
 #&gt; Fixed-Effects:   ----------------- ------------------
 #&gt; Month                           No                Yes
 #&gt; ________________ _________________ __________________
-#&gt; S.E. type                 Standard          by: Month
+#&gt; S.E. type                      IID          by: Month
 #&gt; Observations                   116                116
 #&gt; R2                         0.68106            0.68106
 #&gt; Within R2                       --            0.58296</div><div class='input'>
@@ -617,7 +624,7 @@
 #&gt; Fixed-Effects:   ----------------- ------------------
 #&gt; Month                           No                Yes
 #&gt; ________________ _________________ __________________
-#&gt; S.E. type                 Standard          by: Month
+#&gt; S.E. type                      IID          by: Month
 #&gt; Observations                   116                116
 #&gt; R2                         0.68106            0.68106
 #&gt; Within R2                       --            0.58296</div><div class='input'><span class='co'># or using drop  (see regexp help):</span>
@@ -633,7 +640,7 @@
 #&gt; Fixed-Effects:   ----------------- ------------------
 #&gt; Month                           No                Yes
 #&gt; ________________ _________________ __________________
-#&gt; S.E. type                 Standard          by: Month
+#&gt; S.E. type                      IID          by: Month
 #&gt; Observations                   116                116
 #&gt; R2                         0.68106            0.68106
 #&gt; Within R2                       --            0.58296</div><div class='input'>
@@ -651,7 +658,7 @@
 #&gt; Fixed-Effects:  ----------------- -----------------
 #&gt; Month                          No               Yes
 #&gt; _______________ _________________ _________________
-#&gt; S.E. type                Standard         by: Month
+#&gt; S.E. type                     IID         by: Month
 #&gt; Observations                  116               116
 #&gt; R2                        0.68106           0.68106
 #&gt; Within R2                      --           0.58296</div><div class='input'><span class='co'># or using keep ("!" reverses the effect):</span>
@@ -668,7 +675,7 @@
 #&gt; Fixed-Effects:  ----------------- -----------------
 #&gt; Month                          No               Yes
 #&gt; _______________ _________________ _________________
-#&gt; S.E. type                Standard         by: Month
+#&gt; S.E. type                     IID         by: Month
 #&gt; Observations                  116               116
 #&gt; R2                        0.68106           0.68106
 #&gt; Within R2                      --           0.58296</div><div class='input'>
@@ -691,7 +698,7 @@
 #&gt; Fixed-Effects:   ----------------- ------------------
 #&gt; Month                           No                Yes
 #&gt; ________________ _________________ __________________
-#&gt; S.E. type                 Standard          by: Month
+#&gt; S.E. type                      IID          by: Month
 #&gt; Observations                   116                116
 #&gt; R2                         0.68106            0.68106
 #&gt; Within R2                       --            0.58296</div><div class='input'><span class='co'># Month, then interactions, then the rest</span>
@@ -713,7 +720,7 @@
 #&gt; Fixed-Effects:   ----------------- ------------------
 #&gt; Month                           No                Yes
 #&gt; ________________ _________________ __________________
-#&gt; S.E. type                 Standard          by: Month
+#&gt; S.E. type                      IID          by: Month
 #&gt; Observations                   116                116
 #&gt; R2                         0.68106            0.68106
 #&gt; Within R2                       --            0.58296</div><div class='input'>
@@ -743,7 +750,7 @@
 #&gt; Fixed-Effects:     ----------------- ------------------
 #&gt; Month                             No                Yes
 #&gt; __________________ _________________ __________________
-#&gt; S.E. type                   Standard          by: Month
+#&gt; S.E. type                        IID          by: Month
 #&gt; Observations                     116                116
 #&gt; R2                           0.68106            0.68106
 #&gt; Within R2                         --            0.58296</div><div class='input'><span class='co'># Note the difference of treatment between Jun and May</span>
@@ -772,7 +779,7 @@
 #&gt; Fixed-Effects:  ----------------- ------------------
 #&gt; Month                          No                Yes
 #&gt; _______________ _________________ __________________
-#&gt; S.E. type                Standard          by: Month
+#&gt; S.E. type                     IID          by: Month
 #&gt; Observations                  116                116
 #&gt; R2                        0.68106            0.68106
 #&gt; Within R2                      --            0.58296</div><div class='input'>
@@ -798,7 +805,7 @@
 #&gt; Fixed-Effects:   ---------------- -----------------
 #&gt; Month                          No               Yes
 #&gt; ________________ ________________ _________________
-#&gt; S.E. type                Standard         by: Month
+#&gt; S.E. type                     IID         by: Month
 #&gt; Observations                  116               116
 #&gt; R2                        0.68106           0.68106
 #&gt; Within R2                      --           0.58296</div><div class='input'>
@@ -841,7 +848,7 @@
 #&gt;   &amp;(1.147) &amp; (0.3175)\\
 #&gt; Month &amp;  &amp; Yes\\
 #&gt;  &amp;  &amp; \\
-#&gt; Standard-Errors&amp; Standard&amp;Month\\
+#&gt; Standard-Errors&amp; IID&amp;Month\\
 #&gt; Observations &amp; 116&amp;116\\
 #&gt; R$^2$ &amp; 0.68106&amp;0.68106\\
 #&gt; Within R$^2$ &amp; &amp;0.58296\\
@@ -881,7 +888,7 @@
 #&gt; \midrule \emph{Fixed-effects}&amp;   &amp;  \\
 #&gt; Month &amp;  &amp; Yes\\
 #&gt; \midrule \emph{Fit statistics}&amp;  &amp; \\
-#&gt; Standard-Errors&amp; Standard&amp;Month\\
+#&gt; Standard-Errors&amp; IID&amp;Month\\
 #&gt; Observations &amp; 116&amp;116\\
 #&gt; R$^2$ &amp; 0.68106&amp;0.68106\\
 #&gt; Within R$^2$ &amp; &amp;0.58296\\
@@ -916,7 +923,7 @@
 #&gt; Wind $\times $ Sep &amp; -1.349 &amp; -1.349$^{**}$\\
 #&gt;   &amp;(1.147) &amp; (0.3175)\\
 #&gt;  &amp;  &amp; \\
-#&gt; Standard-Errors&amp; Standard&amp;Month\\
+#&gt; Standard-Errors&amp; IID&amp;Month\\
 #&gt; Observations &amp; 116&amp;116\\
 #&gt; R$^2$ &amp; 0.68106&amp;0.68106\\
 #&gt; Within R$^2$ &amp; &amp;0.58296\\
@@ -945,7 +952,7 @@
 #&gt; Solar.R square                                       -0.0002 (0.0003)
 #&gt; Controls                        No               Yes              Yes
 #&gt; _______________ __________________ _________________ ________________
-#&gt; S.E. type                 Standard          Standard         Standard
+#&gt; S.E. type                      IID               IID              IID
 #&gt; Observations                   111               111              111
 #&gt; R2                         0.12134           0.71231          0.71408
 #&gt; Adj. R2                    0.11328           0.69861          0.69758</div><div class='input'>
@@ -969,7 +976,7 @@
 #&gt; Wind            -3.334*** (0.6544)  -1.107 (0.9236) -5.830*** (1.124)
 #&gt; Sub-sample                     All         May-June         Jul.-Aug.
 #&gt; _______________ __________________ ________________ _________________
-#&gt; S.E. type                 Standard         Standard          Standard
+#&gt; S.E. type                      IID              IID               IID
 #&gt; Observations                   111               33                49
 #&gt; R2                         0.60589          0.35006           0.66607
 #&gt; Adj. R2                    0.59484          0.28282           0.64381
@@ -982,22 +989,22 @@
 #&gt; Wind              -1.353 (0.9065)
 #&gt; Sub-sample                  Sept.
 #&gt; _______________ _________________
-#&gt; S.E. type                Standard
+#&gt; S.E. type                     IID
 #&gt; Observations                   29
 #&gt; R2                        0.71724
 #&gt; Adj. R2                   0.68330</div><div class='input'>
 <span class='co'># You can monitor the placement of the new lines with two special characters</span>
 <span class='co'># at the beginning of the row name.</span>
-<span class='co'># 1) "^" or "_" which mean first or last line of the section</span>
-<span class='co'># 2) "^", "-" or "_" which mean the coefficients, the fixed-effects or the</span>
+<span class='co'># 1) "^", "-" or "_" which mean the coefficients, the fixed-effects or the</span>
 <span class='co'># statistics section.</span>
+<span class='co'># 2) "^" or "_" which mean first or last line of the section</span>
 <span class='co'>#</span>
-<span class='co'># Ex: starting with "^_" will place the line at the top of the stat. section</span>
-<span class='co'>#     starting with "_-" will place the line at the bottom of the FEs section</span>
+<span class='co'># Ex: starting with "_^" will place the line at the top of the stat. section</span>
+<span class='co'>#     starting with "-_" will place the line at the bottom of the FEs section</span>
 <span class='co'>#     etc.</span>
 <span class='co'>#</span>
-<span class='co'># You can use a single character which will represent the section, unless</span>
-<span class='co'># it's</span>
+<span class='co'># You can use a single character which will represent the section,</span>
+<span class='co'># the line would then appear at the bottom of the section.</span>
 
 <span class='co'># Examples</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_c0</span>, <span class='va'>est_c1</span>, <span class='va'>est_c2</span>, group <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"_Controls"</span> <span class='op'>=</span> <span class='st'>"poly"</span><span class='op'>)</span><span class='op'>)</span>
@@ -1008,12 +1015,12 @@
 #&gt; Solar.R         0.1272*** (0.0328) 0.0659** (0.0201)  0.1347 (0.0881)
 #&gt; Solar.R square                                       -0.0002 (0.0003)
 #&gt; _______________ __________________ _________________ ________________
-#&gt; S.E. type                 Standard          Standard         Standard
+#&gt; S.E. type                      IID               IID              IID
 #&gt; Observations                   111               111              111
 #&gt; R2                         0.12134           0.71231          0.71408
 #&gt; Adj. R2                    0.11328           0.69861          0.69758
 #&gt; Controls                        No               Yes              Yes</div><div class='input'><span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_all</span>, <span class='va'>est_sub1</span>, <span class='va'>est_sub2</span>, <span class='va'>est_sub3</span>,
-       extraline <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"^Sub-sample"</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"All"</span>, <span class='st'>"May-June"</span>, <span class='st'>"Jul.-Aug."</span>, <span class='st'>"Sept."</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+       extraline <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"^^Sub-sample"</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"All"</span>, <span class='st'>"May-June"</span>, <span class='st'>"Jul.-Aug."</span>, <span class='st'>"Sept."</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                            est_all         est_sub1          est_sub2
 #&gt; Dependent Var.:              Ozone            Ozone             Ozone
 #&gt;                                                                      
@@ -1023,7 +1030,7 @@
 #&gt; Temp             1.652*** (0.2535) 1.184** (0.4123)  2.037** (0.6508)
 #&gt; Wind            -3.334*** (0.6544)  -1.107 (0.9236) -5.830*** (1.124)
 #&gt; _______________ __________________ ________________ _________________
-#&gt; S.E. type                 Standard         Standard          Standard
+#&gt; S.E. type                      IID              IID               IID
 #&gt; Observations                   111               33                49
 #&gt; R2                         0.60589          0.35006           0.66607
 #&gt; Adj. R2                    0.59484          0.28282           0.64381
@@ -1036,13 +1043,10 @@
 #&gt; Temp            2.005*** (0.3716)
 #&gt; Wind              -1.353 (0.9065)
 #&gt; _______________ _________________
-#&gt; S.E. type                Standard
+#&gt; S.E. type                     IID
 #&gt; Observations                   29
 #&gt; R2                        0.71724
-#&gt; Adj. R2                   0.68330</div><div class='input'><span class='co'># Note that since the default placement is the coefficients section,</span>
-<span class='co'># a single "^" then refers to the position within the section. We end</span>
-<span class='co'># up at the top of the coefficients section.</span>
-
+#&gt; Adj. R2                   0.68330</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># fixef.group</span>
 <span class='co'>#</span>
@@ -1066,7 +1070,7 @@
 #&gt; Fixed-Effects:  ------------------ ----------------
 #&gt; Month and Day                   No              Yes
 #&gt; _______________ __________________ ________________
-#&gt; S.E. type                 Standard        by: Month
+#&gt; S.E. type                      IID        by: Month
 #&gt; Observations                   111              111
 #&gt; R2                         0.60589          0.81604
 #&gt; Within R2                       --          0.61471</div><div class='input'>
@@ -1085,7 +1089,7 @@
 #&gt; Month                           No               Yes              Yes
 #&gt; Day                             No                No              Yes
 #&gt; _______________ __________________ _________________ ________________
-#&gt; S.E. type                 Standard         by: Month        by: Month
+#&gt; S.E. type                      IID         by: Month        by: Month
 #&gt; Observations                   111               111              111
 #&gt; R2                         0.60589           0.63686          0.81604
 #&gt; Within R2                       --           0.53154          0.61471</div><div class='input'>
@@ -1102,7 +1106,7 @@
 #&gt; Fixed-Effects:  ------------------ ----------------
 #&gt; Dates                           No              Yes
 #&gt; _______________ __________________ ________________
-#&gt; S.E. type                 Standard        by: Month
+#&gt; S.E. type                      IID        by: Month
 #&gt; Observations                   111              111
 #&gt; R2                         0.60589          0.81604
 #&gt; Within R2                       --          0.61471</div><div class='input'>
@@ -1126,7 +1130,7 @@
 #&gt; Month                           No               Yes              Yes
 #&gt; Day                             No                No              Yes
 #&gt; _______________ __________________ _________________ ________________
-#&gt; S.E. type                 Standard         by: Month        by: Month
+#&gt; S.E. type                      IID         by: Month        by: Month
 #&gt; Observations                   111               111              111
 #&gt; R2                         0.60589           0.63686          0.81604
 #&gt; Within R2                       --           0.53154          0.61471</div><div class='input'>
@@ -1145,7 +1149,7 @@
 #&gt; Temp             1.652*** (0.2535) 2.052** (0.2390)
 #&gt; Wind            -3.334*** (0.6544)  -3.289* (1.051)
 #&gt; _______________ __________________ ________________
-#&gt; S.E. type                 Standard        by: Month
+#&gt; S.E. type                      IID        by: Month
 #&gt; Observations                   111              111
 #&gt; R2                         0.60589          0.81604
 #&gt; Within R2                       --          0.61471</div><div class='input'>
@@ -1159,7 +1163,7 @@
 #&gt; Temp             1.652*** (0.2535) 2.052** (0.2390)
 #&gt; Wind            -3.334*** (0.6544)  -3.289* (1.051)
 #&gt; _______________ __________________ ________________
-#&gt; S.E. type                 Standard        by: Month
+#&gt; S.E. type                      IID        by: Month
 #&gt; Observations                   111              111
 #&gt; R2                         0.60589          0.81604
 #&gt; Within R2                       --          0.61471
@@ -1170,10 +1174,11 @@
 <span class='co'># Using custom functions to compute the standard errors</span>
 <span class='co'>#</span>
 
-<span class='co'># You can customize the way you compute the SEs with the argument .vcov</span>
+<span class='co'># You can use external functions to compute the VCOVs</span>
+<span class='co'># by feeding functions in the 'vcov' argument.</span>
 <span class='co'># Let's use some covariances from the sandwich package</span>
 
-<span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_c0</span>, <span class='va'>est_c1</span>, <span class='va'>est_c2</span>, .vcov <span class='op'>=</span> <span class='fu'>sandwich</span><span class='fu'>::</span><span class='va'><a href='https://sandwich.R-Forge.R-project.org//reference/vcovHC.html'>vcovHC</a></span><span class='op'>)</span>
+<span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_c0</span>, <span class='va'>est_c1</span>, <span class='va'>est_c2</span>, vcov <span class='op'>=</span> <span class='fu'>sandwich</span><span class='fu'>::</span><span class='va'><a href='https://sandwich.R-Forge.R-project.org//reference/vcovHC.html'>vcovHC</a></span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                             est_c0             est_c1            est_c2
 #&gt; Dependent Var.:              Ozone              Ozone             Ozone
 #&gt;                                                                        
@@ -1189,30 +1194,17 @@
 #&gt; Observations                   111                111               111
 #&gt; R2                         0.12134            0.71231           0.71408
 #&gt; Adj. R2                    0.11328            0.69861           0.69758</div><div class='input'>
-<span class='co'># To add extra arguments to vcovHC, you need to use .vcov_args</span>
-<span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_c0</span>, <span class='va'>est_c1</span>, <span class='va'>est_c2</span>, .vcov <span class='op'>=</span> <span class='fu'>sandwich</span><span class='fu'>::</span><span class='va'><a href='https://sandwich.R-Forge.R-project.org//reference/vcovHC.html'>vcovHC</a></span>, .vcov_args <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>type <span class='op'>=</span> <span class='st'>"HC0"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                             est_c0             est_c1            est_c2
-#&gt; Dependent Var.:              Ozone              Ozone             Ozone
-#&gt;                                                                        
-#&gt; (Intercept)       18.60*** (3.850)   29.83*** (2.890)  25.79*** (4.091)
-#&gt; Solar.R         0.1272*** (0.0260) 0.0659*** (0.0140)  0.1347* (0.0603)
-#&gt; poly(Wind,2)1                       -155.5*** (35.29) -153.6*** (35.11)
-#&gt; poly(Wind,2)2                         98.77** (32.31)   98.88** (32.35)
-#&gt; poly(Temp,2)1                        166.7*** (23.41)  159.3*** (23.76)
-#&gt; poly(Temp,2)2                         67.20** (24.84)   68.77** (24.68)
-#&gt; Solar.R square                                         -0.0002 (0.0002)
-#&gt; _______________ __________________ __________________ _________________
-#&gt; S.E. type                   vcovHC             vcovHC            vcovHC
-#&gt; Observations                   111                111               111
-#&gt; R2                         0.12134            0.71231           0.71408
-#&gt; Adj. R2                    0.11328            0.69861           0.69758</div><div class='input'>
+<span class='co'># To add extra arguments to vcovHC, you can simply pass them in etable.</span>
+<span class='co'># In this example 'type' is an argument of sandwich::vcovHC:</span>
+<span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_c0</span>, <span class='va'>est_c1</span>, <span class='va'>est_c2</span>, vcov <span class='op'>=</span> <span class='fu'>sandwich</span><span class='fu'>::</span><span class='va'><a href='https://sandwich.R-Forge.R-project.org//reference/vcovHC.html'>vcovHC</a></span>, type <span class='op'>=</span> <span class='st'>"HC0"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in etable(est_c0, est_c1, est_c2, vcov = sandwich::vcovHC, type = "HC0"): The fourth element of '...' (named 'type') is not valid: it should be a fixest object or a list, it is neither.</span></div><div class='input'>
 
 <span class='co'>#</span>
 <span class='co'># Customize which fit statistic to display</span>
 <span class='co'>#</span>
 
 <span class='co'># You can change the fit statistics with the argument fitstat</span>
-<span class='co'># and you can rename them with the dictionnary</span>
+<span class='co'># and you can rename them with the dictionary</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, fitstat <span class='op'>=</span> <span class='op'>~</span> <span class='va'>r2</span> <span class='op'>+</span> <span class='va'>n</span> <span class='op'>+</span> <span class='va'>G</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                               est1               est2
 #&gt; Dependent Var.:              Ozone              Ozone
@@ -1231,7 +1223,7 @@
 #&gt; Fixed-Effects:   ----------------- ------------------
 #&gt; Month                           No                Yes
 #&gt; ________________ _________________ __________________
-#&gt; S.E. type                 Standard          by: Month
+#&gt; S.E. type                      IID          by: Month
 #&gt; R2                         0.68106            0.68106
 #&gt; Observations                   116                116
 #&gt; G                              105                  5</div><div class='input'>
@@ -1254,7 +1246,7 @@
 #&gt; Fixed-Effects:   ----------------- ------------------
 #&gt; Month                           No                Yes
 #&gt; ________________ _________________ __________________
-#&gt; S.E. type                 Standard          by: Month
+#&gt; S.E. type                      IID          by: Month
 #&gt; Log-Likelihood             -503.37            -503.37
 #&gt; Observations                   116                116
 #&gt; R2                         0.68106            0.68106
@@ -1269,7 +1261,7 @@
 <span class='co'>#</span>
 <span class='co'># Method 1: use summary</span>
 
-<span class='va'>s1</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"standard"</span><span class='op'>)</span>
+<span class='va'>s1</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"iid"</span><span class='op'>)</span>
 <span class='va'>s2</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='op'>~</span> <span class='va'>Month</span><span class='op'>)</span>
 <span class='va'>s3</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='op'>~</span> <span class='va'>Day</span><span class='op'>)</span>
 <span class='va'>s4</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='op'>~</span> <span class='va'>Day</span> <span class='op'>+</span> <span class='va'>Month</span><span class='op'>)</span>
@@ -1283,7 +1275,7 @@
 #&gt; Wind            -3.334*** (0.6544)   -3.334* (1.181) -3.334*** (0.8343)
 #&gt; Temp             1.652*** (0.2535) 1.652*** (0.1583)  1.652*** (0.1927)
 #&gt; _______________ __________________ _________________ __________________
-#&gt; S.E. type                 Standard         by: Month            by: Day
+#&gt; S.E. type                      IID         by: Month            by: Day
 #&gt; Observations                   111               111                111
 #&gt; R2                         0.60589           0.60589            0.60589
 #&gt; Adj. R2                    0.59484           0.59484            0.59484
@@ -1300,43 +1292,63 @@
 #&gt; R2                        0.60589
 #&gt; Adj. R2                   0.59484</div><div class='input'>
 <span class='co'>#</span>
-<span class='co'># Method 2: using a list in the argument 'cluster'</span>
+<span class='co'># Method 2: using a list in the argument 'vcov'</span>
 
 <span class='va'>est_bis</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='va'>Temp</span> <span class='op'>|</span> <span class='va'>Month</span>, data <span class='op'>=</span> <span class='va'>aq</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'><span class='fu'>etable</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span><span class='op'>)</span>, cluster <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"standard"</span>, <span class='op'>~</span> <span class='va'>Month</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='warning'>Warning: Argument se = 'standard' cannot be used with the argument 'cluster'. Argument 'cluster' is ignored.</span></div><div class='output co'>#&gt;                            model 1           model 2
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'><span class='fu'>etable</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span><span class='op'>)</span>, vcov <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"hetero"</span>, <span class='op'>~</span> <span class='va'>Month</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in vcov[[m]]: subscript out of bounds</span></div><div class='input'>
+<span class='co'># When you have only one model, this model is replicated</span>
+<span class='co'># along the elements of the vcov list.</span>
+<span class='fu'>etable</span><span class='op'>(</span><span class='va'>est</span>, vcov <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"hetero"</span>, <span class='op'>~</span> <span class='va'>Month</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                                est               est
 #&gt; Dependent Var.:              Ozone             Ozone
 #&gt;                                                     
-#&gt; (Intercept)       -64.34** (23.05)                  
-#&gt; Solar.R           0.0598* (0.0232)   0.0522 (0.0408)
-#&gt; Wind            -3.334*** (0.6544)   -3.109. (1.306)
-#&gt; Temp             1.652*** (0.2535) 1.875*** (0.1816)
-#&gt; Fixed-Effects:  ------------------ -----------------
-#&gt; Month                           No               Yes
+#&gt; (Intercept)       -64.34** (21.23)   -64.34* (21.30)
+#&gt; Solar.R          0.0598** (0.0191)   0.0598 (0.0335)
+#&gt; Wind            -3.334*** (0.8749)   -3.334* (1.181)
+#&gt; Temp             1.652*** (0.2025) 1.652*** (0.1583)
 #&gt; _______________ __________________ _________________
-#&gt; S.E. type                 Standard         by: Month
-#&gt; Observations                   111               111
-#&gt; R2                         0.60589           0.63686
-#&gt; Within R2                       --           0.53154</div><div class='input'>
-<span class='co'>#</span>
-<span class='co'># Method 3: Using rep()</span>
-
-<span class='fu'>etable</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"standard"</span>, <span class='op'>~</span> <span class='va'>Month</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='warning'>Warning: Argument se = 'standard' cannot be used with the argument 'cluster'. Argument 'cluster' is ignored.</span></div><div class='output co'>#&gt;                          model 1.1         model 1.2
-#&gt; Dependent Var.:              Ozone             Ozone
-#&gt;                                                     
-#&gt; (Intercept)       -64.34** (23.05)   -64.34* (21.30)
-#&gt; Solar.R           0.0598* (0.0232)   0.0598 (0.0335)
-#&gt; Wind            -3.334*** (0.6544)   -3.334* (1.181)
-#&gt; Temp             1.652*** (0.2535) 1.652*** (0.1583)
-#&gt; _______________ __________________ _________________
-#&gt; S.E. type                 Standard         by: Month
+#&gt; S.E. type       Heteroskedas.-rob.         by: Month
 #&gt; Observations                   111               111
 #&gt; R2                         0.60589           0.60589
 #&gt; Adj. R2                    0.59484           0.59484</div><div class='input'>
-<span class='co'># When using rep on 2 or more objects, you need to embed them in .l()</span>
-<span class='fu'>etable</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'><a href='rep.fixest.html'>.l</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span><span class='op'>)</span>, cluster <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"standard"</span>, <span class='op'>~</span> <span class='va'>Month</span>, <span class='op'>~</span> <span class='va'>Day</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='warning'>Warning: Argument se = 'standard' cannot be used with the argument 'cluster'. Argument 'cluster' is ignored.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Argument se = 'standard' cannot be used with the argument 'cluster'. Argument 'cluster' is ignored.</span></div><div class='output co'>#&gt;                          model 1.1          model 2.1         model 1.2
+<span class='co'>#</span>
+<span class='co'># Method 3: Using "each" or "times" in vcov</span>
+
+
+<span class='co'># each</span>
+<span class='fu'>etable</span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span>, vcov <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"each"</span>, <span class='st'>"iid"</span>, <span class='op'>~</span> <span class='va'>Month</span>, <span class='op'>~</span> <span class='va'>Day</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                                est               est                est
+#&gt; Dependent Var.:              Ozone             Ozone              Ozone
+#&gt;                                                                        
+#&gt; (Intercept)       -64.34** (23.05)   -64.34* (21.30)   -64.34** (20.15)
+#&gt; Solar.R           0.0598* (0.0232)   0.0598 (0.0335) 0.0598*** (0.0162)
+#&gt; Wind            -3.334*** (0.6544)   -3.334* (1.181) -3.334*** (0.8343)
+#&gt; Temp             1.652*** (0.2535) 1.652*** (0.1583)  1.652*** (0.1927)
+#&gt; Fixed-Effects:  ------------------ ----------------- ------------------
+#&gt; Month                           No                No                 No
+#&gt; _______________ __________________ _________________ __________________
+#&gt; S.E. type                      IID         by: Month            by: Day
+#&gt; Observations                   111               111                111
+#&gt; R2                         0.60589           0.60589            0.60589
+#&gt; Within R2                       --                --                 --
+#&gt;                            est_bis           est_bis            est_bis
+#&gt; Dependent Var.:              Ozone             Ozone              Ozone
+#&gt;                                                                        
+#&gt; (Intercept)                                                            
+#&gt; Solar.R           0.0522* (0.0237)   0.0522 (0.0408)   0.0522* (0.0202)
+#&gt; Wind            -3.109*** (0.6601)   -3.109. (1.306) -3.109*** (0.7986)
+#&gt; Temp             1.875*** (0.3407) 1.875*** (0.1816)  1.875*** (0.3671)
+#&gt; Fixed-Effects:  ------------------ ----------------- ------------------
+#&gt; Month                          Yes               Yes                Yes
+#&gt; _______________ __________________ _________________ __________________
+#&gt; S.E. type                      IID         by: Month            by: Day
+#&gt; Observations                   111               111                111
+#&gt; R2                         0.63686           0.63686            0.63686
+#&gt; Within R2                  0.53154           0.53154            0.53154</div><div class='input'>
+<span class='co'># times</span>
+<span class='fu'>etable</span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span>, vcov <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"times"</span>, <span class='st'>"iid"</span>, <span class='op'>~</span> <span class='va'>Month</span>, <span class='op'>~</span> <span class='va'>Day</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                                est            est_bis               est
 #&gt; Dependent Var.:              Ozone              Ozone             Ozone
 #&gt;                                                                        
 #&gt; (Intercept)       -64.34** (23.05)                      -64.34* (21.30)
@@ -1346,11 +1358,11 @@
 #&gt; Fixed-Effects:  ------------------ ------------------ -----------------
 #&gt; Month                           No                Yes                No
 #&gt; _______________ __________________ __________________ _________________
-#&gt; S.E. type                 Standard           Standard         by: Month
+#&gt; S.E. type                      IID                IID         by: Month
 #&gt; Observations                   111                111               111
 #&gt; R2                         0.60589            0.63686           0.60589
 #&gt; Within R2                       --            0.53154                --
-#&gt;                         model 2.2          model 1.3          model 2.3
+#&gt;                           est_bis                est            est_bis
 #&gt; Dependent Var.:             Ozone              Ozone              Ozone
 #&gt;                                                                        
 #&gt; (Intercept)                         -64.34** (20.15)                   
@@ -1364,36 +1376,6 @@
 #&gt; Observations                  111                111                111
 #&gt; R2                        0.63686            0.60589            0.63686
 #&gt; Within R2                 0.53154                 --            0.53154</div><div class='input'>
-<span class='co'># Using each to order differently</span>
-<span class='fu'>etable</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'><a href='rep.fixest.html'>.l</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span><span class='op'>)</span>, each <span class='op'>=</span> <span class='fl'>3</span>, cluster <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"standard"</span>, <span class='op'>~</span> <span class='va'>Month</span>, <span class='op'>~</span> <span class='va'>Day</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='warning'>Warning: Argument se = 'standard' cannot be used with the argument 'cluster'. Argument 'cluster' is ignored.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Argument se = 'standard' cannot be used with the argument 'cluster'. Argument 'cluster' is ignored.</span></div><div class='output co'>#&gt;                          model 1.1         model 1.2          model 1.3
-#&gt; Dependent Var.:              Ozone             Ozone              Ozone
-#&gt;                                                                        
-#&gt; (Intercept)       -64.34** (23.05)   -64.34* (21.30)   -64.34** (20.15)
-#&gt; Solar.R           0.0598* (0.0232)   0.0598 (0.0335) 0.0598*** (0.0162)
-#&gt; Wind            -3.334*** (0.6544)   -3.334* (1.181) -3.334*** (0.8343)
-#&gt; Temp             1.652*** (0.2535) 1.652*** (0.1583)  1.652*** (0.1927)
-#&gt; Fixed-Effects:  ------------------ ----------------- ------------------
-#&gt; Month                           No                No                 No
-#&gt; _______________ __________________ _________________ __________________
-#&gt; S.E. type                 Standard         by: Month            by: Day
-#&gt; Observations                   111               111                111
-#&gt; R2                         0.60589           0.60589            0.60589
-#&gt; Within R2                       --                --                 --
-#&gt;                          model 2.1         model 2.2          model 2.3
-#&gt; Dependent Var.:              Ozone             Ozone              Ozone
-#&gt;                                                                        
-#&gt; (Intercept)                                                            
-#&gt; Solar.R           0.0522* (0.0237)   0.0522 (0.0408)   0.0522* (0.0202)
-#&gt; Wind            -3.109*** (0.6601)   -3.109. (1.306) -3.109*** (0.7986)
-#&gt; Temp             1.875*** (0.3407) 1.875*** (0.1816)  1.875*** (0.3671)
-#&gt; Fixed-Effects:  ------------------ ----------------- ------------------
-#&gt; Month                          Yes               Yes                Yes
-#&gt; _______________ __________________ _________________ __________________
-#&gt; S.E. type                 Standard         by: Month            by: Day
-#&gt; Observations                   111               111                111
-#&gt; R2                         0.63686           0.63686            0.63686
-#&gt; Within R2                  0.53154           0.53154            0.53154</div><div class='input'>
 
 </div></pre>
   </div>

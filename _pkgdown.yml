@@ -44,8 +44,9 @@ reference:
       contents:
         - vcov.fixest
         - summary.fixest
-        - dof
-        - matches("est_(se|dof)$")
+        - ssc
+        - matches("est_(vocv|ssc)$")
+        - matches("^vcov_")
     - title: Multiple estimations
       desc: Perform, and handle, multiple estimations
       contents:

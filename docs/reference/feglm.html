@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
@@ -145,6 +145,7 @@
   <span class='va'>fml</span>,
   <span class='va'>data</span>,
   family <span class='op'>=</span> <span class='st'>"gaussian"</span>,
+  <span class='va'>vcov</span>,
   <span class='va'>offset</span>,
   <span class='va'>weights</span>,
   <span class='va'>subset</span>,
@@ -152,7 +153,7 @@
   <span class='va'>fsplit</span>,
   <span class='va'>cluster</span>,
   <span class='va'>se</span>,
-  <span class='va'>dof</span>,
+  <span class='va'>ssc</span>,
   <span class='va'>panel.id</span>,
   start <span class='op'>=</span> <span class='cn'>NULL</span>,
   etastart <span class='op'>=</span> <span class='cn'>NULL</span>,
@@ -181,12 +182,13 @@
   <span class='va'>X</span>,
   <span class='va'>fixef_df</span>,
   family <span class='op'>=</span> <span class='st'>"gaussian"</span>,
+  <span class='va'>vcov</span>,
   <span class='va'>offset</span>,
   <span class='va'>split</span>,
   <span class='va'>fsplit</span>,
   <span class='va'>cluster</span>,
   <span class='va'>se</span>,
-  <span class='va'>dof</span>,
+  <span class='va'>ssc</span>,
   <span class='va'>weights</span>,
   <span class='va'>subset</span>,
   start <span class='op'>=</span> <span class='cn'>NULL</span>,
@@ -212,6 +214,7 @@
 <span class='fu'>fepois</span><span class='op'>(</span>
   <span class='va'>fml</span>,
   <span class='va'>data</span>,
+  <span class='va'>vcov</span>,
   <span class='va'>offset</span>,
   <span class='va'>weights</span>,
   <span class='va'>subset</span>,
@@ -219,7 +222,7 @@
   <span class='va'>fsplit</span>,
   <span class='va'>cluster</span>,
   <span class='va'>se</span>,
-  <span class='va'>dof</span>,
+  <span class='va'>ssc</span>,
   <span class='va'>panel.id</span>,
   start <span class='op'>=</span> <span class='cn'>NULL</span>,
   etastart <span class='op'>=</span> <span class='cn'>NULL</span>,
@@ -259,6 +262,10 @@
       <td><p>Family to be used for the estimation. Defaults to <code><a href='https://rdrr.io/r/stats/family.html'>gaussian()</a></code>. See <code><a href='https://rdrr.io/r/stats/family.html'>family</a></code> for details of family functions.</p></td>
     </tr>
     <tr>
+      <th>vcov</th>
+      <td><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href='vcov_cluster.html'>vcov_cluster</a></code>, <code><a href='vcov_hac.html'>vcov_NW</a></code>, <code><a href='vcov_hac.html'>NW</a></code>, <code><a href='vcov_hac.html'>vcov_DK</a></code>, <code><a href='vcov_hac.html'>DK</a></code>, <code><a href='vcov_conley.html'>vcov_conley</a></code> and <code><a href='vcov_conley.html'>conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances.</p></td>
+    </tr>
+    <tr>
       <th>offset</th>
       <td><p>A formula or a numeric vector. An offset can be added to the estimation. If equal to a formula, it should be of the form (for example) <code>~0.5*x**2</code>. This offset is linearly added to the elements of the main formula 'fml'.</p></td>
     </tr>
@@ -284,11 +291,11 @@
     </tr>
     <tr>
       <th>se</th>
-      <td><p>Character scalar. Which kind of standard error should be computed: &#8220;standard&#8221;, &#8220;hetero&#8221;, &#8220;cluster&#8221;, &#8220;twoway&#8221;, &#8220;threeway&#8221; or &#8220;fourway&#8221;? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "standard"</code>. Note that this argument can be implicitly deduced from the argument <code>cluster</code>.</p></td>
+      <td><p>Character scalar. Which kind of standard error should be computed: &#8220;standard&#8221;, &#8220;hetero&#8221;, &#8220;cluster&#8221;, &#8220;twoway&#8221;, &#8220;threeway&#8221; or &#8220;fourway&#8221;? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "iid"</code>. Note that this argument is deprecated, you should use <code>vcov</code> instead.</p></td>
     </tr>
     <tr>
-      <th>dof</th>
-      <td><p>An object of class <code>dof.type</code> obtained with the function <code><a href='dof.html'>dof</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href='dof.html'>dof</a></code> for this argument. The arguments and defaults of the function <code><a href='dof.html'>dof</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "conventional"</code>, <code>t.df = "conventional"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href='dof.html'>dof</a></code> for details.</p></td>
+      <th>ssc</th>
+      <td><p>An object of class <code>ssc.type</code> obtained with the function <code><a href='ssc.html'>ssc</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href='ssc.html'>ssc</a></code> for this argument. The arguments and defaults of the function <code><a href='ssc.html'>ssc</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "conventional"</code>, <code>t.df = "conventional"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href='ssc.html'>ssc</a></code> for details.</p></td>
     </tr>
     <tr>
       <th>panel.id</th>
@@ -419,7 +426,7 @@
 <dt>residuals</dt><dd><p>The residuals (y minus the fitted values).</p></dd>
 <dt>sq.cor</dt><dd><p>Squared correlation between the dependent variable and the expected predictor (i.e. fitted.values) obtained by the estimation.</p></dd>
 <dt>hessian</dt><dd><p>The Hessian of the parameters.</p></dd>
-<dt>cov.unscaled</dt><dd><p>The variance-covariance matrix of the parameters.</p></dd>
+<dt>cov.iid</dt><dd><p>The variance-covariance matrix of the parameters.</p></dd>
 <dt>se</dt><dd><p>The standard-error of the parameters.</p></dd>
 <dt>scores</dt><dd><p>The matrix of the scores (first derivative for each observation).</p></dd>
 <dt>residuals</dt><dd><p>The difference between the dependent variable and the expected predictor.</p></dd>
@@ -471,9 +478,9 @@
     
 
 
-<p>Standard-errors can be computed in different ways, you can use the arguments <code>se</code> and <code>dof</code> in <code><a href='summary.fixest.html'>summary.fixest</a></code> to define how to compute them. By default, in the presence of fixed-effects, standard-errors are automatically clustered.</p>
+<p>Standard-errors can be computed in different ways, you can use the arguments <code>se</code> and <code>ssc</code> in <code><a href='summary.fixest.html'>summary.fixest</a></code> to define how to compute them. By default, in the presence of fixed-effects, standard-errors are automatically clustered.</p>
 <p>The following vignette: <a href='https://lrberge.github.io/fixest/articles/standard_errors.html'>On standard-errors</a> describes in details how the standard-errors are computed in <code>fixest</code> and how you can replicate standard-errors from other software.</p>
-<p>You can use the functions <code><a href='setFixest_se.html'>setFixest_se</a></code> and <code><a href='dof.html'>setFixest_dof</a></code> to permanently set the way the standard-errors are computed.</p>
+<p>You can use the functions <code>setFixest_se</code> and <code><a href='ssc.html'>setFixest_ssc</a></code> to permanently set the way the standard-errors are computed.</p>
     <h2 class="hasAnchor" id="multiple-estimations"><a class="anchor" href="#multiple-estimations"></a>Multiple estimations</h2>
 
     
@@ -513,20 +520,9 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 
 <span class='co'># All results are identical:</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res</span>, <span class='va'>res_pois</span>, <span class='va'>res_fit</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                                res           res_pois            res_fit
-#&gt; Dependent Var.:       Sepal.Length       Sepal.Length  iris$Sepal.Length
-#&gt;                                                                         
-#&gt; Sepal.Width       0.0778* (0.0339)   0.0778* (0.0339)   0.0778* (0.0339)
-#&gt; Petal.Length    0.1221*** (0.0150) 0.1221*** (0.0150) 0.1221*** (0.0150)
-#&gt; Fixed-Effects:  ------------------ ------------------ ------------------
-#&gt; Species                        Yes                Yes                 No
-#&gt; iris$Species                    No                 No                Yes
-#&gt; _______________ __________________ __________________ __________________
-#&gt; S.E.: Clustered        by: Species        by: Species   by: iris$Species
-#&gt; Observations                   150                150                150
-#&gt; Squared Cor.               0.86314            0.86314            0.86314
-#&gt; Pseudo R2                  0.02676            0.02676            0.02676
-#&gt; BIC                         570.76             570.76             570.76</div><div class='input'>
+</div><div class='output co'>#&gt; <span class='error'>Error: in vcov.fixest(object, vcov = vcov, ssc = ssc, force...:</span>
+#&gt; <span class='error'> We fetch the data in the enviroment where the estimation was made, but</span>
+#&gt; <span class='error'>the data does not seem to be there any more (btw it was NULL).</span></div><div class='input'>
 <span class='co'># Note that you have many more examples in feols</span>
 
 <span class='co'>#</span>
@@ -547,7 +543,7 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 #&gt; Wind x Temp                            0.0005 (0.0005)    0.0005 (0.0005)
 #&gt; Day                                                    0.0051*** (0.0015)
 #&gt; _______________ ___________________ __________________ __________________
-#&gt; S.E. type                  Standard           Standard           Standard
+#&gt; S.E. type                       IID                IID                IID
 #&gt; Observations                    116                116                116
 #&gt; Squared Cor.                0.62615            0.63129            0.63379
 #&gt; Pseudo R2                   0.53377            0.53402            0.53759
@@ -563,7 +559,7 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 #&gt; Wind x Temp                        0.0007*** (0.0002)  0.0007*** (0.0002)
 #&gt; Day                                                   -0.0061*** (0.0007)
 #&gt; _______________ __________________ __________________ ___________________
-#&gt; S.E. type                 Standard           Standard            Standard
+#&gt; S.E. type                      IID                IID                 IID
 #&gt; Observations                   146                146                 146
 #&gt; Squared Cor.               0.08076            0.08166             0.08983
 #&gt; Pseudo R2                  0.06045            0.06207             0.07100
@@ -580,7 +576,7 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 #&gt; Wind x Temp        0.0005 (0.0005) 0.0007*** (0.0002)    0.0005 (0.0005)
 #&gt; Day                                                   0.0051*** (0.0015)
 #&gt; _______________ __________________ __________________ __________________
-#&gt; S.E. type                 Standard           Standard           Standard
+#&gt; S.E. type                      IID                IID                IID
 #&gt; Observations                   116                146                116
 #&gt; Squared Cor.               0.63129            0.08166            0.63379
 #&gt; Pseudo R2                  0.53402            0.06207            0.53759
@@ -594,7 +590,7 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 #&gt; Wind x Temp      0.0007*** (0.0002)
 #&gt; Day             -0.0061*** (0.0007)
 #&gt; _______________ ___________________
-#&gt; S.E. type                  Standard
+#&gt; S.E. type                       IID
 #&gt; Observations                    146
 #&gt; Squared Cor.                0.08983
 #&gt; Pseudo R2                   0.07100
@@ -605,7 +601,7 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 
 <span class='co'># You can display everything at once with the print method</span>
 <span class='va'>est_split</span>
-</div><div class='output co'>#&gt; Standard-errors: Standard 
+</div><div class='output co'>#&gt; Standard-errors: IID 
 #&gt; 
 #&gt; 
 #&gt; # SAMPLE: 5
@@ -812,7 +808,7 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 #&gt; 20                    1.29*** (0.251) -0.929*** (0.26) </div><div class='input'>
 <span class='co'># You can still select which sample/LHS/RHS to display</span>
 <span class='va'>est_split</span><span class='op'>[</span>sample <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span>, lhs <span class='op'>=</span> <span class='fl'>1</span>, rhs <span class='op'>=</span> <span class='fl'>1</span><span class='op'>]</span>
-</div><div class='output co'>#&gt; Standard-errors: Standard 
+</div><div class='output co'>#&gt; Standard-errors: IID 
 #&gt; Dep. var.: Ozone
 #&gt; Expl. vars.: poly(Wind, 2)
 #&gt; Sample: 5

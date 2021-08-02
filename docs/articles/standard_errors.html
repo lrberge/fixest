@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
@@ -88,13 +88,13 @@
 
       
 
-      </header><script src="standard_errors_files/header-attrs-2.6/header-attrs.js"></script><div class="row">
+      </header><script src="standard_errors_files/header-attrs-2.9/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>On standard-errors</h1>
                         <h4 class="author">Laurent Berge</h4>
             
-            <h4 class="date">2021-04-24</h4>
+            <h4 class="date">2021-08-02</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/standard_errors.Rmd"><code>vignettes/standard_errors.Rmd</code></a></small>
       <div class="hidden name"><code>standard_errors.Rmd</code></div>
@@ -105,12 +105,12 @@
     
 <p>It is an euphemism to say that standard-errors are a critical element of your estimations: literally your paper’s results depend on them. It is therefore unfortunate that no conventional “best” way exists to compute them. Multiple definitions can create confusion and the purpose of this document is to lay bare the fiddly details of standard-error computation in this package.</p>
 <p>The first part describes how standard-errors are computed in <code>fixest</code>’s estimations. Please note that here I don’t discuss the <em>why</em>, but only the <em>how</em>. For a thorough introduction to the topic, see the excellent paper by <a href="https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf">Zeileis, Koll and Graham (2020)</a>. The second part illustrates how to replicate some standard-errors obtained from other estimation methods with <code>fixest</code>.</p>
-<p>This document applies to <code>fixest</code> version 0.8.0 or higher.</p>
+<p>This document applies to <code>fixest</code> version 0.10.0 or higher.</p>
 <div id="how-standard-errors-are-computed-in-fixest" class="section level2">
 <h2 class="hasAnchor">
 <a href="#how-standard-errors-are-computed-in-fixest" class="anchor"></a>How standard-errors are computed in <code>fixest</code>
 </h2>
-<p>There are two components defining the standard-errors in <code>fixest</code>. The main type of standard-error is given by the argument <code>se</code>, the small sample correction is defined by the argument <code>dof</code> (<em>degree of freedom</em>).</p>
+<p>There are two components defining the standard-errors in <code>fixest</code>. The main type of standard-error is given by the argument <code>vcov</code>, the small sample correction is defined by the argument <code>ssc</code>.</p>
 <p>Here’s an example, the explanations follow in the next two sections:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://lrberge.github.io/fixest/">fixest</a></span><span class="op">)</span>
@@ -118,42 +118,45 @@
 <span class="co"># OLS estimation</span>
 <span class="va">gravity</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">Euros</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span> <span class="op">|</span> <span class="va">Destination</span> <span class="op">+</span> <span class="va">Origin</span> <span class="op">+</span> <span class="va">Product</span> <span class="op">+</span> <span class="va">Year</span>, <span class="va">trade</span><span class="op">)</span>
 <span class="co"># Two-way clustered SEs</span>
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">gravity</span>, se <span class="op">=</span> <span class="st">"twoway"</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">gravity</span>, vcov <span class="op">=</span> <span class="st">"twoway"</span><span class="op">)</span></code></pre></div>
 <pre><code>#&gt; OLS estimation, Dep. Var.: log(Euros)
 #&gt; Observations: 38,325 
 #&gt; Fixed-effects: Destination: 15,  Origin: 15,  Product: 20,  Year: 10
-#&gt; Standard-errors: Two-way (Destination &amp; Origin) 
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; log(dist_km)  -2.1699   0.171367 -12.662 4.68e-09 ***
+#&gt; Standard-errors: Clustered (Destination &amp; Origin) 
+#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; log(dist_km)  -2.1699   0.171367 -12.662  4.68e-09 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 1.7434     Adj. R2: 0.705139
 #&gt;                Within R2: 0.219322</code></pre>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Two-way clustered SEs, without DOF correction</span>
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">gravity</span>, se <span class="op">=</span> <span class="st">"twoway"</span>, dof <span class="op">=</span> <span class="fu"><a href="../reference/dof.html">dof</a></span><span class="op">(</span>adj <span class="op">=</span> <span class="cn">FALSE</span>, cluster.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="co"># Two-way clustered SEs, without small sample correction</span>
+<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">gravity</span>, vcov <span class="op">=</span> <span class="st">"twoway"</span>, ssc <span class="op">=</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>adj <span class="op">=</span> <span class="cn">FALSE</span>, cluster.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>#&gt; OLS estimation, Dep. Var.: log(Euros)
 #&gt; Observations: 38,325 
 #&gt; Fixed-effects: Destination: 15,  Origin: 15,  Product: 20,  Year: 10
-#&gt; Standard-errors: Two-way (Destination &amp; Origin) 
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; log(dist_km)  -2.1699   0.165494 -13.112 2.98e-09 ***
+#&gt; Standard-errors: Clustered (Destination &amp; Origin) 
+#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; log(dist_km)  -2.1699   0.165494 -13.112  2.98e-09 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 1.7434     Adj. R2: 0.705139
 #&gt;                Within R2: 0.219322</code></pre>
-<div id="the-argument-se" class="section level3">
+<div id="the-argument-vcov" class="section level3">
 <h3 class="hasAnchor">
-<a href="#the-argument-se" class="anchor"></a>The argument <code>se</code>
+<a href="#the-argument-vcov" class="anchor"></a>The argument <code>vcov</code>
 </h3>
-<p>The argument <code>se</code> can be equal to either: <code>"standard"</code>, <code>"hetero"</code>, <code>"cluster"</code>, <code>"twoway"</code>, or <code>"threeway"</code>.</p>
-<p>If <code>se = "standard"</code>, then the standard-errors are based on the assumption that the errors are all independent and generated with the same law (in particular, same variance). If <code>se = "hetero"</code>, this corresponds to the classic hereoskedasticity-robust standard-errors (White correction), where it is assumed that the errors are independent but the variance of their generative law may vary. If <code>se = "cluster"</code>, then arbitrary correlation of the errors within clusters is accounted for. Same for <code>se = "twoway"</code> (resp. <code>"threeway"</code>): arbitrary correlation within each of the two (resp. three) clusters is accounted for.</p>
+<p>The argument <code>vcov</code> can be equal to either: <code>"iid"</code>, <code>"hetero"</code>, <code>"cluster"</code>, <code>"twoway"</code>, <code>"NW"</code>, <code>"DK"</code>, or <code>"conley"</code>.</p>
+<p>If <code>vcov = "iid"</code>, then the standard-errors are based on the assumption that the errors are all independent and generated with the same law (in particular, same variance). If <code>vcov = "hetero"</code>, this corresponds to the classic hereoskedasticity-robust standard-errors (White correction), where it is assumed that the errors are independent but the variance of their generative law may vary.</p>
+<p>If <code>vcov = "cluster"</code>, then arbitrary correlation of the errors within clusters is accounted for. Same for <code>vcov = "twoway"</code>: arbitrary correlation within each of the two clusters is accounted for.</p>
+<p>In the context of panel data or time series, <code>vcov = "NW"</code>(Newey-West, 1987) or <code>vcov = "DK"</code> (Driscoll-Kraay, 1998) account for temporal correlation between the errors; the two differing on how to account for heterogeneity between units. Their implementation is based on Milo (2017).</p>
+<p>Finally, <code>vcov = "conley"</code> accounts for spatial correlation of the errors.</p>
 </div>
-<div id="the-argument-dof" class="section level3">
+<div id="the-argument-ssc" class="section level3">
 <h3 class="hasAnchor">
-<a href="#the-argument-dof" class="anchor"></a>The argument <code>dof</code>
+<a href="#the-argument-ssc" class="anchor"></a>The argument <code>ssc</code>
 </h3>
-<p>The type of small sample correction applied is defined by the argument <code>dof</code> which accepts only objects produced by the function <code>dof</code>. The main arguments of this function are <code>adj</code>, <code>fixef.K</code> and <code>cluster.adj</code>. I detail each of them below.</p>
+<p>The type of small sample correction applied is defined by the argument <code>ssc</code> which accepts only objects produced by the function <code>ssc</code>. The main arguments of this function are <code>adj</code>, <code>fixef.K</code> and <code>cluster.adj</code>. I detail each of them below.</p>
 <p>Say you have <span class="math inline">\(\tilde{V}\)</span> the variance-covariance matrix (henceforth VCOV) before any small sample adjustment. Argument <code>adj</code> can be equal to <code>TRUE</code> or <code>FALSE</code>, leading to the following adjustment:</p>
 <p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/SE/adj.png?raw=true"></p>
 <p>When the estimation contains fixed-effects, the value of <span class="math inline">\(K\)</span> in the previous adjustment can be determined in different ways, governed by the argument <code>fixef.K</code>. To illustrate how <span class="math inline">\(K\)</span> is computed, let’s use an example with individual (variable <code>id</code>) and time fixed-effect and with clustered standard-errors. The structure of the 10 observations data is:</p>
@@ -162,12 +165,13 @@
 <p>The argument <code>fixef.K</code> can be equal to either <code>"none"</code>, <code>"nested"</code> or <code>"full"</code>. Then <span class="math inline">\(K\)</span> will be computed as follows:</p>
 <p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/SE/K_computation.png?raw=true"></p>
 <p>Where <span class="math inline">\(K_{vars}\)</span> is the number of estimated coefficients associated to the variables. <code>fixef.K="none"</code> discards all fixed-effects coefficients. <code>fixef.K="nested"</code> discards all coefficients that are nested (here the 5 coefficients from <code>id</code>). Finally <code>fixef.K="full"</code> accounts for all fixed-effects coefficients (here 6: equal to 5 from <code>id</code>, plus 2 from <code>time</code>, minus one used as a reference [otherwise collinearity arise]). Note that if <code>fixef.K="nested"</code> and the standard-errors are <em>not</em> clustered, this is equivalent to using <code>fixef.K="full".</code></p>
-<p>The last argument of <code>dof</code> is <code>cluster.adj</code>. This argument is only relevant when the standard-errors are clustered. Let <span class="math inline">\(M\)</span> be the sandwich estimator of the VCOV without adjustment. Then for one-way clustered standard errors:</p>
+<p>The last argument of <code>ssc</code> is <code>cluster.adj</code>. This argument is only relevant when the standard-errors are clustered or when they are corrected for serial correlation (Newey-West or Driscoll-Kraay). Let <span class="math inline">\(M\)</span> be the sandwich estimator of the VCOV without adjustment. Then for one-way clustered standard errors:</p>
 <p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/SE/cluster_adj_one_way.png?raw=true"></p>
 <p>With <span class="math inline">\(G\)</span> the number of unique elements of the cluster variable (in the previous example <span class="math inline">\(G=2\)</span> for <code>cluster</code>).</p>
-<p>The effect of the adjusment for two-way clustered standard-errors is as follows:</p>
+<p>The effect of the adjustment for two-way clustered standard-errors is as follows:</p>
 <p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/SE/cluster_adj_two_way.png?raw=true"></p>
 <p>Using the data from the previous example, here the standard-errors are clustered by <code>id</code> and <code>time</code>, leading to <span class="math inline">\(G_{id}=5\)</span>, <span class="math inline">\(G_{time}=2\)</span>, and <span class="math inline">\(G_{id,time}=10\)</span>.</p>
+<p>When standard-errors are corrected for serial correlation, the corresponding adjustment applied is <span class="math inline">\(G_{time} / (G_{time} - 1)\)</span>.</p>
 <div id="yet-more-details" class="section level4">
 <h4 class="hasAnchor">
 <a href="#yet-more-details" class="anchor"></a>Yet more details</h4>
@@ -175,7 +179,7 @@
 <p>Argument <code>fixef.force_exact</code> is only relevant when there are two or more fixed-effects. By default all the fixed-effects coefficients are accounted for when computing the degrees of freedom. In general this is fine, but in some situations it may overestimate the number of estimated coefficients. Why? Because some of the fixed-effects may be collinear, the effective number of coefficients being lower. Let’s illustrate that with an example. Consider the following set of fixed-effects:</p>
 <p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/SE/exact_collinearity.png?raw=true"></p>
 <p>There are 6 different values of <code>id</code> and 4 different values of <code>time</code>. By default, 9 coefficients are used to compute the degrees of freedom (6 plus 4 minus one reference). But we can see here that the “effective” number of coefficients is equal to 8: two coefficients should be removed to avoid collinearity issues (any one from each color set). If you use <code>fixef.force_exact=TRUE</code>, then the function <code>fixef</code> is first run to determine the number of free coefficients in the fixed-effects, this number is then used to compute the degree of freedom.</p>
-<p>Argument <code>cluster.df</code> is only relevant when you apply two-way clustering (or higher). It can have two values: either <code>"conventional"</code>, or <code>"min"</code> (the default). This affects the adjustments for each clustered matrix. The <code>"conventional"</code> way to make the adjustment has already been described in the previous equation. If <code>cluster.df="min"</code> (again, the default), and for two-way clustered standard errors, the adjusment becomes:</p>
+<p>Argument <code>cluster.df</code> is only relevant when you apply two-way clustering (or higher). It can have two values: either <code>"conventional"</code>, or <code>"min"</code> (the default). This affects the adjustments for each clustered matrix. The <code>"conventional"</code> way to make the adjustment has already been described in the previous equation. If <code>cluster.df="min"</code> (again, the default), and for two-way clustered standard errors, the adjustment becomes:</p>
 <p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/SE/cluster_df_min.png?raw=true"></p>
 <p>Now instead of having a specific adjustment for each matrix, there is only one adjustment of <span class="math inline">\(G_{min}/(G_{min}-1)\)</span> where <span class="math inline">\(G_{min}\)</span> is the minimum cluster size (here <span class="math inline">\(G_{min}=\min(G_{id},G_{time})\)</span>).</p>
 <p>Argument <code>t.df</code> is only relevant when standard-errors are clustered. It affects the way the <em>p-value</em> is computed. It can be equal to: either <code>"conventional"</code>, or <code>"min"</code> (the default). By default, when standard-errors are clustered, the degrees of freedom used in the Student t distribution is equal to the minimum cluster size (among all clusters used to cluster the VCOV). If <code>t.df="conventional"</code>, the degrees of freedom used to find the p-value from the Student t distribution is equal to the number of observations minus the number of estimated coefficients.</p>
@@ -190,12 +194,12 @@
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Data generation</span>
 <span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>
-<span class="va">N</span> <span class="op">=</span> <span class="fl">20</span> ; <span class="va">n_id</span> <span class="op">=</span> <span class="va">N</span><span class="op">/</span><span class="fl">5</span>; <span class="va">n_time</span> <span class="op">=</span> <span class="va">N</span><span class="op">/</span><span class="va">n_id</span>
+<span class="va">N</span> <span class="op">=</span> <span class="fl">200</span> ; <span class="va">n_time</span> <span class="op">=</span> <span class="fl">20</span> ; <span class="va">n_id</span> <span class="op">=</span> <span class="va">N</span><span class="op">/</span><span class="va">n_time</span> 
 <span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="va">N</span><span class="op">)</span>, x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="va">N</span><span class="op">)</span>, id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n_id</span>, <span class="va">n_time</span><span class="op">)</span>, 
                   time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n_time</span>, each <span class="op">=</span> <span class="va">n_id</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>Here are some comparisons when the estimation doesn’t contain fixed-effects.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://sandwich.R-Forge.R-project.org/">sandwich</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://sandwich.R-Forge.R-project.org/">sandwich</a></span><span class="op">)</span>
 
 <span class="co"># Estimations</span>
 <span class="va">res_lm</span>    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span>, <span class="va">base</span><span class="op">)</span>
@@ -203,17 +207,17 @@
 
 <span class="co"># Same standard-errors</span>
 <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">res_lm</span><span class="op">)</span>, <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">res_feols</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>#&gt;      (Intercept)         x
-#&gt; [1,]     0.23693 0.3347682
-#&gt; [2,]     0.23693 0.3347682</code></pre>
+<pre><code>#&gt;      (Intercept)          x
+#&gt; [1,]  0.06548178 0.06571612
+#&gt; [2,]  0.06548178 0.06571612</code></pre>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Heteroskedasticity-robust covariance</span>
 <span class="va">se_lm_hc</span>    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span><span class="op">(</span><span class="fu"><a href="https://sandwich.R-Forge.R-project.org//reference/vcovHC.html">vcovHC</a></span><span class="op">(</span><span class="va">res_lm</span>, type <span class="op">=</span> <span class="st">"HC1"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
-<span class="va">se_feols_hc</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">res_feols</span>, se <span class="op">=</span> <span class="st">"hetero"</span><span class="op">)</span>
+<span class="va">se_feols_hc</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">res_feols</span>, vcov <span class="op">=</span> <span class="st">"hetero"</span><span class="op">)</span>
 <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="va">se_lm_hc</span>, <span class="va">se_feols_hc</span><span class="op">)</span></code></pre></div>
-<pre><code>#&gt;             (Intercept)        x
-#&gt; se_lm_hc      0.2341859 0.215208
-#&gt; se_feols_hc   0.2341859 0.215208</code></pre>
+<pre><code>#&gt;             (Intercept)          x
+#&gt; se_lm_hc      0.0657315 0.06558772
+#&gt; se_feols_hc   0.0657315 0.06558772</code></pre>
 <p>Note that Stata’s <code>reg y x, robust</code> also leads to similar results (same SEs, same p-values).</p>
 <p>The most important differences arise in the presence of fixed-effects. Let’s first compare “standard” standard-errors between <code>lm</code> and <code>plm</code>.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -222,57 +226,101 @@
 <span class="co"># Estimations</span>
 <span class="va">est_lm</span>    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span>, <span class="va">base</span><span class="op">)</span>
 <span class="va">est_plm</span>   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/plm/man/plm.html">plm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span><span class="op">(</span><span class="va">time</span><span class="op">)</span>, <span class="va">base</span>, index <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"time"</span><span class="op">)</span>, model <span class="op">=</span> <span class="st">"within"</span><span class="op">)</span>
-<span class="va">est_feols</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">time</span>, <span class="va">base</span><span class="op">)</span>
+<span class="co"># we use panel.id so that panel VCOVs can be applied directly</span>
+<span class="va">est_feols</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">time</span>, <span class="va">base</span>, panel.id <span class="op">=</span> <span class="op">~</span><span class="va">id</span> <span class="op">+</span> <span class="va">time</span><span class="op">)</span>
 
 <span class="co">#</span>
-<span class="co"># "Standard" standard-errors</span>
+<span class="co"># "iid" standard-errors</span>
 <span class="co">#</span>
 
 <span class="co"># By default fixest clusters the SEs when FEs are present,</span>
-<span class="co">#  so we need to ask for standard SEs explicitly.</span>
-<span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_lm</span><span class="op">)</span><span class="op">[</span><span class="st">"x"</span><span class="op">]</span>, <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_plm</span><span class="op">)</span><span class="op">[</span><span class="st">"x"</span><span class="op">]</span>, <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, se <span class="op">=</span> <span class="st">"standard"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code>#&gt;              x
-#&gt; [1,] 0.3956029
-#&gt; [2,] 0.3956029
-#&gt; [3,] 0.3956029</code></pre>
+<span class="co">#  so we need to ask for iid SEs explicitly.</span>
+<span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_lm</span><span class="op">)</span><span class="op">[</span><span class="st">"x"</span><span class="op">]</span>, <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_plm</span><span class="op">)</span><span class="op">[</span><span class="st">"x"</span><span class="op">]</span>, <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="st">"iid"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code>#&gt;               x
+#&gt; [1,] 0.06746388
+#&gt; [2,] 0.06746388
+#&gt; [3,] 0.06746388</code></pre>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># p-values:</span>
-<span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">est_lm</span><span class="op">)</span><span class="op">[</span><span class="st">"x"</span><span class="op">]</span>, <span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">est_plm</span><span class="op">)</span><span class="op">[</span><span class="st">"x"</span><span class="op">]</span>, <span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">est_feols</span>, se <span class="op">=</span> <span class="st">"standard"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">est_lm</span><span class="op">)</span><span class="op">[</span><span class="st">"x"</span><span class="op">]</span>, <span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">est_plm</span><span class="op">)</span><span class="op">[</span><span class="st">"x"</span><span class="op">]</span>, <span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="st">"iid"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>#&gt;              x
-#&gt; [1,] 0.3638934
-#&gt; [2,] 0.3638934
-#&gt; [3,] 0.3638934</code></pre>
+#&gt; [1,] 0.8687347
+#&gt; [2,] 0.8687347
+#&gt; [3,] 0.8687347</code></pre>
 <p>The standard-errors and p-values are identical, note that this is also the case for Stata’s <code>xtreg</code>.</p>
 <p>Now for clustered SEs:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Clustered by id</span>
-<span class="va">se_lm_id</span>    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://sandwich.R-Forge.R-project.org//reference/vcovCL.html">vcovCL</a></span><span class="op">(</span><span class="va">est_lm</span>, cluster <span class="op">=</span> <span class="va">base</span><span class="op">$</span><span class="va">id</span>, type <span class="op">=</span> <span class="st">"HC1"</span><span class="op">)</span><span class="op">[</span><span class="st">"x"</span>, <span class="st">"x"</span><span class="op">]</span><span class="op">)</span>
-<span class="va">se_plm_id</span>   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/plm/man/re-export_functions.html">vcovHC</a></span><span class="op">(</span><span class="va">est_plm</span>, cluster <span class="op">=</span> <span class="st">"group"</span><span class="op">)</span><span class="op">[</span><span class="st">"x"</span>, <span class="st">"x"</span><span class="op">]</span><span class="op">)</span>
+<span class="va">se_lm_id</span>    <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://sandwich.R-Forge.R-project.org//reference/vcovCL.html">vcovCL</a></span><span class="op">(</span><span class="va">est_lm</span>, cluster <span class="op">=</span> <span class="va">base</span><span class="op">$</span><span class="va">id</span>, type <span class="op">=</span> <span class="st">"HC1"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"x"</span><span class="op">]</span>
+<span class="va">se_plm_id</span>   <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/plm/man/vcovHC.plm.html">vcovHC</a></span><span class="op">(</span><span class="va">est_plm</span>, cluster <span class="op">=</span> <span class="st">"group"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"x"</span><span class="op">]</span>
 <span class="va">se_stata_id</span> <span class="op">=</span> <span class="fl">0.165385</span>      <span class="co"># vce(cluster id)</span>
 <span class="va">se_feols_id</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span><span class="op">)</span> <span class="co"># By default: clustered according to id</span>
 
 <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="va">se_lm_id</span>, <span class="va">se_plm_id</span>, <span class="va">se_stata_id</span>, <span class="va">se_feols_id</span><span class="op">)</span></code></pre></div>
-<pre><code>#&gt;                     x
-#&gt; se_lm_id    0.1865794
-#&gt; se_plm_id   0.1229459
-#&gt; se_stata_id 0.1653850
-#&gt; se_feols_id 0.1653850</code></pre>
+<pre><code>#&gt;                      x
+#&gt; se_lm_id    0.06307930
+#&gt; se_plm_id   0.05531031
+#&gt; se_stata_id 0.16538500
+#&gt; se_feols_id 0.06147306</code></pre>
 <p>As we can see, there are three different versions of the standard-errors, <code>feols</code> being identical to Stata’s <code>xtreg</code> clustered SEs. By default, the <em>p-value</em> is also identical to the one from Stata (from <code>fixest</code> version 0.7.0 onwards).</p>
 <p>Now let’s see how to replicate the standard-errors from <code>lm</code> and <code>plm</code>:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># How to get the lm version</span>
-<span class="va">se_feols_id_lm</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, dof <span class="op">=</span> <span class="fu"><a href="../reference/dof.html">dof</a></span><span class="op">(</span>fixef.K <span class="op">=</span> <span class="st">"full"</span><span class="op">)</span><span class="op">)</span>
+<span class="va">se_feols_id_lm</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, ssc <span class="op">=</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>fixef.K <span class="op">=</span> <span class="st">"full"</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="va">se_lm_id</span>, <span class="va">se_feols_id_lm</span><span class="op">)</span></code></pre></div>
 <pre><code>#&gt;                        x
-#&gt; se_lm_id       0.1865794
-#&gt; se_feols_id_lm 0.1865794</code></pre>
+#&gt; se_lm_id       0.0630793
+#&gt; se_feols_id_lm 0.0630793</code></pre>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># How to get the plm version</span>
-<span class="va">se_feols_id_plm</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, dof <span class="op">=</span> <span class="fu"><a href="../reference/dof.html">dof</a></span><span class="op">(</span>fixef.K <span class="op">=</span> <span class="st">"none"</span>, cluster.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span>
+<span class="va">se_feols_id_plm</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, ssc <span class="op">=</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>fixef.K <span class="op">=</span> <span class="st">"none"</span>, cluster.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="va">se_plm_id</span>, <span class="va">se_feols_id_plm</span><span class="op">)</span></code></pre></div>
-<pre><code>#&gt;                         x
-#&gt; se_plm_id       0.1229459
-#&gt; se_feols_id_plm 0.1229459</code></pre>
+<pre><code>#&gt;                          x
+#&gt; se_plm_id       0.05531031
+#&gt; se_feols_id_plm 0.05531031</code></pre>
+<p>And finally let’s look at Newey-West and Driscoll-Kray standard-errors:</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co">#</span>
+<span class="co"># Newey-west</span>
+<span class="co">#</span>
+
+<span class="va">se_lm_NW</span>    <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://sandwich.R-Forge.R-project.org//reference/vcovPL.html">vcovPL</a></span><span class="op">(</span><span class="va">est_lm</span>, cluster <span class="op">=</span> <span class="op">~</span> <span class="va">id</span> <span class="op">+</span> <span class="va">time</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"x"</span><span class="op">]</span>
+<span class="va">se_plm_NW</span>   <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/plm/man/vcovNW.html">vcovNW</a></span><span class="op">(</span><span class="va">est_plm</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"x"</span><span class="op">]</span>
+<span class="va">se_feols_NW</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="st">"NW"</span><span class="op">)</span>
+
+<span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="va">se_lm_NW</span>, <span class="va">se_plm_NW</span>, <span class="va">se_feols_NW</span><span class="op">)</span></code></pre></div>
+<pre><code>#&gt;                      x
+#&gt; se_lm_NW    0.07342865
+#&gt; se_plm_NW   0.05877448
+#&gt; se_feols_NW 0.06045343</code></pre>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># we can replicate plm's by changing the type of SSC:</span>
+<span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="va">se_plm_NW</span>, 
+      <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="va">NW</span> <span class="op">~</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>adj <span class="op">=</span> <span class="cn">FALSE</span>, cluster.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code>#&gt;                    x
+#&gt; se_plm_NW 0.05877448
+#&gt;           0.05877448</code></pre>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Note that sandwich::vcovPL could not be replicated</span>
+
+<span class="co">#</span>
+<span class="co"># Driscoll-Kraay</span>
+<span class="co">#</span>
+
+<span class="va">se_plm_DK</span>   <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/plm/man/vcovSCC.html">vcovSCC</a></span><span class="op">(</span><span class="va">est_plm</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"x"</span><span class="op">]</span>
+<span class="va">se_feols_DK</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="st">"DK"</span><span class="op">)</span>
+
+<span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="va">se_plm_DK</span>, <span class="va">se_feols_DK</span><span class="op">)</span></code></pre></div>
+<pre><code>#&gt;                      x
+#&gt; se_plm_DK   0.06769787
+#&gt; se_feols_DK 0.07127034</code></pre>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Replicating plm's</span>
+<span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="va">se_plm_DK</span>, 
+      <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="va">DK</span> <span class="op">~</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>adj <span class="op">=</span> <span class="cn">FALSE</span>, cluster.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code>#&gt;                    x
+#&gt; se_plm_DK 0.06769787
+#&gt;           0.06769787</code></pre>
 <p>As we can see, the type of small sample correction we choose can have a non-negligible impact on the standard-error.</p>
 <div id="other-multiple-fixed-effects-methods" class="section level4">
 <h4 class="hasAnchor">
@@ -280,7 +328,7 @@
 <p>Now a specific comparison with <code>lfe</code> (version 2.8-5.1) and Stata’s <code>reghdfe</code> which are popular tools to estimate econometric models with multiple fixed-effects.</p>
 <p>From <code>fixest</code> version 0.7.0 onwards, the standard-errors and p-values are computed similarly to <code>reghdfe</code>, for both clustered and multiway clustered standard errors. So the comparison here focuses on <code>lfe</code>.</p>
 <p>Here are the differences and similarities with <code>lfe</code>:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sgaure/lfe">lfe</a></span><span class="op">)</span>
 
 <span class="co"># lfe: clustered by id</span>
@@ -294,8 +342,8 @@
 <span class="co">#&gt; se_feols_id 0.1653850</span>
 
 <span class="co"># You have to provide a custom VCOV to replicate lfe's VCOV</span>
-<span class="va">my_vcov</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/vcov.html">vcov</a></span><span class="op">(</span><span class="va">est_feols</span>, dof <span class="op">=</span> <span class="fu"><a href="../reference/dof.html">dof</a></span><span class="op">(</span>adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span>
-<span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, .vcov <span class="op">=</span> <span class="va">my_vcov</span> <span class="op">*</span> <span class="fl">19</span><span class="op">/</span><span class="fl">18</span><span class="op">)</span> <span class="co"># Note that there are 20 observations</span>
+<span class="va">my_vcov</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/vcov.html">vcov</a></span><span class="op">(</span><span class="va">est_feols</span>, ssc <span class="op">=</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="va">my_vcov</span> <span class="op">*</span> <span class="fl">19</span><span class="op">/</span><span class="fl">18</span><span class="op">)</span> <span class="co"># Note that there are 20 observations</span>
 <span class="co">#&gt;         x </span>
 <span class="co">#&gt; 0.1458559</span>
 
@@ -310,14 +358,14 @@
 <span class="co"># Now with two-way clustered standard-errors</span>
 <span class="va">est_lfe_2way</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/lfe/man/felm.html">felm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">time</span> <span class="op">|</span> <span class="fl">0</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">time</span>, <span class="va">base</span><span class="op">)</span>
 <span class="va">se_lfe_2way</span>  <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_lfe_2way</span><span class="op">)</span>
-<span class="va">se_feols_2way</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, se <span class="op">=</span> <span class="st">"twoway"</span><span class="op">)</span>
+<span class="va">se_feols_2way</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="st">"twoway"</span><span class="op">)</span>
 <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="va">se_lfe_2way</span>, <span class="va">se_feols_2way</span><span class="op">)</span>
 <span class="co">#&gt;                       x</span>
 <span class="co">#&gt; se_lfe_2way   0.3268584</span>
 <span class="co">#&gt; se_feols_2way 0.3080378</span>
 
 <span class="co"># To obtain the same SEs, use cluster.df = "conventional"</span>
-<span class="va">sum_feols_2way_conv</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">est_feols</span>, se <span class="op">=</span> <span class="st">"twoway"</span>, dof <span class="op">=</span> <span class="fu"><a href="../reference/dof.html">dof</a></span><span class="op">(</span>cluster.df <span class="op">=</span> <span class="st">"conv"</span><span class="op">)</span><span class="op">)</span>
+<span class="va">sum_feols_2way_conv</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="va">twoway</span> <span class="op">~</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>cluster.df <span class="op">=</span> <span class="st">"conv"</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="va">se_lfe_2way</span>, <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">sum_feols_2way_conv</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt;                     x</span>
 <span class="co">#&gt; se_lfe_2way 0.3268584</span>
@@ -333,13 +381,14 @@
 <div id="defining-how-to-compute-the-standard-errors-once-and-for-all" class="section level4">
 <h4 class="hasAnchor">
 <a href="#defining-how-to-compute-the-standard-errors-once-and-for-all" class="anchor"></a>Defining how to compute the standard-errors once and for all</h4>
-<p>Once you’ve found the preferred way to compute the standard-errors for your current project, you can set it permanently using the functions <code><a href="../reference/dof.html">setFixest_dof()</a></code> and <code><a href="../reference/setFixest_se.html">setFixest_se()</a></code>.</p>
+<p>Once you’ve found the preferred way to compute the standard-errors for your current project, you can set it permanently using the functions <code><a href="../reference/ssc.html">setFixest_ssc()</a></code> and <code><a href="../reference/setFixest_vcov.html">setFixest_vcov()</a></code>.</p>
 <p>For example, if you want to remove the small sample adjustment, just use:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/dof.html">setFixest_dof</a></span><span class="op">(</span><span class="fu"><a href="../reference/dof.html">dof</a></span><span class="op">(</span>adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>By default, the standard-errors are clustered in the presence of fixed-effects. You can change this behavior with, e.g.:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/setFixest_se.html">setFixest_se</a></span><span class="op">(</span>no_FE <span class="op">=</span> <span class="st">"standard"</span>, one_FE <span class="op">=</span> <span class="st">"standard"</span>, two_FE <span class="op">=</span> <span class="st">"standard"</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/ssc.html">setFixest_ssc</a></span><span class="op">(</span><span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p>By default, the standard-errors are clustered in the presence of fixed-effects and in the presence of a panel. You can change this behavior with, e.g.:</p>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/setFixest_vcov.html">setFixest_vcov</a></span><span class="op">(</span>no_FE <span class="op">=</span> <span class="st">"iid"</span>, one_FE <span class="op">=</span> <span class="st">"iid"</span>, 
+               two_FE <span class="op">=</span> <span class="st">"hetero"</span>, panel <span class="op">=</span> <span class="st">"driscoll_kraay"</span><span class="op">)</span></code></pre></div>
 <p>which changes the way the default standard-errors are computed when the estimation contains no fixed-effects, one fixed-effect, or two or more fixed-effects.</p>
 </div>
 </div>
@@ -347,6 +396,17 @@
 <h2 class="hasAnchor">
 <a href="#changelog" class="anchor"></a>Changelog</h2>
 <ul>
+<li>
+<p>Version 0.10.0 brings about many important changes:</p>
+<ul>
+<li><p>The arguments <code>se</code> and <code>cluster</code> have been replaced by the argument <code>vcov</code>. Retro compatibility is ensured.</p></li>
+<li><p>The argument <code>dof</code> has been renamed to <code>ssc</code> for clarity (since it was dealing with small sample correction). This is <em>not</em> retro compatible.</p></li>
+<li><p>Three new types of standard-errors are added: Newey-West and Driscoll-Kraay for panel data; Conley to account for spatial correlation.</p></li>
+<li><p>The argument <code>ssc</code> can now be directly summoned in the <code>vcov</code> formula.</p></li>
+<li><p>The functions <code>setFixest_dof</code> and <code>setFixest_se</code> have been renamed into <code>setFixest_ssc</code> and <code>setFixest_vcov</code>. Retro compatibility is <em>not</em> ensured.</p></li>
+<li><p>The default standard-error name has changed from <code>"standard"</code> to <code>"iid"</code> (thanks to Grant McDermott for the suggestion!).</p></li>
+</ul>
+</li>
 <li><p>Version 0.8.0. Evaluation of the chunks related to <code>lfe</code> have been removed since its archival on the CRAN. Hard values from the last CRAN version are maintained.</p></li>
 <li>
 <p>Version 0.7.0 introduces the following important modifications:</p>
@@ -361,10 +421,11 @@
 <h2 class="hasAnchor">
 <a href="#references-acknowledgments" class="anchor"></a>References &amp; acknowledgments</h2>
 <p>I wish to thank Karl Dunkle Werner, Grant McDermott and Ivo Welch for raising the issue and for helpful discussions. Any error is of course my own.</p>
-<p>Zeileis A, Koll S, Graham N (2020). “<a href="https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf">Various Versatile Variances: An Object-Oriented Implementation of Clustered Covariances in R.</a>” Journal of Statistical Software, 95(1), 1–36.</p>
-<p>MacKinnon, JG, White, H (1985). “Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties” Journal of Econometrics, 29(3), 305–325.</p>
-<p>Kauermann G, Carroll RJ (2001). “<a href="https://www.tandfonline.com/doi/abs/10.1198/016214501753382309">A Note on the Efficiency of Sandwich Covariance Matrix Estimation</a>”, Journal of the American Statistical Association, 96(456), 1387–1396.</p>
 <p>Cameron AC, Gelbach JB, Miller DL (2011). “<a href="https://www.nber.org/papers/t0327">Robust Inference with Multiway Clustering</a>”, Journal of Business &amp; Ecomomic Statistics, 29(2), 238–249.</p>
+<p>Kauermann G, Carroll RJ (2001). “<a href="https://www.tandfonline.com/doi/abs/10.1198/016214501753382309">A Note on the Efficiency of Sandwich Covariance Matrix Estimation</a>”, Journal of the American Statistical Association, 96(456), 1387–1396.</p>
+<p>MacKinnon, JG, White, H (1985). “Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties” Journal of Econometrics, 29(3), 305–325.</p>
+<p>Milo G (2017). “<a href="https://www.jstatsoft.org/index.php/jss/article/view/v082i03/v82i03.pdf">Robust Standard Error Estimators for Panel Models: A Unifying Approach</a>” Journal of Statistical Software, 82(3).</p>
+<p>Zeileis A, Koll S, Graham N (2020). “<a href="https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf">Various Versatile Variances: An Object-Oriented Implementation of Clustered Covariances in R.</a>” Journal of Statistical Software, 95(1), 1–36.</p>
 </div>
   </div>
 

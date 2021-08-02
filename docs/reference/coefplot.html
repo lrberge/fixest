@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
@@ -536,7 +536,7 @@
 <span class='co'># (the default when fixed-effects are present)</span>
 <span class='va'>est_clu</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>
 <span class='co'># Now with "regular" standard-errors</span>
-<span class='va'>est_std</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est</span>, se <span class='op'>=</span> <span class='st'>"standard"</span><span class='op'>)</span>
+<span class='va'>est_std</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est</span>, se <span class='op'>=</span> <span class='st'>"iid"</span><span class='op'>)</span>
 
 <span class='co'># You can plot the two results at once</span>
 <span class='fu'>coefplot</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>est_clu</span>, <span class='va'>est_std</span><span class='op'>)</span><span class='op'>)</span>
@@ -552,14 +552,14 @@
 
 <span class='co'># Second set of results: this time with</span>
 <span class='co'>#  standard-errors that are not clustered.</span>
-<span class='fu'>coefplot</span><span class='op'>(</span><span class='va'>est</span>, se <span class='op'>=</span> <span class='st'>"standard"</span>, x.shift <span class='op'>=</span> <span class='fl'>.2</span>,
+<span class='fu'>coefplot</span><span class='op'>(</span><span class='va'>est</span>, se <span class='op'>=</span> <span class='st'>"iid"</span>, x.shift <span class='op'>=</span> <span class='fl'>.2</span>,
          add <span class='op'>=</span> <span class='cn'>TRUE</span>, col <span class='op'>=</span> <span class='fl'>2</span>, ci.lty <span class='op'>=</span> <span class='fl'>2</span>, pch<span class='op'>=</span><span class='fl'>15</span><span class='op'>)</span>
 </div><div class='input'>
  <span class='co'># Note that we used 'se', an argument that will</span>
  <span class='co'>#  be passed to summary.fixest</span>
 
 <span class='fu'><a href='https://rdrr.io/r/graphics/legend.html'>legend</a></span><span class='op'>(</span><span class='st'>"topright"</span>, col <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span>, pch <span class='op'>=</span> <span class='fl'>20</span>, lwd <span class='op'>=</span> <span class='fl'>1</span>, lty <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span>,
-       legend <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Clustered"</span>, <span class='st'>"Standard"</span><span class='op'>)</span>, title <span class='op'>=</span> <span class='st'>"Standard-Errors"</span><span class='op'>)</span>
+       legend <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Clustered"</span>, <span class='st'>"IID"</span><span class='op'>)</span>, title <span class='op'>=</span> <span class='st'>"Standard-Errors"</span><span class='op'>)</span>
 </div><div class='img'><img src='coefplot-2.png' alt='' width='700' height='433' /></div><div class='input'>
 
 <span class='co'>#</span>
@@ -616,7 +616,7 @@
 <span class='co'># To respect a plotting order, use a factor</span>
 <span class='va'>base_inter</span><span class='op'>$</span><span class='va'>month_factor</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span><span class='op'>(</span><span class='va'>base_inter</span><span class='op'>$</span><span class='va'>period_month</span>, levels <span class='op'>=</span> <span class='va'>all_months</span><span class='op'>)</span>
 <span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'><a href='i.html'>i</a></span><span class='op'>(</span><span class='va'>month_factor</span>, <span class='va'>treat</span>, <span class='st'>"oct"</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>id</span><span class='op'>+</span><span class='va'>period</span>, <span class='va'>base_inter</span><span class='op'>)</span>
-<span class='fu'>iplot</span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>The variable 'month_factor::may:treat' has been removed because of collinearity (see $collin.var).</span></div><div class='input'><span class='fu'>iplot</span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>
 </div><div class='img'><img src='coefplot-8.png' alt='' width='700' height='433' /></div><div class='input'>
 
 <span class='co'>#</span>

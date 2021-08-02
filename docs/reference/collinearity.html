@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -115,7 +115,7 @@
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/lrberge/fixest/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -189,15 +189,15 @@
 
 <span class='co'># Collinearity with the fixed-effects:</span>
 <span class='va'>res_1</span> <span class='op'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>dep</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>+</span> <span class='va'>v1</span> <span class='op'>+</span> <span class='va'>v2</span> <span class='op'>+</span> <span class='va'>v4</span> <span class='op'>|</span> <span class='va'>fe_1</span> <span class='op'>+</span> <span class='va'>fe_2</span>, <span class='va'>base</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='warning'>Warning: [femlm]: The optimization algorithm did not converge, the results are not reliable. The information matrix is singular: presence of collinearity. Use function collinearity() to pinpoint the problems.</span></div><div class='input'><span class='fu'>collinearity</span><span class='op'>(</span><span class='va'>res_1</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='warning'>Warning: [femlm]: The optimization algorithm did not converge, the results are not reliable. The information matrix is singular: presence of collinearity.</span></div><div class='input'><span class='fu'>collinearity</span><span class='op'>(</span><span class='va'>res_1</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; [1] "Variables 'v1' and 'v2' are collinear with fixed-effects 'fe_1'."</div><div class='input'>
 <span class='co'># =&gt; collinearity with the first fixed-effect identified, we drop v1 and v2</span>
 <span class='va'>res_1bis</span> <span class='op'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>dep</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>+</span> <span class='va'>v4</span> <span class='op'>|</span> <span class='va'>fe_1</span> <span class='op'>+</span> <span class='va'>fe_2</span>, <span class='va'>base</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='warning'>Warning: [femlm]: The information matrix is singular: presence of collinearity. Use function collinearity() to pinpoint the problems.</span></div><div class='input'><span class='fu'>collinearity</span><span class='op'>(</span><span class='va'>res_1bis</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='warning'>Warning: [femlm]: The information matrix is singular: presence of collinearity.</span></div><div class='input'><span class='fu'>collinearity</span><span class='op'>(</span><span class='va'>res_1bis</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; [1] "Variable 'v4' is collinear with fixed-effects 'fe_2'."</div><div class='input'>
 <span class='co'># Multi-Collinearity:</span>
 <span class='va'>res_2</span> <span class='op'>=</span>  <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>dep</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='op'>+</span> <span class='va'>v1</span> <span class='op'>+</span> <span class='va'>v2</span> <span class='op'>+</span> <span class='va'>v3</span> <span class='op'>+</span> <span class='va'>v4</span>, <span class='va'>base</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='warning'>Warning: [femlm]: The information matrix is singular: presence of collinearity. Use function collinearity() to pinpoint the problems.</span></div><div class='input'><span class='fu'>collinearity</span><span class='op'>(</span><span class='va'>res_2</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='warning'>Warning: [femlm]: The information matrix is singular: presence of collinearity.</span></div><div class='input'><span class='fu'>collinearity</span><span class='op'>(</span><span class='va'>res_2</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; [1] "Variable 'v1' is collinear with variable."</div><div class='input'>
 
 </div></pre>

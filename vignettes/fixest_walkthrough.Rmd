@@ -286,7 +286,7 @@ Note however that the interpretation of the fixed-effects must be taken with ext
 
 # The vcov argument 
 
-The version *0.10.0* of `fixest` introduced the argument `vcov`. This argument is highly versatile and single-handedly manages how the standard-errors are computed. This argument can be many things, so bear with me, and now, let's start trying to describe it!
+The version 0.10.0 of `fixest` introduced the argument `vcov`. This argument is highly versatile and single-handedly manages how the standard-errors are computed. This argument can be many things, so bear with me, and now, let's start trying to describe it!
 
 ## Basics
 
@@ -353,7 +353,7 @@ setFixest_estimation(reset = TRUE)
 feols(y ~ x1 | period, base_did, "cluster")
 ```
 
-Talking about clustered SEs, note that this is such a common operation that the empty keyword *is* equivalent to clustered SEs, so that `vcov = ~id + period` would lead to SEs clustered by `id` and `period`:
+Talking about clustered SEs, note that this is such a common operation that the empty keyword is equivalent to clustered SEs, so that `vcov = ~id + period` would lead to SEs clustered by `id` and `period`:
 ```{r}
 feols(y ~ x1 | period, base_did, ~id + period)
 ```

@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
@@ -146,7 +146,9 @@
   sorted <span class='op'>=</span> <span class='cn'>FALSE</span>,
   add_items <span class='op'>=</span> <span class='cn'>FALSE</span>,
   items.list <span class='op'>=</span> <span class='cn'>FALSE</span>,
-  multi.join <span class='op'>=</span> <span class='st'>"_"</span>
+  multi.df <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  multi.join <span class='op'>=</span> <span class='st'>"_"</span>,
+  internal <span class='op'>=</span> <span class='cn'>FALSE</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -169,8 +171,16 @@
       <td><p>Logical, default is <code>FALSE</code>. Only used if <code>add_items=TRUE</code>. If <code>TRUE</code>, then a list of length 2 is returned with <code>x</code> the integer vector and <code>items</code> the vector of items.</p></td>
     </tr>
     <tr>
+      <th>multi.df</th>
+      <td><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code> then a data.frame listing the unique elements is returned in the form of a data.frame. Ignored if <code>add_items = FALSE</code>.</p></td>
+    </tr>
+    <tr>
       <th>multi.join</th>
       <td><p>Character scalar used to join the items of multiple vectors. The default is <code>"_"</code>. Ignored if <code>add_items = FALSE</code>.</p></td>
+    </tr>
+    <tr>
+      <th>internal</th>
+      <td><p>Logical, default is <code>FALSE</code>. For programming only. If this function is used within another function, setting <code>internal = TRUE</code> is needed to make the evaluation of <code>...</code> valid. End users of <code>to_integer</code> should not care.</p></td>
     </tr>
     </table>
 
@@ -186,30 +196,30 @@ If <code>add_items=TRUE</code> and <code>items.list=TRUE</code>, a list of two e
 
 <span class='co'># transforms the species vector into integers</span>
 <span class='fu'>to_integer</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;   [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-#&gt;  [38] 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
-#&gt;  [75] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 3
+</div><div class='output co'>#&gt;   [1] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+#&gt;  [38] 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+#&gt;  [75] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 3 3 3 3 3 3 3 3 3 3 3
 #&gt; [112] 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
 #&gt; [149] 3 3</div><div class='input'>
 <span class='co'># To obtain the "items":</span>
 <span class='fu'>to_integer</span><span class='op'>(</span><span class='va'>x1</span>, add_items <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;   [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-#&gt;  [38] 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
-#&gt;  [75] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 3
+</div><div class='output co'>#&gt;   [1] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+#&gt;  [38] 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+#&gt;  [75] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 3 3 3 3 3 3 3 3 3 3 3
 #&gt; [112] 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
 #&gt; [149] 3 3
 #&gt; attr(,"items")
-#&gt; [1] "setosa"     "versicolor" "virginica" </div><div class='input'><span class='co'># same but in list form</span>
+#&gt; [1] "versicolor" "setosa"     "virginica" </div><div class='input'><span class='co'># same but in list form</span>
 <span class='fu'>to_integer</span><span class='op'>(</span><span class='va'>x1</span>, add_items <span class='op'>=</span> <span class='cn'>TRUE</span>, items.list <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; $x
-#&gt;   [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-#&gt;  [38] 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
-#&gt;  [75] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3 3
+#&gt;   [1] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+#&gt;  [38] 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+#&gt;  [75] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 3 3 3 3 3 3 3 3 3 3 3
 #&gt; [112] 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
 #&gt; [149] 3 3
 #&gt; 
 #&gt; $items
-#&gt; [1] "setosa"     "versicolor" "virginica" 
+#&gt; [1] "versicolor" "setosa"     "virginica" 
 #&gt; </div><div class='input'>
 <span class='co'># transforms x2 into an integer vector from 1 to 4</span>
 <span class='fu'>to_integer</span><span class='op'>(</span><span class='va'>x2</span>, add_items <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>

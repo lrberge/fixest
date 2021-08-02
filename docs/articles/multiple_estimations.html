@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
@@ -88,13 +88,13 @@
 
       
 
-      </header><script src="multiple_estimations_files/header-attrs-2.6/header-attrs.js"></script><div class="row">
+      </header><script src="multiple_estimations_files/header-attrs-2.9/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Multiple estimations</h1>
                         <h4 class="author">Laurent Berge</h4>
             
-            <h4 class="date">2021-04-24</h4>
+            <h4 class="date">2021-08-02</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/multiple_estimations.Rmd"><code>vignettes/multiple_estimations.Rmd</code></a></small>
       <div class="hidden name"><code>multiple_estimations.Rmd</code></div>
@@ -202,7 +202,7 @@
 ## x1              0.5418*** (0.0693) -0.2571*** (0.0669)
 ## x2               -0.3196* (0.1605)    0.3640* (0.1550)
 ## _______________ __________________ ___________________
-## S.E. type                 Standard            Standard
+## S.E. type                      IID                 IID
 ## Observations                   150                 150
 ## R2                         0.76626             0.21310
 ## Adj. R2                    0.76308             0.20240</code></pre>
@@ -263,7 +263,7 @@
 ## x1               0.5418*** (0.0693)   0.3990 (0.2958) 0.9342*** (0.1693)
 ## x2                -0.3196* (0.1605)   0.7121 (0.4874)   -0.3200 (0.4024)
 ## ________________ __________________ _________________ __________________
-## S.E. type                  Standard          Standard           Standard
+## S.E. type                       IID               IID                IID
 ## Observations                    150                50                 50
 ## R2                          0.76626           0.11173            0.57432
 ## Adj. R2                     0.76308           0.07393            0.55620
@@ -275,7 +275,7 @@
 ## x1               0.9946*** (0.0893)
 ## x2                  0.0071 (0.1795)
 ## ________________ __________________
-## S.E. type                  Standard
+## S.E. type                       IID
 ## Observations                     50
 ## R2                          0.74689
 ## Adj. R2                     0.73612</code></pre>
@@ -316,7 +316,7 @@
 ## x2                 0.7121 (0.4874)   -0.3200 (0.4024)    0.0071 (0.1795)
 ## x2 square                                                               
 ## ________________ _________________ __________________ __________________
-## S.E. type                 Standard           Standard           Standard
+## S.E. type                      IID                IID                IID
 ## Observations                    50                 50                 50
 ## R2                         0.11173            0.57432            0.74689
 ## Adj. R2                    0.07393            0.55620            0.73612
@@ -329,7 +329,7 @@
 ## x2                   2.511 (2.011)      3.015 (2.839)      3.504 (2.153)
 ## x2 square           -2.913 (3.157)     -1.236 (1.042)   -0.8703 (0.5340)
 ## ________________ _________________ __________________ __________________
-## S.E. type                 Standard           Standard           Standard
+## S.E. type                      IID                IID                IID
 ## Observations                    50                 50                 50
 ## R2                         0.12786            0.58696            0.76071
 ## Adj. R2                    0.07098            0.56002            0.74510</code></pre>

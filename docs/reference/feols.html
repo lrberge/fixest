@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
@@ -144,6 +144,7 @@
     <pre class="usage"><span class='fu'>feols</span><span class='op'>(</span>
   <span class='va'>fml</span>,
   <span class='va'>data</span>,
+  <span class='va'>vcov</span>,
   <span class='va'>weights</span>,
   <span class='va'>offset</span>,
   <span class='va'>subset</span>,
@@ -151,7 +152,7 @@
   <span class='va'>fsplit</span>,
   <span class='va'>cluster</span>,
   <span class='va'>se</span>,
-  <span class='va'>dof</span>,
+  <span class='va'>ssc</span>,
   <span class='va'>panel.id</span>,
   <span class='va'>fixef</span>,
   fixef.rm <span class='op'>=</span> <span class='st'>"none"</span>,
@@ -175,12 +176,13 @@
   <span class='va'>y</span>,
   <span class='va'>X</span>,
   <span class='va'>fixef_df</span>,
+  <span class='va'>vcov</span>,
   <span class='va'>offset</span>,
   <span class='va'>split</span>,
   <span class='va'>fsplit</span>,
   <span class='va'>cluster</span>,
   <span class='va'>se</span>,
-  <span class='va'>dof</span>,
+  <span class='va'>ssc</span>,
   <span class='va'>weights</span>,
   <span class='va'>subset</span>,
   fixef.rm <span class='op'>=</span> <span class='st'>"perfect"</span>,
@@ -210,6 +212,10 @@
       <td><p>A data.frame containing the necessary variables to run the model. The variables of the non-linear right hand side of the formula are identified with this <code>data.frame</code> names. Can also be a matrix.</p></td>
     </tr>
     <tr>
+      <th>vcov</th>
+      <td><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href='vcov_cluster.html'>vcov_cluster</a></code>, <code><a href='vcov_hac.html'>vcov_NW</a></code>, <code><a href='vcov_hac.html'>NW</a></code>, <code><a href='vcov_hac.html'>vcov_DK</a></code>, <code><a href='vcov_hac.html'>DK</a></code>, <code><a href='vcov_conley.html'>vcov_conley</a></code> and <code><a href='vcov_conley.html'>conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances.</p></td>
+    </tr>
+    <tr>
       <th>weights</th>
       <td><p>A formula or a numeric vector. Each observation can be weighted, the weights must be greater than 0. If equal to a formula, it should be one-sided: for example <code>~ var_weight</code>.</p></td>
     </tr>
@@ -235,11 +241,11 @@
     </tr>
     <tr>
       <th>se</th>
-      <td><p>Character scalar. Which kind of standard error should be computed: &#8220;standard&#8221;, &#8220;hetero&#8221;, &#8220;cluster&#8221;, &#8220;twoway&#8221;, &#8220;threeway&#8221; or &#8220;fourway&#8221;? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "standard"</code>. Note that this argument can be implicitly deduced from the argument <code>cluster</code>.</p></td>
+      <td><p>Character scalar. Which kind of standard error should be computed: &#8220;standard&#8221;, &#8220;hetero&#8221;, &#8220;cluster&#8221;, &#8220;twoway&#8221;, &#8220;threeway&#8221; or &#8220;fourway&#8221;? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "iid"</code>. Note that this argument is deprecated, you should use <code>vcov</code> instead.</p></td>
     </tr>
     <tr>
-      <th>dof</th>
-      <td><p>An object of class <code>dof.type</code> obtained with the function <code><a href='dof.html'>dof</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href='dof.html'>dof</a></code> for this argument. The arguments and defaults of the function <code><a href='dof.html'>dof</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "conventional"</code>, <code>t.df = "conventional"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href='dof.html'>dof</a></code> for details.</p></td>
+      <th>ssc</th>
+      <td><p>An object of class <code>ssc.type</code> obtained with the function <code><a href='ssc.html'>ssc</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href='ssc.html'>ssc</a></code> for this argument. The arguments and defaults of the function <code><a href='ssc.html'>ssc</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "conventional"</code>, <code>t.df = "conventional"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href='ssc.html'>ssc</a></code> for details.</p></td>
     </tr>
     <tr>
       <th>panel.id</th>
@@ -348,7 +354,7 @@
 <dt>residuals</dt><dd><p>The residuals (y minus the fitted values).</p></dd>
 <dt>sq.cor</dt><dd><p>Squared correlation between the dependent variable and the expected predictor (i.e. fitted.values) obtained by the estimation.</p></dd>
 <dt>hessian</dt><dd><p>The Hessian of the parameters.</p></dd>
-<dt>cov.unscaled</dt><dd><p>The variance-covariance matrix of the parameters.</p></dd>
+<dt>cov.iid</dt><dd><p>The variance-covariance matrix of the parameters.</p></dd>
 <dt>se</dt><dd><p>The standard-error of the parameters.</p></dd>
 <dt>scores</dt><dd><p>The matrix of the scores (first derivative for each observation).</p></dd>
 <dt>residuals</dt><dd><p>The difference between the dependent variable and the expected predictor.</p></dd>
@@ -404,9 +410,9 @@
     
 
 
-<p>Standard-errors can be computed in different ways, you can use the arguments <code>se</code> and <code>dof</code> in <code><a href='summary.fixest.html'>summary.fixest</a></code> to define how to compute them. By default, in the presence of fixed-effects, standard-errors are automatically clustered.</p>
+<p>Standard-errors can be computed in different ways, you can use the arguments <code>se</code> and <code>ssc</code> in <code><a href='summary.fixest.html'>summary.fixest</a></code> to define how to compute them. By default, in the presence of fixed-effects, standard-errors are automatically clustered.</p>
 <p>The following vignette: <a href='https://lrberge.github.io/fixest/articles/standard_errors.html'>On standard-errors</a> describes in details how the standard-errors are computed in <code>fixest</code> and how you can replicate standard-errors from other software.</p>
-<p>You can use the functions <code><a href='setFixest_se.html'>setFixest_se</a></code> and <code><a href='dof.html'>setFixest_dof</a></code> to permanently set the way the standard-errors are computed.</p>
+<p>You can use the functions <code>setFixest_se</code> and <code><a href='ssc.html'>setFixest_ssc</a></code> to permanently set the way the standard-errors are computed.</p>
     <h2 class="hasAnchor" id="instrumental-variables"><a class="anchor" href="#instrumental-variables"></a>Instrumental variables</h2>
 
     
@@ -540,11 +546,11 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 </div><div class='output co'>#&gt;                               est1               est2
 #&gt; Dependent Var.:                  y             f(y,1)
 #&gt;                                                      
-#&gt; f(x1,1)                            0.9940*** (0.0579)
-#&gt; x1              0.9948*** (0.0532)    0.0081 (0.0584)
-#&gt; l(x1,1)            0.0410 (0.0540)    0.0157 (0.0585)
+#&gt; f(x1,1)                            0.9940*** (0.0542)
+#&gt; x1              0.9948*** (0.0487)    0.0081 (0.0592)
+#&gt; l(x1,1)            0.0410 (0.0558)    0.0157 (0.0640)
 #&gt; _______________ __________________ __________________
-#&gt; S.E. type                 Standard           Standard
+#&gt; S.E.: Clustered             by: id             by: id
 #&gt; Observations                   972                864
 #&gt; R2                         0.26558            0.25697
 #&gt; Adj. R2                    0.26406            0.25438</div><div class='input'>
@@ -582,7 +588,7 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 </div><div class='output co'>#&gt; TSLS estimation, Dep. Var.: y, Endo.: x_endo1, Instr.: x_inst1
 #&gt; Second stage: Dep. Var.: y
 #&gt; Observations: 150 
-#&gt; Standard-errors: Standard 
+#&gt; Standard-errors: IID 
 #&gt;              Estimate Std. Error   t value Pr(&gt;|t|)) 
 #&gt; (Intercept) -5.444100    82.9070 -0.065665  0.947735 
 #&gt; fit_x_endo1  4.156900    44.6790  0.093038  0.926001 
@@ -598,7 +604,7 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 </div><div class='output co'>#&gt; TSLS estimation, Dep. Var.: x_endo1, Endo.: x_endo1, Instr.: x_inst1
 #&gt; First stage: Dep. Var.: x_endo1
 #&gt; Observations: 150 
-#&gt; Standard-errors: Standard 
+#&gt; Standard-errors: IID 
 #&gt;              Estimate Std. Error   t value Pr(&gt;|t|))    
 #&gt; (Intercept)  1.867800   1.454900  1.283900  0.201226    
 #&gt; x_inst1     -0.011136   0.119357 -0.093298  0.925795    
@@ -614,7 +620,7 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; TSLS estimation, Dep. Var.: x_endo1, Endo.: x_endo1, Instr.: x_inst1
 #&gt; First stage: Dep. Var.: x_endo1
 #&gt; Observations: 150 
-#&gt; Standard-errors: Standard 
+#&gt; Standard-errors: IID 
 #&gt;              Estimate Std. Error   t value Pr(&gt;|t|))    
 #&gt; (Intercept)  1.867800   1.454900  1.283900  0.201226    
 #&gt; x_inst1     -0.011136   0.119357 -0.093298  0.925795    
@@ -629,7 +635,7 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; TSLS estimation, Dep. Var.: y, Endo.: x_endo1, Instr.: x_inst1
 #&gt; Second stage: Dep. Var.: y
 #&gt; Observations: 150 
-#&gt; Standard-errors: Standard 
+#&gt; Standard-errors: IID 
 #&gt;              Estimate Std. Error   t value Pr(&gt;|t|)) 
 #&gt; (Intercept) -5.444100    82.9070 -0.065665  0.947735 
 #&gt; fit_x_endo1  4.156900    44.6790  0.093038  0.926001 
@@ -654,7 +660,7 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 </div><div class='output co'>#&gt; TSLS estimation, Dep. Var.: x_endo1, Endo.: x_endo1, x_endo2, Instr.: x_inst1, x_inst2
 #&gt; First stage: Dep. Var.: x_endo1
 #&gt; Observations: 150 
-#&gt; Standard-errors: Standard 
+#&gt; Standard-errors: IID 
 #&gt;              Estimate Std. Error   t value Pr(&gt;|t|))    
 #&gt; (Intercept)  1.850700   1.516300  1.220500  0.224240    
 #&gt; x_inst1     -0.011391   0.119922 -0.094984  0.924459    
@@ -678,7 +684,7 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; Fixed-Effects:  -------------- --------------- ----------------
 #&gt; fe1                         No             Yes               No
 #&gt; _______________ ______________ _______________ ________________
-#&gt; S.E. type             Standard         by: fe1         Standard
+#&gt; S.E. type                  IID         by: fe1              IID
 #&gt; Observations               150             150              150
 #&gt; R2                     -92.436         -61.946          -18.724
 #&gt; Within R2                   --         -164.08               --</div><div class='input'>
@@ -696,7 +702,7 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; Fixed-Effects:  ---------------- ------------- ---------------- -------------
 #&gt; fe1                           No            No              Yes           Yes
 #&gt; _______________ ________________ _____________ ________________ _____________
-#&gt; S.E. type               Standard      Standard          by: fe1       by: fe1
+#&gt; S.E. type                    IID           IID          by: fe1       by: fe1
 #&gt; Observations                 150           150              150           150
 #&gt; R2                       0.13993       -92.436          0.14157       -61.946
 #&gt; Within R2                     --            --          0.00829       -164.08
@@ -712,7 +718,7 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; Fixed-Effects:  ---------------- ----------------- ----------------
 #&gt; fe1                           No                No               No
 #&gt; _______________ ________________ _________________ ________________
-#&gt; S.E. type               Standard          Standard         Standard
+#&gt; S.E. type                    IID               IID              IID
 #&gt; Observations                 150               150              150
 #&gt; R2                       0.13994           0.57761          -18.724
 #&gt; Within R2                     --                --               --</div><div class='input'>
@@ -734,7 +740,7 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; Wind x Temp                        -0.2239*** (0.0540) -0.2273*** (0.0539)
 #&gt; Day                                                        0.2940 (0.2185)
 #&gt; _______________ __________________ ___________________ ___________________
-#&gt; S.E. type                 Standard            Standard            Standard
+#&gt; S.E. type                      IID                 IID                 IID
 #&gt; Observations                   116                 116                 116
 #&gt; R2                         0.56871             0.62613             0.63213
 #&gt; Adj. R2                    0.56108             0.61611             0.61887</div><div class='input'>
@@ -749,7 +755,7 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; Wind x Temp                       0.1044 (0.2064) 0.1069 (0.2057)
 #&gt; Day                                               -1.161 (0.8277)
 #&gt; _______________ _________________ _______________ _______________
-#&gt; S.E. type                Standard        Standard        Standard
+#&gt; S.E. type                     IID             IID             IID
 #&gt; Observations                  146             146             146
 #&gt; R2                        0.08198         0.08363         0.09624
 #&gt; Adj. R2                   0.06914         0.06427         0.07061</div><div class='input'>
@@ -765,7 +771,7 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; Wind x Temp     -0.2239*** (0.0540) 0.1044 (0.2064) -0.2273*** (0.0539)
 #&gt; Day                                                     0.2940 (0.2185)
 #&gt; _______________ ___________________ _______________ ___________________
-#&gt; S.E. type                  Standard        Standard            Standard
+#&gt; S.E. type                       IID             IID                 IID
 #&gt; Observations                    116             146                 116
 #&gt; R2                          0.62613         0.08363             0.63213
 #&gt; Adj. R2                     0.61611         0.06427             0.61887
@@ -778,7 +784,7 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; Wind x Temp     0.1069 (0.2057)
 #&gt; Day             -1.161 (0.8277)
 #&gt; _______________ _______________
-#&gt; S.E. type              Standard
+#&gt; S.E. type                   IID
 #&gt; Observations                146
 #&gt; R2                      0.09624
 #&gt; Adj. R2                 0.07061</div><div class='input'>
@@ -788,7 +794,7 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 
 <span class='co'># You can display everything at once with the print method</span>
 <span class='va'>est_split</span>
-</div><div class='output co'>#&gt; Standard-errors: Standard 
+</div><div class='output co'>#&gt; Standard-errors: IID 
 #&gt; 
 #&gt; 
 #&gt; # SAMPLE: 5
@@ -995,7 +1001,7 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; 20     205 (242)     -147 (256) </div><div class='input'>
 <span class='co'># You can still select which sample/LHS/RHS to display</span>
 <span class='va'>est_split</span><span class='op'>[</span>sample <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span>, lhs <span class='op'>=</span> <span class='fl'>1</span>, rhs <span class='op'>=</span> <span class='fl'>1</span><span class='op'>]</span>
-</div><div class='output co'>#&gt; Standard-errors: Standard 
+</div><div class='output co'>#&gt; Standard-errors: IID 
 #&gt; Dep. var.: Ozone
 #&gt; Expl. vars.: poly(Wind, 2)
 #&gt; Sample: 5

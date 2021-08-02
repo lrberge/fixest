@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
@@ -144,9 +144,10 @@
     <pre class="usage"><span class='co'># S3 method for fixest</span>
 <span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span>
   <span class='va'>object</span>,
-  <span class='va'>se</span>,
+  vcov <span class='op'>=</span> <span class='cn'>NULL</span>,
+  se <span class='op'>=</span> <span class='cn'>NULL</span>,
   <span class='va'>cluster</span>,
-  dof <span class='op'>=</span> <span class='cn'>NULL</span>,
+  ssc <span class='op'>=</span> <span class='cn'>NULL</span>,
   attr <span class='op'>=</span> <span class='cn'>FALSE</span>,
   forceCovariance <span class='op'>=</span> <span class='cn'>FALSE</span>,
   keepBounded <span class='op'>=</span> <span class='cn'>FALSE</span>,
@@ -162,16 +163,20 @@
       <td><p>A <code>fixest</code> object. Obtained using the functions <code><a href='femlm.html'>femlm</a></code>, <code><a href='feols.html'>feols</a></code> or <code><a href='feglm.html'>feglm</a></code>.</p></td>
     </tr>
     <tr>
+      <th>vcov</th>
+      <td><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href='vcov_cluster.html'>vcov_cluster</a></code>, <code><a href='vcov_hac.html'>vcov_NW</a></code>, <code><a href='vcov_hac.html'>NW</a></code>, <code><a href='vcov_hac.html'>vcov_DK</a></code>, <code><a href='vcov_hac.html'>DK</a></code>, <code><a href='vcov_conley.html'>vcov_conley</a></code> and <code><a href='vcov_conley.html'>conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances.</p></td>
+    </tr>
+    <tr>
       <th>se</th>
-      <td><p>Character scalar. Which kind of standard error should be computed: &#8220;standard&#8221;, &#8220;hetero&#8221;, &#8220;cluster&#8221;, &#8220;twoway&#8221;, &#8220;threeway&#8221; or &#8220;fourway&#8221;? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "standard"</code>. Note that this argument can be implicitly deduced from the argument <code>cluster</code>.</p></td>
+      <td><p>Character scalar. Which kind of standard error should be computed: &#8220;standard&#8221;, &#8220;hetero&#8221;, &#8220;cluster&#8221;, &#8220;twoway&#8221;, &#8220;threeway&#8221; or &#8220;fourway&#8221;? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "iid"</code>. Note that this argument is deprecated, you should use <code>vcov</code> instead.</p></td>
     </tr>
     <tr>
       <th>cluster</th>
       <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as clusters in the estimation, you could further use <code>cluster = 1:2</code> or leave it blank with <code>se = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] cluster). You can interact two variables using <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
     </tr>
     <tr>
-      <th>dof</th>
-      <td><p>An object of class <code>dof.type</code> obtained with the function <code><a href='dof.html'>dof</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href='dof.html'>dof</a></code> for this argument. The arguments and defaults of the function <code><a href='dof.html'>dof</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "conventional"</code>, <code>t.df = "conventional"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href='dof.html'>dof</a></code> for details.</p></td>
+      <th>ssc</th>
+      <td><p>An object of class <code>ssc.type</code> obtained with the function <code><a href='ssc.html'>ssc</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href='ssc.html'>ssc</a></code> for this argument. The arguments and defaults of the function <code><a href='ssc.html'>ssc</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "conventional"</code>, <code>t.df = "conventional"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href='ssc.html'>ssc</a></code> for details.</p></td>
     </tr>
     <tr>
       <th>attr</th>
@@ -198,62 +203,191 @@
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>It returns a \(N\times N\) square matrix where \(N\) is the number of variables of the fitted model.
-This matrix has an attribute &#8220;type&#8221; specifying how this variance/covariance matrix has been computed (i.e. if it was created using a heteroskedascity-robust correction, or if it was clustered along a specific factor, etc).</p>
+    <p>It returns a \(K\times K\) square matrix where \(K\) is the number of variables of the fitted model.
+If <code>attr = TRUE</code>, this matrix has an attribute &#8220;type&#8221; specifying how this variance/covariance matrix has been computed.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>For an explanation on how the standard-errors are computed and what is the exact meaning of the arguments, please have a look at the dedicated vignette: <a href='https://lrberge.github.io/fixest/articles/standard_errors.html'>On standard-errors</a>.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p>See also the main estimation functions <code><a href='femlm.html'>femlm</a></code>, <code><a href='feols.html'>feols</a></code> or <code><a href='feglm.html'>feglm</a></code>. <code><a href='summary.fixest.html'>summary.fixest</a></code>, <code><a href='confint.fixest.html'>confint.fixest</a></code>, <code><a href='resid.fixest.html'>resid.fixest</a></code>, <code><a href='predict.fixest.html'>predict.fixest</a></code>, <code><a href='fixef.fixest.html'>fixef.fixest</a></code>.</p></div>
+    <div class='dont-index'><p>You can also compute VCOVs with the following functions: <code><a href='vcov_cluster.html'>vcov_cluster</a></code>, <code><a href='vcov_hac.html'>vcov_hac</a></code>, <code><a href='vcov_conley.html'>vcov_conley</a></code>.</p>
+<p>See also the main estimation functions <code><a href='femlm.html'>femlm</a></code>, <code><a href='feols.html'>feols</a></code> or <code><a href='feglm.html'>feglm</a></code>. <code><a href='summary.fixest.html'>summary.fixest</a></code>, <code><a href='confint.fixest.html'>confint.fixest</a></code>, <code><a href='resid.fixest.html'>resid.fixest</a></code>, <code><a href='predict.fixest.html'>predict.fixest</a></code>, <code><a href='fixef.fixest.html'>fixef.fixest</a></code>.</p></div>
     <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
 
     <p>Laurent Berge</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='co'># Load trade data</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>trade</span><span class='op'>)</span>
+<span class='co'># Load panel data</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>base_did</span><span class='op'>)</span>
 
-<span class='co'># We estimate the effect of distance on trade (with 3 fixed-effects)</span>
-<span class='va'>est_pois</span> <span class='op'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>Euros</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>dist_km</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>Year</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>Origin</span> <span class='op'>+</span> <span class='va'>Destination</span> <span class='op'>+</span>
-                 <span class='va'>Product</span>, <span class='va'>trade</span><span class='op'>)</span>
+<span class='co'># Simple estimation on a panel</span>
+<span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base_did</span><span class='op'>)</span>
 
-<span class='co'># By default, in the presence of FEs</span>
-<span class='co'># the VCOV is clustered along the first FE</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_pois</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;            [,1]       [,2]
-#&gt; [1,] 0.01337806  0.2270412
-#&gt; [2,] 0.22704123 48.7565447</div><div class='input'>
+<span class='co'># ======== #</span>
+<span class='co'># IID VCOV #</span>
+<span class='co'># ======== #</span>
+
+<span class='co'># By default the VCOV assumes iid errors:</span>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; (Intercept)          x1 
+#&gt;   0.1491554   0.0501191 </div><div class='input'>
+<span class='co'># You can make the call for an iid VCOV explicitly:</span>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"iid"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; (Intercept)          x1 
+#&gt;   0.1491554   0.0501191 </div><div class='input'>
+<span class='co'>#</span>
 <span class='co'># Heteroskedasticity-robust VCOV</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_pois</span>, se <span class='op'>=</span> <span class='st'>"hetero"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;              [,1]         [,2]
-#&gt; [1,] 0.0004775112  0.002270171
-#&gt; [2,] 0.0022701710 39.999293909</div><div class='input'>
-<span class='co'># "clustered" VCOV (with respect to the Product factor)</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_pois</span>, se <span class='op'>=</span> <span class='st'>"cluster"</span>, cluster <span class='op'>=</span> <span class='va'>trade</span><span class='op'>$</span><span class='va'>Product</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;            [,1]        [,2]
-#&gt; [1,] 0.00965938  0.09050064
-#&gt; [2,] 0.09050064 45.72458483</div><div class='input'><span class='co'># another way to make the same request:</span>
-<span class='co'># note that previously arg. se was optional since deduced from arg. cluster</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_pois</span>, cluster <span class='op'>=</span> <span class='st'>"Product"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;            [,1]        [,2]
-#&gt; [1,] 0.00965938  0.09050064
-#&gt; [2,] 0.09050064 45.72458483</div><div class='input'><span class='co'># yet another way:</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_pois</span>, cluster <span class='op'>=</span> <span class='op'>~</span><span class='va'>Product</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;            [,1]        [,2]
-#&gt; [1,] 0.00965938  0.09050064
-#&gt; [2,] 0.09050064 45.72458483</div><div class='input'>
-<span class='co'># Another estimation without fixed-effects:</span>
-<span class='va'>est_pois_simple</span> <span class='op'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>Euros</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>dist_km</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>Year</span><span class='op'>)</span>, <span class='va'>trade</span><span class='op'>)</span>
+<span class='co'>#</span>
 
-<span class='co'># We can still get the clustered VCOV,</span>
-<span class='co'># but we need to give the argument cluster:</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_pois_simple</span>, cluster <span class='op'>=</span> <span class='op'>~</span><span class='va'>Product</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;              [,1]         [,2]          [,3]
-#&gt; [1,] 2590.3952791 -0.362100706 -339.93823080
-#&gt; [2,]   -0.3621007  0.002112443    0.04584858
-#&gt; [3,] -339.9382308  0.045848576   44.61192316</div><div class='input'>
+<span class='co'># By default the VCOV assumes iid errors:</span>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"hetero"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; (Intercept)          x1 
+#&gt;  0.14902573  0.05101605 </div><div class='input'>
+<span class='co'># =&gt; note that it also accepts vcov = "White" and vcov = "HC1" as aliases.</span>
+
+<span class='co'># =============== #</span>
+<span class='co'># Clustered VCOVs #</span>
+<span class='co'># =============== #</span>
+
+<span class='co'># To cluster the VCOV, you can use a formula of the form cluster ~ var1 + var2 etc</span>
+<span class='co'># Let's cluster by the panel ID:</span>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>cluster</span> <span class='op'>~</span> <span class='va'>id</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; (Intercept)          x1 
+#&gt;   0.1943525   0.0467892 </div><div class='input'>
+<span class='co'># Alternative ways:</span>
+
+<span class='co'># -&gt; cluster is implicitly assumed when a one-sided formula is provided</span>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='op'>~</span> <span class='va'>id</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; (Intercept)          x1 
+#&gt;   0.1943525   0.0467892 </div><div class='input'>
+<span class='co'># -&gt; using the argument cluster instead of vcov</span>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='op'>~</span> <span class='va'>id</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; (Intercept)          x1 
+#&gt;   0.1943525   0.0467892 </div><div class='input'>
+<span class='co'># For two-/three- way clustering, just add more variables:</span>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='op'>~</span> <span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; (Intercept)          x1 
+#&gt;  0.61496508  0.04721779 </div><div class='input'>
+<span class='co'># -------------------|</span>
+<span class='co'># Implicit deduction |</span>
+<span class='co'># -------------------|</span>
+<span class='co'># When the estimation contains FEs, the dimension on which to cluster</span>
+<span class='co'># is directly inferred from the FEs used in the estimation, so you don't need</span>
+<span class='co'># to explicitly add them.</span>
+
+<span class='va'>est_fe</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>|</span> <span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span>, <span class='va'>base_did</span><span class='op'>)</span>
+
+<span class='co'># Clustered along "id"</span>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_fe</span>, <span class='st'>"cluster"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;         x1 
+#&gt; 0.04578726 </div><div class='input'>
+<span class='co'># Clustered along "id" and "period"</span>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_fe</span>, <span class='st'>"twoway"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;         x1 
+#&gt; 0.03417711 </div><div class='input'>
+
+<span class='co'># =========== #</span>
+<span class='co'># Panel VCOVs #</span>
+<span class='co'># =========== #</span>
+
+<span class='co'># ---------------------|</span>
+<span class='co'># Newey West (NW) VCOV |</span>
+<span class='co'># ---------------------|</span>
+<span class='co'># To obtain NW VCOVs, use a formula of the form NW ~ id + period</span>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>NW</span> <span class='op'>~</span> <span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; (Intercept)          x1 
+#&gt;  0.17411100  0.05269927 </div><div class='input'>
+<span class='co'># If you want to change the lag:</span>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='fu'><a href='vcov_hac.html'>NW</a></span><span class='op'>(</span><span class='fl'>3</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; (Intercept)          x1 
+#&gt;  0.19450009  0.05104156 </div><div class='input'>
+<span class='co'># Alternative way:</span>
+
+<span class='co'># -&gt; using the vcov_NW function</span>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='fu'><a href='vcov_hac.html'>vcov_NW</a></span><span class='op'>(</span>unit <span class='op'>=</span> <span class='st'>"id"</span>, time <span class='op'>=</span> <span class='st'>"period"</span>, lag <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; (Intercept)          x1 
+#&gt;  0.19450009  0.05104156 </div><div class='input'>
+<span class='co'># -------------------------|</span>
+<span class='co'># Driscoll-Kraay (DK) VCOV |</span>
+<span class='co'># -------------------------|</span>
+<span class='co'># To obtain DK VCOVs, use a formula of the form DK ~ period</span>
+
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>DK</span> <span class='op'>~</span> <span class='va'>period</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; (Intercept)          x1 
+#&gt;  0.78953790  0.03611533 </div><div class='input'>
+<span class='co'># If you want to change the lag:</span>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='fu'><a href='vcov_hac.html'>DK</a></span><span class='op'>(</span><span class='fl'>3</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>period</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; (Intercept)          x1 
+#&gt;  0.97148590  0.02841491 </div><div class='input'>
+<span class='co'># Alternative way:</span>
+
+<span class='co'># -&gt; using the vcov_DK function</span>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='fu'><a href='vcov_hac.html'>vcov_DK</a></span><span class='op'>(</span>time <span class='op'>=</span> <span class='st'>"period"</span>, lag <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; (Intercept)          x1 
+#&gt;  0.97148590  0.02841491 </div><div class='input'>
+<span class='co'># -------------------|</span>
+<span class='co'># Implicit deduction |</span>
+<span class='co'># -------------------|</span>
+<span class='co'># When the estimation contains a panel identifier, you don't need</span>
+<span class='co'># to re-write them later on</span>
+
+<span class='va'>est_panel</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base_did</span>, panel.id <span class='op'>=</span> <span class='op'>~</span><span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>)</span>
+
+<span class='co'># Both methods, NM and DK, now work automatically</span>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_panel</span>, <span class='st'>"NW"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; (Intercept)          x1 
+#&gt;  0.17411100  0.05269927 </div><div class='input'><span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_panel</span>, <span class='st'>"DK"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; (Intercept)          x1 
+#&gt;  0.78953790  0.03611533 </div><div class='input'>
+
+<span class='co'># =================================== #</span>
+<span class='co'># VCOVs robust to spatial correlation #</span>
+<span class='co'># =================================== #</span>
+
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>quakes</span><span class='op'>)</span>
+<span class='va'>est_geo</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>depth</span> <span class='op'>~</span> <span class='va'>mag</span>, <span class='va'>quakes</span><span class='op'>)</span>
+
+<span class='co'># ------------|</span>
+<span class='co'># Conley VCOV |</span>
+<span class='co'># ------------|</span>
+<span class='co'># To obtain a Conley VCOV, use a formula of the form conley(cutoff) ~ lat + lon</span>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_geo</span>, <span class='fu'><a href='vcov_conley.html'>conley</a></span><span class='op'>(</span><span class='fl'>100</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>lat</span> <span class='op'>+</span> <span class='va'>long</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; (Intercept)         mag 
+#&gt;   108.90052    19.23233 </div><div class='input'>
+<span class='co'># Alternative way:</span>
+
+<span class='co'># -&gt; using the vcov_DK function</span>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='fu'><a href='vcov_conley.html'>vcov_conley</a></span><span class='op'>(</span>lat <span class='op'>=</span> <span class='st'>"lat"</span>, lon <span class='op'>=</span> <span class='st'>"long"</span>, cutoff <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in vcov.fixest(est, vcov_conley(lat = "lat", lon = "long", cutoff = 100)): The variable 'lat' used to compute the VCOV is not in the original data set. Only variables in the data set can be used.</span></div><div class='input'>
+<span class='co'># -------------------|</span>
+<span class='co'># Implicit deduction |</span>
+<span class='co'># -------------------|</span>
+<span class='co'># By default the latitude and longitude are directly fetched in the data based</span>
+<span class='co'># on pattern matching. So you don't have to specify them.</span>
+
+<span class='co'># The following works:</span>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_geo</span>, <span class='fu'><a href='vcov_conley.html'>conley</a></span><span class='op'>(</span><span class='fl'>100</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; (Intercept)         mag 
+#&gt;   108.90052    19.23233 </div><div class='input'>
+
+<span class='co'># ======================== #</span>
+<span class='co'># Small Sample Corrections #</span>
+<span class='co'># ======================== #</span>
+
+<span class='co'># You can change the way the small sample corrections are done with the argument ssc.</span>
+<span class='co'># The argument ssc must be created by the ssc function</span>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, ssc <span class='op'>=</span> <span class='fu'><a href='ssc.html'>ssc</a></span><span class='op'>(</span>adj <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; (Intercept)          x1 
+#&gt;  0.14908629  0.05009587 </div><div class='input'>
+<span class='co'># You can add directly the call to ssc in the vcov formula.</span>
+<span class='co'># You need to add it like a variable:</span>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>iid</span> <span class='op'>~</span> <span class='fu'><a href='ssc.html'>ssc</a></span><span class='op'>(</span>adj <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; (Intercept)          x1 
+#&gt;  0.14908629  0.05009587 </div><div class='input'><span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>DK</span> <span class='op'>~</span> <span class='va'>period</span> <span class='op'>+</span> <span class='fu'><a href='ssc.html'>ssc</a></span><span class='op'>(</span>adj <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; (Intercept)          x1 
+#&gt;  0.78917195  0.03609859 </div><div class='input'>
+
 
 </div></pre>
   </div>

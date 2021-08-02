@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -115,7 +115,7 @@
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/lrberge/fixest/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -174,20 +174,20 @@ $(x, name)</pre>
 
 <span class='co'># Let's the results for the setosa species</span>
 <span class='va'>res</span><span class='op'>$</span><span class='va'>setosa</span>
-</div><div class='output co'>#&gt; Standard-errors: Standard 
+</div><div class='output co'>#&gt; Standard-errors: IID 
 #&gt; Expl. vars.: x1
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; (Intercept)  2.63900   0.310014  8.5125 3.74e-11 ***
-#&gt; x1           0.69049   0.089899  7.6807 6.71e-10 ***
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept)  2.63900   0.310014  8.5125  3.74e-11 ***
+#&gt; x1           0.69049   0.089899  7.6807  6.71e-10 ***
 #&gt; ---
 #&gt; Expl. vars.: x1 + x2
-#&gt;             Estimate Std. Error t value   Pr(&gt;|t|)    
+#&gt;             Estimate Std. Error t value  Pr(&gt;|t|))    
 #&gt; (Intercept) 2.303700   0.385294  5.9792 2.8900e-07 ***
 #&gt; x1          0.667416   0.090356  7.3865 2.1300e-09 ***
 #&gt; x2          0.283419   0.197224  1.4370 1.5733e-01    
 #&gt; ---
 #&gt; Expl. vars.: x1 + x2 + x3
-#&gt;             Estimate Std. Error  t value    Pr(&gt;|t|)    
+#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|))    
 #&gt; (Intercept) 2.351900   0.392868 5.986500 3.03000e-07 ***
 #&gt; x1          0.654835   0.092447 7.083300 6.83000e-09 ***
 #&gt; x2          0.237560   0.208019 1.142000 2.59359e-01    
@@ -203,7 +203,7 @@ $(x, name)</pre>
 #&gt; x2                                  0.7356*** (0.1248) 0.9083*** (0.1654)
 #&gt; x3                                                       -0.6792 (0.4354)
 #&gt; ________________ __________________ __________________ __________________
-#&gt; S.E. type                  Standard           Standard           Standard
+#&gt; S.E. type                       IID                IID                IID
 #&gt; Observations                     50                 50                 50
 #&gt; R2                          0.27658            0.58413            0.60503
 #&gt; Adj. R2                     0.26151            0.56644            0.57927</div><div class='input'>

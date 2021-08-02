@@ -71,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
@@ -274,7 +274,7 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="coeftable.html">coeftable()</a></code> <code><a href="coeftable.html">ctable()</a></code> <code><a href="coeftable.html">pvalue()</a></code> <code><a href="coeftable.html">tstat()</a></code> <code><a href="coeftable.html">se()</a></code> </p>
+          <p><code><a href="coeftable.html">coeftable()</a></code> <code><a href="coeftable.html">pvalue()</a></code> <code><a href="coeftable.html">tstat()</a></code> <code><a href="coeftable.html">se()</a></code> </p>
         </td>
         <td><p>Obtain various statistics from an estimation</p></td>
       </tr><tr>
@@ -323,15 +323,27 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="dof.html">dof()</a></code> <code><a href="dof.html">setFixest_dof()</a></code> <code><a href="dof.html">getFixest_dof</a></code> </p>
+          <p><code><a href="ssc.html">ssc()</a></code> <code><a href="ssc.html">setFixest_ssc()</a></code> <code><a href="ssc.html">getFixest_ssc</a></code> </p>
         </td>
-        <td><p>Type of degree of freedom in fixest summary</p></td>
+        <td><p>Type of degree of freedom in <code>fixest</code> VCOVs</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="setFixest_se.html">setFixest_se()</a></code> <code><a href="setFixest_se.html">getFixest_se()</a></code> </p>
+          <p><code><a href="vcov_cluster.html">vcov_cluster()</a></code> </p>
         </td>
-        <td><p>Sets the default type of standard errors to be used</p></td>
+        <td><p>Clustered VCOV</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="vcov_conley.html">vcov_conley()</a></code> <code><a href="vcov_conley.html">conley()</a></code> </p>
+        </td>
+        <td><p>Conley VCOV</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="vcov_hac.html">vcov_DK()</a></code> <code><a href="vcov_hac.html">vcov_NW()</a></code> <code><a href="vcov_hac.html">NW()</a></code> <code><a href="vcov_hac.html">newey_west()</a></code> <code><a href="vcov_hac.html">DK()</a></code> <code><a href="vcov_hac.html">driscoll_kraay()</a></code> </p>
+        </td>
+        <td><p>HAC VCOVs</p></td>
       </tr>
     </tbody><tbody>
       <tr>
@@ -691,12 +703,6 @@
       <tr>
         
         <td>
-          <p><code><a href="dof.html">dof()</a></code> <code><a href="dof.html">setFixest_dof()</a></code> <code><a href="dof.html">getFixest_dof</a></code> </p>
-        </td>
-        <td><p>Type of degree of freedom in fixest summary</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="etable.html">etable()</a></code> <code><a href="etable.html">setFixest_etable()</a></code> <code><a href="etable.html">getFixest_etable()</a></code> <code><a href="etable.html">esttable()</a></code> <code><a href="etable.html">esttex()</a></code> </p>
         </td>
         <td><p>Estimations table (export the results of multiples estimations to a DF or to Latex)</p></td>
@@ -745,9 +751,15 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="setFixest_se.html">setFixest_se()</a></code> <code><a href="setFixest_se.html">getFixest_se()</a></code> </p>
+          <p><code><a href="setFixest_vcov.html">setFixest_vcov()</a></code> <code><a href="setFixest_vcov.html">getFixest_vcov()</a></code> </p>
         </td>
         <td><p>Sets the default type of standard errors to be used</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="ssc.html">ssc()</a></code> <code><a href="ssc.html">setFixest_ssc()</a></code> <code><a href="ssc.html">getFixest_ssc</a></code> </p>
+        </td>
+        <td><p>Type of degree of freedom in <code>fixest</code> VCOVs</p></td>
       </tr>
     </tbody><tbody>
       <tr>
