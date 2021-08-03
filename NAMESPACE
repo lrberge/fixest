@@ -123,9 +123,9 @@ importFrom(stats, model.matrix, sigma, deviance, weights, terms,
              nobs, AIC, BIC, update, predict, fitted, fitted.values,
 			  resid, residuals, logLik, coef, coefficients, lag,
 			  confint, vcov, binomial, setNames, complete.cases, pchisq, pf,
-			  aggregate, cancor, rnorm)
+			  aggregate, cancor, rnorm, median)
 
-importFrom(utils, combn, head, tail, packageVersion)
+importFrom(utils, combn, head, tail, packageVersion, object.size)
 
 importFrom(Rcpp, evalCpp)
 

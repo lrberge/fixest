@@ -96,7 +96,7 @@ base = iris
 names(base) = c("y", "x1", "x2", "x3", "species")
 
 # I set the default SE to "iid" for comparability with Stata
-setFixest_se(all = "iid")
+setFixest_vcov(all = "iid")
 
 res = fepois(y ~ x1 + x2, base)
 meffect(res)

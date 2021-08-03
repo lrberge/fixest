@@ -596,7 +596,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 
                                 if(length(var_id) == 0){
                                     if(is.null(msg)){
-                                        msg = setnames(nm = "the variable names of the data set",
+                                        msg = setNames(nm = "the variable names of the data set",
                                                        paste0("no match was found for ", vcov_var_value$label))
                                     }
                                 } else if(length(var_id) == 1){
@@ -604,7 +604,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
                                     vname = data_names[var_id]
                                     break
                                 } else {
-                                    msg = setnames(nm = "the variable names of the data set",
+                                    msg = setNames(nm = "the variable names of the data set",
                                                    paste0("several matches were found: ",
                                                           enumerate_items(data_names[var_id], "quote.enum i")))
                                 }

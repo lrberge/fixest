@@ -65,7 +65,7 @@
 #'
 #' The following vignette: \href{https://lrberge.github.io/fixest/articles/standard_errors.html}{On standard-errors} describes in details how the standard-errors are computed in \code{fixest} and how you can replicate standard-errors from other software.
 #'
-#' You can use the functions \code{\link[fixest]{setFixest_se}} and \code{\link[fixest:ssc]{setFixest_ssc}} to permanently set the way the standard-errors are computed.
+#' You can use the functions \code{\link[fixest]{setFixest_vcov}} and \code{\link[fixest:ssc]{setFixest_ssc}} to permanently set the way the standard-errors are computed.
 #'
 #' @section Instrumental variables:
 #'
