@@ -234,10 +234,10 @@ Here is an example that will shortly be explained:
 
 ```{r}
 fitstat_register(type = "p_s", alias = "pvalue (standard)",
-                 fun = function(x) pvalue(x, se = "s")["Solar.R"])
+                 fun = function(x) pvalue(x, se = "iid")["Solar.R"])
 
 fitstat_register(type = "p_h", alias = "pvalue (Heterosk.)",
-                 fun = function(x) pvalue(x, se = "h")["Solar.R"])
+                 fun = function(x) pvalue(x, se = "hetero")["Solar.R"])
 
 fitstat_register(type = "p_day", alias = "pvalue (Day)",
                  fun = function(x) pvalue(x, cluster = "Day")["Solar.R"])
