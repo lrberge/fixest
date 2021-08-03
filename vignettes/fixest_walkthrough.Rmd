@@ -379,7 +379,7 @@ We now cover these two methods in turn. Helper functions can be seen as supercha
 ```{r}
 feols(y ~ x1 | period, base_did, NW(2) ~ id + period)
 
-feols(depth ~ mag, quakes, conley(100, distance = "spherical"))
+feols(depth ~ mag, quakes, conley(200, distance = "spherical"))
 ```
 In the first example, we use the helper function `NW()` directly in the formula, exactly where the VCOV type would be. The first (and only) argument of `NW()` is the number of lags. On the right hand side of the formula, we give the variables used to identify the unit and the time variables, as usual.
 
@@ -390,7 +390,7 @@ There are also dedicated VCOV functions which work in a more standard way. Let's
 feols(y ~ x1 | period, base_did, vcov_NW("id", "period", lag = 2))
 
 feols(depth ~ mag, quakes, vcov_conley(lat = "lat", lon = "long", 
-                                       cutoff = 100, distance = "spherical"))
+                                       cutoff = 200, distance = "spherical"))
 ```
 
 Contrary to the helper functions: a) these functions cannot be used in a formula, b) they accept the variables to compute the SEs as arguments. They provide an alternative way to specify the VCOV.
@@ -398,7 +398,7 @@ Contrary to the helper functions: a) these functions cannot be used in a formula
 
 ## Small sample correction
 
-The value of the SEs can (sometimes quite surprisingly) be impacted by the type of small sample correction (SSC) applied. In `fixest` you can monitor the SSC with the function `ssc()`. Details on how the SSC are computed can be found in the dedicated vignette: [On standard-errors](https://lrberge.github.io/fixest/articles/standard_errors.html) -- here we detail only the implementation. 
+The value of the SEs can (sometimes quite surprisingly) be impacted by the type of small sample correction (SSC) applied. In `fixest` you can monitor the SSC with the function `ssc()`. Details on how the SSCs are computed can be found in the dedicated vignette: [On standard-errors](https://lrberge.github.io/fixest/articles/standard_errors.html) -- here we detail only the implementation. 
 
 Most `fixest` functions accept an `ssc` argument that you can readily use. Here's an example:
 ```{r}

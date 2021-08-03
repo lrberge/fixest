@@ -27,6 +27,8 @@
     
     * accepts functions
     
+    * see the documentation in the [vignette](https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1)
+    
  - New built-in VCOVs:
 
     * Newey-West (1987) for serially correlated errors

@@ -264,7 +264,7 @@ In case you use external export tools, here are some tips.
 
 Multiple estimations, like the object `est` in the previous examples, are a bit special and `broom` methods can't apply directly. To export them, you first need to coerce the results into a list: by simply using `as.list(est)`.
 
-By default in `fixest` the estimations are separated from the calculation of the VCOV matrices. That's not a problem when using `etable` since, after providing the argument `se` or `cluster`, all VCOVs are calculated at once. Using other tools for exportation requires a call to `summary` for each model to compute the appropriate standard-errors. But this process can also be automatised. The function `.l()` can be used to coerce several `fixest` objects to which `summary` can then be applied, for example: 
+By default in `fixest` the estimations are separated from the calculation of the VCOV matrices. That's not a problem when using `etable` since, after providing the argument `se` or `cluster`, all VCOVs are calculated at once. Using other tools for exportation requires a call to `summary` for each model to compute the appropriate standard-errors. But this process can also be automatized. The function `.l()` can be used to coerce several `fixest` objects to which `summary` can then be applied, for example: 
 
 ```{r, eval = FALSE}
 summary(.l(est, est_slopes), cluster = ~ Month)
