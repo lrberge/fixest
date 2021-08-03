@@ -600,7 +600,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
         } else if(type == "theta"){
             isNegbin = x$method == "fenegbin" || (x$method %in% c("femlm", "feNmlm") && x$family == "negbin")
             if(isNegbin){
-                theta = coef(x)[".theta"]
+                theta = x$coefficients[".theta"]
                 names(theta) = "Overdispersion"
             } else {
                 theta = NA
