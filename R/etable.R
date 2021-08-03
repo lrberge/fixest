@@ -324,7 +324,7 @@
 #' # Method 2: using a list in the argument 'vcov'
 #'
 #' est_bis = feols(Ozone ~ Solar.R + Wind + Temp | Month, data = aq)
-#' etable(list(est, est_bis), vcov = list("hetero", ~ Month))
+#' etable(est, est_bis, vcov = list("hetero", ~ Month))
 #'
 #' # When you have only one model, this model is replicated
 #' # along the elements of the vcov list.
@@ -332,6 +332,11 @@
 #'
 #' #
 #' # Method 3: Using "each" or "times" in vcov
+#'
+#' # If the first element of the list in 'vcov' is "each" or "times",
+#' # then all models will be replicated and all the VCOVs will be
+#' # applied to each model. The order in which they are replicated
+#' # are governed by the each/times keywords.
 #'
 #'
 #' # each
@@ -905,55 +910,6 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     if(n_dots == 0) stop_up("Not any estimation as argument.")
 
 
-    IS_MULTI_CLUST = FALSE
-    if(!missnull(vcov) && identical(class(vcov), "list")){
-        IS_MULTI_CLUST = TRUE
-
-        vcov_1 = vcov[[1]]
-
-        is_rep = identical(vcov_1, "times") || identical(vcov_1, "each")
-        if(is_rep || n_dots == 1){
-
-            if(is_rep){
-                vcov[[1]] = NULL
-            }
-
-            n_vcov = length(vcov)
-            if(n_vcov == 0){
-                stop_up("The argument 'vcov' is not valid.")
-            }
-
-            n_total = n_dots * n_vcov
-
-            if(vcov_1 == "times"){
-                id_mod = rep(1:n_dots, n_vcov)
-                id_vcov = rep(1:n_vcov, each = n_dots)
-            } else {
-                id_mod = rep(1:n_dots, each = n_vcov)
-                id_vcov = rep(1:n_vcov, n_dots)
-            }
-
-            mega_dots_call = vector("list", n_total)
-            mega_models = vector("list", n_total)
-            mega_vcov = vector("list", n_total)
-
-            for(i in 1:n_total){
-                mega_dots_call[[i]] = dots_call[[id_mod[i]]]
-                mega_models[[i]] = dots[[id_mod[i]]]
-                mega_vcov[[i]] = vcov[[id_vcov[i]]]
-            }
-
-            dots_call = mega_dots_call
-            dots = mega_models
-            n_dots = length(dots)
-            vcov = mega_vcov
-
-        } else {
-            check_value(vcov, "list len(value)", .value = n_dots, .message = "If 'vcov' is a list, it must be of the same length as the number of models.")
-        }
-    }
-
-
     all_models = list()
     model_names = list()
     auto_subtitles = list()
@@ -1034,6 +990,81 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     if(length(all_models)==0) stop_up("Not any 'fixest' model as argument!")
 
     n_models = length(all_models)
+
+
+    IS_MULTI_VCOV = FALSE
+    if(!missnull(vcov) && identical(class(vcov), "list")){
+        IS_MULTI_VCOV = TRUE
+
+        vcov_1 = vcov[[1]]
+
+        is_rep = identical(vcov_1, "times") || identical(vcov_1, "each")
+        if(is_rep || n_models == 1){
+
+            if(is_rep){
+                vcov[[1]] = NULL
+            }
+
+            n_vcov = length(vcov)
+            if(n_vcov == 0){
+                stop_up("The argument 'vcov' is not valid.")
+            }
+
+            n_total = n_models * n_vcov
+
+            if(vcov_1 == "times"){
+                id_mod = rep(1:n_models, n_vcov)
+                id_vcov = rep(1:n_vcov, each = n_models)
+            } else {
+                id_mod = rep(1:n_models, each = n_vcov)
+                id_vcov = rep(1:n_vcov, n_models)
+            }
+
+            mega_model_names = vector("list", n_total)
+            mega_models = vector("list", n_total)
+            mega_vcov = vector("list", n_total)
+
+            for(i in 1:n_total){
+                m_name = model_names[[id_mod[i]]]
+                if(length(m_name) == 0 || m_name == ""){
+                    mega_model_names[[i]] = paste0("model ", id_mod[i], ".", id_vcov[i])
+                } else {
+                    mega_model_names[[i]] = m_name
+                }
+
+                mega_models[[i]] = all_models[[id_mod[i]]]
+                mega_vcov[[i]] = vcov[[id_vcov[i]]]
+            }
+
+            if(length(auto_subtitles) > 0){
+                # I need to find out the new indexes... pain in the neck....
+                if(vcov_1 == "times"){
+                    for(i in seq_along(auto_subtitles)){
+                        index = auto_subtitles[[i]]
+                        n_index = length(index)
+                        auto_subtitles[[i]] = rep(index, n_vcov) + n_models * rep(0:(n_vcov-1), each = n_index)
+                    }
+                } else {
+                    for(i in seq_along(auto_subtitles)){
+                        index = auto_subtitles[[i]]
+                        new_index = (index - 1) * n_vcov + 1
+                        n_index = length(index)
+
+                        auto_subtitles[[i]] = rep(new_index, each = n_vcov) + rep(1:n_vcov, n_index)
+                    }
+                }
+            }
+
+            model_names = mega_model_names
+            all_models = mega_models
+            n_models = length(all_models)
+            vcov = mega_vcov
+
+        } else {
+            check_value(vcov, "list len(value)", .value = n_models, .message = "If 'vcov' is a list, it must be of the same length as the number of models.")
+        }
+    }
+
 
     auto_subtitles_clean = list()
     if(length(auto_subtitles) > 0){
@@ -1118,7 +1149,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
             if(is.function(vcov)){
                 x = summary(all_models[[m]], vcov = vcov, stage = stage, .vcov_args = .vcov_args, vcov_name = vcov_name, agg = agg)
             } else {
-                if(IS_MULTI_CLUST){
+                if(IS_MULTI_VCOV){
                     x = summary(all_models[[m]], vcov = vcov[[m]], ssc = ssc, stage = stage, agg = agg)
                 } else {
                     x = summary(all_models[[m]], vcov = vcov, ssc = ssc, stage = stage, agg = agg)
@@ -3944,14 +3975,6 @@ extraline_extractor = function(x, name = NULL, tex = FALSE){
 
     el_tmp
 }
-
-
-
-
-
-
-
-
 
 
 

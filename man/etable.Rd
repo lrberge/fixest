@@ -564,7 +564,7 @@ etable(list(s1, s2, s3, s4))
 # Method 2: using a list in the argument 'vcov'
 
 est_bis = feols(Ozone ~ Solar.R + Wind + Temp | Month, data = aq)
-etable(list(est, est_bis), vcov = list("hetero", ~ Month))
+etable(est, est_bis, vcov = list("hetero", ~ Month))
 
 # When you have only one model, this model is replicated
 # along the elements of the vcov list.
@@ -572,6 +572,11 @@ etable(est, vcov = list("hetero", ~ Month))
 
 #
 # Method 3: Using "each" or "times" in vcov
+
+# If the first element of the list in 'vcov' is "each" or "times",
+# then all models will be replicated and all the VCOVs will be
+# applied to each model. The order in which they are replicated
+# are governed by the each/times keywords.
 
 
 # each
