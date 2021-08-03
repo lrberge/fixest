@@ -282,9 +282,9 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' @inheritParams aggregate.fixest
 #'
 #' @method summary fixest
-#' @param vcov Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from \code{\link[fixest]{vcov_cluster}}, \code{\link[fixest:vcov_hac]{vcov_NW}}, \code{\link[fixest:vcov_hac]{NW}}, \code{\link[fixest:vcov_hac]{vcov_DK}}, \code{\link[fixest:vcov_hac]{DK}}, \code{\link[fixest]{vcov_conley}} and \code{\link[fixest:vcov_conley]{conley}}. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances.
+#' @param vcov Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from \code{\link[fixest]{vcov_cluster}}, \code{\link[fixest:vcov_hac]{vcov_NW}}, \code{\link[fixest:vcov_hac]{NW}}, \code{\link[fixest:vcov_hac]{vcov_DK}}, \code{\link[fixest:vcov_hac]{DK}}, \code{\link[fixest]{vcov_conley}} and \code{\link[fixest:vcov_conley]{conley}}. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the `vcov` documentation in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.
 #' @param se Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "iid"}. Note that this argument is deprecated, you should use \code{vcov} instead.
-#' @param cluster Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1", "var2")]}, \code{cluster = c("var1", "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster). You can interact two variables using \code{^} with the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.
+#' @param cluster Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1", "var2")]}, \code{cluster = c("var1", "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as fixed-effects in the estimation, you can leave it blank with \code{vcov = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] fixed-effect). You can interact two variables using \code{^} with the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.
 #' @param stage Can be equal to \code{2} (default), \code{1}, \code{1:2} or \code{2:1}. Only used if the object is an IV estimation: defines the stage to which \code{summary} should be applied. If \code{stage = 1} and there are multiple endogenous regressors or if \code{stage} is of length 2, then an object of class \code{fixest_multi} is returned.
 #' @param object A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
 #' @param ssc An object of class \code{ssc.type} obtained with the function \code{\link[fixest]{ssc}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{ssc}} for this argument. The arguments and defaults of the function \code{\link[fixest]{ssc}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "conventional"}, \code{t.df = "conventional"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{ssc}} for details.
@@ -5759,157 +5759,6 @@ extract_fe_slope = function(t){
     fe_all = gsub("\\[.+", "", t)
 
     list(fixef_vars=fixef_vars, slope_vars=slope_vars, slope_fe=slope_fe, slope_terms=slope_terms, fe_all=fe_all)
-}
-
-format_se_type = function(x, width, by = FALSE){
-    # we make 'nice' se types
-    # format_se_type("Two-way (species & fe2)", 10, by = TRUE)
-
-    if(!grepl("\\(", x)){
-        # means not clustered
-        if(nchar(x) <= width) return(x)
-
-        # We reduce each word to 3 letters (if needed)
-        x_split = c("$", strsplit(x, "")[[1]]) # we add a non-letter flag, marking the beginning
-        x_split_new = x_split
-        end_word = length(x_split)
-        non_letter_flag = grepl("[^[:alpha:]]", x_split) * (1:end_word)
-        letter_flag = grepl("[[:alpha:]]", x_split) * (1:end_word)
-        while(TRUE){
-            start_word = which.max(non_letter_flag[1:end_word]) + 1
-            # we truncate
-            word_length = end_word - start_word + 1
-            slack = length(x_split_new) - (width + 1)
-            letters_to_rm = min(word_length - 4, slack)
-            if(letters_to_rm > 0){
-                i_max = end_word - letters_to_rm
-                x_split_new = x_split_new[-((i_max+1):end_word)]
-                x_split_new[i_max] = "."
-            }
-
-            lf = letter_flag[1:(start_word - 1)]
-            if(all(lf == 0)) break
-
-            # new end_word
-            end_word = which.max(lf)
-        }
-
-        return(paste(x_split_new[-1], collapse = ""))
-    } else if(x == "NA (not-available)"){
-        return("not available")
-    }
-
-    # Now the FEs
-    all_fe = gsub(".+\\((.+)\\)", "\\1", x)
-
-    all_fe_split = gsub(" ", "", strsplit(all_fe, "&")[[1]])
-    n_fe = length(all_fe_split)
-    n_char = nchar(all_fe_split)
-
-    if(n_fe == 1 && !grepl("\\^", all_fe_split[1])){
-        if(by){
-            se_formatted = paste0("by: ", all_fe_split[1])
-        } else {
-            se_formatted = paste0("1-way: ", all_fe_split[1])
-        }
-
-        if(nchar(se_formatted) > width){
-            se_formatted = paste0(substr(se_formatted, 1, width - 2), "..")
-        }
-        return(se_formatted)
-    }
-
-    nb = ifelse(by, 3, 6)
-
-    if(width < nb + sum(n_char) + (n_fe-1) * 3){
-        qui = n_char > 5
-        for(i in which(qui)){
-            if(grepl("\\^", all_fe_split[i])){
-                single_split = strsplit(all_fe_split[i], "\\^")[[1]]
-                qui_bis = nchar(single_split) > 4
-                single_split[qui_bis] = paste0(substr(single_split[qui_bis], 1, 3), ".")
-                all_fe_split[i] = paste(single_split, collapse = "^")
-            } else {
-                all_fe_split[i] = paste0(substr(all_fe_split[i], 1, 4), ".")
-            }
-        }
-    }
-
-    if(by){
-        se_formatted = paste0("by: ", paste(all_fe_split, collapse = " & "))
-    } else {
-        se_formatted = paste0(n_fe, "-way: ", paste(all_fe_split, collapse = " & "))
-    }
-
-
-    # NOTA:
-    # we do not trim if still too large because the SE-type IS informative!
-    # A table without that information is useless, it's trimmed enough already
-
-    # if(nchar(se_formatted) > width){
-    #     # se_formatted = gsub("-way: ", "way: ", se_formatted)
-    #     se_formatted = paste0(substr(se_formatted, 1, width - 2), "..")
-    # }
-
-    se_formatted
-}
-
-format_se_type_latex = function(x, dict = c(), inline = FALSE){
-    # we make 'nice' se types
-
-    if(!grepl("\\(", x)){
-        # means not clustered
-        # we escape all
-        return(escape_all(x))
-    }
-
-    # Now the FEs
-    main_type = gsub(" \\(.*", "", x)
-    all_fe = gsub(".+\\((.+)\\)", "\\1", x)
-
-    all_fe_split = gsub(" ", "", strsplit(all_fe, "&")[[1]])
-    n_fe = length(all_fe_split)
-
-    # Renaming the FEs
-
-    all_fe_format = c()
-    for(i in 1:length(all_fe_split)){
-        fe = all_fe_split[i]
-
-        if(fe %in% names(dict)){
-            all_fe_format[i] = dict[fe]
-        } else if(grepl("\\^", fe)){
-            fe_split = strsplit(fe, "\\^")[[1]]
-            who = fe_split %in% names(dict)
-            fe_split[who] = dict[fe_split[who]]
-            all_fe_format[i] = paste(fe_split, collapse = "-")
-        } else {
-            all_fe_format[i] = fe
-        }
-    }
-
-    fe_format = paste(all_fe_format, collapse = " \\& ")
-
-    # We add some flexibility: anticipation of more VCOV types
-    main_type_dict = c("Clustered" = "Clustered", "Two-way" = "Clustered",
-                       "Three-way" = "Clustered", "Four-way" = "Clustered")
-    main_type = main_type_dict[main_type]
-
-
-    if(inline){
-        # The fact that it is clustered is deduced
-        se_formatted = fe_format
-    } else {
-        se_formatted = paste0(main_type, " (", fe_format, ")")
-    }
-
-    escape_latex(se_formatted)
-}
-
-tex_star = function(x){
-    qui = nchar(x) > 0
-    x[qui] = paste0("$^{", x[qui], "}$")
-    x
 }
 
 deparse_long = function(x){
