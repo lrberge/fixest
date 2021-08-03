@@ -131,22 +131,41 @@ test = function(x, y, type = "=", tol = 1e-6){
 chunk = function(x) cat(toupper(x), "\n\n")
 
 
-run_test = function(chunk){
+run_test = function(chunk, from){
     test_code = readLines("tests/fixest_tests.R")[-(1:17)]
 
-    if(!missing(chunk)){
+    if(!missing(chunk) || !missing(from)){
+
         qui = which(grepl("^chunk\\(", test_code))
         all_chunks = test_code[qui]
         chunk_names = tolower(gsub(".+\\(\"|\".*", "", all_chunks))
-        check_value_plus(chunk, "multi match | integer vector no na", .choices = chunk_names)
-        if(is.numeric(chunk)){
-            if(any(chunk > length(qui))){
-                stop("There are maximum ", length(qui), " chunks.")
+        n_chunks = length(qui)
+
+        if(!missing(from)){
+            check_value_plus(from, "match | integer scalar no na", .choices = chunk_names)
+
+            if(is.numeric(from)){
+                if(any(from > n_chunks)){
+                    stop("There are maximum ", n_chunks, " chunks.")
+                }
+                chunk_select = from:n_chunks
+            } else {
+                chunk_select = which(chunk_names %in% from):n_chunks
             }
-            chunk_select = sort(unique(chunk))
+
         } else {
-            chunk_select = which(chunk_names %in% chunk)
+            check_value_plus(chunk, "multi match | integer vector no na", .choices = chunk_names)
+
+            if(is.numeric(chunk)){
+                if(any(chunk > n_chunks)){
+                    stop("There are maximum ", n_chunks, " chunks.")
+                }
+                chunk_select = sort(unique(chunk))
+            } else {
+                chunk_select = which(chunk_names %in% chunk)
+            }
         }
+
 
         qui = c(qui, length(test_code))
 
