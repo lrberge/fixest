@@ -39,8 +39,8 @@ femlm(
 fenegbin(
   fml,
   data,
-  theta.init,
   vcov,
+  theta.init,
   start = 0,
   fixef,
   fixef.rm = "perfect",

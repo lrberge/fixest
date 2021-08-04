@@ -286,9 +286,9 @@ Note however that the interpretation of the fixed-effects must be taken with ext
 
 # The vcov argument 
 
-The version 0.10.0 of `fixest` introduced the argument `vcov`. This argument is highly versatile and single-handedly manages how the standard-errors are computed. This argument can be many things, so bear with me, and now, let's start trying to describe it!
+The version 0.10.0 of `fixest` introduced the argument `vcov`. This argument is highly versatile and single-handedly manages how the standard-errors are computed (note that you can find many example in [summary.fixest](https://lrberge.github.io/fixest/reference/summary.fixest.html#examples) help pages). This argument can be many things, so bear with me, and now, let's start trying to describe it!
 
-## Basics
+## Basics: main calls and shortcuts
 
 So far (version 0.10.0), six types of standard-errors can be computed, here are their keywords and a brief description:
 
@@ -304,7 +304,7 @@ So far (version 0.10.0), six types of standard-errors can be computed, here are 
  
  - `conley`: Conley (1999) SEs for cross-sections, assumes spatially correlated errors.
  
- The most basic uses of the `vcov` argument are:
+The most basic uses of the `vcov` argument are:
  
   - with a character scalar: `vcov = "vcov_type"` (ex: `vcov = "hetero"`).
   
@@ -324,6 +324,7 @@ Here we queried Newey-West SEs and provided the panel identifiers in the right o
 ```{r, error=TRUE}
 summary(est, "newey_west")
 ```
+
 But, huh what does the error message says? That the `time` variable can be deduced? Indeed, that's the thing: the algorithm tries hard to provide sensible default values for the user.
 Let's now try with panel identifiers set at estimation time:
 ```{r}

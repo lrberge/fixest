@@ -94,7 +94,7 @@
       <h1 data-toc-skip>Fast Fixed-Effects Estimation: Short introduction</h1>
                         <h4 class="author">Laurent Berge and Grant McDermott</h4>
             
-            <h4 class="date">2021-08-03</h4>
+            <h4 class="date">2021-08-04</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/fixest_walkthrough.Rmd"><code>vignettes/fixest_walkthrough.Rmd</code></a></small>
       <div class="hidden name"><code>fixest_walkthrough.Rmd</code></div>
@@ -389,6 +389,12 @@
 <td align="left">1,293,786.1</td>
 <td align="left">151,977.2</td>
 </tr>
+<tr class="even">
+<td align="left">Over-dispersion</td>
+<td align="left">–</td>
+<td align="left">0.54877</td>
+<td align="left">–</td>
+</tr>
 </tbody>
 </table>
 <p>We added the argument <code>vcov="twoway"</code> to cluster the standard-errors for all estimations. As can be seen this function gives an overview of the estimates and standard-errors, as well as some quality of fit measures. The argument <code>subtitles</code> is used to add information on each estimation column.</p>
@@ -625,10 +631,10 @@
 <div id="the-vcov-argument" class="section level1">
 <h1 class="hasAnchor">
 <a href="#the-vcov-argument" class="anchor"></a>The vcov argument</h1>
-<p>The version 0.10.0 of <code>fixest</code> introduced the argument <code>vcov</code>. This argument is highly versatile and single-handedly manages how the standard-errors are computed. This argument can be many things, so bear with me, and now, let’s start trying to describe it!</p>
-<div id="basics" class="section level2">
+<p>The version 0.10.0 of <code>fixest</code> introduced the argument <code>vcov</code>. This argument is highly versatile and single-handedly manages how the standard-errors are computed (note that you can find many example in <a href="https://lrberge.github.io/fixest/reference/summary.fixest.html#examples">summary.fixest</a> help pages). This argument can be many things, so bear with me, and now, let’s start trying to describe it!</p>
+<div id="basics-main-calls-and-shortcuts" class="section level2">
 <h2 class="hasAnchor">
-<a href="#basics" class="anchor"></a>Basics</h2>
+<a href="#basics-main-calls-and-shortcuts" class="anchor"></a>Basics: main calls and shortcuts</h2>
 <p>So far (version 0.10.0), six types of standard-errors can be computed, here are their keywords and a brief description:</p>
 <ul>
 <li><p><code>iid</code>: assumes that errors are identically and independently distributed.</p></li>
@@ -1362,7 +1368,7 @@
 <span class="co"># Accessing them</span>
 <span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">..ctrl</span><span class="op">)</span>
 <span class="co">#&gt; y ~ x1 + poly(x2, 2) + poly(x3, 2)</span>
-<span class="co">#&gt; &lt;environment: 0x000000001628fa20&gt;</span>
+<span class="co">#&gt; &lt;environment: 0x000000001b9b5b18&gt;</span>
 
 <span class="co"># Definition at run time</span>
 <span class="va">vars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x2"</span>, <span class="st">"x2^2"</span>, <span class="st">"x3"</span><span class="op">)</span>
@@ -1370,11 +1376,11 @@
   <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">..ctrl</span>, ..ctrl <span class="op">=</span> <span class="va">vars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
 <span class="op">}</span>
 <span class="co">#&gt; y ~ x1 + x2</span>
-<span class="co">#&gt; &lt;environment: 0x00000000223ec9b0&gt;</span>
+<span class="co">#&gt; &lt;environment: 0x000000001670dd38&gt;</span>
 <span class="co">#&gt; y ~ x1 + x2 + x2^2</span>
-<span class="co">#&gt; &lt;environment: 0x0000000022188918&gt;</span>
+<span class="co">#&gt; &lt;environment: 0x000000001662dc78&gt;</span>
 <span class="co">#&gt; y ~ x1 + x2 + x2^2 + x3</span>
-<span class="co">#&gt; &lt;environment: 0x0000000022ef4e18&gt;</span></code></pre></div>
+<span class="co">#&gt; &lt;environment: 0x000000001637ebb8&gt;</span></code></pre></div>
 <p>Macro variables must start with two dots. As seen in the example, once set globally they can be directly accessed with <code>xpd</code>. In the example, <code>xpd</code> redefines the formula at run-time by having a character vector as input.</p>
 <p>All <code>fixest</code> estimations call <code>xpd</code> internally if appropriate. This means that the following code works just fine:</p>
 <div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
@@ -1398,7 +1404,7 @@
 <span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">longley</span><span class="op">)</span>
 <span class="co">#&gt; Armed.Forces ~ Population + GNP.deflator + GNP + Unemployed + </span>
 <span class="co">#&gt;     Employed</span>
-<span class="co">#&gt; &lt;environment: 0x000000001e890b90&gt;</span></code></pre></div>
+<span class="co">#&gt; &lt;environment: 0x0000000022f9f428&gt;</span></code></pre></div>
 <p>Again, since <code>xpd</code> is called internally, the following works:</p>
 <div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, <span class="va">longley</span><span class="op">)</span>
