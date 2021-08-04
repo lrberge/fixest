@@ -6058,7 +6058,7 @@ fixest_fml_rewriter = function(fml){
         if(isPower){
             # rhs actually also contains the LHS
             rhs_text = deparse_long(fml_parts[[1]])
-            rhs_text = gsub("([\\.[:alpha:]][[:alnum:]\\._]*\\^[[:digit:]]+)", "I(\\1)", rhs_text)
+            rhs_text = gsub("([\\.[:alpha:]][[:alnum:]\\._]*\\^[[:digit:]]+)( |$)", "I(\\1)\\2", rhs_text)
 
             if(grepl("\\^[[:alpha:]]", rhs_text)){
                 stop_up("The operator '^' between variables can be used only in the fixed-effects part of the formula. Otherwise, please use ':' instead.")
@@ -6154,19 +6154,35 @@ fixest_fml_rewriter = function(fml){
         fml_new = merge_fml(fml_linear, fml_fixef, fml_iv)
 
     } else if(isPower){
-        # It's faster not to call terms
-        fml_text = gsub("([\\.[:alpha:]][[:alnum:]\\._]*\\^[[:digit:]]+)", "I(\\1)", fml_text)
+        # This is damn costly.... but I have to deal with corner cases....
+        # I think I should do that at the C level, this will be much faster I guess
 
-        if(grepl("\\^[[:alpha:]]", fml_text)){
-            # We check if there is one ^ specifically in the RHS
+        # We only take care of the RHS (we don't care about the LHS)
+        no_lhs_text = gsub("[^~]+~", "", fml_text)
+        no_lhs_text = gsub("([\\.[:alpha:]][[:alnum:]\\._]*\\^[[:digit:]]+)( |$)", "I(\\1)\\2", no_lhs_text)
+
+        if(grepl("\\^[[:alpha:]]", no_lhs_text)){
+            # We check if there is one ^ specifically in the RHS or in the IV part
+            fml_parts = fml_split(fml, raw = TRUE)
+            n_parts = length(fml_parts)
+
             rhs_txt = fml_split(fml, i = 1, text = TRUE)
 
             if(grepl("\\^[[:alpha:]]", rhs_txt)){
                 stop_up("The operator '^' between variables can be used only in the fixed-effects part of the formula. Otherwise, please use ':' instead.")
             }
+
+            if(is_fml_inside(fml_parts[[n_parts]])){
+                iv_txt = fml_split(fml, i = n_parts, text = TRUE)
+
+                if(grepl("\\^[[:alpha:]]", iv_txt)){
+                    stop_up("The operator '^' between variables can be used only in the fixed-effects part of the formula. Otherwise, please use ':' instead.")
+                }
+            }
+
         }
 
-        fml_new = as.formula(fml_text)
+        fml_new = as.formula(paste0(gsub("~.+", "", fml_text), "~", no_lhs_text))
 
     } else {
         res = list(fml = fml, isPanel = FALSE)
