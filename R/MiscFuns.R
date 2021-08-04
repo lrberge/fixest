@@ -6163,7 +6163,7 @@ fixest_fml_rewriter = function(fml){
 
         # We only take care of the RHS (we don't care about the LHS)
         no_lhs_text = gsub("[^~]+~", "", fml_text)
-        no_lhs_text = gsub("(?<!I\\()(\\b(\\.[[:alpha:]]|[[:alpha:]])[[:alnum:]\\._]*\\^[[:digit:]]+)", "I(\\1\\2)", no_lhs_text, perl = TRUE)
+        no_lhs_text = gsub("(?<!I\\()(\\b(\\.[[:alpha:]]|[[:alpha:]])[[:alnum:]\\._]*\\^[[:digit:]]+)", "I(\\1)", no_lhs_text, perl = TRUE)
 
         if(grepl("\\^[[:alpha:]]", no_lhs_text)){
             # We check if there is one ^ specifically in the RHS or in the IV part
