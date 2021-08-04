@@ -204,7 +204,7 @@
     </tr>
     <tr>
       <th>vcov</th>
-      <td><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href='vcov_cluster.html'>vcov_cluster</a></code>, <code><a href='vcov_hac.html'>vcov_NW</a></code>, <code><a href='vcov_hac.html'>NW</a></code>, <code><a href='vcov_hac.html'>vcov_DK</a></code>, <code><a href='vcov_hac.html'>DK</a></code>, <code><a href='vcov_conley.html'>vcov_conley</a></code> and <code><a href='vcov_conley.html'>conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances.</p></td>
+      <td><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href='vcov_cluster.html'>vcov_cluster</a></code>, <code><a href='vcov_hac.html'>vcov_NW</a></code>, <code><a href='vcov_hac.html'>NW</a></code>, <code><a href='vcov_hac.html'>vcov_DK</a></code>, <code><a href='vcov_hac.html'>DK</a></code>, <code><a href='vcov_conley.html'>vcov_conley</a></code> and <code><a href='vcov_conley.html'>conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the `vcov` documentation in the <a href='https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1'>vignette</a>.</p></td>
     </tr>
     <tr>
       <th>fixef</th>
@@ -248,7 +248,7 @@
     </tr>
     <tr>
       <th>cluster</th>
-      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as clusters in the estimation, you could further use <code>cluster = 1:2</code> or leave it blank with <code>se = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] cluster). You can interact two variables using <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
+      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] fixed-effect). You can interact two variables using <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
     </tr>
     <tr>
       <th>se</th>
@@ -425,7 +425,7 @@ with first a linear term and then a non linear part expressed by the function g.
 
 <p>Standard-errors can be computed in different ways, you can use the arguments <code>se</code> and <code>ssc</code> in <code><a href='summary.fixest.html'>summary.fixest</a></code> to define how to compute them. By default, in the presence of fixed-effects, standard-errors are automatically clustered.</p>
 <p>The following vignette: <a href='https://lrberge.github.io/fixest/articles/standard_errors.html'>On standard-errors</a> describes in details how the standard-errors are computed in <code>fixest</code> and how you can replicate standard-errors from other software.</p>
-<p>You can use the functions <code>setFixest_se</code> and <code><a href='ssc.html'>setFixest_ssc</a></code> to permanently set the way the standard-errors are computed.</p>
+<p>You can use the functions <code><a href='setFixest_vcov.html'>setFixest_vcov</a></code> and <code><a href='ssc.html'>setFixest_ssc</a></code> to permanently set the way the standard-errors are computed.</p>
     <h2 class="hasAnchor" id="multiple-estimations"><a class="anchor" href="#multiple-estimations"></a>Multiple estimations</h2>
 
     

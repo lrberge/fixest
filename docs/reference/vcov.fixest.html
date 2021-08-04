@@ -164,7 +164,7 @@
     </tr>
     <tr>
       <th>vcov</th>
-      <td><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href='vcov_cluster.html'>vcov_cluster</a></code>, <code><a href='vcov_hac.html'>vcov_NW</a></code>, <code><a href='vcov_hac.html'>NW</a></code>, <code><a href='vcov_hac.html'>vcov_DK</a></code>, <code><a href='vcov_hac.html'>DK</a></code>, <code><a href='vcov_conley.html'>vcov_conley</a></code> and <code><a href='vcov_conley.html'>conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances.</p></td>
+      <td><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href='vcov_cluster.html'>vcov_cluster</a></code>, <code><a href='vcov_hac.html'>vcov_NW</a></code>, <code><a href='vcov_hac.html'>NW</a></code>, <code><a href='vcov_hac.html'>vcov_DK</a></code>, <code><a href='vcov_hac.html'>DK</a></code>, <code><a href='vcov_conley.html'>vcov_conley</a></code> and <code><a href='vcov_conley.html'>conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the `vcov` documentation in the <a href='https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1'>vignette</a>.</p></td>
     </tr>
     <tr>
       <th>se</th>
@@ -172,7 +172,7 @@
     </tr>
     <tr>
       <th>cluster</th>
-      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as clusters in the estimation, you could further use <code>cluster = 1:2</code> or leave it blank with <code>se = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] cluster). You can interact two variables using <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
+      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] fixed-effect). You can interact two variables using <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
     </tr>
     <tr>
       <th>ssc</th>
@@ -352,22 +352,25 @@ If <code>attr = TRUE</code>, this matrix has an attribute &#8220;type&#8221; spe
 <span class='co'># Conley VCOV |</span>
 <span class='co'># ------------|</span>
 <span class='co'># To obtain a Conley VCOV, use a formula of the form conley(cutoff) ~ lat + lon</span>
+<span class='co'># with lat/lon the latitude/longitude variable names in the data set</span>
 <span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_geo</span>, <span class='fu'><a href='vcov_conley.html'>conley</a></span><span class='op'>(</span><span class='fl'>100</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>lat</span> <span class='op'>+</span> <span class='va'>long</span><span class='op'>)</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; (Intercept)         mag 
 #&gt;   108.90052    19.23233 </div><div class='input'>
 <span class='co'># Alternative way:</span>
 
 <span class='co'># -&gt; using the vcov_DK function</span>
-<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='fu'><a href='vcov_conley.html'>vcov_conley</a></span><span class='op'>(</span>lat <span class='op'>=</span> <span class='st'>"lat"</span>, lon <span class='op'>=</span> <span class='st'>"long"</span>, cutoff <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in vcov.fixest(est, vcov_conley(lat = "lat", lon = "long", cutoff = 100)): The variable 'lat' used to compute the VCOV is not in the original data set. Only variables in the data set can be used.</span></div><div class='input'>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_geo</span>, <span class='fu'><a href='vcov_conley.html'>vcov_conley</a></span><span class='op'>(</span>lat <span class='op'>=</span> <span class='st'>"lat"</span>, lon <span class='op'>=</span> <span class='st'>"long"</span>, cutoff <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; (Intercept)         mag 
+#&gt;   108.90052    19.23233 </div><div class='input'>
 <span class='co'># -------------------|</span>
 <span class='co'># Implicit deduction |</span>
 <span class='co'># -------------------|</span>
 <span class='co'># By default the latitude and longitude are directly fetched in the data based</span>
 <span class='co'># on pattern matching. So you don't have to specify them.</span>
+<span class='co'># Furhter, an automatic cutoff is deduced by default.</span>
 
 <span class='co'># The following works:</span>
-<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_geo</span>, <span class='fu'><a href='vcov_conley.html'>conley</a></span><span class='op'>(</span><span class='fl'>100</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='coeftable.html'>se</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est_geo</span>, <span class='st'>"conley"</span><span class='op'>)</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; (Intercept)         mag 
 #&gt;   108.90052    19.23233 </div><div class='input'>
 

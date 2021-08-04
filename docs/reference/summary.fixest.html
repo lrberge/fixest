@@ -181,11 +181,11 @@
     </tr>
     <tr>
       <th>vcov</th>
-      <td><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href='vcov_cluster.html'>vcov_cluster</a></code>, <code><a href='vcov_hac.html'>vcov_NW</a></code>, <code><a href='vcov_hac.html'>NW</a></code>, <code><a href='vcov_hac.html'>vcov_DK</a></code>, <code><a href='vcov_hac.html'>DK</a></code>, <code><a href='vcov_conley.html'>vcov_conley</a></code> and <code><a href='vcov_conley.html'>conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances.</p></td>
+      <td><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href='vcov_cluster.html'>vcov_cluster</a></code>, <code><a href='vcov_hac.html'>vcov_NW</a></code>, <code><a href='vcov_hac.html'>NW</a></code>, <code><a href='vcov_hac.html'>vcov_DK</a></code>, <code><a href='vcov_hac.html'>DK</a></code>, <code><a href='vcov_conley.html'>vcov_conley</a></code> and <code><a href='vcov_conley.html'>conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the `vcov` documentation in the <a href='https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1'>vignette</a>.</p></td>
     </tr>
     <tr>
       <th>cluster</th>
-      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as clusters in the estimation, you could further use <code>cluster = 1:2</code> or leave it blank with <code>se = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] cluster). You can interact two variables using <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
+      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] fixed-effect). You can interact two variables using <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
     </tr>
     <tr>
       <th>ssc</th>
@@ -268,34 +268,34 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 <span class='va'>sum_twoway</span>   <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, vcov <span class='op'>=</span> <span class='st'>"twoway"</span><span class='op'>)</span>
 
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>sum_standard</span>, <span class='va'>sum_hetero</span>, <span class='va'>sum_oneway</span>, <span class='va'>sum_twoway</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                          sum_standard         sum_hetero         sum_oneway
-#&gt; Dependent Var.:                 Euros              Euros              Euros
-#&gt;                                                                            
-#&gt; log(dist_km)      -1.528*** (1.93e-6) -1.528*** (0.0220) -1.528*** (0.1156)
-#&gt; Fixed-Effects:    ------------------- ------------------ ------------------
-#&gt; Country of Origin                 Yes                Yes                Yes
-#&gt; Destination                       Yes                Yes                Yes
-#&gt; Product                           Yes                Yes                Yes
-#&gt; _________________ ___________________ __________________ __________________
-#&gt; S.E. type                         IID Heteroskedas.-rob.         by: Origin
-#&gt; Observations                   38,325             38,325             38,325
-#&gt; Squared Cor.                  0.60377            0.60377            0.60377
-#&gt; Pseudo R2                     0.76039            0.76039            0.76039
-#&gt; BIC                          1.43e+12           1.43e+12           1.43e+12
-#&gt;                           sum_twoway
-#&gt; Dependent Var.:                Euros
-#&gt;                                     
-#&gt; log(dist_km)      -1.528*** (0.1307)
-#&gt; Fixed-Effects:    ------------------
-#&gt; Country of Origin                Yes
-#&gt; Destination                      Yes
-#&gt; Product                          Yes
-#&gt; _________________ __________________
-#&gt; S.E. type          by: Orig. &amp; Dest.
-#&gt; Observations                  38,325
-#&gt; Squared Cor.                 0.60377
-#&gt; Pseudo R2                    0.76039
-#&gt; BIC                         1.43e+12</div><div class='input'>
+</div><div class='output co'>#&gt;                        sum_standard         sum_hetero         sum_oneway
+#&gt; Dependent Var.:               Euros              Euros              Euros
+#&gt;                                                                          
+#&gt; log(dist_km)    -1.528*** (1.93e-6) -1.528*** (0.0220) -1.528*** (0.1156)
+#&gt; Fixed-Effects:  ------------------- ------------------ ------------------
+#&gt; Origin                          Yes                Yes                Yes
+#&gt; Destination                     Yes                Yes                Yes
+#&gt; Product                         Yes                Yes                Yes
+#&gt; _______________ ___________________ __________________ __________________
+#&gt; S.E. type                       IID Heteroskedas.-rob.         by: Origin
+#&gt; Observations                 38,325             38,325             38,325
+#&gt; Squared Cor.                0.60377            0.60377            0.60377
+#&gt; Pseudo R2                   0.76039            0.76039            0.76039
+#&gt; BIC                        1.43e+12           1.43e+12           1.43e+12
+#&gt;                         sum_twoway
+#&gt; Dependent Var.:              Euros
+#&gt;                                   
+#&gt; log(dist_km)    -1.528*** (0.1307)
+#&gt; Fixed-Effects:  ------------------
+#&gt; Origin                         Yes
+#&gt; Destination                    Yes
+#&gt; Product                        Yes
+#&gt; _______________ __________________
+#&gt; S.E. type        by: Orig. &amp; Dest.
+#&gt; Observations                38,325
+#&gt; Squared Cor.               0.60377
+#&gt; Pseudo R2                  0.76039
+#&gt; BIC                       1.43e+12</div><div class='input'>
 <span class='co'># Alternative ways to cluster the SE:</span>
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, vcov <span class='op'>=</span> <span class='va'>cluster</span> <span class='op'>~</span> <span class='va'>Product</span> <span class='op'>+</span> <span class='va'>Origin</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; Poisson estimation, Dep. Var.: Euros
@@ -386,8 +386,16 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 4.8969   Adj. R2: 0.262357</div><div class='input'>
 <span class='co'># Now take a lag of 3:</span>
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='fu'><a href='vcov_hac.html'>DK</a></span><span class='op'>(</span><span class='fl'>3</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in vcov.fixest(object, vcov = vcov, ssc = ssc, forceCovariance = forceCovariance,     keepBounded = keepBounded, nthreads = nthreads, attr = TRUE,     se = se, cluster = cluster, ...): In the argument 'vcov', the number of variables in the RHS of the formula (2) is not valid. The formula should correspond to ~time.</span></div><div class='input'>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='fu'><a href='vcov_hac.html'>DK</a></span><span class='op'>(</span><span class='fl'>3</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>period</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
+#&gt; Observations: 1,080 
+#&gt; Standard-errors: Driscoll-Kraay (L=3) 
+#&gt;             Estimate Std. Error t value  Pr(&gt;|t|))    
+#&gt; (Intercept)  1.98880   0.971486  2.0471 7.0943e-02 .  
+#&gt; x1           0.98311   0.028415 34.5980 6.9500e-11 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; RMSE: 4.8969   Adj. R2: 0.262357</div><div class='input'>
 <span class='co'>#--</span>
 <span class='co'># Implicit deductions</span>
 <span class='co'># When the estimation is done with a panel.id, you don't need to</span>
@@ -425,6 +433,7 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 <span class='co'># --</span>
 <span class='co'># Conley</span>
 <span class='co'># Use the syntax: conley(cutoff) ~ lat + lon</span>
+<span class='co'># with lat/lon the latitude/longitude variable names in the data set</span>
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_geo</span>, <span class='fu'><a href='vcov_conley.html'>conley</a></span><span class='op'>(</span><span class='fl'>100</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>lat</span> <span class='op'>+</span> <span class='va'>long</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: depth
 #&gt; Observations: 1,000 
@@ -450,9 +459,10 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 <span class='co'># Implicit deduction</span>
 <span class='co'># By default the latitude and longitude are directly fetched in the data based</span>
 <span class='co'># on pattern matching. So you don't have to specify them.</span>
+<span class='co'># Further an automatic cutoff is computed by default.</span>
 
 <span class='co'># The following works</span>
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_geo</span>, <span class='fu'><a href='vcov_conley.html'>conley</a></span><span class='op'>(</span><span class='fl'>100</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_geo</span>, <span class='st'>"conley"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: depth
 #&gt; Observations: 1,000 
 #&gt; Standard-errors: Conley (100km) 

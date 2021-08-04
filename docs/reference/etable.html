@@ -326,7 +326,7 @@
     </tr>
     <tr>
       <th>vcov</th>
-      <td><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href='vcov_cluster.html'>vcov_cluster</a></code>, <code><a href='vcov_hac.html'>vcov_NW</a></code>, <code><a href='vcov_hac.html'>NW</a></code>, <code><a href='vcov_hac.html'>vcov_DK</a></code>, <code><a href='vcov_hac.html'>DK</a></code>, <code><a href='vcov_conley.html'>vcov_conley</a></code> and <code><a href='vcov_conley.html'>conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances.</p></td>
+      <td><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href='vcov_cluster.html'>vcov_cluster</a></code>, <code><a href='vcov_hac.html'>vcov_NW</a></code>, <code><a href='vcov_hac.html'>NW</a></code>, <code><a href='vcov_hac.html'>vcov_DK</a></code>, <code><a href='vcov_hac.html'>DK</a></code>, <code><a href='vcov_conley.html'>vcov_conley</a></code> and <code><a href='vcov_conley.html'>conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the `vcov` documentation in the <a href='https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1'>vignette</a>.</p></td>
     </tr>
     <tr>
       <th>stage</th>
@@ -346,7 +346,7 @@
     </tr>
     <tr>
       <th>cluster</th>
-      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as clusters in the estimation, you could further use <code>cluster = 1:2</code> or leave it blank with <code>se = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] cluster). You can interact two variables using <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
+      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] fixed-effect). You can interact two variables using <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
     </tr>
     <tr>
       <th>.vcov</th>
@@ -1184,20 +1184,33 @@
 #&gt;                                                                        
 #&gt; (Intercept)       18.60*** (3.949)   29.83*** (3.064)  25.79*** (4.436)
 #&gt; Solar.R         0.1272*** (0.0266) 0.0659*** (0.0150)  0.1347* (0.0651)
-#&gt; poly(Wind,2)1                       -155.5*** (39.20) -153.6*** (39.12)
-#&gt; poly(Wind,2)2                         98.77** (36.32)   98.88** (36.42)
-#&gt; poly(Temp,2)1                        166.7*** (25.38)  159.3*** (25.99)
-#&gt; poly(Temp,2)2                          67.20* (27.38)    68.77* (27.36)
+#&gt; poly(Wind)1                         -155.5*** (39.20) -153.6*** (39.12)
+#&gt; poly(Wind)2                           98.77** (36.32)   98.88** (36.42)
+#&gt; poly(Temp)1                          166.7*** (25.38)  159.3*** (25.99)
+#&gt; poly(Temp)2                            67.20* (27.38)    68.77* (27.36)
 #&gt; Solar.R square                                         -0.0002 (0.0002)
 #&gt; _______________ __________________ __________________ _________________
 #&gt; S.E. type                   vcovHC             vcovHC            vcovHC
 #&gt; Observations                   111                111               111
 #&gt; R2                         0.12134            0.71231           0.71408
 #&gt; Adj. R2                    0.11328            0.69861           0.69758</div><div class='input'>
-<span class='co'># To add extra arguments to vcovHC, you can simply pass them in etable.</span>
-<span class='co'># In this example 'type' is an argument of sandwich::vcovHC:</span>
-<span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_c0</span>, <span class='va'>est_c1</span>, <span class='va'>est_c2</span>, vcov <span class='op'>=</span> <span class='fu'>sandwich</span><span class='fu'>::</span><span class='va'><a href='https://sandwich.R-Forge.R-project.org//reference/vcovHC.html'>vcovHC</a></span>, type <span class='op'>=</span> <span class='st'>"HC0"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in etable(est_c0, est_c1, est_c2, vcov = sandwich::vcovHC, type = "HC0"): The fourth element of '...' (named 'type') is not valid: it should be a fixest object or a list, it is neither.</span></div><div class='input'>
+<span class='co'># To add extra arguments to vcovHC, you need to write your wrapper:</span>
+<span class='fu'>etable</span><span class='op'>(</span><span class='va'>est_c0</span>, <span class='va'>est_c1</span>, <span class='va'>est_c2</span>, vcov <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='fu'>sandwich</span><span class='fu'>::</span><span class='fu'><a href='https://sandwich.R-Forge.R-project.org//reference/vcovHC.html'>vcovHC</a></span><span class='op'>(</span><span class='va'>x</span>, type <span class='op'>=</span> <span class='st'>"HC0"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                             est_c0             est_c1            est_c2
+#&gt; Dependent Var.:              Ozone              Ozone             Ozone
+#&gt;                                                                        
+#&gt; (Intercept)       18.60*** (3.850)   29.83*** (2.890)  25.79*** (4.091)
+#&gt; Solar.R         0.1272*** (0.0260) 0.0659*** (0.0140)  0.1347* (0.0603)
+#&gt; poly(Wind)1                         -155.5*** (35.29) -153.6*** (35.11)
+#&gt; poly(Wind)2                           98.77** (32.31)   98.88** (32.35)
+#&gt; poly(Temp)1                          166.7*** (23.41)  159.3*** (23.76)
+#&gt; poly(Temp)2                           67.20** (24.84)   68.77** (24.68)
+#&gt; Solar.R square                                         -0.0002 (0.0002)
+#&gt; _______________ __________________ __________________ _________________
+#&gt; S.E. type       vcovHC(type="HC0") vcovHC(type="HC0") vcovHC(type="HC..
+#&gt; Observations                   111                111               111
+#&gt; R2                         0.12134            0.71231           0.71408
+#&gt; Adj. R2                    0.11328            0.69861           0.69758</div><div class='input'>
 
 <span class='co'>#</span>
 <span class='co'># Customize which fit statistic to display</span>
@@ -1295,8 +1308,21 @@
 <span class='co'># Method 2: using a list in the argument 'vcov'</span>
 
 <span class='va'>est_bis</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='va'>Temp</span> <span class='op'>|</span> <span class='va'>Month</span>, data <span class='op'>=</span> <span class='va'>aq</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'><span class='fu'>etable</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span><span class='op'>)</span>, vcov <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"hetero"</span>, <span class='op'>~</span> <span class='va'>Month</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in vcov[[m]]: subscript out of bounds</span></div><div class='input'>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'><span class='fu'>etable</span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span>, vcov <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"hetero"</span>, <span class='op'>~</span> <span class='va'>Month</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                                est           est_bis
+#&gt; Dependent Var.:              Ozone             Ozone
+#&gt;                                                     
+#&gt; (Intercept)       -64.34** (21.23)                  
+#&gt; Solar.R          0.0598** (0.0191)   0.0522 (0.0408)
+#&gt; Wind            -3.334*** (0.8749)   -3.109. (1.306)
+#&gt; Temp             1.652*** (0.2025) 1.875*** (0.1816)
+#&gt; Fixed-Effects:  ------------------ -----------------
+#&gt; Month                           No               Yes
+#&gt; _______________ __________________ _________________
+#&gt; S.E. type       Heteroskedas.-rob.         by: Month
+#&gt; Observations                   111               111
+#&gt; R2                         0.60589           0.63686
+#&gt; Within R2                       --           0.53154</div><div class='input'>
 <span class='co'># When you have only one model, this model is replicated</span>
 <span class='co'># along the elements of the vcov list.</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est</span>, vcov <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"hetero"</span>, <span class='op'>~</span> <span class='va'>Month</span><span class='op'>)</span><span class='op'>)</span>
@@ -1314,6 +1340,11 @@
 #&gt; Adj. R2                    0.59484           0.59484</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># Method 3: Using "each" or "times" in vcov</span>
+
+<span class='co'># If the first element of the list in 'vcov' is "each" or "times",</span>
+<span class='co'># then all models will be replicated and all the VCOVs will be</span>
+<span class='co'># applied to each model. The order in which they are replicated</span>
+<span class='co'># are governed by the each/times keywords.</span>
 
 
 <span class='co'># each</span>
