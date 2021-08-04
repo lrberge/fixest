@@ -1920,7 +1920,7 @@ vcov_conley_internal = function(bread, scores, vars, sandwich, nthreads,
     # lon
     lon_range = range(lon)
     if(lon_range[1] < -180 || lon_range[2] > 360 || diff(lon_range) > 360){
-        stop("In vcov.fixest, Conley VCOV cannot be computed: the longitude is outside the [-180, 180] range (current range is [", fsignif(lon_range[1]), ", ", fsignif(lon_range[2]), "]).", call. = FALSE)
+        stop("In vcov.fixest, Conley VCOV cannot be computed: the longitude is outside the [-180, 180] or [0, 360] range (current range is [", fsignif(lon_range[1]), ", ", fsignif(lon_range[2]), "]).", call. = FALSE)
     }
 
     if(lon_range[2] > 180){
@@ -1930,8 +1930,13 @@ vcov_conley_internal = function(bread, scores, vars, sandwich, nthreads,
 
     # lat
     lat_range = range(lat)
-    if(lat_range[1] < -90 || lat_range[2] > 90){
-        stop("In vcov.fixest, Conley VCOV cannot be computed: the latitude is outside the [-90, 90] range (current range is [", fsignif(lat_range[1]), ", ", fsignif(lat_range[2]), "]).", call. = FALSE)
+    if(lat_range[1] < -90 || lat_range[2] > 180 || diff(lat_range) > 180){
+        stop("In vcov.fixest, Conley VCOV cannot be computed: the latitude is outside the [-90, 90] or [0, 180] range (current range is [", fsignif(lat_range[1]), ", ", fsignif(lat_range[2]), "]).", call. = FALSE)
+    }
+
+    if(lat_range[2] > 90){
+        # we normalize
+        lat = (lat + 90) %% 180 - 90
     }
 
     # cutoff
