@@ -522,8 +522,13 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
                         stop("The variable", enumerate_items(pblm, "s.quote"), " used to compute the VCOV ", plural_len(pblm, "is"), " not in the original data set. Only variables in the data set can be used.")
                     }
 
-                    var_names_all[vcov_var_name] = vname
-                    if(only_varnames) next
+                    var_names_all[vcov_var_name] = fix_combined_names(vname)
+                    if(only_varnames) {
+                        var_names_all[vcov_var_name] = vname_all[1]
+                        # To handle combined clusters
+                        var_names_all = c(var_names_all, vname_all[-1])
+                        next
+                    }
 
                     value = eval(str2expression(vname), data)
                     var_values_all[[vcov_var_name]] = trim_obs_removed(value, object)
@@ -2324,6 +2329,15 @@ cutoff_deduce = function(lat, lon){
     attr(cutoff, "metric") = "km"
 
     cutoff
+}
+
+fix_combined_names = function(x){
+    if(grepl("combine_clusters", x)){
+        x = gsub("combine_clusters(_fast)?\\(", "", substr(x, 1, nchar(x) - 1))
+        x = gsub(", ", "^", x, fixed = TRUE)
+    }
+
+    x
 }
 
 ####
