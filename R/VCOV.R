@@ -218,7 +218,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
         return(object$cov.scaled)
     }
 
-    if(!any(c("only_varnames", "sandwich") %in% names(dots)) && !is.function(vcov)){
+    if(!any(c("only_varnames", "sandwich") %in% names(dots)) && !is_function_in_it(vcov)){
         # 1st condition means NOT a client call
         validate_dots(suggest_args = c("vcov", "ssc"))
     }
@@ -306,7 +306,14 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     ####
 
     # Checking the value of vcov
-    check_arg_plus(vcov, "match | formula | function | matrix | class(fixest_vcov_request)", .choices = all_vcov_names)
+    check_arg_plus(vcov, "match | formula | function | matrix | list len(1) | class(fixest_vcov_request)", .choices = all_vcov_names)
+
+    user_vcov_name = NULL
+    if(is.list(vcov)){
+        # We already ensured it was a list of length 1
+        user_vcov_name = names(vcov)
+        vcov = vcov[[1]]
+    }
 
     if(is.function(vcov)){
 
@@ -338,9 +345,14 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
             arg_list = catch_fun_args(vcov, arg_list, exclude_args = "vcov", keep_dots = TRUE)
         }
 
-        vcov_name = gsub("sandwich::", "", vcov_name, fixed = TRUE)
-        vcov_name = gsub("^function\\([^\\)]+\\) ", "", vcov_name)
-        vcov_name = gsub("^vcov$", "Custom", vcov_name)
+        if(!is.null(user_vcov_name)){
+            vcov_name = user_vcov_name
+
+        } else {
+            vcov_name = gsub("sandwich::", "", vcov_name, fixed = TRUE)
+            vcov_name = gsub("^function\\([^\\)]+\\) ", "", vcov_name)
+            vcov_name = gsub("^vcov$", "Custom", vcov_name)
+        }
 
         # We shouldn't have a prior on the name of the first argument
         arg_names = formalArgs(vcov)
@@ -362,14 +374,15 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     if(is.matrix(vcov)){
 
         if(only_varnames){
-            stop("A custom VCOV matrix cannot be used directly in fixest estimation.")
+            stop("A custom VCOV matrix cannot be used directly in a fixest estimation.")
         }
 
         # Check that this makes sense
         n_coef = length(object$coefficients)
         check_value(vcov, "square matrix nrow(value)", .value = n_coef)
 
-        attr(vcov, "type") = "Custom"
+        attr(vcov, "type") = if(is.null(user_vcov_name)) "Custom" else user_vcov_name
+
         attr(vcov, "dof.K") = object$nparams
 
         return(vcov)
@@ -2019,7 +2032,7 @@ oldargs_to_vcov = function(se, cluster, vcov, .vcov = NULL){
 
     if(!missnull(vcov)){
 
-        if(is.function(vcov)){
+        if(is_function_in_it(vcov)){
             return(vcov)
 
         } else {
@@ -2031,7 +2044,7 @@ oldargs_to_vcov = function(se, cluster, vcov, .vcov = NULL){
 
     if(!missnull(.vcov)){
 
-        if(!is.function(.vcov)){
+        if(!is_function_in_it(.vcov)){
             if(!missnull(se) || !missnull(cluster)){
                 id = c(!missnull(se), !missnull(cluster))
                 msg = c("se", "cluster")[id]
@@ -2343,6 +2356,16 @@ fix_combined_names = function(x){
     }
 
     x
+}
+
+
+is_function_in_it = function(x){
+    if(is.function(x)){
+        return(TRUE)
+    } else if(is.list(x) && length(x) > 0 && is.function(x[[1]])){
+        return(TRUE)
+    }
+    return(FALSE)
 }
 
 ####

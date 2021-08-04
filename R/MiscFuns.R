@@ -458,7 +458,7 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
 	# Checking arguments in ...
 	if(!any(c("fromPrint", "iv", "summary_flags") %in% names(mc))){
 	    # condition means NOT internal call => thus client call
-	    if(!is.function(vcov)){
+	    if(!is_function_in_it(vcov)){
 	        validate_dots(suggest_args = c("se", "cluster", "ssc"))
 	    }
 	}

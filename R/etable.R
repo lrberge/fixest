@@ -442,8 +442,9 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     # vcov
     vcov = oldargs_to_vcov(se, cluster, vcov, .vcov)
 
-    if(is.function(vcov) && missnull(.vcov_args)){
-        .vcov_args = catch_fun_args(vcov, dots, exclude_args = "vcov", erase_args = TRUE)
+    if(is_function_in_it(vcov) && missnull(.vcov_args)){
+        vcov_fun = if(is.function(vcov)) vcov else vcov[[1]]
+        .vcov_args = catch_fun_args(vcov_fun, dots, exclude_args = "vcov", erase_args = TRUE)
         for(var in intersect(names(.vcov_args), names(dots))) dots[[var]] = NULL
     }
 
@@ -1107,7 +1108,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
     check_arg(stage, "integer vector no na len(,2) GE{1} LE{2}")
 
-    if(is.function(vcov)){
+    if(is_function_in_it(vcov)){
         # finding the name
 
         sysOrigin = sys.parent(.up)
@@ -1120,7 +1121,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         }
 
         if(missnull(.vcov_args)) .vcov_args = list()
-        check_arg_plus(.vcov_args, "list", .message = "The argument '.vcov_args' must be a list of arguments to be passed to the function in '.cov'.")
+        check_arg_plus(.vcov_args, "list", .message = "The argument '.vcov_args' must be a list of arguments to be passed to the function in '.vcov'.")
     }
 
     # If vcov is provided, we use summary
@@ -1146,7 +1147,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     iv_sub = c()
     for(m in 1:n_models){
         if(useSummary){
-            if(is.function(vcov)){
+            if(is_function_in_it(vcov)){
                 x = summary(all_models[[m]], vcov = vcov, stage = stage, .vcov_args = .vcov_args, vcov_name = vcov_name, agg = agg)
             } else {
                 if(IS_MULTI_VCOV){
