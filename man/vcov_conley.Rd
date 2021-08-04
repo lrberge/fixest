@@ -20,11 +20,11 @@ conley(cutoff = NULL, pixel = NULL, distance = NULL)
 \arguments{
 \item{x}{A \code{fixest} object.}
 
-\item{lat}{A character scalar or a one sided formula giving the name of the variable representing the latitude. The latitude must lie in [-90, 90].}
+\item{lat}{A character scalar or a one sided formula giving the name of the variable representing the latitude. The latitude must lie in [-90, 90], [0, 180] or [-180, 0].}
 
-\item{lon}{A character scalar or a one sided formula giving the name of the variable representing the longitude. The longitude must be in [-180, 180] or in [0, 360].}
+\item{lon}{A character scalar or a one sided formula giving the name of the variable representing the longitude. The longitude must be in [-180, 180], [0, 360] or [-360, 0].}
 
-\item{cutoff}{The distance cutoff, in km. You can express the cutoff in miles by writing the number in character form and adding "mi" as a suffix: cutoff = "100mi" would be 100 miles. If missing, a rough rule of thumb is used to deduce the cutoff.}
+\item{cutoff}{The distance cutoff, in km. You can express the cutoff in miles by writing the number in character form and adding "mi" as a suffix: cutoff = "100mi" would be 100 miles. If missing, a rule of thumb is used to deduce the cutoff.}
 
 \item{pixel}{A positive numeric scalar, default is 0. If a positive number, the coordinates of each observation are pooled into \code{pixel} x \code{pixel} km squares. This lowers the precision but can (depending on the cases) greatly improve computational speed at a low precision cost. Note that if the \code{cutoff} was expressed in miles, then \code{pixel} will also be in miles.}
 
@@ -45,7 +45,7 @@ This function computes VCOVs that are robust to spatial correlations by assuming
 
 The kernel is uniform.
 
-If the cutoff is not provided, a rough estimation (not theoretically grounded but very robust to sub-sampling) is given. This automatic cutoff is only here for convenience and is likely not the most appropriate for the given application.
+If the cutoff is not provided, an estimation of it is given. This cutoff ensures that a minimum of units lie within it and is robust to sub-sampling. This automatic cutoff is only here for convenience, the most appropriate cutoff shall depend on the application and shall be provided by the user.
 
 The function \code{conley} does not compute VCOVs directly but is meant to be used in the argument \code{vcov} of \code{fixest} functions (e.g. in \code{\link[fixest]{vcov.fixest}} or even in the estimation calls).
 }

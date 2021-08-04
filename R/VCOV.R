@@ -309,7 +309,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     check_arg_plus(vcov, "match | formula | function | matrix | list len(1) | class(fixest_vcov_request)", .choices = all_vcov_names)
 
     user_vcov_name = NULL
-    if(is.list(vcov)){
+    if(is.list(vcov) && !inherits(vcov, "fixest_vcov_request")){
         # We already ensured it was a list of length 1
         user_vcov_name = names(vcov)
         vcov = vcov[[1]]
@@ -1440,15 +1440,15 @@ vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, ssc = NULL){
 #'
 #' The kernel is uniform.
 #'
-#' If the cutoff is not provided, a rough estimation (not theoretically grounded but very robust to sub-sampling) is given. This automatic cutoff is only here for convenience and is likely not the most appropriate for the given application.
+#' If the cutoff is not provided, an estimation of it is given. This cutoff ensures that a minimum of units lie within it and is robust to sub-sampling. This automatic cutoff is only here for convenience, the most appropriate cutoff shall depend on the application and shall be provided by the user.
 #'
 #' The function \code{conley} does not compute VCOVs directly but is meant to be used in the argument \code{vcov} of \code{fixest} functions (e.g. in \code{\link[fixest]{vcov.fixest}} or even in the estimation calls).
 #'
 #' @inheritParams vcov_cluster
 #'
-#' @param lat A character scalar or a one sided formula giving the name of the variable representing the latitude. The latitude must lie in [-90, 90].
-#' @param lon A character scalar or a one sided formula giving the name of the variable representing the longitude. The longitude must be in [-180, 180] or in [0, 360].
-#' @param cutoff The distance cutoff, in km. You can express the cutoff in miles by writing the number in character form and adding "mi" as a suffix: cutoff = "100mi" would be 100 miles. If missing, a rough rule of thumb is used to deduce the cutoff.
+#' @param lat A character scalar or a one sided formula giving the name of the variable representing the latitude. The latitude must lie in [-90, 90], [0, 180] or [-180, 0].
+#' @param lon A character scalar or a one sided formula giving the name of the variable representing the longitude. The longitude must be in [-180, 180], [0, 360] or [-360, 0].
+#' @param cutoff The distance cutoff, in km. You can express the cutoff in miles by writing the number in character form and adding "mi" as a suffix: cutoff = "100mi" would be 100 miles. If missing, a rule of thumb is used to deduce the cutoff.
 #' @param pixel A positive numeric scalar, default is 0. If a positive number, the coordinates of each observation are pooled into \code{pixel} x \code{pixel} km squares. This lowers the precision but can (depending on the cases) greatly improve computational speed at a low precision cost. Note that if the \code{cutoff} was expressed in miles, then \code{pixel} will also be in miles.
 #' @param distance How to compute the distance between points. It can be equal to "triangular" (default) or "spherical". The latter case corresponds to the great circle distance and is more precise than triangular but is a bit more intensive computationally.
 #'
@@ -1932,24 +1932,30 @@ vcov_conley_internal = function(bread, scores, vars, sandwich, nthreads,
 
     # lon
     lon_range = range(lon)
-    if(lon_range[1] < -180 || lon_range[2] > 360 || diff(lon_range) > 360){
-        stop("In vcov.fixest, Conley VCOV cannot be computed: the longitude is outside the [-180, 180] or [0, 360] range (current range is [", fsignif(lon_range[1]), ", ", fsignif(lon_range[2]), "]).", call. = FALSE)
+    if(lon_range[1] < -360 || lon_range[2] > 360 || diff(lon_range) > 360){
+        stop("In vcov.fixest, Conley VCOV cannot be computed: the longitude is outside the [-180, 180], [0, 360] or [-360, 0] range (current range is [", fsignif(lon_range[1]), ", ", fsignif(lon_range[2]), "]).", call. = FALSE)
     }
 
+    # Later:
+    # - I think that I really don't need to rescale but I should check first in the cpp code
+    # that I don't use the -180/180 bounds
     if(lon_range[2] > 180){
-        # we normalize
-        lon = (lon + 180) %% 360 - 180
+        lon = lon - 180
+    } else if(lon_range[1] < -180){
+        lon = lon + 180
     }
 
     # lat
     lat_range = range(lat)
-    if(lat_range[1] < -90 || lat_range[2] > 180 || diff(lat_range) > 180){
-        stop("In vcov.fixest, Conley VCOV cannot be computed: the latitude is outside the [-90, 90] or [0, 180] range (current range is [", fsignif(lat_range[1]), ", ", fsignif(lat_range[2]), "]).", call. = FALSE)
+    if(lat_range[1] < -180 || lat_range[2] > 180 || diff(lat_range) > 180){
+        stop("In vcov.fixest, Conley VCOV cannot be computed: the latitude is outside the [-90, 90], [0, 180] or [-180, 0] range (current range is [", fsignif(lat_range[1]), ", ", fsignif(lat_range[2]), "]).", call. = FALSE)
     }
 
     if(lat_range[2] > 90){
         # we normalize
-        lat = (lat + 90) %% 180 - 90
+        lat = lat - 90
+    } else if(lat_range[1] < -90){
+        lat = lat + 90
     }
 
     # cutoff
@@ -2362,7 +2368,7 @@ fix_combined_names = function(x){
 is_function_in_it = function(x){
     if(is.function(x)){
         return(TRUE)
-    } else if(is.list(x) && length(x) > 0 && is.function(x[[1]])){
+    } else if(is.list(x) && !inherits(x, "fixest_vcov_request") && length(x) > 0 && is.function(x[[1]])){
         return(TRUE)
     }
     return(FALSE)
