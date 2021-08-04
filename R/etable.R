@@ -1706,11 +1706,22 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
             }
 
             # poly(xx, d)p => poly(xx)p
-            qui_poly = grepl("^poly\\([^,]+,[[:digit:]]\\)", var_left)
-            if(any(qui_poly)){
-                poly_new = gsub("^(poly\\([^,]+),[[:digit:]]\\)", "\\1)", var_left[qui_poly])
-                var[!qui][qui_poly] = new_var[!qui][qui_poly] = poly_new
+            if(any(grepl("^poly\\(", var_left))){
+
+                qui_poly = grepl("^poly\\([^,]+,[[:digit:]]\\)", var_left)
+                if(any(qui_poly)){
+                    poly_new = gsub("^(poly\\([^,]+),[[:digit:]]\\)", "\\1)", var_left[qui_poly])
+                    var[!qui][qui_poly] = new_var[!qui][qui_poly] = poly_new
+                }
+
+                # poly(var) => poly(var)1
+                qui_poly_clean = grepl("^poly\\([^,]+\\)$", var[!qui])
+                if(any(qui_poly_clean)){
+                    poly_new = gsub("^(poly\\([^,]+\\))$", "\\11", var[!qui][qui_poly_clean])
+                    var[!qui][qui_poly_clean] = new_var[!qui][qui_poly_clean] = poly_new
+                }
             }
+
 
             names(new_var) = names(var) = var_origin
             var_reorder_list[[m]] = new_var
