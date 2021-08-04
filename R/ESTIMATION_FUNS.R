@@ -2799,7 +2799,7 @@ femlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian")
 }
 
 #' @rdname femlm
-fenegbin = function(fml, data, theta.init, vcov, start = 0, fixef, fixef.rm = "perfect",
+fenegbin = function(fml, data, vcov, theta.init, start = 0, fixef, fixef.rm = "perfect",
                     offset, subset, split, fsplit, cluster, se, ssc, panel.id,
                     fixef.tol = 1e-5, fixef.iter = 10000, nthreads = getFixest_nthreads(),
                     lean = FALSE, verbose = 0, warn = TRUE, notes = getFixest_notes(),
