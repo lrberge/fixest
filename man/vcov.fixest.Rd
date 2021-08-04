@@ -169,21 +169,23 @@ est_geo = feols(depth ~ mag, quakes)
 # Conley VCOV |
 # ------------|
 # To obtain a Conley VCOV, use a formula of the form conley(cutoff) ~ lat + lon
+# with lat/lon the latitude/longitude variable names in the data set
 se(vcov(est_geo, conley(100) ~ lat + long))
 
 # Alternative way:
 
 # -> using the vcov_DK function
-se(vcov(est, vcov_conley(lat = "lat", lon = "long", cutoff = 100)))
+se(vcov(est_geo, vcov_conley(lat = "lat", lon = "long", cutoff = 100)))
 
 # -------------------|
 # Implicit deduction |
 # -------------------|
 # By default the latitude and longitude are directly fetched in the data based
 # on pattern matching. So you don't have to specify them.
+# Furhter, an automatic cutoff is deduced by default.
 
 # The following works:
-se(vcov(est_geo, conley(100)))
+se(vcov(est_geo, "conley"))
 
 
 # ======================== #

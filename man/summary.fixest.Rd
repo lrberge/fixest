@@ -124,7 +124,7 @@ summary(est, NW(3) ~ id + period)
 summary(est, DK ~ period)
 
 # Now take a lag of 3:
-summary(est, DK(3) ~ id + period)
+summary(est, DK(3) ~ period)
 
 #--
 # Implicit deductions
@@ -147,6 +147,7 @@ est_geo = feols(depth ~ mag, quakes)
 # --
 # Conley
 # Use the syntax: conley(cutoff) ~ lat + lon
+# with lat/lon the latitude/longitude variable names in the data set
 summary(est_geo, conley(100) ~ lat + long)
 
 # Change the cutoff, and how the distance is computed
@@ -156,9 +157,10 @@ summary(est_geo, conley(200, distance = "spherical") ~ lat + long)
 # Implicit deduction
 # By default the latitude and longitude are directly fetched in the data based
 # on pattern matching. So you don't have to specify them.
+# Further an automatic cutoff is computed by default.
 
 # The following works
-summary(est_geo, conley(100))
+summary(est_geo, "conley")
 
 
 

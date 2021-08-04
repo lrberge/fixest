@@ -158,21 +158,23 @@
 #' # Conley VCOV |
 #' # ------------|
 #' # To obtain a Conley VCOV, use a formula of the form conley(cutoff) ~ lat + lon
+#' # with lat/lon the latitude/longitude variable names in the data set
 #' se(vcov(est_geo, conley(100) ~ lat + long))
 #'
 #' # Alternative way:
 #'
 #' # -> using the vcov_DK function
-#' se(vcov(est, vcov_conley(lat = "lat", lon = "long", cutoff = 100)))
+#' se(vcov(est_geo, vcov_conley(lat = "lat", lon = "long", cutoff = 100)))
 #'
 #' # -------------------|
 #' # Implicit deduction |
 #' # -------------------|
 #' # By default the latitude and longitude are directly fetched in the data based
 #' # on pattern matching. So you don't have to specify them.
+#' # Furhter, an automatic cutoff is deduced by default.
 #'
 #' # The following works:
-#' se(vcov(est_geo, conley(100)))
+#' se(vcov(est_geo, "conley"))
 #'
 #'
 #' # ======================== #
@@ -463,14 +465,30 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 
         } else {
 
+            patterns_split = strsplit(vcov_select$patterns, " ?\\+ ?")
+            n_patterns = lengths(patterns_split)
+
+            if(isTRUE(object$is_fit)){
+                # No automatic deduction for fit methods,except for clustered SEs
+                n_FE = length(object$fixef_vars)
+                if(vcov_select$vcov_label %in% "Clustered"){
+                    if(n_FE == 0){
+                        stop("To compute a clustered VCOV from a '.fit' estimation, you need to provide the variables over which to cluster with the function vcov_cluster(). E.g. vcov = vcov_cluster(cluster = df) with df a data.frame containing the clusters. Or make a regular estimation, i.e. not from '.fit'.")
+                    }
+                    if(!n_FE %in% n_patterns){
+                        stop("To compute a clustered VCOV from a '.fit' estimation, you need to provide the variables over which to cluster with the function vcov = vcov_cluster(cluster = df), with df a data.frmae containing the clusters. Or make a regular estimation, i.e. not from '.fit'.")
+                    }
+                } else {
+                    stop("The estimations from '.fit' methods don't support ", vcov_select$vcov_label, " VCOVs. To use them, perform a regular estimation instead.")
+                }
+            }
 
             if(only_varnames == FALSE){
                 data = fetch_data(object)
                 data_names = names(data)
             }
 
-            patterns_split = strsplit(vcov_select$patterns, " ?\\+ ?")
-            n_patterns = lengths(patterns_split)
+
             if(!length(vcov_vars) %in% n_patterns){
                 fml_display = paste0("~", paste0(vcov_select$patterns[n_patterns != 0], collapse = "+"))
                 stop("In the argument 'vcov', the number of variables in the RHS of the formula (", length(vcov_vars), ") is not valid. The formula should correspond to ", ifunit(n_patterns, "", "one of "), enumerate_items(fml_display, "or"), ".")

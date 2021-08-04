@@ -357,7 +357,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' summary(est, DK ~ period)
 #'
 #' # Now take a lag of 3:
-#' summary(est, DK(3) ~ id + period)
+#' summary(est, DK(3) ~ period)
 #'
 #' #--
 #' # Implicit deductions
@@ -380,6 +380,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' # --
 #' # Conley
 #' # Use the syntax: conley(cutoff) ~ lat + lon
+#' # with lat/lon the latitude/longitude variable names in the data set
 #' summary(est_geo, conley(100) ~ lat + long)
 #'
 #' # Change the cutoff, and how the distance is computed
@@ -389,9 +390,10 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' # Implicit deduction
 #' # By default the latitude and longitude are directly fetched in the data based
 #' # on pattern matching. So you don't have to specify them.
+#' # Further an automatic cutoff is computed by default.
 #'
 #' # The following works
-#' summary(est_geo, conley(100))
+#' summary(est_geo, "conley")
 #'
 #'
 #'
@@ -4971,6 +4973,8 @@ fetch_data = function(x, prefix = "", suffix = ""){
     # 2) less safe but OK => note ???
     # 3) kind of dangerous => warning() ???
 
+    if(is.null(x$call$data)) return(NULL)
+
     # 1) Environment of the call
 
     data = NULL
@@ -7517,7 +7521,7 @@ update.fixest = function(object, fml.update, nframes = 1, evaluate = TRUE, ...){
 
     check_arg(evaluate, "logical scalar")
 
-    if(isTRUE(object$fromFit)){
+    if(isTRUE(object$is_fit)){
         stop("update method not available for fixest estimations obtained from fit methods.")
     }
 
@@ -7713,7 +7717,7 @@ formula.fixest = function(x, type = c("full", "linear", "iv", "NL"), ...){
     # Checking the arguments
     validate_dots(suggest_args = "type")
 
-    if(isTRUE(x$fromFit)){
+    if(isTRUE(x$is_fit)){
         stop("formula method not available for fixest estimations obtained from fit methods.")
     }
 
@@ -7817,7 +7821,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 
     type = check_set_types(type, c("lhs", "rhs", "fixef", "iv.endo", "iv.inst", "iv.exo", "iv.rhs1", "iv.rhs2"))
 
-    if(isTRUE(object$fromFit)){
+    if(isTRUE(object$is_fit)){
         stop("model.matrix method not available for fixest estimations obtained from fit methods.")
     }
 

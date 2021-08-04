@@ -2661,7 +2661,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     if(!is.null(fml_no_xpd)) res$fml_no_xpd = fml_no_xpd
 
-    if(isFit) res$fromFit = TRUE
+    if(isFit) res$is_fit = TRUE
 
     if(do_iv){
         res$iv = TRUE
