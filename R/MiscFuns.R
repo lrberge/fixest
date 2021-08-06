@@ -580,7 +580,7 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
 
 	# modifs of the table
 	coeftable = cbind("Estimate" = object$coefficients, "Std. Error" = se_format,
-	                  "t value" = zvalue, "Pr(>|t|))" = pvalue)
+	                  "t value" = zvalue, "Pr(>|t|)" = pvalue)
 
 	attr(coeftable, "type") = attr(se, "type") = attr(vcov, "type")
 
