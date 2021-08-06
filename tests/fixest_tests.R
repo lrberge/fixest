@@ -605,8 +605,8 @@ data(quakes)
 est = feols(depth ~ mag, quakes, "conley")
 
 se_conley = se(est)
-test(se_conley, se(est, conley(100) ~ 1))
-test(se_conley, se(est, conley(100) ~ lat + long))
+test(se_conley, se(est, conley(90) ~ 1))
+test(se_conley, se(est, conley(90) ~ lat + long))
 
 se_conley200 = se(est, conley(200) ~ lat + long)
 test(se_conley200, se(est, vcov_conley(cutoff = 200)))
