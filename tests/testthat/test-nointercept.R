@@ -1,47 +1,18 @@
 
 library(fixest)
-base = datab2()
-
 setFixest_notes(FALSE)
-# ols
-res = feols(y ~ -1 + x1 + i(fe1), base)
-expect_model_nointercept(res)
-res = feols(y ~ -1 + x1 + factor(fe1), base)
-expect_model_nointercept(res)
-res = feols(y ~ -1 + x1 + i(fe1) + i(fe2), base)
-expect_model_nointercept(res)
-
-## feglm
-res = feglm(y ~ -1 + x1 + i(fe1), base)
-expect_model_nointercept(res)
-res = feglm(y ~ -1 + x1 + factor(fe1), base)
-expect_model_nointercept(res)
-res = feglm(y ~ -1 + x1 + i(fe1) + i(fe2), base)
-expect_model_nointercept(res)
-
-res = feglm(y_r ~ -1 + x1 + i(fe1), base, family = "poisson")
-expect_model_nointercept(res)
-res = feglm(y_r ~ -1 + x1 + factor(fe1), base, family = "poisson")
-expect_model_nointercept(res)
-res = feglm(y_r ~ -1 + x1 + i(fe1) + i(fe2), base, family = "poisson")
-expect_model_nointercept(res)
-
-res = feglm(y ~ -1 + x1 + i(fe1), base, family = "Gamma")
-expect_model_nointercept(res)
-res = feglm(y_r ~ -1 + x1 + factor(fe1), base, family = "Gamma")
-expect_model_nointercept(res)
-res = feglm(y_r ~ -1 + x1 + i(fe1) + i(fe2), base, family = "Gamma")
-expect_model_nointercept(res)
-
-## fenegbin
-res = fenegbin(y ~ -1 + x1 + i(fe1), base)
-expect_model_nointercept(res)
-res = fenegbin(y ~ -1 + x1 + factor(fe1), base)
-expect_model_nointercept(res)
-res = fenegbin(y ~ -1 + x1 + i(fe1) + i(fe2), base)
-expect_model_nointercept(res)
-
-
-## Parametrize the previous tests?
-
+base <- datab2()
+patrick::with_parameters_test_that("fitting without intercept works properly",
+                                   code = {
+                                       res = fixest_mod_select(model = model,
+                                                        fmla = formula,
+                                                        data = base,
+                                                        famly = family)
+                                       expect_model_nointercept(res)
+                                       expect_equal(1,1)
+                                   },
+                                   .cases = nointercept_cases()
+)
+warnings() ## The `code` argument to `test_that()` must be a braced expression to get accurate file-line information for failures.
 setFixest_notes(TRUE)
+
