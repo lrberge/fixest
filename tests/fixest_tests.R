@@ -666,7 +666,7 @@ all_coef <- coef(feols(y ~ -1 + x1 + x2 + species + factor(fe_bis), base))
 
 m_fe <- fixef(m)
 c1 <- get_coef(all_coef, "species")
-test(var(c1 - m_fe$species[names(c1)]), 0)
+test(var(c1 - m_fe$species[names(c1)]), 0) ## Differences are equal among fixef and all_coef
 
 c2 <- get_coef(all_coef, "factor\\(fe_bis\\)")
 test(var(c2 - m_fe$fe_bis[names(c2)]), 0)

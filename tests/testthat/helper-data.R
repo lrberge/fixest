@@ -71,6 +71,17 @@ datab5 <- function() {
   return(base)
 }
 
+# database for test-fixef.R
+datab6 = function(){
+  set.seed(0)
+  base <- iris
+  names(base) <- c("y", "x1", "x2", "x3", "species")
+  base$x4 <- rnorm(150) + 0.25 * base$y
+  base$fe_bis <- sample(10, 150, TRUE)
+  base$fe_ter <- sample(15, 150, TRUE)
+  return(base)
+}
+
 ev_par <- function(string) {
   eval(parse(text = string))
 }
@@ -432,3 +443,55 @@ residuals_cases = function(){
 #
 #
 #
+
+### test-fixef.R helper functinos
+
+get_coef <- function(all_coef, x) {
+  res <- all_coef[grepl(x, names(all_coef), perl = TRUE)]
+  names(res) <- gsub(x, "", names(res), perl = TRUE)
+  res
+}
+
+## fixef.strings
+
+fixef.strings = function(){
+  AuxL1 = list(c("species", "fe_bis"),
+               c("species", "fe_bis", "fe_bis[[x3]]"),
+               c("species", "fe_bis", "fe_bis[[x3]]", "species[[x2]]"),
+               c("species", "fe_bis", "fe_bis[[x2]]", "fe_bis[[x3]]"),
+               c("species", "fe_bis", "fe_bis[[x2]]", "fe_bis[[x3]]"))
+
+  AuxL2 = list(c("species","factor\\(fe_bis\\)"),
+               c("species","factor\\(fe_bis\\)", "fe_bis::|:x3"),
+               c("^species(?=[^:])","^factor\\(fe_bis\\)","fe_bis::|:x3","species::|:x2"),
+               c("^species","^factor\\(fe_bis\\)","fe_bis::(?=.+x2)|:x2", "fe_bis::(?=.+x3)|:x3"),
+               c("^species","^factor\\(fe_bis\\)","fe_bis::(?=.+x2)|:x2", "fe_bis::(?=.+x3)|:x3"))
+
+  return(list(AuxL1,AuxL2))
+}
+#### fixef cases for test-fixef.R
+fixef_cases = function(){
+  Fmlas1 = c("y ~ x1 + x2 | species + fe_bis",
+             "y ~ x1 + x2 | species + fe_bis[x3]",
+             "y ~ x1 | species[x2] + fe_bis[x3] + fe_ter",
+             "y ~ x1 | species + fe_bis[x2, x3] + fe_ter",
+             "y ~ x1 | species + fe_bis[x2, x3] + fe_ter"
+  )
+  Fmlas2 = c("y ~ -1 + x1 + x2 + species + factor(fe_bis)",
+             "y ~ -1 + x1 + x2 + species + factor(fe_bis) + i(fe_bis, x3)",
+             "y ~ -1 + x1 + species + i(species, x2) + factor(fe_bis) + i(fe_bis, x3) + factor(fe_ter)",
+             "y ~ x1 + species + factor(fe_bis) + i(fe_bis, x2) + i(fe_bis, x3) + factor(fe_ter)",
+             "y ~ x1 + species + factor(fe_bis) + i(fe_bis, x2) + i(fe_bis, x3) + factor(fe_ter)"
+  )
+  K = seq(1:5)
+  DF = data.frame(formula1 = Fmlas1,
+                  formula2 = Fmlas2,
+                  K,
+                  test_name = c("With 2 x 1 FE",
+                                "With 1 FE + 1 FE 1 VS",
+                                "With 2 x (1 FE + 1 VS) + 1 FE",
+                                "With 2 x (1 FE) + 1 FE 2 VS",
+                                "Previous With weights"))
+  return(DF)
+}
+
