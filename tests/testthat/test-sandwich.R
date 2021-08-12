@@ -86,3 +86,4 @@ testthat::test_that("Aliases works properly", {
   testthat::expect_equal(se_hetero, se_white)
   # testthat::expect_equal(se_hetero, se_hc1)
 })
+

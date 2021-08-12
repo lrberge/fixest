@@ -3,49 +3,31 @@
 
 expect_ols_equal <- function(object, reference) {
   testthat::test_that("Equal x1 coefficient between feols and lm", {
-<<<<<<< HEAD
     local_edition(2)
     testthat::expect_equal(
       coef(object)["x1"],
       coef(reference)["x1"],
       scale = 1
-=======
-    testthat::expect_equal(
-      coef(object)["x1"],
-      coef(reference)["x1"]
->>>>>>> a851cedfa1a705cb6b6e2fc57f8f4e707bd6d110
     )
   })
 
   testthat::test_that("Equal standard errors between feols and lm", {
     adj <- 1
-<<<<<<< HEAD
     local_edition(2)
     testthat::expect_equal(
       se(object, se = "st", dof = dof(adj = adj))["x1"],
       se(reference)["x1"],
       scale = 1
-=======
-    testthat::expect_equal(
-      se(object, se = "st", dof = dof(adj = adj))["x1"],
-      se(reference)["x1"]
->>>>>>> a851cedfa1a705cb6b6e2fc57f8f4e707bd6d110
     )
   })
 
   testthat::test_that("Equal p-values between feols and lm", {
     adj <- 1
-<<<<<<< HEAD
     local_edition(2)
     testthat::expect_equal(
       pvalue(object, se = "st", dof = dof(adj = adj))["x1"],
       pvalue(reference)["x1"],
       scale = 1
-=======
-    testthat::expect_equal(
-      pvalue(object, se = "st", dof = dof(adj = adj))["x1"],
-      pvalue(reference)["x1"]
->>>>>>> a851cedfa1a705cb6b6e2fc57f8f4e707bd6d110
     )
   })
 }
@@ -54,70 +36,41 @@ expect_ols_equal <- function(object, reference) {
 ### expect function for glms
 expect_glm_equal <- function(object, reference) {
   model <- reference$family$family
-<<<<<<< HEAD
-=======
-
-  # tol and adjust changes depending on the model
-  # tol is by default 1e-5. For negbin is 1e-2 and binomial is 3e-5,
-
->>>>>>> a851cedfa1a705cb6b6e2fc57f8f4e707bd6d110
   tol <- switch(model,
     "binomial" = 3e-5,
     1e-5
   )
   adj <- 0
 
-<<<<<<< HEAD
-=======
-  # For binomial, complex models have tol = 0.5
->>>>>>> a851cedfa1a705cb6b6e2fc57f8f4e707bd6d110
   if (model == "binomial" & (reference$formula == (y_01 ~ x1 + species + i(species, x2) + factor(fe_2) + i(fe_2, x3) + factor(fe_3)) |
     reference$formula == (y_01 ~ x1 + species + factor(fe_2) + i(fe_2, x2) + i(fe_2, x3) + factor(fe_3)))) {
     tol <- 0.5
   }
 
   testthat::test_that("feglm and glm have equal x1 coefficient", {
-<<<<<<< HEAD
     local_edition(2)
     expect_equal(coef(object)["x1"],
       coef(reference)["x1"],
       tolerance = tol,
       scale = 1 # Absolute difference
-=======
-    expect_equal(coef(object)["x1"],
-      coef(reference)["x1"],
-      tolerance = tol
->>>>>>> a851cedfa1a705cb6b6e2fc57f8f4e707bd6d110
     )
   })
 
   testthat::test_that("feglm and glm have equal standard errors", {
-<<<<<<< HEAD
     local_edition(2)
     expect_equal(se(object, se = "st", dof = dof(adj = adj))["x1"],
       se(reference)["x1"],
       tolerance = tol,
       scale = 1 # Absolute difference
-=======
-    expect_equal(se(object, se = "st", dof = dof(adj = adj))["x1"],
-      se(reference)["x1"],
-      tolerance = tol
->>>>>>> a851cedfa1a705cb6b6e2fc57f8f4e707bd6d110
     )
   })
 
   testthat::test_that("Equal p-values between feglm and glm", {
-<<<<<<< HEAD
     local_edition(2)
     expect_equal(pvalue(object, se = "st", dof = dof(adj = adj))["x1"],
       pvalue(reference)["x1"],
       tolerance = tol,
       scale = 1 # Absolute difference
-=======
-    expect_equal(pvalue(object, se = "st", dof = dof(adj = adj))["x1"],
-      pvalue(reference)["x1"],
-      tolerance = tol
->>>>>>> a851cedfa1a705cb6b6e2fc57f8f4e707bd6d110
     )
   })
 }
@@ -130,10 +83,7 @@ expect_negbin_equal <- function(object, reference) {
   adj <- 1
 
   testthat::test_that("Equal x1 coefficient between fenegbin and MASS::glm.nb", {
-<<<<<<< HEAD
     local_edition(2)
-=======
->>>>>>> a851cedfa1a705cb6b6e2fc57f8f4e707bd6d110
     expect_equal(coef(object)["x1"],
       coef(reference)["x1"],
       tolerance = tol
@@ -141,32 +91,20 @@ expect_negbin_equal <- function(object, reference) {
   })
 
   testthat::test_that("Equal standard errors between fenegbin and MASS::glm.nb", {
-<<<<<<< HEAD
     local_edition(2)
     expect_equal(se(object, se = "st", dof = dof(adj = adj))["x1"],
       se(reference)["x1"],
       tolerance = tol,
       scale = 1
-=======
-    expect_equal(se(object, se = "st", dof = dof(adj = adj))["x1"],
-      se(reference)["x1"],
-      tolerance = tol
->>>>>>> a851cedfa1a705cb6b6e2fc57f8f4e707bd6d110
     )
   })
 
   testthat::test_that("Equal p-values between between fenegbin and MASS::glm.nb", {
-<<<<<<< HEAD
     local_edition(2)
     expect_equal(pvalue(object, se = "st", dof = dof(adj = adj))["x1"],
       pvalue(reference)["x1"],
       tolerance = tol * 10,
       scale = 1
-=======
-    expect_equal(pvalue(object, se = "st", dof = dof(adj = adj))["x1"],
-      pvalue(reference)["x1"],
-      tolerance = tol * 10
->>>>>>> a851cedfa1a705cb6b6e2fc57f8f4e707bd6d110
     )
   })
 }

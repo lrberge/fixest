@@ -48,7 +48,4 @@ patrick::with_parameters_test_that("Two-Way Clustered VarCov estimations are cor
   },
   .cases = vcov_cases3()
 )
-<<<<<<< HEAD
 
-=======
->>>>>>> a851cedfa1a705cb6b6e2fc57f8f4e707bd6d110

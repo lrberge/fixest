@@ -295,7 +295,6 @@ V_matrix <- function(Mi, M_t, M_it, c_adj, cdf) {
   return(V)
 }
 
-<<<<<<< HEAD
 ## Database function for test-sandwich.R
 
 vcov_db = function(k){
@@ -362,51 +361,6 @@ fixest_mod_select = function(model, fmla, data, famly = NULL, weights = NULL){
 }
 
 
-=======
-
-## Cases function for test-nointercept.R
-
-nointercept_cases = function(){
-  f_rhs = c("-1 + x1 + i(fe1)",
-            "-1 + x1 + factor(fe1)",
-            "-1 + x1 + i(fe1) + i(fe2)")
-  fmly = c("gaussian", "poisson", "Gamma")
-  DF = data.frame(model = "ols", family = "NULL", formula = paste("y",f_rhs, sep = " ~ "),
-                  test_name = paste("lm", paste("formula",c(1,2,3)), sep = " - ") )
-  for(k in 1:3){
-    f_lhs = ifelse(fmly[k] == "gaussian","y", "y_r")
-    DF = rbind(DF,data.frame(model = "glm",
-                             family = fmly[k],
-                             formula = paste(f_lhs,f_rhs, sep = " ~ "),
-                             test_name = paste("glm", fmly[k],paste("formula",c(1,2,3)), sep = " - ")))
-  }
-  DF = rbind(DF, data.frame(model = "negbin",
-                            family = "NULL",
-                            formula = paste("y",f_rhs, sep = " ~ "),
-                            test_name = paste("negbin", paste("formula",c(1,2,3)), sep = " - ")))
-  return(DF)
-}
-
-# fitting function selection for test-nointercept.R
-fixest_mod_select = function(model, fmla, data, famly = NULL, weights = NULL){
-  fmla = as.formula(fmla)
-  if(model == "ols"){
-    res = feols(fml = fmla, data = data, weights = weights)
-    return(res)
-  }else if(model == "glm"){
-    res = feglm(fml = fmla,data = base, family = famly, weights = weights)
-    return(res)
-  }else if(model == "negbin"){
-    res = fenegbin(fml = fmla, data = data, weights = weights)
-    return(res)
-  }else if(model == "mlm"){
-    res = femlm(fml = fmla, data = data, family = famly)
-    return(res)
-  }
-}
-
-
->>>>>>> a851cedfa1a705cb6b6e2fc57f8f4e707bd6d110
 stats_mod_select = function(model, fmla, data, famly = NULL, weights = NULL){
   fmla = as.formula(fmla)
   if(model == "ols"){
@@ -416,16 +370,11 @@ stats_mod_select = function(model, fmla, data, famly = NULL, weights = NULL){
     res = glm(formula = fmla,data = base, family = famly, weights = weights)
     return(res)
   }else if(model == "negbin"){
-<<<<<<< HEAD
     res = MASS::glm.nb(formula = fmla, data = data)
-=======
-    res = MASS::glm.nb(formula = fmla, data = data, weights = weights)
->>>>>>> a851cedfa1a705cb6b6e2fc57f8f4e707bd6d110
     return(res)
   }
 }
 
-<<<<<<< HEAD
 ### Cases for test-residuals.R
 
 
@@ -446,36 +395,6 @@ residuals_cases = function(){
              wghts = wghts,
              tol = tol,
              test_name = paste(method, paste("weight", do_weight, sep = "="), sep =" - " ) )
-=======
-residuals_cases = function(){
-  method <- c("ols", "glm", "mlm", "negbin")
-  fmla_fe = "y_int ~ x1 | species"
-  fmla_stats = "y_int ~ x1 + species"
-  do_weight <- c(FALSE, TRUE)
-  wghts <- c("NULL", "base$w")
-
-  DF = data.frame(method = "ols",
-                  formula_fe = fmla_fe,
-                  formula_stats = fmla_stats,
-                  family = "NULL",
-                  do_weight = do_weight,
-                  wghts = wghts,
-                  tol = 1e-6,
-                  test_name = paste("ols", paste("weight", do_weight, sep = "="), sep =" - " ))
-  for(k in 2:length(method)){
-    tol = ifelse(method[k] == "negbin", 1e-2, 1e-6)
-    fmly = ifelse((method[k] == "glm" | method[k] == "mlm"), "poisson", "NULL")
-    DF = rbind(DF,data.frame(method = method[k],
-                             formula_fe = fmla_fe,
-                             formula_stats = fmla_stats,
-                             family = fmly,
-                             do_weight = do_weight,
-                             wghts = wghts,
-                             tol = tol,
-                             test_name = paste(method[k], paste("weight", do_weight, sep = "="), sep =" - " )))
-  }
-
->>>>>>> a851cedfa1a705cb6b6e2fc57f8f4e707bd6d110
   return(DF)
 }
 
