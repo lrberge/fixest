@@ -8,6 +8,7 @@ my_offset <- feglm_cases()[K, ]$my_offset
 my_weight <- feglm_cases()[K, ]$my_weight
 
 rm(fml_fixest, fml_stats, my_family, my_offset, my_weight)
+<<<<<<< HEAD
 
 
 
@@ -67,3 +68,5 @@ compare(pvalue(object, se = "st", dof = dof(adj = adj))["x1"],
         pvalue(reference)["x1"],
         tolerance = tol,
         scale = pvalue(reference)["x1"])
+=======
+>>>>>>> a851cedfa1a705cb6b6e2fc57f8f4e707bd6d110
