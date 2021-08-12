@@ -86,7 +86,8 @@ expect_negbin_equal <- function(object, reference) {
     local_edition(2)
     expect_equal(coef(object)["x1"],
       coef(reference)["x1"],
-      tolerance = tol
+      tolerance = tol,
+      scale = 1
     )
   })
 
