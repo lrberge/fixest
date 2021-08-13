@@ -8,7 +8,7 @@ patrick::with_parameters_test_that("feols and lm coefficients, Standard errors a
   {
     res <- fixest::feols(as.formula(fml_fixest), base, weights = ev_par(my_weight), offset = ev_par(my_offset))
     res_bis <- lm(as.formula(fml_stats), base, weights = ev_par(my_weight), offset = ev_par(my_offset))
-    expect_model_equal(res, res_bis, method = "lm")
+    expect_model_equal(res, res_bis, method = "ols")
     expect_equal(1, 1)
   },
   .cases = ols_cases()

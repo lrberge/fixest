@@ -92,6 +92,38 @@ datab7 <- function() {
   return(base)
 }
 
+datab8 <- function(){
+  set.seed(0)
+  base <- iris
+  names(base) <- c("y", "x1", "x2", "x3", "species")
+  base$z <- sample(5, 150, TRUE)
+  base$species_na <- base$species
+  base$species_na[base$species == "setosa"] <- NA
+  return(base)
+}
+
+# Database for test-demean.R
+datab9 <- function() {
+  data(trade)
+  base <- trade
+  base$ln_euros <- log(base$Euros)
+  base$ln_dist <- log(base$dist_km)
+  return(base)
+}
+
+# Database for test-hatvalues.R
+datab10 <- function() {
+  set.seed(0)
+  x <- sin(1:10)
+  y <- rnorm(10)
+  y_int <- rpois(10, 2)
+
+  return(data.frame(y = y, y_int = y_int, x))
+}
+
+
+
+
 ev_par <- function(string) {
   eval(parse(text = string))
 }
@@ -317,7 +349,6 @@ V_matrix <- function(Mi, M_t, M_it, c_adj, cdf) {
 }
 
 ## Database function for test-sandwich.R
-
 vcov_db <- function(k) {
   data(trade)
   if (k == 1) {
@@ -375,34 +406,34 @@ nointercept_cases <- function() {
 }
 
 # fitting function selection for test-nointercept.R
-fixest_mod_select <- function(model, fmla, data, famly = NULL, weights = NULL) {
+fixest_mod_select <- function(model, fmla, base, famly = NULL, weights = NULL) {
   fmla <- as.formula(fmla)
   if (model == "ols") {
-    res <- feols(fml = fmla, data = data, weights = weights)
+    res <- feols(fml = fmla, data = base, weights = weights)
     return(res)
   } else if (model == "glm") {
     res <- feglm(fml = fmla, data = base, family = famly, weights = weights)
     return(res)
   } else if (model == "negbin") {
-    res <- fenegbin(fml = fmla, data = data)
+    res <- fenegbin(fml = fmla, data = base)
     return(res)
   } else if (model == "mlm") {
-    res <- femlm(fml = fmla, data = data, family = famly)
+    res <- femlm(fml = fmla, data = base, family = famly)
     return(res)
   }
 }
 
 
-stats_mod_select <- function(model, fmla, data, famly = NULL, weights = NULL) {
+stats_mod_select <- function(model, fmla, base, famly = NULL, weights = NULL) {
   fmla <- as.formula(fmla)
   if (model == "ols") {
-    res <- lm(formula = fmla, data = data, weights = weights)
+    res <- lm(formula = fmla, data = base, weights = weights)
     return(res)
   } else if (model == "glm" | model == "mlm") {
     res <- glm(formula = fmla, data = base, family = famly, weights = weights)
     return(res)
   } else if (model == "negbin") {
-    res <- MASS::glm.nb(formula = fmla, data = data)
+    res <- MASS::glm.nb(formula = fmla, data = base)
     return(res)
   }
 }
@@ -564,5 +595,36 @@ collin_cases <- function() {
     DF_l[[k]] <- df
   }
   DF <- rbind(DF_l[[1]], DF_l[[2]])
+  return(DF)
+}
+
+
+## Cases function for test-hatvalues.R
+hatvalues_cases <- function() {
+  model = c("ols", "glm")
+  formulas = c("y ~ x", "y_int ~ x")
+  family = c("NULL", "poisson")
+
+  return(data.frame(model = model,
+                    formulas = formulas,
+                    family = family,
+                    test_name = paste(model, family, sep = " - ")))
+
+}
+
+## Cases function for test-sandwhich.R
+sandwcomp_cases = function() {
+  model = c("ols", "ols","glm","glm")
+  family = c("NULL", "NULL","poisson", "poisson")
+  fmlas = c("y ~ x1 + I(x1**2) + factor(id)",
+            "y ~ x1 + I(x1**2) | id",
+            "y_int ~ x1 + I(x1**2) + factor(id)",
+            "y_int ~ x1 + I(x1**2) | id")
+  FE = rep(c(FALSE,TRUE),2)
+  DF = data.frame(test_name = paste(model, paste("FE = ", FE  )),
+                  model = model,
+                  family = family,
+                  fmlas = fmlas,
+                  FE = FE)
   return(DF)
 }

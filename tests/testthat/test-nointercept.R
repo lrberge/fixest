@@ -6,7 +6,7 @@ patrick::with_parameters_test_that("fitting without intercept works properly",
     res <- fixest_mod_select(
       model = model,
       fmla = formula,
-      data = base,
+      base = base,
       famly = family
     )
     expect_model_nointercept(res)

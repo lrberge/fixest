@@ -115,7 +115,7 @@ expect_equal2 <- function(object, expected, tolerance = if (edition_get() >= 3) 
 # }
 
 expect_model_equal <- function(object, reference, method) {
-  model <- ifelse(method != "lm", reference$family$family, method)
+  model <- ifelse(method != "ols", reference$family$family, method)
   tol <- ifelse(model == "binomial", 3e-5, 1e-5)
   tol <- ifelse(method == "negbin", 1e-2, tol)
   if (model == "binomial") {

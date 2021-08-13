@@ -87,3 +87,56 @@ testthat::test_that("Aliases works properly", {
   # testthat::expect_equal(se_hetero, se_hc1)
 })
 
+
+
+## Testing compatibility between fixest and sandwich
+
+## Only vcovCL is tested. Extend to se = hetero, twoway, threeway
+## Parametrize for future extension
+
+data(base_did)
+base = base_did; base$y_int = as.integer(base$y) + 20
+
+patrick::with_parameters_test_that("fixest is compatible with sandwich's vcov",
+                                   {
+                                     est <- fixest_mod_select(
+                                       model = model,
+                                       fmla = fmlas,
+                                       base = base,
+                                       famly = family,
+                                       weights = NULL
+                                     )
+
+                                     if(isFALSE(FE)){
+                                       # test(vcov(est, cluster = ~id), vcovCL(est, cluster = ~id, type = "HC1"))
+                                       expect_equal(vcov(est, cluster = ~id), vcovCL(est, cluster = ~id, type = "HC1"))
+                                     } else {
+                                       # test(vcov(est, cluster = ~id, dof = dof(adj = FALSE)), vcovCL(est, cluster = ~id))
+                                       expect_equal(vcov(est, cluster = ~id, dof = dof(adj = FALSE)), vcovCL(est, cluster = ~id))
+                                     }
+                                   },
+                                   .cases = sandwcomp_cases()
+                                   )
+
+# K = 2
+# casos = sandwcomp_cases()[K,]
+# model = casos$model
+# fmlas = casos$fmlas
+# fmla = as.formula(fmlas)
+# # data = base
+# famly = casos$family
+# Data = base
+# est <- fixest_mod_select(
+#   model = model,
+#   fmla = fmlas,
+#   Data = base,
+#   famly = famly,
+#   weights = NULL
+# )
+#
+# expect_equal(vcov(est, cluster = ~id), vcovCL(est, cluster = ~id, type = "HC1"))
+# expect_equal(vcov(est, cluster = ~id, dof = dof(adj = FALSE)), vcovCL(est, cluster = ~id))
+#
+# ## I must call my database with the same name of fixest_mod_select Data argument
+# ## For some reason vcovCL doesnt work without the previous detail
+

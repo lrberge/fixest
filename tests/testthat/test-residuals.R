@@ -7,14 +7,14 @@ patrick::with_parameters_test_that("Fitting without intercept works properly",
     fe_mod <- fixest_mod_select(
       model = method,
       fmla = formula_fe,
-      data = base,
+      base = base,
       famly = family,
       weights = ev_par(wghts)
     )
     stat_mod <- stats_mod_select(
       model = method,
       fmla = formula_stats,
-      data = base,
+      base = base,
       famly = family,
       weights = ev_par(wghts)
     )

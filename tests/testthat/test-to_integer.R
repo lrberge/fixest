@@ -1,26 +1,44 @@
-####
-#### To Integer ####
-####
+base = datab8()
 
-chunk("TO_INTEGER")
+## All in one test
+# test_that("to_integer creates the correct number of elements",
+#           {
+#               m1 <- to_integer(base$species)
+#               m2 <- to_integer(base$species, base$z)
+#               m3 <- to_integer(base$species_na, base$z)
+#               m4 <- to_integer(base$species_na, base$z, add_items = TRUE, items.list = TRUE)
+#               M = c(length(unique(m1)),
+#                     length(unique(m2)),
+#                     length(unique(m3)),
+#                     length(unique(m4$items)))
+#               expect_equal(M,c(3,15,11,10))
+#
+#           })
 
-base <- iris
-names(base) <- c("y", "x1", "x2", "x3", "species")
-base$z <- sample(5, 150, TRUE)
 
-# Normal
-m <- to_integer(base$species)
-test(length(unique(m)), 3)
+## Separate in different tests?
 
-m <- to_integer(base$species, base$z)
-test(length(unique(m)), 15)
+test_that("to_integer creates the correct number of elements",
+          {
+              m <- to_integer(base$species)
+              expect_equal(length(unique(m)),3)
 
-# with NA
-base$species_na <- base$species
-base$species_na[base$species == "setosa"] <- NA
+          })
+test_that("to_integer creates the correct number of elements with combined factors",
+          {
+              m <- to_integer(base$species, base$z)
+              expect_equal(length(unique(m)),15)
 
-m <- to_integer(base$species_na, base$z)
-test(length(unique(m)), 11)
+          })
+test_that("to_integer creates the correct number of elements with NA presence",
+          {
+              m <- to_integer(base$species_na, base$z)
+              expect_equal(length(unique(m)),11)
 
-m <- to_integer(base$species_na, base$z, add_items = TRUE, items.list = TRUE)
-test(length(m$items), 10)
+          })
+test_that("to_integer creates the correct number of elements with NA presence and added items",
+          {
+              m <- to_integer(base$species_na, base$z, add_items = TRUE, items.list = TRUE)
+              expect_equal(length(unique(m$items)),10)
+
+          })
