@@ -67,12 +67,12 @@ datab5 <- function() {
   base <- iris
   names(base) <- c("y", "x1", "x2", "x3", "species")
   base$y_int <- as.integer(base$y) + 1
-  base$w = as.numeric(base$species)
+  base$w <- as.numeric(base$species)
   return(base)
 }
 
 # database for test-fixef.R
-datab6 = function(){
+datab6 <- function() {
   set.seed(0)
   base <- iris
   names(base) <- c("y", "x1", "x2", "x3", "species")
@@ -83,7 +83,7 @@ datab6 = function(){
 }
 
 # database for test-collinearity.R
-datab7 = function(){
+datab7 <- function() {
   base <- iris
   names(base) <- c("y", "x1", "x2", "x3", "species")
   base$constant <- 5
@@ -318,80 +318,91 @@ V_matrix <- function(Mi, M_t, M_it, c_adj, cdf) {
 
 ## Database function for test-sandwich.R
 
-vcov_db = function(k){
+vcov_db <- function(k) {
   data(trade)
-  if(k == 1){
-    base = trade
+  if (k == 1) {
+    base <- trade
     return(base)
-  }else if(k == 2){
-    base = trade
-    base$Euros[base$Origin == "FR"] = 0
+  } else if (k == 2) {
+    base <- trade
+    base$Euros[base$Origin == "FR"] <- 0
     return(base)
-  }else if(k == 3){
-    base = trade
-    base$Euros[base$Origin == "FR"] = 0
-    base$Euros_na = base$Euros ; base$Euros_na[sample(nrow(base), 50)] = NA
-    base$Destination_na = base$Destination ; base$Destination_na[sample(nrow(base), 50)] = NA
-    base$Origin_na = base$Origin ; base$Origin_na[sample(nrow(base), 50)] = NA
-    base$Product_na = base$Product ; base$Product_na[sample(nrow(base), 50)] = NA
+  } else if (k == 3) {
+    base <- trade
+    base$Euros[base$Origin == "FR"] <- 0
+    base$Euros_na <- base$Euros
+    base$Euros_na[sample(nrow(base), 50)] <- NA
+    base$Destination_na <- base$Destination
+    base$Destination_na[sample(nrow(base), 50)] <- NA
+    base$Origin_na <- base$Origin
+    base$Origin_na[sample(nrow(base), 50)] <- NA
+    base$Product_na <- base$Product
+    base$Product_na[sample(nrow(base), 50)] <- NA
     return(base)
-
   }
 }
 
 
 ## Cases function for test-nointercept.R
 
-nointercept_cases = function(){
-  f_rhs = c("-1 + x1 + i(fe1)",
-            "-1 + x1 + factor(fe1)",
-            "-1 + x1 + i(fe1) + i(fe2)")
-  fmly = c("gaussian", "poisson", "Gamma")
-  DF = data.frame(model = "ols", family = "NULL", formula = paste("y",f_rhs, sep = " ~ "),
-                  test_name = paste("lm", paste("formula",c(1,2,3)), sep = " - ") )
-  for(k in 1:3){
-    f_lhs = ifelse(fmly[k] == "gaussian","y", "y_r")
-    DF = rbind(DF,data.frame(model = "glm",
-                             family = fmly[k],
-                             formula = paste(f_lhs,f_rhs, sep = " ~ "),
-                             test_name = paste("glm", fmly[k],paste("formula",c(1,2,3)), sep = " - ")))
+nointercept_cases <- function() {
+  f_rhs <- c(
+    "-1 + x1 + i(fe1)",
+    "-1 + x1 + factor(fe1)",
+    "-1 + x1 + i(fe1) + i(fe2)"
+  )
+  fmly <- c("gaussian", "poisson", "Gamma")
+  DF <- data.frame(
+    model = "ols", family = "NULL", formula = paste("y", f_rhs, sep = " ~ "),
+    test_name = paste("lm", paste("formula", c(1, 2, 3)), sep = " - ")
+  )
+  for (k in 1:3) {
+    f_lhs <- ifelse(fmly[k] == "gaussian", "y", "y_r")
+    DF <- rbind(DF, data.frame(
+      model = "glm",
+      family = fmly[k],
+      formula = paste(f_lhs, f_rhs, sep = " ~ "),
+      test_name = paste("glm", fmly[k], paste("formula", c(1, 2, 3)), sep = " - ")
+    ))
   }
-  DF = rbind(DF, data.frame(model = "negbin",
-                            family = "NULL",
-                            formula = paste("y",f_rhs, sep = " ~ "),
-                            test_name = paste("negbin", paste("formula",c(1,2,3)), sep = " - ")))
+  DF <- rbind(DF, data.frame(
+    model = "negbin",
+    family = "NULL",
+    formula = paste("y", f_rhs, sep = " ~ "),
+    test_name = paste("negbin", paste("formula", c(1, 2, 3)), sep = " - ")
+  ))
   return(DF)
 }
 
 # fitting function selection for test-nointercept.R
-fixest_mod_select = function(model, fmla, data, famly = NULL, weights = NULL){
-  fmla = as.formula(fmla)
-  if(model == "ols"){
-    res = feols(fml = fmla, data = data, weights = weights)
+fixest_mod_select <- function(model, fmla, data, famly = NULL, weights = NULL) {
+  fmla <- as.formula(fmla)
+  if (model == "ols") {
+    res <- feols(fml = fmla, data = data, weights = weights)
     return(res)
-  }else if(model == "glm"){
-    res = feglm(fml = fmla,data = base, family = famly, weights = weights)
+  } else if (model == "glm") {
+    res <- feglm(fml = fmla, data = base, family = famly, weights = weights)
     return(res)
-  }else if(model == "negbin"){
-    res = fenegbin(fml = fmla, data = data)
+  } else if (model == "negbin") {
+    res <- fenegbin(fml = fmla, data = data)
     return(res)
-  }else if(model == "mlm"){
-    res = femlm(fml = fmla, data = data, family = famly)
+  } else if (model == "mlm") {
+    res <- femlm(fml = fmla, data = data, family = famly)
     return(res)
   }
 }
 
 
-stats_mod_select = function(model, fmla, data, famly = NULL, weights = NULL){
-  fmla = as.formula(fmla)
-  if(model == "ols"){
-    res = lm(formula = fmla, data = data, weights = weights)
+stats_mod_select <- function(model, fmla, data, famly = NULL, weights = NULL) {
+  fmla <- as.formula(fmla)
+  if (model == "ols") {
+    res <- lm(formula = fmla, data = data, weights = weights)
     return(res)
-  }else if(model == "glm" | model == "mlm"){
-    res = glm(formula = fmla,data = base, family = famly, weights = weights)
+  } else if (model == "glm" | model == "mlm") {
+    res <- glm(formula = fmla, data = base, family = famly, weights = weights)
     return(res)
-  }else if(model == "negbin"){
-    res = MASS::glm.nb(formula = fmla, data = data)
+  } else if (model == "negbin") {
+    res <- MASS::glm.nb(formula = fmla, data = data)
     return(res)
   }
 }
@@ -399,23 +410,25 @@ stats_mod_select = function(model, fmla, data, famly = NULL, weights = NULL){
 ### Cases for test-residuals.R
 
 
-residuals_cases = function(){
-  method = c(rep("ols",2), rep("glm",2), "mlm", "negbin")
-  formula_fe = "y_int ~ x1 | species"
-  formula_stats = "y_int ~ x1 + species"
-  famly = c(rep("NULL",2), rep("poisson",3), rep("NULL",1))
-  do_weight = c(rep(c(FALSE,TRUE),2), FALSE, FALSE)
-  wghts = c(rep(c("NULL", "base$w"), 2), rep("NULL",2))
-  tol = c(rep(1e-6,5), 1e-2)
+residuals_cases <- function() {
+  method <- c(rep("ols", 2), rep("glm", 2), "mlm", "negbin")
+  formula_fe <- "y_int ~ x1 | species"
+  formula_stats <- "y_int ~ x1 + species"
+  famly <- c(rep("NULL", 2), rep("poisson", 3), rep("NULL", 1))
+  do_weight <- c(rep(c(FALSE, TRUE), 2), FALSE, FALSE)
+  wghts <- c(rep(c("NULL", "base$w"), 2), rep("NULL", 2))
+  tol <- c(rep(1e-6, 5), 1e-2)
 
-  DF = data.frame(method = method,
-             formula_fe = formula_fe,
-             formula_stats = formula_stats,
-             family = famly,
-             do_weight = do_weight,
-             wghts = wghts,
-             tol = tol,
-             test_name = paste(method, paste("weight", do_weight, sep = "="), sep =" - " ) )
+  DF <- data.frame(
+    method = method,
+    formula_fe = formula_fe,
+    formula_stats = formula_stats,
+    family = famly,
+    do_weight = do_weight,
+    wghts = wghts,
+    tol = tol,
+    test_name = paste(method, paste("weight", do_weight, sep = "="), sep = " - ")
+  )
   return(DF)
 }
 
@@ -464,44 +477,54 @@ get_coef <- function(all_coef, x) {
 
 ## fixef.strings
 
-fixef.strings = function(){
-  AuxL1 = list(c("species", "fe_bis"),
-               c("species", "fe_bis", "fe_bis[[x3]]"),
-               c("species", "fe_bis", "fe_bis[[x3]]", "species[[x2]]"),
-               c("species", "fe_bis", "fe_bis[[x2]]", "fe_bis[[x3]]"),
-               c("species", "fe_bis", "fe_bis[[x2]]", "fe_bis[[x3]]"))
+fixef.strings <- function() {
+  AuxL1 <- list(
+    c("species", "fe_bis"),
+    c("species", "fe_bis", "fe_bis[[x3]]"),
+    c("species", "fe_bis", "fe_bis[[x3]]", "species[[x2]]"),
+    c("species", "fe_bis", "fe_bis[[x2]]", "fe_bis[[x3]]"),
+    c("species", "fe_bis", "fe_bis[[x2]]", "fe_bis[[x3]]")
+  )
 
-  AuxL2 = list(c("species","factor\\(fe_bis\\)"),
-               c("species","factor\\(fe_bis\\)", "fe_bis::|:x3"),
-               c("^species(?=[^:])","^factor\\(fe_bis\\)","fe_bis::|:x3","species::|:x2"),
-               c("^species","^factor\\(fe_bis\\)","fe_bis::(?=.+x2)|:x2", "fe_bis::(?=.+x3)|:x3"),
-               c("^species","^factor\\(fe_bis\\)","fe_bis::(?=.+x2)|:x2", "fe_bis::(?=.+x3)|:x3"))
+  AuxL2 <- list(
+    c("species", "factor\\(fe_bis\\)"),
+    c("species", "factor\\(fe_bis\\)", "fe_bis::|:x3"),
+    c("^species(?=[^:])", "^factor\\(fe_bis\\)", "fe_bis::|:x3", "species::|:x2"),
+    c("^species", "^factor\\(fe_bis\\)", "fe_bis::(?=.+x2)|:x2", "fe_bis::(?=.+x3)|:x3"),
+    c("^species", "^factor\\(fe_bis\\)", "fe_bis::(?=.+x2)|:x2", "fe_bis::(?=.+x3)|:x3")
+  )
 
-  return(list(AuxL1,AuxL2))
+  return(list(AuxL1, AuxL2))
 }
 #### fixef cases for test-fixef.R
-fixef_cases = function(){
-  Fmlas1 = c("y ~ x1 + x2 | species + fe_bis",
-             "y ~ x1 + x2 | species + fe_bis[x3]",
-             "y ~ x1 | species[x2] + fe_bis[x3] + fe_ter",
-             "y ~ x1 | species + fe_bis[x2, x3] + fe_ter",
-             "y ~ x1 | species + fe_bis[x2, x3] + fe_ter"
+fixef_cases <- function() {
+  Fmlas1 <- c(
+    "y ~ x1 + x2 | species + fe_bis",
+    "y ~ x1 + x2 | species + fe_bis[x3]",
+    "y ~ x1 | species[x2] + fe_bis[x3] + fe_ter",
+    "y ~ x1 | species + fe_bis[x2, x3] + fe_ter",
+    "y ~ x1 | species + fe_bis[x2, x3] + fe_ter"
   )
-  Fmlas2 = c("y ~ -1 + x1 + x2 + species + factor(fe_bis)",
-             "y ~ -1 + x1 + x2 + species + factor(fe_bis) + i(fe_bis, x3)",
-             "y ~ -1 + x1 + species + i(species, x2) + factor(fe_bis) + i(fe_bis, x3) + factor(fe_ter)",
-             "y ~ x1 + species + factor(fe_bis) + i(fe_bis, x2) + i(fe_bis, x3) + factor(fe_ter)",
-             "y ~ x1 + species + factor(fe_bis) + i(fe_bis, x2) + i(fe_bis, x3) + factor(fe_ter)"
+  Fmlas2 <- c(
+    "y ~ -1 + x1 + x2 + species + factor(fe_bis)",
+    "y ~ -1 + x1 + x2 + species + factor(fe_bis) + i(fe_bis, x3)",
+    "y ~ -1 + x1 + species + i(species, x2) + factor(fe_bis) + i(fe_bis, x3) + factor(fe_ter)",
+    "y ~ x1 + species + factor(fe_bis) + i(fe_bis, x2) + i(fe_bis, x3) + factor(fe_ter)",
+    "y ~ x1 + species + factor(fe_bis) + i(fe_bis, x2) + i(fe_bis, x3) + factor(fe_ter)"
   )
-  K = seq(1:5)
-  DF = data.frame(formula1 = Fmlas1,
-                  formula2 = Fmlas2,
-                  K,
-                  test_name = c("With 2 x 1 FE",
-                                "With 1 FE + 1 FE 1 VS",
-                                "With 2 x (1 FE + 1 VS) + 1 FE",
-                                "With 2 x (1 FE) + 1 FE 2 VS",
-                                "Previous With weights"))
+  K <- seq(1:5)
+  DF <- data.frame(
+    formula1 = Fmlas1,
+    formula2 = Fmlas2,
+    K,
+    test_name = c(
+      "With 2 x 1 FE",
+      "With 1 FE + 1 FE 1 VS",
+      "With 2 x (1 FE + 1 VS) + 1 FE",
+      "With 2 x (1 FE) + 1 FE 2 VS",
+      "Previous With weights"
+    )
+  )
   return(DF)
 }
 
@@ -509,34 +532,37 @@ fixef_cases = function(){
 
 ### Cases function for test-collinearity.R
 
-collin_cases = function(){
-  useWeights = c("NULL", "base$w") # c(FALSE, TRUE)
-  model = c("ols", "glm")
-  use_fe = c(FALSE,TRUE)
-  fixest_formula1 = c(" ~ x1 + constant", " ~ x1 + constant | species")
-  stats_formula2 = c(" ~ x1 + constant", " ~ x1 + constant + species")
+collin_cases <- function() {
+  useWeights <- c("NULL", "base$w") # c(FALSE, TRUE)
+  model <- c("ols", "glm")
+  use_fe <- c(FALSE, TRUE)
+  fixest_formula1 <- c(" ~ x1 + constant", " ~ x1 + constant | species")
+  stats_formula2 <- c(" ~ x1 + constant", " ~ x1 + constant + species")
 
-  DF_l = list()
-  for(k in 1:2){
-    if(model[k] == "ols"){
-      fmlas1 = paste("y", fixest_formula1)
-      fmlas2 = paste("y", stats_formula2)
-    }else if(model[k] == "glm"){
-      fmlas1 = paste("y_int", fixest_formula1)
-      fmlas2 = paste("y_int", stats_formula2)
+  DF_l <- list()
+  for (k in 1:2) {
+    if (model[k] == "ols") {
+      fmlas1 <- paste("y", fixest_formula1)
+      fmlas2 <- paste("y", stats_formula2)
+    } else if (model[k] == "glm") {
+      fmlas1 <- paste("y_int", fixest_formula1)
+      fmlas2 <- paste("y_int", stats_formula2)
     }
-    df = expand.grid(use_fe = use_fe,
-                     useWeights = useWeights,
-                     stringsAsFactors = FALSE)
-    df_aux = data.frame(use_fe,fixest_formula1 = fmlas1, stats_formula1 = fmlas2)
-    df = dplyr::left_join(df, df_aux, by = "use_fe")
-    df$model = model[k]
-    df$test_name = paste(model[k],
-                         paste("weights=", df$useWeights),
-                         paste("use_fe=" ,df$use_fe),
-                         sep = " - ")
-    DF_l[[k]] = df
+    df <- expand.grid(
+      use_fe = use_fe,
+      useWeights = useWeights,
+      stringsAsFactors = FALSE
+    )
+    df_aux <- data.frame(use_fe, fixest_formula1 = fmlas1, stats_formula1 = fmlas2)
+    df <- dplyr::left_join(df, df_aux, by = "use_fe")
+    df$model <- model[k]
+    df$test_name <- paste(model[k],
+      paste("weights=", df$useWeights),
+      paste("use_fe=", df$use_fe),
+      sep = " - "
+    )
+    DF_l[[k]] <- df
   }
-  DF = rbind(DF_l[[1]], DF_l[[2]])
+  DF <- rbind(DF_l[[1]], DF_l[[2]])
   return(DF)
 }

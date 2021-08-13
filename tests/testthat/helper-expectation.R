@@ -1,8 +1,8 @@
 ## Ctrl + Alt + R to run all the script
 
-expect_equal2 = function(object, expected,tolerance= if (edition_get() >= 3) testthat_tolerance(), scale = NULL){
+expect_equal2 <- function(object, expected, tolerance = if (edition_get() >= 3) testthat_tolerance(), scale = NULL) {
   local_edition(2)
-  expect_equal(object, expected,tolerance = tolerance, scale = scale)
+  expect_equal(object, expected, tolerance = tolerance, scale = scale)
 }
 
 # expect_ols_equal <- function(object, reference) {
@@ -115,36 +115,36 @@ expect_equal2 = function(object, expected,tolerance= if (edition_get() >= 3) tes
 # }
 
 expect_model_equal <- function(object, reference, method) {
-  model = ifelse(method != "lm",  reference$family$family, method)
-  tol = ifelse(model == "binomial", 3e-5,1e-5)
-  tol = ifelse(method == "negbin", 1e-2,tol)
-  if (model == "binomial")  {
-    tol = ifelse((reference$formula == (y_01 ~ x1 + species + i(species, x2) + factor(fe_2) + i(fe_2, x3) + factor(fe_3)) |
-                    reference$formula == (y_01 ~ x1 + species + factor(fe_2) + i(fe_2, x2) + i(fe_2, x3) + factor(fe_3))),0.5,tol)
+  model <- ifelse(method != "lm", reference$family$family, method)
+  tol <- ifelse(model == "binomial", 3e-5, 1e-5)
+  tol <- ifelse(method == "negbin", 1e-2, tol)
+  if (model == "binomial") {
+    tol <- ifelse((reference$formula == (y_01 ~ x1 + species + i(species, x2) + factor(fe_2) + i(fe_2, x3) + factor(fe_3)) |
+      reference$formula == (y_01 ~ x1 + species + factor(fe_2) + i(fe_2, x2) + i(fe_2, x3) + factor(fe_3))), 0.5, tol)
   }
-  adj = ifelse(method == "glm", 0, 1)
+  adj <- ifelse(method == "glm", 0, 1)
 
   testthat::test_that("fixest and stats have equal x1 coefficient", {
     expect_equal2(coef(object)["x1"],
-                  coef(reference)["x1"],
-                  tolerance = tol,
-                  scale = 1 # Absolute difference
+      coef(reference)["x1"],
+      tolerance = tol,
+      scale = 1 # Absolute difference
     )
   })
 
   testthat::test_that("fixest and stats have equal standard errors", {
     expect_equal2(se(object, se = "st", dof = dof(adj = adj))["x1"],
-                  se(reference)["x1"],
-                  tolerance = tol,
-                  scale = 1 # Absolute difference
+      se(reference)["x1"],
+      tolerance = tol,
+      scale = 1 # Absolute difference
     )
   })
 
   testthat::test_that("fixest and stats have equal p-values", {
     expect_equal2(pvalue(object, se = "st", dof = dof(adj = adj))["x1"],
-                  pvalue(reference)["x1"],
-                  tolerance = tol,
-                  scale = 1 # Absolute difference
+      pvalue(reference)["x1"],
+      tolerance = tol,
+      scale = 1 # Absolute difference
     )
   })
 }
@@ -194,26 +194,36 @@ expect_equal_vcov <- function(est_pois) {
 
 ## Helper function for test-fixef.R
 
-expect_var0 = function(x,y){
-  expect_equal(var(x-y), 0)
+expect_var0 <- function(x, y) {
+  expect_equal(var(x - y), 0)
 }
 
-expect_fixef = function(all_coef,m_fe,k, str1, str2){
-  M = switch(as.character(k), "1" = 2, "2" = 3, "3" = 3, "4" = 4, "5" = 4)
-  for(i in 1:M){
+expect_fixef <- function(all_coef, m_fe, k, str1, str2) {
+  M <- switch(as.character(k),
+    "1" = 2,
+    "2" = 3,
+    "3" = 3,
+    "4" = 4,
+    "5" = 4
+  )
+  for (i in 1:M) {
     Cs <- get_coef(all_coef, str2[i])
-    test(var(Cs - m_fe[[ str1[i] ]][names(Cs)] ), 0, "~")
+    test(var(Cs - m_fe[[str1[i]]][names(Cs)]), 0, "~")
   }
-
 }
 
-expect_fixef = function(all_coef,m_fe,k, str1, str2){
-  M = switch(as.character(k), "1" = 2, "2" = 3, "3" = 3, "4" = 4, "5" = 4)
-  for(i in 1:M){
+expect_fixef <- function(all_coef, m_fe, k, str1, str2) {
+  M <- switch(as.character(k),
+    "1" = 2,
+    "2" = 3,
+    "3" = 3,
+    "4" = 4,
+    "5" = 4
+  )
+  for (i in 1:M) {
     Cs <- get_coef(all_coef, str2[i])
 
-    expect_equal2(var(Cs - m_fe[[ str1[i] ]][names(Cs)] ), 0, scale = 1)
-    #test(var(Cs - m_fe[[ str1[i] ]][names(Cs)] ), 0, "~")
+    expect_equal2(var(Cs - m_fe[[str1[i]]][names(Cs)]), 0, scale = 1)
+    # test(var(Cs - m_fe[[ str1[i] ]][names(Cs)] ), 0, "~")
   }
-
 }
