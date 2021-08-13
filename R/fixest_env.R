@@ -2916,6 +2916,7 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, spl
 
     }
 
+    new_order = 1:Q
     if(multi_lhs == FALSE || family == "gaussian"){
         #
         # we save the fixed-effects IDs + sizes (to be returned in "res") [original order!]
@@ -2957,15 +2958,14 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, spl
                 slope_flag = slope_flag[new_order]
             }
 
-        } else {
-            new_order = 1:Q
         }
     }
 
     # saving
     res = list(Q = Q, fixef_id = fixef_id, fixef_names = fixef_names, sum_y_all = sum_y_all,
                fixef_sizes = fixef_sizes, fixef_table = fixef_table, obs2remove = obs2remove,
-               fixef_removed = fixef_removed, message_fixef = message_fixef, lhs = lhs)
+               fixef_removed = fixef_removed, message_fixef = message_fixef, lhs = lhs,
+               new_order = new_order)
 
     res$slope_variables = slope_variables
     res$slope_flag = slope_flag
@@ -2973,7 +2973,6 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, spl
     if(multi_lhs == FALSE || family == "gaussian"){
         res$fixef_id_res = fixef_id_res
         res$fixef_sizes_res = fixef_sizes_res
-        res$new_order = new_order
     }
 
     return(res)
