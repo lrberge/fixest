@@ -1013,11 +1013,13 @@ names(base) <- c("y", "x1", "x2", "x3", "species")
 
 tab <- c("versicolor" = 5, "setosa" = 0, "virginica" = -5)
 
+# a and b are te parameters to be estimated
 fun_nl <- function(a, b, spec) {
   res <- as.numeric(tab[spec])
   a * res + b * res^2
 }
 
+## Adding a linear part in fun_nl -> E(Y) = beta0 + beta1*x1 + a*species + b*specie^2
 est_nl <- feNmlm(y ~ x1, base, NL.fml = ~ fun_nl(a, b, species), NL.start = 1, family = "gaussian")
 
 base$var_spec <- as.numeric(tab[base$species])

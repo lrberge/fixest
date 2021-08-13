@@ -99,7 +99,7 @@ base = base_did; base$y_int = as.integer(base$y) + 20
 
 patrick::with_parameters_test_that("fixest is compatible with sandwich's vcov",
                                    {
-                                     est <- fixest_mod_select(
+                                     est <- fixest_mod_select2(
                                        model = model,
                                        fmla = fmlas,
                                        base = base,
@@ -118,7 +118,7 @@ patrick::with_parameters_test_that("fixest is compatible with sandwich's vcov",
                                    .cases = sandwcomp_cases()
                                    )
 
-# K = 2
+# K = 1
 # casos = sandwcomp_cases()[K,]
 # model = casos$model
 # fmlas = casos$fmlas
@@ -129,7 +129,7 @@ patrick::with_parameters_test_that("fixest is compatible with sandwich's vcov",
 # est <- fixest_mod_select(
 #   model = model,
 #   fmla = fmlas,
-#   Data = base,
+#   base = base,
 #   famly = famly,
 #   weights = NULL
 # )

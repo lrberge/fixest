@@ -121,6 +121,16 @@ datab10 <- function() {
   return(data.frame(y = y, y_int = y_int, x))
 }
 
+# Database for test-subset.R
+datab11 = function(){
+  set.seed(5)
+  base <- iris
+  names(base) <- c("y", "x1", "x2", "x3", "species")
+  base$fe_bis <- sample(letters, 150, TRUE)
+  base$x4 <- rnorm(150)
+  base$x1[sample(150, 5)] <- NA
+  return(base)
+}
 
 
 
@@ -406,7 +416,28 @@ nointercept_cases <- function() {
 }
 
 # fitting function selection for test-nointercept.R
-fixest_mod_select <- function(model, fmla, base, famly = NULL, weights = NULL) {
+fixest_mod_select <- function(model, fmla, base, famly = NULL, weights = NULL, subset = NULL) {
+  fmla <- as.formula(fmla)
+  if (model == "ols") {
+    res <- feols(fml = fmla, data = base, weights = weights, subset = subset)
+    return(res)
+  } else if (model == "glm") {
+    res <- feglm(fml = fmla, data = base, family = famly, weights = weights, subset = subset)
+    return(res)
+  } else if (model == "negbin") {
+    res <- fenegbin(fml = fmla, data = base, subset = subset)
+    return(res)
+  } else if (model == "femlm") {
+    res <- femlm(fml = fmla, data = base, family = famly, subset = subset)
+    return(res)
+  } else if (model == "feNmlm"){
+    res <- feNmlm(fml = fmla, data = base, family = famly, subset = subset)
+  }
+}
+
+## test-sandwich.R doesnt work with the subset argument (even if it is just ommited)
+## Its a strange error! The following version of fixest_mod_slect omits subset argument
+fixest_mod_select2 <- function(model, fmla, base, famly = NULL, weights = NULL) {
   fmla <- as.formula(fmla)
   if (model == "ols") {
     res <- feols(fml = fmla, data = base, weights = weights)
@@ -417,11 +448,14 @@ fixest_mod_select <- function(model, fmla, base, famly = NULL, weights = NULL) {
   } else if (model == "negbin") {
     res <- fenegbin(fml = fmla, data = base)
     return(res)
-  } else if (model == "mlm") {
+  } else if (model == "femlm") {
     res <- femlm(fml = fmla, data = base, family = famly)
     return(res)
+  } else if (model == "feNmlm"){
+    res <- feNmlm(fml = fmla, data = base, family = famly)
   }
 }
+
 
 
 stats_mod_select <- function(model, fmla, base, famly = NULL, weights = NULL) {
@@ -429,7 +463,7 @@ stats_mod_select <- function(model, fmla, base, famly = NULL, weights = NULL) {
   if (model == "ols") {
     res <- lm(formula = fmla, data = base, weights = weights)
     return(res)
-  } else if (model == "glm" | model == "mlm") {
+  } else if (model == "glm" | model == "femlm") {
     res <- glm(formula = fmla, data = base, family = famly, weights = weights)
     return(res)
   } else if (model == "negbin") {
@@ -442,7 +476,7 @@ stats_mod_select <- function(model, fmla, base, famly = NULL, weights = NULL) {
 
 
 residuals_cases <- function() {
-  method <- c(rep("ols", 2), rep("glm", 2), "mlm", "negbin")
+  method <- c(rep("ols", 2), rep("glm", 2), "femlm", "negbin")
   formula_fe <- "y_int ~ x1 | species"
   formula_stats <- "y_int ~ x1 + species"
   famly <- c(rep("NULL", 2), rep("poisson", 3), rep("NULL", 1))
@@ -462,41 +496,6 @@ residuals_cases <- function() {
   )
   return(DF)
 }
-
-# Automatized generation of cases
-# residuals_cases = function(){
-#   method <- c("ols", "glm", "mlm", "negbin")
-#   fmla_fe = "y_int ~ x1 | species"
-#   fmla_stats = "y_int ~ x1 + species"
-#   do_weight <- c(FALSE, TRUE)
-#   wghts <- c("NULL", "base$w")
-#
-#   DF = data.frame(method = "ols",
-#                   formula_fe = fmla_fe,
-#                   formula_stats = fmla_stats,
-#                   family = "NULL",
-#                   do_weight = do_weight,
-#                   wghts = wghts,
-#                   tol = 1e-6,
-#                   test_name = paste("ols", paste("weight", do_weight, sep = "="), sep =" - " ))
-#   for(k in 2:length(method)){
-#     tol = ifelse(method[k] == "negbin", 1e-2, 1e-6)
-#     fmly = ifelse((method[k] == "glm" | method[k] == "mlm"), "poisson", "NULL")
-#     DF = rbind(DF,data.frame(method = method[k],
-#                              formula_fe = fmla_fe,
-#                              formula_stats = fmla_stats,
-#                              family = fmly,
-#                              do_weight = do_weight,
-#                              wghts = wghts,
-#                              tol = tol,
-#                              test_name = paste(method[k], paste("weight", do_weight, sep = "="), sep =" - " )))
-#   }
-#
-#   return(DF)
-# }
-#
-#
-#
 
 ### test-fixef.R helper functinos
 
@@ -628,3 +627,34 @@ sandwcomp_cases = function() {
                   FE = FE)
   return(DF)
 }
+
+
+subset_cases = function() {
+  method = c("ols", "glm", "femlm", "negbin", "feNmlm")
+  fmlas = c("y ~ x1 + x2",
+            "y ~ x1 + x2 | species",
+            "y ~ x1 + x2 | fe_bis",
+            "y ~ x1 + x2 + i(fe_bis)",
+            "y ~ x1 + x2 | fe_bis[x3]")
+
+  DF_l = list()
+  for(k in 1:5){
+    # for femlm, negbin and feNmlm omit lasa formula
+    if (method[k] %in% c("femlm", "negbin", "feNmlm")) {
+        Fmlas = fmlas[-5]
+    } else {
+        Fmlas = fmlas
+      }
+    DF_l[[k]] = data.frame(test_name = paste(method[k], paste("formula", c(1:length(Fmlas))), sep = " - "),
+                           method = method[k],
+                           fmlas = Fmlas)
+  }
+  DF = DF_l[[1]]
+  for(k in 2:length(DF_l)) DF = rbind(DF, DF_l[[k]])
+
+  aux = DF$method == "ols" | DF$method == "negbin"
+  DF$famly[aux] <- "NULL"
+  DF$famly[!aux] <- "poisson"
+  return(DF)
+}
+
