@@ -82,6 +82,16 @@ datab6 = function(){
   return(base)
 }
 
+# database for test-collinearity.R
+datab7 = function(){
+  base <- iris
+  names(base) <- c("y", "x1", "x2", "x3", "species")
+  base$constant <- 5
+  base$y_int <- as.integer(base$y)
+  base$w <- as.vector(unclass(base$species) - 0.95)
+  return(base)
+}
+
 ev_par <- function(string) {
   eval(parse(text = string))
 }
@@ -495,3 +505,38 @@ fixef_cases = function(){
   return(DF)
 }
 
+
+
+### Cases function for test-collinearity.R
+
+collin_cases = function(){
+  useWeights = c("NULL", "base$w") # c(FALSE, TRUE)
+  model = c("ols", "glm")
+  use_fe = c(FALSE,TRUE)
+  fixest_formula1 = c(" ~ x1 + constant", " ~ x1 + constant | species")
+  stats_formula2 = c(" ~ x1 + constant", " ~ x1 + constant + species")
+
+  DF_l = list()
+  for(k in 1:2){
+    if(model[k] == "ols"){
+      fmlas1 = paste("y", fixest_formula1)
+      fmlas2 = paste("y", stats_formula2)
+    }else if(model[k] == "glm"){
+      fmlas1 = paste("y_int", fixest_formula1)
+      fmlas2 = paste("y_int", stats_formula2)
+    }
+    df = expand.grid(use_fe = use_fe,
+                     useWeights = useWeights,
+                     stringsAsFactors = FALSE)
+    df_aux = data.frame(use_fe,fixest_formula1 = fmlas1, stats_formula1 = fmlas2)
+    df = dplyr::left_join(df, df_aux, by = "use_fe")
+    df$model = model[k]
+    df$test_name = paste(model[k],
+                         paste("weights=", df$useWeights),
+                         paste("use_fe=" ,df$use_fe),
+                         sep = " - ")
+    DF_l[[k]] = df
+  }
+  DF = rbind(DF_l[[1]], DF_l[[2]])
+  return(DF)
+}
