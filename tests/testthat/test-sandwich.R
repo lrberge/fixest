@@ -99,7 +99,7 @@ base = base_did; base$y_int = as.integer(base$y) + 20
 
 patrick::with_parameters_test_that("fixest is compatible with sandwich's vcov",
                                    {
-                                     est <- fixest_mod_select2(
+                                     est <- fixest_mod_select(
                                        model = model,
                                        fmla = fmlas,
                                        base = base,

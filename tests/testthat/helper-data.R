@@ -132,7 +132,43 @@ datab11 = function(){
   return(base)
 }
 
+# Database for test-lagging.R
+datab12 = function(){
+  data(base_did)
+  base <- base_did
 
+  n <- nrow(base)
+
+  set.seed(0)
+  base$y_na <- base$y
+  base$y_na[sample(n, 50)] <- NA
+  base$period_txt <- letters[base$period]
+  ten_dates <- c("1960-01-15", "1960-01-16", "1960-03-31", "1960-04-05", "1960-05-12", "1960-05-25", "1960-06-20", "1960-07-30", "1965-01-02", "2002-12-05")
+  base$period_date <- as.Date(ten_dates, "%Y-%m-%d")[base$period]
+  base$y_0 <- base$y**2
+  base$y_0[base$id == 1] <- 0
+
+  # We compute the lags "by hand"
+  base <- base[order(base$id, base$period), ]
+  base$x1_lag <- c(NA, base$x1[-n])
+  base$x1_lag[base$period == 1] <- NA
+  base$x1_lead <- c(base$x1[-1], NA)
+  base$x1_lead[base$period == 10] <- NA
+  base$x1_diff <- base$x1 - base$x1_lag
+
+  # we create holes
+  base$period_bis <- base$period
+  base$period_bis[base$period_bis == 5] <- 50
+  base$x1_lag_hole <- base$x1_lag
+  base$x1_lag_hole[base$period %in% c(5, 6)] <- NA
+  base$x1_lead_hole <- base$x1_lead
+  base$x1_lead_hole[base$period %in% c(4, 5)] <- NA
+
+  # we reshuffle the base
+  base <- base[sample(n), ]
+
+  return(base)
+}
 
 ev_par <- function(string) {
   eval(parse(text = string))
@@ -416,45 +452,45 @@ nointercept_cases <- function() {
 }
 
 # fitting function selection for test-nointercept.R
-fixest_mod_select <- function(model, fmla, base, famly = NULL, weights = NULL, subset = NULL) {
-  fmla <- as.formula(fmla)
-  if (model == "ols") {
-    res <- feols(fml = fmla, data = base, weights = weights, subset = subset)
-    return(res)
-  } else if (model == "glm") {
-    res <- feglm(fml = fmla, data = base, family = famly, weights = weights, subset = subset)
-    return(res)
-  } else if (model == "negbin") {
-    res <- fenegbin(fml = fmla, data = base, subset = subset)
-    return(res)
-  } else if (model == "femlm") {
-    res <- femlm(fml = fmla, data = base, family = famly, subset = subset)
-    return(res)
-  } else if (model == "feNmlm"){
-    res <- feNmlm(fml = fmla, data = base, family = famly, subset = subset)
-  }
-}
-
-## test-sandwich.R doesnt work with the subset argument (even if it is just ommited)
-## Its a strange error! The following version of fixest_mod_slect omits subset argument
-fixest_mod_select2 <- function(model, fmla, base, famly = NULL, weights = NULL) {
-  fmla <- as.formula(fmla)
-  if (model == "ols") {
-    res <- feols(fml = fmla, data = base, weights = weights)
-    return(res)
-  } else if (model == "glm") {
-    res <- feglm(fml = fmla, data = base, family = famly, weights = weights)
-    return(res)
-  } else if (model == "negbin") {
-    res <- fenegbin(fml = fmla, data = base)
-    return(res)
-  } else if (model == "femlm") {
-    res <- femlm(fml = fmla, data = base, family = famly)
-    return(res)
-  } else if (model == "feNmlm"){
-    res <- feNmlm(fml = fmla, data = base, family = famly)
-  }
-}
+# fixest_mod_select <- function(model, fmla, base, famly = NULL, weights = NULL, subset = NULL) {
+#   fmla <- as.formula(fmla)
+#   if (model == "ols") {
+#     res <- feols(fml = fmla, data = base, weights = weights, subset = subset)
+#     return(res)
+#   } else if (model == "glm") {
+#     res <- feglm(fml = fmla, data = base, family = famly, weights = weights, subset = subset)
+#     return(res)
+#   } else if (model == "negbin") {
+#     res <- fenegbin(fml = fmla, data = base, subset = subset)
+#     return(res)
+#   } else if (model == "femlm") {
+#     res <- femlm(fml = fmla, data = base, family = famly, subset = subset)
+#     return(res)
+#   } else if (model == "feNmlm"){
+#     res <- feNmlm(fml = fmla, data = base, family = famly, subset = subset)
+#   }
+# }
+#
+# ## test-sandwich.R doesnt work with the subset argument (even if it is just ommited)
+# ## Its a strange error! The following version of fixest_mod_slect omits subset argument
+# fixest_mod_select2 <- function(model, fmla, base, famly = NULL, weights = NULL) {
+#   fmla <- as.formula(fmla)
+#   if (model == "ols") {
+#     res <- feols(fml = fmla, data = base, weights = weights)
+#     return(res)
+#   } else if (model == "glm") {
+#     res <- feglm(fml = fmla, data = base, family = famly, weights = weights)
+#     return(res)
+#   } else if (model == "negbin") {
+#     res <- fenegbin(fml = fmla, data = base)
+#     return(res)
+#   } else if (model == "femlm") {
+#     res <- femlm(fml = fmla, data = base, family = famly)
+#     return(res)
+#   } else if (model == "feNmlm"){
+#     res <- feNmlm(fml = fmla, data = base, family = famly)
+#   }
+# }
 
 
 
@@ -470,6 +506,33 @@ stats_mod_select <- function(model, fmla, base, famly = NULL, weights = NULL) {
     res <- MASS::glm.nb(formula = fmla, data = base)
     return(res)
   }
+}
+
+fixest_mod_select <- function(model, fmla, base, famly = NULL, ... ) {
+  options(warn=-1)
+  fmla <- as.formula(fmla)
+  if (model == "ols") {
+    res <- feols(fml = fmla, data = base, ...)
+    options(warn=0)
+    return(res)
+  } else if (model == "glm") {
+    res <- feglm(fml = fmla, data = base, family = famly,  ...)
+    options(warn=0)
+    return(res)
+  } else if (model == "negbin") {
+    res <- fenegbin(fml = fmla, data = base, ...)
+    options(warn=0)
+    return(res)
+  } else if (model == "femlm") {
+    res <- femlm(fml = fmla, data = base, family = famly,  ...)
+    options(warn=0)
+    return(res)
+  } else if (model == "feNmlm"){
+    res <- feNmlm(fml = fmla, data = base, family = famly,  ...)
+    options(warn=0)
+    return(res)
+  }
+
 }
 
 ### Cases for test-residuals.R
@@ -656,5 +719,23 @@ subset_cases = function() {
   DF$famly[aux] <- "NULL"
   DF$famly[!aux] <- "poisson"
   return(DF)
+}
+
+# case function for test-lagging.R
+lagging_cases = function() {
+  depvar = c("y", "y_na", "y_0")
+  p = c("period", "period_txt", "period_date")
+  method = c("ols", "glm")
+
+  DF = expand.grid(p = p, depvar = depvar,stringsAsFactors = FALSE)
+  aux = DF$depvar != "y_0"
+  DF$method[aux] = "ols"
+  DF$method[!aux] = "glm"
+  DF$fmly[aux] = "NULL"
+  DF$fmly[!aux] = "poisson"
+
+  DF$test_name = paste(DF$method, paste("depvar =", DF$depvar), paste("p =", DF$p), sep = " - ")
+  return(DF)
+
 }
 

@@ -35,6 +35,7 @@ patrick::with_parameters_test_that("Fitting without intercept works properly",
   },
   .cases = residuals_cases()
 )
+
 #
 # K = 5
 # casos = residuals_cases()[K,]
