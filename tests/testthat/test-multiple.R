@@ -1,9 +1,5 @@
 
 base = datab14()
-
-
-
-
 Est = list()
 mods = c("ols", "glm", "femlm", "feNmlm")
 for(k in 1:length(mods)){

@@ -194,6 +194,38 @@ datab14 = function(){
   return(base)
 }
 
+# Database function for test-IV
+datab15 = function(){
+  base <- iris
+  names(base) <- c("y", "x1", "x_endo_1", "x_inst_1", "fe")
+  set.seed(2)
+  base$x_inst_2 <- 0.2 * base$y + 0.2 * base$x_endo_1 + rnorm(150, sd = 0.5)
+  base$x_endo_2 <- 0.2 * base$y - 0.2 * base$x_inst_1 + rnorm(150, sd = 0.5)
+  return(base)
+}
+
+# Database for test-model_matrix.R
+
+datab16 = function(){
+  base <- iris
+  names(base) <- c("y1", "x1", "x2", "x3", "species")
+  base$y2 <- 10 + rnorm(150) + 0.5 * base$x1
+  base$x4 <- rnorm(150) + 0.5 * base$y1
+  base$fe2 <- rep(letters[1:15], 10)
+  base$fe2[50:51] <- NA
+  base$y2[base$fe2 == "a" & !is.na(base$fe2)] <- 0
+  base$x2[1:5] <- NA
+  base$x3[6] <- NA
+  base$fe3 <- rep(letters[1:10], 15)
+  base$id <- rep(1:15, each = 10)
+  base$time <- rep(1:10, 15)
+
+  base_bis <- base[1:50, ]
+  base_bis$id <- rep(1:5, each = 10)
+  base_bis$time <- rep(1:10, 5)
+  return(list(base, base_bis))
+}
+
 ev_par <- function(string) {
   eval(parse(text = string))
 }
