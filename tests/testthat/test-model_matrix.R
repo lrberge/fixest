@@ -49,12 +49,11 @@ test_that("model.matrix works proprly with fixef",
               res <- feols(y1 ~ x1 + x2 + x3 | species + fe2, base)
               m_fe <- model.matrix(res, type = "fixef") # model has fixed effects but model.matrix is not recognizing it
               expect_equal(ncol(m_fe), 2)
-          })
-test_that("type lhs argument from model.matrix works properly",
-          {
+
               m_lhs <- model.matrix(res, type = "lhs", na.rm = FALSE)
               expect_equal(m_lhs, base$y1)
           })
+
 test_that("model.matrix works properly with a IV model",
           {
               res_iv <- feols(y1 ~ x1 | x2 ~ x3, base)
@@ -79,3 +78,4 @@ test_that("model.matrix works properly with a IV model",
               m_lhs_rhs_fixef <- model.matrix(res_mult, type = c("lhs", "iv.rhs2", "fixef"), na.rm = FALSE) #Again model.matrix is not working
               expect_equal(names(m_lhs_rhs_fixef), c("y1", "fit_x2", "x1", "species"))
           })
+

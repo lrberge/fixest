@@ -5,6 +5,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // compute_cluster_coef_r
 SEXP compute_cluster_coef_r(int family, int nb_coef, double theta, double diffMax_NR, SEXP r_mu, SEXP r_lhs, SEXP r_sum_y, SEXP r_dum, SEXP r_obsCluster, SEXP r_table, SEXP r_cumtable, int nthreads);
 RcppExport SEXP _fixest_compute_cluster_coef_r(SEXP familySEXP, SEXP nb_coefSEXP, SEXP thetaSEXP, SEXP diffMax_NRSEXP, SEXP r_muSEXP, SEXP r_lhsSEXP, SEXP r_sum_ySEXP, SEXP r_dumSEXP, SEXP r_obsClusterSEXP, SEXP r_tableSEXP, SEXP r_cumtableSEXP, SEXP nthreadsSEXP) {
