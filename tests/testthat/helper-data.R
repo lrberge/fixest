@@ -170,6 +170,30 @@ datab12 = function(){
   return(base)
 }
 
+# database function for test-predict.R
+datab13 = function(){
+  set.seed(0)
+  base <- iris
+  names(base) <- c("y", "x1", "x2", "x3", "species")
+  base$fe_bis <- sample(letters, 150, TRUE)
+  return(base)
+}
+
+datab14 = function(){
+  set.seed(2)
+  base <- iris
+  names(base) <- c("y1", "x1", "x2", "x3", "species")
+  base$y2 <- 10 + rnorm(150) + 0.5 * base$x1
+  base$x4 <- rnorm(150) + 0.5 * base$y1
+  base$fe2 <- rep(letters[1:15], 10)
+  base$fe2[50:51] <- NA
+  base$y2[base$fe2 == "a" & !is.na(base$fe2)] <- 0
+  base$x2[1:5] <- NA
+  base$x3[6] <- NA
+  base$fe3 <- rep(letters[1:10], 15)
+  return(base)
+}
+
 ev_par <- function(string) {
   eval(parse(text = string))
 }
@@ -509,27 +533,27 @@ stats_mod_select <- function(model, fmla, base, famly = NULL, weights = NULL) {
 }
 
 fixest_mod_select <- function(model, fmla, base, famly = NULL, ... ) {
-  options(warn=-1)
+  #options(warn=-1)
   fmla <- as.formula(fmla)
   if (model == "ols") {
     res <- feols(fml = fmla, data = base, ...)
-    options(warn=0)
+    # options(warn=0)
     return(res)
   } else if (model == "glm") {
     res <- feglm(fml = fmla, data = base, family = famly,  ...)
-    options(warn=0)
+    # options(warn=0)
     return(res)
   } else if (model == "negbin") {
     res <- fenegbin(fml = fmla, data = base, ...)
-    options(warn=0)
+    # options(warn=0)
     return(res)
   } else if (model == "femlm") {
     res <- femlm(fml = fmla, data = base, family = famly,  ...)
-    options(warn=0)
+    # options(warn=0)
     return(res)
   } else if (model == "feNmlm"){
     res <- feNmlm(fml = fmla, data = base, family = famly,  ...)
-    options(warn=0)
+    # options(warn=0)
     return(res)
   }
 
@@ -739,3 +763,63 @@ lagging_cases = function() {
 
 }
 
+
+### cases function for test-predict.R
+predict_cases = function(){
+  fmlas = c("y ~ x1 | species + fe_bis", "y ~ x1 | species + fe_bis[x3 ]", "y ~ x1 + i(species)", "y ~ x1 + i(species) + i(fe_bis)")
+  method = c("ols", "glm", "femlm")
+  fmly = c("NULL", "poisson", "poisson")
+  tol = c(1e-12, 1e-3, 1e-12, 1e-12)
+  DF_l = list()
+  for(k in 1:3){
+    Fmlas = switch(method[k], "femlm" = fmlas[-2], fmlas)
+    tol = switch(method[k], "femlm" = tol[-2], tol)
+
+    DF_l[[k]] = data.frame(test_name = paste(method[k], fmly[k] , paste("formula", seq(1,length(Fmlas))), sep = " - "),
+                           method = method[k],
+                           fmly = fmly[k],
+                           fmlas = Fmlas,
+                           tol = tol
+    )
+  }
+  DF = DF_l[[1]]; for(k in 2:3) DF = rbind(DF, DF_l[[k]])
+  DF$test_name = paste(seq(1,dim(DF)[1]), DF$test_name, sep = ") ")
+  return(DF)
+}
+
+
+# case function for test-multiple.R
+multiple_cases = function(met = NULL){
+  method = c("ols", "glm", "femlm", "feNmlm")
+  s = c("setosa", "versicolor", "virginica")
+  fmly = c("NULL", "poisson","poisson", "poisson")
+  df_aux = expand.grid(rhs2 = c("x2","x3"), rhs1 = "x1",lhs = c("y1", "y2"), stringsAsFactors = FALSE)
+  # df_aux = df_aux[c(1,4,2,3),] # Ordered to match estimation order of fixtest
+  fmlas = paste(df_aux$lhs, paste(df_aux$rhs1, df_aux$rhs2, sep = " + "), sep = " ~ ")
+
+  DF_l = list()
+  cont = 0
+  for(k in 1:4){
+    for(j in 1:3){
+      cont = cont + 1
+      test_name = paste(method[k], paste("filter =", s[j]), paste("formula ", 1:length(fmlas)), sep = " - " )
+      DF_l[[cont]] = data.frame(test_name = test_name,
+                                method = method[k],
+                                fmly = fmly[k],
+                                s = s[j],
+                                fmlas = fmlas,
+                                num_fmla = 1:length(fmlas))
+    }
+  }
+
+  DF = DF_l[[1]]; for(k in 2:cont) DF = rbind(DF, DF_l[[k]])
+  DF = DF[sort(DF$method, index.return = TRUE, decreasing = TRUE)$ix,]
+  DF$num_fmla = rep(c(1:12),4)
+  DF$test_name = paste(seq(1,dim(DF)[1]), DF$test_name, sep = ") ")
+
+  if( !is.null(met)){
+    return(DF[DF$method == met,])
+  } else{
+    return(DF)
+  }
+}
