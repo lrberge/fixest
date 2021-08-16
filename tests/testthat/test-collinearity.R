@@ -23,7 +23,7 @@ patrick::with_parameters_test_that("fixest fits collinearity as stats",
     # test(coef(res)["x1"], coef(res_bis)["x1"], "~")
     # test(se(res, se = "st", dof = dof(adj = adj))["x1"], se(res_bis)["x1"], "~")
     #
-    expect_model_equal(res,res_bis, method = model)
+    expect_model_equal(res, res_bis, method = model)
   },
   .cases = collin_cases()
 )

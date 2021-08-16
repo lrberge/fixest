@@ -95,28 +95,29 @@ testthat::test_that("Aliases works properly", {
 ## Parametrize for future extension
 
 data(base_did)
-base = base_did; base$y_int = as.integer(base$y) + 20
+base <- base_did
+base$y_int <- as.integer(base$y) + 20
 
 patrick::with_parameters_test_that("fixest is compatible with sandwich's vcov",
-                                   {
-                                     est <- fixest_mod_select(
-                                       model = model,
-                                       fmla = fmlas,
-                                       base = base,
-                                       famly = family,
-                                       weights = NULL
-                                     )
+  {
+    est <- fixest_mod_select(
+      model = model,
+      fmla = fmlas,
+      base = base,
+      famly = family,
+      weights = NULL
+    )
 
-                                     if(isFALSE(FE)){
-                                       # test(vcov(est, cluster = ~id), vcovCL(est, cluster = ~id, type = "HC1"))
-                                       expect_equal(vcov(est, cluster = ~id), vcovCL(est, cluster = ~id, type = "HC1"))
-                                     } else {
-                                       # test(vcov(est, cluster = ~id, dof = dof(adj = FALSE)), vcovCL(est, cluster = ~id))
-                                       expect_equal(vcov(est, cluster = ~id, dof = dof(adj = FALSE)), vcovCL(est, cluster = ~id))
-                                     }
-                                   },
-                                   .cases = sandwcomp_cases()
-                                   )
+    if (isFALSE(FE)) {
+      # test(vcov(est, cluster = ~id), vcovCL(est, cluster = ~id, type = "HC1"))
+      expect_equal(vcov(est, cluster = ~id), vcovCL(est, cluster = ~id, type = "HC1"))
+    } else {
+      # test(vcov(est, cluster = ~id, dof = dof(adj = FALSE)), vcovCL(est, cluster = ~id))
+      expect_equal(vcov(est, cluster = ~id, dof = dof(adj = FALSE)), vcovCL(est, cluster = ~id))
+    }
+  },
+  .cases = sandwcomp_cases()
+)
 
 # K = 1
 # casos = sandwcomp_cases()[K,]
@@ -139,4 +140,3 @@ patrick::with_parameters_test_that("fixest is compatible with sandwich's vcov",
 #
 # ## I must call my database with the same name of fixest_mod_select Data argument
 # ## For some reason vcovCL doesnt work without the previous detail
-

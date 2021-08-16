@@ -56,34 +56,27 @@ names(base) <- c("y", "x1", "x2", "x3", "species")
 base$clu <- sample(6, 150, TRUE)
 base$clu[1:5] <- NA
 
-test_that("vcov estimation from different sources are equal",
-          {
-            est <- feols(y ~ x1 | species, base, cluster = ~clu, dof = dof(adj = FALSE))
-            v1 <- est$cov.scaled
-            v1b <- vcov(est)
-            v1c <- summary(est)$cov.scaled
+test_that("vcov estimation from different sources are equal", {
+  est <- feols(y ~ x1 | species, base, cluster = ~clu, dof = dof(adj = FALSE))
+  v1 <- est$cov.scaled
+  v1b <- vcov(est)
+  v1c <- summary(est)$cov.scaled
 
-            expect_equal(as.numeric(v1), as.numeric(v1b))
-            expect_equal(as.numeric(v1), as.numeric(v1c))
+  expect_equal(as.numeric(v1), as.numeric(v1b))
+  expect_equal(as.numeric(v1), as.numeric(v1c))
 
-            # Only dof change
-            v2 <- summary(est, dof = dof())$cov.scaled
-            v2b <- vcov(est, cluster = ~clu, dof = dof())
+  # Only dof change
+  v2 <- summary(est, dof = dof())$cov.scaled
+  v2b <- vcov(est, cluster = ~clu, dof = dof())
 
-            expect_equal(as.numeric(v2), as.numeric(v2b))
-            expect_true(max(abs(v1 - v2)) != 0)
+  expect_equal(as.numeric(v2), as.numeric(v2b))
+  expect_true(max(abs(v1 - v2)) != 0)
 
-            # SE change only
-            v3 <- summary(est, se = "hetero")$cov.scaled
-            v3b <- vcov(est, se = "hetero", dof = dof(adj = FALSE))
+  # SE change only
+  v3 <- summary(est, se = "hetero")$cov.scaled
+  v3b <- vcov(est, se = "hetero", dof = dof(adj = FALSE))
 
-            expect_equal(as.numeric(v3), as.numeric(v3b))
-            expect_true(max(abs(v1 - v3)) != 0)
-            expect_true(max(abs(v2 - v3)) != 0)
-          }
-          )
-
-
-
-
-
+  expect_equal(as.numeric(v3), as.numeric(v3b))
+  expect_true(max(abs(v1 - v3)) != 0)
+  expect_true(max(abs(v2 - v3)) != 0)
+})

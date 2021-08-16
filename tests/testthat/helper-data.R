@@ -92,7 +92,7 @@ datab7 <- function() {
   return(base)
 }
 
-datab8 <- function(){
+datab8 <- function() {
   set.seed(0)
   base <- iris
   names(base) <- c("y", "x1", "x2", "x3", "species")
@@ -122,7 +122,7 @@ datab10 <- function() {
 }
 
 # Database for test-subset.R
-datab11 = function(){
+datab11 <- function() {
   set.seed(5)
   base <- iris
   names(base) <- c("y", "x1", "x2", "x3", "species")
@@ -133,7 +133,7 @@ datab11 = function(){
 }
 
 # Database for test-lagging.R
-datab12 = function(){
+datab12 <- function() {
   data(base_did)
   base <- base_did
 
@@ -171,7 +171,7 @@ datab12 = function(){
 }
 
 # database function for test-predict.R
-datab13 = function(){
+datab13 <- function() {
   set.seed(0)
   base <- iris
   names(base) <- c("y", "x1", "x2", "x3", "species")
@@ -179,7 +179,7 @@ datab13 = function(){
   return(base)
 }
 
-datab14 = function(){
+datab14 <- function() {
   set.seed(2)
   base <- iris
   names(base) <- c("y1", "x1", "x2", "x3", "species")
@@ -195,7 +195,7 @@ datab14 = function(){
 }
 
 # Database function for test-IV
-datab15 = function(){
+datab15 <- function() {
   base <- iris
   names(base) <- c("y", "x1", "x_endo_1", "x_inst_1", "fe")
   set.seed(2)
@@ -206,7 +206,7 @@ datab15 = function(){
 
 # Database for test-model_matrix.R
 
-datab16 = function(){
+datab16 <- function() {
   base <- iris
   names(base) <- c("y1", "x1", "x2", "x3", "species")
   base$y2 <- 10 + rnorm(150) + 0.5 * base$x1
@@ -564,15 +564,15 @@ stats_mod_select <- function(model, fmla, base, famly = NULL, weights = NULL) {
   }
 }
 
-fixest_mod_select <- function(model, fmla, base, famly = NULL, ... ) {
-  #options(warn=-1)
+fixest_mod_select <- function(model, fmla, base, famly = NULL, ...) {
+  # options(warn=-1)
   fmla <- as.formula(fmla)
   if (model == "ols") {
     res <- feols(fml = fmla, data = base, ...)
     # options(warn=0)
     return(res)
   } else if (model == "glm") {
-    res <- feglm(fml = fmla, data = base, family = famly,  ...)
+    res <- feglm(fml = fmla, data = base, family = famly, ...)
     # options(warn=0)
     return(res)
   } else if (model == "negbin") {
@@ -580,15 +580,14 @@ fixest_mod_select <- function(model, fmla, base, famly = NULL, ... ) {
     # options(warn=0)
     return(res)
   } else if (model == "femlm") {
-    res <- femlm(fml = fmla, data = base, family = famly,  ...)
+    res <- femlm(fml = fmla, data = base, family = famly, ...)
     # options(warn=0)
     return(res)
-  } else if (model == "feNmlm"){
-    res <- feNmlm(fml = fmla, data = base, family = famly,  ...)
+  } else if (model == "feNmlm") {
+    res <- feNmlm(fml = fmla, data = base, family = famly, ...)
     # options(warn=0)
     return(res)
   }
-
 }
 
 ### Cases for test-residuals.R
@@ -719,139 +718,158 @@ collin_cases <- function() {
 
 ## Cases function for test-hatvalues.R
 hatvalues_cases <- function() {
-  model = c("ols", "glm")
-  formulas = c("y ~ x", "y_int ~ x")
-  family = c("NULL", "poisson")
+  model <- c("ols", "glm")
+  formulas <- c("y ~ x", "y_int ~ x")
+  family <- c("NULL", "poisson")
 
-  return(data.frame(model = model,
-                    formulas = formulas,
-                    family = family,
-                    test_name = paste(model, family, sep = " - ")))
-
+  return(data.frame(
+    model = model,
+    formulas = formulas,
+    family = family,
+    test_name = paste(model, family, sep = " - ")
+  ))
 }
 
 ## Cases function for test-sandwhich.R
-sandwcomp_cases = function() {
-  model = c("ols", "ols","glm","glm")
-  family = c("NULL", "NULL","poisson", "poisson")
-  fmlas = c("y ~ x1 + I(x1**2) + factor(id)",
-            "y ~ x1 + I(x1**2) | id",
-            "y_int ~ x1 + I(x1**2) + factor(id)",
-            "y_int ~ x1 + I(x1**2) | id")
-  FE = rep(c(FALSE,TRUE),2)
-  DF = data.frame(test_name = paste(model, paste("FE = ", FE  )),
-                  model = model,
-                  family = family,
-                  fmlas = fmlas,
-                  FE = FE)
+sandwcomp_cases <- function() {
+  model <- c("ols", "ols", "glm", "glm")
+  family <- c("NULL", "NULL", "poisson", "poisson")
+  fmlas <- c(
+    "y ~ x1 + I(x1**2) + factor(id)",
+    "y ~ x1 + I(x1**2) | id",
+    "y_int ~ x1 + I(x1**2) + factor(id)",
+    "y_int ~ x1 + I(x1**2) | id"
+  )
+  FE <- rep(c(FALSE, TRUE), 2)
+  DF <- data.frame(
+    test_name = paste(model, paste("FE = ", FE)),
+    model = model,
+    family = family,
+    fmlas = fmlas,
+    FE = FE
+  )
   return(DF)
 }
 
 
-subset_cases = function() {
-  method = c("ols", "glm", "femlm", "negbin", "feNmlm")
-  fmlas = c("y ~ x1 + x2",
-            "y ~ x1 + x2 | species",
-            "y ~ x1 + x2 | fe_bis",
-            "y ~ x1 + x2 + i(fe_bis)",
-            "y ~ x1 + x2 | fe_bis[x3]")
+subset_cases <- function() {
+  method <- c("ols", "glm", "femlm", "negbin", "feNmlm")
+  fmlas <- c(
+    "y ~ x1 + x2",
+    "y ~ x1 + x2 | species",
+    "y ~ x1 + x2 | fe_bis",
+    "y ~ x1 + x2 + i(fe_bis)",
+    "y ~ x1 + x2 | fe_bis[x3]"
+  )
 
-  DF_l = list()
-  for(k in 1:5){
+  DF_l <- list()
+  for (k in 1:5) {
     # for femlm, negbin and feNmlm omit lasa formula
     if (method[k] %in% c("femlm", "negbin", "feNmlm")) {
-        Fmlas = fmlas[-5]
+      Fmlas <- fmlas[-5]
     } else {
-        Fmlas = fmlas
-      }
-    DF_l[[k]] = data.frame(test_name = paste(method[k], paste("formula", c(1:length(Fmlas))), sep = " - "),
-                           method = method[k],
-                           fmlas = Fmlas)
+      Fmlas <- fmlas
+    }
+    DF_l[[k]] <- data.frame(
+      test_name = paste(method[k], paste("formula", c(1:length(Fmlas))), sep = " - "),
+      method = method[k],
+      fmlas = Fmlas
+    )
   }
-  DF = DF_l[[1]]
-  for(k in 2:length(DF_l)) DF = rbind(DF, DF_l[[k]])
+  DF <- DF_l[[1]]
+  for (k in 2:length(DF_l)) DF <- rbind(DF, DF_l[[k]])
 
-  aux = DF$method == "ols" | DF$method == "negbin"
+  aux <- DF$method == "ols" | DF$method == "negbin"
   DF$famly[aux] <- "NULL"
   DF$famly[!aux] <- "poisson"
   return(DF)
 }
 
 # case function for test-lagging.R
-lagging_cases = function() {
-  depvar = c("y", "y_na", "y_0")
-  p = c("period", "period_txt", "period_date")
-  method = c("ols", "glm")
+lagging_cases <- function() {
+  depvar <- c("y", "y_na", "y_0")
+  p <- c("period", "period_txt", "period_date")
+  method <- c("ols", "glm")
 
-  DF = expand.grid(p = p, depvar = depvar,stringsAsFactors = FALSE)
-  aux = DF$depvar != "y_0"
-  DF$method[aux] = "ols"
-  DF$method[!aux] = "glm"
-  DF$fmly[aux] = "NULL"
-  DF$fmly[!aux] = "poisson"
+  DF <- expand.grid(p = p, depvar = depvar, stringsAsFactors = FALSE)
+  aux <- DF$depvar != "y_0"
+  DF$method[aux] <- "ols"
+  DF$method[!aux] <- "glm"
+  DF$fmly[aux] <- "NULL"
+  DF$fmly[!aux] <- "poisson"
 
-  DF$test_name = paste(DF$method, paste("depvar =", DF$depvar), paste("p =", DF$p), sep = " - ")
+  DF$test_name <- paste(DF$method, paste("depvar =", DF$depvar), paste("p =", DF$p), sep = " - ")
   return(DF)
-
 }
 
 
 ### cases function for test-predict.R
-predict_cases = function(){
-  fmlas = c("y ~ x1 | species + fe_bis", "y ~ x1 | species + fe_bis[x3 ]", "y ~ x1 + i(species)", "y ~ x1 + i(species) + i(fe_bis)")
-  method = c("ols", "glm", "femlm")
-  fmly = c("NULL", "poisson", "poisson")
-  tol = c(1e-12, 1e-3, 1e-12, 1e-12)
-  DF_l = list()
-  for(k in 1:3){
-    Fmlas = switch(method[k], "femlm" = fmlas[-2], fmlas)
-    tol = switch(method[k], "femlm" = tol[-2], tol)
+predict_cases <- function() {
+  fmlas <- c("y ~ x1 | species + fe_bis", "y ~ x1 | species + fe_bis[x3 ]", "y ~ x1 + i(species)", "y ~ x1 + i(species) + i(fe_bis)")
+  method <- c("ols", "glm", "femlm")
+  fmly <- c("NULL", "poisson", "poisson")
+  tol <- c(1e-12, 1e-3, 1e-12, 1e-12)
+  DF_l <- list()
+  for (k in 1:3) {
+    Fmlas <- switch(method[k],
+      "femlm" = fmlas[-2],
+      fmlas
+    )
+    tol <- switch(method[k],
+      "femlm" = tol[-2],
+      tol
+    )
 
-    DF_l[[k]] = data.frame(test_name = paste(method[k], fmly[k] , paste("formula", seq(1,length(Fmlas))), sep = " - "),
-                           method = method[k],
-                           fmly = fmly[k],
-                           fmlas = Fmlas,
-                           tol = tol
+    DF_l[[k]] <- data.frame(
+      test_name = paste(method[k], fmly[k], paste("formula", seq(1, length(Fmlas))), sep = " - "),
+      method = method[k],
+      fmly = fmly[k],
+      fmlas = Fmlas,
+      tol = tol
     )
   }
-  DF = DF_l[[1]]; for(k in 2:3) DF = rbind(DF, DF_l[[k]])
-  DF$test_name = paste(seq(1,dim(DF)[1]), DF$test_name, sep = ") ")
+  DF <- DF_l[[1]]
+  for (k in 2:3) DF <- rbind(DF, DF_l[[k]])
+  DF$test_name <- paste(seq(1, dim(DF)[1]), DF$test_name, sep = ") ")
   return(DF)
 }
 
 
 # case function for test-multiple.R
-multiple_cases = function(met = NULL){
-  method = c("ols", "glm", "femlm", "feNmlm")
-  s = c("setosa", "versicolor", "virginica")
-  fmly = c("NULL", "poisson","poisson", "poisson")
-  df_aux = expand.grid(rhs2 = c("x2","x3"), rhs1 = "x1",lhs = c("y1", "y2"), stringsAsFactors = FALSE)
+multiple_cases <- function(met = NULL) {
+  method <- c("ols", "glm", "femlm", "feNmlm")
+  s <- c("setosa", "versicolor", "virginica")
+  fmly <- c("NULL", "poisson", "poisson", "poisson")
+  df_aux <- expand.grid(rhs2 = c("x2", "x3"), rhs1 = "x1", lhs = c("y1", "y2"), stringsAsFactors = FALSE)
   # df_aux = df_aux[c(1,4,2,3),] # Ordered to match estimation order of fixtest
-  fmlas = paste(df_aux$lhs, paste(df_aux$rhs1, df_aux$rhs2, sep = " + "), sep = " ~ ")
+  fmlas <- paste(df_aux$lhs, paste(df_aux$rhs1, df_aux$rhs2, sep = " + "), sep = " ~ ")
 
-  DF_l = list()
-  cont = 0
-  for(k in 1:4){
-    for(j in 1:3){
-      cont = cont + 1
-      test_name = paste(method[k], paste("filter =", s[j]), paste("formula ", 1:length(fmlas)), sep = " - " )
-      DF_l[[cont]] = data.frame(test_name = test_name,
-                                method = method[k],
-                                fmly = fmly[k],
-                                s = s[j],
-                                fmlas = fmlas,
-                                num_fmla = 1:length(fmlas))
+  DF_l <- list()
+  cont <- 0
+  for (k in 1:4) {
+    for (j in 1:3) {
+      cont <- cont + 1
+      test_name <- paste(method[k], paste("filter =", s[j]), paste("formula ", 1:length(fmlas)), sep = " - ")
+      DF_l[[cont]] <- data.frame(
+        test_name = test_name,
+        method = method[k],
+        fmly = fmly[k],
+        s = s[j],
+        fmlas = fmlas,
+        num_fmla = 1:length(fmlas)
+      )
     }
   }
 
-  DF = DF_l[[1]]; for(k in 2:cont) DF = rbind(DF, DF_l[[k]])
-  DF = DF[sort(DF$method, index.return = TRUE, decreasing = TRUE)$ix,]
-  DF$num_fmla = rep(c(1:12),4)
-  DF$test_name = paste(seq(1,dim(DF)[1]), DF$test_name, sep = ") ")
+  DF <- DF_l[[1]]
+  for (k in 2:cont) DF <- rbind(DF, DF_l[[k]])
+  DF <- DF[sort(DF$method, index.return = TRUE, decreasing = TRUE)$ix, ]
+  DF$num_fmla <- rep(c(1:12), 4)
+  DF$test_name <- paste(seq(1, dim(DF)[1]), DF$test_name, sep = ") ")
 
-  if( !is.null(met)){
-    return(DF[DF$method == met,])
-  } else{
+  if (!is.null(met)) {
+    return(DF[DF$method == met, ])
+  } else {
     return(DF)
   }
 }
