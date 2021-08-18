@@ -71,3 +71,4 @@ test_that("model.matrix works properly with a IV model", {
   m_lhs_rhs_fixef <- model.matrix(res_mult, type = c("lhs", "iv.rhs2", "fixef"), na.rm = FALSE) # Again model.matrix is not working
   expect_equal(names(m_lhs_rhs_fixef), c("y1", "fit_x2", "x1", "species"))
 })
+

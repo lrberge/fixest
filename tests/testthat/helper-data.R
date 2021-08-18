@@ -382,6 +382,23 @@ fenegbin_cases <- function() {
   return(DF)
 }
 
+## Case function for test-fitmethod.R
+fitmethod_cases <- function() {
+  y_dep = c("base$y", "base$y_int", "base$y_log")
+  y_dep = c("y", "y_int", "y_log")
+  with_fmly = c(FALSE, TRUE)
+  method = c("ols", "glm")
+  DF = expand.grid(y_dep = y_dep,
+                   with_fmly = with_fmly,
+                   method = method,
+                   stringsAsFactors = FALSE)
+  DF$fmly = c(rep("NULL", 6), rep("poisson", 6))
+  DF$test_name <- paste(DF$method, paste("with family =", DF$with_fmly), paste("y_dep =", DF$y_dep), sep = " - ")
+  DF$test_name <- paste(seq(1, dim(DF)[1]), DF$test_name, sep = ") ")
+  return(DF)
+}
+
+
 
 vcov_cases1 <- function() {
   DF <- data.frame(expand.grid(
@@ -507,49 +524,6 @@ nointercept_cases <- function() {
   return(DF)
 }
 
-# fitting function selection for test-nointercept.R
-# fixest_mod_select <- function(model, fmla, base, famly = NULL, weights = NULL, subset = NULL) {
-#   fmla <- as.formula(fmla)
-#   if (model == "ols") {
-#     res <- feols(fml = fmla, data = base, weights = weights, subset = subset)
-#     return(res)
-#   } else if (model == "glm") {
-#     res <- feglm(fml = fmla, data = base, family = famly, weights = weights, subset = subset)
-#     return(res)
-#   } else if (model == "negbin") {
-#     res <- fenegbin(fml = fmla, data = base, subset = subset)
-#     return(res)
-#   } else if (model == "femlm") {
-#     res <- femlm(fml = fmla, data = base, family = famly, subset = subset)
-#     return(res)
-#   } else if (model == "feNmlm"){
-#     res <- feNmlm(fml = fmla, data = base, family = famly, subset = subset)
-#   }
-# }
-#
-# ## test-sandwich.R doesnt work with the subset argument (even if it is just ommited)
-# ## Its a strange error! The following version of fixest_mod_slect omits subset argument
-# fixest_mod_select2 <- function(model, fmla, base, famly = NULL, weights = NULL) {
-#   fmla <- as.formula(fmla)
-#   if (model == "ols") {
-#     res <- feols(fml = fmla, data = base, weights = weights)
-#     return(res)
-#   } else if (model == "glm") {
-#     res <- feglm(fml = fmla, data = base, family = famly, weights = weights)
-#     return(res)
-#   } else if (model == "negbin") {
-#     res <- fenegbin(fml = fmla, data = base)
-#     return(res)
-#   } else if (model == "femlm") {
-#     res <- femlm(fml = fmla, data = base, family = famly)
-#     return(res)
-#   } else if (model == "feNmlm"){
-#     res <- feNmlm(fml = fmla, data = base, family = famly)
-#   }
-# }
-
-
-
 stats_mod_select <- function(model, fmla, base, famly = NULL, weights = NULL) {
   fmla <- as.formula(fmla)
   if (model == "ols") {
@@ -616,7 +590,6 @@ residuals_cases <- function() {
 }
 
 ### test-fixef.R helper functinos
-
 get_coef <- function(all_coef, x) {
   res <- all_coef[grepl(x, names(all_coef), perl = TRUE)]
   names(res) <- gsub(x, "", names(res), perl = TRUE)
@@ -624,7 +597,6 @@ get_coef <- function(all_coef, x) {
 }
 
 ## fixef.strings
-
 fixef.strings <- function() {
   AuxL1 <- list(
     c("species", "fe_bis"),
@@ -676,10 +648,7 @@ fixef_cases <- function() {
   return(DF)
 }
 
-
-
 ### Cases function for test-collinearity.R
-
 collin_cases <- function() {
   useWeights <- c("NULL", "base$w") # c(FALSE, TRUE)
   model <- c("ols", "glm")
@@ -838,33 +807,29 @@ predict_cases <- function() {
 # case function for test-multiple.R
 multiple_cases <- function(met = NULL) {
   method <- c("ols", "glm", "femlm", "feNmlm")
-  s <- c("setosa", "versicolor", "virginica")
   fmly <- c("NULL", "poisson", "poisson", "poisson")
-  df_aux <- expand.grid(rhs2 = c("x2", "x3"), rhs1 = "x1", lhs = c("y1", "y2"), stringsAsFactors = FALSE)
-  # df_aux = df_aux[c(1,4,2,3),] # Ordered to match estimation order of fixtest
-  fmlas <- paste(df_aux$lhs, paste(df_aux$rhs1, df_aux$rhs2, sep = " + "), sep = " ~ ")
+  rhs = c("x2", "x3")
+  lhs = c("y1", "y2")
+  s <- c("setosa", "versicolor", "virginica")
+  df_aux = expand.grid(rhs = rhs,
+                       lhs = lhs,
+                       s = s,
+                       stringsAsFactors = FALSE)
 
-  DF_l <- list()
-  cont <- 0
-  for (k in 1:4) {
-    for (j in 1:3) {
-      cont <- cont + 1
-      test_name <- paste(method[k], paste("filter =", s[j]), paste("formula ", 1:length(fmlas)), sep = " - ")
-      DF_l[[cont]] <- data.frame(
-        test_name = test_name,
-        method = method[k],
-        fmly = fmly[k],
-        s = s[j],
-        fmlas = fmlas,
-        num_fmla = 1:length(fmlas)
-      )
-    }
+  DF_l = list()
+  for(k in 1:length(method)){
+    DF_l[[k]] = data.frame(method = method[k],
+                           fmly = fmly[k],
+                           rhs = df_aux$rhs,
+                           lhs = df_aux$lhs,
+                           s = df_aux$s,
+                           num_fmla = 1:dim(df_aux)[1]
+    )
   }
 
   DF <- DF_l[[1]]
-  for (k in 2:cont) DF <- rbind(DF, DF_l[[k]])
-  DF <- DF[sort(DF$method, index.return = TRUE, decreasing = TRUE)$ix, ]
-  DF$num_fmla <- rep(c(1:12), 4)
+  for (k in 2:length(DF_l)) DF <- rbind(DF, DF_l[[k]])
+  DF$test_name <- paste(DF$method, paste("filter =", DF$s), paste("formula ", DF$num_fmla), sep = " - ")
   DF$test_name <- paste(seq(1, dim(DF)[1]), DF$test_name, sep = ") ")
 
   if (!is.null(met)) {
@@ -873,3 +838,44 @@ multiple_cases <- function(met = NULL) {
     return(DF)
   }
 }
+
+
+
+multiple_cases2 = function(met = NULL){
+  method <- c("ols", "glm", "femlm", "feNmlm")
+  fmly <- c("NULL", "poisson", "poisson", "poisson")
+  all_rhs <- c("", "x2", "x3")
+  s <- c("all", "setosa", "versicolor", "virginica")
+  lhs  <- c("y1", "y2")
+  n_rhs <- 1:3
+
+  df_aux = expand.grid(n_rhs = n_rhs,
+                       lhs = lhs,
+                       s = s,
+                       stringsAsFactors = FALSE)
+
+  DF_l = list()
+  for(k in 1:length(method)){
+    DF_l[[k]] = data.frame(method = method[k],
+                           fmly = fmly[k],
+                           s = df_aux$s,
+                           lhs = df_aux$lhs,
+                           n_rhs = df_aux$n_rhs,
+                           num_fmla = 1:dim(df_aux)[1]
+                           )
+  }
+  DF <- DF_l[[1]]
+  for (k in 2:length(DF_l)) DF <- rbind(DF, DF_l[[k]])
+  # DF <- DF[sort(DF$method, index.return = TRUE, decreasing = TRUE)$ix, ]
+  # DF$num_fmla <- rep(c(1:12), 4)
+  DF$test_name <- paste(DF$method, paste("filter =", DF$s), paste("formula ", 1:dim(df_aux)[1]), sep = " - ")
+  DF$test_name <- paste(seq(1, dim(DF)[1]), DF$test_name, sep = ") ")
+
+  if (!is.null(met)) {
+    return(DF[DF$method == met, ])
+  } else {
+    return(DF)
+  }
+}
+
+
