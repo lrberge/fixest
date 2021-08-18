@@ -1,118 +1,10 @@
 ## Ctrl + Alt + R to run all the script
 
+# 2nd edition of expect equal allows to use scale argument to switch bewtween absolute and relative differences
 expect_equal2 <- function(object, expected, tolerance = if (edition_get() >= 3) testthat_tolerance(), scale = NULL) {
   local_edition(2)
   expect_equal(object, expected, tolerance = tolerance, scale = scale)
 }
-
-# expect_ols_equal <- function(object, reference) {
-#   testthat::test_that("Equal x1 coefficient between feols and lm", {
-#     local_edition(2)
-#     testthat::expect_equal(
-#       coef(object)["x1"],
-#       coef(reference)["x1"],
-#       scale = 1
-#     )
-#   })
-#
-#   testthat::test_that("Equal standard errors between feols and lm", {
-#     adj <- 1
-#     local_edition(2)
-#     testthat::expect_equal(
-#       se(object, se = "st", dof = dof(adj = adj))["x1"],
-#       se(reference)["x1"],
-#       scale = 1
-#     )
-#   })
-#
-#   testthat::test_that("Equal p-values between feols and lm", {
-#     adj <- 1
-#     local_edition(2)
-#     testthat::expect_equal(
-#       pvalue(object, se = "st", dof = dof(adj = adj))["x1"],
-#       pvalue(reference)["x1"],
-#       scale = 1
-#     )
-#   })
-# }
-#
-#
-# ### expect function for glms
-# expect_glm_equal <- function(object, reference) {
-#   model <- reference$family$family
-#   tol <- switch(model,
-#     "binomial" = 3e-5,
-#     1e-5
-#   )
-#   adj <- 0
-#
-#   if (model == "binomial" & (reference$formula == (y_01 ~ x1 + species + i(species, x2) + factor(fe_2) + i(fe_2, x3) + factor(fe_3)) |
-#     reference$formula == (y_01 ~ x1 + species + factor(fe_2) + i(fe_2, x2) + i(fe_2, x3) + factor(fe_3)))) {
-#     tol <- 0.5
-#   }
-#
-#   testthat::test_that("feglm and glm have equal x1 coefficient", {
-#     local_edition(2)
-#     expect_equal(coef(object)["x1"],
-#       coef(reference)["x1"],
-#       tolerance = tol,
-#       scale = 1 # Absolute difference
-#     )
-#   })
-#
-#   testthat::test_that("feglm and glm have equal standard errors", {
-#     local_edition(2)
-#     expect_equal(se(object, se = "st", dof = dof(adj = adj))["x1"],
-#       se(reference)["x1"],
-#       tolerance = tol,
-#       scale = 1 # Absolute difference
-#     )
-#   })
-#
-#   testthat::test_that("Equal p-values between feglm and glm", {
-#     local_edition(2)
-#     expect_equal(pvalue(object, se = "st", dof = dof(adj = adj))["x1"],
-#       pvalue(reference)["x1"],
-#       tolerance = tol,
-#       scale = 1 # Absolute difference
-#     )
-#   })
-# }
-#
-#
-# ### Expectation function for Negbin models
-#
-# expect_negbin_equal <- function(object, reference) {
-#   tol <- 1e-2
-#   adj <- 1
-#
-#   testthat::test_that("Equal x1 coefficient between fenegbin and MASS::glm.nb", {
-#     local_edition(2)
-#     expect_equal(coef(object)["x1"],
-#       coef(reference)["x1"],
-#       tolerance = tol,
-#       scale = 1
-#     )
-#   })
-#
-#   testthat::test_that("Equal standard errors between fenegbin and MASS::glm.nb", {
-#     local_edition(2)
-#     expect_equal(se(object, se = "st", dof = dof(adj = adj))["x1"],
-#       se(reference)["x1"],
-#       tolerance = tol,
-#       scale = 1
-#     )
-#   })
-#
-#   testthat::test_that("Equal p-values between between fenegbin and MASS::glm.nb", {
-#     local_edition(2)
-#     expect_equal(pvalue(object, se = "st", dof = dof(adj = adj))["x1"],
-#       pvalue(reference)["x1"],
-#       tolerance = tol * 10,
-#       scale = 1
-#     )
-#   })
-# }
 
 expect_model_equal <- function(object, reference, method) {
   # model <- ifelse(method != "ols", reference$family$family, method)
@@ -194,11 +86,6 @@ expect_equal_vcov <- function(est_pois) {
 
 
 ## Helper function for test-fixef.R
-
-expect_var0 <- function(x, y) {
-  expect_equal(var(x - y), 0)
-}
-
 expect_fixef <- function(all_coef, m_fe, k, str1, str2) {
   M <- switch(as.character(k),
     "1" = 2,
@@ -223,8 +110,6 @@ expect_fixef <- function(all_coef, m_fe, k, str1, str2) {
   )
   for (i in 1:M) {
     Cs <- get_coef(all_coef, str2[i])
-
     expect_equal2(var(Cs - m_fe[[str1[i]]][names(Cs)]), 0, scale = 1)
-    # test(var(Cs - m_fe[[ str1[i] ]][names(Cs)] ), 0, "~")
   }
 }
