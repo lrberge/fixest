@@ -43,7 +43,7 @@ M_it <- vcovClust(paste(base$fe1, base$fe2), VCOV_raw, scores = est$scores, dof 
 patrick::with_parameters_test_that("Two-Way Clustered VarCov estimations are correct",
   {
     vcov_est <- vcov(est, se = "two", dof = dof(adj = adj, fixef.K = k_val, cluster.adj = c_adj, cluster.df = cdf))
-    vcov_raw <- V_matrix(Mi, M_t, M_it, c_adj, cdf) * my_adj
+    vcov_raw <- V_matrix(M_i, M_t, M_it, c_adj, cdf) * my_adj
     testthat::expect_equal(as.numeric(vcov_est), as.numeric(vcov_raw))
   },
   .cases = vcov_cases3()

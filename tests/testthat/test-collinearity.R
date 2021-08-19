@@ -19,11 +19,12 @@ patrick::with_parameters_test_that("fixest fits collinearity as stats",
       famly = "poisson",
       weights = ev_par(useWeights)
     )
-    expect_equal(1, 1)
+
     # test(coef(res)["x1"], coef(res_bis)["x1"], "~")
     # test(se(res, se = "st", dof = dof(adj = adj))["x1"], se(res_bis)["x1"], "~")
     #
     expect_model_equal(res, res_bis, method = model)
+    expect_equal(1, 1)
   },
   .cases = collin_cases()
 )

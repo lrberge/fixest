@@ -7,10 +7,11 @@ expect_equal2 <- function(object, expected, tolerance = if (edition_get() >= 3) 
 }
 
 expect_model_equal <- function(object, reference, method) {
-  # model <- ifelse(method != "ols", reference$family$family, method)
   model <- ifelse(method == "ols" | method == "feNmlm", method, reference$family$family)
   tol <- ifelse(model == "binomial", 3e-5, 1e-5)
   tol <- ifelse(method == "negbin", 1e-2, tol)
+  tol <- ifelse(model == "quasibinomial", 1e-2, tol)
+
   if (model == "binomial") {
     tol <- ifelse((reference$formula == (y_01 ~ x1 + species + i(species, x2) + factor(fe_2) + i(fe_2, x3) + factor(fe_3)) |
       reference$formula == (y_01 ~ x1 + species + factor(fe_2) + i(fe_2, x2) + i(fe_2, x3) + factor(fe_3))), 0.5, tol)
@@ -40,6 +41,16 @@ expect_model_equal <- function(object, reference, method) {
       scale = 1 # Absolute difference
     )
   })
+
+  if (!is.null(object$dispersion)){
+    test_that("fixest and stats have the same dispersion parameter",
+              {
+                if (!is.null(reference$family$family)){
+                  tol <- ifelse(grepl("quasi", reference$family$family), 1e-3, tol)
+                }
+                expect_equal2(object$dispersion, summary(reference)$dispersion, tolerance = tol, scale = 1)
+              })
+  }
 }
 
 
