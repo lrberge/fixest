@@ -4,18 +4,18 @@
 library(sandwich)
 
 base <- datab4()
-base$y_int <- round(abs(10*base$y))
+base$y_int <- round(abs(10 * base$y))
 
 est_lm <- lm(y ~ x + as.factor(grp) + as.factor(tm), data = base)
 est_feols <- feols(y ~ x | grp + tm, data = base)
 
-est_lm <- glm(y_int ~ x + as.factor(grp) + as.factor(tm), data = base, family = "poisson")
-est_feols <- feglm(y_int ~ x | grp + tm, data = base, family = "poisson")
+# est_lm <- glm(y_int ~ x + as.factor(grp) + as.factor(tm), data = base, family = "poisson")
+# est_feols <- feglm(y_int ~ x | grp + tm, data = base, family = "poisson")
+#
+# est_lm <- glm(y_int ~ x + as.factor(grp) + as.factor(tm), data = base, family = "poisson")
+# est_feols <- femlm(y_int ~ x | grp + tm, data = base, family = "poisson")
 
-est_lm <- glm(y_int ~ x + as.factor(grp) + as.factor(tm), data = base, family = "poisson")
-est_feols <- femlm(y_int ~ x | grp + tm, data = base, family = "poisson")
-
-summary(est_lm)$coefficients[2,]
+summary(est_lm)$coefficients[2, ]
 est_feols$coeftable
 est_feols # Notice that the standard error shown here is clustered
 

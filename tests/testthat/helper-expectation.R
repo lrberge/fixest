@@ -42,14 +42,13 @@ expect_model_equal <- function(object, reference, method) {
     )
   })
 
-  if (!is.null(object$dispersion)){
-    test_that("fixest and stats have the same dispersion parameter",
-              {
-                if (!is.null(reference$family$family)){
-                  tol <- ifelse(grepl("quasi", reference$family$family), 1e-3, tol)
-                }
-                expect_equal2(object$dispersion, summary(reference)$dispersion, tolerance = tol, scale = 1)
-              })
+  if (!is.null(object$dispersion)) {
+    test_that("fixest and stats have the same dispersion parameter", {
+      if (!is.null(reference$family$family)) {
+        tol <- ifelse(grepl("quasi", reference$family$family), 1e-3, tol)
+      }
+      expect_equal2(object$dispersion, summary(reference)$dispersion, tolerance = tol, scale = 1)
+    })
   }
 }
 

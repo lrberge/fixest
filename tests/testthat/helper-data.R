@@ -48,7 +48,7 @@ datab3 <- function() {
   set.seed(0)
   base <- data.frame(x = rnorm(20))
   base$y <- base$x + rnorm(20)
-  base$y_int = round(abs(base$y))
+  base$y_int <- round(abs(base$y))
   base$fe1 <- rep(rep(1:3, c(4, 3, 3)), 2)
   base$fe2 <- rep(rep(1:5, each = 2), 2)
   return(base)
@@ -274,18 +274,24 @@ ols_cases <- function() {
     "y ~ x1 + species + factor(fe_2) + i(fe_2, x2) + i(fe_2, x3) + factor(fe_3)"
   )
 
-  df_aux <- expand.grid(ID = 1:length(fml_stats),
-                        my_weight = c("NULL", "base$w"),
-                        my_offset = c("NULL", "base$offset_value"),
-                        stringsAsFactors = FALSE)
-  df_fmla <- data.frame(fml_fixest = fml_fixest,
-                        fml_stats = fml_stats,
-                        ID = 1:length(fml_stats))
+  df_aux <- expand.grid(
+    ID = 1:length(fml_stats),
+    my_weight = c("NULL", "base$w"),
+    my_offset = c("NULL", "base$offset_value"),
+    stringsAsFactors = FALSE
+  )
+  df_fmla <- data.frame(
+    fml_fixest = fml_fixest,
+    fml_stats = fml_stats,
+    ID = 1:length(fml_stats)
+  )
   DF <- merge(df_aux, df_fmla, by = "ID", all.x = TRUE)[-1] # deleting ID
 
-  DF$test_name = paste0(seq(1,dim(DF)[1]), ") ", paste(paste("weight:", DF$my_offset),
-                                                       paste("offset:", DF$my_offset),
-                                                       paste("formula =", 1:length(fml_stats)), sep = " - "))
+  DF$test_name <- paste0(seq(1, dim(DF)[1]), ") ", paste(paste("weight:", DF$my_offset),
+    paste("offset:", DF$my_offset),
+    paste("formula =", 1:length(fml_stats)),
+    sep = " - "
+  ))
   return(DF)
 }
 
@@ -316,25 +322,31 @@ feglm_cases <- function(Models = c("binomial", "poisson", "Gamma")) {
   )
   DF_l <- list()
   for (k in 1:length(Models)) {
-    df_aux <- expand.grid(my_offset = c("NULL", "base$offset_value"),
-                          my_weight = c("NULL", "base$w"),
-                          ID = 1:length(fml_stats1),
-                          stringsAsFactors = FALSE)
+    df_aux <- expand.grid(
+      my_offset = c("NULL", "base$offset_value"),
+      my_weight = c("NULL", "base$w"),
+      ID = 1:length(fml_stats1),
+      stringsAsFactors = FALSE
+    )
     fmlas <- fomla(Models[k], fml_fixest1, fml_stats1)
-    df_fmla <- data.frame(ID = 1:length(fml_stats1),
-                          fml_fixest = fmlas[[1]],
-                          fml_stats = fmlas[[2]])
+    df_fmla <- data.frame(
+      ID = 1:length(fml_stats1),
+      fml_fixest = fmlas[[1]],
+      fml_stats = fmlas[[2]]
+    )
     DF_l[[k]] <- merge(df_aux, df_fmla, by = "ID", all.x = TRUE)[-1] # deleting ID
     DF_l[[k]]$my_family <- Models[k]
   }
 
   DF <- do.call("rbind", DF_l)
-  DF <- DF[!(DF$my_family == "Gamma" &  DF$my_offset != "NULL"),]
+  DF <- DF[!(DF$my_family == "Gamma" & DF$my_offset != "NULL"), ]
 
-  DF$test_name = paste0(seq(1,dim(DF)[1]), ") ", paste(DF$my_family,
-                                                       paste("offset:", DF$my_offset),
-                                                       paste("weights:", DF$my_weight),
-                                                       paste("formula =", 1:length(fml_stats1)), sep = " - "))
+  DF$test_name <- paste0(seq(1, dim(DF)[1]), ") ", paste(DF$my_family,
+    paste("offset:", DF$my_offset),
+    paste("weights:", DF$my_weight),
+    paste("formula =", 1:length(fml_stats1)),
+    sep = " - "
+  ))
   return(DF)
 }
 
@@ -353,28 +365,34 @@ femlm_cases <- function(fmly = c("poisson", "negbin", "logit", "gaussian")) {
   )
 
   DF_l <- list()
-  for(k in 1:length(fmly)){
+  for (k in 1:length(fmly)) {
     aux <- fomla(fmly[k], fml_fixest1, fml_stats1)
     fml_fixest <- aux[[1]]
     fml_stats <- aux[[2]]
-    df_fmla <- data.frame(fml_fixest = fml_fixest,
-                          fml_stats = fml_stats,
-                          ID = 1:length(fml_fixest))
-    df_aux <- expand.grid(my_offset = c("NULL", "base$offset_value"),
-                          my_family = fmly[k],
-                          ID = 1:length(fml_fixest),
-                          stringsAsFactors = FALSE)
+    df_fmla <- data.frame(
+      fml_fixest = fml_fixest,
+      fml_stats = fml_stats,
+      ID = 1:length(fml_fixest)
+    )
+    df_aux <- expand.grid(
+      my_offset = c("NULL", "base$offset_value"),
+      my_family = fmly[k],
+      ID = 1:length(fml_fixest),
+      stringsAsFactors = FALSE
+    )
     DF_l[[k]] <- merge(df_aux, df_fmla, by = "ID", all.x = TRUE)[-1] # deleting ID
   }
 
   DF <- do.call("rbind", DF_l)
-  DF <- DF[sort(DF$my_family, index.return= TRUE)$ix, ]
+  DF <- DF[sort(DF$my_family, index.return = TRUE)$ix, ]
 
-  DF$my_family_stats = DF$my_family
-  DF$my_family_stats[DF$my_family == "logit"] = "binomial"
-  DF$test_name = paste0(seq(1,dim(DF)[1]), ") ", paste(DF$my_family,
-                                                       paste("offset:", DF$my_offset),
-                                                       paste("formula =", 1:length(fml_stats1)), sep = " - "))
+  DF$my_family_stats <- DF$my_family
+  DF$my_family_stats[DF$my_family == "logit"] <- "binomial"
+  DF$test_name <- paste0(seq(1, dim(DF)[1]), ") ", paste(DF$my_family,
+    paste("offset:", DF$my_offset),
+    paste("formula =", 1:length(fml_stats1)),
+    sep = " - "
+  ))
   return(DF)
 }
 
@@ -398,15 +416,17 @@ fenegbin_cases <- function() {
 
 ## Case function for test-fitmethod.R
 fitmethod_cases <- function() {
-  y_dep = c("base$y", "base$y_int", "base$y_log")
-  y_dep = c("y", "y_int", "y_log")
-  with_fmly = c(FALSE, TRUE)
-  method = c("ols", "glm")
-  DF = expand.grid(y_dep = y_dep,
-                   with_fmly = with_fmly,
-                   method = method,
-                   stringsAsFactors = FALSE)
-  DF$fmly = c(rep("NULL", 6), rep("poisson", 6))
+  y_dep <- c("base$y", "base$y_int", "base$y_log")
+  y_dep <- c("y", "y_int", "y_log")
+  with_fmly <- c(FALSE, TRUE)
+  method <- c("ols", "glm")
+  DF <- expand.grid(
+    y_dep = y_dep,
+    with_fmly = with_fmly,
+    method = method,
+    stringsAsFactors = FALSE
+  )
+  DF$fmly <- c(rep("NULL", 6), rep("poisson", 6))
   DF$test_name <- paste(DF$method, paste("with family =", DF$with_fmly), paste("y_dep =", DF$y_dep), sep = " - ")
   DF$test_name <- paste(seq(1, dim(DF)[1]), DF$test_name, sep = ") ")
   return(DF)
@@ -415,7 +435,7 @@ fitmethod_cases <- function() {
 
 ## Case function for test-vcov
 vcov_cases1 <- function() {
-  method = c("ols", "glm", "femlm", "feNmlm")
+  method <- c("ols", "glm", "femlm", "feNmlm")
   DF <- expand.grid(
     adj = c(FALSE, TRUE),
     k_val = c("none", "nested", "full"),
@@ -427,7 +447,7 @@ vcov_cases1 <- function() {
   DF$my_adj <- ifelse(DF$adj, (20 - 1) / (20 - DF$K), 1)
 
   DF$test_name <- paste(DF$method, DF$fmly, paste("adj = ", DF$adj), paste("K =", DF$K), sep = " - ")
-  DF$test_name <- paste0(seq(1,dim(DF)[1]), ") ", DF$test_name)
+  DF$test_name <- paste0(seq(1, dim(DF)[1]), ") ", DF$test_name)
   return(DF)
 }
 
@@ -451,7 +471,7 @@ vcov_cases2 <- function() {
 
   DF$test_name <- paste(DF$k_val, DF$tdf, DF$c_adj, DF$adj, sep = " - ")
   DF$test_name <- paste(DF$method, DF$fmly, paste("K =", DF$K), paste("c_adj =", DF$adj), paste("tdf =", DF$tdf), sep = " - ")
-  DF$test_name <- paste0(seq(1,dim(DF)[1]), ") ", DF$test_name)
+  DF$test_name <- paste0(seq(1, dim(DF)[1]), ") ", DF$test_name)
   return(DF)
 }
 
@@ -475,12 +495,13 @@ vcov_cases3 <- function() {
   DF$df <- ifelse(DF$tdf == "min", 2, 20 - 8)
 
   DF$test_name <- paste(DF$method, DF$fmly,
-                        paste("cdf =", DF$cdf),
-                        paste("tdf =", DF$tdf),
-                        paste("c_adj =", DF$c_adj),
-                        paste("adj =", DF$adj),
-                        sep = " - ")
-  DF$test_name <- paste0(seq(1,dim(DF)[1]), ") ", DF$test_name)
+    paste("cdf =", DF$cdf),
+    paste("tdf =", DF$tdf),
+    paste("c_adj =", DF$c_adj),
+    paste("adj =", DF$adj),
+    sep = " - "
+  )
+  DF$test_name <- paste0(seq(1, dim(DF)[1]), ") ", DF$test_name)
   return(DF)
 }
 
@@ -839,22 +860,25 @@ predict_cases <- function() {
 multiple_cases <- function(met = NULL) {
   method <- c("ols", "glm", "femlm", "feNmlm")
   fmly <- c("NULL", "poisson", "poisson", "poisson")
-  rhs = c("x2", "x3")
-  lhs = c("y1", "y2")
+  rhs <- c("x2", "x3")
+  lhs <- c("y1", "y2")
   s <- c("setosa", "versicolor", "virginica")
-  df_aux = expand.grid(rhs = rhs,
-                       lhs = lhs,
-                       s = s,
-                       stringsAsFactors = FALSE)
+  df_aux <- expand.grid(
+    rhs = rhs,
+    lhs = lhs,
+    s = s,
+    stringsAsFactors = FALSE
+  )
 
-  DF_l = list()
-  for(k in 1:length(method)){
-    DF_l[[k]] = data.frame(method = method[k],
-                           fmly = fmly[k],
-                           rhs = df_aux$rhs,
-                           lhs = df_aux$lhs,
-                           s = df_aux$s,
-                           num_fmla = 1:dim(df_aux)[1]
+  DF_l <- list()
+  for (k in 1:length(method)) {
+    DF_l[[k]] <- data.frame(
+      method = method[k],
+      fmly = fmly[k],
+      rhs = df_aux$rhs,
+      lhs = df_aux$lhs,
+      s = df_aux$s,
+      num_fmla = 1:dim(df_aux)[1]
     )
   }
 
@@ -872,28 +896,31 @@ multiple_cases <- function(met = NULL) {
 
 
 
-multiple_cases2 = function(met = NULL){
+multiple_cases2 <- function(met = NULL) {
   method <- c("ols", "glm", "femlm", "feNmlm")
   fmly <- c("NULL", "poisson", "poisson", "poisson")
   all_rhs <- c("", "x2", "x3")
   s <- c("all", "setosa", "versicolor", "virginica")
-  lhs  <- c("y1", "y2")
+  lhs <- c("y1", "y2")
   n_rhs <- 1:3
 
-  df_aux = expand.grid(n_rhs = n_rhs,
-                       lhs = lhs,
-                       s = s,
-                       stringsAsFactors = FALSE)
+  df_aux <- expand.grid(
+    n_rhs = n_rhs,
+    lhs = lhs,
+    s = s,
+    stringsAsFactors = FALSE
+  )
 
-  DF_l = list()
-  for(k in 1:length(method)){
-    DF_l[[k]] = data.frame(method = method[k],
-                           fmly = fmly[k],
-                           s = df_aux$s,
-                           lhs = df_aux$lhs,
-                           n_rhs = df_aux$n_rhs,
-                           num_fmla = 1:dim(df_aux)[1]
-                           )
+  DF_l <- list()
+  for (k in 1:length(method)) {
+    DF_l[[k]] <- data.frame(
+      method = method[k],
+      fmly = fmly[k],
+      s = df_aux$s,
+      lhs = df_aux$lhs,
+      n_rhs = df_aux$n_rhs,
+      num_fmla = 1:dim(df_aux)[1]
+    )
   }
   DF <- DF_l[[1]]
   for (k in 2:length(DF_l)) DF <- rbind(DF, DF_l[[k]])
@@ -908,5 +935,3 @@ multiple_cases2 = function(met = NULL){
     return(DF)
   }
 }
-
-

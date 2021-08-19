@@ -57,20 +57,17 @@ test_that("prediction with poly() works properly", {
 
 ### HR: predict(fixef = TRUE) doesnt work anymore
 
-test_that(" 'predicting' fixed effects works properly",
-          {
+test_that(" 'predicting' fixed effects works properly", {
+  res <- feols(y ~ x1 | species^fe_bis[x2], base, combine.quick = FALSE)
 
-            res <- feols(y ~ x1 | species^fe_bis[x2], base, combine.quick = FALSE)
+  obs_fe <- predict(res, fixef = TRUE)
+  fe_coef_all <- fixef(res, sorted = FALSE)
 
-            obs_fe <- predict(res, fixef = TRUE)
-            fe_coef_all <- fixef(res, sorted = FALSE)
+  coef_fe <- fe_coef_all[[1]]
+  coef_vs <- fe_coef_all[[2]]
 
-            coef_fe <- fe_coef_all[[1]]
-            coef_vs <- fe_coef_all[[2]]
+  fe_names <- paste0(base$species, "_", base$fe_bis)
 
-            fe_names <- paste0(base$species, "_", base$fe_bis)
-
-            expect_equal(coef_fe[fe_names], obs_fe[, 1])
-            expect_equal(coef_vs[fe_names], obs_fe[, 2])
-
-          })
+  expect_equal(coef_fe[fe_names], obs_fe[, 1])
+  expect_equal(coef_vs[fe_names], obs_fe[, 2])
+})

@@ -96,26 +96,24 @@ patrick::with_parameters_test_that("fitting works with forward and lagging funct
 
 # We just check there is no bug (consistency should be OK)
 
-test_that("there is no bug using data.table for panel data",
-          {
-            base_dt <- data.table::data.table(
-              id = c("A", "A", "B", "B"),
-              time = c(1, 2, 1, 3),
-              x = c(5, 6, 7, 8)
-            )
+test_that("there is no bug using data.table for panel data", {
+  base_dt <- data.table::data.table(
+    id = c("A", "A", "B", "B"),
+    time = c(1, 2, 1, 3),
+    x = c(5, 6, 7, 8)
+  )
 
-            base_dt <- panel(base_dt, ~ id + time)
+  base_dt <- panel(base_dt, ~ id + time)
 
-            base_dt[, x_l := l(x)]
-            expect_equal(base_dt$x_l, c(NA, 5, NA, NA))
+  base_dt[, x_l := l(x)]
+  expect_equal(base_dt$x_l, c(NA, 5, NA, NA))
 
-            lag_creator <- function(dt) {
-              dt2 <- panel(dt, ~ id + time)
-              dt2[, x_l := l(x)]
-              return(dt2)
-            }
+  lag_creator <- function(dt) {
+    dt2 <- panel(dt, ~ id + time)
+    dt2[, x_l := l(x)]
+    return(dt2)
+  }
 
-            base_bis <- lag_creator(base_dt)
-            base_bis[, x_d := d(x)]
-
-          })
+  base_bis <- lag_creator(base_dt)
+  base_bis[, x_d := d(x)]
+})

@@ -3,32 +3,32 @@
 ##### Bug in model.matrix for fixest??
 
 library(fixest)
-base = iris
+base <- iris
 names(base) <- c("y", "x1", "x2", "x3", "species")
-mod = feols(y ~ x1 + x2 | x3 + species, data = base)
+mod <- feols(y ~ x1 + x2 | x3 + species, data = base)
 model.matrix(mod, type = "fixef") # Error -> Estimation does not contain fixed-effects
 mod$fixef_vars # There are fixed effects
 
 # Trying different models:
-mod = feglm(y ~ x1 + x2 | x3 + species, data = base)
+mod <- feglm(y ~ x1 + x2 | x3 + species, data = base)
 model.matrix(mod, type = "fixef")
-mod = femlm(y ~ x1 + x2 | x3 + species, data = base)
-model.matrix(mod, type = "fixef")
-
-mod = feols(y ~ x1 + x2 | species, data = base)
-model.matrix(mod, type = "fixef")
-mod = feglm(y ~ x1 + x2 | species, data = base)
-model.matrix(mod, type = "fixef")
-mod = femlm(y ~ x1 + x2 | species, data = base)
+mod <- femlm(y ~ x1 + x2 | x3 + species, data = base)
 model.matrix(mod, type = "fixef")
 
+mod <- feols(y ~ x1 + x2 | species, data = base)
+model.matrix(mod, type = "fixef")
+mod <- feglm(y ~ x1 + x2 | species, data = base)
+model.matrix(mod, type = "fixef")
+mod <- femlm(y ~ x1 + x2 | species, data = base)
+model.matrix(mod, type = "fixef")
 
-base$fe = base$species
-mod = feols(y ~ x1 | fe, data = base)
+
+base$fe <- base$species
+mod <- feols(y ~ x1 | fe, data = base)
 model.matrix(mod, type = "fixef")
-mod = feglm(y ~ x1 | fe, data = base)
+mod <- feglm(y ~ x1 | fe, data = base)
 model.matrix(mod, type = "fixef")
-mod = femlm(y ~ x1 | fe, data = base)
+mod <- femlm(y ~ x1 | fe, data = base)
 model.matrix(mod, type = "fixef")
 ## Got the same error over and over
 
