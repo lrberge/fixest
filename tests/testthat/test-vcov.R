@@ -131,9 +131,16 @@ base <- iris
 names(base) <- c("y", "x1", "x2", "x3", "species")
 base$clu <- sample(6, 150, TRUE)
 base$clu[1:5] <- NA
+base$y_int <- round(base$y)
+base$y_01 <- c(base$y > mean(base$y)) + 0
 
-test_that("vcov estimation from different sources are equal", {
-  est <- feols(y ~ x1 | species, base, cluster = ~clu, dof = dof(adj = FALSE))
+patrick::with_parameters_test_that("vcov estimation from different sources are equal", {
+  fmla <- xpd(lhs ~ x1 | species, lhs = y_dep)
+  est <- fixest_mod_select(model = method,
+                           fmla = fmla,
+                           base = base,
+                           famly = fmly,
+                           cluster = ~clu, dof = dof(adj = FALSE))
   v1 <- est$cov.scaled
   v1b <- vcov(est)
   v1c <- summary(est)$cov.scaled
@@ -155,4 +162,8 @@ test_that("vcov estimation from different sources are equal", {
   expect_equal(as.numeric(v3), as.numeric(v3b))
   expect_true(max(abs(v1 - v3)) != 0)
   expect_true(max(abs(v2 - v3)) != 0)
-})
+},
+.cases = vcov_cases4()
+)
+
+

@@ -61,6 +61,7 @@ datab4 <- function() {
   G <- N / 5
   T <- N / G
   d <- data.frame(y = rnorm(N), x = rnorm(N), grp = rep(1:G, T), tm = rep(1:T, each = G))
+  d$y_int <- round(abs(10 * d$y)) + 1
   return(d)
 }
 
@@ -117,9 +118,9 @@ datab10 <- function() {
   set.seed(0)
   x <- sin(1:10)
   y <- rnorm(10)
-  y_int <- rpois(10, 2)
-
-  return(data.frame(y = y, y_int = y_int, x))
+  y_01 <- c(y > 0) + 0
+  y_int <- rpois(10, 2) + 2
+  return(data.frame(y = y, y_int = y_int, y_01 = y_01, x))
 }
 
 # Database for test-subset.R
@@ -287,7 +288,7 @@ ols_cases <- function() {
   )
   DF <- merge(df_aux, df_fmla, by = "ID", all.x = TRUE)[-1] # deleting ID
 
-  DF$test_name <- paste0(seq(1, dim(DF)[1]), ") ", paste(paste("weight:", DF$my_offset),
+  DF$test_name <- paste0(seq(1, dim(DF)[1]), ") ", paste(paste("weight:", DF$my_weight),
     paste("offset:", DF$my_offset),
     paste("formula =", 1:length(fml_stats)),
     sep = " - "
@@ -505,6 +506,20 @@ vcov_cases3 <- function() {
   return(DF)
 }
 
+vcov_cases4 <- function(){
+  method <- c("ols", rep("glm",4))
+  fmly <- c("NULL", "poisson", "quasipoisson", "Gamma", "binomial")
+  y_dep <- c("y", "y_int", "y_int", "y", "y_01")
+
+  DF <- data.frame(method = method,
+                   fmly = fmly,
+                   y_dep = y_dep)
+  DF$test_name <- paste(method, fmly, y_dep, sep = " - ")
+  DF$test_name <- paste0(1:dim(DF)[1], "1)", DF$test_name)
+
+  return(DF)
+}
+
 # Function for test-vcov.R
 V_matrix <- function(M_i, M_t, M_it, c_adj, cdf) {
   if (c_adj) {
@@ -544,6 +559,24 @@ vcov_db <- function(k) {
   }
 }
 
+## Case function for test-sandwich.R
+SE_cases <- function(){
+  model <- c("ols", rep("glm",4), rep("femlm",2))
+  y_dep <- c("y",
+             rep("y_int",3), "y",
+             "y_int", "y")
+
+  fmly <- c("NULL",
+            "Gamma", "poisson", "quasipoisson", "gaussian",
+            "poisson", "gaussian")
+
+  DF <- data.frame(y_dep = y_dep,
+                   model = model,
+                   fmly = fmly)
+
+  DF$test_name <- paste(model, fmly, y_dep, sep = " - ")
+  return(DF)
+}
 
 ## Cases function for test-nointercept.R
 
@@ -576,16 +609,16 @@ nointercept_cases <- function() {
   return(DF)
 }
 
-stats_mod_select <- function(model, fmla, base, famly = NULL, weights = NULL) {
+stats_mod_select <- function(model, fmla, base, famly = NULL, ...) {
   fmla <- as.formula(fmla)
   if (model == "ols") {
-    res <- lm(formula = fmla, data = base, weights = weights)
+    res <- lm(formula = fmla, data = base, ...)
     return(res)
   } else if (model == "glm" | model == "femlm") {
-    res <- glm(formula = fmla, data = base, family = famly, weights = weights)
+    res <- glm(formula = fmla, data = base, family = famly, ...)
     return(res)
   } else if (model == "negbin") {
-    res <- MASS::glm.nb(formula = fmla, data = base)
+    res <- MASS::glm.nb(formula = fmla, data = base, ...)
     return(res)
   }
 }
@@ -617,27 +650,35 @@ fixest_mod_select <- function(model, fmla, base, famly = NULL, ...) {
 }
 
 ### Cases for test-residuals.R
-
-
 residuals_cases <- function() {
-  method <- c(rep("ols", 2), rep("glm", 2), "femlm", "negbin")
+  method <- c("ols", "glm", "femlm", "negbin")
   formula_fe <- "y_int ~ x1 | species"
   formula_stats <- "y_int ~ x1 + species"
-  famly <- c(rep("NULL", 2), rep("poisson", 3), rep("NULL", 1))
-  do_weight <- c(rep(c(FALSE, TRUE), 2), FALSE, FALSE)
-  wghts <- c(rep(c("NULL", "base$w"), 2), rep("NULL", 2))
-  tol <- c(rep(1e-6, 5), 1e-2)
+  fmly <- c("poisson", "quasipoisson", "Gamma", "gaussian")
+  fmly_mlm <- c("poisson", "gaussian") # not yet included logit
+  wghts <- c("NULL", "base$w")
 
-  DF <- data.frame(
-    method = method,
-    formula_fe = formula_fe,
-    formula_stats = formula_stats,
-    family = famly,
-    do_weight = do_weight,
-    wghts = wghts,
-    tol = tol,
-    test_name = paste(method, paste("weight", do_weight, sep = "="), sep = " - ")
-  )
+  DF_l <- list()
+  for(k in 1:4){
+    Famly <- fmly
+    Wghts <- wghts
+    if (method[k] %in% c("negbin", "ols")) Famly <- "NULL"
+    if (method[k] == "negbin") Wghts <- "NULL"
+    if (method[k] == "femlm") Famly <- fmly_mlm
+
+    DF_l[[k]] <- expand.grid(method = method[k],
+                             formula_fe = formula_fe,
+                             formula_stats = formula_stats,
+                             weights = Wghts,
+                             family = Famly,
+                             stringsAsFactors = FALSE)
+  }
+
+  DF <- do.call("rbind", DF_l)
+  DF$test_name <- paste(DF$method,
+                        paste("weight:", DF$weights),
+                        sep = " - ")
+  DF$test_name <- paste0(seq(1, dim(DF)[1]), ") ", DF$test_name)
   return(DF)
 }
 
@@ -701,47 +742,61 @@ fixef_cases <- function() {
 }
 
 ### Cases function for test-collinearity.R
-collin_cases <- function() {
+collin_cases2 <- function() {
   useWeights <- c("NULL", "base$w") # c(FALSE, TRUE)
-  model <- c("ols", "glm")
+  model <- c("ols", "glm", "femlm")
   use_fe <- c(FALSE, TRUE)
-  fixest_formula1 <- c(" ~ x1 + constant", " ~ x1 + constant | species")
-  stats_formula2 <- c(" ~ x1 + constant", " ~ x1 + constant + species")
-
+  fmly <- c("poisson", "Gamma") #, "quasipoisson", "Gamma", "binomial")
   DF_l <- list()
-  for (k in 1:2) {
-    if (model[k] == "ols") {
-      fmlas1 <- paste("y", fixest_formula1)
-      fmlas2 <- paste("y", stats_formula2)
-    } else if (model[k] == "glm") {
-      fmlas1 <- paste("y_int", fixest_formula1)
-      fmlas2 <- paste("y_int", stats_formula2)
+  for(k in 1:length(model)){
+    Fmly <- fmly
+    UseWeights <- useWeights
+    if (model[k] == "ols") Fmly <- "NULL"
+    if (model[k] == "femlm") {
+      UseWeights <- "NULL"
+      Fmly <- c("poisson", "negbin")
     }
-    df <- expand.grid(
-      use_fe = use_fe,
-      useWeights = useWeights,
-      stringsAsFactors = FALSE
-    )
-    df_aux <- data.frame(use_fe, fixest_formula1 = fmlas1, stats_formula1 = fmlas2)
-    df <- dplyr::left_join(df, df_aux, by = "use_fe")
-    df$model <- model[k]
-    df$test_name <- paste(model[k],
-      paste("weights=", df$useWeights),
-      paste("use_fe=", df$use_fe),
-      sep = " - "
-    )
-    DF_l[[k]] <- df
+    df_aux = expand.grid(useWeights = UseWeights,
+                         ID = c(1,2),
+                         model = model[k],
+                         fmly = Fmly,
+                         stringsAsFactors = FALSE)
+
+    df_fmla <- data.frame(ID = c(1,2),
+                          use_fe = use_fe,
+                          fixest_formula1 = c("x1 + constant", "x1 + constant | species"),
+                          stats_formula2 = c("x1 + constant", "x1 + constant + species"))
+
+    DF_l[[k]] <- merge(df_aux, df_fmla, by = "ID", all.x = TRUE)[-1] # deleting ID
+
   }
-  DF <- rbind(DF_l[[1]], DF_l[[2]])
+  DF <- do.call("rbind", DF_l)
+
+  DF$y_dep <- "y_int"
+  DF$y_dep[DF$model == "ols" | DF$fmly == "gaussian" | DF$fmly == "Gamma"] <- "y"
+  DF$test_name <- paste(DF$model, fmly, paste("FE:", DF$use_fe), paste("weights:", DF$useWeights), paste("y_dep:", DF$y_dep), sep = " - ")
+  DF$test_name <- paste0(1:dim(DF)[1], ") ", DF$test_name)
   return(DF)
 }
 
 
 ## Cases function for test-hatvalues.R
 hatvalues_cases <- function() {
-  model <- c("ols", "glm")
-  formulas <- c("y ~ x", "y_int ~ x")
-  family <- c("NULL", "poisson")
+  model <- c("ols", rep("glm", 6))
+  formulas <- c("y ~ x",
+                "y_int ~ x",
+                "y_int ~ x",
+                "y ~ x",
+                "y_int ~ x",
+                "y_01 ~ x",
+                "y_01 ~ x")
+  family <- c("NULL",
+              "poisson",
+              "quasipoisson",
+              "gaussian",
+              "Gamma",
+              "binomial",
+              "quasibinomial")
 
   return(data.frame(
     model = model,
@@ -751,17 +806,21 @@ hatvalues_cases <- function() {
   ))
 }
 
+
 ## Cases function for test-sandwhich.R
 sandwcomp_cases <- function() {
-  model <- c("ols", "ols", "glm", "glm")
-  family <- c("NULL", "NULL", "poisson", "poisson")
+  model <- c("ols", "ols", "glm", "glm", "glm", "glm")
+  family <- c("NULL", "NULL", "poisson", "poisson", "Gamma", "Gamma")
   fmlas <- c(
     "y ~ x1 + I(x1**2) + factor(id)",
     "y ~ x1 + I(x1**2) | id",
     "y_int ~ x1 + I(x1**2) + factor(id)",
+    "y_int ~ x1 + I(x1**2) | id",
+    "y_int ~ x1 + I(x1**2) + factor(id)",
     "y_int ~ x1 + I(x1**2) | id"
   )
-  FE <- rep(c(FALSE, TRUE), 2)
+  FE <- rep(c(FALSE, TRUE), 3)
+
   DF <- data.frame(
     test_name = paste(model, paste("FE = ", FE)),
     model = model,

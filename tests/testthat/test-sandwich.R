@@ -4,59 +4,53 @@
 library(sandwich)
 
 base <- datab4()
-base$y_int <- round(abs(10 * base$y))
+patrick::with_parameters_test_that("Santandard, Clustered, HC and tw-way Clustered SE estimations are correct between fixest and stats",
+                                   {
+                                     fixest_fmla <- xpd(lhs ~ x | grp + tm, lhs = y_dep)
+                                     est <- fixest_mod_select(model = model, fmla = fixest_fmla, base = base, famly = fmly)
 
-est_lm <- lm(y ~ x + as.factor(grp) + as.factor(tm), data = base)
-est_feols <- feols(y ~ x | grp + tm, data = base)
+                                     stats_fmla <- xpd(lhs ~ x + as.factor(grp) + as.factor(tm), lhs = y_dep)
+                                     est_bis <- stats_mod_select(model = model, fmla = stats_fmla, base = base, famly = fmly)
 
-# est_lm <- glm(y_int ~ x + as.factor(grp) + as.factor(tm), data = base, family = "poisson")
-# est_feols <- feglm(y_int ~ x | grp + tm, data = base, family = "poisson")
-#
-# est_lm <- glm(y_int ~ x + as.factor(grp) + as.factor(tm), data = base, family = "poisson")
-# est_feols <- femlm(y_int ~ x | grp + tm, data = base, family = "poisson")
+                                     test_that("Clustered Standard Errors are equal between lm and sandwich", {
+                                       # Standard Errors
+                                       # vcov_fxt <- se(est, se = "standard")["x"]
+                                       vcov_fxt <- est$coeftable[,2]
+                                       vcov_sw <- unname(se(est_bis)["x"])
+                                       expect_equal2(vcov_fxt, vcov_sw, tol = 1e-6)
 
-summary(est_lm)$coefficients[2, ]
-est_feols$coeftable
-est_feols # Notice that the standard error shown here is clustered
+                                       # Clustered SE type HC0
+                                       vcov_fxt <- unname(se(est, dof = dof(adj = FALSE, fixef.K = "full")))
+                                       vcov_sw <- sqrt(vcovCL(est_bis, cluster = base$grp, type = "HC0")["x", "x"])
+                                       expect_equal2(vcov_fxt, vcov_sw, tol = 1e-6) # Almost equal
 
-######### Testing sandwich covariance estimations
+                                       # Clusteres SE type HC1
+                                       vcov_fxt <- unname(se(est, dof = dof(fixef.K = "full")))
+                                       vcov_sw <- sqrt(vcovCL(est_bis, cluster = base$grp, type = "HC1")["x", "x"])
+                                       expect_equal2(vcov_fxt, vcov_sw, tol = 1e-6) # Almost equal
+                                     })
 
-### Clustered Standard Errors
-# For feglm and femlm we need to change the tolerance for the estimation in order to pass the test
-testthat::test_that("Clustered Standard Errors are equal between lm and sandwich", {
-  # Standard Errors
-  vcov_fxt <- se(est_feols, se = "standard")["x"]
-  vcov_sw <- se(est_lm)["x"]
-  expect_equal(vcov_fxt, vcov_sw)
+                                     ### Heteroskedasticity-robust
+                                     test_that("Heterscoedastcity-robus Standard Errors are equal between feols and sandwich", {
+                                       vcov_fxt <- unname(se(est, se = "hetero", dof = dof(adj = FALSE, cluster.adj = FALSE)))
+                                       vcov_sw <- sqrt(vcovHC(est_bis, type = "HC0")["x", "x"])
+                                       expect_equal2(vcov_fxt, vcov_sw, tol = 1e-5)
 
-  # Clustered SE type HC0
-  vcov_fxt <- unname(se(est_feols, dof = dof(adj = FALSE, fixef.K = "full")))
-  vcov_sw <- sqrt(vcovCL(est_lm, cluster = base$grp, type = "HC0")["x", "x"])
-  expect_equal2(vcov_fxt, vcov_sw, tol = 1e-6) # Almost equal
+                                       vcov_fxt <- unname(se(est, se = "hetero"))
+                                       vcov_sw <- sqrt(vcovHC(est_bis, type = "HC1")["x", "x"])
+                                       expect_equal2(vcov_fxt, vcov_sw, tol = 1e-5)
+                                     })
 
-  # Clusteres SE type HC1
-  vcov_fxt <- unname(se(est_feols, dof = dof(fixef.K = "full")))
-  vcov_sw <- sqrt(vcovCL(est_lm, cluster = base$grp, type = "HC1")["x", "x"])
-  expect_equal2(vcov_fxt, vcov_sw, tol = 1e-6) # Almost equal
-})
-
-### Heteroskedasticity-robust
-testthat::test_that("Heterscoedastcity-robus Standard Errors are equal between feols and sandwich", {
-  vcov_fxt <- unname(se(est_feols, se = "hetero", dof = dof(adj = FALSE, cluster.adj = FALSE)))
-  vcov_sw <- sqrt(vcovHC(est_lm, type = "HC0")["x", "x"])
-  expect_equal2(vcov_fxt, vcov_sw, tol = 1e-5)
-
-  vcov_fxt <- unname(se(est_feols, se = "hetero"))
-  vcov_sw <- sqrt(vcovHC(est_lm, type = "HC1")["x", "x"])
-  expect_equal2(vcov_fxt, vcov_sw, tol = 1e-5)
-})
-
-### Two-way clustered standard errors
-testthat::test_that("Two-way Clustered Standard Errors are equal between feols and sandwich", {
-  vcov_fxt <- unname(se(est_feols, se = "twoway", dof = dof(fixef.K = "full", cluster.df = "conv")))
-  vcov_sw <- sqrt(vcovCL(est_lm, cluster = ~ grp + tm, type = "HC1")["x", "x"])
-  expect_equal2(vcov_fxt, vcov_sw, tol = 1e-5)
-})
+                                     ### Two-way clustered standard errors
+                                     test_that("Two-way Clustered Standard Errors are equal between feols and sandwich", {
+                                       vcov_fxt <- unname(se(est, se = "twoway", dof = dof(fixef.K = "full", cluster.df = "conv")))
+                                       vcov_sw <- sqrt(vcovCL(est_bis, cluster = ~ grp + tm, type = "HC1")["x", "x"])
+                                       expect_equal2(vcov_fxt, vcov_sw, tol = 1e-5)
+                                     })
+                                     expect_equal(1,1)
+                                   },
+                                   .cases = SE_cases()[1:6,]
+)
 
 
 
@@ -117,15 +111,12 @@ patrick::with_parameters_test_that("fixest is compatible with sandwich's vcov",
       model = model,
       fmla = fmlas,
       base = base,
-      famly = family,
-      weights = NULL
+      famly = family
     )
 
     if (isFALSE(FE)) {
-      # test(vcov(est, cluster = ~id), vcovCL(est, cluster = ~id, type = "HC1"))
       expect_equal(vcov(est, cluster = ~id), vcovCL(est, cluster = ~id, type = "HC1"))
     } else {
-      # test(vcov(est, cluster = ~id, dof = dof(adj = FALSE)), vcovCL(est, cluster = ~id))
       expect_equal(vcov(est, cluster = ~id, dof = dof(adj = FALSE)), vcovCL(est, cluster = ~id))
     }
   },
@@ -153,3 +144,20 @@ patrick::with_parameters_test_that("fixest is compatible with sandwich's vcov",
 #
 # ## I must call my database with the same name of fixest_mod_select Data argument
 # ## For some reason vcovCL doesnt work without the previous detail
+
+#
+# est_lm <- lm(y ~ x + as.factor(grp) + as.factor(tm), data = base)
+# est_feols <- feols(y ~ x | grp + tm, data = base)
+#
+# est_lm <- glm(y_int ~ x + as.factor(grp) + as.factor(tm), data = base, family = "poisson")
+# est_feols <- feglm(y_int ~ x | grp + tm, data = base, family = "poisson")
+#
+# # est_lm <- glm(y_int ~ x + as.factor(grp) + as.factor(tm), data = base, family = "poisson")
+# # est_feols <- femlm(y_int ~ x | grp + tm, data = base, family = "poisson")
+#
+# summary(est_lm)$coefficients[2, ]
+# est_feols$coeftable
+# est_feols # Notice that the standard error shown here is clustered
+# se(est_feols, se = "standard")
+# coeftable(est_feols, se = "standard")
+# coeftable(est_feols)

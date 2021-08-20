@@ -18,7 +18,7 @@ patrick::with_parameters_test_that("estimation with subset works properly",
     })
     expect_equal(1, 1)
   },
-  .cases = subset_cases()[19:22, ]
+  .cases = subset_cases()
 )
 
 # K = 20
