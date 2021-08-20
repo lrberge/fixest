@@ -1,6 +1,7 @@
 ## Ctrl + Alt + R to run all the script
 
 library(fixest)
+library(patrick)
 
 ## Database used for test-fitting.R
 datab <- function() {
@@ -149,6 +150,7 @@ datab12 <- function() {
   base$period_date <- as.Date(ten_dates, "%Y-%m-%d")[base$period]
   base$y_0 <- base$y**2
   base$y_0[base$id == 1] <- 0
+  base$y_00 <- base$y_0 + 1
 
   # We compute the lags "by hand"
   base <- base[order(base$id, base$period), ]
@@ -225,6 +227,9 @@ datab16 <- function() {
   base_bis <- base[1:50, ]
   base_bis$id <- rep(1:5, each = 10)
   base_bis$time <- rep(1:10, 5)
+
+  # for glm models:
+  base$y_int = round(base$y1)
   return(list(base, base_bis))
 }
 
@@ -586,26 +591,38 @@ nointercept_cases <- function() {
     "-1 + x1 + factor(fe1)",
     "-1 + x1 + i(fe1) + i(fe2)"
   )
-  fmly <- c("gaussian", "poisson", "Gamma")
-  DF <- data.frame(
-    model = "ols", family = "NULL", formula = paste("y", f_rhs, sep = " ~ "),
-    test_name = paste("lm", paste("formula", c(1, 2, 3)), sep = " - ")
+
+  DF_l <- list()
+  # OLS
+  DF_l[[1]] <-data.frame(
+    fmly = "NULL",
+    f_rhs = f_rhs,
+    method = "ols",
+    y_dep = "y"
   )
-  for (k in 1:3) {
-    f_lhs <- ifelse(fmly[k] == "gaussian", "y", "y_r")
-    DF <- rbind(DF, data.frame(
-      model = "glm",
-      family = fmly[k],
-      formula = paste(f_lhs, f_rhs, sep = " ~ "),
-      test_name = paste("glm", fmly[k], paste("formula", c(1, 2, 3)), sep = " - ")
-    ))
-  }
-  DF <- rbind(DF, data.frame(
-    model = "negbin",
-    family = "NULL",
-    formula = paste("y", f_rhs, sep = " ~ "),
-    test_name = paste("negbin", paste("formula", c(1, 2, 3)), sep = " - ")
-  ))
+
+  # GLM - FEMLM
+  fmly = c("poisson", "gaussian", "Gamma")
+  df_aux <- expand.grid(f_rhs = f_rhs,
+                        fmly = fmly,
+                        method = c("glm", "femlm"),
+                        stringsAsFactors = FALSE)
+  df_ydep <- data.frame(fmly = fmly,
+                        y_dep = c("y", "y_r", "y_r"))
+  DF <- merge(df_aux, df_ydep, by = "fmly", all.x = TRUE)
+  DF <- DF[sort(DF$method, index.return = TRUE)$ix,]
+  DF_l[[2]] <- DF[!(DF$fmly == "Gamma" & DF$method == "femlm"),]
+
+  ## negbin
+  DF_l[[3]] <- data.frame(
+    fmly = "NULL",
+    f_rhs = f_rhs,
+    method = "negbin",
+    y_dep = "y"
+  )
+
+  DF <- do.call("rbind", DF_l)
+  DF$test_name <- paste(DF$method, DF$fmly, paste("formula = ", DF$y_dep, DF$f_rhs), sep = " - ")
   return(DF)
 }
 
@@ -856,8 +873,9 @@ subset_cases <- function() {
       fmlas = Fmlas
     )
   }
-  DF <- DF_l[[1]]
-  for (k in 2:length(DF_l)) DF <- rbind(DF, DF_l[[k]])
+  # DF <- DF_l[[1]]
+  # for (k in 2:length(DF_l)) DF <- rbind(DF, DF_l[[k]])
+  DF <- do.call("rbind", DF_l)
 
   aux <- DF$method == "ols" | DF$method == "negbin"
   DF$famly[aux] <- "NULL"
@@ -867,58 +885,85 @@ subset_cases <- function() {
 
 # case function for test-lagging.R
 lagging_cases <- function() {
-  depvar <- c("y", "y_na", "y_0")
   p <- c("period", "period_txt", "period_date")
-  method <- c("ols", "glm")
+  DF_l <- list()
+  # OLS
+  DF_l[[1]] <- expand.grid(p = p,
+                           depvar = c("y", "y_na"),
+                           fmly = "NULL",
+                           method = "ols",
+                           stringsAsFactors = FALSE )
 
-  DF <- expand.grid(p = p, depvar = depvar, stringsAsFactors = FALSE)
-  aux <- DF$depvar != "y_0"
-  DF$method[aux] <- "ols"
-  DF$method[!aux] <- "glm"
-  DF$fmly[aux] <- "NULL"
-  DF$fmly[!aux] <- "poisson"
+  # GLM
+  fmly <- c("poisson", "quasipoisson", "Gamma", "gaussian")
+  y_dep_glm <-c("y_0", "y_0", "y_00", "y")
+  df_aux <- expand.grid(p = p,
+                        fmly = fmly,
+                        method = "glm",
+                        stringsAsFactors = FALSE)
+  df_dep <- data.frame(fmly = fmly,
+                       depvar = y_dep_glm)
+  DF_l[[2]] <- merge(df_aux, df_dep, by = "fmly", all.x = TRUE)
+
+  # FEMLM
+  fmly <- c("poisson", "gaussian")
+  y_dep <-c("y_0", "y")
+  df_aux <- expand.grid(p = p,
+                        fmly = fmly,
+                        method = "femlm",
+                        stringsAsFactors = FALSE)
+  df_dep <- data.frame(fmly = fmly,
+                       depvar = y_dep)
+  DF_l[[3]] <- merge(df_aux, df_dep, by = "fmly", all.x = TRUE)
+
+  DF <- do.call("rbind", DF_l)
 
   DF$test_name <- paste(DF$method, paste("depvar =", DF$depvar), paste("p =", DF$p), sep = " - ")
   return(DF)
 }
 
 
+
 ### cases function for test-predict.R
 predict_cases <- function() {
-  fmlas <- c("y ~ x1 | species + fe_bis", "y ~ x1 | species + fe_bis[x3 ]", "y ~ x1 + i(species)", "y ~ x1 + i(species) + i(fe_bis)")
+  y_dep <- c("y")
+  fmlas <- c("x1 | species + fe_bis", "x1 | species + fe_bis[x3]", "x1 + i(species)", "x1 + i(species) + i(fe_bis)")
   method <- c("ols", "glm", "femlm")
-  fmly <- c("NULL", "poisson", "poisson")
-  tol <- c(1e-12, 1e-3, 1e-12, 1e-12)
+  fmly_glm <- c("poisson", "quasipoisson", "Gamma", "inverse.gaussian")
+  fmly_mlm <- c("poisson", "gaussian", "negbin")
   DF_l <- list()
-  for (k in 1:3) {
+  for (k in 1:length(method)) {
     Fmlas <- switch(method[k],
-      "femlm" = fmlas[-2],
-      fmlas
+                    "femlm" = fmlas[-2], # without varying slope
+                    fmlas
     )
-    tol <- switch(method[k],
-      "femlm" = tol[-2],
-      tol
+    Fmly <- switch(method[k],
+                   "ols" = "NULL",
+                   "glm" = fmly_glm,
+                   "femlm" = fmly_mlm
     )
 
-    DF_l[[k]] <- data.frame(
-      test_name = paste(method[k], fmly[k], paste("formula", seq(1, length(Fmlas))), sep = " - "),
-      method = method[k],
-      fmly = fmly[k],
-      fmlas = Fmlas,
-      tol = tol
-    )
+    DF_l[[k]] <- expand.grid(fmlas = Fmlas,
+                             y_dep = y_dep,
+                             fmly = Fmly,
+                             method = method[k],
+                             stringsAsFactors = FALSE)
   }
-  DF <- DF_l[[1]]
-  for (k in 2:3) DF <- rbind(DF, DF_l[[k]])
+
+  DF <- do.call("rbind", DF_l)
+
+  DF$tol <- 1e-12
+  DF$tol[DF$fmlas == "x1 | species + fe_bis[x3]"] <- 1e-3
+  DF$test_name <- paste(DF$method, DF$fmly, paste("formula",DF$fmlas), sep = " - ")
   DF$test_name <- paste(seq(1, dim(DF)[1]), DF$test_name, sep = ") ")
   return(DF)
 }
 
 
 # case function for test-multiple.R
-multiple_cases <- function(met = NULL) {
-  method <- c("ols", "glm", "femlm", "feNmlm")
-  fmly <- c("NULL", "poisson", "poisson", "poisson")
+multiple_cases <- function(met = c("ols", "glm", "femlm", "feNmlm"), famly = "poisson") {
+  method <- met
+  fmly <- famly
   rhs <- c("x2", "x3")
   lhs <- c("y1", "y2")
   s <- c("setosa", "versicolor", "virginica")
@@ -931,9 +976,11 @@ multiple_cases <- function(met = NULL) {
 
   DF_l <- list()
   for (k in 1:length(method)) {
+    Fmly <- switch(method[k], "ols" = "NULL", fmly)
+
     DF_l[[k]] <- data.frame(
       method = method[k],
-      fmly = fmly[k],
+      fmly = Fmly,
       rhs = df_aux$rhs,
       lhs = df_aux$lhs,
       s = df_aux$s,
@@ -941,23 +988,17 @@ multiple_cases <- function(met = NULL) {
     )
   }
 
-  DF <- DF_l[[1]]
-  for (k in 2:length(DF_l)) DF <- rbind(DF, DF_l[[k]])
+  DF <- do.call("rbind", DF_l)
   DF$test_name <- paste(DF$method, paste("filter =", DF$s), paste("formula ", DF$num_fmla), sep = " - ")
   DF$test_name <- paste(seq(1, dim(DF)[1]), DF$test_name, sep = ") ")
-
-  if (!is.null(met)) {
-    return(DF[DF$method == met, ])
-  } else {
-    return(DF)
-  }
+  return(DF)
 }
 
 
 
-multiple_cases2 <- function(met = NULL) {
-  method <- c("ols", "glm", "femlm", "feNmlm")
-  fmly <- c("NULL", "poisson", "poisson", "poisson")
+multiple_cases2 <- function(met = c("ols", "glm", "femlm", "feNmlm"), famly = "poisson") {
+  method <- met
+  fmly <- famly
   all_rhs <- c("", "x2", "x3")
   s <- c("all", "setosa", "versicolor", "virginica")
   lhs <- c("y1", "y2")
@@ -972,25 +1013,32 @@ multiple_cases2 <- function(met = NULL) {
 
   DF_l <- list()
   for (k in 1:length(method)) {
+    Fmly <- switch(method[k], "ols" = "NULL", fmly)
+
     DF_l[[k]] <- data.frame(
       method = method[k],
-      fmly = fmly[k],
+      fmly = Fmly,
       s = df_aux$s,
       lhs = df_aux$lhs,
       n_rhs = df_aux$n_rhs,
       num_fmla = 1:dim(df_aux)[1]
     )
   }
-  DF <- DF_l[[1]]
-  for (k in 2:length(DF_l)) DF <- rbind(DF, DF_l[[k]])
-  # DF <- DF[sort(DF$method, index.return = TRUE, decreasing = TRUE)$ix, ]
-  # DF$num_fmla <- rep(c(1:12), 4)
+  DF <- do.call("rbind", DF_l)
   DF$test_name <- paste(DF$method, paste("filter =", DF$s), paste("formula ", 1:dim(df_aux)[1]), sep = " - ")
   DF$test_name <- paste(seq(1, dim(DF)[1]), DF$test_name, sep = ") ")
+  return(DF)
+}
 
-  if (!is.null(met)) {
-    return(DF[DF$method == met, ])
-  } else {
-    return(DF)
-  }
+
+# Case function fo test-model_matrix.R
+model_matrix_cases <- function(){
+  method <- c("ols", "glm", "femlm")
+  fmly <- c("NULL", "poisson", "poisson")
+  y_dep <- c("y1", "y_int", "y_int")
+  DF <- data.frame(method = method,
+                   fmly = fmly,
+                   y_dep = y_dep)
+  DF$test_name <- paste(method, fmly, y_dep, sep = " - ")
+  return(DF)
 }

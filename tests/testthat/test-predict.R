@@ -1,12 +1,13 @@
 base <- datab13()
-
-
-patrick::with_parameters_test_that("feols, fepois and femlm predict correctly",
-  {
-    res <- fixest_mod_select(model = method, fmla = fmlas, base = base, famly = fmly)
-    expect_equal2(predict(res), predict(res, base), tolerance = tol)
-  },
-  .cases = predict_cases()
+patrick::with_parameters_test_that("feols, feglm and femlm predict correctly with different families",
+                                   {
+                                     fmla <- xpd(lhs ~ rhs, lhs = y_dep, rhs = fmlas)
+                                     res <- fixest_mod_select(model = method, fmla = fmla, base = base, famly = fmly)
+                                     pred_res <- as.numeric(predict(res))
+                                     pred_resb <- predict(res, base)
+                                     expect_equal2(pred_res, pred_resb, tolerance = tol)
+                                   },
+                                   .cases = predict_cases()
 )
 
 test_that("Predict with factors works properly", {
@@ -30,7 +31,7 @@ test_that("prediction with lags works properly", {
   data(base_did)
   res <- feols(y ~ x1 + l(x1), base_did, panel.id = ~ id + period)
   pred_1 <- predict(res)
-  pred_2 <- as.numeric(na.omit(predict(res, base_did)))
+  pred_2 <- as.numeric(na.omit(predict(res, base_did)))# <<---
   expect_equal(pred_1, pred_2)
 
   qui <- sample(which(base_did$id %in% 1:5))

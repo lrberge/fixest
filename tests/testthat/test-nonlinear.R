@@ -20,3 +20,6 @@ test_that("estimation of a linear model between feNmlm and feols are equal", {
 })
 
 ## standard errors are different!
+
+
+## Add tests between feNmlm and nls just to compare coefficients estimation

@@ -71,6 +71,7 @@ patrick::with_parameters_test_that("fitting works with forward and lagging funct
     est <- fixest_mod_select(model = method, fmla = y_dep ~ l(x1, -1:1, fill = 1), base = base, panel.id = ~ id + per, famly = fmly)
     if (depvar == "y") expect_equal(est$nobs, n)
     est <- fixest_mod_select(model = method, fmla = f(y_dep) ~ f(x1, -1:1), base = base, panel.id = ~ id + per, famly = fmly)
+    expect_equal(1,1)
   },
   .cases = lagging_cases()
 )
