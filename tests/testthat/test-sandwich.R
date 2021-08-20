@@ -1,8 +1,4 @@
-
-## http://thestatsgeek.com/2013/10/12/the-robust-sandwich-variance-estimator-for-linear-regression/
-
 library(sandwich)
-
 base <- datab4()
 patrick::with_parameters_test_that("Santandard, Clustered, HC and tw-way Clustered SE estimations are correct between fixest and stats",
                                    {

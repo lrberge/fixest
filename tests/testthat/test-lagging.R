@@ -75,28 +75,8 @@ patrick::with_parameters_test_that("fitting works with forward and lagging funct
   },
   .cases = lagging_cases()
 )
-#
-# K = 7
-# casos = lagging_cases()[K,]
-# p = casos$p
-# depvar = casos$depvar
-# method = casos$method
-# fmly = casos$fmly
-#
-# base$per <- base[[p]]
-# base$y_dep <- base[[depvar]]
-# pdat <- panel(base, ~ id + period)
-# est_raw <- fixest_mod_select(model = method,fmla = y_dep ~ x1 + x1_lag + x1_lead, base = base)
-# est <- fixest_mod_select(model = method,fmla = y_dep ~ x1 + l(x1) + f(x1), base = base, panel.id = "id,per")
-# est_pdat <- fixest_mod_select(model = method,fmla = y_dep ~ x1 + l(x1, 1) + f(x1, 1), base = pdat)
-#
-# expect_equal(unname(coef(est_raw)), unname(coef(est)))
-# expect_equal(unname(coef(est_raw)), unname(coef(est_pdat)))
-
-
 
 # We just check there is no bug (consistency should be OK)
-
 test_that("there is no bug using data.table for panel data", {
   base_dt <- data.table::data.table(
     id = c("A", "A", "B", "B"),

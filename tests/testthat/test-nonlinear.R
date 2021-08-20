@@ -18,8 +18,4 @@ test_that("estimation of a linear model between feNmlm and feols are equal", {
   coef_lin <- coef(est_lin)[c(3, 4, 1, 2)]
   expect_equal2(unname(coef_nl), unname(coef_lin))
 })
-
 ## standard errors are different!
-
-
-## Add tests between feNmlm and nls just to compare coefficients estimation

@@ -56,26 +56,6 @@ patrick::with_parameters_test_that("Clustered VarCov estimations are correct",
   .cases = vcov_cases2()[1:24, ] # works only for ols fitting
 )
 
-# l = 25
-# casos = vcov_cases2()[l,]
-# adj <- casos$adj
-# k_val <- casos$k_val
-# method <- casos$method
-#
-# fmly <- casos$fmly
-# my_adj <- casos$my_adj
-# c_adj <- casos$c_adj
-# cluster_factor <- casos$cluster_factor
-#
-# est = Est[[method]]
-# VCOV_raw = VCOVs_raw[[method]]
-#
-# vcov_est <- vcov(Est[[ method ]], se = "cluster", dof = dof(adj = adj, fixef.K = k_val, cluster.adj = c_adj))
-# vcov_raw <- Hs[[ method ]] * cluster_factor * my_adj
-# testthat::expect_equal(as.numeric(vcov_est), as.numeric(vcov_raw))
-
-
-
 ############# Two-way clustered se
 VCOVs_raw <- list()
 Ms_i <- list()
@@ -106,26 +86,6 @@ patrick::with_parameters_test_that("Two-Way Clustered VarCov estimations are cor
   },
   .cases = vcov_cases3()[1:48, ] # Only works for ols
 )
-
-# l = 1
-# casos = vcov_cases3()[l,]
-# cdf <- casos$cdf
-# tdf <- casos$tdf
-# adj <- casos$adj
-# k_val <- casos$k_val
-# c_adj <- casos$c_adj
-# my_adj <- casos$my_adj
-# cluster_factor <- casos$cluster_factor
-# method <- casos$method
-# df <- casos$df
-#
-# est <- Est[[ method ]]
-# vcov_est <- vcov(est, se = "two", dof = dof(adj = adj, fixef.K = k_val, cluster.adj = c_adj, cluster.df = cdf))
-# vcov_raw <- V_matrix(M_i = Ms_i[[method]], M_t = Ms_t[[method]], M_it = Ms_it[[method]], c_adj = c_adj, cdf = cdf) * my_adj
-# testthat::expect_equal(as.numeric(vcov_est), as.numeric(vcov_raw))
-
-
-
 
 base <- iris
 names(base) <- c("y", "x1", "x2", "x3", "species")
