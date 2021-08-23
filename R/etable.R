@@ -2741,10 +2741,12 @@ etable_internal_latex = function(info){
         start_tag = end_tag = ""
     }
 
-    res = c(supplemental_info, start_table, start_tag, intro_latex, first_line, info_subtitles, model_line, info_family, coef_stack, stat_stack, info_SD, style$line.bottom, outro_latex, end_tag, info_notes, end_table)
+    # add timestamp comment at the very end
+    ts = paste0("\n%written at : ", Sys.time())
+
+    res = c(supplemental_info, start_table, start_tag, intro_latex, first_line, info_subtitles, model_line, info_family, coef_stack, stat_stack, info_SD, style$line.bottom, outro_latex, end_tag, info_notes, end_table, ts)
 
     res = res[nchar(res) > 0]
-
     return(res)
 }
 
@@ -3987,41 +3989,3 @@ extraline_extractor = function(x, name = NULL, tex = FALSE){
 
     el_tmp
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
