@@ -1,9 +1,3 @@
-
-base <- iris
-names(base) <- c("y", "x1", "x2", "x3", "species")
-base$y_int <- as.integer(base$y)
-base$y_log <- sample(c(TRUE, FALSE), 150, TRUE)
-
 fitmethod.cases <- fitmethod_cases()[-c(4:6),] # Eliminating ols with fmly (makes no sense)
 patrick::with_parameters_test_that("feols.fit works properly",
   {

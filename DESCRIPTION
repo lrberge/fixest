@@ -24,7 +24,7 @@ Suggests:
     MASS,
     pander,
     ggplot2,
-    testthat (>= 3.0.0)
+    testthat
 LinkingTo: Rcpp
 Depends: R(>= 3.5.0)
 Description: Fast and user-friendly estimation of econometric models with multiple fixed-effects. Includes ordinary least squares (OLS), generalized linear models (GLM) and the negative binomial.

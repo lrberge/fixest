@@ -3,15 +3,18 @@
 library(fixest)
 library(patrick)
 
+set.seed(0)
+base <- iris
+names(base) <- c("y", "x1", "x2", "x3", "species")
+base$y_int <- as.integer(base$y)
+base$y_log <- sample(c(TRUE, FALSE), 150, TRUE)
+
 ## Database used for test-fitting.R
 datab <- function() {
   set.seed(0)
-  base <- iris
-  names(base) <- c("y", "x1", "x2", "x3", "species")
   base$fe_2 <- rep(1:5, 30)
   base$fe_3 <- sample(15, 150, TRUE)
   base$constant <- 5
-  base$y_int <- as.integer(base$y)
   base$w <- as.vector(unclass(base$species) - 0.95)
   base$offset_value <- unclass(base$species) - 0.95
   base$y_01 <- 1 * ((scale(base$x1) + rnorm(150)) > 0)
@@ -27,8 +30,6 @@ datab <- function() {
 # database used for test-nointercept.R
 datab2 <- function() {
   set.seed(0)
-  base <- iris
-  names(base) <- c("y", "x1", "x2", "x3", "fe1")
   base$y_r <- round(base$y)
   base$fe2 <- rep(1:5, 30)
   base$y[1:5] <- NA
@@ -67,8 +68,6 @@ datab4 <- function() {
 }
 
 datab5 <- function() {
-  base <- iris
-  names(base) <- c("y", "x1", "x2", "x3", "species")
   base$y_int <- as.integer(base$y) + 1
   base$w <- as.numeric(base$species)
   return(base)
@@ -77,8 +76,6 @@ datab5 <- function() {
 # database for test-fixef.R
 datab6 <- function() {
   set.seed(0)
-  base <- iris
-  names(base) <- c("y", "x1", "x2", "x3", "species")
   base$x4 <- rnorm(150) + 0.25 * base$y
   base$fe_bis <- sample(10, 150, TRUE)
   base$fe_ter <- sample(15, 150, TRUE)
@@ -87,8 +84,6 @@ datab6 <- function() {
 
 # database for test-collinearity.R
 datab7 <- function() {
-  base <- iris
-  names(base) <- c("y", "x1", "x2", "x3", "species")
   base$constant <- 5
   base$y_int <- as.integer(base$y)
   base$w <- as.vector(unclass(base$species) - 0.95)
@@ -97,8 +92,6 @@ datab7 <- function() {
 
 datab8 <- function() {
   set.seed(0)
-  base <- iris
-  names(base) <- c("y", "x1", "x2", "x3", "species")
   base$z <- sample(5, 150, TRUE)
   base$species_na <- base$species
   base$species_na[base$species == "setosa"] <- NA
@@ -127,8 +120,6 @@ datab10 <- function() {
 # Database for test-subset.R
 datab11 <- function() {
   set.seed(5)
-  base <- iris
-  names(base) <- c("y", "x1", "x2", "x3", "species")
   base$fe_bis <- sample(letters, 150, TRUE)
   base$x4 <- rnorm(150)
   base$x1[sample(150, 5)] <- NA
@@ -177,16 +168,12 @@ datab12 <- function() {
 # database function for test-predict.R
 datab13 <- function() {
   set.seed(0)
-  base <- iris
-  names(base) <- c("y", "x1", "x2", "x3", "species")
   base$fe_bis <- sample(letters, 150, TRUE)
   return(base)
 }
 
 datab14 <- function() {
   set.seed(2)
-  base <- iris
-  names(base) <- c("y1", "x1", "x2", "x3", "species")
   base$y2 <- 10 + rnorm(150) + 0.5 * base$x1
   base$x4 <- rnorm(150) + 0.5 * base$y1
   base$fe2 <- rep(letters[1:15], 10)
@@ -211,8 +198,6 @@ datab15 <- function() {
 # Database for test-model_matrix.R
 
 datab16 <- function() {
-  base <- iris
-  names(base) <- c("y1", "x1", "x2", "x3", "species")
   base$y2 <- 10 + rnorm(150) + 0.5 * base$x1
   base$x4 <- rnorm(150) + 0.5 * base$y1
   base$fe2 <- rep(letters[1:15], 10)
