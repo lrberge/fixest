@@ -121,8 +121,6 @@ Argument `t.df` is only relevant when standard-errors are clustered. It affects 
 
 This section illustrates how the results from `fixest` compares with the ones from other methods. It also shows how to replicate the latter from `fixest`.
 
-First, let's generate some data:
-
 ```{r, echo = FALSE}
 is_plm = requireNamespace("plm", quietly = TRUE)
 if(!is_plm){
@@ -156,7 +154,7 @@ rbind(se_lm_hc, se_feols_hc)
 
 Note that Stata's `reg inv capital, robust` also leads to similar results (same SEs, same p-values). 
 
-The most important differences arise in the presence of fixed-effects. Let's first compare "standard" standard-errors between `lm` and `plm`.
+The most important differences arise in the presence of fixed-effects. Let's first compare "iid" standard-errors between `lm` and `plm`.
 
 ```{r}
 
@@ -187,7 +185,7 @@ Now for clustered SEs:
 # Clustered by firm
 se_lm_firm    = se(vcovCL(est_lm, cluster = ~firm, type = "HC1"))["capital"]
 se_plm_firm   = se(vcovHC(est_plm, cluster = "group"))["capital"]
-se_stata_firm = 0.0632813      # vce(cluster firm)
+se_stata_firm = 0.06328129    # vce(cluster firm)
 se_feols_firm = se(est_feols) # By default: clustered according to firm
 
 rbind(se_lm_firm, se_plm_firm, se_stata_firm, se_feols_firm)
@@ -219,11 +217,11 @@ se_feols_NW = se(est_feols, vcov = "NW")
 
 rbind(se_lm_NW, se_plm_NW, se_feols_NW)
 
+# Note that sandwich::vcovPL currently cannot be replicated
+
 # we can replicate plm's by changing the type of SSC:
 rbind(se_plm_NW, 
       se(est_feols, vcov = NW ~ ssc(adj = FALSE, cluster.adj = FALSE)))
-
-# Note that sandwich::vcovPL could not be replicated
 
 #
 # Driscoll-Kraay
