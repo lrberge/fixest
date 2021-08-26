@@ -1062,7 +1062,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
             vcov = mega_vcov
 
         } else {
-            check_value(vcov, "list len(value)", .value = n_models, .message = "If 'vcov' is a list, it must be of the same length as the number of models.")
+            check_value(vcov, "list len(value)", .value = n_models, .message = "If 'vcov' is a list, it must be of the same length as the number of models, or you should add the 'each' or 'times' keyword as the first element of the list.")
         }
     }
 

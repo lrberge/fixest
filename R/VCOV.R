@@ -1248,8 +1248,13 @@ vcov_cluster = function(x, cluster = NULL, ssc = NULL){
 
             # We ensure it's a plain list
             vcov_vars = unclass(vcov_vars)
-
             names(vcov_vars) = vcov_var_names
+
+            # Some further checking
+            if(!is.atomic(vcov_vars[[1]])){
+                stop("If the argument 'cluster' it to be a list, it must be made of atomic vectors representing the vectors on which to cluster. Currently its first element is of class '", class(vcov_vars[[1]])[1], "'.")
+            }
+
         }
 
     }
