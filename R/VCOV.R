@@ -1825,7 +1825,7 @@ vcov_newey_west_internal = function(bread, scores, vars, ssc, sandwich, nthreads
 
     # Lag: simple rule of thumb
     if(missnull(lag)){
-        lag = max(floor(n_time^(1/4)), 1)
+        lag = floor(n_time^(1/4))
     }
 
     w = seq(1, 0, by = -(1/(lag + 1)))
