@@ -289,12 +289,14 @@ If \code{tex = TRUE}, the lines composing the Latex table are returned invisibly
 If \code{tex = FALSE}, the data.frame is directly returned. If the argument \code{file} is not missing, the \code{data.frame} is printed and returned invisibly.
 }
 \description{
-Aggregates the results of multiple estimations and displays them in the form of either a Latex table or a \code{data.frame}.
+Aggregates the results of multiple estimations and displays them in the form of either a Latex table or a \code{data.frame}. Note that you will need the \code{booktabs} package for the Latex table to render properly.
 }
 \details{
 The function \code{esttex} is equivalent to the function \code{etable} with argument \code{tex = TRUE}.
 
 The function \code{esttable} is equivalent to the function \code{etable} with argument \code{tex = FALSE}.
+
+To display the table, you will need the Latex package \code{booktabs} which contains the \code{\\toprule}, \code{\\midrule} and \code{\\bottomrule} commands.
 
 You can permanently change the way your table looks in Latex by using \code{setFixest_etable}. The following vignette gives an example as well as illustrates how to use the \code{style} and postprocessing functions: \href{https://lrberge.github.io/fixest/articles/exporting_tables.html}{Exporting estimation tables}.
 
