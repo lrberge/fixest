@@ -131,6 +131,8 @@ if(!is_plm){
 }
 ```
 
+#### The data set and heteroskedasticity-robust SEs
+
 Using the Grunfeld data set from the `plm` package, here are some comparisons when the estimation doesn't contain fixed-effects.
 
 ```{r}
@@ -153,6 +155,8 @@ rbind(se_lm_hc, se_feols_hc)
 ```
 
 Note that Stata's `reg inv capital, robust` also leads to similar results (same SEs, same p-values). 
+
+#### "IID" SEs in the presence of fixed-effects
 
 The most important differences arise in the presence of fixed-effects. Let's first compare "iid" standard-errors between `lm` and `plm`.
 
@@ -179,6 +183,8 @@ rbind(pvalue(est_lm)["capital"], pvalue(est_plm)["capital"], pvalue(est_feols, v
 
 The standard-errors and p-values are identical, note that this is also the case for Stata's `xtreg`. 
 
+#### Clustered SEs
+
 Now for clustered SEs:
 
 ```{r}
@@ -204,6 +210,8 @@ rbind(se_lm_firm, se_feols_firm_lm)
 se_feols_firm_plm = se(est_feols, ssc = ssc(fixef.K = "none", cluster.adj = FALSE))
 rbind(se_plm_firm, se_feols_firm_plm)
 ```
+
+#### HAC SEs
 
 And finally let's look at Newey-West and Driscoll-Kray standard-errors:
 ```{r}
@@ -244,7 +252,7 @@ As we can see, the type of small sample correction we choose can have a non-negl
 
 #### Other multiple fixed-effects methods
 
-Now a specific comparison with `lfe` (version 2.8-5.1) and Stata's `reghdfe` which are popular tools to estimate econometric models with multiple fixed-effects. 
+Now a specific comparison with `lfe` (version 2.8-7) and Stata's `reghdfe` which are popular tools to estimate econometric models with multiple fixed-effects. 
 
 From `fixest` version 0.7.0 onwards, the standard-errors and p-values are computed similarly to `reghdfe`, for both clustered and multiway clustered standard errors. So the comparison here focuses on `lfe`.
 
