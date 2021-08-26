@@ -1,8 +1,8 @@
 `fixest` is the outcome of many many years of development, but development alone in a cave. 
 Github made it a collaborative project, channeling the attention of dozens of persons who took the time to report bugs, suggest new features and even make direct additions to the code.
-The overall software quality is now nowhere near what it would have been without this global collaboration.<sup>[1](#fnt1)</sup>
+The overall software quality is now nowhere near what it would have been without this global collaboration.
 
-This document reports direct and indirect contributors to the project whom Laurent Berge (and likely the community) wishes to thank.<sup>[2](#fnt2)</sup>
+This document reports direct and indirect contributors to the project whom Laurent Berge (and likely the community) wishes to thank.<sup>[1](#fnt1)</sup>
 
 ## Direct contributors (PRs):
 
@@ -20,8 +20,6 @@ Special thanks to @karldw for writing the `broom` method very early, to @zozotin
 
 ----
 
-<a name="fnt1">1</a>: Unfortunately, on the downside, with about 2/3 new issues a week, collaboration substantially increased the workload of the maintainer: we can't have everything!
-
-<a name="fnt2">2</a>: The distinction between direct and indirect contributors is quite arbitrary and does not pay tribute to some issue-filers who spent a lot of time and effort to resolve problems. But the rule, having made a PR, has the merit to be clear and simple.
+<a name="fnt1">1</a>: The distinction between direct and indirect contributors is quite arbitrary and does not pay tribute to some issue-filers who spent a lot of time and effort to resolve problems. But the rule, having made a PR, has the merit to be clear and simple.
 
 
