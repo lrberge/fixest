@@ -29,18 +29,9 @@ knitr::opts_chunk$set(
 
 set.seed(0)
 
-if(requireNamespace("data.table", quietly = TRUE)) library(data.table)
+is_DT = requireNamespace("data.table", quietly = TRUE)
 
-require_DT_ON = function(){
-  if(!requireNamespace("data.table", quietly = TRUE)){
-    knitr::opts_chunk$set(eval = FALSE)
-    cat("Evaluation of the next chunks requires 'data.table', which is not present.")
-  }
-}
-
-require_DT_OFF = function(){
-  knitr::opts_chunk$set(eval = TRUE)
-}
+if(is_DT) library(data.table)
 
 library(fixest)
 setFixest_nthreads(1)
@@ -795,12 +786,7 @@ etable(est1, est2, est_sub, order = "f", drop = "Int")
 
 Last, if you also use `data.table`, let's give an example of lead/lag creation:
 
-```{r, include = FALSE}
-require_DT_ON()
-```
-
-
-```{r}
+```{r, eval = is_DT}
 library(data.table)
 pdat_dt = panel(as.data.table(base_did), ~id+period)
 # we create a lagged value of the variable x1
@@ -809,11 +795,6 @@ pdat_dt[, x1_l1 := l(x1)]
 pdat_dt[, c("x1_l1_fill0", "y_f2") := .(l(x1, fill = 0), f(y, 2))]
 head(pdat_dt)
 ```
-
-```{r, include = FALSE}
-require_DT_OFF()
-```
-
 
 ### Creating lag/lead variables
 
@@ -830,19 +811,11 @@ The first two arguments are mandatory. The formula informs on the variable to be
 
 In case you use the popular package `data.table`, you can create lagged variables very simply:
 
-```{r, include = FALSE}
-require_DT_ON()
-```
-
-```{r}
+```{r, eval = is_DT}
 library(data.table)
 base_lag_dt = as.data.table(base_did)
 # we create a lagged value of the variable x1
 base_lag_dt[, x1.l1 := lag(x1 ~ id + period, 1)]
-```
-
-```{r, include = FALSE}
-require_DT_OFF()
 ```
 
 ## Non-linear in parameters example

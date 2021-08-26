@@ -137,7 +137,7 @@ The objects returned by `fixest` estimations are large. They contain the necessa
 
 The problem when it comes to multiple estimations is that it is very easy to perform many many estimations leading to a ballooning of object size possibly getting out of control at some point. To circumvent this issue, here's what to do: 
 
- 1. use the arguments `se` or `cluster` to get a summary of the results with the appropriate standard-errors at estimation time,
+ 1. use the argument `vcov` to get a summary of the results with the appropriate standard-errors at estimation time,
  2. use the argument `lean = TRUE`.
  
 This will perform the estimation with the appropriate standard errors (point 1) and clean any large object from the results (point 2). 

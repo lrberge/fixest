@@ -15,18 +15,8 @@ vignette: >
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, comment = "#>")
 
-if(requireNamespace("pander", quietly = TRUE)) library(pander)
-
-require_pander_ON = function(){
-  if(!requireNamespace("pander", quietly = TRUE)){
-    knitr::opts_chunk$set(eval = FALSE)
-    cat("Evaluation of the next chunks requires 'pander', which is not present.")
-  }
-}
-
-require_pander_OFF = function(){
-  knitr::opts_chunk$set(eval = TRUE)
-}
+is_pander = requireNamespace("pander", quietly = TRUE)
+if(is_pander) library(pander)
 
 library(fixest)
 setFixest_notes(FALSE)
@@ -35,11 +25,11 @@ setFixest_etable(digits = 3)
 
 `fixest` offers a tool, the function `etable`, to view estimation tables in `R` or export them to Latex. 
 
-The main advantage of this function is its simplicity: it is completely integrated with other `fixest` functions, making it exceedingly easy to export multiple estimation results with, say, different types of standard-errors. On the other hand, its main limitations are that *i)* only `fixest` objects can be exported, and *ii)* only Latex is supported. 
+The main advantage of this function is its simplicity: it is completely integrated with other `fixest` functions, making it exceedingly easy to export multiple estimation results with, say, different types of standard-errors. On the other hand, its main limitations are that *i)* only `fixest` objects can be exported, and *ii)* only Latex is supported (although the use of post-processing functions opens up a lot of possibilities). 
 
 It also offers a fair deal of customization, and since you can seamlessly change its default values, you can completely transform the style of your tables without modifying a single line of code. 
 
-Note that there exists excellent alternatives to export tables, like for instance [modelsummary](https://cran.r-project.org/package=modelsummary) or [texreg](https://cran.r-project.org/package=texreg); but they are, necessarily, less integrated with `fixest` objects, often necessiting more lines of code to export the same results. 
+Note that there exists excellent alternatives to export tables, like for instance [modelsummary](https://cran.r-project.org/package=modelsummary) (if you don't know it already, it's really worth a look!); but they are less integrated with `fixest` objects, possibly necessitating more lines of code to export the same results. 
 
 This document does not describe `etable`'s arguments in details (the help page provides many examples). Rather, it illustrates some features that may be hidden at first sight.
 
@@ -93,12 +83,7 @@ In the previous example, the dependent variable and fixed-effects (FE) headers h
 
 Since the output of `etable` is a `data.frame`, any formatting function handling `data.frame`s can be leveraged. It is then very easy to integrate it into `etable`. Let's have an example with the package `pander`:
 
-```{r, echo = FALSE}
-require_pander_ON()
-```
-
-
-```{r}
+```{r, eval = is_pander}
 library(pander)
 
 etable(est, postprocess.df = pandoc.table.return, style = "rmarkdown")
@@ -111,7 +96,7 @@ What did it do? First, it called the function `pandoc.table.return` from within 
 
 One important feature of `etable` is that you can set the default values of almost all its arguments. This includes the postprocessing function. Let's change the default values of `style.df` and `postprocess.df`:
 
-```{r}
+```{r, eval = is_pander}
 my_style = style.df(depvar.title = "", fixef.title = "", 
                     fixef.suffix = " fixed effect", yesNo = "yes")
 setFixest_etable(style.df = my_style, postprocess.df = pandoc.table.return)
@@ -119,14 +104,9 @@ setFixest_etable(style.df = my_style, postprocess.df = pandoc.table.return)
 
 Since now `pandoc.table.return` is the default postprocessing, *all its arguments are added to `etable`*. So calls like that are valid even though `style` or `caption` are *not* arguments from `etable`:
 
-```{r}
+```{r, eval = is_pand, eval = is_pander}
 etable(est[rhs = 2], style = "rmarkdown", caption = "New default values")
 ```
-
-```{r, echo = FALSE}
-require_pander_OFF()
-```
-
 
 ## Exporting multiple estimations to Latex
 
