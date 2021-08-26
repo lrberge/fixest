@@ -729,18 +729,25 @@ coeftable = function(object, vcov, ssc, cluster, keep, drop, order, ...){
 
     check_arg(keep, drop, order, "NULL character vector no na")
 
-    # We make the same call to summary if necessary
-    mc = match.call()
-
     IS_FIXEST = "fixest" %in% class(object)
     # IS_FIXEST_MULI = "fixest_multi" %in% class(object)
     # IS_FIXEST_LIST = "fixest_multi" %in% class(object)
 
-    if(!any(grepl("summary", class(object))) && (!IS_FIXEST || any(!names(mc) %in% c("", "object")) || !"cov.scaled" %in% names(object))){
-        # We call summary
-        mc[[1]] = as.name("summary")
-        mc$drop = mc$keep = mc$order = NULL
-        object = eval(mc, parent.frame())
+    if(IS_FIXEST){
+        object = summary(object, vcov = vcov, ssc = ssc, cluster = cluster, ...)
+    } else {
+        if(!any(grepl("summary", class(object)))){
+            # Known issue:
+            # - if vcov/.../order are also args of summary, that will be a problem
+
+            args = list(object = object)
+
+            if(...length() > 0){
+                args = append(args, list(...))
+            }
+
+            object = do.call("summary", args)
+        }
     }
 
     # Let's find out the coefficients table
@@ -787,8 +794,9 @@ pvalue = function(object, vcov, ssc, cluster, keep, drop, order, ...){
 
     mc = match.call()
     mc[[1]] = as.name("coeftable")
+    mc$object = as.name("object")
 
-    mat = eval(mc, parent.frame())
+    mat = eval(mc)
 
     if(ncol(mat) != 4){
         stop("No appropriate coefficient table found (number of columns is ", ncol(mat), " instead of 4). You can investigate the problem using function ctable().")
@@ -822,8 +830,9 @@ tstat = function(object, vcov, ssc, cluster, keep, drop, order, ...){
 
     mc = match.call()
     mc[[1]] = as.name("coeftable")
+    mc$object = as.name("object")
 
-    mat = eval(mc, parent.frame())
+    mat = eval(mc)
 
     if(ncol(mat) != 4){
         stop("No appropriate coefficient table found (number of columns is ", ncol(mat), " instead of 4). You can investigate the problem using function coeftable().")
@@ -863,8 +872,9 @@ se = function(object, vcov, ssc, cluster, keep, drop, order, ...){
 
     mc = match.call()
     mc[[1]] = as.name("coeftable")
+    mc$object = as.name("object")
 
-    mat = eval(mc, parent.frame())
+    mat = eval(mc)
 
     if(ncol(mat) != 4){
         stop("No appropriate coefficient table found (number of columns is ", ncol(mat), " instead of 4). You can investigate the problem using function coeftable().")
@@ -6428,6 +6438,31 @@ fetch_arg_deparse = function(arg){
     arg_name
 }
 
+
+
+# Simple utilities to avoid writing too much
+# adds a small overhead but that's OK (about 1us which is OK)
+any_missing = function(x1, x2, x3, x4, x5, x6){
+    n = length(sys.call()) - 1
+    switch(n,
+           "1" = missing(x1),
+           "2" = missing(x1) || missing(x2),
+           "3" = missing(x1) || missing(x2) || missing(x3),
+           "4" = missing(x1) || missing(x2) || missing(x3) || missing(x4),
+           "5" = missing(x1) || missing(x2) || missing(x3) || missing(x4) || missing(x5),
+           "6" = missing(x1) || missing(x2) || missing(x3) || missing(x4) || missing(x5) || missing(x6))
+}
+
+all_missing = function(x1, x2, x3, x4, x5, x6){
+    n = length(sys.call()) - 1
+    switch(n,
+           "1" = missing(x1),
+           "2" = missing(x1) && missing(x2),
+           "3" = missing(x1) && missing(x2) && missing(x3),
+           "4" = missing(x1) && missing(x2) && missing(x3) && missing(x4),
+           "5" = missing(x1) && missing(x2) && missing(x3) && missing(x4) && missing(x5),
+           "6" = missing(x1) && missing(x2) && missing(x3) && missing(x4) && missing(x5) && missing(x6))
+}
 
 
 #### ................. ####
