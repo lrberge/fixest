@@ -94,7 +94,7 @@
       <h1 data-toc-skip>Exporting estimation tables</h1>
                         <h4 class="author">Laurent Berge</h4>
             
-            <h4 class="date">2021-08-03</h4>
+            <h4 class="date">2021-08-26</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/exporting_tables.Rmd"><code>vignettes/exporting_tables.Rmd</code></a></small>
       <div class="hidden name"><code>exporting_tables.Rmd</code></div>
@@ -104,9 +104,9 @@
     
     
 <p><code>fixest</code> offers a tool, the function <code>etable</code>, to view estimation tables in <code>R</code> or export them to Latex.</p>
-<p>The main advantage of this function is its simplicity: it is completely integrated with other <code>fixest</code> functions, making it exceedingly easy to export multiple estimation results with, say, different types of standard-errors. On the other hand, its main limitations are that <em>i)</em> only <code>fixest</code> objects can be exported, and <em>ii)</em> only Latex is supported.</p>
+<p>The main advantage of this function is its simplicity: it is completely integrated with other <code>fixest</code> functions, making it exceedingly easy to export multiple estimation results with, say, different types of standard-errors. On the other hand, its main limitations are that <em>i)</em> only <code>fixest</code> objects can be exported, and <em>ii)</em> only Latex is supported (although the use of post-processing functions opens up a lot of possibilities).</p>
 <p>It also offers a fair deal of customization, and since you can seamlessly change its default values, you can completely transform the style of your tables without modifying a single line of code.</p>
-<p>Note that there exists excellent alternatives to export tables, like for instance <a href="https://cran.r-project.org/package=modelsummary">modelsummary</a> or <a href="https://cran.r-project.org/package=texreg">texreg</a>; but they are, necessarily, less integrated with <code>fixest</code> objects, often necessiting more lines of code to export the same results.</p>
+<p>Note that there exists excellent alternatives to export tables, like for instance <a href="https://cran.r-project.org/package=modelsummary">modelsummary</a> (if you don’t know it already, it’s really worth a look!); but they are less integrated with <code>fixest</code> objects, possibly necessitating more lines of code to export the same results.</p>
 <p>This document does not describe <code>etable</code>’s arguments in details (the help page provides many examples). Rather, it illustrates some features that may be hidden at first sight.</p>
 <p>This document applies to <code>fixest</code> version 0.8.0 or higher.</p>
 <div id="preliminaries" class="section level2">

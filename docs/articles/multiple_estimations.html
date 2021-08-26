@@ -94,7 +94,7 @@
       <h1 data-toc-skip>Multiple estimations</h1>
                         <h4 class="author">Laurent Berge</h4>
             
-            <h4 class="date">2021-08-02</h4>
+            <h4 class="date">2021-08-26</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/multiple_estimations.Rmd"><code>vignettes/multiple_estimations.Rmd</code></a></small>
       <div class="hidden name"><code>multiple_estimations.Rmd</code></div>
@@ -354,7 +354,7 @@
 <p>The objects returned by <code>fixest</code> estimations are large. They contain the necessary information to apply various methods without incurring additional computing costs. This is particularly true for clustering the standard-errors for instance. Stated differently speed is privileged over memory usage.</p>
 <p>The problem when it comes to multiple estimations is that it is very easy to perform many many estimations leading to a ballooning of object size possibly getting out of control at some point. To circumvent this issue, here’s what to do:</p>
 <ol style="list-style-type: decimal">
-<li>use the arguments <code>se</code> or <code>cluster</code> to get a summary of the results with the appropriate standard-errors at estimation time,</li>
+<li>use the argument <code>vcov</code> to get a summary of the results with the appropriate standard-errors at estimation time,</li>
 <li>use the argument <code>lean = TRUE</code>.</li>
 </ol>
 <p>This will perform the estimation with the appropriate standard errors (point 1) and clean any large object from the results (point 2).</p>
