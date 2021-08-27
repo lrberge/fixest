@@ -218,9 +218,17 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
         return(object$cov.scaled)
     }
 
+    if("dof" %in% names(dots)){
+        if(is.null(getOption("fixest_warn_dof_arg"))){
+            warning("The argument 'dof' is deprecated. Please use 'ssc' instead.")
+            options(fixest_warn_dof_arg = TRUE)
+        }
+        ssc = dots$dof
+    }
+
     if(!any(c("only_varnames", "sandwich") %in% names(dots)) && !is_function_in_it(vcov)){
         # 1st condition means NOT a client call
-        validate_dots(suggest_args = c("vcov", "ssc"))
+        validate_dots(suggest_args = c("vcov", "ssc"), valid_args = "dof")
     }
 
     # All the available VCOVs
@@ -1111,7 +1119,8 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 #' # Factory default
 #' setFixest_ssc()
 #'
-ssc = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = "min", t.df = "min", fixef.force_exact = FALSE){
+ssc = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = "min",
+               t.df = "min", fixef.force_exact = FALSE){
 
     check_arg_plus(adj, "loose logical scalar conv")
     check_arg_plus(fixef.K, "match(none, full, nested)")
@@ -1119,11 +1128,26 @@ ssc = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = 
     check_arg_plus(t.df, "match(conventional, min)")
     check_arg(fixef.force_exact, cluster.adj, "logical scalar")
 
-    res = list(adj = adj, fixef.K = fixef.K, cluster.adj = cluster.adj, cluster.df = cluster.df, t.df = t.df, fixef.force_exact = fixef.force_exact)
+    res = list(adj = adj, fixef.K = fixef.K, cluster.adj = cluster.adj, cluster.df = cluster.df,
+               t.df = t.df, fixef.force_exact = fixef.force_exact)
     class(res) = "ssc.type"
 
     res
 }
+
+#' @describeIn ssc This function is deprecated and will be removed at some point (in 6 months from August 2021). Exactly the same as \code{ssc}.
+dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = "min",
+               t.df = "min", fixef.force_exact = FALSE){
+
+    if(is.null(getOption("fixest_warn_dof"))){
+        warning("The function 'dof' is deprecated. Please use function 'ssc' instead.")
+        options(fixest_warn_dof = TRUE)
+    }
+
+    ssc(adj = adj, fixef.K = fixef.K, cluster.adj = cluster.adj, cluster.df = cluster.df,
+        t.df = t.df, fixef.force_exact = fixef.force_exact)
+}
+
 
 ####
 #### User-level ####

@@ -17,6 +17,8 @@
  
  - Fix bug in `to_integer` when converting multiple vectors and sorting is required, without items.
  
+ - Fix bug in `feols.fit` when the matrix of regressors was only partially named (reported by @leucothea [#176](https://github.com/lrberge/fixest/issues/176)).
+ 
 ## Major changes
 
  - New argument `vcov`:
@@ -36,11 +38,11 @@
     * Driscoll-Kraay (1998) for cross-sectionally and serially correlated errors
     
     * Conley (1999) for spatially correlated errors
+ 
+ - Function `dof` has been renamed into `ssc` (stands for small sample correction) to improve clarity. No retro compatibility so far ensured but the function `dof` will be removed at some point.
     
 ## Breaking changes
 
- - Function `dof` has been renamed into `ssc` (stands for small sample correction) to improve clarity. **No retro compatibility ensured.**
- 
  - Functions `setFixest_dof` and `setFixest_se` have been renamed into `setFixest_ssc` and `setFixest_vcov`. **No retro compatibility ensured.**
  
 ## New features

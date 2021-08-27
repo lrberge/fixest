@@ -21,7 +21,7 @@ export(coefplot, iplot)
 # small funs
 export(coeftable, se, tstat, pvalue)
 # dof
-export(ssc, degrees_freedom)
+export(dof, ssc, degrees_freedom)
 # Lag related
 export(panel, unpanel, f, l, d)
 # interactions
