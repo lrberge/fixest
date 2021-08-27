@@ -988,6 +988,29 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                 colnames(linear.mat) = paste0("X", 1:ncol(linear.mat))
             }
 
+            col_names = colnames(linear.mat)
+            who_0_char = nchar(col_names) == 0
+            if(any(who_0_char)){
+                # we test several schemes until it works: Xi Vi Var_i, etc
+
+                n_missing = sum(who_0_char)
+                ok = FALSE
+                for(prefix in c("X", "V", "Var_", "Variable_", "X_")){
+                    new_names = paste0(prefix, 1:n_missing)
+                    if(all(!tolower(new_names) %in% tolower(col_names))){
+                        col_names[who_0_char] = new_names
+                        ok = TRUE
+                        break
+                    }
+                }
+
+                if(!ok){
+                    stop("Wrong format of the X matrix in feols.fit: some names are missing and could not be filled automatically, please provide a matrix with all names non-missing instead.")
+                }
+
+                colnames(linear.mat) = col_names
+            }
+
             # The formula
             rhs = as_varname(colnames(linear.mat))
             fml_linear = .xpd(lhs = fml_linear[[2]], rhs = rhs)
