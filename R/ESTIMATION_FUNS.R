@@ -3558,8 +3558,8 @@ multi_split = function(env, fun){
 
     assign("do_split", FALSE, env)
 
-    res_all = list()
     n_split = length(split.items)
+    res_all = vector("list", n_split + split.full)
     index = NULL
     all_names = NULL
     is_multi = FALSE
@@ -3575,7 +3575,7 @@ multi_split = function(env, fun){
             my_res = fun(env = reshape_env(env, obs2keep = which(split == i)))
         }
 
-        res_all[[length(res_all) + 1]] = my_res
+        res_all[[i + split.full]] = my_res
     }
 
     if(split.full){
@@ -3721,7 +3721,7 @@ multi_fixef = function(env, estfun){
 
     n_fixef = length(multi_fixef_fml_full)
 
-    data_results = list()
+    data_results = vector("list", n_fixef)
     for(i in 1:n_fixef){
 
         fml_fixef = multi_fixef_fml_full[[i]]
