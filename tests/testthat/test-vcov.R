@@ -21,13 +21,13 @@ for (k in 1:length(method)) {
 names(Est) <- method
 names(VCOVs_raw) <- method
 
-patrick::with_parameters_test_that("Standard VarCov estimations are correct",
+with_parameters_test_that("Standard VarCov estimations are correct",
   {
     est <- Est[[method]]
     VCOV_raw <- VCOVs_raw[[method]]
     vcov_est <- vcov(est, se = "standard", dof = dof(adj = adj, fixef.K = k_val))
     vcov_raw <- VCOV_raw * my_adj
-    testthat::expect_equal(vcov_est, vcov_raw)
+    expect_equal(vcov_est, vcov_raw)
   },
   .cases = vcov_cases1()
 )
@@ -47,11 +47,11 @@ for (k in 1:length(method)) {
 names(VCOVs_raw) <- method
 names(Hs) <- method
 
-patrick::with_parameters_test_that("Clustered VarCov estimations are correct",
+with_parameters_test_that("Clustered VarCov estimations are correct",
   {
     vcov_est <- vcov(Est[[method]], se = "cluster", dof = dof(adj = adj, fixef.K = k_val, cluster.adj = c_adj))
     vcov_raw <- Hs[[method]] * cluster_factor * my_adj
-    testthat::expect_equal(as.numeric(vcov_est), as.numeric(vcov_raw))
+    expect_equal(as.numeric(vcov_est), as.numeric(vcov_raw))
   },
   .cases = vcov_cases2()[1:24, ] # works only for ols fitting
 )
@@ -77,12 +77,12 @@ names(Ms_i) <- method
 names(Ms_t) <- method
 names(Ms_it) <- method
 
-patrick::with_parameters_test_that("Two-Way Clustered VarCov estimations are correct",
+with_parameters_test_that("Two-Way Clustered VarCov estimations are correct",
   {
     est <- Est[[method]]
     vcov_est <- vcov(est, se = "two", dof = dof(adj = adj, fixef.K = k_val, cluster.adj = c_adj, cluster.df = cdf))
     vcov_raw <- V_matrix(Ms_i[[method]], Ms_t[[method]], Ms_it[[method]], c_adj, cdf) * my_adj
-    testthat::expect_equal(as.numeric(vcov_est), as.numeric(vcov_raw))
+    expect_equal(as.numeric(vcov_est), as.numeric(vcov_raw))
   },
   .cases = vcov_cases3()[1:48, ] # Only works for ols
 )
@@ -94,7 +94,7 @@ base$clu[1:5] <- NA
 base$y_int <- round(base$y)
 base$y_01 <- c(base$y > mean(base$y)) + 0
 
-patrick::with_parameters_test_that("vcov estimation from different sources are equal", {
+with_parameters_test_that("vcov estimation from different sources are equal", {
   fmla <- xpd(lhs ~ x1 | species, lhs = y_dep)
   est <- fixest_mod_select(model = method,
                            fmla = fmla,

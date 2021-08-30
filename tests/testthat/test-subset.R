@@ -1,7 +1,7 @@
 
 base <- datab11()
 setFixest_notes(FALSE)
-patrick::with_parameters_test_that("estimation with subset works properly",
+with_parameters_test_that("estimation with subset works properly",
   {
     res_sub_a <- fixest_mod_select(model = method, fmla = fmlas, famly = famly, base = base, subset = ~ species == "setosa")
     res_sub_b <- fixest_mod_select(model = method, fmla = fmlas, famly = famly, base = base, subset = base$species == "setosa")

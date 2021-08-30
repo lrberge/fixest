@@ -123,3 +123,10 @@ expect_fixef <- function(all_coef, m_fe, k, str1, str2) {
     expect_equal2(var(Cs - m_fe[[str1[i]]][names(Cs)]), 0, scale = 1)
   }
 }
+
+### Function for test-nonlinear.R
+# a and b are te parameters to be estimated
+fun_nl <- function(a, b, tab2) {
+  res <- as.numeric(tab2)
+  return(a * res + b * res^2)
+}

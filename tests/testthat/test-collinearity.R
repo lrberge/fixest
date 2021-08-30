@@ -2,7 +2,7 @@
 library(fixest)
 setFixest_notes(FALSE)
 base <- datab7()
-patrick::with_parameters_test_that("fixest fits collinearity as stats",
+with_parameters_test_that("fixest fits collinearity as stats",
                                    {
                                      fix_fmla <- paste(y_dep, " ~ ", fixest_formula1)
                                      stat_fmla <- paste(y_dep, " ~ ", stats_formula2)

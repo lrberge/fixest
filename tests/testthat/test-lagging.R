@@ -27,7 +27,7 @@ test_that("fixtest::lag function works properly", {
   expect_equal(lag(x1 ~ id + period_date, -1, data = base), base$x1_lead)
 })
 
-patrick::with_parameters_test_that("fixest model fitting with panel data works properly",
+with_parameters_test_that("fixest model fitting with panel data works properly",
   {
     base$per <- base[[p]]
     base$y_dep <- base[[depvar]]
@@ -43,7 +43,7 @@ patrick::with_parameters_test_that("fixest model fitting with panel data works p
 )
 
 
-patrick::with_parameters_test_that("fixest model fitting with panel data works properly with differentiations",
+with_parameters_test_that("fixest model fitting with panel data works properly with differentiations",
   {
     base$per <- base[[p]]
     base$y_dep <- base[[depvar]]
@@ -60,7 +60,7 @@ patrick::with_parameters_test_that("fixest model fitting with panel data works p
 )
 
 
-patrick::with_parameters_test_that("fitting works with forward and lagging functions",
+with_parameters_test_that("fitting works with forward and lagging functions",
   {
     base$per <- base[[p]]
     base$y_dep <- base[[depvar]]

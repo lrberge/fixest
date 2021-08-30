@@ -1,5 +1,5 @@
 base <- datab13()
-patrick::with_parameters_test_that("feols, feglm and femlm predict correctly with different families",
+with_parameters_test_that("feols, feglm and femlm predict correctly with different families",
                                    {
                                      fmla <- xpd(lhs ~ rhs, lhs = y_dep, rhs = fmlas)
                                      res <- fixest_mod_select(model = method, fmla = fmla, base = base, famly = fmly)

@@ -1,8 +1,3 @@
-## Ctrl + Alt + R to run all the script
-
-library(fixest)
-library(patrick)
-
 set.seed(0)
 base <- iris
 names(base) <- c("y", "x1", "x2", "x3", "species")
@@ -31,6 +26,7 @@ datab <- function() {
 datab2 <- function() {
   set.seed(0)
   base$y_r <- round(base$y)
+  base$fe1 <- base$species
   base$fe2 <- rep(1:5, 30)
   base$y[1:5] <- NA
   base$x1[4:8] <- NA
@@ -174,6 +170,7 @@ datab13 <- function() {
 
 datab14 <- function() {
   set.seed(2)
+  base$y1 <- base$y
   base$y2 <- 10 + rnorm(150) + 0.5 * base$x1
   base$x4 <- rnorm(150) + 0.5 * base$y1
   base$fe2 <- rep(letters[1:15], 10)
@@ -196,8 +193,8 @@ datab15 <- function() {
 }
 
 # Database for test-model_matrix.R
-
 datab16 <- function() {
+  base$y1 <- base$y
   base$y2 <- 10 + rnorm(150) + 0.5 * base$x1
   base$x4 <- rnorm(150) + 0.5 * base$y1
   base$fe2 <- rep(letters[1:15], 10)
@@ -218,6 +215,13 @@ datab16 <- function() {
   return(list(base, base_bis))
 }
 
+# Database for test-nonlinear.R
+datab17 <- function(){
+  base$tab <- c("versicolor" = 5, "setosa" = 0, "virginica" = -5)
+  base$tab2 <- base$tab[base$species]
+  base$var_spec <- as.numeric(base$tab[base$species])
+  return(base)
+}
 ev_par <- function(string) {
   eval(parse(text = string))
 }

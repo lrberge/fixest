@@ -5,7 +5,7 @@ base <- datab6()
 w <- 1
 AuxL1 <- fixef.strings()[[1]]
 AuxL2 <- fixef.strings()[[2]]
-patrick::with_parameters_test_that("manually extracting fixed effects coefficients are equal to nlme::fixef",
+with_parameters_test_that("manually extracting fixed effects coefficients are equal to nlme::fixef",
   {
     if (K == 5) w <- 3 * (as.integer(base$species) - 0.95)
     m1 <- feols(ev_par(formula1), base, weights = w)

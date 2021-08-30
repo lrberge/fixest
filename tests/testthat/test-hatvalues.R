@@ -1,5 +1,5 @@
 base <- datab10()
-patrick::with_parameters_test_that("fixest and stats hatvalues estimations are equal",
+with_parameters_test_that("fixest and stats hatvalues estimations are equal",
                                    {
                                      fm <- fixest_mod_select(model = model, fmla = formulas, base = base, famly = family)
                                      fmm <- stats_mod_select(model = model, fmla = formulas, base = base, famly = family)

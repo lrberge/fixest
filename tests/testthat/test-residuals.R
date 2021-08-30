@@ -2,7 +2,7 @@
 setFixest_notes(FALSE)
 base <- datab5()
 
-patrick::with_parameters_test_that("Residuals obtained from fixest and stat are equal",
+with_parameters_test_that("Residuals obtained from fixest and stat are equal",
                                    {
                                      fe_mod <- fixest_mod_select(
                                        model = method,

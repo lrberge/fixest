@@ -1,5 +1,5 @@
 fitmethod.cases <- fitmethod_cases()[-c(4:6),] # Eliminating ols with fmly (makes no sense)
-patrick::with_parameters_test_that("feols.fit works properly",
+with_parameters_test_that("feols.fit works properly",
   {
     fmla <- paste(y_dep, "-1 + x1 + x2 + x3", sep = " ~ ")
     res <- feols.fit(y = ev_par(paste0("base$", y_dep)), X = base[, 2:4])
@@ -10,7 +10,7 @@ patrick::with_parameters_test_that("feols.fit works properly",
   .cases = fitmethod.cases[1:3, ]
 )
 
-patrick::with_parameters_test_that("feglm.fit works properly",
+with_parameters_test_that("feglm.fit works properly",
   {
     fmla <- paste(y_dep, "-1 + x1 + x2 + x3", sep = " ~ ")
     if (isTRUE(with_fmly)) {

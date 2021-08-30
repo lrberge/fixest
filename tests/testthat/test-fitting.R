@@ -4,9 +4,9 @@ library(fixest)
 setFixest_notes(FALSE)
 
 base <- datab()
-patrick::with_parameters_test_that("feols and lm coefficients, Standard errors and p-values are equall",
+with_parameters_test_that("feols and lm coefficients, Standard errors and p-values are equall",
   {
-    res <- fixest::feols(as.formula(fml_fixest), base, weights = ev_par(my_weight), offset = ev_par(my_offset))
+    res <- feols(as.formula(fml_fixest), base, weights = ev_par(my_weight), offset = ev_par(my_offset))
     res_bis <- lm(as.formula(fml_stats), base, weights = ev_par(my_weight), offset = ev_par(my_offset))
     expect_model_equal(res, res_bis, method = "ols")
     expect_equal(1, 1)
@@ -20,7 +20,7 @@ feglm.cases <- feglm_cases(all_mods)
 # most of the inverse.gaussian with offset dont converge
 feglm.cases <- feglm.cases[!(feglm.cases$my_family == "inverse.gaussian" & feglm.cases$my_offset != "NULL"), ]
 
-patrick::with_parameters_test_that("feglm and glm coefficients, Standard errors and p-values are equall",
+with_parameters_test_that("feglm and glm coefficients, Standard errors and p-values are equall",
   {
     res <- feglm(as.formula(fml_fixest), base, family = my_family, weights = ev_par(my_weight), offset = ev_par(my_offset))
     if (!is.null(res$obs_selection$obsRemoved)) {
@@ -36,7 +36,7 @@ patrick::with_parameters_test_that("feglm and glm coefficients, Standard errors 
   .cases = feglm.cases
 )
 
-patrick::with_parameters_test_that("femlm and glm coefficients are equall",
+with_parameters_test_that("femlm and glm coefficients are equall",
   {
     if (my_family != "negbin") {
       res <- femlm(as.formula(fml_fixest), base, family = my_family, offset = ev_par(my_offset))
@@ -54,7 +54,7 @@ patrick::with_parameters_test_that("femlm and glm coefficients are equall",
 )
 
 
-patrick::with_parameters_test_that("fenegbin and glm.nb coefficients, Standard errors and p-values are equall",
+with_parameters_test_that("fenegbin and glm.nb coefficients, Standard errors and p-values are equall",
   {
     res <- fenegbin(as.formula(fml_fixest), base, notes = FALSE)
     res_bis <- MASS::glm.nb(as.formula(fml_stats), base)
