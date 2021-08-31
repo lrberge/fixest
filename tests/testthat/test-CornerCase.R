@@ -9,23 +9,6 @@ test_that("there is no bug in corner cases for feols", {
   res <- feols(y ~ x1 | fe1[x2] + fe2[x2], base)
 })
 
-
-for(i in 1:2){
-  fun = switch(i, "1" = feols, "2" = feglm)
-
-  res = feols(y ~ x_cst | fe1, base, warn = FALSE)
-  res         # => no error
-  etable(res) # => no error
-
-  # error when warn = TRUE
-  test(feols(y ~ x_cst | fe1, base), "err")
-
-  # multiple est => no error
-  res = feols(c(y, x1) ~ x_cst | fe1, base)
-  res         # => no error
-  etable(res) # => no error
-}
-
 test_that("Error when warn = TRUE",
           {
             res = feols(y ~ x_cst | fe1, base, warn = FALSE)
@@ -33,7 +16,7 @@ test_that("Error when warn = TRUE",
             expect_silent(etable(res)) # => no error
             expect_error(feols(y ~ x_cst | fe1, base))
 
-            res = feols(c(y, x1) ~ x_cst | fe1, base)
+            res = feols(c(y, x1) ~ x_cst | fe1, base, warn = FALSE) # warn doesnt work with multiple estimation
             expect_silent(res)         # => no error
             expect_silent(etable(res)) # => no error
           })

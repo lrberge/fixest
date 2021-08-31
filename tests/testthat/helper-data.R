@@ -7,6 +7,10 @@ base$y_log <- sample(c(TRUE, FALSE), 150, TRUE)
 ## Database used for test-fitting.R
 datab <- function() {
   set.seed(0)
+  base <- iris
+  names(base) <- c("y", "x1", "x2", "x3", "species")
+  base$y_int <- as.integer(base$y)
+  base$y_log <- sample(c(TRUE, FALSE), 150, TRUE)
   base$fe_2 <- rep(1:5, 30)
   base$fe_3 <- sample(15, 150, TRUE)
   base$constant <- 5
@@ -19,6 +23,26 @@ datab <- function() {
   # We enforce the removal of observations
   base$y_int_null <- base$y_int
   base$y_int_null[base$fe_3 %in% 1:5] <- 0
+  return(base)
+}
+
+datab <- function(){
+  set.seed(0)
+  base = iris
+  names(base) = c("y", "x1", "x2", "x3", "species")
+  base$fe_2 = rep(1:5, 30)
+  base$fe_3 = sample(15, 150, TRUE)
+  base$constant = 5
+  base$y_int = as.integer(base$y)
+  base$w = as.vector(unclass(base$species) - 0.95)
+  base$offset_value = unclass(base$species) - 0.95
+  base$y_01 = 1 * ((scale(base$x1) + rnorm(150)) > 0)
+  # what follows to avoid removal of fixed-effects (logit is pain in the neck)
+  base$y_01[1:5 + rep(c(0, 50, 100), each = 5)] = 1
+  base$y_01[6:10 + rep(c(0, 50, 100), each = 5)] = 0
+  # We enforce the removal of observations
+  base$y_int_null = base$y_int
+  base$y_int_null[base$fe_3 %in% 1:5] = 0
   return(base)
 }
 
@@ -116,6 +140,10 @@ datab10 <- function() {
 # Database for test-subset.R
 datab11 <- function() {
   set.seed(5)
+  base <- iris
+  names(base) <- c("y", "x1", "x2", "x3", "species")
+  base$y_int <- as.integer(base$y)
+  base$y_log <- sample(c(TRUE, FALSE), 150, TRUE)
   base$fe_bis <- sample(letters, 150, TRUE)
   base$x4 <- rnorm(150)
   base$x1[sample(150, 5)] <- NA
@@ -164,6 +192,10 @@ datab12 <- function() {
 # database function for test-predict.R
 datab13 <- function() {
   set.seed(0)
+  base <- iris
+  names(base) <- c("y", "x1", "x2", "x3", "species")
+  base$y_int <- as.integer(base$y)
+  base$y_log <- sample(c(TRUE, FALSE), 150, TRUE)
   base$fe_bis <- sample(letters, 150, TRUE)
   return(base)
 }
@@ -194,6 +226,11 @@ datab15 <- function() {
 
 # Database for test-model_matrix.R
 datab16 <- function() {
+  set.seed(0)
+  base <- iris
+  names(base) <- c("y", "x1", "x2", "x3", "species")
+  base$y_int <- as.integer(base$y)
+  base$y_log <- sample(c(TRUE, FALSE), 150, TRUE)
   base$y1 <- base$y
   base$y2 <- 10 + rnorm(150) + 0.5 * base$x1
   base$x4 <- rnorm(150) + 0.5 * base$y1

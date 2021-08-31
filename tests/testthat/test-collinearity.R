@@ -1,5 +1,4 @@
 
-library(fixest)
 setFixest_notes(FALSE)
 base <- datab7()
 with_parameters_test_that("fixest fits collinearity as stats",

@@ -1,12 +1,12 @@
 
 
-base <- datab9()
-X <- base[, c("ln_euros", "ln_dist")]
-fe <- base[, c("Origin", "Destination")]
+Base <- datab9()
+X <- Base[, c("ln_euros", "ln_dist")]
+fe <- Base[, c("Origin", "Destination")]
 base_new <- demean(X, fe)
 
 a <- feols(ln_euros ~ ln_dist, base_new)
-b <- feols(ln_euros ~ ln_dist | Origin + Destination, base, demeaned = TRUE)
+b <- feols(ln_euros ~ ln_dist | Origin + Destination, Base, demeaned = TRUE)
 
 test_that("feols estimates correctly demean'd data", {
   expect_equal2(coef(a)[-1], coef(b), tolerance = 1e-12, scale = 1)
@@ -45,7 +45,7 @@ test_that("demean's as.matrix", {
 })
 
 test_that("demean with formula and slopes", {
-  X_dm_slopes <- demean(ln_dist ~ Origin + Destination[ln_euros], data = base)
-  X_dm_slopes_bis <- demean(base$ln_dist, fe, slope.vars = base$ln_euros, slope.flag = c(0, 1))
+  X_dm_slopes <- demean(ln_dist ~ Origin + Destination[ln_euros], data = Base)
+  X_dm_slopes_bis <- demean(Base$ln_dist, fe, slope.vars = Base$ln_euros, slope.flag = c(0, 1))
   expect_equal(X_dm_slopes[[1]], as.numeric(X_dm_slopes_bis))
 })
