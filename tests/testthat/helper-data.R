@@ -222,6 +222,21 @@ datab17 <- function(){
   base$var_spec <- as.numeric(base$tab[base$species])
   return(base)
 }
+
+datab18 <- function(){
+  base$fe1 <- base$species
+  base$fe2 <- rep(1:5, 30)
+  base$y[1:5] <- NA
+  base$x1[4:8] <- NA
+  base$x2[4:21] <- NA
+  base$x3[110:111] <- NA
+  base$fe1[110:118] <- NA
+  base$fe2[base$fe2 == 1] <- 0
+  base$fe3 <- sample(letters[1:5], 150, TRUE)
+  base$period <- rep(1:50, 3)
+  base$x_cst <- 1
+  return(base)
+}
 ev_par <- function(string) {
   eval(parse(text = string))
 }
