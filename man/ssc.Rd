@@ -3,6 +3,7 @@
 \docType{data}
 \name{ssc}
 \alias{ssc}
+\alias{dof}
 \alias{setFixest_ssc}
 \alias{getFixest_ssc}
 \title{Type of degree of freedom in \code{fixest} VCOVs}
@@ -11,6 +12,15 @@ An object of class \code{function} of length 1.
 }
 \usage{
 ssc(
+  adj = TRUE,
+  fixef.K = "nested",
+  cluster.adj = TRUE,
+  cluster.df = "min",
+  t.df = "min",
+  fixef.force_exact = FALSE
+)
+
+dof(
   adj = TRUE,
   fixef.K = "nested",
   cluster.adj = TRUE,
@@ -47,6 +57,11 @@ Provides how the degrees of freedom should be calculated in \code{\link[fixest]{
 \details{
 The following vignette: \href{https://lrberge.github.io/fixest/articles/standard_errors.html}{On standard-errors}, describes in details how the standard-errors are computed in \code{fixest} and how you can replicate standard-errors from other software.
 }
+\section{Functions}{
+\itemize{
+\item \code{dof}: This function is deprecated and will be removed at some point (in 6 months from August 2021). Exactly the same as \code{ssc}.
+}}
+
 \examples{
 
 #

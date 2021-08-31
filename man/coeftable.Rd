@@ -7,7 +7,7 @@
 \alias{se}
 \title{Obtain various statistics from an estimation}
 \usage{
-coeftable(object, vcov, ssc, cluster, keep, drop, order, ...)
+coeftable(object, vcov = NULL, ssc = NULL, cluster, keep, drop, order, ...)
 
 pvalue(object, vcov, ssc, cluster, keep, drop, order, ...)
 
