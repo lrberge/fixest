@@ -1104,11 +1104,9 @@ NumericVector cpp_iv_resid(NumericVector resid_2nd, NumericVector coef, SEXP res
     int K = Rf_length(resid_1st);
 
     NumericVector iv_resid = clone(resid_2nd);
+    std::vector<int> bounds = set_parallel_scheme(N, nthreads);
 
     if(K == 1){
-        std::vector<double> all_values(nthreads, 0);
-        std::vector<int> bounds = set_parallel_scheme(N, nthreads);
-
         double *p_r = REAL(VECTOR_ELT(resid_1st, 0));
 
         #pragma omp parallel for num_threads(nthreads)
@@ -1126,11 +1124,12 @@ NumericVector cpp_iv_resid(NumericVector resid_2nd, NumericVector coef, SEXP res
         }
 
         #pragma omp parallel for num_threads(nthreads)
-        for(int k=0 ; k<K ; ++k){
-
-            double *p_r = p_p_r[k];
-            for(int i=0 ; i<N ; ++i){
-                iv_resid[i] -= coef[k + is_int] * p_r[i];
+        for(int t=0 ; t<nthreads ; ++t){
+            for(int k=0 ; k<K ; ++k){
+                double *p_r = p_p_r[k];
+                for(int i=bounds[t]; i<bounds[t + 1] ; ++i){
+                    iv_resid[i] -= coef[k + is_int] * p_r[i];
+                }
             }
         }
     }

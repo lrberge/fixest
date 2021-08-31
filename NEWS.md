@@ -3,6 +3,8 @@
 
 ## Bugs fixes
 
+ - Fix bug occurring in IV models with multiple instruments and with multithreading on. That bug could lead to the wrong imputation of the IV residuals, hence affecting the standard-errors (although the order of magnitude of the variation should be minor). Thanks to @whitfillp [#182](https://github.com/lrberge/fixest/issues/182).
+ 
  - Fix minor, rare, bug occurring in `feglm` when the model was badly specified and VAR(Y) >>>> VAR(X).
  
  - `model.matrix` did not work with `type = "fixef"` (thanks to @kylebutts [#172](https://github.com/lrberge/fixest/issues/172)).
