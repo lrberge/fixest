@@ -444,9 +444,6 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
 	            # No modification required
 	            object$summary_from_fit = FALSE
 	            return(object)
-	        } else {
-	            # No modification required regarding the computation of the VCOV
-	            do_assign = FALSE
 	        }
 	    }
 
@@ -724,7 +721,7 @@ summary.fixest_list = function(object, se, cluster, ssc = getFixest_ssc(), .vcov
 #'
 #'
 #'
-coeftable = function(object, vcov, ssc, cluster, keep, drop, order, ...){
+coeftable = function(object, vcov = NULL, ssc = NULL, cluster, keep, drop, order, ...){
     # We don't explicitly refer to the other arguments
 
     check_arg(keep, drop, order, "NULL character vector no na")
@@ -734,7 +731,9 @@ coeftable = function(object, vcov, ssc, cluster, keep, drop, order, ...){
     # IS_FIXEST_LIST = "fixest_multi" %in% class(object)
 
     if(IS_FIXEST){
-        object = summary(object, vcov = vcov, ssc = ssc, cluster = cluster, ...)
+        if(!isTRUE(object$summary) || !(all_missing(vcov, ssc, cluster) && ...length() > 0)){
+            object = summary(object, vcov = vcov, ssc = ssc, cluster = cluster, ...)
+        }
     } else {
         if(!any(grepl("summary", class(object)))){
             # Known issue:
