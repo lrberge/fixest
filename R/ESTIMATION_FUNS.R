@@ -1516,9 +1516,11 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 	# IV correction
 	#
 
+	resid_origin = NULL
 	if(!is.null(dots$resid_1st_stage)){
 	    # We correct the residual
 	    is_int = "(Intercept)" %in% names(res$coefficients)
+	    resid_origin = res$residuals
 	    resid_new = cpp_iv_resid(res$residuals, res$coefficients, dots$resid_1st_stage, is_int, nthreads)
 	    res$iv_residuals = res$residuals
 	    res$residuals = resid_new
@@ -1539,7 +1541,13 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 		# X_beta / fitted / sumFE
 		if(isFixef){
 			x_beta = cpppar_xbeta(X, coef, nthreads)
-			res$sumFE = y - x_beta - res$residuals
+
+			if(!is.null(resid_origin)){
+			    res$sumFE = y - x_beta - resid_origin
+			} else {
+			    res$sumFE = y - x_beta - res$residuals
+			}
+
 			res$fitted.values = x_beta + res$sumFE
 			if(isTRUE(dots$add_fitted_demean)){
 			    res$fitted.values_demean = est$fitted.values

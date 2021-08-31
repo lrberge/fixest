@@ -19,6 +19,8 @@
  
  - Fix bug in `feols.fit` when the matrix of regressors was only partially named (reported by @leucothea [#176](https://github.com/lrberge/fixest/issues/176)).
  
+ - Fix bug in the value of the fixed-effects coefficients in IV estimations (thanks to @tappek [#190](https://github.com/lrberge/fixest/issues/190)).
+ 
 ## Major changes
 
  - New argument `vcov`:
