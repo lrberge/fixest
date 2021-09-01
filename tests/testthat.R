@@ -5,4 +5,3 @@ library(patrick)
 
 test_check("fixest")
 devtools::test()
-

@@ -584,24 +584,24 @@ V_matrix <- function(M_i, M_t, M_it, c_adj, cdf) {
 vcov_db <- function(k) {
   data(trade)
   if (k == 1) {
-    base <- trade
-    return(base)
+    BASE <- trade
+    return(BASE)
   } else if (k == 2) {
-    base <- trade
-    base$Euros[base$Origin == "FR"] <- 0
-    return(base)
+    BASE <- trade
+    BASE$Euros[BASE$Origin == "FR"] <- 0
+    return(BASE)
   } else if (k == 3) {
-    base <- trade
-    base$Euros[base$Origin == "FR"] <- 0
-    base$Euros_na <- base$Euros
-    base$Euros_na[sample(nrow(base), 50)] <- NA
-    base$Destination_na <- base$Destination
-    base$Destination_na[sample(nrow(base), 50)] <- NA
-    base$Origin_na <- base$Origin
-    base$Origin_na[sample(nrow(base), 50)] <- NA
-    base$Product_na <- base$Product
-    base$Product_na[sample(nrow(base), 50)] <- NA
-    return(base)
+    BASE <- trade
+    BASE$Euros[BASE$Origin == "FR"] <- 0
+    BASE$Euros_na <- BASE$Euros
+    BASE$Euros_na[sample(nrow(BASE), 50)] <- NA
+    BASE$Destination_na <- BASE$Destination
+    BASE$Destination_na[sample(nrow(BASE), 50)] <- NA
+    BASE$Origin_na <- BASE$Origin
+    BASE$Origin_na[sample(nrow(BASE), 50)] <- NA
+    BASE$Product_na <- BASE$Product
+    BASE$Product_na[sample(nrow(BASE), 50)] <- NA
+    return(BASE)
   }
 }
 
