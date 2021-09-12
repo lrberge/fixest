@@ -15,19 +15,19 @@ with_parameters_test_that("Standard, Clustered, HC and tw-way Clustered SE estim
       expect_equal2(vcov_fxt, vcov_sw, tol = 1e-6)
 
       # Clustered SE type HC0
-      vcov_fxt <- unname(se(est, dof = dof(adj = FALSE, fixef.K = "full")))
+      vcov_fxt <- unname(se(est, ssc = ssc(adj = FALSE, fixef.K = "full")))
       vcov_sw <- sqrt(sandwich::vcovCL(est_bis, cluster = base$grp, type = "HC0")["x", "x"])
       expect_equal2(vcov_fxt, vcov_sw, tol = 1e-6) # Almost equal
 
       # Clusteres SE type HC1
-      vcov_fxt <- unname(se(est, dof = dof(fixef.K = "full")))
+      vcov_fxt <- unname(se(est, ssc = ssc(fixef.K = "full")))
       vcov_sw <- sqrt(sandwich::vcovCL(est_bis, cluster = base$grp, type = "HC1")["x", "x"])
       expect_equal2(vcov_fxt, vcov_sw, tol = 1e-6) # Almost equal
     })
 
     ### Heteroskedasticity-robust
     test_that("Heterscoedastcity-robus Standard Errors are equal between feols and sandwich", {
-      vcov_fxt <- unname(se(est, se = "hetero", dof = dof(adj = FALSE, cluster.adj = FALSE)))
+      vcov_fxt <- unname(se(est, se = "hetero", ssc = ssc(adj = FALSE, cluster.adj = FALSE)))
       vcov_sw <- sqrt(sandwich::vcovHC(est_bis, type = "HC0")["x", "x"])
       expect_equal2(vcov_fxt, vcov_sw, tol = 1e-5)
 
@@ -38,7 +38,7 @@ with_parameters_test_that("Standard, Clustered, HC and tw-way Clustered SE estim
 
     ### Two-way clustered standard errors
     test_that("Two-way Clustered Standard Errors are equal between feols and sandwich", {
-      vcov_fxt <- unname(se(est, se = "twoway", dof = dof(fixef.K = "full", cluster.df = "conv")))
+      vcov_fxt <- unname(se(est, se = "twoway", ssc = ssc(fixef.K = "full", cluster.df = "conv")))
       vcov_sw <- sqrt(sandwich::vcovCL(est_bis, cluster = ~ grp + tm, type = "HC1")["x", "x"])
       expect_equal2(vcov_fxt, vcov_sw, tol = 1e-5)
     })
@@ -108,7 +108,7 @@ test_that("Aliases works properly", {
 #   if (isFALSE(FE)) {
 #     expect_equal(vcov(est, cluster = ~id), sandwich::vcovCL(est, cluster = ~id, type = "HC1"))
 #   } else {
-#     expect_equal(vcov(est, cluster = ~id, dof = dof(adj = FALSE)), sandwich::vcovCL(est, cluster = ~id))
+#     expect_equal(vcov(est, cluster = ~id, ssc = ssc(adj = FALSE)), sandwich::vcovCL(est, cluster = ~id))
 #   }
 # },
 # .cases = sandwcomp_cases()
@@ -131,7 +131,7 @@ test_that("Aliases works properly", {
 # )
 #
 # expect_equal(vcov(est, cluster = ~id), vcovCL(est, cluster = ~id, type = "HC1"))
-# expect_equal(vcov(est, cluster = ~id, dof = dof(adj = FALSE)), vcovCL(est, cluster = ~id))
+# expect_equal(vcov(est, cluster = ~id, ssc = ssc(adj = FALSE)), vcovCL(est, cluster = ~id))
 #
 # ## I must call my database with the same name of fixest_mod_select Data argument
 # ## For some reason vcovCL doesnt work without the previous detail
