@@ -47,9 +47,8 @@ with_parameters_test_that("Standard, Clustered, HC and tw-way Clustered SE estim
   .cases = SE_cases()[1:6, ]
 )
 
+# cluster = data vs cluster = formula ----
 
-
-## cluster = data vs cluster = formula
 test_that("cluster = data vs cluster = formula works properly", {
   for (k in 1:3) {
     est_pois <- femlm(Euros ~ log(dist_km) | Origin + Destination, vcov_db(k))
@@ -58,8 +57,8 @@ test_that("cluster = data vs cluster = formula works properly", {
   }
 })
 
+# Testing Errors ----
 
-## Testing Errors
 DF <- vcov_db(3)
 test_that("SE is reporting errors correctly", {
   est_pois <- femlm(Euros ~ log(dist_km) | Origin + Destination, DF)
@@ -76,7 +75,7 @@ test_that("SE is reporting errors correctly", {
   # expect_error(se(est_pois, se = "fourway", cluster = ~ Origin + Destination + Product))
 })
 
-## Testing aliases
+# Testing aliases ----
 
 test_that("Aliases works properly", {
   est_pois <- femlm(Euros ~ log(dist_km) | Origin + Destination, vcov_db(3))
@@ -89,9 +88,7 @@ test_that("Aliases works properly", {
   # expect_equal(se_hetero, se_hc1)
 })
 
-
-
-## Testing compatibility between fixest and sandwich
+# Testing compatibility between fixest and sandwich ----
 
 # with_parameters_test_that("fixest is compatible with sandwich's vcov", {
 #   data(base_did)
