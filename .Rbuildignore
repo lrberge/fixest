@@ -1,0 +1,16 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.Renviron$
+^docs$
+^_BENCHMARK$
+^_Code snippets$
+^vignettes/images$
+^inst/NEWS\.Rd$
+^ONGOING_ISSUES\.md$
+^_pkgdown\.yml$
+^pkgdown$
+^.github$
+^check$
+^_AUTO_BENCHMARK$
+^CONTRIBUTORS\.md$
+^\.Renviron$

@@ -1,0 +1,149 @@
+useDynLib(fixest, .registration = TRUE)
+
+#
+# EXPORT
+#
+
+# main funs
+export(feNmlm, femlm, feols, feglm, fepois, fenegbin)
+export(feglm.fit, feols.fit)
+# etable
+export(etable, style.tex, style.df)
+export(extraline_register)
+# misc funs
+export(collinearity)
+export(r2, fitstat, fitstat_register, wald)
+export(fixest_startup_msg)
+# did
+export(did_means)
+# graph
+export(coefplot, iplot)
+# small funs
+export(coeftable, se, tstat, pvalue)
+# dof
+export(dof, ssc, degrees_freedom)
+# Lag related
+export(panel, unpanel, f, l, d)
+# interactions
+export(i)
+# macro
+export(xpd)
+# utilities
+export(to_integer, demean, obs)
+# setters & getters
+exportPattern("^(s|g)etFixest")
+
+# VCOV funs
+export(vcov_cluster, vcov_DK, vcov_NW, vcov_conley)
+
+
+# deprecated
+export(obs2remove, esttex, esttable)
+S3method(summary, fixest.obs2remove)
+
+# Base methods
+S3method(print, fixest)
+S3method(print, fixest_fitstat)
+S3method(summary, fixest.fixef)
+S3method(summary, fixest)
+S3method(summary, fixest_list)
+S3method(aggregate, fixest)
+S3method(plot, fixest.fixef)
+S3method("[", fixest_panel) # Lag related
+# fixest_multi
+S3method("[", fixest_multi)
+S3method("[[", fixest_multi)
+S3method("$", fixest_multi)
+S3method(print, fixest_multi)
+S3method(summary, fixest_multi)
+S3method(as.list, fixest_multi)
+
+# rep
+S3method(rep, fixest) # rep fixest objects
+S3method(rep, fixest_list) # idem: rep a list of fixest objects
+export(.l)
+
+# Stats methods
+S3method(nobs, fixest)
+S3method(logLik, fixest)
+S3method(AIC, fixest)
+S3method(BIC, fixest)
+S3method(vcov, fixest)
+S3method(resid, fixest)
+S3method(residuals, fixest)
+S3method(coef, fixest)
+S3method(coefficients, fixest)
+S3method(fitted, fixest)
+S3method(fitted.values, fixest)
+S3method(update, fixest)
+S3method(predict, fixest)
+S3method(confint, fixest)
+S3method(formula, fixest)
+S3method(model.matrix, fixest)
+S3method(terms, fixest)
+S3method(lag, formula)
+S3method(deviance, fixest)
+S3method(sigma, fixest)
+S3method(weights, fixest)
+S3method(hatvalues, fixest)
+
+# Stats methods => fixest_multi
+S3method(coef, fixest_multi)
+S3method(coefficients, fixest_multi)
+S3method(resid, fixest_multi)
+S3method(residuals, fixest_multi)
+
+# nlme method
+S3method(fixef, fixest)
+
+# sandwich method
+S3method(estfun, fixest)
+S3method(bread, fixest)
+
+#
+# IMPORT
+#
+
+import(dreamerr)
+
+importFrom(numDeriv, hessian, jacobian, genD)
+
+# needs re-export :-(, not the best solution but...
+importFrom(nlme, fixef)
+export(fixef)
+importFrom(sandwich, estfun, bread)
+export(estfun, bread)
+
+importFrom(stats, cor, dnorm, lm, nlminb, optim,
+			  pnorm, qnorm, as.formula, var, sd, formula,
+			  na.omit, model.frame, "na.pass", poisson, pt, hatvalues)
+
+# stats methods
+importFrom(stats, model.matrix, sigma, deviance, weights, terms,
+             nobs, AIC, BIC, update, predict, fitted, fitted.values,
+			  resid, residuals, logLik, coef, coefficients, lag,
+			  confint, vcov, binomial, setNames, complete.cases, pchisq, pf,
+			  aggregate, cancor, rnorm, median)
+
+importFrom(utils, combn, head, tail, packageVersion, object.size)
+
+importFrom(Rcpp, evalCpp)
+
+importFrom(graphics, par, plot, box, axis, abline, points, text, title,
+           lines, polygon, segments, plot.default, strwidth, strheight,
+           rect)
+
+importFrom(grDevices, rgb, col2rgb)
+
+importFrom(methods, formalArgs)
+
+
+
+
+
+
+# Auto-exports::vcov_aliases
+export(NW, newey_west, DK, driscoll_kraay, conley)
+
+
+

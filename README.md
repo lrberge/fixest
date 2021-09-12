@@ -1,6 +1,5 @@
-# fixest: Fast and user-friendly fixed-effects estimation
 
-[![R build status](https://github.com/harobledo/fixest/workflows/R-CMD-check/badge.svg)](https://github.com/harobledo/fixest/actions?workflow=R-CMD-check)
+# fixest: Fast and user-friendly fixed-effects estimation
 
 <a href="https://cran.r-project.org/web/checks/check_results_fixest.html"><img src="https://cranchecks.info/badges/worst/fixest" alt="CRAN status"></a>
 <a href="https://CRAN.R-project.org/package=fixest"><img src="http://www.r-pkg.org/badges/version/fixest" alt="Version"> </a>

@@ -1,0 +1,126 @@
+
+
+title: fixest
+
+
+reference:
+    - title: Estimation
+      desc: Methods to perform fixed-effects estimations
+      contents:
+          - feols
+          - fepois
+          - feglm
+          - fenegbin
+          - femlm
+          - feNmlm
+    - title: Handling results, multiple
+      desc: Visualize results in tables or graphs
+      contents:
+        - etable
+        - coefplot
+        - iplot
+        - style.df
+        - style.tex
+        - extraline_register
+    - title: Difference-in-difference tools
+      desc: Various tools to perform DiD estimations
+      contents:
+        - sunab
+        - aggregate.fixest
+        - i
+    - title: Handling results, single
+      desc: Extracts values from single estimations
+      contents:
+        - summary.fixest
+        - coeftable
+        - coef.fixest
+        - se
+        - tstat
+        - confint.fixest
+        - print.fixest
+        - setFixest_print
+    - title: Standard-errors
+      desc: Computing the Standard-errors
+      contents:
+        - vcov.fixest
+        - summary.fixest
+        - ssc
+        - matches("est_(vocv|ssc)$")
+        - matches("^vcov_")
+    - title: Multiple estimations
+      desc: Perform, and handle, multiple estimations
+      contents:
+        - matches("stepwise|c?sw0?")
+        - matches("fixest_multi")
+    - title: stats method
+      desc: Various methods from the stats package
+      contents:
+        - model.matrix.fixest
+        - predict.fixest
+        - fitted.fixest
+        - hatvalues.fixest
+        - update.fixest
+        - resid.fixest
+        - sigma.fixest
+        - weights.fixest
+        - formula.fixest
+        - terms.fixest
+    - title: Formula tools
+      desc: Tools to manipulate formulas
+      contents:
+        - xpd
+        - matches("est_fml$")
+    - title: Utility tools
+      desc: User-level versions of internal tools
+      contents:
+        - demean
+        - to_integer
+    - title: Panel data tools
+      desc: Set of tools for panel data
+      contents:
+        - panel
+        - unpanel
+        - lag.formula
+        - matches("^(f|l|d)$")
+        - matches("fixest_panel")
+    - title: Handling the fixed-effects
+      desc: Tools to extract and manipulate the fixed-effects
+      contents:
+        - matches("fixef")
+    - title: Fit statistics
+      desc: Methods to extract fit statistics from estimations
+      contents:
+        - fitstat
+        - fitstat_register
+        - degrees_freedom
+        - r2
+        - AIC.fixest
+        - BIC.fixest
+        - logLik.fixest
+        - deviance.fixest
+        - nobs.fixest
+        - wald
+        - print.fixest_fitstat
+    - title: Default values
+      desc: The default arguments of many fixest functions can be set at will
+      contents:
+        - matches("(s|g)etFixest")
+    - title: Other methods and functions
+      desc: Other methods and functions that didn't fit the previous sections
+      contents:
+        - did_means
+        - fixest_startup_msg
+        - obs
+        - bread.fixest
+        - collinearity
+        - estfun.fixest
+        - _index_
+        - rep.fixest
+    - title: Data sets
+      desc: Data sets used in the examples
+      contents:
+        - base_did
+        - trade
+        - base_stagg
+
+
