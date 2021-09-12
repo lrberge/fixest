@@ -1,6 +1,6 @@
 ## Ctrl + Alt + R to run all the script
 
-# 2nd edition of expect equal allows to use scale argument to switch bewtween absolute and relative differences
+# 2nd edition of expect equal allows to use scale argument to switch between absolute and relative differences
 expect_equal2 <- function(object, expected, tolerance = if (edition_get() >= 3) testthat_tolerance(), scale = NULL) {
   local_edition(2)
   expect_equal(object, expected, tolerance = tolerance, scale = scale)
@@ -16,9 +16,10 @@ expect_model_equal <- function(object, reference, method) {
     tol <- ifelse((reference$formula == (y_01 ~ x1 + species + i(species, x2) + factor(fe_2) + i(fe_2, x3) + factor(fe_3)) |
       reference$formula == (y_01 ~ x1 + species + factor(fe_2) + i(fe_2, x2) + i(fe_2, x3) + factor(fe_3))), 0.5, tol)
   }
-  adj <- ifelse(method == "glm", 0, 1)
 
-  testthat::test_that("fixest and stats have equal x1 coefficient", {
+  adj <- ifelse(method == "glm", FALSE, TRUE)
+
+  test_that("fixest and stats have equal x1 coefficient", {
     expect_equal2(coef(object)["x1"],
       coef(reference)["x1"],
       tolerance = tol,
@@ -26,16 +27,18 @@ expect_model_equal <- function(object, reference, method) {
     )
   })
 
-  testthat::test_that("fixest and stats have equal standard errors", {
-    expect_equal2(se(object, se = "st", dof = dof(adj = adj))["x1"],
+  X <- se(object, se = "st", ssc = ssc(adj = adj))["x1"]
+  test_that("fixest and stats have equal standard errors", {
+    expect_equal2(X,
       se(reference)["x1"],
       tolerance = tol,
       scale = 1 # Absolute difference
     )
   })
 
-  testthat::test_that("fixest and stats have equal p-values", {
-    expect_equal2(pvalue(object, se = "st", dof = dof(adj = adj))["x1"],
+  Y <- pvalue(object, se = "st", ssc = ssc(adj = adj))["x1"]
+  test_that("fixest and stats have equal p-values", {
+    expect_equal2(Y,
       pvalue(reference)["x1"],
       tolerance = tol,
       scale = 1 # Absolute difference

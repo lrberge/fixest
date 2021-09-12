@@ -1,4 +1,4 @@
-setFixest_se(all = "standard")
+# setFixest_se(all = "standard")
 base <- datab15()
 test_that("IV estimation works properly", {
   est_iv <- feols(y ~ x1 | x_endo_1 + x_endo_2 ~ x_inst_1 + x_inst_2, base)
@@ -26,4 +26,4 @@ test_that("IV estimation works properly", {
 # check no bug
 est_iv <- feols(y ~ x1 | x_endo_1 + x_endo_2 ~ x_inst_1 + x_inst_2, base)
 etable(summary(est_iv, stage = 1:2))
-setFixest_se(reset = TRUE)
+# setFixest_se(reset = TRUE)
