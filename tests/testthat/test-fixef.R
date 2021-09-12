@@ -1,6 +1,3 @@
-
-library(fixest)
-
 base <- datab6()
 w <- 1
 AuxL1 <- fixef.strings()[[1]]

@@ -17,41 +17,38 @@ expect_model_equal <- function(object, reference, method) {
       reference$formula == (y_01 ~ x1 + species + factor(fe_2) + i(fe_2, x2) + i(fe_2, x3) + factor(fe_3))), 0.5, tol)
   }
 
-  adj <- ifelse(method == "glm", FALSE, TRUE)
+  do_adj <<- ifelse(method == "glm", FALSE, TRUE)
 
-  test_that("fixest and stats have equal x1 coefficient", {
-    expect_equal2(coef(object)["x1"],
-      coef(reference)["x1"],
-      tolerance = tol,
-      scale = 1 # Absolute difference
-    )
-  })
+  # fixest and stats have equal x1 coefficient
+  expect_equal2(
+    coef(object)["x1"],
+    coef(reference)["x1"],
+    tolerance = tol,
+    scale = 1 # Absolute difference
+  )
 
-  X <- se(object, se = "st", ssc = ssc(adj = adj))["x1"]
-  test_that("fixest and stats have equal standard errors", {
-    expect_equal2(X,
-      se(reference)["x1"],
-      tolerance = tol,
-      scale = 1 # Absolute difference
-    )
-  })
+  # fixest and stats have equal standard errors
+  expect_equal2(
+    se(object, se = "st", ssc = ssc(adj = do_adj))["x1"],
+    se(reference)["x1"],
+    tolerance = tol,
+    scale = 1 # Absolute difference
+  )
 
-  Y <- pvalue(object, se = "st", ssc = ssc(adj = adj))["x1"]
-  test_that("fixest and stats have equal p-values", {
-    expect_equal2(Y,
-      pvalue(reference)["x1"],
-      tolerance = tol,
-      scale = 1 # Absolute difference
-    )
-  })
+  # fixest and stats have equal p-values
+  expect_equal2(
+    pvalue(object, se = "st", ssc = ssc(adj = do_adj))["x1"],
+    pvalue(reference)["x1"],
+    tolerance = tol,
+    scale = 1 # Absolute difference
+  )
 
   if (!is.null(object$dispersion)) {
-    test_that("fixest and stats have the same dispersion parameter", {
-      if (!is.null(reference$family$family)) {
-        tol <- ifelse(grepl("quasi", reference$family$family), 1e-3, tol)
-      }
-      expect_equal2(object$dispersion, summary(reference)$dispersion, tolerance = tol, scale = 1)
-    })
+    # fixest and stats have the same dispersion parameter
+    if (!is.null(reference$family$family)) {
+      tol <- ifelse(grepl("quasi", reference$family$family), 1e-3, tol)
+    }
+    expect_equal2(object$dispersion, summary(reference)$dispersion, tolerance = tol, scale = 1)
   }
 }
 

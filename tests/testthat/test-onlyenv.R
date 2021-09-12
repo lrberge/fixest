@@ -1,4 +1,3 @@
-
 test_that("only.env works properly (without error)", {
   base <- iris
   names(base) <- c("y", "x1", "x2", "x3", "species")

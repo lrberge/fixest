@@ -2,7 +2,6 @@ base <- iris
 names(base) <- c("y", "x1", "x2", "x3", "species")
 base$fe_2 <- round(rnorm(150))
 
-
 test_that("the following works without error", {
   m <- feols(y ~ x1 + i(fe_2), base)
   coefplot(m)

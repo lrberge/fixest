@@ -1,5 +1,3 @@
-
-
 Base <- datab9()
 X <- Base[, c("ln_euros", "ln_dist")]
 fe <- Base[, c("Origin", "Destination")]
@@ -25,7 +23,6 @@ X_NA <- X
 fe_NA <- fe
 X_NA[1:5, 1] <- NA
 fe_NA[6:10, 1] <- NA
-
 
 test_that("demean removing NAs works properly", {
   X_demean <- demean(X_NA, fe_NA, na.rm = FALSE)

@@ -1,4 +1,3 @@
-
 test_that("fitstat works properly", {
   base <- iris
   names(base) <- c("y", "x1", "x_endo_1", "x_inst_1", "fe")

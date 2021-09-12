@@ -1,13 +1,12 @@
 base <- datab13()
-with_parameters_test_that("feols, feglm and femlm predict correctly with different families",
-                                   {
-                                     fmla <- xpd(lhs ~ rhs, lhs = y_dep, rhs = fmlas)
-                                     res <- fixest_mod_select(model = method, fmla = fmla, base = base, famly = fmly)
-                                     pred_res <- as.numeric(predict(res))
-                                     pred_resb <- predict(res, base)
-                                     expect_equal2(pred_res, pred_resb, tolerance = tol)
-                                   },
-                                   .cases = predict_cases()
+with_parameters_test_that("feols, feglm and femlm predict correctly with different families", {
+  fmla <- xpd(lhs ~ rhs, lhs = y_dep, rhs = fmlas)
+  res <- fixest_mod_select(model = method, fmla = fmla, base = base, famly = fmly)
+  pred_res <- as.numeric(predict(res))
+  pred_resb <- predict(res, base)
+  expect_equal2(pred_res, pred_resb, tolerance = tol)
+},
+.cases = predict_cases()
 )
 
 test_that("Predict with factors works properly", {
@@ -22,7 +21,6 @@ test_that("Predict with factors works properly", {
   # test(head(predict(res)), predict(res, quoi))
   expect_equal(head(predict(res)), predict(res, quoi))
 })
-
 
 ## HR: predict(sample = "original") doesnt work anymore. sample is not an argument of predict
 ## The following test may not be evaluating if prediction works properly

@@ -35,6 +35,7 @@ Suggests:
     pander,
     ggplot2,
     lfe,
+    sandwich,
     testthat,
     patrick
 LinkingTo: Rcpp
