@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
@@ -144,14 +144,15 @@
     <pre class="usage"><span class='co'># S3 method for fixest</span>
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span>
   <span class='va'>object</span>,
-  se <span class='op'>=</span> <span class='cn'>NULL</span>,
+  vcov <span class='op'>=</span> <span class='cn'>NULL</span>,
   cluster <span class='op'>=</span> <span class='cn'>NULL</span>,
-  dof <span class='op'>=</span> <span class='cn'>NULL</span>,
-  <span class='va'>.vcov</span>,
+  ssc <span class='op'>=</span> <span class='cn'>NULL</span>,
+  .vcov <span class='op'>=</span> <span class='cn'>NULL</span>,
   stage <span class='op'>=</span> <span class='fl'>2</span>,
   lean <span class='op'>=</span> <span class='cn'>FALSE</span>,
   agg <span class='op'>=</span> <span class='cn'>NULL</span>,
   forceCovariance <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  se <span class='op'>=</span> <span class='cn'>NULL</span>,
   keepBounded <span class='op'>=</span> <span class='cn'>FALSE</span>,
   n <span class='op'>=</span> <span class='fl'>1000</span>,
   nthreads <span class='op'>=</span> <span class='fu'><a href='setFixest_nthreads.html'>getFixest_nthreads</a></span><span class='op'>(</span><span class='op'>)</span>,
@@ -163,7 +164,7 @@
   <span class='va'>object</span>,
   <span class='va'>se</span>,
   <span class='va'>cluster</span>,
-  dof <span class='op'>=</span> <span class='fu'><a href='dof.html'>getFixest_dof</a></span><span class='op'>(</span><span class='op'>)</span>,
+  ssc <span class='op'>=</span> <span class='fu'><a href='ssc.html'>getFixest_ssc</a></span><span class='op'>(</span><span class='op'>)</span>,
   <span class='va'>.vcov</span>,
   stage <span class='op'>=</span> <span class='fl'>2</span>,
   lean <span class='op'>=</span> <span class='cn'>FALSE</span>,
@@ -179,16 +180,16 @@
       <td><p>A <code>fixest</code> object. Obtained using the functions <code><a href='femlm.html'>femlm</a></code>, <code><a href='feols.html'>feols</a></code> or <code><a href='feglm.html'>feglm</a></code>.</p></td>
     </tr>
     <tr>
-      <th>se</th>
-      <td><p>Character scalar. Which kind of standard error should be computed: &#8220;standard&#8221;, &#8220;hetero&#8221;, &#8220;cluster&#8221;, &#8220;twoway&#8221;, &#8220;threeway&#8221; or &#8220;fourway&#8221;? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "standard"</code>. Note that this argument can be implicitly deduced from the argument <code>cluster</code>.</p></td>
+      <th>vcov</th>
+      <td><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href='vcov_cluster.html'>vcov_cluster</a></code>, <code><a href='vcov_hac.html'>vcov_NW</a></code>, <code><a href='vcov_hac.html'>NW</a></code>, <code><a href='vcov_hac.html'>vcov_DK</a></code>, <code><a href='vcov_hac.html'>DK</a></code>, <code><a href='vcov_conley.html'>vcov_conley</a></code> and <code><a href='vcov_conley.html'>conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the `vcov` documentation in the <a href='https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1'>vignette</a>.</p></td>
     </tr>
     <tr>
       <th>cluster</th>
-      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as clusters in the estimation, you could further use <code>cluster = 1:2</code> or leave it blank with <code>se = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] cluster). You can interact two variables using <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
+      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] fixed-effect). You can interact two variables using <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
     </tr>
     <tr>
-      <th>dof</th>
-      <td><p>An object of class <code>dof.type</code> obtained with the function <code><a href='dof.html'>dof</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href='dof.html'>dof</a></code> for this argument. The arguments and defaults of the function <code><a href='dof.html'>dof</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "conventional"</code>, <code>t.df = "conventional"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href='dof.html'>dof</a></code> for details.</p></td>
+      <th>ssc</th>
+      <td><p>An object of class <code>ssc.type</code> obtained with the function <code><a href='ssc.html'>ssc</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href='ssc.html'>ssc</a></code> for this argument. The arguments and defaults of the function <code><a href='ssc.html'>ssc</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "conventional"</code>, <code>t.df = "conventional"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href='ssc.html'>ssc</a></code> for details.</p></td>
     </tr>
     <tr>
       <th>.vcov</th>
@@ -209,6 +210,10 @@
     <tr>
       <th>forceCovariance</th>
       <td><p>(Advanced users.) Logical, default is <code>FALSE</code>. In the peculiar case where the obtained Hessian is not invertible (usually because of collinearity of some variables), use this option to force the covariance matrix, by using a generalized inverse of the Hessian. This can be useful to spot where possible problems come from.</p></td>
+    </tr>
+    <tr>
+      <th>se</th>
+      <td><p>Character scalar. Which kind of standard error should be computed: &#8220;standard&#8221;, &#8220;hetero&#8221;, &#8220;cluster&#8221;, &#8220;twoway&#8221;, &#8220;threeway&#8221; or &#8220;fourway&#8221;? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "iid"</code>. Note that this argument is deprecated, you should use <code>vcov</code> instead.</p></td>
     </tr>
     <tr>
       <th>keepBounded</th>
@@ -239,7 +244,7 @@
 
     
 
-<p>The VCOVs from <code>sandwich</code> can be used with <code>feols</code>, <code>feglm</code> and <code>fepois</code> estimations. If you want to have a <code>sandwich</code> VCOV when using <code>summary.fixest</code>, you can use the argument <code>.vcov</code> to specify the VCOV function to use (see examples).
+<p>The VCOVs from <code>sandwich</code> can be used with <code>feols</code>, <code>feglm</code> and <code>fepois</code> estimations. If you want to have a <code>sandwich</code> VCOV when using <code>summary.fixest</code>, you can use the argument <code>vcov</code> to specify the VCOV function to use (see examples).
 Note that if you do so and you use a formula in the <code>cluster</code> argument, an innocuous warning can pop up if you used several non-numeric fixed-effects in the estimation (this is due to the function <code><a href='https://rdrr.io/r/stats/expand.model.frame.html'>expand.model.frame</a></code> used in <code>sandwich</code>).</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
@@ -257,13 +262,12 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 <span class='va'>est_pois</span> <span class='op'>=</span> <span class='fu'><a href='feglm.html'>fepois</a></span><span class='op'>(</span><span class='va'>Euros</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>dist_km</span><span class='op'>)</span><span class='op'>|</span><span class='va'>Origin</span><span class='op'>+</span><span class='va'>Destination</span><span class='op'>+</span><span class='va'>Product</span>, <span class='va'>trade</span><span class='op'>)</span>
 
 <span class='co'># Comparing different types of standard errors</span>
-<span class='va'>sum_standard</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, se <span class='op'>=</span> <span class='st'>"standard"</span><span class='op'>)</span>
-<span class='va'>sum_hetero</span>   <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, se <span class='op'>=</span> <span class='st'>"hetero"</span><span class='op'>)</span>
-<span class='va'>sum_oneway</span>   <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, se <span class='op'>=</span> <span class='st'>"cluster"</span><span class='op'>)</span>
-<span class='va'>sum_twoway</span>   <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, se <span class='op'>=</span> <span class='st'>"twoway"</span><span class='op'>)</span>
-<span class='va'>sum_threeway</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, se <span class='op'>=</span> <span class='st'>"threeway"</span><span class='op'>)</span>
+<span class='va'>sum_standard</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, vcov <span class='op'>=</span> <span class='st'>"iid"</span><span class='op'>)</span>
+<span class='va'>sum_hetero</span>   <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, vcov <span class='op'>=</span> <span class='st'>"hetero"</span><span class='op'>)</span>
+<span class='va'>sum_oneway</span>   <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, vcov <span class='op'>=</span> <span class='st'>"cluster"</span><span class='op'>)</span>
+<span class='va'>sum_twoway</span>   <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, vcov <span class='op'>=</span> <span class='st'>"twoway"</span><span class='op'>)</span>
 
-<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>sum_standard</span>, <span class='va'>sum_hetero</span>, <span class='va'>sum_oneway</span>, <span class='va'>sum_twoway</span>, <span class='va'>sum_threeway</span><span class='op'>)</span>
+<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>sum_standard</span>, <span class='va'>sum_hetero</span>, <span class='va'>sum_oneway</span>, <span class='va'>sum_twoway</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                        sum_standard         sum_hetero         sum_oneway
 #&gt; Dependent Var.:               Euros              Euros              Euros
 #&gt;                                                                          
@@ -273,127 +277,214 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 #&gt; Destination                     Yes                Yes                Yes
 #&gt; Product                         Yes                Yes                Yes
 #&gt; _______________ ___________________ __________________ __________________
-#&gt; S.E. type                  Standard Heteroskedas.-rob.         by: Origin
+#&gt; S.E. type                       IID Heteroskedas.-rob.         by: Origin
 #&gt; Observations                 38,325             38,325             38,325
 #&gt; Squared Cor.                0.60377            0.60377            0.60377
 #&gt; Pseudo R2                   0.76039            0.76039            0.76039
 #&gt; BIC                        1.43e+12           1.43e+12           1.43e+12
-#&gt;                         sum_twoway              sum_threeway
-#&gt; Dependent Var.:              Euros                     Euros
-#&gt;                                                             
-#&gt; log(dist_km)    -1.528*** (0.1307)        -1.528*** (0.1340)
-#&gt; Fixed-Effects:  ------------------        ------------------
-#&gt; Origin                         Yes                       Yes
-#&gt; Destination                    Yes                       Yes
-#&gt; Product                        Yes                       Yes
-#&gt; _______________ __________________        __________________
-#&gt; S.E. type        by: Orig. &amp; Dest. by: Orig. &amp; Dest. &amp; Prod.
-#&gt; Observations                38,325                    38,325
-#&gt; Squared Cor.               0.60377                   0.60377
-#&gt; Pseudo R2                  0.76039                   0.76039
-#&gt; BIC                       1.43e+12                  1.43e+12</div><div class='input'>
+#&gt;                         sum_twoway
+#&gt; Dependent Var.:              Euros
+#&gt;                                   
+#&gt; log(dist_km)    -1.528*** (0.1307)
+#&gt; Fixed-Effects:  ------------------
+#&gt; Origin                         Yes
+#&gt; Destination                    Yes
+#&gt; Product                        Yes
+#&gt; _______________ __________________
+#&gt; S.E. type        by: Orig. &amp; Dest.
+#&gt; Observations                38,325
+#&gt; Squared Cor.               0.60377
+#&gt; Pseudo R2                  0.76039
+#&gt; BIC                       1.43e+12</div><div class='input'>
 <span class='co'># Alternative ways to cluster the SE:</span>
-
-<span class='co'># two-way clustering: Destination and Product</span>
-<span class='co'># (Note that arg. se = "twoway" is implicitly deduced from the argument cluster)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, cluster <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Destination"</span>, <span class='st'>"Product"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, vcov <span class='op'>=</span> <span class='va'>cluster</span> <span class='op'>~</span> <span class='va'>Product</span> <span class='op'>+</span> <span class='va'>Origin</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; Poisson estimation, Dep. Var.: Euros
 #&gt; Observations: 38,325 
 #&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20
-#&gt; Standard-errors: Two-way (Destination &amp; Product) 
+#&gt; Standard-errors: Clustered (Product &amp; Origin) 
 #&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; log(dist_km)  -1.5277   0.119263  -12.81 &lt; 2.2e-16 ***
+#&gt; log(dist_km)  -1.5277   0.122773 -12.444 &lt; 2.2e-16 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389
-#&gt;            BIC:  1.427e+12     Squared Cor.: 0.60377 </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, cluster <span class='op'>=</span> <span class='va'>trade</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Destination"</span>, <span class='st'>"Product"</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>
+#&gt;            BIC:  1.427e+12     Squared Cor.: 0.60377 </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, vcov <span class='op'>=</span> <span class='op'>~</span><span class='va'>Product</span> <span class='op'>+</span> <span class='va'>Origin</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; Poisson estimation, Dep. Var.: Euros
 #&gt; Observations: 38,325 
 #&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20
-#&gt; Standard-errors: Two-way (Destination &amp; Product) 
+#&gt; Standard-errors: Clustered (Product &amp; Origin) 
 #&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; log(dist_km)  -1.5277   0.119263  -12.81 &lt; 2.2e-16 ***
+#&gt; log(dist_km)  -1.5277   0.122773 -12.444 &lt; 2.2e-16 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389
-#&gt;            BIC:  1.427e+12     Squared Cor.: 0.60377 </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, cluster <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>trade</span><span class='op'>$</span><span class='va'>Destination</span>, <span class='va'>trade</span><span class='op'>$</span><span class='va'>Product</span><span class='op'>)</span><span class='op'>)</span>
+#&gt;            BIC:  1.427e+12     Squared Cor.: 0.60377 </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, cluster <span class='op'>=</span> <span class='op'>~</span><span class='va'>Product</span> <span class='op'>+</span> <span class='va'>Origin</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; Poisson estimation, Dep. Var.: Euros
 #&gt; Observations: 38,325 
 #&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20
-#&gt; Standard-errors: Two-way 
+#&gt; Standard-errors: Clustered (Product &amp; Origin) 
 #&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; log(dist_km)  -1.5277   0.119263  -12.81 &lt; 2.2e-16 ***
-#&gt; ---
-#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389
-#&gt;            BIC:  1.427e+12     Squared Cor.: 0.60377 </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, cluster <span class='op'>=</span> <span class='op'>~</span><span class='va'>Destination</span><span class='op'>+</span><span class='va'>Product</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Poisson estimation, Dep. Var.: Euros
-#&gt; Observations: 38,325 
-#&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20
-#&gt; Standard-errors: Two-way (Destination &amp; Product) 
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; log(dist_km)  -1.5277   0.119263  -12.81 &lt; 2.2e-16 ***
-#&gt; ---
-#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389
-#&gt;            BIC:  1.427e+12     Squared Cor.: 0.60377 </div><div class='input'><span class='co'># Since Destination and Product are used as fixed-effects, you can also use:</span>
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, cluster <span class='op'>=</span> <span class='fl'>2</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Poisson estimation, Dep. Var.: Euros
-#&gt; Observations: 38,325 
-#&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20
-#&gt; Standard-errors: Two-way (Destination &amp; Product) 
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; log(dist_km)  -1.5277   0.119263  -12.81 &lt; 2.2e-16 ***
+#&gt; log(dist_km)  -1.5277   0.122773 -12.444 &lt; 2.2e-16 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389
 #&gt;            BIC:  1.427e+12     Squared Cor.: 0.60377 </div><div class='input'>
-<span class='co'># You can interact the clustering variables "live" using the var1 ^ var2 syntax.</span>
-
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, cluster <span class='op'>=</span> <span class='st'>"Destination^Product"</span><span class='op'>)</span>
+<span class='co'># You can interact the clustering variables "live" using the var1 ^ var2 syntax.#'</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, vcov <span class='op'>=</span> <span class='op'>~</span><span class='va'>Destination</span><span class='op'>^</span><span class='va'>Product</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; Poisson estimation, Dep. Var.: Euros
 #&gt; Observations: 38,325 
 #&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20
-#&gt; Standard-errors: Clustered (Destination^Product) 
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; log(dist_km)  -1.5277   0.072633 -21.034 &lt; 2.2e-16 ***
-#&gt; ---
-#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389
-#&gt;            BIC:  1.427e+12     Squared Cor.: 0.60377 </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, cluster <span class='op'>=</span> <span class='op'>~</span><span class='va'>Destination</span><span class='op'>^</span><span class='va'>Product</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Poisson estimation, Dep. Var.: Euros
-#&gt; Observations: 38,325 
-#&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20
-#&gt; Standard-errors: Clustered (Destination^Product) 
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; log(dist_km)  -1.5277   0.072633 -21.034 &lt; 2.2e-16 ***
-#&gt; ---
-#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389
-#&gt;            BIC:  1.427e+12     Squared Cor.: 0.60377 </div><div class='input'><span class='co'># Equivalent to</span>
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, cluster <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='va'>trade</span><span class='op'>$</span><span class='va'>Destination</span>, <span class='va'>trade</span><span class='op'>$</span><span class='va'>Product</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Poisson estimation, Dep. Var.: Euros
-#&gt; Observations: 38,325 
-#&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20
-#&gt; Standard-errors: Clustered 
+#&gt; Standard-errors: Clustered (combine_clusters_fast(Destination, Product)) 
 #&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
 #&gt; log(dist_km)  -1.5277   0.072633 -21.034 &lt; 2.2e-16 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389
 #&gt;            BIC:  1.427e+12     Squared Cor.: 0.60377 </div><div class='input'>
+<span class='co'>#</span>
+<span class='co'># Newey-West and Driscoll-Kraay SEs</span>
+<span class='co'>#</span>
+
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>base_did</span><span class='op'>)</span>
+<span class='co'># Simple estimation on a panel</span>
+<span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base_did</span><span class='op'>)</span>
+
+<span class='co'># --</span>
+<span class='co'># Newey-West</span>
+<span class='co'># Use the syntax NW ~ unit + time</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>NW</span> <span class='op'>~</span> <span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
+#&gt; Observations: 1,080 
+#&gt; Standard-errors: Newey-West (L=1) 
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept)  1.98880   0.174111  11.422  1.17e-06 ***
+#&gt; x1           0.98311   0.052699  18.655  1.68e-08 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; RMSE: 4.8969   Adj. R2: 0.262357</div><div class='input'>
+<span class='co'># Now take a lag of 3:</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='fu'><a href='vcov_hac.html'>NW</a></span><span class='op'>(</span><span class='fl'>3</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
+#&gt; Observations: 1,080 
+#&gt; Standard-errors: Newey-West (L=3) 
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept)  1.98880   0.194500  10.225  2.97e-06 ***
+#&gt; x1           0.98311   0.051042  19.261  1.27e-08 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; RMSE: 4.8969   Adj. R2: 0.262357</div><div class='input'>
+<span class='co'># --</span>
+<span class='co'># Driscoll-Kraay</span>
+<span class='co'># Use the syntax DK ~ time</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>DK</span> <span class='op'>~</span> <span class='va'>period</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
+#&gt; Observations: 1,080 
+#&gt; Standard-errors: Driscoll-Kraay (L=1) 
+#&gt;             Estimate Std. Error t value  Pr(&gt;|t|))    
+#&gt; (Intercept)  1.98880   0.789538  2.5189 3.2829e-02 *  
+#&gt; x1           0.98311   0.036115 27.2210 5.9100e-10 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; RMSE: 4.8969   Adj. R2: 0.262357</div><div class='input'>
+<span class='co'># Now take a lag of 3:</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='fu'><a href='vcov_hac.html'>DK</a></span><span class='op'>(</span><span class='fl'>3</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>period</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
+#&gt; Observations: 1,080 
+#&gt; Standard-errors: Driscoll-Kraay (L=3) 
+#&gt;             Estimate Std. Error t value  Pr(&gt;|t|))    
+#&gt; (Intercept)  1.98880   0.971486  2.0471 7.0943e-02 .  
+#&gt; x1           0.98311   0.028415 34.5980 6.9500e-11 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; RMSE: 4.8969   Adj. R2: 0.262357</div><div class='input'>
+<span class='co'>#--</span>
+<span class='co'># Implicit deductions</span>
+<span class='co'># When the estimation is done with a panel.id, you don't need to</span>
+<span class='co'># specify these values.</span>
+
+<span class='va'>est_panel</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base_did</span>, panel.id <span class='op'>=</span> <span class='op'>~</span><span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>)</span>
+
+<span class='co'># Both methods, NM and DK, now work automatically</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_panel</span>, <span class='st'>"NW"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
+#&gt; Observations: 1,080 
+#&gt; Standard-errors: Newey-West (L=1) 
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept)  1.98880   0.174111  11.422  1.17e-06 ***
+#&gt; x1           0.98311   0.052699  18.655  1.68e-08 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; RMSE: 4.8969   Adj. R2: 0.262357</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_panel</span>, <span class='st'>"DK"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
+#&gt; Observations: 1,080 
+#&gt; Standard-errors: Driscoll-Kraay (L=1) 
+#&gt;             Estimate Std. Error t value  Pr(&gt;|t|))    
+#&gt; (Intercept)  1.98880   0.789538  2.5189 3.2829e-02 *  
+#&gt; x1           0.98311   0.036115 27.2210 5.9100e-10 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; RMSE: 4.8969   Adj. R2: 0.262357</div><div class='input'>
+<span class='co'>#</span>
+<span class='co'># VCOVs robust to spatial correlation</span>
+<span class='co'>#</span>
+
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>quakes</span><span class='op'>)</span>
+<span class='va'>est_geo</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>depth</span> <span class='op'>~</span> <span class='va'>mag</span>, <span class='va'>quakes</span><span class='op'>)</span>
+
+<span class='co'># --</span>
+<span class='co'># Conley</span>
+<span class='co'># Use the syntax: conley(cutoff) ~ lat + lon</span>
+<span class='co'># with lat/lon the latitude/longitude variable names in the data set</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_geo</span>, <span class='fu'><a href='vcov_conley.html'>conley</a></span><span class='op'>(</span><span class='fl'>100</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>lat</span> <span class='op'>+</span> <span class='va'>long</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: depth
+#&gt; Observations: 1,000 
+#&gt; Standard-errors: Conley (100km) 
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept)   881.63    108.900  8.0957  1.65e-15 ***
+#&gt; mag          -123.42     19.232 -6.4174  2.14e-10 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; RMSE: 209.6   Adj. R2: 0.052245</div><div class='input'>
+<span class='co'># Change the cutoff, and how the distance is computed</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_geo</span>, <span class='fu'><a href='vcov_conley.html'>conley</a></span><span class='op'>(</span><span class='fl'>200</span>, distance <span class='op'>=</span> <span class='st'>"spherical"</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>lat</span> <span class='op'>+</span> <span class='va'>long</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: depth
+#&gt; Observations: 1,000 
+#&gt; Standard-errors: Conley (200km) 
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept)   881.63    128.240  6.8747  1.09e-11 ***
+#&gt; mag          -123.42     22.895 -5.3907  8.76e-08 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; RMSE: 209.6   Adj. R2: 0.052245</div><div class='input'>
+<span class='co'># --</span>
+<span class='co'># Implicit deduction</span>
+<span class='co'># By default the latitude and longitude are directly fetched in the data based</span>
+<span class='co'># on pattern matching. So you don't have to specify them.</span>
+<span class='co'># Further an automatic cutoff is computed by default.</span>
+
+<span class='co'># The following works</span>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_geo</span>, <span class='st'>"conley"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: depth
+#&gt; Observations: 1,000 
+#&gt; Standard-errors: Conley (100km) 
+#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt; (Intercept)   881.63    108.900  8.0957  1.65e-15 ***
+#&gt; mag          -123.42     19.232 -6.4174  2.14e-10 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; RMSE: 209.6   Adj. R2: 0.052245</div><div class='input'>
+
 
 <span class='co'>#</span>
 <span class='co'># Compatibility with sandwich</span>
 <span class='co'>#</span>
 
 <span class='co'># You can use the VOCVs from sandwich by using the argument .vcov:</span>
-<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='http://sandwich.R-Forge.R-project.org/'>sandwich</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://sandwich.R-Forge.R-project.org/'>sandwich</a></span><span class='op'>)</span>
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, .vcov <span class='op'>=</span> <span class='va'>vcovCL</span>, cluster <span class='op'>=</span> <span class='va'>trade</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Destination"</span>, <span class='st'>"Product"</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; Poisson estimation, Dep. Var.: Euros
 #&gt; Observations: 38,325 
 #&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20
-#&gt; Standard-errors: vcovCL 
+#&gt; Standard-errors: NULL 
 #&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
 #&gt; log(dist_km)  -1.5277   0.120014  -12.73 &lt; 2.2e-16 ***
 #&gt; ---

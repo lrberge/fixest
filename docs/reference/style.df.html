@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
@@ -80,7 +80,7 @@
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -115,7 +115,7 @@
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/lrberge/fixest/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -222,69 +222,69 @@
 
 <span class='co'># Default result</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                           model 1          model 2          model 3
-#&gt; Dependent Var.:             Ozone            Ozone            Ozone
-#&gt;                                                                    
-#&gt; Wind             -2.693* (0.8923) -2.630* (0.9380) -2.850* (0.9587)
-#&gt; Temp            2.373*** (0.0918)   -4.009 (4.205)   -63.53 (30.19)
-#&gt; Temp square                        0.0407 (0.0265)  0.8215 (0.4114)
-#&gt; Temp cube                                          -0.0034 (0.0018)
-#&gt; Fixed-Effects:  ----------------- ---------------- ----------------
-#&gt; Month                         Yes              Yes              Yes
-#&gt; Day                           Yes              Yes              Yes
-#&gt; _______________ _________________ ________________ ________________
-#&gt; S.E.: Clustered   by: Month &amp; Day  by: Month &amp; Day  by: Month &amp; Day
-#&gt; Observations                  116              116              116
-#&gt; R2                        0.78671          0.79718          0.80469
-#&gt; Within R2                 0.55271          0.57466          0.59040
-#&gt;                        model 4          model 5         model 6
-#&gt; Dependent Var.:        Solar.R          Solar.R         Solar.R
-#&gt;                                                                
-#&gt; Wind             3.031 (2.849)    3.181 (2.874)   3.943 (3.056)
-#&gt; Temp            4.787. (1.997)    17.80 (9.772)   234.4 (127.7)
-#&gt; Temp square                    -0.0824 (0.0581)  -2.933 (1.654)
-#&gt; Temp cube                                       0.0124 (0.0071)
-#&gt; Fixed-Effects:  -------------- ---------------- ---------------
-#&gt; Month                      Yes              Yes             Yes
-#&gt; Day                        Yes              Yes             Yes
-#&gt; _______________ ______________ ________________ _______________
-#&gt; S.E.: Clustered by: Month &amp; ..  by: Month &amp; Day by: Month &amp; Day
-#&gt; Observations               146              146             146
-#&gt; R2                     0.30641          0.31252         0.32651
-#&gt; Within R2              0.08937          0.09740         0.11577</div><div class='input'>
+</div><div class='output co'>#&gt;                           model 1           model 2           model 3
+#&gt; Dependent Var.:             Ozone             Ozone             Ozone
+#&gt;                                                                      
+#&gt; Wind            -2.693** (0.8076) -2.630** (0.8449) -2.850** (0.9134)
+#&gt; Temp            2.373*** (0.1858)    -4.009 (4.333)   -63.53. (33.38)
+#&gt; Temp square                         0.0407 (0.0277)  0.8215. (0.4496)
+#&gt; Temp cube                                            -0.0034 (0.0020)
+#&gt; Fixed-Effects:  ----------------- ----------------- -----------------
+#&gt; Month                         Yes               Yes               Yes
+#&gt; Day                           Yes               Yes               Yes
+#&gt; _______________ _________________ _________________ _________________
+#&gt; S.E.: Clustered         by: Month         by: Month         by: Month
+#&gt; Observations                  116               116               116
+#&gt; R2                        0.78671           0.79718           0.80469
+#&gt; Within R2                 0.55271           0.57466           0.59040
+#&gt;                         model 4          model 5          model 6
+#&gt; Dependent Var.:         Solar.R          Solar.R          Solar.R
+#&gt;                                                                  
+#&gt; Wind              3.031 (3.316)    3.181 (3.278)    3.943 (3.172)
+#&gt; Temp            4.787** (1.459)    17.80 (12.77)   234.4* (101.3)
+#&gt; Temp square                     -0.0824 (0.0762)  -2.933* (1.322)
+#&gt; Temp cube                                        0.0124* (0.0057)
+#&gt; Fixed-Effects:  --------------- ---------------- ----------------
+#&gt; Month                       Yes              Yes              Yes
+#&gt; Day                         Yes              Yes              Yes
+#&gt; _______________ _______________ ________________ ________________
+#&gt; S.E.: Clustered       by: Month        by: Month        by: Month
+#&gt; Observations                146              146              146
+#&gt; R2                      0.30641          0.31252          0.32651
+#&gt; Within R2               0.08937          0.09740          0.11577</div><div class='input'>
 <span class='co'># Playing a bit with the styles</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est</span>, style_df <span class='op'>=</span> <span class='fu'>style.df</span><span class='op'>(</span>fixef.title <span class='op'>=</span> <span class='st'>""</span>, fixef.suffix <span class='op'>=</span> <span class='st'>" FE"</span>,
                                  stats.line <span class='op'>=</span> <span class='st'>" "</span>, yesNo <span class='op'>=</span> <span class='st'>"yes"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                          est[[1]]         est[[2]]         est[[3]]
-#&gt; Dependent Var.:             Ozone            Ozone            Ozone
-#&gt;                                                                    
-#&gt; Wind             -2.693* (0.8923) -2.630* (0.9380) -2.850* (0.9587)
-#&gt; Temp            2.373*** (0.0918)   -4.009 (4.205)   -63.53 (30.19)
-#&gt; Temp square                        0.0407 (0.0265)  0.8215 (0.4114)
-#&gt; Temp cube                                          -0.0034 (0.0018)
-#&gt; Fixed-Effects:  ----------------- ---------------- ----------------
-#&gt; Month                         Yes              Yes              Yes
-#&gt; Day                           Yes              Yes              Yes
-#&gt; _______________ _________________ ________________ ________________
-#&gt; S.E.: Clustered   by: Month &amp; Day  by: Month &amp; Day  by: Month &amp; Day
-#&gt; Observations                  116              116              116
-#&gt; R2                        0.78671          0.79718          0.80469
-#&gt; Within R2                 0.55271          0.57466          0.59040
-#&gt;                       est[[4]]         est[[5]]        est[[6]]
-#&gt; Dependent Var.:        Solar.R          Solar.R         Solar.R
-#&gt;                                                                
-#&gt; Wind             3.031 (2.849)    3.181 (2.874)   3.943 (3.056)
-#&gt; Temp            4.787. (1.997)    17.80 (9.772)   234.4 (127.7)
-#&gt; Temp square                    -0.0824 (0.0581)  -2.933 (1.654)
-#&gt; Temp cube                                       0.0124 (0.0071)
-#&gt; Fixed-Effects:  -------------- ---------------- ---------------
-#&gt; Month                      Yes              Yes             Yes
-#&gt; Day                        Yes              Yes             Yes
-#&gt; _______________ ______________ ________________ _______________
-#&gt; S.E.: Clustered by: Month &amp; ..  by: Month &amp; Day by: Month &amp; Day
-#&gt; Observations               146              146             146
-#&gt; R2                     0.30641          0.31252         0.32651
-#&gt; Within R2              0.08937          0.09740         0.11577</div><div class='input'>
+</div><div class='output co'>#&gt;                          est[[1]]          est[[2]]          est[[3]]
+#&gt; Dependent Var.:             Ozone             Ozone             Ozone
+#&gt;                                                                      
+#&gt; Wind            -2.693** (0.8076) -2.630** (0.8449) -2.850** (0.9134)
+#&gt; Temp            2.373*** (0.1858)    -4.009 (4.333)   -63.53. (33.38)
+#&gt; Temp square                         0.0407 (0.0277)  0.8215. (0.4496)
+#&gt; Temp cube                                            -0.0034 (0.0020)
+#&gt; Fixed-Effects:  ----------------- ----------------- -----------------
+#&gt; Month                         Yes               Yes               Yes
+#&gt; Day                           Yes               Yes               Yes
+#&gt; _______________ _________________ _________________ _________________
+#&gt; S.E.: Clustered         by: Month         by: Month         by: Month
+#&gt; Observations                  116               116               116
+#&gt; R2                        0.78671           0.79718           0.80469
+#&gt; Within R2                 0.55271           0.57466           0.59040
+#&gt;                        est[[4]]         est[[5]]         est[[6]]
+#&gt; Dependent Var.:         Solar.R          Solar.R          Solar.R
+#&gt;                                                                  
+#&gt; Wind              3.031 (3.316)    3.181 (3.278)    3.943 (3.172)
+#&gt; Temp            4.787** (1.459)    17.80 (12.77)   234.4* (101.3)
+#&gt; Temp square                     -0.0824 (0.0762)  -2.933* (1.322)
+#&gt; Temp cube                                        0.0124* (0.0057)
+#&gt; Fixed-Effects:  --------------- ---------------- ----------------
+#&gt; Month                       Yes              Yes              Yes
+#&gt; Day                         Yes              Yes              Yes
+#&gt; _______________ _______________ ________________ ________________
+#&gt; S.E.: Clustered       by: Month        by: Month        by: Month
+#&gt; Observations                146              146              146
+#&gt; R2                      0.30641          0.31252          0.32651
+#&gt; Within R2               0.08937          0.09740          0.11577</div><div class='input'>
 
 </div></pre>
   </div>

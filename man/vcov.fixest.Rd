@@ -6,9 +6,10 @@
 \usage{
 \method{vcov}{fixest}(
   object,
-  se,
+  vcov = NULL,
+  se = NULL,
   cluster,
-  dof = NULL,
+  ssc = NULL,
   attr = FALSE,
   forceCovariance = FALSE,
   keepBounded = FALSE,
@@ -19,11 +20,13 @@
 \arguments{
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}
 
-\item{se}{Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.}
+\item{vcov}{Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from \code{\link[fixest]{vcov_cluster}}, \code{\link[fixest:vcov_hac]{vcov_NW}}, \code{\link[fixest:vcov_hac]{NW}}, \code{\link[fixest:vcov_hac]{vcov_DK}}, \code{\link[fixest:vcov_hac]{DK}}, \code{\link[fixest]{vcov_conley}} and \code{\link[fixest:vcov_conley]{conley}}. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the `vcov` documentation in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.}
 
-\item{cluster}{Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1", "var2")]}, \code{cluster = c("var1", "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster). You can interact two variables using \code{^} with the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.}
+\item{se}{Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "iid"}. Note that this argument is deprecated, you should use \code{vcov} instead.}
 
-\item{dof}{An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{dof}} for this argument. The arguments and defaults of the function \code{\link[fixest]{dof}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "conventional"}, \code{t.df = "conventional"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{dof}} for details.}
+\item{cluster}{Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1", "var2")]}, \code{cluster = c("var1", "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as fixed-effects in the estimation, you can leave it blank with \code{vcov = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] fixed-effect). You can interact two variables using \code{^} with the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.}
+
+\item{ssc}{An object of class \code{ssc.type} obtained with the function \code{\link[fixest]{ssc}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{ssc}} for this argument. The arguments and defaults of the function \code{\link[fixest]{ssc}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "conventional"}, \code{t.df = "conventional"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{ssc}} for details.}
 
 \item{attr}{Logical, defaults to \code{FALSE}. Whether to include the attributes describing how the VCOV was computed.}
 
@@ -38,8 +41,8 @@
 The computation of the VCOV matrix is first done in \code{\link[fixest]{summary.fixest}}.}
 }
 \value{
-It returns a \eqn{N\times N} square matrix where \eqn{N} is the number of variables of the fitted model.
-This matrix has an attribute \dQuote{type} specifying how this variance/covariance matrix has been computed (i.e. if it was created using a heteroskedascity-robust correction, or if it was clustered along a specific factor, etc).
+It returns a \eqn{K\times K} square matrix where \eqn{K} is the number of variables of the fitted model.
+If \code{attr = TRUE}, this matrix has an attribute \dQuote{type} specifying how this variance/covariance matrix has been computed.
 }
 \description{
 This function extracts the variance-covariance of estimated parameters from a model estimated with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
@@ -49,38 +52,161 @@ For an explanation on how the standard-errors are computed and what is the exact
 }
 \examples{
 
-# Load trade data
-data(trade)
+# Load panel data
+data(base_did)
 
-# We estimate the effect of distance on trade (with 3 fixed-effects)
-est_pois = femlm(Euros ~ log(dist_km) + log(Year) | Origin + Destination +
-                 Product, trade)
+# Simple estimation on a panel
+est = feols(y ~ x1, base_did)
 
-# By default, in the presence of FEs
-# the VCOV is clustered along the first FE
-vcov(est_pois)
+# ======== #
+# IID VCOV #
+# ======== #
 
+# By default the VCOV assumes iid errors:
+se(vcov(est))
+
+# You can make the call for an iid VCOV explicitly:
+se(vcov(est, "iid"))
+
+#
 # Heteroskedasticity-robust VCOV
-vcov(est_pois, se = "hetero")
+#
 
-# "clustered" VCOV (with respect to the Product factor)
-vcov(est_pois, se = "cluster", cluster = trade$Product)
-# another way to make the same request:
-# note that previously arg. se was optional since deduced from arg. cluster
-vcov(est_pois, cluster = "Product")
-# yet another way:
-vcov(est_pois, cluster = ~Product)
+# By default the VCOV assumes iid errors:
+se(vcov(est, "hetero"))
 
-# Another estimation without fixed-effects:
-est_pois_simple = femlm(Euros ~ log(dist_km) + log(Year), trade)
+# => note that it also accepts vcov = "White" and vcov = "HC1" as aliases.
 
-# We can still get the clustered VCOV,
-# but we need to give the argument cluster:
-vcov(est_pois_simple, cluster = ~Product)
+# =============== #
+# Clustered VCOVs #
+# =============== #
+
+# To cluster the VCOV, you can use a formula of the form cluster ~ var1 + var2 etc
+# Let's cluster by the panel ID:
+se(vcov(est, cluster ~ id))
+
+# Alternative ways:
+
+# -> cluster is implicitly assumed when a one-sided formula is provided
+se(vcov(est, ~ id))
+
+# -> using the argument cluster instead of vcov
+se(vcov(est, cluster = ~ id))
+
+# For two-/three- way clustering, just add more variables:
+se(vcov(est, ~ id + period))
+
+# -------------------|
+# Implicit deduction |
+# -------------------|
+# When the estimation contains FEs, the dimension on which to cluster
+# is directly inferred from the FEs used in the estimation, so you don't need
+# to explicitly add them.
+
+est_fe = feols(y ~ x1 | id + period, base_did)
+
+# Clustered along "id"
+se(vcov(est_fe, "cluster"))
+
+# Clustered along "id" and "period"
+se(vcov(est_fe, "twoway"))
+
+
+# =========== #
+# Panel VCOVs #
+# =========== #
+
+# ---------------------|
+# Newey West (NW) VCOV |
+# ---------------------|
+# To obtain NW VCOVs, use a formula of the form NW ~ id + period
+se(vcov(est, NW ~ id + period))
+
+# If you want to change the lag:
+se(vcov(est, NW(3) ~ id + period))
+
+# Alternative way:
+
+# -> using the vcov_NW function
+se(vcov(est, vcov_NW(unit = "id", time = "period", lag = 3)))
+
+# -------------------------|
+# Driscoll-Kraay (DK) VCOV |
+# -------------------------|
+# To obtain DK VCOVs, use a formula of the form DK ~ period
+
+se(vcov(est, DK ~ period))
+
+# If you want to change the lag:
+se(vcov(est, DK(3) ~ period))
+
+# Alternative way:
+
+# -> using the vcov_DK function
+se(vcov(est, vcov_DK(time = "period", lag = 3)))
+
+# -------------------|
+# Implicit deduction |
+# -------------------|
+# When the estimation contains a panel identifier, you don't need
+# to re-write them later on
+
+est_panel = feols(y ~ x1, base_did, panel.id = ~id + period)
+
+# Both methods, NM and DK, now work automatically
+se(vcov(est_panel, "NW"))
+se(vcov(est_panel, "DK"))
+
+
+# =================================== #
+# VCOVs robust to spatial correlation #
+# =================================== #
+
+data(quakes)
+est_geo = feols(depth ~ mag, quakes)
+
+# ------------|
+# Conley VCOV |
+# ------------|
+# To obtain a Conley VCOV, use a formula of the form conley(cutoff) ~ lat + lon
+# with lat/lon the latitude/longitude variable names in the data set
+se(vcov(est_geo, conley(100) ~ lat + long))
+
+# Alternative way:
+
+# -> using the vcov_DK function
+se(vcov(est_geo, vcov_conley(lat = "lat", lon = "long", cutoff = 100)))
+
+# -------------------|
+# Implicit deduction |
+# -------------------|
+# By default the latitude and longitude are directly fetched in the data based
+# on pattern matching. So you don't have to specify them.
+# Furhter, an automatic cutoff is deduced by default.
+
+# The following works:
+se(vcov(est_geo, "conley"))
+
+
+# ======================== #
+# Small Sample Corrections #
+# ======================== #
+
+# You can change the way the small sample corrections are done with the argument ssc.
+# The argument ssc must be created by the ssc function
+se(vcov(est, ssc = ssc(adj = FALSE)))
+
+# You can add directly the call to ssc in the vcov formula.
+# You need to add it like a variable:
+se(vcov(est, iid ~ ssc(adj = FALSE)))
+se(vcov(est, DK ~ period + ssc(adj = FALSE)))
+
 
 
 }
 \seealso{
+You can also compute VCOVs with the following functions: \code{\link[fixest]{vcov_cluster}}, \code{\link[fixest]{vcov_hac}}, \code{\link[fixest]{vcov_conley}}.
+
 See also the main estimation functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}. \code{\link[fixest]{summary.fixest}}, \code{\link[fixest]{confint.fixest}}, \code{\link[fixest]{resid.fixest}}, \code{\link[fixest]{predict.fixest}}, \code{\link[fixest]{fixef.fixest}}.
 }
 \author{

@@ -29,18 +29,9 @@ knitr::opts_chunk$set(
 
 set.seed(0)
 
-if(requireNamespace("data.table", quietly = TRUE)) library(data.table)
+is_DT = requireNamespace("data.table", quietly = TRUE)
 
-require_DT_ON = function(){
-  if(!requireNamespace("data.table", quietly = TRUE)){
-    knitr::opts_chunk$set(eval = FALSE)
-    cat("Evaluation of the next chunks requires 'data.table', which is not present.")
-  }
-}
-
-require_DT_OFF = function(){
-  knitr::opts_chunk$set(eval = TRUE)
-}
+if(is_DT) library(data.table)
 
 library(fixest)
 setFixest_nthreads(1)
@@ -107,17 +98,16 @@ Note that the estimation is performed using parallel computing which you can con
 
 ## Clustering the standard-errors
 
-To cluster the standard-errors, we can simply use the argument `se` of the `summary` method. Let's say we want to cluster the standard-errors according to the first two fixed-effects (i.e. the *Origin* and *Destination* variables). Then we just have to do:
+To cluster the standard-errors, we can simply use the argument `vcov` of the `summary` method. Let's say we want to cluster the standard-errors according to the first two fixed-effects (i.e. the *Origin* and *Destination* variables). Then we just have to do:
 ```{r}
-summary(gravity_pois, se = "twoway")
+summary(gravity_pois, vcov = "twoway")
 ```
-The clustering can be done on one (`se="cluster"`), two (`se="twoway"`), three (`se="threeway"`) or up to four (`se="fourway"`) variables. If the estimation includes fixed-effects, then by default the clustering will be done using these fixed-effects, in the original order. This is why the *Origin* and *Destination* variables were used for the two-way clustering in the previous example. If, instead, you wanted to perform one-way clustering on the *Product* variable, you need to use the argument `cluster`: 
+The clustering can be done on one, two, three or up to four variables. If the estimation includes fixed-effects, then by default the clustering will be done using these fixed-effects, in the original order. This is why the *Origin* and *Destination* variables were used for the two-way clustering in the previous example. If, instead, you wanted to perform one-way clustering on the *Product* variable, you need to provide it in a formula or use the argument `cluster`: 
 
 ```{r, eval = FALSE}
-# Two ways to summon clustering on the Product variable
-# - by reference:
+# Three ways to summon clustering on the Product variable
+summary(gravity_pois, vcov = ~Product)
 summary(gravity_pois, cluster = "Product")
-# - with a formula:
 summary(gravity_pois, cluster = ~Product)
 ```
 
@@ -126,22 +116,25 @@ Both produce the same results:
 summary(gravity_pois, cluster = ~Product)
 ```
 
-
-Note that you can always cluster the standard-errors, even when the estimation contained no fixed-effect. But then you must use the argument `cluster`:
+Note that you can always cluster the standard-errors, even when the estimation contained no fixed-effect:
 
 ```{r}
 gravity_simple = fepois(Euros ~ log(dist_km), trade)
 # We use a formula to specify the variables used for two way clustering
 # (note that the values of the variables are fetched directly in the original database)
-summary(gravity_simple, cluster = ~Origin + Destination)
+summary(gravity_simple, ~Origin + Destination)
 ```
 
-Finally, the standard-errors can also be computed at estimation time, you simply need to add the `se` or `cluster` argument:
+Finally, the standard-errors can also be computed at estimation time, you simply need to add the `vcov` argument:
 
 ```{r}
-fepois(Euros ~ log(dist_km), trade, cluster = ~Product)
+fepois(Euros ~ log(dist_km), trade, vcov = ~Product)
 ```
 
+
+## Other standard-errors
+
+Talking about standard-errors... there are more than clustered standard-errors that can be computed... and there are many ways to achieve the same thing... and many shortcuts to know. So before you leave don't forget to have a look at the section describing how to use the [vcov argument](#the-vcov-argument)!
 
 
 ## Other estimation functions
@@ -168,15 +161,15 @@ Now let's say that we want a compact overview of the results of several estimati
 
 ```{r, eval=FALSE}
 etable(gravity_pois, gravity_negbin, gravity_ols,
-         se = "twoway", subtitles = c("Poisson", "Negative Binomial", "Gaussian"))
+         vcov = "twoway", subtitles = c("Poisson", "Negative Binomial", "Gaussian"))
 ```
 ```{r, echo=FALSE, results='asis'}
-tab = etable(gravity_pois, gravity_negbin, gravity_ols, se = "twoway", subtitles = c("Poisson", "Negative Binomial", "Gaussian"))
+tab = etable(gravity_pois, gravity_negbin, gravity_ols, vcov = "twoway", subtitles = c("Poisson", "Negative Binomial", "Gaussian"))
 # problem to display the second empty line in markdown
 knitr::kable(tab[-2, ])
 ```
 
-We added the argument `se="twoway"` to cluster the standard-errors for all estimations. As can be seen this function gives an overview of the estimates and standard-errors, as well as some quality of fit measures. The argument `subtitles` is used to add information on each estimation column.
+We added the argument `vcov="twoway"` to cluster the standard-errors for all estimations. As can be seen this function gives an overview of the estimates and standard-errors, as well as some quality of fit measures. The argument `subtitles` is used to add information on each estimation column.
 
 In the previous example, we directly added the estimation results as arguments of the function `etable`. But the function also accepts lists of estimations.
 Let's give an example. Say you want to see the influence of the introduction of fixed-effects on the estimate of the elasticity of distance. You can do it with the following code where we use the argument `fixef` to include fixed-effects (instead of inserting them directly in the formula):
@@ -281,6 +274,163 @@ plot(fixedEffects)
 For each dimension, the fixed-effects are first centered, then sorted, and finally the most notable (i.e. highest and lowest) are reported. The exponential of the coefficient is reported in the right hand side to simplify the interpretation for models with log-link (as the Poisson model). As we can see from the country of destination fixed-effects, trade involving France (FR), Italy (IT) and Germany (DE) as destination countries is more than 2.7 times higher than the EU15 average. Further, the highest heterogeneity come from the product category, where trade in product 4 (dairy products) is roughly 2.7 times the average while product 14 (vegetable plaiting materials) represents a negligible fraction of the average. 
 
 Note however that the interpretation of the fixed-effects must be taken with extra care. In particular, here the fixed-effects can be interpreted only because they are perfectly balanced. 
+
+# The vcov argument 
+
+The version 0.10.0 of `fixest` introduced the argument `vcov`. This argument is highly versatile and single-handedly manages how the standard-errors are computed (note that you can find many example in [summary.fixest](https://lrberge.github.io/fixest/reference/summary.fixest.html#examples) help pages). This argument can be many things, so bear with me, and now, let's start trying to describe it!
+
+## Basics: main calls and shortcuts
+
+So far (version 0.10.0), six types of standard-errors can be computed, here are their keywords and a brief description:
+
+ - `iid`: assumes that errors are identically and independently distributed.
+ 
+ - `hetero`: assumes that errors are heteroskedastic (White correction).
+ 
+ - `cluster`, `twoway`: clustered SEs, assumes that errors are correlated within the cluster groups.
+ 
+ - `NW`, `newey_west`: Newey and West (1987) SEs for time series or panel data, assumes heteroskedastic and serially correlated errors.
+ 
+ - `DK`, `driscoll_kraay`: Driscoll and Kraay (1998) SEs for panel data, assumes cross-sectionally and serially correlated errors.
+ 
+ - `conley`: Conley (1999) SEs for cross-sections, assumes spatially correlated errors.
+ 
+The most basic uses of the `vcov` argument are:
+ 
+  - with a character scalar: `vcov = "vcov_type"` (ex: `vcov = "hetero"`).
+  
+  - with a formula of the form: `vcov = vcov_type ~ variables` where the variables are used to compute the SEs (ex: `vcov = DK ~ period`).
+  
+Most of the VCOV types need the information on some variables to be computed. For these types, one then needs to use a formula to inform on these variables. Let's give a first example:
+
+```{r}
+data(base_did)
+est = feols(y ~ x1, base_did)
+# Note that there is partial matching enabled (newey = newey_west)
+summary(est, newey ~ id + period)
+```
+
+Here we queried Newey-West SEs and provided the panel identifiers in the right of the formula. Had we used the keyword only, that would have led to an error:
+
+```{r, error=TRUE}
+summary(est, "newey_west")
+```
+
+But, huh what does the error message says? That the `time` variable can be deduced? Indeed, that's the thing: the algorithm tries hard to provide sensible default values for the user.
+Let's now try with panel identifiers set at estimation time:
+```{r}
+est_panel = feols(y ~ x1, base_did, panel.id = ~id + period)
+summary(est_panel, "newey_west")
+```
+Oh, now it works! However I can see some shade of disappointment in your eyes: since we need to add `panel.id = ~id + period` we end up with more typing! Well, I'm not done: typically we tend to make many estimations with the same data set, so it may be useful to set some characteristics globally. This can be done with the `setFixest_estimation()` function:
+```{r}
+setFixest_estimation(panel.id = ~id + period)
+est_implicit = feols(y ~ x1, base_did)
+summary(est_implicit, "newey_west")
+```
+Although the exact same two lines of code led to an error a few paragraphs ago, now it works fine. 
+
+Here is another example of implicit deduction:
+```{r}
+summary(est_implicit, "cluster")
+```
+The SEs are clustered at the unit identifier of the panel. Note that even if fixed-effects are present, the panel identifier takes precedence for clustering:
+```{r}
+feols(y ~ x1 | period, base_did, "cluster")
+```
+Of course, if the panel identifier is missing, the automatic clustering falls back to the first fixed-effect present:
+```{r}
+# Removing the panel
+setFixest_estimation(reset = TRUE)
+feols(y ~ x1 | period, base_did, "cluster")
+```
+
+Talking about clustered SEs, note that this is such a common operation that the empty keyword is equivalent to clustered SEs, so that `vcov = ~id + period` would lead to SEs clustered by `id` and `period`:
+```{r}
+feols(y ~ x1 | period, base_did, ~id + period)
+```
+
+Finally, a last example using Conley SEs:
+```{r}
+data(quakes)
+feols(depth ~ mag, quakes, "conley")
+```
+In this case the latitude and longitude are deduced from the variables names in the data set used for the estimation (here these are `"lat"` and `"long"`). Note that, for convenience, an automatic distance cutoff is deduced from the data but is not likely to be the most appropriate! But how to pass your own cutoff as a parameter? That's what we'll see in the next section!
+
+
+## Using dedicated functions
+
+Some VCOVs require parameters: for example in the Newey-West VCOV, you need to provide the number of lags to consider. Although it is automatically deduced via a rule of thumb, the user is likely to want to use (or test) other values. 
+To provide these extra parameters, you have two solutions:
+
+ - use helper functions which have the same name as the VCOV keywords (ex: `NW` or `newey_west` are two functions). 
+ 
+ - use dedicated VCOV functions (ex: `vcov_NW`).
+ 
+We now cover these two methods in turn. Helper functions can be seen as supercharged keywords: they are used in place of the VCOV keywords but also accept arguments. Here are two examples:
+```{r}
+feols(y ~ x1 | period, base_did, NW(2) ~ id + period)
+
+feols(depth ~ mag, quakes, conley(200, distance = "spherical"))
+```
+In the first example, we use the helper function `NW()` directly in the formula, exactly where the VCOV type would be. The first (and only) argument of `NW()` is the number of lags. On the right hand side of the formula, we give the variables used to identify the unit and the time variables, as usual.
+
+In the second example, we use no formula but directly the helper function `conley()` for which we provide two arguments: the cutoff (first argument) and how the distance should be computed. The latitude and longitude are still deduced from the data. If it could not be deduced, we would have to provide a formula giving them, like in the previous example.
+
+There are also dedicated VCOV functions which work in a more standard way. Let's redo the same two examples with them:
+```{r}
+feols(y ~ x1 | period, base_did, vcov_NW("id", "period", lag = 2))
+
+feols(depth ~ mag, quakes, vcov_conley(lat = "lat", lon = "long", 
+                                       cutoff = 200, distance = "spherical"))
+```
+
+Contrary to the helper functions: a) these functions cannot be used in a formula, b) they accept the variables to compute the SEs as arguments. They provide an alternative way to specify the VCOV.
+
+
+## Small sample correction
+
+The value of the SEs can (sometimes quite surprisingly) be impacted by the type of small sample correction (SSC) applied. In `fixest` you can monitor the SSC with the function `ssc()`. Details on how the SSCs are computed can be found in the dedicated vignette: [On standard-errors](https://lrberge.github.io/fixest/articles/standard_errors.html) -- here we detail only the implementation. 
+
+Most `fixest` functions accept an `ssc` argument that you can readily use. Here's an example:
+```{r}
+est = feols(y ~ x1 | id, base_did)
+est_up = feols(y ~ x1 | id, base_did, ssc = ssc(fixef.K = "full"))
+est_down = feols(y ~ x1 | id, base_did, ssc = ssc(adj = FALSE, cluster.adj = FALSE))
+etable(est, est_up, est_down)
+```
+
+Instead of providing the argument `ssc`, you can instead add the `ssc` call directly within the formula of the `vcov`. In this case you should simply add it as a variable.
+We now replicate the previous example using a list of several VCOVs in `etable` (that's the only function that accepts lists in the argument `vcov`):
+```{r}
+etable(est, vcov = list(~id, ~id + ssc(fixef.K = "full"), 
+                        ~id + ssc(adj = FALSE, cluster.adj = FALSE)))
+```
+
+You can also tweak `iid` or `hetero` SEs using a formula:
+```{r}
+feols(y ~ x1 | id, base_did, iid ~ ssc(adj = FALSE))
+feols(y ~ x1 | id, base_did, hetero ~ ssc(adj = FALSE))
+```
+
+
+## Other types of VCOVs
+
+Finally, we're approaching the end of the tour of the `vcov` argument. That argument can also accept:
+
+ - a matrix, which will be used as the VCOV (possibly useful in specific contexts)
+ 
+ - a function to be applied to a `fixest` object to compute the VCOV.
+
+The matrix case needs no explanation, let's have a few lines on the function. You can provide custom functions to compute the VCOV:
+```{r}
+summary(est, vcov = sandwich::vcovHC, type = "HC1")
+```
+The argument `type` here is not an argument of `summary` but is passed directly to the function `vcovHC`. Note that in estimations you can still pass functions but they must not accept extra arguments. Hence creating you own wrapper function may be necessary:
+```{r}
+feols(y ~ x1 | id, base_did, vcov = function(x) sandwich::vcovHC(x, type = "HC1"))
+```
+
 
 # Instrumental variables
 
@@ -636,12 +786,7 @@ etable(est1, est2, est_sub, order = "f", drop = "Int")
 
 Last, if you also use `data.table`, let's give an example of lead/lag creation:
 
-```{r, include = FALSE}
-require_DT_ON()
-```
-
-
-```{r}
+```{r, eval = is_DT}
 library(data.table)
 pdat_dt = panel(as.data.table(base_did), ~id+period)
 # we create a lagged value of the variable x1
@@ -650,11 +795,6 @@ pdat_dt[, x1_l1 := l(x1)]
 pdat_dt[, c("x1_l1_fill0", "y_f2") := .(l(x1, fill = 0), f(y, 2))]
 head(pdat_dt)
 ```
-
-```{r, include = FALSE}
-require_DT_OFF()
-```
-
 
 ### Creating lag/lead variables
 
@@ -671,19 +811,11 @@ The first two arguments are mandatory. The formula informs on the variable to be
 
 In case you use the popular package `data.table`, you can create lagged variables very simply:
 
-```{r, include = FALSE}
-require_DT_ON()
-```
-
-```{r}
+```{r, eval = is_DT}
 library(data.table)
 base_lag_dt = as.data.table(base_did)
 # we create a lagged value of the variable x1
 base_lag_dt[, x1.l1 := lag(x1 ~ id + period, 1)]
-```
-
-```{r, include = FALSE}
-require_DT_OFF()
 ```
 
 ## Non-linear in parameters example
@@ -785,7 +917,7 @@ system.time(fenegbin(Euros ~ log(dist_km)|Origin+Destination+Product+Year, trade
 
 As you can see, the efficiency of increasing the number of threads is not 1 to 1. Two threads do not divide the computing time by 2, nor four threads by 4. However it still reduces significantly the computing time, which might be valuable for large sample estimations.
 
-You can permanently set the number of threads used by `fixest` using `setFixest_nthreads(nthreads)`.
+You can permanently set the number of threads used by `fixest` using `setFixest_nthreads(nthreads)`. Note that you can permanently set this number at the project level by using the argument save: `setFixest_nthreads(nthreads, save = TRUE)`. This way you won't need to re-set the number of threads whenever you restart *R*.
 
 
 

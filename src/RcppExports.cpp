@@ -1024,6 +1024,67 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_newey_west
+NumericMatrix cpp_newey_west(NumericMatrix S, NumericVector w, int nthreads);
+RcppExport SEXP _fixest_cpp_newey_west(SEXP SSEXP, SEXP wSEXP, SEXP nthreadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type S(SSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_newey_west(S, w, nthreads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_newey_west_panel
+NumericMatrix cpp_newey_west_panel(NumericMatrix S, NumericVector w, IntegerVector unit, int G, IntegerVector time, int T, int nthreads);
+RcppExport SEXP _fixest_cpp_newey_west_panel(SEXP SSEXP, SEXP wSEXP, SEXP unitSEXP, SEXP GSEXP, SEXP timeSEXP, SEXP TSEXP, SEXP nthreadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type S(SSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type unit(unitSEXP);
+    Rcpp::traits::input_parameter< int >::type G(GSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type time(timeSEXP);
+    Rcpp::traits::input_parameter< int >::type T(TSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_newey_west_panel(S, w, unit, G, time, T, nthreads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_driscoll_kraay
+NumericMatrix cpp_driscoll_kraay(NumericMatrix S, NumericVector w, IntegerVector time, int T, int nthreads);
+RcppExport SEXP _fixest_cpp_driscoll_kraay(SEXP SSEXP, SEXP wSEXP, SEXP timeSEXP, SEXP TSEXP, SEXP nthreadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type S(SSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type time(timeSEXP);
+    Rcpp::traits::input_parameter< int >::type T(TSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_driscoll_kraay(S, w, time, T, nthreads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_vcov_conley
+NumericMatrix cpp_vcov_conley(NumericMatrix S, NumericVector lon_rad, NumericVector lat_rad, const int distance, const double cutoff, int nthreads);
+RcppExport SEXP _fixest_cpp_vcov_conley(SEXP SSEXP, SEXP lon_radSEXP, SEXP lat_radSEXP, SEXP distanceSEXP, SEXP cutoffSEXP, SEXP nthreadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type S(SSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type lon_rad(lon_radSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type lat_rad(lat_radSEXP);
+    Rcpp::traits::input_parameter< const int >::type distance(distanceSEXP);
+    Rcpp::traits::input_parameter< const double >::type cutoff(cutoffSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_vcov_conley(S, lon_rad, lat_rad, distance, cutoff, nthreads));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_fixest_compute_cluster_coef_r", (DL_FUNC) &_fixest_compute_cluster_coef_r, 12},
@@ -1095,6 +1156,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpppar_check_only_0", (DL_FUNC) &_fixest_cpppar_check_only_0, 2},
     {"_fixest_cpp_quf_gnl", (DL_FUNC) &_fixest_cpp_quf_gnl, 1},
     {"_fixest_cpppar_quf_table_sum", (DL_FUNC) &_fixest_cpppar_quf_table_sum, 11},
+    {"_fixest_cpp_newey_west", (DL_FUNC) &_fixest_cpp_newey_west, 3},
+    {"_fixest_cpp_newey_west_panel", (DL_FUNC) &_fixest_cpp_newey_west_panel, 7},
+    {"_fixest_cpp_driscoll_kraay", (DL_FUNC) &_fixest_cpp_driscoll_kraay, 5},
+    {"_fixest_cpp_vcov_conley", (DL_FUNC) &_fixest_cpp_vcov_conley, 6},
     {NULL, NULL, 0}
 };
 

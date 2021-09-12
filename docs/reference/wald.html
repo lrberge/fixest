@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
@@ -141,7 +141,7 @@
     <p>Wald test used to test the joint nullity of a set of coefficients.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>wald</span><span class='op'>(</span><span class='va'>x</span>, keep <span class='op'>=</span> <span class='cn'>NULL</span>, drop <span class='op'>=</span> <span class='cn'>NULL</span>, print <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>se</span>, <span class='va'>cluster</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>wald</span><span class='op'>(</span><span class='va'>x</span>, keep <span class='op'>=</span> <span class='cn'>NULL</span>, drop <span class='op'>=</span> <span class='cn'>NULL</span>, print <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>vcov</span>, <span class='va'>se</span>, <span class='va'>cluster</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -163,12 +163,16 @@
       <td><p>Logical, default is <code>TRUE</code>. If <code>TRUE</code>, then a verbose description of the test is prompted on the R console. Otherwise only a named vector containing the test statistics is returned.</p></td>
     </tr>
     <tr>
+      <th>vcov</th>
+      <td><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href='vcov_cluster.html'>vcov_cluster</a></code>, <code><a href='vcov_hac.html'>vcov_NW</a></code>, <code><a href='vcov_hac.html'>NW</a></code>, <code><a href='vcov_hac.html'>vcov_DK</a></code>, <code><a href='vcov_hac.html'>DK</a></code>, <code><a href='vcov_conley.html'>vcov_conley</a></code> and <code><a href='vcov_conley.html'>conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the `vcov` documentation in the <a href='https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1'>vignette</a>.</p></td>
+    </tr>
+    <tr>
       <th>se</th>
-      <td><p>Character scalar. Which kind of standard error should be computed: &#8220;standard&#8221;, &#8220;hetero&#8221;, &#8220;cluster&#8221;, &#8220;twoway&#8221;, &#8220;threeway&#8221; or &#8220;fourway&#8221;? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "standard"</code>. Note that this argument can be implicitly deduced from the argument <code>cluster</code>.</p></td>
+      <td><p>Character scalar. Which kind of standard error should be computed: &#8220;standard&#8221;, &#8220;hetero&#8221;, &#8220;cluster&#8221;, &#8220;twoway&#8221;, &#8220;threeway&#8221; or &#8220;fourway&#8221;? By default if there are clusters in the estimation: <code>se = "cluster"</code>, otherwise <code>se = "iid"</code>. Note that this argument is deprecated, you should use <code>vcov</code> instead.</p></td>
     </tr>
     <tr>
       <th>cluster</th>
-      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as clusters in the estimation, you could further use <code>cluster = 1:2</code> or leave it blank with <code>se = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] cluster). You can interact two variables using <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
+      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] fixed-effect). You can interact two variables using <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -193,15 +197,15 @@
 <span class='co'># Testing the joint nullity of the Temp polynomial</span>
 <span class='fu'>wald</span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"poly"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; Wald test, H0: joint nullity of poly(Temp, 3)1, poly(Temp, 3)2 and poly(Temp, 3)3
-#&gt;  stat = 23.1, p-value = 1.452e-11, on 3 and 105 DoF,VCOV: Standard.</div><div class='input'>
+#&gt;  stat = 23.1, p-value = 1.452e-11, on 3 and 105 DoF, VCOV: IID.</div><div class='input'>
 <span class='co'># Same but with clustered SEs</span>
 <span class='fu'>wald</span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"poly"</span>, cluster <span class='op'>=</span> <span class='st'>"Month"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; Wald test, H0: joint nullity of poly(Temp, 3)1, poly(Temp, 3)2 and poly(Temp, 3)3
-#&gt;  stat = 170.3, p-value &lt; 2.2e-16, on 3 and 105 DoF,VCOV: Clustered (Month).</div><div class='input'>
+#&gt;  stat = 170.3, p-value &lt; 2.2e-16, on 3 and 105 DoF, VCOV: Clustered (Month).</div><div class='input'>
 <span class='co'># Now: all vars but the polynomial and the intercept</span>
 <span class='fu'>wald</span><span class='op'>(</span><span class='va'>est</span>, drop <span class='op'>=</span> <span class='st'>"Inte|poly"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; Wald test, H0: joint nullity of Solar.R and Wind
-#&gt;  stat = 19.1, p-value = 8.538e-8, on 2 and 105 DoF,VCOV: Standard.</div><div class='input'>
+#&gt;  stat = 19.1, p-value = 8.538e-8, on 2 and 105 DoF, VCOV: IID.</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># Toy example: testing pre-trends</span>
 <span class='co'>#</span>

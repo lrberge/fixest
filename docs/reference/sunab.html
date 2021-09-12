@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
@@ -240,7 +240,7 @@
 #&gt; year = 7         5.207*** (0.3301)
 #&gt; year = 8         6.958*** (0.4676)
 #&gt; _______________ __________________
-#&gt; S.E. type                 Standard
+#&gt; S.E. type                      IID
 #&gt; Observations                   950
 #&gt; R2                         0.89654
 #&gt; Adj. R2                    0.88676</div><div class='input'>
@@ -265,7 +265,7 @@
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>res_sunab</span>, agg <span class='op'>=</span> <span class='st'>"ATT"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 950 
-#&gt; Standard-errors: Standard 
+#&gt; Standard-errors: IID 
 #&gt;              Estimate Std. Error    t value Pr(&gt;|t|))    
 #&gt; (Intercept)  0.006306   0.044297   0.142359  0.886829    
 #&gt; x1           0.988344   0.016624  59.453000 &lt; 2.2e-16 ***
@@ -277,7 +277,7 @@
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>res_sunab</span>, agg <span class='op'>=</span> <span class='st'>"cohort"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 950 
-#&gt; Standard-errors: Standard 
+#&gt; Standard-errors: IID 
 #&gt;              Estimate Std. Error    t value Pr(&gt;|t|))    
 #&gt; (Intercept)  0.006306   0.044297   0.142359  0.886829    
 #&gt; x1           0.988344   0.016624  59.453000 &lt; 2.2e-16 ***

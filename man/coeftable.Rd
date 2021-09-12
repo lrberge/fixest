@@ -2,26 +2,25 @@
 % Please edit documentation in R/MiscFuns.R
 \name{coeftable}
 \alias{coeftable}
-\alias{ctable}
 \alias{pvalue}
 \alias{tstat}
 \alias{se}
 \title{Obtain various statistics from an estimation}
 \usage{
-coeftable(object, se, cluster, keep, drop, order, ...)
+coeftable(object, vcov = NULL, ssc = NULL, cluster, keep, drop, order, ...)
 
-ctable(object, se, cluster, keep, drop, order, ...)
+pvalue(object, vcov, ssc, cluster, keep, drop, order, ...)
 
-pvalue(object, se, cluster, keep, drop, order, ...)
+tstat(object, vcov, ssc, cluster, keep, drop, order, ...)
 
-tstat(object, se, cluster, keep, drop, order, ...)
-
-se(object, se, cluster, keep, drop, order, ...)
+se(object, vcov, ssc, cluster, keep, drop, order, ...)
 }
 \arguments{
 \item{object}{An estimation. For example obtained from \code{\link[fixest]{feols}}.}
 
-\item{se}{[Fixest specific.] Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.}
+\item{vcov}{Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from \code{\link[fixest]{vcov_cluster}}, \code{\link[fixest:vcov_hac]{vcov_NW}}, \code{\link[fixest:vcov_hac]{NW}}, \code{\link[fixest:vcov_hac]{vcov_DK}}, \code{\link[fixest:vcov_hac]{DK}}, \code{\link[fixest]{vcov_conley}} and \code{\link[fixest:vcov_conley]{conley}}. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the `vcov` documentation in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.}
+
+\item{ssc}{An object of class \code{ssc.type} obtained with the function \code{\link[fixest]{ssc}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{ssc}} for this argument. The arguments and defaults of the function \code{\link[fixest]{ssc}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "conventional"}, \code{t.df = "conventional"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{ssc}} for details.}
 
 \item{cluster}{[Fixest specific.] Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1, "var2")]}, \code{cluster = c("var1, "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster).}
 
@@ -32,6 +31,8 @@ se(object, se, cluster, keep, drop, order, ...)
 \item{order}{Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument \code{dict}). Example: you have the following variables: \code{month1} to \code{month6}, then \code{x1} to \code{x5}, then \code{year1} to \code{year6}. If you want to display first the x's, then the years, then the months you could use: \code{order = c("x", "year")}. If the first character is an exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that does not contain \dQuote{Intercept} goes first).  See details.}
 
 \item{...}{Other arguments to be passed to \code{summary}.}
+
+\item{se}{[Fixest specific.] Character scalar. Which kind of standard error should be computed: \dQuote{iid}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are fixed-effects in the estimation: \code{se = "cluster"}, otherwise \code{se = "iid"}. Note that this argument is not needed if the argument \code{cluster} is present.}
 }
 \value{
 Returns a table of coefficients, with in rows the variables and four columns: the estimate, the standard-error, the t-statistic and the p-value.
@@ -68,16 +69,16 @@ tstat(est)
 pvalue(est)
 
 # Now with two-way clustered standard-errors
-#  and using ctable(), the alias to coeftable()
+#  and using coeftable()
 
-ctable(est, cluster = ~Origin + Product)
+coeftable(est, cluster = ~Origin + Product)
 se(est, cluster = ~Origin + Product)
 pvalue(est, cluster = ~Origin + Product)
 tstat(est, cluster = ~Origin + Product)
 
 # Or you can cluster only once:
 est_sum = summary(est, cluster = ~Origin + Product)
-ctable(est_sum)
+coeftable(est_sum)
 se(est_sum)
 tstat(est_sum)
 pvalue(est_sum)

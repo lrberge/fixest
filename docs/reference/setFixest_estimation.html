@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
       </span>
     </div>
 
@@ -142,6 +142,8 @@
     </div>
 
     <pre class="usage"><span class='fu'>setFixest_estimation</span><span class='op'>(</span>
+  data <span class='op'>=</span> <span class='cn'>NULL</span>,
+  panel.id <span class='op'>=</span> <span class='cn'>NULL</span>,
   fixef.rm <span class='op'>=</span> <span class='st'>"perfect"</span>,
   fixef.tol <span class='op'>=</span> <span class='fl'>1e-06</span>,
   fixef.iter <span class='op'>=</span> <span class='fl'>10000</span>,
@@ -154,7 +156,6 @@
   mem.clean <span class='op'>=</span> <span class='cn'>FALSE</span>,
   glm.iter <span class='op'>=</span> <span class='fl'>25</span>,
   glm.tol <span class='op'>=</span> <span class='fl'>1e-08</span>,
-  panel.id <span class='op'>=</span> <span class='cn'>NULL</span>,
   reset <span class='op'>=</span> <span class='cn'>FALSE</span>
 <span class='op'>)</span>
 
@@ -163,6 +164,14 @@
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>data</th>
+      <td><p>A data.frame containing the necessary variables to run the model. The variables of the non-linear right hand side of the formula are identified with this <code>data.frame</code> names. Can also be a matrix.</p></td>
+    </tr>
+    <tr>
+      <th>panel.id</th>
+      <td><p>The panel identifiers. Can either be: i) a one sided formula (e.g. <code>panel.id = ~id+time</code>), ii) a character vector of length 2 (e.g. <code>panel.id=c('id', 'time')</code>, or iii) a character scalar of two variables separated by a comma (e.g. <code>panel.id='id,time'</code>). Note that you can combine variables with <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> only inside formulas (see the dedicated section in <code><a href='feols.html'>feols</a></code>).</p></td>
+    </tr>
     <tr>
       <th>fixef.rm</th>
       <td><p>Can be equal to "perfect" (default), "singleton", "both" or "none". Controls which observations are to be removed. If "perfect", then observations having a fixed-effect with perfect fit (e.g. only 0 outcomes in Poisson estimations) will be removed. If "singleton", all observations for which a fixed-effect appears only once will be removed. The meaning of "both" and "none" is direct.</p></td>
@@ -210,10 +219,6 @@
     <tr>
       <th>glm.tol</th>
       <td><p>Tolerance level for the glm algorithm. Default is <code>1e-8</code>.</p></td>
-    </tr>
-    <tr>
-      <th>panel.id</th>
-      <td><p>The panel identifiers. Can either be: i) a one sided formula (e.g. <code>panel.id = ~id+time</code>), ii) a character vector of length 2 (e.g. <code>panel.id=c('id', 'time')</code>, or iii) a character scalar of two variables separated by a comma (e.g. <code>panel.id='id,time'</code>). Note that you can combine variables with <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> only inside formulas (see the dedicated section in <code><a href='feols.html'>feols</a></code>).</p></td>
     </tr>
     <tr>
       <th>reset</th>

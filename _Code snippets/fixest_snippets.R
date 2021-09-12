@@ -13,7 +13,7 @@
 # Very limited but does the job. Easy to expand.
 
 require(dreamerr) ; require(fixest)
-meffect = function(x, at_means = TRUE, se, cluster, ...){
+meffect = function(x, at_means = TRUE, vcov, se, cluster, ...){
     # x: fixest object
 
     check_arg(x, "class(fixest) mbt")
@@ -29,7 +29,7 @@ meffect = function(x, at_means = TRUE, se, cluster, ...){
     }
 
     if(!isTRUE(x$summary) || !missing(se) || !missing(cluster)){
-        x = summary(x, se = se, cluster = cluster, ...)
+        x = summary(x, vcov = vcov, se = se, cluster = cluster, ...)
     }
 
     coef = x$coefficients
@@ -95,8 +95,8 @@ meffect = function(x, at_means = TRUE, se, cluster, ...){
 base = iris
 names(base) = c("y", "x1", "x2", "x3", "species")
 
-# I set the default SE to "standard" for comparability with Stata
-setFixest_se(all = "standard")
+# I set the default SE to "iid" for comparability with Stata
+setFixest_vcov(all = "iid")
 
 res = fepois(y ~ x1 + x2, base)
 meffect(res)

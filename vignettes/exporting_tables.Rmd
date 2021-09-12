@@ -15,18 +15,8 @@ vignette: >
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, comment = "#>")
 
-if(requireNamespace("pander", quietly = TRUE)) library(pander)
-
-require_pander_ON = function(){
-  if(!requireNamespace("pander", quietly = TRUE)){
-    knitr::opts_chunk$set(eval = FALSE)
-    cat("Evaluation of the next chunks requires 'pander', which is not present.")
-  }
-}
-
-require_pander_OFF = function(){
-  knitr::opts_chunk$set(eval = TRUE)
-}
+is_pander = requireNamespace("pander", quietly = TRUE)
+if(is_pander) library(pander)
 
 library(fixest)
 setFixest_notes(FALSE)
@@ -35,11 +25,11 @@ setFixest_etable(digits = 3)
 
 `fixest` offers a tool, the function `etable`, to view estimation tables in `R` or export them to Latex. 
 
-The main advantage of this function is its simplicity: it is completely integrated with other `fixest` functions, making it exceedingly easy to export multiple estimation results with, say, different types of standard-errors. On the other hand, its main limitations are that *i)* only `fixest` objects can be exported, and *ii)* only Latex is supported. 
+The main advantage of this function is its simplicity: it is completely integrated with other `fixest` functions, making it exceedingly easy to export multiple estimation results with, say, different types of standard-errors. On the other hand, its main limitations are that *i)* only `fixest` objects can be exported, and *ii)* only Latex is supported (although the use of post-processing functions opens up a lot of possibilities). 
 
 It also offers a fair deal of customization, and since you can seamlessly change its default values, you can completely transform the style of your tables without modifying a single line of code. 
 
-Note that there exists excellent alternatives to export tables, like for instance [modelsummary](https://cran.r-project.org/package=modelsummary) or [texreg](https://cran.r-project.org/package=texreg); but they are, necessarily, less integrated with `fixest` objects, often necessiting more lines of code to export the same results. 
+Note that there exists excellent alternatives to export tables, like for instance [modelsummary](https://cran.r-project.org/package=modelsummary) (if you don't know it already, please do have a look, it's really great!); but they are less integrated with `fixest` objects, possibly necessitating more lines of code to export the same results. 
 
 This document does not describe `etable`'s arguments in details (the help page provides many examples). Rather, it illustrates some features that may be hidden at first sight.
 
@@ -68,7 +58,7 @@ est = feols(Ozone ~ Solar.R + sw0(Wind + Temp) | csw(Month, Day),
             airquality, cluster = ~Day)
 ```
 
-By default, when the argument `file` is missing, the function `etable` returns a `data.frame`. Let's see the ouput of the previous estimations:
+By default, when the argument `file` is missing, the function `etable` returns a `data.frame`. Let's see the output of the previous estimations:
 
 ```{r}
 etable(est)
@@ -93,12 +83,7 @@ In the previous example, the dependent variable and fixed-effects (FE) headers h
 
 Since the output of `etable` is a `data.frame`, any formatting function handling `data.frame`s can be leveraged. It is then very easy to integrate it into `etable`. Let's have an example with the package `pander`:
 
-```{r, echo = FALSE}
-require_pander_ON()
-```
-
-
-```{r}
+```{r, eval = is_pander}
 library(pander)
 
 etable(est, postprocess.df = pandoc.table.return, style = "rmarkdown")
@@ -111,7 +96,7 @@ What did it do? First, it called the function `pandoc.table.return` from within 
 
 One important feature of `etable` is that you can set the default values of almost all its arguments. This includes the postprocessing function. Let's change the default values of `style.df` and `postprocess.df`:
 
-```{r}
+```{r, eval = is_pander}
 my_style = style.df(depvar.title = "", fixef.title = "", 
                     fixef.suffix = " fixed effect", yesNo = "yes")
 setFixest_etable(style.df = my_style, postprocess.df = pandoc.table.return)
@@ -119,14 +104,9 @@ setFixest_etable(style.df = my_style, postprocess.df = pandoc.table.return)
 
 Since now `pandoc.table.return` is the default postprocessing, *all its arguments are added to `etable`*. So calls like that are valid even though `style` or `caption` are *not* arguments from `etable`:
 
-```{r}
+```{r, eval = is_pand, eval = is_pander}
 etable(est[rhs = 2], style = "rmarkdown", caption = "New default values")
 ```
-
-```{r, echo = FALSE}
-require_pander_OFF()
-```
-
 
 ## Exporting multiple estimations to Latex
 
@@ -234,16 +214,16 @@ Here is an example that will shortly be explained:
 
 ```{r}
 fitstat_register(type = "p_s", alias = "pvalue (standard)",
-                 fun = function(x) pvalue(x, se = "s")["Solar.R"])
+                 fun = function(x) pvalue(x, vcov = "iid")["Solar.R"])
 
 fitstat_register(type = "p_h", alias = "pvalue (Heterosk.)",
-                 fun = function(x) pvalue(x, se = "h")["Solar.R"])
+                 fun = function(x) pvalue(x, vcov = "hetero")["Solar.R"])
 
 fitstat_register(type = "p_day", alias = "pvalue (Day)",
-                 fun = function(x) pvalue(x, cluster = "Day")["Solar.R"])
+                 fun = function(x) pvalue(x, vcov = ~Day)["Solar.R"])
 
 fitstat_register(type = "p_month", alias = "pvalue (Month)",
-                 fun = function(x) pvalue(x, cluster = "Month")["Solar.R"])
+                 fun = function(x) pvalue(x, vcov = ~Month)["Solar.R"])
 
 # We first reset the default values set in the previous sections
 setFixest_etable(reset = TRUE)
@@ -258,13 +238,13 @@ Once these statistics are registered, they can seamlessly be summoned with the a
 
 ## Using external functions to export multiple results
 
-Thanks to contributors (namely Karl Dunkle Werner), `fixest` objects are compatible with [broom](https://broom.tidymodels.org/index.html) methods. This means that export functions building on `broom` can be leveraged, like for instance the excellent  [modelsummary](https://github.com/vincentarelbundock/modelsummary).
+Thanks to contributors (namely Karl Dunkle Werner), `fixest` objects are compatible with [broom](https://broom.tidymodels.org/index.html) methods. This means that export functions building on `broom` can be leveraged, like for instance the excellent [modelsummary](https://github.com/vincentarelbundock/modelsummary).
 
 In case you use external export tools, here are some tips.
 
 Multiple estimations, like the object `est` in the previous examples, are a bit special and `broom` methods can't apply directly. To export them, you first need to coerce the results into a list: by simply using `as.list(est)`.
 
-By default in `fixest` the estimations are separated from the calculation of the VCOV matrices. That's not a problem when using `etable` since, after providing the argument `se` or `cluster`, all VCOVs are calculated at once. Using other tools for exportation requires a call to `summary` for each model to compute the appropriate standard-errors. But this process can also be automatised. The function `.l()` can be used to coerce several `fixest` objects to which `summary` can then be applied, for example: 
+By default in `fixest` the estimations are separated from the calculation of the VCOV matrices. That's not a problem when using `etable` since, after providing the argument `se` or `cluster`, all VCOVs are calculated at once. Using other tools for exportation requires a call to `summary` for each model to compute the appropriate standard-errors. But this process can also be automatized. The function `.l()` can be used to coerce several `fixest` objects to which `summary` can then be applied, for example: 
 
 ```{r, eval = FALSE}
 summary(.l(est, est_slopes), cluster = ~ Month)

@@ -10,11 +10,12 @@
 \usage{
 etable(
   ...,
-  se = NULL,
-  dof = NULL,
-  cluster = NULL,
+  vcov = NULL,
   stage = 2,
   agg = NULL,
+  se = NULL,
+  ssc = NULL,
+  cluster = NULL,
   .vcov,
   .vcov_args = NULL,
   digits = 4,
@@ -95,11 +96,12 @@ getFixest_etable()
 
 esttable(
   ...,
-  se = NULL,
-  dof = NULL,
-  cluster = NULL,
+  vcov = NULL,
   stage = 2,
   agg = NULL,
+  se = NULL,
+  ssc = NULL,
+  cluster = NULL,
   .vcov,
   .vcov_args = NULL,
   digits = 4,
@@ -137,11 +139,12 @@ esttable(
 
 esttex(
   ...,
-  se = NULL,
-  dof = NULL,
-  cluster = NULL,
+  vcov = NULL,
   stage = 2,
   agg = NULL,
+  se = NULL,
+  ssc = NULL,
+  cluster = NULL,
   .vcov,
   .vcov_args = NULL,
   digits = 4,
@@ -184,15 +187,17 @@ esttex(
 \arguments{
 \item{...}{Used to capture different \code{fixest} estimation objects (obtained with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}). Note that any other type of element is discarded. Note that you can give a list of \code{fixest} objects.}
 
-\item{se}{Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "standard"}. Note that this argument can be implicitly deduced from the argument \code{cluster}.}
-
-\item{dof}{An object of class \code{dof.type} obtained with the function \code{\link[fixest]{dof}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{dof}} for this argument. The arguments and defaults of the function \code{\link[fixest]{dof}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "conventional"}, \code{t.df = "conventional"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{dof}} for details.}
-
-\item{cluster}{Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1", "var2")]}, \code{cluster = c("var1", "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster). You can interact two variables using \code{^} with the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.}
+\item{vcov}{Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from \code{\link[fixest]{vcov_cluster}}, \code{\link[fixest:vcov_hac]{vcov_NW}}, \code{\link[fixest:vcov_hac]{NW}}, \code{\link[fixest:vcov_hac]{vcov_DK}}, \code{\link[fixest:vcov_hac]{DK}}, \code{\link[fixest]{vcov_conley}} and \code{\link[fixest:vcov_conley]{conley}}. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the `vcov` documentation in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.}
 
 \item{stage}{Can be equal to \code{2} (default), \code{1}, \code{1:2} or \code{2:1}. Only used if the object is an IV estimation: defines the stage to which \code{summary} should be applied. If \code{stage = 1} and there are multiple endogenous regressors or if \code{stage} is of length 2, then an object of class \code{fixest_multi} is returned.}
 
 \item{agg}{A character scalar describing the variable names to be aggregated, it is pattern-based. All variables that match the pattern will be aggregated. It must be of the form \code{"(root)"}, the parentheses must be there and the resulting variable name will be \code{"root"}. You can add another root with parentheses: \code{"(root1)regex(root2)"}, in which case the resulting name is \code{"root1::root2"}. To name the resulting variable differently you can pass a named vector: \code{c("name" = "pattern")} or \code{c("name" = "pattern(root2)")}. It's a bit intricate sorry, please see the examples.}
+
+\item{se}{Character scalar. Which kind of standard error should be computed: \dQuote{standard}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are clusters in the estimation: \code{se = "cluster"}, otherwise \code{se = "iid"}. Note that this argument is deprecated, you should use \code{vcov} instead.}
+
+\item{ssc}{An object of class \code{ssc.type} obtained with the function \code{\link[fixest]{ssc}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{ssc}} for this argument. The arguments and defaults of the function \code{\link[fixest]{ssc}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "conventional"}, \code{t.df = "conventional"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{ssc}} for details.}
+
+\item{cluster}{Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1", "var2")]}, \code{cluster = c("var1", "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as fixed-effects in the estimation, you can leave it blank with \code{vcov = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] fixed-effect). You can interact two variables using \code{^} with the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.}
 
 \item{.vcov}{A function to be used to compute the standard-errors of each fixest object. You can pass extra arguments to this function using the argument \code{.vcov_args}. See the example.}
 
@@ -284,12 +289,14 @@ If \code{tex = TRUE}, the lines composing the Latex table are returned invisibly
 If \code{tex = FALSE}, the data.frame is directly returned. If the argument \code{file} is not missing, the \code{data.frame} is printed and returned invisibly.
 }
 \description{
-Aggregates the results of multiple estimations and displays them in the form of either a Latex table or a \code{data.frame}.
+Aggregates the results of multiple estimations and displays them in the form of either a Latex table or a \code{data.frame}. Note that you will need the \code{booktabs} package for the Latex table to render properly.
 }
 \details{
 The function \code{esttex} is equivalent to the function \code{etable} with argument \code{tex = TRUE}.
 
 The function \code{esttable} is equivalent to the function \code{etable} with argument \code{tex = FALSE}.
+
+To display the table, you will need the Latex package \code{booktabs} which contains the \code{\\toprule}, \code{\\midrule} and \code{\\bottomrule} commands.
 
 You can permanently change the way your table looks in Latex by using \code{setFixest_etable}. The following vignette gives an example as well as illustrates how to use the \code{style} and postprocessing functions: \href{https://lrberge.github.io/fixest/articles/exporting_tables.html}{Exporting estimation tables}.
 
@@ -338,7 +345,7 @@ If a list: then the elements must be either: a) a logical scalar, b) a vector of
 
 When a list, the elements of type a), b) and c) must have a name! Example: \code{extraline = list("Controls" = TRUE)} is good, \code{extraline = list(TRUE)} is bad. The name for element of type d) is optional. Example: \code{extraline = list("^^My F-stat" = ~f)} will add the row named \code{"My F-stat"} on top of the coefficients (for the placement, see the dedicated section), while \code{extraline = list(~f)} will add the F-stat row with its default name (\code{"F-test"}) at its default placement (below the coefficients).
 
-You can combine elements in the list, so that the following \code{extraline = list(~r2, "Controls" = TRUE), ~f+ivf} is valid.
+You can combine elements in the list, so that the following \code{extraline = list(~r2, "Controls" = TRUE, ~f+ivf)} is valid.
 }
 
 \section{Controlling the placement of extra lines}{
@@ -348,13 +355,13 @@ The arguments \code{group}, \code{extraline} and \code{fixef.group} allow to add
 
 But the placement can be customized. The previous example (of the controls) will be used for illustration (the mechanism for \code{extraline} and \code{fixef.group} is identical).
 
-The row names accept 2 special characters at the very start. The first governs the placement of the new line within the section: it can be equal to \code{"^"}, meaning first line, or \code{"_"}, meaning last line. The second character tells in which section the line should appear: it can be equal to \code{"^"}, \code{"-"}, or \code{"_"}, meaning respectively the coefficients, the fixed-effects and the statistics section (which typically appear at the top, mid and bottom of the table).
+The row names accept 2 special characters at the very start. The first character tells in which section the line should appear: it can be equal to \code{"^"}, \code{"-"}, or \code{"_"}, meaning respectively the coefficients, the fixed-effects and the statistics section (which typically appear at the top, mid and bottom of the table). The second one governs the placement of the new line within the section: it can be equal to \code{"^"}, meaning first line, or \code{"_"}, meaning last line.
 
-Let's have some examples. Using the previous example, writing \code{"^_Controls"} would place the new line in at the top of the statistics section. Writing \code{"_-Controls"} places it as the last row of the fixed-effects section; \code{"^^Controls"} at the top row of the coefficients section; etc...
+Let's have some examples. Using the previous example, writing \code{"_^Controls"} would place the new line at the top of the statistics section. Writing \code{"-_Controls"} places it as the last row of the fixed-effects section; \code{"^^Controls"} at the top row of the coefficients section; etc...
 
-On top of that there are shortcuts to avoid writing the two special characters. If only one special character is found, it is assumed to reflect the section, unless it corresponds to the default section, a case where the character then reflects the position within the section. An example will make it clear. Writing \code{"^Controls"} would place the line at the top of the coefficients section (since the default placement would have been this section). \code{"_Controls"} would place it at the bottom of the statistics section.
+The second character is optional, the default placement being in the bottom. This means that \code{"_Controls"} would place it at the bottom of the statistics section.
 
-The placement in \code{fixef.group} is defined similarly, only the default placement is different. Its default placement is at the top of the fixed-effects section. This means that the only difference with \code{group} and \code{extraline} is when a single special character is used. Here using, e.g., \code{"^My FEs"} would place the row at the bottom of the coefficients section, since \code{"^"} would refer to the section (and not the row within the section).
+The placement in \code{fixef.group} is defined similarly, only the default placement is different. Its default placement is at the top of the fixed-effects section.
 }
 
 \examples{
@@ -457,24 +464,21 @@ etable(est_all, est_sub1, est_sub2, est_sub3,
 
 # You can monitor the placement of the new lines with two special characters
 # at the beginning of the row name.
-# 1) "^" or "_" which mean first or last line of the section
-# 2) "^", "-" or "_" which mean the coefficients, the fixed-effects or the
+# 1) "^", "-" or "_" which mean the coefficients, the fixed-effects or the
 # statistics section.
+# 2) "^" or "_" which mean first or last line of the section
 #
-# Ex: starting with "^_" will place the line at the top of the stat. section
-#     starting with "_-" will place the line at the bottom of the FEs section
+# Ex: starting with "_^" will place the line at the top of the stat. section
+#     starting with "-_" will place the line at the bottom of the FEs section
 #     etc.
 #
-# You can use a single character which will represent the section, unless
-# it's
+# You can use a single character which will represent the section,
+# the line would then appear at the bottom of the section.
 
 # Examples
 etable(est_c0, est_c1, est_c2, group = list("_Controls" = "poly"))
 etable(est_all, est_sub1, est_sub2, est_sub3,
-       extraline = list("^Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
-# Note that since the default placement is the coefficients section,
-# a single "^" then refers to the position within the section. We end
-# up at the top of the coefficients section.
+       extraline = list("^^Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
 
 #
 # fixef.group
@@ -520,13 +524,14 @@ etable(est_0fe, est_2fe, fixef.group = list("_Dates" = "Month|Day"))
 # Using custom functions to compute the standard errors
 #
 
-# You can customize the way you compute the SEs with the argument .vcov
+# You can use external functions to compute the VCOVs
+# by feeding functions in the 'vcov' argument.
 # Let's use some covariances from the sandwich package
 
-etable(est_c0, est_c1, est_c2, .vcov = sandwich::vcovHC)
+etable(est_c0, est_c1, est_c2, vcov = sandwich::vcovHC)
 
-# To add extra arguments to vcovHC, you need to use .vcov_args
-etable(est_c0, est_c1, est_c2, .vcov = sandwich::vcovHC, .vcov_args = list(type = "HC0"))
+# To add extra arguments to vcovHC, you need to write your wrapper:
+etable(est_c0, est_c1, est_c2, vcov = function(x) sandwich::vcovHC(x, type = "HC0"))
 
 
 #
@@ -534,7 +539,7 @@ etable(est_c0, est_c1, est_c2, .vcov = sandwich::vcovHC, .vcov_args = list(type 
 #
 
 # You can change the fit statistics with the argument fitstat
-# and you can rename them with the dictionnary
+# and you can rename them with the dictionary
 etable(est1, est2, fitstat = ~ r2 + n + G)
 
 # If you use a formula, '.' means the default:
@@ -550,7 +555,7 @@ est = feols(Ozone ~ Solar.R + Wind + Temp, data = aq)
 #
 # Method 1: use summary
 
-s1 = summary(est, "standard")
+s1 = summary(est, "iid")
 s2 = summary(est, cluster = ~ Month)
 s3 = summary(est, cluster = ~ Day)
 s4 = summary(est, cluster = ~ Day + Month)
@@ -558,21 +563,29 @@ s4 = summary(est, cluster = ~ Day + Month)
 etable(list(s1, s2, s3, s4))
 
 #
-# Method 2: using a list in the argument 'cluster'
+# Method 2: using a list in the argument 'vcov'
 
 est_bis = feols(Ozone ~ Solar.R + Wind + Temp | Month, data = aq)
-etable(list(est, est_bis), cluster = list("standard", ~ Month))
+etable(est, est_bis, vcov = list("hetero", ~ Month))
+
+# When you have only one model, this model is replicated
+# along the elements of the vcov list.
+etable(est, vcov = list("hetero", ~ Month))
 
 #
-# Method 3: Using rep()
+# Method 3: Using "each" or "times" in vcov
 
-etable(rep(est, cluster = list("standard", ~ Month)))
+# If the first element of the list in 'vcov' is "each" or "times",
+# then all models will be replicated and all the VCOVs will be
+# applied to each model. The order in which they are replicated
+# are governed by the each/times keywords.
 
-# When using rep on 2 or more objects, you need to embed them in .l()
-etable(rep(.l(est, est_bis), cluster = list("standard", ~ Month, ~ Day)))
 
-# Using each to order differently
-etable(rep(.l(est, est_bis), each = 3, cluster = list("standard", ~ Month, ~ Day)))
+# each
+etable(est, est_bis, vcov = list("each", "iid", ~ Month, ~ Day))
+
+# times
+etable(est, est_bis, vcov = list("times", "iid", ~ Month, ~ Day))
 
 
 }
