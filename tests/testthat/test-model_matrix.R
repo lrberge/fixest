@@ -2,9 +2,10 @@ Bases <- datab16()
 base <- Bases[[1]]
 base_bis <- Bases[[2]]
 
-with_parameters_test_that("model.matrix removes NA correctly", {
+with_parameters_test_that("model.matrix removes NA correctly",
+  {
     fmlas <- xpd(lhs ~ x1 + x2 + x3, lhs = y_dep)
-    res <- fixest_mod_select(model = method, fmla =fmlas, base = base, famly = fmly)
+    res <- fixest_mod_select(model = method, fmla = fmlas, base = base, famly = fmly)
     m1 <- model.matrix(res, type = "lhs")
     expect_equal(length(m1), res$nobs)
 
@@ -16,21 +17,22 @@ with_parameters_test_that("model.matrix removes NA correctly", {
     X <- model.matrix(res, type = "rhs", data = base, na.rm = FALSE)
     obs_rm <- res$obs_selection$obsRemoved
 
-    if(method == "ols"){
-        res_bis <- lm.fit(X[obs_rm, ], y[obs_rm])
-    }else{
-        res_bis <- glm.fit(x = X[obs_rm, ], y = y[obs_rm], family = ev_par(paste0(fmly, "()") ) )
+    if (method == "ols") {
+      res_bis <- lm.fit(X[obs_rm, ], y[obs_rm])
+    } else {
+      res_bis <- glm.fit(x = X[obs_rm, ], y = y[obs_rm], family = ev_par(paste0(fmly, "()")))
     }
 
     expect_equal(res_bis$coefficients, res$coefficients)
-},
-.cases = model_matrix_cases()
+  },
+  .cases = model_matrix_cases()
 )
 
-with_parameters_test_that("model.matrix works properly with lagged variables", {
+with_parameters_test_that("model.matrix works properly with lagged variables",
+  {
     fmlas <- xpd(lhs ~ l(x1, 1:2) + x2 + x3, lhs = y_dep)
     # res_lag <- feols(y1 ~ l(x1, 1:2) + x2 + x3, base, panel = ~ id + time)
-    res_lag <- fixest_mod_select(model = method, fmla =fmlas, base = base, famly = fmly, panel = ~ id + time)
+    res_lag <- fixest_mod_select(model = method, fmla = fmlas, base = base, famly = fmly, panel = ~ id + time)
     m_lag <- model.matrix(res_lag)
     expect_equal(nrow(m_lag), nobs(res_lag))
 
@@ -44,18 +46,19 @@ with_parameters_test_that("model.matrix works properly with lagged variables", {
     expect_equal(ncol(mbis_lag_x1), 3)
     # 13 NAs: 2 per ID for the lags, 3 for x2
     expect_equal(nrow(mbis_lag_x1), 37)
-},
-.cases = model_matrix_cases()
+  },
+  .cases = model_matrix_cases()
 )
 
-with_parameters_test_that("model.matrix works properly with poly()", {
-    fmlas <- xpd(lhs ~ poly(x1,2), lhs = y_dep)
-    res_poly <- fixest_mod_select(model = method, fmla =fmlas, base = base, famly = fmly)
+with_parameters_test_that("model.matrix works properly with poly()",
+  {
+    fmlas <- xpd(lhs ~ poly(x1, 2), lhs = y_dep)
+    res_poly <- fixest_mod_select(model = method, fmla = fmlas, base = base, famly = fmly)
     m_poly_old <- model.matrix(res_poly)
     m_poly_new <- model.matrix(res_poly, base_bis)
     expect_equal(m_poly_old[1:50, 3], m_poly_new[, 3])
-},
-.cases = model_matrix_cases()
+  },
+  .cases = model_matrix_cases()
 )
 
 #### PROBLEMS AHEAD

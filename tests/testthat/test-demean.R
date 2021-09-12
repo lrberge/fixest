@@ -15,7 +15,6 @@ test_that("feols and demean produce same demean'd data", {
   expect_equal(base_new$ln_dist, as.numeric(b$X_demeaned))
 })
 
-
 # Now we just check there's no error
 
 # NAs

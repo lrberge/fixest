@@ -1,49 +1,50 @@
 base <- datab4()
-with_parameters_test_that("Standard, Clustered, HC and tw-way Clustered SE estimations are correct between fixest and stats", {
-  fixest_fmla <- xpd(lhs ~ x | grp + tm, lhs = y_dep)
-  est <- fixest_mod_select(model = model, fmla = fixest_fmla, base = base, famly = fmly)
+with_parameters_test_that("Standard, Clustered, HC and tw-way Clustered SE estimations are correct between fixest and stats",
+  {
+    fixest_fmla <- xpd(lhs ~ x | grp + tm, lhs = y_dep)
+    est <- fixest_mod_select(model = model, fmla = fixest_fmla, base = base, famly = fmly)
 
-  stats_fmla <- xpd(lhs ~ x + as.factor(grp) + as.factor(tm), lhs = y_dep)
-  est_bis <- stats_mod_select(model = model, fmla = stats_fmla, base = base, famly = fmly)
+    stats_fmla <- xpd(lhs ~ x + as.factor(grp) + as.factor(tm), lhs = y_dep)
+    est_bis <- stats_mod_select(model = model, fmla = stats_fmla, base = base, famly = fmly)
 
-  test_that("Clustered Standard Errors are equal between lm and sandwich", {
-    # Standard Errors
-    # vcov_fxt <- se(est, se = "standard")["x"]
-    vcov_fxt <- est$coeftable[,2]
-    vcov_sw <- unname(se(est_bis)["x"])
-    expect_equal2(vcov_fxt, vcov_sw, tol = 1e-6)
+    test_that("Clustered Standard Errors are equal between lm and sandwich", {
+      # Standard Errors
+      # vcov_fxt <- se(est, se = "standard")["x"]
+      vcov_fxt <- est$coeftable[, 2]
+      vcov_sw <- unname(se(est_bis)["x"])
+      expect_equal2(vcov_fxt, vcov_sw, tol = 1e-6)
 
-    # Clustered SE type HC0
-    vcov_fxt <- unname(se(est, dof = dof(adj = FALSE, fixef.K = "full")))
-    vcov_sw <- sqrt(sandwich::vcovCL(est_bis, cluster = base$grp, type = "HC0")["x", "x"])
-    expect_equal2(vcov_fxt, vcov_sw, tol = 1e-6) # Almost equal
+      # Clustered SE type HC0
+      vcov_fxt <- unname(se(est, dof = dof(adj = FALSE, fixef.K = "full")))
+      vcov_sw <- sqrt(sandwich::vcovCL(est_bis, cluster = base$grp, type = "HC0")["x", "x"])
+      expect_equal2(vcov_fxt, vcov_sw, tol = 1e-6) # Almost equal
 
-    # Clusteres SE type HC1
-    vcov_fxt <- unname(se(est, dof = dof(fixef.K = "full")))
-    vcov_sw <- sqrt(sandwich::vcovCL(est_bis, cluster = base$grp, type = "HC1")["x", "x"])
-    expect_equal2(vcov_fxt, vcov_sw, tol = 1e-6) # Almost equal
-  })
+      # Clusteres SE type HC1
+      vcov_fxt <- unname(se(est, dof = dof(fixef.K = "full")))
+      vcov_sw <- sqrt(sandwich::vcovCL(est_bis, cluster = base$grp, type = "HC1")["x", "x"])
+      expect_equal2(vcov_fxt, vcov_sw, tol = 1e-6) # Almost equal
+    })
 
-  ### Heteroskedasticity-robust
-  test_that("Heterscoedastcity-robus Standard Errors are equal between feols and sandwich", {
-    vcov_fxt <- unname(se(est, se = "hetero", dof = dof(adj = FALSE, cluster.adj = FALSE)))
-    vcov_sw <- sqrt(sandwich::vcovHC(est_bis, type = "HC0")["x", "x"])
-    expect_equal2(vcov_fxt, vcov_sw, tol = 1e-5)
+    ### Heteroskedasticity-robust
+    test_that("Heterscoedastcity-robus Standard Errors are equal between feols and sandwich", {
+      vcov_fxt <- unname(se(est, se = "hetero", dof = dof(adj = FALSE, cluster.adj = FALSE)))
+      vcov_sw <- sqrt(sandwich::vcovHC(est_bis, type = "HC0")["x", "x"])
+      expect_equal2(vcov_fxt, vcov_sw, tol = 1e-5)
 
-    vcov_fxt <- unname(se(est, se = "hetero"))
-    vcov_sw <- sqrt(sandwich::vcovHC(est_bis, type = "HC1")["x", "x"])
-    expect_equal2(vcov_fxt, vcov_sw, tol = 1e-5)
-  })
+      vcov_fxt <- unname(se(est, se = "hetero"))
+      vcov_sw <- sqrt(sandwich::vcovHC(est_bis, type = "HC1")["x", "x"])
+      expect_equal2(vcov_fxt, vcov_sw, tol = 1e-5)
+    })
 
-  ### Two-way clustered standard errors
-  test_that("Two-way Clustered Standard Errors are equal between feols and sandwich", {
-    vcov_fxt <- unname(se(est, se = "twoway", dof = dof(fixef.K = "full", cluster.df = "conv")))
-    vcov_sw <- sqrt(sandwich::vcovCL(est_bis, cluster = ~ grp + tm, type = "HC1")["x", "x"])
-    expect_equal2(vcov_fxt, vcov_sw, tol = 1e-5)
-  })
-  expect_equal(1,1)
-},
-.cases = SE_cases()[1:6,]
+    ### Two-way clustered standard errors
+    test_that("Two-way Clustered Standard Errors are equal between feols and sandwich", {
+      vcov_fxt <- unname(se(est, se = "twoway", dof = dof(fixef.K = "full", cluster.df = "conv")))
+      vcov_sw <- sqrt(sandwich::vcovCL(est_bis, cluster = ~ grp + tm, type = "HC1")["x", "x"])
+      expect_equal2(vcov_fxt, vcov_sw, tol = 1e-5)
+    })
+    expect_equal(1, 1)
+  },
+  .cases = SE_cases()[1:6, ]
 )
 
 
@@ -53,7 +54,7 @@ test_that("cluster = data vs cluster = formula works properly", {
   for (k in 1:3) {
     est_pois <- femlm(Euros ~ log(dist_km) | Origin + Destination, vcov_db(k))
     expect_equal_vcov(est_pois)
-    expect_equal(1,1)
+    expect_equal(1, 1)
   }
 })
 

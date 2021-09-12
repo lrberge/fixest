@@ -4,7 +4,8 @@ names(base) <- c("y", "x1", "x2", "x3", "species")
 base$y_int <- as.integer(base$y)
 base$y_log <- sample(c(TRUE, FALSE), 150, TRUE)
 
-## Database used for test-fitting.R
+# Data used for test-fitting.R ----
+
 datab <- function() {
   set.seed(0)
   base <- iris
@@ -26,27 +27,8 @@ datab <- function() {
   return(base)
 }
 
-datab <- function(){
-  set.seed(0)
-  base = iris
-  names(base) = c("y", "x1", "x2", "x3", "species")
-  base$fe_2 = rep(1:5, 30)
-  base$fe_3 = sample(15, 150, TRUE)
-  base$constant = 5
-  base$y_int = as.integer(base$y)
-  base$w = as.vector(unclass(base$species) - 0.95)
-  base$offset_value = unclass(base$species) - 0.95
-  base$y_01 = 1 * ((scale(base$x1) + rnorm(150)) > 0)
-  # what follows to avoid removal of fixed-effects (logit is pain in the neck)
-  base$y_01[1:5 + rep(c(0, 50, 100), each = 5)] = 1
-  base$y_01[6:10 + rep(c(0, 50, 100), each = 5)] = 0
-  # We enforce the removal of observations
-  base$y_int_null = base$y_int
-  base$y_int_null[base$fe_3 %in% 1:5] = 0
-  return(base)
-}
+# Data used for test-nointercept.R ----
 
-# database used for test-nointercept.R
 datab2 <- function() {
   set.seed(0)
   base$y_r <- round(base$y)
@@ -64,7 +46,8 @@ datab2 <- function() {
   return(base)
 }
 
-# Database used for test-vcov.R
+# Data used for test-vcov.R ----
+
 datab3 <- function() {
   # We create "irregular" FEs
   set.seed(0)
@@ -76,7 +59,7 @@ datab3 <- function() {
   return(base)
 }
 
-# Database used for test-sandwich.R
+# Data used for test-sandwich.R ----
 datab4 <- function() {
   set.seed(0)
   N <- 20
@@ -93,7 +76,8 @@ datab5 <- function() {
   return(base)
 }
 
-# database for test-fixef.R
+# Data used for test-fixef.R ----
+
 datab6 <- function() {
   set.seed(0)
   base$x4 <- rnorm(150) + 0.25 * base$y
@@ -102,7 +86,7 @@ datab6 <- function() {
   return(base)
 }
 
-# database for test-collinearity.R
+# database for test-collinearity.R ----
 datab7 <- function() {
   base$constant <- 5
   base$y_int <- as.integer(base$y)
@@ -118,7 +102,8 @@ datab8 <- function() {
   return(base)
 }
 
-# Database for test-demean.R
+# Data used for test-demean.R ----
+
 datab9 <- function() {
   data(trade)
   base <- trade
@@ -127,7 +112,8 @@ datab9 <- function() {
   return(base)
 }
 
-# Database for test-hatvalues.R
+# Data used for test-hatvalues.R ----
+
 datab10 <- function() {
   set.seed(0)
   x <- sin(1:10)
@@ -137,7 +123,8 @@ datab10 <- function() {
   return(data.frame(y = y, y_int = y_int, y_01 = y_01, x))
 }
 
-# Database for test-subset.R
+# Data used for test-subset.R ----
+
 datab11 <- function() {
   set.seed(5)
   base <- iris
@@ -150,7 +137,8 @@ datab11 <- function() {
   return(base)
 }
 
-# Database for test-lagging.R
+# Data used for test-lagging.R ----
+
 datab12 <- function() {
   data(base_did)
   base <- base_did
@@ -189,7 +177,8 @@ datab12 <- function() {
   return(base)
 }
 
-# database function for test-predict.R
+# Data used for test-predict.R ----
+
 datab13 <- function() {
   set.seed(0)
   base <- iris
@@ -224,7 +213,8 @@ datab15 <- function() {
   return(base)
 }
 
-# Database for test-model_matrix.R
+# Data used for test-model_matrix.R ----
+
 datab16 <- function() {
   set.seed(0)
   base <- iris
@@ -248,19 +238,20 @@ datab16 <- function() {
   base_bis$time <- rep(1:10, 5)
 
   # for glm models:
-  base$y_int = round(base$y1)
+  base$y_int <- round(base$y1)
   return(list(base, base_bis))
 }
 
-# Database for test-nonlinear.R
-datab17 <- function(){
+# Data used for test-nonlinear.R ----
+
+datab17 <- function() {
   base$tab <- c("versicolor" = 5, "setosa" = 0, "virginica" = -5)
   base$tab2 <- base$tab[base$species]
   base$var_spec <- as.numeric(base$tab[base$species])
   return(base)
 }
 
-datab18 <- function(){
+datab18 <- function() {
   base$fe1 <- base$species
   base$fe2 <- rep(1:5, 30)
   base$y[1:5] <- NA
@@ -274,6 +265,7 @@ datab18 <- function(){
   base$x_cst <- 1
   return(base)
 }
+
 ev_par <- function(string) {
   eval(parse(text = string))
 }
@@ -461,7 +453,8 @@ fenegbin_cases <- function() {
   return(DF)
 }
 
-## Case function for test-fitmethod.R
+# Case function for test-fitmethod.R ----
+
 fitmethod_cases <- function() {
   y_dep <- c("base$y", "base$y_int", "base$y_log")
   y_dep <- c("y", "y_int", "y_log")
@@ -552,21 +545,24 @@ vcov_cases3 <- function() {
   return(DF)
 }
 
-vcov_cases4 <- function(){
-  method <- c("ols", rep("glm",4))
+vcov_cases4 <- function() {
+  method <- c("ols", rep("glm", 4))
   fmly <- c("NULL", "poisson", "quasipoisson", "Gamma", "binomial")
   y_dep <- c("y", "y_int", "y_int", "y", "y_01")
 
-  DF <- data.frame(method = method,
-                   fmly = fmly,
-                   y_dep = y_dep)
+  DF <- data.frame(
+    method = method,
+    fmly = fmly,
+    y_dep = y_dep
+  )
   DF$test_name <- paste(method, fmly, y_dep, sep = " - ")
   DF$test_name <- paste0(1:dim(DF)[1], "1)", DF$test_name)
 
   return(DF)
 }
 
-# Function for test-vcov.R
+# Function for test-vcov.R ----
+
 V_matrix <- function(M_i, M_t, M_it, c_adj, cdf) {
   if (c_adj) {
     if (cdf == "min") {
@@ -580,7 +576,8 @@ V_matrix <- function(M_i, M_t, M_it, c_adj, cdf) {
   return(V)
 }
 
-## Database function for test-sandwich.R
+# Data function for test-sandwich.R ----
+
 vcov_db <- function(k) {
   data(trade)
   if (k == 1) {
@@ -605,26 +602,33 @@ vcov_db <- function(k) {
   }
 }
 
-## Case function for test-sandwich.R
-SE_cases <- function(){
-  model <- c("ols", rep("glm",4), rep("femlm",2))
-  y_dep <- c("y",
-             rep("y_int",3), "y",
-             "y_int", "y")
+# Case function for test-sandwich.R ----
 
-  fmly <- c("NULL",
-            "Gamma", "poisson", "quasipoisson", "gaussian",
-            "poisson", "gaussian")
+SE_cases <- function() {
+  model <- c("ols", rep("glm", 4), rep("femlm", 2))
+  y_dep <- c(
+    "y",
+    rep("y_int", 3), "y",
+    "y_int", "y"
+  )
 
-  DF <- data.frame(y_dep = y_dep,
-                   model = model,
-                   fmly = fmly)
+  fmly <- c(
+    "NULL",
+    "Gamma", "poisson", "quasipoisson", "gaussian",
+    "poisson", "gaussian"
+  )
+
+  DF <- data.frame(
+    y_dep = y_dep,
+    model = model,
+    fmly = fmly
+  )
 
   DF$test_name <- paste(model, fmly, y_dep, sep = " - ")
   return(DF)
 }
 
-## Cases function for test-nointercept.R
+# Case function for test-nointercept.R ----
 
 nointercept_cases <- function() {
   f_rhs <- c(
@@ -635,7 +639,7 @@ nointercept_cases <- function() {
 
   DF_l <- list()
   # OLS
-  DF_l[[1]] <-data.frame(
+  DF_l[[1]] <- data.frame(
     fmly = "NULL",
     f_rhs = f_rhs,
     method = "ols",
@@ -643,16 +647,20 @@ nointercept_cases <- function() {
   )
 
   # GLM - FEMLM
-  fmly = c("poisson", "gaussian", "Gamma")
-  df_aux <- expand.grid(f_rhs = f_rhs,
-                        fmly = fmly,
-                        method = c("glm", "femlm"),
-                        stringsAsFactors = FALSE)
-  df_ydep <- data.frame(fmly = fmly,
-                        y_dep = c("y", "y_r", "y_r"))
+  fmly <- c("poisson", "gaussian", "Gamma")
+  df_aux <- expand.grid(
+    f_rhs = f_rhs,
+    fmly = fmly,
+    method = c("glm", "femlm"),
+    stringsAsFactors = FALSE
+  )
+  df_ydep <- data.frame(
+    fmly = fmly,
+    y_dep = c("y", "y_r", "y_r")
+  )
   DF <- merge(df_aux, df_ydep, by = "fmly", all.x = TRUE)
-  DF <- DF[sort(DF$method, index.return = TRUE)$ix,]
-  DF_l[[2]] <- DF[!(DF$fmly == "Gamma" & DF$method == "femlm"),]
+  DF <- DF[sort(DF$method, index.return = TRUE)$ix, ]
+  DF_l[[2]] <- DF[!(DF$fmly == "Gamma" & DF$method == "femlm"), ]
 
   ## negbin
   DF_l[[3]] <- data.frame(
@@ -707,7 +715,8 @@ fixest_mod_select <- function(model, fmla, base, famly = NULL, ...) {
   }
 }
 
-### Cases for test-residuals.R
+# Cases for test-residuals.R ----
+
 residuals_cases <- function() {
   method <- c("ols", "glm", "femlm", "negbin")
   formula_fe <- "y_int ~ x1 | species"
@@ -717,30 +726,34 @@ residuals_cases <- function() {
   wghts <- c("NULL", "base$w")
 
   DF_l <- list()
-  for(k in 1:4){
+  for (k in 1:4) {
     Famly <- fmly
     Wghts <- wghts
     if (method[k] %in% c("negbin", "ols")) Famly <- "NULL"
     if (method[k] == "negbin") Wghts <- "NULL"
     if (method[k] == "femlm") Famly <- fmly_mlm
 
-    DF_l[[k]] <- expand.grid(method = method[k],
-                             formula_fe = formula_fe,
-                             formula_stats = formula_stats,
-                             weights = Wghts,
-                             family = Famly,
-                             stringsAsFactors = FALSE)
+    DF_l[[k]] <- expand.grid(
+      method = method[k],
+      formula_fe = formula_fe,
+      formula_stats = formula_stats,
+      weights = Wghts,
+      family = Famly,
+      stringsAsFactors = FALSE
+    )
   }
 
   DF <- do.call("rbind", DF_l)
   DF$test_name <- paste(DF$method,
-                        paste("weight:", DF$weights),
-                        sep = " - ")
+    paste("weight:", DF$weights),
+    sep = " - "
+  )
   DF$test_name <- paste0(seq(1, dim(DF)[1]), ") ", DF$test_name)
   return(DF)
 }
 
-### test-fixef.R helper functinos
+# test-fixef.R helper functions ----
+
 get_coef <- function(all_coef, x) {
   res <- all_coef[grepl(x, names(all_coef), perl = TRUE)]
   names(res) <- gsub(x, "", names(res), perl = TRUE)
@@ -767,7 +780,9 @@ fixef.strings <- function() {
 
   return(list(AuxL1, AuxL2))
 }
-#### fixef cases for test-fixef.R
+
+# fixef cases for test-fixef.R ----
+
 fixef_cases <- function() {
   Fmlas1 <- c(
     "y ~ x1 + x2 | species + fe_bis",
@@ -799,14 +814,15 @@ fixef_cases <- function() {
   return(DF)
 }
 
-### Cases function for test-collinearity.R
+# Case function for test-collinearity.R ----
+
 collin_cases2 <- function() {
   useWeights <- c("NULL", "base$w") # c(FALSE, TRUE)
   model <- c("ols", "glm", "femlm")
   use_fe <- c(FALSE, TRUE)
-  fmly <- c("poisson", "Gamma") #, "quasipoisson", "Gamma", "binomial")
+  fmly <- c("poisson", "Gamma") # , "quasipoisson", "Gamma", "binomial")
   DF_l <- list()
-  for(k in 1:length(model)){
+  for (k in 1:length(model)) {
     Fmly <- fmly
     UseWeights <- useWeights
     if (model[k] == "ols") Fmly <- "NULL"
@@ -814,19 +830,22 @@ collin_cases2 <- function() {
       UseWeights <- "NULL"
       Fmly <- c("poisson", "negbin")
     }
-    df_aux = expand.grid(useWeights = UseWeights,
-                         ID = c(1,2),
-                         model = model[k],
-                         fmly = Fmly,
-                         stringsAsFactors = FALSE)
+    df_aux <- expand.grid(
+      useWeights = UseWeights,
+      ID = c(1, 2),
+      model = model[k],
+      fmly = Fmly,
+      stringsAsFactors = FALSE
+    )
 
-    df_fmla <- data.frame(ID = c(1,2),
-                          use_fe = use_fe,
-                          fixest_formula1 = c("x1 + constant", "x1 + constant | species"),
-                          stats_formula2 = c("x1 + constant", "x1 + constant + species"))
+    df_fmla <- data.frame(
+      ID = c(1, 2),
+      use_fe = use_fe,
+      fixest_formula1 = c("x1 + constant", "x1 + constant | species"),
+      stats_formula2 = c("x1 + constant", "x1 + constant + species")
+    )
 
     DF_l[[k]] <- merge(df_aux, df_fmla, by = "ID", all.x = TRUE)[-1] # deleting ID
-
   }
   DF <- do.call("rbind", DF_l)
 
@@ -837,24 +856,28 @@ collin_cases2 <- function() {
   return(DF)
 }
 
+# Case function for test-hatvalues.R ----
 
-## Cases function for test-hatvalues.R
 hatvalues_cases <- function() {
   model <- c("ols", rep("glm", 6))
-  formulas <- c("y ~ x",
-                "y_int ~ x",
-                "y_int ~ x",
-                "y ~ x",
-                "y_int ~ x",
-                "y_01 ~ x",
-                "y_01 ~ x")
-  family <- c("NULL",
-              "poisson",
-              "quasipoisson",
-              "gaussian",
-              "Gamma",
-              "binomial",
-              "quasibinomial")
+  formulas <- c(
+    "y ~ x",
+    "y_int ~ x",
+    "y_int ~ x",
+    "y ~ x",
+    "y_int ~ x",
+    "y_01 ~ x",
+    "y_01 ~ x"
+  )
+  family <- c(
+    "NULL",
+    "poisson",
+    "quasipoisson",
+    "gaussian",
+    "Gamma",
+    "binomial",
+    "quasibinomial"
+  )
 
   return(data.frame(
     model = model,
@@ -864,8 +887,8 @@ hatvalues_cases <- function() {
   ))
 }
 
+# Case function for test-sandwich.R ----
 
-## Cases function for test-sandwhich.R
 sandwcomp_cases <- function() {
   model <- c("ols", "ols", "glm", "glm", "glm", "glm")
   family <- c("NULL", "NULL", "poisson", "poisson", "Gamma", "Gamma")
@@ -924,37 +947,48 @@ subset_cases <- function() {
   return(DF)
 }
 
-# case function for test-lagging.R
+# Case function for test-lagging.R ----
+
 lagging_cases <- function() {
   p <- c("period", "period_txt", "period_date")
   DF_l <- list()
   # OLS
-  DF_l[[1]] <- expand.grid(p = p,
-                           depvar = c("y", "y_na"),
-                           fmly = "NULL",
-                           method = "ols",
-                           stringsAsFactors = FALSE )
+  DF_l[[1]] <- expand.grid(
+    p = p,
+    depvar = c("y", "y_na"),
+    fmly = "NULL",
+    method = "ols",
+    stringsAsFactors = FALSE
+  )
 
   # GLM
   fmly <- c("poisson", "quasipoisson", "Gamma", "gaussian")
-  y_dep_glm <-c("y_0", "y_0", "y_00", "y")
-  df_aux <- expand.grid(p = p,
-                        fmly = fmly,
-                        method = "glm",
-                        stringsAsFactors = FALSE)
-  df_dep <- data.frame(fmly = fmly,
-                       depvar = y_dep_glm)
+  y_dep_glm <- c("y_0", "y_0", "y_00", "y")
+  df_aux <- expand.grid(
+    p = p,
+    fmly = fmly,
+    method = "glm",
+    stringsAsFactors = FALSE
+  )
+  df_dep <- data.frame(
+    fmly = fmly,
+    depvar = y_dep_glm
+  )
   DF_l[[2]] <- merge(df_aux, df_dep, by = "fmly", all.x = TRUE)
 
   # FEMLM
   fmly <- c("poisson", "gaussian")
-  y_dep <-c("y_0", "y")
-  df_aux <- expand.grid(p = p,
-                        fmly = fmly,
-                        method = "femlm",
-                        stringsAsFactors = FALSE)
-  df_dep <- data.frame(fmly = fmly,
-                       depvar = y_dep)
+  y_dep <- c("y_0", "y")
+  df_aux <- expand.grid(
+    p = p,
+    fmly = fmly,
+    method = "femlm",
+    stringsAsFactors = FALSE
+  )
+  df_dep <- data.frame(
+    fmly = fmly,
+    depvar = y_dep
+  )
   DF_l[[3]] <- merge(df_aux, df_dep, by = "fmly", all.x = TRUE)
 
   DF <- do.call("rbind", DF_l)
@@ -963,9 +997,8 @@ lagging_cases <- function() {
   return(DF)
 }
 
+# Case function for test-predict.R ----
 
-
-### cases function for test-predict.R
 predict_cases <- function() {
   y_dep <- c("y")
   fmlas <- c("x1 | species + fe_bis", "x1 | species + fe_bis[x3]", "x1 + i(species)", "x1 + i(species) + i(fe_bis)")
@@ -975,33 +1008,35 @@ predict_cases <- function() {
   DF_l <- list()
   for (k in 1:length(method)) {
     Fmlas <- switch(method[k],
-                    "femlm" = fmlas[-2], # without varying slope
-                    fmlas
+      "femlm" = fmlas[-2], # without varying slope
+      fmlas
     )
     Fmly <- switch(method[k],
-                   "ols" = "NULL",
-                   "glm" = fmly_glm,
-                   "femlm" = fmly_mlm
+      "ols" = "NULL",
+      "glm" = fmly_glm,
+      "femlm" = fmly_mlm
     )
 
-    DF_l[[k]] <- expand.grid(fmlas = Fmlas,
-                             y_dep = y_dep,
-                             fmly = Fmly,
-                             method = method[k],
-                             stringsAsFactors = FALSE)
+    DF_l[[k]] <- expand.grid(
+      fmlas = Fmlas,
+      y_dep = y_dep,
+      fmly = Fmly,
+      method = method[k],
+      stringsAsFactors = FALSE
+    )
   }
 
   DF <- do.call("rbind", DF_l)
 
   DF$tol <- 1e-12
   DF$tol[DF$fmlas == "x1 | species + fe_bis[x3]"] <- 1e-3
-  DF$test_name <- paste(DF$method, DF$fmly, paste("formula",DF$fmlas), sep = " - ")
+  DF$test_name <- paste(DF$method, DF$fmly, paste("formula", DF$fmlas), sep = " - ")
   DF$test_name <- paste(seq(1, dim(DF)[1]), DF$test_name, sep = ") ")
   return(DF)
 }
 
+# Case function for test-multiple.R ----
 
-# case function for test-multiple.R
 multiple_cases <- function(met = c("ols", "glm", "femlm", "feNmlm"), famly = "poisson") {
   method <- met
   fmly <- famly
@@ -1017,7 +1052,10 @@ multiple_cases <- function(met = c("ols", "glm", "femlm", "feNmlm"), famly = "po
 
   DF_l <- list()
   for (k in 1:length(method)) {
-    Fmly <- switch(method[k], "ols" = "NULL", fmly)
+    Fmly <- switch(method[k],
+      "ols" = "NULL",
+      fmly
+    )
 
     DF_l[[k]] <- data.frame(
       method = method[k],
@@ -1054,7 +1092,10 @@ multiple_cases2 <- function(met = c("ols", "glm", "femlm", "feNmlm"), famly = "p
 
   DF_l <- list()
   for (k in 1:length(method)) {
-    Fmly <- switch(method[k], "ols" = "NULL", fmly)
+    Fmly <- switch(method[k],
+      "ols" = "NULL",
+      fmly
+    )
 
     DF_l[[k]] <- data.frame(
       method = method[k],
@@ -1071,15 +1112,17 @@ multiple_cases2 <- function(met = c("ols", "glm", "femlm", "feNmlm"), famly = "p
   return(DF)
 }
 
+# Case function fo test-model_matrix.R ----
 
-# Case function fo test-model_matrix.R
-model_matrix_cases <- function(){
+model_matrix_cases <- function() {
   method <- c("ols", "glm", "femlm")
   fmly <- c("NULL", "poisson", "poisson")
   y_dep <- c("y1", "y_int", "y_int")
-  DF <- data.frame(method = method,
-                   fmly = fmly,
-                   y_dep = y_dep)
+  DF <- data.frame(
+    method = method,
+    fmly = fmly,
+    y_dep = y_dep
+  )
   DF$test_name <- paste(method, fmly, y_dep, sep = " - ")
   return(DF)
 }
