@@ -79,7 +79,7 @@
   
 ## etable
 
- - new argument `interaction.order` to control the order in which interacted variables are displayed (feature request by @ [#182](https://github.com/lrberge/fixest/issues/182)).
+ - new argument `interaction.order` to control the order in which interacted variables are displayed (feature request by @inkrement [#120](https://github.com/lrberge/fixest/issues/120)).
  
  - new argument `i.equal` to control how the values taken by factor variables created with `i()` are displayed.
 
