@@ -2229,9 +2229,9 @@ etable_internal_latex = function(info){
     for(i in 1:length(nb_multi)){
         if(nb_multi[i] == 1){
             # no multi column
-            first_line = paste0(first_line, "&", names_multi[i])
+            first_line = paste0(first_line, " & ", names_multi[i])
         } else {
-            first_line = paste0(first_line, "&\\multicolumn{", nb_multi[i], "}{c}{", names_multi[i], "}")
+            first_line = paste0(first_line, " & \\multicolumn{", nb_multi[i], "}{c}{", names_multi[i], "}")
         }
     }
     first_line = paste0(first_line, "\\\\\n")
@@ -2271,7 +2271,7 @@ etable_internal_latex = function(info){
     } else {
         model_format = paste0("(", 1:n_models, ")")
     }
-    model_line = paste0(escape_latex(style$model.title), "&", paste0(model_format, collapse = " & "), "\\\\\n")
+    model_line = paste0(escape_latex(style$model.title), " & ", paste0(model_format, collapse = " & "), "\\\\\n")
 
     # a simple line with only "variables" written in the first cell
     if(nchar(style$var.title) == 0){
@@ -2279,7 +2279,7 @@ etable_internal_latex = function(info){
     } else if(style$var.title == "\\midrule"){
         coef_title = "\\midrule "
     } else {
-        coef_title = paste0(escape_latex(style$var.title), "& ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
+        coef_title = paste0(escape_latex(style$var.title), " & ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
     }
 
     # Coefficients, the tricky part
@@ -2290,7 +2290,6 @@ etable_internal_latex = function(info){
     for(vars in var_list){
         all_vars = c(all_vars, vars[!vars %in% all_vars])
     }
-    # all_vars <- unique(unlist(var_list))
 
     for(i in seq_along(group)){
         gi = group[[i]]
@@ -2334,7 +2333,7 @@ etable_internal_latex = function(info){
             myCoef[is.na(myCoef)] = "  "
             mySd[is.na(mySd)] = "  "
             myCoef = paste0(aliasVars[v], " & ", paste0(myCoef, collapse = " & "))
-            mySd = paste0("  &", paste0(mySd, collapse = " & "))
+            mySd = paste0("  & ", paste0(mySd, collapse = " & "))
             myLines = paste0(myCoef, "\\\\\n", mySd, "\\\\\n")
             coef_lines = c(coef_lines, myLines)
         }
@@ -2356,7 +2355,7 @@ etable_internal_latex = function(info){
         } else if(style$fixef.title == "\\midrule"){
             fixef_title = "\\midrule "
         } else {
-            fixef_title = paste0(escape_latex(style$fixef.title), "& ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
+            fixef_title = paste0(escape_latex(style$fixef.title), " & ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
         }
 
         # The number of FEs
@@ -2406,7 +2405,7 @@ etable_internal_latex = function(info){
         }
 
         all_fe = cbind(fe_names, all_fe)
-        FE_lines <- paste0(paste0(apply(all_fe, 1, paste0, collapse = " & "), collapse="\\\\\n"), "\\\\\n")
+        FE_lines = paste0(paste0(apply(all_fe, 1, paste0, collapse = " & "), collapse="\\\\\n"), "\\\\\n")
 
     } else {
         FE_lines = NULL
@@ -2424,7 +2423,7 @@ etable_internal_latex = function(info){
         } else if(style$slopes.title == "\\midrule"){
             slope_intro = "\\midrule "
         } else {
-            slope_intro = paste0(escape_latex(style$slopes.title), "& ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
+            slope_intro = paste0(escape_latex(style$slopes.title), " & ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
         }
 
         # reformat the yes/no slope
@@ -2477,7 +2476,7 @@ etable_internal_latex = function(info){
 
     # information on family
     if(family){
-        info_family <- paste0(" &  ", paste(family_list, collapse = " & "), "\\\\\n")
+        info_family = paste0(" &  ", paste(family_list, collapse = " & "), "\\\\\n")
     } else {
         info_family = ""
     }
@@ -2524,7 +2523,7 @@ etable_internal_latex = function(info){
             coefstat_sentence = "Co-variance"
         }
 
-        info_muli_se = paste0(coefstat_sentence, "& ", paste(all_se_type, collapse = "&"), "\\\\\n")
+        info_muli_se = paste0(coefstat_sentence, " & ", paste(all_se_type, collapse = " & "), "\\\\\n")
 
         if(add_signif){
             info_SD = paste0(escape_latex(style$tablefoot.title), sd_intro, "Signif. Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
@@ -2562,7 +2561,7 @@ etable_internal_latex = function(info){
         } else if(style$stats.title == "\\midrule"){
             stat_title = "\\midrule "
         } else {
-            stat_title = paste0(escape_latex(style$stats.title), "& ", paste(rep(" ", n_models), collapse = "&"), "\\\\\n")
+            stat_title = paste0(escape_latex(style$stats.title), " & ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
         }
 
         stat_lines = paste0(nb_FE_lines, info_convergence, info_muli_se)
@@ -2575,7 +2574,7 @@ etable_internal_latex = function(info){
                 fit = sapply(fitstat_list, function(x) x[[fit_id]])
                 if(all(is.na(fit))) next
                 fit[is.na(fit)] = ""
-                stat_lines = paste0(stat_lines, fit_names[fit_id], " & ", paste0(fit, collapse = "&"), "\\\\\n")
+                stat_lines = paste0(stat_lines, fit_names[fit_id], " & ", paste0(fit, collapse = " & "), "\\\\\n")
             }
         }
     } else {
@@ -2799,7 +2798,6 @@ etable_internal_df = function(info){
 
     depvar_list = dict_apply(unlist(depvar_list), dict)
 
-    # all_vars <- unique(c(var_list, recursive=TRUE))
     # we need to loop not to lose names
     all_vars = c()
     for(vars in var_list){
