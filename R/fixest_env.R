@@ -1705,6 +1705,12 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     # Fixed-effects ####
     #
 
+    msg_NA_multi = ""
+    if(multi_lhs || multi_rhs || multi_fixef){
+        msg_NA_multi = " [This msg only concerns the variables common to all estimations.]"
+    }
+
+
     if(debug) cat(" - Fixed-effects\n")
 
     # NOTA on stepwise FEs:
@@ -1893,7 +1899,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
             if(anyNA_sample){
                 msg = msg_na_inf(ANY_NA, ANY_INF)
-                message_NA = paste0(numberFormatNormal(nbNA), " observation", plural(nbNA), " removed because of ", msg, " (", msg_details, ").")
+                message_NA = paste0(numberFormatNormal(nbNA), " observation", plural(nbNA), " removed because of ", msg, " (", msg_details, ").", msg_NA_multi)
                 notes = c(notes, message_NA)
             }
 
@@ -1910,7 +1916,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                 if(nbNA == nobs){
                     if(anyNA_sample){
                         msg = msg_na_inf(ANY_NA, ANY_INF)
-                        stop("All observations contain ", msg, " or are 0-weight. Estimation cannot be done. (0-weight: ", sum(is0W), ", breakup ", msg, ": ", msg_details, ")")
+                        stop("All observations contain ", msg, " or are 0-weight. Estimation cannot be done. (0-weight: ", sum(is0W), ", breakup ", msg, ": ", msg_details, ".)")
                     } else {
                         stop("All observations are 0-weight. Estimation cannot be done.")
                     }
@@ -2005,7 +2011,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
             if(anyNA_sample){
                 msg = msg_na_inf(ANY_NA, ANY_INF)
-                message_NA = paste0(numberFormatNormal(nbNA), " observation", plural(nbNA), " removed because of ", msg, " (", msg_details, ").")
+                message_NA = paste0(numberFormatNormal(nbNA), " observation", plural(nbNA), " removed because of ", msg, " (", msg_details, ").", msg_NA_multi)
                 notes = c(notes, message_NA)
 
                 if(nbNA == nobs){
