@@ -1479,12 +1479,8 @@ collinearity = function(x, verbose){
 	linear_fml = fml_split(formula(x, "linear"), 2, split.lhs = TRUE)
 
 	rhs_fml = fml_split(formula(x, "linear"), 1)
-	if(grepl("[^:]::[^:]", deparse_long(rhs_fml[[3]]))){
-	    new_fml = expand_interactions(rhs_fml)
-	    linear.varnames = all.vars(new_fml[[3]])
-	} else {
-	    linear.varnames = all.vars(rhs_fml[[3]])
-	}
+	linear.varnames = all.vars(rhs_fml[[3]])
+
 	isLinear = length(linear.varnames) > 0
 
 	NL_fml = x$NL.fml
@@ -2483,9 +2479,6 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #'
 #' @return
 #' It returns a matrix with number of rows the length of \code{factor_var}. If there is no interacted variable or it is interacted with a numeric variable, the number of columns is equal to the number of cases contained in \code{factor_var} minus the reference(s). If the interacted variable is a factor, the number of columns is the number of combined cases between \code{factor_var} and \code{var}.
-#'
-#' @section Shorthand in \code{fixest} estimations:
-#' In \code{fixest} estimations, instead of using \code{i(factor_var, var, ref)}, you can instead use the following writing \code{var::factor_var(ref)}. Note that this way of doing interactions is deprecated and will be removed in the future.
 #'
 #' @author
 #' Laurent Berge
@@ -4061,9 +4054,6 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
 
     # Modify the formula to add interactions
     rhs_txt = deparse_long(fml[[3]])
-    if(grepl("::", rhs_txt, fixed = TRUE)){
-        fml = expand_interactions(fml)
-    }
 
     if(grepl("\\^[[:alpha:]]", rhs_txt)){
         stop("The special operator '^' can only be used in the fixed-effects part of the formula. Please use ':' instead.")
@@ -4691,86 +4681,6 @@ combine_clusters = function(...){
     res = clusters$items[clusters$x]
 
     return(res)
-}
-
-expand_interactions_internal = function(x){
-    # x == terms
-
-    terms_all_list = as.list(x)
-    qui = which(grepl("[^:]::[^:]", x))
-    for(i in qui){
-        my_term = x[i]
-        terms_split = strsplit(x[i], "(?<=[^:])::(?=[^:])", perl = TRUE)[[1]]
-
-        if(grepl("\\(", terms_split[2])){
-            if(!grepl("^[\\.]?[[:alnum:]\\._]+\\(", terms_split[2])){
-                stop("Problem in ", x[i], ": the format should be continuous_var::factor_var. See details.")
-            }
-
-            my_call = gsub("^[\\.]?[[:alnum:]\\._]+\\(", "interact_control(", terms_split[2])
-            args = try(eval(str2lang(my_call)), silent = TRUE)
-            fe_name = gsub("^([\\.]?[[:alnum:]\\._]+)\\(.+", "\\1", terms_split[2])
-            if("try-error" %in% class(args)){
-                stop("Problem in the interaction of the formula: Error in ", terms_split[1], "::", fe_name, gsub(".+interact_control", "", args))
-            }
-
-            new_term = paste0("interact(", terms_split[1], ", ", fe_name, ", ", paste(args, collapse = ", "), ")")
-
-        } else {
-            new_term = paste0("interact(", terms_split[1], ", ", terms_split[2], ")")
-        }
-
-        terms_all_list[[i]] = new_term
-
-    }
-
-    x = unlist(terms_all_list)
-
-    return(x)
-}
-
-expand_interactions = function(fml){
-    # The formula is simple (should contain only the RHS)
-
-    fml_linear = fml_split(fml, 1)
-
-    x = attr(terms(fml_linear), "term.labels")
-
-    if (!any(grepl("[^:]::[^:]", x))){
-        return(fml)
-
-    } else {
-        x = expand_interactions_internal(x)
-    }
-
-    lhs_fml = deparse_long(fml_linear[[2]])
-    rhs_fml = paste(x, collapse = "+")
-
-    as.formula(paste0(lhs_fml, "~", rhs_fml))
-}
-
-interact_control = function(ref, keep){
-    # Internal call
-    # used to control the call to interact is valid
-
-    counter = getOption("fixest_deprec_interact")
-    if(is.null(counter)){
-        options("fixest_deprec_interact" = TRUE)
-        .Deprecated(msg = "Interactions with the syntax continuous_var::factor_var is deprecated and will disappear in 1 year from 12/11/2020. Please use the function i() instead.")
-    }
-
-    mc = match.call()
-
-    res = c()
-    if("ref" %in% names(mc)){
-        res = paste0("ref = ", deparse_long(mc$ref))
-    }
-
-    if("keep" %in% names(mc)){
-        res = paste0("keep = ", deparse_long(mc$keep))
-    }
-
-    res
 }
 
 listDefault = function(x, variable, value){
@@ -6025,9 +5935,8 @@ fixest_fml_rewriter = function(fml){
 
     isPanel = grepl("(^|[^\\._[:alnum:]])(f|d|l)\\(", fml_text)
     isPower = grepl("^", fml_text, fixed = TRUE)
-    isInteract = grepl("[^:]::[^:]", fml_text)
 
-    if(isPanel || isInteract){
+    if(isPanel){
         # We rewrite term-wise
 
         fml_parts = fml_split(fml, raw = TRUE)
@@ -6041,26 +5950,24 @@ fixest_fml_rewriter = function(fml){
 
         # We tolerate multiple LHS and expansion
         lhs_text = fml_split(fml, 1, text = TRUE, split.lhs = TRUE)
-        if(isPanel){
 
-            if(grepl("^(c|c?sw0?|list)\\(", lhs_text)){
-                lhs_text2eval = gsub("^(c|c?sw0?|list)\\(", "sw(", lhs_text)
-                lhs_names = eval(str2lang(lhs_text2eval))
-            } else {
-                lhs_names = lhs_text
-            }
-
-            lhs_all = error_sender(expand_lags_internal(lhs_names),
-                                   "Problem in the formula regarding lag/leads: ", clean = "__expand")
-
-            if(length(lhs_all) > 1){
-                lhs_fml = paste("c(", paste(lhs_all, collapse = ","), ")")
-            } else {
-                lhs_fml = lhs_all
-            }
-
-            lhs_text = lhs_fml
+        if(grepl("^(c|c?sw0?|list)\\(", lhs_text)){
+            lhs_text2eval = gsub("^(c|c?sw0?|list)\\(", "sw(", lhs_text)
+            lhs_names = eval(str2lang(lhs_text2eval))
+        } else {
+            lhs_names = lhs_text
         }
+
+        lhs_all = error_sender(expand_lags_internal(lhs_names),
+                               "Problem in the formula regarding lag/leads: ", clean = "__expand")
+
+        if(length(lhs_all) > 1){
+            lhs_fml = paste("c(", paste(lhs_all, collapse = ","), ")")
+        } else {
+            lhs_fml = lhs_all
+        }
+
+        lhs_text = lhs_fml
 
         #
         # RHS
@@ -6084,15 +5991,8 @@ fixest_fml_rewriter = function(fml){
 
         rhs_terms = get_vars(fml_rhs)
 
-        if(isPanel){
-            rhs_terms = error_sender(expand_lags_internal(rhs_terms),
-                                     "Problem in the formula regarding lag/leads: ", clean = "__expand")
-        }
-
-        if(isInteract){
-            rhs_terms = error_sender(expand_interactions_internal(rhs_terms),
-                                     "Error in the interaction in the RHS of the formula: ")
-        }
+        rhs_terms = error_sender(expand_lags_internal(rhs_terms),
+                                 "Problem in the formula regarding lag/leads: ", clean = "__expand")
 
         if(attr(terms(fml_rhs), "intercept") == 0){
             rhs_terms = c("-1", rhs_terms)
@@ -6122,7 +6022,7 @@ fixest_fml_rewriter = function(fml){
                 if(identical(fml_parts[[2]], 0)){
                     fml_fixef = NULL
 
-                } else if(isPanel){
+                } else {
 
                     fml_fixef = fml_maker(fml_parts[[2]])
                     fml_fixef_text = deparse_long(fml_fixef)
@@ -6148,8 +6048,6 @@ fixest_fml_rewriter = function(fml){
                         fml_fixef = as.formula(paste("~", paste(fixef_text, collapse = "+")))
 
                     }
-                } else {
-                    fml_fixef = fml_maker(fml_parts[[2]])
                 }
             }
 
@@ -7299,12 +7197,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), fixef =
 
 	value_linear = 0
 	rhs_fml = fml_split(fml, 1)
-	if(grepl("[^:]::[^:]", deparse_long(rhs_fml[[3]]))){
-	    new_fml = expand_interactions(rhs_fml)
-	    linear.varnames = all_vars_with_i_prefix(new_fml[[3]])
-	} else {
-	    linear.varnames = all_vars_with_i_prefix(rhs_fml[[3]])
-	}
+	linear.varnames = all_vars_with_i_prefix(rhs_fml[[3]])
 
 	if(length(linear.varnames) > 0){
 		# Checking all variables are there

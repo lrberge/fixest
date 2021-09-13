@@ -49,6 +49,8 @@
 
  - Functions `setFixest_dof` and `setFixest_se` have been renamed into `setFixest_ssc` and `setFixest_vcov`. **No retro compatibility ensured.**
  
+ - Removal of the `var::factor` operator to interact a continuous variable with a variable taken as factor.
+ 
 ## New features
 
  - `feglm` now accepts partially matched character shortcuts for families: "poisson", "logit", "probit" are now valid `family` arguments.

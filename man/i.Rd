@@ -30,11 +30,6 @@ Treat a variable as a factor, or interacts a variable with a factor. Values to b
 \details{
 To interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2} in the fixed-effects part of the formula. Please see the details and examples in the help page of \code{\link[fixest]{feols}}.
 }
-\section{Shorthand in \code{fixest} estimations}{
-
-In \code{fixest} estimations, instead of using \code{i(factor_var, var, ref)}, you can instead use the following writing \code{var::factor_var(ref)}. Note that this way of doing interactions is deprecated and will be removed in the future.
-}
-
 \examples{
 
 #
