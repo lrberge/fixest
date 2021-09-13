@@ -355,7 +355,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                   keep, drop, order, dict, file, replace = FALSE, convergence,
                   signifCode, label, float, subtitles = list("auto"), fixef_sizes = FALSE,
                   fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5,
-                  interaction.combine = " $\\times $ ", depvar = TRUE, style.tex = NULL,
+                  interaction.combine = NULL, depvar = TRUE, style.tex = NULL,
                   style.df = NULL, notes = NULL, group = NULL, extraline = NULL,
                   fixef.group = NULL, placement = "htbp", drop.section = NULL,
                   poly_dict = c("", " square", " cube"), postprocess.tex = NULL,
@@ -806,6 +806,12 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     check_arg(keep, drop, order, "character vector no na NULL", .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
 
     check_arg(file, label, interaction.combine, "character scalar")
+
+    # interaction.combine: Default depends on type
+    if(is.null(interaction.combine)){
+        interaction.combine = if(isTex) " $\\times $ " else " x "
+    }
+
     check_arg_plus(signifCode, "NULL NA | match(letters) | named numeric vector no na GE{0} LE{1}")
     check_arg_plus(subtitles, "NULL{list()} character vector no na | NA | list")
 
@@ -1650,11 +1656,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                     who = res %in% names(dict)
                     res[who] = dict[res[who]]
 
-                    if(isTex){
-                        res = paste0(res, collapse = interaction.combine)
-                    } else {
-                        res = paste0(res, collapse = " x ")
-                    }
+                    res = paste0(res, collapse = interaction.combine)
 
                     return(res)
                 }
@@ -2185,14 +2187,14 @@ etable_internal_latex = function(info){
     # intro and outro Latex tabular
     # \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lc}
     if(style$tabular == "normal"){
-        intro_latex <- paste0("\\begin{tabular}{l", paste0(rep("c", n_models), collapse=""), "}\n", style$line.top)
-        outro_latex <- "\\end{tabular}\n"
+        intro_latex = paste0("\\begin{tabular}{l", paste0(rep("c", n_models), collapse=""), "}\n", style$line.top)
+        outro_latex = "\\end{tabular}\n"
     } else if(style$tabular == "*"){
-        intro_latex <- paste0("\\begin{tabular*}{\\textwidth}{@{\\extracolsep{\\fill}}l", paste0(rep("c", n_models), collapse=""), "}\n", style$line.top)
-        outro_latex <- "\\end{tabular*}\n"
+        intro_latex = paste0("\\begin{tabular*}{\\textwidth}{@{\\extracolsep{\\fill}}l", paste0(rep("c", n_models), collapse=""), "}\n", style$line.top)
+        outro_latex = "\\end{tabular*}\n"
     } else if(style$tabular == "X"){
-        intro_latex <- paste0("\\begin{tabularx}{\\textwidth}{", paste0(rep("X", n_models + 1), collapse = ""), "}\n", style$line.top)
-        outro_latex <- "\\end{tabularx}\n"
+        intro_latex = paste0("\\begin{tabularx}{\\textwidth}{", paste0(rep("X", n_models + 1), collapse = ""), "}\n", style$line.top)
+        outro_latex = "\\end{tabularx}\n"
     }
 
     # 1st lines => dep vars
