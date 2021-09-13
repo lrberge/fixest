@@ -74,6 +74,12 @@
   
   # => We obtain the same as feols(y ~ x1 + x2, vcov = ~species)
   ```
+  
+## etable
+
+ - new argument `interaction.order` to control the order in which interacted variables are displayed (feature request by @ [#182](https://github.com/lrberge/fixest/issues/182)).
+ 
+ - new argument `i.equal` to control how the values taken by factor variables created with `i()` are displayed.
 
 
 # fixest 0.9.0

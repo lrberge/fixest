@@ -34,7 +34,9 @@
 #' @param family Logical, default is missing. Whether to display the families of the models. By default this line is displayed when at least two models are from different families.
 #' @param keepFactors Logical, default is \code{TRUE}. If \code{FALSE}, then factor variables are displayed as fixed-effects and no coefficient is shown.
 #' @param powerBelow (Tex only.) Integer, default is -5. A coefficient whose value is below \code{10**(powerBelow+1)} is written with a power in Latex. For example \code{0.0000456} would be written \code{4.56$\\times 10^{-5}$} by default. Setting \code{powerBelow = -6} would lead to \code{0.00004} in Latex.
-#' @param interaction.combine (Tex only.) Character scalar, defaults to \code{" $\\times$ "}. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind $\\times$ Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.
+#' @param interaction.combine Character scalar, defaults to \code{" $\\times$ "} for Tex and to \code{" = "} otherwise. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind $\\times$ Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.
+#' @param interaction.order Character vector of regular expressions. Only affects variables that are interacted like x1 and x2 in \code{feols(y ~ x1*x2, data)}. You can change the order in which the interacted variables are displayed: e.g. \code{interaction.order = "x2"} would lead to "x1 x x2" instead of "x1 x x2". Please look at the argument 'order' and the dedicated section in the help page for more information.
+#' @param i.equal Character scalar, defaults to \code{" $=$ "} when \code{tex = TRUE} and \code{" = "} otherwise. Only affects factor variables created with the function \code{\link[fixest]{i}}, tells how the variable should be linked to its value. For example if you have the \code{Species} factor from the \code{iris} data set, by default the display of the variable is \code{Species = Setosa}, etc. If \code{i.equal = ": "} the display becomes \code{Species: Setosa}.
 #' @param depvar Logical, default is \code{TRUE}. Whether a first line containing the dependent variables should be shown.
 #' @param coefstat One of \code{"se"} (default), \code{"tstat"} or \code{"confint"}. The statistic to report for each coefficient: the standard-error, the t-statistics or the confidence interval. You can adjust the confidence interval with the argument \code{ci}.
 #' @param ci Level of the confidence interval, defaults to \code{0.95}. Only used if \code{coefstat = confint}.
@@ -355,7 +357,8 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                   keep, drop, order, dict, file, replace = FALSE, convergence,
                   signifCode, label, float, subtitles = list("auto"), fixef_sizes = FALSE,
                   fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5,
-                  interaction.combine = NULL, depvar = TRUE, style.tex = NULL,
+                  interaction.combine = NULL, interaction.order = NULL,
+                  i.equal = NULL, depvar = TRUE, style.tex = NULL,
                   style.df = NULL, notes = NULL, group = NULL, extraline = NULL,
                   fixef.group = NULL, placement = "htbp", drop.section = NULL,
                   poly_dict = c("", " square", " cube"), postprocess.tex = NULL,
@@ -520,20 +523,21 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     }
 
 
-    info = results2formattedList(dots = dots, vcov=vcov, ssc=ssc, fitstat_all=fitstat,
-                                 stage=stage, agg = agg,
-                                 .vcov_args=.vcov_args, digits=digits, digits.stats=digits.stats,
-                                 sdBelow=sdBelow, signifCode=signifCode, coefstat = coefstat,
-                                 ci = ci, title=title, float=float, subtitles=subtitles,
-                                 keepFactors=keepFactors, tex = tex, useSummary=useSummary,
-                                 dots_call=dots_call, powerBelow=powerBelow, dict=dict,
-                                 interaction.combine=interaction.combine, convergence=convergence,
-                                 family=family, keep=keep, drop=drop, file=file, order=order,
-                                 label=label, fixef_sizes=fixef_sizes,
-                                 fixef_sizes.simplify=fixef_sizes.simplify,
-                                 depvar=depvar, style.tex=style.tex, style.df=style.df,
-                                 replace=replace, notes = notes, group = group, extraline=extraline,
-                                 fixef.group=fixef.group, placement = placement,
+    info = results2formattedList(dots = dots, vcov = vcov, ssc = ssc, fitstat_all = fitstat,
+                                 stage = stage, agg = agg,
+                                 .vcov_args=.vcov_args, digits = digits, digits.stats = digits.stats,
+                                 sdBelow = sdBelow, signifCode = signifCode, coefstat = coefstat,
+                                 ci = ci, title = title, float = float, subtitles = subtitles,
+                                 keepFactors = keepFactors, tex = tex, useSummary = useSummary,
+                                 dots_call = dots_call, powerBelow = powerBelow, dict = dict,
+                                 interaction.combine = interaction.combine, interaction.order = interaction.order,
+                                 i.equal = i.equal, convergence = convergence,
+                                 family = family, keep = keep, drop = drop, file = file, order = order,
+                                 label = label, fixef_sizes = fixef_sizes,
+                                 fixef_sizes.simplify = fixef_sizes.simplify,
+                                 depvar = depvar, style.tex = style.tex, style.df = style.df,
+                                 replace = replace, notes = notes, group = group, extraline = extraline,
+                                 fixef.group = fixef.group, placement = placement,
                                  drop.section = drop.section, poly_dict = poly_dict,
                                  tex_tag = DO_POSTPROCESS, fit_format = fit_format,
                                  coef.just = coef.just, .up = .up)
@@ -672,7 +676,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                                  coefstat = "se", ci = 0.95, label, subtitles, title,
                                  float = FALSE, replace = FALSE, keepFactors = FALSE,
                                  tex = FALSE, useSummary, dots_call, powerBelow = -5,
-                                 interaction.combine, convergence, family, drop, order,
+                                 interaction.combine, interaction.order, i.equal,
+                                 convergence, family, drop, order,
                                  keep, file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE,
                                  depvar = FALSE, style.tex = NULL, style.df=NULL,
                                  notes = NULL, group = NULL, extraline=NULL,
@@ -805,11 +810,16 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
     check_arg(keep, drop, order, "character vector no na NULL", .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
 
-    check_arg(file, label, interaction.combine, "character scalar")
+    check_arg(file, label, interaction.combine, i.equal, "character scalar")
 
     # interaction.combine: Default depends on type
     if(is.null(interaction.combine)){
         interaction.combine = if(isTex) " $\\times $ " else " x "
+    }
+
+    # i.equal
+    if(is.null(i.equal)){
+        i.equal = if(isTex) " $=$ " else " = "
     }
 
     check_arg_plus(signifCode, "NULL NA | match(letters) | named numeric vector no na GE{0} LE{1}")
@@ -1638,11 +1648,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                             } else {
                                 value_split = dict_apply(x_split[[i]], dict)
 
-                                if(isTex){
-                                    res[i] = paste(value_split, collapse = " $=$ ")
-                                } else {
-                                    res[i] = paste(value_split, collapse = " = ")
-                                }
+                                res[i] = paste(value_split, collapse = i.equal)
                             }
                         }
 
@@ -1653,8 +1659,11 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                         res = x
                     }
 
-                    who = res %in% names(dict)
-                    res[who] = dict[res[who]]
+                    res = dict_apply(res, dict)
+                    res = order_apply(res, interaction.order)
+
+                    # who = res %in% names(dict)
+                    # res[who] = dict[res[who]]
 
                     res = paste0(res, collapse = interaction.combine)
 

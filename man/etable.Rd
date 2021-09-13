@@ -43,6 +43,8 @@ etable(
   family,
   powerBelow = -5,
   interaction.combine = NULL,
+  interaction.order = NULL,
+  i.equal = NULL,
   depvar = TRUE,
   style.tex = NULL,
   style.df = NULL,
@@ -125,6 +127,8 @@ esttable(
   family,
   powerBelow = -5,
   interaction.combine = NULL,
+  interaction.order = NULL,
+  i.equal = NULL,
   depvar = TRUE,
   style.df = NULL,
   group = NULL,
@@ -171,6 +175,8 @@ esttex(
   family,
   powerBelow = -5,
   interaction.combine = NULL,
+  interaction.order = NULL,
+  i.equal = NULL,
   depvar = TRUE,
   style.tex = NULL,
   notes = NULL,
@@ -251,7 +257,11 @@ esttex(
 
 \item{powerBelow}{(Tex only.) Integer, default is -5. A coefficient whose value is below \code{10**(powerBelow+1)} is written with a power in Latex. For example \code{0.0000456} would be written \code{4.56$\\times 10^{-5}$} by default. Setting \code{powerBelow = -6} would lead to \code{0.00004} in Latex.}
 
-\item{interaction.combine}{(Tex only.) Character scalar, defaults to \code{" $\\times$ "}. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind $\\times$ Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.}
+\item{interaction.combine}{Character scalar, defaults to \code{" $\\times$ "} for Tex and to \code{" = "} otherwise. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind $\\times$ Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.}
+
+\item{interaction.order}{Character vector of regular expressions. Only affects variables that are interacted like x1 and x2 in \code{feols(y ~ x1*x2, data)}. You can change the order in which the interacted variables are displayed: e.g. \code{interaction.order = "x2"} would lead to "x1 x x2" instead of "x1 x x2". Please look at the argument 'order' and the dedicated section in the help page for more information.}
+
+\item{i.equal}{Character scalar, defaults to \code{" $=$ "} when \code{tex = TRUE} and \code{" = "} otherwise. Only affects factor variables created with the function \code{\link[fixest]{i}}, tells how the variable should be linked to its value. For example if you have the \code{Species} factor from the \code{iris} data set, by default the display of the variable is \code{Species = Setosa}, etc. If \code{i.equal = ": "} the display becomes \code{Species: Setosa}.}
 
 \item{depvar}{Logical, default is \code{TRUE}. Whether a first line containing the dependent variables should be shown.}
 
