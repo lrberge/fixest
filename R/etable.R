@@ -3287,10 +3287,24 @@ etable_internal_df = function(info){
 
 
 #' @rdname etable
-setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c("se", "tstat", "confint"), ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, signifCode, float, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, family, powerBelow = -5, interaction.combine = " $\\times $ ", depvar, style.tex = NULL, style.df = NULL, notes = NULL, group = NULL, extraline = NULL, fixef.group = NULL, placement = "htbp", drop.section = NULL, postprocess.tex = NULL, postprocess.df = NULL, fit_format = "__var__", reset = FALSE){
+setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c("se", "tstat", "confint"),
+                            ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, signifCode, float,
+                            fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, family, powerBelow = -5,
+                            interaction.combine = NULL, interaction.order = NULL,
+                            i.equal = NULL, depvar, style.tex = NULL,
+                            style.df = NULL, notes = NULL, group = NULL, extraline = NULL,
+                            fixef.group = NULL, placement = "htbp", drop.section = NULL,
+                            postprocess.tex = NULL, postprocess.df = NULL,
+                            fit_format = "__var__", reset = FALSE){
 
     # cat(names(formals(setFixest_etable)), sep = '", "')
-    arg_list = c("digits", "digits.stats", "fitstat", "coefstat", "ci", "sdBelow", "keep", "drop", "order", "dict", "signifCode", "float", "fixef_sizes", "fixef_sizes.simplify", "family", "powerBelow", "interaction.combine", "depvar", "style.tex", "style.df", "notes", "group", "extraline", "placement", "drop.section", "postprocess.tex", "postprocess.df", "fit_format", "fixef.group", "reset")
+    arg_list = c("digits", "digits.stats", "fitstat", "coefstat", "ci", "sdBelow",
+                 "keep", "drop", "order", "dict", "signifCode", "float", "fixef_sizes",
+                 "fixef_sizes.simplify", "family", "powerBelow", "interaction.combine",
+                 "interaction.order", "i.equal",
+                 "depvar", "style.tex", "style.df", "notes", "group", "extraline",
+                 "placement", "drop.section", "postprocess.tex", "postprocess.df",
+                 "fit_format", "fixef.group", "reset")
 
     #
     # Argument checking => strong since these will become default values
@@ -3310,11 +3324,12 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c(
 
     check_arg("logical scalar", sdBelow, fixef_sizes, fixef_sizes.simplify, float, family, depvar, reset)
 
-    check_arg(keep, drop, order, "character vector no na NULL", .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
+    check_arg(keep, drop, order, "character vector no na NULL",
+              .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
 
     check_arg_plus(signifCode, "NULL NA | match(letters) | named numeric vector no na GE{0} LE{1}")
 
-    check_arg(interaction.combine, "character scalar")
+    check_arg(interaction.combine, interaction.order, i.equal, "NULL character scalar")
 
     check_arg(notes, "character vector no na")
 
@@ -3449,7 +3464,11 @@ getFixest_etable = function(){
 #'                                       yesNo = "x",
 #'                                       tabular = "*"))
 #'
-style.tex = function(main = "base", depvar.title, model.title, model.format, line.top, line.bottom, var.title, fixef.title, fixef.prefix, fixef.suffix, fixef.where, slopes.title, slopes.format, fixef_sizes.prefix, fixef_sizes.suffix, stats.title, notes.title, tablefoot, tablefoot.title, tablefoot.value, yesNo, tabular = "normal"){
+style.tex = function(main = "base", depvar.title, model.title, model.format, line.top,
+                     line.bottom, var.title, fixef.title, fixef.prefix, fixef.suffix,
+                     fixef.where, slopes.title, slopes.format, fixef_sizes.prefix,
+                     fixef_sizes.suffix, stats.title, notes.title, tablefoot,
+                     tablefoot.title, tablefoot.value, yesNo, tabular = "normal"){
 
     # To implement later:
     # fixef_sizes.where = "obs"
@@ -3565,7 +3584,11 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
 #'                                  stats.line = " ", yesNo = "yes"))
 #'
 #'
-style.df = function(depvar.title = "Dependent Var.:", fixef.title = "Fixed-Effects:", fixef.line = "-", fixef.prefix = "", fixef.suffix = "", slopes.title = "Varying Slopes:", slopes.line = "-", slopes.format = "__var__ (__slope__)", stats.title = "_", stats.line = "_", yesNo = c("Yes", "No")){
+style.df = function(depvar.title = "Dependent Var.:", fixef.title = "Fixed-Effects:",
+                    fixef.line = "-", fixef.prefix = "", fixef.suffix = "",
+                    slopes.title = "Varying Slopes:", slopes.line = "-",
+                    slopes.format = "__var__ (__slope__)", stats.title = "_",
+                    stats.line = "_", yesNo = c("Yes", "No")){
 
     # Checking
 

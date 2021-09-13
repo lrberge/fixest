@@ -6974,6 +6974,7 @@ residuals.fixest <- resid.fixest
 #' @param newdata A data.frame containing the variables used to make the prediction. If not provided, the fitted expected (or linear if \code{type = "link"}) predictors are returned.
 #' @param sample Either "estimation" (default) or "original". This argument is only used when arg. 'newdata' is missing, and is ignored otherwise. If equal to "estimation", the vector returned matches the sample used for the estimation. If equal to "original", it matches the original data set (the observations not used for the estimation being filled with NAs).
 #' @param fixef Logical scalar, default is \code{FALSE}. If \code{TRUE}, a data.frame is returned, with each column representing the fixed-effects coefficients for each observation in \code{newdata} -- with as many columns as fixed-effects. Note that when there are variables with varying slopes, the slope coefficients are returned (i.e. they are not multiplied by the variable).
+#' @param vs.coef Logical scalar, default is \code{FALSE}. Only used when \code{fixef = TRUE} and when variables with varying slopes are present. If \code{TRUE}, the coefficients of the variables with varying slopes are returned instead of the coefficient multiplied by the value of the variables (default).
 #' @param ... Not currently used.
 #'
 #'
@@ -7034,14 +7035,14 @@ residuals.fixest <- resid.fixest
 #'
 #'
 predict.fixest = function(object, newdata, type = c("response", "link"), fixef = FALSE,
-                          sample = c("estimation", "original"), ...){
+                          vs.coef = FALSE, sample = c("estimation", "original"), ...){
 
     # Checking the arguments
     validate_dots(suggest_args = c("newdata", "type"))
 
 	# Controls
 	check_arg_plus(type, sample, "match")
-	check_arg(fixef, "logical scalar")
+	check_arg(fixef, vs.coef, "logical scalar")
 
 	# renaming to clarify
 	fixef.return = fixef
@@ -7235,9 +7236,16 @@ predict.fixest = function(object, newdata, type = c("response", "link"), fixef =
 		        fixef_coef_current = fixef_coef[[slope_terms[i]]]
 
 		        if(fixef.return){
-		            # We only return the coef, no multiplication with the value of the variable!!!
 		            vname = slope_terms[i]
-		            fixef_df[[vname]] = fixef_coef_current[fixef_current_num]
+
+		            # We return only the coefs OR the coef * the variable
+		            if(vs.coef){
+		                fixef_df[[vname]] = fixef_coef_current[fixef_current_num]
+
+		            } else {
+		                fixef_df[[vname]] = fixef_coef_current[fixef_current_num] * slope_var_list[[slope_vars[i]]]
+		            }
+
 
 		        } else {
 		            value_fixef = value_fixef + fixef_coef_current[fixef_current_num] * slope_var_list[[slope_vars[i]]]
