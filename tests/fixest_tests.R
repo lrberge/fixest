@@ -1641,6 +1641,33 @@ fitstat(est_fe, ~ wf)
 
 
 
+####
+#### Argument sliding ####
+####
+
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
+
+
+setFixest_estimation(data = base)
+
+raw = feols(y ~ x1 + x2, base, ~species)
+slided = feols(y ~ x1 + x2, ~species)
+
+test(coef(raw), coef(slided))
+
+# Error, with error msg relative to 'data'
+test(feols(y ~ x1 + x2, 1:5), "err")
+
+# should be another estimation
+other_est = feols(y ~ x1 + x2, head(base, 50))
+test(nobs(other_test), 50)
+
+setFixest_estimation(reset = TRUE)
+
+
+
+
 
 
 

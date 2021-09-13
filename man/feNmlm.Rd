@@ -235,6 +235,8 @@ Multiple independent variables can be combined with multiple dependent variables
 
 You can also add fixed-effects in a stepwise fashion. Note that you cannot perform stepwise estimations on the IV part of the formula (\code{feols} only).
 
+If NAs are present in the sample, to avoid too many messages, only NA removal concerning the variables common to all estimations is reported.
+
 A note on performance. The feature of multiple estimations has been highly optimized for \code{feols}, in particular in the presence of fixed-effects. It is faster to estimate multiple models using the formula rather than with a loop. For non-\code{feols} models using the formula is roughly similar to using a loop performance-wise.
 }
 

@@ -253,7 +253,15 @@ Multiple independent variables can be combined with multiple dependent variables
 
 You can also add fixed-effects in a stepwise fashion. Note that you cannot perform stepwise estimations on the IV part of the formula (\code{feols} only).
 
+If NAs are present in the sample, to avoid too many messages, only NA removal concerning the variables common to all estimations is reported.
+
 A note on performance. The feature of multiple estimations has been highly optimized for \code{feols}, in particular in the presence of fixed-effects. It is faster to estimate multiple models using the formula rather than with a loop. For non-\code{feols} models using the formula is roughly similar to using a loop performance-wise.
+}
+
+\section{Argument sliding}{
+
+
+When the data set has been set up globally using \code{\link[fixest]{setFixest_estimation}}(data = data_set), the argument \code{vcov} can be used implicitly. This means that calls such as \code{feols(y ~ x, "HC1")}, or \code{feols(y ~ x, ~id)}, are valid: i) the data is automatically deduced from the global settings, and ii) the \code{vcov} is deduced to be the second argument.
 }
 
 \examples{
@@ -386,6 +394,31 @@ summary(est_split, "compact")
 
 # You can still select which sample/LHS/RHS to display
 est_split[sample = 1:2, lhs = 1, rhs = 1]
+
+
+#
+# Argument sliding
+#
+
+# When the data set is set up globally, you can use the vcov argument implicitly
+
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
+
+no_sliding = feols(y ~ x1 + x2, base, ~species)
+
+# With sliding
+setFixest_estimation(data = base)
+
+# ~species is implicitly deduced to be equal to 'vcov'
+sliding = feols(y ~ x1 + x2, ~species)
+
+etable(no_sliding, sliding)
+
+# Resetting the global options
+setFixest_estimation(data = NULL)
+
+
 
 }
 \references{

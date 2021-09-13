@@ -301,6 +301,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
         if(missing(data)) stop("You must provide the argument 'data' (currently it is missing).")
 
+        #  i) default data set
+        # ii) argument sliding for vcov (ex: feols(y~x, "hetero"))
         if(!"data" %in% names(mc_origin)){
             # Means this is the default value
             if(inherits(data, "default_data")){
@@ -310,13 +312,45 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             } else {
                 stop("Argument 'data' could not be propery evaluated: this is an internal error, could you report?")
             }
+
+        } else if(!"vcov" %in% names(mc_origin)){
+            # only in this case there is argument sliding =>
+            # what is in 'data' is in effect 'vcov'
+            #
+            # BEWARE:
+            # - we allow argument sliding only when the value in data is
+            # unambiguously a vcov!
+            # - ie: formula // character scalar // fixest_vcov_request // function (without args!)
+            #       list of length 1 with a function inside
+            #
+
+            opts = getOption("fixest_estimation")
+            if("data" %in% names(opts)){
+                # To report evaluation problems
+                error_sender(data, "The argument 'data' could not be evaluated: ")
+
+                # We check 'data' can really be a vcov
+                if(inherits(data, "formula") || isSingleChar(data) || inherits(data, "fixest_vcov_request") ||
+                   is.function(data) || (is.list(data) && length(data) == 1 && is.function(data[[1]]))){
+                    # OK, let's slide
+
+                    vcov = data
+                    mc_origin$vcov = mc_origin$data
+
+                    # We assign data to its default value
+                    data_lang = str2lang(opts$data)
+                    data = eval(data_lang, call_env)
+                    mc_origin$data = data_lang
+
+                }
+            }
         }
 
         check_value(data, "matrix | data.frame", .arg_name = "data")
 
         if(is.matrix(data)){
             if(is.null(colnames(data))){
-                stop("If argument data is to be a matrix, its columns must be named.")
+                stop("If argument 'data' is to be a matrix, its columns must be named.")
             }
             data = as.data.frame(data)
         }
@@ -326,14 +360,10 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             stop("The argument 'data' must be a data.frame or a matrix.")
         }
 
-        if("data.table" %in% class(data)){
-            # this is a local change only
-            class(data) = "data.frame"
-        } else if("fixest_panel" %in% class(data)){
-            # I know it's weird but it's to disable the specific [.fixest_panel method
-            # which would not be appropriate here
-            class(data) = "data.frame"
-        }
+        # More robust to ensure it's always a plain data.frame, avoids problems from specific methods.
+        # Maybe at some point do as Sebastian suggested and use plain lists instead?
+        # Well I've done it in a branch but I find it more difficult to maintain. We'll see.
+        if(!identical(class(data), "data.frame")) class(data) = "data.frame"
 
         dataNames = names(data)
 

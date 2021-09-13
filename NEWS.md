@@ -43,7 +43,7 @@
     
     * Conley (1999) for spatially correlated errors
  
- - Function `dof` has been renamed into `ssc` (stands for small sample correction) to improve clarity. No retro compatibility so far ensured but the function `dof` will be removed at some point.
+ - Function `dof` has been renamed into `ssc` (stands for small sample correction) to improve clarity. Retro compatibility is partially ensured but the function `dof` will be removed at some point.
     
 ## Breaking changes
 
@@ -60,6 +60,20 @@
     * the default standard-errors is now `"iid"` (former keywords still work)
     
     * the keyword `hc1` can be used to summon heteroskedasticity-robust SEs
+    
+  - *Argument sliding*: the argument `vcov` can be called implicitly when `data` is set up globally:
+  ```R
+  base = iris
+  names(base) = c("y", "x1", "x2", "x3", "species")
+  
+  # Setting up the data
+  setFixest_estimation(data = base)
+  
+  # Now vcov can be used without using vcov = stuff:
+  feols(y ~ x1 + x2, ~species)
+  
+  # => We obtain the same as feols(y ~ x1 + x2, vcov = ~species)
+  ```
 
 
 # fixest 0.9.0

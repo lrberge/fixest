@@ -8785,9 +8785,11 @@ setFixest_estimation = function(data = NULL, panel.id = NULL, fixef.rm = "perfec
     check_arg(panel.id, "NULL character vector len(,2) no na | os formula")
 
     if(!missing(data)){
-        check_arg(data, "data.frame | matrix")
-        data = deparse_long(substitute(data))
-        class(data) = "default_data"
+        check_arg(data, "NULL data.frame | matrix")
+        if(!is.null(data)){
+            data = deparse_long(substitute(data))
+            class(data) = "default_data"
+        }
     }
 
     # Getting the existing defaults
