@@ -58,7 +58,13 @@ etable(
   postprocess.tex = NULL,
   postprocess.df = NULL,
   fit_format = "__var__",
-  coef.just = NULL
+  coef.just = NULL,
+  meta = NULL,
+  meta.time = NULL,
+  meta.author = NULL,
+  meta.sys = NULL,
+  meta.call = NULL,
+  meta.comment = NULL
 )
 
 setFixest_etable(
@@ -93,6 +99,11 @@ setFixest_etable(
   postprocess.tex = NULL,
   postprocess.df = NULL,
   fit_format = "__var__",
+  meta.time = NULL,
+  meta.author = NULL,
+  meta.sys = NULL,
+  meta.call = NULL,
+  meta.comment = NULL,
   reset = FALSE
 )
 
@@ -189,7 +200,13 @@ esttex(
   drop.section = NULL,
   poly_dict = c("", " square", " cube"),
   postprocess.tex = NULL,
-  fit_format = "__var__"
+  fit_format = "__var__",
+  meta = NULL,
+  meta.time = NULL,
+  meta.author = NULL,
+  meta.sys = NULL,
+  meta.call = NULL,
+  meta.comment = NULL
 )
 }
 \arguments{
@@ -292,6 +309,18 @@ esttex(
 \item{fit_format}{Character scalar, default is \code{"__var__"}. Only used in the presence of IVs. By default the endogenous regressors are named \code{fit_varname} in the second stage. The format of the endogenous regressor to appear in the table is governed by \code{fit_format}. For instance, by default, the prefix \code{"fit_"} is removed, leading to only \code{varname} to appear. If \code{fit_format = "$\\\\hat{__var__}$"}, then \code{"$\\hat{varname}$"} will appear in the table.}
 
 \item{coef.just}{(DF only.) Either \code{"."}, \code{"("}, \code{"l"}, \code{"c"} or \code{"r"}, default is \code{NULL}. How the coefficients should be justified. If \code{NULL} then they are right aligned if \code{sdBelow = FALSE} and aligned to the dot if \code{sdBelow = TRUE}. The keywords stand respectively for dot-, parenthesis-, left-, center- and right-aligned.}
+
+\item{meta}{(Tex only.) A one-sided formula that shall contain the following elements: date or time, sys, author, comment and call. Default is \code{NULL}. This argument is a shortcut to controlling the meta information that can be displayed in comments before the table. Typically if the element is in the formula, it means that the argument will be equal to \code{TRUE}. Example: \code{meta = ~time+call} is equivalent to \code{meta.time = TRUE} and \code{meta.call = TRUE}. The "author" and "comment" elements are a bit special. Using \code{meta = ~author("Mark")} is equivalent to \code{meta.author = "Mark"} while meta=~author is equiv. to \code{meta.author = TRUE}. The "comment" must be used with a character string inside: \code{meta = ~comment("this is a comment")}. The order in the formula controls the order of appearance of the meta elements. It also has precedence over the \code{meta.XX} arguments.}
+
+\item{meta.time}{(Tex only.) Either a logical scalar (default is \code{FALSE}) or "time" or "date". Whether to include the time (if \code{TRUE} or "time") or the date (if "date") of creation of the table in a comment right before the table.}
+
+\item{meta.author}{(Tex only.) A logical scalar (default is \code{FALSE}) or a character vector. If \code{TRUE} then the identity of the author (deduced from the system user in \code{Sys.info()}) is inserted in a comment right before the table. If a character vector, then it should contain author names that will be inserted as comments before the table, prefixed with \code{"Created by:"}. For free-form comments see the argument \code{meta.comment}.}
+
+\item{meta.sys}{(Tex only.) A logical scalar, default is \code{FALSE}. Whether to include system information (from \code{Sys.info()}) in a comment right before the table.}
+
+\item{meta.call}{(Tex only.) Logical scalar, default is \code{FALSE}. If \code{TRUE} then the call to the function is inserted right before the table in a comment.}
+
+\item{meta.comment}{(Tex only.) A character vector containing free-form comments to be inserted right before the table.}
 
 \item{reset}{(\code{setFixest_etable} only.) Logical, default is \code{FALSE}. If \code{TRUE}, this will reset all the default values that were already set by the user in previous calls.}
 }

@@ -56,6 +56,12 @@
 #' @param postprocess.df A function that will postprocess.tex the resulting data.frame. Only when \code{tex = FALSE}. By default it is equal to \code{NULL}, meaning that there is no postprocessing. When \code{tex = TRUE}, see the argument \code{postprocess.tex}.
 #' @param fit_format Character scalar, default is \code{"__var__"}. Only used in the presence of IVs. By default the endogenous regressors are named \code{fit_varname} in the second stage. The format of the endogenous regressor to appear in the table is governed by \code{fit_format}. For instance, by default, the prefix \code{"fit_"} is removed, leading to only \code{varname} to appear. If \code{fit_format = "$\\\\hat{__var__}$"}, then \code{"$\\hat{varname}$"} will appear in the table.
 #' @param coef.just (DF only.) Either \code{"."}, \code{"("}, \code{"l"}, \code{"c"} or \code{"r"}, default is \code{NULL}. How the coefficients should be justified. If \code{NULL} then they are right aligned if \code{sdBelow = FALSE} and aligned to the dot if \code{sdBelow = TRUE}. The keywords stand respectively for dot-, parenthesis-, left-, center- and right-aligned.
+#' @param meta (Tex only.) A one-sided formula that shall contain the following elements: date or time, sys, author, comment and call. Default is \code{NULL}. This argument is a shortcut to controlling the meta information that can be displayed in comments before the table. Typically if the element is in the formula, it means that the argument will be equal to \code{TRUE}. Example: \code{meta = ~time+call} is equivalent to \code{meta.time = TRUE} and \code{meta.call = TRUE}. The "author" and "comment" elements are a bit special. Using \code{meta = ~author("Mark")} is equivalent to \code{meta.author = "Mark"} while meta=~author is equiv. to \code{meta.author = TRUE}. The "comment" must be used with a character string inside: \code{meta = ~comment("this is a comment")}. The order in the formula controls the order of appearance of the meta elements. It also has precedence over the \code{meta.XX} arguments.
+#' @param meta.time (Tex only.) Either a logical scalar (default is \code{FALSE}) or "time" or "date". Whether to include the time (if \code{TRUE} or "time") or the date (if "date") of creation of the table in a comment right before the table.
+#' @param meta.sys (Tex only.) A logical scalar, default is \code{FALSE}. Whether to include system information (from \code{Sys.info()}) in a comment right before the table.
+#' @param meta.author (Tex only.) A logical scalar (default is \code{FALSE}) or a character vector. If \code{TRUE} then the identity of the author (deduced from the system user in \code{Sys.info()}) is inserted in a comment right before the table. If a character vector, then it should contain author names that will be inserted as comments before the table, prefixed with \code{"Created by:"}. For free-form comments see the argument \code{meta.comment}.
+#' @param meta.comment (Tex only.) A character vector containing free-form comments to be inserted right before the table.
+#' @param meta.call (Tex only.) Logical scalar, default is \code{FALSE}. If \code{TRUE} then the call to the function is inserted right before the table in a comment.
 #'
 #' @details
 #' The function \code{esttex} is equivalent to the function \code{etable} with argument \code{tex = TRUE}.
@@ -362,7 +368,9 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                   style.df = NULL, notes = NULL, group = NULL, extraline = NULL,
                   fixef.group = NULL, placement = "htbp", drop.section = NULL,
                   poly_dict = c("", " square", " cube"), postprocess.tex = NULL,
-                  postprocess.df = NULL, fit_format = "__var__", coef.just = NULL){
+                  postprocess.df = NULL, fit_format = "__var__", coef.just = NULL,
+                  meta = NULL, meta.time = NULL, meta.author = NULL, meta.sys = NULL,
+                  meta.call = NULL, meta.comment = NULL){
 
     #
     # Checking the arguments
@@ -540,7 +548,10 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                                  fixef.group = fixef.group, placement = placement,
                                  drop.section = drop.section, poly_dict = poly_dict,
                                  tex_tag = DO_POSTPROCESS, fit_format = fit_format,
-                                 coef.just = coef.just, .up = .up)
+                                 coef.just = coef.just, meta = meta, meta.time = meta.time,
+                                 meta.author = meta.author, meta.sys = meta.sys,
+                                 meta.call = meta.call, meta.comment = meta.comment,
+                                 .up = .up)
 
     if(tex){
         res = etable_internal_latex(info)
@@ -570,8 +581,9 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
         }
 
         if(tex){
-            cat(res, sep = "")
             # We add extra whitespaces => otherwise the Latex file is a bit cluttered
+            cat("\n")
+            cat(res, sep = "")
             cat("\n\n")
         } else {
             if(is.data.frame(res)){
@@ -630,7 +642,8 @@ gen_etable_aliases = function(){
     # esttable
     #
 
-    qui_df = !arg_name %in% c("tex", "title", "label", "float", "style.tex", "notes", "placement", "postprocess.tex")
+    qui_df = !arg_name %in% c("tex", "title", "label", "float", "style.tex", "notes", "placement", "postprocess.tex",
+                              "meta", "meta.time", "meta.author", "meta.sys", "meta.call", "meta.comment")
 
     esttable_args = paste0(arg_name[qui_df], " = ", arg_default[qui_df], collapse = ", ")
     esttable_args = gsub(" = ,", ",", esttable_args)
@@ -683,7 +696,10 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                                  notes = NULL, group = NULL, extraline=NULL,
                                  fixef.group = NULL, placement = "htbp", drop.section = NULL,
                                  poly_dict = c("", " square", " cube"), tex_tag = FALSE,
-                                 fit_format = "__var__", coef.just = NULL, .up = 1){
+                                 fit_format = "__var__", coef.just = NULL,
+                                 meta = NULL, meta.time = NULL, meta.author = NULL,
+                                 meta.call = NULL, meta.sys = NULL, meta.comment = NULL,
+                                 .up = 1){
 
     # This function is the core of the function etable
 
@@ -706,8 +722,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     #
 
     opts = getOption("fixest_etable")
+    sysOrigin = sys.parent(.up)
     if(length(opts) > 0){
-        sysOrigin = sys.parent(.up)
         mc = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin), expand.dots = FALSE)
         args_usr = setdiff(names(mc), c("style.tex", "style.df"))
 
@@ -857,6 +873,140 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     check_arg(fit_format, "character scalar")
     if(!grepl("__var__", fit_format, fixed = TRUE)){
         stop("The argument 'fit_format' should include the special name '__var__' that will be replaced by the variable name. So far it does not contain it.")
+    }
+
+    #
+    # meta
+    #
+
+    meta_txt = ""
+    if(isTex){
+        check_arg(meta, "NULL os formula")
+        # Note that meta CANNOT be set globally, so if not null it has **always** precedence!
+        meta_order = c("time", "author", "sys", "call", "comment")
+        if(!is.null(meta)){
+            # meta = ~time + author("hahaha") + sys + comment("this is nuts")
+            meta_vars = all.vars(meta, functions = TRUE)
+            meta_vars = meta_vars[grepl("[[:alpha:]]{2,}", meta_vars)]
+
+            check_value_plus(meta_vars, "multi match(time, date, sys, author, comment, call)",
+                             .message = paste0("The argument 'meta' must be a one-sided formula composed of the following variables: \n",
+                             "  time, date, author, sys, call or comment."))
+
+            # date/time/call/sys cannot be directly edited
+            if("date" %in% meta_vars) meta.time = "date"
+            if("time" %in% meta_vars) meta.time = "time"
+            if("call" %in% meta_vars) meta.call = TRUE
+            if("sys" %in% meta_vars) meta.sys = TRUE
+
+            meta_vars[meta_vars == "date"] = "time"
+            meta_order = order_apply(meta_order, paste0("^", meta_vars, "$"))
+
+            meta_terms = attr(terms(meta), "term.labels")
+            if("author" %in% meta_vars) {
+                if(!"author" %in% all.vars(meta, functions = FALSE)){
+                    # means author is a function
+                    my_term = meta_terms[grepl("^aut.*\\(", meta_terms)]
+                    my_term = gsub("^[^\\(]+\\(", "I(", my_term)
+                    meta.author = eval(str2lang(my_term))
+                } else {
+                    meta.author = TRUE
+                }
+            }
+
+            if("comment" %in% meta_vars){
+                if(!"comment" %in% all.vars(meta, functions = FALSE)){
+                    my_term = meta_terms[grepl("^com.*\\(", meta_terms)]
+                    my_term = gsub("^[^\\(]+\\(", "I(", my_term)
+                    meta.comment = eval(str2lang(my_term))
+                } else {
+                    # Comments MUST be provided explicitly
+                    # => we rely on the default comment then (if provided)
+                }
+            }
+        }
+
+
+        check_arg_plus(meta.time, "NULL match(date, time) | logical scalar")
+        check_arg(meta.call, meta.sys, "NULL logical scalar")
+        check_arg(meta.author, "NULL logical scalar | character vector no na")
+        check_arg(meta.comment, "NULL character vector no na")
+
+        for(meta_value in meta_order){
+
+            if(meta_value == "time" && !is.null(meta.time)){
+                if(isTRUE(meta.time)) meta.time = "time"
+                my_date = switch(meta.time, "date" = Sys.Date(), "time" = Sys.time())
+                meta_txt = paste0(meta_txt, "% Created: ", my_date, "\n")
+
+            } else if(meta_value == "sys" && isTRUE(meta.sys)){
+                my_sys = Sys.info()[1:5]
+                meta_txt = paste0(meta_txt, "% System info: ",
+                                  paste0(names(my_sys), ": ", my_sys, collapse = ", "), "\n")
+
+            } else if(meta_value == "call" && isTRUE(meta.call)){
+                sc = sys.call(sysOrigin)
+                my_call = paste0("% ", deparse(sc), collapse = "\n")
+                meta_txt = paste0(meta_txt, "% Call:\n", my_call, "\n")
+
+            } else if(meta_value == "author" && !is.null(meta.author) && !isFALSE(meta.author)){
+
+                if(isTRUE(meta.author)){
+
+                    user_all = Sys.info()[c("login", "user", "effective_user")]
+
+                    author_txt = "% Created by: "
+                    if(length(unique(user_all)) == 1){
+                        # Windows
+                        author_txt = paste0(author_txt, user_all[1])
+                    } else {
+                        # Unix
+                        user_login = user_all["login"]
+                        user_no_login = user_all[-1]
+
+                        if(length(unique(user_all)) == 2){
+                            if(user_login %in% user_no_login){
+                                i = which(user_no_login == user_login)
+                                user_login = paste0(user_login, " (login, ", names(user_no_login)[i], ")")
+                                user_rest = paste0(user_no_login[-i], " (", names(user_no_login)[-i], ")")
+                            } else {
+                                user_login = paste0(user_login, " (login)")
+                                user_rest = paste0(user_all[2], "(user, effective_user)")
+                            }
+
+                            author_txt = paste0(author_txt, user_login, ", ", user_rest)
+                        } else {
+                            author_txt = paste0(author_txt, user_all[1], " (login), ", user_all[2], "(user), ", user_all[3], " (effective_user)")
+                        }
+                    }
+
+                } else {
+                    author_txt = meta.author
+
+                    if(length(author_txt) > 1){
+                        author_txt = paste0(author_txt, collapse = "\n%             ")
+                    }
+
+                    if(!grepl("^%", author_txt)){
+                        author_txt = paste0("% Created by: ", author_txt)
+                    }
+                }
+
+                meta_txt = paste0(meta_txt, author_txt, "\n")
+
+            } else if(meta_value == "comment" && !is.null(meta.comment)){
+
+                if(length(meta.comment) > 1){
+                    meta.comment = paste0(meta.comment, collapse = "\n% ")
+                }
+
+                if(!grepl("^%", meta.comment)){
+                    meta.comment = paste0("% ", meta.comment)
+                }
+
+                meta_txt = paste0(meta_txt, meta.comment, "\n")
+            }
+        }
     }
 
 
@@ -2117,7 +2267,19 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
     }
 
-    res = list(se_type_list=se_type_list, var_list=var_list, coef_list=coef_list, coef_below=coef_below, sd_below=sd_below, depvar_list=depvar_list, obs_list=obs_list, convergence_list=convergence_list, fe_names=fe_names, is_fe=is_fe, nb_fe=nb_fe, slope_flag_list = slope_flag_list, slope_names=slope_names, useSummary=useSummary, model_names=model_names, family_list=family_list, fitstat_list=fitstat_list, subtitles=subtitles, isSubtitles=isSubtitles, title=title, convergence=convergence, family=family, keep=keep, drop=drop, order=order, file=file, label=label, sdBelow=sdBelow, signifCode=signifCode, fixef_sizes=fixef_sizes, fixef_sizes.simplify = fixef_sizes.simplify, depvar=depvar, useSummary=useSummary, dict=dict, yesNo=yesNo, add_signif=add_signif, float=float, coefstat=coefstat, ci=ci, style=style, notes=notes, group=group, extraline=extraline, placement=placement, drop.section=drop.section, tex_tag=tex_tag, fun_format = fun_format, coef.just = coef.just)
+    res = list(se_type_list=se_type_list, var_list=var_list, coef_list=coef_list,
+               coef_below=coef_below, sd_below=sd_below, depvar_list=depvar_list,
+               obs_list=obs_list, convergence_list=convergence_list, fe_names=fe_names,
+               is_fe=is_fe, nb_fe=nb_fe, slope_flag_list = slope_flag_list,
+               slope_names=slope_names, useSummary=useSummary, model_names=model_names,
+               family_list=family_list, fitstat_list=fitstat_list, subtitles=subtitles,
+               isSubtitles=isSubtitles, title=title, convergence=convergence, family=family,
+               keep=keep, drop=drop, order=order, file=file, label=label, sdBelow=sdBelow,
+               signifCode=signifCode, fixef_sizes=fixef_sizes, fixef_sizes.simplify = fixef_sizes.simplify,
+               depvar=depvar, useSummary=useSummary, dict=dict, yesNo=yesNo, add_signif=add_signif,
+               float=float, coefstat=coefstat, ci=ci, style=style, notes=notes, group=group,
+               extraline=extraline, placement=placement, drop.section=drop.section,
+               tex_tag=tex_tag, fun_format = fun_format, coef.just = coef.just, meta = meta_txt)
 
     return(res)
 }
@@ -2171,6 +2333,7 @@ etable_internal_latex = function(info){
     drop.section = info$drop.section
     tex_tag = info$tex_tag
     fun_format = info$fun_format
+    meta = info$meta
 
     # Formatting the searating lines
     if(nchar(style$line.top) > 1) style$line.top = paste0(style$line.top, "\n")
@@ -2753,7 +2916,10 @@ etable_internal_latex = function(info){
         start_tag = end_tag = ""
     }
 
-    res = c(supplemental_info, start_table, start_tag, intro_latex, first_line, info_subtitles, model_line, info_family, coef_stack, stat_stack, info_SD, style$line.bottom, outro_latex, end_tag, info_notes, end_table)
+
+    # meta information: has been computed in results2formattedList
+
+    res = c(meta, supplemental_info, start_table, start_tag, intro_latex, first_line, info_subtitles, model_line, info_family, coef_stack, stat_stack, info_SD, style$line.bottom, outro_latex, end_tag, info_notes, end_table)
 
     res = res[nchar(res) > 0]
 
@@ -3295,16 +3461,8 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c(
                             style.df = NULL, notes = NULL, group = NULL, extraline = NULL,
                             fixef.group = NULL, placement = "htbp", drop.section = NULL,
                             postprocess.tex = NULL, postprocess.df = NULL,
-                            fit_format = "__var__", reset = FALSE){
-
-    # cat(names(formals(setFixest_etable)), sep = '", "')
-    arg_list = c("digits", "digits.stats", "fitstat", "coefstat", "ci", "sdBelow",
-                 "keep", "drop", "order", "dict", "signifCode", "float", "fixef_sizes",
-                 "fixef_sizes.simplify", "family", "powerBelow", "interaction.combine",
-                 "interaction.order", "i.equal",
-                 "depvar", "style.tex", "style.df", "notes", "group", "extraline",
-                 "placement", "drop.section", "postprocess.tex", "postprocess.df",
-                 "fit_format", "fixef.group", "reset")
+                            fit_format = "__var__", meta.time = NULL, meta.author = NULL, meta.sys = NULL,
+                            meta.call = NULL, meta.comment = NULL, reset = FALSE){
 
     #
     # Argument checking => strong since these will become default values
@@ -3367,6 +3525,12 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c(
         stop("The argument 'fit_format' should include the special name '__var__' that will be replaced by the variable name. So far it does not contain it.")
     }
 
+    # meta
+    check_arg_plus(meta.time, "NULL match(date, time) | logical scalar")
+    check_arg(meta.call, meta.sys, "NULL logical scalar")
+    check_arg(meta.author, "NULL logical scalar | character vector no na")
+    check_arg(meta.comment, "NULL character vector no na")
+
     #
     # Setting the defaults
     #
@@ -3385,7 +3549,7 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c(
 
     # Saving the default values
     mc = match.call()
-    args_default = intersect(names(mc), arg_list)
+    args_default = setdiff(names(mc)[-1], "reset")
 
     # NOTA: we don't allow delayed evaluation => all arguments must have hard values
     for(v in args_default){

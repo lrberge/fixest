@@ -84,6 +84,8 @@
  - new argument `interaction.order` to control the order in which interacted variables are displayed (feature request by @inkrement [#120](https://github.com/lrberge/fixest/issues/120)).
  
  - new argument `i.equal` to control how the values taken by factor variables created with `i()` are displayed.
+ 
+ - new `meta.XX` family of arguments when exporting to Latex. They include various type of information as comments before the table (suggestion of adding the time by Apoorva Lal [#184](https://github.com/lrberge/fixest/pull/184)). So far the new arguments are: `meta.time`, `meta.author`, `meta.sys`, `meta.call`, `meta.comment`. The argument `meta` is a shortcut to all these.
 
 
 # fixest 0.9.0
