@@ -10,6 +10,7 @@
 #' Aggregates the results of multiple estimations and displays them in the form of either a Latex table or a \code{data.frame}. Note that you will need the \code{booktabs} package for the Latex table to render properly.
 #'
 #' @inheritParams summary.fixest
+#' @inheritParams setFixest_nthreads
 #'
 #' @param ... Used to capture different \code{fixest} estimation objects (obtained with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}). Note that any other type of element is discarded. Note that you can give a list of \code{fixest} objects.
 #' @param digits Integer or character scalar. Default is 4 and represents the number of significant digits to be displayed for the coefficients and standard-errors. To apply rounding instead of significance use, e.g., \code{digits = "r3"} which will round at the first 3 decimals. If character, it must be of the form \code{"rd"} or \code{"sd"} with \code{d} a digit (\code{r} is for round and \code{s} is for significance). For the number of digits for the fit statistics, use \code{digits.stats}. Note that when significance is used it does not exactly display the number of significant digits: see details for its exact meaning.
@@ -3462,7 +3463,8 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c(
                             fixef.group = NULL, placement = "htbp", drop.section = NULL,
                             postprocess.tex = NULL, postprocess.df = NULL,
                             fit_format = "__var__", meta.time = NULL, meta.author = NULL, meta.sys = NULL,
-                            meta.call = NULL, meta.comment = NULL, reset = FALSE){
+                            meta.call = NULL, meta.comment = NULL, reset = FALSE, save = FALSE){
+
 
     #
     # Argument checking => strong since these will become default values
@@ -3539,17 +3541,25 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c(
     opts = getOption("fixest_etable")
 
     if(is.null(opts)){
-        opts = list()
+        # We first look at the "root" default
+        root_default = renvir_get("fixest_etable")
+        if(is.null(root_default)){
+            opts = list()
+        } else {
+            opts = root_default
+        }
+
     } else if(!is.list(opts)){
         warning("Wrong formatting of option 'fixest_etable', all options are reset.")
         opts = list()
+
     } else if(reset){
         opts = list()
     }
 
     # Saving the default values
     mc = match.call()
-    args_default = setdiff(names(mc)[-1], "reset")
+    args_default = setdiff(names(mc)[-1], c("reset", "save"))
 
     # NOTA: we don't allow delayed evaluation => all arguments must have hard values
     for(v in args_default){
@@ -3557,6 +3567,15 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c(
     }
 
     options(fixest_etable = opts)
+
+    # Saving at the project level if needed
+    check_arg_plus(save, "logical scalar | match(reset)")
+    if(isTRUE(save)){
+        renvir_update("fixest_etable", opts)
+
+    } else if(identical(save, "reset")){
+        renvir_update("fixest_etable", NULL)
+    }
 
 }
 

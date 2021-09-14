@@ -104,7 +104,8 @@ setFixest_etable(
   meta.sys = NULL,
   meta.call = NULL,
   meta.comment = NULL,
-  reset = FALSE
+  reset = FALSE,
+  save = FALSE
 )
 
 getFixest_etable()
@@ -323,6 +324,8 @@ esttex(
 \item{meta.comment}{(Tex only.) A character vector containing free-form comments to be inserted right before the table.}
 
 \item{reset}{(\code{setFixest_etable} only.) Logical, default is \code{FALSE}. If \code{TRUE}, this will reset all the default values that were already set by the user in previous calls.}
+
+\item{save}{Either a logical or equal to \code{"reset"}. Default is \code{FALSE}. If \code{TRUE} then the value is set permanently at the project level, this means that if you restart R, you will still obtain the previously saved defaults. This is done by writing in the \code{".Renviron"} file, located in the project's working directory, hence we must have write permission there for this to work. If equal to "reset", the default at the project level is erased.}
 }
 \value{
 If \code{tex = TRUE}, the lines composing the Latex table are returned invisibly while the table is directly prompted on the console.

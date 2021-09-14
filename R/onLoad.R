@@ -12,6 +12,7 @@
 
 	setFixest_coefplot("all", reset = TRUE)
 	setFixest_ssc()
+	setFixest_etable()
 
 	# # To include later
 	# cpp_setup_fork_presence()
