@@ -77,6 +77,8 @@
   # => We obtain the same as feols(y ~ x1 + x2, vcov = ~species)
   ```
   
+  - The user can now specify custom degrees of freedom to compute the t-tests (feature request by Kyle F. Butts).
+  
 ## etable
 
  - new argument `interaction.order` to control the order in which interacted variables are displayed (feature request by @inkrement [#120](https://github.com/lrberge/fixest/issues/120)).

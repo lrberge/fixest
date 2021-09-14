@@ -411,8 +411,8 @@ library(sandwich)
 
 # Data generation
 set.seed(0)
-N <- 20; G <- N/5; T <- N/G
-d <- data.frame( y=rnorm(N), x=rnorm(N), grp=rep(1:G,T), tm=rep(1:T,each=G) )
+N = 20; G = N/5; T = N/G
+d = data.frame( y=rnorm(N), x=rnorm(N), grp=rep(1:G,T), tm=rep(1:T,each=G) )
 
 # Estimations
 est_lm    = lm(y ~ x + as.factor(grp) + as.factor(tm), data=d)
@@ -431,14 +431,10 @@ test(se(est_feols, se = "st")["x"], se(est_lm)["x"])
 # Clustered by grp
 se_CL_grp_lm_HC1 = sqrt(vcovCL(est_lm, cluster = d$grp, type = "HC1")["x", "x"])
 se_CL_grp_lm_HC0 = sqrt(vcovCL(est_lm, cluster = d$grp, type = "HC0")["x", "x"])
-se_CL_grp_stata  = 0.165385 # vce(cluster grp)
 
 # How to get the lm
 test(se(est_feols, ssc = ssc(fixef.K = "full")), se_CL_grp_lm_HC1)
 test(se(est_feols, ssc = ssc(adj = FALSE, fixef.K = "full")), se_CL_grp_lm_HC0)
-
-# How to get the Stata
-test(se(est_feols), se_CL_grp_stata, "~")
 
 #
 # Heteroskedasticity-robust
@@ -637,6 +633,16 @@ test(se_clu, se(est, conley(200) ~ ssc(adj = FALSE)))
 se_hc1 = se(est, hetero ~ ssc(adj = FALSE, cluster.adj = FALSE))
 test(se_hc1, se(est, conley(1) ~ ssc(adj = FALSE)))
 
+
+#
+# ssc with custom t.df values
+#
+
+est = feols(y ~ x1 + x2, base)
+
+m = summary(est, ssc = ssc(t.df = 5))
+
+test(m$coeftable[, 4], 2*pt(-abs(m$coeftable[, 3]), 5))
 
 
 ####
@@ -1299,7 +1305,12 @@ coef_vs = fe_coef_all[[2]]
 fe_names = paste0(base$species, "_", base$fe_bis)
 
 test(coef_fe[fe_names], obs_fe[, 1])
-test(coef_vs[fe_names], obs_fe[, 2])
+test(coef_vs[fe_names] * base$x2, obs_fe[, 2])
+
+# with coef only
+obs_fe_coef = predict(res, fixef = TRUE, vs.coef = TRUE)
+test(coef_vs[fe_names], obs_fe_coef[, 2])
+
 
 ####
 #### subset ####

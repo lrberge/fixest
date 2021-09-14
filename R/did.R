@@ -446,12 +446,12 @@ aggregate.fixest = function(x, agg, full = FALSE, use_weights = TRUE, ...){
     zvalue = c_all/se_all
     if(x$method_type == "feols" || (x$method %in% "feglm" && !x$family$family %in% c("poisson", "binomial"))){
 
-        # I have renamed t.df into G
-        t.df = attr(vcov, "G")
+        df.t = attr(vcov, "df.df")
 
-        if(!is.null(t.df)){
-            pvalue = 2*pt(-abs(zvalue), max(t.df - 1, 1))
+        if(!is.null(df.t)){
+            pvalue = 2*pt(-abs(zvalue), df.t)
         } else {
+            # We shouldn't arrive here
             pvalue = 2*pt(-abs(zvalue), max(x$nobs - x$nparams, 1))
         }
 
