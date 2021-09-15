@@ -201,13 +201,7 @@ esttex(
   drop.section = NULL,
   poly_dict = c("", " square", " cube"),
   postprocess.tex = NULL,
-  fit_format = "__var__",
-  meta = NULL,
-  meta.time = NULL,
-  meta.author = NULL,
-  meta.sys = NULL,
-  meta.call = NULL,
-  meta.comment = NULL
+  fit_format = "__var__"
 )
 }
 \arguments{

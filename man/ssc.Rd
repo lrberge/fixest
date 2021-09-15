@@ -6,7 +6,7 @@
 \alias{dof}
 \alias{setFixest_ssc}
 \alias{getFixest_ssc}
-\title{Type of degree of freedom in \code{fixest} VCOVs}
+\title{Governs the small sample correction in \code{fixest} VCOVs}
 \format{
 An object of class \code{function} of length 1.
 }
@@ -52,7 +52,7 @@ getFixest_ssc
 It returns a \code{ssc.type} object.
 }
 \description{
-Provides how the degrees of freedom should be calculated in \code{\link[fixest]{vcov.fixest}}/\code{\link[fixest]{summary.fixest}}.
+Provides how the small sample correction should be calculated in \code{\link[fixest]{vcov.fixest}}/\code{\link[fixest]{summary.fixest}}.
 }
 \details{
 The following vignette: \href{https://lrberge.github.io/fixest/articles/standard_errors.html}{On standard-errors}, describes in details how the standard-errors are computed in \code{fixest} and how you can replicate standard-errors from other software.
