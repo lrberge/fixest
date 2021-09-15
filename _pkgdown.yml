@@ -22,12 +22,6 @@ reference:
         - style.df
         - style.tex
         - extraline_register
-    - title: Difference-in-difference tools
-      desc: Various tools to perform DiD estimations
-      contents:
-        - sunab
-        - aggregate.fixest
-        - i
     - title: Handling results, single
       desc: Extracts values from single estimations
       contents:
@@ -39,6 +33,12 @@ reference:
         - confint.fixest
         - print.fixest
         - setFixest_print
+    - title: Difference-in-difference tools
+      desc: Various tools to perform DiD estimations
+      contents:
+        - sunab
+        - aggregate.fixest
+        - i
     - title: Standard-errors
       desc: Computing the Standard-errors
       contents:
