@@ -1635,6 +1635,9 @@ test(max(abs(v2 - v3)) == 0, FALSE)
 #### fitstat ####
 ####
 
+
+chunk("fitstat")
+
 base = iris
 names(base) = c("y", "x1", "x_endo_1", "x_inst_1", "fe")
 set.seed(2)
@@ -1656,6 +1659,8 @@ fitstat(est_fe, ~ wf)
 #### Argument sliding ####
 ####
 
+chunk("argument sliding")
+
 base = iris
 names(base) = c("y", "x1", "x2", "x3", "species")
 
@@ -1672,7 +1677,7 @@ test(feols(y ~ x1 + x2, 1:5), "err")
 
 # should be another estimation
 other_est = feols(y ~ x1 + x2, head(base, 50))
-test(nobs(other_test), 50)
+test(nobs(other_est), 50)
 
 setFixest_estimation(reset = TRUE)
 
