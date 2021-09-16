@@ -2680,7 +2680,11 @@ etable_internal_latex = function(info){
         n_head = length(headers)
         h_names = names(headers)
 
-        info_headers = character(n_head)
+
+        headers_top = c()
+        headers_mid = c()
+        headers_bottom = c()
+
         for(i in 1:n_head){
             h_i = h_names[i]
 
@@ -2690,12 +2694,33 @@ etable_internal_latex = function(info){
                 h_i = gsub(":_:", "", h_i, fixed = TRUE)
             }
 
-            info_headers[[i]] = paste0(h_i, " & ", tex_multicol(headers[[i]], add_rule = add_rule), "\n")
+            h_placement = substr(h_i, 1, 1)
+            if(h_placement %in% c("^", "-", "_")){
+                h_i = substr(h_i, 2, nchar(h_i))
+            } else {
+                h_placement = "-"
+            }
+
+            h_value = paste0(h_i, " & ", tex_multicol(headers[[i]], add_rule = add_rule), "\n")
+
+            if(h_placement == "^") {
+                headers_top[length(headers_top) + 1] = h_value
+            } else if(h_placement == "-"){
+                headers_mid[length(headers_mid) + 1] = h_value
+            } else {
+                headers_bottom[length(headers_bottom) + 1] = h_value
+            }
+
         }
-        info_headers = paste(info_headers, collapse = "")
+
+        headers_top = paste(headers_top, collapse = "")
+        headers_mid = paste(headers_mid, collapse = "")
+        headers_bottom = paste(headers_bottom, collapse = "")
 
     } else {
-        info_headers = ""
+        headers_top = ""
+        headers_mid = ""
+        headers_bottom = ""
     }
 
     # Convergence information
@@ -2975,7 +3000,7 @@ etable_internal_latex = function(info){
 
     # meta information: has been computed in results2formattedList
 
-    res = c(meta, supplemental_info, start_table, start_tag, intro_latex, first_line, info_headers, model_line, info_family, coef_stack, stat_stack, info_SD, style$line.bottom, outro_latex, end_tag, info_notes, end_table)
+    res = c(meta, supplemental_info, start_table, start_tag, intro_latex, headers_top, first_line, headers_mid, model_line, info_family, headers_bottom, coef_stack, stat_stack, info_SD, style$line.bottom, outro_latex, end_tag, info_notes, end_table)
 
     res = res[nchar(res) > 0]
 
@@ -3298,12 +3323,31 @@ etable_internal_df = function(info){
         n_head = length(headers)
         h_names = names(headers)
 
-        # we clean remaining tex markup
-        h_names = gsub(":_:", "", h_names, fixed = TRUE)
+        headers_top = c()
+        headers_bottom = c()
 
         for(i in 1:n_head){
-            preamble = rbind(c(sfill(h_names[i], i), headers[[i]]), preamble)
+            h_i = h_names[i]
+
+            h_placement = substr(h_i, 1, 1)
+            if(h_placement %in% c("^", "-", "_")){
+                h_i = substr(h_i, 2, nchar(h_i))
+            } else {
+                h_placement = "-"
+            }
+
+            h_value = c(sfill(h_i, i), headers[[i]])
+
+            if(h_placement %in% c("^", "-")){
+                headers_top = rbind(headers_top, h_value)
+            } else {
+                headers_bottom = rbind(headers_bottom, h_value)
+            }
+
         }
+
+        preamble = rbind(headers_top, preamble, headers_bottom)
+
     }
 
     # Used to draw lines
@@ -4138,12 +4182,12 @@ tex_multicol = function(x, add_rule = FALSE){
         }
     }
 
-    res = paste0(paste(names_multi, collapse = " & "), "\\\\ ")
+    res = paste0(paste(names_multi, collapse = " & "), " \\\\ ")
 
     if(add_rule){
         my_rule = c()
-        start = 1 + c(0, cumsum(nb_multi))
-        end = start[-1]
+        start = 2 + c(0, cumsum(nb_multi))
+        end = 1 + cumsum(nb_multi)
         for(i in seq_along(nb_multi)){
             my_rule[i] = paste0("\\cmidrule(lr){", start[i], "-", end[i], "}")
         }
