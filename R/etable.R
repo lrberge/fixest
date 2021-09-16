@@ -3435,7 +3435,10 @@ etable_internal_df = function(info){
 
     # preamble created before because used to set the width
     if(length(preamble) > 0){
-        preamble = rbind(preamble, rep(" ", length(longueur)))
+        if(style$headers.sep){
+            preamble = rbind(preamble, rep(" ", length(longueur)))
+        }
+
         res = rbind(preamble, res)
     }
 
@@ -3844,6 +3847,7 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
 #' @param stats.title Character scalar. Default is \code{"_"}. The header preceding the statistics section. If equal to the empty string, then this line is removed. If equal to single character (like in the default), then this character will be expanded to take the full column width.
 #' @param stats.line Character scalar. Default is \code{"_"}. A character that will be used to create a line of separation for the statistics header. Used only if \code{stats.title} is not the empty string.
 #' @param yesNo Character vector of length 1 or 2. Default is \code{c("Yes", "No")}. Used to inform on the presence or absence of fixed-effects in the estimation. If of length 1, then automatically the second value is considered as the empty string.
+#' @param headers.sep Logical, default is \code{TRUE}. Whether to add a line of separation between the headers and the coefficients.
 #'
 #' @details
 #' The title elements (\code{depvar.title}, \code{fixef.title}, \code{slopes.title} and \code{stats.title}) will be the row names of the returned data.frame. Therefore keep in mind that any two of them should not be identical (since identical row names are forbidden in data.frames).
@@ -3872,7 +3876,7 @@ style.df = function(depvar.title = "Dependent Var.:", fixef.title = "Fixed-Effec
                     fixef.line = "-", fixef.prefix = "", fixef.suffix = "",
                     slopes.title = "Varying Slopes:", slopes.line = "-",
                     slopes.format = "__var__ (__slope__)", stats.title = "_",
-                    stats.line = "_", yesNo = c("Yes", "No")){
+                    stats.line = "_", yesNo = c("Yes", "No"), headers.sep = TRUE){
 
     # Checking
 
@@ -3894,7 +3898,9 @@ style.df = function(depvar.title = "Dependent Var.:", fixef.title = "Fixed-Effec
         stop("The argument 'stats.line' must be a singe character! It's currently a string of length ", nchar(stats.line), ".")
     }
 
-    res = list(depvar.title = depvar.title, fixef.title = fixef.title, fixef.line = fixef.line, fixef.prefix = fixef.prefix, fixef.suffix = fixef.suffix, slopes.title = slopes.title, slopes.line = slopes.line, slopes.format = slopes.format, stats.title = stats.title, stats.line = stats.line, yesNo = yesNo)
+    check_arg(headers.sep, "logical scalar")
+
+    res = list(depvar.title = depvar.title, fixef.title = fixef.title, fixef.line = fixef.line, fixef.prefix = fixef.prefix, fixef.suffix = fixef.suffix, slopes.title = slopes.title, slopes.line = slopes.line, slopes.format = slopes.format, stats.title = stats.title, stats.line = stats.line, yesNo = yesNo, headers.sep = headers.sep)
 
     class(res) = "fixest_style_df"
 
