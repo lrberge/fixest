@@ -29,7 +29,7 @@
 #' @param convergence Logical, default is missing. Should the convergence state of the algorithm be displayed? By default, convergence information is displayed if at least one model did not converge.
 #' @param signifCode Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is \code{c("***"=0.01, "**"=0.05, "*"=0.10)} for a Latex table and \code{c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)} for a data.frame (to conform with R's default). To suppress the significance codes, use \code{signifCode=NA} or \code{signifCode=NULL}. Can also be equal to \code{"letters"}, then the default becomes \code{c("a"=0.01, "b"=0.05, "c"=0.10)}.
 #' @param label (Tex only.) Character scalar. The label of the Latex table.
-#' @param subtitles Character vector or list. The elements should be of length 1 or of the same length as the number of models. If a list, the names of the list will be displayed on the leftmost column. By default it is equal to \code{list("auto")} which means that if the object is a split sample estimation, the sample will be automatically added as a sub-title.
+#' @param headers Character vector or list. The elements should be of length 1 or of the same length as the number of models. If a list, the names of the list will be displayed on the leftmost column. By default it is equal to \code{list("auto")} which means that if the object is a split sample estimation, the sample will be automatically added as a sub-title.
 #' @param fixef_sizes (Tex only.) Logical, default is \code{FALSE}. If \code{TRUE} and fixed-effects were used in the models, then the number of "individuals" per fixed-effect dimension is also displayed.
 #' @param fixef_sizes.simplify Logical, default is \code{TRUE}. Only used if \code{fixef_sizes = TRUE}. If \code{TRUE}, the fixed-effects sizes will be displayed in parentheses instead of in a separate line if there is no ambiguity (i.e. if the size is constant across models).
 #' @param family Logical, default is missing. Whether to display the families of the models. By default this line is displayed when at least two models are from different families.
@@ -362,7 +362,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                   .vcov, .vcov_args = NULL, digits = 4, digits.stats = 5, tex,
                   fitstat, title, coefstat = "se", ci = 0.95, sdBelow = NULL,
                   keep, drop, order, dict, file, replace = FALSE, convergence,
-                  signifCode, label, float, subtitles = list("auto"), fixef_sizes = FALSE,
+                  signifCode, label, float, headers = list("auto"), fixef_sizes = FALSE,
                   fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5,
                   interaction.combine = NULL, interaction.order = NULL,
                   i.equal = NULL, depvar = TRUE, style.tex = NULL,
@@ -381,12 +381,6 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     useSummary = TRUE
     if(missnull(vcov) && missnull(se) && missnull(cluster) && missing(.vcov) && missing(stage) && missnull(agg)){
         useSummary = FALSE
-    }
-
-    if(!missnull(se)){
-        check_arg_plus(se, "match(standard, white, hetero, cluster, twoway, threeway, fourway)")
-    } else {
-        se = NULL
     }
 
     # The depvar
@@ -441,6 +435,16 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
 
     if(length(dots) == 0){
         stop("You must provide at least one element in '...'.")
+    }
+
+    # Deprecated items
+    if("subtitles" %in% names(dots)){
+        if(is.null(getOption("fixest_etable_arg_subtitles"))){
+            warning("The argument 'subtitles' is deprecated. Please use 'headers' instead.")
+            options(fixest_etable_arg_subtitles = TRUE)
+        }
+        headers = dots$subtitles
+        dots$subtitles = NULL
     }
 
     # Getting the model names
@@ -536,7 +540,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                                  stage = stage, agg = agg,
                                  .vcov_args=.vcov_args, digits = digits, digits.stats = digits.stats,
                                  sdBelow = sdBelow, signifCode = signifCode, coefstat = coefstat,
-                                 ci = ci, title = title, float = float, subtitles = subtitles,
+                                 ci = ci, title = title, float = float, headers = headers,
                                  keepFactors = keepFactors, tex = tex, useSummary = useSummary,
                                  dots_call = dots_call, powerBelow = powerBelow, dict = dict,
                                  interaction.combine = interaction.combine, interaction.order = interaction.order,
@@ -687,7 +691,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                                  agg = NULL, .vcov_args = NULL, digits = 4,
                                  digits.stats = 5, fitstat_all, sdBelow=NULL, dict,
                                  signifCode = c("***"=0.01, "**"=0.05, "*"=0.10),
-                                 coefstat = "se", ci = 0.95, label, subtitles, title,
+                                 coefstat = "se", ci = 0.95, label, headers, title,
                                  float = FALSE, replace = FALSE, keepFactors = FALSE,
                                  tex = FALSE, useSummary, dots_call, powerBelow = -5,
                                  interaction.combine, interaction.order, i.equal,
@@ -840,7 +844,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     }
 
     check_arg_plus(signifCode, "NULL NA | match(letters) | named numeric vector no na GE{0} LE{1}")
-    check_arg_plus(subtitles, "NULL{list()} character vector no na | NA | list")
+    check_arg_plus(headers, "NULL{list()} character vector no na | NA | list")
 
     check_arg(poly_dict, "character vector no na")
 
@@ -1039,26 +1043,54 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         signifCode = sort(signifCode)
     }
 
-    # subtitles => must be a list
-    # We get the automatic substitles, if split is used
-    AUTO_SUBTITLES = FALSE
-    if(is.list(subtitles)){
-        if(length(subtitles) > 0){
-            qui = sapply(subtitles, function(x) identical(x, "auto"))
+    # headers => must be a list
+    # We get the automatic headers, if split is used
+    AUTO_HEADERS = FALSE
+    if(is.list(headers)){
+        if(length(headers) > 0){
+            qui = sapply(headers, function(x) identical(x, "auto"))
             if(any(qui)){
-                subtitles = subtitles[!qui]
-                AUTO_SUBTITLES = TRUE
+                i_auto_header = which(qui)[1]
+                headers = headers[!qui]
+                AUTO_HEADERS = TRUE
+            }
+
+            # We expand the headers if needed
+            if(length(headers) > 0){
+                # ex: headers = list(Gender = list("M"=2, "F"=2))
+
+                if(is.numeric(headers[[1]])){
+                    # ex: headers = list("M"=2, "F"=2)
+                    headers = list(headers)
+                }
+
+
+                for(i in seq_along(headers)){
+                    h_i = headers[[i]]
+                    if(is.numeric(h_i[[1]]) && !is.null(names(h_i))){
+                        # we need to expand it
+                        headers[[i]] = rep(names(h_i), unlist(h_i))
+                    }
+                }
+
+                # We ensure headers have names
+                if(is.null(names(headers))){
+                    names(headers) = character(length(headers))
+                }
+
             }
         }
-    } else if(anyNA(subtitles)){
-        subtitles = list()
+    } else if(anyNA(headers)){
+        headers = list()
     } else {
         # It's a character vector
-        if(identical(subtitles, "auto")){
-            subtitles = list()
-            AUTO_SUBTITLES = TRUE
+        if(identical(headers, "auto")){
+            headers = list()
+            AUTO_HEADERS = TRUE
         } else {
-            subtitles = list(subtitles)
+            # we need names
+            headers = list(headers)
+            names(headers) = ""
         }
     }
 
@@ -1082,7 +1114,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
     all_models = list()
     model_names = list()
-    auto_subtitles = list()
+    auto_headers = list()
     model_id = NULL
     k = 1
     for(i in 1:n_dots){
@@ -1092,28 +1124,28 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
             meta = attr(di, "meta")
             di = attr(di, "data")
 
-            if(AUTO_SUBTITLES){
+            if(AUTO_HEADERS){
                 if(!is.null(meta$all_names[["sample"]])){
-                    my_subtitles = list()
+                    my_headers = list()
 
                     if(tex == FALSE){
                         # We need to rename to avoid FE problem duplicate row names
-                        my_subtitles$title = paste0("Sample (", dict_apply(meta$all_names$split.name, dict), ")")
+                        my_headers$title = paste0("Sample (", dict_apply(meta$all_names$split.name, dict), ")")
                     } else {
-                        my_subtitles$title = dict_apply(meta$all_names$split.name, dict)
+                        my_headers$title = dict_apply(meta$all_names$split.name, dict)
                     }
 
                     n_mod = length(di)
 
                     if(!"sample" %in% names(meta$index)){
-                        my_subtitles$value = rep(meta$all_names$sample, n_mod)
+                        my_headers$value = rep(meta$all_names$sample, n_mod)
                     } else {
-                        my_subtitles$value = meta$all_names$sample[meta$tree[, "sample"]]
+                        my_headers$value = meta$all_names$sample[meta$tree[, "sample"]]
                     }
 
-                    my_subtitles$index = seq(k, length.out = n_mod)
+                    my_headers$index = seq(k, length.out = n_mod)
 
-                    auto_subtitles[[length(auto_subtitles) + 1]] = my_subtitles
+                    auto_headers[[length(auto_headers) + 1]] = my_headers
 
                 }
             }
@@ -1163,7 +1195,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
 
     IS_MULTI_VCOV = FALSE
-    if(!missnull(vcov) && identical(class(vcov), "list")){
+    IS_EACH = FALSE
+    if(!missnull(vcov) && identical(class(vcov), "list") && length(vcov) > 1){
         IS_MULTI_VCOV = TRUE
 
         vcov_1 = vcov[[1]]
@@ -1186,6 +1219,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                 id_mod = rep(1:n_models, n_vcov)
                 id_vcov = rep(1:n_vcov, each = n_models)
             } else {
+                IS_EACH = TRUE
                 id_mod = rep(1:n_models, each = n_vcov)
                 id_vcov = rep(1:n_vcov, n_models)
             }
@@ -1206,21 +1240,21 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                 mega_vcov[[i]] = vcov[[id_vcov[i]]]
             }
 
-            if(length(auto_subtitles) > 0){
+            if(length(auto_headers) > 0){
                 # I need to find out the new indexes... pain in the neck....
                 if(vcov_1 == "times"){
-                    for(i in seq_along(auto_subtitles)){
-                        index = auto_subtitles[[i]]
+                    for(i in seq_along(auto_headers)){
+                        index = auto_headers[[i]]
                         n_index = length(index)
-                        auto_subtitles[[i]] = rep(index, n_vcov) + n_models * rep(0:(n_vcov-1), each = n_index)
+                        auto_headers[[i]] = rep(index, n_vcov) + n_models * rep(0:(n_vcov-1), each = n_index)
                     }
                 } else {
-                    for(i in seq_along(auto_subtitles)){
-                        index = auto_subtitles[[i]]
+                    for(i in seq_along(auto_headers)){
+                        index = auto_headers[[i]]
                         new_index = (index - 1) * n_vcov + 1
                         n_index = length(index)
 
-                        auto_subtitles[[i]] = rep(new_index, each = n_vcov) + rep(1:n_vcov, n_index)
+                        auto_headers[[i]] = rep(new_index, each = n_vcov) + rep(1:n_vcov, n_index)
                     }
                 }
             }
@@ -1236,20 +1270,20 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     }
 
 
-    auto_subtitles_clean = list()
-    if(length(auto_subtitles) > 0){
-        # We reconstruct the subtitles properly
+    auto_headers_clean = list()
+    if(length(auto_headers) > 0){
+        # We reconstruct the headers properly
 
-        for(i in seq_along(auto_subtitles)){
-            my_sub = auto_subtitles[[i]]
-            if(my_sub$title %in% names(auto_subtitles_clean)){
-                value = auto_subtitles_clean[[my_sub$title]]
+        for(i in seq_along(auto_headers)){
+            my_sub = auto_headers[[i]]
+            if(my_sub$title %in% names(auto_headers_clean)){
+                value = auto_headers_clean[[my_sub$title]]
             } else {
                 value = character(n_models)
             }
 
             value[my_sub$index] = my_sub$value
-            auto_subtitles_clean[[my_sub$title]] = value
+            auto_headers_clean[[my_sub$title]] = value
         }
     }
 
@@ -1312,7 +1346,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     # The following two objects are only used if is_mult
     all_models_bis = list()
     iv_times = c()
-    # we'll use iv subtitles only if length(stage) > 1
+    # we'll use iv headers only if length(stage) > 1
     iv_sub = c()
     for(m in 1:n_models){
         if(useSummary){
@@ -1356,7 +1390,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     }
 
     if(is_mult){
-        # We've got multiple estimations from summary => we expand the subtitles
+        # We've got multiple estimations from summary => we expand the headers
         all_models = all_models_bis
 
         model_names = rep(model_names, iv_times)
@@ -1365,51 +1399,68 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         suffix[i_max == 1] = ""
         model_names = paste0(model_names, suffix)
 
-        if(length(auto_subtitles) > 0){
-            # We expand the subtitles
-            for(i in seq_along(auto_subtitles_clean)){
-                auto_subtitles_clean[[i]] = rep(auto_subtitles_clean[[i]], iv_times)
+        if(length(auto_headers) > 0){
+            # We expand the headers
+            for(i in seq_along(auto_headers_clean)){
+                auto_headers_clean[[i]] = rep(auto_headers_clean[[i]], iv_times)
             }
         }
 
-        if(AUTO_SUBTITLES){
+        if(AUTO_HEADERS){
             my_stages = sapply(all_models, function(x) ifelse(is.null(x$iv_stage), 3, x$iv_stage))
             if(length(unique(my_stages)) > 1){
                 dict_stage = c("First", "Second", " ")
-                auto_subtitles_clean[["IV stages"]] = dict_stage[my_stages]
+                auto_headers_clean[["IV stages"]] = dict_stage[my_stages]
             }
         }
 
         n_models = length(all_models)
     }
 
-    if(length(auto_subtitles_clean) > 0){
-        for(i in seq_along(auto_subtitles_clean)){
-            my_title = names(auto_subtitles_clean)[i]
-            subtitles[[dict_apply(my_title, dict)]] = dict_apply(auto_subtitles_clean[[i]], dict)
+    if(length(auto_headers_clean) > 0){
+        # We place the auto headers in the right location
+
+        auto_headers_format = list()
+        for(i in seq_along(auto_headers_clean)){
+            my_title = names(auto_headers_clean)[i]
+            auto_headers_format[[dict_apply(my_title, dict)]] = dict_apply(auto_headers_clean[[i]], dict)
         }
+
+        headers = insert(headers, auto_headers_format, i_auto_headers)
     }
 
-    # if there are subtitles
-    if(length(subtitles) == 0){
-        isSubtitles = FALSE
+    # if there are headers
+    if(length(headers) == 0){
+        isHeaders = FALSE
     } else {
 
-        n_all = lengths(subtitles)
-        for(i in which(n_all == 1)){
-            subtitles[[i]] = rep(subtitles[[i]], n_models)
+        n_all = lengths(headers)
+
+        if(any(n_models %% n_all != 0)){
+            i_pblm = which(n_models %% n_all != 0)[1]
+            info = if(length(n_all) == 1) "" else paste0(" (", n_letter(i_pblm), " header)")
+            stop_up("If argument 'headers' is provided, its elements must be of the same length as, or a divisor of, the number of models. Current lengths: ", n_all[i_pblm], " vs ", n_models, " models", info, ".")
         }
 
-        if(any(!n_all %in% c(1, n_models))){
-            stop_up("If argument 'subtitles' is provided, it must be of the same length as the number of models. Current lengths: ", setdiff(n_all, c(1, n_models))[1], " vs ", n_models, " models.")
+
+        for(i in which(n_all != n_models)){
+            if(IS_EACH){
+                headers[[i]] = rep(headers[[i]], each = n_models/n_all[i])
+            } else {
+                headers[[i]] = rep(headers[[i]], n_models/n_all[i])
+            }
         }
 
-        isSubtitles = TRUE
+        isHeaders = TRUE
 
         if(isTex){
-            for(i in seq_along(subtitles)){
-                subtitles[[i]] = escape_latex(subtitles[[i]], up = 2)
+            for(i in seq_along(headers)){
+                headers[[i]] = escape_latex(headers[[i]], up = 2)
             }
+        } else {
+            # we clean the possible Latex markup
+            h_names = gsub(":_:", "", names(headers), fixed = TRUE)
+            names(headers) = h_names
         }
 
     }
@@ -2273,8 +2324,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                obs_list=obs_list, convergence_list=convergence_list, fe_names=fe_names,
                is_fe=is_fe, nb_fe=nb_fe, slope_flag_list = slope_flag_list,
                slope_names=slope_names, useSummary=useSummary, model_names=model_names,
-               family_list=family_list, fitstat_list=fitstat_list, subtitles=subtitles,
-               isSubtitles=isSubtitles, title=title, convergence=convergence, family=family,
+               family_list=family_list, fitstat_list=fitstat_list, headers=headers,
+               isHeaders=isHeaders, title=title, convergence=convergence, family=family,
                keep=keep, drop=drop, order=order, file=file, label=label, sdBelow=sdBelow,
                signifCode=signifCode, fixef_sizes=fixef_sizes, fixef_sizes.simplify = fixef_sizes.simplify,
                depvar=depvar, useSummary=useSummary, dict=dict, yesNo=yesNo, add_signif=add_signif,
@@ -2306,8 +2357,8 @@ etable_internal_latex = function(info){
     slope_flag_list = info$slope_flag_list
     family_list = info$family_list
     fitstat_list = info$fitstat_list
-    subtitles = info$subtitles
-    isSubtitles = info$isSubtitles
+    headers = info$headers
+    isHeaders = info$isHeaders
     title = info$title
     label = info$label
     keep = info$keep
@@ -2394,7 +2445,7 @@ etable_internal_latex = function(info){
     }
 
     # now the proper format
-    first_line = escape_latex(style$depvar.title)
+    first_line = style$depvar.title
     if(length(nb_multi) == 1){
         first_line = gsub("(s)", "", first_line, fixed = TRUE)
     } else {
@@ -2446,7 +2497,7 @@ etable_internal_latex = function(info){
     } else {
         model_format = paste0("(", 1:n_models, ")")
     }
-    model_line = paste0(escape_latex(style$model.title), " & ", paste0(model_format, collapse = " & "), "\\\\\n")
+    model_line = paste0(style$model.title, " & ", paste0(model_format, collapse = " & "), "\\\\\n")
 
     # a simple line with only "variables" written in the first cell
     if(nchar(style$var.title) == 0){
@@ -2454,7 +2505,7 @@ etable_internal_latex = function(info){
     } else if(style$var.title == "\\midrule"){
         coef_title = "\\midrule "
     } else {
-        coef_title = paste0(escape_latex(style$var.title), " & ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
+        coef_title = paste0(style$var.title, " & ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
     }
 
     # Coefficients, the tricky part
@@ -2530,7 +2581,7 @@ etable_internal_latex = function(info){
         } else if(style$fixef.title == "\\midrule"){
             fixef_title = "\\midrule "
         } else {
-            fixef_title = paste0(escape_latex(style$fixef.title), " & ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
+            fixef_title = paste0(style$fixef.title, " & ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
         }
 
         # The number of FEs
@@ -2598,7 +2649,7 @@ etable_internal_latex = function(info){
         } else if(style$slopes.title == "\\midrule"){
             slope_intro = "\\midrule "
         } else {
-            slope_intro = paste0(escape_latex(style$slopes.title), " & ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
+            slope_intro = paste0(style$slopes.title, " & ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
         }
 
         # reformat the yes/no slope
@@ -2624,23 +2675,27 @@ etable_internal_latex = function(info){
         slope_lines = NULL
     }
 
-    # Subtitles
-    if(isSubtitles){
-        # info_subtitles = paste0("  & ", paste(subtitles, collapse = " & "), "\\\\\n")
-        n_sub = length(subtitles)
-        sub_names = names(subtitles)
-        if(is.null(sub_names)){
-            sub_names = character(n_sub)
-        }
+    # Headers
+    if(isHeaders){
+        n_head = length(headers)
+        h_names = names(headers)
 
-        info_subtitles = character(n_sub)
-        for(i in 1:n_sub){
-            info_subtitles[[i]] = paste0(sub_names[i], "  & ", tex_multicol(subtitles[[i]]), "\\\\\n")
+        info_headers = character(n_head)
+        for(i in 1:n_head){
+            h_i = h_names[i]
+
+            add_rule = FALSE
+            if(grepl(":_:", h_i)){
+                add_rule = TRUE
+                h_i = gsub(":_:", "", h_i, fixed = TRUE)
+            }
+
+            info_headers[[i]] = paste0(h_i, " & ", tex_multicol(headers[[i]], add_rule = add_rule), "\n")
         }
-        info_subtitles = paste(info_subtitles, collapse = "")
+        info_headers = paste(info_headers, collapse = "")
 
     } else {
-        info_subtitles = ""
+        info_headers = ""
     }
 
     # Convergence information
@@ -2681,7 +2736,7 @@ etable_internal_latex = function(info){
         } else {
             coefstat_sentence = paste0(" co-variance matrix, ", round(ci*100), "\\% confidence intervals in brackets")
         }
-        info_SD = paste0(escape_latex(style$tablefoot.title), sd_intro, my_se, coefstat_sentence, "}}\\\\\n")
+        info_SD = paste0(style$tablefoot.title, sd_intro, my_se, coefstat_sentence, "}}\\\\\n")
 
         if(add_signif){
             info_SD = paste0(info_SD, sd_intro, "Signif. Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
@@ -2701,10 +2756,10 @@ etable_internal_latex = function(info){
         info_muli_se = paste0(coefstat_sentence, " & ", paste(all_se_type, collapse = " & "), "\\\\\n")
 
         if(add_signif){
-            info_SD = paste0(escape_latex(style$tablefoot.title), sd_intro, "Signif. Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
+            info_SD = paste0(style$tablefoot.title, sd_intro, "Signif. Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
         } else {
             myAmpLine = paste0(paste0(rep(" ", length(depvar_list)+1), collapse = " & "), "\\tabularnewline\n")
-            info_SD = paste0(escape_latex(style$tablefoot.title), myAmpLine, "\\\\\n")
+            info_SD = paste0(style$tablefoot.title, myAmpLine, "\\\\\n")
         }
     }
 
@@ -2716,7 +2771,7 @@ etable_internal_latex = function(info){
                 value = gsub("__se_type__", my_se, value)
             }
 
-            info_SD = paste0(escape_latex(style$tablefoot.title), paste(sd_intro, value, "}}\\\\\n", collapse = ""))
+            info_SD = paste0(style$tablefoot.title, paste(sd_intro, value, "}}\\\\\n", collapse = ""))
         }
     } else {
         info_SD = ""
@@ -2736,7 +2791,7 @@ etable_internal_latex = function(info){
         } else if(style$stats.title == "\\midrule"){
             stat_title = "\\midrule "
         } else {
-            stat_title = paste0(escape_latex(style$stats.title), " & ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
+            stat_title = paste0(style$stats.title, " & ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
         }
 
         stat_lines = paste0(nb_FE_lines, info_convergence, info_muli_se)
@@ -2760,7 +2815,7 @@ etable_internal_latex = function(info){
     # Notes
     info_notes = ""
     if(nchar(notes) > 0){
-        info_notes = paste0("\n", escape_latex(style$notes.title), notes, "\n")
+        info_notes = paste0("\n", style$notes.title, notes, "\n")
     }
 
     #
@@ -2894,7 +2949,7 @@ etable_internal_latex = function(info){
         } else if(style$fixef.title == "\\midrule"){
             fixef_title = "\\midrule "
         } else {
-            fixef_title = paste0(escape_latex(style$fixef.title), "& ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
+            fixef_title = paste0(style$fixef.title, "& ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
         }
     }
 
@@ -2920,7 +2975,7 @@ etable_internal_latex = function(info){
 
     # meta information: has been computed in results2formattedList
 
-    res = c(meta, supplemental_info, start_table, start_tag, intro_latex, first_line, info_subtitles, model_line, info_family, coef_stack, stat_stack, info_SD, style$line.bottom, outro_latex, end_tag, info_notes, end_table)
+    res = c(meta, supplemental_info, start_table, start_tag, intro_latex, first_line, info_headers, model_line, info_family, coef_stack, stat_stack, info_SD, style$line.bottom, outro_latex, end_tag, info_notes, end_table)
 
     res = res[nchar(res) > 0]
 
@@ -2969,8 +3024,8 @@ etable_internal_df = function(info){
     coef.just = info$coef.just
 
     # naming differences
-    subtitles = info$subtitles
-    isSubtitles = info$isSubtitles
+    headers = info$headers
+    isHeaders = info$isHeaders
 
     # The coefficients
 
@@ -3236,18 +3291,18 @@ etable_internal_df = function(info){
         dep_width = nchar(as.vector(preamble))
     }
 
-    # the subtitles
-    if(isSubtitles){
+    # the headers
+    if(isHeaders){
         # we need to provide unique names... sigh...
 
-        n_sub = length(subtitles)
-        sub_names = names(subtitles)
-        if(is.null(sub_names)){
-            sub_names = character(n_sub)
-        }
+        n_head = length(headers)
+        h_names = names(headers)
 
-        for(i in 1:n_sub){
-            preamble = rbind(c(sfill(sub_names[i], i), subtitles[[i]]), preamble)
+        # we clean remaining tex markup
+        h_names = gsub(":_:", "", h_names, fixed = TRUE)
+
+        for(i in 1:n_head){
+            preamble = rbind(c(sfill(h_names[i], i), headers[[i]]), preamble)
         }
     }
 
@@ -3622,6 +3677,8 @@ getFixest_etable = function(){
 #' The \code{\\checkmark} command, used in the "aer" style (in argument \code{yesNo}), is in the \code{amssymb} package.
 #'
 #' The commands \code{\\toprule}, \code{\\midrule} and \code{\\bottomrule} are in the \code{booktabs} package. You can set the width of the top/bottom rules with \\setlength\\heavyrulewidth\{wd\}, and of the midrule with \\setlength\\lightrulewidth\{wd\}.
+#'
+#' Note that all titles (\code{depvar.title}, \code{depvar.title}, etc) are not escaped, so they must be valid Latex expressions.
 #'
 #' @return
 #' Returns a list containing the style parameters.
@@ -4057,7 +4114,7 @@ tex_star = function(x){
 
 
 
-tex_multicol = function(x){
+tex_multicol = function(x, add_rule = FALSE){
 
     if(length(x) == 1) return(x)
 
@@ -4081,7 +4138,18 @@ tex_multicol = function(x){
         }
     }
 
-    res = paste(names_multi, collapse = " & ")
+    res = paste0(paste(names_multi, collapse = " & "), "\\\\ ")
+
+    if(add_rule){
+        my_rule = c()
+        start = 1 + c(0, cumsum(nb_multi))
+        end = start[-1]
+        for(i in seq_along(nb_multi)){
+            my_rule[i] = paste0("\\cmidrule(lr){", start[i], "-", end[i], "}")
+        }
+
+        res = paste0(res, paste0(my_rule, collapse = " "))
+    }
 
     return(res)
 }
@@ -4207,7 +4275,50 @@ extraline_extractor = function(x, name = NULL, tex = FALSE){
 
 
 
+insert = function(x, y, i){
+    # x = list(a = 1, b = 2, c = 3) ; y = list(u = 33, v = 55) ; i = 2 ; insert(x, y, i)
+    # we insert y into x in location i
+    # we don't lose the names!
 
+    mode = mode(x)
+    if(!mode %in% c("list", "numeric", "logical", "character", "integer")){
+        stop("Internal error: the current mode (", mode, ") is node supported in insert().")
+    }
+
+    n_x = length(x)
+
+    if(n_x == 0){
+        return(y)
+    }
+
+    n_y = length(y)
+    res = vector(mode, n_x + n_y)
+
+    names_x = names(x)
+    if(is.null(names_x)) names_x = character(n_x)
+    names_y = names(y)
+    if(is.null(names_y)) names_y = character(n_y)
+
+    if(i > n_x){
+        res[1:n_x] = x
+        res[n_x + 1:n_y] = y
+        names(res) = c(names_x, names_y)
+
+    } else if(i == 1){
+        res[1:n_y] = y
+        res[n_y + 1:n_x] = x
+        names(res) = c(names_y, names_x)
+
+    } else {
+        res[1:(i-1)] = x[1:(i-1)]
+        res[(i-1) + 1:n_y] = y
+        res[(i+n_y):(n_x + n_y)] = x[i:n_x]
+        names(res) = c(names_x[1:(i-1)], names_y, names_x[i:n_x])
+
+    }
+
+    return(res)
+}
 
 
 

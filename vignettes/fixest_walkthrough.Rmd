@@ -161,15 +161,15 @@ Now let's say that we want a compact overview of the results of several estimati
 
 ```{r, eval=FALSE}
 etable(gravity_pois, gravity_negbin, gravity_ols,
-         vcov = "twoway", subtitles = c("Poisson", "Negative Binomial", "Gaussian"))
+         vcov = "twoway", headers = c("Poisson", "Negative Binomial", "Gaussian"))
 ```
 ```{r, echo=FALSE, results='asis'}
-tab = etable(gravity_pois, gravity_negbin, gravity_ols, vcov = "twoway", subtitles = c("Poisson", "Negative Binomial", "Gaussian"))
+tab = etable(gravity_pois, gravity_negbin, gravity_ols, vcov = "twoway", headers = c("Poisson", "Negative Binomial", "Gaussian"))
 # problem to display the second empty line in markdown
 knitr::kable(tab[-2, ])
 ```
 
-We added the argument `vcov="twoway"` to cluster the standard-errors for all estimations. As can be seen this function gives an overview of the estimates and standard-errors, as well as some quality of fit measures. The argument `subtitles` is used to add information on each estimation column.
+We added the argument `vcov="twoway"` to cluster the standard-errors for all estimations. As can be seen this function gives an overview of the estimates and standard-errors, as well as some quality of fit measures. The argument `headers` is used to add information on each estimation column.
 
 In the previous example, we directly added the estimation results as arguments of the function `etable`. But the function also accepts lists of estimations.
 Let's give an example. Say you want to see the influence of the introduction of fixed-effects on the estimate of the elasticity of distance. You can do it with the following code where we use the argument `fixef` to include fixed-effects (instead of inserting them directly in the formula):

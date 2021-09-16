@@ -88,6 +88,8 @@
  - new `meta.XX` family of arguments when exporting to Latex. They include various type of information as comments before the table (suggestion of adding the time by Apoorva Lal [#184](https://github.com/lrberge/fixest/pull/184)). So far the new arguments are: `meta.time`, `meta.author`, `meta.sys`, `meta.call`, `meta.comment`. The argument `meta` is a shortcut to all these.
  
  - default values can be saved at the project level using the argument `save = TRUE` in the function `setFixest_etable`. This means that default values will be automatically set without having to call `setFixest_etable` at the startup of the R session. For example, if you want to permanently add the creation time in your Latex exports, just use `setFixest_etable(meta.time = TRUE, save = TRUE)`, and you won't need to bother about it anymore in any future session in your current project.
+ 
+ - the argument `subtitle` has been renamed into `headers` (retro-compatibility is ensured).
 
 
 # fixest 0.9.0
