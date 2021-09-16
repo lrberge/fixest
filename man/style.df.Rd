@@ -15,7 +15,8 @@ style.df(
   slopes.format = "__var__ (__slope__)",
   stats.title = "_",
   stats.line = "_",
-  yesNo = c("Yes", "No")
+  yesNo = c("Yes", "No"),
+  headers.sep = TRUE
 )
 }
 \arguments{
@@ -40,6 +41,8 @@ style.df(
 \item{stats.line}{Character scalar. Default is \code{"_"}. A character that will be used to create a line of separation for the statistics header. Used only if \code{stats.title} is not the empty string.}
 
 \item{yesNo}{Character vector of length 1 or 2. Default is \code{c("Yes", "No")}. Used to inform on the presence or absence of fixed-effects in the estimation. If of length 1, then automatically the second value is considered as the empty string.}
+
+\item{headers.sep}{Logical, default is \code{TRUE}. Whether to add a line of separation between the headers and the coefficients.}
 }
 \value{
 It returns an object of class \code{fixest_style_df}.
