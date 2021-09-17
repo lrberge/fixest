@@ -16,7 +16,9 @@ style.df(
   stats.title = "_",
   stats.line = "_",
   yesNo = c("Yes", "No"),
-  headers.sep = TRUE
+  headers.sep = TRUE,
+  interaction.combine = " x ",
+  i.equal = " = "
 )
 }
 \arguments{

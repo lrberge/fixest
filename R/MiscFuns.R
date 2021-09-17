@@ -5139,7 +5139,7 @@ escape_latex = function(x_all, up = 0, noArg = FALSE){
             }
         }
 
-        # 2) Escaping but conditionnally on not being in an equation
+        # 2) Escaping but conditionally on not being in an equation
         if(is_eq){
             # Finding out the equations
             all_items = strsplit(paste0(x, " "), "((?<=[^\\\\])|(?<=^))\\$", perl = TRUE)[[1]]

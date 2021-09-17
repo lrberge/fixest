@@ -84,9 +84,7 @@ setFixest_etable(
   fixef_sizes.simplify = TRUE,
   family,
   powerBelow = -5,
-  interaction.combine = NULL,
   interaction.order = NULL,
-  i.equal = NULL,
   depvar,
   style.tex = NULL,
   style.df = NULL,
@@ -408,6 +406,16 @@ The second character is optional, the default placement being in the bottom. Thi
 The placement in \code{fixef.group} is defined similarly, only the default placement is different. Its default placement is at the top of the fixed-effects section.
 }
 
+\section{Escaping special Latex characters}{
+
+
+By default on all instances (with the notable exception of the elements of \code{\link[fixest]{style.tex}}) special Latex characters are escaped. This means that \code{title="Exports in million $."} will be exported as "Exports in million \\$.": the dollar sign will be escaped. This is true for the following characters: &, $, \%, _, ^ and #.
+
+Note, importantly, that equations are NOT escaped. This means that \code{title="Functional form $a_i \\times x^b$, variation in \%."} will be displayed as: \code{"Functional form $a_i \\times x^b$, variation in \\\%."}: only the last percentage will be escaped.
+
+If for some reason you don't want the escaping to take place, the arguments \code{headers} and \code{extraline} are the only ones allowing that. To disable escaping, add the special token ":tex:" in the row names. Example: in \code{headers=list(":tex:Row title"="weird & & \%\\n tex stuff\\\\")}, the elements will be displayed verbatim. Of course, since it can easily ruin your table, it is only advised for super users.
+}
+
 \examples{
 
 aq = airquality
@@ -523,6 +531,48 @@ etable(est_all, est_sub1, est_sub2, est_sub3,
 etable(est_c0, est_c1, est_c2, group = list("_Controls" = "poly"))
 etable(est_all, est_sub1, est_sub2, est_sub3,
        extraline = list("^^Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
+
+
+#
+# headers
+#
+
+
+# You can add header lines with 'headers'
+# These lines will appear at the top of the table
+
+# first, 3 estimations
+est_header = feols(c(Ozone, Solar.R, Wind) ~  poly(Temp, 2), aq)
+
+# header => vector: adds a line w/t title
+etable(est_header, headers = c("A", "A", "B"))
+
+# header => list: identical way to do the previous header
+# The form is: list(item1 = #item1, item2 = #item2,  etc)
+etable(est_header, headers = list("A" = 2, "B" = 1))
+
+# Adding a title +
+# when an element is to be repeated only once, you can avoid the "= 1":
+etable(est_header, headers = list(Group = list("A" = 2, "B")))
+
+# To change the placement, add as first character:
+# - "^" => top
+# - "-" => mid (default)
+# - "_" => bottom
+# Note that "mid" and "top" are only distinguished when tex = TRUE
+
+# Placing the new header line at the bottom
+etable(est_header, headers = list("_Group" = c("A", "A", "B"),
+                                  "^Currency" = list("US $" = 2, "CA $" = 1)))
+
+
+# In Latex, you can add "grouped underlines" (cmidrule from the booktabs package)
+# by adding ":_:" in the title:
+etable(est_header, tex = TRUE,
+       headers = list("^:_:Group" = c("A", "A", "B")))
+
+
+
 
 #
 # fixef.group

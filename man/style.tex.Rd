@@ -26,7 +26,9 @@ style.tex(
   tablefoot.title,
   tablefoot.value,
   yesNo,
-  tabular = "normal"
+  tabular = "normal",
+  interaction.combine = " $\\\\times$ ",
+  i.equal = " $=$ "
 )
 }
 \arguments{

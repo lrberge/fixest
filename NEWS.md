@@ -5,7 +5,7 @@
 
  - Fix bug occurring in IV models with multiple instruments and with multithreading on. That bug could lead to the wrong imputation of the IV residuals, hence affecting the standard-errors (although the order of magnitude of the variation should be minor). Thanks to @whitfillp [#182](https://github.com/lrberge/fixest/issues/182).
  
- - Fix minor, rare, bug occurring in `feglm` when the model was badly specified and VAR(Y) >>>> VAR(X).
+ - Fix minor, rare, bug occurring in `feglm` when the model was badly specified and VAR(Y) >>>> VAR(X) and there were only one variable.
  
  - `model.matrix` did not work with `type = "fixef"` (thanks to @kylebutts [#172](https://github.com/lrberge/fixest/issues/172)).
  
@@ -89,7 +89,17 @@
  
  - default values can be saved at the project level using the argument `save = TRUE` in the function `setFixest_etable`. This means that default values will be automatically set without having to call `setFixest_etable` at the startup of the R session. For example, if you want to permanently add the creation time in your Latex exports, just use `setFixest_etable(meta.time = TRUE, save = TRUE)`, and you won't need to bother about it anymore in any future session in your current project.
  
+ - Some changes in `extraline`, now: i) it accepts raw vectors, ii) it accepts lines without title, iii) the elements are recycled across models, and iv) the elements are Latex-escaped.
+ 
+ - in `style.tex`: all Latex-escaping is removed.
+ 
  - the argument `subtitle` has been renamed into `headers` (retro-compatibility is ensured).
+ 
+ - on the new argument `headers`:
+   * it accepts named lists of numbers, where the names represent the values in the cell and the numbers represent the span. For example `headers = list("Gender" = list("M" = 3, "F" = 4))` will create a line with 3 times "M" and 4 times "F". 
+   * adding the special tag `":_:"` in the row name will add a rule for each column group (in the previous example `":_:Gender"` would do). Suggestion by @nhirschey [#173](https://github.com/lrberge/fixest/pull/173).
+   * you can control the placement of the header line by using as first character the following special tags: "^" (top), "-" (mid, default), "_" (bottom). Ex: `headers = list("_Gender" = list("M" = 3, "F" = 4))` will place the header line at the very bottom of the headers.
+   * by default all values are Latex-escaped. You can disable escaping by adding `":tex:"` in the row title.
 
 
 # fixest 0.9.0
