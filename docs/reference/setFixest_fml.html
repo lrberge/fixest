@@ -291,13 +291,13 @@
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: Armed.Forces
 #&gt; Observations: 16 
 #&gt; Standard-errors: IID 
-#&gt;                 Estimate  Std. Error   t value Pr(&gt;|t|))    
-#&gt; (Intercept)  4403.700000 4091.800000  1.076200  0.307112    
-#&gt; Population    -22.844000   32.671000 -0.699217  0.500356    
-#&gt; GNP.deflator    7.638500   12.348000  0.618611  0.550003    
-#&gt; GNP             3.150500    3.554200  0.886433  0.396201    
-#&gt; Unemployed     -0.591649    0.389005 -1.520900  0.159248    
-#&gt; Employed      -50.060000   25.348000 -1.974900  0.076522 .  
+#&gt;                 Estimate  Std. Error   t value Pr(&gt;|t|)    
+#&gt; (Intercept)  4403.700000 4091.800000  1.076200 0.307112    
+#&gt; Population    -22.844000   32.671000 -0.699217 0.500356    
+#&gt; GNP.deflator    7.638500   12.348000  0.618611 0.550003    
+#&gt; GNP             3.150500    3.554200  0.886433 0.396201    
+#&gt; Unemployed     -0.591649    0.389005 -1.520900 0.159248    
+#&gt; Employed      -50.060000   25.348000 -1.974900 0.076522 .  
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 36.1   Adj. R2: 0.569345</div><div class='input'>
@@ -307,13 +307,13 @@
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: Armed.Forces
 #&gt; Observations: 16 
 #&gt; Standard-errors: IID 
-#&gt;                 Estimate  Std. Error   t value Pr(&gt;|t|))    
-#&gt; (Intercept)  4403.700000 4091.800000  1.076200  0.307112    
-#&gt; Population    -22.844000   32.671000 -0.699217  0.500356    
-#&gt; GNP.deflator    7.638500   12.348000  0.618611  0.550003    
-#&gt; GNP             3.150500    3.554200  0.886433  0.396201    
-#&gt; Unemployed     -0.591649    0.389005 -1.520900  0.159248    
-#&gt; Employed      -50.060000   25.348000 -1.974900  0.076522 .  
+#&gt;                 Estimate  Std. Error   t value Pr(&gt;|t|)    
+#&gt; (Intercept)  4403.700000 4091.800000  1.076200 0.307112    
+#&gt; Population    -22.844000   32.671000 -0.699217 0.500356    
+#&gt; GNP.deflator    7.638500   12.348000  0.618611 0.550003    
+#&gt; GNP             3.150500    3.554200  0.886433 0.396201    
+#&gt; Unemployed     -0.591649    0.389005 -1.520900 0.159248    
+#&gt; Employed      -50.060000   25.348000 -1.974900 0.076522 .  
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 36.1   Adj. R2: 0.569345</div><div class='input'>
@@ -347,12 +347,9 @@
 #&gt;                                                                         
 #&gt; (Intercept)       72.28*** (6.847)   70.40*** (6.518)   71.31*** (6.512)
 #&gt; Wind            -3.055*** (0.6633) -2.866*** (0.6315) -2.928*** (0.6295)
-#&gt; poly(Temp,1)      214.7*** (29.17)                                      
-#&gt; poly(Temp,2)1                        209.0*** (27.73)                   
-#&gt; poly(Temp,2)2                        93.36*** (25.44)                   
-#&gt; poly(Temp,3)1                                           201.5*** (28.02)
-#&gt; poly(Temp,3)2                                           101.7*** (25.91)
-#&gt; poly(Temp,3)3                                             -37.32 (25.03)
+#&gt; poly(Temp)1       214.7*** (29.17)   209.0*** (27.73)   201.5*** (28.02)
+#&gt; poly(Temp)2                          93.36*** (25.44)   101.7*** (25.91)
+#&gt; poly(Temp)3                                               -37.32 (25.03)
 #&gt; _______________ __________________ __________________ __________________
 #&gt; S.E. type                      IID                IID                IID
 #&gt; Observations                   116                116                116
@@ -366,15 +363,15 @@
 <span class='va'>vars</span> <span class='op'>=</span> <span class='va'>letters</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span>
 <span class='fu'><a href='xpd.html'>xpd</a></span><span class='op'>(</span>rhs <span class='op'>=</span> <span class='va'>vars</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; ~a + b + c + d + e
-#&gt; &lt;environment: 0x000000002e234580&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x000000004540e720&gt;</div><div class='input'>
 <span class='co'># Alternatively, to replace the RHS</span>
 <span class='fu'><a href='xpd.html'>xpd</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fl'>1</span>, rhs <span class='op'>=</span> <span class='va'>vars</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ a + b + c + d + e
-#&gt; &lt;environment: 0x00000000458e4e98&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x0000000042bd2bf8&gt;</div><div class='input'>
 <span class='co'># To create a two sided formula</span>
 <span class='fu'><a href='xpd.html'>xpd</a></span><span class='op'>(</span>lhs <span class='op'>=</span> <span class='st'>"y"</span>, rhs <span class='op'>=</span> <span class='va'>vars</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ a + b + c + d + e
-#&gt; &lt;environment: 0x00000000459aef48&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x0000000045005968&gt;</div><div class='input'>
 
 </div></pre>
   </div>

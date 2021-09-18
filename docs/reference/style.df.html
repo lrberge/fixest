@@ -152,7 +152,10 @@
   slopes.format <span class='op'>=</span> <span class='st'>"__var__ (__slope__)"</span>,
   stats.title <span class='op'>=</span> <span class='st'>"_"</span>,
   stats.line <span class='op'>=</span> <span class='st'>"_"</span>,
-  yesNo <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Yes"</span>, <span class='st'>"No"</span><span class='op'>)</span>
+  yesNo <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Yes"</span>, <span class='st'>"No"</span><span class='op'>)</span>,
+  headers.sep <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  interaction.combine <span class='op'>=</span> <span class='st'>" x "</span>,
+  i.equal <span class='op'>=</span> <span class='st'>" = "</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -201,6 +204,10 @@
     <tr>
       <th>yesNo</th>
       <td><p>Character vector of length 1 or 2. Default is <code><a href='https://rdrr.io/r/base/c.html'>c("Yes", "No")</a></code>. Used to inform on the presence or absence of fixed-effects in the estimation. If of length 1, then automatically the second value is considered as the empty string.</p></td>
+    </tr>
+    <tr>
+      <th>headers.sep</th>
+      <td><p>Logical, default is <code>TRUE</code>. Whether to add a line of separation between the headers and the coefficients.</p></td>
     </tr>
     </table>
 

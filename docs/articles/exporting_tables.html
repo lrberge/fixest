@@ -94,7 +94,7 @@
       <h1 data-toc-skip>Exporting estimation tables</h1>
                         <h4 class="author">Laurent Berge</h4>
             
-            <h4 class="date">2021-08-26</h4>
+            <h4 class="date">2021-09-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/exporting_tables.Rmd"><code>vignettes/exporting_tables.Rmd</code></a></small>
       <div class="hidden name"><code>exporting_tables.Rmd</code></div>
@@ -106,7 +106,7 @@
 <p><code>fixest</code> offers a tool, the function <code>etable</code>, to view estimation tables in <code>R</code> or export them to Latex.</p>
 <p>The main advantage of this function is its simplicity: it is completely integrated with other <code>fixest</code> functions, making it exceedingly easy to export multiple estimation results with, say, different types of standard-errors. On the other hand, its main limitations are that <em>i)</em> only <code>fixest</code> objects can be exported, and <em>ii)</em> only Latex is supported (although the use of post-processing functions opens up a lot of possibilities).</p>
 <p>It also offers a fair deal of customization, and since you can seamlessly change its default values, you can completely transform the style of your tables without modifying a single line of code.</p>
-<p>Note that there exists excellent alternatives to export tables, like for instance <a href="https://cran.r-project.org/package=modelsummary">modelsummary</a> (if you don’t know it already, it’s really worth a look!); but they are less integrated with <code>fixest</code> objects, possibly necessitating more lines of code to export the same results.</p>
+<p>Note that there exists excellent alternatives to export tables, like for instance <a href="https://cran.r-project.org/package=modelsummary">modelsummary</a> (if you don’t know it already, please do have a look, it’s really great!); but they are less integrated with <code>fixest</code> objects, possibly necessitating more lines of code to export the same results.</p>
 <p>This document does not describe <code>etable</code>’s arguments in details (the help page provides many examples). Rather, it illustrates some features that may be hidden at first sight.</p>
 <p>This document applies to <code>fixest</code> version 0.8.0 or higher.</p>
 <div id="preliminaries" class="section level2">
@@ -129,7 +129,7 @@
 <code class="sourceCode R"><span class="co"># On multiple estimations: see the dedicated vignette</span>
 <span class="va">est</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">Ozone</span> <span class="op">~</span> <span class="va">Solar.R</span> <span class="op">+</span> <span class="fu"><a href="../reference/stepwise.html">sw0</a></span><span class="op">(</span><span class="va">Wind</span> <span class="op">+</span> <span class="va">Temp</span><span class="op">)</span> <span class="op">|</span> <span class="fu"><a href="../reference/stepwise.html">csw</a></span><span class="op">(</span><span class="va">Month</span>, <span class="va">Day</span><span class="op">)</span>, 
             <span class="va">airquality</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Day</span><span class="op">)</span></code></pre></div>
-<p>By default, when the argument <code>file</code> is missing, the function <code>etable</code> returns a <code>data.frame</code>. Let’s see the ouput of the previous estimations:</p>
+<p>By default, when the argument <code>file</code> is missing, the function <code>etable</code> returns a <code>data.frame</code>. Let’s see the output of the previous estimations:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></code></pre></div>
 <pre><code>#&gt;                                     model 1          model 2         model 3
@@ -343,18 +343,18 @@
 <pre><code>#&gt; \setlength\heavyrulewidth{0.14em}
 #&gt; \begin{tabular}{lccccc}
 #&gt; \toprule
-#&gt; &amp;\multicolumn{5}{c}{Ozone (ppb)}\\
-#&gt; &amp;(1) &amp; (2) &amp; (3) &amp; (4) &amp; (5)\\
+#&gt;  &amp; \multicolumn{5}{c}{Ozone (ppb)}\\
+#&gt;  &amp; (1) &amp; (2) &amp; (3) &amp; (4) &amp; (5)\\
 #&gt; \midrule Solar Radiation (Langleys) &amp; 0.115 &amp; 0.052 &amp; 0.108 &amp; 0.051 &amp; 0.056\\
-#&gt;   &amp;(0.023) &amp; (0.020) &amp; (0.033) &amp; (0.024) &amp; (0.023)\\
+#&gt;   &amp; (0.023) &amp; (0.020) &amp; (0.033) &amp; (0.024) &amp; (0.023)\\
 #&gt; Wind Speed (mph) &amp;    &amp; -3.11 &amp;    &amp; -3.29 &amp; -3.05\\
-#&gt;   &amp;   &amp; (0.799) &amp;    &amp; (0.778) &amp; (0.822)\\
+#&gt;   &amp;    &amp; (0.799) &amp;    &amp; (0.778) &amp; (0.822)\\
 #&gt; Temperature &amp;    &amp; 1.88 &amp;    &amp; 2.05 &amp;   \\
-#&gt;   &amp;   &amp; (0.367) &amp;    &amp; (0.242) &amp;   \\
-#&gt;  &amp;  &amp; &amp; &amp; &amp; \\
-#&gt; R$^2$ &amp; 0.31974&amp;0.63686&amp;0.58018&amp;0.81604&amp;0.82896\\
-#&gt; Observations &amp; 111&amp;111&amp;111&amp;111&amp;111\\
-#&gt;  &amp;   &amp;   &amp;   &amp;   &amp;  \\
+#&gt;   &amp;    &amp; (0.367) &amp;    &amp; (0.242) &amp;   \\
+#&gt;   &amp;   &amp;   &amp;   &amp;   &amp;  \\
+#&gt; R$^2$ &amp; 0.31974 &amp; 0.63686 &amp; 0.58018 &amp; 0.81604 &amp; 0.82896\\
+#&gt; Observations &amp; 111 &amp; 111 &amp; 111 &amp; 111 &amp; 111\\
+#&gt;   &amp;   &amp;   &amp;   &amp;   &amp;  \\
 #&gt; Month fixed effects &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$\\
 #&gt; Day fixed effects &amp;  &amp;  &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$\\
 #&gt; Temperature $\times $ Month &amp;  &amp;  &amp;  &amp;  &amp; $\checkmark$\\
@@ -372,16 +372,16 @@
 <p>Here is an example that will shortly be explained:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/fitstat_register.html">fitstat_register</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"p_s"</span>, alias <span class="op">=</span> <span class="st">"pvalue (standard)"</span>,
-                 fun <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">x</span>, se <span class="op">=</span> <span class="st">"iid"</span><span class="op">)</span><span class="op">[</span><span class="st">"Solar.R"</span><span class="op">]</span><span class="op">)</span>
+                 fun <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">x</span>, vcov <span class="op">=</span> <span class="st">"iid"</span><span class="op">)</span><span class="op">[</span><span class="st">"Solar.R"</span><span class="op">]</span><span class="op">)</span>
 
 <span class="fu"><a href="../reference/fitstat_register.html">fitstat_register</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"p_h"</span>, alias <span class="op">=</span> <span class="st">"pvalue (Heterosk.)"</span>,
-                 fun <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">x</span>, se <span class="op">=</span> <span class="st">"hetero"</span><span class="op">)</span><span class="op">[</span><span class="st">"Solar.R"</span><span class="op">]</span><span class="op">)</span>
+                 fun <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">x</span>, vcov <span class="op">=</span> <span class="st">"hetero"</span><span class="op">)</span><span class="op">[</span><span class="st">"Solar.R"</span><span class="op">]</span><span class="op">)</span>
 
 <span class="fu"><a href="../reference/fitstat_register.html">fitstat_register</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"p_day"</span>, alias <span class="op">=</span> <span class="st">"pvalue (Day)"</span>,
-                 fun <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">x</span>, cluster <span class="op">=</span> <span class="st">"Day"</span><span class="op">)</span><span class="op">[</span><span class="st">"Solar.R"</span><span class="op">]</span><span class="op">)</span>
+                 fun <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">x</span>, vcov <span class="op">=</span> <span class="op">~</span><span class="va">Day</span><span class="op">)</span><span class="op">[</span><span class="st">"Solar.R"</span><span class="op">]</span><span class="op">)</span>
 
 <span class="fu"><a href="../reference/fitstat_register.html">fitstat_register</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"p_month"</span>, alias <span class="op">=</span> <span class="st">"pvalue (Month)"</span>,
-                 fun <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">x</span>, cluster <span class="op">=</span> <span class="st">"Month"</span><span class="op">)</span><span class="op">[</span><span class="st">"Solar.R"</span><span class="op">]</span><span class="op">)</span>
+                 fun <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">x</span>, vcov <span class="op">=</span> <span class="op">~</span><span class="va">Month</span><span class="op">)</span><span class="op">[</span><span class="st">"Solar.R"</span><span class="op">]</span><span class="op">)</span>
 
 <span class="co"># We first reset the default values set in the previous sections</span>
 <span class="fu"><a href="../reference/etable.html">setFixest_etable</a></span><span class="op">(</span>reset <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>

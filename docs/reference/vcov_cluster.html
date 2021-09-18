@@ -201,16 +201,16 @@
 <span class='co'># per se: pretty useless...</span>
 <span class='fu'>vcov_cluster</span><span class='op'>(</span><span class='op'>~</span><span class='va'>species</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; ~species
-#&gt; &lt;environment: 0x0000020f2ccdaf00&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x00000000442c4728&gt;</div><div class='input'>
 <span class='co'># ...but VCOV-requests can be used at estimation time:</span>
 <span class='co'># it may be more explicit than...</span>
 <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base</span>, vcov <span class='op'>=</span> <span class='fu'>vcov_cluster</span><span class='op'>(</span><span class='st'>"species"</span><span class='op'>)</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 150 
 #&gt; Standard-errors: Clustered (species) 
-#&gt;              Estimate Std. Error   t value Pr(&gt;|t|))    
-#&gt; (Intercept)  6.526200   0.939312  6.947900  0.020093 *  
-#&gt; x1          -0.223361   0.406738 -0.549152  0.638023    
+#&gt;              Estimate Std. Error   t value Pr(&gt;|t|)    
+#&gt; (Intercept)  6.526200   0.939312  6.947900 0.020093 *  
+#&gt; x1          -0.223361   0.406738 -0.549152 0.638023    
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.819578   Adj. R2: 0.007159</div><div class='input'>
@@ -219,9 +219,9 @@
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 150 
 #&gt; Standard-errors: Clustered (species) 
-#&gt;              Estimate Std. Error   t value Pr(&gt;|t|))    
-#&gt; (Intercept)  6.526200   0.939312  6.947900  0.020093 *  
-#&gt; x1          -0.223361   0.406738 -0.549152  0.638023    
+#&gt;              Estimate Std. Error   t value Pr(&gt;|t|)    
+#&gt; (Intercept)  6.526200   0.939312  6.947900 0.020093 *  
+#&gt; x1          -0.223361   0.406738 -0.549152 0.638023    
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.819578   Adj. R2: 0.007159</div><div class='input'>
@@ -231,9 +231,9 @@
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 150 
 #&gt; Standard-errors: Clustered (rep(1:5, 30)) 
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; (Intercept)  6.526200   0.296270 22.0280  0.000025 ***
-#&gt; x1          -0.223361   0.100044 -2.2326  0.089350 .  
+#&gt;              Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept)  6.526200   0.296270 22.0280 0.000025 ***
+#&gt; x1          -0.223361   0.100044 -2.2326 0.089350 .  
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.819578   Adj. R2: 0.007159</div><div class='input'>

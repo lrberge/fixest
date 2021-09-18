@@ -493,6 +493,7 @@ Assume you have the following formula: <code>fml = y ~ x1 + sw(x2, x3)</code>. T
 Finally, the prefix <code>c</code> means cumulative: each stepwise element is added to the next. That is, <code>fml = y ~ x1 + csw(x2, x3)</code> would lead to the following models <code>y ~ x1 + x2</code> and <code>y ~ x1 + x2 + x3</code>. The <code>0</code> has the same meaning and would also lead to the model without the stepwise elements to be estimated: in other words, <code>fml = y ~ x1 + csw0(x2, x3)</code> leads to the following three models: <code>y ~ x1</code>, <code>y ~ x1 + x2</code> and <code>y ~ x1 + x2 + x3</code>.</p>
 <p>Multiple independent variables can be combined with multiple dependent variables, as in <code>fml = c(y1, y2) ~ cw(x1, x2, x3)</code> which would lead to 6 estimations. Multiple estimations can also be combined to split samples (with the arguments <code>split</code>, <code>fsplit</code>).</p>
 <p>You can also add fixed-effects in a stepwise fashion. Note that you cannot perform stepwise estimations on the IV part of the formula (<code>feols</code> only).</p>
+<p>If NAs are present in the sample, to avoid too many messages, only NA removal concerning the variables common to all estimations is reported.</p>
 <p>A note on performance. The feature of multiple estimations has been highly optimized for <code>feols</code>, in particular in the presence of fixed-effects. It is faster to estimate multiple models using the formula rather than with a loop. For non-<code>feols</code> models using the formula is roughly similar to using a loop performance-wise.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
@@ -621,13 +622,13 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 #&gt; ### Dep. var.: Ozone
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error  t value Pr(&gt;|t|))    
+#&gt;                Estimate Std. Error  t value  Pr(&gt;|t|)    
 #&gt; (Intercept)      3.3040   0.042415  77.8970 &lt; 2.2e-16 ***
 #&gt; poly(Wind, 2)1  -6.4147   0.617300 -10.3910 &lt; 2.2e-16 ***
 #&gt; poly(Wind, 2)2   3.0758   0.570194   5.3944  6.88e-08 ***
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt;                Estimate Std. Error t value  Pr(&gt;|t|)    
 #&gt; (Intercept)      4.0582   0.109394 37.0970 &lt; 2.2e-16 ***
 #&gt; poly(Temp, 2)1  11.2850   1.448100  7.7926  6.56e-15 ***
 #&gt; poly(Temp, 2)2   2.5057   1.171800  2.1383  0.032492 *  
@@ -635,13 +636,13 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 #&gt; ### Dep. var.: Solar.R
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                 Estimate Std. Error  t value Pr(&gt;|t|))    
+#&gt;                 Estimate Std. Error  t value  Pr(&gt;|t|)    
 #&gt; (Intercept)     5.207800   0.018194 286.2400 &lt; 2.2e-16 ***
 #&gt; poly(Wind, 2)1 -0.569626   0.271696  -2.0966  0.036033 *  
 #&gt; poly(Wind, 2)2 -1.834700   0.250895  -7.3127  2.62e-13 ***
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error  t value Pr(&gt;|t|))    
+#&gt;                Estimate Std. Error  t value  Pr(&gt;|t|)    
 #&gt; (Intercept)      5.1026   0.052341  97.4880 &lt; 2.2e-16 ***
 #&gt; poly(Temp, 2)1  -2.6300   0.635659  -4.1374   3.5e-05 ***
 #&gt; poly(Temp, 2)2  -5.5977   0.432368 -12.9470 &lt; 2.2e-16 ***
@@ -653,13 +654,13 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 #&gt; ### Dep. var.: Ozone
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt;                Estimate Std. Error t value  Pr(&gt;|t|)    
 #&gt; (Intercept)      3.0710   0.124756 24.6160 &lt; 2.2e-16 ***
 #&gt; poly(Wind, 2)1   6.0990   1.922800  3.1720  0.001514 ** 
 #&gt; poly(Wind, 2)2  -2.2844   1.031900 -2.2138  0.026842 *  
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt;                Estimate Std. Error t value  Pr(&gt;|t|)    
 #&gt; (Intercept)      3.4184   0.080824 42.2950 &lt; 2.2e-16 ***
 #&gt; poly(Temp, 2)1   3.2650   1.293500  2.5242  0.011595 *  
 #&gt; poly(Temp, 2)2   5.6690   1.562600  3.6279  0.000286 ***
@@ -667,13 +668,13 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 #&gt; ### Dep. var.: Solar.R
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                 Estimate Std. Error  t value Pr(&gt;|t|))    
+#&gt;                 Estimate Std. Error  t value  Pr(&gt;|t|)    
 #&gt; (Intercept)     5.218500   0.014191 367.7400 &lt; 2.2e-16 ***
 #&gt; poly(Wind, 2)1  2.220400   0.177688  12.4960 &lt; 2.2e-16 ***
 #&gt; poly(Wind, 2)2 -0.624761   0.139873  -4.4666  7.95e-06 ***
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error    t value Pr(&gt;|t|))    
+#&gt;                Estimate Std. Error    t value  Pr(&gt;|t|)    
 #&gt; (Intercept)    5.200300   0.019697 264.010000 &lt; 2.2e-16 ***
 #&gt; poly(Temp, 2)1 3.286100   0.364969   9.003800 &lt; 2.2e-16 ***
 #&gt; poly(Temp, 2)2 0.155763   0.322767   0.482586   0.62939    
@@ -685,13 +686,13 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 #&gt; ### Dep. var.: Ozone
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                 Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt;                 Estimate Std. Error t value  Pr(&gt;|t|)    
 #&gt; (Intercept)     3.778200   0.043180 87.4980 &lt; 2.2e-16 ***
 #&gt; poly(Wind, 2)1 -6.722500   0.703358 -9.5577 &lt; 2.2e-16 ***
 #&gt; poly(Wind, 2)2 -0.959048   0.681576 -1.4071  0.159397    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt;                Estimate Std. Error t value  Pr(&gt;|t|)    
 #&gt; (Intercept)       2.595   0.190413 13.6280 &lt; 2.2e-16 ***
 #&gt; poly(Temp, 2)1   24.895   3.062000  8.1301  4.29e-16 ***
 #&gt; poly(Temp, 2)2   -8.578   1.768700 -4.8499  1.24e-06 ***
@@ -699,13 +700,13 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 #&gt; ### Dep. var.: Solar.R
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                 Estimate Std. Error    t value Pr(&gt;|t|))    
+#&gt;                 Estimate Std. Error    t value  Pr(&gt;|t|)    
 #&gt; (Intercept)     5.360500   0.014178 378.100000 &lt; 2.2e-16 ***
 #&gt; poly(Wind, 2)1 -0.682752   0.216716  -3.150400   0.00163 ** 
 #&gt; poly(Wind, 2)2  0.013888   0.277451   0.050054  0.960079    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt;                Estimate Std. Error t value  Pr(&gt;|t|)    
 #&gt; (Intercept)      5.1094   0.056186 90.9360 &lt; 2.2e-16 ***
 #&gt; poly(Temp, 2)1   4.8281   0.928155  5.2018  1.97e-07 ***
 #&gt; poly(Temp, 2)2  -1.1147   0.615860 -1.8101  0.070285 .  
@@ -717,13 +718,13 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 #&gt; ### Dep. var.: Ozone
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                 Estimate Std. Error   t value Pr(&gt;|t|))    
+#&gt;                 Estimate Std. Error   t value  Pr(&gt;|t|)    
 #&gt; (Intercept)     3.755800   0.041522 90.454000 &lt; 2.2e-16 ***
 #&gt; poly(Wind, 2)1 -6.956500   0.697914 -9.967500 &lt; 2.2e-16 ***
 #&gt; poly(Wind, 2)2 -0.344133   0.486153 -0.707869  0.479027    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt;                Estimate Std. Error t value  Pr(&gt;|t|)    
 #&gt; (Intercept)      3.1434   0.097610 32.2040 &lt; 2.2e-16 ***
 #&gt; poly(Temp, 2)1  17.2990   1.746300  9.9064 &lt; 2.2e-16 ***
 #&gt; poly(Temp, 2)2  -5.7801   0.896709 -6.4459  1.15e-10 ***
@@ -731,13 +732,13 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 #&gt; ### Dep. var.: Solar.R
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                 Estimate Std. Error  t value Pr(&gt;|t|))    
+#&gt;                 Estimate Std. Error  t value  Pr(&gt;|t|)    
 #&gt; (Intercept)     5.134500   0.016224 316.4800 &lt; 2.2e-16 ***
 #&gt; poly(Wind, 2)1 -0.459093   0.272152  -1.6869  0.091623 .  
 #&gt; poly(Wind, 2)2  0.683835   0.246613   2.7729  0.005556 ** 
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                 Estimate Std. Error  t value Pr(&gt;|t|))    
+#&gt;                 Estimate Std. Error  t value  Pr(&gt;|t|)    
 #&gt; (Intercept)     4.926600   0.041382 119.0500 &lt; 2.2e-16 ***
 #&gt; poly(Temp, 2)1  4.222000   0.816701   5.1696  2.35e-07 ***
 #&gt; poly(Temp, 2)2 -0.794082   0.462440  -1.7172   0.08595 .  
@@ -749,13 +750,13 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 #&gt; ### Dep. var.: Ozone
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt;                Estimate Std. Error t value  Pr(&gt;|t|)    
 #&gt; (Intercept)      3.3642   0.036953 91.0400 &lt; 2.2e-16 ***
 #&gt; poly(Wind, 2)1  -4.0441   0.492839 -8.2057  2.29e-16 ***
 #&gt; poly(Wind, 2)2   2.9891   0.470324  6.3554  2.08e-10 ***
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt;                Estimate Std. Error t value  Pr(&gt;|t|)    
 #&gt; (Intercept)      3.3695   0.038292 87.9930 &lt; 2.2e-16 ***
 #&gt; poly(Temp, 2)1   6.1002   0.690949  8.8287 &lt; 2.2e-16 ***
 #&gt; poly(Temp, 2)2   2.2548   0.627045  3.5960  0.000323 ***
@@ -763,13 +764,13 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 #&gt; ### Dep. var.: Solar.R
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                 Estimate Std. Error    t value Pr(&gt;|t|))    
+#&gt;                 Estimate Std. Error    t value  Pr(&gt;|t|)    
 #&gt; (Intercept)     5.123000   0.014639 349.970000 &lt; 2.2e-16 ***
 #&gt; poly(Wind, 2)1 -0.564257   0.193672  -2.913500  0.003574 ** 
 #&gt; poly(Wind, 2)2  0.144413   0.224957   0.641955  0.520902    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                 Estimate Std. Error  t value Pr(&gt;|t|))    
+#&gt;                 Estimate Std. Error  t value  Pr(&gt;|t|)    
 #&gt; (Intercept)     5.111400   0.015302 334.0300 &lt; 2.2e-16 ***
 #&gt; poly(Temp, 2)1  1.286100   0.251169   5.1203  3.05e-07 ***
 #&gt; poly(Temp, 2)2 -0.928769   0.260074  -3.5712  0.000355 ***</div><div class='input'>
@@ -823,13 +824,13 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
 #&gt; Dep. var.: Ozone
 #&gt; Expl. vars.: poly(Wind, 2)
 #&gt; Sample: 5
-#&gt;                Estimate Std. Error  t value Pr(&gt;|t|))    
+#&gt;                Estimate Std. Error  t value  Pr(&gt;|t|)    
 #&gt; (Intercept)      3.3040   0.042415  77.8970 &lt; 2.2e-16 ***
 #&gt; poly(Wind, 2)1  -6.4147   0.617300 -10.3910 &lt; 2.2e-16 ***
 #&gt; poly(Wind, 2)2   3.0758   0.570194   5.3944  6.88e-08 ***
 #&gt; ---
 #&gt; Sample: 6
-#&gt;                Estimate Std. Error t value Pr(&gt;|t|))    
+#&gt;                Estimate Std. Error t value  Pr(&gt;|t|)    
 #&gt; (Intercept)      3.0710   0.124756 24.6160 &lt; 2.2e-16 ***
 #&gt; poly(Wind, 2)1   6.0990   1.922800  3.1720  0.001514 ** 
 #&gt; poly(Wind, 2)2  -2.2844   1.031900 -2.2138  0.026842 *  </div><div class='input'>

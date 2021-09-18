@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Type of degree of freedom in fixest VCOVs — ssc • fixest</title>
+<title>Governs the small sample correction in fixest VCOVs — ssc • fixest</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Type of degree of freedom in fixest VCOVs — ssc" />
-<meta property="og:description" content="Provides how the degrees of freedom should be calculated in vcov.fixest/summary.fixest." />
+<meta property="og:title" content="Governs the small sample correction in fixest VCOVs — ssc" />
+<meta property="og:description" content="Provides how the small sample correction should be calculated in vcov.fixest/summary.fixest." />
 
 
 
@@ -132,16 +132,25 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Type of degree of freedom in <code>fixest</code> VCOVs</h1>
+    <h1>Governs the small sample correction in <code>fixest</code> VCOVs</h1>
     <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/VCOV.R'><code>R/VCOV.R</code></a></small>
     <div class="hidden name"><code>ssc.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Provides how the degrees of freedom should be calculated in <code><a href='vcov.fixest.html'>vcov.fixest</a></code>/<code><a href='summary.fixest.html'>summary.fixest</a></code>.</p>
+    <p>Provides how the small sample correction should be calculated in <code><a href='vcov.fixest.html'>vcov.fixest</a></code>/<code><a href='summary.fixest.html'>summary.fixest</a></code>.</p>
     </div>
 
     <pre class="usage"><span class='fu'>ssc</span><span class='op'>(</span>
+  adj <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  fixef.K <span class='op'>=</span> <span class='st'>"nested"</span>,
+  cluster.adj <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  cluster.df <span class='op'>=</span> <span class='st'>"min"</span>,
+  t.df <span class='op'>=</span> <span class='st'>"min"</span>,
+  fixef.force_exact <span class='op'>=</span> <span class='cn'>FALSE</span>
+<span class='op'>)</span>
+
+<span class='fu'>dof</span><span class='op'>(</span>
   adj <span class='op'>=</span> <span class='cn'>TRUE</span>,
   fixef.K <span class='op'>=</span> <span class='st'>"nested"</span>,
   cluster.adj <span class='op'>=</span> <span class='cn'>TRUE</span>,
@@ -175,7 +184,7 @@
     </tr>
     <tr>
       <th>t.df</th>
-      <td><p>Either "conventional" or "min" (default). Only relevant when the variance-covariance matrix is clustered. It governs how the p-values should be computed. By default, the degrees of freedom of the Student t distribution is equal to the minimum size of the clusters with which the VCOV has been clustered. If <code>t.df="conventional"</code>, then the degrees of freedom of the Student t distribution is equal to the number of observations minus the number of estimated variables.</p></td>
+      <td><p>Either "conventional", "min" (default) or an integer scalar. Only relevant when the variance-covariance matrix is clustered. It governs how the p-values should be computed. By default, the degrees of freedom of the Student t distribution is equal to the minimum size of the clusters with which the VCOV has been clustered. If <code>t.df="conventional"</code>, then the degrees of freedom of the Student t distribution is equal to the number of observations minus the number of estimated variables. You can also pass a number to manually specify the DoF of the t-distribution.</p></td>
     </tr>
     <tr>
       <th>fixef.force_exact</th>
@@ -196,6 +205,12 @@
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>The following vignette: <a href='https://lrberge.github.io/fixest/articles/standard_errors.html'>On standard-errors</a>, describes in details how the standard-errors are computed in <code>fixest</code> and how you can replicate standard-errors from other software.</p>
+    <h2 class="hasAnchor" id="functions"><a class="anchor" href="#functions"></a>Functions</h2>
+
+    
+<ul>
+<li><p><code>dof</code>: This function is deprecated and will be removed at some point (in 6 months from August 2021). Exactly the same as <code>ssc</code>.</p></li>
+</ul>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='summary.fixest.html'>summary.fixest</a></code>, <code><a href='vcov.fixest.html'>vcov.fixest</a></code></p></div>
@@ -268,8 +283,8 @@
 #&gt; Observations: 10 
 #&gt; Fixed-effects: fe1: 3,  fe2: 5
 #&gt; Standard-errors: Clustered (fe1) 
-#&gt;   Estimate Std. Error  t value Pr(&gt;|t|)) 
-#&gt; x 0.206284      1.513 0.136341  0.904037 
+#&gt;   Estimate Std. Error  t value Pr(&gt;|t|) 
+#&gt; x 0.206284      1.513 0.136341 0.904037 
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.998379     Adj. R2: -0.605494
@@ -288,8 +303,8 @@
 #&gt; Observations: 10 
 #&gt; Fixed-effects: fe1: 3,  fe2: 5
 #&gt; Standard-errors: Clustered (fe1) 
-#&gt;   Estimate Std. Error  t value Pr(&gt;|t|)) 
-#&gt; x 0.206284     1.0087 0.204512  0.856877 
+#&gt;   Estimate Std. Error  t value Pr(&gt;|t|) 
+#&gt; x 0.206284     1.0087 0.204512 0.856877 
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.998379     Adj. R2: -0.605494
@@ -303,8 +318,8 @@
 #&gt; Observations: 10 
 #&gt; Fixed-effects: fe1: 3,  fe2: 5
 #&gt; Standard-errors: Clustered (fe1) 
-#&gt;   Estimate Std. Error  t value Pr(&gt;|t|)) 
-#&gt; x 0.206284     2.1397 0.096408  0.931987 
+#&gt;   Estimate Std. Error  t value Pr(&gt;|t|) 
+#&gt; x 0.206284     2.1397 0.096408 0.931987 
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.998379     Adj. R2: -0.605494
@@ -318,8 +333,8 @@
 #&gt; Observations: 10 
 #&gt; Fixed-effects: fe1: 3,  fe2: 5
 #&gt; Standard-errors: Clustered (fe1) 
-#&gt;   Estimate Std. Error  t value Pr(&gt;|t|)) 
-#&gt; x 0.206284     1.7471 0.118075  0.916798 
+#&gt;   Estimate Std. Error  t value Pr(&gt;|t|) 
+#&gt; x 0.206284     1.7471 0.118075 0.916798 
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.998379     Adj. R2: -0.605494
@@ -327,7 +342,7 @@
 </div><div class='output co'>#&gt; [1] 7</div><div class='input'>
 <span class='co'># There are two restrictions:</span>
 <span class='fu'><a href='https://rdrr.io/r/base/attr.html'>attr</a></span><span class='op'>(</span><span class='fu'><a href='fixef_reexported.html'>fixef</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>, <span class='st'>"references"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>NOTE: The fixed-effects are not regular, they cannot be straightforwardly interpreted.</span></div><div class='output co'>#&gt; fe1 fe2 
+</div><div class='output co'>#&gt; fe1 fe2 
 #&gt;   0   2 </div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># To permanently set the default ssc:</span>

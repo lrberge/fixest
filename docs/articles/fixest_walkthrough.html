@@ -94,7 +94,7 @@
       <h1 data-toc-skip>Fast Fixed-Effects Estimation: Short introduction</h1>
                         <h4 class="author">Laurent Berge and Grant McDermott</h4>
             
-            <h4 class="date">2021-08-26</h4>
+            <h4 class="date">2021-09-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/fixest_walkthrough.Rmd"><code>vignettes/fixest_walkthrough.Rmd</code></a></small>
       <div class="hidden name"><code>fixest_walkthrough.Rmd</code></div>
@@ -195,7 +195,7 @@
 <span class="co">#&gt; Observations: 38,325 </span>
 <span class="co">#&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20,  Year: 10</span>
 <span class="co">#&gt; Standard-errors: Clustered (Origin) </span>
-<span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt;              Estimate Std. Error t value  Pr(&gt;|t|)    </span>
 <span class="co">#&gt; log(dist_km)  -1.5279   0.115678 -13.208 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
@@ -213,7 +213,7 @@
 <span class="co">#&gt; Observations: 38,325 </span>
 <span class="co">#&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20,  Year: 10</span>
 <span class="co">#&gt; Standard-errors: Clustered (Origin &amp; Destination) </span>
-<span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt;              Estimate Std. Error t value  Pr(&gt;|t|)    </span>
 <span class="co">#&gt; log(dist_km)  -1.5279   0.130734 -11.687 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
@@ -232,7 +232,7 @@
 <span class="co">#&gt; Observations: 38,325 </span>
 <span class="co">#&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20,  Year: 10</span>
 <span class="co">#&gt; Standard-errors: Clustered (Product) </span>
-<span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt;              Estimate Std. Error t value  Pr(&gt;|t|)    </span>
 <span class="co">#&gt; log(dist_km)  -1.5279   0.098294 -15.544 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
@@ -247,7 +247,7 @@
 <span class="co">#&gt; Poisson estimation, Dep. Var.: Euros</span>
 <span class="co">#&gt; Observations: 38,325 </span>
 <span class="co">#&gt; Standard-errors: Clustered (Origin &amp; Destination) </span>
-<span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt;              Estimate Std. Error t value  Pr(&gt;|t|)    </span>
 <span class="co">#&gt; (Intercept)    24.709   1.124800 21.9680 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; log(dist_km)   -1.029   0.158022 -6.5114  7.44e-11 ***</span>
 <span class="co">#&gt; ---</span>
@@ -260,7 +260,7 @@
 <span class="co">#&gt; Poisson estimation, Dep. Var.: Euros</span>
 <span class="co">#&gt; Observations: 38,325 </span>
 <span class="co">#&gt; Standard-errors: Clustered (Product) </span>
-<span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt;              Estimate Std. Error t value  Pr(&gt;|t|)    </span>
 <span class="co">#&gt; (Intercept)    24.709   0.330044  74.865 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; log(dist_km)   -1.029   0.045954 -22.391 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
@@ -290,7 +290,7 @@
 <p>Now let’s say that we want a compact overview of the results of several estimations. The best way is to use the function <code>etable</code>. This function summarizes the results of several <code>fixest</code> estimations into a data.frame. To see the fixed-effects results with the three different likelihoods, we just have to type:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">gravity_pois</span>, <span class="va">gravity_negbin</span>, <span class="va">gravity_ols</span>,
-         vcov <span class="op">=</span> <span class="st">"twoway"</span>, subtitles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Poisson"</span>, <span class="st">"Negative Binomial"</span>, <span class="st">"Gaussian"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+         vcov <span class="op">=</span> <span class="st">"twoway"</span>, headers <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Poisson"</span>, <span class="st">"Negative Binomial"</span>, <span class="st">"Gaussian"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="left"></th>
@@ -397,7 +397,7 @@
 </tr>
 </tbody>
 </table>
-<p>We added the argument <code>vcov="twoway"</code> to cluster the standard-errors for all estimations. As can be seen this function gives an overview of the estimates and standard-errors, as well as some quality of fit measures. The argument <code>subtitles</code> is used to add information on each estimation column.</p>
+<p>We added the argument <code>vcov="twoway"</code> to cluster the standard-errors for all estimations. As can be seen this function gives an overview of the estimates and standard-errors, as well as some quality of fit measures. The argument <code>headers</code> is used to add information on each estimation column.</p>
 <p>In the previous example, we directly added the estimation results as arguments of the function <code>etable</code>. But the function also accepts lists of estimations. Let’s give an example. Say you want to see the influence of the introduction of fixed-effects on the estimate of the elasticity of distance. You can do it with the following code where we use the argument <code>fixef</code> to include fixed-effects (instead of inserting them directly in the formula):</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">gravity_subfe</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="op">)</span>
@@ -544,22 +544,22 @@
 <span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">res_multi</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Origin</span><span class="op">+</span><span class="va">Destination</span>, tex <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 <span class="co">#&gt; \begin{tabular}{lcccc}</span>
 <span class="co">#&gt; \tabularnewline\midrule\midrule</span>
-<span class="co">#&gt; Dependent Variable:&amp;\multicolumn{4}{c}{Euros}\\</span>
-<span class="co">#&gt; Model:&amp;(1) &amp; (2) &amp; (3) &amp; (4)\\</span>
-<span class="co">#&gt; \midrule \emph{Variables}&amp;   &amp;   &amp;   &amp;  \\</span>
+<span class="co">#&gt; Dependent Variable: &amp; \multicolumn{4}{c}{Euros}\\</span>
+<span class="co">#&gt; Model: &amp; (1) &amp; (2) &amp; (3) &amp; (4)\\</span>
+<span class="co">#&gt; \midrule \emph{Variables} &amp;   &amp;   &amp;   &amp;  \\</span>
 <span class="co">#&gt; (Intercept) &amp; 24.71$^{***}$ &amp;    &amp;    &amp;   \\</span>
-<span class="co">#&gt;   &amp;(1.125) &amp;    &amp;    &amp;   \\</span>
+<span class="co">#&gt;   &amp; (1.125) &amp;    &amp;    &amp;   \\</span>
 <span class="co">#&gt; log(dist\_km) &amp; -1.029$^{***}$ &amp; -1.029$^{***}$ &amp; -1.226$^{***}$ &amp; -1.518$^{***}$\\</span>
-<span class="co">#&gt;   &amp;(0.1580) &amp; (0.1581) &amp; (0.2045) &amp; (0.1282)\\</span>
-<span class="co">#&gt; \midrule \emph{Fixed-effects}&amp;   &amp;   &amp;   &amp;  \\</span>
+<span class="co">#&gt;   &amp; (0.1580) &amp; (0.1581) &amp; (0.2045) &amp; (0.1282)\\</span>
+<span class="co">#&gt; \midrule \emph{Fixed-effects} &amp;   &amp;   &amp;   &amp;  \\</span>
 <span class="co">#&gt; Year &amp;  &amp; Yes &amp; Yes &amp; Yes\\</span>
 <span class="co">#&gt; Destination &amp;  &amp;  &amp; Yes &amp; Yes\\</span>
 <span class="co">#&gt; Origin &amp;  &amp;  &amp;  &amp; Yes\\</span>
-<span class="co">#&gt; \midrule \emph{Fit statistics}&amp;  &amp; &amp; &amp; \\</span>
-<span class="co">#&gt; Observations &amp; 38,325&amp;38,325&amp;38,325&amp;38,325\\</span>
-<span class="co">#&gt; Squared Correlation &amp; 0.05511&amp;0.05711&amp;0.16420&amp;0.38479\\</span>
-<span class="co">#&gt; Pseudo R$^2$ &amp; 0.18502&amp;0.18833&amp;0.35826&amp;0.59312\\</span>
-<span class="co">#&gt; BIC &amp; $4.85\times 10^{12}$&amp;$4.83\times 10^{12}$&amp;$3.82\times 10^{12}$&amp;$2.42\times 10^{12}$\\</span>
+<span class="co">#&gt; \midrule \emph{Fit statistics} &amp;   &amp;   &amp;   &amp;  \\</span>
+<span class="co">#&gt; Observations &amp; 38,325 &amp; 38,325 &amp; 38,325 &amp; 38,325\\</span>
+<span class="co">#&gt; Squared Correlation &amp; 0.05511 &amp; 0.05711 &amp; 0.16420 &amp; 0.38479\\</span>
+<span class="co">#&gt; Pseudo R$^2$ &amp; 0.18502 &amp; 0.18833 &amp; 0.35826 &amp; 0.59312\\</span>
+<span class="co">#&gt; BIC &amp; $4.85\times 10^{12}$ &amp; $4.83\times 10^{12}$ &amp; $3.82\times 10^{12}$ &amp; $2.42\times 10^{12}$\\</span>
 <span class="co">#&gt; \midrule\midrule\multicolumn{5}{l}{\emph{Clustered (Origin \&amp; Destination) standard-errors in parentheses}}\\</span>
 <span class="co">#&gt; \multicolumn{5}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\</span>
 <span class="co">#&gt; \end{tabular}</span></code></pre></div>
@@ -658,9 +658,9 @@
 <span class="co">#&gt; OLS estimation, Dep. Var.: y</span>
 <span class="co">#&gt; Observations: 1,080 </span>
 <span class="co">#&gt; Standard-errors: Newey-West (L=1) </span>
-<span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    </span>
-<span class="co">#&gt; (Intercept)  1.98880   0.174111  11.422  1.17e-06 ***</span>
-<span class="co">#&gt; x1           0.98311   0.052699  18.655  1.68e-08 ***</span>
+<span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    </span>
+<span class="co">#&gt; (Intercept)  1.98880   0.174111  11.422 1.17e-06 ***</span>
+<span class="co">#&gt; x1           0.98311   0.052699  18.655 1.68e-08 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 4.8969   Adj. R2: 0.262357</span></code></pre></div>
@@ -675,9 +675,9 @@
 <span class="co">#&gt; OLS estimation, Dep. Var.: y</span>
 <span class="co">#&gt; Observations: 1,080 </span>
 <span class="co">#&gt; Standard-errors: Newey-West (L=1) </span>
-<span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    </span>
-<span class="co">#&gt; (Intercept)  1.98880   0.174111  11.422  1.17e-06 ***</span>
-<span class="co">#&gt; x1           0.98311   0.052699  18.655  1.68e-08 ***</span>
+<span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    </span>
+<span class="co">#&gt; (Intercept)  1.98880   0.174111  11.422 1.17e-06 ***</span>
+<span class="co">#&gt; x1           0.98311   0.052699  18.655 1.68e-08 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 4.8969   Adj. R2: 0.262357</span></code></pre></div>
@@ -689,9 +689,9 @@
 <span class="co">#&gt; OLS estimation, Dep. Var.: y</span>
 <span class="co">#&gt; Observations: 1,080 </span>
 <span class="co">#&gt; Standard-errors: Newey-West (L=1) </span>
-<span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    </span>
-<span class="co">#&gt; (Intercept)  1.98880   0.174111  11.422  1.17e-06 ***</span>
-<span class="co">#&gt; x1           0.98311   0.052699  18.655  1.68e-08 ***</span>
+<span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    </span>
+<span class="co">#&gt; (Intercept)  1.98880   0.174111  11.422 1.17e-06 ***</span>
+<span class="co">#&gt; x1           0.98311   0.052699  18.655 1.68e-08 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 4.8969   Adj. R2: 0.262357</span></code></pre></div>
@@ -702,7 +702,7 @@
 <span class="co">#&gt; OLS estimation, Dep. Var.: y</span>
 <span class="co">#&gt; Observations: 1,080 </span>
 <span class="co">#&gt; Standard-errors: Clustered (id) </span>
-<span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt;             Estimate Std. Error t value  Pr(&gt;|t|)    </span>
 <span class="co">#&gt; (Intercept)  1.98880   0.194352  10.233 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; x1           0.98311   0.046789  21.011 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
@@ -715,7 +715,7 @@
 <span class="co">#&gt; Observations: 1,080 </span>
 <span class="co">#&gt; Fixed-effects: period: 10</span>
 <span class="co">#&gt; Standard-errors: Clustered (id) </span>
-<span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt;    Estimate Std. Error t value  Pr(&gt;|t|)    </span>
 <span class="co">#&gt; x1 0.997536   0.045721  21.818 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
@@ -730,8 +730,8 @@
 <span class="co">#&gt; Observations: 1,080 </span>
 <span class="co">#&gt; Fixed-effects: period: 10</span>
 <span class="co">#&gt; Standard-errors: Clustered (period) </span>
-<span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|))    </span>
-<span class="co">#&gt; x1 0.997536   0.050264  19.846  9.72e-09 ***</span>
+<span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|)    </span>
+<span class="co">#&gt; x1 0.997536   0.050264  19.846 9.72e-09 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 4.5526     Adj. R2: 0.357059</span>
@@ -743,8 +743,8 @@
 <span class="co">#&gt; Observations: 1,080 </span>
 <span class="co">#&gt; Fixed-effects: period: 10</span>
 <span class="co">#&gt; Standard-errors: Clustered (id &amp; period) </span>
-<span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|))    </span>
-<span class="co">#&gt; x1 0.997536   0.047498  21.001   5.9e-09 ***</span>
+<span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|)    </span>
+<span class="co">#&gt; x1 0.997536   0.047498  21.001  5.9e-09 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 4.5526     Adj. R2: 0.357059</span>
@@ -756,9 +756,9 @@
 <span class="co">#&gt; OLS estimation, Dep. Var.: depth</span>
 <span class="co">#&gt; Observations: 1,000 </span>
 <span class="co">#&gt; Standard-errors: Conley (90km) </span>
-<span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    </span>
-<span class="co">#&gt; (Intercept)   881.63    110.670  7.9661  4.45e-15 ***</span>
-<span class="co">#&gt; mag          -123.42     20.175 -6.1177  1.36e-09 ***</span>
+<span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    </span>
+<span class="co">#&gt; (Intercept)   881.63    110.670  7.9661 4.45e-15 ***</span>
+<span class="co">#&gt; mag          -123.42     20.175 -6.1177 1.36e-09 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 209.6   Adj. R2: 0.052245</span></code></pre></div>
@@ -779,8 +779,8 @@
 <span class="co">#&gt; Observations: 1,080 </span>
 <span class="co">#&gt; Fixed-effects: period: 10</span>
 <span class="co">#&gt; Standard-errors: Newey-West (L=2) </span>
-<span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|))    </span>
-<span class="co">#&gt; x1 0.997536   0.049344  20.216  8.26e-09 ***</span>
+<span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|)    </span>
+<span class="co">#&gt; x1 0.997536   0.049344  20.216 8.26e-09 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 4.5526     Adj. R2: 0.357059</span>
@@ -790,9 +790,9 @@
 <span class="co">#&gt; OLS estimation, Dep. Var.: depth</span>
 <span class="co">#&gt; Observations: 1,000 </span>
 <span class="co">#&gt; Standard-errors: Conley (200km) </span>
-<span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    </span>
-<span class="co">#&gt; (Intercept)   881.63    128.240  6.8747  1.09e-11 ***</span>
-<span class="co">#&gt; mag          -123.42     22.895 -5.3907  8.76e-08 ***</span>
+<span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    </span>
+<span class="co">#&gt; (Intercept)   881.63    128.240  6.8747 1.09e-11 ***</span>
+<span class="co">#&gt; mag          -123.42     22.895 -5.3907 8.76e-08 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 209.6   Adj. R2: 0.052245</span></code></pre></div>
@@ -805,8 +805,8 @@
 <span class="co">#&gt; Observations: 1,080 </span>
 <span class="co">#&gt; Fixed-effects: period: 10</span>
 <span class="co">#&gt; Standard-errors: Newey-West (L=2) </span>
-<span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|))    </span>
-<span class="co">#&gt; x1 0.997536   0.049344  20.216  8.26e-09 ***</span>
+<span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|)    </span>
+<span class="co">#&gt; x1 0.997536   0.049344  20.216 8.26e-09 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 4.5526     Adj. R2: 0.357059</span>
@@ -817,9 +817,9 @@
 <span class="co">#&gt; OLS estimation, Dep. Var.: depth</span>
 <span class="co">#&gt; Observations: 1,000 </span>
 <span class="co">#&gt; Standard-errors: Conley (200km) </span>
-<span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    </span>
-<span class="co">#&gt; (Intercept)   881.63    128.240  6.8747  1.09e-11 ***</span>
-<span class="co">#&gt; mag          -123.42     22.895 -5.3907  8.76e-08 ***</span>
+<span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    </span>
+<span class="co">#&gt; (Intercept)   881.63    128.240  6.8747 1.09e-11 ***</span>
+<span class="co">#&gt; mag          -123.42     22.895 -5.3907 8.76e-08 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 209.6   Adj. R2: 0.052245</span></code></pre></div>
@@ -868,7 +868,7 @@
 <span class="co">#&gt; Observations: 1,080 </span>
 <span class="co">#&gt; Fixed-effects: id: 108</span>
 <span class="co">#&gt; Standard-errors: IID </span>
-<span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt;    Estimate Std. Error t value  Pr(&gt;|t|)    </span>
 <span class="co">#&gt; x1 0.961525   0.048741  19.727 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
@@ -879,7 +879,7 @@
 <span class="co">#&gt; Observations: 1,080 </span>
 <span class="co">#&gt; Fixed-effects: id: 108</span>
 <span class="co">#&gt; Standard-errors: Heteroskedasticity-robust </span>
-<span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt;    Estimate Std. Error t value  Pr(&gt;|t|)    </span>
 <span class="co">#&gt; x1 0.961525   0.050226  19.144 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
@@ -901,7 +901,7 @@
 <span class="co">#&gt; Observations: 1,080 </span>
 <span class="co">#&gt; Fixed-effects: id: 108</span>
 <span class="co">#&gt; Standard-errors: vcovHC </span>
-<span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt;    Estimate Std. Error t value  Pr(&gt;|t|)    </span>
 <span class="co">#&gt; x1 0.961525   0.050226  19.144 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
@@ -914,7 +914,7 @@
 <span class="co">#&gt; Observations: 1,080 </span>
 <span class="co">#&gt; Fixed-effects: id: 108</span>
 <span class="co">#&gt; Standard-errors: vcovHC(x, type = "HC1") </span>
-<span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt;    Estimate Std. Error t value  Pr(&gt;|t|)    </span>
 <span class="co">#&gt; x1 0.961525   0.050226  19.144 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
@@ -939,7 +939,7 @@
 <span class="co">#&gt; Second stage: Dep. Var.: y</span>
 <span class="co">#&gt; Observations: 150 </span>
 <span class="co">#&gt; Standard-errors: IID </span>
-<span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt;              Estimate Std. Error t value  Pr(&gt;|t|)    </span>
 <span class="co">#&gt; (Intercept)  1.831400   0.411435  4.4512   1.7e-05 ***</span>
 <span class="co">#&gt; fit_x_endo_1 0.444982   0.022086 20.1470 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; fit_x_endo_2 0.639916   0.307376  2.0819    0.0391 *  </span>
@@ -970,7 +970,7 @@
 <span class="co">#&gt; Second stage: Dep. Var.: y</span>
 <span class="co">#&gt; Observations: 150 </span>
 <span class="co">#&gt; Standard-errors: IID </span>
-<span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt;              Estimate Std. Error t value  Pr(&gt;|t|)    </span>
 <span class="co">#&gt; (Intercept)  1.831400   0.411435  4.4512   1.7e-05 ***</span>
 <span class="co">#&gt; fit_x_endo_1 0.444982   0.022086 20.1470 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; fit_x_endo_2 0.639916   0.307376  2.0819    0.0391 *  </span>
@@ -992,10 +992,10 @@
 <span class="co">#&gt; Observations: 150 </span>
 <span class="co">#&gt; Fixed-effects: fe: 3</span>
 <span class="co">#&gt; Standard-errors: Clustered (fe) </span>
-<span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    </span>
-<span class="co">#&gt; fit_x_endo_1 0.666671   0.106558  6.2564  0.024608 *  </span>
-<span class="co">#&gt; fit_x_endo_2 0.413839   0.177769  2.3280  0.145344    </span>
-<span class="co">#&gt; x1           0.451680   0.153375  2.9449  0.098553 .  </span>
+<span class="co">#&gt;              Estimate Std. Error t value Pr(&gt;|t|)    </span>
+<span class="co">#&gt; fit_x_endo_1 0.666671   0.106558  6.2564 0.024608 *  </span>
+<span class="co">#&gt; fit_x_endo_2 0.413839   0.177769  2.3280 0.145344    </span>
+<span class="co">#&gt; x1           0.451680   0.153375  2.9449 0.098553 .  </span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 0.327938     Adj. R2: 0.836626</span>
@@ -1013,10 +1013,10 @@
 <span class="co">#&gt; Observations: 150 </span>
 <span class="co">#&gt; Fixed-effects: fe: 3</span>
 <span class="co">#&gt; Standard-errors: Clustered (fe) </span>
-<span class="co">#&gt;          Estimate Std. Error t value Pr(&gt;|t|)) </span>
-<span class="co">#&gt; x_inst_1 0.705992   0.485614  1.4538  0.283198 </span>
-<span class="co">#&gt; x_inst_2 0.202337   0.143302  1.4120  0.293457 </span>
-<span class="co">#&gt; x1       0.189320   0.135622  1.3959  0.297507 </span>
+<span class="co">#&gt;          Estimate Std. Error t value Pr(&gt;|t|) </span>
+<span class="co">#&gt; x_inst_1 0.705992   0.485614  1.4538 0.283198 </span>
+<span class="co">#&gt; x_inst_2 0.202337   0.143302  1.4120 0.293457 </span>
+<span class="co">#&gt; x1       0.189320   0.135622  1.3959 0.297507 </span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 0.346509     Adj. R2: 0.959865</span>
@@ -1029,10 +1029,10 @@
 <span class="co">#&gt; Observations: 150 </span>
 <span class="co">#&gt; Fixed-effects: fe: 3</span>
 <span class="co">#&gt; Standard-errors: Clustered (fe) </span>
-<span class="co">#&gt;           Estimate Std. Error t value Pr(&gt;|t|))    </span>
-<span class="co">#&gt; x_inst_1 -0.546745   0.081370 -6.7192  0.021440 *  </span>
-<span class="co">#&gt; x_inst_2  0.183092   0.083446  2.1942  0.159464    </span>
-<span class="co">#&gt; x1        0.153198   0.089148  1.7185  0.227851    </span>
+<span class="co">#&gt;           Estimate Std. Error t value Pr(&gt;|t|)    </span>
+<span class="co">#&gt; x_inst_1 -0.546745   0.081370 -6.7192 0.021440 *  </span>
+<span class="co">#&gt; x_inst_2  0.183092   0.083446  2.1942 0.159464    </span>
+<span class="co">#&gt; x1        0.153198   0.089148  1.7185 0.227851    </span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 0.51208     Adj. R2: 0.040133</span>
@@ -1094,8 +1094,8 @@
 <span class="co">#&gt; Observations: 150 </span>
 <span class="co">#&gt; Fixed-effects: fe1^fe2: 15</span>
 <span class="co">#&gt; Standard-errors: Clustered (fe1^fe2) </span>
-<span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|))    </span>
-<span class="co">#&gt; x1 0.782815   0.119465  6.5527   1.3e-05 ***</span>
+<span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|)    </span>
+<span class="co">#&gt; x1 0.782815   0.119465  6.5527  1.3e-05 ***</span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 0.406785     Adj. R2: 0.729861</span>
@@ -1133,8 +1133,8 @@
 <span class="co">#&gt; Fixed-effects: fe1: 3</span>
 <span class="co">#&gt; Varying slopes: x2 (fe1: 3)</span>
 <span class="co">#&gt; Standard-errors: Clustered (fe1) </span>
-<span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|)) </span>
-<span class="co">#&gt; x1 0.450006   0.156731  2.8712  0.102916 </span>
+<span class="co">#&gt;    Estimate Std. Error t value Pr(&gt;|t|) </span>
+<span class="co">#&gt; x1 0.450006   0.156731  2.8712 0.102916 </span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 0.298706     Adj. R2: 0.863506</span>
@@ -1224,7 +1224,7 @@
 <span class="co">#&gt; Observations: 1,080 </span>
 <span class="co">#&gt; Fixed-effects: id: 108,  period: 10</span>
 <span class="co">#&gt; Standard-errors: Clustered (id) </span>
-<span class="co">#&gt;                   Estimate Std. Error   t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt;                   Estimate Std. Error   t value  Pr(&gt;|t|)    </span>
 <span class="co">#&gt; x1                0.973490   0.045678 21.312000 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; period::1:treat  -1.403000   1.110300 -1.263700  0.209084    </span>
 <span class="co">#&gt; period::2:treat  -1.247500   1.093100 -1.141200  0.256329    </span>
@@ -1309,7 +1309,7 @@
 <span class="co">#&gt; Observations: 950 </span>
 <span class="co">#&gt; Fixed-effects: id: 95,  year: 10</span>
 <span class="co">#&gt; Standard-errors: Clustered (id) </span>
-<span class="co">#&gt;      Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt;      Estimate Std. Error t value  Pr(&gt;|t|)    </span>
 <span class="co">#&gt; x1   0.994678   0.018378 54.1230 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ATT -1.133700   0.205070 -5.5286  4.43e-08 ***</span>
 <span class="co">#&gt; ---</span>
@@ -1368,7 +1368,7 @@
 <span class="co"># Accessing them</span>
 <span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">..ctrl</span><span class="op">)</span>
 <span class="co">#&gt; y ~ x1 + poly(x2, 2) + poly(x3, 2)</span>
-<span class="co">#&gt; &lt;environment: 0x000000001b6f09f0&gt;</span>
+<span class="co">#&gt; &lt;environment: 0x000000001f90c1f8&gt;</span>
 
 <span class="co"># Definition at run time</span>
 <span class="va">vars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x2"</span>, <span class="st">"x2^2"</span>, <span class="st">"x3"</span><span class="op">)</span>
@@ -1376,11 +1376,11 @@
   <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">..ctrl</span>, ..ctrl <span class="op">=</span> <span class="va">vars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
 <span class="op">}</span>
 <span class="co">#&gt; y ~ x1 + x2</span>
-<span class="co">#&gt; &lt;environment: 0x0000000017155540&gt;</span>
+<span class="co">#&gt; &lt;environment: 0x000000001ba41b30&gt;</span>
 <span class="co">#&gt; y ~ x1 + x2 + x2^2</span>
-<span class="co">#&gt; &lt;environment: 0x0000000016b47550&gt;</span>
+<span class="co">#&gt; &lt;environment: 0x000000001b8084c8&gt;</span>
 <span class="co">#&gt; y ~ x1 + x2 + x2^2 + x3</span>
-<span class="co">#&gt; &lt;environment: 0x000000001681b778&gt;</span></code></pre></div>
+<span class="co">#&gt; &lt;environment: 0x000000001b66c590&gt;</span></code></pre></div>
 <p>Macro variables must start with two dots. As seen in the example, once set globally they can be directly accessed with <code>xpd</code>. In the example, <code>xpd</code> redefines the formula at run-time by having a character vector as input.</p>
 <p>All <code>fixest</code> estimations call <code>xpd</code> internally if appropriate. This means that the following code works just fine:</p>
 <div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
@@ -1388,7 +1388,7 @@
 <span class="co">#&gt; OLS estimation, Dep. Var.: y</span>
 <span class="co">#&gt; Observations: 150 </span>
 <span class="co">#&gt; Standard-errors: IID </span>
-<span class="co">#&gt;               Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt;               Estimate Std. Error t value  Pr(&gt;|t|)    </span>
 <span class="co">#&gt; (Intercept)   4.122800   0.233398 17.6640 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; x1            0.562757   0.075897  7.4147  9.59e-12 ***</span>
 <span class="co">#&gt; poly(x2, 2)1 12.601000   1.783000  7.0676  6.26e-11 ***</span>
@@ -1404,20 +1404,20 @@
 <span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">longley</span><span class="op">)</span>
 <span class="co">#&gt; Armed.Forces ~ Population + GNP.deflator + GNP + Unemployed + </span>
 <span class="co">#&gt;     Employed</span>
-<span class="co">#&gt; &lt;environment: 0x0000000022341c88&gt;</span></code></pre></div>
+<span class="co">#&gt; &lt;environment: 0x0000000012d0e580&gt;</span></code></pre></div>
 <p>Again, since <code>xpd</code> is called internally, the following works:</p>
 <div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, <span class="va">longley</span><span class="op">)</span>
 <span class="co">#&gt; OLS estimation, Dep. Var.: Armed.Forces</span>
 <span class="co">#&gt; Observations: 16 </span>
 <span class="co">#&gt; Standard-errors: IID </span>
-<span class="co">#&gt;                 Estimate  Std. Error   t value Pr(&gt;|t|))    </span>
-<span class="co">#&gt; (Intercept)  4403.700000 4091.800000  1.076200  0.307112    </span>
-<span class="co">#&gt; Population    -22.844000   32.671000 -0.699217  0.500356    </span>
-<span class="co">#&gt; GNP.deflator    7.638500   12.348000  0.618611  0.550003    </span>
-<span class="co">#&gt; GNP             3.150500    3.554200  0.886433  0.396201    </span>
-<span class="co">#&gt; Unemployed     -0.591649    0.389005 -1.520900  0.159248    </span>
-<span class="co">#&gt; Employed      -50.060000   25.348000 -1.974900  0.076522 .  </span>
+<span class="co">#&gt;                 Estimate  Std. Error   t value Pr(&gt;|t|)    </span>
+<span class="co">#&gt; (Intercept)  4403.700000 4091.800000  1.076200 0.307112    </span>
+<span class="co">#&gt; Population    -22.844000   32.671000 -0.699217 0.500356    </span>
+<span class="co">#&gt; GNP.deflator    7.638500   12.348000  0.618611 0.550003    </span>
+<span class="co">#&gt; GNP             3.150500    3.554200  0.886433 0.396201    </span>
+<span class="co">#&gt; Unemployed     -0.591649    0.389005 -1.520900 0.159248    </span>
+<span class="co">#&gt; Employed      -50.060000   25.348000 -1.974900 0.076522 .  </span>
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 36.1   Adj. R2: 0.569345</span></code></pre></div>
@@ -1560,7 +1560,7 @@
 <span class="co">#&gt; Non-linear ML estimation, family = Poisson, Dep. Var.: z</span>
 <span class="co">#&gt; Observations: 1,000 </span>
 <span class="co">#&gt; Standard-errors: IID </span>
-<span class="co">#&gt;   Estimate Std. Error t value Pr(&gt;|t|))    </span>
+<span class="co">#&gt;   Estimate Std. Error t value  Pr(&gt;|t|)    </span>
 <span class="co">#&gt; a   2.0233   0.011217  180.38 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; b   3.0282   0.012684  238.74 &lt; 2.2e-16 ***</span>
 <span class="co">#&gt; ---</span>
