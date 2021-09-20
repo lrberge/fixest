@@ -77,7 +77,7 @@
   # => We obtain the same as feols(y ~ x1 + x2, vcov = ~species)
   ```
   
-  - The user can now specify custom degrees of freedom to compute the t-tests (feature request by Kyle F. Butts).
+  - The user can now specify custom degrees of freedom to compute the t-tests in `ssc()` (feature request by Kyle F. Butts).
   
 ## etable
 
