@@ -1089,7 +1089,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 #' # Default: fixef.K = "nested"
 #' #  => adjustment K = 1 + 5 (i.e. x + fe2)
 #' summary(est)
-#' attributes(vcov(est, attr = TRUE))[c("ssc.type", "dof.K")]
+#' attributes(vcov(est, attr = TRUE))[c("ssc", "dof.K")]
 #'
 #'
 #' # fixef.K = FALSE
