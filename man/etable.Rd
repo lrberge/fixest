@@ -25,7 +25,8 @@ etable(
   title,
   coefstat = "se",
   ci = 0.95,
-  sdBelow = NULL,
+  se.row = NULL,
+  se.below = NULL,
   keep,
   drop,
   order,
@@ -73,7 +74,7 @@ setFixest_etable(
   fitstat,
   coefstat = c("se", "tstat", "confint"),
   ci = 0.95,
-  sdBelow = TRUE,
+  se.below = TRUE,
   keep,
   drop,
   order,
@@ -123,7 +124,8 @@ esttable(
   fitstat,
   coefstat = "se",
   ci = 0.95,
-  sdBelow = NULL,
+  se.row = NULL,
+  se.below = NULL,
   keep,
   drop,
   order,
@@ -169,7 +171,8 @@ esttex(
   title,
   coefstat = "se",
   ci = 0.95,
-  sdBelow = NULL,
+  se.row = NULL,
+  se.below = NULL,
   keep,
   drop,
   order,
@@ -241,7 +244,9 @@ esttex(
 
 \item{ci}{Level of the confidence interval, defaults to \code{0.95}. Only used if \code{coefstat = confint}.}
 
-\item{sdBelow}{Logical or \code{NULL} (default). Should the standard-errors be displayed below the coefficients? If \code{NULL}, then this is \code{TRUE} for Latex and \code{FALSE} otherwise.}
+\item{se.row}{Logical scalar, default is \code{NULL}. Whether should be displayed the row with the type of standard-error for each model. When \code{tex = FALSE}, the default is \code{TRUE}. When \code{tex = FALSE}, the row is showed only when there is a table-footer and the types of standard-errors differ across models.}
+
+\item{se.below}{Logical or \code{NULL} (default). Should the standard-errors be displayed below the coefficients? If \code{NULL}, then this is \code{TRUE} for Latex and \code{FALSE} otherwise.}
 
 \item{keep}{Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is kept). See details.}
 
@@ -307,7 +312,7 @@ esttex(
 
 \item{fit_format}{Character scalar, default is \code{"__var__"}. Only used in the presence of IVs. By default the endogenous regressors are named \code{fit_varname} in the second stage. The format of the endogenous regressor to appear in the table is governed by \code{fit_format}. For instance, by default, the prefix \code{"fit_"} is removed, leading to only \code{varname} to appear. If \code{fit_format = "$\\\\hat{__var__}$"}, then \code{"$\\hat{varname}$"} will appear in the table.}
 
-\item{coef.just}{(DF only.) Either \code{"."}, \code{"("}, \code{"l"}, \code{"c"} or \code{"r"}, default is \code{NULL}. How the coefficients should be justified. If \code{NULL} then they are right aligned if \code{sdBelow = FALSE} and aligned to the dot if \code{sdBelow = TRUE}. The keywords stand respectively for dot-, parenthesis-, left-, center- and right-aligned.}
+\item{coef.just}{(DF only.) Either \code{"."}, \code{"("}, \code{"l"}, \code{"c"} or \code{"r"}, default is \code{NULL}. How the coefficients should be justified. If \code{NULL} then they are right aligned if \code{se.below = FALSE} and aligned to the dot if \code{se.below = TRUE}. The keywords stand respectively for dot-, parenthesis-, left-, center- and right-aligned.}
 
 \item{meta}{(Tex only.) A one-sided formula that shall contain the following elements: date or time, sys, author, comment and call. Default is \code{NULL}. This argument is a shortcut to controlling the meta information that can be displayed in comments before the table. Typically if the element is in the formula, it means that the argument will be equal to \code{TRUE}. Example: \code{meta = ~time+call} is equivalent to \code{meta.time = TRUE} and \code{meta.call = TRUE}. The "author" and "comment" elements are a bit special. Using \code{meta = ~author("Mark")} is equivalent to \code{meta.author = "Mark"} while \code{meta=~author} is equiv. to \code{meta.author = TRUE}. The "comment" must be used with a character string inside: \code{meta = ~comment("this is a comment")}. The order in the formula controls the order of appearance of the meta elements. It also has precedence over the \code{meta.XX} arguments.}
 

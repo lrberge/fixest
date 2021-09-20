@@ -19,7 +19,8 @@
 #' @param fitstat A character vector or a one sided formula (both with only lowercase letters). A vector listing which fit statistics to display. The valid types are 'n', 'll', 'aic', 'bic' and r2 types like 'r2', 'pr2', 'war2', etc (see all valid types in \code{\link[fixest]{r2}}). Also accepts valid types from the function \code{\link[fixest]{fitstat}}. The default value depends on the models to display. Example of use: \code{fitstat=c('n', 'cor2', 'ar2', 'war2')}, or \code{fitstat=~n+cor2+ar2+war2} using a formula. You can use the dot to refer to default values:\code{ ~ . + ll} would add the log-likelihood to the default fit statistics.
 #' @param title (Tex only.) Character scalar. The title of the Latex table.
 #' @param float (Tex only.) Logical. By default, if the argument \code{title} or \code{label} is provided, it is set to \code{TRUE}. Otherwise, it is set to \code{FALSE}.
-#' @param sdBelow Logical or \code{NULL} (default). Should the standard-errors be displayed below the coefficients? If \code{NULL}, then this is \code{TRUE} for Latex and \code{FALSE} otherwise.
+#' @param se.below Logical or \code{NULL} (default). Should the standard-errors be displayed below the coefficients? If \code{NULL}, then this is \code{TRUE} for Latex and \code{FALSE} otherwise.
+#' @param se.row Logical scalar, default is \code{NULL}. Whether should be displayed the row with the type of standard-error for each model. When \code{tex = FALSE}, the default is \code{TRUE}. When \code{tex = FALSE}, the row is showed only when there is a table-footer and the types of standard-errors differ across models.
 #' @param keep Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is kept). See details.
 #' @param drop Character vector. This element is used if some variables are not to be displayed. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be discarded. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{drop = "x[[:digit:]]{2}"}. If the first character is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is dropped). See details.
 #' @param order Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument \code{dict}). Example: you have the following variables: \code{month1} to \code{month6}, then \code{x1} to \code{x5}, then \code{year1} to \code{year6}. If you want to display first the x's, then the years, then the months you could use: \code{order = c("x", "year")}. If the first character is an exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that does not contain \dQuote{Intercept} goes first).  See details.
@@ -56,7 +57,7 @@
 #' @param postprocess.tex A function that will postprocess the character vector defining the latex table. Only when \code{tex = TRUE}. By default it is equal to \code{NULL}, meaning that there is no postprocessing. When \code{tex = FALSE}, see the argument \code{postprocess.df}. See details.
 #' @param postprocess.df A function that will postprocess.tex the resulting data.frame. Only when \code{tex = FALSE}. By default it is equal to \code{NULL}, meaning that there is no postprocessing. When \code{tex = TRUE}, see the argument \code{postprocess.tex}.
 #' @param fit_format Character scalar, default is \code{"__var__"}. Only used in the presence of IVs. By default the endogenous regressors are named \code{fit_varname} in the second stage. The format of the endogenous regressor to appear in the table is governed by \code{fit_format}. For instance, by default, the prefix \code{"fit_"} is removed, leading to only \code{varname} to appear. If \code{fit_format = "$\\\\hat{__var__}$"}, then \code{"$\\hat{varname}$"} will appear in the table.
-#' @param coef.just (DF only.) Either \code{"."}, \code{"("}, \code{"l"}, \code{"c"} or \code{"r"}, default is \code{NULL}. How the coefficients should be justified. If \code{NULL} then they are right aligned if \code{sdBelow = FALSE} and aligned to the dot if \code{sdBelow = TRUE}. The keywords stand respectively for dot-, parenthesis-, left-, center- and right-aligned.
+#' @param coef.just (DF only.) Either \code{"."}, \code{"("}, \code{"l"}, \code{"c"} or \code{"r"}, default is \code{NULL}. How the coefficients should be justified. If \code{NULL} then they are right aligned if \code{se.below = FALSE} and aligned to the dot if \code{se.below = TRUE}. The keywords stand respectively for dot-, parenthesis-, left-, center- and right-aligned.
 #' @param meta (Tex only.) A one-sided formula that shall contain the following elements: date or time, sys, author, comment and call. Default is \code{NULL}. This argument is a shortcut to controlling the meta information that can be displayed in comments before the table. Typically if the element is in the formula, it means that the argument will be equal to \code{TRUE}. Example: \code{meta = ~time+call} is equivalent to \code{meta.time = TRUE} and \code{meta.call = TRUE}. The "author" and "comment" elements are a bit special. Using \code{meta = ~author("Mark")} is equivalent to \code{meta.author = "Mark"} while \code{meta=~author} is equiv. to \code{meta.author = TRUE}. The "comment" must be used with a character string inside: \code{meta = ~comment("this is a comment")}. The order in the formula controls the order of appearance of the meta elements. It also has precedence over the \code{meta.XX} arguments.
 #' @param meta.time (Tex only.) Either a logical scalar (default is \code{FALSE}) or "time" or "date". Whether to include the time (if \code{TRUE} or "time") or the date (if "date") of creation of the table in a comment right before the table.
 #' @param meta.sys (Tex only.) A logical scalar, default is \code{FALSE}. Whether to include system information (from \code{Sys.info()}) in a comment right before the table.
@@ -410,7 +411,8 @@
 etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                   se = NULL, ssc = NULL, cluster = NULL,
                   .vcov, .vcov_args = NULL, digits = 4, digits.stats = 5, tex,
-                  fitstat, title, coefstat = "se", ci = 0.95, sdBelow = NULL,
+                  fitstat, title, coefstat = "se", ci = 0.95,
+                  se.row = NULL, se.below = NULL,
                   keep, drop, order, dict, file, replace = FALSE, convergence,
                   signifCode, label, float, headers = list("auto"), fixef_sizes = FALSE,
                   fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5,
@@ -487,7 +489,9 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
         stop("You must provide at least one element in '...'.")
     }
 
+    #
     # Deprecated items
+    #
     if("subtitles" %in% names(dots)){
         if(is.null(getOption("fixest_etable_arg_subtitles"))){
             warning("The argument 'subtitles' is deprecated. Please use 'headers' instead.")
@@ -495,6 +499,15 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
         }
         headers = dots$subtitles
         dots$subtitles = NULL
+    }
+
+    if("sdBelow" %in% names(dots)){
+        if(is.null(getOption("fixest_etable_arg_sdBelow"))){
+            warning("The argument 'sdBelow' is deprecated. Please use 'se.below' instead.")
+            options(fixest_etable_arg_sdBelow = TRUE)
+        }
+        se.below = dots$sdBelow
+        dots$sdBelow = NULL
     }
 
     # Getting the model names
@@ -589,7 +602,8 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     info = results2formattedList(dots = dots, vcov = vcov, ssc = ssc, fitstat_all = fitstat,
                                  stage = stage, agg = agg,
                                  .vcov_args=.vcov_args, digits = digits, digits.stats = digits.stats,
-                                 sdBelow = sdBelow, signifCode = signifCode, coefstat = coefstat,
+                                 se.row = se.row, se.below = se.below,
+                                 signifCode = signifCode, coefstat = coefstat,
                                  ci = ci, title = title, float = float, headers = headers,
                                  keepFactors = keepFactors, tex = tex, useSummary = useSummary,
                                  dots_call = dots_call, powerBelow = powerBelow, dict = dict,
@@ -739,7 +753,7 @@ gen_etable_aliases = function(){
 
 results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage = 2,
                                  agg = NULL, .vcov_args = NULL, digits = 4,
-                                 digits.stats = 5, fitstat_all, sdBelow=NULL, dict,
+                                 digits.stats = 5, fitstat_all, se.row = NULL, se.below = NULL, dict,
                                  signifCode = c("***"=0.01, "**"=0.05, "*"=0.10),
                                  coefstat = "se", ci = 0.95, label, headers, title,
                                  float = FALSE, replace = FALSE, keepFactors = FALSE,
@@ -826,7 +840,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     if(length(notes) > 1) notes = paste(notes, collapse = "\n")
 
     check_arg("logical scalar", replace, convergence, fixef_sizes, fixef_sizes.simplify, keepFactors, family, tex, depvar)
-    check_arg("NULL logical scalar", sdBelow)
+    check_arg("NULL logical scalar", se.below, se.row)
 
     isTex = tex
     if(missing(family)){
@@ -835,8 +849,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         show_family = family
     }
 
-    if(is.null(sdBelow)){
-        sdBelow = isTex
+    if(is.null(se.below)){
+        se.below = isTex
     }
 
     # start: coef.just
@@ -844,7 +858,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
     if(!isTex){
         # this parameter is only used in DF
-        if(is.null(coef.just) && sdBelow){
+        if(is.null(coef.just) && se.below){
             coef.just = "."
         }
 
@@ -2092,7 +2106,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         var_list[[m]] <- var
         names(structured_coef) <- var
         coef_list[[m]] <- structured_coef
-        if(sdBelow){
+        if(se.below){
             cb = c(paste0(coef, pval))
             if(coefstat != "confint"){
                 sb = c(paste0("(", se_value, ")"))
@@ -2154,7 +2168,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
             var_list = var_reorder_list
             for(m in 1:length(var_list)){
                 names(coef_list[[m]]) = var_list[[m]]
-                if(sdBelow){
+                if(se.below){
                     names(coef_below[[m]]) = var_list[[m]]
                     names(sd_below[[m]]) = var_list[[m]]
                 }
@@ -2411,13 +2425,13 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     }
 
     res = list(se_type_list=se_type_list, var_list=var_list, coef_list=coef_list,
-               coef_below=coef_below, sd_below=sd_below, depvar_list=depvar_list,
+               coef_below=coef_below, se.row = se.row, sd_below=sd_below, depvar_list=depvar_list,
                obs_list=obs_list, convergence_list=convergence_list, fe_names=fe_names,
                is_fe=is_fe, nb_fe=nb_fe, slope_flag_list = slope_flag_list,
                slope_names=slope_names, useSummary=useSummary, model_names=model_names,
                family_list=family_list, fitstat_list=fitstat_list, headers=headers,
                isHeaders=isHeaders, title=title, convergence=convergence, family=family,
-               keep=keep, drop=drop, order=order, file=file, label=label, sdBelow=sdBelow,
+               keep=keep, drop=drop, order=order, file=file, label=label, se.below=se.below,
                signifCode=signifCode, fixef_sizes=fixef_sizes, fixef_sizes.simplify = fixef_sizes.simplify,
                depvar=depvar, useSummary=useSummary, dict=dict, yesNo=yesNo, add_signif=add_signif,
                float=float, coefstat=coefstat, ci=ci, style=style, notes=notes, group=group,
@@ -2458,7 +2472,7 @@ etable_internal_latex = function(info){
     file = info$file
     family = info$family
     convergence = info$convergence
-    sdBelow = info$sdBelow
+    se.below = info$se.below
     signifCode = info$signifCode
     fixef_sizes = info$fixef_sizes
     fixef_sizes.simplify = info$fixef_sizes.simplify
@@ -2477,6 +2491,7 @@ etable_internal_latex = function(info){
     tex_tag = info$tex_tag
     fun_format = info$fun_format
     meta = info$meta
+    se.row = info$se.row
 
     # Formatting the searating lines
     if(nchar(style$line.top) > 1) style$line.top = paste0(style$line.top, "\n")
@@ -2638,7 +2653,7 @@ etable_internal_latex = function(info){
     coef_mat = all_vars
     for(m in 1:n_models) coef_mat = cbind(coef_mat, coef_list[[m]][all_vars])
     coef_mat[is.na(coef_mat)] = "  "
-    if(sdBelow){
+    if(se.below){
         coef_lines = c()
         for(v in all_vars){
             myCoef = mySd = myLine = c()
@@ -2829,38 +2844,85 @@ etable_internal_latex = function(info){
 
 
     # The standard errors => if tablefoot = TRUE
-    info_SD = ""
-    info_muli_se = ""
 
     # We go through this in order to get the multi se if needed
     isUniqueSD = length(unique(unlist(se_type_list))) == 1
     nb_col = length(obs_list) + 1
-    sd_intro = paste0("\\multicolumn{", nb_col, "}{l}{\\emph{")
+    foot_intro = paste0("\\multicolumn{", nb_col, "}{l}{\\emph{")
 
-    if(isUniqueSD){
-        my_se = unique(unlist(se_type_list)) # it comes from summary
-        # every model has the same type of SE
-        # if(my_se == "IID") my_se = "Normal"
+    if(is.null(se.row)){
+        # we show the SE row if:
+        # - NO FOOTER & MULTIPLE SEs
 
-        # Now we modify the names of the clusters if needed
-        my_se = format_se_type_latex(my_se, dict)
+        se.row = isFALSE(style$tablefoot) && !isUniqueSD
+    }
 
-        if(coefstat == "se"){
-            coefstat_sentence = " standard-errors in parentheses"
-        } else if(coefstat == "tstat"){
-            coefstat_sentence = " co-variance matrix, t-stats in parentheses"
+    # Automatic footer information
+    info_SE_footer = ""
+    if(style$tablefoot){
+
+        if(identical(style$tablefoot.value, "default")){
+
+            if(isUniqueSD){
+                my_se = unique(unlist(se_type_list)) # it comes from summary
+                # every model has the same type of SE
+
+                # Now we modify the names of the clusters if needed
+                my_se = format_se_type_latex(my_se, dict)
+
+                if(coefstat == "se"){
+                    coefstat_sentence = " standard-errors in parentheses"
+                } else if(coefstat == "tstat"){
+                    coefstat_sentence = " co-variance matrix, t-stats in parentheses"
+                } else {
+                    coefstat_sentence = paste0(" co-variance matrix, ", round(ci*100), "\\% confidence intervals in brackets")
+                }
+                info_SE_footer = paste0(style$tablefoot.title, foot_intro, my_se, coefstat_sentence, "}}\\\\\n")
+
+                if(add_signif){
+                    info_SE_footer = paste0(info_SE_footer, foot_intro, "Signif. Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
+                }
+
+            } else {
+                # Multiple types of SEs: we're more general
+                all_se_type = sapply(se_type_list, format_se_type_latex, dict = dict, inline = TRUE)
+
+                if(coefstat == "se"){
+                    coefstat_sentence = "Standard-Errors"
+                } else {
+                    coefstat_sentence = "Co-variance"
+                }
+
+                info_muli_se = paste0(coefstat_sentence, " & ", paste(all_se_type, collapse = " & "), "\\\\\n")
+
+                if(add_signif){
+                    info_SE_footer = paste0(style$tablefoot.title, foot_intro, "Signif. Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
+                } else {
+                    myAmpLine = paste0(paste0(rep(" ", length(depvar_list) + 1), collapse = " & "), "\\tabularnewline\n")
+                    info_SE_footer = paste0(style$tablefoot.title, myAmpLine, "\\\\\n")
+                }
+
+            }
+
         } else {
-            coefstat_sentence = paste0(" co-variance matrix, ", round(ci*100), "\\% confidence intervals in brackets")
+
+            value = style$tablefoot.value
+            if(isUniqueSD){
+                # my_se: computed right before
+                value = gsub("__se_type__", my_se, value)
+            } else {
+                # not super elegant, but can't to much more // else: enumerate the SEs?
+                value = gsub("__se_type__", "", value)
+            }
+
+            info_SE_footer = paste0(style$tablefoot.title, paste(foot_intro, value, "}}\\\\\n", collapse = ""))
+
         }
-        info_SD = paste0(style$tablefoot.title, sd_intro, my_se, coefstat_sentence, "}}\\\\\n")
+    }
 
-        if(add_signif){
-            info_SD = paste0(info_SD, sd_intro, "Signif. Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
-        }
 
-        info_muli_se = ""
-
-    } else {
+    info_muli_se = ""
+    if(se.row){
         all_se_type = sapply(se_type_list, format_se_type_latex, dict = dict, inline = TRUE)
 
         if(coefstat == "se"){
@@ -2869,28 +2931,7 @@ etable_internal_latex = function(info){
             coefstat_sentence = "Co-variance"
         }
 
-        info_muli_se = paste0(coefstat_sentence, " & ", paste(all_se_type, collapse = " & "), "\\\\\n")
-
-        if(add_signif){
-            info_SD = paste0(style$tablefoot.title, sd_intro, "Signif. Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
-        } else {
-            myAmpLine = paste0(paste0(rep(" ", length(depvar_list)+1), collapse = " & "), "\\tabularnewline\n")
-            info_SD = paste0(style$tablefoot.title, myAmpLine, "\\\\\n")
-        }
-    }
-
-    if(style$tablefoot){
-        if(!identical(style$tablefoot.value, "default")){
-            value = style$tablefoot.value
-            if(isUniqueSD){
-                # my_se: computed right before
-                value = gsub("__se_type__", my_se, value)
-            }
-
-            info_SD = paste0(style$tablefoot.title, paste(sd_intro, value, "}}\\\\\n", collapse = ""))
-        }
-    } else {
-        info_SD = ""
+        info_muli_se = paste0(coefstat_sentence, " & ", tex_multicol(all_se_type), "\n")
     }
 
 
@@ -3100,7 +3141,7 @@ etable_internal_latex = function(info){
 
     # meta information: has been computed in results2formattedList
 
-    res = c(meta, supplemental_info, start_table, start_tag, intro_latex, headers_top, first_line, headers_mid, model_line, info_family, headers_bottom, coef_stack, stat_stack, info_SD, style$line.bottom, outro_latex, end_tag, info_notes, end_table)
+    res = c(meta, supplemental_info, start_table, start_tag, intro_latex, headers_top, first_line, headers_mid, model_line, info_family, headers_bottom, coef_stack, stat_stack, info_SE_footer, style$line.bottom, outro_latex, end_tag, info_notes, end_table)
 
     res = res[nchar(res) > 0]
 
@@ -3133,7 +3174,7 @@ etable_internal_df = function(info){
     file = info$file
     family = info$family
     convergence = info$convergence
-    sdBelow = info$sdBelow
+    se.below = info$se.below
     signifCode = info$signifCode
     fixef_sizes = info$fixef_sizes
     depvar = info$depvar
@@ -3147,6 +3188,7 @@ etable_internal_df = function(info){
     fun_format = info$fun_format
     drop.section = info$drop.section
     coef.just = info$coef.just
+    se.row = info$se.row
 
     # naming differences
     headers = info$headers
@@ -3181,8 +3223,8 @@ etable_internal_df = function(info){
 
     if(length(all_vars) == 0) stop_up("Not any variable was selected, please reframe your keep/drop arguments.")
 
-    sdBelow = info$sdBelow
-    if(sdBelow){
+    se.below = info$se.below
+    if(se.below){
         coef_below = info$coef_below
         sd_below = info$sd_below
         coef_se_mat = c()
@@ -3574,22 +3616,25 @@ etable_internal_df = function(info){
         res = rbind(res, c("Family", unlist(family_list)))
     }
 
-    if(coefstat == "se"){
-        coefstat_sentence = "S.E. type"
-    } else {
-        coefstat_sentence = "VCOV type"
+    if(!isFALSE(se.row)){
+        # default is to always show the SE row
+        if(coefstat == "se"){
+            coefstat_sentence = "S.E. type"
+        } else {
+            coefstat_sentence = "VCOV type"
+        }
+
+        se_type_format = c()
+        for(m in 1:n_models) se_type_format[m] = format_se_type(se_type_list[[m]], longueur[[1+m]], by = TRUE)
+
+        main_type = ""
+        if(all(grepl("Clustered", unlist(se_type_list), fixed = TRUE))){
+            main_type = ": Clustered"
+            coefstat_sentence = gsub(" type", "", coefstat_sentence)
+        }
+
+        res = rbind(res, c(paste0(coefstat_sentence, main_type), c(se_type_format, recursive = TRUE)))
     }
-
-    se_type_format = c()
-    for(m in 1:n_models) se_type_format[m] = format_se_type(se_type_list[[m]], longueur[[1+m]], by = TRUE)
-
-    main_type = ""
-    if(all(grepl("Clustered", unlist(se_type_list), fixed = TRUE))){
-        main_type = ": Clustered"
-        coefstat_sentence = gsub(" type", "", coefstat_sentence)
-    }
-
-    res = rbind(res, c(paste0(coefstat_sentence, main_type), c(se_type_format, recursive = TRUE)))
 
     # convergence status
     if(convergence){
@@ -3660,7 +3705,7 @@ etable_internal_df = function(info){
 
 #' @rdname etable
 setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c("se", "tstat", "confint"),
-                            ci = 0.95, sdBelow = TRUE, keep, drop, order, dict, signifCode, float,
+                            ci = 0.95, se.below = TRUE, keep, drop, order, dict, signifCode, float,
                             fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, family, powerBelow = -5,
                             interaction.order = NULL, depvar, style.tex = NULL,
                             style.df = NULL, notes = NULL, group = NULL, extraline = NULL,
@@ -3686,7 +3731,7 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c(
     check_arg_plus(coefstat, "match")
     check_arg(ci, "numeric scalar GT{0.5} LT{1}")
 
-    check_arg("logical scalar", sdBelow, fixef_sizes, fixef_sizes.simplify, float, family, depvar, reset)
+    check_arg("logical scalar", se.below, fixef_sizes, fixef_sizes.simplify, float, family, depvar, reset)
 
     check_arg(keep, drop, order, "character vector no na NULL",
               .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
