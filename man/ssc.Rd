@@ -111,7 +111,7 @@ est = feols(y ~ x | fe1 + fe2, base)
 # Default: fixef.K = "nested"
 #  => adjustment K = 1 + 5 (i.e. x + fe2)
 summary(est)
-attributes(vcov(est, attr = TRUE))[c("ssc.type", "dof.K")]
+attributes(vcov(est, attr = TRUE))[c("ssc", "dof.K")]
 
 
 # fixef.K = FALSE

@@ -75,6 +75,10 @@ style.tex(
 \item{yesNo}{A character vector of length 1 or 2. Defaults to \code{"Yes"} if \code{main = "base"} and to \code{"$\\checkmark$"} if \code{main = "aer"} (from package \code{amssymb}). This is the message displayed when a given fixed-effect is (or is not) included in a regression. If \code{yesNo} is of length 1, then the second element is the empty string.}
 
 \item{tabular}{Character scalar equal to "normal" (default), "*" or "X". Represents the type of tabular to export.}
+
+\item{interaction.combine}{Character scalar, defaults to \code{" $\times$ "}. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind $\times$ Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.}
+
+\item{i.equal}{Character scalar, defaults to \code{" $=$ "}. Only affects factor variables created with the function \code{\link[fixest]{i}}, tells how the variable should be linked to its value. For example if you have the Species factor from the iris data set, by default the display of the variable is \code{Species $=$ Setosa}, etc. If \code{i.equal = ": "} the display becomes \code{Species: Setosa}.}
 }
 \value{
 Returns a list containing the style parameters.
