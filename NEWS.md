@@ -57,6 +57,8 @@
  
  - `predict.fixest` accepts the new argument `fixef` which, if `TRUE`, returns a data.frame of the fixed-effects coefficients for each observation, with the same number of columns as the number of fixed-effects (feature requests [#144](https://github.com/lrberge/fixest/issues/144) and [#175](https://github.com/lrberge/fixest/issues/175) by @pp2382 and @cseveren).
  
+ - offsets present in the formula are now accepted.
+ 
  - VCOV aliases (both Grant McDermott's suggestions: thanks Grant!): 
  
     * the default standard-errors is now `"iid"` (former keywords still work)
@@ -65,8 +67,7 @@
     
   - *Argument sliding*: the argument `vcov` can be called implicitly when `data` is set up globally:
   ```R
-  base = iris
-  names(base) = c("y", "x1", "x2", "x3", "species")
+  base = setNames(iris = c("y", "x1", "x2", "x3", "species"))
   
   # Setting up the data
   setFixest_estimation(data = base)
@@ -75,6 +76,11 @@
   feols(y ~ x1 + x2, ~species)
   
   # => We obtain the same as feols(y ~ x1 + x2, vcov = ~species)
+  ```
+  
+  - piping the data now works:
+  ```R
+  mtcars |> feols(cyl ~ mpg)
   ```
   
   - The user can now specify custom degrees of freedom to compute the t-tests in `ssc()` (feature request by Kyle F. Butts).
@@ -100,6 +106,10 @@
    * adding the special tag `":_:"` in the row name will add a rule for each column group (in the previous example `":_:Gender"` would do). Suggestion by @nhirschey [#173](https://github.com/lrberge/fixest/pull/173).
    * you can control the placement of the header line by using as first character the following special tags: "^" (top), "-" (mid, default), "_" (bottom). Ex: `headers = list("_Gender" = list("M" = 3, "F" = 4))` will place the header line at the very bottom of the headers.
    * by default all values are Latex-escaped. You can disable escaping by adding `":tex:"` in the row title.
+   
+ - argument `sdBelow` has been renamed into `se.below` (retro-compatibility is ensured).
+ 
+ - new argument `se.row` to control whether the row displaying the standard-errors should be displayed (clarification requested by @waynelapierre [#127](https://github.com/lrberge/fixest/issues/127)).
 
 
 # fixest 0.9.0
