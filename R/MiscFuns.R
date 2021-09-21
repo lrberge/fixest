@@ -407,7 +407,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #'
 #'
 summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov = NULL,
-                          stage = 2, lean = FALSE, agg = NULL, forceCovariance = FALSE,
+                          stage = NULL, lean = FALSE, agg = NULL, forceCovariance = FALSE,
                           se = NULL, keepBounded = FALSE, n = 1000,
                           nthreads = getFixest_nthreads(), ...){
 
@@ -432,24 +432,30 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
 	# All three arguments se+cluster+.vcov are formatted into a valid vcov arg.
 	vcov_in = vcov = oldargs_to_vcov(se, cluster, vcov, .vcov)
 
+	check_arg(lean, "logical scalar")
+	check_arg(stage, "NULL integer vector no na len(,2) GE{1} LE{2}")
+
+	skip_vcov = FALSE
 	if(isTRUE(object$summary)){
-	    do_assign = TRUE
+
 	    if("fromPrint" %in% names(dots)){
 	        # From print
 	        return(object)
 
-	    } else if(is.null(vcov) && is.null(ssc) && is.null(agg)){
+	    } else if(is.null(vcov) && is.null(ssc)){
 	        # We return directly the object ONLY if not any other argument has been passed
-	        if(length(mc) == 2){
-	            # No modification required
-	            object$summary_from_fit = FALSE
-	            return(object)
+
+	        skip_vcov = TRUE
+	        if(is.null(agg) && is.null(stage)){
+	            if(!lean || (lean && isTRUE(object$lean))){
+	                # No modification required
+	                object$summary_from_fit = FALSE
+	                return(object)
+	            }
 	        }
 	    }
 
-	    if(do_assign){
-	        assign_flags(object$summary_flags, vcov = vcov, ssc = ssc, agg = agg)
-	    }
+	    assign_flags(object$summary_flags, vcov = vcov, ssc = ssc, agg = agg)
 	}
 
 	# Checking arguments in ...
@@ -460,9 +466,7 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
 	    }
 	}
 
-	check_arg(stage, "integer vector no na len(,2) GE{1} LE{2}")
-
-	check_arg(lean, "logical scalar")
+	if(is.null(stage)) stage = 2
 
 
 	# IV
@@ -485,14 +489,18 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
 	    for(s in seq_along(stage)){
 	        if(stage[s] == 1){
                 for(i in seq_along(object$iv_first_stage)){
-                    res[[length(res) + 1]] = summary(object$iv_first_stage[[i]], vcov = vcov, ssc = ssc, lean = lean, forceCovariance = forceCovariance, n = n, nthreads = nthreads, iv = TRUE)
+                    res[[length(res) + 1]] = summary(object$iv_first_stage[[i]],
+                                                     vcov = vcov, ssc = ssc, lean = lean,
+                                                     forceCovariance = forceCovariance,
+                                                     n = n, nthreads = nthreads, iv = TRUE)
 
                     stage_names[length(stage_names) + 1] = paste0("First stage: ", names(object$iv_first_stage)[i])
                 }
 
 	        } else {
 	            # We keep the information on clustering => matters for wald tests of 1st stage
-	            my_res = summary(object, vcov = vcov, ssc = ssc, lean = lean, forceCovariance = forceCovariance, n = n, nthreads = nthreads, iv = TRUE)
+	            my_res = summary(object, vcov = vcov, ssc = ssc, lean = lean,
+	                             forceCovariance = forceCovariance, n = n, nthreads = nthreads, iv = TRUE)
 
 	            res[[length(res) + 1]] = my_res
 	            stage_names[length(stage_names) + 1] = "Second stage"
@@ -529,7 +537,15 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
 
 
 	# The new VCOV
-	vcov = vcov.fixest(object, vcov = vcov, ssc = ssc, forceCovariance = forceCovariance, keepBounded = keepBounded, nthreads = nthreads, attr = TRUE, se = se, cluster = cluster, ...)
+	if(skip_vcov){
+	    vcov = object$cov.scaled
+
+	} else {
+	    vcov = vcov.fixest(object, vcov = vcov, ssc = ssc, forceCovariance = forceCovariance,
+	                       keepBounded = keepBounded, nthreads = nthreads,
+	                       attr = TRUE, se = se, cluster = cluster, ...)
+	}
+
 	# NOTA:
 	# I need to add se and cluster even if they're not needed only to ensure it
 	# works fine when vcov is a function and cluster/se are arguments

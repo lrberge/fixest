@@ -23,6 +23,8 @@
  
  - Fix bug in the value of the fixed-effects coefficients in IV estimations (thanks to @tappek [#190](https://github.com/lrberge/fixest/issues/190)).
  
+ - Fix bug in `coefplot` when `lean = TRUE` in the estimation (reported by @adamaltmejd [#195](https://github.com/lrberge/fixest/issues/195)).
+ 
 ## Major changes
 
  - New argument `vcov`:
