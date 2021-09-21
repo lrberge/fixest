@@ -4022,7 +4022,7 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
 #' etable(est)
 #'
 #' # Playing a bit with the styles
-#' etable(est, style_df = style.df(fixef.title = "", fixef.suffix = " FE",
+#' etable(est, style.df = style.df(fixef.title = "", fixef.suffix = " FE",
 #'                                  stats.line = " ", yesNo = "yes"))
 #'
 #'

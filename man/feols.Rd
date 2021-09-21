@@ -264,6 +264,12 @@ A note on performance. The feature of multiple estimations has been highly optim
 When the data set has been set up globally using \code{\link[fixest]{setFixest_estimation}}(data = data_set), the argument \code{vcov} can be used implicitly. This means that calls such as \code{feols(y ~ x, "HC1")}, or \code{feols(y ~ x, ~id)}, are valid: i) the data is automatically deduced from the global settings, and ii) the \code{vcov} is deduced to be the second argument.
 }
 
+\section{Piping}{
+
+
+Although the argument 'data' is placed in second position, the data can be piped to the estimation functions. For example, with R >= 4.1, \code{mtcars |> feols(mpg ~ cyl)} works as \code{feols(mpg ~ cyl, mtcars)}.
+}
+
 \examples{
 
 #

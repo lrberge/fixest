@@ -103,6 +103,10 @@
 #'
 #' When the data set has been set up globally using \code{\link[fixest]{setFixest_estimation}}(data = data_set), the argument \code{vcov} can be used implicitly. This means that calls such as \code{feols(y ~ x, "HC1")}, or \code{feols(y ~ x, ~id)}, are valid: i) the data is automatically deduced from the global settings, and ii) the \code{vcov} is deduced to be the second argument.
 #'
+#' @section Piping:
+#'
+#' Although the argument 'data' is placed in second position, the data can be piped to the estimation functions. For example, with R >= 4.1, \code{mtcars |> feols(mpg ~ cyl)} works as \code{feols(mpg ~ cyl, mtcars)}.
+#'
 #'
 #' @return
 #' A \code{fixest} object. Note that \code{fixest} objects contain many elements and most of them are for internal use, they are presented here only for information. To access them, it is safer to use the user-level methods (e.g. \code{\link[fixest]{vcov.fixest}}, \code{\link[fixest]{resid.fixest}}, etc) or functions (like for instance \code{\link[fixest]{fitstat}} to access any fit statistic).
@@ -1850,6 +1854,8 @@ feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, cluster, se, s
 #' @inheritSection feols Interactions
 #' @inheritSection feols On standard-errors
 #' @inheritSection feols Multiple estimations
+#' @inheritSection feols Argument sliding
+#' @inheritSection feols Piping
 #'
 #' @param family Family to be used for the estimation. Defaults to \code{gaussian()}. See \code{\link[stats]{family}} for details of family functions.
 #' @param start Starting values for the coefficients. Can be: i) a numeric of length 1 (e.g. \code{start = 0}), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients). Default is missing.
@@ -2689,6 +2695,8 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 #' @inheritSection feols Interactions
 #' @inheritSection feols On standard-errors
 #' @inheritSection feols Multiple estimations
+#' @inheritSection feols Argument sliding
+#' @inheritSection feols Piping
 #'
 #' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y|fixef_1+fixef_2}. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. The formula \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)} leads to 6 estimation, see details.
 #' @param start Starting values for the coefficients. Can be: i) a numeric of length 1 (e.g. \code{start = 0}, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).
@@ -2916,6 +2924,8 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
 #' @inheritSection feols Interactions
 #' @inheritSection feols On standard-errors
 #' @inheritSection feols Multiple estimations
+#' @inheritSection feols Argument sliding
+#' @inheritSection feols Piping
 #'
 #' @param fml A formula. This formula gives the linear formula to be estimated (it is similar to a \code{lm} formula), for example: \code{fml = z~x+y}. To include fixed-effects variables, insert them in this formula using a pipe (e.g. \code{fml = z~x+y|fixef_1+fixef_2}). To include a non-linear in parameters element, you must use the argment \code{NL.fml}. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. This leads to 6 estimation \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)}. See details.
 #' @param start Starting values for the coefficients in the linear part (for the non-linear part, use NL.start). Can be: i) a numeric of length 1 (e.g. \code{start = 0}, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).
