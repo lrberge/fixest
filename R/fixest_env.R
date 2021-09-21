@@ -301,6 +301,50 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
         if(missing(data)) stop("You must provide the argument 'data' (currently it is missing).")
 
+
+        #
+        # enabling piping
+        #
+
+        # first things first: checking
+        if(missing(fml)) stop("You must provide the argument 'fml' (currently it is missing).")
+        # fml can be swapped with data! so it can be a matrix of a data.frame
+        error_sender(fml)
+
+        check_arg(fml, "ts formula | data.frame | matrix",
+                  .message = "The argument 'fml' must be a two-sided formula.")
+
+        if(!inherits(fml, "formula")){
+            # candidate for swapping
+            error_sender(data)
+            if(!inherits(data, "formula")){
+                # we send an error
+                check_arg(fml, "ts formula")
+            }
+
+            # we swap
+            fml_tmp = data
+            data = fml
+            fml = formula(fml_tmp)
+
+            tmp = mc_origin$data
+            mc_origin$data = mc_origin$fml
+            mc_origin$fml = tmp
+
+        } else {
+            # we regularize the formula (to deal with Formula)
+            fml = formula(fml)
+            if(length(fml) != 3) {
+                stop("In the argument 'fml', the formula must be two sided. Problem: it is currently one-sided.")
+            }
+        }
+
+
+        #
+        # argument sliding
+        #
+
+
         #  i) default data set
         # ii) argument sliding for vcov (ex: feols(y~x, "hetero"))
         if(!"data" %in% names(mc_origin)){
@@ -327,7 +371,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             opts = getOption("fixest_estimation")
             if("data" %in% names(opts)){
                 # To report evaluation problems
-                error_sender(data, "The argument 'data' could not be evaluated: ")
+                error_sender(data)
 
                 # We check 'data' can really be a vcov
                 if(inherits(data, "formula") || isSingleChar(data) || inherits(data, "fixest_vcov_request") ||
@@ -363,15 +407,14 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         # More robust to ensure it's always a plain data.frame, avoids problems from specific methods.
         # Maybe at some point do as Sebastian suggested and use plain lists instead?
         # Well I've done it in a branch but I find it more difficult to maintain. We'll see.
-        if(!identical(class(data), "data.frame")) class(data) = "data.frame"
+        if(!identical(class(data), "data.frame")){
+            class(data) = "data.frame"
+        }
 
         dataNames = names(data)
 
         #
         # The fml => controls + setup
-        if(missing(fml)) stop("You must provide the argument 'fml' (currently it is missing).")
-        check_arg(fml, "ts formula")
-
         fml = formula(fml) # we regularize the formula to check it
 
         # We apply expand for macros => we return fml_no_xpd
@@ -755,6 +798,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     isSubset = FALSE
     delayed.subset = FALSE
     if(!missing(subset)){
+        error_sender(subset)
         if(!is.null(subset)){
 
             isSubset = TRUE
@@ -1297,6 +1341,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     offset.value = 0
     msgNA_offset = ""
     if(!missing(offset)){
+        error_sender(offset) # check evaluation
         if(!is.null(offset)){
             isOffset = TRUE
 
@@ -1382,6 +1427,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     weights.value = 1
     isWeight = FALSE
     if(!missing(weights)){
+
+        error_sender(weights)
         if(!is.null(weights)){
             isWeight = TRUE
 
@@ -1490,7 +1537,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     isSplit = FALSE
     msgNA_split = ""
     split.full = FALSE
-    if(!missnull(split) || !missnull(fsplit)){
+    if(!MISSNULL(split) || !MISSNULL(fsplit)){
 
         if(!missnull(fsplit)){
             if(!missnull(split)){

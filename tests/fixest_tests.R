@@ -1661,9 +1661,7 @@ fitstat(est_fe, ~ wf)
 
 chunk("argument sliding")
 
-base = iris
-names(base) = c("y", "x1", "x2", "x3", "species")
-
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
 
 setFixest_estimation(data = base)
 
@@ -1680,6 +1678,41 @@ other_est = feols(y ~ x1 + x2, head(base, 50))
 test(nobs(other_est), 50)
 
 setFixest_estimation(reset = TRUE)
+
+#
+# piping
+#
+
+if(getRversion() >= "4.1.0"){
+    # no vcov
+    p1 = feols(y ~ x1, base)
+    p2 = base |> feols(y ~ x1)
+    test(coef(p1), coef(p2))
+
+    # with vcov
+    p1_se = feols(y ~ x1, base, ~species)
+    p2_se = base |> feols(y ~ x1, ~species)
+    test(se(p1_se), se(p2_se))
+}
+
+
+
+####
+#### Offset ####
+####
+
+chunk("offset")
+
+# we test the different ways to set an offset
+
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+
+o1 = feols(y ~ x1 + offset(x2) + offset(x3^2 + 3), base)
+o2 = feols(y ~ x1, base, offset = ~x2 + x3^2 + 3)
+test(coef(o1), coef(o2))
+
+# error
+test(feols(y ~ x1 + offset(x2), base, offset = ~x3), "err")
 
 
 
