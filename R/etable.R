@@ -1091,12 +1091,12 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
     # default values for dict
     dict_global = getFixest_dict()
-    if(isTRUE(dict)) {
+    if(missing(dict) || isTRUE(dict)) {
         dict = dict_global
     } else if(isFALSE(dict)) {
         dict = NULL
     } else {
-        # dict changes the values before
+        # dict changes the values set in the global dict
 
         if(dict[1] == "reset"){
             dict_global = c()
