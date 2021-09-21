@@ -112,6 +112,8 @@
  
  - new argument `se.row` to control whether the row displaying the standard-errors should be displayed (clarification requested by @waynelapierre [#127](https://github.com/lrberge/fixest/issues/127)).
  
+ - `dict` now directly modifies the entries in the global dictionary instead of creating a brand new one. For example if you have `setFixest_dict(c(cyl="Cylinder"))` and then use `etable` with `dict=c(mpg="miles per gallon")`, you end up with both the names `cyl` and `mpg` to be modified. To disable this behavior, you can add `"reset"` as the first element, like in `dict=c("reset", mpg="miles per gallon")`.
+ 
 ## Other
 
  - in multiple estimations, it is now made explicit that the information regarding NA values only concern the variables in common across all models (formerly, it was implicit and hence confusing).

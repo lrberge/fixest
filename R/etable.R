@@ -24,7 +24,7 @@
 #' @param keep Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is kept). See details.
 #' @param drop Character vector. This element is used if some variables are not to be displayed. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be discarded. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{drop = "x[[:digit:]]{2}"}. If the first character is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is dropped). See details.
 #' @param order Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument \code{dict}). Example: you have the following variables: \code{month1} to \code{month6}, then \code{x1} to \code{x5}, then \code{year1} to \code{year6}. If you want to display first the x's, then the years, then the months you could use: \code{order = c("x", "year")}. If the first character is an exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that does not contain \dQuote{Intercept} goes first).  See details.
-#' @param dict A named character vector or a logical scalar. It changes the original variable names to the ones contained in the \code{dict}ionary. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default, it is equal to \code{getFixest_dict()}, a default dictionary which can be set with \code{\link[fixest]{setFixest_dict}}. You can use \code{dict = FALSE} to disable it.
+#' @param dict A named character vector or a logical scalar. It changes the original variable names to the ones contained in the \code{dict}ionary. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default, it is equal to \code{getFixest_dict()}, a default dictionary which can be set with \code{\link[fixest]{setFixest_dict}}. You can use \code{dict = FALSE} to disable it. By default \code{dict} modifies the entries in the global dictionary, to disable this behavior, use "reset" as the first element (ex: \code{dict=c("reset", mpg="Miles per gallon")}).
 #' @param file A character scalar. If provided, the Latex (or data frame) table will be saved in a file whose path is \code{file}. If you provide this argument, then a Latex table will be exported, to export a regular \code{data.frame}, use argument \code{tex = FALSE}.
 #' @param replace Logical, default is \code{FALSE}. Only used if option \code{file} is used. Should the exported table be written in a new file that replaces any existing file?
 #' @param convergence Logical, default is missing. Should the convergence state of the algorithm be displayed? By default, convergence information is displayed if at least one model did not converge.
@@ -1090,19 +1090,24 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     yesNo = style$yesNo
 
     # default values for dict
-    if(missing(dict)){
-        if(isTex || !missing(file)){
-            dict = getFixest_dict()
-        } else {
-            dict = NULL
-        }
-    } else if(isTRUE(dict)) {
-        dict = getFixest_dict()
-        if(is.null(dict)){
-            dict = c("____" = "OH OH OH")
-        }
+    dict_global = getFixest_dict()
+    if(isTRUE(dict)) {
+        dict = dict_global
     } else if(isFALSE(dict)) {
         dict = NULL
+    } else {
+        # dict changes the values before
+
+        if(dict[1] == "reset"){
+            dict_global = c()
+            dict = dict[-1]
+        }
+
+        if(length(dict) > 0){
+            dict_global[names(dict)] = dict
+        }
+
+        dict = dict_global
     }
 
     add_signif = TRUE
