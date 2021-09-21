@@ -1469,6 +1469,8 @@ plot.fixest.fixef = function(x, n = 5, ...){
 collinearity = function(x, verbose){
 	# x: fixest estimation
 
+    # stop("Sorry, it does not work. A new version will hopefully come soon.")
+
 	if(class(x) != "fixest"){
 		stop("Argument 'x' must be a fixest object.")
 	}
@@ -1671,7 +1673,7 @@ collinearity = function(x, verbose){
 	}
 
 	if(isFE && isLinear){
-		ccat("simple with cluster:")
+		ccat("simple with fixed-effects:")
 		# We project each variable onto the cluster subspace
 
 		cluster = fe_id
@@ -1773,7 +1775,8 @@ collinearity = function(x, verbose){
 			if(max_residuals < 1e-4){
 				ccat("\n")
 				coef_lm = res$coefficients
-				collin_var = names(coef_lm)[!is.na(coef_lm) & abs(coef_lm) > 1e-6]
+				vars = colnames(mat_base)[-i]
+				collin_var = vars[!is.na(coef_lm) & abs(coef_lm) > 1e-6]
 				message = paste0("Variable '", dict_name[v], "' is collinear with variable", enumerate_items(dict_name[collin_var], "s.quote"), ".")
 
 				print(message)
@@ -1784,7 +1787,7 @@ collinearity = function(x, verbose){
 	}
 
 	#
-	# II.b) perfect multicollinearity + cluster
+	# II.b) perfect multicollinearity + fixed-effects
 	#
 
 	# linearVars = setdiff(colnames(linear.matrix), "(Intercept)")
@@ -7379,7 +7382,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), fixef =
 #' confint(est_pois, se = "cluster")
 #'
 #'
-confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster, ssc = getFixest_ssc(), ...){
+confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster, ssc = NULL, ...){
 
     # Checking the arguments
     validate_dots(suggest_args = c("parm", "level", "se", "cluster"),
