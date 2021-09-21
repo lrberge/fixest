@@ -8946,7 +8946,7 @@ renvir_update = function(key, value){
     } else {
 
         # we need to do some extra legwork... => sys env don't do quotes
-        value_text = deparse_long(value)
+        value_text = paste(deparse(value, width.cutoff = 500), collapse = "\n")
         value_text = gsub("\n", "__%%;;", value_text)
         value_text = gsub("\"", "&quot;", value_text)
         value_text = gsub("'", "&apos;", value_text)
