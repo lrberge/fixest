@@ -4,16 +4,7 @@
 \alias{confint.fixest}
 \title{Confidence interval for parameters estimated with \code{fixest}}
 \usage{
-\method{confint}{fixest}(
-  object,
-  parm,
-  level = 0.95,
-  vcov,
-  se,
-  cluster,
-  ssc = getFixest_ssc(),
-  ...
-)
+\method{confint}{fixest}(object, parm, level = 0.95, vcov, se, cluster, ssc = NULL, ...)
 }
 \arguments{
 \item{object}{A \code{fixest} object. Obtained using the functions \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.}

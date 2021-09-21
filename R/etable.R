@@ -1122,11 +1122,12 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     # headers => must be a list
     # We get the automatic headers, if split is used
     AUTO_HEADERS = FALSE
+    i_auto_headers = 1
     if(is.list(headers)){
         if(length(headers) > 0){
             qui = sapply(headers, function(x) identical(x, "auto"))
             if(any(qui)){
-                i_auto_header = which(qui)[1]
+                i_auto_headers = which(qui)[1]
                 headers = headers[!qui]
                 AUTO_HEADERS = TRUE
             }
@@ -1799,11 +1800,11 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         family_list[[m]] = fam
 
         # variable dependante:
-        depvar <- gsub(" ", "", as.character(x$fml)[[2]])
+        depvar = gsub(" ", "", as.character(x$fml)[[2]])
 
-        a <- x$coeftable
+        a = x$coeftable
         if(!is.data.frame(a)){
-            class(a) <- NULL
+            class(a) = NULL
             a = as.data.frame(a)
         }
 
@@ -1922,9 +1923,9 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         #
 
         # on enleve les espaces dans les noms de variables
-        var <- var_origin <- c(gsub(" ", "", row.names(a)))
-        # renaming => Tex only
-        if(isTex || !is.null(dict)){
+        var = var_origin = c(gsub(" ", "", row.names(a)))
+        # renaming
+        if(TRUE){
             qui = var %in% names(dict)
             var[qui] = dict[var[qui]]
             tv = table(var)
@@ -1972,9 +1973,6 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
                     res = dict_apply(res, dict)
                     res = order_apply(res, interaction.order)
-
-                    # who = res %in% names(dict)
-                    # res[who] = dict[res[who]]
 
                     res = paste0(res, collapse = interaction.combine)
 
@@ -2064,7 +2062,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
             names(new_var) = names(var) = var_origin
 
-            var_reorder_list[[m]] <- new_var
+            var_reorder_list[[m]] = new_var
         }
 
         coef = fun_format(a[, 1])
@@ -2107,9 +2105,9 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         }
 
         # saving the infos
-        var_list[[m]] <- var
-        names(structured_coef) <- var
-        coef_list[[m]] <- structured_coef
+        var_list[[m]] = var
+        names(structured_coef) = var
+        coef_list[[m]] = structured_coef
         if(se.below){
             cb = c(paste0(coef, pval))
             if(coefstat != "confint"){
@@ -2124,7 +2122,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         }
 
         # La depvar
-        depvar_list[[m]] <- depvar
+        depvar_list[[m]] = depvar
 
         #
         #  Fit statistics
@@ -2735,7 +2733,7 @@ etable_internal_latex = function(info){
             if(any(is_complex)){
                 fe_names_nbItems = paste0(style$fixef_sizes.prefix, fe_names_raw[is_complex], style$fixef_sizes.suffix)
                 all_nb_FEs = cbind(fe_names_nbItems, all_nb_FEs[is_complex, , drop = FALSE])
-                nb_FE_lines <- paste0(paste0(apply(all_nb_FEs, 1, paste0, collapse = " & "), collapse="\\\\\n"), "\\\\\n")
+                nb_FE_lines = paste0(paste0(apply(all_nb_FEs, 1, paste0, collapse = " & "), collapse="\\\\\n"), "\\\\\n")
             }
 
         }
@@ -3303,9 +3301,9 @@ etable_internal_df = function(info){
 
         coef_mat = cbind(my_names, coef_se_mat)
     } else {
-        coef_mat <- all_vars
-        for(m in 1:n_models) coef_mat <- cbind(coef_mat, coef_list[[m]][all_vars])
-        coef_mat[is.na(coef_mat)] <- "  "
+        coef_mat = all_vars
+        for(m in 1:n_models) coef_mat = cbind(coef_mat, coef_list[[m]][all_vars])
+        coef_mat[is.na(coef_mat)] = "  "
     }
 
     if(!is.null(coef.just)){
