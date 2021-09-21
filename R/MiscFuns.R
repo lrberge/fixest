@@ -5572,6 +5572,17 @@ quickUnclassFactor = function(x, addItem = FALSE, sorted = FALSE){
 
 missnull = function(x) missing(x) || is.null(x)
 
+MISSNULL = function(x){
+    # same a missnull but we also check evaluation
+
+    if(missing(x)) return(TRUE)
+
+    # we check evaluation and nullity
+    error_sender(x, up = 1, arg_name = deparse(substitute(x)))
+
+    is.null(x)
+}
+
 isScalar = function(x, int = FALSE) {
     if(length(x) == 1L && is.numeric(x) && is.finite(x)){
         if(int){
@@ -5858,13 +5869,21 @@ fml_split = function(fml, i, split.lhs = FALSE, text = FALSE, raw = FALSE){
 
 }
 
-error_sender = function(expr, ..., clean, up = 0){
+error_sender = function(expr, ..., clean, up = 0, arg_name){
     res = tryCatch(expr, error = function(e) structure(conditionMessage(e), class = "try-error"))
 
     if("try-error" %in% class(res)){
         set_up(1 + up)
         msg = paste(..., collapse = "")
-        if(!missing(clean)){
+
+        if(nchar(msg) == 0){
+            if(missing(arg_name)){
+                arg_name = deparse(substitute(expr))
+            }
+            msg = paste0("Argument '", arg_name, "' could not be evaluated: ")
+            stop_up(msg, res)
+
+        } else if(!missing(clean)){
 
             if(grepl(" => ", clean)){
                 clean_split = strsplit(clean, " => ")[[1]]
