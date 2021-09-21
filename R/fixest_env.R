@@ -1059,6 +1059,23 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         linear.varnames = all_vars_with_i_prefix(fml_linear[[3]])
 
         fml_terms = terms(fml_linear)
+
+        # the offset
+        if(!is.null(attr(fml_terms, "offset"))){
+            offset_i = attr(fml_terms, "offset")
+            vars_call = attr(fml_terms, "variables")
+            offset_values = c()
+            for(i in offset_i){
+                offset_values = c(offset_values, vars_call[[i + 1]][[2]])
+            }
+
+            if(!MISSNULL(offset)){
+                stop("An offset is present in the formula while the argument 'offset' is non-missing. Please choose one of the two methods to insert an offset.")
+            }
+
+            offset = .xpd(rhs = offset_values)
+        }
+
         if(length(linear.varnames) > 0 || attr(fml_terms, "intercept") == 1){
             isLinear = TRUE
         }
