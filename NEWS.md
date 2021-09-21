@@ -75,12 +75,13 @@
   # Now vcov can be used without using vcov = stuff:
   feols(y ~ x1 + x2, ~species)
   
-  # => We obtain the same as feols(y ~ x1 + x2, vcov = ~species)
+  # => same as feols(y ~ x1 + x2, vcov = ~species)
   ```
   
   - piping the data now works:
   ```R
   mtcars |> feols(cyl ~ mpg)
+  # => same as feols(cyl ~ mpg, mtcars)
   ```
   
   - The user can now specify custom degrees of freedom to compute the t-tests in `ssc()` (feature request by Kyle F. Butts).
@@ -95,7 +96,7 @@
  
  - default values can be saved at the project level using the argument `save = TRUE` in the function `setFixest_etable`. This means that default values will be automatically set without having to call `setFixest_etable` at the startup of the R session. For example, if you want to permanently add the creation time in your Latex exports, just use `setFixest_etable(meta.time = TRUE, save = TRUE)`, and you won't need to bother about it anymore in any future session in your current project.
  
- - Some changes in `extraline`, now: i) it accepts raw vectors, ii) it accepts lines without title, iii) the elements are recycled across models, and iv) the elements are Latex-escaped.
+ - some changes in `extraline`, now: *i)* it accepts raw vectors, *ii)* it accepts lines without title, *iii)* the elements are recycled across models, *iv)* it accepts elements of the form `list("item1" = #item1, "item2" = #item2, etc)`, and *v)* the elements are Latex-escaped.
  
  - in `style.tex`: all Latex-escaping is removed.
  
@@ -110,6 +111,10 @@
  - argument `sdBelow` has been renamed into `se.below` (retro-compatibility is ensured).
  
  - new argument `se.row` to control whether the row displaying the standard-errors should be displayed (clarification requested by @waynelapierre [#127](https://github.com/lrberge/fixest/issues/127)).
+ 
+## Other
+
+ - in multiple estimations, it is now made explicit that the information regarding NA values only concern the variables in common across all models (formerly, it was implicit and hence confusing).
 
 
 # fixest 0.9.0
