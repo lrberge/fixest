@@ -29,6 +29,8 @@
  
  - Fix bug in `iplot` preventing some variables to be removed (reported by @roussanoff [#164](https://github.com/lrberge/fixest/issues/164)).
  
+ - Fix 0 right-padding of numbers displayed in estimation results that could be confusing (reported by @hjuerges [#197](https://github.com/lrberge/fixest/issues/197)).
+ 
 ## Major changes
 
  - New argument `vcov`:

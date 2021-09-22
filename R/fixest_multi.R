@@ -317,7 +317,7 @@ print.fixest_multi = function(x, ...){
             if(isTRUE(data[[i]]$onlyFixef)){
                 cat("No variable (only the fixed-effects).\n")
             } else {
-                myPrintCoefTable(coeftable = coeftable(data[[i]]), show_signif = FALSE)
+                print_coeftable(coeftable = coeftable(data[[i]]), show_signif = FALSE)
             }
             if(tree[i, depth] != index[[depth]]) cat("---\n")
         } else {

@@ -214,13 +214,13 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 				new_table = coeftable[-nrow(coeftable), ]
 			}
 
-			myPrintCoefTable(head(new_table, n), lastLine = last_line)
+		    print_coeftable(head(new_table, n), lastLine = last_line)
 
 			theta = coeftable[".theta", 1]
 			noDispInfo = ifelse(theta > 1000, "(theta >> 0, no sign of overdispersion, you may consider a Poisson model)", "")
 			cat("Over-dispersion parameter: theta =", theta, noDispInfo, "\n")
 		} else {
-			myPrintCoefTable(head(coeftable, n), lastLine = last_line)
+			print_coeftable(head(coeftable, n), lastLine = last_line)
 		}
 	}
 
@@ -3870,7 +3870,7 @@ parse_style = function(x, keywords){
     res
 }
 
-myPrintCoefTable = function(coeftable, lastLine = "", show_signif = TRUE){
+print_coeftable = function(coeftable, lastLine = "", show_signif = TRUE){
     # Simple function that does as the function coeftable but handles special cases
     # => to take care of the case when the coefficient is bounded
 
@@ -3890,9 +3890,12 @@ myPrintCoefTable = function(coeftable, lastLine = "", show_signif = TRUE){
 
     whoIsLow = !is.na(pvalues) & pvalues < 2.2e-16
 
-    for(i in 1:4){
+    # Note that it's a bit different than format => I don't like xxe-yy numbers, very hard to read: you can't see large/small nbers at first sight
+    for(i in 1:3){
         ct[, i] = decimalFormat(ct[, i])
     }
+
+    ct[!whoIsLow, 4] = format(ct[!whoIsLow, 4], digits = 5)
 
     ct[whoIsLow, 4] = "< 2.2e-16"
     ct[is.na(ct[, 4]), 4] = "NA"
@@ -5241,25 +5244,25 @@ addCommas = function(x){
 
 decimalFormat = function(x){
 
-	decimalFormat_single = function(x){
-		# for very small numbers: format 5.2e-08
+    who_valid = which(!is.na(x) & is.numeric(x))
+    if(length(who_valid) == 0) return(x)
 
-		if(is.na(x) || !is.numeric(x)) return(x)
+    res = x
 
-		xPower = log10(abs(x))
+    x_valid = x[who_valid]
+    xPower = log10(abs(x_valid))
 
-		if(xPower < -5){
-			res = signif(x, 3)
-		} else if(xPower < 0){
-			res = round(x, 6)
-		} else {
-			res = round(x, max(1, 5 - ceiling(xPower)))
-		}
+    if(min(xPower) > 0){
+        pow_round = max(1, 6 - ceiling(xPower))
+    } else if(min(xPower) < -5){
+        pow_round = ceiling(abs(min(xPower))) + 2
+    } else {
+        pow_round = 6
+    }
 
-		res
-	}
+    res[who_valid] = round(x_valid, pow_round)
 
-	sapply(x, decimalFormat_single)
+    res
 }
 
 numberFormat_single = function(x, type = "normal"){
