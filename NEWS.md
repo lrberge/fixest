@@ -25,6 +25,8 @@
  
  - Fix bug in `coefplot` when `lean = TRUE` in the estimation (reported by @adamaltmejd [#195](https://github.com/lrberge/fixest/issues/195)).
  
+ - Fix bug in `iplot` when IVs contained interactions.
+ 
 ## Major changes
 
  - New argument `vcov`:

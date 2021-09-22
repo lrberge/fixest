@@ -1666,6 +1666,13 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
             # We take the first i() in the list
             # after having applied keep_apply
 
+            # avoids bug with IVs => problem if user names the variables that way
+            is_IV = FALSE
+            if(isTRUE(object$iv) && identical(object$iv_stage, 2)){
+                all_vars = gsub("^fit_", "", all_vars)
+                names(estimate) = all_vars
+            }
+
             all_vars = keep_apply(all_vars, keep)
 
             mm_info = object$model_matrix_info
