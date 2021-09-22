@@ -566,20 +566,7 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
 
 	# th z & p values
 	zvalue = object$coefficients/se
-	if(object$method %in% "feols" || (object$method %in% "feglm" && !object$family$family %in% c("poisson", "binomial"))){
-
-	    # df.t is always an attribute of the vcov
-	    df.t = attr(vcov, "df.t")
-	    if(is.null(df.t)){
-	        df.t = max(object$nobs - attr(vcov,"dof.K"), 1)
-	    }
-
-	    pvalue = 2*pt(-abs(zvalue), df.t)
-
-	} else {
-	    pvalue = 2*pnorm(-abs(zvalue))
-	}
-
+	pvalue = fixest_pvalue(object, zvalue, vcov)
 
 	# update of se if bounded
 	se_format = se
@@ -5122,6 +5109,59 @@ items_to_drop = function(items, x, varname, keep = FALSE){
     id_drop
 }
 
+
+fixest_pvalue = function(x, zvalue, vcov){
+    # compute the pvalue for a fixest estimation
+
+    if(use_t_distr(x)){
+
+        if(missing(vcov)) {
+            stop("Internal error (=bug): the argument 'vcov' should not be missing in fixest_pvalue().")
+        }
+
+        # df.t is always an attribute of the vcov
+        df.t = attr(vcov, "df.t")
+        if(is.null(df.t)){
+            df.t = max(nobs(x) - attr(vcov,"dof.K"), 1)
+        }
+
+        pvalue = 2*pt(-abs(zvalue), df.t)
+
+    } else {
+        pvalue = 2*pnorm(-abs(zvalue))
+    }
+
+    pvalue
+}
+
+fixest_CI_factor = function(x, level, vcov){
+
+    val = (1 - level) / 2
+    val = c(val, 1 - val)
+
+    if(use_t_distr(x)){
+
+        if(missing(vcov)) {
+            stop("Internal error (=bug): the argument 'vcov' should not be missing in fixest_CI_factor().")
+        }
+
+        # df.t is always an attribute of the vcov
+        df.t = attr(vcov, "df.t")
+        if(is.null(df.t)){
+            df.t = max(nobs(x) - attr(vcov,"dof.K"), 1)
+        }
+
+        fact = qt(val, df.t)
+
+    } else {
+        fact = qnorm(val)
+    }
+
+    fact
+}
+
+
+
 #### ................. ####
 #### Small Utilities ####
 ####
@@ -6399,6 +6439,12 @@ all_missing = function(x1, x2, x3, x4, x5, x6){
            "6" = missing(x1) && missing(x2) && missing(x3) && missing(x4) && missing(x5) && missing(x6))
 }
 
+use_t_distr = function(x){
+    # whether to use the t-distribution or the normal
+    # x: fixest estimation
+    x$method %in% "feols" || (x$method %in% "feglm" && !x$family$family %in% c("poisson", "binomial"))
+}
+
 
 #### ................. ####
 #### Additional Methods ####
@@ -6909,6 +6955,9 @@ residuals.fixest <- resid.fixest
 #'
 #' @param newdata A data.frame containing the variables used to make the prediction. If not provided, the fitted expected (or linear if \code{type = "link"}) predictors are returned.
 #' @param sample Either "estimation" (default) or "original". This argument is only used when arg. 'newdata' is missing, and is ignored otherwise. If equal to "estimation", the vector returned matches the sample used for the estimation. If equal to "original", it matches the original data set (the observations not used for the estimation being filled with NAs).
+#' @param se.fit Logical, default is \code{FALSE}. If \code{TRUE}, the standard-error of the predicted value is computed and returned in a column named \code{se.fit}. This feature is only available for OLS models not containing fixed-effects.
+#' @param interval Either "none" (default), "confidence" or "prediction". What type of confidence interval to compute. Note that this feature is only available for OLS models not containing fixed-effects (GLM/ML models are not covered).
+#' @param level A numeric scalar in between 0.5 and 1, defaults to 0.95. Only used when the argument 'interval' is requested, it corresponds to the width of the confidence interval.
 #' @param fixef Logical scalar, default is \code{FALSE}. If \code{TRUE}, a data.frame is returned, with each column representing the fixed-effects coefficients for each observation in \code{newdata} -- with as many columns as fixed-effects. Note that when there are variables with varying slopes, the slope coefficients are returned (i.e. they are not multiplied by the variable).
 #' @param vs.coef Logical scalar, default is \code{FALSE}. Only used when \code{fixef = TRUE} and when variables with varying slopes are present. If \code{TRUE}, the coefficients of the variables with varying slopes are returned instead of the coefficient multiplied by the value of the variables (default).
 #' @param ... Not currently used.
@@ -6917,7 +6966,8 @@ residuals.fixest <- resid.fixest
 #' @return
 #' It returns a numeric vector of length equal to the number of observations in argument \code{newdata}.
 #' If \code{newdata} is missing, it returns a vector of the same length as the estimation sample, except if \code{sample = "original"}, in which case the length of the vector will match the one of the original data set (which can, but also cannot, be the estimation sample).
-#' If \code{fixef=TRUE}, a \code{data.frame} is returned.
+#' If \code{fixef = TRUE}, a \code{data.frame} is returned.
+#' If \code{se.fit = TRUE} or \code{interval != "none"}, the object returned is a data.frame with the following columns: \code{fit}, \code{se.fit}, and, if CIs are requested, \code{ci_low} and \code{ci_high}.
 #'
 #'
 #' @author
@@ -6970,7 +7020,26 @@ residuals.fixest <- resid.fixest
 #' head(cbind(rowSums(obs_fe), est_trade$sumFE))
 #'
 #'
-predict.fixest = function(object, newdata, type = c("response", "link"), fixef = FALSE,
+#' #
+#' # Standard-error of the prediction
+#' #
+#'
+#' base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+#'
+#' est = feols(y ~ x1 + species, base)
+#'
+#' head(predict(est, se.fit = TRUE))
+#'
+#' # regular confidence interval
+#' head(predict(est, interval = "conf"))
+#'
+#' # adding the residual to the CI
+#' head(predict(est, interval = "predi"))
+#'
+#'
+#'
+predict.fixest = function(object, newdata, type = c("response", "link"), se.fit = FALSE,
+                          interval = "none", level = 0.95, fixef = FALSE,
                           vs.coef = FALSE, sample = c("estimation", "original"), ...){
 
     # Checking the arguments
@@ -6979,15 +7048,26 @@ predict.fixest = function(object, newdata, type = c("response", "link"), fixef =
 	# Controls
 	check_arg_plus(type, sample, "match")
 	check_arg(fixef, vs.coef, "logical scalar")
+	check_arg(se.fit, "logical scalar")
+	check_arg(level, "numeric scalar GT{.50} LT{1}")
+	check_arg_plus(interval, "match(none, confidence, prediction)")
+	if(!se.fit && interval != "none"){
+	    se.fit = TRUE
+	}
+
+	if(se.fit && object$method_type != "feols"){
+	    stop("The standard-error of the prediction is currently only available for OLS models, sorry.")
+	}
 
 	# renaming to clarify
 	fixef.return = fixef
+	do_anyway = fixef.return || se.fit
 
 	# if newdata is missing
 	is_original_data = FALSE
 	if(missing(newdata)){
 
-	    if(fixef.return || isTRUE(object$lean)){
+	    if(do_anyway || isTRUE(object$lean)){
 	        newdata = fetch_data(object, "In 'predict', ")
 	        is_original_data = TRUE
 	    } else {
@@ -7234,6 +7314,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), fixef =
 	coef = object$coefficients
 
 	value_linear = 0
+	var_keep = NULL
 	rhs_fml = fml_split(fml, 1)
 	linear.varnames = all_vars_with_i_prefix(rhs_fml[[3]])
 
@@ -7253,11 +7334,10 @@ predict.fixest = function(object, newdata, type = c("response", "link"), fixef =
 		}
 
 		# we create the matrix
-		# matrix_linear = error_sender(fixest_model_matrix(rhs_fml, newdata, i_noref = TRUE), "Error when creating the linear matrix: ")
 		matrix_linear = error_sender(fixest_model_matrix_extra(object = object, newdata = newdata, original_data = FALSE, fml = rhs_fml, i_noref = TRUE), "Error when creating the linear matrix: ")
 
-		keep = intersect(names(coef), colnames(matrix_linear))
-		value_linear = value_linear + as.vector(matrix_linear[, keep, drop = FALSE] %*% coef[keep])
+		var_keep = intersect(names(coef), colnames(matrix_linear))
+		value_linear = value_linear + as.vector(matrix_linear[, var_keep, drop = FALSE] %*% coef[var_keep])
 	}
 
 	#
@@ -7346,6 +7426,57 @@ predict.fixest = function(object, newdata, type = c("response", "link"), fixef =
 		res = object$family$linkinv(value_predicted)
 	}
 
+
+	#
+	# se.fit
+	#
+
+	if(se.fit){
+
+	    if(!is.null(object$fixef_vars)){
+	        stop("The standard-errors (SEs) of the prediction cannot be computed in the presence of fixed-effects. To obtain the SEs, you would need to include the FEs as standard factors in the model.")
+	    }
+
+	    if(!is.null(NL_fml)){
+	        stop("The standard-errors (SEs) of the prediction cannot be computed in models containing non-linear in parameter elements.")
+	    }
+
+	    # The matrix has been created already
+
+	    V_raw = vcov(object, attr = TRUE)
+	    V = V_raw[var_keep, var_keep, drop = FALSE]
+	    X = matrix_linear[, var_keep, drop = FALSE]
+
+	    var.fit = rowSums((X %*% V) * X)
+	    se.fit = sqrt(var.fit)
+
+	    res = data.frame(fit = res, se.fit = se.fit)
+
+	    if(interval != "none"){
+	        fact = fixest_CI_factor(object, level, V_raw)
+
+	        if(interval == "prediction"){
+	            w = object$weights
+
+	            if(!is.null(w)){
+	                var.u = cpp_ssq(resid(object), w) / w
+	            } else {
+	                var.u = cpp_ssq(resid(object))
+	            }
+	            var.u = var.u / degrees_freedom(object, "resid")
+
+	            se_obs = sqrt(var.fit + var.u)
+
+	        } else {
+	            se_obs = se.fit
+	        }
+
+	        res$ci_low  = res$fit + fact[1] * se_obs
+	        res$ci_high = res$fit + fact[2] * se_obs
+	    }
+
+	}
+
 	res
 }
 
@@ -7423,14 +7554,16 @@ confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster, ssc = N
 	coef_all = object$coefficients
 
 	# multiplicative factor
-	val = (1 - level) / 2
-	fact = abs(qnorm(val))
+	fact = fixest_CI_factor(object, level, sum_object$cov.scaled)
 
 	# The confints
-	lower_bound = coef_all[parm_use] - fact * se_all[parm_use]
-	upper_bound = coef_all[parm_use] + fact * se_all[parm_use]
+	# Note that for glm models, there is no profiling
+	lower_bound = coef_all[parm_use] + fact[1] * se_all[parm_use]
+	upper_bound = coef_all[parm_use] + fact[2] * se_all[parm_use]
 
 	res = data.frame(lower_bound, upper_bound, row.names = parm_use)
+
+	val = (1 - level) / 2
 	names(res) = paste0(round(100*c(val, 1-val), 1), " %")
 
 	attr(res, "type") = attr(se_all, "type")

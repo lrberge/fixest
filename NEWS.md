@@ -88,6 +88,8 @@
   
   - The user can now specify custom degrees of freedom to compute the t-tests in `ssc()` (feature request by Kyle F. Butts).
   
+  - the predict method gains the new argument `se.fit` and `interval` which computes the SEs/CI of the predicted variable. This only works for OLS models without fixed-effects. Feature request by Gábor Békés [#193](https://github.com/lrberge/fixest/issues/193).
+  
 ## etable
 
  - new argument `interaction.order` to control the order in which interacted variables are displayed (feature request by @inkrement [#120](https://github.com/lrberge/fixest/issues/120)).

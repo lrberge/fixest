@@ -1311,6 +1311,34 @@ test(coef_vs[fe_names] * base$x2, obs_fe[, 2])
 obs_fe_coef = predict(res, fixef = TRUE, vs.coef = TRUE)
 test(coef_vs[fe_names], obs_fe_coef[, 2])
 
+#
+# SE of prediction
+#
+
+a = lm(y ~ x1 + species, base)
+b = feols(y ~ x1 + species, base)
+
+test(predict(a, se.fit = TRUE)$se.fit, predict(b, se.fit = TRUE)$se.fit)
+
+test(predict(a, se.fit = TRUE, interval = "con")$fit[, 2],
+     predict(b, se.fit = TRUE, interval = "con")$ci_low)
+
+test(predict(a, se.fit = TRUE, interval = "pre")$fit[, 2],
+     predict(b, se.fit = TRUE, interval = "pre")$ci_low)
+
+# With weights
+base$my_w = seq(0.01, 1, length.out = 150)
+aw = lm(y ~ x1 + species, base, weights = base$my_w)
+bw = feols(y ~ x1 + species, base, weights = ~my_w)
+
+test(predict(aw, se.fit = TRUE)$se.fit, predict(bw, se.fit = TRUE)$se.fit)
+
+test(predict(aw, se.fit = TRUE, interval = "con")$fit[, 2],
+     predict(bw, se.fit = TRUE, interval = "con")$ci_low)
+
+test(predict(aw, se.fit = TRUE, interval = "pre")$fit[, 2],
+     predict(bw, se.fit = TRUE, interval = "pre")$ci_low)
+
 
 ####
 #### subset ####

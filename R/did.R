@@ -444,20 +444,7 @@ aggregate.fixest = function(x, agg, full = FALSE, use_weights = TRUE, ...){
 
     # th z & p values
     zvalue = c_all/se_all
-    if(x$method_type == "feols" || (x$method %in% "feglm" && !x$family$family %in% c("poisson", "binomial"))){
-
-        df.t = attr(vcov, "df.df")
-
-        if(!is.null(df.t)){
-            pvalue = 2*pt(-abs(zvalue), df.t)
-        } else {
-            # We shouldn't arrive here
-            pvalue = 2*pt(-abs(zvalue), max(x$nobs - x$nparams, 1))
-        }
-
-    } else {
-        pvalue = 2*pnorm(-abs(zvalue))
-    }
+    pvalue = fixest_pvalue(x, zvalue, vcov, df.t)
 
     res = cbind(c_all, se_all, zvalue, pvalue)
     if(max(nchar(val)) == 0){
