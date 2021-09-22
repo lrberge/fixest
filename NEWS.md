@@ -27,6 +27,8 @@
  
  - Fix bug in `iplot` when IVs contained interactions.
  
+ - Fix bug in `iplot` preventing some variables to be removed (reported by @roussanoff [#164](https://github.com/lrberge/fixest/issues/164)).
+ 
 ## Major changes
 
  - New argument `vcov`:
@@ -91,6 +93,8 @@
   - The user can now specify custom degrees of freedom to compute the t-tests in `ssc()` (feature request by Kyle F. Butts).
   
   - the predict method gains the new argument `se.fit` and `interval` which computes the SEs/CI of the predicted variable. This only works for OLS models without fixed-effects. Feature request by Gábor Békés [#193](https://github.com/lrberge/fixest/issues/193).
+  
+  - `iplot` gains the argument `i.select` to navigate through the different variables created with `i()` (provided there are more than one of course).
   
 ## etable
 

@@ -67,12 +67,21 @@
 #' @param ylab The label of the y-axis, default is \code{NULL}. Note that if \code{horiz = FALSE}, it overrides the value of the argument \code{value.lab}.
 #' @param sub A subtitle, default is \code{NULL}.
 #' @param style A character scalar giving the style of the plot to be used. You can set styles with the function \code{\link[fixest]{setFixest_coefplot}}, setting all the default values of the function. If missing, then it switches to either "default" or "iplot", depending on the calling function.
+#' @param i.select Integer scalar, default is 1. In \code{iplot}, used to select which variable created with \code{i()} to select. Only used when there are several variables created with \code{\link[fixest]{i}}. This is an index, just try increasing numbers to hopefully obtain what you want. Note that it works much better when the variables are "pure" \code{i()} variables and not interacted with other variables. For example: \code{i(species, x1)} is good while \code{i(species):x1} isn't. The latter will also work but the index may feel weird in case there are many \code{i()} variables.
 #'
 #' @seealso
 #' See \code{\link[fixest]{setFixest_coefplot}} to set the default values of \code{coefplot}, and the estimation functions: e.g. \code{\link[fixest]{feols}}, \code{\link[fixest:feglm]{fepois}}, \code{\link[fixest]{feglm}}, \code{\link[fixest:femlm]{fenegbin}}.
 #'
 #' @section Setting custom default values:
 #' The function \code{coefplot} dispose of many arguments to parametrize the plots. Most of these arguments can be set once an for all using the function \code{\link[fixest]{setFixest_coefplot}}. See Example 3 below for a demonstration.
+#'
+#' @section iplot:
+#'
+#' The function \code{iplot} restricts \code{coefplot} to interactions or factors created with the function \code{\link[fixest]{i}}. Only \emph{one} of the i-variables will be plotted at a time. If you have several i-variables, you can navigate through them with the \code{i.select} argument.
+#'
+#' The argument \code{i.select} is an index that will go through all the i-variables. It will work well if the variables are pure, meaning not interacted with other variables. If the i-variables are interacted, the index may have an odd behavior but will (in most cases) work all the same, just try some numbers up until you (hopefully) obtain the graph you want.
+#'
+#' Note, importantly, that interactions of two factor variables are (in general) disregarded since they would require a 3-D plot to be properly represented.
 #'
 #'
 #' @author
@@ -256,7 +265,16 @@ coefplot = function(object, ..., style = NULL, sd, ci_low, ci_high, x, x.shift =
     dots = list(...)
 
     ylab_add_ci = missing(ci_low)
+
+    #
+    # iplot
+    #
+
     is_iplot = isTRUE(dots$internal.only.i)
+    i.select = dots$i.select
+    if(is_iplot){
+        check_arg(i.select, "integer scalar GE{1}")
+    }
 
     #
     # Setting the default values ####
@@ -1413,7 +1431,9 @@ coefplot = function(object, ..., style = NULL, sd, ci_low, ci_high, x, x.shift =
 
 
 
-coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict, keep, drop, order, ci_level = 0.95, ref = "auto", only.i = TRUE, sep, as.multiple = FALSE){
+coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
+                         keep, drop, order, ci_level = 0.95, ref = "auto",
+                         only.i = TRUE, sep, as.multiple = FALSE){
 
     # get the default for:
     # dict, ci.level, ref
@@ -1421,6 +1441,11 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
 
     dots = list(...)
     is_internal = isTRUE(dots$internal__)
+    if("i.select" %in% names(dots)){
+        i.select = dots$i.select
+        dots$i.select = NULL
+    }
+
 
     varlist = list(ci = paste0(ci_level * 100, "%"))
     dots_drop = c()
@@ -1676,22 +1701,89 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
             all_vars = keep_apply(all_vars, keep)
 
             mm_info = object$model_matrix_info
+            ANY_TWO_FACTORS = FALSE
 
             # Finding out which to display
-            ok = FALSE
+            i_running = 0
             for(i in seq_along(mm_info)){
                 info = mm_info[[i]]
-                if(isFALSE(info$is_inter_fact) && any(info$coef_names %in% all_vars)){
-                    # That's the one
-                    ok = TRUE
-                    break
+                if(isFALSE(info$is_inter_fact)){
+
+                    # First case: regular variable. species::setosa
+                    if(any(info$coef_names %in% all_vars)){
+                        i_running = i_running + 1
+
+                        if(i.select == i_running){
+                            # That's the one
+                            break
+                        }
+
+                    }
                 }
             }
 
-            if(!ok){
-                # Now we look at the cause
-                msg = if(!missnull(keep)) "reshape your 'keep' argument?" else "note that this function only works with i() variables (which should not be interacted with any other variable)."
-                stop("No variable was selected: ", msg)
+            if(i_running < i.select){
+                # not found, maybe an interaction? second round
+
+                for(i in seq_along(mm_info)){
+                    info = mm_info[[i]]
+                    ANY_TWO_FACTORS = ANY_TWO_FACTORS || info$is_inter_fact
+                    if(isFALSE(info$is_inter_fact)){
+
+                        # Second case: interacted variable. species::setosa:x1 ou x1:species::setosa
+                        if(!isTRUE(info$is_inter_num)){
+                            pattern = paste0("(:", info$f_name, "::.+)|(", info$f_name, "::[^:]+:)")
+                            vars_inter = grep(pattern, all_vars, value = TRUE)
+                            if(length(vars_inter) > 0){
+                                vars_inter_unik = unique(gsub(pattern, "", vars_inter))
+                                ok = FALSE
+                                for(v in vars_inter_unik){
+
+                                    inter_before = paste0(v, ":", info$coef_names_full)
+                                    inter_after  = paste0(info$coef_names_full, ":", v)
+
+                                    if(any(c(inter_before, inter_after) %in% all_vars)){
+                                        i_running = i_running + 1
+                                        if(i.select == i_running){
+                                            # That's the one
+                                            ok = TRUE
+                                            break
+                                        }
+                                    }
+                                }
+
+                                if(ok){
+                                    if(any(inter_before %in% all_vars)){
+                                        info$coef_names_full = inter_before
+                                    } else {
+                                        info$coef_names_full = inter_after
+                                    }
+
+                                    break
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+
+            if(i_running < i.select){
+
+                if(i_running == 0){
+                    if(length(mm_info) == 0){
+                        stop("In iplot(), no variable created with i() found (it works only with that kind of variables)")
+                    }
+
+                    if(ANY_TWO_FACTORS){
+                        stop("In iplot(), no valid variable created with i() found. Note that it does not work when i() interacts two factors.")
+                    }
+
+                    stop("In iplot(), no valid variable created with i() found. Note that if there are interactions, they should be created with something of the form i(factor_var, num_var), otherwise the support is limited.")
+
+                }
+
+                stop("In iplot(), the value of 'i.select' (=", i.select, ") exceeds the number of valid i() variables found (=", i_running, "). Please give a lower number.")
             }
 
             # "keep" here works differently => new arg. i.select?
@@ -1847,13 +1939,15 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
     # order/drop/dict ####
     #
 
-    if(!AXIS_AS_NUM && !is.null(prms$estimate_names)){
+    if(!is.null(prms$estimate_names)){
 
-        # dict
-        if(missnull(dict)){
-            dict = c()
-        } else {
-            prms$estimate_names = dict_apply(prms$estimate_names, dict)
+        if(!AXIS_AS_NUM){
+            # dict
+            if(missnull(dict)){
+                dict = c()
+            } else {
+                prms$estimate_names = dict_apply(prms$estimate_names, dict)
+            }
         }
 
         # dropping some coefs
@@ -1879,15 +1973,21 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
             prms = prms[prms$estimate_names %in% all_vars,]
         }
 
-        # ordering the coefs
-        if(!missing(order) && length(order) > 0){
-            all_vars = order_apply(all_vars, order)
+        if(AXIS_AS_NUM && !missing(order) && length(order) > 0){
+            warning("Argument 'order' is ignored since the x-axis is numeric.")
+        }
 
-            my_order = 1:length(all_vars)
-            names(my_order) = all_vars
-            prms$id_order = my_order[prms$estimate_names]
+        if(!AXIS_AS_NUM){
+            # ordering the coefs
+            if(!missing(order) && length(order) > 0){
+                all_vars = order_apply(all_vars, order)
 
-            prms = prms[base::order(prms$id_order), ]
+                my_order = 1:length(all_vars)
+                names(my_order) = all_vars
+                prms$id_order = my_order[prms$estimate_names]
+
+                prms = prms[base::order(prms$id_order), ]
+            }
         }
 
         estimate = prms$estimate
@@ -2126,8 +2226,9 @@ gen_iplot = function(){
 
     coefplot_call = paste0(arg_name[qui_keep], " = ", arg_name[qui_keep], collapse = ", ")
 
-    iplot_fun = paste0("iplot = function(object, ..., ", iplot_args, "){\n\n",
-                        "\tcoefplot(object = object, ..., ", coefplot_call, ", internal.only.i = TRUE)\n}")
+    iplot_fun = paste0("iplot = function(object, ..., i.select = 1, ", iplot_args, "){\n\n",
+                        "\tcoefplot(object = object, ..., i.select = i.select, ",
+                       coefplot_call, ", internal.only.i = TRUE)\n}")
 
     iplot_rox = "#' @describeIn coefplot Plots the coefficients generated with i()"
 
