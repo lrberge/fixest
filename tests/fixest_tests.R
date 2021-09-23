@@ -899,9 +899,8 @@ cat("\n")
 
 chunk("Interact")
 
-base = iris
-names(base) = c("y", "x1", "x2", "x3", "species")
-base$fe_2 = round(rnorm(150))
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+base$fe_2 = round(seq(-5, 5, length.out = 150))
 
 #
 # We just ensure it works without error
@@ -922,6 +921,22 @@ d = i(base$fe_2, keep = 0:1)
 test(ncol(a), ncol(b) + 2)
 test(ncol(d), 2)
 
+#
+# binning
+#
+
+m = feols(y ~ x1 + i(fe_2, bin = list("0" = -1:1)), base)
+test(length(coef(m)), 12 - 2)
+
+# SA
+data(base_stagg)
+res_sunab = feols(y ~ x1 + sunab(year_treated, year, bin = "bin::2"), base_stagg)
+iplot(res_sunab)
+test(length(coef(res_sunab)), 15)
+
+res_sunab = feols(y ~ x1 + sunab(year_treated, year, bin.rel = "bin::2"), base_stagg)
+iplot(res_sunab)
+test(length(coef(res_sunab)), 12)
 
 
 ####

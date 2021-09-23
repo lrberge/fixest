@@ -4,7 +4,7 @@
 \alias{i}
 \title{Create, or interact variables with, factors}
 \usage{
-i(factor_var, var, ref, keep, ref2, keep2, ...)
+i(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...)
 }
 \arguments{
 \item{factor_var}{A vector (of any type) that will be treated as a factor. You can set references (i.e. exclude values for which to create dummies) with the \code{ref} argument.}
@@ -15,9 +15,13 @@ i(factor_var, var, ref, keep, ref2, keep2, ...)
 
 \item{keep}{A vector of values to be kept from \code{factor_var} (all others are dropped). By default they should be values from \code{factor_var} and if \code{keep} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.}
 
+\item{bin}{A list of values to be grouped, a vector, or the special value \code{"bin::digit"}. To create a new value from old values, use \code{bin = list("new_value"=old_values)} with \code{old_values} a vector of existing values. It accepts regular expressions, but they must start with an \code{"@"}, like in \code{bin="@Aug|Dec"}. The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value \code{"bin::digit"} to group every \code{digit} element. For example if \code{x} represent years, using \code{bin="bin::2"} create bins of two years. Using \code{"!bin::digit"} groups every digit consecutive values starting from the first value. Using \code{"!!bin::digit"} is the same bu starting from the last value. In both cases, \code{x} is not required to be numeric.}
+
 \item{ref2}{A vector of values to be dropped from \code{var}. By default they should be values from \code{var} and if \code{ref2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.}
 
 \item{keep2}{A vector of values to be kept from \code{var} (all others are dropped). By default they should be values from \code{var} and if \code{keep2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.}
+
+\item{bin2}{A list or vector defining the binning of the second variable. See help for the argument \code{bin} for details (or look at the help of the function \code{\link[fixest]{bin}}).}
 
 \item{...}{Not currently used.}
 }
@@ -90,9 +94,23 @@ res_2F_bis = feols(Ozone ~ Solar.R + i(Month, i.week, ref = 5, ref2 = 1), aq)
 
 etable(res_2F, res_2F_bis)
 
+#
+# Binning
+#
+
+data(airquality)
+
+feols(Ozone ~ i(Month, bin = "bin::2"), airquality)
+
+feols(Ozone ~ i(Month, bin = list(summer = 7:9)), airquality)
+
+
+
 }
 \seealso{
 \code{\link[fixest:coefplot]{iplot}} to plot interactions or factors created with \code{i()}, \code{\link[fixest]{feols}} for OLS estimation with multiple fixed-effects.
+
+See the function \code{\link[fixest]{bin}} for binning variables.
 }
 \author{
 Laurent Berge

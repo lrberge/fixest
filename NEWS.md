@@ -50,6 +50,8 @@
     * Driscoll-Kraay (1998) for cross-sectionally and serially correlated errors
     
     * Conley (1999) for spatially correlated errors
+    
+ - in `i` and `sunab` you can now bin the variables on the fly with the new argument `bin`. The new function `bin` is also available at the user-level.
  
  - Function `dof` has been renamed into `ssc` (stands for small sample correction) to improve clarity. Retro compatibility is partially ensured but the function `dof` will be removed at some point.
     
@@ -57,7 +59,7 @@
 
  - Functions `setFixest_dof` and `setFixest_se` have been renamed into `setFixest_ssc` and `setFixest_vcov`. **No retro compatibility ensured.**
  
- - Removal of the `var::factor` operator to interact a continuous variable with a variable taken as factor.
+ - Removal of the `var::factor` operator to interact a continuous variable with a variable treated as a factor.
  
 ## New features
 
@@ -92,7 +94,7 @@
   # => same as feols(cyl ~ mpg, mtcars)
   ```
   
-  - The user can now specify custom degrees of freedom to compute the t-tests in `ssc()` (feature request by Kyle F. Butts).
+  - the user can now specify custom degrees of freedom to compute the t-tests in `ssc()` (feature request by Kyle F. Butts).
   
   - the predict method gains the new argument `se.fit` and `interval` which computes the SEs/CI of the predicted variable. This only works for OLS models without fixed-effects. Feature request by Gábor Békés [#193](https://github.com/lrberge/fixest/issues/193).
   

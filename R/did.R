@@ -13,12 +13,16 @@
 #'
 #' User-level method to implement staggered difference-in-difference estimations a la Sun and Abraham (Journal of Econometrics, forthcoming).
 #'
+#'
+#' @inheritParams bin
+#'
 #' @param cohort A vector representing the cohort. It should represent the period at which the treatment has been received (and thus be fixed for each unit).
 #' @param period A vector representing the period. It can be either a relative time period (with negative values representing the before the treatment and positive values after the treatment), or a regular time period. In the latter case, the relative time period will be created from the cohort information (which represents the time at which the treatment has been received).
 #' @param ref.c A vector of references for the cohort. By default the never treated cohorts are taken as reference and the always treated are excluded from the estimation. You can add more references with this argument, which means that dummies will not be created for them (but they will remain in the estimation).
 #' @param ref.p A vector of references for the (relative!) period. By default the first relative period (RP) before the treatment, i.e. -1, is taken as reference. You can instead use your own references (i.e. RPs for which dummies will not be created -- but these observations remain in the sample). Please note that you will need at least two references. You can use the special variables \code{.F} and \code{.L} to access the first and the last relative periods.
 #' @param att Logical, default is \code{FALSE}. If \code{TRUE}: then the total average treatment effect for the treated is computed (instead of the ATT for each relative period).
-#' @param no_agg Logical, default is \code{FALSE}. If \code{TRUE}: then there is no aggregation, leading to the esimation of all \code{cohort x time to treatment} coefficients.
+#' @param no_agg Logical, default is \code{FALSE}. If \code{TRUE}: then there is no aggregation, leading to the estimation of all \code{cohort x time to treatment} coefficients.
+#' @param bin.rel A list or a vector defining which values to bin. Only applies to the relative periods and \emph{not} the cohorts. Please refer to the help of the argument \code{bin} to understand the different ways to do the binning (or look at the help of \code{\link[fixest]{bin}}).
 #'
 #' @details
 #' This function creates a matrix of \code{cohort x relative_period} interactions, and if used within a \code{fixest} estimation, the coefficients will automatically be aggregated to obtain the ATT for each relative period. In practice, the coefficients are aggregated with the \code{\link[fixest]{aggregate.fixest}} function whose argument \code{agg} is automatically set to the appropriate value.
@@ -30,6 +34,14 @@
 #' If the RPs have to be constructed on the fly, any cohort that is not present in the period is considered as never treated. This means that if the period ranges from 1995 to 2005, \code{cohort = 1994} will be considered as never treated, although it should be considered as always treated: so be careful.
 #'
 #' If you construct your own relative periods, the controls cohorts should have only negative RPs.
+#'
+#' @section Binning:
+#'
+#' You can bin periods with the arguments \code{bin} and/or \code{bin.rel}. The argument \code{bin} applies both to the original periods and cohorts (the cohorts will also be binned!). On the other hand, \code{bin.rel} applies only to the relative periods (hence not to the cohorts).
+#'
+#' For \code{bin} to work properly, the argument \code{period} must contain raw periods and \emph{not} relative periods.
+#'
+#' To understand how binning works, please have a look at the help and examples of the function \code{\link[fixest]{bin}}.
 #'
 #' @return
 #' If not used within a \code{fixest} estimation, this function will return a matrix of interacted coefficients.
@@ -72,7 +84,7 @@
 #' summary(res_sunab, agg = "cohort")
 #'
 #'
-sunab = function(cohort, period, ref.c = NULL, ref.p = -1, att = FALSE, no_agg = FALSE){
+sunab = function(cohort, period, ref.c = NULL, ref.p = -1, bin, bin.rel, att = FALSE, no_agg = FALSE){
     # LATER:
     # - add id or indiv argument, just to remove always treated
     # - add argument bin.p
@@ -81,11 +93,15 @@ sunab = function(cohort, period, ref.c = NULL, ref.p = -1, att = FALSE, no_agg =
     check_arg(period, "mbt vector len(data)", .data = cohort)
     check_arg(ref.c, "NULL vector no na")
     check_arg(att, no_agg, "logical scalar")
+    check_arg(bin, bin.rel, "list | vector")
 
+    cohort_name = deparse_long(substitute(cohort))
     period_name = deparse_long(substitute(period))
     period_name = gsub("^[[:alpha:]][[:alpha:]_\\.]*\\$", "", period_name)
 
     # Finding out what kind of data that is
+
+    is_bin = !missnull(bin)
 
     # NAness (big perf hit)
     n_origin = length(cohort)
@@ -120,7 +136,20 @@ sunab = function(cohort, period, ref.c = NULL, ref.p = -1, att = FALSE, no_agg =
     if(is.numeric(period) && 0 %in% period_unik && min(period_unik) < 0 && max(period_unik) > 0){
         # Case 1 => we don't need to do anything
         is_CASE_1 = TRUE
+
+        if(is_bin){
+            stop("You cannot use 'bin' when the argument 'period' contains relative periods. To use 'bin', 'period' should represent \"calendar\" periods.")
+        }
+
     } else {
+
+        if(is_bin){
+            period = bin_factor(bin, period, period_name)
+            cohort = bin_factor(bin, cohort, cohort_name)
+
+            period_unik = unique(period)
+            cohort_unik = unique(cohort)
+        }
 
         # CASE 2 => construction of the relative period
         refs = setdiff(cohort_unik, period_unik)
@@ -164,7 +193,7 @@ sunab = function(cohort, period, ref.c = NULL, ref.p = -1, att = FALSE, no_agg =
     .L = period_max = max(period)
     period_list = list(.F = period_min, .L = period_max)
     check_arg_plus(ref.p, "evalset integer vector no na", .data = period_list)
-    if(missing(ref.p)) ref.p = ref.p
+    if(missing(ref.p)) ref.p = ref.p # One of the oddest line of code I ever wrote ;-)
 
     #
     #  we find out the never/always treated
@@ -184,6 +213,11 @@ sunab = function(cohort, period, ref.c = NULL, ref.p = -1, att = FALSE, no_agg =
     # All references have been removed => pure i() without ref
     cohort = cohort[-qui_drop]
     period = period[-qui_drop]
+
+    if(!missing(bin.rel)){
+        # we bin on the relative period
+        period = bin_factor(bin.rel, period, "relative period")
+    }
 
     res_raw = i(factor_var = period, f2 = cohort, f_name = period_name)
 
@@ -228,13 +262,16 @@ sunab = function(cohort, period, ref.c = NULL, ref.p = -1, att = FALSE, no_agg =
 
                 # We add the attribute containing the appropriate model_matrix_info
                 info = list()
-                info$coef_names_full = paste0(period_name, "::", period_min:period_max)
-                info$items = period_min:period_max
+                period_unik = sort(unique(c(period, ref.p)))
+                info$coef_names_full = paste0(period_name, "::", period_unik)
+                info$items = period_unik
 
                 if(length(ref.p) > 0){
                     info$ref_id = c(which(info$items %in% ref.p[1]), which(info$items %in% ref.p[-1]))
                     info$ref = info$items[info$ref_id]
                 }
+
+                info$f_name = period_name
 
                 info$is_num = TRUE
                 info$is_inter_num = info$is_inter_fact = FALSE
@@ -444,7 +481,7 @@ aggregate.fixest = function(x, agg, full = FALSE, use_weights = TRUE, ...){
 
     # th z & p values
     zvalue = c_all/se_all
-    pvalue = fixest_pvalue(x, zvalue, vcov, df.t)
+    pvalue = fixest_pvalue(x, zvalue, vcov)
 
     res = cbind(c_all, se_all, zvalue, pvalue)
     if(max(nchar(val)) == 0){

@@ -24,8 +24,8 @@ export(coeftable, se, tstat, pvalue)
 export(dof, ssc, degrees_freedom)
 # Lag related
 export(panel, unpanel, f, l, d)
-# interactions
-export(i)
+# factor/interactions/binning
+export(i, bin)
 # macro
 export(xpd)
 # utilities

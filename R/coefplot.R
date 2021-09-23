@@ -1889,6 +1889,9 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
             if(AXIS_AS_NUM){
                 if(!is.numeric(ref) || length(ref) > 1){
                     check_arg(ref, "numeric scalar")
+                    if(is.logical(ref)){
+                        stop("In this context, argument 'ref' must be a numeric scalar.")
+                    }
                 } else {
                     names(ref) = "reference"
                 }

@@ -5,7 +5,16 @@
 \alias{sunab_att}
 \title{Sun and Abraham interactions}
 \usage{
-sunab(cohort, period, ref.c = NULL, ref.p = -1, att = FALSE, no_agg = FALSE)
+sunab(
+  cohort,
+  period,
+  ref.c = NULL,
+  ref.p = -1,
+  bin,
+  bin.rel,
+  att = FALSE,
+  no_agg = FALSE
+)
 
 sunab_att(cohort, period, ref.c = NULL, ref.p = -1)
 }
@@ -18,9 +27,13 @@ sunab_att(cohort, period, ref.c = NULL, ref.p = -1)
 
 \item{ref.p}{A vector of references for the (relative!) period. By default the first relative period (RP) before the treatment, i.e. -1, is taken as reference. You can instead use your own references (i.e. RPs for which dummies will not be created -- but these observations remain in the sample). Please note that you will need at least two references. You can use the special variables \code{.F} and \code{.L} to access the first and the last relative periods.}
 
+\item{bin}{A list of values to be grouped, a vector, or the special value \code{"bin::digit"}. To create a new value from old values, use \code{bin = list("new_value"=old_values)} with \code{old_values} a vector of existing values. It accepts regular expressions, but they must start with an \code{"@"}, like in \code{bin="@Aug|Dec"}. The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value \code{"bin::digit"} to group every \code{digit} element. For example if \code{x} represent years, using \code{bin="bin::2"} create bins of two years. Using \code{"!bin::digit"} groups every digit consecutive values starting from the first value. Using \code{"!!bin::digit"} is the same bu starting from the last value. In both cases, \code{x} is not required to be numeric.}
+
+\item{bin.rel}{A list or a vector defining which values to bin. Only applies to the relative periods and \emph{not} the cohorts. Please refer to the help of the argument \code{bin} to understand the different ways to do the binning (or look at the help of \code{\link[fixest]{bin}}).}
+
 \item{att}{Logical, default is \code{FALSE}. If \code{TRUE}: then the total average treatment effect for the treated is computed (instead of the ATT for each relative period).}
 
-\item{no_agg}{Logical, default is \code{FALSE}. If \code{TRUE}: then there is no aggregation, leading to the esimation of all \code{cohort x time to treatment} coefficients.}
+\item{no_agg}{Logical, default is \code{FALSE}. If \code{TRUE}: then there is no aggregation, leading to the estimation of all \code{cohort x time to treatment} coefficients.}
 }
 \value{
 If not used within a \code{fixest} estimation, this function will return a matrix of interacted coefficients.
@@ -39,6 +52,16 @@ If the RPs have to be constructed on the fly, any cohort that is not present in 
 
 If you construct your own relative periods, the controls cohorts should have only negative RPs.
 }
+\section{Binning}{
+
+
+You can bin periods with the arguments \code{bin} and/or \code{bin.rel}. The argument \code{bin} applies both to the original periods and cohorts (the cohorts will also be binned!). On the other hand, \code{bin.rel} applies only to the relative periods (hence not to the cohorts).
+
+For \code{bin} to work properly, the argument \code{period} must contain raw periods and \emph{not} relative periods.
+
+To understand how binning works, please have a look at the help and examples of the function \code{\link[fixest]{bin}}.
+}
+
 \examples{
 
 # Simple DiD example

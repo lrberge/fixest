@@ -2472,12 +2472,16 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #'
 #' Treat a variable as a factor, or interacts a variable with a factor. Values to be dropped/kept from the factor can be easily set. Note that to interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2}.
 #'
+#'
+#' @inheritParams bin
+#'
 #' @param factor_var  A vector (of any type) that will be treated as a factor. You can set references (i.e. exclude values for which to create dummies) with the \code{ref} argument.
 #' @param var A variable of the same length as \code{factor_var}. This variable will be interacted with the factor in \code{factor_var}. It can be numeric or factor-like. To force a numeric variable to be treated as a factor, you can add the \code{i.} prefix to a variable name. For instance take a numeric variable \code{x_num}: \code{i(x_fact, x_num)} will treat \code{x_num} as numeric while \code{i(x_fact, i.x_num)} will treat \code{x_num} as a factor (it's a shortcut to \code{as.factor(x_num)}).
 #' @param ref A vector of values to be taken as references from \code{factor_var}. Can also be a logical: if \code{TRUE}, then the first value of \code{factor_var} will be removed. If \code{ref} is a character vector, partial matching is applied to values; use "@" as the first character to enable regular expression matching. See examples.
 #' @param keep A vector of values to be kept from \code{factor_var} (all others are dropped). By default they should be values from \code{factor_var} and if \code{keep} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
 #' @param ref2 A vector of values to be dropped from \code{var}. By default they should be values from \code{var} and if \code{ref2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
 #' @param keep2 A vector of values to be kept from \code{var} (all others are dropped). By default they should be values from \code{var} and if \code{keep2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
+#' @param bin2 A list or vector defining the binning of the second variable. See help for the argument \code{bin} for details (or look at the help of the function \code{\link[fixest]{bin}}).
 #' @param ... Not currently used.
 #'
 #' @details
@@ -2491,6 +2495,8 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #'
 #' @seealso
 #' \code{\link[fixest:coefplot]{iplot}} to plot interactions or factors created with \code{i()}, \code{\link[fixest]{feols}} for OLS estimation with multiple fixed-effects.
+#'
+#' See the function \code{\link[fixest]{bin}} for binning variables.
 #'
 #' @examples
 #'
@@ -2552,7 +2558,19 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #'
 #' etable(res_2F, res_2F_bis)
 #'
-i = function(factor_var, var, ref, keep, ref2, keep2, ...){
+#' #
+#' # Binning
+#' #
+#'
+#' data(airquality)
+#'
+#' feols(Ozone ~ i(Month, bin = "bin::2"), airquality)
+#'
+#' feols(Ozone ~ i(Month, bin = list(summer = 7:9)), airquality)
+#'
+#'
+#'
+i = function(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...){
     # Used to create interactions
 
     # Later: binning (bin = 1:3 // bin = list("a" = "[abc]")). Default name is bin name (eg "1:3")
@@ -2659,6 +2677,14 @@ i = function(factor_var, var, ref, keep, ref2, keep2, ...){
         is_na_all = is.na(f) | is.na(var)
     } else {
         is_na_all = is.na(f)
+    }
+
+    if(!MISSNULL(bin)){
+        f = bin_factor(bin, f, f_name)
+    }
+
+    if(IS_INTER_FACTOR && !MISSNULL(bin2)){
+        var = bin_factor(bin2, var, f_name)
     }
 
     if(IS_INTER_FACTOR){
@@ -2782,6 +2808,8 @@ i = function(factor_var, var, ref, keep, ref2, keep2, ...){
         }
 
         if(is_GLOBAL && !IS_INTER_FACTOR){
+            # NOTA:
+            # if you change stuff here => change them also in sunab()
 
             info = list()
             info$coef_names_full = col_names_full
@@ -2791,6 +2819,7 @@ i = function(factor_var, var, ref, keep, ref2, keep2, ...){
                 info$ref = items[ref_id]
             }
             info$is_num = is.numeric(items)
+            info$f_name = f_name
             info$is_inter_num = IS_INTER_NUMERIC
             if(IS_INTER_NUMERIC){
                 info$var_name = var_name
@@ -2808,7 +2837,7 @@ i = function(factor_var, var, ref, keep, ref2, keep2, ...){
 }
 
 
-i_ref = function(factor_var, var, ref, keep, ref2, keep2){
+i_ref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
     # To automatically add references when i(x) is used
 
     mc = match.call()
@@ -2822,7 +2851,7 @@ i_ref = function(factor_var, var, ref, keep, ref2, keep2){
     return(deparse_long(mc))
 }
 
-i_noref = function(factor_var, var, ref, keep, ref2, keep2){
+i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
     # Used only in predict => to create data without restriction
 
     mc = match.call()
@@ -2832,6 +2861,74 @@ i_noref = function(factor_var, var, ref, keep, ref2, keep2){
     mc$ref = mc$keep = mc$ref2 = mc$keep2 = NULL
 
     return(deparse_long(mc))
+}
+
+
+#' Bins the values of a variable (typically a factor)
+#'
+#' Tool to easily group the values of a given variable.
+#'
+#' @param x A vector whose values have to be grouped. Can be of any type but must be atomic.
+    #' @param bin A list of values to be grouped, a vector, or the special value \code{"bin::digit"}. To create a new value from old values, use \code{bin = list("new_value"=old_values)} with \code{old_values} a vector of existing values. It accepts regular expressions, but they must start with an \code{"@"}, like in \code{bin="@Aug|Dec"}. The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value \code{"bin::digit"} to group every \code{digit} element. For example if \code{x} represent years, using \code{bin="bin::2"} create bins of two years. Using \code{"!bin::digit"} groups every digit consecutive values starting from the first value. Using \code{"!!bin::digit"} is the same bu starting from the last value. In both cases, \code{x} is not required to be numeric.
+#'
+#' @return
+#' It returns a vector of the same length as \code{x}
+#'
+#' @examples
+#'
+#' data(airquality)
+#' month_num = airquality$Month
+#' table(month_num)
+#'
+#' # Grouping the first two values
+#' table(bin(month_num, 5:6))
+#'
+#' # ... plus changing the name to '10'
+#' table(bin(month_num, list("10" = 5:6)))
+#'
+#' # ... and grouping 7 to 9
+#' table(bin(month_num, list("g1" = 5:6, "g2" = 7:9)))
+#'
+#' # Grouping every two months
+#' table(bin(month_num, "bin::2"))
+#'
+#' # ... every 2 consecutive elements
+#' table(bin(month_num, "!bin::2"))
+#'
+#' # ... idem starting from the last one
+#' table(bin(month_num, "!!bin::2"))
+#'
+#'
+#' #
+#' # with non numeric data
+#' #
+#'
+#' month_lab = c("may", "june", "july", "august", "september")
+#' month_fact = factor(month_num, labels = month_lab)
+#'
+#' # Grouping the first two elements
+#' table(bin(month_fact, c("may", "jun")))
+#'
+#' # ... using regex
+#' table(bin(month_fact, "@may|jun")))
+#'
+#' # ...changing the name
+#' table(bin(month_fact, list("spring" = "@may|jun")))
+#'
+#' # Grouping every 2 consecutive months
+#' table(bin(month_fact, "!bin::2"))
+#'
+#' # ...idem but starting from the last
+#' table(bin(month_fact, "!!bin::2"))
+#'
+#'
+bin = function(x, bin){
+
+    check_arg(x, "vector mbt")
+    check_arg(bin, "list | vector mbt")
+
+    varname = deparse(substitute(x))[1]
+    bin_factor(bin, x, varname)
 }
 
 
@@ -5043,15 +5140,22 @@ assign_flags = function(flags, ...){
     }
 }
 
-items_to_drop = function(items, x, varname, keep = FALSE){
+items_to_drop = function(items, x, varname, keep = FALSE, argname, keep_first = FALSE, up = 1){
     # selection of items
     # the selection depends on the type of x
     # always returns the IDs of the items to drop
 
-    set_up(1)
+    set_up(up)
 
-    argname = deparse(substitute(x))
+    if(missing(argname)){
+        argname = deparse(substitute(x))
+    }
+
     ref = argname == "ref"
+
+    if(keep_first && (keep || ref)){
+        stop("Internal error: keep_first should not be used with 'keep' or 'ref'.")
+    }
 
     if(is.character(x)){
         all_x = c()
@@ -5072,6 +5176,11 @@ items_to_drop = function(items, x, varname, keep = FALSE){
                 check_value_plus(my_x, "match", .choices = items, .message = paste0("The argument '", argname, "' should contain values of the variable '", varname, "'."))
                 all_x = c(all_x, my_x)
             }
+
+            if(keep_first && i == 1){
+                all_x_first = all_x
+            }
+
         }
 
         if(ref){
@@ -5084,6 +5193,10 @@ items_to_drop = function(items, x, varname, keep = FALSE){
             id_drop = which(!items %in% all_x)
         } else {
             id_drop = which(items %in% all_x)
+
+            if(keep_first){
+                id_drop = unique(c(which(items %in% all_x_first), id_drop))
+            }
         }
 
     } else {
@@ -5100,6 +5213,16 @@ items_to_drop = function(items, x, varname, keep = FALSE){
                 }
             } else {
                 id_drop = which(items %in% x)
+
+                if(keep_first){
+
+                    if(!x[1] %in% items){
+                        stop_up("In argument '", argname, "', the value ", x[1], " does not match any value of '", varname, "'.")
+                    }
+
+                    id_drop = unique(c(which(items %in% x[1]), id_drop))
+                }
+
             }
 
             if(length(id_drop) == 0){
@@ -5110,6 +5233,145 @@ items_to_drop = function(items, x, varname, keep = FALSE){
     }
 
     id_drop
+}
+
+
+
+bin_factor = function(bin, x, varname){
+    # x = base_did$period
+    # bin = list("9" = c(9, 2, 3), "7" = "@7|8", 5:6)
+    # varname = "period" ; argname = "bin"
+
+    set_up(1)
+
+    argname = deparse(substitute(bin))
+    check_arg(bin, "list | vector")
+
+    x_int = to_integer(x, add_items = TRUE, items.list = TRUE, sorted = TRUE)
+    x_items = x_int$items
+
+    do_factor = FALSE
+    if(is.factor(x_items)){
+        do_factor = TRUE
+        x_items = as.character(x_items)
+    }
+
+    if(!is.list(bin)){
+        if(any(grepl("^!?!?bin::", bin))){
+
+            if(length(bin) > 1){
+                stop_up("To use the special binning 'bin::digit', the argument '", argname, "' must be of length 1. Currently it is of length ", length(bin), ".")
+            }
+
+            d = gsub("^!?!?bin::", "", bin)
+            if(any(grepl("[^[:digit:]]", d))){
+                bin_type = gsub("^(!?!?bin).*", "\\1", bin)
+                stop_up("In the argument bin, the special binning must be of the form '", bin_type, "::digit'. Currently this is not the case for '", bin_type, "::", d, "'.")
+            }
+            d = as.numeric(d)
+
+            consecutive = grepl("^!", bin)
+            from_last = grepl("^!!", bin)
+
+            if(!consecutive){
+                if(!is.numeric(x_items)){
+                    stop_up("To use the special binning 'bin::digit', the variable '", varname, "' must be numeric. Currently this is not the case (it is of class ", enumerate_items(class(x_items)), " instead).")
+                }
+
+                new_x = (x_items %/% d) * d
+                new_x_unik = unique(new_x)
+
+            } else {
+                n = length(x_items)
+                x_seq = if(from_last) n:1 else 1:n
+                new_x = ((x_seq - 1) %/% d) * d + 1
+                new_x_unik = unique(new_x)
+            }
+
+            bin = list()
+            for(i in seq_along(new_x_unik)){
+                bin[[i]] = x_items[new_x == new_x_unik[i]]
+            }
+
+        } else {
+            bin = list(bin)
+        }
+    }
+
+    x_map = x_range = seq_along(x_int$items)
+    id_bin = list()
+    for(i in seq_along(bin)){
+        id_bin[[i]] = items_to_drop(x_items, bin[[i]], "bin", up = 2, argname = argname, keep_first = TRUE)
+    }
+
+    # sanity check
+    if(any(table(unlist(id_bin)) > 1)){
+        t_id = table(unlist(id_bin))
+        n_max = max(t_id)
+        pblm = x_items[as.numeric(names(t_id)[t_id == n_max])]
+        stop_up("In 'bin', some values are binned in different bins, it's of course not allowed. The value '", pblm, "' is in ", n_max, " bins.")
+    }
+
+    # recreating the factor
+
+    id_not_core = FALSE
+    for(i in seq_along(bin)){
+        id_bin_i = id_bin[[i]]
+        id_core = id_bin_i[1]
+
+        id_change = x_range %in% setdiff(id_bin_i, id_core)
+        id_not_core = id_not_core | id_change
+
+        x_map = x_map - cumsum(id_change)
+    }
+
+    # final pass
+    for(i in seq_along(bin)){
+        id_bin_i = id_bin[[i]]
+        id_core = id_bin_i[1]
+        id_change = x_range %in% id_bin_i
+
+        x_map[id_change] = x_map[id_core]
+    }
+
+    # changing the item values
+    bin_names = names(bin)
+    if(is.null(bin_names)){
+        bin_names = character(length(bin))
+    }
+
+    x_items_new = x_items
+
+    for(i in seq_along(bin)){
+        b_name = bin_names[[i]]
+        if(nchar(b_name) == 0){
+            b_name = as.character(x_items_new[id_bin[[i]][1]])
+        }
+
+        if(is.numeric(x_items_new)){
+            b_name_num = tryCatch(as.numeric(b_name), warning = function(x) "not numeric")
+            if(identical(b_name_num, "not numeric")){
+                # we convert to character
+                do_factor = TRUE
+                x_items_new = as.character(x_items_new)
+                b_name_num = b_name
+            }
+
+            x_items_new[id_bin[[i]]] = b_name_num
+        } else {
+            x_items_new[id_bin[[i]]] = b_name
+        }
+    }
+
+    x_items_new = x_items_new[!id_not_core]
+
+    if(do_factor){
+        x_items_new = factor(x_items_new, levels = x_items_new)
+    }
+
+    x_new = x_items_new[x_map[x_int$x]]
+
+    return(x_new)
 }
 
 
