@@ -7217,6 +7217,7 @@ residuals.fixest <- resid.fixest
 #'
 #' @inheritParams nobs.fixest
 #' @inheritParams fitted.fixest
+#' @inheritParams summary.fixest
 #'
 #' @param newdata A data.frame containing the variables used to make the prediction. If not provided, the fitted expected (or linear if \code{type = "link"}) predictors are returned.
 #' @param sample Either "estimation" (default) or "original". This argument is only used when arg. 'newdata' is missing, and is ignored otherwise. If equal to "estimation", the vector returned matches the sample used for the estimation. If equal to "original", it matches the original data set (the observations not used for the estimation being filled with NAs).
@@ -7301,11 +7302,15 @@ residuals.fixest <- resid.fixest
 #' # adding the residual to the CI
 #' head(predict(est, interval = "predi"))
 #'
+#' # You can change the type of SE on the fly
+#' head(predict(est, interval = "conf", vcov = ~species))
+#'
 #'
 #'
 predict.fixest = function(object, newdata, type = c("response", "link"), se.fit = FALSE,
                           interval = "none", level = 0.95, fixef = FALSE,
-                          vs.coef = FALSE, sample = c("estimation", "original"), ...){
+                          vs.coef = FALSE, sample = c("estimation", "original"),
+                          vcov = NULL, ssc = NULL, ...){
 
     # Checking the arguments
     validate_dots(suggest_args = c("newdata", "type"))
@@ -7708,7 +7713,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
 
 	    # The matrix has been created already
 
-	    V_raw = vcov(object, attr = TRUE)
+	    V_raw = vcov(object, attr = TRUE, vcov = vcov, ssc = ssc)
 	    V = V_raw[var_keep, var_keep, drop = FALSE]
 	    X = matrix_linear[, var_keep, drop = FALSE]
 
