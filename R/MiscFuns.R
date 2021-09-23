@@ -5301,7 +5301,7 @@ bin_factor = function(bin, x, varname){
     x_map = x_range = seq_along(x_int$items)
     id_bin = list()
     for(i in seq_along(bin)){
-        id_bin[[i]] = items_to_drop(x_items, bin[[i]], "bin", up = 2, argname = argname, keep_first = TRUE)
+        id_bin[[i]] = items_to_drop(x_items, bin[[i]], varname, up = 2, argname = argname, keep_first = TRUE)
     }
 
     # sanity check
