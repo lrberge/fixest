@@ -2910,7 +2910,7 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #' table(bin(month_fact, c("may", "jun")))
 #'
 #' # ... using regex
-#' table(bin(month_fact, "@may|jun")))
+#' table(bin(month_fact, "@may|jun"))
 #'
 #' # ...changing the name
 #' table(bin(month_fact, list("spring" = "@may|jun")))

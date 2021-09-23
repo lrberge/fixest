@@ -53,7 +53,7 @@ month_fact = factor(month_num, labels = month_lab)
 table(bin(month_fact, c("may", "jun")))
 
 # ... using regex
-table(bin(month_fact, "@may|jun")))
+table(bin(month_fact, "@may|jun"))
 
 # ...changing the name
 table(bin(month_fact, list("spring" = "@may|jun")))
