@@ -72,7 +72,7 @@ est_bis = feols(y ~ x1 + i(period, keep = 3:6) + i(period, treat, 5) | id, base_
 
 # we plot the second set of variables created with i()
 # => we need to use keep (otherwise only the first one is represented)
-iplot(est_bis, keep = "trea")
+coefplot(est_bis, keep = "trea")
 
 # => special treatment in etable
 etable(est_bis, dict = c("6" = "six"))

@@ -719,12 +719,16 @@ coefplot = function(object, ..., style = NULL, sd, ci_low, ci_high, x, x.shift =
 
             # switch to multi lines
             if(any(is_collided) || lab.cex < lab.min.cex){
-                lab.info = xaxis_labels(at = x_at, labels = x_labels, line.max = 1, minCex = lab.min.cex, trunc = Inf, only.params = TRUE)
+                lab.info = xaxis_labels(at = x_at, labels = x_labels, line.max = 1,
+                                        minCex = lab.min.cex, trunc = Inf, only.params = TRUE)
 
                 if(lab.info$failed){
                     # switch to tilted
                     lab.fit = "tilted"
-                    lab.info = xaxis_biased(at = x_at, labels = x_labels, line.min = LINE_MIN_TILTED, line.max = LINE_MAX_TILTED, cex = seq(lab.cex, lab.min.cex, length.out = 4), trunc = Inf, only.params = TRUE)
+                    lab.info = xaxis_biased(at = x_at, labels = x_labels, line.min = LINE_MIN_TILTED,
+                                            line.max = LINE_MAX_TILTED,
+                                            cex = seq(lab.cex, lab.min.cex, length.out = 4),
+                                            trunc = Inf, only.params = TRUE)
                     lab.cex = lab.info$cex
                     nlines = lab.info$height_line + LINE_MIN_TILTED
 
@@ -739,7 +743,8 @@ coefplot = function(object, ..., style = NULL, sd, ci_low, ci_high, x, x.shift =
                 nlines = 2 * lab.cex
             }
         } else if(lab.fit == "multi"){
-            lab.info = xaxis_labels(at = x_at, labels = x_labels, line.max = 1, minCex = lab.min.cex, trunc = Inf, only.params = TRUE)
+            lab.info = xaxis_labels(at = x_at, labels = x_labels, line.max = 1,
+                                    minCex = lab.min.cex, trunc = Inf, only.params = TRUE)
             lab.cex = lab.info$cex
             nlines = lab.info$height_line
 
@@ -749,7 +754,10 @@ coefplot = function(object, ..., style = NULL, sd, ci_low, ci_high, x, x.shift =
             }
 
         } else if(lab.fit == "tilted"){
-            lab.info = xaxis_biased(at = x_at, labels = x_labels, line.min = LINE_MIN_TILTED, line.max = LINE_MAX_TILTED, cex = seq(lab.cex, lab.min.cex, length.out = 4), trunc = Inf, only.params = TRUE)
+            lab.info = xaxis_biased(at = x_at, labels = x_labels, line.min = LINE_MIN_TILTED,
+                                    line.max = LINE_MAX_TILTED,
+                                    cex = seq(lab.cex, lab.min.cex, length.out = 4),
+                                    trunc = Inf, only.params = TRUE)
             lab.cex = lab.info$cex
             nlines = lab.info$height_line + LINE_MIN_TILTED
 
@@ -1960,7 +1968,8 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
             all_vars = keep_apply(all_vars, keep)
 
             if(length(all_vars) == 0){
-                stop("Argument 'keep' has removed all variables!")
+                msg = if(is_iplot) " Didn't you mean to use 'i.select'?" else ""
+                stop("Argument 'keep' has removed all variables!", msg)
             }
 
             prms = prms[prms$estimate_names %in% all_vars,]

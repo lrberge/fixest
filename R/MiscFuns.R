@@ -2536,7 +2536,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #'
 #' # we plot the second set of variables created with i()
 #' # => we need to use keep (otherwise only the first one is represented)
-#' iplot(est_bis, keep = "trea")
+#' coefplot(est_bis, keep = "trea")
 #'
 #' # => special treatment in etable
 #' etable(est_bis, dict = c("6" = "six"))
@@ -2710,7 +2710,7 @@ i = function(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...){
         f_items = items
     }
 
-    check_arg(ref, "logical scalar | vector no na", .choices = items)
+    check_arg(ref, "logical scalar | vector no na")
 
     check_arg(ref2, keep, keep2, "vector no na")
 
@@ -5157,6 +5157,14 @@ items_to_drop = function(items, x, varname, keep = FALSE, argname, keep_first = 
         stop("Internal error: keep_first should not be used with 'keep' or 'ref'.")
     }
 
+    if(is.factor(items)){
+        items = as.character(items)
+    }
+
+    if(is.factor(x)){
+        x = as.character(x)
+    }
+
     if(is.character(x)){
         all_x = c()
         for(i in seq_along(x)){
@@ -6514,7 +6522,13 @@ mat_posdef_fix = function(X, tol = 1e-10){
 
 
 is_fixest_call = function(){
-    sys.nframe() > 5 && any(sapply(tail(sys.calls(), 7), function(x) any(grepl("fixest", deparse(x)[1], fixed = TRUE))))
+    nf = sys.nframe()
+
+    if(nf < 5) return(FALSE)
+
+    last_calls = sapply(tail(sys.calls(), 13), function(x) deparse(x)[1])
+
+    any(grepl("fixest", last_calls[-length(last_calls)]))
 }
 
 all_vars_with_i_prefix = function(fml){
