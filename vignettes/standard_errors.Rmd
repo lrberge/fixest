@@ -19,11 +19,6 @@ knitr::opts_chunk$set(echo = TRUE,
 Sys.setenv(lang = "en")
 
 library(fixest)
-
-if(requireNamespace("plm", quietly = TRUE)) library(plm)
-
-if(requireNamespace("sandwich", quietly = TRUE)) library(sandwich)
-
 setFixest_nthreads(1)
 ```
 
@@ -123,12 +118,17 @@ This section illustrates how the results from `fixest` compares with the ones fr
 
 ```{r, echo = FALSE}
 is_plm = requireNamespace("plm", quietly = TRUE)
+is_sandwich = requireNamespace("sandwich", quietly = TRUE)
+
+is_plm = is_plm || is_swandwich
+
 if(!is_plm){
     knitr::opts_chunk$set(eval = FALSE)
-    cat("Evaluation of the next chunks requires 'plm', which is not present.")
+    cat("Evaluation of the next chunks requires 'plm' and 'sandwich'. Problem: One of these packages is missing.")
 } else {
     knitr::opts_chunk$set(eval = TRUE)
 }
+
 ```
 
 #### The data set and heteroskedasticity-robust SEs
