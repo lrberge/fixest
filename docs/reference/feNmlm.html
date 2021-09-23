@@ -440,6 +440,18 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 <p>You can also add fixed-effects in a stepwise fashion. Note that you cannot perform stepwise estimations on the IV part of the formula (<code>feols</code> only).</p>
 <p>If NAs are present in the sample, to avoid too many messages, only NA removal concerning the variables common to all estimations is reported.</p>
 <p>A note on performance. The feature of multiple estimations has been highly optimized for <code>feols</code>, in particular in the presence of fixed-effects. It is faster to estimate multiple models using the formula rather than with a loop. For non-<code>feols</code> models using the formula is roughly similar to using a loop performance-wise.</p>
+    <h2 class="hasAnchor" id="argument-sliding"><a class="anchor" href="#argument-sliding"></a>Argument sliding</h2>
+
+    
+
+
+<p>When the data set has been set up globally using <code><a href='setFixest_estimation.html'>setFixest_estimation</a></code>(data = data_set), the argument <code>vcov</code> can be used implicitly. This means that calls such as <code><a href='feols.html'>feols(y ~ x, "HC1")</a></code>, or <code><a href='feols.html'>feols(y ~ x, ~id)</a></code>, are valid: i) the data is automatically deduced from the global settings, and ii) the <code>vcov</code> is deduced to be the second argument.</p>
+    <h2 class="hasAnchor" id="piping"><a class="anchor" href="#piping"></a>Piping</h2>
+
+    
+
+
+<p>Although the argument 'data' is placed in second position, the data can be piped to the estimation functions. For example, with R &gt;= 4.1, <code>mtcars |&gt; feols(mpg ~ cyl)</code> works as <code><a href='feols.html'>feols(mpg ~ cyl, mtcars)</a></code>.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (<a href='https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13'>https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13</a>).</p>

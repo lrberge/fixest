@@ -213,22 +213,22 @@
 #&gt; Observations: 864 
 #&gt; Standard-errors: Clustered (id) 
 #&gt;             Estimate Std. Error   t value  Pr(&gt;|t|)    
-#&gt; (Intercept) 2.464300   0.223277 11.037000 &lt; 2.2e-16 ***
-#&gt; f(x1, 1)    0.994018   0.054216 18.335000 &lt; 2.2e-16 ***
-#&gt; x1          0.008072   0.059247  0.136241  0.891887    
-#&gt; l(x1, 1)    0.015693   0.063958  0.245360  0.806648    
+#&gt; (Intercept) 2.464313   0.223277 11.037009 &lt; 2.2e-16 ***
+#&gt; f(x1, 1)    0.994018   0.054216 18.334504 &lt; 2.2e-16 ***
+#&gt; x1          0.008072   0.059247  0.136241   0.89189    
+#&gt; l(x1, 1)    0.015693   0.063958  0.245360   0.80665    
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 4.9742   Adj. R2: 0.254377</div><div class='input'><span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='fu'>d</span><span class='op'>(</span><span class='va'>y</span><span class='op'>)</span> <span class='op'>~</span> <span class='fu'>d</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span>, <span class='va'>base_did</span>, panel.id <span class='op'>=</span> <span class='op'>~</span><span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>)</span>
+#&gt; RMSE: 4.97418   Adj. R2: 0.254377</div><div class='input'><span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='fu'>d</span><span class='op'>(</span><span class='va'>y</span><span class='op'>)</span> <span class='op'>~</span> <span class='fu'>d</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span>, <span class='va'>base_did</span>, panel.id <span class='op'>=</span> <span class='op'>~</span><span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; <span class='message'>NOTE: 108 observations removed because of NA values (LHS: 108, RHS: 108).</span></div><div class='output co'>#&gt; OLS estimation, Dep. Var.: d(y, 1)
 #&gt; Observations: 972 
 #&gt; Standard-errors: Clustered (id) 
-#&gt;             Estimate Std. Error t value  Pr(&gt;|t|)    
-#&gt; (Intercept) 0.510685   0.072720  7.0226  2.09e-10 ***
-#&gt; d(x1, 1)    0.972664   0.053437 18.2020 &lt; 2.2e-16 ***
+#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept) 0.510685   0.072720  7.02262 2.0948e-10 ***
+#&gt; d(x1, 1)    0.972664   0.053437 18.20224  &lt; 2.2e-16 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 5.8389   Adj. R2: 0.329253</div><div class='input'>
+#&gt; RMSE: 5.83885   Adj. R2: 0.329253</div><div class='input'>
 <span class='co'># l() and f() can also be used within a data.table:</span>
 <span class='kw'>if</span><span class='op'>(</span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>require</a></span><span class='op'>(</span><span class='st'><a href='https://r-datatable.com'>"data.table"</a></span><span class='op'>)</span><span class='op'>)</span><span class='op'>{</span>
   <span class='va'>pdat_dt</span> <span class='op'>=</span> <span class='fu'><a href='panel.html'>panel</a></span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html'>as.data.table</a></span><span class='op'>(</span><span class='va'>base_did</span><span class='op'>)</span>, <span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>period</span><span class='op'>)</span>

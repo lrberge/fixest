@@ -141,7 +141,7 @@
     <p>Treat a variable as a factor, or interacts a variable with a factor. Values to be dropped/kept from the factor can be easily set. Note that to interact fixed-effects, this function should not be used: instead use directly the syntax <code>fe1^fe2</code>.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>i</span><span class='op'>(</span><span class='va'>factor_var</span>, <span class='va'>var</span>, <span class='va'>ref</span>, <span class='va'>keep</span>, <span class='va'>ref2</span>, <span class='va'>keep2</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>i</span><span class='op'>(</span><span class='va'>factor_var</span>, <span class='va'>var</span>, <span class='va'>ref</span>, <span class='va'>keep</span>, <span class='va'>bin</span>, <span class='va'>ref2</span>, <span class='va'>keep2</span>, <span class='va'>bin2</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -163,12 +163,20 @@
       <td><p>A vector of values to be kept from <code>factor_var</code> (all others are dropped). By default they should be values from <code>factor_var</code> and if <code>keep</code> is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.</p></td>
     </tr>
     <tr>
+      <th>bin</th>
+      <td><p>A list of values to be grouped, a vector, or the special value <code>"bin::digit"</code>. To create a new value from old values, use <code>bin = list("new_value"=old_values)</code> with <code>old_values</code> a vector of existing values. It accepts regular expressions, but they must start with an <code>"@"</code>, like in <code>bin="@Aug|Dec"</code>. The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value <code>"bin::digit"</code> to group every <code>digit</code> element. For example if <code>x</code> represent years, using <code>bin="bin::2"</code> create bins of two years. Using <code>"!bin::digit"</code> groups every digit consecutive values starting from the first value. Using <code>"!!bin::digit"</code> is the same bu starting from the last value. In both cases, <code>x</code> is not required to be numeric.</p></td>
+    </tr>
+    <tr>
       <th>ref2</th>
       <td><p>A vector of values to be dropped from <code>var</code>. By default they should be values from <code>var</code> and if <code>ref2</code> is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.</p></td>
     </tr>
     <tr>
       <th>keep2</th>
       <td><p>A vector of values to be kept from <code>var</code> (all others are dropped). By default they should be values from <code>var</code> and if <code>keep2</code> is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.</p></td>
+    </tr>
+    <tr>
+      <th>bin2</th>
+      <td><p>A list or vector defining the binning of the second variable. See help for the argument <code>bin</code> for details (or look at the help of the function <code><a href='bin.html'>bin</a></code>).</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -184,7 +192,8 @@
     <p>To interact fixed-effects, this function should not be used: instead use directly the syntax <code>fe1^fe2</code> in the fixed-effects part of the formula. Please see the details and examples in the help page of <code><a href='feols.html'>feols</a></code>.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='coefplot.html'>iplot</a></code> to plot interactions or factors created with <code>i()</code>, <code><a href='feols.html'>feols</a></code> for OLS estimation with multiple fixed-effects.</p></div>
+    <div class='dont-index'><p><code><a href='coefplot.html'>iplot</a></code> to plot interactions or factors created with <code>i()</code>, <code><a href='feols.html'>feols</a></code> for OLS estimation with multiple fixed-effects.</p>
+<p>See the function <code><a href='bin.html'>bin</a></code> for binning variables.</p></div>
     <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
 
     <p>Laurent Berge</p>
@@ -323,7 +332,7 @@
 <span class='co'># we plot the second set of variables created with i()</span>
 <span class='co'># =&gt; we need to use keep (otherwise only the first one is represented)</span>
 <span class='fu'><a href='coefplot.html'>iplot</a></span><span class='op'>(</span><span class='va'>est_bis</span>, keep <span class='op'>=</span> <span class='st'>"trea"</span><span class='op'>)</span>
-</div><div class='img'><img src='i-2.png' alt='' width='700' height='433' /></div><div class='input'>
+</div><div class='output co'>#&gt; <span class='error'>Error in coefplot_prms(object = object, ..., sd = sd, ci_low = ci_low,     ci_high = ci_high, x = x, x.shift = x.shift, dict = dict,     keep = keep, drop = drop, order = order, ci_level = ci_level,     ref = ref, only.i = is_iplot, sep = sep, as.multiple = as.multiple): Argument 'keep' has removed all variables!</span></div><div class='input'>
 <span class='co'># =&gt; special treatment in etable</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_bis</span>, dict <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"6"</span> <span class='op'>=</span> <span class='st'>"six"</span><span class='op'>)</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                                 est_bis
@@ -397,6 +406,36 @@
 #&gt; Observations                       111               111
 #&gt; R2                             0.52636           0.37684
 #&gt; Adj. R2                        0.40795           0.27844</div><div class='input'>
+<span class='co'>#</span>
+<span class='co'># Binning</span>
+<span class='co'>#</span>
+
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>airquality</span><span class='op'>)</span>
+
+<span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='fu'>i</span><span class='op'>(</span><span class='va'>Month</span>, bin <span class='op'>=</span> <span class='st'>"bin::2"</span><span class='op'>)</span>, <span class='va'>airquality</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 37 observations removed because of NA values (LHS: 37).</span></div><div class='output co'>#&gt; OLS estimation, Dep. Var.: Ozone
+#&gt; Observations: 116 
+#&gt; Standard-errors: IID 
+#&gt;             Estimate Std. Error t value   Pr(&gt;|t|)    
+#&gt; (Intercept)  23.6154    6.19450 3.81231 0.00022469 ***
+#&gt; Month::6     27.8703    8.17782 3.40804 0.00090749 ***
+#&gt; Month::8     21.3119    7.51740 2.83501 0.00543040 ** 
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; RMSE: 31.2   Adj. R2: 0.083194</div><div class='input'>
+<span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='fu'>i</span><span class='op'>(</span><span class='va'>Month</span>, bin <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>summer <span class='op'>=</span> <span class='fl'>7</span><span class='op'>:</span><span class='fl'>9</span><span class='op'>)</span><span class='op'>)</span>, <span class='va'>airquality</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 37 observations removed because of NA values (LHS: 37).</span></div><div class='output co'>#&gt; OLS estimation, Dep. Var.: Ozone
+#&gt; Observations: 116 
+#&gt; Standard-errors: IID 
+#&gt;               Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept)   23.61538    6.13010 3.852364 0.00019455 ***
+#&gt; Month::6       5.82906   12.08872 0.482190 0.63060377    
+#&gt; Month::summer 25.86610    7.04559 3.671249 0.00037013 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; RMSE: 30.9   Adj. R2: 0.102158</div><div class='input'>
+
+
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

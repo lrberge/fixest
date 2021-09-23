@@ -444,6 +444,12 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 
 
 <p>When the data set has been set up globally using <code><a href='setFixest_estimation.html'>setFixest_estimation</a></code>(data = data_set), the argument <code>vcov</code> can be used implicitly. This means that calls such as <code>feols(y ~ x, "HC1")</code>, or <code>feols(y ~ x, ~id)</code>, are valid: i) the data is automatically deduced from the global settings, and ii) the <code>vcov</code> is deduced to be the second argument.</p>
+    <h2 class="hasAnchor" id="piping"><a class="anchor" href="#piping"></a>Piping</h2>
+
+    
+
+
+<p>Although the argument 'data' is placed in second position, the data can be piped to the estimation functions. For example, with R &gt;= 4.1, <code>mtcars |&gt; feols(mpg ~ cyl)</code> works as <code>feols(mpg ~ cyl, mtcars)</code>.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (<a href='https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13'>https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13</a>).</p>
@@ -469,10 +475,10 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: Sepal.Length
 #&gt; Observations: 150 
 #&gt; Standard-errors: Clustered (Species) 
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; (Intercept)  2.249100   0.162626  13.830 0.005187 ** 
-#&gt; Sepal.Width  0.595525   0.051733  11.511 0.007462 ** 
-#&gt; Petal.Length 0.471920   0.006873  68.667 0.000212 ***
+#&gt;              Estimate Std. Error t value   Pr(&gt;|t|)    
+#&gt; (Intercept)  2.249140   0.162626 13.8302 0.00518747 ** 
+#&gt; Sepal.Width  0.595525   0.051733 11.5115 0.00746202 ** 
+#&gt; Petal.Length 0.471920   0.006873 68.6673 0.00021201 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.329937   Adj. R2: 0.838003</div><div class='input'>
@@ -488,8 +494,8 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; Fixed-effects: Species: 3
 #&gt; Standard-errors: Clustered (Species) 
 #&gt;              Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; Sepal.Width  0.432217   0.161308  2.6794 0.115623    
-#&gt; Petal.Length 0.775629   0.126546  6.1293 0.025601 *  
+#&gt; Sepal.Width  0.432217   0.161308 2.67945 0.115623    
+#&gt; Petal.Length 0.775629   0.126546 6.12925 0.025601 *  
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.305129     Adj. R2: 0.859538
@@ -523,8 +529,8 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; Observations: 150 
 #&gt; Fixed-effects: Species^fe_2: 30
 #&gt; Standard-errors: Clustered (Species^fe_2) 
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; Petal.Length 0.875613   0.062395  14.033 1.85e-14 ***
+#&gt;              Estimate Std. Error t value   Pr(&gt;|t|)    
+#&gt; Petal.Length 0.875613   0.062395 14.0334 1.8483e-14 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.309865     Adj. R2: 0.823494
@@ -597,26 +603,26 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; Observations: 150 
 #&gt; Standard-errors: IID 
 #&gt;              Estimate Std. Error   t value Pr(&gt;|t|) 
-#&gt; (Intercept) -5.444100    82.9070 -0.065665 0.947735 
-#&gt; fit_x_endo1  4.156900    44.6790  0.093038 0.926001 
-#&gt; x1           0.533483     1.8094  0.294843 0.768532 
-#&gt; x2          -1.358100    19.6740 -0.069030 0.945060 
+#&gt; (Intercept) -5.444083   82.90731 -0.065665  0.94773 
+#&gt; fit_x_endo1  4.156853   44.67892  0.093038  0.92600 
+#&gt; x1           0.533483    1.80938  0.294843  0.76853 
+#&gt; x2          -1.358091   19.67381 -0.069030  0.94506 
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 7.9776   Adj. R2: -94.4
+#&gt; RMSE: 7.97755   Adj. R2: -94.4
 #&gt; F-test (1st stage), x_endo1: stat = 0.008704, p = 0.925795, on 1 and 146 DoF.
-#&gt;                  Wu-Hausman: stat = 5.2387  , p = 0.023535, on 1 and 145 DoF.</div><div class='input'>
+#&gt;                  Wu-Hausman: stat = 5.23866 , p = 0.023535, on 1 and 145 DoF.</div><div class='input'>
 <span class='co'># To show the first stage:</span>
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>res_iv</span>, stage <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; TSLS estimation, Dep. Var.: x_endo1, Endo.: x_endo1, Instr.: x_inst1
 #&gt; First stage: Dep. Var.: x_endo1
 #&gt; Observations: 150 
 #&gt; Standard-errors: IID 
-#&gt;              Estimate Std. Error   t value Pr(&gt;|t|)    
-#&gt; (Intercept)  1.867800   1.454900  1.283900 0.201226    
-#&gt; x_inst1     -0.011136   0.119357 -0.093298 0.925795    
-#&gt; x1           0.018677   0.405512  0.046059 0.963326    
-#&gt; x2           0.447831   0.128635  3.481400 0.000658 ***
+#&gt;              Estimate Std. Error   t value   Pr(&gt;|t|)    
+#&gt; (Intercept)  1.867844   1.454871  1.283856 0.20122622    
+#&gt; x_inst1     -0.011136   0.119357 -0.093298 0.92579498    
+#&gt; x1           0.018677   0.405512  0.046059 0.96332636    
+#&gt; x2           0.447831   0.128635  3.481404 0.00065818 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 1.9138   Adj. R2: 0.122258
@@ -628,11 +634,11 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; First stage: Dep. Var.: x_endo1
 #&gt; Observations: 150 
 #&gt; Standard-errors: IID 
-#&gt;              Estimate Std. Error   t value Pr(&gt;|t|)    
-#&gt; (Intercept)  1.867800   1.454900  1.283900 0.201226    
-#&gt; x_inst1     -0.011136   0.119357 -0.093298 0.925795    
-#&gt; x1           0.018677   0.405512  0.046059 0.963326    
-#&gt; x2           0.447831   0.128635  3.481400 0.000658 ***
+#&gt;              Estimate Std. Error   t value   Pr(&gt;|t|)    
+#&gt; (Intercept)  1.867844   1.454871  1.283856 0.20122622    
+#&gt; x_inst1     -0.011136   0.119357 -0.093298 0.92579498    
+#&gt; x1           0.018677   0.405512  0.046059 0.96332636    
+#&gt; x2           0.447831   0.128635  3.481404 0.00065818 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 1.9138   Adj. R2: 0.122258
@@ -644,15 +650,15 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; Observations: 150 
 #&gt; Standard-errors: IID 
 #&gt;              Estimate Std. Error   t value Pr(&gt;|t|) 
-#&gt; (Intercept) -5.444100    82.9070 -0.065665 0.947735 
-#&gt; fit_x_endo1  4.156900    44.6790  0.093038 0.926001 
-#&gt; x1           0.533483     1.8094  0.294843 0.768532 
-#&gt; x2          -1.358100    19.6740 -0.069030 0.945060 
+#&gt; (Intercept) -5.444083   82.90731 -0.065665  0.94773 
+#&gt; fit_x_endo1  4.156853   44.67892  0.093038  0.92600 
+#&gt; x1           0.533483    1.80938  0.294843  0.76853 
+#&gt; x2          -1.358091   19.67381 -0.069030  0.94506 
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 7.9776   Adj. R2: -94.4
+#&gt; RMSE: 7.97755   Adj. R2: -94.4
 #&gt; F-test (1st stage), x_endo1: stat = 0.008704, p = 0.925795, on 1 and 146 DoF.
-#&gt;                  Wu-Hausman: stat = 5.2387  , p = 0.023535, on 1 and 145 DoF.</div><div class='input'>
+#&gt;                  Wu-Hausman: stat = 5.23866 , p = 0.023535, on 1 and 145 DoF.</div><div class='input'>
 <span class='co'># Adding a fixed-effect =&gt; IV formula always last!</span>
 <span class='va'>res_iv_fe</span> <span class='op'>=</span> <span class='fu'>feols</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='va'>x2</span> <span class='op'>|</span> <span class='va'>fe1</span> <span class='op'>|</span> <span class='va'>x_endo1</span> <span class='op'>~</span> <span class='va'>x_inst1</span>, <span class='va'>base</span><span class='op'>)</span>
 
@@ -668,15 +674,15 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; First stage: Dep. Var.: x_endo1
 #&gt; Observations: 150 
 #&gt; Standard-errors: IID 
-#&gt;              Estimate Std. Error   t value Pr(&gt;|t|)    
-#&gt; (Intercept)  1.850700   1.516300  1.220500 0.224240    
-#&gt; x_inst1     -0.011391   0.119922 -0.094984 0.924459    
-#&gt; x_inst2      0.003804   0.091032  0.041784 0.966728    
-#&gt; x1           0.020822   0.410131  0.050770 0.959578    
-#&gt; x2           0.446540   0.132727  3.364300 0.000982 ***
+#&gt;              Estimate Std. Error   t value   Pr(&gt;|t|)    
+#&gt; (Intercept)  1.850720   1.516307  1.220544 0.22423981    
+#&gt; x_inst1     -0.011391   0.119922 -0.094984 0.92445853    
+#&gt; x_inst2      0.003804   0.091032  0.041784 0.96672840    
+#&gt; x1           0.020822   0.410131  0.050770 0.95957842    
+#&gt; x2           0.446540   0.132727  3.364349 0.00098184 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 1.9138   Adj. R2: 0.116216
+#&gt; RMSE: 1.91379   Adj. R2: 0.116216
 #&gt; F-test (1st stage): stat = 0.005195, p = 0.994818, on 2 and 145 DoF.</div><div class='input'>
 <span class='co'># The stage argument also works in etable:</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res_iv</span>, <span class='va'>res_iv_fe</span>, <span class='va'>res_iv2</span>, order <span class='op'>=</span> <span class='st'>"endo"</span><span class='op'>)</span>
@@ -810,30 +816,30 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; ### Dep. var.: Ozone
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error t value   Pr(&gt;|t|)    
-#&gt; (Intercept)      29.851     4.6248  6.4545 0.00000138 ***
-#&gt; poly(Wind, 2)1 -180.150    68.1460 -2.6436 0.01451600 *  
-#&gt; poly(Wind, 2)2   93.319    55.6890  1.6757 0.10734000    
+#&gt;                 Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept)      29.8505    4.62478  6.45448 1.3810e-06 ***
+#&gt; poly(Wind, 2)1 -180.1531   68.14588 -2.64364 1.4516e-02 *  
+#&gt; poly(Wind, 2)2   93.3187   55.68940  1.67570 1.0734e-01    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; (Intercept)      60.885     13.331  4.5670 0.000137 ***
-#&gt; poly(Temp, 2)1  436.080    162.610  2.6817 0.013321 *  
-#&gt; poly(Temp, 2)2  156.570    107.680  1.4540 0.159455    
+#&gt;                Estimate Std. Error t value   Pr(&gt;|t|)    
+#&gt; (Intercept)     60.8847    13.3314 4.56701 0.00013696 ***
+#&gt; poly(Temp, 2)1 436.0792   162.6142 2.68168 0.01332077 *  
+#&gt; poly(Temp, 2)2 156.5738   107.6842 1.45401 0.15945485    
 #&gt; 
 #&gt; ### Dep. var.: Solar.R
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error   t value    Pr(&gt;|t|)    
-#&gt; (Intercept)      185.98     27.217  6.833200 0.000000456 ***
-#&gt; poly(Wind, 2)1  -101.51    403.970 -0.251277 0.803739000    
-#&gt; poly(Wind, 2)2  -248.61    327.310 -0.759552 0.454919000    
+#&gt;                Estimate Std. Error   t value   Pr(&gt;|t|)    
+#&gt; (Intercept)     185.975    27.2165  6.833171 4.5627e-07 ***
+#&gt; poly(Wind, 2)1 -101.509   403.9730 -0.251277 8.0374e-01    
+#&gt; poly(Wind, 2)2 -248.609   327.3103 -0.759552 4.5492e-01    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
 #&gt;                Estimate Std. Error   t value Pr(&gt;|t|)    
-#&gt; (Intercept)      184.74     72.527  2.547100 0.017690 *  
-#&gt; poly(Temp, 2)1  -306.20    881.230 -0.347473 0.731265    
-#&gt; poly(Temp, 2)2  -822.99    547.850 -1.502200 0.146087    
+#&gt; (Intercept)     184.737    72.5274  2.547133  0.01769 *  
+#&gt; poly(Temp, 2)1 -306.202   881.2266 -0.347473  0.73126    
+#&gt; poly(Temp, 2)2 -822.991   547.8534 -1.502211  0.14609    
 #&gt; 
 #&gt; 
 #&gt; # SAMPLE: 6
@@ -843,29 +849,29 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
 #&gt;                Estimate Std. Error   t value Pr(&gt;|t|)    
-#&gt; (Intercept)      21.821      9.489  2.299600 0.061137 .  
-#&gt; poly(Wind, 2)1  166.960    161.900  1.031300 0.342179    
-#&gt; poly(Wind, 2)2  -60.631     92.541 -0.655171 0.536652    
+#&gt; (Intercept)     21.8206    9.48902  2.299565 0.061137 .  
+#&gt; poly(Wind, 2)1 166.9646  161.90174  1.031271 0.342179    
+#&gt; poly(Wind, 2)2 -60.6305   92.54148 -0.655171 0.536652    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; (Intercept)      34.296     4.1531  8.2579 0.000171 ***
-#&gt; poly(Temp, 2)1  114.920    62.2060  1.8474 0.114205    
-#&gt; poly(Temp, 2)2  206.490    79.9990  2.5811 0.041707 *  
+#&gt;                Estimate Std. Error t value   Pr(&gt;|t|)    
+#&gt; (Intercept)     34.2959    4.15309 8.25794 0.00017054 ***
+#&gt; poly(Temp, 2)1 114.9172   62.20576 1.84737 0.11420526    
+#&gt; poly(Temp, 2)2 206.4879   79.99940 2.58112 0.04170670 *  
 #&gt; 
 #&gt; ### Dep. var.: Solar.R
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error   t value    Pr(&gt;|t|)    
-#&gt; (Intercept)     187.780     16.466 11.404000 7.89000e-12 ***
-#&gt; poly(Wind, 2)1  389.560    194.900  1.998800 5.57870e-02 .  
-#&gt; poly(Wind, 2)2  -72.818    156.400 -0.465574 6.45254e-01    
+#&gt;                Estimate Std. Error   t value   Pr(&gt;|t|)    
+#&gt; (Intercept)    187.7785    16.4660 11.404021 7.8882e-12 ***
+#&gt; poly(Wind, 2)1 389.5634   194.8959  1.998828 5.5787e-02 .  
+#&gt; poly(Wind, 2)2 -72.8180   156.4046 -0.465574 6.4525e-01    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error  t value    Pr(&gt;|t|)    
-#&gt; (Intercept)      188.34      21.41 8.796900 2.06000e-09 ***
-#&gt; poly(Temp, 2)1   575.59     374.37 1.537500 1.35815e-01    
-#&gt; poly(Temp, 2)2   133.70     363.96 0.367352 7.16220e-01    
+#&gt;                Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept)     188.337    21.4096 8.796855 2.0604e-09 ***
+#&gt; poly(Temp, 2)1  575.587   374.3715 1.537475 1.3581e-01    
+#&gt; poly(Temp, 2)2  133.702   363.9611 0.367352 7.1622e-01    
 #&gt; 
 #&gt; 
 #&gt; # SAMPLE: 7
@@ -874,30 +880,30 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; ### Dep. var.: Ozone
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error   t value    Pr(&gt;|t|)    
-#&gt; (Intercept)      49.812     5.5194  9.024800 5.11000e-09 ***
-#&gt; poly(Wind, 2)1 -280.640    84.2530 -3.330900 2.90600e-03 ** 
-#&gt; poly(Wind, 2)2   58.003   107.6300  0.538924 5.95118e-01    
+#&gt;                 Estimate Std. Error   t value   Pr(&gt;|t|)    
+#&gt; (Intercept)      49.8115    5.51938  9.024837 5.1064e-09 ***
+#&gt; poly(Wind, 2)1 -280.6407   84.25343 -3.330912 2.9055e-03 ** 
+#&gt; poly(Wind, 2)2   58.0027  107.62694  0.538924 5.9512e-01    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
 #&gt;                Estimate Std. Error  t value Pr(&gt;|t|)    
-#&gt; (Intercept)      29.211     16.069 1.817800 0.082138 .  
-#&gt; poly(Temp, 2)1  584.100    265.920 2.196500 0.038399 *  
-#&gt; poly(Temp, 2)2   14.189    198.960 0.071314 0.943764    
+#&gt; (Intercept)     29.2107    16.0689 1.817844 0.082138 .  
+#&gt; poly(Temp, 2)1 584.0963   265.9188 2.196521 0.038399 *  
+#&gt; poly(Temp, 2)2  14.1887   198.9617 0.071314 0.943764    
 #&gt; 
 #&gt; ### Dep. var.: Solar.R
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                 Estimate Std. Error   t value    Pr(&gt;|t|)    
-#&gt; (Intercept)     213.1600     16.335 13.049000 2.01000e-13 ***
-#&gt; poly(Wind, 2)1 -144.0800    246.760 -0.583909 5.63956e-01    
-#&gt; poly(Wind, 2)2    8.7091    324.820  0.026812 9.78800e-01    
+#&gt;                  Estimate Std. Error   t value   Pr(&gt;|t|)    
+#&gt; (Intercept)     213.16197    16.3352 13.049206 2.0111e-13 ***
+#&gt; poly(Wind, 2)1 -144.08420   246.7578 -0.583909 5.6396e-01    
+#&gt; poly(Wind, 2)2    8.70905   324.8247  0.026812 9.7880e-01    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error   t value Pr(&gt;|t|)    
-#&gt; (Intercept)      172.30     54.609  3.155200 0.003813 ** 
-#&gt; poly(Temp, 2)1   835.02    904.970  0.922697 0.364048    
-#&gt; poly(Temp, 2)2  -107.28    645.970 -0.166070 0.869295    
+#&gt;                Estimate Std. Error   t value  Pr(&gt;|t|)    
+#&gt; (Intercept)     172.303    54.6087  3.155239 0.0038125 ** 
+#&gt; poly(Temp, 2)1  835.016   904.9731  0.922697 0.3640481    
+#&gt; poly(Temp, 2)2 -107.276   645.9680 -0.166070 0.8692954    
 #&gt; 
 #&gt; 
 #&gt; # SAMPLE: 8
@@ -906,30 +912,30 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; ### Dep. var.: Ozone
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error t value    Pr(&gt;|t|)    
-#&gt; (Intercept)      49.732     6.1498  8.0867 3.56000e-08 ***
-#&gt; poly(Wind, 2)1 -289.250    97.1100 -2.9786 6.71900e-03 ** 
-#&gt; poly(Wind, 2)2  116.300    90.0030  1.2922 2.09134e-01    
+#&gt;                 Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept)      49.7316    6.14979  8.08670 3.5632e-08 ***
+#&gt; poly(Wind, 2)1 -289.2515   97.10974 -2.97860 6.7192e-03 ** 
+#&gt; poly(Wind, 2)2  116.2989   90.00343  1.29216 2.0913e-01    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error   t value Pr(&gt;|t|)    
-#&gt; (Intercept)      26.129     16.648  1.569500 0.130195    
-#&gt; poly(Temp, 2)1  678.140    325.990  2.080200 0.048834 *  
-#&gt; poly(Temp, 2)2 -162.120    188.330 -0.860822 0.398222    
+#&gt;                 Estimate Std. Error   t value Pr(&gt;|t|)    
+#&gt; (Intercept)      26.1289    16.6482  1.569471 0.130195    
+#&gt; poly(Temp, 2)1  678.1406   325.9933  2.080228 0.048834 *  
+#&gt; poly(Temp, 2)2 -162.1223   188.3344 -0.860822 0.398222    
 #&gt; 
 #&gt; ### Dep. var.: Solar.R
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error   t value    Pr(&gt;|t|)    
-#&gt; (Intercept)     170.340     15.836 10.757000 7.21000e-11 ***
-#&gt; poly(Wind, 2)1  -78.922    265.260 -0.297520 7.68528e-01    
-#&gt; poly(Wind, 2)2  130.240    250.900  0.519111 6.08249e-01    
+#&gt;                Estimate Std. Error   t value   Pr(&gt;|t|)    
+#&gt; (Intercept)    170.3429    15.8361 10.756599 7.2127e-11 ***
+#&gt; poly(Wind, 2)1 -78.9215   265.2646 -0.297520 7.6853e-01    
+#&gt; poly(Wind, 2)2 130.2447   250.8995  0.519111 6.0825e-01    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error   t value Pr(&gt;|t|)    
-#&gt; (Intercept)     141.740     34.927  4.058100 0.000427 ***
-#&gt; poly(Temp, 2)1  610.440    708.890  0.861125 0.397354    
-#&gt; poly(Temp, 2)2  -62.816    420.060 -0.149540 0.882327    
+#&gt;                Estimate Std. Error   t value  Pr(&gt;|t|)    
+#&gt; (Intercept)    141.7373    34.9269  4.058112 0.0004267 ***
+#&gt; poly(Temp, 2)1 610.4434   708.8908  0.861125 0.3973535    
+#&gt; poly(Temp, 2)2 -62.8161   420.0627 -0.149540 0.8823275    
 #&gt; 
 #&gt; 
 #&gt; # SAMPLE: 9
@@ -938,30 +944,30 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; ### Dep. var.: Ozone
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error t value  Pr(&gt;|t|)    
-#&gt; (Intercept)       32.49     3.0073 10.8040 4.140e-11 ***
-#&gt; poly(Wind, 2)1  -151.11    39.2660 -3.8484 6.930e-04 ***
-#&gt; poly(Wind, 2)2   166.75    45.9360  3.6301 1.217e-03 ** 
+#&gt;                 Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept)      32.4899    3.00730 10.80367 4.1394e-11 ***
+#&gt; poly(Wind, 2)1 -151.1122   39.26645 -3.84838 6.9340e-04 ***
+#&gt; poly(Wind, 2)2  166.7517   45.93576  3.63011 1.2171e-03 ** 
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error t value  Pr(&gt;|t|)    
-#&gt; (Intercept)      35.773     1.9254 18.5800 &lt; 2.2e-16 ***
-#&gt; poly(Temp, 2)1  198.970    30.2130  6.5854  5.53e-07 ***
-#&gt; poly(Temp, 2)2  160.480    32.3630  4.9588   3.7e-05 ***
+#&gt;                Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept)     35.7733    1.92538 18.57989  &lt; 2.2e-16 ***
+#&gt; poly(Temp, 2)1 198.9668   30.21319  6.58543 5.5334e-07 ***
+#&gt; poly(Temp, 2)2 160.4793   32.36259  4.95879 3.7465e-05 ***
 #&gt; 
 #&gt; ### Dep. var.: Solar.R
 #&gt; 
 #&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error   t value    Pr(&gt;|t|)    
-#&gt; (Intercept)     168.050     14.943 11.246000 1.08000e-11 ***
-#&gt; poly(Wind, 2)1  -94.963    195.710 -0.485211 6.31440e-01    
-#&gt; poly(Wind, 2)2   28.000    231.670  0.120859 9.04697e-01    
+#&gt;                Estimate Std. Error   t value   Pr(&gt;|t|)    
+#&gt; (Intercept)    168.0471    14.9433 11.245665 1.0799e-11 ***
+#&gt; poly(Wind, 2)1 -94.9627   195.7141 -0.485211 6.3144e-01    
+#&gt; poly(Wind, 2)2  27.9996   231.6709  0.120859 9.0470e-01    
 #&gt; ---
 #&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error   t value    Pr(&gt;|t|)    
-#&gt; (Intercept)      166.48     15.317 10.869000 2.31000e-11 ***
-#&gt; poly(Temp, 2)1   204.78    241.870  0.846686 4.04613e-01    
-#&gt; poly(Temp, 2)2  -146.65    256.410 -0.571947 5.72090e-01    </div><div class='input'>
+#&gt;                Estimate Std. Error   t value   Pr(&gt;|t|)    
+#&gt; (Intercept)     166.482    15.3173 10.868939 2.3073e-11 ***
+#&gt; poly(Temp, 2)1  204.784   241.8651  0.846686 4.0461e-01    
+#&gt; poly(Temp, 2)2 -146.653   256.4108 -0.571947 5.7209e-01    </div><div class='input'>
 <span class='co'># Different way of displaying the results with "compact"</span>
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_split</span>, <span class='st'>"compact"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;    sample     lhs           rhs    (Intercept) poly(Wind, 2)1 poly(Wind, 2)2
@@ -1012,16 +1018,16 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; Dep. var.: Ozone
 #&gt; Expl. vars.: poly(Wind, 2)
 #&gt; Sample: 5
-#&gt;                Estimate Std. Error t value   Pr(&gt;|t|)    
-#&gt; (Intercept)      29.851     4.6248  6.4545 0.00000138 ***
-#&gt; poly(Wind, 2)1 -180.150    68.1460 -2.6436 0.01451600 *  
-#&gt; poly(Wind, 2)2   93.319    55.6890  1.6757 0.10734000    
+#&gt;                 Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept)      29.8505    4.62478  6.45448 1.3810e-06 ***
+#&gt; poly(Wind, 2)1 -180.1531   68.14588 -2.64364 1.4516e-02 *  
+#&gt; poly(Wind, 2)2   93.3187   55.68940  1.67570 1.0734e-01    
 #&gt; ---
 #&gt; Sample: 6
 #&gt;                Estimate Std. Error   t value Pr(&gt;|t|)    
-#&gt; (Intercept)      21.821      9.489  2.299600 0.061137 .  
-#&gt; poly(Wind, 2)1  166.960    161.900  1.031300 0.342179    
-#&gt; poly(Wind, 2)2  -60.631     92.541 -0.655171 0.536652    </div><div class='input'>
+#&gt; (Intercept)     21.8206    9.48902  2.299565 0.061137 .  
+#&gt; poly(Wind, 2)1 166.9646  161.90174  1.031271 0.342179    
+#&gt; poly(Wind, 2)2 -60.6305   92.54148 -0.655171 0.536652    </div><div class='input'>
 
 <span class='co'>#</span>
 <span class='co'># Argument sliding</span>

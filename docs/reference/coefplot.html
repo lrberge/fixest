@@ -204,6 +204,7 @@
 <span class='fu'>iplot</span><span class='op'>(</span>
   <span class='va'>object</span>,
   <span class='va'>...</span>,
+  i.select <span class='op'>=</span> <span class='fl'>1</span>,
   style <span class='op'>=</span> <span class='cn'>NULL</span>,
   <span class='va'>sd</span>,
   <span class='va'>ci_low</span>,
@@ -302,7 +303,7 @@
     </tr>
     <tr>
       <th>dict</th>
-      <td><p>A named character vector or a logical scalar. It changes the original variable names to the ones contained in the <code>dict</code>ionary. E.g. to change the variables named <code>a</code> and <code>b3</code> to (resp.) &#8220;$log(a)$&#8221; and to &#8220;$bonus^3$&#8221;, use <code>dict=c(a="$log(a)$",b3="$bonus^3$")</code>. By default, it is equal to <code><a href='setFixest_dict.html'>getFixest_dict()</a></code>, a default dictionary which can be set with <code><a href='setFixest_dict.html'>setFixest_dict</a></code>. You can use <code>dict = FALSE</code> to disable it.</p></td>
+      <td><p>A named character vector or a logical scalar. It changes the original variable names to the ones contained in the <code>dict</code>ionary. E.g. to change the variables named <code>a</code> and <code>b3</code> to (resp.) &#8220;$log(a)$&#8221; and to &#8220;$bonus^3$&#8221;, use <code>dict=c(a="$log(a)$",b3="$bonus^3$")</code>. By default, it is equal to <code><a href='setFixest_dict.html'>getFixest_dict()</a></code>, a default dictionary which can be set with <code><a href='setFixest_dict.html'>setFixest_dict</a></code>. You can use <code>dict = FALSE</code> to disable it. By default <code>dict</code> modifies the entries in the global dictionary, to disable this behavior, use "reset" as the first element (ex: <code>dict=c("reset", mpg="Miles per gallon")</code>).</p></td>
     </tr>
     <tr>
       <th>keep</th>
@@ -492,6 +493,10 @@
       <th>sub</th>
       <td><p>A subtitle, default is <code>NULL</code>.</p></td>
     </tr>
+    <tr>
+      <th>i.select</th>
+      <td><p>Integer scalar, default is 1. In <code>iplot</code>, used to select which variable created with <code><a href='i.html'>i()</a></code> to select. Only used when there are several variables created with <code><a href='i.html'>i</a></code>. This is an index, just try increasing numbers to hopefully obtain what you want. Note that it works much better when the variables are "pure" <code><a href='i.html'>i()</a></code> variables and not interacted with other variables. For example: <code><a href='i.html'>i(species, x1)</a></code> is good while <code>i(species):x1</code> isn't. The latter will also work but the index may feel weird in case there are many <code><a href='i.html'>i()</a></code> variables.</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="functions"><a class="anchor" href="#functions"></a>Functions</h2>
@@ -505,6 +510,14 @@
     
 
 <p>The function <code>coefplot</code> dispose of many arguments to parametrize the plots. Most of these arguments can be set once an for all using the function <code><a href='setFixest_coefplot.html'>setFixest_coefplot</a></code>. See Example 3 below for a demonstration.</p>
+    <h2 class="hasAnchor" id="iplot"><a class="anchor" href="#iplot"></a>iplot</h2>
+
+    
+
+
+<p>The function <code>iplot</code> restricts <code>coefplot</code> to interactions or factors created with the function <code><a href='i.html'>i</a></code>. Only <em>one</em> of the i-variables will be plotted at a time. If you have several i-variables, you can navigate through them with the <code>i.select</code> argument.</p>
+<p>The argument <code>i.select</code> is an index that will go through all the i-variables. It will work well if the variables are pure, meaning not interacted with other variables. If the i-variables are interacted, the index may have an odd behavior but will (in most cases) work all the same, just try some numbers up until you (hopefully) obtain the graph you want.</p>
+<p>Note, importantly, that interactions of two factor variables are (in general) disregarded since they would require a 3-D plot to be properly represented.</p>
     <h2 class="hasAnchor" id="arguments-keep-drop-and-order"><a class="anchor" href="#arguments-keep-drop-and-order"></a>Arguments keep, drop and order</h2>
 
     

@@ -141,7 +141,16 @@
     <p>User-level method to implement staggered difference-in-difference estimations a la Sun and Abraham (Journal of Econometrics, forthcoming).</p>
     </div>
 
-    <pre class="usage"><span class='fu'>sunab</span><span class='op'>(</span><span class='va'>cohort</span>, <span class='va'>period</span>, ref.c <span class='op'>=</span> <span class='cn'>NULL</span>, ref.p <span class='op'>=</span> <span class='op'>-</span><span class='fl'>1</span>, att <span class='op'>=</span> <span class='cn'>FALSE</span>, no_agg <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
+    <pre class="usage"><span class='fu'>sunab</span><span class='op'>(</span>
+  <span class='va'>cohort</span>,
+  <span class='va'>period</span>,
+  ref.c <span class='op'>=</span> <span class='cn'>NULL</span>,
+  ref.p <span class='op'>=</span> <span class='op'>-</span><span class='fl'>1</span>,
+  <span class='va'>bin</span>,
+  <span class='va'>bin.rel</span>,
+  att <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  no_agg <span class='op'>=</span> <span class='cn'>FALSE</span>
+<span class='op'>)</span>
 
 <span class='fu'>sunab_att</span><span class='op'>(</span><span class='va'>cohort</span>, <span class='va'>period</span>, ref.c <span class='op'>=</span> <span class='cn'>NULL</span>, ref.p <span class='op'>=</span> <span class='op'>-</span><span class='fl'>1</span><span class='op'>)</span></pre>
 
@@ -165,12 +174,20 @@
       <td><p>A vector of references for the (relative!) period. By default the first relative period (RP) before the treatment, i.e. -1, is taken as reference. You can instead use your own references (i.e. RPs for which dummies will not be created -- but these observations remain in the sample). Please note that you will need at least two references. You can use the special variables <code>.F</code> and <code>.L</code> to access the first and the last relative periods.</p></td>
     </tr>
     <tr>
+      <th>bin</th>
+      <td><p>A list of values to be grouped, a vector, or the special value <code>"bin::digit"</code>. To create a new value from old values, use <code>bin = list("new_value"=old_values)</code> with <code>old_values</code> a vector of existing values. It accepts regular expressions, but they must start with an <code>"@"</code>, like in <code>bin="@Aug|Dec"</code>. The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value <code>"bin::digit"</code> to group every <code>digit</code> element. For example if <code>x</code> represent years, using <code>bin="bin::2"</code> create bins of two years. Using <code>"!bin::digit"</code> groups every digit consecutive values starting from the first value. Using <code>"!!bin::digit"</code> is the same bu starting from the last value. In both cases, <code>x</code> is not required to be numeric.</p></td>
+    </tr>
+    <tr>
+      <th>bin.rel</th>
+      <td><p>A list or a vector defining which values to bin. Only applies to the relative periods and <em>not</em> the cohorts. Please refer to the help of the argument <code>bin</code> to understand the different ways to do the binning (or look at the help of <code><a href='bin.html'>bin</a></code>).</p></td>
+    </tr>
+    <tr>
       <th>att</th>
       <td><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code>: then the total average treatment effect for the treated is computed (instead of the ATT for each relative period).</p></td>
     </tr>
     <tr>
       <th>no_agg</th>
-      <td><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code>: then there is no aggregation, leading to the esimation of all <code>cohort x time to treatment</code> coefficients.</p></td>
+      <td><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code>: then there is no aggregation, leading to the estimation of all <code>cohort x time to treatment</code> coefficients.</p></td>
     </tr>
     </table>
 
@@ -184,6 +201,14 @@
 <p>The never treated, which are the cohorts displaying only negative RPs are used as references (i.e. no dummy will be constructed for them). On the other hand, the always treated are removed from the estimation, by means of adding NAs for each of their observations.</p>
 <p>If the RPs have to be constructed on the fly, any cohort that is not present in the period is considered as never treated. This means that if the period ranges from 1995 to 2005, <code>cohort = 1994</code> will be considered as never treated, although it should be considered as always treated: so be careful.</p>
 <p>If you construct your own relative periods, the controls cohorts should have only negative RPs.</p>
+    <h2 class="hasAnchor" id="binning"><a class="anchor" href="#binning"></a>Binning</h2>
+
+    
+
+
+<p>You can bin periods with the arguments <code>bin</code> and/or <code>bin.rel</code>. The argument <code>bin</code> applies both to the original periods and cohorts (the cohorts will also be binned!). On the other hand, <code>bin.rel</code> applies only to the relative periods (hence not to the cohorts).</p>
+<p>For <code>bin</code> to work properly, the argument <code>period</code> must contain raw periods and <em>not</em> relative periods.</p>
+<p>To understand how binning works, please have a look at the help and examples of the function <code><a href='bin.html'>bin</a></code>.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
@@ -230,15 +255,15 @@
 #&gt; year = -4         -0.1375 (0.1939)
 #&gt; year = -3         -0.0834 (0.1805)
 #&gt; year = -2          0.0754 (0.1693)
-#&gt; year = 0        -5.129*** (0.1604)
-#&gt; year = 1        -3.451*** (0.1698)
-#&gt; year = 2        -2.035*** (0.1803)
-#&gt; year = 3        -0.6104** (0.1950)
-#&gt; year = 4         1.147*** (0.2121)
-#&gt; year = 5         2.287*** (0.2359)
-#&gt; year = 6         4.559*** (0.2729)
-#&gt; year = 7         5.207*** (0.3301)
-#&gt; year = 8         6.958*** (0.4676)
+#&gt; year = 0          -5.129* (0.1604)
+#&gt; year = 1          -3.451* (0.1698)
+#&gt; year = 2          -2.035. (0.1803)
+#&gt; year = 3          -0.6104 (0.1950)
+#&gt; year = 4            1.147 (0.2121)
+#&gt; year = 5           2.287. (0.2359)
+#&gt; year = 6           4.559* (0.2729)
+#&gt; year = 7           5.207* (0.3301)
+#&gt; year = 8           6.958* (0.4676)
 #&gt; _______________ __________________
 #&gt; S.E. type                      IID
 #&gt; Observations                   950
@@ -268,8 +293,8 @@
 #&gt; Standard-errors: IID 
 #&gt;              Estimate Std. Error    t value  Pr(&gt;|t|)    
 #&gt; (Intercept)  0.006306   0.044297   0.142359  0.886829    
-#&gt; x1           0.988344   0.016624  59.453000 &lt; 2.2e-16 ***
-#&gt; ATT         -1.016500   0.083251 -12.210000 &lt; 2.2e-16 ***
+#&gt; x1           0.988344   0.016624  59.452798 &lt; 2.2e-16 ***
+#&gt; ATT         -1.016516   0.083251 -12.210183  0.052022 .  
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.987344   Adj. R2: 0.88676</div><div class='input'>
@@ -280,16 +305,16 @@
 #&gt; Standard-errors: IID 
 #&gt;              Estimate Std. Error    t value  Pr(&gt;|t|)    
 #&gt; (Intercept)  0.006306   0.044297   0.142359  0.886829    
-#&gt; x1           0.988344   0.016624  59.453000 &lt; 2.2e-16 ***
-#&gt; cohort::2    3.082800   0.160917  19.158000 &lt; 2.2e-16 ***
-#&gt; cohort::3    1.429500   0.169888   8.414400 &lt; 2.2e-16 ***
-#&gt; cohort::4    0.001684   0.180523   0.009328   0.99256    
-#&gt; cohort::5   -1.702700   0.194170  -8.769000 &lt; 2.2e-16 ***
-#&gt; cohort::6   -3.082900   0.211683 -14.564000 &lt; 2.2e-16 ***
-#&gt; cohort::7   -4.859300   0.235792 -20.609000 &lt; 2.2e-16 ***
-#&gt; cohort::8   -5.239600   0.272440 -19.232000 &lt; 2.2e-16 ***
-#&gt; cohort::9   -7.760800   0.330684 -23.469000 &lt; 2.2e-16 ***
-#&gt; cohort::10  -8.627700   0.465247 -18.544000 &lt; 2.2e-16 ***
+#&gt; x1           0.988344   0.016624  59.452798 &lt; 2.2e-16 ***
+#&gt; cohort::2    3.082786   0.160917  19.157673  0.033200 *  
+#&gt; cohort::3    1.429502   0.169888   8.414383  0.075305 .  
+#&gt; cohort::4    0.001684   0.180523   0.009328  0.994062    
+#&gt; cohort::5   -1.702666   0.194170  -8.768955  0.072287 .  
+#&gt; cohort::6   -3.082949   0.211683 -14.564003  0.043643 *  
+#&gt; cohort::7   -4.859333   0.235792 -20.608551  0.030867 *  
+#&gt; cohort::8   -5.239574   0.272440 -19.232013  0.033072 *  
+#&gt; cohort::9   -7.760783   0.330684 -23.468871  0.027110 *  
+#&gt; cohort::10  -8.627732   0.465247 -18.544396  0.034296 *  
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 0.987344   Adj. R2: 0.88676</div><div class='input'>

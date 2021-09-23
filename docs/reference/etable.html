@@ -158,7 +158,8 @@
   <span class='va'>title</span>,
   coefstat <span class='op'>=</span> <span class='st'>"se"</span>,
   ci <span class='op'>=</span> <span class='fl'>0.95</span>,
-  sdBelow <span class='op'>=</span> <span class='cn'>NULL</span>,
+  se.row <span class='op'>=</span> <span class='cn'>NULL</span>,
+  se.below <span class='op'>=</span> <span class='cn'>NULL</span>,
   <span class='va'>keep</span>,
   <span class='va'>drop</span>,
   <span class='va'>order</span>,
@@ -206,7 +207,7 @@
   <span class='va'>fitstat</span>,
   coefstat <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"se"</span>, <span class='st'>"tstat"</span>, <span class='st'>"confint"</span><span class='op'>)</span>,
   ci <span class='op'>=</span> <span class='fl'>0.95</span>,
-  sdBelow <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  se.below <span class='op'>=</span> <span class='cn'>TRUE</span>,
   <span class='va'>keep</span>,
   <span class='va'>drop</span>,
   <span class='va'>order</span>,
@@ -256,7 +257,8 @@
   <span class='va'>fitstat</span>,
   coefstat <span class='op'>=</span> <span class='st'>"se"</span>,
   ci <span class='op'>=</span> <span class='fl'>0.95</span>,
-  sdBelow <span class='op'>=</span> <span class='cn'>NULL</span>,
+  se.row <span class='op'>=</span> <span class='cn'>NULL</span>,
+  se.below <span class='op'>=</span> <span class='cn'>NULL</span>,
   <span class='va'>keep</span>,
   <span class='va'>drop</span>,
   <span class='va'>order</span>,
@@ -302,7 +304,8 @@
   <span class='va'>title</span>,
   coefstat <span class='op'>=</span> <span class='st'>"se"</span>,
   ci <span class='op'>=</span> <span class='fl'>0.95</span>,
-  sdBelow <span class='op'>=</span> <span class='cn'>NULL</span>,
+  se.row <span class='op'>=</span> <span class='cn'>NULL</span>,
+  se.below <span class='op'>=</span> <span class='cn'>NULL</span>,
   <span class='va'>keep</span>,
   <span class='va'>drop</span>,
   <span class='va'>order</span>,
@@ -409,7 +412,11 @@
       <td><p>Level of the confidence interval, defaults to <code>0.95</code>. Only used if <code>coefstat = confint</code>.</p></td>
     </tr>
     <tr>
-      <th>sdBelow</th>
+      <th>se.row</th>
+      <td><p>Logical scalar, default is <code>NULL</code>. Whether should be displayed the row with the type of standard-error for each model. When <code>tex = FALSE</code>, the default is <code>TRUE</code>. When <code>tex = FALSE</code>, the row is showed only when there is a table-footer and the types of standard-errors differ across models.</p></td>
+    </tr>
+    <tr>
+      <th>se.below</th>
       <td><p>Logical or <code>NULL</code> (default). Should the standard-errors be displayed below the coefficients? If <code>NULL</code>, then this is <code>TRUE</code> for Latex and <code>FALSE</code> otherwise.</p></td>
     </tr>
     <tr>
@@ -426,7 +433,7 @@
     </tr>
     <tr>
       <th>dict</th>
-      <td><p>A named character vector or a logical scalar. It changes the original variable names to the ones contained in the <code>dict</code>ionary. E.g. to change the variables named <code>a</code> and <code>b3</code> to (resp.) &#8220;$log(a)$&#8221; and to &#8220;$bonus^3$&#8221;, use <code>dict=c(a="$log(a)$",b3="$bonus^3$")</code>. By default, it is equal to <code><a href='setFixest_dict.html'>getFixest_dict()</a></code>, a default dictionary which can be set with <code><a href='setFixest_dict.html'>setFixest_dict</a></code>. You can use <code>dict = FALSE</code> to disable it.</p></td>
+      <td><p>A named character vector or a logical scalar. It changes the original variable names to the ones contained in the <code>dict</code>ionary. E.g. to change the variables named <code>a</code> and <code>b3</code> to (resp.) &#8220;$log(a)$&#8221; and to &#8220;$bonus^3$&#8221;, use <code>dict=c(a="$log(a)$",b3="$bonus^3$")</code>. By default, it is equal to <code><a href='setFixest_dict.html'>getFixest_dict()</a></code>, a default dictionary which can be set with <code><a href='setFixest_dict.html'>setFixest_dict</a></code>. You can use <code>dict = FALSE</code> to disable it. By default <code>dict</code> modifies the entries in the global dictionary, to disable this behavior, use "reset" as the first element (ex: <code>dict=c("reset", mpg="Miles per gallon")</code>).</p></td>
     </tr>
     <tr>
       <th>file</th>
@@ -510,7 +517,7 @@
     </tr>
     <tr>
       <th>extraline</th>
-      <td><p>A list or a one sided formula. The list elements should be either a logical scalar,a vector of the same length as the number of models, or a function. This argument can be many things, please have a look at the dedicated help section; a simplified description follows. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: <code>extraline=list("Sub-sample"=c("&lt;20 yo", "all", "&gt;50 yo"))</code> will create an new line with <code>"Sub-sample"</code> in the leftmost cell, the vector filling the content of the cells for the three models. You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) <code>"^"</code>: coef., <code>"-"</code>: fixed-effect, <code>"_"</code>: stats, section; 2) <code>"^"</code>: 1st, <code>"_"</code>: last, row. For example: <code>extraline=list("__Controls"=stuff)</code> will place the line at the bottom of the stats section, and using <code>extraline=list("^^Controls"=stuff)</code> will make the row appear at the top of the 'coefficients' section. For details, see the dedicated section.</p></td>
+      <td><p>A vector, a list or a one sided formula. The list elements should be either a vector representing the value of each cell, a list of the form <code>list("item1" = #item1, "item2" = #item2, etc)</code>, or a function. This argument can be many things, please have a look at the dedicated help section; a simplified description follows. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: <code>extraline=list("Sub-sample"=c("&lt;20 yo", "all", "&gt;50 yo"))</code> will create an new line with <code>"Sub-sample"</code> in the leftmost cell, the vector filling the content of the cells for the three models. You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) <code>"^"</code>: coef., <code>"-"</code>: fixed-effect, <code>"_"</code>: stats, section; 2) <code>"^"</code>: 1st, <code>"_"</code>: last, row. For example: <code>extraline=list("__Controls"=stuff)</code> will place the line at the bottom of the stats section, and using <code>extraline=list("^^Controls"=stuff)</code> will make the row appear at the top of the 'coefficients' section. For details, see the dedicated section.</p></td>
     </tr>
     <tr>
       <th>fixef.group</th>
@@ -542,11 +549,11 @@
     </tr>
     <tr>
       <th>coef.just</th>
-      <td><p>(DF only.) Either <code>"."</code>, <code>"("</code>, <code>"l"</code>, <code>"c"</code> or <code>"r"</code>, default is <code>NULL</code>. How the coefficients should be justified. If <code>NULL</code> then they are right aligned if <code>sdBelow = FALSE</code> and aligned to the dot if <code>sdBelow = TRUE</code>. The keywords stand respectively for dot-, parenthesis-, left-, center- and right-aligned.</p></td>
+      <td><p>(DF only.) Either <code>"."</code>, <code>"("</code>, <code>"l"</code>, <code>"c"</code> or <code>"r"</code>, default is <code>NULL</code>. How the coefficients should be justified. If <code>NULL</code> then they are right aligned if <code>se.below = FALSE</code> and aligned to the dot if <code>se.below = TRUE</code>. The keywords stand respectively for dot-, parenthesis-, left-, center- and right-aligned.</p></td>
     </tr>
     <tr>
       <th>meta</th>
-      <td><p>(Tex only.) A one-sided formula that shall contain the following elements: date or time, sys, author, comment and call. Default is <code>NULL</code>. This argument is a shortcut to controlling the meta information that can be displayed in comments before the table. Typically if the element is in the formula, it means that the argument will be equal to <code>TRUE</code>. Example: <code>meta = ~time+call</code> is equivalent to <code>meta.time = TRUE</code> and <code>meta.call = TRUE</code>. The "author" and "comment" elements are a bit special. Using <code>meta = ~author("Mark")</code> is equivalent to <code>meta.author = "Mark"</code> while meta=~author is equiv. to <code>meta.author = TRUE</code>. The "comment" must be used with a character string inside: <code>meta = ~comment("this is a comment")</code>. The order in the formula controls the order of appearance of the meta elements. It also has precedence over the <code>meta.XX</code> arguments.</p></td>
+      <td><p>(Tex only.) A one-sided formula that shall contain the following elements: date or time, sys, author, comment and call. Default is <code>NULL</code>. This argument is a shortcut to controlling the meta information that can be displayed in comments before the table. Typically if the element is in the formula, it means that the argument will be equal to <code>TRUE</code>. Example: <code>meta = ~time+call</code> is equivalent to <code>meta.time = TRUE</code> and <code>meta.call = TRUE</code>. The "author" and "comment" elements are a bit special. Using <code>meta = ~author("Mark")</code> is equivalent to <code>meta.author = "Mark"</code> while <code>meta=~author</code> is equiv. to <code>meta.author = TRUE</code>. The "comment" must be used with a character string inside: <code>meta = ~comment("this is a comment")</code>. The order in the formula controls the order of appearance of the meta elements. It also has precedence over the <code>meta.XX</code> arguments.</p></td>
     </tr>
     <tr>
       <th>meta.time</th>
@@ -620,10 +627,12 @@
 
 
 <p>The argument <code>extraline</code> adds well... extra lines to the table. It accepts either a list, or a one-sided formula.</p>
-<p>If a one-sided formula: then the elements in the formula must represent either <code>extraline</code> macros, either fit statistics (i.e. valid types of the function <code><a href='fitstat.html'>fitstat</a></code>). One new line will be added for each element of the formula, they will be appended right after the coefficients. To register <code>extraline</code> macros, you must first register them in <code><a href='extraline_register.html'>extraline_register</a></code>.</p>
-<p>If a list: then the elements must be either: a) a logical scalar, b) a vector of the same length as the number of models, c) a function to be applied to each model and which returns a scalar, or d) a one-sided formula of <code>extraline</code> macros (registered with <code><a href='extraline_register.html'>extraline_register</a></code>) or valid <code><a href='fitstat.html'>fitstat</a></code> types.</p>
-<p>When a list, the elements of type a), b) and c) must have a name! Example: <code>extraline = list("Controls" = TRUE)</code> is good, <code>extraline = list(TRUE)</code> is bad. The name for element of type d) is optional. Example: <code>extraline = list("^^My F-stat" = ~f)</code> will add the row named <code>"My F-stat"</code> on top of the coefficients (for the placement, see the dedicated section), while <code>extraline = list(~f)</code> will add the F-stat row with its default name (<code>"F-test"</code>) at its default placement (below the coefficients).</p>
-<p>You can combine elements in the list, so that the following <code>extraline = list(~r2, "Controls" = TRUE, ~f+ivf)</code> is valid.</p>
+<p>For each line, you can define the values taken by each cell using 4 different ways: a) a vector, b) a list, c) a function, and d) a formula.</p>
+<p>If a vector, it should represent the values taken by each cell. Note that if the length of the vector is smaller than the number of models, its values are recycled across models, but the length of the vector is required to be a divisor of the number of models.</p>
+<p>If a list, it should be of the form <code>list("item1" = #item1, "item2" = #item2, etc)</code>. For example <code><a href='https://rdrr.io/r/base/list.html'>list("A"=2, "B"=3)</a></code> leads to <code><a href='https://rdrr.io/r/base/c.html'>c("A", "A", "B", "B", "B")</a></code>. Note that if the number of items is 1, you don't need to add <code>= 1</code>. For example <code><a href='https://rdrr.io/r/base/list.html'>list("A"=2, "B")</a></code> is valid and leads to <code>c("A", "A", "B"</code>. As for the vector the values are recycled if necessary.</p>
+<p>If a function, it will be applied to each model and should return a scalar (<code>NA</code> values returned are accepted).</p>
+<p>If a formula, it must be one-sided and the elements in the formula must represent either <code>extraline</code> macros, either fit statistics (i.e. valid types of the function <code><a href='fitstat.html'>fitstat</a></code>). One new line will be added for each element of the formula. To register <code>extraline</code> macros, you must first register them in <code><a href='extraline_register.html'>extraline_register</a></code>.</p>
+<p>Finally, you can combine as many lines as wished by nesting them in a list. The names of the nesting list are the row titles (values in the leftmost cell). For example <code>extraline = list(~r2, Controls = TRUE, Group = list("A"=2, "B"))</code> will add three lines, the titles of which are "R2", "Controls" and "Group".</p>
     <h2 class="hasAnchor" id="controlling-the-placement-of-extra-lines"><a class="anchor" href="#controlling-the-placement-of-extra-lines"></a>Controlling the placement of extra lines</h2>
 
     
@@ -642,7 +651,7 @@
 
 <p>By default on all instances (with the notable exception of the elements of <code><a href='style.tex.html'>style.tex</a></code>) special Latex characters are escaped. This means that <code>title="Exports in million $."</code> will be exported as "Exports in million \$.": the dollar sign will be escaped. This is true for the following characters: &amp;, $, %, _, ^ and #.</p>
 <p>Note, importantly, that equations are NOT escaped. This means that <code>title="Functional form $a_i \times x^b$, variation in %."</code> will be displayed as: <code>"Functional form $a_i \times x^b$, variation in \%."</code>: only the last percentage will be escaped.</p>
-<p>If for some reason you don't want the escaping to take place, the arguments <code>headers</code> and <code>extraline</code> are the only ones allowing that. To disable escaping, add the special token ":tex:" in the row names. Example: in <code>headers=list(":tex:Row title"="weird &amp; &amp; %\n tex stuff\\")</code>, the elements will be displayed verbatim. Of course, since it can easily ruin your table, it is only advised for super users.</p>
+<p>If for some reason you don't want the escaping to take place, the arguments <code>headers</code> and <code>extraline</code> are the only ones allowing that. To disable escaping, add the special token ":tex:" in the row names. Example: in <code>headers=list(":tex:Row title"="weird &amp; &amp; %\n tex stuff\\")</code>, the elements will be displayed verbatim. Of course, since it can easily ruin your table, it is only recommended to super users.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p>See also the main estimation functions <code><a href='femlm.html'>femlm</a></code>, <code><a href='feols.html'>feols</a></code> or <code><a href='feglm.html'>feglm</a></code>. Use <code><a href='summary.fixest.html'>summary.fixest</a></code> to see the results with the appropriate standard-errors, <code><a href='fixef.fixest.html'>fixef.fixest</a></code> to extract the fixed-effects coefficients.</p></div>
@@ -917,7 +926,6 @@
 #&gt;   &amp; (1.147) &amp; (0.3175)\\
 #&gt; Month &amp;  &amp; Yes\\
 #&gt;   &amp;   &amp;  \\
-#&gt; Standard-Errors &amp; IID &amp; Month\\
 #&gt; Observations &amp; 116 &amp; 116\\
 #&gt; R$^2$ &amp; 0.68106 &amp; 0.68106\\
 #&gt; Within R$^2$ &amp;  &amp; 0.58296\\
@@ -957,7 +965,7 @@
 #&gt; \midrule \emph{Fixed-effects} &amp;   &amp;  \\
 #&gt; Month &amp;  &amp; Yes\\
 #&gt; \midrule \emph{Fit statistics} &amp;   &amp;  \\
-#&gt; Standard-Errors &amp; IID &amp; Month\\
+#&gt; Standard-Errors &amp; IID &amp; Month \\ 
 #&gt; Observations &amp; 116 &amp; 116\\
 #&gt; R$^2$ &amp; 0.68106 &amp; 0.68106\\
 #&gt; Within R$^2$ &amp;  &amp; 0.58296\\
@@ -992,7 +1000,7 @@
 #&gt; Wind $\times$ Sep &amp; -1.349 &amp; -1.349$^{**}$\\
 #&gt;   &amp; (1.147) &amp; (0.3175)\\
 #&gt;   &amp;   &amp;  \\
-#&gt; Standard-Errors &amp; IID &amp; Month\\
+#&gt; Standard-Errors &amp; IID &amp; Month \\ 
 #&gt; Observations &amp; 116 &amp; 116\\
 #&gt; R$^2$ &amp; 0.68106 &amp; 0.68106\\
 #&gt; Within R$^2$ &amp;  &amp; 0.58296\\

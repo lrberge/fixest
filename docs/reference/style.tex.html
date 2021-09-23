@@ -259,6 +259,14 @@
       <th>tabular</th>
       <td><p>Character scalar equal to "normal" (default), "*" or "X". Represents the type of tabular to export.</p></td>
     </tr>
+    <tr>
+      <th>interaction.combine</th>
+      <td><p>Character scalar, defaults to <code>" $\times$ "</code>. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if <code>dict = c(x1="Wind", x2="Rain")</code> and you have the following interaction <code>x1:x2</code>, then it will be renamed (by default) <code>Wind $\times$ Rain</code> -- using <code>interaction.combine = "*"</code> would lead to <code>Wind*Rain</code>.</p></td>
+    </tr>
+    <tr>
+      <th>i.equal</th>
+      <td><p>Character scalar, defaults to <code>" $=$ "</code>. Only affects factor variables created with the function <code><a href='i.html'>i</a></code>, tells how the variable should be linked to its value. For example if you have the Species factor from the iris data set, by default the display of the variable is <code>Species $=$ Setosa</code>, etc. If <code>i.equal = ": "</code> the display becomes <code>Species: Setosa</code>.</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>

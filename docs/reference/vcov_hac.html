@@ -206,23 +206,23 @@
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 1,080 
 #&gt; Standard-errors: Newey-West (L=2) 
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; (Intercept)  1.98880   0.186061  10.689 2.05e-06 ***
-#&gt; x1           0.98311   0.051618  19.046 1.40e-08 ***
+#&gt;             Estimate Std. Error t value   Pr(&gt;|t|)    
+#&gt; (Intercept) 1.988753   0.186061 10.6887 2.0500e-06 ***
+#&gt; x1          0.983110   0.051618 19.0457 1.3968e-08 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 4.8969   Adj. R2: 0.262357</div><div class='input'>
+#&gt; RMSE: 4.89686   Adj. R2: 0.262357</div><div class='input'>
 <span class='co'># Driscoll-Kraay</span>
 <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base_did</span>, <span class='va'>DK</span> <span class='op'>~</span> <span class='va'>period</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 1,080 
 #&gt; Standard-errors: Driscoll-Kraay (L=1) 
-#&gt;             Estimate Std. Error t value   Pr(&gt;|t|)    
-#&gt; (Intercept)  1.98880   0.789538  2.5189 3.2829e-02 *  
-#&gt; x1           0.98311   0.036115 27.2210 5.9100e-10 ***
+#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept) 1.988753   0.789538  2.51888 3.2829e-02 *  
+#&gt; x1          0.983110   0.036115 27.22141 5.9051e-10 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 4.8969   Adj. R2: 0.262357</div><div class='input'>
+#&gt; RMSE: 4.89686   Adj. R2: 0.262357</div><div class='input'>
 <span class='co'># If the estimation is made with a panel.id, the dimensions are</span>
 <span class='co'># automatically deduced:</span>
 <span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base_did</span>, <span class='st'>"NW"</span>, panel.id <span class='op'>=</span> <span class='op'>~</span><span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>)</span>
@@ -230,12 +230,12 @@
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 1,080 
 #&gt; Standard-errors: Newey-West (L=1) 
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    
-#&gt; (Intercept)  1.98880   0.174111  11.422 1.17e-06 ***
-#&gt; x1           0.98311   0.052699  18.655 1.68e-08 ***
+#&gt;             Estimate Std. Error t value   Pr(&gt;|t|)    
+#&gt; (Intercept) 1.988753   0.174111 11.4223 1.1709e-06 ***
+#&gt; x1          0.983110   0.052699 18.6551 1.6762e-08 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 4.8969   Adj. R2: 0.262357</div><div class='input'>
+#&gt; RMSE: 4.89686   Adj. R2: 0.262357</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># Post estimation</span>
 <span class='co'>#</span>
