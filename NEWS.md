@@ -51,7 +51,7 @@
     
     * Conley (1999) for spatially correlated errors
     
- - in `i` and `sunab` you can now bin the variables on the fly with the new argument `bin`. The new function `bin` is also available at the user-level.
+ - in `i` and `sunab` you can now bin the variables on the fly with the new argument `bin`. The new function [`bin`](https://lrberge.github.io/fixest/reference/bin.html) is also available at the user-level.
  
  - Function `dof` has been renamed into `ssc` (stands for small sample correction) to improve clarity. Retro compatibility is partially ensured but the function `dof` will be removed at some point.
     
