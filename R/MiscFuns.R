@@ -3195,8 +3195,18 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
     }
 
     if("[" %in% all.vars(fml, functions = TRUE)){
-        fml_txt = charget(deparse_long(fml), frame)
-        fml = as.formula(fml_txt)
+        fml_txt = deparse_long(fml)
+        if(grepl(".[", fml_txt, fixed = TRUE)){
+            fml_txt = charget(fml_txt, frame)
+
+            # level 1 recursivity
+            if(grepl(".[", fml_txt, fixed = TRUE)){
+                fml_txt = charget(fml_txt, frame)
+            }
+
+            fml = as.formula(fml_txt)
+        }
+
     }
 
     fml
