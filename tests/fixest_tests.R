@@ -1246,6 +1246,8 @@ cat("done.\n\n")
 
 chunk("xpd")
 
+deparse_long = function(x) deparse(x, width.cutoff = 500)
+
 fml = xpd(y ~ x.[1:5] + z.[2:3])
 test(deparse_long(fml),
      "y ~ x1 + x2 + x3 + x4 + x5 + z2 + z3")
