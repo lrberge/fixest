@@ -94,7 +94,7 @@
       <h1 data-toc-skip>Fast Fixed-Effects Estimation: Short introduction</h1>
                         <h4 class="author">Laurent Berge and Grant McDermott</h4>
             
-            <h4 class="date">2021-09-23</h4>
+            <h4 class="date">2021-09-24</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/fixest_walkthrough.Rmd"><code>vignettes/fixest_walkthrough.Rmd</code></a></small>
       <div class="hidden name"><code>fixest_walkthrough.Rmd</code></div>
@@ -1350,14 +1350,17 @@
 <a href="#additional-features" class="anchor"></a>Additional features</h1>
 <p>Now we present some other features of the package:</p>
 <ol style="list-style-type: decimal">
-<li><p><a href="#formula-macros">Formula macros</a>.</p></li>
+<li><p><a href="#formula-macros">Formula: macros and dot square brackets</a>.</p></li>
 <li><p><a href="#lagging-variables">How to add lead/lags</a>.</p></li>
 <li><p><a href="#non-linear-in-parameters-example">Non-linear in parameter estimation</a>.</p></li>
 <li><p><a href="#multi-threading">Parallelism</a>.</p></li>
 </ol>
-<!-- NOTE: you can't have ":" or "(" in titles to make links --><div id="formula-macros" class="section level2">
+<!-- NOTE: you can't have ":" or "(" in titles to make links --><div id="formula-macros-and-dot-square-brackets" class="section level2">
 <h2 class="hasAnchor">
-<a href="#formula-macros" class="anchor"></a>Formula macros</h2>
+<a href="#formula-macros-and-dot-square-brackets" class="anchor"></a>Formula: macros and dot square brackets</h2>
+<div id="formula-macros" class="section level3">
+<h3 class="hasAnchor">
+<a href="#formula-macros" class="anchor"></a>Formula macros</h3>
 <p>It can be useful, to tidy up the workflow or simply for convenience, to define formula macros: i.e. macro variables each representing several variables. This package offers two functions to deal with that: <code>setFixest_fml</code> to set macro variables globally, and <code>xpd</code> to create a formula with macro variables either globally defined or defined at run time.</p>
 <p>Here is an example:</p>
 <div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
@@ -1368,7 +1371,7 @@
 <span class="co"># Accessing them</span>
 <span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">..ctrl</span><span class="op">)</span>
 <span class="co">#&gt; y ~ x1 + poly(x2, 2) + poly(x3, 2)</span>
-<span class="co">#&gt; &lt;environment: 0x00000000238ba968&gt;</span>
+<span class="co">#&gt; &lt;environment: 0x00000000133d1d70&gt;</span>
 
 <span class="co"># Definition at run time</span>
 <span class="va">vars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x2"</span>, <span class="st">"x2^2"</span>, <span class="st">"x3"</span><span class="op">)</span>
@@ -1376,11 +1379,11 @@
   <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">..ctrl</span>, ..ctrl <span class="op">=</span> <span class="va">vars</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
 <span class="op">}</span>
 <span class="co">#&gt; y ~ x1 + x2</span>
-<span class="co">#&gt; &lt;environment: 0x0000000021c85928&gt;</span>
+<span class="co">#&gt; &lt;environment: 0x0000000021a6bcf8&gt;</span>
 <span class="co">#&gt; y ~ x1 + x2 + x2^2</span>
-<span class="co">#&gt; &lt;environment: 0x0000000021ccd628&gt;</span>
+<span class="co">#&gt; &lt;environment: 0x0000000021ab1f38&gt;</span>
 <span class="co">#&gt; y ~ x1 + x2 + x2^2 + x3</span>
-<span class="co">#&gt; &lt;environment: 0x0000000021d257b8&gt;</span></code></pre></div>
+<span class="co">#&gt; &lt;environment: 0x0000000021b22700&gt;</span></code></pre></div>
 <p>Macro variables must start with two dots. As seen in the example, once set globally they can be directly accessed with <code>xpd</code>. In the example, <code>xpd</code> redefines the formula at run-time by having a character vector as input.</p>
 <p>All <code>fixest</code> estimations call <code>xpd</code> internally if appropriate. This means that the following code works just fine:</p>
 <div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
@@ -1404,7 +1407,7 @@
 <span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">longley</span><span class="op">)</span>
 <span class="co">#&gt; Armed.Forces ~ Population + GNP.deflator + GNP + Unemployed + </span>
 <span class="co">#&gt;     Employed</span>
-<span class="co">#&gt; &lt;environment: 0x0000000024a0c938&gt;</span></code></pre></div>
+<span class="co">#&gt; &lt;environment: 0x0000000024783778&gt;</span></code></pre></div>
 <p>Again, since <code>xpd</code> is called internally, the following works:</p>
 <div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu">..</span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, <span class="va">longley</span><span class="op">)</span>
@@ -1422,6 +1425,37 @@
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 36.1   Adj. R2: 0.569345</span></code></pre></div>
 </div>
+<div id="the-dot-square-bracket-operator" class="section level3">
+<h3 class="hasAnchor">
+<a href="#the-dot-square-bracket-operator" class="anchor"></a>The dot square bracket operator</h3>
+<p>The special operator <code>.[]</code> can be used in <code>fixest</code> formulas to replace the enclosed item by its value in the current environment. Let’s give an example:</p>
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html">setNames</a></span><span class="op">(</span><span class="va">iris</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">)</span>
+<span class="va">i</span> <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">3</span>
+<span class="va">z</span> <span class="op">=</span> <span class="st">"i(species)"</span>
+<span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x.</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">+</span> <span class="va">.</span><span class="op">[</span><span class="va">z</span><span class="op">]</span>, <span class="va">base</span><span class="op">)</span>
+<span class="co">#&gt; OLS estimation, Dep. Var.: y</span>
+<span class="co">#&gt; Observations: 150 </span>
+<span class="co">#&gt; Standard-errors: IID </span>
+<span class="co">#&gt;                      Estimate Std. Error   t value   Pr(&gt;|t|)    </span>
+<span class="co">#&gt; (Intercept)          3.682982   0.107403 34.291343  &lt; 2.2e-16 ***</span>
+<span class="co">#&gt; x2                   0.905946   0.074311 12.191282  &lt; 2.2e-16 ***</span>
+<span class="co">#&gt; x3                  -0.005995   0.156260 -0.038368 9.6945e-01    </span>
+<span class="co">#&gt; species::versicolor -1.598362   0.205706 -7.770113 1.3154e-12 ***</span>
+<span class="co">#&gt; species::virginica  -2.112647   0.304024 -6.948940 1.1550e-10 ***</span>
+<span class="co">#&gt; ---</span>
+<span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class="co">#&gt; RMSE: 0.333482   Adj. R2: 0.832221</span></code></pre></div>
+<p>What did just happen? When <code>.[]</code> is encountered in a formula, its value is evaluated and inserted verbatim in the formula. Further, when the value in brackets is a vector, as many variables are added in the model. That’s why <code>x.[i]</code> led to <code>x2 + x3</code>. Of course, numbers can be used directly: <code>x.[2:3]</code> would have led to the same result.</p>
+<p>Variable names in which <code>.[]</code> is in the middle of the name can also be created, but the use of macros is then mandatory:</p>
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">i</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span>
+<span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">..x</span>, ..x <span class="op">=</span> <span class="st">"x.[i]_sq"</span><span class="op">)</span>
+<span class="co">#&gt; y ~ x1_sq + x2_sq + x3_sq + x4_sq + x5_sq</span>
+<span class="co">#&gt; &lt;environment: 0x0000000015cc8030&gt;</span></code></pre></div>
+<p>The use of a character string is mandatory here to avoid formula parsing problems.</p>
+</div>
+</div>
 <div id="lagging-variables" class="section level2">
 <h2 class="hasAnchor">
 <a href="#lagging-variables" class="anchor"></a>Lagging variables</h2>
@@ -1431,7 +1465,7 @@
 <a href="#lagging-variables-in-an-estimation" class="anchor"></a>Lagging variables in an estimation</h3>
 <p>There are two ways to provide leads and/or lags in a <code>fixest</code> estimation. Either “on-the-fly” by using the argument <code>panel.id</code>, either by setting up a panel data set with the function <code>panel</code> (useful if you run multiple models needing lags and/or leads), described in the next subsection.</p>
 <p>To set up the panel on-the-fly, you need to use the <code>panel.id</code> argument, which will give you access to the functions <code>f</code> and <code>l</code> to create leads and lags, respectively. Let’s give an example, using the previous data set, where we use lags and leads of the explanatory and dependent variables.</p>
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">est1</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="../reference/f.html">l</a></span><span class="op">(</span><span class="va">x1</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>, <span class="va">base_did</span>, panel.id <span class="op">=</span> <span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">period</span><span class="op">)</span>
 <span class="co">#&gt; NOTE: 108 observations removed because of NA values (RHS: 108).</span>
 <span class="va">est2</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="../reference/f.html">f</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="../reference/f.html">l</a></span><span class="op">(</span><span class="va">x1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>, <span class="va">base_did</span>, panel.id <span class="op">=</span> <span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">period</span><span class="op">)</span>
@@ -1460,7 +1494,7 @@
 <a href="#setting-up-a-panel-data-set" class="anchor"></a>Setting up a panel data set</h3>
 <p>You can set up a panel data set with the function <code>panel</code>. There are between two and three advantages of doing so. First, if you have to estimate many models with leads and/or lags, setting up a panel gives you access to the lagging functions, <code>f</code> and <code>l</code>, without having to provide the <code>panel.id</code> argument we’ve seen in the previous subsection. Second, even when you estimate models with a sub-selection of the panel data, the data set is still a proper panel, meaning you can still use the lagging functions. Finally, and only if you are a <code>data.table</code> user, you can use the lagging functions to create new variables.</p>
 <p>Let’s repeat the previous example, now with a panel data set:</p>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># setting up the panel</span>
 <span class="va">pdat</span> <span class="op">=</span> <span class="fu"><a href="../reference/panel.html">panel</a></span><span class="op">(</span><span class="va">base_did</span>, <span class="op">~</span><span class="va">id</span> <span class="op">+</span> <span class="va">period</span><span class="op">)</span>
 <span class="co"># Now the panel.id argument is not required</span>
@@ -1484,7 +1518,7 @@
 <span class="co">#&gt; R2                         0.26558            0.25697           0.26258</span>
 <span class="co">#&gt; Adj. R2                    0.26406            0.25438           0.25983</span></code></pre></div>
 <p>Last, if you also use <code>data.table</code>, let’s give an example of lead/lag creation:</p>
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com">data.table</a></span><span class="op">)</span>
 <span class="va">pdat_dt</span> <span class="op">=</span> <span class="fu"><a href="../reference/panel.html">panel</a></span><span class="op">(</span><span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html">as.data.table</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span>, <span class="op">~</span><span class="va">id</span><span class="op">+</span><span class="va">period</span><span class="op">)</span>
 <span class="co"># we create a lagged value of the variable x1</span>
@@ -1513,7 +1547,7 @@
 <h3 class="hasAnchor">
 <a href="#creating-laglead-variables" class="anchor"></a>Creating lag/lead variables</h3>
 <p>If you just want to create a single lag/lead variable, a simple and fast method has been implemented: <code>lag.formula</code>. Let’s give an example:</p>
-<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">base_lag</span> <span class="op">=</span> <span class="va">base_did</span>
 <span class="co"># we create a lagged value of the variable x1</span>
 <span class="va">base_lag</span><span class="op">$</span><span class="va">x1.l1</span> <span class="op">=</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/shift.html">lag</a></span><span class="op">(</span><span class="va">x1</span> <span class="op">~</span> <span class="va">id</span> <span class="op">+</span> <span class="va">period</span>, <span class="fl">1</span>, <span class="va">base_lag</span><span class="op">)</span>
@@ -1527,7 +1561,7 @@
 <span class="co">#&gt; 6  1.72873240 -0.6363849  1      6    1     1 -5.0443544</span></code></pre></div>
 <p>The first two arguments are mandatory. The formula informs on the variable to be lagged (on the left hand side), and the two panel identifiers. Note that the time index <strong>must</strong> appear second. The second argument tells how much lags we want. Using negative values gives leads. Finally the last argument informs on where to find the variables.</p>
 <p>In case you use the popular package <code>data.table</code>, you can create lagged variables very simply:</p>
-<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com">data.table</a></span><span class="op">)</span>
 <span class="va">base_lag_dt</span> <span class="op">=</span> <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/as.data.table.html">as.data.table</a></span><span class="op">(</span><span class="va">base_did</span><span class="op">)</span>
 <span class="co"># we create a lagged value of the variable x1</span>
@@ -1542,7 +1576,7 @@
 <p>In fact, this type of model is non-linear in the context of a Poisson model because the sum is embedded within the log:</p>
 <p><span class="math inline">\(E\left(z_i\right) = \exp\left(\log\left(a\times x_i + b\times y_i\right)\right)\)</span>.</p>
 <p>So let’s estimate such a relation. (Note that you can estimate this relation with GLM and identity link, but I carry on for the example.) First we generate the data:</p>
-<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Generating data:</span>
 <span class="va">n</span> <span class="op">=</span> <span class="fl">1000</span>
 <span class="co"># x and y: two positive random variables</span>
@@ -1552,10 +1586,10 @@
 <span class="va">z</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html">rpois</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">2</span><span class="op">*</span><span class="va">x</span> <span class="op">+</span> <span class="fl">3</span><span class="op">*</span><span class="va">y</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html">rpois</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">1</span><span class="op">)</span>
 <span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">z</span><span class="op">)</span></code></pre></div>
 <p>To estimate the non-linear relationship, we need to use the argument <code>NL.fml</code> where we put the non-linear part. We also have to provide starting values with the argument <code>NL.start</code>. Finally, to ensure the RHS can be evaluated in any situation, we add lower bounds for the parameters with the argument <code>lower</code>.</p>
-<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">result_NL</span> <span class="op">=</span> <span class="fu"><a href="../reference/feNmlm.html">feNmlm</a></span><span class="op">(</span><span class="va">z</span><span class="op">~</span><span class="fl">0</span>, <span class="va">base</span>, NL.fml <span class="op">=</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">a</span><span class="op">*</span><span class="va">x</span> <span class="op">+</span> <span class="va">b</span><span class="op">*</span><span class="va">y</span><span class="op">)</span>, NL.start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>a<span class="op">=</span><span class="fl">1</span>, b<span class="op">=</span><span class="fl">1</span><span class="op">)</span>, lower <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>a<span class="op">=</span><span class="fl">0</span>, b<span class="op">=</span><span class="fl">0</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>Note that the arguments <code>NL.start</code> and <code>lower</code> are named lists. Setting <code>lower = list(a=0, b=0)</code> means that the optimization algorithm will never explore parameters for <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> that are lower than 0. The results obtained can be interpreted similarly to results with linear RHS. We can see them with a print:</p>
-<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="va">result_NL</span><span class="op">)</span>
 <span class="co">#&gt; Non-linear ML estimation, family = Poisson, Dep. Var.: z</span>
 <span class="co">#&gt; Observations: 1,000 </span>
@@ -1579,7 +1613,7 @@
 <p><span class="math inline">\(\gamma_{k} \left( a\times x_i + b\times y_i \right) = \gamma_{k}^{\prime} \left(a^{\prime}\times x_i + b^{\prime}\times y_i \right),\forall i,k\)</span>.</p>
 <p>An example is <span class="math inline">\(\gamma^{\prime}_{k} = 2\times \gamma_k\)</span>, <span class="math inline">\(a^{\prime} = a/2\)</span> and <span class="math inline">\(b^{\prime} = b/2\)</span>. Thus estimating this relation directly will lead to a problem to uniquely identify the coefficients. To circumvent this problem, we just have to fix one of the coefficient, this will ensure that we uniquely identify them.</p>
 <p>Let’s generate this relation:</p>
-<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># the class of each observation</span>
 <span class="va">id</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fl">20</span>, <span class="va">n</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 <span class="va">base</span><span class="op">$</span><span class="va">id</span> <span class="op">=</span> <span class="va">id</span>
@@ -1589,7 +1623,7 @@
 <span class="va">z_bis</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html">rpois</a></span><span class="op">(</span><span class="va">n</span>, <span class="va">gamma</span><span class="op">[</span><span class="va">id</span><span class="op">]</span> <span class="op">*</span> <span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="va">x</span> <span class="op">+</span> <span class="fl">3</span><span class="op">*</span><span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html">rpois</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">1</span><span class="op">)</span>
 <span class="va">base</span><span class="op">$</span><span class="va">z_bis</span> <span class="op">=</span> <span class="va">z_bis</span></code></pre></div>
 <p>Now we estimate it with the fixed-effects while fixing one of the coefficients (we fix <span class="math inline">\(a\)</span> to its true value but it could be any value):</p>
-<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># we add the fixed-effect in the formula</span>
 <span class="va">result_NL_fe</span> <span class="op">=</span> <span class="fu"><a href="../reference/feNmlm.html">feNmlm</a></span><span class="op">(</span><span class="va">z_bis</span><span class="op">~</span><span class="fl">0</span><span class="op">|</span><span class="va">id</span>, <span class="va">base</span>, NL.fml <span class="op">=</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="va">x</span> <span class="op">+</span> <span class="va">b</span><span class="op">*</span><span class="va">y</span><span class="op">)</span>, NL.start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>b<span class="op">=</span><span class="fl">1</span><span class="op">)</span>, lower <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>b<span class="op">=</span><span class="fl">0</span><span class="op">)</span><span class="op">)</span>
 <span class="co"># The coef should be around 3</span>
@@ -1614,7 +1648,7 @@
 <h2 class="hasAnchor">
 <a href="#multi-threading" class="anchor"></a>Multi-threading</h2>
 <p>The package <code>fixest</code> integrates multi-platform parallelism to hasten the estimation process. By default it makes use of 50% of all available threads. To change the number of threads used, just use the argument <code>nthreads</code>:</p>
-<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Sample of results:</span>
 <span class="co"># 1 nthreads: 3.13s</span>
 <span class="fu"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span><span class="op">(</span><span class="fu"><a href="../reference/femlm.html">fenegbin</a></span><span class="op">(</span><span class="va">Euros</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span><span class="op">|</span><span class="va">Origin</span><span class="op">+</span><span class="va">Destination</span><span class="op">+</span><span class="va">Product</span><span class="op">+</span><span class="va">Year</span>, <span class="va">trade</span>, nthreads <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span>

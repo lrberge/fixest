@@ -148,11 +148,11 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>fml</th>
-      <td><p>A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using <code>setFixest_fml</code>, or can be defined in <code>...</code>. Special macros of the form <code>..("regex")</code> can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument <code>data</code>. See examples.</p></td>
+      <td><p>A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using <code>setFixest_fml</code>, or can be defined in <code>...</code>. Special macros of the form <code>..("regex")</code> can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument <code>data</code>. square brackets have a special meaning: Values in them are evaluated and parsed accordingly. Example: <code>y~x.[1:2] + z.[i]</code> will lead to <code>y~x1+x2+z3</code> if <code>i==3</code>. See examples.</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. <code>..ctrl</code>). The value of each argument must be a one-sided formula or a character vector, it is the definition of the macro variable. Example of a valid call: <code><a href='setFixest_fml.html'>setFixest_fml(..ctrl = ~ var1 + var2)</a></code>. In the function <code>xpd</code>, the default macro variables are taken from <code>getFixest_fml</code>, any variable in <code>...</code> will replace these values.</p></td>
+      <td><p>Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. <code>..ctrl</code>). The value of each argument must be a one-sided formula or a character vector, it is the definition of the macro variable. Example of a valid call: <code><a href='setFixest_fml.html'>setFixest_fml(..ctrl = ~ var1 + var2)</a></code>. In the function <code>xpd</code>, the default macro variables are taken from <code>getFixest_fml</code>, any variable in <code>...</code> will replace these values. You can enclose values in <code>.[]</code>, if so they will be evaluated from the current environment. For example <code>..ctrl = ~ x.[1:2] + .[z]</code> will lead to <code>~x1 + x2 + var</code> if <code>z</code> is equal to <code>"var"</code>.</p></td>
     </tr>
     <tr>
       <th>lhs</th>
@@ -175,6 +175,21 @@
 
     <p>In <code>xpd</code>, the default macro variables are taken from <code>getFixest_fml</code>. Any value in the <code>...</code> argument of <code>xpd</code> will replace these default values.</p>
 <p>The definitions of the macro variables will replace in verbatim the macro variables. Therefore, you can include multi-part formulas if you wish but then beware of the order of the macros variable in the formula. For example, using the <code>airquality</code> data, say you want to set as controls the variable <code>Temp</code> and <code>Day</code> fixed-effects, you can do <code><a href='setFixest_fml.html'>setFixest_fml(..ctrl = ~Temp | Day)</a></code>, but then <code><a href='feols.html'>feols(Ozone ~ Wind + ..ctrl, airquality)</a></code> will be quite different from <code><a href='feols.html'>feols(Ozone ~ ..ctrl + Wind, airquality)</a></code>, so beware!</p>
+    <h2 class="hasAnchor" id="dotted-square-brackets-in-formulas"><a class="anchor" href="#dotted-square-brackets-in-formulas"></a>Dotted square brackets in formulas</h2>
+
+    
+
+
+<p>In the formula, square brackets can i) create manifold variables at once, or ii) capture values from the current environment and put them verbatim in the formula. Note that the square bracket must be preceded by a dot.</p>
+<p>Say you want to include the variables <code>x1</code> to <code>x3</code> in your formula. You can use <code>xpd(y ~ x.[1:3])</code> and you'll get <code>y ~ x1 + x2 + x3</code>.</p>
+<p>You can use square brackets within variable names but they must be in character form in a macro variable: <code>xpd(y ~ ..x, ..x = "x.[1:2]_sq")</code> will create <code>y ~ x1_sq + x2_sq</code>. Otherwise there would be parsing issues.</p>
+<p>To summon values from the environment, simply put the variable in square brackets. For example: <code>for(i in 1:3) xpd(y.[i] ~ x)</code> will create the formulas <code>y1 ~ x</code> to <code>y3 ~ x</code> depending on the value of <code>i</code>.</p>
+<p>You can include a full variable from the environment in the same way: <code>for(y in c("a", "b")) xpd(.[y] ~ x)</code> will create the two formulas <code>a ~ x</code> and <code>b ~ x</code>.</p>
+<p>In all <code>fixest</code> estimations, this special parsing is enabled, so you don't need to use <code>xpd</code> (except for square brackets within a variable name).</p>
+<p>Limitations: the use of multiple square brackets within a single variable is not implemented. For example, the following will not work <code>xpd(y ~ ..x, ..x = x.[1:3]_.[1:3])</code>.</p>
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p><code><a href='setFixest_fml.html'>setFixest_fml</a></code> to set formula macros.</p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
@@ -218,9 +233,44 @@
 #&gt; Observations                   116                116
 #&gt; R2                         0.57308            0.62167
 #&gt; Adj. R2                    0.56164            0.60447</div><div class='input'>
+
+<span class='co'># Using .[]</span>
+
+<span class='va'>base</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/setNames.html'>setNames</a></span><span class='op'>(</span><span class='va'>iris</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>i</span> <span class='op'>=</span> <span class='fl'>2</span><span class='op'>:</span><span class='fl'>3</span>
+<span class='va'>z</span> <span class='op'>=</span> <span class='st'>"species"</span>
+<span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span><span class='op'>(</span><span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='fl'>2</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span> <span class='op'>+</span> <span class='va'>.</span><span class='op'>[</span><span class='va'>z</span><span class='op'>]</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = xpd(y ~ x.[2:3] + .[z]), data = base)
+#&gt; 
+#&gt; Coefficients:
+#&gt;       (Intercept)                 x2                 x3  speciesversicolor  
+#&gt;          3.682982           0.905946          -0.005995          -1.598362  
+#&gt;  speciesvirginica  
+#&gt;         -2.112647  
+#&gt; </div><div class='input'>
+<span class='co'># No xpd() needed in feols</span>
+<span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='fl'>2</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span> <span class='op'>+</span> <span class='va'>.</span><span class='op'>[</span><span class='va'>z</span><span class='op'>]</span>, <span class='va'>base</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
+#&gt; Observations: 150 
+#&gt; Standard-errors: IID 
+#&gt;                    Estimate Std. Error   t value   Pr(&gt;|t|)    
+#&gt; (Intercept)        3.682982   0.107403 34.291343  &lt; 2.2e-16 ***
+#&gt; x2                 0.905946   0.074311 12.191282  &lt; 2.2e-16 ***
+#&gt; x3                -0.005995   0.156260 -0.038368 9.6945e-01    
+#&gt; speciesversicolor -1.598362   0.205706 -7.770113 1.3154e-12 ***
+#&gt; speciesvirginica  -2.112647   0.304024 -6.948940 1.1550e-10 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; RMSE: 0.333482   Adj. R2: 0.832221</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># You can use xpd for stepwise estimations</span>
 <span class='co'>#</span>
+
+<span class='co'># Note that for stepwise estimations in fixest, you can use</span>
+<span class='co'># the stepwise functions: sw, sw0, csw, csw0</span>
+<span class='co'># -&gt; see help in feols or in the dedicated vignette</span>
 
 <span class='co'># we want to look at the effect of x1 on y</span>
 <span class='co'># controlling for different variables</span>
@@ -373,15 +423,38 @@
 <span class='va'>vars</span> <span class='op'>=</span> <span class='va'>letters</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span>
 <span class='fu'>xpd</span><span class='op'>(</span>rhs <span class='op'>=</span> <span class='va'>vars</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; ~a + b + c + d + e
-#&gt; &lt;environment: 0x0000000014018600&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x00000000462384c0&gt;</div><div class='input'>
 <span class='co'># Alternatively, to replace the RHS</span>
 <span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fl'>1</span>, rhs <span class='op'>=</span> <span class='va'>vars</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ a + b + c + d + e
-#&gt; &lt;environment: 0x0000000043d42f20&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x0000000045848a28&gt;</div><div class='input'>
 <span class='co'># To create a two sided formula</span>
 <span class='fu'>xpd</span><span class='op'>(</span>lhs <span class='op'>=</span> <span class='st'>"y"</span>, rhs <span class='op'>=</span> <span class='va'>vars</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ a + b + c + d + e
-#&gt; &lt;environment: 0x000000004532d6e8&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x0000000042fc9300&gt;</div><div class='input'>
+
+<span class='co'>#</span>
+<span class='co'># Dot square bracket operator</span>
+<span class='co'>#</span>
+
+<span class='co'># You can create multiple variables at once</span>
+<span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span> <span class='op'>+</span> <span class='va'>z.</span><span class='op'>[</span><span class='fl'>2</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; y ~ x1 + x2 + x3 + x4 + x5 + z2 + z3
+#&gt; &lt;environment: 0x000000004451cfa0&gt;</div><div class='input'>
+<span class='co'># You can summon variables from the environment</span>
+<span class='va'>var</span> <span class='op'>=</span> <span class='st'>"a"</span>
+<span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='va'>var</span><span class='op'>]</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; y ~ xa
+#&gt; &lt;environment: 0x000000004622cc98&gt;</div><div class='input'>
+<span class='co'># ... the variables can be multiple</span>
+<span class='va'>vars</span> <span class='op'>=</span> <span class='va'>letters</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span>
+<span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='va'>vars</span><span class='op'>]</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; y ~ xa + xb + xc + xd + xe
+#&gt; &lt;environment: 0x0000000045e1ec78&gt;</div><div class='input'>
+<span class='co'># You can have "complex" variable names but must be in character form</span>
+<span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>..x</span>, ..x <span class='op'>=</span> <span class='st'>"x.[vars]_sq"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; y ~ xa_sq + xb_sq + xc_sq + xd_sq + xe_sq
+#&gt; &lt;environment: 0x0000000045d45420&gt;</div><div class='input'>
 
 </div></pre>
   </div>
