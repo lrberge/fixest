@@ -2939,7 +2939,7 @@ bin = function(x, bin){
 #'
 #' @inheritParams setFixest_fml
 #'
-#' @param fml A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}. Special macros of the form \code{..("regex")} can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument \code{data}. See examples.
+#' @param fml A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}. Special macros of the form \code{..("regex")} can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument \code{data}. square brackets have a special meaning: Values in them are evaluated and parsed accordingly. Example: \code{y~x[1:2] + z[i]} will lead to \code{y~x1+x2+z3} if \code{i==3}. To have a single variable, use \code{.[]}: in \code{.[y] ~x1} the variable \code{y} will be replaced by its value in the environment. See examples.
 #' @param lhs If present then a formula will be constructed with \code{lhs} as the full left-hand-side. The value of \code{lhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{rhs}. Note that if \code{fml} is not missing, its LHS will be replaced by \code{lhs}.
 #' @param rhs If present, then a formula will be constructed with \code{rhs} as the full right-hand-side. The value of \code{rhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{lhs}. Note that if \code{fml} is not missing, its RHS will be replaced by \code{rhs}.
 #' @param data Either a character vector or a data.frame. This argument will only be used if a macro of the type \code{..("regex")} is used in the formula of the argument \code{fml}. If so, any variable name from \code{data} that matches the regular expression will be added to the formula.
@@ -2949,8 +2949,26 @@ bin = function(x, bin){
 #'
 #' The definitions of the macro variables will replace in verbatim the macro variables. Therefore, you can include multi-part formulas if you wish but then beware of the order of the macros variable in the formula. For example, using the \code{airquality} data, say you want to set as controls the variable \code{Temp} and \code{Day} fixed-effects, you can do \code{setFixest_fml(..ctrl = ~Temp | Day)}, but then \code{feols(Ozone ~ Wind + ..ctrl, airquality)} will be quite different from \code{feols(Ozone ~ ..ctrl + Wind, airquality)}, so beware!
 #'
+#' @section Square brackets in formulas:
+#'
+#' In a the formula, you use square brackets to i) create manifold variables at once, or ii) capture values from the current environment and put them verbatim in the formula.
+#'
+#' Say you want to include the variables \code{x1} to \code{x3} in your formula. You can use \code{xpd(y ~ x[1:3])} and you'll get \code{y ~ x1 + x2 + x3}. You can use square brackets within variable names: \code{y ~ x[1:2]_sq} will create \code{y ~ x1_sq + x2_sq}.
+#'
+#' To summon values from the environment, simply put the variable in square brackets. For example: \code{for(i in 1:3) xpd(y[i] ~ x)} will create the formulas \code{y1 ~ x} to \code{y3 ~ x} depending on the value of \code{i}.
+#'
+#' Note that to include a full variable from the environment, you must use a dot before the first square bracket. Example: \code{for(y in c("a", "b")) xpd(.[y] ~ x)} will create the two formulas \code{a ~ x} and \code{b ~ x}. The use of the dot is mandatory since otherwise a parsing error will be raised.
+#'
+#' In all \code{fixest} estimations, this special parsing is enabled, so you don't need to use \code{xpd}.
+#'
+#' Limitations: the use of multiple square brackets within a single variable is not implemented. For example, the following will not work \code{y ~ x[1:3]_[1:3]}.
+#'
 #' @return
 #' It returns a formula where all macros have been expanded.
+#'
+#'
+#' @seealso
+#' \code{\link[fixest]{setFixest_fml}} to set formula macros.
 #'
 #' @examples
 #'
@@ -3036,13 +3054,31 @@ bin = function(x, bin){
 #' xpd(lhs = "y", rhs = vars)
 #'
 #'
+#' #
+#' # Parsing of square brackets
+#' #
+#'
+#' # You can create multiple variables at once
+#' xpd(y ~ x[1:5] + z[2:3])
+#'
+#' # You can summon variables from the environment
+#' var = "a"
+#' xpd(y ~ x[var])
+#'
+#' # ... the variables can be multiple
+#' vars = letters[1:5]
+#' xpd(y ~ x[vars])
+#'
+#'
 xpd = function(fml, ..., lhs, rhs, data = NULL){
-    .xpd(fml = fml, ..., lhs = lhs, rhs = rhs, data = data, check = TRUE, macro = TRUE)
+    .xpd(fml = fml, ..., lhs = lhs, rhs = rhs, data = data, check = TRUE, macro = TRUE, frame = parent.frame())
 }
 
-.xpd = function(fml, ..., lhs, rhs, data = NULL, check = FALSE, macro = FALSE){
+.xpd = function(fml, ..., lhs, rhs, data = NULL, check = FALSE, macro = FALSE, frame = NULL){
 
-    if((is_lhs <- !missing(lhs)) | (is_rhs <- !missing(rhs))){
+    is_lhs = !missing(lhs)
+    is_rhs = !missing(rhs)
+    if(is_lhs || is_rhs){
         # No short-circuit in condition!
 
         if(check) check_arg(fml, .type = "formula", .up = 1)
@@ -3083,7 +3119,7 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
         check_arg(fml, .type = "formula mbt", .up = 1)
     }
 
-    macros = parse_macros(..., from_xpd = TRUE, check = check)
+    macros = parse_macros(..., from_xpd = TRUE, check = check, frame = frame)
 
     if(length(macros) == 0 && missnull(data)) return(fml)
 
@@ -3133,6 +3169,11 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 
             fml = as.formula(paste(res, collapse = ""))
         }
+    }
+
+    if("[" %in% all.vars(fml, functions = TRUE)){
+        fml_txt = charget(deparse_long(fml), frame)
+        fml = as.formula(fml_txt)
     }
 
     fml
@@ -3854,10 +3895,12 @@ obs = function(x){
 ####
 
 
-parse_macros = function(..., reset = FALSE, from_xpd = FALSE, check = TRUE){
+parse_macros = function(..., reset = FALSE, from_xpd = FALSE, check = TRUE, frame = NULL){
     set_up(1)
 
-    if(check) check_arg(..., "dotnames os formula | character vector no na | numeric scalar | class(call, name)", .message = paste0("Each element of '...' must be a one-sided formula, and the name of each argument must start with two dots (ex: ", ifelse(from_xpd, "xpd(fml, ..ctrl = ~ x5 + x6)", "setFixest_fml(..ctrl = ~ x5 + x6)"), ").\nAlternatively it can be a character vector of variable names, or a numeric scalar."))
+    if(check){
+        check_arg(..., "dotnames os formula | character vector no na | numeric scalar | class(call, name)", .message = paste0("Each element of '...' must be a one-sided formula, and the name of each argument must start with two dots (ex: ", ifelse(from_xpd, "xpd(fml, ..ctrl = ~ x5 + x6)", "setFixest_fml(..ctrl = ~ x5 + x6)"), ").\nAlternatively it can be a character vector of variable names, or a numeric scalar."))
+    }
 
     # We require os formulas instead of character strings because:
     # 1) I find it more handy
@@ -3891,13 +3934,13 @@ parse_macros = function(..., reset = FALSE, from_xpd = FALSE, check = TRUE){
     }
 
     for(v in names(dots)){
-        fml_macro[[v]] = value2stringCall(dots[[v]], check = check)
+        fml_macro[[v]] = value2stringCall(dots[[v]], check = check, get = get, frame = frame)
     }
 
     fml_macro
 }
 
-value2stringCall = function(value_raw, call = FALSE, check = FALSE){
+value2stringCall = function(value_raw, call = FALSE, check = FALSE, frame = NULL){
 
     if(any(c("call", "name") %in% class(value_raw))){
         res = if(call) value_raw else deparse_long(value_raw)
@@ -3911,7 +3954,12 @@ value2stringCall = function(value_raw, call = FALSE, check = FALSE){
             value_raw = grep("[[:alnum:]]", value_raw, value = TRUE)
             if(length(value_raw)){
                 # We need to check that it leads to a valid formula => otherwise problems later
-                value_raw = paste(value_raw, collapse = "+")
+                for(i in seq_along(value_raw)){
+                    value_raw = charget(value_raw, frame = frame)
+                }
+
+                value_raw = paste(value_raw, collapse = " + ")
+
                 my_call = error_sender(str2lang(value_raw), "The value '", value_raw, "' does not lead to a valid formula: ", up = 2)
                 res = if(call) my_call else value_raw
 
@@ -3922,12 +3970,74 @@ value2stringCall = function(value_raw, call = FALSE, check = FALSE){
         } else {
             value_raw = value_raw[nzchar(value_raw)]
             if(length(value_raw)){
+
+                for(i in seq_along(value_raw)){
+                    value_raw = charget(value_raw, frame = frame)
+                }
+
                 value_raw = paste(value_raw, collapse = "+")
                 res = if(call) str2lang(value_raw) else value_raw
             } else {
                 res = if(call) 1 else "1"
             }
         }
+    }
+
+    if("[" %in% all.vars(res, functions = TRUE)){
+        res_txt = charget(deparse_long(res), frame)
+        res = as.formula(res_txt)
+    }
+
+    res
+}
+
+charget = function(x, frame = .GlobalEnv){
+    # tansforms "x[i]" into x1 if i==1
+    # z = "XX" ; x = ".[z] + x[1:5] + y[1:2]_t"
+
+    if(!grepl("[", x, fixed = TRUE)) return(x)
+
+    x_split = strsplit(x, "(\\.?\\[)|\\]")[[1]]
+
+    n = length(x_split)
+
+    res = as.list(x_split)
+    for(i in (1:n)[(1:n) %% 2 == 0]){
+        # I don't send informative error messages here => OK
+        value = eval(str2lang(x_split[i]), frame)
+        res[[i]] = value
+    }
+
+    if(max(lengths(res)) == 1) {
+        res = paste(res, collapse = "")
+    } else {
+        res_txt = res[[1]]
+        i = 2
+        while(i <= n){
+
+            if(length(res[[i]]) == 1){
+                res_txt = paste0(res_txt, res[[i]])
+                i = i + 1
+
+            } else {
+                before_no_var = gsub("[[:alnum:]_\\.]+$", "", res_txt)
+                var_before = substr(res_txt, nchar(before_no_var) + 1, nchar(res_txt))
+
+                if(i != n && grepl("[[:alnum:]_\\.]", substr(res[[i + 1]], 1, 1))){
+                    after = res[[i + 1]]
+                    after_no_var = gsub("^[[:alnum:]_\\.]+", "", after)
+                    var_after = substr(after, 1, nchar(after) - nchar(after_no_var))
+
+                    res_txt = paste0(before_no_var, paste0(var_before, res[[i]], var_after, collapse = " + "), after_no_var)
+                    i = i + 2
+                } else {
+                    res_txt = paste0(before_no_var, paste0(var_before, res[[i]], collapse = " + "))
+                    i = i + 1
+                }
+            }
+        }
+
+        res = res_txt
     }
 
     res
@@ -9049,7 +9159,7 @@ getFixest_print = function(){
 #'
 #' @inherit xpd examples
 #'
-#' @param ... Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. \code{..ctrl}). The value of each argument must be a one-sided formula or a character vector, it is the definition of the macro variable. Example of a valid call: \code{setFixest_fml(..ctrl = ~ var1 + var2)}. In the function \code{xpd}, the default macro variables are taken from \code{getFixest_fml}, any variable in \code{...} will replace these values.
+#' @param ... Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. \code{..ctrl}). The value of each argument must be a one-sided formula or a character vector, it is the definition of the macro variable. Example of a valid call: \code{setFixest_fml(..ctrl = ~ var1 + var2)}. In the function \code{xpd}, the default macro variables are taken from \code{getFixest_fml}, any variable in \code{...} will replace these values. If you define a variable with a character string, you can evaluate variables within the string by enclosing them in curly braces. For example: \code{setFixest_fml(..ctrl = "x{i}")} with \code{i} a variable.
 #' @param reset A logical scalar, defaults to \code{FALSE}. If \code{TRUE}, all macro variables are first reset (i.e. deleted).
 #'
 #' @details
@@ -9060,13 +9170,16 @@ getFixest_print = function(){
 #' @return
 #' The function \code{getFixest_fml()} returns a list of character strings, the names corresponding to the macro variable names, the character strings corresponding to their definition.
 #'
+#' @seealso
+#' \code{\link[fixest]{xpd}} to make use of formula macros.
+#'
 #'
 #'
 setFixest_fml = function(..., reset = FALSE){
 
-    check_arg(reset, "logical scalar")
+    check_arg(reset, get, "logical scalar")
 
-    fml_macro = parse_macros(..., reset = reset)
+    fml_macro = parse_macros(..., reset = reset, get = TRUE, get.frame = parent.frame())
 
     options("fixest_fml_macro" = fml_macro)
 

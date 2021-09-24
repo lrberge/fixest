@@ -11,6 +11,7 @@
 #' Estimates OLS with any number of fixed-effects.
 #'
 #' @inheritParams femlm
+#' @inheritSection xpd Square brackets in formulas
 #'
 #' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y | fe_1+fe_2}. You can combine two fixed-effects with \code{^}: e.g. \code{fml = z~x+y|fe_1^fe_2}, see details. You can also use variables with varying slopes using square brackets: e.g. in \code{fml = z~y|fe_1[x] + fe_2}, see details. To add IVs, insert the endogenous vars./instruments after a pipe, like in \code{y ~ x | c(x_endo1, x_endo2) ~ x_inst1 + x_inst2}. Note that it should always be the last element, see details. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. The formula \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)} leads to 6 estimation, see details.
 #' @param weights A formula or a numeric vector. Each observation can be weighted, the weights must be greater than 0. If equal to a formula, it should be one-sided: for example \code{~ var_weight}.
@@ -1856,6 +1857,7 @@ feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, cluster, se, s
 #' @inheritSection feols Multiple estimations
 #' @inheritSection feols Argument sliding
 #' @inheritSection feols Piping
+#' @inheritSection xpd Square brackets in formulas
 #'
 #' @param family Family to be used for the estimation. Defaults to \code{gaussian()}. See \code{\link[stats]{family}} for details of family functions.
 #' @param start Starting values for the coefficients. Can be: i) a numeric of length 1 (e.g. \code{start = 0}), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients). Default is missing.
@@ -2697,6 +2699,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 #' @inheritSection feols Multiple estimations
 #' @inheritSection feols Argument sliding
 #' @inheritSection feols Piping
+#' @inheritSection xpd Square brackets in formulas
 #'
 #' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y|fixef_1+fixef_2}. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. The formula \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)} leads to 6 estimation, see details.
 #' @param start Starting values for the coefficients. Can be: i) a numeric of length 1 (e.g. \code{start = 0}, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).
@@ -2926,6 +2929,7 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
 #' @inheritSection feols Multiple estimations
 #' @inheritSection feols Argument sliding
 #' @inheritSection feols Piping
+#' @inheritSection xpd Square brackets in formulas
 #'
 #' @param fml A formula. This formula gives the linear formula to be estimated (it is similar to a \code{lm} formula), for example: \code{fml = z~x+y}. To include fixed-effects variables, insert them in this formula using a pipe (e.g. \code{fml = z~x+y|fixef_1+fixef_2}). To include a non-linear in parameters element, you must use the argment \code{NL.fml}. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. This leads to 6 estimation \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)}. See details.
 #' @param start Starting values for the coefficients in the linear part (for the non-linear part, use NL.start). Can be: i) a numeric of length 1 (e.g. \code{start = 0}, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).

@@ -420,7 +420,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         # We apply expand for macros => we return fml_no_xpd
         if(length(getFixest_fml()) > 0 || ".." %in% all.vars(fml, functions = TRUE)){
             fml_no_xpd = fml
-            fml = .xpd(fml, data = dataNames, macro = TRUE)
+            fml = .xpd(fml, data = dataNames, macro = TRUE, frame = call_env)
         }
 
         #
