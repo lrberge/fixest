@@ -146,7 +146,7 @@ xpd(lhs = "y", rhs = vars)
 
 
 #
-# Parsing of square brackets
+# Dot square bracket operator
 #
 
 # You can create multiple variables at once
