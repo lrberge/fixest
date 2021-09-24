@@ -9367,6 +9367,11 @@ initialize_startup_msg = function(startup_msg){
     # Note that we must return the value of 'fixest_startup_msg' since these are
     # updated only at session restart (and hence are not directly accessible)
 
+    # We make sure we're not in R CMD check => we don't want to write to Renviron in that case
+    if(any(grepl("R_CHECK", names(Sys.getenv()), fixed = TRUE))){
+        return(FALSE)
+    }
+
     previous_version = renvir_get("fixest_version")
     current_version = fixest_version()
 
