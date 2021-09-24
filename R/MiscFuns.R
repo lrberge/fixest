@@ -3156,7 +3156,7 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
             for(i in qui){
                 fml_dp = gsub(paste0(escape_regex(names(macros)[i]), "(?=$|[^[:alnum:]_\\.])"), macros[[i]], fml_dp, perl = TRUE)
             }
-            fml = as.formula(fml_dp)
+            fml = as.formula(fml_dp, frame)
         }
     }
 
@@ -3190,7 +3190,7 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
                 res[i] = paste0(paste(vars, collapse = "+"), substr(res[i], nchar(re) + 3, nchar(res[i])))
             }
 
-            fml = as.formula(paste(res, collapse = ""))
+            fml = as.formula(paste(res, collapse = ""), frame)
         }
     }
 
@@ -3204,7 +3204,7 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
                 fml_txt = charget(fml_txt, frame)
             }
 
-            fml = as.formula(fml_txt)
+            fml = as.formula(fml_txt, frame)
         }
 
     }
