@@ -1174,7 +1174,7 @@ dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = 
 #' Laurent Berge
 #'
 #' @references
-#' Cameron AC, Gelbach JB, Miller DL (2011). "Robust Inference with Multiway Clustering." \emph{Journal of Business & Economic Statistics}, 29(2), 238–249. doi:10.1198/jbes.2010.07136.
+#' Cameron AC, Gelbach JB, Miller DL (2011). "Robust Inference with Multiway Clustering." \emph{Journal of Business & Economic Statistics}, 29(2), 238-249. doi:10.1198/jbes.2010.07136.
 #'
 #' @examples
 #'
@@ -1325,9 +1325,9 @@ vcov_cluster = function(x, cluster = NULL, ssc = NULL){
 #'
 #'
 #' @references
-#' Newey WK, West KD (1987). "A Simple, Positive Semi-Deﬁnite, Heteroskedasticity and Autocorrelation Consistent Covariance Matrix." \emph{Econometrica}, 55(3), 703–708. doi:10.2307/1913610.
+#' Newey WK, West KD (1987). "A Simple, Positive Semi-Definite, Heteroskedasticity and Autocorrelation Consistent Covariance Matrix." \emph{Econometrica}, 55(3), 703-708. doi:10.2307/1913610.
 #'
-#' Driscoll JC, Kraay AC (1998). "Consistent Covariance Matrix Estimation with Spatially Dependent Panel Data." \emph{The Review of Economics and Statistics}, 80(4), 549–560. doi:10.1162/003465398557825.
+#' Driscoll JC, Kraay AC (1998). "Consistent Covariance Matrix Estimation with Spatially Dependent Panel Data." \emph{The Review of Economics and Statistics}, 80(4), 549-560. doi:10.1162/003465398557825.
 #'
 #' Milo G (2017). "Robust Standard Error Estimators for Panel Models: A Unifying Approach" \emph{Journal of Statistical Software}, 82(3). doi:10.18637/jss.v082.i03.
 #'
@@ -1712,7 +1712,7 @@ vcovClust = function (cluster, myBread, scores, adj = FALSE, do.unclass = TRUE, 
     # - scores
     # Note: if length(unique(cluster)) == n (i.e. White correction), then the adj are such that vcovClust is equivalent to vcovHC(res, type="HC1")
     # Source: http://cameron.econ.ucdavis.edu/research/Cameron_Miller_JHR_2015_February.pdf
-    #         Cameron & Miller -- A Practitioner’s Guide to Cluster-Robust Inference
+    #         Cameron & Miller -- A Practitioner's Guide to Cluster-Robust Inference
 
     n = NROW(scores)
 

@@ -7,8 +7,6 @@
 
 
 
-
-
 #' Sun and Abraham interactions
 #'
 #' User-level method to implement staggered difference-in-difference estimations a la Sun and Abraham (Journal of Econometrics, forthcoming).

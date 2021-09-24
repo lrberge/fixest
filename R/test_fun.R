@@ -186,3 +186,40 @@ run_test = function(chunk, from){
     "tests performed successfully"
 }
 
+
+
+non_ascii = function(folder = "R"){
+    # Finds non ascii characters lurking
+
+    all_files = list.files(folder, full.names = TRUE)
+    all_R_text = lapply(all_files, function(x) readLines(x, encoding = "UTF-8"))
+
+    i_non_ascii = which(sapply(all_R_text, function(x) any(grepl("[^ -~\t]", x))))
+    n = length(i_non_ascii)
+
+    if(n == 0) return("No non-ASCII character found.")
+
+    cat("Tip: Type, e.g., 1750G to go to the line in VIM\n\n")
+
+    for(id in seq(n)){
+        i = i_non_ascii[id]
+        cat("File: ", gsub("R/", "", all_files[i]), "\n")
+
+        text = all_R_text[[i]]
+        all_lines = which(grepl("[^ -~\t]", text))
+        for(line in all_lines){
+            cat("-> line ", sfill(line, max(nchar(all_lines))), ":\n===|", text[line], "\n")
+            cat("===|", gsub("[^ -~\t]", "__HERE__", text[line]), "\n")
+
+            if(line != tail(all_lines, 1)) cat("\n")
+        }
+
+        if(id < n) cat("\n ---------- \n\n")
+    }
+}
+
+
+
+
+
+
