@@ -418,9 +418,9 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         fml = formula(fml) # we regularize the formula to check it
 
         # We apply expand for macros => we return fml_no_xpd
-        if(length(getFixest_fml()) > 0 || ".." %in% all.vars(fml, functions = TRUE)){
+        if(length(getFixest_fml()) > 0 || any(c("..", "[") %in% all.vars(fml, functions = TRUE))){
             fml_no_xpd = fml
-            fml = .xpd(fml, data = dataNames, macro = TRUE, frame = call_env)
+            fml = .xpd(fml, data = dataNames, macro = TRUE, frame = call_env, check = TRUE)
         }
 
         #

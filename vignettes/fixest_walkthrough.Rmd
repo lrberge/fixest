@@ -695,7 +695,7 @@ head(etable(res_sa20, agg = FALSE), 20)
 
 Now we present some other features of the package:
 
-  1. [Formula macros](#formula-macros). 
+  1. [Formula: macros and dot square brackets](#formula-macros). 
   
   2. [How to add lead/lags](#lagging-variables).
   
@@ -707,7 +707,9 @@ Now we present some other features of the package:
 <!-- NOTE: you can't have ":" or "(" in titles to make links -->
 
 
-## Formula macros
+## Formula: macros and dot square brackets
+
+### Formula macros
 
 It can be useful, to tidy up the workflow or simply for convenience, to define formula macros: i.e. macro variables each representing several variables. This package offers two functions to deal with that: `setFixest_fml` to set macro variables globally, and `xpd` to create a formula with macro variables either globally defined or defined at run time.
 
@@ -746,6 +748,25 @@ Again, since `xpd` is called internally, the following works:
 ```{r}
 feols(Armed.Forces ~ Population + ..("GNP|ployed"), longley)
 ```
+
+### The dot square bracket operator
+
+The special operator `.[]` can be used in `fixest` formulas to replace the enclosed item by its value in the current environment. Let's give an example:
+```{r}
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+i = 2:3
+z = "i(species)"
+feols(y ~ x.[i] + .[z], base)
+```
+What did just happen? When `.[]` is encountered in a formula, its value is evaluated and inserted verbatim in the formula. Further, when the value in brackets is a vector, as many variables are added in the model. That's why `x.[i]` led to `x2 + x3`. Of course, numbers can be used directly: `x.[2:3]` would have led to the same result.
+
+Variable names in which `.[]` is in the middle of the name can also be created, but the use of macros is then mandatory:
+```{r}
+i = 1:5
+xpd(y ~ ..x, ..x = "x.[i]_sq")
+```
+The use of a character string is mandatory here to avoid formula parsing problems.
+
 
 ## Lagging variables
 

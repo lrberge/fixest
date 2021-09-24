@@ -10,7 +10,7 @@ setFixest_fml(..., reset = FALSE)
 getFixest_fml()
 }
 \arguments{
-\item{...}{Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. \code{..ctrl}). The value of each argument must be a one-sided formula or a character vector, it is the definition of the macro variable. Example of a valid call: \code{setFixest_fml(..ctrl = ~ var1 + var2)}. In the function \code{xpd}, the default macro variables are taken from \code{getFixest_fml}, any variable in \code{...} will replace these values.}
+\item{...}{Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. \code{..ctrl}). The value of each argument must be a one-sided formula or a character vector, it is the definition of the macro variable. Example of a valid call: \code{setFixest_fml(..ctrl = ~ var1 + var2)}. In the function \code{xpd}, the default macro variables are taken from \code{getFixest_fml}, any variable in \code{...} will replace these values. You can enclose values in \code{.[]}, if so they will be evaluated from the current environment. For example \code{..ctrl = ~ x.[1:2] + .[z]} will lead to \code{~x1 + x2 + var} if \code{z} is equal to \code{"var"}.}
 
 \item{reset}{A logical scalar, defaults to \code{FALSE}. If \code{TRUE}, all macro variables are first reset (i.e. deleted).}
 }
@@ -42,9 +42,24 @@ a = feols(Ozone ~ Wind + ..ctrl, airquality)
 b = feols(Ozone ~ Wind + ..ctrl_long, airquality)
 etable(a, b, keep = "Int|Win")
 
+
+# Using .[]
+
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+i = 2:3
+z = "species"
+lm(xpd(y ~ x.[2:3] + .[z]), base)
+
+# No xpd() needed in feols
+feols(y ~ x.[2:3] + .[z], base)
+
 #
 # You can use xpd for stepwise estimations
 #
+
+# Note that for stepwise estimations in fixest, you can use
+# the stepwise functions: sw, sw0, csw, csw0
+# -> see help in feols or in the dedicated vignette
 
 # we want to look at the effect of x1 on y
 # controlling for different variables
@@ -109,4 +124,26 @@ xpd(y ~ 1, rhs = vars)
 xpd(lhs = "y", rhs = vars)
 
 
+#
+# Parsing of square brackets
+#
+
+# You can create multiple variables at once
+xpd(y ~ x.[1:5] + z.[2:3])
+
+# You can summon variables from the environment
+var = "a"
+xpd(y ~ x.[var])
+
+# ... the variables can be multiple
+vars = letters[1:5]
+xpd(y ~ x.[vars])
+
+# You can have "complex" variable names but must be in character form
+xpd(y ~ ..x, ..x = "x.[vars]_sq")
+
+
+}
+\seealso{
+\code{\link[fixest]{xpd}} to make use of formula macros.
 }

@@ -51,6 +51,26 @@
     
     * Conley (1999) for spatially correlated errors
     
+ - you can summon variables from the environment directly in the formula using square brackets starting with a dot:
+ ```R
+ base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+ i = 2:3
+ z = "i(species)"
+ feols(y ~ x.[i] + .[z], base)
+ #> OLS estimation, Dep. Var.: y
+ #> Observations: 150 
+ #> Standard-errors: IID 
+ #>                      Estimate Std. Error   t value   Pr(>|t|)    
+ #> (Intercept)          3.682982   0.107403 34.291343  < 2.2e-16 ***
+ #> x2                   0.905946   0.074311 12.191282  < 2.2e-16 ***
+ #> x3                  -0.005995   0.156260 -0.038368 9.6945e-01    
+ #> species::versicolor -1.598362   0.205706 -7.770113 1.3154e-12 ***
+ #> species::virginica  -2.112647   0.304024 -6.948940 1.1550e-10 ***
+ #> ---
+ #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+ #> RMSE: 0.333482   Adj. R2: 0.832221
+ ```
+    
  - in `i` and `sunab` you can now bin the variables on the fly with the new argument `bin`. The new function [`bin`](https://lrberge.github.io/fixest/reference/bin.html) is also available at the user-level.
  
  - Function `dof` has been renamed into `ssc` (stands for small sample correction) to improve clarity. Retro compatibility is partially ensured but the function `dof` will be removed at some point.

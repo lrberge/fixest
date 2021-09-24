@@ -1241,6 +1241,40 @@ cat("done.\n\n")
 
 
 ####
+#### xpd ####
+####
+
+chunk("xpd")
+
+fml = xpd(y ~ x.[1:5] + z.[2:3])
+test(deparse_long(fml),
+     "y ~ x1 + x2 + x3 + x4 + x5 + z2 + z3")
+
+var = "a"
+fml = xpd(y ~ x.[var])
+test(deparse_long(fml),
+     "y ~ xa")
+
+vars = letters[1:5]
+fml = xpd(y ~ x.[vars] | fe1[[e, f]] + fe2[g])
+test(deparse_long(fml),
+     "y ~ xa + xb + xc + xd + xe | fe1[[e, f]] + fe2[g]")
+
+fml = xpd(y ~ ..x, ..x = "x.[vars]_sq")
+test(deparse_long(fml),
+     "y ~ xa_sq + xb_sq + xc_sq + xd_sq + xe_sq")
+
+# Now we check it works in estimations
+
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+
+i = 1:2
+fml = formula(feols(y ~ x.[i] | species[x3], base))
+test(deparse_long(fml),
+     "y ~ x1 + x2 | species + species[[x3]]")
+
+
+####
 #### predict ####
 ####
 

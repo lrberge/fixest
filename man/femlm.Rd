@@ -67,7 +67,7 @@ fenegbin(
 )
 }
 \arguments{
-\item{fml}{A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y|fixef_1+fixef_2}. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. The formula \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)} leads to 6 estimation, see details.}
+\item{fml}{A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y|fixef_1+fixef_2}. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. The formula \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)} leads to 6 estimation, see details. Square brackets starting with a dot can be used to call global variables: \code{y.[i] ~ x.[1:2]} will lead to \code{y3 ~ x1 + x2} if \code{i} is equal to 3 in the current environment (see details in \code{\link[fixest]{xpd}}).}
 
 \item{data}{A data.frame containing the necessary variables to run the model. The variables of the non-linear right hand side of the formula are identified with this \code{data.frame} names. Can also be a matrix.}
 
@@ -232,6 +232,24 @@ When the data set has been set up globally using \code{\link[fixest]{setFixest_e
 
 
 Although the argument 'data' is placed in second position, the data can be piped to the estimation functions. For example, with R >= 4.1, \code{mtcars |> feols(mpg ~ cyl)} works as \code{feols(mpg ~ cyl, mtcars)}.
+}
+
+\section{Dotted square brackets in formulas}{
+
+
+In the formula, square brackets can i) create manifold variables at once, or ii) capture values from the current environment and put them verbatim in the formula. Note that the square bracket must be preceded by a dot.
+
+Say you want to include the variables \code{x1} to \code{x3} in your formula. You can use \code{xpd(y ~ x.[1:3])} and you'll get \code{y ~ x1 + x2 + x3}.
+
+You can use square brackets within variable names but they must be in character form in a macro variable: \code{xpd(y ~ ..x, ..x = "x.[1:2]_sq")} will create \code{y ~ x1_sq + x2_sq}. Otherwise there would be parsing issues.
+
+To summon values from the environment, simply put the variable in square brackets. For example: \code{for(i in 1:3) xpd(y.[i] ~ x)} will create the formulas \code{y1 ~ x} to \code{y3 ~ x} depending on the value of \code{i}.
+
+You can include a full variable from the environment in the same way: \code{for(y in c("a", "b")) xpd(.[y] ~ x)} will create the two formulas \code{a ~ x} and \code{b ~ x}.
+
+In all \code{fixest} estimations, this special parsing is enabled, so you don't need to use \code{xpd} (except for square brackets within a variable name).
+
+Limitations: the use of multiple square brackets within a single variable is not implemented. For example, the following will not work \code{xpd(y ~ ..x, ..x = x.[1:3]_.[1:3])}.
 }
 
 \examples{
