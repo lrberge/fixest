@@ -651,7 +651,7 @@ With our data in hand, let's move on to the estimations. We'll implement two DiD
 # "Naive" TWFE DiD (note that the time to treatment for the never treated is -1000)
 # (by using ref = c(-1, -1000) we exclude the period just before the treatment and 
 # the never treated)
-res_twfe = feols(y ~ x1 + i(time_to_treatment, treated, ref = c(-1, -1000)) | id + year, base_stagg)
+res_twfe = feols(y ~ x1 + i(time_to_treatment, ref = c(-1, -1000)) | id + year, base_stagg)
 
 # To implement the Sun and Abraham (2020) method,
 # we use the sunab(cohort, period) function
