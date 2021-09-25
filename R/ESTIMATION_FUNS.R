@@ -1618,6 +1618,9 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 
 		rownames(res$cov.iid) = colnames(res$cov.iid) = names(coef)
 
+		# for compatibility with conleyreg
+		res$cov.unscaled = res$cov.iid
+
 		# se
 		se = diag(res$cov.iid)
 		se[se < 0] = NA
@@ -2559,6 +2562,9 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 
         rownames(res$cov.iid) = colnames(res$cov.iid) = names(coef)
 
+        # for compatibility with conleyreg
+        res$cov.unscaled = res$cov.iid
+
         # se
         se = diag(res$cov.iid)
         se[se < 0] = NA
@@ -3408,7 +3414,11 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	res$sq.cor = sq.cor
 	res$fitted.values = expected.predictor
 	res$hessian = hessian
+
 	res$cov.iid = var
+	# for compatibility with conleyreg
+	res$cov.unscaled = res$cov.iid
+
 	res$se = se
 	res$scores = scores
 	res$family = family
