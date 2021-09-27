@@ -136,11 +136,17 @@ var = "a"
 xpd(y ~ x.[var])
 
 # ... the variables can be multiple
-vars = letters[1:5]
+vars = LETTERS[1:3]
 xpd(y ~ x.[vars])
 
-# You can have "complex" variable names but must be in character form
-xpd(y ~ ..x, ..x = "x.[vars]_sq")
+# You can have "complex" variable names but they must be nested in character form
+xpd(y ~ .["x.[vars]_sq"])
+
+# DSB can be used within regular expressions
+re = c("GNP", "Pop")
+xpd(Unemployed ~ ..(".[re]"), data = longley)
+
+# => equivalent to ..("GNP|Pop")
 
 
 }

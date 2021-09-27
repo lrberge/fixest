@@ -765,8 +765,6 @@ coefplot = function(object, ..., style = NULL, sd, ci_low, ci_high, x, x.shift =
             nlines = 2 * lab.cex
         }
 
-        # browser()
-
         if(IS_GROUP){
             # tcl was set before
             group.baseline = nlines + 1 - 0.75 + tcl
@@ -962,8 +960,6 @@ coefplot = function(object, ..., style = NULL, sd, ci_low, ci_high, x, x.shift =
             }
         } else {
             axis(2)
-
-            # browser()
 
             if(AXIS_AS_NUM){
                 axis(1)
@@ -1445,7 +1441,6 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
 
     # get the default for:
     # dict, ci.level, ref
-
 
     dots = list(...)
     is_internal = isTRUE(dots$internal__)

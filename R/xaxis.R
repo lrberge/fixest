@@ -288,8 +288,6 @@ xaxis_biased = function(at, labels, angle, cex, line.min = 0, line.max = 2, yadj
     dots$xpd = TRUE
     dots$adj = 1
 
-    # browser()
-
     do.call("text", dots)
 
     return(invisible(list(cex=cex, angle=angle)))

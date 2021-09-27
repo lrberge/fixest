@@ -51,7 +51,7 @@
     
     * Conley (1999) for spatially correlated errors
     
- - you can summon variables from the environment directly in the formula using square brackets starting with a dot:
+ - you can summon variables from the environment directly in the formula using the new dot square bracket (DSB) operator. The DSB operator can be used to create many variables at once, and can also be using within regular expressions. One example:
 ```R
 base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
 i = 2:3
