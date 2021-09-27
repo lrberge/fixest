@@ -94,7 +94,7 @@
       <h1 data-toc-skip>On standard-errors</h1>
                         <h4 class="author">Laurent Berge</h4>
             
-            <h4 class="date">2021-09-24</h4>
+            <h4 class="date">2021-09-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/standard_errors.Rmd"><code>vignettes/standard_errors.Rmd</code></a></small>
       <div class="hidden name"><code>standard_errors.Rmd</code></div>
@@ -103,8 +103,10 @@
 
     
     
-<p>It is an euphemism to say that standard-errors are a critical element of your estimations: literally your paper’s results depend on them. It is therefore unfortunate that no conventional “best” way exists to compute them. Multiple definitions can create confusion and the purpose of this document is to lay bare the fiddly details of standard-error computation in this package.</p>
-<p>The first part describes how standard-errors are computed in <code>fixest</code>’s estimations. Please note that here I don’t discuss the <em>why</em>, but only the <em>how</em>. For a thorough introduction to the topic, see the excellent paper by <a href="https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf">Zeileis, Koll and Graham (2020)</a>. The second part illustrates how to replicate some standard-errors obtained from other estimation methods with <code>fixest</code>.</p>
+<p>It is an euphemism to say that standard-errors are a critical element of your estimations: literally your paper’s results depend on them. It is therefore unfortunate that no conventional “best” way exists to compute them.</p>
+<p>For example, when performing the exact same estimation across various software, it is not uncommon to obtain different standard-errors. If your first thought is: there must be a bug… well, put that thought aside because there ain’t no bug. It often boils down to the choices the developer made regarding small sample correction which, maybe surprisingly, has many degrees of freedom when it comes to implementation.</p>
+<p>Multiple definitions can create confusion and the purpose of this document is to lay bare the fiddly details of standard-error computation in this package.</p>
+<p>The first part of this vignette describes how standard-errors are computed in <code>fixest</code>’s estimations. In particular, it details all the possible choices surrounding small sample correction. Please note that here I don’t discuss the <em>why</em>, but only the <em>how</em>. For a thorough introduction to the topic, see the excellent paper by <a href="https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf">Zeileis, Koll and Graham (2020)</a>. The second part illustrates how to replicate some standard-errors obtained from other estimation methods with <code>fixest</code>.</p>
 <p>This document applies to <code>fixest</code> version 0.10.0 or higher.</p>
 <div id="how-standard-errors-are-computed-in-fixest" class="section level2">
 <h2 class="hasAnchor">
@@ -293,19 +295,15 @@
 <span class="co"># Newey-west</span>
 <span class="co">#</span>
 
-<span class="va">se_lm_NW</span>    <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://sandwich.R-Forge.R-project.org//reference/vcovPL.html">vcovPL</a></span><span class="op">(</span><span class="va">est_lm</span>, cluster <span class="op">=</span> <span class="op">~</span> <span class="va">firm</span> <span class="op">+</span> <span class="va">year</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"capital"</span><span class="op">]</span>
 <span class="va">se_plm_NW</span>   <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/plm/man/vcovNW.html">vcovNW</a></span><span class="op">(</span><span class="va">est_plm</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"capital"</span><span class="op">]</span>
 <span class="va">se_feols_NW</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="st">"NW"</span><span class="op">)</span>
 
-<span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="va">se_lm_NW</span>, <span class="va">se_plm_NW</span>, <span class="va">se_feols_NW</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="va">se_plm_NW</span>, <span class="va">se_feols_NW</span><span class="op">)</span></code></pre></div>
 <pre><code>#&gt;                capital
-#&gt; se_lm_NW    0.09067404
 #&gt; se_plm_NW   0.08390222
 #&gt; se_feols_NW 0.08629896</code></pre>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Note that sandwich::vcovPL currently cannot be replicated</span>
-
-<span class="co"># we can replicate plm's by changing the type of SSC:</span>
+<code class="sourceCode R"><span class="co"># we can replicate plm's by changing the type of SSC:</span>
 <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="va">se_plm_NW</span>, 
       <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="va">NW</span> <span class="op">~</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>adj <span class="op">=</span> <span class="cn">FALSE</span>, cluster.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>#&gt;              capital
@@ -366,8 +364,8 @@
 #&gt; [2,] 0.06328129</code></pre>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Now with two-way clustered standard-errors</span>
-<span class="va">est_lfe_2way</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/lfe/man/felm.html">felm</a></span><span class="op">(</span><span class="va">inv</span> <span class="op">~</span> <span class="va">capital</span> <span class="op">|</span> <span class="va">firm</span> <span class="op">+</span> <span class="va">year</span> <span class="op">|</span> <span class="fl">0</span> <span class="op">|</span> <span class="va">firm</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">Grunfeld</span><span class="op">)</span>
-<span class="va">se_lfe_2way</span>  <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_lfe_2way</span><span class="op">)</span>
+<span class="va">est_lfe_2way</span>  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/lfe/man/felm.html">felm</a></span><span class="op">(</span><span class="va">inv</span> <span class="op">~</span> <span class="va">capital</span> <span class="op">|</span> <span class="va">firm</span> <span class="op">+</span> <span class="va">year</span> <span class="op">|</span> <span class="fl">0</span> <span class="op">|</span> <span class="va">firm</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">Grunfeld</span><span class="op">)</span>
+<span class="va">se_lfe_2way</span>   <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_lfe_2way</span><span class="op">)</span>
 <span class="va">se_feols_2way</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="st">"twoway"</span><span class="op">)</span>
 <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="va">se_lfe_2way</span>, <span class="va">se_feols_2way</span><span class="op">)</span></code></pre></div>
 <pre><code>#&gt;                  capital

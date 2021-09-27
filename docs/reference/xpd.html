@@ -175,18 +175,25 @@
 
     <p>In <code>xpd</code>, the default macro variables are taken from <code>getFixest_fml</code>. Any value in the <code>...</code> argument of <code>xpd</code> will replace these default values.</p>
 <p>The definitions of the macro variables will replace in verbatim the macro variables. Therefore, you can include multi-part formulas if you wish but then beware of the order of the macros variable in the formula. For example, using the <code>airquality</code> data, say you want to set as controls the variable <code>Temp</code> and <code>Day</code> fixed-effects, you can do <code><a href='setFixest_fml.html'>setFixest_fml(..ctrl = ~Temp | Day)</a></code>, but then <code><a href='feols.html'>feols(Ozone ~ Wind + ..ctrl, airquality)</a></code> will be quite different from <code><a href='feols.html'>feols(Ozone ~ ..ctrl + Wind, airquality)</a></code>, so beware!</p>
-    <h2 class="hasAnchor" id="dotted-square-brackets-in-formulas"><a class="anchor" href="#dotted-square-brackets-in-formulas"></a>Dotted square brackets in formulas</h2>
+    <h2 class="hasAnchor" id="dot-square-bracket-operator-in-formulas"><a class="anchor" href="#dot-square-bracket-operator-in-formulas"></a>Dot square bracket operator in formulas</h2>
 
     
 
 
-<p>In the formula, square brackets can i) create manifold variables at once, or ii) capture values from the current environment and put them verbatim in the formula. Note that the square bracket must be preceded by a dot.</p>
+<p>In a formula, the dot square bracket (DSB) operator can: i) create manifold variables at once, or ii) capture values from the current environment and put them verbatim in the formula.</p>
 <p>Say you want to include the variables <code>x1</code> to <code>x3</code> in your formula. You can use <code>xpd(y ~ x.[1:3])</code> and you'll get <code>y ~ x1 + x2 + x3</code>.</p>
-<p>You can use square brackets within variable names but they must be in character form in a macro variable: <code>xpd(y ~ ..x, ..x = "x.[1:2]_sq")</code> will create <code>y ~ x1_sq + x2_sq</code>. Otherwise there would be parsing issues.</p>
 <p>To summon values from the environment, simply put the variable in square brackets. For example: <code>for(i in 1:3) xpd(y.[i] ~ x)</code> will create the formulas <code>y1 ~ x</code> to <code>y3 ~ x</code> depending on the value of <code>i</code>.</p>
 <p>You can include a full variable from the environment in the same way: <code>for(y in c("a", "b")) xpd(.[y] ~ x)</code> will create the two formulas <code>a ~ x</code> and <code>b ~ x</code>.</p>
-<p>In all <code>fixest</code> estimations, this special parsing is enabled, so you don't need to use <code>xpd</code> (except for square brackets within a variable name).</p>
+<p>The DSB can even be used within variable names, but then the variable must be nested in character form. For example <code>y ~ .["x.[1:2]_sq"]</code> will create <code>y ~ x1_sq +  x2_sq</code>. Using the character form is important to avoid a formula parsing error.</p>
+<p>In all <code>fixest</code> estimations, this special parsing is enabled, so you don't need to use <code>xpd</code>.</p>
 <p>Limitations: the use of multiple square brackets within a single variable is not implemented. For example, the following will not work <code>xpd(y ~ ..x, ..x = x.[1:3]_.[1:3])</code>.</p>
+    <h2 class="hasAnchor" id="regular-expressions"><a class="anchor" href="#regular-expressions"></a>Regular expressions</h2>
+
+    
+
+
+<p>You can catch several variable names at once by using regular expressions. To use regular expressions, you need to enclose it in the dot-dot function: <code>..("regex")</code>. For example, <code>..("Sepal")</code> will catch both the variables <code>Sepal.Length</code> and <code>Sepal.Width</code> from the <code>iris</code> data set. In a <code>fixest</code> estimation, the variables names from which the regex will be applied come from the data set. If you use <code>xpd</code>, you need to provide either a data set or a vector of names in the argument <code>data</code>.</p>
+<p>Note that the dot square bracket operator (DSB, see before) is applied before the regular expression is evaluated. This means that <code>..("x.[3:4]_sq")</code> will lead, after evaluation of the DSB, to <code>..("x3_sq|x4_sq")</code>. It is a handy way to insert range of numbers in a regular expression.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='setFixest_fml.html'>setFixest_fml</a></code> to set formula macros.</p></div>
@@ -423,15 +430,15 @@
 <span class='va'>vars</span> <span class='op'>=</span> <span class='va'>letters</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span>
 <span class='fu'>xpd</span><span class='op'>(</span>rhs <span class='op'>=</span> <span class='va'>vars</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; ~a + b + c + d + e
-#&gt; &lt;environment: 0x00000000462384c0&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x0000000042943b48&gt;</div><div class='input'>
 <span class='co'># Alternatively, to replace the RHS</span>
 <span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fl'>1</span>, rhs <span class='op'>=</span> <span class='va'>vars</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ a + b + c + d + e
-#&gt; &lt;environment: 0x0000000045848a28&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x00000000426d0dd8&gt;</div><div class='input'>
 <span class='co'># To create a two sided formula</span>
 <span class='fu'>xpd</span><span class='op'>(</span>lhs <span class='op'>=</span> <span class='st'>"y"</span>, rhs <span class='op'>=</span> <span class='va'>vars</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ a + b + c + d + e
-#&gt; &lt;environment: 0x0000000042fc9300&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x00000000442116b8&gt;</div><div class='input'>
 
 <span class='co'>#</span>
 <span class='co'># Dot square bracket operator</span>
@@ -440,21 +447,28 @@
 <span class='co'># You can create multiple variables at once</span>
 <span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span> <span class='op'>+</span> <span class='va'>z.</span><span class='op'>[</span><span class='fl'>2</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ x1 + x2 + x3 + x4 + x5 + z2 + z3
-#&gt; &lt;environment: 0x000000004451cfa0&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x00000000426d0dd8&gt;</div><div class='input'>
 <span class='co'># You can summon variables from the environment</span>
 <span class='va'>var</span> <span class='op'>=</span> <span class='st'>"a"</span>
 <span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='va'>var</span><span class='op'>]</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ xa
-#&gt; &lt;environment: 0x000000004622cc98&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x00000000426d0dd8&gt;</div><div class='input'>
 <span class='co'># ... the variables can be multiple</span>
-<span class='va'>vars</span> <span class='op'>=</span> <span class='va'>letters</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span>
+<span class='va'>vars</span> <span class='op'>=</span> <span class='va'>LETTERS</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span>
 <span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='va'>vars</span><span class='op'>]</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; y ~ xa + xb + xc + xd + xe
-#&gt; &lt;environment: 0x0000000045e1ec78&gt;</div><div class='input'>
-<span class='co'># You can have "complex" variable names but must be in character form</span>
-<span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>..x</span>, ..x <span class='op'>=</span> <span class='st'>"x.[vars]_sq"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; y ~ xa_sq + xb_sq + xc_sq + xd_sq + xe_sq
-#&gt; &lt;environment: 0x0000000045d45420&gt;</div><div class='input'>
+</div><div class='output co'>#&gt; y ~ xA + xB + xC
+#&gt; &lt;environment: 0x00000000426d0dd8&gt;</div><div class='input'>
+<span class='co'># You can have "complex" variable names but they must be nested in character form</span>
+<span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>.</span><span class='op'>[</span><span class='st'>"x.[vars]_sq"</span><span class='op'>]</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; y ~ xA_sq + xB_sq + xC_sq
+#&gt; &lt;environment: 0x00000000426d0dd8&gt;</div><div class='input'>
+<span class='co'># DSB can be used within regular expressions</span>
+<span class='va'>re</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"GNP"</span>, <span class='st'>"Pop"</span><span class='op'>)</span>
+<span class='fu'>xpd</span><span class='op'>(</span><span class='va'>Unemployed</span> <span class='op'>~</span> <span class='fu'>..</span><span class='op'>(</span><span class='st'>".[re]"</span><span class='op'>)</span>, data <span class='op'>=</span> <span class='va'>longley</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; Unemployed ~ GNP.deflator + GNP + Population
+#&gt; &lt;environment: 0x00000000426d0dd8&gt;</div><div class='input'>
+<span class='co'># =&gt; equivalent to ..("GNP|Pop")</span>
+
 
 </div></pre>
   </div>
