@@ -22,9 +22,13 @@ library(fixest)
 setFixest_nthreads(1)
 ```
 
-It is an euphemism to say that standard-errors are a critical element of your estimations: literally your paper's results depend on them. It is therefore unfortunate that no conventional "best" way exists to compute them. Multiple definitions can create confusion and the purpose of this document is to lay bare the fiddly details of standard-error computation in this package.
+It is an euphemism to say that standard-errors are a critical element of your estimations: literally your paper's results depend on them. It is therefore unfortunate that no conventional "best" way exists to compute them. 
 
-The first part describes how standard-errors are computed in `fixest`'s estimations. Please note that here I don't discuss the *why*, but only the *how*. For a thorough introduction to the topic, see the excellent paper by [Zeileis, Koll and Graham (2020)](https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf). The second part illustrates how to replicate some standard-errors obtained from other estimation methods with `fixest`. 
+For example, when performing the exact same estimation across various software, it is not uncommon to obtain different standard-errors. If your first thought is: there must be a bug... well, put that thought aside because there ain't no bug. It often boils down to the choices the developer made regarding small sample correction which, maybe surprisingly, has many degrees of freedom when it comes to implementation. 
+
+Multiple definitions can create confusion and the purpose of this document is to lay bare the fiddly details of standard-error computation in this package.
+
+The first part of this vignette describes how standard-errors are computed in `fixest`'s estimations. In particular, it details all the possible choices surrounding small sample correction. Please note that here I don't discuss the *why*, but only the *how*. For a thorough introduction to the topic, see the excellent paper by [Zeileis, Koll and Graham (2020)](https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf). The second part illustrates how to replicate some standard-errors obtained from other estimation methods with `fixest`. 
 
 This document applies to `fixest` version 0.10.0 or higher.
 
@@ -219,13 +223,10 @@ And finally let's look at Newey-West and Driscoll-Kray standard-errors:
 # Newey-west
 #
 
-se_lm_NW    = se(vcovPL(est_lm, cluster = ~ firm + year))["capital"]
 se_plm_NW   = se(vcovNW(est_plm))["capital"]
 se_feols_NW = se(est_feols, vcov = "NW")
 
-rbind(se_lm_NW, se_plm_NW, se_feols_NW)
-
-# Note that sandwich::vcovPL currently cannot be replicated
+rbind(se_plm_NW, se_feols_NW)
 
 # we can replicate plm's by changing the type of SSC:
 rbind(se_plm_NW, 
@@ -290,8 +291,8 @@ rbind(se(felm(inv ~ capital + factor(year) | firm | 0 | firm, Grunfeld))["capita
       se(feols(inv ~ capital + factor(year) | firm, Grunfeld))["capital"])
 
 # Now with two-way clustered standard-errors
-est_lfe_2way = felm(inv ~ capital | firm + year | 0 | firm + year, Grunfeld)
-se_lfe_2way  = se(est_lfe_2way)
+est_lfe_2way  = felm(inv ~ capital | firm + year | 0 | firm + year, Grunfeld)
+se_lfe_2way   = se(est_lfe_2way)
 se_feols_2way = se(est_feols, vcov = "twoway")
 rbind(se_lfe_2way, se_feols_2way)
 
