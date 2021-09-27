@@ -5344,7 +5344,7 @@ assign_flags = function(flags, ...){
     }
 }
 
-items_to_drop = function(items, x, varname, keep = FALSE, argname, keep_first = FALSE, up = 1){
+items_to_drop = function(items, x, varname, keep = FALSE, argname, keep_first = FALSE, up = 1, no_error = FALSE){
     # selection of items
     # the selection depends on the type of x
     # always returns the IDs of the items to drop
@@ -5378,14 +5378,21 @@ items_to_drop = function(items, x, varname, keep = FALSE, argname, keep_first = 
                 # A) regex
                 pattern = substr(my_x, 2, nchar(my_x))
                 new_x = grep(pattern, items, value = TRUE)
-                if(length(new_x) == 0){
+                if(length(new_x) == 0 && !no_error){
                     # strong checking!
                     stop_up("In argument '", argname, "', the regular expression '", pattern, "' does not match any value of '", varname, "'.")
                 }
                 all_x = c(all_x, new_x)
             } else {
                 # B) partial matching
-                check_value_plus(my_x, "match", .choices = items, .message = paste0("The argument '", argname, "' should contain values of the variable '", varname, "'."))
+                if(no_error){
+                    qui_ok = pmatch(tolower(my_x), tolower(items), duplicates.ok = TRUE)
+                    my_x = items[qui_ok]
+                    my_x = my_x[!is.na(my_x)]
+                } else {
+                    check_value_plus(my_x, "match", .choices = items, .message = paste0("The argument '", argname, "' should contain values of the variable '", varname, "'."))
+                }
+
                 all_x = c(all_x, my_x)
             }
 
@@ -5428,7 +5435,7 @@ items_to_drop = function(items, x, varname, keep = FALSE, argname, keep_first = 
 
                 if(keep_first){
 
-                    if(!x[1] %in% items){
+                    if(!x[1] %in% items && !no_error){
                         stop_up("In argument '", argname, "', the value ", x[1], " does not match any value of '", varname, "'.")
                     }
 
@@ -5437,7 +5444,7 @@ items_to_drop = function(items, x, varname, keep = FALSE, argname, keep_first = 
 
             }
 
-            if(length(id_drop) == 0){
+            if(length(id_drop) == 0 && !no_error){
                 stop_up("In argument '", argname, "', the value", plural_len(x, "s.don't"), " match any value of '", varname, "'.")
             }
         }
@@ -5449,7 +5456,7 @@ items_to_drop = function(items, x, varname, keep = FALSE, argname, keep_first = 
 
 
 
-bin_factor = function(bin, x, varname){
+bin_factor = function(bin, x, varname, no_error = FALSE){
     # x = base_did$period
     # bin = list("9" = c(9, 2, 3), "7" = "@7|8", 5:6)
     # varname = "period" ; argname = "bin"
@@ -5513,7 +5520,7 @@ bin_factor = function(bin, x, varname){
     x_map = x_range = seq_along(x_int$items)
     id_bin = list()
     for(i in seq_along(bin)){
-        id_bin[[i]] = items_to_drop(x_items, bin[[i]], varname, up = 2, argname = argname, keep_first = TRUE)
+        id_bin[[i]] = items_to_drop(x_items, bin[[i]], varname, up = 2, argname = argname, keep_first = TRUE, no_error = no_error)
     }
 
     # sanity check
@@ -5525,6 +5532,14 @@ bin_factor = function(bin, x, varname){
     }
 
     # recreating the factor
+
+    # case no_error = TRUE
+    if(any(lengths(id_bin) == 0)){
+        qui_ok = lengths(id_bin) > 0
+        id_bin = id_bin[qui_ok]
+        if(length(id_bin) == 0) return(x)
+        bin = bin[qui_ok]
+    }
 
     id_not_core = FALSE
     for(i in seq_along(bin)){
@@ -5555,6 +5570,7 @@ bin_factor = function(bin, x, varname){
     x_items_new = x_items
 
     for(i in seq_along(bin)){
+
         b_name = bin_names[[i]]
         if(nchar(b_name) == 0){
             b_name = as.character(x_items_new[id_bin[[i]][1]])
@@ -5594,6 +5610,9 @@ fixest_pvalue = function(x, zvalue, vcov){
 
         if(missing(vcov)) {
             stop("Internal error (=bug): the argument 'vcov' should not be missing in fixest_pvalue().")
+
+        } else if(is.null(attr(vcov,"dof.K"))){
+            stop("Internal error (=bug): the attribute 'dof.K' from 'vcov' should not be NULL.")
         }
 
         # df.t is always an attribute of the vcov
