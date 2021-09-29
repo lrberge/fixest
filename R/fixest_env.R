@@ -843,6 +843,10 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                 subset = which(subset)
             }
 
+            if(length(subset) == 0){
+                stop("The argument 'subset' leads to no observation being selected.")
+            }
+
             if(isFit){
                 delayed.subset = TRUE
                 lhs = lhs[subset]

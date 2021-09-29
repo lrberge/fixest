@@ -1139,7 +1139,10 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                 if(length(headers[[1]]) == 1){
                     # ex: headers = list("M"=2, "F"=2)
                     # or list("M", "F" = 2)
-                    headers = list(headers)
+                    if(is.numeric(headers[[1]]) || # case list("M" = 2, "F" = 3)
+                       (!is.null(names(headers)) && nchar(names(headers)[1]) == 0 && is.character(headers[[1]]))){ # case list("M", "F" = 2)
+                        headers = list(headers)
+                    }
                 }
 
                 for(i in seq_along(headers)){

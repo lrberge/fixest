@@ -1758,24 +1758,6 @@ test(nobs(other_est), 50)
 
 setFixest_estimation(reset = TRUE)
 
-#
-# piping
-#
-
-if(getRversion() >= "4.1.0"){
-    # no vcov
-    p1 = feols(y ~ x1, base)
-    p2 = base |> feols(y ~ x1)
-    test(coef(p1), coef(p2))
-
-    # with vcov
-    p1_se = feols(y ~ x1, base, ~species)
-    p2_se = base |> feols(y ~ x1, ~species)
-    test(se(p1_se), se(p2_se))
-}
-
-
-
 ####
 #### Offset ####
 ####

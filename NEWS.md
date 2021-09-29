@@ -1,4 +1,19 @@
 
+# fixest 0.10.1
+
+## Bug fixes
+
+ - remove new R native piping test `|>` which led to errors in R < 4.1.0.
+ 
+ - fix bug in `etable` `headers` when one wants to include several lines and the first line contains only one element repeated across columns.
+ 
+## Other
+
+ - improve error messages when `subset` does not select any element.
+ 
+ - add inheritance of the default style in `iplot` when the style is set globally with `setFixest_coefplot`.
+
+
 # fixest 0.10.0
 
 ## Bugs fixes

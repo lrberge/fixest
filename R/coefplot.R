@@ -298,7 +298,16 @@ coefplot = function(object, ..., style = NULL, sd, ci_low, ci_high, x, x.shift =
         style = "default"
     }
 
-    my_opt = opts[[style]]
+    if(style != "default" && !is.null(opts[["default"]])){
+        # there is always inheritance from the default style
+        my_opt = opts[["default"]]
+        opts_style = opts[[style]]
+        if(!is.null(opts_style)){
+            my_opt[names(opts_style)] = opts_style
+        }
+    } else {
+        my_opt = opts[[style]]
+    }
 
     if(!is.list(my_opt)){
         warning("The default values of coefplot for style '", style, "' are ill-formed and therefore reset. Use only setFixest_coefplot for setting the default values.")
