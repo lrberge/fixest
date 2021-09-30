@@ -111,7 +111,7 @@ importFrom(numDeriv, hessian, jacobian, genD)
 # needs re-export :-(, not the best solution but...
 importFrom(nlme, fixef)
 export(fixef)
-importFrom(sandwich, estfun, bread)
+importFrom(sandwich, estfun, bread, bwNeweyWest)
 export(estfun, bread)
 
 importFrom(stats, cor, dnorm, lm, nlminb, optim,

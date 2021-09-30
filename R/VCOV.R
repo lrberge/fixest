@@ -1850,18 +1850,18 @@ vcov_newey_west_internal = function(bread, scores, vars, ssc, sandwich, nthreads
 
     n_time = max(time)
 
-    # Lag: simple rule of thumb
-    if(missnull(lag)){
-        lag = floor(n_time^(1/4))
-    }
-
-    w = seq(1, 0, by = -(1/(lag + 1)))
-    # we halve the first weight (since we add the transpose in the internal code)
-    w[1] = 0.5
-
     # We check the consistency
     is_panel = !is.null(unit)
     if(is_panel){
+
+        # Lag: simple rule of thumb
+        if(missnull(lag)){
+            lag = floor(n_time^(1/4))
+        }
+
+        w = seq(1, 0, by = -(1/(lag + 1)))
+        # we halve the first weight (since we add the transpose in the internal code)
+        w[1] = 0.5
 
         my_order = order(time, unit)
         time_ro = time[my_order]
@@ -1889,6 +1889,18 @@ vcov_newey_west_internal = function(bread, scores, vars, ssc, sandwich, nthreads
         my_order = order(time)
         time_ro = time[my_order]
         scores_ro = scores[my_order, , drop = FALSE]
+
+        # Lag: simple rule of thumb
+        if(missnull(lag)){
+            # estfun.matrix = function(x) x # => does not work
+            x = structure(list(scores = scores_ro), class = "fixest")
+            lag = sandwich::bwNeweyWest(x, weights = 1)
+            lag = floor(lag)
+        }
+
+        w = seq(1, 0, by = -(1/(lag + 1)))
+        # we halve the first weight (since we add the transpose in the internal code)
+        w[1] = 0.5
 
         meat = cpp_newey_west(scores_ro, w, nthreads)
     }

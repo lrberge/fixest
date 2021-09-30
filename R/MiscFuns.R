@@ -4574,7 +4574,7 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
                 return(list(is_OK = TRUE))
             }
 
-            # We write evaluate the data to get the coefs
+            # We evaluate the data to get the coefs
             # We will return:
             # - degree
             # - deparsed call to evaluate
