@@ -3,7 +3,7 @@
 
 ## Bug fixes
 
- - remove new R native piping test `|>` which led to errors in R < 4.1.0.
+ - remove new R native piping test `|>` which led to errors in R < 4.1.0 despite conditional testing.
  
  - fix bug in `etable` `headers` when one wants to include several lines and the first line contains only one element repeated across columns.
  
