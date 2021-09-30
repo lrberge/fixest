@@ -6347,7 +6347,7 @@ fml_split = function(fml, i, split.lhs = FALSE, text = FALSE, raw = FALSE){
 }
 
 error_sender = function(expr, ..., clean, up = 0, arg_name){
-    res = tryCatch(expr, error = function(e) structure(conditionMessage(e), class = "try-error"))
+    res = tryCatch(expr, error = function(e) structure(list(conditionCall(e), conditionMessage(e)), class = "try-error"))
 
     if("try-error" %in% class(res)){
         set_up(1 + up)
@@ -6358,7 +6358,7 @@ error_sender = function(expr, ..., clean, up = 0, arg_name){
                 arg_name = deparse(substitute(expr))
             }
             msg = paste0("Argument '", arg_name, "' could not be evaluated: ")
-            stop_up(msg, res)
+            stop_up(msg, res[[2]])
 
         } else if(!missing(clean)){
 
@@ -6371,9 +6371,9 @@ error_sender = function(expr, ..., clean, up = 0, arg_name){
                 to = ""
             }
 
-            stop_up(msg, gsub(from, to, res))
+            stop_up(msg, "\n  In ", deparse(res[[1]], 100)[1], ": ", gsub(from, to, res[[2]]))
         } else {
-            stop_up(msg, res)
+            stop_up(msg, "\n  In ", deparse(res[[1]], 100)[1], ": ", res[[2]])
         }
     }
 
