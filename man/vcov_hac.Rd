@@ -27,7 +27,7 @@ driscoll_kraay(lag = NULL)
 
 \item{time}{A character scalar or a one sided formula giving the name of the variable representing the time.}
 
-\item{lag}{An integer scalar, default is \code{NULL}. If \code{NULL}, then the default lag is equal to \code{n_t^0.25} with \code{n_t} the number of time periods.}
+\item{lag}{An integer scalar, default is \code{NULL}. If \code{NULL}, then the default lag is equal to \code{n_t^0.25} with \code{n_t} the number of time periods (as of Newey and West 1987) for panel Newey-West and Driscoll-Kraay. The default for the time series Newey-West is computed via \code{\link[sandwich:NeweyWest]{bwNeweyWest}} which implements the Newey and West 1994 method.}
 
 \item{ssc}{An object returned by the function \code{\link[fixest]{ssc}}. It specifies how to perform the small sample correction.}
 
@@ -48,6 +48,16 @@ The functions on this page without the prefix "vcov_" do not compute VCOVs direc
 
 Note that for Driscoll-Kraay VCOVs, to ensure its properties the number of periods should be long enough (a minimum of 20 periods or so).
 }
+\section{Lag selection}{
+
+
+The default lag selection depends on whether the VCOV applies to a panel or a time series.
+
+For panels, i.e. panel Newey-West or Driscoll-Kraay VCOV, the default lag is \code{n_t^0.25} with \code{n_t} the number of time periods. This is based on Newey and West 1987.
+
+For time series Newey-West, the default lag is found thanks to the \code{\link[sandwich:NeweyWest]{bwNeweyWest}} function from the \code{sandwich} package. It is based on Newey and West 1994.
+}
+
 \examples{
 
 data(base_did)

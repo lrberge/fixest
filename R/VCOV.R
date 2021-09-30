@@ -1321,7 +1321,15 @@ vcov_cluster = function(x, cluster = NULL, ssc = NULL){
 #'
 #' @param unit A character scalar or a one sided formula giving the name of the variable representing the units of the panel.
 #' @param time A character scalar or a one sided formula giving the name of the variable representing the time.
-#' @param lag An integer scalar, default is \code{NULL}. If \code{NULL}, then the default lag is equal to \code{n_t^0.25} with \code{n_t} the number of time periods.
+#' @param lag An integer scalar, default is \code{NULL}. If \code{NULL}, then the default lag is equal to \code{n_t^0.25} with \code{n_t} the number of time periods (as of Newey and West 1987) for panel Newey-West and Driscoll-Kraay. The default for the time series Newey-West is computed via \code{\link[sandwich:NeweyWest]{bwNeweyWest}} which implements the Newey and West 1994 method.
+#'
+#' @section Lag selection:
+#'
+#' The default lag selection depends on whether the VCOV applies to a panel or a time series.
+#'
+#' For panels, i.e. panel Newey-West or Driscoll-Kraay VCOV, the default lag is \code{n_t^0.25} with \code{n_t} the number of time periods. This is based on Newey and West 1987.
+#'
+#' For time series Newey-West, the default lag is found thanks to the \code{\link[sandwich:NeweyWest]{bwNeweyWest}} function from the \code{sandwich} package. It is based on Newey and West 1994.
 #'
 #'
 #' @references
@@ -1850,7 +1858,14 @@ vcov_newey_west_internal = function(bread, scores, vars, ssc, sandwich, nthreads
 
     n_time = max(time)
 
-    # We check the consistency
+    # The bartlett weights
+    set_weights = function(lag){
+        res = seq(1, 0, by = -(1/(lag + 1)))
+        # we must halve the first weight (we'll add the transpose internally)
+        res[1] = 0.5
+        res
+    }
+
     is_panel = !is.null(unit)
     if(is_panel){
 
@@ -1859,9 +1874,7 @@ vcov_newey_west_internal = function(bread, scores, vars, ssc, sandwich, nthreads
             lag = floor(n_time^(1/4))
         }
 
-        w = seq(1, 0, by = -(1/(lag + 1)))
-        # we halve the first weight (since we add the transpose in the internal code)
-        w[1] = 0.5
+        w = set_weights(lag)
 
         my_order = order(time, unit)
         time_ro = time[my_order]
@@ -1890,17 +1903,24 @@ vcov_newey_west_internal = function(bread, scores, vars, ssc, sandwich, nthreads
         time_ro = time[my_order]
         scores_ro = scores[my_order, , drop = FALSE]
 
-        # Lag: simple rule of thumb
+        # Lag: the default relies on bwNeweyWest
         if(missnull(lag)){
-            # estfun.matrix = function(x) x # => does not work
-            x = structure(list(scores = scores_ro), class = "fixest")
+
+            # Later => feed in directly the matrix when the new version of sandwich is ready
+
+            # we drop the intercept (except if there's only the intercept)
+            is_intercept = (colnames(scores_ro) == "(Intercept)") & (ncol(scores_ro) > 1)
+            if(any(is_intercept)){
+                x = structure(list(scores = scores_ro[, !is_intercept, drop = FALSE]), class = "fixest")
+            } else {
+                x = structure(list(scores = scores_ro), class = "fixest")
+            }
+
             lag = sandwich::bwNeweyWest(x, weights = 1)
             lag = floor(lag)
         }
 
-        w = seq(1, 0, by = -(1/(lag + 1)))
-        # we halve the first weight (since we add the transpose in the internal code)
-        w[1] = 0.5
+        w = set_weights(lag)
 
         meat = cpp_newey_west(scores_ro, w, nthreads)
     }
