@@ -8957,22 +8957,19 @@ rep.fixest_list = function(x, times = 1, each = 1, cluster, ...){
 #'
 #' # Change default with
 #' setFixest_notes(FALSE)
+#' feols(Ozone ~ Solar.R, airquality)
 #'
 #' # Back to default which is TRUE
-#' getFixest_notes()
+#' setFixest_notes(TRUE)
+#' feols(Ozone ~ Solar.R, airquality)
 #'
 setFixest_notes = function(x){
-
-	if(missing(x) || length(x) != 1 || !is.logical(x) || is.na(x)){
-		stop("Argument 'x' must be equal to TRUE or FALSE.")
-	}
+    check_arg(x, "mbt logical scalar")
 
 	options("fixest_notes" = x)
 }
 
 #' @rdname setFixest_notes
-"getFixest_notes"
-
 getFixest_notes = function(){
 
     x = getOption("fixest_notes")
@@ -9057,8 +9054,6 @@ setFixest_nthreads = function(nthreads, save = FALSE){
 }
 
 #' @rdname setFixest_nthreads
-"getFixest_nthreads"
-
 getFixest_nthreads = function(){
 
     x = getOption("fixest_nthreads")
@@ -9128,8 +9123,6 @@ setFixest_dict = function(dict){
 }
 
 #' @rdname setFixest_dict
-"getFixest_dict"
-
 getFixest_dict = function(){
 
     x = getOption("fixest_dict")
