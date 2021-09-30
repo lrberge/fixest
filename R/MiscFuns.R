@@ -4292,7 +4292,8 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
     # This function is way faster than model.matrix but does not accept factors
     # The argument fml **MUST** not have factors!
 
-    rhs = fml[c(1,3)]
+    rhs = if(length(fml) == 3) fml[c(1, 3)] else fml
+
     t = terms(rhs, data = base)
 
     all_var_names = attr(t, "term.labels")
@@ -4315,8 +4316,8 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
     # Handling the multi columns case (ex: bs(x1), splines)
     # NOTA: I need to add a check for i() because of 1 value interactions
     #       not caught by the != nber of obs
-    qui_inter = grepl("\\bi\\(", all_var_names)
-    if(any(lengths(data_list) != nrow(base)) || any(qui_inter)){
+    qui_i = grepl("\\bi\\(", all_var_names)
+    if(any(lengths(data_list) != nrow(base)) || any(qui_i)){
 
         all_n = as.vector(lengths(data_list) / nrow(base))
 
@@ -4331,7 +4332,7 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
         all_n_vector = rep(all_n, all_n)
 
         new_names = as.list(all_var_names)
-        for(i in which(all_n > 1 | qui_inter)){
+        for(i in which(all_n > 1 | qui_i)){
             my_names = colnames(data_list[[i]])
             if(is.null(my_names)){
                 my_names = 1:all_n[i]
@@ -4350,7 +4351,7 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
 }
 
 
-fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALSE){
+fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALSE, mf = NULL){
     # This functions takes in the formula of the linear part and the
     # data
     # It reformulates the formula (ie with lags and interactions)
@@ -4362,9 +4363,10 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
 
     # fml = ~a*b+c+i(x1)+Temp:i(x2)+i(x3)/Wind
 
-    # Modify the formula to add interactions
-    rhs_txt = deparse_long(fml[[3]])
+    if(length(fml) == 3) fml = fml[c(1, 3)]
 
+    # We need to check a^b otherwise error is thrown in terms()
+    rhs_txt = deparse_long(fml[[2]])
     if(grepl("\\^[[:alpha:]]", rhs_txt)){
         stop("The special operator '^' can only be used in the fixed-effects part of the formula. Please use ':' instead.")
     }
@@ -4387,60 +4389,65 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
     }
 
     # We check for calls to i()
-    qui_inter = grepl("(^|[^[:alnum:]_\\.])i\\(", tl)
-    IS_INTER = any(qui_inter)
-    if(IS_INTER){
+    qui_i = grepl("(^|[^[:alnum:]_\\.])i\\(", tl)
+    IS_I = any(qui_i)
+    if(IS_I){
         # OMG... why do I always have to reinvent the wheel???
         is_intercept = fake_intercept || (attr(t_fml,"intercept") == 1)
-        i_naked = which(is_naked_fun(tl[qui_inter], "i"))
+        i_naked = which(is_naked_fun(tl[qui_i], "i"))
 
         if(i_noref){
             for(i in seq_along(i_naked)){
                 j = i_naked[i]
-                txt = gsub("(^|(?<=[^[:alnum:]\\._]))i\\(", "i_noref(", tl[qui_inter][j], perl = TRUE)
-                tl[qui_inter][j] = eval(str2lang(txt))
+                txt = gsub("(^|(?<=[^[:alnum:]\\._]))i\\(", "i_noref(", tl[qui_i][j], perl = TRUE)
+                tl[qui_i][j] = eval(str2lang(txt))
             }
         } else {
             for(i in seq_along(i_naked)){
                 if(!is_intercept && i == 1) next
 
                 j = i_naked[i]
-                txt = gsub("(^|(?<=[^[:alnum:]\\._]))i\\(", "i_ref(", tl[qui_inter][j], perl = TRUE)
-                tl[qui_inter][j] = eval(str2lang(txt))
+                txt = gsub("(^|(?<=[^[:alnum:]\\._]))i\\(", "i_ref(", tl[qui_i][j], perl = TRUE)
+                tl[qui_i][j] = eval(str2lang(txt))
             }
         }
 
-        fml_no_inter = .xpd(lhs = "y", rhs = tl[!qui_inter])
+        fml_no_inter = .xpd(rhs = tl[!qui_i])
 
         if(!is_intercept) tl = c("-1", tl)
-        fml = .xpd(lhs = "y", rhs = tl)
+        fml = .xpd(rhs = tl)
 
     }
 
     # Are there factors NOT in i()? If so => model.matrix is used
     dataNames = names(data)
 
-    if(IS_INTER){
-        linear.varnames = all.vars(fml_no_inter[[3]])
-        is_num = sapply(data[, dataNames %in% linear.varnames, FALSE], is.numeric)
-        if(length(is_num) > 0 && (any(!is_num) || grepl("factor", deparse_long(fml_no_inter)))){
-            useModel.matrix = TRUE
-        } else {
-            useModel.matrix = FALSE
-        }
+    if(!is.null(mf)){
+        useModel.matrix = TRUE
     } else {
-        linear.varnames = all.vars(fml[[3]])
-        is_num = sapply(data[, dataNames %in% linear.varnames, FALSE], is.numeric)
-        if(length(is_num) == 0 || any(!is_num) || grepl("factor", deparse_long(fml))){
-            useModel.matrix = TRUE
+        useModel.matrix = FALSE
+        if(IS_I){
+            linear.varnames = all.vars(fml_no_inter[[2]])
+            is_num = sapply(data[, dataNames %in% linear.varnames, FALSE], is.numeric)
+            if(length(is_num) > 0 && (any(!is_num) || grepl("factor", deparse_long(fml_no_inter)))){
+                useModel.matrix = TRUE
+            }
         } else {
-            useModel.matrix = FALSE
+            linear.varnames = all.vars(fml[[2]])
+            is_num = sapply(data[, dataNames %in% linear.varnames, FALSE], is.numeric)
+            if(length(is_num) == 0 || any(!is_num) || grepl("factor", deparse_long(fml))){
+                useModel.matrix = TRUE
+            }
         }
     }
 
     if(useModel.matrix){
         # to catch the NAs, model.frame needs to be used....
-        linear.mat = stats::model.matrix(fml[c(1, 3)], stats::model.frame(fml[c(1, 3)], data, na.action = na.pass))
+        if(is.null(mf)){
+            mf = stats::model.frame(fml, data, na.action = na.pass)
+        }
+
+        linear.mat = stats::model.matrix(fml, mf)
 
         if(fake_intercept){
             who_int = which("(Intercept)" %in% colnames(linear.mat))
@@ -4525,123 +4532,38 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
                 stop("Due to the use of the argument 'subset', not a single variable is left.")
             }
 
-            fml = .xpd(lhs = "y", rhs = terms_all[!terms_drop])
+            fml = .xpd(rhs = terms_all[!terms_drop])
         }
     }
 
-    fml_dp = deparse_long(fml)
-
     #
-    # poly
+    # Extra functions that need raw data-evaluation + single valued factors
     #
 
-    # We check for the presence of poly only in the case of new data
-    # if it's the original data set, that's OK
+    mf = NULL
+    if(!original_data){
 
-    is_poly = FALSE
-    if(!original_data && grepl("(?<![\\.[:alnum:]_])poly\\(", fml_dp, perl = TRUE)){
-        # checking the regex: 87us on a small vector
+        # if lean = TRUE, we should be avoiding that
+        # => I don't know of a solution yet...
 
-        poly_parts = strsplit(fml_dp, "(?<![\\.[:alnum:]_])poly\\(", perl = TRUE)[[1]]
+        if(length(fml) == 3) fml = fml[c(1, 3)]
 
-        split_by_poly = function(r){
-
-            if(!grepl("(", r, fixed = TRUE) && grepl("\\)$", r)){
-                return(c(paste0("poly(", r), ""))
-            }
-
-            letter_vec = strsplit(r, "")[[1]]
-            open = 1 + cumsum(letter_vec == "(")
-            close = cumsum(letter_vec == ")")
-            index = which.max(close - open == 0)
-
-            c(paste0("poly(", substr(r, 1, index)), substr(r, index + 1, nchar(r)))
-        }
-
-        poly_parts_full = lapply(poly_parts[-1], split_by_poly)
-
-        poly_variables_all = sapply(poly_parts_full, function(x) x[1])
-        rest_all = sapply(poly_parts_full, function(x) x[2])
-
-        poly_variables_unik = unique(poly_variables_all)
-
-        # We now evaluate these in the old data => we get the nber of variables and the coefs
+        # We apply model.frame to the original data
         data = fetch_data(object, "To apply 'model.matrix.fixest', ")
 
-        poly_call = function(x, ..., degree = 1, coefs = NULL, raw = FALSE, simple = FALSE, data, i){
-            mc = match.call()
-            if(raw == TRUE || !is.null(coefs)){
-                return(list(is_OK = TRUE))
-            }
+        mf = model.frame(fml, data, na.action = na.pass)
 
-            # We evaluate the data to get the coefs
-            # We will return:
-            # - degree
-            # - deparsed call to evaluate
+        t_mf = terms(mf)
+        xlev = .getXlevels(t_mf, mf)
 
-            mc_new = mc
-            mc_new$simple = FALSE
-            mc_new$data = NULL
-            mc_new[[1]] = as.name("poly")
-
-            tmp = eval(mc_new, data)
-
-            mc_new$coefs = attr(tmp, "coefs")
-            res = list(degree = attr(tmp, "degree"), new_call = deparse_long(mc_new))
-
-            res
-        }
-
-        poly_variables_all_new = poly_variables_all
-        old_varname_all = new_varname_all = list()
-        poly_dict_full = c()
-        for(i in seq_along(poly_variables_unik)){
-
-            polyvar = poly_variables_unik[i]
-            my_call_txt = gsub("poly(", "poly_call(", polyvar, fixed = TRUE)
-            my_call_txt = gsub("\\)$", ", data = data)", my_call_txt)
-            info = eval(str2lang(my_call_txt))
-
-            if(isTRUE(info$is_OK)){
-                next
-            }
-
-            old_var_name = paste0(polyvar, info$degree)
-            new_var_name = paste0("POLY__VAR", i, "__", info$degree)
-            poly_dict_full[polyvar] = paste0("(", paste(new_var_name, collapse = " + "), ")")
-
-            poly_variables_all_new[i] = poly_dict_full[polyvar]
-
-            old_varname_all[[length(old_varname_all) + 1]] = old_var_name
-            new_varname_all[[length(new_varname_all) + 1]] = new_var_name
-
-            # Evaluation in the new data
-            tmp = eval(str2lang(info$new_call), newdata)
-            for(j in 1:ncol(tmp)){
-                newdata[[new_var_name[j]]] = tmp[, j]
-            }
-        }
-
-        old_varname_all = unlist(old_varname_all)
-        new_varname_all = unlist(new_varname_all)
-
-        # Now => recreation of the fml
-        if(length(old_varname_all) > 0){
-            is_poly = TRUE
-            fml = as.formula(paste0("y ~ ", poly_parts[1], paste0(poly_variables_all_new, rest_all, collapse = "")))
+        if(!identical(attr(t_mf,"variables"), attr(t_mf,"predvars")) || length(xlev) > 0){
+            mf = model.frame(t_mf, newdata, xlev = xlev)
+        } else {
+            mf = NULL
         }
     }
 
-    new_matrix = fixest_model_matrix(fml, newdata, fake_intercept, i_noref)
-
-    # Renaming if poly
-    if(is_poly){
-        mat_names = colnames(new_matrix)
-        for(i in seq_along(new_varname_all)){
-            mat_names = gsub(new_varname_all[i], old_varname_all[i], mat_names, fixed = TRUE)
-        }
-        colnames(new_matrix) = mat_names
-    }
+    new_matrix = fixest_model_matrix(fml, newdata, fake_intercept, i_noref, mf = mf)
 
     new_matrix
 }
@@ -6425,7 +6347,7 @@ fml_split = function(fml, i, split.lhs = FALSE, text = FALSE, raw = FALSE){
 }
 
 error_sender = function(expr, ..., clean, up = 0, arg_name){
-    res = tryCatch(expr, error = function(e) structure(conditionMessage(e), class = "try-error"))
+    res = tryCatch(expr, error = function(e) structure(list(conditionCall(e), conditionMessage(e)), class = "try-error"))
 
     if("try-error" %in% class(res)){
         set_up(1 + up)
@@ -6436,7 +6358,7 @@ error_sender = function(expr, ..., clean, up = 0, arg_name){
                 arg_name = deparse(substitute(expr))
             }
             msg = paste0("Argument '", arg_name, "' could not be evaluated: ")
-            stop_up(msg, res)
+            stop_up(msg, res[[2]])
 
         } else if(!missing(clean)){
 
@@ -6449,9 +6371,9 @@ error_sender = function(expr, ..., clean, up = 0, arg_name){
                 to = ""
             }
 
-            stop_up(msg, gsub(from, to, res))
+            stop_up(msg, "\n  In ", deparse(res[[1]], 100)[1], ": ", gsub(from, to, res[[2]]))
         } else {
-            stop_up(msg, res)
+            stop_up(msg, "\n  In ", deparse(res[[1]], 100)[1], ": ", res[[2]])
         }
     }
 
@@ -9035,22 +8957,19 @@ rep.fixest_list = function(x, times = 1, each = 1, cluster, ...){
 #'
 #' # Change default with
 #' setFixest_notes(FALSE)
+#' feols(Ozone ~ Solar.R, airquality)
 #'
 #' # Back to default which is TRUE
-#' getFixest_notes()
+#' setFixest_notes(TRUE)
+#' feols(Ozone ~ Solar.R, airquality)
 #'
 setFixest_notes = function(x){
-
-	if(missing(x) || length(x) != 1 || !is.logical(x) || is.na(x)){
-		stop("Argument 'x' must be equal to TRUE or FALSE.")
-	}
+    check_arg(x, "mbt logical scalar")
 
 	options("fixest_notes" = x)
 }
 
 #' @rdname setFixest_notes
-"getFixest_notes"
-
 getFixest_notes = function(){
 
     x = getOption("fixest_notes")
@@ -9135,8 +9054,6 @@ setFixest_nthreads = function(nthreads, save = FALSE){
 }
 
 #' @rdname setFixest_nthreads
-"getFixest_nthreads"
-
 getFixest_nthreads = function(){
 
     x = getOption("fixest_nthreads")
@@ -9206,8 +9123,6 @@ setFixest_dict = function(dict){
 }
 
 #' @rdname setFixest_dict
-"getFixest_dict"
-
 getFixest_dict = function(){
 
     x = getOption("fixest_dict")

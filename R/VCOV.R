@@ -2457,8 +2457,6 @@ setFixest_ssc = function(ssc.type = ssc()){
 }
 
 #' @rdname ssc
-"getFixest_ssc"
-
 getFixest_ssc = function(){
 
     ssc = getOption("fixest_ssc")
