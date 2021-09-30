@@ -9,6 +9,10 @@
  
  - fix bugs in predict: a) when variables are created with functions of the data, and b) when the new data contains single level factors (relates to issues [#200](https://github.com/lrberge/fixest/issues/200) and [#180](https://github.com/lrberge/fixest/issues/180) by @steffengreup and @IsadoraBM).
  
+## New features
+
+ - when computing Newey-West standard-errors for time series, the bandwidth is now selected thanks to the [bwNeweyWest](https://sandwich.r-forge.r-project.org/reference/NeweyWest.html) function from the [sandwich](https://sandwich.r-forge.r-project.org/index.html) package. This function implements the method described in Newey and West 1994.
+ 
 ## Other
 
  - improve error messages when `subset` does not select any element.
