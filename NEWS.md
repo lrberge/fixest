@@ -18,6 +18,8 @@
  - improve error messages when `subset` does not select any element.
  
  - add inheritance of the default style in `iplot` when the style is set globally with `setFixest_coefplot`.
+ 
+ - improve error messages in general by prompting additional error calls.
 
 
 # fixest 0.10.0
