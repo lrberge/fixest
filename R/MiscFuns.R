@@ -4532,11 +4532,9 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
                 stop("Due to the use of the argument 'subset', not a single variable is left.")
             }
 
-            fml = .xpd(lhs = "y", rhs = terms_all[!terms_drop])
+            fml = .xpd(rhs = terms_all[!terms_drop])
         }
     }
-
-    fml_dp = deparse_long(fml)
 
     #
     # Extra functions that need raw data-evaluation + single valued factors
@@ -4548,132 +4546,24 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
         # if lean = TRUE, we should be avoiding that
         # => I don't know of a solution yet...
 
+        if(length(fml) == 3) fml = fml[c(1, 3)]
+
         # We apply model.frame to the original data
         data = fetch_data(object, "To apply 'model.matrix.fixest', ")
+
         mf = model.frame(fml, data, na.action = na.pass)
 
         t_mf = terms(mf)
         xlev = .getXlevels(t_mf, mf)
 
         if(!identical(attr(t_mf,"variables"), attr(t_mf,"predvars")) || length(xlev) > 0){
-            mf = model.frame(t_mf, new_data, xlev = xlev)
+            mf = model.frame(t_mf, newdata, xlev = xlev)
         } else {
             mf = NULL
         }
     }
 
-
-    #
-    # poly
-    #
-
-    # We check for the presence of poly only in the case of new data
-    # if it's the original data set, that's OK
-
-    is_poly = FALSE
-    if(FALSE && !original_data && grepl("(?<![\\.[:alnum:]_])poly\\(", fml_dp, perl = TRUE)){
-        # checking the regex: 87us on a small vector
-
-        poly_parts = strsplit(fml_dp, "(?<![\\.[:alnum:]_])poly\\(", perl = TRUE)[[1]]
-
-        split_by_poly = function(r){
-
-            if(!grepl("(", r, fixed = TRUE) && grepl("\\)$", r)){
-                return(c(paste0("poly(", r), ""))
-            }
-
-            letter_vec = strsplit(r, "")[[1]]
-            open = 1 + cumsum(letter_vec == "(")
-            close = cumsum(letter_vec == ")")
-            index = which.max(close - open == 0)
-
-            c(paste0("poly(", substr(r, 1, index)), substr(r, index + 1, nchar(r)))
-        }
-
-        poly_parts_full = lapply(poly_parts[-1], split_by_poly)
-
-        poly_variables_all = sapply(poly_parts_full, function(x) x[1])
-        rest_all = sapply(poly_parts_full, function(x) x[2])
-
-        poly_variables_unik = unique(poly_variables_all)
-
-        # We now evaluate these in the old data => we get the nber of variables and the coefs
-        data = fetch_data(object, "To apply 'model.matrix.fixest', ")
-
-        poly_call = function(x, ..., degree = 1, coefs = NULL, raw = FALSE, simple = FALSE, data, i){
-            mc = match.call()
-            if(raw == TRUE || !is.null(coefs)){
-                return(list(is_OK = TRUE))
-            }
-
-            # We write evaluate the data to get the coefs
-            # We will return:
-            # - degree
-            # - deparsed call to evaluate
-
-            mc_new = mc
-            mc_new$simple = FALSE
-            mc_new$data = NULL
-            mc_new[[1]] = as.name("poly")
-
-            tmp = eval(mc_new, data)
-
-            mc_new$coefs = attr(tmp, "coefs")
-            res = list(degree = attr(tmp, "degree"), new_call = deparse_long(mc_new))
-
-            res
-        }
-
-        poly_variables_all_new = poly_variables_all
-        old_varname_all = new_varname_all = list()
-        poly_dict_full = c()
-        for(i in seq_along(poly_variables_unik)){
-
-            polyvar = poly_variables_unik[i]
-            my_call_txt = gsub("poly(", "poly_call(", polyvar, fixed = TRUE)
-            my_call_txt = gsub("\\)$", ", data = data)", my_call_txt)
-            info = eval(str2lang(my_call_txt))
-
-            if(isTRUE(info$is_OK)){
-                next
-            }
-
-            old_var_name = paste0(polyvar, info$degree)
-            new_var_name = paste0("POLY__VAR", i, "__", info$degree)
-            poly_dict_full[polyvar] = paste0("(", paste(new_var_name, collapse = " + "), ")")
-
-            poly_variables_all_new[i] = poly_dict_full[polyvar]
-
-            old_varname_all[[length(old_varname_all) + 1]] = old_var_name
-            new_varname_all[[length(new_varname_all) + 1]] = new_var_name
-
-            # Evaluation in the new data
-            tmp = eval(str2lang(info$new_call), newdata)
-            for(j in 1:ncol(tmp)){
-                newdata[[new_var_name[j]]] = tmp[, j]
-            }
-        }
-
-        old_varname_all = unlist(old_varname_all)
-        new_varname_all = unlist(new_varname_all)
-
-        # Now => recreation of the fml
-        if(length(old_varname_all) > 0){
-            is_poly = TRUE
-            fml = as.formula(paste0("y ~ ", poly_parts[1], paste0(poly_variables_all_new, rest_all, collapse = "")))
-        }
-    }
-
     new_matrix = fixest_model_matrix(fml, newdata, fake_intercept, i_noref, mf = mf)
-
-    # Renaming if poly
-    if(is_poly){
-        mat_names = colnames(new_matrix)
-        for(i in seq_along(new_varname_all)){
-            mat_names = gsub(new_varname_all[i], old_varname_all[i], mat_names, fixed = TRUE)
-        }
-        colnames(new_matrix) = mat_names
-    }
 
     new_matrix
 }
