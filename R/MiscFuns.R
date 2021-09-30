@@ -4363,8 +4363,10 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
 
     # fml = ~a*b+c+i(x1)+Temp:i(x2)+i(x3)/Wind
 
+    if(length(fml) == 3) fml = fml[c(1, 3)]
+
     # We need to check a^b otherwise error is thrown in terms()
-    rhs_txt = deparse_long(fml[[3]])
+    rhs_txt = deparse_long(fml[[2]])
     if(grepl("\\^[[:alpha:]]", rhs_txt)){
         stop("The special operator '^' can only be used in the fixed-effects part of the formula. Please use ':' instead.")
     }
@@ -4388,8 +4390,8 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
 
     # We check for calls to i()
     qui_i = grepl("(^|[^[:alnum:]_\\.])i\\(", tl)
-    IS_INTER = any(qui_i)
-    if(IS_INTER){
+    IS_I = any(qui_i)
+    if(IS_I){
         # OMG... why do I always have to reinvent the wheel???
         is_intercept = fake_intercept || (attr(t_fml,"intercept") == 1)
         i_naked = which(is_naked_fun(tl[qui_i], "i"))
@@ -4410,10 +4412,10 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
             }
         }
 
-        fml_no_inter = .xpd(lhs = "y", rhs = tl[!qui_i])
+        fml_no_inter = .xpd(rhs = tl[!qui_i])
 
         if(!is_intercept) tl = c("-1", tl)
-        fml = .xpd(lhs = "y", rhs = tl)
+        fml = .xpd(rhs = tl)
 
     }
 
@@ -4424,14 +4426,14 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
         useModel.matrix = TRUE
     } else {
         useModel.matrix = FALSE
-        if(IS_INTER){
-            linear.varnames = all.vars(fml_no_inter[[3]])
+        if(IS_I){
+            linear.varnames = all.vars(fml_no_inter[[2]])
             is_num = sapply(data[, dataNames %in% linear.varnames, FALSE], is.numeric)
             if(length(is_num) > 0 && (any(!is_num) || grepl("factor", deparse_long(fml_no_inter)))){
                 useModel.matrix = TRUE
             }
         } else {
-            linear.varnames = all.vars(fml[[3]])
+            linear.varnames = all.vars(fml[[2]])
             is_num = sapply(data[, dataNames %in% linear.varnames, FALSE], is.numeric)
             if(length(is_num) == 0 || any(!is_num) || grepl("factor", deparse_long(fml))){
                 useModel.matrix = TRUE
@@ -4442,10 +4444,10 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
     if(useModel.matrix){
         # to catch the NAs, model.frame needs to be used....
         if(is.null(mf)){
-            mf = stats::model.frame(fml[c(1, 3)], data, na.action = na.pass)
+            mf = stats::model.frame(fml, data, na.action = na.pass)
         }
 
-        linear.mat = stats::model.matrix(fml[c(1, 3)], mf)
+        linear.mat = stats::model.matrix(fml, mf)
 
         if(fake_intercept){
             who_int = which("(Intercept)" %in% colnames(linear.mat))
@@ -4537,6 +4539,21 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
     fml_dp = deparse_long(fml)
 
     #
+    # Extra functions that need raw data-evaluation
+    #
+
+    funs = "(poly|polym|spline|scale)"
+    pattern = paste0("(?<![\\.[:alnum:]_])", funs, "\\(")
+    mf = NULL
+    if(!original_data && grepl(pattern, fml_dp, perl = TRUE)){
+
+        # We apply model.frame to the original data
+        data = fetch_data(object, "To apply 'model.matrix.fixest', ")
+        mf = model.frame(fml, data)
+    }
+
+
+    #
     # poly
     #
 
@@ -4544,7 +4561,7 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
     # if it's the original data set, that's OK
 
     is_poly = FALSE
-    if(!original_data && grepl("(?<![\\.[:alnum:]_])poly\\(", fml_dp, perl = TRUE)){
+    if(FALSE && !original_data && grepl("(?<![\\.[:alnum:]_])poly\\(", fml_dp, perl = TRUE)){
         # checking the regex: 87us on a small vector
 
         poly_parts = strsplit(fml_dp, "(?<![\\.[:alnum:]_])poly\\(", perl = TRUE)[[1]]
@@ -4637,7 +4654,7 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
         }
     }
 
-    new_matrix = fixest_model_matrix(fml, newdata, fake_intercept, i_noref)
+    new_matrix = fixest_model_matrix(fml, newdata, fake_intercept, i_noref, mf = mf)
 
     # Renaming if poly
     if(is_poly){
