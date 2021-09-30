@@ -4539,17 +4539,27 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
     fml_dp = deparse_long(fml)
 
     #
-    # Extra functions that need raw data-evaluation
+    # Extra functions that need raw data-evaluation + single valued factors
     #
 
-    funs = "(poly|polym|spline|scale)"
-    pattern = paste0("(?<![\\.[:alnum:]_])", funs, "\\(")
     mf = NULL
-    if(!original_data && grepl(pattern, fml_dp, perl = TRUE)){
+    if(!original_data){
+
+        # if lean = TRUE, we should be avoiding that
+        # => I don't know of a solution yet...
 
         # We apply model.frame to the original data
         data = fetch_data(object, "To apply 'model.matrix.fixest', ")
-        mf = model.frame(fml, data)
+        mf = model.frame(fml, data, na.action = na.pass)
+
+        t_mf = terms(mf)
+        xlev = .getXlevels(t_mf, mf)
+
+        if(!identical(attr(t_mf,"variables"), attr(t_mf,"predvars")) || length(xlev) > 0){
+            mf = model.frame(t_mf, new_data, xlev = xlev)
+        } else {
+            mf = NULL
+        }
     }
 
 
