@@ -4292,7 +4292,8 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
     # This function is way faster than model.matrix but does not accept factors
     # The argument fml **MUST** not have factors!
 
-    rhs = fml[c(1,3)]
+    rhs = if(length(fml) == 3) fml[c(1, 3)] else fml
+
     t = terms(rhs, data = base)
 
     all_var_names = attr(t, "term.labels")
@@ -4315,8 +4316,8 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
     # Handling the multi columns case (ex: bs(x1), splines)
     # NOTA: I need to add a check for i() because of 1 value interactions
     #       not caught by the != nber of obs
-    qui_inter = grepl("\\bi\\(", all_var_names)
-    if(any(lengths(data_list) != nrow(base)) || any(qui_inter)){
+    qui_i = grepl("\\bi\\(", all_var_names)
+    if(any(lengths(data_list) != nrow(base)) || any(qui_i)){
 
         all_n = as.vector(lengths(data_list) / nrow(base))
 
@@ -4331,7 +4332,7 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
         all_n_vector = rep(all_n, all_n)
 
         new_names = as.list(all_var_names)
-        for(i in which(all_n > 1 | qui_inter)){
+        for(i in which(all_n > 1 | qui_i)){
             my_names = colnames(data_list[[i]])
             if(is.null(my_names)){
                 my_names = 1:all_n[i]
@@ -4350,7 +4351,7 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
 }
 
 
-fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALSE){
+fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALSE, mf = NULL){
     # This functions takes in the formula of the linear part and the
     # data
     # It reformulates the formula (ie with lags and interactions)
@@ -4362,9 +4363,8 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
 
     # fml = ~a*b+c+i(x1)+Temp:i(x2)+i(x3)/Wind
 
-    # Modify the formula to add interactions
+    # We need to check a^b otherwise error is thrown in terms()
     rhs_txt = deparse_long(fml[[3]])
-
     if(grepl("\\^[[:alpha:]]", rhs_txt)){
         stop("The special operator '^' can only be used in the fixed-effects part of the formula. Please use ':' instead.")
     }
@@ -4387,30 +4387,30 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
     }
 
     # We check for calls to i()
-    qui_inter = grepl("(^|[^[:alnum:]_\\.])i\\(", tl)
-    IS_INTER = any(qui_inter)
+    qui_i = grepl("(^|[^[:alnum:]_\\.])i\\(", tl)
+    IS_INTER = any(qui_i)
     if(IS_INTER){
         # OMG... why do I always have to reinvent the wheel???
         is_intercept = fake_intercept || (attr(t_fml,"intercept") == 1)
-        i_naked = which(is_naked_fun(tl[qui_inter], "i"))
+        i_naked = which(is_naked_fun(tl[qui_i], "i"))
 
         if(i_noref){
             for(i in seq_along(i_naked)){
                 j = i_naked[i]
-                txt = gsub("(^|(?<=[^[:alnum:]\\._]))i\\(", "i_noref(", tl[qui_inter][j], perl = TRUE)
-                tl[qui_inter][j] = eval(str2lang(txt))
+                txt = gsub("(^|(?<=[^[:alnum:]\\._]))i\\(", "i_noref(", tl[qui_i][j], perl = TRUE)
+                tl[qui_i][j] = eval(str2lang(txt))
             }
         } else {
             for(i in seq_along(i_naked)){
                 if(!is_intercept && i == 1) next
 
                 j = i_naked[i]
-                txt = gsub("(^|(?<=[^[:alnum:]\\._]))i\\(", "i_ref(", tl[qui_inter][j], perl = TRUE)
-                tl[qui_inter][j] = eval(str2lang(txt))
+                txt = gsub("(^|(?<=[^[:alnum:]\\._]))i\\(", "i_ref(", tl[qui_i][j], perl = TRUE)
+                tl[qui_i][j] = eval(str2lang(txt))
             }
         }
 
-        fml_no_inter = .xpd(lhs = "y", rhs = tl[!qui_inter])
+        fml_no_inter = .xpd(lhs = "y", rhs = tl[!qui_i])
 
         if(!is_intercept) tl = c("-1", tl)
         fml = .xpd(lhs = "y", rhs = tl)
@@ -4420,27 +4420,32 @@ fixest_model_matrix = function(fml, data, fake_intercept = FALSE, i_noref = FALS
     # Are there factors NOT in i()? If so => model.matrix is used
     dataNames = names(data)
 
-    if(IS_INTER){
-        linear.varnames = all.vars(fml_no_inter[[3]])
-        is_num = sapply(data[, dataNames %in% linear.varnames, FALSE], is.numeric)
-        if(length(is_num) > 0 && (any(!is_num) || grepl("factor", deparse_long(fml_no_inter)))){
-            useModel.matrix = TRUE
-        } else {
-            useModel.matrix = FALSE
-        }
+    if(!is.null(mf)){
+        useModel.matrix = TRUE
     } else {
-        linear.varnames = all.vars(fml[[3]])
-        is_num = sapply(data[, dataNames %in% linear.varnames, FALSE], is.numeric)
-        if(length(is_num) == 0 || any(!is_num) || grepl("factor", deparse_long(fml))){
-            useModel.matrix = TRUE
+        useModel.matrix = FALSE
+        if(IS_INTER){
+            linear.varnames = all.vars(fml_no_inter[[3]])
+            is_num = sapply(data[, dataNames %in% linear.varnames, FALSE], is.numeric)
+            if(length(is_num) > 0 && (any(!is_num) || grepl("factor", deparse_long(fml_no_inter)))){
+                useModel.matrix = TRUE
+            }
         } else {
-            useModel.matrix = FALSE
+            linear.varnames = all.vars(fml[[3]])
+            is_num = sapply(data[, dataNames %in% linear.varnames, FALSE], is.numeric)
+            if(length(is_num) == 0 || any(!is_num) || grepl("factor", deparse_long(fml))){
+                useModel.matrix = TRUE
+            }
         }
     }
 
     if(useModel.matrix){
         # to catch the NAs, model.frame needs to be used....
-        linear.mat = stats::model.matrix(fml[c(1, 3)], stats::model.frame(fml[c(1, 3)], data, na.action = na.pass))
+        if(is.null(mf)){
+            mf = stats::model.frame(fml[c(1, 3)], data, na.action = na.pass)
+        }
+
+        linear.mat = stats::model.matrix(fml[c(1, 3)], mf)
 
         if(fake_intercept){
             who_int = which("(Intercept)" %in% colnames(linear.mat))
