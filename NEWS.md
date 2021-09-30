@@ -7,6 +7,8 @@
  
  - fix bug in `etable` `headers` when one wants to include several lines and the first line contains only one element repeated across columns.
  
+ - fix bugs in predict: a) when variables are created with functions of the data, and b) when the new data contains single level factors (relates to issues [#200](https://github.com/lrberge/fixest/issues/200) and [#180](https://github.com/lrberge/fixest/issues/180) by @steffengreup and @IsadoraBM).
+ 
 ## Other
 
  - improve error messages when `subset` does not select any element.
