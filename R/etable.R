@@ -3946,9 +3946,14 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
                        var.title = "\\midrule \\emph{Variables}",
                        fixef.title = "\\midrule \\emph{Fixed-effects}", fixef.prefix = "", fixef.suffix = "", fixef.where = "var",
                        slopes.title = "\\midrule \\emph{Varying Slopes}", slopes.format = "__var__ (__slope__)",
-                       fixef_sizes.prefix = "# ", fixef_sizes.suffix = "",
+                       fixef_sizes.prefix = "\\# ", fixef_sizes.suffix = "",
                        stats.title = "\\midrule \\emph{Fit statistics}", notes.title = "\\medskip \\emph{Notes:} ",
                        tablefoot = TRUE, tablefoot.title = "\\midrule\\midrule", tablefoot.value = "default", yesNo = c("Yes", ""))
+
+            if(!missing(tablefoot) && isFALSE(tablefoot)){
+                res$tablefoot = FALSE
+                res$line.bottom = "\\midrule \\midrule & \\tabularnewline"
+            }
 
         } else {
             res = list(depvar.title = "", model.title = "", model.format = "(1)",
@@ -3956,7 +3961,7 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
                        var.title = "\\midrule",
                        fixef.title = " ", fixef.prefix = "", fixef.suffix = " fixed effects", fixef.where = "stats",
                        slopes.title = "", slopes.format = "__var__ $\\times $ __slope__",
-                       fixef_sizes.prefix = "# ", fixef_sizes.suffix = "",
+                       fixef_sizes.prefix = "\\# ", fixef_sizes.suffix = "",
                        stats.title = " ", notes.title = "\\medskip \\emph{Notes:} ",
                        tablefoot = FALSE, tablefoot.title = "", tablefoot.value = "", yesNo = c("$\\checkmark$", ""))
 
@@ -3964,8 +3969,8 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
                 # just set
 
             } else if(main == "qje"){
-                res$line.top = "\\tabularnewline\\toprule\\toprule"
-                res$line.bottom = "\\bottomrule\\bottomrule & \\tabularnewline"
+                res$line.top = "\\tabularnewline\\midrule\\midrule"
+                res$line.bottom = "\\midrule \\midrule & \\tabularnewline"
             }
         }
 
