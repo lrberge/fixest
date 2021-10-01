@@ -4308,8 +4308,10 @@ format_se_type_latex = function(x, dict = c(), inline = FALSE){
     # We add some flexibility: anticipation of more VCOV types
     main_type_dict = c("Clustered" = "Clustered", "Two-way" = "Clustered",
                        "Three-way" = "Clustered", "Four-way" = "Clustered")
-    main_type = main_type_dict[main_type]
 
+    if(main_type %in% names(main_type_dict)){
+        main_type = main_type_dict[main_type]
+    }
 
     if(inline){
         # The fact that it is clustered is deduced
