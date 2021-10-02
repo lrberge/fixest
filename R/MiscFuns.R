@@ -1458,7 +1458,7 @@ collinearity = function(x, verbose){
 
     # stop("Sorry, it does not work. A new version will hopefully come soon.")
 
-	if(class(x) != "fixest"){
+	if(!inherits(x, "fixest")){
 		stop("Argument 'x' must be a fixest object.")
 	}
 
@@ -1506,23 +1506,7 @@ collinearity = function(x, verbose){
 	}
 
 	# Panel setup
-	if(check_lag(linear_fml)){
-	    if(!is.null(x$panel.info)){
-	        if(is.null(attr(data, "panel_info"))){
-	            # We try to recreate the panel
-	            if(any(!names(x$panel.info) %in% c("", "data", "panel.id"))){
-	                # This was NOT a standard panel creation
-	                stop("The original data set was a fixest_panel, now it isn't any more. Please restore the original data to a panel to perform the collinearity check. NOTA: the original call to panel was:\n", deparse_long(x$panel.info))
-	            } else {
-	                panel__meta__info = panel_setup(data, x$panel.id, from_fixest = TRUE)
-	            }
-	        } else {
-	            panel__meta__info = attr(data, "panel_info")
-	        }
-	    } else {
-	        panel__meta__info = panel_setup(data, x$panel.id, from_fixest = TRUE)
-	    }
-	}
+	panel__meta__info = set_panel_meta_info(x, data)
 
 	if(isLinear || isFixef || "(Intercept)" %in% names(coef)){
 		# linear.matrix = model.matrix(linear_fml, data)
@@ -4543,6 +4527,15 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
     mf = NULL
     if(!original_data){
 
+        # What I don't like here is:
+        # to take care of only two particular cases, namely
+        #  + functions using the original data
+        #  + single value factors
+        # we incur a lot of computing time to EVERYONE
+        # That's really not good.
+        # The problem is that it's not so easy to catch those cases 100% without error.
+        # I shall find a solution at some point.
+
         # if lean = TRUE, we should be avoiding that
         # => I don't know of a solution yet...
 
@@ -4551,7 +4544,11 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
         # We apply model.frame to the original data
         data = fetch_data(object, "To apply 'model.matrix.fixest', ")
 
+        panel__meta__info = set_panel_meta_info(object, data)
+
         mf = model.frame(fml, data, na.action = na.pass)
+
+        rm(panel__meta__info) # needed, so that when the data is recreated for real
 
         t_mf = terms(mf)
         xlev = .getXlevels(t_mf, mf)
@@ -7561,25 +7558,8 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
 
 	# STEP 0: panel setup
 
-	fml_full = formula(object, type = "full")
 	fml = object$fml
-	if(check_lag(fml_full)){
-	    if(!is.null(object$panel.info)){
-	        if(is.null(attr(newdata, "panel_info"))){
-                # We try to recreate the panel
-	            if(any(!names(object$panel.info) %in% c("", "data", "panel.id"))){
-	                # This was NOT a standard panel creation
-	                stop("The estimation contained lags/leads and the original data was a 'fixest_panel' while the new data is not. Please set the new data as a panel first with the function panel(). NOTA: the original call to panel was:\n", deparse_long(object$panel.info))
-	            } else {
-	                panel__meta__info = panel_setup(newdata, object$panel.id, from_fixest = TRUE)
-	            }
-	        } else {
-	            panel__meta__info = attr(newdata, "panel_info")
-	        }
-	    } else {
-	        panel__meta__info = panel_setup(newdata, object$panel.id, from_fixest = TRUE)
-	    }
-	}
+	panel__meta__info = set_panel_meta_info(object, newdata)
 
 	#
 	# 1) Fixed-effects
@@ -8396,23 +8376,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	data = as.data.frame(data)
 
 	# Panel setup
-	if(check_lag(fml_full)){
-	    if(!is.null(object$panel.info)){
-	        if(is.null(attr(data, "panel_info"))){
-	            # We try to recreate the panel
-	            if(any(!names(object$panel.info) %in% c("", "data", "panel.id"))){
-	                # This was NOT a standard panel creation
-	                stop("The original data set was a fixest_panel, now it isn't any more. Please restore the original data to a panel to perform model.matrix. NOTA: the original call to panel was:\n", deparse_long(object$panel.info))
-	            } else {
-	                panel__meta__info = panel_setup(data, object$panel.id, from_fixest = TRUE)
-	            }
-	        } else {
-	            panel__meta__info = attr(data, "panel_info")
-	        }
-	    } else {
-	        panel__meta__info = panel_setup(data, object$panel.id, from_fixest = TRUE)
-	    }
-	}
+	panel__meta__info = set_panel_meta_info(object, data)
 
 	res = list()
 

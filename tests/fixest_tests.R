@@ -8,7 +8,7 @@
 
 # Some functions are not trivial to test properly though
 
-library(dreamerr) ; library(fixest)
+library(fixest)
 
 
 test = fixest:::test ; chunk = fixest:::chunk
@@ -41,7 +41,7 @@ base$y_int_null = base$y_int
 base$y_int_null[base$fe_3 %in% 1:5] = 0
 
 for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
-    cat("Model: ", dreamerr::sfill(model, 6), sep = "")
+    cat("Model: ", format(model, width = 6), sep = "")
     for(use_weights in c(FALSE, TRUE)){
         my_weight = NULL
         if(use_weights) my_weight = base$w
@@ -658,7 +658,7 @@ base$y_int = as.integer(base$y) + 1
 # OLS + GLM + FENMLM
 
 for(method in c("ols", "feglm", "femlm", "fenegbin")){
-    cat("Method: ", dreamerr::sfill(method, 8))
+    cat("Method: ", format(method, width = 8))
     for(do_weight in c(FALSE, TRUE)){
         cat(".")
 
@@ -1323,7 +1323,10 @@ quoi$species = as.character(quoi$species)
 quoi$species[1:3] = "zz"
 test(head(predict(res)), predict(res, quoi))
 
+#
 # prediction with lags
+#
+
 data(base_did)
 res = feols(y ~ x1 + l(x1), base_did, panel.id = ~ id + period)
 test(predict(res, sample = "original"), predict(res, base_did))
@@ -1332,7 +1335,10 @@ qui = sample(which(base_did$id %in% 1:5))
 base_bis = base_did[qui, ]
 test(predict(res, sample = "original")[qui], predict(res, base_bis))
 
+#
 # prediction with poly
+#
+
 res_poly = feols(y ~ poly(x1, 2), base)
 pred_all = predict(res_poly)
 pred_head = predict(res_poly, head(base, 20))
@@ -1361,6 +1367,18 @@ test(coef_vs[fe_names] * base$x2, obs_fe[, 2])
 # with coef only
 obs_fe_coef = predict(res, fixef = TRUE, vs.coef = TRUE)
 test(coef_vs[fe_names], obs_fe_coef[, 2])
+
+#
+# when new data contain single valued factors
+#
+
+est_singleF = feols(y ~ x1 + species, base)
+est_singleF_lm = lm(y ~ x1 + species, base)
+
+new_data = data.frame(x1 = 12:13, species = factor("setosa"))
+
+test(predict(est_singleF, newdata = new_data),
+     predict(est_singleF_lm, newdata = new_data))
 
 #
 # SE of prediction

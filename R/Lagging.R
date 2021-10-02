@@ -1123,3 +1123,52 @@ expand_lags = function(fml){
 
 
 
+set_panel_meta_info = function(object, newdata){
+    # We set the variable panel__meta__info with the current data set
+
+    panel__meta__info = NULL
+
+    fml_full = formula(object, type = "full")
+    if(check_lag(fml_full)){
+        if(!is.null(object$panel.info)){
+            if(is.null(attr(newdata, "panel_info"))){
+                # We try to recreate the panel
+                if(any(!names(object$panel.info) %in% c("", "data", "panel.id"))){
+                    # This was NOT a standard panel creation
+                    stop("The estimation contained lags/leads and the original data was a 'fixest_panel' while the new data is not. Please set the new data as a panel first with the function panel(). NOTA: the original call to panel was:\n", deparse_long(object$panel.info))
+                } else {
+                    panel__meta__info = panel_setup(newdata, object$panel.id, from_fixest = TRUE)
+                }
+            } else {
+                panel__meta__info = attr(newdata, "panel_info")
+            }
+        } else {
+            panel__meta__info = panel_setup(newdata, object$panel.id, from_fixest = TRUE)
+        }
+    }
+
+    panel__meta__info
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
