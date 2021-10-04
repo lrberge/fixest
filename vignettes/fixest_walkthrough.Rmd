@@ -283,7 +283,7 @@ The version 0.10.0 of `fixest` introduced the argument `vcov`. This argument is 
 
 So far (version 0.10.0), six types of standard-errors can be computed, here are their keywords and a brief description:
 
- - `iid`: assumes that errors are identically and independently distributed.
+ - `iid`: assumes that the error variance is spherical, i.e. errors are homoskedastic and not correlated (independent and identically distributed errors have a spherical error variance).
  
  - `hetero`: assumes that errors are heteroskedastic (White correction).
  
