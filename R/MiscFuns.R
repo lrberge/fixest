@@ -6562,7 +6562,7 @@ fixest_fml_rewriter = function(fml){
         # I think I should do that at the C level, this will be much faster I guess
 
         # We only take care of the RHS (we don't care about the LHS)
-        no_lhs_text = gsub("[^~]+~", "", fml_text)
+        no_lhs_text = gsub("^[^~]+~", "", fml_text)
         no_lhs_text = gsub("(?<!I\\()(\\b(\\.[[:alpha:]]|[[:alpha:]])[[:alnum:]\\._]*\\^[[:digit:]]+)", "I(\\1)", no_lhs_text, perl = TRUE)
 
         if(grepl("\\^[[:alpha:]]", no_lhs_text)){

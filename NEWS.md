@@ -13,6 +13,8 @@
  
  - fix bug in `etable` regarding the escaping of `fixef_sizes` (reported by Apoorva Lal [#201](https://github.com/lrberge/fixest/issues/201)).
  
+ - fix bug introduced in 0.10.0 preventing the estimation of Iv models with interacted fixed-effects (reported by @etiennebacher [#203](https://github.com/lrberge/fixest/issues/203)).
+ 
 ## New features
 
  - when computing Newey-West standard-errors for time series, the bandwidth is now selected thanks to the [bwNeweyWest](https://sandwich.r-forge.r-project.org/reference/NeweyWest.html) function from the [sandwich](https://sandwich.r-forge.r-project.org/index.html) package. This function implements the method described in Newey and West 1994.

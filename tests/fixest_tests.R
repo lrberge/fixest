@@ -226,6 +226,9 @@ test("(Intercept)" %in% names(res$coefficients), FALSE)
 test(is.null(res$collin.var), TRUE)
 
 
+# IV + interacted FEs
+res = feols(y ~ x1 + x2 | fe1^fe2 | x_endo1 ~ x_inst1, base)
+
 
 ####
 #### Fit methods ####
