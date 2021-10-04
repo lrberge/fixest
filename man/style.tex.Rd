@@ -42,7 +42,7 @@ style.tex(
 
 \item{line.top}{A character scalar. The line at the top of the table (defaults to \code{"\\tabularnewline\\toprule\\toprule"} if \code{main = "base"} and to \code{"\\toprule"} if \code{main = "aer"}).}
 
-\item{line.bottom}{A character scalar. The line at the bottom of the table (defaults to \code{""} if \code{main = "base"} and to \code{"\\bottomrule"} if \code{main = "aer"}).}
+\item{line.bottom}{A character scalar. The line at the bottom of the table (defaults to \code{""} if \code{main = "base"}, \code{"\\midrule \\midrule & \\tabularnewline"} if \code{main = "base"} AND \code{tablefoot = FALSE}, and to \code{"\\bottomrule"} if \code{main = "aer"}).}
 
 \item{var.title}{A character scalar. The title line appearing before the variables (defaults to \code{"\\midrule \\emph{Variables}"} if \code{main = "base"} and to \code{"\\midrule"} if \code{main = "aer"}). Note that the behavior of \code{var.title = " "} (a space) is different from \code{var.title = ""} (the empty string): in the first case you will get an empty row, while in the second case you get no empty row. To get a line without an empty row, use \code{"\\midrule"} (and not \code{"\\midrule "}!--the space!).}
 
