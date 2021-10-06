@@ -668,7 +668,7 @@ iplot(list(res_twfe, res_sa20), sep = 0.5)
 att_true = tapply(base_stagg$treatment_effect_true, base_stagg$time_to_treatment, mean)[-1]
 points(-9:8, att_true, pch = 15, col = 4)
 
-legend("topleft", col = c(1, 4, 2), pch = c(20, 17, 15), 
+legend("topleft", col = c(1, 4, 2), pch = c(20, 15, 17), 
        legend = c("TWFE", "Truth", "Sun & Abraham (2020)"))
 ```
 
@@ -758,7 +758,7 @@ i = 2:3
 z = "i(species)"
 feols(y ~ x.[i] + .[z], base)
 ```
-What did just happen? When `.[]` is encountered in a formula, its value is evaluated and inserted verbatim in the formula. Further, when the value in brackets is a vector, as many variables are added in the model. That's why `x.[i]` led to `x2 + x3`. Of course, numbers can be used directly: `x.[2:3]` would have led to the same result.
+What just happened? When `.[]` is encountered in a formula, its value is evaluated and inserted verbatim in the formula. Further, when the value in brackets is a vector, as many variables are added in the model. That's why `x.[i]` led to `x2 + x3`. Of course, numbers can be used directly: `x.[2:3]` would have led to the same result.
 
 Variable names in which `.[]` is in the middle of the name can also be created, but the use of macros is then mandatory:
 ```{r}
