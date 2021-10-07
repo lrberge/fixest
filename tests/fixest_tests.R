@@ -229,6 +229,9 @@ test(is.null(res$collin.var), TRUE)
 # IV + interacted FEs
 res = feols(y ~ x1 | fe1^fe2 | x2 ~ x3, base)
 
+# IVs + lags
+res = feols(y ~ x1 | fe1^fe2 | l(x2, -1:1) ~ l(x3, -1:1), base, panel.id = ~ fe1 + period)
+
 
 ####
 #### Fit methods ####

@@ -6419,10 +6419,10 @@ merge_fml = function(fml_linear, fml_fixef = NULL, fml_iv = NULL){
 fixest_fml_rewriter = function(fml){
     # Currently performs the following
     # - expands lags
-    # - expands interactions with :: (note that this will be deprecated)
     # - protects powers: x^3 => I(x^3)
     #
     # fml = sw(f(y, 1:2)) ~ x1 + l(x2, 1:2) + x2^2 | fe1 | y ~ z::e + g^3
+    # fml = y ~ 1 | id + period | l(x_endo, -1:1) ~ l(x_exo, -1:1)
 
     fml_text = deparse_long(fml)
 
@@ -6484,14 +6484,18 @@ fixest_fml_rewriter = function(fml){
 
         rhs_terms = get_vars(fml_rhs)
 
-        rhs_terms = error_sender(expand_lags_internal(rhs_terms),
-                                 "Problem in the formula regarding lag/leads: ", clean = "__expand")
+        if(length(rhs_terms) == 0){
+            rhs_text = "1"
+        } else {
+            rhs_terms = error_sender(expand_lags_internal(rhs_terms),
+                                     "Problem in the formula regarding lag/leads: ", clean = "__expand")
 
-        if(attr(terms(fml_rhs), "intercept") == 0){
-            rhs_terms = c("-1", rhs_terms)
+            if(attr(terms(fml_rhs), "intercept") == 0){
+                rhs_terms = c("-1", rhs_terms)
+            }
+
+            rhs_text = paste(rhs_terms, collapse = "+")
         }
-
-        rhs_text = paste(rhs_terms, collapse = "+")
 
         fml_linear = as.formula(paste0(lhs_text, "~", rhs_text))
 
@@ -6551,7 +6555,13 @@ fixest_fml_rewriter = function(fml){
             if(n_parts == 3 || !is_fe){
                 fml_iv = fml_maker(fml_parts[[n_parts]])
 
-                fml_iv = fixest_fml_rewriter(fml_iv)$fml
+                fml_endo = .xpd(lhs = ~y, rhs = fml_iv[[2]])
+                fml_inst = .xpd(lhs = ~y, rhs = fml_iv[[3]])
+
+                endo_lag_expand = fixest_fml_rewriter(fml_endo)$fml
+                inst_lag_expand = fixest_fml_rewriter(fml_inst)$fml
+
+                fml_iv = .xpd(lhs = endo_lag_expand[[3]], rhs = inst_lag_expand[[3]])
             }
         }
 
