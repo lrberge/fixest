@@ -3922,6 +3922,267 @@ obs = function(x){
     return(id)
 }
 
+
+#' Prints the number of unique elements
+#'
+#' This utility tool displays the number of unique elements in a data.frame as well as their number of NA values.
+#'
+#' @param x A data.frame or a vector.
+#' @param fml A one-sided formula containing the variables for which to count the number of unique values. You can use \code{.N} to get the number of observations. You can combine variables with the "^" operator. For example: \code{fml = ~ .N + id + id^period} will report the number of observations, the number of unique values of \code{id} and the number of unique \code{id} x \code{period} pairs. You can sub select variables with \code{[]}, like in \code{id[!is.na(period)]}. You can use the special functions \code{sw} and \code{sw0}, like in \code{~id^sw0(period) + period[sw0(is.na(id))]} which would lead to \code{~id + id^period + period + period[is.na(id)]}.
+#'
+#' @return
+#' It returns a vector containing the number of unique values per element.
+#'
+#' @examples
+#'
+#' data = base_did
+#' data$x1.L1 = round(lag(x1~id+period, 1, data))
+#'
+#' # By default, just the formatted number of observations
+#' n_unik(data)
+#'
+#' # Or the nber of unique elements of a vector
+#' n_unik(data$id)
+#'
+#' # number of unique id values and id x period pairs
+#' n_unik(data, ~.N + id + id^period)
+#'
+#' # using sub selection + sw0
+#' n_unik(data, ~.N + period[sw0(!is.na(x1.L1))])
+#'
+#'
+n_unik = function(x, fml){
+    # returns a vector with the nber of unique values
+    # attr("na.info") => nber of NA values, vector
+
+    check_arg(x, "mbt data.frame | vector l0")
+
+    # If vector
+    if(is.vector(x)){
+        x_name = deparse_long(substitute(x))
+        x_name = gsub("^[[:alpha:]\\.][[:alnum:]\\._]*\\$", "", x_name)
+
+        na.info = 0
+        if(anyNA(x)){
+            who_NA = is.na(x)
+            na.info = sum(who_NA)
+            x = x[!who_NA]
+        }
+
+        res = length(unique(x))
+        names(res) = x_name
+
+        attr(res, "na.info") = na.info
+
+        class(res) = "vec_n_unik"
+        return(res)
+
+    } else if(missing(fml)){
+
+        res = nrow(x)
+        names(res) = "# Observations"
+
+        attr(res, "na.info") = 0
+        class(res) = "vec_n_unik"
+
+        return(res)
+
+    }
+
+    # If DF + formula
+    # ex: fml = ~ id^year + author_id[sw0(is.na(author_name), is.na(affil_name), year == min_year)]
+    # fml = ~ id^sw0(fe)
+
+    check_arg(fml, "mbt os formula")
+
+    # check variable names
+    all_vars = all.vars(fml)
+    extra_vars = c(names(x), ".N", paste0("NA_", names(x)))
+    check_value(all_vars, "multi charin", .choices = extra_vars, .message = "The formula must only use variables in the data set.")
+
+    tm = terms_hat(fml)
+    all_vars = attr(tm, "term.labels")
+    all_vars = gsub("(^|[^[:alnum:]\\._])NA_([[:alpha:]\\.][[:alnum:]\\._]*)", "\\1is.na(\\2)", all_vars)
+    var_final = c()
+
+    # stepwise function
+    for(var in all_vars){
+        # var = all_vars[1]
+
+        if(grepl("combine_clusters(_fast)?", var)){
+            var = gsub("combine_clusters(_fast)?", "to_integer", var)
+        }
+
+        IS_HAT_SW = grepl("sw0?\\)\\(", var)
+        if(IS_HAT_SW){
+            var = paste0(gsub("(sw0?)\\)\\(", "\\1(", var), ")")
+        }
+
+        if(is_fun_in_char(var, "sw0?")){
+
+            info = extract_fun(var, "sw0?", err_msg = "The stepwise function can be used only once per variable.")
+
+            sw_value = eval(str2lang(info$fun))
+            var_char_new = paste0(info$before, sw_value, info$after)
+
+            if(IS_HAT_SW){
+                var_char_new[1] = gsub(", (,|\\))", "\\1", var_char_new[1])
+
+                qui_nested = grepl("^(to_integer\\(.+){2,}", var_char_new)
+                if(any(qui_nested)){
+                    # later => add check problem if another function is used
+                    var_char_new[qui_nested] = paste0("to_integer(", gsub("to_integer\\(|\\)", "", var_char_new[qui_nested]), ")")
+                }
+            }
+
+            if(grepl("[]", var_char_new[1], fixed = TRUE)){
+                var_char_new[1] = gsub("[]", "", var_char_new[1], fixed = TRUE)
+            }
+
+            var_final = c(var_final, var_char_new)
+        } else {
+            var_final = c(var_final, var)
+        }
+    }
+
+    var_final = unique(var_final)
+
+    var_final_names = var_final
+    # we take care of id^year cases
+    if(any(who_combine <- is_fun_in_char(var_final, "to_integer"))){
+
+        for(i in which(who_combine)){
+            info = extract_fun(var_final[i], "to_integer")
+
+            # we use sw() to get the vars
+            sw_char = gsub("^[^\\(]+\\(", "sw(", info$fun)
+            sw_value = eval(str2lang(sw_char))
+
+            hat_value = paste(sw_value, collapse = "^")
+
+            var_final_names[i] = paste0(info$before, hat_value, info$after)
+        }
+    }
+
+    # NA counting + unique counting
+
+    res = c()
+    na.info = c()
+
+    for(i in seq_along(var_final)){
+
+        vf = var_final[i]
+        vf_name = var_final_names[i]
+        na_i = 0
+
+        if(grepl("^\\.N($|\\[)", vf)){
+
+            n_obs = nrow(x)
+
+            if(vf %in% c(".N", ".N[]")){
+                res_i = n_obs
+                vf_name = "# Observations"
+
+            } else {
+                # Other methods are faster but are less general
+
+                vf_new = gsub("(^\\.N\\[)|(\\]$)", "", vf)
+
+                val = eval(str2lang(vf_new), x)
+
+                # we want to drop the NAs for indices
+                if(anyNA(val)){
+                    val = val[!is.na(val)]
+                }
+
+                if(length(val) == 0){
+                    res_i = 0
+                } else if(is.logical(val)){
+                    res_i = sum(val)
+                } else {
+                    res_i = length(val)
+                }
+
+                vf_name = paste0("# Obs. with ", vf_new)
+            }
+
+        } else {
+            val = eval(str2lang(vf), x)
+
+            if(anyNA(val)){
+                who_NA = is.na(val)
+                na_i = sum(who_NA)
+                val = val[!who_NA]
+            }
+
+            res_i = length(unique(val))
+        }
+
+        res[vf_name] = res_i
+        na.info[i] = na_i
+    }
+
+    attr(res, "na.info") = na.info
+    class(res) = "vec_n_unik"
+    return(res)
+}
+
+#' @rdname n_unik
+print.vec_n_unik = function(x, ...){
+
+    x_names = sfill(names(x))
+    na.info = attr(x, "na.info")
+    na.info_format = sfill(fsignif(na.info))
+    x_value = sfill(fsignif(x))
+
+    n = length(x)
+    na_col = paste0("(# NAs: ", na.info_format, ")")
+    na_col[na.info == 0] = ""
+
+    res = paste0("#> ", x_names, ": ", x_value, " ", na_col)
+    cat(res, sep = "\n")
+}
+
+
+#' Formatted object size
+#'
+#' Tools that returns a formatted object size, where the appropriate unit is automatically chosen.
+#'
+#' @param x Any R object.
+#'
+#' @return
+#' Returns a character scalar.
+#'
+#' @examples
+#'
+#' osize(iris)
+#'
+#' data(trade)
+#' osize(trade)
+#'
+#'
+osize = function(x){
+
+    size = as.numeric(utils::object.size(x))
+    n = log10(size)
+
+    if (n < 3) {
+        res = paste0(size, " Octets.")
+    } else if (n < 6) {
+        res = paste0(fsignif(size/1000), " Ko.")
+    } else {
+        res = paste0(fsignif(size/1e+06), " Mo.")
+    }
+
+    class(res) = "osize"
+    res
+}
+
+#' @rdname osize
+print.osize = function(x, ...){
+    cat(x, "\n")
+}
+
 #### ................. ####
 #### Internal Funs     ####
 ####
@@ -6874,6 +7135,82 @@ use_t_distr = function(x){
     # whether to use the t-distribution or the normal
     # x: fixest estimation
     x$method %in% "feols" || (x$method %in% "feglm" && !x$family$family %in% c("poisson", "binomial"))
+}
+
+
+is_fun_in_char = function(fml_char, fun){
+    extract_fun(fml_char, fun, bool = TRUE)
+}
+
+extract_fun = function(fml_char, fun, err_msg = NULL, bool = FALSE, drop = TRUE){
+    # A formula, in character form // can be a vector
+    # fun: a function name in regex form
+    #
+    # returns a list:
+    # before
+    # fun
+    # after
+    #
+    # fml_char = "to_integer(id, sw0(fe))" ;  fun = "sw0?"
+
+    only_one = TRUE
+
+    regex = paste0(c("(?<=^)", "(?<=[^[:alnum:]\\._])"),
+                   fun, "\\(", collapse = "|")
+
+    is_there = grepl(regex, fml_char, perl = TRUE)
+
+    if(bool) return(is_there)
+
+    res = list()
+
+    n = length(fml_char)
+    for(i in 1:n){
+        # fml_i = fml_char[1]
+
+        fml_i = fml_char[i]
+        if(is_there[i]){
+
+            fml_split = strsplit(fml_i, regex, perl = TRUE)[[1]]
+
+            if(only_one && length(fml_split) > 2){
+                if(is.null(err_msg)){
+                    stop_up("Only one function '", fun, "' can be used at a time.")
+                } else {
+                    stop_up(err_msg)
+                }
+            }
+
+            # we need to add a last character otherwise => problems
+            fml_value = paste0(fml_split[2], " ")
+            fml_right_split = strsplit(fml_value, ")", fixed = TRUE)[[1]]
+            n_open = pmax(lengths(strsplit(fml_right_split, "(", fixed = TRUE)) - 1, 0)
+
+            n_parts = length(fml_right_split)
+            fun_closed = which((1 + cumsum(n_open) - 1:n_parts) == 0)
+
+            fun_name = substr(fml_i, nchar(fml_split[1]) + 1, nchar(fml_i))
+            fun_name = gsub("\\(.+", "", fun_name)
+
+            fun_char = paste0(fun_name, "(", paste(fml_right_split[1:fun_closed], collapse = ")"), ")")
+
+            fml_right_rest = trimws(paste0(fml_right_split[-(1:fun_closed)], collapse = ")"))
+
+            res[[i]] = list(before = fml_split[1],
+                            fun = fun_char,
+                            after = fml_right_rest)
+
+
+        } else {
+            res[[i]] = list(before = fml_i,
+                            fun = "",
+                            after = "")
+        }
+    }
+
+    if(n == 1 && drop) res = res[[1]]
+
+    return(res)
 }
 
 

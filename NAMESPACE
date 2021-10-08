@@ -36,6 +36,9 @@ exportPattern("^(s|g)etFixest")
 # VCOV funs
 export(vcov_cluster, vcov_DK, vcov_NW, vcov_conley)
 
+# other stuff
+export(n_unik, osize)
+
 
 # deprecated
 export(obs2remove, esttex, esttable)
@@ -44,6 +47,8 @@ S3method(summary, fixest.obs2remove)
 # Base methods
 S3method(print, fixest)
 S3method(print, fixest_fitstat)
+S3method(print, vec_n_unik)
+S3method(print, osize)
 S3method(summary, fixest.fixef)
 S3method(summary, fixest)
 S3method(summary, fixest_list)

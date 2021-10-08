@@ -109,6 +109,8 @@ reference:
     - title: Other methods and functions
       desc: Other methods and functions that didn't fit the previous sections
       contents:
+        - n_unik
+        - osize
         - did_means
         - fixest_startup_msg
         - obs

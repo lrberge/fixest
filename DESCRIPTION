@@ -28,5 +28,5 @@ URL: https://lrberge.github.io/fixest/, https://github.com/lrberge/fixest
 SystemRequirements: C++11
 VignetteBuilder: knitr
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Encoding: UTF-8
