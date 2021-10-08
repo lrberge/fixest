@@ -37,7 +37,7 @@ exportPattern("^(s|g)etFixest")
 export(vcov_cluster, vcov_DK, vcov_NW, vcov_conley)
 
 # other stuff
-export(n_unik, osize)
+export(n_unik, osize, sample_df)
 
 
 # deprecated

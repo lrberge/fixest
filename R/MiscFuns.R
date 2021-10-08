@@ -4183,6 +4183,41 @@ print.osize = function(x, ...){
     cat(x, "\n")
 }
 
+
+#' Randomly draws observations from a data set
+#'
+#' This function is useful to check a data set. It gives a random number of rows of the input data set.
+#'
+#' @param x A data set: either a vector, a matrix or a data frame.
+#' @param n The number of random rows/elements to sample randomly.
+#'
+#' @return
+#' A data base (resp vector) with n rows (resp elements).
+#'
+#' @examples
+#'
+#' sample_df(iris)
+#'
+sample_df = function(x, n = 10){
+
+    check_arg(n, "integer scalar")
+
+    if(MISSNULL(x)){
+        if(missing(x)) stop("The argument 'x' cannot be missing, please provide it.")
+        if(is.null(x)) stop("The argument 'x' must be a vector, matrix or data.frame. Currently it is NULL.")
+    }
+
+    if(is.null(dim(x)) || inherits(x, "table")){
+        n = min(n, length(x))
+        return(x[sample(length(x), n)])
+    }
+
+    n = min(n, nrow(x))
+    # complicated var name to avoid issue with data.table variables
+    XXXselectedXXX = sample(nrow(x), n)
+    x[XXXselectedXXX, ]
+}
+
 #### ................. ####
 #### Internal Funs     ####
 ####

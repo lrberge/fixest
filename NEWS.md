@@ -29,6 +29,8 @@
  
  - `n_unik`: simple but flexible function returning the number of unique elements from variables in a data set.
  
+ - `sample_df`: simple function to extract random lines from a `data.frame`.
+ 
 ## Other
 
  - improve error messages when `subset` does not select any element.
