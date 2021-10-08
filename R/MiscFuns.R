@@ -868,23 +868,23 @@ se = function(object, vcov, ssc, cluster, keep, drop, order, ...){
 
     if(is.matrix(object) && nrow(object) == ncol(object)){
         # special case => object is a VCOV matrix and NOT an estimation
-        return(sqrt(diag(object)))
-    }
+        res = sqrt(diag(object))
 
+    } else {
+        mc = match.call()
+        mc[[1]] = as.name("coeftable")
+        mc$object = as.name("object")
 
-    mc = match.call()
-    mc[[1]] = as.name("coeftable")
-    mc$object = as.name("object")
+        mat = eval(mc)
 
-    mat = eval(mc)
+        if(ncol(mat) != 4){
+            stop("No appropriate coefficient table found (number of columns is ", ncol(mat), " instead of 4). You can investigate the problem using function coeftable().")
+        }
 
-    if(ncol(mat) != 4){
-        stop("No appropriate coefficient table found (number of columns is ", ncol(mat), " instead of 4). You can investigate the problem using function coeftable().")
-    }
-
-    res = mat[, 2]
-    if(is.null(names(res))) {
-        names(res) = rownames(mat)
+        res = mat[, 2]
+        if(is.null(names(res))) {
+            names(res) = rownames(mat)
+        }
     }
 
     if(!missnull(keep) || !missnull(drop) || !missnull(order)){

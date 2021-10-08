@@ -689,6 +689,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     vcov_vars = NULL
     if(!missnull(vcov)){
 
+        data_names = if(isFit) character(0) else names(data)
+
         vcov_varnames = error_sender(vcov.fixest(only_varnames = TRUE, vcov = vcov, data_names = names(data),
                                                  panel.id = panel.id, fixef_vars = all.vars(fml_fixef)),
                                      "Problem in the VCOV:\n")
