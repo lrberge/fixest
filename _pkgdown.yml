@@ -109,6 +109,7 @@ reference:
     - title: Other methods and functions
       desc: Other methods and functions that didn't fit the previous sections
       contents:
+        - dsb
         - n_unik
         - osize
         - did_means
