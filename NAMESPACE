@@ -128,7 +128,7 @@ importFrom(stats, model.matrix, sigma, deviance, weights, terms,
              nobs, AIC, BIC, update, predict, fitted, fitted.values,
 			  resid, residuals, logLik, coef, coefficients, lag,
 			  confint, vcov, binomial, setNames, complete.cases, pchisq, pf,
-			  aggregate, cancor, rnorm, median, qt)
+			  aggregate, cancor, rnorm, median, qt, .getXlevels)
 
 importFrom(utils, combn, head, tail, packageVersion, object.size)
 
