@@ -180,5 +180,8 @@ xpd(Unemployed ~ ..(".[re]"), data = longley)
 
 }
 \seealso{
-\code{\link[fixest]{setFixest_fml}} to set formula macros.
+\code{\link[fixest]{setFixest_fml}} to set formula macros, and \code{\link[fixest]{dsb}} to modify character strings with the DSB operator.
+}
+\author{
+Laurent Berge
 }

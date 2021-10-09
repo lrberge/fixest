@@ -31,6 +31,8 @@
  
  - `sample_df`: simple function to extract random lines from a `data.frame`.
  
+ - `dsb`: applies the dot square bracket operator to character strings.
+ 
 ## Other
 
  - improve error messages when `subset` does not select any element.

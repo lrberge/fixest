@@ -2959,9 +2959,12 @@ bin = function(x, bin){
 #' @return
 #' It returns a formula where all macros have been expanded.
 #'
+#' @author
+#' Laurent Berge
+#'
 #'
 #' @seealso
-#' \code{\link[fixest]{setFixest_fml}} to set formula macros.
+#' \code{\link[fixest]{setFixest_fml}} to set formula macros, and \code{\link[fixest]{dsb}} to modify character strings with the DSB operator.
 #'
 #' @examples
 #'
@@ -3209,6 +3212,56 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
     }
 
     fml
+}
+
+
+
+#' Extends strings with variables using the Dot Square Bracket operator
+#'
+#' Simple utility to insert variables into character strings using the "dot square bracket" operator. Typically \code{dsb("Hello I'm .[x]!")} is equivalent to \code{paste0("hello I'm ", x, "!")}.
+#'
+#' @param x A character string, must be of length 1.
+#' @param collapse If the variables inserted into the string are of length greater than 1, you can merge into a single string with \code{collapse}.
+#'
+#' Every expression inside \code{.[]} is evaluated in the current frame and then coerced to character and inserted into the character string.
+#'
+#' If the expression inside \code{.[]} is a vector, then the result will be a vector except the argument \code{collapse} is used.
+#'
+#' @return
+#' A character vector. It is of length > 1 only if the variables inserted are of length > 1.
+#'
+#' @author
+#' Laurent Berge
+#'
+#' @examples
+#'
+#' guy_all = c("Jenny", "Bryan")
+#' loc_all = c("kitchen", "bathroom")
+#'
+#' guy = sample(guy_all, 1)
+#' loc = sample(loc_all, 1)
+#'
+#' dsb("Where is .[guy]? .[guy] is in the .[loc].")
+#'
+#' # Since the stuff in brackets is evaluated in the current frame,
+#' # you can do things like:
+#'
+#' guy_gen = function() sample(guy_all, 1)
+#' loc_gen = function() sample(loc_all, 1)
+#'
+#' dsb("Where is .[g <- guy_gen()]? .[g] is in the .[loc_gen()].")
+#'
+#'
+dsb = function(x, collapse = NULL){
+    check_arg(x, "character scalar")
+    check_arg(collapse, "NULL character scalar")
+
+    res = dot_square_bracket(x, frame = parent.frame(), text = TRUE)
+    if(!is.null(collapse)){
+        res = paste0(res, collapse = collapse)
+    }
+
+    res
 }
 
 
@@ -4309,7 +4362,7 @@ value2stringCall = function(value_raw, call = FALSE, check = FALSE, frame = NULL
     res
 }
 
-dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE){
+dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE){
     # transforms "x.[i]" into x1 if i==1
     # z = "XX" ; x = ".[z] + x.[1:5] + y.[1:2]_t"
     # x = "x.[a] | fe[b] + m.[o]"
@@ -4384,6 +4437,10 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE){
                 res_txt = paste0(res_txt, res[[i]])
                 i = i + 1
 
+            } else if(text){
+                res_txt = paste0(res_txt, res[[i]])
+                i = i + 1
+
             } else if(regex) {
                 after = if(i != n) res[[i + 1]] else ""
                 res_txt = paste0(res_txt, res[[i]], after, collapse = "|")
@@ -4410,7 +4467,12 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE){
         res = res_txt
     }
 
-    if(grepl(".[", res, fixed = TRUE)){
+
+    # Recursivity prevention: no recursivity if text = TRUE
+    DSB_RECURSIVE = TRUE
+    is_rec = exists("DSB_RECURSIVE", parent.frame(), inherits = FALSE) || text
+
+    if(grepl(".[", res, fixed = TRUE) && !is_rec){
         res = dot_square_bracket(res, frame, regex)
     }
 
