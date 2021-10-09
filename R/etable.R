@@ -629,6 +629,8 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
 
     if(tex){
         res = etable_internal_latex(info)
+        n_models = attr(res, "n_models")
+        attr(res, "n_models") = NULL
     } else {
         res = etable_internal_df(info)
     }
@@ -650,6 +652,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
             }
 
             if(tex){
+                # cleaning the tags
                 res = res[!res %in% c("%start:tab\n", "%end:tab\n")]
             }
         }
@@ -657,7 +660,8 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
         if(tex){
             # We add extra whitespaces => otherwise the Latex file is a bit cluttered
             cat("\n")
-            cat(res, sep = "")
+            res = tex.nice(res, n_models) # we wait after PP to nicify
+            cat(res, sep = "\n")
             cat("\n\n")
         } else {
             if(is.data.frame(res)){
@@ -688,7 +692,8 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
         }
 
         if(tex){
-            cat(res, sep = "")
+            res = tex.nice(res, n_models) # we wait after PP to nicify
+            cat(res, sep = "\n")
             return(invisible(res))
         } else {
             if(is.data.frame(res)){
@@ -3150,6 +3155,8 @@ etable_internal_latex = function(info){
 
     res = res[nchar(res) > 0]
 
+    attr(res, "n_models") = n_models
+
     return(res)
 }
 
@@ -4577,7 +4584,43 @@ expand_list_vector = function(x){
 }
 
 
+tex.nice = function(x, n_models){
 
+
+    x = unlist(strsplit(x, "\n"))
+
+    n = n_models + 1
+
+    #
+    # I) dealing with amps
+    #
+
+    x_split_amp = strsplit(x, "&", fixed = TRUE)
+
+    qui_amp = lengths(x_split_amp) == n & !sapply(x_split_amp, function(x) any(grepl("midrule", x)))
+
+    mat_amp = matrix(unlist(x_split_amp[qui_amp]), ncol = n, byrow = TRUE)
+    mat_amp[, 1:(n-1)] = apply(mat_amp[, 1:(n-1), drop = FALSE], 2, format)
+
+    amp_new = apply(mat_amp, 1, paste, collapse = "&")
+
+    x[qui_amp] = amp_new
+
+    #
+    # II) dealing with tabs
+    #
+
+    # We assume eveyrthing is properly formatted
+    x_begin = pmax(lengths(strsplit(x, "\\begin{", fixed = TRUE)) - 1, 0)
+    x_end = pmax(lengths(strsplit(x, "\\end{", fixed = TRUE)) - 1, 0)
+
+    tabs = pmax(cumsum(x_begin) - cumsum(x_end) - x_begin, 0)
+
+    res = paste0(sprintf("% *s", tabs*3, " "), x)
+    res = gsub("^ ([^ ])", "\\1", res)
+
+    res
+}
 
 
 
