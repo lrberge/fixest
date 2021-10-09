@@ -13,6 +13,8 @@ n_unik(x, fml)
 \item{x}{A data.frame or a vector.}
 
 \item{fml}{A one-sided formula containing the variables for which to count the number of unique values. You can use \code{.N} to get the number of observations. You can combine variables with the "^" operator. For example: \code{fml = ~ .N + id + id^period} will report the number of observations, the number of unique values of \code{id} and the number of unique \code{id} x \code{period} pairs. You can sub select variables with \code{[]}, like in \code{id[!is.na(period)]}. You can use the special functions \code{sw} and \code{sw0}, like in \code{~id^sw0(period) + period[sw0(is.na(id))]} which would lead to \code{~id + id^period + period + period[is.na(id)]}.}
+
+\item{...}{Not currently used.}
 }
 \value{
 It returns a vector containing the number of unique values per element.

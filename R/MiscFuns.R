@@ -3982,6 +3982,7 @@ obs = function(x){
 #'
 #' @param x A data.frame or a vector.
 #' @param fml A one-sided formula containing the variables for which to count the number of unique values. You can use \code{.N} to get the number of observations. You can combine variables with the "^" operator. For example: \code{fml = ~ .N + id + id^period} will report the number of observations, the number of unique values of \code{id} and the number of unique \code{id} x \code{period} pairs. You can sub select variables with \code{[]}, like in \code{id[!is.na(period)]}. You can use the special functions \code{sw} and \code{sw0}, like in \code{~id^sw0(period) + period[sw0(is.na(id))]} which would lead to \code{~id + id^period + period + period[is.na(id)]}.
+#' @param ... Not currently used.
 #'
 #' @return
 #' It returns a vector containing the number of unique values per element.
@@ -4202,6 +4203,7 @@ print.vec_n_unik = function(x, ...){
 #' Tools that returns a formatted object size, where the appropriate unit is automatically chosen.
 #'
 #' @param x Any R object.
+#' @param ... Not currently used.
 #'
 #' @return
 #' Returns a character scalar.

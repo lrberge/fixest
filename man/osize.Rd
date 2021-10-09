@@ -11,6 +11,8 @@ osize(x)
 }
 \arguments{
 \item{x}{Any R object.}
+
+\item{...}{Not currently used.}
 }
 \value{
 Returns a character scalar.
