@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.1</span>
       </span>
     </div>
 
@@ -166,7 +166,7 @@
     </tr>
     <tr>
       <th>lag</th>
-      <td><p>An integer scalar, default is <code>NULL</code>. If <code>NULL</code>, then the default lag is equal to <code>n_t^0.25</code> with <code>n_t</code> the number of time periods.</p></td>
+      <td><p>An integer scalar, default is <code>NULL</code>. If <code>NULL</code>, then the default lag is equal to <code>n_t^0.25</code> with <code>n_t</code> the number of time periods (as of Newey and West 1987) for panel Newey-West and Driscoll-Kraay. The default for the time series Newey-West is computed via <code><a href='https://sandwich.R-Forge.R-project.org//reference/NeweyWest.html'>bwNeweyWest</a></code> which implements the Newey and West 1994 method.</p></td>
     </tr>
     <tr>
       <th>ssc</th>
@@ -187,6 +187,14 @@
     <p>There are currently three VCOV types: Newey-West applied to time series, Newey-West applied to a panel setting (when the argument 'unit' is not missing), and Driscoll-Kraay.</p>
 <p>The functions on this page without the prefix "vcov_" do not compute VCOVs directly but are meant to be used in the argument <code>vcov</code> of <code>fixest</code> functions (e.g. in <code><a href='vcov.fixest.html'>vcov.fixest</a></code> or even in the estimation calls).</p>
 <p>Note that for Driscoll-Kraay VCOVs, to ensure its properties the number of periods should be long enough (a minimum of 20 periods or so).</p>
+    <h2 class="hasAnchor" id="lag-selection"><a class="anchor" href="#lag-selection"></a>Lag selection</h2>
+
+    
+
+
+<p>The default lag selection depends on whether the VCOV applies to a panel or a time series.</p>
+<p>For panels, i.e. panel Newey-West or Driscoll-Kraay VCOV, the default lag is <code>n_t^0.25</code> with <code>n_t</code> the number of time periods. This is based on Newey and West 1987.</p>
+<p>For time series Newey-West, the default lag is found thanks to the <code><a href='https://sandwich.R-Forge.R-project.org//reference/NeweyWest.html'>bwNeweyWest</a></code> function from the <code>sandwich</code> package. It is based on Newey and West 1994.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Newey WK, West KD (1987). "A Simple, Positive Semi-Definite, Heteroskedasticity and Autocorrelation Consistent Covariance Matrix." <em>Econometrica</em>, 55(3), 703-708. doi:10.2307/1913610.</p>

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Extracts one element from a fixest_multi object — [[.fixest_multi • fixest</title>
+<title>Extends strings with variables using the Dot Square Bracket operator — dsb • fixest</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Extracts one element from a fixest_multi object — [[.fixest_multi" />
-<meta property="og:description" content="Extracts single elements from multiple fixest estimations." />
+<meta property="og:title" content="Extends strings with variables using the Dot Square Bracket operator — dsb" />
+<meta property="og:description" content="Simple utility to insert variables into character strings using the &quot;dot square bracket&quot; operator. Typically dsb(&quot;Hello I'm .[x]!&quot;) is equivalent to paste0(&quot;hello I'm &quot;, x, &quot;!&quot;)." />
 
 
 
@@ -132,69 +132,58 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Extracts one element from a <code>fixest_multi</code> object</h1>
-    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/fixest_multi.R'><code>R/fixest_multi.R</code></a></small>
-    <div class="hidden name"><code>sub-sub-.fixest_multi.Rd</code></div>
+    <h1>Extends strings with variables using the Dot Square Bracket operator</h1>
+    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/MiscFuns.R'><code>R/MiscFuns.R</code></a></small>
+    <div class="hidden name"><code>dsb.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Extracts single elements from multiple <code>fixest</code> estimations.</p>
+    <p>Simple utility to insert variables into character strings using the "dot square bracket" operator. Typically <code>dsb("Hello I'm .[x]!")</code> is equivalent to <code><a href='https://rdrr.io/r/base/paste.html'>paste0("hello I'm ", x, "!")</a></code>.</p>
     </div>
 
-    <pre class="usage"># S3 method for fixest_multi
-[[(x, i)</pre>
+    <pre class="usage"><span class='fu'>dsb</span><span class='op'>(</span><span class='va'>x</span>, collapse <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>A <code>fixest_multi</code> object, obtained from a <code>fixest</code> estimation leading to multiple results.</p></td>
+      <td><p>A character string, must be of length 1.</p></td>
     </tr>
     <tr>
-      <th>i</th>
-      <td><p>An integer scalar. The identifier of the estimation to extract.</p></td>
+      <th>collapse</th>
+      <td><p>If the variables inserted into the string are of length greater than 1, you can merge into a single string with <code>collapse</code>.</p>
+<p>Every expression inside <code>.[]</code> is evaluated in the current frame and then coerced to character and inserted into the character string.</p>
+<p>If the expression inside <code>.[]</code> is a vector, then the result will be a vector except the argument <code>collapse</code> is used.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A <code>fixest</code> object is returned.</p>
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+    <p>A character vector. It is of length &gt; 1 only if the variables inserted are of length &gt; 1.</p>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
 
-    <div class='dont-index'><p>The main fixest estimation functions: <code><a href='feols.html'>feols</a></code>, <code><a href='feglm.html'>fepois</a></code>, <code><a href='femlm.html'>fenegbin</a></code>, <code><a href='feglm.html'>feglm</a></code>, <code><a href='feNmlm.html'>feNmlm</a></code>. Tools for mutliple fixest estimations: <code><a href='summary.fixest_multi.html'>summary.fixest_multi</a></code>, <code><a href='print.fixest_multi.html'>print.fixest_multi</a></code>, <code><a href='as.list.fixest_multi.html'>as.list.fixest_multi</a></code>, <code>sub-sub-.fixest_multi</code>, <code>sub-.fixest_multi</code>, <code>cash-.fixest_multi</code>.</p></div>
+    <p>Laurent Berge</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='va'>base</span> <span class='op'>=</span> <span class='va'>iris</span>
-<span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>)</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span>
+<span class='va'>guy_all</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Jenny"</span>, <span class='st'>"Bryan"</span><span class='op'>)</span>
+<span class='va'>loc_all</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"kitchen"</span>, <span class='st'>"bathroom"</span><span class='op'>)</span>
 
-<span class='co'># Multiple estimation</span>
-<span class='va'>res</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fu'><a href='stepwise.html'>csw</a></span><span class='op'>(</span><span class='va'>x1</span>, <span class='va'>x2</span>, <span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span>, split <span class='op'>=</span> <span class='op'>~</span><span class='va'>species</span><span class='op'>)</span>
+<span class='va'>guy</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span><span class='op'>(</span><span class='va'>guy_all</span>, <span class='fl'>1</span><span class='op'>)</span>
+<span class='va'>loc</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span><span class='op'>(</span><span class='va'>loc_all</span>, <span class='fl'>1</span><span class='op'>)</span>
 
-<span class='co'># The first estimation</span>
-<span class='va'>res</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>
-</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
-#&gt; Observations: 50 
-#&gt; Standard-errors: IID 
-#&gt;             Estimate Std. Error t value   Pr(&gt;|t|)    
-#&gt; (Intercept) 2.639001   0.310014 8.51251 3.7424e-11 ***
-#&gt; x1          0.690490   0.089899 7.68074 6.7098e-10 ***
-#&gt; ---
-#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 0.233723   Adj. R2: 0.542029</div><div class='input'>
-<span class='co'># The second one, etc</span>
-<span class='va'>res</span><span class='op'>[[</span><span class='fl'>2</span><span class='op'>]</span><span class='op'>]</span>
-</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
-#&gt; Observations: 50 
-#&gt; Standard-errors: IID 
-#&gt;             Estimate Std. Error t value   Pr(&gt;|t|)    
-#&gt; (Intercept) 2.303738   0.385294 5.97917 2.8943e-07 ***
-#&gt; x1          0.667416   0.090356 7.38653 2.1252e-09 ***
-#&gt; x2          0.283419   0.197224 1.43704 1.5733e-01    
-#&gt; ---
-#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 0.228751   Adj. R2: 0.551971</div><div class='input'>
+<span class='fu'>dsb</span><span class='op'>(</span><span class='st'>"Where is .[guy]? .[guy] is in the .[loc]."</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in dsb("Where is .[guy]? .[guy] is in the .[loc]."): could not find function "dsb"</span></div><div class='input'>
+<span class='co'># Since the stuff in brackets is evaluated in the current frame,</span>
+<span class='co'># you can do things like:</span>
+
+<span class='va'>guy_gen</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='op'>)</span> <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span><span class='op'>(</span><span class='va'>guy_all</span>, <span class='fl'>1</span><span class='op'>)</span>
+<span class='va'>loc_gen</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='op'>)</span> <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span><span class='op'>(</span><span class='va'>loc_all</span>, <span class='fl'>1</span><span class='op'>)</span>
+
+<span class='fu'>dsb</span><span class='op'>(</span><span class='st'>"Where is .[g &lt;- guy_gen()]? .[g] is in the .[loc_gen()]."</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in dsb("Where is .[g &lt;- guy_gen()]? .[g] is in the .[loc_gen()]."): could not find function "dsb"</span></div><div class='input'>
+
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

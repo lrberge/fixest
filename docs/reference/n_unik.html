@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Extracts one element from a fixest_multi object — [[.fixest_multi • fixest</title>
+<title>Prints the number of unique elements — n_unik • fixest</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Extracts one element from a fixest_multi object — [[.fixest_multi" />
-<meta property="og:description" content="Extracts single elements from multiple fixest estimations." />
+<meta property="og:title" content="Prints the number of unique elements — n_unik" />
+<meta property="og:description" content="This utility tool displays the number of unique elements in a data.frame as well as their number of NA values." />
 
 
 
@@ -132,69 +132,55 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Extracts one element from a <code>fixest_multi</code> object</h1>
-    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/fixest_multi.R'><code>R/fixest_multi.R</code></a></small>
-    <div class="hidden name"><code>sub-sub-.fixest_multi.Rd</code></div>
+    <h1>Prints the number of unique elements</h1>
+    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/MiscFuns.R'><code>R/MiscFuns.R</code></a></small>
+    <div class="hidden name"><code>n_unik.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Extracts single elements from multiple <code>fixest</code> estimations.</p>
+    <p>This utility tool displays the number of unique elements in a data.frame as well as their number of NA values.</p>
     </div>
 
-    <pre class="usage"># S3 method for fixest_multi
-[[(x, i)</pre>
+    <pre class="usage"><span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>fml</span><span class='op'>)</span>
+
+<span class='co'># S3 method for vec_n_unik</span>
+<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>A <code>fixest_multi</code> object, obtained from a <code>fixest</code> estimation leading to multiple results.</p></td>
+      <td><p>A data.frame or a vector.</p></td>
     </tr>
     <tr>
-      <th>i</th>
-      <td><p>An integer scalar. The identifier of the estimation to extract.</p></td>
+      <th>fml</th>
+      <td><p>A one-sided formula containing the variables for which to count the number of unique values. You can use <code>.N</code> to get the number of observations. You can combine variables with the "^" operator. For example: <code>fml = ~ .N + id + id^period</code> will report the number of observations, the number of unique values of <code>id</code> and the number of unique <code>id</code> x <code>period</code> pairs. You can sub select variables with <code>[]</code>, like in <code>id[!is.na(period)]</code>. You can use the special functions <code>sw</code> and <code>sw0</code>, like in <code>~id^sw0(period) + period[sw0(is.na(id))]</code> which would lead to <code>~id + id^period + period + period[is.na(id)]</code>.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A <code>fixest</code> object is returned.</p>
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
-
-    <div class='dont-index'><p>The main fixest estimation functions: <code><a href='feols.html'>feols</a></code>, <code><a href='feglm.html'>fepois</a></code>, <code><a href='femlm.html'>fenegbin</a></code>, <code><a href='feglm.html'>feglm</a></code>, <code><a href='feNmlm.html'>feNmlm</a></code>. Tools for mutliple fixest estimations: <code><a href='summary.fixest_multi.html'>summary.fixest_multi</a></code>, <code><a href='print.fixest_multi.html'>print.fixest_multi</a></code>, <code><a href='as.list.fixest_multi.html'>as.list.fixest_multi</a></code>, <code>sub-sub-.fixest_multi</code>, <code>sub-.fixest_multi</code>, <code>cash-.fixest_multi</code>.</p></div>
+    <p>It returns a vector containing the number of unique values per element.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='va'>base</span> <span class='op'>=</span> <span class='va'>iris</span>
-<span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>)</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span>
+<span class='va'>data</span> <span class='op'>=</span> <span class='va'>base_did</span>
+<span class='va'>data</span><span class='op'>$</span><span class='va'>x1.L1</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x1</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>period</span>, <span class='fl'>1</span>, <span class='va'>data</span><span class='op'>)</span><span class='op'>)</span>
 
-<span class='co'># Multiple estimation</span>
-<span class='va'>res</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fu'><a href='stepwise.html'>csw</a></span><span class='op'>(</span><span class='va'>x1</span>, <span class='va'>x2</span>, <span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span>, split <span class='op'>=</span> <span class='op'>~</span><span class='va'>species</span><span class='op'>)</span>
+<span class='co'># By default, just the formatted number of observations</span>
+<span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in n_unik(data): could not find function "n_unik"</span></div><div class='input'>
+<span class='co'># Or the nber of unique elements of a vector</span>
+<span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span><span class='op'>$</span><span class='va'>id</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in n_unik(data$id): could not find function "n_unik"</span></div><div class='input'>
+<span class='co'># number of unique id values and id x period pairs</span>
+<span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span>, <span class='op'>~</span><span class='va'>.N</span> <span class='op'>+</span> <span class='va'>id</span> <span class='op'>+</span> <span class='va'>id</span><span class='op'>^</span><span class='va'>period</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in n_unik(data, ~.N + id + id^period): could not find function "n_unik"</span></div><div class='input'>
+<span class='co'># using sub selection + sw0</span>
+<span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span>, <span class='op'>~</span><span class='va'>.N</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>[</span><span class='fu'><a href='stepwise.html'>sw0</a></span><span class='op'>(</span><span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>x1.L1</span><span class='op'>)</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='error'>Error in n_unik(data, ~.N + period[sw0(!is.na(x1.L1))]): could not find function "n_unik"</span></div><div class='input'>
 
-<span class='co'># The first estimation</span>
-<span class='va'>res</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>
-</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
-#&gt; Observations: 50 
-#&gt; Standard-errors: IID 
-#&gt;             Estimate Std. Error t value   Pr(&gt;|t|)    
-#&gt; (Intercept) 2.639001   0.310014 8.51251 3.7424e-11 ***
-#&gt; x1          0.690490   0.089899 7.68074 6.7098e-10 ***
-#&gt; ---
-#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 0.233723   Adj. R2: 0.542029</div><div class='input'>
-<span class='co'># The second one, etc</span>
-<span class='va'>res</span><span class='op'>[[</span><span class='fl'>2</span><span class='op'>]</span><span class='op'>]</span>
-</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
-#&gt; Observations: 50 
-#&gt; Standard-errors: IID 
-#&gt;             Estimate Std. Error t value   Pr(&gt;|t|)    
-#&gt; (Intercept) 2.303738   0.385294 5.97917 2.8943e-07 ***
-#&gt; x1          0.667416   0.090356 7.38653 2.1252e-09 ***
-#&gt; x2          0.283419   0.197224 1.43704 1.5733e-01    
-#&gt; ---
-#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 0.228751   Adj. R2: 0.551971</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

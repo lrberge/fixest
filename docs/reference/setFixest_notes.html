@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.1</span>
       </span>
     </div>
 
@@ -143,7 +143,7 @@
 
     <pre class="usage"><span class='fu'>setFixest_notes</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span>
 
-<span class='va'>getFixest_notes</span></pre>
+<span class='fu'>getFixest_notes</span><span class='op'>(</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -154,9 +154,6 @@
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
-
-    <p>An object of class <code>function</code> of length 1.</p>
     <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
 
     <p>Laurent Berge</p>
@@ -165,10 +162,28 @@
     <pre class="examples"><div class='input'>
 <span class='co'># Change default with</span>
 <span class='fu'>setFixest_notes</span><span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span>
-
+<span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span>, <span class='va'>airquality</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: Ozone
+#&gt; Observations: 111 
+#&gt; Standard-errors: IID 
+#&gt;              Estimate Std. Error t value   Pr(&gt;|t|)    
+#&gt; (Intercept) 18.598728   6.747904 2.75622 0.00685602 ** 
+#&gt; Solar.R      0.127165   0.032776 3.87979 0.00017931 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; RMSE: 31.1   Adj. R2: 0.113281</div><div class='input'>
 <span class='co'># Back to default which is TRUE</span>
-<span class='fu'>getFixest_notes</span><span class='op'>(</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] FALSE</div><div class='input'>
+<span class='fu'>setFixest_notes</span><span class='op'>(</span><span class='cn'>TRUE</span><span class='op'>)</span>
+<span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span>, <span class='va'>airquality</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='output co'>#&gt; OLS estimation, Dep. Var.: Ozone
+#&gt; Observations: 111 
+#&gt; Standard-errors: IID 
+#&gt;              Estimate Std. Error t value   Pr(&gt;|t|)    
+#&gt; (Intercept) 18.598728   6.747904 2.75622 0.00685602 ** 
+#&gt; Solar.R      0.127165   0.032776 3.87979 0.00017931 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; RMSE: 31.1   Adj. R2: 0.113281</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

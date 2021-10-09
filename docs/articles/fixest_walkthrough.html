@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.1</span>
       </span>
     </div>
 
@@ -94,7 +94,7 @@
       <h1 data-toc-skip>Fast Fixed-Effects Estimation: Short introduction</h1>
                         <h4 class="author">Laurent Berge and Grant McDermott</h4>
             
-            <h4 class="date">2021-09-27</h4>
+            <h4 class="date">2021-10-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/fixest_walkthrough.Rmd"><code>vignettes/fixest_walkthrough.Rmd</code></a></small>
       <div class="hidden name"><code>fixest_walkthrough.Rmd</code></div>
@@ -637,7 +637,7 @@
 <a href="#basics-main-calls-and-shortcuts" class="anchor"></a>Basics: main calls and shortcuts</h2>
 <p>So far (version 0.10.0), six types of standard-errors can be computed, here are their keywords and a brief description:</p>
 <ul>
-<li><p><code>iid</code>: assumes that errors are identically and independently distributed.</p></li>
+<li><p><code>iid</code>: assumes that the error variance is spherical, i.e. errors are homoskedastic and not correlated (independent and identically distributed errors have a spherical error variance).</p></li>
 <li><p><code>hetero</code>: assumes that errors are heteroskedastic (White correction).</p></li>
 <li><p><code>cluster</code>, <code>twoway</code>: clustered SEs, assumes that errors are correlated within the cluster groups.</p></li>
 <li><p><code>NW</code>, <code>newey_west</code>: Newey and West (1987) SEs for time series or panel data, assumes heteroskedastic and serially correlated errors.</p></li>
@@ -1297,7 +1297,7 @@
 <span class="va">att_true</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">base_stagg</span><span class="op">$</span><span class="va">treatment_effect_true</span>, <span class="va">base_stagg</span><span class="op">$</span><span class="va">time_to_treatment</span>, <span class="va">mean</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/points.html">points</a></span><span class="op">(</span><span class="op">-</span><span class="fl">9</span><span class="op">:</span><span class="fl">8</span>, <span class="va">att_true</span>, pch <span class="op">=</span> <span class="fl">15</span>, col <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>
 
-<span class="fu"><a href="https://rdrr.io/r/graphics/legend.html">legend</a></span><span class="op">(</span><span class="st">"topleft"</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">4</span>, <span class="fl">2</span><span class="op">)</span>, pch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">17</span>, <span class="fl">15</span><span class="op">)</span>, 
+<span class="fu"><a href="https://rdrr.io/r/graphics/legend.html">legend</a></span><span class="op">(</span><span class="st">"topleft"</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">4</span>, <span class="fl">2</span><span class="op">)</span>, pch <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">15</span>, <span class="fl">17</span><span class="op">)</span>, 
        legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"TWFE"</span>, <span class="st">"Truth"</span>, <span class="st">"Sun &amp; Abraham (2020)"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="fixest_walkthrough_files/figure-html/unnamed-chunk-58-1.png" width="700"></p>
 <p>As we can see, the TWFE results suffer from varying degrees of bias due to the staggered rollout. In contrast, the aggregated SA20 results do a much better job of consistently estimating the true effects.</p>
@@ -1441,7 +1441,7 @@
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 0.333482   Adj. R2: 0.832221</span></code></pre></div>
-<p>What did just happen? When <code>.[]</code> is encountered in a formula, its value is evaluated and inserted verbatim in the formula. Further, when the value in brackets is a vector, as many variables are added in the model. That’s why <code>x.[i]</code> led to <code>x2 + x3</code>. Of course, numbers can be used directly: <code>x.[2:3]</code> would have led to the same result.</p>
+<p>What just happened? When <code>.[]</code> is encountered in a formula, its value is evaluated and inserted verbatim in the formula. Further, when the value in brackets is a vector, as many variables are added in the model. That’s why <code>x.[i]</code> led to <code>x2 + x3</code>. Of course, numbers can be used directly: <code>x.[2:3]</code> would have led to the same result.</p>
 <p>Variable names in which <code>.[]</code> is in the middle of the name can also be created, but the use of macros is then mandatory:</p>
 <div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">i</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span>

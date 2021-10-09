@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.1</span>
       </span>
     </div>
 
@@ -196,7 +196,10 @@
 <p>Note that the dot square bracket operator (DSB, see before) is applied before the regular expression is evaluated. This means that <code>..("x.[3:4]_sq")</code> will lead, after evaluation of the DSB, to <code>..("x3_sq|x4_sq")</code>. It is a handy way to insert range of numbers in a regular expression.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='setFixest_fml.html'>setFixest_fml</a></code> to set formula macros.</p></div>
+    <div class='dont-index'><p><code><a href='setFixest_fml.html'>setFixest_fml</a></code> to set formula macros, and <code><a href='dsb.html'>dsb</a></code> to modify character strings with the DSB operator.</p></div>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Laurent Berge</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
@@ -228,8 +231,8 @@
 #&gt; </div><div class='input'>
 <span class='co'># You can use the macros without xpd() in fixest estimations</span>
 <span class='va'>a</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='va'>..ctrl</span>, <span class='va'>airquality</span><span class='op'>)</span>
-<span class='va'>b</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='va'>..ctrl_long</span>, <span class='va'>airquality</span><span class='op'>)</span>
-<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>a</span>, <span class='va'>b</span>, keep <span class='op'>=</span> <span class='st'>"Int|Win"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 37 observations removed because of NA values (LHS: 37).</span></div><div class='input'><span class='va'>b</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='va'>..ctrl_long</span>, <span class='va'>airquality</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 37 observations removed because of NA values (LHS: 37).</span></div><div class='input'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>a</span>, <span class='va'>b</span>, keep <span class='op'>=</span> <span class='st'>"Int|Win"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                                  a                  b
 #&gt; Dependent Var.:              Ozone              Ozone
 #&gt;                                                      
@@ -407,7 +410,7 @@
 <span class='kw'>for</span><span class='op'>(</span><span class='va'>p</span> <span class='kw'>in</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>)</span><span class='op'>{</span>
   <span class='va'>res_all</span><span class='op'>[[</span><span class='va'>p</span><span class='op'>]</span><span class='op'>]</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='fu'>xpd</span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/stats/poly.html'>poly</a></span><span class='op'>(</span><span class='va'>Temp</span>, <span class='va'>..p</span><span class='op'>)</span>, ..p <span class='op'>=</span> <span class='va'>p</span><span class='op'>)</span>, <span class='va'>airquality</span><span class='op'>)</span>
 <span class='op'>}</span>
-
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 37 observations removed because of NA values (LHS: 37).</span></div><div class='output co'>#&gt; <span class='message'>NOTE: 37 observations removed because of NA values (LHS: 37).</span></div><div class='output co'>#&gt; <span class='message'>NOTE: 37 observations removed because of NA values (LHS: 37).</span></div><div class='input'>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res_all</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                            model 1            model 2            model 3
 #&gt; Dependent Var.:              Ozone              Ozone              Ozone
@@ -430,15 +433,15 @@
 <span class='va'>vars</span> <span class='op'>=</span> <span class='va'>letters</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span>
 <span class='fu'>xpd</span><span class='op'>(</span>rhs <span class='op'>=</span> <span class='va'>vars</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; ~a + b + c + d + e
-#&gt; &lt;environment: 0x0000000042943b48&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x0000000045a2bee8&gt;</div><div class='input'>
 <span class='co'># Alternatively, to replace the RHS</span>
 <span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fl'>1</span>, rhs <span class='op'>=</span> <span class='va'>vars</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ a + b + c + d + e
-#&gt; &lt;environment: 0x00000000426d0dd8&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x0000000045ebbb30&gt;</div><div class='input'>
 <span class='co'># To create a two sided formula</span>
 <span class='fu'>xpd</span><span class='op'>(</span>lhs <span class='op'>=</span> <span class='st'>"y"</span>, rhs <span class='op'>=</span> <span class='va'>vars</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ a + b + c + d + e
-#&gt; &lt;environment: 0x00000000442116b8&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x000000004585dba0&gt;</div><div class='input'>
 
 <span class='co'>#</span>
 <span class='co'># Dot square bracket operator</span>
@@ -447,26 +450,26 @@
 <span class='co'># You can create multiple variables at once</span>
 <span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span> <span class='op'>+</span> <span class='va'>z.</span><span class='op'>[</span><span class='fl'>2</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ x1 + x2 + x3 + x4 + x5 + z2 + z3
-#&gt; &lt;environment: 0x00000000426d0dd8&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x0000000045ebbb30&gt;</div><div class='input'>
 <span class='co'># You can summon variables from the environment</span>
 <span class='va'>var</span> <span class='op'>=</span> <span class='st'>"a"</span>
 <span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='va'>var</span><span class='op'>]</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ xa
-#&gt; &lt;environment: 0x00000000426d0dd8&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x0000000045ebbb30&gt;</div><div class='input'>
 <span class='co'># ... the variables can be multiple</span>
 <span class='va'>vars</span> <span class='op'>=</span> <span class='va'>LETTERS</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span>
 <span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='va'>vars</span><span class='op'>]</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ xA + xB + xC
-#&gt; &lt;environment: 0x00000000426d0dd8&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x0000000045ebbb30&gt;</div><div class='input'>
 <span class='co'># You can have "complex" variable names but they must be nested in character form</span>
 <span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>.</span><span class='op'>[</span><span class='st'>"x.[vars]_sq"</span><span class='op'>]</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ xA_sq + xB_sq + xC_sq
-#&gt; &lt;environment: 0x00000000426d0dd8&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x0000000045ebbb30&gt;</div><div class='input'>
 <span class='co'># DSB can be used within regular expressions</span>
 <span class='va'>re</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"GNP"</span>, <span class='st'>"Pop"</span><span class='op'>)</span>
 <span class='fu'>xpd</span><span class='op'>(</span><span class='va'>Unemployed</span> <span class='op'>~</span> <span class='fu'>..</span><span class='op'>(</span><span class='st'>".[re]"</span><span class='op'>)</span>, data <span class='op'>=</span> <span class='va'>longley</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; Unemployed ~ GNP.deflator + GNP + Population
-#&gt; &lt;environment: 0x00000000426d0dd8&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x0000000045ebbb30&gt;</div><div class='input'>
 <span class='co'># =&gt; equivalent to ..("GNP|Pop")</span>
 
 

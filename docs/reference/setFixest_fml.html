@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.1</span>
       </span>
     </div>
 
@@ -401,15 +401,15 @@
 <span class='va'>vars</span> <span class='op'>=</span> <span class='va'>letters</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span>
 <span class='fu'><a href='xpd.html'>xpd</a></span><span class='op'>(</span>rhs <span class='op'>=</span> <span class='va'>vars</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; ~a + b + c + d + e
-#&gt; &lt;environment: 0x0000000027857ae8&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x00000000437cbd20&gt;</div><div class='input'>
 <span class='co'># Alternatively, to replace the RHS</span>
 <span class='fu'><a href='xpd.html'>xpd</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fl'>1</span>, rhs <span class='op'>=</span> <span class='va'>vars</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ a + b + c + d + e
-#&gt; &lt;environment: 0x00000000270a7060&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x0000000043a6f268&gt;</div><div class='input'>
 <span class='co'># To create a two sided formula</span>
 <span class='fu'><a href='xpd.html'>xpd</a></span><span class='op'>(</span>lhs <span class='op'>=</span> <span class='st'>"y"</span>, rhs <span class='op'>=</span> <span class='va'>vars</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ a + b + c + d + e
-#&gt; &lt;environment: 0x0000000027105c58&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x0000000043bd7f18&gt;</div><div class='input'>
 
 <span class='co'>#</span>
 <span class='co'># Dot square bracket operator</span>
@@ -418,26 +418,26 @@
 <span class='co'># You can create multiple variables at once</span>
 <span class='fu'><a href='xpd.html'>xpd</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span> <span class='op'>+</span> <span class='va'>z.</span><span class='op'>[</span><span class='fl'>2</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ x1 + x2 + x3 + x4 + x5 + z2 + z3
-#&gt; &lt;environment: 0x00000000270a7060&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x0000000043a6f268&gt;</div><div class='input'>
 <span class='co'># You can summon variables from the environment</span>
 <span class='va'>var</span> <span class='op'>=</span> <span class='st'>"a"</span>
 <span class='fu'><a href='xpd.html'>xpd</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='va'>var</span><span class='op'>]</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ xa
-#&gt; &lt;environment: 0x00000000270a7060&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x0000000043a6f268&gt;</div><div class='input'>
 <span class='co'># ... the variables can be multiple</span>
 <span class='va'>vars</span> <span class='op'>=</span> <span class='va'>LETTERS</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span>
 <span class='fu'><a href='xpd.html'>xpd</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='va'>vars</span><span class='op'>]</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ xA + xB + xC
-#&gt; &lt;environment: 0x00000000270a7060&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x0000000043a6f268&gt;</div><div class='input'>
 <span class='co'># You can have "complex" variable names but they must be nested in character form</span>
 <span class='fu'><a href='xpd.html'>xpd</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>.</span><span class='op'>[</span><span class='st'>"x.[vars]_sq"</span><span class='op'>]</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ xA_sq + xB_sq + xC_sq
-#&gt; &lt;environment: 0x00000000270a7060&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x0000000043a6f268&gt;</div><div class='input'>
 <span class='co'># DSB can be used within regular expressions</span>
 <span class='va'>re</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"GNP"</span>, <span class='st'>"Pop"</span><span class='op'>)</span>
 <span class='fu'><a href='xpd.html'>xpd</a></span><span class='op'>(</span><span class='va'>Unemployed</span> <span class='op'>~</span> <span class='fu'>..</span><span class='op'>(</span><span class='st'>".[re]"</span><span class='op'>)</span>, data <span class='op'>=</span> <span class='va'>longley</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; Unemployed ~ GNP.deflator + GNP + Population
-#&gt; &lt;environment: 0x00000000270a7060&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x0000000043a6f268&gt;</div><div class='input'>
 <span class='co'># =&gt; equivalent to ..("GNP|Pop")</span>
 
 
