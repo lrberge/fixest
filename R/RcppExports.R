@@ -185,6 +185,10 @@ cpp_combine_clusters <- function(cluster_list, index) {
     .Call(`_fixest_cpp_combine_clusters`, cluster_list, index)
 }
 
+cpp_cut <- function(x_sorted, cut_points, is_included) {
+    .Call(`_fixest_cpp_cut`, x_sorted, cut_points, is_included)
+}
+
 cpp_get_nb_threads <- function() {
     .Call(`_fixest_cpp_get_nb_threads`)
 }

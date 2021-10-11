@@ -238,7 +238,9 @@ open_all = function(){
     # Opening extra files
 
     extra_files = c("../PROBLEMS.R", "../Problems.Rmd", "../Development.R",
-                    "../social.rmd", "NEWS.md", "DESCRIPTION", "../todo.txt")
+                    "../social.rmd", "NEWS.md", "DESCRIPTION", "tests/fixest_tests.R",
+                    list.files("vignettes/", pattern = "Rmd$", full.names = TRUE),
+                    "../todo.txt")
 
     for(f in extra_files){
         eval(str2lang(dsb("rstudioapi::navigateToFile('.[f]', moveCursor = FALSE)")))

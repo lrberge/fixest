@@ -2853,7 +2853,27 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #' Tool to easily group the values of a given variable.
 #'
 #' @param x A vector whose values have to be grouped. Can be of any type but must be atomic.
-    #' @param bin A list of values to be grouped, a vector, or the special value \code{"bin::digit"}. To create a new value from old values, use \code{bin = list("new_value"=old_values)} with \code{old_values} a vector of existing values. It accepts regular expressions, but they must start with an \code{"@"}, like in \code{bin="@Aug|Dec"}. The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value \code{"bin::digit"} to group every \code{digit} element. For example if \code{x} represent years, using \code{bin="bin::2"} create bins of two years. Using \code{"!bin::digit"} groups every digit consecutive values starting from the first value. Using \code{"!!bin::digit"} is the same bu starting from the last value. In both cases, \code{x} is not required to be numeric.
+#' @param bin A list of values to be grouped, a vector, or the special value \code{"bin::digit"}. To create a new value from old values, use \code{bin = list("new_value"=old_values)} with \code{old_values} a vector of existing values.
+#' It accepts regular expressions, but they must start with an \code{"@"}, like in \code{bin="@Aug|Dec"}. It accepts one-sided formulas which must contain the variable \code{x}, e.g. \code{bin=list("<2" = ~x < 2)}.
+#' The names of the list are the new names. If the new name is missing, the first value matched becomes the new name.
+#' Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value \code{"bin::digit"} to group every \code{digit} element.
+#' For example if \code{x} represent years, using \code{bin="bin::2"} create bins of two years.
+#' With any data, using \code{"!bin::digit"} groups every digit consecutive values starting from the first value.
+#' Using \code{"!!bin::digit"} is the same but starting from the last value. In both cases, \code{x} is not required to be numeric.
+#' With numeric vectors you can: a) use \code{"cut::n"} to cut the vector into \code{n} equal parts, b) use \code{"cut::a]b["} to create the following bins: \code{[min, a]}, \code{]a, b[}, \code{[b, max]}.
+#' The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. See details and examples. Dot square bracket expansion (see \code{\link[fixest]{dsb}}) is enabled.
+#'
+#' @section Cut a numeric vector:
+#'
+#' Numeric vectors can be cut easily into: a) equal parts, b) user-specified bins.
+#'
+#' Use \code{"cut::n"} to cut the vector into \code{n} (roughly) equal parts. Percentiles are used to partition the data, hence some data distributions can lead to create less than \code{n} parts (for example if P0 is the same as P50).
+#'
+#' The user can specify custom bins with the following syntax: \code{"cut::a]b]c]"etc}. Here the numbers \code{a}, \code{b}, \code{c}, etc, are a sequence of increasing numbers, each followed by an open or closed square bracket. The numbers can be specified as either plain numbers (e.g. \code{"cut::5]12[32["}), quartiles (e.g. \code{"cut::q1]q3["), or percentiles (e.g. \code{"cut::p10]p15]p90]"}). Values of different types can be mixed: \code{"cut::5]q2[p80["} is valid provided the median (\code{q2}) is indeed greater than \code{5}, otherwise an error is thrown.
+#'
+#' The square bracket right of each number tells whether the numbers should be included or excluded from the current bin. For example, say \code{x} ranges from 0 to 100, then \code{"cut::5]"} will create two  bins: one from 0 to 5 and a second from 6 to 100. With \code{"cut::5["} the bins would have been 0-4 and 5-100.
+#'
+#' A factor is returned. The labels report the min and max values in each bin.
 #'
 #' @return
 #' It returns a vector of the same length as \code{x}
@@ -2904,6 +2924,45 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #'
 #' # ...idem but starting from the last
 #' table(bin(month_fact, "!!bin::2"))
+#'
+#' #
+#' # "Cutting" numeric data
+#' #
+#'
+#' data(iris)
+#' plen = iris$Petal.Length
+#'
+#' # 3 parts of (roughly) equal size
+#' table(bin(plen, "cut::3"))
+#'
+#' # Three custom bins
+#' table(bin(plen, "cut::2]5]"))
+#'
+#' # .. same, excluding 5 in the 2nd bin
+#' table(bin(plen, "cut::2]5["))
+#'
+#' # Using quartiles
+#' table(bin(plen, "cut::q1]q2]q3]"))
+#'
+#' # Using percentiles
+#' table(bin(plen, "cut::p20]p50]p70]p90]"))
+#'
+#' # Mixing all
+#' table(bin(plen, "cut::2[q2]p90]"))
+#'
+#' # NOTA:
+#' # -> the labels always contain the min/max values in each bin
+#'
+#'
+#' #
+#' # With a formula
+#' #
+#'
+#' data(iris)
+#' plen = iris$Petal.Length
+#'
+#' # We need to use "x"
+#' table(bin(plen, list("< 2" = ~x < 2, ">= 2" = ~x >= 2)))
 #'
 #'
 bin = function(x, bin){
@@ -4364,7 +4423,7 @@ value2stringCall = function(value_raw, call = FALSE, check = FALSE, frame = NULL
     res
 }
 
-dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE){
+dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE, up = 0){
     # transforms "x.[i]" into x1 if i==1
     # z = "XX" ; x = ".[z] + x.[1:5] + y.[1:2]_t"
     # x = "x.[a] | fe[b] + m.[o]"
@@ -4374,10 +4433,10 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
     x_split_open = strsplit(x, ".[", fixed = TRUE)[[1]]
 
     # nesting: a ~ .["x.[1:2]_sq"] + b
-    is_nested = any(grepl("^\"", x_split_open))
+    is_nested = any(grepl("^\"", x_split_open[-1]))
     if(is_nested){
 
-        i_open_quote = which(grepl("^\"", x_split_open))
+        i_open_quote = setdiff(which(grepl("^\"", x_split_open)), 1)
         i_close_quote = which(grepl("\"\\]", x_split_open))
 
         x_split_new = x_split_open[1]
@@ -4416,7 +4475,8 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
 
         if(b_open[[i]][1] != -1){
             # means there was an open [
-            index_closing = b_close[[i]][which.max(b_close[[i]] < c(b_open[[i]], Inf))]
+            n_extend = length(b_close[[i]]) - length(b_open[[i]])
+            index_closing = b_close[[i]][which.max(b_close[[i]] < c(b_open[[i]], rep(Inf, n_extend)))]
         } else {
             index_closing = b_close[[i]][1]
         }
@@ -4437,8 +4497,10 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
 
     res = as.list(x_split)
     for(i in (1:n)[(1:n) %% 2 == 0]){
-        # I don't send informative error messages here => OK
-        value = eval(str2lang(x_split[i]), frame)
+        # Informative error message
+        value = error_sender(eval(str2lang(x_split[i]), frame),
+                             "Dot square bracket operator: Evaluation of '.[", x_split[i], "]' led to an error:",
+                             up = up + 1)
         res[[i]] = value
     }
 
@@ -5664,7 +5726,40 @@ items_to_drop = function(items, x, varname, keep = FALSE, argname, keep_first = 
         x = as.character(x)
     }
 
-    if(is.character(x)){
+
+    if(inherits(x, "formula")){
+
+        if(!identical(all.vars(x), "x")){
+            stop_up("In argument '", argname, "', the formula must contain a single variable name: 'x'. So far '", deparse_long(x), "' is not valid.")
+        }
+
+        if(length(x) > 2){
+            stop_up("In argument '", argname, "', if a formula, it must be one-sided. Problem: '", deparse_long(x), "' is two-sided.")
+        }
+
+        is_here = error_sender(eval(x[[2]], list(x = items)),
+                               "In argument '", argname, "', the evaluation of the formula led to an error:")
+        if(length(is_here) != length(items)){
+            stop_up("In argument '", argname, "', the evaluation of the formula must return a logical vector of the same length as 'x'. Problem: '", deparse_long(x), "' returns a vector of length ", length(is_here), " (expected: ", length(items), ").")
+        }
+
+        if(!is.logical(is_here)){
+            stop_up("In argument '", argname, "', the evaluation of the formula must return a logical vector. Problem: '", deparse_long(x), "' is not logical (instead it is of class ", enumerate_items(class(is_here)), ").")
+        }
+
+        is_here = !is.na(is_here) & is_here
+
+        if(!no_error && !any(is_here)){
+            stop_up("In argument '", argname, "', the evaluation of the formula must match at least one value. Problem: '", deparse_long(x), "' does not match any.")
+        }
+
+        if(keep){
+            id_drop = which(!is_here)
+        } else {
+            id_drop = which(is_here)
+        }
+
+    } else if(is.character(x)){
         all_x = c()
         for(i in seq_along(x)){
 
@@ -5759,7 +5854,39 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
     set_up(1)
 
     argname = deparse(substitute(bin))
-    check_arg(bin, "list | vector")
+    check_arg(bin, "list | vector | os formula")
+
+    #
+    # DSB expansion
+    #
+
+    bin_dp = deparse_long(bin)
+    if(grepl(".[", bin_dp, fixed = TRUE)){
+        bin_dsb = dot_square_bracket(bin_dp, frame = parent.frame(2), text = TRUE, up = 1)
+        if(length(bin_dsb) > 1){
+            bin_dsb = paste0(bin_dsb, collapse = "")
+        }
+
+        bin_dsb_call = error_sender(str2lang(bin_dsb),
+                                    "Error when binning: the values expanded with '.[]' led to an error:")
+        bin = eval(bin)
+    }
+
+    #
+    # cut:: => special treatment, we short circuit
+    #
+
+    if(!is.list(bin) && (is.character(bin) && any(grepl("^cut::", bin)))){
+        if(length(bin) > 1){
+            stop_up("To use the special binning 'cut::values', the argument '", argname, "' must be of length 1. Currently it is of length ", length(bin), ".")
+        }
+
+        if(!is.numeric(x)){
+            stop_up("To use the special binning 'cut::values', the variable '", varname, "' must be numeric. Currently this is not the case (it is of class ", enumerate_items(class(x)), " instead).")
+        }
+
+        return(cut_vector(x, bin))
+    }
 
     x_int = to_integer(x, add_items = TRUE, items.list = TRUE, sorted = TRUE)
     x_items = x_int$items
@@ -5771,7 +5898,7 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
     }
 
     if(!is.list(bin)){
-        if(any(grepl("^!?!?bin::", bin))){
+        if(is.character(bin) && any(grepl("^!?!?bin::", bin))){
 
             if(length(bin) > 1){
                 stop_up("To use the special binning 'bin::digit', the argument '", argname, "' must be of length 1. Currently it is of length ", length(bin), ".")
@@ -5895,6 +6022,186 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
     x_new = x_items_new[x_map[x_int$x]]
 
     return(x_new)
+}
+
+
+cut_vector = function(x, bin){
+    # We cut a vector into pieces
+    # **only numeric vectors**
+    # cut::a]b[c] cuts the vectors into four slices: [-Inf, a]; ]a, b[; [b, c]; ]c, Inf]
+    # a, b, c should be numeric values
+    # they can be replaced with: pXX or qX, percentiles and quartiles
+    # cut::n splits the data into n equal sizes
+
+    set_up(2)
+
+    # checking bin
+    if(!is.character(bin) || !length(bin) == 1 || !grepl("^cut::", bin)){
+        stop("Internal bug: Argument 'bin' should be equal to 'cut::stg' over here -- this is not the case.")
+    }
+
+    # cleaning x
+    n = length(x)
+    ANY_NA = anyNA(x)
+    IS_NA = FALSE
+    if(ANY_NA){
+        IS_NA = is.na(x)
+
+        if(all(IS_NA)){
+            return(x)
+        }
+
+        x = x[!IS_NA]
+    }
+
+    # we sort x (needed later)
+    x_order = order(x)
+    x_sorted = x[x_order]
+
+    my_cut = dsb(gsub("^cut::", "", bin))
+
+    if(is_numeric_in_char(my_cut)){
+        my_cut = as.numeric(my_cut)
+        pct = cumsum(rep(1/my_cut, max(my_cut - 1, 1)))
+        cut_points = quantile(x_sorted, pct)
+
+        bounds = rep("]", length(cut_points))
+
+    } else {
+        bounds = regmatches(my_cut, gregexpr("\\[|\\]", my_cut))[[1]]
+        values = strsplit(my_cut, "\\[|\\]")[[1]]
+
+        n_cuts = length(values)
+
+        if(n_cuts != length(bounds)){
+            stop_up("In 'bin', the format should be 'cut::a]b]' with 'a', 'b', etc, numbers or quartiles/percentiles. Problem: each number must be followed by an open (or closed) square bracket, this is currentlly not the case.")
+        }
+
+        cut_points = numeric(n_cuts)
+        for(i in seq_along(values)){
+
+            v = values[i]
+
+            if(is_numeric_in_char(v)){
+                cut_points[i] = as.numeric(v)
+
+            } else if(grepl("^p|P|q|Q", v)){
+                p = gsub("^.", "", v)
+                if(!is_numeric_in_char(p)){
+                    stop_up("In 'bin', the format should be 'cut::a]b]' with 'a', 'b', etc, numbers or quartiles (resp. percentiles) of the form qX (resp. pX) with X a number. \n  The value '", v, "', in '", bin, "', is incorrect.")
+                }
+
+                p = as.numeric(p)
+
+
+                if(grepl("^q|Q", v)){
+                    # we transform the quartile into a percentile
+                    if(!p %in% c(0:4)){
+                        stop_up("In 'bin', the format should be 'cut::a]b]' with 'a', 'b', etc, numbers or quartiles (resp. percentiles) of the form qX (resp. pX) with X a number. \n  The value '", v, "', in '", bin, "', is incorrect. \n  The quartile must be an integer between 0 and 4.")
+                    }
+
+                    p = c(0, 25, 50, 75, 100)[p + 1]
+                }
+
+                if(!p %in% 0:100){
+                    stop_up("In 'bin', the format should be 'cut::a]b]' with 'a', 'b', etc, numbers or quartiles (resp. percentiles) of the form qX (resp. pX) with X a number. \n  The value '", v, "', in '", bin, "', is incorrect. \n  The percentile must be an integer between 0 and 100.")
+                }
+
+                cut_points[i] = quantile(x, p/100)
+
+            } else {
+                stop_up("In 'bin', the format should be 'cut::a]b]' with 'a', 'b', etc, numbers or quartiles (resp. percentiles) of the form qX (resp. pX) with X a number. \n  The value '", v, "', in '", bin, "', is incorrect. This is not a percentile nor a number.")
+            }
+        }
+
+        if(n_cuts > 1 && any(cut_points[1:(n_cuts-1)] > cut_points[1 + 1:(n_cuts-1)])){
+            i_pblm = which(cut_points[1:(n_cuts-1)] > cut_points[1 + 1:(n_cuts-1)])[1]
+            stop_up("In 'bin', the format should be 'cut::a]b]' with 'a', 'b', etc, numbers or quartiles (resp. percentiles) of the form qX (resp. pX) with X a number. \n  The values 'a', 'b', etc should be increasing, but the ", n_th(i_pblm), " value (", cut_points[i_pblm], ") is larger than the ", n_th(i_pblm + 1), " (", cut_points[i_pblm + 1], ").")
+        }
+
+    }
+
+    is_included = 1 * (bounds == "]")
+    x_cut = cpp_cut(x_sorted, cut_points, is_included)
+
+    x_int = x_cut$x_int
+    isnt_empty = x_cut$isnt_empty
+    value_min = x_cut$value_min
+    value_max = x_cut$value_max
+    is_int = x_cut$is_int
+
+    n_bins = sum(isnt_empty)
+
+    if(any(isnt_empty == 0)){
+        i_empty = which(isnt_empty == 0)
+        if(getFixest_notes()){
+            message("When binning: in '", bin, "', the ", enumerate_items(n_th(i_empty)), " bin", plural_len(i_empty, "s.is"), " empty.")
+        }
+
+        x_int = cumsum(isnt_empty)[x_int]
+        value_min = value_min[-i_empty]
+        value_max = value_max[-i_empty]
+    }
+
+    # creating the labels
+    labels = character(n_bins)
+    if(is_int){
+        # format A-B
+
+        # we don't want to add a comma to the years! But to large numbers: yes
+        fmt_fun = if(value_max[n_bins] > 9999) dreamerr::fsignif else function(x) as.character(x)
+
+        for(i in 1:n_bins){
+            if(value_min[i] == value_max[i]){
+                labels[i] = fmt_fun(value_min[i])
+            } else {
+                labels[i] = paste0(fmt_fun(value_min[i]), "-", fmt_fun(value_max[i]))
+            }
+        }
+
+    } else {
+        # format [A, B]
+        # we always write in inclusion, too hard to do the exclusion mentally
+        d_min = NULL
+        for(i in 1:n_bins){
+            vmin = value_min[i]
+            vmax = value_max[i]
+
+            l10_diff = if(vmax == vmin) 0 else log10(vmax - vmin)
+            # d: nber of digits
+            d = if(l10_diff >= 0) 1 else ceiling(abs(l10_diff))
+            if(!is.null(d_min) && d < d_min) d = d_min
+
+            # we check consistency problems
+            d_min = NULL
+            vmax_fmt = sprintf("%.*f", d, vmax)
+            if(i != n_bins){
+                vmin_next_fmt = sprintf("%.*f", d, value_min[i + 1])
+                if(vmax_fmt == vmin_next_fmt){
+                    l10_diff = log10(value_min[i + 1] - vmax)
+                    d = ceiling(abs(l10_diff))
+                    d_min = d
+                }
+                vmax_fmt = cpp_add_commas(vmax, d, FALSE)
+            }
+            vmin_fmt = cpp_add_commas(vmin, d, FALSE)
+
+            labels[i] = paste0("[", vmin_fmt, "; ", vmax_fmt, "]")
+        }
+    }
+
+
+    # Te result
+    if(ANY_NA){
+        res = rep(NA_real_, n)
+        res[!IS_NA] = x_int[order(x_order)]
+    } else {
+        res = x_int[order(x_order)]
+    }
+
+    res = factor(res, labels = labels)
+
+    return(res)
 }
 
 
@@ -6724,7 +7031,7 @@ error_sender = function(expr, ..., clean, up = 0, arg_name){
 
     if("try-error" %in% class(res)){
         set_up(1 + up)
-        msg = paste(..., collapse = "")
+        msg = paste0(..., collapse = "")
 
         if(nchar(msg) == 0){
             if(missing(arg_name)){
@@ -6733,20 +7040,34 @@ error_sender = function(expr, ..., clean, up = 0, arg_name){
             msg = paste0("Argument '", arg_name, "' could not be evaluated: ")
             stop_up(msg, res[[2]])
 
-        } else if(!missing(clean)){
+        } else {
 
-            if(grepl(" => ", clean)){
-                clean_split = strsplit(clean, " => ")[[1]]
-                from = clean_split[1]
-                to = clean_split[2]
+            # The expression that is evaluated is absolutely non informative for the user
+            call_non_informative = deparse(substitute(expr), 100)[1]
+            call_error = deparse(res[[1]], 100)[1]
+
+            if(call_error == call_non_informative){
+                call_error = ""
+
             } else {
-                from = clean
-                to = ""
+                call_error = paste0("In ", call_error, ": ")
             }
 
-            stop_up(msg, "\n  In ", deparse(res[[1]], 100)[1], ": ", gsub(from, to, res[[2]]))
-        } else {
-            stop_up(msg, "\n  In ", deparse(res[[1]], 100)[1], ": ", res[[2]])
+            if(!missing(clean)){
+
+                if(grepl(" => ", clean)){
+                    clean_split = strsplit(clean, " => ")[[1]]
+                    from = clean_split[1]
+                    to = clean_split[2]
+                } else {
+                    from = clean
+                    to = ""
+                }
+
+                stop_up(msg, "\n  ", call_error, gsub(from, to, res[[2]]))
+            } else {
+                stop_up(msg, "\n  ", call_error, res[[2]])
+            }
         }
     }
 
@@ -7326,6 +7647,11 @@ extract_fun = function(fml_char, fun, err_msg = NULL, bool = FALSE, drop = TRUE)
     if(n == 1 && drop) res = res[[1]]
 
     return(res)
+}
+
+is_numeric_in_char = function(x){
+    res = tryCatch(as.numeric(x), warning = function(x) "not numeric")
+    !identical(res, "not numeric")
 }
 
 

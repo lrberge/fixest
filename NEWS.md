@@ -23,6 +23,32 @@
 
  - when computing Newey-West standard-errors for time series, the bandwidth is now selected thanks to the [bwNeweyWest](https://sandwich.r-forge.r-project.org/reference/NeweyWest.html) function from the [sandwich](https://sandwich.r-forge.r-project.org/index.html) package. This function implements the method described in Newey and West 1994.
  
+ - `bin`: numeric vectors can be 'cut' with the new special value `'cut::q3]p90]'`, check it out!
+```R
+data(iris)
+plen = iris$Petal.Length
+
+# 3 parts of (roughly) equal size
+table(bin(plen, "cut::3"))
+
+# Three custom bins
+table(bin(plen, "cut::2]5]"))
+
+# .. same, excluding 5 in the 2nd bin
+table(bin(plen, "cut::2]5["))
+
+# Using quartiles
+table(bin(plen, "cut::q1]q2]q3]"))
+
+# Using percentiles
+table(bin(plen, "cut::p20]p50]p70]p90]"))
+
+# Mixing all
+table(bin(plen, "cut::2[q2]p90]"))
+```
+
+ - `bin` also accepts formulas, e.g. `bin = list("<2" = ~ x < 2)` (`x` must be the only variable).
+ 
  
 ## etable
 
