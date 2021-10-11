@@ -4403,15 +4403,31 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
         x_split_open = x_split_new
     }
 
-    x_split_close_left = gsub("^([^\\[]+)\\].*", "\\1", x_split_open[-1])
-    x_split_close_right = substr(x_split_open[-1], nchar(x_split_close_left) + 2, nchar(x_split_open[-1]))
+    # Finding the elements left/right of the closing bracket
+    # we take care of indexing within brackets (e.g. x1 + .[m[1]])
+    b_open = gregexpr("[", x_split_open[-1], fixed = TRUE)
+    b_close = gregexpr("]", x_split_open[-1], fixed = TRUE)
 
     x_split = character(length(x_split_open) * 2 - 1)
     n = length(x_split)
     x_split[1] = x_split_open[1]
 
-    for(i in 2:n){
-        x_split[[i]] = if(i %% 2 == 0) x_split_close_left[i %/% 2] else x_split_close_right[i %/% 2]
+    for(i in seq_along(b_open)){
+
+        if(b_open[[i]][1] != -1){
+            # means there was an open [
+            index_closing = b_close[[i]][which.max(b_close[[i]] < c(b_open[[i]], Inf))]
+        } else {
+            index_closing = b_close[[i]][1]
+        }
+
+        x_SO = x_split_open[i + 1]
+        x_split_close_left = substr(x_SO, 1, index_closing - 1)
+        x_split_close_right = substr(x_SO, index_closing + 1, nchar(x_SO))
+
+        j = 2 * i
+        x_split[[j]] = x_split_close_left
+        x_split[[j + 1]] = x_split_close_right
     }
 
     if(is_nested){
