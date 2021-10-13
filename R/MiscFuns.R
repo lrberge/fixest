@@ -4176,6 +4176,7 @@ obs = function(x){
 #' @param x A \code{\link[fixest]{feols}} estimation that should contain fixed-effects.
 #' @param object An object returned by \code{check_conv_feols}.
 #' @param type Either "short" (default) or "detail". If "short", only the maximum absolute FOC are displayed, otherwise the 2 smallest and the 2 largest FOC are reported for each fixed-effect and each variable.
+#' @param ... Not currently used.
 #'
 #' Note that this function first re-demeans the variables, thus possibly incurring some extra computation time.
 #'

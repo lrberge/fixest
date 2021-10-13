@@ -14,7 +14,9 @@ check_conv_feols(x)
 
 \item{object}{An object returned by \code{check_conv_feols}.}
 
-\item{type}{Either "short" (default) or "detail". If "short", only the maximum absolute FOC are displayed, otherwise the 2 smallest and the 2 largest FOC are reported for each fixed-effect and each variable.
+\item{type}{Either "short" (default) or "detail". If "short", only the maximum absolute FOC are displayed, otherwise the 2 smallest and the 2 largest FOC are reported for each fixed-effect and each variable.}
+
+\item{...}{Not currently used.
 
 Note that this function first re-demeans the variables, thus possibly incurring some extra computation time.}
 }
