@@ -10445,33 +10445,44 @@ initialize_startup_msg = function(startup_msg){
         }
 
     } else if(!identical(previous_version, current_version)){
-        # A) we update the version
-        renvir_update("fixest_version", current_version)
 
-        # B) we reset the value of fixest_startup_msg
-        #    only if the previous_version is anterior to the version that introduced the
-        #    message (means the message SHOULD pop since it would be the first time)
+        if(version2num(current_version) < version2num(previous_version)){
+            # Can happen in projects shared in the cloud
+            # In that case, we don't touch the startup message
 
-        max_version_msg = names(startup_msg)[1]
-
-        if(version2num(previous_version) < version2num(max_version_msg)){
-            # You force a startup message even if it was turned off in a previous version
-
-            # use case:
-            # - v0.9.0: startup message, user uses fixest_startup_msg(FALSE)
-            # - v0.10.0: new breaking changes, you want to inform the user even if he had set
-            # fixest_startup_msg(FALSE) in v0.9.0
-            #
-
-            renvir_update("fixest_startup_msg", previous_version)
-            return(previous_version)
+            msg = paste0("The current project used 'fixest' version ", previous_version, ", but the current version is only ", current_version, ". Maybe update the package?")
+            packageStartupMessage(fit_screen(msg, 1))
 
         } else {
-            # The previous version is already posterior to the last message
-            # => no startup message any more
 
-            renvir_update("fixest_startup_msg", FALSE)
-            return(FALSE)
+            # A) we update the version
+            renvir_update("fixest_version", current_version)
+
+            # B) we reset the value of fixest_startup_msg
+            #    only if the previous_version is anterior to the version that introduced the
+            #    message (means the message SHOULD pop since it would be the first time)
+
+            max_version_msg = names(startup_msg)[1]
+
+            if(version2num(previous_version) < version2num(max_version_msg)){
+                # You force a startup message even if it was turned off in a previous version
+
+                # use case:
+                # - v0.9.0: startup message, user uses fixest_startup_msg(FALSE)
+                # - v0.10.0: new breaking changes, you want to inform the user even if he had set
+                # fixest_startup_msg(FALSE) in v0.9.0
+                #
+
+                renvir_update("fixest_startup_msg", previous_version)
+                return(previous_version)
+
+            } else {
+                # The previous version is already posterior to the last message
+                # => no startup message any more
+
+                renvir_update("fixest_startup_msg", FALSE)
+                return(FALSE)
+            }
         }
     }
 
@@ -10496,7 +10507,11 @@ fixest_version = function(){
 }
 
 is_fixest_used = function(){
-    # It takes quite some time though....
+    # To return TRUE:
+    # - fixest in the files
+    # - + file saved > 48H
+    #
+    # - if fixest but file saved > 48H, very likely a new project
 
     # Only level 1 recursivity
     files = list.files(pattern = "\\.(r|R)$")
@@ -10510,7 +10525,23 @@ is_fixest_used = function(){
 
     big_text = lapply(files, readLines, warn = FALSE)
 
-    return(any(grepl("fixest", big_text)))
+    # we get the files that have fixest in them
+    id_fixest = which(sapply(big_text, function(x) any(grepl("fixest", x, fixed = TRUE))))
+
+    fixest_files = files[id_fixest]
+    if(length(fixest_files) == 0) return(FALSE)
+
+    now = Sys.time()
+
+    for(f in fixest_files){
+        f_created = file.mtime(f)
+        d = as.numeric(difftime(now, f_created, units = "days"))
+        if(d > 2){
+            return(TRUE)
+        }
+    }
+
+    return(TRUE)
 }
 
 renvir_get = function(key){

@@ -75,6 +75,8 @@ table(bin(plen, "cut::2[q2]p90]"))
  - improve error messages in general by prompting additional error calls.
  
  - the dictionaries now ignore white spaces in coefficient names (thanks to Caleb Kwon).
+ 
+ - the package startup messages have been improve (it should pop less often).
 
 
 # fixest 0.10.0
