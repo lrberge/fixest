@@ -6,7 +6,7 @@
 
 
 
-error_catcher = function(expr) tryCatch(expr, error = function(e) structure(conditionMessage(e), class = "try-error"))
+
 
 test = function(x, y, type = "=", tol = 1e-6){
     mc = match.call()
@@ -25,7 +25,7 @@ test = function(x, y, type = "=", tol = 1e-6){
 
     if(type == "err"){
         # we expect an error
-        m = error_catcher(x)
+        m = tryCatch(x, error = function(e) structure(conditionMessage(e), class = "try-error"))
         if(!"try-error" %in% class(m)){
             stop("Expected an error that did not occur.")
         } else if(IS_Y && !grepl(tolower(y), tolower(m), fixed = TRUE)){
