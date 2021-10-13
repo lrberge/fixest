@@ -14,6 +14,7 @@ export(extraline_register)
 export(collinearity)
 export(r2, fitstat, fitstat_register, wald)
 export(fixest_startup_msg)
+export(check_conv_feols)
 # did
 export(did_means)
 # graph
@@ -52,6 +53,7 @@ S3method(print, osize)
 S3method(summary, fixest.fixef)
 S3method(summary, fixest)
 S3method(summary, fixest_list)
+S3method(summary, fixest_check_conv)
 S3method(aggregate, fixest)
 S3method(plot, fixest.fixef)
 S3method("[", fixest_panel) # Lag related

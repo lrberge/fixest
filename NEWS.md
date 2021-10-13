@@ -64,6 +64,8 @@ table(bin(plen, "cut::2[q2]p90]"))
  
  - `dsb`: applies the dot square bracket operator to character strings.
  
+ - `check_conv_feols`: checks the convergence of the fixed-effects in `feols` models by looking at the first-order conditions.
+ 
 ## Other
 
  - improve error messages when `subset` does not select any element.

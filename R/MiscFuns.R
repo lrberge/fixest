@@ -3552,7 +3552,7 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
 #'
 #' @inheritSection feols Varying slopes
 #'
-#' @param X A matrix, vector, data.frame or a list OR a formula. If equal to a formula, then the argument \code{data} is required, and it must be of the type: \code{x1 + x2 ~ f1 + fe2} with on the LHS the variables to be centered, and on the RHS the factors used for centering. Note that you can use variables with varying slopes with the syntax \code{fe[v1, v2]} (see details in \code{\link[fixest]{feols}}). If not a formula, it must represent the data to be centered. Of course the dimension of that data must be the same as the factors used for centering (argument \code{f}).
+#' @param X A matrix, vector, data.frame or a list OR a formula OR a \code{\link[fixest]{feols}} estimation. If equal to a formula, then the argument \code{data} is required, and it must be of the type: \code{x1 + x2 ~ f1 + fe2} with on the LHS the variables to be centered, and on the RHS the factors used for centering. Note that you can use variables with varying slopes with the syntax \code{fe[v1, v2]} (see details in \code{\link[fixest]{feols}}). If a \code{feols} estimation, all variables (LHS+RHS) are demeaned and then returned (only if it was estimated with fixed-effects). Otherwise, it must represent the data to be centered. Of course the number of observations of that data must be the same as the factors used for centering (argument \code{f}).
 #' @param f A matrix, vector, data.frame or list. The factors used to center the variables in argument \code{X}. Matrices will be coerced using \code{as.data.frame}.
 #' @param slope.vars A vector, matrix or list representing the variables with varying slopes. Matrices will be coerced using \code{as.data.frame}. Note that if this argument is used it MUST be in conjunction with the argument \code{slope.flag} that maps the factors to which the varying slopes are attached. See examples.
 #' @param slope.flag An integer vector of the same length as the number of variables in \code{f} (the factors used for centering). It indicates for each factor the number of variables with varying slopes to which it is associated. Positive values mean that the raw factor should also be included in the centering, negative values that it should be excluded. Sorry it's complicated... but see the examples it may get clearer.
@@ -3565,6 +3565,8 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
 #' @param na.rm Logical, default is \code{TRUE}. If \code{TRUE} and the input data contains any NA value, then any observation with NA will be discarded leading to an output with less observations than the input. If \code{FALSE}, if NAs are present the output will also be filled with NAs for each NA observation in input.
 #' @param as.matrix Logical, if \code{TRUE} a matrix is returned, if \code{FALSE} it will be a data.frame. The default depends on the input, if atomic then a matrix will be returned.
 #' @param im_confident Logical, default is \code{FALSE}. FOR EXPERT USERS ONLY! This argument allows to skip some of the preprocessing of the arguments given in input. If \code{TRUE}, then \code{X} MUST be a numeric vector/matrix/list (not a formula!), \code{f} MUST be a list, \code{slope.vars} MUST be a list, \code{slope.vars} MUST be consistent with \code{slope.flag}, and \code{weights}, if given, MUST be numeric (not integer!). Further there MUST be not any NA value, and the number of observations of each element MUST be consistent. Non compliance to these rules may simply lead your R session to break.
+#' @param fixef.reorder Logical, default is \code{TRUE}. Whether to reorder the fixed-effects by frequencies before feeding them into the algorithm. If \code{FALSE}, the original fixed-effects order provided by the user is maintained. In general, reordering leads to faster and more precise performance.
+#' @param ... Not currently used.
 #'
 #' @return
 #' It returns a data.frame of the same number of columns as the number of variables to be centered.
@@ -3654,9 +3656,9 @@ to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE
 #'
 demean = function(X, f, slope.vars, slope.flag, data, weights,
                   nthreads = getFixest_nthreads(), notes = getFixest_notes(),
-                  iter = 2000, tol = 1e-6, na.rm = TRUE,
+                  iter = 2000, tol = 1e-6, fixef.reorder = TRUE, na.rm = TRUE,
                   as.matrix = is.atomic(X),
-                  im_confident = FALSE) {
+                  im_confident = FALSE, ...) {
 
 
     ANY_NA = FALSE
@@ -3666,7 +3668,8 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
 
     # LB: next line is needed if input data is matrix and as.matrix is set to FALSE
     clx = NULL
-    if(lX <- is.list(X)) {
+    is_fixest = inherits(X, "fixest")
+    if(lX <- is.list(X) && !is_fixest) {
         clx <- oldClass(X)
         # SK: oldClass is faster and returns NULL when the list is plain. class returns the implicit class "list".
         # This is the key to fast R code -> all data.frame methods are super slow and should duly be avoided in internal code.
@@ -3677,13 +3680,65 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
     # LB: To avoid delayed evaluation problems (due to new default is.atomic(X))
     as_matrix = as.matrix
 
+    # internal argument
+    fe_info = FALSE
+
     # Step 1: formatting the input
     if(!im_confident){
 
-        check_arg(X, "numeric vmatrix | list | formula mbt")
+        check_arg(X, "numeric vmatrix | list | formula | class(fixest) mbt")
         check_arg(iter, "integer scalar GE{1}")
         check_arg(tol, "numeric scalar GT{0}")
         check_arg(notes, "logical scalar")
+
+        validate_dots(valid_args = "fe_info", stop = TRUE)
+        dots = list(...)
+        fe_info = isTRUE(dots$fe_info)
+
+        data_mbt = TRUE
+        if(inherits(X, "fixest")){
+            data_mbt = FALSE
+            if(!identical(X$method, "feols")){
+                stop("This function only works for 'feols' estimations (not for ", X$method, ").")
+            }
+
+            if(!fe_info && !is.null(X$y_demeaned)){
+                return(cbind(X$y_demeaned, X$X_demeaned))
+            }
+
+            if(!"fixef_vars" %in% names(X)){
+                stop("To apply demeaning, the estimation must contain fixed-effects, this is currently not the case.")
+            }
+
+            # Otherwise => we create data and X: formula
+            data = fetch_data(X)
+            fml_linear = X$fml_all$linear
+            fml_fixef = X$fml_all$fixef
+
+            fml_vars = .xpd(~ ..lhs + ..rhs,
+                            ..lhs = fml_linear[[2]],
+                            ..rhs = fml_linear[[3]])
+
+            if(!is.null(X$fml_all$iv)){
+                fml_iv = X$fml_all$iv
+                fml_vars = .xpd(~ ..vars + ..iv_lhs + ..iv_rhs,
+                                ..vars = fml_vars,
+                                ..iv_lhs = fml_iv[[2]],
+                                ..iv_rhs = fml_iv[[3]])
+            }
+
+            fml = .xpd(lhs = fml_vars, rhs = fml_fixef)
+
+            mc = match.call()
+            if(!"tol" %in% names(mc)) tol = X$fixef.tol
+            if(!"iter" %in% names(mc)) iter = X$fixef.iter
+
+            weights = X[["weights"]]
+
+            X = fml
+
+            as_matrix = TRUE
+        }
 
         #
         # X
@@ -3692,8 +3747,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
         fe_done = FALSE
         if(is.call(X)) {
 
-            # The above line is not needed anymore since model.matrix is no longer used.
-            check_arg(data, "data.frame mbt")
+            if(data_mbt) check_arg(data, "data.frame mbt")
             check_arg(X, "ts formula var(data)", .data = data)
 
             # Extracting the information
@@ -3706,11 +3760,21 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
 
             # FE
             fe_done = TRUE
-            f = unclass(error_sender(prepare_df(terms_fixef$fe_vars, data), "Error when evaluating the fixed-effects variables: "))
+            f = unclass(error_sender(prepare_df(terms_fixef$fe_vars, data),
+                                     "Error when evaluating the fixed-effects variables: "))
+
             isSlope = any(terms_fixef$slope_flag != 0)
 
             if(isSlope) {
-                slope.vars = unclass(error_sender(prepare_df(terms_fixef$slope_vars, data), "Error when evaluating the variable with varying slopes: "))
+
+                slope.vars = unclass(error_sender(prepare_df(terms_fixef$slope_vars, data),
+                                                  "Error when evaluating the variable with varying slopes: "))
+
+                if(anyDuplicated(terms_fixef$slope_vars)){
+                    # we need it!!!!
+                    slope.vars = slope.vars[terms_fixef$slope_vars]
+                }
+
                 slope.flag = terms_fixef$slope_flag
 
                 is_numeric = vapply(`attributes<-`(slope.vars, NULL), is.numeric, TRUE)
@@ -3925,6 +3989,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
     #
     # Unclassing fes
     #
+
     quf_info_all = cpppar_quf_table_sum(x = f, y = 0, do_sum_y = FALSE, rm_0 = FALSE,
                                         rm_1 = FALSE, rm_single = FALSE, do_refactor = FALSE,
                                         r_x_sizes = 0, obs2keep = 0, only_slope = slope.flag < 0L,
@@ -3933,6 +3998,60 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
     # table/sum_y/sizes
     fixef_table = quf_info_all$table
     fixef_sizes = lengths(fixef_table)
+
+    if(fixef.reorder){
+        new_order = order(fixef_sizes, decreasing = TRUE)
+        if(is.unsorted(new_order)){
+            fixef_table = fixef_table[new_order]
+            fixef_sizes = fixef_sizes[new_order]
+            quf_info_all$quf = quf_info_all$quf[new_order]
+
+            # We reorder slope.vars only if needed (because it is a pain)
+            if(sum(slope.flag != 0) >= 2){
+
+                # here slope.vars have 2 or more variables:
+                # either matrix or data.frame/list
+                if(!is.list(slope.vars)){
+                    slope.vars = as.data.frame(slope.vars)
+                }
+                # we ensure it's a plain list
+                slope.vars = unclass(slope.vars)
+
+                n_fixef = length(slope.flag)
+                slope_vars_list = vector("list", n_fixef)
+                id_current = 0
+                for(i in 1:n_fixef){
+                    n_slopes = abs(slope.flag[i])
+
+                    if(n_slopes == 0){
+                        slope_vars_list[[i]] = 0
+                    } else {
+                        slope_vars_list[[i]] = slope.vars[1:n_slopes + id_current]
+                        id_current = id_current + n_slopes
+                    }
+                }
+
+                # Reordering => currently it's quite clumsy (but I HATE VSs!)
+                slope.vars = vector("list", sum(abs(slope.flag)))
+                slope_vars_list_reordered = slope_vars_list[new_order]
+                id_current = 0
+                for(i in 1:n_fixef){
+                    vs = slope_vars_list_reordered[[i]]
+                    if(is.list(vs)){
+                        n_vs = length(vs)
+                        for(j in 1:n_vs){
+                            slope.vars[[id_current + j]] = vs[[j]]
+                        }
+                        id_current = id_current + n_vs
+                    }
+                }
+
+                # slope.flag must be reordered afterwards
+                slope.flag = slope.flag[new_order]
+            }
+        }
+    }
+
     fixef_table_vector = unlist(fixef_table)
     if(!is.integer(slope.flag)) slope.flag = as.integer(slope.flag)
 
@@ -3947,7 +4066,7 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
         # Quirk => y returns a list only if NCOL(y) > 1 or is.list(y)
         y = if(lX) X else list(X)
         # SK: This does the same, a bit more frugal
-        # LB: I tend to prefer late evaluations instead of lX which requires bookeeping
+        # LB: I tend to prefer late evaluations instead of lX which requires bookkeeping
         X = 0
     }
 
@@ -3956,6 +4075,17 @@ demean = function(X, f, slope.vars, slope.flag, data, weights,
                               fe_id_list = quf_info_all$quf, table_id_I = fixef_table_vector,
                               slope_flag_Q = slope.flag, slope_vars_list = slope.vars,
                               r_init = 0, nthreads = nthreads)
+
+    # Internal call
+    if(fe_info){
+
+        res = list(y = vars_demean$y_demean, X = vars_demean$X_demean,
+                   weights = weights, fixef_id_list = quf_info_all$quf,
+                   slope_vars = slope.vars, slope_flag = slope.flag, varnames = colnames(X))
+
+        return(res)
+
+    }
 
 
     if(as_matrix) {
@@ -4033,6 +4163,162 @@ obs = function(x){
 
     return(id)
 }
+
+
+
+
+#' Check the fixed-effects convergence of a \code{feols} estimation
+#'
+#' Checks the convergence of a \code{feols} estimation by computing the first-order conditions of all fixed-effects (all should be close to 0)
+#'
+#' @param x A \code{\link[fixest]{feols}} estimation that should contain fixed-effects.
+#' @param object An object returned by \code{check_conv_feols}.
+#' @param type Either "short" (default) or "detail". If "short", only the maximum absolute FOC are displayed, otherwise the 2 smallest and the 2 largest FOC are reported for each fixed-effect and each variable.
+#'
+#' Note that this function first re-demeans the variables, thus possibly incurring some extra computation time.
+#'
+#' @return
+#' It returns a list of \code{N} elements, \code{N} being the number of variables in the estimation (dependent variable + explanatory variables +, if IV, endogenous variables and instruments). For each variable, all the first-order conditions for each fixed-effect are returned.
+#'
+#' @examples
+#'
+#' base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+#' base$FE = rep(1:30, 5)
+#'
+#' # one estimation with fixed-effects + varying slopes
+#' est = feols(y ~ x1 | species[x2] + FE[x3], base)
+#'
+#' # Checking the convergence
+#' conv = check_conv_feols(est)
+#'
+#' # We can check that al values are close to 0
+#' summary(conv)
+#'
+#' summary(conv, "detail")
+#'
+#'
+#'
+check_conv_feols = function(x){
+
+    check_arg(x, "class(fixest) mbt")
+    if(!identical(x$method, "feols")){
+        stop("This function only works for 'feols' estimations (not for ", x$method, ").")
+    }
+
+    if(!"fixef_vars" %in% names(x)){
+        message("This function only works with fixed-effects (which are currently not present).")
+        return(NULL)
+    }
+
+    # fixef names for information
+    new_order = x$fe.reorder
+    fixef_vars = x$fixef_vars[new_order]
+    if(!is.null(x$fixef_terms)){
+
+        slope_variables = x$slope_variables_reordered
+        slope_flag = x$slope_flag_reordered
+
+        # We reconstruct the terms
+        fixef_names = c()
+        start = c(0, cumsum(abs(slope_flag)))
+        for(i in seq_along(slope_flag)){
+            sf = slope_flag[i]
+            if(sf >= 0){
+                fixef_names = c(fixef_names, fixef_vars[i])
+            }
+
+            if(abs(sf) > 0){
+                fixef_names = c(fixef_names, paste0(fixef_vars[i], "[[", names(slope_variables)[start[i] + 1:abs(sf)], "]]"))
+            }
+        }
+    } else {
+        fixef_names = fixef_vars
+    }
+
+
+    info = demean(x, fe_info = TRUE)
+
+    res = check_conv(y = info$y, X = info$X, fixef_id_list = info$fixef_id_list,
+                     slope_flag = info$slope_flag, slope_vars = info$slope_vars,
+                     weights = info$weights, full = TRUE, fixef_names = fixef_names)
+
+    names(res) = info$varnames
+
+    class(res) = "fixest_check_conv"
+
+    res
+}
+
+#' @rdname check_conv_feols
+summary.fixest_check_conv = function(object, type = "short", ...){
+
+    check_arg_plus(type, "match(short, detail)")
+    validate_dots(suggest_args = "type")
+
+    if(type == "short"){
+        info_max_abs = lapply(object, function(x) sapply(x, function(y) max(abs(y))))
+
+        info_max_abs = do.call("rbind", info_max_abs)
+
+        cat("Maximum absolute value of the first-order conditions:\n\n")
+        print(info_max_abs)
+
+    } else {
+
+        extract_and_format = function(x){
+            # x: list
+
+            x_sorted = lapply(x, sort)
+
+            is_short = sapply(x, function(y) length(y) <= 4)
+
+            x_small = list()
+            for(i in seq_along(x)){
+                xi = x_sorted[[i]]
+                if(is_short[i]){
+                    x_small[[i]] = c(xi, rep(NA, 4 - length(xi)))
+                } else {
+                    x_small[[i]] = c(head(xi, 2), tail(xi, 2))
+                }
+            }
+
+            x_mat = format(do.call("rbind", x_small), digits = 3)
+
+            x_fmt = c()
+            for(i in seq_along(x)){
+                xi = x_mat[i, ]
+                if(is_short[i]){
+                    x_fmt[[i]] = gsub(", +NA", "", paste0(xi, collapse = ", "))
+                } else {
+                    x_fmt[[i]] = paste0(xi[1], ", ", xi[2], ", ..., ", xi[3], ", ", xi[4])
+                }
+            }
+
+            x_names = sfill(names(x))
+
+            res = paste0(x_names, ": ", x_fmt)
+
+            res
+        }
+
+        info = lapply(object, extract_and_format)
+
+        cat("Smallest and largest values of the first-order conditions:\n\n")
+        var_names = sfill(names(object), right = TRUE)
+        intro = sfill("|", n = nchar(var_names[1]) + 1)
+        n_var = length(object)
+        for(i in 1:n_var){
+            cat(var_names[i], "\n")
+            value = paste0(intro, info[[i]])
+            cat(value, sep = "\n")
+            cat(gsub(" ", "_", intro), "\n")
+
+            if(i < n_var) cat("\n")
+        }
+    }
+}
+
+
 
 
 #' Prints the number of unique elements

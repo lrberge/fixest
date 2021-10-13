@@ -2812,6 +2812,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         } else {
             K = K + sum(fixef_sizes - 1) + 1
         }
+        res$fixef.tol = fixef.tol
+        res$fixef.iter = fixef.iter
     }
     res$nparams = K
 

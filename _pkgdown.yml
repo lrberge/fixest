@@ -110,6 +110,7 @@ reference:
       desc: Other methods and functions that didn't fit the previous sections
       contents:
         - dsb
+        - check_conv_feols
         - n_unik
         - osize
         - did_means
