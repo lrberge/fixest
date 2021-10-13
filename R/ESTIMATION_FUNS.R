@@ -1388,14 +1388,17 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 		    opt_fe = check_conv(y_demean, X_demean, fixef_id_list, slope_flag, slope_vars, weights)
 
 		    # This is a bit too rough a check but it should catch the most problematic cases
-		    if(any(opt_fe > 1e-4)){
+		    if(anyNA(opt_fe) || any(opt_fe > 1e-4)){
 		        msg = "There seems to be a convergence problem due to the presence of variables with varying slopes. The precision of the estimates may not be great."
 		        if(any(slope_flag < 0)){
 		            sugg = "This convergence problem mostly arises when there are varying slopes without their associated fixed-effect, as is the case in your estimation. Why not try to include the fixed-effect (i.e. use '[' instead of '[[')?"
 		        } else {
-		            sugg = "As a workaround, and if there are not too many slopes, you can use the variables with varying slopes as regular variables using the function interact (see ?interact)."
+		            sugg = "As a workaround, and if there are not too many slopes, you can use the variables with varying slopes as regular variables using the function i (see ?i)."
 		        }
-		        msg = paste(msg, sugg)
+
+		        sugg_tol = "Or use a lower 'fixef.tol' (sometimes it works)?"
+
+		        msg = paste(msg, sugg, sugg_tol)
 
 		        res$convStatus = FALSE
 
