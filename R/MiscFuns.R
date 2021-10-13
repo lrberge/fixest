@@ -6483,6 +6483,20 @@ dict_apply = function(x, dict = NULL){
         return(x)
     }
 
+    # We make the dictionary names space agnostic, adds a handful of us only
+    if(any(grepl(" ", x, fixed = TRUE))){
+        x = gsub(" ", "", x, fixed = TRUE)
+    }
+
+    if(any(grepl(" ", names(dict), fixed = TRUE))){
+        names(dict) = gsub(" ", "", names(dict), fixed = TRUE)
+        if(anyDuplicated(names(dict))){
+            dup = duplicated(names(dict))
+            stop("The dictionary 'dict' contains several items with the same names, it concerns ",
+                 enumerate_items(names(dict)[dup]), " (note that spaces are ignored).")
+        }
+    }
+
     who = x %in% names(dict)
     x[who] = dict[as.character(x[who])]
     x

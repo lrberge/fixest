@@ -71,6 +71,8 @@ table(bin(plen, "cut::2[q2]p90]"))
  - add inheritance of the default style in `iplot` when the style is set globally with `setFixest_coefplot`.
  
  - improve error messages in general by prompting additional error calls.
+ 
+ - the dictionaries now ignore white spaces in coefficient names (thanks to Caleb Kwon).
 
 
 # fixest 0.10.0
