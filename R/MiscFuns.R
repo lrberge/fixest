@@ -1060,7 +1060,9 @@ summary.fixest.fixef = function(object, n=5, ...){
 #' # Plotting them:
 #' plot(fe_trade)
 #'
-fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, ...){
+fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, nthreads = getFixest_nthreads(),
+                        fixef.tol = 1e-5, fixef.iter = 10000, ...){
+
 	# object is a fixest object
 	# This function retrieves the dummies
 
@@ -1069,9 +1071,8 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, ...){
     # Checking the arguments
     validate_dots(valid_args = "fixef.tol")
 
-    dots = list(...)
-    fixef.tol = dots$fixef.tol
-    check_value_plus(fixef.tol, "NULL{1e-5} numeric scalar GT{0} LT{1}")
+    check_value(fixef.tol, "numeric scalar GT{0} LT{1}")
+    check_value(fixef.iter, "strict integer scalar GT{0}")
 
     if(isTRUE(object$lean)){
         # LATER: recompute the FEs by extracting them from the data
@@ -1130,14 +1131,15 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, ...){
 	    # STEP 2: demeaning
 	    #
 
+	    nthreads = check_set_nthreads(nthreads)
 
 	    table_id_I = as.integer(unlist(lapply(fe_id_list, table), use.names = FALSE))
 
-	    S_demean = cpp_demean(y = S, X_raw = 0, r_weights = 0, iterMax = 1000L,
+	    S_demean = cpp_demean(y = S, X_raw = 0, r_weights = 0, iterMax = as.integer(fixef.iter),
 	                           diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
 	                           fe_id_list = fe_id_list, table_id_I = table_id_I,
 	                           slope_flag_Q = slope_flag, slope_vars_list = slope_variables,
-	                           r_init = 0, nthreads = 1L, save_fixef = TRUE)
+	                           r_init = 0, nthreads = nthreads, save_fixef = TRUE)
 
 	    fixef_coef = S_demean$fixef_coef
 
