@@ -13,7 +13,7 @@
  
  - fix bug in `etable` regarding the escaping of `fixef_sizes` (reported by Apoorva Lal [#201](https://github.com/lrberge/fixest/issues/201)).
  
- - fix bug introduced in 0.10.0 preventing the estimation of Iv models with interacted fixed-effects (reported by @etiennebacher [#203](https://github.com/lrberge/fixest/issues/203)).
+ - fix bug introduced in 0.10.0 preventing the estimation of IV models with interacted fixed-effects (reported by @etiennebacher [#203](https://github.com/lrberge/fixest/issues/203)).
  
  - fix bug in IV estimations when: a) no exogenous variables were present AND the IV part contained at lags; and b) the endogenous variables contained at least two lags. Reported by Robbie Minton.
  
@@ -76,7 +76,7 @@ table(bin(plen, "cut::2[q2]p90]"))
  
  - the dictionaries now ignore white spaces in coefficient names (thanks to Caleb Kwon).
  
- - the package startup messages have been improve (it should pop less often).
+ - the package startup messages have been improved (they should pop up less often).
 
 
 # fixest 0.10.0
