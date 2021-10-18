@@ -6502,14 +6502,14 @@ fixest_pvalue = function(x, zvalue, vcov){
         if(missing(vcov)) {
             stop("Internal error (=bug): the argument 'vcov' should not be missing in fixest_pvalue().")
 
-        } else if(is.null(attr(vcov,"dof.K"))){
+        } else if(is.null(attr(vcov, "dof.K"))){
             stop("Internal error (=bug): the attribute 'dof.K' from 'vcov' should not be NULL.")
         }
 
         # df.t is always an attribute of the vcov
         df.t = attr(vcov, "df.t")
         if(is.null(df.t)){
-            df.t = max(nobs(x) - attr(vcov,"dof.K"), 1)
+            df.t = max(nobs(x) - attr(vcov, "dof.K"), 1)
         }
 
         pvalue = 2*pt(-abs(zvalue), df.t)
@@ -6530,6 +6530,9 @@ fixest_CI_factor = function(x, level, vcov){
 
         if(missing(vcov)) {
             stop("Internal error (=bug): the argument 'vcov' should not be missing in fixest_CI_factor().")
+
+        } else if(is.null(attr(vcov, "dof.K"))){
+            stop("Internal error (=bug): the attribute 'dof.K' from 'vcov' should not be NULL.")
         }
 
         # df.t is always an attribute of the vcov

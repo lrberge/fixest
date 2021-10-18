@@ -767,34 +767,40 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 
     if(anyNA(bread)){
 
+        IS_NA_VCOV = FALSE
+
         if(!forceCovariance){
-            last_warn = getOption("fixest_last_warning")
-            if(is.null(last_warn) || (proc.time() - last_warn)[3] > 1){
-                warning("Standard errors are NA because of likely presence of collinearity.", call. = FALSE)
-            }
-
-            attr(bread, "type") = "NA (not-available)"
-
-            return(bread)
+            IS_NA_VCOV = TRUE
         } else {
             info_inv = cpp_cholesky(object$hessian)
             if(!is.null(info_inv$all_removed)){
                 # Means all variables are collinear! => can happen when using FEs
-                stop("All variables have virtually no effect on the dependent variable. Covariance is not defined.")
+                IS_NA_VCOV = TRUE
             }
-
-            VCOV_raw_forced = info_inv$XtX_inv
-            if(any(info_inv$id_excl)){
-                n_collin = sum(info_inv$all_removed)
-                message("NOTE: ", n_letter(n_collin), " variable", plural(n_collin, "s.has"), " been found to be singular.")
-
-                VCOV_raw_forced = cpp_mat_reconstruct(VCOV_raw_forced, info_inv$id_excl)
-                VCOV_raw_forced[, info_inv$id_excl] = NA
-                VCOV_raw_forced[info_inv$id_excl, ] = NA
-            }
-
-            bread = VCOV_raw_forced
         }
+
+        if(IS_NA_VCOV){
+            attr(bread, "type") = "NA (not-available)"
+
+            if(is_attr){
+                attr(bread, "dof.K") = object$nparams
+                attr(bread, "df.t") = NA
+            }
+
+            return(bread)
+        }
+
+        VCOV_raw_forced = info_inv$XtX_inv
+        if(any(info_inv$id_excl)){
+            n_collin = sum(info_inv$all_removed)
+            message("NOTE: ", n_letter(n_collin), " variable", plural(n_collin, "s.has"), " been found to be singular.")
+
+            VCOV_raw_forced = cpp_mat_reconstruct(VCOV_raw_forced, info_inv$id_excl)
+            VCOV_raw_forced[, info_inv$id_excl] = NA
+            VCOV_raw_forced[info_inv$id_excl, ] = NA
+        }
+
+        bread = VCOV_raw_forced
 
     }
 
