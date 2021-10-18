@@ -19,6 +19,8 @@
  
  - fix bug in the `.fit` methods when the argument `vcov` wasn't `NULL`.
  
+ - fix bug in `summary.fixest_multi`: when the variance was NA and internal bug could pop in some circumstances.
+ 
 ## New features
 
  - when computing Newey-West standard-errors for time series, the bandwidth is now selected thanks to the [bwNeweyWest](https://sandwich.r-forge.r-project.org/reference/NeweyWest.html) function from the [sandwich](https://sandwich.r-forge.r-project.org/index.html) package. This function implements the method described in Newey and West 1994.
