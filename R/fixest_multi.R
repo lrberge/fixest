@@ -95,7 +95,7 @@ setup_multi = function(index, all_names, data, simplify = TRUE){
 #' @inherit print.fixest_multi seealso
 #'
 #' @param object A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to multiple results.
-#' @param type A character either equal to \code{"short"}, \code{"long"}, \code{"compact"}, or \code{"se_compact"}. If \code{short}, only the table of coefficients is displayed for each estimation. If \code{long}, then the full results are displayed for each estimation. If \code{compact}, a \code{data.frame} is returned with one line per model and the formatted coefficients + standard-errors in the columns. If \code{se_compact}, a \code{data.frame} is returned with one line per model, one numeric column for each coefficient and one numeric column for each standard-error.
+#' @param type A character either equal to \code{"short"}, \code{"long"}, \code{"compact"}, \code{"se_compact"} or \code{"se_long"}. If \code{short}, only the table of coefficients is displayed for each estimation. If \code{long}, then the full results are displayed for each estimation. If \code{compact}, a \code{data.frame} is returned with one line per model and the formatted coefficients + standard-errors in the columns. If \code{se_compact}, a \code{data.frame} is returned with one line per model, one numeric column for each coefficient and one numeric column for each standard-error. If \code{"se_long"}, same as \code{"se_compact"} but the data is in a long format instead of wide.
 #' @param ... Not currently used.
 #'
 #' @return
@@ -119,13 +119,15 @@ setup_multi = function(index, all_names, data, simplify = TRUE){
 #'
 #' summary(res, type = "se_compact")
 #'
+#' summary(res, type = "se_long")
+#'
 #'
 summary.fixest_multi = function(object, type = "short", vcov = NULL, se = NULL, cluster = NULL, ssc = NULL,
                                 .vcov = NULL, stage = 2, lean = FALSE, n = 1000, ...){
     dots = list(...)
     data = attr(object, "data")
 
-    check_arg_plus(type, "match(short, long, compact, se_compact)")
+    check_arg_plus(type, "match(short, long, compact, se_compact, se_long)")
 
     if(!missing(type) || is.null(attr(object, "print_request"))){
         attr(object, "print_request") = type
@@ -151,7 +153,7 @@ summary.fixest_multi = function(object, type = "short", vcov = NULL, se = NULL, 
 
     }
 
-    if(type %in% c("compact", "se_compact")){
+    if(type %in% c("compact", "se_compact", "se_long")){
         meta = attr(object, "meta")
         data = attr(object, "data")
 
@@ -174,6 +176,12 @@ summary.fixest_multi = function(object, type = "short", vcov = NULL, se = NULL, 
         }
         res$i = NULL
 
+        if(type == "se_long"){
+            res$type = "coef"
+        }
+
+        n_start = ncol(res)
+
         signifCode = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.1)
 
         ct_all = list()
@@ -188,7 +196,7 @@ summary.fixest_multi = function(object, type = "short", vcov = NULL, se = NULL, 
                 value = paste0(signif_plus(ct[, 1], 3), stars, " (", signif_plus(ct[, 2], 3), ")")
                 names(value) = vname
 
-            } else if(type == "se_compact"){
+            } else if(type %in% c("se_compact", "se_long")){
                 n = length(vname)
                 vname_tmp = character(2 * n)
                 qui_coef = seq(1, by = 2, length.out = n)
@@ -221,6 +229,20 @@ summary.fixest_multi = function(object, type = "short", vcov = NULL, se = NULL, 
             } else {
                 res[[vname_all[i]]] = my_ct[, i]
             }
+        }
+
+        if(type == "se_long"){
+            # clumsy... but works
+            who_se = which(grepl("__se", names(res)))
+            se_all = res[, c(1:n_start, who_se)]
+            se_all$type = "se"
+            names(se_all) = gsub("__se$", "", names(se_all))
+            coef_all = res[, -who_se]
+
+            quoi = rbind(coef_all, se_all)
+            n = nrow(coef_all)
+            res = quoi[rep(1:n, each = 2) + rep(c(0, n), n), ]
+            row.names(res) = NULL
         }
 
         return(res)

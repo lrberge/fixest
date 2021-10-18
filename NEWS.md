@@ -51,6 +51,8 @@ table(bin(plen, "cut::2[q2]p90]"))
 
  - `bin` also accepts formulas, e.g. `bin = list("<2" = ~ x < 2)` (`x` must be the only variable).
  
+ - add `type = "se_long"` to `summary.fixest_multi` which yields all coefficients and SEs for all estimations in a "long" format.
+ 
  
 ## etable
 
