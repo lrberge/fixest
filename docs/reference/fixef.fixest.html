@@ -142,7 +142,15 @@
     </div>
 
     <pre class="usage"><span class='co'># S3 method for fixest</span>
-<span class='fu'><a href='fixef_reexported.html'>fixef</a></span><span class='op'>(</span><span class='va'>object</span>, notes <span class='op'>=</span> <span class='fu'><a href='setFixest_notes.html'>getFixest_notes</a></span><span class='op'>(</span><span class='op'>)</span>, sorted <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+<span class='fu'><a href='fixef_reexported.html'>fixef</a></span><span class='op'>(</span>
+  <span class='va'>object</span>,
+  notes <span class='op'>=</span> <span class='fu'><a href='setFixest_notes.html'>getFixest_notes</a></span><span class='op'>(</span><span class='op'>)</span>,
+  sorted <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  nthreads <span class='op'>=</span> <span class='fu'><a href='setFixest_nthreads.html'>getFixest_nthreads</a></span><span class='op'>(</span><span class='op'>)</span>,
+  fixef.tol <span class='op'>=</span> <span class='fl'>1e-05</span>,
+  fixef.iter <span class='op'>=</span> <span class='fl'>10000</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -158,6 +166,18 @@
     <tr>
       <th>sorted</th>
       <td><p>Logical, default is <code>TRUE</code>. Whether to order the fixed-effects by their names. If <code>FALSE</code>, then the order used in the demeaning algorithm is used.</p></td>
+    </tr>
+    <tr>
+      <th>nthreads</th>
+      <td><p>The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. The default is to use 50% of all threads. You can set permanently the number of threads used within this package using the function <code><a href='setFixest_nthreads.html'>setFixest_nthreads</a></code>.</p></td>
+    </tr>
+    <tr>
+      <th>fixef.tol</th>
+      <td><p>Precision used to obtain the fixed-effects. Defaults to <code>1e-5</code>. It corresponds to the maximum absolute difference allowed between two coefficients of successive iterations. Argument <code>fixef.tol</code> cannot be lower than <code>10000*.Machine$double.eps</code>. Note that this parameter is dynamically controlled by the algorithm.</p></td>
+    </tr>
+    <tr>
+      <th>fixef.iter</th>
+      <td><p>Maximum number of iterations in fixed-effects algorithm (only in use for 2+ fixed-effects). Default is 10000.</p></td>
     </tr>
     <tr>
       <th>...</th>

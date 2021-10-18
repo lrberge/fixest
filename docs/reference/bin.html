@@ -152,13 +152,31 @@
     </tr>
     <tr>
       <th>bin</th>
-      <td><p>A list of values to be grouped, a vector, or the special value <code>"bin::digit"</code>. To create a new value from old values, use <code>bin = list("new_value"=old_values)</code> with <code>old_values</code> a vector of existing values. It accepts regular expressions, but they must start with an <code>"@"</code>, like in <code>bin="@Aug|Dec"</code>. The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value <code>"bin::digit"</code> to group every <code>digit</code> element. For example if <code>x</code> represent years, using <code>bin="bin::2"</code> create bins of two years. Using <code>"!bin::digit"</code> groups every digit consecutive values starting from the first value. Using <code>"!!bin::digit"</code> is the same bu starting from the last value. In both cases, <code>x</code> is not required to be numeric.</p></td>
+      <td><p>A list of values to be grouped, a vector, a formula, or the special values <code>"bin::digit"</code> or <code>"cut::values"</code>. To create a new value from old values, use <code>bin = list("new_value"=old_values)</code> with <code>old_values</code> a vector of existing values.
+It accepts regular expressions, but they must start with an <code>"@"</code>, like in <code>bin="@Aug|Dec"</code>. It accepts one-sided formulas which must contain the variable <code>x</code>, e.g. <code>bin=list("&lt;2" = ~x &lt; 2)</code>.
+The names of the list are the new names. If the new name is missing, the first value matched becomes the new name.
+Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value <code>"bin::digit"</code> to group every <code>digit</code> element.
+For example if <code>x</code> represents years, using <code>bin="bin::2"</code> creates bins of two years.
+With any data, using <code>"!bin::digit"</code> groups every digit consecutive values starting from the first value.
+Using <code>"!!bin::digit"</code> is the same but starting from the last value.
+With numeric vectors you can: a) use <code>"cut::n"</code> to cut the vector into <code>n</code> equal parts, b) use <code>"cut::a]b["</code> to create the following bins: <code>[min, a]</code>, <code>]a, b[</code>, <code>[b, max]</code>.
+The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. See details and examples. Dot square bracket expansion (see <code><a href='dsb.html'>dsb</a></code>) is enabled.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>It returns a vector of the same length as <code>x</code></p>
+    <h2 class="hasAnchor" id="-cutting-a-numeric-vector"><a class="anchor" href="#-cutting-a-numeric-vector"></a>"Cutting" a numeric vector</h2>
+
+    
+
+
+<p>Numeric vectors can be cut easily into: a) equal parts, b) user-specified bins.</p>
+<p>Use <code>"cut::n"</code> to cut the vector into <code>n</code> (roughly) equal parts. Percentiles are used to partition the data, hence some data distributions can lead to create less than <code>n</code> parts (for example if P0 is the same as P50).</p>
+<p>The user can specify custom bins with the following syntax: <code>"cut::a]b]c]"etc</code>. Here the numbers <code>a</code>, <code>b</code>, <code>c</code>, etc, are a sequence of increasing numbers, each followed by an open or closed square bracket. The numbers can be specified as either plain numbers (e.g. <code>"cut::5]12[32["</code>), quartiles (e.g. <code>"cut::q1]q3["</code>), or percentiles (e.g. <code>"cut::p10]p15]p90]"</code>). Values of different types can be mixed: <code>"cut::5]q2[p80["</code> is valid provided the median (<code>q2</code>) is indeed greater than <code>5</code>, otherwise an error is thrown.</p>
+<p>The square bracket right of each number tells whether the numbers should be included or excluded from the current bin. For example, say <code>x</code> ranges from 0 to 100, then <code>"cut::5]"</code> will create two  bins: one from 0 to 5 and a second from 6 to 100. With <code>"cut::5["</code> the bins would have been 0-4 and 5-100.</p>
+<p>A factor is returned. The labels report the min and max values in each bin.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
@@ -231,6 +249,59 @@
 </div><div class='output co'>#&gt; 
 #&gt;    may   june august 
 #&gt;     31     61     61 </div><div class='input'>
+<span class='co'>#</span>
+<span class='co'># "Cutting" numeric data</span>
+<span class='co'>#</span>
+
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>)</span>
+<span class='va'>plen</span> <span class='op'>=</span> <span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Length</span>
+
+<span class='co'># 3 parts of (roughly) equal size</span>
+<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='st'>"cut::3"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; 
+#&gt; [1.0; 1.9] [3.0; 4.9] [5.0; 6.9] 
+#&gt;         50         54         46 </div><div class='input'>
+<span class='co'># Three custom bins</span>
+<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='st'>"cut::2]5]"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; 
+#&gt; [1.0; 1.9] [3.0; 5.0] [5.1; 6.9] 
+#&gt;         50         58         42 </div><div class='input'>
+<span class='co'># .. same, excluding 5 in the 2nd bin</span>
+<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='st'>"cut::2]5["</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; 
+#&gt; [1.0; 1.9] [3.0; 4.9] [5.0; 6.9] 
+#&gt;         50         54         46 </div><div class='input'>
+<span class='co'># Using quartiles</span>
+<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='st'>"cut::q1]q2]q3]"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; 
+#&gt; [1.0; 1.6] [1.7; 4.3] [4.4; 5.1] [5.2; 6.9] 
+#&gt;         44         31         41         34 </div><div class='input'>
+<span class='co'># Using percentiles</span>
+<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='st'>"cut::p20]p50]p70]p90]"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; 
+#&gt; [1.0; 1.5] [1.6; 4.3] [4.4; 5.0] [5.1; 5.8] [5.9; 6.9] 
+#&gt;         37         38         33         29         13 </div><div class='input'>
+<span class='co'># Mixing all</span>
+<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='st'>"cut::2[q2]p90]"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; 
+#&gt; [1.0; 1.9] [3.0; 4.3] [4.4; 5.8] [5.9; 6.9] 
+#&gt;         50         25         62         13 </div><div class='input'>
+<span class='co'># NOTA:</span>
+<span class='co'># -&gt; the labels always contain the min/max values in each bin</span>
+
+
+<span class='co'>#</span>
+<span class='co'># With a formula</span>
+<span class='co'>#</span>
+
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>)</span>
+<span class='va'>plen</span> <span class='op'>=</span> <span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Length</span>
+
+<span class='co'># We need to use "x"</span>
+<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"&lt; 2"</span> <span class='op'>=</span> <span class='op'>~</span><span class='va'>x</span> <span class='op'>&lt;</span> <span class='fl'>2</span>, <span class='st'>"&gt;= 2"</span> <span class='op'>=</span> <span class='op'>~</span><span class='va'>x</span> <span class='op'>&gt;=</span> <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; 
+#&gt;  &lt; 2 &gt;= 2 
+#&gt;   50  100 </div><div class='input'>
 
 </div></pre>
   </div>

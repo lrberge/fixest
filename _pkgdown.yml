@@ -111,6 +111,7 @@ reference:
       contents:
         - dsb
         - check_conv_feols
+        - sample_df
         - n_unik
         - osize
         - did_means

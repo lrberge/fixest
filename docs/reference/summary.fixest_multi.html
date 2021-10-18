@@ -165,7 +165,7 @@
     </tr>
     <tr>
       <th>type</th>
-      <td><p>A character either equal to <code>"short"</code>, <code>"long"</code>, <code>"compact"</code>, or <code>"se_compact"</code>. If <code>short</code>, only the table of coefficients is displayed for each estimation. If <code>long</code>, then the full results are displayed for each estimation. If <code>compact</code>, a <code>data.frame</code> is returned with one line per model and the formatted coefficients + standard-errors in the columns. If <code>se_compact</code>, a <code>data.frame</code> is returned with one line per model, one numeric column for each coefficient and one numeric column for each standard-error.</p></td>
+      <td><p>A character either equal to <code>"short"</code>, <code>"long"</code>, <code>"compact"</code>, <code>"se_compact"</code> or <code>"se_long"</code>. If <code>short</code>, only the table of coefficients is displayed for each estimation. If <code>long</code>, then the full results are displayed for each estimation. If <code>compact</code>, a <code>data.frame</code> is returned with one line per model and the formatted coefficients + standard-errors in the columns. If <code>se_compact</code>, a <code>data.frame</code> is returned with one line per model, one numeric column for each coefficient and one numeric column for each standard-error. If <code>"se_long"</code>, same as <code>"se_compact"</code> but the data is in a long format instead of wide.</p></td>
     </tr>
     <tr>
       <th>vcov</th>
@@ -441,6 +441,45 @@
 #&gt; 7        NA         NA         NA        NA
 #&gt; 8 0.9348189 0.08960197         NA        NA
 #&gt; 9 0.9455356 0.09072204 -0.1697527 0.1980724</div><div class='input'>
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>res</span>, type <span class='op'>=</span> <span class='st'>"se_long"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;    lhs     sample          rhs type (Intercept)         x1         x2
+#&gt; 1    y setosa     x1           coef   2.6390012 0.69048972         NA
+#&gt; 2    y setosa     x1             se   0.3100143 0.08989888         NA
+#&gt; 3    y setosa     x1 + x2      coef   2.3037382 0.66741621 0.28341929
+#&gt; 4    y setosa     x1 + x2        se   0.3852942 0.09035581 0.19722377
+#&gt; 5    y setosa     x1 + x2 + x3 coef   2.3518898 0.65483497 0.23756017
+#&gt; 6    y setosa     x1 + x2 + x3   se   0.3928675 0.09244742 0.20801921
+#&gt; 7    y versicolor x1           coef   3.5397347 0.86507772         NA
+#&gt; 8    y versicolor x1             se   0.5628736 0.20193757         NA
+#&gt; 9    y versicolor x1 + x2      coef   2.1164314 0.24764216 0.73558681
+#&gt; 10   y versicolor x1 + x2        se   0.4942556 0.18683892 0.12476776
+#&gt; 11   y versicolor x1 + x2 + x3 coef   1.8955395 0.38685762 0.90833700
+#&gt; 12   y versicolor x1 + x2 + x3   se   0.5070552 0.20454490 0.16543248
+#&gt; 13   y virginica  x1           coef   3.9068365 0.90153448         NA
+#&gt; 14   y virginica  x1             se   0.7570605 0.25310551         NA
+#&gt; 15   y virginica  x1 + x2      coef   0.6247824 0.25995398 0.93481889
+#&gt; 16   y virginica  x1 + x2        se   0.5248675 0.15333757 0.08960197
+#&gt; 17   y virginica  x1 + x2 + x3 coef   0.6998830 0.33033703 0.94553559
+#&gt; 18   y virginica  x1 + x2 + x3   se   0.5336009 0.17432873 0.09072204
+#&gt;            x3
+#&gt; 1          NA
+#&gt; 2          NA
+#&gt; 3          NA
+#&gt; 4          NA
+#&gt; 5   0.2521257
+#&gt; 6   0.3468636
+#&gt; 7          NA
+#&gt; 8          NA
+#&gt; 9          NA
+#&gt; 10         NA
+#&gt; 11 -0.6792238
+#&gt; 12  0.4353821
+#&gt; 13         NA
+#&gt; 14         NA
+#&gt; 15         NA
+#&gt; 16         NA
+#&gt; 17 -0.1697527
+#&gt; 18  0.1980724</div><div class='input'>
 
 </div></pre>
   </div>

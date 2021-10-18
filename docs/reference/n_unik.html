@@ -157,6 +157,10 @@
       <th>fml</th>
       <td><p>A one-sided formula containing the variables for which to count the number of unique values. You can use <code>.N</code> to get the number of observations. You can combine variables with the "^" operator. For example: <code>fml = ~ .N + id + id^period</code> will report the number of observations, the number of unique values of <code>id</code> and the number of unique <code>id</code> x <code>period</code> pairs. You can sub select variables with <code>[]</code>, like in <code>id[!is.na(period)]</code>. You can use the special functions <code>sw</code> and <code>sw0</code>, like in <code>~id^sw0(period) + period[sw0(is.na(id))]</code> which would lead to <code>~id + id^period + period + period[is.na(id)]</code>.</p></td>
     </tr>
+    <tr>
+      <th>...</th>
+      <td><p>Not currently used.</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
@@ -166,20 +170,24 @@
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
 <span class='va'>data</span> <span class='op'>=</span> <span class='va'>base_did</span>
-<span class='va'>data</span><span class='op'>$</span><span class='va'>x1.L1</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x1</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>period</span>, <span class='fl'>1</span>, <span class='va'>data</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>data</span><span class='op'>$</span><span class='va'>x1.L1</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/lag.html'>lag</a></span><span class='op'>(</span><span class='va'>x1</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>period</span>, <span class='fl'>1</span>, <span class='va'>data</span><span class='op'>)</span><span class='op'>)</span>
 
 <span class='co'># By default, just the formatted number of observations</span>
 <span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in n_unik(data): could not find function "n_unik"</span></div><div class='input'>
+</div><div class='output co'>#&gt; #&gt; # Observations: 1,080 </div><div class='input'>
 <span class='co'># Or the nber of unique elements of a vector</span>
 <span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span><span class='op'>$</span><span class='va'>id</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in n_unik(data$id): could not find function "n_unik"</span></div><div class='input'>
+</div><div class='output co'>#&gt; #&gt; id: 108 </div><div class='input'>
 <span class='co'># number of unique id values and id x period pairs</span>
 <span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span>, <span class='op'>~</span><span class='va'>.N</span> <span class='op'>+</span> <span class='va'>id</span> <span class='op'>+</span> <span class='va'>id</span><span class='op'>^</span><span class='va'>period</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in n_unik(data, ~.N + id + id^period): could not find function "n_unik"</span></div><div class='input'>
+</div><div class='output co'>#&gt; #&gt; # Observations: 1,080 
+#&gt; #&gt;             id:   108 
+#&gt; #&gt;      id^period: 1,080 </div><div class='input'>
 <span class='co'># using sub selection + sw0</span>
 <span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span>, <span class='op'>~</span><span class='va'>.N</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>[</span><span class='fu'><a href='stepwise.html'>sw0</a></span><span class='op'>(</span><span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/NA.html'>is.na</a></span><span class='op'>(</span><span class='va'>x1.L1</span><span class='op'>)</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in n_unik(data, ~.N + period[sw0(!is.na(x1.L1))]): could not find function "n_unik"</span></div><div class='input'>
+</div><div class='output co'>#&gt; #&gt;        # Observations: 1,080 
+#&gt; #&gt;                period:    10 
+#&gt; #&gt; period[!is.na(x1.L1)]:     9 </div><div class='input'>
 
 </div></pre>
   </div>
