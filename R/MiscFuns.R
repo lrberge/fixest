@@ -4324,16 +4324,38 @@ summary.fixest_check_conv = function(object, type = "short", ...){
 
 
 
-#' Prints the number of unique elements
+#' Prints the number of unique elements in a data set
 #'
-#' This utility tool displays the number of unique elements in a data.frame as well as their number of NA values.
+#' This utility tool displays the number of unique elements in one or multiple data.frames as well as their number of NA values.
 #'
-#' @param x A data.frame or a vector.
+#' @param x A data.frame or a vector or a formula. If \code{data.frame}: to be used with argument \code{fml} or, if \code{fml} is missing, displays generic information. If a vector: the number of unique values is displayed. If a formula, it must be of the form: \code{data1 + data2 ~ var1 + var2}, with data set names on the LHS and variables on the RHS. You can put as many data sets as you want, same for the vars. The following special variables are admitted: \code{"."} to get default values, \code{".N"} for the number of observations, \code{".U"} for the number of unique rows, \code{".NA"} for the number of rows with at least one NA. Variables can be combined with \code{"^"}, e.g. \code{df~id^period}. There can be sub selection with \code{[]}. The stepwise functions \code{sw} and \code{sw0} can also be used within sub selection for example. Use \code{NA(x, y)} for\code{is.na(x) | is.na(y)}.
 #' @param fml A one-sided formula containing the variables for which to count the number of unique values. You can use \code{.N} to get the number of observations. You can combine variables with the "^" operator. For example: \code{fml = ~ .N + id + id^period} will report the number of observations, the number of unique values of \code{id} and the number of unique \code{id} x \code{period} pairs. You can sub select variables with \code{[]}, like in \code{id[!is.na(period)]}. You can use the special functions \code{sw} and \code{sw0}, like in \code{~id^sw0(period) + period[sw0(is.na(id))]} which would lead to \code{~id + id^period + period + period[is.na(id)]}.
 #' @param ... Not currently used.
 #'
+#' @section Special values and functions
+#'
+#' In the formula, you can use the following special values: \code{"."}, \code{".N"}, \code{".U"}, and \code{".NA"}.
+#'
+#' \itemize{
+#'
+#' \item{\code{"."}}{Access the default values. If there is only one data set and the data set is \emph{not} a \code{data.table}, then the default is to display the number of observations and the number of unique rows. If the data is a \code{data.table}, the number of unique items in the key(s) is displayed instead of the number of unique rows (if the table has keys of course).} If there are two or more data sets, then the default is to display the unique items for: a) the variables common across all data sets, if there's less than 4, and b) if no variable is shown in a), the number of variables common across at least two data sets, provided there are less than 5. If the data sets are data tables, the keys are also displayed on top of the common variables. In any case, the number of observations is always displayed.
+#' \item{\code{".N"}}{Displays the number of observations.}
+#' \item{\code{".U"}}{Displays the number of unique rows.}
+#' \item{\code{".NA"}}{Displays the number of rows with at least one NA.}
+#'
+#' }
+#'
+#' On top of that you can access the special functions: \code{sw}, \code{sw0} and \code{NA}.
+#'
+#' \itemize{
+#'
+#' \item{\code{sw} and \code{sw0}}{Stepwise functions can be used either within sub selections, like in \code{~ id[sw(NA(x), NA(y))]}, which leads to \code{~ id[NA(x)] + id[NA(y)]}. They can also be used when interacting variables, e.g. \code{~id^sw0(period)} which leads to \code{~id + id^period}.
+#' \item{\code{NA}}{The special function \code{NA} is an equivalent to \code{is.na} but can handle several variables. For instance, \code{NA(x, y)} is equivalent to \code{is.na(x) | is.na(y)}. You can add as many variables you want as arguments. If no argument is provided, as in \code{NA()}, it is identical to having all the variables of the data set as argument.}
+#'
+#' }
+#'
 #' @return
-#' It returns a vector containing the number of unique values per element.
+#' It returns a vector containing the number of unique values per element. If several data sets were provided, a list is returned, as long as the number of data sets, each element being a vector of unique values.
 #'
 #' @examples
 #'
@@ -4352,12 +4374,35 @@ summary.fixest_check_conv = function(object, type = "short", ...){
 #' # using sub selection + sw0
 #' n_unik(data, ~.N + period[sw0(!is.na(x1.L1))])
 #'
+#' # We can use one formula if we wish
+#' n_unik(data ~ .N + period[sw0(!NA(x1.L1))])
+#'
+#' #
+#' # Several data sets
+#' #
+#'
+#' # Typical use case: merging
+#' # Let's create two data sets and merge them
+#'
+#' data(base_did)
+#' base_main = base_did
+#' base_extra = sample_df(base_main[, c("id", "period")], 100)
+#' base_extra$z = rnorm(100)
+#'
+#' tmp = merge(base_main, base_extra, all.x = TRUE, by = c("id", "period"))
+#' n_unik(tmp + base_main + base_extra ~ .)
+#'
+#' # "." accesses the default, which is the variables common across all data sets
+#'
+#' # using NA() and sw
+#' n_unik(tmp + base_main + base_extra ~ id[sw0(!NA(z))] + id^period)
+#'
 #'
 n_unik = function(x, fml){
     # returns a vector with the nber of unique values
     # attr("na.info") => nber of NA values, vector
 
-    check_arg(x, "mbt data.frame | vector l0")
+    check_arg(x, "mbt data.frame | vector l0 | ts formula")
 
     # If vector
     if(is.vector(x)){
@@ -4379,32 +4424,155 @@ n_unik = function(x, fml){
         class(res) = "vec_n_unik"
         return(res)
 
-    } else if(missing(fml)){
+    } else if(missing(fml) && is.data.frame(x)){
 
-        res = nrow(x)
-        names(res) = "# Observations"
+        IS_DT = requireNamespace("data.table", quietly = TRUE)
 
-        attr(res, "na.info") = 0
+        x_keys = c()
+        if(IS_DT && inherits(x, "data.table")){
+            x_keys = data.table::key(x)
+        }
+
+        if(length(x_keys) > 0){
+            res = nrow(x)
+            res_names = "# Observations"
+            na_val = 0
+
+            for(k in x_keys){
+                res_names = c(res_names, k)
+                val = x[[k]]
+
+                if(anyNA(val)){
+                    who_NA = is.na(val)
+                    na_val = c(na_val, sum(who_NA))
+                    val = val[!who_NA]
+                } else {
+                    na_val = c(na_val, 0)
+                }
+
+                res = c(res, length(unique(val)))
+
+            }
+
+            attr(res, "na.info") = na_val
+
+        } else {
+            res = c(nrow(x), nrow(unique(x)))
+            names(res) = c("# Observations", "# Unique rows")
+
+            attr(res, "na.info") = c(0, 0)
+        }
+
+
         class(res) = "vec_n_unik"
 
         return(res)
 
+    } else if(inherits(x, "formula")){
+        if(!missing(fml)){
+            warning("Since argument 'x' is a formula, argument 'fml' is ignored.")
+        }
+
+        x_all_names = get_vars(x[1:2])
+
+        # Construction of the list  + sanity check
+        n_x = length(all_x_names)
+        x_all = vector("list", n_x)
+        for(i in 1:n_x){
+            x_all[[i]] = error_sender(eval(str2lang(all_x_names[i]), parent.frame()),
+                                      "The left-hand-side of the formula must contain valid data.frames. Problem in the evaluation of '", all_x_names[i], "':")
+            check_value(x_all[[i]], "data.frame",
+                        .message = paste0("The value '", all_x_names[i], "' (in the LHS of the formula) must be a data.frame."))
+        }
+
+        fml = x[c(1, 3)]
+
+    } else {
+        # fml must be a one sided formula
+        check_arg(fml, "mbt os formula")
+        n_x = 1
+        x_all = list(x)
     }
 
     # If DF + formula
     # ex: fml = ~ id^year + author_id[sw0(is.na(author_name), is.na(affil_name), year == min_year)]
     # fml = ~ id^sw0(fe)
 
-    check_arg(fml, "mbt os formula")
-
     # check variable names
-    all_vars = all.vars(fml)
-    extra_vars = c(names(x), ".N", paste0("NA_", names(x)))
-    check_value(all_vars, "multi charin", .choices = extra_vars, .message = "The formula must only use variables in the data set.")
+    naked_vars = all.vars(fml)
+    valid_vars = c(".N", ".U", ".NA", ".", unique(unlist(lapply(x_all, names))))
+
+    check_value_plus(naked_vars, "multi match", .choices = valid_vars,
+                     .message = paste0("The formula must only use variables in the data set", plural_len(x_all), "."))
+
+    if("." %in% naked_vars){
+        # The default values
+
+        IS_DT = requireNamespace("data.table", quietly = TRUE)
+
+        dot_default = ".N"
+        x_keys = c()
+        x_common_vars = c()
+
+        # keys
+        if(IS_DT){
+            for(I in 1:n_x){
+                if(inherits(x_all[[I]], "data.table")){
+                    x_keys = c(x_keys, data.table::key(x_all[[I]]))
+                }
+            }
+        }
+
+        # common variables
+        if(n_x > 1){
+
+            # Common to all
+            x_names_current = names(x_all[[1]])
+            for(i in 2:n_x){
+                x_names_current = intersect(x_names_current, names(x_all[[i]]))
+                if(length(x_names_current) == 0) break
+            }
+
+            if(length(x_names_current) %in% 1:4){
+                # No more than 4 common variables by default
+                x_common_vars = x_names_current
+
+            } else if(n_x > 2){
+                # Common to at least 2 data sets
+                for(i in 1:(n_x - 1)){
+                    x_names_current = names(x_all[[i]])
+                    for(j in (i + 1):n_x){
+                        qui_common = x_names_current %in% names(x_all[[j]])
+                        if(any(qui_common)){
+                            x_common_vars = c(x_common_vars, x_names_current[qui_common])
+                        }
+                    }
+                }
+
+                x_common_vars = unique(x_common_vars)
+
+                if(length(x_common_vars) > 5){
+                    #  we keep max 5
+                    x_common_vars = c()
+                }
+            }
+        }
+
+        if(length(x_keys) > 0 || length(x_common_vars) > 0){
+            dot_default = unique(c(dot_default, x_keys, x_common_vars))
+        }
+
+        if(length(dot_default) == 1){
+            dot_default = c(".N", ".U")
+        }
+
+        rhs_txt = as.character(fml)[[2]]
+        rhs_txt = gsub("(^| )\\.( |$)", dsb(".[dot_default]", "+"), rhs_txt)
+        fml = .xpd(rhs = rhs_txt)
+    }
 
     tm = terms_hat(fml)
     all_vars = attr(tm, "term.labels")
-    all_vars = gsub("(^|[^[:alnum:]\\._])NA_([[:alpha:]\\.][[:alnum:]\\._]*)", "\\1is.na(\\2)", all_vars)
     var_final = c()
 
     # stepwise function
@@ -4468,65 +4636,166 @@ n_unik = function(x, fml){
 
     # NA counting + unique counting
 
-    res = c()
-    na.info = c()
+    res_all = list()
+    for(I in 1:n_x){
 
-    for(i in seq_along(var_final)){
+        x = x_all[[I]]
+        x_list = unclass(x)
+        x_list[["NA_fun"]] = function(...){
+            dots = list(...)
+            n_dots = length(dots)
 
-        vf = var_final[i]
-        vf_name = var_final_names[i]
-        na_i = 0
-
-        if(grepl("^\\.N($|\\[)", vf)){
-
-            n_obs = nrow(x)
-
-            if(vf %in% c(".N", ".N[]")){
-                res_i = n_obs
-                vf_name = "# Observations"
-
-            } else {
-                # Other methods are faster but are less general
-
-                vf_new = gsub("(^\\.N\\[)|(\\]$)", "", vf)
-
-                val = eval(str2lang(vf_new), x)
-
-                # we want to drop the NAs for indices
-                if(anyNA(val)){
-                    val = val[!is.na(val)]
-                }
-
-                if(length(val) == 0){
-                    res_i = 0
-                } else if(is.logical(val)){
-                    res_i = sum(val)
-                } else {
-                    res_i = length(val)
-                }
-
-                vf_name = paste0("# Obs. with ", vf_new)
+            if(n_dots == 0){
+                res = !complete.cases(x)
+                return(res)
             }
 
-        } else {
-            val = eval(str2lang(vf), x)
+            res = is.na(dots[[1]])
 
-            if(anyNA(val)){
-                who_NA = is.na(val)
-                na_i = sum(who_NA)
-                val = val[!who_NA]
+            if(n_dots == 1){
+                return(res)
             }
 
-            res_i = length(unique(val))
+            for(i in 2:n_dots){
+                res = res | is.na(dots[[i]])
+            }
+            res
         }
 
-        res[vf_name] = res_i
-        na.info[i] = na_i
+        vars_legit = c(".N", ".U", ".NA", names(x))
+
+        res = c()
+        na.info = c()
+
+        for(i in seq_along(var_final)){
+
+            vf = var_final[i]
+            vf_name = var_final_names[i]
+            na_i = 0
+
+            vf = gsub("((?<=[^[:alnum:]_\\.])|^)NA\\(", "NA_fun(", vf, perl = TRUE)
+
+            vf_call = str2lang(vf)
+
+            if(!all(all.vars(vf_call) %in% vars_legit)){
+                res_i = NA_real_
+                vf_name = ""
+
+            } else if(grepl("^\\.(N|U)($|\\[)", vf)){
+
+
+                if(vf %in% c(".N", ".N[]")){
+                    res_i = nrow(x)
+                    vf_name = "# Observations"
+
+                } else if(vf %in% c(".U", ".U[]")){
+                    res_i = nrow(unique(x))
+                    vf_name = "# Unique rows"
+
+                } else {
+                    # Other methods are faster but are less general
+
+                    vf_new = gsub("(^\\.(N|U)\\[)|(\\]$)", "", vf)
+                    do_unik = grepl("^\\.U", vf)
+
+                    val = eval(str2lang(vf_new), x_list)
+
+                    # we want to drop the NAs for indices
+                    if(anyNA(val)){
+                        val = val[!is.na(val)]
+                    }
+
+                    if(length(val) == 0){
+                        res_i = 0
+
+                    } else if(do_unik){
+                        res_i = NROW(unique(x[val, ]))
+
+                    } else {
+                        res_i = if(is.logical(val)) sum(val) else length(val)
+                    }
+
+                    msg = if(do_unik) "# Unique rows" else "# Obs."
+                    vf_new = gsub("NA_fun", "NA", vf_new, fixed = TRUE)
+                    vf_name = paste0(msg, " with ", vf_new)
+                }
+
+            } else if(grepl("^(\\.NA|NA_fun\\(\\))", vf)) {
+
+                if(vf %in% c(".NA", ".NA[]", "NA_fun()", "NA_fun()[]")){
+                    res_i = sum(!complete.cases(x))
+                    vf_name = "# Rows with NAs"
+
+                } else {
+
+                    subselect = NULL
+                    sub_text = ""
+                    if(grepl("\\]$", vf)){
+                        sub_text_split = strsplit(vf, "[", fixed = TRUE)[[1]]
+                        sub_text = paste0(sub_text_split[-1], collapse = "[")
+                        sub_text = gsub("\\]$", "", sub_text)
+
+                        subselect = eval(str2lang(sub_text), x_list)
+                    }
+
+                    if(length(subselect) == 0){
+                        res_i = 0
+                    } else {
+                        res_i = sum(!complete.cases(x[subselect, ]))
+                    }
+
+                    vf_name = dsb("# Rows with NAs, with .[sub_text]")
+                }
+            } else {
+                val = eval(vf_call, x_list)
+
+                if(anyNA(val)){
+                    who_NA = is.na(val)
+                    na_i = sum(who_NA)
+                    val = val[!who_NA]
+                }
+
+                if(grepl("^NA_fun\\(", vf)){
+                    res_i = sum(val)
+
+                    # now the message
+                    leftover = sub("^[^\\)]+\\)", "", vf)
+                    begin = substr(vf, 1, nchar(vf) - nchar(leftover))
+
+                    my_fun = list("NA_fun" = function(x) enumerate_items(sapply(sys.call()[-1], deparse_long)))
+                    na_vars = eval(str2lang(begin), my_fun)
+                    msg_start = paste0("# NAs in ", na_vars)
+
+                    msg_end = ""
+                    if(grepl("[", vf, fixed = TRUE)){
+                        msg_end = paste0(" with ", gsub("^\\[|\\]$", "", leftover))
+                    }
+
+                    vf_name = paste0(msg_start, msg_end)
+
+                } else {
+                    res_i = length(unique(val))
+                }
+
+            }
+
+            res[vf_name] = res_i
+            na.info[i] = na_i
+        }
+
+        attr(res, "na.info") = na.info
+        class(res) = "vec_n_unik"
+
+        if(n_x == 1){
+            return(res)
+        }
+
+        res_all[[x_all_names[I]]] = res
     }
 
-    attr(res, "na.info") = na.info
-    class(res) = "vec_n_unik"
-    return(res)
+    class(res_all) = "list_n_unik"
+
+    return(res_all)
 }
 
 #' @rdname n_unik
@@ -4543,6 +4812,112 @@ print.vec_n_unik = function(x, ...){
 
     res = paste0("#> ", x_names, ": ", x_value, " ", na_col)
     cat(res, sep = "\n")
+}
+
+#' @rdname n_unik
+print.list_n_unik = function(x, ...){
+
+    x_all = x
+    n_x = length(x_all)
+
+    if(n_x == 1) return(x_all[[1]])
+
+    # First, the variable names
+
+    all_names = names(x_all[[1]])
+    qui_0 = nchar(all_names) == 0
+    i = 2
+    while(any(qui_0) && i <= n_x){
+        names_i = names(x_all[[i]])
+        all_names[qui_0] = names_i[qui_0]
+        qui_0 = nchar(all_names) == 0
+        i = i + 1
+    }
+
+    if(all(qui_0)){
+        stop("Not any valid information to display: please check that all your variables exist in all data sets.")
+
+    } else if(any(qui_0)){
+        warning("Some variables could not be evaluated in any data set: please check that all your variables exist in all data sets.")
+
+        all_names = all_names[!qui_0]
+
+        for(i in 1:n_x){
+            x = x_all[[i]]
+            na.info = attr(x, "na.info")
+
+            x = x[!qui_0]
+            na.info = na.infox[!qui_0]
+            attr(x, "na.info") = na.info
+
+            x_all[[i]] = x
+        }
+    }
+
+
+    x_names = sfill(all_names)
+
+    insert_in_between = function(x, y){
+        n_x = length(x)
+        n_y = length(y)
+
+        if(n_y == 1) y = rep(y, n_x)
+        if(n_x == 1) x = rep(x, n_y)
+        n_x = length(x)
+
+        res = rep(x, each = 2)
+        res[2 * 1:n_x] = y
+
+        res
+    }
+
+    var_col = paste0("#> ", x_names, ":")
+    na_intro = paste0("#> ", sfill(" ", nchar(x_names[1])), "|NAs:")
+    var_col = insert_in_between(var_col, na_intro)
+    # we add the first row of the data sets names + format
+    var_col = sfill(c("#> ", var_col), right = TRUE)
+
+    print_mat = var_col
+
+    KEEP_NA_ROW = rep(FALSE, length(x_names))
+
+    for(i in 1:n_x){
+
+        data_name = names(x_all)[i]
+
+        x = x_all[[i]]
+
+        na.info = attr(x, "na.info")
+        KEEP_NA_ROW = KEEP_NA_ROW | na.info > 0
+        na.info_format = fsignif(na.info)
+        x_value = fsignif(x)
+        x_value[is.na(x)] = "--"
+        na.info_format[is.na(x)] = "--"
+
+
+        width = max(nchar(na.info_format), nchar(x_value))
+
+        na.info_format = sfill(na.info_format, width)
+        x_value = sfill(x_value, width)
+
+        x_col = insert_in_between(x_value, na.info_format)
+        x_col = sfill(c(data_name, x_col))
+
+        print_mat = cbind(print_mat, x_col)
+    }
+
+    if(!any(KEEP_NA_ROW)){
+        print_mat[, 1] = substr(print_mat[, 1], 1, nchar(print_mat[1, 1]) - 4)
+    }
+
+    keep = c(TRUE, insert_in_between(TRUE, KEEP_NA_ROW))
+
+    print_mat = print_mat[keep, ]
+
+    vec2print = apply(print_mat, 1, paste, collapse = " ")
+
+    cat(vec2print, sep = "\n")
+
 }
 
 
