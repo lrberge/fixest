@@ -5000,6 +5000,7 @@ sample_df = function(x, n = 10){
 #### Internal Funs     ####
 ####
 
+as.character.formula = function(x, ...) as.character.default(x, ...)
 
 parse_macros = function(..., reset = FALSE, from_xpd = FALSE, check = TRUE, frame = NULL){
     set_up(1)
