@@ -4332,15 +4332,18 @@ summary.fixest_check_conv = function(object, type = "short", ...){
 #' @param fml A one-sided formula containing the variables for which to count the number of unique values. You can use \code{.N} to get the number of observations. You can combine variables with the "^" operator. For example: \code{fml = ~ .N + id + id^period} will report the number of observations, the number of unique values of \code{id} and the number of unique \code{id} x \code{period} pairs. You can sub select variables with \code{[]}, like in \code{id[!is.na(period)]}. You can use the special functions \code{sw} and \code{sw0}, like in \code{~id^sw0(period) + period[sw0(is.na(id))]} which would lead to \code{~id + id^period + period + period[is.na(id)]}.
 #' @param ... Not currently used.
 #'
-#' @section Special values and functions
+#' @section Special values and functions:
 #'
 #' In the formula, you can use the following special values: \code{"."}, \code{".N"}, \code{".U"}, and \code{".NA"}.
 #'
 #' \itemize{
 #'
-#' \item{\code{"."}}{Access the default values. If there is only one data set and the data set is \emph{not} a \code{data.table}, then the default is to display the number of observations and the number of unique rows. If the data is a \code{data.table}, the number of unique items in the key(s) is displayed instead of the number of unique rows (if the table has keys of course).} If there are two or more data sets, then the default is to display the unique items for: a) the variables common across all data sets, if there's less than 4, and b) if no variable is shown in a), the number of variables common across at least two data sets, provided there are less than 5. If the data sets are data tables, the keys are also displayed on top of the common variables. In any case, the number of observations is always displayed.
+#' \item{\code{"."}}{Access the default values. If there is only one data set and the data set is \emph{not} a \code{data.table}, then the default is to display the number of observations and the number of unique rows. If the data is a \code{data.table}, the number of unique items in the key(s) is displayed instead of the number of unique rows (if the table has keys of course). If there are two or more data sets, then the default is to display the unique items for: a) the variables common across all data sets, if there's less than 4, and b) if no variable is shown in a), the number of variables common across at least two data sets, provided there are less than 5. If the data sets are data tables, the keys are also displayed on top of the common variables. In any case, the number of observations is always displayed.}
+#'
 #' \item{\code{".N"}}{Displays the number of observations.}
+#'
 #' \item{\code{".U"}}{Displays the number of unique rows.}
+#'
 #' \item{\code{".NA"}}{Displays the number of rows with at least one NA.}
 #'
 #' }
@@ -4349,7 +4352,8 @@ summary.fixest_check_conv = function(object, type = "short", ...){
 #'
 #' \itemize{
 #'
-#' \item{\code{sw} and \code{sw0}}{Stepwise functions can be used either within sub selections, like in \code{~ id[sw(NA(x), NA(y))]}, which leads to \code{~ id[NA(x)] + id[NA(y)]}. They can also be used when interacting variables, e.g. \code{~id^sw0(period)} which leads to \code{~id + id^period}.
+#' \item{\code{sw} and \code{sw0}}{Stepwise functions can be used either within sub selections, like in \code{~ id[sw(NA(x), NA(y))]}, which leads to \code{~ id[NA(x)] + id[NA(y)]}. They can also be used when interacting variables, e.g. \code{~id^sw0(period)} which leads to \code{~id + id^period}.}
+#'
 #' \item{\code{NA}}{The special function \code{NA} is an equivalent to \code{is.na} but can handle several variables. For instance, \code{NA(x, y)} is equivalent to \code{is.na(x) | is.na(y)}. You can add as many variables you want as arguments. If no argument is provided, as in \code{NA()}, it is identical to having all the variables of the data set as argument.}
 #'
 #' }
@@ -4476,13 +4480,13 @@ n_unik = function(x, fml){
         x_all_names = get_vars(x[1:2])
 
         # Construction of the list  + sanity check
-        n_x = length(all_x_names)
+        n_x = length(x_all_names)
         x_all = vector("list", n_x)
         for(i in 1:n_x){
-            x_all[[i]] = error_sender(eval(str2lang(all_x_names[i]), parent.frame()),
-                                      "The left-hand-side of the formula must contain valid data.frames. Problem in the evaluation of '", all_x_names[i], "':")
+            x_all[[i]] = error_sender(eval(str2lang(x_all_names[i]), parent.frame()),
+                                      "The left-hand-side of the formula must contain valid data.frames. Problem in the evaluation of '", x_all_names[i], "':")
             check_value(x_all[[i]], "data.frame",
-                        .message = paste0("The value '", all_x_names[i], "' (in the LHS of the formula) must be a data.frame."))
+                        .message = paste0("The value '", x_all_names[i], "' (in the LHS of the formula) must be a data.frame."))
         }
 
         fml = x[c(1, 3)]

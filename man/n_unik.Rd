@@ -3,25 +3,56 @@
 \name{n_unik}
 \alias{n_unik}
 \alias{print.vec_n_unik}
-\title{Prints the number of unique elements}
+\alias{print.list_n_unik}
+\title{Prints the number of unique elements in a data set}
 \usage{
 n_unik(x, fml)
 
 \method{print}{vec_n_unik}(x, ...)
+
+\method{print}{list_n_unik}(x, ...)
 }
 \arguments{
-\item{x}{A data.frame or a vector.}
+\item{x}{A data.frame or a vector or a formula. If \code{data.frame}: to be used with argument \code{fml} or, if \code{fml} is missing, displays generic information. If a vector: the number of unique values is displayed. If a formula, it must be of the form: \code{data1 + data2 ~ var1 + var2}, with data set names on the LHS and variables on the RHS. You can put as many data sets as you want, same for the vars. The following special variables are admitted: \code{"."} to get default values, \code{".N"} for the number of observations, \code{".U"} for the number of unique rows, \code{".NA"} for the number of rows with at least one NA. Variables can be combined with \code{"^"}, e.g. \code{df~id^period}. There can be sub selection with \code{[]}. The stepwise functions \code{sw} and \code{sw0} can also be used within sub selection for example. Use \code{NA(x, y)} for\code{is.na(x) | is.na(y)}.}
 
 \item{fml}{A one-sided formula containing the variables for which to count the number of unique values. You can use \code{.N} to get the number of observations. You can combine variables with the "^" operator. For example: \code{fml = ~ .N + id + id^period} will report the number of observations, the number of unique values of \code{id} and the number of unique \code{id} x \code{period} pairs. You can sub select variables with \code{[]}, like in \code{id[!is.na(period)]}. You can use the special functions \code{sw} and \code{sw0}, like in \code{~id^sw0(period) + period[sw0(is.na(id))]} which would lead to \code{~id + id^period + period + period[is.na(id)]}.}
 
 \item{...}{Not currently used.}
 }
 \value{
-It returns a vector containing the number of unique values per element.
+It returns a vector containing the number of unique values per element. If several data sets were provided, a list is returned, as long as the number of data sets, each element being a vector of unique values.
 }
 \description{
-This utility tool displays the number of unique elements in a data.frame as well as their number of NA values.
+This utility tool displays the number of unique elements in one or multiple data.frames as well as their number of NA values.
 }
+\section{Special values and functions}{
+
+
+In the formula, you can use the following special values: \code{"."}, \code{".N"}, \code{".U"}, and \code{".NA"}.
+
+\itemize{
+
+\item{\code{"."}}{Access the default values. If there is only one data set and the data set is \emph{not} a \code{data.table}, then the default is to display the number of observations and the number of unique rows. If the data is a \code{data.table}, the number of unique items in the key(s) is displayed instead of the number of unique rows (if the table has keys of course). If there are two or more data sets, then the default is to display the unique items for: a) the variables common across all data sets, if there's less than 4, and b) if no variable is shown in a), the number of variables common across at least two data sets, provided there are less than 5. If the data sets are data tables, the keys are also displayed on top of the common variables. In any case, the number of observations is always displayed.}
+
+\item{\code{".N"}}{Displays the number of observations.}
+
+\item{\code{".U"}}{Displays the number of unique rows.}
+
+\item{\code{".NA"}}{Displays the number of rows with at least one NA.}
+
+}
+
+On top of that you can access the special functions: \code{sw}, \code{sw0} and \code{NA}.
+
+\itemize{
+
+\item{\code{sw} and \code{sw0}}{Stepwise functions can be used either within sub selections, like in \code{~ id[sw(NA(x), NA(y))]}, which leads to \code{~ id[NA(x)] + id[NA(y)]}. They can also be used when interacting variables, e.g. \code{~id^sw0(period)} which leads to \code{~id + id^period}.}
+
+\item{\code{NA}}{The special function \code{NA} is an equivalent to \code{is.na} but can handle several variables. For instance, \code{NA(x, y)} is equivalent to \code{is.na(x) | is.na(y)}. You can add as many variables you want as arguments. If no argument is provided, as in \code{NA()}, it is identical to having all the variables of the data set as argument.}
+
+}
+}
+
 \examples{
 
 data = base_did
@@ -38,6 +69,29 @@ n_unik(data, ~.N + id + id^period)
 
 # using sub selection + sw0
 n_unik(data, ~.N + period[sw0(!is.na(x1.L1))])
+
+# We can use one formula if we wish
+n_unik(data ~ .N + period[sw0(!NA(x1.L1))])
+
+#
+# Several data sets
+#
+
+# Typical use case: merging
+# Let's create two data sets and merge them
+
+data(base_did)
+base_main = base_did
+base_extra = sample_df(base_main[, c("id", "period")], 100)
+base_extra$z = rnorm(100)
+
+tmp = merge(base_main, base_extra, all.x = TRUE, by = c("id", "period"))
+n_unik(tmp + base_main + base_extra ~ .)
+
+# "." accesses the default, which is the variables common across all data sets
+
+# using NA() and sw
+n_unik(tmp + base_main + base_extra ~ id[sw0(!NA(z))] + id^period)
 
 
 }
