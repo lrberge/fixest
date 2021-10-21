@@ -4430,47 +4430,9 @@ n_unik = function(x, fml){
 
     } else if(missing(fml) && is.data.frame(x)){
 
-        IS_DT = requireNamespace("data.table", quietly = TRUE)
-
-        x_keys = c()
-        if(IS_DT && inherits(x, "data.table")){
-            x_keys = data.table::key(x)
-        }
-
-        if(length(x_keys) > 0){
-            res = nrow(x)
-            res_names = "# Observations"
-            na_val = 0
-
-            for(k in x_keys){
-                res_names = c(res_names, k)
-                val = x[[k]]
-
-                if(anyNA(val)){
-                    who_NA = is.na(val)
-                    na_val = c(na_val, sum(who_NA))
-                    val = val[!who_NA]
-                } else {
-                    na_val = c(na_val, 0)
-                }
-
-                res = c(res, length(unique(val)))
-
-            }
-
-            attr(res, "na.info") = na_val
-
-        } else {
-            res = c(nrow(x), nrow(unique(x)))
-            names(res) = c("# Observations", "# Unique rows")
-
-            attr(res, "na.info") = c(0, 0)
-        }
-
-
-        class(res) = "vec_n_unik"
-
-        return(res)
+        n_x = 1
+        x_all = list(x)
+        fml = ~.
 
     } else if(inherits(x, "formula")){
         if(!missing(fml)){
