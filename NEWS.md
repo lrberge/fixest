@@ -34,26 +34,71 @@ plen = iris$Petal.Length
 
 # 3 parts of (roughly) equal size
 table(bin(plen, "cut::3"))
+#> 
+#> [1.0; 1.9] [3.0; 4.9] [5.0; 6.9] 
+#>         50         54         46 
 
 # Three custom bins
 table(bin(plen, "cut::2]5]"))
+#> 
+#> [1.0; 1.9] [3.0; 5.0] [5.1; 6.9] 
+#>         50         58         42 
 
 # .. same, excluding 5 in the 2nd bin
 table(bin(plen, "cut::2]5["))
+#> 
+#> [1.0; 1.9] [3.0; 4.9] [5.0; 6.9] 
+#>         50         54         46 
 
 # Using quartiles
 table(bin(plen, "cut::q1]q2]q3]"))
+#> 
+#> [1.0; 1.6] [1.7; 4.3] [4.4; 5.1] [5.2; 6.9] 
+#>         44         31         41         34 
 
 # Using percentiles
 table(bin(plen, "cut::p20]p50]p70]p90]"))
+#> 
+#> [1.0; 1.5] [1.6; 4.3] [4.4; 5.0] [5.1; 5.8] [5.9; 6.9] 
+#>         37         38         33         29         13 
 
 # Mixing all
 table(bin(plen, "cut::2[q2]p90]"))
+#> 
+#> [1.0; 1.9] [3.0; 4.3] [4.4; 5.8] [5.9; 6.9] 
+#>         50         25         62         13
 ```
 
  - `bin` also accepts formulas, e.g. `bin = list("<2" = ~ x < 2)` (`x` must be the only variable).
  
  - add `type = "se_long"` to `summary.fixest_multi` which yields all coefficients and SEs for all estimations in a "long" format.
+ 
+## Dot square bracket operator
+
+ - add a comma first, like in `.[,stuff]`, to separate variables with commas (instead of separating them with additions):
+```R
+lhs_vars = c("var1", "var2")
+xpd(c(.[,lhs_vars]) ~ csw(x.[,1:3]))
+#> c(var1, var2) ~ csw(x1, x2, x3)
+```
+
+ - in the function `dsb`, you can add a string literal in first or last position in `.[]` to "collapse" the character string in question. The way the collapse is performed depends on the position:
+```R
+name = c("Juliet", "Romeo")
+
+# default behavior => vector
+dsb("hello .[name], what's up?")
+#> [1] "hello Juliet, what's up?" "hello Romeo, what's up?" 
+
+# string literal in first position
+dsb("hello .[' and ', name], what's up?")
+#> [1] "hello Juliet and Romeo, what's up?"
+
+# string literal in last position
+dsb("hello .[name, ' and '], what's up?")
+#> [1] "hello Juliet and hello Romeo, what's up?"
+
+```
  
  
 ## etable
@@ -62,15 +107,19 @@ table(bin(plen, "cut::2[q2]p90]"))
  
 ## New functions
 
- - `osize`: simple function returning a formatted object size.
- 
- - `n_unik`: simple but flexible function returning the number of unique elements from variables in a data set.
- 
- - `sample_df`: simple function to extract random lines from a `data.frame`.
- 
  - `dsb`: applies the dot square bracket operator to character strings.
  
  - `check_conv_feols`: checks the convergence of the fixed-effects in `feols` models by looking at the first-order conditions.
+ 
+## New functions, unrelated but possibly useful
+
+Although a bit unrelated to the purpose of this package, these functions are so extensively used in the author's research that he decided to leverage his author privileges to include them in `fixest` to make them easier to share with co-authors.
+
+ - `osize`: simple function returning a formatted object size.
+ 
+ - `n_unik`: simple but flexible function returning the number of unique elements from variables in one or several data sets. Useful for checking keys.
+ 
+ - `sample_df`: simple function to extract random lines from a `data.frame`.
  
 ## Other
 

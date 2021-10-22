@@ -7,13 +7,11 @@
 dsb(x, collapse = NULL)
 }
 \arguments{
-\item{x}{A character string, must be of length 1.}
+\item{x}{A character string, must be of length 1. Every expression inside \code{.[]} is evaluated in the current frame and then coerced to character and inserted into the character string. For example: \code{dsb("hello .[name]")} is equivalent to \code{paste0("hello ", name)}. You can add a string literal as first or last element in the \code{.[]}. Doing so will collapse the expression. If first, as in \code{.['text', expr]}, the expression is first collapsed: \code{paste0(expr, collapse = "text")} is applied. If last, as in \code{"before.[expr, 'text']"}, the expression is collapsed to the previous adjacent text: \code{paste0("before", expr, collapse = "text")} is applied. The collapsing is always done with the previous text only. To collapse the whole string, use the argument `collapse`.}
 
 \item{collapse}{If the variables inserted into the string are of length greater than 1, you can merge into a single string with \code{collapse}.
 
-Every expression inside \code{.[]} is evaluated in the current frame and then coerced to character and inserted into the character string.
-
-If the expression inside \code{.[]} is a vector, then the result will be a vector except the argument \code{collapse} is used.}
+Every expression inside \code{.[]} is evaluated in the current frame and then coerced to character and inserted into the character string.}
 }
 \value{
 A character vector. It is of length > 1 only if the variables inserted are of length > 1.
@@ -21,6 +19,21 @@ A character vector. It is of length > 1 only if the variables inserted are of le
 \description{
 Simple utility to insert variables into character strings using the "dot square bracket" operator. Typically \code{dsb("Hello I'm .[x]!")} is equivalent to \code{paste0("hello I'm ", x, "!")}.
 }
+\section{Collapsing}{
+
+
+If the expression inside \code{.[]} is a vector, a vector will be returned, except when we explicitly request the character string to be "collapsed". There are three main ways to do the collapsing that we detail below. Throughout, consider that the variable \code{name} is equal to \code{name = c("Romeo", "Juliet")} and the example \code{dsb("hello .[name], what's up?")}.
+
+
+\itemize{
+
+\item{full collapse:}{The argument \code{collapse} is used. All the string elements are attached. For example \code{dsb("hello .[name], what's up?", collapse = " And... ")} leads to \code{"hello Romeo, what's up? And... hello Juliet, what's up?"}.}
+\item{expression-collapse:}{There is a string literal in the first position of \code{.[]}. In that case the expression in brackets is first collapsed before being merged. For example in \code{dsb("hello .[' and ', name], what's up?")} leads to \code{"hello Romeo and Juliet, what's up?"}. If you add a comma but omit the string literal, the default is to collapse with a space: \code{.[,expr]} is equivalent to \code{.[" ", expr]}.}
+\item{text-expression-collapse:}{There is a string literal in the second position of \code{.[]}. In that case the expression in brackets is collapsed to the adjacent string on the left. For example in \code{dsb("hello .[name, ' and '], what's up?")} leads to \code{"hello Romeo and hello Juliet, what's up?"}. If you add a comma but omit the string literal, the default is to collapse with a space: \code{.[expr,]} is equivalent to \code{.[expr, " "]}.}
+
+}
+}
+
 \examples{
 
 guy_all = c("Jenny", "Bryan")
@@ -39,6 +52,27 @@ loc_gen = function() sample(loc_all, 1)
 
 dsb("Where is .[g <- guy_gen()]? .[g] is in the .[loc_gen()].")
 
+
+#
+# Collapsing options
+#
+
+name = c("Romeo", "Juliet")
+
+# full collapse with argument collapse
+dsb("hello .[name], what's up?", collapse = " and ")
+
+# collapse the expression by adding a string literal
+# in the *first* position of .[]
+dsb("hello .[' and ', name], what's up?")
+
+# collapsing the epression with the previous string
+# using a string literal in the *second* position
+dsb("hello .[name, ' and '], what's up?")
+
+# The elements can also be empty, leading to collapse with a " "
+dsb("hello .[, name], what's up?")
+dsb("hello .[name, ], what's up?")
 
 }
 \author{

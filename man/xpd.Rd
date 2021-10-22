@@ -39,11 +39,13 @@ To summon values from the environment, simply put the variable in square bracket
 
 You can include a full variable from the environment in the same way: \code{for(y in c("a", "b")) xpd(.[y] ~ x)} will create the two formulas \code{a ~ x} and \code{b ~ x}.
 
-The DSB can even be used within variable names, but then the variable must be nested in character form. For example \code{y ~ .["x.[1:2]_sq"]} will create \code{y ~ x1_sq +  x2_sq}. Using the character form is important to avoid a formula parsing error.
+The DSB can even be used within variable names, but then the variable must be nested in character form. For example \code{y ~ .["x.[1:2]_sq"]} will create \code{y ~ x1_sq +  x2_sq}. Using the character form is important to avoid a formula parsing error. Double quotes must be used.
+
+By default, the DSB operator expands vectors into sums. You can add a comma, like in \code{.[, x]}, to expand with commas--the content can then be used within functions. For instance: \code{c(x.[, 1:2])} will create \code{c(x1, x2)} (and \emph{not} \code{c(x1 + x2)}).
 
 In all \code{fixest} estimations, this special parsing is enabled, so you don't need to use \code{xpd}.
 
-Limitations: the use of multiple square brackets within a single variable is not implemented. For example, the following will not work \code{xpd(y ~ ..x, ..x = x.[1:3]_.[1:3])}.
+Limitations: the use of multiple square brackets within a single variable is not directly implemented. But you can use the function \code{\link[fixest]{dsb}} to more flexibly use the DSB operator within character strings. For example, the following will work \code{xpd(y ~ ..x, ..x = dsb(".[letters[1:2]]_.[1:2]"))} and create \code{y ~ a_1 + b_2}.
 }
 
 \section{Regular expressions}{
@@ -176,6 +178,11 @@ re = c("GNP", "Pop")
 xpd(Unemployed ~ ..(".[re]"), data = longley)
 
 # => equivalent to ..("GNP|Pop")
+
+# Use .[,var] (NOTE THE COMMA!) to expand with commas
+# !! can break the formula if missused
+vars = c("wage", "unemp")
+xpd(c(y.[,1:3]) ~ csw(.[,vars]))
 
 
 }

@@ -3004,11 +3004,13 @@ bin = function(x, bin){
 #'
 #' You can include a full variable from the environment in the same way: \code{for(y in c("a", "b")) xpd(.[y] ~ x)} will create the two formulas \code{a ~ x} and \code{b ~ x}.
 #'
-#' The DSB can even be used within variable names, but then the variable must be nested in character form. For example \code{y ~ .["x.[1:2]_sq"]} will create \code{y ~ x1_sq +  x2_sq}. Using the character form is important to avoid a formula parsing error.
+#' The DSB can even be used within variable names, but then the variable must be nested in character form. For example \code{y ~ .["x.[1:2]_sq"]} will create \code{y ~ x1_sq +  x2_sq}. Using the character form is important to avoid a formula parsing error. Double quotes must be used.
+#'
+#' By default, the DSB operator expands vectors into sums. You can add a comma, like in \code{.[, x]}, to expand with commas--the content can then be used within functions. For instance: \code{c(x.[, 1:2])} will create \code{c(x1, x2)} (and \emph{not} \code{c(x1 + x2)}).
 #'
 #' In all \code{fixest} estimations, this special parsing is enabled, so you don't need to use \code{xpd}.
 #'
-#' Limitations: the use of multiple square brackets within a single variable is not implemented. For example, the following will not work \code{xpd(y ~ ..x, ..x = x.[1:3]_.[1:3])}.
+#' Limitations: the use of multiple square brackets within a single variable is not directly implemented. But you can use the function \code{\link[fixest]{dsb}} to more flexibly use the DSB operator within character strings. For example, the following will work \code{xpd(y ~ ..x, ..x = dsb(".[letters[1:2]]_.[1:2]"))} and create \code{y ~ a_1 + b_2}.
 #'
 #' @section Regular expressions:
 #'
@@ -3150,6 +3152,11 @@ bin = function(x, bin){
 #'
 #' # => equivalent to ..("GNP|Pop")
 #'
+#' # Use .[,var] (NOTE THE COMMA!) to expand with commas
+#' # !! can break the formula if missused
+#' vars = c("wage", "unemp")
+#' xpd(c(y.[,1:3]) ~ csw(.[,vars]))
+#'
 #'
 xpd = function(fml, ..., lhs, rhs, data = NULL){
     .xpd(fml = fml, ..., lhs = lhs, rhs = rhs, data = data, check = TRUE, macro = TRUE, frame = parent.frame())
@@ -3204,8 +3211,10 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 
     is_macro = length(macros) != 0
     is_data = !missnull(data)
-    is_brackets = "[" %in% all.vars(fml, functions = TRUE)
-    if(!(is_macro || is_data || is_brackets)) return(fml)
+    fml_funs = all.vars(fml, functions = TRUE)
+    is_brackets = "[" %in% fml_funs
+    is_dot_dot = ".." %in% fml_funs
+    if(!(is_macro || is_data || is_brackets || is_dot_dot)) return(fml)
 
     fml_dp = NULL
 
@@ -3221,21 +3230,28 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
         }
     }
 
-    if(is_data){
+    if(is_dot_dot){
         # We expand only if data is provided (it means the user wants us to check)
+        # if .[]: we expand inside the ..(".[1:3]") => ..("1|2|3")
+
         if(is.null(fml_dp)) fml_dp = deparse_long(fml)
+        is_brackets = grepl(".[", fml_dp, fixed = TRUE)
 
-        if(grepl('..("', fml_dp, fixed = TRUE)){
+        if(is_data || is_brackets){
 
-            check_arg(data, "character vector no na | matrix | data.frame")
+            if(is.null(fml_dp)) fml_dp = deparse_long(fml)
 
-            if(is.matrix(data)){
-                data = colnames(data)
-                if(is.null(data)){
-                    stop("The argument 'data' must contain variable names. It is currently a matrix without column names.")
+            if(is_data){
+                check_arg(data, "character vector no na | matrix | data.frame")
+
+                if(is.matrix(data)){
+                    data = colnames(data)
+                    if(is.null(data)){
+                        stop("The argument 'data' must contain variable names. It is currently a matrix without column names.")
+                    }
+                } else if(is.data.frame(data)){
+                    data = names(data)
                 }
-            } else if(is.data.frame(data)){
-                data = names(data)
             }
 
             fml_dp_split = strsplit(fml_dp, '..("', fixed = TRUE)[[1]]
@@ -3245,12 +3261,18 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
                 re = gsub('"\\).*', "", res[i])
                 re_width = nchar(re)
                 re = dot_square_bracket(re, frame, regex = TRUE)
-                vars = grep(re, data, value = TRUE, perl = TRUE)
-                if(length(vars) == 0){
-                    vars = "1"
+
+                if(is_data){
+                    vars = grep(re, data, value = TRUE, perl = TRUE)
+                    if(length(vars) == 0){
+                        vars = "1"
+                    }
+
+                    res[i] = paste0(paste(vars, collapse = "+"), substr(res[i], re_width + 3, nchar(res[i])))
+                } else {
+                    res[i] = paste0("..(\"", re, "\")", substr(res[i], re_width + 3, nchar(res[i])))
                 }
 
-                res[i] = paste0(paste(vars, collapse = "+"), substr(res[i], re_width + 3, nchar(res[i])))
             }
 
             fml = as.formula(paste(res, collapse = ""), frame)
@@ -3267,7 +3289,10 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
                 fml_txt = dot_square_bracket(fml_txt, frame)
             }
 
-            fml = as.formula(fml_txt, frame)
+            fml = error_sender(as.formula(fml_txt, frame),
+                               "Dot square bracket operator: coercion of the following text to a formula led to an error.\n",
+                               fit_screen(paste0("     TEXT: ", fml_txt)),
+                               "\n  PROBLEM: see below", up = 1)
         }
 
     }
@@ -3281,12 +3306,23 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 #'
 #' Simple utility to insert variables into character strings using the "dot square bracket" operator. Typically \code{dsb("Hello I'm .[x]!")} is equivalent to \code{paste0("hello I'm ", x, "!")}.
 #'
-#' @param x A character string, must be of length 1.
+#' @param x A character string, must be of length 1. Every expression inside \code{.[]} is evaluated in the current frame and then coerced to character and inserted into the character string. For example: \code{dsb("hello .[name]")} is equivalent to \code{paste0("hello ", name)}. You can add a string literal as first or last element in the \code{.[]}. Doing so will collapse the expression. If first, as in \code{.['text', expr]}, the expression is first collapsed: \code{paste0(expr, collapse = "text")} is applied. If last, as in \code{"before.[expr, 'text']"}, the expression is collapsed to the previous adjacent text: \code{paste0("before", expr, collapse = "text")} is applied. The collapsing is always done with the previous text only. To collapse the whole string, use the argument `collapse`.
 #' @param collapse If the variables inserted into the string are of length greater than 1, you can merge into a single string with \code{collapse}.
 #'
 #' Every expression inside \code{.[]} is evaluated in the current frame and then coerced to character and inserted into the character string.
 #'
-#' If the expression inside \code{.[]} is a vector, then the result will be a vector except the argument \code{collapse} is used.
+#' @section Collapsing:
+#'
+#' If the expression inside \code{.[]} is a vector, a vector will be returned, except when we explicitly request the character string to be "collapsed". There are three main ways to do the collapsing that we detail below. Throughout, consider that the variable \code{name} is equal to \code{name = c("Romeo", "Juliet")} and the example \code{dsb("hello .[name], what's up?")}.
+#'
+#'
+#' \itemize{
+#'
+#' \item{full collapse:}{The argument \code{collapse} is used. All the string elements are attached. For example \code{dsb("hello .[name], what's up?", collapse = " And... ")} leads to \code{"hello Romeo, what's up? And... hello Juliet, what's up?"}.}
+#' \item{expression-collapse:}{There is a string literal in the first position of \code{.[]}. In that case the expression in brackets is first collapsed before being merged. For example in \code{dsb("hello .[' and ', name], what's up?")} leads to \code{"hello Romeo and Juliet, what's up?"}. If you add a comma but omit the string literal, the default is to collapse with a space: \code{.[,expr]} is equivalent to \code{.[" ", expr]}.}
+#' \item{text-expression-collapse:}{There is a string literal in the second position of \code{.[]}. In that case the expression in brackets is collapsed to the adjacent string on the left. For example in \code{dsb("hello .[name, ' and '], what's up?")} leads to \code{"hello Romeo and hello Juliet, what's up?"}. If you add a comma but omit the string literal, the default is to collapse with a space: \code{.[expr,]} is equivalent to \code{.[expr, " "]}.}
+#'
+#' }
 #'
 #' @return
 #' A character vector. It is of length > 1 only if the variables inserted are of length > 1.
@@ -3312,6 +3348,27 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 #'
 #' dsb("Where is .[g <- guy_gen()]? .[g] is in the .[loc_gen()].")
 #'
+#'
+#' #
+#' # Collapsing options
+#' #
+#'
+#' name = c("Romeo", "Juliet")
+#'
+#' # full collapse with argument collapse
+#' dsb("hello .[name], what's up?", collapse = " and ")
+#'
+#' # collapse the expression by adding a string literal
+#' # in the *first* position of .[]
+#' dsb("hello .[' and ', name], what's up?")
+#'
+#' # collapsing the epression with the previous string
+#' # using a string literal in the *second* position
+#' dsb("hello .[name, ' and '], what's up?")
+#'
+#' # The elements can also be empty, leading to collapse with a " "
+#' dsb("hello .[, name], what's up?")
+#' dsb("hello .[name, ], what's up?")
 #'
 dsb = function(x, collapse = NULL){
     check_arg(x, "character scalar")
@@ -4823,20 +4880,6 @@ print.list_n_unik = function(x, ...){
 
     x_names = sfill(all_names)
 
-    insert_in_between = function(x, y){
-        n_x = length(x)
-        n_y = length(y)
-
-        if(n_y == 1) y = rep(y, n_x)
-        if(n_x == 1) x = rep(x, n_y)
-        n_x = length(x)
-
-        res = rep(x, each = 2)
-        res[2 * 1:n_x] = y
-
-        res
-    }
-
     var_col = paste0("#> ", x_names, ":")
     na_intro = paste0("#> ", sfill(" ", nchar(x_names[1])), "|NAs:")
     var_col = insert_in_between(var_col, na_intro)
@@ -5058,14 +5101,31 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
     # transforms "x.[i]" into x1 if i==1
     # z = "XX" ; x = ".[z] + x.[1:5] + y.[1:2]_t"
     # x = "x.[a] | fe[b] + m.[o]"
+    # .[,stuff] => means aggregation is comma based
+    # if text, we allow:
+    # - before.["text", stuff]after AND .[stuff, "text"]
+    #   * .["text", stuff] => collapses stuff with "text"
+    #     ie paste0(before, paste0(stuff, collapse = "text"), after)
+    #   * .["text", stuff] => collapses stuff WITH the previous string with "text",
+    #     ie paste0(paste0(before, stuff, collapse = "text), after)
+    # regex = FALSE ; frame = .GlobalEnv ; text = FALSE
+    # x = 'c(.[,y]) ~ sw(x.[,1:3])'
+    # name = c("Jon", "Juliet") ; x = "bonjour .[' and ', name]" ; text = TRUE
+    # name = c("Jon", "Juliet") ; x = "bonjour .[name, ' and ']" ; text = TRUE
 
     if(!grepl(".[", x, fixed = TRUE)) return(x)
 
     x_split_open = strsplit(x, ".[", fixed = TRUE)[[1]]
 
+    # comma aggregation
+    is_comma = grepl("^,", x_split_open[-1])
+    if(any(is_comma) && !text){
+        x_split_open[-1] = gsub("^, *", "", x_split_open[-1])
+    }
+
     # nesting: a ~ .["x.[1:2]_sq"] + b
-    is_nested = any(grepl("^\"", x_split_open[-1]))
-    if(is_nested){
+    any_nested = any(grepl("^\"", x_split_open[-1]))
+    if(any_nested){
 
         i_open_quote = setdiff(which(grepl("^\"", x_split_open)), 1)
         i_close_quote = which(grepl("\"\\]", x_split_open))
@@ -5121,18 +5181,51 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
         x_split[[j + 1]] = x_split_close_right
     }
 
-    if(is_nested){
+    if(any_nested){
         x_split = gsub("__open__", ".[", x_split)
         x_split = gsub("__close__", "]", x_split)
     }
 
+    if(text){
+        # NA means no aggregation
+        agg = rep(NA_character_, n)
+        agg_full = rep(FALSE, n)
+    }
+
     res = as.list(x_split)
     for(i in (1:n)[(1:n) %% 2 == 0]){
+
+        # catching the aggregator
+        if(text && grepl(",", x_split[i], fixed = TRUE)){
+            # taking care of the empty commas
+            x_txt = sub("(^(?=,)|(?<=,)$)", "' '", trimws(x_split[i]), perl = TRUE)
+            x_txt = paste0("dsb_check_set_agg(", x_txt, ")")
+            info_agg = error_sender(eval(str2lang(x_txt), frame),
+                                    "Dot square bracket operator: Evaluation of '.[",
+                                    x_split[i], "]' led to an error:",
+                                    up = up + 1)
+            agg[i] = info_agg$agg
+            agg_full[i] = isTRUE(attr(info_agg$agg, "full"))
+            my_call = info_agg$call
+        } else {
+            my_call = error_sender(str2lang(x_split[i]),
+                                   "Dot square bracket operator: Evaluation of '.[",
+                                   x_split[i], "]' led to an error:",
+                                   up = up + 1)
+        }
+
         # Informative error message
-        value = error_sender(eval(str2lang(x_split[i]), frame),
-                             "Dot square bracket operator: Evaluation of '.[", x_split[i], "]' led to an error:",
+        value = error_sender(as.character(eval(my_call, frame)),
+                             "Dot square bracket operator: Evaluation of '.[",
+                             x_split[i], "]' led to an error:",
                              up = up + 1)
         res[[i]] = value
+    }
+
+    if(any(is_comma)){
+        is_comma = insert_in_between(FALSE, is_comma)
+    } else if(!text){
+        is_comma = rep(FALSE, length(res))
     }
 
     if(max(lengths(res)) == 1) {
@@ -5149,7 +5242,16 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
                 i = i + 1
 
             } else if(text){
-                res_txt = paste0(res_txt, res[[i]])
+                if(is.na(agg[i])){
+                    res_txt = paste0(res_txt, res[[i]])
+                } else {
+                    if(agg_full[i]){
+                        res_txt = paste0(res_txt, res[[i]], collapse = agg[i])
+                    } else {
+                        res_txt = paste0(res_txt, paste0(res[[i]], collapse = agg[i]))
+                    }
+                }
+
                 i = i + 1
 
             } else if(regex) {
@@ -5161,15 +5263,17 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
                 before_no_var = gsub("[[:alnum:]_\\.]+$", "", res_txt)
                 var_before = substr(res_txt, nchar(before_no_var) + 1, nchar(res_txt))
 
+                coll = if(is_comma[i]) ", " else " + "
+
                 if(i != n && grepl("[[:alnum:]_\\.]", substr(res[[i + 1]], 1, 1))){
                     after = res[[i + 1]]
                     after_no_var = gsub("^[[:alnum:]_\\.]+", "", after)
                     var_after = substr(after, 1, nchar(after) - nchar(after_no_var))
 
-                    res_txt = paste0(before_no_var, paste0(var_before, res[[i]], var_after, collapse = " + "), after_no_var)
+                    res_txt = paste0(before_no_var, paste0(var_before, res[[i]], var_after, collapse = coll), after_no_var)
                     i = i + 2
                 } else {
-                    res_txt = paste0(before_no_var, paste0(var_before, res[[i]], collapse = " + "))
+                    res_txt = paste0(before_no_var, paste0(var_before, res[[i]], collapse = coll))
                     i = i + 1
                 }
             }
@@ -5190,6 +5294,27 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
     res
 }
 
+
+dsb_check_set_agg = function(...){
+    if(...length() > 2){
+        stop("You cannot have more than two elements in between .[]. Currently there are ", ...length(), ".")
+    }
+
+    mc = match.call()
+    if(...length() == 1){
+        res = list(agg = NA_character_, call = mc[[2]])
+    } else if(is.character(mc[[2]])){
+        res = list(agg = mc[[2]], call = mc[[3]])
+    } else if(is.character(mc[[3]])){
+        agg = mc[[3]]
+        attr(agg, "full") = TRUE
+        res = list(agg = agg, call = mc[[2]])
+    } else {
+        stop("The operator .[] accepts only up to two elements, one of the MUST be a string literal (eg: .['text', y]). Problem: none of the two elements is a string literal.")
+    }
+
+    return(res)
+}
 
 
 # style_name = "fixef"
@@ -8300,6 +8425,20 @@ extract_fun = function(fml_char, fun, err_msg = NULL, bool = FALSE, drop = TRUE)
 is_numeric_in_char = function(x){
     res = tryCatch(as.numeric(x), warning = function(x) "not numeric")
     !identical(res, "not numeric")
+}
+
+insert_in_between = function(x, y){
+    n_x = length(x)
+    n_y = length(y)
+
+    if(n_y == 1) y = rep(y, n_x)
+    if(n_x == 1) x = rep(x, n_y)
+    n_x = length(x)
+
+    res = rep(x, each = 2)
+    res[2 * 1:n_x] = y
+
+    res
 }
 
 

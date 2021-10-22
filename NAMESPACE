@@ -28,7 +28,7 @@ export(panel, unpanel, f, l, d)
 # factor/interactions/binning
 export(i, bin)
 # macro
-export(xpd)
+export(xpd, dsb)
 # utilities
 export(to_integer, demean, obs)
 # setters & getters
@@ -38,7 +38,7 @@ exportPattern("^(s|g)etFixest")
 export(vcov_cluster, vcov_DK, vcov_NW, vcov_conley)
 
 # other stuff
-export(n_unik, osize, sample_df, dsb)
+export(n_unik, osize, sample_df)
 
 
 # deprecated

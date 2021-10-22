@@ -148,6 +148,11 @@ xpd(Unemployed ~ ..(".[re]"), data = longley)
 
 # => equivalent to ..("GNP|Pop")
 
+# Use .[,var] (NOTE THE COMMA!) to expand with commas
+# !! can break the formula if missused
+vars = c("wage", "unemp")
+xpd(c(y.[,1:3]) ~ csw(.[,vars]))
+
 
 }
 \seealso{
