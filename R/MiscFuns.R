@@ -1308,9 +1308,9 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, nthrea
 
 	# Family information
 	attr(all_clust, "exponential") = FALSE
-	if(object$method == "femlm" && object$family %in% c("poisson", "negbin")){
+	if(object$method_type == "feNmlm" && object$family %in% c("poisson", "negbin")){
 		attr(all_clust, "exponential") = TRUE
-	} else if(object$method == "feglm" && object$family$link == "log"){
+	} else if(object$method_type == "feglm" && object$family$link == "log"){
 		attr(all_clust, "exponential") = TRUE
 	}
 

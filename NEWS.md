@@ -21,6 +21,8 @@
  
  - fix bug in `summary.fixest_multi`: when the variance was NA and internal bug could pop in some circumstances.
  
+ - fix bug `plot.fixef` not working for `fepois` (reported by @statzhero [#213](https://github.com/lrberge/fixest/issues/213)).
+ 
 ## New features
 
  - when computing Newey-West standard-errors for time series, the bandwidth is now selected thanks to the [bwNeweyWest](https://sandwich.r-forge.r-project.org/reference/NeweyWest.html) function from the [sandwich](https://sandwich.r-forge.r-project.org/index.html) package. This function implements the method described in Newey and West 1994.
