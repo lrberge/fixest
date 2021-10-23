@@ -963,9 +963,42 @@ unpanel = function(x){
     return(res)
 }
 
-terms_hat = function(fml, fastCombine = TRUE){
+terms_hat = function(fml, fastCombine = TRUE, hat_op = FALSE){
 
-    fml_char = as.character(fml[length(fml)])
+    fml_char = as.character(fml)[length(fml)]
+
+    # %^%: hat operator, in n_unik
+    if(hat_op && grepl("%^%", fml_char, fixed = TRUE)){
+        # a%^%b => a + b + a^b
+
+        fml_clean = gsub(" %^% ", "__HAT_OP__", fml_char, fixed = TRUE)
+        fml_clean = gsub("^", "__HAT__", fml_clean, fixed = TRUE)
+
+        vars = get_vars(.xpd(rhs = fml_clean))
+
+        qui_hat_op = grepl("__HAT_OP__", vars, fixed = TRUE)
+        while(any(qui_hat_op)){
+            i = which(qui_hat_op)[1]
+            vi = vars[i]
+            vi_all = strsplit(vi, "__HAT_OP__", fixed = TRUE)[[1]]
+            new_vars = vi_all
+            n_vi = length(vi_all)
+            for(ncomb in 2:n_vi){
+                comb_all = combn(n_vi, ncomb)
+                comb_vars = apply(comb_all, 2, function(x) paste0(vi_all[x], collapse = "^"))
+                new_vars = c(new_vars, comb_vars)
+            }
+            vars = insert(vars[-i], new_vars, i)
+            qui_hat_op = grepl("__HAT_OP__", vars, fixed = TRUE)
+        }
+
+        vars = unique(gsub("__HAT__", "^", vars, fixed = TRUE))
+
+        fml = .xpd(rhs = vars)
+        fml_char = as.character(fml)[length(fml)]
+    }
+
+
     if(grepl("^", fml_char, fixed = TRUE)){
         # special indicator to combine factors
         fml = fml_combine(fml_char, fastCombine)

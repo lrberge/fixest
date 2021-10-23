@@ -746,6 +746,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_is_int
+bool cpp_is_int(SEXP x);
+RcppExport SEXP _fixest_cpp_is_int(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_is_int(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_get_nb_threads
 int cpp_get_nb_threads();
 RcppExport SEXP _fixest_cpp_get_nb_threads() {
@@ -1147,6 +1158,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_get_first_item", (DL_FUNC) &_fixest_cpp_get_first_item, 2},
     {"_fixest_cpp_combine_clusters", (DL_FUNC) &_fixest_cpp_combine_clusters, 2},
     {"_fixest_cpp_cut", (DL_FUNC) &_fixest_cpp_cut, 3},
+    {"_fixest_cpp_is_int", (DL_FUNC) &_fixest_cpp_is_int, 1},
     {"_fixest_cpp_get_nb_threads", (DL_FUNC) &_fixest_cpp_get_nb_threads, 0},
     {"_fixest_cpppar_exp", (DL_FUNC) &_fixest_cpppar_exp, 2},
     {"_fixest_cpppar_log", (DL_FUNC) &_fixest_cpppar_log, 2},

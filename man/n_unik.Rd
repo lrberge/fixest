@@ -6,18 +6,14 @@
 \alias{print.list_n_unik}
 \title{Prints the number of unique elements in a data set}
 \usage{
-n_unik(x, fml)
+n_unik(x)
 
 \method{print}{vec_n_unik}(x, ...)
 
 \method{print}{list_n_unik}(x, ...)
 }
 \arguments{
-\item{x}{A data.frame or a vector or a formula. If \code{data.frame}: to be used with argument \code{fml} or, if \code{fml} is missing, displays generic information. If a vector: the number of unique values is displayed. If a formula, it must be of the form: \code{data1 + data2 ~ var1 + var2}, with data set names on the LHS and variables on the RHS. You can put as many data sets as you want, same for the vars. The following special variables are admitted: \code{"."} to get default values, \code{".N"} for the number of observations, \code{".U"} for the number of unique rows, \code{".NA"} for the number of rows with at least one NA. Variables can be combined with \code{"^"}, e.g. \code{df~id^period}. There can be sub selection with \code{[]}. The stepwise functions \code{sw} and \code{sw0} can also be used within sub selection for example. Use \code{NA(x, y)} for\code{is.na(x) | is.na(y)}.}
-
-\item{fml}{A one-sided formula containing the variables for which to count the number of unique values. You can use \code{.N} to get the number of observations. You can combine variables with the "^" operator. For example: \code{fml = ~ .N + id + id^period} will report the number of observations, the number of unique values of \code{id} and the number of unique \code{id} x \code{period} pairs. You can sub select variables with \code{[]}, like in \code{id[!is.na(period)]}. You can use the special functions \code{sw} and \code{sw0}, like in \code{~id^sw0(period) + period[sw0(is.na(id))]} which would lead to \code{~id + id^period + period + period[is.na(id)]}.}
-
-\item{...}{Not currently used.}
+\item{x}{A formula, with data set names on the LHS and variables on the RHS, like \code{data1 + data2 ~ var1 + var2}. The following special variables are admitted: \code{"."} to get default values, \code{".N"} for the number of observations, \code{".U"} for the number of unique rows, \code{".NA"} for the number of rows with at least one NA. Variables can be combined with \code{"^"}, e.g. \code{df~id^period}; use \code{id\%^\%period} to also include the terms on both sides. Sub select with \code{id[cond]}, when doing so \code{id} is automatically included. Conditions can be chained, as in \code{id[cond1, cond2]}. Use \code{NA(x, y)} in conditions instead of \code{is.na(x) | is.na(y)}. If not a formula, \code{x} can be: a vector (displays the # of unique values); a \code{data.frame} (default values are displayed), or a "sum" of data sets like in \code{x = data1 + data2}, in that case it is equivalent to \code{data1 + data2 ~ .}.}
 }
 \value{
 It returns a vector containing the number of unique values per element. If several data sets were provided, a list is returned, as long as the number of data sets, each element being a vector of unique values.
@@ -32,7 +28,7 @@ In the formula, you can use the following special values: \code{"."}, \code{".N"
 
 \itemize{
 
-\item{\code{"."}}{Access the default values. If there is only one data set and the data set is \emph{not} a \code{data.table}, then the default is to display the number of observations and the number of unique rows. If the data is a \code{data.table}, the number of unique items in the key(s) is displayed instead of the number of unique rows (if the table has keys of course). If there are two or more data sets, then the default is to display the unique items for: a) the variables common across all data sets, if there's less than 4, and b) if no variable is shown in a), the number of variables common across at least two data sets, provided there are less than 5. If the data sets are data tables, the keys are also displayed on top of the common variables. In any case, the number of observations is always displayed.}
+\item{\code{"."}}{Accesses the default values. If there is only one data set and the data set is \emph{not} a \code{data.table}, then the default is to display the number of observations and the number of unique rows. If the data is a \code{data.table}, the number of unique items in the key(s) is displayed instead of the number of unique rows (if the table has keys of course). If there are two or more data sets, then the default is to display the unique items for: a) the variables common across all data sets, if there's less than 4, and b) if no variable is shown in a), the number of variables common across at least two data sets, provided there are less than 5. If the data sets are data tables, the keys are also displayed on top of the common variables. In any case, the number of observations is always displayed.}
 
 \item{\code{".N"}}{Displays the number of observations.}
 
@@ -41,16 +37,32 @@ In the formula, you can use the following special values: \code{"."}, \code{".N"
 \item{\code{".NA"}}{Displays the number of rows with at least one NA.}
 
 }
-
-On top of that you can access the special functions: \code{sw}, \code{sw0} and \code{NA}.
-
-\itemize{
-
-\item{\code{sw} and \code{sw0}}{Stepwise functions can be used either within sub selections, like in \code{~ id[sw(NA(x), NA(y))]}, which leads to \code{~ id[NA(x)] + id[NA(y)]}. They can also be used when interacting variables, e.g. \code{~id^sw0(period)} which leads to \code{~id + id^period}.}
-
-\item{\code{NA}}{The special function \code{NA} is an equivalent to \code{is.na} but can handle several variables. For instance, \code{NA(x, y)} is equivalent to \code{is.na(x) | is.na(y)}. You can add as many variables you want as arguments. If no argument is provided, as in \code{NA()}, it is identical to having all the variables of the data set as argument.}
-
 }
+
+\section{The \code{NA} function}{
+
+
+The special function \code{NA} is an equivalent to \code{is.na} but can handle several variables. For instance, \code{NA(x, y)} is equivalent to \code{is.na(x) | is.na(y)}. You can add as many variables as you want as arguments. If no argument is provided, as in \code{NA()}, it is identical to having all the variables of the data set as argument.
+}
+
+\section{Combining variables}{
+
+
+Use the "hat", \code{"^"}, operator to combine several variables. For example \code{id^period} will display the number of unique values of id x period combinations.
+
+Use the "super hat", \code{"\%^\%"}, operator to also include the terms on both sides. For example, instead of writing \code{id + period + id^period}, you can simply write \code{id\%^\%period}.
+}
+
+\section{Sub-selections}{
+
+
+To show the number of unique values for sub samples, simply use \code{[]}. For example, \code{id[x > 10]} will display the number of unique \code{id} for which \code{x > 10}.
+
+Simple square brackets lead to the inclusion of both the variable and its subset. For example \code{id[x > 10]} is equivalent to \code{id + id[x > 10]}. To include only the sub selection, use double square brackets, as in \code{id[[x > 10]]}.
+
+You can add multiple sub selections at once, only separate them with a comma. For example \code{id[x > 10, NA(y)]} is equivalent to \code{id[x > 10] + id[NA(y)]}.
+
+Use the double negative operator, i.e. \code{!!}, to include both a condition and its opposite at once. For example \code{id[!!x > 10]} is equivalent to \code{id[x > 10, !x > 10]}.
 }
 
 \examples{
@@ -65,13 +77,25 @@ n_unik(data)
 n_unik(data$id)
 
 # number of unique id values and id x period pairs
-n_unik(data, ~.N + id + id^period)
+n_unik(data ~.N + id + id^period)
 
-# using sub selection + sw0
-n_unik(data, ~.N + period[sw0(!is.na(x1.L1))])
+# use the \%^\% operator to include the terms on the two sides at once
+n_unik(data ~.N + id \%^\% period)
 
-# We can use one formula if we wish
-n_unik(data ~ .N + period[sw0(!NA(x1.L1))])
+# using sub selection with []
+n_unik(data ~.N + period[!NA(x1.L1)])
+
+# to show only the sub selection: [[]]
+n_unik(data ~.N + period[[!NA(x1.L1)]])
+
+# you can have multiple values in [],
+# just separate them with a comma
+n_unik(data ~.N + period[!NA(x1.L1), x1 > 7])
+
+# to have both a condition and its opposite,
+# use the !! operator
+n_unik(data ~.N[!!NA(x1.L1)])
+
 
 #
 # Several data sets
@@ -86,12 +110,15 @@ base_extra = sample_df(base_main[, c("id", "period")], 100)
 base_extra$z = rnorm(100)
 
 tmp = merge(base_main, base_extra, all.x = TRUE, by = c("id", "period"))
-n_unik(tmp + base_main + base_extra ~ .)
 
+# default values are used when not a formula
+n_unik(tmp + base_main + base_extra)
+
+# it's like n_unik(tmp + base_main + base_extra ~ .)
 # "." accesses the default, which is the variables common across all data sets
 
-# using NA() and sw
-n_unik(tmp + base_main + base_extra ~ id[sw0(!NA(z))] + id^period)
+# You can show unique values for any variable, as before
+n_unik(tmp + base_main + base_extra ~ id[!!NA(z)] + id^period)
 
 
 }
