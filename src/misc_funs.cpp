@@ -1272,7 +1272,30 @@ List cpp_cut(NumericVector x_sorted, NumericVector cut_points, IntegerVector is_
     return res;
 }
 
+// [[Rcpp::export]]
+bool cpp_is_int(SEXP x){
 
+    if(TYPEOF(x) == INTSXP){
+        return true;
+    }
+
+    if(TYPEOF(x) != REALSXP){
+        return false;
+    }
+
+    int N = Rf_length(x);
+    double *px = REAL(x);
+
+    bool is_int = true;
+    for(int i=0 ; i<N ; ++i){
+        if(fabs(px[i] - round(px[i])) > 0.00000000001){
+            is_int = false;
+            break;
+        }
+    }
+
+    return is_int;
+}
 
 
 
