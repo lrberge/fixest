@@ -3433,7 +3433,8 @@ dsb = function(x, collapse = NULL){
 #' # You can use multi.join to handle the join of the items:
 #' to_integer(x1, x2, add_items = TRUE, multi.join = "; ")
 #'
-to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE, multi.df = FALSE, multi.join = "_", internal = FALSE){
+to_integer = function(..., sorted = FALSE, add_items = FALSE, items.list = FALSE,
+                      multi.df = FALSE, multi.join = "_", internal = FALSE){
 
     if(!internal) check_arg(..., "vector mbt")
     check_arg(sorted, add_items, items.list, "logical scalar")
@@ -4385,7 +4386,7 @@ summary.fixest_check_conv = function(object, type = "short", ...){
 #'
 #' This utility tool displays the number of unique elements in one or multiple data.frames as well as their number of NA values.
 #'
-#' @param x A formula, with data set names on the LHS and variables on the RHS, like \code{data1 + data2 ~ var1 + var2}. The following special variables are admitted: \code{"."} to get default values, \code{".N"} for the number of observations, \code{".U"} for the number of unique rows, \code{".NA"} for the number of rows with at least one NA. Variables can be combined with \code{"^"}, e.g. \code{df~id^period}; use \code{id\%^\%period} to also include the terms on both sides. Sub select with \code{id[cond]}, when doing so \code{id} is automatically included. Conditions can be chained, as in \code{id[cond1, cond2]}. Use \code{NA(x, y)} in conditions instead of \code{is.na(x) | is.na(y)}. If not a formula, \code{x} can be: a vector (displays the # of unique values); a \code{data.frame} (default values are displayed), or a "sum" of data sets like in \code{x = data1 + data2}, in that case it is equivalent to \code{data1 + data2 ~ .}.
+#' @param x A formula, with data set names on the LHS and variables on the RHS, like \code{data1 + data2 ~ var1 + var2}. The following special variables are admitted: \code{"."} to get default values, \code{".N"} for the number of observations, \code{".U"} for the number of unique rows, \code{".NA"} for the number of rows with at least one NA. Variables can be combined with \code{"^"}, e.g. \code{df~id^period}; use \code{id\%^\%period} to also include the terms on both sides. Sub select with \code{id[cond]}, when doing so \code{id} is automatically included. Conditions can be chained, as in \code{id[cond1, cond2]}. Use \code{NA(x, y)} in conditions instead of \code{is.na(x) | is.na(y)}. To compare the keys in two data sets, use \code{data1:data2}. If not a formula, \code{x} can be: a vector (displays the # of unique values); a \code{data.frame} (default values are displayed), or a "sum" of data sets like in \code{x = data1 + data2}, in that case it is equivalent to \code{data1 + data2 ~ .}.
 #'
 #' @section Special values and functions:
 #'
@@ -4481,6 +4482,9 @@ summary.fixest_check_conv = function(object, type = "short", ...){
 #' # You can show unique values for any variable, as before
 #' n_unik(tmp + base_main + base_extra ~ id[!!NA(z)] + id^period)
 #'
+#' # Comapring the keys in the two data sets
+#' n_unik(base_main:base_extra ~ id + period + id^period)
+#'
 #'
 n_unik = function(x){
     # returns a vector with the nber of unique values
@@ -4504,6 +4508,7 @@ n_unik = function(x){
     }
 
     # If vector
+    comp_pairs = list()
     if(is.vector(x)){
 
         x_name = gsub("^[[:alpha:]\\.][[:alnum:]\\._]*\\$", "", x_dp)
@@ -4515,7 +4520,7 @@ n_unik = function(x){
             x = x[!who_NA]
         }
 
-        res = length(unique(x))
+        res = len_unique(x)
         names(res) = x_name
 
         attr(res, "na.info") = na.info
@@ -4531,7 +4536,26 @@ n_unik = function(x){
 
     } else if(inherits(x, "formula")){
 
-        x_all_names = get_vars(x[1:2])
+        x_terms = terms(x[1:2])
+
+        fact_mat = attr(x_terms, "factors")
+
+        x_all_names = rownames(fact_mat)
+
+        # We get the comparison pairs
+        vars = colnames(fact_mat)
+        for(pair in grep(":", vars, fixed = TRUE, value = TRUE)){
+            dict = setNames(1:length(x_all_names), x_all_names)
+            pair_split = strsplit(pair, ":", fixed = TRUE)[[1]]
+            comb = combn(pair_split, 2)
+            for(i in 1:ncol(comb)){
+                comp_pairs[[length(comp_pairs) + 1]] = unname(dict[comb[, i]])
+            }
+        }
+
+        if(length(comp_pairs) > 0){
+            comp_pairs = unique(comp_pairs)
+        }
 
         # Construction of the list  + sanity check
         n_x = length(x_all_names)
@@ -4716,26 +4740,7 @@ n_unik = function(x){
 
         x = x_all[[I]]
         x_list = unclass(x)
-        x_list[["NA_fun"]] = function(...){
-            dots = list(...)
-            n_dots = length(dots)
-
-            if(n_dots == 0){
-                res = !complete.cases(x)
-                return(res)
-            }
-
-            res = is.na(dots[[1]])
-
-            if(n_dots == 1){
-                return(res)
-            }
-
-            for(i in 2:n_dots){
-                res = res | is.na(dots[[i]])
-            }
-            res
-        }
+        x_list[["NA_fun"]] = function(...) NA_fun(..., x)
 
         vars_legit = c(".N", ".U", ".NA", names(x))
 
@@ -4849,7 +4854,7 @@ n_unik = function(x){
                     vf_name = paste0(msg_start, msg_end)
 
                 } else {
-                    res_i = length(unique(val))
+                    res_i = len_unique(val)
                 }
 
             }
@@ -4866,6 +4871,79 @@ n_unik = function(x){
         }
 
         res_all[[x_all_names[I]]] = res
+    }
+
+
+    # Specific data set comparisons
+    info_pairs = list()
+    for(pair in comp_pairs){
+
+        i_x = pair[1]
+        i_y = pair[2]
+
+        x = x_all[[i_x]]
+        x_list = unclass(x)
+        x_list[["NA_fun"]] = function(...) NA_fun(..., x)
+
+        y = x_all[[i_y]]
+        y_list = unclass(y)
+        y_list[["NA_fun"]] = function(...) NA_fun(..., y)
+
+        vars_legit = intersect(names(x), names(y))
+
+        # two last elements: id and common
+        all_rows_id_common = c()
+        row_temp = rep(NA_real_, n_x + 2)
+
+        for(i in seq_along(var_final)){
+
+            vf = var_final[i]
+            vf = gsub("((?<=[^[:alnum:]_\\.])|^)NA\\(", "NA_fun(", vf, perl = TRUE)
+            vf_call = str2lang(vf)
+
+            if(!all(all.vars(vf_call) %in% vars_legit) || grepl("^NA_fun", vf)){
+                next
+
+            } else {
+                val_x = eval(vf_call, x_list)
+                val_y = eval(vf_call, y_list)
+
+                if(anyNA(val_x)){
+                    val_x = val_x[!is.na(val_x)]
+                }
+
+                if(anyNA(val_y)){
+                    val_y = val_y[!is.na(val_y)]
+                }
+
+                # first col is ID
+                val_x_unik = unique(val_x)
+                val_y_unik = unique(val_y)
+
+                n_x_not_in_y = sum(!val_x_unik %in% val_y_unik)
+                n_y_not_in_x = sum(!val_y_unik %in% val_x_unik)
+                n_common = sum(val_x_unik %in% val_y_unik)
+
+                row = row_temp
+                row[i_x] = n_x_not_in_y
+                row[i_y] = n_y_not_in_x
+
+                row[n_x + 1] = i
+                row[n_x + 2] = n_common
+
+                all_rows_id_common = rbind(all_rows_id_common, row)
+
+            }
+        }
+
+        if(length(all_rows_id_common) > 0){
+            attr(all_rows_id_common, "data_id") = c(i_x, i_y)
+            info_pairs[[length(info_pairs) + 1]] = all_rows_id_common
+        }
+    }
+
+    if(length(info_pairs) > 0){
+        attr(res_all, "info_pairs") = info_pairs
     }
 
     class(res_all) = "list_n_unik"
@@ -4897,6 +4975,9 @@ print.list_n_unik = function(x, ...){
 
     if(n_x == 1) return(x_all[[1]])
 
+    info_pairs = attr(x, "info_pairs")
+    IS_PAIR = !is.null(info_pairs)
+
     # First, the variable names
 
     all_names = names(x_all[[1]])
@@ -4909,6 +4990,9 @@ print.list_n_unik = function(x, ...){
         i = i + 1
     }
 
+    # id_vars: used in info_pairs
+    id_vars = seq_along(all_names)
+
     if(all(qui_0)){
         stop("Not any valid information to display: please check that all your variables exist in all data sets.")
 
@@ -4916,6 +5000,7 @@ print.list_n_unik = function(x, ...){
         warning("Some variables could not be evaluated in any data set: please check that all your variables exist in all data sets.")
 
         all_names = all_names[!qui_0]
+        id_vars = id_vars[!qui_0]
 
         for(i in 1:n_x){
             x = x_all[[i]]
@@ -4932,8 +5017,17 @@ print.list_n_unik = function(x, ...){
 
     x_names = sfill(all_names)
 
+    # If ambiguous pairs: we add data set suffixes
+    if(n_x > 2 && IS_PAIR){
+        add_suffix = function(x, i) paste0(x, " (", letters[i], ")")
+        var_width = max(nchar("Exclusive "), nchar(x_names[1]))
+    } else {
+        add_suffix = function(x, i) x
+        var_width = nchar(x_names[1])
+    }
+
     var_col = paste0("#> ", x_names, ":")
-    na_intro = paste0("#> ", sfill(" ", nchar(x_names[1])), "|NAs:")
+    na_intro = paste0("#> ", sfill(" ", var_width), "|NAs:")
     var_col = insert_in_between(var_col, na_intro)
     # we add the first row of the data sets names + format
     var_col = sfill(c("#> ", var_col), right = TRUE)
@@ -4944,7 +5038,7 @@ print.list_n_unik = function(x, ...){
 
     for(i in 1:n_x){
 
-        data_name = names(x_all)[i]
+        data_name = add_suffix(names(x_all)[i], i)
 
         x = x_all[[i]]
 
@@ -4974,6 +5068,69 @@ print.list_n_unik = function(x, ...){
     keep = c(TRUE, insert_in_between(TRUE, KEEP_NA_ROW))
 
     print_mat = print_mat[keep, ]
+
+    # PAIR information
+    if(IS_PAIR){
+
+        # identifiers used for insertion
+        id_vars_all = c(0, insert_in_between(id_vars, 0))
+        id_vars_all = id_vars_all[keep]
+
+        # we add two columns: id and common
+        print_mat = cbind(print_mat, id_vars_all, "")
+
+        insert_row_after_id = function(mat, row, col_id){
+
+            for(i in 1:nrow(row)){
+                i_id_mat = max(which(mat[, col_id] == row[i, col_id]))
+                tmp_before = mat[1:i_id_mat, ]
+
+                if(i_id_mat < nrow(mat)){
+                    tmp_after = mat[(i_id_mat + 1):nrow(mat), ]
+                } else {
+                    tmp_after = NULL
+                }
+
+                mat = rbind(tmp_before, row[i, ], tmp_after)
+            }
+
+            mat
+        }
+
+        for(pair in info_pairs){
+            data_id = attr(pair, "data_id")
+
+            if(n_x == 2){
+                data_col = paste0("#> ", sfill(" ", var_width, right = TRUE), "|Excl:")
+            } else {
+                data_col = paste0("#> ", sfill("Exclusive ", var_width, right = TRUE),
+                                  "|", paste0(letters[data_id], collapse = ":"))
+            }
+
+            # formatting the NAs
+            pair[is.na(pair)] = " "
+
+            # adding the data col
+            pair = cbind(data_col, pair)
+
+            print_mat = insert_row_after_id(print_mat, pair, n_x + 2)
+
+        }
+
+        # Formatting
+        print_mat = print_mat[, -(n_x + 2)]
+        print_mat[, 1] = sfill(print_mat[, 1], right = TRUE)
+        for(j in 2:(n_x + 1)){
+            print_mat[, j] = sfill(print_mat[, j])
+        }
+
+        # Last column
+        common = print_mat[, n_x + 2]
+        is_num = grepl("\\d", common)
+        common[is_num] = sfill(fsignif(as.numeric(common[is_num])))
+        common[is_num] = paste0("Common: ", common[is_num])
+        print_mat[, n_x + 2] = common
+    }
 
     vec2print = apply(print_mat, 1, paste, collapse = " ")
 
@@ -5055,6 +5212,35 @@ sample_df = function(x, n = 10){
     # complicated var name to avoid issue with data.table variables
     XXXselectedXXX = sample(nrow(x), n)
     x[XXXselectedXXX, ]
+}
+
+len_unique = function(x){
+
+    if(!is.vector(x)){
+        return(length(unique(x)))
+    }
+
+    ANY_NA = FALSE
+    if(is.numeric(x)){
+        info_na = cpppar_which_na_inf_vec(x, getFixest_nthreads())
+        if(info_na$any_na_inf){
+            ANY_NA = TRUE
+            x = x[!info_na$is_na_inf]
+        }
+    } else {
+        if(anyNA(x)){
+            ANY_NA = TRUE
+            x = x[!is.na(x)]
+        }
+    }
+
+    if(length(x) == 0){
+        return(0)
+    }
+
+    x_quf = quickUnclassFactor(x, addItem = TRUE, sorted = FALSE)
+
+    length(x_quf$items) + ANY_NA
 }
 
 #### ................. ####
@@ -8499,6 +8685,27 @@ str_trim = function(x, n, first = FALSE){
     } else {
         substr(x, 1, nchar(x) - n)
     }
+}
+
+NA_fun = function(..., df){
+    dots = list(...)
+    n_dots = length(dots)
+
+    if(n_dots == 0){
+        res = !complete.cases(df)
+        return(res)
+    }
+
+    res = is.na(dots[[1]])
+
+    if(n_dots == 1){
+        return(res)
+    }
+
+    for(i in 2:n_dots){
+        res = res | is.na(dots[[i]])
+    }
+    res
 }
 
 

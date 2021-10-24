@@ -82,6 +82,8 @@ xpd(c(.[,lhs_vars]) ~ csw(x.[,1:3]))
 #> c(var1, var2) ~ csw(x1, x2, x3)
 ```
 
+ - new function `dsb`: applies the dot square bracket operator to character strings.
+ 
  - in the function `dsb`, you can add a string literal in first or last position in `.[]` to "collapse" the character string in question. The way the collapse is performed depends on the position:
 ```R
 name = c("Juliet", "Romeo")
@@ -106,8 +108,6 @@ dsb("hello .[name, ' and '], what's up?")
  - the tex output is now "nicely" formatted.
  
 ## New functions
-
- - `dsb`: applies the dot square bracket operator to character strings.
  
  - `check_conv_feols`: checks the convergence of the fixed-effects in `feols` models by looking at the first-order conditions.
  
