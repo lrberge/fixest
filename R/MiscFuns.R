@@ -4507,6 +4507,8 @@ n_unik = function(x){
         check_arg(x, "ts formula")
     }
 
+    nthreads = getFixest_nthreads()
+
     # If vector
     comp_pairs = list()
     if(is.vector(x)){
@@ -4520,7 +4522,7 @@ n_unik = function(x){
             x = x[!who_NA]
         }
 
-        res = len_unique(x)
+        res = len_unique(x, nthreads)
         names(res) = x_name
 
         attr(res, "na.info") = na.info
@@ -4854,7 +4856,7 @@ n_unik = function(x){
                     vf_name = paste0(msg_start, msg_end)
 
                 } else {
-                    res_i = len_unique(val)
+                    res_i = len_unique(val, nthreads)
                 }
 
             }
@@ -5214,7 +5216,7 @@ sample_df = function(x, n = 10){
     x[XXXselectedXXX, ]
 }
 
-len_unique = function(x){
+len_unique = function(x, nthreads = getFixest_nthreads()){
 
     if(!is.vector(x)){
         return(length(unique(x)))
@@ -5222,7 +5224,7 @@ len_unique = function(x){
 
     ANY_NA = FALSE
     if(is.numeric(x)){
-        info_na = cpppar_which_na_inf_vec(x, getFixest_nthreads())
+        info_na = cpp_which_na_inf(x, nthreads)
         if(info_na$any_na_inf){
             ANY_NA = TRUE
             x = x[!info_na$is_na_inf]
