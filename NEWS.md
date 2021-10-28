@@ -107,6 +107,8 @@ dsb("hello .[name, ' and '], what's up?")
 
  - the tex output is now "nicely" formatted.
  
+ - argument `extralines` replaces the argument `extraline` to increase coherence. Hence function `extraline_register` becomes `extralines_register` (the change is done without deprecation since I guess this function must be only rarely used).
+ 
 ## New functions
  
  - `check_conv_feols`: checks the convergence of the fixed-effects in `feols` models by looking at the first-order conditions.

@@ -51,7 +51,7 @@ etable(
   style.df = NULL,
   notes = NULL,
   group = NULL,
-  extraline = NULL,
+  extralines = NULL,
   fixef.group = NULL,
   placement = "htbp",
   drop.section = NULL,
@@ -91,7 +91,7 @@ setFixest_etable(
   style.df = NULL,
   notes = NULL,
   group = NULL,
-  extraline = NULL,
+  extralines = NULL,
   fixef.group = NULL,
   placement = "htbp",
   drop.section = NULL,
@@ -146,7 +146,7 @@ esttable(
   depvar = TRUE,
   style.df = NULL,
   group = NULL,
-  extraline = NULL,
+  extralines = NULL,
   fixef.group = NULL,
   drop.section = NULL,
   poly_dict = c("", " square", " cube"),
@@ -196,7 +196,7 @@ esttex(
   style.tex = NULL,
   notes = NULL,
   group = NULL,
-  extraline = NULL,
+  extralines = NULL,
   fixef.group = NULL,
   placement = "htbp",
   drop.section = NULL,
@@ -296,7 +296,7 @@ esttex(
 
 \item{group}{A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument \code{drop}) and \code{TRUE} or \code{FALSE} will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: \code{group=list("Controls: personal traits"=c("gender", "height", "weight"))} will create an new line with \code{"Controls: personal traits"} in the leftmost cell, all three variables gender, height and weight are discarded, \code{TRUE} appearing in each model containing at least one of the three variables (the style of \code{TRUE}/\code{FALSE} is governed by the argument \code{yesNo}). You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section; 2) \code{"^"}: 1st, \code{"_"}: last, row. For example: \code{group=list("_^Controls"=stuff)} will place the line at the top of the 'stats' section, and using \code{group=list("^_Controls"=stuff)} will make the row appear at the bottom of the coefficients section. For details, see the dedicated section.}
 
-\item{extraline}{A vector, a list or a one sided formula. The list elements should be either a vector representing the value of each cell, a list of the form \code{list("item1" = #item1, "item2" = #item2, etc)}, or a function. This argument can be many things, please have a look at the dedicated help section; a simplified description follows. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extraline=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section; 2) \code{"^"}: 1st, \code{"_"}: last, row. For example: \code{extraline=list("__Controls"=stuff)} will place the line at the bottom of the stats section, and using \code{extraline=list("^^Controls"=stuff)} will make the row appear at the top of the 'coefficients' section. For details, see the dedicated section.}
+\item{extralines}{A vector, a list or a one sided formula. The list elements should be either a vector representing the value of each cell, a list of the form \code{list("item1" = #item1, "item2" = #item2, etc)}, or a function. This argument can be many things, please have a look at the dedicated help section; a simplified description follows. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extralines=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section; 2) \code{"^"}: 1st, \code{"_"}: last, row. For example: \code{extralines=list("__Controls"=stuff)} will place the line at the bottom of the stats section, and using \code{extralines=list("^^Controls"=stuff)} will make the row appear at the top of the 'coefficients' section. For details, see the dedicated section.}
 
 \item{fixef.group}{Logical scalar or list (default is \code{NULL}). If equal to \code{TRUE}, then all fixed-effects always appearing jointly in models will be grouped in one row. If a list, its elements must be character vectors of regular expressions and the list names will be the row names. For ex. \code{fixef.group=list("Dates fixed-effects"="Month|Day")} will remove the \code{"Month"} and \code{"Day"} fixed effects from the display and replace them with a single row named "Dates fixed-effects". You can monitor the placement of the new row with the special characters telling where to place the row within a section: \code{"^"} (first), or \code{"_"} (last); and in which section it should appear: \code{"^"} (coef.), \code{"-"} (fixed-effects), or \code{"_"} (stat.). These two special characters must appear first in the row names. Please see the dedicated section}
 
@@ -381,10 +381,10 @@ You can use the special character "\%" (percentage) to make reference to the ori
 The argument \code{order} takes in a vector of regular expressions, the order will follow the elements of this vector. The vector gives a list of priorities, on the left the elements with highest priority. For example, order = c("Wind", "!Inter", "!Temp") would give highest priorities to the variables containing "Wind" (which would then appear first), second highest priority is the variables not containing "Inter", last, with lowest priority, the variables not containing "Temp". If you had the following variables: (Intercept), Temp:Wind, Wind, Temp you would end up with the following order: Wind, Temp:Wind, Temp, (Intercept).
 }
 
-\section{The argument \code{extraline}}{
+\section{The argument \code{extralines}}{
 
 
-The argument \code{extraline} adds well... extra lines to the table. It accepts either a list, or a one-sided formula.
+The argument \code{extralines} adds well... extra lines to the table. It accepts either a list, or a one-sided formula.
 
 For each line, you can define the values taken by each cell using 4 different ways: a) a vector, b) a list, c) a function, and d) a formula.
 
@@ -394,17 +394,17 @@ If a list, it should be of the form \code{list("item1" = #item1, "item2" = #item
 
 If a function, it will be applied to each model and should return a scalar (\code{NA} values returned are accepted).
 
-If a formula, it must be one-sided and the elements in the formula must represent either \code{extraline} macros, either fit statistics (i.e. valid types of the function \code{\link[fixest]{fitstat}}). One new line will be added for each element of the formula. To register \code{extraline} macros, you must first register them in \code{\link[fixest]{extraline_register}}.
+If a formula, it must be one-sided and the elements in the formula must represent either \code{extralines} macros, either fit statistics (i.e. valid types of the function \code{\link[fixest]{fitstat}}). One new line will be added for each element of the formula. To register \code{extralines} macros, you must first register them in \code{\link[fixest]{extralines_register}}.
 
-Finally, you can combine as many lines as wished by nesting them in a list. The names of the nesting list are the row titles (values in the leftmost cell). For example \code{extraline = list(~r2, Controls = TRUE, Group = list("A"=2, "B"))} will add three lines, the titles of which are "R2", "Controls" and "Group".
+Finally, you can combine as many lines as wished by nesting them in a list. The names of the nesting list are the row titles (values in the leftmost cell). For example \code{extralines = list(~r2, Controls = TRUE, Group = list("A"=2, "B"))} will add three lines, the titles of which are "R2", "Controls" and "Group".
 }
 
 \section{Controlling the placement of extra lines}{
 
 
-The arguments \code{group}, \code{extraline} and \code{fixef.group} allow to add customized lines in the table. They can be defined via a list where the list name will be the row name. By default, the placement of the extra line is right after the coefficients (except for \code{fixef.group}, covered in the last paragraph). For instance, \code{group = list("Controls" = "x[[:digit:]]")} will create a line right after the coefficients telling which models contain the control variables.
+The arguments \code{group}, \code{extralines} and \code{fixef.group} allow to add customized lines in the table. They can be defined via a list where the list name will be the row name. By default, the placement of the extra line is right after the coefficients (except for \code{fixef.group}, covered in the last paragraph). For instance, \code{group = list("Controls" = "x[[:digit:]]")} will create a line right after the coefficients telling which models contain the control variables.
 
-But the placement can be customized. The previous example (of the controls) will be used for illustration (the mechanism for \code{extraline} and \code{fixef.group} is identical).
+But the placement can be customized. The previous example (of the controls) will be used for illustration (the mechanism for \code{extralines} and \code{fixef.group} is identical).
 
 The row names accept 2 special characters at the very start. The first character tells in which section the line should appear: it can be equal to \code{"^"}, \code{"-"}, or \code{"_"}, meaning respectively the coefficients, the fixed-effects and the statistics section (which typically appear at the top, mid and bottom of the table). The second one governs the placement of the new line within the section: it can be equal to \code{"^"}, meaning first line, or \code{"_"}, meaning last line.
 
@@ -422,7 +422,7 @@ By default on all instances (with the notable exception of the elements of \code
 
 Note, importantly, that equations are NOT escaped. This means that \code{title="Functional form $a_i \\times x^b$, variation in \%."} will be displayed as: \code{"Functional form $a_i \\times x^b$, variation in \\\%."}: only the last percentage will be escaped.
 
-If for some reason you don't want the escaping to take place, the arguments \code{headers} and \code{extraline} are the only ones allowing that. To disable escaping, add the special token ":tex:" in the row names. Example: in \code{headers=list(":tex:Row title"="weird & & \%\\n tex stuff\\\\")}, the elements will be displayed verbatim. Of course, since it can easily ruin your table, it is only recommended to super users.
+If for some reason you don't want the escaping to take place, the arguments \code{headers} and \code{extralines} are the only ones allowing that. To disable escaping, add the special token ":tex:" in the row names. Example: in \code{headers=list(":tex:Row title"="weird & & \%\\n tex stuff\\\\")}, the elements will be displayed verbatim. Of course, since it can easily ruin your table, it is only recommended to super users.
 }
 
 \examples{
@@ -498,7 +498,7 @@ etable(est1, est2, dict = dict, tex = TRUE, style.tex = style_lines)
 etable(est1, est2, dict = dict, tex = TRUE, style.tex = style.tex("aer"))
 
 #
-# Group and extraline
+# Group and extralines
 #
 
 # Sometimes it's useful to group control variables into a single line
@@ -514,14 +514,14 @@ etable(est_c0, est_c1, est_c2, group = list(Controls = "poly"))
 # 'group' here does the same as drop = "poly", but adds an extra line
 # with TRUE/FALSE where the variables were found
 
-# 'extraline' adds an extra line, where you can add the value for each model
+# 'extralines' adds an extra line, where you can add the value for each model
 est_all  = feols(Ozone ~ Solar.R + Temp + Wind, data = aq)
 est_sub1 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month \%in\% 5:6, ])
 est_sub2 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month \%in\% 7:8, ])
 est_sub3 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month == 9, ])
 
 etable(est_all, est_sub1, est_sub2, est_sub3,
-       extraline = list("Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
+       extralines = list("Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
 
 # You can monitor the placement of the new lines with two special characters
 # at the beginning of the row name.
@@ -539,7 +539,7 @@ etable(est_all, est_sub1, est_sub2, est_sub3,
 # Examples
 etable(est_c0, est_c1, est_c2, group = list("_Controls" = "poly"))
 etable(est_all, est_sub1, est_sub2, est_sub3,
-       extraline = list("^^Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
+       extralines = list("^^Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
 
 
 #
@@ -611,7 +611,7 @@ etable(est_0fe, est_2fe, fixef.group = list("Dates" = "Month|Day"))
 
 etable(est_0fe, est_1fe, est_2fe, fixef.group = list("Dates" = "Month|Day"))
 
-# Using customized placement => as with 'group' and 'extraline',
+# Using customized placement => as with 'group' and 'extralines',
 # the user can control the placement of the new line.
 # See the previous 'group' examples and the dedicated section in the help.
 

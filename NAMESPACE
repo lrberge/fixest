@@ -9,7 +9,7 @@ export(feNmlm, femlm, feols, feglm, fepois, fenegbin)
 export(feglm.fit, feols.fit)
 # etable
 export(etable, style.tex, style.df)
-export(extraline_register)
+export(extralines_register)
 # misc funs
 export(collinearity)
 export(r2, fitstat, fitstat_register, wald)

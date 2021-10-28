@@ -46,7 +46,7 @@
 #' @param style.df An object created by the function \code{\link[fixest]{style.df}. }It represents the style of the data frame returned (if \code{tex = FALSE}), see the documentation of \code{\link[fixest]{style.df}}.
 #' @param notes (Tex only.) Character vector. If provided, a \code{"notes"} section will be added at the end right after the end of the table, containing the text of this argument. Note that if it is a vector, it will be collapsed with new lines.
 #' @param group A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument \code{drop}) and \code{TRUE} or \code{FALSE} will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: \code{group=list("Controls: personal traits"=c("gender", "height", "weight"))} will create an new line with \code{"Controls: personal traits"} in the leftmost cell, all three variables gender, height and weight are discarded, \code{TRUE} appearing in each model containing at least one of the three variables (the style of \code{TRUE}/\code{FALSE} is governed by the argument \code{yesNo}). You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section; 2) \code{"^"}: 1st, \code{"_"}: last, row. For example: \code{group=list("_^Controls"=stuff)} will place the line at the top of the 'stats' section, and using \code{group=list("^_Controls"=stuff)} will make the row appear at the bottom of the coefficients section. For details, see the dedicated section.
-#' @param extraline A vector, a list or a one sided formula. The list elements should be either a vector representing the value of each cell, a list of the form \code{list("item1" = #item1, "item2" = #item2, etc)}, or a function. This argument can be many things, please have a look at the dedicated help section; a simplified description follows. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extraline=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section; 2) \code{"^"}: 1st, \code{"_"}: last, row. For example: \code{extraline=list("__Controls"=stuff)} will place the line at the bottom of the stats section, and using \code{extraline=list("^^Controls"=stuff)} will make the row appear at the top of the 'coefficients' section. For details, see the dedicated section.
+#' @param extralines A vector, a list or a one sided formula. The list elements should be either a vector representing the value of each cell, a list of the form \code{list("item1" = #item1, "item2" = #item2, etc)}, or a function. This argument can be many things, please have a look at the dedicated help section; a simplified description follows. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extralines=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section; 2) \code{"^"}: 1st, \code{"_"}: last, row. For example: \code{extralines=list("__Controls"=stuff)} will place the line at the bottom of the stats section, and using \code{extralines=list("^^Controls"=stuff)} will make the row appear at the top of the 'coefficients' section. For details, see the dedicated section.
 #' @param fixef.group Logical scalar or list (default is \code{NULL}). If equal to \code{TRUE}, then all fixed-effects always appearing jointly in models will be grouped in one row. If a list, its elements must be character vectors of regular expressions and the list names will be the row names. For ex. \code{fixef.group=list("Dates fixed-effects"="Month|Day")} will remove the \code{"Month"} and \code{"Day"} fixed effects from the display and replace them with a single row named "Dates fixed-effects". You can monitor the placement of the new row with the special characters telling where to place the row within a section: \code{"^"} (first), or \code{"_"} (last); and in which section it should appear: \code{"^"} (coef.), \code{"-"} (fixed-effects), or \code{"_"} (stat.). These two special characters must appear first in the row names. Please see the dedicated section
 #' @param placement (Tex only.) Character string giving the position of the float in Latex. Default is "htbp". It must consist of only the characters 'h', 't', 'b', 'p', 'H' and '!'. Reminder: h: here; t: top; b: bottom; p: float page; H: definitely here; !: prevents Latex to look for other positions. Note that it can be equal to the empty string (and you'll get the default placement).
 #' @param drop.section Character vector which can be of length 0 (i.e. equal to \code{NULL}). Can contain the values "fixef", "slopes" or "stats". It would drop, respectively, the fixed-effects section, the variables with varying slopes section or the fit statistics section.
@@ -97,9 +97,9 @@
 #'
 #' The argument \code{order} takes in a vector of regular expressions, the order will follow the elements of this vector. The vector gives a list of priorities, on the left the elements with highest priority. For example, order = c("Wind", "!Inter", "!Temp") would give highest priorities to the variables containing "Wind" (which would then appear first), second highest priority is the variables not containing "Inter", last, with lowest priority, the variables not containing "Temp". If you had the following variables: (Intercept), Temp:Wind, Wind, Temp you would end up with the following order: Wind, Temp:Wind, Temp, (Intercept).
 #'
-#' @section The argument \code{extraline}:
+#' @section The argument \code{extralines}:
 #'
-#' The argument \code{extraline} adds well... extra lines to the table. It accepts either a list, or a one-sided formula.
+#' The argument \code{extralines} adds well... extra lines to the table. It accepts either a list, or a one-sided formula.
 #'
 #' For each line, you can define the values taken by each cell using 4 different ways: a) a vector, b) a list, c) a function, and d) a formula.
 #'
@@ -109,16 +109,16 @@
 #'
 #' If a function, it will be applied to each model and should return a scalar (\code{NA} values returned are accepted).
 #'
-#' If a formula, it must be one-sided and the elements in the formula must represent either \code{extraline} macros, either fit statistics (i.e. valid types of the function \code{\link[fixest]{fitstat}}). One new line will be added for each element of the formula. To register \code{extraline} macros, you must first register them in \code{\link[fixest]{extraline_register}}.
+#' If a formula, it must be one-sided and the elements in the formula must represent either \code{extralines} macros, either fit statistics (i.e. valid types of the function \code{\link[fixest]{fitstat}}). One new line will be added for each element of the formula. To register \code{extralines} macros, you must first register them in \code{\link[fixest]{extralines_register}}.
 #'
-#' Finally, you can combine as many lines as wished by nesting them in a list. The names of the nesting list are the row titles (values in the leftmost cell). For example \code{extraline = list(~r2, Controls = TRUE, Group = list("A"=2, "B"))} will add three lines, the titles of which are "R2", "Controls" and "Group".
+#' Finally, you can combine as many lines as wished by nesting them in a list. The names of the nesting list are the row titles (values in the leftmost cell). For example \code{extralines = list(~r2, Controls = TRUE, Group = list("A"=2, "B"))} will add three lines, the titles of which are "R2", "Controls" and "Group".
 #'
 #'
 #' @section Controlling the placement of extra lines:
 #'
-#' The arguments \code{group}, \code{extraline} and \code{fixef.group} allow to add customized lines in the table. They can be defined via a list where the list name will be the row name. By default, the placement of the extra line is right after the coefficients (except for \code{fixef.group}, covered in the last paragraph). For instance, \code{group = list("Controls" = "x[[:digit:]]")} will create a line right after the coefficients telling which models contain the control variables.
+#' The arguments \code{group}, \code{extralines} and \code{fixef.group} allow to add customized lines in the table. They can be defined via a list where the list name will be the row name. By default, the placement of the extra line is right after the coefficients (except for \code{fixef.group}, covered in the last paragraph). For instance, \code{group = list("Controls" = "x[[:digit:]]")} will create a line right after the coefficients telling which models contain the control variables.
 #'
-#' But the placement can be customized. The previous example (of the controls) will be used for illustration (the mechanism for \code{extraline} and \code{fixef.group} is identical).
+#' But the placement can be customized. The previous example (of the controls) will be used for illustration (the mechanism for \code{extralines} and \code{fixef.group} is identical).
 #'
 #' The row names accept 2 special characters at the very start. The first character tells in which section the line should appear: it can be equal to \code{"^"}, \code{"-"}, or \code{"_"}, meaning respectively the coefficients, the fixed-effects and the statistics section (which typically appear at the top, mid and bottom of the table). The second one governs the placement of the new line within the section: it can be equal to \code{"^"}, meaning first line, or \code{"_"}, meaning last line.
 #'
@@ -134,7 +134,7 @@
 #'
 #' Note, importantly, that equations are NOT escaped. This means that \code{title="Functional form $a_i \\times x^b$, variation in \%."} will be displayed as: \code{"Functional form $a_i \\times x^b$, variation in \\\%."}: only the last percentage will be escaped.
 #'
-#' If for some reason you don't want the escaping to take place, the arguments \code{headers} and \code{extraline} are the only ones allowing that. To disable escaping, add the special token ":tex:" in the row names. Example: in \code{headers=list(":tex:Row title"="weird & & \%\\n tex stuff\\\\")}, the elements will be displayed verbatim. Of course, since it can easily ruin your table, it is only recommended to super users.
+#' If for some reason you don't want the escaping to take place, the arguments \code{headers} and \code{extralines} are the only ones allowing that. To disable escaping, add the special token ":tex:" in the row names. Example: in \code{headers=list(":tex:Row title"="weird & & \%\\n tex stuff\\\\")}, the elements will be displayed verbatim. Of course, since it can easily ruin your table, it is only recommended to super users.
 #'
 #' @return
 #' If \code{tex = TRUE}, the lines composing the Latex table are returned invisibly while the table is directly prompted on the console.
@@ -220,7 +220,7 @@
 #' etable(est1, est2, dict = dict, tex = TRUE, style.tex = style.tex("aer"))
 #'
 #' #
-#' # Group and extraline
+#' # Group and extralines
 #' #
 #'
 #' # Sometimes it's useful to group control variables into a single line
@@ -236,14 +236,14 @@
 #' # 'group' here does the same as drop = "poly", but adds an extra line
 #' # with TRUE/FALSE where the variables were found
 #'
-#' # 'extraline' adds an extra line, where you can add the value for each model
+#' # 'extralines' adds an extra line, where you can add the value for each model
 #' est_all  = feols(Ozone ~ Solar.R + Temp + Wind, data = aq)
 #' est_sub1 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month %in% 5:6, ])
 #' est_sub2 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month %in% 7:8, ])
 #' est_sub3 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month == 9, ])
 #'
 #' etable(est_all, est_sub1, est_sub2, est_sub3,
-#'        extraline = list("Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
+#'        extralines = list("Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
 #'
 #' # You can monitor the placement of the new lines with two special characters
 #' # at the beginning of the row name.
@@ -261,7 +261,7 @@
 #' # Examples
 #' etable(est_c0, est_c1, est_c2, group = list("_Controls" = "poly"))
 #' etable(est_all, est_sub1, est_sub2, est_sub3,
-#'        extraline = list("^^Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
+#'        extralines = list("^^Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
 #'
 #'
 #' #
@@ -333,7 +333,7 @@
 #'
 #' etable(est_0fe, est_1fe, est_2fe, fixef.group = list("Dates" = "Month|Day"))
 #'
-#' # Using customized placement => as with 'group' and 'extraline',
+#' # Using customized placement => as with 'group' and 'extralines',
 #' # the user can control the placement of the new line.
 #' # See the previous 'group' examples and the dedicated section in the help.
 #'
@@ -423,7 +423,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                   fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5,
                   interaction.combine = NULL, interaction.order = NULL,
                   i.equal = NULL, depvar = TRUE, style.tex = NULL,
-                  style.df = NULL, notes = NULL, group = NULL, extraline = NULL,
+                  style.df = NULL, notes = NULL, group = NULL, extralines = NULL,
                   fixef.group = NULL, placement = "htbp", drop.section = NULL,
                   poly_dict = c("", " square", " cube"), postprocess.tex = NULL,
                   postprocess.df = NULL, fit_format = "__var__", coef.just = NULL,
@@ -480,6 +480,9 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
         dict = TRUE
     }
 
+    # NOTA: now that I allow the use of .(stuff) for headers and extralines
+    # list(...) will raise an error if subtitle (now deprec) is used with .()
+    # And there's no clear error message => I think it's a fair limitation
     dots = error_sender(list(...), "Some elements in '...' could not be evaluated: ")
 
     if(".up" %in% names(dots)){
@@ -497,6 +500,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     #
     # Deprecated items
     #
+
     if("subtitles" %in% names(dots)){
         if(is.null(getOption("fixest_etable_arg_subtitles"))){
             warning("The argument 'subtitles' is deprecated. Please use 'headers' instead.")
@@ -504,6 +508,15 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
         }
         headers = dots$subtitles
         dots$subtitles = NULL
+    }
+
+    if("extraline" %in% names(dots)){
+        if(is.null(getOption("fixest_etable_arg_extraline"))){
+            warning("The argument 'extraline' is deprecated. Please use 'extralines' instead (note the last 's'!).")
+            options(fixest_etable_arg_extraline = TRUE)
+        }
+        extralines = dots$extraline
+        dots$extraline = NULL
     }
 
     if("sdBelow" %in% names(dots)){
@@ -618,7 +631,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                                  label = label, fixef_sizes = fixef_sizes,
                                  fixef_sizes.simplify = fixef_sizes.simplify,
                                  depvar = depvar, style.tex = style.tex, style.df = style.df,
-                                 replace = replace, notes = notes, group = group, extraline = extraline,
+                                 replace = replace, notes = notes, group = group, extralines = extralines,
                                  fixef.group = fixef.group, placement = placement,
                                  drop.section = drop.section, poly_dict = poly_dict,
                                  tex_tag = DO_POSTPROCESS, fit_format = fit_format,
@@ -772,7 +785,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                                  convergence, family, drop, order,
                                  keep, file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE,
                                  depvar = FALSE, style.tex = NULL, style.df=NULL,
-                                 notes = NULL, group = NULL, extraline=NULL,
+                                 notes = NULL, group = NULL, extralines=NULL,
                                  fixef.group = NULL, placement = "htbp", drop.section = NULL,
                                  poly_dict = c("", " square", " cube"), tex_tag = FALSE,
                                  fit_format = "__var__", coef.just = NULL,
@@ -941,7 +954,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     check_arg_plus(drop.section, "NULL multi match(fixef, slopes, stats)")
 
     check_arg_plus(group, "NULL{list()} named list l0")
-    check_arg_plus(extraline, "NULL{list()} list l0 | os formula | vector")
+    check_arg_plus(extralines, "NULL{list()} list l0 | os formula | vector")
     # we check it more in depth later
 
     check_arg(fixef.group, "NULL{list()} logical scalar | named list l0")
@@ -1560,7 +1573,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     }
 
     #
-    # We check the group and extraline arguments
+    # We check the group and extralines arguments
     #
 
     if(missing(drop)) drop = NULL
@@ -1570,36 +1583,36 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     }
 
     #
-    # ... extraline ####
+    # ... extralines ####
     #
 
-    if(inherits(extraline, "formula")){
+    if(inherits(extralines, "formula")){
         # If a formula => to summon registered stats
-        extraline = extraline_extractor(extraline, tex = isTex)
+        extralines = extralines_extractor(extralines, tex = isTex)
 
-    } else if(!is.list(extraline)){
+    } else if(!is.list(extralines)){
         # => vector
-        extraline = list(extraline)
+        extralines = list(extralines)
 
-    } else if(length(extraline) > 0 && all(lengths(extraline) == 1) &&
-              !inherits(extraline[[1]], "formula") && !is.function(extraline[[1]])){
+    } else if(length(extralines) > 0 && all(lengths(extralines) == 1) &&
+              !inherits(extralines[[1]], "formula") && !is.function(extralines[[1]])){
         # list("A" = 2, "B")
-        extraline = list(extraline)
+        extralines = list(extralines)
     }
 
 
     el_new = list() # I need it to cope with list(~f+ivf+macro, "my vars" = TRUE)
     # => the first command will create several lines
-    el_names = names(extraline)
-    if(is.null(el_names)) el_names = character(length(extraline))
+    el_names = names(extralines)
+    if(is.null(el_names)) el_names = character(length(extralines))
     el_names = uniquify_names(el_names)
-    for(i in seq_along(extraline)){
-        check_value(extraline[[i]], "vector | function | os formula | list", .message = paste0("The elements of argument 'extraline' must be vectors of length ", n_models, ", logical scalars, functions, one-sided formulas, or lists."),
+    for(i in seq_along(extralines)){
+        check_value(extralines[[i]], "vector | function | os formula | list", .message = paste0("The elements of argument 'extralines' must be vectors of length ", n_models, ", logical scalars, functions, one-sided formulas, or lists."),
                     .value = n_models)
 
-        el = extraline[[i]]
+        el = extralines[[i]]
         if("formula" %in% class(el)){
-            el_tmp = extraline_extractor(el, el_names[i], tex = isTex)
+            el_tmp = extralines_extractor(el, el_names[i], tex = isTex)
             for(k in seq_along(el_tmp)){
                 el_new[[names(el_tmp)[k]]] = el_tmp[[k]]
             }
@@ -1616,7 +1629,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
                     n_el = length(el)
                     if(n_models %% n_el != 0){
-                        stop_up("In 'extraline', the number of elements in the ", n_th(i), " line is not a divisor of the number of models (", n_el, " vs ", n_models, " models).")
+                        stop_up("In 'extralines', the number of elements in the ", n_th(i), " line is not a divisor of the number of models (", n_el, " vs ", n_models, " models).")
                     }
 
                     if(IS_EACH){
@@ -1631,24 +1644,24 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         }
     }
 
-    extraline = el_new
+    extralines = el_new
 
     # Now we catch the functions + normalization of the names
     el_fun_id = NULL
-    if(length(extraline) > 0){
-        el_fun_id = which(sapply(extraline, is.function)) # set of ID such that el[id] is a function
+    if(length(extralines) > 0){
+        el_fun_id = which(sapply(extralines, is.function)) # set of ID such that el[id] is a function
         if(length(el_fun_id) > 0){
-            el_origin = extraline
+            el_origin = extralines
         }
 
-        if(length(unique(names(extraline))) != length(extraline)){
-            new_names = uniquify_names(names(extraline))
-            names(extraline) = new_names
+        if(length(unique(names(extralines))) != length(extralines)){
+            new_names = uniquify_names(names(extralines))
+            names(extralines) = new_names
         }
     }
 
 
-    # end: extraline
+    # end: extralines
 
     # we keep track of the SEs
     se_type_list = list()
@@ -2156,17 +2169,17 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         }
 
         #
-        # Extraline, when function
+        # extralines, when function
         #
 
         for(i in el_fun_id){
             f = el_origin[[i]]
 
             if(m == 1){
-                extraline[[i]] = f(x)
+                extralines[[i]] = f(x)
 
             } else {
-                extraline[[i]] = c(extraline[[i]], f(x))
+                extralines[[i]] = c(extralines[[i]], f(x))
             }
         }
 
@@ -2410,7 +2423,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
             if(length(fixef.extralines) > 0){
                 # We add it to extra lines
-                extraline[names(fixef.extralines)] = fixef.extralines
+                extralines[names(fixef.extralines)] = fixef.extralines
             }
 
             if(length(fe2remove) > 0){
@@ -2427,7 +2440,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                 } else {
                     msg = paste0("some groups lead to inconsistent rows (the ", n_th(i), " one defined by ")
                 }
-                warn_up("In 'fixef.group', ", msg, deparse_long(fixef.group[[i]]), ").\nTo create inconsistent rows: use drop.section = 'fixef' combined with the arghument 'extraline'.")
+                warn_up("In 'fixef.group', ", msg, deparse_long(fixef.group[[i]]), ").\nTo create inconsistent rows: use drop.section = 'fixef' combined with the arghument 'extralines'.")
             }
 
         }
@@ -2445,7 +2458,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                signifCode=signifCode, fixef_sizes=fixef_sizes, fixef_sizes.simplify = fixef_sizes.simplify,
                depvar=depvar, useSummary=useSummary, dict=dict, yesNo=yesNo, add_signif=add_signif,
                float=float, coefstat=coefstat, ci=ci, style=style, notes=notes, group=group,
-               extraline=extraline, placement=placement, drop.section=drop.section,
+               extralines=extralines, placement=placement, drop.section=drop.section,
                tex_tag=tex_tag, fun_format = fun_format, coef.just = coef.just, meta = meta_txt)
 
     return(res)
@@ -2495,7 +2508,7 @@ etable_internal_latex = function(info){
     style = info$style
     notes = info$notes
     group = info$group
-    extraline = info$extraline
+    extralines = info$extralines
     placement = info$placement
     drop.section = info$drop.section
     tex_tag = info$tex_tag
@@ -3045,8 +3058,8 @@ etable_internal_latex = function(info){
     # Extra lines
     #
 
-    for(i in seq_along(extraline)){
-        el = extraline[[i]]
+    for(i in seq_along(extralines)){
+        el = extralines[[i]]
 
         # The format depends on the type
         if(is.logical(el)){
@@ -3063,7 +3076,7 @@ etable_internal_latex = function(info){
 
         el_format[is.na(el_format)] = ""
 
-        el_name = names(extraline)[i]
+        el_name = names(extralines)[i]
 
         el_full = ""
         el_where = "coef"
@@ -3195,7 +3208,7 @@ etable_internal_df = function(info){
     coefstat = info$coefstat
     dict = info$dict
     group = info$group
-    extraline = info$extraline
+    extralines = info$extralines
     style = info$style
     fun_format = info$fun_format
     drop.section = info$drop.section
@@ -3396,8 +3409,8 @@ etable_internal_df = function(info){
     # Extra lines
     #
 
-    for(i in seq_along(extraline)){
-        el = extraline[[i]]
+    for(i in seq_along(extralines)){
+        el = extralines[[i]]
         yesNo = style$yesNo
 
         # The format depends on the type
@@ -3417,7 +3430,7 @@ etable_internal_df = function(info){
 
         el_where = "coef"
 
-        el_name = names(extraline)[i]
+        el_name = names(extralines)[i]
         el_top = FALSE
 
         if(grepl("^(\\^|_|-)", el_name)){
@@ -3720,7 +3733,7 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c(
                             ci = 0.95, se.below = TRUE, keep, drop, order, dict, signifCode, float,
                             fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, family, powerBelow = -5,
                             interaction.order = NULL, depvar, style.tex = NULL,
-                            style.df = NULL, notes = NULL, group = NULL, extraline = NULL,
+                            style.df = NULL, notes = NULL, group = NULL, extralines = NULL,
                             fixef.group = NULL, placement = "htbp", drop.section = NULL,
                             postprocess.tex = NULL, postprocess.df = NULL,
                             fit_format = "__var__", meta.time = NULL, meta.author = NULL, meta.sys = NULL,
@@ -3758,7 +3771,7 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c(
 
     check_arg(dict, "NULL logical scalar | named character vector no na")
 
-    check_arg_plus(group, extraline, "NULL{list()} named list l0")
+    check_arg_plus(group, extralines, "NULL{list()} named list l0")
 
     check_arg_plus(fixef.group, "NULL{list()} logical scalar | named list l0")
 
@@ -4086,9 +4099,9 @@ style.df = function(depvar.title = "Dependent Var.:", fixef.title = "Fixed-Effec
 }
 
 
-#' Register \code{extraline} macros to be used in \code{etable}
+#' Register \code{extralines} macros to be used in \code{etable}
 #'
-#' This function is used to create \code{extraline} (which is an argument of \code{\link[fixest]{etable}}) macros that can be easily summoned in \code{\link[fixest]{etable}}.
+#' This function is used to create \code{extralines} (which is an argument of \code{\link[fixest]{etable}}) macros that can be easily summoned in \code{\link[fixest]{etable}}.
 #'
 #' @param type A character scalar giving the type-name.
 #' @param fun A function to be applied to a \code{fixest} estimation. It must return a scalar.
@@ -4103,7 +4116,7 @@ style.df = function(depvar.title = "Dependent Var.:", fixef.title = "Fixed-Effec
 #'
 #' # We register a function computing the standard-deviation of the dependent variable
 #' my_fun = function(x) sd(model.matrix(x, type = "lhs"))
-#' extraline_register("sdy", my_fun, "SD(y)")
+#' extralines_register("sdy", my_fun, "SD(y)")
 #'
 #' # An estimation
 #' data(iris)
@@ -4111,15 +4124,15 @@ style.df = function(depvar.title = "Dependent Var.:", fixef.title = "Fixed-Effec
 #'
 #' # Now we can easily create a row with the mean of y.
 #' # We just "summon" it in a one-sided formula
-#' etable(est, extraline = ~ sdy)
+#' etable(est, extralines = ~ sdy)
 #'
 #' # We can change the alias on the fly:
-#' etable(est, extraline = list("_Standard deviation of the dep. var." = ~ sdy))
+#' etable(est, extralines = list("_Standard deviation of the dep. var." = ~ sdy))
 #'
 #'
 #'
 #'
-extraline_register = function(type, fun, alias){
+extralines_register = function(type, fun, alias){
     check_arg(type, "character scalar mbt")
     check_arg(fun, "function mbt")
     check_arg(alias, "character scalar mbt")
@@ -4127,7 +4140,7 @@ extraline_register = function(type, fun, alias){
     # We check the type is not conflicting
     existing_types = fitstat(give_types = TRUE)$types
 
-    opts = getOption("fixest_extraline")
+    opts = getOption("fixest_extralines")
 
     if(type %in% setdiff(existing_types, names(opts))){
         stop("The type name '", type, "' is the same as one of fitstat's built-in type. Please choose another one.")
@@ -4152,7 +4165,7 @@ extraline_register = function(type, fun, alias){
 
     opts[[type]] = res
 
-    options(fixest_extraline = opts)
+    options(fixest_extralines = opts)
 
     invisible(NULL)
 }
@@ -4441,15 +4454,15 @@ uniquify_names = function(x){
 }
 
 
-extraline_extractor = function(x, name = NULL, tex = FALSE){
+extralines_extractor = function(x, name = NULL, tex = FALSE){
     # x must be a one sided formula
     # name: name of the listed element (empty = "")
     # => returns a named list
 
     is_name = !is.null(name) && nchar(name) > 0
 
-    # extraline registered
-    el_default = getOption("fixest_extraline")
+    # extralines registered
+    el_default = getOption("fixest_extralines")
     key_registered = names(el_default)
 
     # fitstat
@@ -4461,18 +4474,18 @@ extraline_extractor = function(x, name = NULL, tex = FALSE){
     current_vars = attr(terms(x), "term.labels")
 
     if(length(current_vars) > 1 && is_name){
-        stop_up("You cannot give list names in 'extraline' when several values are summoned via a formula. Simply remove the name associated to the formula to make it work (concerns '", name, "').", up = 2)
+        stop_up("You cannot give list names in 'extralines' when several values are summoned via a formula. Simply remove the name associated to the formula to make it work (concerns '", name, "').", up = 2)
     }
 
     valid_keys = c(key_registered, fitstat_type_allowed)
 
     if(!all(current_vars %in% valid_keys)){
         pblm = setdiff(current_vars, valid_keys)
-        stop_up("Argument 'extraline' can be a one-sided formula whose variables refer to the macros registered using the function 'extraline_register' or fit statistics (valid fitstat keywords). Problem: the values", enumerate_items(pblm, "s.were"), " not valid.", up = 2)
+        stop_up("Argument 'extralines' can be a one-sided formula whose variables refer to the macros registered using the function 'extralines_register' or fit statistics (valid fitstat keywords). Problem: the values", enumerate_items(pblm, "s.were"), " not valid.", up = 2)
     }
 
     if(length(current_vars) == 0){
-        extraline = list()
+        extralines = list()
     } else {
         el_tmp = list()
         for(i in seq_along(current_vars)){

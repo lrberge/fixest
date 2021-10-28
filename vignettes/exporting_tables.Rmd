@@ -204,7 +204,7 @@ etable(est, est_slopes, heavy = "0.14em", tex = TRUE)
 
 ## Setting custom fit statistics
 
-It is often useful to include in a table some fit statistics that are not standard, or simply that may not be included in `fixest` built-in fit statistics. While it is possible to include any extra line in the table with the argument `extraline`, this is rather cumbersome and possibly error-prone if this task has to be repeated.
+It is often useful to include in a table some fit statistics that are not standard, or simply that may not be included in `fixest` built-in fit statistics. While it is possible to include any extra line in the table with the argument `extralines`, this is rather cumbersome and possibly error-prone if this task has to be repeated.
 
 To avoid that kind of issue, `fixest` allows the user to register custom fit statistics. Once they are registered, they can be seamlessly called via the `fitstat` argument in `etable`.
 
