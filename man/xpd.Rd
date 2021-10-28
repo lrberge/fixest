@@ -39,19 +39,21 @@ To summon values from the environment, simply put the variable in square bracket
 
 You can include a full variable from the environment in the same way: \code{for(y in c("a", "b")) xpd(.[y] ~ x)} will create the two formulas \code{a ~ x} and \code{b ~ x}.
 
-The DSB can even be used within variable names, but then the variable must be nested in character form. For example \code{y ~ .["x.[1:2]_sq"]} will create \code{y ~ x1_sq +  x2_sq}. Using the character form is important to avoid a formula parsing error. Double quotes must be used.
+The DSB can even be used within variable names, but then the variable must be nested in character form. For example \code{y ~ .["x.[1:2]_sq"]} will create \code{y ~ x1_sq + x2_sq}. Using the character form is important to avoid a formula parsing error. Double quotes must be used. Note that the character string that is nested will be parsed with the function \code{\link[fixest]{dsb}}, and thus it will return a vector.
 
 By default, the DSB operator expands vectors into sums. You can add a comma, like in \code{.[, x]}, to expand with commas--the content can then be used within functions. For instance: \code{c(x.[, 1:2])} will create \code{c(x1, x2)} (and \emph{not} \code{c(x1 + x2)}).
 
 In all \code{fixest} estimations, this special parsing is enabled, so you don't need to use \code{xpd}.
 
-Limitations: the use of multiple square brackets within a single variable is not directly implemented. But you can use the function \code{\link[fixest]{dsb}} to more flexibly use the DSB operator within character strings. For example, the following will work \code{xpd(y ~ ..x, ..x = dsb(".[letters[1:2]]_.[1:2]"))} and create \code{y ~ a_1 + b_2}.
+You can even use multiple square brackets within a single variable, but then the use of nesting is required. For example, the following \code{xpd(y ~ .[".[letters[1:2]]_.[1:2]"])} will create \code{y ~ a_1 + b_2}. Remember that the nested character string is parsed with \code{\link[fixest]{dsb}}, which explains this behavior.
 }
 
 \section{Regular expressions}{
 
 
 You can catch several variable names at once by using regular expressions. To use regular expressions, you need to enclose it in the dot-dot function: \code{..("regex")}. For example, \code{..("Sepal")} will catch both the variables \code{Sepal.Length} and \code{Sepal.Width} from the \code{iris} data set. In a \code{fixest} estimation, the variables names from which the regex will be applied come from the data set. If you use \code{xpd}, you need to provide either a data set or a vector of names in the argument \code{data}.
+
+By default the variables are aggregated with a sum. For example in a data set with the variables x1 to x10, \code{..("x(1|2)"} will yield \code{x1 + x2 + x10}. You can instead ask for "comma" aggregation by using a comma first, just before the regular expression: \code{y ~ sw(..(,"x(1|2)"))} would lead to \code{y ~ sw(x1, x2, x10)}.
 
 Note that the dot square bracket operator (DSB, see before) is applied before the regular expression is evaluated. This means that \code{..("x.[3:4]_sq")} will lead, after evaluation of the DSB, to \code{..("x3_sq|x4_sq")}. It is a handy way to insert range of numbers in a regular expression.
 }

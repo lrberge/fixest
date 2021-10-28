@@ -3026,17 +3026,19 @@ bin = function(x, bin){
 #'
 #' You can include a full variable from the environment in the same way: \code{for(y in c("a", "b")) xpd(.[y] ~ x)} will create the two formulas \code{a ~ x} and \code{b ~ x}.
 #'
-#' The DSB can even be used within variable names, but then the variable must be nested in character form. For example \code{y ~ .["x.[1:2]_sq"]} will create \code{y ~ x1_sq +  x2_sq}. Using the character form is important to avoid a formula parsing error. Double quotes must be used.
+#' The DSB can even be used within variable names, but then the variable must be nested in character form. For example \code{y ~ .["x.[1:2]_sq"]} will create \code{y ~ x1_sq + x2_sq}. Using the character form is important to avoid a formula parsing error. Double quotes must be used. Note that the character string that is nested will be parsed with the function \code{\link[fixest]{dsb}}, and thus it will return a vector.
 #'
 #' By default, the DSB operator expands vectors into sums. You can add a comma, like in \code{.[, x]}, to expand with commas--the content can then be used within functions. For instance: \code{c(x.[, 1:2])} will create \code{c(x1, x2)} (and \emph{not} \code{c(x1 + x2)}).
 #'
 #' In all \code{fixest} estimations, this special parsing is enabled, so you don't need to use \code{xpd}.
 #'
-#' Limitations: the use of multiple square brackets within a single variable is not directly implemented. But you can use the function \code{\link[fixest]{dsb}} to more flexibly use the DSB operator within character strings. For example, the following will work \code{xpd(y ~ ..x, ..x = dsb(".[letters[1:2]]_.[1:2]"))} and create \code{y ~ a_1 + b_2}.
+#' You can even use multiple square brackets within a single variable, but then the use of nesting is required. For example, the following \code{xpd(y ~ .[".[letters[1:2]]_.[1:2]"])} will create \code{y ~ a_1 + b_2}. Remember that the nested character string is parsed with \code{\link[fixest]{dsb}}, which explains this behavior.
 #'
 #' @section Regular expressions:
 #'
 #' You can catch several variable names at once by using regular expressions. To use regular expressions, you need to enclose it in the dot-dot function: \code{..("regex")}. For example, \code{..("Sepal")} will catch both the variables \code{Sepal.Length} and \code{Sepal.Width} from the \code{iris} data set. In a \code{fixest} estimation, the variables names from which the regex will be applied come from the data set. If you use \code{xpd}, you need to provide either a data set or a vector of names in the argument \code{data}.
+#'
+#' By default the variables are aggregated with a sum. For example in a data set with the variables x1 to x10, \code{..("x(1|2)"} will yield \code{x1 + x2 + x10}. You can instead ask for "comma" aggregation by using a comma first, just before the regular expression: \code{y ~ sw(..(,"x(1|2)"))} would lead to \code{y ~ sw(x1, x2, x10)}.
 #'
 #' Note that the dot square bracket operator (DSB, see before) is applied before the regular expression is evaluated. This means that \code{..("x.[3:4]_sq")} will lead, after evaluation of the DSB, to \code{..("x3_sq|x4_sq")}. It is a handy way to insert range of numbers in a regular expression.
 #'
@@ -3276,12 +3278,17 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
                 }
             }
 
-            fml_dp_split = strsplit(fml_dp, '..("', fixed = TRUE)[[1]]
+            fml_dp_split = strsplit(fml_dp, '\\.\\.\\((?=[,"])', perl = TRUE)[[1]]
 
             res = fml_dp_split
             for(i in 2:length(res)){
                 re = gsub('"\\).*', "", res[i])
+
                 re_width = nchar(re)
+
+                is_comma = grepl("^,", re)
+                re = gsub("^,? ?\"", "", re)
+
                 re = dot_square_bracket(re, frame, regex = TRUE)
 
                 if(is_data){
@@ -3290,14 +3297,20 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
                         vars = "1"
                     }
 
-                    res[i] = paste0(paste(vars, collapse = "+"), substr(res[i], re_width + 3, nchar(res[i])))
+                    coll = if(is_comma) ", " else " + "
+
+                    res[i] = paste0(paste(vars, collapse = coll), substr(res[i], re_width + 3, nchar(res[i])))
                 } else {
                     res[i] = paste0("..(\"", re, "\")", substr(res[i], re_width + 3, nchar(res[i])))
                 }
 
             }
 
-            fml = as.formula(paste(res, collapse = ""), frame)
+            fml_txt = paste(res, collapse = "")
+            fml = error_sender(as.formula(fml_txt, frame),
+                               "Expansion of variables in ..(\"regex\"): coercion of the following text to a formula led to an error.\n",
+                               fit_screen(paste0("     TEXT: ", fml_txt)),
+                               "\n  PROBLEM: see below", up = 1)
         }
     }
 
@@ -5505,11 +5518,19 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
                                    up = up + 1)
         }
 
-        # Informative error message
-        value = error_sender(as.character(eval(my_call, frame)),
-                             "Dot square bracket operator: Evaluation of '.[",
-                             x_split[i], "]' led to an error:",
-                             up = up + 1)
+        if(is.character(my_call) && grepl(".[", my_call, fixed = TRUE)){
+            # Nested call
+            value = dot_square_bracket(my_call, frame = frame, text = TRUE, up = up + 1)
+
+        } else {
+            # Informative error message
+            value = error_sender(as.character(eval(my_call, frame)),
+                                 "Dot square bracket operator: Evaluation of '.[",
+                                 x_split[i], "]' led to an error:",
+                                 up = up + 1)
+        }
+
+
         res[[i]] = value
     }
 

@@ -100,9 +100,17 @@
 #'
 #' A note on performance. The feature of multiple estimations has been highly optimized for \code{feols}, in particular in the presence of fixed-effects. It is faster to estimate multiple models using the formula rather than with a loop. For non-\code{feols} models using the formula is roughly similar to using a loop performance-wise.
 #'
+#' @section Tricks to estimate multiple LHS:
+#'
+#' To use multiple dependent variables in \code{fixest} estimations, you need to include them in a vector: like in \code{c(y1, y2, y3)}.
+#'
+#' First, if names are stored in a vector, they can readily be inserted in a formula to perform multiple estimations using the dot square bracket operator. For instance if \code{my_lhs = c("y1", "y2")}, calling \code{fixest} with, say \code{feols(.[my_lhs] ~ x1, etc)} is equivalent to using \code{feols(c(y1, y2) ~ x1, etc)}. Beware that this is a special feature unique to the \emph{left-hand-side} of \code{fixest} estimations (the default behavior of the DSB operator is to aggregate with sums, see \code{\link[fixest]{xpd}}).
+#'
+#' Second, you can use a regular expression to grep the left-hand-sides on the fly. When the \code{..("regex")} feature is used naked on the LHS, the variables grepped are inserted into \code{c()}. For example \code{..("Pe") ~ Sepal.Length, iris} is equivalent to \code{c(Petal.Length, Petal.Width) ~ Sepal.Length, iris}. Beware that this is a special feature unique to the \emph{left-hand-side} of \code{fixest} estimations (the default behavior of \code{..("regex")} is to aggregate with sums, see \code{\link[fixest]{xpd}}).
+#'
 #' @section Argument sliding:
 #'
-#' When the data set has been set up globally using \code{\link[fixest]{setFixest_estimation}}(data = data_set), the argument \code{vcov} can be used implicitly. This means that calls such as \code{feols(y ~ x, "HC1")}, or \code{feols(y ~ x, ~id)}, are valid: i) the data is automatically deduced from the global settings, and ii) the \code{vcov} is deduced to be the second argument.
+#' When the data set has been set up globally using \code{\link[fixest]{setFixest_estimation}}\code{(data = data_set)}, the argument \code{vcov} can be used implicitly. This means that calls such as \code{feols(y ~ x, "HC1")}, or \code{feols(y ~ x, ~id)}, are valid: i) the data is automatically deduced from the global settings, and ii) the \code{vcov} is deduced to be the second argument.
 #'
 #' @section Piping:
 #'
@@ -317,6 +325,35 @@
 #'
 #' # Resetting the global options
 #' setFixest_estimation(data = NULL)
+#'
+#'
+#' #
+#' # Formula expansions
+#' #
+#'
+#' # By default, the features of the xpd function are enabled in
+#' # all fixest estimations
+#' # Here's a few examples
+#'
+#' base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+#'
+#' # dot square bracket operator
+#' feols(y ~ x.[1:3], base)
+#'
+#' # fetching variables via regular expressions: ..("regex")
+#' feols(y ~ ..("1|2"), base)
+#'
+#' # NOTA: it also works for multiple LHS
+#' mult1 = feols(x.[1:2] ~ y + species, base)
+#' mult2 = feols(..("y|3") ~ x.[1:2] + species, base)
+#' etable(mult1, mult2)
+#'
+#'
+#' # Use .[, stuff] to include variables in functions:
+#' feols(y ~ csw(x.[, 1:3]), base)
+#'
+#' # Same for ..(, "regex")
+#' feols(y ~ csw(..(,"x")), base)
 #'
 #'
 #'
@@ -1897,6 +1934,7 @@ feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, cluster, se, s
 #' @inheritSection feols Multiple estimations
 #' @inheritSection feols Argument sliding
 #' @inheritSection feols Piping
+#' @inheritSection feols Tricks to estimate multiple LHS
 #' @inheritSection xpd Dot square bracket operator in formulas
 #'
 #' @param family Family to be used for the estimation. Defaults to \code{gaussian()}. See \code{\link[stats]{family}} for details of family functions.
@@ -2742,6 +2780,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 #' @inheritSection feols Multiple estimations
 #' @inheritSection feols Argument sliding
 #' @inheritSection feols Piping
+#' @inheritSection feols Tricks to estimate multiple LHS
 #' @inheritSection xpd Dot square bracket operator in formulas
 #'
 #' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y|fixef_1+fixef_2}. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. The formula \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)} leads to 6 estimation, see details. Square brackets starting with a dot can be used to call global variables: \code{y.[i] ~ x.[1:2]} will lead to \code{y3 ~ x1 + x2} if \code{i} is equal to 3 in the current environment (see details in \code{\link[fixest]{xpd}}).
@@ -2972,6 +3011,7 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
 #' @inheritSection feols Multiple estimations
 #' @inheritSection feols Argument sliding
 #' @inheritSection feols Piping
+#' @inheritSection feols Tricks to estimate multiple LHS
 #' @inheritSection xpd Dot square bracket operator in formulas
 #'
 #' @param fml A formula. This formula gives the linear formula to be estimated (it is similar to a \code{lm} formula), for example: \code{fml = z~x+y}. To include fixed-effects variables, insert them in this formula using a pipe (e.g. \code{fml = z~x+y|fixef_1+fixef_2}). To include a non-linear in parameters element, you must use the argment \code{NL.fml}. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. This leads to 6 estimation \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)}. See details. Square brackets starting with a dot can be used to call global variables: \code{y.[i] ~ x.[1:2]} will lead to \code{y3 ~ x1 + x2} if \code{i} is equal to 3 in the current environment (see details in \code{\link[fixest]{xpd}}).
