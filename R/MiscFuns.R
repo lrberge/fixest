@@ -2467,7 +2467,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #' @param keep A vector of values to be kept from \code{factor_var} (all others are dropped). By default they should be values from \code{factor_var} and if \code{keep} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
 #' @param ref2 A vector of values to be dropped from \code{var}. By default they should be values from \code{var} and if \code{ref2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
 #' @param keep2 A vector of values to be kept from \code{var} (all others are dropped). By default they should be values from \code{var} and if \code{keep2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.
-#' @param bin2 A list or vector defining the binning of the second variable. See help for the argument \code{bin} for details (or look at the help of the function \code{\link[fixest]{bin}}).
+#' @param bin2 A list or vector defining the binning of the second variable. See help for the argument \code{bin} for details (or look at the help of the function \code{\link[fixest]{bin}}). You can use \code{.()} for \code{list()}.
 #' @param ... Not currently used.
 #'
 #' @details
@@ -2505,6 +2505,13 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
 #'
 #' # to force a numeric variable to be treated as a factor: use i.
 #' data.frame(x, y, i(x, i.y))
+#'
+#' # Binning
+#' data.frame(x, i(x, bin = list(ab = c("a", "b"))))
+#'
+#' # Same as before but using .() for list() and a regular expression
+#' # note that to trigger a regex, you need to use an @ first
+#' data.frame(x, i(x, bin = .(ab = "@a|b")))
 #'
 #' #
 #' # In fixest estimations
@@ -2665,12 +2672,20 @@ i = function(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...){
         is_na_all = is.na(f)
     }
 
-    if(!MISSNULL(bin)){
-        f = bin_factor(bin, f, f_name)
+    if(!missing(bin)){
+        bin = error_sender(eval_dot(bin), arg_name = "bin")
+
+        if(!is.null(bin)){
+            f = bin_factor(bin, f, f_name)
+        }
     }
 
     if(IS_INTER_FACTOR && !MISSNULL(bin2)){
-        var = bin_factor(bin2, var, f_name)
+        bin2 = error_sender(eval_dot(bin2), arg_name = "bin2")
+
+        if(!is.null(bin2)){
+            var = bin_factor(bin2, var, f_name)
+        }
     }
 
     if(IS_INTER_FACTOR){
@@ -2855,7 +2870,7 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #' Tool to easily group the values of a given variable.
 #'
 #' @param x A vector whose values have to be grouped. Can be of any type but must be atomic.
-#' @param bin A list of values to be grouped, a vector, a formula, or the special values \code{"bin::digit"} or \code{"cut::values"}. To create a new value from old values, use \code{bin = list("new_value"=old_values)} with \code{old_values} a vector of existing values.
+#' @param bin A list of values to be grouped, a vector, a formula, or the special values \code{"bin::digit"} or \code{"cut::values"}. To create a new value from old values, use \code{bin = list("new_value"=old_values)} with \code{old_values} a vector of existing values. You can use \code{.()} for \code{list()}.
 #' It accepts regular expressions, but they must start with an \code{"@"}, like in \code{bin="@Aug|Dec"}. It accepts one-sided formulas which must contain the variable \code{x}, e.g. \code{bin=list("<2" = ~x < 2)}.
 #' The names of the list are the new names. If the new name is missing, the first value matched becomes the new name.
 #' Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value \code{"bin::digit"} to group every \code{digit} element.
@@ -2903,6 +2918,9 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #'
 #' # ... idem starting from the last one
 #' table(bin(month_num, "!!bin::2"))
+#'
+#' # Using .() for list():
+#' table(bin(month_num, .("g1" = 5:6)))
 #'
 #'
 #' #
@@ -2970,6 +2988,10 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 bin = function(x, bin){
 
     check_arg(x, "vector mbt")
+
+
+    bin = error_sender(eval_dot(bin), arg_name = "bin")
+
     check_arg(bin, "list | vector mbt")
 
     varname = deparse(substitute(x))[1]
@@ -8709,6 +8731,24 @@ NA_fun = function(..., df){
     }
     res
 }
+
+
+eval_dot = function(x, up = 1){
+    # Note that the right use of up is ESSENTIAL
+    # if must refer to the parent frame from which the main call has been made
+    # Otherwise an error will be thrown of "." not existing
+
+    x_dp = deparse(substitute(x), 300)
+
+    sysOrigin = sys.parent(up)
+    mc = match.call(sys.function(sysOrigin), sys.call(sysOrigin))
+
+    env = new.env(parent = parent.frame(up))
+    assign(".", list, env)
+
+    eval(mc[[x_dp]], env)
+}
+
 
 
 #### ................. ####

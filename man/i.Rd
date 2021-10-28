@@ -15,7 +15,7 @@ i(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...)
 
 \item{keep}{A vector of values to be kept from \code{factor_var} (all others are dropped). By default they should be values from \code{factor_var} and if \code{keep} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.}
 
-\item{bin}{A list of values to be grouped, a vector, a formula, or the special values \code{"bin::digit"} or \code{"cut::values"}. To create a new value from old values, use \code{bin = list("new_value"=old_values)} with \code{old_values} a vector of existing values.
+\item{bin}{A list of values to be grouped, a vector, a formula, or the special values \code{"bin::digit"} or \code{"cut::values"}. To create a new value from old values, use \code{bin = list("new_value"=old_values)} with \code{old_values} a vector of existing values. You can use \code{.()} for \code{list()}.
 It accepts regular expressions, but they must start with an \code{"@"}, like in \code{bin="@Aug|Dec"}. It accepts one-sided formulas which must contain the variable \code{x}, e.g. \code{bin=list("<2" = ~x < 2)}.
 The names of the list are the new names. If the new name is missing, the first value matched becomes the new name.
 Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value \code{"bin::digit"} to group every \code{digit} element.
@@ -29,7 +29,7 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 
 \item{keep2}{A vector of values to be kept from \code{var} (all others are dropped). By default they should be values from \code{var} and if \code{keep2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.}
 
-\item{bin2}{A list or vector defining the binning of the second variable. See help for the argument \code{bin} for details (or look at the help of the function \code{\link[fixest]{bin}}).}
+\item{bin2}{A list or vector defining the binning of the second variable. See help for the argument \code{bin} for details (or look at the help of the function \code{\link[fixest]{bin}}). You can use \code{.()} for \code{list()}.}
 
 \item{...}{Not currently used.}
 }
@@ -63,6 +63,13 @@ data.frame(x, z, i(x, z))
 
 # to force a numeric variable to be treated as a factor: use i.
 data.frame(x, y, i(x, i.y))
+
+# Binning
+data.frame(x, i(x, bin = list(ab = c("a", "b"))))
+
+# Same as before but using .() for list() and a regular expression
+# note that to trigger a regex, you need to use an @ first
+data.frame(x, i(x, bin = .(ab = "@a|b")))
 
 #
 # In fixest estimations

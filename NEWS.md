@@ -71,6 +71,8 @@ table(bin(plen, "cut::2[q2]p90]"))
 
  - `bin` also accepts formulas, e.g. `bin = list("<2" = ~ x < 2)` (`x` must be the only variable).
  
+ - `bin` accepts the use of `.()` for `list()`.
+ 
  - add `type = "se_long"` to `summary.fixest_multi` which yields all coefficients and SEs for all estimations in a "long" format.
  
 ## Dot square bracket operator
@@ -109,7 +111,13 @@ dsb("hello .[name, ' and '], what's up?")
  
  - argument `extralines` replaces the argument `extraline` to increase coherence. Hence function `extraline_register` becomes `extralines_register` (the change is done without deprecation since I guess this function must be only rarely used).
  
-## New functions
+ - arguments `extralines` and `headers` accept `.()` for `list()`.
+```R
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+
+```
+ 
+## New function
  
  - `check_conv_feols`: checks the convergence of the fixed-effects in `feols` models by looking at the first-order conditions.
  

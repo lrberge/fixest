@@ -9,7 +9,7 @@ bin(x, bin)
 \arguments{
 \item{x}{A vector whose values have to be grouped. Can be of any type but must be atomic.}
 
-\item{bin}{A list of values to be grouped, a vector, a formula, or the special values \code{"bin::digit"} or \code{"cut::values"}. To create a new value from old values, use \code{bin = list("new_value"=old_values)} with \code{old_values} a vector of existing values.
+\item{bin}{A list of values to be grouped, a vector, a formula, or the special values \code{"bin::digit"} or \code{"cut::values"}. To create a new value from old values, use \code{bin = list("new_value"=old_values)} with \code{old_values} a vector of existing values. You can use \code{.()} for \code{list()}.
 It accepts regular expressions, but they must start with an \code{"@"}, like in \code{bin="@Aug|Dec"}. It accepts one-sided formulas which must contain the variable \code{x}, e.g. \code{bin=list("<2" = ~x < 2)}.
 The names of the list are the new names. If the new name is missing, the first value matched becomes the new name.
 Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value \code{"bin::digit"} to group every \code{digit} element.
@@ -62,6 +62,9 @@ table(bin(month_num, "!bin::2"))
 
 # ... idem starting from the last one
 table(bin(month_num, "!!bin::2"))
+
+# Using .() for list():
+table(bin(month_num, .("g1" = 5:6)))
 
 
 #
