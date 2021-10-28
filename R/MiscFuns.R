@@ -4408,7 +4408,7 @@ summary.fixest_check_conv = function(object, type = "short", ...){
 #'
 #' This utility tool displays the number of unique elements in one or multiple data.frames as well as their number of NA values.
 #'
-#' @param x A formula, with data set names on the LHS and variables on the RHS, like \code{data1 + data2 ~ var1 + var2}. The following special variables are admitted: \code{"."} to get default values, \code{".N"} for the number of observations, \code{".U"} for the number of unique rows, \code{".NA"} for the number of rows with at least one NA. Variables can be combined with \code{"^"}, e.g. \code{df~id^period}; use \code{id\%^\%period} to also include the terms on both sides. Sub select with \code{id[cond]}, when doing so \code{id} is automatically included. Conditions can be chained, as in \code{id[cond1, cond2]}. Use \code{NA(x, y)} in conditions instead of \code{is.na(x) | is.na(y)}. To compare the keys in two data sets, use \code{data1:data2}. If not a formula, \code{x} can be: a vector (displays the # of unique values); a \code{data.frame} (default values are displayed), or a "sum" of data sets like in \code{x = data1 + data2}, in that case it is equivalent to \code{data1 + data2 ~ .}.
+#' @param x A formula, with data set names on the LHS and variables on the RHS, like \code{data1 + data2 ~ var1 + var2}. The following special variables are admitted: \code{"."} to get default values, \code{".N"} for the number of observations, \code{".U"} for the number of unique rows, \code{".NA"} for the number of rows with at least one NA. Variables can be combined with \code{"^"}, e.g. \code{df~id^period}; use \code{id\%^\%period} to also include the terms on both sides. Sub select with \code{id[cond]}, when doing so \code{id} is automatically included. Conditions can be chained, as in \code{id[cond1, cond2]}. Use \code{NA(x, y)} in conditions instead of \code{is.na(x) | is.na(y)}. Use the \code{!!} operator to have both a condition and its opposite. To compare the keys in two data sets, use \code{data1:data2}. If not a formula, \code{x} can be: a vector (displays the # of unique values); a \code{data.frame} (default values are displayed), or a "sum" of data sets like in \code{x = data1 + data2}, in that case it is equivalent to \code{data1 + data2 ~ .}.
 #'
 #' @section Special values and functions:
 #'
@@ -4444,7 +4444,7 @@ summary.fixest_check_conv = function(object, type = "short", ...){
 #'
 #' You can add multiple sub selections at once, only separate them with a comma. For example \code{id[x > 10, NA(y)]} is equivalent to \code{id[x > 10] + id[NA(y)]}.
 #'
-#' Use the double negative operator, i.e. \code{!!}, to include both a condition and its opposite at once. For example \code{id[!!x > 10]} is equivalent to \code{id[x > 10, !x > 10]}.
+#' Use the double negative operator, i.e. \code{!!}, to include both a condition and its opposite at once. For example \code{id[!!x > 10]} is equivalent to \code{id[x > 10, !x > 10]}. Double negative operators can be chained, like in \code{id[!!cond1 & !!cond2]}, then the cardinal product of all double negatived conditions is returned.
 #'
 #' @return
 #' It returns a vector containing the number of unique values per element. If several data sets were provided, a list is returned, as long as the number of data sets, each element being a vector of unique values.
@@ -4480,6 +4480,8 @@ summary.fixest_check_conv = function(object, type = "short", ...){
 #' # use the !! operator
 #' n_unik(data ~.N[!!NA(x1.L1)])
 #'
+#' # the !! operator works within condition chains
+#' n_unik(data ~.N[!!NA(x1.L1) & !!x1 > 7])
 #'
 #' #
 #' # Several data sets
@@ -4600,7 +4602,7 @@ n_unik = function(x){
     # fml = ~ id^sw0(fe)
 
     # check variable names
-    naked_vars = all.vars(fml)
+    naked_vars = origin_vars = all.vars(fml)
     valid_vars = c(".N", ".U", ".NA", ".", unique(unlist(lapply(x_all, names))))
 
     check_value_plus(naked_vars, "multi match", .choices = valid_vars,
@@ -4672,6 +4674,20 @@ n_unik = function(x){
         fml = .xpd(rhs = rhs_txt)
     }
 
+    if(any(naked_vars != origin_vars)){
+        # we complete the partial matching
+        fml_txt = deparse_long(fml)
+
+        var_diff = which(naked_vars != origin_vars)
+
+        for(i in seq_along(var_diff)){
+            re = paste0("(?!<[[:alnum:]._])", origin_vars[i], "(?!=[[:alnum:]._])")
+            fml_txt = gsub(re, naked_vars[i], fml_txt, perl = TRUE)
+        }
+
+        fml = as.formula(fml_txt)
+    }
+
     tm = terms_hat(fml, hat_op = TRUE)
     all_vars = attr(tm, "term.labels")
     var_final = c()
@@ -4708,12 +4724,25 @@ n_unik = function(x){
 
             sw_value = eval(str2lang(info$fun))
 
-            qui_double = grepl("^!!", trimws(sw_value))
+            qui_double = grepl("!!", trimws(sw_value))
             while(any(qui_double)){
                 i = which(qui_double)[1]
-                value_dble = paste0(c("", "!"), str_trim(sw_value[i], 2, first = TRUE))
-                sw_value = insert(sw_value[-i], value_dble, i)
-                qui_double = grepl("^!!", sw_value)
+
+                value = sw_value[i]
+                value_split = strsplit(value, "!!")[[1]]
+
+                n_split = length(value_split)
+                n_s = 2 ** (n_split - 1)
+                new_values = rep(value_split[1], n_s)
+
+                prefixes = do.call(expand.grid, rep(list(c("", "!")), n_split - 1))
+
+                for(j in 1:ncol(prefixes)){
+                    new_values = paste0(new_values, prefixes[, j], value_split[j + 1])
+                }
+
+                sw_value = insert(sw_value[-i], new_values, i)
+                qui_double = grepl("!!", sw_value)
             }
 
             var_char_new = paste0(info$before, sw_value, info$after)
@@ -4764,7 +4793,7 @@ n_unik = function(x){
 
         x = x_all[[I]]
         x_list = unclass(x)
-        x_list[["NA_fun"]] = function(...) NA_fun(..., x)
+        x_list[["NA_fun"]] = function(...) NA_fun(..., df = x)
 
         vars_legit = c(".N", ".U", ".NA", names(x))
 
@@ -4907,11 +4936,11 @@ n_unik = function(x){
 
         x = x_all[[i_x]]
         x_list = unclass(x)
-        x_list[["NA_fun"]] = function(...) NA_fun(..., x)
+        x_list[["NA_fun"]] = function(...) NA_fun(..., df = x)
 
         y = x_all[[i_y]]
         y_list = unclass(y)
-        y_list[["NA_fun"]] = function(...) NA_fun(..., y)
+        y_list[["NA_fun"]] = function(...) NA_fun(..., df = y)
 
         vars_legit = intersect(names(x), names(y))
 
