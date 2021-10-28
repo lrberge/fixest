@@ -331,7 +331,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 	# 1st: is the call coming from feglm?
 	fromGLM = FALSE
 	skip_fixef = FALSE
-	if("X" %in% names(dots)){
+	if("fromGLM" %in% names(dots)){
 		fromGLM = TRUE
 		# env is provided by feglm
 		X = dots$X
@@ -2363,7 +2363,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
             gc()
         }
 
-        wols = feols(y = z, X = X, weights = w, means = wols_means, correct_0w = any_0w, env = env, fixef.tol = fixef.tol * 10**(iter==1), fixef.iter = fixef.iter, collin.tol = collin.tol, nthreads = nthreads, mem.clean = mem.clean, verbose = verbose - 1)
+        wols = feols(y = z, X = X, weights = w, means = wols_means, correct_0w = any_0w, env = env, fixef.tol = fixef.tol * 10**(iter==1), fixef.iter = fixef.iter, collin.tol = collin.tol, nthreads = nthreads, mem.clean = mem.clean, verbose = verbose - 1, fromGLM = TRUE)
 
         if(isTRUE(wols$NA_model)){
             return(wols)

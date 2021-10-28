@@ -23,6 +23,8 @@
  
  - fix bug `plot.fixef` not working for `fepois` (reported by @statzhero [#213](https://github.com/lrberge/fixest/issues/213)).
  
+ - fix error message when the (wrong) argument `X` is used in `feols`.
+ 
 ## New features
 
  - when computing Newey-West standard-errors for time series, the bandwidth is now selected thanks to the [bwNeweyWest](https://sandwich.r-forge.r-project.org/reference/NeweyWest.html) function from the [sandwich](https://sandwich.r-forge.r-project.org/index.html) package. This function implements the method described in Newey and West 1994.
