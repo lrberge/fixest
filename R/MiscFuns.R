@@ -10885,7 +10885,7 @@ getFixest_notes = function(){
 #'
 #'
 #' @param nthreads The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. If missing, the default is to use 50\% of all threads.
-#' @param save Either a logical or equal to \code{"reset"}. Default is \code{FALSE}. If \code{TRUE} then the value is set permanently at the project level, this means that if you restart R, you will still obtain the previously saved defaults. This is done by writing in the \code{".Renviron"} file, located in the project's working directory, hence we must have write permission there for this to work. If equal to "reset", the default at the project level is erased.
+#' @param save Either a logical or equal to \code{"reset"}. Default is \code{FALSE}. If \code{TRUE} then the value is set permanently at the project level, this means that if you restart R, you will still obtain the previously saved defaults. This is done by writing in the \code{".Renviron"} file, located in the project's working directory, hence we must have write permission there for this to work, and only works with Rstudio. If equal to "reset", the default at the project level is erased. Since there is writing in a file involved, permission is asked to the user.
 #'
 #' @author
 #' Laurent Berge
@@ -11223,15 +11223,15 @@ getFixest_estimation = function(){
 #' @param x Logical, no default. If \code{FALSE}, the package startup message is removed.
 #'
 #' @details
-#' Note that this function is introduced to cope with the first \code{fixest} startup message (in version 0.9.0). In the future, all startup messages may be removed, but the function will still exist.
+#' Note that this function is introduced to cope with the first \code{fixest} startup message (in version 0.9.0).
 #'
-#' This function works by adding a variable in the \code{.Renviron} file, so it is very lightweight and project-specific.
+#' This function works only with R >= 4.0.0. There are no startup messages for R < 4.0.0.
 #'
 fixest_startup_msg = function(x){
 
     check_arg(x, "logical scalar mbt")
 
-    renvir_update("fixest_startup_msg", x)
+    config_update("fixest_startup_msg", x)
 
 }
 
@@ -11260,17 +11260,24 @@ initialize_startup_msg = function(startup_msg){
     # Note that we must return the value of 'fixest_startup_msg' since these are
     # updated only at session restart (and hence are not directly accessible)
 
-    # We make sure we're not in R CMD check => we don't want to write to Renviron in that case
-    if(any(grepl("R_CHECK", names(Sys.getenv()), fixed = TRUE))){
+    if(getRversion() < "4.0.0"){
+        # No startup message for version < 4.0
+        # because there's no way to monitor the messages
         return(FALSE)
     }
 
-    previous_version = renvir_get("fixest_version")
+    previous_version = config_get("fixest_version")
+
+    if(is.null(previous_version)){
+        # compatibility with previous versions
+        previous_version = renvir_get("fixest_version")
+    }
+
     current_version = fixest_version()
 
     if(is.null(previous_version)){
         # We first update the version
-        renvir_update("fixest_version", current_version)
+        config_update("fixest_version", current_version)
 
         # Is it a new project? Or was fixest simply never used before?
         if(is_fixest_used()){
@@ -11278,12 +11285,12 @@ initialize_startup_msg = function(startup_msg){
             # Since I register versions since 0.9.0, this means that the
             # version of fixest used was anterior => all msgs should pop
 
-            renvir_update("fixest_startup_msg", TRUE)
+            config_update("fixest_startup_msg", TRUE)
             return(TRUE)
         } else {
             # fixest was never used
             # => we don't show any message since it will not break any existing code
-            renvir_update("fixest_startup_msg", FALSE)
+            config_update("fixest_startup_msg", FALSE)
             return(FALSE)
         }
 
@@ -11299,7 +11306,7 @@ initialize_startup_msg = function(startup_msg){
         } else {
 
             # A) we update the version
-            renvir_update("fixest_version", current_version)
+            config_update("fixest_version", current_version)
 
             # B) we reset the value of fixest_startup_msg
             #    only if the previous_version is anterior to the version that introduced the
@@ -11316,14 +11323,14 @@ initialize_startup_msg = function(startup_msg){
                 # fixest_startup_msg(FALSE) in v0.9.0
                 #
 
-                renvir_update("fixest_startup_msg", previous_version)
+                config_update("fixest_startup_msg", previous_version)
                 return(previous_version)
 
             } else {
                 # The previous version is already posterior to the last message
                 # => no startup message any more
 
-                renvir_update("fixest_startup_msg", FALSE)
+                config_update("fixest_startup_msg", FALSE)
                 return(FALSE)
             }
         }
@@ -11331,10 +11338,10 @@ initialize_startup_msg = function(startup_msg){
 
     # If null, we'll get the value thanks to renvir_get("fixest_startup_msg")
     # but in some instances, it may be corrupt, so we fix it
-    res = renvir_get("fixest_startup_msg")
+    res = config_get("fixest_startup_msg")
     if(is.null(res)){
         # corrupt situation (can occur in dev)
-        renvir_update("fixest_startup_msg", FALSE)
+        config_update("fixest_startup_msg", FALSE)
         return(FALSE)
     }
 
@@ -11407,14 +11414,91 @@ renvir_get = function(key){
     return(value)
 }
 
+find_project_path = function(force = FALSE){
+    # finds the root directory
+    # we just look up the search path to find the root
+    # Only works for Rstudio projects!
+
+    past_path = "init"
+    path = normalizePath(".", "/")
+
+    is_found = FALSE
+    i = 1
+    nmax = 10
+    while(past_path != path && i <= nmax){
+        i = i + 1
+        if(length(list.files(path, pattern = "Rproj$")) > 0){
+            is_found = TRUE
+            break
+        } else {
+            past_path = path
+            path = dirname(path)
+        }
+    }
+
+    proj_path = NULL
+    if(is_found){
+        proj_path = path
+    }
+
+    if(force && is.null(proj_path)){
+        proj_path = normalizePath(".", "/")
+    }
+
+    proj_path
+}
+
+find_renviron = function(path = NULL){
+    # Simply attaches .Renviron to the project path
+
+    if(is.null(path)){
+        proj_path = find_project_path()
+        if(is.null(proj_path)) return(NULL)
+    } else {
+        if(!dir.exists(path)){
+            if(file.exists(path)){
+                path = dirname(path)
+            } else {
+                stop_up("The path provided in 'save' does not exist.", .up = 2)
+            }
+        }
+
+        proj_path = path
+    }
+
+    file.path(proj_path, ".Renviron")
+}
+
 renvir_update = function(key, value){
     # Updates the .Renviron file
+    # asks permission to the user => avoids messing up their workspace!
+    # I was thinking to add an argument path, given by the user... but in fact no
+    # the .Renviron works only at the Rstudio project level so making the user think
+    # that giving a path for saving would help is misleading, since the .Renviron from
+    # that path very likely wouldn't be loaded
 
     check_arg(key, "character scalar mbt")
     check_arg(value, "NULL mbt")
 
-    if(file.exists(".Renviron")){
-        file = file(".Renviron", "r", encoding = "UTF-8")
+    renv_path = find_renviron()
+
+    if(is.null(renv_path)){
+        message("The root directory of the Rstudio project could not be found: settings cannot be saved at the project level, sorry.")
+        return(NULL)
+    }
+
+    message("To save the settings at the project level 'fixest' needs to update the '.Renviron' file, currently located at:\n\n ", renv_path, "\n\n If the path indeed leads to your current project, do you give persmission? ")
+
+    consent = readline("ok/y/yes to consent:")
+    consent = tolower(trimws(consent))
+
+    if(!consent %in% c("ok", "y", "ye", "yes")){
+        message("aborting save")
+        return(NULL)
+    }
+
+    if(file.exists(renv_path)){
+        file = file(renv_path, "r", encoding = "UTF-8")
 
         renvir_raw = readLines(file)
 
@@ -11448,7 +11532,7 @@ renvir_update = function(key, value){
     }
 
     if(do_write){
-        file = file(".Renviron", "w", encoding = "UTF-8")
+        file = file(renv_path, "w", encoding = "UTF-8")
 
         renvir_raw = writeLines(renvir_raw, file)
 
@@ -11457,6 +11541,83 @@ renvir_update = function(key, value){
 
 
 }
+
+find_config_path = function(){
+    dir = tools::R_user_dir("fixest", "config")
+
+    # We create the directory if needed
+    if(!dir.exists(dir)){
+        dir.create(dir, recursive = TRUE)
+    }
+
+    dir = normalizePath(dir, "/")
+
+    file.path(dir, "fixest_config.csv")
+}
+
+
+config_update = function(key, value){
+
+    if(getRversion() < "4.0.0"){
+        return(NULL)
+    }
+
+    path = find_config_path()
+    proj = find_project_path(force = TRUE)
+
+    if(file.exists(path)){
+        data = read.csv(path)
+    } else {
+        data = data.frame(proj = proj, fixest_version = fixest_version(), stringsAsFactors = FALSE)
+    }
+
+    if(!key %in% names(data)){
+        data[[key]] = NA_character_
+    }
+
+    if(!proj %in% data$proj){
+        row = data[1, , drop = FALSE] * NA_character_
+        row[1] = proj
+        data = rbind(data, row)
+    }
+
+    i = which(data$proj %in% proj)
+
+    data[["fixest_version"]][i] = fixest_version()
+
+    if(is.null(value)) value = "NULL"
+    data[[key]][i] = as.character(value)
+
+    write.csv(data, path, row.names = FALSE)
+}
+
+config_get = function(key){
+
+    path = find_config_path()
+
+    if(!file.exists(path)){
+        return(NULL)
+    }
+
+    data = read.csv(path)
+
+    proj = find_project_path(force = TRUE)
+
+    if(!proj %in% data$proj){
+        return(NULL)
+    }
+
+    i = which(data$proj %in% proj)
+
+    value = data[[key]][i]
+
+    if(is.character(value) && value %in% c("NULL", "TRUE", "FALSE")){
+        value = str2lang(value)
+    }
+
+    value
+}
+
 
 #### .................. ####
 #### DOCUMENTATION DATA ####

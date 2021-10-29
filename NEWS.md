@@ -176,7 +176,8 @@ Although a bit unrelated to the purpose of this package, these functions are so 
  - the dictionaries now ignore white spaces in coefficient names (thanks to Caleb Kwon).
  
  - the package startup messages have been improved (they should pop up less often).
-
+ 
+ - to comply with CRAN policies, the startup message doesn't write on the .Renviron file any more.
 
 # fixest 0.10.0
 

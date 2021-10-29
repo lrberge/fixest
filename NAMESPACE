@@ -146,10 +146,6 @@ importFrom(grDevices, rgb, col2rgb)
 importFrom(methods, formalArgs)
 
 
-
-
-
-
 # Auto-exports::vcov_aliases
 export(NW, newey_west, DK, driscoll_kraay, conley)
 
