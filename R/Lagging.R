@@ -963,36 +963,38 @@ unpanel = function(x){
     return(res)
 }
 
-terms_hat = function(fml, fastCombine = TRUE, hat_op = FALSE){
+terms_hat = function(fml, fastCombine = TRUE, n_unik = FALSE){
 
     fml_char = as.character(fml)[length(fml)]
 
     # %^%: hat operator, in n_unik
-    if(hat_op && grepl("%^%", fml_char, fixed = TRUE)){
-        # a%^%b => a + b + a^b
+    # + distribution
+    if(n_unik){
 
-        fml_clean = gsub(" %^% ", "__HAT_OP__", fml_char, fixed = TRUE)
-        fml_clean = gsub("^", "__HAT__", fml_clean, fixed = TRUE)
-
-        vars = get_vars(.xpd(rhs = fml_clean))
-
-        qui_hat_op = grepl("__HAT_OP__", vars, fixed = TRUE)
-        while(any(qui_hat_op)){
-            i = which(qui_hat_op)[1]
-            vi = vars[i]
-            vi_all = strsplit(vi, "__HAT_OP__", fixed = TRUE)[[1]]
-            new_vars = vi_all
-            n_vi = length(vi_all)
-            for(ncomb in 2:n_vi){
-                comb_all = combn(n_vi, ncomb)
-                comb_vars = apply(comb_all, 2, function(x) paste0(vi_all[x], collapse = "^"))
-                new_vars = c(new_vars, comb_vars)
-            }
-            vars = insert(vars[-i], new_vars, i)
-            qui_hat_op = grepl("__HAT_OP__", vars, fixed = TRUE)
+        any_hat = grepl("^", fml_char, fixed = TRUE)
+        if(any_hat){
+            fml_char = gsub("%^%", "*", fml_char, fixed = TRUE)
+            fml_char = gsub("\\^(?=[^[:digit:]])", ":", fml_char, perl = TRUE)
         }
 
-        vars = unique(gsub("__HAT__", "^", vars, fixed = TRUE))
+        vars = get_vars(.xpd(rhs = fml_char))
+
+        # distribution:
+        #   (a + b)[cond] => a[cond] + b[cond]
+        is_paren = grepl("^\\(", vars)
+        while(any(is_paren)){
+
+            i = which(is_paren)[1]
+            info_paren = extract_fun(paste0("PAREN", vars[i]), "PAREN")
+            vars_in_paren = get_vars(.xpd(rhs = gsub("^PAREN\\(|\\)$", "", info_paren$fun)))
+
+            new_vars = paste0(vars_in_paren, info_paren$after)
+
+            vars = insert(vars[-i], new_vars, i)
+            is_paren = grepl("^\\(", vars)
+        }
+
+        vars = gsub(":", "^", vars, fixed = TRUE)
 
         fml = .xpd(rhs = vars)
         fml_char = as.character(fml)[length(fml)]
