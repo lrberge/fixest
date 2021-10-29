@@ -11485,7 +11485,7 @@ renvir_update = function(key, value){
     renv_path = find_renviron()
 
     if(is.null(renv_path)){
-        message("The root directory of the Rstudio project could not be found: settings cannot be saved at the project level, sorry.")
+        message("The 'save' feature only works with Rstudio projects. The root directory of the Rstudio project could not be found: settings cannot be saved at the project level, sorry.")
         return(NULL)
     }
 
