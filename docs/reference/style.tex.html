@@ -292,48 +292,49 @@
 <span class='co'># Playing a bit with the styles</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est</span>, tex <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; \begin{tabular}{lcccccc}
-#&gt; \tabularnewline\midrule\midrule
-#&gt; Dependent Variables: &amp; \multicolumn{3}{c}{Ozone} &amp; \multicolumn{3}{c}{Solar.R}\\
-#&gt; Model: &amp; (1) &amp; (2) &amp; (3) &amp; (4) &amp; (5) &amp; (6)\\
-#&gt; \midrule \emph{Variables} &amp;   &amp;   &amp;   &amp;   &amp;   &amp;  \\
-#&gt; Wind &amp; -2.693$^{***}$ &amp; -2.630$^{***}$ &amp; -2.850$^{***}$ &amp; 3.031 &amp; 3.181 &amp; 3.943\\
-#&gt;   &amp; (0.8076) &amp; (0.8449) &amp; (0.9134) &amp; (3.316) &amp; (3.278) &amp; (3.172)\\
-#&gt; Temp &amp; 2.373$^{***}$ &amp; -4.009 &amp; -63.53$^{*}$ &amp; 4.787$^{***}$ &amp; 17.80 &amp; 234.4$^{**}$\\
-#&gt;   &amp; (0.1858) &amp; (4.333) &amp; (33.38) &amp; (1.459) &amp; (12.77) &amp; (101.3)\\
-#&gt; Temp square &amp;    &amp; 0.0407 &amp; 0.8215$^{*}$ &amp;    &amp; -0.0824 &amp; -2.933$^{**}$\\
-#&gt;   &amp;    &amp; (0.0277) &amp; (0.4496) &amp;    &amp; (0.0762) &amp; (1.322)\\
-#&gt; Temp cube &amp;    &amp;    &amp; -0.0034 &amp;    &amp;    &amp; 0.0124$^{**}$\\
-#&gt;   &amp;    &amp;    &amp; (0.0020) &amp;    &amp;    &amp; (0.0057)\\
-#&gt; \midrule \emph{Fixed-effects} &amp;   &amp;   &amp;   &amp;   &amp;   &amp;  \\
-#&gt; Month &amp; Yes &amp; Yes &amp; Yes &amp; Yes &amp; Yes &amp; Yes\\
-#&gt; Day &amp; Yes &amp; Yes &amp; Yes &amp; Yes &amp; Yes &amp; Yes\\
-#&gt; \midrule \emph{Fit statistics} &amp;   &amp;   &amp;   &amp;   &amp;   &amp;  \\
-#&gt; Observations &amp; 116 &amp; 116 &amp; 116 &amp; 146 &amp; 146 &amp; 146\\
-#&gt; R$^2$ &amp; 0.78671 &amp; 0.79718 &amp; 0.80469 &amp; 0.30641 &amp; 0.31252 &amp; 0.32651\\
-#&gt; Within R$^2$ &amp; 0.55271 &amp; 0.57466 &amp; 0.59040 &amp; 0.08937 &amp; 0.09740 &amp; 0.11577\\
-#&gt; \midrule\midrule\multicolumn{7}{l}{\emph{Clustered (Month) standard-errors in parentheses}}\\
-#&gt; \multicolumn{7}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\
+#&gt;    \tabularnewline\midrule\midrule
+#&gt;    Dependent Variables: &amp; \multicolumn{3}{c}{Ozone} &amp; \multicolumn{3}{c}{Solar.R}\\
+#&gt;    Model:       &amp; (1)            &amp; (2)            &amp; (3)            &amp; (4)           &amp; (5)      &amp; (6)\\
+#&gt;    \midrule \emph{Variables} &amp;   &amp;   &amp;   &amp;   &amp;   &amp;  \\
+#&gt;    Wind         &amp; -2.693$^{***}$ &amp; -2.630$^{***}$ &amp; -2.850$^{***}$ &amp; 3.031         &amp; 3.181    &amp; 3.943\\
+#&gt;                 &amp; (0.8076)       &amp; (0.8449)       &amp; (0.9134)       &amp; (3.316)       &amp; (3.278)  &amp; (3.172)\\
+#&gt;    Temp         &amp; 2.373$^{***}$  &amp; -4.009         &amp; -63.53$^{*}$   &amp; 4.787$^{***}$ &amp; 17.80    &amp; 234.4$^{**}$\\
+#&gt;                 &amp; (0.1858)       &amp; (4.333)        &amp; (33.38)        &amp; (1.459)       &amp; (12.77)  &amp; (101.3)\\
+#&gt;    Temp square  &amp;                &amp; 0.0407         &amp; 0.8215$^{*}$   &amp;               &amp; -0.0824  &amp; -2.933$^{**}$\\
+#&gt;                 &amp;                &amp; (0.0277)       &amp; (0.4496)       &amp;               &amp; (0.0762) &amp; (1.322)\\
+#&gt;    Temp cube    &amp;                &amp;                &amp; -0.0034        &amp;               &amp;          &amp; 0.0124$^{**}$\\
+#&gt;                 &amp;                &amp;                &amp; (0.0020)       &amp;               &amp;          &amp; (0.0057)\\
+#&gt;    \midrule \emph{Fixed-effects} &amp;   &amp;   &amp;   &amp;   &amp;   &amp;  \\
+#&gt;    Month        &amp; Yes            &amp; Yes            &amp; Yes            &amp; Yes           &amp; Yes      &amp; Yes\\
+#&gt;    Day          &amp; Yes            &amp; Yes            &amp; Yes            &amp; Yes           &amp; Yes      &amp; Yes\\
+#&gt;    \midrule \emph{Fit statistics} &amp;   &amp;   &amp;   &amp;   &amp;   &amp;  \\
+#&gt;    Observations &amp; 116            &amp; 116            &amp; 116            &amp; 146           &amp; 146      &amp; 146\\
+#&gt;    R$^2$        &amp; 0.78671        &amp; 0.79718        &amp; 0.80469        &amp; 0.30641       &amp; 0.31252  &amp; 0.32651\\
+#&gt;    Within R$^2$ &amp; 0.55271        &amp; 0.57466        &amp; 0.59040        &amp; 0.08937       &amp; 0.09740  &amp; 0.11577\\
+#&gt;    \midrule\midrule\multicolumn{7}{l}{\emph{Clustered (Month) standard-errors in parentheses}}\\
+#&gt;    \multicolumn{7}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\
 #&gt; \end{tabular}</div><div class='input'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est</span>, tex <span class='op'>=</span> <span class='cn'>TRUE</span>, style.tex <span class='op'>=</span> <span class='fu'>style.tex</span><span class='op'>(</span><span class='st'>"aer"</span><span class='op'>)</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; \begin{tabular}{lcccccc}
-#&gt; \toprule
-#&gt;  &amp; \multicolumn{3}{c}{Ozone} &amp; \multicolumn{3}{c}{Solar.R}\\
-#&gt;  &amp; (1) &amp; (2) &amp; (3) &amp; (4) &amp; (5) &amp; (6)\\
-#&gt; \midrule Wind &amp; -2.693$^{***}$ &amp; -2.630$^{***}$ &amp; -2.850$^{***}$ &amp; 3.031 &amp; 3.181 &amp; 3.943\\
-#&gt;   &amp; (0.8076) &amp; (0.8449) &amp; (0.9134) &amp; (3.316) &amp; (3.278) &amp; (3.172)\\
-#&gt; Temp &amp; 2.373$^{***}$ &amp; -4.009 &amp; -63.53$^{*}$ &amp; 4.787$^{***}$ &amp; 17.80 &amp; 234.4$^{**}$\\
-#&gt;   &amp; (0.1858) &amp; (4.333) &amp; (33.38) &amp; (1.459) &amp; (12.77) &amp; (101.3)\\
-#&gt; Temp square &amp;    &amp; 0.0407 &amp; 0.8215$^{*}$ &amp;    &amp; -0.0824 &amp; -2.933$^{**}$\\
-#&gt;   &amp;    &amp; (0.0277) &amp; (0.4496) &amp;    &amp; (0.0762) &amp; (1.322)\\
-#&gt; Temp cube &amp;    &amp;    &amp; -0.0034 &amp;    &amp;    &amp; 0.0124$^{**}$\\
-#&gt;   &amp;    &amp;    &amp; (0.0020) &amp;    &amp;    &amp; (0.0057)\\
-#&gt;   &amp;   &amp;   &amp;   &amp;   &amp;   &amp;  \\
-#&gt; Observations &amp; 116 &amp; 116 &amp; 116 &amp; 146 &amp; 146 &amp; 146\\
-#&gt; R$^2$ &amp; 0.78671 &amp; 0.79718 &amp; 0.80469 &amp; 0.30641 &amp; 0.31252 &amp; 0.32651\\
-#&gt; Within R$^2$ &amp; 0.55271 &amp; 0.57466 &amp; 0.59040 &amp; 0.08937 &amp; 0.09740 &amp; 0.11577\\
-#&gt;   &amp;   &amp;   &amp;   &amp;   &amp;   &amp;  \\
-#&gt; Month fixed effects &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$\\
-#&gt; Day fixed effects &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$\\
-#&gt; \bottomrule
+#&gt;    \toprule
+#&gt;     &amp; \multicolumn{3}{c}{Ozone} &amp; \multicolumn{3}{c}{Solar.R}\\
+#&gt;                        &amp; (1)            &amp; (2)            &amp; (3)            &amp; (4)           &amp; (5)           &amp; (6)\\
+#&gt;    \midrule 
+#&gt;    Wind                &amp; -2.693$^{***}$ &amp; -2.630$^{***}$ &amp; -2.850$^{***}$ &amp; 3.031         &amp; 3.181         &amp; 3.943\\
+#&gt;                        &amp; (0.8076)       &amp; (0.8449)       &amp; (0.9134)       &amp; (3.316)       &amp; (3.278)       &amp; (3.172)\\
+#&gt;    Temp                &amp; 2.373$^{***}$  &amp; -4.009         &amp; -63.53$^{*}$   &amp; 4.787$^{***}$ &amp; 17.80         &amp; 234.4$^{**}$\\
+#&gt;                        &amp; (0.1858)       &amp; (4.333)        &amp; (33.38)        &amp; (1.459)       &amp; (12.77)       &amp; (101.3)\\
+#&gt;    Temp square         &amp;                &amp; 0.0407         &amp; 0.8215$^{*}$   &amp;               &amp; -0.0824       &amp; -2.933$^{**}$\\
+#&gt;                        &amp;                &amp; (0.0277)       &amp; (0.4496)       &amp;               &amp; (0.0762)      &amp; (1.322)\\
+#&gt;    Temp cube           &amp;                &amp;                &amp; -0.0034        &amp;               &amp;               &amp; 0.0124$^{**}$\\
+#&gt;                        &amp;                &amp;                &amp; (0.0020)       &amp;               &amp;               &amp; (0.0057)\\
+#&gt;                        &amp;                &amp;                &amp;                &amp;               &amp;               &amp;  \\
+#&gt;    Observations        &amp; 116            &amp; 116            &amp; 116            &amp; 146           &amp; 146           &amp; 146\\
+#&gt;    R$^2$               &amp; 0.78671        &amp; 0.79718        &amp; 0.80469        &amp; 0.30641       &amp; 0.31252       &amp; 0.32651\\
+#&gt;    Within R$^2$        &amp; 0.55271        &amp; 0.57466        &amp; 0.59040        &amp; 0.08937       &amp; 0.09740       &amp; 0.11577\\
+#&gt;                        &amp;                &amp;                &amp;                &amp;               &amp;               &amp;  \\
+#&gt;    Month fixed effects &amp; $\checkmark$  &amp; $\checkmark$  &amp; $\checkmark$  &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$\\
+#&gt;    Day fixed effects   &amp; $\checkmark$  &amp; $\checkmark$  &amp; $\checkmark$  &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$\\
+#&gt;    \bottomrule
 #&gt; \end{tabular}</div><div class='input'>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est</span>, tex <span class='op'>=</span> <span class='cn'>TRUE</span>, style.tex <span class='op'>=</span> <span class='fu'>style.tex</span><span class='op'>(</span><span class='st'>"aer"</span>,
                                       var.title <span class='op'>=</span> <span class='st'>"\\emph{Expl. Vars.}"</span>,
@@ -341,26 +342,26 @@
                                       yesNo <span class='op'>=</span> <span class='st'>"x"</span>,
                                       tabular <span class='op'>=</span> <span class='st'>"*"</span><span class='op'>)</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccccc}
-#&gt; \toprule
-#&gt;  &amp; \multicolumn{3}{c}{Ozone} &amp; \multicolumn{3}{c}{Solar.R}\\
-#&gt;  &amp; [i] &amp; [ii] &amp; [iii] &amp; [iv] &amp; [v] &amp; [vi]\\
-#&gt; \emph{Expl. Vars.} &amp;   &amp;   &amp;   &amp;   &amp;   &amp;  \\
-#&gt; Wind &amp; -2.693$^{***}$ &amp; -2.630$^{***}$ &amp; -2.850$^{***}$ &amp; 3.031 &amp; 3.181 &amp; 3.943\\
-#&gt;   &amp; (0.8076) &amp; (0.8449) &amp; (0.9134) &amp; (3.316) &amp; (3.278) &amp; (3.172)\\
-#&gt; Temp &amp; 2.373$^{***}$ &amp; -4.009 &amp; -63.53$^{*}$ &amp; 4.787$^{***}$ &amp; 17.80 &amp; 234.4$^{**}$\\
-#&gt;   &amp; (0.1858) &amp; (4.333) &amp; (33.38) &amp; (1.459) &amp; (12.77) &amp; (101.3)\\
-#&gt; Temp square &amp;    &amp; 0.0407 &amp; 0.8215$^{*}$ &amp;    &amp; -0.0824 &amp; -2.933$^{**}$\\
-#&gt;   &amp;    &amp; (0.0277) &amp; (0.4496) &amp;    &amp; (0.0762) &amp; (1.322)\\
-#&gt; Temp cube &amp;    &amp;    &amp; -0.0034 &amp;    &amp;    &amp; 0.0124$^{**}$\\
-#&gt;   &amp;    &amp;    &amp; (0.0020) &amp;    &amp;    &amp; (0.0057)\\
-#&gt;   &amp;   &amp;   &amp;   &amp;   &amp;   &amp;  \\
-#&gt; Observations &amp; 116 &amp; 116 &amp; 116 &amp; 146 &amp; 146 &amp; 146\\
-#&gt; R$^2$ &amp; 0.78671 &amp; 0.79718 &amp; 0.80469 &amp; 0.30641 &amp; 0.31252 &amp; 0.32651\\
-#&gt; Within R$^2$ &amp; 0.55271 &amp; 0.57466 &amp; 0.59040 &amp; 0.08937 &amp; 0.09740 &amp; 0.11577\\
-#&gt;   &amp;   &amp;   &amp;   &amp;   &amp;   &amp;  \\
-#&gt; Month fixed effects &amp; x &amp; x &amp; x &amp; x &amp; x &amp; x\\
-#&gt; Day fixed effects &amp; x &amp; x &amp; x &amp; x &amp; x &amp; x\\
-#&gt; \bottomrule
+#&gt;    \toprule
+#&gt;     &amp; \multicolumn{3}{c}{Ozone} &amp; \multicolumn{3}{c}{Solar.R}\\
+#&gt;                        &amp; [i]            &amp; [ii]           &amp; [iii]          &amp; [iv]          &amp; [v]      &amp; [vi]\\
+#&gt;    \emph{Expl. Vars.} &amp;                &amp;                &amp;                &amp;               &amp;          &amp;  \\
+#&gt;    Wind                &amp; -2.693$^{***}$ &amp; -2.630$^{***}$ &amp; -2.850$^{***}$ &amp; 3.031         &amp; 3.181    &amp; 3.943\\
+#&gt;                        &amp; (0.8076)       &amp; (0.8449)       &amp; (0.9134)       &amp; (3.316)       &amp; (3.278)  &amp; (3.172)\\
+#&gt;    Temp                &amp; 2.373$^{***}$  &amp; -4.009         &amp; -63.53$^{*}$   &amp; 4.787$^{***}$ &amp; 17.80    &amp; 234.4$^{**}$\\
+#&gt;                        &amp; (0.1858)       &amp; (4.333)        &amp; (33.38)        &amp; (1.459)       &amp; (12.77)  &amp; (101.3)\\
+#&gt;    Temp square         &amp;                &amp; 0.0407         &amp; 0.8215$^{*}$   &amp;               &amp; -0.0824  &amp; -2.933$^{**}$\\
+#&gt;                        &amp;                &amp; (0.0277)       &amp; (0.4496)       &amp;               &amp; (0.0762) &amp; (1.322)\\
+#&gt;    Temp cube           &amp;                &amp;                &amp; -0.0034        &amp;               &amp;          &amp; 0.0124$^{**}$\\
+#&gt;                        &amp;                &amp;                &amp; (0.0020)       &amp;               &amp;          &amp; (0.0057)\\
+#&gt;                        &amp;                &amp;                &amp;                &amp;               &amp;          &amp;  \\
+#&gt;    Observations        &amp; 116            &amp; 116            &amp; 116            &amp; 146           &amp; 146      &amp; 146\\
+#&gt;    R$^2$               &amp; 0.78671        &amp; 0.79718        &amp; 0.80469        &amp; 0.30641       &amp; 0.31252  &amp; 0.32651\\
+#&gt;    Within R$^2$        &amp; 0.55271        &amp; 0.57466        &amp; 0.59040        &amp; 0.08937       &amp; 0.09740  &amp; 0.11577\\
+#&gt;                        &amp;                &amp;                &amp;                &amp;               &amp;          &amp;  \\
+#&gt;    Month fixed effects &amp; x              &amp; x              &amp; x              &amp; x             &amp; x        &amp; x\\
+#&gt;    Day fixed effects   &amp; x              &amp; x              &amp; x              &amp; x             &amp; x        &amp; x\\
+#&gt;    \bottomrule
 #&gt; \end{tabular*}</div><div class='input'>
 </div></pre>
   </div>

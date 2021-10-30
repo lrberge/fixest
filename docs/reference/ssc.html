@@ -280,12 +280,12 @@
 #&gt; Observations: 10 
 #&gt; Fixed-effects: fe1: 3,  fe2: 5
 #&gt; Standard-errors: Clustered (fe1) 
-#&gt;   Estimate Std. Error  t value Pr(&gt;|t|) 
-#&gt; x 0.206284    1.51299 0.136341  0.90404 
+#&gt;   Estimate Std. Error t value Pr(&gt;|t|) 
+#&gt; x 0.517215   0.561305 0.92145  0.45409 
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 0.998379     Adj. R2: -0.605494
-#&gt;                  Within R2:  0.010488</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/attributes.html'>attributes</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, attr <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"ssc"</span>, <span class='st'>"dof.K"</span><span class='op'>)</span><span class='op'>]</span>
+#&gt; RMSE: 0.73031     Adj. R2: -1.26941
+#&gt;                 Within R2: 0.219994</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/attributes.html'>attributes</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, attr <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span><span class='op'>[</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"ssc"</span>, <span class='st'>"dof.K"</span><span class='op'>)</span><span class='op'>]</span>
 </div><div class='output co'>#&gt; $ssc
 #&gt; $adj
 #&gt; [1] TRUE
@@ -319,12 +319,12 @@
 #&gt; Observations: 10 
 #&gt; Fixed-effects: fe1: 3,  fe2: 5
 #&gt; Standard-errors: Clustered (fe1) 
-#&gt;   Estimate Std. Error  t value Pr(&gt;|t|) 
-#&gt; x 0.206284    1.00866 0.204512  0.85688 
+#&gt;   Estimate Std. Error t value Pr(&gt;|t|) 
+#&gt; x 0.517215   0.374204 1.38217  0.30104 
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 0.998379     Adj. R2: -0.605494
-#&gt;                  Within R2:  0.010488</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/attr.html'>attr</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, ssc <span class='op'>=</span> <span class='fu'>ssc</span><span class='op'>(</span>fixef.K <span class='op'>=</span> <span class='st'>"none"</span><span class='op'>)</span>, attr <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>, <span class='st'>"dof.K"</span><span class='op'>)</span>
+#&gt; RMSE: 0.73031     Adj. R2: -1.26941
+#&gt;                 Within R2: 0.219994</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/attr.html'>attr</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, ssc <span class='op'>=</span> <span class='fu'>ssc</span><span class='op'>(</span>fixef.K <span class='op'>=</span> <span class='st'>"none"</span><span class='op'>)</span>, attr <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>, <span class='st'>"dof.K"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; [1] 1</div><div class='input'>
 
 <span class='co'># fixef.K = TRUE</span>
@@ -335,11 +335,11 @@
 #&gt; Fixed-effects: fe1: 3,  fe2: 5
 #&gt; Standard-errors: Clustered (fe1) 
 #&gt;   Estimate Std. Error  t value Pr(&gt;|t|) 
-#&gt; x 0.206284     2.1397 0.096408  0.93199 
+#&gt; x 0.517215   0.793806 0.651563  0.58155 
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 0.998379     Adj. R2: -0.605494
-#&gt;                  Within R2:  0.010488</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/attr.html'>attr</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, ssc <span class='op'>=</span> <span class='fu'>ssc</span><span class='op'>(</span>fixef.K <span class='op'>=</span> <span class='st'>"full"</span><span class='op'>)</span>, attr <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>, <span class='st'>"dof.K"</span><span class='op'>)</span>
+#&gt; RMSE: 0.73031     Adj. R2: -1.26941
+#&gt;                 Within R2: 0.219994</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/attr.html'>attr</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, ssc <span class='op'>=</span> <span class='fu'>ssc</span><span class='op'>(</span>fixef.K <span class='op'>=</span> <span class='st'>"full"</span><span class='op'>)</span>, attr <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>, <span class='st'>"dof.K"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; [1] 8</div><div class='input'>
 
 <span class='co'># fixef.K = TRUE &amp; fixef.force_exact = TRUE</span>
@@ -350,11 +350,11 @@
 #&gt; Fixed-effects: fe1: 3,  fe2: 5
 #&gt; Standard-errors: Clustered (fe1) 
 #&gt;   Estimate Std. Error  t value Pr(&gt;|t|) 
-#&gt; x 0.206284    1.74706 0.118075   0.9168 
+#&gt; x 0.517215    0.64814 0.797999  0.50857 
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 0.998379     Adj. R2: -0.605494
-#&gt;                  Within R2:  0.010488</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/attr.html'>attr</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, ssc <span class='op'>=</span> <span class='fu'>ssc</span><span class='op'>(</span>fixef.K <span class='op'>=</span> <span class='st'>"full"</span>, fixef.force_exact <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>, attr <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>, <span class='st'>"dof.K"</span><span class='op'>)</span>
+#&gt; RMSE: 0.73031     Adj. R2: -1.26941
+#&gt;                 Within R2: 0.219994</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/attr.html'>attr</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/vcov.html'>vcov</a></span><span class='op'>(</span><span class='va'>est</span>, ssc <span class='op'>=</span> <span class='fu'>ssc</span><span class='op'>(</span>fixef.K <span class='op'>=</span> <span class='st'>"full"</span>, fixef.force_exact <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>, attr <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>, <span class='st'>"dof.K"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; [1] 7</div><div class='input'>
 <span class='co'># There are two restrictions:</span>
 <span class='fu'><a href='https://rdrr.io/r/base/attr.html'>attr</a></span><span class='op'>(</span><span class='fu'><a href='fixef_reexported.html'>fixef</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>, <span class='st'>"references"</span><span class='op'>)</span>

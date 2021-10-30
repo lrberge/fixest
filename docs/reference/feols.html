@@ -438,12 +438,20 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 <p>You can also add fixed-effects in a stepwise fashion. Note that you cannot perform stepwise estimations on the IV part of the formula (<code>feols</code> only).</p>
 <p>If NAs are present in the sample, to avoid too many messages, only NA removal concerning the variables common to all estimations is reported.</p>
 <p>A note on performance. The feature of multiple estimations has been highly optimized for <code>feols</code>, in particular in the presence of fixed-effects. It is faster to estimate multiple models using the formula rather than with a loop. For non-<code>feols</code> models using the formula is roughly similar to using a loop performance-wise.</p>
+    <h2 class="hasAnchor" id="tricks-to-estimate-multiple-lhs"><a class="anchor" href="#tricks-to-estimate-multiple-lhs"></a>Tricks to estimate multiple LHS</h2>
+
+    
+
+
+<p>To use multiple dependent variables in <code>fixest</code> estimations, you need to include them in a vector: like in <code><a href='https://rdrr.io/r/base/c.html'>c(y1, y2, y3)</a></code>.</p>
+<p>First, if names are stored in a vector, they can readily be inserted in a formula to perform multiple estimations using the dot square bracket operator. For instance if <code>my_lhs = c("y1", "y2")</code>, calling <code>fixest</code> with, say <code>feols(.[my_lhs] ~ x1, etc)</code> is equivalent to using <code>feols(c(y1, y2) ~ x1, etc)</code>. Beware that this is a special feature unique to the <em>left-hand-side</em> of <code>fixest</code> estimations (the default behavior of the DSB operator is to aggregate with sums, see <code><a href='xpd.html'>xpd</a></code>).</p>
+<p>Second, you can use a regular expression to grep the left-hand-sides on the fly. When the <code>..("regex")</code> feature is used naked on the LHS, the variables grepped are inserted into <code><a href='https://rdrr.io/r/base/c.html'>c()</a></code>. For example <code>..("Pe") ~ Sepal.Length, iris</code> is equivalent to <code>c(Petal.Length, Petal.Width) ~ Sepal.Length, iris</code>. Beware that this is a special feature unique to the <em>left-hand-side</em> of <code>fixest</code> estimations (the default behavior of <code>..("regex")</code> is to aggregate with sums, see <code><a href='xpd.html'>xpd</a></code>).</p>
     <h2 class="hasAnchor" id="argument-sliding"><a class="anchor" href="#argument-sliding"></a>Argument sliding</h2>
 
     
 
 
-<p>When the data set has been set up globally using <code><a href='setFixest_estimation.html'>setFixest_estimation</a></code>(data = data_set), the argument <code>vcov</code> can be used implicitly. This means that calls such as <code>feols(y ~ x, "HC1")</code>, or <code>feols(y ~ x, ~id)</code>, are valid: i) the data is automatically deduced from the global settings, and ii) the <code>vcov</code> is deduced to be the second argument.</p>
+<p>When the data set has been set up globally using <code><a href='setFixest_estimation.html'>setFixest_estimation</a></code><code>(data = data_set)</code>, the argument <code>vcov</code> can be used implicitly. This means that calls such as <code>feols(y ~ x, "HC1")</code>, or <code>feols(y ~ x, ~id)</code>, are valid: i) the data is automatically deduced from the global settings, and ii) the <code>vcov</code> is deduced to be the second argument.</p>
     <h2 class="hasAnchor" id="piping"><a class="anchor" href="#piping"></a>Piping</h2>
 
     
@@ -459,9 +467,10 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 <p>Say you want to include the variables <code>x1</code> to <code>x3</code> in your formula. You can use <code><a href='xpd.html'>xpd(y ~ x.[1:3])</a></code> and you'll get <code>y ~ x1 + x2 + x3</code>.</p>
 <p>To summon values from the environment, simply put the variable in square brackets. For example: <code>for(i in 1:3) xpd(y.[i] ~ x)</code> will create the formulas <code>y1 ~ x</code> to <code>y3 ~ x</code> depending on the value of <code>i</code>.</p>
 <p>You can include a full variable from the environment in the same way: <code>for(y in c("a", "b")) xpd(.[y] ~ x)</code> will create the two formulas <code>a ~ x</code> and <code>b ~ x</code>.</p>
-<p>The DSB can even be used within variable names, but then the variable must be nested in character form. For example <code>y ~ .["x.[1:2]_sq"]</code> will create <code>y ~ x1_sq +  x2_sq</code>. Using the character form is important to avoid a formula parsing error.</p>
+<p>The DSB can even be used within variable names, but then the variable must be nested in character form. For example <code>y ~ .["x.[1:2]_sq"]</code> will create <code>y ~ x1_sq + x2_sq</code>. Using the character form is important to avoid a formula parsing error. Double quotes must be used. Note that the character string that is nested will be parsed with the function <code><a href='dsb.html'>dsb</a></code>, and thus it will return a vector.</p>
+<p>By default, the DSB operator expands vectors into sums. You can add a comma, like in <code>.[, x]</code>, to expand with commas--the content can then be used within functions. For instance: <code><a href='https://rdrr.io/r/base/c.html'>c(x.[, 1:2])</a></code> will create <code><a href='https://rdrr.io/r/base/c.html'>c(x1, x2)</a></code> (and <em>not</em> <code><a href='https://rdrr.io/r/base/c.html'>c(x1 + x2)</a></code>).</p>
 <p>In all <code>fixest</code> estimations, this special parsing is enabled, so you don't need to use <code>xpd</code>.</p>
-<p>Limitations: the use of multiple square brackets within a single variable is not implemented. For example, the following will not work <code>xpd(y ~ ..x, ..x = x.[1:3]_.[1:3])</code>.</p>
+<p>You can even use multiple square brackets within a single variable, but then the use of nesting is required. For example, the following <code><a href='xpd.html'>xpd(y ~ .[".[letters[1:2]]_.[1:2]"])</a></code> will create <code>y ~ a_1 + b_2</code>. Remember that the nested character string is parsed with <code><a href='dsb.html'>dsb</a></code>, which explains this behavior.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (<a href='https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13'>https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13</a>).</p>
@@ -716,7 +725,6 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res_iv</span>, <span class='va'>res_iv_fe</span>, <span class='va'>res_iv2</span>, stage <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span>, order <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"endo"</span>, <span class='st'>"inst"</span><span class='op'>)</span>,
        group <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>control <span class='op'>=</span> <span class='st'>"!endo|inst"</span><span class='op'>)</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                         res_iv.1      res_iv.2      res_iv_fe.1   res_iv_fe.2
-#&gt; IV stages                  First        Second            First        Second
 #&gt; Dependent Var.:          x_endo1             y          x_endo1             y
 #&gt;                                                                              
 #&gt; x_endo1                          4.157 (44.68)                  3.414 (15.83)
@@ -732,7 +740,6 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 #&gt; R2                       0.13993       -92.436          0.14157       -61.946
 #&gt; Within R2                     --            --          0.00829       -164.08
 #&gt;                        res_iv2.1         res_iv2.2        res_iv2.3
-#&gt; IV stages                  First             First           Second
 #&gt; Dependent Var.:          x_endo1           x_endo2                y
 #&gt;                                                                    
 #&gt; x_endo1                                              -1.912 (56.41)
@@ -1073,6 +1080,115 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 <span class='co'># Resetting the global options</span>
 <span class='fu'><a href='setFixest_estimation.html'>setFixest_estimation</a></span><span class='op'>(</span>data <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
 
+
+<span class='co'>#</span>
+<span class='co'># Formula expansions</span>
+<span class='co'>#</span>
+
+<span class='co'># By default, the features of the xpd function are enabled in</span>
+<span class='co'># all fixest estimations</span>
+<span class='co'># Here's a few examples</span>
+
+<span class='va'>base</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/setNames.html'>setNames</a></span><span class='op'>(</span><span class='va'>iris</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span><span class='op'>)</span>
+
+<span class='co'># dot square bracket operator</span>
+<span class='fu'>feols</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span>, <span class='va'>base</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
+#&gt; Observations: 150 
+#&gt; Standard-errors: IID 
+#&gt;              Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept)  1.855997   0.250777  7.40098 9.8539e-12 ***
+#&gt; x1           0.650837   0.066647  9.76538  &lt; 2.2e-16 ***
+#&gt; x2           0.709132   0.056719 12.50248  &lt; 2.2e-16 ***
+#&gt; x3          -0.556483   0.127548 -4.36293 2.4129e-05 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; RMSE: 0.310327   Adj. R2: 0.855706</div><div class='input'>
+<span class='co'># fetching variables via regular expressions: ..("regex")</span>
+<span class='fu'>feols</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fu'>..</span><span class='op'>(</span><span class='st'>"1|2"</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
+#&gt; Observations: 150 
+#&gt; Standard-errors: IID 
+#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept) 2.249140   0.247970  9.07022 7.0385e-16 ***
+#&gt; x1          0.595525   0.069328  8.58994 1.1633e-14 ***
+#&gt; x2          0.471920   0.017118 27.56916  &lt; 2.2e-16 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; RMSE: 0.329937   Adj. R2: 0.838003</div><div class='input'>
+<span class='co'># NOTA: it also works for multiple LHS</span>
+<span class='va'>mult1</span> <span class='op'>=</span> <span class='fu'>feols</span><span class='op'>(</span><span class='va'>x.</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span><span class='op'>]</span> <span class='op'>~</span> <span class='va'>y</span> <span class='op'>+</span> <span class='va'>species</span>, <span class='va'>base</span><span class='op'>)</span>
+<span class='va'>mult2</span> <span class='op'>=</span> <span class='fu'>feols</span><span class='op'>(</span><span class='fu'>..</span><span class='op'>(</span><span class='st'>"y|3"</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span><span class='op'>]</span> <span class='op'>+</span> <span class='va'>species</span>, <span class='va'>base</span><span class='op'>)</span>
+<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>mult1</span>, <span class='va'>mult2</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                            mult1[[1]]         mult1[[2]]          mult2[[1]]
+#&gt; Dependent Var.:                    x1                 x2                   y
+#&gt;                                                                             
+#&gt; (Intercept)         1.677*** (0.2354) -1.702*** (0.2301)   2.390*** (0.2623)
+#&gt; y                  0.3499*** (0.0463) 0.6321*** (0.0453)                    
+#&gt; speciesversicolor -0.9834*** (0.0721)  2.210*** (0.0705) -0.9558*** (0.2152)
+#&gt; speciesvirginica   -1.008*** (0.0933)  3.090*** (0.0912)  -1.394*** (0.2857)
+#&gt; x1                                                        0.4322*** (0.0814)
+#&gt; x2                                                        0.7756*** (0.0643)
+#&gt; _________________ ___________________ __________________ ___________________
+#&gt; S.E. type                         IID                IID                 IID
+#&gt; Observations                      150                150                 150
+#&gt; R2                            0.56925            0.97489             0.86331
+#&gt; Adj. R2                       0.56040            0.97438             0.85954
+#&gt;                            mult2[[2]]
+#&gt; Dependent Var.:                    x3
+#&gt;                                      
+#&gt; (Intercept)       -0.6953*** (0.1424)
+#&gt; y                                    
+#&gt; speciesversicolor  0.7369*** (0.1169)
+#&gt; speciesvirginica    1.176*** (0.1551)
+#&gt; x1                 0.2020*** (0.0442)
+#&gt; x2                 0.1701*** (0.0349)
+#&gt; _________________ ___________________
+#&gt; S.E. type                         IID
+#&gt; Observations                      150
+#&gt; R2                            0.95243
+#&gt; Adj. R2                       0.95112</div><div class='input'>
+
+<span class='co'># Use .[, stuff] to include variables in functions:</span>
+<span class='fu'>feols</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fu'><a href='stepwise.html'>csw</a></span><span class='op'>(</span><span class='va'>x.</span><span class='op'>[</span>, <span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; Standard-errors: IID 
+#&gt; Expl. vars.: x1
+#&gt;              Estimate Std. Error  t value  Pr(&gt;|t|)    
+#&gt; (Intercept)  6.526223   0.478896 13.62763 &lt; 2.2e-16 ***
+#&gt; x1          -0.223361   0.155081 -1.44029    0.1519    
+#&gt; ---
+#&gt; Expl. vars.: x1 + x2
+#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept) 2.249140   0.247970  9.07022 7.0385e-16 ***
+#&gt; x1          0.595525   0.069328  8.58994 1.1633e-14 ***
+#&gt; x2          0.471920   0.017118 27.56916  &lt; 2.2e-16 ***
+#&gt; ---
+#&gt; Expl. vars.: x1 + x2 + x3
+#&gt;              Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept)  1.855997   0.250777  7.40098 9.8539e-12 ***
+#&gt; x1           0.650837   0.066647  9.76538  &lt; 2.2e-16 ***
+#&gt; x2           0.709132   0.056719 12.50248  &lt; 2.2e-16 ***
+#&gt; x3          -0.556483   0.127548 -4.36293 2.4129e-05 ***</div><div class='input'>
+<span class='co'># Same for ..(, "regex")</span>
+<span class='fu'>feols</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fu'><a href='stepwise.html'>csw</a></span><span class='op'>(</span><span class='fu'>..</span><span class='op'>(</span>,<span class='st'>"x"</span><span class='op'>)</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; Standard-errors: IID 
+#&gt; Expl. vars.: x1
+#&gt;              Estimate Std. Error  t value  Pr(&gt;|t|)    
+#&gt; (Intercept)  6.526223   0.478896 13.62763 &lt; 2.2e-16 ***
+#&gt; x1          -0.223361   0.155081 -1.44029    0.1519    
+#&gt; ---
+#&gt; Expl. vars.: x1 + x2
+#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept) 2.249140   0.247970  9.07022 7.0385e-16 ***
+#&gt; x1          0.595525   0.069328  8.58994 1.1633e-14 ***
+#&gt; x2          0.471920   0.017118 27.56916  &lt; 2.2e-16 ***
+#&gt; ---
+#&gt; Expl. vars.: x1 + x2 + x3
+#&gt;              Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept)  1.855997   0.250777  7.40098 9.8539e-12 ***
+#&gt; x1           0.650837   0.066647  9.76538  &lt; 2.2e-16 ***
+#&gt; x2           0.709132   0.056719 12.50248  &lt; 2.2e-16 ***
+#&gt; x3          -0.556483   0.127548 -4.36293 2.4129e-05 ***</div><div class='input'>
 
 
 </div></pre>

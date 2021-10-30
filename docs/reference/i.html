@@ -164,15 +164,15 @@
     </tr>
     <tr>
       <th>bin</th>
-      <td><p>A list of values to be grouped, a vector, a formula, or the special values <code>"bin::digit"</code> or <code>"cut::values"</code>. To create a new value from old values, use <code>bin = list("new_value"=old_values)</code> with <code>old_values</code> a vector of existing values.
+      <td><p>A list of values to be grouped, a vector, a formula, or the special values <code>"bin::digit"</code> or <code>"cut::values"</code>. To create a new value from old values, use <code>bin = list("new_value"=old_values)</code> with <code>old_values</code> a vector of existing values. You can use <code>.()</code> for <code><a href='https://rdrr.io/r/base/list.html'>list()</a></code>.
 It accepts regular expressions, but they must start with an <code>"@"</code>, like in <code>bin="@Aug|Dec"</code>. It accepts one-sided formulas which must contain the variable <code>x</code>, e.g. <code>bin=list("&lt;2" = ~x &lt; 2)</code>.
-The names of the list are the new names. If the new name is missing, the first value matched becomes the new name.
+The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. In the name, adding <code>"@d"</code>, with <code>d</code> a digit, will relocate the value in position <code>d</code>: useful to change the position of factors. Use <code>"@"</code> as first item to make subsequent items be located first in the factor.
 Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value <code>"bin::digit"</code> to group every <code>digit</code> element.
 For example if <code>x</code> represents years, using <code>bin="bin::2"</code> creates bins of two years.
 With any data, using <code>"!bin::digit"</code> groups every digit consecutive values starting from the first value.
 Using <code>"!!bin::digit"</code> is the same but starting from the last value.
 With numeric vectors you can: a) use <code>"cut::n"</code> to cut the vector into <code>n</code> equal parts, b) use <code>"cut::a]b["</code> to create the following bins: <code>[min, a]</code>, <code>]a, b[</code>, <code>[b, max]</code>.
-The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. See details and examples. Dot square bracket expansion (see <code><a href='dsb.html'>dsb</a></code>) is enabled.</p></td>
+The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. You can add custom bin names by adding them in the character vector after <code>'cut::values'</code>. See details and examples. Dot square bracket expansion (see <code><a href='dsb.html'>dsb</a></code>) is enabled.</p></td>
     </tr>
     <tr>
       <th>ref2</th>
@@ -184,7 +184,7 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
     </tr>
     <tr>
       <th>bin2</th>
-      <td><p>A list or vector defining the binning of the second variable. See help for the argument <code>bin</code> for details (or look at the help of the function <code><a href='bin.html'>bin</a></code>).</p></td>
+      <td><p>A list or vector defining the binning of the second variable. See help for the argument <code>bin</code> for details (or look at the help of the function <code><a href='bin.html'>bin</a></code>). You can use <code>.()</code> for <code><a href='https://rdrr.io/r/base/list.html'>list()</a></code>.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -268,6 +268,33 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 #&gt; 8  d 4   0   0   0   0   0   0   0   0   0   1
 #&gt; 9  a 4   0   0   1   0   0   0   0   0   0   0
 #&gt; 10 b 4   0   0   0   0   0   1   0   0   0   0</div><div class='input'>
+<span class='co'># Binning</span>
+<span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='fu'>i</span><span class='op'>(</span><span class='va'>x</span>, bin <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>ab <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"a"</span>, <span class='st'>"b"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;    x ab c d
+#&gt; 1  a  1 0 0
+#&gt; 2  b  1 0 0
+#&gt; 3  c  0 1 0
+#&gt; 4  d  0 0 1
+#&gt; 5  a  1 0 0
+#&gt; 6  b  1 0 0
+#&gt; 7  c  0 1 0
+#&gt; 8  d  0 0 1
+#&gt; 9  a  1 0 0
+#&gt; 10 b  1 0 0</div><div class='input'>
+<span class='co'># Same as before but using .() for list() and a regular expression</span>
+<span class='co'># note that to trigger a regex, you need to use an @ first</span>
+<span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='fu'>i</span><span class='op'>(</span><span class='va'>x</span>, bin <span class='op'>=</span> <span class='fu'>.</span><span class='op'>(</span>ab <span class='op'>=</span> <span class='st'>"@a|b"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;    x ab c d
+#&gt; 1  a  1 0 0
+#&gt; 2  b  1 0 0
+#&gt; 3  c  0 1 0
+#&gt; 4  d  0 0 1
+#&gt; 5  a  1 0 0
+#&gt; 6  b  1 0 0
+#&gt; 7  c  0 1 0
+#&gt; 8  d  0 0 1
+#&gt; 9  a  1 0 0
+#&gt; 10 b  1 0 0</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># In fixest estimations</span>
 <span class='co'>#</span>

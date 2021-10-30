@@ -152,15 +152,15 @@
     </tr>
     <tr>
       <th>bin</th>
-      <td><p>A list of values to be grouped, a vector, a formula, or the special values <code>"bin::digit"</code> or <code>"cut::values"</code>. To create a new value from old values, use <code>bin = list("new_value"=old_values)</code> with <code>old_values</code> a vector of existing values.
+      <td><p>A list of values to be grouped, a vector, a formula, or the special values <code>"bin::digit"</code> or <code>"cut::values"</code>. To create a new value from old values, use <code>bin = list("new_value"=old_values)</code> with <code>old_values</code> a vector of existing values. You can use <code>.()</code> for <code><a href='https://rdrr.io/r/base/list.html'>list()</a></code>.
 It accepts regular expressions, but they must start with an <code>"@"</code>, like in <code>bin="@Aug|Dec"</code>. It accepts one-sided formulas which must contain the variable <code>x</code>, e.g. <code>bin=list("&lt;2" = ~x &lt; 2)</code>.
-The names of the list are the new names. If the new name is missing, the first value matched becomes the new name.
+The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. In the name, adding <code>"@d"</code>, with <code>d</code> a digit, will relocate the value in position <code>d</code>: useful to change the position of factors. Use <code>"@"</code> as first item to make subsequent items be located first in the factor.
 Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value <code>"bin::digit"</code> to group every <code>digit</code> element.
 For example if <code>x</code> represents years, using <code>bin="bin::2"</code> creates bins of two years.
 With any data, using <code>"!bin::digit"</code> groups every digit consecutive values starting from the first value.
 Using <code>"!!bin::digit"</code> is the same but starting from the last value.
 With numeric vectors you can: a) use <code>"cut::n"</code> to cut the vector into <code>n</code> equal parts, b) use <code>"cut::a]b["</code> to create the following bins: <code>[min, a]</code>, <code>]a, b[</code>, <code>[b, max]</code>.
-The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. See details and examples. Dot square bracket expansion (see <code><a href='dsb.html'>dsb</a></code>) is enabled.</p></td>
+The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. You can add custom bin names by adding them in the character vector after <code>'cut::values'</code>. See details and examples. Dot square bracket expansion (see <code><a href='dsb.html'>dsb</a></code>) is enabled.</p></td>
     </tr>
     </table>
 
@@ -177,6 +177,7 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <p>The user can specify custom bins with the following syntax: <code>"cut::a]b]c]"etc</code>. Here the numbers <code>a</code>, <code>b</code>, <code>c</code>, etc, are a sequence of increasing numbers, each followed by an open or closed square bracket. The numbers can be specified as either plain numbers (e.g. <code>"cut::5]12[32["</code>), quartiles (e.g. <code>"cut::q1]q3["</code>), or percentiles (e.g. <code>"cut::p10]p15]p90]"</code>). Values of different types can be mixed: <code>"cut::5]q2[p80["</code> is valid provided the median (<code>q2</code>) is indeed greater than <code>5</code>, otherwise an error is thrown.</p>
 <p>The square bracket right of each number tells whether the numbers should be included or excluded from the current bin. For example, say <code>x</code> ranges from 0 to 100, then <code>"cut::5]"</code> will create two  bins: one from 0 to 5 and a second from 6 to 100. With <code>"cut::5["</code> the bins would have been 0-4 and 5-100.</p>
 <p>A factor is returned. The labels report the min and max values in each bin.</p>
+<p>To have user-specified bin labels, just add them in the character vector following <code>'cut::values'</code>. You don't need to provide all of them, and <code>NA</code> values fall back to the default label. For example, <code>bin = c("cut::4", "Q1", NA, "Q3")</code> will modify only the first and third label that will be displayed as <code>"Q1"</code> and <code>"Q3"</code>.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
@@ -216,6 +217,11 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 </div><div class='output co'>#&gt; 
 #&gt;  5  6  8 
 #&gt; 31 61 61 </div><div class='input'>
+<span class='co'># Using .() for list():</span>
+<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_num</span>, <span class='fu'>.</span><span class='op'>(</span><span class='st'>"g1"</span> <span class='op'>=</span> <span class='fl'>5</span><span class='op'>:</span><span class='fl'>6</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; 
+#&gt; g1  7  8  9 
+#&gt; 61 31 31 30 </div><div class='input'>
 
 <span class='co'>#</span>
 <span class='co'># with non numeric data</span>
@@ -249,6 +255,16 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 </div><div class='output co'>#&gt; 
 #&gt;    may   june august 
 #&gt;     31     61     61 </div><div class='input'>
+<span class='co'># Relocating the months using "@d" in the name</span>
+<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_fact</span>, <span class='fu'>.</span><span class='op'>(</span><span class='st'>"@5"</span> <span class='op'>=</span> <span class='st'>"may"</span>, <span class='st'>"@1 summer"</span> <span class='op'>=</span> <span class='st'>"@aug|jul"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; 
+#&gt;    summer      june september       may 
+#&gt;        62        30        30        31 </div><div class='input'>
+<span class='co'># Putting "@" as first item means subsequent items will be placed first</span>
+<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_fact</span>, <span class='fu'>.</span><span class='op'>(</span><span class='st'>"@"</span>, <span class='st'>"aug"</span>, <span class='st'>"july"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; 
+#&gt;    august      july       may      june september 
+#&gt;        31        31        31        30        30 </div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># "Cutting" numeric data</span>
 <span class='co'>#</span>
@@ -288,6 +304,13 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 #&gt;         50         25         62         13 </div><div class='input'>
 <span class='co'># NOTA:</span>
 <span class='co'># -&gt; the labels always contain the min/max values in each bin</span>
+
+<span class='co'># Custom labels can be provided, just give them in the char. vector</span>
+<span class='co'># NA values lead to the default label</span>
+<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"cut::2[q2]p90]"</span>, <span class='st'>"&lt;2"</span>, <span class='st'>"]2; Q2]"</span>, <span class='cn'>NA</span>, <span class='st'>"&gt;90%"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; 
+#&gt;         &lt;2    ]2; Q2] [4.4; 5.8]       &gt;90% 
+#&gt;         50         25         62         13 </div><div class='input'>
 
 
 <span class='co'>#</span>

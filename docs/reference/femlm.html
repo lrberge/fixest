@@ -408,13 +408,21 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
     
 
 
-<p>When the data set has been set up globally using <code><a href='setFixest_estimation.html'>setFixest_estimation</a></code>(data = data_set), the argument <code>vcov</code> can be used implicitly. This means that calls such as <code><a href='feols.html'>feols(y ~ x, "HC1")</a></code>, or <code><a href='feols.html'>feols(y ~ x, ~id)</a></code>, are valid: i) the data is automatically deduced from the global settings, and ii) the <code>vcov</code> is deduced to be the second argument.</p>
+<p>When the data set has been set up globally using <code><a href='setFixest_estimation.html'>setFixest_estimation</a></code><code>(data = data_set)</code>, the argument <code>vcov</code> can be used implicitly. This means that calls such as <code><a href='feols.html'>feols(y ~ x, "HC1")</a></code>, or <code><a href='feols.html'>feols(y ~ x, ~id)</a></code>, are valid: i) the data is automatically deduced from the global settings, and ii) the <code>vcov</code> is deduced to be the second argument.</p>
     <h2 class="hasAnchor" id="piping"><a class="anchor" href="#piping"></a>Piping</h2>
 
     
 
 
 <p>Although the argument 'data' is placed in second position, the data can be piped to the estimation functions. For example, with R &gt;= 4.1, <code>mtcars |&gt; feols(mpg ~ cyl)</code> works as <code><a href='feols.html'>feols(mpg ~ cyl, mtcars)</a></code>.</p>
+    <h2 class="hasAnchor" id="tricks-to-estimate-multiple-lhs"><a class="anchor" href="#tricks-to-estimate-multiple-lhs"></a>Tricks to estimate multiple LHS</h2>
+
+    
+
+
+<p>To use multiple dependent variables in <code>fixest</code> estimations, you need to include them in a vector: like in <code><a href='https://rdrr.io/r/base/c.html'>c(y1, y2, y3)</a></code>.</p>
+<p>First, if names are stored in a vector, they can readily be inserted in a formula to perform multiple estimations using the dot square bracket operator. For instance if <code>my_lhs = c("y1", "y2")</code>, calling <code>fixest</code> with, say <code><a href='feols.html'>feols(.[my_lhs] ~ x1, etc)</a></code> is equivalent to using <code><a href='feols.html'>feols(c(y1, y2) ~ x1, etc)</a></code>. Beware that this is a special feature unique to the <em>left-hand-side</em> of <code>fixest</code> estimations (the default behavior of the DSB operator is to aggregate with sums, see <code><a href='xpd.html'>xpd</a></code>).</p>
+<p>Second, you can use a regular expression to grep the left-hand-sides on the fly. When the <code>..("regex")</code> feature is used naked on the LHS, the variables grepped are inserted into <code><a href='https://rdrr.io/r/base/c.html'>c()</a></code>. For example <code>..("Pe") ~ Sepal.Length, iris</code> is equivalent to <code>c(Petal.Length, Petal.Width) ~ Sepal.Length, iris</code>. Beware that this is a special feature unique to the <em>left-hand-side</em> of <code>fixest</code> estimations (the default behavior of <code>..("regex")</code> is to aggregate with sums, see <code><a href='xpd.html'>xpd</a></code>).</p>
     <h2 class="hasAnchor" id="dot-square-bracket-operator-in-formulas"><a class="anchor" href="#dot-square-bracket-operator-in-formulas"></a>Dot square bracket operator in formulas</h2>
 
     
@@ -424,9 +432,10 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 <p>Say you want to include the variables <code>x1</code> to <code>x3</code> in your formula. You can use <code><a href='xpd.html'>xpd(y ~ x.[1:3])</a></code> and you'll get <code>y ~ x1 + x2 + x3</code>.</p>
 <p>To summon values from the environment, simply put the variable in square brackets. For example: <code>for(i in 1:3) xpd(y.[i] ~ x)</code> will create the formulas <code>y1 ~ x</code> to <code>y3 ~ x</code> depending on the value of <code>i</code>.</p>
 <p>You can include a full variable from the environment in the same way: <code>for(y in c("a", "b")) xpd(.[y] ~ x)</code> will create the two formulas <code>a ~ x</code> and <code>b ~ x</code>.</p>
-<p>The DSB can even be used within variable names, but then the variable must be nested in character form. For example <code>y ~ .["x.[1:2]_sq"]</code> will create <code>y ~ x1_sq +  x2_sq</code>. Using the character form is important to avoid a formula parsing error.</p>
+<p>The DSB can even be used within variable names, but then the variable must be nested in character form. For example <code>y ~ .["x.[1:2]_sq"]</code> will create <code>y ~ x1_sq + x2_sq</code>. Using the character form is important to avoid a formula parsing error. Double quotes must be used. Note that the character string that is nested will be parsed with the function <code><a href='dsb.html'>dsb</a></code>, and thus it will return a vector.</p>
+<p>By default, the DSB operator expands vectors into sums. You can add a comma, like in <code>.[, x]</code>, to expand with commas--the content can then be used within functions. For instance: <code><a href='https://rdrr.io/r/base/c.html'>c(x.[, 1:2])</a></code> will create <code><a href='https://rdrr.io/r/base/c.html'>c(x1, x2)</a></code> (and <em>not</em> <code><a href='https://rdrr.io/r/base/c.html'>c(x1 + x2)</a></code>).</p>
 <p>In all <code>fixest</code> estimations, this special parsing is enabled, so you don't need to use <code>xpd</code>.</p>
-<p>Limitations: the use of multiple square brackets within a single variable is not implemented. For example, the following will not work <code>xpd(y ~ ..x, ..x = x.[1:3]_.[1:3])</code>.</p>
+<p>You can even use multiple square brackets within a single variable, but then the use of nesting is required. For example, the following <code><a href='xpd.html'>xpd(y ~ .[".[letters[1:2]]_.[1:2]"])</a></code> will create <code>y ~ a_1 + b_2</code>. Remember that the nested character string is parsed with <code><a href='dsb.html'>dsb</a></code>, which explains this behavior.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (<a href='https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13'>https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13</a>).</p>

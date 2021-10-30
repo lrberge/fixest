@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Sets/gets the number of threads to use in fixest functions — setFixest_nthreads • fixest</title>
+<title>Register extralines macros to be used in etable — extralines_register • fixest</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Sets/gets the number of threads to use in fixest functions — setFixest_nthreads" />
-<meta property="og:description" content="Sets/gets the default number of threads to used in fixest estimation functions. The default is the maximum number of threads minus two." />
+<meta property="og:title" content="Register extralines macros to be used in etable — extralines_register" />
+<meta property="og:description" content="This function is used to create extralines (which is an argument of etable) macros that can be easily summoned in etable." />
 
 
 
@@ -132,46 +132,79 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Sets/gets the number of threads to use in <code>fixest</code> functions</h1>
-    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/MiscFuns.R'><code>R/MiscFuns.R</code></a></small>
-    <div class="hidden name"><code>setFixest_nthreads.Rd</code></div>
+    <h1>Register <code>extralines</code> macros to be used in <code>etable</code></h1>
+    <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/etable.R'><code>R/etable.R</code></a></small>
+    <div class="hidden name"><code>extralines_register.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Sets/gets the default number of threads to used in <code>fixest</code> estimation functions. The default is the maximum number of threads minus two.</p>
+    <p>This function is used to create <code>extralines</code> (which is an argument of <code><a href='etable.html'>etable</a></code>) macros that can be easily summoned in <code><a href='etable.html'>etable</a></code>.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>setFixest_nthreads</span><span class='op'>(</span><span class='va'>nthreads</span>, save <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-
-<span class='fu'>getFixest_nthreads</span><span class='op'>(</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>extralines_register</span><span class='op'>(</span><span class='va'>type</span>, <span class='va'>fun</span>, <span class='va'>alias</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>nthreads</th>
-      <td><p>The number of threads. Can be: a) an integer lower than, or equal to, the maximum number of threads; b) 0: meaning all available threads will be used; c) a number strictly between 0 and 1 which represents the fraction of all threads to use. If missing, the default is to use 50% of all threads.</p></td>
+      <th>type</th>
+      <td><p>A character scalar giving the type-name.</p></td>
     </tr>
     <tr>
-      <th>save</th>
-      <td><p>Either a logical or equal to <code>"reset"</code>. Default is <code>FALSE</code>. If <code>TRUE</code> then the value is set permanently at the project level, this means that if you restart R, you will still obtain the previously saved defaults. This is done by writing in the <code>".Renviron"</code> file, located in the project's working directory, hence we must have write permission there for this to work, and only works with Rstudio. If equal to "reset", the default at the project level is erased. Since there is writing in a file involved, permission is asked to the user.</p></td>
+      <th>fun</th>
+      <td><p>A function to be applied to a <code>fixest</code> estimation. It must return a scalar.</p></td>
+    </tr>
+    <tr>
+      <th>alias</th>
+      <td><p>A character scalar. This is the alias to be used in lieu of the type name to form the row name.</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>Laurent Berge</p>
+    <p>You can register as many macros as you wish, the only constraint is that the type name should not conflict with a <code><a href='fitstat.html'>fitstat</a></code> type name.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='co'># Gets the current number of threads</span>
-<span class='fu'>getFixest_nthreads</span><span class='op'>(</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] 6</div><div class='input'>
-<span class='co'># To set multi-threading off:</span>
-<span class='fu'>setFixest_nthreads</span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>
 
-<span class='co'># To set it back to default:</span>
-<span class='fu'>setFixest_nthreads</span><span class='op'>(</span><span class='op'>)</span>
+<span class='co'># We register a function computing the standard-deviation of the dependent variable</span>
+<span class='va'>my_fun</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='fu'><a href='https://rdrr.io/r/stats/sd.html'>sd</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/model.matrix.html'>model.matrix</a></span><span class='op'>(</span><span class='va'>x</span>, type <span class='op'>=</span> <span class='st'>"lhs"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='fu'>extralines_register</span><span class='op'>(</span><span class='st'>"sdy"</span>, <span class='va'>my_fun</span>, <span class='st'>"SD(y)"</span><span class='op'>)</span>
+
+<span class='co'># An estimation</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>)</span>
+<span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Petal.Length</span> <span class='op'>~</span> <span class='va'>Sepal.Length</span> <span class='op'>|</span> <span class='va'>Species</span>, <span class='va'>iris</span><span class='op'>)</span>
+
+<span class='co'># Now we can easily create a row with the mean of y.</span>
+<span class='co'># We just "summon" it in a one-sided formula</span>
+<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est</span>, extralines <span class='op'>=</span> <span class='op'>~</span> <span class='va'>sdy</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                              est
+#&gt; Dependent Var.:     Petal.Length
+#&gt;                                 
+#&gt; Sepal.Length    0.6321* (0.1232)
+#&gt; SD(y)                      1.765
+#&gt; Fixed-Effects:  ----------------
+#&gt; Species                      Yes
+#&gt; _______________ ________________
+#&gt; S.E.: Clustered      by: Species
+#&gt; Observations                 150
+#&gt; R2                       0.97489
+#&gt; Within R2                0.57178</div><div class='input'>
+<span class='co'># We can change the alias on the fly:</span>
+<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est</span>, extralines <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"_Standard deviation of the dep. var."</span> <span class='op'>=</span> <span class='op'>~</span> <span class='va'>sdy</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                                                  est
+#&gt; Dependent Var.:                         Petal.Length
+#&gt;                                                     
+#&gt; Sepal.Length                        0.6321* (0.1232)
+#&gt; Fixed-Effects:                      ----------------
+#&gt; Species                                          Yes
+#&gt; _______________                     ________________
+#&gt; S.E.: Clustered                          by: Species
+#&gt; Observations                                     150
+#&gt; R2                                           0.97489
+#&gt; Within R2                                    0.57178
+#&gt; Standard deviation of the dep. var.            1.765</div><div class='input'>
+
 
 
 </div></pre>
