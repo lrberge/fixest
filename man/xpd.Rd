@@ -51,11 +51,11 @@ You can even use multiple square brackets within a single variable, but then the
 \section{Regular expressions}{
 
 
-You can catch several variable names at once by using regular expressions. To use regular expressions, you need to enclose it in the dot-dot function: \code{..("regex")}. For example, \code{..("Sepal")} will catch both the variables \code{Sepal.Length} and \code{Sepal.Width} from the \code{iris} data set. In a \code{fixest} estimation, the variables names from which the regex will be applied come from the data set. If you use \code{xpd}, you need to provide either a data set or a vector of names in the argument \code{data}.
+You can catch several variable names at once by using regular expressions. To use regular expressions, you need to enclose it in the dot-dot or the regex function: \code{..("regex")} or \code{regex("regex")}. For example, \code{regex("Sepal")} will catch both the variables \code{Sepal.Length} and \code{Sepal.Width} from the \code{iris} data set. In a \code{fixest} estimation, the variables names from which the regex will be applied come from the data set. If you use \code{xpd}, you need to provide either a data set or a vector of names in the argument \code{data}.
 
-By default the variables are aggregated with a sum. For example in a data set with the variables x1 to x10, \code{..("x(1|2)"} will yield \code{x1 + x2 + x10}. You can instead ask for "comma" aggregation by using a comma first, just before the regular expression: \code{y ~ sw(..(,"x(1|2)"))} would lead to \code{y ~ sw(x1, x2, x10)}.
+By default the variables are aggregated with a sum. For example in a data set with the variables x1 to x10, \code{regex("x(1|2)"} will yield \code{x1 + x2 + x10}. You can instead ask for "comma" aggregation by using a comma first, just before the regular expression: \code{y ~ sw(regex(,"x(1|2)"))} would lead to \code{y ~ sw(x1, x2, x10)}.
 
-Note that the dot square bracket operator (DSB, see before) is applied before the regular expression is evaluated. This means that \code{..("x.[3:4]_sq")} will lead, after evaluation of the DSB, to \code{..("x3_sq|x4_sq")}. It is a handy way to insert range of numbers in a regular expression.
+Note that the dot square bracket operator (DSB, see before) is applied before the regular expression is evaluated. This means that \code{regex("x.[3:4]_sq")} will lead, after evaluation of the DSB, to \code{regex("x3_sq|x4_sq")}. It is a handy way to insert range of numbers in a regular expression.
 }
 
 \examples{
@@ -122,25 +122,18 @@ data(longley)
 setFixest_fml(..many_vars = grep("GNP|ployed", names(longley), value = TRUE))
 feols(Armed.Forces ~ Population + ..many_vars, longley)
 
-# Example 2: using ..("regex") to grep the variables "live"
+# Example 2: using ..("regex") or regex("regex") to grep the variables "live"
 
 feols(Armed.Forces ~ Population + ..("GNP|ployed"), longley)
 
 # Example 3: same as Ex.2 but without using a fixest estimation
 
 # Here we need to use xpd():
-lm(xpd(Armed.Forces ~ Population + ..("GNP|ployed"), data = longley), longley)
+lm(xpd(Armed.Forces ~ Population + regex("GNP|ployed"), data = longley), longley)
 
-#
-# You can also put numbers in macros
-#
+# Stepwise estimation with regex: use a comma after the parenthesis
+feols(Armed.Forces ~ Population + sw(regex(,"GNP|ployed")), longley)
 
-res_all = list()
-for(p in 1:3){
-  res_all[[p]] = feols(xpd(Ozone ~ Wind + poly(Temp, ..p), ..p = p), airquality)
-}
-
-etable(res_all)
 
 #
 # lhs and rhs arguments
@@ -177,14 +170,44 @@ xpd(y ~ .["x.[vars]_sq"])
 
 # DSB can be used within regular expressions
 re = c("GNP", "Pop")
-xpd(Unemployed ~ ..(".[re]"), data = longley)
+xpd(Unemployed ~ regex(".[re]"), data = longley)
 
-# => equivalent to ..("GNP|Pop")
+# => equivalent to regex("GNP|Pop")
 
 # Use .[,var] (NOTE THE COMMA!) to expand with commas
 # !! can break the formula if missused
 vars = c("wage", "unemp")
 xpd(c(y.[,1:3]) ~ csw(.[,vars]))
+
+
+# Example of use of .[] within a loop
+res_all = list()
+for(p in 1:3){
+  res_all[[p]] = feols(Ozone ~ Wind + poly(Temp, .[p]), airquality)
+}
+
+etable(res_all)
+
+# The former can be compactly estimated with:
+res_compact = feols(Ozone ~ Wind + sw(.[, "poly(Temp, .[1:3])"]), airquality)
+
+etable(res_compact)
+
+# How does it work?
+# 1)  .[, stuff] evaluates stuff and, if a vector, aggregates it with commas
+#     Comma aggregation is done thanks to the comma placed after the square bracket
+#     If .[stuff], then aggregation is with sums.
+# 2) stuff is evaluated, and if it is a character string, it is evaluated with
+# the function dsb which expands values in .[]
+#
+# Wrapping up:
+# 2) evaluation of dsb("poly(Temp, .[1:3])") leads to the vector:
+#    c("poly(Temp, 1)", "poly(Temp, 2)", "poly(Temp, 3)")
+# 1) .[, c("poly(Temp, 1)", "poly(Temp, 2)", "poly(Temp, 3)")] leads to
+#    poly(Temp, 1), poly(Temp, 2), poly(Temp, 3)
+#
+# Hence sw(.[, "poly(Temp, .[1:3])"]) becomes:
+#       sw(poly(Temp, 1), poly(Temp, 2), poly(Temp, 3))
 
 
 }

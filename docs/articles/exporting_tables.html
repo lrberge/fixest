@@ -94,7 +94,7 @@
       <h1 data-toc-skip>Exporting estimation tables</h1>
                         <h4 class="author">Laurent Berge</h4>
             
-            <h4 class="date">2021-10-09</h4>
+            <h4 class="date">2021-10-30</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/exporting_tables.Rmd"><code>vignettes/exporting_tables.Rmd</code></a></small>
       <div class="hidden name"><code>exporting_tables.Rmd</code></div>
@@ -342,23 +342,24 @@
 <code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">est</span>, <span class="va">est_slopes</span>, heavy <span class="op">=</span> <span class="st">"0.14em"</span>, tex <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <pre><code>#&gt; \setlength\heavyrulewidth{0.14em}
 #&gt; \begin{tabular}{lccccc}
-#&gt; \toprule
-#&gt;  &amp; \multicolumn{5}{c}{Ozone (ppb)}\\
-#&gt;  &amp; (1) &amp; (2) &amp; (3) &amp; (4) &amp; (5)\\
-#&gt; \midrule Solar Radiation (Langleys) &amp; 0.115 &amp; 0.052 &amp; 0.108 &amp; 0.051 &amp; 0.056\\
-#&gt;   &amp; (0.023) &amp; (0.020) &amp; (0.033) &amp; (0.024) &amp; (0.023)\\
-#&gt; Wind Speed (mph) &amp;    &amp; -3.11 &amp;    &amp; -3.29 &amp; -3.05\\
-#&gt;   &amp;    &amp; (0.799) &amp;    &amp; (0.778) &amp; (0.822)\\
-#&gt; Temperature &amp;    &amp; 1.88 &amp;    &amp; 2.05 &amp;   \\
-#&gt;   &amp;    &amp; (0.367) &amp;    &amp; (0.242) &amp;   \\
-#&gt;   &amp;   &amp;   &amp;   &amp;   &amp;  \\
-#&gt; R$^2$ &amp; 0.31974 &amp; 0.63686 &amp; 0.58018 &amp; 0.81604 &amp; 0.82896\\
-#&gt; Observations &amp; 111 &amp; 111 &amp; 111 &amp; 111 &amp; 111\\
-#&gt;   &amp;   &amp;   &amp;   &amp;   &amp;  \\
-#&gt; Month fixed effects &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$\\
-#&gt; Day fixed effects &amp;  &amp;  &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$\\
-#&gt; Temperature $\times $ Month &amp;  &amp;  &amp;  &amp;  &amp; $\checkmark$\\
-#&gt; \bottomrule
+#&gt;    \toprule
+#&gt;     &amp; \multicolumn{5}{c}{Ozone (ppb)}\\
+#&gt;                                 &amp; (1)           &amp; (2)           &amp; (3)           &amp; (4)           &amp; (5)\\
+#&gt;    \midrule 
+#&gt;    Solar Radiation (Langleys)   &amp; 0.115         &amp; 0.052         &amp; 0.108         &amp; 0.051         &amp; 0.056\\
+#&gt;                                 &amp; (0.023)       &amp; (0.020)       &amp; (0.033)       &amp; (0.024)       &amp; (0.023)\\
+#&gt;    Wind Speed (mph)             &amp;               &amp; -3.11         &amp;               &amp; -3.29         &amp; -3.05\\
+#&gt;                                 &amp;               &amp; (0.799)       &amp;               &amp; (0.778)       &amp; (0.822)\\
+#&gt;    Temperature                  &amp;               &amp; 1.88          &amp;               &amp; 2.05          &amp;   \\
+#&gt;                                 &amp;               &amp; (0.367)       &amp;               &amp; (0.242)       &amp;   \\
+#&gt;                                 &amp;               &amp;               &amp;               &amp;               &amp;  \\
+#&gt;    R$^2$                        &amp; 0.31974       &amp; 0.63686       &amp; 0.58018       &amp; 0.81604       &amp; 0.82896\\
+#&gt;    Observations                 &amp; 111           &amp; 111           &amp; 111           &amp; 111           &amp; 111\\
+#&gt;                                 &amp;               &amp;               &amp;               &amp;               &amp;  \\
+#&gt;    Month fixed effects          &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$\\
+#&gt;    Day fixed effects            &amp;               &amp;               &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$\\
+#&gt;    Temperature $\times $ Month &amp;               &amp;               &amp;               &amp;               &amp; $\checkmark$\\
+#&gt;    \bottomrule
 #&gt; \end{tabular}</code></pre>
 </div>
 </div>
@@ -366,7 +367,7 @@
 <div id="setting-custom-fit-statistics" class="section level2">
 <h2 class="hasAnchor">
 <a href="#setting-custom-fit-statistics" class="anchor"></a>Setting custom fit statistics</h2>
-<p>It is often useful to include in a table some fit statistics that are not standard, or simply that may not be included in <code>fixest</code> built-in fit statistics. While it is possible to include any extra line in the table with the argument <code>extraline</code>, this is rather cumbersome and possibly error-prone if this task has to be repeated.</p>
+<p>It is often useful to include in a table some fit statistics that are not standard, or simply that may not be included in <code>fixest</code> built-in fit statistics. While it is possible to include any extra line in the table with the argument <code>extralines</code>, this is rather cumbersome and possibly error-prone if this task has to be repeated.</p>
 <p>To avoid that kind of issue, <code>fixest</code> allows the user to register custom fit statistics. Once they are registered, they can be seamlessly called via the <code>fitstat</code> argument in <code>etable</code>.</p>
 <p>Let’s continue with the previous example using the <code>airquality</code> data set, and now let’s display different p-values of statistical significance for the variable <code>Solar.R</code>. These p-values will vary depending on how we compute the VCOV matrix.</p>
 <p>Here is an example that will shortly be explained:</p>

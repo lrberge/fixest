@@ -736,17 +736,17 @@ All `fixest` estimations call `xpd` internally if appropriate. This means that t
 feols(y ~ x1 + ..ctrl, base)
 ```
 
-The function `xpd` also accepts regular expression macros of the form `..("regex")`. If these macros are encountered and provided a character vector/data.frame is in the argument `data`,  then all variables names matching the regular expression will be placed in the formula.
+The function `xpd` also accepts regular expression macros of the form `regex("regex")`. If these macros are encountered and provided a character vector/data.frame is in the argument `data`,  then all variables names matching the regular expression will be placed in the formula.
 
 ```{r}
 data(longley)
-xpd(Armed.Forces ~ Population + ..("GNP|ployed"), data = longley)
+xpd(Armed.Forces ~ Population + regex("GNP|ployed"), data = longley)
 ```
 
 Again, since `xpd` is called internally, the following works:
 
 ```{r}
-feols(Armed.Forces ~ Population + ..("GNP|ployed"), longley)
+feols(Armed.Forces ~ Population + regex("GNP|ployed"), longley)
 ```
 
 ### The dot square bracket operator
@@ -760,12 +760,26 @@ feols(y ~ x.[i] + .[z], base)
 ```
 What just happened? When `.[]` is encountered in a formula, its value is evaluated and inserted verbatim in the formula. Further, when the value in brackets is a vector, as many variables are added in the model. That's why `x.[i]` led to `x2 + x3`. Of course, numbers can be used directly: `x.[2:3]` would have led to the same result.
 
-Variable names in which `.[]` is in the middle of the name can also be created, but the use of macros is then mandatory:
+Variable names in which `.[]` is in the middle of the name can also be created, but it has to be nested:
 ```{r}
-i = 1:5
-xpd(y ~ ..x, ..x = "x.[i]_sq")
+i = 1:3
+xpd(y ~ .["x.[i]_sq"])
 ```
-The use of a character string is mandatory here to avoid formula parsing problems.
+
+How does it work? `.[stuff]` evaluates `stuff` and if stuff is a string literal, the function `dsb`, which expands anything in `.[]`, is applied. In the previous example, `dsb("x.[i]_sq")` leads to the vector `c("x1_sq", "x2_sq", "x3_sq")`. Then vector is then aggregated with a sum due to the initial `.[]`, leading to `x1_sq + x2_sq + x3_sq` being inserted in the formula.
+
+By default, when `stuff` is a vector, the aggregation is done with a sum. But in some instances, it can be interesting to aggregate with commas: e.g. when you want to perform a stepwise estimation. To summon comma-aggregation, place a comma right after the opening square bracket. Here's an example:
+
+```{r}
+etable(feols(y ~ csw(x.[, 1:3]), base))
+```
+
+Finally, there is a special shortcut to facilitate multiple estimations with variable names stored in a vector. If `vars` is a vector of variable names, just use `.[vars]` in the LHS to perform a multiple estimation:
+
+```{r}
+vars = c("x1", "x2", "x3") # Equiv. to: dsb("x.[1:3]")
+etable(feols(.[vars] ~ i(species), base))
+```
 
 
 ## Lagging variables

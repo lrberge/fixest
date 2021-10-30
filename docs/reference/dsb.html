@@ -148,19 +148,31 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>A character string, must be of length 1.</p></td>
+      <td><p>A character string, must be of length 1. Every expression inside <code>.[]</code> is evaluated in the current frame and then coerced to character and inserted into the character string. For example: <code>dsb("hello .[name]")</code> is equivalent to <code><a href='https://rdrr.io/r/base/paste.html'>paste0("hello ", name)</a></code>. You can add a string literal as first or last element in the <code>.[]</code>. Doing so will collapse the expression. If first, as in <code>.['text', expr]</code>, the expression is first collapsed: <code><a href='https://rdrr.io/r/base/paste.html'>paste0(expr, collapse = "text")</a></code> is applied. If last, as in <code>"before.[expr, 'text']"</code>, the expression is collapsed to the previous adjacent text: <code><a href='https://rdrr.io/r/base/paste.html'>paste0("before", expr, collapse = "text")</a></code> is applied. The collapsing is always done with the previous text only. To collapse the whole string, use the argument `collapse`.</p></td>
     </tr>
     <tr>
       <th>collapse</th>
       <td><p>If the variables inserted into the string are of length greater than 1, you can merge into a single string with <code>collapse</code>.</p>
-<p>Every expression inside <code>.[]</code> is evaluated in the current frame and then coerced to character and inserted into the character string.</p>
-<p>If the expression inside <code>.[]</code> is a vector, then the result will be a vector except the argument <code>collapse</code> is used.</p></td>
+<p>Every expression inside <code>.[]</code> is evaluated in the current frame and then coerced to character and inserted into the character string.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A character vector. It is of length &gt; 1 only if the variables inserted are of length &gt; 1.</p>
+    <h2 class="hasAnchor" id="collapsing"><a class="anchor" href="#collapsing"></a>Collapsing</h2>
+
+    
+
+
+<p>If the expression inside <code>.[]</code> is a vector, a vector will be returned, except when we explicitly request the character string to be "collapsed". There are three main ways to do the collapsing that we detail below. Throughout, consider that the variable <code>name</code> is equal to <code>name = c("Romeo", "Juliet")</code> and the example <code>dsb("hello .[name], what's up?")</code>.</p>
+
+<ul>
+<li><p>full collapse:The argument <code>collapse</code> is used. All the string elements are attached. For example <code>dsb("hello .[name], what's up?", collapse = " And... ")</code> leads to <code>"hello Romeo, what's up? And... hello Juliet, what's up?"</code>.</p></li>
+<li><p>expression-collapse:There is a string literal in the first position of <code>.[]</code>. In that case the expression in brackets is first collapsed before being merged. For example in <code>dsb("hello .[' and ', name], what's up?")</code> leads to <code>"hello Romeo and Juliet, what's up?"</code>. If you add a comma but omit the string literal, the default is to collapse with a space: <code>.[,expr]</code> is equivalent to <code>.[" ", expr]</code>.</p></li>
+<li><p>text-expression-collapse:There is a string literal in the second position of <code>.[]</code>. In that case the expression in brackets is collapsed to the adjacent string on the left. For example in <code>dsb("hello .[name, ' and '], what's up?")</code> leads to <code>"hello Romeo and hello Juliet, what's up?"</code>. If you add a comma but omit the string literal, the default is to collapse with a space: <code>.[expr,]</code> is equivalent to <code>.[expr, " "]</code>.</p></li>
+</ul>
+
     <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
 
     <p>Laurent Berge</p>
@@ -174,7 +186,7 @@
 <span class='va'>loc</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span><span class='op'>(</span><span class='va'>loc_all</span>, <span class='fl'>1</span><span class='op'>)</span>
 
 <span class='fu'>dsb</span><span class='op'>(</span><span class='st'>"Where is .[guy]? .[guy] is in the .[loc]."</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in dsb("Where is .[guy]? .[guy] is in the .[loc]."): could not find function "dsb"</span></div><div class='input'>
+</div><div class='output co'>#&gt; [1] "Where is Jenny? Jenny is in the kitchen."</div><div class='input'>
 <span class='co'># Since the stuff in brackets is evaluated in the current frame,</span>
 <span class='co'># you can do things like:</span>
 
@@ -182,8 +194,29 @@
 <span class='va'>loc_gen</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='op'>)</span> <span class='fu'><a href='https://rdrr.io/r/base/sample.html'>sample</a></span><span class='op'>(</span><span class='va'>loc_all</span>, <span class='fl'>1</span><span class='op'>)</span>
 
 <span class='fu'>dsb</span><span class='op'>(</span><span class='st'>"Where is .[g &lt;- guy_gen()]? .[g] is in the .[loc_gen()]."</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='error'>Error in dsb("Where is .[g &lt;- guy_gen()]? .[g] is in the .[loc_gen()]."): could not find function "dsb"</span></div><div class='input'>
+</div><div class='output co'>#&gt; [1] "Where is Jenny? Jenny is in the kitchen."</div><div class='input'>
 
+<span class='co'>#</span>
+<span class='co'># Collapsing options</span>
+<span class='co'>#</span>
+
+<span class='va'>name</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Romeo"</span>, <span class='st'>"Juliet"</span><span class='op'>)</span>
+
+<span class='co'># full collapse with argument collapse</span>
+<span class='fu'>dsb</span><span class='op'>(</span><span class='st'>"hello .[name], what's up?"</span>, collapse <span class='op'>=</span> <span class='st'>" and "</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; [1] "hello Romeo, what's up? and hello Juliet, what's up?"</div><div class='input'>
+<span class='co'># collapse the expression by adding a string literal</span>
+<span class='co'># in the *first* position of .[]</span>
+<span class='fu'>dsb</span><span class='op'>(</span><span class='st'>"hello .[' and ', name], what's up?"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; [1] "hello Romeo and Juliet, what's up?"</div><div class='input'>
+<span class='co'># collapsing the epression with the previous string</span>
+<span class='co'># using a string literal in the *second* position</span>
+<span class='fu'>dsb</span><span class='op'>(</span><span class='st'>"hello .[name, ' and '], what's up?"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; [1] "hello Romeo and hello Juliet, what's up?"</div><div class='input'>
+<span class='co'># The elements can also be empty, leading to collapse with a " "</span>
+<span class='fu'>dsb</span><span class='op'>(</span><span class='st'>"hello .[, name], what's up?"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; [1] "hello Romeo Juliet, what's up?"</div><div class='input'><span class='fu'>dsb</span><span class='op'>(</span><span class='st'>"hello .[name, ], what's up?"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; [1] "hello Romeo hello Juliet, what's up?"</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

@@ -21,7 +21,7 @@ reference:
         - iplot
         - style.df
         - style.tex
-        - extraline_register
+        - extralines_register
     - title: Handling results, single
       desc: Extracts values from single estimations
       contents:

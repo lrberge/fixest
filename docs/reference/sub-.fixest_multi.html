@@ -210,7 +210,6 @@
 <span class='co'># By default: sample is the root</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_split</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                          model 1          model 2          model 3
-#&gt; Sample (Month)                 5                5                5
 #&gt; Dependent Var.:            Ozone            Ozone          Solar.R
 #&gt;                                                                   
 #&gt; (Intercept)     26.06*** (4.090) 41.22*** (6.910) 182.7*** (23.38)
@@ -224,7 +223,6 @@
 #&gt; R2                       0.23366          0.36534          0.07374
 #&gt; Adj. R2                  0.16702          0.31015         -0.00345
 #&gt;                          model 4        model 5         model 6
-#&gt; Sample (Month)                 5              6               6
 #&gt; Dependent Var.:          Solar.R          Ozone           Ozone
 #&gt;                                                                
 #&gt; (Intercept)     191.6*** (37.62) 25.43* (7.310) 30.73** (6.188)
@@ -238,7 +236,6 @@
 #&gt; R2                       0.27498        0.18587         0.73781
 #&gt; Adj. R2                  0.21456       -0.08550         0.65041
 #&gt;                          model 7          model 8
-#&gt; Sample (Month)                 6                6
 #&gt; Dependent Var.:          Solar.R          Solar.R
 #&gt;                                                  
 #&gt; (Intercept)     196.5*** (16.70) 161.7*** (37.25)
@@ -254,7 +251,6 @@
 <span class='co'># Let's reorder, by considering lhs the root</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_split</span><span class='op'>[</span>lhs <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='va'>.N</span><span class='op'>]</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                          model 1          model 2        model 3
-#&gt; Sample (Month)                 5                5              6
 #&gt; Dependent Var.:            Ozone            Ozone          Ozone
 #&gt;                                                                 
 #&gt; (Intercept)     26.06*** (4.090) 41.22*** (6.910) 25.43* (7.310)
@@ -268,7 +264,6 @@
 #&gt; R2                       0.23366          0.36534        0.18587
 #&gt; Adj. R2                  0.16702          0.31015       -0.08550
 #&gt;                         model 4          model 5          model 6
-#&gt; Sample (Month)                6                5                5
 #&gt; Dependent Var.:           Ozone          Solar.R          Solar.R
 #&gt;                                                                  
 #&gt; (Intercept)     30.73** (6.188) 182.7*** (23.38) 191.6*** (37.62)
@@ -282,7 +277,6 @@
 #&gt; R2                      0.73781          0.07374          0.27498
 #&gt; Adj. R2                 0.65041         -0.00345          0.21456
 #&gt;                          model 7          model 8
-#&gt; Sample (Month)                 6                6
 #&gt; Dependent Var.:          Solar.R          Solar.R
 #&gt;                                                  
 #&gt; (Intercept)     196.5*** (16.70) 161.7*** (37.25)
@@ -298,7 +292,6 @@
 <span class='co'># Selecting only one LHS and RHS</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_split</span><span class='op'>[</span>lhs <span class='op'>=</span> <span class='st'>"Ozone"</span>, rhs <span class='op'>=</span> <span class='fl'>1</span><span class='op'>]</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                          model 1        model 2
-#&gt; Sample (Month)                 5              6
 #&gt; Dependent Var.:            Ozone          Ozone
 #&gt;                                                
 #&gt; (Intercept)     26.06*** (4.090) 25.43* (7.310)
@@ -312,7 +305,6 @@
 <span class='co'># Taking the first root (here sample = 5)</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_split</span><span class='op'>[</span>I <span class='op'>=</span> <span class='fl'>1</span><span class='op'>]</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                          model 1          model 2          model 3
-#&gt; Sample (Month)                 5                5                5
 #&gt; Dependent Var.:            Ozone            Ozone          Solar.R
 #&gt;                                                                   
 #&gt; (Intercept)     26.06*** (4.090) 41.22*** (6.910) 182.7*** (23.38)
@@ -326,7 +318,6 @@
 #&gt; R2                       0.23366          0.36534          0.07374
 #&gt; Adj. R2                  0.16702          0.31015         -0.00345
 #&gt;                          model 4
-#&gt; Sample (Month)                 5
 #&gt; Dependent Var.:          Solar.R
 #&gt;                                 
 #&gt; (Intercept)     191.6*** (37.62)
