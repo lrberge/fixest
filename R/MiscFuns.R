@@ -11466,6 +11466,10 @@ initialize_startup_msg = function(startup_msg){
         return(FALSE)
     }
 
+    if(is.null(find_project_path())){
+        return(FALSE)
+    }
+
     # message("getting version")
 
     previous_version = config_get("fixest_version")
