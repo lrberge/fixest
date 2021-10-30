@@ -4421,7 +4421,7 @@ summary.fixest_check_conv = function(object, type = "short", ...){
 #'
 #' This utility tool displays the number of unique elements in one or multiple data.frames as well as their number of NA values.
 #'
-#' @param x A formula, with data set names on the LHS and variables on the RHS, like \code{data1 + data2 ~ var1 + var2}. The following special variables are admitted: \code{"."} to get default values, \code{".N"} for the number of observations, \code{".U"} for the number of unique rows, \code{".NA"} for the number of rows with at least one NA. Variables can be combined with \code{"^"}, e.g. \code{df~id^period}; use \code{id\%^\%period} to also include the terms on both sides. Note that using \code{:} and \code{*} is equivalent to \code{^} and \code{%^%}. Sub select with \code{id[cond]}, when doing so \code{id} is automatically included. Conditions can be chained, as in \code{id[cond1, cond2]}. Use \code{NA(x, y)} in conditions instead of \code{is.na(x) | is.na(y)}. Use the \code{!!} operator to have both a condition and its opposite. To compare the keys in two data sets, use \code{data1:data2}. If not a formula, \code{x} can be: a vector (displays the # of unique values); a \code{data.frame} (default values are displayed), or a "sum" of data sets like in \code{x = data1 + data2}, in that case it is equivalent to \code{data1 + data2 ~ .}.
+#' @param x A formula, with data set names on the LHS and variables on the RHS, like \code{data1 + data2 ~ var1 + var2}. The following special variables are admitted: \code{"."} to get default values, \code{".N"} for the number of observations, \code{".U"} for the number of unique rows, \code{".NA"} for the number of rows with at least one NA. Variables can be combined with \code{"^"}, e.g. \code{df~id^period}; use \code{id\%^\%period} to also include the terms on both sides. Note that using \code{:} and \code{*} is equivalent to \code{^} and \code{\%^\%}. Sub select with \code{id[cond]}, when doing so \code{id} is automatically included. Conditions can be chained, as in \code{id[cond1, cond2]}. Use \code{NA(x, y)} in conditions instead of \code{is.na(x) | is.na(y)}. Use the \code{!!} operator to have both a condition and its opposite. To compare the keys in two data sets, use \code{data1:data2}. If not a formula, \code{x} can be: a vector (displays the # of unique values); a \code{data.frame} (default values are displayed), or a "sum" of data sets like in \code{x = data1 + data2}, in that case it is equivalent to \code{data1 + data2 ~ .}.
 #'
 #' @section Special values and functions:
 #'
@@ -4449,7 +4449,7 @@ summary.fixest_check_conv = function(object, type = "short", ...){
 #'
 #' Use the "super hat", \code{"\%^\%"}, operator to also include the terms on both sides. For example, instead of writing \code{id + period + id^period}, you can simply write \code{id\%^\%period}.
 #'
-#' Alternatively, you can use \code{:} for \code{^} and \code{*} for \code{%^%}.
+#' Alternatively, you can use \code{:} for \code{^} and \code{*} for \code{\%^\%}.
 #'
 #' @section Sub-selections:
 #'
@@ -4479,6 +4479,7 @@ summary.fixest_check_conv = function(object, type = "short", ...){
 #' n_unik(data ~.N + id + id^period)
 #'
 #' # use the %^% operator to include the terms on the two sides at once
+#' # => same as id*period
 #' n_unik(data ~.N + id %^% period)
 #'
 #' # using sub selection with []
@@ -4498,6 +4499,9 @@ summary.fixest_check_conv = function(object, type = "short", ...){
 #' # the !! operator works within condition chains
 #' n_unik(data ~.N[!!NA(x1.L1) & !!x1 > 7])
 #'
+#' # Conditions can be distributed
+#' n_unik(data ~ (id + period)[x1 > 7])
+#'
 #' #
 #' # Several data sets
 #' #
@@ -4508,21 +4512,18 @@ summary.fixest_check_conv = function(object, type = "short", ...){
 #' data(base_did)
 #' base_main = base_did
 #' base_extra = sample_df(base_main[, c("id", "period")], 100)
+#' base_extra$id[1:10] = 111:120
+#' base_extra$period[11:20] = 11:20
 #' base_extra$z = rnorm(100)
 #'
+#' # You can use db1:db2 to compare the common keys in two data sets
+#'  n_unik(base_main:base_extra)
+#'
 #' tmp = merge(base_main, base_extra, all.x = TRUE, by = c("id", "period"))
-#'
-#' # default values are used when not a formula
-#' n_unik(tmp + base_main + base_extra)
-#'
-#' # it's like n_unik(tmp + base_main + base_extra ~ .)
-#' # "." accesses the default, which is the variables common across all data sets
 #'
 #' # You can show unique values for any variable, as before
 #' n_unik(tmp + base_main + base_extra ~ id[!!NA(z)] + id^period)
 #'
-#' # Comapring the keys in the two data sets
-#' n_unik(base_main:base_extra ~ id + period + id^period)
 #'
 #'
 n_unik = function(x){
@@ -4654,6 +4655,10 @@ n_unik = function(x){
             if(length(x_names_current) %in% 1:4){
                 # No more than 4 common variables by default
                 x_common_vars = x_names_current
+
+                if(length(comp_pairs) > 0 && length(x_names_current) <= 3){
+                    x_common_vars = paste0(x_names_current, collapse = "*")
+                }
 
             } else if(n_x > 2){
                 # Common to at least 2 data sets
@@ -4973,8 +4978,37 @@ n_unik = function(x){
                 next
 
             } else {
-                val_x = eval(vf_call, x_list)
-                val_y = eval(vf_call, y_list)
+
+                if(grepl("to_integer", vf, fixed = TRUE)){
+                    # specific scheme for combinations
+
+                    if(grepl("NA_fun()", vf, fixed = TRUE)){
+                        # we don't allow that
+                        next
+                    }
+
+                    vars_keep = all.vars(vf_call)
+
+                    xy_list = list()
+                    for(v in vars_keep){
+                        xy_list[[v]] = c(x_list[[v]], y_list[[v]])
+                    }
+
+                    xy_list[["NA_fun"]] = function(...) NA_fun(..., df = stop("Internal error."))
+
+
+                    val_xy = eval(vf_call, xy_list)
+
+                    nrow_x = length(x_list[[1]])
+                    nrow_y = length(y_list[[1]])
+                    val_x = val_xy[1:nrow_x]
+                    val_y = val_xy[(nrow_x + 1):(nrow_x + nrow_y)]
+
+                } else {
+                    val_x = eval(vf_call, x_list)
+                    val_y = eval(vf_call, y_list)
+                }
+
 
                 if(anyNA(val_x)){
                     val_x = val_x[!is.na(val_x)]
@@ -5022,6 +5056,8 @@ n_unik = function(x){
 #' @rdname n_unik
 print.vec_n_unik = function(x, ...){
 
+    hash = "## "
+
     x_names = sfill(names(x))
     na.info = attr(x, "na.info")
     na.info_format = sfill(fsignif(na.info))
@@ -5031,12 +5067,17 @@ print.vec_n_unik = function(x, ...){
     na_col = paste0("(# NAs: ", na.info_format, ")")
     na_col[na.info == 0] = ""
 
-    res = paste0("#> ", x_names, ": ", x_value, " ", na_col)
+    res = paste0(hash, x_names, ": ", x_value, " ", na_col)
     cat(res, sep = "\n")
 }
 
 #' @rdname n_unik
 print.list_n_unik = function(x, ...){
+
+
+    # I can't use #> anymore!!! The auto complete by the new version
+    # of Rstudio drives me nuts!!!
+    hash = "## "
 
     x_all = x
     n_x = length(x_all)
@@ -5094,11 +5135,11 @@ print.list_n_unik = function(x, ...){
         var_width = nchar(x_names[1])
     }
 
-    var_col = paste0("#> ", x_names, ":")
-    na_intro = paste0("#> ", sfill(" ", var_width), "|NAs:")
+    var_col = paste0(hash, x_names, ":")
+    na_intro = paste0(hash, sfill(" ", var_width), "|NAs:")
     var_col = insert_in_between(var_col, na_intro)
     # we add the first row of the data sets names + format
-    var_col = sfill(c("#> ", var_col), right = TRUE)
+    var_col = sfill(c(hash, var_col), right = TRUE)
 
     print_mat = var_col
 
@@ -5169,9 +5210,10 @@ print.list_n_unik = function(x, ...){
             data_id = attr(pair, "data_id")
 
             if(n_x == 2){
-                data_col = paste0("#> ", sfill(" ", var_width, right = TRUE), "|Excl:")
+                # data_col = paste0(hash, sfill(" ", var_width, right = TRUE), "|Excl:")
+                data_col = paste0(hash, sfill("# Exclusive ", var_width, right = TRUE), "|")
             } else {
-                data_col = paste0("#> ", sfill("Exclusive ", var_width, right = TRUE),
+                data_col = paste0(hash, sfill("# Exclusive ", var_width, right = TRUE),
                                   "|", paste0(letters[data_id], collapse = ":"))
             }
 
@@ -5196,7 +5238,7 @@ print.list_n_unik = function(x, ...){
         common = print_mat[, n_x + 2]
         is_num = grepl("\\d", common)
         common[is_num] = sfill(fsignif(as.numeric(common[is_num])))
-        common[is_num] = paste0("Common: ", common[is_num])
+        common[is_num] = paste0("# Common: ", common[is_num])
         print_mat[, n_x + 2] = common
     }
 
@@ -5506,7 +5548,8 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
             # taking care of the empty commas
             x_txt = sub("(^(?=,)|(?<=,)$)", "' '", trimws(x_split[i]), perl = TRUE)
             x_txt = paste0("dsb_check_set_agg(", x_txt, ")")
-            info_agg = error_sender(eval(str2lang(x_txt), frame),
+            my_list = list(dsb_check_set_agg = dsb_check_set_agg)
+            info_agg = error_sender(eval(str2lang(x_txt), my_list, frame),
                                     "Dot square bracket operator: Evaluation of '.[",
                                     x_split[i], "]' led to an error:",
                                     up = up + 1)
@@ -8795,10 +8838,9 @@ eval_dot = function(x, up = 1){
     sysOrigin = sys.parent(up)
     mc = match.call(sys.function(sysOrigin), sys.call(sysOrigin))
 
-    env = new.env(parent = parent.frame(up))
-    assign(".", list, env)
+    my_list = list("." = list)
 
-    eval(mc[[x_dp]], env)
+    eval(mc[[x_dp]], my_list, parent.frame(up + 1))
 }
 
 
@@ -11262,16 +11304,23 @@ initialize_startup_msg = function(startup_msg){
     # Note that we must return the value of 'fixest_startup_msg' since these are
     # updated only at session restart (and hence are not directly accessible)
 
+    # message("fixest_startup_msg")
+
     if(getRversion() < "4.0.0"){
         # No startup message for version < 4.0
         # because there's no way to monitor the messages
         return(FALSE)
     }
 
+    # message("getting version")
+
     previous_version = config_get("fixest_version")
+
+    # message("version is ", previous_version)
 
     if(is.null(previous_version)){
         # compatibility with previous versions
+        # message("trying to get version from renviron")
         previous_version = renvir_get("fixest_version")
     }
 
@@ -11279,7 +11328,10 @@ initialize_startup_msg = function(startup_msg){
 
     if(is.null(previous_version)){
         # We first update the version
+        # message("updating the version")
         config_update("fixest_version", current_version)
+
+        # message("Is fixest used? ", is_fixest_used())
 
         # Is it a new project? Or was fixest simply never used before?
         if(is_fixest_used()){
@@ -11295,6 +11347,8 @@ initialize_startup_msg = function(startup_msg){
             config_update("fixest_startup_msg", FALSE)
             return(FALSE)
         }
+
+        # message("updating done ")
 
     } else if(!identical(previous_version, current_version)){
 
@@ -11361,9 +11415,9 @@ fixest_version = function(){
 is_fixest_used = function(){
     # To return TRUE:
     # - fixest in the files
-    # - + file saved > 48H
+    # - + file saved > 7 days
     #
-    # - if fixest but file saved > 48H, very likely a new project
+    # - if fixest but file saved > 7 days, very likely a new project
 
     # Only level 1 recursivity
     files = list.files(pattern = "\\.(r|R)$")
@@ -11388,7 +11442,7 @@ is_fixest_used = function(){
     for(f in fixest_files){
         f_created = file.mtime(f)
         d = as.numeric(difftime(now, f_created, units = "days"))
-        if(d > 2){
+        if(d > 7){
             return(TRUE)
         }
     }
@@ -11578,8 +11632,9 @@ config_update = function(key, value){
     }
 
     if(!proj %in% data$proj){
-        row = data[1, , drop = FALSE] * NA_character_
-        row[1] = proj
+        row = data[1, , drop = FALSE]
+        for(i in 1:ncol(row)) row[1, i] = NA
+        row[1, 1] = proj
         data = rbind(data, row)
     }
 
