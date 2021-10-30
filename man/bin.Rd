@@ -11,13 +11,13 @@ bin(x, bin)
 
 \item{bin}{A list of values to be grouped, a vector, a formula, or the special values \code{"bin::digit"} or \code{"cut::values"}. To create a new value from old values, use \code{bin = list("new_value"=old_values)} with \code{old_values} a vector of existing values. You can use \code{.()} for \code{list()}.
 It accepts regular expressions, but they must start with an \code{"@"}, like in \code{bin="@Aug|Dec"}. It accepts one-sided formulas which must contain the variable \code{x}, e.g. \code{bin=list("<2" = ~x < 2)}.
-The names of the list are the new names. If the new name is missing, the first value matched becomes the new name.
+The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. In the name, adding \code{"@d"}, with \code{d} a digit, will relocate the value in position \code{d}: useful to change the position of factors.
 Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value \code{"bin::digit"} to group every \code{digit} element.
 For example if \code{x} represents years, using \code{bin="bin::2"} creates bins of two years.
 With any data, using \code{"!bin::digit"} groups every digit consecutive values starting from the first value.
 Using \code{"!!bin::digit"} is the same but starting from the last value.
 With numeric vectors you can: a) use \code{"cut::n"} to cut the vector into \code{n} equal parts, b) use \code{"cut::a]b["} to create the following bins: \code{[min, a]}, \code{]a, b[}, \code{[b, max]}.
-The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. See details and examples. Dot square bracket expansion (see \code{\link[fixest]{dsb}}) is enabled.}
+The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. You can add custom bin names by adding them in the character vector after \code{'cut::values'}. See details and examples. Dot square bracket expansion (see \code{\link[fixest]{dsb}}) is enabled.}
 }
 \value{
 It returns a vector of the same length as \code{x}
@@ -37,6 +37,8 @@ The user can specify custom bins with the following syntax: \code{"cut::a]b]c]"e
 The square bracket right of each number tells whether the numbers should be included or excluded from the current bin. For example, say \code{x} ranges from 0 to 100, then \code{"cut::5]"} will create two  bins: one from 0 to 5 and a second from 6 to 100. With \code{"cut::5["} the bins would have been 0-4 and 5-100.
 
 A factor is returned. The labels report the min and max values in each bin.
+
+To have user-specified bin labels, just add them in the character vector following \code{'cut::values'}. You don't need to provide all of them, and NA values fall back to the default label. For example, \code{bin = c("cut::4", "Q1", NA, "Q3")} will modify only the first and third label that will be displayed as \code{"Q1"} and \code{"Q3"}.
 }
 
 \examples{
@@ -89,6 +91,9 @@ table(bin(month_fact, "!bin::2"))
 # ...idem but starting from the last
 table(bin(month_fact, "!!bin::2"))
 
+# Relocating the months using "@" in the name
+table(bin(month_fact, .("@5" = "may", "@1 summer" = "@aug|jul")))
+
 #
 # "Cutting" numeric data
 #
@@ -116,6 +121,11 @@ table(bin(plen, "cut::2[q2]p90]"))
 
 # NOTA:
 # -> the labels always contain the min/max values in each bin
+
+# Custom labels can be provided, just give them in the char. vector
+# NA values lead to the default label
+table(bin(plen, c("cut::2[q2]p90]", "<2", "]2; Q2]", NA, ">90\%")))
+
 
 
 #

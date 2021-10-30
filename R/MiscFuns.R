@@ -2872,13 +2872,13 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #' @param x A vector whose values have to be grouped. Can be of any type but must be atomic.
 #' @param bin A list of values to be grouped, a vector, a formula, or the special values \code{"bin::digit"} or \code{"cut::values"}. To create a new value from old values, use \code{bin = list("new_value"=old_values)} with \code{old_values} a vector of existing values. You can use \code{.()} for \code{list()}.
 #' It accepts regular expressions, but they must start with an \code{"@"}, like in \code{bin="@Aug|Dec"}. It accepts one-sided formulas which must contain the variable \code{x}, e.g. \code{bin=list("<2" = ~x < 2)}.
-#' The names of the list are the new names. If the new name is missing, the first value matched becomes the new name.
+#' The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. In the name, adding \code{"@d"}, with \code{d} a digit, will relocate the value in position \code{d}: useful to change the position of factors.
 #' Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value \code{"bin::digit"} to group every \code{digit} element.
 #' For example if \code{x} represents years, using \code{bin="bin::2"} creates bins of two years.
 #' With any data, using \code{"!bin::digit"} groups every digit consecutive values starting from the first value.
 #' Using \code{"!!bin::digit"} is the same but starting from the last value.
 #' With numeric vectors you can: a) use \code{"cut::n"} to cut the vector into \code{n} equal parts, b) use \code{"cut::a]b["} to create the following bins: \code{[min, a]}, \code{]a, b[}, \code{[b, max]}.
-#' The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. See details and examples. Dot square bracket expansion (see \code{\link[fixest]{dsb}}) is enabled.
+#' The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. You can add custom bin names by adding them in the character vector after \code{'cut::values'}. See details and examples. Dot square bracket expansion (see \code{\link[fixest]{dsb}}) is enabled.
 #'
 #' @section "Cutting" a numeric vector:
 #'
@@ -2891,6 +2891,8 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #' The square bracket right of each number tells whether the numbers should be included or excluded from the current bin. For example, say \code{x} ranges from 0 to 100, then \code{"cut::5]"} will create two  bins: one from 0 to 5 and a second from 6 to 100. With \code{"cut::5["} the bins would have been 0-4 and 5-100.
 #'
 #' A factor is returned. The labels report the min and max values in each bin.
+#'
+#' To have user-specified bin labels, just add them in the character vector following \code{'cut::values'}. You don't need to provide all of them, and NA values fall back to the default label. For example, \code{bin = c("cut::4", "Q1", NA, "Q3")} will modify only the first and third label that will be displayed as \code{"Q1"} and \code{"Q3"}.
 #'
 #' @return
 #' It returns a vector of the same length as \code{x}
@@ -2945,6 +2947,9 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #' # ...idem but starting from the last
 #' table(bin(month_fact, "!!bin::2"))
 #'
+#' # Relocating the months using "@" in the name
+#' table(bin(month_fact, .("@5" = "may", "@1 summer" = "@aug|jul")))
+#'
 #' #
 #' # "Cutting" numeric data
 #' #
@@ -2972,6 +2977,11 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #'
 #' # NOTA:
 #' # -> the labels always contain the min/max values in each bin
+#'
+#' # Custom labels can be provided, just give them in the char. vector
+#' # NA values lead to the default label
+#' table(bin(plen, c("cut::2[q2]p90]", "<2", "]2; Q2]", NA, ">90%")))
+#'
 #'
 #'
 #' #
@@ -6990,8 +7000,23 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
     #
 
     if(!is.list(bin) && (is.character(bin) && any(grepl("^cut::", bin)))){
-        if(length(bin) > 1){
-            stop_up("To use the special binning 'cut::values', the argument '", argname, "' must be of length 1. Currently it is of length ", length(bin), ".")
+
+        if(!grepl("^cut::", bin[1])){
+            stop_up("To use the special binning 'cut::values', it must be in the first position of the vector, possibly followed by custom names. Currently 'cut::values' is in position ", which(grepl("^cut::", bin))[1], ".")
+        }
+
+        n_names = length(bin) - 1
+        if(n_names > 1){
+            my_cut = trimws(sub("^cut::", "", bin[1]))
+            if(grepl("^[[:digit:]]+$", my_cut)){
+                n_cuts = as.numeric(my_cut)
+            } else {
+                n_cuts = length(strsplit(my_cut, "\\[|\\]")[[1]]) + 1
+            }
+
+            if(n_names > n_cuts){
+                stop_up("In the special binning 'cut::values', the number of custom names is greater than the number of bins (", n_names, " vs ", n_cuts, ").")
+            }
         }
 
         if(!is.numeric(x)){
@@ -7097,18 +7122,32 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
     }
 
     # changing the item values
+    x_items_new = x_items
+
     bin_names = names(bin)
+    custom_loc = FALSE # custom location
     if(is.null(bin_names)){
         bin_names = character(length(bin))
-    }
 
-    x_items_new = x_items
+    } else if(any(grepl("^@\\d", bin_names))){
+        custom_loc = TRUE
+        do_factor = TRUE
+        x_items_new = as.character(x_items_new)
+
+        qui = grepl("^@\\d", bin_names)
+        bin_location = sub("^@(\\d+).*", "\\1", bin_names)
+        bin_location[!qui] = NA
+        bin_location = as.numeric(bin_location)
+
+        bin_names = sub("^@\\d+ *", "", bin_names)
+    }
 
     for(i in seq_along(bin)){
 
         b_name = bin_names[[i]]
         if(nchar(b_name) == 0){
             b_name = as.character(x_items_new[id_bin[[i]][1]])
+            bin_names[[i]] = b_name # useful for new_loc
         }
 
         if(is.numeric(x_items_new)){
@@ -7127,6 +7166,59 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
     }
 
     x_items_new = x_items_new[!id_not_core]
+
+    if(custom_loc){
+        n_bins = length(bin_names)
+        new_loc = rep(NA_real_, length(x_items_new))
+        for(i in 1:n_bins){
+            b_name = bin_names[i]
+            new_loc[x_items_new == b_name] = bin_location[i]
+        }
+
+        loc_no_na = new_loc[!is.na(new_loc)]
+        while(anyDuplicated(loc_no_na)){
+            # regularization
+            is_dup = duplicated(loc_no_na)
+            value = min(loc_no_na[is_dup])
+            i_first = which.max(loc_no_na == value)
+            loc_no_na[loc_no_na >= value] = loc_no_na[loc_no_na >= value] + 1
+            loc_no_na[i_first] = value
+        }
+
+        n_max = length(x_items_new)
+        if(any(loc_no_na > n_max)){
+            # regularization
+
+            n_lnona = length(loc_no_na)
+            if(n_lnona == 1){
+                loc_no_na = n_max
+            } else {
+                order_loc_no_na = order(loc_no_na)
+
+                loc_sorted = loc_no_na[order_loc_no_na]
+                loc_sorted[n_lnona] = n_max
+                for(i in n_lnona:2) {
+                    if(loc_sorted[i] <= loc_sorted[i - 1]){
+                        loc_sorted[i - 1] = loc_sorted[i] - 1
+                    }
+                }
+
+                loc_no_na = loc_sorted[order(order_loc_no_na)]
+            }
+        }
+
+        new_loc[!is.na(new_loc)] = loc_no_na
+
+        for(i in seq_along(new_loc)){
+            if(!i %in% new_loc){
+                j = which(is.na(new_loc))[1]
+                new_loc[j] = i
+            }
+        }
+
+        x_map = new_loc[x_map]
+        x_items_new = x_items_new[order(new_loc)]
+    }
 
     if(do_factor){
         x_items_new = factor(x_items_new, levels = x_items_new)
@@ -7148,8 +7240,11 @@ cut_vector = function(x, bin){
 
     set_up(2)
 
+    bin_names_usr = bin[-1]
+    bin = bin[1]
+
     # checking bin
-    if(!is.character(bin) || !length(bin) == 1 || !grepl("^cut::", bin)){
+    if(!is.character(bin) || !grepl("^cut::", bin)){
         stop("Internal bug: Argument 'bin' should be equal to 'cut::stg' over here -- this is not the case.")
     }
 
@@ -7234,6 +7329,14 @@ cut_vector = function(x, bin){
 
     }
 
+    bin_names = character(length(cut_points) + 1)
+    for(i in seq_along(bin_names_usr)){
+        bi = bin_names_usr[i]
+        if(!is.na(bi)){
+            bin_names[i] = bi
+        }
+    }
+
     is_included = 1 * (bounds == "]")
     x_cut = cpp_cut(x_sorted, cut_points, is_included)
 
@@ -7254,6 +7357,7 @@ cut_vector = function(x, bin){
         x_int = cumsum(isnt_empty)[x_int]
         value_min = value_min[-i_empty]
         value_max = value_max[-i_empty]
+        bin_names = bin_names[-i_empty]
     }
 
     # creating the labels
@@ -7300,6 +7404,13 @@ cut_vector = function(x, bin){
             vmin_fmt = cpp_add_commas(vmin, d, FALSE)
 
             labels[i] = paste0("[", vmin_fmt, "; ", vmax_fmt, "]")
+        }
+    }
+
+    for(i in seq_along(bin_names)){
+        bi = bin_names[i]
+        if(nchar(bi) > 0){
+            labels[i] = bi
         }
     }
 

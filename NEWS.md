@@ -29,52 +29,6 @@
 
  - when computing Newey-West standard-errors for time series, the bandwidth is now selected thanks to the [bwNeweyWest](https://sandwich.r-forge.r-project.org/reference/NeweyWest.html) function from the [sandwich](https://sandwich.r-forge.r-project.org/index.html) package. This function implements the method described in Newey and West 1994.
  
- - `bin`: numeric vectors can be 'cut' with the new special value `'cut::q3]p90]'`, check it out!
-```R
-data(iris)
-plen = iris$Petal.Length
-
-# 3 parts of (roughly) equal size
-table(bin(plen, "cut::3"))
-#> 
-#> [1.0; 1.9] [3.0; 4.9] [5.0; 6.9] 
-#>         50         54         46 
-
-# Three custom bins
-table(bin(plen, "cut::2]5]"))
-#> 
-#> [1.0; 1.9] [3.0; 5.0] [5.1; 6.9] 
-#>         50         58         42 
-
-# .. same, excluding 5 in the 2nd bin
-table(bin(plen, "cut::2]5["))
-#> 
-#> [1.0; 1.9] [3.0; 4.9] [5.0; 6.9] 
-#>         50         54         46 
-
-# Using quartiles
-table(bin(plen, "cut::q1]q2]q3]"))
-#> 
-#> [1.0; 1.6] [1.7; 4.3] [4.4; 5.1] [5.2; 6.9] 
-#>         44         31         41         34 
-
-# Using percentiles
-table(bin(plen, "cut::p20]p50]p70]p90]"))
-#> 
-#> [1.0; 1.5] [1.6; 4.3] [4.4; 5.0] [5.1; 5.8] [5.9; 6.9] 
-#>         37         38         33         29         13 
-
-# Mixing all
-table(bin(plen, "cut::2[q2]p90]"))
-#> 
-#> [1.0; 1.9] [3.0; 4.3] [4.4; 5.8] [5.9; 6.9] 
-#>         50         25         62         13
-```
-
- - `bin` also accepts formulas, e.g. `bin = list("<2" = ~ x < 2)` (`x` must be the only variable).
- 
- - `bin` accepts the use of `.()` for `list()`.
- 
  - add `type = "se_long"` to `summary.fixest_multi` which yields all coefficients and SEs for all estimations in a "long" format.
  
  - only in `fixest` estimations, using a "naked" dot square bracket variable in the left-hand-side includes them as multiple left hand sides. Regular expressions can also be used in the LHS.
@@ -136,6 +90,71 @@ dsb("hello .[' and ', name], what's up?")
 dsb("hello .[name, ' and '], what's up?")
 #> [1] "hello Juliet and hello Romeo, what's up?"
 
+```
+
+## bin
+
+ - `bin`: numeric vectors can be 'cut' with the new special value `'cut::q3]p90]'`, check it out!
+```R
+data(iris)
+plen = iris$Petal.Length
+
+# 3 parts of (roughly) equal size
+table(bin(plen, "cut::3"))
+#> 
+#> [1.0; 1.9] [3.0; 4.9] [5.0; 6.9] 
+#>         50         54         46 
+
+# Three custom bins
+table(bin(plen, "cut::2]5]"))
+#> 
+#> [1.0; 1.9] [3.0; 5.0] [5.1; 6.9] 
+#>         50         58         42 
+
+# .. same, excluding 5 in the 2nd bin
+table(bin(plen, "cut::2]5["))
+#> 
+#> [1.0; 1.9] [3.0; 4.9] [5.0; 6.9] 
+#>         50         54         46 
+
+# Using quartiles
+table(bin(plen, "cut::q1]q2]q3]"))
+#> 
+#> [1.0; 1.6] [1.7; 4.3] [4.4; 5.1] [5.2; 6.9] 
+#>         44         31         41         34 
+
+# Using percentiles
+table(bin(plen, "cut::p20]p50]p70]p90]"))
+#> 
+#> [1.0; 1.5] [1.6; 4.3] [4.4; 5.0] [5.1; 5.8] [5.9; 6.9] 
+#>         37         38         33         29         13 
+
+# Mixing all
+table(bin(plen, "cut::2[q2]p90]"))
+#> 
+#> [1.0; 1.9] [3.0; 4.3] [4.4; 5.8] [5.9; 6.9] 
+#>         50         25         62         13
+
+# Adding custom names
+table(bin(plen, c("cut::2[q2]p90]", "<2", "]2; Q2]", NA, ">90%")))
+#>         <2    ]2; Q2] [4.4; 5.8]       >90% 
+#>         50         25         62         13 
+```
+
+ - `bin` also accepts formulas, e.g. `bin = list("<2" = ~ x < 2)` (`x` must be the only variable).
+ 
+ - `bin` accepts the use of `.()` for `list()`.
+ 
+ - you can add the location of the element using `@d` in the name. Useful to rearrange factors:
+```R
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+table(base$species)
+#>     setosa versicolor  virginica 
+#>         50         50         50
+
+table(bin(base$species, .("@3" = "seto", "@1 VIRGIN" = "virg")))
+#>     VIRGIN versicolor     setosa 
+#>         50         50         50 
 ```
  
  
