@@ -949,6 +949,8 @@ test(length(coef(res_sunab)), 12)
 #### bin ####
 ####
 
+chunk("BIN")
+
 plen = iris$Petal.Length
 years = round(rnorm(1000, 2000, 5))
 
@@ -959,8 +961,10 @@ for(type in 1:2){
     x = switch(type, "1" = plen, "2" = years)
 
     for(cut in my_cuts){
+
         my_bin = bin(x, cut)
         bin_char = as.character(my_bin)
+
         if(grepl("[", bin_char[1], fixed = TRUE)){
             all_min = as.numeric(gsub("(^\\[)|(;.+)", "", bin_char))
             all_max = as.numeric(gsub(".+; |\\]", "", bin_char))
@@ -973,6 +977,12 @@ for(type in 1:2){
         test(all(x <= all_max), TRUE)
     }
 }
+
+
+
+
+
+
 
 ####
 #### demean ####
