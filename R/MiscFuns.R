@@ -2872,7 +2872,7 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #' @param x A vector whose values have to be grouped. Can be of any type but must be atomic.
 #' @param bin A list of values to be grouped, a vector, a formula, or the special values \code{"bin::digit"} or \code{"cut::values"}. To create a new value from old values, use \code{bin = list("new_value"=old_values)} with \code{old_values} a vector of existing values. You can use \code{.()} for \code{list()}.
 #' It accepts regular expressions, but they must start with an \code{"@"}, like in \code{bin="@Aug|Dec"}. It accepts one-sided formulas which must contain the variable \code{x}, e.g. \code{bin=list("<2" = ~x < 2)}.
-#' The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. In the name, adding \code{"@d"}, with \code{d} a digit, will relocate the value in position \code{d}: useful to change the position of factors.
+#' The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. In the name, adding \code{"@d"}, with \code{d} a digit, will relocate the value in position \code{d}: useful to change the position of factors. Use \code{"@"} as first item to make subsequent items be located first in the factor.
 #' Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value \code{"bin::digit"} to group every \code{digit} element.
 #' For example if \code{x} represents years, using \code{bin="bin::2"} creates bins of two years.
 #' With any data, using \code{"!bin::digit"} groups every digit consecutive values starting from the first value.
@@ -2892,7 +2892,7 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #'
 #' A factor is returned. The labels report the min and max values in each bin.
 #'
-#' To have user-specified bin labels, just add them in the character vector following \code{'cut::values'}. You don't need to provide all of them, and NA values fall back to the default label. For example, \code{bin = c("cut::4", "Q1", NA, "Q3")} will modify only the first and third label that will be displayed as \code{"Q1"} and \code{"Q3"}.
+#' To have user-specified bin labels, just add them in the character vector following \code{'cut::values'}. You don't need to provide all of them, and \code{NA} values fall back to the default label. For example, \code{bin = c("cut::4", "Q1", NA, "Q3")} will modify only the first and third label that will be displayed as \code{"Q1"} and \code{"Q3"}.
 #'
 #' @return
 #' It returns a vector of the same length as \code{x}
@@ -2947,8 +2947,11 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #' # ...idem but starting from the last
 #' table(bin(month_fact, "!!bin::2"))
 #'
-#' # Relocating the months using "@" in the name
+#' # Relocating the months using "@d" in the name
 #' table(bin(month_fact, .("@5" = "may", "@1 summer" = "@aug|jul")))
+#'
+#' # Putting "@" as first item means subsequent items will be placed first
+#' table(bin(month_fact, .("@", "aug", "july")))
 #'
 #' #
 #' # "Cutting" numeric data
@@ -7076,6 +7079,20 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
         } else {
             bin = list(bin)
         }
+    }
+
+    # we catch "@" as first item
+    if(identical(bin[[1]], "@") && length(bin) > 1){
+        # this means that the user wants to specify
+        # the binned values as first elements of the new factor
+        bin[[1]] = NULL
+        if(is.null(names(bin))){
+            names(bin) = paste0("@", seq_along(bin), names(bin))
+        } else {
+            qui_ok = !grepl("^@\\d+", names(bin))
+            names(bin)[qui_ok] = paste0("@", seq(sum(qui_ok)), names(bin)[qui_ok])
+        }
+
     }
 
     x_map = x_range = seq_along(x_int$items)
