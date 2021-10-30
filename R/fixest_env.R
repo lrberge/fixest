@@ -418,7 +418,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         fml = formula(fml) # we regularize the formula to check it
 
         # We apply expand for macros => we return fml_no_xpd
-        if(length(getFixest_fml()) > 0 || any(c("..", "[") %in% all.vars(fml, functions = TRUE))){
+        if(length(getFixest_fml()) > 0 || any(c("..", "[", "regex") %in% all.vars(fml, functions = TRUE))){
             fml_no_xpd = fml
 
             # Special beavior .[y] for multiple LHSs
@@ -437,12 +437,15 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                 new_lhs_fml[[2]] = my_dsb
                 fml[[2]] = new_lhs_fml
 
-            } else if(lhs_fml[[1]] == ".." && length(lhs_fml) == 2 && is.character(lhs_fml[[2]])){
+            } else if(as.character(lhs_fml[[1]])[1] %in% c("..", "regex") &&
+                      length(lhs_fml) == 2 && is.character(lhs_fml[[2]])){
+
                 # works for ..("x") ~ y
                 re = lhs_fml[[2]]
                 if(grepl(".[", re, fixed = TRUE)){
                     re = dot_square_bracket(re, call_env, regex = TRUE)
                 }
+
                 vars = grep(re, dataNames, value = TRUE, perl = TRUE)
                 if(length(vars) == 0){
 

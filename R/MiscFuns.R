@@ -3142,6 +3142,9 @@ bin = function(x, bin){
 #' # Stepwise estimation with regex: use a comma after the parenthesis
 #' feols(Armed.Forces ~ Population + sw(regex(,"GNP|ployed")), longley)
 #'
+#' # Multiple LHS
+#' etable(feols(..("GNP|ployed") ~ Population, longley))
+#'
 #'
 #' #
 #' # lhs and rhs arguments
