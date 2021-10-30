@@ -25,44 +25,6 @@
  
  - fix error message when the (wrong) argument `X` is used in `feols`.
  
-## New features
-
- - when computing Newey-West standard-errors for time series, the bandwidth is now selected thanks to the [bwNeweyWest](https://sandwich.r-forge.r-project.org/reference/NeweyWest.html) function from the [sandwich](https://sandwich.r-forge.r-project.org/index.html) package. This function implements the method described in Newey and West 1994.
- 
- - add `type = "se_long"` to `summary.fixest_multi` which yields all coefficients and SEs for all estimations in a "long" format.
- 
- - only in `fixest` estimations, using a "naked" dot square bracket variable in the left-hand-side includes them as multiple left hand sides. Regular expressions can also be used in the LHS.
-```R
-base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
-y = c("y", "x1")
-feols(.[y] ~ x2, base)
-#> Standard-errors: IID 
-#> Dep. var.: y
-#>             Estimate Std. Error t value  Pr(>|t|)    
-#> (Intercept) 4.306603   0.078389 54.9389 < 2.2e-16 ***
-#> x2          0.408922   0.018891 21.6460 < 2.2e-16 ***
-#> ---
-#> Dep. var.: x1
-#>              Estimate Std. Error  t value   Pr(>|t|)    
-#> (Intercept)  3.454874   0.076095 45.40188  < 2.2e-16 ***
-#> x2          -0.105785   0.018339 -5.76845 4.5133e-08 ***
-
-
-etable(feols(..("x") ~ y + i(species), base))
-#>                                  model 1            model 2            model 3
-#> Dependent Var.:                       x1                 x2                 x3
-#>                                                                               
-#> (Intercept)            1.677*** (0.2354) -1.702*** (0.2301) -0.4794** (0.1557)
-#> y                     0.3499*** (0.0463) 0.6321*** (0.0453) 0.1449*** (0.0306)
-#> species = versicolor -0.9834*** (0.0721)  2.210*** (0.0705) 0.9452*** (0.0477)
-#> species = virginica   -1.008*** (0.0933)  3.090*** (0.0912)  1.551*** (0.0617)
-#> ____________________ ___________________ __________________ __________________
-#> S.E. type                            IID                IID                IID
-#> Observations                         150                150                150
-#> R2                               0.56925            0.97489            0.93833
-#> Adj. R2                          0.56040            0.97438            0.93706
-```
- 
 ## Dot square bracket operator
 
  - add a comma first, like in `.[,stuff]`, to separate variables with commas (instead of separating them with additions):
@@ -184,13 +146,53 @@ Although a bit unrelated to the purpose of this package, these functions are so 
  
  - `sample_df`: simple function to extract random lines from a `data.frame`.
  
+## Other new features
+
+ - when computing Newey-West standard-errors for time series, the bandwidth is now selected thanks to the [bwNeweyWest](https://sandwich.r-forge.r-project.org/reference/NeweyWest.html) function from the [sandwich](https://sandwich.r-forge.r-project.org/index.html) package. This function implements the method described in Newey and West 1994.
+ 
+ - add `type = "se_long"` to `summary.fixest_multi` which yields all coefficients and SEs for all estimations in a "long" format.
+ 
+ - only in `fixest` estimations, using a "naked" dot square bracket variable in the left-hand-side includes them as multiple left hand sides. Regular expressions can also be used in the LHS.
+```R
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+y = c("y", "x1")
+feols(.[y] ~ x2, base)
+#> Standard-errors: IID 
+#> Dep. var.: y
+#>             Estimate Std. Error t value  Pr(>|t|)    
+#> (Intercept) 4.306603   0.078389 54.9389 < 2.2e-16 ***
+#> x2          0.408922   0.018891 21.6460 < 2.2e-16 ***
+#> ---
+#> Dep. var.: x1
+#>              Estimate Std. Error  t value   Pr(>|t|)    
+#> (Intercept)  3.454874   0.076095 45.40188  < 2.2e-16 ***
+#> x2          -0.105785   0.018339 -5.76845 4.5133e-08 ***
+
+
+etable(feols(..("x") ~ y + i(species), base))
+#>                                  model 1            model 2            model 3
+#> Dependent Var.:                       x1                 x2                 x3
+#>                                                                               
+#> (Intercept)            1.677*** (0.2354) -1.702*** (0.2301) -0.4794** (0.1557)
+#> y                     0.3499*** (0.0463) 0.6321*** (0.0453) 0.1449*** (0.0306)
+#> species = versicolor -0.9834*** (0.0721)  2.210*** (0.0705) 0.9452*** (0.0477)
+#> species = virginica   -1.008*** (0.0933)  3.090*** (0.0912)  1.551*** (0.0617)
+#> ____________________ ___________________ __________________ __________________
+#> S.E. type                            IID                IID                IID
+#> Observations                         150                150                150
+#> R2                               0.56925            0.97489            0.93833
+#> Adj. R2                          0.56040            0.97438            0.93706
+```
+ 
 ## Other
 
  - improve error messages when `subset` does not select any element.
  
+ - in `xpd` and `fixest` estimations, variables can be "grepped" from the data set with `regex("regex")`.
+ 
  - add inheritance of the default style in `iplot` when the style is set globally with `setFixest_coefplot`.
  
- - improve error messages in general by prompting additional error calls.
+ - improve error messages in general by prompting additional error calls (when appropriate).
  
  - the dictionaries now ignore white spaces in coefficient names (thanks to Caleb Kwon).
  
