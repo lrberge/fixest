@@ -41,7 +41,7 @@ setFixest_nthreads(1)
 
 The package `fixest` provides a family of functions to perform estimations with multiple fixed-effects.
 The two main functions are `feols` for linear models and `feglm` for generalized linear models. In addition, the function `femlm` performs direct maximum likelihood estimation, and `feNmlm` extends the latter to allow the inclusion of non-linear in parameters right-hand-sides. Finally, the functions `fepois` and `fenegbin` are aliases for Poisson and negative binomial fixed-effect estimations.
-Each of these functions supports any number of fixed-effects and is implemented with full fledged multi-threading in c++. Functions `feols` and `feglm` further support variables with varying slopes.
+Each of these functions supports any number of fixed-effects and is implemented with full fledged multi-threading in C++. Functions `feols` and `feglm` further support variables with varying slopes.
 
 This package is currently (Feb. 2020) the fastest software available to perform fixed-effects estimations. See the project's [homepage](https://lrberge.github.io/fixest/) for a set of benchmarks.
 
