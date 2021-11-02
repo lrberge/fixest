@@ -724,7 +724,7 @@ summary.fixest_list = function(object, se, cluster, ssc = getFixest_ssc(), .vcov
 #'
 #'
 #'
-coeftable = function(object, vcov = NULL, ssc = NULL, cluster, keep, drop, order, ...){
+coeftable = function(object, vcov = NULL, ssc = NULL, cluster = NULL, keep, drop, order, ...){
     # We don't explicitly refer to the other arguments
 
     check_arg(keep, drop, order, "NULL character vector no na")
@@ -790,18 +790,14 @@ coeftable = function(object, vcov = NULL, ssc = NULL, cluster, keep, drop, order
 }
 
 #' @describeIn coeftable Extracts the p-value of an estimation
-pvalue = function(object, vcov, ssc, cluster, keep, drop, order, ...){
+pvalue = function(object, vcov = NULL, ssc = NULL, cluster = NULL, keep, drop, order, ...){
 
     check_arg(keep, drop, order, "NULL character vector no na")
 
-    mc = match.call()
-    mc[[1]] = as.name("coeftable")
-    mc$object = as.name("object")
-
-    mat = eval(mc)
+    mat = coeftable(object, vcov = vcov, ssc = ssc, cluster = cluster, ...)
 
     if(ncol(mat) != 4){
-        stop("No appropriate coefficient table found (number of columns is ", ncol(mat), " instead of 4). You can investigate the problem using function ctable().")
+        stop("No appropriate coefficient table found (number of columns is ", ncol(mat), " instead of 4), sorry.")
     }
 
     res = mat[, 4]
@@ -826,18 +822,14 @@ pvalue = function(object, vcov, ssc, cluster, keep, drop, order, ...){
 }
 
 #' @describeIn coeftable Extracts the t-statistics of an estimation
-tstat = function(object, vcov, ssc, cluster, keep, drop, order, ...){
+tstat = function(object, vcov = NULL, ssc = NULL, cluster = NULL, keep, drop, order, ...){
 
     check_arg(keep, drop, order, "NULL character vector no na")
 
-    mc = match.call()
-    mc[[1]] = as.name("coeftable")
-    mc$object = as.name("object")
-
-    mat = eval(mc)
+    mat = coeftable(object, vcov = vcov, ssc = ssc, cluster = cluster, ...)
 
     if(ncol(mat) != 4){
-        stop("No appropriate coefficient table found (number of columns is ", ncol(mat), " instead of 4). You can investigate the problem using function coeftable().")
+        stop("No appropriate coefficient table found (number of columns is ", ncol(mat), " instead of 4), sorry.")
     }
 
     res = mat[, 3]
@@ -862,7 +854,7 @@ tstat = function(object, vcov, ssc, cluster, keep, drop, order, ...){
 }
 
 #' @describeIn coeftable Extracts the standard-error of an estimation
-se = function(object, vcov, ssc, cluster, keep, drop, order, ...){
+se = function(object, vcov = NULL, ssc = NULL, cluster = NULL, keep, drop, order, ...){
 
     check_arg(keep, drop, order, "NULL character vector no na")
 
@@ -871,14 +863,11 @@ se = function(object, vcov, ssc, cluster, keep, drop, order, ...){
         res = sqrt(diag(object))
 
     } else {
-        mc = match.call()
-        mc[[1]] = as.name("coeftable")
-        mc$object = as.name("object")
 
-        mat = eval(mc)
+        mat = coeftable(object, vcov = vcov, ssc = ssc, cluster = cluster, ...)
 
         if(ncol(mat) != 4){
-            stop("No appropriate coefficient table found (number of columns is ", ncol(mat), " instead of 4). You can investigate the problem using function coeftable().")
+            stop("No appropriate coefficient table found (number of columns is ", ncol(mat), " instead of 4), sorry.")
         }
 
         res = mat[, 2]
