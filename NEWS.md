@@ -6,6 +6,8 @@
   - fix bug in stepwise estimations when two (stepwised) explanatory variables have exactly the same NAs values.
 
   - fix display bug regarding factors in `etable` when `dict` was present.
+  
+  - fix bug `tablefoot.value` not working any more (reported by @resulumit [#224](https://github.com/lrberge/fixest/issues/224)).
 
 # fixest 0.10.1
 

@@ -2944,7 +2944,9 @@ etable_internal_latex = function(info){
 
             value = style$tablefoot.value
             if(isUniqueSD){
-                # my_se: computed right before
+                my_se = unique(unlist(se_type_list))
+                my_se = format_se_type_latex(my_se, dict)
+
                 value = gsub("__se_type__", my_se, value)
             } else {
                 # not super elegant, but can't to much more // else: enumerate the SEs?
