@@ -645,7 +645,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 	                    go_next = FALSE
 	                    for(j in qui){
 	                        if(all(is_na_current == rhs_group_is_na[[j]])){
-	                            rhs_group_id[i] = rhs_group_id[j]
+	                            rhs_group_id[i] = j
 	                            go_next = TRUE
 	                            break
 	                        }
@@ -662,6 +662,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 
 	            }
 	        }
+
 
 	        # we make groups
 	        rhs_group = list()

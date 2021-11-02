@@ -1961,8 +1961,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         var = var_origin = c(gsub(" ", "", row.names(a)))
         # renaming
         if(TRUE){
-            qui = var %in% names(dict)
-            var[qui] = dict[var[qui]]
+            var = dict_apply(var, dict)
             tv = table(var)
             if(any(tv > 1)){
                 value_pblm = names(tv)[tv > 1][1]

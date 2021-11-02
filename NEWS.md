@@ -1,4 +1,12 @@
 
+# fixest 0.10.2
+
+## Bug fixes
+
+  - fix bug in stepwise estimations when two (stepwised) explanatory variables have exactly the same NAs values.
+
+  - fix display bug regarding factors in `etable` when `dict` was present.
+
 # fixest 0.10.1
 
 ## Bug fixes
