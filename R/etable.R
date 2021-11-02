@@ -1961,6 +1961,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         var = var_origin = c(gsub(" ", "", row.names(a)))
         # renaming
         if(TRUE){
+            # Now I clean white spaces in dict_apply
+            qui = gsub(" ", "", var, fixed = TRUE) %in% gsub(" ", "", names(dict), fixed = TRUE)
             var = dict_apply(var, dict)
             tv = table(var)
             if(any(tv > 1)){
