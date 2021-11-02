@@ -8,6 +8,8 @@
   - fix display bug regarding factors in `etable` when `dict` was present.
   
   - fix bug `tablefoot.value` not working any more (reported by @resulumit [#224](https://github.com/lrberge/fixest/issues/224)).
+  
+  - fix possible environment problem when estimating non linear functions outside of the global environment.
 
 # fixest 0.10.1
 
