@@ -10,7 +10,6 @@
 
 library(fixest)
 
-
 test = fixest:::test ; chunk = fixest:::chunk
 vcovClust = fixest:::vcovClust
 
@@ -1048,19 +1047,26 @@ test(X_dm_slopes[[1]], X_dm_slopes_bis)
 
 chunk("HATVALUES")
 
-set.seed(0)
-x = sin(1:10)
-y = rnorm(10)
-y_int = rpois(10, 2)
-fm  = lm(y ~ x)
-ffm = feols(y ~ x, data.frame(y, x))
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+base$y_int = as.integer(base$y)
+base$y_bin = 1 * (base$y > mean(base$y))
 
+fm  = lm(y ~ x1 + x2, base)
+ffm = feols(y ~ x1 + x2, base)
 test(hatvalues(ffm), hatvalues(fm))
 
-gm  = glm(y_int ~ x, family = poisson())
-fgm = fepois(y_int ~ x, data.frame(y_int, x))
+glm_poi  = glm(y_int ~ x1 + x2, family = poisson(), base)
+feglm_poi = fepois(y_int ~ x1 + x2, base)
+test(hatvalues(feglm_poi), hatvalues(glm_poi))
 
-test(hatvalues(fgm), hatvalues(gm))
+
+glm_logit  = glm(y_bin ~ x1 + x2, family = binomial(), base)
+feglm_logit = feglm(y_bin ~ x1 + x2, base, binomial())
+test(hatvalues(feglm_logit), hatvalues(glm_logit))
+
+glm_probit  = glm(y_bin ~ x1 + x2, family = binomial("probit"), base)
+feglm_probit = feglm(y_bin ~ x1 + x2, base, binomial("probit"))
+test(hatvalues(feglm_probit), hatvalues(glm_probit))
 
 
 ####
