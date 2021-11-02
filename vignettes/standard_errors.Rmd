@@ -362,9 +362,9 @@ Cameron AC, Gelbach JB, Miller DL (2011). "[Robust Inference with Multiway Clust
 
 Kauermann G, Carroll RJ (2001). "[A Note on the Efficiency of Sandwich Covariance Matrix Estimation](https://www.tandfonline.com/doi/abs/10.1198/016214501753382309)", Journal of the American Statistical Association, 96(456), 1387–1396.
 
-MacKinnon, JG, White, H (1985). "Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties" Journal of Econometrics, 29(3), 305–325.
+MacKinnon JG, White H (1985). "Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties" Journal of Econometrics, 29(3), 305–325.
 
-Milo G (2017). "[Robust Standard Error Estimators for Panel Models: A Unifying Approach](https://www.jstatsoft.org/index.php/jss/article/view/v082i03/v82i03.pdf)" Journal of Statistical Software, 82(3).
+Milo G (2017). "[Robust Standard Error Estimators for Panel Models: A Unifying Approach](https://doi.org/10.18637/jss.v082.i03)" Journal of Statistical Software, 82(3).
 
 Zeileis A, Koll S, Graham N (2020). "[Various Versatile Variances: An Object-Oriented Implementation of Clustered Covariances in R.](https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf)" Journal of Statistical Software, 95(1), 1–36.
 
