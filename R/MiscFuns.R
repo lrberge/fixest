@@ -7758,7 +7758,9 @@ dict_apply = function(x, dict = NULL){
 
     # We make the dictionary names space agnostic, adds a handful of us only
     if(any(grepl(" ", x, fixed = TRUE))){
-        x = gsub(" ", "", x, fixed = TRUE)
+        x_tmp = gsub(" ", "", x, fixed = TRUE)
+    } else {
+        x_tmp = x
     }
 
     if(any(grepl(" ", names(dict), fixed = TRUE))){
@@ -7770,8 +7772,8 @@ dict_apply = function(x, dict = NULL){
         }
     }
 
-    who = x %in% names(dict)
-    x[who] = dict[as.character(x[who])]
+    who = x_tmp %in% names(dict)
+    x[who] = dict[as.character(x_tmp[who])]
     x
 }
 
