@@ -151,8 +151,18 @@ run_test = function(chunk, from){
     # since this leads to parsing errors
 
     i_open = which(grepl(",[[:blank:]]*$", code_LINE))
-    if(length(i_open) > 0){
-        code_LINE = code_LINE[-(i_open + 1)]
+
+    if(length(i_open)) i_open = i_open + 1
+
+    # We remove the counters just before closing brackets => otherwise equivalent to a return statement!
+    i_closing_bracket = which(grepl("^[[:blank:]]*\\}", code_LINE))
+
+    if(length(i_closing_bracket)) i_closing_bracket = i_closing_bracket - 1
+
+    # removing
+    i_rm = c(i_open, i_closing_bracket)
+    if(length(i_rm) > 0){
+        code_LINE = code_LINE[-(i_rm)]
     }
 
     # B) Adding the FOR loops
