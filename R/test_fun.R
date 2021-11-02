@@ -132,7 +132,61 @@ chunk = function(x) cat(toupper(x), "\n\n")
 
 
 run_test = function(chunk, from){
-    test_code = readLines("tests/fixest_tests.R")[-(1:17)]
+
+    test_code = readLines("tests/fixest_tests.R")
+
+    i = grepl("library(fixest)", test_code, fixed = TRUE)
+    test_code[i] = "devtools::load_all(export_all = FALSE)"
+
+    # A) adding the line numbers
+
+    lines = paste0("LINE_COUNTER = ", seq_along(test_code))
+
+    code_LINE = rep(lines, each = 2)
+    code_LINE[seq_along(test_code)  * 2] = test_code
+
+    # We remove the counters for the lines with open parenthesis, like in
+    # sum(x,
+    #     y)
+    # since this leads to parsing errors
+
+    i_open = which(grepl(",[[:blank:]]*$", code_LINE))
+    if(length(i_open) > 0){
+        code_LINE = code_LINE[-(i_open + 1)]
+    }
+
+    # B) Adding the FOR loops
+
+    bracket_close = which(grepl("^\\}", code_LINE))
+    for_start = which(grepl("^for\\(", code_LINE))
+    for_end = c()
+    for(i in for_start){
+        for_end = c(for_end, bracket_close[which.max(bracket_close > i)])
+    }
+
+    n = length(code_LINE)
+    my_rep = rep(1, n)
+    my_rep[c(for_start, for_end)] = 2
+
+    code_LINE_FOR = rep(code_LINE, my_rep)
+    n_loop = length(for_start)
+    code_LINE_FOR[for_start + 2 * (0:(n_loop - 1))] = "INSIDE_LOOP = TRUE ; INDEX_LOOP = list()"
+    code_LINE_FOR[for_end + 2 * 1:n_loop] = "INSIDE_LOOP = FALSE"
+
+    qui_for = which(grepl("\\bfor\\(", code_LINE_FOR))
+    index = gsub("^.*for\\(([^ ]+).+", "\\1", code_LINE_FOR[qui_for])
+
+    n = length(code_LINE_FOR)
+    my_rep = rep(1, n)
+    my_rep[qui_for] = 2
+
+    code_LINE_FOR = rep(code_LINE_FOR, my_rep)
+    n_loop = length(qui_for)
+    code_LINE_FOR[qui_for + 1 + (0:(n_loop - 1))] = paste0("INDEX_LOOP[[\"", index, "\"]] = ", index)
+
+    test_code = code_LINE_FOR
+
+    # C) Chunk selection
 
     if(!missing(chunk) || !missing(from)){
 
@@ -166,7 +220,6 @@ run_test = function(chunk, from){
             }
         }
 
-
         qui = c(qui, length(test_code))
 
         new_test_code = c()
@@ -174,16 +227,38 @@ run_test = function(chunk, from){
             new_test_code = c(new_test_code, test_code[qui[i] : (qui[i + 1] - 1)])
         }
 
-        test_code = new_test_code
+        # We add the preamble
+        preamble = test_code[1:(qui[1] - 1)]
+
+        test_code = c(preamble, new_test_code)
     }
 
-    setFixest_notes(FALSE)
+    # D) Evaluation
 
     parsed_code = parse(text = test_code)
 
-    eval(parsed_code, .GlobalEnv)
+    env = new.env()
+    assign("INSIDE_LOOP", FALSE, env)
 
-    "tests performed successfully"
+    my_eval = try(eval(parsed_code, env))
+
+    # E) Message
+
+    if("try-error" %in% class(my_eval)){
+        line_fail = get("LINE_COUNTER", env)
+        inside_loop = get("INSIDE_LOOP", env)
+
+        message("Test failed at line: ", line_fail)
+        if(inside_loop){
+            index_loop = get("INDEX_LOOP", env)
+            index_names = names(index_loop)
+            index_values = unlist(index_loop)
+            msg = paste0(index_names, ":", index_values, collapse = ", ")
+            message("Loop values: ", msg, ".")
+        }
+    } else {
+        print("tests performed successfully")
+    }
 }
 
 
@@ -238,7 +313,7 @@ open_all = function(){
     # Opening extra files
 
     extra_files = c("../PROBLEMS.R", "../Problems.Rmd", "../Development.R",
-                    "../social.rmd", "NEWS.md", "DESCRIPTION", "tests/fixest_tests.R",
+                    "../social.rmd", "NEWS.md", "DESCRIPTION", "NAMESPACE", "tests/fixest_tests.R",
                     list.files("vignettes/", pattern = "Rmd$", full.names = TRUE),
                     "../todo.txt")
 
