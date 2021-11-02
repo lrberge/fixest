@@ -2700,7 +2700,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     if(origin_type == "feNmlm"){
 
         # basic NL
-        envNL = new.env()
+        envNL = new.env(parent = call_env)
         if(isNL){
             data_NL = as.data.frame(data_NL)
             for(var in nonlinear.varnames) assign(var, data_NL[[var]], envNL)
