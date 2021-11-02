@@ -826,9 +826,6 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         mc = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin), expand.dots = FALSE)
         args_usr = setdiff(names(mc), c("style.tex", "style.df"))
 
-        # Arguments for which the defaults should not be changed in etable, tex = FALSE
-        if(!tex) args_usr = c(args_usr, "signifCode")
-
         # We modify only non-user provided arguments
         for(v in names(opts)){
             if(!v %in% args_usr){
