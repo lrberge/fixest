@@ -10,6 +10,10 @@
   - fix bug `tablefoot.value` not working any more (reported by @resulumit [#224](https://github.com/lrberge/fixest/issues/224)).
   
   - fix possible environment problem when estimating non linear functions outside of the global environment.
+  
+## etable
+
+ - in `headers`/`extralines`: `cmidrule` does not show up for empty column names any more.
 
 # fixest 0.10.1
 

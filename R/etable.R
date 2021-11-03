@@ -4373,8 +4373,6 @@ tex_star = function(x){
 
 tex_multicol = function(x, add_rule = FALSE){
 
-    if(length(x) == 1) return(x)
-
     nb_multi = c(1)
     index = 1
     names_multi = x_current = x[1]
@@ -4389,6 +4387,7 @@ tex_multicol = function(x, add_rule = FALSE){
         }
     }
 
+    names_multi_raw = names_multi
     for(i in seq_along(nb_multi)){
         if(nb_multi[i] > 1){
             names_multi[i] = paste0("\\multicolumn{", nb_multi[i], "}{c}{", names_multi[i], "}")
@@ -4402,7 +4401,9 @@ tex_multicol = function(x, add_rule = FALSE){
         start = 2 + c(0, cumsum(nb_multi))
         end = 1 + cumsum(nb_multi)
         for(i in seq_along(nb_multi)){
-            my_rule[i] = paste0("\\cmidrule(lr){", start[i], "-", end[i], "}")
+            if(grepl("[^ ]", names_multi_raw[i])){
+                my_rule[i] = paste0("\\cmidrule(lr){", start[i], "-", end[i], "}")
+            }
         }
 
         res = paste0(res, paste0(my_rule, collapse = " "))
