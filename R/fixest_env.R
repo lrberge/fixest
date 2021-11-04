@@ -464,6 +464,12 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
             # Expansion
             fml = .xpd(fml, data = dataNames, macro = TRUE, frame = call_env, check = TRUE)
+
+            # Cleaning if necessary
+            lhs = fml[[2]]
+            if(lhs[[1]] == "c" && length(lhs) == 2){
+                fml[[2]] = lhs[[2]]
+            }
         }
 
         #
