@@ -7325,7 +7325,7 @@ cut_vector = function(x, bin){
         cut_points = numeric(n_cuts)
         for(i in seq_along(values)){
 
-            v = values[i]
+            v = trimws(values[i])
 
             if(is_numeric_in_char(v)){
                 cut_points[i] = as.numeric(v)
