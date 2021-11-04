@@ -3436,8 +3436,10 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 #' dsb("hello .[name, ], what's up?")
 #'
 dsb = function(x, collapse = NULL){
-    check_arg(x, "character scalar")
+    check_arg(x, "character scalar na ok")
     check_arg(collapse, "NULL character scalar")
+
+    if(is.na(x)) return(x)
 
     res = dot_square_bracket(x, frame = parent.frame(), text = TRUE)
     if(!is.null(collapse)){
@@ -8324,7 +8326,7 @@ error_sender = function(expr, ..., clean, up = 0, arg_name){
             call_non_informative = deparse(substitute(expr), 100)[1]
             call_error = deparse(res[[1]], 100)[1]
 
-            if(call_error == call_non_informative){
+            if(call_error == call_non_informative || grepl("^(doTry|eval)", call_error)){
                 call_error = ""
 
             } else {
