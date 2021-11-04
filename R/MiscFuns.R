@@ -8988,6 +8988,10 @@ eval_dot = function(x, up = 1){
     sysOrigin = sys.parent(up)
     mc = match.call(sys.function(sysOrigin), sys.call(sysOrigin))
 
+    if(!x_dp %in% names(mc)){
+        return(x)
+    }
+
     my_list = list("." = list)
 
     eval(mc[[x_dp]], my_list, parent.frame(up + 1))
