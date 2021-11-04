@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.2</span>
       </span>
     </div>
 
@@ -141,13 +141,22 @@
     <p>Set of functions to directly extract some commonly used statistics, like the p-value or the table of coefficients, from estimations. This was first implemented for <code>fixest</code> estimations, but has some support for other models.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>coeftable</span><span class='op'>(</span><span class='va'>object</span>, vcov <span class='op'>=</span> <span class='cn'>NULL</span>, ssc <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>cluster</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, <span class='va'>...</span><span class='op'>)</span>
+    <pre class="usage"><span class='fu'>coeftable</span><span class='op'>(</span>
+  <span class='va'>object</span>,
+  vcov <span class='op'>=</span> <span class='cn'>NULL</span>,
+  ssc <span class='op'>=</span> <span class='cn'>NULL</span>,
+  cluster <span class='op'>=</span> <span class='cn'>NULL</span>,
+  <span class='va'>keep</span>,
+  <span class='va'>drop</span>,
+  <span class='va'>order</span>,
+  <span class='va'>...</span>
+<span class='op'>)</span>
 
-<span class='fu'>pvalue</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>vcov</span>, <span class='va'>ssc</span>, <span class='va'>cluster</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, <span class='va'>...</span><span class='op'>)</span>
+<span class='fu'>pvalue</span><span class='op'>(</span><span class='va'>object</span>, vcov <span class='op'>=</span> <span class='cn'>NULL</span>, ssc <span class='op'>=</span> <span class='cn'>NULL</span>, cluster <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, <span class='va'>...</span><span class='op'>)</span>
 
-<span class='fu'>tstat</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>vcov</span>, <span class='va'>ssc</span>, <span class='va'>cluster</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, <span class='va'>...</span><span class='op'>)</span>
+<span class='fu'>tstat</span><span class='op'>(</span><span class='va'>object</span>, vcov <span class='op'>=</span> <span class='cn'>NULL</span>, ssc <span class='op'>=</span> <span class='cn'>NULL</span>, cluster <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, <span class='va'>...</span><span class='op'>)</span>
 
-<span class='fu'>se</span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>vcov</span>, <span class='va'>ssc</span>, <span class='va'>cluster</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+<span class='fu'>se</span><span class='op'>(</span><span class='va'>object</span>, vcov <span class='op'>=</span> <span class='cn'>NULL</span>, ssc <span class='op'>=</span> <span class='cn'>NULL</span>, cluster <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>keep</span>, <span class='va'>drop</span>, <span class='va'>order</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">

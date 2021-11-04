@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.2</span>
       </span>
     </div>
 
@@ -811,27 +811,27 @@
 <span class='co'># Here's a full example:</span>
 <span class='va'>dict</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span>Temp <span class='op'>=</span> <span class='st'>"Temperature"</span>, <span class='st'>"Month::5"</span><span class='op'>=</span><span class='st'>"May"</span>, <span class='st'>"6"</span><span class='op'>=</span><span class='st'>"Jun"</span><span class='op'>)</span>
 <span class='fu'>etable</span><span class='op'>(</span><span class='va'>est1</span>, <span class='va'>est2</span>, dict <span class='op'>=</span> <span class='va'>dict</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                               est1               est2
-#&gt; Dependent Var.:              Ozone              Ozone
-#&gt;                                                      
-#&gt; (Intercept)      -100.2*** (26.35)                   
-#&gt; Month=Jun          -54.99* (26.34)                   
-#&gt; Month=7             35.89. (18.37)                   
-#&gt; Month=8             44.52* (18.05)                   
-#&gt; Month=9             -11.78 (18.22)                   
-#&gt; Temperature      2.042*** (0.3078)  2.042*** (0.2242)
-#&gt; Wind x May          -1.086 (1.127)  -1.086** (0.1408)
-#&gt; Wind x Month=Jun     2.046 (1.784)  2.046*** (0.0398)
-#&gt; Wind x Month=7   -5.616*** (1.316) -5.616*** (0.1554)
-#&gt; Wind x Month=8   -6.515*** (1.220) -6.515*** (0.2203)
-#&gt; Wind x Month=9      -1.349 (1.147)   -1.349* (0.3175)
-#&gt; Fixed-Effects:   ----------------- ------------------
-#&gt; Month                           No                Yes
-#&gt; ________________ _________________ __________________
-#&gt; S.E. type                      IID          by: Month
-#&gt; Observations                   116                116
-#&gt; R2                         0.68106            0.68106
-#&gt; Within R2                       --            0.58296</div><div class='input'><span class='co'># Note the difference of treatment between Jun and May</span>
+</div><div class='output co'>#&gt;                                 est1               est2
+#&gt; Dependent Var.:                Ozone              Ozone
+#&gt;                                                        
+#&gt; (Intercept)        -100.2*** (26.35)                   
+#&gt; Month = Jun          -54.99* (26.34)                   
+#&gt; Month = 7             35.89. (18.37)                   
+#&gt; Month = 8             44.52* (18.05)                   
+#&gt; Month = 9             -11.78 (18.22)                   
+#&gt; Temperature        2.042*** (0.3078)  2.042*** (0.2242)
+#&gt; Wind x May            -1.086 (1.127)  -1.086** (0.1408)
+#&gt; Wind x Month = Jun     2.046 (1.784)  2.046*** (0.0398)
+#&gt; Wind x Month = 7   -5.616*** (1.316) -5.616*** (0.1554)
+#&gt; Wind x Month = 8   -6.515*** (1.220) -6.515*** (0.2203)
+#&gt; Wind x Month = 9      -1.349 (1.147)   -1.349* (0.3175)
+#&gt; Fixed-Effects:     ----------------- ------------------
+#&gt; Month                             No                Yes
+#&gt; __________________ _________________ __________________
+#&gt; S.E. type                        IID          by: Month
+#&gt; Observations                     116                116
+#&gt; R2                           0.68106            0.68106
+#&gt; Within R2                         --            0.58296</div><div class='input'><span class='co'># Note the difference of treatment between Jun and May</span>
 
 <span class='co'># Assume the following dictionary:</span>
 <span class='va'>dict</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Month::5"</span><span class='op'>=</span><span class='st'>"May"</span>, <span class='st'>"Month::6"</span><span class='op'>=</span><span class='st'>"Jun"</span>, <span class='st'>"Month::7"</span><span class='op'>=</span><span class='st'>"Jul"</span>,
