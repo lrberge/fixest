@@ -11,9 +11,17 @@
   
   - fix possible environment problem when estimating non linear functions outside of the global environment.
   
+  - fix bug in the stepwise functions `sw` and `csw` when they contained only one variable.
+  
 ## etable
 
  - in `headers`/`extralines`: `cmidrule` does not show up for empty column names any more.
+ 
+ - new argument `tex.preview` to preview the latex table in the viewer pane (suggestion by Or Avishay-Rizi [#227](https://github.com/lrberge/fixest/issues/227)).
+ 
+## Other
+
+ - `bin`: `cut::` now ignores white spaces, so that `cut:: q1 ] q3 [` works appropriately.
 
 # fixest 0.10.1
 
