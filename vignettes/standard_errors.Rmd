@@ -57,7 +57,7 @@ If `vcov = "iid"`, then the standard-errors are based on the assumption that the
 
 If `vcov = "cluster"`, then arbitrary correlation of the errors within clusters is accounted for. Same for `vcov = "twoway"`: arbitrary correlation within each of the two clusters is accounted for. 
 
-In the context of panel data or time series, `vcov = "NW"` (Newey-West, 1987) or `vcov = "DK"` (Driscoll-Kraay, 1998) account for temporal correlation between the errors; the two differing on how to account for heterogeneity between units. Their implementation is based on Milo (2017).  
+In the context of panel data or time series, `vcov = "NW"` (Newey-West, 1987) or `vcov = "DK"` (Driscoll-Kraay, 1998) account for temporal correlation between the errors; the two differing on how to account for heterogeneity between units. Their implementation is based on Millo (2017).  
 
 Finally, `vcov = "conley"` accounts for spatial correlation of the errors.
 
@@ -364,9 +364,9 @@ Kauermann G, Carroll RJ (2001). "[A Note on the Efficiency of Sandwich Covarianc
 
 MacKinnon JG, White H (1985). "Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties" Journal of Econometrics, 29(3), 305–325.
 
-Milo G (2017). "[Robust Standard Error Estimators for Panel Models: A Unifying Approach](https://doi.org/10.18637/jss.v082.i03)" Journal of Statistical Software, 82(3).
+Millo G (2017). "[Robust Standard Error Estimators for Panel Models: A Unifying Approach](https://doi.org/10.18637/jss.v082.i03)" Journal of Statistical Software, 82(3).
 
-Zeileis A, Koll S, Graham N (2020). "[Various Versatile Variances: An Object-Oriented Implementation of Clustered Covariances in R.](https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf)" Journal of Statistical Software, 95(1), 1–36.
+Zeileis A, Koll S, Graham N (2020). "[Various Versatile Variances: An Object-Oriented Implementation of Clustered Covariances in R](https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf)" Journal of Statistical Software, 95(1), 1–36.
 
 
 
