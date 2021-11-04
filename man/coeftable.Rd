@@ -7,13 +7,22 @@
 \alias{se}
 \title{Obtain various statistics from an estimation}
 \usage{
-coeftable(object, vcov = NULL, ssc = NULL, cluster, keep, drop, order, ...)
+coeftable(
+  object,
+  vcov = NULL,
+  ssc = NULL,
+  cluster = NULL,
+  keep,
+  drop,
+  order,
+  ...
+)
 
-pvalue(object, vcov, ssc, cluster, keep, drop, order, ...)
+pvalue(object, vcov = NULL, ssc = NULL, cluster = NULL, keep, drop, order, ...)
 
-tstat(object, vcov, ssc, cluster, keep, drop, order, ...)
+tstat(object, vcov = NULL, ssc = NULL, cluster = NULL, keep, drop, order, ...)
 
-se(object, vcov, ssc, cluster, keep, drop, order, ...)
+se(object, vcov = NULL, ssc = NULL, cluster = NULL, keep, drop, order, ...)
 }
 \arguments{
 \item{object}{An estimation. For example obtained from \code{\link[fixest]{feols}}.}

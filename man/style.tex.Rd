@@ -89,7 +89,7 @@ This function describes the style of Latex tables to be exported with the functi
 \details{
 The \code{\\checkmark} command, used in the "aer" style (in argument \code{yesNo}), is in the \code{amssymb} package.
 
-The commands \code{\\toprule}, \code{\\midrule} and \code{\\bottomrule} are in the \code{booktabs} package. You can set the width of the top/bottom rules with \\setlength\\heavyrulewidth\{wd\}, and of the midrule with \\setlength\\lightrulewidth\{wd\}.
+The commands \code{\\toprule}, \code{\\midrule} and \code{\\bottomrule} are in the \code{booktabs} package. You can set the width of the top/bottom rules with \\setlength\\heavyrulewidth\{wd\}, and of the midrule with \code{\\setlength\\lightrulewidth\{wd\}}.
 
 Note that all titles (\code{depvar.title}, \code{depvar.title}, etc) are not escaped, so they must be valid Latex expressions.
 }
