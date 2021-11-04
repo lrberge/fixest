@@ -467,7 +467,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
             # Cleaning if necessary
             lhs = fml[[2]]
-            if(lhs[[1]] == "c" && length(lhs) == 2){
+            if(length(lhs) == 2 && lhs[[1]] == "c"){
                 fml[[2]] = lhs[[2]]
             }
         }
@@ -1220,6 +1220,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
             } else {
                 # Regular, single RHS
+
+                fml_linear = rhs_info_stepwise$fml
 
                 linear.mat = error_sender(fixest_model_matrix(fml_linear, data, fake_intercept),
                                           "Evaluation of the right-hand-side of the formula raises an error: ")
