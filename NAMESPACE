@@ -65,6 +65,9 @@ S3method("$", fixest_multi)
 S3method(print, fixest_multi)
 S3method(summary, fixest_multi)
 S3method(as.list, fixest_multi)
+# etable
+S3method(print, etable_tex)
+S3method(print, etable_df)
 
 # rep
 S3method(rep, fixest) # rep fixest objects

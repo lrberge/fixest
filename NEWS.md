@@ -13,11 +13,15 @@
   
   - fix bug in the stepwise functions `sw` and `csw` when they contained only one variable.
   
+  - fix bug in `etable` preventing automatic headers to be displayed.
+  
 ## etable
 
  - in `headers`/`extralines`: `cmidrule` does not show up for empty column names any more.
  
  - new argument `tex.preview` to preview the latex table in the viewer pane (suggestion by Or Avishay-Rizi [#227](https://github.com/lrberge/fixest/issues/227)).
+ 
+ - the object returned by `etable` are now of class `etable_tex` (when `tex = TRUE`) or `etable_df`, both types having their own printing method.
  
 ## Other
 
