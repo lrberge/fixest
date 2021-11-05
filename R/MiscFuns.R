@@ -5712,39 +5712,6 @@ dsb_check_set_agg = function(...){
     return(res)
 }
 
-
-# style_name = "fixef"
-# keywords = c("title", "prefix", "suffix")
-parse_style = function(x, keywords){
-    # x is a character scalar, example x = "title:Variables:;below:_"
-    # style_name: name of the style, only to format the error message
-    # keywords: the vector of accepted keywords
-
-    style_name = gsub(".+\\$", "", deparse(substitute(x)))
-
-    set_up(1)
-
-    res = setNames(as.list(rep("", length(keywords))), keywords)
-    if(grepl("^ *$", x)) return(res)
-
-    x_split = strsplit(x, ";")[[1]]
-    if(!all(grepl(":", x_split))){
-        stop_up("In argument 'style', the styles must be of the form 'keyword1:value1; keyword2:value2' etc. A colon is currently missing in the '", style_name, "' style (i.e. '", x, "' is not valid).")
-    }
-
-    kws = gsub("^ +|:.*", "", x_split)
-
-    check_value(kws, "multi charin", .choices = keywords, .message = paste0("In argument 'style', the keywords of '", style_name, "' must be equal to ", enumerate_items(keywords, "quote.or"), "."))
-
-    values = as.list(gsub("^[^:]+:", "", x_split))
-
-    for(i in seq_along(kws)){
-        res[[kws[i]]] = escape_latex(values[i], up = 3, TRUE)
-    }
-
-    res
-}
-
 print_coeftable = function(coeftable, lastLine = "", show_signif = TRUE){
     # Simple function that does as the function coeftable but handles special cases
     # => to take care of the case when the coefficient is bounded
