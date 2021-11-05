@@ -5240,7 +5240,9 @@ print.list_n_unik = function(x, ...){
         }
 
         for(pair in info_pairs){
+
             data_id = attr(pair, "data_id")
+            pair = as.data.frame(pair)
 
             if(n_x == 2){
                 # data_col = paste0(hash, sfill(" ", var_width, right = TRUE), "|Excl:")
@@ -5251,7 +5253,11 @@ print.list_n_unik = function(x, ...){
             }
 
             # formatting the NAs
+            for(i in 1:(ncol(pair) - 2)){
+                pair[[i]] = fsignif(pair[[i]])
+            }
             pair[is.na(pair)] = " "
+            pair = as.matrix(pair)
 
             # adding the data col
             pair = cbind(data_col, pair)
