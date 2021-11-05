@@ -11413,6 +11413,11 @@ getFixest_estimation = function(){
     getOption("fixest_estimation")
 }
 
+#### ............... ####
+#### Startup         ####
+####
+
+
 
 #' Permanently removes the fixest package startup message
 #'
