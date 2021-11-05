@@ -44,7 +44,7 @@
 #' @param ci Level of the confidence interval, defaults to \code{0.95}. Only used if \code{coefstat = confint}.
 #' @param style.tex An object created by the function \code{\link[fixest]{style.tex}}. It represents the style of the Latex table, see the documentation of \code{\link[fixest]{style.tex}}.
 #' @param style.df An object created by the function \code{\link[fixest]{style.df}. }It represents the style of the data frame returned (if \code{tex = FALSE}), see the documentation of \code{\link[fixest]{style.df}}.
-#' @param notes (Tex only.) Character vector. If provided, a \code{"notes"} section will be added at the end right after the end of the table, containing the text of this argument. Note that if it is a vector, it will be collapsed with new lines.
+#' @param notes (Tex only.) Character vector. If provided, a \code{"notes"} section will be added at the end right after the end of the table, containing the text of this argument. If it is a vector, it will be collapsed with new lines. If \code{tpt = TRUE}, the behavior is different: each element of the vector is an item. If the first element of the vector starts with \code{"@"}, then it will be included verbatim, and in case of \code{tpt = TRUE}, right before the first item. If that element is provided, it will replace the value defined in \code{style.tex(notes.title)} or \code{style.tex(notes.tpt.intro)}.
 #' @param group A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument \code{drop}) and \code{TRUE} or \code{FALSE} will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: \code{group=list("Controls: personal traits"=c("gender", "height", "weight"))} will create an new line with \code{"Controls: personal traits"} in the leftmost cell, all three variables gender, height and weight are discarded, \code{TRUE} appearing in each model containing at least one of the three variables (the style of \code{TRUE}/\code{FALSE} is governed by the argument \code{yesNo}). You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section; 2) \code{"^"}: 1st, \code{"_"}: last, row. For example: \code{group=list("_^Controls"=stuff)} will place the line at the top of the 'stats' section, and using \code{group=list("^_Controls"=stuff)} will make the row appear at the bottom of the coefficients section. For details, see the dedicated section.
 #' @param extralines A vector, a list or a one sided formula. The list elements should be either a vector representing the value of each cell, a list of the form \code{list("item1" = #item1, "item2" = #item2, etc)}, or a function. This argument can be many things, please have a look at the dedicated help section; a simplified description follows. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extralines=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section; 2) \code{"^"}: 1st, \code{"_"}: last, row. For example: \code{extralines=list("__Controls"=stuff)} will place the line at the bottom of the stats section, and using \code{extralines=list("^^Controls"=stuff)} will make the row appear at the top of the 'coefficients' section. For details, see the dedicated section. You can use \code{.()} instead of \code{list()}.
 #' @param fixef.group Logical scalar or list (default is \code{NULL}). If equal to \code{TRUE}, then all fixed-effects always appearing jointly in models will be grouped in one row. If a list, its elements must be character vectors of regular expressions and the list names will be the row names. For ex. \code{fixef.group=list("Dates fixed-effects"="Month|Day")} will remove the \code{"Month"} and \code{"Day"} fixed effects from the display and replace them with a single row named "Dates fixed-effects". You can monitor the placement of the new row with the special characters telling where to place the row within a section: \code{"^"} (first), or \code{"_"} (last); and in which section it should appear: \code{"^"} (coef.), \code{"-"} (fixed-effects), or \code{"_"} (stat.). These two special characters must appear first in the row names. Please see the dedicated section
@@ -66,6 +66,10 @@
 #' @param meta.call (Tex only.) Logical scalar, default is \code{FALSE}. If \code{TRUE} then the call to the function is inserted right before the table in a comment.
 #' @param tex.preview Logical, default is \code{FALSE}. If \code{TRUE}, then the table generated by \code{etable} is displayed in the viewer pane thanks to the package \code{texPreview} (which must be installed).
 #' @param x An object returned by \code{etable}.
+#' @param tpt (Tex only.) Logical scalar, default is FALSE. Whether to use the \code{threeparttable} environment. If so, the \code{notes} will be integrated into the \code{tablenotes} environment.
+#' @param arraystretch (Tex only.) A numeric scalar, default is \code{NULL}. If provided, the command \code{\\renewcommand*{\\arraystretch}{x}} is inserted, replacing \code{x} by the value of \code{arraystretch}. The changes are specific to the current table and do not affect the rest of the document.
+#' @param fontsize (Tex only.) A character scalar, default is \code{NULL}. Can be equal to \code{tiny}, \code{scriptsize}, \code{footnotesize}, \code{small}, \code{normalsize}, \code{large}, or \code{Large}. The change affect the table only (and not the rest of the document).
+#' @param adjustbox (Tex only.) A logical, numeric or character scalar, default is \code{NULL}. If not \code{NULL}, the table is inserted within the \code{adjustbox} environment. By default the options are \code{width = 1\\textwidth, center} (if \code{TRUE}). A numeric value changes the value before \code{\\textwidth}. You can also add a character of the form \code{"x tw"} or \code{"x th"} with \code{x} a number and where tw (th) stands for text-width (text-height). Finally any other character value is passed verbatim as an \code{adjustbox} option.
 #'
 #' @details
 #' The function \code{esttex} is equivalent to the function \code{etable} with argument \code{tex = TRUE}.
@@ -435,7 +439,8 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                   style.df = NULL, notes = NULL, group = NULL, extralines = NULL,
                   fixef.group = NULL, placement = "htbp", drop.section = NULL,
                   poly_dict = c("", " square", " cube"), postprocess.tex = NULL,
-                  postprocess.df = NULL, fit_format = "__var__", coef.just = NULL,
+                  postprocess.df = NULL, tpt = FALSE, arraystretch = NULL, adjustbox = NULL,
+                  fontsize = NULL, fit_format = "__var__", coef.just = NULL,
                   meta = NULL, meta.time = NULL, meta.author = NULL, meta.sys = NULL,
                   meta.call = NULL, meta.comment = NULL, tex.preview = FALSE){
 
@@ -647,7 +652,8 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                                  coef.just = coef.just, meta = meta, meta.time = meta.time,
                                  meta.author = meta.author, meta.sys = meta.sys,
                                  meta.call = meta.call, meta.comment = meta.comment,
-                                 .up = .up)
+                                 tpt = tpt, arraystretch = arraystretch, adjustbox = adjustbox,
+                                 fontsize = fontsize, .up = .up)
 
     if(tex){
         res = etable_internal_latex(info)
@@ -658,9 +664,8 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     }
 
     # tex.preview
-    tex.preview = tex.preview && tex
-
     if(tex && tex.preview){
+
         is_texPreview = requireNamespace("texPreview", quietly = TRUE)
         if(!is_texPreview){
             warning("For the argument 'tex.preview' to work, you need to install the package 'texPreview'.")
@@ -672,7 +677,25 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
 
     make_preview = function(x) NULL
     if(tex.preview){
-        make_preview = function(x) texPreview::tex_preview(paste0(x, collapse = "\n"))
+
+        # p: package ; pn: package name ; x: tex vector ; y: tex packages
+        add_pkg = function(p, x, y, pn = p){
+            if(any(grepl(p, x, fixed = TRUE))){
+                c(y, paste0("\\usepackage{", pn, "}"))
+            } else {
+                y
+            }
+        }
+
+        tex_pkg = c()
+        tex_pkg = add_pkg("threeparttable", res, tex_pkg)
+        tex_pkg = add_pkg("adjustbox", res, tex_pkg)
+        tex_pkg = add_pkg("checkmark", res, tex_pkg, "amssymb")
+
+        # I do that to avoid having texPreview in suggests which makes my session hang
+        preview_fun = eval(str2lang("function(x, pkg) texPreview::texPreview(x, usrPackages = pkg)"))
+
+        make_preview = function(x) preview_fun(paste0(x, collapse = "\n"), usrPackages = tex_pkg)
     }
 
     if(!missnull(file)){
@@ -771,9 +794,11 @@ gen_etable_aliases = function(){
     # esttable
     #
 
-    qui_df = !arg_name %in% c("tex", "title", "label", "float", "style.tex", "notes", "placement", "postprocess.tex",
-                              "meta", "meta.time", "meta.author", "meta.sys", "meta.call", "meta.comment",
-                              "tex.preview")
+    qui_df = !arg_name %in% c("tex", "title", "label", "float", "style.tex",
+                              "notes", "placement", "postprocess.tex",
+                              "meta", "meta.time", "meta.author", "meta.sys",
+                              "meta.call", "meta.comment", "tpt", "arraystretch",
+                              "adjustbox", "fontsize", "tex.preview")
 
     esttable_args = paste0(arg_name[qui_df], " = ", arg_default[qui_df], collapse = ", ")
     esttable_args = gsub(" = ,", ",", esttable_args)
@@ -829,7 +854,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                                  fit_format = "__var__", coef.just = NULL,
                                  meta = NULL, meta.time = NULL, meta.author = NULL,
                                  meta.call = NULL, meta.sys = NULL, meta.comment = NULL,
-                                 .up = 1){
+                                 tpt = FALSE, arraystretch = NULL, adjustbox = NULL,
+                                 fontsize = NULL, .up = 1){
 
     # This function is the core of the function etable
 
@@ -853,8 +879,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
     opts = getOption("fixest_etable")
     sysOrigin = sys.parent(.up)
+    mc = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin), expand.dots = FALSE)
     if(length(opts) > 0){
-        mc = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin), expand.dots = FALSE)
         args_usr = setdiff(names(mc), c("style.tex", "style.df"))
 
         # We modify only non-user provided arguments
@@ -865,6 +891,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         }
     }
 
+    # Getting the default style values
     if(tex){
         if(!"style.tex" %in% names(opts)){
             style = fixest::style.tex(main = "base")
@@ -886,6 +913,12 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         style[names(style_user)] = style_user
     }
 
+    # Arguments both in style AND in etable
+    args_dual = c("tpt", "arraystretch", "fontsize", "adjustbox")
+    for(arg in setdiff(args_dual, names(mc))){
+        # We set to the default in style (only if NOT user-provided)
+        assign(arg, style[[arg]])
+    }
 
     #
     # Full control
@@ -894,10 +927,11 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     check_arg(title, "character scalar")
     check_arg_plus(coefstat, "match(se, tstat, confint)")
 
-    check_arg_plus(notes, "NULL{''} character vector no na")
-    if(length(notes) > 1) notes = paste(notes, collapse = "\n")
+    check_arg_plus(notes, "NULL character vector no na")
+    if(length(notes) > 0) notes = notes[nchar(notes) > 0]
 
     check_arg("logical scalar", replace, convergence, fixef_sizes, fixef_sizes.simplify, keepFactors, family, tex, depvar)
+    check_arg("logical scalar", tpt)
     check_arg("NULL logical scalar", se.below, se.row)
 
     isTex = tex
@@ -951,7 +985,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         show_depvar = depvar
     }
 
-    check_arg(keep, drop, order, "character vector no na NULL", .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
+    check_arg(keep, drop, order, "character vector no na NULL",
+              .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
 
     check_arg(file, label, interaction.combine, i.equal, "character scalar")
 
@@ -974,7 +1009,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     headers = error_sender(eval_dot(headers, .up + 1), arg_name = "headers", up = .up)
     extralines = error_sender(eval_dot(extralines, .up + 1), arg_name = "extralines", up = .up)
 
-    check_arg_plus(headers, "NULL character vector no na | NA | list")
+    check_arg(headers, "NULL character vector no na | NA | list")
     if(is.null(headers)) headers = list()
 
     check_arg(poly_dict, "character vector no na")
@@ -1010,6 +1045,13 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     if(!grepl("__var__", fit_format, fixed = TRUE)){
         stop("The argument 'fit_format' should include the special name '__var__' that will be replaced by the variable name. So far it does not contain it.")
     }
+
+    check_arg(arraystretch, "NULL numeric scalar GT{0}")
+
+    check_arg_plus(fontsize, "NULL match(tiny, scriptsize, footnotesize, small, normalsize, large, Large)")
+
+    # adjustbox + default
+    adjustbox = check_set_adjustbox(adjustbox, .up)
 
     #
     # meta
@@ -2490,19 +2532,20 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
     }
 
-    res = list(se_type_list=se_type_list, var_list=var_list, coef_list=coef_list,
-               coef_below=coef_below, se.row = se.row, sd_below=sd_below, depvar_list=depvar_list,
-               obs_list=obs_list, convergence_list=convergence_list, fe_names=fe_names,
-               is_fe=is_fe, nb_fe=nb_fe, slope_flag_list = slope_flag_list,
-               slope_names=slope_names, useSummary=useSummary, model_names=model_names,
-               family_list=family_list, fitstat_list=fitstat_list, headers=headers,
-               isHeaders=isHeaders, title=title, convergence=convergence, family=family,
-               keep=keep, drop=drop, order=order, file=file, label=label, se.below=se.below,
-               signifCode=signifCode, fixef_sizes=fixef_sizes, fixef_sizes.simplify = fixef_sizes.simplify,
-               depvar=depvar, useSummary=useSummary, dict=dict, yesNo=yesNo, add_signif=add_signif,
-               float=float, coefstat=coefstat, ci=ci, style=style, notes=notes, group=group,
-               extralines=extralines, placement=placement, drop.section=drop.section,
-               tex_tag=tex_tag, fun_format = fun_format, coef.just = coef.just, meta = meta_txt)
+    res = list(se_type_list = se_type_list, var_list = var_list, coef_list = coef_list,
+               coef_below = coef_below, se.row = se.row, sd_below = sd_below, depvar_list = depvar_list,
+               obs_list = obs_list, convergence_list = convergence_list, fe_names = fe_names,
+               is_fe = is_fe, nb_fe = nb_fe, slope_flag_list = slope_flag_list,
+               slope_names = slope_names, useSummary = useSummary, model_names = model_names,
+               family_list = family_list, fitstat_list = fitstat_list, headers = headers,
+               isHeaders = isHeaders, title = title, convergence = convergence, family = family,
+               keep = keep, drop = drop, order = order, file = file, label = label, se.below = se.below,
+               signifCode = signifCode, fixef_sizes = fixef_sizes, fixef_sizes.simplify = fixef_sizes.simplify,
+               depvar = depvar, useSummary = useSummary, dict = dict, yesNo = yesNo, add_signif = add_signif,
+               float = float, coefstat = coefstat, ci = ci, style = style, notes = notes, group = group,
+               extralines = extralines, placement = placement, drop.section = drop.section,
+               tex_tag = tex_tag, fun_format = fun_format, coef.just = coef.just, meta = meta_txt,
+               tpt = tpt, arraystretch = arraystretch, adjustbox = adjustbox, fontsize = fontsize)
 
     return(res)
 }
@@ -2558,6 +2601,10 @@ etable_internal_latex = function(info){
     fun_format = info$fun_format
     meta = info$meta
     se.row = info$se.row
+    tpt = info$tpt
+    arraystretch = info$arraystretch
+    adjustbox = info$adjustbox
+    fontsize = info$fontsize
 
     # Formatting the searating lines
     if(nchar(style$line.top) > 1) style$line.top = paste0(style$line.top, "\n")
@@ -2570,27 +2617,31 @@ etable_internal_latex = function(info){
     # Starting the table
     myTitle = title
     if(!is.null(label)) myTitle = paste0("\\label{", label, "} ", myTitle)
+    caption = ""
+    info_center = "\\centering\n"
     if(float){
         if(nchar(placement) > 0) placement = paste0("[", placement, "]")
-        start_table = paste0("\\begin{table}", placement, "\n\\centering\n\\caption{",  myTitle, "}\n")
-        end_table = "\\end{table}"
+
+        table_begin = paste0("\\begin{table}", placement, "\n")
+        caption = paste0("\\caption{",  myTitle, "}\n")
+        table_end = "\\end{table}"
     } else {
-        start_table = ""
-        end_table = ""
+        table_begin = "\\begingroup\n"
+        table_end = "\\par\\endgroup\n"
     }
 
 
     # intro and outro Latex tabular
     # \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lc}
     if(style$tabular == "normal"){
-        intro_latex = paste0("\\begin{tabular}{l", paste0(rep("c", n_models), collapse=""), "}\n", style$line.top)
-        outro_latex = "\\end{tabular}\n"
+        tabular_begin = paste0("\\begin{tabular}{l", paste0(rep("c", n_models), collapse=""), "}\n", style$line.top)
+        tabular_end = "\\end{tabular}\n"
     } else if(style$tabular == "*"){
-        intro_latex = paste0("\\begin{tabular*}{\\textwidth}{@{\\extracolsep{\\fill}}l", paste0(rep("c", n_models), collapse=""), "}\n", style$line.top)
-        outro_latex = "\\end{tabular*}\n"
+        tabular_begin = paste0("\\begin{tabular*}{\\textwidth}{@{\\extracolsep{\\fill}}l", paste0(rep("c", n_models), collapse = ""), "}\n", style$line.top)
+        tabular_end = "\\end{tabular*}\n"
     } else if(style$tabular == "X"){
-        intro_latex = paste0("\\begin{tabularx}{\\textwidth}{", paste0(rep("X", n_models + 1), collapse = ""), "}\n", style$line.top)
-        outro_latex = "\\end{tabularx}\n"
+        tabular_begin = paste0("\\begin{tabularx}{\\textwidth}{", paste0(rep("X", n_models + 1), collapse = ""), "}\n", style$line.top)
+        tabular_end = "\\end{tabularx}\n"
     }
 
     # 1st lines => dep vars
@@ -2677,7 +2728,7 @@ etable_internal_latex = function(info){
     } else if(style$var.title == "\\midrule"){
         coef_title = "\\midrule "
     } else {
-        coef_title = paste0(style$var.title, " & ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
+        coef_title = paste0(style$var.title, "\\\\\n")
     }
 
     # Coefficients, the tricky part
@@ -2753,7 +2804,7 @@ etable_internal_latex = function(info){
         } else if(style$fixef.title == "\\midrule"){
             fixef_title = "\\midrule "
         } else {
-            fixef_title = paste0(style$fixef.title, " & ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
+            fixef_title = paste0(style$fixef.title, "\\\\\n")
         }
 
         # The number of FEs
@@ -2821,7 +2872,7 @@ etable_internal_latex = function(info){
         } else if(style$slopes.title == "\\midrule"){
             slope_intro = "\\midrule "
         } else {
-            slope_intro = paste0(style$slopes.title, " & ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
+            slope_intro = paste0(style$slopes.title, "\\\\\n")
         }
 
         # reformat the yes/no slope
@@ -3002,10 +3053,6 @@ etable_internal_latex = function(info){
         info_muli_se = paste0(coefstat_sentence, " & ", tex_multicol(all_se_type), "\n")
     }
 
-
-    # Information on number of items
-    supplemental_info = ""
-
     #
     # Fit statistics
     #
@@ -3016,7 +3063,7 @@ etable_internal_latex = function(info){
         } else if(style$stats.title == "\\midrule"){
             stat_title = "\\midrule "
         } else {
-            stat_title = paste0(style$stats.title, " & ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
+            stat_title = paste0(style$stats.title, "\\\\\n")
         }
 
         stat_lines = paste0(nb_FE_lines, info_convergence, info_muli_se)
@@ -3039,8 +3086,35 @@ etable_internal_latex = function(info){
 
     # Notes
     info_notes = ""
-    if(nchar(notes) > 0){
-        info_notes = paste0("\n", style$notes.title, notes, "\n")
+    if(length(notes) > 0){
+
+        notes_intro = if(tpt) style$notes.tpt.intro else style$notes.title
+
+        if(grepl("^@", notes[1])){
+            notes_intro = paste0(gsub("^@", "", notes[1]), " ")
+            notes = notes[-1]
+        }
+
+        if(length(notes) > 0){
+            notes = escape_latex(notes)
+
+            if(tpt){
+                if(nchar(trimws(notes_intro)) > 0){
+                    notes_intro = paste0(notes_intro, "\n")
+                }
+
+                # if note = [a] => we want it to be attached to item => \item[a]
+                # otherwise, we don't want it
+                notes = gsub("^([^\\[])", " \\1", notes)
+                notes = paste0("\\item", notes, collapse = "\n")
+
+                info_notes = paste0("\n\\begin{tablenotes}\n",
+                                    notes_intro, notes,
+                                    "\n\\end{tablenotes}\n")
+            } else {
+                info_notes = paste0("\n", notes_intro, paste0(notes, collapse = "\\\\\n"), "\n")
+            }
+        }
     }
 
     #
@@ -3183,7 +3257,7 @@ etable_internal_latex = function(info){
         } else if(style$fixef.title == "\\midrule"){
             fixef_title = "\\midrule "
         } else {
-            fixef_title = paste0(style$fixef.title, "& ", paste(rep(" ", n_models), collapse = " & "), "\\\\\n")
+            fixef_title = paste0(style$fixef.title, "\\\\\n")
         }
     }
 
@@ -3200,16 +3274,50 @@ etable_internal_latex = function(info){
     }
 
     if(tex_tag){
-        start_tag = "%start:tab\n"
-        end_tag = "%end:tab\n"
+        tag_tabular_before = "%start:tab\n"
+        tag_tabular_end = "%end:tab\n"
     } else {
-        start_tag = end_tag = ""
+        tag_tabular_before = tag_tabular_end = ""
     }
 
+    #
+    # Other info:
+    #
+
+    tpt_begin = tpt_end = tpt_caption = ""
+    if(tpt){
+        tpt_begin = "\\begin{threeparttable}[b]\n"
+        tpt_end = "\\end{threeparttable}\n"
+        tpt_caption = caption
+        caption = ""
+    }
+
+    info_stretch = ""
+    if(!is.null(arraystretch)){
+        info_stretch = paste0("\\renewcommand*{\\arraystretch}{", arraystretch, "}")
+    }
+
+    adj_box_begin = adj_box_end = ""
+    if(!is.null(adjustbox)){
+        adj_box_begin = paste0("\\begin{adjustbox}{", adjustbox, "}\n")
+        adj_box_end = "\\end{adjustbox}\n"
+    }
+
+    info_font = ""
+    if(!is.null(fontsize)){
+        info_font = paste0("\\", fontsize, "\n")
+    }
 
     # meta information: has been computed in results2formattedList
 
-    res = c(meta, supplemental_info, start_table, start_tag, intro_latex, headers_top, first_line, headers_mid, model_line, info_family, headers_bottom, coef_stack, stat_stack, info_SE_footer, style$line.bottom, outro_latex, end_tag, info_notes, end_table)
+
+    res = c(meta, table_begin, caption, info_center, info_font, adj_box_begin,
+            tpt_begin, tpt_caption, info_stretch,
+            tag_tabular_before, tabular_begin,
+            headers_top, first_line, headers_mid, model_line, info_family, headers_bottom,
+            coef_stack, stat_stack, info_SE_footer, style$line.bottom,
+            tabular_end, tag_tabular_end,
+            info_notes, tpt_end, adj_box_end, table_end)
 
     res = res[nchar(res) > 0]
 
@@ -3940,6 +4048,7 @@ getFixest_etable = function(){
 #' @param tabular Character scalar equal to "normal" (default), "*" or "X". Represents the type of tabular to export.
 #' @param interaction.combine Character scalar, defaults to \code{" $\\times$ "}. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind $\\times$ Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.
 #' @param i.equal Character scalar, defaults to \code{" $=$ "}. Only affects factor variables created with the function \code{\link[fixest]{i}}, tells how the variable should be linked to its value. For example if you have the Species factor from the iris data set, by default the display of the variable is \code{Species $=$ Setosa}, etc. If \code{i.equal = ": "} the display becomes \code{Species: Setosa}.
+#' @param notes.tpt.intro Character scalar. Only used if \code{tpt = TRUE}, it is some tex code that is passed before any \code{threeparttable} item (can be used for, typically, the font size). Default is the empty string.
 #'
 #' @details
 #' The \code{\\checkmark} command, used in the "aer" style (in argument \code{yesNo}), is in the \code{amssymb} package.
@@ -3975,8 +4084,10 @@ getFixest_etable = function(){
 style.tex = function(main = "base", depvar.title, model.title, model.format, line.top,
                      line.bottom, var.title, fixef.title, fixef.prefix, fixef.suffix,
                      fixef.where, slopes.title, slopes.format, fixef_sizes.prefix,
-                     fixef_sizes.suffix, stats.title, notes.title, tablefoot,
-                     tablefoot.title, tablefoot.value, yesNo, tabular = "normal",
+                     fixef_sizes.suffix, stats.title, notes.title,
+                     notes.tpt.intro, tablefoot, tablefoot.title, tablefoot.value,
+                     yesNo, tabular = "normal",
+                     tpt, arraystretch, adjustbox = NULL, fontsize,
                      interaction.combine = " $\\times$ ", i.equal = " $=$ "){
 
     # To implement later:
@@ -3993,9 +4104,10 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
     check_arg("character scalar", fixef.title, fixef.prefix, fixef.suffix, slopes.title, slopes.format)
     check_arg("character scalar", fixef_sizes.prefix, fixef_sizes.suffix, stats.title)
     check_arg("character scalar", notes.title, tablefoot.title, interaction.combine, i.equal)
+    check_arg("character scalar", notes.tpt.intro)
 
     check_arg(tablefoot.value, "character vector no na")
-    check_arg(tablefoot, "logical scalar")
+    check_arg(tablefoot, tpt, "logical scalar")
     check_arg_plus(fixef.where, "match(var, stats)")
     check_arg_plus(tabular, "match(normal, *, X)")
 
@@ -4004,18 +4116,28 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
         yesNo = c(yesNo, "")
     }
 
+    check_arg(arraystretch, "numeric scalar GT{0}")
+    adjustbox = check_set_adjustbox(adjustbox)
+    check_arg_plus(fontsize, "NULL match(tiny, scriptsize, footnotesize, small, normalsize, large, Large)")
+
     mc = match.call()
 
     if("main" %in% names(mc)){
         if(main == "base"){
-            res = list(depvar.title = "Dependent Variable(s):", model.title = "Model:", model.format = "(1)",
+            res = list(depvar.title = "Dependent Variable(s):", model.title = "Model:",
+                       model.format = "(1)",
                        line.top = "\\tabularnewline\\midrule\\midrule", line.bottom = "",
-                       var.title = "\\midrule \\emph{Variables}",
-                       fixef.title = "\\midrule \\emph{Fixed-effects}", fixef.prefix = "", fixef.suffix = "", fixef.where = "var",
-                       slopes.title = "\\midrule \\emph{Varying Slopes}", slopes.format = "__var__ (__slope__)",
+                       var.title = "\\midrule\n\\emph{Variables}",
+                       fixef.title = "\\midrule\n\\emph{Fixed-effects}", fixef.prefix = "",
+                       fixef.suffix = "", fixef.where = "var",
+                       slopes.title = "\\midrule\n\\emph{Varying Slopes}",
+                       slopes.format = "__var__ (__slope__)",
                        fixef_sizes.prefix = "\\# ", fixef_sizes.suffix = "",
-                       stats.title = "\\midrule \\emph{Fit statistics}", notes.title = "\\medskip \\emph{Notes:} ",
-                       tablefoot = TRUE, tablefoot.title = "\\midrule\\midrule", tablefoot.value = "default", yesNo = c("Yes", ""))
+                       stats.title = "\\midrule\n\\emph{Fit statistics}",
+                       notes.title = "\\par \\emph{Notes:} ",
+                       notes.tpt.intro = "",
+                       tablefoot = TRUE, tablefoot.title = "\\midrule\\midrule\n",
+                       tablefoot.value = "default", yesNo = c("Yes", ""))
 
             if(!missing(tablefoot) && isFALSE(tablefoot)){
                 res$tablefoot = FALSE
@@ -4026,11 +4148,14 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
             res = list(depvar.title = "", model.title = "", model.format = "(1)",
                        line.top = "\\toprule", line.bottom = "\\bottomrule",
                        var.title = "\\midrule",
-                       fixef.title = " ", fixef.prefix = "", fixef.suffix = " fixed effects", fixef.where = "stats",
+                       fixef.title = " ", fixef.prefix = "", fixef.suffix = " fixed effects",
+                       fixef.where = "stats",
                        slopes.title = "", slopes.format = "__var__ $\\times $ __slope__",
                        fixef_sizes.prefix = "\\# ", fixef_sizes.suffix = "",
                        stats.title = " ", notes.title = "\\medskip \\emph{Notes:} ",
-                       tablefoot = FALSE, tablefoot.title = "", tablefoot.value = "", yesNo = c("$\\checkmark$", ""))
+                       notes.tpt.intro = "",
+                       tablefoot = FALSE, tablefoot.title = "", tablefoot.value = "",
+                       yesNo = c("$\\checkmark$", ""))
 
             if(main == "aer"){
                 # just set
@@ -4735,7 +4860,36 @@ tex.nice = function(x, n_models){
     res
 }
 
+check_set_adjustbox = function(adjustbox, up = 0){
+    set_up(up + 1)
 
+    check_arg(adjustbox, "NULL scalar(character, strict logical, numeric) GT{0}")
+
+    if(is.null(adjustbox)){
+        # nothing
+    } else if(isTRUE(adjustbox)){
+        adjustbox = "width = \\textwidth, center"
+    } else if(isFALSE(adjustbox)){
+        adjustbox = NULL
+    } else if(is.numeric(adjustbox)){
+        if(adjustbox > 3){
+            warn_up("When 'adjustbox' is a number, the unit is the text-width. Hence a value of ", fsignif(adjustbox), " may be too large.")
+        }
+        adjustbox = paste0("width = ", adjustbox, "\\textwidth, center")
+    } else if(grepl("(?i)^[[:digit:]\\.]+ *t(w|h)$", trimws(adjustbox))){
+        adj_nbr = gsub("[^[:digit:]\\.]", "", adjustbox)
+
+        if(!is_numeric_in_char(adj_nbr)){
+            stop_up("The number in the argument 'adjustbox' (equal to '", adjustbox, "') could not be parsed. Please revise.")
+        }
+
+        adj_unit = if(grepl("(?i)tw", adjustbox)) "\\textwidth" else "\\textheight"
+
+        adjustbox = paste0("width = ", adj_nbr, adj_unit, ", center")
+    }
+
+    adjustbox
+}
 
 
 

@@ -17,11 +17,21 @@
   
 ## etable
 
+ - the quality of the tex output has been substantially improved.
+ 
  - in `headers`/`extralines`: `cmidrule` does not show up for empty column names any more.
  
  - new argument `tex.preview` to preview the latex table in the viewer pane (suggestion by Or Avishay-Rizi [#227](https://github.com/lrberge/fixest/issues/227)).
  
  - the object returned by `etable` are now of class `etable_tex` (when `tex = TRUE`) or `etable_df`, both types having their own printing method.
+ 
+ - new argument `tpt` to nest the table in a `threeparttable` environment. Notes are then nested into the `tablenotes` environment.
+ 
+ - new argument `arraystretch`, self-explanatory.
+ 
+ - new argument `fontsize`, self-explanatory.
+ 
+ - new argument `adjustbox`: `adjustbox = TRUE` nests the tabular into an `adjustbox` environment with `width = \\textwidth, center` as default option. Use `adjustbox = x` with `x` a number giving the text-width. Use `adjustbox = "x th"` with `x` a number giving the text-height. Finally you can use a character string, as in `adjustbox = "my options"`, that will be passed verbatim as a an `adjustbox` option.
  
 ## Other
 

@@ -60,6 +60,10 @@ etable(
   poly_dict = c("", " square", " cube"),
   postprocess.tex = NULL,
   postprocess.df = NULL,
+  tpt = FALSE,
+  arraystretch = NULL,
+  adjustbox = NULL,
+  fontsize = NULL,
   fit_format = "__var__",
   coef.just = NULL,
   meta = NULL,
@@ -209,6 +213,10 @@ esttex(
   drop.section = NULL,
   poly_dict = c("", " square", " cube"),
   postprocess.tex = NULL,
+  tpt = FALSE,
+  arraystretch = NULL,
+  adjustbox = NULL,
+  fontsize = NULL,
   fit_format = "__var__",
   meta = NULL,
   meta.time = NULL,
@@ -300,7 +308,7 @@ esttex(
 
 \item{style.df}{An object created by the function \code{\link[fixest]{style.df}. }It represents the style of the data frame returned (if \code{tex = FALSE}), see the documentation of \code{\link[fixest]{style.df}}.}
 
-\item{notes}{(Tex only.) Character vector. If provided, a \code{"notes"} section will be added at the end right after the end of the table, containing the text of this argument. Note that if it is a vector, it will be collapsed with new lines.}
+\item{notes}{(Tex only.) Character vector. If provided, a \code{"notes"} section will be added at the end right after the end of the table, containing the text of this argument. If it is a vector, it will be collapsed with new lines. If \code{tpt = TRUE}, the behavior is different: each element of the vector is an item. If the first element of the vector starts with \code{"@"}, then it will be included verbatim, and in case of \code{tpt = TRUE}, right before the first item. If that element is provided, it will replace the value defined in \code{style.tex(notes.title)} or \code{style.tex(notes.tpt.intro)}.}
 
 \item{group}{A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument \code{drop}) and \code{TRUE} or \code{FALSE} will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: \code{group=list("Controls: personal traits"=c("gender", "height", "weight"))} will create an new line with \code{"Controls: personal traits"} in the leftmost cell, all three variables gender, height and weight are discarded, \code{TRUE} appearing in each model containing at least one of the three variables (the style of \code{TRUE}/\code{FALSE} is governed by the argument \code{yesNo}). You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section; 2) \code{"^"}: 1st, \code{"_"}: last, row. For example: \code{group=list("_^Controls"=stuff)} will place the line at the top of the 'stats' section, and using \code{group=list("^_Controls"=stuff)} will make the row appear at the bottom of the coefficients section. For details, see the dedicated section.}
 
@@ -317,6 +325,14 @@ esttex(
 \item{postprocess.tex}{A function that will postprocess the character vector defining the latex table. Only when \code{tex = TRUE}. By default it is equal to \code{NULL}, meaning that there is no postprocessing. When \code{tex = FALSE}, see the argument \code{postprocess.df}. See details.}
 
 \item{postprocess.df}{A function that will postprocess.tex the resulting data.frame. Only when \code{tex = FALSE}. By default it is equal to \code{NULL}, meaning that there is no postprocessing. When \code{tex = TRUE}, see the argument \code{postprocess.tex}.}
+
+\item{tpt}{(Tex only.) Logical scalar, default is FALSE. Whether to use the \code{threeparttable} environment. If so, the \code{notes} will be integrated into the \code{tablenotes} environment.}
+
+\item{arraystretch}{(Tex only.) A numeric scalar, default is \code{NULL}. If provided, the command \code{\\renewcommand*{\\arraystretch}{x}} is inserted, replacing \code{x} by the value of \code{arraystretch}. The changes are specific to the current table and do not affect the rest of the document.}
+
+\item{adjustbox}{(Tex only.) A logical, numeric or character scalar, default is \code{NULL}. If not \code{NULL}, the table is inserted within the \code{adjustbox} environment. By default the options are \code{width = 1\\textwidth, center} (if \code{TRUE}). A numeric value changes the value before \code{\\textwidth}. You can also add a character of the form \code{"x tw"} or \code{"x th"} with \code{x} a number and where tw (th) stands for text-width (text-height). Finally any other character value is passed verbatim as an \code{adjustbox} option.}
+
+\item{fontsize}{(Tex only.) A character scalar, default is \code{NULL}. Can be equal to \code{tiny}, \code{scriptsize}, \code{footnotesize}, \code{small}, \code{normalsize}, \code{large}, or \code{Large}. The change affect the table only (and not the rest of the document).}
 
 \item{fit_format}{Character scalar, default is \code{"__var__"}. Only used in the presence of IVs. By default the endogenous regressors are named \code{fit_varname} in the second stage. The format of the endogenous regressor to appear in the table is governed by \code{fit_format}. For instance, by default, the prefix \code{"fit_"} is removed, leading to only \code{varname} to appear. If \code{fit_format = "$\\\\hat{__var__}$"}, then \code{"$\\hat{varname}$"} will appear in the table.}
 

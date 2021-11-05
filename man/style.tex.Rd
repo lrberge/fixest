@@ -22,11 +22,16 @@ style.tex(
   fixef_sizes.suffix,
   stats.title,
   notes.title,
+  notes.tpt.intro,
   tablefoot,
   tablefoot.title,
   tablefoot.value,
   yesNo,
   tabular = "normal",
+  tpt,
+  arraystretch,
+  adjustbox = NULL,
+  fontsize,
   interaction.combine = " $\\\\times$ ",
   i.equal = " $=$ "
 )
@@ -65,6 +70,8 @@ style.tex(
 \item{stats.title}{A character scalar. The title line appearing before the statistics (defaults to \code{"\\midrule \\emph{Fit statistics}"} if \code{main = "base"} and to \code{" "} if \code{main = "aer"}). Note that the behavior of \code{stats.title = " "} (a space) is different from \code{stats.title = ""} (the empty string): in the first case you will get an empty row, while in the second case you get no empty row. To get a line without an empty row, use \code{"\\midrule"} (and not \code{"\\midrule "}!--the space!).}
 
 \item{notes.title}{A character scalar. The title appearing just before the notes, defaults to \code{"\\medskip \\emph{Notes:} "}.}
+
+\item{notes.tpt.intro}{Character scalar. Only used if \code{tpt = TRUE}, it is some tex code that is passed before any \code{threeparttable} item (can be used for, typically, the font size). Default is the empty string.}
 
 \item{tablefoot}{A logical scalar. Whether or not to display a footer within the table. Defaults to \code{TRUE} if \code{main = "aer"}) and \code{FALSE} if \code{main = "aer"}).}
 

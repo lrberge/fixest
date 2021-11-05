@@ -92,5 +92,5 @@ Newey WK, West KD (1987). "A Simple, Positive Semi-Definite, Heteroskedasticity 
 
 Driscoll JC, Kraay AC (1998). "Consistent Covariance Matrix Estimation with Spatially Dependent Panel Data." \emph{The Review of Economics and Statistics}, 80(4), 549-560. doi:10.1162/003465398557825.
 
-Milo G (2017). "Robust Standard Error Estimators for Panel Models: A Unifying Approach" \emph{Journal of Statistical Software}, 82(3). doi:10.18637/jss.v082.i03.
+Millo G (2017). "Robust Standard Error Estimators for Panel Models: A Unifying Approach" \emph{Journal of Statistical Software}, 82(3). doi:10.18637/jss.v082.i03.
 }
