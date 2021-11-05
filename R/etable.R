@@ -3098,6 +3098,7 @@ etable_internal_latex = function(info){
         }
 
         if(length(notes) > 0){
+            notes = dict_apply(notes, dict)
             notes = escape_latex(notes)
 
             if(tpt){
@@ -4048,7 +4049,7 @@ getFixest_etable = function(){
 #' @param fixef_sizes.prefix A prefix to add to the fixed-effects names. Defaults to \code{"# "}.
 #' @param fixef_sizes.suffix A suffix to add to the fixed-effects names. Defaults to \code{""} (i.e. no suffix).
 #' @param stats.title A character scalar. The title line appearing before the statistics (defaults to \code{"\\midrule \\emph{Fit statistics}"} if \code{main = "base"} and to \code{" "} if \code{main = "aer"}). Note that the behavior of \code{stats.title = " "} (a space) is different from \code{stats.title = ""} (the empty string): in the first case you will get an empty row, while in the second case you get no empty row. To get a line without an empty row, use \code{"\\midrule"} (and not \code{"\\midrule "}!--the space!).
-#' @param notes.title A character scalar. The title appearing just before the notes, defaults to \code{"\\medskip \\emph{Notes:} "}.
+#' @param notes.title A character scalar. Some text appearing just before the notes, defaults to \code{"\\par \n"}.
 #' @param tablefoot A logical scalar. Whether or not to display a footer within the table. Defaults to \code{TRUE} if \code{main = "aer"}) and \code{FALSE} if \code{main = "aer"}).
 #' @param tablefoot.title A character scalar. Only if \code{tablefoot = TRUE}, value to appear before the table footer. Defaults to \code{"\\bottomrule\\bottomrule"} if \code{main = "base"}.
 #' @param tablefoot.value A character scalar. The notes to be displayed in the footer. Defaults to \code{"default"} if \code{main = "base"}, which leads to custom footers informing on the type of standard-error and significance codes, depending on the estimations.
@@ -4142,7 +4143,7 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
                        slopes.format = "__var__ (__slope__)",
                        fixef_sizes.prefix = "\\# ", fixef_sizes.suffix = "",
                        stats.title = "\\midrule\n\\emph{Fit statistics}",
-                       notes.title = "\\par \\emph{Notes:} ",
+                       notes.title = "\\par\n",
                        notes.tpt.intro = "",
                        tablefoot = TRUE, tablefoot.title = "\\midrule\\midrule\n",
                        tablefoot.value = "default", yesNo = c("Yes", ""))
@@ -4160,7 +4161,7 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
                        fixef.where = "stats",
                        slopes.title = "", slopes.format = "__var__ $\\times $ __slope__",
                        fixef_sizes.prefix = "\\# ", fixef_sizes.suffix = "",
-                       stats.title = " ", notes.title = "\\medskip \\emph{Notes:} ",
+                       stats.title = " ", notes.title = "\\par \n",
                        notes.tpt.intro = "",
                        tablefoot = FALSE, tablefoot.title = "", tablefoot.value = "",
                        yesNo = c("$\\checkmark$", ""))
