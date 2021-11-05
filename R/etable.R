@@ -142,6 +142,10 @@
 #'
 #' If for some reason you don't want the escaping to take place, the arguments \code{headers} and \code{extralines} are the only ones allowing that. To disable escaping, add the special token ":tex:" in the row names. Example: in \code{headers=list(":tex:Row title"="weird & & \%\\n tex stuff\\\\")}, the elements will be displayed verbatim. Of course, since it can easily ruin your table, it is only recommended to super users.
 #'
+#' @section Markdown markup:
+#'
+#' Within anything that is Latex-escaped (see previous section), you can use a markdown-style markup to put the text in italic and/or bold. Use \code{*text*}, \code{**text**} or \code{***text***} to put some text in, respectively, italic (with \code{\\textit}), bold (with \code{\\textbf}) and italic-bold.
+#'
 #' @return
 #' If \code{tex = TRUE}, the lines composing the Latex table are returned invisibly while the table is directly prompted on the console.
 #'
@@ -155,10 +159,9 @@
 #'
 #' @examples
 #'
-#' aq = airquality
 #'
-#' est1 = feols(Ozone ~ i(Month) / Wind + Temp, data = aq)
-#' est2 = feols(Ozone ~ i(Month, Wind) + Temp | Month, data = aq)
+#' est1 = feols(Ozone ~ i(Month) / Wind + Temp, data = airquality)
+#' est2 = feols(Ozone ~ i(Month, Wind) + Temp | Month, data = airquality)
 #'
 #' # Displaying the two results in a single table
 #' etable(est1, est2)
@@ -233,9 +236,9 @@
 #' # You can achieve that with the group argument
 #'
 #' setFixest_fml(..ctrl = ~ poly(Wind, 2) + poly(Temp, 2))
-#' est_c0 = feols(Ozone ~ Solar.R, data = aq)
-#' est_c1 = feols(Ozone ~ Solar.R + ..ctrl, data = aq)
-#' est_c2 = feols(Ozone ~ Solar.R + Solar.R^2 + ..ctrl, data = aq)
+#' est_c0 = feols(Ozone ~ Solar.R, data = airquality)
+#' est_c1 = feols(Ozone ~ Solar.R + ..ctrl, data = airquality)
+#' est_c2 = feols(Ozone ~ Solar.R + Solar.R^2 + ..ctrl, data = airquality)
 #'
 #' etable(est_c0, est_c1, est_c2, group = list(Controls = "poly"))
 #'
@@ -243,10 +246,13 @@
 #' # with TRUE/FALSE where the variables were found
 #'
 #' # 'extralines' adds an extra line, where you can add the value for each model
-#' est_all  = feols(Ozone ~ Solar.R + Temp + Wind, data = aq)
-#' est_sub1 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month %in% 5:6, ])
-#' est_sub2 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month %in% 7:8, ])
-#' est_sub3 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month == 9, ])
+#' est_all  = feols(Ozone ~ Solar.R + Temp + Wind, data = airquality)
+#' est_sub1 = feols(Ozone ~ Solar.R + Temp + Wind, data = airquality,
+#'                  subset = ~ Month %in% 5:6)
+#' est_sub2 = feols(Ozone ~ Solar.R + Temp + Wind, data = airquality,
+#'                  subset = ~ Month %in% 7:8)
+#' est_sub3 = feols(Ozone ~ Solar.R + Temp + Wind, data = airquality,
+#'                  subset = ~ Month == 9)
 #'
 #' etable(est_all, est_sub1, est_sub2, est_sub3,
 #'        extralines = list("Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
@@ -279,7 +285,7 @@
 #' # These lines will appear at the top of the table
 #'
 #' # first, 3 estimations
-#' est_header = feols(c(Ozone, Solar.R, Wind) ~  poly(Temp, 2), aq)
+#' est_header = feols(c(Ozone, Solar.R, Wind) ~  poly(Temp, 2), airquality)
 #'
 #' # header => vector: adds a line w/t title
 #' etable(est_header, headers = c("A", "A", "B"))
@@ -324,9 +330,9 @@
 #'
 #' # You can group the fixed-effects line with fixef.group
 #'
-#' est_0fe = feols(Ozone ~ Solar.R + Temp + Wind, aq)
-#' est_1fe = feols(Ozone ~ Solar.R + Temp + Wind | Month, aq)
-#' est_2fe = feols(Ozone ~ Solar.R + Temp + Wind | Month + Day, aq)
+#' est_0fe = feols(Ozone ~ Solar.R + Temp + Wind, airquality)
+#' est_1fe = feols(Ozone ~ Solar.R + Temp + Wind | Month, airquality)
+#' est_2fe = feols(Ozone ~ Solar.R + Temp + Wind | Month + Day, airquality)
 #'
 #' # A) automatic way => simply use fixef.group = TRUE
 #'
@@ -388,7 +394,7 @@
 #' # Computing a different SE for each model
 #' #
 #'
-#' est = feols(Ozone ~ Solar.R + Wind + Temp, data = aq)
+#' est = feols(Ozone ~ Solar.R + Wind + Temp, data = airquality)
 #'
 #' #
 #' # Method 1: use summary
@@ -403,7 +409,7 @@
 #' #
 #' # Method 2: using a list in the argument 'vcov'
 #'
-#' est_bis = feols(Ozone ~ Solar.R + Wind + Temp | Month, data = aq)
+#' est_bis = feols(Ozone ~ Solar.R + Wind + Temp | Month, data = airquality)
 #' etable(est, est_bis, vcov = list("hetero", ~ Month))
 #'
 #' # When you have only one model, this model is replicated
@@ -424,6 +430,21 @@
 #'
 #' # times
 #' etable(est, est_bis, vcov = list("times", "iid", ~ Month, ~ Day))
+#'
+#' #
+#' # Notes and markup
+#' #
+#'
+#' # Notes can be also be set in a dictionary
+#' # You can use markdown markup to put text into italic/bold
+#'
+#' dict = c("note 1" = "*Notes:* This data is not really random.",
+#'          "source 1" = "**Source:** the internet?")
+#'
+#' est = feols(Ozone ~ csw(Solar.R, Wind, Temp), data = airquality)
+#'
+#' etable(est, dict = dict, tex = TRUE, notes = c("note 1", "source 1"))
+#'
 #'
 #'
 etable = function(..., vcov = NULL, stage = 2, agg = NULL,
@@ -4411,6 +4432,110 @@ print.etable_df = function(x, ...){
 #### Utilities ####
 ####
 
+x = "*bonjour*"
+
+
+# x = "*bonjour*"
+# x = "et **bonsoir**!"
+apply_markup = function(x){
+    # x must be of length 1
+    # the function is slow, but we don't apply it to many things anyway, so that's OK
+
+    res = x
+
+    # patterns
+    dict_pat = c("***" = "\\textbf{\\textit{___}}",
+                 "**" = "\\textbf{___}",
+                 "*" = "\\textit{___}")
+    failed = rep(FALSE, 3)
+
+    for(i in 1:3){
+        pat = names(dict_pat)[i]
+
+        if(grepl(pat, x, fixed = TRUE)){
+            markup = dict_pat[i]
+
+            n_match = length(gregexpr(pat, x, fixed = TRUE)[[1]])
+
+            if(!n_match %% 2 == 0){
+                # failed markup
+                res = gsub(pat, dsb("__.['', rep('$', i)]__"), res, fixed = TRUE)
+                failed[i] = TRUE
+            } else {
+                x_split = strsplit(res, pat, fixed = TRUE)[[1]]
+                n = length(x_split)
+                for(j in (1:n)[(1:n) %% 2 == 0]){
+                    x_split[j] = sub("___", x_split[j], markup, fixed = TRUE)
+                }
+                res = paste0(x_split, collapse = "")
+            }
+        }
+    }
+
+    for(i in which(failed)){
+        pat = names(dict_pat)[i]
+        res = gsub(dsb("__.['', rep('$', i)]__"), pat, res, fixed = TRUE)
+    }
+
+    res
+}
+
+escape_all = function(x){
+    # we escape all
+    res = gsub("((?<=[^\\\\])|(?<=^))(\\$|_|%|&|\\^|#)", "\\\\\\2", x, perl = TRUE)
+    res
+}
+
+# escape_latex("Voici **une** *equation*: $5! = 5*4*3*2*1$. Est-ce que ***ca marche***?$^*$")
+escape_latex = function(x_all, up = 0, noArg = FALSE){
+    # This is super tricky to escape properly!
+    # We do NOT escape within equations
+
+    x_name = deparse(substitute(x_all))
+
+    res = c()
+
+    for(index in seq_along(x_all)){
+        x = x_all[index]
+
+        # 1) finding out equations, ie non escaped dollar signs
+        dollars = gregexpr("((?<=[^\\\\])|(?<=^))\\$", x, perl = TRUE)[[1]]
+
+        is_eq = FALSE
+        if(length(dollars) > 1){
+            is_eq = TRUE
+            if(length(dollars) %% 2 != 0){
+                my_arg = "T"
+                if(!noArg){
+                    my_arg = paste0("In argument '", x_name, "', t")
+                }
+                stop_up(up = up, my_arg, "here are ", length(dollars), " dollar signs in the following character string:\n", x, "\nIt will raise a Latex error (which '$' means equation? which means dollar-sign?): if you want to use a regular dollar sign, please escape it like that: \\\\$.")
+            }
+        }
+
+        # 2) Escaping but conditionally on not being in an equation
+        if(is_eq){
+            # Finding out the equations
+            all_items = strsplit(paste0(x, " "), "((?<=[^\\\\])|(?<=^))\\$", perl = TRUE)[[1]]
+            for(i in seq_along(all_items)){
+                if(i %% 2 == 1){
+                    all_items[i] = escape_all(all_items[i])
+                    all_items[i] = apply_markup(all_items[i])
+                }
+            }
+
+            res[index] = gsub(" $", "", paste(all_items, collapse = "$"))
+        } else {
+            res[index] = apply_markup(escape_all(x))
+        }
+    }
+
+    if(!is.null(names(x_all))){
+        names(res) = names(x_all)
+    }
+
+    res
+}
 
 format_se_type = function(x, width, by = FALSE){
     # we make 'nice' se types

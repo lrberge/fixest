@@ -35,6 +35,10 @@
  
  - new argument `adjustbox`: `adjustbox = TRUE` nests the tabular into an `adjustbox` environment with `width = \\textwidth, center` as default option. Use `adjustbox = x` with `x` a number giving the text-width. Use `adjustbox = "x th"` with `x` a number giving the text-height. Finally you can use a character string, as in `adjustbox = "my options"`, that will be passed verbatim as a an `adjustbox` option.
  
+ - new markup: markdown-style markup (e.g. `**text**`) can be used to put text in italic/bold in almost anything in the table.
+ 
+ - notes can be set in the dictionary: useful for notes (like source for example) that gets repeated across tables.
+ 
 ## Other
 
  - `bin`: `cut::` now ignores white spaces, so that `cut:: q1 ] q3 [` works appropriately.

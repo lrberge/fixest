@@ -102,6 +102,7 @@ setFixest_etable(
   fixef.group = NULL,
   placement = "htbp",
   drop.section = NULL,
+  tex.preview = FALSE,
   postprocess.tex = NULL,
   postprocess.df = NULL,
   fit_format = "__var__",
@@ -453,12 +454,17 @@ Note, importantly, that equations are NOT escaped. This means that \code{title="
 If for some reason you don't want the escaping to take place, the arguments \code{headers} and \code{extralines} are the only ones allowing that. To disable escaping, add the special token ":tex:" in the row names. Example: in \code{headers=list(":tex:Row title"="weird & & \%\\n tex stuff\\\\")}, the elements will be displayed verbatim. Of course, since it can easily ruin your table, it is only recommended to super users.
 }
 
+\section{Markdown markup}{
+
+
+Within anything that is Latex-escaped (see previous section), you can use a markdown-style markup to put the text in italic and/or bold. Use \code{*text*}, \code{**text**} or \code{***text***} to put some text in, respectively, italic (with \code{\\textit}), bold (with \code{\\textbf}) and italic-bold.
+}
+
 \examples{
 
-aq = airquality
 
-est1 = feols(Ozone ~ i(Month) / Wind + Temp, data = aq)
-est2 = feols(Ozone ~ i(Month, Wind) + Temp | Month, data = aq)
+est1 = feols(Ozone ~ i(Month) / Wind + Temp, data = airquality)
+est2 = feols(Ozone ~ i(Month, Wind) + Temp | Month, data = airquality)
 
 # Displaying the two results in a single table
 etable(est1, est2)
@@ -533,9 +539,9 @@ etable(est1, est2, dict = dict, tex = TRUE, style.tex = style.tex("aer"))
 # You can achieve that with the group argument
 
 setFixest_fml(..ctrl = ~ poly(Wind, 2) + poly(Temp, 2))
-est_c0 = feols(Ozone ~ Solar.R, data = aq)
-est_c1 = feols(Ozone ~ Solar.R + ..ctrl, data = aq)
-est_c2 = feols(Ozone ~ Solar.R + Solar.R^2 + ..ctrl, data = aq)
+est_c0 = feols(Ozone ~ Solar.R, data = airquality)
+est_c1 = feols(Ozone ~ Solar.R + ..ctrl, data = airquality)
+est_c2 = feols(Ozone ~ Solar.R + Solar.R^2 + ..ctrl, data = airquality)
 
 etable(est_c0, est_c1, est_c2, group = list(Controls = "poly"))
 
@@ -543,10 +549,13 @@ etable(est_c0, est_c1, est_c2, group = list(Controls = "poly"))
 # with TRUE/FALSE where the variables were found
 
 # 'extralines' adds an extra line, where you can add the value for each model
-est_all  = feols(Ozone ~ Solar.R + Temp + Wind, data = aq)
-est_sub1 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month \%in\% 5:6, ])
-est_sub2 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month \%in\% 7:8, ])
-est_sub3 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month == 9, ])
+est_all  = feols(Ozone ~ Solar.R + Temp + Wind, data = airquality)
+est_sub1 = feols(Ozone ~ Solar.R + Temp + Wind, data = airquality,
+                 subset = ~ Month \%in\% 5:6)
+est_sub2 = feols(Ozone ~ Solar.R + Temp + Wind, data = airquality,
+                 subset = ~ Month \%in\% 7:8)
+est_sub3 = feols(Ozone ~ Solar.R + Temp + Wind, data = airquality,
+                 subset = ~ Month == 9)
 
 etable(est_all, est_sub1, est_sub2, est_sub3,
        extralines = list("Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
@@ -579,7 +588,7 @@ etable(est_all, est_sub1, est_sub2, est_sub3,
 # These lines will appear at the top of the table
 
 # first, 3 estimations
-est_header = feols(c(Ozone, Solar.R, Wind) ~  poly(Temp, 2), aq)
+est_header = feols(c(Ozone, Solar.R, Wind) ~  poly(Temp, 2), airquality)
 
 # header => vector: adds a line w/t title
 etable(est_header, headers = c("A", "A", "B"))
@@ -624,9 +633,9 @@ etable(est_header, headers = .("^Currency" = .("US $" = 2, "CA $" = 1)))
 
 # You can group the fixed-effects line with fixef.group
 
-est_0fe = feols(Ozone ~ Solar.R + Temp + Wind, aq)
-est_1fe = feols(Ozone ~ Solar.R + Temp + Wind | Month, aq)
-est_2fe = feols(Ozone ~ Solar.R + Temp + Wind | Month + Day, aq)
+est_0fe = feols(Ozone ~ Solar.R + Temp + Wind, airquality)
+est_1fe = feols(Ozone ~ Solar.R + Temp + Wind | Month, airquality)
+est_2fe = feols(Ozone ~ Solar.R + Temp + Wind | Month + Day, airquality)
 
 # A) automatic way => simply use fixef.group = TRUE
 
@@ -688,7 +697,7 @@ etable(est1, est2, fitstat = ~ ll + .)
 # Computing a different SE for each model
 #
 
-est = feols(Ozone ~ Solar.R + Wind + Temp, data = aq)
+est = feols(Ozone ~ Solar.R + Wind + Temp, data = airquality)
 
 #
 # Method 1: use summary
@@ -703,7 +712,7 @@ etable(list(s1, s2, s3, s4))
 #
 # Method 2: using a list in the argument 'vcov'
 
-est_bis = feols(Ozone ~ Solar.R + Wind + Temp | Month, data = aq)
+est_bis = feols(Ozone ~ Solar.R + Wind + Temp | Month, data = airquality)
 etable(est, est_bis, vcov = list("hetero", ~ Month))
 
 # When you have only one model, this model is replicated
@@ -724,6 +733,21 @@ etable(est, est_bis, vcov = list("each", "iid", ~ Month, ~ Day))
 
 # times
 etable(est, est_bis, vcov = list("times", "iid", ~ Month, ~ Day))
+
+#
+# Notes and markup
+#
+
+# Notes can be also be set in a dictionary
+# You can use markdown markup to put text into italic/bold
+
+dict = c("note 1" = "*Notes:* This data is not really random.",
+         "source 1" = "**Source:** the internet?")
+
+est = feols(Ozone ~ csw(Solar.R, Wind, Temp), data = airquality)
+
+etable(est, dict = dict, tex = TRUE, notes = c("note 1", "source 1"))
+
 
 
 }

@@ -7501,61 +7501,6 @@ fixest_CI_factor = function(x, level, vcov){
 #### Small Utilities ####
 ####
 
-escape_all = function(x){
-    # we escape all
-    res = gsub("((?<=[^\\\\])|(?<=^))(\\$|_|%|&|\\^|#)", "\\\\\\2", x, perl = TRUE)
-    res
-}
-
-escape_latex = function(x_all, up = 0, noArg = FALSE){
-    # This is super tricky to escape properly!
-    # We do NOT escape within equations
-
-    x_name = deparse(substitute(x_all))
-
-    res = c()
-
-    for(index in seq_along(x_all)){
-        x = x_all[index]
-
-        # 1) finding out equations, ie non escaped dollar signs
-        dollars = gregexpr("((?<=[^\\\\])|(?<=^))\\$", x, perl = TRUE)[[1]]
-
-        is_eq = FALSE
-        if(length(dollars) > 1){
-            is_eq = TRUE
-            if(length(dollars) %% 2 != 0){
-                my_arg = "T"
-                if(!noArg){
-                    my_arg = paste0("In argument '", x_name, "', t")
-                }
-                stop_up(up = up, my_arg, "here are ", length(dollars), " dollar signs in the following character string:\n", x, "\nIt will raise a Latex error (which '$' means equation? which means dollar-sign?): if you want to use a regular dollar sign, please escape it like that: \\\\$.")
-            }
-        }
-
-        # 2) Escaping but conditionally on not being in an equation
-        if(is_eq){
-            # Finding out the equations
-            all_items = strsplit(paste0(x, " "), "((?<=[^\\\\])|(?<=^))\\$", perl = TRUE)[[1]]
-            for(i in seq_along(all_items)){
-                if(i %% 2 == 1){
-                    all_items[i] = escape_all(all_items[i])
-                }
-            }
-
-            res[index] = gsub(" $", "", paste(all_items, collapse = "$"))
-        } else {
-            res[index] = escape_all(x)
-        }
-    }
-
-    if(!is.null(names(x_all))){
-        names(res) = names(x_all)
-    }
-
-    res
-}
-
 escape_regex = function(x){
     # escape special characters in regular expressions => to make it as "fixed"
 
