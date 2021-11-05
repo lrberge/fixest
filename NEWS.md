@@ -15,6 +15,8 @@
   
   - fix bug in `etable` preventing automatic headers to be displayed.
   
+  - fix bug in `n_unik` preventing the auto completion of variable names.
+  
 ## etable
 
  - the quality of the tex output has been substantially improved.

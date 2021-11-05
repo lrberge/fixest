@@ -4733,7 +4733,7 @@ n_unik = function(x){
 
         var_diff = which(naked_vars != origin_vars)
 
-        for(i in seq_along(var_diff)){
+        for(i in var_diff){
             re = paste0("(?!<[[:alnum:]._])", origin_vars[i], "(?!=[[:alnum:]._])")
             fml_txt = gsub(re, naked_vars[i], fml_txt, perl = TRUE)
         }
