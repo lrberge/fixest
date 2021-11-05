@@ -549,7 +549,8 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
         mc = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin), expand.dots = FALSE)
         dots_call = mc[["..."]]
     } else {
-        dots_call = match.call(expand.dots = FALSE)[["..."]]
+        mc = match.call(expand.dots = FALSE)
+        dots_call = mc[["..."]]
     }
 
     # vcov
@@ -561,6 +562,17 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
         for(var in intersect(names(.vcov_args), names(dots))) dots[[var]] = NULL
     }
 
+
+    # Arguments that can be set globally
+    opts = getOption("fixest_etable")
+
+    args_global = c("postprocess.tex", "postprocess.df", "tex.preview")
+    for(arg in setdiff(args_global, names(mc))){
+        if(arg %in% names(opts)){
+            assign(arg, opts[[arg]])
+        }
+    }
+
     #
     # postprocess.tex
     #
@@ -568,23 +580,11 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     # Note that I need to catch the arguments from the two pp functions
     # => so that the same call lead to valid evaluations
 
-    opts = getOption("fixest_etable")
-    pp_tex = pp_df = NULL
-
     check_arg(postprocess.tex, "NULL function arg(1,)")
-
-    if(!is.null(postprocess.tex)){
-        pp_tex = postprocess.tex
-    } else if(!is.null(opts$postprocess.tex)){
-        pp_tex = opts$postprocess.tex
-    }
+    pp_tex = postprocess.tex
 
     check_arg(postprocess.df, "NULL function arg(1,)")
-    if(!is.null(postprocess.df)){
-        pp_df = postprocess.df
-    } else if(!is.null(opts$postprocess.df)){
-        pp_df = opts$postprocess.df
-    }
+    pp_df = postprocess.df
 
     my_postprocess = pp_other = NULL
     if(tex){
@@ -930,9 +930,11 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     check_arg_plus(notes, "NULL character vector no na")
     if(length(notes) > 0) notes = notes[nchar(notes) > 0]
 
-    check_arg("logical scalar", replace, convergence, fixef_sizes, fixef_sizes.simplify, keepFactors, family, tex, depvar)
-    check_arg("logical scalar", tpt)
-    check_arg("NULL logical scalar", se.below, se.row)
+    check_arg("logical scalar", replace, convergence, fixef_sizes, fixef_sizes.simplify,
+              keepFactors, family, tex, depvar)
+
+    check_arg("NULL logical scalar", se.below, se.row, tpt)
+    if(is.null(tpt)) tpt = FALSE
 
     isTex = tex
     if(missing(family)){
@@ -3885,14 +3887,19 @@ etable_internal_df = function(info){
 
 #' @rdname etable
 setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c("se", "tstat", "confint"),
-                            ci = 0.95, se.below = TRUE, keep, drop, order, dict, signifCode, float,
-                            fixef_sizes = FALSE, fixef_sizes.simplify = TRUE, family, powerBelow = -5,
+                            ci = 0.95, se.below = TRUE, keep, drop, order, dict,
+                            signifCode, float,
+                            fixef_sizes = FALSE, fixef_sizes.simplify = TRUE,
+                            family, powerBelow = -5,
                             interaction.order = NULL, depvar, style.tex = NULL,
                             style.df = NULL, notes = NULL, group = NULL, extralines = NULL,
                             fixef.group = NULL, placement = "htbp", drop.section = NULL,
+                            tex.preview = FALSE,
                             postprocess.tex = NULL, postprocess.df = NULL,
-                            fit_format = "__var__", meta.time = NULL, meta.author = NULL, meta.sys = NULL,
-                            meta.call = NULL, meta.comment = NULL, reset = FALSE, save = FALSE){
+                            fit_format = "__var__", meta.time = NULL,
+                            meta.author = NULL, meta.sys = NULL,
+                            meta.call = NULL, meta.comment = NULL,
+                            reset = FALSE, save = FALSE){
 
 
     #
@@ -3911,7 +3918,8 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c(
     check_arg_plus(coefstat, "match")
     check_arg(ci, "numeric scalar GT{0.5} LT{1}")
 
-    check_arg("logical scalar", se.below, fixef_sizes, fixef_sizes.simplify, float, family, depvar, reset)
+    check_arg("logical scalar", se.below, fixef_sizes, fixef_sizes.simplify,
+              float, family, depvar, reset, tex.preview)
 
     check_arg(keep, drop, order, "character vector no na NULL",
               .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
