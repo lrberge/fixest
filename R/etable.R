@@ -2629,7 +2629,7 @@ etable_internal_latex = function(info){
     adjustbox = info$adjustbox
     fontsize = info$fontsize
 
-    # Formatting the searating lines
+    # Formatting the separating lines
     if(nchar(style$line.top) > 1) style$line.top = paste0(style$line.top, "\n")
     if(nchar(style$line.bottom) > 1) style$line.bottom = paste0(style$line.bottom, "\n")
 
@@ -2654,16 +2654,24 @@ etable_internal_latex = function(info){
     }
 
 
-    # intro and outro Latex tabular
-    # \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lc}
+    space = if(style$no_border) "@{}" else ""
     if(style$tabular == "normal"){
-        tabular_begin = paste0("\\begin{tabular}{l", paste0(rep("c", n_models), collapse=""), "}\n", style$line.top)
+        tabular_begin = paste0("\\begin{tabular}{", space, "l",
+                               paste0(rep("c", n_models), collapse=""), space,
+                               "}\n", style$line.top)
+
         tabular_end = "\\end{tabular}\n"
     } else if(style$tabular == "*"){
-        tabular_begin = paste0("\\begin{tabular*}{\\textwidth}{@{\\extracolsep{\\fill}}l", paste0(rep("c", n_models), collapse = ""), "}\n", style$line.top)
+        tabular_begin = paste0("\\begin{tabular*}{\\textwidth}{@{\\extracolsep{\\fill}}",
+                               space, "l", paste0(rep("c", n_models), collapse = ""),
+                               space, "}\n", style$line.top)
+
         tabular_end = "\\end{tabular*}\n"
     } else if(style$tabular == "X"){
-        tabular_begin = paste0("\\begin{tabularx}{\\textwidth}{", paste0(rep("X", n_models + 1), collapse = ""), "}\n", style$line.top)
+        tabular_begin = paste0("\\begin{tabularx}{\\textwidth}{",
+                               space, paste0(rep("X", n_models + 1), collapse = ""),
+                               space, "}\n", style$line.top)
+
         tabular_end = "\\end{tabularx}\n"
     }
 
@@ -2687,6 +2695,16 @@ etable_internal_latex = function(info){
                 nb_multi[k] = 1
                 names_multi[k] = old_dep = depvar_list[i]
             }
+        }
+    }
+
+    if(style$depvar.style != ""){
+        if(style$depvar.style == "*"){
+            names_multi = paste0("\\textit{", names_multi, "}")
+        } else if(style$depvar.style == "**"){
+            names_multi = paste0("\\textbf{", names_multi, "}")
+        } else {
+            names_multi = paste0("\\textbf{\\textit{", names_multi, "}}")
         }
     }
 
@@ -4054,6 +4072,8 @@ getFixest_etable = function(){
 #'
 #' This function describes the style of Latex tables to be exported with the function \code{\link[fixest]{etable}}.
 #'
+#' @inheritParams etable
+#'
 #' @param main Either "base", "aer" or "qje". Defines the basic style to start from. The styles "aer" and "qje" are almost identical and only differ on the top/bottom lines.
 #' @param depvar.title A character scalar. The title of the line of the dependent variables (defaults to \code{"Dependent variable(s):"} if \code{main = "base"} (the 's' appears only if just one variable) and to \code{""} if \code{main = "aer"}).
 #' @param model.title A character scalar. The title of the line of the models (defaults to \code{"Model:"} if \code{main = "base"} and to \code{""} if \code{main = "aer"}).
@@ -4079,6 +4099,8 @@ getFixest_etable = function(){
 #' @param interaction.combine Character scalar, defaults to \code{" $\\times$ "}. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind $\\times$ Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.
 #' @param i.equal Character scalar, defaults to \code{" $=$ "}. Only affects factor variables created with the function \code{\link[fixest]{i}}, tells how the variable should be linked to its value. For example if you have the Species factor from the iris data set, by default the display of the variable is \code{Species $=$ Setosa}, etc. If \code{i.equal = ": "} the display becomes \code{Species: Setosa}.
 #' @param notes.tpt.intro Character scalar. Only used if \code{tpt = TRUE}, it is some tex code that is passed before any \code{threeparttable} item (can be used for, typically, the font size). Default is the empty string.
+#' @param depvar.style Character scalar equal to either \code{" "} (default), \code{"*"} (italic), \code{"**"} (bold), \code{"***"} (italic-bold). How the name of the dependent variable should be displayed.
+#' @param no_border Logical, default is \code{FALSE}. Whether to remove any side border to the table (typically adds \code{@\{\}} to the sides of the tabular).
 #'
 #' @details
 #' The \code{\\checkmark} command, used in the "aer" style (in argument \code{yesNo}), is in the \code{amssymb} package.
@@ -4116,7 +4138,7 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
                      fixef.where, slopes.title, slopes.format, fixef_sizes.prefix,
                      fixef_sizes.suffix, stats.title, notes.title,
                      notes.tpt.intro, tablefoot, tablefoot.title, tablefoot.value,
-                     yesNo, tabular = "normal",
+                     yesNo, tabular = "normal", depvar.style, no_border,
                      tpt, arraystretch, adjustbox = NULL, fontsize,
                      interaction.combine = " $\\times$ ", i.equal = " $=$ "){
 
@@ -4134,10 +4156,17 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
     check_arg("character scalar", fixef.title, fixef.prefix, fixef.suffix, slopes.title, slopes.format)
     check_arg("character scalar", fixef_sizes.prefix, fixef_sizes.suffix, stats.title)
     check_arg("character scalar", notes.title, tablefoot.title, interaction.combine, i.equal)
-    check_arg("character scalar", notes.tpt.intro)
+    check_arg("character scalar", notes.tpt.intro, depvar.style)
+
+    if(!missing(depvar.style)){
+        depvar.style = trimws(depvar.style)
+        if(!depvar.style %in% c("", "*", "**", "***")){
+            stop("Argument 'depvar.style' must be one of ' ', '*', '**', '***', which means regular, italic, bold and italic-bold.")
+        }
+    }
 
     check_arg(tablefoot.value, "character vector no na")
-    check_arg(tablefoot, tpt, "logical scalar")
+    check_arg(tablefoot, tpt, no_border, "logical scalar")
     check_arg_plus(fixef.where, "match(var, stats)")
     check_arg_plus(tabular, "match(normal, *, X)")
 
@@ -4164,10 +4193,11 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
                        slopes.format = "__var__ (__slope__)",
                        fixef_sizes.prefix = "\\# ", fixef_sizes.suffix = "",
                        stats.title = "\\midrule\n\\emph{Fit statistics}",
-                       notes.title = "\\par\n",
+                       notes.title = "\\par \\raggedright \n",
                        notes.tpt.intro = "",
                        tablefoot = TRUE, tablefoot.title = "\\midrule\\midrule\n",
-                       tablefoot.value = "default", yesNo = c("Yes", ""))
+                       tablefoot.value = "default", yesNo = c("Yes", ""),
+                       depvar.style = "", no_border = FALSE)
 
             if(!missing(tablefoot) && isFALSE(tablefoot)){
                 res$tablefoot = FALSE
@@ -4182,10 +4212,11 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
                        fixef.where = "stats",
                        slopes.title = "", slopes.format = "__var__ $\\times $ __slope__",
                        fixef_sizes.prefix = "\\# ", fixef_sizes.suffix = "",
-                       stats.title = " ", notes.title = "\\par \n",
+                       stats.title = " ", notes.title = "\\par \\raggedright \n",
                        notes.tpt.intro = "",
                        tablefoot = FALSE, tablefoot.title = "", tablefoot.value = "",
-                       yesNo = c("$\\checkmark$", ""))
+                       yesNo = c("$\\checkmark$", ""), depvar.style = "",
+                       no_border = FALSE)
 
             if(main == "aer"){
                 # just set
