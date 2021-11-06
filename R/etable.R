@@ -70,6 +70,7 @@
 #' @param arraystretch (Tex only.) A numeric scalar, default is \code{NULL}. If provided, the command \code{\\renewcommand*{\\arraystretch}{x}} is inserted, replacing \code{x} by the value of \code{arraystretch}. The changes are specific to the current table and do not affect the rest of the document.
 #' @param fontsize (Tex only.) A character scalar, default is \code{NULL}. Can be equal to \code{tiny}, \code{scriptsize}, \code{footnotesize}, \code{small}, \code{normalsize}, \code{large}, or \code{Large}. The change affect the table only (and not the rest of the document).
 #' @param adjustbox (Tex only.) A logical, numeric or character scalar, default is \code{NULL}. If not \code{NULL}, the table is inserted within the \code{adjustbox} environment. By default the options are \code{width = 1\\textwidth, center} (if \code{TRUE}). A numeric value changes the value before \code{\\textwidth}. You can also add a character of the form \code{"x tw"} or \code{"x th"} with \code{x} a number and where tw (th) stands for text-width (text-height). Finally any other character value is passed verbatim as an \code{adjustbox} option.
+#' @param tabular (Tex only.) Character scalar equal to "normal" (default), "*" or "X". Represents the type of tabular environment to use: either \code{tabular}, \code{tabular*} or \code{tabularx}.
 #'
 #' @details
 #' The function \code{esttex} is equivalent to the function \code{etable} with argument \code{tex = TRUE}.
@@ -462,6 +463,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                   poly_dict = c("", " square", " cube"), postprocess.tex = NULL,
                   postprocess.df = NULL, tpt = FALSE, arraystretch = NULL, adjustbox = NULL,
                   fontsize = NULL, fit_format = "__var__", coef.just = NULL,
+                  tabular = "normal",
                   meta = NULL, meta.time = NULL, meta.author = NULL, meta.sys = NULL,
                   meta.call = NULL, meta.comment = NULL, tex.preview = FALSE){
 
@@ -674,7 +676,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                                  meta.author = meta.author, meta.sys = meta.sys,
                                  meta.call = meta.call, meta.comment = meta.comment,
                                  tpt = tpt, arraystretch = arraystretch, adjustbox = adjustbox,
-                                 fontsize = fontsize, .up = .up)
+                                 fontsize = fontsize, tabular = tabular, .up = .up)
 
     if(tex){
         res = etable_internal_latex(info)
@@ -820,7 +822,7 @@ gen_etable_aliases = function(){
                               "notes", "placement", "postprocess.tex",
                               "meta", "meta.time", "meta.author", "meta.sys",
                               "meta.call", "meta.comment", "tpt", "arraystretch",
-                              "adjustbox", "fontsize", "tex.preview")
+                              "adjustbox", "fontsize", "tex.preview", "tabular")
 
     esttable_args = paste0(arg_name[qui_df], " = ", arg_default[qui_df], collapse = ", ")
     esttable_args = gsub(" = ,", ",", esttable_args)
@@ -877,7 +879,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                                  meta = NULL, meta.time = NULL, meta.author = NULL,
                                  meta.call = NULL, meta.sys = NULL, meta.comment = NULL,
                                  tpt = FALSE, arraystretch = NULL, adjustbox = NULL,
-                                 fontsize = NULL, .up = 1){
+                                 fontsize = NULL, tabular = "normal", .up = 1){
 
     # This function is the core of the function etable
 
@@ -936,10 +938,12 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     }
 
     # Arguments both in style AND in etable
-    args_dual = c("tpt", "arraystretch", "fontsize", "adjustbox")
+    args_dual = c("tpt", "arraystretch", "fontsize", "adjustbox", "tabular")
     for(arg in setdiff(args_dual, names(mc))){
         # We set to the default in style (only if NOT user-provided)
-        assign(arg, style[[arg]])
+        if(arg %in% names(style)){
+            assign(arg, style[[arg]])
+        }
     }
 
     #
@@ -1013,6 +1017,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
               .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
 
     check_arg(file, label, interaction.combine, i.equal, "character scalar")
+
+    check_arg_plus(tabular, "match(normal, *, X)")
 
     # interaction.combine: Default depends on type
     if(is.null(interaction.combine)){
@@ -2569,7 +2575,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                float = float, coefstat = coefstat, ci = ci, style = style, notes = notes, group = group,
                extralines = extralines, placement = placement, drop.section = drop.section,
                tex_tag = tex_tag, fun_format = fun_format, coef.just = coef.just, meta = meta_txt,
-               tpt = tpt, arraystretch = arraystretch, adjustbox = adjustbox, fontsize = fontsize)
+               tpt = tpt, arraystretch = arraystretch, adjustbox = adjustbox, fontsize = fontsize,
+               tabular = tabular)
 
     return(res)
 }
@@ -2629,6 +2636,7 @@ etable_internal_latex = function(info){
     arraystretch = info$arraystretch
     adjustbox = info$adjustbox
     fontsize = info$fontsize
+    tabular = info$tabular
 
     # top line
     style$line.top = switch(style$line.top,
@@ -2643,7 +2651,7 @@ etable_internal_latex = function(info){
     # bottom line
     if(style$tablefoot){
         style$line.bottom = switch(style$line.bottom,
-                                   "simple" = "\\toprule",
+                                   "simple" = "\\midrule",
                                    "double" = "\\midrule \\midrule",
                                    style$line.bottom)
     } else {
@@ -2681,22 +2689,24 @@ etable_internal_latex = function(info){
 
 
     space = if(style$no_border) "@{}" else ""
-    if(style$tabular == "normal"){
+    if(tabular == "normal"){
         tabular_begin = paste0("\\begin{tabular}{", space, "l",
-                               paste0(rep("c", n_models), collapse=""), space,
+                               paste0(rep("c", n_models), collapse = ""), space,
                                "}\n", style$line.top)
 
         tabular_end = "\\end{tabular}\n"
-    } else if(style$tabular == "*"){
+    } else if(tabular == "*"){
         tabular_begin = paste0("\\begin{tabular*}{\\textwidth}{@{\\extracolsep{\\fill}}",
                                space, "l", paste0(rep("c", n_models), collapse = ""),
                                space, "}\n", style$line.top)
 
         tabular_end = "\\end{tabular*}\n"
-    } else if(style$tabular == "X"){
+    } else if(tabular == "X"){
+
+        all_cols = dsb("l *.[n_models]{>{\\centering\\arraybackslash}X}")
+
         tabular_begin = paste0("\\begin{tabularx}{\\textwidth}{",
-                               space, paste0(rep("X", n_models + 1), collapse = ""),
-                               space, "}\n", style$line.top)
+                               space, all_cols, space, "}\n", style$line.top)
 
         tabular_end = "\\end{tabularx}\n"
     }
@@ -4127,7 +4137,6 @@ getFixest_etable = function(){
 #' @param tablefoot A logical scalar. Whether or not to display a footer within the table. Defaults to \code{TRUE} if \code{main = "aer"}) and \code{FALSE} if \code{main = "aer"}).
 #' @param tablefoot.value A character scalar. The notes to be displayed in the footer. Defaults to \code{"default"} if \code{main = "base"}, which leads to custom footers informing on the type of standard-error and significance codes, depending on the estimations.
 #' @param yesNo A character vector of length 1 or 2. Defaults to \code{"Yes"} if \code{main = "base"} and to \code{"$\\checkmark$"} if \code{main = "aer"} (from package \code{amssymb}). This is the message displayed when a given fixed-effect is (or is not) included in a regression. If \code{yesNo} is of length 1, then the second element is the empty string.
-#' @param tabular Character scalar equal to "normal" (default), "*" or "X". Represents the type of tabular environment to use: either \code{tabular}, \code{tabular*} or \code{tabularx}.
 #' @param interaction.combine Character scalar, defaults to \code{" $\\times$ "}. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind $\\times$ Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.
 #' @param i.equal Character scalar, defaults to \code{" $=$ "}. Only affects factor variables created with the function \code{\link[fixest]{i}}, tells how the variable should be linked to its value. For example if you have the Species factor from the iris data set, by default the display of the variable is \code{Species $=$ Setosa}, etc. If \code{i.equal = ": "} the display becomes \code{Species: Setosa}.
 #' @param notes.tpt.intro Character scalar. Only used if \code{tpt = TRUE}, it is some tex code that is passed before any \code{threeparttable} item (can be used for, typically, the font size). Default is the empty string.

@@ -80,7 +80,7 @@ style.tex(
 
 \item{yesNo}{A character vector of length 1 or 2. Defaults to \code{"Yes"} if \code{main = "base"} and to \code{"$\\checkmark$"} if \code{main = "aer"} (from package \code{amssymb}). This is the message displayed when a given fixed-effect is (or is not) included in a regression. If \code{yesNo} is of length 1, then the second element is the empty string.}
 
-\item{tabular}{Character scalar equal to "normal" (default), "*" or "X". Represents the type of tabular environment to use: either \code{tabular}, \code{tabular*} or \code{tabularx}.}
+\item{tabular}{(Tex only.) Character scalar equal to "normal" (default), "*" or "X". Represents the type of tabular environment to use: either \code{tabular}, \code{tabular*} or \code{tabularx}.}
 
 \item{depvar.style}{Character scalar equal to either \code{" "} (default), \code{"*"} (italic), \code{"**"} (bold), \code{"***"} (italic-bold). How the name of the dependent variable should be displayed.}
 

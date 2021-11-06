@@ -66,6 +66,7 @@ etable(
   fontsize = NULL,
   fit_format = "__var__",
   coef.just = NULL,
+  tabular = "normal",
   meta = NULL,
   meta.time = NULL,
   meta.author = NULL,
@@ -219,6 +220,7 @@ esttex(
   adjustbox = NULL,
   fontsize = NULL,
   fit_format = "__var__",
+  tabular = "normal",
   meta = NULL,
   meta.time = NULL,
   meta.author = NULL,
@@ -338,6 +340,8 @@ esttex(
 \item{fit_format}{Character scalar, default is \code{"__var__"}. Only used in the presence of IVs. By default the endogenous regressors are named \code{fit_varname} in the second stage. The format of the endogenous regressor to appear in the table is governed by \code{fit_format}. For instance, by default, the prefix \code{"fit_"} is removed, leading to only \code{varname} to appear. If \code{fit_format = "$\\\\hat{__var__}$"}, then \code{"$\\hat{varname}$"} will appear in the table.}
 
 \item{coef.just}{(DF only.) Either \code{"."}, \code{"("}, \code{"l"}, \code{"c"} or \code{"r"}, default is \code{NULL}. How the coefficients should be justified. If \code{NULL} then they are right aligned if \code{se.below = FALSE} and aligned to the dot if \code{se.below = TRUE}. The keywords stand respectively for dot-, parenthesis-, left-, center- and right-aligned.}
+
+\item{tabular}{(Tex only.) Character scalar equal to "normal" (default), "*" or "X". Represents the type of tabular environment to use: either \code{tabular}, \code{tabular*} or \code{tabularx}.}
 
 \item{meta}{(Tex only.) A one-sided formula that shall contain the following elements: date or time, sys, author, comment and call. Default is \code{NULL}. This argument is a shortcut to controlling the meta information that can be displayed in comments before the table. Typically if the element is in the formula, it means that the argument will be equal to \code{TRUE}. Example: \code{meta = ~time+call} is equivalent to \code{meta.time = TRUE} and \code{meta.call = TRUE}. The "author" and "comment" elements are a bit special. Using \code{meta = ~author("Mark")} is equivalent to \code{meta.author = "Mark"} while \code{meta=~author} is equiv. to \code{meta.author = TRUE}. The "comment" must be used with a character string inside: \code{meta = ~comment("this is a comment")}. The order in the formula controls the order of appearance of the meta elements. It also has precedence over the \code{meta.XX} arguments.}
 
