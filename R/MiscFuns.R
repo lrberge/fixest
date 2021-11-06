@@ -5511,7 +5511,7 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
     }
 
     # nesting: a ~ .["x.[1:2]_sq"] + b
-    any_nested = any(grepl("^\"", x_split_open[-1]))
+    any_nested = any(grepl("^\"", x_split_open[-1])) && !text
     if(any_nested){
 
         i_open_quote = setdiff(which(grepl("^\"", x_split_open)), 1)
