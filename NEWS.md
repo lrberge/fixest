@@ -39,6 +39,8 @@
  
  - notes can be set in the dictionary: useful for notes (like source for example) that gets repeated across tables.
  
+ - `line.top` and `line.bottom` now admit the values `simple` and `double`. The argument `line.bottom` now affects the "effective" end of table, irrespective of the value of `tablefoot`. This is more in line with intuition.
+ 
 ## Other
 
  - `bin`: `cut::` now ignores white spaces, so that `cut:: q1 ] q3 [` works appropriately.

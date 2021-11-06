@@ -44,7 +44,7 @@
 #' @param ci Level of the confidence interval, defaults to \code{0.95}. Only used if \code{coefstat = confint}.
 #' @param style.tex An object created by the function \code{\link[fixest]{style.tex}}. It represents the style of the Latex table, see the documentation of \code{\link[fixest]{style.tex}}.
 #' @param style.df An object created by the function \code{\link[fixest]{style.df}. }It represents the style of the data frame returned (if \code{tex = FALSE}), see the documentation of \code{\link[fixest]{style.df}}.
-#' @param notes (Tex only.) Character vector. If provided, a \code{"notes"} section will be added at the end right after the end of the table, containing the text of this argument. If it is a vector, it will be collapsed with new lines. If \code{tpt = TRUE}, the behavior is different: each element of the vector is an item. If the first element of the vector starts with \code{"@"}, then it will be included verbatim, and in case of \code{tpt = TRUE}, right before the first item. If that element is provided, it will replace the value defined in \code{style.tex(notes.title)} or \code{style.tex(notes.tpt.intro)}.
+#' @param notes (Tex only.) Character vector. If provided, a \code{"notes"} section will be added at the end right after the end of the table, containing the text of this argument. If it is a vector, it will be collapsed with new lines. If \code{tpt = TRUE}, the behavior is different: each element of the vector is an item. If the first element of the vector starts with \code{"@"}, then it will be included verbatim, and in case of \code{tpt = TRUE}, right before the first item. If that element is provided, it will replace the value defined in \code{style.tex(notes.intro)} or \code{style.tex(notes.tpt.intro)}.
 #' @param group A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument \code{drop}) and \code{TRUE} or \code{FALSE} will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: \code{group=list("Controls: personal traits"=c("gender", "height", "weight"))} will create an new line with \code{"Controls: personal traits"} in the leftmost cell, all three variables gender, height and weight are discarded, \code{TRUE} appearing in each model containing at least one of the three variables (the style of \code{TRUE}/\code{FALSE} is governed by the argument \code{yesNo}). You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section; 2) \code{"^"}: 1st, \code{"_"}: last, row. For example: \code{group=list("_^Controls"=stuff)} will place the line at the top of the 'stats' section, and using \code{group=list("^_Controls"=stuff)} will make the row appear at the bottom of the coefficients section. For details, see the dedicated section.
 #' @param extralines A vector, a list or a one sided formula. The list elements should be either a vector representing the value of each cell, a list of the form \code{list("item1" = #item1, "item2" = #item2, etc)}, or a function. This argument can be many things, please have a look at the dedicated help section; a simplified description follows. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extralines=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section; 2) \code{"^"}: 1st, \code{"_"}: last, row. For example: \code{extralines=list("__Controls"=stuff)} will place the line at the bottom of the stats section, and using \code{extralines=list("^^Controls"=stuff)} will make the row appear at the top of the 'coefficients' section. For details, see the dedicated section. You can use \code{.()} instead of \code{list()}.
 #' @param fixef.group Logical scalar or list (default is \code{NULL}). If equal to \code{TRUE}, then all fixed-effects always appearing jointly in models will be grouped in one row. If a list, its elements must be character vectors of regular expressions and the list names will be the row names. For ex. \code{fixef.group=list("Dates fixed-effects"="Month|Day")} will remove the \code{"Month"} and \code{"Day"} fixed effects from the display and replace them with a single row named "Dates fixed-effects". You can monitor the placement of the new row with the special characters telling where to place the row within a section: \code{"^"} (first), or \code{"_"} (last); and in which section it should appear: \code{"^"} (coef.), \code{"-"} (fixed-effects), or \code{"_"} (stat.). These two special characters must appear first in the row names. Please see the dedicated section
@@ -712,6 +712,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
         tex_pkg = add_pkg("threeparttable", res, tex_pkg)
         tex_pkg = add_pkg("adjustbox", res, tex_pkg)
         tex_pkg = add_pkg("checkmark", res, tex_pkg, "amssymb")
+        tex_pkg = add_pkg("tabularx", res, tex_pkg)
 
         # I do that to avoid having texPreview in suggests which makes my session hang
         preview_fun = eval(str2lang("function(x, pkg) texPreview::texPreview(x, usrPackages = pkg)"))
@@ -2629,9 +2630,34 @@ etable_internal_latex = function(info){
     adjustbox = info$adjustbox
     fontsize = info$fontsize
 
-    # Formatting the separating lines
-    if(nchar(style$line.top) > 1) style$line.top = paste0(style$line.top, "\n")
-    if(nchar(style$line.bottom) > 1) style$line.bottom = paste0(style$line.bottom, "\n")
+    # top line
+    style$line.top = switch(style$line.top,
+                            "simple" = "\\toprule",
+                            "double" = "\\tabularnewline \\midrule \\midrule",
+                            style$line.top)
+
+    if(nchar(style$line.top) > 1){
+        style$line.top = paste0(style$line.top, "\n")
+    }
+
+    # bottom line
+    if(style$tablefoot){
+        style$line.bottom = switch(style$line.bottom,
+                                   "simple" = "\\toprule",
+                                   "double" = "\\midrule \\midrule",
+                                   style$line.bottom)
+    } else {
+        style$line.bottom = switch(style$line.bottom,
+                                   "simple" = "\\bottomrule",
+                                   "double" = "\\midrule \\midrule & \\tabularnewline",
+                                   style$line.bottom)
+    }
+
+
+
+    if(nchar(style$line.bottom) > 1){
+        style$line.bottom = paste0(style$line.bottom, "\n")
+    }
 
     #
     # prompting the infos gathered
@@ -3019,6 +3045,9 @@ etable_internal_latex = function(info){
     info_SE_footer = ""
     if(style$tablefoot){
 
+        bottom_line = style$line.bottom
+        style$line.bottom = ""
+
         if(identical(style$tablefoot.value, "default")){
 
             if(isUniqueSD){
@@ -3035,10 +3064,12 @@ etable_internal_latex = function(info){
                 } else {
                     coefstat_sentence = paste0(" co-variance matrix, ", round(ci*100), "\\% confidence intervals in brackets")
                 }
-                info_SE_footer = paste0(style$tablefoot.title, foot_intro, my_se, coefstat_sentence, "}}\\\\\n")
+                info_SE_footer = paste0(bottom_line, foot_intro, my_se,
+                                        coefstat_sentence, "}}\\\\\n")
 
                 if(add_signif){
-                    info_SE_footer = paste0(info_SE_footer, foot_intro, "Signif. Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
+                    info_SE_footer = paste0(info_SE_footer, foot_intro, "Signif. Codes: ",
+                                            paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
                 }
 
             } else {
@@ -3054,10 +3085,13 @@ etable_internal_latex = function(info){
                 info_muli_se = paste0(coefstat_sentence, " & ", paste(all_se_type, collapse = " & "), "\\\\\n")
 
                 if(add_signif){
-                    info_SE_footer = paste0(style$tablefoot.title, foot_intro, "Signif. Codes: ", paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
+                    info_SE_footer = paste0(bottom_line, foot_intro, "Signif. Codes: ",
+                                            paste(names(signifCode), signifCode,
+                                                  sep = ": ", collapse = ", "),
+                                            "}}\\\\\n")
                 } else {
                     myAmpLine = paste0(paste0(rep(" ", length(depvar_list) + 1), collapse = " & "), "\\tabularnewline\n")
-                    info_SE_footer = paste0(style$tablefoot.title, myAmpLine, "\\\\\n")
+                    info_SE_footer = paste0(bottom_line, myAmpLine, "\\\\\n")
                 }
 
             }
@@ -3075,11 +3109,10 @@ etable_internal_latex = function(info){
                 value = gsub("__se_type__", "", value)
             }
 
-            info_SE_footer = paste0(style$tablefoot.title, paste(foot_intro, value, "}}\\\\\n", collapse = ""))
+            info_SE_footer = paste0(bottom_line, paste(foot_intro, value, "}}\\\\\n", collapse = ""))
 
         }
     }
-
 
     info_muli_se = ""
     if(se.row){
@@ -3129,7 +3162,7 @@ etable_internal_latex = function(info){
     info_notes = ""
     if(length(notes) > 0){
 
-        notes_intro = if(tpt) style$notes.tpt.intro else style$notes.title
+        notes_intro = if(tpt) style$notes.tpt.intro else style$notes.intro
 
         if(grepl("^@", notes[1])){
             notes_intro = paste0(gsub("^@", "", notes[1]), " ")
@@ -4078,8 +4111,8 @@ getFixest_etable = function(){
 #' @param depvar.title A character scalar. The title of the line of the dependent variables (defaults to \code{"Dependent variable(s):"} if \code{main = "base"} (the 's' appears only if just one variable) and to \code{""} if \code{main = "aer"}).
 #' @param model.title A character scalar. The title of the line of the models (defaults to \code{"Model:"} if \code{main = "base"} and to \code{""} if \code{main = "aer"}).
 #' @param model.format A character scalar. The value to appear on top of each column. It defaults to \code{"(1)"}. Note that 1, i, I, a and A are special characters: if found, their values will be automatically incremented across columns.
-#' @param line.top A character scalar. The line at the top of the table (defaults to \code{"\\tabularnewline\\toprule\\toprule"} if \code{main = "base"} and to \code{"\\toprule"} if \code{main = "aer"}).
-#' @param line.bottom A character scalar. The line at the bottom of the table (defaults to \code{""} if \code{main = "base"}, \code{"\\midrule \\midrule & \\tabularnewline"} if \code{main = "base"} AND \code{tablefoot = FALSE}, and to \code{"\\bottomrule"} if \code{main = "aer"}).
+#' @param line.top A character scalar equal to \code{"simple"}, \code{"double"}, or anything else. The line at the top of the table (defaults to \code{"double"} if \code{main = "base"} and to \code{"simple"} if \code{main = "aer"}). \code{"simple"} is equivalent to \code{"\\toprule"}, and \code{"double"} to \code{"\\tabularnewline \\midrule \\midrule"}.
+#' @param line.bottom A character scalar equal to \code{"simple"}, \code{"double"}, or anything else. The line at the bottom of the table (defaults to \code{"double"} if \code{main = "base"} and to \code{"simple"} if \code{main = "aer"}). \code{"simple"} is equivalent to \code{"\\bottomrule"}, and \code{"double"} to \code{"\\midrule \\midrule & \\tabularnewline"}.
 #' @param var.title A character scalar. The title line appearing before the variables (defaults to \code{"\\midrule \\emph{Variables}"} if \code{main = "base"} and to \code{"\\midrule"} if \code{main = "aer"}). Note that the behavior of \code{var.title = " "} (a space) is different from \code{var.title = ""} (the empty string): in the first case you will get an empty row, while in the second case you get no empty row. To get a line without an empty row, use \code{"\\midrule"} (and not \code{"\\midrule "}!--the space!).
 #' @param fixef.title A character scalar. The title line appearing before the fixed-effects (defaults to \code{"\\midrule \\emph{Fixed-effects}"} if \code{main = "base"} and to \code{" "} if \code{main = "aer"}). Note that the behavior of \code{fixef.title = " "} (a space) is different from \code{fixef.title = ""} (the empty string): in the first case you will get an empty row, while in the second case you get no empty row. To get a line without an empty row, use \code{"\\midrule"} (and not \code{"\\midrule "}!--the space!).
 #' @param fixef.prefix A prefix to add to the fixed-effects names. Defaults to \code{""} (i.e. no prefix).
@@ -4090,12 +4123,11 @@ getFixest_etable = function(){
 #' @param fixef_sizes.prefix A prefix to add to the fixed-effects names. Defaults to \code{"# "}.
 #' @param fixef_sizes.suffix A suffix to add to the fixed-effects names. Defaults to \code{""} (i.e. no suffix).
 #' @param stats.title A character scalar. The title line appearing before the statistics (defaults to \code{"\\midrule \\emph{Fit statistics}"} if \code{main = "base"} and to \code{" "} if \code{main = "aer"}). Note that the behavior of \code{stats.title = " "} (a space) is different from \code{stats.title = ""} (the empty string): in the first case you will get an empty row, while in the second case you get no empty row. To get a line without an empty row, use \code{"\\midrule"} (and not \code{"\\midrule "}!--the space!).
-#' @param notes.title A character scalar. Some text appearing just before the notes, defaults to \code{"\\par \n"}.
+#' @param notes.intro A character scalar. Some tex code appearing just before the notes, defaults to \code{"\\par \\raggedright \n"}.
 #' @param tablefoot A logical scalar. Whether or not to display a footer within the table. Defaults to \code{TRUE} if \code{main = "aer"}) and \code{FALSE} if \code{main = "aer"}).
-#' @param tablefoot.title A character scalar. Only if \code{tablefoot = TRUE}, value to appear before the table footer. Defaults to \code{"\\bottomrule\\bottomrule"} if \code{main = "base"}.
 #' @param tablefoot.value A character scalar. The notes to be displayed in the footer. Defaults to \code{"default"} if \code{main = "base"}, which leads to custom footers informing on the type of standard-error and significance codes, depending on the estimations.
 #' @param yesNo A character vector of length 1 or 2. Defaults to \code{"Yes"} if \code{main = "base"} and to \code{"$\\checkmark$"} if \code{main = "aer"} (from package \code{amssymb}). This is the message displayed when a given fixed-effect is (or is not) included in a regression. If \code{yesNo} is of length 1, then the second element is the empty string.
-#' @param tabular Character scalar equal to "normal" (default), "*" or "X". Represents the type of tabular to export.
+#' @param tabular Character scalar equal to "normal" (default), "*" or "X". Represents the type of tabular environment to use: either \code{tabular}, \code{tabular*} or \code{tabularx}.
 #' @param interaction.combine Character scalar, defaults to \code{" $\\times$ "}. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind $\\times$ Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.
 #' @param i.equal Character scalar, defaults to \code{" $=$ "}. Only affects factor variables created with the function \code{\link[fixest]{i}}, tells how the variable should be linked to its value. For example if you have the Species factor from the iris data set, by default the display of the variable is \code{Species $=$ Setosa}, etc. If \code{i.equal = ": "} the display becomes \code{Species: Setosa}.
 #' @param notes.tpt.intro Character scalar. Only used if \code{tpt = TRUE}, it is some tex code that is passed before any \code{threeparttable} item (can be used for, typically, the font size). Default is the empty string.
@@ -4136,8 +4168,8 @@ getFixest_etable = function(){
 style.tex = function(main = "base", depvar.title, model.title, model.format, line.top,
                      line.bottom, var.title, fixef.title, fixef.prefix, fixef.suffix,
                      fixef.where, slopes.title, slopes.format, fixef_sizes.prefix,
-                     fixef_sizes.suffix, stats.title, notes.title,
-                     notes.tpt.intro, tablefoot, tablefoot.title, tablefoot.value,
+                     fixef_sizes.suffix, stats.title, notes.intro,
+                     notes.tpt.intro, tablefoot, tablefoot.value,
                      yesNo, tabular = "normal", depvar.style, no_border,
                      tpt, arraystretch, adjustbox = NULL, fontsize,
                      interaction.combine = " $\\times$ ", i.equal = " $=$ "){
@@ -4152,10 +4184,12 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
     # Checking
     check_arg_plus(main, "match(base, aer, qje)")
 
-    check_arg("character scalar", depvar.title, model.title, line.top, line.bottom, var.title)
+    check_arg_plus(line.top, line.bottom, "match(simple, double) | character scalar")
+
+    check_arg("character scalar", depvar.title, model.title, var.title)
     check_arg("character scalar", fixef.title, fixef.prefix, fixef.suffix, slopes.title, slopes.format)
     check_arg("character scalar", fixef_sizes.prefix, fixef_sizes.suffix, stats.title)
-    check_arg("character scalar", notes.title, tablefoot.title, interaction.combine, i.equal)
+    check_arg("character scalar", notes.intro, interaction.combine, i.equal)
     check_arg("character scalar", notes.tpt.intro, depvar.style)
 
     if(!missing(depvar.style)){
@@ -4185,7 +4219,8 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
         if(main == "base"){
             res = list(depvar.title = "Dependent Variable(s):", model.title = "Model:",
                        model.format = "(1)",
-                       line.top = "\\tabularnewline\\midrule\\midrule", line.bottom = "",
+                       line.top = "\\tabularnewline \\midrule \\midrule",
+                       line.bottom = "double",
                        var.title = "\\midrule\n\\emph{Variables}",
                        fixef.title = "\\midrule\n\\emph{Fixed-effects}", fixef.prefix = "",
                        fixef.suffix = "", fixef.where = "var",
@@ -4193,9 +4228,9 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
                        slopes.format = "__var__ (__slope__)",
                        fixef_sizes.prefix = "\\# ", fixef_sizes.suffix = "",
                        stats.title = "\\midrule\n\\emph{Fit statistics}",
-                       notes.title = "\\par \\raggedright \n",
+                       notes.intro = "\\par \\raggedright \n",
                        notes.tpt.intro = "",
-                       tablefoot = TRUE, tablefoot.title = "\\midrule\\midrule\n",
+                       tablefoot = TRUE,
                        tablefoot.value = "default", yesNo = c("Yes", ""),
                        depvar.style = "", no_border = FALSE)
 
@@ -4212,9 +4247,9 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
                        fixef.where = "stats",
                        slopes.title = "", slopes.format = "__var__ $\\times $ __slope__",
                        fixef_sizes.prefix = "\\# ", fixef_sizes.suffix = "",
-                       stats.title = " ", notes.title = "\\par \\raggedright \n",
+                       stats.title = " ", notes.intro = "\\par \\raggedright \n",
                        notes.tpt.intro = "",
-                       tablefoot = FALSE, tablefoot.title = "", tablefoot.value = "",
+                       tablefoot = FALSE, tablefoot.value = "",
                        yesNo = c("$\\checkmark$", ""), depvar.style = "",
                        no_border = FALSE)
 

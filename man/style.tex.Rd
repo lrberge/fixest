@@ -21,13 +21,14 @@ style.tex(
   fixef_sizes.prefix,
   fixef_sizes.suffix,
   stats.title,
-  notes.title,
+  notes.intro,
   notes.tpt.intro,
   tablefoot,
-  tablefoot.title,
   tablefoot.value,
   yesNo,
   tabular = "normal",
+  depvar.style,
+  no_border,
   tpt,
   arraystretch,
   adjustbox = NULL,
@@ -45,9 +46,9 @@ style.tex(
 
 \item{model.format}{A character scalar. The value to appear on top of each column. It defaults to \code{"(1)"}. Note that 1, i, I, a and A are special characters: if found, their values will be automatically incremented across columns.}
 
-\item{line.top}{A character scalar. The line at the top of the table (defaults to \code{"\\tabularnewline\\toprule\\toprule"} if \code{main = "base"} and to \code{"\\toprule"} if \code{main = "aer"}).}
+\item{line.top}{A character scalar equal to \code{"simple"}, \code{"double"}, or anything else. The line at the top of the table (defaults to \code{"double"} if \code{main = "base"} and to \code{"simple"} if \code{main = "aer"}). \code{"simple"} is equivalent to \code{"\\toprule"}, and \code{"double"} to \code{"\\tabularnewline \\midrule \\midrule"}.}
 
-\item{line.bottom}{A character scalar. The line at the bottom of the table (defaults to \code{""} if \code{main = "base"}, \code{"\\midrule \\midrule & \\tabularnewline"} if \code{main = "base"} AND \code{tablefoot = FALSE}, and to \code{"\\bottomrule"} if \code{main = "aer"}).}
+\item{line.bottom}{A character scalar equal to \code{"simple"}, \code{"double"}, or anything else. The line at the bottom of the table (defaults to \code{"double"} if \code{main = "base"} and to \code{"simple"} if \code{main = "aer"}). \code{"simple"} is equivalent to \code{"\\bottomrule"}, and \code{"double"} to \code{"\\midrule \\midrule & \\tabularnewline"}.}
 
 \item{var.title}{A character scalar. The title line appearing before the variables (defaults to \code{"\\midrule \\emph{Variables}"} if \code{main = "base"} and to \code{"\\midrule"} if \code{main = "aer"}). Note that the behavior of \code{var.title = " "} (a space) is different from \code{var.title = ""} (the empty string): in the first case you will get an empty row, while in the second case you get no empty row. To get a line without an empty row, use \code{"\\midrule"} (and not \code{"\\midrule "}!--the space!).}
 
@@ -69,19 +70,29 @@ style.tex(
 
 \item{stats.title}{A character scalar. The title line appearing before the statistics (defaults to \code{"\\midrule \\emph{Fit statistics}"} if \code{main = "base"} and to \code{" "} if \code{main = "aer"}). Note that the behavior of \code{stats.title = " "} (a space) is different from \code{stats.title = ""} (the empty string): in the first case you will get an empty row, while in the second case you get no empty row. To get a line without an empty row, use \code{"\\midrule"} (and not \code{"\\midrule "}!--the space!).}
 
-\item{notes.title}{A character scalar. Some text appearing just before the notes, defaults to \code{"\\par \n"}.}
+\item{notes.intro}{A character scalar. Some tex code appearing just before the notes, defaults to \code{"\\par \\raggedright \n"}.}
 
 \item{notes.tpt.intro}{Character scalar. Only used if \code{tpt = TRUE}, it is some tex code that is passed before any \code{threeparttable} item (can be used for, typically, the font size). Default is the empty string.}
 
 \item{tablefoot}{A logical scalar. Whether or not to display a footer within the table. Defaults to \code{TRUE} if \code{main = "aer"}) and \code{FALSE} if \code{main = "aer"}).}
 
-\item{tablefoot.title}{A character scalar. Only if \code{tablefoot = TRUE}, value to appear before the table footer. Defaults to \code{"\\bottomrule\\bottomrule"} if \code{main = "base"}.}
-
 \item{tablefoot.value}{A character scalar. The notes to be displayed in the footer. Defaults to \code{"default"} if \code{main = "base"}, which leads to custom footers informing on the type of standard-error and significance codes, depending on the estimations.}
 
 \item{yesNo}{A character vector of length 1 or 2. Defaults to \code{"Yes"} if \code{main = "base"} and to \code{"$\\checkmark$"} if \code{main = "aer"} (from package \code{amssymb}). This is the message displayed when a given fixed-effect is (or is not) included in a regression. If \code{yesNo} is of length 1, then the second element is the empty string.}
 
-\item{tabular}{Character scalar equal to "normal" (default), "*" or "X". Represents the type of tabular to export.}
+\item{tabular}{Character scalar equal to "normal" (default), "*" or "X". Represents the type of tabular environment to use: either \code{tabular}, \code{tabular*} or \code{tabularx}.}
+
+\item{depvar.style}{Character scalar equal to either \code{" "} (default), \code{"*"} (italic), \code{"**"} (bold), \code{"***"} (italic-bold). How the name of the dependent variable should be displayed.}
+
+\item{no_border}{Logical, default is \code{FALSE}. Whether to remove any side border to the table (typically adds \code{@\{\}} to the sides of the tabular).}
+
+\item{tpt}{(Tex only.) Logical scalar, default is FALSE. Whether to use the \code{threeparttable} environment. If so, the \code{notes} will be integrated into the \code{tablenotes} environment.}
+
+\item{arraystretch}{(Tex only.) A numeric scalar, default is \code{NULL}. If provided, the command \code{\\renewcommand*{\\arraystretch}{x}} is inserted, replacing \code{x} by the value of \code{arraystretch}. The changes are specific to the current table and do not affect the rest of the document.}
+
+\item{adjustbox}{(Tex only.) A logical, numeric or character scalar, default is \code{NULL}. If not \code{NULL}, the table is inserted within the \code{adjustbox} environment. By default the options are \code{width = 1\\textwidth, center} (if \code{TRUE}). A numeric value changes the value before \code{\\textwidth}. You can also add a character of the form \code{"x tw"} or \code{"x th"} with \code{x} a number and where tw (th) stands for text-width (text-height). Finally any other character value is passed verbatim as an \code{adjustbox} option.}
+
+\item{fontsize}{(Tex only.) A character scalar, default is \code{NULL}. Can be equal to \code{tiny}, \code{scriptsize}, \code{footnotesize}, \code{small}, \code{normalsize}, \code{large}, or \code{Large}. The change affect the table only (and not the rest of the document).}
 
 \item{interaction.combine}{Character scalar, defaults to \code{" $\\times$ "}. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind $\\times$ Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.}
 
