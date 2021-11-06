@@ -702,16 +702,16 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     if(tex.preview){
 
         # p: package ; pn: package name ; x: tex vector ; y: tex packages
-        add_pkg = function(p, x, y, pn = p){
+        add_pkg = function(p, x, y, pn = p, opt = ""){
             if(any(grepl(p, x, fixed = TRUE))){
-                c(y, paste0("\\usepackage{", pn, "}"))
+                c(y, dsb("\\usepackage.[opt]{.[pn]}"))
             } else {
                 y
             }
         }
 
         tex_pkg = c()
-        tex_pkg = add_pkg("threeparttable", res, tex_pkg)
+        tex_pkg = add_pkg("threeparttable", res, tex_pkg, opt = "[flushleft]")
         tex_pkg = add_pkg("adjustbox", res, tex_pkg)
         tex_pkg = add_pkg("checkmark", res, tex_pkg, "amssymb")
         tex_pkg = add_pkg("tabularx", res, tex_pkg)
@@ -724,7 +724,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
 
     if(!missnull(file)){
         error_sender(sink(file = file, append = !replace),
-                     "Argument 'file': error when creating the document:")
+                     "Argument 'file': error when creating the document in ", file)
 
         on.exit(sink())
 
@@ -3185,16 +3185,15 @@ etable_internal_latex = function(info){
 
             if(tpt){
                 if(nchar(trimws(notes_intro)) > 0){
-                    notes_intro = paste0(notes_intro, "\n")
+                    notes_intro = paste0(trimws(notes_intro), "\n")
                 }
 
-                # if note = [a] => we want it to be attached to item => \item[a]
-                # otherwise, we don't want it
-                notes = gsub("^([^\\[])", " \\1", notes)
-                notes = paste0("\\item", notes, collapse = "\n")
+                notes = paste0("\\item ", notes, collapse = "\n")
 
-                info_notes = paste0("\n\\begin{tablenotes}\n",
-                                    notes_intro, notes,
+                # The note intro is placed right after the } so that you can pass options
+                # like [flushleft]
+                info_notes = paste0("\n\\begin{tablenotes}", notes_intro,
+                                    notes,
                                     "\n\\end{tablenotes}\n")
             } else {
                 info_notes = paste0("\n", notes_intro, paste0(notes, collapse = "\\\\\n"), "\n")
