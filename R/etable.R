@@ -689,7 +689,8 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     # tex.preview
     if(tex && tex.preview){
 
-        is_texPreview = requireNamespace("texPreview", quietly = TRUE)
+        stop("tex.preview not yet implemented")
+
         if(!is_texPreview){
             warning("For the argument 'tex.preview' to work, you need to install the package 'texPreview'.")
             tex.preview = FALSE
@@ -717,9 +718,8 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
         tex_pkg = add_pkg("tabularx", res, tex_pkg)
 
         # I do that to avoid having texPreview in suggests which makes my session hang
-        preview_fun = eval(str2lang("function(x, pkg) texPreview::texPreview(x, usrPackages = pkg)"))
 
-        make_preview = function(x) preview_fun(paste0(x, collapse = "\n"), usrPackages = tex_pkg)
+        # make_preview = function(x) preview_fun(paste0(x, collapse = "\n"), usrPackages = tex_pkg)
     }
 
     if(!missnull(file)){
