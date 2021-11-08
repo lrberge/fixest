@@ -17,6 +17,8 @@
   
   - fix bug in `n_unik` preventing the auto completion of variable names.
   
+  - fix bug in `fitstat` for the KPR statistic (reported by @etiennebacher [#161](https://github.com/lrberge/fixest/issues/161)).
+  
 ## etable
 
  - the quality of the tex output has been substantially improved.

@@ -1496,7 +1496,9 @@ kp_stat = function(x){
     # There is need to compute the vcov specifically for this case
     # We do it the same way as it was for x
 
-    if(identical(x$se_info$se, "IID")){
+    VCOV_TYPE = attr(x$cov.scaled, "type")
+
+    if(identical(VCOV_TYPE, "IID")){
         vlab = chol(tcrossprod(kronv) / nrow(X_proj))
 
     } else {
@@ -1514,7 +1516,7 @@ kp_stat = function(x){
         vhat = solve(K, t(solve(K, meat)))
 
         # DOF correction now
-        n = nobs(x) - (x$se_info$se == "cluster")
+        n = nobs(x) - identical(VCOV_TYPE, "cluster")
         df_resid = degrees_freedom(x, "resid", stage = 1)
         vhat = vhat * n / df_resid
 
