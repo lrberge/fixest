@@ -3367,30 +3367,49 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 
 
 
-#' Extends strings with variables using the Dot Square Bracket operator
+#' Extends strings with variables using the Dot Square Bracket operator (experimental)
 #'
-#' Simple utility to insert variables into character strings using the "dot square bracket" operator. Typically \code{dsb("Hello I'm .[x]!")} is equivalent to \code{paste0("hello I'm ", x, "!")}.
+#' (\emph{Currently experimental, design will likely evolve.}) Simple utility to insert variables into character strings using the "dot square bracket" operator. Typically \code{dsb("Hello I'm .[x]!")} is equivalent to \code{paste0("hello I'm ", x, "!")}.
 #'
-#' @param x A character string, must be of length 1. Every expression inside \code{.[]} is evaluated in the current frame and then coerced to character and inserted into the character string. For example: \code{dsb("hello .[name]")} is equivalent to \code{paste0("hello ", name)}. You can add a string literal as first or last element in the \code{.[]}. Doing so will collapse the expression. If first, as in \code{.['text', expr]}, the expression is first collapsed: \code{paste0(expr, collapse = "text")} is applied. If last, as in \code{"before.[expr, 'text']"}, the expression is collapsed to the previous adjacent text: \code{paste0("before", expr, collapse = "text")} is applied. The collapsing is always done with the previous text only. To collapse the whole string, use the argument `collapse`.
+#' @param x A character string, must be of length 1. Every expression inside \code{.[]} is evaluated in the current frame and then coerced to character and inserted into the character string. For example: \code{dsb("hello .[name]")} is equivalent to \code{paste0("hello ", name)}.
+#' You can add a string literal as first or last element in the \code{.[]}. Doing so \emph{the behavior will change}!
+#' If first, as in \code{.['coll', expr]}, the expression is first collapsed: \code{paste0(expr, collapse = "coll")} is applied before merging to the existing string.
+#' If last, as in \code{".[expr, 'split']"}, the expression \code{expr} is \emph{not evaluated and taken verbatim}! Then it is split according to \code{'split'} to create a vector. The value of split is fixed, but can start with an \code{@}, if so it is taken as a regular expression. Ending with a comma (as in \code{.[expr,]}) is like having comma separation: i.e. \code{.[expr, '@, *']}.
 #' @param collapse If the variables inserted into the string are of length greater than 1, you can merge into a single string with \code{collapse}.
+#' @param split Character scalar, default is \code{NULL}. If provided, the character in \code{x} will be broken into a vector according to the value in \code{split}. Ex \code{dsb("a.b.c.", split = ".")} will create the vector of \code{a}, \code{b} and \code{c}. You can use a regular expression by starting with an \code{@}, like in \code{"@[[:punct:]]"}. If you really want to start with an \code{@}, escape it like in \code{"\\@"}.
 #'
 #' Every expression inside \code{.[]} is evaluated in the current frame and then coerced to character and inserted into the character string.
 #'
+#' If \code{split} is used and if \code{.[]} is also used and returns a vector, that vector is accumulated. Ex: \code{dsb("a, .[x], c", split = ", ")}, if x returns \code{c("x1", "x2")}, the final vector returned will be \code{c("a", "x1", "x2", "c")}.
+#'
+#' If both \code{split} and \code{collapse} are provided, they will be applied in the order chosen by the user. Placing \code{collapse} last will always return a vector of length 1. That's not the case if it is placed before \code{split}.
+#'
 #' @section Collapsing:
 #'
-#' If the expression inside \code{.[]} is a vector, a vector will be returned, except when we explicitly request the character string to be "collapsed". There are three main ways to do the collapsing that we detail below. Throughout, consider that the variable \code{name} is equal to \code{name = c("Romeo", "Juliet")} and the example \code{dsb("hello .[name], what's up?")}.
+#' If the expression inside \code{.[]} is a vector, a vector will be returned, except when we explicitly request the character string to be "collapsed". There are two main ways to do the collapsing that we detail below. Throughout, consider that the variable \code{name} is equal to \code{name = c("Romeo", "Juliet")} and the example \code{dsb("hello .[name], what's up?")}.
 #'
 #'
 #' \itemize{
 #'
 #' \item{full collapse:}{The argument \code{collapse} is used. All the string elements are attached. For example \code{dsb("hello .[name], what's up?", collapse = " And... ")} leads to \code{"hello Romeo, what's up? And... hello Juliet, what's up?"}.}
 #' \item{expression-collapse:}{There is a string literal in the first position of \code{.[]}. In that case the expression in brackets is first collapsed before being merged. For example in \code{dsb("hello .[' and ', name], what's up?")} leads to \code{"hello Romeo and Juliet, what's up?"}. If you add a comma but omit the string literal, the default is to collapse with a space: \code{.[,expr]} is equivalent to \code{.[" ", expr]}.}
-#' \item{text-expression-collapse:}{There is a string literal in the second position of \code{.[]}. In that case the expression in brackets is collapsed to the adjacent string on the left. For example in \code{dsb("hello .[name, ' and '], what's up?")} leads to \code{"hello Romeo and hello Juliet, what's up?"}. If you add a comma but omit the string literal, the default is to collapse with a space: \code{.[expr,]} is equivalent to \code{.[expr, " "]}.}
 #'
 #' }
 #'
+#' @section Splitting:
+#'
+#' There are two ways to split: either using the argument \code{split}, either using the within \code{.[]} splitting operator. We detail them below.
+#'
+#' \itemize{
+#'
+#' \item{\code{split} argument:}{The argument \code{split} splits the character string according to a character string. For example: \code{dsb("a.b.c", split = ".")} becomes \code{c("a", "b", "c")}. By default the character is fixed, but you can make it a regular expression by adding an \code{"@"} first. For example \code{dsb("a.b; c", split = "@[[:punct:] ]+")} would also lead to the same vector. Note that if \code{.[]} is present in the string and would lead to a vector, the value is concatenated.}
+#' \item{In \code{.[]} splitting:}{There is a string literal in the last position of \code{.[]}. In that case \emph{the expression in brackets is not evaluated any more: instead it is taken verbatim}! After that, the expression is split according to the string literal. For example \code{dsb("x.[a.b.c, '.']")} will first break \code{"a.b.c"} in to the vector from \code{a} to \code{c} which will then merged to \code{x}, leading to \code{c("xa", "xb", "xc")}. To enable regular expressions, as before, you must use an \code{@} first. Finally, the default value, when no string literal is provided, is \code{"@, *"}, which means comma-separated. For example \code{dsb("x.[a, b, c,]")} will lead to the same vector as before.}
+#'
+#' }
+#'
+#'
 #' @return
-#' A character vector. It is of length > 1 only if the variables inserted are of length > 1.
+#' A character vector. It is of length > 1 only if the variables inserted are of length > 1 or if \code{split} is provided.
 #'
 #' @author
 #' Laurent Berge
@@ -3427,23 +3446,70 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 #' # in the *first* position of .[]
 #' dsb("hello .[' and ', name], what's up?")
 #'
-#' # collapsing the epression with the previous string
-#' # using a string literal in the *second* position
-#' dsb("hello .[name, ' and '], what's up?")
-#'
 #' # The elements can also be empty, leading to collapse with a " "
 #' dsb("hello .[, name], what's up?")
-#' dsb("hello .[name, ], what's up?")
 #'
-dsb = function(x, collapse = NULL){
-    check_arg(x, "character scalar na ok")
-    check_arg(collapse, "NULL character scalar")
+#' # Another example
+#' n = 5
+#' dsb(".[n]! = .['*', 1:n]")
+#'
+#'
+#' #
+#' # Splitting options
+#' #
+#'
+#' # You can split with the argument split
+#' dsb("This.is.a.list.of.tings", split = ".")
+#'
+#' # When split is used, vectors in .[] are concatenated
+#' dsb("a.b..[letters[3:8]].y.z..[1:3]", split = ".")
+#'
+#' # You can split using the .[],
+#' # by adding a character literal in second position
+#' dsb("library(.[pacman / here / data.table, ' / '])")
+#'
+#' # By default the split is comma-separated:
+#' dsb("\\usepackage{.[lmodern, xcolor, array,]}")
+#'
+#' # But don't forget the last comma!
+#' # Otherwise: error is raised because the value cannot be evaluated!
+#' try(dsb("\\usepackage{.[lmodern, xcolor, array]}"))
+#'
+#' # Since there is no evaluation when split is requested,
+#' # you can have anything you want in .[]
+#' dsb("Operator %.[*$£?/,'']%")
+#'
+#'
+dsb = function(x, split = NULL, collapse = NULL){
+    check_arg(x, "character scalar na ok mbt l0 NULL")
 
+    if(length(x) == 0) return(x)
     if(is.na(x)) return(x)
 
-    res = dot_square_bracket(x, frame = parent.frame(), text = TRUE)
-    if(!is.null(collapse)){
-        res = paste0(res, collapse = collapse)
+    check_arg(split, collapse, "NULL character scalar")
+
+
+    res = dot_square_bracket(x, frame = parent.frame(), text = TRUE,
+                             forced_merge = !is.null(split))
+    # forced_merge merges the values with _MERGE_
+
+    mc = match.call()
+    loop_args = c("split", "collapse")
+    for(arg in intersect(names(mc), loop_args)){
+
+        if(arg == "collapse" && !is.null(collapse)){
+            res = paste0(res, collapse = collapse)
+        }
+
+        if(arg == "split" && !is.null(split)){
+            # res is always of length 1 over here thanks to the forced merge
+
+            if(grepl("_MERGE_", res, fixed = TRUE)){
+                res = strsplit(res, "_MERGE_", fixed = TRUE)[[1]]
+            }
+
+            res = unlist(str_split(res, split))
+        }
     }
 
     res
@@ -4764,7 +4830,7 @@ n_unik = function(x){
 
             var_new = gsub("^([[:alpha:].][[:alnum:]._]*)\\[", "\\1[sw0(", var)
             if(grepl("sw0([", var_new, fixed = TRUE)){
-                var_new = sub("sw0([", "sw(", str_trim(var_new, 1), fixed = TRUE)
+                var_new = sub("sw0([", "sw(", str_trim(var_new, -1), fixed = TRUE)
             }
             var_new = sub("\\]$", ")]", var_new)
 
@@ -5484,7 +5550,8 @@ value2stringCall = function(value_raw, call = FALSE, check = FALSE, frame = NULL
     res
 }
 
-dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE, up = 0){
+dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE,
+                              forced_merge = FALSE, up = 0){
     # transforms "x.[i]" into x1 if i==1
     # z = "XX" ; x = ".[z] + x.[1:5] + y.[1:2]_t"
     # x = "x.[a] | fe[b] + m.[o]"
@@ -5575,8 +5642,8 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
 
     if(text){
         # NA means no aggregation
-        agg = rep(NA_character_, n)
-        agg_full = rep(FALSE, n)
+        operator = rep(NA_character_, n)
+        do_split = rep(FALSE, n)
     }
 
     res = as.list(x_split)
@@ -5585,16 +5652,42 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
         # catching the aggregator
         if(text && grepl(",", x_split[i], fixed = TRUE)){
             # taking care of the empty commas
-            x_txt = sub("(^(?=,)|(?<=,)$)", "' '", trimws(x_split[i]), perl = TRUE)
-            x_txt = paste0("dsb_check_set_agg(", x_txt, ")")
-            my_list = list(dsb_check_set_agg = dsb_check_set_agg)
-            info_agg = error_sender(eval(str2lang(x_txt), my_list, frame),
-                                    "Dot square bracket operator: Evaluation of '.[",
-                                    x_split[i], "]' led to an error:",
-                                    up = up + 1)
-            agg[i] = info_agg$agg
-            agg_full[i] = isTRUE(attr(info_agg$agg, "full"))
-            my_call = info_agg$call
+            x_txt = trimws(x_split[i])
+            is_default = grepl("^,|,$", x_txt)
+            x_txt = sub("(^(?=,)|(?<=,)$)", "' '", x_txt, perl = TRUE)
+
+            if(grepl("('|\")$", x_txt)){
+                # we take everything before verbatim!
+                if(grepl("'$", x_txt)){
+                    op = sub(".+'([^']*)'$", "\\1", x_txt)
+                } else {
+                    op = sub(".+\"([^']*)\"$", "\\1", x_txt)
+                }
+
+                x_txt_clean = str_trim(x_txt, -nchar(op) - 2)
+                x_txt_clean = sub(",[^,]*$", "", x_txt_clean)
+
+                if(is_default){
+                    op = "@, *"
+                }
+
+                operator[i] = op
+                do_split[i] = TRUE
+                my_call = x_txt_clean
+
+            } else {
+                x_txt = paste0("dsb_check_set_agg(", x_txt, ")")
+                my_list = list(dsb_check_set_agg = dsb_check_set_agg)
+                info_agg = error_sender(eval(str2lang(x_txt), my_list, frame),
+                                        "Dot square bracket operator: Evaluation of '.[",
+                                        x_split[i], "]' led to an error:",
+                                        up = up + 1)
+
+                operator[i] = info_agg$agg
+                do_split[i] = FALSE
+                my_call = info_agg$call
+            }
+
         } else {
             my_call = error_sender(str2lang(x_split[i]),
                                    "Dot square bracket operator: Evaluation of '.[",
@@ -5625,7 +5718,23 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
     }
 
     if(max(lengths(res)) == 1) {
-        res = paste(res, collapse = "")
+
+        if(text && any(do_split)){
+            res_txt = res[[1]]
+            for(i in 2:length(res)){
+
+                if(do_split[i]){
+                    res_txt = paste0(res_txt, str_split(res[[i]], operator[i])[[1]])
+                } else {
+                    res_txt = paste0(res_txt, res[[i]])
+                }
+            }
+
+            res = res_txt
+
+        } else {
+            res = paste(res, collapse = "")
+        }
 
     } else {
         # first value is NEVER a vector ("" is added automatically in split)
@@ -5634,18 +5743,27 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
         while(i <= n){
 
             if(length(res[[i]]) == 1){
-                res_txt = paste0(res_txt, res[[i]])
+
+                if(text && do_split[i]){
+                    res_txt = paste0(res_txt, str_split(res[[i]], operator[i])[[1]])
+                } else {
+                    res_txt = paste0(res_txt, res[[i]])
+                }
+
                 i = i + 1
 
             } else if(text){
-                if(is.na(agg[i])){
-                    res_txt = paste0(res_txt, res[[i]])
-                } else {
-                    if(agg_full[i]){
-                        res_txt = paste0(res_txt, res[[i]], collapse = agg[i])
+                if(is.na(operator[i])){
+                    if(forced_merge){
+                        res_txt = paste0(res_txt, paste0(res[[i]], collapse = "_MERGE_"))
                     } else {
-                        res_txt = paste0(res_txt, paste0(res[[i]], collapse = agg[i]))
+                        res_txt = paste0(res_txt, res[[i]])
                     }
+
+                } else {
+                    # If we're here => must be an aggregation requested
+                    # (if it was a split, it would be of length 1)
+                    res_txt = paste0(res_txt, paste0(res[[i]], collapse = operator[i]))
                 }
 
                 i = i + 1
@@ -5692,8 +5810,9 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
 
 
 dsb_check_set_agg = function(...){
+
     if(...length() > 2){
-        stop("You cannot have more than two elements in between .[]. Currently there are ", ...length(), ".")
+        stop_up("You cannot have more than two elements in between .[]. Currently there are ", ...length(), ".")
     }
 
     mc = match.call()
@@ -5703,7 +5822,7 @@ dsb_check_set_agg = function(...){
         res = list(agg = mc[[2]], call = mc[[3]])
     } else if(is.character(mc[[3]])){
         agg = mc[[3]]
-        attr(agg, "full") = TRUE
+        attr(agg, "split") = TRUE
         res = list(agg = agg, call = mc[[2]])
     } else {
         stop("The operator .[] accepts only up to two elements, one of the MUST be a string literal (eg: .['text', y]). Problem: none of the two elements is a string literal.")
@@ -8244,11 +8363,18 @@ error_sender = function(expr, ..., clean, up = 0, arg_name){
             call_non_informative = deparse(substitute(expr), 100)[1]
             call_error = deparse(res[[1]], 100)[1]
 
-            if(call_error == call_non_informative || grepl("^(doTry|eval)", call_error)){
+            if(call_error == call_non_informative || call_error == "NULL" ||
+               grepl("^(doTry|eval)", call_error)){
                 call_error = ""
 
             } else {
                 call_error = paste0("In ", call_error, ": ")
+            }
+
+            err = res[[2]]
+
+            if(grepl("^in eval\\(str[^:]+:\n", err)){
+                err = sub("^in eval\\(str[^:]+:\n", "", err)
             }
 
             if(!missing(clean)){
@@ -8262,9 +8388,9 @@ error_sender = function(expr, ..., clean, up = 0, arg_name){
                     to = ""
                 }
 
-                stop_up(msg, "\n  ", call_error, gsub(from, to, res[[2]]))
+                stop_up(msg, "\n  ", call_error, gsub(from, to, err))
             } else {
-                stop_up(msg, "\n  ", call_error, res[[2]])
+                stop_up(msg, "\n  ", call_error, err)
             }
         }
     }
@@ -8866,12 +8992,32 @@ insert_in_between = function(x, y){
     res
 }
 
-str_trim = function(x, n, first = FALSE){
-    if(first){
+str_trim = function(x, n){
+    # positive values: first
+    # negative values: last
+    if(n > 0){
         substr(x, 1 + n, nchar(x))
     } else {
-        substr(x, 1, nchar(x) - n)
+        substr(x, 1, nchar(x) + n)
     }
+}
+
+str_split = function(x, split){
+    # Simple wrapper
+
+    fixed = TRUE
+    perl = FALSE
+    if(grepl("@", split, fixed = TRUE)){
+        if(grepl("^\\\\@", split)){
+            split = str_trim(split, 1)
+        } else if(grepl("^@", split)){
+            split = str_trim(split, 1)
+            fixed = FALSE
+            perl = TRUE
+        }
+    }
+
+    strsplit(x, split, fixed = fixed, perl = perl)
 }
 
 NA_fun = function(..., df){
