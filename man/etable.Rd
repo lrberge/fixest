@@ -6,6 +6,7 @@
 \alias{getFixest_etable}
 \alias{print.etable_tex}
 \alias{print.etable_df}
+\alias{log_etable}
 \alias{esttable}
 \alias{esttex}
 \title{Estimations table (export the results of multiples estimations to a DF or to Latex)}
@@ -18,32 +19,32 @@ etable(
   se = NULL,
   ssc = NULL,
   cluster = NULL,
-  .vcov,
+  .vcov = NULL,
   .vcov_args = NULL,
   digits = 4,
   digits.stats = 5,
   tex,
-  fitstat,
-  title,
+  fitstat = NULL,
+  title = NULL,
   coefstat = "se",
   ci = 0.95,
   se.row = NULL,
   se.below = NULL,
-  keep,
-  drop,
-  order,
-  dict,
-  file,
+  keep = NULL,
+  drop = NULL,
+  order = NULL,
+  dict = TRUE,
+  file = NULL,
   replace = FALSE,
-  convergence,
-  signifCode,
-  label,
-  float,
+  convergence = NULL,
+  signif.code = NULL,
+  label = NULL,
+  float = NULL,
   headers = list("auto"),
   fixef_sizes = FALSE,
   fixef_sizes.simplify = TRUE,
   keepFactors = TRUE,
-  family,
+  family = NULL,
   powerBelow = -5,
   interaction.combine = NULL,
   interaction.order = NULL,
@@ -73,7 +74,9 @@ etable(
   meta.sys = NULL,
   meta.call = NULL,
   meta.comment = NULL,
-  tex.preview = FALSE
+  view = FALSE,
+  export = NULL,
+  markdown = NULL
 )
 
 setFixest_etable(
@@ -87,7 +90,6 @@ setFixest_etable(
   drop,
   order,
   dict,
-  signifCode,
   float,
   fixef_sizes = FALSE,
   fixef_sizes.simplify = TRUE,
@@ -103,7 +105,9 @@ setFixest_etable(
   fixef.group = NULL,
   placement = "htbp",
   drop.section = NULL,
-  tex.preview = FALSE,
+  view = FALSE,
+  markdown = NULL,
+  view.cache = FALSE,
   postprocess.tex = NULL,
   postprocess.df = NULL,
   fit_format = "__var__",
@@ -122,6 +126,8 @@ getFixest_etable()
 
 \method{print}{etable_df}(x, ...)
 
+log_etable(type = "pdflatex")
+
 esttable(
   ...,
   vcov = NULL,
@@ -130,28 +136,28 @@ esttable(
   se = NULL,
   ssc = NULL,
   cluster = NULL,
-  .vcov,
+  .vcov = NULL,
   .vcov_args = NULL,
   digits = 4,
   digits.stats = 5,
-  fitstat,
+  fitstat = NULL,
   coefstat = "se",
   ci = 0.95,
   se.row = NULL,
   se.below = NULL,
-  keep,
-  drop,
-  order,
-  dict,
-  file,
+  keep = NULL,
+  drop = NULL,
+  order = NULL,
+  dict = TRUE,
+  file = NULL,
   replace = FALSE,
-  convergence,
-  signifCode,
+  convergence = NULL,
+  signif.code = NULL,
   headers = list("auto"),
   fixef_sizes = FALSE,
   fixef_sizes.simplify = TRUE,
   keepFactors = TRUE,
-  family,
+  family = NULL,
   powerBelow = -5,
   interaction.combine = NULL,
   interaction.order = NULL,
@@ -165,7 +171,8 @@ esttable(
   poly_dict = c("", " square", " cube"),
   postprocess.df = NULL,
   fit_format = "__var__",
-  coef.just = NULL
+  coef.just = NULL,
+  export = NULL
 )
 
 esttex(
@@ -176,31 +183,31 @@ esttex(
   se = NULL,
   ssc = NULL,
   cluster = NULL,
-  .vcov,
+  .vcov = NULL,
   .vcov_args = NULL,
   digits = 4,
   digits.stats = 5,
-  fitstat,
-  title,
+  fitstat = NULL,
+  title = NULL,
   coefstat = "se",
   ci = 0.95,
   se.row = NULL,
   se.below = NULL,
-  keep,
-  drop,
-  order,
-  dict,
-  file,
+  keep = NULL,
+  drop = NULL,
+  order = NULL,
+  dict = TRUE,
+  file = NULL,
   replace = FALSE,
-  convergence,
-  signifCode,
-  label,
-  float,
+  convergence = NULL,
+  signif.code = NULL,
+  label = NULL,
+  float = NULL,
   headers = list("auto"),
   fixef_sizes = FALSE,
   fixef_sizes.simplify = TRUE,
   keepFactors = TRUE,
-  family,
+  family = NULL,
   powerBelow = -5,
   interaction.combine = NULL,
   interaction.order = NULL,
@@ -227,7 +234,9 @@ esttex(
   meta.sys = NULL,
   meta.call = NULL,
   meta.comment = NULL,
-  tex.preview = FALSE
+  view = FALSE,
+  export = NULL,
+  markdown = NULL
 )
 }
 \arguments{
@@ -281,7 +290,7 @@ esttex(
 
 \item{convergence}{Logical, default is missing. Should the convergence state of the algorithm be displayed? By default, convergence information is displayed if at least one model did not converge.}
 
-\item{signifCode}{Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is \code{c("***"=0.01, "**"=0.05, "*"=0.10)} for a Latex table and \code{c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)} for a data.frame (to conform with R's default). To suppress the significance codes, use \code{signifCode=NA} or \code{signifCode=NULL}. Can also be equal to \code{"letters"}, then the default becomes \code{c("a"=0.01, "b"=0.05, "c"=0.10)}.}
+\item{signif.code}{Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is \code{c("***"=0.01, "**"=0.05, "*"=0.10)} for a Latex table and \code{c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)} for a data.frame (to conform with R's default). To suppress the significance codes, use \code{signif.code=NA} or \code{signif.code=NULL}. Can also be equal to \code{"letters"}, then the default becomes \code{c("a"=0.01, "b"=0.05, "c"=0.10)}.}
 
 \item{label}{(Tex only.) Character scalar. The label of the Latex table.}
 
@@ -355,13 +364,21 @@ esttex(
 
 \item{meta.comment}{(Tex only.) A character vector containing free-form comments to be inserted right before the table.}
 
-\item{tex.preview}{Logical, default is \code{FALSE}. If \code{TRUE}, then the table generated by \code{etable} is displayed in the viewer pane thanks to the package \code{texPreview} (which must be installed).}
+\item{view}{Logical, default is \code{FALSE}. If \code{TRUE}, then the table generated in Latex by \code{etable} and then is displayed in the viewer pane. Note that for this option to work you need i) pdflatex, ii) imagemagick and iii) ghostscript. All three software must be installed and on the path.}
+
+\item{export}{Character scalar giving the path to a PNG file to be created, default is \code{NULL}. If provided, the Latex table will be converted to PNG and copied to the \code{export} location. Note that for this option to work you need a working distribution of \code{pdflatex}, \code{imagemagick} and \code{ghostscript}.}
+
+\item{markdown}{Character scalar giving the location of a directory, or a logical scalar. Default is \code{NULL}. This argument only works in Rmarkdown documents, when knitting the document. If provided: two behaviors depending on context. A) if the output document is Latex, the table is exported in Latex. B) if the output document is not Latex, the table will be exported to PNG at the desired location and inserted in the document via a markdown link. If equal to \code{TRUE}, the default location of the PNGs is a temporary folder for \code{R > 4.0.0}, or to \code{"images/etable/"} for earlier versions.}
+
+\item{view.cache}{Logical, default is \code{FALSE}. Only used when \code{view = TRUE}. Whether the PNGs of the tables should be cached.}
 
 \item{reset}{(\code{setFixest_etable} only.) Logical, default is \code{FALSE}. If \code{TRUE}, this will reset all the default values that were already set by the user in previous calls.}
 
 \item{save}{Either a logical or equal to \code{"reset"}. Default is \code{FALSE}. If \code{TRUE} then the value is set permanently at the project level, this means that if you restart R, you will still obtain the previously saved defaults. This is done by writing in the \code{".Renviron"} file, located in the project's working directory, hence we must have write permission there for this to work, and only works with Rstudio. If equal to "reset", the default at the project level is erased. Since there is writing in a file involved, permission is asked to the user.}
 
 \item{x}{An object returned by \code{etable}.}
+
+\item{type}{Character scalar equal to 'pdflatex' (default) or 'magick'. Which log file to report.}
 }
 \value{
 If \code{tex = TRUE}, the lines composing the Latex table are returned invisibly while the table is directly prompted on the console.
@@ -510,10 +527,10 @@ dict = c("Month::5"="May", "Month::6"="Jun", "Month::7"="Jul",
 etable(est1, est2, dict = dict, keep = "\%Month")
 
 #
-# signifCode
+# signif.code
 #
 
-etable(est1, est2, signifCode = c(" A"=0.01, " B"=0.05, " C"=0.1, " D"=0.15, " F"=1))
+etable(est1, est2, signif.code = c(" A"=0.01, " B"=0.05, " C"=0.1, " D"=0.15, " F"=1))
 
 #
 # Using the argument style to customize Latex exports

@@ -28,7 +28,7 @@
 #' @param file A character scalar. If provided, the Latex (or data frame) table will be saved in a file whose path is \code{file}. If you provide this argument, then a Latex table will be exported, to export a regular \code{data.frame}, use argument \code{tex = FALSE}.
 #' @param replace Logical, default is \code{FALSE}. Only used if option \code{file} is used. Should the exported table be written in a new file that replaces any existing file?
 #' @param convergence Logical, default is missing. Should the convergence state of the algorithm be displayed? By default, convergence information is displayed if at least one model did not converge.
-#' @param signifCode Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is \code{c("***"=0.01, "**"=0.05, "*"=0.10)} for a Latex table and \code{c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)} for a data.frame (to conform with R's default). To suppress the significance codes, use \code{signifCode=NA} or \code{signifCode=NULL}. Can also be equal to \code{"letters"}, then the default becomes \code{c("a"=0.01, "b"=0.05, "c"=0.10)}.
+#' @param signif.code Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is \code{c("***"=0.01, "**"=0.05, "*"=0.10)} for a Latex table and \code{c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)} for a data.frame (to conform with R's default). To suppress the significance codes, use \code{signif.code=NA} or \code{signif.code=NULL}. Can also be equal to \code{"letters"}, then the default becomes \code{c("a"=0.01, "b"=0.05, "c"=0.10)}.
 #' @param label (Tex only.) Character scalar. The label of the Latex table.
 #' @param headers Character vector or list. Adds one or more header lines in the table. A header line can be represented by a character vector or a named list of numbers where the names are the cell values and the numbers are the span. Example: \code{headers=list("M"=2, "F"=3)} will create a row with 2 times "M" and three time "F" (this is identical to \code{headers=rep(c("M", "F"), c(2, 3))}). You can stack header lines within a list, in that case the list names will be displayed in the leftmost cell. Example: \code{headers=list(Gender=list("M"=2, "F"=3), Country="US"} will create two header lines. When \code{tex = TRUE}, you can add a rule to separate groups by using \code{":_:"} somewhere in the row name (ex: \code{headers=list(":_:Gender"=list("M"=2, "F"=3))}. You can monitor the placement by inserting a special character in the row name: "^" means at the top, "-" means in the middle (default) and "_" means at the bottom. Example: \code{headers=list("_Country"="US")} will add the country row as the very last header row (after the model row). Finally, you can use the special value "auto" to include automatic headers when the data contains split sample estimations. By default it is equal to \code{list("auto")}. You can use \code{.()} instead of \code{list()}.
 #' @param fixef_sizes (Tex only.) Logical, default is \code{FALSE}. If \code{TRUE} and fixed-effects were used in the models, then the number of "units" per fixed-effect dimension is also displayed.
@@ -208,10 +208,10 @@
 #' etable(est1, est2, dict = dict, keep = "%Month")
 #'
 #' #
-#' # signifCode
+#' # signif.code
 #' #
 #'
-#' etable(est1, est2, signifCode = c(" A"=0.01, " B"=0.05, " C"=0.1, " D"=0.15, " F"=1))
+#' etable(est1, est2, signif.code = c(" A"=0.01, " B"=0.05, " C"=0.1, " D"=0.15, " F"=1))
 #'
 #' #
 #' # Using the argument style to customize Latex exports
@@ -459,7 +459,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                   se.row = NULL, se.below = NULL,
                   keep = NULL, drop = NULL, order = NULL,
                   dict = TRUE, file = NULL, replace = FALSE, convergence = NULL,
-                  signifCode = NULL, label = NULL, float = NULL,
+                  signif.code = NULL, label = NULL, float = NULL,
                   headers = list("auto"), fixef_sizes = FALSE,
                   fixef_sizes.simplify = TRUE, keepFactors = TRUE,
                   family = NULL, powerBelow = -5,
@@ -496,15 +496,6 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
             tex = TRUE
         } else {
             tex = FALSE
-        }
-    }
-
-    # The signif codes
-    if(missnull(signifCode)){
-        if(tex){
-            signifCode = c("***"=0.01, "**"=0.05, "*"=0.10)
-        } else {
-            signifCode = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)
         }
     }
 
@@ -568,6 +559,15 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
         }
         se.below = dots$sdBelow
         dots$sdBelow = NULL
+    }
+
+    if("signifCode" %in% names(dots)){
+        if(is.null(getOption("fixest_etable_arg_signifCode"))){
+            warning("The argument 'signifCode' is deprecated. Please use 'signif.code' instead.")
+            options(fixest_etable_arg_signifCode = TRUE)
+        }
+        signif.code = dots$signifCode
+        dots$signifCode = NULL
     }
 
     # Getting the model names
@@ -690,7 +690,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
             stage = stage, agg = agg,
             .vcov_args = .vcov_args, digits = digits, digits.stats = digits.stats,
             se.row = se.row, se.below = se.below,
-            signifCode = signifCode, coefstat = coefstat,
+            signif.code = signif.code, coefstat = coefstat,
             ci = ci, title = title, float = float, headers = headers,
             keepFactors = keepFactors, tex = TEX, useSummary = useSummary,
             dots_call = dots_call, powerBelow = powerBelow, dict = dict,
@@ -930,7 +930,7 @@ gen_etable_aliases = function(){
 results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage = 2,
                                  agg = NULL, .vcov_args = NULL, digits = 4,
                                  digits.stats = 5, fitstat_all, se.row = NULL, se.below = NULL, dict,
-                                 signifCode = c("***"=0.01, "**"=0.05, "*"=0.10),
+                                 signif.code = c("***"=0.01, "**"=0.05, "*"=0.10),
                                  coefstat = "se", ci = 0.95, label, headers, title,
                                  float = FALSE, replace = FALSE, keepFactors = FALSE,
                                  tex = FALSE, useSummary, dots_call, powerBelow = -5,
@@ -990,7 +990,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         }
     } else if(!tex){
         if(!"style.df" %in% names(opts)){
-            style = fixest::style.df()
+            style = fixest::style.df(default = TRUE)
         } else {
             # We rename style.df into style
             style = style.df
@@ -1004,7 +1004,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     }
 
     # Arguments both in style AND in etable
-    args_dual = c("tpt", "arraystretch", "fontsize", "adjustbox", "tabular")
+    args_dual = c("tpt", "arraystretch", "fontsize", "adjustbox",
+                  "tabular", "signif.code")
     for(arg in setdiff(args_dual, names(mc))){
         # We set to the default in style (only if NOT user-provided)
         if(arg %in% names(style)){
@@ -1098,8 +1099,24 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         i.equal = style$i.equal
     }
 
-    check_arg_plus(signifCode, "NULL NA | match(letters) | named numeric vector no na GE{0} LE{1}")
+    check_arg_plus(signif.code, "NULL NA | match(letters) | named numeric vector no na GE{0} LE{1}")
 
+    if(missnull(signif.code)){
+        if(isTex){
+            signif.code = c("***"=0.01, "**"=0.05, "*"=0.10)
+        } else {
+            signif.code = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)
+        }
+    }
+
+    add_signif = TRUE
+    if(identical(signif.code, "letters")){
+        signif.code = c("a"=0.01, "b"=0.05, "c"=0.10)
+    } else if(length(signif.code) == 0 || (length(signif.code) == 1 && is.na(signif.code))){
+        add_signif = FALSE
+    } else {
+        signif.code = sort(signif.code)
+    }
 
     # eval_dot: headers and extralines
     headers = error_sender(eval_dot(headers, .up + 1), arg_name = "headers", up = .up)
@@ -1306,15 +1323,6 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         }
 
         dict = dict_global
-    }
-
-    add_signif = TRUE
-    if(identical(signifCode, "letters")){
-        signifCode = c("a"=0.01, "b"=0.05, "c"=0.10)
-    } else if(length(signifCode) == 0 || (length(signifCode) == 1 && is.na(signifCode))){
-        add_signif = FALSE
-    } else {
-        signifCode = sort(signifCode)
     }
 
     # headers => must be a list
@@ -2284,9 +2292,9 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
         if(add_signif){
             if(isTex){
-                pval = cut(a[, 4], breaks = c(-1, signifCode, 100), labels = c(tex_star(names(signifCode)), ""))
+                pval = cut(a[, 4], breaks = c(-1, signif.code, 100), labels = c(tex_star(names(signif.code)), ""))
             } else {
-                pval = cut(a[, 4], breaks = c(-1, signifCode, 100), labels = c(names(signifCode), ""))
+                pval = cut(a[, 4], breaks = c(-1, signif.code, 100), labels = c(names(signif.code), ""))
             }
             pval[is.na(pval)] = ""
         } else {
@@ -2631,7 +2639,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                family_list = family_list, fitstat_list = fitstat_list, headers = headers,
                isHeaders = isHeaders, title = title, convergence = convergence, family = family,
                keep = keep, drop = drop, order = order, file = file, label = label, se.below = se.below,
-               signifCode = signifCode, fixef_sizes = fixef_sizes, fixef_sizes.simplify = fixef_sizes.simplify,
+               signif.code = signif.code, fixef_sizes = fixef_sizes, fixef_sizes.simplify = fixef_sizes.simplify,
                depvar = depvar, useSummary = useSummary, dict = dict, yesNo = yesNo, add_signif = add_signif,
                float = float, coefstat = coefstat, ci = ci, style = style, notes = notes, group = group,
                extralines = extralines, placement = placement, drop.section = drop.section,
@@ -2674,7 +2682,7 @@ etable_internal_latex = function(info){
     family = info$family
     convergence = info$convergence
     se.below = info$se.below
-    signifCode = info$signifCode
+    signif.code = info$signif.code
     fixef_sizes = info$fixef_sizes
     fixef_sizes.simplify = info$fixef_sizes.simplify
     dict = info$dict
@@ -3155,7 +3163,7 @@ etable_internal_latex = function(info){
 
                 if(add_signif){
                     info_SE_footer = paste0(info_SE_footer, foot_intro, "Signif. Codes: ",
-                                            paste(names(signifCode), signifCode, sep=": ", collapse = ", "), "}}\\\\\n")
+                                            paste(names(signif.code), signif.code, sep=": ", collapse = ", "), "}}\\\\\n")
                 }
 
             } else {
@@ -3172,7 +3180,7 @@ etable_internal_latex = function(info){
 
                 if(add_signif){
                     info_SE_footer = paste0(bottom_line, foot_intro, "Signif. Codes: ",
-                                            paste(names(signifCode), signifCode,
+                                            paste(names(signif.code), signif.code,
                                                   sep = ": ", collapse = ", "),
                                             "}}\\\\\n")
                 } else {
@@ -3512,7 +3520,8 @@ etable_internal_df = function(info){
     family = info$family
     convergence = info$convergence
     se.below = info$se.below
-    signifCode = info$signifCode
+    signif.code = info$signif.code
+    add_signif = info$add_signif
     fixef_sizes = info$fixef_sizes
     depvar = info$depvar
     useSummary = info$useSummary
@@ -4033,6 +4042,10 @@ etable_internal_df = function(info){
 
     class(res) = c("etable_df", "data.frame")
 
+    if(add_signif){
+        attr(res, "signif") = signif.code
+    }
+
     return(res)
 }
 
@@ -4046,7 +4059,7 @@ etable_internal_df = function(info){
 setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
                             coefstat = c("se", "tstat", "confint"),
                             ci = 0.95, se.below = TRUE, keep, drop, order, dict,
-                            signifCode, float,
+                            float,
                             fixef_sizes = FALSE, fixef_sizes.simplify = TRUE,
                             family, powerBelow = -5,
                             interaction.order = NULL, depvar, style.tex = NULL,
@@ -4082,8 +4095,6 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
     check_arg(keep, drop, order, "character vector no na NULL",
               .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
 
-    check_arg_plus(signifCode, "NULL NA | match(letters) | named numeric vector no na GE{0} LE{1}")
-
     check_arg(interaction.order, "NULL character scalar")
 
     check_arg(notes, "character vector no na")
@@ -4114,6 +4125,12 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
     }
 
     check_arg(style.df, "NULL class(fixest_style_df)")
+    if(length(style.df) > 0){
+        # We ensure we always have ALL components provided
+        basic_style = fixest::style.df(default = TRUE)
+        basic_style[names(style.df)] = style.df
+        style.df = basic_style
+    }
 
     check_arg(postprocess.tex, postprocess.df, "NULL function arg(1,)")
 
@@ -4260,7 +4277,7 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
                      fixef_sizes.suffix, stats.title, notes.intro,
                      notes.tpt.intro, tablefoot, tablefoot.value,
                      yesNo, tabular = "normal", depvar.style, no_border,
-                     caption.after, rules_width,
+                     caption.after, rules_width, signif.code,
                      tpt, arraystretch, adjustbox = NULL, fontsize,
                      interaction.combine = " $\\times$ ", i.equal = " $=$ "){
 
@@ -4303,6 +4320,8 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
     check_arg(arraystretch, "numeric scalar GT{0}")
     adjustbox = check_set_adjustbox(adjustbox)
     check_arg_plus(fontsize, "NULL match(tiny, scriptsize, footnotesize, small, normalsize, large, Large)")
+
+    check_arg_plus(signif.code, "NULL NA | match(letters) | named numeric vector no na GE{0} LE{1}")
 
     mc = match.call()
 
@@ -4378,6 +4397,8 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
 #'
 #' This function describes the style of data.frames created with the function \code{\link[fixest]{etable}}.
 #'
+#'  @inheritParams etable
+#'
 #' @param depvar.title Character scalar. Default is \code{"Dependent Var.:"}. The row name of the dependent variables.
 #' @param fixef.title Character scalar. Default is \code{"Fixed-Effects:"}. The header preceding the fixed-effects. If equal to the empty string, then this line is removed.
 #' @param fixef.line A single character. Default is \code{"-"}. A character that will be used to create a line of separation for the fixed-effects header. Used only if \code{fixef.title} is not the empty string.
@@ -4392,6 +4413,7 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
 #' @param headers.sep Logical, default is \code{TRUE}. Whether to add a line of separation between the headers and the coefficients.
 #' @param interaction.combine Character scalar, defaults to \code{" x "}. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind x Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.
 #' @param i.equal Character scalar, defaults to \code{" = "}. Only affects factor variables created with the function \code{\link[fixest]{i}}, tells how the variable should be linked to its value. For example if you have the Species factor from the iris data set, by default the display of the variable is \code{Species = Setosa}, etc. If \code{i.equal = ": "} the display becomes \code{Species: Setosa}.
+#' @param default Logical, default is \code{FALSE}. If \code{TRUE}, all the values not provided by the user are set to their default.
 #'
 #' @details
 #' The title elements (\code{depvar.title}, \code{fixef.title}, \code{slopes.title} and \code{stats.title}) will be the row names of the returned data.frame. Therefore keep in mind that any two of them should not be identical (since identical row names are forbidden in data.frames).
@@ -4421,7 +4443,8 @@ style.df = function(depvar.title = "Dependent Var.:", fixef.title = "Fixed-Effec
                     slopes.title = "Varying Slopes:", slopes.line = "-",
                     slopes.format = "__var__ (__slope__)", stats.title = "_",
                     stats.line = "_", yesNo = c("Yes", "No"), headers.sep = TRUE,
-                    interaction.combine = " x ", i.equal = " = "){
+                    signif.code = c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10),
+                    interaction.combine = " x ", i.equal = " = ", default = FALSE){
 
     # Checking
 
@@ -4444,14 +4467,19 @@ style.df = function(depvar.title = "Dependent Var.:", fixef.title = "Fixed-Effec
         stop("The argument 'stats.line' must be a singe character! It's currently a string of length ", nchar(stats.line), ".")
     }
 
-    check_arg(headers.sep, "logical scalar")
+    check_arg(headers.sep, default, "logical scalar")
 
-    res = list(depvar.title = depvar.title, fixef.title = fixef.title, fixef.line = fixef.line,
-               fixef.prefix = fixef.prefix, fixef.suffix = fixef.suffix,
-               slopes.title = slopes.title, slopes.line = slopes.line,
-               slopes.format = slopes.format, stats.title = stats.title,
-               stats.line = stats.line, yesNo = yesNo, headers.sep = headers.sep,
-               interaction.combine = interaction.combine, i.equal = i.equal)
+    check_arg_plus(signif.code, "NULL NA | match(letters) | named numeric vector no na GE{0} LE{1}")
+
+    res = list()
+
+    mc = match.call()
+    args2set = if(default) formalArgs(style.df) else names(mc)[-1]
+
+    args2set = setdiff(args2set, "default")
+    for(var in args2set){
+        res[[var]] = eval(as.name(var))
+    }
 
     class(res) = "fixest_style_df"
 
@@ -4582,6 +4610,13 @@ print.etable_df = function(x, ...){
         my_col = my_col + n_max
         col_width = col_width[-(1:n_max)]
 
+    }
+
+    signif.code = attr(x, "signif")
+    if(!is.null(signif.code)){
+        s = signif.code
+        s_fmt = paste0(insert_in_between(.dsb("'.[names(s)]'"), s), collapse = " ")
+        cat("---\nSignif. codes: 0 ", s_fmt, " ' ' 1\n", sep = "")
     }
 
 }

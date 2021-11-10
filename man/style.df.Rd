@@ -17,8 +17,10 @@ style.df(
   stats.line = "_",
   yesNo = c("Yes", "No"),
   headers.sep = TRUE,
+  signif.code = c(`***` = 0.001, `**` = 0.01, `*` = 0.05, . = 0.1),
   interaction.combine = " x ",
-  i.equal = " = "
+  i.equal = " = ",
+  default = FALSE
 )
 }
 \arguments{
@@ -49,6 +51,8 @@ style.df(
 \item{interaction.combine}{Character scalar, defaults to \code{" x "}. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind x Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.}
 
 \item{i.equal}{Character scalar, defaults to \code{" = "}. Only affects factor variables created with the function \code{\link[fixest]{i}}, tells how the variable should be linked to its value. For example if you have the Species factor from the iris data set, by default the display of the variable is \code{Species = Setosa}, etc. If \code{i.equal = ": "} the display becomes \code{Species: Setosa}.}
+
+\item{default}{Logical, default is \code{FALSE}. If \code{TRUE}, all the values not provided by the user are set to their default.}
 }
 \value{
 It returns an object of class \code{fixest_style_df}.
@@ -57,6 +61,9 @@ It returns an object of class \code{fixest_style_df}.
 This function describes the style of data.frames created with the function \code{\link[fixest]{etable}}.
 }
 \details{
+@inheritParams etable
+
+
 The title elements (\code{depvar.title}, \code{fixef.title}, \code{slopes.title} and \code{stats.title}) will be the row names of the returned data.frame. Therefore keep in mind that any two of them should not be identical (since identical row names are forbidden in data.frames).
 }
 \examples{

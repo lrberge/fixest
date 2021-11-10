@@ -224,7 +224,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 		}
 	}
 
-	if(isTRUE(x$NA_mode)){
+	if(isTRUE(x$NA_model)){
 	    return(invisible())
 	}
 
