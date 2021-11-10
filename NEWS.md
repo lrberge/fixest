@@ -21,25 +21,49 @@
   
 ## etable
 
- - the quality of the tex output has been substantially improved.
+### New arguments
+
+ - new argument `view` to display the latex table in the viewer pane (suggestion by Or Avishay-Rizi [#227](https://github.com/lrberge/fixest/issues/227)). You need to have a working distribution of pdflatex, imagemagick and ghostscript for this feature to work.
  
- - in `headers`/`extralines`: `cmidrule` does not show up for empty column names any more.
+ - new argument `view.cache` in `setFixest_etable`: whether to cache the PNGs generated.
  
- - new argument `tex.preview` to preview the latex table in the viewer pane (suggestion by Or Avishay-Rizi [#227](https://github.com/lrberge/fixest/issues/227)).
+ - new argument `export` to export the Latex table in PNG to a file.
  
- - the object returned by `etable` are now of class `etable_tex` (when `tex = TRUE`) or `etable_df`, both types having their own printing method.
+ - new (experimental) argument `markdown`: Latex tables can be automatically integrated in the non-Latex markdown document in PNG format.
  
  - new argument `tpt` to nest the table in a `threeparttable` environment. Notes are then nested into the `tablenotes` environment.
  
- - new argument `arraystretch`, self-explanatory.
+ - in `style.tex`: new argument `notes.tpt.intro` to insert code right after the `tablenotes` environment and before any note (useful to set the font size of notes globally for instance).
  
- - new argument `fontsize`, self-explanatory.
+ - new argument `arraystretch` to set the height of the table rows.
+ 
+ - new argument `fontsize` which applies Latex font sizes to the table.
  
  - new argument `adjustbox`: `adjustbox = TRUE` nests the tabular into an `adjustbox` environment with `width = \\textwidth, center` as default option. Use `adjustbox = x` with `x` a number giving the text-width. Use `adjustbox = "x th"` with `x` a number giving the text-height. Finally you can use a character string, as in `adjustbox = "my options"`, that will be passed verbatim as a an `adjustbox` option.
  
+ - in `style.tex`: new argument `rules_width` to easily set the width of the `booktabs` rules.
+ 
+ - in `style.tex`: new argument `caption.after` to insert code right after the caption.
+ 
+ - in `style.tex`: new argument `no_border` to remove the borders on the sides of the table.
+
+### New features
+
+ - the quality of the tex output has been substantially improved.
+ 
+ - `signif.code` now replaces `signifCode` (retro compatibility ensured).
+ 
+ - `signifCode` is removed from `setFixest_etable`, and `signif.code` is added to both `style.tex` and `style.df` so that each style can have its own significance code defined globally.
+ 
+  - the object returned by `etable` are now of class `etable_tex` (when `tex = TRUE`) or `etable_df`, both types having their own printing method.
+  
+ - the significance codes are now displayed under the table when the output is a `data.frame`.
+ 
+ - in `headers`/`extralines`: `cmidrule` does not show up for empty column names any more.
+ 
  - new markup: markdown-style markup (e.g. `**text**`) can be used to put text in italic/bold in almost anything in the table.
  
- - notes can be set in the dictionary: useful for notes (like source for example) that gets repeated across tables.
+ - `notes` can be set in the dictionary: useful for notes (like source for example) that gets repeated across tables.
  
  - `line.top` and `line.bottom` now admit the values `simple` and `double`. The argument `line.bottom` now affects the "effective" end of table, irrespective of the value of `tablefoot`. This is more in line with intuition.
  
