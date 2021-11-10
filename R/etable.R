@@ -5367,7 +5367,41 @@ check_set_adjustbox = function(adjustbox, up = 0){
 
 
 
+tag_gen = function(){
+    # What's the fuss here?
+    # We want to ensure that the tags are unique even if
+    # the seed is reset, that's why we make all that.
+    # Why? because otherwise, if two identical tags are used in a tex
+    # document it will fail to compile.
+    # => granted that's almost impossible, but that's still possible.
+    # (ex: two identical code sections with set.seed in Rmarkdown)
+    #
 
+    id = getOption("fixest_tag")
+    if(is.null(id)) id = 1
+    options(fixest_tag = id + 1)
+
+    items = c(letters, 0:9)
+
+    # Below: to ensure unicity even if the seed is the same
+    n_shifts = id %% 36
+    n_reshuffle = id %/% 36
+
+    if(n_reshuffle > 0){
+        for(i in 1:n_reshuffle){
+            items = sample(items)
+        }
+    }
+
+    if(n_shifts > 0){
+        items = c(items[-(1:n_shifts)], items[1:n_shifts])
+    }
+
+    # 36 ** 5 = 60,466,176
+    tag = paste0(sample(items, 6, replace = TRUE), collapse = "")
+
+    return(tag)
+}
 
 
 
