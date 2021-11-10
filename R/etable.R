@@ -71,6 +71,10 @@
 #' @param fontsize (Tex only.) A character scalar, default is \code{NULL}. Can be equal to \code{tiny}, \code{scriptsize}, \code{footnotesize}, \code{small}, \code{normalsize}, \code{large}, or \code{Large}. The change affect the table only (and not the rest of the document).
 #' @param adjustbox (Tex only.) A logical, numeric or character scalar, default is \code{NULL}. If not \code{NULL}, the table is inserted within the \code{adjustbox} environment. By default the options are \code{width = 1\\textwidth, center} (if \code{TRUE}). A numeric value changes the value before \code{\\textwidth}. You can also add a character of the form \code{"x tw"} or \code{"x th"} with \code{x} a number and where tw (th) stands for text-width (text-height). Finally any other character value is passed verbatim as an \code{adjustbox} option.
 #' @param tabular (Tex only.) Character scalar equal to "normal" (default), "*" or "X". Represents the type of tabular environment to use: either \code{tabular}, \code{tabular*} or \code{tabularx}.
+#' @param export Character scalar giving the path to a PNG file to be created, default is \code{NULL}. If provided, the Latex table will be converted to PNG and copied to the \code{export} location. Note that for this option to work you need a working distribution of \code{pdflatex}, \code{imagemagick} and \code{ghostscript}.
+#' @param markdown Character scalar giving the location of a directory, or a logical scalar. Default is \code{NULL}. This argument only works in Rmarkdown documents, when knitting the document. If provided: two behaviors depending on context. A) if the output document is Latex, the table is exported in Latex. B) if the output document is not Latex, the table will be exported to PNG at the desired location and inserted in the document via a markdown link. If equal to \code{TRUE}, the default location of the PNGs is a temporary folder for \code{R > 4.0.0}, or to \code{"images/etable/"} for earlier versions.
+#' @param view.cache Logical, default is \code{FALSE}. Only used when \code{view = TRUE}. Whether the PNGs of the tables should be cached.
+#' @param type Character scalar equal to 'pdflatex' (default) or 'magick'. Which log file to report.
 #'
 #' @details
 #' The function \code{esttex} is equivalent to the function \code{etable} with argument \code{tex = TRUE}.
@@ -597,9 +601,16 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
         }
     }
 
+    # argument only in setFixest_etable: cache
+    cache = opts$view.cache
+
     check_arg(markdown, "NULL scalar(logical, character)")
     if(is.logical(markdown)){
-        markdown = if(markdown) "images/etable/" else NULL
+        # R > 4.0.0: we use R_user_dir() to store the files across sessions
+        # else images/etable/
+
+        # The bookkeeping is handled in the dedicated function build_tex_png
+        if(isFALSE(markdown)) markdown = NULL
     }
 
     tex_origin = tex
@@ -613,6 +624,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
             is_md = FALSE
         } else {
             tex = TRUE
+            view = FALSE
         }
     }
 
@@ -731,7 +743,8 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     make_png = function(x) NULL
     is_png = view || is_md || is_export
     if(is_png){
-       make_png = function(x) build_tex_pdf(x, view = view, export = export, markdown = markdown)
+       make_png = function(x) build_tex_png(x, view = view, export = export,
+                                            markdown = markdown, cache = cache)
     }
 
     # DF requested, but also png, OK user
@@ -794,7 +807,14 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
 
         res_tex = tex.nice(res_tex, n_models) # we wait after PP to nicify
 
-        make_png(res_tex)
+        path = make_png(res_tex)
+
+        if(is_md){
+            if(!knitr::is_latex_output()){
+                cat(.dsb("[](.[path])\n"))
+                return(invisible(NULL))
+            }
+        }
 
         if(is_file){
             # We add extra whitespaces => otherwise the Latex file is a bit cluttered
@@ -868,7 +888,7 @@ gen_etable_aliases = function(){
                               "notes", "placement", "postprocess.tex",
                               "meta", "meta.time", "meta.author", "meta.sys",
                               "meta.call", "meta.comment", "tpt", "arraystretch",
-                              "adjustbox", "fontsize", "view", "tabular")
+                              "adjustbox", "fontsize", "view", "tabular", "markdown")
 
     esttable_args = paste0(arg_name[qui_df], " = ", arg_default[qui_df], collapse = ", ")
     esttable_args = gsub(" = ,", ",", esttable_args)
@@ -2730,6 +2750,19 @@ etable_internal_latex = function(info){
         table_end = "\\par\\endgroup\n"
     }
 
+    info_width = ""
+    if(!is.null(style$rules_width) && !all(is.na(style$rules_width))){
+        w = style$rules_width
+        info_width = c()
+        if(!is.na(w[1])){
+            info_width = paste0("\\setlength\\heavyrulewidth{", w[1], "}\n")
+        }
+
+        if(!is.na(w[2])){
+            info_width = c(info_width, paste0("\\setlength\\lightrulewidth{", w[2], "}\n"))
+        }
+    }
+
 
     space = if(style$no_border) "@{}" else ""
     if(tabular == "normal"){
@@ -2746,7 +2779,7 @@ etable_internal_latex = function(info){
         tabular_end = "\\end{tabular*}\n"
     } else if(tabular == "X"){
 
-        all_cols = dsb("l *.[n_models]{>{\\centering\\arraybackslash}X}")
+        all_cols = .dsb("l *.[n_models]{>{\\centering\\arraybackslash}X}")
 
         tabular_begin = paste0("\\begin{tabularx}{\\textwidth}{",
                                space, all_cols, space, "}\n", style$line.top)
@@ -3437,8 +3470,7 @@ etable_internal_latex = function(info){
 
     # meta information: has been computed in results2formattedList
 
-
-    res = c(meta, table_begin, caption, info_center, info_font, adj_box_begin,
+    res = c(meta, table_begin, caption, info_center, info_width, info_font, adj_box_begin,
             tpt_begin, tpt_caption, info_stretch,
             tag_tabular_before, tabular_begin,
             headers_top, first_line, headers_mid, model_line, info_family, headers_bottom,
@@ -4011,7 +4043,8 @@ etable_internal_df = function(info){
 
 
 #' @rdname etable
-setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c("se", "tstat", "confint"),
+setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
+                            coefstat = c("se", "tstat", "confint"),
                             ci = 0.95, se.below = TRUE, keep, drop, order, dict,
                             signifCode, float,
                             fixef_sizes = FALSE, fixef_sizes.simplify = TRUE,
@@ -4019,7 +4052,7 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c(
                             interaction.order = NULL, depvar, style.tex = NULL,
                             style.df = NULL, notes = NULL, group = NULL, extralines = NULL,
                             fixef.group = NULL, placement = "htbp", drop.section = NULL,
-                            view = FALSE, markdown = NULL, cache = FALSE,
+                            view = FALSE, markdown = NULL, view.cache = FALSE,
                             postprocess.tex = NULL, postprocess.df = NULL,
                             fit_format = "__var__", meta.time = NULL,
                             meta.author = NULL, meta.sys = NULL,
@@ -4095,7 +4128,7 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c(
     check_arg(meta.author, "NULL logical scalar | character vector no na")
     check_arg(meta.comment, "NULL character vector no na")
 
-    check_arg(view, cache, "logical scalar")
+    check_arg(view, view.cache, "logical scalar")
     check_arg(markdown, "NULL scalar(logical, character)")
 
     #
@@ -4148,7 +4181,7 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c(
 getFixest_etable = function(){
     opts = getOption("fixest_etable")
     if(!is.list(opts)){
-        warning("Wrong formatting of option 'fplot_distr', all options are reset.")
+        warning("Wrong formatting of option 'fixest_etable', all options are reset.")
         opts = list()
         options(fixest_etable = opts)
     }
@@ -4188,6 +4221,7 @@ getFixest_etable = function(){
 #' @param depvar.style Character scalar equal to either \code{" "} (default), \code{"*"} (italic), \code{"**"} (bold), \code{"***"} (italic-bold). How the name of the dependent variable should be displayed.
 #' @param no_border Logical, default is \code{FALSE}. Whether to remove any side border to the table (typically adds \code{@\{\}} to the sides of the tabular).
 #' @param caption.after Character scalar. Tex code that will be placed right after the caption. Defaults to \code{""} for \code{main = "base"} and \code{"\\medskip"} for \code{main = "aer"}.
+#' @param rules_width Character vector of length 1 or 2. This vector gives the width of the \code{booktabs} rules: the first element the heavy-width, the second element the light-width. NA values mean no modification. If of length 1, only the heavy rules are modified. The width are in Latex units (ex: \code{"0.1 em"}, etc).
 #'
 #' @details
 #' The \code{\\checkmark} command, used in the "aer" style (in argument \code{yesNo}), is in the \code{amssymb} package.
@@ -4226,7 +4260,7 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
                      fixef_sizes.suffix, stats.title, notes.intro,
                      notes.tpt.intro, tablefoot, tablefoot.value,
                      yesNo, tabular = "normal", depvar.style, no_border,
-                     caption.after,
+                     caption.after, rules_width,
                      tpt, arraystretch, adjustbox = NULL, fontsize,
                      interaction.combine = " $\\times$ ", i.equal = " $=$ "){
 
@@ -4247,6 +4281,7 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
     check_arg("character scalar", fixef_sizes.prefix, fixef_sizes.suffix, stats.title)
     check_arg("character scalar", notes.intro, interaction.combine, i.equal)
     check_arg("character scalar", notes.tpt.intro, depvar.style, caption.after)
+    check_arg("character vector len(1,2)", rules_width)
 
     if(!missing(depvar.style)){
         depvar.style = trimws(depvar.style)
@@ -4589,16 +4624,53 @@ check_build_available = function(){
     return(TRUE)
 }
 
-build_tex_pdf = function(x, view = FALSE, export = NULL, markdown = NULL, cache = FALSE){
+build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL, cache = FALSE, up = 0){
 
-    set_up(1)
+    up = up + 1
+    set_up(up)
     check_arg(view, "logical scalar")
     check_arg(export, "NULL character scalar")
-    check_arg(markdown, "NULL character scalar")
+    check_arg(markdown, "NULL scalar(logical, character)")
 
+    dir_cache = NULL
+    if(cache== TRUE || isTRUE(markdown)){
+        # We look up to the global directory where to save the pngs
+        #
+        # The default storage location of the png tables
+        # R < 4.0.0 => now way to get the location for sure
+        # so the default is images/etable/
+
+        is_global_dir = !is.null(find_config_path()) && !is.null(find_project_path())
+        if(is_global_dir){
+            dir_cache = config_get("cache_dir")
+
+            if(!DIR_EXISTS(dir_cache)){
+                # reset
+                dir_cache = file.path(normalizePath(tempdir(), "/"), "etable")
+                dir.create(dir_cache)
+                config_update("cache_dir", dir_cache)
+            }
+        }
+    }
+
+    if(isFALSE(markdown)){
+        markdown = NULL
+    } else if(isTRUE(markdown)){
+        # The default storage location of the png tables
+        # R < 4.0.0 => now way to get the location for sure
+        # so the default is images/etable/
+
+        if(!is.null(dir_cache)){
+            markdown = dir_cache
+        } else {
+            markdown = "images/etable/"
+        }
+    }
+
+    do_build = TRUE
     export_markdown = id = NULL
     if(!is.null(markdown)){
-        markdown_path = check_set_path(markdown, "w, dir", create = TRUE, up = 1)
+        markdown_path = check_set_path(markdown, "w, dir", create = TRUE, up = up + 1)
 
         all_files = list.files(markdown_path, "\\.png$")
         id_all = gsub("^.+_|\\.png$", "", all_files)
@@ -4606,35 +4678,40 @@ build_tex_pdf = function(x, view = FALSE, export = NULL, markdown = NULL, cache 
 
         if(!id %in% id_all){
             time = gsub(" .+", "", Sys.time())
-            name = dsb("etable_tex_.[time]_.[id].png")
+            name = .dsb("etable_tex_.[time]_.[id].png")
             export_markdown = file.path(markdown_path, name)
+        } else {
+            do_build = FALSE
+            export_markdown = png_name = all_files[id_all == id][1]
         }
     }
 
     if(!is.null(export)){
-        export_path = check_set_path(export, "w", up = 1)
+        export_path = check_set_path(export, "w", up = up + 1)
     }
 
-    dir = normalizePath(tempdir(), "/")
+    if(do_build){
 
-    do_build = TRUE
-    if(cache){
-        if(!is.null(id)){
-            id = as.character(cpp_hash_string(paste(x, collapse = "")))
-        }
+        dir = if(cache && !is.null(dir_cache)) dir_cache else normalizePath(tempdir(), "/")
 
-        # If the file already exists, we don't recreate it
-        all_files = list.files(dir, "^etable.+\\.png$")
-        id_all = gsub("^.+_|\\.png$", "", all_files)
-        if(id %in% id_all){
-            do_build = FALSE
-            png_name = all_files[id_all == id][1]
+        if(cache){
+            if(!is.null(id)){
+                id = as.character(cpp_hash_string(paste(x, collapse = "")))
+            }
+
+            # If the file already exists, we don't recreate it
+            all_files = list.files(dir, "^etable.+\\.png$")
+            id_all = gsub("^.+_|\\.png$", "", all_files)
+            if(id %in% id_all){
+                do_build = FALSE
+                png_name = all_files[id_all == id][1]
+            } else {
+                time = gsub(" .+", "", Sys.time())
+                png_name = .dsb("etable_tex_.[time]_.[id].png")
+            }
         } else {
-            time = gsub(" .+", "", Sys.time())
-            png_name = dsb("etable_tex_.[time]_.[id].png")
+            png_name = "etable.png"
         }
-    } else {
-        png_name = "etable.png"
     }
 
     if(do_build){
@@ -4647,7 +4724,7 @@ build_tex_pdf = function(x, view = FALSE, export = NULL, markdown = NULL, cache 
         # p: package ; pn: package name ; x: tex vector ; y: tex packages
         add_pkg = function(p, x, y, pn = p, opt = ""){
             if(any(grepl(p, x, fixed = TRUE))){
-                c(y, dsb("\\usepackage.[opt]{.[pn]}"))
+                c(y, .dsb("\\usepackage.[opt]{.[pn]}"))
             } else {
                 y
             }
@@ -4655,7 +4732,7 @@ build_tex_pdf = function(x, view = FALSE, export = NULL, markdown = NULL, cache 
 
         intro = c("\\documentclass[varwidth, border={ 10 5 10 5 }]{standalone}",
                   "\\usepackage[table]{xcolor}",
-                  dsb("\\usepackage{.[/array, booktabs, multirow, helvet, amsmath, amssymb]}"),
+                  .dsb("\\usepackage{.[/array, booktabs, multirow, helvet, amsmath, amssymb]}"),
                   "\\renewcommand{\\familydefault}{\\sfdefault}")
 
         tex_pkg = c()
@@ -4678,34 +4755,35 @@ build_tex_pdf = function(x, view = FALSE, export = NULL, markdown = NULL, cache 
         on.exit(setwd(current_dir))
         setwd(dir)
 
-
         tex_file = file("etable.tex", "w", encoding = "UTF-8")
         writeLines(doc_full, tex_file)
         close(tex_file)
 
+        options(fixest_log_dir = dir)
+
         # We compile the document
         outcome = system2("pdflatex", "--halt-on-error -interaction=nonstopmode etable.tex",
-                          "etable_shell.log", "etable_shell.err")
+                          "etable_shell_pdf.log", "etable_shell_pdf.err")
 
         if(outcome == 127){
             warning("pdflatex could not be run: check install?")
             return(NULL)
 
         } else if(outcome == 1){
-            warning("pdflatex: error when compiling -- sorry!")
+            warning("pdflatex: error when compiling -- sorry! Check the log file with log_etable('pdflatex').")
             return(NULL)
         }
 
         # Now we create the png
-        outcome = system2("magick", dsb("-density 500 etable.pdf -colorspace RGB .[png_name]"),
-                          "etable_shell.log", "etable_shell.err")
+        outcome = system2("magick", .dsb("-density 500 etable.pdf -colorspace RGB .[png_name]"),
+                          "etable_shell_magick.log", "etable_shell_magick.err")
 
         if(outcome == 127){
             warning("magick could not be run: check the install of imagemagick?")
             return(NULL)
 
         } else if(outcome == 1){
-            warning("magick: error when converting pdf to png. Check install of ghostscript?")
+            warning("magick: error when converting pdf to png. Check install of ghostscript?  Check the log file with log_etable('magick').")
             return(NULL)
         }
     }
@@ -4732,9 +4810,11 @@ build_tex_pdf = function(x, view = FALSE, export = NULL, markdown = NULL, cache 
         file.copy(png_name, export_path, overwrite = TRUE)
     }
 
-    if(!is.null(export_markdown)){
+    if(!is.null(export_markdown) && export_markdown != png_name){
         file.copy(png_name, export_markdown, overwrite = TRUE)
     }
+
+    return(export_markdown)
 }
 
 
@@ -4808,7 +4888,7 @@ check_set_path = function(x, type = "", create = TRUE, up = 0){
 viewer_html_template = function(png_name){
     # I really wanted to see the full table all the time, so I had to add some JS.
     # There must be some straightforward way in CSS, but I don't know it...
-    dsb('
+    .dsb('
 <!DOCTYPE html>
 <html> <head>
 
@@ -4862,6 +4942,37 @@ window.addEventListener("load", changeImgRatio);
 ')
 }
 
+#' @rdname etable
+log_etable = function(type = "pdflatex"){
+    check_arg_plus(type, "match(pdflatex, magick)")
+
+    dir = getOption("fixest_log_dir")
+
+    if(type == "pdflatex"){
+        path = file.path(dir, "etable.log")
+    } else {
+        path = file.path(dir, "etable_shell_magick.log")
+    }
+
+    if(!file.exists(path)){
+        message(.dsb("No log currently exists for '.[type]'."))
+        return(invisible(NULL))
+    }
+
+    res = readLines(path)
+
+    class(res) = "etable.tex"
+    res
+}
+
+DIR_EXISTS = function(x){
+    if(length(x) != 1 || is.na(x) || !is.character(x)){
+        return(FALSE)
+    }
+
+    dir.exists(x)
+}
+
 ####
 #### Utilities ####
 ####
@@ -4908,7 +5019,7 @@ markup_apply = function(x){
 
             if(!n_match %% 2 == 0){
                 # failed markup
-                res = gsub(pat, dsb("__.['', rep('$', i)]__"), res, fixed = TRUE)
+                res = gsub(pat, .dsb("__.['', rep('$', i)]__"), res, fixed = TRUE)
                 failed[i] = TRUE
             } else {
                 x_split = strsplit(res, pat, fixed = TRUE)[[1]]
@@ -4923,7 +5034,7 @@ markup_apply = function(x){
 
     for(i in which(failed)){
         pat = names(dict_pat)[i]
-        res = gsub(dsb("__.['', rep('$', i)]__"), pat, res, fixed = TRUE)
+        res = gsub(.dsb("__.['', rep('$', i)]__"), pat, res, fixed = TRUE)
     }
 
     if(is_eq){

@@ -317,7 +317,7 @@ open_all = function(){
 
     for(f in R_files){
         if(f %in% R_not_open) next
-        eval(str2lang(dsb("rstudioapi::navigateToFile('.[f]', moveCursor = FALSE)")))
+        eval(str2lang(.dsb("rstudioapi::navigateToFile('.[f]', moveCursor = FALSE)")))
     }
 
     # Opening extra files
@@ -328,7 +328,7 @@ open_all = function(){
                     "../todo.txt")
 
     for(f in extra_files){
-        eval(str2lang(dsb("rstudioapi::navigateToFile('.[f]', moveCursor = FALSE)")))
+        eval(str2lang(.dsb("rstudioapi::navigateToFile('.[f]', moveCursor = FALSE)")))
     }
 
 

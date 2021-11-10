@@ -3482,6 +3482,13 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 #'
 #'
 dsb = function(x, split = NULL, collapse = NULL){
+    .dsb(x = x, split = split, collapse = collapse, check = TRUE)
+}
+
+.dsb = function(x, split = NULL, collapse = NULL, check = FALSE){
+
+    set_check(check)
+
     check_arg(x, "character scalar na ok mbt l0 NULL")
 
     if(length(x) == 0) return(x)
@@ -4791,7 +4798,7 @@ n_unik = function(x){
         }
 
         rhs_txt = as.character(fml)[[2]]
-        rhs_txt = gsub("(^| )\\.( |$)", dsb(".[dot_default]", "+"), rhs_txt)
+        rhs_txt = gsub("(^| )\\.( |$)", dsb(".['+', dot_default]"), rhs_txt)
         fml = .xpd(rhs = rhs_txt)
     }
 
@@ -7406,7 +7413,7 @@ cut_vector = function(x, bin){
     x_order = order(x)
     x_sorted = x[x_order]
 
-    my_cut = dsb(gsub("^cut::", "", bin))
+    my_cut = gsub("^cut::", "", bin)
 
     if(is_numeric_in_char(my_cut)){
         my_cut = as.numeric(my_cut)
@@ -11837,6 +11844,11 @@ renvir_update = function(key, value){
 }
 
 find_config_path = function(){
+
+    if(getRversion() < "4.0.0"){
+        return(NULL)
+    }
+
     dir = tools::R_user_dir("fixest", "config")
 
     # We create the directory if needed
@@ -11890,7 +11902,7 @@ config_get = function(key){
 
     path = find_config_path()
 
-    if(!file.exists(path)){
+    if(is.null(path) || !file.exists(path)){
         return(NULL)
     }
 
