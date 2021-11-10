@@ -465,7 +465,8 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                   fontsize = NULL, fit_format = "__var__", coef.just = NULL,
                   tabular = "normal",
                   meta = NULL, meta.time = NULL, meta.author = NULL, meta.sys = NULL,
-                  meta.call = NULL, meta.comment = NULL, view = FALSE){
+                  meta.call = NULL, meta.comment = NULL, view = FALSE,
+                  export = NULL, markdown = NULL){
 
     #
     # Checking the arguments
@@ -510,7 +511,8 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
         }
     } else if(float && (!missing(title) || !missing(label))) {
         what = c("title", "label")[c(!missing(title), !missing(label))]
-        warning("Since float = TRUE, the argument", enumerate_items(what, "s.is"), " ignored", immediate. = TRUE, call. = FALSE)
+        warning("Since float = TRUE, the argument", enumerate_items(what, "s.is"), " ignored.",
+                immediate. = TRUE, call. = FALSE)
     }
 
     if(missing(dict) && !tex){
@@ -589,10 +591,24 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     # Arguments that can be set globally
     opts = getOption("fixest_etable")
 
-    args_global = c("postprocess.tex", "postprocess.df", "view")
+    args_global = c("postprocess.tex", "postprocess.df", "view", "markdown")
     for(arg in setdiff(args_global, names(mc))){
         if(arg %in% names(opts)){
             assign(arg, opts[[arg]])
+        }
+    }
+
+    check_arg(markdown, "NULL scalar(logical, character)")
+    if(is.logical(markdown)){
+        markdown = if(markdown) "images/etable/" else NULL
+    }
+
+    if(!is.null(markdown)){
+        if(!"knitr" %in% loadedNamespaces() || is.null(knitr::pandoc_to())){
+            if("markdown" %in% names(mc)){
+                warning("The argument 'markdown' only works when knitting Rmarkdown documents. It is currently ignored.")
+            }
+            markdown = NULL
         }
     }
 
@@ -656,7 +672,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
 
     info = results2formattedList(dots = dots, vcov = vcov, ssc = ssc, fitstat_all = fitstat,
                                  stage = stage, agg = agg,
-                                 .vcov_args=.vcov_args, digits = digits, digits.stats = digits.stats,
+                                 .vcov_args = .vcov_args, digits = digits, digits.stats = digits.stats,
                                  se.row = se.row, se.below = se.below,
                                  signifCode = signifCode, coefstat = coefstat,
                                  ci = ci, title = title, float = float, headers = headers,
@@ -4522,27 +4538,26 @@ check_build_available = function(){
     return(TRUE)
 }
 
-build_tex_pdf = function(x, view = FALSE, export = NULL, include = NULL){
+build_tex_pdf = function(x, view = FALSE, export = NULL, markdown = NULL, cache = FALSE){
 
     set_up(1)
     check_arg(view, "logical scalar")
     check_arg(export, "NULL character scalar")
-    check_arg(include, "NULL character scalar")
+    check_arg(markdown, "NULL character scalar")
 
-    export_include = NULL
-    if(!is.null(include)){
-        include_path = check_set_path(include, "w, dir", create = TRUE, up = 1)
+    export_markdown = id = NULL
+    if(!is.null(markdown)){
+        markdown_path = check_set_path(markdown, "w, dir", create = TRUE, up = 1)
 
-        all_files = list.files(include_path, "\\.png$")
+        all_files = list.files(markdown_path, "\\.png$")
         id_all = gsub("^.+_|\\.png$", "", all_files)
         id = as.character(cpp_hash_string(paste(x, collapse = "")))
 
         if(!id %in% id_all){
             time = gsub(" .+", "", Sys.time())
             name = dsb("etable_tex_.[time]_.[id].png")
-            export_include = file.path(include_path, name)
+            export_markdown = file.path(markdown_path, name)
         }
-
     }
 
     if(!is.null(export)){
@@ -4551,117 +4566,109 @@ build_tex_pdf = function(x, view = FALSE, export = NULL, include = NULL){
 
     dir = normalizePath(tempdir(), "/")
 
-    # Intro of the Latex document
+    do_build = TRUE
+    if(cache){
+        if(!is.null(id)){
+            id = as.character(cpp_hash_string(paste(x, collapse = "")))
+        }
 
-    intro = c("\\documentclass[varwidth, border={ 10 5 10 5 }]{standalone}",
-              "\\usepackage[table]{xcolor}",
-              dsb("\\usepackage{.[/array, booktabs, multirow, helvet, amsmath, amssymb]}"),
-              dsb("\\usepackage{.[/tabularx, adjustbox, tikz]}"),
-              "\\usepackage[flushleft]{threeparttable}",
-              "\\renewcommand{\\familydefault}{\\sfdefault}",
-              "\\usetikzlibrary{matrix, shapes, arrows, fit, tikzmark}")
-
-    doc_full = c(intro, "\n\n\\begin{document}\n", x, "\n\\end{document}\n")
-
-    current_dir = getwd()
-    on.exit(setwd(current_dir))
-    setwd(dir)
-
-
-    tex_file = file("etable.tex", "w", encoding = "UTF-8")
-    writeLines(doc_full, tex_file)
-    close(tex_file)
-
-    # We compile the document
-    outcome = system2("pdflatex", "--halt-on-error -interaction=nonstopmode etable.tex",
-                      "etable_shell.log", "etable_shell.err")
-
-    if(outcome == 127){
-        warning("pdflatex could not be run: check install?")
-        return(NULL)
-
-    } else if(outcome == 1){
-        warning("pdflatex: error when compiling -- sorry!")
-        return(NULL)
+        # If the file already exists, we don't recreate it
+        all_files = list.files(dir, "^etable.+\\.png$")
+        id_all = gsub("^.+_|\\.png$", "", all_files)
+        if(id %in% id_all){
+            do_build = FALSE
+            png_name = all_files[id_all == id][1]
+        } else {
+            time = gsub(" .+", "", Sys.time())
+            png_name = dsb("etable_tex_.[time]_.[id].png")
+        }
+    } else {
+        png_name = "etable.png"
     }
 
-    # Now we create the png
-    outcome = system2("magick", "-density 500 etable.pdf -colorspace RGB etable.png",
-                      "etable_shell.log", "etable_shell.err")
+    if(do_build){
 
-    if(outcome == 127){
-        warning("magick could not be run: check the install of imagemagick?")
-        return(NULL)
+        #
+        # Latex document
+        #
 
-    } else if(outcome == 1){
-        warning("magick: error when converting pdf to png. Check install of ghostscript?")
-        return(NULL)
+        # packages increase build time, so we load them sparingly
+        # p: package ; pn: package name ; x: tex vector ; y: tex packages
+        add_pkg = function(p, x, y, pn = p, opt = ""){
+            if(any(grepl(p, x, fixed = TRUE))){
+                c(y, dsb("\\usepackage.[opt]{.[pn]}"))
+            } else {
+                y
+            }
+        }
+
+        intro = c("\\documentclass[varwidth, border={ 10 5 10 5 }]{standalone}",
+                  "\\usepackage[table]{xcolor}",
+                  dsb("\\usepackage{.[/array, booktabs, multirow, helvet, amsmath, amssymb]}"),
+                  "\\renewcommand{\\familydefault}{\\sfdefault}",)
+
+        tex_pkg = c()
+        tex_pkg = add_pkg("threeparttable", res, tex_pkg, opt = "[flushleft]")
+        tex_pkg = add_pkg("adjustbox", res, tex_pkg)
+        tex_pkg = add_pkg("tabularx", res, tex_pkg)
+
+        if(any(grepl("tikz", x, fixed = TRUE))){
+            tex_pkg = c(tex_pkg, "\\usepackage{tikz}",
+                        "\\usetikzlibrary{matrix, shapes, arrows, fit, tikzmark}")
+        }
+
+        doc_full = c(intro, tex_pkg, "\n\n\\begin{document}\n", x, "\n\\end{document}\n")
+
+        #
+        # Compiling + exporting
+        #
+
+        current_dir = getwd()
+        on.exit(setwd(current_dir))
+        setwd(dir)
+
+
+        tex_file = file("etable.tex", "w", encoding = "UTF-8")
+        writeLines(doc_full, tex_file)
+        close(tex_file)
+
+        # We compile the document
+        outcome = system2("pdflatex", "--halt-on-error -interaction=nonstopmode etable.tex",
+                          "etable_shell.log", "etable_shell.err")
+
+        if(outcome == 127){
+            warning("pdflatex could not be run: check install?")
+            return(NULL)
+
+        } else if(outcome == 1){
+            warning("pdflatex: error when compiling -- sorry!")
+            return(NULL)
+        }
+
+        # Now we create the png
+        outcome = system2("magick", dsb("-density 500 etable.pdf -colorspace RGB .[png_name]"),
+                          "etable_shell.log", "etable_shell.err")
+
+        if(outcome == 127){
+            warning("magick could not be run: check the install of imagemagick?")
+            return(NULL)
+
+        } else if(outcome == 1){
+            warning("magick: error when converting pdf to png. Check install of ghostscript?")
+            return(NULL)
+        }
     }
 
     # Now porting to the viewer
 
-    my_viewer = getOption("viewer")
     if(view){
+        my_viewer = getOption("viewer")
         if(is.null(my_viewer)){
             warning("To preview the table, we need RStudio's viewer -- which wasn't found.")
         } else {
             # setting up the html document
 
-
-            # I really wanted to see the full table all the time, so I had to add some JS.
-            # There must be some straightforward way in CSS, but I don't know it...
-            html_file = '
-<!DOCTYPE html>
-<html> <head>
-
-<style>
-
-#container {
- width: 100%;
- display: block;
- margin: auto;
-}
-
-</style>
-
-<script>
-
-// Simple function to get the image always at the right size
-changeImgRatio = function(){
-
-	my_div = document.getElementById("container");
-
-	let current_height = parseInt(my_div.offsetHeight);
-	let view_height = parseInt(window.innerHeight);
-	let ratio_height = 1.0 * current_height / view_height;
-
-	let current_width = parseInt(my_div.offsetWidth);
-	let view_width = parseInt(window.innerWidth);
-	let ratio_width = 1.0 * current_width/ view_width;
-
-	if(ratio_height > ratio_width){
-		let new_width = .97 * view_height * current_width / current_height;
-		my_div.style.width = new_width.toString() + "px";
-	} else {
-		my_div.style.width = view_width.toString() + "px";
-	}
-}
-
-window.addEventListener("resize", changeImgRatio);
-window.addEventListener("load", changeImgRatio);
-
-</script>
-
-</head>
-
-<body>
-
-<div id="container">
-	<img src = "etable.png" alt="etable preview" width = "100%">
-</div>
-
-</body> </html>
-'
+            html_file = viewer_html_template(png_name)
 
             writeLines(html_file, "etable.html")
 
@@ -4671,7 +4678,11 @@ window.addEventListener("load", changeImgRatio);
 
     # And exporting
     if(!is.null(export)){
-        file.copy("etable.png", export_path, overwrite = TRUE)
+        file.copy(png_name, export_path, overwrite = TRUE)
+    }
+
+    if(!is.null(export_markdown)){
+        file.copy(png_name, export_markdown, overwrite = TRUE)
     }
 }
 
@@ -4743,7 +4754,62 @@ check_set_path = function(x, type = "", create = TRUE, up = 0){
 
 }
 
+viewer_html_template = function(png_name){
+    # I really wanted to see the full table all the time, so I had to add some JS.
+    # There must be some straightforward way in CSS, but I don't know it...
+    dsb('
+<!DOCTYPE html>
+<html> <head>
 
+<style>
+
+#container {
+ width: 100%;
+ display: block;
+ margin: auto;
+}
+
+</style>
+
+<script>
+
+// Simple function to get the image always at the right size
+changeImgRatio = function(){
+
+	my_div = document.getElementById("container");
+
+	let current_height = parseInt(my_div.offsetHeight);
+	let view_height = parseInt(window.innerHeight);
+	let ratio_height = 1.0 * current_height / view_height;
+
+	let current_width = parseInt(my_div.offsetWidth);
+	let view_width = parseInt(window.innerWidth);
+	let ratio_width = 1.0 * current_width/ view_width;
+
+	if(ratio_height > ratio_width){
+		let new_width = .97 * view_height * current_width / current_height;
+		my_div.style.width = new_width.toString() + "px";
+	} else {
+		my_div.style.width = view_width.toString() + "px";
+	}
+}
+
+window.addEventListener("resize", changeImgRatio);
+window.addEventListener("load", changeImgRatio);
+
+</script>
+
+</head>
+
+<body>
+
+<div id="container">
+	<img src = ".[png_name]" alt="etable preview" width = "100%">
+</div>
+
+</body> </html>
+')
+}
 
 ####
 #### Utilities ####
