@@ -193,6 +193,10 @@ cpp_is_int <- function(x) {
     .Call(`_fixest_cpp_is_int`, x)
 }
 
+cpp_hash_string <- function(x) {
+    .Call(`_fixest_cpp_hash_string`, x)
+}
+
 cpp_get_nb_threads <- function() {
     .Call(`_fixest_cpp_get_nb_threads`)
 }

@@ -20,6 +20,7 @@
 #include <vector>
 #include <stdio.h>
 #include <cmath>
+#include <functional>
 
 using namespace Rcpp;
 using namespace std;
@@ -1297,7 +1298,15 @@ bool cpp_is_int(SEXP x){
     return is_int;
 }
 
+// [[Rcpp::export]]
+double cpp_hash_string(std::string x){
+    // simple function hashing a string
+    // used to identify tables in etable
 
+    double res = std::hash<std::string>{}(x);
+
+    return res;
+}
 
 
 
