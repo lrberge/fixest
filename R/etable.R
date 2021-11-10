@@ -450,12 +450,15 @@
 #'
 etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                   se = NULL, ssc = NULL, cluster = NULL,
-                  .vcov, .vcov_args = NULL, digits = 4, digits.stats = 5, tex,
-                  fitstat, title, coefstat = "se", ci = 0.95,
+                  .vcov = NULL, .vcov_args = NULL, digits = 4, digits.stats = 5, tex,
+                  fitstat = NULL, title = NULL, coefstat = "se", ci = 0.95,
                   se.row = NULL, se.below = NULL,
-                  keep, drop, order, dict, file, replace = FALSE, convergence,
-                  signifCode, label, float, headers = list("auto"), fixef_sizes = FALSE,
-                  fixef_sizes.simplify = TRUE, keepFactors = TRUE, family, powerBelow = -5,
+                  keep = NULL, drop = NULL, order = NULL,
+                  dict = TRUE, file = NULL, replace = FALSE, convergence = NULL,
+                  signifCode = NULL, label = NULL, float = NULL,
+                  headers = list("auto"), fixef_sizes = FALSE,
+                  fixef_sizes.simplify = TRUE, keepFactors = TRUE,
+                  family = NULL, powerBelow = -5,
                   interaction.combine = NULL, interaction.order = NULL,
                   i.equal = NULL, depvar = TRUE, style.tex = NULL,
                   style.df = NULL, notes = NULL, group = NULL, extralines = NULL,
@@ -493,7 +496,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     }
 
     # The signif codes
-    if(missing(signifCode)){
+    if(missnull(signifCode)){
         if(tex){
             signifCode = c("***"=0.01, "**"=0.05, "*"=0.10)
         } else {
@@ -502,21 +505,17 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     }
 
     # Float or not
-    check_arg(float, "logical scalar")
-    if(missing(float)){
+    check_arg(float, "NULL logical scalar")
+    if(missnull(float)){
         if(!missing(title) || !missing(label)){
             float = TRUE
         } else {
             float = FALSE
         }
-    } else if(float && (!missing(title) || !missing(label))) {
+    } else if(!float && (!missnull(title) || !missnull(label))) {
         what = c("title", "label")[c(!missing(title), !missing(label))]
-        warning("Since float = TRUE, the argument", enumerate_items(what, "s.is"), " ignored.",
+        warning("Since float = FALSE, the argument", enumerate_items(what, "s.is"), " ignored.",
                 immediate. = TRUE, call. = FALSE)
-    }
-
-    if(missing(dict) && !tex){
-        dict = TRUE
     }
 
     # NOTA: now that I allow the use of .(stuff) for headers and extralines
@@ -603,14 +602,26 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
         markdown = if(markdown) "images/etable/" else NULL
     }
 
-    if(!is.null(markdown)){
+    tex_origin = tex
+    is_md = !is.null(markdown)
+    if(is_md){
         if(!"knitr" %in% loadedNamespaces() || is.null(knitr::pandoc_to())){
             if("markdown" %in% names(mc)){
                 warning("The argument 'markdown' only works when knitting Rmarkdown documents. It is currently ignored.")
             }
             markdown = NULL
+            is_md = FALSE
+        } else {
+            tex = TRUE
         }
     }
+
+    is_export = !is.null(export)
+
+    # We can display the table in the R console AND at the same time showing
+    # the latex table in the viewer
+    do_df = isFALSE(tex)
+    do_tex = tex || view || is_export
 
     #
     # postprocess.tex
@@ -621,38 +632,29 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
 
     check_arg(postprocess.tex, "NULL function arg(1,)")
     pp_tex = postprocess.tex
+    is_pp_tex = !is.null(pp_tex)
 
     check_arg(postprocess.df, "NULL function arg(1,)")
     pp_df = postprocess.df
+    is_pp_df = !is.null(pp_df)
 
-    my_postprocess = pp_other = NULL
-    if(tex){
-        my_postprocess = pp_tex
-        pp_other = pp_df
-    } else {
-        my_postprocess = pp_df
-        pp_other = pp_tex
-    }
-
-    DO_POSTPROCESS = !is.null(my_postprocess)
 
     # Catching the arguments
-    pp_args = list()
+    pp_tex_args = pp_df_args = list()
     if(!is.null(names(dots))){
-        # Catching the arguments
-        if(!is.null(my_postprocess)){
-            fm = formalArgs(my_postprocess)
+        if(is_pp_tex){
+            fm = formalArgs(pp_tex)
             qui = names(dots) %in% fm
-            pp_args = dots[qui]
+            pp_tex_args = dots[qui]
             dots = dots[!qui]
         }
 
-        if(!is.null(pp_other)){
-            fm = formalArgs(pp_other)
+        if(is_pp_df){
+            fm = formalArgs(pp_df)
             qui = names(dots) %in% fm
+            pp_df_args = dots[qui]
             dots = dots[!qui]
         }
-
     }
 
     if(length(dots) == 0){
@@ -670,127 +672,178 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     }
 
 
-    info = results2formattedList(dots = dots, vcov = vcov, ssc = ssc, fitstat_all = fitstat,
-                                 stage = stage, agg = agg,
-                                 .vcov_args = .vcov_args, digits = digits, digits.stats = digits.stats,
-                                 se.row = se.row, se.below = se.below,
-                                 signifCode = signifCode, coefstat = coefstat,
-                                 ci = ci, title = title, float = float, headers = headers,
-                                 keepFactors = keepFactors, tex = tex, useSummary = useSummary,
-                                 dots_call = dots_call, powerBelow = powerBelow, dict = dict,
-                                 interaction.combine = interaction.combine, interaction.order = interaction.order,
-                                 i.equal = i.equal, convergence = convergence,
-                                 family = family, keep = keep, drop = drop, file = file, order = order,
-                                 label = label, fixef_sizes = fixef_sizes,
-                                 fixef_sizes.simplify = fixef_sizes.simplify,
-                                 depvar = depvar, style.tex = style.tex, style.df = style.df,
-                                 replace = replace, notes = notes, group = group, extralines = extralines,
-                                 fixef.group = fixef.group, placement = placement,
-                                 drop.section = drop.section, poly_dict = poly_dict,
-                                 tex_tag = DO_POSTPROCESS, fit_format = fit_format,
-                                 coef.just = coef.just, meta = meta, meta.time = meta.time,
-                                 meta.author = meta.author, meta.sys = meta.sys,
-                                 meta.call = meta.call, meta.comment = meta.comment,
-                                 tpt = tpt, arraystretch = arraystretch, adjustbox = adjustbox,
-                                 fontsize = fontsize, tabular = tabular, .up = .up)
-
-    if(tex){
-        res = etable_internal_latex(info)
-        n_models = attr(res, "n_models")
-        attr(res, "n_models") = NULL
-    } else {
-        res = etable_internal_df(info)
+    build_etable_list = function(TEX){
+        results2formattedList(
+            dots = dots, vcov = vcov, ssc = ssc, fitstat_all = fitstat,
+            stage = stage, agg = agg,
+            .vcov_args = .vcov_args, digits = digits, digits.stats = digits.stats,
+            se.row = se.row, se.below = se.below,
+            signifCode = signifCode, coefstat = coefstat,
+            ci = ci, title = title, float = float, headers = headers,
+            keepFactors = keepFactors, tex = TEX, useSummary = useSummary,
+            dots_call = dots_call, powerBelow = powerBelow, dict = dict,
+            interaction.combine = interaction.combine, interaction.order = interaction.order,
+            i.equal = i.equal, convergence = convergence,
+            family = family, keep = keep, drop = drop, file = file, order = order,
+            label = label, fixef_sizes = fixef_sizes,
+            fixef_sizes.simplify = fixef_sizes.simplify,
+            depvar = depvar, style.tex = style.tex, style.df = style.df,
+            replace = replace, notes = notes, group = group, extralines = extralines,
+            fixef.group = fixef.group, placement = placement,
+            drop.section = drop.section, poly_dict = poly_dict,
+            tex_tag = TRUE, fit_format = fit_format,
+            coef.just = coef.just, meta = meta, meta.time = meta.time,
+            meta.author = meta.author, meta.sys = meta.sys,
+            meta.call = meta.call, meta.comment = meta.comment,
+            tpt = tpt, arraystretch = arraystretch, adjustbox = adjustbox,
+            fontsize = fontsize, tabular = tabular, mc = mc, .up = .up + 1)
     }
 
-    # view
-    if(tex && view){
-        view = check_build_available()
 
-    } else {
-        view = FALSE
+    # Checking the requirements for exports to png
+    if(view || is_md || is_export){
+        build_ok = check_build_available()
+        if(!isTRUE(build_ok)){
+            args = c("view", "export", "markdown")
+            what = args[args %in% names(mc)]
+            if(length(what) > 0){
+                warning("The argument", enumerate_items(what, "s.require.quote"), " ", build_ok, " to work. So they are currently ignored.")
+            }
+
+            view = is_md = is_export = FALSE
+            markdown = export = NULL
+            do_tex = tex = tex_origin
+        }
     }
 
-    make_preview = function(x) NULL
-    if(view){
-       make_preview = function(x) build_tex_pdf(x, view = TRUE, export = NULL)
+    if(do_tex){
+        info_tex = build_etable_list(TRUE)
+        res_tex = etable_internal_latex(info_tex)
+        n_models = attr(res_tex, "n_models")
+        attr(res_tex, "n_models") = NULL
     }
 
-    if(!missnull(file)){
+    if(do_df){
+        info_df = build_etable_list(FALSE)
+        res_df = etable_internal_df(info_df)
+    }
+
+    make_png = function(x) NULL
+    is_png = view || is_md || is_export
+    if(is_png){
+       make_png = function(x) build_tex_pdf(x, view = view, export = export, markdown = markdown)
+    }
+
+    # DF requested, but also png, OK user
+    if(isFALSE(tex) && is_png){
+        # Some exporting functions only print stuff!
+        # I need to take care of that! PAIN IN THE NECK!
+
+        ok = TRUE
+        if(is_pp_tex){
+            pp_tex_args_all = list(res_tex)
+            if(length(pp_tex_args) > 0){
+                pp_tex_args_all[names(pp_tex_args)] = pp_tex_args
+            }
+
+            tex_output = capture.output(res_tex <- do.call(pp_tex, pp_tex_args_all))
+            if(length(tex_output) > 0){
+                ok = FALSE
+                args = c("view", "export")[c(view, is_export)]
+                warning("The argument", enumerate_items(args, "s.don't.quote"),
+                        " work with the current postprocessing function for tex. Try to remove it first.")
+            }
+        }
+
+        if(ok) make_png(res_tex)
+    }
+
+    # Export to file
+    is_file = !missnull(file)
+    if(is_file){
         error_sender(sink(file = file, append = !replace),
                      "Argument 'file': error when creating the document in ", file)
 
         on.exit(sink())
+    }
 
-        if(DO_POSTPROCESS){
-            # res = my_postprocess(res)
-            pp_args_all = list(res)
-            if(length(pp_args) > 0){
-                pp_args_all[names(pp_args)] = pp_args
-            }
-            res = do.call(my_postprocess, pp_args_all)
 
-            if(is.null(res)){
-                return(invisible(NULL))
+    # Output to the requested format
+    if(tex){
+
+        if(is_pp_tex){
+            pp_tex_args_all = list(res_tex)
+            if(length(pp_tex_args) > 0){
+                pp_tex_args_all[names(pp_tex_args)] = pp_tex_args
             }
 
-            if(tex){
-                # cleaning the tags
-                res = res[!res %in% c("%start:tab\n", "%end:tab\n")]
-            }
+            res_tex = do.call(pp_tex, pp_tex_args_all)
         }
 
-        if(tex){
+        if(is.null(res_tex)){
+            if(is_pdf){
+                args = c("view", "export", "markdown")[c(view, is_export, is_md)]
+                warning("The argument", enumerate_items(args, "s.don't.quote"),
+                        " work with the current postprocessing function for tex. Try to remove it first.")
+            }
+
+            return(invisible(NULL))
+        }
+
+        res_tex = res_tex[!res_tex %in% c("%start:tab\n", "%end:tab\n")]
+
+        res_tex = tex.nice(res_tex, n_models) # we wait after PP to nicify
+
+        make_png(res_tex)
+
+        if(is_file){
             # We add extra whitespaces => otherwise the Latex file is a bit cluttered
             cat("\n")
-            res = tex.nice(res, n_models) # we wait after PP to nicify
-            cat(res, sep = "\n")
+            cat(res_tex, sep = "\n")
             cat("\n\n")
-
-            make_preview(res)
-        } else {
-            if(is.data.frame(res)){
-                print(res)
-            } else {
-                cat(res)
-            }
         }
 
-        return(invisible(res))
+        if(identical(class(res_tex), "character")){
+            class(res_tex) = "etable_tex"
+        }
+
+        if(is_file){
+            return(invisible(res_tex))
+        } else {
+            return(res_tex)
+        }
+
+
     } else {
+        # Some postptocessing functions return nothing (just print)
+        # other return a character vector => I need to take care of that
 
-        if(DO_POSTPROCESS){
-
-            pp_args_all = list(res)
-            if(length(pp_args) > 0){
-                pp_args_all[names(pp_args)] = pp_args
-            }
-            res = do.call(my_postprocess, pp_args_all)
-
-            if(is.null(res)){
-                return(invisible(NULL))
+        if(is_pp_df){
+            pp_df_args_all = list(res_df)
+            if(length(pp_df_args) > 0){
+                pp_df_args_all[names(pp_df_args)] = pp_df_args
             }
 
-            if(tex){
-                res = res[!res %in% c("%start:tab\n", "%end:tab\n")]
-            }
+            res_df = do.call(pp_df, pp_df_args_all)
         }
 
-        if(tex){
-            res = tex.nice(res, n_models) # we wait after PP to nicify
+        if(is.null(res_df)){
+            return(invisible(NULL))
+        }
 
-            make_preview(res)
-
-            if(identical(class(res), "character")){
-                class(res) = "etable_tex"
-            }
-
-            return(res)
-        } else {
-            if(is.data.frame(res)){
-                return(res)
+        if(is_file){
+            if(is.data.frame(res_df)){
+                print(res_df)
             } else {
-                cat(res)
-                return(invisible(res))
+                cat(res_df)
+            }
+            return(invisible(res_df))
+        } else {
+            if(is.data.frame(res_df)){
+                return(res_df)
+            } else {
+                cat(res_df)
+                return(invisible(res_df))
             }
         }
     }
@@ -872,7 +925,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                                  meta = NULL, meta.time = NULL, meta.author = NULL,
                                  meta.call = NULL, meta.sys = NULL, meta.comment = NULL,
                                  tpt = FALSE, arraystretch = NULL, adjustbox = NULL,
-                                 fontsize = NULL, tabular = "normal", .up = 1){
+                                 fontsize = NULL, tabular = "normal", mc = NULL, .up = 1){
+
 
     # This function is the core of the function etable
 
@@ -896,7 +950,6 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
     opts = getOption("fixest_etable")
     sysOrigin = sys.parent(.up)
-    mc = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin), expand.dots = FALSE)
     if(length(opts) > 0){
         args_usr = setdiff(names(mc), c("style.tex", "style.df"))
 
@@ -943,20 +996,20 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     # Full control
     #
 
-    check_arg(title, "character scalar")
+    check_arg(title, "NULL character scalar")
     check_arg_plus(coefstat, "match(se, tstat, confint)")
 
     check_arg_plus(notes, "NULL character vector no na")
     if(length(notes) > 0) notes = notes[nchar(notes) > 0]
 
-    check_arg("logical scalar", replace, convergence, fixef_sizes, fixef_sizes.simplify,
-              keepFactors, family, tex, depvar)
+    check_arg("logical scalar", replace, fixef_sizes, fixef_sizes.simplify,
+              keepFactors, tex, depvar)
 
-    check_arg("NULL logical scalar", se.below, se.row, tpt)
+    check_arg("NULL logical scalar", convergence, family, se.below, se.row, tpt)
     if(is.null(tpt)) tpt = FALSE
 
     isTex = tex
-    if(missing(family)){
+    if(missnull(family)){
         show_family = NULL
     } else {
         show_family = family
@@ -1009,7 +1062,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     check_arg(keep, drop, order, "character vector no na NULL",
               .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
 
-    check_arg(file, label, interaction.combine, i.equal, "character scalar")
+    check_arg(file, label, interaction.combine, i.equal, "NULL character scalar")
 
     check_arg_plus(tabular, "match(normal, *, X)")
 
@@ -1799,7 +1852,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         fitstat_all = opts$fitstat
     }
 
-    if(missing(fitstat_all)){
+    if(missnull(fitstat_all)){
         # => do default
         fitstat_all = "."
 
@@ -2351,19 +2404,19 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     }
 
     if(isTex){
-        if(missing(title)){
+        if(missnull(title)){
             title = "no title"
         } else {
             title = escape_latex(title, 2)
         }
     } else {
-        if(missing(title)){
+        if(missnull(title)){
             title = NULL
         }
     }
 
 
-    if((missing(convergence) && any(convergence_list == FALSE)) || (!missing(convergence) && convergence)){
+    if((missnull(convergence) && any(convergence_list == FALSE)) || (!missnull(convergence) && convergence)){
         convergence = TRUE
     } else {
         convergence = FALSE
@@ -2380,11 +2433,6 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     } else {
         depvar = FALSE
     }
-
-    if(missing(keep)) keep = NULL
-    if(missing(order)) order = NULL
-    if(missing(file)) file = NULL
-    if(missing(label)) label = NULL
 
     if(IS_FIXEF_GROUP && length(fe_names) > 0){
 
@@ -3971,7 +4019,7 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c(
                             interaction.order = NULL, depvar, style.tex = NULL,
                             style.df = NULL, notes = NULL, group = NULL, extralines = NULL,
                             fixef.group = NULL, placement = "htbp", drop.section = NULL,
-                            view = FALSE,
+                            view = FALSE, markdown = NULL, cache = FALSE,
                             postprocess.tex = NULL, postprocess.df = NULL,
                             fit_format = "__var__", meta.time = NULL,
                             meta.author = NULL, meta.sys = NULL,
@@ -4046,6 +4094,9 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat, coefstat = c(
     check_arg(meta.call, meta.sys, "NULL logical scalar")
     check_arg(meta.author, "NULL logical scalar | character vector no na")
     check_arg(meta.comment, "NULL character vector no na")
+
+    check_arg(view, cache, "logical scalar")
+    check_arg(markdown, "NULL scalar(logical, character)")
 
     #
     # Setting the defaults
@@ -4513,14 +4564,14 @@ check_build_available = function(){
         if(outcome == 127){
             warn_up("pdflatex could not be run: check install?")
             options(fixest_build_available = "pdflatex")
-            return(FALSE)
+            return("pdflatex")
         }
 
         outcome = system2("magick", "-help", FALSE, FALSE)
         if(outcome == 127){
             warn_up("magick could not be run: check install?")
             options(fixest_build_available = "magick")
-            return(FALSE)
+            return("magick")
         }
 
         options(fixest_build_available = TRUE)
@@ -4528,11 +4579,11 @@ check_build_available = function(){
 
     } else if(identical(opt, "pdflatex")){
         warn_up("pdflatex could not be run: check install?")
-        return(FALSE)
+        return("pdflatex")
 
     } else if(identical(opt, "magick")){
         warn_up("magick could not be run: check install?")
-        return(FALSE)
+        return("magick")
     }
 
     return(TRUE)
@@ -4605,12 +4656,12 @@ build_tex_pdf = function(x, view = FALSE, export = NULL, markdown = NULL, cache 
         intro = c("\\documentclass[varwidth, border={ 10 5 10 5 }]{standalone}",
                   "\\usepackage[table]{xcolor}",
                   dsb("\\usepackage{.[/array, booktabs, multirow, helvet, amsmath, amssymb]}"),
-                  "\\renewcommand{\\familydefault}{\\sfdefault}",)
+                  "\\renewcommand{\\familydefault}{\\sfdefault}")
 
         tex_pkg = c()
-        tex_pkg = add_pkg("threeparttable", res, tex_pkg, opt = "[flushleft]")
-        tex_pkg = add_pkg("adjustbox", res, tex_pkg)
-        tex_pkg = add_pkg("tabularx", res, tex_pkg)
+        tex_pkg = add_pkg("threeparttable", intro, tex_pkg, opt = "[flushleft]")
+        tex_pkg = add_pkg("adjustbox", intro, tex_pkg)
+        tex_pkg = add_pkg("tabularx", intro, tex_pkg)
 
         if(any(grepl("tikz", x, fixed = TRUE))){
             tex_pkg = c(tex_pkg, "\\usepackage{tikz}",
