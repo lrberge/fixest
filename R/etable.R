@@ -1742,12 +1742,12 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                 h_i = h_names[i]
                 if(grepl(":tex:", h_i)){
                     # no escaping
-                    h_i = gsub(":tex:", "", h_i, fixed = TRUE)
+                    h_i = sub(":tex:", "", h_i, fixed = TRUE)
                 } else {
-                    h_i = escape_latex(h_i, up = 2)
+                    h_i = escape_latex(h_i)
                     h_i = gsub("^\\\\(\\^|\\_)", "\\1", h_i)
                     h_i = gsub(":\\_:", ":_:", h_i, fixed = TRUE)
-                    headers[[i]] = escape_latex(headers[[i]], up = 2)
+                    headers[[i]] = escape_latex(headers[[i]])
                 }
                 h_names[i] = h_i
             }
@@ -1869,7 +1869,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     slope_flag_list = vector(mode = "list", n_models)
 
     if(!is.null(dict) && isTex){
-        dict = escape_latex(dict, up = 2)
+        dict = escape_latex(dict)
     }
 
     #
@@ -2435,7 +2435,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         if(missnull(title)){
             title = "no title"
         } else {
-            title = escape_latex(title, 2)
+            title = escape_latex(title, makecell = FALSE)
         }
     } else {
         if(missnull(title)){
@@ -2797,7 +2797,7 @@ etable_internal_latex = function(info){
 
     # 1st lines => dep vars
     depvar_list = dict_apply(c(depvar_list, recursive = TRUE), dict)
-    depvar_list = escape_latex(depvar_list, up = 2)
+    depvar_list = escape_latex(depvar_list)
 
     # We write the dependent variables properly, with multicolumn when necessary
     # to do that, we count the number of occurrences of each variable (& we respect the order provided by the user)
@@ -2926,7 +2926,7 @@ etable_internal_latex = function(info){
     qui = all_vars %in% names(dict)
     who = aliasVars[qui]
     aliasVars[qui] = dict[who]
-    aliasVars = escape_latex(aliasVars, up = 2)
+    aliasVars = escape_latex(aliasVars)
 
     coef_mat = all_vars
     for(m in 1:n_models) coef_mat = cbind(coef_mat, coef_list[[m]][all_vars])
@@ -3265,7 +3265,7 @@ etable_internal_latex = function(info){
 
         if(length(notes) > 0){
             notes = dict_apply(notes, dict)
-            notes = escape_latex(notes)
+            notes = escape_latex(notes, makecell = FALSE)
 
             if(tpt){
                 if(nchar(trimws(notes_intro)) > 0){
@@ -3391,8 +3391,8 @@ etable_internal_latex = function(info){
             el_name = gsub(":tex:", "", el_name, fixed = TRUE)
         } else {
             # escaping
-            el_name = escape_latex(el_name, up = 2, TRUE)
-            el_format = escape_latex(el_format, up = 2, TRUE)
+            el_name = escape_latex(el_name)
+            el_format = escape_latex(el_format)
         }
 
         el_full = paste0(el_full, el_name, " & ", paste0(el_format, collapse = " & "), "\\\\\n")
@@ -5089,7 +5089,7 @@ escape_all = function(x){
 }
 
 # escape_latex("Voici **une** *equation*: $5! = 5*4*3*2*1$. Est-ce que ***ca marche***?$^*$")
-escape_latex = function(x_all, up = 0, noArg = FALSE){
+escape_latex = function(x_all, makecell = TRUE){
     # This is super tricky to escape properly!
     # We do NOT escape within equations
 
@@ -5111,7 +5111,7 @@ escape_latex = function(x_all, up = 0, noArg = FALSE){
                 if(!noArg){
                     my_arg = paste0("In argument '", x_name, "', t")
                 }
-                stop_up(up = up, my_arg, "here are ", length(dollars), " dollar signs in the following character string:\n", x, "\nIt will raise a Latex error (which '$' means equation? which means dollar-sign?): if you want to use a regular dollar sign, please escape it like that: \\\\$.")
+                stop_up(up = 2, my_arg, "here are ", length(dollars), " dollar signs in the following character string:\n", x, "\nIt will raise a Latex error (which '$' means equation? which means dollar-sign?): if you want to use a regular dollar sign, please escape it like that: \\\\$.")
             }
         }
 
@@ -5130,6 +5130,13 @@ escape_latex = function(x_all, up = 0, noArg = FALSE){
             res[index] = gsub(" $", "", paste(all_items, collapse = "$"))
         } else {
             res[index] = markup_apply(escape_all(x))
+        }
+    }
+
+    if(makecell){
+        who = grepl("\n", res, fixed = TRUE)
+        if(any(who)){
+            res[who] = paste0("\\makecell{", gsub("\n", "\\\\", res[who], fixed = TRUE), "}")
         }
     }
 

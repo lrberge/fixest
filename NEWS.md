@@ -69,6 +69,8 @@
  
  - improve the use of `tabularx`.
  
+ - automatic support `makecell`: any new lines found in names within the table will be translated with `makecell`. For example: `"The \n long \n varname"` is automatically translated into `\makecell{The \\ long \\ varname}`.
+ 
 ## Other
 
  - `bin`: `cut::` now ignores white spaces, so that `cut:: q1 ] q3 [` works appropriately.
