@@ -74,7 +74,14 @@
 #' @param export Character scalar giving the path to a PNG file to be created, default is \code{NULL}. If provided, the Latex table will be converted to PNG and copied to the \code{export} location. Note that for this option to work you need a working distribution of \code{pdflatex}, \code{imagemagick} and \code{ghostscript}.
 #' @param markdown Character scalar giving the location of a directory, or a logical scalar. Default is \code{NULL}. This argument only works in Rmarkdown documents, when knitting the document. If provided: two behaviors depending on context. A) if the output document is Latex, the table is exported in Latex. B) if the output document is not Latex, the table will be exported to PNG at the desired location and inserted in the document via a markdown link. If equal to \code{TRUE}, the default location of the PNGs is a temporary folder for \code{R > 4.0.0}, or to \code{"images/etable/"} for earlier versions.
 #' @param view.cache Logical, default is \code{FALSE}. Only used when \code{view = TRUE}. Whether the PNGs of the tables should be cached.
-#' @param type Character scalar equal to 'pdflatex' (default) or 'magick'. Which log file to report.
+#' @param type Character scalar equal to 'pdflatex' (default), 'magick' or 'tex'. Which log file to report; if 'tex', the full source code of the tex file is returned.
+#' @param highlight List containing coefficients to highlight. Highlighting is of the form \code{.("options1" = "coefs1", "options2" = "coefs2", etc)}.
+#' The coefficients to be highlighted can be written in three forms: 1) row, eg \code{"x1"} will highlight the full row of the variable \code{x1}; 2) cells, use \code{'@}' after the coefficient name to give the column, it accepts ranges, eg \code{"x1@2, 4-6, 8"} will highlight only the columns 2, 4, 5, 6, and 8 of the variable \code{x1}; 3) range, by giving the top-left and bottom-right values separated with a semi-colon, eg \code{"x1@2 ; x3@5"} will highlight from the column 2 of \code{x1} to the 5th column of \code{x3}. Coefficient names are partially matched, use a \code{'\%'} first to refer to the original name (before dictionary) and use \code{'@'} first to use a regular expression. You can add a vector of row/cell/range.
+#' The options are a comma-separated list of items. By default the highlighting is done with a frame (a thick box) around the coefficient, use \code{'rowcol'} to highlight with a row color instead. Here are the other options: \code{'se'} to highlight the standard-errors too; \code{'square'} to have a square box (instead of rounded); \code{'thick1'} to \code{'thick6'} to monitor the width of the box; \code{'sep0'} to \code{'sep9'} to monitor the inner spacing. Finally the remaining option is the color: simply add an R color (it must be a valid R color!). You can use \code{"color!alpha"} with "alpha" a number between 0 to 100 to change the alpha channel of the color.
+#' @param coef.style Named list containing styles to be applied to the coefficients. It must be of the form \code{.("style1" = "coefs1", "style2" = "coefs2", etc)}.
+#' The style must contain the string \code{":coef:"} (or \code{":coef_se:"} to style both the coefficient and its standard-error). The string \code{:coef:} will be replaced verbatim by the coefficient value. For example use \code{"\\textbf{:coef:}"} to put the coefficient in bold. Note that markdown markup is enabled so \code{"**:coef:**"} would also put it in bold.
+#' The coefficients to be styled can be written in three forms: 1) row, eg \code{"x1"} will style the full row of the variable \code{x1}; 2) cells, use \code{'@}' after the coefficient name to give the column, it accepts ranges, eg \code{"x1@2, 4-6, 8"} will style only the columns 2, 4, 5, 6, and 8 of the variable \code{x1}; 3) range, by giving the top-left and bottom-right values separated with a semi-colon, eg \code{"x1@2 ; x3@5"} will style from the column 2 of \code{x1} to the 5th column of \code{x3}. Coefficient names are partially matched, use a \code{'\%'} first to refer to the original name (before dictionary) and use \code{'@'} first to use a regular expression. You can add a vector of row/cell/range.
+#'
 #'
 #' @details
 #' The function \code{esttex} is equivalent to the function \code{etable} with argument \code{tex = TRUE}.
@@ -470,7 +477,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                   poly_dict = c("", " square", " cube"), postprocess.tex = NULL,
                   postprocess.df = NULL, tpt = FALSE, arraystretch = NULL, adjustbox = NULL,
                   fontsize = NULL, fit_format = "__var__", coef.just = NULL,
-                  tabular = "normal",
+                  tabular = "normal", highlight = NULL, coef.style = NULL,
                   meta = NULL, meta.time = NULL, meta.author = NULL, meta.sys = NULL,
                   meta.call = NULL, meta.comment = NULL, view = FALSE,
                   export = NULL, markdown = NULL){
@@ -708,7 +715,9 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
             meta.author = meta.author, meta.sys = meta.sys,
             meta.call = meta.call, meta.comment = meta.comment,
             tpt = tpt, arraystretch = arraystretch, adjustbox = adjustbox,
-            fontsize = fontsize, tabular = tabular, mc = mc, .up = .up + 1)
+            fontsize = fontsize, tabular = tabular, highlight = highlight,
+            coef.style = coef.style,
+            mc = mc, .up = .up + 1)
     }
 
 
@@ -945,7 +954,9 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                                  meta = NULL, meta.time = NULL, meta.author = NULL,
                                  meta.call = NULL, meta.sys = NULL, meta.comment = NULL,
                                  tpt = FALSE, arraystretch = NULL, adjustbox = NULL,
-                                 fontsize = NULL, tabular = "normal", mc = NULL, .up = 1){
+                                 fontsize = NULL, tabular = "normal", highlight = NULL,
+                                 coef.style = NULL,
+                                 mc = NULL, .up = 1){
 
 
     # This function is the core of the function etable
@@ -1118,12 +1129,34 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         signif.code = sort(signif.code)
     }
 
-    # eval_dot: headers and extralines
+    # eval_dot: headers + extralines + highlight
     headers = error_sender(eval_dot(headers, .up + 1), arg_name = "headers", up = .up)
     extralines = error_sender(eval_dot(extralines, .up + 1), arg_name = "extralines", up = .up)
+    highlight = error_sender(eval_dot(highlight, .up + 1), arg_name = "highlight", up = .up)
+    coef.style = error_sender(eval_dot(coef.style, .up + 1), arg_name = "coef.style", up = .up)
 
     check_arg(headers, "NULL character vector no na | NA | list")
     if(is.null(headers)) headers = list()
+
+    check_arg(highlight, "NULL character vector no na | list")
+    if(is.character(highlight)){
+        # We always want HL to be a list!
+        # hl = "Petal.L>1-2"
+        # hl = c("rowcol, lightblue" = "Petal.L>1-2")
+        if(length(highlight) == 1){
+            highlight = as.list(highlight)
+        } else {
+            # length 2 => can't have names
+            # hl = c("Petal.L@1", "Sepal.L@3")
+            highlight = list(highlight)
+        }
+    }
+
+    check_arg(coef.style, "NULL named list")
+    if(is.null(coef.style)){
+        coef.style = list()
+    }
+
 
     check_arg(poly_dict, "character vector no na")
 
@@ -2645,7 +2678,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                extralines = extralines, placement = placement, drop.section = drop.section,
                tex_tag = tex_tag, fun_format = fun_format, coef.just = coef.just, meta = meta_txt,
                tpt = tpt, arraystretch = arraystretch, adjustbox = adjustbox, fontsize = fontsize,
-               tabular = tabular)
+               tabular = tabular, highlight = highlight, coef.style = coef.style)
 
     return(res)
 }
@@ -2706,6 +2739,8 @@ etable_internal_latex = function(info){
     adjustbox = info$adjustbox
     fontsize = info$fontsize
     tabular = info$tabular
+    highlight = info$highlight
+    coef.style = info$coef.style
 
     # top line
     style$line.top = switch(style$line.top,
@@ -2920,20 +2955,19 @@ etable_internal_latex = function(info){
     if(length(all_vars) == 0) stop_up("Not any variable was selected, please reframe your keep/drop arguments.")
 
     # changing the names of the coefs
-    aliasVars = all_vars
-    names(aliasVars) = all_vars
+    coef_names = all_vars
+    names(coef_names) = all_vars
 
     qui = all_vars %in% names(dict)
-    who = aliasVars[qui]
-    aliasVars[qui] = dict[who]
-    aliasVars = escape_latex(aliasVars)
+    who = coef_names[qui]
+    coef_names[qui] = dict[who]
+    coef_names = escape_latex(coef_names)
 
-    coef_mat = all_vars
-    for(m in 1:n_models) coef_mat = cbind(coef_mat, coef_list[[m]][all_vars])
-    coef_mat[is.na(coef_mat)] = "  "
     if(se.below){
-        coef_lines = c()
+        coef_mat = c()
+        # coef_lines = c()
         for(v in all_vars){
+
             myCoef = mySd = myLine = c()
             for(m in 1:n_models){
                 myCoef = c(myCoef, coef_below[[m]][v])
@@ -2942,16 +2976,29 @@ etable_internal_latex = function(info){
 
             myCoef[is.na(myCoef)] = "  "
             mySd[is.na(mySd)] = "  "
-            myCoef = paste0(aliasVars[v], " & ", paste0(myCoef, collapse = " & "))
-            mySd = paste0("  & ", paste0(mySd, collapse = " & "))
-            myLines = paste0(myCoef, "\\\\\n", mySd, "\\\\\n")
-            coef_lines = c(coef_lines, myLines)
+
+            coef_mat = rbind(coef_mat, c(coef_names[v], myCoef), c(" ", mySd))
         }
-        coef_lines = paste0(coef_lines, collapse="")
+
     } else {
-        coef_mat[, 1] = aliasVars
-        coef_lines = paste0(paste0(apply(coef_mat, 1, paste0, collapse = " & "), collapse="\\\\\n"), "\\\\\n")
+
+        coef_mat = all_vars
+        for(m in 1:n_models){
+            coef_mat = cbind(coef_mat, coef_list[[m]][all_vars])
+        }
+        coef_mat[is.na(coef_mat)] = "  "
+
+        coef_mat[, 1] = coef_names
     }
+
+
+    coef_mat = style_apply(coef.style, coef_mat, coef_names)
+    info_mat = highlight_apply(highlight, coef_mat, coef_names)
+    coef_mat = info_mat$coef_mat
+    info_tikz = info_mat$preamble
+
+    coef_lines = paste0(apply(coef_mat, 1, paste, collapse = " & "), "\\\\ \n")
+    coef_lines = paste0(coef_lines, collapse = "")
 
     #
     # Fixed-effects (if needed)
@@ -3478,7 +3525,7 @@ etable_internal_latex = function(info){
 
     # meta information: has been computed in results2formattedList
 
-    res = c(meta, table_begin, caption, info_center, info_width, info_font, adj_box_begin,
+    res = c(meta, table_begin, info_tikz, caption, info_center, info_width, info_font, adj_box_begin,
             tpt_begin, tpt_caption, info_stretch,
             tag_tabular_before, tabular_begin,
             headers_top, first_line, headers_mid, model_line, info_family, headers_bottom,
@@ -5040,6 +5087,523 @@ DIR_EXISTS = function(x){
 #### Utilities ####
 ####
 
+
+style_apply = function(coef.style, coef_mat, coef_names){
+    # applies a style to specified coefficients
+
+    set_up(2)
+
+    if(length(coef.style) == 0){
+        return(coef_mat)
+    }
+
+    res = coef_mat
+    n_models = ncol(res) - 1
+
+    has_row_se = any(" " %in% res[, 1])
+    get_row_id = function(i) if(has_row_se) 1 + 2 * (i - 1) else i
+
+    for(i in seq_along(coef.style)){
+        cs = coef.style[[i]]
+        cs_name = paste0(trimws(names(coef.style)[i]), " ")
+
+        if(!grepl(":coef(_se)?:", cs_name)){
+            stop_up("In the argument 'coef.style', the names must contain the ':coef:' (or :coef_se:) string. ",
+                    "Problem: this is not the case for the ", n_th(i), " element (equal to '", cs_name, "').")
+        }
+
+        is_se = grepl(":coef_se:", cs_name)
+        if(is_se){
+            cs_name = sub(":coef_se:", ":coef:", cs_name, fixed = TRUE)
+        }
+        add_se = function(x) if(is_se) rbind(x, x + matrix(c(1, 0), nrow(x), 2, byrow = TRUE)) else x
+
+        style_split = strsplit(cs_name, ":coef:", fixed = TRUE)[[1]]
+
+        if(cs %in% c(".", "all")){
+
+            id = which(matrix(grepl("[^ ]", coef_mat), nrow(coef_mat)), arr.ind = TRUE)
+            # we remove the row names
+            id = id[id[, 2] != 1, ]
+            if(!is_se && has_row_se){
+                # we remove the se row!
+                id = id[id[, 1] %% 2 == 1, ]
+            }
+
+            # We apply the style
+            values = res[id]
+            new_values = paste0(style_split[1])
+            for(k in seq_along(style_split)[-1]){
+                new_values = paste0(new_values, values, style_split[k])
+            }
+            new_values = trimws(new_values)
+            res[id] = escape_latex(new_values)
+
+        } else {
+            coef_location_all = coef_location(cs, coef_names, n_models, "coef.style", pool = TRUE)
+            cell = coef_location_all$cell
+
+            # cell: list of n x 2 matrices
+            for(j in seq_along(cell)){
+                cell_mat = cell[[j]]
+
+                id = cbind(get_row_id(cell_mat[, 1]), cell_mat[, 2] + 1)
+                id = add_se(id)
+
+                id = id[grepl("[^ ]", res[id]), ]
+
+                if(length(id) > 0){
+                    values = res[id]
+                    new_values = paste0(style_split[1])
+                    for(k in seq_along(style_split)[-1]){
+                        new_values = paste0(new_values, values, style_split[k])
+                    }
+                    new_values = trimws(new_values)
+                    res[id] = escape_latex(new_values)
+                }
+            }
+        }
+    }
+
+    return(res)
+}
+
+highlight_apply = function(highlight, coef_mat, coef_names){
+    # applies coefficients highlighting
+
+    set_up(2)
+
+    if(length(highlight) == 0){
+        return(list(preamble = "", coef_mat = coef_mat))
+    }
+
+    if(is.null(names(highlight))){
+        names(highlight) = " "
+    }
+
+    # default color
+    COLOR = "#c80815"
+
+    res = coef_mat
+    n_models = ncol(res) - 1
+
+    # \definecolor{Mycolor2}{HTML}{00F9DE}
+    # \definecolor{mypink1}{rgb}{0.858, 0.188, 0.478}
+    # \definecolor{mypink2}{RGB}{219, 48, 122}
+
+    has_row_se = any(" " %in% res[, 1])
+    get_row_id = function(i) if(has_row_se) 1 + 2 * (i - 1) else i
+
+    # frame id
+    f_id = 0
+
+    all_colors = c()
+    tex_preamble = c()
+
+    for(i in seq_along(highlight)){
+        hl = highlight[[i]]
+        hl_name = trimws(strsplit(names(highlight)[i], "[, ]+")[[1]])
+        if(identical(hl_name, '')){
+            hl_name = character(0)
+        }
+
+        #
+        # Parsing the parameters
+        #
+
+        # TRUE/FALSE flags
+        is_se = "se" %in% hl_name && has_row_se
+        add_se = function(x) if(is_se) rbind(x, x + matrix(c(1, 0), nrow(x), 2, byrow = TRUE)) else x
+
+        is_rowcol = "rowcol" %in% hl_name
+        is_round = !"square" %in% hl_name
+
+        hl_name = setdiff(hl_name, c("se", "rowcol", "square"))
+
+        # Values
+        thick_raw = grep("^thick\\d$", hl_name, value = TRUE)
+        thick = if(length(thick_raw) == 0) 6 else as.numeric(sub("thick", "", thick_raw))
+        if(thick > 6){
+            stop_up("In the argument 'highlight', the name of the ", n_th(i),
+                 " element (equal to '", hl_name, "') is ill formed. ",
+                 "The item 'thick' can go only from 1 to 6.")
+        }
+
+        sep_raw = grep("^sep\\d+$", hl_name, value = TRUE)
+        sep = if(length(sep_raw) == 0) 3 else sub("sep", "", sep_raw)
+
+        hl_name = setdiff(hl_name, c(thick_raw, sep_raw))
+
+        # Color: the remaining
+        color = hl_name
+        is_col = length(color) == 1
+
+        if(length(color) > 1){
+            stop_up("In the argument 'highlight', the name of the ", n_th(i),
+                 " element (equal to '", hl_name, "') is ill formed. ",
+                 "It should be a comma separated list of options, which include: 'rowcol', 'square', 'thickd' (with d from 0 to 6), 'sepd' (d: 0-9), 'se', and 'color!alpha' with 'color' a valid R color and, optionnaly, 'alpha' in 0-100.")
+        }
+
+        # conversion of the color
+        is_alpha = FALSE
+        if(is_col){
+            if(grepl("!", color, fixed = TRUE)){
+                color_split = strsplit(color, "!", fixed = TRUE)[[1]]
+                is_alpha = TRUE
+                alpha = color_split[2]
+                color = color_split[1]
+            }
+        } else {
+            color = COLOR
+            if(is_rowcol){
+                # Default row color is not solid
+                alpha = "25"
+                is_alpha = TRUE
+            }
+        }
+
+        tex_color = error_sender(col2rgb(color),
+                                 "In the argument 'highlight', the color, in the name of the ", n_th(i),
+                                 " element (equal to '", color, "'), could not be converted to RGB. ")
+        tex_color = paste0(as.vector(tex_color), collapse = ", ")
+
+        if(tex_color %in% all_colors){
+            tag_color = names(all_colors)[all_colors == tex_color]
+
+        } else {
+            tag_color = paste0("col", tag_gen())
+            all_colors[tag_color] = tex_color
+            tex_preamble = c(tex_preamble,
+                             paste0("\\definecolor{", tag_color, "}{RGB}{", tex_color, "}"))
+        }
+
+        if(is_alpha){
+            tag_color = paste0(tag_color, "!", alpha)
+        }
+
+        coef_location_all = coef_location(hl, coef_names, n_models, "highlight")
+        cell = coef_location_all$cell
+        row = coef_location_all$row
+        range = coef_location_all$range
+
+        if(is_rowcol){
+            # cell: list of n x 2 matrices
+            for(j in seq_along(cell)){
+                cell_mat = cell[[j]]
+                for(k in 1:nrow(cell_mat)){
+                    my_cell = cell_mat[k, ]
+
+                    id = cbind(get_row_id(my_cell[1]), my_cell[2] + 1)
+                    id = add_se(id)
+
+                    res[id] = paste0("\\cellcolor{", tag_color, "} ", res[id])
+                }
+            }
+
+            # row: list of integers
+            for(j in seq_along(row)){
+                my_row = row[[j]]
+
+                id = cbind(get_row_id(my_row), 1)
+                id = add_se(id)
+
+                res[id] = paste0("\\rowcolor{", tag_color, "} ", res[id])
+            }
+
+            # range: list of vectors of length 4 (i1, k1, i2, k2)
+            for(j in seq_along(range)){
+                my_range = range[[j]]
+
+                id = expand.grid(my_range[1]:my_range[3], my_range[2]:my_range[4])
+                id = add_se(id)
+
+                res[id] = paste0("\\cellcolor{", tag_color, "} ", res[id])
+            }
+
+        } else {
+            #
+            # FRAME
+            #
+
+            tag_frame = tag_gen()
+
+            tag_frame_NW = paste0("\\markNW", tag_frame)
+            tag_frame_SE = paste0("\\markSE", tag_frame)
+
+            # thickness
+            # thin, very thin, ultra thin
+            # thick, very thick, ultra thick
+            thickness = .dsb(".[/thin, very thin, ultra thin, thick, very thick, ultra thick]")[thick]
+            rounded = if(is_round) "rounded corners, " else ""
+
+            tex_preamble = c(tex_preamble, .dsb(
+                "
+\\newcommand.[tag_frame_NW][1]{%
+   \\tikz[overlay,remember picture]
+      \\node (marker-#1-a) at (0, .3em) {};%
+}
+
+\\newcommand.[tag_frame_SE][1]{%
+   \\tikz[overlay,remember picture]
+      \\node (marker-#1-b) at (0, .3em) {};%
+   \\tikz[overlay,remember picture,inner sep=.[sep]pt, .[thickness]]
+      \\node[draw=.[tag_color],.[rounded]fit=(marker-#1-a.north west) (marker-#1-b.south east)] {};%
+}\n"))
+
+
+            # cell: list of n x 2 matrices
+            for(j in seq_along(cell)){
+                cell_mat = cell[[j]]
+                for(k in 1:nrow(cell_mat)){
+                    my_cell = cell_mat[k, ]
+
+                    id = cbind(get_row_id(my_cell[1]), my_cell[2] + 1)
+
+                    n_id = nrow(id)
+                    frame_id = f_id + 1:n_id
+                    f_id = f_id + n_id
+
+                    if(is_se){
+                        # NW on the coef, South East on the SE
+                        res[id] = .dsb(".[tag_frame_NW]{f.[frame_id]} .[res[id]]")
+
+                        id_se = id + matrix(c(1, 0), n_id, 2, byrow = TRUE)
+                        res[id_se] = .dsb(".[tag_frame_SE]{f.[frame_id]} .[res[id_se]]")
+                    } else {
+                        res[id] = .dsb(".[tag_frame_NW]{f.[frame_id]} .[res[id]] .[tag_frame_SE]{f.[frame_id]}")
+                    }
+
+                }
+            }
+
+            # row: list of integers
+            for(j in seq_along(row)){
+                my_row = row[[j]]
+
+                id_NW = cbind(get_row_id(my_row), 2)
+
+                if(is_se){
+                    # We need to end at the line just below is is_se
+                    id_SE = cbind(get_row_id(my_row) + 1, n_models + 1)
+                } else {
+                    id_SE = cbind(get_row_id(my_row), n_models + 1)
+                }
+
+                f_id = f_id + 1
+
+                res[id_NW] = .dsb(".[tag_frame_NW]{f.[f_id]} .[res[id_NW]]")
+                res[id_SE] = .dsb(".[res[id_SE]] .[tag_frame_SE]{f.[f_id]}")
+
+            }
+
+            # range: list of vectors of length 4 (i1, k1, i2, k2)
+            for(j in seq_along(range)){
+                my_range = range[[j]]
+
+                id_NW = cbind(get_row_id(my_range[1]), my_range[2] + 1)
+                id_SE = cbind(get_row_id(my_range[3]), my_range[4] + 1)
+
+                if(is_se){
+                    # We need to end at the line just below is is_se
+                    id_SE[1] = id_SE[1] + 1
+                }
+
+                f_id = f_id + 1
+
+                res[id_NW] = .dsb(".[tag_frame_NW]{f.[f_id]} .[res[id_NW]]")
+                res[id_SE] = .dsb(".[res[id_SE]] .[tag_frame_SE]{f.[f_id]}")
+            }
+        }
+    }
+
+    return(list(coef_mat = res, preamble = tex_preamble))
+}
+
+
+coef_location = function(x, coef_names, n_models, arg_name, pool = FALSE){
+    # x: vector of coef location
+    # cell: "x1@2", "x1@1, 3, 5-8"
+    # range: "x2@2; x3@.N", "x2; x3"
+    # row: "x1"
+
+    cell = range = row = list()
+
+    for(i in seq_along(x)){
+        xi = x[i]
+
+        if(grepl(";", xi, fixed = TRUE)){
+            # => range
+            xi_split = trimws(strsplit(xi, ";", fixed = TRUE)[[1]])
+
+            if(length(xi_split) != 2){
+                stop_up(up = 3, "In the argument '", arg_name, "', the value of the ", n_th(i),
+                        " element (equal to '", xi, "') is not valid. ",
+                        "It should contain at most one semi-comma.")
+            }
+
+            xi_1 = xi_split[[1]]
+            xi_2 = xi_split[[2]]
+
+            xi_1_loc = coef_pos_parse(xi_1, coef_names, n_models, i, arg_name)
+            xi_2_loc = coef_pos_parse(xi_2, coef_names, n_models, i, arg_name)
+
+            # We always normalize the range, it must be two single positions
+            xi_1_pos = if(xi_1_loc$is_row) 1 else min(xi_1_loc$pos)
+            xi_2_pos = if(xi_2_loc$is_row) 1 else max(xi_2_loc$pos)
+
+            if(pool){
+                cell[[length(cell) + 1]] = expand.grid(xi_1_loc$coef:xi_2_loc$coef,
+                                                       xi_1_pos:xi_2_pos)
+            } else {
+                range[[length(range) + 1]] = c(xi_1_loc$coef, xi_1_pos, xi_2_loc$coef, xi_2_pos)
+            }
+
+        } else {
+            xi_loc = coef_pos_parse(xi, coef_names, n_models, i, arg_name)
+
+            if(xi_loc$is_row){
+                if(pool){
+                    all_cells = cbind(xi_loc$coef, 1:n_models)
+                    cell[[length(cell) + 1]] = all_cells
+                } else {
+                    row[[length(row) + 1]] = xi_loc$coef
+                }
+            } else {
+                all_cells = cbind(xi_loc$coef, xi_loc$pos)
+                cell[[length(cell) + 1]] = all_cells
+            }
+        }
+    }
+
+
+    res = list(cell = cell, row = row, range = range)
+    return(res)
+}
+
+coef_pos_parse = function(x, coef_names, n_models, i, arg_name){
+    # x: "x1@2", "x1", "x1@2, 5, 7-10, 13"
+
+    set_up(4)
+
+    x_split = strsplit(x, "@", fixed = TRUE)[[1]]
+    if(length(x_split) > 2){
+        stop_up("In the argument '", arg_name, "', the location of the ", n_th(i),
+                " element (equal to '", x, "') is not valid. ",
+                "It should contain at most one '@'.")
+    }
+
+    x_coef = x_split[1]
+    x_pos = if(length(x_split) == 2) x_split[2] else NULL
+
+    #
+    # Position
+    #
+
+    x_pos = gsub(".N", n_models, x_pos, fixed = TRUE)
+
+    if(length(x_pos) > 0){
+        # x: 3, 5, 6-8, 10
+
+        if(grepl("[^ ,-[[:digit:]]]", x_pos)){
+            stop_up("In the argument '", arg_name, "', the location of the ", n_th(i),
+                    " element (equal to '", x, "') contains non valid characters. Please have a look at the help/example.")
+        }
+
+        # new DSB power
+        #       dsb("c(.['- => :'r: x])") ou dsb("c(.['-_to_:'r: x])")
+        x_txt = paste0("c(", gsub("-", ":", x_pos), ")")
+        x_call = error_sender(str2lang(x_txt), "In argument '", arg_name,
+                              "' the position in '", x,
+                              "' is not valid. Please have a look at the help/example.",
+                              up = 4)
+
+        x_pos = eval(x_call)
+    }
+
+    #
+    # Coefficient
+    #
+
+    coef_id = pmatch_varname(x_coef, coef_names, arg_name)
+
+    res = list(coef = coef_id, pos = x_pos, is_row = length(x_pos) == 0)
+
+    return(res)
+}
+
+pmatch_varname = function(x, coef_names, arg_name){
+    # We want a SINGLE match
+    # coef_names: vector of names
+    # names(coef_names): original names
+
+    is_regex = is_original = FALSE
+    if(grepl("^@", x)){
+        is_regex = TRUE
+        x = str_trim(x, 1)
+        if(grepl("^%", x)){
+            is_original = TRUE
+            x = str_trim(x, 1)
+        }
+    } else if(grepl("^%", x)){
+        is_original = TRUE
+        x = str_trim(x, 1)
+        if(grepl("^@", x)){
+            is_regex = TRUE
+            x = str_trim(x, 1)
+        }
+    }
+
+    # Pattern of match finding
+    if(is_regex && is_original){
+        do_regex = TRUE
+        do_original = TRUE
+    } else if(is_regex){
+        do_regex = c(TRUE, TRUE)
+        do_original = c(FALSE, TRUE)
+    } else if(is_original){
+        do_regex = c(FALSE, TRUE)
+        do_original = c(TRUE, TRUE)
+    } else {
+        do_regex = c(FALSE, FALSE, TRUE, TRUE)
+        do_original = c(FALSE, TRUE, FALSE, TRUE)
+    }
+
+    ok = FALSE
+    for(i in seq_along(do_regex)){
+
+        if(do_regex[i]){
+            if(do_original[i]){
+                qui = grepl(x, names(coef_names))
+            } else {
+                qui = grepl(x, coef_names)
+            }
+
+            if(sum(qui) == 1){
+                ok = TRUE
+                qui = which(qui)
+            }
+        } else {
+            if(do_original[i]){
+                qui = charmatch(x, names(coef_names))
+            } else {
+                qui = charmatch(x, coef_names)
+            }
+
+            if(!is.na(qui) && qui != 0) ok = TRUE
+        }
+
+        if(ok) break
+    }
+
+    if(!ok){
+        stop_up(up = 5, "In the argument '", arg_name, "', the value '", x,
+                "' does not match any variable name.")
+    }
+
+
+    qui
+}
+
 # x = strsplit("*bonjour $x^2$*", "$", fixed = TRUE)[[1]]
 # x = strsplit("*bonjour $x^2*3$*", "$", fixed = TRUE)[[1]]
 # x = "et **bonsoir**!"
@@ -5612,6 +6176,13 @@ tex.nice = function(x, n_models){
     mat_amp = matrix(unlist(x_split_amp[qui_amp]), ncol = n, byrow = TRUE)
     mat_amp[, 1:(n-1)] = apply(mat_amp[, 1:(n-1), drop = FALSE], 2, format)
 
+    if(any(grepl("\\", mat_amp, fixed = TRUE))){
+        # we fix the \\ problem that will count for one character eventually
+        who_slash = which(grepl("\\", mat_amp, fixed = TRUE))
+        slash_count = lengths(gregexpr("\\", mat_amp[who_slash], fixed = TRUE))
+        mat_amp[who_slash] = paste0(mat_amp[who_slash], sprintf("% *s", slash_count, " "))
+    }
+
     amp_new = apply(mat_amp, 1, paste, collapse = "&")
 
     x[qui_amp] = amp_new
@@ -5620,7 +6191,7 @@ tex.nice = function(x, n_models){
     # II) dealing with tabs
     #
 
-    # We assume eveyrthing is properly formatted
+    # We assume everything is properly formatted
     x_begin = pmax(lengths(strsplit(x, "\\begin{", fixed = TRUE)) - 1, 0)
     x_end = pmax(lengths(strsplit(x, "\\end{", fixed = TRUE)) - 1, 0)
 
@@ -5674,16 +6245,17 @@ tag_gen = function(){
     # => granted that's almost impossible, but that's still possible.
     # (ex: two identical code sections with set.seed in Rmarkdown)
     #
+    # we only use letters because tex macro names only allow letters
 
     id = getOption("fixest_tag")
     if(is.null(id)) id = 1
     options(fixest_tag = id + 1)
 
-    items = c(letters, 0:9)
+    items = letters
 
     # Below: to ensure unicity even if the seed is the same
-    n_shifts = id %% 36
-    n_reshuffle = id %/% 36
+    n_shifts = id %% 26
+    n_reshuffle = id %/% 26
 
     if(n_reshuffle > 0){
         for(i in 1:n_reshuffle){
@@ -5695,7 +6267,7 @@ tag_gen = function(){
         items = c(items[-(1:n_shifts)], items[1:n_shifts])
     }
 
-    # 36 ** 5 = 60,466,176
+    # 26 ** 5 = 11,881,376
     tag = paste0(sample(items, 6, replace = TRUE), collapse = "")
 
     return(tag)

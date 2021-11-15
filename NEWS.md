@@ -41,6 +41,10 @@
  
  - new argument `adjustbox`: `adjustbox = TRUE` nests the tabular into an `adjustbox` environment with `width = \\textwidth, center` as default option. Use `adjustbox = x` with `x` a number giving the text-width. Use `adjustbox = "x th"` with `x` a number giving the text-height. Finally you can use a character string, as in `adjustbox = "my options"`, that will be passed verbatim as a an `adjustbox` option.
  
+ - new argument `highlight` to highlight the coefficients with a frame or by changing the row/cell color.
+ 
+ - new argument `coef.style` to apply an arbitrary style to one or several coefficients.
+ 
  - in `style.tex`: new argument `rules_width` to easily set the width of the `booktabs` rules.
  
  - in `style.tex`: new argument `caption.after` to insert code right after the caption.
