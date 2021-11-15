@@ -4979,14 +4979,16 @@ window.addEventListener("load", changeImgRatio);
 
 #' @rdname etable
 log_etable = function(type = "pdflatex"){
-    check_arg_plus(type, "match(pdflatex, magick)")
+    check_arg_plus(type, "match(pdflatex, magick, tex)")
 
     dir = getOption("fixest_log_dir")
 
     if(type == "pdflatex"){
         path = file.path(dir, "etable.log")
-    } else {
+    } else if(type == "magick"){
         path = file.path(dir, "etable_shell_magick.log")
+    } else {
+        path = file.path(dir, "etable.tex")
     }
 
     if(!file.exists(path)){
@@ -4996,7 +4998,7 @@ log_etable = function(type = "pdflatex"){
 
     res = readLines(path)
 
-    class(res) = "etable.tex"
+    class(res) = "etable_tex"
     res
 }
 
