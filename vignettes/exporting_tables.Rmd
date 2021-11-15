@@ -33,7 +33,7 @@ Note that there exists excellent alternatives to export tables, like for instanc
 
 This document does not describe `etable`'s arguments in details (the help page provides many examples). Rather, it illustrates some features that may be hidden at first sight.
 
-This document applies to `fixest` version 0.8.0 or higher.
+This document applies to `fixest` version 0.10.2 or higher.
 
 ## Preliminaries
 
@@ -74,7 +74,7 @@ You can change many elements of the `data.frame` with the argument `style.df` wh
 
 ```{r}
 etable(est, style.df = style.df(depvar.title = "", fixef.title = "", 
-                                 fixef.suffix = " fixed effect", yesNo = "yes"))
+                                fixef.suffix = " fixed effect", yesNo = "yes"))
 ```
 
 In the previous example, the dependent variable and fixed-effects (FE) headers have been removed, and this is achieved with the (explicit) arguments `depvar.title` and `fixef.title`. Furthermore the suffix `"fixed effect"` is added to each fixed-effect variable, and the indicator of which FE is included in which model is slightly changed. There are more options that are described in the `style.df` documentation.
@@ -192,14 +192,14 @@ Of course it is even more convenient to set `set_rules` as the default postproce
 To set the default values, like for the data.frame output, use `setFixest_etable`:
 
 ```{r}
-setFixest_etable(style.tex = style.tex("aer"), postprocess.tex = set_rules, 
-                 fitstat = ~ r2 + n, signifCode = NA)
+setFixest_etable(style.tex = style.tex("aer", signif.code = NA), postprocess.tex = set_rules, 
+                 fitstat = ~ r2 + n)
 ```
 
 Now we can access directly the arguments of the postprocessing function and the default style is the one of the second table:
 
 ```{r}
-etable(est, est_slopes, heavy = "0.14em", tex = TRUE)
+etable(est, heavy = "0.14em", tex = TRUE)
 ```
 
 ## Setting custom fit statistics
