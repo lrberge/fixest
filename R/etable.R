@@ -4667,8 +4667,10 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL, cache 
     check_arg(export, "NULL character scalar")
     check_arg(markdown, "NULL scalar(logical, character)")
 
+    cache = isTRUE(cache)
+
     dir_cache = NULL
-    if(cache== TRUE || isTRUE(markdown)){
+    if(cache || isTRUE(markdown)){
         # We look up to the global directory where to save the pngs
         #
         # The default storage location of the png tables
@@ -4757,8 +4759,8 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL, cache 
 
         # packages increase build time, so we load them sparingly
         # p: package ; pn: package name ; x: tex vector ; y: tex packages
-        add_pkg = function(p, x, y, pn = p, opt = ""){
-            if(any(grepl(p, x, fixed = TRUE))){
+        add_pkg = function(p, x, y, pn = p, opt = "", fixed = TRUE){
+            if(any(grepl(p, x, fixed = fixed))){
                 c(y, .dsb("\\usepackage.[opt]{.[pn]}"))
             } else {
                 y
@@ -4766,16 +4768,20 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL, cache 
         }
 
         intro = c("\\documentclass[varwidth, border={ 10 5 10 5 }]{standalone}",
-                  "\\usepackage[table]{xcolor}",
+                  "\\usepackage[dvipsnames,table]{xcolor}",
                   .dsb("\\usepackage{.[/array, booktabs, multirow, helvet, amsmath, amssymb]}"),
                   "\\renewcommand{\\familydefault}{\\sfdefault}")
 
         tex_pkg = c()
-        tex_pkg = add_pkg("threeparttable", intro, tex_pkg, opt = "[flushleft]")
-        tex_pkg = add_pkg("adjustbox", intro, tex_pkg)
-        tex_pkg = add_pkg("tabularx", intro, tex_pkg)
+        tex_pkg = add_pkg("(row|cell)color", x, tex_pkg, "colortbl", fixed = FALSE)
+        tex_pkg = add_pkg("threeparttable", x, tex_pkg, opt = "[flushleft]")
+        tex_pkg = add_pkg("adjustbox", x, tex_pkg)
+        tex_pkg = add_pkg("tabularx", x, tex_pkg)
 
+        do_rerun = FALSE
         if(any(grepl("tikz", x, fixed = TRUE))){
+            # If tikz is present, we need to run pdflatex twice to make it work properly
+            do_rerun = TRUE
             tex_pkg = c(tex_pkg, "\\usepackage{tikz}",
                         "\\usetikzlibrary{matrix, shapes, arrows, fit, tikzmark}")
         }
@@ -4797,7 +4803,9 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL, cache 
         options(fixest_log_dir = dir)
 
         # We compile the document
-        outcome = system2("pdflatex", "--halt-on-error -interaction=nonstopmode etable.tex",
+        draft = if(do_rerun) "-draftmode" else ""
+
+        outcome = system2("pdflatex", .dsb("-halt-on-error -interaction=nonstopmode .[draft] etable.tex"),
                           "etable_shell_pdf.log", "etable_shell_pdf.err")
 
         if(outcome == 127){
@@ -4805,8 +4813,26 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL, cache 
             return(NULL)
 
         } else if(outcome == 1){
-            warning("pdflatex: error when compiling -- sorry! Check the log file with log_etable('pdflatex').")
-            return(NULL)
+
+            # Sometimes recompiling works!!!
+            outcome = system2("pdflatex", .dsb("-halt-on-error -interaction=nonstopmode .[draft] etable.tex"),
+                              "etable_shell_pdf.log", "etable_shell_pdf.err")
+
+            if(outcome == 1){
+                warning("pdflatex: error when compiling -- sorry! Check the log file with log_etable('pdflatex').")
+                return(NULL)
+            }
+        }
+
+        if(do_rerun){
+            outcome = system2("pdflatex", "-halt-on-error -interaction=nonstopmode etable.tex",
+                              "etable_shell_pdf.log", "etable_shell_pdf.err")
+
+            # No reason for the 2nd run to fail, but I add it anyway just to be safe
+            if(outcome == 1){
+                warning("pdflatex: error when compiling -- sorry! Check the log file with log_etable('pdflatex').")
+                return(NULL)
+            }
         }
 
         # Now we create the png
