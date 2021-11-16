@@ -48,6 +48,8 @@ style.df(
 
 \item{headers.sep}{Logical, default is \code{TRUE}. Whether to add a line of separation between the headers and the coefficients.}
 
+\item{signif.code}{Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is \code{c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)}. To suppress the significance codes, use \code{signif.code=NA} or \code{signif.code=NULL}. Can also be equal to \code{"letters"}, then the default becomes \code{c("a"=0.01, "b"=0.05, "c"=0.10)}.}
+
 \item{interaction.combine}{Character scalar, defaults to \code{" x "}. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind x Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.}
 
 \item{i.equal}{Character scalar, defaults to \code{" = "}. Only affects factor variables created with the function \code{\link[fixest]{i}}, tells how the variable should be linked to its value. For example if you have the Species factor from the iris data set, by default the display of the variable is \code{Species = Setosa}, etc. If \code{i.equal = ": "} the display becomes \code{Species: Setosa}.}
