@@ -3377,6 +3377,7 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 #' If \code{".['s'/expr]"}, the expression \code{expr} is \emph{not evaluated and taken verbatim}, then split according to \code{'s'} to create a vector. The value of split is fixed, but can start with an \code{@}, if so it is taken as a regular expression. If \code{'s'} is missing (as in \code{.[/expr]}), the default is comma separation: i.e. \code{.['@, *'/expr]}.
 #' @param collapse If the variables inserted into the string are of length greater than 1, you can merge into a single string with \code{collapse}.
 #' @param split Character scalar, default is \code{NULL}. If provided, the character in \code{x} will be broken into a vector according to the value in \code{split}. Ex \code{dsb("a.b.c.", split = ".")} will create the vector of \code{a}, \code{b} and \code{c}. You can use a regular expression by starting with an \code{@}, like in \code{"@[[:punct:]]"}. If you really want to start with an \code{@}, escape it like in \code{"\\@"}.
+#' @param frame Environment in which to evaluate the variables in \code{.[]}, defaults to \code{parent.frame()}.
 #'
 #' Every expression inside \code{.[]} is evaluated in the current frame and then coerced to character and inserted into the character string.
 #'
@@ -3481,11 +3482,11 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 #' dsb("character = .[''/*$£?/]")
 #'
 #'
-dsb = function(x, split = NULL, collapse = NULL){
-    .dsb(x = x, split = split, collapse = collapse, check = TRUE)
+dsb = function(x, split = NULL, collapse = NULL, frame = parent.frame()){
+    .dsb(x = x, split = split, collapse = collapse, frame = frame, check = TRUE)
 }
 
-.dsb = function(x, split = NULL, collapse = NULL, check = FALSE){
+.dsb = function(x, split = NULL, collapse = NULL, frame = parent.frame(), check = FALSE){
 
     set_check(check)
 
@@ -3497,7 +3498,7 @@ dsb = function(x, split = NULL, collapse = NULL){
     check_arg(split, collapse, "NULL character scalar")
 
 
-    res = dot_square_bracket(x, frame = parent.frame(), text = TRUE,
+    res = dot_square_bracket(x, frame = frame, text = TRUE,
                              forced_merge = !is.null(split))
     # forced_merge merges the values with _MERGE_
 

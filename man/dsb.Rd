@@ -4,7 +4,7 @@
 \alias{dsb}
 \title{Extends strings with variables using the Dot Square Bracket operator (experimental)}
 \usage{
-dsb(x, split = NULL, collapse = NULL)
+dsb(x, split = NULL, collapse = NULL, frame = parent.frame())
 }
 \arguments{
 \item{x}{A character string, must be of length 1. Every expression inside \code{.[]} is evaluated in the current frame and then coerced to character and inserted into the character string. For example: \code{dsb("hello .[name]")} is equivalent to \code{paste0("hello ", name)}.
@@ -12,7 +12,11 @@ You can add a string literal as first element in the \code{.[]}, followed by a c
 If \code{.['s', expr]}, the expression will be evaluated and collapsed: \code{paste0(expr, collapse = "s")} is applied before merging to the existing string. If \code{'s'} is missing, the default is the empty string.
 If \code{".['s'/expr]"}, the expression \code{expr} is \emph{not evaluated and taken verbatim}, then split according to \code{'s'} to create a vector. The value of split is fixed, but can start with an \code{@}, if so it is taken as a regular expression. If \code{'s'} is missing (as in \code{.[/expr]}), the default is comma separation: i.e. \code{.['@, *'/expr]}.}
 
-\item{split}{Character scalar, default is \code{NULL}. If provided, the character in \code{x} will be broken into a vector according to the value in \code{split}. Ex \code{dsb("a.b.c.", split = ".")} will create the vector of \code{a}, \code{b} and \code{c}. You can use a regular expression by starting with an \code{@}, like in \code{"@[[:punct:]]"}. If you really want to start with an \code{@}, escape it like in \code{"\\@"}.
+\item{split}{Character scalar, default is \code{NULL}. If provided, the character in \code{x} will be broken into a vector according to the value in \code{split}. Ex \code{dsb("a.b.c.", split = ".")} will create the vector of \code{a}, \code{b} and \code{c}. You can use a regular expression by starting with an \code{@}, like in \code{"@[[:punct:]]"}. If you really want to start with an \code{@}, escape it like in \code{"\\@"}.}
+
+\item{collapse}{If the variables inserted into the string are of length greater than 1, you can merge into a single string with \code{collapse}.}
+
+\item{frame}{Environment in which to evaluate the variables in \code{.[]}, defaults to \code{parent.frame()}.
 
 Every expression inside \code{.[]} is evaluated in the current frame and then coerced to character and inserted into the character string.
 
@@ -21,8 +25,6 @@ If \code{split} is used and if \code{.[]} is also used and returns a vector, tha
 If both \code{split} and \code{collapse} are provided, they will be applied in the order chosen by the user. Placing \code{collapse} last will always return a vector of length 1. That's not the case if it is placed before \code{split}.
 
 Nesting \code{.[]}, like in \code{dsb(".[/a, b, .[x]]")}, is currently not possible and will lead to an error.}
-
-\item{collapse}{If the variables inserted into the string are of length greater than 1, you can merge into a single string with \code{collapse}.}
 }
 \value{
 A character vector. It is of length > 1 only if the variables inserted are of length > 1 or if \code{split} is provided.
