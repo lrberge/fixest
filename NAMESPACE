@@ -136,7 +136,8 @@ importFrom(stats, model.matrix, sigma, deviance, weights, terms,
 			  confint, vcov, binomial, setNames, complete.cases, pchisq, pf,
 			  aggregate, cancor, rnorm, median, qt, .getXlevels, quantile)
 
-importFrom(utils, combn, head, tail, packageVersion, object.size, read.csv, write.csv, write.table)
+importFrom(utils, combn, head, tail, packageVersion, object.size, read.csv,
+           write.csv, write.table, capture.output)
 
 importFrom(Rcpp, evalCpp)
 
