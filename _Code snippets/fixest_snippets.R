@@ -30,6 +30,8 @@
 # - the non-sparse model matrix is never created, hence it's very fast
 #
 
+# Be sure to run the *three* functions sparse_model_matrix, mult_wrap and mult_sparse
+
 
 # est: fixest estimation
 sparse_model_matrix = function(est){
@@ -214,7 +216,7 @@ mult_sparse = function(...){
     res
 }
 
-
+library(fixest)
 est = feols(mpg ~ hp + as.factor(gear)*as.factor(carb) | cyl, mtcars)
 
 sparse_model_matrix(est)
