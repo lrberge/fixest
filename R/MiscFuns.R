@@ -2350,7 +2350,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict, di
         # Changing the names of the variables
         if(!missnull(dict)){
             qui = which(res$vars %in% names(dict))
-            for(i in qui) res$vars[i] = escape_latex(dict[res$vars[i]], up = 1)
+            for(i in qui) res$vars[i] = escape_latex(dict[res$vars[i]])
         }
 
         # The data
