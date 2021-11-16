@@ -5699,11 +5699,7 @@ escape_latex = function(x_all, makecell = TRUE){
         if(length(dollars) > 1){
             is_eq = TRUE
             if(length(dollars) %% 2 != 0){
-                my_arg = "T"
-                if(!noArg){
-                    my_arg = paste0("In argument '", x_name, "', t")
-                }
-                stop_up(up = 2, my_arg, "here are ", length(dollars), " dollar signs in the following character string:\n", x, "\nIt will raise a Latex error (which '$' means equation? which means dollar-sign?): if you want to use a regular dollar sign, please escape it like that: \\\\$.")
+                stop_up(up = 2, "There are ", length(dollars), " dollar signs in the following character string:\n", x, "\nIt will raise a Latex error (which '$' means equation? which means dollar-sign?): if you want to use a regular dollar sign, please escape it like that: \\\\$.")
             }
         }
 
