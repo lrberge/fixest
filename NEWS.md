@@ -84,6 +84,8 @@
 ## Other
 
  - `bin`: `cut::` now ignores white spaces, so that `cut:: q1 ] q3 [` works appropriately.
+ 
+ - speed of stepwise estimations (using `sw` [not `csw`]) has been improved.
 
 # fixest 0.10.1
 

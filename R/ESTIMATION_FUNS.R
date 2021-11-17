@@ -446,6 +446,8 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 
 		demeaned = get("demeaned", env)
 
+		warn = get("warn", env)
+
 		verbose = get("verbose", env)
 		if(verbose >= 2) gt("Setup")
 	}
@@ -670,8 +672,6 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 	            rhs_group[[i]] = which(rhs_group_id == i)
 	        }
 
-
-
 	        # Finding the right column IDs to select
 
 	        rhs_group_n_vars = rep(0, length(rhs_group)) # To get the total nber of cols per group
@@ -802,12 +802,41 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 	                my_env = reshape_env(env)
 	            }
 
+	            all_varnames = NULL
 	            isLinear_current = TRUE
 	            if(length(my_rhs) == 0){
 	                X_all = 0
 	                isLinear_current = FALSE
 	            } else {
-	                X_all = do.call("cbind", my_rhs)
+	                # We try to avoid repeating variables
+	                # => can happen in stepwise estimations (not in csw)
+
+	                all_varnames = unlist(sapply(my_rhs, colnames))
+	                all_varnames_unik = unique(all_varnames)
+	                all_varnames_done = rep(FALSE, length(all_varnames_unik))
+	                all_varnames_done = all_varnames_unik %in% colnames(my_rhs[[1]])
+
+	                dict_vars = 1:length(all_varnames_unik)
+	                names(dict_vars) = all_varnames_unik
+
+	                n_rhs_current = length(my_rhs)
+	                args_cbind = vector("list", n_rhs_current)
+	                args_cbind[[1]] = my_rhs[[1]]
+
+	                id_rhs = 2
+	                while(!all(all_varnames_done) && id_rhs <= n_rhs_current){
+
+	                    rhs_current = my_rhs[[id_rhs]]
+	                    qui = !colnames(rhs_current) %in% all_varnames_unik[all_varnames_done]
+	                    if(any(qui)){
+	                        args_cbind[[id_rhs]] = rhs_current[, qui, drop = FALSE]
+	                        all_varnames_done = all_varnames_done | all_varnames_unik %in% colnames(rhs_current)
+	                    }
+
+	                    id_rhs = id_rhs + 1
+	                }
+
+	                X_all = do.call("cbind", args_cbind)
 	            }
 
 	            if(do_iv){
@@ -883,9 +912,14 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 
 	                for(jj in rhs_group[[j]]){
 
-	                    qui = rhs_col_id[[jj]]
+	                    # linking the unique variables to the variables
+	                    qui_X = rhs_col_id[[jj]]
+	                    if(!is.null(all_varnames)){
+	                        qui_X = dict_vars[all_varnames[qui_X]]
+	                    }
+
 	                    if(isLinear_current){
-	                        my_X = X_all[, qui, drop = FALSE]
+	                        my_X = X_all[, qui_X, drop = FALSE]
 	                    } else {
 	                        my_X = 0
 	                    }
@@ -895,10 +929,10 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 
 	                    if(do_iv){
 	                        if(isLinear_current){
-	                            qui_iv = c(1:n_inst, n_inst + qui)
+	                            qui_iv = c(1:n_inst, n_inst + qui_X)
 
-	                            XtX = iv_products$XtX[qui, qui, drop = FALSE]
-	                            Xty = iv_products$Xty[[ii]][qui]
+	                            XtX = iv_products$XtX[qui_X, qui_X, drop = FALSE]
+	                            Xty = iv_products$Xty[[ii]][qui_X]
 	                        } else {
 	                            qui_iv = 1:n_inst
 
@@ -913,7 +947,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 
 	                        if(isFixef){
 	                            my_res = feols(env = current_env, iv_products = my_iv_products,
-	                                           X_demean = X_demean[ , qui, drop = FALSE],
+	                                           X_demean = X_demean[ , qui_X, drop = FALSE],
 	                                           y_demean = y_demean[[ii]],
 	                                           iv.mat_demean = iv.mat_demean, iv_lhs_demean = iv_lhs_demean)
 	                        } else {
@@ -922,11 +956,11 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 
 	                    } else {
 	                        if(isFixef){
-	                            my_res = feols(env = current_env, xwx = xwx[qui, qui, drop = FALSE], xwy = xwy[[ii]][qui],
-	                                           X_demean = X_demean[ , qui, drop = FALSE],
+	                            my_res = feols(env = current_env, xwx = xwx[qui_X, qui_X, drop = FALSE], xwy = xwy[[ii]][qui_X],
+	                                           X_demean = X_demean[ , qui_X, drop = FALSE],
 	                                           y_demean = y_demean[[ii]])
 	                        } else {
-	                            my_res = feols(env = current_env, xwx = xwx[qui, qui, drop = FALSE], xwy = xwy[[ii]][qui])
+	                            my_res = feols(env = current_env, xwx = xwx[qui_X, qui_X, drop = FALSE], xwy = xwy[[ii]][qui_X])
 	                        }
 	                    }
 
@@ -2190,6 +2224,9 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
         # weights
         weights = get("weights.value", env)
 
+        # warn flag
+        warn = get("warn", env)
+
         # init
         init.type = get("init.type", env)
         starting_values = get("starting_values", env)
@@ -2402,7 +2439,11 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
             gc()
         }
 
-        wols = feols(y = z, X = X, weights = w, means = wols_means, correct_0w = any_0w, env = env, fixef.tol = fixef.tol * 10**(iter==1), fixef.iter = fixef.iter, collin.tol = collin.tol, nthreads = nthreads, mem.clean = mem.clean, verbose = verbose - 1, fromGLM = TRUE)
+        wols = feols(y = z, X = X, weights = w, means = wols_means,
+                     correct_0w = any_0w, env = env, fixef.tol = fixef.tol * 10**(iter==1),
+                     fixef.iter = fixef.iter, collin.tol = collin.tol, nthreads = nthreads,
+                     mem.clean = mem.clean, warn = warn,
+                     verbose = verbose - 1, fromGLM = TRUE)
 
         if(isTRUE(wols$NA_model)){
             return(wols)
