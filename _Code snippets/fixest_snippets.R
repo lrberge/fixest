@@ -193,6 +193,11 @@ mult_wrap = function(x){
         }
     }
 
+    if(length(res) > 2){
+        # we restore the original order
+        res[-1] = rev(res[-1])
+    }
+
     return(res)
 }
 
