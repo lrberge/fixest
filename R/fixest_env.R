@@ -418,7 +418,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         fml = formula(fml) # we regularize the formula to check it
 
         # We apply expand for macros => we return fml_no_xpd
-        if(length(getFixest_fml()) > 0 || any(c("..", "[", "regex") %in% all.vars(fml, functions = TRUE))){
+        if(length(getFixest_fml()) > 0 || any(c("..", "[", "regex", "mvsw") %in% all.vars(fml, functions = TRUE))){
             fml_no_xpd = fml
 
             # Special beavior .[y] for multiple LHSs
@@ -470,6 +470,20 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             if(length(lhs) == 2 && lhs[[1]] == "c"){
                 fml[[2]] = lhs[[2]]
             }
+
+            # Multiverse stepwise
+            if("mvsw" %in% all.vars(fml, functions = TRUE)){
+                fml_parts = fml_split(fml, text = TRUE)
+                for(i in seq_along(fml_parts)){
+                    mv_txt = extract_fun(fml_parts[i], "mvsw")
+                    if(nchar(mv_txt$fun) > 0){
+                        mv_value = eval(str2lang(mv_txt$fun))
+                        fml_parts[i] = paste(mv_txt$before, mv_value, mv_txt$after)
+                    }
+                }
+                fml = as.formula(paste0(fml_parts, collapse = ""))
+            }
+
         }
 
         #
@@ -2583,6 +2597,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     assign("fixef.tol", fixef.tol, env)
     assign("collin.tol", collin.tol, env)
     assign("fixef.rm", fixef.rm, env)
+    assign("warn", warn, env)
 
     # Data
     if(isLinear){
@@ -3816,6 +3831,34 @@ sw0 <- sw0
 
 #' @rdname stepwise
 csw0 <- csw0
+
+mvsw = function(...){
+    # It returns a stepwise function
+
+    mc = match.call(expand.dots = TRUE)
+
+    n = length(mc) - 1
+
+    if(n == 0){
+        return("1")
+    }
+
+    x = vector("character", n)
+    for(i in 1:n){
+        x[[i]] = deparse_long(mc[[i + 1]])
+    }
+
+    res = c()
+    for(k in 1:n){
+        x_comb = combn(x, k)
+        x_vec = apply(x_comb, 2, paste, collapse = " + ")
+        res = c(res, x_vec)
+    }
+
+    res = paste0("sw0(", paste0(res, collapse = ", "), ")")
+
+    res
+}
 
 
 extract_stepwise = function(fml, tms, all_vars = TRUE){
