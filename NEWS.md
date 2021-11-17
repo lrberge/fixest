@@ -19,6 +19,8 @@
   
   - fix bug in `fitstat` for the KPR statistic (reported by @etiennebacher [#161](https://github.com/lrberge/fixest/issues/161)).
   
+  - fix bug in `i` when two factor variables were interacted and on specific value of one variable was to be set as a reference.
+  
 ## etable
 
 ### New arguments

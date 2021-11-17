@@ -7037,7 +7037,7 @@ items_to_drop = function(items, x, varname, keep = FALSE, argname, keep_first = 
                     my_x = items[qui_ok]
                     my_x = my_x[!is.na(my_x)]
                 } else {
-                    check_value_plus(my_x, "match", .choices = items, .message = paste0("The argument '", argname, "' should contain values of the variable '", varname, "'."))
+                    check_value_plus(my_x, "match", .choices = unique(items), .message = paste0("The argument '", argname, "' should contain values of the variable '", varname, "'."))
                 }
 
                 all_x = c(all_x, my_x)
