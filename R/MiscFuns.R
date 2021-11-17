@@ -10641,7 +10641,11 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	        fml = .xpd(..lhs ~ ..endo + ..rhs, ..lhs = fml[[2]], ..endo = fml_iv[[2]], ..rhs = fml[[3]])
 	    }
 
-	    linear.mat = error_sender(fixest_model_matrix_extra(object = object, newdata = data, original_data = original_data, fml = fml, fake_intercept = fake_intercept, subset = subset), "In 'model.matrix', the RHS could not be evaluated: ")
+	    linear.mat = error_sender(fixest_model_matrix_extra(
+	        object = object, newdata = data, original_data = original_data,
+	        fml = fml, fake_intercept = fake_intercept,
+	        subset = subset),
+	        "In 'model.matrix', the RHS could not be evaluated: ")
 
 	    if(collin.rm){
 	        qui = which(colnames(linear.mat) %in% object$collin.var)
@@ -10649,6 +10653,17 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 	            linear.mat = NULL
 	        } else if(length(qui) > 0){
 	            linear.mat =  linear.mat[, -qui, drop = FALSE]
+	        }
+
+	        coefs = object$coefficients
+	        if(length(coefs) == ncol(linear.mat) && any(colnames(linear.mat) != names(coefs))){
+	            # we reorder the matrix
+	            # This can happen in multiple estimations, where we respect the
+	            # order of the user
+
+	            if(all(names(coefs) %in% colnames(linear.mat))){
+	                linear.mat = linear.mat[, names(coefs), drop = FALSE]
+	            }
 	        }
 	    }
 

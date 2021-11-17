@@ -23,6 +23,8 @@
   
   - fix bug in `model.matrix` when no variable was used in the estimation (reported by @kylebutts [#229](https://github.com/lrberge/fixest/issues/229)).
   
+  - `model.matrix` now returns the variables in the same order as in the estimation -- a discrepancy could happen in stepwise estimations with interactions in which the interactions were put *before* fixed covariates (related to @sergiu-burlacu [#231](https://github.com/lrberge/fixest/issues/231)).
+  
 ## etable
 
 ### New arguments
