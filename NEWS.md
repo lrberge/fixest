@@ -21,6 +21,8 @@
   
   - fix bug in `i` when two factor variables were interacted and on specific value of one variable was to be set as a reference.
   
+  - fix bug in `model.matrix` when no variable was used in the estimation (reported by @kylebutts [#229](https://github.com/lrberge/fixest/issues/229)).
+  
 ## etable
 
 ### New arguments

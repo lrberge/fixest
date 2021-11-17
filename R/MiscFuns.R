@@ -10631,7 +10631,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
         res[["lhs"]] = as.data.frame(lhs)
 	}
 
-	if("rhs" %in% type){
+	if("rhs" %in% type && !isTRUE(object$onlyFixef)){
 	    # we kick out the intercept if there is presence of fixed-effects
 	    fake_intercept = !is.null(object$fixef_vars) && !(!is.null(object$slope_flag) && all(object$slope_flag < 0))
 
