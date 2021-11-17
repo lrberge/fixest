@@ -18,9 +18,7 @@
 # NOTE: both are Matrix matrices from library(Matrix)
 
 # Limitations:
-# - does not handle functions returning matrices in the formula (ex: poly(x1, 2))
-# - => hence does not handle i()
-# - does not remove references from factors
+# - does not automatically remove references from factors
 # - does not handle estimations containing variables with varying slopes
 #
 
@@ -33,15 +31,17 @@
 # Be sure to run the *three* functions sparse_model_matrix, mult_wrap and mult_sparse
 
 
-# est: fixest estimation
-sparse_model_matrix = function(est){
+# x: fixest estimation
+sparse_model_matrix = function(x){
 
     require(Matrix)
 
     # Linear formula
-    fml_lin = formula(est, "lin")
+    fml_lin = formula(x, "lin")
 
-    data = fixest:::fetch_data(est)
+    data = fixest:::fetch_data(x)
+    data = as.data.frame(data)
+    data = data[obs(x), ]
 
     #
     # Step 1: Linear matrix
@@ -73,7 +73,6 @@ sparse_model_matrix = function(est){
 
         # To create the sparse matrix, we need the indexes
 
-
         total_cols = 0
         running_cols = c(0)
         for(i in 1:n){
@@ -81,7 +80,7 @@ sparse_model_matrix = function(est){
             if(inherits(xi, "sparse_var")){
                 total_cols = total_cols + xi$n_cols
             } else {
-                total_cols = total_cols + 1
+                total_cols = total_cols + NCOL(xi)
             }
             running_cols[i + 1] = total_cols
         }
@@ -96,13 +95,22 @@ sparse_model_matrix = function(est){
         for(i in 1:n){
             xi = variables_list[[i]]
             if(inherits(xi, "sparse_var")){
-                id_all[[i]] = cbind(rowid, running_cols[i] + xi$indexes)
-                values_all[[i]] = xi$value
-                names_all[[i]] = paste0(vars[[i]], "::", xi$fact_names)
-            } else {
+                id_all[[i]] = cbind(xi$rowid, running_cols[i] + xi$colid)
+                values_all[[i]] = xi$values
+                names_all[[i]] = paste0(vars[[i]], "::", xi$col_names)
+            } else if(NCOL(xi) == 1){
                 id_all[[i]] = cbind(rowid, running_cols[i] + 1)
                 values_all[[i]] = xi
                 names_all[[i]] = vars[[i]]
+            } else {
+                colid = rep(1:NCOL(xi), each = nrow(data))
+                id_all[[i]] = cbind(rep(rowid, NCOL(xi)), running_cols[i] + colid)
+                values_all[[i]] = as.vector(xi)
+                if(!is.null(colnames(xi))){
+                    names_all[[i]] = paste0(vars[[i]], colnames(xi))
+                } else {
+                    names_all[[i]] = paste0(vars[[i]], 1:NCOL(xi))
+                }
             }
         }
 
@@ -120,20 +128,20 @@ sparse_model_matrix = function(est){
     # Step 2: the fixed-effects
     #
 
-    if(length(est$fixef_id) == 0){
+    if(length(x$fixef_id) == 0){
         mat_FE = NULL
-
     } else {
         # Same process, but easier
 
-        total_cols = sum(est$fixef_sizes)
-        running_cols = c(0, est$fixef_sizes)
-        n_FE = length(est$fixef_sizes)
+        rowid = 1:nrow(data)
+        total_cols = sum(x$fixef_sizes)
+        running_cols = c(0, x$fixef_sizes)
+        n_FE = length(x$fixef_sizes)
         id_all = names_all = vector("list", n_FE)
         for(i in 1:n_FE){
-            xi = est$fixef_id[[i]]
+            xi = x$fixef_id[[i]]
             id_all[[i]] = cbind(rowid, running_cols[i] + xi)
-            names_all[[i]] = paste0(names(est$fixef_id)[i], "::", attr(xi, "fixef_names"))
+            names_all[[i]] = paste0(names(x$fixef_id)[i], "::", attr(xi, "fixef_names"))
         }
 
         id_mat = do.call(rbind, id_all)
@@ -154,6 +162,8 @@ mult_wrap = function(x){
     # ex: "x1" => mult_sparse(x1)
     #     "x1:factor(x2):x3" => mult_sparse(x3, factor(x2), x1)
     #
+    # We also add the argument sparse to i()
+    #     "x1:i(species, TRUE)" => mult_sparse(x1, i(species, TRUE, sparse = TRUE))
 
     x_call = str2lang(x)
 
@@ -174,6 +184,15 @@ mult_wrap = function(x){
         res[[length(res) + 1]] = tmp
     }
 
+    # We also add sparse to i() if found
+    for(i in 2:length(res)){
+        ri = res[[i]]
+        if(length(ri) > 1 && ri[[1]] == "i"){
+            ri[["sparse"]] = TRUE
+            res[[i]] = ri
+        }
+    }
+
     return(res)
 }
 
@@ -187,37 +206,58 @@ mult_sparse = function(...){
 
     num_var = NULL
     factor_list = list()
+    info_i = NULL
+    is_i = is_factor = FALSE
+    # You can't have interactions between i and factors, it's either
 
     for(i in 1:n){
         xi = dots[[i]]
         if(is.numeric(xi)){
             # We stack the product
             num_var = if(is.null(num_var)) xi else xi * num_var
+        } else if(inherits(xi, "i_sparse")){
+            is_i = TRUE
+            info_i = xi
         } else {
+            is_factor = TRUE
             factor_list[[length(factor_list) + 1]] = xi
         }
     }
 
-    if(length(factor_list) == 0){
+    if(!is_i && !is_factor){
         return(num_var)
     }
 
-    factor_list$add_items = TRUE
-    factor_list$items.list = TRUE
+    if(is_factor){
+        factor_list$add_items = TRUE
+        factor_list$items.list = TRUE
 
-    fact_as_int = do.call(to_integer, factor_list)
+        fact_as_int = do.call(to_integer, factor_list)
 
-    value = if(is.null(num_var)) rep(1, length(fact_as_int$x)) else num_var
+        values = if(is.null(num_var)) rep(1, length(fact_as_int$x)) else num_var
 
-    res = list(value = value, indexes = fact_as_int$x, fact_names = fact_as_int$items,
-               n_cols = length(fact_as_int$items))
+        rowid = seq_along(values)
+        res = list(rowid = rowid, colid = fact_as_int$x, values = values,
+                   col_names = fact_as_int$items, n_cols = length(fact_as_int$items))
+    } else {
+
+        values = info_i$values
+        if(!is.null(num_var)){
+            num_var = num_var[info_i$rowid]
+            values = values * num_var
+        }
+
+        res = list(rowid = info_i$rowid, colid = info_i$colid, values = values,
+                   col_names = info_i$col_names, n_cols = length(info_i$col_names))
+    }
+
     class(res) = "sparse_var"
 
     res
 }
 
 library(fixest)
-est = feols(mpg ~ hp + as.factor(gear)*as.factor(carb) | cyl, mtcars)
+est = feols(mpg ~ poly(hp, 2) + as.factor(gear)*as.factor(carb) + i(am) | cyl, mtcars)
 
 sparse_model_matrix(est)
 
