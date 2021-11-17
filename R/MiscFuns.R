@@ -2560,8 +2560,9 @@ i = function(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...){
     # gt = function(x) cat(sfill(x, 20), ": ", -(t0 - (t0<<-proc.time()))[3], "s\n", sep = "")
     # t0 = proc.time()
 
-    validate_dots(valid_args = c("f2", "f_name", "ref_special"))
+    validate_dots(valid_args = c("f2", "f_name", "ref_special", "sparse"))
     dots = list(...)
+    is_sparse = isTRUE(dots$sparse)
 
     mc = match.call()
 
@@ -2776,6 +2777,27 @@ i = function(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...){
         }
 
         col_names = items_name
+    }
+
+    if(is_sparse){
+        # Internal call: we return the row ids + the values + the indexes + the names
+
+        if(length(who_is_dropped) > 0){
+            valid_row = !is_na_all & !fe_num %in% who_is_dropped
+        } else {
+            valid_row = !is_na_all
+        }
+
+        # we need to ensure the IDs go from 1 to # Unique
+        fe_colid = to_integer(fe_num[valid_row], sorted = TRUE)
+
+        values = if(length(var) == 1) rep(1, length(valid_row)) else var
+        res = list(rowid = which(valid_row), values = values,
+                   colid = fe_colid, col_names = col_names)
+
+        class(res) = "i_sparse"
+
+        return(res)
     }
 
     res = cpp_factor_matrix(fe_num, is_na_all, who_is_dropped, var, col_names)
@@ -10583,7 +10605,7 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
 		}
 		data = as.data.frame(data)
 	}
-	# The conversion of the data (due to data.table)
+
 	if(!"data.frame" %in% class(data)){
 		stop("The argument 'data' must be a data.frame or a matrix.")
 	}
