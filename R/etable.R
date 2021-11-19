@@ -5336,6 +5336,10 @@ highlight_apply = function(highlight, coef_mat, coef_names){
             thickness = .dsb(".[/thin, very thin, ultra thin, thick, very thick, ultra thick]")[thick]
             rounded = if(is_round) "rounded corners, " else ""
 
+            # On the frame:
+            # https://tex.stackexchange.com/questions/240542/adding-a-rectangular-box-with-tikz-to-table-beamer
+            #
+
             tex_preamble = c(tex_preamble, .dsb(
                 "
 \\newcommand.[tag_frame_NW][1]{%
