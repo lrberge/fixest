@@ -59,7 +59,7 @@ etable(feols(c(y1, y2) ~ x1 + x2, base))
 
 #### Multiple RHS and fixed-effects: stepwise functions
 
-To estimate multiple RHS (or fixed-effects), you need to use a specific set of functions: the *stepwise* functions. There are four of them: `sw`, `sw0`, `csw`, `csw0`.
+To estimate multiple RHS (or fixed-effects), you need to use a specific set of functions: the *stepwise* functions. There are five of them: `sw`, `sw0`, `csw`, `csw0` and `mvsw`.
 
  - `sw`: this function is replaced sequentially by each of its arguments. For example, `y ~ x1 + sw(x2, x3)` leads to two estimations: `y ~ x1 + x2` and `y ~ x1 + x3`.
     
@@ -68,6 +68,8 @@ To estimate multiple RHS (or fixed-effects), you need to use a specific set of f
  - `csw`: it stands for *cumulative* stepwise. It adds to the formula each of its arguments sequentially. E.g. `y ~ x1 + csw(x2, x3)` will become `y ~ x1 + x2` and `y ~ x1 + x2 + x3`.
     
  - `csw0`: identical to `csw` but first adds the empty element. E.g.  `y ~ x1 + csw0(x2, x3)` leads to three estimations: `y ~ x1`, `y ~ x1 + x2` and `y ~ x1 + x2 + x3`.
+ 
+ - `mvsw`: it stands for multiverse stepwise. It will add, in a stepwise fashion, all possible combinations of the variables in its arguments. For example `mvsw(x1, x2, x3)` is equivalent to `sw0(x1, x2, x3, x1 + x2, x1 + x3, x2 + x3, x1 + x2 + x3)`. The number of models to estimate grows at a factorial rate: so be *very* cautious!
 
 The stepwise functions can be applied both to the linear part and the fixed-effects part of the formula. Note that at most one stepwise function can be applied per part. 
 
