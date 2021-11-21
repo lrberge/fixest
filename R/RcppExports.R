@@ -69,6 +69,14 @@ cpp_which_na_inf <- function(x, nthreads) {
     .Call(`_fixest_cpp_which_na_inf`, x, nthreads)
 }
 
+cpp_dsb <- function(Rstr) {
+    .Call(`_fixest_cpp_dsb`, Rstr)
+}
+
+cpp_dsb_full_string <- function(Rstr) {
+    .Call(`_fixest_cpp_dsb_full_string`, Rstr)
+}
+
 cpp_cholesky <- function(X, tol = 1.0/100000.0/100000.0, nthreads = 1L) {
     .Call(`_fixest_cpp_cholesky`, X, tol, nthreads)
 }

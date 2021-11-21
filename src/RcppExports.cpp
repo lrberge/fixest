@@ -349,6 +349,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_dsb
+List cpp_dsb(SEXP Rstr);
+RcppExport SEXP _fixest_cpp_dsb(SEXP RstrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_dsb(Rstr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_dsb_full_string
+List cpp_dsb_full_string(SEXP Rstr);
+RcppExport SEXP _fixest_cpp_dsb_full_string(SEXP RstrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_dsb_full_string(Rstr));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_cholesky
 List cpp_cholesky(NumericMatrix X, double tol, int nthreads);
 RcppExport SEXP _fixest_cpp_cholesky(SEXP XSEXP, SEXP tolSEXP, SEXP nthreadsSEXP) {
@@ -1139,6 +1161,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_update_deriv_single", (DL_FUNC) &_fixest_update_deriv_single, 5},
     {"_fixest_cpp_demean", (DL_FUNC) &_fixest_cpp_demean, 13},
     {"_fixest_cpp_which_na_inf", (DL_FUNC) &_fixest_cpp_which_na_inf, 2},
+    {"_fixest_cpp_dsb", (DL_FUNC) &_fixest_cpp_dsb, 1},
+    {"_fixest_cpp_dsb_full_string", (DL_FUNC) &_fixest_cpp_dsb_full_string, 1},
     {"_fixest_cpp_cholesky", (DL_FUNC) &_fixest_cpp_cholesky, 3},
     {"_fixest_cpp_sparse_products", (DL_FUNC) &_fixest_cpp_sparse_products, 5},
     {"_fixest_cpppar_crossprod", (DL_FUNC) &_fixest_cpppar_crossprod, 3},

@@ -9,6 +9,7 @@ export(feNmlm, femlm, feols, feglm, fepois, fenegbin)
 export(feglm.fit, feols.fit)
 # etable
 export(etable, style.tex, style.df)
+export(log_etable)
 export(extralines_register)
 # misc funs
 export(collinearity)
@@ -28,7 +29,7 @@ export(panel, unpanel, f, l, d)
 # factor/interactions/binning
 export(i, bin)
 # macro
-export(xpd, dsb)
+export(xpd)
 # utilities
 export(to_integer, demean, obs)
 # setters & getters
@@ -40,6 +41,9 @@ export(vcov_cluster, vcov_DK, vcov_NW, vcov_conley)
 # other stuff
 export(n_unik, osize, sample_df)
 
+# dsb
+export(dsb, .dsb, .dsb0)
+S3method(print, dsb)
 
 # deprecated
 export(obs2remove, esttex, esttable)
