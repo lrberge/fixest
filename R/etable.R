@@ -74,11 +74,12 @@
 #' @param export Character scalar giving the path to a PNG file to be created, default is \code{NULL}. If provided, the Latex table will be converted to PNG and copied to the \code{export} location. Note that for this option to work you need a working distribution of \code{pdflatex}, \code{imagemagick} and \code{ghostscript}.
 #' @param markdown Character scalar giving the location of a directory, or a logical scalar. Default is \code{NULL}. This argument only works in Rmarkdown documents, when knitting the document. If provided: two behaviors depending on context. A) if the output document is Latex, the table is exported in Latex. B) if the output document is not Latex, the table will be exported to PNG at the desired location and inserted in the document via a markdown link. If equal to \code{TRUE}, the default location of the PNGs is a temporary folder for \code{R > 4.0.0}, or to \code{"images/etable/"} for earlier versions.
 #' @param view.cache Logical, default is \code{FALSE}. Only used when \code{view = TRUE}. Whether the PNGs of the tables should be cached.
-#' @param type Character scalar equal to 'pdflatex' (default), 'magick' or 'tex'. Which log file to report; if 'tex', the full source code of the tex file is returned.
+#' @param type Character scalar equal to 'pdflatex' (default), 'magick', 'dir' or 'tex'. Which log file to report; if 'tex', the full source code of the tex file is returned, if 'dir': the directory of the log files is returned.
 #' @param highlight List containing coefficients to highlight. Highlighting is of the form \code{.("options1" = "coefs1", "options2" = "coefs2", etc)}.
 #' The coefficients to be highlighted can be written in three forms: 1) row, eg \code{"x1"} will highlight the full row of the variable \code{x1}; 2) cells, use \code{'@'} after the coefficient name to give the column, it accepts ranges, eg \code{"x1@2, 4-6, 8"} will highlight only the columns 2, 4, 5, 6, and 8 of the variable \code{x1}; 3) range, by giving the top-left and bottom-right values separated with a semi-colon, eg \code{"x1@2 ; x3@5"} will highlight from the column 2 of \code{x1} to the 5th column of \code{x3}. Coefficient names are partially matched, use a \code{'\%'} first to refer to the original name (before dictionary) and use \code{'@'} first to use a regular expression. You can add a vector of row/cell/range.
 #' The options are a comma-separated list of items. By default the highlighting is done with a frame (a thick box) around the coefficient, use \code{'rowcol'} to highlight with a row color instead. Here are the other options: \code{'se'} to highlight the standard-errors too; \code{'square'} to have a square box (instead of rounded); \code{'thick1'} to \code{'thick6'} to monitor the width of the box; \code{'sep0'} to \code{'sep9'} to monitor the inner spacing. Finally the remaining option is the color: simply add an R color (it must be a valid R color!). You can use \code{"color!alpha"} with "alpha" a number between 0 to 100 to change the alpha channel of the color.
 #' @param coef.style Named list containing styles to be applied to the coefficients. It must be of the form \code{.("style1" = "coefs1", "style2" = "coefs2", etc)}. The style must contain the string \code{":coef:"} (or \code{":coef_se:"} to style both the coefficient and its standard-error). The string \code{:coef:} will be replaced verbatim by the coefficient value. For example use \code{"\\textbf{:coef:}"} to put the coefficient in bold. Note that markdown markup is enabled so \code{"**:coef:**"} would also put it in bold. The coefficients to be styled can be written in three forms: 1) row, eg \code{"x1"} will style the full row of the variable \code{x1}; 2) cells, use \code{'@'} after the coefficient name to give the column, it accepts ranges, eg \code{"x1@2, 4-6, 8"} will style only the columns 2, 4, 5, 6, and 8 of the variable \code{x1}; 3) range, by giving the top-left and bottom-right values separated with a semi-colon, eg \code{"x1@2 ; x3@5"} will style from the column 2 of \code{x1} to the 5th column of \code{x3}. Coefficient names are partially matched, use a \code{'\%'} first to refer to the original name (before dictionary) and use \code{'@'} first to use a regular expression. You can add a vector of row/cell/range.
+#' @param page.width Character scalar equal to \code{'fit'} (default), \code{'a4'} or \code{'us'} or a Latex measure (like \code{'17cm'}). Only used when the Latex table is to be viewed (\code{view = TRUE}), exported (\code{export != NULL}) or displayed in Rmarkdown (\code{markdown != NULL}). It represents the text width of the page in which the Latex table will be inserted. By default, \code{'fit'}, the page fits exactly the table (i.e. text width = table width). If \code{'a4'} or \code{'us'}, two times 2cm is removed from the page width to account for margins.
 #'
 #'
 #' @details
@@ -478,7 +479,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                   tabular = "normal", highlight = NULL, coef.style = NULL,
                   meta = NULL, meta.time = NULL, meta.author = NULL, meta.sys = NULL,
                   meta.call = NULL, meta.comment = NULL, view = FALSE,
-                  export = NULL, markdown = NULL){
+                  export = NULL, markdown = NULL, page.width = "fit"){
 
     #
     # Checking the arguments
@@ -629,7 +630,11 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
             is_md = FALSE
         } else {
             tex = TRUE
+            export = NULL
             view = FALSE
+            if(knitr::is_latex_output()){
+                is_md = FALSE
+            }
         }
     }
 
@@ -751,7 +756,8 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     is_png = view || is_md || is_export
     if(is_png){
        make_png = function(x) build_tex_png(x, view = view, export = export,
-                                            markdown = markdown, cache = cache)
+                                            markdown = markdown, cache = cache,
+                                            page.width = page.width)
     }
 
     # DF requested, but also png, OK user
@@ -818,7 +824,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
 
         if(is_md){
             if(!knitr::is_latex_output()){
-                cat(.dsb("[](.[path])\n"))
+                cat(.dsb0("![](.[path])\n"))
                 return(invisible(NULL))
             }
         }
@@ -4111,6 +4117,7 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
                             style.df = NULL, notes = NULL, group = NULL, extralines = NULL,
                             fixef.group = NULL, placement = "htbp", drop.section = NULL,
                             view = FALSE, markdown = NULL, view.cache = FALSE,
+                            page.width = "fit",
                             postprocess.tex = NULL, postprocess.df = NULL,
                             fit_format = "__var__", meta.time = NULL,
                             meta.author = NULL, meta.sys = NULL,
@@ -4192,6 +4199,8 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
 
     check_arg(view, view.cache, "logical scalar")
     check_arg(markdown, "NULL scalar(logical, character)")
+
+    page.width = check_set_page_width(page.width)
 
     #
     # Setting the defaults
@@ -4662,7 +4671,7 @@ print.etable_df = function(x, ...){
     signif.code = attr(x, "signif")
     if(!is.null(signif.code)){
         s = signif.code
-        s_fmt = paste0(insert_in_between(.dsb("'.[names(s)]'"), s), collapse = " ")
+        s_fmt = paste0(insert_in_between(.dsb("q?names(s)"), s), collapse = " ")
         cat("---\nSignif. codes: 0 ", s_fmt, " ' ' 1\n", sep = "")
     }
 
@@ -4706,24 +4715,20 @@ check_build_available = function(){
     return(TRUE)
 }
 
-build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL, cache = FALSE, up = 0){
+build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
+                         cache = FALSE, page.width = "fit", up = 0){
 
     up = up + 1
     set_up(up)
-    check_arg(view, "logical scalar")
-    check_arg(export, "NULL character scalar")
-    check_arg(markdown, "NULL scalar(logical, character)")
+    check_value(view, "logical scalar")
+    check_value(export, "NULL character scalar")
+    check_value(markdown, "NULL scalar(logical, character)")
+    page.width = check_set_page_width(page.width)
 
     cache = isTRUE(cache)
 
     dir_cache = NULL
     if(cache || isTRUE(markdown)){
-        # We look up to the global directory where to save the pngs
-        #
-        # The default storage location of the png tables
-        # R < 4.0.0 => now way to get the location for sure
-        # so the default is images/etable/
-
         is_global_dir = !is.null(find_config_path()) && !is.null(find_project_path())
         if(is_global_dir){
             dir_cache = config_get("cache_dir")
@@ -4740,25 +4745,25 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL, cache 
     if(isFALSE(markdown)){
         markdown = NULL
     } else if(isTRUE(markdown)){
-        # The default storage location of the png tables
-        # R < 4.0.0 => now way to get the location for sure
-        # so the default is images/etable/
+        # note that it's very important to have the default saving path to be relative
+        # to the working directory and not (as I initially wanted) in a temp dir.
+        # Why? To make it work properly in webpages, it should be self contained
+        # and should not use things out of the current working dir.
+        #
+        # (In regular markdown, the temp dir is a bit more elegant since
+        #  it does not clutter the workspace)
 
-        if(!is.null(dir_cache)){
-            markdown = dir_cache
-        } else {
-            markdown = "images/etable/"
-        }
+        markdown = "./images/etable/"
     }
 
     do_build = TRUE
     export_markdown = id = NULL
     if(!is.null(markdown)){
-        markdown_path = check_set_path(markdown, "w, dir", create = TRUE, up = up + 1)
+        markdown_path = check_set_path(markdown, "w, dir", create = TRUE, up = up)
 
-        all_files = list.files(markdown_path, "\\.png$")
+        all_files = list.files(markdown_path, "\\.png$", full.names = TRUE)
         id_all = gsub("^.+_|\\.png$", "", all_files)
-        id = as.character(cpp_hash_string(paste(x, collapse = "")))
+        id = as.character(cpp_hash_string(paste(c(page.width, x), collapse = "")))
 
         if(!id %in% id_all){
             time = gsub(" .+", "", Sys.time())
@@ -4766,12 +4771,12 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL, cache 
             export_markdown = file.path(markdown_path, name)
         } else {
             do_build = FALSE
-            export_markdown = png_name = all_files[id_all == id][1]
+            export_markdown = png_name = normalizePath(all_files[id_all == id][1], "/")
         }
     }
 
     if(!is.null(export)){
-        export_path = check_set_path(export, "w", up = up + 1)
+        export_path = check_set_path(export, "w", up = up)
     }
 
     if(do_build){
@@ -4780,15 +4785,15 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL, cache 
 
         if(cache){
             if(!is.null(id)){
-                id = as.character(cpp_hash_string(paste(x, collapse = "")))
+                id = as.character(cpp_hash_string(paste(c(page.width, x), collapse = "")))
             }
 
             # If the file already exists, we don't recreate it
-            all_files = list.files(dir, "^etable.+\\.png$")
+            all_files = list.files(dir, "^etable.+\\.png$", full.names = TRUE)
             id_all = gsub("^.+_|\\.png$", "", all_files)
             if(id %in% id_all){
                 do_build = FALSE
-                png_name = all_files[id_all == id][1]
+                png_name = normalizePath(all_files[id_all == id][1], "/")
             } else {
                 time = gsub(" .+", "", Sys.time())
                 png_name = .dsb("etable_tex_.[time]_.[id].png")
@@ -4814,7 +4819,13 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL, cache 
             }
         }
 
-        intro = c("\\documentclass[varwidth, border={ 10 5 10 5 }]{standalone}",
+        minipage_start = minipage_end = ""
+        if(!identical(page.width, "fit")){
+            minipage_start = .dsb("\\begin{minipage}{.[page.width]}\n")
+            minipage_end = "\n\\end{minipage}"
+        }
+
+        intro = c("\\documentclass[border={ 10 5 10 5 }]{standalone}",
                   "\\usepackage[dvipsnames,table]{xcolor}",
                   .dsb("\\usepackage{.[/array, booktabs, multirow, helvet, amsmath, amssymb]}"),
                   "\\renewcommand{\\familydefault}{\\sfdefault}")
@@ -4824,6 +4835,7 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL, cache 
         tex_pkg = add_pkg("threeparttable", x, tex_pkg, opt = "[flushleft]")
         tex_pkg = add_pkg("adjustbox", x, tex_pkg)
         tex_pkg = add_pkg("tabularx", x, tex_pkg)
+        tex_pkg = add_pkg("makecell", x, tex_pkg)
 
         do_rerun = FALSE
         if(any(grepl("tikz", x, fixed = TRUE))){
@@ -4833,7 +4845,10 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL, cache 
                         "\\usetikzlibrary{matrix, shapes, arrows, fit, tikzmark}")
         }
 
-        doc_full = c(intro, tex_pkg, "\n\n\\begin{document}\n", x, "\n\\end{document}\n")
+        doc_full = c(intro, tex_pkg,
+                     "\n\n\\begin{document}\n", minipage_start,
+                     x,
+                     minipage_end, "\n\\end{document}\n")
 
         #
         # Compiling + exporting
@@ -4939,7 +4954,14 @@ check_set_path = function(x, type = "", create = TRUE, up = 0){
     flags = strsplit(type, ", *")[[1]]
 
     x_dp = deparse(substitute(x))
-    path = normalizePath(x, "/", mustWork = FALSE)
+
+    path = try(normalizePath(x, "/", mustWork = FALSE))
+    if("try-error" %in% class(path)){
+        path = try(normalizePath(paste0("./", x), "/", mustWork = FALSE))
+        if("try-error" %in% class(path)){
+            stop_up("The path ", x, " is not valid, please revise.")
+        }
+    }
 
     # If path exists: fine!
     is_dir = "dir" %in% flags
@@ -4996,7 +5018,7 @@ check_set_path = function(x, type = "", create = TRUE, up = 0){
 viewer_html_template = function(png_name){
     # I really wanted to see the full table all the time, so I had to add some JS.
     # There must be some straightforward way in CSS, but I don't know it...
-    .dsb('
+    .dsb0('
 <!DOCTYPE html>
 <html> <head>
 
@@ -5052,14 +5074,20 @@ window.addEventListener("load", changeImgRatio);
 
 #' @rdname etable
 log_etable = function(type = "pdflatex"){
-    check_arg_plus(type, "match(pdflatex, magick, tex)")
+    check_arg_plus(type, "match(pdflatex, magick, tex, dir)")
 
     dir = getOption("fixest_log_dir")
+
+    if(length(dir) == 0){
+        return("No log currently exists")
+    }
 
     if(type == "pdflatex"){
         path = file.path(dir, "etable.log")
     } else if(type == "magick"){
         path = file.path(dir, "etable_shell_magick.log")
+    } else if(type == "dir"){
+        return(dir)
     } else {
         path = file.path(dir, "etable.tex")
     }
@@ -6275,6 +6303,38 @@ tag_gen = function(){
 
 
 
+check_set_page_width = function(page.width, up = 0){
+
+    set_up(up + 1)
+    check_value_plus(page.width, "match(fit, a4, us) | scalar(character, numeric) GT{0}")
+
+    if(is.numeric(page.width)){
+        page.width = paste0(page.width, "cm")
+
+    } else if(page.width %in% c("a4", "us")){
+        page.width = switch(page.width,
+                            a4 = "17cm",
+                            us = "17.6cm")
+
+    } else if(page.width != "fit"){
+        # we extract the first number
+        number = .dsb("'[[:digit:].]+'x?page.width")
+        if(!is_numeric_in_char(number)){
+            stop_up("The argument 'page.width' must represent a 'Latex' measure, ex: 12cm. ",
+                    "Problem: a proper number could not be found in ", page.width, ".")
+        }
+
+        unit = .dsb("'[^[:alpha:]]'R, L?page.width")
+        if(!unit %in% c("cm", "mm", "in", "pt", "em", "ex")){
+            stop_up("The argument 'page.width' must represent a 'Latex' measure, ex: 12cm. ",
+                    "Problem: a valid unit could not be found in ", unit,".")
+        }
+
+        page.width = paste0(number, unit)
+    }
+
+    page.width
+}
 
 
 
