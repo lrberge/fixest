@@ -1,11 +1,300 @@
 
+# fixest 0.10.2
+
+## Bug fixes
+
+  - fix bug in stepwise estimations when two (stepwised) explanatory variables have exactly the same NAs values.
+
+  - fix display bug regarding factors in `etable` when `dict` was present.
+  
+  - fix bug `tablefoot.value` not working any more (reported by @resulumit [#224](https://github.com/lrberge/fixest/issues/224)).
+  
+  - fix possible environment problem when estimating non linear functions outside of the global environment.
+  
+  - fix bug in the stepwise functions `sw` and `csw` when they contained only one variable.
+  
+  - fix bug in `etable` preventing automatic headers to be displayed.
+  
+  - fix bug in `n_unik` preventing the auto completion of variable names.
+  
+  - fix bug in `fitstat` for the KPR statistic (reported by @etiennebacher [#161](https://github.com/lrberge/fixest/issues/161)).
+  
+  - fix bug in `i` when two factor variables were interacted and on specific value of one variable was to be set as a reference.
+  
+  - fix bug in `model.matrix` when no variable was used in the estimation (reported by @kylebutts [#229](https://github.com/lrberge/fixest/issues/229)).
+  
+  - `model.matrix` now returns the variables in the same order as in the estimation -- a discrepancy could happen in stepwise estimations with interactions in which the interactions were put *before* fixed covariates (related to @sergiu-burlacu [#231](https://github.com/lrberge/fixest/issues/231)).
+  
+## etable
+
+### New arguments
+
+ - new argument `view` to display the latex table in the viewer pane (suggestion by Or Avishay-Rizi [#227](https://github.com/lrberge/fixest/issues/227)). You need to have a working distribution of pdflatex, imagemagick and ghostscript for this feature to work.
+ 
+ - new argument `view.cache` in `setFixest_etable`: whether to cache the PNGs generated.
+ 
+ - new argument `export` to export the Latex table in PNG to a file.
+ 
+ - new (experimental) argument `markdown`: Latex tables can be automatically integrated in the non-Latex markdown document in PNG format.
+ 
+ - new argument `tpt` to nest the table in a `threeparttable` environment. Notes are then nested into the `tablenotes` environment.
+ 
+ - in `style.tex`: new argument `notes.tpt.intro` to insert code right after the `tablenotes` environment and before any note (useful to set the font size of notes globally for instance).
+ 
+ - new argument `arraystretch` to set the height of the table rows.
+ 
+ - new argument `fontsize` which applies Latex font sizes to the table.
+ 
+ - new argument `adjustbox`: `adjustbox = TRUE` nests the tabular into an `adjustbox` environment with `width = \\textwidth, center` as default option. Use `adjustbox = x` with `x` a number giving the text-width. Use `adjustbox = "x th"` with `x` a number giving the text-height. Finally you can use a character string, as in `adjustbox = "my options"`, that will be passed verbatim as a an `adjustbox` option.
+ 
+ - new argument `highlight` to highlight the coefficients with a frame or by changing the row/cell color.
+ 
+ - new argument `coef.style` to apply an arbitrary style to one or several coefficients.
+ 
+ - in `style.tex`: new argument `rules_width` to easily set the width of the `booktabs` rules.
+ 
+ - in `style.tex`: new argument `caption.after` to insert code right after the caption.
+ 
+ - in `style.tex`: new argument `no_border` to remove the borders on the sides of the table.
+
+### New features
+
+ - the quality of the tex output has been substantially improved.
+ 
+ - `signif.code` now replaces `signifCode` (retro compatibility ensured).
+ 
+ - `signifCode` is removed from `setFixest_etable`, and `signif.code` is added to both `style.tex` and `style.df` so that each style can have its own significance code defined globally.
+ 
+  - the object returned by `etable` are now of class `etable_tex` (when `tex = TRUE`) or `etable_df`, both types having their own printing method.
+  
+ - the significance codes are now displayed under the table when the output is a `data.frame`.
+ 
+ - in `headers`/`extralines`: `cmidrule` does not show up for empty column names any more.
+ 
+ - new markup: markdown-style markup (e.g. `**text**`) can be used to put text in italic/bold in almost anything in the table.
+ 
+ - `notes` can be set in the dictionary: useful for notes (like source for example) that gets repeated across tables.
+ 
+ - `line.top` and `line.bottom` now admit the values `simple` and `double`. The argument `line.bottom` now affects the "effective" end of table, irrespective of the value of `tablefoot`. This is more in line with intuition.
+ 
+ - improve the use of `tabularx`.
+ 
+ - automatic support `makecell`: any new lines found in names within the table will be translated with `makecell`. For example: `"The \n long \n varname"` is automatically translated into `\makecell{The \\ long \\ varname}`.
+ 
+## Other
+
+ - `bin`: `cut::` now ignores white spaces, so that `cut:: q1 ] q3 [` works appropriately.
+ 
+ - speed of stepwise estimations (using `sw` [not `csw`]) has been improved.
+
+# fixest 0.10.1
+
+## Bug fixes
+
+ - remove new R native piping test `|>` which led to errors in R < 4.1.0 despite conditional testing.
+ 
+ - fix bug in `etable` `headers` when one wants to include several lines and the first line contains only one element repeated across columns.
+ 
+ - fix bugs in predict: a) when variables are created with functions of the data, and b) when the new data contains single level factors (relates to issues [#200](https://github.com/lrberge/fixest/issues/200) and [#180](https://github.com/lrberge/fixest/issues/180) by @steffengreup and @IsadoraBM).
+ 
+ - fix bug in `etable` non-clustered standard errors not displaying properly in footers.
+ 
+ - fix bug in `etable` regarding the escaping of `fixef_sizes` (reported by Apoorva Lal [#201](https://github.com/lrberge/fixest/issues/201)).
+ 
+ - fix bug introduced in 0.10.0 preventing the estimation of IV models with interacted fixed-effects (reported by @etiennebacher [#203](https://github.com/lrberge/fixest/issues/203)).
+ 
+ - fix bug in IV estimations when: a) no exogenous variables were present AND the IV part contained at lags; and b) the endogenous variables contained at least two lags. Reported by Robbie Minton.
+ 
+ - fix bug in the `.fit` methods when the argument `vcov` wasn't `NULL`.
+ 
+ - fix bug in `summary.fixest_multi`: when the variance was NA and internal bug could pop in some circumstances.
+ 
+ - fix bug `plot.fixef` not working for `fepois` (reported by @statzhero [#213](https://github.com/lrberge/fixest/issues/213)).
+ 
+ - fix error message when the (wrong) argument `X` is used in `feols`.
+ 
+## Dot square bracket operator
+
+ - add a comma first, like in `.[,stuff]`, to separate variables with commas (instead of separating them with additions):
+```R
+lhs_vars = c("var1", "var2")
+xpd(c(.[,lhs_vars]) ~ csw(x.[,1:3]))
+#> c(var1, var2) ~ csw(x1, x2, x3)
+```
+
+ - new function `dsb`: applies the dot square bracket operator to character strings.
+ 
+ - in the function `dsb`, you can add a string literal in first or last position in `.[]` to "collapse" the character string in question. The way the collapse is performed depends on the position:
+```R
+name = c("Juliet", "Romeo")
+
+# default behavior => vector
+dsb("hello .[name], what's up?")
+#> [1] "hello Juliet, what's up?" "hello Romeo, what's up?" 
+
+# string literal in first position
+dsb("hello .[' and ', name], what's up?")
+#> [1] "hello Juliet and Romeo, what's up?"
+
+# string literal in last position
+dsb("hello .[name, ' and '], what's up?")
+#> [1] "hello Juliet and hello Romeo, what's up?"
+
+```
+
+## bin
+
+ - `bin`: numeric vectors can be 'cut' with the new special value `'cut::q3]p90]'`, check it out!
+```R
+data(iris)
+plen = iris$Petal.Length
+
+# 3 parts of (roughly) equal size
+table(bin(plen, "cut::3"))
+#> 
+#> [1.0; 1.9] [3.0; 4.9] [5.0; 6.9] 
+#>         50         54         46 
+
+# Three custom bins
+table(bin(plen, "cut::2]5]"))
+#> 
+#> [1.0; 1.9] [3.0; 5.0] [5.1; 6.9] 
+#>         50         58         42 
+
+# .. same, excluding 5 in the 2nd bin
+table(bin(plen, "cut::2]5["))
+#> 
+#> [1.0; 1.9] [3.0; 4.9] [5.0; 6.9] 
+#>         50         54         46 
+
+# Using quartiles
+table(bin(plen, "cut::q1]q2]q3]"))
+#> 
+#> [1.0; 1.6] [1.7; 4.3] [4.4; 5.1] [5.2; 6.9] 
+#>         44         31         41         34 
+
+# Using percentiles
+table(bin(plen, "cut::p20]p50]p70]p90]"))
+#> 
+#> [1.0; 1.5] [1.6; 4.3] [4.4; 5.0] [5.1; 5.8] [5.9; 6.9] 
+#>         37         38         33         29         13 
+
+# Mixing all
+table(bin(plen, "cut::2[q2]p90]"))
+#> 
+#> [1.0; 1.9] [3.0; 4.3] [4.4; 5.8] [5.9; 6.9] 
+#>         50         25         62         13
+
+# Adding custom names
+table(bin(plen, c("cut::2[q2]p90]", "<2", "]2; Q2]", NA, ">90%")))
+#>         <2    ]2; Q2] [4.4; 5.8]       >90% 
+#>         50         25         62         13 
+```
+
+ - `bin` also accepts formulas, e.g. `bin = list("<2" = ~ x < 2)` (`x` must be the only variable).
+ 
+ - `bin` accepts the use of `.()` for `list()`.
+ 
+ - you can add the location of the element using `@d` in the name. Useful to rearrange factors:
+```R
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+table(base$species)
+#>     setosa versicolor  virginica 
+#>         50         50         50
+
+table(bin(base$species, .("@3" = "seto", "@1 VIRGIN" = "virg")))
+#>     VIRGIN versicolor     setosa 
+#>         50         50         50 
+```
+ 
+ 
+## etable
+
+ - the tex output is now "nicely" formatted.
+ 
+ - argument `extralines` replaces the argument `extraline` to increase coherence. Hence function `extraline_register` becomes `extralines_register` (the change is done without deprecation since I guess this function must be only rarely used).
+ 
+ - arguments `extralines` and `headers` accept `.()` for `list()`.
+```R
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+
+```
+ 
+## New function
+ 
+ - `check_conv_feols`: checks the convergence of the fixed-effects in `feols` models by looking at the first-order conditions.
+ 
+## New functions, unrelated but possibly useful
+
+Although a bit unrelated to the purpose of this package, these functions are so extensively used in the author's research that he decided to leverage his author privileges to include them in `fixest` to make them easier to share with co-authors.
+
+ - `osize`: simple function returning a formatted object size.
+ 
+ - `n_unik`: simple but flexible function returning the number of unique elements from variables in one or several data sets. Useful for checking keys.
+ 
+ - `sample_df`: simple function to extract random lines from a `data.frame`.
+ 
+## Other new features
+
+ - when computing Newey-West standard-errors for time series, the bandwidth is now selected thanks to the [bwNeweyWest](https://sandwich.r-forge.r-project.org/reference/NeweyWest.html) function from the [sandwich](https://sandwich.r-forge.r-project.org/index.html) package. This function implements the method described in Newey and West 1994.
+ 
+ - add `type = "se_long"` to `summary.fixest_multi` which yields all coefficients and SEs for all estimations in a "long" format.
+ 
+ - only in `fixest` estimations, using a "naked" dot square bracket variable in the left-hand-side includes them as multiple left hand sides. Regular expressions can also be used in the LHS.
+```R
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+y = c("y", "x1")
+feols(.[y] ~ x2, base)
+#> Standard-errors: IID 
+#> Dep. var.: y
+#>             Estimate Std. Error t value  Pr(>|t|)    
+#> (Intercept) 4.306603   0.078389 54.9389 < 2.2e-16 ***
+#> x2          0.408922   0.018891 21.6460 < 2.2e-16 ***
+#> ---
+#> Dep. var.: x1
+#>              Estimate Std. Error  t value   Pr(>|t|)    
+#> (Intercept)  3.454874   0.076095 45.40188  < 2.2e-16 ***
+#> x2          -0.105785   0.018339 -5.76845 4.5133e-08 ***
+
+
+etable(feols(..("x") ~ y + i(species), base))
+#>                                  model 1            model 2            model 3
+#> Dependent Var.:                       x1                 x2                 x3
+#>                                                                               
+#> (Intercept)            1.677*** (0.2354) -1.702*** (0.2301) -0.4794** (0.1557)
+#> y                     0.3499*** (0.0463) 0.6321*** (0.0453) 0.1449*** (0.0306)
+#> species = versicolor -0.9834*** (0.0721)  2.210*** (0.0705) 0.9452*** (0.0477)
+#> species = virginica   -1.008*** (0.0933)  3.090*** (0.0912)  1.551*** (0.0617)
+#> ____________________ ___________________ __________________ __________________
+#> S.E. type                            IID                IID                IID
+#> Observations                         150                150                150
+#> R2                               0.56925            0.97489            0.93833
+#> Adj. R2                          0.56040            0.97438            0.93706
+```
+ 
+## Other
+
+ - improve error messages when `subset` does not select any element.
+ 
+ - in `xpd` and `fixest` estimations, variables can be "grepped" from the data set with `regex("regex")`.
+ 
+ - add inheritance of the default style in `iplot` when the style is set globally with `setFixest_coefplot`.
+ 
+ - improve error messages in general by prompting additional error calls (when appropriate).
+ 
+ - the dictionaries now ignore white spaces in coefficient names (thanks to Caleb Kwon).
+ 
+ - the package startup messages have been improved (they should pop up less often).
+ 
+ - to comply with CRAN policies, the startup message doesn't write on the .Renviron file any more.
+
 # fixest 0.10.0
 
 ## Bugs fixes
 
  - Fix bug occurring in IV models with multiple instruments and with multithreading on. That bug could lead to the wrong imputation of the IV residuals, hence affecting the standard-errors (although the order of magnitude of the variation should be minor). Thanks to @whitfillp [#182](https://github.com/lrberge/fixest/issues/182).
  
- - Fix minor, rare, bug occurring in `feglm` when the model was badly specified and VAR(Y) >>>> VAR(X).
+ - Fix minor, rare, bug occurring in `feglm` when the model was badly specified and VAR(Y) >>>> VAR(X) and there were only one variable.
  
  - `model.matrix` did not work with `type = "fixef"` (thanks to @kylebutts [#172](https://github.com/lrberge/fixest/issues/172)).
  
@@ -22,6 +311,14 @@
  - Fix bug in `feols.fit` when the matrix of regressors was only partially named (reported by @leucothea [#176](https://github.com/lrberge/fixest/issues/176)).
  
  - Fix bug in the value of the fixed-effects coefficients in IV estimations (thanks to @tappek [#190](https://github.com/lrberge/fixest/issues/190)).
+ 
+ - Fix bug in `coefplot` when `lean = TRUE` in the estimation (reported by @adamaltmejd [#195](https://github.com/lrberge/fixest/issues/195)).
+ 
+ - Fix bug in `iplot` when IVs contained interactions.
+ 
+ - Fix bug in `iplot` preventing some variables to be removed (reported by @roussanoff [#164](https://github.com/lrberge/fixest/issues/164)).
+ 
+ - Fix 0 right-padding of numbers displayed in estimation results that could be confusing (reported by @hjuerges [#197](https://github.com/lrberge/fixest/issues/197)).
  
 ## Major changes
 
@@ -42,12 +339,36 @@
     * Driscoll-Kraay (1998) for cross-sectionally and serially correlated errors
     
     * Conley (1999) for spatially correlated errors
+    
+ - you can summon variables from the environment directly in the formula using the new dot square bracket (DSB) operator. The DSB operator can be used to create many variables at once, and can also be using within regular expressions. One example:
+```R
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+i = 2:3
+z = "i(species)"
+feols(y ~ x.[i] + .[z], base)
+#> OLS estimation, Dep. Var.: y
+#> Observations: 150 
+#> Standard-errors: IID 
+#>                      Estimate Std. Error   t value   Pr(>|t|)    
+#> (Intercept)          3.682982   0.107403 34.291343  < 2.2e-16 ***
+#> x2                   0.905946   0.074311 12.191282  < 2.2e-16 ***
+#> x3                  -0.005995   0.156260 -0.038368 9.6945e-01    
+#> species::versicolor -1.598362   0.205706 -7.770113 1.3154e-12 ***
+#> species::virginica  -2.112647   0.304024 -6.948940 1.1550e-10 ***
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> RMSE: 0.333482   Adj. R2: 0.832221
+```
+    
+ - in `i` and `sunab` you can now bin the variables on the fly with the new argument `bin`. The new function [`bin`](https://lrberge.github.io/fixest/reference/bin.html) is also available at the user-level.
  
- - Function `dof` has been renamed into `ssc` (stands for small sample correction) to improve clarity. No retro compatibility so far ensured but the function `dof` will be removed at some point.
+ - Function `dof` has been renamed into `ssc` (stands for small sample correction) to improve clarity. Retro compatibility is partially ensured but the function `dof` will be removed at some point.
     
 ## Breaking changes
 
  - Functions `setFixest_dof` and `setFixest_se` have been renamed into `setFixest_ssc` and `setFixest_vcov`. **No retro compatibility ensured.**
+ 
+ - Removal of the `var::factor` operator to interact a continuous variable with a variable treated as a factor.
  
 ## New features
 
@@ -55,11 +376,70 @@
  
  - `predict.fixest` accepts the new argument `fixef` which, if `TRUE`, returns a data.frame of the fixed-effects coefficients for each observation, with the same number of columns as the number of fixed-effects (feature requests [#144](https://github.com/lrberge/fixest/issues/144) and [#175](https://github.com/lrberge/fixest/issues/175) by @pp2382 and @cseveren).
  
+ - offsets present in the formula are now accepted.
+ 
  - VCOV aliases (both Grant McDermott's suggestions: thanks Grant!): 
  
     * the default standard-errors is now `"iid"` (former keywords still work)
     
     * the keyword `hc1` can be used to summon heteroskedasticity-robust SEs
+    
+  - *Argument sliding*: the argument `vcov` can be called implicitly when `data` is set up globally:
+  ```R
+  base = setNames(iris = c("y", "x1", "x2", "x3", "species"))
+  
+  # Setting up the data
+  setFixest_estimation(data = base)
+  
+  # Now vcov can be used without using vcov = stuff:
+  feols(y ~ x1 + x2, ~species)
+  
+  # => same as feols(y ~ x1 + x2, vcov = ~species)
+  ```
+  
+  - piping the data now works:
+  ```R
+  mtcars |> feols(cyl ~ mpg)
+  # => same as feols(cyl ~ mpg, mtcars)
+  ```
+  
+  - the user can now specify custom degrees of freedom to compute the t-tests in `ssc()` (feature request by Kyle F. Butts).
+  
+  - the predict method gains the new argument `se.fit` and `interval` which computes the SEs/CI of the predicted variable. This only works for OLS models without fixed-effects. Feature request by Gábor Békés [#193](https://github.com/lrberge/fixest/issues/193).
+  
+  - `iplot` gains the argument `i.select` to navigate through the different variables created with `i()` (provided there are more than one of course).
+  
+## etable
+
+ - new argument `interaction.order` to control the order in which interacted variables are displayed (feature request by @inkrement [#120](https://github.com/lrberge/fixest/issues/120)).
+ 
+ - new argument `i.equal` to control how the values taken by factor variables created with `i()` are displayed.
+ 
+ - new `meta.XX` family of arguments when exporting to Latex. They include various type of information as comments before the table (suggestion of adding the time by Apoorva Lal [#184](https://github.com/lrberge/fixest/pull/184)). So far the new arguments are: `meta.time`, `meta.author`, `meta.sys`, `meta.call`, `meta.comment`. The argument `meta` is a shortcut to all these.
+ 
+ - default values can be saved at the project level using the argument `save = TRUE` in the function `setFixest_etable`. This means that default values will be automatically set without having to call `setFixest_etable` at the startup of the R session. For example, if you want to permanently add the creation time in your Latex exports, just use `setFixest_etable(meta.time = TRUE, save = TRUE)`, and you won't need to bother about it anymore in any future session in your current project.
+ 
+ - some changes in `extraline`, now: *i)* it accepts raw vectors, *ii)* it accepts lines without title, *iii)* the elements are recycled across models, *iv)* it accepts elements of the form `list("item1" = #item1, "item2" = #item2, etc)`, and *v)* the elements are Latex-escaped.
+ 
+ - in `style.tex`: all Latex-escaping is removed.
+ 
+ - the argument `subtitle` has been renamed into `headers` (retro-compatibility is ensured).
+ 
+ - on the new argument `headers`:
+   * it accepts named lists of numbers, where the names represent the values in the cell and the numbers represent the span. For example `headers = list("Gender" = list("M" = 3, "F" = 4))` will create a line with 3 times "M" and 4 times "F". 
+   * adding the special tag `":_:"` in the row name will add a rule for each column group (in the previous example `":_:Gender"` would do). Suggestion by @nhirschey [#173](https://github.com/lrberge/fixest/pull/173).
+   * you can control the placement of the header line by using as first character the following special tags: "^" (top), "-" (mid, default), "_" (bottom). Ex: `headers = list("_Gender" = list("M" = 3, "F" = 4))` will place the header line at the very bottom of the headers.
+   * by default all values are Latex-escaped. You can disable escaping by adding `":tex:"` in the row title.
+   
+ - argument `sdBelow` has been renamed into `se.below` (retro-compatibility is ensured).
+ 
+ - new argument `se.row` to control whether the row displaying the standard-errors should be displayed (clarification requested by @waynelapierre [#127](https://github.com/lrberge/fixest/issues/127)).
+ 
+ - `dict` now directly modifies the entries in the global dictionary instead of creating a brand new one. For example if you have `setFixest_dict(c(cyl="Cylinder"))` and then use `etable` with `dict=c(mpg="miles per gallon")`, you end up with both the names `cyl` and `mpg` to be modified. To disable this behavior, you can add `"reset"` as the first element, like in `dict=c("reset", mpg="miles per gallon")`.
+ 
+## Other
+
+ - in multiple estimations, it is now made explicit that the information regarding NA values only concern the variables in common across all models (formerly, it was implicit and hence confusing).
 
 
 # fixest 0.9.0

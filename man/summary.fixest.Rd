@@ -11,7 +11,7 @@
   cluster = NULL,
   ssc = NULL,
   .vcov = NULL,
-  stage = 2,
+  stage = NULL,
   lean = FALSE,
   agg = NULL,
   forceCovariance = FALSE,

@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.2</span>
       </span>
     </div>
 
@@ -188,7 +188,7 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>fml</th>
-      <td><p>A formula. This formula gives the linear formula to be estimated (it is similar to a <code>lm</code> formula), for example: <code>fml = z~x+y</code>. To include fixed-effects variables, insert them in this formula using a pipe (e.g. <code>fml = z~x+y|fixef_1+fixef_2</code>). To include a non-linear in parameters element, you must use the argment <code>NL.fml</code>. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in <code><a href='https://rdrr.io/r/base/c.html'>c()</a></code>: ex <code><a href='https://rdrr.io/r/base/c.html'>c(y1, y2)</a></code>. For multiple indep. vars, use the stepwise functions: ex <code>x1 + csw(x2, x3)</code>. This leads to 6 estimation <code>fml = c(y1, y2) ~ x1 + cw0(x2, x3)</code>. See details.</p></td>
+      <td><p>A formula. This formula gives the linear formula to be estimated (it is similar to a <code>lm</code> formula), for example: <code>fml = z~x+y</code>. To include fixed-effects variables, insert them in this formula using a pipe (e.g. <code>fml = z~x+y|fixef_1+fixef_2</code>). To include a non-linear in parameters element, you must use the argment <code>NL.fml</code>. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in <code><a href='https://rdrr.io/r/base/c.html'>c()</a></code>: ex <code><a href='https://rdrr.io/r/base/c.html'>c(y1, y2)</a></code>. For multiple indep. vars, use the stepwise functions: ex <code>x1 + csw(x2, x3)</code>. This leads to 6 estimation <code>fml = c(y1, y2) ~ x1 + cw0(x2, x3)</code>. See details. Square brackets starting with a dot can be used to call global variables: <code>y.[i] ~ x.[1:2]</code> will lead to <code>y3 ~ x1 + x2</code> if <code>i</code> is equal to 3 in the current environment (see details in <code><a href='xpd.html'>xpd</a></code>).</p></td>
     </tr>
     <tr>
       <th>data</th>
@@ -438,7 +438,41 @@ Assume you have the following formula: <code>fml = y ~ x1 + sw(x2, x3)</code>. T
 Finally, the prefix <code>c</code> means cumulative: each stepwise element is added to the next. That is, <code>fml = y ~ x1 + csw(x2, x3)</code> would lead to the following models <code>y ~ x1 + x2</code> and <code>y ~ x1 + x2 + x3</code>. The <code>0</code> has the same meaning and would also lead to the model without the stepwise elements to be estimated: in other words, <code>fml = y ~ x1 + csw0(x2, x3)</code> leads to the following three models: <code>y ~ x1</code>, <code>y ~ x1 + x2</code> and <code>y ~ x1 + x2 + x3</code>.</p>
 <p>Multiple independent variables can be combined with multiple dependent variables, as in <code>fml = c(y1, y2) ~ cw(x1, x2, x3)</code> which would lead to 6 estimations. Multiple estimations can also be combined to split samples (with the arguments <code>split</code>, <code>fsplit</code>).</p>
 <p>You can also add fixed-effects in a stepwise fashion. Note that you cannot perform stepwise estimations on the IV part of the formula (<code>feols</code> only).</p>
+<p>If NAs are present in the sample, to avoid too many messages, only NA removal concerning the variables common to all estimations is reported.</p>
 <p>A note on performance. The feature of multiple estimations has been highly optimized for <code>feols</code>, in particular in the presence of fixed-effects. It is faster to estimate multiple models using the formula rather than with a loop. For non-<code>feols</code> models using the formula is roughly similar to using a loop performance-wise.</p>
+    <h2 class="hasAnchor" id="argument-sliding"><a class="anchor" href="#argument-sliding"></a>Argument sliding</h2>
+
+    
+
+
+<p>When the data set has been set up globally using <code><a href='setFixest_estimation.html'>setFixest_estimation</a></code><code>(data = data_set)</code>, the argument <code>vcov</code> can be used implicitly. This means that calls such as <code><a href='feols.html'>feols(y ~ x, "HC1")</a></code>, or <code><a href='feols.html'>feols(y ~ x, ~id)</a></code>, are valid: i) the data is automatically deduced from the global settings, and ii) the <code>vcov</code> is deduced to be the second argument.</p>
+    <h2 class="hasAnchor" id="piping"><a class="anchor" href="#piping"></a>Piping</h2>
+
+    
+
+
+<p>Although the argument 'data' is placed in second position, the data can be piped to the estimation functions. For example, with R &gt;= 4.1, <code>mtcars |&gt; feols(mpg ~ cyl)</code> works as <code><a href='feols.html'>feols(mpg ~ cyl, mtcars)</a></code>.</p>
+    <h2 class="hasAnchor" id="tricks-to-estimate-multiple-lhs"><a class="anchor" href="#tricks-to-estimate-multiple-lhs"></a>Tricks to estimate multiple LHS</h2>
+
+    
+
+
+<p>To use multiple dependent variables in <code>fixest</code> estimations, you need to include them in a vector: like in <code><a href='https://rdrr.io/r/base/c.html'>c(y1, y2, y3)</a></code>.</p>
+<p>First, if names are stored in a vector, they can readily be inserted in a formula to perform multiple estimations using the dot square bracket operator. For instance if <code>my_lhs = c("y1", "y2")</code>, calling <code>fixest</code> with, say <code><a href='feols.html'>feols(.[my_lhs] ~ x1, etc)</a></code> is equivalent to using <code><a href='feols.html'>feols(c(y1, y2) ~ x1, etc)</a></code>. Beware that this is a special feature unique to the <em>left-hand-side</em> of <code>fixest</code> estimations (the default behavior of the DSB operator is to aggregate with sums, see <code><a href='xpd.html'>xpd</a></code>).</p>
+<p>Second, you can use a regular expression to grep the left-hand-sides on the fly. When the <code>..("regex")</code> feature is used naked on the LHS, the variables grepped are inserted into <code><a href='https://rdrr.io/r/base/c.html'>c()</a></code>. For example <code>..("Pe") ~ Sepal.Length, iris</code> is equivalent to <code>c(Petal.Length, Petal.Width) ~ Sepal.Length, iris</code>. Beware that this is a special feature unique to the <em>left-hand-side</em> of <code>fixest</code> estimations (the default behavior of <code>..("regex")</code> is to aggregate with sums, see <code><a href='xpd.html'>xpd</a></code>).</p>
+    <h2 class="hasAnchor" id="dot-square-bracket-operator-in-formulas"><a class="anchor" href="#dot-square-bracket-operator-in-formulas"></a>Dot square bracket operator in formulas</h2>
+
+    
+
+
+<p>In a formula, the dot square bracket (DSB) operator can: i) create manifold variables at once, or ii) capture values from the current environment and put them verbatim in the formula.</p>
+<p>Say you want to include the variables <code>x1</code> to <code>x3</code> in your formula. You can use <code><a href='xpd.html'>xpd(y ~ x.[1:3])</a></code> and you'll get <code>y ~ x1 + x2 + x3</code>.</p>
+<p>To summon values from the environment, simply put the variable in square brackets. For example: <code>for(i in 1:3) xpd(y.[i] ~ x)</code> will create the formulas <code>y1 ~ x</code> to <code>y3 ~ x</code> depending on the value of <code>i</code>.</p>
+<p>You can include a full variable from the environment in the same way: <code>for(y in c("a", "b")) xpd(.[y] ~ x)</code> will create the two formulas <code>a ~ x</code> and <code>b ~ x</code>.</p>
+<p>The DSB can even be used within variable names, but then the variable must be nested in character form. For example <code>y ~ .["x.[1:2]_sq"]</code> will create <code>y ~ x1_sq + x2_sq</code>. Using the character form is important to avoid a formula parsing error. Double quotes must be used. Note that the character string that is nested will be parsed with the function <code><a href='dsb.html'>dsb</a></code>, and thus it will return a vector.</p>
+<p>By default, the DSB operator expands vectors into sums. You can add a comma, like in <code>.[, x]</code>, to expand with commas--the content can then be used within functions. For instance: <code><a href='https://rdrr.io/r/base/c.html'>c(x.[, 1:2])</a></code> will create <code><a href='https://rdrr.io/r/base/c.html'>c(x1, x2)</a></code> (and <em>not</em> <code><a href='https://rdrr.io/r/base/c.html'>c(x1 + x2)</a></code>).</p>
+<p>In all <code>fixest</code> estimations, this special parsing is enabled, so you don't need to use <code>xpd</code>.</p>
+<p>You can even use multiple square brackets within a single variable, but then the use of nesting is required. For example, the following <code><a href='xpd.html'>xpd(y ~ .[".[letters[1:2]]_.[1:2]"])</a></code> will create <code>y ~ a_1 + b_2</code>. Remember that the nested character string is parsed with <code><a href='dsb.html'>dsb</a></code>, which explains this behavior.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (<a href='https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13'>https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13</a>).</p>

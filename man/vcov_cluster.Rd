@@ -59,7 +59,7 @@ feols(y ~ x1, base, vcov = vcov_cluster(rep(1:5, 30)))
 
 }
 \references{
-Cameron AC, Gelbach JB, Miller DL (2011). "Robust Inference with Multiway Clustering." \emph{Journal of Business & Economic Statistics}, 29(2), 238–249. doi:10.1198/jbes.2010.07136.
+Cameron AC, Gelbach JB, Miller DL (2011). "Robust Inference with Multiway Clustering." \emph{Journal of Business & Economic Statistics}, 29(2), 238-249. doi:10.1198/jbes.2010.07136.
 }
 \author{
 Laurent Berge

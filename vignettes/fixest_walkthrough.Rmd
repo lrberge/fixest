@@ -41,7 +41,7 @@ setFixest_nthreads(1)
 
 The package `fixest` provides a family of functions to perform estimations with multiple fixed-effects.
 The two main functions are `feols` for linear models and `feglm` for generalized linear models. In addition, the function `femlm` performs direct maximum likelihood estimation, and `feNmlm` extends the latter to allow the inclusion of non-linear in parameters right-hand-sides. Finally, the functions `fepois` and `fenegbin` are aliases for Poisson and negative binomial fixed-effect estimations.
-Each of these functions supports any number of fixed-effects and is implemented with full fledged multi-threading in c++. Functions `feols` and `feglm` further support variables with varying slopes.
+Each of these functions supports any number of fixed-effects and is implemented with full fledged multi-threading in C++. Functions `feols` and `feglm` further support variables with varying slopes.
 
 This package is currently (Feb. 2020) the fastest software available to perform fixed-effects estimations. See the project's [homepage](https://lrberge.github.io/fixest/) for a set of benchmarks.
 
@@ -161,15 +161,15 @@ Now let's say that we want a compact overview of the results of several estimati
 
 ```{r, eval=FALSE}
 etable(gravity_pois, gravity_negbin, gravity_ols,
-         vcov = "twoway", subtitles = c("Poisson", "Negative Binomial", "Gaussian"))
+         vcov = "twoway", headers = c("Poisson", "Negative Binomial", "Gaussian"))
 ```
 ```{r, echo=FALSE, results='asis'}
-tab = etable(gravity_pois, gravity_negbin, gravity_ols, vcov = "twoway", subtitles = c("Poisson", "Negative Binomial", "Gaussian"))
+tab = etable(gravity_pois, gravity_negbin, gravity_ols, vcov = "twoway", headers = c("Poisson", "Negative Binomial", "Gaussian"))
 # problem to display the second empty line in markdown
 knitr::kable(tab[-2, ])
 ```
 
-We added the argument `vcov="twoway"` to cluster the standard-errors for all estimations. As can be seen this function gives an overview of the estimates and standard-errors, as well as some quality of fit measures. The argument `subtitles` is used to add information on each estimation column.
+We added the argument `vcov="twoway"` to cluster the standard-errors for all estimations. As can be seen this function gives an overview of the estimates and standard-errors, as well as some quality of fit measures. The argument `headers` is used to add information on each estimation column.
 
 In the previous example, we directly added the estimation results as arguments of the function `etable`. But the function also accepts lists of estimations.
 Let's give an example. Say you want to see the influence of the introduction of fixed-effects on the estimate of the elasticity of distance. You can do it with the following code where we use the argument `fixef` to include fixed-effects (instead of inserting them directly in the formula):
@@ -283,7 +283,7 @@ The version 0.10.0 of `fixest` introduced the argument `vcov`. This argument is 
 
 So far (version 0.10.0), six types of standard-errors can be computed, here are their keywords and a brief description:
 
- - `iid`: assumes that errors are identically and independently distributed.
+ - `iid`: assumes that the error variance is spherical, i.e. errors are homoskedastic and not correlated (independent and identically distributed errors have a spherical error variance).
  
  - `hetero`: assumes that errors are heteroskedastic (White correction).
  
@@ -651,7 +651,7 @@ With our data in hand, let's move on to the estimations. We'll implement two DiD
 # "Naive" TWFE DiD (note that the time to treatment for the never treated is -1000)
 # (by using ref = c(-1, -1000) we exclude the period just before the treatment and 
 # the never treated)
-res_twfe = feols(y ~ x1 + i(time_to_treatment, treated, ref = c(-1, -1000)) | id + year, base_stagg)
+res_twfe = feols(y ~ x1 + i(time_to_treatment, ref = c(-1, -1000)) | id + year, base_stagg)
 
 # To implement the Sun and Abraham (2020) method,
 # we use the sunab(cohort, period) function
@@ -668,7 +668,7 @@ iplot(list(res_twfe, res_sa20), sep = 0.5)
 att_true = tapply(base_stagg$treatment_effect_true, base_stagg$time_to_treatment, mean)[-1]
 points(-9:8, att_true, pch = 15, col = 4)
 
-legend("topleft", col = c(1, 4, 2), pch = c(20, 17, 15), 
+legend("topleft", col = c(1, 4, 2), pch = c(20, 15, 17), 
        legend = c("TWFE", "Truth", "Sun & Abraham (2020)"))
 ```
 
@@ -695,7 +695,7 @@ head(etable(res_sa20, agg = FALSE), 20)
 
 Now we present some other features of the package:
 
-  1. [Formula macros](#formula-macros). 
+  1. [Formula: macros and dot square brackets](#formula-macros). 
   
   2. [How to add lead/lags](#lagging-variables).
   
@@ -707,7 +707,9 @@ Now we present some other features of the package:
 <!-- NOTE: you can't have ":" or "(" in titles to make links -->
 
 
-## Formula macros
+## Formula: macros and dot square brackets
+
+### Formula macros
 
 It can be useful, to tidy up the workflow or simply for convenience, to define formula macros: i.e. macro variables each representing several variables. This package offers two functions to deal with that: `setFixest_fml` to set macro variables globally, and `xpd` to create a formula with macro variables either globally defined or defined at run time.
 
@@ -734,18 +736,51 @@ All `fixest` estimations call `xpd` internally if appropriate. This means that t
 feols(y ~ x1 + ..ctrl, base)
 ```
 
-The function `xpd` also accepts regular expression macros of the form `..("regex")`. If these macros are encountered and provided a character vector/data.frame is in the argument `data`,  then all variables names matching the regular expression will be placed in the formula.
+The function `xpd` also accepts regular expression macros of the form `regex("regex")`. If these macros are encountered and provided a character vector/data.frame is in the argument `data`,  then all variables names matching the regular expression will be placed in the formula.
 
 ```{r}
 data(longley)
-xpd(Armed.Forces ~ Population + ..("GNP|ployed"), data = longley)
+xpd(Armed.Forces ~ Population + regex("GNP|ployed"), data = longley)
 ```
 
 Again, since `xpd` is called internally, the following works:
 
 ```{r}
-feols(Armed.Forces ~ Population + ..("GNP|ployed"), longley)
+feols(Armed.Forces ~ Population + regex("GNP|ployed"), longley)
 ```
+
+### The dot square bracket operator
+
+The special operator `.[]` can be used in `fixest` formulas to replace the enclosed item by its value in the current environment. Let's give an example:
+```{r}
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+i = 2:3
+z = "i(species)"
+feols(y ~ x.[i] + .[z], base)
+```
+What just happened? When `.[]` is encountered in a formula, its value is evaluated and inserted verbatim in the formula. Further, when the value in brackets is a vector, as many variables are added in the model. That's why `x.[i]` led to `x2 + x3`. Of course, numbers can be used directly: `x.[2:3]` would have led to the same result.
+
+Variable names in which `.[]` is in the middle of the name can also be created, but it has to be nested:
+```{r}
+i = 1:3
+xpd(y ~ .["x.[i]_sq"])
+```
+
+How does it work? `.[stuff]` evaluates `stuff` and if stuff is a string literal, the function `dsb`, which expands anything in `.[]`, is applied. In the previous example, `dsb("x.[i]_sq")` leads to the vector `c("x1_sq", "x2_sq", "x3_sq")`. Then vector is then aggregated with a sum due to the initial `.[]`, leading to `x1_sq + x2_sq + x3_sq` being inserted in the formula.
+
+By default, when `stuff` is a vector, the aggregation is done with a sum. But in some instances, it can be interesting to aggregate with commas: e.g. when you want to perform a stepwise estimation. To summon comma-aggregation, place a comma right after the opening square bracket. Here's an example:
+
+```{r}
+etable(feols(y ~ csw(x.[, 1:3]), base))
+```
+
+Finally, there is a special shortcut to facilitate multiple estimations with variable names stored in a vector. If `vars` is a vector of variable names, just use `.[vars]` in the LHS to perform a multiple estimation:
+
+```{r}
+vars = c("x1", "x2", "x3") # Equiv. to: dsb("x.[1:3]")
+etable(feols(.[vars] ~ i(species), base))
+```
+
 
 ## Lagging variables
 

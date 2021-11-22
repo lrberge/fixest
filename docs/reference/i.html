@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.2</span>
       </span>
     </div>
 
@@ -141,7 +141,7 @@
     <p>Treat a variable as a factor, or interacts a variable with a factor. Values to be dropped/kept from the factor can be easily set. Note that to interact fixed-effects, this function should not be used: instead use directly the syntax <code>fe1^fe2</code>.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>i</span><span class='op'>(</span><span class='va'>factor_var</span>, <span class='va'>var</span>, <span class='va'>ref</span>, <span class='va'>keep</span>, <span class='va'>ref2</span>, <span class='va'>keep2</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>i</span><span class='op'>(</span><span class='va'>factor_var</span>, <span class='va'>var</span>, <span class='va'>ref</span>, <span class='va'>keep</span>, <span class='va'>bin</span>, <span class='va'>ref2</span>, <span class='va'>keep2</span>, <span class='va'>bin2</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -163,12 +163,28 @@
       <td><p>A vector of values to be kept from <code>factor_var</code> (all others are dropped). By default they should be values from <code>factor_var</code> and if <code>keep</code> is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.</p></td>
     </tr>
     <tr>
+      <th>bin</th>
+      <td><p>A list of values to be grouped, a vector, a formula, or the special values <code>"bin::digit"</code> or <code>"cut::values"</code>. To create a new value from old values, use <code>bin = list("new_value"=old_values)</code> with <code>old_values</code> a vector of existing values. You can use <code>.()</code> for <code><a href='https://rdrr.io/r/base/list.html'>list()</a></code>.
+It accepts regular expressions, but they must start with an <code>"@"</code>, like in <code>bin="@Aug|Dec"</code>. It accepts one-sided formulas which must contain the variable <code>x</code>, e.g. <code>bin=list("&lt;2" = ~x &lt; 2)</code>.
+The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. In the name, adding <code>"@d"</code>, with <code>d</code> a digit, will relocate the value in position <code>d</code>: useful to change the position of factors. Use <code>"@"</code> as first item to make subsequent items be located first in the factor.
+Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value <code>"bin::digit"</code> to group every <code>digit</code> element.
+For example if <code>x</code> represents years, using <code>bin="bin::2"</code> creates bins of two years.
+With any data, using <code>"!bin::digit"</code> groups every digit consecutive values starting from the first value.
+Using <code>"!!bin::digit"</code> is the same but starting from the last value.
+With numeric vectors you can: a) use <code>"cut::n"</code> to cut the vector into <code>n</code> equal parts, b) use <code>"cut::a]b["</code> to create the following bins: <code>[min, a]</code>, <code>]a, b[</code>, <code>[b, max]</code>.
+The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. You can add custom bin names by adding them in the character vector after <code>'cut::values'</code>. See details and examples. Dot square bracket expansion (see <code><a href='dsb.html'>dsb</a></code>) is enabled.</p></td>
+    </tr>
+    <tr>
       <th>ref2</th>
       <td><p>A vector of values to be dropped from <code>var</code>. By default they should be values from <code>var</code> and if <code>ref2</code> is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.</p></td>
     </tr>
     <tr>
       <th>keep2</th>
       <td><p>A vector of values to be kept from <code>var</code> (all others are dropped). By default they should be values from <code>var</code> and if <code>keep2</code> is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.</p></td>
+    </tr>
+    <tr>
+      <th>bin2</th>
+      <td><p>A list or vector defining the binning of the second variable. See help for the argument <code>bin</code> for details (or look at the help of the function <code><a href='bin.html'>bin</a></code>). You can use <code>.()</code> for <code><a href='https://rdrr.io/r/base/list.html'>list()</a></code>.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -182,14 +198,10 @@
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>To interact fixed-effects, this function should not be used: instead use directly the syntax <code>fe1^fe2</code> in the fixed-effects part of the formula. Please see the details and examples in the help page of <code><a href='feols.html'>feols</a></code>.</p>
-    <h2 class="hasAnchor" id="shorthand-in-fixest-estimations"><a class="anchor" href="#shorthand-in-fixest-estimations"></a>Shorthand in <code>fixest</code> estimations</h2>
-
-    
-
-<p>In <code>fixest</code> estimations, instead of using <code>i(factor_var, var, ref)</code>, you can instead use the following writing <code>var::factor_var(ref)</code>. Note that this way of doing interactions is deprecated and will be removed in the future.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='coefplot.html'>iplot</a></code> to plot interactions or factors created with <code>i()</code>, <code><a href='feols.html'>feols</a></code> for OLS estimation with multiple fixed-effects.</p></div>
+    <div class='dont-index'><p><code><a href='coefplot.html'>iplot</a></code> to plot interactions or factors created with <code>i()</code>, <code><a href='feols.html'>feols</a></code> for OLS estimation with multiple fixed-effects.</p>
+<p>See the function <code><a href='bin.html'>bin</a></code> for binning variables.</p></div>
     <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
 
     <p>Laurent Berge</p>
@@ -205,112 +217,84 @@
 
 <span class='co'># interaction</span>
 <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>y</span>, <span class='fu'>i</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>y</span>, ref <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;    x y X__CLEAN__x..b.y X__CLEAN__x..c.y X__CLEAN__x..d.y
-#&gt; 1  a 1                0                0                0
-#&gt; 2  b 2                2                0                0
-#&gt; 3  c 2                0                2                0
-#&gt; 4  d 3                0                0                3
-#&gt; 5  a 3                0                0                0
-#&gt; 6  b 3                3                0                0
-#&gt; 7  c 4                0                4                0
-#&gt; 8  d 4                0                0                4
-#&gt; 9  a 4                0                0                0
-#&gt; 10 b 4                4                0                0</div><div class='input'>
+</div><div class='output co'>#&gt;    x y b c d
+#&gt; 1  a 1 0 0 0
+#&gt; 2  b 2 2 0 0
+#&gt; 3  c 2 0 2 0
+#&gt; 4  d 3 0 0 3
+#&gt; 5  a 3 0 0 0
+#&gt; 6  b 3 3 0 0
+#&gt; 7  c 4 0 4 0
+#&gt; 8  d 4 0 0 4
+#&gt; 9  a 4 0 0 0
+#&gt; 10 b 4 4 0 0</div><div class='input'>
 <span class='co'># without interaction</span>
 <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='fu'>i</span><span class='op'>(</span><span class='va'>x</span>, <span class='st'>"b"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;    x X__CLEAN__x..a X__CLEAN__x..c X__CLEAN__x..d
-#&gt; 1  a              1              0              0
-#&gt; 2  b              0              0              0
-#&gt; 3  c              0              1              0
-#&gt; 4  d              0              0              1
-#&gt; 5  a              1              0              0
-#&gt; 6  b              0              0              0
-#&gt; 7  c              0              1              0
-#&gt; 8  d              0              0              1
-#&gt; 9  a              1              0              0
-#&gt; 10 b              0              0              0</div><div class='input'>
+</div><div class='output co'>#&gt;    x a c d
+#&gt; 1  a 1 0 0
+#&gt; 2  b 0 0 0
+#&gt; 3  c 0 1 0
+#&gt; 4  d 0 0 1
+#&gt; 5  a 1 0 0
+#&gt; 6  b 0 0 0
+#&gt; 7  c 0 1 0
+#&gt; 8  d 0 0 1
+#&gt; 9  a 1 0 0
+#&gt; 10 b 0 0 0</div><div class='input'>
 <span class='co'># you can interact factors too</span>
 <span class='va'>z</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"e"</span>, <span class='st'>"f"</span>, <span class='st'>"g"</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>5</span>, <span class='fl'>3</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>
 <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>z</span>, <span class='fu'>i</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>z</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;    x z X__CLEAN__x..a.z..e X__CLEAN__x..a.z..g X__CLEAN__x..b.z..e
-#&gt; 1  a e                   1                   0                   0
-#&gt; 2  b e                   0                   0                   1
-#&gt; 3  c e                   0                   0                   0
-#&gt; 4  d e                   0                   0                   0
-#&gt; 5  a e                   1                   0                   0
-#&gt; 6  b f                   0                   0                   0
-#&gt; 7  c f                   0                   0                   0
-#&gt; 8  d f                   0                   0                   0
-#&gt; 9  a g                   0                   1                   0
-#&gt; 10 b g                   0                   0                   0
-#&gt;    X__CLEAN__x..b.z..f X__CLEAN__x..b.z..g X__CLEAN__x..c.z..e
-#&gt; 1                    0                   0                   0
-#&gt; 2                    0                   0                   0
-#&gt; 3                    0                   0                   1
-#&gt; 4                    0                   0                   0
-#&gt; 5                    0                   0                   0
-#&gt; 6                    1                   0                   0
-#&gt; 7                    0                   0                   0
-#&gt; 8                    0                   0                   0
-#&gt; 9                    0                   0                   0
-#&gt; 10                   0                   1                   0
-#&gt;    X__CLEAN__x..c.z..f X__CLEAN__x..d.z..e X__CLEAN__x..d.z..f
-#&gt; 1                    0                   0                   0
-#&gt; 2                    0                   0                   0
-#&gt; 3                    0                   0                   0
-#&gt; 4                    0                   1                   0
-#&gt; 5                    0                   0                   0
-#&gt; 6                    0                   0                   0
-#&gt; 7                    1                   0                   0
-#&gt; 8                    0                   0                   1
-#&gt; 9                    0                   0                   0
-#&gt; 10                   0                   0                   0</div><div class='input'>
+</div><div class='output co'>#&gt;    x z a.e a.g b.e b.f b.g c.e c.f d.e d.f
+#&gt; 1  a e   1   0   0   0   0   0   0   0   0
+#&gt; 2  b e   0   0   1   0   0   0   0   0   0
+#&gt; 3  c e   0   0   0   0   0   1   0   0   0
+#&gt; 4  d e   0   0   0   0   0   0   0   1   0
+#&gt; 5  a e   1   0   0   0   0   0   0   0   0
+#&gt; 6  b f   0   0   0   1   0   0   0   0   0
+#&gt; 7  c f   0   0   0   0   0   0   1   0   0
+#&gt; 8  d f   0   0   0   0   0   0   0   0   1
+#&gt; 9  a g   0   1   0   0   0   0   0   0   0
+#&gt; 10 b g   0   0   0   0   1   0   0   0   0</div><div class='input'>
 <span class='co'># to force a numeric variable to be treated as a factor: use i.</span>
 <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>y</span>, <span class='fu'>i</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>i.y</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;    x y X__CLEAN__x..a.y..1 X__CLEAN__x..a.y..3 X__CLEAN__x..a.y..4
-#&gt; 1  a 1                   1                   0                   0
-#&gt; 2  b 2                   0                   0                   0
-#&gt; 3  c 2                   0                   0                   0
-#&gt; 4  d 3                   0                   0                   0
-#&gt; 5  a 3                   0                   1                   0
-#&gt; 6  b 3                   0                   0                   0
-#&gt; 7  c 4                   0                   0                   0
-#&gt; 8  d 4                   0                   0                   0
-#&gt; 9  a 4                   0                   0                   1
-#&gt; 10 b 4                   0                   0                   0
-#&gt;    X__CLEAN__x..b.y..2 X__CLEAN__x..b.y..3 X__CLEAN__x..b.y..4
-#&gt; 1                    0                   0                   0
-#&gt; 2                    1                   0                   0
-#&gt; 3                    0                   0                   0
-#&gt; 4                    0                   0                   0
-#&gt; 5                    0                   0                   0
-#&gt; 6                    0                   1                   0
-#&gt; 7                    0                   0                   0
-#&gt; 8                    0                   0                   0
-#&gt; 9                    0                   0                   0
-#&gt; 10                   0                   0                   1
-#&gt;    X__CLEAN__x..c.y..2 X__CLEAN__x..c.y..4 X__CLEAN__x..d.y..3
-#&gt; 1                    0                   0                   0
-#&gt; 2                    0                   0                   0
-#&gt; 3                    1                   0                   0
-#&gt; 4                    0                   0                   1
-#&gt; 5                    0                   0                   0
-#&gt; 6                    0                   0                   0
-#&gt; 7                    0                   1                   0
-#&gt; 8                    0                   0                   0
-#&gt; 9                    0                   0                   0
-#&gt; 10                   0                   0                   0
-#&gt;    X__CLEAN__x..d.y..4
-#&gt; 1                    0
-#&gt; 2                    0
-#&gt; 3                    0
-#&gt; 4                    0
-#&gt; 5                    0
-#&gt; 6                    0
-#&gt; 7                    0
-#&gt; 8                    1
-#&gt; 9                    0
-#&gt; 10                   0</div><div class='input'>
+</div><div class='output co'>#&gt;    x y a.1 a.3 a.4 b.2 b.3 b.4 c.2 c.4 d.3 d.4
+#&gt; 1  a 1   1   0   0   0   0   0   0   0   0   0
+#&gt; 2  b 2   0   0   0   1   0   0   0   0   0   0
+#&gt; 3  c 2   0   0   0   0   0   0   1   0   0   0
+#&gt; 4  d 3   0   0   0   0   0   0   0   0   1   0
+#&gt; 5  a 3   0   1   0   0   0   0   0   0   0   0
+#&gt; 6  b 3   0   0   0   0   1   0   0   0   0   0
+#&gt; 7  c 4   0   0   0   0   0   0   0   1   0   0
+#&gt; 8  d 4   0   0   0   0   0   0   0   0   0   1
+#&gt; 9  a 4   0   0   1   0   0   0   0   0   0   0
+#&gt; 10 b 4   0   0   0   0   0   1   0   0   0   0</div><div class='input'>
+<span class='co'># Binning</span>
+<span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='fu'>i</span><span class='op'>(</span><span class='va'>x</span>, bin <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>ab <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"a"</span>, <span class='st'>"b"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;    x ab c d
+#&gt; 1  a  1 0 0
+#&gt; 2  b  1 0 0
+#&gt; 3  c  0 1 0
+#&gt; 4  d  0 0 1
+#&gt; 5  a  1 0 0
+#&gt; 6  b  1 0 0
+#&gt; 7  c  0 1 0
+#&gt; 8  d  0 0 1
+#&gt; 9  a  1 0 0
+#&gt; 10 b  1 0 0</div><div class='input'>
+<span class='co'># Same as before but using .() for list() and a regular expression</span>
+<span class='co'># note that to trigger a regex, you need to use an @ first</span>
+<span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='fu'>i</span><span class='op'>(</span><span class='va'>x</span>, bin <span class='op'>=</span> <span class='fu'>.</span><span class='op'>(</span>ab <span class='op'>=</span> <span class='st'>"@a|b"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;    x ab c d
+#&gt; 1  a  1 0 0
+#&gt; 2  b  1 0 0
+#&gt; 3  c  0 1 0
+#&gt; 4  d  0 0 1
+#&gt; 5  a  1 0 0
+#&gt; 6  b  1 0 0
+#&gt; 7  c  0 1 0
+#&gt; 8  d  0 0 1
+#&gt; 9  a  1 0 0
+#&gt; 10 b  1 0 0</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># In fixest estimations</span>
 <span class='co'>#</span>
@@ -327,7 +311,7 @@
 
 <span class='co'># we plot the second set of variables created with i()</span>
 <span class='co'># =&gt; we need to use keep (otherwise only the first one is represented)</span>
-<span class='fu'><a href='coefplot.html'>iplot</a></span><span class='op'>(</span><span class='va'>est_bis</span>, keep <span class='op'>=</span> <span class='st'>"trea"</span><span class='op'>)</span>
+<span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='va'>est_bis</span>, keep <span class='op'>=</span> <span class='st'>"trea"</span><span class='op'>)</span>
 </div><div class='img'><img src='i-2.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># =&gt; special treatment in etable</span>
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_bis</span>, dict <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"6"</span> <span class='op'>=</span> <span class='st'>"six"</span><span class='op'>)</span><span class='op'>)</span>
@@ -402,6 +386,36 @@
 #&gt; Observations                       111               111
 #&gt; R2                             0.52636           0.37684
 #&gt; Adj. R2                        0.40795           0.27844</div><div class='input'>
+<span class='co'>#</span>
+<span class='co'># Binning</span>
+<span class='co'>#</span>
+
+<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>airquality</span><span class='op'>)</span>
+
+<span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='fu'>i</span><span class='op'>(</span><span class='va'>Month</span>, bin <span class='op'>=</span> <span class='st'>"bin::2"</span><span class='op'>)</span>, <span class='va'>airquality</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 37 observations removed because of NA values (LHS: 37).</span></div><div class='output co'>#&gt; OLS estimation, Dep. Var.: Ozone
+#&gt; Observations: 116 
+#&gt; Standard-errors: IID 
+#&gt;             Estimate Std. Error t value   Pr(&gt;|t|)    
+#&gt; (Intercept)  23.6154    6.19450 3.81231 0.00022469 ***
+#&gt; Month::6     27.8703    8.17782 3.40804 0.00090749 ***
+#&gt; Month::8     21.3119    7.51740 2.83501 0.00543040 ** 
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; RMSE: 31.2   Adj. R2: 0.083194</div><div class='input'>
+<span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='fu'>i</span><span class='op'>(</span><span class='va'>Month</span>, bin <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>summer <span class='op'>=</span> <span class='fl'>7</span><span class='op'>:</span><span class='fl'>9</span><span class='op'>)</span><span class='op'>)</span>, <span class='va'>airquality</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 37 observations removed because of NA values (LHS: 37).</span></div><div class='output co'>#&gt; OLS estimation, Dep. Var.: Ozone
+#&gt; Observations: 116 
+#&gt; Standard-errors: IID 
+#&gt;               Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept)   23.61538    6.13010 3.852364 0.00019455 ***
+#&gt; Month::6       5.82906   12.08872 0.482190 0.63060377    
+#&gt; Month::summer 25.86610    7.04559 3.671249 0.00037013 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; RMSE: 30.9   Adj. R2: 0.102158</div><div class='input'>
+
+
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

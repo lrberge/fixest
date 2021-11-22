@@ -4,7 +4,7 @@
 \alias{i}
 \title{Create, or interact variables with, factors}
 \usage{
-i(factor_var, var, ref, keep, ref2, keep2, ...)
+i(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...)
 }
 \arguments{
 \item{factor_var}{A vector (of any type) that will be treated as a factor. You can set references (i.e. exclude values for which to create dummies) with the \code{ref} argument.}
@@ -15,9 +15,21 @@ i(factor_var, var, ref, keep, ref2, keep2, ...)
 
 \item{keep}{A vector of values to be kept from \code{factor_var} (all others are dropped). By default they should be values from \code{factor_var} and if \code{keep} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.}
 
+\item{bin}{A list of values to be grouped, a vector, a formula, or the special values \code{"bin::digit"} or \code{"cut::values"}. To create a new value from old values, use \code{bin = list("new_value"=old_values)} with \code{old_values} a vector of existing values. You can use \code{.()} for \code{list()}.
+It accepts regular expressions, but they must start with an \code{"@"}, like in \code{bin="@Aug|Dec"}. It accepts one-sided formulas which must contain the variable \code{x}, e.g. \code{bin=list("<2" = ~x < 2)}.
+The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. In the name, adding \code{"@d"}, with \code{d} a digit, will relocate the value in position \code{d}: useful to change the position of factors. Use \code{"@"} as first item to make subsequent items be located first in the factor.
+Feeding in a vector is like using a list without name and only a single element. If the vector is numeric, you can use the special value \code{"bin::digit"} to group every \code{digit} element.
+For example if \code{x} represents years, using \code{bin="bin::2"} creates bins of two years.
+With any data, using \code{"!bin::digit"} groups every digit consecutive values starting from the first value.
+Using \code{"!!bin::digit"} is the same but starting from the last value.
+With numeric vectors you can: a) use \code{"cut::n"} to cut the vector into \code{n} equal parts, b) use \code{"cut::a]b["} to create the following bins: \code{[min, a]}, \code{]a, b[}, \code{[b, max]}.
+The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. You can add custom bin names by adding them in the character vector after \code{'cut::values'}. See details and examples. Dot square bracket expansion (see \code{\link[fixest]{dsb}}) is enabled.}
+
 \item{ref2}{A vector of values to be dropped from \code{var}. By default they should be values from \code{var} and if \code{ref2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.}
 
 \item{keep2}{A vector of values to be kept from \code{var} (all others are dropped). By default they should be values from \code{var} and if \code{keep2} is a character vector partial matching is applied. Use "@" as the first character to enable regular expression matching instead.}
+
+\item{bin2}{A list or vector defining the binning of the second variable. See help for the argument \code{bin} for details (or look at the help of the function \code{\link[fixest]{bin}}). You can use \code{.()} for \code{list()}.}
 
 \item{...}{Not currently used.}
 }
@@ -30,11 +42,6 @@ Treat a variable as a factor, or interacts a variable with a factor. Values to b
 \details{
 To interact fixed-effects, this function should not be used: instead use directly the syntax \code{fe1^fe2} in the fixed-effects part of the formula. Please see the details and examples in the help page of \code{\link[fixest]{feols}}.
 }
-\section{Shorthand in \code{fixest} estimations}{
-
-In \code{fixest} estimations, instead of using \code{i(factor_var, var, ref)}, you can instead use the following writing \code{var::factor_var(ref)}. Note that this way of doing interactions is deprecated and will be removed in the future.
-}
-
 \examples{
 
 #
@@ -57,6 +64,13 @@ data.frame(x, z, i(x, z))
 # to force a numeric variable to be treated as a factor: use i.
 data.frame(x, y, i(x, i.y))
 
+# Binning
+data.frame(x, i(x, bin = list(ab = c("a", "b"))))
+
+# Same as before but using .() for list() and a regular expression
+# note that to trigger a regex, you need to use an @ first
+data.frame(x, i(x, bin = .(ab = "@a|b")))
+
 #
 # In fixest estimations
 #
@@ -73,7 +87,7 @@ est_bis = feols(y ~ x1 + i(period, keep = 3:6) + i(period, treat, 5) | id, base_
 
 # we plot the second set of variables created with i()
 # => we need to use keep (otherwise only the first one is represented)
-iplot(est_bis, keep = "trea")
+coefplot(est_bis, keep = "trea")
 
 # => special treatment in etable
 etable(est_bis, dict = c("6" = "six"))
@@ -95,9 +109,23 @@ res_2F_bis = feols(Ozone ~ Solar.R + i(Month, i.week, ref = 5, ref2 = 1), aq)
 
 etable(res_2F, res_2F_bis)
 
+#
+# Binning
+#
+
+data(airquality)
+
+feols(Ozone ~ i(Month, bin = "bin::2"), airquality)
+
+feols(Ozone ~ i(Month, bin = list(summer = 7:9)), airquality)
+
+
+
 }
 \seealso{
 \code{\link[fixest:coefplot]{iplot}} to plot interactions or factors created with \code{i()}, \code{\link[fixest]{feols}} for OLS estimation with multiple fixed-effects.
+
+See the function \code{\link[fixest]{bin}} for binning variables.
 }
 \author{
 Laurent Berge

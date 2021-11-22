@@ -9,11 +9,12 @@ export(feNmlm, femlm, feols, feglm, fepois, fenegbin)
 export(feglm.fit, feols.fit)
 # etable
 export(etable, style.tex, style.df)
-export(extraline_register)
+export(extralines_register)
 # misc funs
 export(collinearity)
 export(r2, fitstat, fitstat_register, wald)
 export(fixest_startup_msg)
+export(check_conv_feols)
 # did
 export(did_means)
 # graph
@@ -24,10 +25,10 @@ export(coeftable, se, tstat, pvalue)
 export(dof, ssc, degrees_freedom)
 # Lag related
 export(panel, unpanel, f, l, d)
-# interactions
-export(i)
+# factor/interactions/binning
+export(i, bin)
 # macro
-export(xpd)
+export(xpd, dsb)
 # utilities
 export(to_integer, demean, obs)
 # setters & getters
@@ -35,6 +36,9 @@ exportPattern("^(s|g)etFixest")
 
 # VCOV funs
 export(vcov_cluster, vcov_DK, vcov_NW, vcov_conley)
+
+# other stuff
+export(n_unik, osize, sample_df)
 
 
 # deprecated
@@ -44,9 +48,13 @@ S3method(summary, fixest.obs2remove)
 # Base methods
 S3method(print, fixest)
 S3method(print, fixest_fitstat)
+S3method(print, vec_n_unik)
+S3method(print, list_n_unik)
+S3method(print, osize)
 S3method(summary, fixest.fixef)
 S3method(summary, fixest)
 S3method(summary, fixest_list)
+S3method(summary, fixest_check_conv)
 S3method(aggregate, fixest)
 S3method(plot, fixest.fixef)
 S3method("[", fixest_panel) # Lag related
@@ -57,6 +65,9 @@ S3method("$", fixest_multi)
 S3method(print, fixest_multi)
 S3method(summary, fixest_multi)
 S3method(as.list, fixest_multi)
+# etable
+S3method(print, etable_tex)
+S3method(print, etable_df)
 
 # rep
 S3method(rep, fixest) # rep fixest objects
@@ -111,7 +122,7 @@ importFrom(numDeriv, hessian, jacobian, genD)
 # needs re-export :-(, not the best solution but...
 importFrom(nlme, fixef)
 export(fixef)
-importFrom(sandwich, estfun, bread)
+importFrom(sandwich, estfun, bread, bwNeweyWest)
 export(estfun, bread)
 
 importFrom(stats, cor, dnorm, lm, nlminb, optim,
@@ -123,9 +134,10 @@ importFrom(stats, model.matrix, sigma, deviance, weights, terms,
              nobs, AIC, BIC, update, predict, fitted, fitted.values,
 			  resid, residuals, logLik, coef, coefficients, lag,
 			  confint, vcov, binomial, setNames, complete.cases, pchisq, pf,
-			  aggregate, cancor, rnorm, median)
+			  aggregate, cancor, rnorm, median, qt, .getXlevels, quantile)
 
-importFrom(utils, combn, head, tail, packageVersion, object.size)
+importFrom(utils, combn, head, tail, packageVersion, object.size, read.csv,
+           write.csv, write.table, capture.output)
 
 importFrom(Rcpp, evalCpp)
 
@@ -136,10 +148,6 @@ importFrom(graphics, par, plot, box, axis, abline, points, text, title,
 importFrom(grDevices, rgb, col2rgb)
 
 importFrom(methods, formalArgs)
-
-
-
-
 
 
 # Auto-exports::vcov_aliases

@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.2</span>
       </span>
     </div>
 
@@ -94,7 +94,7 @@
       <h1 data-toc-skip>On standard-errors</h1>
                         <h4 class="author">Laurent Berge</h4>
             
-            <h4 class="date">2021-08-26</h4>
+            <h4 class="date">2021-11-04</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/standard_errors.Rmd"><code>vignettes/standard_errors.Rmd</code></a></small>
       <div class="hidden name"><code>standard_errors.Rmd</code></div>
@@ -103,8 +103,10 @@
 
     
     
-<p>It is an euphemism to say that standard-errors are a critical element of your estimations: literally your paper’s results depend on them. It is therefore unfortunate that no conventional “best” way exists to compute them. Multiple definitions can create confusion and the purpose of this document is to lay bare the fiddly details of standard-error computation in this package.</p>
-<p>The first part describes how standard-errors are computed in <code>fixest</code>’s estimations. Please note that here I don’t discuss the <em>why</em>, but only the <em>how</em>. For a thorough introduction to the topic, see the excellent paper by <a href="https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf">Zeileis, Koll and Graham (2020)</a>. The second part illustrates how to replicate some standard-errors obtained from other estimation methods with <code>fixest</code>.</p>
+<p>It is an euphemism to say that standard-errors are a critical element of your estimations: literally your paper’s results depend on them. It is therefore unfortunate that no conventional “best” way exists to compute them.</p>
+<p>For example, when performing the exact same estimation across various software, it is not uncommon to obtain different standard-errors. If your first thought is: there must be a bug… well, put that thought aside because there ain’t no bug. It often boils down to the choices the developer made regarding small sample correction which, maybe surprisingly, has many degrees of freedom when it comes to implementation.</p>
+<p>Multiple definitions can create confusion and the purpose of this document is to lay bare the fiddly details of standard-error computation in this package.</p>
+<p>The first part of this vignette describes how standard-errors are computed in <code>fixest</code>’s estimations. In particular, it details all the possible choices surrounding small sample correction. Please note that here I don’t discuss the <em>why</em>, but only the <em>how</em>. For a thorough introduction to the topic, see the excellent paper by <a href="https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf">Zeileis, Koll and Graham (2020)</a>. The second part illustrates how to replicate some standard-errors obtained from other estimation methods with <code>fixest</code>.</p>
 <p>This document applies to <code>fixest</code> version 0.10.0 or higher.</p>
 <div id="how-standard-errors-are-computed-in-fixest" class="section level2">
 <h2 class="hasAnchor">
@@ -123,12 +125,12 @@
 #&gt; Observations: 38,325 
 #&gt; Fixed-effects: Destination: 15,  Origin: 15,  Product: 20,  Year: 10
 #&gt; Standard-errors: Clustered (Destination &amp; Origin) 
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; log(dist_km)  -2.1699   0.171367 -12.662  4.68e-09 ***
+#&gt;              Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; log(dist_km) -2.16988   0.171367 -12.6621 4.6802e-09 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 1.7434     Adj. R2: 0.705139
-#&gt;                Within R2: 0.219322</code></pre>
+#&gt; RMSE: 1.74337     Adj. R2: 0.705139
+#&gt;                 Within R2: 0.219322</code></pre>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Two-way clustered SEs, without small sample correction</span>
 <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">gravity</span>, vcov <span class="op">=</span> <span class="st">"twoway"</span>, ssc <span class="op">=</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>adj <span class="op">=</span> <span class="cn">FALSE</span>, cluster.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></code></pre></div>
@@ -136,12 +138,12 @@
 #&gt; Observations: 38,325 
 #&gt; Fixed-effects: Destination: 15,  Origin: 15,  Product: 20,  Year: 10
 #&gt; Standard-errors: Clustered (Destination &amp; Origin) 
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; log(dist_km)  -2.1699   0.165494 -13.112  2.98e-09 ***
+#&gt;              Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; log(dist_km) -2.16988   0.165494 -13.1115 2.9764e-09 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 1.7434     Adj. R2: 0.705139
-#&gt;                Within R2: 0.219322</code></pre>
+#&gt; RMSE: 1.74337     Adj. R2: 0.705139
+#&gt;                 Within R2: 0.219322</code></pre>
 <div id="the-argument-vcov" class="section level3">
 <h3 class="hasAnchor">
 <a href="#the-argument-vcov" class="anchor"></a>The argument <code>vcov</code>
@@ -293,19 +295,15 @@
 <span class="co"># Newey-west</span>
 <span class="co">#</span>
 
-<span class="va">se_lm_NW</span>    <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://sandwich.R-Forge.R-project.org//reference/vcovPL.html">vcovPL</a></span><span class="op">(</span><span class="va">est_lm</span>, cluster <span class="op">=</span> <span class="op">~</span> <span class="va">firm</span> <span class="op">+</span> <span class="va">year</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"capital"</span><span class="op">]</span>
 <span class="va">se_plm_NW</span>   <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/plm/man/vcovNW.html">vcovNW</a></span><span class="op">(</span><span class="va">est_plm</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="st">"capital"</span><span class="op">]</span>
 <span class="va">se_feols_NW</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="st">"NW"</span><span class="op">)</span>
 
-<span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="va">se_lm_NW</span>, <span class="va">se_plm_NW</span>, <span class="va">se_feols_NW</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="va">se_plm_NW</span>, <span class="va">se_feols_NW</span><span class="op">)</span></code></pre></div>
 <pre><code>#&gt;                capital
-#&gt; se_lm_NW    0.09067404
 #&gt; se_plm_NW   0.08390222
 #&gt; se_feols_NW 0.08629896</code></pre>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Note that sandwich::vcovPL currently cannot be replicated</span>
-
-<span class="co"># we can replicate plm's by changing the type of SSC:</span>
+<code class="sourceCode R"><span class="co"># we can replicate plm's by changing the type of SSC:</span>
 <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="va">se_plm_NW</span>, 
       <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="va">NW</span> <span class="op">~</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>adj <span class="op">=</span> <span class="cn">FALSE</span>, cluster.adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>#&gt;              capital
@@ -366,8 +364,8 @@
 #&gt; [2,] 0.06328129</code></pre>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Now with two-way clustered standard-errors</span>
-<span class="va">est_lfe_2way</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/lfe/man/felm.html">felm</a></span><span class="op">(</span><span class="va">inv</span> <span class="op">~</span> <span class="va">capital</span> <span class="op">|</span> <span class="va">firm</span> <span class="op">+</span> <span class="va">year</span> <span class="op">|</span> <span class="fl">0</span> <span class="op">|</span> <span class="va">firm</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">Grunfeld</span><span class="op">)</span>
-<span class="va">se_lfe_2way</span>  <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_lfe_2way</span><span class="op">)</span>
+<span class="va">est_lfe_2way</span>  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/lfe/man/felm.html">felm</a></span><span class="op">(</span><span class="va">inv</span> <span class="op">~</span> <span class="va">capital</span> <span class="op">|</span> <span class="va">firm</span> <span class="op">+</span> <span class="va">year</span> <span class="op">|</span> <span class="fl">0</span> <span class="op">|</span> <span class="va">firm</span> <span class="op">+</span> <span class="va">year</span>, <span class="va">Grunfeld</span><span class="op">)</span>
+<span class="va">se_lfe_2way</span>   <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_lfe_2way</span><span class="op">)</span>
 <span class="va">se_feols_2way</span> <span class="op">=</span> <span class="fu"><a href="../reference/coeftable.html">se</a></span><span class="op">(</span><span class="va">est_feols</span>, vcov <span class="op">=</span> <span class="st">"twoway"</span><span class="op">)</span>
 <span class="fu"><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind</a></span><span class="op">(</span><span class="va">se_lfe_2way</span>, <span class="va">se_feols_2way</span><span class="op">)</span></code></pre></div>
 <pre><code>#&gt;                  capital
@@ -435,8 +433,8 @@
 <p>I wish to thank Karl Dunkle Werner, Grant McDermott and Ivo Welch for raising the issue and for helpful discussions. Any error is of course my own.</p>
 <p>Cameron AC, Gelbach JB, Miller DL (2011). “<a href="https://www.nber.org/papers/t0327">Robust Inference with Multiway Clustering</a>”, Journal of Business &amp; Ecomomic Statistics, 29(2), 238–249.</p>
 <p>Kauermann G, Carroll RJ (2001). “<a href="https://www.tandfonline.com/doi/abs/10.1198/016214501753382309">A Note on the Efficiency of Sandwich Covariance Matrix Estimation</a>”, Journal of the American Statistical Association, 96(456), 1387–1396.</p>
-<p>MacKinnon, JG, White, H (1985). “Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties” Journal of Econometrics, 29(3), 305–325.</p>
-<p>Milo G (2017). “<a href="https://www.jstatsoft.org/index.php/jss/article/view/v082i03/v82i03.pdf">Robust Standard Error Estimators for Panel Models: A Unifying Approach</a>” Journal of Statistical Software, 82(3).</p>
+<p>MacKinnon JG, White H (1985). “Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties” Journal of Econometrics, 29(3), 305–325.</p>
+<p>Milo G (2017). “<a href="https://doi.org/10.18637/jss.v082.i03">Robust Standard Error Estimators for Panel Models: A Unifying Approach</a>” Journal of Statistical Software, 82(3).</p>
 <p>Zeileis A, Koll S, Graham N (2020). “<a href="https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf">Various Versatile Variances: An Object-Oriented Implementation of Clustered Covariances in R.</a>” Journal of Statistical Software, 95(1), 1–36.</p>
 </div>
   </div>

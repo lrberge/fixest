@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.2</span>
       </span>
     </div>
 
@@ -173,54 +173,54 @@
 <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fu'>sw</span><span class='op'>(</span><span class='va'>x1</span>, <span class='va'>x2</span>, <span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; Standard-errors: IID 
 #&gt; Expl. vars.: x1
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; (Intercept)  6.526200   0.478896 13.6280 &lt; 2.2e-16 ***
-#&gt; x1          -0.223361   0.155081 -1.4403  0.151898    
+#&gt;              Estimate Std. Error  t value  Pr(&gt;|t|)    
+#&gt; (Intercept)  6.526223   0.478896 13.62763 &lt; 2.2e-16 ***
+#&gt; x1          -0.223361   0.155081 -1.44029    0.1519    
 #&gt; ---
 #&gt; Expl. vars.: x2
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; (Intercept) 4.306600   0.078389  54.939 &lt; 2.2e-16 ***
-#&gt; x2          0.408922   0.018891  21.646 &lt; 2.2e-16 ***
+#&gt;             Estimate Std. Error t value  Pr(&gt;|t|)    
+#&gt; (Intercept) 4.306603   0.078389 54.9389 &lt; 2.2e-16 ***
+#&gt; x2          0.408922   0.018891 21.6460 &lt; 2.2e-16 ***
 #&gt; ---
 #&gt; Expl. vars.: x3
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; (Intercept)  4.77760   0.072935  65.506 &lt; 2.2e-16 ***
-#&gt; x3           0.88858   0.051374  17.296 &lt; 2.2e-16 ***</div><div class='input'>
+#&gt;             Estimate Std. Error t value  Pr(&gt;|t|)    
+#&gt; (Intercept) 4.777629   0.072935 65.5055 &lt; 2.2e-16 ***
+#&gt; x3          0.888580   0.051374 17.2965 &lt; 2.2e-16 ***</div><div class='input'>
 <span class='co'># Cumulative stepwise</span>
 <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fu'>csw</span><span class='op'>(</span><span class='va'>x1</span>, <span class='va'>x2</span>, <span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; Standard-errors: IID 
 #&gt; Expl. vars.: x1
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; (Intercept)  6.526200   0.478896 13.6280 &lt; 2.2e-16 ***
-#&gt; x1          -0.223361   0.155081 -1.4403  0.151898    
+#&gt;              Estimate Std. Error  t value  Pr(&gt;|t|)    
+#&gt; (Intercept)  6.526223   0.478896 13.62763 &lt; 2.2e-16 ***
+#&gt; x1          -0.223361   0.155081 -1.44029    0.1519    
 #&gt; ---
 #&gt; Expl. vars.: x1 + x2
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; (Intercept) 2.249100   0.247970  9.0702  7.04e-16 ***
-#&gt; x1          0.595525   0.069328  8.5899  1.16e-14 ***
-#&gt; x2          0.471920   0.017118 27.5690 &lt; 2.2e-16 ***
+#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept) 2.249140   0.247970  9.07022 7.0385e-16 ***
+#&gt; x1          0.595525   0.069328  8.58994 1.1633e-14 ***
+#&gt; x2          0.471920   0.017118 27.56916  &lt; 2.2e-16 ***
 #&gt; ---
 #&gt; Expl. vars.: x1 + x2 + x3
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; (Intercept)  1.856000   0.250777  7.4010  9.85e-12 ***
-#&gt; x1           0.650837   0.066647  9.7654 &lt; 2.2e-16 ***
-#&gt; x2           0.709132   0.056719 12.5020 &lt; 2.2e-16 ***
-#&gt; x3          -0.556483   0.127548 -4.3629   2.4e-05 ***</div><div class='input'>
+#&gt;              Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept)  1.855997   0.250777  7.40098 9.8539e-12 ***
+#&gt; x1           0.650837   0.066647  9.76538  &lt; 2.2e-16 ***
+#&gt; x2           0.709132   0.056719 12.50248  &lt; 2.2e-16 ***
+#&gt; x3          -0.556483   0.127548 -4.36293 2.4129e-05 ***</div><div class='input'>
 <span class='co'># Using the 0</span>
 <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='va'>x2</span> <span class='op'>+</span> <span class='fu'>sw0</span><span class='op'>(</span><span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; Standard-errors: IID 
 #&gt; Expl. vars.: x1 + x2
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; (Intercept) 2.249100   0.247970  9.0702  7.04e-16 ***
-#&gt; x1          0.595525   0.069328  8.5899  1.16e-14 ***
-#&gt; x2          0.471920   0.017118 27.5690 &lt; 2.2e-16 ***
+#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept) 2.249140   0.247970  9.07022 7.0385e-16 ***
+#&gt; x1          0.595525   0.069328  8.58994 1.1633e-14 ***
+#&gt; x2          0.471920   0.017118 27.56916  &lt; 2.2e-16 ***
 #&gt; ---
 #&gt; Expl. vars.: x1 + x2 + x3
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; (Intercept)  1.856000   0.250777  7.4010  9.85e-12 ***
-#&gt; x1           0.650837   0.066647  9.7654 &lt; 2.2e-16 ***
-#&gt; x2           0.709132   0.056719 12.5020 &lt; 2.2e-16 ***
-#&gt; x3          -0.556483   0.127548 -4.3629   2.4e-05 ***</div><div class='input'>
+#&gt;              Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept)  1.855997   0.250777  7.40098 9.8539e-12 ***
+#&gt; x1           0.650837   0.066647  9.76538  &lt; 2.2e-16 ***
+#&gt; x2           0.709132   0.056719 12.50248  &lt; 2.2e-16 ***
+#&gt; x3          -0.556483   0.127548 -4.36293 2.4129e-05 ***</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

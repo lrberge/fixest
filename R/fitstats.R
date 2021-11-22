@@ -1358,24 +1358,17 @@ degrees_freedom = function(x, type, vars = NULL, vcov = NULL, se = NULL, cluster
 
     if(is.null(vcov)){
         dof.K = x$nparams
-        t.df = NULL
+        df.t = nobs(x) - dof.K
     } else {
-        t.df = attr(vcov, "G")
+        # From v0.10.0 onward, "dt.t" is always provided!
+        df.t = attr(vcov, "df.t")
         dof.K = attr(vcov, "dof.K")
     }
 
-
-    if(type == "k"){
-        res = dof.K
-    } else if(type == "resid"){
-        res = x$nobs - dof.K
-    } else if(type == "t"){
-        if(is.null(t.df)){
-            res = nobs(x) - dof.K
-        } else {
-            res = t.df - 1
-        }
-    }
+    res = switch(type,
+                 "k" = dof.K,
+                 "resid" = max(nobs(x) - dof.K, 1),
+                 "t" = df.t)
 
     res
 }
@@ -1503,7 +1496,9 @@ kp_stat = function(x){
     # There is need to compute the vcov specifically for this case
     # We do it the same way as it was for x
 
-    if(identical(x$se_info$se, "IID")){
+    VCOV_TYPE = attr(x$cov.scaled, "type")
+
+    if(identical(VCOV_TYPE, "IID")){
         vlab = chol(tcrossprod(kronv) / nrow(X_proj))
 
     } else {
@@ -1521,7 +1516,7 @@ kp_stat = function(x){
         vhat = solve(K, t(solve(K, meat)))
 
         # DOF correction now
-        n = nobs(x) - (x$se_info$se == "cluster")
+        n = nobs(x) - identical(VCOV_TYPE, "cluster")
         df_resid = degrees_freedom(x, "resid", stage = 1)
         vhat = vhat * n / df_resid
 

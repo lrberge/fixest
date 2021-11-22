@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.2</span>
       </span>
     </div>
 
@@ -166,7 +166,7 @@
     </tr>
     <tr>
       <th>lag</th>
-      <td><p>An integer scalar, default is <code>NULL</code>. If <code>NULL</code>, then the default lag is equal to <code>n_t^0.25</code> with <code>n_t</code> the number of time periods.</p></td>
+      <td><p>An integer scalar, default is <code>NULL</code>. If <code>NULL</code>, then the default lag is equal to <code>n_t^0.25</code> with <code>n_t</code> the number of time periods (as of Newey and West 1987) for panel Newey-West and Driscoll-Kraay. The default for the time series Newey-West is computed via <code><a href='https://sandwich.R-Forge.R-project.org//reference/NeweyWest.html'>bwNeweyWest</a></code> which implements the Newey and West 1994 method.</p></td>
     </tr>
     <tr>
       <th>ssc</th>
@@ -187,10 +187,18 @@
     <p>There are currently three VCOV types: Newey-West applied to time series, Newey-West applied to a panel setting (when the argument 'unit' is not missing), and Driscoll-Kraay.</p>
 <p>The functions on this page without the prefix "vcov_" do not compute VCOVs directly but are meant to be used in the argument <code>vcov</code> of <code>fixest</code> functions (e.g. in <code><a href='vcov.fixest.html'>vcov.fixest</a></code> or even in the estimation calls).</p>
 <p>Note that for Driscoll-Kraay VCOVs, to ensure its properties the number of periods should be long enough (a minimum of 20 periods or so).</p>
+    <h2 class="hasAnchor" id="lag-selection"><a class="anchor" href="#lag-selection"></a>Lag selection</h2>
+
+    
+
+
+<p>The default lag selection depends on whether the VCOV applies to a panel or a time series.</p>
+<p>For panels, i.e. panel Newey-West or Driscoll-Kraay VCOV, the default lag is <code>n_t^0.25</code> with <code>n_t</code> the number of time periods. This is based on Newey and West 1987.</p>
+<p>For time series Newey-West, the default lag is found thanks to the <code><a href='https://sandwich.R-Forge.R-project.org//reference/NeweyWest.html'>bwNeweyWest</a></code> function from the <code>sandwich</code> package. It is based on Newey and West 1994.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
-    <p>Newey WK, West KD (1987). "A Simple, Positive Semi-Deﬁnite, Heteroskedasticity and Autocorrelation Consistent Covariance Matrix." <em>Econometrica</em>, 55(3), 703–708. doi:10.2307/1913610.</p>
-<p>Driscoll JC, Kraay AC (1998). "Consistent Covariance Matrix Estimation with Spatially Dependent Panel Data." <em>The Review of Economics and Statistics</em>, 80(4), 549–560. doi:10.1162/003465398557825.</p>
+    <p>Newey WK, West KD (1987). "A Simple, Positive Semi-Definite, Heteroskedasticity and Autocorrelation Consistent Covariance Matrix." <em>Econometrica</em>, 55(3), 703-708. doi:10.2307/1913610.</p>
+<p>Driscoll JC, Kraay AC (1998). "Consistent Covariance Matrix Estimation with Spatially Dependent Panel Data." <em>The Review of Economics and Statistics</em>, 80(4), 549-560. doi:10.1162/003465398557825.</p>
 <p>Milo G (2017). "Robust Standard Error Estimators for Panel Models: A Unifying Approach" <em>Journal of Statistical Software</em>, 82(3). doi:10.18637/jss.v082.i03.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
@@ -206,23 +214,23 @@
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 1,080 
 #&gt; Standard-errors: Newey-West (L=2) 
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; (Intercept)  1.98880   0.186061  10.689  2.05e-06 ***
-#&gt; x1           0.98311   0.051618  19.046  1.40e-08 ***
+#&gt;             Estimate Std. Error t value   Pr(&gt;|t|)    
+#&gt; (Intercept) 1.988753   0.186061 10.6887 2.0500e-06 ***
+#&gt; x1          0.983110   0.051618 19.0457 1.3968e-08 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 4.8969   Adj. R2: 0.262357</div><div class='input'>
+#&gt; RMSE: 4.89686   Adj. R2: 0.262357</div><div class='input'>
 <span class='co'># Driscoll-Kraay</span>
 <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base_did</span>, <span class='va'>DK</span> <span class='op'>~</span> <span class='va'>period</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 1,080 
 #&gt; Standard-errors: Driscoll-Kraay (L=1) 
-#&gt;             Estimate Std. Error t value  Pr(&gt;|t|))    
-#&gt; (Intercept)  1.98880   0.789538  2.5189 3.2829e-02 *  
-#&gt; x1           0.98311   0.036115 27.2210 5.9100e-10 ***
+#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept) 1.988753   0.789538  2.51888 3.2829e-02 *  
+#&gt; x1          0.983110   0.036115 27.22141 5.9051e-10 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 4.8969   Adj. R2: 0.262357</div><div class='input'>
+#&gt; RMSE: 4.89686   Adj. R2: 0.262357</div><div class='input'>
 <span class='co'># If the estimation is made with a panel.id, the dimensions are</span>
 <span class='co'># automatically deduced:</span>
 <span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base_did</span>, <span class='st'>"NW"</span>, panel.id <span class='op'>=</span> <span class='op'>~</span><span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>)</span>
@@ -230,12 +238,12 @@
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 1,080 
 #&gt; Standard-errors: Newey-West (L=1) 
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; (Intercept)  1.98880   0.174111  11.422  1.17e-06 ***
-#&gt; x1           0.98311   0.052699  18.655  1.68e-08 ***
+#&gt;             Estimate Std. Error t value   Pr(&gt;|t|)    
+#&gt; (Intercept) 1.988753   0.174111 11.4223 1.1709e-06 ***
+#&gt; x1          0.983110   0.052699 18.6551 1.6762e-08 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 4.8969   Adj. R2: 0.262357</div><div class='input'>
+#&gt; RMSE: 4.89686   Adj. R2: 0.262357</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># Post estimation</span>
 <span class='co'>#</span>

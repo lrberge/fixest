@@ -963,9 +963,44 @@ unpanel = function(x){
     return(res)
 }
 
-terms_hat = function(fml, fastCombine = TRUE){
+terms_hat = function(fml, fastCombine = TRUE, n_unik = FALSE){
 
-    fml_char = as.character(fml[length(fml)])
+    fml_char = as.character(fml)[length(fml)]
+
+    # %^%: hat operator, in n_unik
+    # + distribution
+    if(n_unik){
+
+        any_hat = grepl("^", fml_char, fixed = TRUE)
+        if(any_hat){
+            fml_char = gsub("%^%", "*", fml_char, fixed = TRUE)
+            fml_char = gsub("\\^(?=[^[:digit:]])", ":", fml_char, perl = TRUE)
+        }
+
+        vars = get_vars(.xpd(rhs = fml_char))
+
+        # distribution:
+        #   (a + b)[cond] => a[cond] + b[cond]
+        is_paren = grepl("^\\(", vars)
+        while(any(is_paren)){
+
+            i = which(is_paren)[1]
+            info_paren = extract_fun(paste0("PAREN", vars[i]), "PAREN")
+            vars_in_paren = get_vars(.xpd(rhs = gsub("^PAREN\\(|\\)$", "", info_paren$fun)))
+
+            new_vars = paste0(vars_in_paren, info_paren$after)
+
+            vars = insert(vars[-i], new_vars, i)
+            is_paren = grepl("^\\(", vars)
+        }
+
+        vars = gsub(":", "^", vars, fixed = TRUE)
+
+        fml = .xpd(rhs = vars)
+        fml_char = as.character(fml)[length(fml)]
+    }
+
+
     if(grepl("^", fml_char, fixed = TRUE)){
         # special indicator to combine factors
         fml = fml_combine(fml_char, fastCombine)
@@ -1120,6 +1155,55 @@ expand_lags = function(fml){
 
     as.formula(paste0(lhs_fml, "~", rhs_fml, fixef_fml, iv_fml))
 }
+
+
+
+set_panel_meta_info = function(object, newdata){
+    # We set the variable panel__meta__info with the current data set
+
+    panel__meta__info = NULL
+
+    fml_full = formula(object, type = "full")
+    if(check_lag(fml_full)){
+        if(!is.null(object$panel.info)){
+            if(is.null(attr(newdata, "panel_info"))){
+                # We try to recreate the panel
+                if(any(!names(object$panel.info) %in% c("", "data", "panel.id"))){
+                    # This was NOT a standard panel creation
+                    stop("The estimation contained lags/leads and the original data was a 'fixest_panel' while the new data is not. Please set the new data as a panel first with the function panel(). NOTA: the original call to panel was:\n", deparse_long(object$panel.info))
+                } else {
+                    panel__meta__info = panel_setup(newdata, object$panel.id, from_fixest = TRUE)
+                }
+            } else {
+                panel__meta__info = attr(newdata, "panel_info")
+            }
+        } else {
+            panel__meta__info = panel_setup(newdata, object$panel.id, from_fixest = TRUE)
+        }
+    }
+
+    panel__meta__info
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

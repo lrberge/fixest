@@ -68,6 +68,7 @@ coefplot(
 iplot(
   object,
   ...,
+  i.select = 1,
   style = NULL,
   sd,
   ci_low,
@@ -144,7 +145,7 @@ iplot(
 
 \item{horiz}{A logical scalar, default is \code{FALSE}. Whether to display the confidence intervals horizontally instead of vertically.}
 
-\item{dict}{A named character vector or a logical scalar. It changes the original variable names to the ones contained in the \code{dict}ionary. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default, it is equal to \code{getFixest_dict()}, a default dictionary which can be set with \code{\link[fixest]{setFixest_dict}}. You can use \code{dict = FALSE} to disable it..}
+\item{dict}{A named character vector or a logical scalar. It changes the original variable names to the ones contained in the \code{dict}ionary. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default, it is equal to \code{getFixest_dict()}, a default dictionary which can be set with \code{\link[fixest]{setFixest_dict}}. You can use \code{dict = FALSE} to disable it. By default \code{dict} modifies the entries in the global dictionary, to disable this behavior, use "reset" as the first element (ex: \code{dict=c("reset", mpg="Miles per gallon")}).}
 
 \item{keep}{Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is kept). See details.}
 
@@ -239,6 +240,8 @@ iplot(
 \item{xlab}{The label of the x-axis, default is \code{NULL}. Note that if \code{horiz = TRUE}, it overrides the value of the argument \code{value.lab}.}
 
 \item{sub}{A subtitle, default is \code{NULL}.}
+
+\item{i.select}{Integer scalar, default is 1. In \code{iplot}, used to select which variable created with \code{i()} to select. Only used when there are several variables created with \code{\link[fixest]{i}}. This is an index, just try increasing numbers to hopefully obtain what you want. Note that it works much better when the variables are "pure" \code{i()} variables and not interacted with other variables. For example: \code{i(species, x1)} is good while \code{i(species):x1} isn't. The latter will also work but the index may feel weird in case there are many \code{i()} variables.}
 }
 \description{
 This function plots the results of estimations (coefficients and confidence intervals). The function \code{iplot} restricts the output to variables created with \code{\link[fixest]{i}}, either interactions with factors or raw factors.
@@ -251,6 +254,16 @@ This function plots the results of estimations (coefficients and confidence inte
 \section{Setting custom default values}{
 
 The function \code{coefplot} dispose of many arguments to parametrize the plots. Most of these arguments can be set once an for all using the function \code{\link[fixest]{setFixest_coefplot}}. See Example 3 below for a demonstration.
+}
+
+\section{iplot}{
+
+
+The function \code{iplot} restricts \code{coefplot} to interactions or factors created with the function \code{\link[fixest]{i}}. Only \emph{one} of the i-variables will be plotted at a time. If you have several i-variables, you can navigate through them with the \code{i.select} argument.
+
+The argument \code{i.select} is an index that will go through all the i-variables. It will work well if the variables are pure, meaning not interacted with other variables. If the i-variables are interacted, the index may have an odd behavior but will (in most cases) work all the same, just try some numbers up until you (hopefully) obtain the graph you want.
+
+Note, importantly, that interactions of two factor variables are (in general) disregarded since they would require a 3-D plot to be properly represented.
 }
 
 \section{Arguments keep, drop and order}{

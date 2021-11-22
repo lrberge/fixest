@@ -21,13 +21,7 @@ reference:
         - iplot
         - style.df
         - style.tex
-        - extraline_register
-    - title: Difference-in-difference tools
-      desc: Various tools to perform DiD estimations
-      contents:
-        - sunab
-        - aggregate.fixest
-        - i
+        - extralines_register
     - title: Handling results, single
       desc: Extracts values from single estimations
       contents:
@@ -39,6 +33,12 @@ reference:
         - confint.fixest
         - print.fixest
         - setFixest_print
+    - title: Difference-in-difference tools
+      desc: Various tools to perform DiD estimations
+      contents:
+        - sunab
+        - aggregate.fixest
+        - i
     - title: Standard-errors
       desc: Computing the Standard-errors
       contents:
@@ -75,6 +75,7 @@ reference:
       contents:
         - demean
         - to_integer
+        - bin
     - title: Panel data tools
       desc: Set of tools for panel data
       contents:
@@ -108,6 +109,11 @@ reference:
     - title: Other methods and functions
       desc: Other methods and functions that didn't fit the previous sections
       contents:
+        - dsb
+        - check_conv_feols
+        - sample_df
+        - n_unik
+        - osize
         - did_means
         - fixest_startup_msg
         - obs

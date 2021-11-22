@@ -15,6 +15,8 @@ xaxis_labels = function(at, labels, line.min = 0, line.max = 2, minCex = 0.8, ad
     # It uses the vertical placement to fit all the labels
     # if only.params => nothing is plotted
 
+    labels = as.character(labels)
+
     # only 1 value => we do nothing
     if(length(at) == 1){
         if(only.params){
@@ -285,8 +287,6 @@ xaxis_biased = function(at, labels, angle, cex, line.min = 0, line.max = 2, yadj
     dots$srt = angle
     dots$xpd = TRUE
     dots$adj = 1
-
-    # browser()
 
     do.call("text", dots)
 

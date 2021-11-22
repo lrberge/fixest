@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.2</span>
       </span>
     </div>
 
@@ -148,11 +148,11 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>fml</th>
-      <td><p>A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using <code>setFixest_fml</code>, or can be defined in <code>...</code>. Special macros of the form <code>..("regex")</code> can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument <code>data</code>. See examples.</p></td>
+      <td><p>A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using <code>setFixest_fml</code>, or can be defined in <code>...</code>. Special macros of the form <code>..("regex")</code> can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument <code>data</code>. square brackets have a special meaning: Values in them are evaluated and parsed accordingly. Example: <code>y~x.[1:2] + z.[i]</code> will lead to <code>y~x1+x2+z3</code> if <code>i==3</code>. See examples.</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. <code>..ctrl</code>). The value of each argument must be a one-sided formula or a character vector, it is the definition of the macro variable. Example of a valid call: <code><a href='setFixest_fml.html'>setFixest_fml(..ctrl = ~ var1 + var2)</a></code>. In the function <code>xpd</code>, the default macro variables are taken from <code>getFixest_fml</code>, any variable in <code>...</code> will replace these values.</p></td>
+      <td><p>Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. <code>..ctrl</code>). The value of each argument must be a one-sided formula or a character vector, it is the definition of the macro variable. Example of a valid call: <code><a href='setFixest_fml.html'>setFixest_fml(..ctrl = ~ var1 + var2)</a></code>. In the function <code>xpd</code>, the default macro variables are taken from <code>getFixest_fml</code>, any variable in <code>...</code> will replace these values. You can enclose values in <code>.[]</code>, if so they will be evaluated from the current environment. For example <code>..ctrl = ~ x.[1:2] + .[z]</code> will lead to <code>~x1 + x2 + var</code> if <code>z</code> is equal to <code>"var"</code>.</p></td>
     </tr>
     <tr>
       <th>lhs</th>
@@ -175,6 +175,33 @@
 
     <p>In <code>xpd</code>, the default macro variables are taken from <code>getFixest_fml</code>. Any value in the <code>...</code> argument of <code>xpd</code> will replace these default values.</p>
 <p>The definitions of the macro variables will replace in verbatim the macro variables. Therefore, you can include multi-part formulas if you wish but then beware of the order of the macros variable in the formula. For example, using the <code>airquality</code> data, say you want to set as controls the variable <code>Temp</code> and <code>Day</code> fixed-effects, you can do <code><a href='setFixest_fml.html'>setFixest_fml(..ctrl = ~Temp | Day)</a></code>, but then <code><a href='feols.html'>feols(Ozone ~ Wind + ..ctrl, airquality)</a></code> will be quite different from <code><a href='feols.html'>feols(Ozone ~ ..ctrl + Wind, airquality)</a></code>, so beware!</p>
+    <h2 class="hasAnchor" id="dot-square-bracket-operator-in-formulas"><a class="anchor" href="#dot-square-bracket-operator-in-formulas"></a>Dot square bracket operator in formulas</h2>
+
+    
+
+
+<p>In a formula, the dot square bracket (DSB) operator can: i) create manifold variables at once, or ii) capture values from the current environment and put them verbatim in the formula.</p>
+<p>Say you want to include the variables <code>x1</code> to <code>x3</code> in your formula. You can use <code>xpd(y ~ x.[1:3])</code> and you'll get <code>y ~ x1 + x2 + x3</code>.</p>
+<p>To summon values from the environment, simply put the variable in square brackets. For example: <code>for(i in 1:3) xpd(y.[i] ~ x)</code> will create the formulas <code>y1 ~ x</code> to <code>y3 ~ x</code> depending on the value of <code>i</code>.</p>
+<p>You can include a full variable from the environment in the same way: <code>for(y in c("a", "b")) xpd(.[y] ~ x)</code> will create the two formulas <code>a ~ x</code> and <code>b ~ x</code>.</p>
+<p>The DSB can even be used within variable names, but then the variable must be nested in character form. For example <code>y ~ .["x.[1:2]_sq"]</code> will create <code>y ~ x1_sq + x2_sq</code>. Using the character form is important to avoid a formula parsing error. Double quotes must be used. Note that the character string that is nested will be parsed with the function <code><a href='dsb.html'>dsb</a></code>, and thus it will return a vector.</p>
+<p>By default, the DSB operator expands vectors into sums. You can add a comma, like in <code>.[, x]</code>, to expand with commas--the content can then be used within functions. For instance: <code><a href='https://rdrr.io/r/base/c.html'>c(x.[, 1:2])</a></code> will create <code><a href='https://rdrr.io/r/base/c.html'>c(x1, x2)</a></code> (and <em>not</em> <code><a href='https://rdrr.io/r/base/c.html'>c(x1 + x2)</a></code>).</p>
+<p>In all <code>fixest</code> estimations, this special parsing is enabled, so you don't need to use <code>xpd</code>.</p>
+<p>You can even use multiple square brackets within a single variable, but then the use of nesting is required. For example, the following <code>xpd(y ~ .[".[letters[1:2]]_.[1:2]"])</code> will create <code>y ~ a_1 + b_2</code>. Remember that the nested character string is parsed with <code><a href='dsb.html'>dsb</a></code>, which explains this behavior.</p>
+    <h2 class="hasAnchor" id="regular-expressions"><a class="anchor" href="#regular-expressions"></a>Regular expressions</h2>
+
+    
+
+
+<p>You can catch several variable names at once by using regular expressions. To use regular expressions, you need to enclose it in the dot-dot or the regex function: <code>..("regex")</code> or <code><a href='https://rdrr.io/r/base/regex.html'>regex("regex")</a></code>. For example, <code><a href='https://rdrr.io/r/base/regex.html'>regex("Sepal")</a></code> will catch both the variables <code>Sepal.Length</code> and <code>Sepal.Width</code> from the <code>iris</code> data set. In a <code>fixest</code> estimation, the variables names from which the regex will be applied come from the data set. If you use <code>xpd</code>, you need to provide either a data set or a vector of names in the argument <code>data</code>.</p>
+<p>By default the variables are aggregated with a sum. For example in a data set with the variables x1 to x10, <code>regex("x(1|2)"</code> will yield <code>x1 + x2 + x10</code>. You can instead ask for "comma" aggregation by using a comma first, just before the regular expression: <code>y ~ sw(regex(,"x(1|2)"))</code> would lead to <code>y ~ sw(x1, x2, x10)</code>.</p>
+<p>Note that the dot square bracket operator (DSB, see before) is applied before the regular expression is evaluated. This means that <code><a href='https://rdrr.io/r/base/regex.html'>regex("x.[3:4]_sq")</a></code> will lead, after evaluation of the DSB, to <code><a href='https://rdrr.io/r/base/regex.html'>regex("x3_sq|x4_sq")</a></code>. It is a handy way to insert range of numbers in a regular expression.</p>
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p><code><a href='setFixest_fml.html'>setFixest_fml</a></code> to set formula macros, and <code><a href='dsb.html'>dsb</a></code> to modify character strings with the DSB operator.</p></div>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Laurent Berge</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
@@ -206,8 +233,8 @@
 #&gt; </div><div class='input'>
 <span class='co'># You can use the macros without xpd() in fixest estimations</span>
 <span class='va'>a</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='va'>..ctrl</span>, <span class='va'>airquality</span><span class='op'>)</span>
-<span class='va'>b</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='va'>..ctrl_long</span>, <span class='va'>airquality</span><span class='op'>)</span>
-<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>a</span>, <span class='va'>b</span>, keep <span class='op'>=</span> <span class='st'>"Int|Win"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 37 observations removed because of NA values (LHS: 37).</span></div><div class='input'><span class='va'>b</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='va'>..ctrl_long</span>, <span class='va'>airquality</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 37 observations removed because of NA values (LHS: 37).</span></div><div class='input'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>a</span>, <span class='va'>b</span>, keep <span class='op'>=</span> <span class='st'>"Int|Win"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                                  a                  b
 #&gt; Dependent Var.:              Ozone              Ozone
 #&gt;                                                      
@@ -218,9 +245,44 @@
 #&gt; Observations                   116                116
 #&gt; R2                         0.57308            0.62167
 #&gt; Adj. R2                    0.56164            0.60447</div><div class='input'>
+
+<span class='co'># Using .[]</span>
+
+<span class='va'>base</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/setNames.html'>setNames</a></span><span class='op'>(</span><span class='va'>iris</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>i</span> <span class='op'>=</span> <span class='fl'>2</span><span class='op'>:</span><span class='fl'>3</span>
+<span class='va'>z</span> <span class='op'>=</span> <span class='st'>"species"</span>
+<span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span><span class='op'>(</span><span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='fl'>2</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span> <span class='op'>+</span> <span class='va'>.</span><span class='op'>[</span><span class='va'>z</span><span class='op'>]</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; 
+#&gt; Call:
+#&gt; lm(formula = xpd(y ~ x.[2:3] + .[z]), data = base)
+#&gt; 
+#&gt; Coefficients:
+#&gt;       (Intercept)                 x2                 x3  speciesversicolor  
+#&gt;          3.682982           0.905946          -0.005995          -1.598362  
+#&gt;  speciesvirginica  
+#&gt;         -2.112647  
+#&gt; </div><div class='input'>
+<span class='co'># No xpd() needed in feols</span>
+<span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='fl'>2</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span> <span class='op'>+</span> <span class='va'>.</span><span class='op'>[</span><span class='va'>z</span><span class='op'>]</span>, <span class='va'>base</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
+#&gt; Observations: 150 
+#&gt; Standard-errors: IID 
+#&gt;                    Estimate Std. Error   t value   Pr(&gt;|t|)    
+#&gt; (Intercept)        3.682982   0.107403 34.291343  &lt; 2.2e-16 ***
+#&gt; x2                 0.905946   0.074311 12.191282  &lt; 2.2e-16 ***
+#&gt; x3                -0.005995   0.156260 -0.038368 9.6945e-01    
+#&gt; speciesversicolor -1.598362   0.205706 -7.770113 1.3154e-12 ***
+#&gt; speciesvirginica  -2.112647   0.304024 -6.948940 1.1550e-10 ***
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#&gt; RMSE: 0.333482   Adj. R2: 0.832221</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># You can use xpd for stepwise estimations</span>
 <span class='co'>#</span>
+
+<span class='co'># Note that for stepwise estimations in fixest, you can use</span>
+<span class='co'># the stepwise functions: sw, sw0, csw, csw0</span>
+<span class='co'># -&gt; see help in feols or in the dedicated vignette</span>
 
 <span class='co'># we want to look at the effect of x1 on y</span>
 <span class='co'># controlling for different variables</span>
@@ -301,39 +363,39 @@
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: Armed.Forces
 #&gt; Observations: 16 
 #&gt; Standard-errors: IID 
-#&gt;                 Estimate  Std. Error   t value Pr(&gt;|t|))    
-#&gt; (Intercept)  4403.700000 4091.800000  1.076200  0.307112    
-#&gt; Population    -22.844000   32.671000 -0.699217  0.500356    
-#&gt; GNP.deflator    7.638500   12.348000  0.618611  0.550003    
-#&gt; GNP             3.150500    3.554200  0.886433  0.396201    
-#&gt; Unemployed     -0.591649    0.389005 -1.520900  0.159248    
-#&gt; Employed      -50.060000   25.348000 -1.974900  0.076522 .  
+#&gt;                 Estimate  Std. Error   t value Pr(&gt;|t|)    
+#&gt; (Intercept)  4403.682352 4091.847594  1.076209 0.307112    
+#&gt; Population    -22.844324   32.671302 -0.699217 0.500356    
+#&gt; GNP.deflator    7.638472   12.347773  0.618611 0.550003    
+#&gt; GNP             3.150533    3.554170  0.886433 0.396201    
+#&gt; Unemployed     -0.591649    0.389005 -1.520928 0.159248    
+#&gt; Employed      -50.059800   25.348299 -1.974878 0.076522 .  
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 36.1   Adj. R2: 0.569345</div><div class='input'>
-<span class='co'># Example 2: using ..("regex") to grep the variables "live"</span>
+<span class='co'># Example 2: using ..("regex") or regex("regex") to grep the variables "live"</span>
 
 <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Armed.Forces</span> <span class='op'>~</span> <span class='va'>Population</span> <span class='op'>+</span> <span class='fu'>..</span><span class='op'>(</span><span class='st'>"GNP|ployed"</span><span class='op'>)</span>, <span class='va'>longley</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: Armed.Forces
 #&gt; Observations: 16 
 #&gt; Standard-errors: IID 
-#&gt;                 Estimate  Std. Error   t value Pr(&gt;|t|))    
-#&gt; (Intercept)  4403.700000 4091.800000  1.076200  0.307112    
-#&gt; Population    -22.844000   32.671000 -0.699217  0.500356    
-#&gt; GNP.deflator    7.638500   12.348000  0.618611  0.550003    
-#&gt; GNP             3.150500    3.554200  0.886433  0.396201    
-#&gt; Unemployed     -0.591649    0.389005 -1.520900  0.159248    
-#&gt; Employed      -50.060000   25.348000 -1.974900  0.076522 .  
+#&gt;                 Estimate  Std. Error   t value Pr(&gt;|t|)    
+#&gt; (Intercept)  4403.682352 4091.847594  1.076209 0.307112    
+#&gt; Population    -22.844324   32.671302 -0.699217 0.500356    
+#&gt; GNP.deflator    7.638472   12.347773  0.618611 0.550003    
+#&gt; GNP             3.150533    3.554170  0.886433 0.396201    
+#&gt; Unemployed     -0.591649    0.389005 -1.520928 0.159248    
+#&gt; Employed      -50.059800   25.348299 -1.974878 0.076522 .  
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 36.1   Adj. R2: 0.569345</div><div class='input'>
 <span class='co'># Example 3: same as Ex.2 but without using a fixest estimation</span>
 
 <span class='co'># Here we need to use xpd():</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span><span class='op'>(</span><span class='fu'>xpd</span><span class='op'>(</span><span class='va'>Armed.Forces</span> <span class='op'>~</span> <span class='va'>Population</span> <span class='op'>+</span> <span class='fu'>..</span><span class='op'>(</span><span class='st'>"GNP|ployed"</span><span class='op'>)</span>, data <span class='op'>=</span> <span class='va'>longley</span><span class='op'>)</span>, <span class='va'>longley</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span><span class='op'>(</span><span class='fu'>xpd</span><span class='op'>(</span><span class='va'>Armed.Forces</span> <span class='op'>~</span> <span class='va'>Population</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/regex.html'>regex</a></span><span class='op'>(</span><span class='st'>"GNP|ployed"</span><span class='op'>)</span>, data <span class='op'>=</span> <span class='va'>longley</span><span class='op'>)</span>, <span class='va'>longley</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; 
 #&gt; Call:
-#&gt; lm(formula = xpd(Armed.Forces ~ Population + ..("GNP|ployed"), 
+#&gt; lm(formula = xpd(Armed.Forces ~ Population + regex("GNP|ployed"), 
 #&gt;     data = longley), data = longley)
 #&gt; 
 #&gt; Coefficients:
@@ -342,32 +404,55 @@
 #&gt;     Employed  
 #&gt;     -50.0598  
 #&gt; </div><div class='input'>
-<span class='co'>#</span>
-<span class='co'># You can also put numbers in macros</span>
-<span class='co'>#</span>
+<span class='co'># Stepwise estimation with regex: use a comma after the parenthesis</span>
+<span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Armed.Forces</span> <span class='op'>~</span> <span class='va'>Population</span> <span class='op'>+</span> <span class='fu'><a href='stepwise.html'>sw</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/regex.html'>regex</a></span><span class='op'>(</span>,<span class='st'>"GNP|ployed"</span><span class='op'>)</span><span class='op'>)</span>, <span class='va'>longley</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; Standard-errors: IID 
+#&gt; Expl. vars.: Population + GNP.deflator
+#&gt;               Estimate Std. Error  t value Pr(&gt;|t|)    
+#&gt; (Intercept)  1126.8354  573.65977  1.96429 0.071242 .  
+#&gt; Population    -21.9900   10.44869 -2.10457 0.055351 .  
+#&gt; GNP.deflator   16.8762    6.73510  2.50570 0.026304 *  
+#&gt; ---
+#&gt; Expl. vars.: Population + GNP
+#&gt;               Estimate  Std. Error  t value  Pr(&gt;|t|)    
+#&gt; (Intercept) 4123.92248 1276.578585  3.23045 0.0065709 ** 
+#&gt; Population   -44.01096   14.088805 -3.12382 0.0080681 ** 
+#&gt; GNP            3.36522    0.985998  3.41301 0.0046253 ** 
+#&gt; ---
+#&gt; Expl. vars.: Population + Unemployed
+#&gt;                Estimate Std. Error  t value  Pr(&gt;|t|)    
+#&gt; (Intercept) -627.459659 282.947983 -2.21758 0.0450189 *  
+#&gt; Population     9.201621   2.755427  3.33945 0.0053277 ** 
+#&gt; Unemployed    -0.602393   0.205112 -2.93689 0.0115594 *  
+#&gt; ---
+#&gt; Expl. vars.: Population + Employed
+#&gt;               Estimate Std. Error  t value Pr(&gt;|t|) 
+#&gt; (Intercept) -396.96880  310.16774 -1.27985  0.22297 
+#&gt; Population    -9.63435    8.44253 -1.14117  0.27439 
+#&gt; Employed      27.38861   16.72199  1.63788  0.12541 </div><div class='input'>
+<span class='co'># Multiple LHS</span>
+<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='fu'>..</span><span class='op'>(</span><span class='st'>"GNP|ployed"</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>Population</span>, <span class='va'>longley</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                           model 1             model 2         model 3
+#&gt; Dependent Var.:      GNP.deflator                 GNP      Unemployed
+#&gt;                                                                      
+#&gt; (Intercept)     -76.69*** (9.903) -1,275.2*** (59.83) -763.7* (307.0)
+#&gt; Population      1.519*** (0.0842)   14.16*** (0.5086) 9.223** (2.610)
+#&gt; _______________ _________________ ___________________ _______________
+#&gt; S.E. type                     IID                 IID             IID
+#&gt; Observations                   16                  16              16
+#&gt; R2                        0.95876             0.98226         0.47135
+#&gt; Adj. R2                   0.95582             0.98099         0.43359
+#&gt;                            model 4
+#&gt; Dependent Var.:           Employed
+#&gt;                                   
+#&gt; (Intercept)         8.381. (4.422)
+#&gt; Population      0.4849*** (0.0376)
+#&gt; _______________ __________________
+#&gt; S.E. type                      IID
+#&gt; Observations                    16
+#&gt; R2                         0.92235
+#&gt; Adj. R2                    0.91680</div><div class='input'>
 
-<span class='va'>res_all</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>
-<span class='kw'>for</span><span class='op'>(</span><span class='va'>p</span> <span class='kw'>in</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>)</span><span class='op'>{</span>
-  <span class='va'>res_all</span><span class='op'>[[</span><span class='va'>p</span><span class='op'>]</span><span class='op'>]</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='fu'>xpd</span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/stats/poly.html'>poly</a></span><span class='op'>(</span><span class='va'>Temp</span>, <span class='va'>..p</span><span class='op'>)</span>, ..p <span class='op'>=</span> <span class='va'>p</span><span class='op'>)</span>, <span class='va'>airquality</span><span class='op'>)</span>
-<span class='op'>}</span>
-
-<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res_all</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                            model 1            model 2            model 3
-#&gt; Dependent Var.:              Ozone              Ozone              Ozone
-#&gt;                                                                         
-#&gt; (Intercept)       72.28*** (6.847)   70.40*** (6.518)   71.31*** (6.512)
-#&gt; Wind            -3.055*** (0.6633) -2.866*** (0.6315) -2.928*** (0.6295)
-#&gt; poly(Temp,1)      214.7*** (29.17)                                      
-#&gt; poly(Temp,2)1                        209.0*** (27.73)                   
-#&gt; poly(Temp,2)2                        93.36*** (25.44)                   
-#&gt; poly(Temp,3)1                                           201.5*** (28.02)
-#&gt; poly(Temp,3)2                                           101.7*** (25.91)
-#&gt; poly(Temp,3)3                                             -37.32 (25.03)
-#&gt; _______________ __________________ __________________ __________________
-#&gt; S.E. type                      IID                IID                IID
-#&gt; Observations                   116                116                116
-#&gt; R2                         0.56871            0.61501            0.62256
-#&gt; Adj. R2                    0.56108            0.60469            0.60896</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># lhs and rhs arguments</span>
 <span class='co'>#</span>
@@ -376,15 +461,105 @@
 <span class='va'>vars</span> <span class='op'>=</span> <span class='va'>letters</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span>
 <span class='fu'>xpd</span><span class='op'>(</span>rhs <span class='op'>=</span> <span class='va'>vars</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; ~a + b + c + d + e
-#&gt; &lt;environment: 0x0000000043fc1830&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x00000000442886b0&gt;</div><div class='input'>
 <span class='co'># Alternatively, to replace the RHS</span>
 <span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fl'>1</span>, rhs <span class='op'>=</span> <span class='va'>vars</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ a + b + c + d + e
-#&gt; &lt;environment: 0x00000000283bd998&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x0000000045a73c00&gt;</div><div class='input'>
 <span class='co'># To create a two sided formula</span>
 <span class='fu'>xpd</span><span class='op'>(</span>lhs <span class='op'>=</span> <span class='st'>"y"</span>, rhs <span class='op'>=</span> <span class='va'>vars</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; y ~ a + b + c + d + e
-#&gt; &lt;environment: 0x0000000043e40bb0&gt;</div><div class='input'>
+#&gt; &lt;environment: 0x0000000043f430b0&gt;</div><div class='input'>
+
+<span class='co'>#</span>
+<span class='co'># Dot square bracket operator</span>
+<span class='co'>#</span>
+
+<span class='co'># You can create multiple variables at once</span>
+<span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span> <span class='op'>+</span> <span class='va'>z.</span><span class='op'>[</span><span class='fl'>2</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; y ~ x1 + x2 + x3 + x4 + x5 + z2 + z3
+#&gt; &lt;environment: 0x0000000045a73c00&gt;</div><div class='input'>
+<span class='co'># You can summon variables from the environment</span>
+<span class='va'>var</span> <span class='op'>=</span> <span class='st'>"a"</span>
+<span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='va'>var</span><span class='op'>]</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; y ~ xa
+#&gt; &lt;environment: 0x0000000045a73c00&gt;</div><div class='input'>
+<span class='co'># ... the variables can be multiple</span>
+<span class='va'>vars</span> <span class='op'>=</span> <span class='va'>LETTERS</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span>
+<span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='va'>vars</span><span class='op'>]</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; y ~ xA + xB + xC
+#&gt; &lt;environment: 0x0000000045a73c00&gt;</div><div class='input'>
+<span class='co'># You can have "complex" variable names but they must be nested in character form</span>
+<span class='fu'>xpd</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>.</span><span class='op'>[</span><span class='st'>"x.[vars]_sq"</span><span class='op'>]</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; y ~ xA_sq + xB_sq + xC_sq
+#&gt; &lt;environment: 0x0000000045a73c00&gt;</div><div class='input'>
+<span class='co'># DSB can be used within regular expressions</span>
+<span class='va'>re</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"GNP"</span>, <span class='st'>"Pop"</span><span class='op'>)</span>
+<span class='fu'>xpd</span><span class='op'>(</span><span class='va'>Unemployed</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/regex.html'>regex</a></span><span class='op'>(</span><span class='st'>".[re]"</span><span class='op'>)</span>, data <span class='op'>=</span> <span class='va'>longley</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; Unemployed ~ GNP.deflator + GNP + Population
+#&gt; &lt;environment: 0x0000000045a73c00&gt;</div><div class='input'>
+<span class='co'># =&gt; equivalent to regex("GNP|Pop")</span>
+
+<span class='co'># Use .[,var] (NOTE THE COMMA!) to expand with commas</span>
+<span class='co'># !! can break the formula if missused</span>
+<span class='va'>vars</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"wage"</span>, <span class='st'>"unemp"</span><span class='op'>)</span>
+<span class='fu'>xpd</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>y.</span><span class='op'>[</span>,<span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span><span class='op'>)</span> <span class='op'>~</span> <span class='fu'><a href='stepwise.html'>csw</a></span><span class='op'>(</span><span class='va'>.</span><span class='op'>[</span>,<span class='va'>vars</span><span class='op'>]</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; c(y1, y2, y3) ~ csw(wage, unemp)
+#&gt; &lt;environment: 0x0000000045a73c00&gt;</div><div class='input'>
+
+<span class='co'># Example of use of .[] within a loop</span>
+<span class='va'>res_all</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>
+<span class='kw'>for</span><span class='op'>(</span><span class='va'>p</span> <span class='kw'>in</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>)</span><span class='op'>{</span>
+  <span class='va'>res_all</span><span class='op'>[[</span><span class='va'>p</span><span class='op'>]</span><span class='op'>]</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/stats/poly.html'>poly</a></span><span class='op'>(</span><span class='va'>Temp</span>, <span class='va'>.</span><span class='op'>[</span><span class='va'>p</span><span class='op'>]</span><span class='op'>)</span>, <span class='va'>airquality</span><span class='op'>)</span>
+<span class='op'>}</span>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 37 observations removed because of NA values (LHS: 37).</span></div><div class='output co'>#&gt; <span class='message'>NOTE: 37 observations removed because of NA values (LHS: 37).</span></div><div class='output co'>#&gt; <span class='message'>NOTE: 37 observations removed because of NA values (LHS: 37).</span></div><div class='input'>
+<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res_all</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                            model 1            model 2            model 3
+#&gt; Dependent Var.:              Ozone              Ozone              Ozone
+#&gt;                                                                         
+#&gt; (Intercept)       72.28*** (6.847)   70.40*** (6.518)   71.31*** (6.512)
+#&gt; Wind            -3.055*** (0.6633) -2.866*** (0.6315) -2.928*** (0.6295)
+#&gt; poly(Temp)1       214.7*** (29.17)   209.0*** (27.73)   201.5*** (28.02)
+#&gt; poly(Temp)2                          93.36*** (25.44)   101.7*** (25.91)
+#&gt; poly(Temp)3                                               -37.32 (25.03)
+#&gt; _______________ __________________ __________________ __________________
+#&gt; S.E. type                      IID                IID                IID
+#&gt; Observations                   116                116                116
+#&gt; R2                         0.56871            0.61501            0.62256
+#&gt; Adj. R2                    0.56108            0.60469            0.60896</div><div class='input'>
+<span class='co'># The former can be compactly estimated with:</span>
+<span class='va'>res_compact</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='fu'><a href='stepwise.html'>sw</a></span><span class='op'>(</span><span class='va'>.</span><span class='op'>[</span>, <span class='st'>"poly(Temp, .[1:3])"</span><span class='op'>]</span><span class='op'>)</span>, <span class='va'>airquality</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 37 observations removed because of NA values (LHS: 37). [This msg only concerns the variables common to all estimations.]</span></div><div class='input'>
+<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res_compact</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;                            model 1            model 2            model 3
+#&gt; Dependent Var.:              Ozone              Ozone              Ozone
+#&gt;                                                                         
+#&gt; (Intercept)       72.28*** (6.847)   70.40*** (6.518)   71.31*** (6.512)
+#&gt; Wind            -3.055*** (0.6633) -2.866*** (0.6315) -2.928*** (0.6295)
+#&gt; poly(Temp)1       214.7*** (29.17)   209.0*** (27.73)   201.5*** (28.02)
+#&gt; poly(Temp)2                          93.36*** (25.44)   101.7*** (25.91)
+#&gt; poly(Temp)3                                               -37.32 (25.03)
+#&gt; _______________ __________________ __________________ __________________
+#&gt; S.E. type                      IID                IID                IID
+#&gt; Observations                   116                116                116
+#&gt; R2                         0.56871            0.61501            0.62256
+#&gt; Adj. R2                    0.56108            0.60469            0.60896</div><div class='input'>
+<span class='co'># How does it work?</span>
+<span class='co'># 1)  .[, stuff] evaluates stuff and, if a vector, aggregates it with commas</span>
+<span class='co'>#     Comma aggregation is done thanks to the comma placed after the square bracket</span>
+<span class='co'>#     If .[stuff], then aggregation is with sums.</span>
+<span class='co'># 2) stuff is evaluated, and if it is a character string, it is evaluated with</span>
+<span class='co'># the function dsb which expands values in .[]</span>
+<span class='co'>#</span>
+<span class='co'># Wrapping up:</span>
+<span class='co'># 2) evaluation of dsb("poly(Temp, .[1:3])") leads to the vector:</span>
+<span class='co'>#    c("poly(Temp, 1)", "poly(Temp, 2)", "poly(Temp, 3)")</span>
+<span class='co'># 1) .[, c("poly(Temp, 1)", "poly(Temp, 2)", "poly(Temp, 3)")] leads to</span>
+<span class='co'>#    poly(Temp, 1), poly(Temp, 2), poly(Temp, 3)</span>
+<span class='co'>#</span>
+<span class='co'># Hence sw(.[, "poly(Temp, .[1:3])"]) becomes:</span>
+<span class='co'>#       sw(poly(Temp, 1), poly(Temp, 2), poly(Temp, 3))</span>
+
 
 </div></pre>
   </div>

@@ -21,12 +21,23 @@ style.tex(
   fixef_sizes.prefix,
   fixef_sizes.suffix,
   stats.title,
-  notes.title,
+  notes.intro,
+  notes.tpt.intro,
   tablefoot,
-  tablefoot.title,
   tablefoot.value,
   yesNo,
-  tabular = "normal"
+  tabular = "normal",
+  depvar.style,
+  no_border,
+  caption.after,
+  rules_width,
+  signif.code,
+  tpt,
+  arraystretch,
+  adjustbox = NULL,
+  fontsize,
+  interaction.combine = " $\\\\times$ ",
+  i.equal = " $=$ "
 )
 }
 \arguments{
@@ -38,9 +49,9 @@ style.tex(
 
 \item{model.format}{A character scalar. The value to appear on top of each column. It defaults to \code{"(1)"}. Note that 1, i, I, a and A are special characters: if found, their values will be automatically incremented across columns.}
 
-\item{line.top}{A character scalar. The line at the top of the table (defaults to \code{"\\tabularnewline\\toprule\\toprule"} if \code{main = "base"} and to \code{"\\toprule"} if \code{main = "aer"}).}
+\item{line.top}{A character scalar equal to \code{"simple"}, \code{"double"}, or anything else. The line at the top of the table (defaults to \code{"double"} if \code{main = "base"} and to \code{"simple"} if \code{main = "aer"}). \code{"simple"} is equivalent to \code{"\\toprule"}, and \code{"double"} to \code{"\\tabularnewline \\midrule \\midrule"}.}
 
-\item{line.bottom}{A character scalar. The line at the bottom of the table (defaults to \code{""} if \code{main = "base"} and to \code{"\\bottomrule"} if \code{main = "aer"}).}
+\item{line.bottom}{A character scalar equal to \code{"simple"}, \code{"double"}, or anything else. The line at the bottom of the table (defaults to \code{"double"} if \code{main = "base"} and to \code{"simple"} if \code{main = "aer"}). \code{"simple"} is equivalent to \code{"\\bottomrule"}, and \code{"double"} to \code{"\\midrule \\midrule & \\tabularnewline"}.}
 
 \item{var.title}{A character scalar. The title line appearing before the variables (defaults to \code{"\\midrule \\emph{Variables}"} if \code{main = "base"} and to \code{"\\midrule"} if \code{main = "aer"}). Note that the behavior of \code{var.title = " "} (a space) is different from \code{var.title = ""} (the empty string): in the first case you will get an empty row, while in the second case you get no empty row. To get a line without an empty row, use \code{"\\midrule"} (and not \code{"\\midrule "}!--the space!).}
 
@@ -62,17 +73,39 @@ style.tex(
 
 \item{stats.title}{A character scalar. The title line appearing before the statistics (defaults to \code{"\\midrule \\emph{Fit statistics}"} if \code{main = "base"} and to \code{" "} if \code{main = "aer"}). Note that the behavior of \code{stats.title = " "} (a space) is different from \code{stats.title = ""} (the empty string): in the first case you will get an empty row, while in the second case you get no empty row. To get a line without an empty row, use \code{"\\midrule"} (and not \code{"\\midrule "}!--the space!).}
 
-\item{notes.title}{A character scalar. The title appearing just before the notes, defaults to \code{"\\medskip \\emph{Notes:} "}.}
+\item{notes.intro}{A character scalar. Some tex code appearing just before the notes, defaults to \code{"\\par \\raggedright \n"}.}
+
+\item{notes.tpt.intro}{Character scalar. Only used if \code{tpt = TRUE}, it is some tex code that is passed before any \code{threeparttable} item (can be used for, typically, the font size). Default is the empty string.}
 
 \item{tablefoot}{A logical scalar. Whether or not to display a footer within the table. Defaults to \code{TRUE} if \code{main = "aer"}) and \code{FALSE} if \code{main = "aer"}).}
-
-\item{tablefoot.title}{A character scalar. Only if \code{tablefoot = TRUE}, value to appear before the table footer. Defaults to \code{"\\bottomrule\\bottomrule"} if \code{main = "base"}.}
 
 \item{tablefoot.value}{A character scalar. The notes to be displayed in the footer. Defaults to \code{"default"} if \code{main = "base"}, which leads to custom footers informing on the type of standard-error and significance codes, depending on the estimations.}
 
 \item{yesNo}{A character vector of length 1 or 2. Defaults to \code{"Yes"} if \code{main = "base"} and to \code{"$\\checkmark$"} if \code{main = "aer"} (from package \code{amssymb}). This is the message displayed when a given fixed-effect is (or is not) included in a regression. If \code{yesNo} is of length 1, then the second element is the empty string.}
 
-\item{tabular}{Character scalar equal to "normal" (default), "*" or "X". Represents the type of tabular to export.}
+\item{tabular}{(Tex only.) Character scalar equal to "normal" (default), "*" or "X". Represents the type of tabular environment to use: either \code{tabular}, \code{tabular*} or \code{tabularx}.}
+
+\item{depvar.style}{Character scalar equal to either \code{" "} (default), \code{"*"} (italic), \code{"**"} (bold), \code{"***"} (italic-bold). How the name of the dependent variable should be displayed.}
+
+\item{no_border}{Logical, default is \code{FALSE}. Whether to remove any side border to the table (typically adds \code{@\{\}} to the sides of the tabular).}
+
+\item{caption.after}{Character scalar. Tex code that will be placed right after the caption. Defaults to \code{""} for \code{main = "base"} and \code{"\\medskip"} for \code{main = "aer"}.}
+
+\item{rules_width}{Character vector of length 1 or 2. This vector gives the width of the \code{booktabs} rules: the first element the heavy-width, the second element the light-width. NA values mean no modification. If of length 1, only the heavy rules are modified. The width are in Latex units (ex: \code{"0.1 em"}, etc).}
+
+\item{signif.code}{Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is \code{c("***"=0.01, "**"=0.05, "*"=0.10)}. To suppress the significance codes, use \code{signif.code=NA} or \code{signif.code=NULL}. Can also be equal to \code{"letters"}, then the default becomes \code{c("a"=0.01, "b"=0.05, "c"=0.10)}.}
+
+\item{tpt}{(Tex only.) Logical scalar, default is FALSE. Whether to use the \code{threeparttable} environment. If so, the \code{notes} will be integrated into the \code{tablenotes} environment.}
+
+\item{arraystretch}{(Tex only.) A numeric scalar, default is \code{NULL}. If provided, the command \code{\\renewcommand*{\\arraystretch}{x}} is inserted, replacing \code{x} by the value of \code{arraystretch}. The changes are specific to the current table and do not affect the rest of the document.}
+
+\item{adjustbox}{(Tex only.) A logical, numeric or character scalar, default is \code{NULL}. If not \code{NULL}, the table is inserted within the \code{adjustbox} environment. By default the options are \code{width = 1\\textwidth, center} (if \code{TRUE}). A numeric value changes the value before \code{\\textwidth}. You can also add a character of the form \code{"x tw"} or \code{"x th"} with \code{x} a number and where tw (th) stands for text-width (text-height). Finally any other character value is passed verbatim as an \code{adjustbox} option.}
+
+\item{fontsize}{(Tex only.) A character scalar, default is \code{NULL}. Can be equal to \code{tiny}, \code{scriptsize}, \code{footnotesize}, \code{small}, \code{normalsize}, \code{large}, or \code{Large}. The change affect the table only (and not the rest of the document).}
+
+\item{interaction.combine}{Character scalar, defaults to \code{" $\\times$ "}. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind $\\times$ Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.}
+
+\item{i.equal}{Character scalar, defaults to \code{" $=$ "}. Only affects factor variables created with the function \code{\link[fixest]{i}}, tells how the variable should be linked to its value. For example if you have the Species factor from the iris data set, by default the display of the variable is \code{Species $=$ Setosa}, etc. If \code{i.equal = ": "} the display becomes \code{Species: Setosa}.}
 }
 \value{
 Returns a list containing the style parameters.
@@ -83,7 +116,9 @@ This function describes the style of Latex tables to be exported with the functi
 \details{
 The \code{\\checkmark} command, used in the "aer" style (in argument \code{yesNo}), is in the \code{amssymb} package.
 
-The commands \code{\\toprule}, \code{\\midrule} and \code{\\bottomrule} are in the \code{booktabs} package. You can set the width of the top/bottom rules with \\setlength\\heavyrulewidth\{wd\}, and of the midrule with \\setlength\\lightrulewidth\{wd\}.
+The commands \code{\\toprule}, \code{\\midrule} and \code{\\bottomrule} are in the \code{booktabs} package. You can set the width of the top/bottom rules with \\setlength\\heavyrulewidth\{wd\}, and of the midrule with \code{\\setlength\\lightrulewidth\{wd\}}.
+
+Note that all titles (\code{depvar.title}, \code{depvar.title}, etc) are not escaped, so they must be valid Latex expressions.
 }
 \examples{
 

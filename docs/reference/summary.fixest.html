@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.2</span>
       </span>
     </div>
 
@@ -148,7 +148,7 @@
   cluster <span class='op'>=</span> <span class='cn'>NULL</span>,
   ssc <span class='op'>=</span> <span class='cn'>NULL</span>,
   .vcov <span class='op'>=</span> <span class='cn'>NULL</span>,
-  stage <span class='op'>=</span> <span class='fl'>2</span>,
+  stage <span class='op'>=</span> <span class='cn'>NULL</span>,
   lean <span class='op'>=</span> <span class='cn'>FALSE</span>,
   agg <span class='op'>=</span> <span class='cn'>NULL</span>,
   forceCovariance <span class='op'>=</span> <span class='cn'>FALSE</span>,
@@ -268,42 +268,42 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 <span class='va'>sum_twoway</span>   <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, vcov <span class='op'>=</span> <span class='st'>"twoway"</span><span class='op'>)</span>
 
 <span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>sum_standard</span>, <span class='va'>sum_hetero</span>, <span class='va'>sum_oneway</span>, <span class='va'>sum_twoway</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                        sum_standard         sum_hetero         sum_oneway
-#&gt; Dependent Var.:               Euros              Euros              Euros
-#&gt;                                                                          
-#&gt; log(dist_km)    -1.528*** (1.93e-6) -1.528*** (0.0220) -1.528*** (0.1156)
-#&gt; Fixed-Effects:  ------------------- ------------------ ------------------
-#&gt; Origin                          Yes                Yes                Yes
-#&gt; Destination                     Yes                Yes                Yes
-#&gt; Product                         Yes                Yes                Yes
-#&gt; _______________ ___________________ __________________ __________________
-#&gt; S.E. type                       IID Heteroskedas.-rob.         by: Origin
-#&gt; Observations                 38,325             38,325             38,325
-#&gt; Squared Cor.                0.60377            0.60377            0.60377
-#&gt; Pseudo R2                   0.76039            0.76039            0.76039
-#&gt; BIC                        1.43e+12           1.43e+12           1.43e+12
-#&gt;                         sum_twoway
-#&gt; Dependent Var.:              Euros
-#&gt;                                   
-#&gt; log(dist_km)    -1.528*** (0.1307)
-#&gt; Fixed-Effects:  ------------------
-#&gt; Origin                         Yes
-#&gt; Destination                    Yes
-#&gt; Product                        Yes
-#&gt; _______________ __________________
-#&gt; S.E. type        by: Orig. &amp; Dest.
-#&gt; Observations                38,325
-#&gt; Squared Cor.               0.60377
-#&gt; Pseudo R2                  0.76039
-#&gt; BIC                       1.43e+12</div><div class='input'>
+</div><div class='output co'>#&gt;                          sum_standard         sum_hetero         sum_oneway
+#&gt; Dependent Var.:                 Euros              Euros              Euros
+#&gt;                                                                            
+#&gt; log(dist_km)      -1.528*** (1.93e-6) -1.528*** (0.0220) -1.528*** (0.1156)
+#&gt; Fixed-Effects:    ------------------- ------------------ ------------------
+#&gt; Country of Origin                 Yes                Yes                Yes
+#&gt; Destination                       Yes                Yes                Yes
+#&gt; Product                           Yes                Yes                Yes
+#&gt; _________________ ___________________ __________________ __________________
+#&gt; S.E. type                         IID Heteroskedas.-rob.         by: Origin
+#&gt; Observations                   38,325             38,325             38,325
+#&gt; Squared Cor.                  0.60377            0.60377            0.60377
+#&gt; Pseudo R2                     0.76039            0.76039            0.76039
+#&gt; BIC                          1.43e+12           1.43e+12           1.43e+12
+#&gt;                           sum_twoway
+#&gt; Dependent Var.:                Euros
+#&gt;                                     
+#&gt; log(dist_km)      -1.528*** (0.1307)
+#&gt; Fixed-Effects:    ------------------
+#&gt; Country of Origin                Yes
+#&gt; Destination                      Yes
+#&gt; Product                          Yes
+#&gt; _________________ __________________
+#&gt; S.E. type          by: Orig. &amp; Dest.
+#&gt; Observations                  38,325
+#&gt; Squared Cor.                 0.60377
+#&gt; Pseudo R2                    0.76039
+#&gt; BIC                         1.43e+12</div><div class='input'>
 <span class='co'># Alternative ways to cluster the SE:</span>
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_pois</span>, vcov <span class='op'>=</span> <span class='va'>cluster</span> <span class='op'>~</span> <span class='va'>Product</span> <span class='op'>+</span> <span class='va'>Origin</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; Poisson estimation, Dep. Var.: Euros
 #&gt; Observations: 38,325 
 #&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20
 #&gt; Standard-errors: Clustered (Product &amp; Origin) 
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; log(dist_km)  -1.5277   0.122773 -12.444 &lt; 2.2e-16 ***
+#&gt;              Estimate Std. Error  t value  Pr(&gt;|t|)    
+#&gt; log(dist_km) -1.52775   0.122773 -12.4437 &lt; 2.2e-16 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389
@@ -312,8 +312,8 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 #&gt; Observations: 38,325 
 #&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20
 #&gt; Standard-errors: Clustered (Product &amp; Origin) 
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; log(dist_km)  -1.5277   0.122773 -12.444 &lt; 2.2e-16 ***
+#&gt;              Estimate Std. Error  t value  Pr(&gt;|t|)    
+#&gt; log(dist_km) -1.52775   0.122773 -12.4437 &lt; 2.2e-16 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389
@@ -322,8 +322,8 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 #&gt; Observations: 38,325 
 #&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20
 #&gt; Standard-errors: Clustered (Product &amp; Origin) 
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; log(dist_km)  -1.5277   0.122773 -12.444 &lt; 2.2e-16 ***
+#&gt;              Estimate Std. Error  t value  Pr(&gt;|t|)    
+#&gt; log(dist_km) -1.52775   0.122773 -12.4437 &lt; 2.2e-16 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389
@@ -333,9 +333,9 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 </div><div class='output co'>#&gt; Poisson estimation, Dep. Var.: Euros
 #&gt; Observations: 38,325 
 #&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20
-#&gt; Standard-errors: Clustered (combine_clusters_fast(Destination, Product)) 
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; log(dist_km)  -1.5277   0.072633 -21.034 &lt; 2.2e-16 ***
+#&gt; Standard-errors: Clustered (Destination^Product) 
+#&gt;              Estimate Std. Error  t value  Pr(&gt;|t|)    
+#&gt; log(dist_km) -1.52775   0.072633 -21.0337 &lt; 2.2e-16 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389
@@ -355,23 +355,23 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 1,080 
 #&gt; Standard-errors: Newey-West (L=1) 
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; (Intercept)  1.98880   0.174111  11.422  1.17e-06 ***
-#&gt; x1           0.98311   0.052699  18.655  1.68e-08 ***
+#&gt;             Estimate Std. Error t value   Pr(&gt;|t|)    
+#&gt; (Intercept) 1.988753   0.174111 11.4223 1.1709e-06 ***
+#&gt; x1          0.983110   0.052699 18.6551 1.6762e-08 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 4.8969   Adj. R2: 0.262357</div><div class='input'>
+#&gt; RMSE: 4.89686   Adj. R2: 0.262357</div><div class='input'>
 <span class='co'># Now take a lag of 3:</span>
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='fu'><a href='vcov_hac.html'>NW</a></span><span class='op'>(</span><span class='fl'>3</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 1,080 
 #&gt; Standard-errors: Newey-West (L=3) 
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; (Intercept)  1.98880   0.194500  10.225  2.97e-06 ***
-#&gt; x1           0.98311   0.051042  19.261  1.27e-08 ***
+#&gt;             Estimate Std. Error t value   Pr(&gt;|t|)    
+#&gt; (Intercept) 1.988753   0.194500 10.2249 2.9725e-06 ***
+#&gt; x1          0.983110   0.051042 19.2610 1.2652e-08 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 4.8969   Adj. R2: 0.262357</div><div class='input'>
+#&gt; RMSE: 4.89686   Adj. R2: 0.262357</div><div class='input'>
 <span class='co'># --</span>
 <span class='co'># Driscoll-Kraay</span>
 <span class='co'># Use the syntax DK ~ time</span>
@@ -379,23 +379,23 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 1,080 
 #&gt; Standard-errors: Driscoll-Kraay (L=1) 
-#&gt;             Estimate Std. Error t value  Pr(&gt;|t|))    
-#&gt; (Intercept)  1.98880   0.789538  2.5189 3.2829e-02 *  
-#&gt; x1           0.98311   0.036115 27.2210 5.9100e-10 ***
+#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept) 1.988753   0.789538  2.51888 3.2829e-02 *  
+#&gt; x1          0.983110   0.036115 27.22141 5.9051e-10 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 4.8969   Adj. R2: 0.262357</div><div class='input'>
+#&gt; RMSE: 4.89686   Adj. R2: 0.262357</div><div class='input'>
 <span class='co'># Now take a lag of 3:</span>
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='fu'><a href='vcov_hac.html'>DK</a></span><span class='op'>(</span><span class='fl'>3</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>period</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 1,080 
 #&gt; Standard-errors: Driscoll-Kraay (L=3) 
-#&gt;             Estimate Std. Error t value  Pr(&gt;|t|))    
-#&gt; (Intercept)  1.98880   0.971486  2.0471 7.0943e-02 .  
-#&gt; x1           0.98311   0.028415 34.5980 6.9500e-11 ***
+#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept) 1.988753   0.971486  2.04712 7.0943e-02 .  
+#&gt; x1          0.983110   0.028415 34.59840 6.9512e-11 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 4.8969   Adj. R2: 0.262357</div><div class='input'>
+#&gt; RMSE: 4.89686   Adj. R2: 0.262357</div><div class='input'>
 <span class='co'>#--</span>
 <span class='co'># Implicit deductions</span>
 <span class='co'># When the estimation is done with a panel.id, you don't need to</span>
@@ -408,21 +408,21 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 1,080 
 #&gt; Standard-errors: Newey-West (L=1) 
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; (Intercept)  1.98880   0.174111  11.422  1.17e-06 ***
-#&gt; x1           0.98311   0.052699  18.655  1.68e-08 ***
+#&gt;             Estimate Std. Error t value   Pr(&gt;|t|)    
+#&gt; (Intercept) 1.988753   0.174111 11.4223 1.1709e-06 ***
+#&gt; x1          0.983110   0.052699 18.6551 1.6762e-08 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 4.8969   Adj. R2: 0.262357</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_panel</span>, <span class='st'>"DK"</span><span class='op'>)</span>
+#&gt; RMSE: 4.89686   Adj. R2: 0.262357</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_panel</span>, <span class='st'>"DK"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 1,080 
 #&gt; Standard-errors: Driscoll-Kraay (L=1) 
-#&gt;             Estimate Std. Error t value  Pr(&gt;|t|))    
-#&gt; (Intercept)  1.98880   0.789538  2.5189 3.2829e-02 *  
-#&gt; x1           0.98311   0.036115 27.2210 5.9100e-10 ***
+#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept) 1.988753   0.789538  2.51888 3.2829e-02 *  
+#&gt; x1          0.983110   0.036115 27.22141 5.9051e-10 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 4.8969   Adj. R2: 0.262357</div><div class='input'>
+#&gt; RMSE: 4.89686   Adj. R2: 0.262357</div><div class='input'>
 <span class='co'>#</span>
 <span class='co'># VCOVs robust to spatial correlation</span>
 <span class='co'>#</span>
@@ -438,9 +438,9 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: depth
 #&gt; Observations: 1,000 
 #&gt; Standard-errors: Conley (100km) 
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; (Intercept)   881.63    108.900  8.0957  1.65e-15 ***
-#&gt; mag          -123.42     19.232 -6.4174  2.14e-10 ***
+#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept)  881.625   108.9005  8.09569 1.6480e-15 ***
+#&gt; mag         -123.421    19.2323 -6.41737 2.1389e-10 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 209.6   Adj. R2: 0.052245</div><div class='input'>
@@ -449,9 +449,9 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: depth
 #&gt; Observations: 1,000 
 #&gt; Standard-errors: Conley (200km) 
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; (Intercept)   881.63    128.240  6.8747  1.09e-11 ***
-#&gt; mag          -123.42     22.895 -5.3907  8.76e-08 ***
+#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept)  881.625   128.2426  6.87467 1.0937e-11 ***
+#&gt; mag         -123.421    22.8950 -5.39074 8.7582e-08 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 209.6   Adj. R2: 0.052245</div><div class='input'>
@@ -465,10 +465,10 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_geo</span>, <span class='st'>"conley"</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; OLS estimation, Dep. Var.: depth
 #&gt; Observations: 1,000 
-#&gt; Standard-errors: Conley (100km) 
-#&gt;             Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; (Intercept)   881.63    108.900  8.0957  1.65e-15 ***
-#&gt; mag          -123.42     19.232 -6.4174  2.14e-10 ***
+#&gt; Standard-errors: Conley (90km) 
+#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|)    
+#&gt; (Intercept)  881.625   110.6727  7.96606 4.4465e-15 ***
+#&gt; mag         -123.421    20.1746 -6.11765 1.3619e-09 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; RMSE: 209.6   Adj. R2: 0.052245</div><div class='input'>
@@ -485,8 +485,8 @@ Note that if you do so and you use a formula in the <code>cluster</code> argumen
 #&gt; Observations: 38,325 
 #&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20
 #&gt; Standard-errors: NULL 
-#&gt;              Estimate Std. Error t value Pr(&gt;|t|))    
-#&gt; log(dist_km)  -1.5277   0.120014  -12.73 &lt; 2.2e-16 ***
+#&gt;              Estimate Std. Error  t value  Pr(&gt;|t|)    
+#&gt; log(dist_km) -1.52775   0.120014 -12.7298 &lt; 2.2e-16 ***
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #&gt; Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389

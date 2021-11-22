@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.2</span>
       </span>
     </div>
 
@@ -152,9 +152,11 @@
   notes <span class='op'>=</span> <span class='fu'><a href='setFixest_notes.html'>getFixest_notes</a></span><span class='op'>(</span><span class='op'>)</span>,
   iter <span class='op'>=</span> <span class='fl'>2000</span>,
   tol <span class='op'>=</span> <span class='fl'>1e-06</span>,
+  fixef.reorder <span class='op'>=</span> <span class='cn'>TRUE</span>,
   na.rm <span class='op'>=</span> <span class='cn'>TRUE</span>,
   as.matrix <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/is.recursive.html'>is.atomic</a></span><span class='op'>(</span><span class='va'>X</span><span class='op'>)</span>,
-  im_confident <span class='op'>=</span> <span class='cn'>FALSE</span>
+  im_confident <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  <span class='va'>...</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -162,7 +164,7 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>X</th>
-      <td><p>A matrix, vector, data.frame or a list OR a formula. If equal to a formula, then the argument <code>data</code> is required, and it must be of the type: <code>x1 + x2 ~ f1 + fe2</code> with on the LHS the variables to be centered, and on the RHS the factors used for centering. Note that you can use variables with varying slopes with the syntax <code>fe[v1, v2]</code> (see details in <code><a href='feols.html'>feols</a></code>). If not a formula, it must represent the data to be centered. Of course the dimension of that data must be the same as the factors used for centering (argument <code>f</code>).</p></td>
+      <td><p>A matrix, vector, data.frame or a list OR a formula OR a <code><a href='feols.html'>feols</a></code> estimation. If equal to a formula, then the argument <code>data</code> is required, and it must be of the type: <code>x1 + x2 ~ f1 + fe2</code> with on the LHS the variables to be centered, and on the RHS the factors used for centering. Note that you can use variables with varying slopes with the syntax <code>fe[v1, v2]</code> (see details in <code><a href='feols.html'>feols</a></code>). If a <code>feols</code> estimation, all variables (LHS+RHS) are demeaned and then returned (only if it was estimated with fixed-effects). Otherwise, it must represent the data to be centered. Of course the number of observations of that data must be the same as the factors used for centering (argument <code>f</code>).</p></td>
     </tr>
     <tr>
       <th>f</th>
@@ -201,6 +203,10 @@
       <td><p>Stopping criterion of the algorithm. Default is <code>1e-6</code>. The algorithm stops when the maximum absolute increase in the coefficients values is lower than <code>tol</code>.</p></td>
     </tr>
     <tr>
+      <th>fixef.reorder</th>
+      <td><p>Logical, default is <code>TRUE</code>. Whether to reorder the fixed-effects by frequencies before feeding them into the algorithm. If <code>FALSE</code>, the original fixed-effects order provided by the user is maintained. In general, reordering leads to faster and more precise performance.</p></td>
+    </tr>
+    <tr>
       <th>na.rm</th>
       <td><p>Logical, default is <code>TRUE</code>. If <code>TRUE</code> and the input data contains any NA value, then any observation with NA will be discarded leading to an output with less observations than the input. If <code>FALSE</code>, if NAs are present the output will also be filled with NAs for each NA observation in input.</p></td>
     </tr>
@@ -211,6 +217,10 @@
     <tr>
       <th>im_confident</th>
       <td><p>Logical, default is <code>FALSE</code>. FOR EXPERT USERS ONLY! This argument allows to skip some of the preprocessing of the arguments given in input. If <code>TRUE</code>, then <code>X</code> MUST be a numeric vector/matrix/list (not a formula!), <code>f</code> MUST be a list, <code>slope.vars</code> MUST be a list, <code>slope.vars</code> MUST be consistent with <code>slope.flag</code>, and <code>weights</code>, if given, MUST be numeric (not integer!). Further there MUST be not any NA value, and the number of observations of each element MUST be consistent. Non compliance to these rules may simply lead your R session to break.</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>Not currently used.</p></td>
     </tr>
     </table>
 

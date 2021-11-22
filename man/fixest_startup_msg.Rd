@@ -13,7 +13,7 @@ fixest_startup_msg(x)
 Package startup messages can be very annoying, although sometimes they can be necessary. Use this function to prevent \code{fixest}'s package startup message from popping when loading. This will be specific to your current project.
 }
 \details{
-Note that this function is introduced to cope with the first \code{fixest} startup message (in version 0.9.0). In the future, all startup messages may be removed, but the function will still exist.
+Note that this function is introduced to cope with the first \code{fixest} startup message (in version 0.9.0).
 
-This function works by adding a variable in the \code{.Renviron} file, so it is very lightweight and project-specific.
+This function works only with R >= 4.0.0. There are no startup messages for R < 4.0.0.
 }

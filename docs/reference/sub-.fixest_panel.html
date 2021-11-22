@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.2</span>
       </span>
     </div>
 
@@ -188,11 +188,11 @@
 <span class='co'># Subselections of fixest_panel objects bookkeeps the leads/lags engine</span>
 <span class='va'>pdat_small</span> <span class='op'>=</span> <span class='va'>pdat</span><span class='op'>[</span><span class='op'>!</span><span class='va'>pdat</span><span class='op'>$</span><span class='va'>period</span> <span class='op'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>2</span>, <span class='fl'>4</span><span class='op'>)</span>, <span class='op'>]</span>
 <span class='va'>a</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span><span class='op'>~</span><span class='fu'><a href='f.html'>l</a></span><span class='op'>(</span><span class='va'>x1</span>, <span class='fl'>0</span><span class='op'>:</span><span class='fl'>1</span><span class='op'>)</span>, <span class='va'>pdat_small</span><span class='op'>)</span>
-
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 324 observations removed because of NA values (RHS: 324).</span></div><div class='input'>
 <span class='co'># we obtain the same results, had we created the lags "on the fly"</span>
 <span class='va'>base_small</span> <span class='op'>=</span> <span class='va'>base_did</span><span class='op'>[</span><span class='op'>!</span><span class='va'>base_did</span><span class='op'>$</span><span class='va'>period</span> <span class='op'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>2</span>, <span class='fl'>4</span><span class='op'>)</span>, <span class='op'>]</span>
 <span class='va'>b</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span><span class='op'>~</span><span class='fu'><a href='f.html'>l</a></span><span class='op'>(</span><span class='va'>x1</span>, <span class='fl'>0</span><span class='op'>:</span><span class='fl'>1</span><span class='op'>)</span>, <span class='va'>base_small</span>, panel.id <span class='op'>=</span> <span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>period</span><span class='op'>)</span>
-<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>a</span>, <span class='va'>b</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 324 observations removed because of NA values (RHS: 324).</span></div><div class='input'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>a</span>, <span class='va'>b</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;                                 a                 b
 #&gt; Dependent Var.:                 y                 y
 #&gt;                                                    
@@ -217,16 +217,16 @@
   <span class='co'>#  (the lead/lags work appropriately)</span>
   <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span><span class='op'>~</span><span class='fu'><a href='f.html'>l</a></span><span class='op'>(</span><span class='va'>x1</span>, <span class='fl'>0</span><span class='op'>:</span><span class='fl'>1</span><span class='op'>)</span>, <span class='va'>pdat_dt</span><span class='op'>[</span><span class='op'>!</span><span class='va'>period</span> <span class='op'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>2</span>, <span class='fl'>4</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>
 <span class='op'>}</span>
-</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
+</div><div class='output co'>#&gt; <span class='message'>NOTE: 324 observations removed because of NA values (RHS: 324).</span></div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
 #&gt; Observations: 540 
 #&gt; Standard-errors: Clustered (id) 
-#&gt;              Estimate Std. Error   t value Pr(&gt;|t|))    
-#&gt; (Intercept)  3.691400   0.308452 11.968000 &lt; 2.2e-16 ***
-#&gt; x1           1.013000   0.070704 14.327000 &lt; 2.2e-16 ***
-#&gt; l(x1, 1)    -0.006268   0.077920 -0.080439  0.936038    
+#&gt;              Estimate Std. Error   t value  Pr(&gt;|t|)    
+#&gt; (Intercept)  3.691450   0.308452 11.967645 &lt; 2.2e-16 ***
+#&gt; x1           1.012976   0.070704 14.327048 &lt; 2.2e-16 ***
+#&gt; l(x1, 1)    -0.006268   0.077920 -0.080439   0.93604    
 #&gt; ---
 #&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 5.0207   Adj. R2: 0.259834</div><div class='input'>
+#&gt; RMSE: 5.02071   Adj. R2: 0.259834</div><div class='input'>
 
 </div></pre>
   </div>

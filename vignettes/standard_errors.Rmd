@@ -19,17 +19,16 @@ knitr::opts_chunk$set(echo = TRUE,
 Sys.setenv(lang = "en")
 
 library(fixest)
-
-if(requireNamespace("plm", quietly = TRUE)) library(plm)
-
-if(requireNamespace("sandwich", quietly = TRUE)) library(sandwich)
-
 setFixest_nthreads(1)
 ```
 
-It is an euphemism to say that standard-errors are a critical element of your estimations: literally your paper's results depend on them. It is therefore unfortunate that no conventional "best" way exists to compute them. Multiple definitions can create confusion and the purpose of this document is to lay bare the fiddly details of standard-error computation in this package.
+It is an euphemism to say that standard-errors are a critical element of your estimations: literally your paper's results depend on them. It is therefore unfortunate that no conventional "best" way exists to compute them. 
 
-The first part describes how standard-errors are computed in `fixest`'s estimations. Please note that here I don't discuss the *why*, but only the *how*. For a thorough introduction to the topic, see the excellent paper by [Zeileis, Koll and Graham (2020)](https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf). The second part illustrates how to replicate some standard-errors obtained from other estimation methods with `fixest`. 
+For example, when performing the exact same estimation across various software, it is not uncommon to obtain different standard-errors. If your first thought is: there must be a bug... well, put that thought aside because there ain't no bug. It often boils down to the choices the developer made regarding small sample correction which, maybe surprisingly, has many degrees of freedom when it comes to implementation. 
+
+Multiple definitions can create confusion and the purpose of this document is to lay bare the fiddly details of standard-error computation in this package.
+
+The first part of this vignette describes how standard-errors are computed in `fixest`'s estimations. In particular, it details all the possible choices surrounding small sample correction. Please note that here I don't discuss the *why*, but only the *how*. For a thorough introduction to the topic, see the excellent paper by [Zeileis, Koll and Graham (2020)](https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf). The second part illustrates how to replicate some standard-errors obtained from other estimation methods with `fixest`. 
 
 This document applies to `fixest` version 0.10.0 or higher.
 
@@ -58,7 +57,7 @@ If `vcov = "iid"`, then the standard-errors are based on the assumption that the
 
 If `vcov = "cluster"`, then arbitrary correlation of the errors within clusters is accounted for. Same for `vcov = "twoway"`: arbitrary correlation within each of the two clusters is accounted for. 
 
-In the context of panel data or time series, `vcov = "NW"` (Newey-West, 1987) or `vcov = "DK"` (Driscoll-Kraay, 1998) account for temporal correlation between the errors; the two differing on how to account for heterogeneity between units. Their implementation is based on Milo (2017).  
+In the context of panel data or time series, `vcov = "NW"` (Newey-West, 1987) or `vcov = "DK"` (Driscoll-Kraay, 1998) account for temporal correlation between the errors; the two differing on how to account for heterogeneity between units. Their implementation is based on Millo (2017).  
 
 Finally, `vcov = "conley"` accounts for spatial correlation of the errors.
 
@@ -123,12 +122,17 @@ This section illustrates how the results from `fixest` compares with the ones fr
 
 ```{r, echo = FALSE}
 is_plm = requireNamespace("plm", quietly = TRUE)
+is_sandwich = requireNamespace("sandwich", quietly = TRUE)
+
+is_plm = is_plm || is_swandwich
+
 if(!is_plm){
     knitr::opts_chunk$set(eval = FALSE)
-    cat("Evaluation of the next chunks requires 'plm', which is not present.")
+    cat("Evaluation of the next chunks requires 'plm' and 'sandwich'. Problem: One of these packages is missing.")
 } else {
     knitr::opts_chunk$set(eval = TRUE)
 }
+
 ```
 
 #### The data set and heteroskedasticity-robust SEs
@@ -219,13 +223,10 @@ And finally let's look at Newey-West and Driscoll-Kray standard-errors:
 # Newey-west
 #
 
-se_lm_NW    = se(vcovPL(est_lm, cluster = ~ firm + year))["capital"]
 se_plm_NW   = se(vcovNW(est_plm))["capital"]
 se_feols_NW = se(est_feols, vcov = "NW")
 
-rbind(se_lm_NW, se_plm_NW, se_feols_NW)
-
-# Note that sandwich::vcovPL currently cannot be replicated
+rbind(se_plm_NW, se_feols_NW)
 
 # we can replicate plm's by changing the type of SSC:
 rbind(se_plm_NW, 
@@ -290,8 +291,8 @@ rbind(se(felm(inv ~ capital + factor(year) | firm | 0 | firm, Grunfeld))["capita
       se(feols(inv ~ capital + factor(year) | firm, Grunfeld))["capital"])
 
 # Now with two-way clustered standard-errors
-est_lfe_2way = felm(inv ~ capital | firm + year | 0 | firm + year, Grunfeld)
-se_lfe_2way  = se(est_lfe_2way)
+est_lfe_2way  = felm(inv ~ capital | firm + year | 0 | firm + year, Grunfeld)
+se_lfe_2way   = se(est_lfe_2way)
 se_feols_2way = se(est_feols, vcov = "twoway")
 rbind(se_lfe_2way, se_feols_2way)
 
@@ -361,11 +362,11 @@ Cameron AC, Gelbach JB, Miller DL (2011). "[Robust Inference with Multiway Clust
 
 Kauermann G, Carroll RJ (2001). "[A Note on the Efficiency of Sandwich Covariance Matrix Estimation](https://www.tandfonline.com/doi/abs/10.1198/016214501753382309)", Journal of the American Statistical Association, 96(456), 1387–1396.
 
-MacKinnon, JG, White, H (1985). "Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties" Journal of Econometrics, 29(3), 305–325.
+MacKinnon JG, White H (1985). "Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties" Journal of Econometrics, 29(3), 305–325.
 
-Milo G (2017). "[Robust Standard Error Estimators for Panel Models: A Unifying Approach](https://www.jstatsoft.org/index.php/jss/article/view/v082i03/v82i03.pdf)" Journal of Statistical Software, 82(3).
+Millo G (2017). "[Robust Standard Error Estimators for Panel Models: A Unifying Approach](https://doi.org/10.18637/jss.v082.i03)" Journal of Statistical Software, 82(3).
 
-Zeileis A, Koll S, Graham N (2020). "[Various Versatile Variances: An Object-Oriented Implementation of Clustered Covariances in R.](https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf)" Journal of Statistical Software, 95(1), 1–36.
+Zeileis A, Koll S, Graham N (2020). "[Various Versatile Variances: An Object-Oriented Implementation of Clustered Covariances in R](https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf)" Journal of Statistical Software, 95(1), 1–36.
 
 
 

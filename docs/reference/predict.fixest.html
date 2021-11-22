@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.2</span>
       </span>
     </div>
 
@@ -146,8 +146,14 @@
   <span class='va'>object</span>,
   <span class='va'>newdata</span>,
   type <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"response"</span>, <span class='st'>"link"</span><span class='op'>)</span>,
+  se.fit <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  interval <span class='op'>=</span> <span class='st'>"none"</span>,
+  level <span class='op'>=</span> <span class='fl'>0.95</span>,
   fixef <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  vs.coef <span class='op'>=</span> <span class='cn'>FALSE</span>,
   sample <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"estimation"</span>, <span class='st'>"original"</span><span class='op'>)</span>,
+  vcov <span class='op'>=</span> <span class='cn'>NULL</span>,
+  ssc <span class='op'>=</span> <span class='cn'>NULL</span>,
   <span class='va'>...</span>
 <span class='op'>)</span></pre>
 
@@ -167,12 +173,36 @@
       <td><p>Character either equal to <code>"response"</code> (default) or <code>"link"</code>. If <code>type="response"</code>, then the output is at the level of the response variable, i.e. it is the expected predictor \(E(Y|X)\). If <code>"link"</code>, then the output is at the level of the explanatory variables, i.e. the linear predictor \(X\cdot \beta\).</p></td>
     </tr>
     <tr>
+      <th>se.fit</th>
+      <td><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code>, the standard-error of the predicted value is computed and returned in a column named <code>se.fit</code>. This feature is only available for OLS models not containing fixed-effects.</p></td>
+    </tr>
+    <tr>
+      <th>interval</th>
+      <td><p>Either "none" (default), "confidence" or "prediction". What type of confidence interval to compute. Note that this feature is only available for OLS models not containing fixed-effects (GLM/ML models are not covered).</p></td>
+    </tr>
+    <tr>
+      <th>level</th>
+      <td><p>A numeric scalar in between 0.5 and 1, defaults to 0.95. Only used when the argument 'interval' is requested, it corresponds to the width of the confidence interval.</p></td>
+    </tr>
+    <tr>
       <th>fixef</th>
       <td><p>Logical scalar, default is <code>FALSE</code>. If <code>TRUE</code>, a data.frame is returned, with each column representing the fixed-effects coefficients for each observation in <code>newdata</code> -- with as many columns as fixed-effects. Note that when there are variables with varying slopes, the slope coefficients are returned (i.e. they are not multiplied by the variable).</p></td>
     </tr>
     <tr>
+      <th>vs.coef</th>
+      <td><p>Logical scalar, default is <code>FALSE</code>. Only used when <code>fixef = TRUE</code> and when variables with varying slopes are present. If <code>TRUE</code>, the coefficients of the variables with varying slopes are returned instead of the coefficient multiplied by the value of the variables (default).</p></td>
+    </tr>
+    <tr>
       <th>sample</th>
       <td><p>Either "estimation" (default) or "original". This argument is only used when arg. 'newdata' is missing, and is ignored otherwise. If equal to "estimation", the vector returned matches the sample used for the estimation. If equal to "original", it matches the original data set (the observations not used for the estimation being filled with NAs).</p></td>
+    </tr>
+    <tr>
+      <th>vcov</th>
+      <td><p>Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: <code>vcov_type ~ variables</code>. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from <code><a href='vcov_cluster.html'>vcov_cluster</a></code>, <code><a href='vcov_hac.html'>vcov_NW</a></code>, <code><a href='vcov_hac.html'>NW</a></code>, <code><a href='vcov_hac.html'>vcov_DK</a></code>, <code><a href='vcov_hac.html'>DK</a></code>, <code><a href='vcov_conley.html'>vcov_conley</a></code> and <code><a href='vcov_conley.html'>conley</a></code>. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the `vcov` documentation in the <a href='https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1'>vignette</a>.</p></td>
+    </tr>
+    <tr>
+      <th>ssc</th>
+      <td><p>An object of class <code>ssc.type</code> obtained with the function <code><a href='ssc.html'>ssc</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href='ssc.html'>ssc</a></code> for this argument. The arguments and defaults of the function <code><a href='ssc.html'>ssc</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "conventional"</code>, <code>t.df = "conventional"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href='ssc.html'>ssc</a></code> for details.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -184,7 +214,8 @@
 
     <p>It returns a numeric vector of length equal to the number of observations in argument <code>newdata</code>.
 If <code>newdata</code> is missing, it returns a vector of the same length as the estimation sample, except if <code>sample = "original"</code>, in which case the length of the vector will match the one of the original data set (which can, but also cannot, be the estimation sample).
-If <code>fixef=TRUE</code>, a <code>data.frame</code> is returned.</p>
+If <code>fixef = TRUE</code>, a <code>data.frame</code> is returned.
+If <code>se.fit = TRUE</code> or <code>interval != "none"</code>, the object returned is a data.frame with the following columns: <code>fit</code>, <code>se.fit</code>, and, if CIs are requested, <code>ci_low</code> and <code>ci_high</code>.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p>See also the main estimation functions <code><a href='femlm.html'>femlm</a></code>, <code><a href='feols.html'>feols</a></code> or <code><a href='feglm.html'>feglm</a></code>. <code><a href='update.fixest.html'>update.fixest</a></code>, <code><a href='summary.fixest.html'>summary.fixest</a></code>, <code><a href='vcov.fixest.html'>vcov.fixest</a></code>, <code><a href='fixef.fixest.html'>fixef.fixest</a></code>.</p></div>
@@ -247,6 +278,51 @@ If <code>fixef=TRUE</code>, a <code>data.frame</code> is returned.</p>
 #&gt; [4,] 22.93679 22.93679
 #&gt; [5,] 24.43620 24.43620
 #&gt; [6,] 22.22697 22.22697</div><div class='input'>
+
+<span class='co'>#</span>
+<span class='co'># Standard-error of the prediction</span>
+<span class='co'>#</span>
+
+<span class='va'>base</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/setNames.html'>setNames</a></span><span class='op'>(</span><span class='va'>iris</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span><span class='op'>)</span>
+
+<span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='va'>species</span>, <span class='va'>base</span><span class='op'>)</span>
+
+<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>est</span>, se.fit <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;        fit     se.fit
+#&gt; 1 5.063856 0.06240784
+#&gt; 2 4.662076 0.07686065
+#&gt; 3 4.822788 0.06651280
+#&gt; 4 4.742432 0.07108218
+#&gt; 5 5.144212 0.06458060
+#&gt; 6 5.385281 0.07972048</div><div class='input'>
+<span class='co'># regular confidence interval</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>est</span>, interval <span class='op'>=</span> <span class='st'>"conf"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;        fit     se.fit   ci_low  ci_high
+#&gt; 1 5.063856 0.06240784 4.940517 5.187196
+#&gt; 2 4.662076 0.07686065 4.510173 4.813979
+#&gt; 3 4.822788 0.06651280 4.691336 4.954240
+#&gt; 4 4.742432 0.07108218 4.601949 4.882915
+#&gt; 5 5.144212 0.06458060 5.016579 5.271846
+#&gt; 6 5.385281 0.07972048 5.227726 5.542836</div><div class='input'>
+<span class='co'># adding the residual to the CI</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>est</span>, interval <span class='op'>=</span> <span class='st'>"predi"</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;        fit     se.fit   ci_low  ci_high
+#&gt; 1 5.063856 0.06240784 4.189559 5.938154
+#&gt; 2 4.662076 0.07686065 3.783294 5.540858
+#&gt; 3 4.822788 0.06651280 3.947310 5.698267
+#&gt; 4 4.742432 0.07108218 3.865552 5.619312
+#&gt; 5 5.144212 0.06458060 4.269299 6.019126
+#&gt; 6 5.385281 0.07972048 4.505504 6.265057</div><div class='input'>
+<span class='co'># You can change the type of SE on the fly</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>est</span>, interval <span class='op'>=</span> <span class='st'>"conf"</span>, vcov <span class='op'>=</span> <span class='op'>~</span><span class='va'>species</span><span class='op'>)</span><span class='op'>)</span>
+</div><div class='output co'>#&gt;        fit      se.fit   ci_low  ci_high
+#&gt; 1 5.063856 0.005175705 5.041587 5.086126
+#&gt; 2 4.662076 0.030766691 4.529698 4.794454
+#&gt; 3 4.822788 0.016389733 4.752269 4.893307
+#&gt; 4 4.742432 0.023578212 4.640983 4.843881
+#&gt; 5 5.144212 0.012364184 5.091014 5.197411
+#&gt; 6 5.385281 0.033929622 5.239293 5.531268</div><div class='input'>
+
 
 </div></pre>
   </div>

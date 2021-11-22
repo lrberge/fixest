@@ -767,34 +767,40 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 
     if(anyNA(bread)){
 
+        IS_NA_VCOV = FALSE
+
         if(!forceCovariance){
-            last_warn = getOption("fixest_last_warning")
-            if(is.null(last_warn) || (proc.time() - last_warn)[3] > 1){
-                warning("Standard errors are NA because of likely presence of collinearity.", call. = FALSE)
-            }
-
-            attr(bread, "type") = "NA (not-available)"
-
-            return(bread)
+            IS_NA_VCOV = TRUE
         } else {
             info_inv = cpp_cholesky(object$hessian)
             if(!is.null(info_inv$all_removed)){
                 # Means all variables are collinear! => can happen when using FEs
-                stop("All variables have virtually no effect on the dependent variable. Covariance is not defined.")
+                IS_NA_VCOV = TRUE
             }
-
-            VCOV_raw_forced = info_inv$XtX_inv
-            if(any(info_inv$id_excl)){
-                n_collin = sum(info_inv$all_removed)
-                message("NOTE: ", n_letter(n_collin), " variable", plural(n_collin, "s.has"), " been found to be singular.")
-
-                VCOV_raw_forced = cpp_mat_reconstruct(VCOV_raw_forced, info_inv$id_excl)
-                VCOV_raw_forced[, info_inv$id_excl] = NA
-                VCOV_raw_forced[info_inv$id_excl, ] = NA
-            }
-
-            bread = VCOV_raw_forced
         }
+
+        if(IS_NA_VCOV){
+            attr(bread, "type") = "NA (not-available)"
+
+            if(is_attr){
+                attr(bread, "dof.K") = object$nparams
+                attr(bread, "df.t") = NA
+            }
+
+            return(bread)
+        }
+
+        VCOV_raw_forced = info_inv$XtX_inv
+        if(any(info_inv$id_excl)){
+            n_collin = sum(info_inv$all_removed)
+            message("NOTE: ", n_letter(n_collin), " variable", plural(n_collin, "s.has"), " been found to be singular.")
+
+            VCOV_raw_forced = cpp_mat_reconstruct(VCOV_raw_forced, info_inv$id_excl)
+            VCOV_raw_forced[, info_inv$id_excl] = NA
+            VCOV_raw_forced[info_inv$id_excl, ] = NA
+        }
+
+        bread = VCOV_raw_forced
 
     }
 
@@ -976,7 +982,10 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     if(is_attr){
 
         min_cluster_size = attr(vcov_mat, "min_cluster_size")
-        if(ssc$t.df == "min" && !is.null(min_cluster_size)){
+        if(is.numeric(ssc$t.df)){
+            attr(vcov_mat, "df.t") = ssc$t.df
+
+        } else if(ssc$t.df == "min" && !is.null(min_cluster_size)){
             attr(vcov_mat, "df.t") = max(min_cluster_size - 1, 1)
 
         } else {
@@ -1013,16 +1022,16 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 
 
 
-#' Type of degree of freedom in \code{fixest} VCOVs
+#' Governs the small sample correction in \code{fixest} VCOVs
 #'
-#' Provides how the degrees of freedom should be calculated in \code{\link[fixest]{vcov.fixest}}/\code{\link[fixest]{summary.fixest}}.
+#' Provides how the small sample correction should be calculated in \code{\link[fixest]{vcov.fixest}}/\code{\link[fixest]{summary.fixest}}.
 #'
 #' @param adj Logical scalar, defaults to \code{TRUE}. Whether to apply a small sample adjustment of the form \code{(n - 1) / (n - K)}, with \code{K} the number of estimated parameters. If \code{FALSE}, then no adjustment is made.
 #' @param fixef.K Character scalar equal to \code{"nested"} (default), \code{"none"} or \code{"full"}. In the small sample adjustment, how to account for the fixed-effects parameters. If \code{"none"}, the fixed-effects parameters are discarded, meaning the number of parameters (\code{K}) is only equal to the number of variables. If \code{"full"}, then the number of parameters is equal to the number of variables plus the number of fixed-effects. Finally, if \code{"nested"}, then the number of parameters is equal to the number of variables plus the number of fixed-effects that *are not* nested in the clusters used to cluster the standard-errors.
 #' @param fixef.force_exact Logical, default is \code{FALSE}. If there are 2 or more fixed-effects, these fixed-effects they can be irregular, meaning they can provide the same information. If so, the "real" number of parameters should be lower than the total number of fixed-effects. If \code{fixef.force_exact = TRUE}, then \code{\link[fixest]{fixef.fixest}} is first run to determine the exact number of parameters among the fixed-effects. Mostly, panels of the type individual-firm require \code{fixef.force_exact = TRUE} (but it adds computational costs).
 #' @param cluster.adj Logical scalar, default is \code{TRUE}. How to make the small sample correction when clustering the standard-errors? If \code{TRUE} a \code{G/(G-1)} correction is performed with \code{G} the number of cluster values.
 #' @param cluster.df Either "conventional" or "min" (default). Only relevant when the variance-covariance matrix is two-way clustered (or higher). It governs how the small sample adjustment for the clusters is to be performed. [Sorry for the jargon that follows.] By default a unique adjustment is made, of the form G_min/(G_min-1) with G_min the smallest G_i. If \code{cluster.df="conventional"} then the i-th "sandwich" matrix is adjusted with G_i/(G_i-1) with G_i the number of unique clusters.
-#' @param t.df Either "conventional" or "min" (default). Only relevant when the variance-covariance matrix is clustered. It governs how the p-values should be computed. By default, the degrees of freedom of the Student t distribution is equal to the minimum size of the clusters with which the VCOV has been clustered. If \code{t.df="conventional"}, then the degrees of freedom of the Student t distribution is equal to the number of observations minus the number of estimated variables.
+#' @param t.df Either "conventional", "min" (default) or an integer scalar. Only relevant when the variance-covariance matrix is clustered. It governs how the p-values should be computed. By default, the degrees of freedom of the Student t distribution is equal to the minimum size of the clusters with which the VCOV has been clustered. If \code{t.df="conventional"}, then the degrees of freedom of the Student t distribution is equal to the number of observations minus the number of estimated variables. You can also pass a number to manually specify the DoF of the t-distribution.
 #'
 #' @details
 #'
@@ -1086,7 +1095,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 #' # Default: fixef.K = "nested"
 #' #  => adjustment K = 1 + 5 (i.e. x + fe2)
 #' summary(est)
-#' attributes(vcov(est, attr = TRUE))[c("ssc.type", "dof.K")]
+#' attributes(vcov(est, attr = TRUE))[c("ssc", "dof.K")]
 #'
 #'
 #' # fixef.K = FALSE
@@ -1125,7 +1134,7 @@ ssc = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = 
     check_arg_plus(adj, "loose logical scalar conv")
     check_arg_plus(fixef.K, "match(none, full, nested)")
     check_arg_plus(cluster.df, "match(conventional, min)")
-    check_arg_plus(t.df, "match(conventional, min)")
+    check_arg_plus(t.df, "match(conventional, min) | integer scalar GT{0}")
     check_arg(fixef.force_exact, cluster.adj, "logical scalar")
 
     res = list(adj = adj, fixef.K = fixef.K, cluster.adj = cluster.adj, cluster.df = cluster.df,
@@ -1171,7 +1180,7 @@ dof = function(adj = TRUE, fixef.K = "nested", cluster.adj = TRUE, cluster.df = 
 #' Laurent Berge
 #'
 #' @references
-#' Cameron AC, Gelbach JB, Miller DL (2011). "Robust Inference with Multiway Clustering." \emph{Journal of Business & Economic Statistics}, 29(2), 238–249. doi:10.1198/jbes.2010.07136.
+#' Cameron AC, Gelbach JB, Miller DL (2011). "Robust Inference with Multiway Clustering." \emph{Journal of Business & Economic Statistics}, 29(2), 238-249. doi:10.1198/jbes.2010.07136.
 #'
 #' @examples
 #'
@@ -1318,15 +1327,23 @@ vcov_cluster = function(x, cluster = NULL, ssc = NULL){
 #'
 #' @param unit A character scalar or a one sided formula giving the name of the variable representing the units of the panel.
 #' @param time A character scalar or a one sided formula giving the name of the variable representing the time.
-#' @param lag An integer scalar, default is \code{NULL}. If \code{NULL}, then the default lag is equal to \code{n_t^0.25} with \code{n_t} the number of time periods.
+#' @param lag An integer scalar, default is \code{NULL}. If \code{NULL}, then the default lag is equal to \code{n_t^0.25} with \code{n_t} the number of time periods (as of Newey and West 1987) for panel Newey-West and Driscoll-Kraay. The default for the time series Newey-West is computed via \code{\link[sandwich:NeweyWest]{bwNeweyWest}} which implements the Newey and West 1994 method.
+#'
+#' @section Lag selection:
+#'
+#' The default lag selection depends on whether the VCOV applies to a panel or a time series.
+#'
+#' For panels, i.e. panel Newey-West or Driscoll-Kraay VCOV, the default lag is \code{n_t^0.25} with \code{n_t} the number of time periods. This is based on Newey and West 1987.
+#'
+#' For time series Newey-West, the default lag is found thanks to the \code{\link[sandwich:NeweyWest]{bwNeweyWest}} function from the \code{sandwich} package. It is based on Newey and West 1994.
 #'
 #'
 #' @references
-#' Newey WK, West KD (1987). "A Simple, Positive Semi-Deﬁnite, Heteroskedasticity and Autocorrelation Consistent Covariance Matrix." \emph{Econometrica}, 55(3), 703–708. doi:10.2307/1913610.
+#' Newey WK, West KD (1987). "A Simple, Positive Semi-Definite, Heteroskedasticity and Autocorrelation Consistent Covariance Matrix." \emph{Econometrica}, 55(3), 703-708. doi:10.2307/1913610.
 #'
-#' Driscoll JC, Kraay AC (1998). "Consistent Covariance Matrix Estimation with Spatially Dependent Panel Data." \emph{The Review of Economics and Statistics}, 80(4), 549–560. doi:10.1162/003465398557825.
+#' Driscoll JC, Kraay AC (1998). "Consistent Covariance Matrix Estimation with Spatially Dependent Panel Data." \emph{The Review of Economics and Statistics}, 80(4), 549-560. doi:10.1162/003465398557825.
 #'
-#' Milo G (2017). "Robust Standard Error Estimators for Panel Models: A Unifying Approach" \emph{Journal of Statistical Software}, 82(3). doi:10.18637/jss.v082.i03.
+#' Millo G (2017). "Robust Standard Error Estimators for Panel Models: A Unifying Approach" \emph{Journal of Statistical Software}, 82(3). doi:10.18637/jss.v082.i03.
 #'
 #' @return
 #' If the first argument is a \code{fixest} object, then a VCOV is returned (i.e. a symmetric matrix).
@@ -1709,7 +1726,7 @@ vcovClust = function (cluster, myBread, scores, adj = FALSE, do.unclass = TRUE, 
     # - scores
     # Note: if length(unique(cluster)) == n (i.e. White correction), then the adj are such that vcovClust is equivalent to vcovHC(res, type="HC1")
     # Source: http://cameron.econ.ucdavis.edu/research/Cameron_Miller_JHR_2015_February.pdf
-    #         Cameron & Miller -- A Practitioner’s Guide to Cluster-Robust Inference
+    #         Cameron & Miller -- A Practitioner's Guide to Cluster-Robust Inference
 
     n = NROW(scores)
 
@@ -1847,18 +1864,23 @@ vcov_newey_west_internal = function(bread, scores, vars, ssc, sandwich, nthreads
 
     n_time = max(time)
 
-    # Lag: simple rule of thumb
-    if(missnull(lag)){
-        lag = floor(n_time^(1/4))
+    # The bartlett weights
+    set_weights = function(lag){
+        res = seq(1, 0, by = -(1/(lag + 1)))
+        # we must halve the first weight (we'll add the transpose internally)
+        res[1] = 0.5
+        res
     }
 
-    w = seq(1, 0, by = -(1/(lag + 1)))
-    # we halve the first weight (since we add the transpose in the internal code)
-    w[1] = 0.5
-
-    # We check the consistency
     is_panel = !is.null(unit)
     if(is_panel){
+
+        # Lag: simple rule of thumb
+        if(missnull(lag)){
+            lag = floor(n_time^(1/4))
+        }
+
+        w = set_weights(lag)
 
         my_order = order(time, unit)
         time_ro = time[my_order]
@@ -1886,6 +1908,25 @@ vcov_newey_west_internal = function(bread, scores, vars, ssc, sandwich, nthreads
         my_order = order(time)
         time_ro = time[my_order]
         scores_ro = scores[my_order, , drop = FALSE]
+
+        # Lag: the default relies on bwNeweyWest
+        if(missnull(lag)){
+
+            # Later => feed in directly the matrix when the new version of sandwich is ready
+
+            # we drop the intercept (except if there's only the intercept)
+            is_intercept = (colnames(scores_ro) == "(Intercept)") & (ncol(scores_ro) > 1)
+            if(any(is_intercept)){
+                x = structure(list(scores = scores_ro[, !is_intercept, drop = FALSE]), class = "fixest")
+            } else {
+                x = structure(list(scores = scores_ro), class = "fixest")
+            }
+
+            lag = sandwich::bwNeweyWest(x, weights = 1)
+            lag = floor(lag)
+        }
+
+        w = set_weights(lag)
 
         meat = cpp_newey_west(scores_ro, w, nthreads)
     }
@@ -2422,8 +2463,6 @@ setFixest_ssc = function(ssc.type = ssc()){
 }
 
 #' @rdname ssc
-"getFixest_ssc"
-
 getFixest_ssc = function(){
 
     ssc = getOption("fixest_ssc")
@@ -2477,7 +2516,7 @@ setFixest_vcov = function(no_FE = "iid", one_FE = "cluster", two_FE = "cluster",
                           panel = "cluster", all = NULL, reset = FALSE){
 
     # NOTE:
-    # The default walues should ALWAYS be working.
+    # The default values should ALWAYS be working.
     # That's why I don't allow conley SEs nor NW SEs
     # => they can be not working at times
 

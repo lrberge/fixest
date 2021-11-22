@@ -71,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.2</span>
       </span>
     </div>
 
@@ -135,21 +135,253 @@
       <small>Source: <a href='https://github.com/lrberge/fixest/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
+    <div id="fixest-0102" class="section level1">
+<h1 class="page-header" data-toc-text="0.10.2">
+<a href="#fixest-0102" class="anchor"></a>fixest 0.10.2<small> Unreleased </small>
+</h1>
+<div id="bug-fixes" class="section level2">
+<h2 class="hasAnchor">
+<a href="#bug-fixes" class="anchor"></a>Bug fixes</h2>
+<ul>
+<li><p>fix bug in stepwise estimations when two (stepwised) explanatory variables have exactly the same NAs values.</p></li>
+<li><p>fix display bug regarding factors in <code>etable</code> when <code>dict</code> was present.</p></li>
+<li><p>fix bug <code>tablefoot.value</code> not working any more (reported by <a href='https://github.com/resulumit'>@resulumit</a> <a href="https://github.com/lrberge/fixest/issues/224"><a href='https://github.com/lrberge/fixest/issues/224'>#224</a></a>).</p></li>
+<li><p>fix possible environment problem when estimating non linear functions outside of the global environment.</p></li>
+</ul>
+</div>
+<div id="etable" class="section level2">
+<h2 class="hasAnchor">
+<a href="#etable" class="anchor"></a>etable</h2>
+<ul>
+<li>in <code>headers</code>/<code>extralines</code>: <code>cmidrule</code> does not show up for empty column names any more.</li>
+</ul>
+</div>
+</div>
+    <div id="fixest-0101" class="section level1">
+<h1 class="page-header" data-toc-text="0.10.1">
+<a href="#fixest-0101" class="anchor"></a>fixest 0.10.1<small> 2021-10-30 </small>
+</h1>
+<div id="bug-fixes-1" class="section level2">
+<h2 class="hasAnchor">
+<a href="#bug-fixes-1" class="anchor"></a>Bug fixes</h2>
+<ul>
+<li><p>remove new R native piping test <code>|&gt;</code> which led to errors in R &lt; 4.1.0 despite conditional testing.</p></li>
+<li><p>fix bug in <code>etable</code> <code>headers</code> when one wants to include several lines and the first line contains only one element repeated across columns.</p></li>
+<li><p>fix bugs in predict: a) when variables are created with functions of the data, and b) when the new data contains single level factors (relates to issues <a href="https://github.com/lrberge/fixest/issues/200"><a href='https://github.com/lrberge/fixest/issues/200'>#200</a></a> and <a href="https://github.com/lrberge/fixest/issues/180"><a href='https://github.com/lrberge/fixest/issues/180'>#180</a></a> by <a href='https://github.com/steffengreup'>@steffengreup</a> and <a href='https://github.com/IsadoraBM'>@IsadoraBM</a>).</p></li>
+<li><p>fix bug in <code>etable</code> non-clustered standard errors not displaying properly in footers.</p></li>
+<li><p>fix bug in <code>etable</code> regarding the escaping of <code>fixef_sizes</code> (reported by Apoorva Lal <a href="https://github.com/lrberge/fixest/issues/201"><a href='https://github.com/lrberge/fixest/issues/201'>#201</a></a>).</p></li>
+<li><p>fix bug introduced in 0.10.0 preventing the estimation of IV models with interacted fixed-effects (reported by <a href='https://github.com/etiennebacher'>@etiennebacher</a> <a href="https://github.com/lrberge/fixest/issues/203"><a href='https://github.com/lrberge/fixest/issues/203'>#203</a></a>).</p></li>
+<li><p>fix bug in IV estimations when: a) no exogenous variables were present AND the IV part contained at lags; and b) the endogenous variables contained at least two lags. Reported by Robbie Minton.</p></li>
+<li><p>fix bug in the <code>.fit</code> methods when the argument <code>vcov</code> wasn’t <code>NULL</code>.</p></li>
+<li><p>fix bug in <code>summary.fixest_multi</code>: when the variance was NA and internal bug could pop in some circumstances.</p></li>
+<li><p>fix bug <code>plot.fixef</code> not working for <code>fepois</code> (reported by <a href='https://github.com/statzhero'>@statzhero</a> <a href="https://github.com/lrberge/fixest/issues/213"><a href='https://github.com/lrberge/fixest/issues/213'>#213</a></a>).</p></li>
+<li><p>fix error message when the (wrong) argument <code>X</code> is used in <code>feols</code>.</p></li>
+</ul>
+</div>
+<div id="dot-square-bracket-operator" class="section level2">
+<h2 class="hasAnchor">
+<a href="#dot-square-bracket-operator" class="anchor"></a>Dot square bracket operator</h2>
+<ul>
+<li>add a comma first, like in <code>.[,stuff]</code>, to separate variables with commas (instead of separating them with additions):</li>
+</ul>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R">
+<span class="va">lhs_vars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"var1"</span>, <span class="st">"var2"</span><span class="op">)</span>
+<span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">.</span><span class="op">[</span>,<span class="va">lhs_vars</span><span class="op">]</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="../reference/stepwise.html">csw</a></span><span class="op">(</span><span class="va">x.</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt; c(var1, var2) ~ csw(x1, x2, x3)</span></code></pre></div>
+<ul>
+<li><p>new function <code>dsb</code>: applies the dot square bracket operator to character strings.</p></li>
+<li><p>in the function <code>dsb</code>, you can add a string literal in first or last position in <code>.[]</code> to “collapse” the character string in question. The way the collapse is performed depends on the position:</p></li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R">
+<span class="va">name</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Juliet"</span>, <span class="st">"Romeo"</span><span class="op">)</span>
+
+<span class="co"># default behavior =&gt; vector</span>
+<span class="fu"><a href="../reference/dsb.html">dsb</a></span><span class="op">(</span><span class="st">"hello .[name], what's up?"</span><span class="op">)</span>
+<span class="co">#&gt; [1] "hello Juliet, what's up?" "hello Romeo, what's up?" </span>
+
+<span class="co"># string literal in first position</span>
+<span class="fu"><a href="../reference/dsb.html">dsb</a></span><span class="op">(</span><span class="st">"hello .[' and ', name], what's up?"</span><span class="op">)</span>
+<span class="co">#&gt; [1] "hello Juliet and Romeo, what's up?"</span>
+
+<span class="co"># string literal in last position</span>
+<span class="fu"><a href="../reference/dsb.html">dsb</a></span><span class="op">(</span><span class="st">"hello .[name, ' and '], what's up?"</span><span class="op">)</span>
+<span class="co">#&gt; [1] "hello Juliet and hello Romeo, what's up?"</span></code></pre></div>
+</div>
+<div id="bin" class="section level2">
+<h2 class="hasAnchor">
+<a href="#bin" class="anchor"></a>bin</h2>
+<ul>
+<li>
+<code>bin</code>: numeric vectors can be ‘cut’ with the new special value <code>'cut::q3]p90]'</code>, check it out!</li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R">
+<span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span>
+<span class="va">plen</span> <span class="op">=</span> <span class="va">iris</span><span class="op">$</span><span class="va">Petal.Length</span>
+
+<span class="co"># 3 parts of (roughly) equal size</span>
+<span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="../reference/bin.html">bin</a></span><span class="op">(</span><span class="va">plen</span>, <span class="st">"cut::3"</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; [1.0; 1.9] [3.0; 4.9] [5.0; 6.9] </span>
+<span class="co">#&gt;         50         54         46 </span>
+
+<span class="co"># Three custom bins</span>
+<span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="../reference/bin.html">bin</a></span><span class="op">(</span><span class="va">plen</span>, <span class="st">"cut::2]5]"</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; [1.0; 1.9] [3.0; 5.0] [5.1; 6.9] </span>
+<span class="co">#&gt;         50         58         42 </span>
+
+<span class="co"># .. same, excluding 5 in the 2nd bin</span>
+<span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="../reference/bin.html">bin</a></span><span class="op">(</span><span class="va">plen</span>, <span class="st">"cut::2]5["</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; [1.0; 1.9] [3.0; 4.9] [5.0; 6.9] </span>
+<span class="co">#&gt;         50         54         46 </span>
+
+<span class="co"># Using quartiles</span>
+<span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="../reference/bin.html">bin</a></span><span class="op">(</span><span class="va">plen</span>, <span class="st">"cut::q1]q2]q3]"</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; [1.0; 1.6] [1.7; 4.3] [4.4; 5.1] [5.2; 6.9] </span>
+<span class="co">#&gt;         44         31         41         34 </span>
+
+<span class="co"># Using percentiles</span>
+<span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="../reference/bin.html">bin</a></span><span class="op">(</span><span class="va">plen</span>, <span class="st">"cut::p20]p50]p70]p90]"</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; [1.0; 1.5] [1.6; 4.3] [4.4; 5.0] [5.1; 5.8] [5.9; 6.9] </span>
+<span class="co">#&gt;         37         38         33         29         13 </span>
+
+<span class="co"># Mixing all</span>
+<span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="../reference/bin.html">bin</a></span><span class="op">(</span><span class="va">plen</span>, <span class="st">"cut::2[q2]p90]"</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; [1.0; 1.9] [3.0; 4.3] [4.4; 5.8] [5.9; 6.9] </span>
+<span class="co">#&gt;         50         25         62         13</span>
+
+<span class="co"># Adding custom names</span>
+<span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="../reference/bin.html">bin</a></span><span class="op">(</span><span class="va">plen</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"cut::2[q2]p90]"</span>, <span class="st">"&lt;2"</span>, <span class="st">"]2; Q2]"</span>, <span class="cn">NA</span>, <span class="st">"&gt;90%"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt;         &lt;2    ]2; Q2] [4.4; 5.8]       &gt;90% </span>
+<span class="co">#&gt;         50         25         62         13 </span></code></pre></div>
+<ul>
+<li><p><code>bin</code> also accepts formulas, e.g. <code>bin = list("&lt;2" = ~ x &lt; 2)</code> (<code>x</code> must be the only variable).</p></li>
+<li><p><code>bin</code> accepts the use of <code>.()</code> for <code><a href="https://rdrr.io/r/base/list.html">list()</a></code>.</p></li>
+<li><p>you can add the location of the element using <code>@d</code> in the name. Useful to rearrange factors:</p></li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R">
+<span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html">setNames</a></span><span class="op">(</span><span class="va">iris</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">base</span><span class="op">$</span><span class="va">species</span><span class="op">)</span>
+<span class="co">#&gt;     setosa versicolor  virginica </span>
+<span class="co">#&gt;         50         50         50</span>
+
+<span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="../reference/bin.html">bin</a></span><span class="op">(</span><span class="va">base</span><span class="op">$</span><span class="va">species</span>, <span class="fu">.</span><span class="op">(</span><span class="st">"@3"</span> <span class="op">=</span> <span class="st">"seto"</span>, <span class="st">"@1 VIRGIN"</span> <span class="op">=</span> <span class="st">"virg"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt;     VIRGIN versicolor     setosa </span>
+<span class="co">#&gt;         50         50         50 </span></code></pre></div>
+</div>
+<div id="etable-1" class="section level2">
+<h2 class="hasAnchor">
+<a href="#etable-1" class="anchor"></a>etable</h2>
+<ul>
+<li><p>the tex output is now “nicely” formatted.</p></li>
+<li><p>argument <code>extralines</code> replaces the argument <code>extraline</code> to increase coherence. Hence function <code>extraline_register</code> becomes <code>extralines_register</code> (the change is done without deprecation since I guess this function must be only rarely used).</p></li>
+<li><p>arguments <code>extralines</code> and <code>headers</code> accept <code>.()</code> for <code><a href="https://rdrr.io/r/base/list.html">list()</a></code>.</p></li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R">
+<span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html">setNames</a></span><span class="op">(</span><span class="va">iris</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+</div>
+<div id="new-function" class="section level2">
+<h2 class="hasAnchor">
+<a href="#new-function" class="anchor"></a>New function</h2>
+<ul>
+<li>
+<code>check_conv_feols</code>: checks the convergence of the fixed-effects in <code>feols</code> models by looking at the first-order conditions.</li>
+</ul>
+</div>
+<div id="new-functions-unrelated-but-possibly-useful" class="section level2">
+<h2 class="hasAnchor">
+<a href="#new-functions-unrelated-but-possibly-useful" class="anchor"></a>New functions, unrelated but possibly useful</h2>
+<p>Although a bit unrelated to the purpose of this package, these functions are so extensively used in the author’s research that he decided to leverage his author privileges to include them in <code>fixest</code> to make them easier to share with co-authors.</p>
+<ul>
+<li><p><code>osize</code>: simple function returning a formatted object size.</p></li>
+<li><p><code>n_unik</code>: simple but flexible function returning the number of unique elements from variables in one or several data sets. Useful for checking keys.</p></li>
+<li><p><code>sample_df</code>: simple function to extract random lines from a <code>data.frame</code>.</p></li>
+</ul>
+</div>
+<div id="other-new-features" class="section level2">
+<h2 class="hasAnchor">
+<a href="#other-new-features" class="anchor"></a>Other new features</h2>
+<ul>
+<li><p>when computing Newey-West standard-errors for time series, the bandwidth is now selected thanks to the <a href="https://sandwich.r-forge.r-project.org/reference/NeweyWest.html">bwNeweyWest</a> function from the <a href="https://sandwich.r-forge.r-project.org/index.html">sandwich</a> package. This function implements the method described in Newey and West 1994.</p></li>
+<li><p>add <code>type = "se_long"</code> to <code>summary.fixest_multi</code> which yields all coefficients and SEs for all estimations in a “long” format.</p></li>
+<li><p>only in <code>fixest</code> estimations, using a “naked” dot square bracket variable in the left-hand-side includes them as multiple left hand sides. Regular expressions can also be used in the LHS.</p></li>
+</ul>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R">
+<span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html">setNames</a></span><span class="op">(</span><span class="va">iris</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">)</span>
+<span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span><span class="op">)</span>
+<span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">.</span><span class="op">[</span><span class="va">y</span><span class="op">]</span> <span class="op">~</span> <span class="va">x2</span>, <span class="va">base</span><span class="op">)</span>
+<span class="co">#&gt; Standard-errors: IID </span>
+<span class="co">#&gt; Dep. var.: y</span>
+<span class="co">#&gt;             Estimate Std. Error t value  Pr(&gt;|t|)    </span>
+<span class="co">#&gt; (Intercept) 4.306603   0.078389 54.9389 &lt; 2.2e-16 ***</span>
+<span class="co">#&gt; x2          0.408922   0.018891 21.6460 &lt; 2.2e-16 ***</span>
+<span class="co">#&gt; ---</span>
+<span class="co">#&gt; Dep. var.: x1</span>
+<span class="co">#&gt;              Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
+<span class="co">#&gt; (Intercept)  3.454874   0.076095 45.40188  &lt; 2.2e-16 ***</span>
+<span class="co">#&gt; x2          -0.105785   0.018339 -5.76845 4.5133e-08 ***</span>
+
+
+<span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="fu">..</span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span> <span class="op">~</span> <span class="va">y</span> <span class="op">+</span> <span class="fu"><a href="../reference/i.html">i</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span>, <span class="va">base</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt;                                  model 1            model 2            model 3</span>
+<span class="co">#&gt; Dependent Var.:                       x1                 x2                 x3</span>
+<span class="co">#&gt;                                                                               </span>
+<span class="co">#&gt; (Intercept)            1.677*** (0.2354) -1.702*** (0.2301) -0.4794** (0.1557)</span>
+<span class="co">#&gt; y                     0.3499*** (0.0463) 0.6321*** (0.0453) 0.1449*** (0.0306)</span>
+<span class="co">#&gt; species = versicolor -0.9834*** (0.0721)  2.210*** (0.0705) 0.9452*** (0.0477)</span>
+<span class="co">#&gt; species = virginica   -1.008*** (0.0933)  3.090*** (0.0912)  1.551*** (0.0617)</span>
+<span class="co">#&gt; ____________________ ___________________ __________________ __________________</span>
+<span class="co">#&gt; S.E. type                            IID                IID                IID</span>
+<span class="co">#&gt; Observations                         150                150                150</span>
+<span class="co">#&gt; R2                               0.56925            0.97489            0.93833</span>
+<span class="co">#&gt; Adj. R2                          0.56040            0.97438            0.93706</span></code></pre></div>
+</div>
+<div id="other" class="section level2">
+<h2 class="hasAnchor">
+<a href="#other" class="anchor"></a>Other</h2>
+<ul>
+<li><p>improve error messages when <code>subset</code> does not select any element.</p></li>
+<li><p>in <code>xpd</code> and <code>fixest</code> estimations, variables can be “grepped” from the data set with <code><a href="https://rdrr.io/r/base/regex.html">regex("regex")</a></code>.</p></li>
+<li><p>add inheritance of the default style in <code>iplot</code> when the style is set globally with <code>setFixest_coefplot</code>.</p></li>
+<li><p>improve error messages in general by prompting additional error calls (when appropriate).</p></li>
+<li><p>the dictionaries now ignore white spaces in coefficient names (thanks to Caleb Kwon).</p></li>
+<li><p>the package startup messages have been improved (they should pop up less often).</p></li>
+<li><p>to comply with CRAN policies, the startup message doesn’t write on the .Renviron file any more.</p></li>
+</ul>
+</div>
+</div>
     <div id="fixest-0100" class="section level1">
 <h1 class="page-header" data-toc-text="0.10.0">
-<a href="#fixest-0100" class="anchor"></a>fixest 0.10.0<small> Unreleased </small>
+<a href="#fixest-0100" class="anchor"></a>fixest 0.10.0<small> 2021-09-28 </small>
 </h1>
 <div id="bugs-fixes" class="section level2">
 <h2 class="hasAnchor">
 <a href="#bugs-fixes" class="anchor"></a>Bugs fixes</h2>
 <ul>
-<li><p>Fix minor, rare, bug occurring in <code>feglm</code> when the model was badly specified and VAR(Y) &gt;&gt;&gt;&gt; VAR(X).</p></li>
+<li><p>Fix bug occurring in IV models with multiple instruments and with multithreading on. That bug could lead to the wrong imputation of the IV residuals, hence affecting the standard-errors (although the order of magnitude of the variation should be minor). Thanks to <a href='https://github.com/whitfillp'>@whitfillp</a> <a href="https://github.com/lrberge/fixest/issues/182"><a href='https://github.com/lrberge/fixest/issues/182'>#182</a></a>.</p></li>
+<li><p>Fix minor, rare, bug occurring in <code>feglm</code> when the model was badly specified and VAR(Y) &gt;&gt;&gt;&gt; VAR(X) and there were only one variable.</p></li>
 <li><p><code>model.matrix</code> did not work with <code>type = "fixef"</code> (thanks to <a href='https://github.com/kylebutts'>@kylebutts</a> <a href="https://github.com/lrberge/fixest/issues/172"><a href='https://github.com/lrberge/fixest/issues/172'>#172</a></a>).</p></li>
 <li><p>In nonlinear estimations:<code>fixef.rm = "none"</code> or <code>fixef.rm = "singleton"</code> did not work as expected (thanks to <a href='https://github.com/kre32'>@kre32</a> <a href="https://github.com/lrberge/fixest/issues/171"><a href='https://github.com/lrberge/fixest/issues/171'>#171</a></a>).</p></li>
 <li><p>Fix bug that could occur when observations had to be removed on several fixed-effects dimensions (had no impact on the estimates though).</p></li>
 <li><p>Fix bug in <code>etable</code> when <code>file</code> is provided and <code>tex = FALSE</code> (thanks to <a href='https://github.com/roussanoff'>@roussanoff</a> <a href="https://github.com/lrberge/fixest/issues/169"><a href='https://github.com/lrberge/fixest/issues/169'>#169</a></a>).</p></li>
 <li><p>Fix bug when: i) a <code>fixest_panel</code> is used as a data set in an estimation, ii) NA values are to be removed and iii) fixed-effects are used. Thanks to Nicola Cortinovis for the report!</p></li>
 <li><p>Fix bug in <code>to_integer</code> when converting multiple vectors and sorting is required, without items.</p></li>
+<li><p>Fix bug in <code>feols.fit</code> when the matrix of regressors was only partially named (reported by <a href='https://github.com/leucothea'>@leucothea</a> <a href="https://github.com/lrberge/fixest/issues/176"><a href='https://github.com/lrberge/fixest/issues/176'>#176</a></a>).</p></li>
+<li><p>Fix bug in the value of the fixed-effects coefficients in IV estimations (thanks to <a href='https://github.com/tappek'>@tappek</a> <a href="https://github.com/lrberge/fixest/issues/190"><a href='https://github.com/lrberge/fixest/issues/190'>#190</a></a>).</p></li>
+<li><p>Fix bug in <code>coefplot</code> when <code>lean = TRUE</code> in the estimation (reported by <a href='https://github.com/adamaltmejd'>@adamaltmejd</a> <a href="https://github.com/lrberge/fixest/issues/195"><a href='https://github.com/lrberge/fixest/issues/195'>#195</a></a>).</p></li>
+<li><p>Fix bug in <code>iplot</code> when IVs contained interactions.</p></li>
+<li><p>Fix bug in <code>iplot</code> preventing some variables to be removed (reported by <a href='https://github.com/roussanoff'>@roussanoff</a> <a href="https://github.com/lrberge/fixest/issues/164"><a href='https://github.com/lrberge/fixest/issues/164'>#164</a></a>).</p></li>
+<li><p>Fix 0 right-padding of numbers displayed in estimation results that could be confusing (reported by <a href='https://github.com/hjuerges'>@hjuerges</a> <a href="https://github.com/lrberge/fixest/issues/197"><a href='https://github.com/lrberge/fixest/issues/197'>#197</a></a>).</p></li>
 </ul>
 </div>
 <div id="major-changes" class="section level2">
@@ -162,6 +394,7 @@
 <li><p>greatly simplifies and extends how to specify the SEs</p></li>
 <li><p>completely replaces the arguments <code>se</code> and <code>cluster</code> (they still work)</p></li>
 <li><p>accepts functions</p></li>
+<li><p>see the documentation in the <a href="https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1">vignette</a></p></li>
 </ul>
 </li>
 <li>
@@ -172,14 +405,37 @@
 <li><p>Conley (1999) for spatially correlated errors</p></li>
 </ul>
 </li>
+<li><p>you can summon variables from the environment directly in the formula using the new dot square bracket (DSB) operator. The DSB operator can be used to create many variables at once, and can also be using within regular expressions. One example:</p></li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R">
+<span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html">setNames</a></span><span class="op">(</span><span class="va">iris</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">)</span>
+<span class="va">i</span> <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">3</span>
+<span class="va">z</span> <span class="op">=</span> <span class="st">"i(species)"</span>
+<span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x.</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">+</span> <span class="va">.</span><span class="op">[</span><span class="va">z</span><span class="op">]</span>, <span class="va">base</span><span class="op">)</span>
+<span class="co">#&gt; OLS estimation, Dep. Var.: y</span>
+<span class="co">#&gt; Observations: 150 </span>
+<span class="co">#&gt; Standard-errors: IID </span>
+<span class="co">#&gt;                      Estimate Std. Error   t value   Pr(&gt;|t|)    </span>
+<span class="co">#&gt; (Intercept)          3.682982   0.107403 34.291343  &lt; 2.2e-16 ***</span>
+<span class="co">#&gt; x2                   0.905946   0.074311 12.191282  &lt; 2.2e-16 ***</span>
+<span class="co">#&gt; x3                  -0.005995   0.156260 -0.038368 9.6945e-01    </span>
+<span class="co">#&gt; species::versicolor -1.598362   0.205706 -7.770113 1.3154e-12 ***</span>
+<span class="co">#&gt; species::virginica  -2.112647   0.304024 -6.948940 1.1550e-10 ***</span>
+<span class="co">#&gt; ---</span>
+<span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class="co">#&gt; RMSE: 0.333482   Adj. R2: 0.832221</span></code></pre></div>
+<ul>
+<li><p>in <code>i</code> and <code>sunab</code> you can now bin the variables on the fly with the new argument <code>bin</code>. The new function <a href="https://lrberge.github.io/fixest/reference/bin.html"><code>bin</code></a> is also available at the user-level.</p></li>
+<li><p>Function <code>dof</code> has been renamed into <code>ssc</code> (stands for small sample correction) to improve clarity. Retro compatibility is partially ensured but the function <code>dof</code> will be removed at some point.</p></li>
 </ul>
 </div>
 <div id="breaking-changes" class="section level2">
 <h2 class="hasAnchor">
 <a href="#breaking-changes" class="anchor"></a>Breaking changes</h2>
 <ul>
-<li><p>Function <code>dof</code> has been renamed into <code>ssc</code> (stands for small sample correction) to improve clarity. <strong>No retro compatibility ensured.</strong></p></li>
 <li><p>Functions <code>setFixest_dof</code> and <code>setFixest_se</code> have been renamed into <code>setFixest_ssc</code> and <code>setFixest_vcov</code>. <strong>No retro compatibility ensured.</strong></p></li>
+<li><p>Removal of the <code>var::factor</code> operator to interact a continuous variable with a variable treated as a factor.</p></li>
 </ul>
 </div>
 <div id="new-features" class="section level2">
@@ -188,6 +444,7 @@
 <ul>
 <li><p><code>feglm</code> now accepts partially matched character shortcuts for families: “poisson”, “logit”, “probit” are now valid <code>family</code> arguments.</p></li>
 <li><p><code>predict.fixest</code> accepts the new argument <code>fixef</code> which, if <code>TRUE</code>, returns a data.frame of the fixed-effects coefficients for each observation, with the same number of columns as the number of fixed-effects (feature requests <a href="https://github.com/lrberge/fixest/issues/144"><a href='https://github.com/lrberge/fixest/issues/144'>#144</a></a> and <a href="https://github.com/lrberge/fixest/issues/175"><a href='https://github.com/lrberge/fixest/issues/175'>#175</a></a> by <a href='https://github.com/pp2382'>@pp2382</a> and <a href='https://github.com/cseveren'>@cseveren</a>).</p></li>
+<li><p>offsets present in the formula are now accepted.</p></li>
 <li>
 <p>VCOV aliases (both Grant McDermott’s suggestions: thanks Grant!):</p>
 <ul>
@@ -195,6 +452,62 @@
 <li><p>the keyword <code>hc1</code> can be used to summon heteroskedasticity-robust SEs</p></li>
 </ul>
 </li>
+<li><p><em>Argument sliding</em>: the argument <code>vcov</code> can be called implicitly when <code>data</code> is set up globally:</p></li>
+</ul>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R">
+<span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html">setNames</a></span><span class="op">(</span>iris <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">)</span>
+
+<span class="co"># Setting up the data</span>
+<span class="fu"><a href="../reference/setFixest_estimation.html">setFixest_estimation</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">base</span><span class="op">)</span>
+
+<span class="co"># Now vcov can be used without using vcov = stuff:</span>
+<span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span>, <span class="op">~</span><span class="va">species</span><span class="op">)</span>
+
+<span class="co"># =&gt; same as feols(y ~ x1 + x2, vcov = ~species)</span></code></pre></div>
+<ul>
+<li>piping the data now works:</li>
+</ul>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R">
+<span class="va">mtcars</span> |&gt; <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">cyl</span> <span class="op">~</span> <span class="va">mpg</span><span class="op">)</span>
+<span class="co"># =&gt; same as feols(cyl ~ mpg, mtcars)</span></code></pre></div>
+<ul>
+<li><p>the user can now specify custom degrees of freedom to compute the t-tests in <code><a href="../reference/ssc.html">ssc()</a></code> (feature request by Kyle F. Butts).</p></li>
+<li><p>the predict method gains the new argument <code>se.fit</code> and <code>interval</code> which computes the SEs/CI of the predicted variable. This only works for OLS models without fixed-effects. Feature request by Gábor Békés <a href="https://github.com/lrberge/fixest/issues/193"><a href='https://github.com/lrberge/fixest/issues/193'>#193</a></a>.</p></li>
+<li><p><code>iplot</code> gains the argument <code>i.select</code> to navigate through the different variables created with <code><a href="../reference/i.html">i()</a></code> (provided there are more than one of course).</p></li>
+</ul>
+</div>
+<div id="etable-2" class="section level2">
+<h2 class="hasAnchor">
+<a href="#etable-2" class="anchor"></a>etable</h2>
+<ul>
+<li><p>new argument <code>interaction.order</code> to control the order in which interacted variables are displayed (feature request by <a href='https://github.com/inkrement'>@inkrement</a> <a href="https://github.com/lrberge/fixest/issues/120"><a href='https://github.com/lrberge/fixest/issues/120'>#120</a></a>).</p></li>
+<li><p>new argument <code>i.equal</code> to control how the values taken by factor variables created with <code><a href="../reference/i.html">i()</a></code> are displayed.</p></li>
+<li><p>new <code>meta.XX</code> family of arguments when exporting to Latex. They include various type of information as comments before the table (suggestion of adding the time by Apoorva Lal <a href="https://github.com/lrberge/fixest/pull/184"><a href='https://github.com/lrberge/fixest/issues/184'>#184</a></a>). So far the new arguments are: <code>meta.time</code>, <code>meta.author</code>, <code>meta.sys</code>, <code>meta.call</code>, <code>meta.comment</code>. The argument <code>meta</code> is a shortcut to all these.</p></li>
+<li><p>default values can be saved at the project level using the argument <code>save = TRUE</code> in the function <code>setFixest_etable</code>. This means that default values will be automatically set without having to call <code>setFixest_etable</code> at the startup of the R session. For example, if you want to permanently add the creation time in your Latex exports, just use <code><a href="../reference/etable.html">setFixest_etable(meta.time = TRUE, save = TRUE)</a></code>, and you won’t need to bother about it anymore in any future session in your current project.</p></li>
+<li><p>some changes in <code>extraline</code>, now: <em>i)</em> it accepts raw vectors, <em>ii)</em> it accepts lines without title, <em>iii)</em> the elements are recycled across models, <em>iv)</em> it accepts elements of the form <code>list("item1" = #item1, "item2" = #item2, etc)</code>, and <em>v)</em> the elements are Latex-escaped.</p></li>
+<li><p>in <code>style.tex</code>: all Latex-escaping is removed.</p></li>
+<li><p>the argument <code>subtitle</code> has been renamed into <code>headers</code> (retro-compatibility is ensured).</p></li>
+<li>
+<p>on the new argument <code>headers</code>:</p>
+<ul>
+<li>it accepts named lists of numbers, where the names represent the values in the cell and the numbers represent the span. For example <code>headers = list("Gender" = list("M" = 3, "F" = 4))</code> will create a line with 3 times “M” and 4 times “F”.</li>
+<li>adding the special tag <code>":_:"</code> in the row name will add a rule for each column group (in the previous example <code>":_:Gender"</code> would do). Suggestion by <a href='https://github.com/nhirschey'>@nhirschey</a> <a href="https://github.com/lrberge/fixest/pull/173"><a href='https://github.com/lrberge/fixest/issues/173'>#173</a></a>.</li>
+<li>you can control the placement of the header line by using as first character the following special tags: “^” (top), “-” (mid, default), "_" (bottom). Ex: <code>headers = list("_Gender" = list("M" = 3, "F" = 4))</code> will place the header line at the very bottom of the headers.</li>
+<li>by default all values are Latex-escaped. You can disable escaping by adding <code>":tex:"</code> in the row title.</li>
+</ul>
+</li>
+<li><p>argument <code>sdBelow</code> has been renamed into <code>se.below</code> (retro-compatibility is ensured).</p></li>
+<li><p>new argument <code>se.row</code> to control whether the row displaying the standard-errors should be displayed (clarification requested by <a href='https://github.com/waynelapierre'>@waynelapierre</a> <a href="https://github.com/lrberge/fixest/issues/127"><a href='https://github.com/lrberge/fixest/issues/127'>#127</a></a>).</p></li>
+<li><p><code>dict</code> now directly modifies the entries in the global dictionary instead of creating a brand new one. For example if you have <code><a href="../reference/setFixest_dict.html">setFixest_dict(c(cyl="Cylinder"))</a></code> and then use <code>etable</code> with <code>dict=c(mpg="miles per gallon")</code>, you end up with both the names <code>cyl</code> and <code>mpg</code> to be modified. To disable this behavior, you can add <code>"reset"</code> as the first element, like in <code>dict=c("reset", mpg="miles per gallon")</code>.</p></li>
+</ul>
+</div>
+<div id="other-1" class="section level2">
+<h2 class="hasAnchor">
+<a href="#other-1" class="anchor"></a>Other</h2>
+<ul>
+<li>in multiple estimations, it is now made explicit that the information regarding NA values only concern the variables in common across all models (formerly, it was implicit and hence confusing).</li>
 </ul>
 </div>
 </div>
@@ -267,9 +580,9 @@
 <li><p>the function <code>iplot</code> hence replaces <code>coefplot</code>’s former argument <code>only.inter</code> which controlled whether or not to focus on interactions.</p></li>
 </ul>
 </div>
-<div id="etable" class="section level2">
+<div id="etable-3" class="section level2">
 <h2 class="hasAnchor">
-<a href="#etable" class="anchor"></a>etable</h2>
+<a href="#etable-3" class="anchor"></a>etable</h2>
 <ul>
 <li><p><code>group</code> and <code>extraline</code>: enhanced and simplified control of the placement of the new rows. Now only two special characters at the beginning of the row name decide its location.</p></li>
 <li><p>new argument <code>fixest.group</code>. If <code>TRUE</code>, then fixed-effects appearing always jointly across models will be grouped in a single row. The user can alternatively specify a list to declare which fixed-effect to group and customize the row name.</p></li>
@@ -434,9 +747,9 @@
 <li><p>Fix bug preventing the return of demeaned variables in IV estimations (thanks to <a href='https://github.com/amarbler'>@amarbler</a> <a href="https://github.com/lrberge/fixest/issues/94"><a href='https://github.com/lrberge/fixest/issues/94'>#94</a></a>).</p></li>
 </ul>
 </div>
-<div id="other" class="section level2">
+<div id="other-2" class="section level2">
 <h2 class="hasAnchor">
-<a href="#other" class="anchor"></a>Other</h2>
+<a href="#other-2" class="anchor"></a>Other</h2>
 <ul>
 <li><p><code><a href="../reference/i.html">i()</a></code> now automatically converts its first argument to numeric if it was of type logical. The user can still pass logicals to the argument <code>f2</code> if the expected behavior is really to treat it as a logical.</p></li>
 <li><p>Improve <code>fitstat</code> help and error messages.</p></li>
@@ -485,9 +798,9 @@
 <li><p>Argument <code>split</code> now accepts variable names.</p></li>
 </ul>
 </div>
-<div id="other-1" class="section level2">
+<div id="other-3" class="section level2">
 <h2 class="hasAnchor">
-<a href="#other-1" class="anchor"></a>Other</h2>
+<a href="#other-3" class="anchor"></a>Other</h2>
 <ul>
 <li><p>More coherence regarding the use of <code>summary</code> applied to models for which the SEs were computed at estimation time. Now there is a memory of how the SEs were computed, so that, for example, if only the argument <code>dof</code> is passed to <code>summary</code>, then the SEs will be clustered in the same way as estimation time and only <code>dof</code> will change.</p></li>
 <li><p>Now an error is raised when <code><a href="../reference/i.html">i()</a></code> is used in the fixed-effects part of the formula. The appropriate way is indicated (related to <a href="https://github.com/lrberge/fixest/issues/77"><a href='https://github.com/lrberge/fixest/issues/77'>#77</a></a> by <a href='https://github.com/rrichmond'>@rrichmond</a>).</p></li>
@@ -524,7 +837,7 @@
 <ul>
 <li>IV estimations are now supported. It is summoned by adding a formula defining the endogenous regressors and the instruments after a pipe.</li>
 </ul>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="va">base</span> <span class="op">=</span> <span class="va">iris</span>
 <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x_endo"</span>, <span class="st">"x_inst"</span>, <span class="st">"species"</span><span class="op">)</span>
@@ -569,7 +882,7 @@
 <li><p>In the right-hand-side and the fixed-effects parts of the formula, stepwise estimations can be performed with the new stepwise functions (<code>sw</code>, <code>sw0</code>, <code>csw</code> and <code>csw0</code>).</p></li>
 <li><p>The object returned is of class <code>fixest_multi</code>. You can easily navigate through the results with its subset methods.</p></li>
 </ul>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="va">aq</span> <span class="op">=</span> <span class="va">airquality</span><span class="op">[</span><span class="va">airquality</span><span class="op">$</span><span class="va">Month</span> <span class="op">%in%</span> <span class="fl">5</span><span class="op">:</span><span class="fl">6</span>, <span class="op">]</span>
 <span class="va">est_split</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">Ozone</span>, <span class="va">Solar.R</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="../reference/stepwise.html">sw</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/poly.html">poly</a></span><span class="op">(</span><span class="va">Wind</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/poly.html">poly</a></span><span class="op">(</span><span class="va">Temp</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>,
@@ -596,7 +909,7 @@
 <ul>
 <li>The algorithm now accepts regular expressions with the syntax <code>..("regex")</code>:</li>
 </ul>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">longley</span><span class="op">)</span>
 <span class="co"># All variables containing "GNP" or "ployed" in their names are fetched</span>
@@ -620,9 +933,9 @@
 <li><p>the argument <code>subtitles</code> has been improved, and now automatically displays the samples when split sample estimations are performed.</p></li>
 </ul>
 </div>
-<div id="other-new-features" class="section level2">
+<div id="other-new-features-1" class="section level2">
 <h2 class="hasAnchor">
-<a href="#other-new-features" class="anchor"></a>Other new features</h2>
+<a href="#other-new-features-1" class="anchor"></a>Other new features</h2>
 <ul>
 <li>
 <p>In all estimations:</p>
@@ -634,7 +947,7 @@
 <li><p><code>fixef.rm</code>: argument that accepts <code>none</code>, <code>perfect</code>, <code>singleton</code>, <code>both</code>. Controls the removal of fixed-effects from the observation.</p></li>
 <li><p>auto parsing of powers. Now you don’t need to use <code><a href="https://rdrr.io/r/base/AsIs.html">I()</a></code> to have powers of variables in the RHS, it is automatically done for you (i.e. <code>x^3</code> becomes <code><a href="https://rdrr.io/r/base/AsIs.html">I(x^3)</a></code>):</p></li>
 </ul>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="va">base</span> <span class="op">=</span> <span class="va">iris</span>
 <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span>
@@ -942,9 +1255,9 @@
 <li>(minor) <code>signifCode</code> can be equal to <code>"letters"</code> to display letters instead of stars.</li>
 </ul>
 </div>
-<div id="other-2" class="section level2">
+<div id="other-4" class="section level2">
 <h2 class="hasAnchor">
-<a href="#other-2" class="anchor"></a>Other</h2>
+<a href="#other-4" class="anchor"></a>Other</h2>
 <ul>
 <li>
 <code>setFixest_nthreads</code> now respects the <code>OMP_THREAD_LIMIT</code> environment variable.</li>
@@ -956,9 +1269,9 @@
 <h1 class="page-header" data-toc-text="0.5.0">
 <a href="#fixest-050-2020-06-10" class="anchor"></a>fixest 0.5.0 (2020-06-10)<small> 2020-06-10 </small>
 </h1>
-<div id="bug-fixes" class="section level2">
+<div id="bug-fixes-2" class="section level2">
 <h2 class="hasAnchor">
-<a href="#bug-fixes" class="anchor"></a>Bug fixes</h2>
+<a href="#bug-fixes-2" class="anchor"></a>Bug fixes</h2>
 <ul>
 <li>Bug with estimations with varying slopes if the fixed-effect relative to the slope is not in its decreasing order (thanks to Davide Proserpio).</li>
 <li>Bug when interacting two variables with the <code>var::fe</code> syntax with <code>confirm = TRUE</code> and no reference.</li>
@@ -1048,9 +1361,9 @@
 <li>Improved error-handling with <a href="https://cran.r-project.org/package=dreamerr">dreamerr</a>’s functions.</li>
 </ul>
 </div>
-<div id="other-3" class="section level2">
+<div id="other-5" class="section level2">
 <h2 class="hasAnchor">
-<a href="#other-3" class="anchor"></a>Other</h2>
+<a href="#other-5" class="anchor"></a>Other</h2>
 <ul>
 <li>Dependency to MASS has been removed.</li>
 </ul>
@@ -1060,9 +1373,9 @@
 <h1 class="page-header" data-toc-text="0.4.1">
 <a href="#fixest-041-2020-04-13" class="anchor"></a>fixest 0.4.1 (2020-04-13)<small> 2020-04-14 </small>
 </h1>
-<div id="bug-fixes-1" class="section level2">
+<div id="bug-fixes-3" class="section level2">
 <h2 class="hasAnchor">
-<a href="#bug-fixes-1" class="anchor"></a>Bug fixes</h2>
+<a href="#bug-fixes-3" class="anchor"></a>Bug fixes</h2>
 <ul>
 <li>Major bug leading R to crash when using non-linear-in-parameters right-hand-sides in feNmlm. Only occured when some observations were removed from the data set (due to NAness or to perfect fit). <a href="https://github.com/lrberge/fixest/issues/17">Thanks to <a href='https://github.com/marissachilds'>@marissachilds</a>, GH issue [<a href='https://github.com/lrberge/fixest/issues/17'>#17</a>]</a>.]</li>
 <li>In the <code>collinearity</code> help pages: an example could lead to an error (due to random data generation). It has been removed.</li>
@@ -1078,9 +1391,9 @@
 <li>Rewriting of sections, correction of small mistakes (wrong argument names), dropping completely the ‘cluster’ terminology (meant for fixed-effects), addition of what is contained in fixest objects.</li>
 </ul>
 </div>
-<div id="other-4" class="section level2">
+<div id="other-6" class="section level2">
 <h2 class="hasAnchor">
-<a href="#other-4" class="anchor"></a>Other</h2>
+<a href="#other-6" class="anchor"></a>Other</h2>
 <ul>
 <li>Adding a README.md.</li>
 <li>Small corrections in the vignette.</li>
@@ -1125,9 +1438,9 @@
 <code>terms.fixest</code> giving the terms of the estimation.</li>
 </ul>
 </div>
-<div id="other-5" class="section level2">
+<div id="other-7" class="section level2">
 <h2 class="hasAnchor">
-<a href="#other-5" class="anchor"></a>Other</h2>
+<a href="#other-7" class="anchor"></a>Other</h2>
 <ul>
 <li>All <code>donttest</code> sections were removed from help pages.</li>
 </ul>
@@ -1264,9 +1577,9 @@
 <h1 class="page-header" data-toc-text="0.2.0">
 <a href="#fixest-020-2019-11-19" class="anchor"></a>fixest 0.2.0 (2019-11-19)<small> 2019-11-19 </small>
 </h1>
-<div id="new-function" class="section level2">
+<div id="new-function-1" class="section level2">
 <h2 class="hasAnchor">
-<a href="#new-function" class="anchor"></a>New function</h2>
+<a href="#new-function-1" class="anchor"></a>New function</h2>
 <p>-[did_means] New function <code>did_means</code> to conveniently compare means of groups of observations (both treat/control and pre/post). Contains tools to easily export in Latex.</p>
 </div>
 <div id="major-user-visible-changes-2" class="section level2">

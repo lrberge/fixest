@@ -11,8 +11,9 @@
 #' Estimates OLS with any number of fixed-effects.
 #'
 #' @inheritParams femlm
+#' @inheritSection xpd Dot square bracket operator in formulas
 #'
-#' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y | fe_1+fe_2}. You can combine two fixed-effects with \code{^}: e.g. \code{fml = z~x+y|fe_1^fe_2}, see details. You can also use variables with varying slopes using square brackets: e.g. in \code{fml = z~y|fe_1[x] + fe_2}, see details. To add IVs, insert the endogenous vars./instruments after a pipe, like in \code{y ~ x | c(x_endo1, x_endo2) ~ x_inst1 + x_inst2}. Note that it should always be the last element, see details. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. The formula \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)} leads to 6 estimation, see details.
+#' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y | fe_1+fe_2}. You can combine two fixed-effects with \code{^}: e.g. \code{fml = z~x+y|fe_1^fe_2}, see details. You can also use variables with varying slopes using square brackets: e.g. in \code{fml = z~y|fe_1[x] + fe_2}, see details. To add IVs, insert the endogenous vars./instruments after a pipe, like in \code{y ~ x | c(x_endo1, x_endo2) ~ x_inst1 + x_inst2}. Note that it should always be the last element, see details. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. The formula \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)} leads to 6 estimation, see details. Square brackets starting with a dot can be used to call global variables: \code{y.[i] ~ x.[1:2]} will lead to \code{y3 ~ x1 + x2} if \code{i} is equal to 3 in the current environment (see details in \code{\link[fixest]{xpd}}).
 #' @param weights A formula or a numeric vector. Each observation can be weighted, the weights must be greater than 0. If equal to a formula, it should be one-sided: for example \code{~ var_weight}.
 #' @param verbose Integer. Higher values give more information. In particular, it can detail the number of iterations in the demeaning algorithm (the first number is the left-hand-side, the other numbers are the right-hand-side variables).
 #' @param demeaned Logical, default is \code{FALSE}. Only used in the presence of fixed-effects: should the centered variables be returned? If \code{TRUE}, it creates the items \code{y_demeaned} and \code{X_demeaned}.
@@ -95,7 +96,25 @@
 #'
 #' You can also add fixed-effects in a stepwise fashion. Note that you cannot perform stepwise estimations on the IV part of the formula (\code{feols} only).
 #'
+#' If NAs are present in the sample, to avoid too many messages, only NA removal concerning the variables common to all estimations is reported.
+#'
 #' A note on performance. The feature of multiple estimations has been highly optimized for \code{feols}, in particular in the presence of fixed-effects. It is faster to estimate multiple models using the formula rather than with a loop. For non-\code{feols} models using the formula is roughly similar to using a loop performance-wise.
+#'
+#' @section Tricks to estimate multiple LHS:
+#'
+#' To use multiple dependent variables in \code{fixest} estimations, you need to include them in a vector: like in \code{c(y1, y2, y3)}.
+#'
+#' First, if names are stored in a vector, they can readily be inserted in a formula to perform multiple estimations using the dot square bracket operator. For instance if \code{my_lhs = c("y1", "y2")}, calling \code{fixest} with, say \code{feols(.[my_lhs] ~ x1, etc)} is equivalent to using \code{feols(c(y1, y2) ~ x1, etc)}. Beware that this is a special feature unique to the \emph{left-hand-side} of \code{fixest} estimations (the default behavior of the DSB operator is to aggregate with sums, see \code{\link[fixest]{xpd}}).
+#'
+#' Second, you can use a regular expression to grep the left-hand-sides on the fly. When the \code{..("regex")} feature is used naked on the LHS, the variables grepped are inserted into \code{c()}. For example \code{..("Pe") ~ Sepal.Length, iris} is equivalent to \code{c(Petal.Length, Petal.Width) ~ Sepal.Length, iris}. Beware that this is a special feature unique to the \emph{left-hand-side} of \code{fixest} estimations (the default behavior of \code{..("regex")} is to aggregate with sums, see \code{\link[fixest]{xpd}}).
+#'
+#' @section Argument sliding:
+#'
+#' When the data set has been set up globally using \code{\link[fixest]{setFixest_estimation}}\code{(data = data_set)}, the argument \code{vcov} can be used implicitly. This means that calls such as \code{feols(y ~ x, "HC1")}, or \code{feols(y ~ x, ~id)}, are valid: i) the data is automatically deduced from the global settings, and ii) the \code{vcov} is deduced to be the second argument.
+#'
+#' @section Piping:
+#'
+#' Although the argument 'data' is placed in second position, the data can be piped to the estimation functions. For example, with R >= 4.1, \code{mtcars |> feols(mpg ~ cyl)} works as \code{feols(mpg ~ cyl, mtcars)}.
 #'
 #'
 #' @return
@@ -284,6 +303,60 @@
 #' # You can still select which sample/LHS/RHS to display
 #' est_split[sample = 1:2, lhs = 1, rhs = 1]
 #'
+#'
+#' #
+#' # Argument sliding
+#' #
+#'
+#' # When the data set is set up globally, you can use the vcov argument implicitly
+#'
+#' base = iris
+#' names(base) = c("y", "x1", "x2", "x3", "species")
+#'
+#' no_sliding = feols(y ~ x1 + x2, base, ~species)
+#'
+#' # With sliding
+#' setFixest_estimation(data = base)
+#'
+#' # ~species is implicitly deduced to be equal to 'vcov'
+#' sliding = feols(y ~ x1 + x2, ~species)
+#'
+#' etable(no_sliding, sliding)
+#'
+#' # Resetting the global options
+#' setFixest_estimation(data = NULL)
+#'
+#'
+#' #
+#' # Formula expansions
+#' #
+#'
+#' # By default, the features of the xpd function are enabled in
+#' # all fixest estimations
+#' # Here's a few examples
+#'
+#' base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+#'
+#' # dot square bracket operator
+#' feols(y ~ x.[1:3], base)
+#'
+#' # fetching variables via regular expressions: ..("regex")
+#' feols(y ~ ..("1|2"), base)
+#'
+#' # NOTA: it also works for multiple LHS
+#' mult1 = feols(x.[1:2] ~ y + species, base)
+#' mult2 = feols(..("y|3") ~ x.[1:2] + species, base)
+#' etable(mult1, mult2)
+#'
+#'
+#' # Use .[, stuff] to include variables in functions:
+#' feols(y ~ csw(x.[, 1:3]), base)
+#'
+#' # Same for ..(, "regex")
+#' feols(y ~ csw(..(,"x")), base)
+#'
+#'
+#'
 feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluster, se,
                  ssc, panel.id, fixef, fixef.rm = "none", fixef.tol = 1e-6,
                  fixef.iter = 10000, collin.tol = 1e-10, nthreads = getFixest_nthreads(),
@@ -295,7 +368,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 	# 1st: is the call coming from feglm?
 	fromGLM = FALSE
 	skip_fixef = FALSE
-	if("X" %in% names(dots)){
+	if("fromGLM" %in% names(dots)){
 		fromGLM = TRUE
 		# env is provided by feglm
 		X = dots$X
@@ -304,6 +377,8 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 		correct_0w = dots$correct_0w
 
 		if(verbose){
+		    # I can't really mutualize these three lines of code since the verbose
+		    # needs to be checked before using it, and here it's an internal call
 		    time_start = proc.time()
 		    gt = function(x, nl = TRUE) cat(sfill(x, 20), ": ", -(t0 - (t0<<-proc.time()))[3], "s", ifelse(nl, "\n", ""), sep = "")
 		    t0 = proc.time()
@@ -370,6 +445,8 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 		mem.clean = get("mem.clean", env)
 
 		demeaned = get("demeaned", env)
+
+		warn = get("warn", env)
 
 		verbose = get("verbose", env)
 		if(verbose >= 2) gt("Setup")
@@ -570,7 +647,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 	                    go_next = FALSE
 	                    for(j in qui){
 	                        if(all(is_na_current == rhs_group_is_na[[j]])){
-	                            rhs_group_id[i] = rhs_group_id[j]
+	                            rhs_group_id[i] = j
 	                            go_next = TRUE
 	                            break
 	                        }
@@ -588,13 +665,12 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 	            }
 	        }
 
+
 	        # we make groups
 	        rhs_group = list()
 	        for(i in 1:max(rhs_group_id)){
 	            rhs_group[[i]] = which(rhs_group_id == i)
 	        }
-
-
 
 	        # Finding the right column IDs to select
 
@@ -726,12 +802,41 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 	                my_env = reshape_env(env)
 	            }
 
+	            all_varnames = NULL
 	            isLinear_current = TRUE
 	            if(length(my_rhs) == 0){
 	                X_all = 0
 	                isLinear_current = FALSE
 	            } else {
-	                X_all = do.call("cbind", my_rhs)
+	                # We try to avoid repeating variables
+	                # => can happen in stepwise estimations (not in csw)
+
+	                all_varnames = unlist(sapply(my_rhs, colnames))
+	                all_varnames_unik = unique(all_varnames)
+	                all_varnames_done = rep(FALSE, length(all_varnames_unik))
+	                all_varnames_done = all_varnames_unik %in% colnames(my_rhs[[1]])
+
+	                dict_vars = 1:length(all_varnames_unik)
+	                names(dict_vars) = all_varnames_unik
+
+	                n_rhs_current = length(my_rhs)
+	                args_cbind = vector("list", n_rhs_current)
+	                args_cbind[[1]] = my_rhs[[1]]
+
+	                id_rhs = 2
+	                while(!all(all_varnames_done) && id_rhs <= n_rhs_current){
+
+	                    rhs_current = my_rhs[[id_rhs]]
+	                    qui = !colnames(rhs_current) %in% all_varnames_unik[all_varnames_done]
+	                    if(any(qui)){
+	                        args_cbind[[id_rhs]] = rhs_current[, qui, drop = FALSE]
+	                        all_varnames_done = all_varnames_done | all_varnames_unik %in% colnames(rhs_current)
+	                    }
+
+	                    id_rhs = id_rhs + 1
+	                }
+
+	                X_all = do.call("cbind", args_cbind)
 	            }
 
 	            if(do_iv){
@@ -807,9 +912,14 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 
 	                for(jj in rhs_group[[j]]){
 
-	                    qui = rhs_col_id[[jj]]
+	                    # linking the unique variables to the variables
+	                    qui_X = rhs_col_id[[jj]]
+	                    if(!is.null(all_varnames)){
+	                        qui_X = dict_vars[all_varnames[qui_X]]
+	                    }
+
 	                    if(isLinear_current){
-	                        my_X = X_all[, qui, drop = FALSE]
+	                        my_X = X_all[, qui_X, drop = FALSE]
 	                    } else {
 	                        my_X = 0
 	                    }
@@ -819,10 +929,10 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 
 	                    if(do_iv){
 	                        if(isLinear_current){
-	                            qui_iv = c(1:n_inst, n_inst + qui)
+	                            qui_iv = c(1:n_inst, n_inst + qui_X)
 
-	                            XtX = iv_products$XtX[qui, qui, drop = FALSE]
-	                            Xty = iv_products$Xty[[ii]][qui]
+	                            XtX = iv_products$XtX[qui_X, qui_X, drop = FALSE]
+	                            Xty = iv_products$Xty[[ii]][qui_X]
 	                        } else {
 	                            qui_iv = 1:n_inst
 
@@ -837,7 +947,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 
 	                        if(isFixef){
 	                            my_res = feols(env = current_env, iv_products = my_iv_products,
-	                                           X_demean = X_demean[ , qui, drop = FALSE],
+	                                           X_demean = X_demean[ , qui_X, drop = FALSE],
 	                                           y_demean = y_demean[[ii]],
 	                                           iv.mat_demean = iv.mat_demean, iv_lhs_demean = iv_lhs_demean)
 	                        } else {
@@ -846,11 +956,11 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 
 	                    } else {
 	                        if(isFixef){
-	                            my_res = feols(env = current_env, xwx = xwx[qui, qui, drop = FALSE], xwy = xwy[[ii]][qui],
-	                                           X_demean = X_demean[ , qui, drop = FALSE],
+	                            my_res = feols(env = current_env, xwx = xwx[qui_X, qui_X, drop = FALSE], xwy = xwy[[ii]][qui_X],
+	                                           X_demean = X_demean[ , qui_X, drop = FALSE],
 	                                           y_demean = y_demean[[ii]])
 	                        } else {
-	                            my_res = feols(env = current_env, xwx = xwx[qui, qui, drop = FALSE], xwy = xwy[[ii]][qui])
+	                            my_res = feols(env = current_env, xwx = xwx[qui_X, qui_X, drop = FALSE], xwy = xwy[[ii]][qui_X])
 	                        }
 	                    }
 
@@ -1350,14 +1460,17 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 		    opt_fe = check_conv(y_demean, X_demean, fixef_id_list, slope_flag, slope_vars, weights)
 
 		    # This is a bit too rough a check but it should catch the most problematic cases
-		    if(any(opt_fe > 1e-4)){
+		    if(anyNA(opt_fe) || any(opt_fe > 1e-4)){
 		        msg = "There seems to be a convergence problem due to the presence of variables with varying slopes. The precision of the estimates may not be great."
 		        if(any(slope_flag < 0)){
 		            sugg = "This convergence problem mostly arises when there are varying slopes without their associated fixed-effect, as is the case in your estimation. Why not try to include the fixed-effect (i.e. use '[' instead of '[[')?"
 		        } else {
-		            sugg = "As a workaround, and if there are not too many slopes, you can use the variables with varying slopes as regular variables using the function interact (see ?interact)."
+		            sugg = "As a workaround, and if there are not too many slopes, you can use the variables with varying slopes as regular variables using the function i (see ?i)."
 		        }
-		        msg = paste(msg, sugg)
+
+		        sugg_tol = "Or use a lower 'fixef.tol' (sometimes it works)?"
+
+		        msg = paste(msg, sugg, sugg_tol)
 
 		        res$convStatus = FALSE
 
@@ -1492,7 +1605,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 
 	    res$collin.var = var_collinear
 
-	    # full set of coeffficients with NAs
+	    # full set of coefficients with NAs
 	    collin.coef = setNames(rep(NA, ncol(X)), colnames(X))
 	    collin.coef[!est$is_excluded] = res$coefficients
 	    res$collin.coef = collin.coef
@@ -1579,6 +1692,9 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 		res$cov.iid = est$xwx_inv * res$sigma2
 
 		rownames(res$cov.iid) = colnames(res$cov.iid) = names(coef)
+
+		# for compatibility with conleyreg
+		res$cov.unscaled = res$cov.iid
 
 		# se
 		se = diag(res$cov.iid)
@@ -1694,9 +1810,7 @@ ols_fit = function(y, X, w, correct_0w = FALSE, collin.tol, nthreads, xwx = NULL
     res
 }
 
-
-
-check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights){
+check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights, full = FALSE, fixef_names = NULL){
     # VERY SLOW!!!!
     # IF THIS FUNCTION LASTS => TO BE PORTED TO C++
 
@@ -1707,29 +1821,45 @@ check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights){
 
     Q = length(slope_flag)
 
-    nobs = length(y)
+    use_y = TRUE
     if(length(X) == 1){
         K = 1
+        nobs = length(y)
     } else {
-        K = NCOL(X) + 1
-    }
+        nobs = NROW(X)
 
-    res = list()
-
-    for(k in 1:K){
-        if(k == 1){
-            x = y
-        } else {
-            x = X[, k - 1]
+        if(length(y) <= 1){
+            use_y = FALSE
         }
 
-        res_tmp = c()
+        K = NCOL(X) + use_y
+    }
+
+    info_max = list()
+    info_full = vector("list", K)
+
+    for(k in 1:K){
+        if(k == 1 && use_y){
+            x = y
+        } else if(use_y){
+            x = X[, k - use_y]
+        } else {
+            x = X[, k]
+        }
+
+        info_max_tmp = c()
+        info_full_tmp = list()
         index_slope = 1
         for(q in 1:Q){
             fixef_id = fixef_id_list[[q]]
 
             if(slope_flag[q] >= 0){
-                res_tmp = c(res_tmp, max(abs(tapply(weights * x, fixef_id, mean))))
+                x_means = tapply(weights * x, fixef_id, mean)
+                info_max_tmp = c(info_max_tmp, max(abs(x_means)))
+
+                if(full){
+                    info_full_tmp[[length(info_full_tmp) + 1]] = x_means
+                }
             }
 
             n_slopes = abs(slope_flag[q])
@@ -1739,17 +1869,37 @@ check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights){
 
                     num = tapply(weights * x * var, fixef_id, sum)
                     denom = tapply(weights * var^2, fixef_id, sum)
-                    res_tmp = c(res_tmp, max(abs(num/denom)))
+
+                    x_means = num/denom
+                    info_max_tmp = c(info_max_tmp, max(abs(x_means)))
+
+                    if(full){
+                        info_full_tmp[[length(info_full_tmp) + 1]] = x_means
+                    }
 
                     index_slope = index_slope + 1
                 }
             }
         }
 
-        res[[k]] = res_tmp
+        if(!is.null(fixef_names)){
+            names(info_full_tmp) = fixef_names
+        }
+
+        info_max[[k]] = info_max_tmp
+
+        if(full){
+            info_full[[k]] = info_full_tmp
+        }
     }
 
-    res = do.call("rbind", res)
+    info_max = do.call("rbind", info_max)
+
+    if(full){
+        res = info_full
+    } else {
+        res = info_max
+    }
 
     res
 }
@@ -1817,6 +1967,10 @@ feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, cluster, se, s
 #' @inheritSection feols Interactions
 #' @inheritSection feols On standard-errors
 #' @inheritSection feols Multiple estimations
+#' @inheritSection feols Argument sliding
+#' @inheritSection feols Piping
+#' @inheritSection feols Tricks to estimate multiple LHS
+#' @inheritSection xpd Dot square bracket operator in formulas
 #'
 #' @param family Family to be used for the estimation. Defaults to \code{gaussian()}. See \code{\link[stats]{family}} for details of family functions.
 #' @param start Starting values for the coefficients. Can be: i) a numeric of length 1 (e.g. \code{start = 0}), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients). Default is missing.
@@ -2070,6 +2224,9 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
         # weights
         weights = get("weights.value", env)
 
+        # warn flag
+        warn = get("warn", env)
+
         # init
         init.type = get("init.type", env)
         starting_values = get("starting_values", env)
@@ -2282,7 +2439,11 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
             gc()
         }
 
-        wols = feols(y = z, X = X, weights = w, means = wols_means, correct_0w = any_0w, env = env, fixef.tol = fixef.tol * 10**(iter==1), fixef.iter = fixef.iter, collin.tol = collin.tol, nthreads = nthreads, mem.clean = mem.clean, verbose = verbose - 1)
+        wols = feols(y = z, X = X, weights = w, means = wols_means,
+                     correct_0w = any_0w, env = env, fixef.tol = fixef.tol * 10**(iter==1),
+                     fixef.iter = fixef.iter, collin.tol = collin.tol, nthreads = nthreads,
+                     mem.clean = mem.clean, warn = warn,
+                     verbose = verbose - 1, fromGLM = TRUE)
 
         if(isTRUE(wols$NA_model)){
             return(wols)
@@ -2518,6 +2679,9 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 
         rownames(res$cov.iid) = colnames(res$cov.iid) = names(coef)
 
+        # for compatibility with conleyreg
+        res$cov.unscaled = res$cov.iid
+
         # se
         se = diag(res$cov.iid)
         se[se < 0] = NA
@@ -2656,8 +2820,12 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 #' @inheritSection feols Interactions
 #' @inheritSection feols On standard-errors
 #' @inheritSection feols Multiple estimations
+#' @inheritSection feols Argument sliding
+#' @inheritSection feols Piping
+#' @inheritSection feols Tricks to estimate multiple LHS
+#' @inheritSection xpd Dot square bracket operator in formulas
 #'
-#' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y|fixef_1+fixef_2}. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. The formula \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)} leads to 6 estimation, see details.
+#' @param fml A formula representing the relation to be estimated. For example: \code{fml = z~x+y}. To include fixed-effects, insert them in this formula using a pipe: e.g. \code{fml = z~x+y|fixef_1+fixef_2}. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. The formula \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)} leads to 6 estimation, see details. Square brackets starting with a dot can be used to call global variables: \code{y.[i] ~ x.[1:2]} will lead to \code{y3 ~ x1 + x2} if \code{i} is equal to 3 in the current environment (see details in \code{\link[fixest]{xpd}}).
 #' @param start Starting values for the coefficients. Can be: i) a numeric of length 1 (e.g. \code{start = 0}, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).
 #'
 #' @details
@@ -2883,8 +3051,12 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
 #' @inheritSection feols Interactions
 #' @inheritSection feols On standard-errors
 #' @inheritSection feols Multiple estimations
+#' @inheritSection feols Argument sliding
+#' @inheritSection feols Piping
+#' @inheritSection feols Tricks to estimate multiple LHS
+#' @inheritSection xpd Dot square bracket operator in formulas
 #'
-#' @param fml A formula. This formula gives the linear formula to be estimated (it is similar to a \code{lm} formula), for example: \code{fml = z~x+y}. To include fixed-effects variables, insert them in this formula using a pipe (e.g. \code{fml = z~x+y|fixef_1+fixef_2}). To include a non-linear in parameters element, you must use the argment \code{NL.fml}. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. This leads to 6 estimation \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)}. See details.
+#' @param fml A formula. This formula gives the linear formula to be estimated (it is similar to a \code{lm} formula), for example: \code{fml = z~x+y}. To include fixed-effects variables, insert them in this formula using a pipe (e.g. \code{fml = z~x+y|fixef_1+fixef_2}). To include a non-linear in parameters element, you must use the argment \code{NL.fml}. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. This leads to 6 estimation \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)}. See details. Square brackets starting with a dot can be used to call global variables: \code{y.[i] ~ x.[1:2]} will lead to \code{y3 ~ x1 + x2} if \code{i} is equal to 3 in the current environment (see details in \code{\link[fixest]{xpd}}).
 #' @param start Starting values for the coefficients in the linear part (for the non-linear part, use NL.start). Can be: i) a numeric of length 1 (e.g. \code{start = 0}, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).
 #' @param NL.fml A formula. If provided, this formula represents the non-linear part of the right hand side (RHS). Note that contrary to the \code{fml} argument, the coefficients must explicitly appear in this formula. For instance, it can be \code{~a*log(b*x + c*x^3)}, where \code{a}, \code{b}, and \code{c} are the coefficients to be estimated. Note that only the RHS of the formula is to be provided, and NOT the left hand side.
 #' @param split A one sided formula representing a variable (eg \code{split = ~var}) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. If you also want to include the estimation for the full sample, use the argument \code{fsplit} instead.
@@ -3361,7 +3533,11 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	res$sq.cor = sq.cor
 	res$fitted.values = expected.predictor
 	res$hessian = hessian
+
 	res$cov.iid = var
+	# for compatibility with conleyreg
+	res$cov.unscaled = res$cov.iid
+
 	res$se = se
 	res$scores = scores
 	res$family = family

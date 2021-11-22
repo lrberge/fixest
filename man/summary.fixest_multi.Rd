@@ -21,7 +21,7 @@
 \arguments{
 \item{object}{A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to multiple results.}
 
-\item{type}{A character either equal to \code{"short"}, \code{"long"}, \code{"compact"}, or \code{"se_compact"}. If \code{short}, only the table of coefficients is displayed for each estimation. If \code{long}, then the full results are displayed for each estimation. If \code{compact}, a \code{data.frame} is returned with one line per model and the formatted coefficients + standard-errors in the columns. If \code{se_compact}, a \code{data.frame} is returned with one line per model, one numeric column for each coefficient and one numeric column for each standard-error.}
+\item{type}{A character either equal to \code{"short"}, \code{"long"}, \code{"compact"}, \code{"se_compact"} or \code{"se_long"}. If \code{short}, only the table of coefficients is displayed for each estimation. If \code{long}, then the full results are displayed for each estimation. If \code{compact}, a \code{data.frame} is returned with one line per model and the formatted coefficients + standard-errors in the columns. If \code{se_compact}, a \code{data.frame} is returned with one line per model, one numeric column for each coefficient and one numeric column for each standard-error. If \code{"se_long"}, same as \code{"se_compact"} but the data is in a long format instead of wide.}
 
 \item{vcov}{Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from \code{\link[fixest]{vcov_cluster}}, \code{\link[fixest:vcov_hac]{vcov_NW}}, \code{\link[fixest:vcov_hac]{NW}}, \code{\link[fixest:vcov_hac]{vcov_DK}}, \code{\link[fixest:vcov_hac]{DK}}, \code{\link[fixest]{vcov_conley}} and \code{\link[fixest:vcov_conley]{conley}}. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the `vcov` documentation in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.}
 
@@ -64,6 +64,8 @@ summary(res, type = "long")
 summary(res, type = "compact")
 
 summary(res, type = "se_compact")
+
+summary(res, type = "se_long")
 
 
 }

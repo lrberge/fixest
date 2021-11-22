@@ -10,7 +10,7 @@ setFixest_fml(..., reset = FALSE)
 getFixest_fml()
 }
 \arguments{
-\item{...}{Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. \code{..ctrl}). The value of each argument must be a one-sided formula or a character vector, it is the definition of the macro variable. Example of a valid call: \code{setFixest_fml(..ctrl = ~ var1 + var2)}. In the function \code{xpd}, the default macro variables are taken from \code{getFixest_fml}, any variable in \code{...} will replace these values.}
+\item{...}{Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. \code{..ctrl}). The value of each argument must be a one-sided formula or a character vector, it is the definition of the macro variable. Example of a valid call: \code{setFixest_fml(..ctrl = ~ var1 + var2)}. In the function \code{xpd}, the default macro variables are taken from \code{getFixest_fml}, any variable in \code{...} will replace these values. You can enclose values in \code{.[]}, if so they will be evaluated from the current environment. For example \code{..ctrl = ~ x.[1:2] + .[z]} will lead to \code{~x1 + x2 + var} if \code{z} is equal to \code{"var"}.}
 
 \item{reset}{A logical scalar, defaults to \code{FALSE}. If \code{TRUE}, all macro variables are first reset (i.e. deleted).}
 }
@@ -42,9 +42,24 @@ a = feols(Ozone ~ Wind + ..ctrl, airquality)
 b = feols(Ozone ~ Wind + ..ctrl_long, airquality)
 etable(a, b, keep = "Int|Win")
 
+
+# Using .[]
+
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+i = 2:3
+z = "species"
+lm(xpd(y ~ x.[2:3] + .[z]), base)
+
+# No xpd() needed in feols
+feols(y ~ x.[2:3] + .[z], base)
+
 #
 # You can use xpd for stepwise estimations
 #
+
+# Note that for stepwise estimations in fixest, you can use
+# the stepwise functions: sw, sw0, csw, csw0
+# -> see help in feols or in the dedicated vignette
 
 # we want to look at the effect of x1 on y
 # controlling for different variables
@@ -74,25 +89,21 @@ data(longley)
 setFixest_fml(..many_vars = grep("GNP|ployed", names(longley), value = TRUE))
 feols(Armed.Forces ~ Population + ..many_vars, longley)
 
-# Example 2: using ..("regex") to grep the variables "live"
+# Example 2: using ..("regex") or regex("regex") to grep the variables "live"
 
 feols(Armed.Forces ~ Population + ..("GNP|ployed"), longley)
 
 # Example 3: same as Ex.2 but without using a fixest estimation
 
 # Here we need to use xpd():
-lm(xpd(Armed.Forces ~ Population + ..("GNP|ployed"), data = longley), longley)
+lm(xpd(Armed.Forces ~ Population + regex("GNP|ployed"), data = longley), longley)
 
-#
-# You can also put numbers in macros
-#
+# Stepwise estimation with regex: use a comma after the parenthesis
+feols(Armed.Forces ~ Population + sw(regex(,"GNP|ployed")), longley)
 
-res_all = list()
-for(p in 1:3){
-  res_all[[p]] = feols(xpd(Ozone ~ Wind + poly(Temp, ..p), ..p = p), airquality)
-}
+# Multiple LHS
+etable(feols(..("GNP|ployed") ~ Population, longley))
 
-etable(res_all)
 
 #
 # lhs and rhs arguments
@@ -109,4 +120,67 @@ xpd(y ~ 1, rhs = vars)
 xpd(lhs = "y", rhs = vars)
 
 
+#
+# Dot square bracket operator
+#
+
+# You can create multiple variables at once
+xpd(y ~ x.[1:5] + z.[2:3])
+
+# You can summon variables from the environment
+var = "a"
+xpd(y ~ x.[var])
+
+# ... the variables can be multiple
+vars = LETTERS[1:3]
+xpd(y ~ x.[vars])
+
+# You can have "complex" variable names but they must be nested in character form
+xpd(y ~ .["x.[vars]_sq"])
+
+# DSB can be used within regular expressions
+re = c("GNP", "Pop")
+xpd(Unemployed ~ regex(".[re]"), data = longley)
+
+# => equivalent to regex("GNP|Pop")
+
+# Use .[,var] (NOTE THE COMMA!) to expand with commas
+# !! can break the formula if missused
+vars = c("wage", "unemp")
+xpd(c(y.[,1:3]) ~ csw(.[,vars]))
+
+
+# Example of use of .[] within a loop
+res_all = list()
+for(p in 1:3){
+  res_all[[p]] = feols(Ozone ~ Wind + poly(Temp, .[p]), airquality)
+}
+
+etable(res_all)
+
+# The former can be compactly estimated with:
+res_compact = feols(Ozone ~ Wind + sw(.[, "poly(Temp, .[1:3])"]), airquality)
+
+etable(res_compact)
+
+# How does it work?
+# 1)  .[, stuff] evaluates stuff and, if a vector, aggregates it with commas
+#     Comma aggregation is done thanks to the comma placed after the square bracket
+#     If .[stuff], then aggregation is with sums.
+# 2) stuff is evaluated, and if it is a character string, it is evaluated with
+# the function dsb which expands values in .[]
+#
+# Wrapping up:
+# 2) evaluation of dsb("poly(Temp, .[1:3])") leads to the vector:
+#    c("poly(Temp, 1)", "poly(Temp, 2)", "poly(Temp, 3)")
+# 1) .[, c("poly(Temp, 1)", "poly(Temp, 2)", "poly(Temp, 3)")] leads to
+#    poly(Temp, 1), poly(Temp, 2), poly(Temp, 3)
+#
+# Hence sw(.[, "poly(Temp, .[1:3])"]) becomes:
+#       sw(poly(Temp, 1), poly(Temp, 2), poly(Temp, 3))
+
+
+}
+\seealso{
+\code{\link[fixest]{xpd}} to make use of formula macros.
 }

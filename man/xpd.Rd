@@ -7,9 +7,9 @@
 xpd(fml, ..., lhs, rhs, data = NULL)
 }
 \arguments{
-\item{fml}{A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}. Special macros of the form \code{..("regex")} can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument \code{data}. See examples.}
+\item{fml}{A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}. Special macros of the form \code{..("regex")} can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument \code{data}. square brackets have a special meaning: Values in them are evaluated and parsed accordingly. Example: \code{y~x.[1:2] + z.[i]} will lead to \code{y~x1+x2+z3} if \code{i==3}. See examples.}
 
-\item{...}{Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. \code{..ctrl}). The value of each argument must be a one-sided formula or a character vector, it is the definition of the macro variable. Example of a valid call: \code{setFixest_fml(..ctrl = ~ var1 + var2)}. In the function \code{xpd}, the default macro variables are taken from \code{getFixest_fml}, any variable in \code{...} will replace these values.}
+\item{...}{Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. \code{..ctrl}). The value of each argument must be a one-sided formula or a character vector, it is the definition of the macro variable. Example of a valid call: \code{setFixest_fml(..ctrl = ~ var1 + var2)}. In the function \code{xpd}, the default macro variables are taken from \code{getFixest_fml}, any variable in \code{...} will replace these values. You can enclose values in \code{.[]}, if so they will be evaluated from the current environment. For example \code{..ctrl = ~ x.[1:2] + .[z]} will lead to \code{~x1 + x2 + var} if \code{z} is equal to \code{"var"}.}
 
 \item{lhs}{If present then a formula will be constructed with \code{lhs} as the full left-hand-side. The value of \code{lhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{rhs}. Note that if \code{fml} is not missing, its LHS will be replaced by \code{lhs}.}
 
@@ -28,6 +28,36 @@ In \code{xpd}, the default macro variables are taken from \code{getFixest_fml}. 
 
 The definitions of the macro variables will replace in verbatim the macro variables. Therefore, you can include multi-part formulas if you wish but then beware of the order of the macros variable in the formula. For example, using the \code{airquality} data, say you want to set as controls the variable \code{Temp} and \code{Day} fixed-effects, you can do \code{setFixest_fml(..ctrl = ~Temp | Day)}, but then \code{feols(Ozone ~ Wind + ..ctrl, airquality)} will be quite different from \code{feols(Ozone ~ ..ctrl + Wind, airquality)}, so beware!
 }
+\section{Dot square bracket operator in formulas}{
+
+
+In a formula, the dot square bracket (DSB) operator can: i) create manifold variables at once, or ii) capture values from the current environment and put them verbatim in the formula.
+
+Say you want to include the variables \code{x1} to \code{x3} in your formula. You can use \code{xpd(y ~ x.[1:3])} and you'll get \code{y ~ x1 + x2 + x3}.
+
+To summon values from the environment, simply put the variable in square brackets. For example: \code{for(i in 1:3) xpd(y.[i] ~ x)} will create the formulas \code{y1 ~ x} to \code{y3 ~ x} depending on the value of \code{i}.
+
+You can include a full variable from the environment in the same way: \code{for(y in c("a", "b")) xpd(.[y] ~ x)} will create the two formulas \code{a ~ x} and \code{b ~ x}.
+
+The DSB can even be used within variable names, but then the variable must be nested in character form. For example \code{y ~ .["x.[1:2]_sq"]} will create \code{y ~ x1_sq + x2_sq}. Using the character form is important to avoid a formula parsing error. Double quotes must be used. Note that the character string that is nested will be parsed with the function \code{\link[fixest]{dsb}}, and thus it will return a vector.
+
+By default, the DSB operator expands vectors into sums. You can add a comma, like in \code{.[, x]}, to expand with commas--the content can then be used within functions. For instance: \code{c(x.[, 1:2])} will create \code{c(x1, x2)} (and \emph{not} \code{c(x1 + x2)}).
+
+In all \code{fixest} estimations, this special parsing is enabled, so you don't need to use \code{xpd}.
+
+You can even use multiple square brackets within a single variable, but then the use of nesting is required. For example, the following \code{xpd(y ~ .[".[letters[1:2]]_.[1:2]"])} will create \code{y ~ a_1 + b_2}. Remember that the nested character string is parsed with \code{\link[fixest]{dsb}}, which explains this behavior.
+}
+
+\section{Regular expressions}{
+
+
+You can catch several variable names at once by using regular expressions. To use regular expressions, you need to enclose it in the dot-dot or the regex function: \code{..("regex")} or \code{regex("regex")}. For example, \code{regex("Sepal")} will catch both the variables \code{Sepal.Length} and \code{Sepal.Width} from the \code{iris} data set. In a \code{fixest} estimation, the variables names from which the regex will be applied come from the data set. If you use \code{xpd}, you need to provide either a data set or a vector of names in the argument \code{data}.
+
+By default the variables are aggregated with a sum. For example in a data set with the variables x1 to x10, \code{regex("x(1|2)"} will yield \code{x1 + x2 + x10}. You can instead ask for "comma" aggregation by using a comma first, just before the regular expression: \code{y ~ sw(regex(,"x(1|2)"))} would lead to \code{y ~ sw(x1, x2, x10)}.
+
+Note that the dot square bracket operator (DSB, see before) is applied before the regular expression is evaluated. This means that \code{regex("x.[3:4]_sq")} will lead, after evaluation of the DSB, to \code{regex("x3_sq|x4_sq")}. It is a handy way to insert range of numbers in a regular expression.
+}
+
 \examples{
 
 # Small examples with airquality data
@@ -45,9 +75,24 @@ a = feols(Ozone ~ Wind + ..ctrl, airquality)
 b = feols(Ozone ~ Wind + ..ctrl_long, airquality)
 etable(a, b, keep = "Int|Win")
 
+
+# Using .[]
+
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+i = 2:3
+z = "species"
+lm(xpd(y ~ x.[2:3] + .[z]), base)
+
+# No xpd() needed in feols
+feols(y ~ x.[2:3] + .[z], base)
+
 #
 # You can use xpd for stepwise estimations
 #
+
+# Note that for stepwise estimations in fixest, you can use
+# the stepwise functions: sw, sw0, csw, csw0
+# -> see help in feols or in the dedicated vignette
 
 # we want to look at the effect of x1 on y
 # controlling for different variables
@@ -77,25 +122,21 @@ data(longley)
 setFixest_fml(..many_vars = grep("GNP|ployed", names(longley), value = TRUE))
 feols(Armed.Forces ~ Population + ..many_vars, longley)
 
-# Example 2: using ..("regex") to grep the variables "live"
+# Example 2: using ..("regex") or regex("regex") to grep the variables "live"
 
 feols(Armed.Forces ~ Population + ..("GNP|ployed"), longley)
 
 # Example 3: same as Ex.2 but without using a fixest estimation
 
 # Here we need to use xpd():
-lm(xpd(Armed.Forces ~ Population + ..("GNP|ployed"), data = longley), longley)
+lm(xpd(Armed.Forces ~ Population + regex("GNP|ployed"), data = longley), longley)
 
-#
-# You can also put numbers in macros
-#
+# Stepwise estimation with regex: use a comma after the parenthesis
+feols(Armed.Forces ~ Population + sw(regex(,"GNP|ployed")), longley)
 
-res_all = list()
-for(p in 1:3){
-  res_all[[p]] = feols(xpd(Ozone ~ Wind + poly(Temp, ..p), ..p = p), airquality)
-}
+# Multiple LHS
+etable(feols(..("GNP|ployed") ~ Population, longley))
 
-etable(res_all)
 
 #
 # lhs and rhs arguments
@@ -112,4 +153,70 @@ xpd(y ~ 1, rhs = vars)
 xpd(lhs = "y", rhs = vars)
 
 
+#
+# Dot square bracket operator
+#
+
+# You can create multiple variables at once
+xpd(y ~ x.[1:5] + z.[2:3])
+
+# You can summon variables from the environment
+var = "a"
+xpd(y ~ x.[var])
+
+# ... the variables can be multiple
+vars = LETTERS[1:3]
+xpd(y ~ x.[vars])
+
+# You can have "complex" variable names but they must be nested in character form
+xpd(y ~ .["x.[vars]_sq"])
+
+# DSB can be used within regular expressions
+re = c("GNP", "Pop")
+xpd(Unemployed ~ regex(".[re]"), data = longley)
+
+# => equivalent to regex("GNP|Pop")
+
+# Use .[,var] (NOTE THE COMMA!) to expand with commas
+# !! can break the formula if missused
+vars = c("wage", "unemp")
+xpd(c(y.[,1:3]) ~ csw(.[,vars]))
+
+
+# Example of use of .[] within a loop
+res_all = list()
+for(p in 1:3){
+  res_all[[p]] = feols(Ozone ~ Wind + poly(Temp, .[p]), airquality)
+}
+
+etable(res_all)
+
+# The former can be compactly estimated with:
+res_compact = feols(Ozone ~ Wind + sw(.[, "poly(Temp, .[1:3])"]), airquality)
+
+etable(res_compact)
+
+# How does it work?
+# 1)  .[, stuff] evaluates stuff and, if a vector, aggregates it with commas
+#     Comma aggregation is done thanks to the comma placed after the square bracket
+#     If .[stuff], then aggregation is with sums.
+# 2) stuff is evaluated, and if it is a character string, it is evaluated with
+# the function dsb which expands values in .[]
+#
+# Wrapping up:
+# 2) evaluation of dsb("poly(Temp, .[1:3])") leads to the vector:
+#    c("poly(Temp, 1)", "poly(Temp, 2)", "poly(Temp, 3)")
+# 1) .[, c("poly(Temp, 1)", "poly(Temp, 2)", "poly(Temp, 3)")] leads to
+#    poly(Temp, 1), poly(Temp, 2), poly(Temp, 3)
+#
+# Hence sw(.[, "poly(Temp, .[1:3])"]) becomes:
+#       sw(poly(Temp, 1), poly(Temp, 2), poly(Temp, 3))
+
+
+}
+\seealso{
+\code{\link[fixest]{setFixest_fml}} to set formula macros, and \code{\link[fixest]{dsb}} to modify character strings with the DSB operator.
+}
+\author{
+Laurent Berge
 }

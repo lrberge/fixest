@@ -8,8 +8,14 @@
   object,
   newdata,
   type = c("response", "link"),
+  se.fit = FALSE,
+  interval = "none",
+  level = 0.95,
   fixef = FALSE,
+  vs.coef = FALSE,
   sample = c("estimation", "original"),
+  vcov = NULL,
+  ssc = NULL,
   ...
 )
 }
@@ -20,16 +26,29 @@
 
 \item{type}{Character either equal to \code{"response"} (default) or \code{"link"}. If \code{type="response"}, then the output is at the level of the response variable, i.e. it is the expected predictor \eqn{E(Y|X)}. If \code{"link"}, then the output is at the level of the explanatory variables, i.e. the linear predictor \eqn{X\cdot \beta}.}
 
+\item{se.fit}{Logical, default is \code{FALSE}. If \code{TRUE}, the standard-error of the predicted value is computed and returned in a column named \code{se.fit}. This feature is only available for OLS models not containing fixed-effects.}
+
+\item{interval}{Either "none" (default), "confidence" or "prediction". What type of confidence interval to compute. Note that this feature is only available for OLS models not containing fixed-effects (GLM/ML models are not covered).}
+
+\item{level}{A numeric scalar in between 0.5 and 1, defaults to 0.95. Only used when the argument 'interval' is requested, it corresponds to the width of the confidence interval.}
+
 \item{fixef}{Logical scalar, default is \code{FALSE}. If \code{TRUE}, a data.frame is returned, with each column representing the fixed-effects coefficients for each observation in \code{newdata} -- with as many columns as fixed-effects. Note that when there are variables with varying slopes, the slope coefficients are returned (i.e. they are not multiplied by the variable).}
 
+\item{vs.coef}{Logical scalar, default is \code{FALSE}. Only used when \code{fixef = TRUE} and when variables with varying slopes are present. If \code{TRUE}, the coefficients of the variables with varying slopes are returned instead of the coefficient multiplied by the value of the variables (default).}
+
 \item{sample}{Either "estimation" (default) or "original". This argument is only used when arg. 'newdata' is missing, and is ignored otherwise. If equal to "estimation", the vector returned matches the sample used for the estimation. If equal to "original", it matches the original data set (the observations not used for the estimation being filled with NAs).}
+
+\item{vcov}{Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from \code{\link[fixest]{vcov_cluster}}, \code{\link[fixest:vcov_hac]{vcov_NW}}, \code{\link[fixest:vcov_hac]{NW}}, \code{\link[fixest:vcov_hac]{vcov_DK}}, \code{\link[fixest:vcov_hac]{DK}}, \code{\link[fixest]{vcov_conley}} and \code{\link[fixest:vcov_conley]{conley}}. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the `vcov` documentation in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.}
+
+\item{ssc}{An object of class \code{ssc.type} obtained with the function \code{\link[fixest]{ssc}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{ssc}} for this argument. The arguments and defaults of the function \code{\link[fixest]{ssc}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "conventional"}, \code{t.df = "conventional"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{ssc}} for details.}
 
 \item{...}{Not currently used.}
 }
 \value{
 It returns a numeric vector of length equal to the number of observations in argument \code{newdata}.
 If \code{newdata} is missing, it returns a vector of the same length as the estimation sample, except if \code{sample = "original"}, in which case the length of the vector will match the one of the original data set (which can, but also cannot, be the estimation sample).
-If \code{fixef=TRUE}, a \code{data.frame} is returned.
+If \code{fixef = TRUE}, a \code{data.frame} is returned.
+If \code{se.fit = TRUE} or \code{interval != "none"}, the object returned is a data.frame with the following columns: \code{fit}, \code{se.fit}, and, if CIs are requested, \code{ci_low} and \code{ci_high}.
 }
 \description{
 This function obtains prediction from a fitted model estimated with \code{\link[fixest]{femlm}}, \code{\link[fixest]{feols}} or \code{\link[fixest]{feglm}}.
@@ -76,6 +95,27 @@ head(obs_fe)
 
 # can we check we get the right sum of fixed-effects
 head(cbind(rowSums(obs_fe), est_trade$sumFE))
+
+
+#
+# Standard-error of the prediction
+#
+
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+
+est = feols(y ~ x1 + species, base)
+
+head(predict(est, se.fit = TRUE))
+
+# regular confidence interval
+head(predict(est, interval = "conf"))
+
+# adding the residual to the CI
+head(predict(est, interval = "predi"))
+
+# You can change the type of SE on the fly
+head(predict(est, interval = "conf", vcov = ~species))
+
 
 
 }

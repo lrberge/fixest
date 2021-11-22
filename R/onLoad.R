@@ -12,6 +12,7 @@
 
 	setFixest_coefplot("all", reset = TRUE)
 	setFixest_ssc()
+	setFixest_etable()
 
 	# # To include later
 	# cpp_setup_fork_presence()
@@ -38,7 +39,7 @@
     # a while is fully informed on how to change his/her old code
 
     startup_msg = c(
-        "0.10.0" = "fixest 0.10.0:\n- vcov: new argument 'vcov' that replaces 'se' and 'cluster' in all functions (retro compatibility is ensured).\n- function 'dof()' has been renamed into 'ssc()' (which stands for small sample correction). Retro compatibility is ensured but will be removed at some point.",
+        "0.10.0" = "fixest 0.10.0:\n- vcov: new argument 'vcov' that replaces 'se' and 'cluster' in all functions (retro compatibility is ensured).\n- Breaking: arg. 'vcov' now comes after 'data'/'family', hence code using an offset w/t the arg. name may break (just use 'offset = stuff' now). \n- function 'dof()' has been renamed into 'ssc()' (i.e. small sample correction).",
         "0.9.0" = "From fixest 0.9.0 onward: BREAKING changes! \n- In i():\n    + the first two arguments have been swapped! Now it's i(factor_var, continuous_var) for interactions. \n    + argument 'drop' has been removed (put everything in 'ref' now).\n- In feglm(): \n    + the default family becomes 'gaussian' to be in line with glm(). Hence, for Poisson estimations, please use fepois() instead.")
 
     fixest_startup_msg = initialize_startup_msg(startup_msg)
@@ -61,7 +62,7 @@
 
     if(length(msg) > 0) {
         msg = c("(Permanently remove the following message with fixest_startup_msg(FALSE).)", msg)
-        packageStartupMessage(fit_screen(paste(msg, collapse = "\n"), .95))
+        packageStartupMessage(fit_screen(paste(msg, collapse = "\n"), 1))
     }
 
 }

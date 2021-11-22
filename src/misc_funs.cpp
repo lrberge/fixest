@@ -20,6 +20,7 @@
 #include <vector>
 #include <stdio.h>
 #include <cmath>
+#include <functional>
 
 using namespace Rcpp;
 using namespace std;
@@ -1189,6 +1190,159 @@ IntegerVector cpp_combine_clusters(SEXP cluster_list, IntegerVector index){
 
     return res;
 }
+
+
+
+
+// [[Rcpp::export]]
+List cpp_cut(NumericVector x_sorted, NumericVector cut_points, IntegerVector is_included){
+    // x_sorted: no NA, sorted
+    // cut_points: bounds
+    // is_included: for each bound, if it is included or not
+    //
+
+    int N = x_sorted.length();
+    int n_cuts = cut_points.length();
+
+    bool is_int = true;
+    for(int i=0 ; i<N ; ++i){
+        if(fabs(x_sorted[i] - round(x_sorted[i])) > 0.00000000001){
+            is_int = false;
+            break;
+        }
+    }
+
+    IntegerVector x_int(N, n_cuts + 1);
+    IntegerVector isnt_empty(n_cuts + 1);
+    NumericVector value_min(n_cuts + 1);
+    NumericVector value_max(n_cuts + 1);
+
+    int index = 0;
+    bool first = true;
+    bool include = is_included[0];
+    double cutoff = cut_points[0];
+    int i = 0;
+    while(i < N){
+
+        if(include ? x_sorted[i] <= cutoff : x_sorted[i] < cutoff){
+
+            if(first){
+                isnt_empty[index] = true;
+                value_min[index] = x_sorted[i];
+                first = false;
+            }
+
+            x_int[i] = index + 1;
+            ++i;
+
+        } else {
+            // we increment index
+            // bins can be empty
+
+            if(isnt_empty[index] && i > 0){
+                value_max[index] = x_sorted[i - 1];
+            }
+
+            ++index;
+
+            if(index == n_cuts){
+                // last bin: we've done it at initialization
+                isnt_empty[index] = true;
+                value_min[index] = x_sorted[i];
+                value_max[index] = x_sorted[N - 1];
+                break;
+            }
+
+            include = is_included[index];
+            cutoff = cut_points[index];
+            first = true;
+        }
+    }
+
+    if(index != n_cuts){
+        value_max[index] = x_sorted[N - 1];
+    }
+
+    List res;
+    res["x_int"] = x_int;
+    res["isnt_empty"] = isnt_empty;
+    res["value_min"] = value_min;
+    res["value_max"] = value_max;
+    res["is_int"] = is_int;
+
+    return res;
+}
+
+// [[Rcpp::export]]
+bool cpp_is_int(SEXP x){
+
+    if(TYPEOF(x) == INTSXP){
+        return true;
+    }
+
+    if(TYPEOF(x) != REALSXP){
+        return false;
+    }
+
+    int N = Rf_length(x);
+    double *px = REAL(x);
+
+    bool is_int = true;
+    for(int i=0 ; i<N ; ++i){
+        if(fabs(px[i] - round(px[i])) > 0.00000000001){
+            is_int = false;
+            break;
+        }
+    }
+
+    return is_int;
+}
+
+// [[Rcpp::export]]
+double cpp_hash_string(std::string x){
+    // simple function hashing a string
+    // used to identify tables in etable
+
+    double res = std::hash<std::string>{}(x);
+
+    return res;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

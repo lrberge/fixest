@@ -71,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.2</span>
       </span>
     </div>
 
@@ -218,40 +218,9 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="extraline_register.html">extraline_register()</a></code> </p>
+          <p><code><a href="extralines_register.html">extralines_register()</a></code> </p>
         </td>
-        <td><p>Register <code>extraline</code> macros to be used in <code>etable</code></p></td>
-      </tr>
-    </tbody><tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-difference-in-difference-tools" class="hasAnchor"><a href="#section-difference-in-difference-tools" class="anchor"></a>Difference-in-difference tools</h2>
-          <p class="section-desc"><p>Various tools to perform DiD estimations</p></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="sunab.html">sunab()</a></code> <code><a href="sunab.html">sunab_att()</a></code> </p>
-        </td>
-        <td><p>Sun and Abraham interactions</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="aggregate.fixest.html">aggregate(<i>&lt;fixest&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Aggregates the values of DiD coefficients a la Sun and Abraham</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="i.html">i()</a></code> </p>
-        </td>
-        <td><p>Create, or interact variables with, factors</p></td>
+        <td><p>Register <code>extralines</code> macros to be used in <code>etable</code></p></td>
       </tr>
     </tbody><tbody>
       <tr>
@@ -299,6 +268,37 @@
     </tbody><tbody>
       <tr>
         <th colspan="2">
+          <h2 id="section-difference-in-difference-tools" class="hasAnchor"><a href="#section-difference-in-difference-tools" class="anchor"></a>Difference-in-difference tools</h2>
+          <p class="section-desc"><p>Various tools to perform DiD estimations</p></p>
+        </th>
+      </tr>
+      
+      
+    </tbody><tbody>
+      
+      
+      <tr>
+        
+        <td>
+          <p><code><a href="sunab.html">sunab()</a></code> <code><a href="sunab.html">sunab_att()</a></code> </p>
+        </td>
+        <td><p>Sun and Abraham interactions</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="aggregate.fixest.html">aggregate(<i>&lt;fixest&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Aggregates the values of DiD coefficients a la Sun and Abraham</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="i.html">i()</a></code> </p>
+        </td>
+        <td><p>Create, or interact variables with, factors</p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
           <h2 id="section-standard-errors" class="hasAnchor"><a href="#section-standard-errors" class="anchor"></a>Standard-errors</h2>
           <p class="section-desc"><p>Computing the Standard-errors</p></p>
         </th>
@@ -323,9 +323,9 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="ssc.html">ssc()</a></code> <code><a href="ssc.html">setFixest_ssc()</a></code> <code><a href="ssc.html">getFixest_ssc</a></code> </p>
+          <p><code><a href="ssc.html">ssc()</a></code> <code><a href="ssc.html">dof()</a></code> <code><a href="ssc.html">setFixest_ssc()</a></code> <code><a href="ssc.html">getFixest_ssc()</a></code> </p>
         </td>
-        <td><p>Type of degree of freedom in <code>fixest</code> VCOVs</p></td>
+        <td><p>Governs the small sample correction in <code>fixest</code> VCOVs</p></td>
       </tr><tr>
         
         <td>
@@ -534,6 +534,12 @@
           <p><code><a href="to_integer.html">to_integer()</a></code> </p>
         </td>
         <td><p>Fast transform of any type of vector(s) into an integer vector</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="bin.html">bin()</a></code> </p>
+        </td>
+        <td><p>Bins the values of a variable (typically a factor)</p></td>
       </tr>
     </tbody><tbody>
       <tr>
@@ -721,7 +727,7 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="setFixest_dict.html">setFixest_dict()</a></code> <code><a href="setFixest_dict.html">getFixest_dict</a></code> </p>
+          <p><code><a href="setFixest_dict.html">setFixest_dict()</a></code> <code><a href="setFixest_dict.html">getFixest_dict()</a></code> </p>
         </td>
         <td><p>Sets/gets the dictionary relabeling the variables</p></td>
       </tr><tr>
@@ -739,13 +745,13 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="setFixest_notes.html">setFixest_notes()</a></code> <code><a href="setFixest_notes.html">getFixest_notes</a></code> </p>
+          <p><code><a href="setFixest_notes.html">setFixest_notes()</a></code> <code><a href="setFixest_notes.html">getFixest_notes()</a></code> </p>
         </td>
         <td><p>Sets/gets whether to display notes in <code>fixest</code> estimation functions</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="setFixest_nthreads.html">setFixest_nthreads()</a></code> <code><a href="setFixest_nthreads.html">getFixest_nthreads</a></code> </p>
+          <p><code><a href="setFixest_nthreads.html">setFixest_nthreads()</a></code> <code><a href="setFixest_nthreads.html">getFixest_nthreads()</a></code> </p>
         </td>
         <td><p>Sets/gets the number of threads to use in <code>fixest</code> functions</p></td>
       </tr><tr>
@@ -757,9 +763,9 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="ssc.html">ssc()</a></code> <code><a href="ssc.html">setFixest_ssc()</a></code> <code><a href="ssc.html">getFixest_ssc</a></code> </p>
+          <p><code><a href="ssc.html">ssc()</a></code> <code><a href="ssc.html">dof()</a></code> <code><a href="ssc.html">setFixest_ssc()</a></code> <code><a href="ssc.html">getFixest_ssc()</a></code> </p>
         </td>
-        <td><p>Type of degree of freedom in <code>fixest</code> VCOVs</p></td>
+        <td><p>Governs the small sample correction in <code>fixest</code> VCOVs</p></td>
       </tr>
     </tbody><tbody>
       <tr>
@@ -774,6 +780,36 @@
       
       
       <tr>
+        
+        <td>
+          <p><code><a href="dsb.html">dsb()</a></code> </p>
+        </td>
+        <td><p>Extends strings with variables using the Dot Square Bracket operator</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="check_conv_feols.html">check_conv_feols()</a></code> <code><a href="check_conv_feols.html">summary(<i>&lt;fixest_check_conv&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Check the fixed-effects convergence of a <code>feols</code> estimation</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sample_df.html">sample_df()</a></code> </p>
+        </td>
+        <td><p>Randomly draws observations from a data set</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="n_unik.html">n_unik()</a></code> <code><a href="n_unik.html">print(<i>&lt;vec_n_unik&gt;</i>)</a></code> <code><a href="n_unik.html">print(<i>&lt;list_n_unik&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Prints the number of unique elements in a data set</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="osize.html">osize()</a></code> <code><a href="osize.html">print(<i>&lt;osize&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Formatted object size</p></td>
+      </tr><tr>
         
         <td>
           <p><code><a href="did_means.html">did_means()</a></code> </p>

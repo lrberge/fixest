@@ -4,6 +4,9 @@
 \alias{etable}
 \alias{setFixest_etable}
 \alias{getFixest_etable}
+\alias{print.etable_tex}
+\alias{print.etable_df}
+\alias{log_etable}
 \alias{esttable}
 \alias{esttex}
 \title{Estimations table (export the results of multiples estimations to a DF or to Latex)}
@@ -16,47 +19,66 @@ etable(
   se = NULL,
   ssc = NULL,
   cluster = NULL,
-  .vcov,
+  .vcov = NULL,
   .vcov_args = NULL,
   digits = 4,
   digits.stats = 5,
   tex,
-  fitstat,
-  title,
+  fitstat = NULL,
+  title = NULL,
   coefstat = "se",
   ci = 0.95,
-  sdBelow = NULL,
-  keep,
-  drop,
-  order,
-  dict,
-  file,
+  se.row = NULL,
+  se.below = NULL,
+  keep = NULL,
+  drop = NULL,
+  order = NULL,
+  dict = TRUE,
+  file = NULL,
   replace = FALSE,
-  convergence,
-  signifCode,
-  label,
-  float,
-  subtitles = list("auto"),
+  convergence = NULL,
+  signif.code = NULL,
+  label = NULL,
+  float = NULL,
+  headers = list("auto"),
   fixef_sizes = FALSE,
   fixef_sizes.simplify = TRUE,
   keepFactors = TRUE,
-  family,
+  family = NULL,
   powerBelow = -5,
-  interaction.combine = " $\\\\times $ ",
+  interaction.combine = NULL,
+  interaction.order = NULL,
+  i.equal = NULL,
   depvar = TRUE,
   style.tex = NULL,
   style.df = NULL,
   notes = NULL,
   group = NULL,
-  extraline = NULL,
+  extralines = NULL,
   fixef.group = NULL,
   placement = "htbp",
   drop.section = NULL,
   poly_dict = c("", " square", " cube"),
   postprocess.tex = NULL,
   postprocess.df = NULL,
+  tpt = FALSE,
+  arraystretch = NULL,
+  adjustbox = NULL,
+  fontsize = NULL,
   fit_format = "__var__",
-  coef.just = NULL
+  coef.just = NULL,
+  tabular = "normal",
+  highlight = NULL,
+  coef.style = NULL,
+  meta = NULL,
+  meta.time = NULL,
+  meta.author = NULL,
+  meta.sys = NULL,
+  meta.call = NULL,
+  meta.comment = NULL,
+  view = FALSE,
+  export = NULL,
+  markdown = NULL
 )
 
 setFixest_etable(
@@ -65,34 +87,48 @@ setFixest_etable(
   fitstat,
   coefstat = c("se", "tstat", "confint"),
   ci = 0.95,
-  sdBelow = TRUE,
+  se.below = TRUE,
   keep,
   drop,
   order,
   dict,
-  signifCode,
   float,
   fixef_sizes = FALSE,
   fixef_sizes.simplify = TRUE,
   family,
   powerBelow = -5,
-  interaction.combine = " $\\\\times $ ",
+  interaction.order = NULL,
   depvar,
   style.tex = NULL,
   style.df = NULL,
   notes = NULL,
   group = NULL,
-  extraline = NULL,
+  extralines = NULL,
   fixef.group = NULL,
   placement = "htbp",
   drop.section = NULL,
+  view = FALSE,
+  markdown = NULL,
+  view.cache = FALSE,
   postprocess.tex = NULL,
   postprocess.df = NULL,
   fit_format = "__var__",
-  reset = FALSE
+  meta.time = NULL,
+  meta.author = NULL,
+  meta.sys = NULL,
+  meta.call = NULL,
+  meta.comment = NULL,
+  reset = FALSE,
+  save = FALSE
 )
 
 getFixest_etable()
+
+\method{print}{etable_tex}(x, ...)
+
+\method{print}{etable_df}(x, ...)
+
+log_etable(type = "pdflatex")
 
 esttable(
   ...,
@@ -102,39 +138,45 @@ esttable(
   se = NULL,
   ssc = NULL,
   cluster = NULL,
-  .vcov,
+  .vcov = NULL,
   .vcov_args = NULL,
   digits = 4,
   digits.stats = 5,
-  fitstat,
+  fitstat = NULL,
   coefstat = "se",
   ci = 0.95,
-  sdBelow = NULL,
-  keep,
-  drop,
-  order,
-  dict,
-  file,
+  se.row = NULL,
+  se.below = NULL,
+  keep = NULL,
+  drop = NULL,
+  order = NULL,
+  dict = TRUE,
+  file = NULL,
   replace = FALSE,
-  convergence,
-  signifCode,
-  subtitles = list("auto"),
+  convergence = NULL,
+  signif.code = NULL,
+  headers = list("auto"),
   fixef_sizes = FALSE,
   fixef_sizes.simplify = TRUE,
   keepFactors = TRUE,
-  family,
+  family = NULL,
   powerBelow = -5,
-  interaction.combine = " $\\\\times $ ",
+  interaction.combine = NULL,
+  interaction.order = NULL,
+  i.equal = NULL,
   depvar = TRUE,
   style.df = NULL,
   group = NULL,
-  extraline = NULL,
+  extralines = NULL,
   fixef.group = NULL,
   drop.section = NULL,
   poly_dict = c("", " square", " cube"),
   postprocess.df = NULL,
   fit_format = "__var__",
-  coef.just = NULL
+  coef.just = NULL,
+  highlight = NULL,
+  coef.style = NULL,
+  export = NULL
 )
 
 esttex(
@@ -145,43 +187,62 @@ esttex(
   se = NULL,
   ssc = NULL,
   cluster = NULL,
-  .vcov,
+  .vcov = NULL,
   .vcov_args = NULL,
   digits = 4,
   digits.stats = 5,
-  fitstat,
-  title,
+  fitstat = NULL,
+  title = NULL,
   coefstat = "se",
   ci = 0.95,
-  sdBelow = NULL,
-  keep,
-  drop,
-  order,
-  dict,
-  file,
+  se.row = NULL,
+  se.below = NULL,
+  keep = NULL,
+  drop = NULL,
+  order = NULL,
+  dict = TRUE,
+  file = NULL,
   replace = FALSE,
-  convergence,
-  signifCode,
-  label,
-  float,
-  subtitles = list("auto"),
+  convergence = NULL,
+  signif.code = NULL,
+  label = NULL,
+  float = NULL,
+  headers = list("auto"),
   fixef_sizes = FALSE,
   fixef_sizes.simplify = TRUE,
   keepFactors = TRUE,
-  family,
+  family = NULL,
   powerBelow = -5,
-  interaction.combine = " $\\\\times $ ",
+  interaction.combine = NULL,
+  interaction.order = NULL,
+  i.equal = NULL,
   depvar = TRUE,
   style.tex = NULL,
   notes = NULL,
   group = NULL,
-  extraline = NULL,
+  extralines = NULL,
   fixef.group = NULL,
   placement = "htbp",
   drop.section = NULL,
   poly_dict = c("", " square", " cube"),
   postprocess.tex = NULL,
-  fit_format = "__var__"
+  tpt = FALSE,
+  arraystretch = NULL,
+  adjustbox = NULL,
+  fontsize = NULL,
+  fit_format = "__var__",
+  tabular = "normal",
+  highlight = NULL,
+  coef.style = NULL,
+  meta = NULL,
+  meta.time = NULL,
+  meta.author = NULL,
+  meta.sys = NULL,
+  meta.call = NULL,
+  meta.comment = NULL,
+  view = FALSE,
+  export = NULL,
+  markdown = NULL
 )
 }
 \arguments{
@@ -217,7 +278,9 @@ esttex(
 
 \item{ci}{Level of the confidence interval, defaults to \code{0.95}. Only used if \code{coefstat = confint}.}
 
-\item{sdBelow}{Logical or \code{NULL} (default). Should the standard-errors be displayed below the coefficients? If \code{NULL}, then this is \code{TRUE} for Latex and \code{FALSE} otherwise.}
+\item{se.row}{Logical scalar, default is \code{NULL}. Whether should be displayed the row with the type of standard-error for each model. When \code{tex = FALSE}, the default is \code{TRUE}. When \code{tex = FALSE}, the row is showed only when there is a table-footer and the types of standard-errors differ across models.}
+
+\item{se.below}{Logical or \code{NULL} (default). Should the standard-errors be displayed below the coefficients? If \code{NULL}, then this is \code{TRUE} for Latex and \code{FALSE} otherwise.}
 
 \item{keep}{Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is kept). See details.}
 
@@ -225,7 +288,7 @@ esttex(
 
 \item{order}{Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument \code{dict}). Example: you have the following variables: \code{month1} to \code{month6}, then \code{x1} to \code{x5}, then \code{year1} to \code{year6}. If you want to display first the x's, then the years, then the months you could use: \code{order = c("x", "year")}. If the first character is an exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that does not contain \dQuote{Intercept} goes first).  See details.}
 
-\item{dict}{A named character vector or a logical scalar. It changes the original variable names to the ones contained in the \code{dict}ionary. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default, it is equal to \code{getFixest_dict()}, a default dictionary which can be set with \code{\link[fixest]{setFixest_dict}}. You can use \code{dict = FALSE} to disable it..}
+\item{dict}{A named character vector or a logical scalar. It changes the original variable names to the ones contained in the \code{dict}ionary. E.g. to change the variables named \code{a} and \code{b3} to (resp.) \dQuote{$log(a)$} and to \dQuote{$bonus^3$}, use \code{dict=c(a="$log(a)$",b3="$bonus^3$")}. By default, it is equal to \code{getFixest_dict()}, a default dictionary which can be set with \code{\link[fixest]{setFixest_dict}}. You can use \code{dict = FALSE} to disable it. By default \code{dict} modifies the entries in the global dictionary, to disable this behavior, use "reset" as the first element (ex: \code{dict=c("reset", mpg="Miles per gallon")}).}
 
 \item{file}{A character scalar. If provided, the Latex (or data frame) table will be saved in a file whose path is \code{file}. If you provide this argument, then a Latex table will be exported, to export a regular \code{data.frame}, use argument \code{tex = FALSE}.}
 
@@ -233,15 +296,15 @@ esttex(
 
 \item{convergence}{Logical, default is missing. Should the convergence state of the algorithm be displayed? By default, convergence information is displayed if at least one model did not converge.}
 
-\item{signifCode}{Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is \code{c("***"=0.01, "**"=0.05, "*"=0.10)} for a Latex table and \code{c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)} for a data.frame (to conform with R's default). To suppress the significance codes, use \code{signifCode=NA} or \code{signifCode=NULL}. Can also be equal to \code{"letters"}, then the default becomes \code{c("a"=0.01, "b"=0.05, "c"=0.10)}.}
+\item{signif.code}{Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is \code{c("***"=0.01, "**"=0.05, "*"=0.10)} for a Latex table and \code{c("***"=0.001, "**"=0.01, "*"=0.05, "."=0.10)} for a data.frame (to conform with R's default). To suppress the significance codes, use \code{signif.code=NA} or \code{signif.code=NULL}. Can also be equal to \code{"letters"}, then the default becomes \code{c("a"=0.01, "b"=0.05, "c"=0.10)}.}
 
 \item{label}{(Tex only.) Character scalar. The label of the Latex table.}
 
 \item{float}{(Tex only.) Logical. By default, if the argument \code{title} or \code{label} is provided, it is set to \code{TRUE}. Otherwise, it is set to \code{FALSE}.}
 
-\item{subtitles}{Character vector or list. The elements should be of length 1 or of the same length as the number of models. If a list, the names of the list will be displayed on the leftmost column. By default it is equal to \code{list("auto")} which means that if the object is a split sample estimation, the sample will be automatically added as a sub-title.}
+\item{headers}{Character vector or list. Adds one or more header lines in the table. A header line can be represented by a character vector or a named list of numbers where the names are the cell values and the numbers are the span. Example: \code{headers=list("M"=2, "F"=3)} will create a row with 2 times "M" and three time "F" (this is identical to \code{headers=rep(c("M", "F"), c(2, 3))}). You can stack header lines within a list, in that case the list names will be displayed in the leftmost cell. Example: \code{headers=list(Gender=list("M"=2, "F"=3), Country="US"} will create two header lines. When \code{tex = TRUE}, you can add a rule to separate groups by using \code{":_:"} somewhere in the row name (ex: \code{headers=list(":_:Gender"=list("M"=2, "F"=3))}. You can monitor the placement by inserting a special character in the row name: "^" means at the top, "-" means in the middle (default) and "_" means at the bottom. Example: \code{headers=list("_Country"="US")} will add the country row as the very last header row (after the model row). Finally, you can use the special value "auto" to include automatic headers when the data contains split sample estimations. By default it is equal to \code{list("auto")}. You can use \code{.()} instead of \code{list()}.}
 
-\item{fixef_sizes}{(Tex only.) Logical, default is \code{FALSE}. If \code{TRUE} and fixed-effects were used in the models, then the number of "individuals" per fixed-effect dimension is also displayed.}
+\item{fixef_sizes}{(Tex only.) Logical, default is \code{FALSE}. If \code{TRUE} and fixed-effects were used in the models, then the number of "units" per fixed-effect dimension is also displayed.}
 
 \item{fixef_sizes.simplify}{Logical, default is \code{TRUE}. Only used if \code{fixef_sizes = TRUE}. If \code{TRUE}, the fixed-effects sizes will be displayed in parentheses instead of in a separate line if there is no ambiguity (i.e. if the size is constant across models).}
 
@@ -251,7 +314,11 @@ esttex(
 
 \item{powerBelow}{(Tex only.) Integer, default is -5. A coefficient whose value is below \code{10**(powerBelow+1)} is written with a power in Latex. For example \code{0.0000456} would be written \code{4.56$\\times 10^{-5}$} by default. Setting \code{powerBelow = -6} would lead to \code{0.00004} in Latex.}
 
-\item{interaction.combine}{(Tex only.) Character scalar, defaults to \code{" $\\times$ "}. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind $\\times$ Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.}
+\item{interaction.combine}{Character scalar, defaults to \code{" $\\times$ "} for Tex and to \code{" = "} otherwise. When the estimation contains interactions, then the variables names (after aliasing) are combined with this argument. For example: if \code{dict = c(x1="Wind", x2="Rain")} and you have the following interaction \code{x1:x2}, then it will be renamed (by default) \code{Wind $\\times$ Rain} -- using \code{interaction.combine = "*"} would lead to \code{Wind*Rain}.}
+
+\item{interaction.order}{Character vector of regular expressions. Only affects variables that are interacted like x1 and x2 in \code{feols(y ~ x1*x2, data)}. You can change the order in which the interacted variables are displayed: e.g. \code{interaction.order = "x2"} would lead to "x1 x x2" instead of "x1 x x2". Please look at the argument 'order' and the dedicated section in the help page for more information.}
+
+\item{i.equal}{Character scalar, defaults to \code{" $=$ "} when \code{tex = TRUE} and \code{" = "} otherwise. Only affects factor variables created with the function \code{\link[fixest]{i}}, tells how the variable should be linked to its value. For example if you have the \code{Species} factor from the \code{iris} data set, by default the display of the variable is \code{Species = Setosa}, etc. If \code{i.equal = ": "} the display becomes \code{Species: Setosa}.}
 
 \item{depvar}{Logical, default is \code{TRUE}. Whether a first line containing the dependent variables should be shown.}
 
@@ -259,13 +326,13 @@ esttex(
 
 \item{style.df}{An object created by the function \code{\link[fixest]{style.df}. }It represents the style of the data frame returned (if \code{tex = FALSE}), see the documentation of \code{\link[fixest]{style.df}}.}
 
-\item{notes}{(Tex only.) Character vector. If provided, a \code{"notes"} section will be added at the end right after the end of the table, containing the text of this argument. Note that if it is a vector, it will be collapsed with new lines.}
+\item{notes}{(Tex only.) Character vector. If provided, a \code{"notes"} section will be added at the end right after the end of the table, containing the text of this argument. If it is a vector, it will be collapsed with new lines. If \code{tpt = TRUE}, the behavior is different: each element of the vector is an item. If the first element of the vector starts with \code{"@"}, then it will be included verbatim, and in case of \code{tpt = TRUE}, right before the first item. If that element is provided, it will replace the value defined in \code{style.tex(notes.intro)} or \code{style.tex(notes.tpt.intro)}.}
 
-\item{group}{A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument \code{drop}) and \code{TRUE} or \code{FALSE} will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: \code{group=list("Controls: personal traits"=c("gender", "height", "weight"))} will create an new line with \code{"Controls: personal traits"} in the leftmost cell, all three variables gender, height and weight are discarded, \code{TRUE} appearing in each model containing at least one of the three variables (the style of \code{TRUE}/\code{FALSE} is governed by the argument \code{yesNo}). You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: 1st, \code{"_"}: last, row; 2) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section. For example: \code{group=list("_Controls"=stuff)} will place the line last in the stats sections, and using \code{group=list("^_Controls"=stuff)} will make the row appear first in the stats section. For details, see the dedicated section.}
+\item{group}{A list. The list elements should be vectors of regular expressions. For each elements of this list: A new line in the table is created, all variables that are matched by the regular expressions are discarded (same effect as the argument \code{drop}) and \code{TRUE} or \code{FALSE} will appear in the model cell, depending on whether some of the previous variables were found in the model. Example: \code{group=list("Controls: personal traits"=c("gender", "height", "weight"))} will create an new line with \code{"Controls: personal traits"} in the leftmost cell, all three variables gender, height and weight are discarded, \code{TRUE} appearing in each model containing at least one of the three variables (the style of \code{TRUE}/\code{FALSE} is governed by the argument \code{yesNo}). You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section; 2) \code{"^"}: 1st, \code{"_"}: last, row. For example: \code{group=list("_^Controls"=stuff)} will place the line at the top of the 'stats' section, and using \code{group=list("^_Controls"=stuff)} will make the row appear at the bottom of the coefficients section. For details, see the dedicated section.}
 
-\item{extraline}{A list or a one sided formula. The list elements should be either a logical scalar,a vector of the same length as the number of models, or a function. This argument can be many things, please have a look at the dedicated help section; a simplified description follows. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extraline=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: 1st, \code{"_"}: last, row; 2) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section. For example: \code{group=list("_Controls"=stuff)} will place the line last in the stats sections, and using \code{group=list("^_Controls"=stuff)} will make the row appear first in the stats section. For details, see the dedicated section.}
+\item{extralines}{A vector, a list or a one sided formula. The list elements should be either a vector representing the value of each cell, a list of the form \code{list("item1" = #item1, "item2" = #item2, etc)}, or a function. This argument can be many things, please have a look at the dedicated help section; a simplified description follows. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extralines=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section; 2) \code{"^"}: 1st, \code{"_"}: last, row. For example: \code{extralines=list("__Controls"=stuff)} will place the line at the bottom of the stats section, and using \code{extralines=list("^^Controls"=stuff)} will make the row appear at the top of the 'coefficients' section. For details, see the dedicated section. You can use \code{.()} instead of \code{list()}.}
 
-\item{fixef.group}{Logical scalar or list (default is \code{NULL}). If equal to \code{TRUE}, then all fixed-effects always appearing jointly in models will be grouped in one row. If a list, its elements must be character vectors of regular expressions and the list names will be the row names. For ex. \code{fixef.group=list("Dates fixed-effects"="Month|Day")} will remove the \code{"Month"} and \code{"Day"} fixed effects from the display and replace them with a single row named "Dates fixed-effects". You can monitor the placement of the new row with the special characters telling where to place the row within a section: \code{"^"} (first), or \code{"_"} (last); and in which section it should appear: \code{"^"} (coef.), \code{"-"} (fixed-effects), or \code{"_"} (stat.). These two special characters must appear first in the row names. Please see the dedicated section.}
+\item{fixef.group}{Logical scalar or list (default is \code{NULL}). If equal to \code{TRUE}, then all fixed-effects always appearing jointly in models will be grouped in one row. If a list, its elements must be character vectors of regular expressions and the list names will be the row names. For ex. \code{fixef.group=list("Dates fixed-effects"="Month|Day")} will remove the \code{"Month"} and \code{"Day"} fixed effects from the display and replace them with a single row named "Dates fixed-effects". You can monitor the placement of the new row with the special characters telling where to place the row within a section: \code{"^"} (first), or \code{"_"} (last); and in which section it should appear: \code{"^"} (coef.), \code{"-"} (fixed-effects), or \code{"_"} (stat.). These two special characters must appear first in the row names. Please see the dedicated section}
 
 \item{placement}{(Tex only.) Character string giving the position of the float in Latex. Default is "htbp". It must consist of only the characters 'h', 't', 'b', 'p', 'H' and '!'. Reminder: h: here; t: top; b: bottom; p: float page; H: definitely here; !: prevents Latex to look for other positions. Note that it can be equal to the empty string (and you'll get the default placement).}
 
@@ -277,11 +344,53 @@ esttex(
 
 \item{postprocess.df}{A function that will postprocess.tex the resulting data.frame. Only when \code{tex = FALSE}. By default it is equal to \code{NULL}, meaning that there is no postprocessing. When \code{tex = TRUE}, see the argument \code{postprocess.tex}.}
 
+\item{tpt}{(Tex only.) Logical scalar, default is FALSE. Whether to use the \code{threeparttable} environment. If so, the \code{notes} will be integrated into the \code{tablenotes} environment.}
+
+\item{arraystretch}{(Tex only.) A numeric scalar, default is \code{NULL}. If provided, the command \code{\\renewcommand*{\\arraystretch}{x}} is inserted, replacing \code{x} by the value of \code{arraystretch}. The changes are specific to the current table and do not affect the rest of the document.}
+
+\item{adjustbox}{(Tex only.) A logical, numeric or character scalar, default is \code{NULL}. If not \code{NULL}, the table is inserted within the \code{adjustbox} environment. By default the options are \code{width = 1\\textwidth, center} (if \code{TRUE}). A numeric value changes the value before \code{\\textwidth}. You can also add a character of the form \code{"x tw"} or \code{"x th"} with \code{x} a number and where tw (th) stands for text-width (text-height). Finally any other character value is passed verbatim as an \code{adjustbox} option.}
+
+\item{fontsize}{(Tex only.) A character scalar, default is \code{NULL}. Can be equal to \code{tiny}, \code{scriptsize}, \code{footnotesize}, \code{small}, \code{normalsize}, \code{large}, or \code{Large}. The change affect the table only (and not the rest of the document).}
+
 \item{fit_format}{Character scalar, default is \code{"__var__"}. Only used in the presence of IVs. By default the endogenous regressors are named \code{fit_varname} in the second stage. The format of the endogenous regressor to appear in the table is governed by \code{fit_format}. For instance, by default, the prefix \code{"fit_"} is removed, leading to only \code{varname} to appear. If \code{fit_format = "$\\\\hat{__var__}$"}, then \code{"$\\hat{varname}$"} will appear in the table.}
 
-\item{coef.just}{(DF only.) Either \code{"."}, \code{"("}, \code{"l"}, \code{"c"} or \code{"r"}, default is \code{NULL}. How the coefficients should be justified. If \code{NULL} then they are right aligned if \code{sdBelow = FALSE} and aligned to the dot if \code{sdBelow = TRUE}. The keywords stand respectively for dot-, parenthesis-, left-, center- and right-aligned.}
+\item{coef.just}{(DF only.) Either \code{"."}, \code{"("}, \code{"l"}, \code{"c"} or \code{"r"}, default is \code{NULL}. How the coefficients should be justified. If \code{NULL} then they are right aligned if \code{se.below = FALSE} and aligned to the dot if \code{se.below = TRUE}. The keywords stand respectively for dot-, parenthesis-, left-, center- and right-aligned.}
+
+\item{tabular}{(Tex only.) Character scalar equal to "normal" (default), "*" or "X". Represents the type of tabular environment to use: either \code{tabular}, \code{tabular*} or \code{tabularx}.}
+
+\item{highlight}{List containing coefficients to highlight. Highlighting is of the form \code{.("options1" = "coefs1", "options2" = "coefs2", etc)}.
+The coefficients to be highlighted can be written in three forms: 1) row, eg \code{"x1"} will highlight the full row of the variable \code{x1}; 2) cells, use \code{'@'} after the coefficient name to give the column, it accepts ranges, eg \code{"x1@2, 4-6, 8"} will highlight only the columns 2, 4, 5, 6, and 8 of the variable \code{x1}; 3) range, by giving the top-left and bottom-right values separated with a semi-colon, eg \code{"x1@2 ; x3@5"} will highlight from the column 2 of \code{x1} to the 5th column of \code{x3}. Coefficient names are partially matched, use a \code{'\%'} first to refer to the original name (before dictionary) and use \code{'@'} first to use a regular expression. You can add a vector of row/cell/range.
+The options are a comma-separated list of items. By default the highlighting is done with a frame (a thick box) around the coefficient, use \code{'rowcol'} to highlight with a row color instead. Here are the other options: \code{'se'} to highlight the standard-errors too; \code{'square'} to have a square box (instead of rounded); \code{'thick1'} to \code{'thick6'} to monitor the width of the box; \code{'sep0'} to \code{'sep9'} to monitor the inner spacing. Finally the remaining option is the color: simply add an R color (it must be a valid R color!). You can use \code{"color!alpha"} with "alpha" a number between 0 to 100 to change the alpha channel of the color.}
+
+\item{coef.style}{Named list containing styles to be applied to the coefficients. It must be of the form \code{.("style1" = "coefs1", "style2" = "coefs2", etc)}. The style must contain the string \code{":coef:"} (or \code{":coef_se:"} to style both the coefficient and its standard-error). The string \code{:coef:} will be replaced verbatim by the coefficient value. For example use \code{"\\textbf{:coef:}"} to put the coefficient in bold. Note that markdown markup is enabled so \code{"**:coef:**"} would also put it in bold. The coefficients to be styled can be written in three forms: 1) row, eg \code{"x1"} will style the full row of the variable \code{x1}; 2) cells, use \code{'@'} after the coefficient name to give the column, it accepts ranges, eg \code{"x1@2, 4-6, 8"} will style only the columns 2, 4, 5, 6, and 8 of the variable \code{x1}; 3) range, by giving the top-left and bottom-right values separated with a semi-colon, eg \code{"x1@2 ; x3@5"} will style from the column 2 of \code{x1} to the 5th column of \code{x3}. Coefficient names are partially matched, use a \code{'\%'} first to refer to the original name (before dictionary) and use \code{'@'} first to use a regular expression. You can add a vector of row/cell/range.}
+
+\item{meta}{(Tex only.) A one-sided formula that shall contain the following elements: date or time, sys, author, comment and call. Default is \code{NULL}. This argument is a shortcut to controlling the meta information that can be displayed in comments before the table. Typically if the element is in the formula, it means that the argument will be equal to \code{TRUE}. Example: \code{meta = ~time+call} is equivalent to \code{meta.time = TRUE} and \code{meta.call = TRUE}. The "author" and "comment" elements are a bit special. Using \code{meta = ~author("Mark")} is equivalent to \code{meta.author = "Mark"} while \code{meta=~author} is equiv. to \code{meta.author = TRUE}. The "comment" must be used with a character string inside: \code{meta = ~comment("this is a comment")}. The order in the formula controls the order of appearance of the meta elements. It also has precedence over the \code{meta.XX} arguments.}
+
+\item{meta.time}{(Tex only.) Either a logical scalar (default is \code{FALSE}) or "time" or "date". Whether to include the time (if \code{TRUE} or "time") or the date (if "date") of creation of the table in a comment right before the table.}
+
+\item{meta.author}{(Tex only.) A logical scalar (default is \code{FALSE}) or a character vector. If \code{TRUE} then the identity of the author (deduced from the system user in \code{Sys.info()}) is inserted in a comment right before the table. If a character vector, then it should contain author names that will be inserted as comments before the table, prefixed with \code{"Created by:"}. For free-form comments see the argument \code{meta.comment}.}
+
+\item{meta.sys}{(Tex only.) A logical scalar, default is \code{FALSE}. Whether to include system information (from \code{Sys.info()}) in a comment right before the table.}
+
+\item{meta.call}{(Tex only.) Logical scalar, default is \code{FALSE}. If \code{TRUE} then the call to the function is inserted right before the table in a comment.}
+
+\item{meta.comment}{(Tex only.) A character vector containing free-form comments to be inserted right before the table.}
+
+\item{view}{Logical, default is \code{FALSE}. If \code{TRUE}, then the table generated in Latex by \code{etable} and then is displayed in the viewer pane. Note that for this option to work you need i) pdflatex, ii) imagemagick and iii) ghostscript. All three software must be installed and on the path.}
+
+\item{export}{Character scalar giving the path to a PNG file to be created, default is \code{NULL}. If provided, the Latex table will be converted to PNG and copied to the \code{export} location. Note that for this option to work you need a working distribution of \code{pdflatex}, \code{imagemagick} and \code{ghostscript}.}
+
+\item{markdown}{Character scalar giving the location of a directory, or a logical scalar. Default is \code{NULL}. This argument only works in Rmarkdown documents, when knitting the document. If provided: two behaviors depending on context. A) if the output document is Latex, the table is exported in Latex. B) if the output document is not Latex, the table will be exported to PNG at the desired location and inserted in the document via a markdown link. If equal to \code{TRUE}, the default location of the PNGs is a temporary folder for \code{R > 4.0.0}, or to \code{"images/etable/"} for earlier versions.}
+
+\item{view.cache}{Logical, default is \code{FALSE}. Only used when \code{view = TRUE}. Whether the PNGs of the tables should be cached.}
 
 \item{reset}{(\code{setFixest_etable} only.) Logical, default is \code{FALSE}. If \code{TRUE}, this will reset all the default values that were already set by the user in previous calls.}
+
+\item{save}{Either a logical or equal to \code{"reset"}. Default is \code{FALSE}. If \code{TRUE} then the value is set permanently at the project level, this means that if you restart R, you will still obtain the previously saved defaults. This is done by writing in the \code{".Renviron"} file, located in the project's working directory, hence we must have write permission there for this to work, and only works with Rstudio. If equal to "reset", the default at the project level is erased. Since there is writing in a file involved, permission is asked to the user.}
+
+\item{x}{An object returned by \code{etable}.}
+
+\item{type}{Character scalar equal to 'pdflatex' (default), 'magick' or 'tex'. Which log file to report; if 'tex', the full source code of the tex file is returned.}
 }
 \value{
 If \code{tex = TRUE}, the lines composing the Latex table are returned invisibly while the table is directly prompted on the console.
@@ -334,26 +443,30 @@ You can use the special character "\%" (percentage) to make reference to the ori
 The argument \code{order} takes in a vector of regular expressions, the order will follow the elements of this vector. The vector gives a list of priorities, on the left the elements with highest priority. For example, order = c("Wind", "!Inter", "!Temp") would give highest priorities to the variables containing "Wind" (which would then appear first), second highest priority is the variables not containing "Inter", last, with lowest priority, the variables not containing "Temp". If you had the following variables: (Intercept), Temp:Wind, Wind, Temp you would end up with the following order: Wind, Temp:Wind, Temp, (Intercept).
 }
 
-\section{The argument \code{extraline}}{
+\section{The argument \code{extralines}}{
 
 
-The argument \code{extraline} adds well... extra lines to the table. It accepts either a list, or a one-sided formula.
+The argument \code{extralines} adds well... extra lines to the table. It accepts either a list, or a one-sided formula.
 
-If a one-sided formula: then the elements in the formula must represent either \code{extraline} macros, either fit statistics (i.e. valid types of the function \code{\link[fixest]{fitstat}}). One new line will be added for each element of the formula, they will be appended right after the coefficients. To register \code{extraline} macros, you must first register them in \code{\link[fixest]{extraline_register}}.
+For each line, you can define the values taken by each cell using 4 different ways: a) a vector, b) a list, c) a function, and d) a formula.
 
-If a list: then the elements must be either: a) a logical scalar, b) a vector of the same length as the number of models, c) a function to be applied to each model and which returns a scalar, or d) a one-sided formula of \code{extraline} macros (registered with \code{\link[fixest]{extraline_register}}) or valid \code{\link[fixest]{fitstat}} types.
+If a vector, it should represent the values taken by each cell. Note that if the length of the vector is smaller than the number of models, its values are recycled across models, but the length of the vector is required to be a divisor of the number of models.
 
-When a list, the elements of type a), b) and c) must have a name! Example: \code{extraline = list("Controls" = TRUE)} is good, \code{extraline = list(TRUE)} is bad. The name for element of type d) is optional. Example: \code{extraline = list("^^My F-stat" = ~f)} will add the row named \code{"My F-stat"} on top of the coefficients (for the placement, see the dedicated section), while \code{extraline = list(~f)} will add the F-stat row with its default name (\code{"F-test"}) at its default placement (below the coefficients).
+If a list, it should be of the form \code{list("item1" = #item1, "item2" = #item2, etc)}. For example \code{list("A"=2, "B"=3)} leads to \code{c("A", "A", "B", "B", "B")}. Note that if the number of items is 1, you don't need to add \code{= 1}. For example \code{list("A"=2, "B")} is valid and leads to \code{c("A", "A", "B"}. As for the vector the values are recycled if necessary.
 
-You can combine elements in the list, so that the following \code{extraline = list(~r2, "Controls" = TRUE, ~f+ivf)} is valid.
+If a function, it will be applied to each model and should return a scalar (\code{NA} values returned are accepted).
+
+If a formula, it must be one-sided and the elements in the formula must represent either \code{extralines} macros, either fit statistics (i.e. valid types of the function \code{\link[fixest]{fitstat}}). One new line will be added for each element of the formula. To register \code{extralines} macros, you must first register them in \code{\link[fixest]{extralines_register}}.
+
+Finally, you can combine as many lines as wished by nesting them in a list. The names of the nesting list are the row titles (values in the leftmost cell). For example \code{extralines = list(~r2, Controls = TRUE, Group = list("A"=2, "B"))} will add three lines, the titles of which are "R2", "Controls" and "Group".
 }
 
 \section{Controlling the placement of extra lines}{
 
 
-The arguments \code{group}, \code{extraline} and \code{fixef.group} allow to add customized lines in the table. They can be defined via a list where the list name will be the row name. By default, the placement of the extra line is right after the coefficients (except for \code{fixef.group}, covered in the last paragraph). For instance, \code{group = list("Controls" = "x[[:digit:]]")} will create a line right after the coefficients telling which models contain the control variables.
+The arguments \code{group}, \code{extralines} and \code{fixef.group} allow to add customized lines in the table. They can be defined via a list where the list name will be the row name. By default, the placement of the extra line is right after the coefficients (except for \code{fixef.group}, covered in the last paragraph). For instance, \code{group = list("Controls" = "x[[:digit:]]")} will create a line right after the coefficients telling which models contain the control variables.
 
-But the placement can be customized. The previous example (of the controls) will be used for illustration (the mechanism for \code{extraline} and \code{fixef.group} is identical).
+But the placement can be customized. The previous example (of the controls) will be used for illustration (the mechanism for \code{extralines} and \code{fixef.group} is identical).
 
 The row names accept 2 special characters at the very start. The first character tells in which section the line should appear: it can be equal to \code{"^"}, \code{"-"}, or \code{"_"}, meaning respectively the coefficients, the fixed-effects and the statistics section (which typically appear at the top, mid and bottom of the table). The second one governs the placement of the new line within the section: it can be equal to \code{"^"}, meaning first line, or \code{"_"}, meaning last line.
 
@@ -364,12 +477,27 @@ The second character is optional, the default placement being in the bottom. Thi
 The placement in \code{fixef.group} is defined similarly, only the default placement is different. Its default placement is at the top of the fixed-effects section.
 }
 
+\section{Escaping special Latex characters}{
+
+
+By default on all instances (with the notable exception of the elements of \code{\link[fixest]{style.tex}}) special Latex characters are escaped. This means that \code{title="Exports in million $."} will be exported as "Exports in million \\$.": the dollar sign will be escaped. This is true for the following characters: &, $, \%, _, ^ and #.
+
+Note, importantly, that equations are NOT escaped. This means that \code{title="Functional form $a_i \\times x^b$, variation in \%."} will be displayed as: \code{"Functional form $a_i \\times x^b$, variation in \\\%."}: only the last percentage will be escaped.
+
+If for some reason you don't want the escaping to take place, the arguments \code{headers} and \code{extralines} are the only ones allowing that. To disable escaping, add the special token ":tex:" in the row names. Example: in \code{headers=list(":tex:Row title"="weird & & \%\\n tex stuff\\\\")}, the elements will be displayed verbatim. Of course, since it can easily ruin your table, it is only recommended to super users.
+}
+
+\section{Markdown markup}{
+
+
+Within anything that is Latex-escaped (see previous section), you can use a markdown-style markup to put the text in italic and/or bold. Use \code{*text*}, \code{**text**} or \code{***text***} to put some text in, respectively, italic (with \code{\\textit}), bold (with \code{\\textbf}) and italic-bold.
+}
+
 \examples{
 
-aq = airquality
 
-est1 = feols(Ozone ~ i(Month) / Wind + Temp, data = aq)
-est2 = feols(Ozone ~ i(Month, Wind) + Temp | Month, data = aq)
+est1 = feols(Ozone ~ i(Month) / Wind + Temp, data = airquality)
+est2 = feols(Ozone ~ i(Month, Wind) + Temp | Month, data = airquality)
 
 # Displaying the two results in a single table
 etable(est1, est2)
@@ -411,10 +539,10 @@ dict = c("Month::5"="May", "Month::6"="Jun", "Month::7"="Jul",
 etable(est1, est2, dict = dict, keep = "\%Month")
 
 #
-# signifCode
+# signif.code
 #
 
-etable(est1, est2, signifCode = c(" A"=0.01, " B"=0.05, " C"=0.1, " D"=0.15, " F"=1))
+etable(est1, est2, signif.code = c(" A"=0.01, " B"=0.05, " C"=0.1, " D"=0.15, " F"=1))
 
 #
 # Using the argument style to customize Latex exports
@@ -437,30 +565,33 @@ etable(est1, est2, dict = dict, tex = TRUE, style.tex = style_lines)
 etable(est1, est2, dict = dict, tex = TRUE, style.tex = style.tex("aer"))
 
 #
-# Group and extraline
+# Group and extralines
 #
 
 # Sometimes it's useful to group control variables into a single line
 # You can achieve that with the group argument
 
 setFixest_fml(..ctrl = ~ poly(Wind, 2) + poly(Temp, 2))
-est_c0 = feols(Ozone ~ Solar.R, data = aq)
-est_c1 = feols(Ozone ~ Solar.R + ..ctrl, data = aq)
-est_c2 = feols(Ozone ~ Solar.R + Solar.R^2 + ..ctrl, data = aq)
+est_c0 = feols(Ozone ~ Solar.R, data = airquality)
+est_c1 = feols(Ozone ~ Solar.R + ..ctrl, data = airquality)
+est_c2 = feols(Ozone ~ Solar.R + Solar.R^2 + ..ctrl, data = airquality)
 
 etable(est_c0, est_c1, est_c2, group = list(Controls = "poly"))
 
 # 'group' here does the same as drop = "poly", but adds an extra line
 # with TRUE/FALSE where the variables were found
 
-# 'extraline' adds an extra line, where you can add the value for each model
-est_all  = feols(Ozone ~ Solar.R + Temp + Wind, data = aq)
-est_sub1 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month \%in\% 5:6, ])
-est_sub2 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month \%in\% 7:8, ])
-est_sub3 = feols(Ozone ~ Solar.R + Temp + Wind, data = aq[aq$Month == 9, ])
+# 'extralines' adds an extra line, where you can add the value for each model
+est_all  = feols(Ozone ~ Solar.R + Temp + Wind, data = airquality)
+est_sub1 = feols(Ozone ~ Solar.R + Temp + Wind, data = airquality,
+                 subset = ~ Month \%in\% 5:6)
+est_sub2 = feols(Ozone ~ Solar.R + Temp + Wind, data = airquality,
+                 subset = ~ Month \%in\% 7:8)
+est_sub3 = feols(Ozone ~ Solar.R + Temp + Wind, data = airquality,
+                 subset = ~ Month == 9)
 
 etable(est_all, est_sub1, est_sub2, est_sub3,
-       extraline = list("Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
+       extralines = list("Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
 
 # You can monitor the placement of the new lines with two special characters
 # at the beginning of the row name.
@@ -478,7 +609,56 @@ etable(est_all, est_sub1, est_sub2, est_sub3,
 # Examples
 etable(est_c0, est_c1, est_c2, group = list("_Controls" = "poly"))
 etable(est_all, est_sub1, est_sub2, est_sub3,
-       extraline = list("^^Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
+       extralines = list("^^Sub-sample" = c("All", "May-June", "Jul.-Aug.", "Sept.")))
+
+
+#
+# headers
+#
+
+
+# You can add header lines with 'headers'
+# These lines will appear at the top of the table
+
+# first, 3 estimations
+est_header = feols(c(Ozone, Solar.R, Wind) ~  poly(Temp, 2), airquality)
+
+# header => vector: adds a line w/t title
+etable(est_header, headers = c("A", "A", "B"))
+
+# header => list: identical way to do the previous header
+# The form is: list(item1 = #item1, item2 = #item2,  etc)
+etable(est_header, headers = list("A" = 2, "B" = 1))
+
+# Adding a title +
+# when an element is to be repeated only once, you can avoid the "= 1":
+etable(est_header, headers = list(Group = list("A" = 2, "B")))
+
+# To change the placement, add as first character:
+# - "^" => top
+# - "-" => mid (default)
+# - "_" => bottom
+# Note that "mid" and "top" are only distinguished when tex = TRUE
+
+# Placing the new header line at the bottom
+etable(est_header, headers = list("_Group" = c("A", "A", "B"),
+                                  "^Currency" = list("US $" = 2, "CA $" = 1)))
+
+
+# In Latex, you can add "grouped underlines" (cmidrule from the booktabs package)
+# by adding ":_:" in the title:
+etable(est_header, tex = TRUE,
+       headers = list("^:_:Group" = c("A", "A", "B")))
+
+#
+# extralines and headers: .() for list()
+#
+
+# In the two arguments extralines and headers, .() can be used for list()
+# For example:
+etable(est_header, headers = .("^Currency" = .("US $" = 2, "CA $" = 1)))
+
+
 
 #
 # fixef.group
@@ -486,9 +666,9 @@ etable(est_all, est_sub1, est_sub2, est_sub3,
 
 # You can group the fixed-effects line with fixef.group
 
-est_0fe = feols(Ozone ~ Solar.R + Temp + Wind, aq)
-est_1fe = feols(Ozone ~ Solar.R + Temp + Wind | Month, aq)
-est_2fe = feols(Ozone ~ Solar.R + Temp + Wind | Month + Day, aq)
+est_0fe = feols(Ozone ~ Solar.R + Temp + Wind, airquality)
+est_1fe = feols(Ozone ~ Solar.R + Temp + Wind | Month, airquality)
+est_2fe = feols(Ozone ~ Solar.R + Temp + Wind | Month + Day, airquality)
 
 # A) automatic way => simply use fixef.group = TRUE
 
@@ -508,7 +688,7 @@ etable(est_0fe, est_2fe, fixef.group = list("Dates" = "Month|Day"))
 
 etable(est_0fe, est_1fe, est_2fe, fixef.group = list("Dates" = "Month|Day"))
 
-# Using customized placement => as with 'group' and 'extraline',
+# Using customized placement => as with 'group' and 'extralines',
 # the user can control the placement of the new line.
 # See the previous 'group' examples and the dedicated section in the help.
 
@@ -550,7 +730,7 @@ etable(est1, est2, fitstat = ~ ll + .)
 # Computing a different SE for each model
 #
 
-est = feols(Ozone ~ Solar.R + Wind + Temp, data = aq)
+est = feols(Ozone ~ Solar.R + Wind + Temp, data = airquality)
 
 #
 # Method 1: use summary
@@ -565,7 +745,7 @@ etable(list(s1, s2, s3, s4))
 #
 # Method 2: using a list in the argument 'vcov'
 
-est_bis = feols(Ozone ~ Solar.R + Wind + Temp | Month, data = aq)
+est_bis = feols(Ozone ~ Solar.R + Wind + Temp | Month, data = airquality)
 etable(est, est_bis, vcov = list("hetero", ~ Month))
 
 # When you have only one model, this model is replicated
@@ -586,6 +766,21 @@ etable(est, est_bis, vcov = list("each", "iid", ~ Month, ~ Day))
 
 # times
 etable(est, est_bis, vcov = list("times", "iid", ~ Month, ~ Day))
+
+#
+# Notes and markup
+#
+
+# Notes can be also be set in a dictionary
+# You can use markdown markup to put text into italic/bold
+
+dict = c("note 1" = "*Notes:* This data is not really random.",
+         "source 1" = "**Source:** the internet?")
+
+est = feols(Ozone ~ csw(Solar.R, Wind, Temp), data = airquality)
+
+etable(est, dict = dict, tex = TRUE, notes = c("note 1", "source 1"))
+
 
 
 }

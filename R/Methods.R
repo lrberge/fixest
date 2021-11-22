@@ -203,6 +203,7 @@ hatvalues.fixest = function(model, ...){
 #'
 #' @examples
 #'
+#' data(iris)
 #' est = feols(Petal.Length ~ Petal.Width + Sepal.Width, iris)
 #' head(estfun(est))
 #'
