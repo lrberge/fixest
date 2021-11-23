@@ -8873,14 +8873,18 @@ insert_in_between = function(x, y){
     res
 }
 
-str_trim = function(x, n){
+str_trim = function(x, n_first = 0, n_last = 0){
     # positive values: first
     # negative values: last
-    if(n > 0){
-        substr(x, 1 + n, nchar(x))
-    } else {
-        substr(x, 1, nchar(x) + n)
+
+    if(is.character(n_first)){
+        n_first = nchar(n_first)
+    } else if(n_first < 0){
+        n_last = -n_first
+        n_first = 0
     }
+
+    res = substr(x, 1 + n_first, nchar(x) - n_last)
 }
 
 str_split = function(x, split){

@@ -7,8 +7,28 @@ print.dsb = function(x, ...){
 
 
 
-dsb = function(..., frame = parent.frame(), sep = "", concat = FALSE, nest = TRUE){
-    check_arg(concat, nest, "logical scalar")
+#' Simple and powerful string manipulation with the dot square bracket operator
+#'
+#'
+#'
+#' @param ... Character scalars that will be collapsed with the argument \code{sep}. You can use \code{".[x]"} within each character string to insert the value of \code{x} in the string. You can add string operations in each \code{".[]"} instance with the syntax \code{"'arg'op ? x"} (resp. \code{"'arg'op ! x"}) to apply the operation \code{'op'} with the argument \code{'arg'} to \code{x} (resp. the verbatim of \code{x}). Otherwise, what to say? Ah, nesting is enabled, and since there's over 30 operators, it's bit complicated to sort you out in this small space. But type \code{dsb("--help")} to prompt an (almost) extensive help.
+#' @param frame An environment used to evaluate the variables in \code{".[]"}.
+#' @param sep Character scalar, default is \code{""}. It is used to collapse all the elements in \code{...}.
+#' @param vectorize Logical, default is \code{FALSE}. If \code{TRUE}, the values in \code{".[]"} will be vectorized with \code{c()} instead of being appended with \code{\link[base]{paste}}.
+#' @param nest Logical, default is \code{TRUE}. Whether the original character strings should be nested into a \code{".[]"}. If \code{TRUE}, then things like \code{dsb("S!one, two")} are equivalent to \code{dsb(".[S!one, two]")} and hence create the vector \code{c("one", "two")}.
+#'
+#'
+#'
+#' @return
+#' It returns a character vector whose length depends on the elements and operations in \code{".[]"}.
+#'
+#' @examples
+#'
+#'
+#'
+#'
+dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE, nest = TRUE){
+    check_arg(vectorize, nest, "logical scalar")
     check_arg(sep, "character scalar")
     check_arg(frame, "class(environment)")
     check_arg(..., "vector len(1)")
@@ -25,11 +45,14 @@ dsb = function(..., frame = parent.frame(), sep = "", concat = FALSE, nest = TRU
             '    Ex: if x = "John", then dsb("Hi .[x]!") -> "Hi John!"',
             " ",
             "STRING OPERATIONS ------|",
-            "    Each .[] instance supports one or more string operations. The syntax is .['arg'op?x], with:",
+            "    Each .[] instance supports one or more string operations.",
+            "    The syntax is .['arg'op?x] or .['arg'op!x], with:",
             "      - 'arg' a quoted string used as argument,",
             "      - op an operator code,",
-            "      - ? (question mark) marks the end of the operation(s),",
-            "      - x a variable to be evaluated.",
+            "      - ? or !:",
+            "        + ?: evaluates the expression x",
+            "        + !: takes x as verbatim",
+            "      - x an expression to be evaluated or some verbatim text (no quote needed).",
             '    Ex: dsb(".[\' + \'c?1:3] = 6") -> "1 + 2 + 3 = 6". 1:3 is collapsed (c) with \' + \'.',
             "",
             "    Using ! instead of ? applies the operation to the *verbatim* of the expression.",
@@ -52,53 +75,136 @@ dsb = function(..., frame = parent.frame(), sep = "", concat = FALSE, nest = TRU
             "    Ex: dsb(\"', 's!a1, b3, d8\") -> c(\"a1\", \"b3\", \"d8\")",
             "",
             "    Operators have default values, so the quoted argument is optional.",
-            '    Ex: dsb("c?1:3") -> "123". 1:3 is collapsed (c) with \'\', its default.',
+            '    Ex: dsb("c?1:3") -> "1 2 3". 1:3 is collapsed (c) with \' \', its default.',
             "",
             "OPERATORS --------------|",
             "    Below is the list of operators and their default argument when relevant.",
-            "    OPERATOR DEFAULT                   VALUE ",
+            "    OPERATOR   DEFAULT                   VALUE ",
             "",
-            "    s        ', '                      split, fixed = TRUE",
-            "    S        ', *'                     split, perl = TRUE",
-            "    x        '[[:alnum:]]+'            extracts the first pattern, perl = TRUE",
-            "    X        '[[:alnum:]]+'            extracts all patterns, perl = TRUE",
+            "    s          ' '                       split, fixed = TRUE",
+            "    S          ', *'                     split, perl = TRUE",
+            "    x          '[[:alnum:]]+'            extracts the first pattern, perl = TRUE",
+            "    X          '[[:alnum:]]+'            extracts all patterns, perl = TRUE",
             "",
             "  Collapse:",
             "    - collapses a vector with paste(x, collapse = 's'),",
             "    - use a double pipe to apply a special collapse to the last values,",
             "    - the syntax is 's1||s2', s2 will be applied to the last 2 values,",
             "    - .[', || and 'c!1:3] -> \"1, 2 and 3\".",
-            "    c        ''                        collapse",
-            "    C        ', '                      collapse",
+            "    c          ''                        collapse",
+            "    C          ', || and '               collapse",
             "",
             "  Replication:",
             "    - use 5* to replicate 5 times,",
-            "    - this is the only operator that does not require a quoted argument,",
-            "    - but quoted numbers also work.",
-            "    *        '1'                       replicates n times",
-            "    *c       '1'                       replicates n times, then collapses with ''",
+            "    - using quotes also works, like in '5'*.",
+            "    *          '1'                       replicates n times",
+            "    *c         '1'                       replicates n times, then collapses with ''",
             "",
             "  Replacement: ",
             "    - the syntax is 'old => new', 'old=>new' or 'old_=>_new',",
             "    - if new is missing, it is considered as the empty string,",
             "    - the default for 'R' is: removing trailing spaces.",
-            "    r        '\\n'                      replacement, fixed = TRUE ",
-            "    R        '^[ \\t\\r\\n]+|[ \\t\\r\\n]+$' replacement, perl = TRUE ",
+            "    r          '\\n'                      replacement, fixed = TRUE ",
+            "    R          '^[ \\t\\r\\n]+|[ \\t\\r\\n]+$' replacement, perl = TRUE ",
             "",
             "  Operators without arguments:",
-            "    u                                  puts the first letter of the string to uppercase",
-            "    U                                  puts the complete string to uppercase",
-            "    l, L                               puts the complete string to lowercase",
-            "    q                                  adds single quotes",
-            "    Q                                  adds double quotes",
-            "    f                                  applies format(x)",
-            "    F                                  applies format(x, justify = 'right')",
+            "    u                                    puts the first letter of the string to uppercase",
+            "    U                                    puts the complete string to uppercase",
+            "    l, L                                 puts the complete string to lowercase",
+            "    q                                    adds single quotes",
+            "    Q                                    adds double quotes",
+            "    f                                    applies format(x)",
+            "    F                                    applies format(x, justify = 'right')",
+            "    w                                    reformat white spaces",
+            "    W                                    reformat white spaces and punctuation",
+            "    d                                    replaces the content with the empty string",
+            "    D                                    removes all elements",
+            "    stop                                 removes basic English stop words",
             "",
             "  sprintf formatting:",
             "    - applies a formatting via sprintf,",
             "    - .['.3f'%?x] is equivalent to sprintf('%.3f', x),",
             "    - .['.2f'% ? pi] -> '3.14'.",
-            "    %        No default                applies sprintf formatting",
+            "    %          No default                applies sprintf formatting",
+            "",
+            "  Keeping a selected number of characters or elements: ",
+            "    - the syntax is nK, 'n'K, 'n|s'K, or 'n||s'K",
+            "    - with 'n' a number and 's' a string,",
+            "    - K keeps the first n elements and drops the rest,",
+            "    - k keeps the first n characters of each element,",
+            "    - optionaly a string 's' can be appended at the end,",
+            "    - but only when the length is greater than n.",
+            "    - 'n|s' simply appends 's' while 'n||s' includes the length of 's'",
+            "    - in the calculation of the final length.",
+            "    - the special markup :rest: and :REST: can be used in 's'.",
+            "    - Ex: .['5||..'k!c('hello', 'bonjour')] -> c('hello', 'bon..')",
+            "    -     .['5|..'k!c('hello', 'bonjour')]  -> c('hello', 'bonjo..')",
+            "    k          NO DEFAULT                keeps the first n characters",
+            "    K          NO DEFAULT                keeps the first n elements",
+            "    Ko         'n||:rest: others'        keeps the first n elements and adds 'others'",
+            "                                         ex. usage: 3Ko",
+            "",
+            "  Insertion and appending operators:",
+            "    - the syntax is 's1|s2' to insert, or append, the string s1 first",
+            "    - and the string 's2' last.",
+            "    - Note that '_|_' can also be used to separate first/last.",
+            "    - The uppercase versions insert/append invisibly: ie without changing the vector.",
+            "    a          NO DEFAULT                equiv. to paste0(s1, x, s2)",
+            "    A          NO DEFAULT                appends s1/s2 to the beginning/end of the full string",
+            "    i          NO DEFAULT                inserts s1/s2 at the beginning/end of the vector",
+            "    I          NO DEFAULT                inserts s1/s2 at the beginning/end of the vector",
+            "",
+            "  Adding length dependent verbs/s:",
+            "   - verbs can be conjugated WRT the length of the vector,",
+            "   - Ex: .[' have'V, C? c('Jonh', 'Henry')]  -> 'John and Henry have'",
+            "         .[' have'V, C? 'Rosemary']          -> 'Rosemary has'",
+            "   - 's' can be added in the same way:",
+            "   - Ex: 'The number.[*s_, v, C ? 1:3]' -> 'The numbers are 1, 2 and 3'",
+            "         'The number.[*s_, v, C ? 5]'   -> 'The number is 5'",
+            "   v           'is '                     adds a conjugated verb at the beginning",
+            "   V           ' is'                     adds a conjugated verb at the end",
+            "   *s          NO ARGUMENT               adds an 's' at the beginning of the string",
+            "   *s_         NO ARGUMENT               adds an 's' followed by a space at the beginning of the string",
+            "",
+            "CONDITIONS--------------|",
+            "    Conditions can be applied with 'if' statements.",
+            "    The syntax is 'type comp value'if(true : false), with",
+            "    - type: either 'len', 'char', 'fixed' or 'regex'",
+            "      + len: number of elements in the vector",
+            "      + char: number of characters",
+            "      + fixed: fixed pattern",
+            "      + regex: regular expression pattern",
+            "    - comp: a comparator: ",
+            "      + valid for len/char: >, <, >=, <=, !=, ==",
+            "      + valid for fixed/regex: !=, ==",
+            "    - value: a value for which the comparison is applied.",
+            "    - true: operations to be applied if true (can be void)",
+            "    - false: operations to be applied if false (can be void)",
+            "",
+            "    Example: .['char <= 2'if('(|)'a : '[|]'a), ' + 'c ? c(1, 12, 123)]",
+            "             ->  '(1) + (12) + [123]'",
+            "",
+            "  Which operators are valid?",
+            "    The 'len' type looks at the length of the vector so that the true/false",
+            "    will apply to the full vector. Hence the operations will concern the full vector and",
+            "    all operations are valid.",
+            "",
+            "    The other types apply the true/false operations only to the subset of elements",
+            "    which were true or false. Hence to avoid consistency problems, all operators",
+            "    that would change the length of the vector/or affect the full vector are disabled.",
+            "    Operators not working in that case: A, i, I, K, c, C, *, *c, s, S, v, V.",
+            "    Note that the D operator of deletion still works.",
+            "",
+            "  Special if operators:",
+            "    'type comp value'IF(true : false)",
+            "      The operator 'IF' works like the regular 'if' except that it also applies any().",
+            "      This means that the result of the if statement will be at the level of the vector,",
+            "      thus for the types different from 'len', all operators can be applied.",
+            "",
+            "    *if(true : false):",
+            "      The operator *if accepts no argument. The value is true is the length of the vector",
+            "      is greater than 1. ",
+            "      This is a shortcut to 'len>1'if(true : false).",
             "",
             "SPECIALS ---------------|",
             "    Use '/' first to split the character with commas:",
@@ -113,17 +219,17 @@ dsb = function(..., frame = parent.frame(), sep = "", concat = FALSE, nest = TRU
         return(invisible(NULL))
     }
 
-    res = .dsb(..., frame = frame, sep = sep, concat = concat, nest = nest, check = TRUE)
+    res = .dsb(..., frame = frame, sep = sep, vectorize = vectorize, nest = nest, check = TRUE)
 
     class(res) = c("dsb", "character")
     res
 }
 
-.dsb0 = function(..., frame = parent.frame(), sep = "", concat = FALSE){
-    .dsb(..., frame = frame, nest = FALSE, sep = sep, concat = concat, check = FALSE)
+.dsb0 = function(..., frame = parent.frame(), sep = "", vectorize = FALSE){
+    .dsb(..., frame = frame, nest = FALSE, sep = sep, vectorize = vectorize, check = FALSE)
 }
 
-.dsb = function(..., frame = parent.frame(), sep = "", concat = FALSE,
+.dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
                 nest = TRUE, check = FALSE){
 
     if(...length() == 0){
@@ -228,7 +334,7 @@ dsb = function(..., frame = parent.frame(), sep = "", concat = FALSE, nest = TRU
                 concat_nested = length(operators) > 0 && grepl("(s|S)$", operators[[1]])
 
                 if(verbatim && grepl(".[", xi, fixed = TRUE)){
-                    xi = .dsb(xi, frame = frame, nest = FALSE, concat = concat_nested, check = check)
+                    xi = .dsb(xi, frame = frame, nest = FALSE, vectorize = concat_nested, check = check)
 
                 } else if(!verbatim){
                     # evaluation
@@ -251,7 +357,7 @@ dsb = function(..., frame = parent.frame(), sep = "", concat = FALSE, nest = TRU
                 # Now we apply the operators
                 for(j in seq_along(operators)){
                     opi = operators[[j]]
-                    op_parsed = dsb_char2operator(opi, verbatim)
+                    op_parsed = dsb_char2operator(opi)
 
                     if(op_parsed$do_eval){
                         if(check){
@@ -271,11 +377,44 @@ dsb = function(..., frame = parent.frame(), sep = "", concat = FALSE, nest = TRU
                     }
 
                     if(check){
-                        xi = error_sender(dsb_operators(xi, quoted, op_parsed$op),
+                        xi = error_sender(dsb_operators(xi, quoted, op_parsed$op,
+                                                        check = check, frame = frame),
                                           "The operation '", opi, "' failed. Please revise your call.")
                     } else {
-                        xi = dsb_operators(xi, quoted, op_parsed$op)
+                        xi = dsb_operators(xi, quoted, op_parsed$op, check = check, frame = frame)
                     }
+                }
+
+                extra = attr(xi, "extra")
+                if(length(extra) > 0){
+
+                    if(length(extra$element_add_first) > 0){
+                        if(length(extra$element_add_last) > 0){
+                            xi = c(extra$element_add_first, xi, extra$element_add_last)
+                        } else {
+                            xi = c(extra$element_add_first, xi)
+                        }
+                    } else if(length(extra$element_add_last) > 0){
+                        xi = c(xi, extra$element_add_last)
+                    }
+
+                    if(length(extra$str_add_first) > 0){
+                        if(length(xi) > 0){
+                            xi[1] = paste0(extra$str_add_first, xi[1])
+                        } else {
+                            xi = extra$str_add_first
+                        }
+                    }
+
+                    if(length(extra$str_add_last) > 0){
+                        if(length(xi) > 0){
+                            xi[length(xi)] = paste0(xi[length(xi)], extra$str_add_last)
+                        } else {
+                            xi = extra$str_add_last
+                        }
+                    }
+
+                    attr(xi, "extra") = NULL
                 }
             }
 
@@ -283,7 +422,7 @@ dsb = function(..., frame = parent.frame(), sep = "", concat = FALSE, nest = TRU
                 res = xi
             } else{
                 if(i < n && n_x_all[i + 1] == 1){
-                    if(concat){
+                    if(vectorize){
                         res = c(res, xi, x_parsed[[i + 1]])
                     } else {
                         res = paste0(res, xi, x_parsed[[i + 1]])
@@ -291,7 +430,7 @@ dsb = function(..., frame = parent.frame(), sep = "", concat = FALSE, nest = TRU
 
                     i_done = TRUE
                 } else {
-                    if(concat){
+                    if(vectorize){
                         res = c(res, xi)
                     } else {
                         res = paste0(res, xi)
@@ -305,21 +444,25 @@ dsb = function(..., frame = parent.frame(), sep = "", concat = FALSE, nest = TRU
 }
 
 
-dsb_char2operator = function(x, verbatim){
+dsb_char2operator = function(x){
 
     quote = substr(x, 1, 1)
 
     OPERATORS = c("s", "S", "x", "X", "c", "C", "r", "R", "*", "*c",
                   "u", "U", "l", "L", "q", "Q", "f", "F", "%",
-                  "a", "A", "k", "K", "d", "D", "if")
+                  "a", "A", "k", "K", "d", "D", "v", "V",
+                  "w", "W", "stop",
+                  "*s", "*s_", "*if", "if", "IF")
+
+    ok = FALSE
 
     if(quote %in% c("'", "\"", "`")){
-        in_quote = sub(paste0(quote, "[^", quote, "]*", "$"), "", x)
-        in_quote = str_trim(in_quote, 1)
-        op_abbrev = str_trim(x, nchar(in_quote) + 2)
+        pat = paste0("^", quote, "[^", quote, "]*", quote)
+        op_abbrev = sub(pat, "", x)
+        in_quote = str_trim(x, 1, nchar(op_abbrev) + 1)
 
         if(nchar(op_abbrev) == 0){
-            op_abbrev = if(verbatim) "S" else "c"
+            stop_up("In dsb, if a quoted value is present, the operators must always be of the form 'value'op, with 'op' an operator. Problem: In '", x, "' the operator is missing.")
         }
 
     } else if(x %in% OPERATORS){
@@ -327,16 +470,18 @@ dsb_char2operator = function(x, verbatim){
         in_quote = switch(x,
                           s = " ", S = ", *",
                           x = "[[:alnum:]]+", X = "[[:alnum:]]+",
-                          c = "", C = ", ",
+                          c = " ", C = ", || and ",
                           "*" = "1", "*c" = "1",
                           r = "\n", R = "^[ \t\r\n]+|[ \t\r\n]+$",
+                          v = "is ", V = " is",
                           "")
         op_abbrev = x
 
-        if(op_abbrev %in% c("%", "k", "K", "a", "A", "if")){
+        if(op_abbrev %in% c("%", "k", "K", "a", "A", "if", "IF")){
             ex = c("%" = ".['.3f'%?pi]", "k" = ".[4k ! longuest word ]", "K" = ".[2K ? 1:5]",
                    "a" = ".['|s'a ! cat]", "A" = ".['|two'A ! one]",
-                   "if" = ".['len<3'if(d) ? c('a', 'abc')]")
+                   "if" = ".['len<3'if(d) ? c('a', 'abc')]",
+                   "IF" = ".['char>3'IF(D) ? c('a', 'abc')]")
             stop_up("The operator '", op_abbrev,
                     "' has no default value, you must provide values explicitly. Like in ",
                     ex[op_abbrev], " for instance.")
@@ -349,29 +494,49 @@ dsb_char2operator = function(x, verbatim){
             op_abbrev = last1
         } else {
             last2 = substr(x, nchar(x) - 1, nchar(x))
-            if(last2 == "*c"){
+            if(last2 %in% c("*c", "Ko", "KO")){
                 in_quote = str_trim(x, -2)
                 op_abbrev = last2
+
+                if(op_abbrev %in% c("Ko", "KO")){
+                    # special case
+                    in_quote = paste0(in_quote, "||:n: others")
+                    op_abbrev = "K"
+                }
+
             } else {
-                op_abbrev = "problem"
+                first3 = substr(x, 1, 3)
+
+                if(first3 %in% c("*if")){
+                    ok = TRUE
+                    in_quote = ""
+                    op_abbrev = x
+                    # OK, dealt with later => special case
+                } else {
+                    op_abbrev = "problem"
+                }
             }
         }
     }
 
-    if(!op_abbrev %in% OPERATORS){
+    if(!ok && !op_abbrev %in% OPERATORS){
 
-        msg = c("The operation '", x, "' is not valid. It must be something quoted followed by a valid operator.",
-                "\n  Valid operators: to split: s, S / to replace: r, R  / to collapse: c, C / to extract: x, X",
-                "\n                   to replicate: * / to replicate and collapse with the empty string: *c",
-                "\n                   to upper/lower case: u, U, L / to single/double quote: q, Q",
-                "\n                   to format f, F / to apply sprintf format: %",
-                "\n  NOTA: upper cases enable regular expressions.",
-                "\n        type dsb('--help') for more help.",
-                "\n  Example: .[', *'S, 'a => b'r? var] first splits the variable var by commas then replaces every 'a' with a 'b'.")
+        first2 = substr(op_abbrev, 1, 2)
+        if(!first2 %in% c("if", "IF")){
+            msg = c("The operation '", x, "' is not valid. It must be something quoted followed by a valid operator.",
+                    "\n  Valid operators: to split: s, S / to replace: r, R  / to collapse: c, C / to extract: x, X",
+                    "\n                   to replicate: * / to replicate and collapse with the empty string: *c",
+                    "\n                   to upper/lower case: u, U, L / to single/double quote: q, Q",
+                    "\n                   to format f, F / to apply sprintf format: %",
+                    "\n  NOTA: upper cases enable regular expressions.",
+                    "\n        type dsb('--help') for more help.",
+                    "\n  Example: .[', *'S, 'a => b'r? var] first splits the variable var by commas then replaces every 'a' with a 'b'.")
 
-        message(msg)
+            message(msg)
 
-        stop_up("In dsb, the operation is not valid, see upper message.")
+            stop_up("In dsb, the operation is not valid, see upper message.")
+        }
+
     }
 
     res = list(quoted = in_quote, do_eval = quote == "`", op = op_abbrev)
@@ -379,7 +544,11 @@ dsb_char2operator = function(x, verbatim){
 }
 
 
-dsb_operators = function(x, quoted, op){
+dsb_operators = function(x, quoted, op, check = FALSE, frame = NULL){
+
+    extra = attr(x, "extra")
+
+    # S, C, R ####
 
     if(op %in% c("s", "S")){
         # Split is always applied on verbatim stuff => length 1
@@ -431,6 +600,8 @@ dsb_operators = function(x, quoted, op){
         }
 
     } else if(op %in% c("*", "*c", "*C")){
+        # *, X ####
+
         if(!is_numeric_in_char(quoted)){
             stop("In dsb: the operator '", op, "' must have numeric arguments, '", quoted, "' is not numeric.")
         }
@@ -469,6 +640,8 @@ dsb_operators = function(x, quoted, op){
         res = unlist(lapply(seq_along(x_pat), function(i) my_extract(x[i], x_pat[[i]])))
 
     } else if(op == "U"){
+        # U, L, Q, F, %, W ####
+
         res = toupper(x)
     } else if(op == "u"){
         # First letter only, if relevant
@@ -486,25 +659,634 @@ dsb_operators = function(x, quoted, op){
         res = format(x, justify = "right")
     } else if(op == "%"){
         res = sprintf(paste0("%", quoted), x)
-    } else if(op == "k"){
+    } else if(op %in% c("w", "W")){
+        # w: only whitespaces
+        # W: whitespaces extended
 
-    } else if(op == "K"){
+        res = trimws(x)
 
-    } else if(op == "a"){
+        # now the whitespaces
+        pat = if(op == "w") "[ \t\r\n]+" else "[[:blank:][:punct:]]+"
+        res = gsub(pat, " ", res, perl = TRUE)
 
-    } else if(op == "A"){
+    } else if(op %in% c("k", "K")){
+        # keep: either the nber of characters (k) or the number of elements (K)
+
+        #
+        # Keep ####
+        #
+
+        quoted_split = quoted
+        pat = c("_||_", "_|_", "||", "|")
+        for(p in pat){
+            if(grepl(p, quoted, fixed = TRUE)){
+                quoted_split = strsplit(quoted, p, fixed = TRUE)[[1]]
+                break
+            }
+        }
+        is_included = grepl("||", p, fixed = TRUE)
+
+        if(length(quoted_split) == 1){
+            nb = quoted
+            add = ""
+            is_included = FALSE
+        } else {
+            nb = quoted_split[[1]]
+            add = quoted_split[[2]]
+        }
+
+        if(!is_numeric_in_char(nb)){
+            stop("In dsb: the operator '", op, "' must first contain a numeric argument, '", quoted, "' does not contain a numeric first.")
+        }
+
+        nb = as.numeric(nb)
+
+        if(op == "k"){
+            qui = nchar(x) > nb
+            res = substr(x, 1, nb)
+
+            if(is_included){
+                res[qui] = substr(res[qui], 1, nb - nchar(add))
+            }
+
+            if(nchar(add) > 0){
+                res[qui] = paste0(res[qui], add)
+            }
+
+        } else if(op == "K"){
+
+            if(nb == 0){
+                res = character(0)
+            } else {
+                res = x[1:nb]
+
+                if(any(grepl(":(n|N|rest|REST):", add))){
+                    n = length(x)
+                    n_letter = ""
+                    if(grepl(":N:", add, fixed = TRUE)){
+                        n_letter = n_letter(n)
+                        add = gsub(":N:", n_letter, add, fixed = TRUE)
+                    }
+
+                    add = gsub(":n:", n, add, fixed = TRUE)
+                    n_rest = n - nb + is_included
+                    add = gsub(":rest:", n_rest, add, fixed = TRUE)
+                    add = gsub(":REST:", n_letter(n_rest), add, fixed = TRUE)
+                }
+
+                if(length(x) > nb){
+                    if(is_included){
+                        res = res[-nb]
+                    }
+
+                    if(nchar(add) > 0){
+                        res = c(res, add)
+                    }
+                }
+            }
+        }
+    } else if(op %in% c("a", "i", "A", "I")){
+        # Appends at the beginning/end of all strings
+
+        #
+        # Insert/Append ####
+        #
+
+        pat = c("_|_", "|")
+        quoted_split = quoted
+        for(p in pat){
+            if(grepl(p, quoted, fixed = TRUE)){
+                quoted_split = strsplit(quoted, p, fixed = TRUE)[[1]]
+                break
+            }
+        }
+
+        left = quoted_split[[1]]
+        right = if(length(quoted_split) > 1) quoted_split[[2]] else ""
+
+        if(nchar(quoted) == 0){
+            res = x
+
+        } else if(op == "a"){
+
+            if(length(x) == 0){
+                res = x
+
+            } else {
+                first = last = FALSE
+                flag = substr(left, 1, 2)
+                if(flag %in% c("\\^", "\\$")){
+                    # flag escaping
+                    left = str_trim(left, 1)
+                } else {
+                    flag = substr(flag, 1, 1)
+                    if(flag %in% c("^", "$")){
+                        first = flag == "^"
+                        last = !first
+                        left = str_trim(left, 1)
+                    }
+                }
+
+                if(first){
+                    x = x[1]
+                } else if(last){
+                    x = x[length(x)]
+                }
+
+                if(nchar(left) > 0){
+                    if(nchar(right) > 0){
+                        res = paste0(left, x, right)
+                    } else {
+                        res = paste0(left, x)
+                    }
+                } else {
+                    res = paste0(x, right)
+                }
+            }
+        } else if(op == "i"){
+            # inserts an ELEMENT at the beginning/end
+
+            if(nchar(left) > 0){
+                if(nchar(right) > 0){
+                    res = c(left, x, right)
+                } else {
+                    res = c(left, x)
+                }
+            } else {
+                res = c(x, right)
+            }
+
+        } else if(op %in% c("A", "I")){
+            # appends/inserts **implicitly** at the beginning of the first/last string
+
+            res = x
+
+            if(any(grepl(":(n|N):", c(left, right)))){
+                n = length(x)
+                n_letter = ""
+                if(any(grepl(":N:", c(left, right), fixed = TRUE))){
+                    n_letter = n_letter(n)
+                    left = gsub(":N:", n_letter, left)
+                    right = gsub(":N:", n_letter, right)
+                }
+
+                left = gsub(":n:", n, left)
+                right = gsub(":n:", n, right)
+            }
+
+            if(is.null(extra)){
+                extra = list()
+            }
+
+            if(op == "A"){
+                if(nchar(left) > 0){
+                    extra$str_add_first = paste0(extra$str_add_first, left)
+                }
+
+                if(nchar(right) > 0){
+                    extra$str_add_last = paste0(extra$str_add_last, right)
+                }
+            } else if(op == "I"){
+                if(nchar(left) > 0){
+                    extra$element_add_first = c(extra$element_add_first, left)
+                }
+
+                if(nchar(right) > 0){
+                    extra$element_add_last = c(extra$element_add_last, right)
+                }
+            }
+        }
+
+        # END: insert/append
 
     } else if(op == "d"){
-
+        res = rep("", length(x))
     } else if(op == "D"){
+        res = character(0)
+    } else if(op %in% c("v", "V")){
+        # The verb is added implicitly
+        # original code from dreamerr
 
-    } else if(op == "if"){
-        stop("in progress")
+        #
+        # D, Verb ####
+        #
+
+        res = x
+
+        PLURAL = length(x) > 1
+
+        space_left = space_right = ""
+        if(grepl("^ ", quoted)){
+            space_left = " "
+            quoted = str_trim(quoted, 1)
+        }
+
+        if(grepl(" $", quoted)){
+            space_right = " "
+            quoted = str_trim(quoted, -1)
+        }
+
+        past = grepl("\\bpast\\b", quoted)
+        if(past){
+            quoted = gsub("\\bquoted\\b", "", quoted)
+        }
+
+        verb = trimws(quoted)
+        if(nchar(verb) == 0){
+            verb = "is"
+        }
+
+        if(verb %in% c("be", "are")){
+            verb = "is"
+        } else if(verb == "have"){
+            verb = "has"
+        } else if(verb == "does"){
+            verb = "do"
+        } else if(verb %in% c("do not", "does not", "don't", "doesn't")){
+            verb = "do not"
+        } else if(verb %in% c("is not", "are not", "isn't", "aren't")){
+            verb = "is not"
+        } else if(verb %in% c("was", "were")){
+            verb = "is"
+            past = TRUE
+        }
+
+        if(past){
+            if(verb %in% c("is", "is not", "has", "do", "do not")){
+                verb_format = switch(verb, is = ifelse(!PLURAL, "was", "were"), "is not" = ifelse(!PLURAL, "wasn't", "weren't"), has = "had", do = "did", "do not" = "didn't")
+            } else {
+                verb_format = paste0(verb, "ed")
+            }
+        } else {
+            if(verb %in% c("is", "is not", "has", "do", "do not")){
+                verb_format = switch(verb, is = ifelse(!PLURAL, "is", "are"), "is not" = ifelse(!PLURAL, "isn't", "aren't"), has = ifelse(!PLURAL, "has", "have"), do = ifelse(!PLURAL, "does", "do"), "do not" = ifelse(!PLURAL, "doesn't", "don't"))
+            } else {
+                verb_format = ifelse(PLURAL, verb, paste0(verb, "s"))
+            }
+        }
+
+        # Adding the verb
+        if(is.null(extra)){
+            extra = list()
+        }
+
+        if(op == "v"){
+            extra$str_add_first = paste0(extra$str_add_first, space_left, verb_format, space_right)
+        } else if(op == "V"){
+            extra$str_add_last = paste0(extra$str_add_last, space_left, verb_format, space_right)
+        }
+
+    } else if(op %in% c("*s", "*s_")){
+
+        res = x
+
+        if(is.null(extra)){
+            extra = list()
+        }
+
+        if(length(x) > 1){
+            if(op == "*s_"){
+                extra$str_add_first = paste0(extra$str_add_first, "s ")
+            } else {
+                extra$str_add_first = paste0(extra$str_add_first, "s")
+            }
+
+        } else if(op == "*s_"){
+            extra$str_add_first = paste0(extra$str_add_first, " ")
+        }
+
+    } else if(grepl("^(\\*?if|IF)", op)){
+        # The operator is ALWAYS of the form if(yes:no), there must be a parenthesis
+
+        #
+        # IF ####
+        #
+
+        if(substr(op, 1, 1) == "*"){
+            # star if
+            quoted = "len > 1"
+            if_operators = str_trim(op, 4, 1)
+            op = "*if"
+        } else {
+            if_operators = str_trim(op, 3, 1)
+            op = substr(op, 1, 2)
+        }
+
+        # We have 4 types:
+        # - len
+        # - char
+        # - fixed
+        # - regex
+
+        # left trim
+        quoted = sub("^ +", "", quoted)
+
+        type = substr(quoted, 1, 3)
+        if(type %in% c("fix", "reg")){
+            type = substr(quoted, 1, 5)
+        } else if(type == "cha"){
+            type = substr(quoted, 1, 4)
+        }
+
+        if(!type %in% c("len", "char", "regex", "fixed")){
+            stop("In the operator 'if', the argument must be of the form 'type comp value', with 'comp' a comparator (eg ==, >=, etc), and type one of 4 types: 'len', 'char', 'regex' or 'fixed'.",
+                 "\nIn the current argument ('", quoted, "') the type is not valid.")
+        }
+
+        rest = str_trim(quoted, type)
+
+        is_space = substr(rest, 1, 1) == " "
+        if(is_space){
+            rest = str_trim(rest, 1)
+        }
+
+        comp1 = substr(rest, 1, 1)
+        comp2 = substr(rest, 2, 2)
+
+        if(!comp1 %in% c("<", ">", "!", "=") || (comp1 %in% c("!", "=") && comp2 != "=")){
+            comp = if(comp1 %in% c("!", "=") && comp2 != "=") paste0(comp1, comp2) else comp1
+            stop("In the operator 'if', the argument must be of the form 'type comp value', with 'comp' a comparator (eg ==, >=, etc), and type one of 4 types: 'len', 'char', 'regex' or 'fixed'.",
+                 "\nIn the current argument ('", quoted, "') the comparator ('", comp, "') is not valid.")
+        }
+
+        if(comp2 == "="){
+            comp = paste0(comp1, comp2)
+            rest = str_trim(rest, 2)
+        } else {
+            comp = comp1
+            rest = str_trim(rest, 1)
+        }
+
+        if(is_space && substr(rest, 1, 1) == " "){
+            rest = str_trim(rest, 1)
+        }
+
+        value = rest
+
+        # Now we have the 3 elements:
+        # - type
+        # - comp
+        # - value
+
+        if(type %in% c("len", "char")){
+            if(!is_numeric_in_char(value)){
+                stop("In the operator 'if' (equal to '", quoted, "'), '", type, "' should be compared to a number. Problem: '", value, "' is not a number.")
+            }
+        }
+
+        is_len = type == "len"
+
+        operators_TF = cpp_dsb_if_extract(if_operators)
+
+        if(isFALSE(operators_TF[[1]])){
+            # means error
+            stop("Parsing error in the operators of the '", op, "' statement. ",
+                 "\nIt must be of the form: ", op, "(yes:no) with yes and no chains of valid operations. Further, 'if' statements cannot be nested.",
+                 "\nEx: 'len>3'if(3K, '| and others'A, ', 'c : 'n <= 3'A, D)")
+        }
+
+        len_true = FALSE
+        if(is_len){
+            n_x = length(x)
+
+            len_true = eval(str2lang(paste0(n_x, comp, value)))
+            if(len_true){
+                x_true = x
+                x_false = character(0)
+            } else {
+                x_true = character(0)
+                x_false = x
+            }
+        } else {
+            if(type == "char"){
+                comp_call = str2lang(paste0("nchar(x)", comp, value))
+            } else {
+                comp_txt = paste0("grepl(\"", value, "\", x")
+                if(type == "regex"){
+                    comp_txt = paste0(comp_txt, ", perl = TRUE)")
+                } else {
+                    comp_txt = paste0(comp_txt, ", fixed = TRUE)")
+                }
+                comp_call = str2lang(comp_txt)
+            }
+
+            qui = eval(comp_call)
+
+            if(op == "IF"){
+                is_len = TRUE
+                len_true = any(qui)
+                if(len_true){
+                    x_true = x
+                    x_false = character(0)
+                } else {
+                    x_true = character(0)
+                    x_false = x
+                }
+            } else {
+                x_true = x[qui]
+                x_false = x[!qui]
+            }
+        }
+
+        # All operators that change the length of the element:
+        FORBIDDEN = c("c", "C", "*", "*c", "s", "S", "i", "I", "A", "v", "V")
+
+        # if TRUE
+        op_true = operators_TF[[1]]
+
+        for(state in c("true", "false")){
+
+            if(state == "true"){
+                if(is_len && !len_true) next
+                xi = x_true
+            } else {
+                if(is_len && len_true) next
+                xi = x_false
+            }
+
+            index = 1 + (state == "false")
+            op_all = operators_TF[[index]]
+
+            for(i in seq_along(op_all)){
+                opi = op_all[i]
+
+                op_parsed = dsb_char2operator(opi)
+
+                if(!is_len && op_parsed$op %in% FORBIDDEN){
+                    stop_up("In the 'if' statement, you cannot use operators that would change the length of the vector, hence '", op_parsed$op, "' is forbidden. The IF statement (which does like 'if(any(cond))'), or if applied to the length, would be OK since they apply changes to the full vector.")
+                }
+
+                if(op_parsed$do_eval){
+                    if(check){
+                        quoted_call = error_sender(up = 1, str2lang(op_parsed$quoted),
+                                                   "In operation '", opi, "', the value '",
+                                                   op_parsed$quoted, "' could not be parsed.")
+
+                        quoted = error_sender(up = 1, eval(quoted_call, frame),
+                                              "In operation '", opi, "', the value '",
+                                              op_parsed$quoted, "' could not be evaluated.")
+                    } else {
+                        quoted = eval(str2lang(op_parsed$quoted), frame)
+                    }
+
+                } else {
+                    quoted = op_parsed$quoted
+                }
+
+                if(check){
+                    xi = error_sender(up = 1, dsb_operators(xi, quoted, op_parsed$op),
+                                      "The operation '", opi, "' failed. Please revise your call.")
+                } else {
+                    xi = dsb_operators(xi, quoted, op_parsed$op)
+                }
+            }
+
+            if(state == "true"){
+                x_true = xi
+            } else {
+                x_false = xi
+            }
+        }
+
+        if(is_len){
+            res = if(len_true) x_true else x_false
+
+            # we can add extra stuff, if needed
+
+            extra_if = attr(res, "extra")
+            if(length(extra_if) > 0){
+                if(is.null(extra)){
+                    extra = list()
+                }
+
+                if(length(extra_if$element_add_first) > 0){
+                    extra$element_add_first = c(extra$element_add_first, extra_if$element_add_first)
+                }
+
+                if(length(extra_if$element_add_last) > 0){
+                    extra$element_add_last = c(extra$element_add_last, extra_if$element_add_last)
+                }
+
+                if(length(extra_if$str_add_first) > 0){
+                    extra$str_add_first = paste0(extra$str_add_first, extra_if$str_add_first)
+                }
+
+                if(length(extra_if$str_add_last) > 0){
+                    extra$str_add_last = paste0(extra$str_add_last, extra_if$str_add_last)
+                }
+            }
+
+        } else {
+            # extra is not touched
+
+            res = x
+
+            if(length(x_true) == 0 && length(x_false) == 0){
+                res = character(0)
+            } else if(length(x_true) == 0){
+                res[!qui] = x_false
+                res = res[!qui]
+            } else if(length(x_false) == 0){
+                res[qui] = x_true
+                res = res[qui]
+            } else {
+                res[qui] = x_true
+                res[!qui] = x_false
+            }
+        }
+
+    } else if(op == "stop"){
+        # stop ####
+
+        # current limitation: does not work for quoted words
+        #                     but quoted words are not stopwords usually
+
+        # Snowball stopwords
+        # These come from http://snowballstem.org/algorithms/english/stop.txt
+        stopwords = c("i", "me", "my", "myself", "we", "our", "ours", "ourselves",
+                      "you", "your", "yours", "yourself", "yourselves", "he", "him",
+                      "his", "himself", "she", "her", "hers", "herself", "it", "its",
+                      "itself", "they", "them", "their", "theirs", "themselves", "what",
+                      "which", "who", "whom", "this", "that", "these", "those", "am", "is",
+                      "are", "was", "were", "be", "been", "being", "have", "has", "had",
+                      "having", "do", "does", "did", "doing", "would", "should",
+                      "could", "ought", "i'm", "you're", "he's", "she's", "it's",
+                      "we're", "they're", "i've", "you've", "we've", "they've",
+                      "i'd", "you'd", "he'd", "she'd", "we'd", "they'd", "i'll",
+                      "you'll", "he'll", "she'll", "we'll", "they'll", "isn't",
+                      "aren't", "wasn't", "weren't", "hasn't", "haven't", "hadn't",
+                      "doesn't", "don't", "didn't", "won't", "wouldn't", "shan't",
+                      "shouldn't", "can't", "cannot", "couldn't", "mustn't", "let's",
+                      "that's", "who's", "what's", "here's", "there's", "when's", "where's",
+                      "why's", "how's", "a", "an", "the", "and", "but", "if", "or",
+                      "because", "as", "until", "while", "of", "at", "by", "for",
+                      "with", "about", "against", "between", "into", "through",
+                      "during", "before", "after", "above", "below", "to", "from",
+                      "up", "down", "in", "out", "on", "off", "over", "under",
+                      "again", "further", "then", "once", "here", "there", "when",
+                      "where", "why", "how", "all", "any", "both", "each", "few",
+                      "more", "most", "other", "some", "such", "no", "nor", "not",
+                      "only", "own", "same", "so", "than", "too", "very")
+
+        n = length(x)
+        x_split = strsplit(x, "(?<=[[:alnum:]])(?=[^[:alnum:]'])|(?<=[^[:alnum:]'])(?=[[:alnum:]])", perl = TRUE)
+        x_len = lengths(x_split)
+        x_vec = unlist(x_split)
+
+        id = rep(1:n, x_len)
+
+        # Lowering is costly, checking costs a bit less
+        if(any(grepl("[[:upper:]]", x))){
+            qui_drop = which(tolower(x_vec) %in% stopwords)
+        } else {
+            qui_drop = which(x_vec %in% stopwords)
+        }
+
+        x_vec = x_vec[-qui_drop]
+        id = id[-qui_drop]
+
+        res = cpp_paste_conditional(x_vec, id, n)
+
+
     } else {
         stop("In dsb: the operator '", op, "' is not recognized. Internal error: this problem should have been spotted beforehand.")
     }
 
+    if(length(extra) > 0){
+        attr(res, "extra") = extra
+    }
+
     return(res)
 }
+
+
+
+
+n_letter = function(n){
+    num2char = c("zero", "one", "two", "three", "four", "five", "six", "seven",
+                 "eight", "nine", "ten", "eleven", "twelve", "thirteen",
+                 "fourteen", "fifteen", "sixteen", "seventeen", "eighteen",
+                 "nineteen")
+    if(n < 20){
+        n_letter = num2char[n + 1]
+    } else if(n < 100){
+        tens = n %/% 10
+        digit = n %% 10
+        tens_letter = c("twenty", "thirty", "forty", "fifty",
+                        "sixty", "seventy", "eighty", "ninety")
+
+        num2char = paste0("-", num2char)
+        num2char[1] = ""
+
+        n_letter = paste0(tens_letter[tens - 1], num2char[digit + 1])
+    } else {
+        n_letter = n
+    }
+
+    n_letter
+}
+
+
+
 
 

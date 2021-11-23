@@ -371,6 +371,30 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_dsb_if_extract
+List cpp_dsb_if_extract(SEXP Rstr);
+RcppExport SEXP _fixest_cpp_dsb_if_extract(SEXP RstrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_dsb_if_extract(Rstr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_paste_conditional
+StringVector cpp_paste_conditional(StringVector x, IntegerVector id, int n);
+RcppExport SEXP _fixest_cpp_paste_conditional(SEXP xSEXP, SEXP idSEXP, SEXP nSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< StringVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type id(idSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_paste_conditional(x, id, n));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_cholesky
 List cpp_cholesky(NumericMatrix X, double tol, int nthreads);
 RcppExport SEXP _fixest_cpp_cholesky(SEXP XSEXP, SEXP tolSEXP, SEXP nthreadsSEXP) {
@@ -1163,6 +1187,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpp_which_na_inf", (DL_FUNC) &_fixest_cpp_which_na_inf, 2},
     {"_fixest_cpp_dsb", (DL_FUNC) &_fixest_cpp_dsb, 1},
     {"_fixest_cpp_dsb_full_string", (DL_FUNC) &_fixest_cpp_dsb_full_string, 1},
+    {"_fixest_cpp_dsb_if_extract", (DL_FUNC) &_fixest_cpp_dsb_if_extract, 1},
+    {"_fixest_cpp_paste_conditional", (DL_FUNC) &_fixest_cpp_paste_conditional, 3},
     {"_fixest_cpp_cholesky", (DL_FUNC) &_fixest_cpp_cholesky, 3},
     {"_fixest_cpp_sparse_products", (DL_FUNC) &_fixest_cpp_sparse_products, 5},
     {"_fixest_cpppar_crossprod", (DL_FUNC) &_fixest_cpppar_crossprod, 3},

@@ -77,6 +77,14 @@ cpp_dsb_full_string <- function(Rstr) {
     .Call(`_fixest_cpp_dsb_full_string`, Rstr)
 }
 
+cpp_dsb_if_extract <- function(Rstr) {
+    .Call(`_fixest_cpp_dsb_if_extract`, Rstr)
+}
+
+cpp_paste_conditional <- function(x, id, n) {
+    .Call(`_fixest_cpp_paste_conditional`, x, id, n)
+}
+
 cpp_cholesky <- function(X, tol = 1.0/100000.0/100000.0, nthreads = 1L) {
     .Call(`_fixest_cpp_cholesky`, X, tol, nthreads)
 }
