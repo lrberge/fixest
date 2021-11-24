@@ -1479,7 +1479,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 
 		        if(fromGLM){
 		            res$warn_varying_slope = msg
-		        } else {
+		        } else if(warn){
 		            warning(msg)
 		        }
 		    }

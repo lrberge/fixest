@@ -79,7 +79,8 @@
 #' The coefficients to be highlighted can be written in three forms: 1) row, eg \code{"x1"} will highlight the full row of the variable \code{x1}; 2) cells, use \code{'@'} after the coefficient name to give the column, it accepts ranges, eg \code{"x1@2, 4-6, 8"} will highlight only the columns 2, 4, 5, 6, and 8 of the variable \code{x1}; 3) range, by giving the top-left and bottom-right values separated with a semi-colon, eg \code{"x1@2 ; x3@5"} will highlight from the column 2 of \code{x1} to the 5th column of \code{x3}. Coefficient names are partially matched, use a \code{'\%'} first to refer to the original name (before dictionary) and use \code{'@'} first to use a regular expression. You can add a vector of row/cell/range.
 #' The options are a comma-separated list of items. By default the highlighting is done with a frame (a thick box) around the coefficient, use \code{'rowcol'} to highlight with a row color instead. Here are the other options: \code{'se'} to highlight the standard-errors too; \code{'square'} to have a square box (instead of rounded); \code{'thick1'} to \code{'thick6'} to monitor the width of the box; \code{'sep0'} to \code{'sep9'} to monitor the inner spacing. Finally the remaining option is the color: simply add an R color (it must be a valid R color!). You can use \code{"color!alpha"} with "alpha" a number between 0 to 100 to change the alpha channel of the color.
 #' @param coef.style Named list containing styles to be applied to the coefficients. It must be of the form \code{.("style1" = "coefs1", "style2" = "coefs2", etc)}. The style must contain the string \code{":coef:"} (or \code{":coef_se:"} to style both the coefficient and its standard-error). The string \code{:coef:} will be replaced verbatim by the coefficient value. For example use \code{"\\textbf{:coef:}"} to put the coefficient in bold. Note that markdown markup is enabled so \code{"**:coef:**"} would also put it in bold. The coefficients to be styled can be written in three forms: 1) row, eg \code{"x1"} will style the full row of the variable \code{x1}; 2) cells, use \code{'@'} after the coefficient name to give the column, it accepts ranges, eg \code{"x1@2, 4-6, 8"} will style only the columns 2, 4, 5, 6, and 8 of the variable \code{x1}; 3) range, by giving the top-left and bottom-right values separated with a semi-colon, eg \code{"x1@2 ; x3@5"} will style from the column 2 of \code{x1} to the 5th column of \code{x3}. Coefficient names are partially matched, use a \code{'\%'} first to refer to the original name (before dictionary) and use \code{'@'} first to use a regular expression. You can add a vector of row/cell/range.
-#' @param page.width Character scalar equal to \code{'fit'} (default), \code{'a4'} or \code{'us'} or a Latex measure (like \code{'17cm'}). Only used when the Latex table is to be viewed (\code{view = TRUE}), exported (\code{export != NULL}) or displayed in Rmarkdown (\code{markdown != NULL}). It represents the text width of the page in which the Latex table will be inserted. By default, \code{'fit'}, the page fits exactly the table (i.e. text width = table width). If \code{'a4'} or \code{'us'}, two times 2cm is removed from the page width to account for margins.
+#' @param page.width Character scalar equal to \code{'fit'} (default), \code{'a4'} or \code{'us'}; or a single Latex measure (like \code{'17cm'}) or a double one (like \code{"21, 2cm"}). Only used when the Latex table is to be viewed (\code{view = TRUE}), exported (\code{export != NULL}) or displayed in Rmarkdown (\code{markdown != NULL}). It represents the text width of the page in which the Latex table will be inserted. By default, \code{'fit'}, the page fits exactly the table (i.e. text width = table width). If \code{'a4'} or \code{'us'}, two times 2cm is removed from the page width to account for margins. Providing a page width and a margin width, like in \code{"17in, 1in"}, enables a correct display of the argument \code{adjustbox}. Note that the margin width represent the width of a single side margin (and hence will be doubled).
+#' @param css.class Character scalar, default is \code{"etable"}. Only used in Rmarkdown documents when \code{markdown = TRUE}. The table in an image format is embedded in a \code{<div>} container, and that container is of class \code{css.class}.
 #'
 #'
 #' @details
@@ -479,7 +480,8 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                   tabular = "normal", highlight = NULL, coef.style = NULL,
                   meta = NULL, meta.time = NULL, meta.author = NULL, meta.sys = NULL,
                   meta.call = NULL, meta.comment = NULL, view = FALSE,
-                  export = NULL, markdown = NULL, page.width = "fit"){
+                  export = NULL, markdown = NULL, page.width = "fit",
+                  css.class = "etable"){
 
     #
     # Checking the arguments
@@ -518,6 +520,8 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
         warning("Since float = FALSE, the argument", enumerate_items(what, "s.is"), " ignored.",
                 immediate. = TRUE, call. = FALSE)
     }
+
+    check_value(css.class, "character scalar")
 
     # NOTA: now that I allow the use of .(stuff) for headers and extralines
     # list(...) will raise an error if subtitle (now deprec) is used with .()
@@ -600,7 +604,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     # Arguments that can be set globally
     opts = getOption("fixest_etable")
 
-    args_global = c("postprocess.tex", "postprocess.df", "view", "markdown")
+    args_global = c("postprocess.tex", "postprocess.df", "view", "markdown", "page.width")
     for(arg in setdiff(args_global, names(mc))){
         if(arg %in% names(opts)){
             assign(arg, opts[[arg]])
@@ -824,7 +828,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
 
         if(is_md){
             if(!knitr::is_latex_output()){
-                cat(.dsb0("![](.[path])\n"))
+                cat(.dsb0('<div class = ".[css.class]"><img src = ".[path]"></div>\n'))
                 return(invisible(NULL))
             }
         }
@@ -4821,8 +4825,12 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
 
         minipage_start = minipage_end = ""
         if(!identical(page.width, "fit")){
-            minipage_start = .dsb("\\begin{minipage}{.[page.width]}\n")
-            minipage_end = "\n\\end{minipage}"
+            # page.width is guaranteed to be of length 2
+            minipage_start = .dsb("\\begin{minipage}{.[page.width[1]]} ",
+                                  "\\centering ",
+                                  "\\begin{minipage}{.[page.width[2]]}\n ", sep = "\n")
+
+            minipage_end = "\n\\end{minipage}\n\\end{minipage}"
         }
 
         intro = c("\\documentclass[border={ 10 5 10 5 }]{standalone}",
@@ -5064,7 +5072,7 @@ window.addEventListener("load", changeImgRatio);
 
 <body>
 
-<div id="container">
+<div id="container" class = "etable">
 	<img src = ".[png_name]" alt="etable preview" width = "100%">
 </div>
 
@@ -6306,31 +6314,52 @@ tag_gen = function(){
 check_set_page_width = function(page.width, up = 0){
 
     set_up(up + 1)
-    check_value_plus(page.width, "match(fit, a4, us) | scalar(character, numeric) GT{0}")
+    check_value_plus(page.width, "match(fit, a4, us) | vector(character, numeric) GT{0} len(1, 2) no NA")
 
-    if(is.numeric(page.width)){
-        page.width = paste0(page.width, "cm")
+    if(identical(page.width, "fit")){
+        # nothing
+    } else if(identical(page.width, "a4")){
+        page.width = c("21cm", "17cm")
 
-    } else if(page.width %in% c("a4", "us")){
-        page.width = switch(page.width,
-                            a4 = "17cm",
-                            us = "17.6cm")
+    } else if(identical(page.width, "us")){
+        page.width = c("21.6cm", "16.5cm")
 
-    } else if(page.width != "fit"){
-        # we extract the first number
-        number = .dsb("'[[:digit:].]+'x?page.width")
-        if(!is_numeric_in_char(number)){
-            stop_up("The argument 'page.width' must represent a 'Latex' measure, ex: 12cm. ",
-                    "Problem: a proper number could not be found in ", page.width, ".")
+    } else if(is.numeric(page.width)){
+        if(length(page.width) == 1){
+            page.width = paste0(c(page.width, page.width - 4), "cm")
+        } else {
+            page.width = paste0(c(page.width[1], page.width[1] - 2*page.width[2]), "cm")
+        }
+    } else {
+        # page.fit is a character scalar
+        # format: 21:2cm
+        #         21 is the total width
+        #         2 is "optional". The margin width of ONE side
+        #         cm: the unit
+
+        if(length(page.width) > 1){
+            page.width = paste0(page.width, collapse = ", ")
         }
 
-        unit = .dsb("'[^[:alpha:]]'R, L?page.width")
+        unit = .dsb("'[[:alpha:] ]+$'x, w, L?page.width")
         if(!unit %in% c("cm", "mm", "in", "pt", "em", "ex")){
             stop_up("The argument 'page.width' must represent a 'Latex' measure, ex: 12cm. ",
-                    "Problem: a valid unit could not be found in ", unit,".")
+                    "It can be optionally followed by a side margin width, as in '21, 2cm'. ",
+                    "Problem: a valid unit could not be found in '", unit,"'.")
         }
 
-        page.width = paste0(number, unit)
+        # Now the numbers
+        numbers = .dsb("'[[:alpha:]]'R, '[:,;]'S, w, s ? page.width")
+        if(!length(numbers) %in% 1:2 || !all(sapply(numbers, is_numeric_in_char))){
+
+            stop_up("The argument 'page.width' must represent a 'Latex' measure, ex: 12cm. ",
+                    "It can be optionally followed by a side margin width, as in '21, 2cm'. ",
+                    "Problem: the current format could not be parsed ('", page.width, "').")
+        }
+
+        if(length(numbers) == 1) numbers[2] = numbers[1]
+
+        page.width = paste0(c(numbers[1], numbers[2]), unit)
     }
 
     page.width

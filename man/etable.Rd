@@ -78,7 +78,9 @@ etable(
   meta.comment = NULL,
   view = FALSE,
   export = NULL,
-  markdown = NULL
+  markdown = NULL,
+  page.width = "fit",
+  css.class = "etable"
 )
 
 setFixest_etable(
@@ -110,6 +112,7 @@ setFixest_etable(
   view = FALSE,
   markdown = NULL,
   view.cache = FALSE,
+  page.width = "fit",
   postprocess.tex = NULL,
   postprocess.df = NULL,
   fit_format = "__var__",
@@ -176,7 +179,9 @@ esttable(
   coef.just = NULL,
   highlight = NULL,
   coef.style = NULL,
-  export = NULL
+  export = NULL,
+  page.width = "fit",
+  css.class = "etable"
 )
 
 esttex(
@@ -242,7 +247,9 @@ esttex(
   meta.comment = NULL,
   view = FALSE,
   export = NULL,
-  markdown = NULL
+  markdown = NULL,
+  page.width = "fit",
+  css.class = "etable"
 )
 }
 \arguments{
@@ -382,6 +389,10 @@ The options are a comma-separated list of items. By default the highlighting is 
 
 \item{markdown}{Character scalar giving the location of a directory, or a logical scalar. Default is \code{NULL}. This argument only works in Rmarkdown documents, when knitting the document. If provided: two behaviors depending on context. A) if the output document is Latex, the table is exported in Latex. B) if the output document is not Latex, the table will be exported to PNG at the desired location and inserted in the document via a markdown link. If equal to \code{TRUE}, the default location of the PNGs is a temporary folder for \code{R > 4.0.0}, or to \code{"images/etable/"} for earlier versions.}
 
+\item{page.width}{Character scalar equal to \code{'fit'} (default), \code{'a4'} or \code{'us'}; or a single Latex measure (like \code{'17cm'}) or a double one (like \code{"21, 2cm"}). Only used when the Latex table is to be viewed (\code{view = TRUE}), exported (\code{export != NULL}) or displayed in Rmarkdown (\code{markdown != NULL}). It represents the text width of the page in which the Latex table will be inserted. By default, \code{'fit'}, the page fits exactly the table (i.e. text width = table width). If \code{'a4'} or \code{'us'}, two times 2cm is removed from the page width to account for margins. Providing a page width and a margin width, like in \code{"17in, 1in"}, enables a correct display of the argument \code{adjustbox}. Note that the margin width represent the width of a single side margin (and hence will be doubled).}
+
+\item{css.class}{Character scalar, default is \code{"etable"}. Only used in Rmarkdown documents when \code{markdown = TRUE}. The table in an image format is embedded in a \code{<div>} container, and that container is of class \code{css.class}.}
+
 \item{view.cache}{Logical, default is \code{FALSE}. Only used when \code{view = TRUE}. Whether the PNGs of the tables should be cached.}
 
 \item{reset}{(\code{setFixest_etable} only.) Logical, default is \code{FALSE}. If \code{TRUE}, this will reset all the default values that were already set by the user in previous calls.}
@@ -390,7 +401,7 @@ The options are a comma-separated list of items. By default the highlighting is 
 
 \item{x}{An object returned by \code{etable}.}
 
-\item{type}{Character scalar equal to 'pdflatex' (default), 'magick' or 'tex'. Which log file to report; if 'tex', the full source code of the tex file is returned.}
+\item{type}{Character scalar equal to 'pdflatex' (default), 'magick', 'dir' or 'tex'. Which log file to report; if 'tex', the full source code of the tex file is returned, if 'dir': the directory of the log files is returned.}
 }
 \value{
 If \code{tex = TRUE}, the lines composing the Latex table are returned invisibly while the table is directly prompted on the console.
