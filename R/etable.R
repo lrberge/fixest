@@ -80,7 +80,7 @@
 #' The options are a comma-separated list of items. By default the highlighting is done with a frame (a thick box) around the coefficient, use \code{'rowcol'} to highlight with a row color instead. Here are the other options: \code{'se'} to highlight the standard-errors too; \code{'square'} to have a square box (instead of rounded); \code{'thick1'} to \code{'thick6'} to monitor the width of the box; \code{'sep0'} to \code{'sep9'} to monitor the inner spacing. Finally the remaining option is the color: simply add an R color (it must be a valid R color!). You can use \code{"color!alpha"} with "alpha" a number between 0 to 100 to change the alpha channel of the color.
 #' @param coef.style Named list containing styles to be applied to the coefficients. It must be of the form \code{.("style1" = "coefs1", "style2" = "coefs2", etc)}. The style must contain the string \code{":coef:"} (or \code{":coef_se:"} to style both the coefficient and its standard-error). The string \code{:coef:} will be replaced verbatim by the coefficient value. For example use \code{"\\textbf{:coef:}"} to put the coefficient in bold. Note that markdown markup is enabled so \code{"**:coef:**"} would also put it in bold. The coefficients to be styled can be written in three forms: 1) row, eg \code{"x1"} will style the full row of the variable \code{x1}; 2) cells, use \code{'@'} after the coefficient name to give the column, it accepts ranges, eg \code{"x1@2, 4-6, 8"} will style only the columns 2, 4, 5, 6, and 8 of the variable \code{x1}; 3) range, by giving the top-left and bottom-right values separated with a semi-colon, eg \code{"x1@2 ; x3@5"} will style from the column 2 of \code{x1} to the 5th column of \code{x3}. Coefficient names are partially matched, use a \code{'\%'} first to refer to the original name (before dictionary) and use \code{'@'} first to use a regular expression. You can add a vector of row/cell/range.
 #' @param page.width Character scalar equal to \code{'fit'} (default), \code{'a4'} or \code{'us'}; or a single Latex measure (like \code{'17cm'}) or a double one (like \code{"21, 2cm"}). Only used when the Latex table is to be viewed (\code{view = TRUE}), exported (\code{export != NULL}) or displayed in Rmarkdown (\code{markdown != NULL}). It represents the text width of the page in which the Latex table will be inserted. By default, \code{'fit'}, the page fits exactly the table (i.e. text width = table width). If \code{'a4'} or \code{'us'}, two times 2cm is removed from the page width to account for margins. Providing a page width and a margin width, like in \code{"17in, 1in"}, enables a correct display of the argument \code{adjustbox}. Note that the margin width represent the width of a single side margin (and hence will be doubled).
-#' @param css.class Character scalar, default is \code{"etable"}. Only used in Rmarkdown documents when \code{markdown = TRUE}. The table in an image format is embedded in a \code{<div>} container, and that container is of class \code{css.class}.
+#' @param div.class Character scalar, default is \code{"etable"}. Only used in Rmarkdown documents when \code{markdown = TRUE}. The table in an image format is embedded in a \code{<div>} container, and that container is of class \code{div.class}.
 #'
 #'
 #' @details
@@ -481,7 +481,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                   meta = NULL, meta.time = NULL, meta.author = NULL, meta.sys = NULL,
                   meta.call = NULL, meta.comment = NULL, view = FALSE,
                   export = NULL, markdown = NULL, page.width = "fit",
-                  css.class = "etable"){
+                  div.class = "etable"){
 
     #
     # Checking the arguments
@@ -521,7 +521,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                 immediate. = TRUE, call. = FALSE)
     }
 
-    check_value(css.class, "character scalar")
+    check_value(div.class, "character scalar")
 
     # NOTA: now that I allow the use of .(stuff) for headers and extralines
     # list(...) will raise an error if subtitle (now deprec) is used with .()
@@ -828,7 +828,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
 
         if(is_md){
             if(!knitr::is_latex_output()){
-                cat(.dsb0('<div class = ".[css.class]"><img src = ".[path]"></div>\n'))
+                cat(.dsb0('<div class = ".[div.class]"><img src = ".[path]"></div>\n'))
                 return(invisible(NULL))
             }
         }

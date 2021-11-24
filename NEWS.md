@@ -37,6 +37,8 @@
  
  - new (experimental) argument `markdown`: Latex tables can be automatically integrated in the non-Latex markdown document in PNG format.
  
+ - new argument `div.class`. Linked to the `markdown` argument. In Rmarkdown documents, the table in PNG format is embedded in a `<div>` container. The class of the div is `div.class`, which is by default `"etable"`.
+ 
  - new argument `tpt` to nest the table in a `threeparttable` environment. Notes are then nested into the `tablenotes` environment.
  
  - in `style.tex`: new argument `notes.tpt.intro` to insert code right after the `tablenotes` environment and before any note (useful to set the font size of notes globally for instance).

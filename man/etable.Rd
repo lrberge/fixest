@@ -80,7 +80,7 @@ etable(
   export = NULL,
   markdown = NULL,
   page.width = "fit",
-  css.class = "etable"
+  div.class = "etable"
 )
 
 setFixest_etable(
@@ -391,7 +391,7 @@ The options are a comma-separated list of items. By default the highlighting is 
 
 \item{page.width}{Character scalar equal to \code{'fit'} (default), \code{'a4'} or \code{'us'}; or a single Latex measure (like \code{'17cm'}) or a double one (like \code{"21, 2cm"}). Only used when the Latex table is to be viewed (\code{view = TRUE}), exported (\code{export != NULL}) or displayed in Rmarkdown (\code{markdown != NULL}). It represents the text width of the page in which the Latex table will be inserted. By default, \code{'fit'}, the page fits exactly the table (i.e. text width = table width). If \code{'a4'} or \code{'us'}, two times 2cm is removed from the page width to account for margins. Providing a page width and a margin width, like in \code{"17in, 1in"}, enables a correct display of the argument \code{adjustbox}. Note that the margin width represent the width of a single side margin (and hence will be doubled).}
 
-\item{css.class}{Character scalar, default is \code{"etable"}. Only used in Rmarkdown documents when \code{markdown = TRUE}. The table in an image format is embedded in a \code{<div>} container, and that container is of class \code{css.class}.}
+\item{div.class}{Character scalar, default is \code{"etable"}. Only used in Rmarkdown documents when \code{markdown = TRUE}. The table in an image format is embedded in a \code{<div>} container, and that container is of class \code{div.class}.}
 
 \item{view.cache}{Logical, default is \code{FALSE}. Only used when \code{view = TRUE}. Whether the PNGs of the tables should be cached.}
 
