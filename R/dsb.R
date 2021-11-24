@@ -225,8 +225,8 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE, nest = 
     res
 }
 
-.dsb0 = function(..., frame = parent.frame(), sep = "", vectorize = FALSE){
-    .dsb(..., frame = frame, nest = FALSE, sep = sep, vectorize = vectorize, check = FALSE)
+.dsb0 = function(..., frame = parent.frame(), sep = "", vectorize = FALSE, check = FALSE){
+    .dsb(..., frame = frame, nest = FALSE, sep = sep, vectorize = vectorize, check = check)
 }
 
 .dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
@@ -236,17 +236,30 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE, nest = 
         return("")
     } else if(...length() == 1){
         x = as.character(..1)
-    }else {
+
+        if(length(x) > 1){
+            stop("dsb can only be applied to character scalars. Problem: the argument is of length ",
+                 length(qui), "")
+        }
+
+    } else {
         # Note: using paste(..1, ..2, sep = sep) explicitly only saves 2us vav do.call
         # not worth it.
 
         dots = list(...)
+
+        if(any(lengths(dots) > 1)){
+            qui = which(lengths(dots) > 1)[1]
+            stop("dsb can only be applied to character scalars. Problem: The ", n_th(qui),
+                 " elment in ... is of length ", length(dots[[qui]]), ".")
+        }
+
         dots$sep = sep
         x = do.call(paste, dots)
     }
 
-    if(length(x) == 1 && is.na(x)){
-        return(NA_character_)
+    if(is.na(x) || length(x) == 0){
+        return(x)
     }
 
     if(nest){
@@ -454,12 +467,21 @@ dsb_char2operator = function(x){
                   "w", "W", "stop",
                   "*s", "*s_", "*if", "if", "IF")
 
-    ok = FALSE
+    ok = do_eval = FALSE
 
     if(quote %in% c("'", "\"", "`")){
         pat = paste0("^", quote, "[^", quote, "]*", quote)
         op_abbrev = sub(pat, "", x)
         in_quote = str_trim(x, 1, nchar(op_abbrev) + 1)
+
+        do_eval = quote == "`"
+
+        if(do_eval && substr(in_quote, 1, 1) == "!"){
+            # special case: back ticks used as extra quote
+            # => enables to use ' and " freely in arguments
+            do_eval = FALSE
+            in_quote = str_trim(in_quote, 1)
+        }
 
         if(nchar(op_abbrev) == 0){
             stop_up("In dsb, if a quoted value is present, the operators must always be of the form 'value'op, with 'op' an operator. Problem: In '", x, "' the operator is missing.")
@@ -539,7 +561,7 @@ dsb_char2operator = function(x){
 
     }
 
-    res = list(quoted = in_quote, do_eval = quote == "`", op = op_abbrev)
+    res = list(quoted = in_quote, do_eval = do_eval, op = op_abbrev)
     res
 }
 
@@ -619,7 +641,7 @@ dsb_operators = function(x, quoted, op, check = FALSE, frame = NULL){
 
         x_pat = regexpr(quoted, x, perl = TRUE)
 
-        res = substr(x, x_pat, attr(x_pat, "match.length"))
+        res = substr(x, x_pat, x_pat - 1 + attr(x_pat, "match.length"))
 
     } else if(op == "X"){
         # extract all patterns
