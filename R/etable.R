@@ -5550,7 +5550,6 @@ coef_pos_parse = function(x, coef_names, n_models, i, arg_name){
         }
 
         # new DSB power
-        #       dsb("c(.['- => :'r: x])") ou dsb("c(.['-_to_:'r: x])")
         x_txt = paste0("c(", gsub("-", ":", x_pos), ")")
         x_call = error_sender(str2lang(x_txt), "In argument '", arg_name,
                               "' the position in '", x,
@@ -5686,7 +5685,7 @@ markup_apply = function(x){
 
             if(!n_match %% 2 == 0){
                 # failed markup
-                res = gsub(pat, .dsb("__.['', rep('$', i)]__"), res, fixed = TRUE)
+                res = gsub(pat, .dsb("__.[`i`*c!$]__"), res, fixed = TRUE)
                 failed[i] = TRUE
             } else {
                 x_split = strsplit(res, pat, fixed = TRUE)[[1]]
@@ -5701,7 +5700,7 @@ markup_apply = function(x){
 
     for(i in which(failed)){
         pat = names(dict_pat)[i]
-        res = gsub(.dsb("__.['', rep('$', i)]__"), pat, res, fixed = TRUE)
+        res = gsub(.dsb("__.[`i`*c!$]__"), pat, res, fixed = TRUE)
     }
 
     if(is_eq){

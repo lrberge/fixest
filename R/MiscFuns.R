@@ -4661,7 +4661,7 @@ n_unik = function(x){
         }
 
         rhs_txt = as.character(fml)[[2]]
-        rhs_txt = gsub("(^| )\\.( |$)", dsb(".['+', dot_default]"), rhs_txt)
+        rhs_txt = gsub("(^| )\\.( |$)", dsb(".['+'c? dot_default]"), rhs_txt)
         fml = .xpd(rhs = rhs_txt)
     }
 
