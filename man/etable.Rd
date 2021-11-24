@@ -181,7 +181,7 @@ esttable(
   coef.style = NULL,
   export = NULL,
   page.width = "fit",
-  css.class = "etable"
+  div.class = "etable"
 )
 
 esttex(
@@ -249,7 +249,7 @@ esttex(
   export = NULL,
   markdown = NULL,
   page.width = "fit",
-  css.class = "etable"
+  div.class = "etable"
 )
 }
 \arguments{
