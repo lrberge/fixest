@@ -170,7 +170,7 @@
     </tr>
     <tr>
       <th>panel.id</th>
-      <td><p>The panel identifiers. Can either be: i) a one sided formula (e.g. <code>panel.id = ~id+time</code>), ii) a character vector of length 2 (e.g. <code>panel.id=c('id', 'time')</code>, or iii) a character scalar of two variables separated by a comma (e.g. <code>panel.id='id,time'</code>). Note that you can combine variables with <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> only inside formulas (see the dedicated section in <code><a href='feols.html'>feols</a></code>).</p></td>
+      <td><p>The panel identifiers. Can either be: i) a one sided formula (e.g. <code>panel.id = ~id+time</code>), ii) a character vector of length 2 (e.g. <code>panel.id=c('id', 'time')</code>, or iii) a character scalar of two variables separated by a comma (e.g. <code>panel.id='id,time'</code>). Note that you can combine variables with <code>^</code> only inside formulas (see the dedicated section in <code><a href='feols.html'>feols</a></code>).</p></td>
     </tr>
     <tr>
       <th>fixef.rm</th>
@@ -231,45 +231,50 @@
     <p>The function <code>getFixest_estimation</code> returns the currently set global defaults.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='co'>#</span>
-<span class='co'># Example: removing singletons is FALSE by default</span>
-<span class='co'>#</span>
-
-<span class='co'># =&gt; changing this default</span>
-
-<span class='co'># Let's create data with singletons</span>
-<span class='va'>base</span> <span class='op'>=</span> <span class='va'>iris</span>
-<span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>)</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span>
-<span class='va'>base</span><span class='op'>$</span><span class='va'>fe_singletons</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/character.html'>as.character</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>$</span><span class='va'>species</span><span class='op'>)</span>
-<span class='va'>base</span><span class='op'>$</span><span class='va'>fe_singletons</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span> <span class='op'>=</span> <span class='va'>letters</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span>
-
-<span class='va'>res</span>          <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='va'>x2</span> <span class='op'>|</span> <span class='va'>fe_singletons</span>, <span class='va'>base</span><span class='op'>)</span>
-<span class='va'>res_noSingle</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='va'>x2</span> <span class='op'>|</span> <span class='va'>fe_singletons</span>, <span class='va'>base</span>, fixef.rm <span class='op'>=</span> <span class='st'>"single"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>NOTE: 5 fixed-effect singletons were removed (5 observations).</span></div><div class='input'>
-<span class='co'># New defaults</span>
-<span class='fu'>setFixest_estimation</span><span class='op'>(</span>fixef.rm <span class='op'>=</span> <span class='st'>"single"</span><span class='op'>)</span>
-<span class='va'>res_newDefault</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='va'>x2</span> <span class='op'>|</span> <span class='va'>fe_singletons</span>, <span class='va'>base</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>NOTE: 5 fixed-effect singletons were removed (5 observations).</span></div><div class='input'>
-<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res</span>, <span class='va'>res_noSingle</span>, <span class='va'>res_newDefault</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                                res     res_noSingle   res_newDefault
-#&gt; Dependent Var.:                  y                y                y
-#&gt;                                                                     
-#&gt; x1                0.4274* (0.1409)  0.4274 (0.1615)  0.4274 (0.1615)
-#&gt; x2              0.7774*** (0.1099) 0.7774* (0.1260) 0.7774* (0.1260)
-#&gt; Fixed-Effects:  ------------------ ---------------- ----------------
-#&gt; fe_singletons                  Yes              Yes              Yes
-#&gt; _______________ __________________ ________________ ________________
-#&gt; S.E.: Clustered  by: fe_singletons by: fe_singlet.. by: fe_singlet..
-#&gt; Observations                   150              145              145
-#&gt; R2                         0.86452          0.85729          0.85729
-#&gt; Within R2                  0.64201          0.64201          0.64201</div><div class='input'>
-<span class='co'># Resetting the defaults</span>
-<span class='fu'>setFixest_estimation</span><span class='op'>(</span>reset <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-
-
-
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'><span class='co'># Example: removing singletons is FALSE by default</span></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># =&gt; changing this default</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Let's create data with singletons</span></span>
+<span class='r-in'><span class='va'>base</span> <span class='op'>=</span> <span class='va'>iris</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>)</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>base</span><span class='op'>$</span><span class='va'>fe_singletons</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/character.html'>as.character</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>$</span><span class='va'>species</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>base</span><span class='op'>$</span><span class='va'>fe_singletons</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span> <span class='op'>=</span> <span class='va'>letters</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>res</span>          <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='va'>x2</span> <span class='op'>|</span> <span class='va'>fe_singletons</span>, <span class='va'>base</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>res_noSingle</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='va'>x2</span> <span class='op'>|</span> <span class='va'>fe_singletons</span>, <span class='va'>base</span>, fixef.rm <span class='op'>=</span> <span class='st'>"single"</span><span class='op'>)</span></span>
+<span class='r-msg co'><span class='r-pr'>#&gt;</span> NOTE: 5 fixed-effect singletons were removed (5 observations).</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># New defaults</span></span>
+<span class='r-in'><span class='fu'>setFixest_estimation</span><span class='op'>(</span>fixef.rm <span class='op'>=</span> <span class='st'>"single"</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>res_newDefault</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='va'>x2</span> <span class='op'>|</span> <span class='va'>fe_singletons</span>, <span class='va'>base</span><span class='op'>)</span></span>
+<span class='r-msg co'><span class='r-pr'>#&gt;</span> NOTE: 5 fixed-effect singletons were removed (5 observations).</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res</span>, <span class='va'>res_noSingle</span>, <span class='va'>res_newDefault</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                                res     res_noSingle   res_newDefault</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:                  y                y                y</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                                                                     </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x1                0.4274* (0.1409)  0.4274 (0.1615)  0.4274 (0.1615)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x2              0.7774*** (0.1099) 0.7774* (0.1260) 0.7774* (0.1260)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Fixed-Effects:  ------------------ ---------------- ----------------</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> fe_singletons                  Yes              Yes              Yes</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> _______________ __________________ ________________ ________________</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> S.E.: Clustered  by: fe_singletons by: fe_singlet.. by: fe_singlet..</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations                   150              145              145</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> R2                         0.86452          0.85729          0.85729</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Within R2                  0.64201          0.64201          0.64201</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Resetting the defaults</span></span>
+<span class='r-in'><span class='fu'>setFixest_estimation</span><span class='op'>(</span>reset <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

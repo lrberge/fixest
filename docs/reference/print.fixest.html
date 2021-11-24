@@ -184,90 +184,96 @@
     <p>Laurent Berge</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='co'># Load trade data</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>trade</span><span class='op'>)</span>
-
-<span class='co'># We estimate the effect of distance on trade</span>
-<span class='co'>#   =&gt; we account for 3 fixed-effects (FEs)</span>
-<span class='va'>est_pois</span> <span class='op'>=</span> <span class='fu'><a href='feglm.html'>fepois</a></span><span class='op'>(</span><span class='va'>Euros</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>dist_km</span><span class='op'>)</span><span class='op'>|</span><span class='va'>Origin</span><span class='op'>+</span><span class='va'>Destination</span><span class='op'>+</span><span class='va'>Product</span>, <span class='va'>trade</span><span class='op'>)</span>
-
-<span class='co'># displaying the results</span>
-<span class='co'>#  (by default SEs are clustered if FEs are used)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>est_pois</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Poisson estimation, Dep. Var.: Euros
-#&gt; Observations: 38,325 
-#&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20
-#&gt; Standard-errors: Clustered (Origin) 
-#&gt;              Estimate Std. Error  t value  Pr(&gt;|t|)    
-#&gt; log(dist_km) -1.52775   0.115627 -13.2127 &lt; 2.2e-16 ***
-#&gt; ---
-#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389
-#&gt;            BIC:  1.427e+12     Squared Cor.: 0.60377 </div><div class='input'>
-<span class='co'># By default the coefficient table is displayed.</span>
-<span class='co'>#  If the user wished to display only the coefficents, use option type:</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>est_pois</span>, type <span class='op'>=</span> <span class='st'>"coef"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; log(dist_km) 
-#&gt;    -1.527747 </div><div class='input'>
-<span class='co'># To permanently display coef. only, use setFixest_print:</span>
-<span class='fu'>setFixest_print</span><span class='op'>(</span>type <span class='op'>=</span> <span class='st'>"coef"</span><span class='op'>)</span>
-<span class='va'>est_pois</span>
-</div><div class='output co'>#&gt; log(dist_km) 
-#&gt;    -1.527747 </div><div class='input'><span class='co'># back to default:</span>
-<span class='fu'>setFixest_print</span><span class='op'>(</span>type <span class='op'>=</span> <span class='st'>"table"</span><span class='op'>)</span>
-
-<span class='co'>#</span>
-<span class='co'># fitstat</span>
-<span class='co'>#</span>
-
-<span class='co'># We modify which fit statistic to display</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>est_pois</span>, fitstat <span class='op'>=</span> <span class='op'>~</span> <span class='va'>.</span> <span class='op'>+</span> <span class='va'>lr</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Poisson estimation, Dep. Var.: Euros
-#&gt; Observations: 38,325 
-#&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20
-#&gt; Standard-errors: Clustered (Origin) 
-#&gt;              Estimate Std. Error  t value  Pr(&gt;|t|)    
-#&gt; log(dist_km) -1.52775   0.115627 -13.2127 &lt; 2.2e-16 ***
-#&gt; ---
-#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389
-#&gt;            BIC:  1.427e+12     Squared Cor.: 0.60377 
-#&gt; LR: stat = 4.527e+12, p &lt; 2.2e-16, on 49 DoF.</div><div class='input'>
-<span class='co'># We add the LR test to the default (represented by the ".")</span>
-
-<span class='co'># to show only the LR stat:</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>est_pois</span>, fitstat <span class='op'>=</span> <span class='op'>~</span> <span class='va'>.</span> <span class='op'>+</span> <span class='va'>lr.stat</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Poisson estimation, Dep. Var.: Euros
-#&gt; Observations: 38,325 
-#&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20
-#&gt; Standard-errors: Clustered (Origin) 
-#&gt;              Estimate Std. Error  t value  Pr(&gt;|t|)    
-#&gt; log(dist_km) -1.52775   0.115627 -13.2127 &lt; 2.2e-16 ***
-#&gt; ---
-#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389 
-#&gt;            BIC:  1.427e+12     Squared Cor.: 0.60377  
-#&gt;                                   LR, stat.: 4.527e+12</div><div class='input'>
-<span class='co'># To modify the defaults:</span>
-<span class='fu'>setFixest_print</span><span class='op'>(</span>fitstat <span class='op'>=</span> <span class='op'>~</span> <span class='va'>.</span> <span class='op'>+</span> <span class='va'>lr.stat</span> <span class='op'>+</span> <span class='va'>rmse</span><span class='op'>)</span>
-<span class='va'>est_pois</span>
-</div><div class='output co'>#&gt; Poisson estimation, Dep. Var.: Euros
-#&gt; Observations: 38,325 
-#&gt; Fixed-effects: Origin: 15,  Destination: 15,  Product: 20
-#&gt; Standard-errors: Clustered (Origin) 
-#&gt;              Estimate Std. Error  t value  Pr(&gt;|t|)    
-#&gt; log(dist_km) -1.52775   0.115627 -13.2127 &lt; 2.2e-16 ***
-#&gt; ---
-#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389    
-#&gt;            BIC:  1.427e+12     Squared Cor.: 0.60377     
-#&gt;      LR, stat.:  4.527e+12             RMSE: 88,419,292.2</div><div class='input'>
-<span class='co'># Back to default (NULL == default)</span>
-<span class='fu'>setFixest_print</span><span class='op'>(</span>fitstat <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
-
-
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='co'># Load trade data</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>trade</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># We estimate the effect of distance on trade</span></span>
+<span class='r-in'><span class='co'>#   =&gt; we account for 3 fixed-effects (FEs)</span></span>
+<span class='r-in'><span class='va'>est_pois</span> <span class='op'>=</span> <span class='fu'><a href='feglm.html'>fepois</a></span><span class='op'>(</span><span class='va'>Euros</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>dist_km</span><span class='op'>)</span><span class='op'>|</span><span class='va'>Origin</span><span class='op'>+</span><span class='va'>Destination</span><span class='op'>+</span><span class='va'>Product</span>, <span class='va'>trade</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># displaying the results</span></span>
+<span class='r-in'><span class='co'>#  (by default SEs are clustered if FEs are used)</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>est_pois</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Poisson estimation, Dep. Var.: Euros</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations: 38,325 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Standard-errors: Clustered (Origin) </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>              Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log(dist_km) -1.52775   0.115627 -13.2127 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>            BIC:  1.427e+12     Squared Cor.: 0.60377 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># By default the coefficient table is displayed.</span></span>
+<span class='r-in'><span class='co'>#  If the user wished to display only the coefficents, use option type:</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>est_pois</span>, type <span class='op'>=</span> <span class='st'>"coef"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log(dist_km) </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    -1.527747 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># To permanently display coef. only, use setFixest_print:</span></span>
+<span class='r-in'><span class='fu'>setFixest_print</span><span class='op'>(</span>type <span class='op'>=</span> <span class='st'>"coef"</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>est_pois</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log(dist_km) </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    -1.527747 </span>
+<span class='r-in'><span class='co'># back to default:</span></span>
+<span class='r-in'><span class='fu'>setFixest_print</span><span class='op'>(</span>type <span class='op'>=</span> <span class='st'>"table"</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'><span class='co'># fitstat</span></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># We modify which fit statistic to display</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>est_pois</span>, fitstat <span class='op'>=</span> <span class='op'>~</span> <span class='va'>.</span> <span class='op'>+</span> <span class='va'>lr</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Poisson estimation, Dep. Var.: Euros</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations: 38,325 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Standard-errors: Clustered (Origin) </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>              Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log(dist_km) -1.52775   0.115627 -13.2127 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>            BIC:  1.427e+12     Squared Cor.: 0.60377 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> LR: stat = 4.527e+12, p &lt; 2.2e-16, on 49 DoF.</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># We add the LR test to the default (represented by the ".")</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># to show only the LR stat:</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>est_pois</span>, fitstat <span class='op'>=</span> <span class='op'>~</span> <span class='va'>.</span> <span class='op'>+</span> <span class='va'>lr.stat</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Poisson estimation, Dep. Var.: Euros</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations: 38,325 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Standard-errors: Clustered (Origin) </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>              Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log(dist_km) -1.52775   0.115627 -13.2127 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>            BIC:  1.427e+12     Squared Cor.: 0.60377  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                                   LR, stat.: 4.527e+12</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># To modify the defaults:</span></span>
+<span class='r-in'><span class='fu'>setFixest_print</span><span class='op'>(</span>fitstat <span class='op'>=</span> <span class='op'>~</span> <span class='va'>.</span> <span class='op'>+</span> <span class='va'>lr.stat</span> <span class='op'>+</span> <span class='va'>rmse</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>est_pois</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Poisson estimation, Dep. Var.: Euros</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations: 38,325 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Fixed-effects: Origin: 15,  Destination: 15,  Product: 20</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Standard-errors: Clustered (Origin) </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>              Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log(dist_km) -1.52775   0.115627 -13.2127 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Log-Likelihood: -7.133e+11   Adj. Pseudo R2: 0.760389    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>            BIC:  1.427e+12     Squared Cor.: 0.60377     </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>      LR, stat.:  4.527e+12             RMSE: 88,419,292.2</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Back to default (NULL == default)</span></span>
+<span class='r-in'><span class='fu'>setFixest_print</span><span class='op'>(</span>fitstat <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

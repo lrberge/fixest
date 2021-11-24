@@ -182,95 +182,109 @@
     <p>To apply <code>rep.fixest</code> on a list of fixest objects, it is absolutely necessary to use <code>.l()</code> and not <code><a href='https://rdrr.io/r/base/list.html'>list()</a></code>.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='co'># Let's show results with different standard-errors</span>
-
-<span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='va'>Temp</span>, data <span class='op'>=</span> <span class='va'>airquality</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'>
-<span class='va'>my_cluster</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"Month"</span>, <span class='st'>"Day"</span>, <span class='op'>~</span> <span class='va'>Day</span> <span class='op'>+</span> <span class='va'>Month</span><span class='op'>)</span>
-
-<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='va'>my_cluster</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                         model 1.1          model 1.2         model 1.3
-#&gt; Dependent Var.:             Ozone              Ozone             Ozone
-#&gt;                                                                       
-#&gt; (Intercept)       -64.34* (21.30)   -64.34** (20.15)   -64.34* (19.66)
-#&gt; Solar.R           0.0598 (0.0335) 0.0598*** (0.0162)   0.0598 (0.0314)
-#&gt; Wind              -3.334* (1.181) -3.334*** (0.8343)   -3.334* (1.135)
-#&gt; Temp            1.652*** (0.1583)  1.652*** (0.1927) 1.652*** (0.1386)
-#&gt; _______________ _________________ __________________ _________________
-#&gt; S.E.: Clustered         by: Month            by: Day   by: Day &amp; Month
-#&gt; Observations                  111                111               111
-#&gt; R2                        0.60589            0.60589           0.60589
-#&gt; Adj. R2                   0.59484            0.59484           0.59484</div><div class='input'>
-<span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='va'>my_cluster</span><span class='op'>)</span>, drop <span class='op'>=</span> <span class='st'>"Int"</span><span class='op'>)</span>
-</div><div class='img'><img src='rep.fixest-1.png' alt='' width='700' height='433' /></div><div class='input'>
-<span class='co'>#</span>
-<span class='co'># To rep multiple objects, you need to use .l()</span>
-<span class='co'>#</span>
-
-<span class='va'>est_bis</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='va'>Temp</span> <span class='op'>|</span> <span class='va'>Month</span>, <span class='va'>airquality</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'>
-<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'>.l</span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span><span class='op'>)</span>, cluster <span class='op'>=</span> <span class='va'>my_cluster</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                         model 1.1         model 2.1          model 1.2
-#&gt; Dependent Var.:             Ozone             Ozone              Ozone
-#&gt;                                                                       
-#&gt; (Intercept)       -64.34* (21.30)                     -64.34** (20.15)
-#&gt; Solar.R           0.0598 (0.0335)   0.0522 (0.0408) 0.0598*** (0.0162)
-#&gt; Wind              -3.334* (1.181)   -3.109. (1.306) -3.334*** (0.8343)
-#&gt; Temp            1.652*** (0.1583) 1.875*** (0.1816)  1.652*** (0.1927)
-#&gt; Fixed-Effects:  ----------------- ----------------- ------------------
-#&gt; Month                          No               Yes                 No
-#&gt; _______________ _________________ _________________ __________________
-#&gt; S.E.: Clustered         by: Month         by: Month            by: Day
-#&gt; Observations                  111               111                111
-#&gt; R2                        0.60589           0.63686            0.60589
-#&gt; Within R2                      --           0.53154                 --
-#&gt;                          model 2.2         model 1.3        model 2.3
-#&gt; Dependent Var.:              Ozone             Ozone            Ozone
-#&gt;                                                                      
-#&gt; (Intercept)                          -64.34* (19.66)                 
-#&gt; Solar.R           0.0522* (0.0202)   0.0598 (0.0314)  0.0522 (0.0391)
-#&gt; Wind            -3.109*** (0.7986)   -3.334* (1.135)  -3.109. (1.215)
-#&gt; Temp             1.875*** (0.3671) 1.652*** (0.1386) 1.875** (0.2209)
-#&gt; Fixed-Effects:  ------------------ ----------------- ----------------
-#&gt; Month                          Yes                No              Yes
-#&gt; _______________ __________________ _________________ ________________
-#&gt; S.E.: Clustered            by: Day   by: Day &amp; Month  by: Day &amp; Month
-#&gt; Observations                   111               111              111
-#&gt; R2                         0.63686           0.60589          0.63686
-#&gt; Within R2                  0.53154                --          0.53154</div><div class='input'>
-<span class='co'># using each</span>
-<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'>.l</span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span><span class='op'>)</span>, each <span class='op'>=</span> <span class='fl'>3</span>, cluster <span class='op'>=</span> <span class='va'>my_cluster</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                         model 1.1          model 1.2         model 1.3
-#&gt; Dependent Var.:             Ozone              Ozone             Ozone
-#&gt;                                                                       
-#&gt; (Intercept)       -64.34* (21.30)   -64.34** (20.15)   -64.34* (19.66)
-#&gt; Solar.R           0.0598 (0.0335) 0.0598*** (0.0162)   0.0598 (0.0314)
-#&gt; Wind              -3.334* (1.181) -3.334*** (0.8343)   -3.334* (1.135)
-#&gt; Temp            1.652*** (0.1583)  1.652*** (0.1927) 1.652*** (0.1386)
-#&gt; Fixed-Effects:  ----------------- ------------------ -----------------
-#&gt; Month                          No                 No                No
-#&gt; _______________ _________________ __________________ _________________
-#&gt; S.E.: Clustered         by: Month            by: Day   by: Day &amp; Month
-#&gt; Observations                  111                111               111
-#&gt; R2                        0.60589            0.60589           0.60589
-#&gt; Within R2                      --                 --                --
-#&gt;                         model 2.1          model 2.2        model 2.3
-#&gt; Dependent Var.:             Ozone              Ozone            Ozone
-#&gt;                                                                      
-#&gt; (Intercept)                                                          
-#&gt; Solar.R           0.0522 (0.0408)   0.0522* (0.0202)  0.0522 (0.0391)
-#&gt; Wind              -3.109. (1.306) -3.109*** (0.7986)  -3.109. (1.215)
-#&gt; Temp            1.875*** (0.1816)  1.875*** (0.3671) 1.875** (0.2209)
-#&gt; Fixed-Effects:  ----------------- ------------------ ----------------
-#&gt; Month                         Yes                Yes              Yes
-#&gt; _______________ _________________ __________________ ________________
-#&gt; S.E.: Clustered         by: Month            by: Day  by: Day &amp; Month
-#&gt; Observations                  111                111              111
-#&gt; R2                        0.63686            0.63686          0.63686
-#&gt; Within R2                 0.53154            0.53154          0.53154</div><div class='input'>
-
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='co'># Let's show results with different standard-errors</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='va'>Temp</span>, data <span class='op'>=</span> <span class='va'>airquality</span><span class='op'>)</span></span>
+<span class='r-msg co'><span class='r-pr'>#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>my_cluster</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"Month"</span>, <span class='st'>"Day"</span>, <span class='op'>~</span> <span class='va'>Day</span> <span class='op'>+</span> <span class='va'>Month</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='va'>my_cluster</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                         model 1.1          model 1.2         model 1.3</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:             Ozone              Ozone             Ozone</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                                                                       </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)       -64.34* (21.30)   -64.34** (20.15)   -64.34* (19.66)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Solar.R           0.0598 (0.0335) 0.0598*** (0.0162)   0.0598 (0.0314)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Wind              -3.334* (1.181) -3.334*** (0.8343)   -3.334* (1.135)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Temp            1.652*** (0.1583)  1.652*** (0.1927) 1.652*** (0.1386)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> _______________ _________________ __________________ _________________</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> S.E.: Clustered         by: Month            by: Day   by: Day &amp; Month</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations                  111                111               111</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> R2                        0.60589            0.60589           0.60589</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Adj. R2                   0.59484            0.59484           0.59484</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='va'>my_cluster</span><span class='op'>)</span>, drop <span class='op'>=</span> <span class='st'>"Int"</span><span class='op'>)</span></span>
+<span class='r-plt img'><img src='rep.fixest-1.png' alt='' width='700' height='433' /></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'><span class='co'># To rep multiple objects, you need to use .l()</span></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>est_bis</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='va'>Temp</span> <span class='op'>|</span> <span class='va'>Month</span>, <span class='va'>airquality</span><span class='op'>)</span></span>
+<span class='r-msg co'><span class='r-pr'>#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'>.l</span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span><span class='op'>)</span>, cluster <span class='op'>=</span> <span class='va'>my_cluster</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                         model 1.1         model 2.1          model 1.2</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:             Ozone             Ozone              Ozone</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                                                                       </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)       -64.34* (21.30)                     -64.34** (20.15)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Solar.R           0.0598 (0.0335)   0.0522 (0.0408) 0.0598*** (0.0162)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Wind              -3.334* (1.181)   -3.109. (1.306) -3.334*** (0.8343)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Temp            1.652*** (0.1583) 1.875*** (0.1816)  1.652*** (0.1927)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Fixed-Effects:  ----------------- ----------------- ------------------</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Month                          No               Yes                 No</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> _______________ _________________ _________________ __________________</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> S.E.: Clustered         by: Month         by: Month            by: Day</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations                  111               111                111</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> R2                        0.60589           0.63686            0.60589</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Within R2                      --           0.53154                 --</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                          model 2.2         model 1.3        model 2.3</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:              Ozone             Ozone            Ozone</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                                                                      </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)                          -64.34* (19.66)                 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Solar.R           0.0522* (0.0202)   0.0598 (0.0314)  0.0522 (0.0391)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Wind            -3.109*** (0.7986)   -3.334* (1.135)  -3.109. (1.215)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Temp             1.875*** (0.3671) 1.652*** (0.1386) 1.875** (0.2209)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Fixed-Effects:  ------------------ ----------------- ----------------</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Month                          Yes                No              Yes</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> _______________ __________________ _________________ ________________</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> S.E.: Clustered            by: Day   by: Day &amp; Month  by: Day &amp; Month</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations                   111               111              111</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> R2                         0.63686           0.60589          0.63686</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Within R2                  0.53154                --          0.53154</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># using each</span></span>
+<span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'>.l</span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span><span class='op'>)</span>, each <span class='op'>=</span> <span class='fl'>3</span>, cluster <span class='op'>=</span> <span class='va'>my_cluster</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                         model 1.1          model 1.2         model 1.3</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:             Ozone              Ozone             Ozone</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                                                                       </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)       -64.34* (21.30)   -64.34** (20.15)   -64.34* (19.66)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Solar.R           0.0598 (0.0335) 0.0598*** (0.0162)   0.0598 (0.0314)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Wind              -3.334* (1.181) -3.334*** (0.8343)   -3.334* (1.135)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Temp            1.652*** (0.1583)  1.652*** (0.1927) 1.652*** (0.1386)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Fixed-Effects:  ----------------- ------------------ -----------------</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Month                          No                 No                No</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> _______________ _________________ __________________ _________________</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> S.E.: Clustered         by: Month            by: Day   by: Day &amp; Month</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations                  111                111               111</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> R2                        0.60589            0.60589           0.60589</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Within R2                      --                 --                --</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                         model 2.1          model 2.2        model 2.3</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:             Ozone              Ozone            Ozone</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                                                                      </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)                                                          </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Solar.R           0.0522 (0.0408)   0.0522* (0.0202)  0.0522 (0.0391)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Wind              -3.109. (1.306) -3.109*** (0.7986)  -3.109. (1.215)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Temp            1.875*** (0.1816)  1.875*** (0.3671) 1.875** (0.2209)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Fixed-Effects:  ----------------- ------------------ ----------------</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Month                         Yes                Yes              Yes</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> _______________ _________________ __________________ ________________</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> S.E.: Clustered         by: Month            by: Day  by: Day &amp; Month</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations                  111                111              111</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> R2                        0.63686            0.63686          0.63686</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Within R2                 0.53154            0.53154          0.53154</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

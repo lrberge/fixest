@@ -172,7 +172,7 @@
     </tr>
     <tr>
       <th>cluster</th>
-      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] fixed-effect). You can interact two variables using <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
+      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] fixed-effect). You can interact two variables using <code>^</code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -189,43 +189,49 @@
     <p>The type of VCOV matrix plays a crucial role in this test. Use the arguments <code>se</code> and <code>cluster</code> to change the type of VCOV for the test.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>airquality</span><span class='op'>)</span>
-
-<span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/stats/poly.html'>poly</a></span><span class='op'>(</span><span class='va'>Temp</span>, <span class='fl'>3</span><span class='op'>)</span>, <span class='va'>airquality</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='input'>
-<span class='co'># Testing the joint nullity of the Temp polynomial</span>
-<span class='fu'>wald</span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"poly"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Wald test, H0: joint nullity of poly(Temp, 3)1, poly(Temp, 3)2 and poly(Temp, 3)3
-#&gt;  stat = 23.1, p-value = 1.452e-11, on 3 and 105 DoF, VCOV: IID.</div><div class='input'>
-<span class='co'># Same but with clustered SEs</span>
-<span class='fu'>wald</span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"poly"</span>, cluster <span class='op'>=</span> <span class='st'>"Month"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Wald test, H0: joint nullity of poly(Temp, 3)1, poly(Temp, 3)2 and poly(Temp, 3)3
-#&gt;  stat = 170.3, p-value &lt; 2.2e-16, on 3 and 105 DoF, VCOV: Clustered (Month).</div><div class='input'>
-<span class='co'># Now: all vars but the polynomial and the intercept</span>
-<span class='fu'>wald</span><span class='op'>(</span><span class='va'>est</span>, drop <span class='op'>=</span> <span class='st'>"Inte|poly"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Wald test, H0: joint nullity of Solar.R and Wind
-#&gt;  stat = 19.1, p-value = 8.538e-8, on 2 and 105 DoF, VCOV: IID.</div><div class='input'>
-<span class='co'>#</span>
-<span class='co'># Toy example: testing pre-trends</span>
-<span class='co'>#</span>
-
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>base_did</span><span class='op'>)</span>
-
-<span class='va'>est_did</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'><a href='i.html'>i</a></span><span class='op'>(</span><span class='va'>period</span>, <span class='va'>treat</span>, <span class='fl'>5</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span>, <span class='va'>base_did</span><span class='op'>)</span>
-
-<span class='co'># The graph of the coefficients</span>
-<span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='va'>est_did</span><span class='op'>)</span>
-</div><div class='img'><img src='wald-1.png' alt='' width='700' height='433' /></div><div class='input'>
-<span class='co'># The pre-trend test</span>
-<span class='fu'>wald</span><span class='op'>(</span><span class='va'>est_did</span>, <span class='st'>"period::[1234]$"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] NA</div><div class='input'>
-<span class='co'># If "period::[1234]$" looks weird to you, check out</span>
-<span class='co'># regular expressions: e.g. see ?regex.</span>
-<span class='co'># Learn it, you won't regret it!</span>
-
-
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>airquality</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/stats/poly.html'>poly</a></span><span class='op'>(</span><span class='va'>Temp</span>, <span class='fl'>3</span><span class='op'>)</span>, <span class='va'>airquality</span><span class='op'>)</span></span>
+<span class='r-msg co'><span class='r-pr'>#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Testing the joint nullity of the Temp polynomial</span></span>
+<span class='r-in'><span class='fu'>wald</span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"poly"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Wald test, H0: joint nullity of poly(Temp, 3)1, poly(Temp, 3)2 and poly(Temp, 3)3</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  stat = 23.1, p-value = 1.452e-11, on 3 and 105 DoF, VCOV: IID.</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Same but with clustered SEs</span></span>
+<span class='r-in'><span class='fu'>wald</span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"poly"</span>, cluster <span class='op'>=</span> <span class='st'>"Month"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Wald test, H0: joint nullity of poly(Temp, 3)1, poly(Temp, 3)2 and poly(Temp, 3)3</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  stat = 170.3, p-value &lt; 2.2e-16, on 3 and 105 DoF, VCOV: Clustered (Month).</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Now: all vars but the polynomial and the intercept</span></span>
+<span class='r-in'><span class='fu'>wald</span><span class='op'>(</span><span class='va'>est</span>, drop <span class='op'>=</span> <span class='st'>"Inte|poly"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Wald test, H0: joint nullity of Solar.R and Wind</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  stat = 19.1, p-value = 8.538e-8, on 2 and 105 DoF, VCOV: IID.</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'><span class='co'># Toy example: testing pre-trends</span></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>base_did</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>est_did</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'><a href='i.html'>i</a></span><span class='op'>(</span><span class='va'>period</span>, <span class='va'>treat</span>, <span class='fl'>5</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span>, <span class='va'>base_did</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># The graph of the coefficients</span></span>
+<span class='r-in'><span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='va'>est_did</span><span class='op'>)</span></span>
+<span class='r-plt img'><img src='wald-1.png' alt='' width='700' height='433' /></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># The pre-trend test</span></span>
+<span class='r-in'><span class='fu'>wald</span><span class='op'>(</span><span class='va'>est_did</span>, <span class='st'>"period::[1234]$"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] NA</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># If "period::[1234]$" looks weird to you, check out</span></span>
+<span class='r-in'><span class='co'># regular expressions: e.g. see ?regex.</span></span>
+<span class='r-in'><span class='co'># Learn it, you won't regret it!</span></span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

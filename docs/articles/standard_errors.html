@@ -88,13 +88,13 @@
 
       
 
-      </header><script src="standard_errors_files/header-attrs-2.9/header-attrs.js"></script><div class="row">
+      </header><script src="standard_errors_files/header-attrs-2.11/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>On standard-errors</h1>
                         <h4 class="author">Laurent Berge</h4>
             
-            <h4 class="date">2021-11-04</h4>
+            <h4 class="date">2021-11-24</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/standard_errors.Rmd"><code>vignettes/standard_errors.Rmd</code></a></small>
       <div class="hidden name"><code>standard_errors.Rmd</code></div>
@@ -151,7 +151,7 @@
 <p>The argument <code>vcov</code> can be equal to either: <code>"iid"</code>, <code>"hetero"</code>, <code>"cluster"</code>, <code>"twoway"</code>, <code>"NW"</code>, <code>"DK"</code>, or <code>"conley"</code>.</p>
 <p>If <code>vcov = "iid"</code>, then the standard-errors are based on the assumption that the errors are all independent and generated with the same law (in particular, same variance). If <code>vcov = "hetero"</code>, this corresponds to the classic hereoskedasticity-robust standard-errors (White correction), where it is assumed that the errors are independent but the variance of their generative law may vary.</p>
 <p>If <code>vcov = "cluster"</code>, then arbitrary correlation of the errors within clusters is accounted for. Same for <code>vcov = "twoway"</code>: arbitrary correlation within each of the two clusters is accounted for.</p>
-<p>In the context of panel data or time series, <code>vcov = "NW"</code> (Newey-West, 1987) or <code>vcov = "DK"</code> (Driscoll-Kraay, 1998) account for temporal correlation between the errors; the two differing on how to account for heterogeneity between units. Their implementation is based on Milo (2017).</p>
+<p>In the context of panel data or time series, <code>vcov = "NW"</code> (Newey-West, 1987) or <code>vcov = "DK"</code> (Driscoll-Kraay, 1998) account for temporal correlation between the errors; the two differing on how to account for heterogeneity between units. Their implementation is based on Millo (2017).</p>
 <p>Finally, <code>vcov = "conley"</code> accounts for spatial correlation of the errors.</p>
 </div>
 <div id="the-argument-ssc" class="section level3">
@@ -434,8 +434,8 @@
 <p>Cameron AC, Gelbach JB, Miller DL (2011). “<a href="https://www.nber.org/papers/t0327">Robust Inference with Multiway Clustering</a>”, Journal of Business &amp; Ecomomic Statistics, 29(2), 238–249.</p>
 <p>Kauermann G, Carroll RJ (2001). “<a href="https://www.tandfonline.com/doi/abs/10.1198/016214501753382309">A Note on the Efficiency of Sandwich Covariance Matrix Estimation</a>”, Journal of the American Statistical Association, 96(456), 1387–1396.</p>
 <p>MacKinnon JG, White H (1985). “Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties” Journal of Econometrics, 29(3), 305–325.</p>
-<p>Milo G (2017). “<a href="https://doi.org/10.18637/jss.v082.i03">Robust Standard Error Estimators for Panel Models: A Unifying Approach</a>” Journal of Statistical Software, 82(3).</p>
-<p>Zeileis A, Koll S, Graham N (2020). “<a href="https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf">Various Versatile Variances: An Object-Oriented Implementation of Clustered Covariances in R.</a>” Journal of Statistical Software, 95(1), 1–36.</p>
+<p>Millo G (2017). “<a href="https://doi.org/10.18637/jss.v082.i03">Robust Standard Error Estimators for Panel Models: A Unifying Approach</a>” Journal of Statistical Software, 82(3).</p>
+<p>Zeileis A, Koll S, Graham N (2020). “<a href="https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf">Various Versatile Variances: An Object-Oriented Implementation of Clustered Covariances in R</a>” Journal of Statistical Software, 95(1), 1–36.</p>
 </div>
   </div>
 

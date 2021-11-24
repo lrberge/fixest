@@ -19,7 +19,7 @@
   
   - fix bug in `fitstat` for the KPR statistic (reported by @etiennebacher [#161](https://github.com/lrberge/fixest/issues/161)).
   
-  - fix bug in `i` when two factor variables were interacted and on specific value of one variable was to be set as a reference.
+  - fix bug in `i` when two factor variables were interacted and one specific value of one variable was to be set as a reference.
   
   - fix bug in `model.matrix` when no variable was used in the estimation (reported by @kylebutts [#229](https://github.com/lrberge/fixest/issues/229)).
   
@@ -27,7 +27,7 @@
   
 ## etable
 
-### New arguments
+#### New arguments
 
  - new argument `view` to display the latex table in the viewer pane (suggestion by Or Avishay-Rizi [#227](https://github.com/lrberge/fixest/issues/227)). You need to have a working distribution of pdflatex, imagemagick and ghostscript for this feature to work.
  
@@ -59,7 +59,7 @@
  
  - in `style.tex`: new argument `no_border` to remove the borders on the sides of the table.
 
-### New features
+#### New features
 
  - the quality of the tex output has been substantially improved.
  

@@ -158,12 +158,21 @@
   <span class='va'>fixef_sizes.prefix</span>,
   <span class='va'>fixef_sizes.suffix</span>,
   <span class='va'>stats.title</span>,
-  <span class='va'>notes.title</span>,
+  <span class='va'>notes.intro</span>,
+  <span class='va'>notes.tpt.intro</span>,
   <span class='va'>tablefoot</span>,
-  <span class='va'>tablefoot.title</span>,
   <span class='va'>tablefoot.value</span>,
   <span class='va'>yesNo</span>,
   tabular <span class='op'>=</span> <span class='st'>"normal"</span>,
+  <span class='va'>depvar.style</span>,
+  <span class='va'>no_border</span>,
+  <span class='va'>caption.after</span>,
+  <span class='va'>rules_width</span>,
+  <span class='va'>signif.code</span>,
+  <span class='va'>tpt</span>,
+  <span class='va'>arraystretch</span>,
+  adjustbox <span class='op'>=</span> <span class='cn'>NULL</span>,
+  <span class='va'>fontsize</span>,
   interaction.combine <span class='op'>=</span> <span class='st'>" $\\times$ "</span>,
   i.equal <span class='op'>=</span> <span class='st'>" $=$ "</span>
 <span class='op'>)</span></pre>
@@ -189,11 +198,11 @@
     </tr>
     <tr>
       <th>line.top</th>
-      <td><p>A character scalar. The line at the top of the table (defaults to <code>"\tabularnewline\toprule\toprule"</code> if <code>main = "base"</code> and to <code>"\toprule"</code> if <code>main = "aer"</code>).</p></td>
+      <td><p>A character scalar equal to <code>"simple"</code>, <code>"double"</code>, or anything else. The line at the top of the table (defaults to <code>"double"</code> if <code>main = "base"</code> and to <code>"simple"</code> if <code>main = "aer"</code>). <code>"simple"</code> is equivalent to <code>"\toprule"</code>, and <code>"double"</code> to <code>"\tabularnewline \midrule \midrule"</code>.</p></td>
     </tr>
     <tr>
       <th>line.bottom</th>
-      <td><p>A character scalar. The line at the bottom of the table (defaults to <code>""</code> if <code>main = "base"</code>, <code>"\midrule \midrule &amp; \tabularnewline"</code> if <code>main = "base"</code> AND <code>tablefoot = FALSE</code>, and to <code>"\bottomrule"</code> if <code>main = "aer"</code>).</p></td>
+      <td><p>A character scalar equal to <code>"simple"</code>, <code>"double"</code>, or anything else. The line at the bottom of the table (defaults to <code>"double"</code> if <code>main = "base"</code> and to <code>"simple"</code> if <code>main = "aer"</code>). <code>"simple"</code> is equivalent to <code>"\bottomrule"</code>, and <code>"double"</code> to <code>"\midrule \midrule &amp; \tabularnewline"</code>.</p></td>
     </tr>
     <tr>
       <th>var.title</th>
@@ -236,16 +245,16 @@
       <td><p>A character scalar. The title line appearing before the statistics (defaults to <code>"\midrule \emph{Fit statistics}"</code> if <code>main = "base"</code> and to <code>" "</code> if <code>main = "aer"</code>). Note that the behavior of <code>stats.title = " "</code> (a space) is different from <code>stats.title = ""</code> (the empty string): in the first case you will get an empty row, while in the second case you get no empty row. To get a line without an empty row, use <code>"\midrule"</code> (and not <code>"\midrule "</code>!--the space!).</p></td>
     </tr>
     <tr>
-      <th>notes.title</th>
-      <td><p>A character scalar. The title appearing just before the notes, defaults to <code>"\medskip \emph{Notes:} "</code>.</p></td>
+      <th>notes.intro</th>
+      <td><p>A character scalar. Some tex code appearing just before the notes, defaults to <code>"\par \raggedright \n"</code>.</p></td>
+    </tr>
+    <tr>
+      <th>notes.tpt.intro</th>
+      <td><p>Character scalar. Only used if <code>tpt = TRUE</code>, it is some tex code that is passed before any <code>threeparttable</code> item (can be used for, typically, the font size). Default is the empty string.</p></td>
     </tr>
     <tr>
       <th>tablefoot</th>
       <td><p>A logical scalar. Whether or not to display a footer within the table. Defaults to <code>TRUE</code> if <code>main = "aer"</code>) and <code>FALSE</code> if <code>main = "aer"</code>).</p></td>
-    </tr>
-    <tr>
-      <th>tablefoot.title</th>
-      <td><p>A character scalar. Only if <code>tablefoot = TRUE</code>, value to appear before the table footer. Defaults to <code>"\bottomrule\bottomrule"</code> if <code>main = "base"</code>.</p></td>
     </tr>
     <tr>
       <th>tablefoot.value</th>
@@ -257,7 +266,43 @@
     </tr>
     <tr>
       <th>tabular</th>
-      <td><p>Character scalar equal to "normal" (default), "*" or "X". Represents the type of tabular to export.</p></td>
+      <td><p>(Tex only.) Character scalar equal to "normal" (default), "*" or "X". Represents the type of tabular environment to use: either <code>tabular</code>, <code>tabular*</code> or <code>tabularx</code>.</p></td>
+    </tr>
+    <tr>
+      <th>depvar.style</th>
+      <td><p>Character scalar equal to either <code>" "</code> (default), <code>"*"</code> (italic), <code>"**"</code> (bold), <code>"***"</code> (italic-bold). How the name of the dependent variable should be displayed.</p></td>
+    </tr>
+    <tr>
+      <th>no_border</th>
+      <td><p>Logical, default is <code>FALSE</code>. Whether to remove any side border to the table (typically adds <code>@{}</code> to the sides of the tabular).</p></td>
+    </tr>
+    <tr>
+      <th>caption.after</th>
+      <td><p>Character scalar. Tex code that will be placed right after the caption. Defaults to <code>""</code> for <code>main = "base"</code> and <code>"\medskip"</code> for <code>main = "aer"</code>.</p></td>
+    </tr>
+    <tr>
+      <th>rules_width</th>
+      <td><p>Character vector of length 1 or 2. This vector gives the width of the <code>booktabs</code> rules: the first element the heavy-width, the second element the light-width. NA values mean no modification. If of length 1, only the heavy rules are modified. The width are in Latex units (ex: <code>"0.1 em"</code>, etc).</p></td>
+    </tr>
+    <tr>
+      <th>signif.code</th>
+      <td><p>Named numeric vector, used to provide the significance codes with respect to the p-value of the coefficients. Default is <code>c("***"=0.01, "**"=0.05, "*"=0.10)</code>. To suppress the significance codes, use <code>signif.code=NA</code> or <code>signif.code=NULL</code>. Can also be equal to <code>"letters"</code>, then the default becomes <code>c("a"=0.01, "b"=0.05, "c"=0.10)</code>.</p></td>
+    </tr>
+    <tr>
+      <th>tpt</th>
+      <td><p>(Tex only.) Logical scalar, default is FALSE. Whether to use the <code>threeparttable</code> environment. If so, the <code>notes</code> will be integrated into the <code>tablenotes</code> environment.</p></td>
+    </tr>
+    <tr>
+      <th>arraystretch</th>
+      <td><p>(Tex only.) A numeric scalar, default is <code>NULL</code>. If provided, the command <code>\renewcommand*{\arraystretch}{x}</code> is inserted, replacing <code>x</code> by the value of <code>arraystretch</code>. The changes are specific to the current table and do not affect the rest of the document.</p></td>
+    </tr>
+    <tr>
+      <th>adjustbox</th>
+      <td><p>(Tex only.) A logical, numeric or character scalar, default is <code>NULL</code>. If not <code>NULL</code>, the table is inserted within the <code>adjustbox</code> environment. By default the options are <code>width = 1\textwidth, center</code> (if <code>TRUE</code>). A numeric value changes the value before <code>\textwidth</code>. You can also add a character of the form <code>"x tw"</code> or <code>"x th"</code> with <code>x</code> a number and where tw (th) stands for text-width (text-height). Finally any other character value is passed verbatim as an <code>adjustbox</code> option.</p></td>
+    </tr>
+    <tr>
+      <th>fontsize</th>
+      <td><p>(Tex only.) A character scalar, default is <code>NULL</code>. Can be equal to <code>tiny</code>, <code>scriptsize</code>, <code>footnotesize</code>, <code>small</code>, <code>normalsize</code>, <code>large</code>, or <code>Large</code>. The change affect the table only (and not the rest of the document).</p></td>
     </tr>
     <tr>
       <th>interaction.combine</th>
@@ -282,88 +327,104 @@
     <div class='dont-index'><p><code><a href='etable.html'>etable</a></code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='co'># Multiple estimations =&gt; see details in feols</span>
-<span class='va'>aq</span> <span class='op'>=</span> <span class='va'>airquality</span>
-<span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>Ozone</span>, <span class='va'>Solar.R</span><span class='op'>)</span> <span class='op'>~</span>
-                <span class='va'>Wind</span> <span class='op'>+</span> <span class='fu'><a href='stepwise.html'>csw</a></span><span class='op'>(</span><span class='va'>Temp</span>, <span class='va'>Temp</span><span class='op'>^</span><span class='fl'>2</span>, <span class='va'>Temp</span><span class='op'>^</span><span class='fl'>3</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>Month</span> <span class='op'>+</span> <span class='va'>Day</span>,
-            data <span class='op'>=</span> <span class='va'>aq</span><span class='op'>)</span>
-
-<span class='co'># Playing a bit with the styles</span>
-<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est</span>, tex <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; \begin{tabular}{lcccccc}
-#&gt;    \tabularnewline\midrule\midrule
-#&gt;    Dependent Variables: &amp; \multicolumn{3}{c}{Ozone} &amp; \multicolumn{3}{c}{Solar.R}\\
-#&gt;    Model:       &amp; (1)            &amp; (2)            &amp; (3)            &amp; (4)           &amp; (5)      &amp; (6)\\
-#&gt;    \midrule \emph{Variables} &amp;   &amp;   &amp;   &amp;   &amp;   &amp;  \\
-#&gt;    Wind         &amp; -2.693$^{***}$ &amp; -2.630$^{***}$ &amp; -2.850$^{***}$ &amp; 3.031         &amp; 3.181    &amp; 3.943\\
-#&gt;                 &amp; (0.8076)       &amp; (0.8449)       &amp; (0.9134)       &amp; (3.316)       &amp; (3.278)  &amp; (3.172)\\
-#&gt;    Temp         &amp; 2.373$^{***}$  &amp; -4.009         &amp; -63.53$^{*}$   &amp; 4.787$^{***}$ &amp; 17.80    &amp; 234.4$^{**}$\\
-#&gt;                 &amp; (0.1858)       &amp; (4.333)        &amp; (33.38)        &amp; (1.459)       &amp; (12.77)  &amp; (101.3)\\
-#&gt;    Temp square  &amp;                &amp; 0.0407         &amp; 0.8215$^{*}$   &amp;               &amp; -0.0824  &amp; -2.933$^{**}$\\
-#&gt;                 &amp;                &amp; (0.0277)       &amp; (0.4496)       &amp;               &amp; (0.0762) &amp; (1.322)\\
-#&gt;    Temp cube    &amp;                &amp;                &amp; -0.0034        &amp;               &amp;          &amp; 0.0124$^{**}$\\
-#&gt;                 &amp;                &amp;                &amp; (0.0020)       &amp;               &amp;          &amp; (0.0057)\\
-#&gt;    \midrule \emph{Fixed-effects} &amp;   &amp;   &amp;   &amp;   &amp;   &amp;  \\
-#&gt;    Month        &amp; Yes            &amp; Yes            &amp; Yes            &amp; Yes           &amp; Yes      &amp; Yes\\
-#&gt;    Day          &amp; Yes            &amp; Yes            &amp; Yes            &amp; Yes           &amp; Yes      &amp; Yes\\
-#&gt;    \midrule \emph{Fit statistics} &amp;   &amp;   &amp;   &amp;   &amp;   &amp;  \\
-#&gt;    Observations &amp; 116            &amp; 116            &amp; 116            &amp; 146           &amp; 146      &amp; 146\\
-#&gt;    R$^2$        &amp; 0.78671        &amp; 0.79718        &amp; 0.80469        &amp; 0.30641       &amp; 0.31252  &amp; 0.32651\\
-#&gt;    Within R$^2$ &amp; 0.55271        &amp; 0.57466        &amp; 0.59040        &amp; 0.08937       &amp; 0.09740  &amp; 0.11577\\
-#&gt;    \midrule\midrule\multicolumn{7}{l}{\emph{Clustered (Month) standard-errors in parentheses}}\\
-#&gt;    \multicolumn{7}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\
-#&gt; \end{tabular}</div><div class='input'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est</span>, tex <span class='op'>=</span> <span class='cn'>TRUE</span>, style.tex <span class='op'>=</span> <span class='fu'>style.tex</span><span class='op'>(</span><span class='st'>"aer"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; \begin{tabular}{lcccccc}
-#&gt;    \toprule
-#&gt;     &amp; \multicolumn{3}{c}{Ozone} &amp; \multicolumn{3}{c}{Solar.R}\\
-#&gt;                        &amp; (1)            &amp; (2)            &amp; (3)            &amp; (4)           &amp; (5)           &amp; (6)\\
-#&gt;    \midrule 
-#&gt;    Wind                &amp; -2.693$^{***}$ &amp; -2.630$^{***}$ &amp; -2.850$^{***}$ &amp; 3.031         &amp; 3.181         &amp; 3.943\\
-#&gt;                        &amp; (0.8076)       &amp; (0.8449)       &amp; (0.9134)       &amp; (3.316)       &amp; (3.278)       &amp; (3.172)\\
-#&gt;    Temp                &amp; 2.373$^{***}$  &amp; -4.009         &amp; -63.53$^{*}$   &amp; 4.787$^{***}$ &amp; 17.80         &amp; 234.4$^{**}$\\
-#&gt;                        &amp; (0.1858)       &amp; (4.333)        &amp; (33.38)        &amp; (1.459)       &amp; (12.77)       &amp; (101.3)\\
-#&gt;    Temp square         &amp;                &amp; 0.0407         &amp; 0.8215$^{*}$   &amp;               &amp; -0.0824       &amp; -2.933$^{**}$\\
-#&gt;                        &amp;                &amp; (0.0277)       &amp; (0.4496)       &amp;               &amp; (0.0762)      &amp; (1.322)\\
-#&gt;    Temp cube           &amp;                &amp;                &amp; -0.0034        &amp;               &amp;               &amp; 0.0124$^{**}$\\
-#&gt;                        &amp;                &amp;                &amp; (0.0020)       &amp;               &amp;               &amp; (0.0057)\\
-#&gt;                        &amp;                &amp;                &amp;                &amp;               &amp;               &amp;  \\
-#&gt;    Observations        &amp; 116            &amp; 116            &amp; 116            &amp; 146           &amp; 146           &amp; 146\\
-#&gt;    R$^2$               &amp; 0.78671        &amp; 0.79718        &amp; 0.80469        &amp; 0.30641       &amp; 0.31252       &amp; 0.32651\\
-#&gt;    Within R$^2$        &amp; 0.55271        &amp; 0.57466        &amp; 0.59040        &amp; 0.08937       &amp; 0.09740       &amp; 0.11577\\
-#&gt;                        &amp;                &amp;                &amp;                &amp;               &amp;               &amp;  \\
-#&gt;    Month fixed effects &amp; $\checkmark$  &amp; $\checkmark$  &amp; $\checkmark$  &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$\\
-#&gt;    Day fixed effects   &amp; $\checkmark$  &amp; $\checkmark$  &amp; $\checkmark$  &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$\\
-#&gt;    \bottomrule
-#&gt; \end{tabular}</div><div class='input'>
-<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est</span>, tex <span class='op'>=</span> <span class='cn'>TRUE</span>, style.tex <span class='op'>=</span> <span class='fu'>style.tex</span><span class='op'>(</span><span class='st'>"aer"</span>,
-                                      var.title <span class='op'>=</span> <span class='st'>"\\emph{Expl. Vars.}"</span>,
-                                      model.format <span class='op'>=</span> <span class='st'>"[i]"</span>,
-                                      yesNo <span class='op'>=</span> <span class='st'>"x"</span>,
-                                      tabular <span class='op'>=</span> <span class='st'>"*"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccccc}
-#&gt;    \toprule
-#&gt;     &amp; \multicolumn{3}{c}{Ozone} &amp; \multicolumn{3}{c}{Solar.R}\\
-#&gt;                        &amp; [i]            &amp; [ii]           &amp; [iii]          &amp; [iv]          &amp; [v]      &amp; [vi]\\
-#&gt;    \emph{Expl. Vars.} &amp;                &amp;                &amp;                &amp;               &amp;          &amp;  \\
-#&gt;    Wind                &amp; -2.693$^{***}$ &amp; -2.630$^{***}$ &amp; -2.850$^{***}$ &amp; 3.031         &amp; 3.181    &amp; 3.943\\
-#&gt;                        &amp; (0.8076)       &amp; (0.8449)       &amp; (0.9134)       &amp; (3.316)       &amp; (3.278)  &amp; (3.172)\\
-#&gt;    Temp                &amp; 2.373$^{***}$  &amp; -4.009         &amp; -63.53$^{*}$   &amp; 4.787$^{***}$ &amp; 17.80    &amp; 234.4$^{**}$\\
-#&gt;                        &amp; (0.1858)       &amp; (4.333)        &amp; (33.38)        &amp; (1.459)       &amp; (12.77)  &amp; (101.3)\\
-#&gt;    Temp square         &amp;                &amp; 0.0407         &amp; 0.8215$^{*}$   &amp;               &amp; -0.0824  &amp; -2.933$^{**}$\\
-#&gt;                        &amp;                &amp; (0.0277)       &amp; (0.4496)       &amp;               &amp; (0.0762) &amp; (1.322)\\
-#&gt;    Temp cube           &amp;                &amp;                &amp; -0.0034        &amp;               &amp;          &amp; 0.0124$^{**}$\\
-#&gt;                        &amp;                &amp;                &amp; (0.0020)       &amp;               &amp;          &amp; (0.0057)\\
-#&gt;                        &amp;                &amp;                &amp;                &amp;               &amp;          &amp;  \\
-#&gt;    Observations        &amp; 116            &amp; 116            &amp; 116            &amp; 146           &amp; 146      &amp; 146\\
-#&gt;    R$^2$               &amp; 0.78671        &amp; 0.79718        &amp; 0.80469        &amp; 0.30641       &amp; 0.31252  &amp; 0.32651\\
-#&gt;    Within R$^2$        &amp; 0.55271        &amp; 0.57466        &amp; 0.59040        &amp; 0.08937       &amp; 0.09740  &amp; 0.11577\\
-#&gt;                        &amp;                &amp;                &amp;                &amp;               &amp;          &amp;  \\
-#&gt;    Month fixed effects &amp; x              &amp; x              &amp; x              &amp; x             &amp; x        &amp; x\\
-#&gt;    Day fixed effects   &amp; x              &amp; x              &amp; x              &amp; x             &amp; x        &amp; x\\
-#&gt;    \bottomrule
-#&gt; \end{tabular*}</div><div class='input'>
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='co'># Multiple estimations =&gt; see details in feols</span></span>
+<span class='r-in'><span class='va'>aq</span> <span class='op'>=</span> <span class='va'>airquality</span></span>
+<span class='r-in'><span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>Ozone</span>, <span class='va'>Solar.R</span><span class='op'>)</span> <span class='op'>~</span></span>
+<span class='r-in'>                <span class='va'>Wind</span> <span class='op'>+</span> <span class='fu'><a href='stepwise.html'>csw</a></span><span class='op'>(</span><span class='va'>Temp</span>, <span class='va'>Temp</span><span class='op'>^</span><span class='fl'>2</span>, <span class='va'>Temp</span><span class='op'>^</span><span class='fl'>3</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>Month</span> <span class='op'>+</span> <span class='va'>Day</span>,</span>
+<span class='r-in'>            data <span class='op'>=</span> <span class='va'>aq</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Playing a bit with the styles</span></span>
+<span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est</span>, tex <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> \begingroup</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> \centering</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> \begin{tabular}{lcccccc}</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    \tabularnewline \midrule \midrule</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Dependent Variables: &amp; \multicolumn{3}{c}{Ozone} &amp; \multicolumn{3}{c}{Solar.R}\\</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Model:       &amp; (1)            &amp; (2)            &amp; (3)            &amp; (4)           &amp; (5)      &amp; (6)\\  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    \midrule</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    \emph{Variables}\\</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Wind         &amp; -2.693$^{***}$ &amp; -2.630$^{***}$ &amp; -2.850$^{***}$ &amp; 3.031         &amp; 3.181    &amp; 3.943\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                 &amp; (0.8076)       &amp; (0.8449)       &amp; (0.9134)       &amp; (3.316)       &amp; (3.278)  &amp; (3.172)\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Temp         &amp; 2.373$^{***}$  &amp; -4.009         &amp; -63.53$^{*}$   &amp; 4.787$^{***}$ &amp; 17.80    &amp; 234.4$^{**}$\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                 &amp; (0.1858)       &amp; (4.333)        &amp; (33.38)        &amp; (1.459)       &amp; (12.77)  &amp; (101.3)\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Temp square  &amp;                &amp; 0.0407         &amp; 0.8215$^{*}$   &amp;               &amp; -0.0824  &amp; -2.933$^{**}$\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                 &amp;                &amp; (0.0277)       &amp; (0.4496)       &amp;               &amp; (0.0762) &amp; (1.322)\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Temp cube    &amp;                &amp;                &amp; -0.0034        &amp;               &amp;          &amp; 0.0124$^{**}$\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                 &amp;                &amp;                &amp; (0.0020)       &amp;               &amp;          &amp; (0.0057)\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    \midrule</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    \emph{Fixed-effects}\\</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Month        &amp; Yes            &amp; Yes            &amp; Yes            &amp; Yes           &amp; Yes      &amp; Yes\\  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Day          &amp; Yes            &amp; Yes            &amp; Yes            &amp; Yes           &amp; Yes      &amp; Yes\\  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    \midrule</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    \emph{Fit statistics}\\</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Observations &amp; 116            &amp; 116            &amp; 116            &amp; 146           &amp; 146      &amp; 146\\  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    R$^2$        &amp; 0.78671        &amp; 0.79718        &amp; 0.80469        &amp; 0.30641       &amp; 0.31252  &amp; 0.32651\\  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Within R$^2$ &amp; 0.55271        &amp; 0.57466        &amp; 0.59040        &amp; 0.08937       &amp; 0.09740  &amp; 0.11577\\  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    \midrule \midrule</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    \multicolumn{7}{l}{\emph{Clustered (Month) standard-errors in parentheses}}\\</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    \multicolumn{7}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> \end{tabular}</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> \par\endgroup</span>
+<span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est</span>, tex <span class='op'>=</span> <span class='cn'>TRUE</span>, style.tex <span class='op'>=</span> <span class='fu'>style.tex</span><span class='op'>(</span><span class='st'>"aer"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> \begingroup</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> \centering</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> \begin{tabular}{lcccccc}</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    \toprule</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>     &amp; \multicolumn{3}{c}{Ozone} &amp; \multicolumn{3}{c}{Solar.R}\\</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                        &amp; (1)            &amp; (2)            &amp; (3)            &amp; (4)           &amp; (5)           &amp; (6)\\  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    \midrule </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Wind                &amp; -2.693$^{***}$ &amp; -2.630$^{***}$ &amp; -2.850$^{***}$ &amp; 3.031         &amp; 3.181         &amp; 3.943\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                        &amp; (0.8076)       &amp; (0.8449)       &amp; (0.9134)       &amp; (3.316)       &amp; (3.278)       &amp; (3.172)\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Temp                &amp; 2.373$^{***}$  &amp; -4.009         &amp; -63.53$^{*}$   &amp; 4.787$^{***}$ &amp; 17.80         &amp; 234.4$^{**}$\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                        &amp; (0.1858)       &amp; (4.333)        &amp; (33.38)        &amp; (1.459)       &amp; (12.77)       &amp; (101.3)\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Temp square         &amp;                &amp; 0.0407         &amp; 0.8215$^{*}$   &amp;               &amp; -0.0824       &amp; -2.933$^{**}$\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                        &amp;                &amp; (0.0277)       &amp; (0.4496)       &amp;               &amp; (0.0762)      &amp; (1.322)\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Temp cube           &amp;                &amp;                &amp; -0.0034        &amp;               &amp;               &amp; 0.0124$^{**}$\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                        &amp;                &amp;                &amp; (0.0020)       &amp;               &amp;               &amp; (0.0057)\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>     \\</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Observations        &amp; 116            &amp; 116            &amp; 116            &amp; 146           &amp; 146           &amp; 146\\  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    R$^2$               &amp; 0.78671        &amp; 0.79718        &amp; 0.80469        &amp; 0.30641       &amp; 0.31252       &amp; 0.32651\\  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Within R$^2$        &amp; 0.55271        &amp; 0.57466        &amp; 0.59040        &amp; 0.08937       &amp; 0.09740       &amp; 0.11577\\  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>     \\</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Month fixed effects &amp; $\checkmark$   &amp; $\checkmark$   &amp; $\checkmark$   &amp; $\checkmark$  &amp; $\checkmark$  &amp; $\checkmark$\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Day fixed effects   &amp; $\checkmark$   &amp; $\checkmark$   &amp; $\checkmark$   &amp; $\checkmark$  &amp; $\checkmark$  &amp; $\checkmark$\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    \bottomrule</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> \end{tabular}</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> \par\endgroup</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est</span>, tex <span class='op'>=</span> <span class='cn'>TRUE</span>, style.tex <span class='op'>=</span> <span class='fu'>style.tex</span><span class='op'>(</span><span class='st'>"aer"</span>,</span>
+<span class='r-in'>                                      var.title <span class='op'>=</span> <span class='st'>"\\emph{Expl. Vars.}"</span>,</span>
+<span class='r-in'>                                      model.format <span class='op'>=</span> <span class='st'>"[i]"</span>,</span>
+<span class='r-in'>                                      yesNo <span class='op'>=</span> <span class='st'>"x"</span>,</span>
+<span class='r-in'>                                      tabular <span class='op'>=</span> <span class='st'>"*"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> \begingroup</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> \centering</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccccc}</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    \toprule</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>     &amp; \multicolumn{3}{c}{Ozone} &amp; \multicolumn{3}{c}{Solar.R}\\</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                        &amp; [i]            &amp; [ii]           &amp; [iii]          &amp; [iv]          &amp; [v]      &amp; [vi]\\  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    \emph{Expl. Vars.}\\</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Wind                &amp; -2.693$^{***}$ &amp; -2.630$^{***}$ &amp; -2.850$^{***}$ &amp; 3.031         &amp; 3.181    &amp; 3.943\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                        &amp; (0.8076)       &amp; (0.8449)       &amp; (0.9134)       &amp; (3.316)       &amp; (3.278)  &amp; (3.172)\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Temp                &amp; 2.373$^{***}$  &amp; -4.009         &amp; -63.53$^{*}$   &amp; 4.787$^{***}$ &amp; 17.80    &amp; 234.4$^{**}$\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                        &amp; (0.1858)       &amp; (4.333)        &amp; (33.38)        &amp; (1.459)       &amp; (12.77)  &amp; (101.3)\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Temp square         &amp;                &amp; 0.0407         &amp; 0.8215$^{*}$   &amp;               &amp; -0.0824  &amp; -2.933$^{**}$\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                        &amp;                &amp; (0.0277)       &amp; (0.4496)       &amp;               &amp; (0.0762) &amp; (1.322)\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Temp cube           &amp;                &amp;                &amp; -0.0034        &amp;               &amp;          &amp; 0.0124$^{**}$\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                        &amp;                &amp;                &amp; (0.0020)       &amp;               &amp;          &amp; (0.0057)\\   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>     \\</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Observations        &amp; 116            &amp; 116            &amp; 116            &amp; 146           &amp; 146      &amp; 146\\  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    R$^2$               &amp; 0.78671        &amp; 0.79718        &amp; 0.80469        &amp; 0.30641       &amp; 0.31252  &amp; 0.32651\\  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Within R$^2$        &amp; 0.55271        &amp; 0.57466        &amp; 0.59040        &amp; 0.08937       &amp; 0.09740  &amp; 0.11577\\  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>     \\</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Month fixed effects &amp; x              &amp; x              &amp; x              &amp; x             &amp; x        &amp; x\\  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    Day fixed effects   &amp; x              &amp; x              &amp; x              &amp; x             &amp; x        &amp; x\\  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    \bottomrule</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> \end{tabular*}</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> \par\endgroup</span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

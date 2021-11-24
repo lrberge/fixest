@@ -243,114 +243,123 @@
 <p>In general, for convergence reasons, it is recommended to always add the fixed-effect and avoid using only the variable with varying slope (i.e. use single square brackets).</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='co'># Illustration of the FWL theorem</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>trade</span><span class='op'>)</span>
-
-<span class='va'>base</span> <span class='op'>=</span> <span class='va'>trade</span>
-<span class='va'>base</span><span class='op'>$</span><span class='va'>ln_dist</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>$</span><span class='va'>dist_km</span><span class='op'>)</span>
-<span class='va'>base</span><span class='op'>$</span><span class='va'>ln_euros</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>$</span><span class='va'>Euros</span><span class='op'>)</span>
-
-<span class='co'># We center the two variables ln_dist and ln_euros</span>
-<span class='co'>#  on the factors Origin and Destination</span>
-<span class='va'>X_demean</span> <span class='op'>=</span> <span class='fu'>demean</span><span class='op'>(</span>X <span class='op'>=</span> <span class='va'>base</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"ln_dist"</span>, <span class='st'>"ln_euros"</span><span class='op'>)</span><span class='op'>]</span>,
-                  f <span class='op'>=</span> <span class='va'>base</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Origin"</span>, <span class='st'>"Destination"</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>
-<span class='va'>base</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"ln_dist_dm"</span>, <span class='st'>"ln_euros_dm"</span><span class='op'>)</span><span class='op'>]</span> <span class='op'>=</span> <span class='va'>X_demean</span>
-
-<span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>ln_euros_dm</span> <span class='op'>~</span> <span class='va'>ln_dist_dm</span>, <span class='va'>base</span><span class='op'>)</span>
-<span class='va'>est_fe</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>ln_euros</span> <span class='op'>~</span> <span class='va'>ln_dist</span> <span class='op'>|</span> <span class='va'>Origin</span> <span class='op'>+</span> <span class='va'>Destination</span>, <span class='va'>base</span><span class='op'>)</span>
-
-<span class='co'># The results are the same as if we used the two factors</span>
-<span class='co'># as fixed-effects</span>
-<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_fe</span>, se <span class='op'>=</span> <span class='st'>"st"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                                est             est_fe
-#&gt; Dependent Var.:        ln_euros_dm           ln_euros
-#&gt;                                                      
-#&gt; (Intercept)     -6.89e-14 (0.0116)                   
-#&gt; ln_dist_dm      -2.072*** (0.0271)                   
-#&gt; ln_dist                            -2.072*** (0.0271)
-#&gt; Fixed-Effects:  ------------------ ------------------
-#&gt; Origin                          No                Yes
-#&gt; Destination                     No                Yes
-#&gt; _______________ __________________ __________________
-#&gt; S.E. type                      IID                IID
-#&gt; Observations                38,325             38,325
-#&gt; R2                         0.13218            0.50428
-#&gt; Within R2                       --            0.13218</div><div class='input'>
-<span class='co'>#</span>
-<span class='co'># Variables with varying slopes</span>
-<span class='co'>#</span>
-
-<span class='co'># You can center on factors but also on variables with varying slopes</span>
-
-<span class='co'># Let's have an illustration</span>
-<span class='va'>base</span> <span class='op'>=</span> <span class='va'>iris</span>
-<span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>)</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span>
-
-<span class='co'>#</span>
-<span class='co'># We center y and x1 on species and x2 * species</span>
-
-<span class='co'># using a formula</span>
-<span class='va'>base_dm</span> <span class='op'>=</span> <span class='fu'>demean</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>+</span> <span class='va'>x1</span> <span class='op'>~</span> <span class='va'>species</span><span class='op'>[</span><span class='va'>x2</span><span class='op'>]</span>, data <span class='op'>=</span> <span class='va'>base</span><span class='op'>)</span>
-
-<span class='co'># using vectors</span>
-<span class='va'>base_dm_bis</span> <span class='op'>=</span> <span class='fu'>demean</span><span class='op'>(</span>X <span class='op'>=</span> <span class='va'>base</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span><span class='op'>)</span><span class='op'>]</span>, f <span class='op'>=</span> <span class='va'>base</span><span class='op'>$</span><span class='va'>species</span>,
-                     slope.vars <span class='op'>=</span> <span class='va'>base</span><span class='op'>$</span><span class='va'>x2</span>, slope.flag <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>
-
-<span class='co'># Let's look at the equivalences</span>
-<span class='va'>res_vs_1</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='va'>species</span> <span class='op'>+</span> <span class='va'>x2</span><span class='op'>:</span><span class='va'>species</span>, <span class='va'>base</span><span class='op'>)</span>
-<span class='va'>res_vs_2</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base_dm</span><span class='op'>)</span>
-<span class='va'>res_vs_3</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base_dm_bis</span><span class='op'>)</span>
-
-<span class='co'># only the small sample adj. differ in the SEs</span>
-<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res_vs_1</span>, <span class='va'>res_vs_2</span>, <span class='va'>res_vs_3</span>, keep <span class='op'>=</span> <span class='st'>"x1"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                           res_vs_1           res_vs_2           res_vs_3
-#&gt; Dependent Var.:                  y                  y                  y
-#&gt;                                                                         
-#&gt; x1              0.4500*** (0.0806) 0.4500*** (0.0792) 0.4500*** (0.0792)
-#&gt; _______________ __________________ __________________ __________________
-#&gt; S.E. type                      IID                IID                IID
-#&gt; Observations                   150                150                150
-#&gt; R2                         0.86900            0.17894            0.17894
-#&gt; Adj. R2                    0.86351            0.17340            0.17340</div><div class='input'>
-<span class='co'>#</span>
-<span class='co'># center on x2 * species and on another FE</span>
-
-<span class='va'>base</span><span class='op'>$</span><span class='va'>fe</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span>, <span class='fl'>10</span><span class='op'>)</span>
-
-<span class='co'># using a formula =&gt; double square brackets!</span>
-<span class='va'>base_dm</span> <span class='op'>=</span> <span class='fu'>demean</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>+</span> <span class='va'>x1</span> <span class='op'>~</span> <span class='va'>fe</span> <span class='op'>+</span> <span class='va'>species</span><span class='op'>[[</span><span class='va'>x2</span><span class='op'>]</span><span class='op'>]</span>, data <span class='op'>=</span> <span class='va'>base</span><span class='op'>)</span>
-
-<span class='co'># using vectors =&gt; note slope.flag!</span>
-<span class='va'>base_dm_bis</span> <span class='op'>=</span> <span class='fu'>demean</span><span class='op'>(</span>X <span class='op'>=</span> <span class='va'>base</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span><span class='op'>)</span><span class='op'>]</span>, f <span class='op'>=</span> <span class='va'>base</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"fe"</span>, <span class='st'>"species"</span><span class='op'>)</span><span class='op'>]</span>,
-                     slope.vars <span class='op'>=</span> <span class='va'>base</span><span class='op'>$</span><span class='va'>x2</span>, slope.flag <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='op'>-</span><span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span>
-
-<span class='co'># Explanations slope.flag = c(0, -1):</span>
-<span class='co'># - the first 0: the first factor (fe) is associated to no variable</span>
-<span class='co'># - the "-1":</span>
-<span class='co'>#    * |-1| = 1: the second factor (species) is associated to ONE variable</span>
-<span class='co'>#    *   -1 &lt; 0: the second factor should not be included as such</span>
-
-<span class='co'># Let's look at the equivalences</span>
-<span class='va'>res_vs_1</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'><a href='i.html'>i</a></span><span class='op'>(</span><span class='va'>fe</span><span class='op'>)</span> <span class='op'>+</span> <span class='va'>x2</span><span class='op'>:</span><span class='va'>species</span>, <span class='va'>base</span><span class='op'>)</span>
-<span class='va'>res_vs_2</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base_dm</span><span class='op'>)</span>
-<span class='va'>res_vs_3</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base_dm_bis</span><span class='op'>)</span>
-
-<span class='co'># only the small sample adj. differ in the SEs</span>
-<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res_vs_1</span>, <span class='va'>res_vs_2</span>, <span class='va'>res_vs_3</span>, keep <span class='op'>=</span> <span class='st'>"x1"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                           res_vs_1           res_vs_2           res_vs_3
-#&gt; Dependent Var.:                  y                  y                  y
-#&gt;                                                                         
-#&gt; x1              0.4915*** (0.0839) 0.4915*** (0.0819) 0.4915*** (0.0819)
-#&gt; _______________ __________________ __________________ __________________
-#&gt; S.E. type                      IID                IID                IID
-#&gt; Observations                   150                150                150
-#&gt; R2                         0.85514            0.19580            0.19580
-#&gt; Adj. R2                    0.84693            0.19037            0.19037</div><div class='input'>
-
-
-
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='co'># Illustration of the FWL theorem</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>trade</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>base</span> <span class='op'>=</span> <span class='va'>trade</span></span>
+<span class='r-in'><span class='va'>base</span><span class='op'>$</span><span class='va'>ln_dist</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>$</span><span class='va'>dist_km</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>base</span><span class='op'>$</span><span class='va'>ln_euros</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>$</span><span class='va'>Euros</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># We center the two variables ln_dist and ln_euros</span></span>
+<span class='r-in'><span class='co'>#  on the factors Origin and Destination</span></span>
+<span class='r-in'><span class='va'>X_demean</span> <span class='op'>=</span> <span class='fu'>demean</span><span class='op'>(</span>X <span class='op'>=</span> <span class='va'>base</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"ln_dist"</span>, <span class='st'>"ln_euros"</span><span class='op'>)</span><span class='op'>]</span>,</span>
+<span class='r-in'>                  f <span class='op'>=</span> <span class='va'>base</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Origin"</span>, <span class='st'>"Destination"</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>base</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"ln_dist_dm"</span>, <span class='st'>"ln_euros_dm"</span><span class='op'>)</span><span class='op'>]</span> <span class='op'>=</span> <span class='va'>X_demean</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>ln_euros_dm</span> <span class='op'>~</span> <span class='va'>ln_dist_dm</span>, <span class='va'>base</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>est_fe</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>ln_euros</span> <span class='op'>~</span> <span class='va'>ln_dist</span> <span class='op'>|</span> <span class='va'>Origin</span> <span class='op'>+</span> <span class='va'>Destination</span>, <span class='va'>base</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># The results are the same as if we used the two factors</span></span>
+<span class='r-in'><span class='co'># as fixed-effects</span></span>
+<span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_fe</span>, se <span class='op'>=</span> <span class='st'>"st"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                                est             est_fe</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:        ln_euros_dm           ln_euros</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                                                      </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     -6.89e-14 (0.0116)                   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ln_dist_dm      -2.072*** (0.0271)                   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ln_dist                            -2.072*** (0.0271)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Fixed-Effects:  ------------------ ------------------</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Origin                          No                Yes</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Destination                     No                Yes</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> _______________ __________________ __________________</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> S.E. type                      IID                IID</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations                38,325             38,325</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> R2                         0.13218            0.50428</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Within R2                       --            0.13218</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'><span class='co'># Variables with varying slopes</span></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># You can center on factors but also on variables with varying slopes</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Let's have an illustration</span></span>
+<span class='r-in'><span class='va'>base</span> <span class='op'>=</span> <span class='va'>iris</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>)</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'><span class='co'># We center y and x1 on species and x2 * species</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># using a formula</span></span>
+<span class='r-in'><span class='va'>base_dm</span> <span class='op'>=</span> <span class='fu'>demean</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>+</span> <span class='va'>x1</span> <span class='op'>~</span> <span class='va'>species</span><span class='op'>[</span><span class='va'>x2</span><span class='op'>]</span>, data <span class='op'>=</span> <span class='va'>base</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># using vectors</span></span>
+<span class='r-in'><span class='va'>base_dm_bis</span> <span class='op'>=</span> <span class='fu'>demean</span><span class='op'>(</span>X <span class='op'>=</span> <span class='va'>base</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span><span class='op'>)</span><span class='op'>]</span>, f <span class='op'>=</span> <span class='va'>base</span><span class='op'>$</span><span class='va'>species</span>,</span>
+<span class='r-in'>                     slope.vars <span class='op'>=</span> <span class='va'>base</span><span class='op'>$</span><span class='va'>x2</span>, slope.flag <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Let's look at the equivalences</span></span>
+<span class='r-in'><span class='va'>res_vs_1</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='va'>species</span> <span class='op'>+</span> <span class='va'>x2</span><span class='op'>:</span><span class='va'>species</span>, <span class='va'>base</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>res_vs_2</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base_dm</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>res_vs_3</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base_dm_bis</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># only the small sample adj. differ in the SEs</span></span>
+<span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res_vs_1</span>, <span class='va'>res_vs_2</span>, <span class='va'>res_vs_3</span>, keep <span class='op'>=</span> <span class='st'>"x1"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                           res_vs_1           res_vs_2           res_vs_3</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:                  y                  y                  y</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                                                                         </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x1              0.4500*** (0.0806) 0.4500*** (0.0792) 0.4500*** (0.0792)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> _______________ __________________ __________________ __________________</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> S.E. type                      IID                IID                IID</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations                   150                150                150</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> R2                         0.86900            0.17894            0.17894</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Adj. R2                    0.86351            0.17340            0.17340</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'><span class='co'># center on x2 * species and on another FE</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>base</span><span class='op'>$</span><span class='va'>fe</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span>, <span class='fl'>10</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># using a formula =&gt; double square brackets!</span></span>
+<span class='r-in'><span class='va'>base_dm</span> <span class='op'>=</span> <span class='fu'>demean</span><span class='op'>(</span><span class='va'>y</span> <span class='op'>+</span> <span class='va'>x1</span> <span class='op'>~</span> <span class='va'>fe</span> <span class='op'>+</span> <span class='va'>species</span><span class='op'>[[</span><span class='va'>x2</span><span class='op'>]</span><span class='op'>]</span>, data <span class='op'>=</span> <span class='va'>base</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># using vectors =&gt; note slope.flag!</span></span>
+<span class='r-in'><span class='va'>base_dm_bis</span> <span class='op'>=</span> <span class='fu'>demean</span><span class='op'>(</span>X <span class='op'>=</span> <span class='va'>base</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span><span class='op'>)</span><span class='op'>]</span>, f <span class='op'>=</span> <span class='va'>base</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"fe"</span>, <span class='st'>"species"</span><span class='op'>)</span><span class='op'>]</span>,</span>
+<span class='r-in'>                     slope.vars <span class='op'>=</span> <span class='va'>base</span><span class='op'>$</span><span class='va'>x2</span>, slope.flag <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='op'>-</span><span class='fl'>1</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Explanations slope.flag = c(0, -1):</span></span>
+<span class='r-in'><span class='co'># - the first 0: the first factor (fe) is associated to no variable</span></span>
+<span class='r-in'><span class='co'># - the "-1":</span></span>
+<span class='r-in'><span class='co'>#    * |-1| = 1: the second factor (species) is associated to ONE variable</span></span>
+<span class='r-in'><span class='co'>#    *   -1 &lt; 0: the second factor should not be included as such</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Let's look at the equivalences</span></span>
+<span class='r-in'><span class='va'>res_vs_1</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'><a href='i.html'>i</a></span><span class='op'>(</span><span class='va'>fe</span><span class='op'>)</span> <span class='op'>+</span> <span class='va'>x2</span><span class='op'>:</span><span class='va'>species</span>, <span class='va'>base</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>res_vs_2</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base_dm</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>res_vs_3</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base_dm_bis</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># only the small sample adj. differ in the SEs</span></span>
+<span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res_vs_1</span>, <span class='va'>res_vs_2</span>, <span class='va'>res_vs_3</span>, keep <span class='op'>=</span> <span class='st'>"x1"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                           res_vs_1           res_vs_2           res_vs_3</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:                  y                  y                  y</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                                                                         </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x1              0.4915*** (0.0839) 0.4915*** (0.0819) 0.4915*** (0.0819)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> _______________ __________________ __________________ __________________</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> S.E. type                      IID                IID                IID</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations                   150                150                150</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> R2                         0.85514            0.19580            0.19580</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Adj. R2                    0.84693            0.19037            0.19037</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

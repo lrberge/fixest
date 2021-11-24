@@ -292,7 +292,7 @@
     </tr>
     <tr>
       <th>ci.join.par</th>
-      <td><p>A list of parameters to be passed to <code><a href='https://rdrr.io/r/graphics/lines.html'>lines</a></code>. Only used if <code>ci.join=TRUE</code>. By default it is equal to <code><a href='https://rdrr.io/r/base/list.html'>list(lwd = lwd, col = col, lty = 2)</a></code>.</p></td>
+      <td><p>A list of parameters to be passed to <code><a href='https://rdrr.io/r/graphics/lines.html'>lines</a></code>. Only used if <code>ci.join=TRUE</code>. By default it is equal to <code>list(lwd = lwd, col = col, lty = 2)</code>.</p></td>
     </tr>
     <tr>
       <th>ci.fill</th>
@@ -300,7 +300,7 @@
     </tr>
     <tr>
       <th>ci.fill.par</th>
-      <td><p>A list of parameters to be passed to <code><a href='https://rdrr.io/r/graphics/polygon.html'>polygon</a></code>. Only used if <code>ci.fill=TRUE</code>. By default it is equal to <code><a href='https://rdrr.io/r/base/list.html'>list(col = "lightgray", alpha = 0.5)</a></code>. Note that <code>alpha</code> is a special parameter that adds transparency to the color (ranges from 0 to 1).</p></td>
+      <td><p>A list of parameters to be passed to <code><a href='https://rdrr.io/r/graphics/polygon.html'>polygon</a></code>. Only used if <code>ci.fill=TRUE</code>. By default it is equal to <code>list(col = "lightgray", alpha = 0.5)</code>. Note that <code>alpha</code> is a special parameter that adds transparency to the color (ranges from 0 to 1).</p></td>
     </tr>
     <tr>
       <th>ref.line</th>
@@ -384,34 +384,36 @@
     <div class='dont-index'><p><code><a href='coefplot.html'>coefplot</a></code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='co'># coefplot has many arguments, which makes it highly flexible.</span>
-<span class='co'># If you don't like the default style of coefplot. No worries,</span>
-<span class='co'># you can set *your* default by using the function</span>
-<span class='co'># setFixest_coefplot()</span>
-
-<span class='co'># Estimation</span>
-<span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Petal.Length</span> <span class='op'>~</span> <span class='va'>Petal.Width</span> <span class='op'>+</span> <span class='va'>Sepal.Length</span> <span class='op'>+</span>
-                <span class='va'>Sepal.Width</span> <span class='op'>|</span> <span class='va'>Species</span>, <span class='va'>iris</span><span class='op'>)</span>
-
-<span class='co'># Plot with default style</span>
-<span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>
-</div><div class='img'><img src='setFixest_coefplot-1.png' alt='' width='700' height='433' /></div><div class='input'>
-<span class='co'># Now we permanently change some arguments</span>
-<span class='va'>dict</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Petal.Length"</span><span class='op'>=</span><span class='st'>"Length (Petal)"</span>, <span class='st'>"Petal.Width"</span><span class='op'>=</span><span class='st'>"Width (Petal)"</span>,
-         <span class='st'>"Sepal.Length"</span><span class='op'>=</span><span class='st'>"Length (Sepal)"</span>, <span class='st'>"Sepal.Width"</span><span class='op'>=</span><span class='st'>"Width (Sepal)"</span><span class='op'>)</span>
-
-<span class='fu'>setFixest_coefplot</span><span class='op'>(</span>ci.col <span class='op'>=</span> <span class='fl'>2</span>, pt.col <span class='op'>=</span> <span class='st'>"darkblue"</span>, ci.lwd <span class='op'>=</span> <span class='fl'>3</span>,
-                   pt.cex <span class='op'>=</span> <span class='fl'>2</span>, pt.pch <span class='op'>=</span> <span class='fl'>15</span>, ci.width <span class='op'>=</span> <span class='fl'>0</span>, dict <span class='op'>=</span> <span class='va'>dict</span><span class='op'>)</span>
-
-<span class='co'># Tadaaa!</span>
-<span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>
-</div><div class='img'><img src='setFixest_coefplot-2.png' alt='' width='700' height='433' /></div><div class='input'>
-<span class='co'># To reset to the default settings:</span>
-<span class='fu'>setFixest_coefplot</span><span class='op'>(</span><span class='op'>)</span>
-<span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>
-
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='co'># coefplot has many arguments, which makes it highly flexible.</span></span>
+<span class='r-in'><span class='co'># If you don't like the default style of coefplot. No worries,</span></span>
+<span class='r-in'><span class='co'># you can set *your* default by using the function</span></span>
+<span class='r-in'><span class='co'># setFixest_coefplot()</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Estimation</span></span>
+<span class='r-in'><span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Petal.Length</span> <span class='op'>~</span> <span class='va'>Petal.Width</span> <span class='op'>+</span> <span class='va'>Sepal.Length</span> <span class='op'>+</span></span>
+<span class='r-in'>                <span class='va'>Sepal.Width</span> <span class='op'>|</span> <span class='va'>Species</span>, <span class='va'>iris</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Plot with default style</span></span>
+<span class='r-in'><span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span></span>
+<span class='r-plt img'><img src='setFixest_coefplot-1.png' alt='' width='700' height='433' /></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Now we permanently change some arguments</span></span>
+<span class='r-in'><span class='va'>dict</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Petal.Length"</span><span class='op'>=</span><span class='st'>"Length (Petal)"</span>, <span class='st'>"Petal.Width"</span><span class='op'>=</span><span class='st'>"Width (Petal)"</span>,</span>
+<span class='r-in'>         <span class='st'>"Sepal.Length"</span><span class='op'>=</span><span class='st'>"Length (Sepal)"</span>, <span class='st'>"Sepal.Width"</span><span class='op'>=</span><span class='st'>"Width (Sepal)"</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'>setFixest_coefplot</span><span class='op'>(</span>ci.col <span class='op'>=</span> <span class='fl'>2</span>, pt.col <span class='op'>=</span> <span class='st'>"darkblue"</span>, ci.lwd <span class='op'>=</span> <span class='fl'>3</span>,</span>
+<span class='r-in'>                   pt.cex <span class='op'>=</span> <span class='fl'>2</span>, pt.pch <span class='op'>=</span> <span class='fl'>15</span>, ci.width <span class='op'>=</span> <span class='fl'>0</span>, dict <span class='op'>=</span> <span class='va'>dict</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Tadaaa!</span></span>
+<span class='r-in'><span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span></span>
+<span class='r-plt img'><img src='setFixest_coefplot-2.png' alt='' width='700' height='433' /></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># To reset to the default settings:</span></span>
+<span class='r-in'><span class='fu'>setFixest_coefplot</span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

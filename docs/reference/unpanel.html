@@ -163,32 +163,38 @@
     <p>Laurent Berge</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>base_did</span><span class='op'>)</span>
-
-<span class='co'># Setting a data set as a panel</span>
-<span class='va'>pdat</span> <span class='op'>=</span> <span class='fu'><a href='panel.html'>panel</a></span><span class='op'>(</span><span class='va'>base_did</span>, <span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>period</span><span class='op'>)</span>
-
-<span class='co'># ... allows you to use leads and lags in estimations</span>
-<span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span><span class='op'>~</span><span class='fu'><a href='f.html'>l</a></span><span class='op'>(</span><span class='va'>x1</span>, <span class='fl'>0</span><span class='op'>:</span><span class='fl'>1</span><span class='op'>)</span>, <span class='va'>pdat</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>NOTE: 108 observations removed because of NA values (RHS: 108).</span></div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
-#&gt; Observations: 972 
-#&gt; Standard-errors: Clustered (id) 
-#&gt;             Estimate Std. Error   t value  Pr(&gt;|t|)    
-#&gt; (Intercept) 2.234786   0.203176 10.999281 &lt; 2.2e-16 ***
-#&gt; x1          0.994800   0.048671 20.439162 &lt; 2.2e-16 ***
-#&gt; l(x1, 1)    0.040962   0.055826  0.733756    0.4647    
-#&gt; ---
-#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 4.90919   Adj. R2: 0.264064</div><div class='input'>
-<span class='co'># Now unpanel =&gt; returns the initial data set</span>
-<span class='fu'><a href='https://rdrr.io/r/base/class.html'>class</a></span><span class='op'>(</span><span class='va'>pdat</span><span class='op'>)</span> ; <span class='fu'><a href='https://rdrr.io/r/base/dim.html'>dim</a></span><span class='op'>(</span><span class='va'>pdat</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] "fixest_panel" "data.frame"  </div><div class='output co'>#&gt; [1] 1080    6</div><div class='input'><span class='va'>new_base</span> <span class='op'>=</span> <span class='fu'>unpanel</span><span class='op'>(</span><span class='va'>pdat</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/class.html'>class</a></span><span class='op'>(</span><span class='va'>new_base</span><span class='op'>)</span> ; <span class='fu'><a href='https://rdrr.io/r/base/dim.html'>dim</a></span><span class='op'>(</span><span class='va'>new_base</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] "data.frame"</div><div class='output co'>#&gt; [1] 1080    6</div><div class='input'>
-
-
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>base_did</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Setting a data set as a panel</span></span>
+<span class='r-in'><span class='va'>pdat</span> <span class='op'>=</span> <span class='fu'><a href='panel.html'>panel</a></span><span class='op'>(</span><span class='va'>base_did</span>, <span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>period</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># ... allows you to use leads and lags in estimations</span></span>
+<span class='r-in'><span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span><span class='op'>~</span><span class='fu'><a href='f.html'>l</a></span><span class='op'>(</span><span class='va'>x1</span>, <span class='fl'>0</span><span class='op'>:</span><span class='fl'>1</span><span class='op'>)</span>, <span class='va'>pdat</span><span class='op'>)</span></span>
+<span class='r-msg co'><span class='r-pr'>#&gt;</span> NOTE: 108 observations removed because of NA values (RHS: 108).</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> OLS estimation, Dep. Var.: y</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations: 972 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Standard-errors: Clustered (id) </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>             Estimate Std. Error   t value  Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept) 2.234786   0.203176 10.999281 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x1          0.994800   0.048671 20.439162 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> l(x1, 1)    0.040962   0.055826  0.733756    0.4647    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> RMSE: 4.90919   Adj. R2: 0.264064</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Now unpanel =&gt; returns the initial data set</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/class.html'>class</a></span><span class='op'>(</span><span class='va'>pdat</span><span class='op'>)</span> ; <span class='fu'><a href='https://rdrr.io/r/base/dim.html'>dim</a></span><span class='op'>(</span><span class='va'>pdat</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "fixest_panel" "data.frame"  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] 1080    6</span>
+<span class='r-in'><span class='va'>new_base</span> <span class='op'>=</span> <span class='fu'>unpanel</span><span class='op'>(</span><span class='va'>pdat</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/class.html'>class</a></span><span class='op'>(</span><span class='va'>new_base</span><span class='op'>)</span> ; <span class='fu'><a href='https://rdrr.io/r/base/dim.html'>dim</a></span><span class='op'>(</span><span class='va'>new_base</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "data.frame"</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] 1080    6</span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

@@ -165,63 +165,66 @@
 <p>Finally, the prefix <code>c</code> means cumulative: each stepwise element is added to the next. That is, <code>fml = y ~ x1 + csw(x2, x3)</code> would lead to the following models <code>y ~ x1 + x2</code> and <code>y ~ x1 + x2 + x3</code>. The <code>0</code> has the same meaning and would also lead to the model without the stepwise elements to be estimated: in other words, <code>fml = y ~ x1 + csw0(x2, x3)</code> leads to the following three models: <code>y ~ x1</code>, <code>y ~ x1 + x2</code> and <code>y ~ x1 + x2 + x3</code>.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='va'>base</span> <span class='op'>=</span> <span class='va'>iris</span>
-<span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>)</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span>
-
-<span class='co'># Regular stepwise</span>
-<span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fu'>sw</span><span class='op'>(</span><span class='va'>x1</span>, <span class='va'>x2</span>, <span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Standard-errors: IID 
-#&gt; Expl. vars.: x1
-#&gt;              Estimate Std. Error  t value  Pr(&gt;|t|)    
-#&gt; (Intercept)  6.526223   0.478896 13.62763 &lt; 2.2e-16 ***
-#&gt; x1          -0.223361   0.155081 -1.44029    0.1519    
-#&gt; ---
-#&gt; Expl. vars.: x2
-#&gt;             Estimate Std. Error t value  Pr(&gt;|t|)    
-#&gt; (Intercept) 4.306603   0.078389 54.9389 &lt; 2.2e-16 ***
-#&gt; x2          0.408922   0.018891 21.6460 &lt; 2.2e-16 ***
-#&gt; ---
-#&gt; Expl. vars.: x3
-#&gt;             Estimate Std. Error t value  Pr(&gt;|t|)    
-#&gt; (Intercept) 4.777629   0.072935 65.5055 &lt; 2.2e-16 ***
-#&gt; x3          0.888580   0.051374 17.2965 &lt; 2.2e-16 ***</div><div class='input'>
-<span class='co'># Cumulative stepwise</span>
-<span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fu'>csw</span><span class='op'>(</span><span class='va'>x1</span>, <span class='va'>x2</span>, <span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Standard-errors: IID 
-#&gt; Expl. vars.: x1
-#&gt;              Estimate Std. Error  t value  Pr(&gt;|t|)    
-#&gt; (Intercept)  6.526223   0.478896 13.62763 &lt; 2.2e-16 ***
-#&gt; x1          -0.223361   0.155081 -1.44029    0.1519    
-#&gt; ---
-#&gt; Expl. vars.: x1 + x2
-#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|)    
-#&gt; (Intercept) 2.249140   0.247970  9.07022 7.0385e-16 ***
-#&gt; x1          0.595525   0.069328  8.58994 1.1633e-14 ***
-#&gt; x2          0.471920   0.017118 27.56916  &lt; 2.2e-16 ***
-#&gt; ---
-#&gt; Expl. vars.: x1 + x2 + x3
-#&gt;              Estimate Std. Error  t value   Pr(&gt;|t|)    
-#&gt; (Intercept)  1.855997   0.250777  7.40098 9.8539e-12 ***
-#&gt; x1           0.650837   0.066647  9.76538  &lt; 2.2e-16 ***
-#&gt; x2           0.709132   0.056719 12.50248  &lt; 2.2e-16 ***
-#&gt; x3          -0.556483   0.127548 -4.36293 2.4129e-05 ***</div><div class='input'>
-<span class='co'># Using the 0</span>
-<span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='va'>x2</span> <span class='op'>+</span> <span class='fu'>sw0</span><span class='op'>(</span><span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Standard-errors: IID 
-#&gt; Expl. vars.: x1 + x2
-#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|)    
-#&gt; (Intercept) 2.249140   0.247970  9.07022 7.0385e-16 ***
-#&gt; x1          0.595525   0.069328  8.58994 1.1633e-14 ***
-#&gt; x2          0.471920   0.017118 27.56916  &lt; 2.2e-16 ***
-#&gt; ---
-#&gt; Expl. vars.: x1 + x2 + x3
-#&gt;              Estimate Std. Error  t value   Pr(&gt;|t|)    
-#&gt; (Intercept)  1.855997   0.250777  7.40098 9.8539e-12 ***
-#&gt; x1           0.650837   0.066647  9.76538  &lt; 2.2e-16 ***
-#&gt; x2           0.709132   0.056719 12.50248  &lt; 2.2e-16 ***
-#&gt; x3          -0.556483   0.127548 -4.36293 2.4129e-05 ***</div><div class='input'>
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='va'>base</span> <span class='op'>=</span> <span class='va'>iris</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>)</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Regular stepwise</span></span>
+<span class='r-in'><span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fu'>sw</span><span class='op'>(</span><span class='va'>x1</span>, <span class='va'>x2</span>, <span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Standard-errors: IID </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: x1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>              Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)  6.526223   0.478896 13.62763 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x1          -0.223361   0.155081 -1.44029    0.1519    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: x2</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>             Estimate Std. Error t value  Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept) 4.306603   0.078389 54.9389 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x2          0.408922   0.018891 21.6460 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: x3</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>             Estimate Std. Error t value  Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept) 4.777629   0.072935 65.5055 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x3          0.888580   0.051374 17.2965 &lt; 2.2e-16 ***</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Cumulative stepwise</span></span>
+<span class='r-in'><span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fu'>csw</span><span class='op'>(</span><span class='va'>x1</span>, <span class='va'>x2</span>, <span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Standard-errors: IID </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: x1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>              Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)  6.526223   0.478896 13.62763 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x1          -0.223361   0.155081 -1.44029    0.1519    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: x1 + x2</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>             Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept) 2.249140   0.247970  9.07022 7.0385e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x1          0.595525   0.069328  8.58994 1.1633e-14 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x2          0.471920   0.017118 27.56916  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: x1 + x2 + x3</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>              Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)  1.855997   0.250777  7.40098 9.8539e-12 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x1           0.650837   0.066647  9.76538  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x2           0.709132   0.056719 12.50248  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x3          -0.556483   0.127548 -4.36293 2.4129e-05 ***</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Using the 0</span></span>
+<span class='r-in'><span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='va'>x2</span> <span class='op'>+</span> <span class='fu'>sw0</span><span class='op'>(</span><span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Standard-errors: IID </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: x1 + x2</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>             Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept) 2.249140   0.247970  9.07022 7.0385e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x1          0.595525   0.069328  8.58994 1.1633e-14 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x2          0.471920   0.017118 27.56916  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: x1 + x2 + x3</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>              Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)  1.855997   0.250777  7.40098 9.8539e-12 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x1           0.650837   0.066647  9.76538  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x2           0.709132   0.056719 12.50248  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x3          -0.556483   0.127548 -4.36293 2.4129e-05 ***</span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

@@ -172,36 +172,37 @@
     <p>Laurent Berge</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>trade</span><span class='op'>)</span>
-
-<span class='co'># We estimate the effect of distance on trade</span>
-<span class='co'># =&gt; we account for 3 fixed-effects effects</span>
-<span class='va'>est_pois</span> <span class='op'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>Euros</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>dist_km</span><span class='op'>)</span><span class='op'>|</span><span class='va'>Origin</span><span class='op'>+</span><span class='va'>Destination</span><span class='op'>+</span><span class='va'>Product</span>, <span class='va'>trade</span><span class='op'>)</span>
-
-<span class='co'># obtaining the fixed-effects coefficients</span>
-<span class='va'>fe_trade</span> <span class='op'>=</span> <span class='fu'><a href='fixef_reexported.html'>fixef</a></span><span class='op'>(</span><span class='va'>est_pois</span><span class='op'>)</span>
-
-<span class='co'># printing some summary information on the fixed-effects coefficients:</span>
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>fe_trade</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Fixed_effects coefficients
-#&gt;                         Origin Destination Product
-#&gt; Number of fixed-effects     15          15      20
-#&gt; Number of references         0           1       1
-#&gt; Mean                      23.5        3.09  0.0127
-#&gt; Standard-deviation        1.28        1.11    1.36
-#&gt; 
-#&gt; COEFFICIENTS:
-#&gt;   Origin:    AT    BE    DE   DK    ES                 
-#&gt;           22.67 23.72 24.87 23.6 25.13 ... 10 remaining
-#&gt; -----
-#&gt;   Destination:    AT    BE    DE    DK    ES                 
-#&gt;                2.436 2.696 4.323 2.451 4.043 ... 10 remaining
-#&gt; -----
-#&gt;   Product: 1     2     3     4      5                 
-#&gt;            0 1.414 0.656 1.449 -1.521 ... 15 remaining</div><div class='input'>
-
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>trade</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># We estimate the effect of distance on trade</span></span>
+<span class='r-in'><span class='co'># =&gt; we account for 3 fixed-effects effects</span></span>
+<span class='r-in'><span class='va'>est_pois</span> <span class='op'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>Euros</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>dist_km</span><span class='op'>)</span><span class='op'>|</span><span class='va'>Origin</span><span class='op'>+</span><span class='va'>Destination</span><span class='op'>+</span><span class='va'>Product</span>, <span class='va'>trade</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># obtaining the fixed-effects coefficients</span></span>
+<span class='r-in'><span class='va'>fe_trade</span> <span class='op'>=</span> <span class='fu'><a href='fixef_reexported.html'>fixef</a></span><span class='op'>(</span><span class='va'>est_pois</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># printing some summary information on the fixed-effects coefficients:</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>fe_trade</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Fixed_effects coefficients</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                         Origin Destination Product</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Number of fixed-effects     15          15      20</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Number of references         0           1       1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Mean                      23.5        3.09  0.0127</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Standard-deviation        1.28        1.11    1.36</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> COEFFICIENTS:</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   Origin:    AT    BE    DE   DK    ES                 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>           22.67 23.72 24.87 23.6 25.13 ... 10 remaining</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> -----</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   Destination:    AT    BE    DE    DK    ES                 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                2.436 2.696 4.323 2.451 4.043 ... 10 remaining</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> -----</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   Product: 1     2     3     4      5                 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>            0 1.414 0.656 1.449 -1.521 ... 15 remaining</span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

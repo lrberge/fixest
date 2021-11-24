@@ -174,36 +174,39 @@
 
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='va'>base</span> <span class='op'>=</span> <span class='va'>iris</span>
-<span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>)</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span>
-
-<span class='co'># A multiple estimation</span>
-<span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'><a href='stepwise.html'>csw0</a></span><span class='op'>(</span><span class='va'>x2</span>, <span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span>
-
-<span class='co'># Getting all the coefficients at once,</span>
-<span class='co'># each row is a model</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;      (Intercept)         x1       x2         x3
-#&gt; [1,]    6.526223 -0.2233611       NA         NA
-#&gt; [2,]    2.249140  0.5955247 0.471920         NA
-#&gt; [3,]    1.855997  0.6508372 0.709132 -0.5564827</div><div class='input'>
-<span class='co'># Example of keep/drop/order</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span><span class='op'>(</span><span class='va'>est</span>, keep <span class='op'>=</span> <span class='st'>"Int|x1"</span>, order <span class='op'>=</span> <span class='st'>"x1"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;              x1 (Intercept)
-#&gt; [1,] -0.2233611    6.526223
-#&gt; [2,]  0.5955247    2.249140
-#&gt; [3,]  0.6508372    1.855997</div><div class='input'>
-
-<span class='co'># To change the order of the model, use fixest_multi</span>
-<span class='co'># extraction tools:</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>[</span>rhs <span class='op'>=</span> <span class='va'>.N</span><span class='op'>:</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;      (Intercept)         x1       x2         x3
-#&gt; [1,]    1.855997  0.6508372 0.709132 -0.5564827
-#&gt; [2,]    2.249140  0.5955247 0.471920         NA
-#&gt; [3,]    6.526223 -0.2233611       NA         NA</div><div class='input'>
-
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='va'>base</span> <span class='op'>=</span> <span class='va'>iris</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>)</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># A multiple estimation</span></span>
+<span class='r-in'><span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='fu'><a href='stepwise.html'>csw0</a></span><span class='op'>(</span><span class='va'>x2</span>, <span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Getting all the coefficients at once,</span></span>
+<span class='r-in'><span class='co'># each row is a model</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>      (Intercept)         x1       x2         x3</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1,]    6.526223 -0.2233611       NA         NA</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [2,]    2.249140  0.5955247 0.471920         NA</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [3,]    1.855997  0.6508372 0.709132 -0.5564827</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Example of keep/drop/order</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span><span class='op'>(</span><span class='va'>est</span>, keep <span class='op'>=</span> <span class='st'>"Int|x1"</span>, order <span class='op'>=</span> <span class='st'>"x1"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>              x1 (Intercept)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1,] -0.2233611    6.526223</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [2,]  0.5955247    2.249140</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [3,]  0.6508372    1.855997</span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># To change the order of the model, use fixest_multi</span></span>
+<span class='r-in'><span class='co'># extraction tools:</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/stats/coef.html'>coef</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>[</span>rhs <span class='op'>=</span> <span class='va'>.N</span><span class='op'>:</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>      (Intercept)         x1       x2         x3</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1,]    1.855997  0.6508372 0.709132 -0.5564827</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [2,]    2.249140  0.5955247 0.471920         NA</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [3,]    6.526223 -0.2233611       NA         NA</span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

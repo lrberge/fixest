@@ -88,13 +88,13 @@
 
       
 
-      </header><script src="exporting_tables_files/header-attrs-2.9/header-attrs.js"></script><div class="row">
+      </header><script src="exporting_tables_files/header-attrs-2.11/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Exporting estimation tables</h1>
                         <h4 class="author">Laurent Berge</h4>
             
-            <h4 class="date">2021-11-04</h4>
+            <h4 class="date">2021-11-24</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/exporting_tables.Rmd"><code>vignettes/exporting_tables.Rmd</code></a></small>
       <div class="hidden name"><code>exporting_tables.Rmd</code></div>
@@ -108,7 +108,7 @@
 <p>It also offers a fair deal of customization, and since you can seamlessly change its default values, you can completely transform the style of your tables without modifying a single line of code.</p>
 <p>Note that there exists excellent alternatives to export tables, like for instance <a href="https://cran.r-project.org/package=modelsummary">modelsummary</a> (if you don’t know it already, please do have a look, it’s really great!); but they are less integrated with <code>fixest</code> objects, possibly necessitating more lines of code to export the same results.</p>
 <p>This document does not describe <code>etable</code>’s arguments in details (the help page provides many examples). Rather, it illustrates some features that may be hidden at first sight.</p>
-<p>This document applies to <code>fixest</code> version 0.8.0 or higher.</p>
+<p>This document applies to <code>fixest</code> version 0.10.2 or higher.</p>
 <div id="preliminaries" class="section level2">
 <h2 class="hasAnchor">
 <a href="#preliminaries" class="anchor"></a>Preliminaries</h2>
@@ -146,6 +146,7 @@
 #&gt; Observations                            111              111             111
 #&gt; R2                                  0.31974          0.63686         0.58018
 #&gt; Within R2                           0.12245          0.53154         0.12074
+#&gt; 
 #&gt;                                     model 4
 #&gt; Dependent Var.:                 Ozone (ppb)
 #&gt;                                            
@@ -159,7 +160,9 @@
 #&gt; S.E.: Clustered                     by: Day
 #&gt; Observations                            111
 #&gt; R2                                  0.81604
-#&gt; Within R2                           0.61471</code></pre>
+#&gt; Within R2                           0.61471
+#&gt; ---
+#&gt; Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <p>What can we notice? First, the variables are properly labeled. Second, the fixed-effects section details which fixed-effects is included in which model. Third, the type of standard-error is reminded in a dedicated row.</p>
 <p>Starting from this table, two elements are detailed: a) how to change the look of the table with the <code>style.df</code> argument, b) how to leverage tools from other packages with the <code>postprocess.df</code> argument.</p>
 <div id="changing-the-look-of-the-data-frame-with-style-df" class="section level3">
@@ -169,7 +172,7 @@
 <p>You can change many elements of the <code>data.frame</code> with the argument <code>style.df</code> whose input must come from the function <code>style.df</code>. The style monitors many elements of the table, in particular the titles of the sections. Let’s have an example:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">est</span>, style.df <span class="op">=</span> <span class="fu"><a href="../reference/style.df.html">style.df</a></span><span class="op">(</span>depvar.title <span class="op">=</span> <span class="st">""</span>, fixef.title <span class="op">=</span> <span class="st">""</span>, 
-                                 fixef.suffix <span class="op">=</span> <span class="st">" fixed effect"</span>, yesNo <span class="op">=</span> <span class="st">"yes"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+                                fixef.suffix <span class="op">=</span> <span class="st">" fixed effect"</span>, yesNo <span class="op">=</span> <span class="st">"yes"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>#&gt;                                     model 1          model 2         model 3
 #&gt;                                 Ozone (ppb)      Ozone (ppb)     Ozone (ppb)
 #&gt;                                                                             
@@ -183,6 +186,7 @@
 #&gt; Observations                            111              111             111
 #&gt; R2                                  0.31974          0.63686         0.58018
 #&gt; Within R2                           0.12245          0.53154         0.12074
+#&gt; 
 #&gt;                                     model 4
 #&gt;                                 Ozone (ppb)
 #&gt;                                            
@@ -195,7 +199,9 @@
 #&gt; S.E.: Clustered                     by: Day
 #&gt; Observations                            111
 #&gt; R2                                  0.81604
-#&gt; Within R2                           0.61471</code></pre>
+#&gt; Within R2                           0.61471
+#&gt; ---
+#&gt; Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <p>In the previous example, the dependent variable and fixed-effects (FE) headers have been removed, and this is achieved with the (explicit) arguments <code>depvar.title</code> and <code>fixef.title</code>. Furthermore the suffix <code>"fixed effect"</code> is added to each fixed-effect variable, and the indicator of which FE is included in which model is slightly changed. There are more options that are described in the <code>style.df</code> documentation.</p>
 <div id="postprocessing-with-external-functions" class="section level4">
 <h4 class="hasAnchor">
@@ -299,6 +305,8 @@
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">est</span>, <span class="va">est_slopes</span>, style.tex <span class="op">=</span> <span class="fu"><a href="../reference/style.tex.html">style.tex</a></span><span class="op">(</span><span class="st">"aer"</span><span class="op">)</span>, 
        signifCode <span class="op">=</span> <span class="cn">NA</span>, fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">r2</span> <span class="op">+</span> <span class="va">n</span>, tex <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<pre><code>#&gt; Warning in etable(est, est_slopes, style.tex = style.tex("aer"), signifCode =
+#&gt; NA, : The argument 'signifCode' is deprecated. Please use 'signif.code' instead.</code></pre>
 <p>Which yields the following table:</p>
 <p><img src="https://github.com/lrberge/fixest/blob/master/vignettes/images/etable/table_new_style.PNG?raw=true"></p>
 </div>
@@ -308,7 +316,7 @@
 </h3>
 <p>When <code>tex = TRUE</code> <code>etable</code> returns a character vector. It is possible to modify it at will with the argument <code>postprocess.tex</code>. When a postprocessing function is detected, two additional tags are added to the character vector identifying the start and end of the table (<code>"%start:tab\\n"</code> and <code>"%end:tab\\n"</code>).</p>
 <p>Assume we want to set the rule widths of the table, we could write the following function:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">set_rules</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">heavy</span>, <span class="va">light</span><span class="op">)</span><span class="op">{</span>
   <span class="co"># x: the character vector returned by etable</span>
   
@@ -327,40 +335,42 @@
   <span class="va">x</span>
 <span class="op">}</span></code></pre></div>
 <p>Now we can summon that function from <code>etable</code>:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">est</span>, <span class="va">est_slopes</span>, postprocess.tex <span class="op">=</span> <span class="va">set_rules</span>, heavy <span class="op">=</span> <span class="st">"0.14em"</span>, tex <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <p>Of course it is even more convenient to set <code>set_rules</code> as the default postprocessing function.</p>
 <div id="setting-etable-default-values-latex-edition" class="section level4">
 <h4 class="hasAnchor">
 <a href="#setting-etable-default-values-latex-edition" class="anchor"></a>Setting <code>etable</code> default values: Latex edition</h4>
 <p>To set the default values, like for the data.frame output, use <code>setFixest_etable</code>:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">setFixest_etable</a></span><span class="op">(</span>style.tex <span class="op">=</span> <span class="fu"><a href="../reference/style.tex.html">style.tex</a></span><span class="op">(</span><span class="st">"aer"</span><span class="op">)</span>, postprocess.tex <span class="op">=</span> <span class="va">set_rules</span>, 
-                 fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">r2</span> <span class="op">+</span> <span class="va">n</span>, signifCode <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></code></pre></div>
-<p>Now we can access directly the arguments of the postprocessing function and the default style is the one of the second table:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">est</span>, <span class="va">est_slopes</span>, heavy <span class="op">=</span> <span class="st">"0.14em"</span>, tex <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<pre><code>#&gt; \setlength\heavyrulewidth{0.14em}
-#&gt; \begin{tabular}{lccccc}
+<code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">setFixest_etable</a></span><span class="op">(</span>style.tex <span class="op">=</span> <span class="fu"><a href="../reference/style.tex.html">style.tex</a></span><span class="op">(</span><span class="st">"aer"</span>, signif.code <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>, postprocess.tex <span class="op">=</span> <span class="va">set_rules</span>, 
+                 fitstat <span class="op">=</span> <span class="op">~</span> <span class="va">r2</span> <span class="op">+</span> <span class="va">n</span><span class="op">)</span></code></pre></div>
+<p>Now we can access directly the arguments of the postprocessing function and the default style is the one of the second table:</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">est</span>, heavy <span class="op">=</span> <span class="st">"0.14em"</span>, tex <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<pre><code>#&gt; \begingroup
+#&gt; \centering
+#&gt; \setlength\heavyrulewidth{0.14em}
+#&gt; \begin{tabular}{lcccc}
 #&gt;    \toprule
-#&gt;     &amp; \multicolumn{5}{c}{Ozone (ppb)}\\
-#&gt;                                 &amp; (1)           &amp; (2)           &amp; (3)           &amp; (4)           &amp; (5)\\
+#&gt;     &amp; \multicolumn{4}{c}{Ozone (ppb)}\\
+#&gt;                               &amp; (1)           &amp; (2)           &amp; (3)           &amp; (4)\\  
 #&gt;    \midrule 
-#&gt;    Solar Radiation (Langleys)   &amp; 0.115         &amp; 0.052         &amp; 0.108         &amp; 0.051         &amp; 0.056\\
-#&gt;                                 &amp; (0.023)       &amp; (0.020)       &amp; (0.033)       &amp; (0.024)       &amp; (0.023)\\
-#&gt;    Wind Speed (mph)             &amp;               &amp; -3.11         &amp;               &amp; -3.29         &amp; -3.05\\
-#&gt;                                 &amp;               &amp; (0.799)       &amp;               &amp; (0.778)       &amp; (0.822)\\
-#&gt;    Temperature                  &amp;               &amp; 1.88          &amp;               &amp; 2.05          &amp;   \\
-#&gt;                                 &amp;               &amp; (0.367)       &amp;               &amp; (0.242)       &amp;   \\
-#&gt;                                 &amp;               &amp;               &amp;               &amp;               &amp;  \\
-#&gt;    R$^2$                        &amp; 0.31974       &amp; 0.63686       &amp; 0.58018       &amp; 0.81604       &amp; 0.82896\\
-#&gt;    Observations                 &amp; 111           &amp; 111           &amp; 111           &amp; 111           &amp; 111\\
-#&gt;                                 &amp;               &amp;               &amp;               &amp;               &amp;  \\
-#&gt;    Month fixed effects          &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$\\
-#&gt;    Day fixed effects            &amp;               &amp;               &amp; $\checkmark$ &amp; $\checkmark$ &amp; $\checkmark$\\
-#&gt;    Temperature $\times $ Month &amp;               &amp;               &amp;               &amp;               &amp; $\checkmark$\\
+#&gt;    Solar Radiation (Langleys) &amp; 0.115         &amp; 0.052         &amp; 0.108         &amp; 0.051\\   
+#&gt;                               &amp; (0.023)       &amp; (0.020)       &amp; (0.033)       &amp; (0.024)\\   
+#&gt;    Wind Speed (mph)           &amp;               &amp; -3.11         &amp;               &amp; -3.29\\   
+#&gt;                               &amp;               &amp; (0.799)       &amp;               &amp; (0.778)\\   
+#&gt;    Temperature                &amp;               &amp; 1.88          &amp;               &amp; 2.05\\   
+#&gt;                               &amp;               &amp; (0.367)       &amp;               &amp; (0.242)\\   
+#&gt;     \\
+#&gt;    R$^2$                      &amp; 0.31974       &amp; 0.63686       &amp; 0.58018       &amp; 0.81604\\  
+#&gt;    Observations               &amp; 111           &amp; 111           &amp; 111           &amp; 111\\  
+#&gt;     \\
+#&gt;    Month fixed effects        &amp; $\checkmark$  &amp; $\checkmark$  &amp; $\checkmark$  &amp; $\checkmark$\\   
+#&gt;    Day fixed effects          &amp;               &amp;               &amp; $\checkmark$  &amp; $\checkmark$\\   
 #&gt;    \bottomrule
-#&gt; \end{tabular}</code></pre>
+#&gt; \end{tabular}
+#&gt; \par\endgroup</code></pre>
 </div>
 </div>
 </div>
@@ -371,7 +381,7 @@
 <p>To avoid that kind of issue, <code>fixest</code> allows the user to register custom fit statistics. Once they are registered, they can be seamlessly called via the <code>fitstat</code> argument in <code>etable</code>.</p>
 <p>Let’s continue with the previous example using the <code>airquality</code> data set, and now let’s display different p-values of statistical significance for the variable <code>Solar.R</code>. These p-values will vary depending on how we compute the VCOV matrix.</p>
 <p>Here is an example that will shortly be explained:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/fitstat_register.html">fitstat_register</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"p_s"</span>, alias <span class="op">=</span> <span class="st">"pvalue (standard)"</span>,
                  fun <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="../reference/coeftable.html">pvalue</a></span><span class="op">(</span><span class="va">x</span>, vcov <span class="op">=</span> <span class="st">"iid"</span><span class="op">)</span><span class="op">[</span><span class="st">"Solar.R"</span><span class="op">]</span><span class="op">)</span>
 
@@ -406,6 +416,7 @@
 #&gt; pvalue (Heterosk.)                    6.64e-6            0.02268
 #&gt; pvalue (Day)                             3e-5            0.01468
 #&gt; pvalue (Month)                        0.06066            0.26992
+#&gt; 
 #&gt;                                      model 3            model 4
 #&gt; Dependent Var.:                  Ozone (ppb)        Ozone (ppb)
 #&gt;                                                                
@@ -423,7 +434,9 @@
 #&gt; pvalue (standard)                    0.00196            0.03720
 #&gt; pvalue (Heterosk.)                   0.00103            0.02815
 #&gt; pvalue (Day)                         0.00263            0.03881
-#&gt; pvalue (Month)                       0.02676            0.29967</code></pre>
+#&gt; pvalue (Month)                       0.02676            0.29967
+#&gt; ---
+#&gt; Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <p>The function <code>fitstat_register</code> is a tool to add fit statistics in the <code>fitstat</code> engine. The first argument, <code>type</code>, is the code name by which the statistic is to be summoned. The argument <code>alias</code> provides the row name of the statistics: how it should look in the table. Finally in the <code>fun</code> argument is the function computing the statistic. That function must apply to a <code>fixest</code> estimation and must also return a single value.</p>
 <p>Once these statistics are registered, they can seamlessly be summoned with the argument <code>fitstat</code> and will appear in the order the user provide. Note that the dot in <code>fitstat = ~ . + p_s + etc</code> represents the default statistics to be displayed and need not be there.</p>
 </div>
@@ -432,9 +445,9 @@
 <a href="#using-external-functions-to-export-multiple-results" class="anchor"></a>Using external functions to export multiple results</h2>
 <p>Thanks to contributors (namely Karl Dunkle Werner), <code>fixest</code> objects are compatible with <a href="https://broom.tidymodels.org/index.html">broom</a> methods. This means that export functions building on <code>broom</code> can be leveraged, like for instance the excellent <a href="https://github.com/vincentarelbundock/modelsummary">modelsummary</a>.</p>
 <p>In case you use external export tools, here are some tips.</p>
-<p>Multiple estimations, like the object <code>est</code> in the previous examples, are a bit special and <code>broom</code> methods can’t apply directly. To export them, you first need to coerce the results into a list: by simply using <code><a href="https://rdrr.io/r/base/list.html">as.list(est)</a></code>.</p>
+<p>Multiple estimations, like the object <code>est</code> in the previous examples, are a bit special and <code>broom</code> methods can’t apply directly. To export them, you first need to coerce the results into a list: by simply using <code>as.list(est)</code>.</p>
 <p>By default in <code>fixest</code> the estimations are separated from the calculation of the VCOV matrices. That’s not a problem when using <code>etable</code> since, after providing the argument <code>se</code> or <code>cluster</code>, all VCOVs are calculated at once. Using other tools for exportation requires a call to <code>summary</code> for each model to compute the appropriate standard-errors. But this process can also be automatized. The function <code><a href="../reference/rep.fixest.html">.l()</a></code> can be used to coerce several <code>fixest</code> objects to which <code>summary</code> can then be applied, for example:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="fu"><a href="../reference/rep.fixest.html">.l</a></span><span class="op">(</span><span class="va">est</span>, <span class="va">est_slopes</span><span class="op">)</span>, cluster <span class="op">=</span> <span class="op">~</span> <span class="va">Month</span><span class="op">)</span></code></pre></div>
 <p>The previous code returns a list of the five estimations for which the standard-errors are all clustered at the Month level, and can then be exported with external software.</p>
 </div>

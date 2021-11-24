@@ -174,16 +174,18 @@ with k the penalty parameter.</p>
     <p>Laurent Berge</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='co'># two fitted models with different expl. variables:</span>
-<span class='va'>res1</span> <span class='op'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>Sepal.Length</span> <span class='op'>~</span> <span class='va'>Sepal.Width</span> <span class='op'>+</span> <span class='va'>Petal.Length</span> <span class='op'>+</span>
-            <span class='va'>Petal.Width</span> <span class='op'>|</span> <span class='va'>Species</span>, <span class='va'>iris</span><span class='op'>)</span>
-<span class='va'>res2</span> <span class='op'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>Sepal.Length</span> <span class='op'>~</span> <span class='va'>Petal.Width</span> <span class='op'>|</span> <span class='va'>Species</span>, <span class='va'>iris</span><span class='op'>)</span>
-
-<span class='fu'><a href='https://rdrr.io/r/stats/AIC.html'>AIC</a></span><span class='op'>(</span><span class='va'>res1</span>, <span class='va'>res2</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] 557.6455 556.9454</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/stats/AIC.html'>BIC</a></span><span class='op'>(</span><span class='va'>res1</span>, <span class='va'>res2</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] 575.7093 568.9879</div><div class='input'>
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='co'># two fitted models with different expl. variables:</span></span>
+<span class='r-in'><span class='va'>res1</span> <span class='op'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>Sepal.Length</span> <span class='op'>~</span> <span class='va'>Sepal.Width</span> <span class='op'>+</span> <span class='va'>Petal.Length</span> <span class='op'>+</span></span>
+<span class='r-in'>            <span class='va'>Petal.Width</span> <span class='op'>|</span> <span class='va'>Species</span>, <span class='va'>iris</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>res2</span> <span class='op'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>Sepal.Length</span> <span class='op'>~</span> <span class='va'>Petal.Width</span> <span class='op'>|</span> <span class='va'>Species</span>, <span class='va'>iris</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/stats/AIC.html'>AIC</a></span><span class='op'>(</span><span class='va'>res1</span>, <span class='va'>res2</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] 557.6455 556.9454</span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/stats/AIC.html'>BIC</a></span><span class='op'>(</span><span class='va'>res1</span>, <span class='va'>res2</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] 575.7093 568.9879</span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

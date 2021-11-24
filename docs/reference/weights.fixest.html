@@ -165,20 +165,21 @@
     <div class='dont-index'><p><code><a href='feols.html'>feols</a></code>, <code><a href='feglm.html'>fepois</a></code>, <code><a href='feglm.html'>feglm</a></code>, <code><a href='femlm.html'>fenegbin</a></code>, <code><a href='feNmlm.html'>feNmlm</a></code>.</p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Petal.Length</span> <span class='op'>~</span> <span class='va'>Petal.Width</span>, <span class='va'>iris</span>, weights <span class='op'>=</span> <span class='op'>~</span><span class='fu'><a href='https://rdrr.io/r/base/integer.html'>as.integer</a></span><span class='op'>(</span><span class='va'>Sepal.Length</span><span class='op'>)</span> <span class='op'>-</span> <span class='fl'>3.99</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/weights.html'>weights</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;   [1] 1.01 0.01 0.01 0.01 1.01 1.01 0.01 1.01 0.01 0.01 1.01 0.01 0.01 0.01 1.01
-#&gt;  [16] 1.01 1.01 1.01 1.01 1.01 1.01 1.01 0.01 1.01 0.01 1.01 1.01 1.01 1.01 0.01
-#&gt;  [31] 0.01 1.01 1.01 1.01 0.01 1.01 1.01 0.01 0.01 1.01 1.01 0.01 0.01 1.01 1.01
-#&gt;  [46] 0.01 1.01 0.01 1.01 1.01 3.01 2.01 2.01 1.01 2.01 1.01 2.01 0.01 2.01 1.01
-#&gt;  [61] 1.01 1.01 2.01 2.01 1.01 2.01 1.01 1.01 2.01 1.01 1.01 2.01 2.01 2.01 2.01
-#&gt;  [76] 2.01 2.01 2.01 2.01 1.01 1.01 1.01 1.01 2.01 1.01 2.01 2.01 2.01 1.01 1.01
-#&gt;  [91] 1.01 2.01 1.01 1.01 1.01 1.01 1.01 2.01 1.01 1.01 2.01 1.01 3.01 2.01 2.01
-#&gt; [106] 3.01 0.01 3.01 2.01 3.01 2.01 2.01 2.01 1.01 1.01 2.01 2.01 3.01 3.01 2.01
-#&gt; [121] 2.01 1.01 3.01 2.01 2.01 3.01 2.01 2.01 2.01 3.01 3.01 3.01 2.01 2.01 2.01
-#&gt; [136] 3.01 2.01 2.01 2.01 2.01 2.01 2.01 1.01 2.01 2.01 2.01 2.01 2.01 2.01 1.01</div><div class='input'>
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Petal.Length</span> <span class='op'>~</span> <span class='va'>Petal.Width</span>, <span class='va'>iris</span>, weights <span class='op'>=</span> <span class='op'>~</span><span class='fu'><a href='https://rdrr.io/r/base/integer.html'>as.integer</a></span><span class='op'>(</span><span class='va'>Sepal.Length</span><span class='op'>)</span> <span class='op'>-</span> <span class='fl'>3.99</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/stats/weights.html'>weights</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   [1] 1.01 0.01 0.01 0.01 1.01 1.01 0.01 1.01 0.01 0.01 1.01 0.01 0.01 0.01 1.01</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [16] 1.01 1.01 1.01 1.01 1.01 1.01 1.01 0.01 1.01 0.01 1.01 1.01 1.01 1.01 0.01</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [31] 0.01 1.01 1.01 1.01 0.01 1.01 1.01 0.01 0.01 1.01 1.01 0.01 0.01 1.01 1.01</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [46] 0.01 1.01 0.01 1.01 1.01 3.01 2.01 2.01 1.01 2.01 1.01 2.01 0.01 2.01 1.01</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [61] 1.01 1.01 2.01 2.01 1.01 2.01 1.01 1.01 2.01 1.01 1.01 2.01 2.01 2.01 2.01</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [76] 2.01 2.01 2.01 2.01 1.01 1.01 1.01 1.01 2.01 1.01 2.01 2.01 2.01 1.01 1.01</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [91] 1.01 2.01 1.01 1.01 1.01 1.01 1.01 2.01 1.01 1.01 2.01 1.01 3.01 2.01 2.01</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [106] 3.01 0.01 3.01 2.01 3.01 2.01 2.01 2.01 1.01 1.01 2.01 2.01 3.01 3.01 2.01</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [121] 2.01 1.01 3.01 2.01 2.01 3.01 2.01 2.01 2.01 3.01 3.01 3.01 2.01 2.01 2.01</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [136] 3.01 2.01 2.01 2.01 2.01 2.01 2.01 1.01 2.01 2.01 2.01 2.01 2.01 2.01 1.01</span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

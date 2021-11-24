@@ -159,38 +159,39 @@
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>An object of class <code><a href='https://rdrr.io/r/base/c.html'>c("terms", "formula")</a></code> which contains the terms representation of a symbolic model.</p>
+    <p>An object of class <code>c("terms", "formula")</code> which contains the terms representation of a symbolic model.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='co'># simple estimation on iris data, using "Species" fixed-effects</span>
-<span class='va'>res</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Sepal.Length</span> <span class='op'>~</span> <span class='va'>Sepal.Width</span><span class='op'>*</span><span class='va'>Petal.Length</span> <span class='op'>+</span>
-            <span class='va'>Petal.Width</span> <span class='op'>|</span> <span class='va'>Species</span>, <span class='va'>iris</span><span class='op'>)</span>
-
-<span class='co'># Terms of the linear part</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/terms.html'>terms</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Sepal.Length ~ Sepal.Width * Petal.Length + Petal.Width
-#&gt; attr(,"variables")
-#&gt; list(Sepal.Length, Sepal.Width, Petal.Length, Petal.Width)
-#&gt; attr(,"factors")
-#&gt;              Sepal.Width Petal.Length Petal.Width Sepal.Width:Petal.Length
-#&gt; Sepal.Length           0            0           0                        0
-#&gt; Sepal.Width            1            0           0                        1
-#&gt; Petal.Length           0            1           0                        1
-#&gt; Petal.Width            0            0           1                        0
-#&gt; attr(,"term.labels")
-#&gt; [1] "Sepal.Width"              "Petal.Length"            
-#&gt; [3] "Petal.Width"              "Sepal.Width:Petal.Length"
-#&gt; attr(,"order")
-#&gt; [1] 1 1 1 2
-#&gt; attr(,"intercept")
-#&gt; [1] 1
-#&gt; attr(,"response")
-#&gt; [1] 1
-#&gt; attr(,".Environment")
-#&gt; &lt;environment: 0x00000000288ecf30&gt;</div><div class='input'>
-
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='co'># simple estimation on iris data, using "Species" fixed-effects</span></span>
+<span class='r-in'><span class='va'>res</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Sepal.Length</span> <span class='op'>~</span> <span class='va'>Sepal.Width</span><span class='op'>*</span><span class='va'>Petal.Length</span> <span class='op'>+</span></span>
+<span class='r-in'>            <span class='va'>Petal.Width</span> <span class='op'>|</span> <span class='va'>Species</span>, <span class='va'>iris</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Terms of the linear part</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/stats/terms.html'>terms</a></span><span class='op'>(</span><span class='va'>res</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Sepal.Length ~ Sepal.Width * Petal.Length + Petal.Width</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> attr(,"variables")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> list(Sepal.Length, Sepal.Width, Petal.Length, Petal.Width)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> attr(,"factors")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>              Sepal.Width Petal.Length Petal.Width Sepal.Width:Petal.Length</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Sepal.Length           0            0           0                        0</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Sepal.Width            1            0           0                        1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Petal.Length           0            1           0                        1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Petal.Width            0            0           1                        0</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> attr(,"term.labels")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "Sepal.Width"              "Petal.Length"            </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [3] "Petal.Width"              "Sepal.Width:Petal.Length"</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> attr(,"order")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] 1 1 1 2</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> attr(,"intercept")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> attr(,"response")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> attr(,".Environment")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> &lt;environment: 0x000000004a5fbdd0&gt;</span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

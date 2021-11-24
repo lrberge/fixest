@@ -88,13 +88,13 @@
 
       
 
-      </header><script src="fixest_walkthrough_files/header-attrs-2.9/header-attrs.js"></script><div class="row">
+      </header><script src="fixest_walkthrough_files/header-attrs-2.11/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Fast Fixed-Effects Estimation: Short introduction</h1>
                         <h4 class="author">Laurent Berge and Grant McDermott</h4>
             
-            <h4 class="date">2021-11-04</h4>
+            <h4 class="date">2021-11-24</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/fixest_walkthrough.Rmd"><code>vignettes/fixest_walkthrough.Rmd</code></a></small>
       <div class="hidden name"><code>fixest_walkthrough.Rmd</code></div>
@@ -104,7 +104,7 @@
     
     
 <!-- Help on vignette writing here: http://r-pkgs.had.co.nz/vignettes.html. -->
-<p>The package <code>fixest</code> provides a family of functions to perform estimations with multiple fixed-effects. The two main functions are <code>feols</code> for linear models and <code>feglm</code> for generalized linear models. In addition, the function <code>femlm</code> performs direct maximum likelihood estimation, and <code>feNmlm</code> extends the latter to allow the inclusion of non-linear in parameters right-hand-sides. Finally, the functions <code>fepois</code> and <code>fenegbin</code> are aliases for Poisson and negative binomial fixed-effect estimations. Each of these functions supports any number of fixed-effects and is implemented with full fledged multi-threading in c++. Functions <code>feols</code> and <code>feglm</code> further support variables with varying slopes.</p>
+<p>The package <code>fixest</code> provides a family of functions to perform estimations with multiple fixed-effects. The two main functions are <code>feols</code> for linear models and <code>feglm</code> for generalized linear models. In addition, the function <code>femlm</code> performs direct maximum likelihood estimation, and <code>feNmlm</code> extends the latter to allow the inclusion of non-linear in parameters right-hand-sides. Finally, the functions <code>fepois</code> and <code>fenegbin</code> are aliases for Poisson and negative binomial fixed-effect estimations. Each of these functions supports any number of fixed-effects and is implemented with full fledged multi-threading in C++. Functions <code>feols</code> and <code>feglm</code> further support variables with varying slopes.</p>
 <p>This package is currently (Feb. 2020) the fastest software available to perform fixed-effects estimations. See the project’s <a href="https://lrberge.github.io/fixest/">homepage</a> for a set of benchmarks.</p>
 <p>The standard-errors of the estimates can be easily and intuitively clustered (up to four-way).</p>
 <p>The function <code>etable</code> allows to seamlessly export the results of multiple estimations into either a data.frame, or into a Latex table.</p>
@@ -542,27 +542,34 @@
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># with two-way clustered SEs</span>
 <span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">res_multi</span>, cluster <span class="op">=</span> <span class="op">~</span><span class="va">Origin</span><span class="op">+</span><span class="va">Destination</span>, tex <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="co">#&gt; \begingroup</span>
+<span class="co">#&gt; \centering</span>
 <span class="co">#&gt; \begin{tabular}{lcccc}</span>
-<span class="co">#&gt;    \tabularnewline\midrule\midrule</span>
+<span class="co">#&gt;    \tabularnewline \midrule \midrule</span>
 <span class="co">#&gt;    Dependent Variable: &amp; \multicolumn{4}{c}{Euros}\\</span>
-<span class="co">#&gt;    Model:              &amp; (1)                   &amp; (2)                   &amp; (3)                   &amp; (4)\\</span>
-<span class="co">#&gt;    \midrule \emph{Variables} &amp;   &amp;   &amp;   &amp;  \\</span>
-<span class="co">#&gt;    (Intercept)         &amp; 24.71$^{***}$         &amp;                       &amp;                       &amp;   \\</span>
-<span class="co">#&gt;                        &amp; (1.125)               &amp;                       &amp;                       &amp;   \\</span>
-<span class="co">#&gt;    log(dist\_km)      &amp; -1.029$^{***}$        &amp; -1.029$^{***}$        &amp; -1.226$^{***}$        &amp; -1.518$^{***}$\\</span>
-<span class="co">#&gt;                        &amp; (0.1580)              &amp; (0.1581)              &amp; (0.2045)              &amp; (0.1282)\\</span>
-<span class="co">#&gt;    \midrule \emph{Fixed-effects} &amp;   &amp;   &amp;   &amp;  \\</span>
-<span class="co">#&gt;    Year                &amp;                       &amp; Yes                   &amp; Yes                   &amp; Yes\\</span>
-<span class="co">#&gt;    Destination         &amp;                       &amp;                       &amp; Yes                   &amp; Yes\\</span>
-<span class="co">#&gt;    Origin              &amp;                       &amp;                       &amp;                       &amp; Yes\\</span>
-<span class="co">#&gt;    \midrule \emph{Fit statistics} &amp;   &amp;   &amp;   &amp;  \\</span>
-<span class="co">#&gt;    Observations        &amp; 38,325                &amp; 38,325                &amp; 38,325                &amp; 38,325\\</span>
-<span class="co">#&gt;    Squared Correlation &amp; 0.05511               &amp; 0.05711               &amp; 0.16420               &amp; 0.38479\\</span>
-<span class="co">#&gt;    Pseudo R$^2$        &amp; 0.18502               &amp; 0.18833               &amp; 0.35826               &amp; 0.59312\\</span>
-<span class="co">#&gt;    BIC                 &amp; $4.85\times 10^{12}$ &amp; $4.83\times 10^{12}$ &amp; $3.82\times 10^{12}$ &amp; $2.42\times 10^{12}$\\</span>
-<span class="co">#&gt;    \midrule\midrule\multicolumn{5}{l}{\emph{Clustered (Origin \&amp; Destination) standard-errors in parentheses}}\\</span>
+<span class="co">#&gt;    Model:              &amp; (1)                   &amp; (2)                   &amp; (3)                   &amp; (4)\\  </span>
+<span class="co">#&gt;    \midrule</span>
+<span class="co">#&gt;    \emph{Variables}\\</span>
+<span class="co">#&gt;    (Intercept)         &amp; 24.71$^{***}$         &amp;                       &amp;                       &amp;   \\   </span>
+<span class="co">#&gt;                        &amp; (1.125)               &amp;                       &amp;                       &amp;   \\   </span>
+<span class="co">#&gt;    log(dist\_km)       &amp; -1.029$^{***}$        &amp; -1.029$^{***}$        &amp; -1.226$^{***}$        &amp; -1.518$^{***}$\\   </span>
+<span class="co">#&gt;                        &amp; (0.1580)              &amp; (0.1581)              &amp; (0.2045)              &amp; (0.1282)\\   </span>
+<span class="co">#&gt;    \midrule</span>
+<span class="co">#&gt;    \emph{Fixed-effects}\\</span>
+<span class="co">#&gt;    Year                &amp;                       &amp; Yes                   &amp; Yes                   &amp; Yes\\  </span>
+<span class="co">#&gt;    Destination         &amp;                       &amp;                       &amp; Yes                   &amp; Yes\\  </span>
+<span class="co">#&gt;    Origin              &amp;                       &amp;                       &amp;                       &amp; Yes\\  </span>
+<span class="co">#&gt;    \midrule</span>
+<span class="co">#&gt;    \emph{Fit statistics}\\</span>
+<span class="co">#&gt;    Observations        &amp; 38,325                &amp; 38,325                &amp; 38,325                &amp; 38,325\\  </span>
+<span class="co">#&gt;    Squared Correlation &amp; 0.05511               &amp; 0.05711               &amp; 0.16420               &amp; 0.38479\\  </span>
+<span class="co">#&gt;    Pseudo R$^2$        &amp; 0.18502               &amp; 0.18833               &amp; 0.35826               &amp; 0.59312\\  </span>
+<span class="co">#&gt;    BIC                 &amp; $4.85\times 10^{12}$  &amp; $4.83\times 10^{12}$  &amp; $3.82\times 10^{12}$  &amp; $2.42\times 10^{12}$\\   </span>
+<span class="co">#&gt;    \midrule \midrule</span>
+<span class="co">#&gt;    \multicolumn{5}{l}{\emph{Clustered (Origin \&amp; Destination) standard-errors in parentheses}}\\</span>
 <span class="co">#&gt;    \multicolumn{5}{l}{\emph{Signif. Codes: ***: 0.01, **: 0.05, *: 0.1}}\\</span>
-<span class="co">#&gt; \end{tabular}</span></code></pre></div>
+<span class="co">#&gt; \end{tabular}</span>
+<span class="co">#&gt; \par\endgroup</span></code></pre></div>
 <p>The user can export the Latex table directly into a file (argument <code>file</code>), add a title (arg. <code>title</code>) and a label to the table (arg. <code>label</code>). Note that when the argument <code>file</code> is present, the Latex format becomes the default (i.e. <code>tex = TRUE</code> by default).</p>
 <p>The coefficients can be renamed easily (arg. <code>dict</code>), some can be dropped (arg. <code>drop</code>) and they can be easily reordered with regular expressions (arg. <code>order</code>).</p>
 <p>The significance codes can easily be changed (arg. <code>signifCode</code>) and all quality of fit information can be customized (argument <code>fitstat</code>). Among others, the number of fixed-effect per fixed-effect dimension can also be displayed using the argument <code>fixef_sizes</code>.</p>
@@ -583,7 +590,7 @@
        title <span class="op">=</span> <span class="st">"Second export -- clustered standard-errors (on Product variable)"</span><span class="op">)</span></code></pre></div>
 <p>In this example, two tables containing the results of the 4 estimations are directly exported to a Latex table into the file “Estimation Tables.tex”. First take notice (again) that <em>we do not need to use the argument</em> <code>tex=TRUE</code> since when the argument <code>file</code> is present, the Latex format becomes the default. The file is re-created in the first exportation thanks to the argument <code>replace = TRUE</code>.</p>
 <p>To change the variable names in the Latex table, we use the argument <code>dict</code>. The variable <code>myDict</code> is the dictionary we use to rename the variables, it is simply a named vector. The original name of the variables correspond to the names of <code>myDict</code> while the new names of the variables are the values of this vector. Any variable that matches the names of <code>myDict</code> will be replaced by its value. Thus we do not care of the order of appearance of the variables in the estimation results.</p>
-<p>In the first export, the coefficient of the intercept is dropped by using <code>drop = "Const"</code> (could be anything such that <code><a href="https://rdrr.io/r/base/grep.html">grepl(drop[1], "Constant")</a></code> is TRUE). In the second, the coefficient of the distance is put before the intercept (which is kept) thanks to the argument <code>order</code>. Note that the actions performed by the arguments <code>drop</code> or <code>order</code> are performed <strong>after</strong> the renaming takes place with the argument <code>dict</code>.</p>
+<p>In the first export, the coefficient of the intercept is dropped by using <code>drop = "Const"</code> (could be anything such that <code>grepl(drop[1], "Constant")</code> is TRUE). In the second, the coefficient of the distance is put before the intercept (which is kept) thanks to the argument <code>order</code>. Note that the actions performed by the arguments <code>drop</code> or <code>order</code> are performed <strong>after</strong> the renaming takes place with the argument <code>dict</code>.</p>
 <p>Note that you can completely customize the style of the table by using the <code>style</code> and <code>postprocessing</code> arguments, please have a look at the dedicated vignette: <a href="https://lrberge.github.io/fixest/articles/exporting_tables.html">Exporting estimation tables</a>.</p>
 </div>
 </div>
@@ -845,7 +852,9 @@
 <span class="co">#&gt; S.E.: Clustered             by: id             by: id             by: id</span>
 <span class="co">#&gt; Observations                 1,080              1,080              1,080</span>
 <span class="co">#&gt; R2                         0.38715            0.38715            0.38715</span>
-<span class="co">#&gt; Within R2                  0.26507            0.26507            0.26507</span></code></pre></div>
+<span class="co">#&gt; Within R2                  0.26507            0.26507            0.26507</span>
+<span class="co">#&gt; ---</span>
+<span class="co">#&gt; Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></code></pre></div>
 <p>Instead of providing the argument <code>ssc</code>, you can instead add the <code>ssc</code> call directly within the formula of the <code>vcov</code>. In this case you should simply add it as a variable. We now replicate the previous example using a list of several VCOVs in <code>etable</code> (that’s the only function that accepts lists in the argument <code>vcov</code>):</p>
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">est</span>, vcov <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="op">~</span><span class="va">id</span>, <span class="op">~</span><span class="va">id</span> <span class="op">+</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>fixef.K <span class="op">=</span> <span class="st">"full"</span><span class="op">)</span>, 
@@ -860,7 +869,9 @@
 <span class="co">#&gt; S.E.: Clustered             by: id             by: id             by: id</span>
 <span class="co">#&gt; Observations                 1,080              1,080              1,080</span>
 <span class="co">#&gt; R2                         0.38715            0.38715            0.38715</span>
-<span class="co">#&gt; Within R2                  0.26507            0.26507            0.26507</span></code></pre></div>
+<span class="co">#&gt; Within R2                  0.26507            0.26507            0.26507</span>
+<span class="co">#&gt; ---</span>
+<span class="co">#&gt; Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></code></pre></div>
 <p>You can also tweak <code>iid</code> or <code>hetero</code> SEs using a formula:</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">id</span>, <span class="va">base_did</span>, <span class="va">iid</span> <span class="op">~</span> <span class="fu"><a href="../reference/ssc.html">ssc</a></span><span class="op">(</span>adj <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span>
@@ -1057,9 +1068,11 @@
 <span class="co">#&gt; R2                              0.96121           0.07234          0.84211</span>
 <span class="co">#&gt; Within R2                       0.33841           0.06392          0.58591</span>
 <span class="co">#&gt; F-test (IV only)                 21.581            4.7882           8.3352</span>
-<span class="co">#&gt; Wald (IV only), p-value         2.29e-9           1.32e-9          2.94e-8</span></code></pre></div>
+<span class="co">#&gt; Wald (IV only), p-value         2.29e-9           1.32e-9          2.94e-8</span>
+<span class="co">#&gt; ---</span>
+<span class="co">#&gt; Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></code></pre></div>
 <p>Here we use <code>stage = 1:2</code> to get all first stage regressions followed by the second stage. Using <code>stage = 2:1</code> would have done the opposite.</p>
-<p>Now some explanations regarding <code>fitstat</code>. The suffix <code>all</code> concerns IV only and means the following: if it’s a first stage regression, then the first-stage F-stat is displayed, otherwise it’s the second stage F-stat. The suffix <code>.p</code> is used in <code>ivwaldall.p</code> to access the p-value and not the statistic. Finally, you can permanently set which fit statistic to display in <code>etable</code> by using <code>setFixest_etable</code>, like for example <code><a href="../reference/etable.html">setFixest_etable(fitstat = ~ . + ivfall + ivwaldall.p)</a></code>.</p>
+<p>Now some explanations regarding <code>fitstat</code>. The suffix <code>all</code> concerns IV only and means the following: if it’s a first stage regression, then the first-stage F-stat is displayed, otherwise it’s the second stage F-stat. The suffix <code>.p</code> is used in <code>ivwaldall.p</code> to access the p-value and not the statistic. Finally, you can permanently set which fit statistic to display in <code>etable</code> by using <code>setFixest_etable</code>, like for example <code>setFixest_etable(fitstat = ~ . + ivfall + ivwaldall.p)</code>.</p>
 </div>
 <div id="interaction-terms" class="section level1">
 <h1 class="hasAnchor">
@@ -1086,7 +1099,7 @@
 <div id="combining-several-fixed-effects-fe1fe2fe3---" class="section level3">
 <h3 class="hasAnchor">
 <a href="#combining-several-fixed-effects-fe1fe2fe3---" class="anchor"></a>Combining several fixed-effects (<code>fe1^fe2^fe3...</code>)</h3>
-<p>Say we want to “combine” the two fixed-effect variables <code>fe1</code> and <code>fe2</code> to create a brand new fixed-effect variable. We can do it simply via <code>fixest</code>’s special <code><a href="https://rdrr.io/r/base/Arithmetic.html">^</a></code> operator:</p>
+<p>Say we want to “combine” the two fixed-effect variables <code>fe1</code> and <code>fe2</code> to create a brand new fixed-effect variable. We can do it simply via <code>fixest</code>’s special <code>^</code> operator:</p>
 <div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">est_comb</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">|</span> <span class="va">fe1</span><span class="op">^</span><span class="va">fe2</span>, <span class="va">base</span><span class="op">)</span>
 <span class="va">est_comb</span>
@@ -1100,7 +1113,7 @@
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 0.406785     Adj. R2: 0.729861</span>
 <span class="co">#&gt;                  Within R2: 0.280234</span></code></pre></div>
-<p>The <code><a href="https://rdrr.io/r/base/Arithmetic.html">^</a></code> operator does the same thing as <code><a href="https://rdrr.io/r/base/paste.html">paste0(species, "_", fe)</a></code>, but is more convenient and significantly faster for large datasets. You can still extract the fixed-effects the same way:</p>
+<p>The <code>^</code> operator does the same thing as <code>paste0(species, "_", fe)</code>, but is more convenient and significantly faster for large datasets. You can still extract the fixed-effects the same way:</p>
 <div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/fixef_reexported.html">fixef</a></span><span class="op">(</span><span class="va">est_comb</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>
 <span class="co">#&gt;     setosa_a     setosa_b     setosa_c     setosa_d     setosa_e versicolor_a </span>
@@ -1155,13 +1168,13 @@
 <span class="co">#&gt; -----</span>
 <span class="co">#&gt;   x2 (slopes: fe1): setosa versicolor virginica</span>
 <span class="co">#&gt;                     0.3677     0.6598    0.8903</span></code></pre></div>
-<p>Note that this produces the same result as <code><a href="../reference/feols.html">feols(y ~ x1 + fe1/x2, base)</a></code>, but is much more performant for large datasets. The trade-off from the <code>fe1[x2]</code> method is that we lose the ability to estimate confidence intervals on the resulting slope coefficients. This should be fine in cases where we are just trying to control for some confounding or nuisance parameters. If you are interested in conducting statistical inference on the resulting slope coefficients and require confidence intervals, then you should use the slower <code>fe1/x2</code> approach instead.</p>
+<p>Note that this produces the same result as <code>feols(y ~ x1 + fe1/x2, base)</code>, but is much more performant for large datasets. The trade-off from the <code>fe1[x2]</code> method is that we lose the ability to estimate confidence intervals on the resulting slope coefficients. This should be fine in cases where we are just trying to control for some confounding or nuisance parameters. If you are interested in conducting statistical inference on the resulting slope coefficients and require confidence intervals, then you should use the slower <code>fe1/x2</code> approach instead.</p>
 </div>
 </div>
 <div id="interactions-that-dont-involve-fixed-effects" class="section level2">
 <h2 class="hasAnchor">
 <a href="#interactions-that-dont-involve-fixed-effects" class="anchor"></a>Interactions that don’t involve fixed-effects</h2>
-<p>The preceding interaction examples all took place in the fixed-effects slot (i.e. after the <code><a href="https://rdrr.io/r/base/Logic.html">|</a></code>). Underneath the hood, methods like <code>fe1^fe2</code> and <code>fe1[x2]</code> use numerical shortcuts that greatly speed up computation. This comes at the cost of being able to do richer inference with the interacted terms — e.g. construct confidence intervals — since they are swept out of the model at estimation time. In many cases, this should prove to be a perfectly acceptable trade-off. After all, the primary motivation for estimating fixed-effects models in the first place is to remove the confounding effect of such “nuisance” parameters.</p>
+<p>The preceding interaction examples all took place in the fixed-effects slot (i.e. after the <code>|</code>). Underneath the hood, methods like <code>fe1^fe2</code> and <code>fe1[x2]</code> use numerical shortcuts that greatly speed up computation. This comes at the cost of being able to do richer inference with the interacted terms — e.g. construct confidence intervals — since they are swept out of the model at estimation time. In many cases, this should prove to be a perfectly acceptable trade-off. After all, the primary motivation for estimating fixed-effects models in the first place is to remove the confounding effect of such “nuisance” parameters.</p>
 <p>Yet, there are equally many cases where we do want to retain full inferential information about interaction terms. For example, in a difference-in-differences (DiD) research design. Here too <code>fixest</code> offers its own specialized syntax for combining terms in the model formula: <code><a href="../reference/i.html">i()</a></code>.</p>
 <p>As we shall see, <code><a href="../reference/i.html">i()</a></code> is more versatile than just creating interaction terms. It is also able to coerce individual variables to a factor and, compared to base R <code><a href="https://rdrr.io/r/base/factor.html">factor()</a></code>, does so in a way that allows for better synergies with other <code>fixest</code> functions like <code>etable</code> and <code>coefplot</code>/<code>iplot</code>. This will allow us to perform some common estimation tasks much more easily.</p>
 <p>We now illustrate the main uses of <code><a href="../reference/i.html">i()</a></code> with the help of some examples.</p>
@@ -1195,7 +1208,9 @@
 <span class="co">#&gt; S.E. type                      IID                IID                IID</span>
 <span class="co">#&gt; Observations                   111                111                111</span>
 <span class="co">#&gt; R2                         0.31974            0.31974            0.22452</span>
-<span class="co">#&gt; Adj. R2                    0.28735            0.28735            0.20278</span></code></pre></div>
+<span class="co">#&gt; Adj. R2                    0.28735            0.28735            0.20278</span>
+<span class="co">#&gt; ---</span>
+<span class="co">#&gt; Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></code></pre></div>
 <p>Now that we’ve seen the basic <code><a href="../reference/i.html">i()</a></code> functionality with a single variable, let’s see how it can be put to use in an interaction context. We will consider two DiD examples of increasing complexity.</p>
 </div>
 <div id="simple-difference-in-differences-twfe" class="section level3">
@@ -1214,9 +1229,9 @@
 <span class="co">#&gt; 4  3.78147485 -2.8300587  1      4    0     1</span>
 <span class="co">#&gt; 5 -2.55819959 -5.0443544  1      5    0     1</span>
 <span class="co">#&gt; 6  1.72873240 -0.6363849  1      6    1     1</span></code></pre></div>
-<p>The empirical approach that we will use here is the canonical two-way fixed effects (TWFE) model that should be familiar to many empirical researchers. In a regression context, TWFE essentially amounts to an interaction between our <code>treat</code> and <code>period</code> variables. This is easily done using the <code><a href="../reference/i.html">i(fact_var, num_var, reference)</a></code> syntax:</p>
+<p>The empirical approach that we will use here is the canonical two-way fixed effects (TWFE) model that should be familiar to many empirical researchers. In a regression context, TWFE essentially amounts to an interaction between our <code>treat</code> and <code>period</code> variables. This is easily done using the <code>i(fact_var, num_var, reference)</code> syntax:</p>
 <div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Estimation of treatment × period effects</span>
+<code class="sourceCode R"><span class="co"># Estimation of treatment × period effects</span>s
 <span class="co"># We also add individual and period fixed-effects:</span>
 <span class="va">est_did</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="fu"><a href="../reference/i.html">i</a></span><span class="op">(</span><span class="va">period</span>, <span class="va">treat</span>, <span class="fl">5</span><span class="op">)</span> <span class="op">|</span> <span class="va">id</span> <span class="op">+</span> <span class="va">period</span>, <span class="va">base_did</span><span class="op">)</span>
 <span class="va">est_did</span>
@@ -1239,7 +1254,7 @@
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 3.83653     Adj. R2: 0.48783 </span>
 <span class="co">#&gt;                 Within R2: 0.389628</span></code></pre></div>
-<p>Here, <code><a href="../reference/i.html">i(period, treat, 5)</a></code> creates a set of interact terms: One <code>treat</code> dummy for each <code>period</code>, but excluding period 5 as a reference. While the explicit reference period is optional, note that we need a reference to avoid the collinearity problem posed by the <code>id</code> fixed effects. More to the point, for this DiD analysis we are interested in whether the treatment generated a sustained impact on our outcome variable relative to the control group. This makes period 5 (immediately prior to treatment) the obvious choice to use as our relative anchor. It also demonstrates an advantage that <code><a href="../reference/i.html">i()</a></code>’s syntax offers over the equivalent base <code>treat*factor(period)</code> expansion, which would automatically use period 1 as a reference. Of course, we could specify the levels of <code><a href="https://rdrr.io/r/base/factor.html">factor(period)</a></code> ahead of time. But this is rather tedious, whereas <code><a href="../reference/i.html">i()</a></code> allows us to do so concisely on the fly.</p>
+<p>Here, <code>i(period, treat, 5)</code> creates a set of interact terms: One <code>treat</code> dummy for each <code>period</code>, but excluding period 5 as a reference. While the explicit reference period is optional, note that we need a reference to avoid the collinearity problem posed by the <code>id</code> fixed effects. More to the point, for this DiD analysis we are interested in whether the treatment generated a sustained impact on our outcome variable relative to the control group. This makes period 5 (immediately prior to treatment) the obvious choice to use as our relative anchor. It also demonstrates an advantage that <code><a href="../reference/i.html">i()</a></code>’s syntax offers over the equivalent base <code>treat*factor(period)</code> expansion, which would automatically use period 1 as a reference. Of course, we could specify the levels of <code>factor(period)</code> ahead of time. But this is rather tedious, whereas <code><a href="../reference/i.html">i()</a></code> allows us to do so concisely on the fly.</p>
 <p>To display the treatment effects on a graph, we can use the function <code>iplot</code>:</p>
 <div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/coefplot.html">iplot</a></span><span class="op">(</span><span class="va">est_did</span><span class="op">)</span></code></pre></div>
@@ -1341,7 +1356,9 @@
 <span class="co">#&gt; year = -5 x cohort = 9     0.3015 (0.6042)</span>
 <span class="co">#&gt; year = -5 x cohort = 10   -0.5648 (0.4632)</span>
 <span class="co">#&gt; year = -4 x cohort = 5    -0.9835 (0.6345)</span>
-<span class="co">#&gt; year = -4 x cohort = 6     0.3604 (0.8583)</span></code></pre></div>
+<span class="co">#&gt; year = -4 x cohort = 6     0.3604 (0.8583)</span>
+<span class="co">#&gt; ---</span>
+<span class="co">#&gt; Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></code></pre></div>
 </div>
 </div>
 </div>
@@ -1397,7 +1414,7 @@
 <span class="co">#&gt; ---</span>
 <span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="co">#&gt; RMSE: 0.30128   Adj. R2: 0.862108</span></code></pre></div>
-<p>The function <code>xpd</code> also accepts regular expression macros of the form <code><a href="https://rdrr.io/r/base/regex.html">regex("regex")</a></code>. If these macros are encountered and provided a character vector/data.frame is in the argument <code>data</code>, then all variables names matching the regular expression will be placed in the formula.</p>
+<p>The function <code>xpd</code> also accepts regular expression macros of the form <code>regex("regex")</code>. If these macros are encountered and provided a character vector/data.frame is in the argument <code>data</code>, then all variables names matching the regular expression will be placed in the formula.</p>
 <div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">longley</span><span class="op">)</span>
 <span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">Armed.Forces</span> <span class="op">~</span> <span class="va">Population</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/regex.html">regex</a></span><span class="op">(</span><span class="st">"GNP|ployed"</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">longley</span><span class="op">)</span>
@@ -1447,7 +1464,7 @@
 <code class="sourceCode R"><span class="va">i</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span>
 <span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">.</span><span class="op">[</span><span class="st">"x.[i]_sq"</span><span class="op">]</span><span class="op">)</span>
 <span class="co">#&gt; y ~ x1_sq + x2_sq + x3_sq</span></code></pre></div>
-<p>How does it work? <code>.[stuff]</code> evaluates <code>stuff</code> and if stuff is a string literal, the function <code>dsb</code>, which expands anything in <code>.[]</code>, is applied. In the previous example, <code><a href="../reference/dsb.html">dsb("x.[i]_sq")</a></code> leads to the vector <code><a href="https://rdrr.io/r/base/c.html">c("x1_sq", "x2_sq", "x3_sq")</a></code>. Then vector is then aggregated with a sum due to the initial <code>.[]</code>, leading to <code>x1_sq + x2_sq + x3_sq</code> being inserted in the formula.</p>
+<p>How does it work? <code>.[stuff]</code> evaluates <code>stuff</code> and if stuff is a string literal, the function <code>dsb</code>, which expands anything in <code>.[]</code>, is applied. In the previous example, <code>dsb("x.[i]_sq")</code> leads to the vector <code>c("x1_sq", "x2_sq", "x3_sq")</code>. Then vector is then aggregated with a sum due to the initial <code>.[]</code>, leading to <code>x1_sq + x2_sq + x3_sq</code> being inserted in the formula.</p>
 <p>By default, when <code>stuff</code> is a vector, the aggregation is done with a sum. But in some instances, it can be interesting to aggregate with commas: e.g. when you want to perform a stepwise estimation. To summon comma-aggregation, place a comma right after the opening square bracket. Here’s an example:</p>
 <div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="../reference/stepwise.html">csw</a></span><span class="op">(</span><span class="va">x.</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span>, <span class="va">base</span><span class="op">)</span><span class="op">)</span>
@@ -1462,7 +1479,9 @@
 <span class="co">#&gt; S.E. type                     IID                IID                 IID</span>
 <span class="co">#&gt; Observations                  150                150                 150</span>
 <span class="co">#&gt; R2                        0.01382            0.84018             0.85861</span>
-<span class="co">#&gt; Adj. R2                   0.00716            0.83800             0.85571</span></code></pre></div>
+<span class="co">#&gt; Adj. R2                   0.00716            0.83800             0.85571</span>
+<span class="co">#&gt; ---</span>
+<span class="co">#&gt; Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></code></pre></div>
 <p>Finally, there is a special shortcut to facilitate multiple estimations with variable names stored in a vector. If <code>vars</code> is a vector of variable names, just use <code>.[vars]</code> in the LHS to perform a multiple estimation:</p>
 <div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">vars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span><span class="op">)</span> <span class="co"># Equiv. to: dsb("x.[1:3]")</span>
@@ -1477,7 +1496,9 @@
 <span class="co">#&gt; S.E. type                            IID               IID                IID</span>
 <span class="co">#&gt; Observations                         150               150                150</span>
 <span class="co">#&gt; R2                               0.40078           0.94137            0.92888</span>
-<span class="co">#&gt; Adj. R2                          0.39263           0.94057            0.92792</span></code></pre></div>
+<span class="co">#&gt; Adj. R2                          0.39263           0.94057            0.92792</span>
+<span class="co">#&gt; ---</span>
+<span class="co">#&gt; Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></code></pre></div>
 </div>
 </div>
 <div id="lagging-variables" class="section level2">
@@ -1509,9 +1530,11 @@
 <span class="co">#&gt; S.E.: Clustered             by: id             by: id             by: id</span>
 <span class="co">#&gt; Observations                   972                864                756</span>
 <span class="co">#&gt; R2                         0.26558            0.25697            0.25875</span>
-<span class="co">#&gt; Adj. R2                    0.26406            0.25438            0.25480</span></code></pre></div>
+<span class="co">#&gt; Adj. R2                    0.26406            0.25438            0.25480</span>
+<span class="co">#&gt; ---</span>
+<span class="co">#&gt; Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></code></pre></div>
 <p>First of all, the value of <code>panel.id</code> corresponds to panel identifiers: first comes the variable identifying the panel-individuals, then comes the variables identifying the time. In the example, the <code>panel.id</code> came in the form of a one-sided formula, but it could equivalently be equal to <code>panel.id = c("id", "period")</code> or <code>panel.id = "id,period"</code>.</p>
-<p>As we can see, in the first estimation, a lag is created with the function <code>l</code>. The second argument of the function consists of a vector giving the lags we want. In this case, <code><a href="../reference/f.html">l(x1, 0:1)</a></code> means we want <code>x1</code> and the first lag of <code>x1</code>. This argument accepts negative values which give leads, as shown in the second estimation where <code><a href="../reference/f.html">l(x1, -1:1)</a></code> means that we want the first lead of <code>x1</code>, <code>x1</code>, then its first lag. In this example, we also use the first lead of <code>y</code> as a dependent variable with <code><a href="../reference/f.html">f(y)</a></code>.</p>
+<p>As we can see, in the first estimation, a lag is created with the function <code>l</code>. The second argument of the function consists of a vector giving the lags we want. In this case, <code>l(x1, 0:1)</code> means we want <code>x1</code> and the first lag of <code>x1</code>. This argument accepts negative values which give leads, as shown in the second estimation where <code>l(x1, -1:1)</code> means that we want the first lead of <code>x1</code>, <code>x1</code>, then its first lag. In this example, we also use the first lead of <code>y</code> as a dependent variable with <code>f(y)</code>.</p>
 </div>
 <div id="setting-up-a-panel-data-set" class="section level3">
 <h3 class="hasAnchor">
@@ -1527,7 +1550,7 @@
 <span class="va">est2</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="../reference/f.html">f</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="../reference/f.html">l</a></span><span class="op">(</span><span class="va">x1</span>, <span class="op">-</span><span class="fl">1</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>, <span class="va">pdat</span><span class="op">)</span>
 <span class="co">#&gt; NOTE: 216 observations removed because of NA values (LHS: 108, RHS: 216).</span>
 <span class="co"># You can use sub selections of the panel data</span>
-<span class="va">est_sub</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="../reference/f.html">l</a></span><span class="op">(</span><span class="va">x1</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>, <span class="va">pdat</span><span class="op">[</span><span class="op">!</span><span class="va">pdat</span><span class="op">$</span><span class="va">period</span> <span class="op">%in%</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>
+<span class="va">est_sub</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="../reference/f.html">l</a></span><span class="op">(</span><span class="va">x1</span>, <span class="fl">0</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>, <span class="va">pdat</span><span class="op">[</span><span class="op">!</span><span class="va">pdat</span><span class="op">$</span><span class="va">period</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>
 <span class="co">#&gt; NOTE: 324 observations removed because of NA values (RHS: 324).</span>
 <span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">est1</span>, <span class="va">est2</span>, <span class="va">est_sub</span>, order <span class="op">=</span> <span class="st">"f"</span>, drop <span class="op">=</span> <span class="st">"Int"</span><span class="op">)</span>
 <span class="co">#&gt;                               est1               est2           est_sub</span>
@@ -1540,7 +1563,9 @@
 <span class="co">#&gt; S.E.: Clustered             by: id             by: id            by: id</span>
 <span class="co">#&gt; Observations                   972                864               540</span>
 <span class="co">#&gt; R2                         0.26558            0.25697           0.26258</span>
-<span class="co">#&gt; Adj. R2                    0.26406            0.25438           0.25983</span></code></pre></div>
+<span class="co">#&gt; Adj. R2                    0.26406            0.25438           0.25983</span>
+<span class="co">#&gt; ---</span>
+<span class="co">#&gt; Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></code></pre></div>
 <p>Last, if you also use <code>data.table</code>, let’s give an example of lead/lag creation:</p>
 <div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com">data.table</a></span><span class="op">)</span>
@@ -1681,7 +1706,7 @@
 <span class="co"># 4 nthreads: 1.17s</span>
 <span class="fu"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span><span class="op">(</span><span class="fu"><a href="../reference/femlm.html">fenegbin</a></span><span class="op">(</span><span class="va">Euros</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html">log</a></span><span class="op">(</span><span class="va">dist_km</span><span class="op">)</span><span class="op">|</span><span class="va">Origin</span><span class="op">+</span><span class="va">Destination</span><span class="op">+</span><span class="va">Product</span><span class="op">+</span><span class="va">Year</span>, <span class="va">trade</span>, nthreads <span class="op">=</span> <span class="fl">4</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>As you can see, the efficiency of increasing the number of threads is not 1 to 1. Two threads do not divide the computing time by 2, nor four threads by 4. However it still reduces significantly the computing time, which might be valuable for large sample estimations.</p>
-<p>You can permanently set the number of threads used by <code>fixest</code> using <code><a href="../reference/setFixest_nthreads.html">setFixest_nthreads(nthreads)</a></code>. Note that you can permanently set this number at the project level by using the argument save: <code><a href="../reference/setFixest_nthreads.html">setFixest_nthreads(nthreads, save = TRUE)</a></code>. This way you won’t need to re-set the number of threads whenever you restart <em>R</em>.</p>
+<p>You can permanently set the number of threads used by <code>fixest</code> using <code>setFixest_nthreads(nthreads)</code>. Note that you can permanently set this number at the project level by using the argument save: <code>setFixest_nthreads(nthreads, save = TRUE)</code>. This way you won’t need to re-set the number of threads whenever you restart <em>R</em>.</p>
 </div>
 </div>
 <div class="footnotes">

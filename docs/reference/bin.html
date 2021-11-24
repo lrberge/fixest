@@ -180,153 +180,176 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <p>To have user-specified bin labels, just add them in the character vector following <code>'cut::values'</code>. You don't need to provide all of them, and <code>NA</code> values fall back to the default label. For example, <code>bin = c("cut::4", "Q1", NA, "Q3")</code> will modify only the first and third label that will be displayed as <code>"Q1"</code> and <code>"Q3"</code>.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>airquality</span><span class='op'>)</span>
-<span class='va'>month_num</span> <span class='op'>=</span> <span class='va'>airquality</span><span class='op'>$</span><span class='va'>Month</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>month_num</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; month_num
-#&gt;  5  6  7  8  9 
-#&gt; 31 30 31 31 30 </div><div class='input'>
-<span class='co'># Grouping the first two values</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_num</span>, <span class='fl'>5</span><span class='op'>:</span><span class='fl'>6</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt;  5  7  8  9 
-#&gt; 61 31 31 30 </div><div class='input'>
-<span class='co'># ... plus changing the name to '10'</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_num</span>, <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"10"</span> <span class='op'>=</span> <span class='fl'>5</span><span class='op'>:</span><span class='fl'>6</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt;  7  8  9 10 
-#&gt; 31 31 30 61 </div><div class='input'>
-<span class='co'># ... and grouping 7 to 9</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_num</span>, <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"g1"</span> <span class='op'>=</span> <span class='fl'>5</span><span class='op'>:</span><span class='fl'>6</span>, <span class='st'>"g2"</span> <span class='op'>=</span> <span class='fl'>7</span><span class='op'>:</span><span class='fl'>9</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt; g1 g2 
-#&gt; 61 92 </div><div class='input'>
-<span class='co'># Grouping every two months</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_num</span>, <span class='st'>"bin::2"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt;  5  6  8 
-#&gt; 31 61 61 </div><div class='input'>
-<span class='co'># ... every 2 consecutive elements</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_num</span>, <span class='st'>"!bin::2"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt;  5  7  9 
-#&gt; 61 62 30 </div><div class='input'>
-<span class='co'># ... idem starting from the last one</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_num</span>, <span class='st'>"!!bin::2"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt;  5  6  8 
-#&gt; 31 61 61 </div><div class='input'>
-<span class='co'># Using .() for list():</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_num</span>, <span class='fu'>.</span><span class='op'>(</span><span class='st'>"g1"</span> <span class='op'>=</span> <span class='fl'>5</span><span class='op'>:</span><span class='fl'>6</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt; g1  7  8  9 
-#&gt; 61 31 31 30 </div><div class='input'>
-
-<span class='co'>#</span>
-<span class='co'># with non numeric data</span>
-<span class='co'>#</span>
-
-<span class='va'>month_lab</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"may"</span>, <span class='st'>"june"</span>, <span class='st'>"july"</span>, <span class='st'>"august"</span>, <span class='st'>"september"</span><span class='op'>)</span>
-<span class='va'>month_fact</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span><span class='op'>(</span><span class='va'>month_num</span>, labels <span class='op'>=</span> <span class='va'>month_lab</span><span class='op'>)</span>
-
-<span class='co'># Grouping the first two elements</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_fact</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"may"</span>, <span class='st'>"jun"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt;       may      july    august september 
-#&gt;        61        31        31        30 </div><div class='input'>
-<span class='co'># ... using regex</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_fact</span>, <span class='st'>"@may|jun"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt;       may      july    august september 
-#&gt;        61        31        31        30 </div><div class='input'>
-<span class='co'># ...changing the name</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_fact</span>, <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"spring"</span> <span class='op'>=</span> <span class='st'>"@may|jun"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt;    spring      july    august september 
-#&gt;        61        31        31        30 </div><div class='input'>
-<span class='co'># Grouping every 2 consecutive months</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_fact</span>, <span class='st'>"!bin::2"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt;       may      july september 
-#&gt;        61        62        30 </div><div class='input'>
-<span class='co'># ...idem but starting from the last</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_fact</span>, <span class='st'>"!!bin::2"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt;    may   june august 
-#&gt;     31     61     61 </div><div class='input'>
-<span class='co'># Relocating the months using "@d" in the name</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_fact</span>, <span class='fu'>.</span><span class='op'>(</span><span class='st'>"@5"</span> <span class='op'>=</span> <span class='st'>"may"</span>, <span class='st'>"@1 summer"</span> <span class='op'>=</span> <span class='st'>"@aug|jul"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt;    summer      june september       may 
-#&gt;        62        30        30        31 </div><div class='input'>
-<span class='co'># Putting "@" as first item means subsequent items will be placed first</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_fact</span>, <span class='fu'>.</span><span class='op'>(</span><span class='st'>"@"</span>, <span class='st'>"aug"</span>, <span class='st'>"july"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt;    august      july       may      june september 
-#&gt;        31        31        31        30        30 </div><div class='input'>
-<span class='co'>#</span>
-<span class='co'># "Cutting" numeric data</span>
-<span class='co'>#</span>
-
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>)</span>
-<span class='va'>plen</span> <span class='op'>=</span> <span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Length</span>
-
-<span class='co'># 3 parts of (roughly) equal size</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='st'>"cut::3"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt; [1.0; 1.9] [3.0; 4.9] [5.0; 6.9] 
-#&gt;         50         54         46 </div><div class='input'>
-<span class='co'># Three custom bins</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='st'>"cut::2]5]"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt; [1.0; 1.9] [3.0; 5.0] [5.1; 6.9] 
-#&gt;         50         58         42 </div><div class='input'>
-<span class='co'># .. same, excluding 5 in the 2nd bin</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='st'>"cut::2]5["</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt; [1.0; 1.9] [3.0; 4.9] [5.0; 6.9] 
-#&gt;         50         54         46 </div><div class='input'>
-<span class='co'># Using quartiles</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='st'>"cut::q1]q2]q3]"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt; [1.0; 1.6] [1.7; 4.3] [4.4; 5.1] [5.2; 6.9] 
-#&gt;         44         31         41         34 </div><div class='input'>
-<span class='co'># Using percentiles</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='st'>"cut::p20]p50]p70]p90]"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt; [1.0; 1.5] [1.6; 4.3] [4.4; 5.0] [5.1; 5.8] [5.9; 6.9] 
-#&gt;         37         38         33         29         13 </div><div class='input'>
-<span class='co'># Mixing all</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='st'>"cut::2[q2]p90]"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt; [1.0; 1.9] [3.0; 4.3] [4.4; 5.8] [5.9; 6.9] 
-#&gt;         50         25         62         13 </div><div class='input'>
-<span class='co'># NOTA:</span>
-<span class='co'># -&gt; the labels always contain the min/max values in each bin</span>
-
-<span class='co'># Custom labels can be provided, just give them in the char. vector</span>
-<span class='co'># NA values lead to the default label</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"cut::2[q2]p90]"</span>, <span class='st'>"&lt;2"</span>, <span class='st'>"]2; Q2]"</span>, <span class='cn'>NA</span>, <span class='st'>"&gt;90%"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt;         &lt;2    ]2; Q2] [4.4; 5.8]       &gt;90% 
-#&gt;         50         25         62         13 </div><div class='input'>
-
-
-<span class='co'>#</span>
-<span class='co'># With a formula</span>
-<span class='co'>#</span>
-
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>)</span>
-<span class='va'>plen</span> <span class='op'>=</span> <span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Length</span>
-
-<span class='co'># We need to use "x"</span>
-<span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"&lt; 2"</span> <span class='op'>=</span> <span class='op'>~</span><span class='va'>x</span> <span class='op'>&lt;</span> <span class='fl'>2</span>, <span class='st'>"&gt;= 2"</span> <span class='op'>=</span> <span class='op'>~</span><span class='va'>x</span> <span class='op'>&gt;=</span> <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; 
-#&gt;  &lt; 2 &gt;= 2 
-#&gt;   50  100 </div><div class='input'>
-
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>airquality</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>month_num</span> <span class='op'>=</span> <span class='va'>airquality</span><span class='op'>$</span><span class='va'>Month</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='va'>month_num</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> month_num</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  5  6  7  8  9 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 31 30 31 31 30 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Grouping the first two values</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_num</span>, <span class='fl'>5</span><span class='op'>:</span><span class='fl'>6</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  5  7  8  9 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 61 31 31 30 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># ... plus changing the name to '10'</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_num</span>, <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"10"</span> <span class='op'>=</span> <span class='fl'>5</span><span class='op'>:</span><span class='fl'>6</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  7  8  9 10 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 31 31 30 61 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># ... and grouping 7 to 9</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_num</span>, <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"g1"</span> <span class='op'>=</span> <span class='fl'>5</span><span class='op'>:</span><span class='fl'>6</span>, <span class='st'>"g2"</span> <span class='op'>=</span> <span class='fl'>7</span><span class='op'>:</span><span class='fl'>9</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> g1 g2 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 61 92 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Grouping every two months</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_num</span>, <span class='st'>"bin::2"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  5  6  8 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 31 61 61 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># ... every 2 consecutive elements</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_num</span>, <span class='st'>"!bin::2"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  5  7  9 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 61 62 30 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># ... idem starting from the last one</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_num</span>, <span class='st'>"!!bin::2"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  5  6  8 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 31 61 61 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Using .() for list():</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_num</span>, <span class='fu'>.</span><span class='op'>(</span><span class='st'>"g1"</span> <span class='op'>=</span> <span class='fl'>5</span><span class='op'>:</span><span class='fl'>6</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> g1  7  8  9 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 61 31 31 30 </span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'><span class='co'># with non numeric data</span></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>month_lab</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"may"</span>, <span class='st'>"june"</span>, <span class='st'>"july"</span>, <span class='st'>"august"</span>, <span class='st'>"september"</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>month_fact</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/factor.html'>factor</a></span><span class='op'>(</span><span class='va'>month_num</span>, labels <span class='op'>=</span> <span class='va'>month_lab</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Grouping the first two elements</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_fact</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"may"</span>, <span class='st'>"jun"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>       may      july    august september </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>        61        31        31        30 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># ... using regex</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_fact</span>, <span class='st'>"@may|jun"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>       may      july    august september </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>        61        31        31        30 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># ...changing the name</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_fact</span>, <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"spring"</span> <span class='op'>=</span> <span class='st'>"@may|jun"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    spring      july    august september </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>        61        31        31        30 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Grouping every 2 consecutive months</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_fact</span>, <span class='st'>"!bin::2"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>       may      july september </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>        61        62        30 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># ...idem but starting from the last</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_fact</span>, <span class='st'>"!!bin::2"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    may   june august </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>     31     61     61 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Relocating the months using "@d" in the name</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_fact</span>, <span class='fu'>.</span><span class='op'>(</span><span class='st'>"@5"</span> <span class='op'>=</span> <span class='st'>"may"</span>, <span class='st'>"@1 summer"</span> <span class='op'>=</span> <span class='st'>"@aug|jul"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    summer      june september       may </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>        62        30        30        31 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Putting "@" as first item means subsequent items will be placed first</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>month_fact</span>, <span class='fu'>.</span><span class='op'>(</span><span class='st'>"@"</span>, <span class='st'>"aug"</span>, <span class='st'>"july"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    august      july       may      june september </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>        31        31        31        30        30 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'><span class='co'># "Cutting" numeric data</span></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>plen</span> <span class='op'>=</span> <span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Length</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># 3 parts of (roughly) equal size</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='st'>"cut::3"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1.0; 1.9] [3.0; 4.9] [5.0; 6.9] </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>         50         54         46 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Three custom bins</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='st'>"cut::2]5]"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1.0; 1.9] [3.0; 5.0] [5.1; 6.9] </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>         50         58         42 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># .. same, excluding 5 in the 2nd bin</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='st'>"cut::2]5["</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1.0; 1.9] [3.0; 4.9] [5.0; 6.9] </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>         50         54         46 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Using quartiles</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='st'>"cut::q1]q2]q3]"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1.0; 1.6] [1.7; 4.3] [4.4; 5.1] [5.2; 6.9] </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>         44         31         41         34 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Using percentiles</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='st'>"cut::p20]p50]p70]p90]"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1.0; 1.5] [1.6; 4.3] [4.4; 5.0] [5.1; 5.8] [5.9; 6.9] </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>         37         38         33         29         13 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Mixing all</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='st'>"cut::2[q2]p90]"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1.0; 1.9] [3.0; 4.3] [4.4; 5.8] [5.9; 6.9] </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>         50         25         62         13 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># NOTA:</span></span>
+<span class='r-in'><span class='co'># -&gt; the labels always contain the min/max values in each bin</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Custom labels can be provided, just give them in the char. vector</span></span>
+<span class='r-in'><span class='co'># NA values lead to the default label</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"cut::2[q2]p90]"</span>, <span class='st'>"&lt;2"</span>, <span class='st'>"]2; Q2]"</span>, <span class='cn'>NA</span>, <span class='st'>"&gt;90%"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>         &lt;2    ]2; Q2] [4.4; 5.8]       &gt;90% </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>         50         25         62         13 </span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'><span class='co'># With a formula</span></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>plen</span> <span class='op'>=</span> <span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Length</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># We need to use "x"</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>bin</span><span class='op'>(</span><span class='va'>plen</span>, <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"&lt; 2"</span> <span class='op'>=</span> <span class='op'>~</span><span class='va'>x</span> <span class='op'>&lt;</span> <span class='fl'>2</span>, <span class='st'>"&gt;= 2"</span> <span class='op'>=</span> <span class='op'>~</span><span class='va'>x</span> <span class='op'>&gt;=</span> <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  &lt; 2 &gt;= 2 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   50  100 </span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

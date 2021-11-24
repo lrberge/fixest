@@ -172,73 +172,80 @@
     <p>Laurent Berge</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='va'>base</span> <span class='op'>=</span> <span class='va'>iris</span>
-<span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>)</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span>
-<span class='va'>base</span><span class='op'>$</span><span class='va'>clu</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span>, <span class='fl'>30</span><span class='op'>)</span>
-
-<span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base</span><span class='op'>)</span>
-
-<span class='co'># VCOV: using a formula giving the name of the clusters</span>
-<span class='fu'>vcov_cluster</span><span class='op'>(</span><span class='va'>est</span>, <span class='op'>~</span><span class='va'>species</span> <span class='op'>+</span> <span class='va'>clu</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;             (Intercept)         x1
-#&gt; (Intercept)   0.6046144 -0.2634955
-#&gt; x1           -0.2634955  0.1235058</div><div class='input'>
-<span class='co'># works as well with a character vector</span>
-<span class='fu'>vcov_cluster</span><span class='op'>(</span><span class='va'>est</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"species"</span>, <span class='st'>"clu"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;             (Intercept)         x1
-#&gt; (Intercept)   0.6046144 -0.2634955
-#&gt; x1           -0.2634955  0.1235058</div><div class='input'>
-<span class='co'># you can also combine the two with '^'</span>
-<span class='fu'>vcov_cluster</span><span class='op'>(</span><span class='va'>est</span>, <span class='op'>~</span><span class='va'>species</span><span class='op'>^</span><span class='va'>clu</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;             (Intercept)          x1
-#&gt; (Intercept)  0.27358801 -0.09893941
-#&gt; x1          -0.09893941  0.03852919</div><div class='input'>
-<span class='co'>#</span>
-<span class='co'># Using VCOV requests</span>
-<span class='co'>#</span>
-
-<span class='co'># per se: pretty useless...</span>
-<span class='fu'>vcov_cluster</span><span class='op'>(</span><span class='op'>~</span><span class='va'>species</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; ~species
-#&gt; &lt;environment: 0x00000000462ec720&gt;</div><div class='input'>
-<span class='co'># ...but VCOV-requests can be used at estimation time:</span>
-<span class='co'># it may be more explicit than...</span>
-<span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base</span>, vcov <span class='op'>=</span> <span class='fu'>vcov_cluster</span><span class='op'>(</span><span class='st'>"species"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
-#&gt; Observations: 150 
-#&gt; Standard-errors: Clustered (species) 
-#&gt;              Estimate Std. Error   t value Pr(&gt;|t|)    
-#&gt; (Intercept)  6.526223   0.939312  6.947878 0.020093 *  
-#&gt; x1          -0.223361   0.406738 -0.549152 0.638023    
-#&gt; ---
-#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 0.819578   Adj. R2: 0.007159</div><div class='input'>
-<span class='co'># ...the equivalent, built-in way:</span>
-<span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base</span>, vcov <span class='op'>=</span> <span class='op'>~</span><span class='va'>species</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
-#&gt; Observations: 150 
-#&gt; Standard-errors: Clustered (species) 
-#&gt;              Estimate Std. Error   t value Pr(&gt;|t|)    
-#&gt; (Intercept)  6.526223   0.939312  6.947878 0.020093 *  
-#&gt; x1          -0.223361   0.406738 -0.549152 0.638023    
-#&gt; ---
-#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 0.819578   Adj. R2: 0.007159</div><div class='input'>
-<span class='co'># The argument vcov does not accept hard values,</span>
-<span class='co'># so you can feed them with a VCOV-request:</span>
-<span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base</span>, vcov <span class='op'>=</span> <span class='fu'>vcov_cluster</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span>, <span class='fl'>30</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
-#&gt; Observations: 150 
-#&gt; Standard-errors: Clustered (rep(1:5, 30)) 
-#&gt;              Estimate Std. Error  t value   Pr(&gt;|t|)    
-#&gt; (Intercept)  6.526223   0.296270 22.02795 2.5137e-05 ***
-#&gt; x1          -0.223361   0.100044 -2.23263 8.9350e-02 .  
-#&gt; ---
-#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 0.819578   Adj. R2: 0.007159</div><div class='input'>
-
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='va'>base</span> <span class='op'>=</span> <span class='va'>iris</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>)</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>base</span><span class='op'>$</span><span class='va'>clu</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span>, <span class='fl'>30</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># VCOV: using a formula giving the name of the clusters</span></span>
+<span class='r-in'><span class='fu'>vcov_cluster</span><span class='op'>(</span><span class='va'>est</span>, <span class='op'>~</span><span class='va'>species</span> <span class='op'>+</span> <span class='va'>clu</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>             (Intercept)         x1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)   0.6046144 -0.2634955</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x1           -0.2634955  0.1235058</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># works as well with a character vector</span></span>
+<span class='r-in'><span class='fu'>vcov_cluster</span><span class='op'>(</span><span class='va'>est</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"species"</span>, <span class='st'>"clu"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>             (Intercept)         x1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)   0.6046144 -0.2634955</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x1           -0.2634955  0.1235058</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># you can also combine the two with '^'</span></span>
+<span class='r-in'><span class='fu'>vcov_cluster</span><span class='op'>(</span><span class='va'>est</span>, <span class='op'>~</span><span class='va'>species</span><span class='op'>^</span><span class='va'>clu</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>             (Intercept)          x1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)  0.27358801 -0.09893941</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x1          -0.09893941  0.03852919</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'><span class='co'># Using VCOV requests</span></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># per se: pretty useless...</span></span>
+<span class='r-in'><span class='fu'>vcov_cluster</span><span class='op'>(</span><span class='op'>~</span><span class='va'>species</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ~species</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> &lt;environment: 0x000000004d487b40&gt;</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># ...but VCOV-requests can be used at estimation time:</span></span>
+<span class='r-in'><span class='co'># it may be more explicit than...</span></span>
+<span class='r-in'><span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base</span>, vcov <span class='op'>=</span> <span class='fu'>vcov_cluster</span><span class='op'>(</span><span class='st'>"species"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> OLS estimation, Dep. Var.: y</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations: 150 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Standard-errors: Clustered (species) </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>              Estimate Std. Error   t value Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)  6.526223   0.939312  6.947878 0.020093 *  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x1          -0.223361   0.406738 -0.549152 0.638023    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> RMSE: 0.819578   Adj. R2: 0.007159</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># ...the equivalent, built-in way:</span></span>
+<span class='r-in'><span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base</span>, vcov <span class='op'>=</span> <span class='op'>~</span><span class='va'>species</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> OLS estimation, Dep. Var.: y</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations: 150 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Standard-errors: Clustered (species) </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>              Estimate Std. Error   t value Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)  6.526223   0.939312  6.947878 0.020093 *  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x1          -0.223361   0.406738 -0.549152 0.638023    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> RMSE: 0.819578   Adj. R2: 0.007159</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># The argument vcov does not accept hard values,</span></span>
+<span class='r-in'><span class='co'># so you can feed them with a VCOV-request:</span></span>
+<span class='r-in'><span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span>, <span class='va'>base</span>, vcov <span class='op'>=</span> <span class='fu'>vcov_cluster</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span>, <span class='fl'>30</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> OLS estimation, Dep. Var.: y</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations: 150 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Standard-errors: Clustered (rep(1:5, 30)) </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>              Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)  6.526223   0.296270 22.02795 2.5137e-05 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x1          -0.223361   0.100044 -2.23263 8.9350e-02 .  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> RMSE: 0.819578   Adj. R2: 0.007159</span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

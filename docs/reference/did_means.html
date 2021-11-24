@@ -185,7 +185,7 @@
     </tr>
     <tr>
       <th>treat_dict</th>
-      <td><p>A character vector of length two. What are the names of the treated and the control? This should be a dictionnary: e.g. <code><a href='https://rdrr.io/r/base/c.html'>c("1"="Treated", "0" = "Control")</a></code>.</p></td>
+      <td><p>A character vector of length two. What are the names of the treated and the control? This should be a dictionnary: e.g. <code>c("1"="Treated", "0" = "Control")</code>.</p></td>
     </tr>
     <tr>
       <th>dict</th>
@@ -221,7 +221,7 @@
     </tr>
     <tr>
       <th>prepostnames</th>
-      <td><p>Only if there is a 'post' variable. The names of the pre and post periods to be displayed in Latex. Default is <code><a href='https://rdrr.io/r/base/c.html'>c("Before", "After")</a></code>.</p></td>
+      <td><p>Only if there is a 'post' variable. The names of the pre and post periods to be displayed in Latex. Default is <code>c("Before", "After")</code>.</p></td>
     </tr>
     <tr>
       <th>diff.inv</th>
@@ -238,80 +238,86 @@
 <p>NAs are removed automatically: if the data contains NAs an information message will be prompted. First all observations containing NAs relating to the treatment or post variables are removed. Then if there are still NAs for the variables, they are excluded separately for each variable, and a new message detailing the NA breakup is prompted.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='co'># Playing around with the DiD data</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>base_did</span><span class='op'>)</span>
-
-<span class='co'># means of treat/control</span>
-<span class='fu'>did_means</span><span class='op'>(</span><span class='va'>y</span><span class='op'>+</span><span class='va'>x1</span><span class='op'>+</span><span class='va'>period</span><span class='op'>~</span><span class='va'>treat</span>, <span class='va'>base_did</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;           vars    cond: 1      cond: 0 Difference t-stat
-#&gt; 1            y    3.3 (6)     0.68 (5)       2.64   7.83
-#&gt; 2           x1 0.13 (3.1) -0.066 (2.8)      0.199    1.1
-#&gt; 3       period  5.5 (2.9)    5.5 (2.9)          0      0
-#&gt; 4 Observations        550          530                  </div><div class='input'>
-<span class='co'># same but inverting the difference</span>
-<span class='fu'>did_means</span><span class='op'>(</span><span class='va'>y</span><span class='op'>+</span><span class='va'>x1</span><span class='op'>+</span><span class='va'>period</span><span class='op'>~</span><span class='va'>treat</span>, <span class='va'>base_did</span>, diff.inv <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;           vars    cond: 1      cond: 0 Difference t-stat
-#&gt; 1            y    3.3 (6)     0.68 (5)      -2.64  -7.83
-#&gt; 2           x1 0.13 (3.1) -0.066 (2.8)     -0.199   -1.1
-#&gt; 3       period  5.5 (2.9)    5.5 (2.9)          0      0
-#&gt; 4 Observations        550          530                  </div><div class='input'>
-<span class='co'># now treat/control, before/after</span>
-<span class='fu'>did_means</span><span class='op'>(</span><span class='va'>y</span><span class='op'>+</span><span class='va'>x1</span><span class='op'>+</span><span class='va'>period</span><span class='op'>~</span><span class='va'>treat</span><span class='op'>|</span><span class='va'>post</span>, <span class='va'>base_did</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;           vars    cond: 1     cond: 0 Difference t-stat     cond: 1     cond: 0
-#&gt; 1            y 0.47 (5.1)    0.32 (5)      0.142  0.326   6.2 (5.5)       1 (5)
-#&gt; 2           x1 0.17 (3.1) 0.046 (2.9)      0.125  0.487 0.095 (3.1) -0.18 (2.8)
-#&gt; 3       period    3 (1.4)     3 (1.4)          0      0     8 (1.4)     8 (1.4)
-#&gt; 4 Observations        275         265                           275         265
-#&gt;   Difference t-stat
-#&gt; 1       5.14   11.4
-#&gt; 2      0.272   1.07
-#&gt; 3          0      0
-#&gt; 4                  </div><div class='input'>
-<span class='co'># same but with a new line giving the number of unique "indiv" for each case</span>
-<span class='fu'>did_means</span><span class='op'>(</span><span class='va'>y</span><span class='op'>+</span><span class='va'>x1</span><span class='op'>+</span><span class='va'>period</span><span class='op'>~</span><span class='va'>treat</span><span class='op'>|</span><span class='va'>post</span>, <span class='va'>base_did</span>, indiv <span class='op'>=</span> <span class='st'>"id"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;            vars    cond: 1     cond: 0 Difference t-stat     cond: 1
-#&gt; 1             y 0.47 (5.1)    0.32 (5)      0.142  0.326   6.2 (5.5)
-#&gt; 2            x1 0.17 (3.1) 0.046 (2.9)      0.125  0.487 0.095 (3.1)
-#&gt; 3        period    3 (1.4)     3 (1.4)          0      0     8 (1.4)
-#&gt; 4  Observations        275         265                           275
-#&gt; 5 # Individuals         55          53                            55
-#&gt;       cond: 0 Difference t-stat
-#&gt; 1       1 (5)       5.14   11.4
-#&gt; 2 -0.18 (2.8)      0.272   1.07
-#&gt; 3     8 (1.4)          0      0
-#&gt; 4         265                  
-#&gt; 5          53                  </div><div class='input'>
-<span class='co'># same but with the treat case "0" coming first</span>
-<span class='fu'>did_means</span><span class='op'>(</span><span class='va'>y</span><span class='op'>+</span><span class='va'>x1</span><span class='op'>+</span><span class='va'>period</span><span class='op'>~</span><span class='va'>treat</span><span class='op'>|</span><span class='va'>post</span>, <span class='va'>base_did</span>, indiv <span class='op'>=</span> <span class='op'>~</span><span class='va'>id</span>, treat_first <span class='op'>=</span> <span class='fl'>0</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;            vars     cond: 0    cond: 1 Difference t-stat     cond: 0
-#&gt; 1             y    0.32 (5) 0.47 (5.1)     -0.142 -0.326       1 (5)
-#&gt; 2            x1 0.046 (2.9) 0.17 (3.1)     -0.125 -0.487 -0.18 (2.8)
-#&gt; 3        period     3 (1.4)    3 (1.4)          0      0     8 (1.4)
-#&gt; 4  Observations         265        275                           265
-#&gt; 5 # Individuals          53         55                            53
-#&gt;       cond: 1 Difference t-stat
-#&gt; 1   6.2 (5.5)      -5.14  -11.4
-#&gt; 2 0.095 (3.1)     -0.272  -1.07
-#&gt; 3     8 (1.4)          0      0
-#&gt; 4         275                  
-#&gt; 5          55                  </div><div class='input'>
-<span class='co'># Selecting all the variables with "."</span>
-<span class='fu'>did_means</span><span class='op'>(</span><span class='va'>.</span><span class='op'>~</span><span class='va'>treat</span><span class='op'>|</span><span class='va'>post</span>, <span class='va'>base_did</span>, indiv <span class='op'>=</span> <span class='st'>"id"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;            vars    cond: 1     cond: 0 Difference t-stat     cond: 1
-#&gt; 1             y 0.47 (5.1)    0.32 (5)      0.142  0.326   6.2 (5.5)
-#&gt; 2            x1 0.17 (3.1) 0.046 (2.9)      0.125  0.487 0.095 (3.1)
-#&gt; 3        period    3 (1.4)     3 (1.4)          0      0     8 (1.4)
-#&gt; 4  Observations        275         265                           275
-#&gt; 5 # Individuals         55          53                            55
-#&gt;       cond: 0 Difference t-stat
-#&gt; 1       1 (5)       5.14   11.4
-#&gt; 2 -0.18 (2.8)      0.272   1.07
-#&gt; 3     8 (1.4)          0      0
-#&gt; 4         265                  
-#&gt; 5          53                  </div><div class='input'>
-
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='co'># Playing around with the DiD data</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>base_did</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># means of treat/control</span></span>
+<span class='r-in'><span class='fu'>did_means</span><span class='op'>(</span><span class='va'>y</span><span class='op'>+</span><span class='va'>x1</span><span class='op'>+</span><span class='va'>period</span><span class='op'>~</span><span class='va'>treat</span>, <span class='va'>base_did</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>           vars    cond: 1      cond: 0 Difference t-stat</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1            y    3.3 (6)     0.68 (5)       2.64   7.83</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2           x1 0.13 (3.1) -0.066 (2.8)      0.199    1.1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3       period  5.5 (2.9)    5.5 (2.9)          0      0</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4 Observations        550          530                  </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># same but inverting the difference</span></span>
+<span class='r-in'><span class='fu'>did_means</span><span class='op'>(</span><span class='va'>y</span><span class='op'>+</span><span class='va'>x1</span><span class='op'>+</span><span class='va'>period</span><span class='op'>~</span><span class='va'>treat</span>, <span class='va'>base_did</span>, diff.inv <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>           vars    cond: 1      cond: 0 Difference t-stat</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1            y    3.3 (6)     0.68 (5)      -2.64  -7.83</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2           x1 0.13 (3.1) -0.066 (2.8)     -0.199   -1.1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3       period  5.5 (2.9)    5.5 (2.9)          0      0</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4 Observations        550          530                  </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># now treat/control, before/after</span></span>
+<span class='r-in'><span class='fu'>did_means</span><span class='op'>(</span><span class='va'>y</span><span class='op'>+</span><span class='va'>x1</span><span class='op'>+</span><span class='va'>period</span><span class='op'>~</span><span class='va'>treat</span><span class='op'>|</span><span class='va'>post</span>, <span class='va'>base_did</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>           vars    cond: 1     cond: 0 Difference t-stat     cond: 1     cond: 0</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1            y 0.47 (5.1)    0.32 (5)      0.142  0.326   6.2 (5.5)       1 (5)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2           x1 0.17 (3.1) 0.046 (2.9)      0.125  0.487 0.095 (3.1) -0.18 (2.8)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3       period    3 (1.4)     3 (1.4)          0      0     8 (1.4)     8 (1.4)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4 Observations        275         265                           275         265</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   Difference t-stat</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1       5.14   11.4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2      0.272   1.07</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3          0      0</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4                  </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># same but with a new line giving the number of unique "indiv" for each case</span></span>
+<span class='r-in'><span class='fu'>did_means</span><span class='op'>(</span><span class='va'>y</span><span class='op'>+</span><span class='va'>x1</span><span class='op'>+</span><span class='va'>period</span><span class='op'>~</span><span class='va'>treat</span><span class='op'>|</span><span class='va'>post</span>, <span class='va'>base_did</span>, indiv <span class='op'>=</span> <span class='st'>"id"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>            vars    cond: 1     cond: 0 Difference t-stat     cond: 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1             y 0.47 (5.1)    0.32 (5)      0.142  0.326   6.2 (5.5)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2            x1 0.17 (3.1) 0.046 (2.9)      0.125  0.487 0.095 (3.1)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3        period    3 (1.4)     3 (1.4)          0      0     8 (1.4)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4  Observations        275         265                           275</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 5 # Individuals         55          53                            55</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>       cond: 0 Difference t-stat</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1       1 (5)       5.14   11.4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2 -0.18 (2.8)      0.272   1.07</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3     8 (1.4)          0      0</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4         265                  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 5          53                  </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># same but with the treat case "0" coming first</span></span>
+<span class='r-in'><span class='fu'>did_means</span><span class='op'>(</span><span class='va'>y</span><span class='op'>+</span><span class='va'>x1</span><span class='op'>+</span><span class='va'>period</span><span class='op'>~</span><span class='va'>treat</span><span class='op'>|</span><span class='va'>post</span>, <span class='va'>base_did</span>, indiv <span class='op'>=</span> <span class='op'>~</span><span class='va'>id</span>, treat_first <span class='op'>=</span> <span class='fl'>0</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>            vars     cond: 0    cond: 1 Difference t-stat     cond: 0</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1             y    0.32 (5) 0.47 (5.1)     -0.142 -0.326       1 (5)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2            x1 0.046 (2.9) 0.17 (3.1)     -0.125 -0.487 -0.18 (2.8)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3        period     3 (1.4)    3 (1.4)          0      0     8 (1.4)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4  Observations         265        275                           265</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 5 # Individuals          53         55                            53</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>       cond: 1 Difference t-stat</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1   6.2 (5.5)      -5.14  -11.4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2 0.095 (3.1)     -0.272  -1.07</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3     8 (1.4)          0      0</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4         275                  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 5          55                  </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Selecting all the variables with "."</span></span>
+<span class='r-in'><span class='fu'>did_means</span><span class='op'>(</span><span class='va'>.</span><span class='op'>~</span><span class='va'>treat</span><span class='op'>|</span><span class='va'>post</span>, <span class='va'>base_did</span>, indiv <span class='op'>=</span> <span class='st'>"id"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>            vars    cond: 1     cond: 0 Difference t-stat     cond: 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1             y 0.47 (5.1)    0.32 (5)      0.142  0.326   6.2 (5.5)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2            x1 0.17 (3.1) 0.046 (2.9)      0.125  0.487 0.095 (3.1)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3        period    3 (1.4)     3 (1.4)          0      0     8 (1.4)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4  Observations        275         265                           275</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 5 # Individuals         55          53                            55</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>       cond: 0 Difference t-stat</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1       1 (5)       5.14   11.4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2 -0.18 (2.8)      0.272   1.07</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3     8 (1.4)          0      0</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4         265                  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 5          53                  </span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

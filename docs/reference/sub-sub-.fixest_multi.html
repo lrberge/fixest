@@ -165,37 +165,39 @@
     <div class='dont-index'><p>The main fixest estimation functions: <code><a href='feols.html'>feols</a></code>, <code><a href='feglm.html'>fepois</a></code>, <code><a href='femlm.html'>fenegbin</a></code>, <code><a href='feglm.html'>feglm</a></code>, <code><a href='feNmlm.html'>feNmlm</a></code>. Tools for mutliple fixest estimations: <code><a href='summary.fixest_multi.html'>summary.fixest_multi</a></code>, <code><a href='print.fixest_multi.html'>print.fixest_multi</a></code>, <code><a href='as.list.fixest_multi.html'>as.list.fixest_multi</a></code>, <code>sub-sub-.fixest_multi</code>, <code>sub-.fixest_multi</code>, <code>cash-.fixest_multi</code>.</p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='va'>base</span> <span class='op'>=</span> <span class='va'>iris</span>
-<span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>)</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span>
-
-<span class='co'># Multiple estimation</span>
-<span class='va'>res</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fu'><a href='stepwise.html'>csw</a></span><span class='op'>(</span><span class='va'>x1</span>, <span class='va'>x2</span>, <span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span>, split <span class='op'>=</span> <span class='op'>~</span><span class='va'>species</span><span class='op'>)</span>
-
-<span class='co'># The first estimation</span>
-<span class='va'>res</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span>
-</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
-#&gt; Observations: 50 
-#&gt; Standard-errors: IID 
-#&gt;             Estimate Std. Error t value   Pr(&gt;|t|)    
-#&gt; (Intercept) 2.639001   0.310014 8.51251 3.7424e-11 ***
-#&gt; x1          0.690490   0.089899 7.68074 6.7098e-10 ***
-#&gt; ---
-#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 0.233723   Adj. R2: 0.542029</div><div class='input'>
-<span class='co'># The second one, etc</span>
-<span class='va'>res</span><span class='op'>[[</span><span class='fl'>2</span><span class='op'>]</span><span class='op'>]</span>
-</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: y
-#&gt; Observations: 50 
-#&gt; Standard-errors: IID 
-#&gt;             Estimate Std. Error t value   Pr(&gt;|t|)    
-#&gt; (Intercept) 2.303738   0.385294 5.97917 2.8943e-07 ***
-#&gt; x1          0.667416   0.090356 7.38653 2.1252e-09 ***
-#&gt; x2          0.283419   0.197224 1.43704 1.5733e-01    
-#&gt; ---
-#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 0.228751   Adj. R2: 0.551971</div><div class='input'>
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='va'>base</span> <span class='op'>=</span> <span class='va'>iris</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>)</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Multiple estimation</span></span>
+<span class='r-in'><span class='va'>res</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fu'><a href='stepwise.html'>csw</a></span><span class='op'>(</span><span class='va'>x1</span>, <span class='va'>x2</span>, <span class='va'>x3</span><span class='op'>)</span>, <span class='va'>base</span>, split <span class='op'>=</span> <span class='op'>~</span><span class='va'>species</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># The first estimation</span></span>
+<span class='r-in'><span class='va'>res</span><span class='op'>[[</span><span class='fl'>1</span><span class='op'>]</span><span class='op'>]</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> OLS estimation, Dep. Var.: y</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations: 50 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Standard-errors: IID </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>             Estimate Std. Error t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept) 2.639001   0.310014 8.51251 3.7424e-11 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x1          0.690490   0.089899 7.68074 6.7098e-10 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> RMSE: 0.233723   Adj. R2: 0.542029</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># The second one, etc</span></span>
+<span class='r-in'><span class='va'>res</span><span class='op'>[[</span><span class='fl'>2</span><span class='op'>]</span><span class='op'>]</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> OLS estimation, Dep. Var.: y</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations: 50 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Standard-errors: IID </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>             Estimate Std. Error t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept) 2.303738   0.385294 5.97917 2.8943e-07 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x1          0.667416   0.090356 7.38653 2.1252e-09 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> x2          0.283419   0.197224 1.43704 1.5733e-01    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> RMSE: 0.228751   Adj. R2: 0.551971</span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

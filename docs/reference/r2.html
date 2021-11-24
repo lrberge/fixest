@@ -173,38 +173,44 @@
     <p>Laurent Berge</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='co'># Load trade data</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>trade</span><span class='op'>)</span>
-
-<span class='co'># We estimate the effect of distance on trade (with 3 fixed-effects)</span>
-<span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>Euros</span><span class='op'>)</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>dist_km</span><span class='op'>)</span><span class='op'>|</span><span class='va'>Origin</span><span class='op'>+</span><span class='va'>Destination</span><span class='op'>+</span><span class='va'>Product</span>, <span class='va'>trade</span><span class='op'>)</span>
-
-<span class='co'># Squared correlation:</span>
-<span class='fu'>r2</span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"cor2"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;      cor2 
-#&gt; 0.7040186 </div><div class='input'>
-<span class='co'># "regular" r2:</span>
-<span class='fu'>r2</span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"r2"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;        r2 
-#&gt; 0.7040186 </div><div class='input'>
-<span class='co'># pseudo r2 (equivalent to GLM with Gaussian family)</span>
-<span class='fu'>r2</span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"pr2"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;       pr2 
-#&gt; 0.2353827 </div><div class='input'>
-<span class='co'># adjusted within r2</span>
-<span class='fu'>r2</span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"war2"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;      war2 
-#&gt; 0.2182526 </div><div class='input'>
-<span class='co'># all four at once</span>
-<span class='fu'>r2</span><span class='op'>(</span><span class='va'>est</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"cor2"</span>, <span class='st'>"r2"</span>, <span class='st'>"pr2"</span>, <span class='st'>"war2"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;      cor2        r2       pr2      war2 
-#&gt; 0.7040186 0.7040186 0.2353827 0.2182526 </div><div class='input'>
-<span class='co'># same with full names instead of codes</span>
-<span class='fu'>r2</span><span class='op'>(</span><span class='va'>est</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"cor2"</span>, <span class='st'>"r2"</span>, <span class='st'>"pr2"</span>, <span class='st'>"war2"</span><span class='op'>)</span>, full_names <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Squared Correlation                  R2           Pseudo R2  Adjusted Within R2 
-#&gt;           0.7040186           0.7040186           0.2353827           0.2182526 </div><div class='input'>
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='co'># Load trade data</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>trade</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># We estimate the effect of distance on trade (with 3 fixed-effects)</span></span>
+<span class='r-in'><span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>Euros</span><span class='op'>)</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>dist_km</span><span class='op'>)</span><span class='op'>|</span><span class='va'>Origin</span><span class='op'>+</span><span class='va'>Destination</span><span class='op'>+</span><span class='va'>Product</span>, <span class='va'>trade</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Squared correlation:</span></span>
+<span class='r-in'><span class='fu'>r2</span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"cor2"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>      cor2 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 0.7040186 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># "regular" r2:</span></span>
+<span class='r-in'><span class='fu'>r2</span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"r2"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>        r2 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 0.7040186 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># pseudo r2 (equivalent to GLM with Gaussian family)</span></span>
+<span class='r-in'><span class='fu'>r2</span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"pr2"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>       pr2 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 0.2353827 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># adjusted within r2</span></span>
+<span class='r-in'><span class='fu'>r2</span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"war2"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>      war2 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 0.2182526 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># all four at once</span></span>
+<span class='r-in'><span class='fu'>r2</span><span class='op'>(</span><span class='va'>est</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"cor2"</span>, <span class='st'>"r2"</span>, <span class='st'>"pr2"</span>, <span class='st'>"war2"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>      cor2        r2       pr2      war2 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 0.7040186 0.7040186 0.2353827 0.2182526 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># same with full names instead of codes</span></span>
+<span class='r-in'><span class='fu'>r2</span><span class='op'>(</span><span class='va'>est</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"cor2"</span>, <span class='st'>"r2"</span>, <span class='st'>"pr2"</span>, <span class='st'>"war2"</span><span class='op'>)</span>, full_names <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Squared Correlation                  R2           Pseudo R2  Adjusted Within R2 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>           0.7040186           0.7040186           0.2353827           0.2182526 </span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

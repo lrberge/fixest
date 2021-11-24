@@ -224,107 +224,114 @@ If <code>se.fit = TRUE</code> or <code>interval != "none"</code>, the object ret
     <p>Laurent Berge</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='co'># Estimation on iris data</span>
-<span class='va'>res</span> <span class='op'>=</span> <span class='fu'><a href='feglm.html'>fepois</a></span><span class='op'>(</span><span class='va'>Sepal.Length</span> <span class='op'>~</span> <span class='va'>Petal.Length</span> <span class='op'>|</span> <span class='va'>Species</span>, <span class='va'>iris</span><span class='op'>)</span>
-
-<span class='co'># what would be the prediction if the data was all setosa?</span>
-<span class='va'>newdata</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span>Petal.Length <span class='op'>=</span> <span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Length</span>, Species <span class='op'>=</span> <span class='st'>"setosa"</span><span class='op'>)</span>
-<span class='va'>pred_setosa</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>res</span>, newdata <span class='op'>=</span> <span class='va'>newdata</span><span class='op'>)</span>
-
-<span class='co'># Let's look at it graphically</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>7</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>3</span>, <span class='fl'>11</span><span class='op'>)</span>, type <span class='op'>=</span> <span class='st'>"n"</span>, xlab <span class='op'>=</span> <span class='st'>"Petal.Length"</span>,
-     ylab <span class='op'>=</span> <span class='st'>"Sepal.Length"</span><span class='op'>)</span>
-</div><div class='input'>
-<span class='va'>newdata</span> <span class='op'>=</span> <span class='va'>iris</span><span class='op'>[</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setorder.html'>order</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Length</span><span class='op'>)</span>, <span class='op'>]</span>
-<span class='va'>newdata</span><span class='op'>$</span><span class='va'>Species</span> <span class='op'>=</span> <span class='st'>"setosa"</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/lines.html'>lines</a></span><span class='op'>(</span><span class='va'>newdata</span><span class='op'>$</span><span class='va'>Petal.Length</span>, <span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>res</span>, <span class='va'>newdata</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='input'>
-<span class='co'># versicolor</span>
-<span class='va'>newdata</span><span class='op'>$</span><span class='va'>Species</span> <span class='op'>=</span> <span class='st'>"versicolor"</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/lines.html'>lines</a></span><span class='op'>(</span><span class='va'>newdata</span><span class='op'>$</span><span class='va'>Petal.Length</span>, <span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>res</span>, <span class='va'>newdata</span><span class='op'>)</span>, col<span class='op'>=</span><span class='fl'>2</span><span class='op'>)</span>
-</div><div class='input'>
-<span class='co'># virginica</span>
-<span class='va'>newdata</span><span class='op'>$</span><span class='va'>Species</span> <span class='op'>=</span> <span class='st'>"virginica"</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/lines.html'>lines</a></span><span class='op'>(</span><span class='va'>newdata</span><span class='op'>$</span><span class='va'>Petal.Length</span>, <span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>res</span>, <span class='va'>newdata</span><span class='op'>)</span>, col<span class='op'>=</span><span class='fl'>3</span><span class='op'>)</span>
-</div><div class='input'>
-<span class='co'># The original data</span>
-<span class='fu'><a href='https://rdrr.io/r/graphics/points.html'>points</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Length</span>, <span class='va'>iris</span><span class='op'>$</span><span class='va'>Sepal.Length</span>, col <span class='op'>=</span> <span class='va'>iris</span><span class='op'>$</span><span class='va'>Species</span>, pch <span class='op'>=</span> <span class='fl'>18</span><span class='op'>)</span>
-</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/legend.html'>legend</a></span><span class='op'>(</span><span class='st'>"topleft"</span>, lty <span class='op'>=</span> <span class='fl'>1</span>, col <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span>, legend <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/levels.html'>levels</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>$</span><span class='va'>Species</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='img'><img src='predict.fixest-1.png' alt='' width='700' height='433' /></div><div class='input'>
-
-<span class='co'>#</span>
-<span class='co'># Getting the fixed-effect coefficients for each obs.</span>
-<span class='co'>#</span>
-
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>trade</span><span class='op'>)</span>
-<span class='va'>est_trade</span> <span class='op'>=</span> <span class='fu'><a href='feglm.html'>fepois</a></span><span class='op'>(</span><span class='va'>Euros</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>dist_km</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>Destination</span><span class='op'>^</span><span class='va'>Product</span> <span class='op'>+</span>
-                                           <span class='va'>Origin</span><span class='op'>^</span><span class='va'>Product</span> <span class='op'>+</span> <span class='va'>Year</span>, <span class='va'>trade</span><span class='op'>)</span>
-<span class='va'>obs_fe</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>est_trade</span>, fixef <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>obs_fe</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;   Destination^Product Origin^Product Year
-#&gt; 1            22.69941       0.000000    0
-#&gt; 2            26.17685      -2.470634    0
-#&gt; 3            25.41261       0.000000    0
-#&gt; 4            27.60928      -4.672485    0
-#&gt; 5            24.43620       0.000000    0
-#&gt; 6            26.67832      -4.451350    0</div><div class='input'>
-<span class='co'># can we check we get the right sum of fixed-effects</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/colSums.html'>rowSums</a></span><span class='op'>(</span><span class='va'>obs_fe</span><span class='op'>)</span>, <span class='va'>est_trade</span><span class='op'>$</span><span class='va'>sumFE</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;          [,1]     [,2]
-#&gt; [1,] 22.69941 22.69941
-#&gt; [2,] 23.70622 23.70622
-#&gt; [3,] 25.41261 25.41261
-#&gt; [4,] 22.93679 22.93679
-#&gt; [5,] 24.43620 24.43620
-#&gt; [6,] 22.22697 22.22697</div><div class='input'>
-
-<span class='co'>#</span>
-<span class='co'># Standard-error of the prediction</span>
-<span class='co'>#</span>
-
-<span class='va'>base</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/setNames.html'>setNames</a></span><span class='op'>(</span><span class='va'>iris</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span><span class='op'>)</span>
-
-<span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='va'>species</span>, <span class='va'>base</span><span class='op'>)</span>
-
-<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>est</span>, se.fit <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;        fit     se.fit
-#&gt; 1 5.063856 0.06240784
-#&gt; 2 4.662076 0.07686065
-#&gt; 3 4.822788 0.06651280
-#&gt; 4 4.742432 0.07108218
-#&gt; 5 5.144212 0.06458060
-#&gt; 6 5.385281 0.07972048</div><div class='input'>
-<span class='co'># regular confidence interval</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>est</span>, interval <span class='op'>=</span> <span class='st'>"conf"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;        fit     se.fit   ci_low  ci_high
-#&gt; 1 5.063856 0.06240784 4.940517 5.187196
-#&gt; 2 4.662076 0.07686065 4.510173 4.813979
-#&gt; 3 4.822788 0.06651280 4.691336 4.954240
-#&gt; 4 4.742432 0.07108218 4.601949 4.882915
-#&gt; 5 5.144212 0.06458060 5.016579 5.271846
-#&gt; 6 5.385281 0.07972048 5.227726 5.542836</div><div class='input'>
-<span class='co'># adding the residual to the CI</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>est</span>, interval <span class='op'>=</span> <span class='st'>"predi"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;        fit     se.fit   ci_low  ci_high
-#&gt; 1 5.063856 0.06240784 4.189559 5.938154
-#&gt; 2 4.662076 0.07686065 3.783294 5.540858
-#&gt; 3 4.822788 0.06651280 3.947310 5.698267
-#&gt; 4 4.742432 0.07108218 3.865552 5.619312
-#&gt; 5 5.144212 0.06458060 4.269299 6.019126
-#&gt; 6 5.385281 0.07972048 4.505504 6.265057</div><div class='input'>
-<span class='co'># You can change the type of SE on the fly</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>est</span>, interval <span class='op'>=</span> <span class='st'>"conf"</span>, vcov <span class='op'>=</span> <span class='op'>~</span><span class='va'>species</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;        fit      se.fit   ci_low  ci_high
-#&gt; 1 5.063856 0.005175705 5.041587 5.086126
-#&gt; 2 4.662076 0.030766691 4.529698 4.794454
-#&gt; 3 4.822788 0.016389733 4.752269 4.893307
-#&gt; 4 4.742432 0.023578212 4.640983 4.843881
-#&gt; 5 5.144212 0.012364184 5.091014 5.197411
-#&gt; 6 5.385281 0.033929622 5.239293 5.531268</div><div class='input'>
-
-
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='co'># Estimation on iris data</span></span>
+<span class='r-in'><span class='va'>res</span> <span class='op'>=</span> <span class='fu'><a href='feglm.html'>fepois</a></span><span class='op'>(</span><span class='va'>Sepal.Length</span> <span class='op'>~</span> <span class='va'>Petal.Length</span> <span class='op'>|</span> <span class='va'>Species</span>, <span class='va'>iris</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># what would be the prediction if the data was all setosa?</span></span>
+<span class='r-in'><span class='va'>newdata</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span>Petal.Length <span class='op'>=</span> <span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Length</span>, Species <span class='op'>=</span> <span class='st'>"setosa"</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>pred_setosa</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>res</span>, newdata <span class='op'>=</span> <span class='va'>newdata</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Let's look at it graphically</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>7</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>3</span>, <span class='fl'>11</span><span class='op'>)</span>, type <span class='op'>=</span> <span class='st'>"n"</span>, xlab <span class='op'>=</span> <span class='st'>"Petal.Length"</span>,</span>
+<span class='r-in'>     ylab <span class='op'>=</span> <span class='st'>"Sepal.Length"</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>newdata</span> <span class='op'>=</span> <span class='va'>iris</span><span class='op'>[</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setorder.html'>order</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Length</span><span class='op'>)</span>, <span class='op'>]</span></span>
+<span class='r-in'><span class='va'>newdata</span><span class='op'>$</span><span class='va'>Species</span> <span class='op'>=</span> <span class='st'>"setosa"</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/graphics/lines.html'>lines</a></span><span class='op'>(</span><span class='va'>newdata</span><span class='op'>$</span><span class='va'>Petal.Length</span>, <span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>res</span>, <span class='va'>newdata</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># versicolor</span></span>
+<span class='r-in'><span class='va'>newdata</span><span class='op'>$</span><span class='va'>Species</span> <span class='op'>=</span> <span class='st'>"versicolor"</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/graphics/lines.html'>lines</a></span><span class='op'>(</span><span class='va'>newdata</span><span class='op'>$</span><span class='va'>Petal.Length</span>, <span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>res</span>, <span class='va'>newdata</span><span class='op'>)</span>, col<span class='op'>=</span><span class='fl'>2</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># virginica</span></span>
+<span class='r-in'><span class='va'>newdata</span><span class='op'>$</span><span class='va'>Species</span> <span class='op'>=</span> <span class='st'>"virginica"</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/graphics/lines.html'>lines</a></span><span class='op'>(</span><span class='va'>newdata</span><span class='op'>$</span><span class='va'>Petal.Length</span>, <span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>res</span>, <span class='va'>newdata</span><span class='op'>)</span>, col<span class='op'>=</span><span class='fl'>3</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># The original data</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/graphics/points.html'>points</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>$</span><span class='va'>Petal.Length</span>, <span class='va'>iris</span><span class='op'>$</span><span class='va'>Sepal.Length</span>, col <span class='op'>=</span> <span class='va'>iris</span><span class='op'>$</span><span class='va'>Species</span>, pch <span class='op'>=</span> <span class='fl'>18</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/graphics/legend.html'>legend</a></span><span class='op'>(</span><span class='st'>"topleft"</span>, lty <span class='op'>=</span> <span class='fl'>1</span>, col <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span>, legend <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/levels.html'>levels</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>$</span><span class='va'>Species</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-plt img'><img src='predict.fixest-1.png' alt='' width='700' height='433' /></span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'><span class='co'># Getting the fixed-effect coefficients for each obs.</span></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>trade</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>est_trade</span> <span class='op'>=</span> <span class='fu'><a href='feglm.html'>fepois</a></span><span class='op'>(</span><span class='va'>Euros</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>dist_km</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>Destination</span><span class='op'>^</span><span class='va'>Product</span> <span class='op'>+</span></span>
+<span class='r-in'>                                           <span class='va'>Origin</span><span class='op'>^</span><span class='va'>Product</span> <span class='op'>+</span> <span class='va'>Year</span>, <span class='va'>trade</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>obs_fe</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>est_trade</span>, fixef <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>obs_fe</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   Destination^Product Origin^Product Year</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1            22.69941       0.000000    0</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2            26.17685      -2.470634    0</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3            25.41261       0.000000    0</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4            27.60928      -4.672485    0</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 5            24.43620       0.000000    0</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 6            26.67832      -4.451350    0</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># can we check we get the right sum of fixed-effects</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/colSums.html'>rowSums</a></span><span class='op'>(</span><span class='va'>obs_fe</span><span class='op'>)</span>, <span class='va'>est_trade</span><span class='op'>$</span><span class='va'>sumFE</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>          [,1]     [,2]</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1,] 22.69941 22.69941</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [2,] 23.70622 23.70622</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [3,] 25.41261 25.41261</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [4,] 22.93679 22.93679</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [5,] 24.43620 24.43620</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [6,] 22.22697 22.22697</span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'><span class='co'># Standard-error of the prediction</span></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>base</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/setNames.html'>setNames</a></span><span class='op'>(</span><span class='va'>iris</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='va'>species</span>, <span class='va'>base</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>est</span>, se.fit <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>        fit     se.fit</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1 5.063856 0.06240784</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2 4.662076 0.07686065</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3 4.822788 0.06651280</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4 4.742432 0.07108218</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 5 5.144212 0.06458060</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 6 5.385281 0.07972048</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># regular confidence interval</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>est</span>, interval <span class='op'>=</span> <span class='st'>"conf"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>        fit     se.fit   ci_low  ci_high</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1 5.063856 0.06240784 4.940517 5.187196</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2 4.662076 0.07686065 4.510173 4.813979</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3 4.822788 0.06651280 4.691336 4.954240</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4 4.742432 0.07108218 4.601949 4.882915</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 5 5.144212 0.06458060 5.016579 5.271846</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 6 5.385281 0.07972048 5.227726 5.542836</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># adding the residual to the CI</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>est</span>, interval <span class='op'>=</span> <span class='st'>"predi"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>        fit     se.fit   ci_low  ci_high</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1 5.063856 0.06240784 4.189559 5.938154</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2 4.662076 0.07686065 3.783294 5.540858</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3 4.822788 0.06651280 3.947310 5.698267</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4 4.742432 0.07108218 3.865552 5.619312</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 5 5.144212 0.06458060 4.269299 6.019126</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 6 5.385281 0.07972048 4.505504 6.265057</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># You can change the type of SE on the fly</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/predict.html'>predict</a></span><span class='op'>(</span><span class='va'>est</span>, interval <span class='op'>=</span> <span class='st'>"conf"</span>, vcov <span class='op'>=</span> <span class='op'>~</span><span class='va'>species</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>        fit      se.fit   ci_low  ci_high</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1 5.063856 0.005175705 5.041587 5.086126</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2 4.662076 0.030766691 4.529698 4.794454</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3 4.822788 0.016389733 4.752269 4.893307</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4 4.742432 0.023578212 4.640983 4.843881</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 5 5.144212 0.012364184 5.091014 5.197411</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 6 5.385281 0.033929622 5.239293 5.531268</span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

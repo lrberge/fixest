@@ -110,6 +110,7 @@ reference:
       desc: Other methods and functions that didn't fit the previous sections
       contents:
         - dsb
+        - log_etable
         - check_conv_feols
         - sample_df
         - n_unik

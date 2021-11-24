@@ -169,7 +169,7 @@
     </tr>
     <tr>
       <th>cluster</th>
-      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] fixed-effect). You can interact two variables using <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
+      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] fixed-effect). You can interact two variables using <code>^</code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
     </tr>
     <tr>
       <th>ssc</th>
@@ -189,26 +189,28 @@
     <p>Laurent Berge</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='co'># Load trade data</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>trade</span><span class='op'>)</span>
-
-<span class='co'># We estimate the effect of distance on trade (with 3 fixed-effects)</span>
-<span class='va'>est_pois</span> <span class='op'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>Euros</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>dist_km</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>Year</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>Origin</span> <span class='op'>+</span> <span class='va'>Destination</span> <span class='op'>+</span>
-                 <span class='va'>Product</span>, <span class='va'>trade</span><span class='op'>)</span>
-
-<span class='co'># confidence interval with "normal" VCOV</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/confint.html'>confint</a></span><span class='op'>(</span><span class='va'>est_pois</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                  2.5 %    97.5 %
-#&gt; log(dist_km) -1.754564 -1.301171
-#&gt; log(Year)    58.934594 86.305838</div><div class='input'>
-<span class='co'># confidence interval with "clustered" VCOV (w.r.t. the Origin factor)</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/confint.html'>confint</a></span><span class='op'>(</span><span class='va'>est_pois</span>, se <span class='op'>=</span> <span class='st'>"cluster"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                  2.5 %    97.5 %
-#&gt; log(dist_km) -1.754564 -1.301171
-#&gt; log(Year)    58.934594 86.305838</div><div class='input'>
-
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='co'># Load trade data</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>trade</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># We estimate the effect of distance on trade (with 3 fixed-effects)</span></span>
+<span class='r-in'><span class='va'>est_pois</span> <span class='op'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>Euros</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>dist_km</span><span class='op'>)</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/Log.html'>log</a></span><span class='op'>(</span><span class='va'>Year</span><span class='op'>)</span> <span class='op'>|</span> <span class='va'>Origin</span> <span class='op'>+</span> <span class='va'>Destination</span> <span class='op'>+</span></span>
+<span class='r-in'>                 <span class='va'>Product</span>, <span class='va'>trade</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># confidence interval with "normal" VCOV</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/stats/confint.html'>confint</a></span><span class='op'>(</span><span class='va'>est_pois</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                  2.5 %    97.5 %</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log(dist_km) -1.754564 -1.301171</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log(Year)    58.934594 86.305838</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># confidence interval with "clustered" VCOV (w.r.t. the Origin factor)</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/stats/confint.html'>confint</a></span><span class='op'>(</span><span class='va'>est_pois</span>, se <span class='op'>=</span> <span class='st'>"cluster"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                  2.5 %    97.5 %</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log(dist_km) -1.754564 -1.301171</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> log(Year)    58.934594 86.305838</span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

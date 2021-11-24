@@ -147,13 +147,63 @@
 <li><p>fix display bug regarding factors in <code>etable</code> when <code>dict</code> was present.</p></li>
 <li><p>fix bug <code>tablefoot.value</code> not working any more (reported by <a href='https://github.com/resulumit'>@resulumit</a> <a href="https://github.com/lrberge/fixest/issues/224"><a href='https://github.com/lrberge/fixest/issues/224'>#224</a></a>).</p></li>
 <li><p>fix possible environment problem when estimating non linear functions outside of the global environment.</p></li>
+<li><p>fix bug in the stepwise functions <code>sw</code> and <code>csw</code> when they contained only one variable.</p></li>
+<li><p>fix bug in <code>etable</code> preventing automatic headers to be displayed.</p></li>
+<li><p>fix bug in <code>n_unik</code> preventing the auto completion of variable names.</p></li>
+<li><p>fix bug in <code>fitstat</code> for the KPR statistic (reported by <a href='https://github.com/etiennebacher'>@etiennebacher</a> <a href="https://github.com/lrberge/fixest/issues/161"><a href='https://github.com/lrberge/fixest/issues/161'>#161</a></a>).</p></li>
+<li><p>fix bug in <code>i</code> when two factor variables were interacted and one specific value of one variable was to be set as a reference.</p></li>
+<li><p>fix bug in <code>model.matrix</code> when no variable was used in the estimation (reported by <a href='https://github.com/kylebutts'>@kylebutts</a> <a href="https://github.com/lrberge/fixest/issues/229"><a href='https://github.com/lrberge/fixest/issues/229'>#229</a></a>).</p></li>
+<li><p><code>model.matrix</code> now returns the variables in the same order as in the estimation – a discrepancy could happen in stepwise estimations with interactions in which the interactions were put <em>before</em> fixed covariates (related to <a href='https://github.com/sergiu-burlacu'>@sergiu-burlacu</a> <a href="https://github.com/lrberge/fixest/issues/231"><a href='https://github.com/lrberge/fixest/issues/231'>#231</a></a>).</p></li>
 </ul>
 </div>
 <div id="etable" class="section level2">
 <h2 class="hasAnchor">
 <a href="#etable" class="anchor"></a>etable</h2>
+<div id="new-arguments" class="section level4">
+<h4 class="hasAnchor">
+<a href="#new-arguments" class="anchor"></a>New arguments</h4>
 <ul>
-<li>in <code>headers</code>/<code>extralines</code>: <code>cmidrule</code> does not show up for empty column names any more.</li>
+<li><p>new argument <code>view</code> to display the latex table in the viewer pane (suggestion by Or Avishay-Rizi <a href="https://github.com/lrberge/fixest/issues/227"><a href='https://github.com/lrberge/fixest/issues/227'>#227</a></a>). You need to have a working distribution of pdflatex, imagemagick and ghostscript for this feature to work.</p></li>
+<li><p>new argument <code>view.cache</code> in <code>setFixest_etable</code>: whether to cache the PNGs generated.</p></li>
+<li><p>new argument <code>export</code> to export the Latex table in PNG to a file.</p></li>
+<li><p>new (experimental) argument <code>markdown</code>: Latex tables can be automatically integrated in the non-Latex markdown document in PNG format.</p></li>
+<li><p>new argument <code>div.class</code>. Linked to the <code>markdown</code> argument. In Rmarkdown documents, the table in PNG format is embedded in a <code>&lt;div&gt;</code> container. The class of the div is <code>div.class</code>, which is by default <code>"etable"</code>.</p></li>
+<li><p>new argument <code>tpt</code> to nest the table in a <code>threeparttable</code> environment. Notes are then nested into the <code>tablenotes</code> environment.</p></li>
+<li><p>in <code>style.tex</code>: new argument <code>notes.tpt.intro</code> to insert code right after the <code>tablenotes</code> environment and before any note (useful to set the font size of notes globally for instance).</p></li>
+<li><p>new argument <code>arraystretch</code> to set the height of the table rows.</p></li>
+<li><p>new argument <code>fontsize</code> which applies Latex font sizes to the table.</p></li>
+<li><p>new argument <code>adjustbox</code>: <code>adjustbox = TRUE</code> nests the tabular into an <code>adjustbox</code> environment with <code>width = \\textwidth, center</code> as default option. Use <code>adjustbox = x</code> with <code>x</code> a number giving the text-width. Use <code>adjustbox = "x th"</code> with <code>x</code> a number giving the text-height. Finally you can use a character string, as in <code>adjustbox = "my options"</code>, that will be passed verbatim as a an <code>adjustbox</code> option.</p></li>
+<li><p>new argument <code>highlight</code> to highlight the coefficients with a frame or by changing the row/cell color.</p></li>
+<li><p>new argument <code>coef.style</code> to apply an arbitrary style to one or several coefficients.</p></li>
+<li><p>in <code>style.tex</code>: new argument <code>rules_width</code> to easily set the width of the <code>booktabs</code> rules.</p></li>
+<li><p>in <code>style.tex</code>: new argument <code>caption.after</code> to insert code right after the caption.</p></li>
+<li><p>in <code>style.tex</code>: new argument <code>no_border</code> to remove the borders on the sides of the table.</p></li>
+</ul>
+</div>
+<div id="new-features" class="section level4">
+<h4 class="hasAnchor">
+<a href="#new-features" class="anchor"></a>New features</h4>
+<ul>
+<li><p>the quality of the tex output has been substantially improved.</p></li>
+<li><p><code>signif.code</code> now replaces <code>signifCode</code> (retro compatibility ensured).</p></li>
+<li><p><code>signifCode</code> is removed from <code>setFixest_etable</code>, and <code>signif.code</code> is added to both <code>style.tex</code> and <code>style.df</code> so that each style can have its own significance code defined globally.</p></li>
+<li><p>the object returned by <code>etable</code> are now of class <code>etable_tex</code> (when <code>tex = TRUE</code>) or <code>etable_df</code>, both types having their own printing method.</p></li>
+<li><p>the significance codes are now displayed under the table when the output is a <code>data.frame</code>.</p></li>
+<li><p>in <code>headers</code>/<code>extralines</code>: <code>cmidrule</code> does not show up for empty column names any more.</p></li>
+<li><p>new markup: markdown-style markup (e.g. <code>**text**</code>) can be used to put text in italic/bold in almost anything in the table.</p></li>
+<li><p><code>notes</code> can be set in the dictionary: useful for notes (like source for example) that gets repeated across tables.</p></li>
+<li><p><code>line.top</code> and <code>line.bottom</code> now admit the values <code>simple</code> and <code>double</code>. The argument <code>line.bottom</code> now affects the “effective” end of table, irrespective of the value of <code>tablefoot</code>. This is more in line with intuition.</p></li>
+<li><p>improve the use of <code>tabularx</code>.</p></li>
+<li><p>automatic support <code>makecell</code>: any new lines found in names within the table will be translated with <code>makecell</code>. For example: <code>"The \n long \n varname"</code> is automatically translated into <code>\makecell{The \\ long \\ varname}</code>.</p></li>
+</ul>
+</div>
+</div>
+<div id="other" class="section level2">
+<h2 class="hasAnchor">
+<a href="#other" class="anchor"></a>Other</h2>
+<ul>
+<li><p><code>bin</code>: <code>cut::</code> now ignores white spaces, so that <code>cut:: q1 ] q3 [</code> works appropriately.</p></li>
+<li><p>speed of stepwise estimations (using <code>sw</code> [not <code>csw</code>]) has been improved.</p></li>
 </ul>
 </div>
 </div>
@@ -346,12 +396,12 @@
 <span class="co">#&gt; R2                               0.56925            0.97489            0.93833</span>
 <span class="co">#&gt; Adj. R2                          0.56040            0.97438            0.93706</span></code></pre></div>
 </div>
-<div id="other" class="section level2">
+<div id="other-1" class="section level2">
 <h2 class="hasAnchor">
-<a href="#other" class="anchor"></a>Other</h2>
+<a href="#other-1" class="anchor"></a>Other</h2>
 <ul>
 <li><p>improve error messages when <code>subset</code> does not select any element.</p></li>
-<li><p>in <code>xpd</code> and <code>fixest</code> estimations, variables can be “grepped” from the data set with <code><a href="https://rdrr.io/r/base/regex.html">regex("regex")</a></code>.</p></li>
+<li><p>in <code>xpd</code> and <code>fixest</code> estimations, variables can be “grepped” from the data set with <code>regex("regex")</code>.</p></li>
 <li><p>add inheritance of the default style in <code>iplot</code> when the style is set globally with <code>setFixest_coefplot</code>.</p></li>
 <li><p>improve error messages in general by prompting additional error calls (when appropriate).</p></li>
 <li><p>the dictionaries now ignore white spaces in coefficient names (thanks to Caleb Kwon).</p></li>
@@ -438,9 +488,9 @@
 <li><p>Removal of the <code>var::factor</code> operator to interact a continuous variable with a variable treated as a factor.</p></li>
 </ul>
 </div>
-<div id="new-features" class="section level2">
+<div id="new-features-1" class="section level2">
 <h2 class="hasAnchor">
-<a href="#new-features" class="anchor"></a>New features</h2>
+<a href="#new-features-1" class="anchor"></a>New features</h2>
 <ul>
 <li><p><code>feglm</code> now accepts partially matched character shortcuts for families: “poisson”, “logit”, “probit” are now valid <code>family</code> arguments.</p></li>
 <li><p><code>predict.fixest</code> accepts the new argument <code>fixef</code> which, if <code>TRUE</code>, returns a data.frame of the fixed-effects coefficients for each observation, with the same number of columns as the number of fixed-effects (feature requests <a href="https://github.com/lrberge/fixest/issues/144"><a href='https://github.com/lrberge/fixest/issues/144'>#144</a></a> and <a href="https://github.com/lrberge/fixest/issues/175"><a href='https://github.com/lrberge/fixest/issues/175'>#175</a></a> by <a href='https://github.com/pp2382'>@pp2382</a> and <a href='https://github.com/cseveren'>@cseveren</a>).</p></li>
@@ -485,7 +535,7 @@
 <li><p>new argument <code>interaction.order</code> to control the order in which interacted variables are displayed (feature request by <a href='https://github.com/inkrement'>@inkrement</a> <a href="https://github.com/lrberge/fixest/issues/120"><a href='https://github.com/lrberge/fixest/issues/120'>#120</a></a>).</p></li>
 <li><p>new argument <code>i.equal</code> to control how the values taken by factor variables created with <code><a href="../reference/i.html">i()</a></code> are displayed.</p></li>
 <li><p>new <code>meta.XX</code> family of arguments when exporting to Latex. They include various type of information as comments before the table (suggestion of adding the time by Apoorva Lal <a href="https://github.com/lrberge/fixest/pull/184"><a href='https://github.com/lrberge/fixest/issues/184'>#184</a></a>). So far the new arguments are: <code>meta.time</code>, <code>meta.author</code>, <code>meta.sys</code>, <code>meta.call</code>, <code>meta.comment</code>. The argument <code>meta</code> is a shortcut to all these.</p></li>
-<li><p>default values can be saved at the project level using the argument <code>save = TRUE</code> in the function <code>setFixest_etable</code>. This means that default values will be automatically set without having to call <code>setFixest_etable</code> at the startup of the R session. For example, if you want to permanently add the creation time in your Latex exports, just use <code><a href="../reference/etable.html">setFixest_etable(meta.time = TRUE, save = TRUE)</a></code>, and you won’t need to bother about it anymore in any future session in your current project.</p></li>
+<li><p>default values can be saved at the project level using the argument <code>save = TRUE</code> in the function <code>setFixest_etable</code>. This means that default values will be automatically set without having to call <code>setFixest_etable</code> at the startup of the R session. For example, if you want to permanently add the creation time in your Latex exports, just use <code>setFixest_etable(meta.time = TRUE, save = TRUE)</code>, and you won’t need to bother about it anymore in any future session in your current project.</p></li>
 <li><p>some changes in <code>extraline</code>, now: <em>i)</em> it accepts raw vectors, <em>ii)</em> it accepts lines without title, <em>iii)</em> the elements are recycled across models, <em>iv)</em> it accepts elements of the form <code>list("item1" = #item1, "item2" = #item2, etc)</code>, and <em>v)</em> the elements are Latex-escaped.</p></li>
 <li><p>in <code>style.tex</code>: all Latex-escaping is removed.</p></li>
 <li><p>the argument <code>subtitle</code> has been renamed into <code>headers</code> (retro-compatibility is ensured).</p></li>
@@ -494,18 +544,18 @@
 <ul>
 <li>it accepts named lists of numbers, where the names represent the values in the cell and the numbers represent the span. For example <code>headers = list("Gender" = list("M" = 3, "F" = 4))</code> will create a line with 3 times “M” and 4 times “F”.</li>
 <li>adding the special tag <code>":_:"</code> in the row name will add a rule for each column group (in the previous example <code>":_:Gender"</code> would do). Suggestion by <a href='https://github.com/nhirschey'>@nhirschey</a> <a href="https://github.com/lrberge/fixest/pull/173"><a href='https://github.com/lrberge/fixest/issues/173'>#173</a></a>.</li>
-<li>you can control the placement of the header line by using as first character the following special tags: “^” (top), “-” (mid, default), "_" (bottom). Ex: <code>headers = list("_Gender" = list("M" = 3, "F" = 4))</code> will place the header line at the very bottom of the headers.</li>
+<li>you can control the placement of the header line by using as first character the following special tags: “^” (top), “-” (mid, default), “_” (bottom). Ex: <code>headers = list("_Gender" = list("M" = 3, "F" = 4))</code> will place the header line at the very bottom of the headers.</li>
 <li>by default all values are Latex-escaped. You can disable escaping by adding <code>":tex:"</code> in the row title.</li>
 </ul>
 </li>
 <li><p>argument <code>sdBelow</code> has been renamed into <code>se.below</code> (retro-compatibility is ensured).</p></li>
 <li><p>new argument <code>se.row</code> to control whether the row displaying the standard-errors should be displayed (clarification requested by <a href='https://github.com/waynelapierre'>@waynelapierre</a> <a href="https://github.com/lrberge/fixest/issues/127"><a href='https://github.com/lrberge/fixest/issues/127'>#127</a></a>).</p></li>
-<li><p><code>dict</code> now directly modifies the entries in the global dictionary instead of creating a brand new one. For example if you have <code><a href="../reference/setFixest_dict.html">setFixest_dict(c(cyl="Cylinder"))</a></code> and then use <code>etable</code> with <code>dict=c(mpg="miles per gallon")</code>, you end up with both the names <code>cyl</code> and <code>mpg</code> to be modified. To disable this behavior, you can add <code>"reset"</code> as the first element, like in <code>dict=c("reset", mpg="miles per gallon")</code>.</p></li>
+<li><p><code>dict</code> now directly modifies the entries in the global dictionary instead of creating a brand new one. For example if you have <code>setFixest_dict(c(cyl="Cylinder"))</code> and then use <code>etable</code> with <code>dict=c(mpg="miles per gallon")</code>, you end up with both the names <code>cyl</code> and <code>mpg</code> to be modified. To disable this behavior, you can add <code>"reset"</code> as the first element, like in <code>dict=c("reset", mpg="miles per gallon")</code>.</p></li>
 </ul>
 </div>
-<div id="other-1" class="section level2">
+<div id="other-2" class="section level2">
 <h2 class="hasAnchor">
-<a href="#other-1" class="anchor"></a>Other</h2>
+<a href="#other-2" class="anchor"></a>Other</h2>
 <ul>
 <li>in multiple estimations, it is now made explicit that the information regarding NA values only concern the variables in common across all models (formerly, it was implicit and hence confusing).</li>
 </ul>
@@ -555,7 +605,7 @@
 <ul>
 <li><p>the function <code><a href="../reference/i.html">i()</a></code>, used to create factors or interactions has been tidied up, leading to breaking changes.</p></li>
 <li><p>the first two arguments have been swapped! such that now the first argument will always be treated as a factor.</p></li>
-<li><p>the new syntax is <code><a href="../reference/i.html">i(factor_var, var, ref, keep, ref2, keep2)</a></code> where <code>var</code> can be either continuous or factor-like (the argument <code>f2</code>, for interaction with factors, has been removed).</p></li>
+<li><p>the new syntax is <code>i(factor_var, var, ref, keep, ref2, keep2)</code> where <code>var</code> can be either continuous or factor-like (the argument <code>f2</code>, for interaction with factors, has been removed).</p></li>
 <li><p>Fix rare bug when the number of parameters is greater than the number of observations and the GLM family has a dispersion parameter.</p></li>
 </ul>
 </div>
@@ -604,7 +654,7 @@
 <a href="#sun-and-abraham-staggered-did-method" class="anchor"></a>Sun and Abraham staggered DiD method</h2>
 <ul>
 <li><p>new function <code>sunab</code> that simplifies the implementation of the SA method.</p></li>
-<li><p>just type <code><a href="../reference/sunab.html">sunab(cohort, period)</a></code> in a <code>fixest</code> estimation and it works!</p></li>
+<li><p>just type <code>sunab(cohort, period)</code> in a <code>fixest</code> estimation and it works!</p></li>
 </ul>
 </div>
 <div id="fixest_multi-methods" class="section level2">
@@ -634,9 +684,9 @@
 <li><p><code>obs</code>: to obtain the observations used in the estimation.</p></li>
 </ul>
 </div>
-<div id="new-features-1" class="section level2">
+<div id="new-features-2" class="section level2">
 <h2 class="hasAnchor">
-<a href="#new-features-1" class="anchor"></a>New features</h2>
+<a href="#new-features-2" class="anchor"></a>New features</h2>
 <ul>
 <li><p>All <code>fixest</code> estimation now accept scalars from the global environment (variables are still not allowed!).</p></li>
 <li><p>Better handling of the DoFs in <code>fitstat</code> (in particular when the VCOV is clustered).</p></li>
@@ -690,9 +740,9 @@
 <li><p>Fix bug that prevented <code>aggregate</code> to effectively use weights (thanks to Benny Goldman).</p></li>
 </ul>
 </div>
-<div id="new-features-2" class="section level2">
+<div id="new-features-3" class="section level2">
 <h2 class="hasAnchor">
-<a href="#new-features-2" class="anchor"></a>New features</h2>
+<a href="#new-features-3" class="anchor"></a>New features</h2>
 <ul>
 <li><p><code>model.matrix</code> gains the new argument <code>subset</code> which allows the creation of the design matrix for a subset of variables only.</p></li>
 <li><p><code>drop.section</code> now works for <code>etable</code> when <code>tex = FALSE</code>.</p></li>
@@ -723,9 +773,9 @@
 <li><p>Fix bug when using at least two fixed-effects and varying slopes with singletons (thanks to <a href='https://github.com/adamtheising'>@adamtheising</a> <a href="https://github.com/lrberge/fixest/issues/89"><a href='https://github.com/lrberge/fixest/issues/89'>#89</a></a>).</p></li>
 </ul>
 </div>
-<div id="new-features-3" class="section level2">
+<div id="new-features-4" class="section level2">
 <h2 class="hasAnchor">
-<a href="#new-features-3" class="anchor"></a>New features</h2>
+<a href="#new-features-4" class="anchor"></a>New features</h2>
 <ul>
 <li>In <code>xpd</code>, macros are parsed even after creating the formula with the <code>lhs</code> and <code>rhs</code> arguments.</li>
 </ul>
@@ -747,9 +797,9 @@
 <li><p>Fix bug preventing the return of demeaned variables in IV estimations (thanks to <a href='https://github.com/amarbler'>@amarbler</a> <a href="https://github.com/lrberge/fixest/issues/94"><a href='https://github.com/lrberge/fixest/issues/94'>#94</a></a>).</p></li>
 </ul>
 </div>
-<div id="other-2" class="section level2">
+<div id="other-3" class="section level2">
 <h2 class="hasAnchor">
-<a href="#other-2" class="anchor"></a>Other</h2>
+<a href="#other-3" class="anchor"></a>Other</h2>
 <ul>
 <li><p><code><a href="../reference/i.html">i()</a></code> now automatically converts its first argument to numeric if it was of type logical. The user can still pass logicals to the argument <code>f2</code> if the expected behavior is really to treat it as a logical.</p></li>
 <li><p>Improve <code>fitstat</code> help and error messages.</p></li>
@@ -787,9 +837,9 @@
 <li><p>For details, check out the help page of the function <code>aggregate</code> or the staggered DiD section in the vignette <a href="https://CRAN.R-project.org/package=fixest/vignettes/fixest_walkthrough.html">fixest walkthrough</a>.</p></li>
 </ul>
 </div>
-<div id="new-features-4" class="section level2">
+<div id="new-features-5" class="section level2">
 <h2 class="hasAnchor">
-<a href="#new-features-4" class="anchor"></a>New features</h2>
+<a href="#new-features-5" class="anchor"></a>New features</h2>
 <ul>
 <li><p>Function <code><a href="../reference/i.html">i()</a></code> now has the new arguments <code>f2</code>, <code>drop2</code> and <code>keep2</code> which allows the interaction of two factors (useful for staggered DiD estimations).</p></li>
 <li><p>Argument <code>dof</code>, used to compute the standard-errors, can now be used at estimation time.</p></li>
@@ -798,9 +848,9 @@
 <li><p>Argument <code>split</code> now accepts variable names.</p></li>
 </ul>
 </div>
-<div id="other-3" class="section level2">
+<div id="other-4" class="section level2">
 <h2 class="hasAnchor">
-<a href="#other-3" class="anchor"></a>Other</h2>
+<a href="#other-4" class="anchor"></a>Other</h2>
 <ul>
 <li><p>More coherence regarding the use of <code>summary</code> applied to models for which the SEs were computed at estimation time. Now there is a memory of how the SEs were computed, so that, for example, if only the argument <code>dof</code> is passed to <code>summary</code>, then the SEs will be clustered in the same way as estimation time and only <code>dof</code> will change.</p></li>
 <li><p>Now an error is raised when <code><a href="../reference/i.html">i()</a></code> is used in the fixed-effects part of the formula. The appropriate way is indicated (related to <a href="https://github.com/lrberge/fixest/issues/77"><a href='https://github.com/lrberge/fixest/issues/77'>#77</a></a> by <a href='https://github.com/rrichmond'>@rrichmond</a>).</p></li>
@@ -884,7 +934,7 @@
 </ul>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
-<span class="va">aq</span> <span class="op">=</span> <span class="va">airquality</span><span class="op">[</span><span class="va">airquality</span><span class="op">$</span><span class="va">Month</span> <span class="op">%in%</span> <span class="fl">5</span><span class="op">:</span><span class="fl">6</span>, <span class="op">]</span>
+<span class="va">aq</span> <span class="op">=</span> <span class="va">airquality</span><span class="op">[</span><span class="va">airquality</span><span class="op">$</span><span class="va">Month</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fl">5</span><span class="op">:</span><span class="fl">6</span>, <span class="op">]</span>
 <span class="va">est_split</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">Ozone</span>, <span class="va">Solar.R</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="../reference/stepwise.html">sw</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/poly.html">poly</a></span><span class="op">(</span><span class="va">Wind</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/poly.html">poly</a></span><span class="op">(</span><span class="va">Temp</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>,
                  <span class="va">aq</span>, split <span class="op">=</span> <span class="op">~</span> <span class="va">Month</span><span class="op">)</span>
                  
@@ -945,7 +995,7 @@
 <li><p><code>se</code>, <code>cluster</code>: to cluster the standard-errors during the call.</p></li>
 <li><p><code>lean</code>: if <code>TRUE</code>, then summary is applied and any large object is removed from the result. To save memory =&gt; but many methods won’t work afterwards.</p></li>
 <li><p><code>fixef.rm</code>: argument that accepts <code>none</code>, <code>perfect</code>, <code>singleton</code>, <code>both</code>. Controls the removal of fixed-effects from the observation.</p></li>
-<li><p>auto parsing of powers. Now you don’t need to use <code><a href="https://rdrr.io/r/base/AsIs.html">I()</a></code> to have powers of variables in the RHS, it is automatically done for you (i.e. <code>x^3</code> becomes <code><a href="https://rdrr.io/r/base/AsIs.html">I(x^3)</a></code>):</p></li>
+<li><p>auto parsing of powers. Now you don’t need to use <code><a href="https://rdrr.io/r/base/AsIs.html">I()</a></code> to have powers of variables in the RHS, it is automatically done for you (i.e. <code>x^3</code> becomes <code>I(x^3)</code>):</p></li>
 </ul>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
@@ -990,9 +1040,9 @@
 <li><p>Internal algorithm of <code><a href="../reference/i.html">i()</a></code> is much faster.</p></li>
 </ul>
 </div>
-<div id="new-features-5" class="section level2">
+<div id="new-features-6" class="section level2">
 <h2 class="hasAnchor">
-<a href="#new-features-5" class="anchor"></a>New features</h2>
+<a href="#new-features-6" class="anchor"></a>New features</h2>
 <ul>
 <li><p>In <code>etable</code>, the user can now provide a type of clustering for each model.</p></li>
 <li><p>New method <code>rep.fixest</code> to replicate fixest objects, mostly useful in <code>etable</code> when several SEs for the same models are to be reported.</p></li>
@@ -1008,7 +1058,7 @@
 <h2 class="hasAnchor">
 <a href="#bugs-6" class="anchor"></a>Bugs</h2>
 <ul>
-<li><p>Major bug when fixed-effects were combined with <code><a href="https://rdrr.io/r/base/Arithmetic.html">^</a></code> and they contained NAs (thanks to <a href='https://github.com/poliquin'>@poliquin</a> <a href="https://github.com/lrberge/fixest/issues/35"><a href='https://github.com/lrberge/fixest/issues/35'>#35</a></a>).</p></li>
+<li><p>Major bug when fixed-effects were combined with <code>^</code> and they contained NAs (thanks to <a href='https://github.com/poliquin'>@poliquin</a> <a href="https://github.com/lrberge/fixest/issues/35"><a href='https://github.com/lrberge/fixest/issues/35'>#35</a></a>).</p></li>
 <li><p>Bug when using lead/lags in estimations. The bug was due to a bug in a dependency (<a href="https://cran.r-project.org/package=dreamerr">dreamerr</a>) and was fixed. Now fixest requires <strong>dreamerr</strong> version &gt;= 1.2.1. Bug spotted by <a href='https://github.com/seunghoon001'>@seunghoon001</a> (<a href="https://github.com/lrberge/fixest/issues/44"><a href='https://github.com/lrberge/fixest/issues/44'>#44</a></a>).</p></li>
 <li><p>Major bug when n_obs x n_vars &gt; 2B or n_obs x n_fixed-effects &gt; 2B. In such cases estimations could just not be done, even leading R to crash when using nthreads &gt; 1. The algorithm was fixed to allow datasets with up to 2B observations to be estimated in all circumstances. Bug reported, and many help for checking provided, by Howard Zihao Zhang.</p></li>
 <li><p><code>coefplot</code>: Problem regarding interactions when observations, and hence coefficients, were removed from the estimation. Now the coefficients are removed from the plot. Bug reported by <a href='https://github.com/phisherblack'>@phisherblack</a> <a href="https://github.com/lrberge/fixest/issues/45"><a href='https://github.com/lrberge/fixest/issues/45'>#45</a></a>.</p></li>
@@ -1045,8 +1095,8 @@
 <a href="#new-features-in-interact" class="anchor"></a>New features in <code>interact()</code>
 </h2>
 <ul>
-<li><p>You can now use <code><a href="../reference/i.html">i(var)</a></code> to treat the variable <code>var</code> as a factor. You can select which values to drop/keep with the respective arguments.</p></li>
-<li><p>Using <code><a href="../reference/i.html">i(var)</a></code> leads to a special treatment of these variables in the functions <code>coefplot</code> and <code>etable</code>.</p></li>
+<li><p>You can now use <code>i(var)</code> to treat the variable <code>var</code> as a factor. You can select which values to drop/keep with the respective arguments.</p></li>
+<li><p>Using <code>i(var)</code> leads to a special treatment of these variables in the functions <code>coefplot</code> and <code>etable</code>.</p></li>
 </ul>
 </div>
 <div id="new-features-in-etable-1" class="section level2">
@@ -1255,9 +1305,9 @@
 <li>(minor) <code>signifCode</code> can be equal to <code>"letters"</code> to display letters instead of stars.</li>
 </ul>
 </div>
-<div id="other-4" class="section level2">
+<div id="other-5" class="section level2">
 <h2 class="hasAnchor">
-<a href="#other-4" class="anchor"></a>Other</h2>
+<a href="#other-5" class="anchor"></a>Other</h2>
 <ul>
 <li>
 <code>setFixest_nthreads</code> now respects the <code>OMP_THREAD_LIMIT</code> environment variable.</li>
@@ -1287,9 +1337,9 @@
 <a href="#new-functionality-formula-macros" class="anchor"></a>New functionality: formula macros</h2>
 <ul>
 <li>You can use macros in formulas.</li>
-<li>To set a macro variable, use e.g., <code><a href="../reference/setFixest_fml.html">setFixest_fml(..ctrl = ~ var1 + var2)</a></code>. Here the macro variable <code>..ctrl</code> has been set to the value <code>"var1 + var2"</code>.</li>
-<li>Now you can use this macro variable in any <code>fixest</code> estimation: e.g. <code><a href="https://rdrr.io/r/utils/data.html">data(airquality) ; setFixest_fml(..ctrl = ~ Temp + Day) ; feols(Ozone ~ Wind + ..ctrl, airquality)</a></code>.</li>
-<li>You can use macros in non-fixest estimations with <code>xpd</code>, which expands formulas. E.g. <code><a href="https://rdrr.io/r/stats/lm.html">lm(xpd(Ozone ~ Wind + ..ctrl), airquality)</a></code>.</li>
+<li>To set a macro variable, use e.g., <code>setFixest_fml(..ctrl = ~ var1 + var2)</code>. Here the macro variable <code>..ctrl</code> has been set to the value <code>"var1 + var2"</code>.</li>
+<li>Now you can use this macro variable in any <code>fixest</code> estimation: e.g. <code>data(airquality) ; setFixest_fml(..ctrl = ~ Temp + Day) ; feols(Ozone ~ Wind + ..ctrl, airquality)</code>.</li>
+<li>You can use macros in non-fixest estimations with <code>xpd</code>, which expands formulas. E.g. <code>lm(xpd(Ozone ~ Wind + ..ctrl), airquality)</code>.</li>
 </ul>
 </div>
 <div id="new-functions-1" class="section level2">
@@ -1361,9 +1411,9 @@
 <li>Improved error-handling with <a href="https://cran.r-project.org/package=dreamerr">dreamerr</a>’s functions.</li>
 </ul>
 </div>
-<div id="other-5" class="section level2">
+<div id="other-6" class="section level2">
 <h2 class="hasAnchor">
-<a href="#other-5" class="anchor"></a>Other</h2>
+<a href="#other-6" class="anchor"></a>Other</h2>
 <ul>
 <li>Dependency to MASS has been removed.</li>
 </ul>
@@ -1391,9 +1441,9 @@
 <li>Rewriting of sections, correction of small mistakes (wrong argument names), dropping completely the ‘cluster’ terminology (meant for fixed-effects), addition of what is contained in fixest objects.</li>
 </ul>
 </div>
-<div id="other-6" class="section level2">
+<div id="other-7" class="section level2">
 <h2 class="hasAnchor">
-<a href="#other-6" class="anchor"></a>Other</h2>
+<a href="#other-7" class="anchor"></a>Other</h2>
 <ul>
 <li>Adding a README.md.</li>
 <li>Small corrections in the vignette.</li>
@@ -1438,9 +1488,9 @@
 <code>terms.fixest</code> giving the terms of the estimation.</li>
 </ul>
 </div>
-<div id="other-7" class="section level2">
+<div id="other-8" class="section level2">
 <h2 class="hasAnchor">
-<a href="#other-7" class="anchor"></a>Other</h2>
+<a href="#other-8" class="anchor"></a>Other</h2>
 <ul>
 <li>All <code>donttest</code> sections were removed from help pages.</li>
 </ul>
@@ -1466,9 +1516,9 @@
 <li>[estimations] Bug when particular non-numeric vectors were used in explanatory variables.</li>
 </ul>
 </div>
-<div id="new-features-6" class="section level2">
+<div id="new-features-7" class="section level2">
 <h2 class="hasAnchor">
-<a href="#new-features-6" class="anchor"></a>New features</h2>
+<a href="#new-features-7" class="anchor"></a>New features</h2>
 <ul>
 <li>[coefplot] The function <code>coefplot</code> now accepts lists of estimations.</li>
 </ul>

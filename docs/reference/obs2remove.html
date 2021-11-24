@@ -169,55 +169,63 @@ The vector has an attribute <code>fixef</code> which is a list giving the IDs of
     <div class='dont-index'><p><code><a href='fixest-deprecated.html'>fixest-deprecated</a></code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='va'>base</span> <span class='op'>=</span> <span class='va'>iris</span>
-<span class='co'># v6: Petal.Length with only 0 values for 'setosa'</span>
-<span class='va'>base</span><span class='op'>$</span><span class='va'>v6</span> <span class='op'>=</span> <span class='va'>base</span><span class='op'>$</span><span class='va'>Petal.Length</span>
-<span class='va'>base</span><span class='op'>$</span><span class='va'>v6</span><span class='op'>[</span><span class='va'>base</span><span class='op'>$</span><span class='va'>Species</span> <span class='op'>==</span> <span class='st'>"setosa"</span><span class='op'>]</span> <span class='op'>=</span> <span class='fl'>0</span>
-
-<span class='op'>(</span><span class='va'>x</span> <span class='op'>=</span> <span class='fu'>obs2remove</span><span class='op'>(</span><span class='va'>v6</span> <span class='op'>~</span> <span class='va'>Species</span>, <span class='va'>base</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='warning'>Warning: This function is deprecated and will disappear in 1 year from 12/11/2020.</span></div><div class='output co'>#&gt;  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
-#&gt; [26] 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50
-#&gt; attr(,"class")
-#&gt; [1] "fixest.obs2remove"
-#&gt; attr(,"family")
-#&gt; [1] "poisson"
-#&gt; attr(,"fixef")
-#&gt; attr(,"fixef")$v6
-#&gt; [1] 0
-#&gt; 
-#&gt; attr(,"fixef")$Species
-#&gt; [1] "setosa"
-#&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/attr.html'>attr</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='st'>"fixef"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; $v6
-#&gt; [1] 0
-#&gt; 
-#&gt; $Species
-#&gt; [1] "setosa"
-#&gt; </div><div class='input'>
-<span class='co'># The two results are identical:</span>
-<span class='va'>res_1</span> <span class='op'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>v6</span> <span class='op'>~</span> <span class='va'>Petal.Width</span> <span class='op'>|</span> <span class='va'>Species</span>, <span class='va'>base</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>NOTE: 1 fixed-effect (50 observations) removed because of only 0 outcomes.</span></div><div class='input'><span class='co'># =&gt; note + obsRemoved is created</span>
-
-<span class='va'>res_2</span> <span class='op'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>v6</span> <span class='op'>~</span> <span class='va'>Petal.Width</span> <span class='op'>|</span> <span class='va'>Species</span>, <span class='va'>base</span><span class='op'>[</span><span class='op'>-</span><span class='va'>x</span>, <span class='op'>]</span><span class='op'>)</span>
-<span class='co'># =&gt; no note because observations are removed before</span>
-
-<span class='fu'><a href='etable.html'>esttable</a></span><span class='op'>(</span><span class='va'>res_1</span>, <span class='va'>res_2</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                           res_1           res_2
-#&gt; Dependent Var.:              v6              v6
-#&gt;                                                
-#&gt; Petal.Width     0.2089 (0.1324) 0.2089 (0.1324)
-#&gt; Fixed-Effects:  --------------- ---------------
-#&gt; Species                     Yes             Yes
-#&gt; _______________ _______________ _______________
-#&gt; S.E.: Clustered     by: Species     by: Species
-#&gt; Observations                100             100
-#&gt; Squared Cor.            0.69884         0.69884
-#&gt; Pseudo R2               0.02726         0.02726
-#&gt; BIC                      362.73          362.73</div><div class='input'>
-<span class='fu'><a href='https://rdrr.io/r/base/all.html'>all</a></span><span class='op'>(</span><span class='va'>res_1</span><span class='op'>$</span><span class='va'>obs_selection</span><span class='op'>$</span><span class='va'>obsRemoved</span> <span class='op'>==</span> <span class='va'>x</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] FALSE</div><div class='input'>
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='va'>base</span> <span class='op'>=</span> <span class='va'>iris</span></span>
+<span class='r-in'><span class='co'># v6: Petal.Length with only 0 values for 'setosa'</span></span>
+<span class='r-in'><span class='va'>base</span><span class='op'>$</span><span class='va'>v6</span> <span class='op'>=</span> <span class='va'>base</span><span class='op'>$</span><span class='va'>Petal.Length</span></span>
+<span class='r-in'><span class='va'>base</span><span class='op'>$</span><span class='va'>v6</span><span class='op'>[</span><span class='va'>base</span><span class='op'>$</span><span class='va'>Species</span> <span class='op'>==</span> <span class='st'>"setosa"</span><span class='op'>]</span> <span class='op'>=</span> <span class='fl'>0</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='op'>(</span><span class='va'>x</span> <span class='op'>=</span> <span class='fu'>obs2remove</span><span class='op'>(</span><span class='va'>v6</span> <span class='op'>~</span> <span class='va'>Species</span>, <span class='va'>base</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>This function is deprecated and will disappear in 1 year from 12/11/2020.</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [26] 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> attr(,"class")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "fixest.obs2remove"</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> attr(,"family")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "poisson"</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> attr(,"fixef")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> attr(,"fixef")$v6</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] 0</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> attr(,"fixef")$Species</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "setosa"</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/attr.html'>attr</a></span><span class='op'>(</span><span class='va'>x</span>, <span class='st'>"fixef"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> $v6</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] 0</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> $Species</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "setosa"</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># The two results are identical:</span></span>
+<span class='r-in'><span class='va'>res_1</span> <span class='op'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>v6</span> <span class='op'>~</span> <span class='va'>Petal.Width</span> <span class='op'>|</span> <span class='va'>Species</span>, <span class='va'>base</span><span class='op'>)</span></span>
+<span class='r-msg co'><span class='r-pr'>#&gt;</span> NOTE: 1 fixed-effect (50 observations) removed because of only 0 outcomes.</span>
+<span class='r-in'><span class='co'># =&gt; note + obsRemoved is created</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>res_2</span> <span class='op'>=</span> <span class='fu'><a href='femlm.html'>femlm</a></span><span class='op'>(</span><span class='va'>v6</span> <span class='op'>~</span> <span class='va'>Petal.Width</span> <span class='op'>|</span> <span class='va'>Species</span>, <span class='va'>base</span><span class='op'>[</span><span class='op'>-</span><span class='va'>x</span>, <span class='op'>]</span><span class='op'>)</span></span>
+<span class='r-in'><span class='co'># =&gt; no note because observations are removed before</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='etable.html'>esttable</a></span><span class='op'>(</span><span class='va'>res_1</span>, <span class='va'>res_2</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                           res_1           res_2</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:              v6              v6</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                                                </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Petal.Width     0.2089 (0.1324) 0.2089 (0.1324)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Fixed-Effects:  --------------- ---------------</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Species                     Yes             Yes</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> _______________ _______________ _______________</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> S.E.: Clustered     by: Species     by: Species</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations                100             100</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Squared Cor.            0.69884         0.69884</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Pseudo R2               0.02726         0.02726</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> BIC                      362.73          362.73</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/all.html'>all</a></span><span class='op'>(</span><span class='va'>res_1</span><span class='op'>$</span><span class='va'>obs_selection</span><span class='op'>$</span><span class='va'>obsRemoved</span> <span class='op'>==</span> <span class='va'>x</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] FALSE</span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

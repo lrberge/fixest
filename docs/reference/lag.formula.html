@@ -196,96 +196,103 @@
     <p>Laurent Berge</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'># simple example with an unbalanced panel</span>
-<span class='va'>base</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span>id <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span>, each <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span>,
-                  time <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>2</span>, <span class='fl'>3</span>, <span class='fl'>4</span>, <span class='fl'>1</span>, <span class='fl'>4</span>, <span class='fl'>6</span>, <span class='fl'>9</span><span class='op'>)</span>, x <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>8</span><span class='op'>)</span>
-
-<span class='va'>base</span><span class='op'>$</span><span class='va'>lag1</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>,  <span class='fl'>1</span>, <span class='va'>base</span><span class='op'>)</span> <span class='co'># lag 1</span>
-<span class='va'>base</span><span class='op'>$</span><span class='va'>lead1</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>, <span class='op'>-</span><span class='fl'>1</span>, <span class='va'>base</span><span class='op'>)</span> <span class='co'># lead 1</span>
-<span class='va'>base</span><span class='op'>$</span><span class='va'>lag2_fill0</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>, <span class='fl'>2</span>, <span class='va'>base</span>, fill <span class='op'>=</span> <span class='fl'>0</span><span class='op'>)</span>
-<span class='co'># with time.step = "consecutive"</span>
-<span class='va'>base</span><span class='op'>$</span><span class='va'>lag1_consecutive</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>, <span class='fl'>1</span>, <span class='va'>base</span>, time.step <span class='op'>=</span> <span class='st'>"consecutive"</span><span class='op'>)</span>
-<span class='co'>#   =&gt; works for indiv. 2 because 9 (resp. 6) is consecutive to 6 (resp. 4)</span>
-<span class='va'>base</span><span class='op'>$</span><span class='va'>lag1_within.consecutive</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>, <span class='fl'>1</span>, <span class='va'>base</span>, time.step <span class='op'>=</span> <span class='st'>"within"</span><span class='op'>)</span>
-<span class='co'>#   =&gt; now two consecutive years within each indiv is one lag</span>
-
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;   id time x lag1 lead1 lag2_fill0 lag1_consecutive lag1_within.consecutive
-#&gt; 1  1    1 1   NA     2          0               NA                      NA
-#&gt; 2  1    2 2    1     3          0                1                       1
-#&gt; 3  1    3 3    2     4          1                2                       2
-#&gt; 4  1    4 4    3    NA          2                3                       3
-#&gt; 5  2    1 5   NA    NA          0               NA                      NA
-#&gt; 6  2    4 6   NA    NA          0               NA                       5
-#&gt; 7  2    6 7   NA    NA          6                6                       6
-#&gt; 8  2    9 8   NA    NA          0                7                       7</div><div class='input'>
-<span class='co'># Argument time.step = "consecutive" is</span>
-<span class='co'># mostly useful when the time variable is not a number:</span>
-<span class='co'># e.g. c("1991q1", "1991q2", "1991q3") etc</span>
-
-<span class='co'># with duplicates</span>
-<span class='va'>base_dup</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span>id <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span>, each <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span>,
-                      time <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>1</span>, <span class='fl'>1</span>, <span class='fl'>2</span>, <span class='fl'>1</span>, <span class='fl'>2</span>, <span class='fl'>2</span>, <span class='fl'>3</span><span class='op'>)</span>, x <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>8</span><span class='op'>)</span>
-
-<span class='co'># Error because of duplicate values for (id, time)</span>
-<span class='kw'><a href='https://rdrr.io/r/base/try.html'>try</a></span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>, <span class='fl'>1</span>, <span class='va'>base_dup</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Error : in lag.formula(x ~ id + time, 1, base_dup):
-#&gt;  The panel identifiers contain duplicate values: this is not allowed
-#&gt; since lag/leads are not defined for them. For example (id, time) = (1,
-#&gt; 1) appears three times. Please provide data without duplicates -- or you
-#&gt; can also use duplicate.method = 'first' (see Details).</div><div class='input'>
-
-<span class='co'># Error is bypassed, lag corresponds to first occurence of (id, time)</span>
-<span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>, <span class='fl'>1</span>, <span class='va'>base_dup</span>, duplicate.method <span class='op'>=</span> <span class='st'>"first"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] NA NA NA  1 NA  5  5  6</div><div class='input'>
-
-<span class='co'># Playing with time steps</span>
-<span class='va'>base</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span>id <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span>, each <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span>,
-                  time <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>2</span>, <span class='fl'>3</span>, <span class='fl'>4</span>, <span class='fl'>1</span>, <span class='fl'>4</span>, <span class='fl'>6</span>, <span class='fl'>9</span><span class='op'>)</span>, x <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>8</span><span class='op'>)</span>
-
-<span class='co'># time step: 0.5 (here equivalent to lag of 1)</span>
-<span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>, <span class='fl'>2</span>, <span class='va'>base</span>, time.step <span class='op'>=</span> <span class='fl'>0.5</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] NA  1  2  3 NA NA NA NA</div><div class='input'>
-<span class='co'># Error: wrong time step</span>
-<span class='kw'><a href='https://rdrr.io/r/base/try.html'>try</a></span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>, <span class='fl'>2</span>, <span class='va'>base</span>, time.step <span class='op'>=</span> <span class='fl'>7</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Error : in lag.formula(x ~ id + time, 2, base, time.step = 7):
-#&gt;  If 'time.step' is a number, then it must be an exact divisor of all the
-#&gt; difference between two consecutive time periods. This is currently not
-#&gt; the case: 7 is not a divisor of 1 (the difference btw the time periods 2
-#&gt; and 1).</div><div class='input'>
-<span class='co'># Adding NAs + unsorted IDs</span>
-<span class='va'>base</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span>id <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span>, each <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span>,
-                  time <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>4</span>, <span class='cn'>NA</span>, <span class='fl'>3</span>, <span class='fl'>1</span>, <span class='fl'>2</span>, <span class='cn'>NA</span>, <span class='fl'>1</span>, <span class='fl'>3</span><span class='op'>)</span>, x <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>8</span><span class='op'>)</span>
-
-<span class='va'>base</span><span class='op'>$</span><span class='va'>lag1</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>, <span class='fl'>1</span>, <span class='va'>base</span><span class='op'>)</span>
-<span class='va'>base</span><span class='op'>$</span><span class='va'>lag1_within</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>, <span class='fl'>1</span>, <span class='va'>base</span>, time.step <span class='op'>=</span> <span class='st'>"w"</span><span class='op'>)</span>
-<span class='va'>base_bis</span> <span class='op'>=</span> <span class='va'>base</span><span class='op'>[</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setorder.html'>order</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>$</span><span class='va'>id</span>, <span class='va'>base</span><span class='op'>$</span><span class='va'>time</span><span class='op'>)</span>,<span class='op'>]</span>
-
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>base_bis</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;   id time x lag1 lag1_within
-#&gt; 4  1    1 4   NA          NA
-#&gt; 3  1    3 3   NA           4
-#&gt; 1  1    4 1    3           3
-#&gt; 2  1   NA 2   NA          NA
-#&gt; 7  2    1 7   NA          NA
-#&gt; 5  2    2 5    7           7
-#&gt; 8  2    3 8    5           5
-#&gt; 6  2   NA 6   NA          NA</div><div class='input'>
-<span class='co'># You can create variables without specifying the data within data.table:</span>
-<span class='kw'>if</span><span class='op'>(</span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>require</a></span><span class='op'>(</span><span class='st'><a href='https://r-datatable.com'>"data.table"</a></span><span class='op'>)</span><span class='op'>)</span><span class='op'>{</span>
-  <span class='va'>base</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/data.table.html'>data.table</a></span><span class='op'>(</span>id <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span>, each <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>, year <span class='op'>=</span> <span class='fl'>1990</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span>, <span class='fl'>2</span><span class='op'>)</span>, x <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>6</span><span class='op'>)</span>
-  <span class='va'>base</span><span class='op'>[</span>, <span class='va'>x.l1</span> <span class='op'>:=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>year</span>, <span class='fl'>1</span><span class='op'>)</span><span class='op'>]</span>
-<span class='op'>}</span>
-</div><div class='output co'>#&gt;    id year x x.l1
-#&gt; 1:  1 1991 1   NA
-#&gt; 2:  1 1992 2    1
-#&gt; 3:  1 1993 3    2
-#&gt; 4:  2 1991 4   NA
-#&gt; 5:  2 1992 5    4
-#&gt; 6:  2 1993 6    5</div><div class='input'>
-
-
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='co'># simple example with an unbalanced panel</span></span>
+<span class='r-in'><span class='va'>base</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span>id <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span>, each <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span>,</span>
+<span class='r-in'>                  time <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>2</span>, <span class='fl'>3</span>, <span class='fl'>4</span>, <span class='fl'>1</span>, <span class='fl'>4</span>, <span class='fl'>6</span>, <span class='fl'>9</span><span class='op'>)</span>, x <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>8</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>base</span><span class='op'>$</span><span class='va'>lag1</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>,  <span class='fl'>1</span>, <span class='va'>base</span><span class='op'>)</span> <span class='co'># lag 1</span></span>
+<span class='r-in'><span class='va'>base</span><span class='op'>$</span><span class='va'>lead1</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>, <span class='op'>-</span><span class='fl'>1</span>, <span class='va'>base</span><span class='op'>)</span> <span class='co'># lead 1</span></span>
+<span class='r-in'><span class='va'>base</span><span class='op'>$</span><span class='va'>lag2_fill0</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>, <span class='fl'>2</span>, <span class='va'>base</span>, fill <span class='op'>=</span> <span class='fl'>0</span><span class='op'>)</span></span>
+<span class='r-in'><span class='co'># with time.step = "consecutive"</span></span>
+<span class='r-in'><span class='va'>base</span><span class='op'>$</span><span class='va'>lag1_consecutive</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>, <span class='fl'>1</span>, <span class='va'>base</span>, time.step <span class='op'>=</span> <span class='st'>"consecutive"</span><span class='op'>)</span></span>
+<span class='r-in'><span class='co'>#   =&gt; works for indiv. 2 because 9 (resp. 6) is consecutive to 6 (resp. 4)</span></span>
+<span class='r-in'><span class='va'>base</span><span class='op'>$</span><span class='va'>lag1_within.consecutive</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>, <span class='fl'>1</span>, <span class='va'>base</span>, time.step <span class='op'>=</span> <span class='st'>"within"</span><span class='op'>)</span></span>
+<span class='r-in'><span class='co'>#   =&gt; now two consecutive years within each indiv is one lag</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   id time x lag1 lead1 lag2_fill0 lag1_consecutive lag1_within.consecutive</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1  1    1 1   NA     2          0               NA                      NA</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2  1    2 2    1     3          0                1                       1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3  1    3 3    2     4          1                2                       2</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4  1    4 4    3    NA          2                3                       3</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 5  2    1 5   NA    NA          0               NA                      NA</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 6  2    4 6   NA    NA          0               NA                       5</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 7  2    6 7   NA    NA          6                6                       6</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 8  2    9 8   NA    NA          0                7                       7</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Argument time.step = "consecutive" is</span></span>
+<span class='r-in'><span class='co'># mostly useful when the time variable is not a number:</span></span>
+<span class='r-in'><span class='co'># e.g. c("1991q1", "1991q2", "1991q3") etc</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># with duplicates</span></span>
+<span class='r-in'><span class='va'>base_dup</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span>id <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span>, each <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span>,</span>
+<span class='r-in'>                      time <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>1</span>, <span class='fl'>1</span>, <span class='fl'>2</span>, <span class='fl'>1</span>, <span class='fl'>2</span>, <span class='fl'>2</span>, <span class='fl'>3</span><span class='op'>)</span>, x <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>8</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Error because of duplicate values for (id, time)</span></span>
+<span class='r-in'><span class='kw'><a href='https://rdrr.io/r/base/try.html'>try</a></span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>, <span class='fl'>1</span>, <span class='va'>base_dup</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Error : in lag.formula(x ~ id + time, 1, base_dup):</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  The panel identifiers contain duplicate values: this is not allowed</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> since lag/leads are not defined for them. For example (id, time) = (1,</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1) appears three times. Please provide data without duplicates -- or you</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> can also use duplicate.method = 'first' (see Details).</span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Error is bypassed, lag corresponds to first occurence of (id, time)</span></span>
+<span class='r-in'><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>, <span class='fl'>1</span>, <span class='va'>base_dup</span>, duplicate.method <span class='op'>=</span> <span class='st'>"first"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] NA NA NA  1 NA  5  5  6</span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Playing with time steps</span></span>
+<span class='r-in'><span class='va'>base</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span>id <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span>, each <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span>,</span>
+<span class='r-in'>                  time <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span>, <span class='fl'>2</span>, <span class='fl'>3</span>, <span class='fl'>4</span>, <span class='fl'>1</span>, <span class='fl'>4</span>, <span class='fl'>6</span>, <span class='fl'>9</span><span class='op'>)</span>, x <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>8</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># time step: 0.5 (here equivalent to lag of 1)</span></span>
+<span class='r-in'><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>, <span class='fl'>2</span>, <span class='va'>base</span>, time.step <span class='op'>=</span> <span class='fl'>0.5</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] NA  1  2  3 NA NA NA NA</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Error: wrong time step</span></span>
+<span class='r-in'><span class='kw'><a href='https://rdrr.io/r/base/try.html'>try</a></span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>, <span class='fl'>2</span>, <span class='va'>base</span>, time.step <span class='op'>=</span> <span class='fl'>7</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Error : in lag.formula(x ~ id + time, 2, base, time.step = 7):</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  If 'time.step' is a number, then it must be an exact divisor of all the</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> difference between two consecutive time periods. This is currently not</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> the case: 7 is not a divisor of 1 (the difference btw the time periods 2</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> and 1).</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Adding NAs + unsorted IDs</span></span>
+<span class='r-in'><span class='va'>base</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span>id <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span>, each <span class='op'>=</span> <span class='fl'>4</span><span class='op'>)</span>,</span>
+<span class='r-in'>                  time <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>4</span>, <span class='cn'>NA</span>, <span class='fl'>3</span>, <span class='fl'>1</span>, <span class='fl'>2</span>, <span class='cn'>NA</span>, <span class='fl'>1</span>, <span class='fl'>3</span><span class='op'>)</span>, x <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>8</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>base</span><span class='op'>$</span><span class='va'>lag1</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>, <span class='fl'>1</span>, <span class='va'>base</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>base</span><span class='op'>$</span><span class='va'>lag1_within</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>time</span>, <span class='fl'>1</span>, <span class='va'>base</span>, time.step <span class='op'>=</span> <span class='st'>"w"</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>base_bis</span> <span class='op'>=</span> <span class='va'>base</span><span class='op'>[</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/setorder.html'>order</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>$</span><span class='va'>id</span>, <span class='va'>base</span><span class='op'>$</span><span class='va'>time</span><span class='op'>)</span>,<span class='op'>]</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>base_bis</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   id time x lag1 lag1_within</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4  1    1 4   NA          NA</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3  1    3 3   NA           4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1  1    4 1    3           3</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2  1   NA 2   NA          NA</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 7  2    1 7   NA          NA</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 5  2    2 5    7           7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 8  2    3 8    5           5</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 6  2   NA 6   NA          NA</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># You can create variables without specifying the data within data.table:</span></span>
+<span class='r-in'><span class='kw'>if</span><span class='op'>(</span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>require</a></span><span class='op'>(</span><span class='st'><a href='https://r-datatable.com'>"data.table"</a></span><span class='op'>)</span><span class='op'>)</span><span class='op'>{</span></span>
+<span class='r-in'>  <span class='va'>base</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/data.table.html'>data.table</a></span><span class='op'>(</span>id <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span>, each <span class='op'>=</span> <span class='fl'>3</span><span class='op'>)</span>, year <span class='op'>=</span> <span class='fl'>1990</span> <span class='op'>+</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span>, <span class='fl'>2</span><span class='op'>)</span>, x <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>6</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='va'>base</span><span class='op'>[</span>, <span class='va'>x.l1</span> <span class='op'>:=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>year</span>, <span class='fl'>1</span><span class='op'>)</span><span class='op'>]</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    id year x x.l1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1:  1 1991 1   NA</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2:  1 1992 2    1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3:  1 1993 3    2</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4:  2 1991 4   NA</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 5:  2 1992 5    4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 6:  2 1993 6    5</span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

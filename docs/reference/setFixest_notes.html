@@ -159,32 +159,35 @@
     <p>Laurent Berge</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='co'># Change default with</span>
-<span class='fu'>setFixest_notes</span><span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span>
-<span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span>, <span class='va'>airquality</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: Ozone
-#&gt; Observations: 111 
-#&gt; Standard-errors: IID 
-#&gt;              Estimate Std. Error t value   Pr(&gt;|t|)    
-#&gt; (Intercept) 18.598728   6.747904 2.75622 0.00685602 ** 
-#&gt; Solar.R      0.127165   0.032776 3.87979 0.00017931 ***
-#&gt; ---
-#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 31.1   Adj. R2: 0.113281</div><div class='input'>
-<span class='co'># Back to default which is TRUE</span>
-<span class='fu'>setFixest_notes</span><span class='op'>(</span><span class='cn'>TRUE</span><span class='op'>)</span>
-<span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span>, <span class='va'>airquality</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span></div><div class='output co'>#&gt; OLS estimation, Dep. Var.: Ozone
-#&gt; Observations: 111 
-#&gt; Standard-errors: IID 
-#&gt;              Estimate Std. Error t value   Pr(&gt;|t|)    
-#&gt; (Intercept) 18.598728   6.747904 2.75622 0.00685602 ** 
-#&gt; Solar.R      0.127165   0.032776 3.87979 0.00017931 ***
-#&gt; ---
-#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 31.1   Adj. R2: 0.113281</div><div class='input'>
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='co'># Change default with</span></span>
+<span class='r-in'><span class='fu'>setFixest_notes</span><span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span>, <span class='va'>airquality</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> OLS estimation, Dep. Var.: Ozone</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations: 111 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Standard-errors: IID </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>              Estimate Std. Error t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept) 18.598728   6.747904 2.75622 0.00685602 ** </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Solar.R      0.127165   0.032776 3.87979 0.00017931 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> RMSE: 31.1   Adj. R2: 0.113281</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Back to default which is TRUE</span></span>
+<span class='r-in'><span class='fu'>setFixest_notes</span><span class='op'>(</span><span class='cn'>TRUE</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span>, <span class='va'>airquality</span><span class='op'>)</span></span>
+<span class='r-msg co'><span class='r-pr'>#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> OLS estimation, Dep. Var.: Ozone</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations: 111 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Standard-errors: IID </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>              Estimate Std. Error t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept) 18.598728   6.747904 2.75622 0.00685602 ** </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Solar.R      0.127165   0.032776 3.87979 0.00017931 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> RMSE: 31.1   Adj. R2: 0.113281</span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

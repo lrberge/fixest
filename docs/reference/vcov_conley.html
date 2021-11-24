@@ -201,29 +201,31 @@
     <p>Conley TG (1999). "GMM Estimation with Cross Sectional Dependence", <em>Journal of Econometrics</em>, 92, 1-45.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>quakes</span><span class='op'>)</span>
-
-<span class='co'># We use conley() in the vcov argument of the estimation</span>
-<span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>depth</span> <span class='op'>~</span> <span class='va'>mag</span>, <span class='va'>quakes</span>, <span class='fu'>conley</span><span class='op'>(</span><span class='fl'>100</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; OLS estimation, Dep. Var.: depth
-#&gt; Observations: 1,000 
-#&gt; Standard-errors: Conley (100km) 
-#&gt;             Estimate Std. Error  t value   Pr(&gt;|t|)    
-#&gt; (Intercept)  881.625   108.9005  8.09569 1.6480e-15 ***
-#&gt; mag         -123.421    19.2323 -6.41737 2.1389e-10 ***
-#&gt; ---
-#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#&gt; RMSE: 209.6   Adj. R2: 0.052245</div><div class='input'>
-<span class='co'># Post estimation</span>
-<span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>depth</span> <span class='op'>~</span> <span class='va'>mag</span>, <span class='va'>quakes</span><span class='op'>)</span>
-<span class='fu'>vcov_conley</span><span class='op'>(</span><span class='va'>est</span>, cutoff <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;             (Intercept)        mag
-#&gt; (Intercept)   11859.324 -1955.8155
-#&gt; mag           -1955.816   369.8824</div><div class='input'>
-
-
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>quakes</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># We use conley() in the vcov argument of the estimation</span></span>
+<span class='r-in'><span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>depth</span> <span class='op'>~</span> <span class='va'>mag</span>, <span class='va'>quakes</span>, <span class='fu'>conley</span><span class='op'>(</span><span class='fl'>100</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> OLS estimation, Dep. Var.: depth</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations: 1,000 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Standard-errors: Conley (100km) </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>             Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)  881.625   108.9005  8.09569 1.6480e-15 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> mag         -123.421    19.2323 -6.41737 2.1389e-10 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> RMSE: 209.6   Adj. R2: 0.052245</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Post estimation</span></span>
+<span class='r-in'><span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>depth</span> <span class='op'>~</span> <span class='va'>mag</span>, <span class='va'>quakes</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'>vcov_conley</span><span class='op'>(</span><span class='va'>est</span>, cutoff <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>             (Intercept)        mag</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)   11859.324 -1955.8155</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> mag           -1955.816   369.8824</span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

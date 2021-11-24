@@ -156,7 +156,7 @@
     </tr>
     <tr>
       <th>alias</th>
-      <td><p>A (named) character vector. An alias to be used in lieu of the type name in the display methods (ie when used in <code><a href='print.fixest_fitstat.html'>print.fixest_fitstat</a></code> or <code><a href='etable.html'>etable</a></code>). If the function returns several values, i.e. sub-types, you can give an alias to these sub-types. The syntax is <code><a href='https://rdrr.io/r/base/c.html'>c("type" = "alias", "subtype_i" = "alias_i")</a></code>, with "type" (resp. "subtype") the value of the argument <code>type</code> resp. (<code>subtypes</code>). You can also give an alias encompassing the type and sub-type with the syntax <code><a href='https://rdrr.io/r/base/c.html'>c("type.subtype_i" = "alias")</a></code>.</p></td>
+      <td><p>A (named) character vector. An alias to be used in lieu of the type name in the display methods (ie when used in <code><a href='print.fixest_fitstat.html'>print.fixest_fitstat</a></code> or <code><a href='etable.html'>etable</a></code>). If the function returns several values, i.e. sub-types, you can give an alias to these sub-types. The syntax is <code>c("type" = "alias", "subtype_i" = "alias_i")</code>, with "type" (resp. "subtype") the value of the argument <code>type</code> resp. (<code>subtypes</code>). You can also give an alias encompassing the type and sub-type with the syntax <code>c("type.subtype_i" = "alias")</code>.</p></td>
     </tr>
     <tr>
       <th>subtypes</th>
@@ -172,51 +172,54 @@
     <p>Laurent Berge</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='co'># An estimation</span>
-<span class='va'>base</span> <span class='op'>=</span> <span class='va'>iris</span>
-<span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>)</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span>
-<span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='va'>x2</span> <span class='op'>|</span> <span class='va'>species</span>, <span class='va'>base</span><span class='op'>)</span>
-
-<span class='co'>#</span>
-<span class='co'># single valued tests</span>
-<span class='co'>#</span>
-
-<span class='co'># say you want to add the coefficient of variation of the dependent variable</span>
-<span class='va'>cv</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span><span class='op'>{</span>
-  <span class='va'>y</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/model.matrix.html'>model.matrix</a></span><span class='op'>(</span><span class='va'>est</span>, type <span class='op'>=</span> <span class='st'>"lhs"</span><span class='op'>)</span>
-  <span class='fu'><a href='https://rdrr.io/r/stats/sd.html'>sd</a></span><span class='op'>(</span><span class='va'>y</span><span class='op'>)</span><span class='op'>/</span><span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>y</span><span class='op'>)</span>
-<span class='op'>}</span>
-
-<span class='co'># Now we register the routine</span>
-<span class='fu'>fitstat_register</span><span class='op'>(</span><span class='st'>"cvy"</span>, <span class='va'>cv</span>, <span class='st'>"Coef. of Variation (dep. var.)"</span><span class='op'>)</span>
-
-<span class='co'># now we can summon the registered routine with its type ("cvy")</span>
-<span class='fu'><a href='fitstat.html'>fitstat</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"cvy"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Coef. of Variation (dep. var.): 0.141711</div><div class='input'>
-<span class='co'>#</span>
-<span class='co'># Multi valued tests</span>
-<span class='co'>#</span>
-
-<span class='co'># Let's say you want a Wald test with an heteroskedasticiy robust variance</span>
-
-<span class='co'># First we create the function</span>
-<span class='va'>hc_wald</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span><span class='op'>{</span>
-  <span class='va'>w</span> <span class='op'>=</span> <span class='fu'><a href='wald.html'>wald</a></span><span class='op'>(</span><span class='va'>est</span>, keep <span class='op'>=</span> <span class='st'>"!Intercept"</span>, print <span class='op'>=</span> <span class='cn'>FALSE</span>, se <span class='op'>=</span> <span class='st'>"hetero"</span><span class='op'>)</span>
-  <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>w</span>, <span class='fl'>4</span><span class='op'>)</span>
-<span class='op'>}</span>
-<span class='co'># This test returns a vector of 4 elements: stat, p, df1 and df2</span>
-
-<span class='co'># Now we register the routine</span>
-<span class='fu'>fitstat_register</span><span class='op'>(</span><span class='st'>"hc_wald"</span>, <span class='va'>hc_wald</span>, <span class='st'>"Wald (HC1)"</span>, <span class='st'>"test2"</span><span class='op'>)</span>
-
-<span class='co'># You can access the statistic, as before</span>
-<span class='fu'><a href='fitstat.html'>fitstat</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"hc_wald"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Wald (HC1): stat = 122.7, p &lt; 2.2e-16, on 2 and 145 DoF.</div><div class='input'>
-<span class='co'># But you can also access the sub elements</span>
-<span class='fu'><a href='fitstat.html'>fitstat</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"hc_wald.p"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Wald (HC1), p-value: 6.573e-32</div><div class='input'>
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='co'># An estimation</span></span>
+<span class='r-in'><span class='va'>base</span> <span class='op'>=</span> <span class='va'>iris</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span><span class='op'>(</span><span class='va'>base</span><span class='op'>)</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"y"</span>, <span class='st'>"x1"</span>, <span class='st'>"x2"</span>, <span class='st'>"x3"</span>, <span class='st'>"species"</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x1</span> <span class='op'>+</span> <span class='va'>x2</span> <span class='op'>|</span> <span class='va'>species</span>, <span class='va'>base</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'><span class='co'># single valued tests</span></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># say you want to add the coefficient of variation of the dependent variable</span></span>
+<span class='r-in'><span class='va'>cv</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span><span class='op'>{</span></span>
+<span class='r-in'>  <span class='va'>y</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/model.matrix.html'>model.matrix</a></span><span class='op'>(</span><span class='va'>est</span>, type <span class='op'>=</span> <span class='st'>"lhs"</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/stats/sd.html'>sd</a></span><span class='op'>(</span><span class='va'>y</span><span class='op'>)</span><span class='op'>/</span><span class='fu'><a href='https://rdrr.io/r/base/mean.html'>mean</a></span><span class='op'>(</span><span class='va'>y</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Now we register the routine</span></span>
+<span class='r-in'><span class='fu'>fitstat_register</span><span class='op'>(</span><span class='st'>"cvy"</span>, <span class='va'>cv</span>, <span class='st'>"Coef. of Variation (dep. var.)"</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># now we can summon the registered routine with its type ("cvy")</span></span>
+<span class='r-in'><span class='fu'><a href='fitstat.html'>fitstat</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"cvy"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Coef. of Variation (dep. var.): 0.141711</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'><span class='co'># Multi valued tests</span></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Let's say you want a Wald test with an heteroskedasticiy robust variance</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># First we create the function</span></span>
+<span class='r-in'><span class='va'>hc_wald</span> <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span><span class='op'>{</span></span>
+<span class='r-in'>  <span class='va'>w</span> <span class='op'>=</span> <span class='fu'><a href='wald.html'>wald</a></span><span class='op'>(</span><span class='va'>est</span>, keep <span class='op'>=</span> <span class='st'>"!Intercept"</span>, print <span class='op'>=</span> <span class='cn'>FALSE</span>, se <span class='op'>=</span> <span class='st'>"hetero"</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='va'>w</span>, <span class='fl'>4</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+<span class='r-in'><span class='co'># This test returns a vector of 4 elements: stat, p, df1 and df2</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Now we register the routine</span></span>
+<span class='r-in'><span class='fu'>fitstat_register</span><span class='op'>(</span><span class='st'>"hc_wald"</span>, <span class='va'>hc_wald</span>, <span class='st'>"Wald (HC1)"</span>, <span class='st'>"test2"</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># You can access the statistic, as before</span></span>
+<span class='r-in'><span class='fu'><a href='fitstat.html'>fitstat</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"hc_wald"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Wald (HC1): stat = 122.7, p &lt; 2.2e-16, on 2 and 145 DoF.</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># But you can also access the sub elements</span></span>
+<span class='r-in'><span class='fu'><a href='fitstat.html'>fitstat</a></span><span class='op'>(</span><span class='va'>est</span>, <span class='st'>"hc_wald.p"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Wald (HC1), p-value: 6.573e-32</span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

@@ -154,7 +154,7 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>A formula, with data set names on the LHS and variables on the RHS, like <code>data1 + data2 ~ var1 + var2</code>. The following special variables are admitted: <code>"."</code> to get default values, <code>".N"</code> for the number of observations, <code>".U"</code> for the number of unique rows, <code>".NA"</code> for the number of rows with at least one NA. Variables can be combined with <code>"^"</code>, e.g. <code>df~id^period</code>; use <code>id%^%period</code> to also include the terms on both sides. Note that using <code><a href='https://rdrr.io/r/base/Colon.html'>:</a></code> and <code><a href='https://rdrr.io/r/base/Arithmetic.html'>*</a></code> is equivalent to <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> and <code>%^%</code>. Sub select with <code>id[cond]</code>, when doing so <code>id</code> is automatically included. Conditions can be chained, as in <code>id[cond1, cond2]</code>. Use <code>NA(x, y)</code> in conditions instead of <code>is.na(x) | is.na(y)</code>. Use the <code>!!</code> operator to have both a condition and its opposite. To compare the keys in two data sets, use <code>data1:data2</code>. If not a formula, <code>x</code> can be: a vector (displays the # of unique values); a <code>data.frame</code> (default values are displayed), or a "sum" of data sets like in <code>x = data1 + data2</code>, in that case it is equivalent to <code>data1 + data2 ~ .</code>.</p></td>
+      <td><p>A formula, with data set names on the LHS and variables on the RHS, like <code>data1 + data2 ~ var1 + var2</code>. The following special variables are admitted: <code>"."</code> to get default values, <code>".N"</code> for the number of observations, <code>".U"</code> for the number of unique rows, <code>".NA"</code> for the number of rows with at least one NA. Variables can be combined with <code>"^"</code>, e.g. <code>df~id^period</code>; use <code>id%^%period</code> to also include the terms on both sides. Note that using <code>:</code> and <code>*</code> is equivalent to <code>^</code> and <code>%^%</code>. Sub select with <code>id[cond]</code>, when doing so <code>id</code> is automatically included. Conditions can be chained, as in <code>id[cond1, cond2]</code>. Use <code>NA(x, y)</code> in conditions instead of <code>is.na(x) | is.na(y)</code>. Use the <code>!!</code> operator to have both a condition and its opposite. To compare the keys in two data sets, use <code>data1:data2</code>. If not a formula, <code>x</code> can be: a vector (displays the # of unique values); a <code>data.frame</code> (default values are displayed), or a "sum" of data sets like in <code>x = data1 + data2</code>, in that case it is equivalent to <code>data1 + data2 ~ .</code>.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -191,7 +191,7 @@
 
 <p>Use the "hat", <code>"^"</code>, operator to combine several variables. For example <code>id^period</code> will display the number of unique values of id x period combinations.</p>
 <p>Use the "super hat", <code>"%^%"</code>, operator to also include the terms on both sides. For example, instead of writing <code>id + period + id^period</code>, you can simply write <code>id%^%period</code>.</p>
-<p>Alternatively, you can use <code><a href='https://rdrr.io/r/base/Colon.html'>:</a></code> for <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> and <code><a href='https://rdrr.io/r/base/Arithmetic.html'>*</a></code> for <code>%^%</code>.</p>
+<p>Alternatively, you can use <code>:</code> for <code>^</code> and <code>*</code> for <code>%^%</code>.</p>
     <h2 class="hasAnchor" id="sub-selections"><a class="anchor" href="#sub-selections"></a>Sub-selections</h2>
 
     
@@ -203,100 +203,112 @@
 <p>Use the double negative operator, i.e. <code>!!</code>, to include both a condition and its opposite at once. For example <code>id[!!x &gt; 10]</code> is equivalent to <code>id[x &gt; 10, !x &gt; 10]</code>. Double negative operators can be chained, like in <code>id[!!cond1 &amp; !!cond2]</code>, then the cardinal product of all double negatived conditions is returned.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='va'>data</span> <span class='op'>=</span> <span class='va'>base_did</span>
-<span class='va'>data</span><span class='op'>$</span><span class='va'>x1.L1</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x1</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>period</span>, <span class='fl'>1</span>, <span class='va'>data</span><span class='op'>)</span><span class='op'>)</span>
-
-<span class='co'># By default, just the formatted number of observations</span>
-<span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; ## # Observations: 1,080 
-#&gt; ##  # Unique rows: 1,080 </div><div class='input'>
-<span class='co'># Or the nber of unique elements of a vector</span>
-<span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span><span class='op'>$</span><span class='va'>id</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; ## id: 108 </div><div class='input'>
-<span class='co'># number of unique id values and id x period pairs</span>
-<span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span> <span class='op'>~</span><span class='va'>.N</span> <span class='op'>+</span> <span class='va'>id</span> <span class='op'>+</span> <span class='va'>id</span><span class='op'>^</span><span class='va'>period</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; ## # Observations: 1,080 
-#&gt; ##             id:   108 
-#&gt; ##      id^period: 1,080 </div><div class='input'>
-<span class='co'># use the %^% operator to include the terms on the two sides at once</span>
-<span class='co'># =&gt; same as id*period</span>
-<span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span> <span class='op'>~</span><span class='va'>.N</span> <span class='op'>+</span> <span class='va'>id</span> <span class='op'>%^%</span> <span class='va'>period</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; ## # Observations: 1,080 
-#&gt; ##             id:   108 
-#&gt; ##         period:    10 
-#&gt; ##      id^period: 1,080 </div><div class='input'>
-<span class='co'># using sub selection with []</span>
-<span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span> <span class='op'>~</span><span class='va'>.N</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>[</span><span class='op'>!</span><span class='cn'>NA</span><span class='op'>(</span><span class='va'>x1.L1</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; ##     # Observations: 1,080 
-#&gt; ##             period:    10 
-#&gt; ## period[!NA(x1.L1)]:     9 </div><div class='input'>
-<span class='co'># to show only the sub selection: [[]]</span>
-<span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span> <span class='op'>~</span><span class='va'>.N</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>[[</span><span class='op'>!</span><span class='cn'>NA</span><span class='op'>(</span><span class='va'>x1.L1</span><span class='op'>)</span><span class='op'>]</span><span class='op'>]</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; ##     # Observations: 1,080 
-#&gt; ## period[!NA(x1.L1)]:     9 </div><div class='input'>
-<span class='co'># you can have multiple values in [],</span>
-<span class='co'># just separate them with a comma</span>
-<span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span> <span class='op'>~</span><span class='va'>.N</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>[</span><span class='op'>!</span><span class='cn'>NA</span><span class='op'>(</span><span class='va'>x1.L1</span><span class='op'>)</span>, <span class='va'>x1</span> <span class='op'>&gt;</span> <span class='fl'>7</span><span class='op'>]</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; ##     # Observations: 1,080 
-#&gt; ##             period:    10 
-#&gt; ## period[!NA(x1.L1)]:     9 
-#&gt; ##     period[x1 &gt; 7]:     7 </div><div class='input'>
-<span class='co'># to have both a condition and its opposite,</span>
-<span class='co'># use the !! operator</span>
-<span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span> <span class='op'>~</span><span class='va'>.N</span><span class='op'>[</span><span class='op'>!</span><span class='op'>!</span><span class='cn'>NA</span><span class='op'>(</span><span class='va'>x1.L1</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; ##         # Observations: 1,080 
-#&gt; ##  # Obs. with NA(x1.L1):   108 
-#&gt; ## # Obs. with !NA(x1.L1):   972 </div><div class='input'>
-<span class='co'># the !! operator works within condition chains</span>
-<span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span> <span class='op'>~</span><span class='va'>.N</span><span class='op'>[</span><span class='op'>!</span><span class='op'>!</span><span class='cn'>NA</span><span class='op'>(</span><span class='va'>x1.L1</span><span class='op'>)</span> <span class='op'>&amp;</span> <span class='op'>!</span><span class='op'>!</span><span class='va'>x1</span> <span class='op'>&gt;</span> <span class='fl'>7</span><span class='op'>]</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; ##                   # Observations: 1,080 
-#&gt; ##   # Obs. with NA(x1.L1) &amp; x1 &gt; 7:     3 
-#&gt; ##  # Obs. with !NA(x1.L1) &amp; x1 &gt; 7:    10 
-#&gt; ##  # Obs. with NA(x1.L1) &amp; !x1 &gt; 7:   105 
-#&gt; ## # Obs. with !NA(x1.L1) &amp; !x1 &gt; 7:   962 </div><div class='input'>
-<span class='co'># Conditions can be distributed</span>
-<span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span> <span class='op'>~</span> <span class='op'>(</span><span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>)</span><span class='op'>[</span><span class='va'>x1</span> <span class='op'>&gt;</span> <span class='fl'>7</span><span class='op'>]</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; ##             id: 108 
-#&gt; ##     id[x1 &gt; 7]:  13 
-#&gt; ##         period:  10 
-#&gt; ## period[x1 &gt; 7]:   7 </div><div class='input'>
-<span class='co'>#</span>
-<span class='co'># Several data sets</span>
-<span class='co'>#</span>
-
-<span class='co'># Typical use case: merging</span>
-<span class='co'># Let's create two data sets and merge them</span>
-
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>base_did</span><span class='op'>)</span>
-<span class='va'>base_main</span> <span class='op'>=</span> <span class='va'>base_did</span>
-<span class='va'>base_extra</span> <span class='op'>=</span> <span class='fu'><a href='sample_df.html'>sample_df</a></span><span class='op'>(</span><span class='va'>base_main</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"id"</span>, <span class='st'>"period"</span><span class='op'>)</span><span class='op'>]</span>, <span class='fl'>100</span><span class='op'>)</span>
-<span class='va'>base_extra</span><span class='op'>$</span><span class='va'>id</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>10</span><span class='op'>]</span> <span class='op'>=</span> <span class='fl'>111</span><span class='op'>:</span><span class='fl'>120</span>
-<span class='va'>base_extra</span><span class='op'>$</span><span class='va'>period</span><span class='op'>[</span><span class='fl'>11</span><span class='op'>:</span><span class='fl'>20</span><span class='op'>]</span> <span class='op'>=</span> <span class='fl'>11</span><span class='op'>:</span><span class='fl'>20</span>
-<span class='va'>base_extra</span><span class='op'>$</span><span class='va'>z</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='fl'>100</span><span class='op'>)</span>
-
-<span class='co'># You can use db1:db2 to compare the common keys in two data sets</span>
- <span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>base_main</span><span class='op'>:</span><span class='va'>base_extra</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; ##                 base_main base_extra 
-#&gt; ## # Observations:     1,080        100 
-#&gt; ##             id:       108         73 
-#&gt; ## # Exclusive   |        45         10 # Common: 63
-#&gt; ##         period:        10         20 
-#&gt; ## # Exclusive   |         0         10 # Common: 10
-#&gt; ##      id^period:     1,080        100 
-#&gt; ## # Exclusive   |      1000         20 # Common: 80</div><div class='input'>
-<span class='va'>tmp</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/merge.html'>merge</a></span><span class='op'>(</span><span class='va'>base_main</span>, <span class='va'>base_extra</span>, all.x <span class='op'>=</span> <span class='cn'>TRUE</span>, by <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"id"</span>, <span class='st'>"period"</span><span class='op'>)</span><span class='op'>)</span>
-
-<span class='co'># You can show unique values for any variable, as before</span>
-<span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>tmp</span> <span class='op'>+</span> <span class='va'>base_main</span> <span class='op'>+</span> <span class='va'>base_extra</span> <span class='op'>~</span> <span class='va'>id</span><span class='op'>[</span><span class='op'>!</span><span class='op'>!</span><span class='cn'>NA</span><span class='op'>(</span><span class='va'>z</span><span class='op'>)</span><span class='op'>]</span> <span class='op'>+</span> <span class='va'>id</span><span class='op'>^</span><span class='va'>period</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; ##               tmp base_main base_extra
-#&gt; ##         id:   108       108         73
-#&gt; ##  id[NA(z)]:   108        --          0
-#&gt; ## id[!NA(z)]:    59        --         73
-#&gt; ##  id^period: 1,080     1,080        100</div><div class='input'>
-
-
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='va'>data</span> <span class='op'>=</span> <span class='va'>base_did</span></span>
+<span class='r-in'><span class='va'>data</span><span class='op'>$</span><span class='va'>x1.L1</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>round</a></span><span class='op'>(</span><span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/shift.html'>lag</a></span><span class='op'>(</span><span class='va'>x1</span><span class='op'>~</span><span class='va'>id</span><span class='op'>+</span><span class='va'>period</span>, <span class='fl'>1</span>, <span class='va'>data</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># By default, just the formatted number of observations</span></span>
+<span class='r-in'><span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span><span class='op'>)</span></span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> <span class='error'>Error:</span> in .dsb(xi, frame = frame, nest = FALSE, check = che...:</span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span>  The value ''+', dot_default' could not be parsed.</span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span>   &lt;text&gt;:1:4: ',' inattendu(e)</span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> 1: '+',</span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span>        ^</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Or the nber of unique elements of a vector</span></span>
+<span class='r-in'><span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span><span class='op'>$</span><span class='va'>id</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ## id: 108 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># number of unique id values and id x period pairs</span></span>
+<span class='r-in'><span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span> <span class='op'>~</span><span class='va'>.N</span> <span class='op'>+</span> <span class='va'>id</span> <span class='op'>+</span> <span class='va'>id</span><span class='op'>^</span><span class='va'>period</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ## # Observations: 1,080 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##             id:   108 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##      id^period: 1,080 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># use the %^% operator to include the terms on the two sides at once</span></span>
+<span class='r-in'><span class='co'># =&gt; same as id*period</span></span>
+<span class='r-in'><span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span> <span class='op'>~</span><span class='va'>.N</span> <span class='op'>+</span> <span class='va'>id</span> <span class='op'>%^%</span> <span class='va'>period</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ## # Observations: 1,080 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##             id:   108 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##         period:    10 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##      id^period: 1,080 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># using sub selection with []</span></span>
+<span class='r-in'><span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span> <span class='op'>~</span><span class='va'>.N</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>[</span><span class='op'>!</span><span class='cn'>NA</span><span class='op'>(</span><span class='va'>x1.L1</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##     # Observations: 1,080 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##             period:    10 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ## period[!NA(x1.L1)]:     9 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># to show only the sub selection: [[]]</span></span>
+<span class='r-in'><span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span> <span class='op'>~</span><span class='va'>.N</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>[[</span><span class='op'>!</span><span class='cn'>NA</span><span class='op'>(</span><span class='va'>x1.L1</span><span class='op'>)</span><span class='op'>]</span><span class='op'>]</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##     # Observations: 1,080 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ## period[!NA(x1.L1)]:     9 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># you can have multiple values in [],</span></span>
+<span class='r-in'><span class='co'># just separate them with a comma</span></span>
+<span class='r-in'><span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span> <span class='op'>~</span><span class='va'>.N</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>[</span><span class='op'>!</span><span class='cn'>NA</span><span class='op'>(</span><span class='va'>x1.L1</span><span class='op'>)</span>, <span class='va'>x1</span> <span class='op'>&gt;</span> <span class='fl'>7</span><span class='op'>]</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##     # Observations: 1,080 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##             period:    10 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ## period[!NA(x1.L1)]:     9 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##     period[x1 &gt; 7]:     7 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># to have both a condition and its opposite,</span></span>
+<span class='r-in'><span class='co'># use the !! operator</span></span>
+<span class='r-in'><span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span> <span class='op'>~</span><span class='va'>.N</span><span class='op'>[</span><span class='op'>!</span><span class='op'>!</span><span class='cn'>NA</span><span class='op'>(</span><span class='va'>x1.L1</span><span class='op'>)</span><span class='op'>]</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##         # Observations: 1,080 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##  # Obs. with NA(x1.L1):   108 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ## # Obs. with !NA(x1.L1):   972 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># the !! operator works within condition chains</span></span>
+<span class='r-in'><span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span> <span class='op'>~</span><span class='va'>.N</span><span class='op'>[</span><span class='op'>!</span><span class='op'>!</span><span class='cn'>NA</span><span class='op'>(</span><span class='va'>x1.L1</span><span class='op'>)</span> <span class='op'>&amp;</span> <span class='op'>!</span><span class='op'>!</span><span class='va'>x1</span> <span class='op'>&gt;</span> <span class='fl'>7</span><span class='op'>]</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##                   # Observations: 1,080 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##   # Obs. with NA(x1.L1) &amp; x1 &gt; 7:     3 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##  # Obs. with !NA(x1.L1) &amp; x1 &gt; 7:    10 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##  # Obs. with NA(x1.L1) &amp; !x1 &gt; 7:   105 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ## # Obs. with !NA(x1.L1) &amp; !x1 &gt; 7:   962 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Conditions can be distributed</span></span>
+<span class='r-in'><span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span> <span class='op'>~</span> <span class='op'>(</span><span class='va'>id</span> <span class='op'>+</span> <span class='va'>period</span><span class='op'>)</span><span class='op'>[</span><span class='va'>x1</span> <span class='op'>&gt;</span> <span class='fl'>7</span><span class='op'>]</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##             id: 108 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##     id[x1 &gt; 7]:  13 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##         period:  10 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ## period[x1 &gt; 7]:   7 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'><span class='co'># Several data sets</span></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Typical use case: merging</span></span>
+<span class='r-in'><span class='co'># Let's create two data sets and merge them</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>base_did</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>base_main</span> <span class='op'>=</span> <span class='va'>base_did</span></span>
+<span class='r-in'><span class='va'>base_extra</span> <span class='op'>=</span> <span class='fu'><a href='sample_df.html'>sample_df</a></span><span class='op'>(</span><span class='va'>base_main</span><span class='op'>[</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"id"</span>, <span class='st'>"period"</span><span class='op'>)</span><span class='op'>]</span>, <span class='fl'>100</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>base_extra</span><span class='op'>$</span><span class='va'>id</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>10</span><span class='op'>]</span> <span class='op'>=</span> <span class='fl'>111</span><span class='op'>:</span><span class='fl'>120</span></span>
+<span class='r-in'><span class='va'>base_extra</span><span class='op'>$</span><span class='va'>period</span><span class='op'>[</span><span class='fl'>11</span><span class='op'>:</span><span class='fl'>20</span><span class='op'>]</span> <span class='op'>=</span> <span class='fl'>11</span><span class='op'>:</span><span class='fl'>20</span></span>
+<span class='r-in'><span class='va'>base_extra</span><span class='op'>$</span><span class='va'>z</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span><span class='op'>(</span><span class='fl'>100</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># You can use db1:db2 to compare the common keys in two data sets</span></span>
+<span class='r-in'> <span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>base_main</span><span class='op'>:</span><span class='va'>base_extra</span><span class='op'>)</span></span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> <span class='error'>Error:</span> in .dsb(xi, frame = frame, nest = FALSE, check = che...:</span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span>  The value ''+', dot_default' could not be parsed.</span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span>   &lt;text&gt;:1:4: ',' inattendu(e)</span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> 1: '+',</span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span>        ^</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>tmp</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/merge.html'>merge</a></span><span class='op'>(</span><span class='va'>base_main</span>, <span class='va'>base_extra</span>, all.x <span class='op'>=</span> <span class='cn'>TRUE</span>, by <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"id"</span>, <span class='st'>"period"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># You can show unique values for any variable, as before</span></span>
+<span class='r-in'><span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>tmp</span> <span class='op'>+</span> <span class='va'>base_main</span> <span class='op'>+</span> <span class='va'>base_extra</span> <span class='op'>~</span> <span class='va'>id</span><span class='op'>[</span><span class='op'>!</span><span class='op'>!</span><span class='cn'>NA</span><span class='op'>(</span><span class='va'>z</span><span class='op'>)</span><span class='op'>]</span> <span class='op'>+</span> <span class='va'>id</span><span class='op'>^</span><span class='va'>period</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##               tmp base_main base_extra</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##         id:   108       108         73</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##  id[NA(z)]:   108        --          0</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ## id[!NA(z)]:    59        --         73</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##  id^period: 1,080     1,080        100</span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

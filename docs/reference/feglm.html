@@ -251,7 +251,7 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>fml</th>
-      <td><p>A formula representing the relation to be estimated. For example: <code>fml = z~x+y</code>. To include fixed-effects, insert them in this formula using a pipe: e.g. <code>fml = z~x+y|fixef_1+fixef_2</code>. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in <code><a href='https://rdrr.io/r/base/c.html'>c()</a></code>: ex <code><a href='https://rdrr.io/r/base/c.html'>c(y1, y2)</a></code>. For multiple indep. vars, use the stepwise functions: ex <code>x1 + csw(x2, x3)</code>. The formula <code>fml = c(y1, y2) ~ x1 + cw0(x2, x3)</code> leads to 6 estimation, see details. Square brackets starting with a dot can be used to call global variables: <code>y.[i] ~ x.[1:2]</code> will lead to <code>y3 ~ x1 + x2</code> if <code>i</code> is equal to 3 in the current environment (see details in <code><a href='xpd.html'>xpd</a></code>).</p></td>
+      <td><p>A formula representing the relation to be estimated. For example: <code>fml = z~x+y</code>. To include fixed-effects, insert them in this formula using a pipe: e.g. <code>fml = z~x+y|fixef_1+fixef_2</code>. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in <code><a href='https://rdrr.io/r/base/c.html'>c()</a></code>: ex <code>c(y1, y2)</code>. For multiple indep. vars, use the stepwise functions: ex <code>x1 + csw(x2, x3)</code>. The formula <code>fml = c(y1, y2) ~ x1 + cw0(x2, x3)</code> leads to 6 estimation, see details. Square brackets starting with a dot can be used to call global variables: <code>y.[i] ~ x.[1:2]</code> will lead to <code>y3 ~ x1 + x2</code> if <code>i</code> is equal to 3 in the current environment (see details in <code><a href='xpd.html'>xpd</a></code>).</p></td>
     </tr>
     <tr>
       <th>data</th>
@@ -287,7 +287,7 @@
     </tr>
     <tr>
       <th>cluster</th>
-      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] fixed-effect). You can interact two variables using <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
+      <td><p>Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over <code>var1</code> and <code>var2</code> contained in the data.frame <code>base</code> used for the estimation. All the following <code>cluster</code> arguments are valid and do the same thing: <code>cluster = base[, c("var1", "var2")]</code>, <code>cluster = c("var1", "var2")</code>, <code>cluster = ~var1+var2</code>. If the two variables were used as fixed-effects in the estimation, you can leave it blank with <code>vcov = "twoway"</code> (assuming <code>var1</code> [resp. <code>var2</code>] was the 1st [res. 2nd] fixed-effect). You can interact two variables using <code>^</code> with the following syntax: <code>cluster = ~var1^var2</code> or <code>cluster = "var1^var2"</code>.</p></td>
     </tr>
     <tr>
       <th>se</th>
@@ -299,7 +299,7 @@
     </tr>
     <tr>
       <th>panel.id</th>
-      <td><p>The panel identifiers. Can either be: i) a one sided formula (e.g. <code>panel.id = ~id+time</code>), ii) a character vector of length 2 (e.g. <code>panel.id=c('id', 'time')</code>, or iii) a character scalar of two variables separated by a comma (e.g. <code>panel.id='id,time'</code>). Note that you can combine variables with <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code> only inside formulas (see the dedicated section in <code><a href='feols.html'>feols</a></code>).</p></td>
+      <td><p>The panel identifiers. Can either be: i) a one sided formula (e.g. <code>panel.id = ~id+time</code>), ii) a character vector of length 2 (e.g. <code>panel.id=c('id', 'time')</code>, or iii) a character scalar of two variables separated by a comma (e.g. <code>panel.id='id,time'</code>). Note that you can combine variables with <code>^</code> only inside formulas (see the dedicated section in <code><a href='feols.html'>feols</a></code>).</p></td>
     </tr>
     <tr>
       <th>start</th>
@@ -355,7 +355,7 @@
     </tr>
     <tr>
       <th>notes</th>
-      <td><p>Logical. By default, three notes are displayed: when NAs are removed, when some fixed-effects are removed because of only 0 (or 0/1) outcomes, or when a variable is dropped because of collinearity. To avoid displaying these messages, you can set <code>notes = FALSE</code>. You can remove these messages permanently by using <code><a href='setFixest_notes.html'>setFixest_notes(FALSE)</a></code>.</p></td>
+      <td><p>Logical. By default, three notes are displayed: when NAs are removed, when some fixed-effects are removed because of only 0 (or 0/1) outcomes, or when a variable is dropped because of collinearity. To avoid displaying these messages, you can set <code>notes = FALSE</code>. You can remove these messages permanently by using <code>setFixest_notes(FALSE)</code>.</p></td>
     </tr>
     <tr>
       <th>verbose</th>
@@ -443,8 +443,8 @@
 
     
 
-<p>You can combine two variables to make it a new fixed-effect using <code><a href='https://rdrr.io/r/base/Arithmetic.html'>^</a></code>. The syntax is as follows: <code>fe_1^fe_2</code>. Here you created a new variable which is the combination of the two variables fe_1 and fe_2. This is identical to doing <code><a href='https://rdrr.io/r/base/paste.html'>paste0(fe_1, "_", fe_2)</a></code> but more convenient.</p>
-<p>Note that pasting is a costly operation, especially for large data sets. Thus, the internal algorithm uses a numerical trick which is fast, but the drawback is that the identity of each observation is lost (i.e. they are now equal to a meaningless number instead of being equal to <code><a href='https://rdrr.io/r/base/paste.html'>paste0(fe_1, "_", fe_2)</a></code>). These &#8220;identities&#8221; are useful only if you're interested in the value of the fixed-effects (that you can extract with <code><a href='fixef.fixest.html'>fixef.fixest</a></code>). If you're only interested in coefficients of the variables, it doesn't matter. Anyway, you can use <code>combine.quick = FALSE</code> to tell the internal algorithm to use <code>paste</code> instead of the numerical trick. By default, the numerical trick is performed only for large data sets.</p>
+<p>You can combine two variables to make it a new fixed-effect using <code>^</code>. The syntax is as follows: <code>fe_1^fe_2</code>. Here you created a new variable which is the combination of the two variables fe_1 and fe_2. This is identical to doing <code>paste0(fe_1, "_", fe_2)</code> but more convenient.</p>
+<p>Note that pasting is a costly operation, especially for large data sets. Thus, the internal algorithm uses a numerical trick which is fast, but the drawback is that the identity of each observation is lost (i.e. they are now equal to a meaningless number instead of being equal to <code>paste0(fe_1, "_", fe_2)</code>). These &#8220;identities&#8221; are useful only if you're interested in the value of the fixed-effects (that you can extract with <code><a href='fixef.fixest.html'>fixef.fixest</a></code>). If you're only interested in coefficients of the variables, it doesn't matter. Anyway, you can use <code>combine.quick = FALSE</code> to tell the internal algorithm to use <code>paste</code> instead of the numerical trick. By default, the numerical trick is performed only for large data sets.</p>
     <h2 class="hasAnchor" id="varying-slopes"><a class="anchor" href="#varying-slopes"></a>Varying slopes</h2>
 
     
@@ -469,7 +469,7 @@
     
 
 
-<p>You can interact a numeric variable with a "factor-like" variable by using <code><a href='i.html'>i(factor_var, continuous_var, ref)</a></code>, where <code>continuous_var</code> will be interacted with each value of <code>factor_var</code> and the argument <code>ref</code> is a value of <code>factor_var</code> taken as a reference (optional).</p>
+<p>You can interact a numeric variable with a "factor-like" variable by using <code>i(factor_var, continuous_var, ref)</code>, where <code>continuous_var</code> will be interacted with each value of <code>factor_var</code> and the argument <code>ref</code> is a value of <code>factor_var</code> taken as a reference (optional).</p>
 <p>Using this specific way to create interactions leads to a different display of the interacted values in <code><a href='etable.html'>etable</a></code> and offers a special representation of the interacted coefficients in the function <code><a href='coefplot.html'>coefplot</a></code>. See examples.</p>
 <p>It is important to note that *if you do not care about the standard-errors of the interactions*, then you can add interactions in the fixed-effects part of the formula, it will be incomparably faster (using the syntax <code>factor_var[continuous_var]</code>, as explained in the section &#8220;Varying slopes&#8221;).</p>
 <p>The function <code><a href='i.html'>i</a></code> has in fact more arguments, please see details in its associated help page.</p>
@@ -488,9 +488,10 @@
 
 <p>Multiple estimations can be performed at once, they just have to be specified in the formula. Multiple estimations yield a <code>fixest_multi</code> object which is &#8216;kind of&#8217; a list of all the results but includes specific methods to access the results in a handy way. Please have a look at the dedicated vignette: <a href='https://lrberge.github.io/fixest/articles/multiple_estimations.html'>Multiple estimations</a>.</p>
 <p>To include multiple dependent variables, wrap them in <code><a href='https://rdrr.io/r/base/c.html'>c()</a></code> (<code><a href='https://rdrr.io/r/base/list.html'>list()</a></code> also works). For instance <code>fml = c(y1, y2) ~ x1</code> would estimate the model <code>fml = y1 ~ x1</code> and then the model <code>fml = y2 ~ x1</code>.</p>
-<p>To include multiple independent variables, you need to use the stepwise functions. There are 4 stepwise functions: <code>sw</code>, <code>sw0</code>, <code>csw</code>, <code>csw0</code>. Of course <code>sw</code> stands for stepwise, and <code>csw</code> for cumulative stepwise. Let's explain that.
+<p>To include multiple independent variables, you need to use the stepwise functions. There are 4 stepwise functions: <code>sw</code>, <code>sw0</code>, <code>csw</code>, <code>csw0</code>, and <code>mvsw</code>. Of course <code>sw</code> stands for stepwise, and <code>csw</code> for cumulative stepwise. Finally <code>mvsw</code> is a bit special, it stands for multiverse stepwise. Let's explain that.
 Assume you have the following formula: <code>fml = y ~ x1 + sw(x2, x3)</code>. The stepwise function <code>sw</code> will estimate the following two models: <code>y ~ x1 + x2</code> and <code>y ~ x1 + x3</code>. That is, each element in <code><a href='stepwise.html'>sw()</a></code> is sequentially, and separately, added to the formula. Would have you used <code>sw0</code> in lieu of <code>sw</code>, then the model <code>y ~ x1</code> would also have been estimated. The <code>0</code> in the name means that the model without any stepwise element also needs to be estimated.
-Finally, the prefix <code>c</code> means cumulative: each stepwise element is added to the next. That is, <code>fml = y ~ x1 + csw(x2, x3)</code> would lead to the following models <code>y ~ x1 + x2</code> and <code>y ~ x1 + x2 + x3</code>. The <code>0</code> has the same meaning and would also lead to the model without the stepwise elements to be estimated: in other words, <code>fml = y ~ x1 + csw0(x2, x3)</code> leads to the following three models: <code>y ~ x1</code>, <code>y ~ x1 + x2</code> and <code>y ~ x1 + x2 + x3</code>.</p>
+The prefix <code>c</code> means cumulative: each stepwise element is added to the next. That is, <code>fml = y ~ x1 + csw(x2, x3)</code> would lead to the following models <code>y ~ x1 + x2</code> and <code>y ~ x1 + x2 + x3</code>. The <code>0</code> has the same meaning and would also lead to the model without the stepwise elements to be estimated: in other words, <code>fml = y ~ x1 + csw0(x2, x3)</code> leads to the following three models: <code>y ~ x1</code>, <code>y ~ x1 + x2</code> and <code>y ~ x1 + x2 + x3</code>.
+Finally <code>mvsw</code> will add, in a stepwise fashion all possible combinations of the variables in its arguments. For example <code>mvsw(x1, x2, x3)</code> is equivalent to <code>sw0(x1, x2, x3, x1 + x2, x1 + x3, x2 + x3, x1 + x2 + x3)</code>. The number of models to estimate grows at a factorial rate: so be cautious!</p>
 <p>Multiple independent variables can be combined with multiple dependent variables, as in <code>fml = c(y1, y2) ~ cw(x1, x2, x3)</code> which would lead to 6 estimations. Multiple estimations can also be combined to split samples (with the arguments <code>split</code>, <code>fsplit</code>).</p>
 <p>You can also add fixed-effects in a stepwise fashion. Note that you cannot perform stepwise estimations on the IV part of the formula (<code>feols</code> only).</p>
 <p>If NAs are present in the sample, to avoid too many messages, only NA removal concerning the variables common to all estimations is reported.</p>
@@ -500,20 +501,20 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
     
 
 
-<p>When the data set has been set up globally using <code><a href='setFixest_estimation.html'>setFixest_estimation</a></code><code>(data = data_set)</code>, the argument <code>vcov</code> can be used implicitly. This means that calls such as <code><a href='feols.html'>feols(y ~ x, "HC1")</a></code>, or <code><a href='feols.html'>feols(y ~ x, ~id)</a></code>, are valid: i) the data is automatically deduced from the global settings, and ii) the <code>vcov</code> is deduced to be the second argument.</p>
+<p>When the data set has been set up globally using <code><a href='setFixest_estimation.html'>setFixest_estimation</a></code><code>(data = data_set)</code>, the argument <code>vcov</code> can be used implicitly. This means that calls such as <code>feols(y ~ x, "HC1")</code>, or <code>feols(y ~ x, ~id)</code>, are valid: i) the data is automatically deduced from the global settings, and ii) the <code>vcov</code> is deduced to be the second argument.</p>
     <h2 class="hasAnchor" id="piping"><a class="anchor" href="#piping"></a>Piping</h2>
 
     
 
 
-<p>Although the argument 'data' is placed in second position, the data can be piped to the estimation functions. For example, with R &gt;= 4.1, <code>mtcars |&gt; feols(mpg ~ cyl)</code> works as <code><a href='feols.html'>feols(mpg ~ cyl, mtcars)</a></code>.</p>
+<p>Although the argument 'data' is placed in second position, the data can be piped to the estimation functions. For example, with R &gt;= 4.1, <code>mtcars |&gt; feols(mpg ~ cyl)</code> works as <code>feols(mpg ~ cyl, mtcars)</code>.</p>
     <h2 class="hasAnchor" id="tricks-to-estimate-multiple-lhs"><a class="anchor" href="#tricks-to-estimate-multiple-lhs"></a>Tricks to estimate multiple LHS</h2>
 
     
 
 
-<p>To use multiple dependent variables in <code>fixest</code> estimations, you need to include them in a vector: like in <code><a href='https://rdrr.io/r/base/c.html'>c(y1, y2, y3)</a></code>.</p>
-<p>First, if names are stored in a vector, they can readily be inserted in a formula to perform multiple estimations using the dot square bracket operator. For instance if <code>my_lhs = c("y1", "y2")</code>, calling <code>fixest</code> with, say <code><a href='feols.html'>feols(.[my_lhs] ~ x1, etc)</a></code> is equivalent to using <code><a href='feols.html'>feols(c(y1, y2) ~ x1, etc)</a></code>. Beware that this is a special feature unique to the <em>left-hand-side</em> of <code>fixest</code> estimations (the default behavior of the DSB operator is to aggregate with sums, see <code><a href='xpd.html'>xpd</a></code>).</p>
+<p>To use multiple dependent variables in <code>fixest</code> estimations, you need to include them in a vector: like in <code>c(y1, y2, y3)</code>.</p>
+<p>First, if names are stored in a vector, they can readily be inserted in a formula to perform multiple estimations using the dot square bracket operator. For instance if <code>my_lhs = c("y1", "y2")</code>, calling <code>fixest</code> with, say <code>feols(.[my_lhs] ~ x1, etc)</code> is equivalent to using <code>feols(c(y1, y2) ~ x1, etc)</code>. Beware that this is a special feature unique to the <em>left-hand-side</em> of <code>fixest</code> estimations (the default behavior of the DSB operator is to aggregate with sums, see <code><a href='xpd.html'>xpd</a></code>).</p>
 <p>Second, you can use a regular expression to grep the left-hand-sides on the fly. When the <code>..("regex")</code> feature is used naked on the LHS, the variables grepped are inserted into <code><a href='https://rdrr.io/r/base/c.html'>c()</a></code>. For example <code>..("Pe") ~ Sepal.Length, iris</code> is equivalent to <code>c(Petal.Length, Petal.Width) ~ Sepal.Length, iris</code>. Beware that this is a special feature unique to the <em>left-hand-side</em> of <code>fixest</code> estimations (the default behavior of <code>..("regex")</code> is to aggregate with sums, see <code><a href='xpd.html'>xpd</a></code>).</p>
     <h2 class="hasAnchor" id="dot-square-bracket-operator-in-formulas"><a class="anchor" href="#dot-square-bracket-operator-in-formulas"></a>Dot square bracket operator in formulas</h2>
 
@@ -521,13 +522,13 @@ Finally, the prefix <code>c</code> means cumulative: each stepwise element is ad
 
 
 <p>In a formula, the dot square bracket (DSB) operator can: i) create manifold variables at once, or ii) capture values from the current environment and put them verbatim in the formula.</p>
-<p>Say you want to include the variables <code>x1</code> to <code>x3</code> in your formula. You can use <code><a href='xpd.html'>xpd(y ~ x.[1:3])</a></code> and you'll get <code>y ~ x1 + x2 + x3</code>.</p>
+<p>Say you want to include the variables <code>x1</code> to <code>x3</code> in your formula. You can use <code>xpd(y ~ x.[1:3])</code> and you'll get <code>y ~ x1 + x2 + x3</code>.</p>
 <p>To summon values from the environment, simply put the variable in square brackets. For example: <code>for(i in 1:3) xpd(y.[i] ~ x)</code> will create the formulas <code>y1 ~ x</code> to <code>y3 ~ x</code> depending on the value of <code>i</code>.</p>
 <p>You can include a full variable from the environment in the same way: <code>for(y in c("a", "b")) xpd(.[y] ~ x)</code> will create the two formulas <code>a ~ x</code> and <code>b ~ x</code>.</p>
 <p>The DSB can even be used within variable names, but then the variable must be nested in character form. For example <code>y ~ .["x.[1:2]_sq"]</code> will create <code>y ~ x1_sq + x2_sq</code>. Using the character form is important to avoid a formula parsing error. Double quotes must be used. Note that the character string that is nested will be parsed with the function <code><a href='dsb.html'>dsb</a></code>, and thus it will return a vector.</p>
-<p>By default, the DSB operator expands vectors into sums. You can add a comma, like in <code>.[, x]</code>, to expand with commas--the content can then be used within functions. For instance: <code><a href='https://rdrr.io/r/base/c.html'>c(x.[, 1:2])</a></code> will create <code><a href='https://rdrr.io/r/base/c.html'>c(x1, x2)</a></code> (and <em>not</em> <code><a href='https://rdrr.io/r/base/c.html'>c(x1 + x2)</a></code>).</p>
+<p>By default, the DSB operator expands vectors into sums. You can add a comma, like in <code>.[, x]</code>, to expand with commas--the content can then be used within functions. For instance: <code>c(x.[, 1:2])</code> will create <code>c(x1, x2)</code> (and <em>not</em> <code>c(x1 + x2)</code>).</p>
 <p>In all <code>fixest</code> estimations, this special parsing is enabled, so you don't need to use <code>xpd</code>.</p>
-<p>You can even use multiple square brackets within a single variable, but then the use of nesting is required. For example, the following <code><a href='xpd.html'>xpd(y ~ .[".[letters[1:2]]_.[1:2]"])</a></code> will create <code>y ~ a_1 + b_2</code>. Remember that the nested character string is parsed with <code><a href='dsb.html'>dsb</a></code>, which explains this behavior.</p>
+<p>You can even use multiple square brackets within a single variable, but then the use of nesting is required. For example, the following <code>xpd(y ~ .[".[letters[1:2]]_.[1:2]"])</code> will create <code>y ~ a_1 + b_2</code>. Remember that the nested character string is parsed with <code><a href='dsb.html'>dsb</a></code>, which explains this behavior.</p>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
     <p>Berge, Laurent, 2018, "Efficient estimation of maximum likelihood models with multiple fixed-effects: the R package FENmlm." CREA Discussion Papers, 13 (<a href='https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13'>https://wwwen.uni.lu/content/download/110162/1299525/file/2018_13</a>).</p>
@@ -542,333 +543,349 @@ And other estimation methods: <code><a href='feols.html'>feols</a></code>, <code
     <p>Laurent Berge</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='co'># Poisson estimation</span>
-<span class='va'>res</span> <span class='op'>=</span> <span class='fu'>feglm</span><span class='op'>(</span><span class='va'>Sepal.Length</span> <span class='op'>~</span> <span class='va'>Sepal.Width</span> <span class='op'>+</span> <span class='va'>Petal.Length</span> <span class='op'>|</span> <span class='va'>Species</span>, <span class='va'>iris</span>, <span class='st'>"poisson"</span><span class='op'>)</span>
-
-<span class='co'># You could also use fepois</span>
-<span class='va'>res_pois</span> <span class='op'>=</span> <span class='fu'>fepois</span><span class='op'>(</span><span class='va'>Sepal.Length</span> <span class='op'>~</span> <span class='va'>Sepal.Width</span> <span class='op'>+</span> <span class='va'>Petal.Length</span> <span class='op'>|</span> <span class='va'>Species</span>, <span class='va'>iris</span><span class='op'>)</span>
-
-<span class='co'># With the fit method:</span>
-<span class='va'>res_fit</span> <span class='op'>=</span> <span class='fu'>feglm.fit</span><span class='op'>(</span><span class='va'>iris</span><span class='op'>$</span><span class='va'>Sepal.Length</span>, <span class='va'>iris</span><span class='op'>[</span>, <span class='fl'>2</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span>, <span class='va'>iris</span><span class='op'>$</span><span class='va'>Species</span>, <span class='st'>"poisson"</span><span class='op'>)</span>
-
-<span class='co'># All results are identical:</span>
-<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res</span>, <span class='va'>res_pois</span>, <span class='va'>res_fit</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                                res           res_pois            res_fit
-#&gt; Dependent Var.:       Sepal.Length       Sepal.Length  iris$Sepal.Length
-#&gt;                                                                         
-#&gt; Sepal.Width       0.0778* (0.0339)   0.0778* (0.0339)   0.0778* (0.0339)
-#&gt; Petal.Length    0.1221*** (0.0150) 0.1221*** (0.0150) 0.1221*** (0.0150)
-#&gt; Fixed-Effects:  ------------------ ------------------ ------------------
-#&gt; Species                        Yes                Yes                 No
-#&gt; iris$Species                    No                 No                Yes
-#&gt; _______________ __________________ __________________ __________________
-#&gt; S.E.: Clustered        by: Species        by: Species   by: iris$Species
-#&gt; Observations                   150                150                150
-#&gt; Squared Cor.               0.86314            0.86314            0.86314
-#&gt; Pseudo R2                  0.02676            0.02676            0.02676
-#&gt; BIC                         570.76             570.76             570.76</div><div class='input'>
-<span class='co'># Note that you have many more examples in feols</span>
-
-<span class='co'>#</span>
-<span class='co'># Multiple estimations:</span>
-<span class='co'>#</span>
-
-<span class='co'># 6 estimations</span>
-<span class='va'>est_mult</span> <span class='op'>=</span> <span class='fu'>fepois</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>Ozone</span>, <span class='va'>Solar.R</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='va'>Temp</span> <span class='op'>+</span> <span class='fu'><a href='stepwise.html'>csw0</a></span><span class='op'>(</span><span class='va'>Wind</span><span class='op'>:</span><span class='va'>Temp</span>, <span class='va'>Day</span><span class='op'>)</span>, <span class='va'>airquality</span><span class='op'>)</span>
-
-<span class='co'># We can display the results for the first lhs:</span>
-<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_mult</span><span class='op'>[</span>lhs <span class='op'>=</span> <span class='fl'>1</span><span class='op'>]</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                             model 1            model 2            model 3
-#&gt; Dependent Var.:               Ozone              Ozone              Ozone
-#&gt;                                                                          
-#&gt; (Intercept)       0.5334** (0.1943)   0.8890* (0.4430)   0.8028. (0.4441)
-#&gt; Wind            -0.0761*** (0.0052) -0.1151** (0.0439) -0.1152** (0.0440)
-#&gt; Temp             0.0483*** (0.0020) 0.0441*** (0.0051) 0.0444*** (0.0051)
-#&gt; Wind x Temp                            0.0005 (0.0005)    0.0005 (0.0005)
-#&gt; Day                                                    0.0051*** (0.0015)
-#&gt; _______________ ___________________ __________________ __________________
-#&gt; S.E. type                       IID                IID                IID
-#&gt; Observations                    116                116                116
-#&gt; Squared Cor.                0.62615            0.63129            0.63379
-#&gt; Pseudo R2                   0.53377            0.53402            0.53759
-#&gt; BIC                         1,564.7            1,568.7            1,561.5</div><div class='input'>
-<span class='co'># And now the second (access can be made by name)</span>
-<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_mult</span><span class='op'>[</span>lhs <span class='op'>=</span> <span class='st'>"Solar.R"</span><span class='op'>]</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                            model 1            model 2             model 3
-#&gt; Dependent Var.:            Solar.R            Solar.R             Solar.R
-#&gt;                                                                          
-#&gt; (Intercept)      3.777*** (0.0714)  4.343*** (0.1689)   4.529*** (0.1708)
-#&gt; Wind            0.0119*** (0.0020) -0.0415** (0.0146)  -0.0433** (0.0147)
-#&gt; Temp            0.0169*** (0.0008) 0.0098*** (0.0021)  0.0088*** (0.0021)
-#&gt; Wind x Temp                        0.0007*** (0.0002)  0.0007*** (0.0002)
-#&gt; Day                                                   -0.0061*** (0.0007)
-#&gt; _______________ __________________ __________________ ___________________
-#&gt; S.E. type                      IID                IID                 IID
-#&gt; Observations                   146                146                 146
-#&gt; Squared Cor.               0.08076            0.08166             0.08983
-#&gt; Pseudo R2                  0.06045            0.06207             0.07100
-#&gt; BIC                        8,192.6            8,183.5             8,110.7</div><div class='input'>
-<span class='co'># Now we focus on the two last right hand sides</span>
-<span class='co'># (note that .N can be used to specify the last item)</span>
-<span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_mult</span><span class='op'>[</span>rhs <span class='op'>=</span> <span class='fl'>2</span><span class='op'>:</span><span class='va'>.N</span><span class='op'>]</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;                            model 1            model 2            model 3
-#&gt; Dependent Var.:              Ozone            Solar.R              Ozone
-#&gt;                                                                         
-#&gt; (Intercept)       0.8890* (0.4430)  4.343*** (0.1689)   0.8028. (0.4441)
-#&gt; Wind            -0.1151** (0.0439) -0.0415** (0.0146) -0.1152** (0.0440)
-#&gt; Temp            0.0441*** (0.0051) 0.0098*** (0.0021) 0.0444*** (0.0051)
-#&gt; Wind x Temp        0.0005 (0.0005) 0.0007*** (0.0002)    0.0005 (0.0005)
-#&gt; Day                                                   0.0051*** (0.0015)
-#&gt; _______________ __________________ __________________ __________________
-#&gt; S.E. type                      IID                IID                IID
-#&gt; Observations                   116                146                116
-#&gt; Squared Cor.               0.63129            0.08166            0.63379
-#&gt; Pseudo R2                  0.53402            0.06207            0.53759
-#&gt; BIC                        1,568.7            8,183.5            1,561.5
-#&gt;                             model 4
-#&gt; Dependent Var.:             Solar.R
-#&gt;                                    
-#&gt; (Intercept)       4.529*** (0.1708)
-#&gt; Wind             -0.0433** (0.0147)
-#&gt; Temp             0.0088*** (0.0021)
-#&gt; Wind x Temp      0.0007*** (0.0002)
-#&gt; Day             -0.0061*** (0.0007)
-#&gt; _______________ ___________________
-#&gt; S.E. type                       IID
-#&gt; Observations                    146
-#&gt; Squared Cor.                0.08983
-#&gt; Pseudo R2                   0.07100
-#&gt; BIC                         8,110.7</div><div class='input'>
-<span class='co'># Combining with split</span>
-<span class='va'>est_split</span> <span class='op'>=</span> <span class='fu'>fepois</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>Ozone</span>, <span class='va'>Solar.R</span><span class='op'>)</span> <span class='op'>~</span> <span class='fu'><a href='stepwise.html'>sw</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/poly.html'>poly</a></span><span class='op'>(</span><span class='va'>Wind</span>, <span class='fl'>2</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/stats/poly.html'>poly</a></span><span class='op'>(</span><span class='va'>Temp</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>,
-                  <span class='va'>airquality</span>, split <span class='op'>=</span> <span class='op'>~</span> <span class='va'>Month</span><span class='op'>)</span>
-
-<span class='co'># You can display everything at once with the print method</span>
-<span class='va'>est_split</span>
-</div><div class='output co'>#&gt; Standard-errors: IID 
-#&gt; 
-#&gt; 
-#&gt; # SAMPLE: 5
-#&gt; 
-#&gt; 
-#&gt; ### Dep. var.: Ozone
-#&gt; 
-#&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error   t value   Pr(&gt;|t|)    
-#&gt; (Intercept)     3.30403   0.042415  77.89732  &lt; 2.2e-16 ***
-#&gt; poly(Wind, 2)1 -6.41466   0.617300 -10.39149  &lt; 2.2e-16 ***
-#&gt; poly(Wind, 2)2  3.07584   0.570194   5.39437 6.8765e-08 ***
-#&gt; ---
-#&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error  t value   Pr(&gt;|t|)    
-#&gt; (Intercept)     4.05816   0.109394 37.09674  &lt; 2.2e-16 ***
-#&gt; poly(Temp, 2)1 11.28467   1.448123  7.79261 6.5637e-15 ***
-#&gt; poly(Temp, 2)2  2.50568   1.171805  2.13830 3.2492e-02 *  
-#&gt; 
-#&gt; ### Dep. var.: Solar.R
-#&gt; 
-#&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                 Estimate Std. Error   t value   Pr(&gt;|t|)    
-#&gt; (Intercept)     5.207784   0.018194 286.23787  &lt; 2.2e-16 ***
-#&gt; poly(Wind, 2)1 -0.569626   0.271696  -2.09656 3.6033e-02 *  
-#&gt; poly(Wind, 2)2 -1.834732   0.250895  -7.31274 2.6176e-13 ***
-#&gt; ---
-#&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error   t value  Pr(&gt;|t|)    
-#&gt; (Intercept)     5.10262   0.052341  97.48802 &lt; 2.2e-16 ***
-#&gt; poly(Temp, 2)1 -2.63000   0.635659  -4.13744 3.512e-05 ***
-#&gt; poly(Temp, 2)2 -5.59769   0.432368 -12.94657 &lt; 2.2e-16 ***
-#&gt; 
-#&gt; 
-#&gt; # SAMPLE: 6
-#&gt; 
-#&gt; 
-#&gt; ### Dep. var.: Ozone
-#&gt; 
-#&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error  t value  Pr(&gt;|t|)    
-#&gt; (Intercept)     3.07100   0.124756 24.61599 &lt; 2.2e-16 ***
-#&gt; poly(Wind, 2)1  6.09901   1.922777  3.17198  0.001514 ** 
-#&gt; poly(Wind, 2)2 -2.28442   1.031893 -2.21381  0.026842 *  
-#&gt; ---
-#&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error  t value   Pr(&gt;|t|)    
-#&gt; (Intercept)     3.41843   0.080824 42.29472  &lt; 2.2e-16 ***
-#&gt; poly(Temp, 2)1  3.26499   1.293450  2.52425 0.01159456 *  
-#&gt; poly(Temp, 2)2  5.66897   1.562592  3.62792 0.00028571 ***
-#&gt; 
-#&gt; ### Dep. var.: Solar.R
-#&gt; 
-#&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                 Estimate Std. Error   t value   Pr(&gt;|t|)    
-#&gt; (Intercept)     5.218537   0.014191 367.74415  &lt; 2.2e-16 ***
-#&gt; poly(Wind, 2)1  2.220448   0.177688  12.49633  &lt; 2.2e-16 ***
-#&gt; poly(Wind, 2)2 -0.624761   0.139873  -4.46664 7.9458e-06 ***
-#&gt; ---
-#&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error    t value  Pr(&gt;|t|)    
-#&gt; (Intercept)    5.200307   0.019697 264.014030 &lt; 2.2e-16 ***
-#&gt; poly(Temp, 2)1 3.286120   0.364969   9.003834 &lt; 2.2e-16 ***
-#&gt; poly(Temp, 2)2 0.155763   0.322767   0.482586   0.62939    
-#&gt; 
-#&gt; 
-#&gt; # SAMPLE: 7
-#&gt; 
-#&gt; 
-#&gt; ### Dep. var.: Ozone
-#&gt; 
-#&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                 Estimate Std. Error  t value  Pr(&gt;|t|)    
-#&gt; (Intercept)     3.778200   0.043180 87.49820 &lt; 2.2e-16 ***
-#&gt; poly(Wind, 2)1 -6.722474   0.703358 -9.55768 &lt; 2.2e-16 ***
-#&gt; poly(Wind, 2)2 -0.959048   0.681576 -1.40710    0.1594    
-#&gt; ---
-#&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error  t value   Pr(&gt;|t|)    
-#&gt; (Intercept)     2.59501   0.190413 13.62828  &lt; 2.2e-16 ***
-#&gt; poly(Temp, 2)1 24.89459   3.062021  8.13011 4.2888e-16 ***
-#&gt; poly(Temp, 2)2 -8.57801   1.768706 -4.84988 1.2354e-06 ***
-#&gt; 
-#&gt; ### Dep. var.: Solar.R
-#&gt; 
-#&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                 Estimate Std. Error    t value  Pr(&gt;|t|)    
-#&gt; (Intercept)     5.360516   0.014178 378.099115 &lt; 2.2e-16 ***
-#&gt; poly(Wind, 2)1 -0.682752   0.216716  -3.150439 0.0016303 ** 
-#&gt; poly(Wind, 2)2  0.013888   0.277451   0.050054 0.9600792    
-#&gt; ---
-#&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error  t value   Pr(&gt;|t|)    
-#&gt; (Intercept)     5.10937   0.056186 90.93638  &lt; 2.2e-16 ***
-#&gt; poly(Temp, 2)1  4.82809   0.928155  5.20181 1.9735e-07 ***
-#&gt; poly(Temp, 2)2 -1.11475   0.615860 -1.81007 7.0285e-02 .  
-#&gt; 
-#&gt; 
-#&gt; # SAMPLE: 8
-#&gt; 
-#&gt; 
-#&gt; ### Dep. var.: Ozone
-#&gt; 
-#&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                 Estimate Std. Error   t value  Pr(&gt;|t|)    
-#&gt; (Intercept)     3.755844   0.041522 90.453699 &lt; 2.2e-16 ***
-#&gt; poly(Wind, 2)1 -6.956477   0.697914 -9.967528 &lt; 2.2e-16 ***
-#&gt; poly(Wind, 2)2 -0.344133   0.486153 -0.707869   0.47903    
-#&gt; ---
-#&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error  t value   Pr(&gt;|t|)    
-#&gt; (Intercept)     3.14340   0.097610 32.20355  &lt; 2.2e-16 ***
-#&gt; poly(Temp, 2)1 17.29925   1.746264  9.90643  &lt; 2.2e-16 ***
-#&gt; poly(Temp, 2)2 -5.78006   0.896709 -6.44586 1.1495e-10 ***
-#&gt; 
-#&gt; ### Dep. var.: Solar.R
-#&gt; 
-#&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                 Estimate Std. Error   t value  Pr(&gt;|t|)    
-#&gt; (Intercept)     5.134474   0.016224 316.48225 &lt; 2.2e-16 ***
-#&gt; poly(Wind, 2)1 -0.459093   0.272152  -1.68690 0.0916227 .  
-#&gt; poly(Wind, 2)2  0.683835   0.246613   2.77291 0.0055558 ** 
-#&gt; ---
-#&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                 Estimate Std. Error   t value   Pr(&gt;|t|)    
-#&gt; (Intercept)     4.926595   0.041382 119.05115  &lt; 2.2e-16 ***
-#&gt; poly(Temp, 2)1  4.222008   0.816701   5.16959 2.3461e-07 ***
-#&gt; poly(Temp, 2)2 -0.794082   0.462440  -1.71716 8.5950e-02 .  
-#&gt; 
-#&gt; 
-#&gt; # SAMPLE: 9
-#&gt; 
-#&gt; 
-#&gt; ### Dep. var.: Ozone
-#&gt; 
-#&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                Estimate Std. Error  t value   Pr(&gt;|t|)    
-#&gt; (Intercept)     3.36418   0.036953 91.04039  &lt; 2.2e-16 ***
-#&gt; poly(Wind, 2)1 -4.04407   0.492839 -8.20566 2.2933e-16 ***
-#&gt; poly(Wind, 2)2  2.98908   0.470324  6.35536 2.0794e-10 ***
-#&gt; ---
-#&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                Estimate Std. Error  t value   Pr(&gt;|t|)    
-#&gt; (Intercept)     3.36946   0.038292 87.99344  &lt; 2.2e-16 ***
-#&gt; poly(Temp, 2)1  6.10018   0.690949  8.82870  &lt; 2.2e-16 ***
-#&gt; poly(Temp, 2)2  2.25482   0.627045  3.59595 0.00032321 ***
-#&gt; 
-#&gt; ### Dep. var.: Solar.R
-#&gt; 
-#&gt; Expl. vars.: poly(Wind, 2)
-#&gt;                 Estimate Std. Error    t value  Pr(&gt;|t|)    
-#&gt; (Intercept)     5.122995   0.014639 349.966703 &lt; 2.2e-16 ***
-#&gt; poly(Wind, 2)1 -0.564257   0.193672  -2.913473 0.0035743 ** 
-#&gt; poly(Wind, 2)2  0.144413   0.224957   0.641955 0.5209022    
-#&gt; ---
-#&gt; Expl. vars.: poly(Temp, 2)
-#&gt;                 Estimate Std. Error   t value   Pr(&gt;|t|)    
-#&gt; (Intercept)     5.111358   0.015302 334.02914  &lt; 2.2e-16 ***
-#&gt; poly(Temp, 2)1  1.286054   0.251169   5.12026 3.0511e-07 ***
-#&gt; poly(Temp, 2)2 -0.928769   0.260074  -3.57117 3.5539e-04 ***</div><div class='input'>
-<span class='co'># Different way of displaying the results with "compact"</span>
-<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_split</span>, <span class='st'>"compact"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;    sample     lhs           rhs      (Intercept)   poly(Wind, 2)1
-#&gt; 1       5 Ozone   poly(Wind, 2)  3.3*** (0.0424) -6.41*** (0.617)
-#&gt; 2       5 Ozone   poly(Temp, 2) 4.06*** (0.109)                  
-#&gt; 3       5 Solar.R poly(Wind, 2) 5.21*** (0.0182)   -0.57* (0.272)
-#&gt; 4       5 Solar.R poly(Temp, 2)  5.1*** (0.0523)                 
-#&gt; 5       6 Ozone   poly(Wind, 2) 3.07*** (0.125)     6.1** (1.92) 
-#&gt; 6       6 Ozone   poly(Temp, 2) 3.42*** (0.0808)                 
-#&gt; 7       6 Solar.R poly(Wind, 2) 5.22*** (0.0142)  2.22*** (0.178)
-#&gt; 8       6 Solar.R poly(Temp, 2)  5.2*** (0.0197)                 
-#&gt; 9       7 Ozone   poly(Wind, 2) 3.78*** (0.0432) -6.72*** (0.703)
-#&gt; 10      7 Ozone   poly(Temp, 2)  2.6*** (0.19)                   
-#&gt; 11      7 Solar.R poly(Wind, 2) 5.36*** (0.0142) -0.683** (0.217)
-#&gt; 12      7 Solar.R poly(Temp, 2) 5.11*** (0.0562)                 
-#&gt; 13      8 Ozone   poly(Wind, 2) 3.76*** (0.0415) -6.96*** (0.698)
-#&gt; 14      8 Ozone   poly(Temp, 2) 3.14*** (0.0976)                 
-#&gt; 15      8 Solar.R poly(Wind, 2) 5.13*** (0.0162)  -0.459. (0.272)
-#&gt; 16      8 Solar.R poly(Temp, 2) 4.93*** (0.0414)                 
-#&gt; 17      9 Ozone   poly(Wind, 2) 3.36*** (0.037)  -4.04*** (0.493)
-#&gt; 18      9 Ozone   poly(Temp, 2) 3.37*** (0.0383)                 
-#&gt; 19      9 Solar.R poly(Wind, 2) 5.12*** (0.0146) -0.564** (0.194)
-#&gt; 20      9 Solar.R poly(Temp, 2) 5.11*** (0.0153)                 
-#&gt;       poly(Wind, 2)2   poly(Temp, 2)1    poly(Temp, 2)2
-#&gt; 1    3.08*** (0.57)                                    
-#&gt; 2                     11.3*** (1.45)      2.51* (1.17) 
-#&gt; 3   -1.83*** (0.251)                                   
-#&gt; 4                    -2.63*** (0.636)   -5.6*** (0.432)
-#&gt; 5     -2.28* (1.03)                                    
-#&gt; 6                       3.26* (1.29)    5.67*** (1.56) 
-#&gt; 7  -0.625*** (0.14)                                    
-#&gt; 8                     3.29*** (0.365)     0.156 (0.323)
-#&gt; 9     -0.959 (0.682)                                   
-#&gt; 10                    24.9*** (3.06)   -8.58*** (1.77) 
-#&gt; 11    0.0139 (0.277)                                   
-#&gt; 12                    4.83*** (0.928)    -1.11. (0.616)
-#&gt; 13    -0.344 (0.486)                                   
-#&gt; 14                    17.3*** (1.75)   -5.78*** (0.897)
-#&gt; 15   0.684** (0.247)                                   
-#&gt; 16                    4.22*** (0.817)   -0.794. (0.462)
-#&gt; 17   2.99*** (0.47)                                    
-#&gt; 18                     6.1*** (0.691)   2.25*** (0.627)
-#&gt; 19     0.144 (0.225)                                   
-#&gt; 20                    1.29*** (0.251) -0.929*** (0.26) </div><div class='input'>
-<span class='co'># You can still select which sample/LHS/RHS to display</span>
-<span class='va'>est_split</span><span class='op'>[</span>sample <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span>, lhs <span class='op'>=</span> <span class='fl'>1</span>, rhs <span class='op'>=</span> <span class='fl'>1</span><span class='op'>]</span>
-</div><div class='output co'>#&gt; Standard-errors: IID 
-#&gt; Dep. var.: Ozone
-#&gt; Expl. vars.: poly(Wind, 2)
-#&gt; Sample: 5
-#&gt;                Estimate Std. Error   t value   Pr(&gt;|t|)    
-#&gt; (Intercept)     3.30403   0.042415  77.89732  &lt; 2.2e-16 ***
-#&gt; poly(Wind, 2)1 -6.41466   0.617300 -10.39149  &lt; 2.2e-16 ***
-#&gt; poly(Wind, 2)2  3.07584   0.570194   5.39437 6.8765e-08 ***
-#&gt; ---
-#&gt; Sample: 6
-#&gt;                Estimate Std. Error  t value  Pr(&gt;|t|)    
-#&gt; (Intercept)     3.07100   0.124756 24.61599 &lt; 2.2e-16 ***
-#&gt; poly(Wind, 2)1  6.09901   1.922777  3.17198  0.001514 ** 
-#&gt; poly(Wind, 2)2 -2.28442   1.031893 -2.21381  0.026842 *  </div><div class='input'>
-
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='co'># Poisson estimation</span></span>
+<span class='r-in'><span class='va'>res</span> <span class='op'>=</span> <span class='fu'>feglm</span><span class='op'>(</span><span class='va'>Sepal.Length</span> <span class='op'>~</span> <span class='va'>Sepal.Width</span> <span class='op'>+</span> <span class='va'>Petal.Length</span> <span class='op'>|</span> <span class='va'>Species</span>, <span class='va'>iris</span>, <span class='st'>"poisson"</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># You could also use fepois</span></span>
+<span class='r-in'><span class='va'>res_pois</span> <span class='op'>=</span> <span class='fu'>fepois</span><span class='op'>(</span><span class='va'>Sepal.Length</span> <span class='op'>~</span> <span class='va'>Sepal.Width</span> <span class='op'>+</span> <span class='va'>Petal.Length</span> <span class='op'>|</span> <span class='va'>Species</span>, <span class='va'>iris</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># With the fit method:</span></span>
+<span class='r-in'><span class='va'>res_fit</span> <span class='op'>=</span> <span class='fu'>feglm.fit</span><span class='op'>(</span><span class='va'>iris</span><span class='op'>$</span><span class='va'>Sepal.Length</span>, <span class='va'>iris</span><span class='op'>[</span>, <span class='fl'>2</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span>, <span class='va'>iris</span><span class='op'>$</span><span class='va'>Species</span>, <span class='st'>"poisson"</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># All results are identical:</span></span>
+<span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>res</span>, <span class='va'>res_pois</span>, <span class='va'>res_fit</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                                res           res_pois            res_fit</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:       Sepal.Length       Sepal.Length  iris$Sepal.Length</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                                                                         </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Sepal.Width       0.0778* (0.0339)   0.0778* (0.0339)   0.0778* (0.0339)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Petal.Length    0.1221*** (0.0150) 0.1221*** (0.0150) 0.1221*** (0.0150)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Fixed-Effects:  ------------------ ------------------ ------------------</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Species                        Yes                Yes                 No</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> iris$Species                    No                 No                Yes</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> _______________ __________________ __________________ __________________</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> S.E.: Clustered        by: Species        by: Species   by: iris$Species</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations                   150                150                150</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Squared Cor.               0.86314            0.86314            0.86314</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Pseudo R2                  0.02676            0.02676            0.02676</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> BIC                         570.76             570.76             570.76</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Note that you have many more examples in feols</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'><span class='co'># Multiple estimations:</span></span>
+<span class='r-in'><span class='co'>#</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># 6 estimations</span></span>
+<span class='r-in'><span class='va'>est_mult</span> <span class='op'>=</span> <span class='fu'>fepois</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>Ozone</span>, <span class='va'>Solar.R</span><span class='op'>)</span> <span class='op'>~</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='va'>Temp</span> <span class='op'>+</span> <span class='fu'><a href='stepwise.html'>csw0</a></span><span class='op'>(</span><span class='va'>Wind</span><span class='op'>:</span><span class='va'>Temp</span>, <span class='va'>Day</span><span class='op'>)</span>, <span class='va'>airquality</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># We can display the results for the first lhs:</span></span>
+<span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_mult</span><span class='op'>[</span>lhs <span class='op'>=</span> <span class='fl'>1</span><span class='op'>]</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                             model 1            model 2            model 3</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:               Ozone              Ozone              Ozone</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                                                                          </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)       0.5334** (0.1943)   0.8890* (0.4430)   0.8028. (0.4441)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Wind            -0.0761*** (0.0052) -0.1151** (0.0439) -0.1152** (0.0440)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Temp             0.0483*** (0.0020) 0.0441*** (0.0051) 0.0444*** (0.0051)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Wind x Temp                            0.0005 (0.0005)    0.0005 (0.0005)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Day                                                    0.0051*** (0.0015)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> _______________ ___________________ __________________ __________________</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> S.E. type                       IID                IID                IID</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations                    116                116                116</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Squared Cor.                0.62615            0.63129            0.63379</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Pseudo R2                   0.53377            0.53402            0.53759</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> BIC                         1,564.7            1,568.7            1,561.5</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># And now the second (access can be made by name)</span></span>
+<span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_mult</span><span class='op'>[</span>lhs <span class='op'>=</span> <span class='st'>"Solar.R"</span><span class='op'>]</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                            model 1            model 2             model 3</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:            Solar.R            Solar.R             Solar.R</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                                                                          </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)      3.777*** (0.0714)  4.343*** (0.1689)   4.529*** (0.1708)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Wind            0.0119*** (0.0020) -0.0415** (0.0146)  -0.0433** (0.0147)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Temp            0.0169*** (0.0008) 0.0098*** (0.0021)  0.0088*** (0.0021)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Wind x Temp                        0.0007*** (0.0002)  0.0007*** (0.0002)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Day                                                   -0.0061*** (0.0007)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> _______________ __________________ __________________ ___________________</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> S.E. type                      IID                IID                 IID</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations                   146                146                 146</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Squared Cor.               0.08076            0.08166             0.08983</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Pseudo R2                  0.06045            0.06207             0.07100</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> BIC                        8,192.6            8,183.5             8,110.7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Now we focus on the two last right hand sides</span></span>
+<span class='r-in'><span class='co'># (note that .N can be used to specify the last item)</span></span>
+<span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>est_mult</span><span class='op'>[</span>rhs <span class='op'>=</span> <span class='fl'>2</span><span class='op'>:</span><span class='va'>.N</span><span class='op'>]</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                            model 1            model 2            model 3</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:              Ozone            Solar.R              Ozone</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                                                                         </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)       0.8890* (0.4430)  4.343*** (0.1689)   0.8028. (0.4441)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Wind            -0.1151** (0.0439) -0.0415** (0.0146) -0.1152** (0.0440)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Temp            0.0441*** (0.0051) 0.0098*** (0.0021) 0.0444*** (0.0051)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Wind x Temp        0.0005 (0.0005) 0.0007*** (0.0002)    0.0005 (0.0005)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Day                                                   0.0051*** (0.0015)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> _______________ __________________ __________________ __________________</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> S.E. type                      IID                IID                IID</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations                   116                146                116</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Squared Cor.               0.63129            0.08166            0.63379</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Pseudo R2                  0.53402            0.06207            0.53759</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> BIC                        1,568.7            8,183.5            1,561.5</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                             model 4</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:             Solar.R</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                                    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)       4.529*** (0.1708)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Wind             -0.0433** (0.0147)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Temp             0.0088*** (0.0021)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Wind x Temp      0.0007*** (0.0002)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Day             -0.0061*** (0.0007)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> _______________ ___________________</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> S.E. type                       IID</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations                    146</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Squared Cor.                0.08983</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Pseudo R2                   0.07100</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> BIC                         8,110.7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Combining with split</span></span>
+<span class='r-in'><span class='va'>est_split</span> <span class='op'>=</span> <span class='fu'>fepois</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>Ozone</span>, <span class='va'>Solar.R</span><span class='op'>)</span> <span class='op'>~</span> <span class='fu'><a href='stepwise.html'>sw</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/poly.html'>poly</a></span><span class='op'>(</span><span class='va'>Wind</span>, <span class='fl'>2</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/stats/poly.html'>poly</a></span><span class='op'>(</span><span class='va'>Temp</span>, <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span>,</span>
+<span class='r-in'>                  <span class='va'>airquality</span>, split <span class='op'>=</span> <span class='op'>~</span> <span class='va'>Month</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># You can display everything at once with the print method</span></span>
+<span class='r-in'><span class='va'>est_split</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Standard-errors: IID </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> # SAMPLE: 5</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ### Dep. var.: Ozone</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: poly(Wind, 2)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                Estimate Std. Error   t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     3.30403   0.042415  77.89732  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)1 -6.41466   0.617300 -10.39149  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)2  3.07584   0.570194   5.39437 6.8765e-08 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: poly(Temp, 2)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     4.05816   0.109394 37.09674  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Temp, 2)1 11.28467   1.448123  7.79261 6.5637e-15 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Temp, 2)2  2.50568   1.171805  2.13830 3.2492e-02 *  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ### Dep. var.: Solar.R</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: poly(Wind, 2)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                 Estimate Std. Error   t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     5.207784   0.018194 286.23787  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)1 -0.569626   0.271696  -2.09656 3.6033e-02 *  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)2 -1.834732   0.250895  -7.31274 2.6176e-13 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: poly(Temp, 2)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                Estimate Std. Error   t value  Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     5.10262   0.052341  97.48802 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Temp, 2)1 -2.63000   0.635659  -4.13744 3.512e-05 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Temp, 2)2 -5.59769   0.432368 -12.94657 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> # SAMPLE: 6</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ### Dep. var.: Ozone</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: poly(Wind, 2)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     3.07100   0.124756 24.61599 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)1  6.09901   1.922777  3.17198  0.001514 ** </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)2 -2.28442   1.031893 -2.21381  0.026842 *  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: poly(Temp, 2)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     3.41843   0.080824 42.29472  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Temp, 2)1  3.26499   1.293450  2.52425 0.01159456 *  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Temp, 2)2  5.66897   1.562592  3.62792 0.00028571 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ### Dep. var.: Solar.R</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: poly(Wind, 2)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                 Estimate Std. Error   t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     5.218537   0.014191 367.74415  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)1  2.220448   0.177688  12.49633  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)2 -0.624761   0.139873  -4.46664 7.9458e-06 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: poly(Temp, 2)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                Estimate Std. Error    t value  Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)    5.200307   0.019697 264.014030 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Temp, 2)1 3.286120   0.364969   9.003834 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Temp, 2)2 0.155763   0.322767   0.482586   0.62939    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> # SAMPLE: 7</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ### Dep. var.: Ozone</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: poly(Wind, 2)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                 Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     3.778200   0.043180 87.49820 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)1 -6.722474   0.703358 -9.55768 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)2 -0.959048   0.681576 -1.40710    0.1594    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: poly(Temp, 2)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     2.59501   0.190413 13.62828  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Temp, 2)1 24.89459   3.062021  8.13011 4.2888e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Temp, 2)2 -8.57801   1.768706 -4.84988 1.2354e-06 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ### Dep. var.: Solar.R</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: poly(Wind, 2)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                 Estimate Std. Error    t value  Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     5.360516   0.014178 378.099115 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)1 -0.682752   0.216716  -3.150439 0.0016303 ** </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)2  0.013888   0.277451   0.050054 0.9600792    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: poly(Temp, 2)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     5.10937   0.056186 90.93638  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Temp, 2)1  4.82809   0.928155  5.20181 1.9735e-07 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Temp, 2)2 -1.11475   0.615860 -1.81007 7.0285e-02 .  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> # SAMPLE: 8</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ### Dep. var.: Ozone</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: poly(Wind, 2)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                 Estimate Std. Error   t value  Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     3.755844   0.041522 90.453699 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)1 -6.956477   0.697914 -9.967528 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)2 -0.344133   0.486153 -0.707869   0.47903    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: poly(Temp, 2)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     3.14340   0.097610 32.20355  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Temp, 2)1 17.29925   1.746264  9.90643  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Temp, 2)2 -5.78006   0.896709 -6.44586 1.1495e-10 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ### Dep. var.: Solar.R</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: poly(Wind, 2)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                 Estimate Std. Error   t value  Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     5.134474   0.016224 316.48225 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)1 -0.459093   0.272152  -1.68690 0.0916227 .  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)2  0.683835   0.246613   2.77291 0.0055558 ** </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: poly(Temp, 2)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                 Estimate Std. Error   t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     4.926595   0.041382 119.05115  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Temp, 2)1  4.222008   0.816701   5.16959 2.3461e-07 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Temp, 2)2 -0.794082   0.462440  -1.71716 8.5950e-02 .  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> # SAMPLE: 9</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ### Dep. var.: Ozone</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: poly(Wind, 2)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     3.36418   0.036953 91.04039  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)1 -4.04407   0.492839 -8.20566 2.2933e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)2  2.98908   0.470324  6.35536 2.0794e-10 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: poly(Temp, 2)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     3.36946   0.038292 87.99344  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Temp, 2)1  6.10018   0.690949  8.82870  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Temp, 2)2  2.25482   0.627045  3.59595 0.00032321 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ### Dep. var.: Solar.R</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: poly(Wind, 2)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                 Estimate Std. Error    t value  Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     5.122995   0.014639 349.966703 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)1 -0.564257   0.193672  -2.913473 0.0035743 ** </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)2  0.144413   0.224957   0.641955 0.5209022    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: poly(Temp, 2)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                 Estimate Std. Error   t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     5.111358   0.015302 334.02914  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Temp, 2)1  1.286054   0.251169   5.12026 3.0511e-07 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Temp, 2)2 -0.928769   0.260074  -3.57117 3.5539e-04 ***</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Different way of displaying the results with "compact"</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>est_split</span>, <span class='st'>"compact"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    sample     lhs           rhs      (Intercept)   poly(Wind, 2)1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1       5 Ozone   poly(Wind, 2)  3.3*** (0.0424) -6.41*** (0.617)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2       5 Ozone   poly(Temp, 2) 4.06*** (0.109)                  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3       5 Solar.R poly(Wind, 2) 5.21*** (0.0182)   -0.57* (0.272)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4       5 Solar.R poly(Temp, 2)  5.1*** (0.0523)                 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 5       6 Ozone   poly(Wind, 2) 3.07*** (0.125)     6.1** (1.92) </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 6       6 Ozone   poly(Temp, 2) 3.42*** (0.0808)                 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 7       6 Solar.R poly(Wind, 2) 5.22*** (0.0142)  2.22*** (0.178)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 8       6 Solar.R poly(Temp, 2)  5.2*** (0.0197)                 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 9       7 Ozone   poly(Wind, 2) 3.78*** (0.0432) -6.72*** (0.703)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 10      7 Ozone   poly(Temp, 2)  2.6*** (0.19)                   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 11      7 Solar.R poly(Wind, 2) 5.36*** (0.0142) -0.683** (0.217)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 12      7 Solar.R poly(Temp, 2) 5.11*** (0.0562)                 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 13      8 Ozone   poly(Wind, 2) 3.76*** (0.0415) -6.96*** (0.698)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 14      8 Ozone   poly(Temp, 2) 3.14*** (0.0976)                 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 15      8 Solar.R poly(Wind, 2) 5.13*** (0.0162)  -0.459. (0.272)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 16      8 Solar.R poly(Temp, 2) 4.93*** (0.0414)                 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 17      9 Ozone   poly(Wind, 2) 3.36*** (0.037)  -4.04*** (0.493)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 18      9 Ozone   poly(Temp, 2) 3.37*** (0.0383)                 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 19      9 Solar.R poly(Wind, 2) 5.12*** (0.0146) -0.564** (0.194)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 20      9 Solar.R poly(Temp, 2) 5.11*** (0.0153)                 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>       poly(Wind, 2)2   poly(Temp, 2)1    poly(Temp, 2)2</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1    3.08*** (0.57)                                    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2                     11.3*** (1.45)      2.51* (1.17) </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3   -1.83*** (0.251)                                   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4                    -2.63*** (0.636)   -5.6*** (0.432)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 5     -2.28* (1.03)                                    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 6                       3.26* (1.29)    5.67*** (1.56) </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 7  -0.625*** (0.14)                                    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 8                     3.29*** (0.365)     0.156 (0.323)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 9     -0.959 (0.682)                                   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 10                    24.9*** (3.06)   -8.58*** (1.77) </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 11    0.0139 (0.277)                                   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 12                    4.83*** (0.928)    -1.11. (0.616)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 13    -0.344 (0.486)                                   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 14                    17.3*** (1.75)   -5.78*** (0.897)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 15   0.684** (0.247)                                   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 16                    4.22*** (0.817)   -0.794. (0.462)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 17   2.99*** (0.47)                                    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 18                     6.1*** (0.691)   2.25*** (0.627)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 19     0.144 (0.225)                                   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 20                    1.29*** (0.251) -0.929*** (0.26) </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># You can still select which sample/LHS/RHS to display</span></span>
+<span class='r-in'><span class='va'>est_split</span><span class='op'>[</span>sample <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>2</span>, lhs <span class='op'>=</span> <span class='fl'>1</span>, rhs <span class='op'>=</span> <span class='fl'>1</span><span class='op'>]</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Standard-errors: IID </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Dep. var.: Ozone</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Expl. vars.: poly(Wind, 2)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Sample: 5</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                Estimate Std. Error   t value   Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     3.30403   0.042415  77.89732  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)1 -6.41466   0.617300 -10.39149  &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)2  3.07584   0.570194   5.39437 6.8765e-08 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Sample: 6</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>                Estimate Std. Error  t value  Pr(&gt;|t|)    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)     3.07100   0.124756 24.61599 &lt; 2.2e-16 ***</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)1  6.09901   1.922777  3.17198  0.001514 ** </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> poly(Wind, 2)2 -2.28442   1.031893 -2.21381  0.026842 *  </span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

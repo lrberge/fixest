@@ -162,18 +162,19 @@
     <p>Returns a matrix of the same number of rows as the number of observations used for the estimation, and the same number of columns as there were variables.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>)</span>
-<span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Petal.Length</span> <span class='op'>~</span> <span class='va'>Petal.Width</span> <span class='op'>+</span> <span class='va'>Sepal.Width</span>, <span class='va'>iris</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='sandwich_reexported.html'>estfun</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt;      (Intercept)  Petal.Width Sepal.Width
-#&gt; [1,] -0.04666458 -0.009332917 -0.16332605
-#&gt; [2,] -0.22418187 -0.044836375 -0.67254562
-#&gt; [3,] -0.25317496 -0.050634992 -0.81015987
-#&gt; [4,] -0.08867842 -0.017735683 -0.27490309
-#&gt; [5,] -0.01116113 -0.002232225 -0.04018005
-#&gt; [6,] -0.03577286 -0.014309142 -0.13951414</div><div class='input'>
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>iris</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Petal.Length</span> <span class='op'>~</span> <span class='va'>Petal.Width</span> <span class='op'>+</span> <span class='va'>Sepal.Width</span>, <span class='va'>iris</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span><span class='op'>(</span><span class='fu'><a href='sandwich_reexported.html'>estfun</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>      (Intercept)  Petal.Width Sepal.Width</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1,] -0.04666458 -0.009332917 -0.16332605</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [2,] -0.22418187 -0.044836375 -0.67254562</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [3,] -0.25317496 -0.050634992 -0.81015987</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [4,] -0.08867842 -0.017735683 -0.27490309</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [5,] -0.01116113 -0.002232225 -0.04018005</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [6,] -0.03577286 -0.014309142 -0.13951414</span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
