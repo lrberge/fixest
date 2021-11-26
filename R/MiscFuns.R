@@ -6117,7 +6117,13 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
         }
     }
 
+    GLOBAL_fixest_mm_info = list()
+
     new_matrix = fixest_model_matrix(fml, newdata, fake_intercept, i_noref, mf = mf)
+
+    if(length(GLOBAL_fixest_mm_info) > 0){
+        attr(new_matrix, "model_matrix_info") = GLOBAL_fixest_mm_info
+    }
 
     new_matrix
 }
@@ -9820,11 +9826,32 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
 
 		varNotHere = setdiff(linear.varnames, names(newdata))
 		if(length(varNotHere) > 0){
-			stop("The variable", enumerate_items(varNotHere, "s.quote"), " used to estimate the model (in fml) ", ifsingle(varNotHere, "is", "are"), " missing in the data.frame given by the argument 'newdata'.")
+			stop("The variable", enumerate_items(varNotHere, "s.quote"),
+			     " used to estimate the model (in fml) ", ifsingle(varNotHere, "is", "are"),
+			     " missing in the data.frame given by the argument 'newdata'.")
 		}
 
 		# we create the matrix
 		matrix_linear = error_sender(fixest_model_matrix_extra(object = object, newdata = newdata, original_data = FALSE, fml = rhs_fml, i_noref = TRUE), "Error when creating the linear matrix: ")
+
+		# Checking the levels created with i()
+		mm_info_new = attr(matrix_linear, "model_matrix_info")
+		if(!is.null(mm_info_new)){
+		    mm_info = object$model_matrix_info
+		    # The order of creation is exactly the same (same fun used),
+		    # so the two mm_info are identical in structure
+		    for(i in seq_along(mm_info)){
+		        mm_new_i = mm_info_new[[i]]
+		        mm_i = mm_info[[i]]
+		        if("coef_names_full" %in% names(mm_i)){
+		            pblm = setdiff(mm_new_i$coef_names_full, mm_i$coef_names_full)
+		            if(length(pblm) > 0){
+		                stop(dsb("In i(), predictions cannot be done for values that were not present at estimation time.",
+		                         " It concerns the value.[*s_, 3KO, C?pblm]."))
+		            }
+		        }
+		    }
+		}
 
 		var_keep = intersect(names(coef), colnames(matrix_linear))
 		value_linear = value_linear + as.vector(matrix_linear[, var_keep, drop = FALSE] %*% coef[var_keep])

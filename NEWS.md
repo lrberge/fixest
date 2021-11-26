@@ -27,6 +27,8 @@
   
   - fix bugs in `feglm.fit` prevented the VCOV to be computed (reported by @etiennebacher and @edrubin [#237](https://github.com/lrberge/fixest/issues/237))
   
+  - fix bug in `predict` with variables created with `i()` leading to a prediction even for values not included in the original estimation (reported by @vincentarelbundock [#235](https://github.com/lrberge/fixest/issues/235)).
+  
 ## etable
 
 #### New arguments
