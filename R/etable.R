@@ -4824,8 +4824,10 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
         }
 
         minipage_start = minipage_end = ""
+        w = "21cm"
         if(!identical(page.width, "fit")){
             # page.width is guaranteed to be of length 2
+            w = page.width[1]
             minipage_start = .dsb("\\begin{minipage}{.[page.width[1]]} ",
                                   "\\centering ",
                                   "\\begin{minipage}{.[page.width[2]]}\n ", sep = "\n")
@@ -4833,10 +4835,10 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
             minipage_end = "\n\\end{minipage}\n\\end{minipage}"
         }
 
-        intro = c("\\documentclass[border={ 10 5 10 5 }]{standalone}",
-                  "\\usepackage[dvipsnames,table]{xcolor}",
-                  .dsb("\\usepackage{.[/array, booktabs, multirow, helvet, amsmath, amssymb]}"),
-                  "\\renewcommand{\\familydefault}{\\sfdefault}")
+        intro = .dsb0("\\documentclass[varwidth=.[w], border={ 10 5 10 5 }]{standalone}",
+                      "\\usepackage[dvipsnames,table]{xcolor}",
+                      "\\usepackage{.[/array, booktabs, multirow, helvet, amsmath, amssymb]}",
+                      "\\renewcommand{\\familydefault}{\\sfdefault}", vectorize = TRUE)
 
         tex_pkg = c()
         tex_pkg = add_pkg("(row|cell)color", x, tex_pkg, "colortbl", fixed = FALSE)
