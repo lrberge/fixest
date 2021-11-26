@@ -92,6 +92,8 @@
  - `bin`: `cut::` now ignores white spaces, so that `cut:: q1 ] q3 [` works appropriately.
  
  - speed of stepwise estimations (using `sw` [not `csw`]) has been improved.
+ 
+ - recursive formula macro definitions are allowed (feature request by @turbanisch [#234](https://github.com/lrberge/fixest/issues/234)).
 
 # fixest 0.10.1
 

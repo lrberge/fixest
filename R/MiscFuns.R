@@ -3241,7 +3241,6 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
     is_lhs = !missing(lhs)
     is_rhs = !missing(rhs)
     if(is_lhs || is_rhs){
-        # No short-circuit in condition!
 
         if(check) check_arg(fml, .type = "formula", .up = 1)
 
@@ -3293,14 +3292,20 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
     fml_dp = NULL
 
     if(is_macro){
+        # We allow recursion
+        any_done = TRUE
         qui = which(names(macros) %in% all.vars(fml))
-        if(length(qui) > 0){
-            fml_dp = deparse_long(fml)
+        while(length(qui) > 0 && any_done){
+            fml_dp_origin = fml_dp = deparse_long(fml)
             # We need to add a lookafter assertion: otherwise if we have ..ctrl + ..ctrl_long, there will be a replacement in ..ctrl_long
             for(i in qui){
                 fml_dp = gsub(paste0(escape_regex(names(macros)[i]), "(?=$|[^[:alnum:]_\\.])"), macros[[i]], fml_dp, perl = TRUE)
             }
+
             fml = as.formula(fml_dp, frame)
+
+            qui = which(names(macros) %in% all.vars(fml))
+            any_done = fml_dp_origin != fml_dp
         }
     }
 
