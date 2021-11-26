@@ -25,6 +25,8 @@
   
   - `model.matrix` now returns the variables in the same order as in the estimation -- a discrepancy could happen in stepwise estimations with interactions in which the interactions were put *before* fixed covariates (related to @sergiu-burlacu [#231](https://github.com/lrberge/fixest/issues/231)).
   
+  - fix bugs in `feglm.fit` prevented the VCOV to be computed (reported by @etiennebacher and @edrubin [#237](https://github.com/lrberge/fixest/issues/237))
+  
 ## etable
 
 #### New arguments
@@ -67,7 +69,7 @@
  
  - `signifCode` is removed from `setFixest_etable`, and `signif.code` is added to both `style.tex` and `style.df` so that each style can have its own significance code defined globally.
  
-  - the object returned by `etable` are now of class `etable_tex` (when `tex = TRUE`) or `etable_df`, both types having their own printing method.
+ - the object returned by `etable` are now of class `etable_tex` (when `tex = TRUE`) or `etable_df`, both types having their own printing method.
   
  - the significance codes are now displayed under the table when the output is a `data.frame`.
  

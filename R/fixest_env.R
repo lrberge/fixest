@@ -754,14 +754,17 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
         data_names = if(isFit) character(0) else names(data)
 
-        vcov_varnames = error_sender(vcov.fixest(only_varnames = TRUE, vcov = vcov, data_names = names(data),
+        vcov_varnames = error_sender(vcov.fixest(only_varnames = TRUE, vcov = vcov, data_names = data_names,
                                                  panel.id = panel.id, fixef_vars = all.vars(fml_fixef)),
                                      "Problem in the VCOV:\n")
 
+        if(isFit && length(vcov_varnames) > 0){
+            stop("In argument 'vcov', fit methods cannot accept VCOVs using extra variables (since there's no data base from which to extract them).")
+        }
 
         # Check
-        if(any(!vcov_varnames %in% dataNames)){
-            stop("In argument 'vcov' the variable", enumerate_items(setdiff(vcov_varnames, dataNames), "s.is.quote"), " not in the data set. It must be composed of variable names only.")
+        if(any(!vcov_varnames %in% data_names)){
+            stop("In argument 'vcov' the variable", enumerate_items(setdiff(vcov_varnames, data_names), "s.is.quote"), " not in the data set. It must be composed of variable names only.")
         }
 
         complete_vars = unique(c(complete_vars, vcov_varnames))
@@ -2903,6 +2906,10 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
         res$fixef_id = fixef_id_res
         res$fixef_sizes = fixef_sizes_res
+        if(isFit){
+            # by default fixef_vars is NULL
+            res$fixef_vars = names(res$fixef_sizes)
+        }
 
     }
 
