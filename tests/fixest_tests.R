@@ -1372,7 +1372,7 @@ test(head(predict(res)), predict(res, quoi))
 
 quoi$species = as.character(quoi$species)
 quoi$species[1:3] = "zz"
-test(head(predict(res)), predict(res, quoi))
+test(predict(res, quoi), "err")
 
 #
 # prediction with lags

@@ -14,7 +14,7 @@ print.dsb = function(x, ...){
 #' @param ... Character scalars that will be collapsed with the argument \code{sep}. You can use \code{".[x]"} within each character string to insert the value of \code{x} in the string. You can add string operations in each \code{".[]"} instance with the syntax \code{"'arg'op ? x"} (resp. \code{"'arg'op ! x"}) to apply the operation \code{'op'} with the argument \code{'arg'} to \code{x} (resp. the verbatim of \code{x}). Otherwise, what to say? Ah, nesting is enabled, and since there's over 30 operators, it's bit complicated to sort you out in this small space. But type \code{dsb("--help")} to prompt an (almost) extensive help.
 #' @param frame An environment used to evaluate the variables in \code{".[]"}.
 #' @param sep Character scalar, default is \code{""}. It is used to collapse all the elements in \code{...}.
-#' @param vectorize Logical, default is \code{FALSE}. If \code{TRUE}, the values in \code{".[]"} will be vectorized with \code{c()} instead of being appended with \code{\link[base]{paste}}.
+#' @param vectorize Logical, default is \code{FALSE}. If \code{TRUE}, Further, elements in \code{...} are NOT collapsed together, but instead vectorised.
 #' @param nest Logical, default is \code{TRUE}. Whether the original character strings should be nested into a \code{".[]"}. If \code{TRUE}, then things like \code{dsb("S!one, two")} are equivalent to \code{dsb(".[S!one, two]")} and hence create the vector \code{c("one", "two")}.
 #'
 #'
@@ -243,10 +243,12 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE, nest = 
         }
 
     } else {
-        # Note: using paste(..1, ..2, sep = sep) explicitly only saves 2us vav do.call
-        # not worth it.
 
-        dots = list(...)
+        if(check){
+            dots = error_sender(list(...), "In dsb, one element of ... could not be evaluated.")
+        } else {
+            dots = list(...)
+        }
 
         if(any(lengths(dots) > 1)){
             qui = which(lengths(dots) > 1)[1]
@@ -254,8 +256,22 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE, nest = 
                  " elment in ... is of length ", length(dots[[qui]]), ".")
         }
 
-        dots$sep = sep
-        x = do.call(paste, dots)
+        if(!vectorize){
+            # Note: using paste(..1, ..2, sep = sep) explicitly only saves 2us vav do.call
+            # not worth it.
+
+            dots$sep = sep
+            x = do.call(paste, dots)
+        } else {
+            # vectorize
+            n = length(dots)
+            res = vector("list", n)
+            for(i in 1:n){
+                res[[i]] = .dsb(dots[[i]], nest = nest, frame = frame, check = check)
+            }
+
+            return(unlist(res))
+        }
     }
 
     if(is.na(x) || length(x) == 0){
@@ -500,7 +516,8 @@ dsb_char2operator = function(x){
         op_abbrev = x
 
         if(op_abbrev %in% c("%", "k", "K", "a", "A", "if", "IF")){
-            ex = c("%" = ".['.3f'%?pi]", "k" = ".[4k ! longuest word ]", "K" = ".[2K ? 1:5]",
+            ex = c("%" = ".['.3f'%?pi]",
+                   "k" = ".[4k ! longuest word ]", "K" = ".[2K ? 1:5]",
                    "a" = ".['|s'a ! cat]", "A" = ".['|two'A ! one]",
                    "if" = ".['len<3'if(d) ? c('a', 'abc')]",
                    "IF" = ".['char>3'IF(D) ? c('a', 'abc')]")
@@ -522,7 +539,8 @@ dsb_char2operator = function(x){
 
                 if(op_abbrev %in% c("Ko", "KO")){
                     # special case
-                    in_quote = paste0(in_quote, "||:n: others")
+                    text = if(op_abbrev == "Ko") "||:rest: others" else "||:REST: others"
+                    in_quote = paste0(in_quote, text)
                     op_abbrev = "K"
                 }
 
@@ -740,20 +758,22 @@ dsb_operators = function(x, quoted, op, check = FALSE, frame = NULL){
             if(nb == 0){
                 res = character(0)
             } else {
-                res = x[1:nb]
+                res = if(nb < length(x)) x[1:nb] else x
 
                 if(any(grepl(":(n|N|rest|REST):", add))){
                     n = length(x)
-                    n_letter = ""
+                    N = ""
                     if(grepl(":N:", add, fixed = TRUE)){
-                        n_letter = n_letter(n)
-                        add = gsub(":N:", n_letter, add, fixed = TRUE)
+                        N = n_letter(n)
+                        add = gsub(":N:", N, add, fixed = TRUE)
                     }
 
                     add = gsub(":n:", n, add, fixed = TRUE)
                     n_rest = n - nb + is_included
-                    add = gsub(":rest:", n_rest, add, fixed = TRUE)
-                    add = gsub(":REST:", n_letter(n_rest), add, fixed = TRUE)
+                    if(n_rest > 0){
+                        add = gsub(":rest:", n_rest, add, fixed = TRUE)
+                        add = gsub(":REST:", n_letter(n_rest), add, fixed = TRUE)
+                    }
                 }
 
                 if(length(x) > nb){

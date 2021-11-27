@@ -13,7 +13,7 @@ dsb(..., frame = parent.frame(), sep = "", vectorize = FALSE, nest = TRUE)
 
 \item{sep}{Character scalar, default is \code{""}. It is used to collapse all the elements in \code{...}.}
 
-\item{vectorize}{Logical, default is \code{FALSE}. If \code{TRUE}, the values in \code{".[]"} will be vectorized with \code{c()} instead of being appended with \code{\link[base]{paste}}.}
+\item{vectorize}{Logical, default is \code{FALSE}. If \code{TRUE}, Further, elements in \code{...} are NOT collapsed together, but instead vectorised.}
 
 \item{nest}{Logical, default is \code{TRUE}. Whether the original character strings should be nested into a \code{".[]"}. If \code{TRUE}, then things like \code{dsb("S!one, two")} are equivalent to \code{dsb(".[S!one, two]")} and hence create the vector \code{c("one", "two")}.}
 }
