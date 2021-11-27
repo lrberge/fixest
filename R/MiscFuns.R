@@ -3292,10 +3292,14 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
     fml_dp = NULL
 
     if(is_macro){
-        # We allow recursion
+        # We allow recursion + auto-blocking at 5th depth
+        # to allow crazy things from the user side (but not too much)
+        max_depth = 5
+        depth  = 0
         any_done = TRUE
         qui = which(names(macros) %in% all.vars(fml))
-        while(length(qui) > 0 && any_done){
+        while(length(qui) > 0 && any_done && depth < max_depth){
+            depth = depth + 1
             fml_dp_origin = fml_dp = deparse_long(fml)
             # We need to add a lookafter assertion: otherwise if we have ..ctrl + ..ctrl_long, there will be a replacement in ..ctrl_long
             for(i in qui){
@@ -3306,6 +3310,12 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 
             qui = which(names(macros) %in% all.vars(fml))
             any_done = fml_dp_origin != fml_dp
+        }
+
+        if(depth == max_depth && length(qui) > 0){
+            warning(dsb("In xpd, max recursivity has been reached. ",
+                        "Please revise the recursive definition of your variables. ",
+                        "It concerns the variable.[*s_, q, C?names(macros)[qui]]."))
         }
     }
 
