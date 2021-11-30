@@ -697,6 +697,8 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
         }
     }
 
+    # internal argument
+    caption.number = TRUE
 
     build_etable_list = function(TEX){
         results2formattedList(
@@ -747,8 +749,6 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     if(do_tex){
 
         # if we're in markdown, we remove the table number
-        # internal argument
-        caption.number = TRUE
         if(is_md){
             caption.number = FALSE
         }
@@ -1051,7 +1051,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     if(length(notes) > 0) notes = notes[nchar(notes) > 0]
 
     check_arg("logical scalar", replace, fixef_sizes, fixef_sizes.simplify,
-              keepFactors, tex, depvar, caption.number)
+              keepFactors, tex, depvar)
 
     check_arg("NULL logical scalar", convergence, family, se.below, se.row, tpt)
     if(is.null(tpt)) tpt = FALSE
