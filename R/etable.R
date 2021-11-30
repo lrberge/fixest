@@ -4438,7 +4438,7 @@ style.tex = function(main = "base", depvar.title, model.title, model.format, lin
                        slopes.title = "", slopes.format = "__var__ $\\times $ __slope__",
                        fixef_sizes.prefix = "\\# ", fixef_sizes.suffix = "",
                        stats.title = " ", notes.intro = "\\par \\raggedright \n",
-                       notes.tpt.intro = "", caption.after = "\\medskip",
+                       notes.tpt.intro = "", caption.after = "\\bigskip",
                        tablefoot = FALSE, tablefoot.value = "",
                        yesNo = c("$\\checkmark$", ""), depvar.style = "",
                        no_border = FALSE)
@@ -4780,6 +4780,13 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
         markdown = "./images/etable/"
     }
 
+    # we need to clean all the tmp tags otherwise the caching does not work
+    x_clean = x
+    if(any(grepl("definecolor", x, fixed = TRUE)) || any(grepl("\\mark", x, fixed = TRUE))){
+        x_clean = gsub("definecolor\\{[:alpha:]+\\}", "", x_clean)
+        x_clean = gsub("mark[:alpha:]+", "", x_clean)
+    }
+
     do_build = TRUE
     export_markdown = id = NULL
     if(!is.null(markdown)){
@@ -4787,7 +4794,7 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
 
         all_files = list.files(markdown_path, "\\.png$", full.names = TRUE)
         id_all = gsub("^.+_|\\.png$", "", all_files)
-        id = as.character(cpp_hash_string(paste(c(page.width, x), collapse = "")))
+        id = as.character(cpp_hash_string(paste(c(page.width, x_clean), collapse = "")))
 
         if(!id %in% id_all){
             time = gsub(" .+", "", Sys.time())
@@ -4809,7 +4816,7 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
 
         if(cache){
             if(!is.null(id)){
-                id = as.character(cpp_hash_string(paste(c(page.width, x), collapse = "")))
+                id = as.character(cpp_hash_string(paste(c(page.width, x_clean), collapse = "")))
             }
 
             # If the file already exists, we don't recreate it
