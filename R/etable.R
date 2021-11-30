@@ -4749,6 +4749,9 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
     check_value(markdown, "NULL scalar(logical, character)")
     page.width = check_set_page_width(page.width)
 
+    # numbers used to uniquely identify the images
+    NMAX = 10
+
     cache = isTRUE(cache)
 
     dir_cache = NULL
@@ -4781,10 +4784,14 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
     }
 
     # we need to clean all the tmp tags otherwise the caching does not work
-    x_clean = x
-    if(any(grepl("definecolor", x, fixed = TRUE)) || any(grepl("\\mark", x, fixed = TRUE))){
-        x_clean = gsub("definecolor\\{[:alpha:]+\\}", "", x_clean)
-        x_clean = gsub("mark[:alpha:]+", "", x_clean)
+    x_clean = paste0(c(page.width, x), collapse = "\n")
+    if(any(grepl("definecolor", x_clean, fixed = TRUE))){
+        my_colors = dsb("'(?<=definecolor\\{)[[:alpha:]]+(?=\\})'X, '|'c ? x_clean")
+        x_clean = gsub(my_colors, "", x_clean)
+    }
+
+    if(any(grepl("\\mark", x, fixed = TRUE))){
+        x_clean = gsub("mark[[:alpha:]]+", "", x_clean)
     }
 
     do_build = TRUE
@@ -4794,7 +4801,7 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
 
         all_files = list.files(markdown_path, "\\.png$", full.names = TRUE)
         id_all = gsub("^.+_|\\.png$", "", all_files)
-        id = as.character(cpp_hash_string(paste(c(page.width, x_clean), collapse = "")))
+        id = substr(cpp_hash_string(x_clean), 1, NMAX)
 
         if(!id %in% id_all){
             time = gsub(" .+", "", Sys.time())
@@ -4816,7 +4823,7 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
 
         if(cache){
             if(!is.null(id)){
-                id = as.character(cpp_hash_string(paste(c(page.width, x_clean), collapse = "")))
+                id = substr(cpp_hash_string(x_clean), 1, NMAX)
             }
 
             # If the file already exists, we don't recreate it
