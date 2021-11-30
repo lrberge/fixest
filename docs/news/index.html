@@ -94,6 +94,9 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
+    </li>
+    <li>
       <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
     </li>
     <li>
@@ -154,6 +157,8 @@
 <li><p>fix bug in <code>i</code> when two factor variables were interacted and one specific value of one variable was to be set as a reference.</p></li>
 <li><p>fix bug in <code>model.matrix</code> when no variable was used in the estimation (reported by <a href='https://github.com/kylebutts'>@kylebutts</a> <a href="https://github.com/lrberge/fixest/issues/229"><a href='https://github.com/lrberge/fixest/issues/229'>#229</a></a>).</p></li>
 <li><p><code>model.matrix</code> now returns the variables in the same order as in the estimation – a discrepancy could happen in stepwise estimations with interactions in which the interactions were put <em>before</em> fixed covariates (related to <a href='https://github.com/sergiu-burlacu'>@sergiu-burlacu</a> <a href="https://github.com/lrberge/fixest/issues/231"><a href='https://github.com/lrberge/fixest/issues/231'>#231</a></a>).</p></li>
+<li><p>fix bugs in <code>feglm.fit</code> prevented the VCOV to be computed (reported by <a href='https://github.com/etiennebacher'>@etiennebacher</a> and <a href='https://github.com/edrubin'>@edrubin</a> <a href="https://github.com/lrberge/fixest/issues/237"><a href='https://github.com/lrberge/fixest/issues/237'>#237</a></a>)</p></li>
+<li><p>fix bug in <code>predict</code> with variables created with <code><a href="../reference/i.html">i()</a></code> leading to a prediction even for values not included in the original estimation (reported by <a href='https://github.com/vincentarelbundock'>@vincentarelbundock</a> <a href="https://github.com/lrberge/fixest/issues/235"><a href='https://github.com/lrberge/fixest/issues/235'>#235</a></a>).</p></li>
 </ul>
 </div>
 <div id="etable" class="section level2">
@@ -204,6 +209,8 @@
 <ul>
 <li><p><code>bin</code>: <code>cut::</code> now ignores white spaces, so that <code>cut:: q1 ] q3 [</code> works appropriately.</p></li>
 <li><p>speed of stepwise estimations (using <code>sw</code> [not <code>csw</code>]) has been improved.</p></li>
+<li><p>recursive formula macro definitions are allowed (feature request by <a href='https://github.com/turbanisch'>@turbanisch</a> <a href="https://github.com/lrberge/fixest/issues/234"><a href='https://github.com/lrberge/fixest/issues/234'>#234</a></a>).</p></li>
+<li><p>the startup message does not pop in Rmarkdown documents any more.</p></li>
 </ul>
 </div>
 </div>

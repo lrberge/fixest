@@ -95,6 +95,9 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/etable_new_features.html">`etable`: new features in `fixest` 0.10.2</a>
+    </li>
+    <li>
       <a href="../articles/exporting_tables.html">Exporting estimation tables</a>
     </li>
     <li>
@@ -209,11 +212,8 @@
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># By default, just the formatted number of observations</span></span>
 <span class='r-in'><span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span><span class='op'>)</span></span>
-<span class='r-err co'><span class='r-pr'>#&gt;</span> <span class='error'>Error:</span> in .dsb(xi, frame = frame, nest = FALSE, check = che...:</span>
-<span class='r-err co'><span class='r-pr'>#&gt;</span>  The value ''+', dot_default' could not be parsed.</span>
-<span class='r-err co'><span class='r-pr'>#&gt;</span>   &lt;text&gt;:1:4: ',' inattendu(e)</span>
-<span class='r-err co'><span class='r-pr'>#&gt;</span> 1: '+',</span>
-<span class='r-err co'><span class='r-pr'>#&gt;</span>        ^</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ## # Observations: 1,080 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##  # Unique rows: 1,080 </span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># Or the nber of unique elements of a vector</span></span>
 <span class='r-in'><span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>data</span><span class='op'>$</span><span class='va'>id</span><span class='op'>)</span></span>
@@ -290,11 +290,14 @@
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># You can use db1:db2 to compare the common keys in two data sets</span></span>
 <span class='r-in'> <span class='fu'>n_unik</span><span class='op'>(</span><span class='va'>base_main</span><span class='op'>:</span><span class='va'>base_extra</span><span class='op'>)</span></span>
-<span class='r-err co'><span class='r-pr'>#&gt;</span> <span class='error'>Error:</span> in .dsb(xi, frame = frame, nest = FALSE, check = che...:</span>
-<span class='r-err co'><span class='r-pr'>#&gt;</span>  The value ''+', dot_default' could not be parsed.</span>
-<span class='r-err co'><span class='r-pr'>#&gt;</span>   &lt;text&gt;:1:4: ',' inattendu(e)</span>
-<span class='r-err co'><span class='r-pr'>#&gt;</span> 1: '+',</span>
-<span class='r-err co'><span class='r-pr'>#&gt;</span>        ^</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##                 base_main base_extra </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ## # Observations:     1,080        100 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##             id:       108         73 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ## # Exclusive   |        45         10 # Common: 63</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##         period:        10         20 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ## # Exclusive   |         0         10 # Common: 10</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ##      id^period:     1,080        100 </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> ## # Exclusive   |     1,000         20 # Common: 80</span>
 <span class='r-in'></span>
 <span class='r-in'><span class='va'>tmp</span> <span class='op'>=</span> <span class='fu'><a href='https://Rdatatable.gitlab.io/data.table/reference/merge.html'>merge</a></span><span class='op'>(</span><span class='va'>base_main</span>, <span class='va'>base_extra</span>, all.x <span class='op'>=</span> <span class='cn'>TRUE</span>, by <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"id"</span>, <span class='st'>"period"</span><span class='op'>)</span><span class='op'>)</span></span>
 <span class='r-in'></span>
