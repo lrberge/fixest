@@ -94,6 +94,8 @@
  - speed of stepwise estimations (using `sw` [not `csw`]) has been improved.
  
  - recursive formula macro definitions are allowed (feature request by @turbanisch [#234](https://github.com/lrberge/fixest/issues/234)).
+ 
+ - the startup message does not pop in Rmarkdown documents any more.
 
 # fixest 0.10.1
 

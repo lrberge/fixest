@@ -626,7 +626,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     tex_origin = tex
     is_md = !is.null(markdown)
     if(is_md){
-        if(!"knitr" %in% loadedNamespaces() || is.null(knitr::pandoc_to())){
+        if(!is_Rmarkdown()){
             if("markdown" %in% names(mc)){
                 warning("The argument 'markdown' only works when knitting Rmarkdown documents. It is currently ignored.")
             }
