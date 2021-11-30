@@ -294,6 +294,35 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     complete_vars = c()
     if(isFit){
         isFixef = !missnull(fixef_df)
+
+        if(isFixef){
+            # I do it now bc it's used in vcov and avoids duplication
+
+            if(isVector(fixef_df)){
+                fixef_df = data.frame(x = fixef_df, stringsAsFactors = FALSE)
+                names(fixef_df) = deparse(mc_origin[["fixef_df"]])[1]
+
+            } else if(is.list(fixef_df)){
+                all_len = lengths(fixef_df)
+                if(any(diff(all_len) != 0)){
+                    stop("The lengths of the vectors in fixef_df differ (currently it is: ", enumerate_items(all_len), ").")
+                }
+                fixef_df = as.data.frame(fixef_df)
+            }
+
+            if(!is.matrix(fixef_df) && !"data.frame" %in% class(fixef_df)){
+                stop("Argument fixef_df must be a vector, a matrix, a list or a data.frame (currently its class is ", enumerate_items(class(fixef_df)), ").")
+            }
+
+            if(is.matrix(fixef_df)){
+                if(is.null(colnames(fixef_df))){
+                    colnames(fixef_df) = paste0("fixef_", 1:ncol(fixef_df))
+                }
+
+                fixef_df = as.data.frame(fixef_df)
+            }
+        }
+
     } else {
 
         #
@@ -752,13 +781,24 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     vcov_vars = NULL
     if(!missnull(vcov)){
 
-        data_names = if(isFit) character(0) else names(data)
+        if(isFit){
+            data_names = character(0)
+            if(isFixef){
+                fe_vars = names(fixef_df)
+                data_names = c(data_names, fe_vars)
+            }
+
+        } else {
+            data_names = names(data)
+            fe_vars = all.vars(fml_fixef)
+        }
+
 
         vcov_varnames = error_sender(vcov.fixest(only_varnames = TRUE, vcov = vcov, data_names = data_names,
-                                                 panel.id = panel.id, fixef_vars = all.vars(fml_fixef)),
+                                                 panel.id = panel.id, fixef_vars = fe_vars),
                                      "Problem in the VCOV:\n")
 
-        if(isFit && length(vcov_varnames) > 0){
+        if(isFit && (length(vcov_varnames) > 0 && !vcov_varnames %in% fe_vars)){
             stop("In argument 'vcov', fit methods cannot accept VCOVs using extra variables (since there's no data base from which to extract them).")
         }
 
@@ -1780,7 +1820,12 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
         isNA_vcov = NULL
         if(length(vcov_varnames) > 0){
-            vcov_var_values = data[, vcov_varnames, drop = FALSE]
+            if(isFit){
+                vcov_var_values = fixef_df[, which(fe_vars %in% vcov_varnames), drop = FALSE]
+
+            } else {
+                vcov_var_values = data[, vcov_varnames, drop = FALSE]
+            }
 
             if(anyNA(vcov_var_values)){
                 isNA_vcov = !complete.cases(vcov_var_values)
@@ -1865,27 +1910,6 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             #
             # ... From fit ####
             #
-
-            if(isVector(fixef_df)){
-                fixef_df = data.frame(x = fixef_df, stringsAsFactors = FALSE)
-                names(fixef_df) = deparse(mc_origin[["fixef_df"]])[1]
-
-            } else if(is.list(fixef_df)){
-                all_len = lengths(fixef_df)
-                if(any(diff(all_len) != 0)){
-                    stop("The lengths of the vectors in fixef_df differ (currently it is: ", enumerate_items(all_len), ").")
-                }
-                fixef_df = as.data.frame(fixef_df)
-            }
-
-            if(!is.matrix(fixef_df) && !"data.frame" %in% class(fixef_df)){
-                stop("Argument fixef_df must be a vector, a matrix, a list or a data.frame (currently its class is ", enumerate_items(class(fixef_df)), ").")
-            }
-
-            if(is.matrix(fixef_df) && is.null(colnames(fixef_df))){
-                colnames(fixef_df) = paste0("fixef_", 1:ncol(fixef_df))
-                fixef_df = as.data.frame(fixef_df)
-            }
 
             if(nrow(fixef_df) != nobs){
                 stop("The number of observations of fixef_df (", nrow(fixef_df), ") must match the length of y (", nobs, ").")

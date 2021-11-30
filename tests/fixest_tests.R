@@ -649,6 +649,32 @@ m = summary(est, ssc = ssc(t.df = 5))
 
 test(m$coeftable[, 4], 2*pt(-abs(m$coeftable[, 3]), 5))
 
+#
+# feols.fit
+#
+
+
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+
+est = feols(y ~ x1 | species, base, vcov = "hete")
+est_fit = feols.fit(base$y, base$x1, base$species, vcov = "hete")
+
+test(se(est), se(est_fit))
+
+est = feols(y ~ x1 | species, base, cluster = base$species)
+est_fit = feols.fit(base$y, base$x1, base$species, cluster = base$species)
+
+test(se(est), se(est_fit))
+
+est = feols(y ~ x1 | species, base, vcov = "cluster")
+est_fit = feols.fit(base$y, base$x1, base$species, vcov = "cluster")
+
+test(se(est), se(est_fit))
+
+
+# error for the other VCOVs
+test(feols.fit(base$y, base$x1, base$species, vcov = "hac"), "err")
+test(feols.fit(base$y, base$x1, base$species, vcov = "conley"), "err")
 
 ####
 #### Residuals ####
