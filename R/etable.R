@@ -723,7 +723,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
             meta.call = meta.call, meta.comment = meta.comment,
             tpt = tpt, arraystretch = arraystretch, adjustbox = adjustbox,
             fontsize = fontsize, tabular = tabular, highlight = highlight,
-            coef.style = coef.style,
+            coef.style = coef.style, caption.number = caption.number,
             mc = mc, .up = .up + 1)
     }
 
@@ -745,6 +745,14 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
     }
 
     if(do_tex){
+
+        # if we're in markdown, we remove the table number
+        # internal argument
+        caption.number = TRUE
+        if(is_md){
+            caption.number = FALSE
+        }
+
         info_tex = build_etable_list(TRUE)
         res_tex = etable_internal_latex(info_tex)
         n_models = attr(res_tex, "n_models")
@@ -963,7 +971,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                                  meta.call = NULL, meta.sys = NULL, meta.comment = NULL,
                                  tpt = FALSE, arraystretch = NULL, adjustbox = NULL,
                                  fontsize = NULL, tabular = "normal", highlight = NULL,
-                                 coef.style = NULL,
+                                 coef.style = NULL, caption.number = TRUE,
                                  mc = NULL, .up = 1){
 
 
@@ -1043,7 +1051,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     if(length(notes) > 0) notes = notes[nchar(notes) > 0]
 
     check_arg("logical scalar", replace, fixef_sizes, fixef_sizes.simplify,
-              keepFactors, tex, depvar)
+              keepFactors, tex, depvar, caption.number)
 
     check_arg("NULL logical scalar", convergence, family, se.below, se.row, tpt)
     if(is.null(tpt)) tpt = FALSE
@@ -2172,6 +2180,10 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         #   END: FE/slope formatting
         #
 
+        #
+        # Now we rename the variables
+        #
+
         # on enleve les espaces dans les noms de variables
         var = var_origin = c(gsub(" ", "", row.names(a)))
         # renaming
@@ -2686,7 +2698,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                extralines = extralines, placement = placement, drop.section = drop.section,
                tex_tag = tex_tag, fun_format = fun_format, coef.just = coef.just, meta = meta_txt,
                tpt = tpt, arraystretch = arraystretch, adjustbox = adjustbox, fontsize = fontsize,
-               tabular = tabular, highlight = highlight, coef.style = coef.style)
+               tabular = tabular, highlight = highlight, coef.style = coef.style,
+               caption.number = caption.number)
 
     return(res)
 }
@@ -2749,6 +2762,7 @@ etable_internal_latex = function(info){
     tabular = info$tabular
     highlight = info$highlight
     coef.style = info$coef.style
+    caption.number = info$caption.number
 
     # top line
     style$line.top = switch(style$line.top,
@@ -2785,15 +2799,27 @@ etable_internal_latex = function(info){
 
     # Starting the table
     myTitle = title
-    if(!is.null(label)) myTitle = paste0("\\label{", label, "} ", myTitle)
+    if(!is.null(label)){
+        myTitle = paste0("\\label{", label, "} ", myTitle)
+    }
+
     caption = ""
     info_center = "\\centering\n"
     if(float){
-        if(nchar(placement) > 0) placement = paste0("[", placement, "]")
+        if(nchar(placement) > 0){
+            placement = paste0("[", placement, "]")
+        }
 
         table_begin = paste0("\\begin{table}", placement, "\n")
+
         caption = paste0("\\caption{",  myTitle, "}\n")
-        if(nchar(style$caption.after) > 0) caption = paste0(caption, style$caption.after, "\n")
+        if(nchar(style$caption.after) > 0){
+            caption = paste0(caption, style$caption.after, "\n")
+        }
+
+        if(!caption.number){
+            table_begin = paste0("\\renewcommand{\\thetable}{}\n", table_begin)
+        }
 
         table_end = "\\end{table}"
     } else {
@@ -2962,18 +2988,12 @@ etable_internal_latex = function(info){
 
     if(length(all_vars) == 0) stop_up("Not any variable was selected, please reframe your keep/drop arguments.")
 
-    # changing the names of the coefs
-    coef_names = all_vars
+    # The names are set in results2formattedList
+    coef_names = escape_latex(all_vars)
     names(coef_names) = all_vars
-
-    qui = all_vars %in% names(dict)
-    who = coef_names[qui]
-    coef_names[qui] = dict[who]
-    coef_names = escape_latex(coef_names)
 
     if(se.below){
         coef_mat = c()
-        # coef_lines = c()
         for(v in all_vars){
 
             myCoef = mySd = myLine = c()
@@ -3000,8 +3020,8 @@ etable_internal_latex = function(info){
     }
 
 
-    coef_mat = style_apply(coef.style, coef_mat, coef_names)
-    info_mat = highlight_apply(highlight, coef_mat, coef_names)
+    coef_mat = style_apply(coef.style, coef_mat, all_vars)
+    info_mat = highlight_apply(highlight, coef_mat, all_vars)
     coef_mat = info_mat$coef_mat
     info_tikz = info_mat$preamble
 
@@ -4877,6 +4897,11 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
         # We compile the document
         draft = if(do_rerun) "-draftmode" else ""
 
+        # we delete the aux that can generate problems
+        if(file.exists("etable.aux")){
+            unlink("etable.aux")
+        }
+
         outcome = system2("pdflatex", .dsb("-halt-on-error -interaction=nonstopmode .[draft] etable.tex"),
                           "etable_shell_pdf.log", "etable_shell_pdf.err")
 
@@ -5146,7 +5171,7 @@ style_apply = function(coef.style, coef_mat, coef_names){
         cs_name = paste0(trimws(names(coef.style)[i]), " ")
 
         if(!grepl(":coef(_se)?:", cs_name)){
-            stop_up("In the argument 'coef.style', the names must contain the ':coef:' (or :coef_se:) string. ",
+            warn_up("In the argument 'coef.style', the names must contain the ':coef:' (or :coef_se:) string. ",
                     "Problem: this is not the case for the ", n_th(i), " element (equal to '", cs_name, "').")
         }
 
@@ -5188,7 +5213,7 @@ style_apply = function(coef.style, coef_mat, coef_names){
                 id = cbind(get_row_id(cell_mat[, 1]), cell_mat[, 2] + 1)
                 id = add_se(id)
 
-                id = id[grepl("[^ ]", res[id]), ]
+                id = id[grepl("[^ ]", res[id]), , drop = FALSE]
 
                 if(length(id) > 0){
                     values = res[id]
@@ -5396,25 +5421,37 @@ highlight_apply = function(highlight, coef_mat, coef_names){
             # cell: list of n x 2 matrices
             for(j in seq_along(cell)){
                 cell_mat = cell[[j]]
-                for(k in 1:nrow(cell_mat)){
+                n_cells = nrow(cell_mat)
+                k_done = c()
+                for(k in 1:n_cells){
+
+                    if(k %in% k_done) next
+
                     my_cell = cell_mat[k, ]
 
-                    id = cbind(get_row_id(my_cell[1]), my_cell[2] + 1)
-
-                    n_id = nrow(id)
-                    frame_id = f_id + 1:n_id
-                    f_id = f_id + n_id
-
-                    if(is_se){
-                        # NW on the coef, South East on the SE
-                        res[id] = .dsb(".[tag_frame_NW]{f.[frame_id]} .[res[id]]")
-
-                        id_se = id + matrix(c(1, 0), n_id, 2, byrow = TRUE)
-                        res[id_se] = .dsb(".[tag_frame_SE]{f.[frame_id]} .[res[id_se]]")
-                    } else {
-                        res[id] = .dsb(".[tag_frame_NW]{f.[frame_id]} .[res[id]] .[tag_frame_SE]{f.[frame_id]}")
+                    # we find the rightmost index
+                    cell_right = my_cell
+                    while(k + 1 <= n_cells &&
+                          cell_mat[k + 1, 1] == my_cell[1] &&
+                          cell_mat[k + 1, 2] == my_cell[2] + 1){
+                        k_right = k + 1
+                        cell_right = cell_mat[k_right, ]
+                        k_done[length(k_done) + 1] = k_right
+                        k = k + 1
                     }
 
+                    id_NW = cbind(get_row_id(my_cell[1]), my_cell[2] + 1)
+
+                    if(is_se){
+                        id_SE = cbind(get_row_id(my_cell[1]) + 1, cell_right[2] + 1)
+                    } else {
+                        id_SE = cbind(get_row_id(my_cell[1]), cell_right[2] + 1)
+                    }
+
+                    f_id = f_id + 1
+
+                    res[id_NW] = .dsb(".[tag_frame_NW]{f.[f_id]} .[res[id_NW]]")
+                    res[id_SE] = .dsb(".[res[id_SE]] .[tag_frame_SE]{f.[f_id]}")
                 }
             }
 
@@ -5576,6 +5613,8 @@ pmatch_varname = function(x, coef_names, arg_name){
     # We want a SINGLE match
     # coef_names: vector of names
     # names(coef_names): original names
+    # coef_names = setNames(c("Petal length", "Petal width"), c("Petal.Length", "Petal.Width"))
+    # x = "Petal.L"
 
     is_regex = is_original = FALSE
     if(grepl("^@", x)){
@@ -5640,7 +5679,6 @@ pmatch_varname = function(x, coef_names, arg_name){
         stop_up(up = 5, "In the argument '", arg_name, "', the value '", x,
                 "' does not match any variable name.")
     }
-
 
     qui
 }
@@ -6367,7 +6405,9 @@ check_set_page_width = function(page.width, up = 0){
 }
 
 
-
+is_Rmarkdown = function(){
+    "knitr" %in% loadedNamespaces() && !is.null(knitr::pandoc_to())
+}
 
 
 
