@@ -1260,19 +1260,25 @@ r2 = function(x, type = "all", full_names = FALSE){
                 res[i] = 1 - x$ssr / ssr_fe_only * (n - nb_fe) / (n - nb_fe - df_k)
             }
         } else {
-            df_k = ifelse(adj, x$nparams, 1 - pseudo)
-            if(pseudo){
-                ll_null = x$ll_null
-                ll = logLik(x)
-                if(adj){
-                    res[i] = 1 - (ll - x$nparams + 1) / ll_null
-                } else {
-                    res[i] = 1 - ll / ll_null
-                }
+
+            if(x$nparams == 1 && any(grepl("(Intercept)", names(x$coefficients), fixed = TRUE))){
+                res[i] = NA
+
             } else {
-                ssr_null = x$ssr_null
-                df.intercept = 1 * (isFixef || any(grepl("(Intercept)", names(x$coefficients), fixed = TRUE)))
-                res[i] = 1 - x$ssr / ssr_null * (n - df.intercept) / (n - df_k)
+                df_k = ifelse(adj, x$nparams, 1 - pseudo)
+                if(pseudo){
+                    ll_null = x$ll_null
+                    ll = logLik(x)
+                    if(adj){
+                        res[i] = 1 - (ll - x$nparams + 1) / ll_null
+                    } else {
+                        res[i] = 1 - ll / ll_null
+                    }
+                } else {
+                    ssr_null = x$ssr_null
+                    df.intercept = 1 * (isFixef || any(grepl("(Intercept)", names(x$coefficients), fixed = TRUE)))
+                    res[i] = 1 - x$ssr / ssr_null * (n - df.intercept) / (n - df_k)
+                }
             }
 
         }
