@@ -87,6 +87,23 @@
  
  - automatic support `makecell`: any new lines found in names within the table will be translated with `makecell`. For example: `"The \n long \n varname"` is automatically translated into `\makecell{The \\ long \\ varname}`.
  
+## dsb
+
+ - Completely new function `dsb()` to manipulate strings. Applies many low level string operations very easily. The syntax may be a bit disturbing at first, but, unlike French grammar, there's some logic behind!
+ 
+ - There are over 30 basic string operations available! Do complex string manipulations in a single call!
+
+```R
+# At first sight, it's impossible to understand what's going on.
+# But I assure you, it's pretty logical! 
+# Type dsb("--help") to get some help.
+
+dollar = 6
+reason = "glory"
+dsb("Why do you develop packages? For .[`dollar`*c!$]?",
+    "For money? No... for .[U,''s, c?reason]!", sep = "\n")
+```
+ 
 ## Other
 
  - `bin`: `cut::` now ignores white spaces, so that `cut:: q1 ] q3 [` works appropriately.

@@ -4955,7 +4955,7 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
             return(NULL)
 
         } else if(outcome == 1){
-            warning("magick: error when converting pdf to png. Check install of ghostscript?  Check the log file with log_etable('magick').")
+            warning("magick: error when converting pdf to png. Check install of ghostscript? Check the log file with log_etable('magick').")
             return(NULL)
         }
     }
