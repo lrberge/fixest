@@ -836,8 +836,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
 
         if(is_md){
             if(!knitr::is_latex_output()){
-                rel_path = absolute_to_relative(path)
-                cat(.dsb0('<div class = ".[div.class]"><img src = ".[rel_path]"></div>\n'))
+                cat(.dsb0('<div class = ".[div.class]"><img src = ".[path]"></div>\n'))
                 return(invisible(NULL))
             }
         }
@@ -5159,54 +5158,6 @@ DIR_EXISTS = function(x){
     }
 
     dir.exists(x)
-}
-
-
-absolute_to_relative = function(path){
-    # path = normalizePath("../../C_testing/ctesting/")
-    # NOTA: fs:::is_absolute_path does not consider ./image/etc or ../images/etc as relative...
-    # ONLY /images/etc is OK or images/etc
-
-    wd = normalizePath(".", "/")
-    path = normalizePath(path, "/")
-
-    if(wd == path){
-        return(".")
-    }
-
-    wd.s = strsplit(wd, "/")[[1]]
-    path.s = strsplit(path, "/")[[1]]
-
-    n = min(length(wd.s), length(path.s))
-
-    if(wd.s[1] != path.s[1]){
-        # different drive, must be absolute
-        return(path)
-    }
-
-    i = which.max(wd.s[1:n] != path.s[1:n])
-
-    if(i == 1){
-        # all the same => inclusion
-        i = n + 1
-    }
-
-    rest_wd = wd.s[-(1:(i-1))]
-
-    res = ""
-    nr = length(rest_wd)
-    if(nr > 0){
-        res = dsb("`nr`*, '/'c!..")
-    }
-
-    rest_path = path.s[-(1:(i-1))]
-
-    nr = length(rest_path)
-    if(nr > 0){
-        res = dsb(".['char>0'if('|/'a) ? res].['/'c ? rest_path]")
-    }
-
-    res
 }
 
 
