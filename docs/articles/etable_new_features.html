@@ -98,7 +98,7 @@
 <code>etable</code>: new features in <code>fixest</code> 0.10.2</h1>
                         <h4 class="author">Laurent Bergé</h4>
             
-            <h4 class="date">2021-11-30</h4>
+            <h4 class="date">2021-12-02</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/lrberge/fixest/blob/master/vignettes/etable_new_features.Rmd"><code>vignettes/etable_new_features.Rmd</code></a></small>
       <div class="hidden name"><code>etable_new_features.Rmd</code></div>
@@ -107,7 +107,7 @@
 
     
     
-<p>This document illustrates the news features of <code>etable</code>, the tool to export estimation tables in <code>fixest</code>, in version 0.10.2.</p>
+<p>This document illustrates the new features of <code>etable</code>, the tool to export estimation tables in <code>fixest</code>, in version 0.10.2.</p>
 <div id="preamble" class="section level2">
 <h2 class="hasAnchor">
 <a href="#preamble" class="anchor"></a>Preamble</h2>
@@ -187,7 +187,7 @@
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">est</span>, headers <span class="op">=</span> <span class="fu">.</span><span class="op">(</span><span class="st">"\n\n Short header"</span> <span class="op">=</span> <span class="fl">2</span>, <span class="st">"*Very* \n **long** \n ***header***"</span> <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <div class="etable">
-<img src="../../../../../Google%20Drive/R_packages/fixest/fixest/vignettes/images/etable/etable_tex_2021-11-30_1103261186.png">
+<img src="../../vignettes/images/etable/etable_tex_2021-12-02_1103261186.png">
 </div>
 </div>
 <div id="support-for-threeparttable-notes" class="section level2">
@@ -199,7 +199,7 @@
        style.tex <span class="op">=</span> <span class="fu"><a href="../reference/style.tex.html">style.tex</a></span><span class="op">(</span>tpt <span class="op">=</span> <span class="cn">TRUE</span>, notes.tpt.intro <span class="op">=</span> <span class="st">"\\footnotesize"</span><span class="op">)</span>,
        notes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"note1"</span>, <span class="st">"source"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <div class="etable">
-<img src="../../../../../Google%20Drive/R_packages/fixest/fixest/vignettes/images/etable/etable_tex_2021-11-30_1.05477838.png">
+<img src="../../vignettes/images/etable/etable_tex_2021-12-02_1.05477838.png">
 </div>
 <p>The table notes now are adjusted to the table width thanks to <code>threeparttable</code> and the notes are accessed directly with their keys. The argument <code>notes.tpt.intro</code> inserts Latex code right before the first <code>\\item</code> of threeparttable: in this case, it sets the font to <code>footnotesize</code>.</p>
 <p>It is advised to set the value of <code>tpt</code> and the <code>notes.tpt.intro</code> globally. If one wants to change the value of the Latex code in a specific table, the first element of notes will be inserted verbatim if it starts with an <code>"@"</code> (i.e. it replaces <code>notes.tpt.intro</code>):</p>
@@ -207,7 +207,7 @@
 <code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">est</span>, style.tex <span class="op">=</span> <span class="fu"><a href="../reference/style.tex.html">style.tex</a></span><span class="op">(</span>tpt <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,
        notes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"@\\Large"</span>, <span class="st">"These notes are large."</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <div class="etable">
-<img src="../../../../../Google%20Drive/R_packages/fixest/fixest/vignettes/images/etable/etable_tex_2021-11-30_8984382543.png">
+<img src="../../vignettes/images/etable/etable_tex_2021-12-02_8984382543.png">
 </div>
 </div>
 <div id="support-for-adjustbox" class="section level2">
@@ -221,7 +221,7 @@
 <span class="va">est_many</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">.</span><span class="op">[</span><span class="va">nm</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">~</span> <span class="fu">mvsw</span><span class="op">(</span><span class="va">.</span><span class="op">[</span>, <span class="va">nm</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>, <span class="va">iris</span><span class="op">)</span>
 <span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">est_many</span>, adjustbox <span class="op">=</span> <span class="fl">1.1</span><span class="op">)</span></code></pre></div>
 <div class="etable">
-<img src="../../../../../Google%20Drive/R_packages/fixest/fixest/vignettes/images/etable/etable_tex_2021-11-30_8615922768.png">
+<img src="../../vignettes/images/etable/etable_tex_2021-12-02_8615922768.png">
 </div>
 </div>
 <div id="highlighting-coefficients" class="section level2">
@@ -251,7 +251,7 @@
                      <span class="st">"cyan4, square"</span> <span class="op">=</span> <span class="st">"Petal.L@3-4"</span>,
                      <span class="st">"thick5, sep8, darkgreen!90, se"</span> <span class="op">=</span> <span class="st">"Petal.W"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <div class="etable">
-<img src="../../../../../Google%20Drive/R_packages/fixest/fixest/vignettes/images/etable/etable_tex_2021-11-30_1968465510.png">
+<img src="../../vignettes/images/etable/etable_tex_2021-12-02_1968465510.png">
 </div>
 <p>There are five main options:</p>
 <ul>
@@ -277,7 +277,7 @@
                      <span class="st">"rowcol, cyan4!70"</span> <span class="op">=</span> <span class="st">"Petal.L@3-4"</span>,
                      <span class="st">"rowcol, darkgreen!40, se"</span> <span class="op">=</span> <span class="st">"Petal.W"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <div class="etable">
-<img src="../../../../../Google%20Drive/R_packages/fixest/fixest/vignettes/images/etable/etable_tex_2021-11-30_8270472157.png">
+<img src="../../vignettes/images/etable/etable_tex_2021-12-02_8270472157.png">
 </div>
 <p>As opposed to the previous example, we only have increased the transparency of the colors with the <code>color!alpha</code> syntax.</p>
 <p>Contrary to the frame, there are no options for the row coloring apart from the color itself and <code>se</code> to include the standard-errors.</p>
@@ -292,7 +292,7 @@
                            <span class="st">"**:coef:**"</span> <span class="op">=</span> <span class="st">"Petal.L@3-4"</span>,
                            <span class="st">"\\color{BrickRed} :coef_se:"</span> <span class="op">=</span> <span class="st">"Petal.W"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <div class="etable">
-<img src="../../../../../Google%20Drive/R_packages/fixest/fixest/vignettes/images/etable/etable_tex_2021-11-30_1613039342.png">
+<img src="../../vignettes/images/etable/etable_tex_2021-12-02_1613039342.png">
 </div>
 </div>
 </div>
@@ -323,7 +323,7 @@
 <code class="sourceCode R"><span class="fu"><a href="../reference/etable.html">etable</a></span><span class="op">(</span><span class="va">est</span>, div.class <span class="op">=</span> <span class="st">"etable_box"</span>, page.width <span class="op">=</span> <span class="st">"fit"</span>,
        title <span class="op">=</span> <span class="st">"Table with CSS."</span><span class="op">)</span></code></pre></div>
 <div class="etable_box">
-<img src="../../../../../Google%20Drive/R_packages/fixest/fixest/vignettes/images/etable/etable_tex_2021-11-30_5627984720.png">
+<img src="../../vignettes/images/etable/etable_tex_2021-12-02_5627984720.png">
 </div>
 <p>That’s all folks!</p>
 </div>
