@@ -836,7 +836,8 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
 
         if(is_md){
             if(!knitr::is_latex_output()){
-                cat(.dsb0('<div class = ".[div.class]"><img src = ".[path]"></div>\n'))
+                rel_path = absolute_to_relative(path)
+                cat(.dsb0('<div class = ".[div.class]"><img src = ".[rel_path]"></div>\n'))
                 return(invisible(NULL))
             }
         }
@@ -4947,7 +4948,7 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
         }
 
         # Now we create the png
-        outcome = system2("magick", .dsb("-density 500 etable.pdf -colorspace RGB .[png_name]"),
+        outcome = system2("magick", .dsb("-density 600 etable.pdf -colorspace RGB .[png_name]"),
                           "etable_shell_magick.log", "etable_shell_magick.err")
 
         if(outcome == 127){
@@ -5158,6 +5159,80 @@ DIR_EXISTS = function(x){
     }
 
     dir.exists(x)
+}
+
+
+absolute_to_relative = function(path){
+    # path = normalizePath("../../C_testing/ctesting/")
+    # NOTA: fs:::is_absolute_path does not consider ./image/etc or ../images/etc as relative...
+    # ONLY /images/etc is OK or images/etc
+
+    wd = normalizePath(".", "/")
+    path = normalizePath(path, "/")
+
+    if(wd == path){
+        return(".")
+    }
+
+    wd.s = strsplit(wd, "/")[[1]]
+    path.s = strsplit(path, "/")[[1]]
+
+    n = min(length(wd.s), length(path.s))
+
+    if(wd.s[1] != path.s[1]){
+        # different drive, must be absolute
+        return(path)
+    }
+
+    i = which.max(wd.s[1:n] != path.s[1:n])
+
+    if(i == 1){
+        # all the same => inclusion
+        i = n + 1
+    }
+
+    rest_wd = wd.s[-(1:(i-1))]
+
+    res = ""
+    nr = length(rest_wd)
+    if(nr > 0){
+        res = dsb("`nr`*, '/'c!..")
+    }
+
+    rest_path = path.s[-(1:(i-1))]
+
+    nr = length(rest_path)
+    if(nr > 0){
+        res = dsb(".['char>0'if('|/'a) ? res].['/'c ? rest_path]")
+    }
+
+    res
+}
+
+
+fix_pkgwdown_path = function(){
+    # https://github.com/r-lib/pkgdown/issues/1218
+    # just because I use google drive...
+
+    # This is to ensure it only works for me
+    if(!isTRUE(renvir_get("fixest_ROOT"))) return(NULL)
+    # we check we're in the right directory (otherwise there can be prblms with Rmakdown)
+    if(!isTRUE(file.exists("R/VCOV_aliases.R"))) return(NULL)
+
+    all_files = list.files("docs/articles/", full.names = TRUE, pattern = "html$")
+
+    for(f in all_files){
+        my_file = file(f, "r", encoding = "UTF-8")
+        text = readLines(f)
+        close(my_file)
+        if(any(grepl("../../../", text, fixed = TRUE))){
+            my_file = file(f, "w", encoding = "UTF-8")
+            text = gsub("\\.\\./.+/fixest/.+/images/", "../../vignettes/images/", text)
+            writeLines(text, f)
+            close(my_file)
+        }
+    }
+
 }
 
 ####

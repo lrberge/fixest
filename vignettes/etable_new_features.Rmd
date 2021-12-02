@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE, results = "asis")
 ```
 
 
-This document illustrates the news features of `etable`, the tool to export estimation tables in `fixest`, in version 0.10.2. 
+This document illustrates the new features of `etable`, the tool to export estimation tables in `fixest`, in version 0.10.2. 
 
 
 ## Preamble
