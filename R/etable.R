@@ -4193,20 +4193,6 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
     check_arg_plus(drop.section, "NULL multi match(fixef, slopes, stats)")
 
     check_arg(style.tex, "NULL class(fixest_style_tex)")
-    if(length(style.tex) > 0){
-        # We ensure we always have ALL components provided
-        basic_style = fixest::style.tex(main = "base")
-        basic_style[names(style.tex)] = style.tex
-        style.tex = basic_style
-    }
-
-    check_arg(style.df, "NULL class(fixest_style_df)")
-    if(length(style.df) > 0){
-        # We ensure we always have ALL components provided
-        basic_style = fixest::style.df(default = TRUE)
-        basic_style[names(style.df)] = style.df
-        style.df = basic_style
-    }
 
     check_arg(postprocess.tex, postprocess.df, "NULL function arg(1,)")
 
@@ -4248,6 +4234,33 @@ setFixest_etable = function(digits = 4, digits.stats = 5, fitstat,
 
     } else if(reset){
         opts = list()
+    }
+
+    # Style setting
+    if(length(style.tex) > 0){
+        # We ensure we always have ALL components provided
+        if(length(opts$style.tex) == 0){
+            basic_style = fixest::style.tex(main = "base")
+        } else {
+            basic_style = opts$style.tex
+        }
+
+        basic_style[names(style.tex)] = style.tex
+        style.tex = basic_style
+
+    }
+
+    check_arg(style.df, "NULL class(fixest_style_df)")
+    if(length(style.df) > 0){
+        # We ensure we always have ALL components provided
+        if(length(opts$style.df) == 0){
+            basic_style = fixest::style.df(default = TRUE)
+        } else {
+            basic_style = opts$style.df
+        }
+
+        basic_style[names(style.df)] = style.df
+        style.df = basic_style
     }
 
     # Saving the default values
