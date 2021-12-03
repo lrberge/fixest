@@ -5178,7 +5178,31 @@ fix_pkgwdown_path = function(){
         close(my_file)
         if(any(grepl("../../../", text, fixed = TRUE))){
             my_file = file(f, "w", encoding = "UTF-8")
-            text = gsub("\\.\\./.+/fixest/.+/images/", "../../vignettes/images/", text)
+
+            # We embed the images directly: safer
+
+            # A) we get the path
+            # B) we transform to URI
+            # C) we replace the line
+
+            pat = "<img.+\\.\\./.+/fixest/.+/images/"
+            qui = which(grepl(pat, text))
+            for(i in qui){
+                # ex: line = "<img src = \"../../../Google drive/fixest/fixest/vignettes/images/etable/etable_tex_2021-12-02_1.05477838.png\">"
+                line = text[i]
+                line_split = strsplit(line, "src *= *\"")[[1]]
+                path = gsub("\".*", "", line_split[2])
+                # ROOT is always fixest
+                path = gsub(".+fixest/", "", path)
+
+                URI = knitr::image_uri(path)
+
+                rest = gsub("^[^\"]+\"", "", line_split[2])
+                new_line = dsb('.[line_split[1]] src = ".[URI]".[rest]')
+
+                text[i] = new_line
+            }
+
             writeLines(text, f)
             close(my_file)
         }
