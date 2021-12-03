@@ -275,7 +275,7 @@ dsb("Bordeaux wines I like: .[4KO, C ? bx].")
 
 dsb("'e'r !The letter e is deleted")
 
-# adding a perl look-before
+# adding a perl look-behind
 dsb("'(?<! )e'R !The letter e is deleted")
 
 dsb("'e => a'r !The letter e becomes a")
