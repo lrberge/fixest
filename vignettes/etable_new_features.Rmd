@@ -15,7 +15,7 @@ This document illustrates the new features of `etable`, the tool to export estim
 
 ## Preamble
 
-Version 0.10.2 comes with majors changes in the Latex engine of `etable`. The most notable one is the ability to transform Latex tables into PNG files and display them either in RStudio's viewer, either directly in HTML markdown documents (like all the tables in this document!).
+Version 0.10.2 comes with majors changes in the Latex engine of `etable`. The most notable one is the ability to transform Latex tables into PNG files and display them either in RStudio's viewer, either directly in HTML markdown documents (like all the tables in this document).
 
 However, it requires that the following software are installed and work properly on the user-side:
 
@@ -43,7 +43,7 @@ Then let's define a few global options for the table. The philosophy is to set a
 
 ```{r}
 # The style of the table
-my_style = style.tex("aer", model.format = "(i)", fixef.where = "stats", fixef.suffix = "FE")
+my_style = style.tex("aer", model.format = "(i)")
 
 # markdown = TRUE is only useful in Rmarkdown documents
 setFixest_etable(style.tex = my_style, markdown = TRUE, page.width = "a4")
@@ -61,7 +61,7 @@ One major improvement is the ability to generate PNG snapshots of Latex tables (
 
 #### Argument `view`
 
-In any call of `etable` (i.e. `tex = TRUE` is not required), on can use `view = TRUE` to display the table snapshot in Rstudio's viewer. The table will fit the viewer's window, being as large as possible without overflowing on any side. 
+In any call of `etable` (i.e. `tex = TRUE` is not required), on can use `view = TRUE` to display the table snapshot in Rstudio's viewer. The table will fit the viewer's window, being as large as possible without overflowing horizontally nor vertically. 
 
 This feature is, ironically, very hard to display in this document since there's no viewer: so to see it at work, you should try it! Using the current example, just run `etable(est, view = TRUE)`.
 
@@ -69,13 +69,13 @@ Note that if the same tables are to be displayed several times, it can be useful
 
 #### Argument `markdown` 
 
-This is a peculiar option that works only within `Rmarkdown` documents and is ignored otherwise. If `markdown = TRUE` the output becomes always a Latex table, even when `tex = FALSE` (default). Second, and most importantly, the output within the `Rmarkdown` document becomes contingent to the type of file generated. If the document is to be a PDF, then the code of a regular Latex table is returned. If the document is **not** a PDF (especially if it is a HTML file), then:
+This is a peculiar option that works only within `Rmarkdown` documents and is ignored otherwise. If `markdown = TRUE` the output becomes always a Latex table, even when `tex = FALSE` (default). Second, and most importantly, the output within the `Rmarkdown` document becomes contingent to the type of file generated. If the document is to be a PDF, then the code of a *regular Latex table* is returned. If the document is **not** a PDF (especially if it is an HTML file), then:
 
   1. the PNG of the table is generated and saved in `images/etable/`, so that successive calls don't need to re-generate the PNGs (i.e. this is caching),
   2. the generated image is inserted in the document in an `<img>` tag,
   3. that `<img>` tag is inserted in a `<div>` container of class `etable`.
 
-This ensures that the tables are the same whether the output is a PDF or a HTML document. Since the table is embedded in a `<div>` container, you can even add some custom CSS to further customize how it looks. 
+This ensures that the tables are the same whether the output is a PDF or an HTML document. Since the table is embedded in a `<div>` container, you can even add some custom CSS to further customize how it looks. 
 
 All the images of the tables in this document are generated using `markdown = TRUE`, set globally in `setFixest_etable`.
 
@@ -83,9 +83,9 @@ All the images of the tables in this document are generated using `markdown = TR
 
 As mentioned, the tables are embedded in a standalone Latex document. The main consequence of this is that the table fits the PDF file completely, without any margin on any side. This means that whatever the width of the table (be it two or twenty columns), it will always take 100% of the width of the PDF. 
 
-While this property is fine when displaying on the viewer (since we usually want to see the full table), it makes the tables look odd and inconsistent in a HTML document. Indeed, since tables of two columns will take the same width as table of twenty columns, the font will look extra large for the former and extra small for the latter. That's not something we usually want in a document.
+While this property is fine when displaying on the viewer (since we usually want to see the full table), it makes the tables look odd and inconsistent in an HTML document. Indeed, since tables of two columns will take the same width as table of twenty columns, the font will look extra large for the former and extra small for the latter. That's not something we usually want in a document.
 
-Hence, here comes the `page.width` argument. This argument sets the width and side margins of the page in which will be inserted the table. The goal of this argument is to mimic the placement of the table in a *real* PDF document (i.e. in your article). This ensures that the PNG will look *as in* the PDF. For instance, `page.width = "a4"` will set an A4 page width and 2cm side margins on both sides. This argument can be customized at will: e.g. `8.5in, 1.1in` will lead to a page width of 8.5 inches with 1 inch side margins.
+Hence, here comes the `page.width` argument. This argument sets the width and side margins of the page in which will be inserted the table. The goal of this argument is to mimic the placement of the table in a *real* PDF document (i.e. in your article). This ensures that the PNG will look *as in* the PDF. For instance, `page.width = "a4"` will set an A4 page width and 2cm side margins on both sides. This argument can be customized at will: e.g. `8.5in, 1.1in` will lead to a page width of 8.5 inches with 1.1 inch side margins (the only constraint is that the unit of the width should be the same as the unit of the margin).
 
 When `page.width` is set up, all tables in an HTML document will be consistent: the font will be the same across tables. On top of that, it also enables a couple of specific features. First, if the table is too narrow, you can use a *tabularx* table (with the argument `tabluar`) and the table will be as large as the "text" width (not the HTML text but the hypothetical PDF text).
 Second, if the table overflows, you can adjust it with the argument `adjustbox` to make it fit the text width.
@@ -111,10 +111,18 @@ etable(est,
 
 The table notes now are adjusted to the table width thanks to `threeparttable` and the notes are accessed directly with their keys. The argument `notes.tpt.intro` inserts Latex code right before the first `\\item` of threeparttable: in this case, it sets the font to `footnotesize`. 
 
-It is advised to set the value of `tpt` and the `notes.tpt.intro` globally. If one wants to change the value of the Latex code in a specific table, the first element of notes will be inserted verbatim if it starts with an `"@"` (i.e. it replaces `notes.tpt.intro`):
+In general, it is advised to set the value of `tpt` and the `notes.tpt.intro` globally. Then if one wants to change the value of `notes.tpt.intro`, instead of typing `style.tex = style.tex(notes.tpt.intro = "stuff")`, the first element of `notes` will replace `notes.tpt.intro` if it starts with an `"@"`:
 ```{r}
-etable(est, style.tex = style.tex(tpt = TRUE),
-       notes = c("@\\Large", "These notes are large."))
+# Setting up tpt globally
+my_style = style.tex(tpt = TRUE, 
+                     notes.tpt.intro = "\\footnotesize")
+setFixest_etable(style.tex = my_style)
+
+# Below is identical to: 
+#  etable(est, 
+#         style.tex = style.tex(notes.tpt.intro = "\\Large"),
+#         notes = "These notes are large.")
+etable(est, notes = c("@\\Large", "These notes are large."))
 ```
 
 
@@ -221,7 +229,8 @@ etable(est, div.class = "etable_box", page.width = "fit",
        title = "Table with CSS.")
 ```
 
-That's all folks!
+I'm not sure it should be done, but at least it's possible!
+
 
 
 
