@@ -4939,9 +4939,9 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
             unlink("etable.aux")
         }
 
-        # I keep the CMD because it is *substantially* faster
+        # I keep the CMD because it is faster
         # WITH: 2.5s
-        # SANS: 4.5s
+        # SANS: 3.5s
 
         DO_CMD = TRUE
 
@@ -5021,19 +5021,24 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
 
 
         if(!ok_cmd_magick){
-            if(!requireNamespace("magick", quietly = TRUE)){
+            if(!requireNamespace("pdftools", quietly = TRUE)){
 
                 if(!is.null(warn_msg)){
                     warn_up(warn_msg)
                     return(NULL)
                 }
 
-                warn_up("The functionality you want to use requires the package 'magick' which is not installed or a working imagemagick+ghostscript installation which wasn't found.")
+                warn_up("The functionality you want to use requires the package 'pdftools' which is not installed or a working imagemagick+ghostscript installation which wasn't found.")
                 return(NULL)
             }
 
-            img_pdf = magick::image_read_pdf("etable.pdf", density = 600)
-            magick::image_write(img_pdf, path = png_name, format = "png")
+            # We use pdftools, but to avoid an ugly warning, we need to provide a name we don't want
+            # and hence rename the file later...
+
+            pdftools::pdf_convert("etable.pdf", dpi = 600, verbose = FALSE,
+                                  filenames = .dsb(".[png_name]_%d.%s"))
+            old_name = .dsb(".[png_name]_1.png")
+            file.rename(old_name, png_name)
         }
 
     }
