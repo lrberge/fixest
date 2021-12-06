@@ -4830,12 +4830,13 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
         export_path = check_set_path(export, "w", up = up)
     }
 
+    dir = NULL
     if(do_build){
 
         dir = if(cache && !is.null(dir_cache)) dir_cache else normalizePath(tempdir(), "/")
 
         if(cache){
-            if(!is.null(id)){
+            if(is.null(id)){
                 id = substr(cpp_hash_string(x_clean), 1, NMAX)
             }
 
@@ -4852,6 +4853,19 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
         } else {
             png_name = "etable.png"
         }
+    }
+
+    if(view || do_build){
+        # we set the working directory properly
+        # used to:
+        #  - compile .tex to .pdf to .png
+        #  - view the HTML document (needs to be on the WD)
+
+        if(is.null(dir)) dir = normalizePath(tempdir(), "/")
+
+        current_dir = getwd()
+        on.exit(setwd(current_dir))
+        setwd(dir)
     }
 
     if(do_build){
@@ -4911,10 +4925,6 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
         # Compiling + exporting
         #
 
-        current_dir = getwd()
-        on.exit(setwd(current_dir))
-        setwd(dir)
-
         tex_file = file("etable.tex", "w", encoding = "UTF-8")
         writeLines(doc_full, tex_file)
         close(tex_file)
@@ -4929,48 +4939,103 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
             unlink("etable.aux")
         }
 
-        outcome = system2("pdflatex", .dsb("-halt-on-error -interaction=nonstopmode .[draft] etable.tex"),
-                          "etable_shell_pdf.log", "etable_shell_pdf.err")
+        # I keep the CMD because it is *substantially* faster
+        # WITH: 2.5s
+        # SANS: 4.5s
 
-        if(outcome == 127){
-            warning("pdflatex could not be run: check install?")
-            return(NULL)
+        DO_CMD = TRUE
 
-        } else if(outcome == 1){
-
-            # Sometimes recompiling works!!!
+        warn_msg = NULL
+        ok_cmd_tex = TRUE && DO_CMD
+        if(DO_CMD){
             outcome = system2("pdflatex", .dsb("-halt-on-error -interaction=nonstopmode .[draft] etable.tex"),
                               "etable_shell_pdf.log", "etable_shell_pdf.err")
 
-            if(outcome == 1){
-                warning("pdflatex: error when compiling -- sorry! Check the log file with log_etable('pdflatex').")
-                return(NULL)
+            if(outcome == 127){
+                ok_cmd_tex = FALSE
+            } else if(outcome == 1){
+
+                # Sometimes recompiling works!!!
+                outcome = system2("pdflatex", .dsb("-halt-on-error -interaction=nonstopmode .[draft] etable.tex"),
+                                  "etable_shell_pdf.log", "etable_shell_pdf.err")
+
+                if(outcome == 1){
+                    warn_msg = "pdflatex: error when compiling -- sorry! Check the log file with log_etable('pdflatex')."
+                    ok_cmd_tex = FALSE
+                }
             }
         }
 
-        if(do_rerun){
+        if(ok_cmd_tex && do_rerun){
             outcome = system2("pdflatex", "-halt-on-error -interaction=nonstopmode etable.tex",
                               "etable_shell_pdf.log", "etable_shell_pdf.err")
 
             # No reason for the 2nd run to fail, but I add it anyway just to be safe
             if(outcome == 1){
-                warning("pdflatex: error when compiling -- sorry! Check the log file with log_etable('pdflatex').")
-                return(NULL)
+                warn_msg = "pdflatex: error when compiling -- sorry! Check the log file with log_etable('pdflatex')."
+                ok_cmd_tex = FALSE
             }
         }
 
-        # Now we create the png
-        outcome = system2("magick", .dsb("-density 600 etable.pdf -colorspace RGB .[png_name]"),
-                          "etable_shell_magick.log", "etable_shell_magick.err")
+        if(!ok_cmd_tex){
+            # We use tinytex
+            if(!requireNamespace("tinytex", quietly = TRUE)){
 
-        if(outcome == 127){
-            warning("magick could not be run: check the install of imagemagick?")
-            return(NULL)
+                if(!is.null(warn_msg)){
+                    # we still give the warning to the user due to CMD pblm
+                    warn_up(warn_msg)
+                    return(NULL)
+                }
 
-        } else if(outcome == 1){
-            warning("magick: error when converting pdf to png. Check install of ghostscript? Check the log file with log_etable('magick').")
-            return(NULL)
+                warn_up("The functionality you want to use requires the package 'tinytex' which is not installed or a working pdflatex installation which wasn't found.")
+                return(NULL)
+            }
+
+            info_compile = try(suppressMessages(tinytex::pdflatex("etable.tex",
+                                                                  clean = FALSE, min_times = 1 + do_rerun)))
+            if(inherits(info_compile, "try-error")){
+                warn_up("pdflatex: error when compiling -- sorry! Check the log file with log_etable('pdflatex').")
+                return(NULL)
+            }
+
         }
+
+        #
+        # Creating the PNG
+        #
+
+        ok_cmd_magick = TRUE && DO_CMD
+        warn_msg = NULL
+        if(DO_CMD){
+            outcome = system2("magick", .dsb("-density 600 etable.pdf -colorspace RGB .[png_name]"),
+                              "etable_shell_magick.log", "etable_shell_magick.err")
+
+            if(outcome == 127){
+                ok_cmd_magick = FALSE
+
+            } else if(outcome == 1){
+                warn_msg = "magick: error when converting pdf to png. Check install of ghostscript? Check the log file with log_etable('magick')."
+                ok_cmd_magick = FALSE
+            }
+        }
+
+
+        if(!ok_cmd_magick){
+            if(!requireNamespace("magick", quietly = TRUE)){
+
+                if(!is.null(warn_msg)){
+                    warn_up(warn_msg)
+                    return(NULL)
+                }
+
+                warn_up("The functionality you want to use requires the package 'magick' which is not installed or a working imagemagick+ghostscript installation which wasn't found.")
+                return(NULL)
+            }
+
+            img_pdf = magick::image_read_pdf("etable.pdf", density = 600)
+            magick::image_write(img_pdf, path = png_name, format = "png")
+        }
+
     }
 
     # Now porting to the viewer
@@ -4981,6 +5046,19 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
             warning("To preview the table, we need RStudio's viewer -- which wasn't found.")
         } else {
             # setting up the html document
+
+            # NOTE: all the viewer's data must be in tempdir
+            # => when we cache, that can cause problems
+            # hence we copy the file there if necessary
+
+            tmp_dir = normalizePath(tempdir(), "/")
+
+            if(normalizePath(getwd(), "/") != tmp_dir){
+                old_name = png_name
+                png_name = gsub(".+/", "", png_name)
+                file.copy(old_name, file.path(tmp_dir, png_name))
+                setwd(tmp_dir)
+            }
 
             html_file = viewer_html_template(png_name)
 

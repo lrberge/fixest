@@ -33,7 +33,7 @@
 
 #### New arguments
 
- - new argument `view` to display the latex table in the viewer pane (suggestion by Or Avishay-Rizi [#227](https://github.com/lrberge/fixest/issues/227)). You need to have a working distribution of pdflatex, imagemagick and ghostscript for this feature to work.
+ - new argument `view` to display the latex table in the viewer pane (suggestion by Or Avishay-Rizi [#227](https://github.com/lrberge/fixest/issues/227)). You need to a) have a working distribution of pdflatex, imagemagick and ghostscript, or b) have the R packages magick and tinytex installed, for this feature to work.
  
  - new argument `view.cache` in `setFixest_etable`: whether to cache the PNGs generated.
  
