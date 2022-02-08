@@ -510,7 +510,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                         fml_parts[i] = paste(mv_txt$before, mv_value, mv_txt$after)
                     }
                 }
-                fml = as.formula(paste0(fml_parts, collapse = ""))
+                fml = as.formula(paste0(fml_parts, collapse = "|"))
             }
 
         }

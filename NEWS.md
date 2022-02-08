@@ -31,6 +31,8 @@
   
   - fix bug in multiple estimations when the data contains weights and there are missing values in the y's or X's (reported by @sahilchinoy [#263](https://github.com/lrberge/fixest/issues/263)).
   
+  - fix bug multiverse stepwise when the estimation contains fixed-effects or IVs (reported by @resulumit [#260](https://github.com/lrberge/fixest/issues/260)).
+  
 ## etable
 
 #### New arguments
