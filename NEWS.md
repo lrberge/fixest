@@ -35,6 +35,8 @@
   
   - fix bug in the startup message trigger.
   
+  - increase the robustness of the code leading to the startup message (reported by @flycattt [#262](https://github.com/lrberge/fixest/issues/262)).
+  
 ## etable
 
 #### New arguments

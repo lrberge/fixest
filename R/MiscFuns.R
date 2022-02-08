@@ -11489,6 +11489,7 @@ initialize_startup_msg = function(startup_msg){
     # message("getting version")
 
     previous_version = config_get("fixest_version")
+    is_corrupt_version = !is.null(previous_version) && !is_pkg_version(previous_version)
 
     # message("version is ", previous_version)
 
@@ -11500,7 +11501,12 @@ initialize_startup_msg = function(startup_msg){
 
     current_version = fixest_version()
 
-    if(is.null(previous_version)){
+    if(!is_pkg_version(current_version)){
+        # If we're here, it's a bug: this should NEVER happen
+        return(FALSE)
+    }
+
+    if(!is_pkg_version(previous_version)){
         # We first update the version
         # message("updating the version")
         config_update("fixest_version", current_version)
@@ -11508,7 +11514,7 @@ initialize_startup_msg = function(startup_msg){
         # message("Is fixest used? ", is_fixest_used())
 
         # Is it a new project? Or was fixest simply never used before?
-        if(is_fixest_used()){
+        if(!is_corrupt_version && is_fixest_used()){
             # => message
             # Since I register versions since 0.9.0, this means that the
             # version of fixest used was anterior => all msgs should pop
@@ -11516,7 +11522,7 @@ initialize_startup_msg = function(startup_msg){
             config_update("fixest_startup_msg", TRUE)
             return(TRUE)
         } else {
-            # fixest was never used
+            # fixest was never used or the version was corrupt
             # => we don't show any message since it will not break any existing code
             config_update("fixest_startup_msg", FALSE)
             return(FALSE)
@@ -11584,6 +11590,10 @@ version2num = function(x){
 
 fixest_version = function(){
     as.character(packageVersion("fixest"))
+}
+
+is_pkg_version = function(x){
+    length(x) == 1 && is.character(x) && length(strsplit(x, "\\.")[[1]]) == 3
 }
 
 is_fixest_used = function(){
