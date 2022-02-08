@@ -33,6 +33,8 @@
   
   - fix bug multiverse stepwise when the estimation contains fixed-effects or IVs (reported by @resulumit [#260](https://github.com/lrberge/fixest/issues/260)).
   
+  - fix bug in the startup message trigger.
+  
 ## etable
 
 #### New arguments

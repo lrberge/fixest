@@ -11615,13 +11615,15 @@ is_fixest_used = function(){
 
     for(f in fixest_files){
         f_created = file.mtime(f)
-        d = as.numeric(difftime(now, f_created, units = "days"))
-        if(d > 7){
-            return(TRUE)
+        if("POSIXt" %in% class(f_created)){
+            d = as.numeric(difftime(now, f_created, units = "days"))
+            if(d > 7){
+                return(TRUE)
+            }
         }
     }
 
-    return(TRUE)
+    return(FALSE)
 }
 
 renvir_get = function(key){
