@@ -29,6 +29,8 @@
   
   - fix bug in `predict` with variables created with `i()` leading to a prediction even for values not included in the original estimation (reported by @vincentarelbundock [#235](https://github.com/lrberge/fixest/issues/235)).
   
+  - fix bug in multiple estimations when the data contains weights and there are missing values in the y's or X's (reported by @sahilchinoy [#263](https://github.com/lrberge/fixest/issues/263)).
+  
 ## etable
 
 #### New arguments
