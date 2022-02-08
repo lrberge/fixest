@@ -803,6 +803,8 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 	                my_env = reshape_env(env)
 	            }
 
+	            weights = get("weights.value", my_env)
+
 	            all_varnames = NULL
 	            isLinear_current = TRUE
 	            if(length(my_rhs) == 0){
@@ -898,6 +900,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 	                }
 
 	            } else {
+
 	                if(isFixef){
 	                    my_products = cpp_sparse_products(X_demean, weights, y_demean, nthreads = nthreads)
 	                } else {
@@ -1395,7 +1398,6 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 	#
 	# Regular estimation ####
 	#
-
 
 	onlyFixef = length(X) == 1
 
