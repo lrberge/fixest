@@ -1525,7 +1525,6 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
     n_models = length(all_models)
 
-
     IS_MULTI_VCOV = FALSE
     IS_EACH = FALSE
     if(!missnull(vcov) && identical(class(vcov), "list") && length(vcov) > 1){
@@ -1600,7 +1599,6 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
             check_value(vcov, "list len(value)", .value = n_models, .message = "If 'vcov' is a list, it must be of the same length as the number of models, or you should add the 'each' or 'times' keyword as the first element of the list.")
         }
     }
-
 
     auto_headers_clean = list()
     if(length(auto_headers) > 0){

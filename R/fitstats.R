@@ -1555,8 +1555,8 @@ cd_stat = function(x){
     Z_proj = proj_on_U(x, Z)
 
     n = nobs(x)
-    n_endo = ncol(X_proj)
-    n_inst = ncol(Z_proj)
+    n_endo = NCOL(X_proj)
+    n_inst = NCOL(Z_proj)
 
     # The stat
     if(FALSE){
