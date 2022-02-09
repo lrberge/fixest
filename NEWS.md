@@ -37,6 +37,8 @@
   
   - increase the robustness of the code leading to the startup message (reported by @flycattt [#262](https://github.com/lrberge/fixest/issues/262)).
   
+  - improve the robustness of the algorithm parsing the fixed-effects (linked to issue [#253](https://github.com/lrberge/fixest/issues/253))
+  
 ## etable
 
 #### New arguments

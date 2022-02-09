@@ -5855,7 +5855,7 @@ prepare_matrix = function(fml, base, fake_intercept = FALSE){
     all_var_names = attr(t, "term.labels")
 
     # We take care of interactions: references can be multiple, then ':' is legal
-    all_vars = colon_to_star(all_var_names)
+    all_vars = cpp_colon_to_star(all_var_names)
 
     # Forming the call
     if(attr(t, "intercept") == 1 && !fake_intercept){
@@ -6160,7 +6160,7 @@ fixef_terms = function(fml, stepwise = FALSE, origin_type = "feols"){
         # we need to take care of the ^ used to combine variables
         fml_char = as.character(fml[2])
         if(grepl("^", fml_char, fixed = TRUE)){
-            fml_char_new = gsub("^", "_impossible_var_name_", fml_char, fixed = TRUE)
+            fml_char_new = gsub("^", "%^%", fml_char, fixed = TRUE)
             fml = as.formula(paste0("~", fml_char_new))
         }
 
@@ -6269,7 +6269,7 @@ fixef_terms = function(fml, stepwise = FALSE, origin_type = "feols"){
     my_vars = unique(my_vars)
 
     # we put the ^ back
-    my_vars = gsub("_impossible_var_name_", "^", my_vars, fixed = TRUE)
+    my_vars = gsub(" %^% ", "^", my_vars, fixed = TRUE)
 
     res = list(fml_terms = my_vars)
     # OLD version
@@ -6317,18 +6317,12 @@ prepare_df = function(vars, base, fastCombine = NA){
         # special indicator to combine factors
         # ^ is a special character: only used to combine variables!!!
 
-        fun2combine = ifelse(fastCombine, "combine_clusters_fast", "combine_clusters")
+        vars = fml_combine(vars, fastCombine, vars = TRUE)
 
-        vars_new = gsub("([[:alpha:]\\.][[:alnum:]_\\.]*(\\^[[:alpha:]\\.][[:alnum:]_\\.]*)+)",
-                        paste0(fun2combine, "(\\1)"), vars)
-
-        vars_new = gsub("\\^", ", ", vars_new)
-
-        vars = vars_new
         changeNames = TRUE
     }
 
-    all_vars = gsub(":", "*", vars)
+    all_vars = cpp_colon_to_star(vars)
 
     if(all(all_vars %in% names(base))){
         res = base[, all_vars, drop = FALSE]
@@ -6347,10 +6341,7 @@ prepare_df = function(vars, base, fastCombine = NA){
         res = do.call("data.frame", data_list)
 
         if(changeNames){
-            qui = grepl("combine_clusters", all_var_names, fixed = TRUE)
-            new_names = gsub("combine_clusters(_fast)?\\(|\\)", "", all_var_names[qui])
-            new_names = gsub(", ?", "^", new_names)
-            all_var_names[qui] = new_names
+            all_var_names = rename_hat(all_var_names)
         }
 
         names(res) = all_var_names
@@ -6360,20 +6351,57 @@ prepare_df = function(vars, base, fastCombine = NA){
 }
 
 
-fml_combine = function(fml_char, fastCombine){
+# fml_char = "x + y + u^factor(v1, v2) + x5"
+fml_combine = function(fml_char, fastCombine, vars = FALSE){
     # function that transforms "hat" interactions into a proper function call:
     # Origin^Destination^Product + Year becomes ~combine_clusters(Origin, Destination, Product) + Year
 
     fun2combine = ifelse(fastCombine, "combine_clusters_fast", "combine_clusters")
 
-    fml_char_new = gsub("([[:alpha:]\\.][[:alnum:]_\\.]*(\\^[[:alpha:]\\.][[:alnum:]_\\.]*)+)",
-                        paste0(fun2combine, "(\\1)"),
-                        fml_char)
+    # we need to change ^ into %^% otherwise terms sends error
+    labels = attr(terms(.xpd(rhs = gsub("\\^(?=[^0-9])", "%^%", fml_char, perl = TRUE))), "term.labels")
 
-    fml_char_new = gsub("\\^(?=[[:alpha:]\\.])", ", ", fml_char_new, perl = TRUE)
-    fml = as.formula(paste0("~", fml_char_new))
+    # now we work this out
+    for(i in seq_along(labels)){
+        lab = labels[i]
+        if(grepl("^", lab, fixed = TRUE)){
+            lab_split = trimws(strsplit(lab, "%^%", fixed = TRUE)[[1]])
+            if(grepl("(", lab, fixed = TRUE)){
+                # we add some error control -- imperfect, but... it's enough
+                lab_collapsed = gsub("\\([^\\)]+\\)", "", lab)
+                if(length(lab_split) != length(strsplit(lab_collapsed, "%^%", fixed = TRUE)[[1]])){
+                    msg = "Wrong formatting of the fixed-effects interactions. The '^' operator should not be within parentheses."
+                    stop(msg)
+                }
+            }
+            labels[i] = paste0(fun2combine, "(", paste0(lab_split, collapse = ", "), ")")
+        }
+    }
+
+    if(vars){
+        return(labels)
+    }
+
+    fml = .xpd(rhs = labels)
 
     fml
+}
+
+# x = c('combine_clusters(bin(fe1, "!bin::2"), fe2)', 'fe3')
+rename_hat = function(x){
+
+    qui = grepl("combine_clusters", x, fixed = TRUE)
+    if(!any(qui)) return(x)
+
+    for(i in which(qui)){
+        xi_new = gsub("combine_clusters(_fast)?", "sw", x[i])
+        sw_only = extract_fun(xi_new, "sw")
+        sw_eval = eval(str2lang(sw_only$fun))
+        new_var = paste0(sw_only$before, paste0(sw_eval, collapse = "^"), sw_only$after)
+        x[i] = new_var
+    }
+
+    x
 }
 
 prepare_cluster_mat = function(fml, base, fastCombine){
@@ -6403,10 +6431,7 @@ prepare_cluster_mat = function(fml, base, fastCombine){
         res = do.call("data.frame", data_list)
 
         if(changeNames){
-            qui = grepl("combine_clusters", all_var_names)
-            new_names = gsub("combine_clusters(_fast)?\\(|\\)", "", all_var_names[qui])
-            new_names = gsub(", ?", "^", new_names)
-            all_var_names[qui] = new_names
+            all_var_names = rename_hat(all_var_names)
         }
 
         names(res) = all_var_names
@@ -7988,26 +8013,13 @@ fml2varnames = function(fml, combine_fun = FALSE){
     # Only the ^ users "pay the price"
 
     if("^" %in% all.vars(fml, functions = TRUE)){
-        fml_char = gsub(" ", "", as.character(fml)[2], fixed = TRUE)
-
-        if(grepl("[[:alpha:]\\.][[:alnum:]\\._]*\\^", fml_char)){
-            fml_char_new = gsub("([[:alpha:]\\.][[:alnum:]\\._]*)\\^", "\\1_xXx_", fml_char)
-            fml = .xpd(rhs = fml_char_new)
+        # new algo using fml_combine, more robust
+        fml_char = as.character(fml)[2]
+        all_var_names = fml_combine(fml_char, TRUE, vars = TRUE)
+        if(!combine_fun){
+            all_var_names = rename_hat(all_var_names)
         }
 
-        t = terms(fml)
-        all_var_names = attr(t, "term.labels")
-
-        if(combine_fun){
-            # we rewrite the variables with combine_cluster_fast
-
-            qui = grepl("_xXx_[[:alpha:]\\.]", all_var_names)
-
-            all_var_names[qui] = paste0("combine_clusters_fast(", gsub("_xXx_", ", ", all_var_names[qui]), ")")
-        }
-
-        all_var_names = gsub("_xXx_", "^", all_var_names) # even with combine_fun=TRUE, some can remain (real powers)
-        all_var_names = gsub(":", "*", all_var_names)
     } else {
         t = terms(fml)
         all_var_names = attr(t, "term.labels")
@@ -8454,7 +8466,7 @@ fixest_fml_rewriter = function(fml){
                         do_sub = grepl("^", fml_fixef_text, fixed = TRUE)
 
                         if(do_sub){
-                            fml_fixef = as.formula(gsub("^", "__impossible_var__", fml_fixef_text, fixed = TRUE))
+                            fml_fixef = as.formula(gsub("^", "%^%", fml_fixef_text, fixed = TRUE))
                         }
 
                         fixef_terms = attr(terms(fml_fixef), "term.labels")
@@ -8462,7 +8474,7 @@ fixest_fml_rewriter = function(fml){
                                                   "Problem in the formula regarding lag/leads: ", clean = "__expand")
 
                         if(do_sub){
-                            fixef_text = gsub("__impossible_var__", "^", fixef_text, fixed = TRUE)
+                            fixef_text = gsub(" %^% ", "^", fixef_text, fixed = TRUE)
                         }
 
                         fml_fixef = as.formula(paste("~", paste(fixef_text, collapse = "+")))
@@ -8647,60 +8659,6 @@ all_vars_with_i_prefix = function(fml){
     vars
 }
 
-
-colon_to_star = function(x){
-    # used to transform ":" from interactions into proper multiplications
-    # This is needed for evaluation (so that : is not interpreted as the sequence operator)
-    # basically we leave all colon in parentheses untouched
-    # this code is not robust to formulas including textual parentheses, like "(" or ")"
-    # I don't see when it should happen so it's OK
-    #
-    # it would have been easier to write c code dealing at the character level
-    # but this also works
-    #
-    # fml = ~ x1:x2:a(6:7) + x5 + i(aa, 5:6):jjl + base::poly(x, 5)
-    # x = get_vars(fml)
-
-    qui_colon = grepl(":", x, fixed = TRUE)
-    qui_paren = grepl("(", x, fixed = TRUE)
-
-    if(any(qui_colon)){
-
-        res = x
-        res[qui_colon & !qui_paren] = gsub("(^|[^:]):($|[^:])", "\\1*\\2", res[qui_colon & !qui_paren])
-
-        qui_check = qui_colon & qui_paren
-
-        for(i in which(qui_check)){
-            var = x[i]
-
-            var_split_open = strsplit(var, "(", fixed = TRUE)[[1]]
-            n_open = -1
-            for(j in 1:length(var_split_open)){
-                n_open = n_open + 1
-
-                element = var_split_open[j]
-                element_split_close = strsplit(element, ")", fixed = TRUE)[[1]]
-
-                n_close = length(element_split_close) - 1
-                n_open = n_open - n_close
-                if(n_open == 0){
-                    n_el = length(element_split_close)
-                    element_split_close[n_el] = gsub("(^|[^:]):($|[^:])", "\\1*\\2", element_split_close[n_el])
-                    var_split_open[j] = paste(element_split_close, collapse = ")")
-                }
-            }
-
-            res[i] = paste(var_split_open, collapse = "(")
-
-        }
-
-        return(res)
-
-    } else {
-        return(x)
-    }
-}
 
 # function to normalize character vectors into variable names
 as_varname = function(x){
@@ -9696,10 +9654,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
 			        stop("You cannot use predict() based on the initial regression since the fixed-effect '", fe_var, "' was combined using an algorithm dropping the FE values (but fast). Please re-run the regression using the argument 'combine.quick=FALSE'.")
 			    }
 
-			    fe_var_new = gsub("([[:alpha:]_\\.][[:alnum:]_\\.]*(\\^[[:alpha:]_\\.][[:alnum:]_\\.]*)+)",
-			                    "combine_clusters(\\1)", fe_var)
-
-			    fe_var = gsub("\\^", ", ", fe_var_new)
+			    fe_var = fml_combine(fe_var, fastCombine = FALSE, vars = TRUE)
 			}
 
 			# Obtaining the vector of fixed-effect

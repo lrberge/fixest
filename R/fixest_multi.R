@@ -299,7 +299,7 @@ print.fixest_multi = function(x, ...){
         all_se = unique(unlist(sapply(data, function(x) attr(x$cov.scaled, "type"))))
 
         if(length(all_se) > 1){
-            cat("Standard-errors: mixed (use summary() with arg. 'se' or 'cluster' to harmonize them) \n")
+            cat("Standard-errors: mixed (use summary() with arg. 'vcov' to harmonize them) \n")
         } else if(length(all_se) == 1){
             cat("Standard-errors:", all_se, "\n")
         }

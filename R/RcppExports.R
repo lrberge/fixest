@@ -305,6 +305,10 @@ cpppar_quf_table_sum <- function(x, y, do_sum_y, rm_0, rm_1, rm_single, only_slo
     .Call(`_fixest_cpppar_quf_table_sum`, x, y, do_sum_y, rm_0, rm_1, rm_single, only_slope, nthreads, do_refactor, r_x_sizes, obs2keep)
 }
 
+cpp_colon_to_star <- function(Rstr) {
+    .Call(`_fixest_cpp_colon_to_star`, Rstr)
+}
+
 cpp_newey_west <- function(S, w, nthreads) {
     .Call(`_fixest_cpp_newey_west`, S, w, nthreads)
 }

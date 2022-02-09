@@ -231,6 +231,14 @@ res = feols(y ~ x1 | fe1^fe2 | x2 ~ x3, base)
 # IVs + lags
 res = feols(y ~ x1 | fe1^fe2 | l(x2, -1:1) ~ l(x3, -1:1), base, panel.id = ~ fe1 + period)
 
+# functions in interactions
+res = feols(y ~ x1 | factor(fe1)^factor(fe2), base)
+res = feols(y ~ x1 | round(x2^2), base)
+test(feols(y ~ x1 | factor(fe1^fe2), base), "err")
+
+res = feols(y ~ x1 | bin(x2, "bin::1")^fe1 + fe1^fe2, base)
+
+
 
 ####
 #### Fit methods ####
@@ -1400,6 +1408,10 @@ quoi$species = as.character(quoi$species)
 quoi$species[1:3] = "zz"
 test(predict(res, quoi), "err")
 
+# combine FEs
+res = feols(y ~ x1 | species^fe_bis, base)
+test(predict(res), predict(res, base))
+
 #
 # prediction with lags
 #
@@ -1655,6 +1667,17 @@ user_name = c("fit_x2", "left", "x1", "x4", "x1:x4", "right")
 test(names(coef(est_multi_LR[lhs = "y1", rhs = "x1", fixef = "spe"])), user_name)
 test(coef(est_multi_LR[lhs = "y1", rhs = "x1", fixef = "spe"]), coef(est_b)[user_name])
 test(coef(est_multi_LR[lhs = "y2", rhs = "!x1", fixef = "1"]), coef(est_c))
+
+
+# mvsw
+
+est_mvsw = feols(y1 ~ mvsw(x1, x2), base)
+est_mvsw_fe = feols(y1 ~ mvsw(x1, x2) | mvsw(species, fe2), base)
+est_mvsw_fe_iv = feols(y1 ~ mvsw(x1, x2) | mvsw(species, fe2) | x3 ~ x4, base)
+
+test(length(est_mvsw), 4)
+test(length(as.list(est_mvsw_fe)), 16)
+test(length(as.list(est_mvsw_fe_iv)), 16)
 
 
 ####

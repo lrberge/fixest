@@ -1105,6 +1105,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_colon_to_star
+StringVector cpp_colon_to_star(SEXP Rstr);
+RcppExport SEXP _fixest_cpp_colon_to_star(SEXP RstrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type Rstr(RstrSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_colon_to_star(Rstr));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_newey_west
 NumericMatrix cpp_newey_west(NumericMatrix S, NumericVector w, int nthreads);
 RcppExport SEXP _fixest_cpp_newey_west(SEXP SSEXP, SEXP wSEXP, SEXP nthreadsSEXP) {
@@ -1244,6 +1255,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_fixest_cpppar_check_only_0", (DL_FUNC) &_fixest_cpppar_check_only_0, 2},
     {"_fixest_cpp_quf_gnl", (DL_FUNC) &_fixest_cpp_quf_gnl, 1},
     {"_fixest_cpppar_quf_table_sum", (DL_FUNC) &_fixest_cpppar_quf_table_sum, 11},
+    {"_fixest_cpp_colon_to_star", (DL_FUNC) &_fixest_cpp_colon_to_star, 1},
     {"_fixest_cpp_newey_west", (DL_FUNC) &_fixest_cpp_newey_west, 3},
     {"_fixest_cpp_newey_west_panel", (DL_FUNC) &_fixest_cpp_newey_west_panel, 7},
     {"_fixest_cpp_driscoll_kraay", (DL_FUNC) &_fixest_cpp_driscoll_kraay, 5},
