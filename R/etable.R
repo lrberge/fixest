@@ -4883,7 +4883,7 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
         }
 
         minipage_start = minipage_end = ""
-        w = "21cm"
+        w = "35cm"
         if(!identical(page.width, "fit")){
             # page.width is guaranteed to be of length 2
             w = page.width[1]
@@ -5170,45 +5170,23 @@ viewer_html_template = function(png_name){
 #container {
  width: 100%;
  display: block;
- margin: auto;
+ height: 96vh;
+ text-align: center;
+}
+
+img {
+  max-width: 100%;
+  max-height: 100%;
 }
 
 </style>
-
-<script>
-
-// Simple function to get the image always at the right size
-changeImgRatio = function(){
-
-	my_div = document.getElementById("container");
-
-	let current_height = parseInt(my_div.offsetHeight);
-	let view_height = parseInt(window.innerHeight);
-	let ratio_height = 1.0 * current_height / view_height;
-
-	let current_width = parseInt(my_div.offsetWidth);
-	let view_width = parseInt(window.innerWidth);
-	let ratio_width = 1.0 * current_width/ view_width;
-
-	if(ratio_height > ratio_width){
-		let new_width = .97 * view_height * current_width / current_height;
-		my_div.style.width = new_width.toString() + "px";
-	} else {
-		my_div.style.width = view_width.toString() + "px";
-	}
-}
-
-window.addEventListener("resize", changeImgRatio);
-window.addEventListener("load", changeImgRatio);
-
-</script>
 
 </head>
 
 <body>
 
 <div id="container" class = "etable">
-	<img src = ".[png_name]" alt="etable preview" width = "100%">
+	<img src = ".[png_name]" alt="etable preview">
 </div>
 
 </body> </html>
@@ -6554,7 +6532,12 @@ check_set_page_width = function(page.width, up = 0){
                     "Problem: the current format could not be parsed ('", page.width, "').")
         }
 
-        if(length(numbers) == 1) numbers[2] = numbers[1]
+        if(length(numbers) == 1){
+            numbers[2] = numbers[1]
+        } else {
+            numbers = as.numeric(numbers)
+            numbers[2] = numbers[1] - 2*numbers[2]
+        }
 
         page.width = paste0(c(numbers[1], numbers[2]), unit)
     }
