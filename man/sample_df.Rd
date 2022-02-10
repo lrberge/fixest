@@ -4,15 +4,17 @@
 \alias{sample_df}
 \title{Randomly draws observations from a data set}
 \usage{
-sample_df(x, n = 10)
+sample_df(x, n = 10, previous = FALSE)
 }
 \arguments{
 \item{x}{A data set: either a vector, a matrix or a data frame.}
 
 \item{n}{The number of random rows/elements to sample randomly.}
+
+\item{previous}{Logical scalar. Whether the results of the previous draw should be returned.}
 }
 \value{
-A data base (resp vector) with n rows (resp elements).
+A data base (resp vector) with \code{n} rows (resp elements).
 }
 \description{
 This function is useful to check a data set. It gives a random number of rows of the input data set.
@@ -20,5 +22,7 @@ This function is useful to check a data set. It gives a random number of rows of
 \examples{
 
 sample_df(iris)
+
+sample_df(iris, previous = TRUE)
 
 }

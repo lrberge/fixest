@@ -5288,32 +5288,61 @@ print.osize = function(x, ...){
 #'
 #' @param x A data set: either a vector, a matrix or a data frame.
 #' @param n The number of random rows/elements to sample randomly.
+#' @param previous Logical scalar. Whether the results of the previous draw should be returned.
 #'
 #' @return
-#' A data base (resp vector) with n rows (resp elements).
+#' A data base (resp vector) with \code{n} rows (resp elements).
 #'
 #' @examples
 #'
 #' sample_df(iris)
 #'
-sample_df = function(x, n = 10){
+#' sample_df(iris, previous = TRUE)
+#'
+sample_df = function(x, n = 10, previous = FALSE){
 
     check_arg(n, "integer scalar")
+    check_arg(previous, "logical scalar")
 
     if(MISSNULL(x)){
         if(missing(x)) stop("The argument 'x' cannot be missing, please provide it.")
         if(is.null(x)) stop("The argument 'x' must be a vector, matrix or data.frame. Currently it is NULL.")
     }
 
-    if(is.null(dim(x)) || inherits(x, "table")){
-        n = min(n, length(x))
-        return(x[sample(length(x), n)])
+    all_draws = getOption("fixest_sample_df")
+    x_dp = deparse(substitute(x))
+
+    make_draw = TRUE
+    if(previous){
+        if(x_dp %in% names(all_draws)){
+            draw__ = all_draws[[x_dp]]
+            make_draw = FALSE
+        } else {
+            warning("No previous draw found for this data. Making a new draw.")
+        }
     }
 
-    n = min(n, nrow(x))
-    # complicated var name to avoid issue with data.table variables
-    XXXselectedXXX = sample(nrow(x), n)
-    x[XXXselectedXXX, ]
+    is_unidim = is.null(dim(x)) || inherits(x, "table")
+    n_data = if(is_unidim) length(x) else nrow(x)
+
+
+    n = min(n, n_data)
+
+    if(make_draw){
+        # complicated var name to avoid issue with data.table variables
+        draw__ = sample(n_data, n)
+    }
+
+    # saving
+    all_draws[[x_dp]] = draw__
+    options(fixest_sample_df = all_draws)
+
+    # returning
+    if(is_unidim){
+        return(x[draw__])
+    } else {
+        return(x[draw__, ])
+    }
 }
 
 len_unique = function(x, nthreads = getFixest_nthreads()){
