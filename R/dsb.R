@@ -590,7 +590,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE, nest = 
             "      thus for the types different from 'len', all operators can be applied.",
             "",
             "    *if(true : false):",
-            "      The operator *if accepts no argument. The value is true is the length of the vector",
+            "      The operator *if accepts no argument. The value is true if the length of the vector",
             "      is greater than 1. ",
             "      This is a shortcut to 'len>1'if(true : false).",
             "",
