@@ -41,6 +41,8 @@
   
   - fix minor bug Cragg-Donald statistic.
   
+  - fix peculiar problem on load when directories names end with ".R" (thanks to @kyleam [#271](https://github.com/lrberge/fixest/issues/271)).
+  
 ## etable
 
 #### New arguments

@@ -11585,15 +11585,16 @@ is_fixest_used = function(){
     # - fixest in the files
     # - + file saved > 7 days
     #
-    # - if fixest but file saved > 7 days, very likely a new project
+    # - if fixest but file saved < 7 days, very likely a new project
 
     # Only level 1 recursivity
     files = list.files(pattern = "\\.(r|R)$")
     dirs = c("./", list.dirs(recursive = FALSE))
     sub_files = unlist(lapply(dirs, list.files, pattern = "\\.(r|R)$", full.names = TRUE))
-    file_extra = grep("\\.Rprofile", list.files(all.files = TRUE), value = TRUE)
+    file_extra = if(file.exists(".Rprofile")) ".Rprofile" else NULL
 
     files = c(files, file_extra, sub_files)
+    files = files[!dir.exists(files)]
 
     if(length(files) == 0) return(FALSE)
 
