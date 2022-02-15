@@ -4722,15 +4722,17 @@ check_build_available = function(){
 
     if(is.null(opt)){
         outcome = system2("pdflatex", "-help", FALSE, FALSE)
-        if(outcome == 127){
-            warn_up("pdflatex could not be run: check install?")
+        if(outcome == 127 && !requireNamespace("tinytex", quietly = TRUE)){
+            warn_up("The functionality you want to use requires the package 'tinytex' which is not installed or a working pdflatex installation which wasn't found.")
+
             options(fixest_build_available = "pdflatex")
             return("pdflatex")
         }
 
         outcome = system2("magick", "-help", FALSE, FALSE)
-        if(outcome == 127){
-            warn_up("magick could not be run: check install?")
+        if(outcome == 127 && !requireNamespace("pdftools", quietly = TRUE)){
+            warn_up("The functionality you want to use requires the package 'pdftools' which is not installed or a working imagemagick + ghostscript installation which wasn't found.")
+
             options(fixest_build_available = "magick")
             return("magick")
         }
@@ -4739,11 +4741,11 @@ check_build_available = function(){
         return(TRUE)
 
     } else if(identical(opt, "pdflatex")){
-        warn_up("pdflatex could not be run: check install?")
+        warn_up("The functionality you want to use requires the package 'tinytex' which is not installed or a working pdflatex installation which wasn't found.")
         return("pdflatex")
 
     } else if(identical(opt, "magick")){
-        warn_up("magick could not be run: check install?")
+        warn_up("The functionality you want to use requires the package 'pdftools' which is not installed or a working imagemagick + ghostscript installation which wasn't found.")
         return("magick")
     }
 
