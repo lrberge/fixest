@@ -1436,10 +1436,10 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 		}
 
 		vars_demean = cpp_demean(y, X, weights, iterMax = fixef.iter,
-		                            diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
-		                            fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
-		                            slope_flag_Q = slope_flag, slope_vars_list = slope_vars,
-		                            r_init = init, nthreads = nthreads)
+		                         diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
+		                         fe_id_list = fixef_id_list, table_id_I = fixef_table_vector,
+		                         slope_flag_Q = slope_flag, slope_vars_list = slope_vars,
+		                         r_init = init, nthreads = nthreads)
 
 		y_demean = vars_demean$y_demean
 		if(onlyFixef){

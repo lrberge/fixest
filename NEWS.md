@@ -39,11 +39,13 @@
   
   - improve the robustness of the algorithm parsing the fixed-effects (linked to issue [#253](https://github.com/lrberge/fixest/issues/253)).
   
-  - fix minor bug Cragg-Donald statistic.
+  - fix minor bug in the Cragg-Donald statistic.
   
   - fix peculiar problem on load when directories names end with ".R" (thanks to @kyleam [#271](https://github.com/lrberge/fixest/issues/271)).
   
   - remove remaining large items from GLM estimations with `lean = TRUE`.
+  
+  - fix bug in removing the singletons from several fixed-effects (reported by @johannesbubeck [#244](https://github.com/lrberge/fixest/issues/244)).
   
 ## etable
 
