@@ -740,7 +740,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             # => extraction of the stepwise information
             fixef_info_stepwise = error_sender(fixef_terms(fml_fixef, stepwise = TRUE, origin_type = origin_type),
                                          "The fixed-effects part of the formula (", charShorten(as.character(fml_fixef)[2], 15),
-                                         ") is not valid:\n", clean = "_impossible_var_name_ => ^")
+                                         ") is not valid:\n", clean = "%\\^% => ^")
 
             if(fixef_info_stepwise$do_multi){
                 fml_fixef = fml_tl = fixef_info_stepwise$fml
@@ -757,7 +757,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
             fixef_terms_full = error_sender(fixef_terms(fml_tl),
                                             "The fixed-effects part of the formula (", charShorten(as.character(fml_fixef)[2], 15),
-                                            ") is not valid:\n", clean = "_impossible_var_name_ => ^")
+                                            ") is not valid:\n", clean = "%\\^% => ^")
 
             # if fixed-effects are provided, we make sure there is an
             # intercept so that factors can be handled properly
@@ -3907,7 +3907,7 @@ extract_stepwise = function(fml, tms, all_vars = TRUE){
     } else {
         osf = TRUE
         tl = attr(tms, "term.labels")
-        tl = gsub("_impossible_var_name_", "^", tl, fixed = TRUE)
+        tl = gsub(" %^% ", "^", tl, fixed = TRUE)
         do_stepwise = any(grepl("(^|[^[:alnum:]_\\.])c?sw0?\\(", tl))
 
     }
