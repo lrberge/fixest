@@ -43,6 +43,8 @@
   
   - fix peculiar problem on load when directories names end with ".R" (thanks to @kyleam [#271](https://github.com/lrberge/fixest/issues/271)).
   
+  - remove remaining large items from GLM estimations with `lean = TRUE`.
+  
 ## etable
 
 #### New arguments
