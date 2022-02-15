@@ -46,8 +46,7 @@ export(dsb, .dsb, .dsb0)
 S3method(print, dsb)
 
 # deprecated
-export(obs2remove, esttex, esttable)
-S3method(summary, fixest.obs2remove)
+export(esttex, esttable)
 
 # Base methods
 S3method(print, fixest)
