@@ -1808,7 +1808,9 @@ ols_fit = function(y, X, w, correct_0w = FALSE, collin.tol, nthreads, xwx = NULL
 
     residuals = y - fitted.values
 
-    res = list(xwx = xwx, coefficients = beta, fitted.values = fitted.values, xwx_inv = xwx_inv, multicol = multicol, residuals = residuals, is_excluded = is_excluded, collin.min_norm = info_inv$min_norm)
+    res = list(xwx = xwx, coefficients = beta, fitted.values = fitted.values,
+               xwx_inv = xwx_inv, multicol = multicol, residuals = residuals,
+               is_excluded = is_excluded, collin.min_norm = info_inv$min_norm)
 
     res
 }

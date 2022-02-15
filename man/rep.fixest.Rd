@@ -4,33 +4,33 @@
 \alias{rep.fixest}
 \alias{rep.fixest_list}
 \alias{.l}
-\title{Replicates fixest objects}
+\title{Replicates \code{fixest} objects}
 \usage{
-\method{rep}{fixest}(x, times = 1, each = 1, cluster, ...)
+\method{rep}{fixest}(x, times = 1, each = 1, vcov, ...)
 
-\method{rep}{fixest_list}(x, times = 1, each = 1, cluster, ...)
+\method{rep}{fixest_list}(x, times = 1, each = 1, vcov, ...)
 
 .l(...)
 }
 \arguments{
-\item{x}{Either a fixest object, either a list of fixest objects created with \code{.l()}.}
+\item{x}{Either a \code{fixest} object, either a list of \code{fixest} objects created with \code{.l()}.}
 
 \item{times}{Integer vector giving the number of repetitions of the vector of elements. By default \code{times = 1}. It must be either of length 1, either of the same length as the argument \code{x}.}
 
 \item{each}{Integer scalar indicating the repetition of each element. Default is 1.}
 
-\item{cluster}{A list containing the types of standard-error to be computed, default is missing. If not missing, it must be of the same length as \code{times}, \code{each}, or the final vector. Note that if the arguments \code{times} and \code{each} are missing, then \code{times} becomes equal to the length of \code{cluster}. (Note that \code{cluster} accepts the character values \code{"standard"} or \code{"hetero"} to compute non-clustered SEs.)}
+\item{vcov}{A list containing the types of standard-error to be computed, default is missing. If not missing, it must be of the same length as \code{times}, \code{each}, or the final vector. Note that if the arguments \code{times} and \code{each} are missing, then \code{times} becomes equal to the length of \code{vcov}. To see how to summon a VCOV, see the dedicated section in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.}
 
 \item{...}{In \code{.l()}: \code{fixest} objects. In \code{rep()}: not currently used.}
 }
 \value{
-Returns a list of the appropriate length. Each element of the list is a fixest object.
+Returns a list of the appropriate length. Each element of the list is a \code{fixest} object.
 }
 \description{
-Simple function that replicates fixest objects while (optionally) computing different standard-errors. Useful mostly in combination with \code{\link[fixest]{etable}} or \code{\link[fixest]{coefplot}}.
+Simple function that replicates \code{fixest} objects while (optionally) computing different standard-errors. Useful mostly in combination with \code{\link[fixest]{etable}} or \code{\link[fixest]{coefplot}}.
 }
 \details{
-To apply \code{rep.fixest} on a list of fixest objects, it is absolutely necessary to use \code{.l()} and not \code{list()}.
+To apply \code{rep.fixest} on a list of \code{fixest} objects, it is absolutely necessary to use \code{.l()} and not \code{list()}.
 }
 \examples{
 
@@ -38,11 +38,11 @@ To apply \code{rep.fixest} on a list of fixest objects, it is absolutely necessa
 
 est = feols(Ozone ~ Solar.R + Wind + Temp, data = airquality)
 
-my_cluster = list("Month", "Day", ~ Day + Month)
+my_vcov = list("Month", "Day", ~ Day + Month)
 
-etable(rep(est, cluster = my_cluster))
+etable(rep(est, vcov = my_vcov))
 
-coefplot(rep(est, cluster = my_cluster), drop = "Int")
+coefplot(rep(est, vcov = my_vcov), drop = "Int")
 
 #
 # To rep multiple objects, you need to use .l()
@@ -50,10 +50,10 @@ coefplot(rep(est, cluster = my_cluster), drop = "Int")
 
 est_bis = feols(Ozone ~ Solar.R + Wind + Temp | Month, airquality)
 
-etable(rep(.l(est, est_bis), cluster = my_cluster))
+etable(rep(.l(est, est_bis), vcov = my_vcov))
 
 # using each
-etable(rep(.l(est, est_bis), each = 3, cluster = my_cluster))
+etable(rep(.l(est, est_bis), each = 3, vcov = my_vcov))
 
 
 }
