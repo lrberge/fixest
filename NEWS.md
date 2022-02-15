@@ -47,6 +47,8 @@
   
   - fix bug in removing the singletons from several fixed-effects (reported by @johannesbubeck [#244](https://github.com/lrberge/fixest/issues/244)).
   
+  - in rep.fixest: replace argument cluster with argument vcov to enable the use of any VCOV (related to [#258](https://github.com/lrberge/fixest/issues/258) by @ShunsukeMatsuno).
+  
 ## etable
 
 #### New arguments
