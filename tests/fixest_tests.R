@@ -1925,11 +1925,29 @@ test(coef(o1), coef(o2))
 test(feols(y ~ x1 + offset(x2), base, offset = ~x3), "err")
 
 
+####
+#### Only Coef ####
+####
+
+chunk("only.coef")
 
 
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+base$x4 = base$x1 + 5
 
+m = feols(y ~ x1 + x2 + x4, base, only.coef = TRUE)
+test(length(m), 4)
+test(sum(is.na(m)), 1)
 
+m = fepois(y ~ x1 + x2 + x4, base, only.coef = TRUE)
+test(length(m), 4)
+test(sum(is.na(m)), 1)
 
+m = femlm(y ~ x1 + x2, base, only.coef = TRUE)
+test(length(m), 3)
+test(sum(is.na(m)), 0)
+
+test(feols(y ~ sw(x1, x2), base, only.coef = TRUE), "err")
 
 
 

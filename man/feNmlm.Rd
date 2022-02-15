@@ -42,6 +42,7 @@ feNmlm(
   combine.quick,
   mem.clean = FALSE,
   only.env = FALSE,
+  only.coef = FALSE,
   env,
   ...
 )
@@ -120,6 +121,8 @@ feNmlm(
 \item{mem.clean}{Logical, default is \code{FALSE}. Only to be used if the data set is large compared to the available RAM. If \code{TRUE} then intermediary objects are removed as much as possible and \code{\link[base]{gc}} is run before each substantial C++ section in the internal code to avoid memory issues.}
 
 \item{only.env}{(Advanced users.) Logical, default is \code{FALSE}. If \code{TRUE}, then only the environment used to make the estimation is returned.}
+
+\item{only.coef}{Logical, default is \code{FALSE}. If \code{TRUE}, then only the estimated coefficients are returned. Note that the length of the vector returned is always the length of the number of coefficients to be estimated: this means that the variables found to be collinear are returned with an NA value.}
 
 \item{env}{(Advanced users.) A \code{fixest} environment created by a \code{fixest} estimation with \code{only.env = TRUE}. Default is missing. If provided, the data from this environment will be used to perform the estimation.}
 

@@ -17,7 +17,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                       deriv.tol = 1e-4, glm.iter = 25, glm.tol = 1e-8, etastart, mustart,
                       warn = TRUE, notes = getFixest_notes(), combine.quick, demeaned = FALSE,
                       origin_bis, origin = "feNmlm", mc_origin, mc_origin_bis, mc_origin_ter,
-                      computeModel0 = FALSE, weights = NULL,
+                      computeModel0 = FALSE, weights = NULL, only.coef = FALSE,
                       debug = FALSE, mem.clean = FALSE, call_env = NULL, call_env_bis, ...){
 
     # INTERNAL function:
@@ -65,7 +65,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     main_args = c("fml", "data", "panel.id", "offset", "subset", "split", "fsplit", "vcov",
                   "cluster", "se", "ssc", "fixef.rm", "fixef.tol", "fixef.iter", "fixef",
                   "nthreads", "lean", "verbose", "warn", "notes", "combine.quick",
-                  "start", "only.env", "mem.clean")
+                  "start", "only.env", "mem.clean", "only.coef")
 
     femlm_args = c("family", "theta.init", "linear.start", "opt.control", "deriv.tol", "deriv.iter")
     feNmlm_args = c("NL.fml", "NL.start", "lower", "upper", "NL.start.init", "jacobian.method", "useHessian", "hessian.args")
@@ -241,7 +241,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         computeModel0 = family_equiv %in% c("poisson", "logit")
     }
 
-    check_arg(demeaned, notes, warn, mem.clean, "logical scalar")
+    check_arg(demeaned, notes, warn, mem.clean, only.coef, "logical scalar")
 
     check_arg_plus(fixef.rm, "match(singleton, perfect, both, none)")
 
@@ -2584,7 +2584,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     NR.tol = fixef.tol/100
 
     # Initial checks are done
-    nonlinear.params <- names(NL.start) #=> in the order the user wants
+    nonlinear.params = names(NL.start) #=> in the order the user wants
 
     # starting values of all parameters (initialized with the NL ones):
     start = NL.start
@@ -2693,7 +2693,18 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         }
     }
 
-    assign("IN_MULTI", multi_lhs || multi_rhs || multi_fixef || isSplit, env)
+    IN_MULTI = multi_lhs || multi_rhs || multi_fixef || isSplit
+    assign("IN_MULTI", IN_MULTI, env)
+
+    if(only.coef && IN_MULTI){
+        stop("The argument 'only.coef' cannot be used in multiple estimations.")
+    }
+
+    if(!isLinear && !isNonLinear){
+        stop("The argument 'only.coef' only works when there is at least one variable to be estimated (the FEs don't count), which is not the case here.")
+    }
+
+    assign("only.coef", only.coef, env)
 
 
     # IV

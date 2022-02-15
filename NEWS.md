@@ -123,6 +123,10 @@ reason = "glory"
 dsb("Why do you develop packages? For .[`dollar`*c!$]?",
     "For money? No... for .[U,''s, c?reason]!", sep = "\n")
 ```
+
+## New argument in all estimations
+
+ - new argument `only.coef` in all estimation. If `TRUE`, then only the estimated coefficients are returned, which can be useful for MC experiments.
  
 ## Other
 
