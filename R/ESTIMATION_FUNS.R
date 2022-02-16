@@ -2349,6 +2349,37 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
     mu.eta = family$mu.eta
     family_equiv = family$family_equiv
 
+    # Optimizing poisson/logit
+    if(family_equiv == "poisson"){
+        linkfun = function(mu) cpppar_log(mu, nthreads)
+        linkinv = function(eta) cpppar_poisson_linkinv(eta, nthreads)
+
+        y_pos = y[y > 0]
+        qui_pos = y > 0
+        if(isWeight){
+            constant = sum(weights[qui_pos] * y_pos * cpppar_log(y_pos, nthreads) - weights[qui_pos] * y_pos)
+            sum_dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(wt[qui_pos] * y_pos * eta[qui_pos]) + sum(wt * mu))
+        } else {
+            constant = sum(y_pos * cpppar_log(y_pos, nthreads) - y_pos)
+            sum_dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(y_pos * eta[qui_pos]) + sum(mu))
+        }
+
+        mu.eta = function(mu, eta) mu
+        validmu = function(mu) cpppar_poisson_validmu(mu, nthreads)
+
+    } else if(family_equiv == "logit"){
+        linkfun = function(mu) cpppar_logit_linkfun(mu, nthreads)
+        linkinv = function(eta) cpppar_logit_linkinv(eta, nthreads)
+        if(isWeight){
+            sum_dev.resids = function(y, mu, eta, wt) sum(cpppar_logit_devresids(y, mu, wt, nthreads))
+        } else {
+            sum_dev.resids = function(y, mu, eta, wt) sum(cpppar_logit_devresids(y, mu, 1, nthreads))
+        }
+        sum_dev.resids = sum_dev.resids
+
+        mu.eta = function(mu, eta) cpppar_logit_mueta(eta, nthreads)
+    }
+
     #
     # Init
     #
@@ -3765,6 +3796,8 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 #' I strongly discourage changing the dimension of any of these elements, or else crash can occur. However, you can change their values at will (given the dimension stay the same). The only exception is the weights, which tolerates changing its dimension: it can be identical to the scalar \code{1} (meaning no weights), or to something of the length the number of observations.
 #'
 #' I also discourage changing anything in the fixed-effects (even their value) since this will almost surely lead to a crash.
+#'
+#' Note that this function is mostly useful when the overheads/estimation ratio is high. This means that OLS will benefit the most from this function. For GLM/Max.Lik. estimations, the ratio is small since the overheads is only a tiny portion of the total estimation time. Hence this function will be less useful for these models.
 #'
 #' @author
 #' Laurent Berge

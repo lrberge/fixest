@@ -1164,6 +1164,15 @@ env = feNmlm(y ~ x1 + x2 | species, base, only.env = TRUE)
 feNmlm(env = env)
 
 
+# Now we check that modifications work as expected
+
+env = fepois(y ~ x1 + x2 | species, base, only.env = TRUE)
+est_w = fepois(y ~ x1 + x2 | species, base, weights = ~x3)
+
+assign("weights.value", base$x3, env)
+est_env_w = est_env(env = env)
+
+test(coef(est_w), coef(est_env_w))
 
 ####
 #### Non linear tests ####
@@ -1510,6 +1519,8 @@ names(base) = c("y", "x1", "x2", "x3", "species")
 base$fe_bis = sample(letters, 150, TRUE)
 base$x4 = rnorm(150)
 base$x1[sample(150, 5)] = NA
+
+fml = y ~ x1 + x2
 
 # Errors
 test(feols(fml, base, subset = ~species), "err")

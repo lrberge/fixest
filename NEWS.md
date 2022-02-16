@@ -128,6 +128,23 @@ dsb("Why do you develop packages? For .[`dollar`*c!$]?",
 
  - new argument `only.coef` in all estimation. If `TRUE`, then only the estimated coefficients are returned, which can be useful for MC experiments.
  
+## New function `est_env`
+
+- new function `est_env` to estimate a model from a `fixest` environment. Mostly useful to cut overheads in simulations.
+```R
+# First we get the environment (the estimation is not performed!)
+env = feols(mpg ~ disp + drat, mtcars, only.env = TRUE)
+
+# Then we estimate: we get the reult from feols(mpg ~ disp + drat, mtcars)
+est_env(env)
+
+# Why doing that? You can modify the env w/t incurring overheads
+assign("weight.values", mtcars$wt, env)
+# New estimation with weights
+est_env(env)
+
+```
+ 
 ## Other
 
  - `bin`: `cut::` now ignores white spaces, so that `cut:: q1 ] q3 [` works appropriately.

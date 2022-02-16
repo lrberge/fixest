@@ -221,8 +221,11 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         family$family_equiv = family_equiv
 
         #
-        # Custom functions (we will complete these functions later in this code, after lhs and nthreads are set)
-        # they concern only logit and poisson (so far)
+        # Custom functions
+        #
+        # Now the poisson and logit families are modified directly in feglm.fit
+        #   at a late stage => much easier for bookkeeping + avoids a bug
+        #   when weights are modified before using feglm.fit(env = env)
         #
 
         dev.resids = family$dev.resids
@@ -239,6 +242,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         family = family_type
 
         computeModel0 = family_equiv %in% c("poisson", "logit")
+
+        assign("family_funs", family_funs, env)
     }
 
     check_arg(demeaned, notes, warn, mem.clean, only.coef, "logical scalar")
@@ -2411,56 +2416,6 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     }
 
-    #
-    # families of feglm
-    #
-
-    if(origin_type == "feglm"){
-        # We optimize Poisson and Logit
-
-        family_equiv = family_funs$family_equiv
-
-        if(family_equiv == "poisson"){
-            family_funs$linkfun = function(mu) cpppar_log(mu, nthreads)
-            family_funs$linkinv = function(eta) cpppar_poisson_linkinv(eta, nthreads)
-
-            if(multi_lhs == FALSE && isSplit == FALSE){
-                # => we simply delay the assignment for multi_lhs == TRUE or split
-                # It will be done in reshape_env
-                y_pos = lhs[lhs > 0]
-                qui_pos = lhs > 0
-                if(isWeight){
-                    constant = sum(weights.value[qui_pos] * y_pos * cpppar_log(y_pos, nthreads) - weights.value[qui_pos] * y_pos)
-                    sum_dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(wt[qui_pos] * y_pos * eta[qui_pos]) + sum(wt * mu))
-                } else {
-                    constant = sum(y_pos * cpppar_log(y_pos, nthreads) - y_pos)
-                    sum_dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(y_pos * eta[qui_pos]) + sum(mu))
-                }
-
-                family_funs$sum_dev.resids = sum_dev.resids
-            }
-
-
-            family_funs$mu.eta = function(mu, eta) mu
-            family_funs$validmu = function(mu) cpppar_poisson_validmu(mu, nthreads)
-
-        } else if(family_equiv == "logit"){
-            family_funs$linkfun = function(mu) cpppar_logit_linkfun(mu, nthreads)
-            family_funs$linkinv = function(eta) cpppar_logit_linkinv(eta, nthreads)
-            if(isWeight){
-                sum_dev.resids = function(y, mu, eta, wt) sum(cpppar_logit_devresids(y, mu, wt, nthreads))
-            } else {
-                sum_dev.resids = function(y, mu, eta, wt) sum(cpppar_logit_devresids(y, mu, 1, nthreads))
-            }
-            family_funs$sum_dev.resids = sum_dev.resids
-
-            family_funs$mu.eta = function(mu, eta) cpppar_logit_mueta(eta, nthreads)
-        }
-
-        assign("family_funs", family_funs, env)
-
-    }
-
     if(lparams == 0 && Q == 0 && !multi_fixef && !multi_rhs) stop("No parameter to be estimated.")
 
     check_arg(useHessian, "logical scalar")
@@ -2696,12 +2651,14 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     IN_MULTI = multi_lhs || multi_rhs || multi_fixef || isSplit
     assign("IN_MULTI", IN_MULTI, env)
 
-    if(only.coef && IN_MULTI){
-        stop("The argument 'only.coef' cannot be used in multiple estimations.")
-    }
+    if(only.coef){
+        if(IN_MULTI){
+            stop("The argument 'only.coef' cannot be used in multiple estimations.")
+        }
 
-    if(!isLinear && !isNonLinear){
-        stop("The argument 'only.coef' only works when there is at least one variable to be estimated (the FEs don't count), which is not the case here.")
+        if(!isLinear && !isNonLinear){
+            stop("The argument 'only.coef' only works when there is at least one variable to be estimated (the FEs don't count), which is not the case here.")
+        }
     }
 
     assign("only.coef", only.coef, env)
@@ -3564,25 +3521,6 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
             # GLM specific stuff
             if(origin_type == "feglm"){
 
-                family_funs = get("family_funs", env)
-                if(!is.list(lhs) && family_funs$family_equiv == "poisson"){
-
-                    y_pos = lhs[lhs > 0]
-                    qui_pos = lhs > 0
-
-                    if(isWeight){
-                        constant = sum(weights.value[qui_pos] * y_pos * cpppar_log(y_pos, nthreads) - weights.value[qui_pos] * y_pos)
-                        sum_dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(wt[qui_pos] * y_pos * eta[qui_pos]) + sum(wt * mu))
-                    } else {
-                        constant = sum(y_pos * cpppar_log(y_pos, nthreads) - y_pos)
-                        sum_dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(y_pos * eta[qui_pos]) + sum(mu))
-                    }
-
-                    family_funs$sum_dev.resids = sum_dev.resids
-
-                    assign("family_funs", family_funs, new_env)
-                }
-
                 starting_values = get("starting_values", env)
                 if(!is.null(starting_values)){
                     assign("starting_values", starting_values[obs2keep], new_env)
@@ -3659,31 +3597,6 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
     if(save_lhs){
         # Here lhs is ALWAYS a vector
         assign("lhs", lhs, new_env)
-
-        if(origin_type == "feglm"){
-            family_funs = get("family_funs", env)
-
-            if(family_funs$family_equiv == "poisson"){
-
-                y_pos = lhs[lhs > 0]
-                qui_pos = lhs > 0
-
-                weights.value = get("weights.value", env)
-                isWeight = length(weights.value) > 1
-
-                if(isWeight){
-                    constant = sum(weights.value[qui_pos] * y_pos * cpppar_log(y_pos, nthreads) - weights.value[qui_pos] * y_pos)
-                    sum_dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(wt[qui_pos] * y_pos * eta[qui_pos]) + sum(wt * mu))
-                } else {
-                    constant = sum(y_pos * cpppar_log(y_pos, nthreads) - y_pos)
-                    sum_dev.resids = function(y, mu, eta, wt) 2 * (constant - sum(y_pos * eta[qui_pos]) + sum(mu))
-                }
-
-                family_funs$sum_dev.resids = sum_dev.resids
-
-                assign("family_funs", family_funs, new_env)
-            }
-        }
 
         if(origin_type == "feglm" && isFixef){
             res$y = lhs
