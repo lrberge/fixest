@@ -167,6 +167,7 @@
   verbose <span class='op'>=</span> <span class='fl'>0</span>,
   warn <span class='op'>=</span> <span class='cn'>TRUE</span>,
   notes <span class='op'>=</span> <span class='fu'><a href='setFixest_notes.html'>getFixest_notes</a></span><span class='op'>(</span><span class='op'>)</span>,
+  only.coef <span class='op'>=</span> <span class='cn'>FALSE</span>,
   <span class='va'>combine.quick</span>,
   demeaned <span class='op'>=</span> <span class='cn'>FALSE</span>,
   mem.clean <span class='op'>=</span> <span class='cn'>FALSE</span>,
@@ -199,6 +200,7 @@
   mem.clean <span class='op'>=</span> <span class='cn'>FALSE</span>,
   verbose <span class='op'>=</span> <span class='fl'>0</span>,
   only.env <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  only.coef <span class='op'>=</span> <span class='cn'>FALSE</span>,
   <span class='va'>env</span>,
   <span class='va'>...</span>
 <span class='op'>)</span></pre>
@@ -248,7 +250,7 @@
     </tr>
     <tr>
       <th>ssc</th>
-      <td><p>An object of class <code>ssc.type</code> obtained with the function <code><a href='ssc.html'>ssc</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href='ssc.html'>ssc</a></code> for this argument. The arguments and defaults of the function <code><a href='ssc.html'>ssc</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "conventional"</code>, <code>t.df = "conventional"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href='ssc.html'>ssc</a></code> for details.</p></td>
+      <td><p>An object of class <code>ssc.type</code> obtained with the function <code><a href='ssc.html'>ssc</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href='ssc.html'>ssc</a></code> for this argument. The arguments and defaults of the function <code><a href='ssc.html'>ssc</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "min"</code>, <code>t.df = "min"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href='ssc.html'>ssc</a></code> for details.</p></td>
     </tr>
     <tr>
       <th>panel.id</th>
@@ -293,6 +295,10 @@
     <tr>
       <th>notes</th>
       <td><p>Logical. By default, two notes are displayed: when NAs are removed (to show additional information) and when some observations are removed because of collinearity. To avoid displaying these messages, you can set <code>notes = FALSE</code>. You can remove these messages permanently by using <code>setFixest_notes(FALSE)</code>.</p></td>
+    </tr>
+    <tr>
+      <th>only.coef</th>
+      <td><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code>, then only the estimated coefficients are returned. Note that the length of the vector returned is always the length of the number of coefficients to be estimated: this means that the variables found to be collinear are returned with an NA value.</p></td>
     </tr>
     <tr>
       <th>combine.quick</th>

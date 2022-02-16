@@ -168,7 +168,8 @@
     <p>Returns a named vector.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>For R2s with no theoretical justification, like e.g. regular R2s for maximum likelihood models -- or within R2s for models without fixed-effects, NA is returned. The single measure to possibly compare all kinds of models is the squared correlation between the dependent variable and the expected predictor.</p>
+    <p>The pseudo R2s are the McFaddens R2s, that is the ratio of log-likelihoods.</p>
+<p>For R2s with no theoretical justification, like e.g. regular R2s for maximum likelihood models -- or within R2s for models without fixed-effects, NA is returned. The single measure to possibly compare all kinds of models is the squared correlation between the dependent variable and the expected predictor.</p>
 <p>The pseudo-R2 is also returned in the OLS case, it corresponds to the pseudo-R2 of the equivalent GLM model with a Gaussian family.</p>
 <p>For the adjusted within-R2s, the adjustment factor is <code>(n - nb_fe) / (n - nb_fe - K)</code> with <code>n</code> the number of observations, <code>nb_fe</code> the number of fixed-effects and <code>K</code> the number of variables.</p>
     <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>

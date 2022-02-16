@@ -52,7 +52,7 @@ reference:
       contents:
         - matches("stepwise|c?sw0?")
         - matches("fixest_multi")
-    - title: stats method
+    - title: Methods from the `stats` package
       desc: Various methods from the stats package
       contents:
         - model.matrix.fixest
@@ -109,8 +109,8 @@ reference:
     - title: Other methods and functions
       desc: Other methods and functions that didn't fit the previous sections
       contents:
+        - est_env
         - dsb
-        - log_etable
         - check_conv_feols
         - sample_df
         - n_unik

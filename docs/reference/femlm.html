@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Fixed-effects maximum likelihood model — femlm • fixest</title>
+<title>Fixed-effects maximum likelihood models — femlm • fixest</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,7 @@
 
 
 
-<meta property="og:title" content="Fixed-effects maximum likelihood model — femlm" />
+<meta property="og:title" content="Fixed-effects maximum likelihood models — femlm" />
 <meta property="og:description" content="This function estimates maximum likelihood models with any number of fixed-effects." />
 
 
@@ -135,7 +135,7 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Fixed-effects maximum likelihood model</h1>
+    <h1>Fixed-effects maximum likelihood models</h1>
     <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/ESTIMATION_FUNS.R'><code>R/ESTIMATION_FUNS.R</code></a></small>
     <div class="hidden name"><code>femlm.Rd</code></div>
     </div>
@@ -171,6 +171,7 @@
   <span class='va'>combine.quick</span>,
   mem.clean <span class='op'>=</span> <span class='cn'>FALSE</span>,
   only.env <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  only.coef <span class='op'>=</span> <span class='cn'>FALSE</span>,
   <span class='va'>env</span>,
   <span class='va'>...</span>
 <span class='op'>)</span>
@@ -201,6 +202,7 @@
   <span class='va'>combine.quick</span>,
   mem.clean <span class='op'>=</span> <span class='cn'>FALSE</span>,
   only.env <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  only.coef <span class='op'>=</span> <span class='cn'>FALSE</span>,
   <span class='va'>env</span>,
   <span class='va'>...</span>
 <span class='op'>)</span></pre>
@@ -262,7 +264,7 @@
     </tr>
     <tr>
       <th>ssc</th>
-      <td><p>An object of class <code>ssc.type</code> obtained with the function <code><a href='ssc.html'>ssc</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href='ssc.html'>ssc</a></code> for this argument. The arguments and defaults of the function <code><a href='ssc.html'>ssc</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "conventional"</code>, <code>t.df = "conventional"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href='ssc.html'>ssc</a></code> for details.</p></td>
+      <td><p>An object of class <code>ssc.type</code> obtained with the function <code><a href='ssc.html'>ssc</a></code>. Represents how the degree of freedom correction should be done.You must use the function <code><a href='ssc.html'>ssc</a></code> for this argument. The arguments and defaults of the function <code><a href='ssc.html'>ssc</a></code> are: <code>adj = TRUE</code>, <code>fixef.K="nested"</code>, <code>cluster.adj = TRUE</code>, <code>cluster.df = "min"</code>, <code>t.df = "min"</code>, <code>fixef.force_exact=FALSE)</code>. See the help of the function <code><a href='ssc.html'>ssc</a></code> for details.</p></td>
     </tr>
     <tr>
       <th>panel.id</th>
@@ -311,6 +313,10 @@
     <tr>
       <th>only.env</th>
       <td><p>(Advanced users.) Logical, default is <code>FALSE</code>. If <code>TRUE</code>, then only the environment used to make the estimation is returned.</p></td>
+    </tr>
+    <tr>
+      <th>only.coef</th>
+      <td><p>Logical, default is <code>FALSE</code>. If <code>TRUE</code>, then only the estimated coefficients are returned. Note that the length of the vector returned is always the length of the number of coefficients to be estimated: this means that the variables found to be collinear are returned with an NA value.</p></td>
     </tr>
     <tr>
       <th>env</th>

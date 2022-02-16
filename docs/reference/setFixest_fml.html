@@ -454,17 +454,17 @@
 <span class='r-in'><span class='va'>vars</span> <span class='op'>=</span> <span class='va'>letters</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span></span>
 <span class='r-in'><span class='fu'><a href='xpd.html'>xpd</a></span><span class='op'>(</span>rhs <span class='op'>=</span> <span class='va'>vars</span><span class='op'>)</span></span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span> ~a + b + c + d + e</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> &lt;environment: 0x000000004ab8cb68&gt;</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> &lt;environment: 0x000000004d8387d0&gt;</span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># Alternatively, to replace the RHS</span></span>
 <span class='r-in'><span class='fu'><a href='xpd.html'>xpd</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='fl'>1</span>, rhs <span class='op'>=</span> <span class='va'>vars</span><span class='op'>)</span></span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span> y ~ a + b + c + d + e</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> &lt;environment: 0x000000004c2c6838&gt;</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> &lt;environment: 0x0000000012104448&gt;</span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># To create a two sided formula</span></span>
 <span class='r-in'><span class='fu'><a href='xpd.html'>xpd</a></span><span class='op'>(</span>lhs <span class='op'>=</span> <span class='st'>"y"</span>, rhs <span class='op'>=</span> <span class='va'>vars</span><span class='op'>)</span></span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span> y ~ a + b + c + d + e</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> &lt;environment: 0x000000004e705970&gt;</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> &lt;environment: 0x000000004ccd3650&gt;</span>
 <span class='r-in'></span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'>#</span></span>
@@ -474,30 +474,30 @@
 <span class='r-in'><span class='co'># You can create multiple variables at once</span></span>
 <span class='r-in'><span class='fu'><a href='xpd.html'>xpd</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>]</span> <span class='op'>+</span> <span class='va'>z.</span><span class='op'>[</span><span class='fl'>2</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span><span class='op'>)</span></span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span> y ~ x1 + x2 + x3 + x4 + x5 + z2 + z3</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> &lt;environment: 0x000000004c2c6838&gt;</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> &lt;environment: 0x0000000012104448&gt;</span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># You can summon variables from the environment</span></span>
 <span class='r-in'><span class='va'>var</span> <span class='op'>=</span> <span class='st'>"a"</span></span>
 <span class='r-in'><span class='fu'><a href='xpd.html'>xpd</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='va'>var</span><span class='op'>]</span><span class='op'>)</span></span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span> y ~ xa</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> &lt;environment: 0x000000004c2c6838&gt;</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> &lt;environment: 0x0000000012104448&gt;</span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># ... the variables can be multiple</span></span>
 <span class='r-in'><span class='va'>vars</span> <span class='op'>=</span> <span class='va'>LETTERS</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span></span>
 <span class='r-in'><span class='fu'><a href='xpd.html'>xpd</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>x.</span><span class='op'>[</span><span class='va'>vars</span><span class='op'>]</span><span class='op'>)</span></span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span> y ~ xA + xB + xC</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> &lt;environment: 0x000000004c2c6838&gt;</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> &lt;environment: 0x0000000012104448&gt;</span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># You can have "complex" variable names but they must be nested in character form</span></span>
 <span class='r-in'><span class='fu'><a href='xpd.html'>xpd</a></span><span class='op'>(</span><span class='va'>y</span> <span class='op'>~</span> <span class='va'>.</span><span class='op'>[</span><span class='st'>"x.[vars]_sq"</span><span class='op'>]</span><span class='op'>)</span></span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span> y ~ xA_sq + xB_sq + xC_sq</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> &lt;environment: 0x000000004c2c6838&gt;</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> &lt;environment: 0x0000000012104448&gt;</span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># DSB can be used within regular expressions</span></span>
 <span class='r-in'><span class='va'>re</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"GNP"</span>, <span class='st'>"Pop"</span><span class='op'>)</span></span>
 <span class='r-in'><span class='fu'><a href='xpd.html'>xpd</a></span><span class='op'>(</span><span class='va'>Unemployed</span> <span class='op'>~</span> <span class='fu'><a href='https://rdrr.io/r/base/regex.html'>regex</a></span><span class='op'>(</span><span class='st'>".[re]"</span><span class='op'>)</span>, data <span class='op'>=</span> <span class='va'>longley</span><span class='op'>)</span></span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span> Unemployed ~ GNP.deflator + GNP + Population</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> &lt;environment: 0x000000004c2c6838&gt;</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> &lt;environment: 0x0000000012104448&gt;</span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># =&gt; equivalent to regex("GNP|Pop")</span></span>
 <span class='r-in'></span>
@@ -506,7 +506,7 @@
 <span class='r-in'><span class='va'>vars</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"wage"</span>, <span class='st'>"unemp"</span><span class='op'>)</span></span>
 <span class='r-in'><span class='fu'><a href='xpd.html'>xpd</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='va'>y.</span><span class='op'>[</span>,<span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>]</span><span class='op'>)</span> <span class='op'>~</span> <span class='fu'><a href='stepwise.html'>csw</a></span><span class='op'>(</span><span class='va'>.</span><span class='op'>[</span>,<span class='va'>vars</span><span class='op'>]</span><span class='op'>)</span><span class='op'>)</span></span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span> c(y1, y2, y3) ~ csw(wage, unemp)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> &lt;environment: 0x000000004c2c6838&gt;</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> &lt;environment: 0x0000000012104448&gt;</span>
 <span class='r-in'></span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># Example of use of .[] within a loop</span></span>

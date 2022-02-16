@@ -135,20 +135,20 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Replicates fixest objects</h1>
+    <h1>Replicates <code>fixest</code> objects</h1>
     <small class="dont-index">Source: <a href='https://github.com/lrberge/fixest/blob/master/R/MiscFuns.R'><code>R/MiscFuns.R</code></a></small>
     <div class="hidden name"><code>rep.fixest.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Simple function that replicates fixest objects while (optionally) computing different standard-errors. Useful mostly in combination with <code><a href='etable.html'>etable</a></code> or <code><a href='coefplot.html'>coefplot</a></code>.</p>
+    <p>Simple function that replicates <code>fixest</code> objects while (optionally) computing different standard-errors. Useful mostly in combination with <code><a href='etable.html'>etable</a></code> or <code><a href='coefplot.html'>coefplot</a></code>.</p>
     </div>
 
     <pre class="usage"><span class='co'># S3 method for fixest</span>
-<span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='va'>x</span>, times <span class='op'>=</span> <span class='fl'>1</span>, each <span class='op'>=</span> <span class='fl'>1</span>, <span class='va'>cluster</span>, <span class='va'>...</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='va'>x</span>, times <span class='op'>=</span> <span class='fl'>1</span>, each <span class='op'>=</span> <span class='fl'>1</span>, <span class='va'>vcov</span>, <span class='va'>...</span><span class='op'>)</span>
 
 <span class='co'># S3 method for fixest_list</span>
-<span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='va'>x</span>, times <span class='op'>=</span> <span class='fl'>1</span>, each <span class='op'>=</span> <span class='fl'>1</span>, <span class='va'>cluster</span>, <span class='va'>...</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='va'>x</span>, times <span class='op'>=</span> <span class='fl'>1</span>, each <span class='op'>=</span> <span class='fl'>1</span>, <span class='va'>vcov</span>, <span class='va'>...</span><span class='op'>)</span>
 
 <span class='fu'>.l</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span></pre>
 
@@ -157,7 +157,7 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>Either a fixest object, either a list of fixest objects created with <code>.l()</code>.</p></td>
+      <td><p>Either a <code>fixest</code> object, either a list of <code>fixest</code> objects created with <code>.l()</code>.</p></td>
     </tr>
     <tr>
       <th>times</th>
@@ -168,8 +168,8 @@
       <td><p>Integer scalar indicating the repetition of each element. Default is 1.</p></td>
     </tr>
     <tr>
-      <th>cluster</th>
-      <td><p>A list containing the types of standard-error to be computed, default is missing. If not missing, it must be of the same length as <code>times</code>, <code>each</code>, or the final vector. Note that if the arguments <code>times</code> and <code>each</code> are missing, then <code>times</code> becomes equal to the length of <code>cluster</code>. (Note that <code>cluster</code> accepts the character values <code>"standard"</code> or <code>"hetero"</code> to compute non-clustered SEs.)</p></td>
+      <th>vcov</th>
+      <td><p>A list containing the types of standard-error to be computed, default is missing. If not missing, it must be of the same length as <code>times</code>, <code>each</code>, or the final vector. Note that if the arguments <code>times</code> and <code>each</code> are missing, then <code>times</code> becomes equal to the length of <code>vcov</code>. To see how to summon a VCOV, see the dedicated section in the <a href='https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1'>vignette</a>.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -179,10 +179,10 @@
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Returns a list of the appropriate length. Each element of the list is a fixest object.</p>
+    <p>Returns a list of the appropriate length. Each element of the list is a <code>fixest</code> object.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>To apply <code>rep.fixest</code> on a list of fixest objects, it is absolutely necessary to use <code>.l()</code> and not <code><a href='https://rdrr.io/r/base/list.html'>list()</a></code>.</p>
+    <p>To apply <code>rep.fixest</code> on a list of <code>fixest</code> objects, it is absolutely necessary to use <code>.l()</code> and not <code><a href='https://rdrr.io/r/base/list.html'>list()</a></code>.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='r-in'></span>
@@ -191,9 +191,9 @@
 <span class='r-in'><span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='va'>Temp</span>, data <span class='op'>=</span> <span class='va'>airquality</span><span class='op'>)</span></span>
 <span class='r-msg co'><span class='r-pr'>#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
 <span class='r-in'></span>
-<span class='r-in'><span class='va'>my_cluster</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='st'>"Month"</span>, <span class='st'>"Day"</span>, <span class='op'>~</span> <span class='va'>Day</span> <span class='op'>+</span> <span class='va'>Month</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>my_vcov</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>~</span> <span class='va'>Month</span>, <span class='op'>~</span> <span class='va'>Day</span>, <span class='op'>~</span> <span class='va'>Day</span> <span class='op'>+</span> <span class='va'>Month</span><span class='op'>)</span></span>
 <span class='r-in'></span>
-<span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='va'>my_cluster</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='va'>est</span>, vcov <span class='op'>=</span> <span class='va'>my_vcov</span><span class='op'>)</span><span class='op'>)</span></span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span>                         model 1.1          model 1.2         model 1.3</span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:             Ozone              Ozone             Ozone</span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span>                                                                       </span>
@@ -209,7 +209,7 @@
 <span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class='r-in'></span>
-<span class='r-in'><span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='va'>est</span>, cluster <span class='op'>=</span> <span class='va'>my_cluster</span><span class='op'>)</span>, drop <span class='op'>=</span> <span class='st'>"Int"</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='va'>est</span>, vcov <span class='op'>=</span> <span class='va'>my_vcov</span><span class='op'>)</span>, drop <span class='op'>=</span> <span class='st'>"Int"</span><span class='op'>)</span></span>
 <span class='r-plt img'><img src='rep.fixest-1.png' alt='' width='700' height='433' /></span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'>#</span></span>
@@ -219,7 +219,7 @@
 <span class='r-in'><span class='va'>est_bis</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Ozone</span> <span class='op'>~</span> <span class='va'>Solar.R</span> <span class='op'>+</span> <span class='va'>Wind</span> <span class='op'>+</span> <span class='va'>Temp</span> <span class='op'>|</span> <span class='va'>Month</span>, <span class='va'>airquality</span><span class='op'>)</span></span>
 <span class='r-msg co'><span class='r-pr'>#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
 <span class='r-in'></span>
-<span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'>.l</span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span><span class='op'>)</span>, cluster <span class='op'>=</span> <span class='va'>my_cluster</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'>.l</span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span><span class='op'>)</span>, vcov <span class='op'>=</span> <span class='va'>my_vcov</span><span class='op'>)</span><span class='op'>)</span></span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span>                         model 1.1         model 2.1          model 1.2</span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:             Ozone             Ozone              Ozone</span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span>                                                                       </span>
@@ -253,7 +253,7 @@
 <span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># using each</span></span>
-<span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'>.l</span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span><span class='op'>)</span>, each <span class='op'>=</span> <span class='fl'>3</span>, cluster <span class='op'>=</span> <span class='va'>my_cluster</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'>.l</span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span><span class='op'>)</span>, each <span class='op'>=</span> <span class='fl'>3</span>, vcov <span class='op'>=</span> <span class='va'>my_vcov</span><span class='op'>)</span><span class='op'>)</span></span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span>                         model 1.1          model 1.2         model 1.3</span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:             Ozone              Ozone             Ozone</span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span>                                                                       </span>
