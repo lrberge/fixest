@@ -3,7 +3,7 @@
 \name{femlm}
 \alias{femlm}
 \alias{fenegbin}
-\title{Fixed-effects maximum likelihood model}
+\title{Fixed-effects maximum likelihood models}
 \usage{
 femlm(
   fml,

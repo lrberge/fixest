@@ -2906,7 +2906,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 }
 
 
-#' Fixed-effects maximum likelihood model
+#' Fixed-effects maximum likelihood models
 #'
 #' This function estimates maximum likelihood models with any number of fixed-effects.
 #'
