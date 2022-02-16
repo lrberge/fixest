@@ -38,7 +38,7 @@ To apply \code{rep.fixest} on a list of \code{fixest} objects, it is absolutely 
 
 est = feols(Ozone ~ Solar.R + Wind + Temp, data = airquality)
 
-my_vcov = list("Month", "Day", ~ Day + Month)
+my_vcov = list(~ Month, ~ Day, ~ Day + Month)
 
 etable(rep(est, vcov = my_vcov))
 

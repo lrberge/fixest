@@ -5399,7 +5399,7 @@ len_unique = function(x, nthreads = getFixest_nthreads()){
 #'
 #' est = feols(Ozone ~ Solar.R + Wind + Temp, data = airquality)
 #'
-#' my_vcov = list("Month", "Day", ~ Day + Month)
+#' my_vcov = list(~ Month, ~ Day, ~ Day + Month)
 #'
 #' etable(rep(est, vcov = my_vcov))
 #'
