@@ -1421,6 +1421,14 @@ test(predict(res, quoi), "err")
 res = feols(y ~ x1 | species^fe_bis, base)
 test(predict(res), predict(res, base))
 
+# Handling NAs properly
+base_NA = data.frame(a = 1:5, b = c(3:6, NA),
+                     c = as.factor(c("a", "b", "a", "b", "a")))
+
+res = feols(a ~ b + c, base_NA)
+
+test(length(predict(res, newdata = base_NA)), 5)
+
 #
 # prediction with lags
 #

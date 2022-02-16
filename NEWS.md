@@ -49,6 +49,8 @@
   
   - in rep.fixest: replace argument cluster with argument vcov to enable the use of any VCOV (related to [#258](https://github.com/lrberge/fixest/issues/258) by @ShunsukeMatsuno).
   
+  - fix bug in predict, which automatically discarded NA values (reported by @ColinTB [#273](https://github.com/lrberge/fixest/issues/273)).
+  
 ## etable
 
 #### New arguments

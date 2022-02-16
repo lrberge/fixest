@@ -6357,7 +6357,7 @@ fixest_model_matrix_extra = function(object, newdata, original_data, fml, fake_i
         xlev = .getXlevels(t_mf, mf)
 
         if(!identical(attr(t_mf,"variables"), attr(t_mf,"predvars")) || length(xlev) > 0){
-            mf = model.frame(t_mf, newdata, xlev = xlev)
+            mf = model.frame(t_mf, newdata, xlev = xlev, na.action = na.pass)
         } else {
             mf = NULL
         }
