@@ -7,6 +7,7 @@ useDynLib(fixest, .registration = TRUE)
 # main funs
 export(feNmlm, femlm, feols, feglm, fepois, fenegbin)
 export(feglm.fit, feols.fit)
+export(est_env)
 # etable
 export(etable, style.tex, style.df)
 export(log_etable)
