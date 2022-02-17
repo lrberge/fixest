@@ -18,6 +18,7 @@ print.dsb = function(x, ...){
 #' @param sep Character scalar, default is \code{""}. It is used to collapse all the elements in \code{...}.
 #' @param vectorize Logical, default is \code{FALSE}. If \code{TRUE}, Further, elements in \code{...} are NOT collapsed together, but instead vectorised.
 #' @param nest Logical, default is \code{TRUE}. Whether the original character strings should be nested into a \code{".[]"}. If \code{TRUE}, then things like \code{dsb("S!one, two")} are equivalent to \code{dsb(".[S!one, two]")} and hence create the vector \code{c("one", "two")}.
+#' @param collapse Character scalar or \code{NULL} (default). If provided, the resulting character vector will be collapsed into a character scalar using this value as a separator.
 #'
 #'
 #' There are over 30 basic string operations, it supports pluralization, it's fast (e.g. faster than \code{glue} in the benchmarks), string operations can be nested (it may be the most powerful feature), operators have sensible defaults.
@@ -408,9 +409,11 @@ print.dsb = function(x, ...){
 #'
 #'
 #'
-dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE, nest = TRUE){
+dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE, nest = TRUE,
+               collapse = NULL){
     check_arg(vectorize, nest, "logical scalar")
     check_arg(sep, "character scalar")
+    check_arg(collapse, "NULL character scalar")
     check_arg(frame, "class(environment)")
     check_arg(..., "vector len(1)")
 
@@ -607,7 +610,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE, nest = 
         return(invisible(NULL))
     }
 
-    res = .dsb(..., frame = frame, sep = sep, vectorize = vectorize, nest = nest, check = TRUE)
+    res = .dsb(..., frame = frame, sep = sep, vectorize = vectorize, nest = nest, collapse = collapse, check = TRUE)
 
     class(res) = c("dsb", "character")
     res
@@ -618,7 +621,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE, nest = 
 }
 
 .dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE,
-                nest = TRUE, check = FALSE){
+                nest = TRUE, collapse = NULL, check = FALSE){
 
     if(...length() == 0){
         return("")
@@ -855,6 +858,10 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE, nest = 
                 }
             }
         }
+    }
+
+    if(!is.null(collapse) && length(res) > 1){
+        res = paste0(res, collapse = collapse)
     }
 
     return(res)

@@ -4,7 +4,14 @@
 \alias{dsb}
 \title{Simple and powerful string manipulation with the dot square bracket operator}
 \usage{
-dsb(..., frame = parent.frame(), sep = "", vectorize = FALSE, nest = TRUE)
+dsb(
+  ...,
+  frame = parent.frame(),
+  sep = "",
+  vectorize = FALSE,
+  nest = TRUE,
+  collapse = NULL
+)
 }
 \arguments{
 \item{...}{Character scalars that will be collapsed with the argument \code{sep}. You can use \code{".[x]"} within each character string to insert the value of \code{x} in the string. You can add string operations in each \code{".[]"} instance with the syntax \code{"'arg'op ? x"} (resp. \code{"'arg'op ! x"}) to apply the operation \code{'op'} with the argument \code{'arg'} to \code{x} (resp. the verbatim of \code{x}). Otherwise, what to say? Ah, nesting is enabled, and since there's over 30 operators, it's bit complicated to sort you out in this small space. But type \code{dsb("--help")} to prompt an (almost) extensive help.}
@@ -15,7 +22,9 @@ dsb(..., frame = parent.frame(), sep = "", vectorize = FALSE, nest = TRUE)
 
 \item{vectorize}{Logical, default is \code{FALSE}. If \code{TRUE}, Further, elements in \code{...} are NOT collapsed together, but instead vectorised.}
 
-\item{nest}{Logical, default is \code{TRUE}. Whether the original character strings should be nested into a \code{".[]"}. If \code{TRUE}, then things like \code{dsb("S!one, two")} are equivalent to \code{dsb(".[S!one, two]")} and hence create the vector \code{c("one", "two")}.
+\item{nest}{Logical, default is \code{TRUE}. Whether the original character strings should be nested into a \code{".[]"}. If \code{TRUE}, then things like \code{dsb("S!one, two")} are equivalent to \code{dsb(".[S!one, two]")} and hence create the vector \code{c("one", "two")}.}
+
+\item{collapse}{Character scalar or \code{NULL} (default). If provided, the resulting character vector will be collapsed into a character scalar using this value as a separator.
 
 
 There are over 30 basic string operations, it supports pluralization, it's fast (e.g. faster than \code{glue} in the benchmarks), string operations can be nested (it may be the most powerful feature), operators have sensible defaults.
