@@ -169,6 +169,7 @@
 <li><p>remove remaining large items from GLM estimations with <code>lean = TRUE</code>.</p></li>
 <li><p>fix bug in removing the singletons from several fixed-effects (reported by <a href='https://github.com/johannesbubeck'>@johannesbubeck</a> <a href="https://github.com/lrberge/fixest/issues/244"><a href='https://github.com/lrberge/fixest/issues/244'>#244</a></a>).</p></li>
 <li><p>in rep.fixest: replace argument cluster with argument vcov to enable the use of any VCOV (related to <a href="https://github.com/lrberge/fixest/issues/258"><a href='https://github.com/lrberge/fixest/issues/258'>#258</a></a> by <a href='https://github.com/ShunsukeMatsuno'>@ShunsukeMatsuno</a>).</p></li>
+<li><p>fix bug in predict, which automatically discarded NA values (reported by <a href='https://github.com/ColinTB'>@ColinTB</a> <a href="https://github.com/lrberge/fixest/issues/273"><a href='https://github.com/lrberge/fixest/issues/273'>#273</a></a>).</p></li>
 </ul>
 </div>
 <div id="etable" class="section level2">
@@ -217,8 +218,8 @@
 <h2 class="hasAnchor">
 <a href="#dsb" class="anchor"></a>dsb</h2>
 <ul>
-<li><p>Completely new function <code><a href="../reference/dsb.html">dsb()</a></code> to manipulate strings. Applies many low level string operations very easily. The syntax may be a bit disturbing at first, but, unlike French grammar, there’s some logic behind!</p></li>
-<li><p>There are over 30 basic string operations available! Do complex string manipulations in a single call!</p></li>
+<li><p>completely new function <code><a href="../reference/dsb.html">dsb()</a></code> to manipulate strings. Applies many low level string operations very easily. The syntax may be a bit disturbing at first, but, unlike French grammar, there’s some logic behind!</p></li>
+<li><p>there are over 30 basic string operations available! Do complex string manipulations in a single call!</p></li>
 </ul>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
@@ -229,7 +230,16 @@
 <span class="va">dollar</span> <span class="op">=</span> <span class="fl">6</span>
 <span class="va">reason</span> <span class="op">=</span> <span class="st">"glory"</span>
 <span class="fu"><a href="../reference/dsb.html">dsb</a></span><span class="op">(</span><span class="st">"Why do you develop packages? For .[`dollar`*c!$]?"</span>,
-    <span class="st">"For money? No... for .[U,''s, c?reason]!"</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></code></pre></div>
+    <span class="st">"For money? No... for .[U,''s, c?reason]!"</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span>
+<span class="co">#&gt; Why do you develop packages? For $$$$$$?</span>
+<span class="co">#&gt; For money? No... for G L O R Y!</span></code></pre></div>
+<ul>
+<li>the dot square bracket operator in formulas now calls <code>dsb</code> when the calls are nested:</li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R">
+<span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="op">~</span> <span class="fu"><a href="../reference/stepwise.html">sw</a></span><span class="op">(</span><span class="va">.</span><span class="op">[</span>, <span class="st">"disp:.[/mpg, cyl]"</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt; ~sw(disp:mpg, disp:cyl)</span></code></pre></div>
 </div>
 <div id="new-argument-in-all-estimations" class="section level2">
 <h2 class="hasAnchor">
@@ -238,25 +248,60 @@
 <li>new argument <code>only.coef</code> in all estimation. If <code>TRUE</code>, then only the estimated coefficients are returned, which can be useful for MC experiments.</li>
 </ul>
 </div>
-<div id="new-function-est_env" class="section level2">
+<div id="new-functions" class="section level2">
 <h2 class="hasAnchor">
-<a href="#new-function-est_env" class="anchor"></a>New function <code>est_env</code>
-</h2>
+<a href="#new-functions" class="anchor"></a>New functions</h2>
 <ul>
 <li>new function <code>est_env</code> to estimate a model from a <code>fixest</code> environment. Mostly useful to cut overheads in simulations.</li>
 </ul>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="co"># First we get the environment (the estimation is not performed!)</span>
 <span class="va">env</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">disp</span> <span class="op">+</span> <span class="va">drat</span>, <span class="va">mtcars</span>, only.env <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 
 <span class="co"># Then we estimate: we get the reult from feols(mpg ~ disp + drat, mtcars)</span>
+
 <span class="fu"><a href="../reference/est_env.html">est_env</a></span><span class="op">(</span><span class="va">env</span><span class="op">)</span>
+<span class="co">#&gt; OLS estimation, Dep. Var.: mpg</span>
+<span class="co">#&gt; Observations: 32 </span>
+<span class="co">#&gt; Standard-errors: IID </span>
+<span class="co">#&gt;              Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
+<span class="co">#&gt; (Intercept) 21.844880   6.747971  3.23725 3.0167e-03 ** </span>
+<span class="co">#&gt; disp        -0.035694   0.006653 -5.36535 9.1914e-06 ***</span>
+<span class="co">#&gt; drat         1.802027   1.542091  1.16856 2.5210e-01    </span>
+<span class="co">#&gt; ---</span>
+<span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class="co">#&gt; RMSE: 3.07661   Adj. R2: 0.712458</span>
 
 <span class="co"># Why doing that? You can modify the env w/t incurring overheads</span>
-<span class="fu"><a href="https://rdrr.io/r/base/assign.html">assign</a></span><span class="op">(</span><span class="st">"weight.values"</span>, <span class="va">mtcars</span><span class="op">$</span><span class="va">wt</span>, <span class="va">env</span><span class="op">)</span>
+
+<span class="fu"><a href="https://rdrr.io/r/base/assign.html">assign</a></span><span class="op">(</span><span class="st">"weights.value"</span>, <span class="va">mtcars</span><span class="op">$</span><span class="va">wt</span>, <span class="va">env</span><span class="op">)</span>
 <span class="co"># New estimation with weights</span>
-<span class="fu"><a href="../reference/est_env.html">est_env</a></span><span class="op">(</span><span class="va">env</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="../reference/est_env.html">est_env</a></span><span class="op">(</span><span class="va">env</span><span class="op">)</span>
+<span class="co">#&gt; OLS estimation, Dep. Var.: mpg</span>
+<span class="co">#&gt; Observations: 32 </span>
+<span class="co">#&gt; Standard-errors: IID </span>
+<span class="co">#&gt;              Estimate Std. Error  t value   Pr(&gt;|t|)    </span>
+<span class="co">#&gt; (Intercept) 21.967576   6.320006  3.47588 1.6241e-03 ** </span>
+<span class="co">#&gt; disp        -0.032922   0.005884 -5.59478 4.8664e-06 ***</span>
+<span class="co">#&gt; drat         1.505517   1.470671  1.02369 3.1444e-01    </span>
+<span class="co">#&gt; ---</span>
+<span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class="co">#&gt; RMSE: 5.08781   Adj. R2: 0.709392</span></code></pre></div>
+<ul>
+<li>new function <code>ref</code> which allows to re-factor variables on-the-fly. This function always returns a factor and relocates the values given in the argument as the first factor levels. It also allows to bin values, similarly to the function <code>bin</code>:</li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R">
+<span class="co"># We want to place 5 in the first place</span>
+<span class="fu"><a href="../reference/ref.html">ref</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span>
+<span class="co">#&gt; [1] 1 2 3 4 5</span>
+<span class="co">#&gt; Levels: 5 1 2 3 4</span>
+
+<span class="co"># You can also bin at the same time</span>
+<span class="fu"><a href="../reference/ref.html">ref</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fu">.</span><span class="op">(</span><span class="st">"4:5"</span> <span class="op">=</span> <span class="fl">4</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span>
+<span class="co">#&gt; [1] 1   2   3   4:5 4:5</span>
+<span class="co">#&gt; Levels: 4:5 1 2 3</span></code></pre></div>
 </div>
 <div id="other" class="section level2">
 <h2 class="hasAnchor">
@@ -297,7 +342,7 @@
 <ul>
 <li>add a comma first, like in <code>.[,stuff]</code>, to separate variables with commas (instead of separating them with additions):</li>
 </ul>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="va">lhs_vars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"var1"</span>, <span class="st">"var2"</span><span class="op">)</span>
 <span class="fu"><a href="../reference/xpd.html">xpd</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">.</span><span class="op">[</span>,<span class="va">lhs_vars</span><span class="op">]</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="../reference/stepwise.html">csw</a></span><span class="op">(</span><span class="va">x.</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
@@ -306,7 +351,7 @@
 <li><p>new function <code>dsb</code>: applies the dot square bracket operator to character strings.</p></li>
 <li><p>in the function <code>dsb</code>, you can add a string literal in first or last position in <code>.[]</code> to “collapse” the character string in question. The way the collapse is performed depends on the position:</p></li>
 </ul>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="va">name</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Juliet"</span>, <span class="st">"Romeo"</span><span class="op">)</span>
 
@@ -329,7 +374,7 @@
 <li>
 <code>bin</code>: numeric vectors can be ‘cut’ with the new special value <code>'cut::q3]p90]'</code>, check it out!</li>
 </ul>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span>
 <span class="va">plen</span> <span class="op">=</span> <span class="va">iris</span><span class="op">$</span><span class="va">Petal.Length</span>
@@ -379,7 +424,7 @@
 <li><p><code>bin</code> accepts the use of <code>.()</code> for <code><a href="https://rdrr.io/r/base/list.html">list()</a></code>.</p></li>
 <li><p>you can add the location of the element using <code>@d</code> in the name. Useful to rearrange factors:</p></li>
 </ul>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html">setNames</a></span><span class="op">(</span><span class="va">iris</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">base</span><span class="op">$</span><span class="va">species</span><span class="op">)</span>
@@ -398,7 +443,7 @@
 <li><p>argument <code>extralines</code> replaces the argument <code>extraline</code> to increase coherence. Hence function <code>extraline_register</code> becomes <code>extralines_register</code> (the change is done without deprecation since I guess this function must be only rarely used).</p></li>
 <li><p>arguments <code>extralines</code> and <code>headers</code> accept <code>.()</code> for <code><a href="https://rdrr.io/r/base/list.html">list()</a></code>.</p></li>
 </ul>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html">setNames</a></span><span class="op">(</span><span class="va">iris</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 </div>
@@ -428,7 +473,7 @@
 <li><p>add <code>type = "se_long"</code> to <code>summary.fixest_multi</code> which yields all coefficients and SEs for all estimations in a “long” format.</p></li>
 <li><p>only in <code>fixest</code> estimations, using a “naked” dot square bracket variable in the left-hand-side includes them as multiple left hand sides. Regular expressions can also be used in the LHS.</p></li>
 </ul>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html">setNames</a></span><span class="op">(</span><span class="va">iris</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">)</span>
 <span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span><span class="op">)</span>
@@ -520,7 +565,7 @@
 </li>
 <li><p>you can summon variables from the environment directly in the formula using the new dot square bracket (DSB) operator. The DSB operator can be used to create many variables at once, and can also be using within regular expressions. One example:</p></li>
 </ul>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html">setNames</a></span><span class="op">(</span><span class="va">iris</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">)</span>
 <span class="va">i</span> <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">3</span>
@@ -567,7 +612,7 @@
 </li>
 <li><p><em>Argument sliding</em>: the argument <code>vcov</code> can be called implicitly when <code>data</code> is set up globally:</p></li>
 </ul>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="va">base</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html">setNames</a></span><span class="op">(</span>iris <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span><span class="op">)</span>
 
@@ -581,7 +626,7 @@
 <ul>
 <li>piping the data now works:</li>
 </ul>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="va">mtcars</span> |&gt; <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="va">cyl</span> <span class="op">~</span> <span class="va">mpg</span><span class="op">)</span>
 <span class="co"># =&gt; same as feols(cyl ~ mpg, mtcars)</span></code></pre></div>
@@ -738,9 +783,9 @@
 <li><p><code>my</code>: gives the mean of the dependent variable.</p></li>
 </ul>
 </div>
-<div id="new-functions" class="section level2">
+<div id="new-functions-1" class="section level2">
 <h2 class="hasAnchor">
-<a href="#new-functions" class="anchor"></a>New functions</h2>
+<a href="#new-functions-1" class="anchor"></a>New functions</h2>
 <ul>
 <li><p><code>degrees_freedom</code>: to access the DoFs of the models (sometimes that can be intricate).</p></li>
 <li><p><code>feols.fit</code>: fit method for feols.</p></li>
@@ -950,7 +995,7 @@
 <ul>
 <li>IV estimations are now supported. It is summoned by adding a formula defining the endogenous regressors and the instruments after a pipe.</li>
 </ul>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="va">base</span> <span class="op">=</span> <span class="va">iris</span>
 <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x_endo"</span>, <span class="st">"x_inst"</span>, <span class="st">"species"</span><span class="op">)</span>
@@ -995,7 +1040,7 @@
 <li><p>In the right-hand-side and the fixed-effects parts of the formula, stepwise estimations can be performed with the new stepwise functions (<code>sw</code>, <code>sw0</code>, <code>csw</code> and <code>csw0</code>).</p></li>
 <li><p>The object returned is of class <code>fixest_multi</code>. You can easily navigate through the results with its subset methods.</p></li>
 </ul>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="va">aq</span> <span class="op">=</span> <span class="va">airquality</span><span class="op">[</span><span class="va">airquality</span><span class="op">$</span><span class="va">Month</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fl">5</span><span class="op">:</span><span class="fl">6</span>, <span class="op">]</span>
 <span class="va">est_split</span> <span class="op">=</span> <span class="fu"><a href="../reference/feols.html">feols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">Ozone</span>, <span class="va">Solar.R</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="../reference/stepwise.html">sw</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/poly.html">poly</a></span><span class="op">(</span><span class="va">Wind</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/poly.html">poly</a></span><span class="op">(</span><span class="va">Temp</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>,
@@ -1022,7 +1067,7 @@
 <ul>
 <li>The algorithm now accepts regular expressions with the syntax <code>..("regex")</code>:</li>
 </ul>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">longley</span><span class="op">)</span>
 <span class="co"># All variables containing "GNP" or "ployed" in their names are fetched</span>
@@ -1060,7 +1105,7 @@
 <li><p><code>fixef.rm</code>: argument that accepts <code>none</code>, <code>perfect</code>, <code>singleton</code>, <code>both</code>. Controls the removal of fixed-effects from the observation.</p></li>
 <li><p>auto parsing of powers. Now you don’t need to use <code><a href="https://rdrr.io/r/base/AsIs.html">I()</a></code> to have powers of variables in the RHS, it is automatically done for you (i.e. <code>x^3</code> becomes <code>I(x^3)</code>):</p></li>
 </ul>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="va">base</span> <span class="op">=</span> <span class="va">iris</span>
 <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">base</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span>, <span class="st">"species"</span><span class="op">)</span>
@@ -1405,9 +1450,9 @@
 <li>You can use macros in non-fixest estimations with <code>xpd</code>, which expands formulas. E.g. <code>lm(xpd(Ozone ~ Wind + ..ctrl), airquality)</code>.</li>
 </ul>
 </div>
-<div id="new-functions-1" class="section level2">
+<div id="new-functions-2" class="section level2">
 <h2 class="hasAnchor">
-<a href="#new-functions-1" class="anchor"></a>New functions</h2>
+<a href="#new-functions-2" class="anchor"></a>New functions</h2>
 <ul>
 <li>
 <code>to_integer</code>: user-level version of the internal algorithm transforming any kind of vector (or combination of vectors) into an integer ranging from 1 to the number of unique elements of the vector. Very fast.</li>
@@ -1619,9 +1664,9 @@
 <li><p><code>coefplot</code> detects when interactions have been used and offers a special display for it.</p></li>
 </ul>
 </div>
-<div id="new-functions-2" class="section level2">
+<div id="new-functions-3" class="section level2">
 <h2 class="hasAnchor">
-<a href="#new-functions-2" class="anchor"></a>New functions</h2>
+<a href="#new-functions-3" class="anchor"></a>New functions</h2>
 <ul>
 <li><p>[etable] Estimations table: new function to export the results of multiple estimations. Replaces the two functions <code>esttex</code> and <code>esttable</code> (the two functions still exist but they will be deprecated in the future).</p></li>
 <li><p>[Lagging] New functions related to lagging: <code>l</code>, <code>f</code>, <code>panel</code>, <code>unpanel</code> and <code>[.fixest_panel</code>.</p></li>
