@@ -7241,7 +7241,9 @@ assign_flags = function(flags, ...){
     }
 }
 
-items_to_drop = function(items, x, varname, keep = FALSE, argname, keep_first = FALSE, up = 1, no_error = FALSE){
+items_to_drop = function(items, x, varname, keep = FALSE, argname,
+                         keep_first = FALSE, up = 1, no_error = FALSE,
+                         valid_ref = FALSE){
     # selection of items
     # the selection depends on the type of x
     # always returns the IDs of the items to drop
@@ -7252,7 +7254,7 @@ items_to_drop = function(items, x, varname, keep = FALSE, argname, keep_first = 
         argname = deparse(substitute(x))
     }
 
-    ref = argname == "ref"
+    ref = argname == "ref" && !valid_ref
 
     if(keep_first && (keep || ref)){
         stop("Internal error: keep_first should not be used with 'keep' or 'ref'.")
