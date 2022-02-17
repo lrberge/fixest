@@ -39,7 +39,7 @@ Note that this function is mostly useful when the overheads/estimation ratio is 
 }
 \examples{
 
-# Let's make a short simultation
+# Let's make a short simulation
 # Inspired from Grant McDermott bboot function
 # See https://twitter.com/grant_mcdermott/status/1487528757418102787
 
