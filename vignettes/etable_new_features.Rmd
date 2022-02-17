@@ -4,10 +4,6 @@ author: "Laurent Bergé"
 date: "`r Sys.Date()`"
 output: 
   html_document
-vignette: >
-  %\VignetteIndexEntry{New features for etable in version 0.10.2}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}

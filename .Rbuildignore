@@ -5,6 +5,7 @@
 ^_BENCHMARK$
 ^_Code snippets$
 ^vignettes/images$
+^vignettes/etable_new_features.Rmd
 ^inst/NEWS\.Rd$
 ^ONGOING_ISSUES\.md$
 ^_pkgdown\.yml$
