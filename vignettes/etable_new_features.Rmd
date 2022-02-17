@@ -19,9 +19,8 @@ Version 0.10.2 comes with majors changes in the Latex engine of `etable`. The mo
 
 However, it requires that the following software are installed and work properly on the user-side:
 
- - pdflatex (shipped in most Latex distributions),
- - [imagemagick](https://www.imagemagick.org/) (to convert images),
- - [ghostscipt](https://www.ghostscript.com/) (to convert PDF files).
+ - pdflatex (shipped in most Latex distributions) **or** the R package [`tinytex`](https://cran.r-project.org/package=tinytex) (very likely already installed),
+ - [imagemagick](https://www.imagemagick.org/) (to convert images) and [ghostscipt](https://www.ghostscript.com/) (to convert PDF files), **or** the R package [`pdftools`](https://cran.r-project.org/web/packages/pdftools/index.html).
  
 Now we're good to start. Let's first define a global dictionary: it will rename the variables and will also include pre-defined notes that can be fetched from `etable`.
 
@@ -92,7 +91,7 @@ Second, if the table overflows, you can adjust it with the argument `adjustbox` 
 
 ## New Latex-escaping mechanism: Markdown markup and `makecell` support
 
-Now almost any user-added text supports markdown markup for italics/bold/bold-italics with `*`, `**` and `***`. Further, there is native support for `makecell`, simply using `"\n"` enables it:
+Now almost any user-added text supports markdown markup for italics/bold/bold-italics with `*`, `**` and `***`. Further, there is native support for `makecell`: simply using `"\n"` enables it. Here's an example:
 
 ```{r}
 etable(est, headers = .("\n\n Short header" = 2, "*Very* \n **long** \n ***header***" = 2))
@@ -146,14 +145,14 @@ etable(est_many, adjustbox = 1.1)
 Highlighting coefficients is often very useful, especially in presentations. There are now three main ways, natively implemented, to highlight the coefficients:
 
  - using a frame,
- - coloring the row,
+ - coloring the cells,
  - giving a custom style to the coefficients.
 
 The first two can be accessed via the `highlight` argument. The last is implemented in the `coef.style` argument.
 
 #### Frame
 
-By default, the `highlight` argument superimposes a frame around the coefficients of interest. This is done thanks to some `tickz` magic that I barely understand and which I found in an answer from Alenanno, a user with over 35k reputation (wow), in [tex stack exchange](https://tex.stackexchange.com/questions/240542/adding-a-rectangular-box-with-tikz-to-table-beamer).
+By default, the `highlight` argument superimposes a frame around the coefficients of interest. This is done thanks to some `tickz` magic that I barely understand found in [tex stack exchange](https://tex.stackexchange.com/questions/240542/adding-a-rectangular-box-with-tikz-to-table-beamer).
 
 Anyway, back to the argument. The syntax is `"options" = "coefficients location"`. The coefficient location can be expressed in several ways:
 
@@ -182,7 +181,7 @@ There are five main options:
 
 #### Row colors
 
-Instead of highlighting coefficients with a frame, row color highlighting can be used. It is monitored with the same argument `highlight` and in fact you only have to add the option `rowcolor` to make it work. Let's replicate the previous example with row color:
+Instead of highlighting coefficients with a frame, row color highlighting can be used. It is monitored with the same argument `highlight` and in fact you only have to add the option `rowcol` to make it work. Let's replicate the previous example with row color:
 
 ```{r}
 etable(est, arraystretch = 1.5,
@@ -226,7 +225,7 @@ As already said, the image of the table is embedded in a `<div>` container whose
 
 ```{r}
 etable(est, div.class = "etable_box", page.width = "fit",
-       title = "Table with CSS.")
+       title = "CSS illustration.")
 ```
 
 I'm not sure it should be done, but at least it's possible!
