@@ -5975,7 +5975,7 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
 
         if(is.character(my_call) && grepl(".[", my_call, fixed = TRUE)){
             # Nested call
-            value = dot_square_bracket(my_call, frame = frame, text = TRUE, up = up + 1)
+            value = dsb(my_call, frame = frame)
 
         } else {
             # Informative error message
@@ -7404,14 +7404,32 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
 
     bin_dp = deparse_long(bin)
     if(grepl(".[", bin_dp, fixed = TRUE)){
-        bin_dsb = dot_square_bracket(bin_dp, frame = parent.frame(2), text = TRUE, up = 1)
-        if(length(bin_dsb) > 1){
-            bin_dsb = paste0(bin_dsb, collapse = "")
+
+        bin_names = names(bin)
+        if(!is.null(bin_names)){
+            qui = which(grepl(".[", bin_names, fixed = TRUE))
+            for(i in qui){
+                bin_names[i] = error_sender(dsb(bin_names[i], frame = parent.frame(2), nest = FALSE,
+                                                vectorize = TRUE, collapse = ""),
+                                            dsb("Error when binning: the name (.[bin_names[i]]) expanded",
+                                                " with '.[]' led to an error:"))
+
+            }
+        }
+        names(bin) = bin_names
+
+        qui = which(sapply(bin, function(x) is.character(x) && any(grepl(".[", x, fixed = TRUE))))
+        for(i in qui){
+            value = as.list(bin[[i]])
+            qui_bis = which(grepl(".[", value, fixed = TRUE))
+            for(j in qui_bis){
+                value[[j]] = error_sender(.dsb(value[[j]], frame = parent.frame(2), nest = FALSE),
+                                           dsb("Error when binning: the name (.[value[[j]]]) expanded",
+                                               " with '.[]' led to an error:"))
+            }
+            bin[[i]] = unlist(value)
         }
 
-        bin_dsb_call = error_sender(str2lang(bin_dsb),
-                                    "Error when binning: the values expanded with '.[]' led to an error:")
-        bin = eval(bin)
     }
 
     #
@@ -7502,18 +7520,18 @@ bin_factor = function(bin, x, varname, no_error = FALSE){
         # the binned values as first elements of the new factor
         bin[[1]] = NULL
         if(is.null(names(bin))){
-            names(bin) = paste0("@", seq_along(bin), names(bin))
+            names(bin) = paste0("@", seq_along(bin), " ", names(bin))
         } else {
             qui_ok = !grepl("^@\\d+", names(bin))
-            names(bin)[qui_ok] = paste0("@", seq(sum(qui_ok)), names(bin)[qui_ok])
+            names(bin)[qui_ok] = paste0("@", seq(sum(qui_ok)), " ", names(bin)[qui_ok])
         }
-
     }
 
     x_map = x_range = seq_along(x_int$items)
     id_bin = list()
     for(i in seq_along(bin)){
-        id_bin[[i]] = items_to_drop(x_items, bin[[i]], varname, up = 2, argname = argname, keep_first = TRUE, no_error = no_error)
+        id_bin[[i]] = items_to_drop(x_items, bin[[i]], varname, up = 2, argname = argname,
+                                    keep_first = TRUE, no_error = no_error, valid_ref = TRUE)
     }
 
     # sanity check
