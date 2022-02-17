@@ -414,7 +414,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE, nest = 
     check_arg(vectorize, nest, "logical scalar")
     check_arg(sep, "character scalar")
     check_arg(collapse, "NULL character scalar")
-    check_arg(frame, "class(environment)")
+    check_arg(frame, "class(environment) l0")
     check_arg(..., "vector len(1)")
 
     if(...length() == 0) return("")

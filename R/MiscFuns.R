@@ -5975,7 +5975,7 @@ dot_square_bracket = function(x, frame = .GlobalEnv, regex = FALSE, text = FALSE
 
         if(is.character(my_call) && grepl(".[", my_call, fixed = TRUE)){
             # Nested call
-            value = dsb(my_call, frame = frame)
+            value = .dsb(my_call, frame = frame)
 
         } else {
             # Informative error message
