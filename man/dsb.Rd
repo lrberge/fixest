@@ -14,7 +14,7 @@ dsb(
 )
 }
 \arguments{
-\item{...}{Character scalars that will be collapsed with the argument \code{sep}. You can use \code{".[x]"} within each character string to insert the value of \code{x} in the string. You can add string operations in each \code{".[]"} instance with the syntax \code{"'arg'op ? x"} (resp. \code{"'arg'op ! x"}) to apply the operation \code{'op'} with the argument \code{'arg'} to \code{x} (resp. the verbatim of \code{x}). Otherwise, what to say? Ah, nesting is enabled, and since there's over 30 operators, it's bit complicated to sort you out in this small space. But type \code{dsb("--help")} to prompt an (almost) extensive help.}
+\item{...}{Character scalars that will be collapsed with the argument \code{sep}. You can use \code{".[x]"} within each character string to insert the value of \code{x} in the string. You can add string operations in each \code{".[]"} instance with the syntax \code{"'arg'op ? x"} (resp. \code{"'arg'op ! x"}) to apply the operation \code{'op'} with the argument \code{'arg'} to \code{x} (resp. the verbatim of \code{x}). Otherwise, what to say? Ah, nesting is enabled, and since there's over 30 operators, it's a bit complicated to sort you out in this small space. But type \code{dsb("--help")} to prompt an (almost) extensive help.}
 
 \item{frame}{An environment used to evaluate the variables in \code{".[]"}.}
 

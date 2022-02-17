@@ -342,7 +342,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
         # first things first: checking
         if(missing(fml)) stop("You must provide the argument 'fml' (currently it is missing).")
-        # fml can be swapped with data! so it can be a matrix of a data.frame
+        # fml can be swapped with data! so it can be a matrix or a data.frame
         error_sender(fml)
 
         check_arg(fml, "ts formula | data.frame | matrix",
