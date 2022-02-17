@@ -1848,8 +1848,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                     stop("The length of a variable used to compute the VCOV is different from the number of observations in the data set used for the estimation (", pblm, " vs ", nobs_origin, ").")
                 }
 
-                # below, anyNA.data.frame but applied to a list
-                if(anyNA.data.frame(vcov_vars)){
+                if(any(sapply(vcov_vars, anyNA))){
 
                     if(is.null(isNA_vcov)){
                         isNA_vcov = !complete.cases(vcov_vars)
