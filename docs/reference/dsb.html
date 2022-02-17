@@ -144,7 +144,14 @@
     <p>Compactly performs many low level string operations. Advanced support for pluralization.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>dsb</span><span class='op'>(</span><span class='va'>...</span>, frame <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sys.parent.html'>parent.frame</a></span><span class='op'>(</span><span class='op'>)</span>, sep <span class='op'>=</span> <span class='st'>""</span>, vectorize <span class='op'>=</span> <span class='cn'>FALSE</span>, nest <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>dsb</span><span class='op'>(</span>
+  <span class='va'>...</span>,
+  frame <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/sys.parent.html'>parent.frame</a></span><span class='op'>(</span><span class='op'>)</span>,
+  sep <span class='op'>=</span> <span class='st'>""</span>,
+  vectorize <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  nest <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  collapse <span class='op'>=</span> <span class='cn'>NULL</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -167,7 +174,11 @@
     </tr>
     <tr>
       <th>nest</th>
-      <td><p>Logical, default is <code>TRUE</code>. Whether the original character strings should be nested into a <code>".[]"</code>. If <code>TRUE</code>, then things like <code>dsb("S!one, two")</code> are equivalent to <code>dsb(".[S!one, two]")</code> and hence create the vector <code>c("one", "two")</code>.</p>
+      <td><p>Logical, default is <code>TRUE</code>. Whether the original character strings should be nested into a <code>".[]"</code>. If <code>TRUE</code>, then things like <code>dsb("S!one, two")</code> are equivalent to <code>dsb(".[S!one, two]")</code> and hence create the vector <code>c("one", "two")</code>.</p></td>
+    </tr>
+    <tr>
+      <th>collapse</th>
+      <td><p>Character scalar or <code>NULL</code> (default). If provided, the resulting character vector will be collapsed into a character scalar using this value as a separator.</p>
 
 <p>There are over 30 basic string operations, it supports pluralization, it's fast (e.g. faster than <code>glue</code> in the benchmarks), string operations can be nested (it may be the most powerful feature), operators have sensible defaults.</p>
 <p>See detailed help on the console with <code>dsb("--help")</code>. The real help is in fact in the "Examples" section.</p></td>

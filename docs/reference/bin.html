@@ -169,7 +169,7 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>It returns a vector of the same length as <code>x</code></p>
+    <p>It returns a vector of the same length as <code>x</code>.</p>
     <h2 class="hasAnchor" id="-cutting-a-numeric-vector"><a class="anchor" href="#-cutting-a-numeric-vector"></a>"Cutting" a numeric vector</h2>
 
     
@@ -181,6 +181,24 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <p>The square bracket right of each number tells whether the numbers should be included or excluded from the current bin. For example, say <code>x</code> ranges from 0 to 100, then <code>"cut::5]"</code> will create two  bins: one from 0 to 5 and a second from 6 to 100. With <code>"cut::5["</code> the bins would have been 0-4 and 5-100.</p>
 <p>A factor is returned. The labels report the min and max values in each bin.</p>
 <p>To have user-specified bin labels, just add them in the character vector following <code>'cut::values'</code>. You don't need to provide all of them, and <code>NA</code> values fall back to the default label. For example, <code>bin = c("cut::4", "Q1", NA, "Q3")</code> will modify only the first and third label that will be displayed as <code>"Q1"</code> and <code>"Q3"</code>.</p>
+    <h2 class="hasAnchor" id="bin-vs-ref"><a class="anchor" href="#bin-vs-ref"></a><code>bin</code> vs <code>ref</code></h2>
+
+    
+
+
+<p>The functions <code>bin</code> and <code><a href='ref.html'>ref</a></code> are able to do the same thing, then why use one instead of the other? Here are the differences:</p>
+<ul>
+<li><p><code>ref</code> always returns a factor. This is in contrast with <code>bin</code> which returns, when possible, a vector of the same type as the vector in input.</p></li>
+<li><p><code>ref</code> always places the values modified in the first place of the factor levels. On the other hand, <code>bin</code> tries to not modify the ordering of the levels. It is possible to make <code>bin</code> mimic the behavior of <code>ref</code> by adding an <code>"@"</code> as the first element of the list in the argument <code>bin</code>.</p></li>
+<li><p>when a vector (and not a list) is given in input, <code>ref</code> will place each element of the vector in the first place of the factor levels. The behavior of <code>bin</code> is totally different, <code>bin</code> will transform all the values in the vector into a single value in <code>x</code> (i.e. it's binning).</p></li>
+</ul>
+
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p>To re-factor variables: <code><a href='ref.html'>ref</a></code>.</p></div>
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Laurent Berge</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='r-in'></span>

@@ -76,6 +76,7 @@ reference:
         - demean
         - to_integer
         - bin
+        - ref
     - title: Panel data tools
       desc: Set of tools for panel data
       contents:
