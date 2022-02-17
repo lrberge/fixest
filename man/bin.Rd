@@ -20,7 +20,7 @@ With numeric vectors you can: a) use \code{"cut::n"} to cut the vector into \cod
 The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. You can add custom bin names by adding them in the character vector after \code{'cut::values'}. See details and examples. Dot square bracket expansion (see \code{\link[fixest]{dsb}}) is enabled.}
 }
 \value{
-It returns a vector of the same length as \code{x}
+It returns a vector of the same length as \code{x}.
 }
 \description{
 Tool to easily group the values of a given variable.
@@ -39,6 +39,18 @@ The square bracket right of each number tells whether the numbers should be incl
 A factor is returned. The labels report the min and max values in each bin.
 
 To have user-specified bin labels, just add them in the character vector following \code{'cut::values'}. You don't need to provide all of them, and \code{NA} values fall back to the default label. For example, \code{bin = c("cut::4", "Q1", NA, "Q3")} will modify only the first and third label that will be displayed as \code{"Q1"} and \code{"Q3"}.
+}
+
+\section{\code{bin} vs \code{ref}}{
+
+
+The functions \code{\link[fixest]{bin}} and \code{\link[fixest]{ref}} are able to do the same thing, then why use one instead of the other? Here are the differences:
+
+\itemize{
+\item{}{\code{ref} always returns a factor. This is in contrast with \code{bin} which returns, when possible, a vector of the same type as the vector in input.}
+\item{}{\code{ref} always places the values modified in the first place of the factor levels. On the other hand, \code{bin} tries to not modify the ordering of the levels. It is possible to make \code{bin} mimic the behavior of \code{ref} by adding an \code{"@"} as the first element of the list in the argument \code{bin}.}
+ \item{}{when a vector (and not a list) is given in input, \code{ref} will place each element of the vector in the first place of the factor levels. The behavior of \code{bin} is totally different, \code{bin} will transform all the values in the vector into a single value in \code{x} (i.e. it's binning).}
+}
 }
 
 \examples{
@@ -142,4 +154,10 @@ plen = iris$Petal.Length
 table(bin(plen, list("< 2" = ~x < 2, ">= 2" = ~x >= 2)))
 
 
+}
+\seealso{
+To re-factor variables: \code{\link[fixest]{ref}}.
+}
+\author{
+Laurent Berge
 }

@@ -2908,8 +2908,24 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #'
 #' To have user-specified bin labels, just add them in the character vector following \code{'cut::values'}. You don't need to provide all of them, and \code{NA} values fall back to the default label. For example, \code{bin = c("cut::4", "Q1", NA, "Q3")} will modify only the first and third label that will be displayed as \code{"Q1"} and \code{"Q3"}.
 #'
+#' @section \code{bin} vs \code{ref}:
+#'
+#' The functions \code{\link[fixest]{bin}} and \code{\link[fixest]{ref}} are able to do the same thing, then why use one instead of the other? Here are the differences:
+#'
+#' \itemize{
+#' \item{}{\code{ref} always returns a factor. This is in contrast with \code{bin} which returns, when possible, a vector of the same type as the vector in input.}
+#' \item{}{\code{ref} always places the values modified in the first place of the factor levels. On the other hand, \code{bin} tries to not modify the ordering of the levels. It is possible to make \code{bin} mimic the behavior of \code{ref} by adding an \code{"@"} as the first element of the list in the argument \code{bin}.}
+#'  \item{}{when a vector (and not a list) is given in input, \code{ref} will place each element of the vector in the first place of the factor levels. The behavior of \code{bin} is totally different, \code{bin} will transform all the values in the vector into a single value in \code{x} (i.e. it's binning).}
+#' }
+#'
 #' @return
-#' It returns a vector of the same length as \code{x}
+#' It returns a vector of the same length as \code{x}.
+#'
+#' @author
+#' Laurent Berge
+#'
+#' @seealso
+#' To re-factor variables: \code{\link[fixest]{ref}}.
 #'
 #' @examples
 #'
@@ -3013,9 +3029,7 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #'
 #'
 bin = function(x, bin){
-
     check_arg(x, "vector mbt")
-
 
     bin = error_sender(eval_dot(bin), arg_name = "bin")
 
@@ -3023,6 +3037,136 @@ bin = function(x, bin){
 
     varname = deparse(substitute(x))[1]
     bin_factor(bin, x, varname)
+}
+
+#' Refactors a variable
+#'
+#' Takes a variables of any types, transforms it into a factors, and modifies the values of the factors. Useful in estimations when you want to set some value of a vector as a reference.
+#'
+#' @inheritSection bin \code{bin} vs \code{ref}
+#'
+#' @param x A vector of any type (must be atomic though).
+#' @param ref A vector or a list, or special binning values (explained later). If a vector, it must correspond to (partially matched) values of the vector \code{x}. The vector \code{x} which will be transformed into a factor and these values will be placed first in the levels. That's the main usage of this function. You can also bin on-the-fly the values of \code{x}, using the same syntax as the function \code{\link[fixest]{bin}}. Here's a description of what bin does: To create a new value from old values, use \code{bin = list("new_value"=old_values)} with \code{old_values} a vector of existing values. You can use \code{.()} for \code{list()}.
+#' It accepts regular expressions, but they must start with an \code{"@"}, like in \code{bin="@Aug|Dec"}. It accepts one-sided formulas which must contain the variable \code{x}, e.g. \code{bin=list("<2" = ~x < 2)}.
+#' The names of the list are the new names. If the new name is missing, the first value matched becomes the new name. In the name, adding \code{"@d"}, with \code{d} a digit, will relocate the value in position \code{d}: useful to change the position of factors.
+#' If the vector \code{x} is numeric, you can use the special value \code{"bin::digit"} to group every \code{digit} element.
+#' For example if \code{x} represents years, using \code{bin="bin::2"} creates bins of two years.
+#' With any data, using \code{"!bin::digit"} groups every digit consecutive values starting from the first value.
+#' Using \code{"!!bin::digit"} is the same but starting from the last value.
+#' With numeric vectors you can: a) use \code{"cut::n"} to cut the vector into \code{n} equal parts, b) use \code{"cut::a]b["} to create the following bins: \code{[min, a]}, \code{]a, b[}, \code{[b, max]}.
+#' The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to p100) followed by an open or closed square bracket. You can add custom bin names by adding them in the character vector after \code{'cut::values'}. See details and examples. Dot square bracket expansion (see \code{\link[fixest]{dsb}}) is enabled.
+#'
+#' @return
+#' It returns a factor of the same length as \code{x}, where levels have been modified according to the argument \code{ref}.
+#'
+#' @author
+#' Laurent Berge
+#'
+#' @seealso
+#' To bin the values of a vectors: \code{\link[fixest]{bin}}.
+#'
+#' @examples
+#'
+#' data(airquality)
+#'
+#' # A vector of months
+#' month_num = airquality$Month
+#' month_lab = c("may", "june", "july", "august", "september")
+#' month_fact = factor(month_num, labels = month_lab)
+#' table(month_num)
+#' table(month_fact)
+#'
+#' #
+#' # Main use
+#' #
+#'
+#' # Without argument: equivalent to as.factor
+#' ref(month_num)
+#'
+#' # Main usage: to set a level first:
+#' # (Note that partial matching is enabled.)
+#' table(ref(month_fact, "aug"))
+#'
+#' # You can rename the level on-the-fly
+#' # (Northern hemisphere specific!)
+#' table(ref(month_fact, .("Hot month"="aug",
+#'                         "Late summer" = "sept")))
+#'
+#'
+#' # Main use is in estimations:
+#' a = feols(Petal.Width ~ Petal.Length + Species, iris)
+#'
+#' # We change the reference
+#' b = feols(Petal.Width ~ Petal.Length + ref(Species, "vers"), iris)
+#'
+#' etable(a, b)
+#'
+#'
+#' #
+#' # Binning
+#' #
+#'
+#' # You can also bin factor values on the fly
+#' # Using @ first means a regular expression will be used to match the values.
+#' # Note that the value created is placed first.
+#' # To avoid that behavior => use the function "bin"
+#' table(ref(month_fact, .(summer = "@jul|aug|sep")))
+#'
+#' # Please refer to the example in the bin help page for more example.
+#' # The syntax is the same.
+#'
+#'
+#' #
+#' # Precise relocation
+#' #
+#'
+#' # You can place a factor at the location you want
+#' #  by adding "@digit" in the name first:
+#' table(ref(month_num, .("@5"=5)))
+#'
+#' # Same with renaming
+#' table(ref(month_num, .("@5 five"=5)))
+#'
+#'
+ref = function(x, ref){
+    check_arg(x, "vector mbt")
+
+    if(missing(ref)){
+        return(as.factor(x))
+    }
+
+    ref = error_sender(eval_dot(ref), arg_name = "ref")
+    check_arg(ref, "list | vector mbt")
+
+    varname = deparse(substitute(x))[1]
+
+    IS_SPECIAL = FALSE
+    if(!is.list(ref)){
+        if(is.character(ref[1]) && grepl("^(cut|bin)", ref[1])){
+            IS_SPECIAL = TRUE
+            if(!is.numeric(x)){
+                stop(.dsb("To use the special binning '.[ref[1]]' the variable ",
+                          "'.[varname]' must be numeric. Currently this is not the case ",
+                          "(it is of class .[3KO, C?class(x)] instead)."))
+            }
+        } else {
+            ref = as.list(ref)
+        }
+    }
+
+    if(!IS_SPECIAL && !is.factor(x)){
+        x = as.factor(x)
+    }
+
+    if(!IS_SPECIAL && ref[[1]] != "@"){
+        ref_new = list("@")
+        index = 1:length(ref) + 1
+        ref_new[index] = ref
+        names(ref_new)[index] = names(ref)
+        ref = ref_new
+    }
+
+    bin_factor(ref, x, varname)
 }
 
 

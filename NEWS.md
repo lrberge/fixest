@@ -111,9 +111,9 @@
  
 ## dsb
 
- - Completely new function `dsb()` to manipulate strings. Applies many low level string operations very easily. The syntax may be a bit disturbing at first, but, unlike French grammar, there's some logic behind!
+ - completely new function `dsb()` to manipulate strings. Applies many low level string operations very easily. The syntax may be a bit disturbing at first, but, unlike French grammar, there's some logic behind!
  
- - There are over 30 basic string operations available! Do complex string manipulations in a single call!
+ - there are over 30 basic string operations available! Do complex string manipulations in a single call!
 
 ```R
 # At first sight, it's impossible to understand what's going on.
@@ -124,13 +124,21 @@ dollar = 6
 reason = "glory"
 dsb("Why do you develop packages? For .[`dollar`*c!$]?",
     "For money? No... for .[U,''s, c?reason]!", sep = "\n")
+#> Why do you develop packages? For $$$$$$?
+#> For money? No... for G L O R Y!
+```
+
+ - the dot square bracket operator in formulas now calls `dsb` when the calls are nested:
+```R
+xpd(~ sw(.[, "disp:.[/mpg, cyl]"]))
+#> ~sw(disp:mpg, disp:cyl)
 ```
 
 ## New argument in all estimations
 
  - new argument `only.coef` in all estimation. If `TRUE`, then only the estimated coefficients are returned, which can be useful for MC experiments.
  
-## New function `est_env`
+## New functions
 
 - new function `est_env` to estimate a model from a `fixest` environment. Mostly useful to cut overheads in simulations.
 ```R
@@ -138,14 +146,49 @@ dsb("Why do you develop packages? For .[`dollar`*c!$]?",
 env = feols(mpg ~ disp + drat, mtcars, only.env = TRUE)
 
 # Then we estimate: we get the reult from feols(mpg ~ disp + drat, mtcars)
+
 est_env(env)
+#> OLS estimation, Dep. Var.: mpg
+#> Observations: 32 
+#> Standard-errors: IID 
+#>              Estimate Std. Error  t value   Pr(>|t|)    
+#> (Intercept) 21.844880   6.747971  3.23725 3.0167e-03 ** 
+#> disp        -0.035694   0.006653 -5.36535 9.1914e-06 ***
+#> drat         1.802027   1.542091  1.16856 2.5210e-01    
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> RMSE: 3.07661   Adj. R2: 0.712458
 
 # Why doing that? You can modify the env w/t incurring overheads
-assign("weight.values", mtcars$wt, env)
+
+assign("weights.value", mtcars$wt, env)
 # New estimation with weights
 est_env(env)
-
+#> OLS estimation, Dep. Var.: mpg
+#> Observations: 32 
+#> Standard-errors: IID 
+#>              Estimate Std. Error  t value   Pr(>|t|)    
+#> (Intercept) 21.967576   6.320006  3.47588 1.6241e-03 ** 
+#> disp        -0.032922   0.005884 -5.59478 4.8664e-06 ***
+#> drat         1.505517   1.470671  1.02369 3.1444e-01    
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> RMSE: 5.08781   Adj. R2: 0.709392
 ```
+
+- new function `ref` which allows to re-factor variables on-the-fly. This function always returns a factor and relocates the values given in the argument as the first factor levels. It also allows to bin values, similarly to the function `bin`:
+```R
+# We want to place 5 in the first place
+ref(1:5, 5)
+#> [1] 1 2 3 4 5
+#> Levels: 5 1 2 3 4
+
+# You can also bin at the same time
+ref(1:5, .("4:5" = 4:5))
+#> [1] 1   2   3   4:5 4:5
+#> Levels: 4:5 1 2 3
+```
+
  
 ## Other
 

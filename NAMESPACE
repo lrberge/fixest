@@ -28,7 +28,7 @@ export(dof, ssc, degrees_freedom)
 # Lag related
 export(panel, unpanel, f, l, d)
 # factor/interactions/binning
-export(i, bin)
+export(i, bin, ref)
 # macro
 export(xpd)
 # utilities
