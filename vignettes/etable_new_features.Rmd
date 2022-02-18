@@ -60,7 +60,7 @@ One major improvement is the ability to generate PNG snapshots of Latex tables (
 
 #### Argument `view`
 
-In any call of `etable` (i.e. `tex = TRUE` is not required), on can use `view = TRUE` to display the table snapshot in Rstudio's viewer. The table will fit the viewer's window, being as large as possible without overflowing horizontally nor vertically. 
+In any call of `etable` (i.e. `tex = TRUE` is not required), one can use `view = TRUE` to display the table snapshot in Rstudio's viewer. The table will fit the viewer's window, being as large as possible without overflowing horizontally nor vertically. 
 
 This feature is, ironically, very hard to display in this document since there's no viewer: so to see it at work, you should try it! Using the current example, just run `etable(est, view = TRUE)`.
 
@@ -152,7 +152,7 @@ The first two can be accessed via the `highlight` argument. The last is implemen
 
 #### Frame
 
-By default, the `highlight` argument superimposes a frame around the coefficients of interest. This is done thanks to some `tickz` magic that I barely understand found in [tex stack exchange](https://tex.stackexchange.com/questions/240542/adding-a-rectangular-box-with-tikz-to-table-beamer).
+By default, the `highlight` argument superimposes a frame around the coefficients of interest. This is done thanks to some `tikz` magic that I barely understand found in [tex stack exchange](https://tex.stackexchange.com/questions/240542/adding-a-rectangular-box-with-tikz-to-table-beamer).
 
 Anyway, back to the argument. The syntax is `"options" = "coefficients location"`. The coefficient location can be expressed in several ways:
 
