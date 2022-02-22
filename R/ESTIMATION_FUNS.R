@@ -1403,7 +1403,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 	# Regular estimation ####
 	#
 
-	onlyFixef = length(X) == 1
+	onlyFixef = length(X) == 1 || ncol(X) == 0
 
 	if(fromGLM){
 		res = list(coefficients = NA)

@@ -1,4 +1,8 @@
 
+# fixest 0.10.3
+
+ - fix bug linked to the proper identification of estimations with only fixed-effects.
+
 # fixest 0.10.2
 
 ## Bug fixes

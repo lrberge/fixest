@@ -139,7 +139,7 @@ List cpp_cholesky(NumericMatrix X, double tol = 1.0/100000.0/100000.0, int nthre
     LogicalVector id_excl(K);
     int n_excl = 0;
 
-    // we check for interrupt every 1s when it's the most computationnaly intensive
+    // we check for interrupt every 1s when it's the most computationally intensive
     // at each iteration we have K * (j+1) - j**2 - 2*j - 1 multiplications
     // max => K**2/4
     double flop = K * K / 4.0;
