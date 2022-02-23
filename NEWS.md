@@ -2,6 +2,8 @@
 # fixest 0.10.3
 
  - fix bug linked to the proper identification of estimations with only fixed-effects.
+ 
+ - remove the use of anyNA.data.frame leading to a dependency to R 3.6.3 (reported by @MichaelChirico [#261](https://github.com/lrberge/fixest/issues/261)).
 
 # fixest 0.10.2
 
