@@ -10406,34 +10406,34 @@ confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster, ssc = N
 		stop("The argument 'level' must be a numeric scalar greater than 0.50 and strictly lower than 1.")
 	}
 
-	# the parameters for which we should compute the confint
-	all_params = names(object$coefficients)
-
-	if(missing(parm)){
-		parm_use = all_params
-	} else if(is.numeric(parm)){
-		if(any(parm %% 1 != 0)){
-			stop("If the argument 'parm' is numeric, it must be integers.")
-		}
-
-		parm_use = unique(na.omit(all_params[parm]))
-		if(length(parm_use) == 0){
-			stop("There are ", length(all_params), " coefficients, the argument 'parm' does not correspond to any of them.")
-		}
-	} else if(is.character(parm)){
-		parm_pblm = setdiff(parm, all_params)
-		if(length(parm_pblm) > 0){
-			stop("some parameters of 'parm' have no estimated coefficient: ", paste0(parm_pblm, collapse=", "), ".")
-		}
-
-		parm_use = intersect(parm, all_params)
-	}
-
 	# The proper SE
 	sum_object = summary(object, vcov = vcov, se = se, cluster = cluster, ssc = ssc, ...)
 
-	se_all = sum_object$se
-	coef_all = object$coefficients
+	se_all = sum_object$coeftable[, 2]
+	coef_all = sum_object$coeftable[, 1]
+
+	# the parameters for which we should compute the confint
+	all_params = names(coef_all)
+
+	if(missing(parm)){
+	    parm_use = all_params
+	} else if(is.numeric(parm)){
+	    if(any(parm %% 1 != 0)){
+	        stop("If the argument 'parm' is numeric, it must be integers.")
+	    }
+
+	    parm_use = unique(na.omit(all_params[parm]))
+	    if(length(parm_use) == 0){
+	        stop("There are ", length(all_params), " coefficients, the argument 'parm' does not correspond to any of them.")
+	    }
+	} else if(is.character(parm)){
+	    parm_pblm = setdiff(parm, all_params)
+	    if(length(parm_pblm) > 0){
+	        stop("some parameters of 'parm' have no estimated coefficient: ", paste0(parm_pblm, collapse=", "), ".")
+	    }
+
+	    parm_use = intersect(parm, all_params)
+	}
 
 	# multiplicative factor
 	fact = fixest_CI_factor(object, level, sum_object$cov.scaled)

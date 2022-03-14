@@ -1,4 +1,8 @@
 
+# fixest 0.10.4
+
+ - fix bug in `confint` when `sunab` was used (thanks to Sarah Hofmann).
+
 # fixest 0.10.3
 
  - fix bug linked to the proper identification of estimations with only fixed-effects.
