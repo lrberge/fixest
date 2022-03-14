@@ -1081,20 +1081,9 @@ dsb_operators = function(x, quoted, op, check = FALSE, frame = NULL){
     } else if(op == "X"){
         # extract all patterns
 
-        x_pat = gregexpr(quoted, x, perl = TRUE)
+        x_list = regmatches(x, gregexpr(quoted, x, perl = TRUE))
 
-        my_extract = function(str, pat){
-            if(length(pat) == 1 && pat == -1) return("")
-            len = attr(pat, "match.length")
-            n_pat = length(pat)
-            res = character(n_pat)
-            for(i in 1:n_pat){
-                res[i] = substr(str, pat[i], pat[i] + len[i] - 1)
-            }
-            res
-        }
-
-        res = unlist(lapply(seq_along(x_pat), function(i) my_extract(x[i], x_pat[[i]])))
+        res = unlist(x_list)
 
     } else if(op == "U"){
         # U, L, Q, F, %, W ####
