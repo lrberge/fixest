@@ -1,7 +1,7 @@
 Package: fixest
 Type: Package
 Title: Fast Fixed-Effects Estimations
-Version: 0.10.3
+Version: 0.10.4
 Authors@R:
     c(person(given = "Laurent",
              family = "Berge",
