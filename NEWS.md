@@ -1,6 +1,12 @@
 
 # fixest 0.10.4
 
+## Hot fix
+
+ - fix major bug related to the extraction of fixed-effects (function `fixef`) when there are 3+ fixed-effects. This bug led to, in some specific circumstances, wrong values for the fixed-effects coefficients. Thanks a lot to @pachadotdev ([#286](https://github.com/lrberge/fixest/issues/286)) for finding this out!
+
+## Other bug fixes
+
  - fix bug in `confint` when `sunab` was used (thanks to Sarah Hofmann).
 
 # fixest 0.10.3

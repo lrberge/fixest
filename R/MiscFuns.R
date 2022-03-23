@@ -1090,6 +1090,7 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, nthrea
 	id_dummies_vect = list()
 	for(i in 1:Q) id_dummies_vect[[i]] = as.vector(fixef_id[[i]])
 
+	is_ref_approx = FALSE
 	isSlope = FALSE
 	if(!is.null(object$fixef_terms)){
 	    isSlope = TRUE
@@ -1256,6 +1257,46 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, nthrea
 
 		fixef_values = cpp_get_fe_gnl(Q, N, S, dumMat, nbCluster, orderCluster)
 
+		# The algorithm is fast but may fail on some instance. We need to check
+		if(any(fixef_values[[Q + 1]] > 1) && Q >= 3){
+		    # we re-compute the "sumFE"
+		    sum_FE = fixef_values[[1]][1 + dumMat[, 1]]
+		    for(i in 2:Q){
+		        sum_FE = sum_FE + fixef_values[[i]][1 + dumMat[, i]]
+		    }
+
+		    if(max(abs(sum_FE - S)) > 1e-1){
+		        # divergence => we need to correct
+		        # we recompute the FEs
+
+		        is_ref_approx = TRUE
+
+		        fixef_sizes = as.integer(object$fixef_sizes)
+		        new_order = order(object$fixef_sizes, decreasing = TRUE)
+		        fixef_sizes = fixef_sizes[new_order]
+
+                fe_id_list = object$fixef_id[new_order]
+		        table_id_I = as.integer(unlist(lapply(fe_id_list, table), use.names = FALSE))
+
+		        slope_flag = rep(0L, Q)
+		        slope_variables = list()
+
+		        S_demean = cpp_demean(y = S, X_raw = 0, r_weights = 0, iterMax = as.integer(fixef.iter),
+		                              diffMax = fixef.tol, r_nb_id_Q = fixef_sizes,
+		                              fe_id_list = fe_id_list, table_id_I = table_id_I,
+		                              slope_flag_Q = slope_flag, slope_vars_list = slope_variables,
+		                              r_init = 0, nthreads = nthreads, save_fixef = TRUE)
+
+		        fixef_coef = S_demean$fixef_coef
+
+		        end = cumsum(fixef_sizes)
+		        start = c(1, end + 1)
+		        for(i in 1:Q){
+		            fixef_values[[new_order[i]]] = fixef_coef[start[i]:end[i]]
+		        }
+		    }
+		}
+
 		# the information on the references
 		nb_ref = fixef_values[[Q+1]]
 		fixef_values[[Q+1]] = NULL
@@ -1294,7 +1335,12 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, nthrea
 
 		# warning if unbalanced
 		if(notes && sum(nb_ref[!slope_flag]) > Q-1){
-			message("NOTE: The fixed-effects are not regular, they cannot be straightforwardly interpreted.")
+		    if(is_ref_approx){
+		        message("NOTE: The fixed-effects are not regular, they cannot be straightforwardly interpreted. The number of references is only approximate.")
+		    } else {
+		        message("NOTE: The fixed-effects are not regular, they cannot be straightforwardly interpreted.")
+		    }
+
 		}
 	}
 
