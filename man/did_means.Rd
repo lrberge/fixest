@@ -24,7 +24,7 @@ did_means(
 )
 }
 \arguments{
-\item{fml}{Either a formula of the type \code{var1 + ... + var[N] ~ treat} or \code{var1 + ... + var[N] ~ treat | post}. Either a data.frame/matrix containing all the variables for which the means are to be computed (they must be numeric of course). Both the treatment and the post variables must contain only exactly two values. You can use a point to select all the variables of the data set: \code{. ~ treat}.}
+\item{fml}{Either a formula of the type \code{var1 + ... + varN ~ treat} or \code{var1 + ... + varN ~ treat | post}. Either a data.frame/matrix containing all the variables for which the means are to be computed (they must be numeric of course). Both the treatment and the post variables must contain only exactly two values. You can use a point to select all the variables of the data set: \code{. ~ treat}.}
 
 \item{base}{A data base containing all the variables in the formula \code{fml}.}
 
@@ -34,9 +34,9 @@ did_means(
 
 \item{tex}{Should the result be displayed in Latex? Default is \code{FALSE}. Automatically set to \code{TRUE} if the table is to be saved in a file using the argument \code{file}.}
 
-\item{treat_dict}{A character vector of length two. What are the names of the treated and the control? This should be a dictionnary: e.g. \code{c("1"="Treated", "0" = "Control")}.}
+\item{treat_dict}{A character vector of length two. What are the names of the treated and the control? This should be a dictionary: e.g. \code{c("1"="Treated", "0" = "Control")}.}
 
-\item{dict}{A named character vector. A dictionnary between the variables names and an alias. For instance \code{dict=c("x"="Inflation Rate")} would replace the variable name \code{x} by \dQuote{Inflation Rate}.}
+\item{dict}{A named character vector. A dictionary between the variables names and an alias. For instance \code{dict=c("x"="Inflation Rate")} would replace the variable name \code{x} by \dQuote{Inflation Rate}.}
 
 \item{file}{A file path. If given, the table is written in Latex into this file.}
 
