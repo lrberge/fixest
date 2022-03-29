@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.4</span>
       </span>
     </div>
 
@@ -88,7 +88,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -200,31 +200,31 @@ If <code>add_items=TRUE</code> and <code>items.list=TRUE</code>, a list of two e
 <span class='r-in'><span class='co'># transforms the species vector into integers</span></span>
 <span class='r-in'><span class='fu'>to_integer</span><span class='op'>(</span><span class='va'>x1</span><span class='op'>)</span></span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span>   [1] 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>  [38] 3 3 3 3 3 3 3 3 3 3 3 3 3 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>  [75] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> [112] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> [149] 2 2</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [38] 3 3 3 3 3 3 3 3 3 3 3 3 3 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [75] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [112] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [149] 1 1</span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># To obtain the "items":</span></span>
 <span class='r-in'><span class='fu'>to_integer</span><span class='op'>(</span><span class='va'>x1</span>, add_items <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span>   [1] 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>  [38] 3 3 3 3 3 3 3 3 3 3 3 3 3 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>  [75] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> [112] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> [149] 2 2</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [38] 3 3 3 3 3 3 3 3 3 3 3 3 3 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [75] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [112] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [149] 1 1</span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span> attr(,"items")</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "versicolor" "virginica"  "setosa"    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "virginica"  "versicolor" "setosa"    </span>
 <span class='r-in'><span class='co'># same but in list form</span></span>
 <span class='r-in'><span class='fu'>to_integer</span><span class='op'>(</span><span class='va'>x1</span>, add_items <span class='op'>=</span> <span class='cn'>TRUE</span>, items.list <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span> $x</span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span>   [1] 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>  [38] 3 3 3 3 3 3 3 3 3 3 3 3 3 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>  [75] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> [112] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> [149] 2 2</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [38] 3 3 3 3 3 3 3 3 3 3 3 3 3 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [75] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [112] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [149] 1 1</span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span> $items</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "versicolor" "virginica"  "setosa"    </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "virginica"  "versicolor" "setosa"    </span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># transforms x2 into an integer vector from 1 to 4</span></span>

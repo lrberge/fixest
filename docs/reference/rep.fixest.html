@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.4</span>
       </span>
     </div>
 
@@ -88,7 +88,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -194,23 +194,16 @@
 <span class='r-in'><span class='va'>my_vcov</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>~</span> <span class='va'>Month</span>, <span class='op'>~</span> <span class='va'>Day</span>, <span class='op'>~</span> <span class='va'>Day</span> <span class='op'>+</span> <span class='va'>Month</span><span class='op'>)</span></span>
 <span class='r-in'></span>
 <span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='va'>est</span>, vcov <span class='op'>=</span> <span class='va'>my_vcov</span><span class='op'>)</span><span class='op'>)</span></span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>                         model 1.1          model 1.2         model 1.3</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:             Ozone              Ozone             Ozone</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>                                                                       </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)       -64.34* (21.30)   -64.34** (20.15)   -64.34* (19.66)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Solar.R           0.0598 (0.0335) 0.0598*** (0.0162)   0.0598 (0.0314)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Wind              -3.334* (1.181) -3.334*** (0.8343)   -3.334* (1.135)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Temp            1.652*** (0.1583)  1.652*** (0.1927) 1.652*** (0.1386)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> _______________ _________________ __________________ _________________</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> S.E.: Clustered         by: Month            by: Day   by: Day &amp; Month</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations                  111                111               111</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> R2                        0.60589            0.60589           0.60589</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Adj. R2                   0.59484            0.59484           0.59484</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> <span class='error'>Error:</span> in etable(rep(est, vcov = my_vcov)):</span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span>  Some elements in '...' could not be evaluated: </span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span>   in rep.fixest(est, vcov = my_vcov):</span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span>  'vcov' is not a valid argument of function rep.fixest (fyi, some of its</span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> main arguments are 'times' and 'each').</span>
 <span class='r-in'></span>
 <span class='r-in'><span class='fu'><a href='coefplot.html'>coefplot</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='va'>est</span>, vcov <span class='op'>=</span> <span class='va'>my_vcov</span><span class='op'>)</span>, drop <span class='op'>=</span> <span class='st'>"Int"</span><span class='op'>)</span></span>
-<span class='r-plt img'><img src='rep.fixest-1.png' alt='' width='700' height='433' /></span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> <span class='error'>Error:</span> in rep.fixest(est, vcov = my_vcov):</span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span>  'vcov' is not a valid argument of function rep.fixest (fyi, some of its</span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> main arguments are 'times' and 'each').</span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'>#</span></span>
 <span class='r-in'><span class='co'># To rep multiple objects, you need to use .l()</span></span>
@@ -220,71 +213,21 @@
 <span class='r-msg co'><span class='r-pr'>#&gt;</span> NOTE: 42 observations removed because of NA values (LHS: 37, RHS: 7).</span>
 <span class='r-in'></span>
 <span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'>.l</span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span><span class='op'>)</span>, vcov <span class='op'>=</span> <span class='va'>my_vcov</span><span class='op'>)</span><span class='op'>)</span></span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>                         model 1.1         model 2.1          model 1.2</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:             Ozone             Ozone              Ozone</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>                                                                       </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)       -64.34* (21.30)                     -64.34** (20.15)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Solar.R           0.0598 (0.0335)   0.0522 (0.0408) 0.0598*** (0.0162)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Wind              -3.334* (1.181)   -3.109. (1.306) -3.334*** (0.8343)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Temp            1.652*** (0.1583) 1.875*** (0.1816)  1.652*** (0.1927)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Fixed-Effects:  ----------------- ----------------- ------------------</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Month                          No               Yes                 No</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> _______________ _________________ _________________ __________________</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> S.E.: Clustered         by: Month         by: Month            by: Day</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations                  111               111                111</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> R2                        0.60589           0.63686            0.60589</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Within R2                      --           0.53154                 --</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>                          model 2.2         model 1.3        model 2.3</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:              Ozone             Ozone            Ozone</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>                                                                      </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)                          -64.34* (19.66)                 </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Solar.R           0.0522* (0.0202)   0.0598 (0.0314)  0.0522 (0.0391)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Wind            -3.109*** (0.7986)   -3.334* (1.135)  -3.109. (1.215)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Temp             1.875*** (0.3671) 1.652*** (0.1386) 1.875** (0.2209)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Fixed-Effects:  ------------------ ----------------- ----------------</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Month                          Yes                No              Yes</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> _______________ __________________ _________________ ________________</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> S.E.: Clustered            by: Day   by: Day &amp; Month  by: Day &amp; Month</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations                   111               111              111</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> R2                         0.63686           0.60589          0.63686</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Within R2                  0.53154                --          0.53154</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>le nombre d'objets à remplacer n'est pas multiple de la taille du remplacement</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>le nombre d'objets à remplacer n'est pas multiple de la taille du remplacement</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Conversion automatique de LHS en liste</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Conversion automatique de LHS en liste</span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> <span class='error'>Error in etable(rep(.l(est, est_bis), vcov = my_vcov)):</span> The first element of '...' is not valid: it should be a fixest object or a list of fixest objects, it is neither.</span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># using each</span></span>
 <span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fu'>.l</span><span class='op'>(</span><span class='va'>est</span>, <span class='va'>est_bis</span><span class='op'>)</span>, each <span class='op'>=</span> <span class='fl'>3</span>, vcov <span class='op'>=</span> <span class='va'>my_vcov</span><span class='op'>)</span><span class='op'>)</span></span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>                         model 1.1          model 1.2         model 1.3</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:             Ozone              Ozone             Ozone</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>                                                                       </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)       -64.34* (21.30)   -64.34** (20.15)   -64.34* (19.66)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Solar.R           0.0598 (0.0335) 0.0598*** (0.0162)   0.0598 (0.0314)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Wind              -3.334* (1.181) -3.334*** (0.8343)   -3.334* (1.135)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Temp            1.652*** (0.1583)  1.652*** (0.1927) 1.652*** (0.1386)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Fixed-Effects:  ----------------- ------------------ -----------------</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Month                          No                 No                No</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> _______________ _________________ __________________ _________________</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> S.E.: Clustered         by: Month            by: Day   by: Day &amp; Month</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations                  111                111               111</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> R2                        0.60589            0.60589           0.60589</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Within R2                      --                 --                --</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>                         model 2.1          model 2.2        model 2.3</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:             Ozone              Ozone            Ozone</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>                                                                      </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)                                                          </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Solar.R           0.0522 (0.0408)   0.0522* (0.0202)  0.0522 (0.0391)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Wind              -3.109. (1.306) -3.109*** (0.7986)  -3.109. (1.215)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Temp            1.875*** (0.1816)  1.875*** (0.3671) 1.875** (0.2209)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Fixed-Effects:  ----------------- ------------------ ----------------</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Month                         Yes                Yes              Yes</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> _______________ _________________ __________________ ________________</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> S.E.: Clustered         by: Month            by: Day  by: Day &amp; Month</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations                  111                111              111</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> R2                        0.63686            0.63686          0.63686</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Within R2                 0.53154            0.53154          0.53154</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>le nombre d'objets à remplacer n'est pas multiple de la taille du remplacement</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>le nombre d'objets à remplacer n'est pas multiple de la taille du remplacement</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Conversion automatique de LHS en liste</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Conversion automatique de LHS en liste</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Conversion automatique de LHS en liste</span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>Conversion automatique de LHS en liste</span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> <span class='error'>Error in etable(rep(.l(est, est_bis), each = 3, vcov = my_vcov)):</span> The first element of '...' is not valid: it should be a fixest object or a list of fixest objects, it is neither.</span>
 <span class='r-in'></span>
 <span class='r-in'></span>
 </pre>

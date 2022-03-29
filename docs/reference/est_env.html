@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.4</span>
       </span>
     </div>
 
@@ -88,7 +88,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -206,8 +206,12 @@
 <span class='r-in'><span class='va'>est</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>mpg</span> <span class='op'>~</span> <span class='va'>wt</span> <span class='op'>+</span> <span class='va'>hp</span>, <span class='va'>mtcars</span><span class='op'>)</span></span>
 <span class='r-in'></span>
 <span class='r-in'><span class='va'>boot_res</span> <span class='op'>=</span> <span class='fu'>bboot</span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span></span>
+<span class='r-wrn co'><span class='r-pr'>#&gt;</span> <span class='warning'>Warning: </span>feols(fml = mpg...: only.coef is not a valid argument for function feols.</span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> <span class='error'>Error in est_env(env = core_env):</span> impossible de trouver la fonction "est_env"</span>
 <span class='r-in'><span class='va'>coef</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/colSums.html'>colMeans</a></span><span class='op'>(</span><span class='va'>boot_res</span><span class='op'>)</span></span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> <span class='error'>Error in is.data.frame(x):</span> objet 'boot_res' introuvable</span>
 <span class='r-in'><span class='va'>std_err</span> <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/apply.html'>apply</a></span><span class='op'>(</span><span class='va'>boot_res</span>, <span class='fl'>2</span>, <span class='va'>sd</span><span class='op'>)</span></span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> <span class='error'>Error in apply(boot_res, 2, sd):</span> objet 'boot_res' introuvable</span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># Comparing the results with the main estimation</span></span>
 <span class='r-in'><span class='fu'><a href='coeftable.html'>coeftable</a></span><span class='op'>(</span><span class='va'>est</span><span class='op'>)</span></span>
@@ -218,10 +222,7 @@
 <span class='r-out co'><span class='r-pr'>#&gt;</span> attr(,"type")</span>
 <span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "IID"</span>
 <span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>cbind</a></span><span class='op'>(</span><span class='va'>coef</span>, <span class='va'>std_err</span><span class='op'>)</span></span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>                    coef     std_err</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept) 37.29406592 2.019810558</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> wt          -3.85405857 0.560320295</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> hp          -0.03292371 0.007150125</span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> <span class='error'>Error in cbind(coef, std_err):</span> objet 'std_err' introuvable</span>
 <span class='r-in'></span>
 <span class='r-in'></span>
 <span class='r-in'></span>

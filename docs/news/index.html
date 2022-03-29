@@ -71,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.4</span>
       </span>
     </div>
 
@@ -87,7 +87,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -138,9 +138,37 @@
       <small>Source: <a href='https://github.com/lrberge/fixest/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
+    <div id="fixest-0104" class="section level1">
+<h1 class="page-header" data-toc-text="0.10.4">
+<a href="#fixest-0104" class="anchor"></a>fixest 0.10.4<small> Unreleased </small>
+</h1>
+<div id="hot-fix" class="section level2">
+<h2 class="hasAnchor">
+<a href="#hot-fix" class="anchor"></a>Hot fix</h2>
+<ul>
+<li>fix major bug related to the extraction of fixed-effects (function <code>fixef</code>) when there are 3+ fixed-effects. This bug led to, in some specific circumstances, wrong values for the fixed-effects coefficients. Thanks a lot to <a href='https://github.com/pachadotdev'>@pachadotdev</a> (<a href="https://github.com/lrberge/fixest/issues/286"><a href='https://github.com/lrberge/fixest/issues/286'>#286</a></a>) for finding this out!</li>
+</ul>
+</div>
+<div id="other-bug-fixes" class="section level2">
+<h2 class="hasAnchor">
+<a href="#other-bug-fixes" class="anchor"></a>Other bug fixes</h2>
+<ul>
+<li>fix bug in <code>confint</code> when <code>sunab</code> was used (thanks to Sarah Hofmann).</li>
+</ul>
+</div>
+</div>
+    <div id="fixest-0103" class="section level1">
+<h1 class="page-header" data-toc-text="0.10.3">
+<a href="#fixest-0103" class="anchor"></a>fixest 0.10.3<small> 2022-03-01 </small>
+</h1>
+<ul>
+<li><p>fix bug linked to the proper identification of estimations with only fixed-effects.</p></li>
+<li><p>remove the use of anyNA.data.frame leading to a dependency to R 3.6.3 (reported by <a href='https://github.com/MichaelChirico'>@MichaelChirico</a> <a href="https://github.com/lrberge/fixest/issues/261"><a href='https://github.com/lrberge/fixest/issues/261'>#261</a></a>).</p></li>
+</ul>
+</div>
     <div id="fixest-0102" class="section level1">
 <h1 class="page-header" data-toc-text="0.10.2">
-<a href="#fixest-0102" class="anchor"></a>fixest 0.10.2<small> Unreleased </small>
+<a href="#fixest-0102" class="anchor"></a>fixest 0.10.2<small> 2022-02-17 </small>
 </h1>
 <div id="bug-fixes" class="section level2">
 <h2 class="hasAnchor">
@@ -1615,9 +1643,9 @@
 <li>[panel] Fixed faulty memory access when taking the lead of a variable.</li>
 </ul>
 </div>
-<div id="other-bug-fixes" class="section level2">
+<div id="other-bug-fixes-1" class="section level2">
 <h2 class="hasAnchor">
-<a href="#other-bug-fixes" class="anchor"></a>Other bug fixes</h2>
+<a href="#other-bug-fixes-1" class="anchor"></a>Other bug fixes</h2>
 <ul>
 <li>[esttable/esttex] These two functions were replaced by the function <code>etable</code>. In the process, some of their arguments were “lost”, this is now corrected.</li>
 <li>[etable] Better escaping of special characters.</li>

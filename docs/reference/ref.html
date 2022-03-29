@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">fixest</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.10.4</span>
       </span>
     </div>
 
@@ -88,7 +88,7 @@
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -212,27 +212,18 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># Without argument: equivalent to as.factor</span></span>
 <span class='r-in'><span class='fu'>ref</span><span class='op'>(</span><span class='va'>month_num</span><span class='op'>)</span></span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>   [1] 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 6 6 6 6 6 6</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>  [38] 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 7 7 7 7 7 7 7 7 7 7 7 7 7</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>  [75] 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> [112] 8 8 8 8 8 8 8 8 8 8 8 8 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> [149] 9 9 9 9 9</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Levels: 5 6 7 8 9</span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> <span class='error'>Error in ref(month_num):</span> impossible de trouver la fonction "ref"</span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># Main usage: to set a level first:</span></span>
 <span class='r-in'><span class='co'># (Note that partial matching is enabled.)</span></span>
 <span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>ref</span><span class='op'>(</span><span class='va'>month_fact</span>, <span class='st'>"aug"</span><span class='op'>)</span><span class='op'>)</span></span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>    august       may      june      july september </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>        31        31        30        31        30 </span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> <span class='error'>Error in ref(month_fact, "aug"):</span> impossible de trouver la fonction "ref"</span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># You can rename the level on-the-fly</span></span>
 <span class='r-in'><span class='co'># (Northern hemisphere specific!)</span></span>
 <span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>ref</span><span class='op'>(</span><span class='va'>month_fact</span>, <span class='fu'>.</span><span class='op'>(</span><span class='st'>"Hot month"</span><span class='op'>=</span><span class='st'>"aug"</span>,</span>
 <span class='r-in'>                        <span class='st'>"Late summer"</span> <span class='op'>=</span> <span class='st'>"sept"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>   Hot month Late summer         may        june        july </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>          31          30          31          30          31 </span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> <span class='error'>Error in ref(month_fact, .(`Hot month` = "aug", `Late summer` = "sept")):</span> impossible de trouver la fonction "ref"</span>
 <span class='r-in'></span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># Main use is in estimations:</span></span>
@@ -240,24 +231,13 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># We change the reference</span></span>
 <span class='r-in'><span class='va'>b</span> <span class='op'>=</span> <span class='fu'><a href='feols.html'>feols</a></span><span class='op'>(</span><span class='va'>Petal.Width</span> <span class='op'>~</span> <span class='va'>Petal.Length</span> <span class='op'>+</span> <span class='fu'>ref</span><span class='op'>(</span><span class='va'>Species</span>, <span class='st'>"vers"</span><span class='op'>)</span>, <span class='va'>iris</span><span class='op'>)</span></span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> <span class='error'>Error in feols(Petal.Width ~ Petal.Length + ref(Species, "vers"), iris):</span> Evaluation of the right-hand-side of the formula raises an error: </span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span>   In ref(Species, "vers"): impossible de trouver la fonction "ref"</span>
 <span class='r-in'></span>
 <span class='r-in'><span class='fu'><a href='etable.html'>etable</a></span><span class='op'>(</span><span class='va'>a</span>, <span class='va'>b</span><span class='op'>)</span></span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>                                               a                   b</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Dependent Var.:                     Petal.Width         Petal.Width</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>                                                                    </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> (Intercept)                    -0.0908 (0.0564)    0.3445* (0.1489)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Petal.Length                 0.2304*** (0.0344)  0.2304*** (0.0344)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Speciesversicolor            0.4354*** (0.1028)                    </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Speciesvirginica             0.8377*** (0.1453)                    </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> ref(Species,"vers")setosa                       -0.4354*** (0.1028)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> ref(Species,"vers")virginica                     0.4023*** (0.0572)</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> ____________________________ __________________ ___________________</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> S.E. type                                   IID                 IID</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Observations                                150                 150</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> R2                                      0.94557             0.94557</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Adj. R2                                 0.94446             0.94446</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> ---</span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> <span class='error'>Error:</span> in etable(a, b):</span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span>  Some elements in '...' could not be evaluated: </span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span>   objet 'b' introuvable</span>
 <span class='r-in'></span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'>#</span></span>
@@ -269,9 +249,7 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class='r-in'><span class='co'># Note that the value created is placed first.</span></span>
 <span class='r-in'><span class='co'># To avoid that behavior =&gt; use the function "bin"</span></span>
 <span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>ref</span><span class='op'>(</span><span class='va'>month_fact</span>, <span class='fu'>.</span><span class='op'>(</span>summer <span class='op'>=</span> <span class='st'>"@jul|aug|sep"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> summer    may   june </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>     92     31     30 </span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> <span class='error'>Error in ref(month_fact, .(summer = "@jul|aug|sep")):</span> impossible de trouver la fonction "ref"</span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># Please refer to the example in the bin help page for more example.</span></span>
 <span class='r-in'><span class='co'># The syntax is the same.</span></span>
@@ -284,15 +262,11 @@ The latter syntax is a sequence of number/quartile (q0 to q4)/percentile (p0 to 
 <span class='r-in'><span class='co'># You can place a factor at the location you want</span></span>
 <span class='r-in'><span class='co'>#  by adding "@digit" in the name first:</span></span>
 <span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>ref</span><span class='op'>(</span><span class='va'>month_num</span>, <span class='fu'>.</span><span class='op'>(</span><span class='st'>"@5"</span><span class='op'>=</span><span class='fl'>5</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>  6  7  8  9  5 </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> 30 31 31 30 31 </span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> <span class='error'>Error in ref(month_num, .(`@5` = 5)):</span> impossible de trouver la fonction "ref"</span>
 <span class='r-in'></span>
 <span class='r-in'><span class='co'># Same with renaming</span></span>
 <span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/table.html'>table</a></span><span class='op'>(</span><span class='fu'>ref</span><span class='op'>(</span><span class='va'>month_num</span>, <span class='fu'>.</span><span class='op'>(</span><span class='st'>"@5 five"</span><span class='op'>=</span><span class='fl'>5</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span></span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>    6    7    8    9 five </span>
-<span class='r-out co'><span class='r-pr'>#&gt;</span>   30   31   31   30   31 </span>
+<span class='r-err co'><span class='r-pr'>#&gt;</span> <span class='error'>Error in ref(month_num, .(`@5 five` = 5)):</span> impossible de trouver la fonction "ref"</span>
 <span class='r-in'></span>
 <span class='r-in'></span>
 </pre>
