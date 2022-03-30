@@ -496,7 +496,6 @@ aggregate.fixest = function(x, agg, full = FALSE, use_weights = TRUE, ...){
     c_all = c()
     se_all = c()
     for(i in 1:nrow(name_df)){
-
         r = name_df[i, 1]
         v = name_df[i, 2]
         v_names = cname_select[root == r & val == v]

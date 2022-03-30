@@ -124,7 +124,7 @@ This section illustrates how the results from `fixest` compares with the ones fr
 is_plm = requireNamespace("plm", quietly = TRUE)
 is_sandwich = requireNamespace("sandwich", quietly = TRUE)
 
-is_plm = is_plm || is_swandwich
+is_plm = is_plm || is_sandwich
 
 if(!is_plm){
     knitr::opts_chunk$set(eval = FALSE)
