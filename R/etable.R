@@ -836,6 +836,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
 
         if(is_md){
             if(!knitr::is_latex_output()){
+                path = path_to_relative(path)
                 cat(.dsb0('<div class = ".[div.class]"><img src = ".[path]"></div>\n'))
                 return(invisible(NULL))
             }
@@ -4885,8 +4886,9 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
         }
 
         minipage_start = minipage_end = ""
+
         w = "35cm"
-        if(!identical(page.width, "fit")){
+        if(!identical(as.vector(page.width), "fit", )){
             # page.width is guaranteed to be of length 2
             w = page.width[1]
             minipage_start = .dsb("\\begin{minipage}{.[page.width[1]]} ",
@@ -6493,7 +6495,9 @@ check_set_page_width = function(page.width, up = 0){
     set_up(up + 1)
     check_value_plus(page.width, "match(fit, a4, us) | vector(character, numeric) GT{0} len(1, 2) no NA")
 
-    if(identical(page.width, "fit")){
+    if(isTRUE(attr(page.width, "no-margin"))){
+        # Nothing => already set
+    } else if(identical(page.width, "fit")){
         # nothing
     } else if(identical(page.width, "a4")){
         page.width = c("21cm", "17cm")
@@ -6544,6 +6548,8 @@ check_set_page_width = function(page.width, up = 0){
         page.width = paste0(c(numbers[1], numbers[2]), unit)
     }
 
+    attr(page.width, "no-margin") = TRUE
+
     page.width
 }
 
@@ -6552,7 +6558,60 @@ is_Rmarkdown = function(){
     "knitr" %in% loadedNamespaces() && !is.null(knitr::pandoc_to())
 }
 
+path_to_relative = function(x){
+    # orig = "C:/Users/berge028/Google Drive/R_packages/fixest/fixest"
+    # dest = "C:/Users/berge028/Google Drive/R_packages/automake/automake/NAMESPACE"
 
+    # I'm not sure it works perfectly well on linux...
+
+    dest = normalizePath(x, "/", mustWork = FALSE)
+    orig = normalizePath(".", "/", mustWork = FALSE)
+
+    if(dest == orig) return(".")
+
+    dest_split = strsplit(dest, "/")[[1]]
+    orig_split = strsplit(orig, "/")[[1]]
+
+    n_d = length(dest_split)
+    n_o = length(orig_split)
+    n_od = min(n_d, n_o)
+
+    i_common = which.max(dest_split[1:n_od] != orig_split[1:n_od])
+
+    # I'm not sure of that on linux....
+    if(i_common == 1){
+        if(dest_split[1] == orig_split[1]){
+            # means all are the same => inclusion
+            i_common = n_od
+
+        } else if(dest_split[1] != orig_split[1]){
+        # different roots? => can't do much
+            return(dest)
+        }
+    } else {
+        i_common = i_common - 1
+    }
+
+    # common = paste0(dest_split[1:i_common], collapse = "/")
+
+    # From orig, we need to go up to the common dir
+    if(i_common == n_o){
+        up = "./"
+    } else {
+        n_up = n_o - i_common
+        up = dsb("`n_up`*c!../")
+    }
+
+    if(i_common == n_d){
+        down = ""
+    } else {
+        down = paste(dest_split[(i_common + 1):n_d], collapse = "/")
+    }
+
+    relpath = paste0(up, down)
+
+    relpath
+}
 
 
 
