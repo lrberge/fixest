@@ -92,7 +92,8 @@ etable(res_sunab)
 # i.e. ref.p = c(-1, .F); where .F is a shortcut for the first period.
 # Say you want to set as references the first three periods on top of -1
 
-res_sunab_3ref = feols(y ~ x1 + sunab(year_treated, year, ref.p = c(.F + 0:2, -1)) | id + year, base_stagg)
+res_sunab_3ref = feols(y ~ x1 + sunab(year_treated, year, ref.p = c(.F + 0:2, -1)) |
+                         id + year, base_stagg)
 
 # Display the two results
 iplot(list(res_sunab, res_sunab_3ref))
