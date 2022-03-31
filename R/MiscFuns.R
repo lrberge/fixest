@@ -9370,6 +9370,32 @@ eval_dot = function(x, up = 1){
 }
 
 
+is_user_level_call = function(){
+    length(sys.calls()) <= 2
+}
+
+
+is_calling_fun = function(pattern){
+    sc_all = sys.calls()
+    n_sc = length(sc_all)
+    if(n_sc > 2){
+
+        if(grepl(".fixest", sc_all[[n_sc - 1]][[1]], fixed = TRUE)){
+            if(n_sc == 3){
+                return(FALSE)
+            }
+
+            sc = sc_all[[n_sc - 3]]
+        } else {
+            sc = sc_all[[n_sc - 2]]
+        }
+
+        return(grepl(pattern, as.character(sc[[1]])))
+    }
+
+    FALSE
+}
+
 
 #### ................. ####
 #### Additional Methods ####
@@ -9632,6 +9658,22 @@ coef.fixest = coefficients.fixest = function(object, keep, drop, order, agg = TR
 
     if(identical(object$family, "negbin")){
         res = res[-length(res)]
+    }
+
+
+    # deltaMethod tweak
+    if(is_calling_fun("deltaMethod")){
+        sysOrigin = sys.parent()
+        mc_DM = match.call(definition = sys.function(sysOrigin), call = sys.call(sysOrigin))
+
+        if("parameterNames" %in% names(mc_DM)){
+            PN = eval(mc_DM$parameterNames, parent.frame())
+
+            check_value(PN, "character vector no na len(data)", .data = res,
+                        .arg_name = "parameterNames", .up = 1)
+
+            names(res) = PN
+        }
     }
 
     res
