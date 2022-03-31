@@ -2302,7 +2302,7 @@ gen_iplot = function(){
 #' coefplot(est)
 #'
 #' # To reset to the default settings:
-#' setFixest_coefplot()
+#' setFixest_coefplot("all", reset = TRUE)
 #' coefplot(est)
 #'
 setFixest_coefplot = function(style, horiz = FALSE, dict = getFixest_dict(), keep,
@@ -2347,7 +2347,7 @@ setFixest_coefplot = function(style, horiz = FALSE, dict = getFixest_dict(), kee
     #
 
     if(missing(style)){
-        style = "default"
+        style = if(reset) "all" else "default"
     }
 
     if(style == "all" && reset){

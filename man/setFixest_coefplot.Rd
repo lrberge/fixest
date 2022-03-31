@@ -177,7 +177,7 @@ setFixest_coefplot(ci.col = 2, pt.col = "darkblue", ci.lwd = 3,
 coefplot(est)
 
 # To reset to the default settings:
-setFixest_coefplot()
+setFixest_coefplot("all", reset = TRUE)
 coefplot(est)
 
 }
