@@ -133,6 +133,11 @@ summary.fixest_multi = function(object, type = "short", vcov = NULL, se = NULL, 
         attr(object, "print_request") = type
     }
 
+    if(is_user_level_call()){
+        validate_dots(suggest_args = c("type", "vcov"),
+                      valid_args = c("agg", "forceCovariance", "keepBounded", "nthreads"))
+    }
+
     est_1 = data[[1]]
     if(is.null(est_1$cov.scaled) || !isTRUE(dots$fromPrint)){
 
@@ -276,6 +281,10 @@ summary.fixest_multi = function(object, type = "short", vcov = NULL, se = NULL, 
 #' res
 #'
 print.fixest_multi = function(x, ...){
+
+    if(is_user_level_call()){
+        validate_dots(valid_args = dsb("/type, vcov, se, cluster, ssc, stage, lean, agg, forceCovariance, keepBounded, n, nthreads"))
+    }
 
     x = summary(x, fromPrint = TRUE, ...)
 

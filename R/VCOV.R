@@ -226,9 +226,10 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
         ssc = dots$dof
     }
 
-    if(!any(c("only_varnames", "sandwich") %in% names(dots)) && !is_function_in_it(vcov)){
-        # 1st condition means NOT a client call
-        validate_dots(suggest_args = c("vcov", "ssc"), valid_args = "dof")
+    if(is_user_level_call()){
+        if(!is_function_in_it(vcov)){
+            validate_dots(suggest_args = c("vcov", "ssc"), valid_args = "dof")
+        }
     }
 
     # All the available VCOVs

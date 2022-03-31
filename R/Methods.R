@@ -163,7 +163,9 @@ hatvalues.fixest = function(model, ...){
         stop("The method 'hatvalues.fixest' cannot be applied to 'lean' fixest objects. Please re-estimate with 'lean = FALSE'.")
     }
 
-    validate_dots()
+    if(is_user_level_call()){
+        validate_dots()
+    }
 
     method = model$method_type
     family = model$family
@@ -257,7 +259,10 @@ NULL
 #' bread(est)
 #'
 bread.fixest = function(x, ...){
-    validate_dots()
+
+    if(is_user_level_call()){
+        validate_dots()
+    }
 
     method = x$method_type
     family = x$family

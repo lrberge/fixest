@@ -66,8 +66,10 @@
 print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 
     # checking the arguments
-    validate_dots(suggest_args = c("n", "type", "se", "cluster"),
-                  valid_args = c("se", "cluster", "ssc", "forceCovariance", "keepBounded"))
+    if(is_user_level_call()){
+        validate_dots(suggest_args = c("n", "type", "vcov"),
+                      valid_args = c("vcov", "se", "cluster", "ssc", "forceCovariance", "keepBounded"))
+    }
 
     # The objects from the estimation and the summary are identical, except regarding the vcov
 	fromSummary = isTRUE(x$summary)
@@ -459,8 +461,7 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
 	}
 
 	# Checking arguments in ...
-	if(!any(c("fromPrint", "iv", "summary_flags") %in% names(mc))){
-	    # condition means NOT internal call => thus client call
+	if(is_user_level_call()){
 	    if(!is_function_in_it(vcov)){
 	        validate_dots(suggest_args = c("se", "cluster", "ssc"), valid_args = "dof")
 	    }
@@ -929,11 +930,13 @@ se = function(object, vcov = NULL, ssc = NULL, cluster = NULL, keep, drop, order
 #' summary(fe_trade)
 #'
 #'
-summary.fixest.fixef = function(object, n=5, ...){
+summary.fixest.fixef = function(object, n = 5, ...){
 	# This function shows some generic information on the fixed-effect coefficients
 
     # checking arguments in dots
-    validate_dots(suggest_args = "n")
+    if(is_user_level_call()){
+        validate_dots(suggest_args = "n")
+    }
 
 	Q = length(object)
 	fixef_names = names(object)
@@ -1061,7 +1064,9 @@ fixef.fixest = function(object, notes = getFixest_notes(), sorted = TRUE, nthrea
     check_arg(notes, sorted, "logical scalar")
 
     # Checking the arguments
-    validate_dots(valid_args = "fixef.tol")
+    if(is_user_level_call()){
+        validate_dots()
+    }
 
     check_value(fixef.tol, "numeric scalar GT{0} LT{1}")
     check_value(fixef.iter, "strict integer scalar GT{0}")
@@ -1415,7 +1420,9 @@ NULL
 plot.fixest.fixef = function(x, n = 5, ...){
 
     # Checking the arguments
-    validate_dots(suggest_args = "n")
+    if(is_user_level_call()){
+        validate_dots(suggest_args = "n")
+    }
 
 	Q = length(x)
 
@@ -2613,6 +2620,7 @@ i = function(factor_var, var, ref, keep, bin, ref2, keep2, bin2, ...){
     # t0 = proc.time()
 
     validate_dots(valid_args = c("f2", "f_name", "ref_special", "sparse"))
+
     dots = list(...)
     is_sparse = isTRUE(dots$sparse)
 
@@ -4530,7 +4538,9 @@ check_conv_feols = function(x){
 summary.fixest_check_conv = function(object, type = "short", ...){
 
     check_arg_plus(type, "match(short, detail)")
-    validate_dots(suggest_args = "type")
+    if(is_user_level_call()){
+        validate_dots(suggest_args = "type")
+    }
 
     if(type == "short"){
         info_max_abs = lapply(object, function(x) sapply(x, function(y) max(abs(y))))
@@ -5619,7 +5629,9 @@ rep.fixest = function(x, times = 1, each = 1, vcov, ...){
     check_arg(each, "integer scalar GE{1} | logical scalar")
     check_arg(vcov, "class(list)")
 
-    validate_dots(suggest_args = c("times", "each"), stop = TRUE)
+    if(is_user_level_call()){
+        validate_dots(suggest_args = c("times", "each"), stop = TRUE)
+    }
 
     # Checking the arguments
     IS_LIST = FALSE
@@ -7986,7 +7998,6 @@ fixest_CI_factor = function(x, level, vcov){
 }
 
 
-
 #### ................. ####
 #### Small Utilities ####
 ####
@@ -9731,7 +9742,9 @@ coefficients.fixest <- coef.fixest
 fitted.fixest = fitted.values.fixest = function(object, type = c("response", "link"), na.rm = TRUE, ...){
 
     # Checking the arguments
-    validate_dots(suggest_args = "type")
+    if(is_user_level_call()){
+        validate_dots(suggest_args = "type")
+    }
 
 	type = match.arg(type)
 
@@ -10015,7 +10028,9 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
                           vcov = NULL, ssc = NULL, ...){
 
     # Checking the arguments
-    validate_dots(suggest_args = c("newdata", "type"))
+    if(is_user_level_call()){
+        validate_dots(suggest_args = c("newdata", "type"))
+    }
 
 	# Controls
 	check_arg_plus(type, sample, "match")
@@ -10489,8 +10504,10 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
 confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster, ssc = NULL, ...){
 
     # Checking the arguments
-    validate_dots(suggest_args = c("parm", "level", "se", "cluster"),
-                  valid_args = c("forceCovariance", "keepBounded"))
+    if(is_user_level_call()){
+        validate_dots(suggest_args = c("parm", "level", "se", "cluster"),
+                      valid_args = c("forceCovariance", "keepBounded"))
+    }
 
 	# Control
 	if(!is.numeric(level) || !length(level) == 1 || level >= 1 || level <= .50){
@@ -10794,7 +10811,9 @@ formula.fixest = function(x, type = c("full", "linear", "iv", "NL"), ...){
 	# we add the clusters in the formula if needed
 
     # Checking the arguments
-    validate_dots(suggest_args = "type")
+    if(is_user_level_call()){
+        validate_dots(suggest_args = "type")
+    }
 
     if(isTRUE(x$is_fit)){
         stop("formula method not available for fixest estimations obtained from fit methods.")
@@ -10883,7 +10902,9 @@ model.matrix.fixest = function(object, data, type = "rhs", na.rm = TRUE, subset 
     # if fixef => return a DF
 
     # Checking the arguments
-    validate_dots(suggest_args = c("data", "type"))
+    if(is_user_level_call()){
+        validate_dots(suggest_args = c("data", "type"))
+    }
 
     # We allow type to be used in the location of data if data is missing
     if(!missing(data) && missing(type)){

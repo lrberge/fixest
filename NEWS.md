@@ -8,12 +8,20 @@
 ## Other bug fixes
 
  - fix bug in `confint` when `sunab` was used (thanks to Sarah Hofmann).
+ 
+ - fix an important "documentation bug" on the Sun and Abraham method (thanks to Kyle Butts [#287](https://github.com/lrberge/fixest/issues/287#issuecomment-1083243256)).
+ 
+## Other
+
+ - added compatibility with `car::deltaMethod` following Grant McDermott's suggestion.
+ 
+ - new function `lag_fml` which is an alias to `lag.formula`. The latter being easily stomped by other function names from other packages.
 
 # fixest 0.10.3
 
  - fix bug linked to the proper identification of estimations with only fixed-effects.
  
- - remove the use of anyNA.data.frame leading to a dependency to R 3.6.3 (reported by @MichaelChirico [#261](https://github.com/lrberge/fixest/issues/261)).
+ - remove the use of `anyNA.data.frame` leading to a dependency to R 3.6.3 (reported by @MichaelChirico [#261](https://github.com/lrberge/fixest/issues/261)).
 
 # fixest 0.10.2
 
