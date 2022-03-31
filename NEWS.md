@@ -11,6 +11,8 @@
  
  - fix an important "documentation bug" on the Sun and Abraham method (thanks to Kyle Butts [#287](https://github.com/lrberge/fixest/issues/287#issuecomment-1083243256)).
  
+ - fix bugs regarding `view`/`markdown` features of `etable`.
+ 
 ## Other
 
  - added compatibility with `car::deltaMethod` following Grant McDermott's suggestion.

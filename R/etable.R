@@ -5239,7 +5239,7 @@ DIR_EXISTS = function(x){
 
 fix_pkgwdown_path = function(){
     # https://github.com/r-lib/pkgdown/issues/1218
-    # just because I use google drive...
+    # just because I use google drive... it seems pkgdown cannot convert to relative path...
 
     # This is to ensure it only works for me
     if(!isTRUE(renvir_get("fixest_ROOT"))) return(NULL)
@@ -5253,8 +5253,6 @@ fix_pkgwdown_path = function(){
         text = readLines(f)
         close(my_file)
         if(any(grepl("../../../", text, fixed = TRUE))){
-            my_file = file(f, "w", encoding = "UTF-8")
-
             # We embed the images directly: safer
 
             # A) we get the path
@@ -5270,6 +5268,7 @@ fix_pkgwdown_path = function(){
                 path = gsub("\".*", "", line_split[2])
                 # ROOT is always fixest
                 path = gsub(".+fixest/", "", path)
+                path = gsub("^articles", "vignettes", path)
 
                 URI = knitr::image_uri(path)
 
@@ -5279,6 +5278,7 @@ fix_pkgwdown_path = function(){
                 text[i] = new_line
             }
 
+            my_file = file(f, "w", encoding = "UTF-8")
             writeLines(text, f)
             close(my_file)
         }
