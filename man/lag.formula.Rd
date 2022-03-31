@@ -2,9 +2,20 @@
 % Please edit documentation in R/Lagging.R
 \name{lag.formula}
 \alias{lag.formula}
+\alias{lag_fml}
 \title{Lags a variable using a formula}
 \usage{
 \method{lag}{formula}(
+  x,
+  k = 1,
+  data,
+  time.step = NULL,
+  fill = NA,
+  duplicate.method = c("none", "first"),
+  ...
+)
+
+lag_fml(
   x,
   k = 1,
   data,
