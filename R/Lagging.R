@@ -658,6 +658,9 @@ lag.formula = function(x, k = 1, data, time.step = NULL, fill = NA, duplicate.me
     res
 }
 
+#' @rdname lag.formula
+lag_fml = lag.formula
+
 
 
 #' Constructs a \code{fixest} panel data base
