@@ -4721,8 +4721,8 @@ check_build_available = function(){
 
     opt = getOption("fixest_build_available")
 
-    if(is.null(opt)){
-        outcome = system2("pdflatex", "-help", FALSE, FALSE)
+    if(!isTRUE(opt)){
+        outcome = suppressWarnings(system2("pdflatex", "-help", FALSE, FALSE))
         if(outcome == 127 && !requireNamespace("tinytex", quietly = TRUE)){
             warn_up("The functionality you want to use requires the package 'tinytex' which is not installed or a working pdflatex installation which wasn't found.")
 
@@ -4730,7 +4730,7 @@ check_build_available = function(){
             return("pdflatex")
         }
 
-        outcome = system2("magick", "-help", FALSE, FALSE)
+        outcome = suppressWarnings(system2("magick", "-help", FALSE, FALSE))
         if(outcome == 127 && !requireNamespace("pdftools", quietly = TRUE)){
             warn_up("The functionality you want to use requires the package 'pdftools' which is not installed or a working imagemagick + ghostscript installation which wasn't found.")
 
@@ -4739,15 +4739,6 @@ check_build_available = function(){
         }
 
         options(fixest_build_available = TRUE)
-        return(TRUE)
-
-    } else if(identical(opt, "pdflatex")){
-        warn_up("The functionality you want to use requires the package 'tinytex' which is not installed or a working pdflatex installation which wasn't found.")
-        return("pdflatex")
-
-    } else if(identical(opt, "magick")){
-        warn_up("The functionality you want to use requires the package 'pdftools' which is not installed or a working imagemagick + ghostscript installation which wasn't found.")
-        return("magick")
     }
 
     return(TRUE)
@@ -4950,16 +4941,16 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
         warn_msg = NULL
         ok_cmd_tex = TRUE && DO_CMD
         if(DO_CMD){
-            outcome = system2("pdflatex", .dsb("-halt-on-error -interaction=nonstopmode .[draft] etable.tex"),
-                              "etable_shell_pdf.log", "etable_shell_pdf.err")
+            outcome = suppressWarnings(system2("pdflatex", .dsb("-halt-on-error -interaction=nonstopmode .[draft] etable.tex"),
+                              "etable_shell_pdf.log", "etable_shell_pdf.err"))
 
             if(outcome == 127){
                 ok_cmd_tex = FALSE
             } else if(outcome == 1){
 
                 # Sometimes recompiling works!!!
-                outcome = system2("pdflatex", .dsb("-halt-on-error -interaction=nonstopmode .[draft] etable.tex"),
-                                  "etable_shell_pdf.log", "etable_shell_pdf.err")
+                outcome = suppressWarnings(system2("pdflatex", .dsb("-halt-on-error -interaction=nonstopmode .[draft] etable.tex"),
+                                  "etable_shell_pdf.log", "etable_shell_pdf.err"))
 
                 if(outcome == 1){
                     warn_msg = "pdflatex: error when compiling -- sorry! Check the log file with log_etable('pdflatex')."
@@ -4969,8 +4960,8 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
         }
 
         if(ok_cmd_tex && do_rerun){
-            outcome = system2("pdflatex", "-halt-on-error -interaction=nonstopmode etable.tex",
-                              "etable_shell_pdf.log", "etable_shell_pdf.err")
+            outcome = suppressWarnings(system2("pdflatex", "-halt-on-error -interaction=nonstopmode etable.tex",
+                              "etable_shell_pdf.log", "etable_shell_pdf.err"))
 
             # No reason for the 2nd run to fail, but I add it anyway just to be safe
             if(outcome == 1){
@@ -5009,8 +5000,8 @@ build_tex_png = function(x, view = FALSE, export = NULL, markdown = NULL,
         ok_cmd_magick = TRUE && DO_CMD
         warn_msg = NULL
         if(DO_CMD){
-            outcome = system2("magick", .dsb("-density 600 etable.pdf -colorspace RGB .[png_name]"),
-                              "etable_shell_magick.log", "etable_shell_magick.err")
+            outcome = suppressWarnings(system2("magick", .dsb("-density 600 etable.pdf -colorspace RGB .[png_name]"),
+                              "etable_shell_magick.log", "etable_shell_magick.err"))
 
             if(outcome == 127){
                 ok_cmd_magick = FALSE
