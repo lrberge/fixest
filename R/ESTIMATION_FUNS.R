@@ -3913,8 +3913,8 @@ format_error_msg = function(x, origin){
 
     x = gsub("\n+$", "", x)
 
-    if(grepl("^Error (in|:|: in) (fe|fixest|fun)[^\n]+\n", x)){
-        res = gsub("^Error (in|:|: in) (fe|fixest|fun)[^\n]+\n *(.+)", "\\3", x)
+    if(grepl("^Error (in|:|: in) (fe|fixest|fun|fml_split)[^\n]+\n", x)){
+        res = gsub("^Error (in|:|: in) (fe|fixest|fun|fml_split)[^\n]+\n *(.+)", "\\3", x)
     } else if(grepl("[Oo]bject '.+' not found", x) || grepl("memory|cannot allocate", x)) {
         res = x
     } else {
