@@ -158,7 +158,7 @@ panel_setup = function(data, panel.id, time.step = NULL, duplicate.method = "non
 
         } else {
             all_steps = unique(diff(time_unik))
-            my_step = cpp_pgcd(unique(all_steps))
+            my_step = cpp_pgcd(all_steps)
 
             # we rescale time_unik
             time_unik_new = (time_unik - min(time_unik)) / my_step
