@@ -14,7 +14,8 @@
 .datatable.aware = TRUE
 
 
-panel_setup = function(data, panel.id, time.step = NULL, duplicate.method = "none", DATA_MISSING = FALSE, from_fixest = FALSE){
+panel_setup = function(data, panel.id, time.step = NULL, duplicate.method = "none",
+                       DATA_MISSING = FALSE, from_fixest = FALSE){
     # Function to setup the panel.
     # Used in lag.formula, panel, and fixest_env (with argument panel.id and panel.args)
     # DATA_MISSING: arg used in lag.formula
@@ -567,7 +568,8 @@ d__expand = function(x, k = 1, fill){
 #'
 #'
 #'
-lag.formula = function(x, k = 1, data, time.step = NULL, fill = NA, duplicate.method = c("none", "first"), ...){
+lag.formula = function(x, k = 1, data, time.step = NULL, fill = NA,
+                       duplicate.method = c("none", "first"), ...){
     # Arguments:
     # time.step: default: "consecutive", other option: "unitary" (where you find the most common step and use it -- if the data is numeric), other option: a number, of course the time must be numeric
 
@@ -604,7 +606,8 @@ lag.formula = function(x, k = 1, data, time.step = NULL, fill = NA, duplicate.me
     vars = all.vars(x)
     qui_pblm = setdiff(vars, existing_vars)
     if(length(qui_pblm) > 0){
-        stop("In the formula the variable", enumerate_items(qui_pblm, "s.is.quote"), " not in the ", ifelse(DATA_MISSING, "environment. Add argument data?", "data."))
+        stop("In the formula the variable", enumerate_items(qui_pblm, "s.is.quote"),
+             " not in the ", ifelse(DATA_MISSING, "environment. Add argument data?", "data."))
     }
 
 
@@ -629,7 +632,8 @@ lag.formula = function(x, k = 1, data, time.step = NULL, fill = NA, duplicate.me
         # I could go further in checking but it's enough
     }
 
-    meta_info = panel_setup(data, panel.id = x, time.step = time.step, duplicate.method = duplicate.method, DATA_MISSING = DATA_MISSING)
+    meta_info = panel_setup(data, panel.id = x, time.step = time.step,
+                            duplicate.method = duplicate.method, DATA_MISSING = DATA_MISSING)
 
     # we get the observation id!
     obs_lagged = cpp_lag_obs(id = meta_info$id_sorted, time = meta_info$time_sorted, nlag = k)
@@ -658,7 +662,7 @@ lag.formula = function(x, k = 1, data, time.step = NULL, fill = NA, duplicate.me
     res
 }
 
-#' @rdname lag.formula
+#' @describeIn lag.formula Lags a variable using a formula syntax
 lag_fml = lag.formula
 
 
@@ -736,7 +740,8 @@ panel = function(data, panel.id, time.step = NULL, duplicate.method = c("none", 
 
     mc = match.call()
 
-    meta_info = panel_setup(data, panel.id = panel.id, time.step = time.step, duplicate.method = duplicate.method)
+    meta_info = panel_setup(data, panel.id = panel.id, time.step = time.step,
+                            duplicate.method = duplicate.method)
     meta_info$call = mc
 
     # R makes a shallow copy of data => need to do it differently with DT
@@ -954,7 +959,10 @@ unpanel = function(x){
         order_it = order(id, time)
         order_inv = order(order_it)
 
-        new_info = list(order_it = order_it, order_inv=order_inv, id_sorted=id[order_it], time_sorted=time[order_it], na_flag = na_flag, panel.id = info$panel.id, call = info$call)
+        new_info = list(order_it = order_it, order_inv=order_inv,
+                        id_sorted=id[order_it], time_sorted=time[order_it],
+                        na_flag = na_flag, panel.id = info$panel.id, call = info$call)
+
         if(na_flag) new_info$is_na = is_na
         attr(res, "panel_info") = new_info
     }
