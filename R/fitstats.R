@@ -598,7 +598,7 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
             res_all[[type]] = mean(model.matrix(x, type = "lhs"))
 
         } else if(type == "theta"){
-            isNegbin = x$method == "fenegbin" || (x$method %in% c("femlm", "feNmlm") && x$family == "negbin")
+            isNegbin = x$method == "fenegbin" || (x$method_type == "feNmlm" && x$family == "negbin")
             if(isNegbin){
                 theta = x$coefficients[".theta"]
                 names(theta) = "Overdispersion"

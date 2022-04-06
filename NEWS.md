@@ -5,9 +5,11 @@
 
  - fix bug in function `coef()` leading to methods to throw errors in R devel. Thanks to @vincentarelbundock for reporting ([#291](https://github.com/lrberge/fixest/issues/291)).
 
+ - fix bug in the `predict` method when applied to objects estimated with `feNmlm`. Thanks again to @vincentarelbundock for reporting ([#292](https://github.com/lrberge/fixest/issues/292))! 
+ 
 ## Other
 
- - `xpd` gains the argument `add`.
+ - the function `xpd` gains the argument `add`.
 
 
 # fixest 0.10.4

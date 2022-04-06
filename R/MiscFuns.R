@@ -92,7 +92,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 	    }
 	}
 
-	isNegbin = x$method == "fenegbin" || (x$method %in% c("femlm", "feNmlm") && x$family=="negbin")
+	isNegbin = x$method == "fenegbin" || (x$method_type == "feNmlm" && x$family=="negbin")
 
 	x = summary(x, fromPrint = TRUE, ...)
 
@@ -140,7 +140,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 	if(isFALSE(x$convStatus)){
 	    last_warn = getOption("fixest_last_warning")
 	    if(is.null(last_warn) || (proc.time() - last_warn)[3] > 1){
-	        if(x$method %in% c("femlm", "feNmlm", "fenegbin")){
+	        if(x$method_type == "feNmlm"){
 	            warning("The optimization algorithm did not converge, the results are not reliable. (", x$message, ")", call. = FALSE)
 	        } else if(x$method_type == "feols"){
 	            warning("The demeaning algorithm did not converge, the results are not reliable. (", x$message, ")", call. = FALSE)
@@ -157,7 +157,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 	se.type = attr(coeftable, "type")
 	if(is.null(se.type)) se.type = "Custom"
 
-	if(x$method_type %in% c("femlm", "feNmlm")){
+	if(x$method_type == "feNmlm"){
 		family_format = c(poisson="Poisson", negbin="Negative Binomial", logit="Logit", gaussian="Gaussian")
 		msg = ifelse(is.null(x$call$NL.fml), "", "Non-linear ")
 		half_line = paste0(msg, "ML estimation, family = ", family_format[x$family])
@@ -9791,7 +9791,7 @@ fitted.fixest = fitted.values.fixest = function(object, type = c("response", "li
 		res = fit
 	} else if(!is.null(object$mu)){
 		res = object$mu
-	} else if(object$method == "femlm"){
+	} else if(object$method_type == "feNmlm"){
 		family = object$family
 		famFuns = switch(family,
 							  poisson = ml_poisson(),
@@ -9846,7 +9846,8 @@ fitted.values.fixest <- fitted.fixest
 #' # we plot the residuals
 #' plot(resid(res_poisson))
 #'
-resid.fixest = residuals.fixest = function(object, type = c("response", "deviance", "pearson", "working"), na.rm = TRUE, ...){
+resid.fixest = residuals.fixest = function(object, type = c("response", "deviance", "pearson", "working"),
+                                           na.rm = TRUE, ...){
 
     check_arg_plus(type, "match")
     check_arg_plus(na.rm, "logical scalar")
@@ -10097,7 +10098,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
 	    } else {
 	        if(type == "response" || object$method_type == "feols"){
 	            res = object$fitted.values
-	        } else if(object$method == "femlm") {
+	        } else if(object$method_type == "feNmlm") {
 	            if("mu" %in% names(object)){
 	                res = object$mu
 	            } else {
@@ -10431,7 +10432,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
 
 	if(type == "link" || object$method_type == "feols"){
 		res = value_predicted
-	} else if(object$method == "femlm") {
+	} else if(object$method_type == "feNmlm") {
 		# Now the expected predictor
 		family = object$family
 		famFuns = switch(family,
