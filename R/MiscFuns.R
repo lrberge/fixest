@@ -9438,7 +9438,7 @@ is_calling_fun = function(pattern){
             sc = sc_all[[n_sc - 2]]
         }
 
-        return(grepl(pattern, as.character(sc[[1]])))
+        return(grepl(pattern, as.character(sc[[1]])[1]))
     }
 
     FALSE
