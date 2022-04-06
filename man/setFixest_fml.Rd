@@ -119,6 +119,17 @@ xpd(y ~ 1, rhs = vars)
 # To create a two sided formula
 xpd(lhs = "y", rhs = vars)
 
+#
+# argument 'add'
+#
+
+xpd(~x1, add = ~ x2 + x3)
+
+# also works with character vectors
+xpd(~x1, add = c("x2", "x3"))
+
+# only adds to the RHS
+xpd(y ~ x, add = ~bon + jour)
 
 #
 # Dot square bracket operator

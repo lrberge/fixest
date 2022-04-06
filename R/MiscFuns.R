@@ -3235,6 +3235,7 @@ ref = function(x, ref){
 #' @inheritParams setFixest_fml
 #'
 #' @param fml A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}. Special macros of the form \code{..("regex")} can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument \code{data}. square brackets have a special meaning: Values in them are evaluated and parsed accordingly. Example: \code{y~x.[1:2] + z.[i]} will lead to \code{y~x1+x2+z3} if \code{i==3}. See examples.
+#' @param add Either a character scalar or a one-sided formula. The elements will be added to the right-hand-side of the formula, before any macro expansion is applied.
 #' @param lhs If present then a formula will be constructed with \code{lhs} as the full left-hand-side. The value of \code{lhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{rhs}. Note that if \code{fml} is not missing, its LHS will be replaced by \code{lhs}.
 #' @param rhs If present, then a formula will be constructed with \code{rhs} as the full right-hand-side. The value of \code{rhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{lhs}. Note that if \code{fml} is not missing, its RHS will be replaced by \code{rhs}.
 #' @param data Either a character vector or a data.frame. This argument will only be used if a macro of the type \code{..("regex")} is used in the formula of the argument \code{fml}. If so, any variable name from \code{data} that matches the regular expression will be added to the formula.
@@ -3375,6 +3376,17 @@ ref = function(x, ref){
 #' # To create a two sided formula
 #' xpd(lhs = "y", rhs = vars)
 #'
+#' #
+#' # argument 'add'
+#' #
+#'
+#' xpd(~x1, add = ~ x2 + x3)
+#'
+#' # also works with character vectors
+#' xpd(~x1, add = c("x2", "x3"))
+#'
+#' # only adds to the RHS
+#' xpd(y ~ x, add = ~bon + jour)
 #'
 #' #
 #' # Dot square bracket operator
@@ -3436,11 +3448,12 @@ ref = function(x, ref){
 #' #       sw(poly(Temp, 1), poly(Temp, 2), poly(Temp, 3))
 #'
 #'
-xpd = function(fml, ..., lhs, rhs, data = NULL){
-    .xpd(fml = fml, ..., lhs = lhs, rhs = rhs, data = data, check = TRUE, macro = TRUE, frame = parent.frame())
+xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL){
+    .xpd(fml = fml, ..., add = add, lhs = lhs, rhs = rhs, data = data, check = TRUE,
+         macro = TRUE, frame = parent.frame())
 }
 
-.xpd = function(fml, ..., lhs, rhs, data = NULL, check = FALSE, macro = FALSE, frame = NULL){
+.xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, check = FALSE, macro = FALSE, frame = NULL){
 
     is_lhs = !missing(lhs)
     is_rhs = !missing(rhs)
@@ -3472,7 +3485,7 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
 
         fml = res
 
-        if(!macro) return(fml)
+        if(!macro && missnull(add)) return(fml)
 
         # NOTA:
         # if we allow for macro implementation ex post:
@@ -3480,8 +3493,32 @@ xpd = function(fml, ..., lhs, rhs, data = NULL){
         # Now, without macro variables, speed is at 30us while it was 20us before
         # so in .xpd => macro argument
 
+    } else if(!missing(add)){
+
+        if(check){
+            check_arg(fml, .type = "NULL formula", .up = 1)
+        }
+
+        if(missnull(fml)){
+            fml = ~ 1
+            fml[[2]] = value2stringCall(add, call = TRUE, check = check)
+            add = NULL
+        }
+
     } else if(check){
         check_arg(fml, .type = "formula mbt", .up = 1)
+    }
+
+
+    if(!missnull(add)){
+        # Direct formula manipulation is too complicated (and I want to avoid ugly parentheses)
+        # by string it's easy
+        fml_dp = deparse_long(fml)
+
+        add_txt = value2stringCall(add, call = FALSE, check = check)
+        add_txt = gsub("^~", "", add_txt)
+
+        fml = as.formula(paste0(fml_dp, "+", add_txt), frame)
     }
 
     macros = parse_macros(..., from_xpd = TRUE, check = check, frame = frame)

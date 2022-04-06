@@ -4,12 +4,14 @@
 \alias{xpd}
 \title{Expands formula macros}
 \usage{
-xpd(fml, ..., lhs, rhs, data = NULL)
+xpd(fml, ..., add = NULL, lhs, rhs, data = NULL)
 }
 \arguments{
 \item{fml}{A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}. Special macros of the form \code{..("regex")} can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument \code{data}. square brackets have a special meaning: Values in them are evaluated and parsed accordingly. Example: \code{y~x.[1:2] + z.[i]} will lead to \code{y~x1+x2+z3} if \code{i==3}. See examples.}
 
 \item{...}{Definition of the macro variables. Each argument name corresponds to the name of the macro variable. It is required that each macro variable name starts with two dots (e.g. \code{..ctrl}). The value of each argument must be a one-sided formula or a character vector, it is the definition of the macro variable. Example of a valid call: \code{setFixest_fml(..ctrl = ~ var1 + var2)}. In the function \code{xpd}, the default macro variables are taken from \code{getFixest_fml}, any variable in \code{...} will replace these values. You can enclose values in \code{.[]}, if so they will be evaluated from the current environment. For example \code{..ctrl = ~ x.[1:2] + .[z]} will lead to \code{~x1 + x2 + var} if \code{z} is equal to \code{"var"}.}
+
+\item{add}{Either a character scalar or a one-sided formula. The elements will be added to the right-hand-side of the formula, before any macro expansion is applied.}
 
 \item{lhs}{If present then a formula will be constructed with \code{lhs} as the full left-hand-side. The value of \code{lhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{rhs}. Note that if \code{fml} is not missing, its LHS will be replaced by \code{lhs}.}
 
@@ -152,6 +154,17 @@ xpd(y ~ 1, rhs = vars)
 # To create a two sided formula
 xpd(lhs = "y", rhs = vars)
 
+#
+# argument 'add'
+#
+
+xpd(~x1, add = ~ x2 + x3)
+
+# also works with character vectors
+xpd(~x1, add = c("x2", "x3"))
+
+# only adds to the RHS
+xpd(y ~ x, add = ~bon + jour)
 
 #
 # Dot square bracket operator
