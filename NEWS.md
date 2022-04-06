@@ -1,10 +1,13 @@
 
 # fixest 0.10.5
 
-# Bug fixes
+## Bug fixes
 
  - fix bug in function `coef()` leading to methods to throw errors in R devel. Thanks to @vincentarelbundock for reporting ([#291](https://github.com/lrberge/fixest/issues/291)).
 
+## Other
+
+ - `xpd` gains the argument `add`.
 
 
 # fixest 0.10.4
