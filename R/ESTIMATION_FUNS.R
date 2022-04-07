@@ -3646,6 +3646,7 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	res$fitted.values = expected.predictor
 	res$hessian = hessian
 
+	dimnames(var) = list(params, params)
 	res$cov.iid = var
 	# for compatibility with conleyreg
 	res$cov.unscaled = res$cov.iid

@@ -7,6 +7,8 @@
 
  - fix bug in the `predict` method when applied to objects estimated with `feNmlm`. Thanks again to @vincentarelbundock for reporting ([#292](https://github.com/lrberge/fixest/issues/292))! 
  
+ - fix missing variable names in the VCOV matrix of `feNmlm` models. Thanks (yet again!) to @vincentarelbundock for reporting ([#293](https://github.com/lrberge/fixest/issues/293)).
+ 
 ## Other
 
  - the function `xpd` gains the argument `add`.

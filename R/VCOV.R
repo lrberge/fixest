@@ -311,7 +311,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     }
 
     ####
-    #### vcov parsing ####
+    #### ... vcov parsing ####
     ####
 
     # Checking the value of vcov
@@ -727,7 +727,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 
 
     ####
-    #### scores ####
+    #### ... scores ####
     ####
 
     # We handle the bounded parameters:
@@ -750,7 +750,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 
 
     ####
-    #### bread ####
+    #### ... bread ####
     ####
 
     n = object$nobs
@@ -806,7 +806,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     }
 
     ####
-    #### vcov no adj ####
+    #### ... vcov no adj ####
     ####
 
     # we compute the vcov. The adjustment (which is a pain in the neck) will come after that
@@ -836,7 +836,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     dimnames(vcov_noAdj) = dimnames(bread)
 
     ####
-    #### ssc ####
+    #### ... ssc ####
     ####
 
     # ssc is a ssc object in here
@@ -968,7 +968,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     vcov_mat = vcov_noAdj * ss_adj
 
     ####
-    #### vcov attributes ####
+    #### ... vcov attributes ####
     ####
 
 
