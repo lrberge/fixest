@@ -7,11 +7,15 @@
 
  - fix bug in the `predict` method when applied to objects estimated with `feNmlm`. Thanks again to @vincentarelbundock for reporting ([#292](https://github.com/lrberge/fixest/issues/292))! 
  
- - fix missing variable names in the VCOV matrix of `feNmlm` models. Thanks (yet again!) to @vincentarelbundock for reporting ([#293](https://github.com/lrberge/fixest/issues/293)).
+ - fix missing variable names in the VCOV matrix of `feNmlm` models. Thanks (yet again!) to @vincentarelbundock for reporting ([#293](https://github.com/lrberge/fixest/issues/293)). Comme on dit : jamais deux sans trois !
  
 ## Other
 
  - the function `xpd` gains the argument `add`.
+ 
+ - remove warnings when a binomial family is used with weights in `feglm`.
+ 
+ - add the arguments `y`, `X`, `weights`, `endo`, `inst` to the function `est_env` to make it more user-friendly.
 
 
 # fixest 0.10.4

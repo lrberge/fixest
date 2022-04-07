@@ -2339,14 +2339,26 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
     # the preformatted results
     res = get("res", env)
 
+    #
     # glm functions:
+    #
+
     variance = family$variance
     linkfun = family$linkfun
     linkinv = family$linkinv
-    sum_dev.resids = family$sum_dev.resids
+
+    dev.resids = family$dev.resids
+    sum_dev.resids = function(y, mu, eta, wt) sum(dev.resids(y, mu, wt))
+
+    fun_mu.eta = family$mu.eta
+    mu.eta = function(mu, eta) fun_mu.eta(eta)
+
     valideta = family$valideta
+    if(is.null(valideta)) valideta = function(...) TRUE
+
     validmu = family$validmu
-    mu.eta = family$mu.eta
+    if(is.null(validmu)) validmu = function(...) TRUE
+
     family_equiv = family$family_equiv
 
     # Optimizing poisson/logit
@@ -2368,6 +2380,9 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
         validmu = function(mu) cpppar_poisson_validmu(mu, nthreads)
 
     } else if(family_equiv == "logit"){
+        # To avoid annoying warnings
+        family$initialize = quasibinomial()$initialize
+
         linkfun = function(mu) cpppar_logit_linkfun(mu, nthreads)
         linkinv = function(eta) cpppar_logit_linkinv(eta, nthreads)
         if(isWeight){

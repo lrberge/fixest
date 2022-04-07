@@ -221,21 +221,13 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         family$family_equiv = family_equiv
 
         #
-        # Custom functions
+        # Custom functions -> now in the estimation fun
         #
         # Now the poisson and logit families are modified directly in feglm.fit
         #   at a late stage => much easier for bookkeeping + avoids a bug
         #   when weights are modified before using feglm.fit(env = env)
         #
 
-        dev.resids = family$dev.resids
-        family$sum_dev.resids = function(y, mu, eta, wt) sum(dev.resids(y, mu, wt))
-
-        fun_mu.eta = family$mu.eta
-        family$mu.eta = function(mu, eta) fun_mu.eta(eta)
-
-        if(is.null(family$valideta)) family$valideta = function(...) TRUE
-        if(is.null(family$validmu)) family$validmu = function(...) TRUE
 
         # QUIRKINESS => now family becomes the family name and the functions become family_funs
         family_funs = family
