@@ -4,10 +4,20 @@
 \alias{est_env}
 \title{Estimates a \code{fixest} estimation from a \code{fixest} environment}
 \usage{
-est_env(env)
+est_env(env, y, X, weights, endo, inst)
 }
 \arguments{
 \item{env}{An environment obtained from a \code{fixest} estimation with \code{only.env = TRUE}. This is intended for advanced users so there is no error handling: any other kind of input will fail with a poor error message.}
+
+\item{y}{A vector representing the dependent variable. Should be of the same length as the number of observations in the initial estimation.}
+
+\item{X}{A matrix representing the independent variables. Should be of the same dimension as in the initial estimation.}
+
+\item{weights}{A vector of weights (i.e. with only positive values). Should be of the same length as the number of observations in the initial estimation. If identical to the scalar 1, this will mean that no weights will be used in the estimation.}
+
+\item{endo}{A matrix representing the endogenous regressors in IV estimations. It should be of the same dimension as the original endogenous regressors.}
+
+\item{inst}{A matrix representing the instruments in IV estimations. It should be of the same dimension as the original instruments.}
 }
 \value{
 It returns the results of a \code{fixest} estimation: the one that was summoned when obtaining the environment.
@@ -54,8 +64,14 @@ bboot = function(x, n_sim = 100){
 
   res_all = vector("list", n_sim)
   for(i in 1:n_sim){
-    assign("weights.value", rexp(n_obs, rate = 1), core_env)
-    res_all[[i]] = est_env(env = core_env)
+    # # begin: NOT RUN
+    # # We could directly assign in the environment:
+    # assign("weights.value", rexp(n_obs, rate = 1), core_env)
+    # res_all[[i]] = est_env(env = core_env)
+    #   end: NOT RUN
+
+    # Instead we can use the argument weights, which does the same
+    res_all[[i]] = est_env(env = core_env, weights = rexp(n_obs, rate = 1))
   }
 
   do.call(rbind, res_all)

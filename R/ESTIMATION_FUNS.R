@@ -3787,6 +3787,11 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 #' This is a function advanced users which allows to estimate any \code{fixest} estimation from a \code{fixest} environment obtained with \code{only.env = TRUE} in a \code{fixest} estimation.
 #'
 #' @param env An environment obtained from a \code{fixest} estimation with \code{only.env = TRUE}. This is intended for advanced users so there is no error handling: any other kind of input will fail with a poor error message.
+#' @param y A vector representing the dependent variable. Should be of the same length as the number of observations in the initial estimation.
+#' @param X A matrix representing the independent variables. Should be of the same dimension as in the initial estimation.
+#' @param weights A vector of weights (i.e. with only positive values). Should be of the same length as the number of observations in the initial estimation. If identical to the scalar 1, this will mean that no weights will be used in the estimation.
+#' @param endo A matrix representing the endogenous regressors in IV estimations. It should be of the same dimension as the original endogenous regressors.
+#' @param inst A matrix representing the instruments in IV estimations. It should be of the same dimension as the original instruments.
 #'
 #' @return
 #'
@@ -3835,8 +3840,14 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 #'
 #'   res_all = vector("list", n_sim)
 #'   for(i in 1:n_sim){
-#'     assign("weights.value", rexp(n_obs, rate = 1), core_env)
-#'     res_all[[i]] = est_env(env = core_env)
+#'     # # begin: NOT RUN
+#'     # # We could directly assign in the environment:
+#'     # assign("weights.value", rexp(n_obs, rate = 1), core_env)
+#'     # res_all[[i]] = est_env(env = core_env)
+#'     #   end: NOT RUN
+#'
+#'     # Instead we can use the argument weights, which does the same
+#'     res_all[[i]] = est_env(env = core_env, weights = rexp(n_obs, rate = 1))
 #'   }
 #'
 #'   do.call(rbind, res_all)
@@ -3857,8 +3868,29 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 #'
 #'
 #'
-est_env = function(env){
+est_env = function(env, y, X, weights, endo, inst){
     # No check whatsoever: for advanced users
+
+    if(!missnull(y)){
+        assign("lhs", y, env)
+    }
+
+    if(!missnull(X)){
+        assign("linear.mat", X, env)
+    }
+
+    if(!missnull(weights)){
+        assign("weights.value", weights, env)
+    }
+
+    if(!missnull(endo)){
+        assign("is_lhs", endo, env)
+    }
+
+    if(!missnull(inst)){
+        assign("iv.mat", inst, env)
+    }
+
     switch(env$res$method_type,
            "feols"  = feols(env = env),
            "feglm"  = feglm.fit(env = env),
