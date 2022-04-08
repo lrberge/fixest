@@ -9,6 +9,8 @@
  
  - fix missing variable names in the VCOV matrix of `feNmlm` models. Thanks (yet again!) to @vincentarelbundock for reporting ([#293](https://github.com/lrberge/fixest/issues/293)). Comme on dit : jamais deux sans trois !
  
+ - fix display bug in cluster names in `etable`. 
+ 
 ## Other
 
  - the function `xpd` gains the argument `add`.

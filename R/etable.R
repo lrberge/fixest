@@ -4045,7 +4045,7 @@ etable_internal_df = function(info){
         }
 
         se_type_format = c()
-        for(m in 1:n_models) se_type_format[m] = format_se_type(se_type_list[[m]], longueur[[1+m]], by = TRUE)
+        for(m in 1:n_models) se_type_format[m] = format_se_type(se_type_list[[m]], longueur[[1+m]], by = TRUE, dict = dict)
 
         main_type = ""
         if(all(grepl("Clustered", unlist(se_type_list), fixed = TRUE))){
@@ -5945,7 +5945,7 @@ escape_latex = function(x_all, makecell = TRUE){
     res
 }
 
-format_se_type = function(x, width, by = FALSE){
+format_se_type = function(x, width, by = FALSE, dict = c()){
     # we make 'nice' se types
     # format_se_type("Clustered (species & fe2)", 10, by = TRUE)
     # format_se_type("vcovHC(x, type = \"HC0\")", 10, by = TRUE)
@@ -6011,6 +6011,24 @@ format_se_type = function(x, width, by = FALSE){
     all_fe_split = gsub(" ", "", strsplit(all_fe, "&")[[1]])
     n_fe = length(all_fe_split)
     n_char = nchar(all_fe_split)
+
+    # renaming the FEs
+    all_fe_format = c()
+    for(i in 1:length(all_fe_split)){
+        fe = all_fe_split[i]
+
+        if(fe %in% names(dict)){
+            all_fe_format[i] = dict[fe]
+        } else if(grepl("\\^", fe)){
+            fe_split = strsplit(fe, "\\^")[[1]]
+            who = fe_split %in% names(dict)
+            fe_split[who] = dict[fe_split[who]]
+            all_fe_format[i] = paste(fe_split, collapse = "-")
+        } else {
+            all_fe_format[i] = fe
+        }
+    }
+    all_fe_split = all_fe_format
 
     if(n_fe == 1 && !grepl("\\^", all_fe_split[1])){
         if(by){
