@@ -11,6 +11,10 @@
  
  - fix display bug in cluster names in `etable`. 
  
+## New functions
+
+ - new function `degrees_freedom_iid` which is a more user-friendly version of `degrees_freedom`.
+ 
 ## Other
 
  - the function `xpd` gains the argument `add`.

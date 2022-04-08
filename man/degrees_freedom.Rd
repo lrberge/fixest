@@ -2,6 +2,7 @@
 % Please edit documentation in R/fitstats.R
 \name{degrees_freedom}
 \alias{degrees_freedom}
+\alias{degrees_freedom_iid}
 \title{Gets the degrees of freedom of a \code{fixest} estimation}
 \usage{
 degrees_freedom(
@@ -14,6 +15,8 @@ degrees_freedom(
   ssc = NULL,
   stage = 2
 )
+
+degrees_freedom_iid(x, type)
 }
 \arguments{
 \item{x}{A \code{fixest} estimation.}
@@ -35,6 +38,11 @@ degrees_freedom(
 \description{
 Simple utility to extract the degrees of freedom from a \code{fixest} estimation.
 }
+\section{Functions}{
+\itemize{
+\item \code{degrees_freedom_iid}: Gets the degrees of freedom of a \code{fixest} estimation
+}}
+
 \examples{
 
 # First: an estimation

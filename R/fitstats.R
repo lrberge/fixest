@@ -1382,6 +1382,12 @@ degrees_freedom = function(x, type, vars = NULL, vcov = NULL, se = NULL, cluster
     res
 }
 
+
+#' @describeIn degrees_freedom Gets the degrees of freedom of a \code{fixest} estimation
+degrees_freedom_iid = function(x, type){
+    degrees_freedom(x, type, vcov = "iid")
+}
+
 ####
 #### Stats -- internal ####
 ####
