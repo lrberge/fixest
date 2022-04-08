@@ -3661,61 +3661,9 @@ etable_internal_df = function(info){
             coef_se_mat = rbind(coef_se_mat, myCoef, mySd)
         }
 
-        # The tricky part: the row names!!!!
-        # => this is a pain in the neck and currently the behavior is a bit odd
-        # but so be it.
-        all_names = rep(all_vars, each = 2)
         n_vars = length(all_vars)
-        # We create batches of names
-        empty_names = character(n_vars)
-        my_batch = sprintf("% *s", 2:15, " ")
-
-        if(n_vars <= 14){
-            empty_names = my_batch[1:n_vars]
-        } else {
-            empty_names[1:14] = my_batch
-
-            # This accounts for thousands of variables without bug
-            all_chars_raw = all_chars = c(".", ":", "_", "*", ";", "~", "-", "=", letters)
-            n_round = 1
-            my_char = all_chars[1]
-            i_char = 1
-            i = 14
-            while(i < n_vars){
-                if(nchar(my_char) > 10){
-                    i_char = i_char + 1
-
-                    if(i_char > length(all_chars)){
-                        # Specific case => many many vars
-                        n_round = n_round + 1
-                        my_list = list()
-                        for(r in 1:n_round){
-                            my_list[[r]] = all_chars_raw
-                        }
-                        quoi = do.call(expand.grid, my_list)
-                        quoi = quoi[!apply(quoi, 1, function(x) length(unique(x)) == 1), ]
-                        new_chars = apply(quoi, 1, paste, collapse = "")
-                        new_chars = setdiff(new_chars, empty_names)
-                        all_chars = new_chars
-
-                        i_char = 1
-                    }
-                    my_char = all_chars[i_char]
-                }
-
-                my_batch = sprintf("%s% *s", my_char, 0:(15 - nchar(my_char)), "")
-                n_batch = length(my_batch)
-                n_max = min(n_vars - i, n_batch)
-                empty_names[i + 1:n_max] = my_batch[1:n_max]
-
-                i = i + n_max
-                my_char = paste0(my_char, all_chars_raw[i_char])
-            }
-        }
-
         my_names = character(2 * n_vars)
         my_names[1 + 2 * 0:(n_vars - 1)] = all_vars
-        my_names[2 + 2 * 0:(n_vars - 1)] = empty_names
 
         coef_mat = cbind(my_names, coef_se_mat)
     } else {
@@ -4107,8 +4055,7 @@ etable_internal_df = function(info){
         res$variables[qui] = paste0(res$variables[qui], add_space)
     }
 
-    row.names(res) = uniquify_names(unlist(res$variables))
-    res$variables = NULL
+    names(res)[1] = ""
 
     # We rename theta when NB is used
     quiTheta = which(row.names(res) == ".theta")
@@ -4663,7 +4610,8 @@ print.etable_df = function(x, ...){
     width = 0.99
     MAX_WIDTH = getOption("width") * width
 
-    ROWNAMES = row.names(x)
+    ROWNAMES = x[, 1]
+    x = x[, -1, drop = FALSE]
     labels_width = max(nchar(ROWNAMES))
     MAX_WIDTH = MAX_WIDTH - labels_width - 1
 

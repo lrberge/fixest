@@ -20,6 +20,8 @@
  - add the arguments `y`, `X`, `weights`, `endo`, `inst` to the function `est_env` to make it more user-friendly.
  
  - fix documentation typos (thanks to Caleb Kwon).
+ 
+ - `etable` now returns a `data.frame` whose first column is the variables names (before this was contained in the row names).
 
 
 # fixest 0.10.4
