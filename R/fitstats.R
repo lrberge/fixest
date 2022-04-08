@@ -1309,6 +1309,8 @@ r2 = function(x, type = "all", full_names = FALSE){
 #' @param vars A vector of variable names, of the regressors. This is optional. If provided, then \code{type} is set to 1 by default and the number of regressors contained in \code{vars} is returned. This is only useful in the presence of collinearity and we want a subset of the regressors only. (Mostly for internal use.)
 #' @param stage Either 1 or 2. Only concerns IV regressions, which stage to look at.
 #'
+#' The type of VCOV can have an influence on the degrees of freedom. In particular, when the VCOV is clustered, the DoF returned will be in accordance with the way the small sample correction was performed when computing the VCOV. That type of value is in general not what we have in mind when we think of "degrees of freedom". To obtain the ones that are more intuitive, please use \code{degrees_freedom_iid} instead.
+#'
 #'
 #' @examples
 #'

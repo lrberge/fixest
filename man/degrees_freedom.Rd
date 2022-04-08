@@ -33,7 +33,9 @@ degrees_freedom_iid(x, type)
 
 \item{ssc}{An object of class \code{ssc.type} obtained with the function \code{\link[fixest]{ssc}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{ssc}} for this argument. The arguments and defaults of the function \code{\link[fixest]{ssc}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "min"}, \code{t.df = "min"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{ssc}} for details.}
 
-\item{stage}{Either 1 or 2. Only concerns IV regressions, which stage to look at.}
+\item{stage}{Either 1 or 2. Only concerns IV regressions, which stage to look at.
+
+The type of VCOV can have an influence on the degrees of freedom. In particular, when the VCOV is clustered, the DoF returned will be in accordance with the way the small sample correction was performed when computing the VCOV. That type of value is in general not what we have in mind when we think of "degrees of freedom". To obtain the ones that are more intuitive, please use \code{degrees_freedom_iid} instead.}
 }
 \description{
 Simple utility to extract the degrees of freedom from a \code{fixest} estimation.
