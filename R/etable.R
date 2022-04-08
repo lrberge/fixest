@@ -4602,7 +4602,7 @@ style.df = function(depvar.title = "Dependent Var.:", fixef.title = "Fixed-Effec
 #' data(iris)
 #' est = feols(Petal.Length ~ Sepal.Length | Species, iris)
 #'
-#' # Now we can easily create a row with the mean of y.
+#' # Now we can easily create a row with the SD of y.
 #' # We just "summon" it in a one-sided formula
 #' etable(est, extralines = ~ sdy)
 #'

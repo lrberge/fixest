@@ -16,6 +16,8 @@
  - remove warnings when a binomial family is used with weights in `feglm`.
  
  - add the arguments `y`, `X`, `weights`, `endo`, `inst` to the function `est_env` to make it more user-friendly.
+ 
+ - fix documentation typos (thanks to Caleb Kwon).
 
 
 # fixest 0.10.4
