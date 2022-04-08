@@ -228,6 +228,11 @@ test(is.null(res$collin.var), TRUE)
 # IV + interacted FEs
 res = feols(y ~ x1 | fe1^fe2 | x2 ~ x3, base)
 
+# IVs no exo var
+res = feols(y ~ 0 | x2 ~ x3, base)
+# Same in stepwise
+res = feols(y ~ 0 | sw0(fe1) | x2 ~ x3, base)
+
 # IVs + lags
 res = feols(y ~ x1 | fe1^fe2 | l(x2, -1:1) ~ l(x3, -1:1), base, panel.id = ~ fe1 + period)
 
@@ -237,6 +242,8 @@ res = feols(y ~ x1 | round(x2^2), base)
 test(feols(y ~ x1 | factor(fe1^fe2), base), "err")
 
 res = feols(y ~ x1 | bin(x2, "bin::1")^fe1 + fe1^fe2, base)
+
+
 
 
 

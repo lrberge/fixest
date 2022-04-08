@@ -1023,7 +1023,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 	    if(isFixef){
 	        # we batch demean first
 
-	        n_vars_X = ifelse(is.null(ncol(X)), 0, ncol(X))
+	        n_vars_X = if(is.null(ncol(X))) 0 else ncol(X)
 
 	        if(mem.clean) gc()
 
@@ -1168,6 +1168,11 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 	    } else {
 	        # fixef == FALSE
 
+	        is_X = length(X) > 1
+	        if(!is_X){
+	            X = as.matrix(X)
+	        }
+
 	        # We precompute the solution
 	        if(!is.null(dots$iv_products)){
 	            # means this is a call from multiple LHS/RHS
@@ -1181,7 +1186,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 
 	        if(verbose >= 2) gt("IV products")
 
-	        ZX = cbind(iv.mat, X)
+	        ZX = if(is_X) cbind(iv.mat, X) else iv.mat
 
 	        # First stage(s)
 
@@ -1211,11 +1216,15 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 	                           iv_call = TRUE, notes = FALSE)
 
 	            # For the F-stats
-	            fit_no_inst = ols_fit(iv_lhs[[i]], X, w = weights, correct_0w = FALSE,
-	                                  collin.tol = collin.tol, nthreads = nthreads,
-	                                  xwx = ZXtZX[-(1:K + is_int), -(1:K + is_int), drop = FALSE],
-	                                  xwy = ZXtu[[i]][-(1:K + is_int)])
-	            my_res$ssr_no_inst = cpp_ssq(fit_no_inst$residuals, weights)
+	            if(is_X){
+	                fit_no_inst = ols_fit(iv_lhs[[i]], X, w = weights, correct_0w = FALSE,
+	                                      collin.tol = collin.tol, nthreads = nthreads,
+	                                      xwx = ZXtZX[-(1:K + is_int), -(1:K + is_int), drop = FALSE],
+	                                      xwy = ZXtu[[i]][-(1:K + is_int)])
+	                my_res$ssr_no_inst = cpp_ssq(fit_no_inst$residuals, weights)
+	            } else {
+	                my_res$ssr_no_inst = cpp_ssr_null(iv_lhs[[i]], weights)
+	            }
 
 	            my_res$iv_stage = 1
 	            my_res$iv_inst_names_xpd = colnames(iv.mat)
@@ -1243,7 +1252,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 
 	        colnames(U) = paste0("fit_", iv_lhs_names)
 
-            UX = cbind(U, X)
+            UX = if(is_X) cbind(U, X) else U
 
 	        XtX = iv_products$XtX
 	        Xty = iv_products$Xty

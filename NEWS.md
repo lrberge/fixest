@@ -11,6 +11,8 @@
  
  - fix display bug in cluster names in `etable`. 
  
+ - fix bug in IV estimations with no exogenous variable and no fixed-effect (thanks to Kyle Butts).
+ 
 ## New functions
 
  - new function `degrees_freedom_iid` which is a more user-friendly version of `degrees_freedom`.

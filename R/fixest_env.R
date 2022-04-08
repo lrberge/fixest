@@ -2407,7 +2407,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     }
 
-    if(lparams == 0 && Q == 0 && !multi_fixef && !multi_rhs) stop("No parameter to be estimated.")
+    if(lparams == 0 && Q == 0 && !multi_fixef && !multi_rhs && !do_iv) stop("No parameter to be estimated.")
 
     check_arg(useHessian, "logical scalar")
     assign("hessian.args", hessian.args, env)
