@@ -4,7 +4,7 @@
 \alias{xpd}
 \title{Expands formula macros}
 \usage{
-xpd(fml, ..., add = NULL, lhs, rhs, data = NULL)
+xpd(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame())
 }
 \arguments{
 \item{fml}{A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}. Special macros of the form \code{..("regex")} can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument \code{data}. square brackets have a special meaning: Values in them are evaluated and parsed accordingly. Example: \code{y~x.[1:2] + z.[i]} will lead to \code{y~x1+x2+z3} if \code{i==3}. See examples.}
@@ -18,6 +18,8 @@ xpd(fml, ..., add = NULL, lhs, rhs, data = NULL)
 \item{rhs}{If present, then a formula will be constructed with \code{rhs} as the full right-hand-side. The value of \code{rhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{lhs}. Note that if \code{fml} is not missing, its RHS will be replaced by \code{rhs}.}
 
 \item{data}{Either a character vector or a data.frame. This argument will only be used if a macro of the type \code{..("regex")} is used in the formula of the argument \code{fml}. If so, any variable name from \code{data} that matches the regular expression will be added to the formula.}
+
+\item{frame}{The environment containing the values to be expanded with the dot square bracket operator. Default is \code{parent.frame()}.}
 }
 \value{
 It returns a formula where all macros have been expanded.

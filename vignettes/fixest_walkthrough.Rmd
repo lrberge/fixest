@@ -736,7 +736,7 @@ All `fixest` estimations call `xpd` internally if appropriate. This means that t
 feols(y ~ x1 + ..ctrl, base)
 ```
 
-The function `xpd` also accepts regular expression macros of the form `regex("regex")`. If these macros are encountered and provided a character vector/data.frame is in the argument `data`,  then all variables names matching the regular expression will be placed in the formula.
+The function `xpd` also accepts regular expression macros of the form `..("regex")` (or `regex("regex")`). If these macros are encountered and provided a character vector/data.frame is in the argument `data`,  then all variables names matching the regular expression will be placed in the formula.
 
 ```{r}
 data(longley)

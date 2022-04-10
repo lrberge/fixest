@@ -19,7 +19,7 @@
  
 ## Other
 
- - the function `xpd` gains the argument `add`.
+ - the function `xpd` gains the arguments `add` and `frame`.
  
  - remove warnings when a binomial family is used with weights in `feglm`.
  

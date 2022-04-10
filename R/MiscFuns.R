@@ -3239,6 +3239,7 @@ ref = function(x, ref){
 #' @param lhs If present then a formula will be constructed with \code{lhs} as the full left-hand-side. The value of \code{lhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{rhs}. Note that if \code{fml} is not missing, its LHS will be replaced by \code{lhs}.
 #' @param rhs If present, then a formula will be constructed with \code{rhs} as the full right-hand-side. The value of \code{rhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{lhs}. Note that if \code{fml} is not missing, its RHS will be replaced by \code{rhs}.
 #' @param data Either a character vector or a data.frame. This argument will only be used if a macro of the type \code{..("regex")} is used in the formula of the argument \code{fml}. If so, any variable name from \code{data} that matches the regular expression will be added to the formula.
+#' @param frame The environment containing the values to be expanded with the dot square bracket operator. Default is \code{parent.frame()}.
 #'
 #' @details
 #' In \code{xpd}, the default macro variables are taken from \code{getFixest_fml}. Any value in the \code{...} argument of \code{xpd} will replace these default values.
@@ -3448,9 +3449,9 @@ ref = function(x, ref){
 #' #       sw(poly(Temp, 1), poly(Temp, 2), poly(Temp, 3))
 #'
 #'
-xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL){
+xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame()){
     .xpd(fml = fml, ..., add = add, lhs = lhs, rhs = rhs, data = data, check = TRUE,
-         macro = TRUE, frame = parent.frame())
+         macro = TRUE, frame = frame)
 }
 
 .xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, check = FALSE, macro = FALSE, frame = NULL){
