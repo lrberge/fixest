@@ -2985,7 +2985,17 @@ etable_internal_latex = function(info){
     # ordering the coefs
     all_vars = order_apply(all_vars, order)
 
-    if(length(all_vars) == 0) stop_up("Not any variable was selected, please reframe your keep/drop arguments.")
+    if(length(all_vars) == 0){
+        if(!is.null(keep) && !any(grepl("^%", keep))){
+            msg = paste0(" In particular, to 'keep' variables using their original names (before dict is applied), use the special character '%' first. E.g. keep = \"%", keep[1], "\"")
+        } else if(!is.null(drop) && !any(grepl("^%", drop))){
+            msg = paste0(" In particular, to 'drop' variables using their original names (before dict is applied), use the special character '%' first. E.g. drop = \"%", drop[1], "\"")
+        } else {
+            msg = ""
+        }
+
+        stop_up("Not any variable was selected, please reframe your keep/drop arguments.", msg)
+    }
 
     # The names are set in results2formattedList
     coef_names = escape_latex(all_vars)
