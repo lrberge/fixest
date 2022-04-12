@@ -3989,34 +3989,25 @@ format_error_msg = function(x, origin){
 
 multi_split = function(env, fun){
     split = get("split", env)
-    split.full = get("split.full", env)
     split.items = get("split.items", env)
+    split.id = get("split.id", env)
     split.name = get("split.name", env)
 
     assign("do_split", FALSE, env)
 
-    n_split = length(split.items)
-    res_all = vector("list", n_split + split.full)
-    index = NULL
-    all_names = NULL
-    is_multi = FALSE
-    for(i in 0:n_split){
+    n_split = length(split.id)
+    res_all = vector("list", n_split)
+    I = 1
+    for(i in split.id){
         if(i == 0){
-            if(split.full){
-                my_env = reshape_env(env)
-                my_res = fun(env = my_env)
-            } else {
-                next
-            }
+            my_env = reshape_env(env)
+            my_res = fun(env = my_env)
         } else {
             my_res = fun(env = reshape_env(env, obs2keep = which(split == i)))
         }
 
-        res_all[[i + split.full]] = my_res
-    }
-
-    if(split.full){
-        split.items = c("Full sample", split.items)
+        res_all[[I]] = my_res
+        I = I + 1
     }
 
     index = list(sample = length(res_all))

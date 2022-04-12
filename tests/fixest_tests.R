@@ -1588,6 +1588,43 @@ for(id_fun in 1:6){
 cat("\n")
 
 
+####
+#### split ####
+####
+
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+
+# simple: formula
+est = feols(y ~ x.[1:3], base, split = ~species %keep% "@^v")
+test(length(est), 2)
+
+est = feols(y ~ x.[1:3], base, fsplit = ~species %keep% c("set", "vers"))
+test(length(est), 3)
+
+est = feols(y ~ x.[1:3], base, split = ~species %drop% "set")
+test(length(est), 2)
+
+# simple: vector
+est = feols(y ~ x.[1:3], base, split = base$species %keep% "@^v")
+test(length(est), 2)
+
+est = feols(y ~ x.[1:3], base, split = base$species %keep% c("set", "vers"))
+test(length(est), 2)
+
+est = feols(y ~ x.[1:3], base, split = base$species %drop% "set")
+test(length(est), 2)
+
+# with bin
+est = feols(y ~ x.[1:2], base,
+            split = ~bin(x3, c("cut::5", "saint emilion", "pessac leognan",
+                               "margaux", "saint julien", "entre deux mers")) %keep% c("saint e", "pe"))
+test(length(est), 2)
+
+est = feols(y ~ x.[1:2], base,
+            split = ~bin(x3, c("cut::5", "saint emilion", "pessac leognan", NA)) %drop% "@\\d")
+test(length(est), 2)
+
+
 
 ####
 #### Multiple estimations ####
