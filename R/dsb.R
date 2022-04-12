@@ -744,7 +744,7 @@ dsb = function(..., frame = parent.frame(), sep = "", vectorize = FALSE, nest = 
                 verbatim = operators[n_op] %in% c("!", "/")
 
                 if(operators[n_op] == "/"){
-                    operators = "', *'S"
+                    operators = "',[ \t\n\r]*'S"
                 } else {
                     operators = operators[-n_op]
                     # The two separators ? and ! have no default operation
