@@ -358,7 +358,8 @@
 #'
 #'
 #'
-feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluster, se,
+feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.keep, split.drop,
+                 cluster, se,
                  ssc, panel.id, fixef, fixef.rm = "none", fixef.tol = 1e-6,
                  fixef.iter = 10000, collin.tol = 1e-10, nthreads = getFixest_nthreads(),
                  lean = FALSE, verbose = 0, warn = TRUE, notes = getFixest_notes(),
@@ -400,6 +401,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, cluste
 
 		    env = try(fixest_env(fml = fml, data = data, weights = weights, offset = offset,
 		                         subset = subset, split = split, fsplit = fsplit,
+		                         split.keep = split.keep, split.drop = split.drop,
 		                         vcov = vcov, cluster = cluster, se = se, ssc = ssc,
 		                         panel.id = panel.id, fixef = fixef, fixef.rm = fixef.rm,
 		                         fixef.tol = fixef.tol, fixef.iter = fixef.iter, collin.tol = collin.tol,
@@ -1942,7 +1944,8 @@ check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights, full
 
 
 #' @rdname feols
-feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, cluster, se, ssc, weights,
+feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, split.keep, split.drop,
+                     cluster, se, ssc, weights,
                      subset, fixef.rm = "perfect", fixef.tol = 1e-6, fixef.iter = 10000,
                      collin.tol = 1e-10, nthreads = getFixest_nthreads(), lean = FALSE,
                      warn = TRUE, notes = getFixest_notes(), mem.clean = FALSE, verbose = 0,
@@ -1958,7 +1961,9 @@ feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, cluster, se, s
         call_env = new.env(parent = parent.frame())
 
         env = try(fixest_env(y = y, X = X, fixef_df = fixef_df, vcov = vcov, offset = offset,
-                             split = split, fsplit = fsplit, cluster = cluster, se = se, ssc = ssc,
+                             split = split, fsplit = fsplit,
+                             split.keep = split.keep, split.drop = split.drop,
+                             cluster = cluster, se = se, ssc = ssc,
                              weights = weights, subset = subset, fixef.rm = fixef.rm,
                              fixef.tol = fixef.tol, fixef.iter = fixef.iter, collin.tol = collin.tol,
                              nthreads = nthreads, lean = lean, warn = warn, notes = notes,
@@ -2129,7 +2134,7 @@ feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, cluster, se, s
 #'
 #'
 feglm = function(fml, data, family = "gaussian", vcov, offset, weights, subset, split,
-                 fsplit, cluster, se, ssc, panel.id, start = NULL,
+                 fsplit, split.keep, split.drop, cluster, se, ssc, panel.id, start = NULL,
                  etastart = NULL, mustart = NULL, fixef, fixef.rm = "perfect",
                  fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
                  glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
@@ -2147,7 +2152,9 @@ feglm = function(fml, data, family = "gaussian", vcov, offset, weights, subset, 
 
         env = try(fixest_env(fml=fml, data=data, family = family,
                              offset = offset, weights = weights, subset = subset,
-                             split = split, fsplit = fsplit, vcov = vcov,
+                             split = split, fsplit = fsplit,
+                             split.keep = split.keep, split.drop = split.drop,
+                             vcov = vcov,
                              cluster = cluster, se = se, ssc = ssc,
                              panel.id = panel.id, linear.start = start,
                              etastart=etastart, mustart = mustart, fixef = fixef,
@@ -2187,7 +2194,7 @@ feglm = function(fml, data, family = "gaussian", vcov, offset, weights, subset, 
 
 #' @rdname feglm
 feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
-                     fsplit, cluster, se, ssc, weights, subset, start = NULL,
+                     fsplit, split.keep, split.drop, cluster, se, ssc, weights, subset, start = NULL,
                      etastart = NULL, mustart = NULL, fixef.rm = "perfect",
                      fixef.tol = 1e-6, fixef.iter = 10000, collin.tol = 1e-10,
                      glm.iter = 25, glm.tol = 1e-8, nthreads = getFixest_nthreads(),
@@ -2254,7 +2261,9 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
         env = try(fixest_env(y = y, X = X, fixef_df = fixef_df, family = family,
                              nthreads = nthreads, lean = lean, offset = offset,
                              weights = weights, subset = subset, split = split,
-                             fsplit = fsplit, vcov = vcov, cluster = cluster,
+                             fsplit = fsplit,
+                             split.keep = split.keep, split.drop = split.drop,
+                             vcov = vcov, cluster = cluster,
                              se = se, ssc = ssc, linear.start = start,
                              etastart = etastart, mustart = mustart, fixef.rm = fixef.rm,
                              fixef.tol = fixef.tol, fixef.iter = fixef.iter,
@@ -3068,7 +3077,8 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 #'
 #'
 femlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian"), vcov,
-                 start = 0, fixef, fixef.rm = "perfect", offset, subset, split, fsplit,
+                 start = 0, fixef, fixef.rm = "perfect", offset, subset,
+                 split, fsplit, split.keep, split.drop,
                  cluster, se, ssc, panel.id, fixef.tol = 1e-5, fixef.iter = 10000,
                  nthreads = getFixest_nthreads(), lean = FALSE, verbose = 0, warn = TRUE,
                  notes = getFixest_notes(), theta.init, combine.quick, mem.clean = FALSE,
@@ -3080,7 +3090,9 @@ femlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian")
 
 	res = try(feNmlm(fml = fml, data = data, family = family, fixef = fixef,
 	                 fixef.rm = fixef.rm, offset = offset, subset = subset,
-	                 split = split, fsplit = fsplit, vcov = vcov, cluster = cluster,
+	                 split = split, fsplit = fsplit,
+	                 split.keep = split.keep, split.drop = split.drop,
+	                 vcov = vcov, cluster = cluster,
 	                 se = se, ssc = ssc, panel.id = panel.id, start = start,
 	                 fixef.tol=fixef.tol, fixef.iter=fixef.iter, nthreads=nthreads,
 	                 lean = lean, verbose=verbose, warn=warn, notes=notes,
@@ -3098,7 +3110,8 @@ femlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian")
 
 #' @rdname femlm
 fenegbin = function(fml, data, vcov, theta.init, start = 0, fixef, fixef.rm = "perfect",
-                    offset, subset, split, fsplit, cluster, se, ssc, panel.id,
+                    offset, subset, split, fsplit, split.keep, split.drop,
+                    cluster, se, ssc, panel.id,
                     fixef.tol = 1e-5, fixef.iter = 10000, nthreads = getFixest_nthreads(),
                     lean = FALSE, verbose = 0, warn = TRUE, notes = getFixest_notes(),
                     combine.quick, mem.clean = FALSE, only.env = FALSE, only.coef = FALSE, env, ...){
@@ -3113,7 +3126,9 @@ fenegbin = function(fml, data, vcov, theta.init, start = 0, fixef, fixef.rm = "p
 
     res = try(feNmlm(fml = fml, data=data, family = "negbin", theta.init = theta.init,
                      start = start, fixef = fixef, fixef.rm = fixef.rm, offset = offset,
-                     subset = subset, split = split, fsplit = fsplit, vcov = vcov, cluster = cluster,
+                     subset = subset, split = split, fsplit = fsplit,
+                     split.keep = split.keep, split.drop = split.drop,
+                     vcov = vcov, cluster = cluster,
                      se = se, ssc = ssc, panel.id = panel.id, fixef.tol = fixef.tol,
                      fixef.iter = fixef.iter, nthreads = nthreads, lean = lean,
                      verbose = verbose, warn = warn, notes = notes, combine.quick = combine.quick,
@@ -3129,7 +3144,7 @@ fenegbin = function(fml, data, vcov, theta.init, start = 0, fixef, fixef.rm = "p
 }
 
 #' @rdname feglm
-fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
+fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit, split.keep, split.drop,
                   cluster, se, ssc, panel.id, start = NULL, etastart = NULL,
                   mustart = NULL, fixef, fixef.rm = "perfect", fixef.tol = 1e-6,
                   fixef.iter = 10000, collin.tol = 1e-10, glm.iter = 25, glm.tol = 1e-8,
@@ -3147,6 +3162,7 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
 
     res = try(feglm(fml = fml, data = data, family = "poisson", offset = offset,
                     weights = weights, subset = subset, split = split, fsplit = fsplit,
+                    split.keep = split.keep, split.drop = split.drop,
                     vcov = vcov, cluster = cluster, se = se, ssc = ssc, panel.id = panel.id,
                     start = start, etastart = etastart, mustart = mustart, fixef = fixef,
                     fixef.rm = fixef.rm, fixef.tol = fixef.tol, fixef.iter = fixef.iter,
@@ -3184,8 +3200,10 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
 #' @param fml A formula. This formula gives the linear formula to be estimated (it is similar to a \code{lm} formula), for example: \code{fml = z~x+y}. To include fixed-effects variables, insert them in this formula using a pipe (e.g. \code{fml = z~x+y|fixef_1+fixef_2}). To include a non-linear in parameters element, you must use the argment \code{NL.fml}. Multiple estimations can be performed at once: for multiple dep. vars, wrap them in \code{c()}: ex \code{c(y1, y2)}. For multiple indep. vars, use the stepwise functions: ex \code{x1 + csw(x2, x3)}. This leads to 6 estimation \code{fml = c(y1, y2) ~ x1 + cw0(x2, x3)}. See details. Square brackets starting with a dot can be used to call global variables: \code{y.[i] ~ x.[1:2]} will lead to \code{y3 ~ x1 + x2} if \code{i} is equal to 3 in the current environment (see details in \code{\link[fixest]{xpd}}).
 #' @param start Starting values for the coefficients in the linear part (for the non-linear part, use NL.start). Can be: i) a numeric of length 1 (e.g. \code{start = 0}, the default), ii) a numeric vector of the exact same length as the number of variables, or iii) a named vector of any length (the names will be used to initialize the appropriate coefficients).
 #' @param NL.fml A formula. If provided, this formula represents the non-linear part of the right hand side (RHS). Note that contrary to the \code{fml} argument, the coefficients must explicitly appear in this formula. For instance, it can be \code{~a*log(b*x + c*x^3)}, where \code{a}, \code{b}, and \code{c} are the coefficients to be estimated. Note that only the RHS of the formula is to be provided, and NOT the left hand side.
-#' @param split A one sided formula representing a variable (eg \code{split = ~var}) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. If you also want to include the estimation for the full sample, use the argument \code{fsplit} instead.
-#' @param fsplit A one sided formula representing a variable (eg \code{split = ~var}) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. This argument is the same as split but also includes the full sample as the first estimation.
+#' @param split A one sided formula representing a variable (eg \code{split = ~var}) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. If you also want to include the estimation for the full sample, use the argument \code{fsplit} instead. You can use the special operators \code{\%keep\%} and \code{\%drop\%} to select only a subset of values for which to split the sample. E.g. \code{split = ~var \%keep\% c("v1", "v2")} will split the sample only according to the values \code{v1} and \code{v2} of the variable \code{var}; it is equivalent to supplying the argument \code{split.keep = c("v1", "v2")}. By default there is partial matching on each value, you can trigger a regular expression evaluation by adding a \code{'@'} first, as in: \code{~var \%drop\% "@^v[12]"} which will drop values starting with \code{"v1"} or \code{"v2"} (of course you need to know regexes!).
+#' @param fsplit A one sided formula representing a variable (eg \code{split = ~var}) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. This argument is the same as split but also includes the full sample as the first estimation. You can use the special operators \code{\%keep\%} and \code{\%drop\%} to select only a subset of values for which to split the sample. E.g. \code{split = ~var \%keep\% c("v1", "v2")} will split the sample only according to the values \code{v1} and \code{v2} of the variable \code{var}; it is equivalent to supplying the argument \code{split.keep = c("v1", "v2")}. By default there is partial matching on each value, you can trigger a regular expression evaluation by adding an \code{'@'} first, as in: \code{~var \%drop\% "@^v[12]"} which will drop values starting with \code{"v1"} or \code{"v2"} (of course you need to know regexes!).
+#' @param split.keep A character vector. Only used when \code{split}, or \code{fsplit}, is supplied. If provided, then the sample will be split only on the values of \code{split.keep}. The values in \code{split.keep} will be partially matched to the values of \code{split}. To enable regular expressions, you need to add an \code{'@'} first. For example \code{split.keep = c("v1", "@other|var")} will keep only the value in \code{split} partially matched by \code{"v1"} or the values containing \code{"other"} or \code{"var"}.
+#' @param split.drop A character vector. Only used when \code{split}, or \code{fsplit}, is supplied. If provided, then the sample will be split only on the values that are not in \code{split.drop}. The values in \code{split.drop} will be partially matched to the values of \code{split}. To enable regular expressions, you need to add an \code{'@'} first. For example \code{split.drop = c("v1", "@other|var")} will drop only the value in \code{split} partially matched by \code{"v1"} or the values containing \code{"other"} or \code{"var"}.
 #' @param data A data.frame containing the necessary variables to run the model. The variables of the non-linear right hand side of the formula are identified with this \code{data.frame} names. Can also be a matrix.
 #' @param family Character scalar. It should provide the family. The possible values are "poisson" (Poisson model with log-link, the default), "negbin" (Negative Binomial model with log-link), "logit" (LOGIT model with log-link), "gaussian" (Gaussian model).
 #' @param fixef Character vector. The names of variables to be used as fixed-effects. These variables should contain the identifier of each observation (e.g., think of it as a panel identifier). Note that the recommended way to include fixed-effects is to insert them directly in the formula.
@@ -3336,7 +3354,8 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
 #'
 feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), NL.fml, vcov,
                   fixef, fixef.rm = "perfect", NL.start, lower, upper, NL.start.init,
-                  offset, subset, split, fsplit, cluster, se, ssc, panel.id,
+                  offset, subset, split, fsplit, split.keep, split.drop,
+                  cluster, se, ssc, panel.id,
                   start = 0, jacobian.method="simple", useHessian = TRUE,
                   hessian.args = NULL, opt.control = list(), nthreads = getFixest_nthreads(),
                   lean = FALSE, verbose = 0, theta.init, fixef.tol = 1e-5, fixef.iter = 10000,
@@ -3354,6 +3373,7 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	                         fixef = fixef, fixef.rm = fixef.rm, NL.start = NL.start,
 	                         lower = lower, upper = upper, NL.start.init = NL.start.init,
 	                         offset = offset, subset = subset, split = split, fsplit = fsplit,
+	                         split.keep = split.keep, split.drop = split.drop,
 	                         vcov = vcov, cluster = cluster, se = se, ssc = ssc,
 	                         panel.id = panel.id, linear.start = start, jacobian.method = jacobian.method,
 	                         useHessian = useHessian, opt.control = opt.control, nthreads = nthreads,
@@ -3989,34 +4009,25 @@ format_error_msg = function(x, origin){
 
 multi_split = function(env, fun){
     split = get("split", env)
-    split.full = get("split.full", env)
     split.items = get("split.items", env)
+    split.id = get("split.id", env)
     split.name = get("split.name", env)
 
     assign("do_split", FALSE, env)
 
-    n_split = length(split.items)
-    res_all = vector("list", n_split + split.full)
-    index = NULL
-    all_names = NULL
-    is_multi = FALSE
-    for(i in 0:n_split){
+    n_split = length(split.id)
+    res_all = vector("list", n_split)
+    I = 1
+    for(i in split.id){
         if(i == 0){
-            if(split.full){
-                my_env = reshape_env(env)
-                my_res = fun(env = my_env)
-            } else {
-                next
-            }
+            my_env = reshape_env(env)
+            my_res = fun(env = my_env)
         } else {
             my_res = fun(env = reshape_env(env, obs2keep = which(split == i)))
         }
 
-        res_all[[i + split.full]] = my_res
-    }
-
-    if(split.full){
-        split.items = c("Full sample", split.items)
+        res_all[[I]] = my_res
+        I = I + 1
     }
 
     index = list(sample = length(res_all))

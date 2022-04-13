@@ -58,7 +58,7 @@ setup_multi = function(index, all_names, data, simplify = TRUE){
     if(simplify){
         n_all = sapply(index, max)
         qui = n_all == 1
-        if(any(qui)){
+        if(any(qui) && !all(qui)){
             index = index[!qui]
             # all_names = all_names[!qui]
             # We don't drop the names dimension => we always keep it as an imprint
@@ -317,7 +317,7 @@ print.fixest_multi = function(x, ...){
     dict_title = c("sample" = "Sample", "lhs" = "Dep. var.", "rhs" = "Expl. vars.", "iv" = "IV", "fixef" = "Fixed-effects")
 
     qui_drop = apply(tree, 2, max) == 1
-    if(any(qui_drop)){
+    if(any(qui_drop) && !all(qui_drop)){
         var2drop = names(tree)[qui_drop]
         for(d in var2drop){
             cat(dict_title[d], ": ", all_names[[d]][1], "\n", sep = "")

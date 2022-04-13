@@ -8,7 +8,8 @@
 
 fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), NL.fml = NULL,
                       fixef, NL.start, lower, upper, NL.start.init, offset = NULL,
-                      subset, split = NULL, fsplit = NULL, linear.start = 0,
+                      subset, split = NULL, fsplit = NULL, split.keep = NULL, split.drop = NULL,
+                      linear.start = 0,
                       jacobian.method = "simple",useHessian = TRUE, hessian.args = NULL,
                       opt.control = list(), vcov = NULL, cluster, se, ssc, y, X, fixef_df,
                       panel.id, fixef.rm = "perfect", nthreads = getFixest_nthreads(),
@@ -62,7 +63,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     #
     # Arguments control
-    main_args = c("fml", "data", "panel.id", "offset", "subset", "split", "fsplit", "vcov",
+    main_args = c("fml", "data", "panel.id", "offset", "subset", "split", "fsplit", "split.keep",
+                  "split.drop", "vcov",
                   "cluster", "se", "ssc", "fixef.rm", "fixef.tol", "fixef.iter", "fixef",
                   "nthreads", "lean", "verbose", "warn", "notes", "combine.quick",
                   "start", "only.env", "mem.clean", "only.coef")
@@ -1648,7 +1650,25 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     isSplit = FALSE
     msgNA_split = ""
     split.full = FALSE
-    if(!MISSNULL(split) || !MISSNULL(fsplit)){
+    # I use a while to break from the if. It's really like a if.
+    while(!missing(split) || !missing(fsplit)){
+
+        # We first evaluate with the extra functions, covers the non formula case
+        # beware: we still need to evaluate the formula
+
+        my_funs = list()
+        my_funs[["%keep%"]] = function(a, b) {attr(a, "keep") = b ; a}
+        my_funs[["%drop%"]] = function(a, b) {attr(a, "drop") = b ; a}
+
+        if(!missing(split)){
+            split_mc = mc_origin$split
+            split = eval(split_mc, my_funs, call_env)
+        }
+
+        if(!missing(fsplit)){
+            split_mc = mc_origin$fsplit
+            fsplit = eval(split_mc, my_funs, call_env)
+        }
 
         if(!missnull(fsplit)){
             if(!missnull(split)){
@@ -1658,6 +1678,17 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             split = fsplit
         }
 
+        if(is.null(split)){
+            # Nothing: the argument is non missing but null
+            break
+        }
+
+        if(missing(split.keep)) split.keep = NULL
+        if(missing(split.drop)) split.drop = NULL
+
+        if(is.null(split.keep)) split.keep = attr(split, "keep")
+        if(is.null(split.drop)) split.drop = attr(split, "drop")
+
         if("formula" %in% class(split)){
 
             if(isFit){
@@ -1666,8 +1697,36 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
             check_value(split, "os formula var(data)", .data = data)
             split.value = split[[2]]
-            split.name = as.character(split.value)
-            split = check_value_plus(split.value, "evalset vector", .data = data, .prefix = "In argument 'split', the expression")
+
+            # we are already sure no variable is missing
+            for(v in all.vars(split)){
+                my_funs[[v]] = data[[v]]
+            }
+
+            split = eval(split.value, my_funs)
+
+            if(is.null(split.keep)) split.keep = attr(split, "keep")
+            if(is.null(split.drop)) split.drop = attr(split, "drop")
+
+            # We clean the name
+            sv = split.value
+            while(length(sv) == 3){
+                op = as.character(sv[[1]])[1]
+                if(op %in% c("%keep%", "%drop%")){
+                    sv = sv[[2]]
+                } else {
+                    break
+                }
+            }
+
+            if(length(sv) > 2){
+                op = as.character(sv[[1]])[1]
+                if(op %in% c("bin", "ref")){
+                    sv = sv[[2]]
+                }
+            }
+
+            split.name = deparse_long(sv)
 
         } else {
 
@@ -1682,7 +1741,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                 check_value(split, "charin", .choices = dataNames, .message = "If equal to a character scalar, argument 'split' must be a variable name.")
                 split = data[[split]]
             } else {
-                split.name = gsub("^[[:alpha:]][[:alnum:]\\._]*\\$", "", deparse_long(mc_origin$split))
+                split.name = gsub("^[[:alpha:]][[:alnum:]\\._]*\\$", "", deparse_long(split_mc))
 
                 if(length(obs_selection$subset) > 0){
                     split = split[obs_selection$subset]
@@ -1690,6 +1749,9 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             }
 
         }
+
+        # Checking the values of split.keep and split.drop
+        check_arg(split.keep, split.drop, "NULL character vector no na")
 
         if(delayed.subset){
             split = split[subset]
@@ -1714,6 +1776,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             }
         }
 
+        break
     }
 
     if(mem.clean && gc2trig){
@@ -2810,13 +2873,20 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     assign("do_split", isSplit, env)
     if(isSplit){
         split = to_integer(split, add_items = TRUE, sorted = TRUE, items.list = TRUE)
-        split.items = as.character(split$items)
+        split.id = split_select(split$items, split.keep, split.drop)
+        split.items = as.character(split$items)[split.id]
+
+        if(split.full){
+            split.id = c(0, split.id)
+            split.items = c("Full sample", split.items)
+        }
+
         split = split$x
 
         assign("split", split, env)
+        assign("split.id", split.id, env)
         assign("split.items", split.items, env)
         assign("split.name", split.name, env)
-        assign("split.full", split.full, env)
     }
 
     # fixest tag
@@ -4084,6 +4154,79 @@ fixest_NA_results = function(env){
     class(res) = "fixest"
 
     res
+}
+
+
+
+split_select = function(items, keep, drop){
+
+    if(is.null(keep)){
+        if(is.null(drop)){
+            return(seq_along(items))
+        }
+
+        res = as.character(items)
+    } else {
+        items = as.character(items)
+        res = c()
+        for(k in keep){
+
+            if(k %in% items){
+                res = c(res, k)
+            } else {
+                is_regex = grepl("^@", k)
+                if(is_regex){
+                    k = str_trim(k, 1)
+                    sel = grep(k, items, perl = TRUE, value = TRUE)
+                    if(length(sel) == 0){
+                        stop_up("When applying 'split.keep', the regex '", k, "' did not match any choice. Revise?")
+                    }
+                    res = c(res, sel)
+                } else {
+                    sel = items[startsWith(items, k)]
+                    if(length(sel) == 0){
+                        stop_up("When applying 'split.keep', the element '", k, "' did not match any choice. Revise? To apply a regular expression, use '@' first ('@", k, "').")
+                    } else if(length(sel) > 1){
+                        stop_up("When applying 'split.keep', the element '", k, "' matched more than one value (", enumerate_items(sel), "). It should select only one value: either use a regular expression by adding '@' first ('@", k, "'), or add another element in 'split.keep'.")
+                    }
+                    res = c(res, sel)
+                }
+            }
+        }
+    }
+
+    if(!is.null(drop)){
+        for(d in drop){
+
+            if(d %in% res){
+                res = setdiff(res, d)
+            } else {
+                is_regex = grepl("^@", d)
+                if(is_regex){
+                    d = str_trim(d, 1)
+                    sel = grep(d, res, perl = TRUE, value = TRUE)
+                    if(length(sel) == 0){
+                        stop_up("When applying 'split.drop', the regex '", d, "' did not match any choice. Revise?")
+                    }
+                    res = setdiff(res, sel)
+                } else {
+                    sel = res[startsWith(res, d)]
+                    if(length(sel) == 0){
+                        stop_up("When applying 'split.drop', the element '", d, "' did not match any choice. Revise?")
+                    } else if(length(sel) > 1){
+                        stop_up("When applying 'split.drop', the element '", d, "' matched more than one value (", enumerate_items(sel), "). It should select only one value: either use a regular expression by adding '@' first ('@", d, "'), or add another element in 'split.drop'.")
+                    }
+                    res = setdiff(res, sel)
+                }
+            }
+
+            if(length(res) == 0){
+                stop_up("When applying 'split.drop', all elements have been removed! Revise?")
+            }
+        }
+    }
+
+    which(items %in% res)
 }
 
 

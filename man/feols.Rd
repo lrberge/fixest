@@ -14,6 +14,8 @@ feols(
   subset,
   split,
   fsplit,
+  split.keep,
+  split.drop,
   cluster,
   se,
   ssc,
@@ -45,6 +47,8 @@ feols.fit(
   offset,
   split,
   fsplit,
+  split.keep,
+  split.drop,
   cluster,
   se,
   ssc,
@@ -79,9 +83,13 @@ feols.fit(
 
 \item{subset}{A vector (logical or numeric) or a one-sided formula. If provided, then the estimation will be performed only on the observations defined by this argument.}
 
-\item{split}{A one sided formula representing a variable (eg \code{split = ~var}) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. If you also want to include the estimation for the full sample, use the argument \code{fsplit} instead.}
+\item{split}{A one sided formula representing a variable (eg \code{split = ~var}) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. If you also want to include the estimation for the full sample, use the argument \code{fsplit} instead. You can use the special operators \code{\%keep\%} and \code{\%drop\%} to select only a subset of values for which to split the sample. E.g. \code{split = ~var \%keep\% c("v1", "v2")} will split the sample only according to the values \code{v1} and \code{v2} of the variable \code{var}; it is equivalent to supplying the argument \code{split.keep = c("v1", "v2")}. By default there is partial matching on each value, you can trigger a regular expression evaluation by adding a \code{'@'} first, as in: \code{~var \%drop\% "@^v[12]"} which will drop values starting with \code{"v1"} or \code{"v2"} (of course you need to know regexes!).}
 
-\item{fsplit}{A one sided formula representing a variable (eg \code{split = ~var}) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. This argument is the same as split but also includes the full sample as the first estimation.}
+\item{fsplit}{A one sided formula representing a variable (eg \code{split = ~var}) or a vector. If provided, the sample is split according to the variable and one estimation is performed for each value of that variable. This argument is the same as split but also includes the full sample as the first estimation. You can use the special operators \code{\%keep\%} and \code{\%drop\%} to select only a subset of values for which to split the sample. E.g. \code{split = ~var \%keep\% c("v1", "v2")} will split the sample only according to the values \code{v1} and \code{v2} of the variable \code{var}; it is equivalent to supplying the argument \code{split.keep = c("v1", "v2")}. By default there is partial matching on each value, you can trigger a regular expression evaluation by adding an \code{'@'} first, as in: \code{~var \%drop\% "@^v[12]"} which will drop values starting with \code{"v1"} or \code{"v2"} (of course you need to know regexes!).}
+
+\item{split.keep}{A character vector. Only used when \code{split}, or \code{fsplit}, is supplied. If provided, then the sample will be split only on the values of \code{split.keep}. The values in \code{split.keep} will be partially matched to the values of \code{split}. To enable regular expressions, you need to add an \code{'@'} first. For example \code{split.keep = c("v1", "@other|var")} will keep only the value in \code{split} partially matched by \code{"v1"} or the values containing \code{"other"} or \code{"var"}.}
+
+\item{split.drop}{A character vector. Only used when \code{split}, or \code{fsplit}, is supplied. If provided, then the sample will be split only on the values that are not in \code{split.drop}. The values in \code{split.drop} will be partially matched to the values of \code{split}. To enable regular expressions, you need to add an \code{'@'} first. For example \code{split.drop = c("v1", "@other|var")} will drop only the value in \code{split} partially matched by \code{"v1"} or the values containing \code{"other"} or \code{"var"}.}
 
 \item{cluster}{Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1", "var2")]}, \code{cluster = c("var1", "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as fixed-effects in the estimation, you can leave it blank with \code{vcov = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] fixed-effect). You can interact two variables using \code{^} with the following syntax: \code{cluster = ~var1^var2} or \code{cluster = "var1^var2"}.}
 
