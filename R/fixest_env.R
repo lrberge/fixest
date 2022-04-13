@@ -1683,6 +1683,9 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             break
         }
 
+        if(missing(split.keep)) split.keep = NULL
+        if(missing(split.drop)) split.drop = NULL
+
         if(is.null(split.keep)) split.keep = attr(split, "keep")
         if(is.null(split.drop)) split.drop = attr(split, "drop")
 
@@ -1746,6 +1749,9 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             }
 
         }
+
+        # Checking the values of split.keep and split.drop
+        check_arg(split.keep, split.drop, "NULL character vector no na")
 
         if(delayed.subset){
             split = split[subset]

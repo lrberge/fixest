@@ -1624,6 +1624,15 @@ est = feols(y ~ x.[1:2], base,
             split = ~bin(x3, c("cut::5", "saint emilion", "pessac leognan", NA)) %drop% "@\\d")
 test(length(est), 2)
 
+# with argument
+est = feols(y ~ x.[1:3], base, split = ~species, split.keep = "@^v")
+test(length(est), 2)
+
+est = feols(y ~ x.[1:3], base, fsplit = ~species, split.keep = c("set", "vers"))
+test(length(est), 3)
+
+est = feols(y ~ x.[1:3], base, split = ~species, split.drop = "set")
+test(length(est), 2)
 
 
 ####
