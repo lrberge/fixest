@@ -17,6 +17,28 @@
 
  - new function `degrees_freedom_iid` which is a more user-friendly version of `degrees_freedom`.
  
+## All estimations
+
+ - arguments `split` and `fsplit` gain the `%keep%` and `%drop%` operators which allow to split the sample only on a subset of elements. All estimations also gain the arguments `split.keep` and `split.drop` which do the same thing as the previous operators.
+```
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+est = feols(y ~ x.[1:3], base, fsplit = ~species %keep% c("set", "vers"))
+etable(est)
+#>                              model 1            model 2            model 3
+#> Sample (species)         Full sample             setosa         versicolor
+#> Dependent Var.:                    y                  y                  y
+#>                                                                           
+#> (Intercept)        1.856*** (0.2508)  2.352*** (0.3929)  1.896*** (0.5071)
+#> x1                0.6508*** (0.0667) 0.6548*** (0.0925)   0.3869. (0.2045)
+#> x2                0.7091*** (0.0567)    0.2376 (0.2080) 0.9083*** (0.1654)
+#> x3               -0.5565*** (0.1275)    0.2521 (0.3469)   -0.6792 (0.4354)
+#> ________________ ___________________ __________________ __________________
+#> S.E. type                        IID                IID                IID
+#> Observations                     150                 50                 50
+#> R2                           0.85861            0.57514            0.60503
+#> Adj. R2                      0.85571            0.54743            0.57927
+```
+ 
 ## Other
 
  - the function `xpd` gains the arguments `add` and `frame`.
