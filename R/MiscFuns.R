@@ -528,9 +528,8 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
 	        return(res[[1]])
 	    }
 
-	    index = list("iv" = length(res))
-	    all_names = list("iv" = stage_names)
-	    res_multi = setup_multi(index, all_names, res)
+	    values = list("iv" = stage_names)
+	    res_multi = setup_multi(res, values)
 	    attr(res_multi, "print_request") = "long"
 
 	    return(res_multi)

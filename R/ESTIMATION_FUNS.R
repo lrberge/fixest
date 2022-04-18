@@ -1000,12 +1000,13 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 	    }
 
 	    # Meta information for fixest_multi
-
-	    index = list(lhs = n_lhs, rhs = n_rhs)
-	    all_names = list(lhs = lhs_names, rhs = rhs_names)
+	    values = list(lhs = rep(lhs_names, each = n_rhs),
+	                  rhs = rep(rhs_names, n_lhs))
+	    if(n_lhs == 1) values$lhs = NULL
+	    if(n_rhs == 1) values$rhs = NULL
 
 	    # result
-	    res_multi = setup_multi(index, all_names, res)
+	    res_multi = setup_multi(res, values)
 
 	    return(res_multi)
 	}
@@ -4047,11 +4048,10 @@ multi_split = function(env, fun){
         I = I + 1
     }
 
-    index = list(sample = length(res_all))
-    all_names = list(sample = split.items, split.name = split.name)
+    values = list(sample = split.items)
 
     # result
-    res_multi = setup_multi(index, all_names, res_all)
+    res_multi = setup_multi(res_all, values, var = split.name)
 
     return(res_multi)
 }
@@ -4160,12 +4160,11 @@ multi_LHS_RHS = function(env, fun){
     }
 
     # Meta information for fixest_multi
-
-    index = list(lhs = n_lhs, rhs = n_rhs)
-    all_names = list(lhs = lhs_names, rhs = rhs_names)
+    values = list(lhs = rep(lhs_names, each = n_rhs),
+                  rhs = rep(rhs_names, n_lhs))
 
     # result
-    res_multi = setup_multi(index, all_names, res)
+    res_multi = setup_multi(res, values)
 
     return(res_multi)
 }
@@ -4360,9 +4359,9 @@ multi_fixef = function(env, estfun){
 
     index = list(fixef = n_fixef)
     fixef_names = sapply(multi_fixef_fml_full, function(x) as.character(x)[[2]])
-    all_names = list(fixef = fixef_names)
+    values = list(fixef = fixef_names)
 
-    res_multi = setup_multi(index, all_names, data_results)
+    res_multi = setup_multi(data_results, values)
 
     if("lhs" %in% names(attr(res_multi, "meta")$index)){
         res_multi = res_multi[lhs = TRUE]

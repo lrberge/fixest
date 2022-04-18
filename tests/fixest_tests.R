@@ -1723,9 +1723,9 @@ est_a = feols(y1 ~ 1 | x2 ~ x3, base)
 est_b = feols(y1 ~ x1 | species | x2 ~ x3, base)
 est_c = feols(y2 ~ 1 | x2 ~ x3, base)
 
-test(coef(est_multi[lhs = "y1", rhs = "^1", fixef = "1"]), coef(est_a))
-test(coef(est_multi[lhs = "y1", rhs = "x1", fixef = "spe"]), coef(est_b))
-test(coef(est_multi[lhs = "y2", rhs = "^1", fixef = "1"]), coef(est_c))
+test(coef(est_multi[lhs = "y1", rhs = "^1", fixef = "1", drop = TRUE]), coef(est_a))
+test(coef(est_multi[lhs = "y1", rhs = "x1", fixef = "spe", drop = TRUE]), coef(est_b))
+test(coef(est_multi[lhs = "y2", rhs = "^1", fixef = "1", drop = TRUE]), coef(est_c))
 
 # with fixed covariates
 est_multi_LR = feols(c(y1, y2) ~ left + sw0(x1*x4) + right | sw0(species) | x2 ~ x3, base)
@@ -1734,11 +1734,11 @@ est_a = feols(y1 ~ left + right | x2 ~ x3, base)
 est_b = feols(y1 ~ left + x1*x4 + right | species | x2 ~ x3, base)
 est_c = feols(y2 ~ left + right | x2 ~ x3, base)
 
-test(coef(est_multi_LR[lhs = "y1", rhs = "!x1", fixef = "1"]), coef(est_a))
+test(coef(est_multi_LR[lhs = "y1", rhs = "!x1", fixef = "1", drop = TRUE]), coef(est_a))
 user_name = c("fit_x2", "left", "x1", "x4", "x1:x4", "right")
-test(names(coef(est_multi_LR[lhs = "y1", rhs = "x1", fixef = "spe"])), user_name)
-test(coef(est_multi_LR[lhs = "y1", rhs = "x1", fixef = "spe"]), coef(est_b)[user_name])
-test(coef(est_multi_LR[lhs = "y2", rhs = "!x1", fixef = "1"]), coef(est_c))
+test(names(coef(est_multi_LR[lhs = "y1", rhs = "x1", fixef = "spe", drop = TRUE])), user_name)
+test(coef(est_multi_LR[lhs = "y1", rhs = "x1", fixef = "spe", drop = TRUE]), coef(est_b)[user_name])
+test(coef(est_multi_LR[lhs = "y2", rhs = "!x1", fixef = "1", drop = TRUE]), coef(est_c))
 
 
 # mvsw

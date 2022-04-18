@@ -31,6 +31,8 @@ export(panel, unpanel, f, l, d, lag_fml)
 export(i, bin, ref)
 # macro
 export(xpd)
+# multiple estimations
+export(models)
 # utilities
 export(to_integer, demean, obs)
 # setters & getters
