@@ -779,7 +779,7 @@ void quf_refactor_table_sum_single(int n, int *quf_old, int *quf_new, vector<boo
         // is there a problem?
         bool any_pblm = false;
         // we check only if needed (if !rm_single && !rm_1 && length(id_pblm) == 0 => means no problem)
-        if(id_pblm.size() > 0){
+        if(!id_pblm.empty()){
             for(int d=0 ; d<D ; ++d){
                 if(id_pblm[d]){
                     any_pblm = true;
