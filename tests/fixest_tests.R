@@ -1340,6 +1340,24 @@ base_bis[, x_d := d(x)]
 
 cat("done.\n\n")
 
+####
+#### Panel ####
+####
+
+# We ensure we get the right SEs whether we use the panel() or the panel.id method
+data(base_did)
+
+# Setting a data set as a panel...
+pdat = panel(base_did, ~id+period)
+pdat$fe = sample(15, nrow(pdat), replace = TRUE)
+
+base_panel = unpanel(pdat)
+
+est_pdat = feols(y ~ x1 | fe, pdat)
+est_panel = feols(y ~ x1 | fe, base_panel, panel.id = ~id+period)
+
+test(attr(vcov(est_pdat, attr = TRUE), "type"),
+     attr(vcov(est_panel, attr = TRUE), "type"))
 
 ####
 #### xpd ####

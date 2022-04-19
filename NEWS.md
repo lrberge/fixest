@@ -13,6 +13,8 @@
  
  - fix bug in IV estimations with no exogenous variable and no fixed-effect (thanks to Kyle Butts).
  
+ - fix bug panel vs panel.id behaving differently in terms of default type of VCOV when the estimation did not contained lags. 
+ 
 ## New functions
 
  - new function `degrees_freedom_iid` which is a more user-friendly version of `degrees_freedom`.

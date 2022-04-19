@@ -691,6 +691,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                     panel.id = NULL
                 }
             }
+        } else if(!is.null(attr(data, "panel_info"))){
+            panel.id = attr(data, "panel_info")$panel.id
         }
 
         if(!is.null(panel.id) && inherits(panel.id, "formula")){
