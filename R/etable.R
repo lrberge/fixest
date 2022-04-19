@@ -1444,7 +1444,6 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
     if(n_dots == 0) stop_up("Not any estimation as argument.")
 
-
     all_models = list()
     model_names = list()
     auto_headers = list()

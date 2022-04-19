@@ -2748,7 +2748,6 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     # The Fixed-effects
     #
 
-
     assign("isFixef", isFixef, env)
     if(isFixef){
 
@@ -2954,9 +2953,9 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
             res$slope_flag = slope_flag[order(new_order)]
             res$slope_flag_reordered = slope_flag
             res$slope_variables_reordered = slope_variables
-            res$fe.reorder = new_order
         }
 
+        res$fe.reorder = new_order
         res$fixef_id = fixef_id_res
         res$fixef_sizes = fixef_sizes_res
         if(isFit){
@@ -3016,7 +3015,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
 setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, split.full = FALSE,
                        origin_type, isSlope, slope_flag, slope_df, slope_vars_list,
-                       fixef_names_old = NULL, fixef_sizes = NULL, obs2keep = NULL, nthreads){
+                       fixef_names_old = NULL, fixef_sizes = NULL, obs2keep = NULL,
+                       prev_order = NULL, nthreads){
 
     isSplitNoFull = identical(fixef_names_old, "SPLIT_NO_FULL")
     isRefactor = !isSplitNoFull && !is.null(fixef_names_old)
@@ -3102,8 +3102,13 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, spl
                                         do_refactor = isRefactor, r_x_sizes = fixef_sizes, obs2keep = obs2keep)
 
     fixef_id = quf_info_all$quf
-    # names
 
+    # table/sum_y/sizes
+    fixef_table = quf_info_all$table
+    sum_y_all = quf_info_all$sum_y
+    fixef_sizes = lengths(fixef_table)
+
+    # names
     fixef_names = list()
     if(isRefactor == FALSE){
         is_string = sapply(fixef_df, is.character)
@@ -3118,15 +3123,32 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, spl
     } else {
         # If here, we're in refactoring. The new fixef are integers
         for(i in 1:length(fixef_id)){
-            fixef_names[[i]] = fixef_names_old[[i]][quf_info_all$items[[i]]]
+            # We ensure we have exactly the same estimates as the if the estimation
+            # was done separately, otherwise there can be a reordering of the fixed-effects IDs
+            # Personally, I find it's overdoing it since it's not really needed.
+
+            items_order = order(quf_info_all$items[[i]])
+            items_order_order = order(items_order)
+            new_id = items_order_order[fixef_id[[i]]]
+            new_items = quf_info_all$items[[i]][items_order]
+            new_table = fixef_table[[i]][items_order]
+            new_sum_y = sum_y_all[[i]]
+            if(length(new_sum_y) > 0){
+                new_sum_y = new_sum_y[items_order]
+            }
+
+            # fixef_names[[i]] = fixef_names_old[[i]][quf_info_all$items[[i]]]
+            # a = fixef_names_old[[i]][quf_info_all$items[[i]]][fixef_id[[i]]]
+            # b = fixef_names_old[[i]][new_items][new_id]
+            # all(a == b)
+            # all(as.numeric(new_table) == table(new_id))
+
+            fixef_names[[i]] = fixef_names_old[[i]][new_items]
+            fixef_id[[i]] = new_id
+            fixef_table[[i]] = new_table
+            sum_y_all[[i]] = new_sum_y
         }
     }
-
-
-    # table/sum_y/sizes
-    fixef_table = quf_info_all$table
-    sum_y_all = quf_info_all$sum_y
-    fixef_sizes = lengths(fixef_table)
 
     # If observations have been removed:
     fixef_removed = list()
@@ -3166,11 +3188,18 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, spl
         nb_missing = lengths(fixef_removed)
         if(rm_0 == FALSE){
             n_single = sum(nb_missing)
-            message_fixef = paste0(fsignif(n_single), " fixed-effect singleton", plural(n_single, "s.was"), " removed (", numberFormatNormal(length(obs2remove)), " observation", plural_len(obs2remove), ifelse(Q == 1, "", paste0(", breakup: ", paste0(nb_missing, collapse = "/"))), ").")
+            message_fixef = paste0(fsignif(n_single), " fixed-effect singleton", plural(n_single, "s.was"), " removed (", numberFormatNormal(length(obs2remove)), " observation", plural_len(obs2remove), ifelse(Q == 1, "", paste0(", breakup: ", paste0(fsignif(nb_missing), collapse = "/"))), ").")
         } else {
             message_fixef = paste0(paste0(fsignif(nb_missing), collapse = "/"), " fixed-effect", plural(sum(nb_missing)), " (", numberFormatNormal(length(obs2remove)), " observation", plural_len(obs2remove), ") removed because of only ", ifelse(rm_1, "0 (or only 1)", "0"), " outcomes", ifelse(rm_single && !rm_1, " or singletons", ""), ".")
         }
 
+    }
+
+    # prev_order: only used when reshaping the env
+    if(!is.null(prev_order)){
+        prev_reorder = order(prev_order)
+    } else {
+        prev_reorder = 1:Q
     }
 
     new_order = 1:Q
@@ -3180,11 +3209,16 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, spl
         #
 
         fixef_id_res = list()
+        fixef_sizes_res = integer(Q)
         for(i in 1:Q){
-            dum = fixef_id[[i]]
-            attr(dum, "fixef_names") = as.character(fixef_names[[i]])
+            id = prev_reorder[i]
+            dum = fixef_id[[id]]
+            attr(dum, "fixef_names") = as.character(fixef_names[[id]])
             fixef_id_res[[fixef_vars[i]]] = dum
+
+            fixef_sizes_res[i] = fixef_sizes[id]
         }
+        names(fixef_sizes_res) = fixef_vars
 
         # The real size is equal to nb_coef * nb_slopes
         if(isSlope){
@@ -3192,9 +3226,6 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, spl
         } else {
             fixef_sizes_real = fixef_sizes
         }
-
-        fixef_sizes_res = fixef_sizes
-        names(fixef_sizes_res) = fixef_vars
 
         #
         # We re-order the fixed-effects
@@ -3214,8 +3245,14 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, spl
                 slope_variables = slope_variables[unlist(slope_vars_list[new_order], use.names = FALSE)]
                 slope_flag = slope_flag[new_order]
             }
-
         }
+
+        fixef_names = fixef_names[new_order]
+    }
+
+    if(!is.null(prev_order)){
+        # new order refers to the original order
+        new_order = prev_order[new_order]
     }
 
     # saving
@@ -3365,7 +3402,7 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
 
         # gt("fixef, dropping lhs")
 
-        fixef_df       = get("fixef_id_list", env)
+        fixef_df        = get("fixef_id_list", env)
         fixef_vars      = get("fixef_vars", env)
         fixef.rm        = get("fixef.rm", env)
         fixef_names_old = get("fixef_names", env)
@@ -3376,6 +3413,8 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
         slope_vars_list = get("slope_vars_list", env)
         isSlope         = any(slope_flag != 0)
 
+        prev_order      = res$fe.reorder
+
         # gt("fixef, dropping")
 
         # We refactor the fixed effects => we may remove even more obs
@@ -3384,7 +3423,7 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
                               origin_type = origin_type, isSlope = isSlope, slope_flag = slope_flag,
                               slope_df = slope_df, slope_vars_list = slope_vars_list,
                               fixef_names_old = fixef_names_old, fixef_sizes = fixef_sizes,
-                              obs2keep = obs2keep, nthreads = nthreads)
+                              obs2keep = obs2keep, prev_order = prev_order, nthreads = nthreads)
 
         # gt("fixef, recompute")
 
@@ -3642,9 +3681,9 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
                 res$slope_flag = slope_flag[order(new_order)]
                 res$slope_flag_reordered = slope_flag
                 res$slope_variables_reordered = slope_variables
-                res$fe.reorder = new_order
             }
 
+            res$fe.reorder = new_order
             res$fixef_id = fixef_id_res
             res$fixef_sizes = fixef_sizes_res
         }

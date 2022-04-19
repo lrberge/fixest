@@ -316,7 +316,6 @@ class FEClass{
 
     int Q;
     int n_obs;
-    int slope_index;
     bool is_weight;
     bool is_slope;
 
