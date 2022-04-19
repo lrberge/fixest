@@ -3129,7 +3129,7 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, isSplit, spl
 
             items_order = order(quf_info_all$items[[i]])
             items_order_order = order(items_order)
-            new_id = items_order_order[fixef_df[[i]]]
+            new_id = items_order_order[fixef_id[[i]]]
             new_items = quf_info_all$items[[i]][items_order]
             new_table = fixef_table[[i]][items_order]
             new_sum_y = sum_y_all[[i]]
