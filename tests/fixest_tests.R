@@ -1651,6 +1651,8 @@ base$fe2[50:51] = NA
 base$y2[base$fe2 == "a" & !is.na(base$fe2)] = 0
 base$x2[1:5] = NA
 base$x3[6] = NA
+base$x5 = rnorm(150)
+base$x6 = rnorm(150) + base$y1 * 0.25
 base$fe3 = rep(letters[1:10], 15)
 
 
@@ -1750,6 +1752,35 @@ est_mvsw_fe_iv = feols(y1 ~ mvsw(x1, x2) | mvsw(species, fe2) | x3 ~ x4, base)
 test(length(est_mvsw), 4)
 test(length(as.list(est_mvsw_fe)), 16)
 test(length(as.list(est_mvsw_fe_iv)), 16)
+
+# Summary of multiple endo vars
+est_multi_iv = feols(c(y1, y2) ~ sw0(x1) | sw0(species) | x3 + x4 ~ x5 + x6, base)
+test(length(est_multi_iv), 8)
+test(length(summary(est_multi_iv, stage = 1)), 16)
+
+# IV without exo var:
+est_mult_no_exo = feols(c(y1, y2) ~ 0 | x3 + x4 ~ x5 + x6, base)
+est_no_exo_y2 = feols(y2 ~ 0 | x3 + x4 ~ x5 + x6, base)
+test(coef(est_mult_no_exo[[2]]), coef(est_no_exo_y2))
+
+# proper ordering
+est_multi = feols(c(y1, y2) ~ sw0(x1) | sw0(fe2), base, split = ~species)
+test(names(models(est_multi[fixef = TRUE, sample = FALSE])),
+     dsb("/id, fixef, lhs, rhs, sample.var, sample"))
+
+test(names(models(est_multi[fixef = "fe2", sample = "seto"])),
+     dsb("/id, fixef, sample.var, sample, lhs, rhs"))
+
+test(names(models(est_multi[fixef = "fe2", sample = "seto", reorder = FALSE])),
+     dsb("/id, sample.var, sample, fixef, lhs, rhs"))
+
+# NA models
+base$y_0 = base$x1 ** 2 + rnorm(150)
+base$y_0[base$species == "setosa"] = 0
+
+est_pois = fepois(y_0 ~ csw(x.[,1:4]), base, split = ~species)
+
+
 
 
 ####

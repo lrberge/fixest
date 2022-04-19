@@ -22,13 +22,16 @@ setup_multi = function(data, values, var = NULL, tree = NULL){
     check_arg(values, "named list")
     check_arg(var, "NULL character vector no na")
     check_arg(tree, "NULL data.frame")
-    stopifnot(identical(class(data), "list"))
 
     n_models = length(data)
     IS_VAR = !is.null(var)
     IS_TREE = !is.null(tree)
-    var_label = NULL
 
+    if(!IS_TREE){
+        stopifnot(identical(class(data), "list"))
+    }
+
+    var_label = NULL
     if(IS_VAR){
         stopifnot(length(values) == 1)
         var_label = names(values)[1]
@@ -574,6 +577,7 @@ print.fixest_multi = function(x, ...){
 
     core_args = c("sample", "lhs", "rhs", "fixef", "iv")
     check_arg(reorder, drop, "logical scalar")
+    extra_args = c("reorder", "drop")
 
     mc = match.call()
     if(!any(c(core_args, "i", "I") %in% names(mc))){
@@ -597,7 +601,7 @@ print.fixest_multi = function(x, ...){
     index_n = lapply(index_names, length)
 
     # tree_index does not contain extra info like id or .var
-    args = c(names(tree_index), "reorder", "drop")
+    args = c(names(tree_index), extra_args)
 
     nc = ncol(tree)
     n = nrow(tree)
@@ -714,7 +718,7 @@ print.fixest_multi = function(x, ...){
 
     # We keep the order of the user!!!!!
     sc = sys.call()
-    user_order = setdiff(names(sc)[-(1:2)], c("reorder", "drop"))
+    user_order = setdiff(names(sc)[-(1:2)], extra_args)
     if(reorder == FALSE){
         user_order = names(index_n)
     } else {
@@ -1006,15 +1010,15 @@ residuals.fixest_multi <- resid.fixest_multi
 #'
 #' # a multiple estimation
 #' base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
-#' est = feols(y ~ csw(x.[, 1:3]), base, fsplit =~species)
+#' est = feols(y ~ csw(x.[, 1:3]), base, fsplit = ~species)
 #'
 #' # All the meta information
 #' models(est)
 #'
 #' # Illustration: Why use simplify
 #' est_sub = est[sample = 2]
-#' models(est)
-#' models(est, simplify = TRUE)
+#' models(est_sub)
+#' models(est_sub, simplify = TRUE)
 #'
 #'
 #'

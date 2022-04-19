@@ -594,8 +594,8 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 	        # => of course this is dependent on the pattern of NAs
 	        #
 
-	        n_core_left = ifelse(length(linear_core$left) == 1, 0, ncol(linear_core$left))
-	        n_core_right = ifelse(length(linear_core$right) == 1, 0, ncol(linear_core$right))
+	        n_core_left = if(length(linear_core$left) == 1) 0 else ncol(linear_core$left)
+	        n_core_right = if(length(linear_core$right) == 1) 0 else ncol(linear_core$right)
 
 	        # rnc: running number of columns
 	        rnc = n_core_left
@@ -918,6 +918,9 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 	                                                  Z = iv.mat_demean, u = iv_lhs_demean,
 	                                                  w = weights, nthreads = nthreads)
 	                } else {
+	                    if(!is.matrix(X_all)){
+	                        X_all = as.matrix(X_all)
+	                    }
 	                    iv_products = cpp_iv_products(X = X_all, y = my_lhs, Z = iv.mat,
 	                                                  u = iv_lhs, w = weights, nthreads = nthreads)
 	                }
@@ -1299,10 +1302,15 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 	                                 resid_1st_stage = resid_s1, iv_call = TRUE, notes = FALSE)
 
 	        # For the F-stats
-	        fit_no_endo = ols_fit(y, X, w = weights, correct_0w = FALSE,
-	                              collin.tol = collin.tol, nthreads = nthreads,
-	                              xwx = XtX, xwy = Xty)
-	        res_second_stage$ssr_no_endo = cpp_ssq(fit_no_endo$residuals, weights)
+	        if(is_X){
+	            fit_no_endo = ols_fit(y, X, w = weights, correct_0w = FALSE,
+	                                  collin.tol = collin.tol, nthreads = nthreads,
+	                                  xwx = XtX, xwy = Xty)
+	            res_second_stage$ssr_no_endo = cpp_ssq(fit_no_endo$residuals, weights)
+	        } else {
+	            res_second_stage$ssr_no_endo = cpp_ssr_null(y, weights)
+	        }
+
 	    }
 
 	    if(verbose >= 2) gt("2nd stage")
@@ -4118,7 +4126,10 @@ multi_LHS_RHS = function(env, fun){
             my_rhs = linear_core[1]
 
             if(multi_rhs_cumul){
-                my_rhs[1 + 1:j] = rhs_sw[1:j]
+                if(j > 1){
+                    # if j == 1, the RHS is already in the data
+                    my_rhs[1 + (2:j - 1)] = rhs_sw[2:j]
+                }
             } else {
                 my_rhs[2] = rhs_sw[j]
             }

@@ -1493,7 +1493,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                 model_names[[k]] = as.character(dots_call[[i]])
             }
 
-            k = k+1
+            k = k + 1
         } else if(any(c("list", "fixest_list") %in% class(di))){
             # we get into this list to get the fixest objects
             types = sapply(di, function(x) class(x)[1])
@@ -1516,13 +1516,13 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                     }
                 }
 
-                k = k+1
+                k = k + 1
             }
         }
 
     }
 
-    if(length(all_models)==0) stop_up("Not any 'fixest' model as argument!")
+    if(length(all_models) == 0) stop_up("Not any 'fixest' model as argument!")
 
     n_models = length(all_models)
 
