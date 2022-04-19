@@ -1453,38 +1453,6 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     for(i in 1:n_dots){
         di = dots[[i]]
 
-        if("fixest_multi" %in% class(di)){
-            meta = attr(di, "meta")
-            di = attr(di, "data")
-
-            if(AUTO_HEADERS){
-                if(!is.null(meta$all_names[["sample"]])){
-                    my_headers = list()
-
-                    if(tex == FALSE){
-                        # We need to rename to avoid FE problem duplicate row names
-                        my_headers$title = paste0("Sample (", dict_apply(meta$all_names$split.name, dict), ")")
-                    } else {
-                        my_headers$title = dict_apply(meta$all_names$split.name, dict)
-                    }
-
-                    n_mod = length(di)
-
-                    if(!"sample" %in% names(meta$index)){
-                        my_headers$value = rep(meta$all_names$sample, n_mod)
-                    } else {
-                        my_headers$value = meta$all_names$sample[meta$tree[, "sample"]]
-                    }
-
-                    my_headers$index = seq(k, length.out = n_mod)
-
-                    auto_headers[[length(auto_headers) + 1]] = my_headers
-
-                }
-            }
-
-        }
-
         if("fixest" %in% class(di)){
             all_models[[k]] = di
             if(any(class(dots_call[[i]]) %in% c("call", "name"))){
@@ -1494,37 +1462,91 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
             }
 
             k = k + 1
-        } else if(any(c("list", "fixest_list") %in% class(di))){
+        } else if(any(c("list", "fixest_list", "fixest_multi") %in% class(di))){
             # we get into this list to get the fixest objects
             types = sapply(di, function(x) class(x)[1])
-            qui = which(types == "fixest")
+            qui = which(types %in% c("fixest", "fixest_multi"))
+            is_multi = inherits(di, "fixest_multi")
+
             for(m in qui){
-                all_models[[k]] = di[[m]]
+                mod = di[[m]]
 
                 # handling names
-                if(n_dots > 1){
-                    if(is.null(names(di)[m]) || names(di)[m]==""){
-                        model_names[[k]] = paste0(dots_call[[i]], "[[", m, "]]")
+                if(is_multi){
+                    if(any(class(dots_call[[i]]) %in% c("call", "name"))){
+                        mod_name = deparse_long(dots_call[[i]])
                     } else {
-                        model_names[[k]] = paste0(dots_call[[i]], "$", names(di)[m])
+                        mod_name = as.character(dots_call[[i]])
                     }
+                    mod_name = paste0(mod_name, ".", m)
                 } else {
-                    model_names[[k]] = as.character(names(di)[m])
+                    if(n_dots > 1){
+                        if(is.null(names(di)[m]) || names(di)[m] == ""){
+                            mod_name  = paste0(dots_call[[i]], "[[", m, "]]")
+                        } else {
+                            mod_name = paste0(dots_call[[i]], "$", names(di)[m])
+                        }
+                    } else {
+                        mod_name = as.character(names(di)[m])
+                    }
+                }
+
+
+                if(inherits(mod, "fixest_multi")){
+
+                    for(j in seq_along(mod)){
+                        all_models[[k]] = mod[[j]]
+                        model_names[[k]] = paste0(mod_name, ".", j)
+
+                        k = k + 1
+                    }
+
+                } else {
+                    # regular fixest or from fixest_list
+                    all_models[[k]] = mod
+                    model_names[[k]] = mod_name
+
                     id = di[[m]]$model_id
                     if(!is.null(id)){
                         model_id[k] = id
                     }
-                }
 
-                k = k + 1
+                    k = k + 1
+                }
             }
         }
-
     }
 
     if(length(all_models) == 0) stop_up("Not any 'fixest' model as argument!")
 
     n_models = length(all_models)
+
+    if(AUTO_HEADERS){
+
+        # SAMPLE (ie split)
+        sample_info = lapply(all_models, function(x) x$model_info$sample)
+        sample_info_ok = which(lengths(sample_info) > 0)
+
+
+        for(i in sample_info_ok){
+            my_headers = list()
+
+            si = sample_info[[i]]
+
+            if(tex == FALSE){
+                # We need to rename to avoid FE problem duplicate row names
+                my_headers$title = paste0("Sample (", dict_apply(si$var, dict), ")")
+            } else {
+                my_headers$title = dict_apply(si$var, dict)
+            }
+
+            my_headers$value = si$value
+
+            my_headers$index = i
+
+            auto_headers[[length(auto_headers) + 1]] = my_headers
+        }
+    }
 
     IS_MULTI_VCOV = FALSE
     IS_EACH = FALSE
