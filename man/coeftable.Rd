@@ -2,109 +2,81 @@
 % Please edit documentation in R/MiscFuns.R
 \name{coeftable}
 \alias{coeftable}
+\alias{se}
 \alias{pvalue}
 \alias{tstat}
-\alias{se}
-\title{Obtain various statistics from an estimation}
+\alias{pvalue.fixest}
+\alias{tstat.fixest}
+\alias{se.fixest}
+\title{Extracts the coefficients table from an estimation}
 \usage{
-coeftable(
+coeftable(object, ...)
+
+se(object, ...)
+
+pvalue(object, ...)
+
+tstat(object, ...)
+
+\method{pvalue}{fixest}(
   object,
   vcov = NULL,
   ssc = NULL,
   cluster = NULL,
-  keep,
-  drop,
-  order,
+  keep = NULL,
+  drop = NULL,
+  order = NULL,
   ...
 )
 
-pvalue(object, vcov = NULL, ssc = NULL, cluster = NULL, keep, drop, order, ...)
+\method{tstat}{fixest}(
+  object,
+  vcov = NULL,
+  ssc = NULL,
+  cluster = NULL,
+  keep = NULL,
+  drop = NULL,
+  order = NULL,
+  ...
+)
 
-tstat(object, vcov = NULL, ssc = NULL, cluster = NULL, keep, drop, order, ...)
-
-se(object, vcov = NULL, ssc = NULL, cluster = NULL, keep, drop, order, ...)
+\method{se}{fixest}(
+  object,
+  vcov = NULL,
+  ssc = NULL,
+  cluster = NULL,
+  keep = NULL,
+  drop = NULL,
+  order = NULL,
+  ...
+)
 }
 \arguments{
-\item{object}{An estimation. For example obtained from \code{\link[fixest]{feols}}.}
+\item{object}{An estimation (fitted model object), e.g. a \code{fixest} object.}
 
-\item{vcov}{Versatile argument to specify the VCOV. In general, it is either a character scalar equal to a VCOV type, either a formula of the form: \code{vcov_type ~ variables}. The VCOV types implemented are: "iid", "hetero" (or "HC1"), "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". It also accepts object from \code{\link[fixest]{vcov_cluster}}, \code{\link[fixest:vcov_hac]{vcov_NW}}, \code{\link[fixest:vcov_hac]{NW}}, \code{\link[fixest:vcov_hac]{vcov_DK}}, \code{\link[fixest:vcov_hac]{DK}}, \code{\link[fixest]{vcov_conley}} and \code{\link[fixest:vcov_conley]{conley}}. It also accepts covariance matrices computed externally. Finally it accepts functions to compute the covariances. See the `vcov` documentation in the \href{https://lrberge.github.io/fixest/articles/fixest_walkthrough.html#the-vcov-argument-1}{vignette}.}
-
-\item{ssc}{An object of class \code{ssc.type} obtained with the function \code{\link[fixest]{ssc}}. Represents how the degree of freedom correction should be done.You must use the function \code{\link[fixest]{ssc}} for this argument. The arguments and defaults of the function \code{\link[fixest]{ssc}} are: \code{adj = TRUE}, \code{fixef.K="nested"}, \code{cluster.adj = TRUE}, \code{cluster.df = "min"}, \code{t.df = "min"}, \code{fixef.force_exact=FALSE)}. See the help of the function \code{\link[fixest]{ssc}} for details.}
-
-\item{cluster}{[Fixest specific.] Tells how to cluster the standard-errors (if clustering is requested). Can be either a list of vectors, a character vector of variable names, a formula or an integer vector. Assume we want to perform 2-way clustering over \code{var1} and \code{var2} contained in the data.frame \code{base} used for the estimation. All the following \code{cluster} arguments are valid and do the same thing: \code{cluster = base[, c("var1, "var2")]}, \code{cluster = c("var1, "var2")}, \code{cluster = ~var1+var2}. If the two variables were used as clusters in the estimation, you could further use \code{cluster = 1:2} or leave it blank with \code{se = "twoway"} (assuming \code{var1} [resp. \code{var2}] was the 1st [res. 2nd] cluster).}
-
-\item{keep}{Character vector. This element is used to display only a subset of variables. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be kept. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is kept). See details.}
-
-\item{drop}{Character vector. This element is used if some variables are not to be displayed. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). Each variable satisfying any of the regular expressions will be discarded. This argument is applied post aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display only \code{x1} to \code{x9}, then you could use \code{drop = "x[[:digit:]]{2}"}. If the first character is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable that does not contain \dQuote{Intercept} is dropped). See details.}
-
-\item{order}{Character vector. This element is used if the user wants the variables to be ordered in a certain way. This should be a vector of regular expressions (see \code{\link[base]{regex}} help for more info). The variables satisfying the first regular expression will be placed first, then the order follows the sequence of regular expressions. This argument is applied post aliasing (see argument \code{dict}). Example: you have the following variables: \code{month1} to \code{month6}, then \code{x1} to \code{x5}, then \code{year1} to \code{year6}. If you want to display first the x's, then the years, then the months you could use: \code{order = c("x", "year")}. If the first character is an exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that does not contain \dQuote{Intercept} goes first).  See details.}
-
-\item{...}{Other arguments to be passed to \code{summary}.}
-
-\item{se}{[Fixest specific.] Character scalar. Which kind of standard error should be computed: \dQuote{iid}, \dQuote{hetero}, \dQuote{cluster}, \dQuote{twoway}, \dQuote{threeway} or \dQuote{fourway}? By default if there are fixed-effects in the estimation: \code{se = "cluster"}, otherwise \code{se = "iid"}. Note that this argument is not needed if the argument \code{cluster} is present.}
+\item{...}{Other arguments to the methods.}
 }
 \value{
-Returns a table of coefficients, with in rows the variables and four columns: the estimate, the standard-error, the t-statistic and the p-value.
+Returns a matrix (\code{coeftable}) or vectors.
 }
 \description{
-Set of functions to directly extract some commonly used statistics, like the p-value or the table of coefficients, from estimations. This was first implemented for \code{fixest} estimations, but has some support for other models.
+Methods to extracts the coefficients table and its sub-components from an estimation.
 }
-\details{
-This set of functions is primarily constructed for \code{fixest} estimations. Although it can work for non-\code{fixest} estimations, support for exotic estimation procedures that do not report standardized coefficient tables is highly limited.
-}
-\section{Functions}{
+\section{Methods (by class)}{
 \itemize{
-\item \code{pvalue}: Extracts the p-value of an estimation
+\item \code{fixest}: Extracts the p-value of an estimation
 
-\item \code{tstat}: Extracts the t-statistics of an estimation
+\item \code{fixest}: Extracts the t-statistics of an estimation
 
-\item \code{se}: Extracts the standard-error of an estimation
+\item \code{fixest}: Extracts the standard-error of an estimation
 }}
 
 \examples{
 
-# Some data and estimation
-data(trade)
-est = fepois(Euros ~ log(dist_km) | Origin^Product + Year, trade)
-
-#
-# Coeftable/se/tstat/pvalue
-#
-
-# Default is clustering along Origin^Product
+est = lm(mpg ~ cyl, mtcars)
 coeftable(est)
-se(est)
-tstat(est)
-pvalue(est)
 
-# Now with two-way clustered standard-errors
-#  and using coeftable()
-
-coeftable(est, cluster = ~Origin + Product)
-se(est, cluster = ~Origin + Product)
-pvalue(est, cluster = ~Origin + Product)
-tstat(est, cluster = ~Origin + Product)
-
-# Or you can cluster only once:
-est_sum = summary(est, cluster = ~Origin + Product)
-coeftable(est_sum)
-se(est_sum)
-tstat(est_sum)
-pvalue(est_sum)
-
-# You can use the arguments keep, drop, order
-# to rearrange the results
-
-base = iris
-names(base) = c("y", "x1", "x2", "x3", "species")
-
-est_iv = feols(y ~ x1 | x2 ~ x3, base)
-
-tstat(est_iv, keep = "x1")
-coeftable(est_iv, keep = "x1|Int")
-
-coeftable(est_iv, order = "!Int")
-
-
-
+}
+\seealso{
+Please look at the \code{\link[fixest]{coeftable.fixest}} page for more detailed information.
 }

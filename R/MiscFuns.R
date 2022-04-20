@@ -694,17 +694,17 @@ coeftable = function(object, ...){
     UseMethod("coeftable")
 }
 
-#' @describeIn coeftable Extracts the standard-errors from an estimation
+#' @rdname coeftable
 se = function(object, ...){
     UseMethod("se")
 }
 
-#' @describeIn coeftable Extracts the p-values from an estimation
+#' @rdname coeftable
 pvalue = function(object, ...){
     UseMethod("pvalue")
 }
 
-#' @describeIn coeftable Extracts the t-statistics from an estimation
+#' @rdname coeftable
 tstat = function(object, ...){
     UseMethod("tstat")
 }

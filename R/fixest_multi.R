@@ -1063,6 +1063,9 @@ coefficients.fixest_multi <- coef.fixest_multi
 #' # we get all the coefficient tables at once
 #' coeftable(est_multi)
 #'
+#' # Now just the standard-errors
+#' se(est_multi)
+#'
 #' # wide = TRUE => leads toa  list of wide tables
 #' coeftable(est_multi, wide = TRUE)
 #'
