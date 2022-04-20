@@ -484,7 +484,9 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 #'
 fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE, ...){
 
-    r2_types = c("sq.cor", "cor2", "r2", "ar2", "pr2", "apr2", "par2", "wr2", "war2", "awr2", "wpr2", "pwr2", "wapr2", "wpar2", "awpr2", "apwr2", "pawr2", "pwar2")
+    r2_types = c("sq.cor", "cor2", "r2", "ar2", "pr2", "apr2", "par2", "wr2",
+                 "war2", "awr2", "wpr2", "pwr2", "wapr2", "wpar2", "awpr2",
+                 "apwr2", "pawr2", "pwar2")
 
     opts = getOption("fixest_fitstat_user")
     user_types = names(opts)
@@ -496,7 +498,10 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
         # Compound types => types yielding several values
 
         # F-test etc
-        comp_types = c("f", "wf", "ivf", "ivf1", "ivf2", "ivfall", "wald", "ivwald", "ivwald1", "ivwald2", "ivwaldall", "wh", "sargan", "lr", "wlr", "kpr", "cd")
+        comp_types = c("f", "wf", "ivf", "ivf1", "ivf2", "ivfall", "wald", "ivwald",
+                       "ivwald1", "ivwald2", "ivwaldall", "wh", "sargan", "lr",
+                       "wlr", "kpr", "cd")
+
         full_comp_types = paste(comp_types, rep(c("stat", "p"), each = length(comp_types)), sep = ".")
 
         comp_alias = c(f = "F-test", wf = "F-test (projected)", ivfall = "F-test (IV only)", ivf1 = "F-test (1st stage)", ivf2 = "F-test (2nd stage)", wald = "Wald (joint nullity)", ivwaldall = "Wald (IV only)", ivwald1 = "Wald (1st stage)", ivwald2 = "Wald (2nd stage)", wh = "Wu-Hausman", sargan = "Sargan", lr = "LR", wlr = "LR (within)", df1 = "DoF (first)", df2 = "DoF (second)", df = "DoF", kpr = "Kleibergen-Paap", cd = "Cragg-Donald")

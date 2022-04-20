@@ -269,6 +269,58 @@ rep_df = function(x, times = 1, each = 1, ...){
 #### USER LEVEL ####
 ####
 
+#' Extracts the models tree from a \code{fixest_multi} object
+#'
+#' Extracts the meta information on all the models contained in a \code{fixest_multi} estimation.
+#'
+#' @inheritParams print.fixest_multi
+#' @param simplify Logical, default is \code{FALSE}. The default behavior is to display all the meta information, even if they are identical across models. By using \code{simplify = TRUE}, only the information with some variation is kept.
+#'
+#' @return
+#' It returns a \code{data.frame} whose first column (named \code{id}) is the index of the models and the other columns contain the information specific to each model (e.g. which sample, which RHS,  which dependent variable, etc).
+#'
+#' @examples
+#'
+#' # a multiple estimation
+#' base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+#' est = feols(y ~ csw(x.[, 1:3]), base, fsplit = ~species)
+#'
+#' # All the meta information
+#' models(est)
+#'
+#' # Illustration: Why use simplify
+#' est_sub = est[sample = 2]
+#' models(est_sub)
+#' models(est_sub, simplify = TRUE)
+#'
+#'
+#'
+models = function(x, simplify = FALSE){
+    check_arg(x, "class(fixest_multi)")
+
+    res = attr(x, "tree")
+    if(simplify){
+        who_keep = sapply(res, function(x) length(unique(x)) != 1)
+
+        if(!all(who_keep)){
+            # we need to handle the behavior with the .var thing
+            names_keep = names(res)[who_keep]
+            pattern = dsb("^(.['|'C?names_keep])")
+
+            res = res[, grepl(pattern, names(res)), drop = FALSE]
+        }
+
+    }
+
+    res
+}
+
+
+####
+#### METHODS ####
+####
+
+
 
 #' Summary for fixest_multi objects
 #'
@@ -985,10 +1037,211 @@ coef.fixest_multi = function(object, keep, drop, order, collin = FALSE,
 #' @rdname coef.fixest_multi
 coefficients.fixest_multi <- coef.fixest_multi
 
+#' Extracts the coefficients tables from \code{fixest_multi} estimations
+#'
+#' Series of methods to extract the coefficients table or its sub-components from a \code{fixest_multi} objects (i.e. the outcome of multiple estimations).
+#'
+#' @inheritParams etable
+#'
+#' @param object A \code{fixest_multi} object, coming from a \code{fixest} multiple estimation.
+#' @param wide A logical scalar, default is \code{FALSE}. If \code{TRUE}, then a list is returned: the elements of the list are coef/se/tstat/pvalue. Each element of the list is a wide table with a column per coefficient.
+#' @param long Logical scalar, default is \code{FALSE}. If \code{TRUE}, then all the information is stacked, with two columns containing the information: \code{"param"} and \code{"value"}. The column \code{param} contains the values \code{coef}/\code{se}/\code{tstat}/\code{pvalue}.
+#' @param ... Other arguments to be passed to \code{\link[fixest]{summary.fixest}}.
+#'
+#' @return
+#' It returns a \code{data.frame} containing the coefficients tables (or just the se/pvalue/tstat) along with the information on which model was estimated.
+#'
+#' If \code{wide = TRUE}, then a list is returned. The elements of the list are coef/se/tstat/pvalue. Each element of the list is a wide table with a column per coefficient.
+#'
+#' If \code{long = TRUE}, then all the information is stacked. This removes the 4 columns containing the coefficient estimates to the p-values, and replace them with two new columns: \code{"param"} and \code{"value"}. The column \code{param} contains the values \code{coef}/\code{se}/\code{tstat}/\code{pvalue}, and the column \code{values} the associated numerical information.
+#'
+#' @examples
+#'
+#' base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+#' est_multi = feols(y~ csw(x.[,1:3]), base, split = ~species)
+#'
+#' # we get all the coefficient tables at once
+#' coeftable(est_multi)
+#'
+#' # wide = TRUE => leads toa  list of wide tables
+#' coeftable(est_multi, wide = TRUE)
+#'
+#' # long = TRUE, all the information is stacked
+#' coeftable(est_multi, long = TRUE)
+#'
+#'
+#'
+coeftable.fixest_multi = function(object, vcov = NULL, keep = NULL, drop = NULL, order = NULL,
+                                  long = FALSE, wide = FALSE, ...){
+
+    check_arg(keep, drop, order, "NULL character vector no na")
+    check_arg(wide, "logical scalar | charin(se, pvalue, tstat)")
+    check_arg(long, "logical scalar")
+
+    if(long && !isFALSE(wide)){
+        stop("You cannot have 'wide = TRUE' with 'long = TRUE', please choose.")
+    }
+
+    mod = models(object)
+
+    res_list = list()
+    for(i in seq_along(object)){
+        ct = coeftable(object[[i]], vcov = vcov, keep = keep, drop = drop, order = order, ...)
+        if(is.null(ct)){
+            next
+        }
+
+        ct = cbind(coefficient = row.names(ct), as.data.frame(ct))
+
+        mod_current = rep_df(mod[i, , drop = FALSE], each = nrow(ct))
+        res_list[[length(res_list) + 1]] = cbind(mod_current, ct)
+    }
+
+    if(length(res_list) == 0){
+        stop("Not any variable was selected: revise you 'keep'/'drop' arguments?")
+    }
+
+    res = do.call(rbind, res_list)
+    row.names(res) = NULL
+
+    if(!isFALSE(wide)){
+        # we return a list of wide tables
+        res_list = list()
+
+        roots = c("coef", "se", "tstat", "pvalue")
+        if(isTRUE(wide)) wide = roots
+
+        i_coef = which(names(res) == "coefficient")
+
+        for(i_select in which(roots %in% wide)){
+
+            all_coef = unique(res$coefficient)
+            all_id = unique(res$id)
+
+            key = paste0(res$id, "; ", res$coefficient)
+            value = res[, i_coef + i_select]
+            names(value) = key
+
+            df_xpd = expand.grid(coef = all_coef, id = all_id)
+            new_key = paste0(df_xpd$id, "; ", df_xpd$coef)
+
+
+            res_wide = matrix(value[new_key], nrow = length(all_id), ncol = length(all_coef),
+                              dimnames = list(NULL, all_coef), byrow = TRUE)
+
+            item = cbind(mod[all_id, , drop = FALSE], as.data.frame(res_wide))
+            if(length(wide) == 1){
+                # internal call
+                return(item)
+            }
+
+            res_list[[roots[i_select]]] = item
+        }
+
+        res = res_list
+    }
+
+    if(long){
+        i_coef = which(names(res) == "coefficient")
+        values = res[, i_coef + 1:4]
+
+        values_all = c(t(values), recursive = TRUE)
+
+        params = data.frame(param = rep(c("coef", "se", "tstat", "pvalue"), nrow(res)))
+
+        info = rep_df(res[, 1:i_coef, drop = FALSE], each = 4)
+
+        res = cbind(info, params, value = values_all)
+
+    }
+
+
+    res
+}
+
+
+#' @describeIn coeftable.fixest_multi Extracts the standard-errors from \code{fixest_multi} estimations
+se.fixest_multi = function(object, vcov = NULL, keep = NULL, drop = NULL, order = NULL,
+                           long = FALSE, ...){
+    # Default is wide format => same as with coef
+
+    check_arg(keep, drop, order, "NULL character vector no na")
+    check_arg(long, "logical scalar")
+
+    mc = match.call()
+    if("wide" %in% names(mc)){
+        stop("The argument 'wide' is not a valid argument.")
+    }
+
+    wide = if(long) FALSE else "se"
+
+    res = coeftable(object, vcov = vcov, keep = keep, drop = drop, order = order,
+                    wide = wide, ...)
+
+    if(long){
+        i_coef = which(names(res) == "coefficient")
+        res = res[, c(1:i_coef, i_coef + 2)]
+    }
+
+    res
+}
+
+#' @describeIn coeftable.fixest_multi Extracts the t-stats from \code{fixest_multi} estimations
+tstat.fixest_multi = function(object, vcov = NULL, keep = NULL, drop = NULL, order = NULL,
+                           long = FALSE, ...){
+    # Default is wide format => same as with coef
+
+    check_arg(keep, drop, order, "NULL character vector no na")
+    check_arg(long, "logical scalar")
+
+    mc = match.call()
+    if("wide" %in% names(mc)){
+        stop("The argument 'wide' is not a valid argument.")
+    }
+
+    wide = if(long) FALSE else "tstat"
+
+    res = coeftable(object, vcov = vcov, keep = keep, drop = drop, order = order,
+                    wide = wide, ...)
+
+    if(long){
+        i_coef = which(names(res) == "coefficient")
+        res = res[, c(1:i_coef, i_coef + 3)]
+    }
+
+    res
+}
+
+#' @describeIn coeftable.fixest_multi Extracts the p-values from \code{fixest_multi} estimations
+pvalue.fixest_multi = function(object, vcov = NULL, keep = NULL, drop = NULL, order = NULL,
+                              long = FALSE, ...){
+    # Default is wide format => same as with coef
+
+    check_arg(keep, drop, order, "NULL character vector no na")
+    check_arg(long, "logical scalar")
+
+    mc = match.call()
+    if("wide" %in% names(mc)){
+        stop("The argument 'wide' is not a valid argument.")
+    }
+
+    wide = if(long) FALSE else "pvalue"
+
+    res = coeftable(object, vcov = vcov, keep = keep, drop = drop, order = order,
+                    wide = wide, ...)
+
+    if(long){
+        i_coef = which(names(res) == "coefficient")
+        res = res[, c(1:i_coef, i_coef + 4)]
+    }
+
+    res
+}
+
 
 #' Extracts the residuals from a \code{fixest_multi} object
 #'
-#' Utility to extract the residuals from multiple \code{fixest} estimations. If possible, all the residuals are coerced into
+#' Utility to extract the residuals from multiple \code{fixest} estimations. If possible, all the residuals are coerced into a matrix.
 #'
 #' @inheritParams resid.fixest
 #'
@@ -996,7 +1249,7 @@ coefficients.fixest_multi <- coef.fixest_multi
 #' @param na.rm Logical, default is \code{FALSE}. Should the NAs be kept? If \code{TRUE}, they are removed.
 #'
 #' @return
-#' If all the models return residuals of the same length, a matrix is returned. Otherwise, a \code{data.frame} is returned.
+#' If all the models return residuals of the same length, a matrix is returned. Otherwise, a \code{list} is returned.
 #'
 #' @examples
 #'
@@ -1041,54 +1294,6 @@ resid.fixest_multi = function(object, type = c("response", "deviance", "pearson"
 
 #' @rdname resid.fixest_multi
 residuals.fixest_multi <- resid.fixest_multi
-
-
-
-#' Extracts the models tree from a \code{fixest_multi} object
-#'
-#' Extracts the meta information on all the models contained in a \code{fixest_multi} estimation.
-#'
-#' @inheritParams print.fixest_multi
-#' @param simplify Logical, default is \code{FALSE}. The default behavior is to display all the meta information, even if they are identical across models. By using \code{simplify = TRUE}, only the information with some variation is kept.
-#'
-#' @return
-#' It returns a \code{data.frame} whose first column (named \code{id}) is the index of the models and the other columns contain the information specific to each model (e.g. which sample, which RHS,  which dependent variable, etc).
-#'
-#' @examples
-#'
-#' # a multiple estimation
-#' base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
-#' est = feols(y ~ csw(x.[, 1:3]), base, fsplit = ~species)
-#'
-#' # All the meta information
-#' models(est)
-#'
-#' # Illustration: Why use simplify
-#' est_sub = est[sample = 2]
-#' models(est_sub)
-#' models(est_sub, simplify = TRUE)
-#'
-#'
-#'
-models = function(x, simplify = FALSE){
-    check_arg(x, "class(fixest_multi)")
-
-    res = attr(x, "tree")
-    if(simplify){
-        who_keep = sapply(res, function(x) length(unique(x)) != 1)
-
-        if(!all(who_keep)){
-            # we need to handle the behavior with the .var thing
-            names_keep = names(res)[who_keep]
-            pattern = dsb("^(.['|'C?names_keep])")
-
-            res = res[, grepl(pattern, names(res)), drop = FALSE]
-        }
-
-    }
-
-    res
-}
 
 
 

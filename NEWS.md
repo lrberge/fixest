@@ -25,7 +25,11 @@
  
  - new function `models` to extract the matrix of informing on which model has been estimated.
  
+ - in multiple estimations: all warnings are turned to notes and all notes are delayed and stacked.
+ 
  - `coef.fixest_multi`: Now reports the model of each estimation in the first columns. Also gains the arguments `collin`, `long` (to display the results in a long format) and `na.rm`.
+ 
+ - new methods: `coeftable.fixest_multi`, `se.fixest_multi`, `tstat.fixest_multi`, `pvalue.fixest_multi` to easily extract the results from multiple estimations.
  
 ## All estimations
 
@@ -65,9 +69,7 @@ etable(est)
  
  - `etable` now returns a `data.frame` whose first column is the variables names (before this was contained in the row names).
  
- - in multiple estimations: all warnings are turned to notes and all notes are delayed and stacked.
- 
- - fix environment problems when `lean = TRUE`.
+ - fix environment problems when `lean = TRUE`, leading to large objects when saved on disk.
 
 
 # fixest 0.10.4
