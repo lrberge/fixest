@@ -8175,6 +8175,7 @@ logLik.fixest = function(object, ...){
 #' @inheritParams etable
 #'
 #' @param agg Logical scalar, default is \code{TRUE}. If the coefficients of the estimation have been aggregated, whether to report the aggregated coefficients. If \code{FALSE}, the raw coefficients will be returned.
+#' @param collin Logical, default is \code{FALSE}. Whether the coefficients removed because of collinearity should be also returned as \code{NA}. It cannot be used when coefficients aggregation is also used.
 #' @param ... Not currently used.
 #'
 #' @details
@@ -8204,14 +8205,22 @@ logLik.fixest = function(object, ...){
 #' fixef(res)
 #'
 #'
-coef.fixest = coefficients.fixest = function(object, keep, drop, order, agg = TRUE, ...){
+coef.fixest = coefficients.fixest = function(object, keep, drop, order,
+                                             collin = FALSE, agg = TRUE, ...){
 
     check_arg(keep, drop, order, "NULL character vector no na")
-    check_arg(agg, "logical scalar")
+    check_arg(collin, agg, "logical scalar")
 
     if(isTRUE(object$is_agg) && agg){
+        if(collin){
+            warning("The argument 'collin = TRUE' cannot be used when there is coefficient aggregation.")
+        }
+
         res = object$coeftable[, 1]
         names(res) = rownames(object$coeftable)
+
+    } else if(collin && !is.null(object$collin.coef)){
+        res = object$collin.coef
     } else {
         res = object$coefficients
     }

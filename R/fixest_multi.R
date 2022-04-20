@@ -219,6 +219,57 @@ reshape_multi = function(x, obs, colorder = NULL){
 }
 
 
+set_index_multi = function(x, index_names){
+    # Function specific to [.fixest_multi => global assignments!!!
+    arg = deparse(substitute(x))
+
+    NAMES = index_names[[arg]]
+    vmax = length(NAMES)
+
+    if(is.logical(x)){
+        if(isFALSE(x)){
+            last = get("last", parent.frame())
+            last[length(last) + 1] = arg
+            assign("last", last, parent.frame())
+        }
+        res = 1:vmax
+    } else if(is.character(x)){
+        dict = 1:vmax
+        names(dict) = NAMES
+        vars = keep_apply(NAMES, x)
+        vars = order_apply(vars, x)
+
+        res = as.integer(dict[vars])
+
+        if(length(res) == 0){
+            stop_up("The set of regular expressions (equal to: ", x, ") in '", arg, "' didn't match any choice.")
+        }
+
+    } else if(any(abs(x) > vmax)){
+        stop_up("The index '", arg, "' cannot be greater than ", vmax, ". Currently ", x[which.max(abs(x))], " is not valid.")
+    } else {
+        res = x
+    }
+
+    res
+}
+
+
+
+
+rep_df = function(x, times = 1, each = 1, ...){
+    if(times == 1 && each == 1){
+        return(x)
+    }
+
+    as.data.frame(lapply(x, rep, times = times, each = each))
+}
+
+####
+#### USER LEVEL ####
+####
+
+
 #' Summary for fixest_multi objects
 #'
 #' Summary information for fixest_multi objects. In particular, this is used to specify the type of standard-errors to be computed.
@@ -277,7 +328,7 @@ summary.fixest_multi = function(object, type = "short", vcov = NULL, se = NULL, 
 
         for(i in 1:length(object)){
             object[[i]] = summary(object[[i]], vcov = vcov, se = se, cluster = cluster, ssc = ssc,
-                                .vcov = .vcov, stage = stage, lean = lean, n = n, ...)
+                                  .vcov = .vcov, stage = stage, lean = lean, n = n, ...)
         }
 
         # In IV: multiple estimations can be returned
@@ -834,51 +885,16 @@ as.list.fixest_multi = function(x, ...){
     x
 }
 
-
-set_index_multi = function(x, index_names){
-    # Function specific to [.fixest_multi => global assignments!!!
-    arg = deparse(substitute(x))
-
-    NAMES = index_names[[arg]]
-    vmax = length(NAMES)
-
-    if(is.logical(x)){
-        if(isFALSE(x)){
-            last = get("last", parent.frame())
-            last[length(last) + 1] = arg
-            assign("last", last, parent.frame())
-        }
-        res = 1:vmax
-    } else if(is.character(x)){
-        dict = 1:vmax
-        names(dict) = NAMES
-        vars = keep_apply(NAMES, x)
-        vars = order_apply(vars, x)
-
-        res = as.integer(dict[vars])
-
-        if(length(res) == 0){
-            stop_up("The set of regular expressions (equal to: ", x, ") in '", arg, "' didn't match any choice.")
-        }
-
-    } else if(any(abs(x) > vmax)){
-        stop_up("The index '", arg, "' cannot be greater than ", vmax, ". Currently ", x[which.max(abs(x))], " is not valid.")
-    } else {
-        res = x
-    }
-
-    res
-}
-
-
-
 #' Extracts the coefficients of fixest_multi objects
 #'
 #' Utility to extract the coefficients of multiple estimations and rearrange them into a matrix.
 #'
 #' @inheritParams etable
+#' @inheritParams coef.fixest
 #'
 #' @param object A \code{fixest_multi} object. Obtained from a multiple estimation.
+#' @param long Logical, default is \code{FALSE}. Whether the results should be displayed in a long format.
+#' @param na.rm Logical, default is \code{TRUE}. Only applies when \code{long = TRUE}: whether to remove the coefficients with \code{NA} values.
 #' @param ... Not currently used.
 #'
 #'
@@ -902,18 +918,33 @@ set_index_multi = function(x, index_names){
 #' # extraction tools:
 #' coef(est[rhs = .N:1])
 #'
+#' # collin + long + na.rm
+#' base$x1_bis = base$x1 # => collinear
+#' est = feols(y ~ x1_bis + csw0(x1, x2, x3), base, split = ~species)
 #'
-coef.fixest_multi = function(object, keep, drop, order, ...){
+#' # does not display x1 since it is always collinear
+#' coef(est)
+#' # now it does
+#' coef(est, collin = TRUE)
+#'
+#' # long
+#' coef(est, long = TRUE)
+#'
+#' # long but balanced (with NAs then)
+#' coef(est, long = TRUE, na.rm = FALSE)
+#'
+#'
+coef.fixest_multi = function(object, keep, drop, order, collin = FALSE,
+                             long = FALSE, na.rm = TRUE, ...){
     # row: model
     # col: coefficient
 
     check_arg(keep, drop, order, "NULL character vector no na")
-
-    data = attr(object, "data")
+    check_arg(collin, "logical scalar")
 
     res_list = list()
-    for(i in seq_along(data)){
-        res_list[[i]] = coef(data[[i]])
+    for(i in seq_along(object)){
+        res_list[[i]] = coef(object[[i]], collin = collin)
     }
 
     all_names = unique(unlist(lapply(res_list, names)))
@@ -930,6 +961,23 @@ coef.fixest_multi = function(object, keep, drop, order, ...){
     res_list = lapply(res_list, function(x) x[all_names])
     res = do.call(rbind, res_list)
     colnames(res) = all_names
+
+    # model information
+    mod = models(object)
+
+    if(long){
+        res_long = c(t(res), recursive = TRUE)
+        tmp = data.frame(coefficient =  res_long)
+        mod_long = rep_df(mod, each = ncol(res))
+        res = cbind(mod_long, coefficient = res_long)
+
+        if(na.rm && anyNA(res$coefficient)){
+            res = res[!is.na(res$coefficient), , drop = FALSE]
+        }
+
+    } else {
+        res = cbind(mod, res)
+    }
 
     res
 }
@@ -1041,18 +1089,6 @@ models = function(x, simplify = FALSE){
 
     res
 }
-
-
-rep_df = function(x, times = 1, each = 1, ...){
-    if(times == 1 && each == 1){
-        return(x)
-    }
-
-    as.data.frame(lapply(x, rep, times = times, each = each))
-}
-
-
-
 
 
 
