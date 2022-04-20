@@ -21,8 +21,6 @@ export(check_conv_feols)
 export(did_means)
 # graph
 export(coefplot, iplot)
-# small funs
-export(coeftable, se, tstat, pvalue)
 # dof
 export(dof, ssc, degrees_freedom)
 # Lag related
@@ -38,10 +36,25 @@ export(to_integer, demean, obs)
 # setters & getters
 exportPattern("^(s|g)etFixest")
 
+# coeftable and co
+export(coeftable, se, pvalue, tstat)
+S3method(coeftable, default)
+S3method(coeftable, fixest)
+S3method(coeftable, fixest_multi)
+S3method(se, default)
+S3method(se, fixest)
+S3method(se, fixest_multi)
+S3method(pvalue, default)
+S3method(pvalue, fixest)
+S3method(pvalue, fixest_multi)
+S3method(tstat, default)
+S3method(tstat, fixest)
+S3method(tstat, fixest_multi)
+
 # VCOV funs
 export(vcov_cluster, vcov_DK, vcov_NW, vcov_conley)
 
-# other stuff
+# Data manipulation
 export(n_unik, osize, sample_df)
 
 # dsb
