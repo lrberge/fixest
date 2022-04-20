@@ -26,7 +26,7 @@ wald(x, keep = NULL, drop = NULL, print = TRUE, vcov, se, cluster, ...)
 \value{
 A named vector containing the following elements is returned: \code{stat}, \code{p}, \code{df1}, and \code{df2}. They correspond to the test statistic, the p-value, the first and second degrees of freedoms.
 
-If no valud coefficient is found, the value \code{NA} is returned.
+If no valid coefficient is found, the value \code{NA} is returned.
 }
 \description{
 Wald test used to test the joint nullity of a set of coefficients.

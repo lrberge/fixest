@@ -191,6 +191,16 @@ etable(res_compact)
 #       sw(poly(Temp, 1), poly(Temp, 2), poly(Temp, 3))
 
 
+#
+# In non-fixest functions: guessing the data allows to use regex
+#
+
+# When used in non-fixest functions, the algorithm tries to "guess" the data
+# so that ..("regex") can be directly evaluated without passing the argument 'data'
+data(longley)
+lm(xpd(Armed.Forces ~ Population + ..("GNP|ployed")), longley)
+
+
 }
 \seealso{
 \code{\link[fixest]{xpd}} to make use of formula macros.

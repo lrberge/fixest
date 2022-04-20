@@ -19,6 +19,14 @@
 
  - new function `degrees_freedom_iid` which is a more user-friendly version of `degrees_freedom`.
  
+## Multiple estimations
+
+ - new internal algorithm leading to an object very much like a plain list, much easier to interact with.
+ 
+ - new function `models` to extract the matrix of informing on which model has been estimated.
+ 
+ - `coef.fixest_multi`: Now reports the model of each estimation in the first columns. Also gains the arguments `collin`, `long` (to display the results in a long format) and `na.rm`.
+ 
 ## All estimations
 
  - arguments `split` and `fsplit` gain the `%keep%` and `%drop%` operators which allow to split the sample only on a subset of elements. All estimations also gain the arguments `split.keep` and `split.drop` which do the same thing as the previous operators.
@@ -43,7 +51,11 @@ etable(est)
  
 ## Other
 
- - the function `xpd` gains the arguments `add` and `frame`.
+ - `xpd`: 
+ 
+   * new arguments `add` and `frame`.
+   
+   * when using xpd() in non-fixest functions, the data is automatically guessed so that calls to ..("regex") can be used seamlessly.
  
  - remove warnings when a binomial family is used with weights in `feglm`.
  
@@ -52,6 +64,10 @@ etable(est)
  - fix documentation typos (thanks to Caleb Kwon).
  
  - `etable` now returns a `data.frame` whose first column is the variables names (before this was contained in the row names).
+ 
+ - in multiple estimations: all warnings are turned to notes and all notes are delayed and stacked.
+ 
+ - fix environment problems when `lean = TRUE`.
 
 
 # fixest 0.10.4

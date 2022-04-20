@@ -2,9 +2,9 @@
 % Please edit documentation in R/fixest_multi.R
 \name{[.fixest_multi}
 \alias{[.fixest_multi}
-\title{Subset a fixest_multi object}
+\title{Subsets a fixest_multi object}
 \usage{
-\method{[}{fixest_multi}(x, i, sample, lhs, rhs, fixef, iv, I, reorder = TRUE, drop = TRUE)
+\method{[}{fixest_multi}(x, i, sample, lhs, rhs, fixef, iv, I, reorder = TRUE, drop = FALSE)
 }
 \arguments{
 \item{x}{A \code{fixest_multi} object, obtained from a \code{fixest} estimation leading to multiple results.}
@@ -25,13 +25,13 @@
 
 \item{reorder}{Logical, default is \code{TRUE}. Indicates whether reordering of the results should be performed depending on the user input.}
 
-\item{drop}{Logical, default is \code{TRUE}. If the result contains only one estimation, then if \code{drop = TRUE} it will be transformed into a \code{fixest} object (instead of \code{fixest_multi}).}
+\item{drop}{Logical, default is \code{FALSE}. If the result contains only one estimation, then if \code{drop = TRUE} it will be transformed into a \code{fixest} object (instead of \code{fixest_multi}).}
 }
 \value{
 It returns a \code{fixest_multi} object. If there is only one estimation left in the object, then the result is simplified into a \code{fixest} object.
 }
 \description{
-Subset a fixest_multi object using different keys.
+Subsets a fixest_multi object using different keys.
 }
 \details{
 The order with we we use the keys matter. Every time a key \code{sample}, \code{lhs}, \code{rhs}, \code{fixef} or \code{iv} is used, a reordering is performed to consider the leftmost-side key to be the new root.

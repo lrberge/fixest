@@ -1678,7 +1678,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 	if(res$multicol){
 	    var_collinear = colnames(X)[est$is_excluded]
 	    if(notes){
-	        msg = dsb("w!The variable.[*s_, ' has'V, 3KO, C?var_collinear] been
+	        msg = dsb("w!The variable.[*s_, q, ' has'V, 3KO, C?var_collinear] been
 	                  removed because of collinearity (see $collin.var).")
 	        if(IN_MULTI){
 	            stack_multi_notes(msg)
@@ -3003,7 +3003,6 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 
     # other
     res$iterations = iter
-    res$family = family
     class(res) = "fixest"
 
     do_summary = get("do_summary", env)

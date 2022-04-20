@@ -444,6 +444,24 @@ summary(est_split, "compact")
 # You can still select which sample/LHS/RHS to display
 est_split[sample = 1:2, lhs = 1, rhs = 1]
 
+#
+# Split sample estimations
+#
+
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+
+est  = feols(y ~ x.[1:3], base, split = ~species)
+etable(est)
+
+# You can select specific values with the \%keep\% and \%drop\% operators
+# By default, partial matching is enabled. It should refer to a single variable.
+est  = feols(y ~ x.[1:3], base, split = ~species \%keep\% c("set", "vers"))
+etable(est)
+
+# You can supply regular expression by using an @ first.
+# regex can match several values.
+est  = feols(y ~ x.[1:3], base, split = ~species \%keep\% c("@set|vers"))
+etable(est)
 
 #
 # Argument sliding
@@ -451,8 +469,7 @@ est_split[sample = 1:2, lhs = 1, rhs = 1]
 
 # When the data set is set up globally, you can use the vcov argument implicitly
 
-base = iris
-names(base) = c("y", "x1", "x2", "x3", "species")
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
 
 no_sliding = feols(y ~ x1 + x2, base, ~species)
 
