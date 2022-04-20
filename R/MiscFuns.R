@@ -2951,7 +2951,7 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #'
 #' @inheritParams setFixest_fml
 #'
-#' @param fml A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}. Special macros of the form \code{..("regex")} can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument \code{data}. square brackets have a special meaning: Values in them are evaluated and parsed accordingly. Example: \code{y~x.[1:2] + z.[i]} will lead to \code{y~x1+x2+z3} if \code{i==3}. See examples.
+#' @param fml A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}. Special macros of the form \code{..("regex")} can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument \code{data} (note that the algorithm tries to "guess" the argument data when nested in function calls [see example]). square brackets have a special meaning: Values in them are evaluated and parsed accordingly. Example: \code{y~x.[1:2] + z.[i]} will lead to \code{y~x1+x2+z3} if \code{i==3}. See examples.
 #' @param add Either a character scalar or a one-sided formula. The elements will be added to the right-hand-side of the formula, before any macro expansion is applied.
 #' @param lhs If present then a formula will be constructed with \code{lhs} as the full left-hand-side. The value of \code{lhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{rhs}. Note that if \code{fml} is not missing, its LHS will be replaced by \code{lhs}.
 #' @param rhs If present, then a formula will be constructed with \code{rhs} as the full right-hand-side. The value of \code{rhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{lhs}. Note that if \code{fml} is not missing, its RHS will be replaced by \code{rhs}.
@@ -3166,12 +3166,35 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #' #       sw(poly(Temp, 1), poly(Temp, 2), poly(Temp, 3))
 #'
 #'
+#' #
+#' # In non-fixest functions: guessing the data allows to use regex
+#' #
+#'
+#' # When used in non-fixest functions, the algorithm tries to "guess" the data
+#' # so that ..("regex") can be directly evaluated without passing the argument 'data'
+#' data(longley)
+#' lm(xpd(Armed.Forces ~ Population + ..("GNP|ployed")), longley)
+#'
+#'
 xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame()){
+
+    if(MISSNULL(data)){
+        # We "guess" the data
+        sc = sys.calls()
+        n_sc = length(sc)
+        if(n_sc > 1){
+            mc = match.call(definition = sys.function(n_sc - 1), call = sys.call(n_sc - 1))
+            if("data" %in% names(mc)){
+                data = tryCatch(eval(mc$data, parent.frame(2)), error = function(e) NULL)
+            }
+        }
+    }
+
     .xpd(fml = fml, ..., add = add, lhs = lhs, rhs = rhs, data = data, check = TRUE,
          macro = TRUE, frame = frame)
 }
 
-.xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, check = FALSE, macro = FALSE, frame = NULL){
+.xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, check = FALSE, macro = FALSE, frame = .GlobalEnv){
 
     is_lhs = !missing(lhs)
     is_rhs = !missing(rhs)
@@ -3203,6 +3226,8 @@ xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame
 
         fml = res
 
+        attr(fml, ".Environment") = frame
+
         if(!macro && missnull(add)) return(fml)
 
         # NOTA:
@@ -3221,6 +3246,8 @@ xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame
             fml = ~ 1
             fml[[2]] = value2stringCall(add, call = TRUE, check = check)
             add = NULL
+
+            attr(fml, ".Environment") = frame
         }
 
     } else if(check){
@@ -7361,7 +7388,7 @@ merge_fml = function(fml_linear, fml_fixef = NULL, fml_iv = NULL){
 
         if(is_iv) fml_all[[length(fml_all) + 1]] = deparse_long(fml_iv)
 
-       res = as.formula(paste(fml_all, collapse = "|"))
+       res = as.formula(paste(fml_all, collapse = "|"), .GlobalEnv)
     }
 
     res
