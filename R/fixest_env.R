@@ -3002,6 +3002,10 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         res$y = lhs
     }
 
+    if(origin_type == "feglm"){
+        res$family = family_funs
+    }
+
     # Panel information
     if(!is.null(panel.id)){
         res$panel.id = panel.id

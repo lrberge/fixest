@@ -597,6 +597,13 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL, .vcov
 	    object[var2clean] = NULL
 
 	    object$lean = TRUE
+
+	    # We also clean the environments from the formulas
+	    for(i in seq_along(object$fml_all)){
+	        attr(object$fml_all[[i]], ".Environment") = .GlobalEnv
+	    }
+	    attr(object$fml, ".Environment") = .GlobalEnv
+
 	}
 
 	object$summary = TRUE
