@@ -1798,7 +1798,8 @@ base$y_0[base$species == "setosa"] = 0
 
 est_pois = fepois(y_0 ~ csw(x.[,1:4]), base, split = ~species)
 
-est_pois = fepois(y_0 ~ x.[1:3] | sw0(species), base)
+base$x1_bis = base$x1
+est_pois = fepois(y_0 ~ x.[1:3] + x1_bis | sw0(species), base)
 
 
 

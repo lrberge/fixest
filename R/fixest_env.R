@@ -2706,6 +2706,16 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     IN_MULTI = multi_lhs || multi_rhs || multi_fixef || isSplit
     assign("IN_MULTI", IN_MULTI, env)
+    # is_multi_root: used to trigger delayed warnings
+    assign("is_multi_root", IN_MULTI, env)
+
+    if(!show_notes){
+        assign("is_multi_root", FALSE, env)
+    }
+
+    if(IN_MULTI && show_notes){
+        setup_multi_notes()
+    }
 
     if(only.coef){
         if(IN_MULTI){

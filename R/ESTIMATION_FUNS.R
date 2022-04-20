@@ -397,6 +397,9 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 		correct_0w = dots$correct_0w
 		only.coef = FALSE
 
+		# IN_MULTI is only used to trigger notes, this happens only within feglm
+		IN_MULTI = FALSE
+
 		if(verbose){
 		    # I can't really mutualize these three lines of code since the verbose
 		    # needs to be checked before using it, and here it's an internal call
@@ -471,6 +474,13 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 		warn = get("warn", env)
 
 		only.coef = get("only.coef", env)
+
+		IN_MULTI = get("IN_MULTI", env)
+		is_multi_root = get("is_multi_root", env)
+		if(is_multi_root){
+		    on.exit(release_multi_notes())
+		    assign("is_multi_root", FALSE, env)
+		}
 
 		verbose = get("verbose", env)
 		if(verbose >= 2) gt("Setup")
@@ -1409,7 +1419,13 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
 	        msg = enumerate_items(c(msg_endo, msg_inst, msg_exo))
 	        msg = gsub("^t", "T", msg)
-	        message(msg, " ", plural(n_c, "has"), " been removed because of collinearity (see $collin.var).")
+	        msg = paste0(msg, " ", plural(n_c, "has"), " been removed because of collinearity (see $collin.var).")
+	        if(IN_MULTI){
+	            stack_multi_notes(msg)
+	        } else {
+	            message(msg)
+	        }
+
 
 	    }
 
@@ -1523,7 +1539,11 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 		        if(fromGLM){
 		            res$warn_varying_slope = msg
 		        } else if(warn){
-		            warning(msg)
+		            if(IN_MULTI){
+		                stack_multi_notes(msg)
+		            } else {
+		                warning(msg)
+		            }
 		        }
 		    }
 		} else if(any(res$iterations >= fixef.iter)){
@@ -1535,7 +1555,11 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 		    if(fromGLM){
 		        res$warn_varying_slope = msg
 		    } else {
-		        warning(msg)
+		        if(IN_MULTI){
+		            stack_multi_notes(msg)
+		        } else {
+		            warning(msg)
+		        }
 		    }
 		}
 
@@ -1575,8 +1599,6 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 	    if(!is.null(est$all_removed)){
 	        all_vars = colnames(X)
 
-	        IN_MULTI = get("IN_MULTI", env)
-
 	        if(isFixef){
 	            msg = paste0(ifsingle(all_vars, "The only variable ", "All variables"), enumerate_items(all_vars, "quote.is", nmax = 3), " collinear with the fixed effects. In such circumstances, the estimation is void.")
 	        } else {
@@ -1585,7 +1607,13 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
 	        if(IN_MULTI || !warn){
 
-	            if(warn) warning(msg)
+	            if(warn){
+	                if(IN_MULTI){
+	                    stack_multi_notes(msg)
+	                } else {
+	                    warning(msg)
+	                }
+	            }
 
 	            return(fixest_NA_results(env))
 
@@ -1650,7 +1678,14 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 	if(res$multicol){
 	    var_collinear = colnames(X)[est$is_excluded]
 	    if(notes){
-	        message(ifsingle(var_collinear, "The variable ", "Variables "), enumerate_items(var_collinear, "quote.has", nmax = 3), " been removed because of collinearity (see $collin.var).")
+	        msg = dsb("w!The variable.[*s_, ' has'V, 3KO, C?var_collinear] been
+	                  removed because of collinearity (see $collin.var).")
+	        if(IN_MULTI){
+	            stack_multi_notes(msg)
+	        } else {
+	            message(msg)
+	        }
+
 	    }
 
 	    res$collin.var = var_collinear
@@ -1766,7 +1801,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
 	# fit stats
 	if(!cpp_isConstant(res$fitted.values)){
-	    res$sq.cor = stats::cor(y, res$fitted.values)**2
+	    res$sq.cor = tryCatch(stats::cor(y, res$fitted.values), warning = function(x) NA_real_)**2
 	} else {
 	    res$sq.cor = NA
 	}
@@ -2329,6 +2364,13 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
         starting_values = get("starting_values", env)
     }
 
+    IN_MULTI = get("IN_MULTI", env)
+    is_multi_root = get("is_multi_root", env)
+    if(is_multi_root){
+        on.exit(release_multi_notes())
+        assign("is_multi_root", FALSE, env)
+    }
+
 
     #
     # Split ####
@@ -2525,7 +2567,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
     }
 
     assign("nb_sh", 0, env)
-    on.exit(warn_step_halving(env))
+    on.exit(warn_step_halving(env, stack_multi = IN_MULTI))
 
     if((init.type == "coef" && verbose >= 1) || verbose >= 4) {
         cat("Deviance at initializat.  = ", numberFormatNormal(devold), "\n", sep = "")
@@ -2743,7 +2785,15 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
     collin.adj = 0
     if(wols$multicol){
         var_collinear = colnames(X)[wols$is_excluded]
-        if(notes) message(ifsingle(var_collinear, "The variable ", "Variables "), enumerate_items(var_collinear, "quote.has"), " been removed because of collinearity (see $collin.var).")
+        if(notes){
+            msg = dsb("w!The variable.[*s_, q, ' has'V, 3KO, C?var_collinear] been
+                       removed because of collinearity (see $collin.var).")
+            if(IN_MULTI){
+                stack_multi_notes(msg)
+            } else {
+                message(msg)
+            }
+        }
 
         res$collin.var = var_collinear
 
@@ -2766,7 +2816,12 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
     res$collin.min_norm = wols$collin.min_norm
 
     if(!is.null(wols$warn_varying_slope)){
-        warning(wols$warn_varying_slope)
+        msg = wols$warn_varying_slope
+        if(IN_MULTI){
+            stack_multi_notes(msg)
+        } else {
+            warning(msg)
+        }
     }
 
     res$linear.predictors = wols$fitted.values
@@ -2865,8 +2920,12 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 
     if(nchar(warning_msg) > 0){
         if(warn){
-            warning(warning_msg, call. = FALSE)
-            options("fixest_last_warning" = proc.time())
+            if(IN_MULTI){
+                stack_multi_notes(warning_msg)
+            } else {
+                warning(warning_msg, call. = FALSE)
+                options("fixest_last_warning" = proc.time())
+            }
         }
     }
 
@@ -2877,7 +2936,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
 
     # r2s
     if(!cpp_isConstant(res$fitted.values)){
-        res$sq.cor = stats::cor(y, res$fitted.values)**2
+        res$sq.cor = tryCatch(stats::cor(y, res$fitted.values), warning = function(x) NA_real_)**2
     } else {
         res$sq.cor = NA
     }
@@ -3427,6 +3486,13 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	verbose = get("verbose", env)
 	if(verbose >= 2) cat("Setup in ", (proc.time() - time_start)[3], "s\n", sep="")
 
+	IN_MULTI = get("IN_MULTI", env)
+	is_multi_root = get("is_multi_root", env)
+	if(is_multi_root){
+	    on.exit(release_multi_notes())
+	    assign("is_multi_root", FALSE, env)
+	}
+
 
 	#
 	# Split ####
@@ -3533,7 +3599,7 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	}
 
 	# warnings => to avoid accumulation, but should appear even if the user stops the algorithm
-	on.exit(warn_fixef_iter(env))
+	on.exit(warn_fixef_iter(env, stack_multi = IN_MULTI))
 
 	#
 	# Maximizing the likelihood
@@ -3546,7 +3612,10 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 		iter = get("iter", env)
 		origin = get("origin", env)
 		warning_msg = paste0("[", origin, "] Optimization failed at iteration ", iter, ". Reason: ", gsub("^[^\n]+\n *(.+\n)", "\\1", opt))
-		if(!"coef_evaluated" %in% names(env)){
+		if(IN_MULTI){
+		    stack_multi_notes(warning_msg)
+		    return(fixest_NA_results(env))
+		} else if(!"coef_evaluated" %in% names(env)){
 			# big problem right from the start
 			stop(warning_msg)
 		} else {
@@ -3568,7 +3637,11 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 
 	if(only.coef){
 	    if(convStatus == FALSE){
-	        warning(warning_msg)
+	        if(IN_MULTI){
+	            stack_multi_notes(warning_msg)
+	        } else {
+	            warning(warning_msg)
+	        }
 	    }
 
 	    names(coef) = params
@@ -3641,8 +3714,13 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 	# Warning message
 	if(nchar(warning_msg) > 0){
 		if(warn){
-		    warning("[femlm]:", warning_msg, call. = FALSE)
-		    options("fixest_last_warning" = proc.time())
+
+		    if(IN_MULTI){
+		       stack_multi_notes(warning_msg)
+		    } else {
+		        warning("[femlm]:", warning_msg, call. = FALSE)
+		        options("fixest_last_warning" = proc.time())
+		    }
 		}
 	}
 
@@ -3808,7 +3886,12 @@ feNmlm = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"),
 		res$theta = theta
 
 		if(notes && theta > 1000){
-			message("Very high value of theta (", theta, "). There is no sign of overdispersion, you may consider a Poisson model.")
+		    msg = paste0("Very high value of theta (", theta, "). There is no sign of overdispersion, you may consider a Poisson model.")
+		    if(IN_MULTI){
+		        stack_multi_notes(msg)
+		    } else {
+		        message(msg)
+		    }
 		}
 
 	}
@@ -3954,11 +4037,53 @@ est_env = function(env, y, X, weights, endo, inst){
 
 
 ####
-#### Delayed Warnings ####
+#### Delayed warnings and notes ####
 ####
 
+setup_multi_notes = function(){
+    # We reset all the notes
+    options("fixest_multi_notes" = NULL)
+}
 
-warn_fixef_iter = function(env){
+stack_multi_notes = function(note){
+    all_notes = getOption("fixest_multi_notes")
+    options("fixest_multi_notes" = c(all_notes, note))
+}
+
+release_multi_notes = function(){
+    notes = getOption("fixest_multi_notes")
+
+    if(length(notes) > 0){
+        dict = c("\\$collin\\.var" = "Some variables have been removed because of collinearity (see $collin.var).",
+                 "collinear with the fixed-effects" = "All the variables are collinear with the fixed-effects (the estimation is void).",
+                 "virtually constant and equal to 0" = "All the variables are virtually constant and equal to 0 (the estimation is void).",
+                 "Very high value of theta" = "Very high value of theta, there is no sign of overdispersion, you may consider a Poisson model.")
+
+        for(i in seq_along(dict)){
+            d_value = dict[i]
+            d_name = names(dict)[i]
+
+            x_i = grepl(d_name, notes)
+            x = notes[x_i]
+            # we prefer specific messages
+            if(length(unique(x)) == 1){
+                next
+            } else {
+                notes[x_i] = d_value
+            }
+        }
+
+        tn = table(notes)
+        new_notes = paste0("[x ", tn, "] ", names(tn))
+
+        message("Notes from the estimations:\n", dsb("'\n'c?new_notes"))
+    }
+
+    options("fixest_multi_notes" = NULL)
+}
+
+
+warn_fixef_iter = function(env, stack_multi = FALSE){
 	# Show warnings related to the nber of times the maximum of iterations was reached
 
 	# For fixed-effect
@@ -3987,13 +4112,17 @@ warn_fixef_iter = function(env){
 	}
 
 	if(goWarning){
-		warning(warning_msg, call. = FALSE, immediate. = TRUE)
+	    if(stack_multi){
+	        stack_multi_notes(warning_msg)
+	    } else {
+	        warning(warning_msg, call. = FALSE, immediate. = TRUE)
+	    }
 	}
 
 }
 
 
-warn_step_halving = function(env){
+warn_step_halving = function(env, stack_multi = FALSE){
 
     nb_sh = get("nb_sh", env)
     warn = get("warn", env)
@@ -4001,7 +4130,12 @@ warn_step_halving = function(env){
     if(!warn) return(invisible(NULL))
 
     if(nb_sh > 0){
-        warning("feglm: Step halving due to non-finite deviance (", ifelse(nb_sh > 1, paste0(nb_sh, " times"), "once"), ").", call. = FALSE, immediate. = TRUE)
+        msg = paste0("feglm: Step halving due to non-finite deviance (", ifelse(nb_sh > 1, paste0(nb_sh, " times"), "once"), ").")
+        if(stack_multi){
+            stack_multi_notes(msg)
+        } else {
+            warning(msg, call. = FALSE, immediate. = TRUE)
+        }
     }
 
 }
