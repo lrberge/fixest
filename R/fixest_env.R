@@ -6,11 +6,12 @@
 #----------------------------------------------#
 
 
-fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussian"), NL.fml = NULL,
+fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian"), NL.fml = NULL,
                       fixef, NL.start, lower, upper, NL.start.init, offset = NULL,
-                      subset, split = NULL, fsplit = NULL, split.keep = NULL, split.drop = NULL,
+                      subset = NULL, fsubset = NULL, split = NULL, fsplit = NULL,
+                      split.keep = NULL, split.drop = NULL,
                       linear.start = 0,
-                      jacobian.method = "simple",useHessian = TRUE, hessian.args = NULL,
+                      jacobian.method = "simple", useHessian = TRUE, hessian.args = NULL,
                       opt.control = list(), vcov = NULL, cluster, se, ssc, y, X, fixef_df,
                       panel.id, fixef.rm = "perfect", nthreads = getFixest_nthreads(),
                       lean = FALSE, verbose = 0, theta.init, fixef.tol = 1e-5,
@@ -446,7 +447,9 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
         fml = formula(fml) # we regularize the formula to check it
 
         # We apply expand for macros => we return fml_no_xpd
-        if(length(getFixest_fml()) > 0 || any(c("..", "[", "regex", "mvsw") %in% all.vars(fml, functions = TRUE))){
+        if(length(getFixest_fml()) > 0 || any(c("..", "[", "regex", "mvsw") %in% all.vars(fml, functions = TRUE)) ||
+           any(grepl("[[:alnum:]]\\.\\.$", all.vars(fml)))){
+
             fml_no_xpd = fml
 
             # Special beavior .[y] for multiple LHSs
@@ -826,6 +829,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     obs_selection = list()
     multi_lhs = FALSE
+    info_subset = NULL
     nobs_origin = NULL
     if(isFit){
         # We have to first eval y if isFit in order to check subset properly
@@ -906,7 +910,29 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     # delayed.subset only concerns isFit // subsetting must always occur before NA checking
     isSubset = FALSE
     delayed.subset = FALSE
-    if(!missing(subset)){
+    if(!missing(subset) || !missing(fsubset)){
+
+        my_funs = list()
+        my_funs[["."]] = list
+        my_funs[["%in%"]] = subset_in
+
+        browser()
+
+        # Faire exactement comme split
+        # subset.id
+        #
+
+        if(!missing(subset)){
+            subset_mc = mc_origin$subset
+            subset = eval(subset_mc, my_funs, call_env)
+        }
+
+        if(!missing(fsubset)){
+            fsubset_mc = mc_origin$fsubset
+            fsubset = eval(fsubset_mc, my_funs, call_env)
+        }
+
+
         error_sender(subset)
         if(!is.null(subset)){
 
@@ -920,6 +946,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
                 check_value(subset, "os formula var(data)", .data = data)
                 subset.value = subset[[2]]
+                info_subset = deparse_long(subset.value)
                 subset = check_value_plus(subset.value, "evalset integer vmatrix ncol(1) gt{0} | logical vector len(data)", .data = data, .prefix = "In argument 'subset', the expression")
 
             } else {
@@ -930,6 +957,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                     check_value(subset, "integer vmatrix ncol(1) gt{0} | logical vector len(data)",
                                 .prefix = "If not a formula, argument 'subset'", .data = data)
                 }
+
+                info_subset = deparse(mc_origin$subset)[1]
 
             }
 
@@ -1454,6 +1483,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     isOffset = FALSE
     offset.value = 0
+    info_offset = NULL
     msgNA_offset = ""
     if(!missing(offset)){
         error_sender(offset) # check evaluation
@@ -1468,6 +1498,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
                 check_value(offset, "os formula var(data)", .data = data)
                 offset.value = offset[[2]]
+                info_offset = deparse_long(offset.value)
                 check_value_plus(offset.value, "evalset numeric vmatrix ncol(1) conv", .data = data, .prefix = "In argument 'offset', the expression")
 
             } else {
@@ -1487,6 +1518,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                         offset.value = offset.value[obs_selection$subset]
                     }
                 }
+
+                info_offset = deparse_long(mc_origin$offset)
             }
 
             if(is.matrix(offset.value)) offset.value = as.vector(offset.value)
@@ -1540,6 +1573,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     any0W = anyNA_W = FALSE
     msgNA_weight = message_0W = ""
     weights.value = 1
+    info_weights = NULL
     isWeight = FALSE
     if(!missing(weights)){
 
@@ -1555,8 +1589,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
                 check_value(weights, "os formula var(data)", .data = data)
                 weights.value = weights[[2]]
+                info_weights = deparse_long(weights.value)
                 check_value_plus(weights.value, "evalset numeric vmatrix ncol(1) conv", .data = data, .prefix = "In argument 'weights', the expression")
-
 
             } else {
 
@@ -1581,6 +1615,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
                         weights.value = weights.value[obs_selection$subset]
                     }
                 }
+
+                info_weights = deparse(mc_origin$weights)[1]
             }
 
             if(is.matrix(weights.value)) weights.value = as.vector(weights.value)
@@ -2874,8 +2910,8 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
         # Mise en place du calcul du gradient
         gradient = femlm_gradient
-        hessian <- NULL
-        if(useHessian) hessian <- femlm_hessian
+        hessian = NULL
+        if(useHessian) hessian = femlm_hessian
         assign("gradient", gradient, env)
         assign("hessian", hessian, env)
     }
@@ -2911,7 +2947,7 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
     # Preparation of the results list (avoids code repetition in estimation funs)
     #
 
-    res = list(nobs=nobs, nobs_origin=nobs_origin, fml=fml_linear, call = mc_origin,
+    res = list(nobs = nobs, nobs_origin = nobs_origin, fml = fml_linear, call = mc_origin,
                call_env = call_env, method = origin, method_type = origin_type)
 
     fml_all = list()
@@ -2988,13 +3024,24 @@ fixest_env = function(fml, data, family=c("poisson", "negbin", "logit", "gaussia
 
     res$obs_selection = obs_selection
 
+    model_info = list()
+
     # offset and weight
     if(isOffset){
         res$offset = offset.value
+        model_info$offset = info_offset
     }
+
     if(isWeight){
         res$weights = weights.value
+        model_info$weights = info_weights
     }
+
+    if(isSubset){
+        model_info$subset = info_subset
+    }
+
+    res$model_info = model_info
 
     # We save lhs in case of feglm, for later within-r2 evaluation
     if(origin_type == "feglm" && isFixef && !multi_lhs){
@@ -4282,6 +4329,27 @@ split_select = function(items, keep, drop){
     }
 
     which(items %in% res)
+}
+
+subset_in = function(x, y){
+    if(is.list(y)){
+        n_y = length(y)
+        if(n_y == 1){
+            res = which(x %in% y[[1]])
+        } else {
+            x_int = to_integer(x, add_items = TRUE, sorted = TRUE, items.list = TRUE)
+            x_items = x_int$items
+
+            res = vector("list", n_y)
+            for(i in 1:n_y){
+                res[[i]] = which(x %in% y[[i]])
+            }
+        }
+    } else {
+        res = which(x %in% y)
+    }
+
+    res
 }
 
 

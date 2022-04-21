@@ -72,7 +72,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
     }
 
     # The objects from the estimation and the summary are identical, except regarding the vcov
-	fromSummary = isTRUE(x$summary)
+	from_summary = isTRUE(x$summary)
 
 	if(!missnull(fitstat)){
 	    fitstat = fitstat_validate(fitstat, TRUE)
@@ -82,7 +82,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 	set_defaults("fixest_print")
 
 	# if NOT from summary, we consider the argument 'type'
-	if(!fromSummary){
+	if(!from_summary){
 	    # checking argument type
 	    check_arg_plus(type, "match(coef, table)")
 
@@ -92,7 +92,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 	    }
 	}
 
-	isNegbin = x$method == "fenegbin" || (x$method_type == "feNmlm" && x$family=="negbin")
+	isNegbin = x$method == "fenegbin" || (x$method_type == "feNmlm" && x$family == "negbin")
 
 	x = summary(x, fromPrint = TRUE, ...)
 
@@ -101,7 +101,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 	msgRemaining = ""
 	nb_coef = length(coef(x)) - isNegbin
 	if(missing(n) && is.null(x$n_print)){
-		if(fromSummary && !isTRUE(x$summary_from_fit)){
+		if(from_summary && !isTRUE(x$summary_from_fit)){
 			n = Inf
 		} else {
 			if(nb_coef <= 10){
@@ -187,6 +187,23 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 
 
 	cat("Observations:", addCommas(x$nobs), "\n")
+
+	extra_info = c("subset", "sample", "offset", "weights")
+	for(i in seq_along(extra_info)){
+	    nm = extra_info[i]
+	    if(nm %in% names(x$model_info)){
+	        xtra = x$model_info[[extra_info[i]]]
+
+	        if(length(xtra) == 1){
+	            cat(dsb(".[u?nm]:"), xtra, "\n")
+	        } else {
+	            if(xtra$value != "Full sample"){
+	                cat(dsb(".[u?nm] (.[xtra$var]): .[xtra$value]\n"))
+	            }
+	        }
+	    }
+	}
+
 	if(!is.null(x$fixef_terms)){
 	    terms_full = extract_fe_slope(x$fixef_terms)
 	    fixef_vars = terms_full$fixef_vars
@@ -3076,7 +3093,7 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #'
 #' @inheritParams setFixest_fml
 #'
-#' @param fml A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}. Special macros of the form \code{..("regex")} can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument \code{data} (note that the algorithm tries to "guess" the argument data when nested in function calls [see example]). square brackets have a special meaning: Values in them are evaluated and parsed accordingly. Example: \code{y~x.[1:2] + z.[i]} will lead to \code{y~x1+x2+z3} if \code{i==3}. See examples.
+#' @param fml A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}. Special macros of the form \code{..("regex")} can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument \code{data} (note that the algorithm tries to "guess" the argument data when nested in function calls [see example]). square brackets have a special meaning: Values in them are evaluated and parsed accordingly. Example: \code{y~x.[1:2] + z.[i]} will lead to \code{y~x1+x2+z3} if \code{i==3}. You can trigger the auto-completion of variables by using the \code{'..'} suffix, like in \code{y ~ x..} which would include \code{x1} and \code{x2}, etc. See examples.
 #' @param add Either a character scalar or a one-sided formula. The elements will be added to the right-hand-side of the formula, before any macro expansion is applied.
 #' @param lhs If present then a formula will be constructed with \code{lhs} as the full left-hand-side. The value of \code{lhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{rhs}. Note that if \code{fml} is not missing, its LHS will be replaced by \code{lhs}.
 #' @param rhs If present, then a formula will be constructed with \code{rhs} as the full right-hand-side. The value of \code{rhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{lhs}. Note that if \code{fml} is not missing, its RHS will be replaced by \code{rhs}.
@@ -3152,6 +3169,19 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #'
 #' # No xpd() needed in feols
 #' feols(y ~ x.[2:3] + .[z], base)
+#'
+#' #
+#' # Auto completion with '..' suffix
+#' #
+#'
+#' # You can trigger variables autocompletion with the '..' suffix
+#' # You need to provide the argument data
+#' base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+#' xpd(y ~ x.., data = base)
+#'
+#' # In fixest estimations, this is automatically taken care of
+#' feols(y ~ x.., data = base)
+#'
 #'
 #' #
 #' # You can use xpd for stepwise estimations
@@ -3300,6 +3330,9 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #' data(longley)
 #' lm(xpd(Armed.Forces ~ Population + ..("GNP|ployed")), longley)
 #'
+#' # same for the auto completion with '..'
+#' lm(xpd(Armed.Forces ~ Population + GN..), longley)
+#'
 #'
 xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame()){
 
@@ -3430,6 +3463,7 @@ xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame
         }
     }
 
+    data_vars = NULL
     if(is_regex){
         # We expand only if data is provided (it means the user wants us to check)
         # if .[]: we expand inside the ..(".[1:3]") => ..("1|2|3")
@@ -3447,14 +3481,16 @@ xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame
                 if(is.matrix(data)){
                     data = colnames(data)
                     if(is.null(data)){
-                        stop("The argument 'data' must contain variable names. It is currently a matrix without column names.")
+                        stop("The argument 'data' must contain variables names. It is currently a matrix without column names.")
                     }
                 } else if(is.data.frame(data)){
                     data = names(data)
                 }
+
+                data_vars = data
             }
 
-            fml_dp_split = strsplit(fml_dp, '(?!<[[:alnum:]._])(regex|\\.\\.)\\((?=[,"])',
+            fml_dp_split = strsplit(fml_dp, '(?<![[:alnum:]._])(regex|\\.\\.)\\((?=[,"])',
                                     perl = TRUE)[[1]]
 
             res = fml_dp_split
@@ -3508,6 +3544,46 @@ xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame
                                "\n  PROBLEM: see below", up = 1)
         }
 
+    }
+
+    if(is_data){
+        var_to_complete = grep("[[:alnum:]]\\.\\.$", all.vars(fml), value = TRUE)
+        n_var = length(var_to_complete)
+        if(n_var > 0){
+
+            if(is.null(data_vars)){
+                check_arg(data, "character vector no na | matrix | data.frame")
+
+                if(is.matrix(data)){
+                    data = colnames(data)
+                    if(is.null(data)){
+                        stop("The argument 'data' must contain variables names. It is currently a matrix without column names.")
+                    }
+                } else if(is.data.frame(data)){
+                    data = names(data)
+                }
+
+                data_vars = data
+            }
+
+            fml_txt = deparse_long(fml)
+            for(i in 1:n_var){
+                var = var_to_complete[i]
+                vars_filled = data_vars[startsWith(data_vars, str_trim(var, n_last = 2))]
+                if(length(vars_filled) == 0) next
+
+                vars_new = paste0(vars_filled, collapse = " + ")
+
+                pattern = dsb("(?<![[:alnum:]._])\\Q.[var]\\E(?![[:alnum:]._])")
+
+                fml_txt = gsub(pattern, vars_new, fml_txt, perl = TRUE)
+            }
+
+            fml = error_sender(as.formula(fml_txt, frame),
+                               "Expansion of variables ending with '..' did not work. Coercion of the following text to a formula led to an error.\n",
+                               fit_screen(paste0("     TEXT: ", fml_txt)),
+                               "\n  PROBLEM: see below", up = 1)
+        }
     }
 
     fml
@@ -8032,7 +8108,7 @@ str_trim = function(x, n_first = 0, n_last = 0){
         n_first = 0
     }
 
-    res = substr(x, 1 + n_first, nchar(x) - n_last)
+    substr(x, 1 + n_first, nchar(x) - n_last)
 }
 
 str_split = function(x, split){

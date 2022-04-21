@@ -31,6 +31,42 @@
  
  - new methods: `coeftable.fixest_multi`, `se.fixest_multi`, `tstat.fixest_multi`, `pvalue.fixest_multi` to easily extract the results from multiple estimations.
  
+## xpd
+
+ - new argument `add` to facilitate adding elements to the formula.
+ 
+ - new argument `frame` to tell where to fetch the values of the variables expanded with the dot square bracket operator.
+ 
+ - auto-completion of variables names is now enabled with the '..' suffix.
+```R
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+xpd(y ~ x.., data = base)
+#> y ~ x1 + x2 + x3
+feols(y ~ x.., base)
+#> OLS estimation, Dep. Var.: y
+#> Observations: 150 
+#> Standard-errors: IID 
+#>              Estimate Std. Error  t value   Pr(>|t|)    
+#> (Intercept)  1.855997   0.250777  7.40098 9.8539e-12 ***
+#> x1           0.650837   0.066647  9.76538  < 2.2e-16 ***
+#> x2           0.709132   0.056719 12.50248  < 2.2e-16 ***
+#> x3          -0.556483   0.127548 -4.36293 2.4129e-05 ***
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> RMSE: 0.310327   Adj. R2: 0.855706
+```
+
+ - when using `xpd` in non-fixest functions, the algorithm tries to guess the `data` so that calls to `..("regex")` or auto-completion can be used seamlessly.
+```R
+lm(xpd(y ~ x..), base)
+#> Call:
+#> lm(formula = xpd(y ~ x..), data = base)
+#> 
+#> Coefficients:
+#> (Intercept)           x1           x2           x3  
+#>      1.8560       0.6508       0.7091      -0.5565 
+```
+ 
 ## All estimations
 
  - arguments `split` and `fsplit` gain the `%keep%` and `%drop%` operators which allow to split the sample only on a subset of elements. All estimations also gain the arguments `split.keep` and `split.drop` which do the same thing as the previous operators.
@@ -55,12 +91,6 @@ etable(est)
  
 ## Other
 
- - `xpd`: 
- 
-   * new arguments `add` and `frame`.
-   
-   * when using xpd() in non-fixest functions, the data is automatically guessed so that calls to ..("regex") can be used seamlessly.
- 
  - remove warnings when a binomial family is used with weights in `feglm`.
  
  - add the arguments `y`, `X`, `weights`, `endo`, `inst` to the function `est_env` to make it more user-friendly.
@@ -70,6 +100,8 @@ etable(est)
  - `etable` now returns a `data.frame` whose first column is the variables names (before this was contained in the row names).
  
  - fix environment problems when `lean = TRUE`, leading to large objects when saved on disk.
+ 
+ - `print.fixest` now displays the information on the sample/subset/offset/weights.
 
 
 # fixest 0.10.4
