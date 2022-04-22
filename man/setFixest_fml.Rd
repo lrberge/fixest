@@ -54,6 +54,19 @@ lm(xpd(y ~ x.[2:3] + .[z]), base)
 feols(y ~ x.[2:3] + .[z], base)
 
 #
+# Auto completion with '..' suffix
+#
+
+# You can trigger variables autocompletion with the '..' suffix
+# You need to provide the argument data
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+xpd(y ~ x.., data = base)
+
+# In fixest estimations, this is automatically taken care of
+feols(y ~ x.., data = base)
+
+
+#
 # You can use xpd for stepwise estimations
 #
 
@@ -199,6 +212,9 @@ etable(res_compact)
 # so that ..("regex") can be directly evaluated without passing the argument 'data'
 data(longley)
 lm(xpd(Armed.Forces ~ Population + ..("GNP|ployed")), longley)
+
+# same for the auto completion with '..'
+lm(xpd(Armed.Forces ~ Population + GN..), longley)
 
 
 }

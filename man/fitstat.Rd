@@ -4,7 +4,15 @@
 \alias{fitstat}
 \title{Computes fit statistics of fixest objects}
 \usage{
-fitstat(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE, ...)
+fitstat(
+  x,
+  type,
+  simplify = FALSE,
+  verbose = TRUE,
+  show_types = FALSE,
+  frame = parent.frame(),
+  ...
+)
 }
 \arguments{
 \item{x}{A \code{fixest} estimation.}
@@ -16,6 +24,8 @@ fitstat(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE, ...)
 \item{verbose}{Logical, default is \code{TRUE}. If \code{TRUE}, an object of class \code{fixest_fitstat} is returned (so its associated print method will be triggered). If \code{FALSE} a simple list is returned instead.}
 
 \item{show_types}{Logical, default is \code{FALSE}. If \code{TRUE}, only prompts all available types.}
+
+\item{frame}{An environment in which to evaluate variables, default is \code{parent.frame()}. Only used if the argument \code{type} is a formula and some values in the formula have to be extended with the dot square bracket operator. Mostly for internal use.}
 
 \item{...}{Other elements to be passed to other methods and may be used to compute the statistics (for example you can pass on arguments to compute the VCOV when using \code{type = "g"} or \code{type = "wald"}.).}
 }
