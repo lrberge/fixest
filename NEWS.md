@@ -39,6 +39,12 @@
  
  - new argument `frame` to tell where to fetch the values of the variables expanded with the dot square bracket operator.
  
+ - regex values can be negated: just start with a `!`:
+```R
+xpd(am ~ ..("!^am"), data = mtcars)
+#> am ~ mpg + cyl + disp + hp + drat + wt + qsec + vs + gear + carb
+```
+ 
  - auto-completion of variables names is now enabled with the '..' suffix.
 ```R
 base = setNames(iris, c("y", "x1", "x2", "x3", "species"))

@@ -3093,7 +3093,7 @@ i_noref = function(factor_var, var, ref, bin, keep, ref2, keep2, bin2){
 #'
 #' @inheritParams setFixest_fml
 #'
-#' @param fml A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}. Special macros of the form \code{..("regex")} can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument \code{data} (note that the algorithm tries to "guess" the argument data when nested in function calls [see example]). square brackets have a special meaning: Values in them are evaluated and parsed accordingly. Example: \code{y~x.[1:2] + z.[i]} will lead to \code{y~x1+x2+z3} if \code{i==3}. You can trigger the auto-completion of variables by using the \code{'..'} suffix, like in \code{y ~ x..} which would include \code{x1} and \code{x2}, etc. See examples.
+#' @param fml A formula containing macros variables. Each macro variable must start with two dots. The macro variables can be set globally using \code{setFixest_fml}, or can be defined in \code{...}. Special macros of the form \code{..("regex")} can be used to fetch, through a regular expression, variables directly in a character vector (or in column names) given in the argument \code{data} (note that the algorithm tries to "guess" the argument data when nested in function calls [see example]). You can negate the regex by starting with a \code{"!"}. Square brackets have a special meaning: Values in them are evaluated and parsed accordingly. Example: \code{y~x.[1:2] + z.[i]} will lead to \code{y~x1+x2+z3} if \code{i==3}. You can trigger the auto-completion of variables by using the \code{'..'} suffix, like in \code{y ~ x..} which would include \code{x1} and \code{x2}, etc. See examples.
 #' @param add Either a character scalar or a one-sided formula. The elements will be added to the right-hand-side of the formula, before any macro expansion is applied.
 #' @param lhs If present then a formula will be constructed with \code{lhs} as the full left-hand-side. The value of \code{lhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{rhs}. Note that if \code{fml} is not missing, its LHS will be replaced by \code{lhs}.
 #' @param rhs If present, then a formula will be constructed with \code{rhs} as the full right-hand-side. The value of \code{rhs} can be a one-sided formula, a call, or a character vector. Note that the macro variables wont be applied. You can use it in combination with the argument \code{lhs}. Note that if \code{fml} is not missing, its RHS will be replaced by \code{rhs}.
@@ -3506,7 +3506,14 @@ xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame
                 re = dot_square_bracket(re, frame, regex = TRUE)
 
                 if(is_data){
-                    vars = grep(re, data, value = TRUE, perl = TRUE)
+                    if(substr(re, 1, 1) == "!"){
+                        # negation
+                        re = str_trim(re, 1)
+                        vars = data[!grepl(re, data, perl = TRUE)]
+                    } else {
+                        vars = grep(re, data, value = TRUE, perl = TRUE)
+                    }
+
                     if(length(vars) == 0){
                         vars = "1"
                     }
