@@ -9310,18 +9310,20 @@ confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster, ssc = N
     }
 
 	# Control
-	if(!is.numeric(level) || !length(level) == 1 || level >= 1 || level <= .50){
-		stop("The argument 'level' must be a numeric scalar greater than 0.50 and strictly lower than 1.")
-	}
+    check_arg(level, "numeric scalar gt{0.5} lt{1}")
 
 	# The proper SE
 	sum_object = summary(object, vcov = vcov, se = se, cluster = cluster, ssc = ssc, ...)
+	coeftable = sum_object$coeftable
 
-	se_all = sum_object$coeftable[, 2]
-	coef_all = sum_object$coeftable[, 1]
+	se_all = coeftable[, 2]
+	coef_all = coeftable[, 1]
 
 	# the parameters for which we should compute the confint
-	all_params = names(coef_all)
+	all_params = rownames(coeftable)
+
+	# Ensuring names are all right
+	names(se_all) = names(coef_all) = all_params
 
 	if(missing(parm)){
 	    parm_use = all_params

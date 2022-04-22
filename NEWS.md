@@ -15,6 +15,8 @@
  
  - fix bug panel vs panel.id behaving differently in terms of default type of VCOV when the estimation did not contained lags. 
  
+ - fix bug in `confint.fixest` when only one variable was estimated (thanks to @joachim-gassen [#296](https://github.com/lrberge/fixest/issues/296))
+ 
 ## New functions
 
  - new function `degrees_freedom_iid` which is a more user-friendly version of `degrees_freedom`.

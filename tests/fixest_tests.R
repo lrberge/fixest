@@ -2074,9 +2074,24 @@ test(sum(is.na(m)), 0)
 test(feols(y ~ sw(x1, x2), base, only.coef = TRUE), "err")
 
 
+####
+#### confint ####
+####
+
+chunk("confint")
+
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+est = feols(y ~ x1 + x2 | species, base)
+
+test(nrow(confint(est)), 2)
+test(confint(est, "x1"))
+
+est_pois = fepois(y ~ x1 | species, base)
+test(nrow(confint(est)), 1)
 
 
-
+est_iv = feols(y ~ x1 | species | x2 ~ x3, base)
+test(nrow(confint(est_iv)), 2)
 
 
 
