@@ -11,7 +11,7 @@
  
  - fix display bug in cluster names in `etable`. 
  
- - fix bug in IV estimations with no exogenous variable and no fixed-effect (thanks to Kyle Butts).
+ - fix bug in IV estimations with no exogenous variable and no fixed-effect (thanks to Kyle Butts [#296](https://github.com/lrberge/fixest/issues/296)).
  
  - fix bug panel vs panel.id behaving differently in terms of default type of VCOV when the estimation did not contained lags. 
  
@@ -68,6 +68,33 @@ lm(xpd(y ~ x..), base)
 #> (Intercept)           x1           x2           x3  
 #>      1.8560       0.6508       0.7091      -0.5565 
 ```
+
+## etable
+
+ - in the argument `fitstat`, the formula is now automatically expanded with `xpd`. This means that you can set fit statistics macro which can be summoned from etable. Useful to set default fit statistics for: IVs, GLMs, etc.
+ ```R
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+est = feols(y ~ csw(x.[,1:3]), base)
+
+# setting the macro
+setFixest_fml(..fit_ols = ~ n + ar2 + my)
+
+# summoning it
+etable(est, fitstat = ~..fit_ols)
+#>                             est.1              est.2               est.3
+#> Dependent Var.:                 y                  y                   y
+#>                                                                         
+#> Constant        6.526*** (0.4789)  2.249*** (0.2480)   1.856*** (0.2508)
+#> x1               -0.2234 (0.1551) 0.5955*** (0.0693)  0.6508*** (0.0667)
+#> x2                                0.4719*** (0.0171)  0.7091*** (0.0567)
+#> x3                                                   -0.5565*** (0.1275)
+#> _______________ _________________ __________________ ___________________
+#> S.E. type                     IID                IID                 IID
+#> Observations                  150                150                 150
+#> Adj. R2                   0.00716            0.83800             0.85571
+#> Dep. Var. mean             5.8433             5.8433              5.8433
+ 
+ ```
  
 ## All estimations
 

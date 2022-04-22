@@ -414,6 +414,7 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 #' @param simplify Logical, default is \code{FALSE}. By default a list is returned whose names are the selected types. If \code{simplify = TRUE} and only one type is selected, then the element is directly returned (ie will not be nested in a list).
 #' @param verbose Logical, default is \code{TRUE}. If \code{TRUE}, an object of class \code{fixest_fitstat} is returned (so its associated print method will be triggered). If \code{FALSE} a simple list is returned instead.
 #' @param show_types Logical, default is \code{FALSE}. If \code{TRUE}, only prompts all available types.
+#' @param frame An environment in which to evaluate variables, default is \code{parent.frame()}. Only used if the argument \code{type} is a formula and some values in the formula have to be extended with the dot square bracket operator. Mostly for internal use.
 #' @param ... Other elements to be passed to other methods and may be used to compute the statistics (for example you can pass on arguments to compute the VCOV when using \code{type = "g"} or \code{type = "wald"}.).
 #'
 #' @section Registering your own types:
@@ -482,7 +483,8 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 #' # to errors, but that's another story!
 #'
 #'
-fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE, ...){
+fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE,
+                   frame = parent.frame(), ...){
 
     r2_types = c("sq.cor", "cor2", "r2", "ar2", "pr2", "apr2", "par2", "wr2",
                  "war2", "awr2", "wpr2", "pwr2", "wapr2", "wpar2", "awpr2",
@@ -542,6 +544,8 @@ fitstat = function(x, type, simplify = FALSE, verbose = TRUE, show_types = FALSE
     check_arg(simplify, verbose, "logical scalar")
 
     if("formula" %in% class(type)){
+        type = .xpd(type, frame = frame)
+
         type = gsub(" ", "", strsplit(deparse_long(type[[2]]), "+", fixed = TRUE)[[1]])
     }
     type = tolower(type)

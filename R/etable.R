@@ -1960,7 +1960,11 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     } else if("formula" %in% class(fitstat_all)){
         check_arg(fitstat_all, "os formula", .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing valid types from the function fitstat (see details in ?fitstat).")
 
+        fitstat_all = .xpd(fitstat_all, frame = parent.frame(.up))
+
         fitstat_all = gsub(" ", "", strsplit(deparse_long(fitstat_all[[2]]), "+", fixed = TRUE)[[1]])
+
+        fitstat_all = unique(fitstat_all)
 
     } else {
         check_arg(fitstat_all, "character vector no na", .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing valid types from the function fitstat (see details in ?fitstat).")
@@ -4638,6 +4642,8 @@ print.etable_tex = function(x, ...){
 print.etable_df = function(x, ...){
     # Almost equivalent to print.data.frame
 
+    signif.code = attr(x, "signif")
+
     width = 0.99
     MAX_WIDTH = getOption("width") * width
 
@@ -4683,7 +4689,6 @@ print.etable_df = function(x, ...){
 
     }
 
-    signif.code = attr(x, "signif")
     if(!is.null(signif.code)){
         s = signif.code
         s_fmt = paste0(insert_in_between(.dsb("q?names(s)"), s), collapse = " ")
