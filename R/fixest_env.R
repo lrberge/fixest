@@ -8,7 +8,7 @@
 
 fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian"), NL.fml = NULL,
                       fixef, NL.start, lower, upper, NL.start.init, offset = NULL,
-                      subset = NULL, fsubset = NULL, split = NULL, fsplit = NULL,
+                      subset = NULL, split = NULL, fsplit = NULL,
                       split.keep = NULL, split.drop = NULL,
                       linear.start = 0,
                       jacobian.method = "simple", useHessian = TRUE, hessian.args = NULL,

@@ -2084,10 +2084,10 @@ base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
 est = feols(y ~ x1 + x2 | species, base)
 
 test(nrow(confint(est)), 2)
-test(confint(est, "x1"))
+test(nrow(confint(est, "x1")), 1)
 
 est_pois = fepois(y ~ x1 | species, base)
-test(nrow(confint(est)), 1)
+test(nrow(confint(est_pois)), 1)
 
 
 est_iv = feols(y ~ x1 | species | x2 ~ x3, base)

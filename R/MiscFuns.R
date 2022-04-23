@@ -1750,7 +1750,7 @@ xpd = function(fml, ..., add = NULL, lhs, rhs, data = NULL, frame = parent.frame
         sc = sys.calls()
         n_sc = length(sc)
         if(n_sc > 1){
-            mc = match.call(definition = sys.function(n_sc - 1), call = sys.call(n_sc - 1))
+            mc = tryCatch(match.call(definition = sys.function(n_sc - 1), call = sys.call(n_sc - 1)), error = function(e) NULL)
             if("data" %in% names(mc)){
                 data = tryCatch(eval(mc$data, parent.frame(2)), error = function(e) NULL)
             }
