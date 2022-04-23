@@ -863,47 +863,6 @@ print.fixest_multi = function(x, ...){
 }
 
 
-#' Extracts the root of a fixest_multi object
-#'
-#' Extracts an element at the root of a fixest_multi object.
-#'
-#'
-#' @inherit print.fixest_multi seealso
-#' @inheritParams print.fixest_multi
-#'
-#' @param name The name of the root element to select.
-#'
-#' @return
-#' It either returns a \code{fixest_multi} object or a \code{fixest} object it there is only one estimation associated to the root element.
-#'
-#' @examples
-#'
-#' base = iris
-#' names(base) = c("y", "x1", "x2", "x3", "species")
-#'
-#' # Multiple estimation
-#' res = feols(y ~ csw(x1, x2, x3), base, split = ~species)
-#'
-#' # Let's the results for the setosa species
-#' res$setosa
-#'
-#' # now for versicolor
-#' etable(res$versicolor)
-#'
-"$.fixest_multi" = function(x, name){
-
-    # real variables
-    if(!name %in% names(x)){
-        mc = match.call()
-        stop(name, " is not at the root of the multiple fixest estimations object.")
-    }
-
-    qui = which(name == names(x))
-
-    return(x[I = qui])
-}
-
-
 #' Transforms a fixest_multi object into a list
 #'
 #' Extracts the results from a \code{fixest_multi} object and place them into a list.

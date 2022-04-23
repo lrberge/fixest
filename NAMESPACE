@@ -81,7 +81,6 @@ S3method("[", fixest_panel) # Lag related
 # fixest_multi
 S3method("[", fixest_multi)
 S3method("[[", fixest_multi)
-S3method("$", fixest_multi)
 S3method(print, fixest_multi)
 S3method(summary, fixest_multi)
 S3method(as.list, fixest_multi)
