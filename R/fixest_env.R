@@ -910,29 +910,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     # delayed.subset only concerns isFit // subsetting must always occur before NA checking
     isSubset = FALSE
     delayed.subset = FALSE
-    if(!missing(subset) || !missing(fsubset)){
-
-        my_funs = list()
-        my_funs[["."]] = list
-        my_funs[["%in%"]] = subset_in
-
-        browser()
-
-        # Faire exactement comme split
-        # subset.id
-        #
-
-        if(!missing(subset)){
-            subset_mc = mc_origin$subset
-            subset = eval(subset_mc, my_funs, call_env)
-        }
-
-        if(!missing(fsubset)){
-            fsubset_mc = mc_origin$fsubset
-            fsubset = eval(fsubset_mc, my_funs, call_env)
-        }
-
-
+    if(!missing(subset)){
         error_sender(subset)
         if(!is.null(subset)){
 
@@ -4330,26 +4308,4 @@ split_select = function(items, keep, drop){
 
     which(items %in% res)
 }
-
-subset_in = function(x, y){
-    if(is.list(y)){
-        n_y = length(y)
-        if(n_y == 1){
-            res = which(x %in% y[[1]])
-        } else {
-            x_int = to_integer(x, add_items = TRUE, sorted = TRUE, items.list = TRUE)
-            x_items = x_int$items
-
-            res = vector("list", n_y)
-            for(i in 1:n_y){
-                res[[i]] = which(x %in% y[[i]])
-            }
-        }
-    } else {
-        res = which(x %in% y)
-    }
-
-    res
-}
-
 
