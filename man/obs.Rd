@@ -23,8 +23,8 @@ base$y[1:5] = NA
 
 # Split sample estimations
 est_split = feols(y ~ x1, base, split = ~species)
-(obs_setosa = obs(est_split$setosa))
-(obs_versi = obs(est_split$versicolor))
+(obs_setosa = obs(est_split[[1]]))
+(obs_versi = obs(est_split[sample = "versi", drop = TRUE]))
 
 est_versi = feols(y ~ x1, base, subset = obs_versi)
 
