@@ -77,7 +77,7 @@ lm(xpd(y ~ x..), base)
 
 ## etable
 
- - in the argument `fitstat`, the formula is now automatically expanded with `xpd`. This means that you can set fit statistics macro which can be summoned from etable. Useful to set default fit statistics for: IVs, GLMs, etc.
+ - in the argument `fitstat`, the formula is now automatically expanded with `xpd`. This means that you can set fit statistics macro which can be summoned from `etable`. Useful to set default fit statistics for: IVs, GLMs, etc.
  ```R
 base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
 est = feols(y ~ csw(x.[,1:3]), base)
@@ -101,6 +101,20 @@ etable(est, fitstat = ~..fit_ols)
 #> Dep. Var. mean             5.8433             5.8433              5.8433
  
  ```
+ 
+## coeftable
+
+ - it gains the argument `list`. If `TRUE`, then the result is returned in a list form. Useful in Rmarkdown documents for quick reference to specific values.
+```R
+est = feols(mpg ~ cyl + drat + wt, mtcars)
+ct = coeftable(est, list = TRUE)
+ct$constant$coef
+#> Estimate 
+#> 39.76766 
+ct$wt$se
+#> Std. Error 
+#>  0.8293065
+```
  
 ## All estimations
 

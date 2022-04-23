@@ -1386,11 +1386,14 @@ se.default = function(object, keep, drop, order, ...){
 
     mat = coeftable(object, keep = keep, drop = drop, order = order, ...)
 
+
     if(is.null(mat)){
         return(NULL)
     }
 
     res = mat[, 2]
+    names(res) = row.names(mat)
+
     res
 }
 
@@ -1411,6 +1414,8 @@ tstat.default = function(object, keep, drop, order, ...){
     }
 
     res = mat[, 3]
+    names(res) = row.names(mat)
+
     res
 }
 
@@ -1431,6 +1436,8 @@ pvalue.default = function(object, keep, drop, order, ...){
     }
 
     res = mat[, 4]
+    names(res) = row.names(mat)
+
     res
 }
 
@@ -1534,7 +1541,6 @@ coeftable.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
 
     # Let's find out the coefficients table
     res = object$coeftable
-    attr(res, "type") = NULL
 
     if(!missnull(keep) || !missnull(drop) || !missnull(order)){
         r_names = rownames(res)
@@ -1564,9 +1570,9 @@ coeftable.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
     res
 }
 
-#' @describeIn coeftable Extracts the p-value of an estimation
-pvalue.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
-                         keep = NULL, drop = NULL, order = NULL, ...){
+#' @describeIn coeftable Extracts the standard-error of an estimation
+se.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
+                     keep = NULL, drop = NULL, order = NULL, ...){
 
     check_arg(keep, drop, order, "NULL character vector no na")
 
@@ -1577,7 +1583,9 @@ pvalue.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
         return(NULL)
     }
 
-    res = mat[, 4]
+    res = mat[, 2]
+    names(res) = row.names(mat)
+
     res
 }
 
@@ -1595,12 +1603,14 @@ tstat.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
     }
 
     res = mat[, 3]
+    names(res) = row.names(mat)
+
     res
 }
 
-#' @describeIn coeftable Extracts the standard-error of an estimation
-se.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
-                     keep = NULL, drop = NULL, order = NULL, ...){
+#' @describeIn coeftable Extracts the p-value of an estimation
+pvalue.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
+                         keep = NULL, drop = NULL, order = NULL, ...){
 
     check_arg(keep, drop, order, "NULL character vector no na")
 
@@ -1611,7 +1621,9 @@ se.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
         return(NULL)
     }
 
-    res = mat[, 2]
+    res = mat[, 4]
+    names(res) = row.names(mat)
+
     res
 }
 
