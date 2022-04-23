@@ -1490,7 +1490,6 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                     }
                 }
 
-
                 if(inherits(mod, "fixest_multi")){
 
                     for(j in seq_along(mod)){
@@ -4072,11 +4071,15 @@ etable_internal_df = function(info){
     modelNames = model_names
 
     # we shorten the model names to fit the width
-    for(m in 1:n_models) modelNames[m] = charShorten(modelNames[[m]], longueur[[1+m]])
+    for(m in 1:n_models){
+        modelNames[m] = charShorten(modelNames[[m]], longueur[[1+m]], keep.digits = TRUE)
+    }
 
     # I need to do that otherwise as.data.frame goes wild
     res_list = list()
-    for(i in 1:ncol(res)) res_list[[i]] = unlist(res[, i])
+    for(i in 1:ncol(res)){
+        res_list[[i]] = unlist(res[, i])
+    }
     names(res_list) = paste0("x", 1:length(res_list))
 
     res = as.data.frame(res_list)
@@ -4085,7 +4088,11 @@ etable_internal_df = function(info){
     if(any(tvar > 1)){
         qui = which(res$variables %in% names(tvar)[tvar > 1])
         add_space = c("", " ")
-        if(length(qui) > 2) for(i in 3:length(qui)) add_space[i] = paste(rep(" ", i), collapse = "")
+        if(length(qui) > 2){
+            for(i in 3:length(qui)){
+                add_space[i] = paste(rep(" ", i), collapse = "")
+            }
+        }
         res$variables = as.character(res$variables)
         res$variables[qui] = paste0(res$variables[qui], add_space)
     }

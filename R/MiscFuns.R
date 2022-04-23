@@ -5501,15 +5501,24 @@ order_apply = function(x, order = NULL){
     res
 }
 
-charShorten = function(x, width){
+charShorten = function(x, width, keep.digits = FALSE){
 	# transforms characters => they can't go beyond a certain width
 	# two dots are added to suggest longer character
 	# charShorten("bonjour", 5) => "bon.."
 	n = nchar(x)
 
 	if(n > width && width > 3){
-		res = substr(x, 1, width - 2)
-		res = paste0(res, "..")
+	    if(keep.digits){
+	        trailing_digits = dsb("'\\d+$'X ? x")
+	        n_d = nchar(trailing_digits)
+	        if(n_d > 0){
+	            res = dsb(".[`max(width - n_d - 2, 3)`k ? x]...[trailing_digits]")
+	            return(res)
+	        }
+	    }
+
+        res = substr(x, 1, width - 2)
+        res = paste0(res, "..")
 	} else {
 		res = x
 	}
