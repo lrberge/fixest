@@ -1724,12 +1724,11 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         if(is_mult){
 
             if("fixest_multi" %in% class(x)){
-                data = attr(x, "data")
-                for(i in seq_along(data)){
-                    all_models_bis[[length(all_models_bis) + 1]] = data[[i]]
+                for(i in seq_along(x)){
+                    all_models_bis[[length(all_models_bis) + 1]] = x[[i]]
                 }
 
-                iv_times[m] = length(data)
+                iv_times[m] = length(x)
             } else {
                 all_models_bis[[length(all_models_bis) + 1]] = x
                 iv_times[m] = 1

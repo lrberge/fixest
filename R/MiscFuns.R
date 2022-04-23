@@ -2945,7 +2945,7 @@ rep.fixest_list = function(x, times = 1, each = 1, vcov, ...){
     if(length(dots) == 1){
 
         if("fixest_multi" %in% class(dots[[1]])){
-            res = attr(dots[[1]], "data")
+            res = dots[[1]]
             class(res) = "fixest_list"
             return(res)
         }
@@ -2964,10 +2964,9 @@ rep.fixest_list = function(x, times = 1, each = 1, vcov, ...){
         } else {
             obj = dots[[i]]
 
-            if(class(obj) %in% "fixest_multi"){
-                data = attr(obj, "data")
-                for(j in seq_along(data)){
-                    res[[length(res) + 1]] = data[[j]]
+            if("fixest_multi" %in% class(obj)){
+                for(j in seq_along(obj)){
+                    res[[length(res) + 1]] = obj[[j]]
                 }
 
             } else {

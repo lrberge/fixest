@@ -683,9 +683,8 @@ summary.fixest_list = function(object, se, cluster, ssc = getFixest_ssc(), .vcov
 
         # we unroll in case of IV
         if("fixest_multi" %in% class(my_res)){
-            data = attr(my_res, "data")
-            for(j in seq_along(data)){
-                res[[length(res) + 1]] = data[[j]]
+            for(j in seq_along(my_res)){
+                res[[length(res) + 1]] = my_res[[j]]
             }
         } else {
             res[[length(res) + 1]] = my_res

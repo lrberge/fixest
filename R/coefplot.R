@@ -1470,13 +1470,6 @@ coefplot_prms = function(object, ..., sd, ci_low, ci_high, x, x.shift = 0, dict,
     if(is_internal == FALSE && ((is.list(object) && class(object)[1] == "list") || "fixest_multi" %in% class(object))){
         # This is a list of estimations
 
-        if("fixest_multi" %in% class(object)){
-            # WIP:
-            # - add tags of the sample
-            # - add legend
-            object = attr(object, "data")
-        }
-
         #
         # Multiple estimations ####
         #

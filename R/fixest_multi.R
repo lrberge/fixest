@@ -1235,11 +1235,9 @@ resid.fixest_multi = function(object, type = c("response", "deviance", "pearson"
     check_arg_plus(type, "match")
     check_arg_plus(na.rm, "logical scalar")
 
-    data = attr(object, "data")
-
     res_list = list()
-    for(i in seq_along(data)){
-        res_list[[i]] = resid(data[[i]], type = type, na.rm = na.rm)
+    for(i in seq_along(object)){
+        res_list[[i]] = resid(object[[i]], type = type, na.rm = na.rm)
     }
 
     n_all = sapply(res_list, length)
