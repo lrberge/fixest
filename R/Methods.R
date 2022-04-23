@@ -1441,6 +1441,39 @@ pvalue.default = function(object, keep, drop, order, ...){
     res
 }
 
+#' @describeIn coeftable.default Extracts the standard-errors from a VCOV matrix
+se.matrix = function(object, keep, drop, order, ...){
+    # There is NO GARANTEE that it works
+
+    check_arg(object, "square numeric matrix")
+    check_arg(keep, drop, order, "NULL character vector no na")
+
+    vcov_diag = diag(object)
+    vcov_diag[vcov_diag < 0] = NA
+
+    all_names = rownames(object)
+    se = sqrt(vcov_diag)
+    names(se) = all_names
+
+    if(!missnull(keep) || !missnull(drop) || !missnull(order)){
+
+        if(is.null(all_names)){
+            stop("The VCOV matrix has no names attributes: the arguments keep, drop or order cannot be used.")
+        }
+
+        all_names = keep_apply(all_names, keep)
+        all_names = drop_apply(all_names, drop)
+        all_names = order_apply(all_names, order)
+
+        if(length(all_names) == 0){
+            return(NULL)
+        }
+
+        se = se[all_names]
+    }
+
+    se
+}
 
 
 
