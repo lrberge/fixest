@@ -102,6 +102,8 @@ etable(est, fitstat = ~..fit_ols)
  ```
  - now there is support for models with no coefficient (only fixed-effects).
  
+ - the application of markdown markup is now more robust.
+ 
 ## coeftable
 
  - it gains the argument `list`. If `TRUE`, then the result is returned in a list form. Useful in Rmarkdown documents for quick reference to specific values.

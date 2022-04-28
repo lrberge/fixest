@@ -5873,6 +5873,9 @@ pmatch_varname = function(x, coef_names, arg_name){
 markup_apply = function(x){
     # x: if len > 1, means it contains equations that have been split
     # the function is slow, but we don't apply it to many things anyway, so that's OK
+    # Update: now I use lookbehind/after: the function is REALLY super slow
+    # maybe port it to c++ at come point?
+    # from 150us => 2ms BIG DIFF!!!!
 
     if(!any(grepl("*", x, fixed = TRUE))){
         return(x)
@@ -5901,18 +5904,20 @@ markup_apply = function(x){
 
     for(i in 1:3){
         pat = names(dict_pat)[i]
+        pat_re = paste0("(?<!\\*)", dsb("`nchar(pat)`*c!\\*"), "(?!\\*)")
 
-        if(grepl(pat, x, fixed = TRUE)){
+        if(grepl(pat_re, x, perl = TRUE)){
             markup = dict_pat[i]
 
-            n_match = length(gregexpr(pat, x, fixed = TRUE)[[1]])
+            location = gregexpr(pat_re, x, perl = TRUE)[[1]]
+            n_match = length(location)
 
             if(!n_match %% 2 == 0){
                 # failed markup
-                res = gsub(pat, .dsb("__.[`i`*c!$]__"), res, fixed = TRUE)
+                res = gsub(pat_re, .dsb("__.[`i`*c!$]__"), res, perl = TRUE)
                 failed[i] = TRUE
             } else {
-                x_split = strsplit(res, pat, fixed = TRUE)[[1]]
+                x_split = strsplit(res, pat_re, perl = TRUE)[[1]]
                 n = length(x_split)
                 for(j in (1:n)[(1:n) %% 2 == 0]){
                     x_split[j] = sub("___", x_split[j], markup, fixed = TRUE)
