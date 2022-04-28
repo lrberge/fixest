@@ -2103,11 +2103,26 @@ est_iv = feols(y ~ x1 | species | x2 ~ x3, base)
 test(nrow(confint(est_iv)), 2)
 
 
+####
+#### etable ####
+####
 
+chunk("etable")
 
+# VERY hard to make proper tests...
 
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+est_onlyFE = feols(y ~ 1 | species, base)
+est = feols(y ~ x.[1:3], base)
 
+et0 = etable(est_onlyFE)
+test(nrow(et0), 7)
 
+et1 = etable(est_onlyFE, est)
+test(nrow(et1), 12)
+
+et2 = etable(est_onlyFE, est, se.below = TRUE)
+test(nrow(et2), 16)
 
 
 

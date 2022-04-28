@@ -49,7 +49,7 @@
 #' @param extralines A vector, a list or a one sided formula. The list elements should be either a vector representing the value of each cell, a list of the form \code{list("item1" = #item1, "item2" = #item2, etc)}, or a function. This argument can be many things, please have a look at the dedicated help section; a simplified description follows. For each elements of this list: A new line in the table is created, the list name being the row name and the vector being the content of the cells. Example: \code{extralines=list("Sub-sample"=c("<20 yo", "all", ">50 yo"))} will create an new line with \code{"Sub-sample"} in the leftmost cell, the vector filling the content of the cells for the three models. You can control the placement of the new row by using 1 or 2 special characters at the start of the row name. The meaning of these special characters are: 1) \code{"^"}: coef., \code{"-"}: fixed-effect, \code{"_"}: stats, section; 2) \code{"^"}: 1st, \code{"_"}: last, row. For example: \code{extralines=list("__Controls"=stuff)} will place the line at the bottom of the stats section, and using \code{extralines=list("^^Controls"=stuff)} will make the row appear at the top of the 'coefficients' section. For details, see the dedicated section. You can use \code{.()} instead of \code{list()}.
 #' @param fixef.group Logical scalar or list (default is \code{NULL}). If equal to \code{TRUE}, then all fixed-effects always appearing jointly in models will be grouped in one row. If a list, its elements must be character vectors of regular expressions and the list names will be the row names. For ex. \code{fixef.group=list("Dates fixed-effects"="Month|Day")} will remove the \code{"Month"} and \code{"Day"} fixed effects from the display and replace them with a single row named "Dates fixed-effects". You can monitor the placement of the new row with two special characters telling where to place the row within a section: first in which section it should appear: \code{"^"} (coef.), \code{"-"} (fixed-effects), or \code{"_"} (stat.) section; then whether the row should be \code{"^"} (first), or \code{"_"} (last). These two special characters must appear first in the row names. Please see the dedicated section
 #' @param placement (Tex only.) Character string giving the position of the float in Latex. Default is "htbp". It must consist of only the characters 'h', 't', 'b', 'p', 'H' and '!'. Reminder: h: here; t: top; b: bottom; p: float page; H: definitely here; !: prevents Latex to look for other positions. Note that it can be equal to the empty string (and you'll get the default placement).
-#' @param drop.section Character vector which can be of length 0 (i.e. equal to \code{NULL}). Can contain the values "fixef", "slopes" or "stats". It would drop, respectively, the fixed-effects section, the variables with varying slopes section or the fit statistics section.
+#' @param drop.section Character vector which can be of length 0 (i.e. equal to \code{NULL}). Can contain the values "coef", "fixef", "slopes" or "stats". It would drop, respectively, the coefficients section, fixed-effects section, the variables with varying slopes section or the fit statistics section.
 #' @param reset (\code{setFixest_etable} only.) Logical, default is \code{FALSE}. If \code{TRUE}, this will reset all the default values that were already set by the user in previous calls.
 #' @param .vcov A function to be used to compute the standard-errors of each fixest object. You can pass extra arguments to this function using the argument \code{.vcov_args}. See the example.
 #' @param .vcov_args A list containing arguments to be passed to the function \code{.vcov}.
@@ -2053,7 +2053,11 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     reformat_fitstat = FALSE
     for(m in 1:n_models){
         x = all_models[[m]]
-        se_type_list[[m]] = attr(x$se, "type")
+        if(isTRUE(x$onlyFixef)){
+            se_type_list[[m]] = "NONE_FIXEF_ONLY"
+        } else {
+            se_type_list[[m]] = attr(x$se, "type")
+        }
 
         # family
         family = x$family
@@ -2083,7 +2087,9 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
         depvar = gsub(" ", "", as.character(x$fml)[[2]])
 
         a = x$coeftable
-        if(!is.data.frame(a)){
+        if(is.null(a)){
+            a = data.frame(coef = NA_real_, se = NA_real_, tstat = NA_real_, pvale = NA_real_, row.names = "TO_BE_REMOVED")
+        } else if(!is.data.frame(a)){
             class(a) = NULL
             a = as.data.frame(a)
         }
@@ -2974,22 +2980,20 @@ etable_internal_latex = function(info){
     }
     model_line = paste0(style$model.title, " & ", paste0(model_format, collapse = " & "), "\\\\\n")
 
-    # a simple line with only "variables" written in the first cell
-    if(nchar(style$var.title) == 0){
-        coef_title = ""
-    } else if(style$var.title == "\\midrule"){
-        coef_title = "\\midrule "
-    } else {
-        coef_title = paste0(style$var.title, "\\\\\n")
-    }
-
-    # Coefficients, the tricky part
-    coef_lines = list()
+    #
+    # the coefficients
+    #
 
     # we need to loop not to lose names
     all_vars = c()
     for(vars in var_list){
-        all_vars = c(all_vars, vars[!vars %in% all_vars])
+        all_vars = c(all_vars, setdiff(vars, all_vars))
+    }
+
+    # dealing with the special case of only-fixef estimations
+    all_vars = setdiff(all_vars, "TO_BE_REMOVED")
+    if(length(all_vars) == 0){
+        drop.section = c(drop.section, "coef")
     }
 
     for(i in seq_along(group)){
@@ -3001,64 +3005,88 @@ etable_internal_latex = function(info){
 
     # keeping some coefs
     all_vars = keep_apply(all_vars, keep)
-
     # dropping some coefs
     all_vars = drop_apply(all_vars, drop)
-
     # ordering the coefs
     all_vars = order_apply(all_vars, order)
 
     if(length(all_vars) == 0){
-        if(!is.null(keep) && !any(grepl("^%", keep))){
-            msg = paste0(" In particular, to 'keep' variables using their original names (before dict is applied), use the special character '%' first. E.g. keep = \"%", keep[1], "\"")
-        } else if(!is.null(drop) && !any(grepl("^%", drop))){
-            msg = paste0(" In particular, to 'drop' variables using their original names (before dict is applied), use the special character '%' first. E.g. drop = \"%", drop[1], "\"")
-        } else {
-            msg = ""
-        }
 
-        stop_up("Not any variable was selected, please reframe your keep/drop arguments.", msg)
-    }
-
-    # The names are set in results2formattedList
-    coef_names = escape_latex(all_vars)
-    names(coef_names) = all_vars
-
-    if(se.below){
-        coef_mat = c()
-        for(v in all_vars){
-
-            myCoef = mySd = myLine = c()
-            for(m in 1:n_models){
-                myCoef = c(myCoef, coef_below[[m]][v])
-                mySd = c(mySd, sd_below[[m]][v])
+        if((!is.null(keep) || !is.null(drop)) && length(group) == 0){
+            if(!is.null(keep) && !any(grepl("^%", keep))){
+                msg = paste0(" In particular, to 'keep' variables using their original names (before dict is applied), use the special character '%' first. E.g. keep = \"%", keep[1], "\"")
+            } else if(!is.null(drop) && !any(grepl("^%", drop))){
+                msg = paste0(" In particular, to 'drop' variables using their original names (before dict is applied), use the special character '%' first. E.g. drop = \"%", drop[1], "\"")
+            } else {
+                msg = ""
             }
 
-            myCoef[is.na(myCoef)] = "  "
-            mySd[is.na(mySd)] = "  "
-
-            coef_mat = rbind(coef_mat, c(coef_names[v], myCoef), c(" ", mySd))
+            stop_up("Not any variable was selected, please reframe your keep/drop arguments.", msg, "\n To drop the coefficients section, use the argument drop.section = 'coef'.")
         }
+
+        # => we drop the coef section
+        drop.section = c(drop.section, "coef")
+    }
+
+    if("coef" %in% drop.section){
+        # => we drop the coef section
+        coef_title = NULL
+        coef_lines = NULL
+        info_tikz = NULL
 
     } else {
 
-        coef_mat = all_vars
-        for(m in 1:n_models){
-            coef_mat = cbind(coef_mat, coef_list[[m]][all_vars])
+        # a simple line with only "variables" written in the first cell
+        if(nchar(style$var.title) == 0){
+            coef_title = ""
+        } else if(style$var.title == "\\midrule"){
+            coef_title = "\\midrule "
+        } else {
+            coef_title = paste0(style$var.title, "\\\\\n")
         }
-        coef_mat[is.na(coef_mat)] = "  "
 
-        coef_mat[, 1] = coef_names
+        # we have coefficients to display
+        # The names are set in results2formattedList
+        coef_names = escape_latex(all_vars)
+        names(coef_names) = all_vars
+
+        if(se.below){
+            coef_mat = c()
+            for(v in all_vars){
+
+                myCoef = mySd = myLine = c()
+                for(m in 1:n_models){
+                    myCoef = c(myCoef, coef_below[[m]][v])
+                    mySd = c(mySd, sd_below[[m]][v])
+                }
+
+                myCoef[is.na(myCoef)] = "  "
+                mySd[is.na(mySd)] = "  "
+
+                coef_mat = rbind(coef_mat, c(coef_names[v], myCoef), c(" ", mySd))
+            }
+
+        } else {
+
+            coef_mat = all_vars
+            for(m in 1:n_models){
+                coef_mat = cbind(coef_mat, coef_list[[m]][all_vars])
+            }
+            coef_mat[is.na(coef_mat)] = "  "
+
+            coef_mat[, 1] = coef_names
+        }
+
+
+        coef_mat = style_apply(coef.style, coef_mat, all_vars)
+        info_mat = highlight_apply(highlight, coef_mat, all_vars)
+        coef_mat = info_mat$coef_mat
+        info_tikz = info_mat$preamble
+
+        coef_lines = paste0(apply(coef_mat, 1, paste, collapse = " & "), "\\\\ \n")
+        coef_lines = paste0(coef_lines, collapse = "")
+
     }
-
-
-    coef_mat = style_apply(coef.style, coef_mat, all_vars)
-    info_mat = highlight_apply(highlight, coef_mat, all_vars)
-    coef_mat = info_mat$coef_mat
-    info_tikz = info_mat$preamble
-
-    coef_lines = paste0(apply(coef_mat, 1, paste, collapse = " & "), "\\\\ \n")
-    coef_lines = paste0(coef_lines, collapse = "")
 
     #
     # Fixed-effects (if needed)
@@ -3249,7 +3277,10 @@ etable_internal_latex = function(info){
         bottom_line = style$line.bottom
         style$line.bottom = ""
 
-        if(identical(style$tablefoot.value, "default")){
+        if("coef" %in% drop.section){
+            info_SE_footer = paste0(bottom_line, " \\\\\n")
+
+        } else if(identical(style$tablefoot.value, "default")){
 
             if(isUniqueSD){
                 my_se = unique(unlist(se_type_list)) # it comes from summary
@@ -3654,7 +3685,13 @@ etable_internal_df = function(info){
     # we need to loop not to lose names
     all_vars = c()
     for(vars in var_list){
-        all_vars = c(all_vars, vars[!vars %in% all_vars])
+        all_vars = c(all_vars, setdiff(vars, all_vars))
+    }
+
+    # dealing with the special case of only-fixef estimations
+    all_vars = setdiff(all_vars, "TO_BE_REMOVED")
+    if(length(all_vars) == 0){
+        drop.section = c(drop.section, "coef")
     }
 
     for(i in seq_along(group)){
@@ -3674,58 +3711,79 @@ etable_internal_df = function(info){
     # ordering the coefs
     all_vars = order_apply(all_vars, order)
 
-    if(length(all_vars) == 0) stop_up("Not any variable was selected, please reframe your keep/drop arguments.")
+    if(length(all_vars) == 0){
 
-    se.below = info$se.below
-    if(se.below){
-        coef_below = info$coef_below
-        sd_below = info$sd_below
-        coef_se_mat = c()
-        for(v in all_vars){
-            myCoef = mySd= myLine = c()
-            for(m in 1:n_models){
-                myCoef = c(myCoef, coef_below[[m]][v])
-                mySd = c(mySd, sd_below[[m]][v])
+        if((!is.null(keep) || !is.null(drop)) && length(group) == 0){
+            if(!is.null(keep) && !any(grepl("^%", keep))){
+                msg = paste0(" In particular, to 'keep' variables using their original names (before dict is applied), use the special character '%' first. E.g. keep = \"%", keep[1], "\"")
+            } else if(!is.null(drop) && !any(grepl("^%", drop))){
+                msg = paste0(" In particular, to 'drop' variables using their original names (before dict is applied), use the special character '%' first. E.g. drop = \"%", drop[1], "\"")
+            } else {
+                msg = ""
             }
 
-            myCoef[is.na(myCoef)] = "  "
-            mySd[is.na(mySd)] = "  "
-
-            coef_se_mat = rbind(coef_se_mat, myCoef, mySd)
+            stop_up("Not any variable was selected, please reframe your keep/drop arguments.", msg, "\n To drop the coefficients section, use the argument drop.section = 'coef'.")
         }
 
-        n_vars = length(all_vars)
-        my_names = character(2 * n_vars)
-        my_names[1 + 2 * 0:(n_vars - 1)] = all_vars
+        # => we drop the coef section
+        drop.section = c(drop.section, "coef")
+    }
 
-        coef_mat = cbind(my_names, coef_se_mat)
+    if("coef" %in% drop.section){
+        res = NULL
+
     } else {
-        coef_mat = all_vars
-        for(m in 1:n_models) coef_mat = cbind(coef_mat, coef_list[[m]][all_vars])
-        coef_mat[is.na(coef_mat)] = "  "
-    }
+        se.below = info$se.below
+        if(se.below){
+            coef_below = info$coef_below
+            sd_below = info$sd_below
+            coef_se_mat = c()
+            for(v in all_vars){
+                myCoef = mySd= myLine = c()
+                for(m in 1:n_models){
+                    myCoef = c(myCoef, coef_below[[m]][v])
+                    mySd = c(mySd, sd_below[[m]][v])
+                }
 
-    if(!is.null(coef.just)){
+                myCoef[is.na(myCoef)] = "  "
+                mySd[is.na(mySd)] = "  "
 
-        if(coef.just == "."){
-            align_fun = function(x) sfill(sfill(x, anchor = "."), right = TRUE)
-        } else if(coef.just == "("){
-            align_fun = function(x) sfill(sfill(x, anchor = "("), right = TRUE)
-        } else if(coef.just == "c"){
-            align_fun = function(x) format(x, justify = "centre")
-        } else if(coef.just == "l"){
-            align_fun = function(x) sfill(x, anchor = "left")
+                coef_se_mat = rbind(coef_se_mat, myCoef, mySd)
+            }
+
+            n_vars = length(all_vars)
+            my_names = character(2 * n_vars)
+            my_names[1 + 2 * 0:(n_vars - 1)] = all_vars
+
+            coef_mat = cbind(my_names, coef_se_mat)
+        } else {
+            coef_mat = all_vars
+            for(m in 1:n_models) coef_mat = cbind(coef_mat, coef_list[[m]][all_vars])
+            coef_mat[is.na(coef_mat)] = "  "
         }
 
-        new_mat = list(coef_mat[, 1])
-        for(i in 2:ncol(coef_mat)){
-            new_mat[[i]] = align_fun(coef_mat[, i])
+        if(!is.null(coef.just)){
+
+            if(coef.just == "."){
+                align_fun = function(x) sfill(sfill(x, anchor = "."), right = TRUE)
+            } else if(coef.just == "("){
+                align_fun = function(x) sfill(sfill(x, anchor = "("), right = TRUE)
+            } else if(coef.just == "c"){
+                align_fun = function(x) format(x, justify = "centre")
+            } else if(coef.just == "l"){
+                align_fun = function(x) sfill(x, anchor = "left")
+            }
+
+            new_mat = list(coef_mat[, 1])
+            for(i in 2:ncol(coef_mat)){
+                new_mat[[i]] = align_fun(coef_mat[, i])
+            }
+
+            coef_mat = do.call("cbind", new_mat)
         }
 
-        coef_mat = do.call("cbind", new_mat)
+        res = coef_mat
     }
-
-    res = coef_mat
 
     #
     # Group
@@ -3897,8 +3955,13 @@ etable_internal_df = function(info){
     }
 
     # Used to draw lines
-    longueur = apply(res, 2, function(x) max(nchar(as.character(x))))
-    longueur = pmax(dep_width, longueur)
+    if(is.null(res)){
+        longueur = pmax(dep_width, 8)
+    } else {
+        longueur = apply(res, 2, function(x) max(nchar(as.character(x))))
+        longueur = pmax(dep_width, longueur)
+        longueur = pmax(longueur, 8)
+    }
 
     #
     # fixed-effects
@@ -4017,7 +4080,7 @@ etable_internal_df = function(info){
         res = rbind(res, c("Family", unlist(family_list)))
     }
 
-    if(!isFALSE(se.row)){
+    if(!isFALSE(se.row) && !"coef" %in% drop.section){
         # default is to always show the SE row
         if(coefstat == "se"){
             coefstat_sentence = "S.E. type"
@@ -5943,6 +6006,10 @@ format_se_type = function(x, width, by = FALSE, dict = c()){
     # format_se_type("Driscoll-Kraay (L=10)", 10, by = TRUE)
     # format_se_type("Conley (100km)", 10, by = TRUE)
 
+    if(identical(x, "NONE_FIXEF_ONLY")){
+        return("--")
+    }
+
     if(!grepl("\\(", x) || !grepl("Clustered", x, fixed = TRUE)){
         # means not clustered
         if(nchar(x) <= width) return(x)
@@ -6070,6 +6137,10 @@ format_se_type = function(x, width, by = FALSE, dict = c()){
 
 format_se_type_latex = function(x, dict = c(), inline = FALSE){
     # we make 'nice' se types
+
+    if(identical(x, "NONE_FIXEF_ONLY")){
+        return(" ")
+    }
 
     if(!grepl("\\(", x)){
         # means not clustered

@@ -5510,7 +5510,7 @@ charShorten = function(x, width, keep.digits = FALSE){
 	    if(keep.digits){
 	        trailing_digits = dsb("'\\d+$'X ? x")
 	        n_d = nchar(trailing_digits)
-	        if(n_d > 0){
+	        if(length(n_d) == 1 && n_d > 0){
 	            res = dsb(".[`max(width - n_d - 2, 3)`k ? x]...[trailing_digits]")
 	            return(res)
 	        }

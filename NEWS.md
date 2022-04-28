@@ -15,7 +15,7 @@
  
  - fix bug panel vs panel.id behaving differently in terms of default type of VCOV when the estimation did not contained lags. 
  
- - fix bug in `confint.fixest` when only one variable was estimated (thanks to @joachim-gassen [#296](https://github.com/lrberge/fixest/issues/296))
+ - fix bug in `confint.fixest` when only one variable was estimated (thanks to @joachim-gassen [#296](https://github.com/lrberge/fixest/issues/296)).
  
 ## New functions
 
@@ -99,8 +99,8 @@ etable(est, fitstat = ~..fit_ols)
 #> Observations                  150                150                 150
 #> Adj. R2                   0.00716            0.83800             0.85571
 #> Dep. Var. mean             5.8433             5.8433              5.8433
- 
  ```
+ - now there is support for models with no coefficient (only fixed-effects).
  
 ## coeftable
 
