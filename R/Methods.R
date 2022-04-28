@@ -1331,17 +1331,9 @@ coeftable.default = function(object, keep, drop, order, ...){
     check_arg(keep, drop, order, "NULL character vector no na")
 
     if(!any(grepl("summary", class(object)))){
-
-        sum_exists = FALSE
-        for(c_name in class(object)){
-            if(exists(paste0("summary.", c_name), mode = "function")){
-                sum_exists = TRUE
-                break
-            }
-        }
-
-        if(sum_exists){
-            object = summary(object, ...)
+        object_sum = try(summary(object, ...))
+        if(!inherits(object_sum, "try-error")){
+            object = object_sum
         }
     }
 
