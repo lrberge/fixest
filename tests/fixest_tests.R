@@ -16,8 +16,13 @@ vcovClust = fixest:::vcovClust
 setFixest_notes(FALSE)
 
 ####
-#### Estimations ####
+#### ESTIMATIONS ####
 ####
+
+####
+#### ... Main ####
+####
+
 
 chunk("ESTIMATION")
 
@@ -156,7 +161,7 @@ for(model in c("ols", "pois", "logit", "negbin", "Gamma")){
 }
 
 ####
-#### Corner cases ####
+#### ... Corner cases ####
 ####
 
 chunk("Corner cases")
@@ -248,7 +253,7 @@ res = feols(y ~ x1 | bin(x2, "bin::1")^fe1 + fe1^fe2, base)
 
 
 ####
-#### Fit methods ####
+#### ... Fit methods ####
 ####
 
 chunk("Fit methods")
@@ -283,6 +288,650 @@ test(coef(res), coef(res_bis))
 res = feglm.fit(base$y_log, base[, 2:4], family = "poisson")
 res_bis = feglm(y_log ~ -1 + x1 + x2 + x3, base, family = "poisson")
 test(coef(res), coef(res_bis))
+
+
+
+####
+#### ... Collinearity ####
+####
+
+cat("COLLINEARITY\n\n")
+
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
+base$constant = 5
+base$y_int = as.integer(base$y)
+base$w = as.vector(unclass(base$species) - 0.95)
+
+for(useWeights in c(FALSE, TRUE)){
+    for(model in c("ols", "pois")){
+        for(use_fe in c(FALSE, TRUE)){
+            cat(".")
+
+            my_weight = NULL
+            if(useWeights) my_weight = base$w
+
+            adj = 1
+            if(model == "ols"){
+                if(!use_fe){
+                    res = feols(y ~ x1 + constant, base, weights = my_weight)
+                    res_bis = lm(y ~ x1 + constant, base, weights = my_weight)
+                } else {
+                    res = feols(y ~ x1 + constant | species, base, weights = my_weight)
+                    res_bis = lm(y ~ x1 + constant + species, base, weights = my_weight)
+                }
+            } else {
+                if(!use_fe){
+                    res = fepois(y_int ~ x1 + constant, base, weights = my_weight)
+                    res_bis = glm(y_int ~ x1 + constant, base, weights = my_weight, family = poisson)
+                } else {
+                    res = fepois(y_int ~ x1 + constant | species, base, weights = my_weight)
+                    res_bis = glm(y_int ~ x1 + constant + species, base, weights = my_weight, family = poisson)
+                }
+                adj = 0
+            }
+
+            test(coef(res)["x1"], coef(res_bis)["x1"], "~")
+            test(se(res, se = "st", ssc = ssc(adj=adj))["x1"], se(res_bis)["x1"], "~")
+            # cat("Weight: ", useWeights, ", model: ", model, ", FE: ", use_fe, "\n", sep="")
+
+        }
+    }
+}
+cat("\n")
+
+
+####
+#### ... Non linear tests ####
+####
+
+chunk("NON LINEAR")
+
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
+
+tab = c("versicolor" = 5, "setosa" = 0, "virginica" = -5)
+
+fun_nl = function(a, b, spec){
+    res = as.numeric(tab[spec])
+    a*res + b*res^2
+}
+
+est_nl = feNmlm(y ~ x1, base, NL.fml = ~fun_nl(a, b, species), NL.start = 1, family = "gaussian")
+
+base$var_spec = as.numeric(tab[base$species])
+
+est_lin = feols(y ~ x1 + var_spec + I(var_spec^2), base)
+
+test(coef(est_nl), coef(est_lin)[c(3, 4, 1, 2)], "~")
+
+####
+#### ... Lagging ####
+####
+
+# Different types of lag
+# 1) check no error in wide variety of situations
+# 2) check consistency
+
+chunk("LAGGING")
+
+data(base_did)
+base = base_did
+
+n = nrow(base)
+
+set.seed(0)
+base$y_na = base$y ; base$y_na[sample(n, 50)] = NA
+base$period_txt = letters[base$period]
+ten_dates = c("1960-01-15", "1960-01-16", "1960-03-31", "1960-04-05", "1960-05-12", "1960-05-25", "1960-06-20", "1960-07-30", "1965-01-02", "2002-12-05")
+base$period_date = as.Date(ten_dates, "%Y-%m-%d")[base$period]
+base$y_0 = base$y**2 ; base$y_0[base$id == 1] = 0
+
+# We compute the lags "by hand"
+base = base[order(base$id, base$period), ]
+base$x1_lag = c(NA, base$x1[-n]) ; base$x1_lag[base$period == 1] = NA
+base$x1_lead = c(base$x1[-1], NA) ; base$x1_lead[base$period == 10] = NA
+base$x1_diff = base$x1 - base$x1_lag
+
+# we create holes
+base$period_bis = base$period ; base$period_bis[base$period_bis == 5] = 50
+base$x1_lag_hole = base$x1_lag ; base$x1_lag_hole[base$period %in% c(5, 6)] = NA
+base$x1_lead_hole = base$x1_lead ; base$x1_lead_hole[base$period %in% c(4, 5)] = NA
+
+# we reshuffle the base
+base = base[sample(n), ]
+
+#
+# Checks consistency
+#
+
+cat("consistentcy...")
+
+test(lag(x1 ~ id + period, data = base), base$x1_lag)
+test(lag(x1 ~ id + period, -1, data = base), base$x1_lead)
+
+test(lag(x1 ~ id + period_bis, data = base), base$x1_lag_hole)
+test(lag(x1 ~ id + period_bis, -1, data = base), base$x1_lead_hole)
+
+test(lag(x1 ~ id + period_txt, data = base), base$x1_lag)
+test(lag(x1 ~ id + period_txt, -1, data = base), base$x1_lead)
+
+test(lag(x1 ~ id + period_date, data = base), base$x1_lag)
+test(lag(x1 ~ id + period_date, -1, data = base), base$x1_lead)
+
+cat("done.\nEstimations...")
+
+#
+# Estimations
+#
+
+# Poisson
+
+for(depvar in c("y", "y_na", "y_0")){
+    for(p in c("period", "period_txt", "period_date")){
+
+        base$per = base[[p]]
+
+        cat(".")
+
+        base$y_dep = base[[depvar]]
+        pdat = panel(base, ~ id + period)
+
+        if(depvar == "y_0"){
+            estfun = fepois
+        } else {
+            estfun = feols
+        }
+
+        est_raw  = estfun(y_dep ~ x1 + x1_lag + x1_lead, base)
+        est      = estfun(y_dep ~ x1 + l(x1) + f(x1), base, panel.id = "id,per")
+        est_pdat = estfun(y_dep ~ x1 + l(x1, 1) + f(x1, 1), pdat)
+        test(coef(est_raw), coef(est))
+        test(coef(est_raw), coef(est_pdat))
+
+        # Now diff
+        est_raw  = estfun(y_dep ~ x1 + x1_diff, base)
+        est      = estfun(y_dep ~ x1 + d(x1), base, panel.id = "id,per")
+        est_pdat = estfun(y_dep ~ x1 + d(x1, 1), pdat)
+        test(coef(est_raw), coef(est))
+        test(coef(est_raw), coef(est_pdat))
+
+        # Now we just check that calls to l/f works without checking coefs
+
+        est = estfun(y_dep ~ x1 + l(x1) + f(x1), base, panel.id = "id,per")
+        est = estfun(y_dep ~ l(x1, -1:1) + f(x1, 2), base, panel.id = c("id", "per"))
+        est = estfun(y_dep ~ l(x1, -1:1, fill = 1), base, panel.id = ~ id + per)
+        if(depvar == "y") test(est$nobs, n)
+        est = estfun(f(y_dep) ~ f(x1, -1:1), base, panel.id = ~ id + per)
+    }
+}
+
+cat("done.\n\n")
+
+#
+# Data table
+#
+
+cat("data.table...")
+# We just check there is no bug (consistency should be OK)
+
+library(data.table)
+
+base_dt = data.table(id = c("A", "A", "B", "B"),
+                     time = c(1, 2, 1, 3),
+                     x = c(5, 6, 7, 8))
+
+base_dt = panel(base_dt, ~id + time)
+
+base_dt[, x_l := l(x)]
+test(base_dt$x_l, c(NA, 5, NA, NA))
+
+lag_creator = function(dt) {
+    dt2 = panel(dt, ~id + time)
+    dt2[, x_l := l(x)]
+    return(dt2)
+}
+
+base_bis = lag_creator(base_dt)
+
+base_bis[, x_d := d(x)]
+
+cat("done.\n\n")
+
+#
+# Panel
+#
+
+# We ensure we get the right SEs whether we use the panel() or the panel.id method
+data(base_did)
+
+# Setting a data set as a panel...
+pdat = panel(base_did, ~id+period)
+pdat$fe = sample(15, nrow(pdat), replace = TRUE)
+
+base_panel = unpanel(pdat)
+
+est_pdat = feols(y ~ x1 | fe, pdat)
+est_panel = feols(y ~ x1 | fe, base_panel, panel.id = ~id+period)
+
+test(attr(vcov(est_pdat, attr = TRUE), "type"),
+     attr(vcov(est_panel, attr = TRUE), "type"))
+
+####
+#### ... subset ####
+####
+
+chunk("SUBSET")
+
+set.seed(5)
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
+base$fe_bis = sample(letters, 150, TRUE)
+base$x4 = rnorm(150)
+base$x1[sample(150, 5)] = NA
+
+fml = y ~ x1 + x2
+
+# Errors
+test(feols(fml, base, subset = ~species), "err")
+test(feols(fml, base, subset = -1:15), "err")
+test(feols(fml, base, subset = integer(0)), "err")
+test(feols(fml, base, subset = c(TRUE, TRUE, FALSE)), "err")
+
+# Valid use
+for(id_fun in 1:6){
+    estfun = switch(as.character(id_fun),
+                    "1" = feols,
+                    "2" = feglm,
+                    "3" = fepois,
+                    "4" = femlm,
+                    "5" = fenegbin,
+                    "6" = feNmlm)
+
+    for(id_fe in 1:5){
+
+        cat(".")
+
+        fml = switch(as.character(id_fe),
+                     "1" = y ~ x1 + x2,
+                     "2" = y ~ x1 + x2 | species,
+                     "3" = y ~ x1 + x2 | fe_bis,
+                     "4" = y ~ x1 + x2 + i(fe_bis),
+                     "5" = y ~ x1 + x2 | fe_bis[x3])
+
+        if(id_fe == 5 && id_fun %in% 4:6) next
+
+        if(id_fun == 6){
+            res_sub_a = estfun(fml, base, subset = ~species == "setosa", NL.fml = ~ a*x4, NL.start = 0)
+            res_sub_b = estfun(fml, base, subset = base$species == "setosa", NL.fml = ~ a*x4, NL.start = 0)
+            res_sub_c = estfun(fml, base, subset = which(base$species == "setosa"), NL.fml = ~ a*x4, NL.start = 0)
+            res       = estfun(fml, base[base$species == "setosa", ], NL.fml = ~ a*x4, NL.start = 0)
+        } else {
+            res_sub_a = estfun(fml, base, subset = ~species == "setosa")
+            res_sub_b = estfun(fml, base, subset = base$species == "setosa")
+            res_sub_c = estfun(fml, base, subset = which(base$species == "setosa"))
+            res       = estfun(fml, base[base$species == "setosa", ])
+        }
+
+        test(coef(res_sub_a), coef(res))
+        test(coef(res_sub_b), coef(res))
+        test(coef(res_sub_c), coef(res))
+        test(se(res_sub_c, cluster = "fe_bis"), se(res, cluster = "fe_bis"))
+    }
+    cat("|")
+}
+cat("\n")
+
+
+####
+#### ... split ####
+####
+
+chunk("split")
+
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+
+# simple: formula
+est = feols(y ~ x.[1:3], base, split = ~species %keep% "@^v")
+test(length(est), 2)
+
+est = feols(y ~ x.[1:3], base, fsplit = ~species %keep% c("set", "vers"))
+test(length(est), 3)
+
+est = feols(y ~ x.[1:3], base, split = ~species %drop% "set")
+test(length(est), 2)
+
+# simple: vector
+est = feols(y ~ x.[1:3], base, split = base$species %keep% "@^v")
+test(length(est), 2)
+
+est = feols(y ~ x.[1:3], base, split = base$species %keep% c("set", "vers"))
+test(length(est), 2)
+
+est = feols(y ~ x.[1:3], base, split = base$species %drop% "set")
+test(length(est), 2)
+
+# with bin
+est = feols(y ~ x.[1:2], base,
+            split = ~bin(x3, c("cut::5", "saint emilion", "pessac leognan",
+                               "margaux", "saint julien", "entre deux mers")) %keep% c("saint e", "pe"))
+test(length(est), 2)
+
+est = feols(y ~ x.[1:2], base,
+            split = ~bin(x3, c("cut::5", "saint emilion", "pessac leognan", NA)) %drop% "@\\d")
+test(length(est), 2)
+
+# with argument
+est = feols(y ~ x.[1:3], base, split = ~species, split.keep = "@^v")
+test(length(est), 2)
+
+est = feols(y ~ x.[1:3], base, fsplit = ~species, split.keep = c("set", "vers"))
+test(length(est), 3)
+
+est = feols(y ~ x.[1:3], base, split = ~species, split.drop = "set")
+test(length(est), 2)
+
+
+####
+#### ... Multiple estimations ####
+####
+
+chunk("Multiple")
+
+set.seed(2)
+base = iris
+names(base) = c("y1", "x1", "x2", "x3", "species")
+base$y2 = 10 + rnorm(150) + 0.5 * base$x1
+base$x4 = rnorm(150) + 0.5 * base$y1
+base$fe2 = rep(letters[1:15], 10)
+base$fe2[50:51] = NA
+base$y2[base$fe2 == "a" & !is.na(base$fe2)] = 0
+base$x2[1:5] = NA
+base$x3[6] = NA
+base$x5 = rnorm(150)
+base$x6 = rnorm(150) + base$y1 * 0.25
+base$fe3 = rep(letters[1:10], 15)
+
+
+for(id_fun in 1:5){
+    estfun = switch(as.character(id_fun),
+                    "1" = feols,
+                    "2" = feglm,
+                    "3" = fepois,
+                    "4" = femlm,
+                    "5" = feNmlm)
+
+    # Following weird bug ASAN on CRAN I cannot replicate, check 4/5 not performed on non Windows
+    if(Sys.info()["sysname"] != "Windows"){
+        if(id_fun %in% 4:5) next
+    }
+
+
+    est_multi = estfun(c(y1, y2) ~ x1 + sw(x2, x3), base, split = ~species)
+
+    k = 1
+    for(s in c("setosa", "versicolor", "virginica")){
+        for(lhs in c("y1", "y2")){
+            for(rhs in c("x2", "x3")){
+                res = estfun(.[lhs] ~ x1 + .[rhs], base[base$species == s, ], notes = FALSE)
+
+                test(coef(est_multi[[k]]), coef(res))
+                test(se(est_multi[[k]], cluster = "fe3"), se(res, cluster = "fe3"))
+                k = k + 1
+            }
+        }
+    }
+
+    cat("__")
+
+    est_multi = estfun(c(y1, y2) ~ x1 + csw0(x2, x3) + x4 | species + fe2, base, fsplit = ~species)
+    k = 1
+    all_rhs = c("", "x2", "x3")
+    for(s in c("all", "setosa", "versicolor", "virginica")){
+        for(lhs in c("y1", "y2")){
+            for(n_rhs in 1:3){
+                if(s == "all"){
+                    res = estfun(xpd(..lhs ~ x1 + ..rhs + x4 | species + fe2, ..lhs = lhs, ..rhs = all_rhs[1:n_rhs]), base, notes = FALSE)
+                } else {
+                    res = estfun(xpd(..lhs ~ x1 + ..rhs + x4 | species + fe2, ..lhs = lhs, ..rhs = all_rhs[1:n_rhs]), base[base$species == s, ], notes = FALSE)
+                }
+
+                vname = names(coef(res))
+                test(coef(est_multi[[k]])[vname], coef(res), "~" , 1e-6)
+                test(se(est_multi[[k]], cluster = "fe3")[vname], se(res, cluster = "fe3"), "~" , 1e-6)
+                k = k + 1
+            }
+        }
+    }
+
+    cat("|")
+}
+cat("\n")
+
+
+# No error tests
+# We test with IV + possible corner cases
+
+base$left = rnorm(150)
+base$right = rnorm(150)
+
+est_multi = feols(c(y1, y2) ~ sw0(x1) | sw0(species) | x2 ~ x3, base)
+
+# We check a few
+est_a = feols(y1 ~ 1 | x2 ~ x3, base)
+est_b = feols(y1 ~ x1 | species | x2 ~ x3, base)
+est_c = feols(y2 ~ 1 | x2 ~ x3, base)
+
+test(coef(est_multi[lhs = "y1", rhs = "^1", fixef = "1", drop = TRUE]), coef(est_a))
+test(coef(est_multi[lhs = "y1", rhs = "x1", fixef = "spe", drop = TRUE]), coef(est_b))
+test(coef(est_multi[lhs = "y2", rhs = "^1", fixef = "1", drop = TRUE]), coef(est_c))
+
+# with fixed covariates
+est_multi_LR = feols(c(y1, y2) ~ left + sw0(x1*x4) + right | sw0(species) | x2 ~ x3, base)
+
+est_a = feols(y1 ~ left + right | x2 ~ x3, base)
+est_b = feols(y1 ~ left + x1*x4 + right | species | x2 ~ x3, base)
+est_c = feols(y2 ~ left + right | x2 ~ x3, base)
+
+test(coef(est_multi_LR[lhs = "y1", rhs = "!x1", fixef = "1", drop = TRUE]), coef(est_a))
+user_name = c("fit_x2", "left", "x1", "x4", "x1:x4", "right")
+test(names(coef(est_multi_LR[lhs = "y1", rhs = "x1", fixef = "spe", drop = TRUE])), user_name)
+test(coef(est_multi_LR[lhs = "y1", rhs = "x1", fixef = "spe", drop = TRUE]), coef(est_b)[user_name])
+test(coef(est_multi_LR[lhs = "y2", rhs = "!x1", fixef = "1", drop = TRUE]), coef(est_c))
+
+
+# mvsw
+
+est_mvsw = feols(y1 ~ mvsw(x1, x2), base)
+est_mvsw_fe = feols(y1 ~ mvsw(x1, x2) | mvsw(species, fe2), base)
+est_mvsw_fe_iv = feols(y1 ~ mvsw(x1, x2) | mvsw(species, fe2) | x3 ~ x4, base)
+
+test(length(est_mvsw), 4)
+test(length(as.list(est_mvsw_fe)), 16)
+test(length(as.list(est_mvsw_fe_iv)), 16)
+
+# Summary of multiple endo vars
+est_multi_iv = feols(c(y1, y2) ~ sw0(x1) | sw0(species) | x3 + x4 ~ x5 + x6, base)
+test(length(est_multi_iv), 8)
+test(length(summary(est_multi_iv, stage = 1)), 16)
+
+# IV without exo var:
+est_mult_no_exo = feols(c(y1, y2) ~ 0 | x3 + x4 ~ x5 + x6, base)
+est_no_exo_y2 = feols(y2 ~ 0 | x3 + x4 ~ x5 + x6, base)
+test(coef(est_mult_no_exo[[2]]), coef(est_no_exo_y2))
+
+# proper ordering
+est_multi = feols(c(y1, y2) ~ sw0(x1) | sw0(fe2), base, split = ~species)
+test(names(models(est_multi[fixef = TRUE, sample = FALSE])),
+     dsb("/id, fixef, lhs, rhs, sample.var, sample"))
+
+test(names(models(est_multi[fixef = "fe2", sample = "seto"])),
+     dsb("/id, fixef, sample.var, sample, lhs, rhs"))
+
+test(names(models(est_multi[fixef = "fe2", sample = "seto", reorder = FALSE])),
+     dsb("/id, sample.var, sample, fixef, lhs, rhs"))
+
+# NA models
+base$y_0 = base$x1 ** 2 + rnorm(150)
+base$y_0[base$species == "setosa"] = 0
+
+est_pois = fepois(y_0 ~ csw(x.[,1:4]), base, split = ~species)
+
+base$x1_bis = base$x1
+est_pois = fepois(y_0 ~ x.[1:3] + x1_bis | sw0(species), base)
+
+
+
+
+####
+#### ... IV ####
+####
+
+chunk("IV")
+
+base = iris
+names(base) = c("y", "x1", "x_endo_1", "x_inst_1", "fe")
+set.seed(2)
+base$x_inst_2 = 0.2 * base$y + 0.2 * base$x_endo_1 + rnorm(150, sd = 0.5)
+base$x_endo_2 = 0.2 * base$y - 0.2 * base$x_inst_1 + rnorm(150, sd = 0.5)
+
+# Checking a basic estimation
+
+setFixest_vcov(all = "iid")
+
+est_iv = feols(y ~ x1 | x_endo_1 + x_endo_2 ~ x_inst_1 + x_inst_2, base)
+
+res_f1 = feols(x_endo_1 ~ x1 + x_inst_1 + x_inst_2, base)
+res_f2 = feols(x_endo_2 ~ x1 + x_inst_1 + x_inst_2, base)
+
+base$fit_x_endo_1 = predict(res_f1)
+base$fit_x_endo_2 = predict(res_f2)
+
+res_2nd = feols(y ~ fit_x_endo_1 + fit_x_endo_2 + x1, base)
+
+# the coef
+test(coef(est_iv), coef(res_2nd))
+
+# the SE
+resid_iv = base$y - predict(res_2nd, data.frame(x1 = base$x1, fit_x_endo_1 = base$x_endo_1, fit_x_endo_2 = base$x_endo_2))
+sigma2_iv = sum(resid_iv**2) / (res_2nd$nobs - res_2nd$nparams)
+
+sum_2nd = summary(res_2nd, .vcov = res_2nd$cov.iid / res_2nd$sigma2 * sigma2_iv)
+
+# We only check that on Windows => avoids super odd bug in fedora devel
+# The worst is that I just can't debug it.... so that's the way it's done.
+if(Sys.info()["sysname"] == "Windows"){
+    test(se(sum_2nd), se(est_iv))
+}
+
+
+# check no bug
+etable(summary(est_iv, stage = 1:2))
+
+setFixest_vcov(reset = TRUE)
+
+####
+#### ... VCOV at estimation ####
+####
+
+chunk("vcov at estimation")
+
+base = iris
+names(base) = c("y", "x1", "x2", "x3", "species")
+base$clu = sample(6, 150, TRUE)
+base$clu[1:5] = NA
+
+est = feols(y ~ x1 | species, base, cluster = ~clu, ssc = ssc(adj = FALSE))
+
+# The three should be identical
+v1 = est$cov.scaled
+v1b = vcov(est)
+v1c = summary(est)$cov.scaled
+
+test(v1, v1b)
+test(v1, v1c)
+
+# Only ssc change
+v2 = summary(est, ssc = ssc())$cov.scaled
+v2b = vcov(est, cluster = ~clu, ssc = ssc())
+
+test(v2, v2b)
+test(max(abs(v1 - v2)) == 0, FALSE)
+
+# SE change only
+v3 = summary(est, se = "hetero")$cov.scaled
+v3b = vcov(est, se = "hetero", ssc = ssc(adj = FALSE))
+
+test(v3, v3b)
+test(max(abs(v1 - v3)) == 0, FALSE)
+test(max(abs(v2 - v3)) == 0, FALSE)
+
+####
+#### ... Argument sliding ####
+####
+
+chunk("argument sliding")
+
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+
+setFixest_estimation(data = base)
+
+raw = feols(y ~ x1 + x2, base, ~species)
+slided = feols(y ~ x1 + x2, ~species)
+
+test(coef(raw), coef(slided))
+
+# Error, with error msg relative to 'data'
+test(feols(y ~ x1 + x2, 1:5), "err")
+
+# should be another estimation
+other_est = feols(y ~ x1 + x2, head(base, 50))
+test(nobs(other_est), 50)
+
+setFixest_estimation(reset = TRUE)
+
+####
+#### ... Offset ####
+####
+
+chunk("offset")
+
+# we test the different ways to set an offset
+
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+
+o1 = feols(y ~ x1 + offset(x2) + offset(x3^2 + 3), base)
+o2 = feols(y ~ x1, base, offset = ~x2 + x3^2 + 3)
+test(coef(o1), coef(o2))
+
+# error
+test(feols(y ~ x1 + offset(x2), base, offset = ~x3), "err")
+
+
+####
+#### ... Only Coef ####
+####
+
+chunk("only.coef")
+
+
+base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
+base$x4 = base$x1 + 5
+
+m = feols(y ~ x1 + x2 + x4, base, only.coef = TRUE)
+test(length(m), 4)
+test(sum(is.na(m)), 1)
+
+m = fepois(y ~ x1 + x2 + x4, base, only.coef = TRUE)
+test(length(m), 4)
+test(sum(is.na(m)), 1)
+
+m = femlm(y ~ x1 + x2, base, only.coef = TRUE)
+test(length(m), 3)
+test(sum(is.na(m)), 0)
+
+test(feols(y ~ sw(x1, x2), base, only.coef = TRUE), "err")
+
 
 ####
 #### Standard-errors ####
@@ -888,55 +1537,6 @@ m = to_integer(base$species_na, base$z, add_items = TRUE, items.list = TRUE)
 test(length(m$items), 10)
 
 
-####
-#### Collinearity ####
-####
-
-cat("COLLINEARITY\n\n")
-
-base = iris
-names(base) = c("y", "x1", "x2", "x3", "species")
-base$constant = 5
-base$y_int = as.integer(base$y)
-base$w = as.vector(unclass(base$species) - 0.95)
-
-for(useWeights in c(FALSE, TRUE)){
-    for(model in c("ols", "pois")){
-        for(use_fe in c(FALSE, TRUE)){
-            cat(".")
-
-            my_weight = NULL
-            if(useWeights) my_weight = base$w
-
-            adj = 1
-            if(model == "ols"){
-                if(!use_fe){
-                    res = feols(y ~ x1 + constant, base, weights = my_weight)
-                    res_bis = lm(y ~ x1 + constant, base, weights = my_weight)
-                } else {
-                    res = feols(y ~ x1 + constant | species, base, weights = my_weight)
-                    res_bis = lm(y ~ x1 + constant + species, base, weights = my_weight)
-                }
-            } else {
-                if(!use_fe){
-                    res = fepois(y_int ~ x1 + constant, base, weights = my_weight)
-                    res_bis = glm(y_int ~ x1 + constant, base, weights = my_weight, family = poisson)
-                } else {
-                    res = fepois(y_int ~ x1 + constant | species, base, weights = my_weight)
-                    res_bis = glm(y_int ~ x1 + constant + species, base, weights = my_weight, family = poisson)
-                }
-                adj = 0
-            }
-
-            test(coef(res)["x1"], coef(res_bis)["x1"], "~")
-            test(se(res, se = "st", ssc = ssc(adj=adj))["x1"], se(res_bis)["x1"], "~")
-            # cat("Weight: ", useWeights, ", model: ", model, ", FE: ", use_fe, "\n", sep="")
-
-        }
-    }
-}
-cat("\n")
-
 
 ####
 #### Interact ####
@@ -1182,184 +1782,6 @@ est_env_w = est_env(env = env)
 test(coef(est_w), coef(est_env_w))
 
 ####
-#### Non linear tests ####
-####
-
-chunk("NON LINEAR")
-
-base = iris
-names(base) = c("y", "x1", "x2", "x3", "species")
-
-tab = c("versicolor" = 5, "setosa" = 0, "virginica" = -5)
-
-fun_nl = function(a, b, spec){
-    res = as.numeric(tab[spec])
-    a*res + b*res^2
-}
-
-est_nl = feNmlm(y ~ x1, base, NL.fml = ~fun_nl(a, b, species), NL.start = 1, family = "gaussian")
-
-base$var_spec = as.numeric(tab[base$species])
-
-est_lin = feols(y ~ x1 + var_spec + I(var_spec^2), base)
-
-test(coef(est_nl), coef(est_lin)[c(3, 4, 1, 2)], "~")
-
-
-
-####
-#### Lagging ####
-####
-
-# Different types of lag
-# 1) check no error in wide variety of situations
-# 2) check consistency
-
-chunk("LAGGING")
-
-data(base_did)
-base = base_did
-
-n = nrow(base)
-
-set.seed(0)
-base$y_na = base$y ; base$y_na[sample(n, 50)] = NA
-base$period_txt = letters[base$period]
-ten_dates = c("1960-01-15", "1960-01-16", "1960-03-31", "1960-04-05", "1960-05-12", "1960-05-25", "1960-06-20", "1960-07-30", "1965-01-02", "2002-12-05")
-base$period_date = as.Date(ten_dates, "%Y-%m-%d")[base$period]
-base$y_0 = base$y**2 ; base$y_0[base$id == 1] = 0
-
-# We compute the lags "by hand"
-base = base[order(base$id, base$period), ]
-base$x1_lag = c(NA, base$x1[-n]) ; base$x1_lag[base$period == 1] = NA
-base$x1_lead = c(base$x1[-1], NA) ; base$x1_lead[base$period == 10] = NA
-base$x1_diff = base$x1 - base$x1_lag
-
-# we create holes
-base$period_bis = base$period ; base$period_bis[base$period_bis == 5] = 50
-base$x1_lag_hole = base$x1_lag ; base$x1_lag_hole[base$period %in% c(5, 6)] = NA
-base$x1_lead_hole = base$x1_lead ; base$x1_lead_hole[base$period %in% c(4, 5)] = NA
-
-# we reshuffle the base
-base = base[sample(n), ]
-
-#
-# Checks consistency
-#
-
-cat("consistentcy...")
-
-test(lag(x1 ~ id + period, data = base), base$x1_lag)
-test(lag(x1 ~ id + period, -1, data = base), base$x1_lead)
-
-test(lag(x1 ~ id + period_bis, data = base), base$x1_lag_hole)
-test(lag(x1 ~ id + period_bis, -1, data = base), base$x1_lead_hole)
-
-test(lag(x1 ~ id + period_txt, data = base), base$x1_lag)
-test(lag(x1 ~ id + period_txt, -1, data = base), base$x1_lead)
-
-test(lag(x1 ~ id + period_date, data = base), base$x1_lag)
-test(lag(x1 ~ id + period_date, -1, data = base), base$x1_lead)
-
-cat("done.\nEstimations...")
-
-#
-# Estimations
-#
-
-# Poisson
-
-for(depvar in c("y", "y_na", "y_0")){
-    for(p in c("period", "period_txt", "period_date")){
-
-        base$per = base[[p]]
-
-        cat(".")
-
-        base$y_dep = base[[depvar]]
-        pdat = panel(base, ~ id + period)
-
-        if(depvar == "y_0"){
-            estfun = fepois
-        } else {
-            estfun = feols
-        }
-
-        est_raw  = estfun(y_dep ~ x1 + x1_lag + x1_lead, base)
-        est      = estfun(y_dep ~ x1 + l(x1) + f(x1), base, panel.id = "id,per")
-        est_pdat = estfun(y_dep ~ x1 + l(x1, 1) + f(x1, 1), pdat)
-        test(coef(est_raw), coef(est))
-        test(coef(est_raw), coef(est_pdat))
-
-        # Now diff
-        est_raw  = estfun(y_dep ~ x1 + x1_diff, base)
-        est      = estfun(y_dep ~ x1 + d(x1), base, panel.id = "id,per")
-        est_pdat = estfun(y_dep ~ x1 + d(x1, 1), pdat)
-        test(coef(est_raw), coef(est))
-        test(coef(est_raw), coef(est_pdat))
-
-        # Now we just check that calls to l/f works without checking coefs
-
-        est = estfun(y_dep ~ x1 + l(x1) + f(x1), base, panel.id = "id,per")
-        est = estfun(y_dep ~ l(x1, -1:1) + f(x1, 2), base, panel.id = c("id", "per"))
-        est = estfun(y_dep ~ l(x1, -1:1, fill = 1), base, panel.id = ~ id + per)
-        if(depvar == "y") test(est$nobs, n)
-        est = estfun(f(y_dep) ~ f(x1, -1:1), base, panel.id = ~ id + per)
-    }
-}
-
-cat("done.\n\n")
-
-#
-# Data table
-#
-
-cat("data.table...")
-# We just check there is no bug (consistency should be OK)
-
-library(data.table)
-
-base_dt = data.table(id = c("A", "A", "B", "B"),
-                     time = c(1, 2, 1, 3),
-                     x = c(5, 6, 7, 8))
-
-base_dt = panel(base_dt, ~id + time)
-
-base_dt[, x_l := l(x)]
-test(base_dt$x_l, c(NA, 5, NA, NA))
-
-lag_creator = function(dt) {
-    dt2 = panel(dt, ~id + time)
-    dt2[, x_l := l(x)]
-    return(dt2)
-}
-
-base_bis = lag_creator(base_dt)
-
-base_bis[, x_d := d(x)]
-
-cat("done.\n\n")
-
-####
-#### Panel ####
-####
-
-# We ensure we get the right SEs whether we use the panel() or the panel.id method
-data(base_did)
-
-# Setting a data set as a panel...
-pdat = panel(base_did, ~id+period)
-pdat$fe = sample(15, nrow(pdat), replace = TRUE)
-
-base_panel = unpanel(pdat)
-
-est_pdat = feols(y ~ x1 | fe, pdat)
-est_panel = feols(y ~ x1 | fe, base_panel, panel.id = ~id+period)
-
-test(attr(vcov(est_pdat, attr = TRUE), "type"),
-     attr(vcov(est_panel, attr = TRUE), "type"))
-
-####
 #### xpd ####
 ####
 
@@ -1540,316 +1962,6 @@ test(predict(aw, se.fit = TRUE, interval = "pre")$fit[, 2],
      predict(bw, se.fit = TRUE, interval = "pre")$ci_low)
 
 
-####
-#### subset ####
-####
-
-chunk("SUBSET")
-
-set.seed(5)
-base = iris
-names(base) = c("y", "x1", "x2", "x3", "species")
-base$fe_bis = sample(letters, 150, TRUE)
-base$x4 = rnorm(150)
-base$x1[sample(150, 5)] = NA
-
-fml = y ~ x1 + x2
-
-# Errors
-test(feols(fml, base, subset = ~species), "err")
-test(feols(fml, base, subset = -1:15), "err")
-test(feols(fml, base, subset = integer(0)), "err")
-test(feols(fml, base, subset = c(TRUE, TRUE, FALSE)), "err")
-
-# Valid use
-for(id_fun in 1:6){
-    estfun = switch(as.character(id_fun),
-                    "1" = feols,
-                    "2" = feglm,
-                    "3" = fepois,
-                    "4" = femlm,
-                    "5" = fenegbin,
-                    "6" = feNmlm)
-
-    for(id_fe in 1:5){
-
-        cat(".")
-
-        fml = switch(as.character(id_fe),
-                     "1" = y ~ x1 + x2,
-                     "2" = y ~ x1 + x2 | species,
-                     "3" = y ~ x1 + x2 | fe_bis,
-                     "4" = y ~ x1 + x2 + i(fe_bis),
-                     "5" = y ~ x1 + x2 | fe_bis[x3])
-
-        if(id_fe == 5 && id_fun %in% 4:6) next
-
-        if(id_fun == 6){
-            res_sub_a = estfun(fml, base, subset = ~species == "setosa", NL.fml = ~ a*x4, NL.start = 0)
-            res_sub_b = estfun(fml, base, subset = base$species == "setosa", NL.fml = ~ a*x4, NL.start = 0)
-            res_sub_c = estfun(fml, base, subset = which(base$species == "setosa"), NL.fml = ~ a*x4, NL.start = 0)
-            res       = estfun(fml, base[base$species == "setosa", ], NL.fml = ~ a*x4, NL.start = 0)
-        } else {
-            res_sub_a = estfun(fml, base, subset = ~species == "setosa")
-            res_sub_b = estfun(fml, base, subset = base$species == "setosa")
-            res_sub_c = estfun(fml, base, subset = which(base$species == "setosa"))
-            res       = estfun(fml, base[base$species == "setosa", ])
-        }
-
-        test(coef(res_sub_a), coef(res))
-        test(coef(res_sub_b), coef(res))
-        test(coef(res_sub_c), coef(res))
-        test(se(res_sub_c, cluster = "fe_bis"), se(res, cluster = "fe_bis"))
-    }
-    cat("|")
-}
-cat("\n")
-
-
-####
-#### split ####
-####
-
-base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
-
-# simple: formula
-est = feols(y ~ x.[1:3], base, split = ~species %keep% "@^v")
-test(length(est), 2)
-
-est = feols(y ~ x.[1:3], base, fsplit = ~species %keep% c("set", "vers"))
-test(length(est), 3)
-
-est = feols(y ~ x.[1:3], base, split = ~species %drop% "set")
-test(length(est), 2)
-
-# simple: vector
-est = feols(y ~ x.[1:3], base, split = base$species %keep% "@^v")
-test(length(est), 2)
-
-est = feols(y ~ x.[1:3], base, split = base$species %keep% c("set", "vers"))
-test(length(est), 2)
-
-est = feols(y ~ x.[1:3], base, split = base$species %drop% "set")
-test(length(est), 2)
-
-# with bin
-est = feols(y ~ x.[1:2], base,
-            split = ~bin(x3, c("cut::5", "saint emilion", "pessac leognan",
-                               "margaux", "saint julien", "entre deux mers")) %keep% c("saint e", "pe"))
-test(length(est), 2)
-
-est = feols(y ~ x.[1:2], base,
-            split = ~bin(x3, c("cut::5", "saint emilion", "pessac leognan", NA)) %drop% "@\\d")
-test(length(est), 2)
-
-# with argument
-est = feols(y ~ x.[1:3], base, split = ~species, split.keep = "@^v")
-test(length(est), 2)
-
-est = feols(y ~ x.[1:3], base, fsplit = ~species, split.keep = c("set", "vers"))
-test(length(est), 3)
-
-est = feols(y ~ x.[1:3], base, split = ~species, split.drop = "set")
-test(length(est), 2)
-
-
-####
-#### Multiple estimations ####
-####
-
-chunk("Multiple")
-
-set.seed(2)
-base = iris
-names(base) = c("y1", "x1", "x2", "x3", "species")
-base$y2 = 10 + rnorm(150) + 0.5 * base$x1
-base$x4 = rnorm(150) + 0.5 * base$y1
-base$fe2 = rep(letters[1:15], 10)
-base$fe2[50:51] = NA
-base$y2[base$fe2 == "a" & !is.na(base$fe2)] = 0
-base$x2[1:5] = NA
-base$x3[6] = NA
-base$x5 = rnorm(150)
-base$x6 = rnorm(150) + base$y1 * 0.25
-base$fe3 = rep(letters[1:10], 15)
-
-
-for(id_fun in 1:5){
-    estfun = switch(as.character(id_fun),
-                    "1" = feols,
-                    "2" = feglm,
-                    "3" = fepois,
-                    "4" = femlm,
-                    "5" = feNmlm)
-
-    # Following weird bug ASAN on CRAN I cannot replicate, check 4/5 not performed on non Windows
-    if(Sys.info()["sysname"] != "Windows"){
-       if(id_fun %in% 4:5) next
-    }
-
-
-    est_multi = estfun(c(y1, y2) ~ x1 + sw(x2, x3), base, split = ~species)
-
-    k = 1
-    for(s in c("setosa", "versicolor", "virginica")){
-        for(lhs in c("y1", "y2")){
-            for(rhs in c("x2", "x3")){
-                res = estfun(.[lhs] ~ x1 + .[rhs], base[base$species == s, ], notes = FALSE)
-
-                test(coef(est_multi[[k]]), coef(res))
-                test(se(est_multi[[k]], cluster = "fe3"), se(res, cluster = "fe3"))
-                k = k + 1
-            }
-        }
-    }
-
-    cat("__")
-
-    est_multi = estfun(c(y1, y2) ~ x1 + csw0(x2, x3) + x4 | species + fe2, base, fsplit = ~species)
-    k = 1
-    all_rhs = c("", "x2", "x3")
-    for(s in c("all", "setosa", "versicolor", "virginica")){
-        for(lhs in c("y1", "y2")){
-            for(n_rhs in 1:3){
-                if(s == "all"){
-                    res = estfun(xpd(..lhs ~ x1 + ..rhs + x4 | species + fe2, ..lhs = lhs, ..rhs = all_rhs[1:n_rhs]), base, notes = FALSE)
-                } else {
-                    res = estfun(xpd(..lhs ~ x1 + ..rhs + x4 | species + fe2, ..lhs = lhs, ..rhs = all_rhs[1:n_rhs]), base[base$species == s, ], notes = FALSE)
-                }
-
-                vname = names(coef(res))
-                test(coef(est_multi[[k]])[vname], coef(res), "~" , 1e-6)
-                test(se(est_multi[[k]], cluster = "fe3")[vname], se(res, cluster = "fe3"), "~" , 1e-6)
-                k = k + 1
-            }
-        }
-    }
-
-    cat("|")
-}
-cat("\n")
-
-
-# No error tests
-# We test with IV + possible corner cases
-
-base$left = rnorm(150)
-base$right = rnorm(150)
-
-est_multi = feols(c(y1, y2) ~ sw0(x1) | sw0(species) | x2 ~ x3, base)
-
-# We check a few
-est_a = feols(y1 ~ 1 | x2 ~ x3, base)
-est_b = feols(y1 ~ x1 | species | x2 ~ x3, base)
-est_c = feols(y2 ~ 1 | x2 ~ x3, base)
-
-test(coef(est_multi[lhs = "y1", rhs = "^1", fixef = "1", drop = TRUE]), coef(est_a))
-test(coef(est_multi[lhs = "y1", rhs = "x1", fixef = "spe", drop = TRUE]), coef(est_b))
-test(coef(est_multi[lhs = "y2", rhs = "^1", fixef = "1", drop = TRUE]), coef(est_c))
-
-# with fixed covariates
-est_multi_LR = feols(c(y1, y2) ~ left + sw0(x1*x4) + right | sw0(species) | x2 ~ x3, base)
-
-est_a = feols(y1 ~ left + right | x2 ~ x3, base)
-est_b = feols(y1 ~ left + x1*x4 + right | species | x2 ~ x3, base)
-est_c = feols(y2 ~ left + right | x2 ~ x3, base)
-
-test(coef(est_multi_LR[lhs = "y1", rhs = "!x1", fixef = "1", drop = TRUE]), coef(est_a))
-user_name = c("fit_x2", "left", "x1", "x4", "x1:x4", "right")
-test(names(coef(est_multi_LR[lhs = "y1", rhs = "x1", fixef = "spe", drop = TRUE])), user_name)
-test(coef(est_multi_LR[lhs = "y1", rhs = "x1", fixef = "spe", drop = TRUE]), coef(est_b)[user_name])
-test(coef(est_multi_LR[lhs = "y2", rhs = "!x1", fixef = "1", drop = TRUE]), coef(est_c))
-
-
-# mvsw
-
-est_mvsw = feols(y1 ~ mvsw(x1, x2), base)
-est_mvsw_fe = feols(y1 ~ mvsw(x1, x2) | mvsw(species, fe2), base)
-est_mvsw_fe_iv = feols(y1 ~ mvsw(x1, x2) | mvsw(species, fe2) | x3 ~ x4, base)
-
-test(length(est_mvsw), 4)
-test(length(as.list(est_mvsw_fe)), 16)
-test(length(as.list(est_mvsw_fe_iv)), 16)
-
-# Summary of multiple endo vars
-est_multi_iv = feols(c(y1, y2) ~ sw0(x1) | sw0(species) | x3 + x4 ~ x5 + x6, base)
-test(length(est_multi_iv), 8)
-test(length(summary(est_multi_iv, stage = 1)), 16)
-
-# IV without exo var:
-est_mult_no_exo = feols(c(y1, y2) ~ 0 | x3 + x4 ~ x5 + x6, base)
-est_no_exo_y2 = feols(y2 ~ 0 | x3 + x4 ~ x5 + x6, base)
-test(coef(est_mult_no_exo[[2]]), coef(est_no_exo_y2))
-
-# proper ordering
-est_multi = feols(c(y1, y2) ~ sw0(x1) | sw0(fe2), base, split = ~species)
-test(names(models(est_multi[fixef = TRUE, sample = FALSE])),
-     dsb("/id, fixef, lhs, rhs, sample.var, sample"))
-
-test(names(models(est_multi[fixef = "fe2", sample = "seto"])),
-     dsb("/id, fixef, sample.var, sample, lhs, rhs"))
-
-test(names(models(est_multi[fixef = "fe2", sample = "seto", reorder = FALSE])),
-     dsb("/id, sample.var, sample, fixef, lhs, rhs"))
-
-# NA models
-base$y_0 = base$x1 ** 2 + rnorm(150)
-base$y_0[base$species == "setosa"] = 0
-
-est_pois = fepois(y_0 ~ csw(x.[,1:4]), base, split = ~species)
-
-base$x1_bis = base$x1
-est_pois = fepois(y_0 ~ x.[1:3] + x1_bis | sw0(species), base)
-
-
-
-
-####
-#### IV ####
-####
-
-chunk("IV")
-
-base = iris
-names(base) = c("y", "x1", "x_endo_1", "x_inst_1", "fe")
-set.seed(2)
-base$x_inst_2 = 0.2 * base$y + 0.2 * base$x_endo_1 + rnorm(150, sd = 0.5)
-base$x_endo_2 = 0.2 * base$y - 0.2 * base$x_inst_1 + rnorm(150, sd = 0.5)
-
-# Checking a basic estimation
-
-setFixest_vcov(all = "iid")
-
-est_iv = feols(y ~ x1 | x_endo_1 + x_endo_2 ~ x_inst_1 + x_inst_2, base)
-
-res_f1 = feols(x_endo_1 ~ x1 + x_inst_1 + x_inst_2, base)
-res_f2 = feols(x_endo_2 ~ x1 + x_inst_1 + x_inst_2, base)
-
-base$fit_x_endo_1 = predict(res_f1)
-base$fit_x_endo_2 = predict(res_f2)
-
-res_2nd = feols(y ~ fit_x_endo_1 + fit_x_endo_2 + x1, base)
-
-# the coef
-test(coef(est_iv), coef(res_2nd))
-
-# the SE
-resid_iv = base$y - predict(res_2nd, data.frame(x1 = base$x1, fit_x_endo_1 = base$x_endo_1, fit_x_endo_2 = base$x_endo_2))
-sigma2_iv = sum(resid_iv**2) / (res_2nd$nobs - res_2nd$nparams)
-
-sum_2nd = summary(res_2nd, .vcov = res_2nd$cov.iid / res_2nd$sigma2 * sigma2_iv)
-
-# We only check that on Windows => avoids super odd bug in fedora devel
-# The worst is that I just can't debug it.... so that's the way it's done.
-if(Sys.info()["sysname"] == "Windows"){
-    test(se(sum_2nd), se(est_iv))
-}
-
-
-# check no bug
-etable(summary(est_iv, stage = 1:2))
-
-setFixest_vcov(reset = TRUE)
 
 
 ####
@@ -1947,41 +2059,6 @@ res_mult = feols(y1 ~ x1 | species | x2 ~ x3, base)
 m_lhs_rhs_fixef = model.matrix(res_mult, type = c("lhs", "iv.rhs2", "fixef"), na.rm = FALSE)
 test(names(m_lhs_rhs_fixef), c("y1", "fit_x2", "x1", "species"))
 
-####
-#### VCOV at estimation ####
-####
-
-chunk("vcov at estimation")
-
-base = iris
-names(base) = c("y", "x1", "x2", "x3", "species")
-base$clu = sample(6, 150, TRUE)
-base$clu[1:5] = NA
-
-est = feols(y ~ x1 | species, base, cluster = ~clu, ssc = ssc(adj = FALSE))
-
-# The three should be identical
-v1 = est$cov.scaled
-v1b = vcov(est)
-v1c = summary(est)$cov.scaled
-
-test(v1, v1b)
-test(v1, v1c)
-
-# Only ssc change
-v2 = summary(est, ssc = ssc())$cov.scaled
-v2b = vcov(est, cluster = ~clu, ssc = ssc())
-
-test(v2, v2b)
-test(max(abs(v1 - v2)) == 0, FALSE)
-
-# SE change only
-v3 = summary(est, se = "hetero")$cov.scaled
-v3b = vcov(est, se = "hetero", ssc = ssc(adj = FALSE))
-
-test(v3, v3b)
-test(max(abs(v1 - v3)) == 0, FALSE)
-test(max(abs(v2 - v3)) == 0, FALSE)
 
 ####
 #### fitstat ####
@@ -2004,74 +2081,6 @@ fitstat(est_iv, ~ f + ivf + ivf2 + wald + ivwald + ivwald2 + wh + sargan + rmse 
 est_fe = feols(y ~ x1 | fe, base)
 
 fitstat(est_fe, ~ wf)
-
-
-
-####
-#### Argument sliding ####
-####
-
-chunk("argument sliding")
-
-base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
-
-setFixest_estimation(data = base)
-
-raw = feols(y ~ x1 + x2, base, ~species)
-slided = feols(y ~ x1 + x2, ~species)
-
-test(coef(raw), coef(slided))
-
-# Error, with error msg relative to 'data'
-test(feols(y ~ x1 + x2, 1:5), "err")
-
-# should be another estimation
-other_est = feols(y ~ x1 + x2, head(base, 50))
-test(nobs(other_est), 50)
-
-setFixest_estimation(reset = TRUE)
-
-####
-#### Offset ####
-####
-
-chunk("offset")
-
-# we test the different ways to set an offset
-
-base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
-
-o1 = feols(y ~ x1 + offset(x2) + offset(x3^2 + 3), base)
-o2 = feols(y ~ x1, base, offset = ~x2 + x3^2 + 3)
-test(coef(o1), coef(o2))
-
-# error
-test(feols(y ~ x1 + offset(x2), base, offset = ~x3), "err")
-
-
-####
-#### Only Coef ####
-####
-
-chunk("only.coef")
-
-
-base = setNames(iris, c("y", "x1", "x2", "x3", "species"))
-base$x4 = base$x1 + 5
-
-m = feols(y ~ x1 + x2 + x4, base, only.coef = TRUE)
-test(length(m), 4)
-test(sum(is.na(m)), 1)
-
-m = fepois(y ~ x1 + x2 + x4, base, only.coef = TRUE)
-test(length(m), 4)
-test(sum(is.na(m)), 1)
-
-m = femlm(y ~ x1 + x2, base, only.coef = TRUE)
-test(length(m), 3)
-test(sum(is.na(m)), 0)
-
-test(feols(y ~ sw(x1, x2), base, only.coef = TRUE), "err")
 
 
 ####
