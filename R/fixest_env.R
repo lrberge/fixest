@@ -963,11 +963,20 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
                 stop("The argument 'subset' leads to no observation being selected.")
             }
 
+            if(!isFit){
+                # nobs_origin already created for isFit
+                nobs_origin = NROW(data)
+            }
+
+            if(max(subset) > nobs_origin){
+                stop("In 'subset', some indexes were greater than the number of observations of the data set (",
+                     fsignif(max(subset)), " vs ", fsignif(nobs_origin), ").")
+            }
+
             if(isFit){
                 delayed.subset = TRUE
                 lhs = lhs[subset]
             } else {
-                nobs_origin = NROW(data)
 
                 # subsetting creates a deep copy. We avoid copying the entire data set.
                 # Note that we don't need to check that complete_vars exists in the data set
